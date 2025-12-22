@@ -1,6 +1,6 @@
 # 05. Backlog
 
-> 待办事项
+> 待办事项 - 迭代管理
 
 ---
 
@@ -9,27 +9,26 @@
 - [x] 文档体系
 - [x] Python ETL + SQLite
 - [x] 技术指标 (MA/MACD/BOLL/RSI/KDJ)
-
----
-
-## 🚧 进行中
-
-- [ ] Next.js 前端骨架
+- [x] **Sprint 1**: 前端最小可运行版本 ✅
+- [x] **Sprint 2**: 风控规则与信号引擎 ✅
+- [x] **Sprint 3**: 历史复盘页面 ✅
+- [x] **Sprint 4**: 数据库连接 ✅
+- [x] **Sprint 5**: UI 细节打磨 ✅ 2024-12-22
+  - [x] 深色专业主题
+  - [x] 简洁配色系统
+  - [x] 卡片和导航样式
 
 ---
 
 ## 📋 待开始
 
-- [ ] Dashboard 页面 (现价 + 红绿灯)
-- [ ] Settings Modal (风控规则)
-- [ ] LocalStorage 规则引擎
-- [ ] History 复盘页
-- [ ] PWA 配置
-- [ ] AI 点评集成 (Gemini)
-- [ ] GitHub Actions 定时任务
-- [ ] Turso 生产数据库
-- [ ] 图片分析 API
+- [ ] Sprint 6: PWA 配置 (离线 + 安装)
+- [ ] Sprint 7: Turso 生产数据库
+- [ ] Sprint 8: GitHub Actions 自动化
+- [ ] Sprint 9: Gemini AI 点评集成
 
 ---
 
-*更新: 2024-12-22*
+*更新: 2024-12-22 23:10*
+</Parameter>
+<parameter name="Complexity">1
