@@ -9,26 +9,28 @@
 - [x] 文档体系
 - [x] Python ETL + SQLite
 - [x] 技术指标 (MA/MACD/BOLL/RSI/KDJ)
-- [x] **Sprint 1**: 前端最小可运行版本 ✅
-- [x] **Sprint 2**: 风控规则与信号引擎 ✅
-- [x] **Sprint 3**: 历史复盘页面 ✅
-- [x] **Sprint 4**: 数据库连接 ✅
-- [x] **Sprint 5**: UI 细节打磨 ✅ 2024-12-22
-  - [x] 深色专业主题
-  - [x] 简洁配色系统
-  - [x] 卡片和导航样式
+- [x] **Sprint 1-5**: 核心看板、风控规则、复盘、数据库连接、UI 打磨 ✅
+
+---
+
+## 🔥 Sprint 6: 股票池 (Watchlist)
+
+**目标**: 提供多股票管理页面，展示 AI 信号
+
+- [ ] 6.1 更新导航系统 (股票池 / 决策 / 复盘)
+- [ ] 6.2 扩展存储引擎以支持股票池列表
+- [ ] 6.3 创建 Stock Pool 列表页面
+- [ ] 6.4 实现「添加新股票」功能
+- [ ] 6.5 样式同步当前深色专业风格
 
 ---
 
 ## 📋 待开始
 
-- [ ] Sprint 6: PWA 配置 (离线 + 安装)
-- [ ] Sprint 7: Turso 生产数据库
-- [ ] Sprint 8: GitHub Actions 自动化
-- [ ] Sprint 9: Gemini AI 点评集成
+- [ ] Sprint 7: PWA 配置
+- [ ] Sprint 8: Gemini AI 点评深度集成
+- [ ] Sprint 9: Turso 生产数据库
 
 ---
 
-*更新: 2024-12-22 23:10*
-</Parameter>
-<parameter name="Complexity">1
+*更新: 2024-12-22 23:18*

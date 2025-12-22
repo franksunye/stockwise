@@ -1,0 +1,165 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { Plus, Search, Trash2 } from 'lucide-react';
+import { getWatchlist, addToWatchlist, removeFromWatchlist } from '@/lib/storage';
+import { BottomNav } from '@/components/BottomNav';
+import Link from 'next/link';
+
+const COLORS = { up: '#10b981', down: '#f43f5e', hold: '#f59e0b', muted: '#6b7280' };
+
+const NAME_MAP: Record<string, string> = {
+  '02171': '科济药业-B',
+  '02269': '药明生物',
+  '01801': '信达生物',
+};
+
+interface StockSnapshot {
+  symbol: string;
+  name: string;
+  price: number;
+  change: number;
+  aiSignal: string;
+  aiColor: string;
+}
+
+export default function StockPoolPage() {
+  const [stocks, setStocks] = useState<StockSnapshot[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [newSymbol, setNewSymbol] = useState('');
+  const [showAdd, setShowAdd] = useState(false);
+
+  const fetchStockData = async () => {
+    setLoading(true);
+    const watchlist = getWatchlist();
+    const results: StockSnapshot[] = [];
+
+    for (const symbol of watchlist) {
+      try {
+        const res = await fetch(`/api/stock?symbol=${symbol}`);
+        const data = await res.json();
+        
+        if (data.price) {
+          let signal = '观望';
+          let color = COLORS.hold;
+          
+          if (data.price.macd_hist > 0.05) {
+            signal = '看多'; // 对应图片中的 "试错/看多"
+            color = COLORS.up;
+          } else if (data.price.macd_hist < -0.05) {
+            signal = '减持'; // 对应图片中的 "止损/减持"
+            color = COLORS.down;
+          }
+
+          results.push({
+            symbol,
+            name: NAME_MAP[symbol] || `股票 ${symbol}`,
+            price: data.price.close,
+            change: data.price.change_percent,
+            aiSignal: signal,
+            aiColor: color
+          });
+        }
+      } catch (e) {
+        console.error(`Failed to fetch ${symbol}`, e);
+      }
+    }
+    setStocks(results);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchStockData();
+  }, []);
+
+  const handleAdd = () => {
+    if (newSymbol.trim()) {
+      addToWatchlist(newSymbol.trim());
+      setNewSymbol('');
+      setShowAdd(false);
+      fetchStockData();
+    }
+  };
+
+  const handleRemove = (e: React.MouseEvent, symbol: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    removeFromWatchlist(symbol);
+    fetchStockData();
+  };
+
+  return (
+    <div className="min-h-screen p-4 pb-24 text-white">
+      <header className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-xl font-bold tracking-tight">我的股票池</h1>
+          <p className="text-xs" style={{ color: COLORS.muted }}>关注列表与 AI 信号</p>
+        </div>
+        <button 
+          onClick={() => setShowAdd(!showAdd)}
+          className="p-2 rounded-full bg-[#1e1e2e] hover:bg-[#2a2a3a]"
+        >
+          <Plus className="w-6 h-6" />
+        </button>
+      </header>
+
+      {showAdd && (
+        <div className="card mb-6 flex gap-2 animate-in slide-in-from-top-2 duration-200">
+          <input 
+            value={newSymbol}
+            onChange={(e) => setNewSymbol(e.target.value)}
+            placeholder="输入代码 (如 02269)"
+            className="flex-1 bg-[#0a0a0f] border border-[#1e1e2e] rounded-lg px-4 py-2 mono focus:outline-none focus:border-white"
+          />
+          <button 
+            onClick={handleAdd}
+            className="px-4 py-2 bg-white text-black rounded-lg font-medium"
+          >
+            添加
+          </button>
+        </div>
+      )}
+
+      <div className="space-y-4">
+        {loading ? (
+          [1, 2, 3].map(i => <div key={i} className="card h-20 animate-pulse" />)
+        ) : stocks.length === 0 ? (
+          <div className="text-center py-20 text-[#6b7280]">
+            <Search className="w-12 h-12 mx-auto mb-4 opacity-20" />
+            <p>还没有关注的股票</p>
+          </div>
+        ) : (
+          stocks.map(stock => (
+            <Link 
+              key={stock.symbol} 
+              href={`/?symbol=${stock.symbol}`}
+              className="card flex items-center justify-between group hover:bg-[#1a1a24] transition-colors"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: stock.aiColor }} />
+                <div>
+                  <h3 className="font-semibold">{stock.name}</h3>
+                  <p className="text-xs mono" style={{ color: COLORS.muted }}>{stock.symbol}.HK</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-6">
+                <div className="text-right">
+                  <p className="text-lg font-medium" style={{ color: stock.aiColor }}>{stock.aiSignal}</p>
+                </div>
+                <button 
+                  onClick={(e) => handleRemove(e, stock.symbol)}
+                  className="opacity-0 group-hover:opacity-100 p-2 hover:text-red-500 transition-opacity"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            </Link>
+          ))
+        )}
+      </div>
+
+      <BottomNav />
+    </div>
+  );
+}

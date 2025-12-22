@@ -1,17 +1,21 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { Suspense, useState, useEffect, useCallback } from 'react';
 import { RefreshCw, Settings } from 'lucide-react';
 import { DailyPrice, UserRule } from '@/lib/types';
 import { getRule } from '@/lib/storage';
 import { SignalBadge } from '@/components/SignalBadge';
 import { BottomNav } from '@/components/BottomNav';
 import { SettingsModal } from '@/components/SettingsModal';
+import { useSearchParams } from 'next/navigation';
 
-const SYMBOL = '02171';
 const COLORS = { up: '#10b981', down: '#f43f5e', hold: '#f59e0b', muted: '#6b7280' };
 
-export default function DashboardPage() {
+function DashboardContent() {
+  const searchParams = useSearchParams();
+  const urlSymbol = searchParams.get('symbol');
+  const SYMBOL = urlSymbol || '02171';
+  
   const [price, setPrice] = useState<DailyPrice | null>(null);
   const [rule, setRule] = useState<UserRule | null>(null);
   const [loading, setLoading] = useState(true);
@@ -23,9 +27,9 @@ export default function DashboardPage() {
     const data = await res.json();
     if (data.price) setPrice(data.price);
     setLoading(false);
-  }, []);
+  }, [SYMBOL]);
 
-  const loadRule = useCallback(() => setRule(getRule(SYMBOL)), []);
+  const loadRule = useCallback(() => setRule(getRule(SYMBOL)), [SYMBOL]);
 
   useEffect(() => {
     loadData();
@@ -36,11 +40,11 @@ export default function DashboardPage() {
   const priceColor = isUp ? COLORS.up : COLORS.down;
 
   return (
-    <div className="min-h-screen p-4 pb-24">
+    <div className="min-h-screen p-4 pb-24 text-white">
       {/* Header */}
       <header className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-lg font-semibold tracking-tight">StockWise</h1>
+          <h1 className="text-lg font-semibold tracking-tight">AI 决策看板</h1>
           <p className="text-xs" style={{ color: COLORS.muted }}>{SYMBOL}</p>
         </div>
         <div className="flex gap-1">
@@ -101,5 +105,13 @@ export default function DashboardPage() {
       <SettingsModal symbol={SYMBOL} isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} onSave={loadRule} />
       <BottomNav />
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#0a0a0f] p-4 text-white">加载中...</div>}>
+      <DashboardContent />
+    </Suspense>
   );
 }

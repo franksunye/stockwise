@@ -2,12 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, History } from 'lucide-react';
+import { ListFilter, LayoutDashboard, History } from 'lucide-react';
 
 export function BottomNav() {
   const pathname = usePathname();
   const links = [
-    { href: '/', icon: LayoutDashboard, label: '看板' },
+    { href: '/stock-pool', icon: ListFilter, label: '股票池' },
+    { href: '/', icon: LayoutDashboard, label: '决策' },
     { href: '/history', icon: History, label: '复盘' },
   ];
 
@@ -19,7 +20,7 @@ export function BottomNav() {
             key={href}
             href={href}
             className={`flex-1 flex flex-col items-center py-3 ${
-              pathname === href ? 'text-white' : 'text-muted'
+              pathname === href ? 'text-white' : 'text-[#6b7280]'
             }`}
           >
             <Icon className="w-5 h-5" />

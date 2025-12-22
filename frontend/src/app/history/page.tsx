@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { TrendingUp, TrendingDown, Check, X, Minus } from 'lucide-react';
 import { BottomNav } from '@/components/BottomNav';
+import { useSearchParams } from 'next/navigation';
 
-const SYMBOL = '02171';
 const COLORS = { up: '#10b981', down: '#f43f5e', hold: '#f59e0b', muted: '#6b7280' };
 
 interface Item {
@@ -15,7 +15,11 @@ interface Item {
   result: 'win' | 'loss' | 'neutral' | null;
 }
 
-export default function HistoryPage() {
+function HistoryContent() {
+  const searchParams = useSearchParams();
+  const urlSymbol = searchParams.get('symbol');
+  const SYMBOL = urlSymbol || '02171';
+
   const [items, setItems] = useState<Item[]>([]);
   const [stats, setStats] = useState({ winRate: 0, returns: 0 });
 
@@ -24,7 +28,7 @@ export default function HistoryPage() {
       .then(r => r.json())
       .then(data => {
         if (!data.prices) return;
-        const list: Item[] = data.prices.map((p: { macd_hist: number; close: number; date: string; change_percent: number }, i: number) => {
+        const list: Item[] = data.prices.map((p: any, i: number) => {
           const next = data.prices[i - 1];
           const signal: 'up' | 'down' | 'flat' = p.macd_hist > 0.05 ? 'up' : p.macd_hist < -0.05 ? 'down' : 'flat';
           const nextChange = next ? ((next.close - p.close) / p.close * 100) : null;
@@ -45,10 +49,10 @@ export default function HistoryPage() {
           returns: list.reduce((acc, i) => acc + (i.result === 'win' ? 1 : i.result === 'loss' ? -1 : 0) * Math.abs(i.change), 0)
         });
       });
-  }, []);
+  }, [SYMBOL]);
 
   return (
-    <div className="min-h-screen p-4 pb-24">
+    <div className="min-h-screen p-4 pb-24 text-white">
       <h1 className="text-lg font-semibold mb-1">历史复盘</h1>
       <p className="text-xs mb-6" style={{ color: COLORS.muted }}>{SYMBOL} · 最近30天</p>
 
@@ -60,7 +64,7 @@ export default function HistoryPage() {
           </p>
         </div>
         <div className="card text-center">
-          <p className="text-xs" style={{ color: COLORS.muted }}>累计</p>
+          <p className="text-xs" style={{ color: COLORS.muted }}>预计收益</p>
           <p className="text-2xl mono" style={{ color: stats.returns >= 0 ? COLORS.up : COLORS.down }}>
             {stats.returns >= 0 ? '+' : ''}{stats.returns.toFixed(1)}%
           </p>
@@ -92,5 +96,13 @@ export default function HistoryPage() {
 
       <BottomNav />
     </div>
+  );
+}
+
+export default function HistoryPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#0a0a0f] p-4 text-white">加载中...</div>}>
+      <HistoryContent />
+    </Suspense>
   );
 }
