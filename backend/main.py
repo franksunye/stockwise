@@ -37,19 +37,49 @@ def init_db():
     conn = get_connection()
     cursor = conn.cursor()
     
+    # 删除旧表，重建新结构 (开发阶段)
+    cursor.execute("DROP TABLE IF EXISTS daily_prices")
+    
     cursor.execute("""
-        CREATE TABLE IF NOT EXISTS daily_prices (
+        CREATE TABLE daily_prices (
             symbol TEXT NOT NULL,
             date TEXT NOT NULL,
+            
+            -- 基础行情
             open REAL,
             high REAL,
             low REAL,
             close REAL,
             volume REAL,
             change_percent REAL,
+            
+            -- 均线系统
+            ma5 REAL,
+            ma10 REAL,
             ma20 REAL,
+            ma60 REAL,
+            
+            -- MACD
+            macd REAL,
+            macd_signal REAL,
+            macd_hist REAL,
+            
+            -- 布林带
+            boll_upper REAL,
+            boll_mid REAL,
+            boll_lower REAL,
+            
+            -- RSI
             rsi REAL,
+            
+            -- KDJ
+            kdj_k REAL,
+            kdj_d REAL,
+            kdj_j REAL,
+            
+            -- AI 层
             ai_summary TEXT,
+            
             PRIMARY KEY (symbol, date)
         )
     """)
@@ -126,11 +156,41 @@ def process_stock(symbol: str):
     # 3. 计算技术指标
     print("📊 计算技术指标...")
     
-    # MA20
+    # === 均线系统 ===
+    df["ma5"] = df.ta.sma(length=5, close="close")
+    df["ma10"] = df.ta.sma(length=10, close="close")
     df["ma20"] = df.ta.sma(length=20, close="close")
+    df["ma60"] = df.ta.sma(length=60, close="close")
     
-    # RSI (14)
+    # === MACD (12, 26, 9) ===
+    macd = df.ta.macd(close="close", fast=12, slow=26, signal=9)
+    if macd is not None:
+        df["macd"] = macd.iloc[:, 0]       # MACD 线
+        df["macd_signal"] = macd.iloc[:, 1] # 信号线
+        df["macd_hist"] = macd.iloc[:, 2]   # 柱状图
+    else:
+        df["macd"] = df["macd_signal"] = df["macd_hist"] = 0
+    
+    # === 布林带 (20, 2) ===
+    bbands = df.ta.bbands(close="close", length=20, std=2)
+    if bbands is not None:
+        df["boll_lower"] = bbands.iloc[:, 0]  # 下轨
+        df["boll_mid"] = bbands.iloc[:, 1]    # 中轨
+        df["boll_upper"] = bbands.iloc[:, 2]  # 上轨
+    else:
+        df["boll_lower"] = df["boll_mid"] = df["boll_upper"] = 0
+    
+    # === RSI (14) ===
     df["rsi"] = df.ta.rsi(length=14, close="close")
+    
+    # === KDJ (9, 3, 3) ===
+    stoch = df.ta.stoch(high="high", low="low", close="close", k=9, d=3, smooth_k=3)
+    if stoch is not None:
+        df["kdj_k"] = stoch.iloc[:, 0]  # K 值
+        df["kdj_d"] = stoch.iloc[:, 1]  # D 值
+        df["kdj_j"] = 3 * stoch.iloc[:, 0] - 2 * stoch.iloc[:, 1]  # J = 3K - 2D
+    else:
+        df["kdj_k"] = df["kdj_d"] = df["kdj_j"] = 0
     
     # 4. 填充 NaN (计算指标的前几天是空的)
     df = df.fillna(0)
@@ -155,15 +215,29 @@ def process_stock(symbol: str):
             row["close"],
             row["volume"],
             row["change_percent"],
+            row["ma5"],
+            row["ma10"],
             row["ma20"],
+            row["ma60"],
+            row["macd"],
+            row["macd_signal"],
+            row["macd_hist"],
+            row["boll_upper"],
+            row["boll_mid"],
+            row["boll_lower"],
             row["rsi"],
+            row["kdj_k"],
+            row["kdj_d"],
+            row["kdj_j"],
             row["ai_summary"]
         ))
     
     cursor.executemany("""
         INSERT OR REPLACE INTO daily_prices 
-        (symbol, date, open, high, low, close, volume, change_percent, ma20, rsi, ai_summary)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (symbol, date, open, high, low, close, volume, change_percent,
+         ma5, ma10, ma20, ma60, macd, macd_signal, macd_hist,
+         boll_upper, boll_mid, boll_lower, rsi, kdj_k, kdj_d, kdj_j, ai_summary)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, records)
     
     conn.commit()
@@ -179,7 +253,7 @@ def show_latest_data(symbol: str, limit: int = 5):
     cursor = conn.cursor()
     
     cursor.execute("""
-        SELECT date, close, change_percent, ma20, rsi
+        SELECT date, close, change_percent, ma5, ma20, macd, rsi, kdj_k
         FROM daily_prices
         WHERE symbol = ?
         ORDER BY date DESC
@@ -191,12 +265,12 @@ def show_latest_data(symbol: str, limit: int = 5):
     
     if rows:
         print(f"\n📈 {symbol} 最新 {limit} 条数据:")
-        print("-" * 60)
-        print(f"{'日期':<12} {'收盘价':>10} {'涨跌幅':>10} {'MA20':>10} {'RSI':>8}")
-        print("-" * 60)
+        print("-" * 80)
+        print(f"{'日期':<12} {'收盘':>8} {'涨跌幅':>8} {'MA5':>8} {'MA20':>8} {'MACD':>8} {'RSI':>6} {'K':>6}")
+        print("-" * 80)
         for row in rows:
-            date, close, change, ma20, rsi = row
-            print(f"{date:<12} {close:>10.2f} {change:>9.2f}% {ma20:>10.2f} {rsi:>8.1f}")
+            date, close, change, ma5, ma20, macd, rsi, k = row
+            print(f"{date:<12} {close:>8.2f} {change:>7.2f}% {ma5:>8.2f} {ma20:>8.2f} {macd:>8.3f} {rsi:>6.1f} {k:>6.1f}")
 
 
 # ============================================================
