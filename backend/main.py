@@ -195,8 +195,8 @@ def process_stock(symbol: str):
     # 4. 填充 NaN (计算指标的前几天是空的)
     df = df.fillna(0)
     
-    # 5. AI 点评 (本地开发暂用占位符)
-    df["ai_summary"] = "暂无AI点评"
+    # 5. AI 点评 (本地开发暂无，设为 None)
+    df["ai_summary"] = None
     
     # 6. 写入数据库
     print("💾 写入数据库...")
@@ -204,32 +204,37 @@ def process_stock(symbol: str):
     conn = get_connection()
     cursor = conn.cursor()
     
+    # 辅助函数：保留小数位
+    def r2(x): return round(x, 2) if x else 0  # 价格类：2位
+    def r3(x): return round(x, 3) if x else 0  # 指标类：3位
+    def r1(x): return round(x, 1) if x else 0  # 百分比：1位
+    
     records = []
     for _, row in df.iterrows():
         records.append((
             symbol,
             row["date"],
-            row["open"],
-            row["high"],
-            row["low"],
-            row["close"],
-            row["volume"],
-            row["change_percent"],
-            row["ma5"],
-            row["ma10"],
-            row["ma20"],
-            row["ma60"],
-            row["macd"],
-            row["macd_signal"],
-            row["macd_hist"],
-            row["boll_upper"],
-            row["boll_mid"],
-            row["boll_lower"],
-            row["rsi"],
-            row["kdj_k"],
-            row["kdj_d"],
-            row["kdj_j"],
-            row["ai_summary"]
+            r2(row["open"]),
+            r2(row["high"]),
+            r2(row["low"]),
+            r2(row["close"]),
+            int(row["volume"]),           # 成交量取整
+            r2(row["change_percent"]),
+            r2(row["ma5"]),
+            r2(row["ma10"]),
+            r2(row["ma20"]),
+            r2(row["ma60"]),
+            r3(row["macd"]),
+            r3(row["macd_signal"]),
+            r3(row["macd_hist"]),
+            r2(row["boll_upper"]),
+            r2(row["boll_mid"]),
+            r2(row["boll_lower"]),
+            r1(row["rsi"]),
+            r1(row["kdj_k"]),
+            r1(row["kdj_d"]),
+            r1(row["kdj_j"]),
+            row["ai_summary"]             # None 或实际值
         ))
     
     cursor.executemany("""
