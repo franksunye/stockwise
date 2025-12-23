@@ -69,23 +69,23 @@ function HistoryContent() {
       <div className="w-full max-w-md px-6 pt-10 pb-32 z-10">
         <header className="mb-8">
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-[10px] uppercase tracking-[0.3em] text-slate-500 font-bold">深度复盘分析</span>
+            <span className="text-xs uppercase tracking-[0.3em] text-slate-500 font-bold">深度复盘分析</span>
           </div>
-          <h1 className="text-3xl font-black italic tracking-tighter">AGENT <span className="text-indigo-500">HISTORY</span></h1>
-          <p className="text-[10px] text-slate-500 font-bold mt-1 uppercase tracking-widest">{SYMBOL} · 最近 30 条记录</p>
+          <h1 className="text-2xl font-black italic tracking-tighter">AGENT <span className="text-indigo-500">HISTORY</span></h1>
+          <p className="text-xs text-slate-500 font-bold mt-1 uppercase tracking-widest">{SYMBOL} · 最近 30 条记录</p>
         </header>
 
         {/* 统计看板 - 恢复大气设计 */}
         <section className="grid grid-cols-2 gap-4 mb-8">
           <div className="glass-card flex flex-col items-center py-6 text-center">
-            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">预测准确率</span>
-            <p className="text-3xl font-black mono" style={{ color: stats.winRate >= 50 ? COLORS.up : COLORS.down }}>
+            <span className="text-xs text-slate-500 font-bold uppercase tracking-widest mb-1">预测准确率</span>
+            <p className="text-4xl font-black mono" style={{ color: stats.winRate >= 50 ? COLORS.up : COLORS.down }}>
               {stats.winRate.toFixed(0)}%
             </p>
           </div>
           <div className="glass-card flex flex-col items-center py-6 text-center">
-            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">累计超额收益</span>
-            <p className="text-3xl font-black mono" style={{ color: stats.returns >= 0 ? COLORS.up : COLORS.down }}>
+            <span className="text-xs text-slate-500 font-bold uppercase tracking-widest mb-1">累计超额收益</span>
+            <p className="text-4xl font-black mono" style={{ color: stats.returns >= 0 ? COLORS.up : COLORS.down }}>
               {stats.returns >= 0 ? '+' : ''}{stats.returns.toFixed(1)}%
             </p>
           </div>
@@ -105,8 +105,8 @@ function HistoryContent() {
                    <Minus size={14} style={{ color: COLORS.hold }} />}
                 </div>
                 <div>
-                  <p className="text-[11px] font-black mono text-slate-300">{item.date.split('-').slice(1).join('.')}</p>
-                  <p className="text-[10px] font-bold uppercase tracking-widest" style={{ 
+                  <p className="text-xs font-black mono text-slate-300">{item.date.split('-').slice(1).join('.')}</p>
+                  <p className="text-xs font-bold uppercase tracking-widest" style={{ 
                     color: item.signal === 'Long' ? COLORS.up : item.signal === 'Short' ? COLORS.down : COLORS.hold 
                   }}>
                     {item.signal === 'Long' ? '看多' : item.signal === 'Short' ? '看空' : '观望'}
@@ -116,7 +116,7 @@ function HistoryContent() {
 
               <div className="flex items-center gap-4 text-right">
                 {item.result === 'Pending' ? (
-                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/5 text-slate-500 uppercase">验证中</span>
+                   <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-white/5 text-slate-500 uppercase">验证中</span>
                 ) : (
                   <div className="flex items-center gap-3">
                     <span className="text-sm font-black mono" style={{ color: (item.actual_change || 0) >= 0 ? COLORS.up : COLORS.down }}>
@@ -132,7 +132,7 @@ function HistoryContent() {
           ))}
           
           {items.length === 0 && (
-            <div className="text-center py-20 text-slate-500 text-[10px] font-black uppercase tracking-widest">
+            <div className="text-center py-20 text-slate-500 text-xs font-black uppercase tracking-widest">
               暂无记录
             </div>
           )}

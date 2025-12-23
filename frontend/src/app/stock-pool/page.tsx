@@ -122,8 +122,10 @@ export default function StockPoolPage() {
             <ArrowLeft className="w-5 h-5 text-slate-400" />
           </button>
           <div className="flex flex-col">
-            <span className="text-[10px] uppercase tracking-[0.3em] text-slate-500 font-bold">资产注册列表</span>
+          <div className="flex flex-col">
+            <span className="text-xs uppercase tracking-[0.3em] text-slate-500 font-bold">资产注册列表</span>
             <h1 className="text-2xl font-black italic tracking-tighter">WATCHLIST <span className="text-indigo-500">POOL</span></h1>
+          </div>
           </div>
         </header>
 
@@ -140,7 +142,6 @@ export default function StockPoolPage() {
                 className="flex-1 bg-black/20 border border-white/5 rounded-2xl px-5 py-3 mono text-sm focus:outline-none focus:border-indigo-500/50 transition-all"
               />
               <button 
-                onClick={handleAdd}
                 className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 rounded-2xl font-black italic text-sm transition-all active:scale-95"
               >
                 添加
@@ -152,20 +153,20 @@ export default function StockPoolPage() {
               className="w-full glass-card flex items-center justify-center gap-2 py-6 border-dashed border-white/10 bg-white/[0.02] text-slate-500 hover:text-slate-200 hover:border-white/20 transition-all group"
             >
               <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
-              <span className="text-xs font-black uppercase tracking-widest">关注新资产</span>
+              <span className="text-sm font-black uppercase tracking-widest">关注新资产</span>
             </button>
           )}
         </div>
 
         {/* 列表 */}
         <div className="space-y-4">
-          <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-2">监控中的资产</h4>
+          <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest px-2">监控中的资产</h4>
           {loading && !stocks.length ? (
             [1, 2].map(i => <div key={i} className="glass-card h-24 animate-pulse" />)
           ) : stocks.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-slate-600">
               <Search className="w-12 h-12 mb-4 opacity-10" />
-              <p className="text-[10px] font-black uppercase tracking-widest text-center">暂无活跃资产<br/>(已根据数据库同步)</p>
+              <p className="text-xs font-black uppercase tracking-widest text-center">暂无活跃资产<br/>(已根据数据库同步)</p>
             </div>
           ) : (
             stocks.map(stock => (
@@ -184,15 +185,15 @@ export default function StockPoolPage() {
                      <Minus className="w-6 h-6" style={{ color: COLORS.hold }} />}
                   </div>
                   <div>
-                    <h3 className="font-black text-base italic tracking-tight">{stock.name}</h3>
-                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">AI 信号: {stock.aiSignal === 'Long' ? '看多' : stock.aiSignal === 'Short' ? '看空' : '观望'}</p>
+                    <h3 className="font-black text-sm italic tracking-tight">{stock.name}</h3>
+                    <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">AI 信号: {stock.aiSignal === 'Long' ? '看多' : stock.aiSignal === 'Short' ? '看空' : '观望'}</p>
                   </div>
                 </div>
                 
                 <div className="flex items-center gap-4">
                   <div className="text-right">
-                    <p className="text-sm font-black mono">{stock.price.toFixed(2)}</p>
-                    <p className="text-[10px] font-bold mono" style={{ color: stock.change >= 0 ? COLORS.up : COLORS.down }}>
+                    <p className="text-base font-black mono">{stock.price.toFixed(2)}</p>
+                    <p className="text-xs font-bold mono" style={{ color: stock.change >= 0 ? COLORS.up : COLORS.down }}>
                       {stock.change >= 0 ? '+' : ''}{stock.change.toFixed(2)}%
                     </p>
                   </div>
