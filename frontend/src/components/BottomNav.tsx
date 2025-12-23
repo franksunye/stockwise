@@ -13,20 +13,30 @@ export function BottomNav() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-[#12121a] border-t border-[#1e1e2e]">
-      <div className="max-w-md mx-auto flex">
-        {links.map(({ href, icon: Icon, label }) => (
-          <Link
-            key={href}
-            href={href}
-            className={`flex-1 flex flex-col items-center py-3 ${
-              pathname === href ? 'text-white' : 'text-[#6b7280]'
-            }`}
-          >
-            <Icon className="w-5 h-5" />
-            <span className="text-xs mt-1">{label}</span>
-          </Link>
-        ))}
+    <nav className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50">
+      <div className="flex items-center gap-1 p-2 rounded-[32px] bg-black/40 backdrop-blur-2xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+        {links.map(({ href, icon: Icon, label }) => {
+          const isActive = pathname === href;
+          return (
+            <Link
+              key={href}
+              href={href}
+              className={`relative flex items-center justify-center gap-2 px-6 py-3 rounded-full transition-all duration-300 group ${
+                isActive 
+                  ? 'bg-white/10 text-white shadow-inner' 
+                  : 'text-slate-500 hover:text-slate-200'
+              }`}
+            >
+              <Icon className={`w-5 h-5 transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
+              <span className={`text-xs font-bold tracking-tight overflow-hidden transition-all duration-300 ${isActive ? 'max-w-[100px] opacity-100' : 'max-w-0 opacity-0'}`}>
+                {label}
+              </span>
+              {isActive && (
+                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-indigo-500 shadow-[0_0_10px_2px_rgba(99,102,241,0.5)]" />
+              )}
+            </Link>
+          );
+        })}
       </div>
     </nav>
   );

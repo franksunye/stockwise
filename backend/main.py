@@ -11,7 +11,10 @@ from pathlib import Path
 import akshare as ak
 import pandas as pd
 import pandas_ta_classic as ta
-from libsql_experimental import connect
+try:
+    from libsql_experimental import connect
+except ImportError:
+    connect = None
 
 # ============================================================
 # 配置
@@ -92,21 +95,29 @@ def init_db():
             added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
+
+    # 4. AI 预测与验证表
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS ai_predictions (
+            symbol TEXT NOT NULL,
+            date TEXT NOT NULL,          -- 预测生成日 (T)
+            target_date TEXT NOT NULL,   -- 预测目标日 (T+1)
+            signal TEXT,                 -- Long/Short/Side
+            confidence REAL,             -- 置信度 (0-1)
+            support_price REAL,          -- AI 建议支撑位
+            ai_reasoning TEXT,           -- AI 理由
+            validation_status TEXT DEFAULT 'Pending', -- Correct/Incorrect/Pending
+            actual_change REAL,          -- 实际涨跌幅
+            PRIMARY KEY (symbol, date)
+        )
+    """)
     
     # 初始化核心股票池 (如果为空)
     cursor.execute("SELECT COUNT(*) FROM stock_pool")
     if cursor.fetchone()[0] == 0:
         initial_stocks = [
-            ('02171', '映客'),
-            ('02269', '药明生物'),
-            ('01801', '信达生物'),
-            ('00700', '腾讯控股'),
-            ('09988', '阿里巴巴-SW'),
-            ('03690', '美团-W'),
-            ('01024', '快手-W'),
-            ('02015', '理想汽车-W'),
-            ('09868', '小鹏汽车-W'),
-            ('01810', '小米集团-W'),
+            ('02171', '科济药业-B'),
+            ('01167', '加科思-B'),
         ]
         cursor.executemany(
             "INSERT INTO stock_pool (symbol, name) VALUES (?, ?)",
@@ -209,6 +220,96 @@ def fetch_stock_data(symbol: str, period: str = "daily", start_date: str = None)
         return pd.DataFrame()
 
 
+def validate_previous_prediction(symbol: str, today_data: pd.Series):
+    """验证昨日的 AI 预测 (T-1 预测 T)"""
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    # 查找最近一条待验证的预测
+    cursor.execute("""
+        SELECT date, signal, support_price 
+        FROM ai_predictions 
+        WHERE symbol = ? AND validation_status = 'Pending'
+        ORDER BY date DESC LIMIT 1
+    """, (symbol,))
+    
+    row = cursor.fetchone()
+    if not row:
+        conn.close()
+        return
+        
+    pred_date, signal, support_price = row
+    
+    # 获取今日收盘价和涨跌幅
+    actual_change = today_data.get('change_percent', 0)
+    close_price = today_data.get('close', 0)
+    
+    # 简易验证逻辑
+    status = 'Neutral'
+    if signal == 'Long':
+        # 看多：涨了就是对的，跌了就是错的
+        status = 'Correct' if actual_change > 0 else 'Incorrect'
+    elif signal == 'Short':
+        # 看空：跌了就是对的，涨了就是错的
+        status = 'Correct' if actual_change < 0 else 'Incorrect'
+    elif signal == 'Side':
+        # 观望：波动较小视为中性或准确 (这里暂定 Neutral)
+        status = 'Neutral'
+
+    # 更新数据库
+    cursor.execute("""
+        UPDATE ai_predictions 
+        SET validation_status = ?, actual_change = ?
+        WHERE symbol = ? AND date = ?
+    """, (status, actual_change, symbol, pred_date))
+    
+    conn.commit()
+    conn.close()
+    print(f"   🔎 验证昨日预测 ({pred_date}): 信号={signal}, 今日实际涨幅={actual_change}%, 结论={status}")
+
+
+def generate_ai_prediction(symbol: str, today_data: pd.Series):
+    """根据今日行情生成对明日的 AI 预测 (T 预测 T+1)"""
+    gemini_key = os.getenv("GEMINI_API_KEY")
+    
+    if not gemini_key:
+        # 如果没有 Key，生成一个基于均线的简单规则作为 mock
+        close = today_data.get('close', 0)
+        ma20 = today_data.get('ma20', 0)
+        signal = 'Long' if close > ma20 else 'Short'
+        confidence = 0.6
+        reasoning = f"基于规则: 现价({close}) {'高于' if signal=='Long' else '低于'} MA20({ma20})"
+        support_price = ma20
+    else:
+        # TODO: 接入真实的 Gemini 调用 (Sprint 后续任务)
+        signal = 'Side'
+        confidence = 0.5
+        reasoning = "Gemini 集成开发中..."
+        support_price = today_data.get('ma20', 0)
+
+    # 存储到数据库
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    # 预测日期是今天 T，目标日期是明天 T+1
+    today_str = today_data.get('date')
+    if not today_str:
+        return
+        
+    dt = datetime.strptime(today_str, "%Y-%m-%d")
+    target_date = (dt + timedelta(days=1)).strftime("%Y-%m-%d")
+
+    cursor.execute("""
+        INSERT OR REPLACE INTO ai_predictions 
+        (symbol, date, target_date, signal, confidence, support_price, ai_reasoning, validation_status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, 'Pending')
+    """, (symbol, today_str, target_date, signal, confidence, support_price, reasoning))
+    
+    conn.commit()
+    conn.close()
+    print(f"   🔮 生成今日预测 ({today_str} -> {target_date}): 信号={signal}, 置信度={confidence}")
+
+
 def process_stock_period(symbol: str, period: str = "daily"):
     """增量处理特定周期的股票数据"""
     table_name = f"{period}_prices"
@@ -240,12 +341,25 @@ def process_stock_period(symbol: str, period: str = "daily"):
     })
     df["date"] = pd.to_datetime(df["date"]).dt.strftime("%Y-%m-%d")
     
-    # 幂等性检查：如果最新 K 线没变化，跳过
+    # 5. [核心] 验证昨日预测 (仅针对日线)
+    if period == "daily" and not df.empty:
+        latest_row = df.iloc[-1]
+        validate_previous_prediction(symbol, latest_row)
+
+    # 幂等性检查：如果最新 K 线没变化，说明行情和指标已完整入库
     if last_date_str and df["date"].max() <= last_date_str:
-        print(f"✨ 数据已是最新 ({last_date_str})。停止。")
+        print(f"✨ 数据已是最新 ({last_date_str})。")
+        # 如果是日线，确保今日预测已生成
+        if period == "daily":
+             # 从数据库读取带指标的最新一行
+             conn = get_connection()
+             df_last = pd.read_sql(f"SELECT * FROM {table_name} WHERE symbol='{symbol}' ORDER BY date DESC LIMIT 1", conn)
+             conn.close()
+             if not df_last.empty:
+                 generate_ai_prediction(symbol, df_last.iloc[0])
         return
 
-    # 5. 计算指标
+    # 6. 计算指标
     print(f"📊 计算 {period} 技术指标...")
     df["ma5"] = df.ta.sma(length=5, close="close")
     df["ma10"] = df.ta.sma(length=10, close="close")
@@ -306,6 +420,10 @@ def process_stock_period(symbol: str, period: str = "daily"):
     conn.commit()
     conn.close()
     print(f"✅ {symbol} {period} 同步完成")
+    
+    # 7. 生成今日预测 (仅针对日线)
+    if period == "daily":
+        generate_ai_prediction(symbol, df.iloc[-1])
 
 
 def show_latest_data(symbol: str, period: str = "daily", limit: int = 3):

@@ -30,5 +30,18 @@ export interface UserRule {
     support_price: number | null;
     pressure_price: number | null;
     min_volume: number | null;
+    position: 'holding' | 'empty' | 'none';
     last_updated: number;
+}
+// AI 预测数据类型
+export interface AIPrediction {
+    symbol: string;
+    date: string;
+    target_date: string;
+    signal: 'Long' | 'Short' | 'Side';
+    confidence: number;
+    support_price: number;
+    ai_reasoning: string;
+    validation_status: 'Pending' | 'Correct' | 'Incorrect' | 'Neutral';
+    actual_change: number | null;
 }

@@ -4,7 +4,7 @@ import { UserRule } from './types';
 
 const RULES_KEY = 'stock_rules';
 const WATCHLIST_KEY = 'stock_watchlist';
-const DEFAULT_WATCHLIST = ['02171', '02269', '01801']; // 预设您图片中的几个股票
+const DEFAULT_WATCHLIST = ['02171', '01167']; // 保持专注，只关注科济药业和加科思
 
 export function getRule(symbol: string): UserRule | null {
     if (typeof window === 'undefined') return null;
@@ -25,6 +25,7 @@ export function saveRule(symbol: string, rule: Partial<UserRule>): void {
         support_price: rule.support_price ?? null,
         pressure_price: rule.pressure_price ?? null,
         min_volume: rule.min_volume ?? null,
+        position: rule.position ?? 'none',
         last_updated: Date.now(),
     };
     localStorage.setItem(RULES_KEY, JSON.stringify(rules));

@@ -29,13 +29,17 @@ export async function GET(request: Request) {
         }
 
         const row = db.prepare('SELECT * FROM daily_prices WHERE symbol = ? ORDER BY date DESC LIMIT 1').get(symbol);
+        const prediction = db.prepare('SELECT * FROM ai_predictions WHERE symbol = ? ORDER BY date DESC LIMIT 1').get(symbol);
         db.close();
 
         if (!row) {
             return NextResponse.json({ error: '未找到该股票数据' }, { status: 404 });
         }
 
-        return NextResponse.json({ price: row });
+        return NextResponse.json({
+            price: row,
+            prediction: prediction || null
+        });
 
     } catch (error) {
         console.error('API Error:', error);
