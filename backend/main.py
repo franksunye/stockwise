@@ -487,5 +487,21 @@ if __name__ == "__main__":
         show_latest_data(stock, period="weekly")
     
     print("\n" + "=" * 60)
+    
+    # [Final Safety Check]
+    # 防止脚本运行过程中因意外导致 Stock Pool 被清空
+    final_conn = get_connection()
+    final_cursor = final_conn.cursor()
+    final_cursor.execute("SELECT COUNT(*) FROM stock_pool")
+    final_count = final_cursor.fetchone()[0]
+    final_conn.close()
+    
+    if final_count == 0:
+        print("⚠️ 警告: 检测到 Stock Pool 为空！正在执行紧急恢复...")
+        init_db()
+        print("✅ 紧急恢复已完成。")
+    else:
+        print(f"✅ Stock Pool 完整性校验通过 (剩余 {final_count} 只)")
+
     print("🎉 全部处理完成!")
     print("=" * 60)
