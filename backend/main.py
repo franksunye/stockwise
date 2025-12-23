@@ -40,9 +40,11 @@ def get_connection():
     """获取数据库连接 (支持本地 SQLite 或 Turso)"""
     if TURSO_DB_URL:
         # 使用 Turso 远程连接
+        print(f"🔗 连接 Turso: {TURSO_DB_URL[:50]}...")
         return connect(TURSO_DB_URL, auth_token=TURSO_AUTH_TOKEN)
     else:
         # 使用本地 SQLite
+        print(f"⚠️ TURSO_DB_URL 未设置，使用本地 SQLite: {DB_PATH}")
         DB_PATH.parent.mkdir(parents=True, exist_ok=True)
         import sqlite3
         return sqlite3.connect(DB_PATH)
@@ -114,7 +116,8 @@ def init_db():
     
     conn.commit()
     conn.close()
-    print(f"✅ 数据库准备就绪 (日线/周线/元数据/股票池): {DB_PATH}")
+    db_info = TURSO_DB_URL[:50] + "..." if TURSO_DB_URL else str(DB_PATH)
+    print(f"✅ 数据库准备就绪 (日线/周线/元数据/股票池): {db_info}")
 
 
 def sync_stock_meta():
