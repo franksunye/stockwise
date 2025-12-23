@@ -361,7 +361,8 @@ def process_stock_period(symbol: str, period: str = "daily"):
         validate_previous_prediction(symbol, latest_row)
 
     # 幂等性检查：如果最新 K 线没变化，说明行情和指标已完整入库
-    if last_date_str and df["date"].max() <= last_date_str:
+    # 修改：为了支持修正当日错误股价，即使日期相同也允许更新 (改为 < 而不是 <=)
+    if last_date_str and df["date"].max() < last_date_str:
         print(f"✨ 数据已是最新 ({last_date_str})。")
         # 如果是日线，确保今日预测已生成
         if period == "daily":
