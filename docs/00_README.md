@@ -42,6 +42,8 @@ StockWise 是一个帮助个人投资者**执行交易纪律**的 Mobile-First W
 | 02 | [产品规格](./02_product-specification.md) | MVP 功能模块与用户流程 |
 | 03 | [技术规格](./03_technical-specification.md) | 前后端开发蓝图 |
 | 04 | [数据字典](./04_data-dictionary.md) | 数据库表结构与字段定义 |
+| 05 | [Backlog](./05_backlog.md) | 迭代计划与待办事项 |
+| 06 | [MVP 策略](./06_mvp-strategy.md) | 0-100 用户阶段技术决策 |
 
 ---
 

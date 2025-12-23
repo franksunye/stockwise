@@ -21,8 +21,8 @@ function getSignal(price: DailyPrice, rule: UserRule | null): Signal {
 }
 
 const config = {
-  buy: { color: COLORS.up, icon: TrendingUp, label: '突破压力位' },
-  sell: { color: COLORS.down, icon: AlertTriangle, label: '跌破止损位' },
+  buy: { color: COLORS.up, icon: TrendingUp, label: '试错' },
+  sell: { color: COLORS.down, icon: AlertTriangle, label: '止损' },
   hold: { color: COLORS.hold, icon: Minus, label: '观望' },
   none: { color: COLORS.muted, icon: Settings, label: '未设置规则' },
 };
