@@ -108,9 +108,36 @@ function DashboardContent() {
                   </div>
                   <div>
                     <h3 className="text-xs font-bold text-slate-500 uppercase tracking-tight mb-1">AI 深度洞察</h3>
-                    <p className="text-sm leading-relaxed text-slate-200 font-medium">
-                      &quot;{prediction?.ai_reasoning || '正在评估当下市场波动与技术面共振程度...'}&quot;
-                    </p>
+                    <div className="space-y-3">
+                      {(() => {
+                        try {
+                          const data = JSON.parse(prediction?.ai_reasoning || '');
+                          const userPos = rule?.position === 'holding' ? 'holding' : 'empty';
+                          const p1 = data.tactics?.[userPos]?.[0];
+                          
+                          return (
+                            <>
+                              <p className="text-sm leading-relaxed text-slate-200 font-medium">
+                                &quot;{data.summary || prediction?.ai_reasoning}&quot;
+                              </p>
+                              {p1 && (
+                                <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-indigo-500/10 border border-indigo-500/20">
+                                  <span className="text-[10px] font-black bg-indigo-500 text-white px-1.5 py-0.5 rounded italic">P1</span>
+                                  <span className="text-[11px] font-bold text-indigo-400">{p1.a}:</span>
+                                  <span className="text-[11px] text-slate-300 font-medium">{p1.c}</span>
+                                </div>
+                              )}
+                            </>
+                          );
+                        } catch (_) {
+                          return (
+                            <p className="text-sm leading-relaxed text-slate-200 font-medium">
+                              &quot;{prediction?.ai_reasoning || '正在评估当下市场波动与技术面共振程度...'}&quot;
+                            </p>
+                          );
+                        }
+                      })()}
+                    </div>
                   </div>
                 </div>
 

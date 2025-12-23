@@ -270,22 +270,36 @@ def validate_previous_prediction(symbol: str, today_data: pd.Series):
 
 def generate_ai_prediction(symbol: str, today_data: pd.Series):
     """根据今日行情生成对明日的 AI 预测 (T 预测 T+1)"""
-    gemini_key = os.getenv("GEMINI_API_KEY")
+    import json
     
-    if not gemini_key:
-        # 如果没有 Key，生成一个基于均线的简单规则作为 mock
-        close = today_data.get('close', 0)
-        ma20 = today_data.get('ma20', 0)
-        signal = 'Long' if close > ma20 else 'Short'
-        confidence = 0.6
-        reasoning = f"基于规则: 现价({close}) {'高于' if signal=='Long' else '低于'} MA20({ma20})"
-        support_price = ma20
-    else:
-        # TODO: 接入真实的 Gemini 调用 (Sprint 后续任务)
-        signal = 'Side'
-        confidence = 0.5
-        reasoning = "Gemini 集成开发中..."
-        support_price = today_data.get('ma20', 0)
+    # 模拟更复杂的战术决策逻辑
+    close = today_data.get('close', 0)
+    ma20 = today_data.get('ma20', 0)
+    rsi = today_data.get('rsi', 50)
+    support_price = today_data.get('ma20', close * 0.95)
+    
+    signal = 'Long' if close > ma20 else 'Short'
+    if 45 <= rsi <= 55: signal = 'Side'
+    
+    tactics = {
+        "holding": [
+            {"p": "P1", "a": "止损/减仓", "c": f"跌破 {support_price:.2f} 且30分钟不收回", "r": "防止趋势转盈为亏"},
+            {"p": "P2", "a": "持仓待涨", "c": "股价运行在MA20上方", "r": "跟随趋势"}
+        ],
+        "empty": [
+            {"p": "P1", "a": "观望/谨慎", "c": f"等待站稳 {ma20:.2f} 且放量", "r": "右侧交易更稳健"},
+            {"p": "P2", "a": "小仓试错", "c": f"回踩 {support_price:.2f} 不破", "r": "博取反弹"}
+        ]
+    }
+    
+    reasoning_data = {
+        "summary": f"当前价 {'站稳' if close > ma20 else '跌破'} MA20，RSI 指标显示{'动能充沛' if rsi > 50 else '超卖反弹需求'}。",
+        "tactics": tactics,
+        "conflict": "趋势优先（MA20） > 动能（RSI）"
+    }
+    
+    reasoning = json.dumps(reasoning_data, ensure_ascii=False)
+    confidence = 0.72 if signal != 'Side' else 0.5
 
     # 存储到数据库
     conn = get_connection()
