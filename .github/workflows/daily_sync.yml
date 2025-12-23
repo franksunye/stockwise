@@ -23,10 +23,20 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
 
+      - name: Test Imports
+        run: |
+          python -c "print('Testing imports...')"
+          python -c "import pandas; print(f'pandas: {pandas.__version__}')"
+          python -c "import pandas_ta_classic as ta; print(f'pandas_ta_classic: OK')"
+          python -c "import akshare; print(f'akshare: OK')"
+          python -c "import libsql_experimental; print(f'libsql_experimental: OK')"
+          echo "All imports successful!"
+
       - name: Run ETL Pipeline
         env:
+          PYTHONUNBUFFERED: "1"
           TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
           TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
-          python backend/main.py
+          python -u backend/main.py
