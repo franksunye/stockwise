@@ -123,8 +123,8 @@ export default function StockPoolPage() {
           </button>
           <div className="flex flex-col">
           <div className="flex flex-col">
-            <span className="text-xs uppercase tracking-[0.3em] text-slate-500 font-bold">资产注册列表</span>
-            <h1 className="text-2xl font-black italic tracking-tighter">WATCHLIST <span className="text-indigo-500">POOL</span></h1>
+            <span className="text-xs uppercase tracking-[0.3em] text-slate-500 font-bold">自选监控池</span>
+            <h1 className="text-2xl font-black italic tracking-tighter">MONITOR <span className="text-indigo-500">POOL</span></h1>
           </div>
           </div>
         </header>
