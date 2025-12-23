@@ -1,5 +1,5 @@
 akshare
 pandas
-pandas_ta
+pandas-ta
 libsql-experimental
 google-generativeai
