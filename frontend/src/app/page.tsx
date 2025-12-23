@@ -61,7 +61,7 @@ function TacticalBriefDrawer({
         
         <header className="flex items-center justify-between mb-8">
           <div>
-            <span className="text-[10px] uppercase tracking-[0.3em] text-slate-500 font-bold">决策深度推演</span>
+            <span className="text-xs uppercase tracking-[0.3em] text-slate-500 font-bold">智能决策核心</span>
             <h2 className="text-xl font-black italic tracking-tighter text-white">TACTICAL <span className="text-indigo-500">BRIEF</span></h2>
           </div>
           <button onClick={onClose} className="p-2 rounded-full bg-white/5 border border-white/10 text-slate-400">
@@ -71,7 +71,7 @@ function TacticalBriefDrawer({
 
         <div className="space-y-8">
           <section>
-            <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+            <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
               <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" /> 
               当前场景建议 ({userPos === 'holding' ? '已持仓' : '未建仓'})
             </h3>
@@ -79,23 +79,23 @@ function TacticalBriefDrawer({
               {(tactics as Tactic[]).map((t, idx) => (
                 <div key={idx} className="glass-card p-4 border-white/5 bg-white/[0.02]">
                   <div className="flex items-center gap-2 mb-2">
-                    <span className={`text-[9px] font-black px-1.5 py-0.5 rounded italic ${
+                    <span className={`text-xs font-black px-1.5 py-0.5 rounded italic ${
                       t.p === 'P1' ? 'bg-indigo-500 text-white' : 'bg-slate-700 text-slate-300'
                     }`}>{t.p}</span>
-                    <span className="text-sm font-bold text-white">{t.a}</span>
+                    <span className="text-sm font-bold text-white content-start">{t.a}</span>
                   </div>
                   <p className="text-xs text-slate-400 mb-1">触发: <span className="text-slate-200">{t.c}</span></p>
-                  <p className="text-[10px] text-slate-500 font-medium italic">理由: {t.r}</p>
+                  <p className="text-xs text-slate-500 font-medium italic">理由: {t.r}</p>
                 </div>
               ))}
             </div>
           </section>
 
           <section className="p-4 rounded-2xl bg-indigo-500/5 border border-indigo-500/10">
-            <h3 className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+            <h3 className="text-xs font-black text-indigo-400 uppercase tracking-widest mb-2 flex items-center gap-2">
               <Info size={12} /> 核心冲突处理原则
             </h3>
-            <p className="text-xs text-indigo-300/70 leading-relaxed italic">
+            <p className="text-sm text-indigo-300/70 leading-relaxed italic">
               {data.conflict || "遵循趋势优先原则，在信号矛盾时以核心支撑位为准。"}
             </p>
           </section>
@@ -150,8 +150,8 @@ function DashboardContent() {
         {/* Header */}
         <header className="flex items-center justify-between mb-10">
           <div className="flex flex-col">
-            <span className="text-[10px] uppercase tracking-[0.3em] text-slate-500 font-bold">智能决策核心</span>
-            <h1 className="text-xl font-black italic tracking-tighter">STOCKWISE <span className="text-indigo-500 underline decoration-2 underline-offset-4">X</span></h1>
+            <span className="text-xs uppercase tracking-[0.3em] text-slate-500 font-bold">智能决策核心</span>
+            <h1 className="text-2xl font-black italic tracking-tighter">STOCKWISE <span className="text-indigo-500 underline decoration-2 underline-offset-4">X</span></h1>
           </div>
           <div className="flex gap-3">
             <button onClick={() => setSettingsOpen(true)} className="p-2.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-all active:scale-90">
@@ -174,9 +174,9 @@ function DashboardContent() {
             <section className="text-center space-y-2 py-4">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-ping" />
-                <span className="text-[10px] font-bold text-slate-400 tracking-wider">AI 代理实时在线</span>
+                <span className="text-xs font-bold text-slate-400 tracking-wider">AI 代理实时在线</span>
               </div>
-              <h2 className="text-5xl font-black tracking-tighter" style={{ 
+              <h2 className="text-4xl font-black tracking-tighter" style={{ 
                 color: prediction?.signal === 'Long' ? COLORS.up : 
                        prediction?.signal === 'Short' ? COLORS.down : COLORS.hold 
               }}>
@@ -217,9 +217,9 @@ function DashboardContent() {
                               </p>
                               {p1 && (
                                 <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-indigo-500/10 border border-indigo-500/20">
-                                  <span className="text-[10px] font-black bg-indigo-500 text-white px-1.5 py-0.5 rounded italic">P1</span>
-                                  <span className="text-[11px] font-bold text-indigo-400">{p1.a}:</span>
-                                  <span className="text-[11px] text-slate-300 font-medium">{p1.c}</span>
+                                  <span className="text-xs font-black bg-indigo-500 text-white px-1.5 py-0.5 rounded italic">P1</span>
+                                  <span className="text-xs font-bold text-indigo-400">{p1.a}:</span>
+                                  <span className="text-xs text-slate-300 font-medium">{p1.c}</span>
                                 </div>
                               )}
                             </>
@@ -241,7 +241,7 @@ function DashboardContent() {
 
                 <div className="grid grid-cols-2 gap-4 py-4 border-t border-white/5">
                   <div>
-                    <span className="text-[10px] text-slate-500 uppercase font-black tracking-widest block mb-1">当前成交价</span>
+                    <span className="text-xs text-slate-500 uppercase font-black tracking-widest block mb-1">当前成交价</span>
                     <div className="flex items-center gap-2">
                       <span className="text-2xl font-black mono">{price.close.toFixed(2)}</span>
                       <span className="text-xs font-bold px-1.5 py-0.5 rounded bg-white/5" style={{ color: price.change_percent >= 0 ? COLORS.up : COLORS.down }}>
@@ -250,7 +250,7 @@ function DashboardContent() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <span className="text-[10px] text-slate-500 uppercase font-black tracking-widest block mb-1">昨日验证</span>
+                    <span className="text-xs text-slate-500 uppercase font-black tracking-widest block mb-1">昨日验证</span>
                     <div className="flex items-center justify-end gap-1.5 mt-1">
                       {prediction?.validation_status === 'Correct' ? (
                         <span className="text-emerald-500 flex items-center gap-1 text-sm font-bold"><ShieldCheck className="w-4 h-4" /> 结果准确</span>
@@ -268,19 +268,19 @@ function DashboardContent() {
             {/* 3. 辅助决策信息 */}
             <section className="grid grid-cols-2 gap-4">
                <div className="glass-card p-4 flex flex-col justify-between">
-                  <span className="text-[10px] text-slate-500 font-bold uppercase">
+                  <span className="text-xs text-slate-500 font-bold uppercase">
                     {rule?.position === 'holding' ? '卖出预警线' : 
                      rule?.position === 'empty' ? '入场观察位' : '建议止损/支撑'}
                   </span>
-                  <p className="text-xl font-black mono text-rose-500 mt-2">
+                  <p className="text-2xl font-black mono text-rose-500 mt-2">
                     {prediction?.support_price?.toFixed(2) || rule?.support_price?.toFixed(2) || '--'}
                   </p>
                </div>
                <div className="glass-card p-4 flex flex-col justify-between">
-                  <span className="text-[10px] text-slate-500 font-bold uppercase">市场情绪 (RSI)</span>
+                  <span className="text-xs text-slate-500 font-bold uppercase">市场情绪 (RSI)</span>
                   <div className="flex items-baseline gap-2 mt-2">
-                    <p className="text-xl font-black mono">{price.rsi.toFixed(0)}</p>
-                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-white/5 text-slate-400">
+                    <p className="text-2xl font-black mono">{price.rsi.toFixed(0)}</p>
+                    <span className="text-xs font-bold px-1.5 py-0.5 rounded-full bg-white/5 text-slate-400">
                       {price.rsi > 70 ? '超买' : price.rsi < 30 ? '超卖' : '运行稳健'}
                     </span>
                   </div>
@@ -289,12 +289,12 @@ function DashboardContent() {
 
             {/* 4. 技术状态微型列表 */}
             <section className="space-y-3 px-2">
-              <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+              <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
                 <div className="w-2 h-1 bg-indigo-500 rounded-full" /> 技术状态自检
               </h4>
               <div className="flex flex-wrap gap-2">
                 {reviews.slice(0, 4).map(review => (
-                  <div key={review.label} className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/5 text-[10px] font-bold">
+                  <div key={review.label} className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/5 text-xs font-bold">
                     <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: COLORS[review.status as keyof typeof COLORS] || COLORS.hold }} />
                     <span className="text-slate-300">{review.label}</span>
                     <span className="text-slate-600">{review.status === 'up' ? '↗' : review.status === 'down' ? '↘' : '→'}</span>
