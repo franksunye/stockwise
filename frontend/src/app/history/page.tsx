@@ -1,7 +1,7 @@
 'use client';
 
 import { Suspense, useState, useEffect } from 'react';
-import { TrendingUp, TrendingDown, Check, X, Minus, Calendar, BarChart3, Zap } from 'lucide-react';
+import { TrendingUp, TrendingDown, Check, X, Minus } from 'lucide-react';
 import { BottomNav } from '@/components/BottomNav';
 import { useSearchParams } from 'next/navigation';
 
@@ -34,7 +34,14 @@ function HistoryContent() {
       .then(r => r.json())
       .then(data => {
         if (!data.predictions) return;
-        const list: Item[] = data.predictions.map((p: any) => ({
+        const list: Item[] = data.predictions.map((p: {
+          date: string;
+          target_date: string;
+          signal: 'Long' | 'Short' | 'Side';
+          validation_status: 'Correct' | 'Incorrect' | 'Neutral' | 'Pending';
+          actual_change: number | null;
+          confidence: number;
+        }) => ({
           date: p.date,
           target_date: p.target_date,
           signal: p.signal,

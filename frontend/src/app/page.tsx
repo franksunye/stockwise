@@ -109,7 +109,7 @@ function DashboardContent() {
                   <div>
                     <h3 className="text-xs font-bold text-slate-500 uppercase tracking-tight mb-1">AI 深度洞察</h3>
                     <p className="text-sm leading-relaxed text-slate-200 font-medium">
-                      "{prediction?.ai_reasoning || '正在评估当下市场波动与技术面共振程度...'}"
+                      &quot;{prediction?.ai_reasoning || '正在评估当下市场波动与技术面共振程度...'}&quot;
                     </p>
                   </div>
                 </div>

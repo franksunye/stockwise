@@ -32,7 +32,7 @@ export async function GET(request: Request) {
                 rowObjects = client.prepare('SELECT DISTINCT symbol FROM daily_prices').all();
                 client.close();
             }
-            return NextResponse.json({ symbols: rowObjects.map((r: any) => r.symbol) });
+            return NextResponse.json({ symbols: (rowObjects as { symbol: string }[]).map((r) => r.symbol) });
         }
 
         if (history) {

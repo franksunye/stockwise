@@ -1,4 +1,4 @@
-import { DailyPrice, UserRule } from './types';
+import { DailyPrice } from './types';
 
 export interface IndicatorReview {
     label: string;

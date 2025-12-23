@@ -61,7 +61,7 @@ export function SettingsModal({ symbol, isOpen, onClose, onSave }: Props) {
               ].map((opt) => (
                 <button
                   key={opt.id}
-                  onClick={() => setPosition(opt.id as any)}
+                  onClick={() => setPosition(opt.id as 'holding' | 'empty' | 'none')}
                   className={`py-2 rounded-xl text-[10px] font-bold transition-all ${
                     position === opt.id 
                       ? 'bg-indigo-600 text-white shadow-lg' 

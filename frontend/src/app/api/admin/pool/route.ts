@@ -76,8 +76,8 @@ export async function POST(request: Request) {
         } else {
             const db = getLocalDb();
             if (!stockName) {
-                const meta = db.prepare('SELECT name FROM stock_meta WHERE symbol = ?').get(symbol);
-                if (meta) stockName = (meta as any).name;
+                const meta = db.prepare('SELECT name FROM stock_meta WHERE symbol = ?').get(symbol) as { name: string } | undefined;
+                if (meta) stockName = meta.name;
             }
 
             if (!stockName) {
@@ -89,7 +89,7 @@ export async function POST(request: Request) {
             db.close();
             return NextResponse.json({ success: true, name: stockName });
         }
-    } catch (error: any) {
+    } catch (error) {
         console.error('❌ 添加失败:', error);
         return NextResponse.json({ error: 'Failed' }, { status: 500 });
     }
