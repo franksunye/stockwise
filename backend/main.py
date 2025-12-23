@@ -113,17 +113,17 @@ def init_db():
     """)
     
     # 初始化核心股票池 (如果为空)
-    cursor.execute("SELECT COUNT(*) FROM stock_pool")
-    if cursor.fetchone()[0] == 0:
-        initial_stocks = [
-            ('02171', '科济药业-B'),
-            ('01167', '加科思-B'),
-        ]
-        cursor.executemany(
-            "INSERT INTO stock_pool (symbol, name) VALUES (?, ?)",
-            initial_stocks
-        )
-        print(f"   已初始化 {len(initial_stocks)} 只核心股票")
+    # 强制确保核心资产存在 (自动修复)
+    # 无论表是否为空，都确保这两只核心股票在池中 (防止意外被清空)
+    initial_stocks = [
+        ('02171', '科济药业-B'),
+        ('01167', '加科思-B'),
+    ]
+    cursor.executemany(
+        "INSERT OR IGNORE INTO stock_pool (symbol, name) VALUES (?, ?)",
+        initial_stocks
+    )
+    print(f"   已验证核心资产完整性 ({len(initial_stocks)} 只)")
     
     conn.commit()
     conn.close()
