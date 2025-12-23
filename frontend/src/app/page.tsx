@@ -9,12 +9,101 @@ import { BottomNav } from '@/components/BottomNav';
 import { SettingsModal } from '@/components/SettingsModal';
 import { useSearchParams } from 'next/navigation';
 
+import { ChevronRight, X as CloseIcon, Info } from 'lucide-react';
+
 const COLORS = { 
   up: '#10b981', 
   down: '#f43f5e', 
   hold: '#f59e0b', 
   muted: '#64748b' 
 };
+
+interface Tactic {
+  p: string;
+  a: string;
+  c: string;
+  r: string;
+}
+
+interface TacticalData {
+  summary: string;
+  tactics: {
+    holding: Tactic[];
+    empty: Tactic[];
+  };
+  conflict: string;
+}
+
+// --- Tactical Brief Drawer Component ---
+function TacticalBriefDrawer({ 
+  isOpen, 
+  onClose, 
+  data, 
+  userPos 
+}: { 
+  isOpen: boolean; 
+  onClose: () => void; 
+  data: TacticalData;
+  userPos: 'holding' | 'empty' | 'none';
+}) {
+  if (!isOpen || !data) return null;
+
+  const tactics = data.tactics?.[userPos === 'none' ? 'empty' : userPos] || [];
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
+      <div 
+        className="fixed inset-0" 
+        onClick={onClose} 
+      />
+      <div className="w-full max-w-md bg-[#0a0a0f] border-t border-white/10 rounded-t-[32px] p-8 pb-12 shadow-[0_-20px_50px_rgba(0,0,0,0.5)] animate-in slide-in-from-bottom-20 duration-500 relative z-10">
+        <div className="w-12 h-1 bg-white/10 rounded-full mx-auto mb-6" />
+        
+        <header className="flex items-center justify-between mb-8">
+          <div>
+            <span className="text-[10px] uppercase tracking-[0.3em] text-slate-500 font-bold">决策深度推演</span>
+            <h2 className="text-xl font-black italic tracking-tighter text-white">TACTICAL <span className="text-indigo-500">BRIEF</span></h2>
+          </div>
+          <button onClick={onClose} className="p-2 rounded-full bg-white/5 border border-white/10 text-slate-400">
+            <CloseIcon size={20} />
+          </button>
+        </header>
+
+        <div className="space-y-8">
+          <section>
+            <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" /> 
+              当前场景建议 ({userPos === 'holding' ? '已持仓' : '未建仓'})
+            </h3>
+            <div className="space-y-3">
+              {(tactics as Tactic[]).map((t, idx) => (
+                <div key={idx} className="glass-card p-4 border-white/5 bg-white/[0.02]">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className={`text-[9px] font-black px-1.5 py-0.5 rounded italic ${
+                      t.p === 'P1' ? 'bg-indigo-500 text-white' : 'bg-slate-700 text-slate-300'
+                    }`}>{t.p}</span>
+                    <span className="text-sm font-bold text-white">{t.a}</span>
+                  </div>
+                  <p className="text-xs text-slate-400 mb-1">触发: <span className="text-slate-200">{t.c}</span></p>
+                  <p className="text-[10px] text-slate-500 font-medium italic">理由: {t.r}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="p-4 rounded-2xl bg-indigo-500/5 border border-indigo-500/10">
+            <h3 className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+              <Info size={12} /> 核心冲突处理原则
+            </h3>
+            <p className="text-xs text-indigo-300/70 leading-relaxed italic">
+              {data.conflict || "遵循趋势优先原则，在信号矛盾时以核心支撑位为准。"}
+            </p>
+          </section>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function DashboardContent() {
   const searchParams = useSearchParams();
@@ -26,8 +115,11 @@ function DashboardContent() {
   const [rule, setRule] = useState<UserRule | null>(null);
   const [loading, setLoading] = useState(true);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [showTactics, setShowTactics] = useState(false);
 
   const loadData = useCallback(async () => {
+// ... existing loadData code ...
+// Skipping to the return section to add the drawer and click handlers
     setLoading(true);
     try {
       const res = await fetch(`/api/stock?symbol=${symbol}`);
@@ -99,7 +191,10 @@ function DashboardContent() {
             </section>
 
             {/* 2. 当前价格与 AI 理由 (Glass Card) */}
-            <section className="glass-card relative overflow-hidden group">
+            <section 
+              onClick={() => setShowTactics(true)}
+              className="glass-card relative overflow-hidden group cursor-pointer active:scale-[0.98] transition-all hover:bg-white/[0.04]"
+            >
                {/* 理由 */}
               <div className="relative z-10">
                 <div className="flex items-start gap-4 mb-6">
@@ -111,7 +206,7 @@ function DashboardContent() {
                     <div className="space-y-3">
                       {(() => {
                         try {
-                          const data = JSON.parse(prediction?.ai_reasoning || '');
+                          const data = JSON.parse(prediction?.ai_reasoning || '') as TacticalData;
                           const userPos = rule?.position === 'holding' ? 'holding' : 'empty';
                           const p1 = data.tactics?.[userPos]?.[0];
                           
@@ -129,7 +224,7 @@ function DashboardContent() {
                               )}
                             </>
                           );
-                        } catch (_) {
+                        } catch {
                           return (
                             <p className="text-sm leading-relaxed text-slate-200 font-medium">
                               &quot;{prediction?.ai_reasoning || '正在评估当下市场波动与技术面共振程度...'}&quot;
@@ -137,6 +232,9 @@ function DashboardContent() {
                           );
                         }
                       })()}
+                    </div>
+                    <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <ChevronRight className="w-4 h-4 text-slate-600" />
                     </div>
                   </div>
                 </div>
@@ -217,6 +315,23 @@ function DashboardContent() {
           setRule(getRule(symbol));
           loadData();
         }} />
+
+        {(() => {
+          try {
+            const data = JSON.parse(prediction?.ai_reasoning || '') as TacticalData;
+            return (
+              <TacticalBriefDrawer 
+                isOpen={showTactics} 
+                onClose={() => setShowTactics(false)} 
+                data={data}
+                userPos={rule?.position || 'none'}
+              />
+            );
+          } catch {
+            return null;
+          }
+        })()}
+
         <BottomNav />
       </div>
     </div>
