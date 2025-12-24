@@ -52,21 +52,26 @@ export async function GET(request: Request) {
         }
 
         // 获取最新价格和 AI 预测
-        let row, prediction;
+        // latestPrediction: 今日生成的预测（预测明日），用于显示信号
+        // prevPrediction: 昨日生成的预测（预测今日），用于显示 "昨日验证" 的验证结果
+        let row, latestPrediction, prevPrediction;
         if ('execute' in client) {
             const rsPrice = await client.execute({
                 sql: 'SELECT * FROM daily_prices WHERE symbol = ? ORDER BY date DESC LIMIT 1',
                 args: [symbol]
             });
             const rsPred = await client.execute({
-                sql: 'SELECT * FROM ai_predictions WHERE symbol = ? ORDER BY date DESC LIMIT 1',
+                sql: 'SELECT * FROM ai_predictions WHERE symbol = ? ORDER BY date DESC LIMIT 2',
                 args: [symbol]
             });
             row = rsPrice.rows[0];
-            prediction = rsPred.rows[0];
+            latestPrediction = rsPred.rows[0];
+            prevPrediction = rsPred.rows[1]; // 第二条就是昨日的预测
         } else {
             row = client.prepare('SELECT * FROM daily_prices WHERE symbol = ? ORDER BY date DESC LIMIT 1').get(symbol);
-            prediction = client.prepare('SELECT * FROM ai_predictions WHERE symbol = ? ORDER BY date DESC LIMIT 1').get(symbol);
+            const predictions = client.prepare('SELECT * FROM ai_predictions WHERE symbol = ? ORDER BY date DESC LIMIT 2').all(symbol) as Record<string, unknown>[];
+            latestPrediction = predictions[0];
+            prevPrediction = predictions[1];
             client.close();
         }
 
@@ -76,7 +81,8 @@ export async function GET(request: Request) {
 
         return NextResponse.json({
             price: row,
-            prediction: prediction || null
+            prediction: latestPrediction || null,
+            previousPrediction: prevPrediction || null
         });
 
     } catch (error) {

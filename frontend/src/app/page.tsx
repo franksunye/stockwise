@@ -112,6 +112,7 @@ function DashboardContent() {
   
   const [price, setPrice] = useState<DailyPrice | null>(null);
   const [prediction, setPrediction] = useState<AIPrediction | null>(null);
+  const [previousPrediction, setPreviousPrediction] = useState<AIPrediction | null>(null);
   const [rule, setRule] = useState<UserRule | null>(null);
   const [loading, setLoading] = useState(true);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -125,6 +126,7 @@ function DashboardContent() {
       const data = await res.json();
       if (data.price) setPrice(data.price);
       if (data.prediction) setPrediction(data.prediction);
+      if (data.previousPrediction) setPreviousPrediction(data.previousPrediction);
       setLastUpdated(new Date());
     } catch (e) {
       console.error(e);
@@ -264,10 +266,12 @@ function DashboardContent() {
                   <div className="text-right">
                     <span className="text-xs text-slate-500 uppercase font-black tracking-widest block mb-1">昨日验证</span>
                     <div className="flex items-center justify-end gap-1.5 mt-1">
-                      {prediction?.validation_status === 'Correct' ? (
+                      {previousPrediction?.validation_status === 'Correct' ? (
                         <span className="text-emerald-500 flex items-center gap-1 text-sm font-bold"><ShieldCheck className="w-4 h-4" /> 结果准确</span>
-                      ) : prediction?.validation_status === 'Incorrect' ? (
+                      ) : previousPrediction?.validation_status === 'Incorrect' ? (
                         <span className="text-rose-500 text-sm font-bold">❌ 偏差回顾</span>
+                      ) : previousPrediction?.validation_status === 'Neutral' ? (
+                        <span className="text-amber-500 text-sm font-bold">观望中性</span>
                       ) : (
                         <span className="text-slate-500 text-sm font-bold italic">待验证</span>
                       )}
