@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Plus, Search, Trash2, ArrowLeft, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { BottomNav } from '@/components/BottomNav';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { getCurrentUser, type User } from '@/lib/user';
 
 const COLORS = { 
   up: '#10b981', 
@@ -23,16 +24,29 @@ interface StockSnapshot {
 
 export default function StockPoolPage() {
   const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
   const [stocks, setStocks] = useState<StockSnapshot[]>([]);
   const [loading, setLoading] = useState(true);
   const [newSymbol, setNewSymbol] = useState('');
   const [showAdd, setShowAdd] = useState(false);
 
-  const fetchStockData = async () => {
+  // 初始化用户
+  useEffect(() => {
+    getCurrentUser().then(setUser);
+  }, []);
+
+
+  // fetchStockData 函数移到下面使用 useCallback 定义
+
+
+  // 使用 useCallback 避免无限循环
+  const fetchStockData = useCallback(async () => {
+    if (!user) return;
+    
     setLoading(true);
     try {
-      // 1. 从数据库读取股票池列表
-      const poolRes = await fetch('/api/stock-pool');
+      // 1. 从数据库读取用户的股票池列表
+      const poolRes = await fetch(`/api/stock-pool?userId=${user.userId}`);
       const poolData = await poolRes.json();
       const watchlist = poolData.stocks || [];
       
@@ -73,37 +87,88 @@ export default function StockPoolPage() {
       console.error('Failed to load pool from database', err);
     }
     setLoading(false);
-  };
+  }, [user]);
 
   useEffect(() => {
-    fetchStockData();
-  }, []);
+    if (user) {
+      fetchStockData();
+    }
+  }, [user, fetchStockData]);
 
-  const handleAdd = async () => {
-    if (newSymbol.trim()) {
-      setLoading(true);
-      try {
-        await fetch('/api/stock-pool', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ symbol: newSymbol.trim() })
-        });
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  // 快捷推荐列表
+  const SUGGESTIONS = [
+    { symbol: '02171', name: '科济药业-B' },
+    { symbol: '01167', name: '加科思-B' },
+    { symbol: '00700', name: '腾讯控股' },
+    { symbol: '09988', name: '阿里巴巴-SW' }
+  ];
+
+  // 搜索逻辑
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      if (newSymbol.trim()) {
+        try {
+          const res = await fetch(`/api/stock/search?q=${newSymbol}`);
+          const data = await res.json();
+          setSearchResults(data.results || []);
+          setShowSuggestions(true);
+        } catch (e) {
+          console.error('Search failed', e);
+        }
+      } else {
+        setSearchResults([]);
+        setShowSuggestions(false);
+      }
+    }, 300); // 防抖处理
+
+    return () => clearTimeout(timer);
+  }, [newSymbol]);
+
+  const handleAdd = async (symbolOverride?: string, nameOverride?: string) => {
+    const targetSymbol = symbolOverride || newSymbol.trim();
+    if (!targetSymbol) return;
+    
+    const activeUser = user || await getCurrentUser();
+    if (!user) setUser(activeUser);
+    
+    setLoading(true);
+    try {
+      const response = await fetch('/api/stock-pool', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          userId: activeUser.userId,
+          symbol: targetSymbol,
+          name: nameOverride // 如果知道名称，传给后端
+        })
+      });
+      
+      if (response.ok) {
         setNewSymbol('');
         setShowAdd(false);
+        setShowSuggestions(false);
         await fetchStockData();
-      } catch (e) {
-        console.error('Add failed', e);
+      } else {
+        const result = await response.json();
+        console.error('Add failed:', result.error);
       }
-      setLoading(false);
+    } catch (e) {
+      console.error('Add error:', e);
     }
+    setLoading(false);
   };
 
   const handleRemove = async (e: React.MouseEvent, symbol: string) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!user) return;
+    
     setLoading(true);
     try {
-      await fetch(`/api/stock-pool?symbol=${symbol}`, { method: 'DELETE' });
+      await fetch(`/api/stock-pool?userId=${user.userId}&symbol=${symbol}`, { method: 'DELETE' });
       await fetchStockData();
     } catch (e) {
       console.error('Delete failed', e);
@@ -122,30 +187,65 @@ export default function StockPoolPage() {
             <ArrowLeft className="w-5 h-5 text-slate-400" />
           </button>
           <div className="flex flex-col">
-          <div className="flex flex-col">
             <span className="text-xs uppercase tracking-[0.3em] text-slate-500 font-bold">自选监控池</span>
             <h1 className="text-2xl font-black italic tracking-tighter">MONITOR <span className="text-indigo-500">POOL</span></h1>
-          </div>
           </div>
         </header>
 
         {/* 搜索/添加区域 */}
-        <div className="mb-8">
+        <div className="mb-8 relative">
           {showAdd ? (
-            <div className="glass-card flex gap-2 p-3 animate-in fade-in zoom-in duration-300">
-              <input 
-                autoFocus
-                value={newSymbol}
-                onChange={(e) => setNewSymbol(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
-                placeholder="输入股票代码 (如 02171)"
-                className="flex-1 bg-black/20 border border-white/5 rounded-2xl px-5 py-3 mono text-sm focus:outline-none focus:border-indigo-500/50 transition-all"
-              />
-              <button 
-                className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 rounded-2xl font-black italic text-sm transition-all active:scale-95"
-              >
-                添加
-              </button>
+            <div className="glass-card flex flex-col p-3 animate-in fade-in zoom-in duration-300 gap-3">
+              <div className="flex gap-2">
+                <input 
+                  autoFocus
+                  value={newSymbol}
+                  onChange={(e) => setNewSymbol(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
+                  placeholder="输入代码或名称 (如 科济)"
+                  className="flex-1 bg-black/20 border border-white/5 rounded-2xl px-5 py-3 mono text-sm focus:outline-none focus:border-indigo-500/50 transition-all"
+                />
+                <button 
+                  onClick={() => handleAdd()}
+                  disabled={loading}
+                  className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-2xl font-black italic text-sm transition-all active:scale-95"
+                >
+                  {loading ? '...' : '添加'}
+                </button>
+              </div>
+
+              {/* 实时搜索建议 */}
+              {showSuggestions && searchResults.length > 0 && (
+                <div className="flex flex-col border-t border-white/5 pt-2 max-h-48 overflow-y-auto">
+                  {searchResults.map((item) => (
+                    <button
+                      key={item.symbol}
+                      onClick={() => handleAdd(item.symbol, item.name)}
+                      className="flex items-center justify-between p-3 hover:bg-white/5 rounded-xl transition-colors text-left group"
+                    >
+                      <div className="flex flex-col">
+                        <span className="text-sm font-bold">{item.name}</span>
+                        <span className="text-xs text-slate-500 mono">{item.symbol}</span>
+                      </div>
+                      <Plus className="w-4 h-4 text-slate-600 group-hover:text-indigo-500 transition-colors" />
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* 快捷推荐 */}
+              <div className="flex flex-wrap gap-2 pt-1">
+                <span className="text-[10px] text-slate-600 font-bold uppercase w-full">推荐关注</span>
+                {SUGGESTIONS.filter(s => !stocks.some(existing => existing.symbol === s.symbol)).map((s) => (
+                  <button
+                    key={s.symbol}
+                    onClick={() => handleAdd(s.symbol, s.name)}
+                    className="px-3 py-1.5 rounded-full bg-white/5 border border-white/5 text-[10px] font-bold text-slate-500 hover:bg-indigo-500/20 hover:text-indigo-400 hover:border-indigo-500/30 transition-all"
+                  >
+                    {s.name}
+                  </button>
+                ))}
+              </div>
             </div>
           ) : (
             <button 

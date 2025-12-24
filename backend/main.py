@@ -27,10 +27,12 @@ TURSO_AUTH_TOKEN = os.getenv("TURSO_AUTH_TOKEN")
 
 
 def get_stock_pool():
-    """从数据库获取核心股票池"""
+    """从全局股票池获取需要同步的股票 (仅同步有人关注的股票)"""
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT symbol FROM stock_pool ORDER BY added_at")
+    # 只同步有人关注的股票 (watchers_count > 0)
+    # watchers_count = 0 表示系统默认池，可选择性同步
+    cursor.execute("SELECT symbol FROM global_stock_pool WHERE watchers_count > 0 ORDER BY watchers_count DESC")
     stocks = [row[0] for row in cursor.fetchall()]
     conn.close()
     return stocks
@@ -112,23 +114,20 @@ def init_db():
         )
     """)
     
-    # 初始化核心股票池 (如果为空)
-    # 强制确保核心资产存在 (自动修复)
-    # 无论表是否为空，都确保这两只核心股票在池中 (防止意外被清空)
-    initial_stocks = [
-        ('02171', '科济药业-B'),
-        ('01167', '加科思-B'),
-    ]
-    cursor.executemany(
-        "INSERT OR IGNORE INTO stock_pool (symbol, name) VALUES (?, ?)",
-        initial_stocks
-    )
-    print(f"   已验证核心资产完整性 ({len(initial_stocks)} 只)")
+    # 验证全局股票池是否有数据
+    cursor.execute("SELECT COUNT(*) FROM global_stock_pool WHERE watchers_count > 0")
+    active_stocks_count = cursor.fetchone()[0]
+    
+    if active_stocks_count == 0:
+        print("   ⚠️ 全局股票池为空，ETL 将不会同步任何股票")
+        print("   💡 提示: 用户需要在前端添加关注的股票后，ETL 才会开始同步数据")
+    else:
+        print(f"   ✅ 全局股票池已有 {active_stocks_count} 只活跃股票")
     
     conn.commit()
     conn.close()
     db_info = TURSO_DB_URL[:50] + "..." if TURSO_DB_URL else str(DB_PATH)
-    print(f"✅ 数据库准备就绪 (日线/周线/元数据/股票池): {db_info}")
+    print(f"✅ 数据库准备就绪: {db_info}")
 
 
 def sync_stock_meta():
@@ -278,8 +277,16 @@ def generate_ai_prediction(symbol: str, today_data: pd.Series):
     rsi = today_data.get('rsi', 50)
     support_price = today_data.get('ma20', close * 0.95)
     
-    signal = 'Long' if close > ma20 else 'Short'
-    if 45 <= rsi <= 55: signal = 'Side'
+    # [核心变化] 动态调整信号
+    # 如果是盘中实时价，信号要根据当前与支撑位的关系敏感变动
+    if close < support_price * 0.98:
+        signal = 'Short' # 严重破位
+    elif close > ma20:
+        signal = 'Long' # 趋势向上
+    else:
+        signal = 'Side' # 震荡
+        
+    if 45 <= rsi <= 55 and signal != 'Short': signal = 'Side'
     
     tactics = {
         "holding": [
@@ -321,7 +328,97 @@ def generate_ai_prediction(symbol: str, today_data: pd.Series):
     
     conn.commit()
     conn.close()
-    print(f"   🔮 生成今日预测 ({today_str} -> {target_date}): 信号={signal}, 置信度={confidence}")
+    print(f"   🔮 系统决策同步 ({today_str}): 信号={signal}, 置信度={confidence}")
+    return signal, support_price
+
+
+def send_wecom_notification(content: str):
+    """发送企业微信机器人通知"""
+    import requests
+    wecom_key = os.getenv("WECOM_ROBOT_KEY")
+    if not wecom_key:
+        return
+    
+    url = f"https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key={wecom_key}"
+    data = {
+        "msgtype": "markdown",
+        "markdown": {
+            "content": content
+        }
+    }
+    try:
+        response = requests.post(url, json=data, timeout=10)
+        if response.status_code == 200:
+            print("   📲 企微实时报告已推送")
+        else:
+            print(f"   ⚠️ 企微推送失败: {response.text}")
+    except Exception as e:
+        print(f"   ⚠️ 企微网络异常: {e}")
+
+
+def sync_spot_prices(symbols: list):
+    """同步盘中实时价格 (Spot) - System Ops 版本"""
+    import time
+    start_time = time.time()
+    max_retries = 3
+    retry_delay = 5
+    
+    success_count = 0
+    errors = []
+    
+    print(f"\n⚡ 正在执行盘中实时同步 (Spot) - 目标: {len(symbols)} 只股票")
+    
+    hk_spot = pd.DataFrame()
+    for attempt in range(max_retries):
+        try:
+            hk_spot = ak.stock_hk_spot_em()
+            if not hk_spot.empty: break
+        except Exception as e:
+            if attempt < max_retries - 1: time.sleep(retry_delay)
+            else: errors.append(f"Market Data Fetch Error: {str(e)[:100]}")
+
+    if not hk_spot.empty:
+        now = datetime.now()
+        today_str = now.strftime("%Y-%m-%d")
+        try:
+            conn = get_connection()
+            for symbol in symbols:
+                row = hk_spot[hk_spot['代码'] == symbol]
+                if row.empty: continue
+                try:
+                    spot_price = float(row.iloc[0]['最新价'])
+                    change_pct = float(row.iloc[0]['涨跌幅'])
+                    cursor = conn.cursor()
+                    cursor.execute("""
+                        INSERT INTO daily_prices (symbol, date, close, change_percent)
+                        VALUES (?, ?, ?, ?)
+                        ON CONFLICT(symbol, date) DO UPDATE SET close=excluded.close, change_percent=excluded.change_percent
+                    """, (symbol, today_str, spot_price, change_pct))
+                    conn.commit()
+                    process_stock_period(symbol, period="daily")
+                    success_count += 1
+                except Exception as e:
+                    errors.append(f"Stock {symbol} processing error: {str(e)[:100]}")
+            conn.close()
+        except Exception as e:
+            errors.append(f"Database Connection Error: {str(e)[:100]}")
+
+    # 发送系统运维报告
+    duration = time.time() - start_time
+    status = "✅ SUCCESS" if not errors and success_count > 0 else "⚠️ PARTIAL" if success_count > 0 else "❌ FAILED"
+    
+    ops_report = f"### 🛠️ StockWise Ops: Realtime Sync\n"
+    ops_report += f"> **Status**: {status}\n"
+    ops_report += f"- **Time**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+    ops_report += f"- **Duration**: {duration:.2f}s\n"
+    ops_report += f"- **Processed**: {success_count}/{len(symbols)} stocks\n"
+    
+    if errors:
+        ops_report += f"\n**Errors ({len(errors)})**:\n"
+        ops_report += "\n".join([f"- {err}" for err in errors[:5]]) # 最多显示5条错误
+        
+    send_wecom_notification(ops_report)
+    print(f"✅ 盘中实时任务处理完成 (Success: {success_count})")
 
 
 def process_stock_period(symbol: str, period: str = "daily"):
@@ -459,49 +556,69 @@ def show_latest_data(symbol: str, period: str = "daily", limit: int = 3):
 # ============================================================
 
 if __name__ == "__main__":
+    import sys
+    is_realtime = len(sys.argv) > 1 and sys.argv[1] == "--realtime"
+
     print("=" * 60)
-    print("StockWise ETL Pipeline - [日线/周线/元数据] 增量多引擎版")
+    print(f"StockWise ETL Pipeline - [{'REALTIME' if is_realtime else 'FULL'}] Sync Mode")
     print("=" * 60)
     
     init_db()
     
-    # 1. 元数据同步 (MVP 阶段跳过，仅在需要时手动执行)
-    # sync_stock_meta()  # 耗时较长，仅在需要更新全市场股票名称时执行
-    
-    # 2. 从数据库获取核心股票池
+    # 获取核心股票池
     target_stocks = get_stock_pool()
-    print(f"\n📊 核心股票池: {len(target_stocks)} 只股票")
-    print(f"   {', '.join(target_stocks)}")
     
-    # 3. 处理目标股票行情
-    for stock in target_stocks:
-        print(f"\n🚀 处理股票: {stock}")
-        print("-" * 30)
-        # 先处理日线
-        process_stock_period(stock, period="daily")
-        # 再处理周线
-        process_stock_period(stock, period="weekly")
+    if not target_stocks:
+        # 如果 global_stock_pool 为空，尝试从 stock_pool 获取 (兼容旧版)
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT symbol FROM stock_pool")
+        target_stocks = [row[0] for row in cursor.fetchall()]
+        conn.close()
+
+    if not target_stocks:
+        print("⚠️ 股票池为空，退出。")
+        sys.exit(0)
+
+    print(f"\n📊 目标股票池: {len(target_stocks)} 只股票")
+
+    if is_realtime:
+        # 实时同步模式 (5分钟一次，由外部调度或简易循环)
+        sync_spot_prices(target_stocks)
+    else:
+        # 全量/增量历史同步模式 (System Ops 视角)
+        import time
+        start_time = time.time()
+        success_count = 0
+        errors = []
         
-        # 验证显示
-        show_latest_data(stock, period="daily")
-        show_latest_data(stock, period="weekly")
+        for stock in target_stocks:
+            print(f"\n🚀 处理股票: {stock}")
+            print("-" * 30)
+            try:
+                process_stock_period(stock, period="daily")
+                process_stock_period(stock, period="weekly")
+                success_count += 1
+            except Exception as e:
+                print(f"   ❌ {stock} 处理失败: {e}")
+                errors.append(f"{stock} sync error: {str(e)[:100]}")
+        
+        # 发送每日运维总结
+        duration = time.time() - start_time
+        status = "✅ SUCCESS" if not errors and success_count > 0 else "❌ FAILED"
+        
+        ops_report = f"### 📊 StockWise Ops: Daily Full Sync\n"
+        ops_report += f"> **Status**: {status}\n"
+        ops_report += f"- **Date**: {datetime.now().strftime('%Y-%m-%d')}\n"
+        ops_report += f"- **Duration**: {duration:.1f}s\n"
+        ops_report += f"- **Processed**: {success_count}/{len(target_stocks)} stocks\n"
+        
+        if errors:
+            ops_report += f"\n**Critical Errors**:\n"
+            ops_report += "\n".join([f"- {err}" for err in errors[:5]])
+            
+        send_wecom_notification(ops_report)
     
     print("\n" + "=" * 60)
-    
-    # [Final Safety Check]
-    # 防止脚本运行过程中因意外导致 Stock Pool 被清空
-    final_conn = get_connection()
-    final_cursor = final_conn.cursor()
-    final_cursor.execute("SELECT COUNT(*) FROM stock_pool")
-    final_count = final_cursor.fetchone()[0]
-    final_conn.close()
-    
-    if final_count == 0:
-        print("⚠️ 警告: 检测到 Stock Pool 为空！正在执行紧急恢复...")
-        init_db()
-        print("✅ 紧急恢复已完成。")
-    else:
-        print(f"✅ Stock Pool 完整性校验通过 (剩余 {final_count} 只)")
-
     print("🎉 全部处理完成!")
     print("=" * 60)

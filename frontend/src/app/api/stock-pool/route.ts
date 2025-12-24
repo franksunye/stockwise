@@ -1,55 +1,123 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@libsql/client';
-import Database from 'better-sqlite3';
-import path from 'path';
+import { getDbClient } from '../../../lib/db';
 
-function getDbClient() {
-    const url = process.env.TURSO_DB_URL;
-    const authToken = process.env.TURSO_AUTH_TOKEN;
 
-    if (url && authToken) {
-        // 远程模式 (Vercel + Turso)
-        return createClient({ url, authToken });
-    } else {
-        // 本地模式 (Local SQLite)
-        const dbPath = path.join(process.cwd(), '..', 'data', 'stockwise.db');
-        return new Database(dbPath);
+/**
+ * GET /api/stock-pool?userId=xxx
+ * 获取用户的股票池
+ */
+export async function GET(request: Request) {
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get('userId');
+
+    if (!userId) {
+        return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
     }
-}
 
-export async function GET() {
     try {
         const client = getDbClient();
         let stocks;
 
         if ('execute' in client) {
-            const rs = await client.execute('SELECT symbol, name FROM stock_pool ORDER BY added_at');
+            // Turso
+            const rs = await client.execute({
+                sql: `SELECT uw.symbol, gp.name 
+                      FROM user_watchlist uw
+                      LEFT JOIN global_stock_pool gp ON uw.symbol = gp.symbol
+                      WHERE uw.user_id = ?
+                      ORDER BY uw.added_at DESC`,
+                args: [userId],
+            });
             stocks = rs.rows;
         } else {
-            stocks = client.prepare('SELECT symbol, name FROM stock_pool ORDER BY added_at').all();
+            // SQLite
+            stocks = client
+                .prepare(
+                    `SELECT uw.symbol, gp.name 
+                     FROM user_watchlist uw
+                     LEFT JOIN global_stock_pool gp ON uw.symbol = gp.symbol
+                     WHERE uw.user_id = ?
+                     ORDER BY uw.added_at DESC`
+                )
+                .all(userId);
             client.close();
         }
 
         return NextResponse.json({ stocks });
     } catch (error) {
-        console.error('Fetch stock pool error:', error);
+        console.error('Fetch user watchlist error:', error);
         return NextResponse.json({ stocks: [] }, { status: 500 });
     }
 }
 
+/**
+ * POST /api/stock-pool
+ * 添加股票到用户关注列表
+ */
 export async function POST(request: Request) {
     try {
-        const { symbol, name } = await request.json();
+        const { userId, symbol, name } = await request.json();
+
+        if (!userId || !symbol) {
+            return NextResponse.json(
+                { error: 'Missing userId or symbol' },
+                { status: 400 }
+            );
+        }
+
         const client = getDbClient();
         const displayName = name || `股票 ${symbol}`;
+        const now = new Date().toISOString();
 
         if ('execute' in client) {
+            // Turso
+            // 1. 添加到用户关注列表
             await client.execute({
-                sql: 'INSERT OR REPLACE INTO stock_pool (symbol, name) VALUES (?, ?)',
-                args: [symbol, displayName]
+                sql: 'INSERT OR IGNORE INTO user_watchlist (user_id, symbol, added_at) VALUES (?, ?, ?)',
+                args: [userId, symbol, now],
             });
+
+            // 2. 更新全局股票池
+            const existing = await client.execute({
+                sql: 'SELECT watchers_count FROM global_stock_pool WHERE symbol = ?',
+                args: [symbol],
+            });
+
+            if (existing.rows.length > 0) {
+                // 股票已存在，增加计数
+                await client.execute({
+                    sql: 'UPDATE global_stock_pool SET watchers_count = watchers_count + 1 WHERE symbol = ?',
+                    args: [symbol],
+                });
+            } else {
+                // 新股票，插入记录
+                await client.execute({
+                    sql: 'INSERT INTO global_stock_pool (symbol, name, watchers_count, first_watched_at) VALUES (?, ?, 1, ?)',
+                    args: [symbol, displayName, now],
+                });
+            }
         } else {
-            client.prepare('INSERT OR REPLACE INTO stock_pool (symbol, name) VALUES (?, ?)').run(symbol, displayName);
+            // SQLite
+            // 1. 添加到用户关注列表
+            client
+                .prepare('INSERT OR IGNORE INTO user_watchlist (user_id, symbol, added_at) VALUES (?, ?, ?)')
+                .run(userId, symbol, now);
+
+            // 2. 更新全局股票池
+            const existing = client
+                .prepare('SELECT watchers_count FROM global_stock_pool WHERE symbol = ?')
+                .get(symbol);
+
+            if (existing) {
+                client
+                    .prepare('UPDATE global_stock_pool SET watchers_count = watchers_count + 1 WHERE symbol = ?')
+                    .run(symbol);
+            } else {
+                client
+                    .prepare('INSERT INTO global_stock_pool (symbol, name, watchers_count, first_watched_at) VALUES (?, ?, 1, ?)')
+                    .run(symbol, displayName, now);
+            }
+
             client.close();
         }
 
@@ -60,22 +128,54 @@ export async function POST(request: Request) {
     }
 }
 
+/**
+ * DELETE /api/stock-pool?userId=xxx&symbol=xxx
+ * 从用户关注列表删除股票
+ */
 export async function DELETE(request: Request) {
     const { searchParams } = new URL(request.url);
+    const userId = searchParams.get('userId');
     const symbol = searchParams.get('symbol');
 
-    try {
-        if (!symbol) return NextResponse.json({ error: 'Missing symbol' }, { status: 400 });
+    if (!userId || !symbol) {
+        return NextResponse.json(
+            { error: 'Missing userId or symbol' },
+            { status: 400 }
+        );
+    }
 
+    try {
         const client = getDbClient();
 
         if ('execute' in client) {
+            // Turso
+            // 1. 从用户关注列表删除
             await client.execute({
-                sql: 'DELETE FROM stock_pool WHERE symbol = ?',
-                args: [symbol]
+                sql: 'DELETE FROM user_watchlist WHERE user_id = ? AND symbol = ?',
+                args: [userId, symbol],
             });
+
+            // 2. 更新全局股票池计数
+            await client.execute({
+                sql: 'UPDATE global_stock_pool SET watchers_count = watchers_count - 1 WHERE symbol = ?',
+                args: [symbol],
+            });
+
+            // 3. 可选：如果无人关注，删除记录 (暂时保留以保存历史数据)
+            // await client.execute({
+            //     sql: 'DELETE FROM global_stock_pool WHERE symbol = ? AND watchers_count <= 0',
+            //     args: [symbol],
+            // });
         } else {
-            client.prepare('DELETE FROM stock_pool WHERE symbol = ?').run(symbol);
+            // SQLite
+            client
+                .prepare('DELETE FROM user_watchlist WHERE user_id = ? AND symbol = ?')
+                .run(userId, symbol);
+
+            client
+                .prepare('UPDATE global_stock_pool SET watchers_count = watchers_count - 1 WHERE symbol = ?')
+                .run(symbol);
+
             client.close();
         }
 
@@ -85,3 +185,4 @@ export async function DELETE(request: Request) {
         return NextResponse.json({ error: 'Failed to delete' }, { status: 500 });
     }
 }
+

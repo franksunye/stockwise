@@ -116,16 +116,16 @@ function DashboardContent() {
   const [loading, setLoading] = useState(true);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [showTactics, setShowTactics] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   const loadData = useCallback(async () => {
-// ... existing loadData code ...
-// Skipping to the return section to add the drawer and click handlers
     setLoading(true);
     try {
       const res = await fetch(`/api/stock?symbol=${symbol}`);
       const data = await res.json();
       if (data.price) setPrice(data.price);
       if (data.prediction) setPrediction(data.prediction);
+      setLastUpdated(new Date());
     } catch (e) {
       console.error(e);
     }
@@ -135,11 +135,21 @@ function DashboardContent() {
   useEffect(() => {
     loadData();
     setRule(getRule(symbol));
+
+    // 每 10 分钟自动刷新一次 (600,000 ms)
+    const interval = setInterval(() => {
+      loadData();
+    }, 10 * 60 * 1000);
+
+    return () => clearInterval(interval);
   }, [symbol, loadData]);
 
   const reviews = price ? getIndicatorReviews(price) : [];
   const signalGlow = prediction?.signal === 'Long' ? 'glow-up' : 
                      prediction?.signal === 'Short' ? 'glow-down' : 'glow-hold';
+
+  // 计算是否跌破预警线
+  const isTriggered = price && prediction?.support_price && price.close < prediction.support_price;
 
   return (
     <div className="relative min-h-screen overflow-hidden flex flex-col items-center">
@@ -173,8 +183,10 @@ function DashboardContent() {
             {/* 1. AI 顶层核心结论 */}
             <section className="text-center space-y-2 py-4">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-ping" />
-                <span className="text-xs font-bold text-slate-400 tracking-wider">AI 代理实时在线</span>
+                <span className={`w-1.5 h-1.5 rounded-full ${loading ? 'bg-indigo-400 animate-spin' : 'bg-indigo-500 animate-ping'}`} />
+                <span className="text-[10px] font-bold text-slate-400 tracking-wider uppercase">
+                  {loading ? '同步中...' : `AI 实时监控 (最后更新: ${lastUpdated?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) || '--:--'})`}
+                </span>
               </div>
               <h2 className="text-4xl font-black tracking-tighter" style={{ 
                 color: prediction?.signal === 'Long' ? COLORS.up : 
@@ -193,7 +205,7 @@ function DashboardContent() {
             {/* 2. 当前价格与 AI 理由 (Glass Card) */}
             <section 
               onClick={() => setShowTactics(true)}
-              className="glass-card relative overflow-hidden group cursor-pointer active:scale-[0.98] transition-all hover:bg-white/[0.04]"
+              className={`glass-card relative overflow-hidden group cursor-pointer active:scale-[0.98] transition-all hover:bg-white/[0.04] ${isTriggered ? 'warning-pulse' : ''}`}
             >
                {/* 理由 */}
               <div className="relative z-10">
