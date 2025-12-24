@@ -410,7 +410,7 @@ def sync_spot_prices(symbols: list):
             try:
                 # 利用 akshare 的 history 接口获取包含当日实时数据的日线行情
                 # 这种方式是 symbol-specific 的，避免了全量同步 4000+ 股票导致的 SSL 错误
-                process_stock_period(symbol, period="daily")
+                process_stock_period(symbol, period="daily", is_realtime=True)
                 success_count += 1
                 print(f"   ✅ {symbol} 实时同步完成")
             except Exception as e:
@@ -436,21 +436,32 @@ def sync_spot_prices(symbols: list):
     print(f"✅ 盘中实时任务处理完成 (Success: {success_count})")
 
 
-def process_stock_period(symbol: str, period: str = "daily"):
+def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool = False):
     """增量处理特定周期的股票数据"""
     table_name = f"{period}_prices"
-    print(f"\n🔍 检查 {period} 状态: {symbol}")
+    if is_realtime:
+        print(f"\n⏱️ [实时重算] 正在更新盘中指标: {symbol}")
+    else:
+        print(f"\n🔍 检查 {period} 状态: {symbol}")
     
     # 1. 守门员检查 (Gatekeeper)
     last_date_str = get_last_date(symbol, table_name)
     
-    # 2. 计算抓取起始点 (Buffer: 日线取 150天, 周线取 150周 -> 约3年)
-    buffer_days = 150 if period == "daily" else 150 * 7
+    # 2. 计算抓取起始点
+    # 日线取 80 天回溯 (满足 MA60 稳定性)，周线取 150 周 (约 3 年)
+    if period == "daily":
+        buffer_days = 80
+    else:
+        buffer_days = 150 * 7
+    
     if last_date_str:
         last_dt = datetime.strptime(last_date_str, "%Y-%m-%d")
         fetch_dt = last_dt - timedelta(days=buffer_days)
         fetch_start_str = fetch_dt.strftime("%Y%m%d")
-        print(f"🌊 发现更新需求。最后日期: {last_date_str}，回溯起点: {fetch_start_str}")
+        if is_realtime:
+            print(f"   🌊 盘中回溯起点: {fetch_start_str} (满足指标平滑)")
+        else:
+            print(f"   🌊 发现更新需求。最后日期: {last_date_str}，回溯起点: {fetch_start_str}")
     else:
         fetch_start_str = (datetime.now() - timedelta(days=365 * 3)).strftime("%Y%m%d")
         print(f"🆕 数据库无记录。执行全量初始化 (3年)...")
@@ -517,7 +528,10 @@ def process_stock_period(symbol: str, period: str = "daily"):
     df["ai_summary"] = None
     
     # 6. 批量写入
-    print(f"💾 写入 {period} 数据 ({len(df)} 条)...")
+    if is_realtime:
+        print(f"   💾 更新 {period} 实时数据...")
+    else:
+        print(f"💾 写入 {period} 数据 ({len(df)} 条)...")
     conn = get_connection()
     cursor = conn.cursor()
     
