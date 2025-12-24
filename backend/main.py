@@ -79,13 +79,15 @@ def init_db():
     cursor.execute(create_table_sql("daily_prices"))
     cursor.execute(create_table_sql("weekly_prices"))
     
-    # 2. 股票元数据表 (编号、名称、市场)
+    # 2. 股票元数据表 (编号、名称、市场、拼音搜索支持)
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS stock_meta (
             symbol TEXT PRIMARY KEY,
             name TEXT NOT NULL,
             market TEXT NOT NULL,
-            last_updated TEXT
+            last_updated TEXT,
+            pinyin TEXT,
+            pinyin_abbr TEXT
         )
     """)
     
