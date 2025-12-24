@@ -498,27 +498,40 @@ def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool =
         return
 
     # 6. 计算指标
-    print(f"📊 计算 {period} 技术指标...")
-    df["ma5"] = df.ta.sma(length=5, close="close")
-    df["ma10"] = df.ta.sma(length=10, close="close")
-    df["ma20"] = df.ta.sma(length=20, close="close")
-    df["ma60"] = df.ta.sma(length=60, close="close")
+    if is_realtime:
+        print(f"   📊 正在计算实时技术指标...")
+    else:
+        print(f"📊 计算 {period} 技术指标...")
+        
+    # 为防止某些环境下 ta 返回 DataFrame 而非 Series，统一使用 iloc 取第一列
+    df["ma5"] = ta.sma(df["close"], length=5)
+    df["ma10"] = ta.sma(df["close"], length=10)
+    df["ma20"] = ta.sma(df["close"], length=20)
+    df["ma60"] = ta.sma(df["close"], length=60)
     
-    macd = df.ta.macd(close="close", fast=12, slow=26, signal=9)
+    # 额外处理：如果 ta 函数返回的是 DataFrame (带有列名)，显式转为 Series
+    for col in ["ma5", "ma10", "ma20", "ma60"]:
+        if isinstance(df[col], pd.DataFrame):
+            df[col] = df[col].iloc[:, 0]
+    
+    macd = ta.macd(df["close"], fast=12, slow=26, signal=9)
     if macd is not None:
+        # MACD 结果通常是 DataFrame，包含 MACD, Signal, Hist
         df["macd"] = macd.iloc[:, 0]
         df["macd_signal"] = macd.iloc[:, 1]
         df["macd_hist"] = macd.iloc[:, 2]
     
-    bbands = df.ta.bbands(close="close", length=20, std=2)
+    bbands = ta.bbands(df["close"], length=20, std=2)
     if bbands is not None:
         df["boll_lower"] = bbands.iloc[:, 0]
         df["boll_mid"] = bbands.iloc[:, 1]
         df["boll_upper"] = bbands.iloc[:, 2]
     
-    df["rsi"] = df.ta.rsi(length=14, close="close")
+    df["rsi"] = ta.rsi(df["close"], length=14)
+    if isinstance(df["rsi"], pd.DataFrame):
+        df["rsi"] = df["rsi"].iloc[:, 0]
     
-    stoch = df.ta.stoch(high="high", low="low", close="close", k=9, d=3, smooth_k=3)
+    stoch = ta.stoch(high=df["high"], low=df["low"], close=df["close"], k=9, d=3, smooth_k=3)
     if stoch is not None:
         df["kdj_k"] = stoch.iloc[:, 0]
         df["kdj_d"] = stoch.iloc[:, 1]
