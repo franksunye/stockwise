@@ -399,48 +399,24 @@ def sync_spot_prices(symbols: list):
     """同步盘中实时价格 (Spot) - System Ops 版本"""
     import time
     start_time = time.time()
-    max_retries = 3
-    retry_delay = 5
     
     success_count = 0
     errors = []
     
-    print(f"\n⚡ 正在执行盘中实时同步 (Spot) - 目标: {len(symbols)} 只股票")
+    print(f"\n⚡ 正在执行盘中实时同步 (精简模式) - 针对 {len(symbols)} 只关注股票")
     
-    hk_spot = pd.DataFrame()
-    for attempt in range(max_retries):
-        try:
-            hk_spot = ak.stock_hk_spot_em()
-            if not hk_spot.empty: break
-        except Exception as e:
-            if attempt < max_retries - 1: time.sleep(retry_delay)
-            else: errors.append(f"Market Data Fetch Error: {str(e)[:100]}")
-
-    if not hk_spot.empty:
-        now = datetime.now()
-        today_str = now.strftime("%Y-%m-%d")
-        try:
-            conn = get_connection()
-            for symbol in symbols:
-                row = hk_spot[hk_spot['代码'] == symbol]
-                if row.empty: continue
-                try:
-                    spot_price = float(row.iloc[0]['最新价'])
-                    change_pct = float(row.iloc[0]['涨跌幅'])
-                    cursor = conn.cursor()
-                    cursor.execute("""
-                        INSERT INTO daily_prices (symbol, date, close, change_percent)
-                        VALUES (?, ?, ?, ?)
-                        ON CONFLICT(symbol, date) DO UPDATE SET close=excluded.close, change_percent=excluded.change_percent
-                    """, (symbol, today_str, spot_price, change_pct))
-                    conn.commit()
-                    process_stock_period(symbol, period="daily")
-                    success_count += 1
-                except Exception as e:
-                    errors.append(f"Stock {symbol} processing error: {str(e)[:100]}")
-            conn.close()
-        except Exception as e:
-            errors.append(f"Database Connection Error: {str(e)[:100]}")
+    try:
+        for symbol in symbols:
+            try:
+                # 利用 akshare 的 history 接口获取包含当日实时数据的日线行情
+                # 这种方式是 symbol-specific 的，避免了全量同步 4000+ 股票导致的 SSL 错误
+                process_stock_period(symbol, period="daily")
+                success_count += 1
+                print(f"   ✅ {symbol} 实时同步完成")
+            except Exception as e:
+                errors.append(f"Stock {symbol} processing error: {str(e)[:100]}")
+    except Exception as e:
+        errors.append(f"Global processing Error: {str(e)[:100]}")
 
     # 发送系统运维报告
     duration = time.time() - start_time
