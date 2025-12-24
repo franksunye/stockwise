@@ -13,7 +13,7 @@ import { config } from 'dotenv';
 import { resolve } from 'path';
 
 // 加载 backend/.env 文件
-config({ path: resolve(process.cwd(), '../backend/.env') });
+config({ path: resolve(process.cwd(), 'backend/.env') });
 
 const TURSO_DB_URL = process.env.TURSO_DB_URL;
 const TURSO_AUTH_TOKEN = process.env.TURSO_AUTH_TOKEN;

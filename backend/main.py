@@ -89,7 +89,7 @@ def init_db():
         )
     """)
     
-    # 3. 股票池表 (管理后台配置)
+    # 3. 核心股票池 (系统级同步目标)
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS stock_pool (
             symbol TEXT PRIMARY KEY,
@@ -98,7 +98,44 @@ def init_db():
         )
     """)
 
-    # 4. AI 预测与验证表
+    # 4. 全局股票池 (带关注计数的聚合表)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS global_stock_pool (
+            symbol TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            first_watched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            watchers_count INTEGER DEFAULT 1,
+            last_synced_at TIMESTAMP
+        )
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_global_pool_watchers ON global_stock_pool(watchers_count)")
+
+    # 5. 用户系统表 (用于多用户关注计数)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            user_id TEXT PRIMARY KEY,
+            username TEXT,
+            email TEXT,
+            registration_type TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            last_active_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_registration_type ON users(registration_type)")
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS user_watchlist (
+            user_id TEXT NOT NULL,
+            symbol TEXT NOT NULL,
+            added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (user_id, symbol),
+            FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+        )
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_user_watchlist_user ON user_watchlist(user_id)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_user_watchlist_symbol ON user_watchlist(symbol)")
+
+    # 6. AI 预测与验证表
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS ai_predictions (
             symbol TEXT NOT NULL,
