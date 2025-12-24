@@ -47,6 +47,7 @@ export async function GET(request: Request) {
             rows = rs.rows;
         } else {
             // Local SQLite (better-sqlite3)
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             rows = (db as any).prepare(sql).all(...args);
         }
 

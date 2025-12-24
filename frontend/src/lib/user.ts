@@ -43,7 +43,7 @@ export async function getCurrentUser(): Promise<User> {
 
   let userId = localStorage.getItem(USER_ID_KEY);
   let userType = localStorage.getItem(USER_TYPE_KEY) as RegistrationType;
-  let username = localStorage.getItem(USERNAME_KEY) || undefined;
+  const username = localStorage.getItem(USERNAME_KEY) || undefined;
 
   // 如果没有 userId，创建新的匿名用户
   if (!userId) {

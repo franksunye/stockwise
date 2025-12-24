@@ -95,7 +95,7 @@ export default function StockPoolPage() {
     }
   }, [user, fetchStockData]);
 
-  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchResults, setSearchResults] = useState<{symbol: string; name: string}[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
   // 快捷推荐列表
