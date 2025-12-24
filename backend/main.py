@@ -263,13 +263,14 @@ def validate_previous_prediction(symbol: str, today_data: pd.Series):
     conn = get_connection()
     cursor = conn.cursor()
     
-    # 查找最近一条待验证的预测
+    # 查找距离今日最近的一条待验证预测 (必须是今日之前的预测)
+    today_str = today_data['date']
     cursor.execute("""
         SELECT date, signal, support_price 
         FROM ai_predictions 
-        WHERE symbol = ? AND validation_status = 'Pending'
+        WHERE symbol = ? AND validation_status = 'Pending' AND date < ?
         ORDER BY date DESC LIMIT 1
-    """, (symbol,))
+    """, (symbol, today_str))
     
     row = cursor.fetchone()
     if not row:
