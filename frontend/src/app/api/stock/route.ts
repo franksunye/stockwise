@@ -79,10 +79,41 @@ export async function GET(request: Request) {
             return NextResponse.json({ error: '未找到该股票数据' }, { status: 404 });
         }
 
+        // 计算客观的最后更新时间
+        // 规则：
+        // 1. 交易时间 (09:30-12:00, 13:00-16:00): 向下取整到最近的 10 分钟
+        // 2. 午休 (12:00-13:00): 固定显示 12:00
+        // 3. 收盘后 (>16:00): 固定显示 16:00
+        // 4. 开盘前 (<09:30): 显示 16:00 (前一日收盘)
+        const getLastUpdateTime = () => {
+            const now = new Date();
+            // 转换为 UTC+8 (北京/香港时间)
+            const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+            const hkTime = new Date(utc + (3600000 * 8));
+
+            const hours = hkTime.getHours();
+            const minutes = hkTime.getMinutes();
+            const totalMinutes = hours * 60 + minutes;
+
+            // 收盘后 (> 16:00 = 960m)
+            if (totalMinutes >= 960) return "16:00";
+
+            // 开盘前 (< 09:30 = 570m)
+            if (totalMinutes < 570) return "16:00";
+
+            // 午休 (12:00-13:00 / 720m-780m)
+            if (totalMinutes >= 720 && totalMinutes < 780) return "12:00";
+
+            // 交易中 -> 向下取整到 10 分钟
+            const roundedMinutes = Math.floor(minutes / 10) * 10;
+            return `${hours.toString().padStart(2, '0')}:${roundedMinutes.toString().padStart(2, '0')}`;
+        };
+
         return NextResponse.json({
             price: row,
             prediction: latestPrediction || null,
-            previousPrediction: prevPrediction || null
+            previousPrediction: prevPrediction || null,
+            last_update_time: getLastUpdateTime()
         });
 
     } catch (error) {

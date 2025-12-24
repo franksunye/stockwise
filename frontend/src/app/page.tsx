@@ -117,7 +117,7 @@ function DashboardContent() {
   const [loading, setLoading] = useState(true);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [showTactics, setShowTactics] = useState(false);
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<string>('--:--');
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -127,7 +127,7 @@ function DashboardContent() {
       if (data.price) setPrice(data.price);
       if (data.prediction) setPrediction(data.prediction);
       if (data.previousPrediction) setPreviousPrediction(data.previousPrediction);
-      setLastUpdated(new Date());
+      if (data.last_update_time) setLastUpdated(data.last_update_time);
     } catch (e) {
       console.error(e);
     }
@@ -187,7 +187,7 @@ function DashboardContent() {
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-2">
                 <span className={`w-1.5 h-1.5 rounded-full ${loading ? 'bg-indigo-400 animate-spin' : 'bg-indigo-500 animate-ping'}`} />
                 <span className="text-[10px] font-bold text-slate-400 tracking-wider uppercase">
-                  {loading ? '同步中...' : `AI 实时监控 (最后更新: ${lastUpdated?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) || '--:--'})`}
+                  {loading ? '同步中...' : `AI 实时监控 (最后更新: ${lastUpdated})`}
                 </span>
               </div>
               <h2 className="text-4xl font-black tracking-tighter" style={{ 
