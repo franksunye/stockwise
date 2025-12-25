@@ -91,7 +91,17 @@ function TacticalBriefDrawer({
 }
 
 function StockDashboardCard({ data, onShowTactics }: { data: StockData, onShowTactics: () => void }) {
-  if (data.loading || !data.price) return <div className="h-full w-full flex items-center justify-center"><Zap className="w-12 h-12 text-slate-800 animate-pulse" /></div>;
+  if (data.loading || !data.price) return (
+    <div className="h-full w-full flex flex-col items-center justify-center space-y-4">
+      <div className="w-20 h-20 rounded-[32px] bg-white/5 border border-white/10 flex items-center justify-center">
+        <Zap className="w-8 h-8 text-indigo-500 animate-pulse fill-indigo-500/20" />
+      </div>
+      <div className="text-center">
+        <h2 className="text-2xl font-black italic tracking-tighter text-white">{data.name}</h2>
+        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mt-1">核心数据同步中...</p>
+      </div>
+    </div>
+  );
 
   const reviews = getIndicatorReviews(data.price);
   const isTriggered = data.prediction?.support_price && data.price.close < data.prediction.support_price;

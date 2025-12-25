@@ -41,15 +41,13 @@ export default function StockPoolPage() {
         try {
           const res = await fetch(`/api/stock?symbol=${item.symbol}`);
           const data = await res.json();
-          if (data.price) {
-            results.push({
-              symbol: item.symbol,
-              name: item.name || `股票 ${item.symbol}`,
-              price: data.price.close,
-              change: data.price.change_percent,
-              aiSignal: data.prediction?.signal || 'Side'
-            });
-          }
+          results.push({
+            symbol: item.symbol,
+            name: item.name || `股票 ${item.symbol}`,
+            price: data.price?.close || 0,
+            change: data.price?.change_percent || 0,
+            aiSignal: data.prediction?.signal || 'Side'
+          });
         } catch (e) {
           console.error(`Failed to fetch ${item.symbol}`, e);
         }
@@ -209,9 +207,11 @@ export default function StockPoolPage() {
                     
                     <div className="flex items-center gap-6">
                       <div className="text-right">
-                        <p className="text-xl font-black mono tracking-tighter">{stock.price.toFixed(2)}</p>
-                        <p className={`text-[10px] font-black mono ${stock.change >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                          {stock.change >= 0 ? '+' : ''}{stock.change.toFixed(2)}%
+                        <p className="text-xl font-black mono tracking-tighter">
+                          {stock.price > 0 ? stock.price.toFixed(2) : '--.--'}
+                        </p>
+                        <p className={`text-[10px] font-black mono ${stock.change > 0 ? 'text-emerald-500' : stock.change < 0 ? 'text-rose-500' : 'text-slate-500'}`}>
+                          {stock.price > 0 ? `${stock.change >= 0 ? '+' : ''}${stock.change.toFixed(2)}%` : '数据同步中'}
                         </p>
                       </div>
                       <button 
