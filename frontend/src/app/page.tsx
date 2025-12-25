@@ -232,14 +232,13 @@ function VerticalIndicator({ container }: { container: HTMLDivElement | null }) 
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 5 }}
             transition={{ duration: 0.2 }}
-            className="absolute right-1 top-[30vh] h-[40vh] w-1 bg-white/20 rounded-full"
+            className="absolute right-1 top-1/3 bottom-1/3 w-0.5 bg-white/5 rounded-full"
           >
             <motion.div 
-              className="absolute left-0 right-0 bg-white/80 rounded-full"
+              className="absolute left-0 right-0 bg-white/30 rounded-full"
               style={{ 
-                height: '25%', 
-                top: `${progress * 75}%`,
-                boxShadow: '0 0 10px rgba(255,255,255,0.3)'
+                height: '20%', 
+                top: `${progress * 80}%`
               }}
             />
           </motion.div>
