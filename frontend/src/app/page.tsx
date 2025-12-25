@@ -554,13 +554,10 @@ function DashboardPageContent() {
       </AnimatePresence>
 
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-[100] p-8 flex items-center justify-between pointer-events-none">
-        <Link href="/stock-pool" className="pointer-events-auto p-3 rounded-2xl bg-white/5 border border-white/10 active:scale-95 transition-all">
+      <header className="fixed top-0 left-0 right-0 z-[100] p-8 pointer-events-none">
+        <Link href="/stock-pool" className="pointer-events-auto p-3 w-fit block rounded-2xl bg-white/5 border border-white/10 active:scale-95 transition-all">
           <Grid className="w-5 h-5 text-indigo-400" />
         </Link>
-        <div className="flex gap-4 pointer-events-auto">
-           <button onClick={() => setSettingsOpen(true)} className="p-2.5 rounded-full bg-white/5 border border-white/10 active:scale-90"><Settings className="w-4 h-4 text-slate-400" /></button>
-        </div>
       </header>
 
       {/* X轴 监控容器 (Weather Mode) */}
@@ -614,7 +611,12 @@ function DashboardPageContent() {
              )}
            </AnimatePresence>
 
-           <div className="w-11" />
+           <button 
+             onClick={() => setSettingsOpen(true)} 
+             className="w-11 h-11 rounded-[18px] bg-white/5 border border-white/10 flex items-center justify-center transition-all active:scale-90 hover:bg-white/10 shrink-0"
+           >
+             <Settings className="w-5 h-5 text-slate-400" />
+           </button>
         </div>
       </footer>
 
