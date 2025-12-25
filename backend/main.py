@@ -5,8 +5,11 @@ StockWise ETL Pipeline
 
 import os
 import sqlite3
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
+
+# 北京时区 (UTC+8)
+BEIJING_TZ = timezone(timedelta(hours=8))
 
 import akshare as ak
 import pandas as pd
@@ -425,7 +428,7 @@ def sync_spot_prices(symbols: list):
     
     ops_report = f"### 🛠️ StockWise Ops: Realtime Sync\n"
     ops_report += f"> **Status**: {status}\n"
-    ops_report += f"- **Time**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+    ops_report += f"- **Time**: {datetime.now(BEIJING_TZ).strftime('%Y-%m-%d %H:%M:%S')}\n"
     ops_report += f"- **Duration**: {duration:.2f}s\n"
     ops_report += f"- **Processed**: {success_count}/{len(symbols)} stocks\n"
     
@@ -652,7 +655,7 @@ if __name__ == "__main__":
         
         ops_report = f"### 📊 StockWise Ops: Daily Full Sync\n"
         ops_report += f"> **Status**: {status}\n"
-        ops_report += f"- **Date**: {datetime.now().strftime('%Y-%m-%d')}\n"
+        ops_report += f"- **Date**: {datetime.now(BEIJING_TZ).strftime('%Y-%m-%d')}\n"
         ops_report += f"- **Duration**: {duration:.1f}s\n"
         ops_report += f"- **Processed**: {success_count}/{len(target_stocks)} stocks\n"
         
