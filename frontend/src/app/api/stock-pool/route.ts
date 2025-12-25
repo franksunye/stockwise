@@ -121,10 +121,56 @@ export async function POST(request: Request) {
             client.close();
         }
 
+        // 3. 异步触发 GitHub Action 进行即时同步
+        triggerGithubSync(symbol).catch(err => console.error('Failed to trigger GitHub sync:', err));
+
         return NextResponse.json({ success: true });
     } catch (error) {
         console.error('Add stock error:', error);
         return NextResponse.json({ error: 'Failed to add' }, { status: 500 });
+    }
+}
+
+/**
+ * 触发 GitHub Action 异步同步特定股票数据
+ */
+async function triggerGithubSync(symbol: string) {
+    const pat = process.env.GITHUB_PAT;
+    const owner = 'franksunye';
+    const repo = 'stockwise';
+    const workflowId = 'on-demand-sync.yml';
+
+    if (!pat) {
+        console.warn('⚠️ GITHUB_PAT not found in environment, skipping on-demand sync');
+        return;
+    }
+
+    try {
+        const response = await fetch(
+            `https://api.github.com/repos/${owner}/${repo}/actions/workflows/${workflowId}/dispatches`,
+            {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/vnd.github+json',
+                    'Authorization': `Bearer ${pat}`,
+                    'X-GitHub-Api-Version': '2022-11-28',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    ref: 'main',
+                    inputs: { symbol }
+                }),
+            }
+        );
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`GitHub API error: ${response.status} ${errorText}`);
+        }
+
+        console.log(`🚀 Successfully triggered GitHub sync for ${symbol}`);
+    } catch (error) {
+        console.error(`❌ Failed to trigger GitHub sync for ${symbol}:`, error);
     }
 }
 

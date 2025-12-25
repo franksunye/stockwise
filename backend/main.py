@@ -604,15 +604,23 @@ def show_latest_data(symbol: str, period: str = "daily", limit: int = 3):
 if __name__ == "__main__":
     import sys
     is_realtime = len(sys.argv) > 1 and sys.argv[1] == "--realtime"
+    single_symbol = None
+    if "--symbol" in sys.argv:
+        idx = sys.argv.index("--symbol")
+        if idx + 1 < len(sys.argv):
+            single_symbol = sys.argv[idx + 1]
 
     print("=" * 60)
-    print(f"StockWise ETL Pipeline - [{'REALTIME' if is_realtime else 'FULL'}] Sync Mode")
+    print(f"StockWise ETL Pipeline - [{'SINGLE:'+single_symbol if single_symbol else ('REALTIME' if is_realtime else 'FULL')}] Sync Mode")
     print("=" * 60)
     
     init_db()
     
-    # 获取核心股票池
-    target_stocks = get_stock_pool()
+    if single_symbol:
+        target_stocks = [single_symbol]
+    else:
+        # 获取核心股票池
+        target_stocks = get_stock_pool()
     
     if not target_stocks:
         # 如果 global_stock_pool 为空，尝试从 stock_pool 获取 (兼容旧版)
@@ -628,7 +636,12 @@ if __name__ == "__main__":
 
     print(f"\n📊 目标股票池: {len(target_stocks)} 只股票")
 
-    if is_realtime:
+    if single_symbol:
+        # 单独同步模式
+        print(f"\n🚀 [即时同步] 处理股票: {single_symbol}")
+        process_stock_period(single_symbol, period="daily")
+        process_stock_period(single_symbol, period="weekly")
+    elif is_realtime:
         # 实时同步模式 (5分钟一次，由外部调度或简易循环)
         sync_spot_prices(target_stocks)
     else:
