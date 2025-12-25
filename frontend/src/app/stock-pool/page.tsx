@@ -37,23 +37,25 @@ export default function StockPoolPage() {
       const poolRes = await fetch(`/api/stock-pool?userId=${user.userId}`, { cache: 'no-store' });
       const poolData = await poolRes.json();
       const watchlist = poolData.stocks || [];
-      const results: StockSnapshot[] = [];
-
-      for (const item of watchlist) {
+      // 并行同步请求所有股票数据，大幅提升加载速度
+      const stockDataPromises = watchlist.map(async (item: { symbol: string, name: string }) => {
         try {
           const res = await fetch(`/api/stock?symbol=${item.symbol}`, { cache: 'no-store' });
           const data = await res.json();
-          results.push({
+          return {
             symbol: item.symbol,
             name: item.name || `股票 ${item.symbol}`,
             price: data.price?.close || 0,
             change: data.price?.change_percent || 0,
             aiSignal: data.prediction?.signal || 'Side'
-          });
+          } as StockSnapshot;
         } catch (e) {
           console.error(`Failed to fetch ${item.symbol}`, e);
+          return null;
         }
-      }
+      });
+
+      const results = (await Promise.all(stockDataPromises)).filter((s): s is StockSnapshot => s !== null);
       setStocks(results);
     } catch (err) {
       console.error('Failed to load pool', err);
