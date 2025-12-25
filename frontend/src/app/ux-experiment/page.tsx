@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   TrendingUp, TrendingDown, Target, Zap, ShieldCheck, 
   ChevronDown, History, Grid, ArrowLeft, Info, Menu
@@ -186,9 +186,9 @@ function TacticalCard({ data, stockName }: { data: HistoryRecord, stockName: str
 function VerticalFeed({ stock }: { stock: Stock }) {
   return (
     <div className="h-full w-full overflow-y-scroll snap-y snap-mandatory scrollbar-hide">
-      {stock.history.map((record: HistoryRecord, idx: number) => (
+      {stock.history.map((record: HistoryRecord) => (
         <TacticalCard 
-          key={idx} 
+          key={record.date} 
           data={record} 
           stockName={stock.name} 
         />
@@ -255,11 +255,10 @@ export default function UXExperiment() {
         onScroll={handleScroll}
         className="h-full w-full flex overflow-x-scroll snap-x snap-mandatory scrollbar-hide"
       >
-        {MOCK_DATA.map((stock, idx) => (
-          <div key={idx} className="min-w-full h-full snap-center">
+        {MOCK_DATA.map((stock) => (
+          <div key={stock.symbol} className="min-w-full h-full snap-center">
             <VerticalFeed 
               stock={stock} 
-              onProfileClick={() => setProfileStock(stock)} 
             />
           </div>
         ))}
