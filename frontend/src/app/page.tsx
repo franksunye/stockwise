@@ -198,57 +198,54 @@ function StockDashboardCard({ data, onShowTactics }: { data: StockData, onShowTa
   );
 }
 
-function VerticalIndicator({ containerRef }: { containerRef: React.RefObject<HTMLDivElement | null> }) {
+function VerticalIndicator({ container }: { container: HTMLDivElement | null }) {
   const [progress, setProgress] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
+    if (!container) return;
 
     const handleScroll = () => {
-      // 1. 获取位置
-      const { scrollTop, scrollHeight, clientHeight } = el;
+      const { scrollTop, scrollHeight, clientHeight } = container;
       const total = scrollHeight - clientHeight;
       if (total > 0) setProgress(scrollTop / total);
 
-      // 2. 显示并重置计时器
       setIsVisible(true);
       if (timerRef.current) clearTimeout(timerRef.current);
-      timerRef.current = setTimeout(() => {
-        setIsVisible(false);
-      }, 1500);
+      timerRef.current = setTimeout(() => setIsVisible(false), 1500);
     };
 
-    el.addEventListener('scroll', handleScroll, { passive: true });
+    container.addEventListener('scroll', handleScroll, { passive: true });
     return () => {
-      el.removeEventListener('scroll', handleScroll);
+      container.removeEventListener('scroll', handleScroll);
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [containerRef]);
+  }, [container]);
 
   return (
-    <AnimatePresence>
-      {isVisible && (
-        <motion.div 
-          initial={{ opacity: 0, x: 5 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: 5 }}
-          transition={{ duration: 0.2 }}
-          className="absolute right-1.5 top-1/4 bottom-1/4 w-1 bg-white/10 rounded-full z-[100] pointer-events-none"
-        >
+    <div className="sticky top-0 h-0 w-full z-[100] pointer-events-none">
+      <AnimatePresence>
+        {isVisible && (
           <motion.div 
-            className="absolute left-0 right-0 bg-white/60 rounded-full"
-            style={{ 
-              height: '20%', 
-              top: `${progress * 80}%`,
-              transition: 'top 0.1s linear'
-            }}
-          />
-        </motion.div>
-      )}
-    </AnimatePresence>
+            initial={{ opacity: 0, x: 5 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 5 }}
+            transition={{ duration: 0.2 }}
+            className="absolute right-1 top-[30vh] h-[40vh] w-1 bg-white/20 rounded-full"
+          >
+            <motion.div 
+              className="absolute left-0 right-0 bg-white/80 rounded-full"
+              style={{ 
+                height: '25%', 
+                top: `${progress * 75}%`,
+                boxShadow: '0 0 10px rgba(255,255,255,0.3)'
+              }}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
 function HistoricalCard({ data }: { data: AIPrediction }) {
@@ -305,13 +302,14 @@ function HistoricalCard({ data }: { data: AIPrediction }) {
 }
 
 function StockVerticalFeed({ stock, onShowTactics }: { stock: StockData, onShowTactics: () => void }) {
-  const vRef = useRef<HTMLDivElement>(null);
+  const [container, setContainer] = useState<HTMLDivElement | null>(null);
+  
   return (
     <div 
-      ref={vRef}
+      ref={setContainer}
       className="min-w-full h-full relative snap-center overflow-y-scroll snap-y snap-mandatory scrollbar-hide"
     >
-      <VerticalIndicator containerRef={vRef} />
+      <VerticalIndicator container={container} />
       {/* Y轴 垂直内容 (TikTok Mode) */}
       <StockDashboardCard data={stock} onShowTactics={onShowTactics} />
       {stock.history.slice(1).map((h, i) => <HistoricalCard key={i} data={h} />)}
