@@ -39,24 +39,26 @@ export function SettingsModal({ symbol, isOpen, onClose, onSave }: Props) {
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[200] flex items-end justify-center bg-black/60 backdrop-blur-sm pointer-events-auto overflow-hidden touch-none">
+        <div className="fixed inset-0 z-[200] flex items-end justify-center bg-black/60 backdrop-blur-sm pointer-events-auto overflow-hidden">
           <motion.div 
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
-            drag
-            dragConstraints={{ top: 0, bottom: 0, left: 0, right: 0 }}
-            dragElastic={0.5}
+            drag="y"
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={{ top: 0.1, bottom: 0.6 }}
             onDragEnd={(_, info) => {
-              // 支持下划或左右滑动关闭
-              if (info.offset.y > 150 || Math.abs(info.offset.x) > 100) {
-                onClose();
-              }
+              if (info.offset.y > 150) onClose();
             }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
             className="w-full max-w-md bg-[#0a0a0f] border-t border-white/10 rounded-t-[32px] shadow-[0_-20px_50px_rgba(0,0,0,0.5)] overflow-hidden pointer-events-auto"
           >
-            <div className="p-8 flex flex-col">
+            {/* 顶部视觉拉手 */}
+            <div className="w-full flex justify-center pt-3 pb-1">
+               <div className="w-12 h-1 rounded-full bg-white/20" />
+            </div>
+
+            <div className="p-8 pt-2 flex flex-col">
               <div className="flex items-center gap-4 mb-8">
                 <button onClick={onClose} className="p-3 rounded-full bg-white/5 border border-white/10 active:scale-90 transition-all">
                   <X className="w-5 h-5 text-slate-400" />

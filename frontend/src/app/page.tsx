@@ -362,19 +362,21 @@ function StockProfile({ stock, isOpen, onClose }: { stock: StockData | null, isO
           initial={{ y: '100%' }}
           animate={{ y: 0 }}
           exit={{ y: '100%' }}
-          drag
-          dragConstraints={{ top: 0, bottom: 0, left: 0, right: 0 }}
-          dragElastic={0.5}
+          drag="y"
+          dragConstraints={{ top: 0, bottom: 0 }}
+          dragElastic={{ top: 0.1, bottom: 0.6 }}
           onDragEnd={(_, info) => {
-            // 支持下划或左右滑动关闭
-            if (info.offset.y > 150 || Math.abs(info.offset.x) > 100) {
-              onClose();
-            }
+            if (info.offset.y > 150) onClose();
           }}
           transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-          className="fixed inset-0 z-[200] bg-[#050508] flex flex-col pointer-events-auto touch-none"
+          className="fixed inset-0 z-[200] bg-[#050508] flex flex-col pointer-events-auto shadow-[0_-20px_60px_rgba(0,0,0,0.8)]"
         >
-          <div className="h-full w-full p-6 flex flex-col overflow-y-auto pointer-events-auto">
+          {/* 顶部视觉拉手 */}
+          <div className="w-full flex justify-center pt-3 pb-1">
+             <div className="w-12 h-1 rounded-full bg-white/10" />
+          </div>
+
+          <div className="h-full w-full p-6 pt-2 flex flex-col overflow-y-auto">
             <button onClick={onClose} className="mb-8 p-3 w-fit rounded-full bg-white/5 border border-white/10 active:scale-95">
               <CloseIcon className="w-5 h-5 text-slate-400" />
             </button>
@@ -536,7 +538,7 @@ function DashboardPageContent() {
       <div 
         ref={scrollRef}
         onScroll={handleScroll}
-        className={`h-full w-full flex overflow-x-scroll snap-x snap-mandatory scrollbar-hide ${(profileStock || settingsOpen) ? 'overflow-hidden pointer-events-none' : ''}`}
+        className={`h-full w-full flex overflow-x-scroll snap-x snap-mandatory scrollbar-hide transition-opacity duration-300 ${(profileStock || settingsOpen) ? 'opacity-40 pointer-events-none touch-none' : 'opacity-100'}`}
       >
         {stocks.map((stock) => (
           <StockVerticalFeed 
