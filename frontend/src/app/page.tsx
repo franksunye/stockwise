@@ -97,22 +97,22 @@ function StockDashboardCard({ data, onShowTactics }: { data: StockData, onShowTa
   const isTriggered = data.prediction?.support_price && data.price.close < data.prediction.support_price;
 
   return (
-    <div className="h-full w-full flex flex-col items-center justify-center px-6 snap-start pt-16 pb-24">
-      <div className="w-full max-w-md space-y-8">
+    <div className="h-full w-full flex flex-col items-center justify-start px-6 snap-start pt-[max(20vh,160px)] pb-32 overflow-hidden">
+      <div className="w-full max-w-md space-y-6">
         {/* 1. AI 顶层核心结论 */}
-        <section className="text-center space-y-2 py-4">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-2">
+        <section className="text-center space-y-1 py-2">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-1">
             <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-ping" />
-            <span className="text-[10px] font-bold text-slate-400 tracking-wider uppercase">AI 实时监控 ({data.lastUpdated})</span>
+            <span className="text-[9px] font-bold text-slate-500 tracking-wider uppercase">AI 实时监控 ({data.lastUpdated})</span>
           </div>
           <h2 className="text-4xl font-black tracking-tighter" style={{ 
             color: data.prediction?.signal === 'Long' ? COLORS.up : data.prediction?.signal === 'Short' ? COLORS.down : COLORS.hold 
           }}>
-            {data.prediction?.signal === 'Long' ? '强烈看多' : data.prediction?.signal === 'Short' ? '建议避灾' : '持仓观望'}
+            {data.prediction?.signal === 'Long' ? '建议做多' : data.prediction?.signal === 'Short' ? '建议避灾' : '持仓观望'}
           </h2>
-          <div className="flex items-center justify-center gap-4 text-xs font-medium text-slate-500">
+          <div className="flex items-center justify-center gap-3 text-[10px] font-bold text-slate-600">
             <span className="flex items-center gap-1 uppercase tracking-widest"><Target className="w-3 h-3" /> 置信度 {((data.prediction?.confidence || 0) * 100).toFixed(0)}%</span>
-            <span className="w-1 h-1 rounded-full bg-slate-700" />
+            <span className="w-0.5 h-0.5 rounded-full bg-slate-800" />
             <span className="uppercase tracking-widest italic">{data.symbol}.HK</span>
           </div>
         </section>
@@ -122,74 +122,70 @@ function StockDashboardCard({ data, onShowTactics }: { data: StockData, onShowTa
           onClick={onShowTactics}
           className={`glass-card relative overflow-hidden group cursor-pointer active:scale-[0.98] transition-all hover:bg-white/[0.04] ${isTriggered ? 'warning-pulse' : ''}`}
         >
-          <div className="relative z-10 p-6">
-            <div className="flex items-start gap-4 mb-6">
-              <div className="w-10 h-10 rounded-2xl bg-indigo-600/20 flex items-center justify-center shrink-0 border border-indigo-500/30 ai-pulse"><Zap className="w-5 h-5 text-indigo-400 fill-indigo-400/20" /></div>
+          <div className="relative z-10 p-5">
+            <div className="flex items-start gap-3 mb-5">
+              <div className="w-9 h-9 rounded-xl bg-indigo-600/20 flex items-center justify-center shrink-0 border border-indigo-500/30 ai-pulse"><Zap className="w-4 h-4 text-indigo-400 fill-indigo-400/20" /></div>
               <div className="flex-1">
-                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-tight mb-1">AI 深度洞察</h3>
+                <h3 className="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1.5">AI 深度洞察</h3>
                 <div className="space-y-3">
                   {(() => {
                     try {
+                      // ... (逻辑保持不变，仅调整文字大小)
                       const tData = JSON.parse(data.prediction?.ai_reasoning || '') as TacticalData;
                       const userPos = data.rule?.position === 'holding' ? 'holding' : 'empty';
                       const p1 = tData.tactics?.[userPos]?.[0];
                       return (
                         <>
-                          <p className="text-sm leading-relaxed text-slate-200 font-medium italic">&quot;{tData.summary || data.prediction?.ai_reasoning}&quot;</p>
-                          {p1 && <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-indigo-500/10 border border-indigo-500/20">
-                            <span className="text-xs font-black bg-indigo-500 text-white px-1.5 py-0.5 rounded italic">P1</span>
-                            <span className="text-xs font-bold text-indigo-400">{p1.a}:</span>
-                            <span className="text-xs text-slate-300 font-medium">{p1.c}</span>
+                          <p className="text-sm leading-relaxed text-slate-300 font-medium italic">&quot;{tData.summary || data.prediction?.ai_reasoning}&quot;</p>
+                          {p1 && <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20">
+                            <span className="text-[9px] font-black bg-indigo-500 text-white px-1 py-0.5 rounded italic">P1</span>
+                            <span className="text-[10px] font-bold text-indigo-400">{p1.a}:</span>
+                            <span className="text-[10px] text-slate-400 font-medium line-clamp-1">{p1.c}</span>
                           </div>}
                         </>
                       );
                     } catch {
-                      return <p className="text-sm leading-relaxed text-slate-200 font-medium italic">&quot;{data.prediction?.ai_reasoning || '正在评估当下市场波动...'}&quot;</p>;
+                      return <p className="text-sm leading-relaxed text-slate-300 font-medium italic">&quot;{data.prediction?.ai_reasoning || '正在评估行情...'}&quot;</p>;
                     }
                   })()}
                 </div>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4 py-4 border-t border-white/5">
+            <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/5">
               <div>
-                <span className="text-xs text-slate-500 uppercase font-black tracking-widest block mb-1">当前成交价</span>
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl font-black mono">{data.price.close.toFixed(2)}</span>
-                  <span className="text-xs font-bold px-1.5 py-0.5 rounded bg-white/5" style={{ color: data.price.change_percent >= 0 ? COLORS.up : COLORS.down }}>
+                <span className="text-[10px] text-slate-600 uppercase font-black tracking-widest block mb-0.5">当前成交价</span>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-xl font-black mono tracking-tight">{data.price.close.toFixed(2)}</span>
+                  <span className="text-[10px] font-bold" style={{ color: data.price.change_percent >= 0 ? COLORS.up : COLORS.down }}>
                     {data.price.change_percent >= 0 ? '+' : ''}{data.price.change_percent.toFixed(2)}%
                   </span>
                 </div>
               </div>
               <div className="text-right">
-                <span className="text-xs text-slate-500 uppercase font-black tracking-widest block mb-1">昨日验证</span>
-                <div className="flex items-center justify-end gap-1.5 mt-1 font-bold text-sm">
-                  {data.previousPrediction?.validation_status === 'Correct' ? <span className="text-emerald-500 flex items-center gap-1"><ShieldCheck className="w-4 h-4" /> 结果准确</span> :
-                   data.previousPrediction?.validation_status === 'Incorrect' ? <span className="text-rose-500 text-sm">❌ 偏差回顾</span> : <span className="text-slate-500 italic">待验证</span>}
+                <span className="text-[10px] text-slate-600 uppercase font-black tracking-widest block mb-1">昨日验证</span>
+                <div className="flex items-center justify-end gap-1.5 font-bold text-[11px]">
+                  {data.previousPrediction?.validation_status === 'Correct' ? <span className="text-emerald-500/80 flex items-center gap-1"><ShieldCheck size={12} /> 结果准确</span> :
+                   data.previousPrediction?.validation_status === 'Incorrect' ? <span className="text-rose-500/80">❌ 偏差回顾</span> : <span className="text-slate-600 italic">待验证</span>}
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* 3. 底部微型列表 */}
-        <section className="grid grid-cols-2 gap-4">
+        {/* 3. 底部信息块 */}
+        <section className="grid grid-cols-2 gap-4 pb-2">
            <div className="glass-card p-4 flex flex-col justify-between">
-              <span className="text-[10px] text-slate-500 font-bold uppercase">{data.rule?.position === 'holding' ? '卖出预警线' : '建议支撑'}</span>
-              <p className="text-2xl font-black mono text-rose-500 mt-2">{data.prediction?.support_price?.toFixed(2) || '--'}</p>
+              <span className="text-[9px] text-slate-600 font-black uppercase tracking-widest">{data.rule?.position === 'holding' ? '止损预警' : '策略支撑'}</span>
+              <p className="text-xl font-black mono text-rose-500/90 mt-1">{data.prediction?.support_price?.toFixed(2) || '--'}</p>
            </div>
            <div className="glass-card p-4 flex flex-col justify-between">
-              <span className="text-[10px] text-slate-500 font-bold uppercase">市场情绪 (RSI)</span>
-              <div className="flex items-baseline gap-2 mt-2">
-                <p className="text-2xl font-black mono">{data.price.rsi.toFixed(0)}</p>
-                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-white/5 text-slate-400">{data.price.rsi > 70 ? '超买' : data.price.rsi < 30 ? '超卖' : '运行稳健'}</span>
+              <span className="text-[9px] text-slate-600 font-black uppercase tracking-widest">市场情绪 (RSI)</span>
+              <div className="flex items-baseline gap-2 mt-1">
+                <p className="text-xl font-black mono">{data.price.rsi.toFixed(0)}</p>
+                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-white/5 text-slate-600 whitespace-nowrap">{data.price.rsi > 70 ? '超买' : data.price.rsi < 30 ? '超卖' : '运行稳健'}</span>
               </div>
            </div>
         </section>
-
-        <div className="flex flex-col items-center gap-2 pt-4 opacity-20 group">
-          <span className="text-[10px] font-black tracking-widest text-slate-500 uppercase">上划追溯历史轨迹</span>
-          <ChevronDown className="w-4 h-4 animate-bounce" />
-        </div>
       </div>
     </div>
   );
