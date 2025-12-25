@@ -350,12 +350,27 @@ function StockProfile({ stock, isOpen, onClose }: { stock: StockData | null, isO
           initial={{ y: '100%' }}
           animate={{ y: 0 }}
           exit={{ y: '100%' }}
+          drag="y"
+          dragConstraints={{ top: 0, bottom: 0 }}
+          dragElastic={{ top: 0.1, bottom: 0.6 }}
+          onDragEnd={(_, info) => {
+            if (info.offset.y > 150) onClose();
+          }}
           transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-          className="fixed inset-0 z-[200] bg-[#050508] p-6 flex flex-col pointer-events-auto"
+          className="fixed inset-0 z-[200] bg-[#050508] flex flex-col pointer-events-auto touch-pan-x"
         >
-          <button onClick={onClose} className="mb-8 p-3 w-fit rounded-full bg-white/5 border border-white/10">
-            <CloseIcon className="w-5 h-5 text-slate-400" />
-          </button>
+          {/* 增加一个手势区域，同时也支持横向滑动关闭（符合用户提到的左滑/右滑逻辑） */}
+          <motion.div 
+            drag="x" 
+            dragConstraints={{ left: 0, right: 0 }}
+            onDragEnd={(_, info) => {
+              if (Math.abs(info.offset.x) > 100) onClose();
+            }}
+            className="h-full w-full p-6 flex flex-col"
+          >
+            <button onClick={onClose} className="mb-8 p-3 w-fit rounded-full bg-white/5 border border-white/10 active:scale-95">
+              <CloseIcon className="w-5 h-5 text-slate-400" />
+            </button>
           
           <div className="flex items-center gap-4 mb-10">
             <div className="w-16 h-16 rounded-[24px] bg-white/5 border border-white/10 flex items-center justify-center text-2xl font-black italic text-indigo-500">
@@ -392,6 +407,8 @@ function StockProfile({ stock, isOpen, onClose }: { stock: StockData | null, isO
               </div>
             ))}
           </div>
+            </div>
+          </motion.div>
         </motion.div>
       )}
     </AnimatePresence>
@@ -513,7 +530,7 @@ function DashboardPageContent() {
       <div 
         ref={scrollRef}
         onScroll={handleScroll}
-        className="h-full w-full flex overflow-x-scroll snap-x snap-mandatory scrollbar-hide"
+        className={`h-full w-full flex overflow-x-scroll snap-x snap-mandatory scrollbar-hide ${profileStock ? 'overflow-hidden pointer-events-none' : ''}`}
       >
         {stocks.map((stock) => (
           <StockVerticalFeed 
