@@ -529,7 +529,7 @@ function DashboardPageContent() {
       <div 
         ref={scrollRef}
         onScroll={handleScroll}
-        className={`h-full w-full flex overflow-x-scroll snap-x snap-mandatory scrollbar-hide ${profileStock ? 'overflow-hidden pointer-events-none' : ''}`}
+        className={`h-full w-full flex overflow-x-scroll snap-x snap-mandatory scrollbar-hide ${(profileStock || settingsOpen) ? 'overflow-hidden pointer-events-none' : ''}`}
       >
         {stocks.map((stock) => (
           <StockVerticalFeed 
