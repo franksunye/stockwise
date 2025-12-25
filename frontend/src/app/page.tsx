@@ -376,20 +376,21 @@ function StockProfile({ stock, isOpen, onClose }: { stock: StockData | null, isO
              <div className="w-12 h-1 rounded-full bg-white/10" />
           </div>
 
-          <div className="h-full w-full p-6 pt-2 flex flex-col overflow-y-auto">
-            <button onClick={onClose} className="mb-8 p-3 w-fit rounded-full bg-white/5 border border-white/10 active:scale-95">
-              <CloseIcon className="w-5 h-5 text-slate-400" />
-            </button>
-          
-            <div className="flex items-center gap-4 mb-10">
-              <div className="w-16 h-16 rounded-[24px] bg-white/5 border border-white/10 flex items-center justify-center text-2xl font-black italic text-indigo-500">
-                {stock.symbol.slice(-2)}
+          <div className="h-full w-full p-8 pt-6 flex flex-col overflow-y-auto">
+            <header className="flex items-center justify-between mb-10">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-[22px] bg-white/5 border border-white/10 flex items-center justify-center text-xl font-black italic text-indigo-500">
+                  {stock.symbol.slice(-2)}
+                </div>
+                <div>
+                  <h2 className="text-2xl font-black italic tracking-tighter text-white">{stock.name}</h2>
+                  <p className="text-[10px] text-slate-500 font-bold tracking-[0.2em] uppercase">{stock.symbol}.HK · 统计档案</p>
+                </div>
               </div>
-              <div>
-                <h2 className="text-2xl font-black italic tracking-tighter text-white">{stock.name}</h2>
-                <p className="text-xs text-slate-500 font-bold tracking-widest uppercase">{stock.symbol}.HK · 统计档案</p>
-              </div>
-            </div>
+              <button onClick={onClose} className="p-2.5 rounded-full bg-white/5 border border-white/10 active:scale-90 transition-all">
+                <CloseIcon className="w-5 h-5 text-slate-400" />
+              </button>
+            </header>
 
             <div className="grid grid-cols-2 gap-4 mb-8">
               <div className="glass-card p-4 text-center">

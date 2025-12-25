@@ -58,16 +58,16 @@ export function SettingsModal({ symbol, isOpen, onClose, onSave }: Props) {
                <div className="w-12 h-1 rounded-full bg-white/20" />
             </div>
 
-            <div className="p-8 pt-2 flex flex-col">
-              <div className="flex items-center gap-4 mb-8">
-                <button onClick={onClose} className="p-3 rounded-full bg-white/5 border border-white/10 active:scale-90 transition-all">
-                  <X className="w-5 h-5 text-slate-400" />
-                </button>
+            <div className="p-8 pt-4 flex flex-col">
+              <header className="flex items-center justify-between mb-8">
                 <div>
                   <span className="text-[10px] uppercase tracking-[0.3em] text-slate-500 font-bold">锚点参数配置</span>
                   <h2 className="text-xl font-black italic tracking-tighter text-white">风控中心 <span className="text-indigo-500">CORE</span></h2>
                 </div>
-              </div>
+                <button onClick={onClose} className="p-2.5 rounded-full bg-white/5 border border-white/10 active:scale-90 transition-all">
+                  <X className="w-5 h-5 text-slate-400" />
+                </button>
+              </header>
 
               <div className="space-y-6">
                 <div>
