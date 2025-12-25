@@ -32,14 +32,14 @@ export default function StockPoolPage() {
     if (!user) return;
     setLoading(true);
     try {
-      const poolRes = await fetch(`/api/stock-pool?userId=${user.userId}`);
+      const poolRes = await fetch(`/api/stock-pool?userId=${user.userId}`, { cache: 'no-store' });
       const poolData = await poolRes.json();
       const watchlist = poolData.stocks || [];
       const results: StockSnapshot[] = [];
 
       for (const item of watchlist) {
         try {
-          const res = await fetch(`/api/stock?symbol=${item.symbol}`);
+          const res = await fetch(`/api/stock?symbol=${item.symbol}`, { cache: 'no-store' });
           const data = await res.json();
           results.push({
             symbol: item.symbol,
@@ -102,11 +102,25 @@ export default function StockPoolPage() {
   const handleRemove = async (e: React.MouseEvent, symbol: string) => {
     e.preventDefault(); e.stopPropagation();
     if (!user) return;
+    
+    if (!confirm(`确定要从监控池中移除 ${symbol} 吗？`)) return;
+    
     setLoading(true);
     try {
-      await fetch(`/api/stock-pool?userId=${user.userId}&symbol=${symbol}`, { method: 'DELETE' });
-      await fetchStockData();
-    } catch (e) { console.error('Delete failed', e); }
+      const res = await fetch(`/api/stock-pool?userId=${user.userId}&symbol=${symbol}`, { 
+        method: 'DELETE',
+        cache: 'no-store'
+      });
+      if (res.ok) {
+        // 成功后重新获取最新列表
+        await fetchStockData();
+      } else {
+        alert('移除失败，请重试');
+      }
+    } catch (e) { 
+      console.error('Delete failed', e); 
+      alert('网络错误，请稍后重试');
+    }
     setLoading(false);
   };
 
@@ -216,9 +230,9 @@ export default function StockPoolPage() {
                       </div>
                       <button 
                         onClick={(e) => handleRemove(e, stock.symbol)}
-                        className="p-2 opacity-0 group-hover:opacity-100 transition-all text-slate-700 hover:text-rose-500 active:scale-75"
+                        className="p-3 opacity-60 hover:opacity-100 transition-all text-slate-500 hover:text-rose-500 active:scale-75 z-20 relative"
                       >
-                        <Trash2 size={18} />
+                        <Trash2 size={20} />
                       </button>
                     </div>
                  </div>
