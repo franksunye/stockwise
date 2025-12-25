@@ -13,6 +13,7 @@ import { getIndicatorReviews } from '@/lib/analysis';
 import { SettingsModal } from '@/components/SettingsModal';
 import { getCurrentUser } from '@/lib/user';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 
 const COLORS = { 
   up: '#10b981', 
@@ -462,6 +463,28 @@ function DashboardPageContent() {
   const [showTactics, setShowTactics] = useState<string | null>(null);
   const [profileStock, setProfileStock] = useState<StockData | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const searchParams = useSearchParams();
+  const targetSymbol = searchParams.get('symbol');
+  const hasAutoScrolled = useRef(false);
+
+  // 处理从股票池跳转过来的定位逻辑
+  useEffect(() => {
+    if (targetSymbol && stocks.length > 0 && scrollRef.current && !hasAutoScrolled.current) {
+      const index = stocks.findIndex(s => s.symbol === targetSymbol);
+      if (index !== -1) {
+        hasAutoScrolled.current = true;
+        setCurrentIndex(index);
+        const container = scrollRef.current;
+        const timer = setTimeout(() => {
+          container.scrollTo({
+            left: index * container.clientWidth,
+            behavior: 'instant'
+          });
+        }, 50);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [targetSymbol, stocks.length]);
 
   const loadAllData = useCallback(async () => {
     const user = await getCurrentUser();
