@@ -242,7 +242,7 @@ function VerticalIndicator({ container, onScroll }: { container: HTMLDivElement 
   }, [container, onScroll]);
 
   return (
-    <div className="sticky top-0 h-0 w-full z-[100] pointer-events-none">
+    <div className="absolute inset-0 z-[100] pointer-events-none overflow-hidden">
       <AnimatePresence>
         {isVisible && (
           <motion.div 
@@ -334,14 +334,16 @@ function StockVerticalFeed({ stock, onShowTactics, onVerticalScroll, scrollReque
   }, [container, scrollRequest]);
 
   return (
-    <div 
-      ref={setContainer}
-      className="min-w-full h-full relative snap-center overflow-y-scroll snap-y snap-mandatory scrollbar-hide"
-    >
+    <div className="min-w-full h-full relative snap-center overflow-hidden">
       <VerticalIndicator container={container} onScroll={onVerticalScroll} />
-      {/* Y轴 垂直内容 (TikTok Mode) */}
-      <StockDashboardCard data={stock} onShowTactics={onShowTactics} />
-      {stock.history.slice(1).map((h, i) => <HistoricalCard key={i} data={h} />)}
+      <div 
+        ref={setContainer}
+        className="w-full h-full absolute inset-0 overflow-y-scroll snap-y snap-mandatory scrollbar-hide"
+      >
+        {/* Y轴 垂直内容 (TikTok Mode) */}
+        <StockDashboardCard data={stock} onShowTactics={onShowTactics} />
+        {stock.history.slice(1).map((h, i) => <HistoricalCard key={i} data={h} />)}
+      </div>
     </div>
   );
 }
