@@ -197,6 +197,45 @@ function StockDashboardCard({ data, onShowTactics }: { data: StockData, onShowTa
     </div>
   );
 }
+
+function VerticalIndicator({ containerRef }: { containerRef: React.RefObject<HTMLDivElement> }) {
+  const [progress, setProgress] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = el;
+      setIsVisible(scrollTop > 20);
+      const total = scrollHeight - clientHeight;
+      if (total > 0) setProgress(scrollTop / total);
+    };
+    el.addEventListener('scroll', handleScroll);
+    return () => el.removeEventListener('scroll', handleScroll);
+  }, [containerRef]);
+
+  return (
+    <AnimatePresence>
+      {isVisible && (
+        <motion.div 
+          initial={{ opacity: 0, x: 10 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: 10 }}
+          className="absolute right-1 top-1/3 bottom-1/3 w-0.5 bg-white/5 rounded-full z-[100] pointer-events-none"
+        >
+          <motion.div 
+            className="absolute left-0 right-0 bg-white/40 rounded-full"
+            style={{ 
+              height: '15%', 
+              top: `${progress * 85}%` 
+            }}
+          />
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
 function HistoricalCard({ data }: { data: AIPrediction }) {
   const isUp = data.signal === 'Long';
   const isDown = data.signal === 'Short';
@@ -430,13 +469,21 @@ function DashboardPageContent() {
         onScroll={handleScroll}
         className="h-full w-full flex overflow-x-scroll snap-x snap-mandatory scrollbar-hide"
       >
-        {stocks.map((stock) => (
-          <div key={stock.symbol} className="min-w-full h-full snap-center overflow-y-scroll snap-y snap-mandatory scrollbar-hide">
-            {/* Y轴 垂直内容 (TikTok Mode) */}
-            <StockDashboardCard data={stock} onShowTactics={() => setShowTactics(stock.symbol)} />
-            {stock.history.slice(1).map((h, i) => <HistoricalCard key={i} data={h} />)}
-          </div>
-        ))}
+        {stocks.map((stock) => {
+          const vRef = useRef<HTMLDivElement>(null);
+          return (
+            <div 
+              key={stock.symbol} 
+              ref={vRef}
+              className="min-w-full h-full relative snap-center overflow-y-scroll snap-y snap-mandatory scrollbar-hide"
+            >
+              <VerticalIndicator containerRef={vRef} />
+              {/* Y轴 垂直内容 (TikTok Mode) */}
+              <StockDashboardCard data={stock} onShowTactics={() => setShowTactics(stock.symbol)} />
+              {stock.history.slice(1).map((h, i) => <HistoricalCard key={i} data={h} />)}
+            </div>
+          );
+        })}
       </div>
 
       {/* 底部导航 */}
