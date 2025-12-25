@@ -123,32 +123,38 @@ function StockDashboardCard({ data, onShowTactics }: { data: StockData, onShowTa
           className={`glass-card relative overflow-hidden group cursor-pointer active:scale-[0.98] transition-all hover:bg-white/[0.04] ${isTriggered ? 'warning-pulse' : ''}`}
         >
           <div className="relative z-10 p-5">
-            <div className="flex items-start gap-3 mb-5">
-              <div className="w-9 h-9 rounded-xl bg-indigo-600/20 flex items-center justify-center shrink-0 border border-indigo-500/30 ai-pulse"><Zap className="w-4 h-4 text-indigo-400 fill-indigo-400/20" /></div>
-              <div className="flex-1">
-                <h3 className="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1.5">AI 深度洞察</h3>
-                <div className="space-y-3">
-                  {(() => {
-                    try {
-                      // ... (逻辑保持不变，仅调整文字大小)
-                      const tData = JSON.parse(data.prediction?.ai_reasoning || '') as TacticalData;
-                      const userPos = data.rule?.position === 'holding' ? 'holding' : 'empty';
-                      const p1 = tData.tactics?.[userPos]?.[0];
-                      return (
-                        <>
-                          <p className="text-sm leading-relaxed text-slate-300 font-medium italic">&quot;{tData.summary || data.prediction?.ai_reasoning}&quot;</p>
-                          {p1 && <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20">
-                            <span className="text-[9px] font-black bg-indigo-500 text-white px-1 py-0.5 rounded italic">P1</span>
-                            <span className="text-[10px] font-bold text-indigo-400">{p1.a}:</span>
-                            <span className="text-[10px] text-slate-400 font-medium line-clamp-1">{p1.c}</span>
-                          </div>}
-                        </>
-                      );
-                    } catch {
-                      return <p className="text-sm leading-relaxed text-slate-300 font-medium italic">&quot;{data.prediction?.ai_reasoning || '正在评估行情...'}&quot;</p>;
-                    }
-                  })()}
+            <div className="mb-5">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-5 h-5 rounded-md bg-indigo-600/20 flex items-center justify-center border border-indigo-500/30 ai-pulse">
+                  <Zap className="w-2.5 h-2.5 text-indigo-400 fill-indigo-400/20" />
                 </div>
+                <h3 className="text-[10px] font-black text-slate-600 uppercase tracking-widest">AI 深度洞察</h3>
+              </div>
+              
+              <div className="space-y-4">
+                {(() => {
+                  try {
+                    const tData = JSON.parse(data.prediction?.ai_reasoning || '') as TacticalData;
+                    const userPos = data.rule?.position === 'holding' ? 'holding' : 'empty';
+                    const p1 = tData.tactics?.[userPos]?.[0];
+                    return (
+                      <>
+                        <p className="text-sm leading-relaxed text-slate-300 font-medium italic pl-1 border-l-2 border-indigo-500/20">
+                          &quot;{tData.summary || data.prediction?.ai_reasoning}&quot;
+                        </p>
+                        {p1 && <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 w-full overflow-hidden">
+                          <span className="text-[9px] font-black bg-indigo-500 text-white px-1 py-0.5 rounded italic shrink-0">P1</span>
+                          <div className="flex items-center gap-1 min-w-0">
+                            <span className="text-[10px] font-bold text-indigo-400 shrink-0">{p1.a}:</span>
+                            <span className="text-[10px] text-slate-400 font-medium truncate">{p1.c}</span>
+                          </div>
+                        </div>}
+                      </>
+                    );
+                  } catch {
+                    return <p className="text-sm leading-relaxed text-slate-300 font-medium italic pl-1 border-l-2 border-indigo-500/20">&quot;{data.prediction?.ai_reasoning || '正在评估行情...'}&quot;</p>;
+                  }
+                })()}
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/5">
