@@ -23,6 +23,8 @@ export default function StockPoolPage() {
   const [showAdd, setShowAdd] = useState(false);
   const [searchResults, setSearchResults] = useState<{symbol: string; name: string}[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [stockToDelete, setStockToDelete] = useState<StockSnapshot | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     getCurrentUser().then(setUser);
@@ -99,29 +101,25 @@ export default function StockPoolPage() {
     setLoading(false);
   };
 
-  const handleRemove = async (e: React.MouseEvent, symbol: string) => {
+  const handleRemoveClick = (e: React.MouseEvent, stock: StockSnapshot) => {
     e.preventDefault(); e.stopPropagation();
-    if (!user) return;
-    
-    if (!confirm(`确定要从监控池中移除 ${symbol} 吗？`)) return;
-    
-    setLoading(true);
+    setStockToDelete(stock);
+  };
+
+  const confirmDelete = async () => {
+    if (!stockToDelete || !user) return;
+    setIsDeleting(true);
     try {
-      const res = await fetch(`/api/stock-pool?userId=${user.userId}&symbol=${symbol}`, { 
+      const res = await fetch(`/api/stock-pool?userId=${user.userId}&symbol=${stockToDelete.symbol}`, { 
         method: 'DELETE',
         cache: 'no-store'
       });
       if (res.ok) {
-        // 成功后重新获取最新列表
         await fetchStockData();
-      } else {
-        alert('移除失败，请重试');
+        setStockToDelete(null);
       }
-    } catch (e) { 
-      console.error('Delete failed', e); 
-      alert('网络错误，请稍后重试');
-    }
-    setLoading(false);
+    } catch (e) { console.error('Delete failed', e); }
+    setIsDeleting(false);
   };
 
   return (
@@ -229,7 +227,7 @@ export default function StockPoolPage() {
                         </p>
                       </div>
                       <button 
-                        onClick={(e) => handleRemove(e, stock.symbol)}
+                        onClick={(e) => handleRemoveClick(e, stock)}
                         className="p-3 opacity-60 hover:opacity-100 transition-all text-slate-500 hover:text-rose-500 active:scale-75 z-20 relative"
                       >
                         <Trash2 size={20} />
@@ -241,6 +239,52 @@ export default function StockPoolPage() {
           )}
         </div>
       </div>
+
+      <AnimatePresence>
+        {stockToDelete && (
+          <div className="fixed inset-0 z-[1000] flex items-center justify-center px-6">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => !isDeleting && setStockToDelete(null)}
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-sm glass-card p-8 border-rose-500/20 bg-[#0a0a0f] shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
+            >
+              <div className="flex flex-col items-center text-center">
+                <div className="w-16 h-16 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center mb-6">
+                  <Trash2 className="text-rose-500" size={28} />
+                </div>
+                <h3 className="text-xl font-black italic tracking-tighter mb-2 text-white">确认移除？</h3>
+                <p className="text-sm text-slate-400 mb-8 leading-relaxed">
+                  确定要从监控池中移除 <span className="text-white font-bold">{stockToDelete.name} ({stockToDelete.symbol})</span> 吗？此操作不可撤销。
+                </p>
+                <div className="flex gap-3 w-full">
+                  <button 
+                    disabled={isDeleting}
+                    onClick={() => setStockToDelete(null)}
+                    className="flex-1 px-6 py-4 rounded-2xl bg-white/5 border border-white/10 text-xs font-black uppercase tracking-widest active:scale-95 transition-all disabled:opacity-50"
+                  >
+                    取消
+                  </button>
+                  <button 
+                    disabled={isDeleting}
+                    onClick={confirmDelete}
+                    className="flex-1 px-6 py-4 rounded-2xl bg-rose-500 text-white text-xs font-black uppercase tracking-widest active:scale-95 transition-all shadow-[0_10px_20px_rgba(244,63,94,0.3)] disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {isDeleting ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : '确认移除'}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       <style jsx global>{`
         .scrollbar-hide::-webkit-scrollbar { display: none; }
