@@ -198,7 +198,7 @@ function StockDashboardCard({ data, onShowTactics }: { data: StockData, onShowTa
   );
 }
 
-function VerticalIndicator({ containerRef }: { containerRef: React.RefObject<HTMLDivElement> }) {
+function VerticalIndicator({ containerRef }: { containerRef: React.RefObject<HTMLDivElement | null> }) {
   const [progress, setProgress] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -222,13 +222,13 @@ function VerticalIndicator({ containerRef }: { containerRef: React.RefObject<HTM
           initial={{ opacity: 0, x: 10 }}
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: 10 }}
-          className="absolute right-1 top-1/3 bottom-1/3 w-0.5 bg-white/5 rounded-full z-[100] pointer-events-none"
+          className="absolute right-1.5 top-1/4 bottom-1/4 w-1 bg-white/10 rounded-full z-[100] pointer-events-none"
         >
           <motion.div 
-            className="absolute left-0 right-0 bg-white/40 rounded-full"
+            className="absolute left-0 right-0 bg-white/60 rounded-full"
             style={{ 
-              height: '15%', 
-              top: `${progress * 85}%` 
+              height: '20%', 
+              top: `${progress * 80}%` 
             }}
           />
         </motion.div>
