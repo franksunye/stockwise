@@ -549,10 +549,9 @@ function DashboardPageContent() {
                  animate={{ opacity: 1, y: 0 }}
                  exit={{ opacity: 0, y: 20 }}
                  onClick={() => setBackToTopCounter(prev => prev + 1)}
-                 className="flex items-center gap-2 bg-indigo-500 px-6 py-2.5 rounded-full shadow-lg shadow-indigo-500/20 active:scale-90 transition-all"
+                 className="flex items-center bg-white/5 border border-white/10 px-5 py-2.5 rounded-full shadow-lg active:scale-90 transition-all pointer-events-auto"
                >
-                 <History className="w-4 h-4 text-white" />
-                 <span className="text-[10px] font-black uppercase tracking-widest text-white">回到今天</span>
+                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">回到今天</span>
                </motion.button>
              )}
            </AnimatePresence>
