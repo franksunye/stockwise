@@ -360,64 +360,59 @@ function StockProfile({ stock, isOpen, onClose }: { stock: StockData | null, isO
           initial={{ y: '100%' }}
           animate={{ y: 0 }}
           exit={{ y: '100%' }}
-          drag="y"
-          dragConstraints={{ top: 0, bottom: 0 }}
-          dragElastic={{ top: 0.1, bottom: 0.6 }}
+          drag
+          dragConstraints={{ top: 0, bottom: 0, left: 0, right: 0 }}
+          dragElastic={0.5}
           onDragEnd={(_, info) => {
-            if (info.offset.y > 150) onClose();
+            // 支持下划或左右滑动关闭
+            if (info.offset.y > 150 || Math.abs(info.offset.x) > 100) {
+              onClose();
+            }
           }}
           transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-          className="fixed inset-0 z-[200] bg-[#050508] flex flex-col pointer-events-auto touch-pan-x"
+          className="fixed inset-0 z-[200] bg-[#050508] flex flex-col pointer-events-auto touch-none"
         >
-          {/* 增加一个手势区域，同时也支持横向滑动关闭（符合用户提到的左滑/右滑逻辑） */}
-          <motion.div 
-            drag="x" 
-            dragConstraints={{ left: 0, right: 0 }}
-            onDragEnd={(_, info) => {
-              if (Math.abs(info.offset.x) > 100) onClose();
-            }}
-            className="h-full w-full p-6 flex flex-col"
-          >
+          <div className="h-full w-full p-6 flex flex-col overflow-y-auto pointer-events-auto">
             <button onClick={onClose} className="mb-8 p-3 w-fit rounded-full bg-white/5 border border-white/10 active:scale-95">
               <CloseIcon className="w-5 h-5 text-slate-400" />
             </button>
           
-          <div className="flex items-center gap-4 mb-10">
-            <div className="w-16 h-16 rounded-[24px] bg-white/5 border border-white/10 flex items-center justify-center text-2xl font-black italic text-indigo-500">
-              {stock.symbol.slice(-2)}
-            </div>
-            <div>
-              <h2 className="text-2xl font-black italic tracking-tighter text-white">{stock.name}</h2>
-              <p className="text-xs text-slate-500 font-bold tracking-widest uppercase">{stock.symbol}.HK · 统计档案</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4 mb-8">
-            <div className="glass-card p-4 text-center">
-              <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest block mb-2">历史胜率</span>
-              <p className="text-3xl font-black mono text-emerald-500">{winRate}%</p>
-            </div>
-            <div className="glass-card p-4 text-center">
-              <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest block mb-2">累计验证</span>
-              <p className="text-3xl font-black mono text-white">{totalCount}</p>
-            </div>
-          </div>
-
-          <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 px-2">复盘矩阵 (最近 30 天)</h3>
-          <div className="grid grid-cols-4 gap-2 overflow-y-auto overflow-x-hidden">
-            {stock.history.map((h, i) => (
-              <div 
-                key={i} 
-                className={`aspect-square rounded-xl border border-white/5 flex items-center justify-center text-[10px] font-black ${
-                  h.validation_status === 'Correct' ? 'bg-emerald-500/10 text-emerald-500/50' : 
-                  h.validation_status === 'Incorrect' ? 'bg-rose-500/10 text-rose-500/50' : 'bg-white/5 text-slate-700'
-                }`}
-              >
-                {h.date.split('-').slice(1).join('/')}
+            <div className="flex items-center gap-4 mb-10">
+              <div className="w-16 h-16 rounded-[24px] bg-white/5 border border-white/10 flex items-center justify-center text-2xl font-black italic text-indigo-500">
+                {stock.symbol.slice(-2)}
               </div>
-            ))}
+              <div>
+                <h2 className="text-2xl font-black italic tracking-tighter text-white">{stock.name}</h2>
+                <p className="text-xs text-slate-500 font-bold tracking-widest uppercase">{stock.symbol}.HK · 统计档案</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 mb-8">
+              <div className="glass-card p-4 text-center">
+                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest block mb-2">历史胜率</span>
+                <p className="text-3xl font-black mono text-emerald-500">{winRate}%</p>
+              </div>
+              <div className="glass-card p-4 text-center">
+                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest block mb-2">累计验证</span>
+                <p className="text-3xl font-black mono text-white">{totalCount}</p>
+              </div>
+            </div>
+
+            <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 px-2">复盘矩阵 (最近 30 天)</h3>
+            <div className="grid grid-cols-4 gap-2">
+              {stock.history.map((h, i) => (
+                <div 
+                  key={i} 
+                  className={`aspect-square rounded-xl border border-white/5 flex items-center justify-center text-[10px] font-black ${
+                    h.validation_status === 'Correct' ? 'bg-emerald-500/10 text-emerald-500/50' : 
+                    h.validation_status === 'Incorrect' ? 'bg-rose-500/10 text-rose-500/50' : 'bg-white/5 text-slate-700'
+                  }`}
+                >
+                  {h.date.split('-').slice(1).join('/')}
+                </div>
+              ))}
+            </div>
           </div>
-          </motion.div>
         </motion.div>
       )}
     </AnimatePresence>
