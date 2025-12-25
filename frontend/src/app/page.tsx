@@ -407,7 +407,6 @@ function StockProfile({ stock, isOpen, onClose }: { stock: StockData | null, isO
               </div>
             ))}
           </div>
-            </div>
           </motion.div>
         </motion.div>
       )}
