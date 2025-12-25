@@ -198,7 +198,7 @@ function StockDashboardCard({ data, onShowTactics }: { data: StockData, onShowTa
   );
 }
 
-function VerticalIndicator({ container }: { container: HTMLDivElement | null }) {
+function VerticalIndicator({ container, onScroll }: { container: HTMLDivElement | null, onScroll?: (top: number) => void }) {
   const [progress, setProgress] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -210,6 +210,8 @@ function VerticalIndicator({ container }: { container: HTMLDivElement | null }) 
       const { scrollTop, scrollHeight, clientHeight } = container;
       const total = scrollHeight - clientHeight;
       if (total > 0) setProgress(scrollTop / total);
+      
+      if (onScroll) onScroll(scrollTop);
 
       setIsVisible(true);
       if (timerRef.current) clearTimeout(timerRef.current);
@@ -221,7 +223,7 @@ function VerticalIndicator({ container }: { container: HTMLDivElement | null }) 
       container.removeEventListener('scroll', handleScroll);
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [container]);
+  }, [container, onScroll]);
 
   return (
     <div className="sticky top-0 h-0 w-full z-[100] pointer-events-none">
@@ -300,15 +302,27 @@ function HistoricalCard({ data }: { data: AIPrediction }) {
   );
 }
 
-function StockVerticalFeed({ stock, onShowTactics }: { stock: StockData, onShowTactics: () => void }) {
+function StockVerticalFeed({ stock, onShowTactics, onVerticalScroll, scrollRequest }: { 
+  stock: StockData, 
+  onShowTactics: () => void, 
+  onVerticalScroll: (top: number) => void,
+  scrollRequest?: number // 用于外部请求滚动回顶部的逻辑
+}) {
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   
+  // 监听回顶请求
+  useEffect(() => {
+    if (container && scrollRequest !== undefined) {
+      container.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [container, scrollRequest]);
+
   return (
     <div 
       ref={setContainer}
       className="min-w-full h-full relative snap-center overflow-y-scroll snap-y snap-mandatory scrollbar-hide"
     >
-      <VerticalIndicator container={container} />
+      <VerticalIndicator container={container} onScroll={onVerticalScroll} />
       {/* Y轴 垂直内容 (TikTok Mode) */}
       <StockDashboardCard data={stock} onShowTactics={onShowTactics} />
       {stock.history.slice(1).map((h, i) => <HistoricalCard key={i} data={h} />)}
@@ -436,6 +450,9 @@ function DashboardPageContent() {
     }
   }, []);
 
+  const [yScrollPosition, setYScrollPosition] = useState(0);
+  const [backToTopCounter, setBackToTopCounter] = useState(0);
+
   useEffect(() => {
     loadAllData();
     const interval = setInterval(loadAllData, 10 * 60 * 1000);
@@ -474,17 +491,9 @@ function DashboardPageContent() {
 
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-[100] p-8 flex items-center justify-between pointer-events-none">
-        <div className="flex items-center gap-3 pointer-events-auto cursor-pointer group" onClick={() => setProfileStock(currentStock)}>
-          <div className="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center transition-all group-active:scale-95">
-             <div className="text-xs font-black italic text-indigo-500">{currentStock?.symbol.slice(-2)}</div>
-          </div>
-          <div>
-            <h1 className="text-sm font-black italic tracking-tighter group-hover:text-indigo-400 transition-colors">
-              {currentStock?.name || 'STOCKWISE'} 
-              <span className="text-[10px] ml-2 text-slate-600 mono font-bold not-italic">{currentStock?.symbol}</span>
-            </h1>
-          </div>
-        </div>
+        <Link href="/stock-pool" className="pointer-events-auto p-3 rounded-2xl bg-white/5 border border-white/10 active:scale-95 transition-all">
+          <Grid className="w-5 h-5 text-indigo-400" />
+        </Link>
         <div className="flex gap-4 pointer-events-auto">
            <button onClick={() => setSettingsOpen(true)} className="p-2.5 rounded-full bg-white/5 border border-white/10 active:scale-90"><Settings className="w-4 h-4 text-slate-400" /></button>
         </div>
@@ -501,23 +510,47 @@ function DashboardPageContent() {
             key={stock.symbol} 
             stock={stock} 
             onShowTactics={() => setShowTactics(stock.symbol)} 
+            onVerticalScroll={(top) => setYScrollPosition(top)}
+            scrollRequest={currentIndex === stocks.indexOf(stock) ? backToTopCounter : undefined}
           />
         ))}
       </div>
 
       {/* 底部导航 */}
-      <footer className="fixed bottom-0 left-0 right-0 p-10 flex flex-col items-center gap-6 z-[100] pointer-events-none">
+      <footer className="fixed bottom-0 left-0 right-0 p-10 px-8 flex flex-col items-center gap-6 z-[100] pointer-events-none">
         <div className="flex gap-2">
           {stocks.map((_, idx) => (
             <div key={idx} className={`h-1 rounded-full transition-all duration-300 ${idx === currentIndex ? 'w-6 bg-white' : 'w-1 bg-white/20'}`} />
           ))}
         </div>
-        <div className="w-full max-w-xs flex justify-between items-center pointer-events-auto">
-           <Link href="/stock-pool" className="flex flex-col items-center gap-1 group">
-              <div className="p-3 rounded-full bg-white/5 border border-white/10 group-active:scale-90 transition-all"><Grid className="w-5 h-5 text-slate-400" /></div>
-              <span className="text-[8px] font-black uppercase tracking-widest text-slate-600">股票池</span>
-           </Link>
-           <div className="bg-indigo-500/10 border border-indigo-500/20 px-8 py-3 rounded-full"><span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400">智能决策核心</span></div>
+        <div className="w-full flex justify-between items-center pointer-events-auto">
+           {/* 现在入口移到了左下角，方便大拇指点击 */}
+           <div className="flex items-center gap-3 cursor-pointer group shrink-0" onClick={() => setProfileStock(currentStock)}>
+              <div className="w-11 h-11 rounded-[18px] bg-white/5 border border-white/10 flex items-center justify-center transition-all group-active:scale-90 group-hover:bg-white/10">
+                 <div className="text-[10px] font-black italic text-indigo-500">{currentStock?.symbol.slice(-2)}</div>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs font-black italic group-hover:text-indigo-400 transition-colors">{currentStock?.name}</span>
+                <span className="text-[9px] text-slate-600 font-bold mono">{currentStock?.symbol}</span>
+              </div>
+           </div>
+
+           {/* 中间的动态按钮：上划后显示“回到今天” */}
+           <AnimatePresence>
+             {yScrollPosition > 100 && (
+               <motion.button 
+                 initial={{ opacity: 0, y: 20 }}
+                 animate={{ opacity: 1, y: 0 }}
+                 exit={{ opacity: 0, y: 20 }}
+                 onClick={() => setBackToTopCounter(prev => prev + 1)}
+                 className="flex items-center gap-2 bg-indigo-500 px-6 py-2.5 rounded-full shadow-lg shadow-indigo-500/20 active:scale-90 transition-all"
+               >
+                 <History className="w-4 h-4 text-white" />
+                 <span className="text-[10px] font-black uppercase tracking-widest text-white">回到今天</span>
+               </motion.button>
+             )}
+           </AnimatePresence>
+
            <div className="w-11" />
         </div>
       </footer>
