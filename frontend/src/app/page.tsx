@@ -337,7 +337,7 @@ function DashboardPageContent() {
       setLoadingPool(false);
 
       // 并行请求每只股票的数据
-      initialStocks.forEach(async (stock) => {
+      initialStocks.forEach(async (stock: StockData) => {
         try {
           const [stockRes, historyRes] = await Promise.all([
             fetch(`/api/stock?symbol=${stock.symbol}`),
