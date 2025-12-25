@@ -201,34 +201,49 @@ function StockDashboardCard({ data, onShowTactics }: { data: StockData, onShowTa
 function VerticalIndicator({ containerRef }: { containerRef: React.RefObject<HTMLDivElement | null> }) {
   const [progress, setProgress] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
+
     const handleScroll = () => {
+      // 1. 获取位置
       const { scrollTop, scrollHeight, clientHeight } = el;
-      setIsVisible(scrollTop > 20);
       const total = scrollHeight - clientHeight;
       if (total > 0) setProgress(scrollTop / total);
+
+      // 2. 显示并重置计时器
+      setIsVisible(true);
+      if (timerRef.current) clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(() => {
+        setIsVisible(false);
+      }, 1500);
     };
-    el.addEventListener('scroll', handleScroll);
-    return () => el.removeEventListener('scroll', handleScroll);
+
+    el.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      el.removeEventListener('scroll', handleScroll);
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
   }, [containerRef]);
 
   return (
     <AnimatePresence>
       {isVisible && (
         <motion.div 
-          initial={{ opacity: 0, x: 10 }}
+          initial={{ opacity: 0, x: 5 }}
           animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: 10 }}
+          exit={{ opacity: 0, x: 5 }}
+          transition={{ duration: 0.2 }}
           className="absolute right-1.5 top-1/4 bottom-1/4 w-1 bg-white/10 rounded-full z-[100] pointer-events-none"
         >
           <motion.div 
             className="absolute left-0 right-0 bg-white/60 rounded-full"
             style={{ 
               height: '20%', 
-              top: `${progress * 80}%` 
+              top: `${progress * 80}%`,
+              transition: 'top 0.1s linear'
             }}
           />
         </motion.div>
