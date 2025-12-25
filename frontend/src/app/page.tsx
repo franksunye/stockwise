@@ -97,8 +97,8 @@ function StockDashboardCard({ data, onShowTactics }: { data: StockData, onShowTa
   const isTriggered = data.prediction?.support_price && data.price.close < data.prediction.support_price;
 
   return (
-    <div className="h-full w-full flex flex-col items-center justify-start px-6 snap-start pt-[max(20vh,160px)] pb-32 overflow-hidden">
-      <div className="w-full max-w-md space-y-6">
+    <div className="h-full w-full flex flex-col items-center justify-center px-6 snap-start pt-32 pb-32">
+      <div className="w-full max-w-md space-y-5">
         {/* 1. AI 顶层核心结论 */}
         <section className="text-center space-y-1 py-2">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-1">
