@@ -289,6 +289,21 @@ function HistoricalCard({ data }: { data: AIPrediction }) {
   );
 }
 
+function StockVerticalFeed({ stock, onShowTactics }: { stock: StockData, onShowTactics: () => void }) {
+  const vRef = useRef<HTMLDivElement>(null);
+  return (
+    <div 
+      ref={vRef}
+      className="min-w-full h-full relative snap-center overflow-y-scroll snap-y snap-mandatory scrollbar-hide"
+    >
+      <VerticalIndicator containerRef={vRef} />
+      {/* Y轴 垂直内容 (TikTok Mode) */}
+      <StockDashboardCard data={stock} onShowTactics={onShowTactics} />
+      {stock.history.slice(1).map((h, i) => <HistoricalCard key={i} data={h} />)}
+    </div>
+  );
+}
+
 function StockProfile({ stock, isOpen, onClose }: { stock: StockData | null, isOpen: boolean, onClose: () => void }) {
   if (!stock) return null; // 渲染守护
 
@@ -469,21 +484,13 @@ function DashboardPageContent() {
         onScroll={handleScroll}
         className="h-full w-full flex overflow-x-scroll snap-x snap-mandatory scrollbar-hide"
       >
-        {stocks.map((stock) => {
-          const vRef = useRef<HTMLDivElement>(null);
-          return (
-            <div 
-              key={stock.symbol} 
-              ref={vRef}
-              className="min-w-full h-full relative snap-center overflow-y-scroll snap-y snap-mandatory scrollbar-hide"
-            >
-              <VerticalIndicator containerRef={vRef} />
-              {/* Y轴 垂直内容 (TikTok Mode) */}
-              <StockDashboardCard data={stock} onShowTactics={() => setShowTactics(stock.symbol)} />
-              {stock.history.slice(1).map((h, i) => <HistoricalCard key={i} data={h} />)}
-            </div>
-          );
-        })}
+        {stocks.map((stock) => (
+          <StockVerticalFeed 
+            key={stock.symbol} 
+            stock={stock} 
+            onShowTactics={() => setShowTactics(stock.symbol)} 
+          />
+        ))}
       </div>
 
       {/* 底部导航 */}
