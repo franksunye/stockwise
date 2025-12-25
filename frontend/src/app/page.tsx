@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   RefreshCw, Settings, Target, ShieldCheck, Zap, 
   ChevronRight, X as CloseIcon, Info, Grid, ChevronDown, 
-  TrendingUp, TrendingDown, Minus
+  TrendingUp, TrendingDown, Minus, History
 } from 'lucide-react';
 import { DailyPrice, UserRule, AIPrediction } from '@/lib/types';
 import { getRule } from '@/lib/storage';
