@@ -327,7 +327,7 @@ function DashboardPageContent() {
       const poolData = await poolRes.json();
       const watchlist = poolData.stocks || [{ symbol: '02171', name: '科济药业' }];
 
-      const initialStocks = watchlist.map((s: any) => ({
+      const initialStocks = watchlist.map((s: { symbol: string; name: string }) => ({
         symbol: s.symbol,
         name: s.name,
         price: null, prediction: null, previousPrediction: null, history: [],
@@ -337,7 +337,7 @@ function DashboardPageContent() {
       setLoadingPool(false);
 
       // 并行请求每只股票的数据
-      initialStocks.forEach(async (stock: any, idx: number) => {
+      initialStocks.forEach(async (stock) => {
         try {
           const [stockRes, historyRes] = await Promise.all([
             fetch(`/api/stock?symbol=${stock.symbol}`),

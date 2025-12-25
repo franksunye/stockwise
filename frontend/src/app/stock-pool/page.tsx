@@ -1,17 +1,10 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Plus, Trash2, ArrowLeft, TrendingUp, TrendingDown, Minus, Search, Zap, LayoutGrid } from 'lucide-react';
+import { Plus, Trash2, ArrowLeft, TrendingUp, TrendingDown, Minus, LayoutGrid } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { getCurrentUser, type User } from '@/lib/user';
 import { motion, AnimatePresence } from 'framer-motion';
-
-const COLORS = { 
-  up: '#10b981', 
-  down: '#f43f5e', 
-  hold: '#f59e0b', 
-  muted: '#64748b' 
-};
 
 interface StockSnapshot {
   symbol: string;

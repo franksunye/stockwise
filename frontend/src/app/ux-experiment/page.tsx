@@ -1,10 +1,9 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  TrendingUp, TrendingDown, Target, Zap, ShieldCheck, 
-  ChevronDown, History, Grid, ArrowLeft, Info, Menu
+  Zap, ChevronDown, Grid, ArrowLeft, Info, Menu
 } from 'lucide-react';
 
 // --- 1. Types & Mock Data ---
