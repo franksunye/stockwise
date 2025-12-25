@@ -247,9 +247,11 @@ function HistoricalCard({ data }: { data: AIPrediction }) {
   );
 }
 
-function StockProfile({ stock, isOpen, onClose }: { stock: StockData, isOpen: boolean, onClose: () => void }) {
-  const winCount = stock.history.filter(h => h.validation_status === 'Correct').length;
-  const totalCount = stock.history.filter(h => h.validation_status !== 'Pending').length;
+function StockProfile({ stock, isOpen, onClose }: { stock: StockData | null, isOpen: boolean, onClose: () => void }) {
+  if (!stock) return null; // 渲染守护
+
+  const winCount = stock.history?.filter(h => h.validation_status === 'Correct').length || 0;
+  const totalCount = stock.history?.filter(h => h.validation_status !== 'Pending').length || 0;
   const winRate = totalCount > 0 ? Math.round((winCount / totalCount) * 100) : 0;
 
   return (
@@ -459,7 +461,7 @@ function DashboardPageContent() {
         onSave={() => loadAllData()} 
       />
       <StockProfile 
-        stock={profileStock || stocks[0]} 
+        stock={profileStock} 
         isOpen={!!profileStock} 
         onClose={() => setProfileStock(null)} 
       />
