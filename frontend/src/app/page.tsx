@@ -1,15 +1,18 @@
 'use client';
 
-import { Suspense, useState, useEffect, useCallback } from 'react';
-import { RefreshCw, Settings, Target, ShieldCheck, Zap } from 'lucide-react';
+import { Suspense, useState, useEffect, useCallback, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  RefreshCw, Settings, Target, ShieldCheck, Zap, 
+  ChevronRight, X as CloseIcon, Info, Grid, ChevronDown, 
+  TrendingUp, TrendingDown, Minus
+} from 'lucide-react';
 import { DailyPrice, UserRule, AIPrediction } from '@/lib/types';
 import { getRule } from '@/lib/storage';
 import { getIndicatorReviews } from '@/lib/analysis';
-import { BottomNav } from '@/components/BottomNav';
 import { SettingsModal } from '@/components/SettingsModal';
-import { useSearchParams } from 'next/navigation';
-
-import { ChevronRight, X as CloseIcon, Info } from 'lucide-react';
+import { getCurrentUser } from '@/lib/user';
+import Link from 'next/link';
 
 const COLORS = { 
   up: '#10b981', 
@@ -18,47 +21,38 @@ const COLORS = {
   muted: '#64748b' 
 };
 
-interface Tactic {
-  p: string;
-  a: string;
-  c: string;
-  r: string;
-}
-
+// --- Types ---
+interface Tactic { p: string; a: string; c: string; r: string; }
 interface TacticalData {
   summary: string;
-  tactics: {
-    holding: Tactic[];
-    empty: Tactic[];
-  };
+  tactics: { holding: Tactic[]; empty: Tactic[]; };
   conflict: string;
 }
 
-// --- Tactical Brief Drawer Component ---
+interface StockData {
+  symbol: string;
+  name: string;
+  price: DailyPrice | null;
+  prediction: AIPrediction | null;
+  previousPrediction: AIPrediction | null;
+  history: AIPrediction[];
+  lastUpdated: string;
+  rule: UserRule | null;
+  loading: boolean;
+}
+
+// --- Sub-Components ---
+
 function TacticalBriefDrawer({ 
-  isOpen, 
-  onClose, 
-  data, 
-  userPos 
-}: { 
-  isOpen: boolean; 
-  onClose: () => void; 
-  data: TacticalData;
-  userPos: 'holding' | 'empty' | 'none';
-}) {
+  isOpen, onClose, data, userPos 
+}: { isOpen: boolean; onClose: () => void; data: TacticalData; userPos: 'holding' | 'empty' | 'none'; }) {
   if (!isOpen || !data) return null;
-
   const tactics = data.tactics?.[userPos === 'none' ? 'empty' : userPos] || [];
-
   return (
     <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
-      <div 
-        className="fixed inset-0" 
-        onClick={onClose} 
-      />
+      <div className="fixed inset-0" onClick={onClose} />
       <div className="w-full max-w-md bg-[#0a0a0f] border-t border-white/10 rounded-t-[32px] p-8 pb-12 shadow-[0_-20px_50px_rgba(0,0,0,0.5)] animate-in slide-in-from-bottom-20 duration-500 relative z-10">
         <div className="w-12 h-1 bg-white/10 rounded-full mx-auto mb-6" />
-        
         <header className="flex items-center justify-between mb-8">
           <div>
             <span className="text-xs uppercase tracking-[0.3em] text-slate-500 font-bold">智能决策核心</span>
@@ -68,21 +62,17 @@ function TacticalBriefDrawer({
             <CloseIcon size={20} />
           </button>
         </header>
-
         <div className="space-y-8">
           <section>
             <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" /> 
-              当前场景建议 ({userPos === 'holding' ? '已持仓' : '未建仓'})
+              <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" /> 当前场景建议 ({userPos === 'holding' ? '已持仓' : '未建仓'})
             </h3>
             <div className="space-y-3">
-              {(tactics as Tactic[]).map((t, idx) => (
+              {tactics.map((t, idx) => (
                 <div key={idx} className="glass-card p-4 border-white/5 bg-white/[0.02]">
                   <div className="flex items-center gap-2 mb-2">
-                    <span className={`text-xs font-black px-1.5 py-0.5 rounded italic ${
-                      t.p === 'P1' ? 'bg-indigo-500 text-white' : 'bg-slate-700 text-slate-300'
-                    }`}>{t.p}</span>
-                    <span className="text-sm font-bold text-white content-start">{t.a}</span>
+                    <span className={`text-xs font-black px-1.5 py-0.5 rounded italic ${t.p === 'P1' ? 'bg-indigo-500 text-white' : 'bg-slate-700 text-slate-300'}`}>{t.p}</span>
+                    <span className="text-sm font-bold text-white">{t.a}</span>
                   </div>
                   <p className="text-xs text-slate-400 mb-1">触发: <span className="text-slate-200">{t.c}</span></p>
                   <p className="text-xs text-slate-500 font-medium italic">理由: {t.r}</p>
@@ -90,14 +80,9 @@ function TacticalBriefDrawer({
               ))}
             </div>
           </section>
-
           <section className="p-4 rounded-2xl bg-indigo-500/5 border border-indigo-500/10">
-            <h3 className="text-xs font-black text-indigo-400 uppercase tracking-widest mb-2 flex items-center gap-2">
-              <Info size={12} /> 核心冲突处理原则
-            </h3>
-            <p className="text-sm text-indigo-300/70 leading-relaxed italic">
-              {data.conflict || "遵循趋势优先原则，在信号矛盾时以核心支撑位为准。"}
-            </p>
+            <h3 className="text-xs font-black text-indigo-400 uppercase tracking-widest mb-2 flex items-center gap-2"><Info size={12} /> 核心冲突处理原则</h3>
+            <p className="text-sm text-indigo-300/70 leading-relaxed italic">{data.conflict || "遵循趋势优先原则。"}</p>
           </section>
         </div>
       </div>
@@ -105,259 +90,408 @@ function TacticalBriefDrawer({
   );
 }
 
-function DashboardContent() {
-  const searchParams = useSearchParams();
-  const urlSymbol = searchParams.get('symbol');
-  const symbol = urlSymbol || '02171';
-  
-  const [price, setPrice] = useState<DailyPrice | null>(null);
-  const [prediction, setPrediction] = useState<AIPrediction | null>(null);
-  const [previousPrediction, setPreviousPrediction] = useState<AIPrediction | null>(null);
-  const [rule, setRule] = useState<UserRule | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [showTactics, setShowTactics] = useState(false);
-  const [lastUpdated, setLastUpdated] = useState<string>('--:--');
+function StockDashboardCard({ data, onShowTactics }: { data: StockData, onShowTactics: () => void }) {
+  if (data.loading || !data.price) return <div className="h-full w-full flex items-center justify-center"><Zap className="w-12 h-12 text-slate-800 animate-pulse" /></div>;
 
-  const loadData = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/stock?symbol=${symbol}`);
-      const data = await res.json();
-      if (data.price) setPrice(data.price);
-      if (data.prediction) setPrediction(data.prediction);
-      if (data.previousPrediction) setPreviousPrediction(data.previousPrediction);
-      if (data.last_update_time) setLastUpdated(data.last_update_time);
-    } catch (e) {
-      console.error(e);
-    }
-    setLoading(false);
-  }, [symbol]);
-
-  useEffect(() => {
-    loadData();
-    setRule(getRule(symbol));
-
-    // 每 10 分钟自动刷新一次 (600,000 ms)
-    const interval = setInterval(() => {
-      loadData();
-    }, 10 * 60 * 1000);
-
-    return () => clearInterval(interval);
-  }, [symbol, loadData]);
-
-  const reviews = price ? getIndicatorReviews(price) : [];
-  const signalGlow = prediction?.signal === 'Long' ? 'glow-up' : 
-                     prediction?.signal === 'Short' ? 'glow-down' : 'glow-hold';
-
-  // 计算是否跌破预警线
-  const isTriggered = price && prediction?.support_price && price.close < prediction.support_price;
+  const reviews = getIndicatorReviews(data.price);
+  const isTriggered = data.prediction?.support_price && data.price.close < data.prediction.support_price;
 
   return (
-    <div className="relative min-h-screen overflow-hidden flex flex-col items-center">
-      {/* 动态背景辉光 */}
-      <div className={`hero-glow ${signalGlow}`} />
-
-      <div className="w-full max-w-md px-6 pt-8 pb-32 z-10">
-        {/* Header */}
-        <header className="flex items-center justify-between mb-10">
-          <div className="flex flex-col">
-            <span className="text-xs uppercase tracking-[0.3em] text-slate-500 font-bold">智能决策核心</span>
-            <h1 className="text-2xl font-black italic tracking-tighter">STOCKWISE <span className="text-indigo-500 underline decoration-2 underline-offset-4">X</span></h1>
+    <div className="h-full w-full flex flex-col items-center justify-center px-6 snap-start pt-16 pb-24">
+      <div className="w-full max-w-md space-y-8">
+        {/* 1. AI 顶层核心结论 */}
+        <section className="text-center space-y-2 py-4">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-ping" />
+            <span className="text-[10px] font-bold text-slate-400 tracking-wider uppercase">AI 实时监控 ({data.lastUpdated})</span>
           </div>
-          <div className="flex gap-3">
-            <button onClick={() => setSettingsOpen(true)} className="p-2.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-all active:scale-90">
-              <Settings className="w-4 h-4 text-slate-400" />
-            </button>
-            <button onClick={loadData} className="p-2.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-all active:scale-90">
-              <RefreshCw className={`w-4 h-4 text-slate-400 ${loading ? 'animate-spin' : ''}`} />
-            </button>
+          <h2 className="text-4xl font-black tracking-tighter" style={{ 
+            color: data.prediction?.signal === 'Long' ? COLORS.up : data.prediction?.signal === 'Short' ? COLORS.down : COLORS.hold 
+          }}>
+            {data.prediction?.signal === 'Long' ? '强烈看多' : data.prediction?.signal === 'Short' ? '建议避灾' : '持仓观望'}
+          </h2>
+          <div className="flex items-center justify-center gap-4 text-xs font-medium text-slate-500">
+            <span className="flex items-center gap-1 uppercase tracking-widest"><Target className="w-3 h-3" /> 置信度 {((data.prediction?.confidence || 0) * 100).toFixed(0)}%</span>
+            <span className="w-1 h-1 rounded-full bg-slate-700" />
+            <span className="uppercase tracking-widest italic">{data.symbol}.HK</span>
           </div>
-        </header>
+        </section>
 
-        {loading ? (
-          <div className="space-y-6">
-            <div className="glass-card h-64 animate-pulse" />
-            <div className="glass-card h-32 animate-pulse" />
-          </div>
-        ) : price ? (
-          <div className="space-y-8">
-            {/* 1. AI 顶层核心结论 */}
-            <section className="text-center space-y-2 py-4">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-2">
-                <span className={`w-1.5 h-1.5 rounded-full ${loading ? 'bg-indigo-400 animate-spin' : 'bg-indigo-500 animate-ping'}`} />
-                <span className="text-[10px] font-bold text-slate-400 tracking-wider uppercase">
-                  {loading ? '同步中...' : `AI 实时监控 (最后更新: ${lastUpdated})`}
-                </span>
-              </div>
-              <h2 className="text-4xl font-black tracking-tighter" style={{ 
-                color: prediction?.signal === 'Long' ? COLORS.up : 
-                       prediction?.signal === 'Short' ? COLORS.down : COLORS.hold 
-              }}>
-                {prediction?.signal === 'Long' ? '强烈看多' : 
-                 prediction?.signal === 'Short' ? '建议避灾' : '持仓观望'}
-              </h2>
-              <div className="flex items-center justify-center gap-4 text-xs font-medium text-slate-500">
-                <span className="flex items-center gap-1 uppercase tracking-widest"><Target className="w-3 h-3" /> 置信度 {((prediction?.confidence || 0) * 100).toFixed(0)}%</span>
-                <span className="w-1 h-1 rounded-full bg-slate-700" />
-                <span className="uppercase tracking-widest italic">{symbol}.HK</span>
-              </div>
-            </section>
-
-            {/* 2. 当前价格与 AI 理由 (Glass Card) */}
-            <section 
-              onClick={() => setShowTactics(true)}
-              className={`glass-card relative overflow-hidden group cursor-pointer active:scale-[0.98] transition-all hover:bg-white/[0.04] ${isTriggered ? 'warning-pulse' : ''}`}
-            >
-               {/* 理由 */}
-              <div className="relative z-10">
-                <div className="flex items-start gap-4 mb-6">
-                  <div className="w-10 h-10 rounded-2xl bg-indigo-600/20 flex items-center justify-center shrink-0 border border-indigo-500/30 ai-pulse">
-                    <Zap className="w-5 h-5 text-indigo-400 fill-indigo-400/20" />
-                  </div>
-                  <div>
-                    <h3 className="text-xs font-bold text-slate-500 uppercase tracking-tight mb-1">AI 深度洞察</h3>
-                    <div className="space-y-3">
-                      {(() => {
-                        try {
-                          const data = JSON.parse(prediction?.ai_reasoning || '') as TacticalData;
-                          const userPos = rule?.position === 'holding' ? 'holding' : 'empty';
-                          const p1 = data.tactics?.[userPos]?.[0];
-                          
-                          return (
-                            <>
-                              <p className="text-sm leading-relaxed text-slate-200 font-medium">
-                                &quot;{data.summary || prediction?.ai_reasoning}&quot;
-                              </p>
-                              {p1 && (
-                                <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-indigo-500/10 border border-indigo-500/20">
-                                  <span className="text-xs font-black bg-indigo-500 text-white px-1.5 py-0.5 rounded italic">P1</span>
-                                  <span className="text-xs font-bold text-indigo-400">{p1.a}:</span>
-                                  <span className="text-xs text-slate-300 font-medium">{p1.c}</span>
-                                </div>
-                              )}
-                            </>
-                          );
-                        } catch {
-                          return (
-                            <p className="text-sm leading-relaxed text-slate-200 font-medium">
-                              &quot;{prediction?.ai_reasoning || '正在评估当下市场波动与技术面共振程度...'}&quot;
-                            </p>
-                          );
-                        }
-                      })()}
-                    </div>
-                    <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <ChevronRight className="w-4 h-4 text-slate-600" />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 py-4 border-t border-white/5">
-                  <div>
-                    <span className="text-xs text-slate-500 uppercase font-black tracking-widest block mb-1">当前成交价</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-2xl font-black mono">{price.close.toFixed(2)}</span>
-                      <span className="text-xs font-bold px-1.5 py-0.5 rounded bg-white/5" style={{ color: price.change_percent >= 0 ? COLORS.up : COLORS.down }}>
-                        {price.change_percent >= 0 ? '+' : ''}{price.change_percent.toFixed(2)}%
-                      </span>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-xs text-slate-500 uppercase font-black tracking-widest block mb-1">昨日验证</span>
-                    <div className="flex items-center justify-end gap-1.5 mt-1">
-                      {previousPrediction?.validation_status === 'Correct' ? (
-                        <span className="text-emerald-500 flex items-center gap-1 text-sm font-bold"><ShieldCheck className="w-4 h-4" /> 结果准确</span>
-                      ) : previousPrediction?.validation_status === 'Incorrect' ? (
-                        <span className="text-rose-500 text-sm font-bold">❌ 偏差回顾</span>
-                      ) : previousPrediction?.validation_status === 'Neutral' ? (
-                        <span className="text-amber-500 text-sm font-bold">观望中性</span>
-                      ) : (
-                        <span className="text-slate-500 text-sm font-bold italic">待验证</span>
-                      )}
-                    </div>
-                  </div>
+        {/* 2. 当前价格与 AI 理由 */}
+        <section 
+          onClick={onShowTactics}
+          className={`glass-card relative overflow-hidden group cursor-pointer active:scale-[0.98] transition-all hover:bg-white/[0.04] ${isTriggered ? 'warning-pulse' : ''}`}
+        >
+          <div className="relative z-10 p-6">
+            <div className="flex items-start gap-4 mb-6">
+              <div className="w-10 h-10 rounded-2xl bg-indigo-600/20 flex items-center justify-center shrink-0 border border-indigo-500/30 ai-pulse"><Zap className="w-5 h-5 text-indigo-400 fill-indigo-400/20" /></div>
+              <div className="flex-1">
+                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-tight mb-1">AI 深度洞察</h3>
+                <div className="space-y-3">
+                  {(() => {
+                    try {
+                      const tData = JSON.parse(data.prediction?.ai_reasoning || '') as TacticalData;
+                      const userPos = data.rule?.position === 'holding' ? 'holding' : 'empty';
+                      const p1 = tData.tactics?.[userPos]?.[0];
+                      return (
+                        <>
+                          <p className="text-sm leading-relaxed text-slate-200 font-medium italic">&quot;{tData.summary || data.prediction?.ai_reasoning}&quot;</p>
+                          {p1 && <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-indigo-500/10 border border-indigo-500/20">
+                            <span className="text-xs font-black bg-indigo-500 text-white px-1.5 py-0.5 rounded italic">P1</span>
+                            <span className="text-xs font-bold text-indigo-400">{p1.a}:</span>
+                            <span className="text-xs text-slate-300 font-medium">{p1.c}</span>
+                          </div>}
+                        </>
+                      );
+                    } catch {
+                      return <p className="text-sm leading-relaxed text-slate-200 font-medium italic">&quot;{data.prediction?.ai_reasoning || '正在评估当下市场波动...'}&quot;</p>;
+                    }
+                  })()}
                 </div>
               </div>
-            </section>
-
-            {/* 3. 辅助决策信息 */}
-            <section className="grid grid-cols-2 gap-4">
-               <div className="glass-card p-4 flex flex-col justify-between">
-                  <span className="text-xs text-slate-500 font-bold uppercase">
-                    {rule?.position === 'holding' ? '卖出预警线' : 
-                     rule?.position === 'empty' ? '入场观察位' : '建议止损/支撑'}
+            </div>
+            <div className="grid grid-cols-2 gap-4 py-4 border-t border-white/5">
+              <div>
+                <span className="text-xs text-slate-500 uppercase font-black tracking-widest block mb-1">当前成交价</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl font-black mono">{data.price.close.toFixed(2)}</span>
+                  <span className="text-xs font-bold px-1.5 py-0.5 rounded bg-white/5" style={{ color: data.price.change_percent >= 0 ? COLORS.up : COLORS.down }}>
+                    {data.price.change_percent >= 0 ? '+' : ''}{data.price.change_percent.toFixed(2)}%
                   </span>
-                  <p className="text-2xl font-black mono text-rose-500 mt-2">
-                    {prediction?.support_price?.toFixed(2) || rule?.support_price?.toFixed(2) || '--'}
-                  </p>
-               </div>
-               <div className="glass-card p-4 flex flex-col justify-between">
-                  <span className="text-xs text-slate-500 font-bold uppercase">市场情绪 (RSI)</span>
-                  <div className="flex items-baseline gap-2 mt-2">
-                    <p className="text-2xl font-black mono">{price.rsi.toFixed(0)}</p>
-                    <span className="text-xs font-bold px-1.5 py-0.5 rounded-full bg-white/5 text-slate-400">
-                      {price.rsi > 70 ? '超买' : price.rsi < 30 ? '超卖' : '运行稳健'}
-                    </span>
-                  </div>
-               </div>
-            </section>
-
-            {/* 4. 技术状态微型列表 */}
-            <section className="space-y-3 px-2">
-              <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
-                <div className="w-2 h-1 bg-indigo-500 rounded-full" /> 技术状态自检
-              </h4>
-              <div className="flex flex-wrap gap-2">
-                {reviews.slice(0, 4).map(review => (
-                  <div key={review.label} className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/5 text-xs font-bold">
-                    <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: COLORS[review.status as keyof typeof COLORS] || COLORS.hold }} />
-                    <span className="text-slate-300">{review.label}</span>
-                    <span className="text-slate-600">{review.status === 'up' ? '↗' : review.status === 'down' ? '↘' : '→'}</span>
-                  </div>
-                ))}
+                </div>
               </div>
-            </section>
+              <div className="text-right">
+                <span className="text-xs text-slate-500 uppercase font-black tracking-widest block mb-1">昨日验证</span>
+                <div className="flex items-center justify-end gap-1.5 mt-1 font-bold text-sm">
+                  {data.previousPrediction?.validation_status === 'Correct' ? <span className="text-emerald-500 flex items-center gap-1"><ShieldCheck className="w-4 h-4" /> 结果准确</span> :
+                   data.previousPrediction?.validation_status === 'Incorrect' ? <span className="text-rose-500 text-sm">❌ 偏差回顾</span> : <span className="text-slate-500 italic">待验证</span>}
+                </div>
+              </div>
+            </div>
           </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center py-20 text-slate-500">
-            <Zap className="w-12 h-12 mb-4 opacity-20" />
-            <p className="text-sm font-medium">未能捕获到行情数据</p>
-            <button onClick={loadData} className="mt-4 text-xs font-bold underline">重试抓取</button>
+        </section>
+
+        {/* 3. 底部微型列表 */}
+        <section className="grid grid-cols-2 gap-4">
+           <div className="glass-card p-4 flex flex-col justify-between">
+              <span className="text-[10px] text-slate-500 font-bold uppercase">{data.rule?.position === 'holding' ? '卖出预警线' : '建议支撑'}</span>
+              <p className="text-2xl font-black mono text-rose-500 mt-2">{data.prediction?.support_price?.toFixed(2) || '--'}</p>
+           </div>
+           <div className="glass-card p-4 flex flex-col justify-between">
+              <span className="text-[10px] text-slate-500 font-bold uppercase">市场情绪 (RSI)</span>
+              <div className="flex items-baseline gap-2 mt-2">
+                <p className="text-2xl font-black mono">{data.price.rsi.toFixed(0)}</p>
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-white/5 text-slate-400">{data.price.rsi > 70 ? '超买' : data.price.rsi < 30 ? '超卖' : '运行稳健'}</span>
+              </div>
+           </div>
+        </section>
+
+        <div className="flex flex-col items-center gap-2 pt-4 opacity-20 group">
+          <span className="text-[10px] font-black tracking-widest text-slate-500 uppercase">上划追溯历史轨迹</span>
+          <ChevronDown className="w-4 h-4 animate-bounce" />
+        </div>
+      </div>
+    </div>
+  );
+}
+function HistoricalCard({ data }: { data: AIPrediction }) {
+  const isUp = data.signal === 'Long';
+  const isDown = data.signal === 'Short';
+  
+  // 尝试解析 JSON 理由
+  let displayReason = data.ai_reasoning;
+  try {
+    const parsed = JSON.parse(data.ai_reasoning);
+    displayReason = parsed.summary || data.ai_reasoning;
+  } catch (e) {
+    // 如果不是 JSON，则保持原样
+  }
+
+  return (
+    <div className="h-full w-full flex flex-col items-center justify-center px-6 snap-start">
+      <div className="w-full max-w-md glass-card p-8 border-white/5 relative overflow-hidden active:scale-[0.99] transition-transform">
+        <div className="flex items-center gap-3 mb-8">
+          <div className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-black text-slate-500 tracking-widest mono uppercase">
+            {data.date}
           </div>
-        )}
+          <div className="h-px flex-1 bg-white/5" />
+          <div className={`flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest ${
+            data.validation_status === 'Correct' ? 'text-emerald-500' : 'text-rose-500'
+          }`}>
+            {data.validation_status === 'Correct' ? <><ShieldCheck size={12} /> 准确</> : <><TrendingDown size={12} /> 偏离回顾</>}
+          </div>
+        </div>
 
-        <SettingsModal symbol={symbol} isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} onSave={() => {
-          setRule(getRule(symbol));
-          loadData();
-        }} />
+        <h3 className="text-3xl font-black italic mb-6 tracking-tighter" style={{ color: isUp ? COLORS.up : isDown ? COLORS.down : COLORS.hold }}>
+          {isUp ? '看多方向' : isDown ? '风险回避' : '持仓待机'}
+        </h3>
+        
+        <p className="text-base text-slate-300 leading-relaxed italic mb-10 font-medium">
+          &quot;{displayReason.length > 80 ? displayReason.slice(0, 80) + '...' : displayReason}&quot;
+        </p>
 
-        {(() => {
-          try {
-            const data = JSON.parse(prediction?.ai_reasoning || '') as TacticalData;
-            return (
-              <TacticalBriefDrawer 
-                isOpen={showTactics} 
-                onClose={() => setShowTactics(false)} 
-                data={data}
-                userPos={rule?.position || 'none'}
-              />
-            );
-          } catch {
-            return null;
-          }
-        })()}
-
-        <BottomNav />
+        <div className="grid grid-cols-2 pt-8 border-t border-white/5">
+           <div>
+              <span className="text-[10px] text-slate-500 font-bold uppercase block mb-1 tracking-widest">建议参考价</span>
+              <p className="text-2xl font-black mono text-white">{data.support_price?.toFixed(2) || '--'}</p>
+           </div>
+           <div className="text-right">
+              <span className="text-[10px] text-slate-500 font-bold uppercase block mb-1 tracking-widest">实盘变动</span>
+              <p className={`text-xl font-black mono ${data.actual_change && data.actual_change >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                {data.actual_change ? (data.actual_change >= 0 ? '+' : '') + data.actual_change.toFixed(2) + '%' : '已结算'}
+              </p>
+           </div>
+        </div>
       </div>
     </div>
   );
 }
 
+function StockProfile({ stock, isOpen, onClose }: { stock: StockData, isOpen: boolean, onClose: () => void }) {
+  const winCount = stock.history.filter(h => h.validation_status === 'Correct').length;
+  const totalCount = stock.history.filter(h => h.validation_status !== 'Pending').length;
+  const winRate = totalCount > 0 ? Math.round((winCount / totalCount) * 100) : 0;
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div 
+          initial={{ y: '100%' }}
+          animate={{ y: 0 }}
+          exit={{ y: '100%' }}
+          transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+          className="fixed inset-0 z-[200] bg-[#050508] p-6 flex flex-col pointer-events-auto"
+        >
+          <button onClick={onClose} className="mb-8 p-3 w-fit rounded-full bg-white/5 border border-white/10">
+            <CloseIcon className="w-5 h-5 text-slate-400" />
+          </button>
+          
+          <div className="flex items-center gap-4 mb-10">
+            <div className="w-16 h-16 rounded-[24px] bg-white/5 border border-white/10 flex items-center justify-center text-2xl font-black italic text-indigo-500">
+              {stock.symbol.slice(-2)}
+            </div>
+            <div>
+              <h2 className="text-2xl font-black italic tracking-tighter text-white">{stock.name}</h2>
+              <p className="text-xs text-slate-500 font-bold tracking-widest uppercase">{stock.symbol}.HK · 统计档案</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 mb-8">
+            <div className="glass-card p-4 text-center">
+              <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest block mb-2">历史胜率</span>
+              <p className="text-3xl font-black mono text-emerald-500">{winRate}%</p>
+            </div>
+            <div className="glass-card p-4 text-center">
+              <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest block mb-2">累计验证</span>
+              <p className="text-3xl font-black mono text-white">{totalCount}</p>
+            </div>
+          </div>
+
+          <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 px-2">复盘矩阵 (最近 30 天)</h3>
+          <div className="grid grid-cols-4 gap-2 overflow-y-auto overflow-x-hidden">
+            {stock.history.map((h, i) => (
+              <div 
+                key={i} 
+                className={`aspect-square rounded-xl border border-white/5 flex items-center justify-center text-[10px] font-black ${
+                  h.validation_status === 'Correct' ? 'bg-emerald-500/10 text-emerald-500/50' : 
+                  h.validation_status === 'Incorrect' ? 'bg-rose-500/10 text-rose-500/50' : 'bg-white/5 text-slate-700'
+                }`}
+              >
+                {h.date.split('-').slice(1).join('/')}
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+// --- Main Page ---
+
+function DashboardPageContent() {
+  const [stocks, setStocks] = useState<StockData[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [loadingPool, setLoadingPool] = useState(true);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [showTactics, setShowTactics] = useState<string | null>(null);
+  const [profileStock, setProfileStock] = useState<StockData | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const loadAllData = useCallback(async () => {
+    const user = await getCurrentUser();
+    if (!user) return;
+
+    try {
+      const poolRes = await fetch(`/api/stock-pool?userId=${user.userId}`);
+      const poolData = await poolRes.json();
+      const watchlist = poolData.stocks || [{ symbol: '02171', name: '科济药业' }];
+
+      const initialStocks = watchlist.map((s: any) => ({
+        symbol: s.symbol,
+        name: s.name,
+        price: null, prediction: null, previousPrediction: null, history: [],
+        lastUpdated: '--:--', rule: getRule(s.symbol), loading: true
+      }));
+      setStocks(initialStocks);
+      setLoadingPool(false);
+
+      // 并行请求每只股票的数据
+      initialStocks.forEach(async (stock: any, idx: number) => {
+        try {
+          const [stockRes, historyRes] = await Promise.all([
+            fetch(`/api/stock?symbol=${stock.symbol}`),
+            fetch(`/api/predictions?symbol=${stock.symbol}&limit=5`)
+          ]);
+          const sData = await stockRes.json();
+          const hData = await historyRes.json();
+
+          setStocks(prev => prev.map(p => p.symbol === stock.symbol ? {
+            ...p,
+            price: sData.price,
+            prediction: sData.prediction,
+            previousPrediction: sData.previousPrediction,
+            lastUpdated: sData.last_update_time || '--:--',
+            history: hData.predictions || [],
+            loading: false
+          } : p));
+        } catch (e) {
+          console.error(`Failed to load ${stock.symbol}`, e);
+        }
+      });
+    } catch (e) {
+      console.error(e);
+      setLoadingPool(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadAllData();
+    const interval = setInterval(loadAllData, 10 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [loadAllData]);
+
+  const handleScroll = () => {
+    if (!scrollRef.current) return;
+    const scrollLeft = scrollRef.current.scrollLeft;
+    const width = scrollRef.current.clientWidth;
+    const newIndex = Math.round(scrollLeft / width);
+    if (newIndex !== currentIndex) setCurrentIndex(newIndex);
+  };
+
+  if (loadingPool) return <div className="min-h-screen bg-[#050508] flex items-center justify-center text-slate-500 text-xs font-bold tracking-widest animate-pulse">核心系统初始化中...</div>;
+
+  const currentStock = stocks[currentIndex];
+
+  return (
+    <main className="fixed inset-0 bg-[#050508] text-white overflow-hidden select-none font-sans">
+      {/* 动态背景辉光 */}
+      <AnimatePresence>
+        <motion.div 
+          key={currentIndex}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 pointer-events-none"
+          style={{ 
+            backgroundColor: currentStock?.prediction?.signal === 'Long' ? '#6366f1' : 
+                            currentStock?.prediction?.signal === 'Short' ? '#f43f5e' : '#f59e0b',
+            filter: 'blur(150px)', scale: 1.5
+          }}
+        />
+      </AnimatePresence>
+
+      {/* Header */}
+      <header className="fixed top-0 left-0 right-0 z-[100] p-8 flex items-center justify-between pointer-events-none">
+        <div className="flex items-center gap-3 pointer-events-auto cursor-pointer group" onClick={() => setProfileStock(currentStock)}>
+          <div className="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center transition-all group-active:scale-95">
+             <div className="text-xs font-black italic text-indigo-500">{currentStock?.symbol.slice(-2)}</div>
+          </div>
+          <div>
+            <h1 className="text-sm font-black italic tracking-tighter group-hover:text-indigo-400 transition-colors">
+              {currentStock?.name || 'STOCKWISE'} 
+              <span className="text-[10px] ml-2 text-slate-600 mono font-bold not-italic">{currentStock?.symbol}</span>
+            </h1>
+          </div>
+        </div>
+        <div className="flex gap-4 pointer-events-auto">
+           <button onClick={() => setSettingsOpen(true)} className="p-2.5 rounded-full bg-white/5 border border-white/10 active:scale-90"><Settings className="w-4 h-4 text-slate-400" /></button>
+        </div>
+      </header>
+
+      {/* X轴 监控容器 (Weather Mode) */}
+      <div 
+        ref={scrollRef}
+        onScroll={handleScroll}
+        className="h-full w-full flex overflow-x-scroll snap-x snap-mandatory scrollbar-hide"
+      >
+        {stocks.map((stock) => (
+          <div key={stock.symbol} className="min-w-full h-full snap-center overflow-y-scroll snap-y snap-mandatory scrollbar-hide">
+            {/* Y轴 垂直内容 (TikTok Mode) */}
+            <StockDashboardCard data={stock} onShowTactics={() => setShowTactics(stock.symbol)} />
+            {stock.history.slice(1).map((h, i) => <HistoricalCard key={i} data={h} />)}
+          </div>
+        ))}
+      </div>
+
+      {/* 底部导航 */}
+      <footer className="fixed bottom-0 left-0 right-0 p-10 flex flex-col items-center gap-6 z-[100] pointer-events-none">
+        <div className="flex gap-2">
+          {stocks.map((_, idx) => (
+            <div key={idx} className={`h-1 rounded-full transition-all duration-300 ${idx === currentIndex ? 'w-6 bg-white' : 'w-1 bg-white/20'}`} />
+          ))}
+        </div>
+        <div className="w-full max-w-xs flex justify-between items-center pointer-events-auto">
+           <Link href="/stock-pool" className="flex flex-col items-center gap-1 group">
+              <div className="p-3 rounded-full bg-white/5 border border-white/10 group-active:scale-90 transition-all"><Grid className="w-5 h-5 text-slate-400" /></div>
+              <span className="text-[8px] font-black uppercase tracking-widest text-slate-600">股票池</span>
+           </Link>
+           <div className="bg-indigo-500/10 border border-indigo-500/20 px-8 py-3 rounded-full"><span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400">智能决策核心</span></div>
+           <div className="w-11" />
+        </div>
+      </footer>
+
+      {/* Modals & Drawers */}
+      <SettingsModal 
+        symbol={currentStock?.symbol || '02171'} 
+        isOpen={settingsOpen} 
+        onClose={() => setSettingsOpen(false)} 
+        onSave={() => loadAllData()} 
+      />
+      <StockProfile 
+        stock={profileStock || stocks[0]} 
+        isOpen={!!profileStock} 
+        onClose={() => setProfileStock(null)} 
+      />
+
+      {stocks.map(s => {
+        try {
+          const tData = JSON.parse(s.prediction?.ai_reasoning || '') as TacticalData;
+          return <TacticalBriefDrawer 
+            key={s.symbol} 
+            isOpen={showTactics === s.symbol} 
+            onClose={() => setShowTactics(null)} 
+            data={tData} 
+            userPos={s.rule?.position || 'none'} 
+          />
+        } catch { return null; }
+      })}
+
+      <style jsx global>{`
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        .glass-card { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 32px; }
+        @keyframes warning-pulse { 0%, 100% { border-color: rgba(255, 255, 255, 0.05); } 50% { border-color: rgba(244, 63, 94, 0.3); background: rgba(244, 63, 94, 0.02); } }
+        .warning-pulse { animation: warning-pulse 2s infinite; }
+      `}</style>
+    </main>
+  );
+}
+
 export default function DashboardPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#050508] flex items-center justify-center text-slate-500 text-xs font-bold tracking-widest">正在初始化核心系统...</div>}>
-      <DashboardContent />
+    <Suspense fallback={null}>
+      <DashboardPageContent />
     </Suspense>
   );
 }
