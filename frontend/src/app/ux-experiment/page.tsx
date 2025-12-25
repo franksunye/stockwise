@@ -279,20 +279,20 @@ export default function UXExperiment() {
         </div>
 
         {/* 底部功能栏 */}
-        <div className="w-full max-w-xs flex justify-between pointer-events-auto">
+        <div className="w-full max-w-xs flex justify-between items-center pointer-events-auto">
            <button className="flex flex-col items-center gap-1 group">
               <div className="p-3 rounded-full bg-white/5 border border-white/10 group-active:scale-90 transition-all">
                 <Grid className="w-5 h-5 text-slate-400" />
               </div>
+              <span className="text-[8px] font-black uppercase tracking-widest text-slate-600 group-hover:text-indigo-400 transition-colors">股票池</span>
            </button>
-           <button className="flex flex-col items-center gap-1 group bg-indigo-500/10 border border-indigo-500/20 px-8 py-3 rounded-full">
+           
+           <div className="bg-indigo-500/10 border border-indigo-500/20 px-8 py-3 rounded-full">
               <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400">智能决策核心</span>
-           </button>
-           <button className="flex flex-col items-center gap-1 group">
-              <div className="p-3 rounded-full bg-white/5 border border-white/10 group-active:scale-90 transition-all">
-                <History className="w-5 h-5 text-slate-400" />
-              </div>
-           </button>
+           </div>
+
+           {/* 右侧留空或放置微小的设置入口，保持极简感 */}
+           <div className="w-11" /> 
         </div>
       </footer>
 
