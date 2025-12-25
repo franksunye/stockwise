@@ -7,8 +7,23 @@ import {
   ChevronDown, History, Grid, ArrowLeft, Info, Menu
 } from 'lucide-react';
 
-// --- 1. Mock Data ---
-const MOCK_DATA = [
+// --- 1. Types & Mock Data ---
+interface HistoryRecord {
+  date: string;
+  signal: 'Long' | 'Short' | 'Side';
+  title: string;
+  reason: string;
+  support: number;
+}
+
+interface Stock {
+  symbol: string;
+  name: string;
+  color: string;
+  history: HistoryRecord[];
+}
+
+const MOCK_DATA: Stock[] = [
   {
     symbol: '02171',
     name: '科济药业-B',
@@ -44,7 +59,7 @@ const MOCK_DATA = [
 /**
  * 股票档案页 (Z-axis)
  */
-function StockProfile({ stock, isOpen, onClose }: { stock: any, isOpen: boolean, onClose: () => void }) {
+function StockProfile({ stock, isOpen, onClose }: { stock: Stock, isOpen: boolean, onClose: () => void }) {
   return (
     <AnimatePresence>
       {isOpen && (
@@ -81,7 +96,7 @@ function StockProfile({ stock, isOpen, onClose }: { stock: any, isOpen: boolean,
           </div>
 
           <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 px-2">复盘矩阵 (小方块)</h3>
-          <div className="grid grid-cols-4 gap-2 overflow-y-auto">
+          <div className="grid grid-cols-4 gap-2 overflow-y-auto overflow-x-hidden">
             {Array.from({ length: 24 }).map((_, i) => (
               <div 
                 key={i} 
@@ -102,7 +117,7 @@ function StockProfile({ stock, isOpen, onClose }: { stock: any, isOpen: boolean,
 /**
  * 单个跟踪信息卡片
  */
-function TacticalCard({ data, stockName, onProfileClick }: { data: any, stockName: string, onProfileClick: () => void }) {
+function TacticalCard({ data, stockName }: { data: HistoryRecord, stockName: string }) {
   const isUp = data.signal === 'Long';
   const isDown = data.signal === 'Short';
 
@@ -168,15 +183,14 @@ function TacticalCard({ data, stockName, onProfileClick }: { data: any, stockNam
 /**
  * 垂直信息流 (Y-axis - TikTok模式)
  */
-function VerticalFeed({ stock, onProfileClick }: { stock: any, onProfileClick: () => void }) {
+function VerticalFeed({ stock }: { stock: Stock }) {
   return (
     <div className="h-full w-full overflow-y-scroll snap-y snap-mandatory scrollbar-hide">
-      {stock.history.map((record: any, idx: number) => (
+      {stock.history.map((record: HistoryRecord, idx: number) => (
         <TacticalCard 
           key={idx} 
           data={record} 
           stockName={stock.name} 
-          onProfileClick={onProfileClick} 
         />
       ))}
     </div>
@@ -187,7 +201,7 @@ function VerticalFeed({ stock, onProfileClick }: { stock: any, onProfileClick: (
 
 export default function UXExperiment() {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [profileStock, setProfileStock] = useState<any>(null);
+  const [profileStock, setProfileStock] = useState<Stock | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // 处理横向滚动吸附后的索引更新
