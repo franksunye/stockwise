@@ -78,6 +78,9 @@ def generate_ai_prediction(symbol: str, today_data: pd.Series):
     }
     
     # 构建三层透明体验：推理链 (Reasoning Trace)
+    # 注意：需要将 numpy 类型转换为 Python 原生类型以支持 JSON 序列化
+    volume_int = int(today_data['volume']) if today_data.get('volume') else 0
+    
     reasoning_trace = [
         {
             "step": "trend",
@@ -91,8 +94,8 @@ def generate_ai_prediction(symbol: str, today_data: pd.Series):
         },
         {
             "step": "volume",
-            "data": f"今日成交 {int(today_data['volume']):,}",
-            "conclusion": "量能稳定" if today_data['volume'] > 1000000 else "缩量震荡"
+            "data": f"今日成交 {volume_int:,}",
+            "conclusion": "量能稳定" if volume_int > 1000000 else "缩量震荡"
         },
         {
             "step": "decision",
@@ -106,9 +109,9 @@ def generate_ai_prediction(symbol: str, today_data: pd.Series):
         "reasoning_trace": reasoning_trace,
         "tactics": tactics,
         "key_levels": {
-            "support": round(support_price, 3),
-            "resistance": round(ma20 * 1.05, 3),
-            "stop_loss": round(support_price * 0.97, 3)
+            "support": round(float(support_price), 3),
+            "resistance": round(float(ma20) * 1.05, 3),
+            "stop_loss": round(float(support_price) * 0.97, 3)
         },
         "conflict_resolution": "趋势优先（MA20） > 动能（RSI）",
         "tomorrow_focus": f"能否有效突破 {ma20:.2f} 并实现量比 > 1.2"
