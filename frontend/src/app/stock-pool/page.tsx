@@ -5,6 +5,7 @@ import { Plus, Trash2, ArrowLeft, TrendingUp, TrendingDown, Minus, LayoutGrid } 
 import { useRouter } from 'next/navigation';
 import { getCurrentUser, type User } from '@/lib/user';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getMarketScene } from '@/lib/date-utils';
 
 interface StockSnapshot {
   symbol: string;
@@ -26,6 +27,9 @@ export default function StockPoolPage() {
   const [stockToDelete, setStockToDelete] = useState<StockSnapshot | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  const scene = getMarketScene();
+  const isPreMarket = scene === 'pre_market';
+
   useEffect(() => {
     getCurrentUser().then(setUser);
   }, []);
@@ -37,7 +41,6 @@ export default function StockPoolPage() {
       const poolRes = await fetch(`/api/stock-pool?userId=${user.userId}`, { cache: 'no-store' });
       const poolData = await poolRes.json();
       const watchlist = poolData.stocks || [];
-      // 并行同步请求所有股票数据，大幅提升加载速度
       const stockDataPromises = watchlist.map(async (item: { symbol: string, name: string }) => {
         try {
           const res = await fetch(`/api/stock?symbol=${item.symbol}`, { cache: 'no-store' });
@@ -65,7 +68,6 @@ export default function StockPoolPage() {
 
   useEffect(() => { if (user) fetchStockData(); }, [user, fetchStockData]);
 
-  // Search Logic
   useEffect(() => {
     const timer = setTimeout(async () => {
       if (newSymbol.trim()) {
@@ -124,12 +126,18 @@ export default function StockPoolPage() {
     setIsDeleting(false);
   };
 
+  const getSignalMeta = (signal: string) => {
+    switch(signal) {
+      case 'Long': return { text: '建议做多', color: 'bg-emerald-500', iconColor: 'text-emerald-500', bgColor: 'bg-emerald-500/10 border-emerald-500/20' };
+      case 'Short': return { text: '建议避险', color: 'bg-rose-500', iconColor: 'text-rose-500', bgColor: 'bg-rose-500/10 border-rose-500/20' };
+      default: return { text: '建议观望', color: 'bg-amber-500', iconColor: 'text-amber-500', bgColor: 'bg-amber-500/10 border-amber-500/20' };
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-[#050508] text-white overflow-hidden flex flex-col font-sans">
-      {/* 动态背景 */}
       <div className="fixed inset-0 opacity-[0.03] pointer-events-none bg-indigo-500 blur-[120px] scale-150" />
 
-      {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-[100] p-8 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <button onClick={() => router.push('/')} className="p-2.5 rounded-full bg-white/5 border border-white/10 active:scale-90 transition-all">
@@ -145,7 +153,6 @@ export default function StockPoolPage() {
         </button>
       </header>
 
-      {/* Main Content Area */}
       <div className="flex-1 overflow-y-auto px-6 pt-32 pb-12 scrollbar-hide">
         <AnimatePresence>
           {showAdd && (
@@ -194,50 +201,56 @@ export default function StockPoolPage() {
               <p className="text-xs font-black uppercase tracking-widest">暂无资产</p>
             </div>
           ) : (
-            stocks.map(stock => (
-               <motion.div 
-                 key={stock.symbol}
-                 layout
-                 onClick={() => router.push(`/?symbol=${stock.symbol}`)}
-                 className="glass-card p-5 group hover:bg-white/[0.04] transition-all cursor-pointer relative"
-               >
-                 <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className={`w-14 h-14 rounded-[22px] flex items-center justify-center border-2 ${
-                        stock.aiSignal === 'Long' ? 'bg-emerald-500/10 border-emerald-500/20' : 
-                        stock.aiSignal === 'Short' ? 'bg-rose-500/10 border-rose-500/20' : 'bg-amber-500/10 border-amber-500/20'
-                      }`}>
-                         {stock.aiSignal === 'Long' ? <TrendingUp className="text-emerald-500" /> :
-                          stock.aiSignal === 'Short' ? <TrendingDown className="text-rose-500" /> : <Minus className="text-amber-500" />}
-                      </div>
-                      <div>
-                        <h3 className="text-base font-black italic tracking-tighter">{stock.name}</h3>
-                        <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest flex items-center gap-1.5 mt-0.5">
-                          <span className={`w-1 h-1 rounded-full ${stock.aiSignal === 'Long' ? 'bg-emerald-500' : stock.aiSignal === 'Short' ? 'bg-rose-500' : 'bg-amber-500'}`} />
-                          {stock.aiSignal === 'Long' ? '建议做多' : stock.aiSignal === 'Short' ? '警惕风险' : '观望中性'}
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-6">
-                      <div className="text-right">
-                        <p className="text-xl font-black mono tracking-tighter">
-                          {stock.price > 0 ? stock.price.toFixed(2) : '--.--'}
-                        </p>
-                        <p className={`text-[10px] font-black mono ${stock.change > 0 ? 'text-emerald-500' : stock.change < 0 ? 'text-rose-500' : 'text-slate-500'}`}>
-                          {stock.price > 0 ? `${stock.change >= 0 ? '+' : ''}${stock.change.toFixed(2)}%` : '数据同步中'}
-                        </p>
-                      </div>
-                      <button 
-                        onClick={(e) => handleRemoveClick(e, stock)}
-                        className="p-3 opacity-60 hover:opacity-100 transition-all text-slate-500 hover:text-rose-500 active:scale-75 z-20 relative"
-                      >
-                        <Trash2 size={20} />
-                      </button>
-                    </div>
-                 </div>
-               </motion.div>
-            ))
+            stocks.map(stock => {
+              const meta = getSignalMeta(stock.aiSignal);
+              return (
+                <motion.div 
+                  key={stock.symbol}
+                  layout
+                  onClick={() => router.push(`/?symbol=${stock.symbol}`)}
+                  className="glass-card p-5 group hover:bg-white/[0.04] transition-all cursor-pointer relative"
+                >
+                  <div className="flex items-center justify-between">
+                     <div className="flex items-center gap-4">
+                       <div className={`w-14 h-14 rounded-[22px] flex items-center justify-center border-2 ${meta.bgColor}`}>
+                          {stock.aiSignal === 'Long' ? <TrendingUp className={meta.iconColor} /> :
+                           stock.aiSignal === 'Short' ? <TrendingDown className={meta.iconColor} /> : <Minus className={meta.iconColor} />}
+                       </div>
+                       <div>
+                         <h3 className="text-base font-black italic tracking-tighter text-white">{stock.name}</h3>
+                         <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest flex items-center gap-1.5 mt-0.5">
+                           <span className={`w-1 h-1 rounded-full ${meta.color}`} />
+                           {meta.text}
+                         </p>
+                       </div>
+                     </div>
+                     
+                     <div className="flex items-center gap-6">
+                       <div className="text-right">
+                         {!isPreMarket ? (
+                           <>
+                             <p className="text-xl font-black mono tracking-tighter text-white">
+                               {stock.price > 0 ? stock.price.toFixed(2) : '--.--'}
+                             </p>
+                             <p className={`text-[10px] font-black mono ${stock.change > 0 ? 'text-emerald-500' : stock.change < 0 ? 'text-rose-500' : 'text-slate-500'}`}>
+                               {stock.price > 0 ? `${stock.change >= 0 ? '+' : ''}${stock.change.toFixed(2)}%` : '数据中'}
+                             </p>
+                           </>
+                         ) : (
+                           <p className="text-[10px] text-slate-600 font-black italic uppercase tracking-widest">盘前静默</p>
+                         )}
+                       </div>
+                       <button 
+                         onClick={(e) => { e.stopPropagation(); handleRemoveClick(e, stock); }}
+                         className="p-3 opacity-60 hover:opacity-100 transition-all text-slate-500 hover:text-rose-500 active:scale-75 z-20 relative"
+                       >
+                         <Trash2 size={20} />
+                       </button>
+                     </div>
+                  </div>
+                </motion.div>
+              );
+            })
           )}
         </div>
       </div>

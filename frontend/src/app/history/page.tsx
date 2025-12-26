@@ -109,7 +109,7 @@ function HistoryContent() {
                   <p className="text-xs font-bold uppercase tracking-widest" style={{ 
                     color: item.signal === 'Long' ? COLORS.up : item.signal === 'Short' ? COLORS.down : COLORS.hold 
                   }}>
-                    {item.signal === 'Long' ? '看多' : item.signal === 'Short' ? '看空' : '观望'}
+                    {item.signal === 'Long' ? '建议做多' : item.signal === 'Short' ? '建议避险' : '建议观望'}
                   </p>
                 </div>
               </div>
