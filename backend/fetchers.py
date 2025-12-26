@@ -65,45 +65,111 @@ def sync_stock_meta():
     except Exception as e:
         print(f"   ⚠️ 港股列表获取失败: {e}")
 
-    # 2. A 股列表 (多策略)
+    # 2. A 股列表 (分交易所独立获取，任一失败不影响其他)
+    print("   正在获取 A 股列表...")
+    cn_count = 0
+    
+    # 策略 A: 使用东财 HTTP API 获取全量沪深 A 股 (最稳定，覆盖 5000+ 只)
+    # 注意: API 服务端限制每页最多 100 条，需要分页获取
+    http_success = False
     try:
-        print("   正在获取 A 股列表...")
-        # 策略 A: 直接调用东财 HTTP 接口
+        url = "http://82.push2.eastmoney.com/api/qt/clist/get"
+        all_a_stocks = []
+        
+        # 沪深主板(m:0+t:6, m:1+t:2)，创业板(m:0+t:80)，科创板(m:1+t:23)
+        for fs_code in ["m:0+t:6,m:0+t:80", "m:1+t:2,m:1+t:23"]:
+            page = 1
+            while True:
+                params = {
+                    "pn": str(page), "pz": "100", "po": "1", "np": "1",
+                    "ut": "bd1d9ddb04089700cf9c27f6f7426281",
+                    "fltt": "2", "invt": "2", "fid": "f12",
+                    "fs": fs_code,
+                    "fields": "f12,f14"
+                }
+                resp = requests.get(url, params=params, timeout=15)
+                data = resp.json()
+                stocks = data.get("data", {}).get("diff", [])
+                if not stocks:
+                    break
+                all_a_stocks.extend(stocks)
+                total = data.get("data", {}).get("total", 0)
+                if page * 100 >= total:
+                    break
+                page += 1
+        
+        if all_a_stocks:
+            for s in all_a_stocks:
+                symbol = str(s.get("f12", ""))
+                name = str(s.get("f14", ""))
+                if symbol.isdigit() and len(symbol) == 6:
+                    py, abbr = get_pinyin_info(name)
+                    all_records.append((symbol, name, "CN", now_str, py, abbr))
+                    cn_count += 1
+            print(f"   ✅ [HTTP API] 沪深 A 股: {cn_count} 条")
+            http_success = True
+    except Exception as e_http:
+        print(f"   ⚠️ HTTP API 失败: {e_http}")
+
+    # 策略 B: 如果 HTTP 失败，使用 AkShare 分交易所获取 (每个独立容错)
+    if not http_success:
+        # B1: 上证主板
         try:
-            url = "http://82.push2.eastmoney.com/api/qt/clist/get"
-            params = {
-                "pn": "1", "pz": "6000", "po": "1", "np": "1", 
-                "ut": "bd1d9ddb04089700cf9c27f6f7426281",
-                "fltt": "2", "invt": "2", "fid": "f12",
-                "fs": "m:0+t:6,m:1+t:2,m:1+t:23,m:0+t:80",
-                "fields": "f12,f14"
-            }
-            resp = requests.get(url, params=params, timeout=10)
-            data = resp.json()
-            stocks = data.get("data", {}).get("diff", [])
-            if stocks:
-                for s in stocks:
-                    symbol = str(s["f12"])
-                    name = str(s["f14"])
-                    if symbol.isdigit():
-                        py, abbr = get_pinyin_info(name)
-                        all_records.append((symbol, name, "CN", now_str, py, abbr))
-                print(f"   ✅ 已通过 HTTP API 成功获取 {len(stocks)} 条 A 股全量元数据")
-        except Exception as e_http:
-            print(f"   ⚠️ HTTP 接口获取失败 ({e_http})，尝试 AkShare 接口...")
-            # 策略 B & C 的逻辑可以精简到这里
-            a_stocks = ak.stock_zh_a_spot_em()
-            if not a_stocks.empty:
-                s_col = "代码" if "代码" in a_stocks.columns else "symbol"
-                n_col = "名称" if "名称" in a_stocks.columns else "name"
-                for _, row in a_stocks.iterrows():
-                    symbol, name = str(row[s_col]), str(row[n_col])
-                    if symbol.isdigit():
-                        py, abbr = get_pinyin_info(name)
-                        all_records.append((symbol, name, "CN", now_str, py, abbr))
-                print(f"   ✅ 已通过 AkShare 获取 {len(a_stocks)} 条 A 股元数据")
+            sh_main = ak.stock_info_sh_name_code(symbol="主板A股")
+            for _, row in sh_main.iterrows():
+                symbol = str(row.get("证券代码", "")).strip()
+                name = str(row.get("证券简称", "")).strip()
+                if symbol.isdigit() and len(symbol) == 6:
+                    py, abbr = get_pinyin_info(name)
+                    all_records.append((symbol, name, "CN", now_str, py, abbr))
+                    cn_count += 1
+            print(f"   ✅ [AkShare] 上证主板: {len(sh_main)} 条")
+        except Exception as e:
+            print(f"   ⚠️ 上证主板获取失败: {e}")
+
+        # B2: 上证科创板
+        try:
+            sh_kcb = ak.stock_info_sh_name_code(symbol="科创板")
+            for _, row in sh_kcb.iterrows():
+                symbol = str(row.get("证券代码", "")).strip()
+                name = str(row.get("证券简称", "")).strip()
+                if symbol.isdigit() and len(symbol) == 6:
+                    py, abbr = get_pinyin_info(name)
+                    all_records.append((symbol, name, "CN", now_str, py, abbr))
+                    cn_count += 1
+            print(f"   ✅ [AkShare] 上证科创板: {len(sh_kcb)} 条")
+        except Exception as e:
+            print(f"   ⚠️ 上证科创板获取失败: {e}")
+
+        # B3: 深证 A 股 (含主板+创业板)
+        try:
+            sz_a = ak.stock_info_sz_name_code(symbol="A股列表")
+            for _, row in sz_a.iterrows():
+                symbol = str(row.get("A股代码", "")).strip()
+                name = str(row.get("A股简称", "")).strip()
+                if symbol.isdigit() and len(symbol) == 6:
+                    py, abbr = get_pinyin_info(name)
+                    all_records.append((symbol, name, "CN", now_str, py, abbr))
+                    cn_count += 1
+            print(f"   ✅ [AkShare] 深证A股: {len(sz_a)} 条")
+        except Exception as e:
+            print(f"   ⚠️ 深证A股获取失败: {e}")
+
+    # 策略 C: 北交所 (独立获取，因为经常有 SSL 问题)
+    try:
+        bj = ak.stock_info_bj_name_code()
+        for _, row in bj.iterrows():
+            symbol = str(row.get("证券代码", "")).strip()
+            name = str(row.get("证券简称", "")).strip()
+            if symbol.isdigit() and len(symbol) == 6:
+                py, abbr = get_pinyin_info(name)
+                all_records.append((symbol, name, "CN", now_str, py, abbr))
+                cn_count += 1
+        print(f"   ✅ [AkShare] 北交所: {len(bj)} 条")
     except Exception as e:
-        print(f"   ⚠️ A 股列表整体获取异常: {e}")
+        print(f"   ⚠️ 北交所获取失败 (可忽略，占比极小): {e}")
+
+    print(f"   📊 A 股合计: {cn_count} 条")
 
     if all_records:
         conn = get_connection()
