@@ -126,8 +126,15 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
                   <div className="text-right">
                     <span className="text-[10px] text-slate-600 uppercase font-black tracking-widest block mb-1">今日验证</span>
                     <div className="flex items-center justify-end gap-1.5 font-bold text-[11px]">
-                      {data.previousPrediction?.validation_status === 'Correct' ? <span className="text-emerald-500/80 flex items-center gap-1"><ShieldCheck size={12} /> 结果准确</span> :
-                       data.previousPrediction?.validation_status === 'Incorrect' ? <span className="text-rose-500/80">❌ 偏差回顾</span> : <span className="text-slate-600 italic">待验证</span>}
+                      {!data.previousPrediction ? (
+                        <span className="text-slate-600 italic">首日入池</span>
+                      ) : data.previousPrediction.validation_status === 'Correct' ? (
+                        <span className="text-emerald-500/80 flex items-center gap-1"><ShieldCheck size={12} /> 结果准确</span>
+                      ) : data.previousPrediction.validation_status === 'Incorrect' ? (
+                        <span className="text-rose-500/80">❌ 偏差回顾</span>
+                      ) : (
+                        <span className="text-slate-600 italic">待验证</span>
+                      )}
                     </div>
                   </div>
                 )}
