@@ -224,9 +224,8 @@ def sync_profiles(limit=20):
     # 注意: 我们优先更新那些已经被关注但还没有 industry 信息的股票
     try:
         # 获取关注列表 (Left join to check if profile exists)
-        # 假设 global_stock_pool 只有 symbol 字段，我们需要关联 stock_meta
         query = """
-            SELECT p.symbol, m.name 
+            SELECT p.symbol, m.name, m.market
             FROM global_stock_pool p
             JOIN stock_meta m ON p.symbol = m.symbol
             WHERE m.industry IS NULL OR m.industry = ''
@@ -243,29 +242,45 @@ def sync_profiles(limit=20):
         print(f"🔍 发现 {len(targets)} 只关注股票缺失概况信息，开始更新...")
         
         success_count = 0
-        for symbol, name in targets:
-            print(f"   Getting profile for {symbol} ({name})...")
+        for symbol, name, market in targets:
+            print(f"   Getting profile for {symbol} ({name}) [{market}]...")
             try:
-                # 尝试 A 股接口
-                df = ak.stock_profile_cninfo(symbol=symbol)
-                if not df.empty:
-                    record = df.iloc[0]
-                    industry = record.get("所属行业", "")
-                    main_bus = record.get("主营业务", "")
-                    # 处理科创板可能没有经营范围的情况，使用机构简介代替或结合
-                    desc = record.get("经营范围")
-                    intro = record.get("机构简介", "")
-                    
-                    if not desc or len(str(desc)) < 5:
-                        desc = intro
-                    else:
-                        # 如果简介也很长，可以截断或者只存经营范围
-                        pass 
+                industry = ""
+                main_bus = ""
+                desc = ""
+                
+                if market == "CN":
+                    # A 股接口
+                    df = ak.stock_profile_cninfo(symbol=symbol)
+                    if not df.empty:
+                        record = df.iloc[0]
+                        industry = record.get("所属行业", "")
+                        main_bus = record.get("主营业务", "")
+                        desc = record.get("经营范围")
+                        intro = record.get("机构简介", "")
+                        if not desc or len(str(desc)) < 5:
+                            desc = intro
+                
+                elif market == "HK":
+                    # 港股接口：公司资料 (包含所属行业和公司介绍)
+                    try:
+                        df_info = ak.stock_hk_company_profile_em(symbol=symbol)
+                        if not df_info.empty:
+                            record = df_info.iloc[0]
+                            # 调试发现: 港股接口的"所属行业"在公司资料里，不在证券资料里
+                            industry = record.get("所属行业", "")
+                            desc = record.get("公司介绍", "")
+                            # 港股没找到专门的主营业务字段，暂时为空
+                            main_bus = "" 
+                    except Exception as e_hk:
+                        print(f"     ⚠️ 港股接口异常: {e_hk}")
 
+                # 共有逻辑：更新数据库
+                if industry or main_bus or desc:
                     # 截断过长文本
-                    if desc and len(desc) > 500:
-                        desc = desc[:497] + "..."
-
+                    if desc and len(str(desc)) > 500:
+                        desc = str(desc)[:497] + "..."
+                    
                     cursor.execute("""
                         UPDATE stock_meta 
                         SET industry = ?, main_business = ?, description = ?
@@ -275,6 +290,7 @@ def sync_profiles(limit=20):
                     success_count += 1
                 else:
                     print(f"   ⚠️ 无数据: {symbol}")
+                    
             except Exception as e:
                 print(f"   ❌ 失败 {symbol}: {e}")
                 import time
