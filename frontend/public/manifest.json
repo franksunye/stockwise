@@ -2,7 +2,7 @@
     "name": "StockWise X",
     "short_name": "StockWise",
     "description": "智能炒股决策控制台",
-    "start_url": "/",
+    "start_url": "/dashboard",
     "display": "standalone",
     "background_color": "#050508",
     "theme_color": "#6366f1",

@@ -140,7 +140,7 @@ export default function StockPoolPage() {
 
       <header className="fixed top-0 left-0 right-0 z-[100] p-8 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <button onClick={() => router.push('/')} className="p-2.5 rounded-full bg-white/5 border border-white/10 active:scale-90 transition-all">
+          <button onClick={() => router.push('/dashboard')} className="p-2.5 rounded-full bg-white/5 border border-white/10 active:scale-90 transition-all">
             <ArrowLeft className="w-5 h-5 text-slate-400" />
           </button>
           <div className="flex flex-col">
@@ -207,7 +207,7 @@ export default function StockPoolPage() {
                 <motion.div 
                   key={stock.symbol}
                   layout
-                  onClick={() => router.push(`/?symbol=${stock.symbol}`)}
+                  onClick={() => router.push(`/dashboard?symbol=${stock.symbol}`)}
                   className="glass-card p-5 group hover:bg-white/[0.04] transition-all cursor-pointer relative"
                 >
                   <div className="flex items-center justify-between">

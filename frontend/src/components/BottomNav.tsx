@@ -7,9 +7,9 @@ import { ListFilter, LayoutDashboard, History } from 'lucide-react';
 export function BottomNav() {
   const pathname = usePathname();
   const links = [
-    { href: '/stock-pool', icon: ListFilter, label: '股票池' },
-    { href: '/', icon: LayoutDashboard, label: '决策' },
-    { href: '/history', icon: History, label: '复盘' },
+    { href: '/dashboard/stock-pool', icon: ListFilter, label: '股票池' },
+    { href: '/dashboard', icon: LayoutDashboard, label: '决策' },
+    { href: '/dashboard/history', icon: History, label: '复盘' },
   ];
 
   return (
