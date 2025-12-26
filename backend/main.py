@@ -215,58 +215,62 @@ def sync_stock_meta():
         except Exception as e:
             print(f"   ⚠️ 港股列表获取失败: {e}")
 
-        # 2. 获取 A 股列表 (分市场获取以提高稳定性)
+        # 2. 获取 A 股列表 (分层次尝试以提高稳定性)
         try:
             print("   正在获取 A 股列表...")
-            # 尝试通过 stock_info_a_code_name 获取全量 A 股 (含北交所)
+            # 策略 A: 尝试通过东财实时行情接口获取全量 (最稳定，包含 5000+ 股票)
             try:
-                a_stocks = ak.stock_info_a_code_name()
+                # 尝试关闭 SSL 验证提升稳定性
+                import requests
+                from urllib3.exceptions import InsecureRequestWarning
+                requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
+                os.environ['CURL_CA_BUNDLE'] = ''
+                os.environ['REQUESTS_CA_BUNDLE'] = ''
+                
+                a_stocks = ak.stock_zh_a_spot_em()
                 if not a_stocks.empty:
-                    symbol_col = "code" if "code" in a_stocks.columns else "代码"
-                    name_col = "name" if "name" in a_stocks.columns else "名称"
+                    symbol_col = "代码" if "代码" in a_stocks.columns else "symbol"
+                    name_col = "名称" if "名称" in a_stocks.columns else "name"
                     for _, row in a_stocks.iterrows():
                         symbol = str(row[symbol_col])
                         name = str(row[name_col])
                         if symbol.isdigit():
                             py, abbr = get_pinyin_info(name)
                             all_records.append((symbol, name, "CN", now_str, py, abbr))
-                    print(f"   已通过 A 股总表获取 {len(a_stocks)} 条元数据")
-            except Exception as e_a:
-                print(f"   ⚠️ A 股总表获取失败 ({e_a})，尝试分交易所获取...")
-                # 备选方案: 分交易所获取
-                for market_type in ["sh", "sz", "bj"]:
-                    try:
-                        if market_type == "sh": m_df = ak.stock_info_sh_name_code()
-                        elif market_type == "sz": m_df = ak.stock_info_sz_name_code(indicator="A股列表")
-                        else: m_df = ak.stock_info_bj_name_code()
-                        
-                        if not m_df.empty:
-                            # 灵活匹配代码列
-                            symbol_col = None
-                            for c in ["证券代码", "A股代码", "代码", "code"]:
-                                if c in m_df.columns:
-                                    symbol_col = c
-                                    break
+                    print(f"   ✅ 已成功获取 {len(a_stocks)} 条 A 股全量元数据")
+            except Exception as e_em:
+                print(f"   ⚠️ 全量列表获取失败 ({e_em})，尝试分交易所获取...")
+                # 策略 B: 分交易所获取备份
+                exchange_configs = [
+                    ("SH", ak.stock_info_sh_name_code, ["主板A股", "科创板"]),
+                    ("SZ", ak.stock_info_sz_name_code, ["A股列表"]),
+                    ("BJ", ak.stock_info_bj_name_code, [None]) # 北交所通常不带参数
+                ]
+                
+                for ex_name, func, symbols in exchange_configs:
+                    for sym in symbols:
+                        try:
+                            if sym: m_df = func(symbol=sym)
+                            else: m_df = func()
                             
-                            # 灵活匹配名称列
-                            name_col = None
-                            for c in ["证券简称", "A股简称", "名称", "name"]:
-                                if c in m_df.columns:
-                                    name_col = c
-                                    break
-                                    
-                            if symbol_col and name_col:
-                                for _, row in m_df.iterrows():
-                                    symbol = str(row[symbol_col]).strip()
-                                    name = str(row[name_col]).strip()
-                                    if symbol.isdigit():
-                                        py, abbr = get_pinyin_info(name)
-                                        all_records.append((symbol, name, "CN", now_str, py, abbr))
-                                print(f"   已获取 {market_type.upper()} 交易所 {len(m_df)} 条元数据")
-                            else:
-                                print(f"   ⚠️ {market_type.upper()} 交易所列名匹配失败: {m_df.columns.tolist()}")
-                    except Exception as e_m:
-                        print(f"   ⚠️ {market_type.upper()} 交易所获取失败: {e_m}")
+                            if not m_df.empty:
+                                # 灵活匹配代码列
+                                s_col = next((c for c in ["证券代码", "A股代码", "代码", "code"] if c in m_df.columns), None)
+                                # 灵活匹配名称列
+                                n_col = next((c for c in ["证券简称", "A股简称", "名称", "name"] if c in m_df.columns), None)
+                                        
+                                if s_col and n_col:
+                                    count = 0
+                                    for _, row in m_df.iterrows():
+                                        symbol = str(row[s_col]).strip()
+                                        name = str(row[n_col]).strip()
+                                        if symbol.isdigit():
+                                            py, abbr = get_pinyin_info(name)
+                                            all_records.append((symbol, name, "CN", now_str, py, abbr))
+                                            count += 1
+                                    print(f"   已从 {ex_name}:{sym or 'ALL'} 获取 {count} 条元数据")
+                        except Exception as e_m:
+                            print(f"   ⚠️ {ex_name}:{sym} 获取失败: {e_m}")
         except Exception as e:
             print(f"   ⚠️ A 股列表整体获取异常: {e}")
 
