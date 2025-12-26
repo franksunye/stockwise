@@ -145,7 +145,23 @@ def get_stock_pool():
     """从全局股票池获取需要同步的股票 (仅同步有人关注的股票)"""
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT symbol FROM global_stock_pool WHERE watchers_count > 0 ORDER BY watchers_count DESC")
-    stocks = [row[0] for row in cursor.fetchall()]
+    cursor.execute("""
+        SELECT symbol FROM global_stock_pool 
+        WHERE watchers_count > 0 
+        ORDER BY watchers_count DESC
+    """)
+    rows = cursor.fetchall()
     conn.close()
-    return stocks
+    return [row[0] for row in rows]
+
+def get_stock_profile(symbol: str):
+    """
+    获取股票的公司概况信息
+    返回: (industry, main_business, description) 或 None
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT industry, main_business, description FROM stock_meta WHERE symbol = ?", (symbol,))
+    row = cursor.fetchone()
+    conn.close()
+    return row

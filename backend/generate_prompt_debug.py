@@ -1,12 +1,10 @@
 import json
 import sqlite3
 from datetime import datetime
-from database import get_connection
+from database import get_connection, get_stock_profile
 
 def generate_full_prompt(symbol: str):
-    """
-    为你生成该股票的全量 LLM 提示词，可直接复制到 Gemini/DeepSeek Chat 界面。
-    """
+    # ... (no change) ...
     conn = get_connection()
     cursor = conn.cursor()
     
@@ -14,6 +12,20 @@ def generate_full_prompt(symbol: str):
     cursor.execute("SELECT name FROM stock_meta WHERE symbol = ?", (symbol,))
     name_row = cursor.fetchone()
     stock_name = name_row[0] if name_row else "未知股票"
+
+    # 1.1 获取公司概况 (Profile)
+    profile_row = get_stock_profile(symbol)
+    profile_section = ""
+    if profile_row:
+        industry, main_bus, desc = profile_row
+        main_bus_str = main_bus if main_bus else "暂无"
+        # 简介只要前 100 字，避免太长
+        desc_str = f"{desc[:100]}..." if desc else "暂无简介"
+        profile_section = f"""## 公司基本面 (Profile)
+- **行业**: {industry or '未知'}
+- **主营业务**: {main_bus_str}
+- **公司简介**: {desc_str}
+"""
     
     # 2. 获取最新行情和指标
     cursor.execute(f"""
@@ -271,6 +283,8 @@ def generate_full_prompt(symbol: str):
 - **名称**: {stock_name}
 - **代码**: {symbol}.HK
 - **日期**: {data['date']}
+
+{profile_section}
 
 ## 近10日行情走势 (Tactical)
 | 日期 | 开盘 | 最高 | 最低 | 收盘 | 涨跌幅 | 成交量 |
