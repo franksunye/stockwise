@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { X as CloseIcon, ShieldCheck, TrendingDown } from 'lucide-react';
+import { X as CloseIcon } from 'lucide-react';
 import { StockData } from '@/lib/types';
 
 interface StockProfileProps {

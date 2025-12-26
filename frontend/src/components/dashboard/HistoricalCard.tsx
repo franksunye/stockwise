@@ -17,7 +17,7 @@ export function HistoricalCard({ data }: HistoricalCardProps) {
   try {
     const parsed = JSON.parse(data.ai_reasoning);
     displayReason = parsed.summary || data.ai_reasoning;
-  } catch (e) {
+  } catch {
     // 如果不是 JSON，则保持原样
   }
 

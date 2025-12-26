@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getDbClient } from '@/lib/db';
+import { Client } from '@libsql/client';
+import Database from 'better-sqlite3';
 
 export async function DELETE(
     request: Request,
@@ -11,12 +13,13 @@ export async function DELETE(
         const strategy = process.env.DB_STRATEGY || 'local';
 
         if (strategy === 'cloud') {
-            await (client as any).execute({
+            const turso = client as Client;
+            await turso.execute({
                 sql: 'DELETE FROM global_stock_pool WHERE symbol = ?',
                 args: [symbol]
             });
         } else {
-            const db = client as any;
+            const db = client as Database.Database;
             db.prepare('DELETE FROM global_stock_pool WHERE symbol = ?').run(symbol);
             db.close();
         }

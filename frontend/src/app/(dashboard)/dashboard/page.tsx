@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LayoutGrid as Grid, Settings, ChevronDown, MessageSquare } from 'lucide-react';
 import { StockData } from '@/lib/types';
@@ -20,8 +20,8 @@ const SettingsModal = dynamic(() => import('@/components/SettingsModal').then(mo
   loading: () => null
 });
 
-export default function DashboardPage() {
-  const { stocks, loadingPool } = useDashboardData();
+function DashboardContent() {
+  const { stocks, loadingPool, refresh } = useDashboardData();
   const {
     currentIndex,
     scrollRef,
@@ -153,9 +153,19 @@ export default function DashboardPage() {
       />
 
       <SettingsModal 
+        symbol={currentStock?.symbol || ''}
         isOpen={settingsOpen}
         onClose={() => setSettingsOpen(false)}
+        onSave={refresh}
       />
     </main>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={null}>
+      <DashboardContent />
+    </Suspense>
   );
 }

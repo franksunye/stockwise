@@ -52,7 +52,7 @@ export function useTikTokScroll(stocks: StockData[]) {
                 return () => clearTimeout(timer);
             }
         }
-    }, [targetSymbol, stocks.length]);
+    }, [targetSymbol, stocks.length, stocks]);
 
     return {
         currentIndex,

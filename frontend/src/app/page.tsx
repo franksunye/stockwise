@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Zap, ShieldCheck, TrendingUp, BarChart3, ChevronRight } from 'lucide-react';
+import { Zap, ShieldCheck, BarChart3, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 
 export default function LandingPage() {

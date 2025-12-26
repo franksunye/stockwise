@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getDbClient } from '@/lib/db';
+import { Client } from '@libsql/client';
+import Database from 'better-sqlite3';
 
 export async function GET() {
     try {
@@ -7,10 +9,11 @@ export async function GET() {
         const strategy = process.env.DB_STRATEGY || 'local';
 
         if (strategy === 'cloud') {
-            const result = await (client as any).execute('SELECT symbol, name, first_watched_at as added_at FROM global_stock_pool ORDER BY first_watched_at DESC');
+            const turso = client as Client;
+            const result = await turso.execute('SELECT symbol, name, first_watched_at as added_at FROM global_stock_pool ORDER BY first_watched_at DESC');
             return NextResponse.json({ stocks: result.rows });
         } else {
-            const db = client as any;
+            const db = client as Database.Database;
             const stocks = db.prepare('SELECT symbol, name, first_watched_at as added_at FROM global_stock_pool ORDER BY first_watched_at DESC').all();
             db.close();
             return NextResponse.json({ stocks });
@@ -35,7 +38,7 @@ export async function POST(request: Request) {
         let stockName = name;
 
         if (strategy === 'cloud') {
-            const turso = client as any;
+            const turso = client as Client;
             // 1. 尝试从 stock_meta 获取名称
             if (!stockName) {
                 const metaResult = await turso.execute({
@@ -58,7 +61,7 @@ export async function POST(request: Request) {
             });
             return NextResponse.json({ success: true, name: stockName });
         } else {
-            const db = client as any;
+            const db = client as Database.Database;
             if (!stockName) {
                 const meta = db.prepare('SELECT name FROM stock_meta WHERE symbol = ?').get(symbol) as { name: string } | undefined;
                 if (meta) stockName = meta.name;
