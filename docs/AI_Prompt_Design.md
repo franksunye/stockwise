@@ -217,6 +217,41 @@ LLM 的上下文窗口有限。即使对于 Gemini 2.5 Pro 的 100万 tokens 窗
 
 ---
 
+## 架构演进：多 Agent 协同上下文 (Proposed)
+
+为了解决随着上下文增加导致的**注意力分散 (Attention Dilution)** 和 **Token 拥挤** 问题，我们计划在未来将单体 Prompt 升级为 **垂直分工的多 Agent 系统 (Vertical Specialization)**。
+
+### 设计理念
+将复杂的决策过程拆解为独立且专业的子任务，最后由主 Agent 汇总决策。
+
+![Multi-Agent Architecture](https://via.placeholder.com/800x400?text=Traceability+Strategy)
+
+### Agent 角色分工
+
+1.  **📊 技术分析 Agent (Technical Analyst)**
+    *   **职责**: 仅关注 K 线形态、均线系统、成交量分布。
+    *   **输入**: OHLCV 数据、技术指标 (RSI/MACD)。
+    *   **输出**: 纯技术面的“形态语言”（如：“底背离确认”、“量价配合完美”）。
+    *   **优势**: 排除情绪干扰，通过数学逻辑输出客观信号。
+
+2.  **📰 消息洞察 Agent (News Insight)**
+    *   **职责**: 仅关注文本数据，进行情感分析和关键事件提取。
+    *   **输入**: 新闻标题、公告摘要、研报观点。
+    *   **输出**: 结构化的“利好/利空因子”（如：“因子：立案调查 | 强度：高 | 方向：空”）。
+    *   **优势**: 擅长处理非结构化长文本，不受 K 线波动影响。
+
+3.  **🧠 主决策 Agent (Lead Decision Maker)**
+    *   **职责**: 扮演基金经理角色，接收上述两个 Agent 的精炼汇报。
+    *   **输入**: 技术结论 + 消息因子 + 用户持仓数据。
+    *   **输出**: 最终 JSON 格式的操作建议 (Tactics) 和置信度。
+    *   **优势**: 解决“幻觉”问题，当技术面与基本面冲突时（如：形态好但有暴雷风险），能够依据预设权重进行**冲突裁决 (Conflict Resolution)**。
+
+### 实施路线
+*   **阶段一 (当前)**: **Virtual Agents (伪 Agent)**。在 System Prompt 中通过 `Role Playing` 和 `Chain of Thought` 模拟分工，无需改变代码架构。
+*   **阶段二 (未来)**: **Physical Agents (真 Agent)**。使用 `asyncio` 并行调用多个专门优化的 LLM 实例（或不同模型），实现真正的解耦与并发处理。
+
+---
+
 ### 待探索与优化的上下文维度 (Roadmap)
 
 为了进一步提升 AI 的“决策质量”而非仅仅是“预测准确度”，我们需要利用 AkShare 的深度数据能力，完成以下上下文维度的拼图：
