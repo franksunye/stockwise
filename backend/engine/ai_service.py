@@ -40,13 +40,38 @@ def generate_ai_prediction(symbol: str, today_data: pd.Series):
         ]
     }
     
+    # 构建三层透明体验：推理链 (Reasoning Trace)
+    reasoning_trace = [
+        {
+            "step": "trend",
+            "data": f"价格 {close:.2f} 对比起 MA20 {ma20:.2f}",
+            "conclusion": "顺势行情" if close > ma20 else "压力位下方"
+        },
+        {
+            "step": "momentum",
+            "data": f"RSI 处于 {rsi:.0f} 水平",
+            "conclusion": "动能健康" if 40 <= rsi <= 60 else ("超买警惕" if rsi > 70 else "超卖反弹")
+        },
+        {
+            "step": "volume",
+            "data": "成交量能表现稳定" if today_data.get('volume', 0) > 100000 else "量能萎缩观望",
+            "conclusion": "支持趋势" if today_data.get('volume', 0) > 100000 else "动能不足"
+        },
+        {
+            "step": "history",
+            "data": "规则引擎历史一致性回顾",
+            "conclusion": "信号平稳" if signal == 'Side' else "尝试变盘"
+        },
+        {
+            "step": "decision",
+            "data": f"基于趋势/动能综合判定信号为 {signal}",
+            "conclusion": "执行防御" if signal != 'Long' else "执行进攻"
+        }
+    ]
+    
     reasoning_data = {
         "summary": "缩量震荡，维持观望" if signal == 'Side' else ("顺势做多" if signal == 'Long' else "避险为主"),
-        "analysis": {
-            "trend": f"价格在 MA20 {'上方' if close > ma20 else '下方'}运行，短期趋势{'偏强' if close > ma20 else '偏弱'}。",
-            "momentum": f"RSI 读数 {rsi:.0f}，{'进入超买区' if rsi > 70 else ('进入超卖区' if rsi < 30 else '处于中性区域')}。",
-            "volume": f"成交量 {'正常' if today_data.get('volume', 0) > 100 else '低迷'}"
-        },
+        "reasoning_trace": reasoning_trace,
         "tactics": tactics,
         "key_levels": {
             "support": round(support_price, 3),

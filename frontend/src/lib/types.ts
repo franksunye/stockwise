@@ -54,14 +54,17 @@ export interface Tactic {
     reason: string;
 }
 
+// 推理链步骤（用于三层体验的"分析过程"展示）
+export interface ReasoningStep {
+    step: 'trend' | 'momentum' | 'volume' | 'history' | 'decision';
+    data: string;       // 关键数据点（≤20字）
+    conclusion: string; // 判断结论（≤15字）
+}
+
 // 战术数据包 (AI Reasoning 的解析格式)
 export interface TacticalData {
     summary: string;
-    analysis?: {
-        trend: string;
-        momentum: string;
-        volume: string;
-    };
+    reasoning_trace: ReasoningStep[]; // 5步推理链，替代原 analysis
     tactics: {
         holding: Tactic[];
         empty: Tactic[];

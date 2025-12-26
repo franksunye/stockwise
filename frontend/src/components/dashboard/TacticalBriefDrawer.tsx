@@ -1,7 +1,17 @@
 'use client';
 
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X as CloseIcon, Info } from 'lucide-react';
+import { 
+  X as CloseIcon, 
+  Info, 
+  TrendingUp, 
+  Zap, 
+  BarChart3, 
+  RotateCcw, 
+  Target,
+  ChevronDown 
+} from 'lucide-react';
 import { TacticalData } from '@/lib/types';
 
 interface TacticalBriefDrawerProps {
@@ -14,7 +24,9 @@ interface TacticalBriefDrawerProps {
 export function TacticalBriefDrawer({ 
   isOpen, onClose, data, userPos 
 }: TacticalBriefDrawerProps) {
-// 核心逻辑：获取当前场景建议 + 通用建议
+  const [isExpanded, setIsExpanded] = useState(false);
+  
+  // 核心逻辑：获取当前场景建议 + 通用建议
   const currentTactics = data?.tactics?.[userPos === 'holding' ? 'holding' : 'empty'] || [];
   const generalTactics = data?.tactics?.general || [];
   
@@ -95,6 +107,73 @@ export function TacticalBriefDrawer({
                   </section>
                 )}
 
+                {/* 第三层：分析过程 - 推理链 (带折叠交互) */}
+                {data.reasoning_trace && data.reasoning_trace.length > 0 && (
+                  <section className="space-y-4">
+                    <button 
+                      onClick={() => setIsExpanded(!isExpanded)}
+                      className="w-full flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/5 group active:scale-[0.98] transition-all"
+                    >
+                      <div className="flex items-center gap-3">
+                         <div className={`w-1.5 h-1.5 rounded-full bg-indigo-500 transition-all duration-500 ${isExpanded ? 'shadow-[0_0_12px_rgba(99,102,241,0.8)] scale-125' : 'opacity-40'}`} />
+                         <span className="text-xs font-black text-slate-400 uppercase tracking-widest group-hover:text-slate-200 transition-colors">解析 AI 推理逻辑</span>
+                      </div>
+                      <motion.div
+                        animate={{ rotate: isExpanded ? 180 : 0 }}
+                        className="text-slate-600 group-hover:text-slate-400"
+                      >
+                         <ChevronDown size={16} />
+                      </motion.div>
+                    </button>
+
+                    <AnimatePresence>
+                      {isExpanded && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          className="overflow-hidden"
+                        >
+                          <div className="p-6 rounded-2xl bg-white/[0.01] border border-white/[0.03] space-y-0 relative before:absolute before:left-[35px] before:top-8 before:bottom-8 before:w-[1px] before:bg-white/5">
+                            {data.reasoning_trace.map((step, idx) => (
+                              <div key={idx} className="relative pl-9 pb-6 last:pb-2 group">
+                                <div className="absolute left-[8px] top-1.5 w-1.5 h-1.5 rounded-full border border-white/20 bg-[#0a0a0f] group-hover:border-indigo-500 transition-colors z-10" />
+                                
+                                <div className="flex flex-col gap-2">
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-slate-500">
+                                        {step.step === 'trend' && <TrendingUp size={12} />}
+                                        {step.step === 'momentum' && <Zap size={12} />}
+                                        {step.step === 'volume' && <BarChart3 size={12} />}
+                                        {step.step === 'history' && <RotateCcw size={12} />}
+                                        {step.step === 'decision' && <Target size={12} />}
+                                      </span>
+                                      <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider">
+                                        {step.step === 'trend' && 'Trend'}
+                                        {step.step === 'momentum' && 'Momentum'}
+                                        {step.step === 'volume' && 'Volume'}
+                                        {step.step === 'history' && 'History'}
+                                        {step.step === 'decision' && 'Decision'}
+                                      </span>
+                                    </div>
+                                    <span className="text-[9px] font-black text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-full italic tracking-tight">
+                                      {step.conclusion}
+                                    </span>
+                                  </div>
+                                  <p className="text-xs text-slate-200/60 font-medium leading-relaxed">
+                                    {step.data}
+                                  </p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </section>
+                )}
+
                 <section className="p-4 rounded-2xl bg-indigo-500/5 border border-indigo-500/10">
                   <h3 className="text-xs font-black text-indigo-400 uppercase tracking-widest mb-2 flex items-center gap-2"><Info size={12} /> 核心冲突处理原则</h3>
                   <p className="text-sm text-indigo-300/70 leading-relaxed italic">{data.conflict_resolution || "遵循趋势优先原则。"}</p>
@@ -107,3 +186,4 @@ export function TacticalBriefDrawer({
     </AnimatePresence>
   );
 }
+
