@@ -4,3 +4,4 @@ pandas-ta-classic
 libsql-experimental
 google-generativeai
 requests
+pypinyin

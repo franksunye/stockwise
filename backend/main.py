@@ -14,10 +14,18 @@ BEIJING_TZ = timezone(timedelta(hours=8))
 import akshare as ak
 import pandas as pd
 import pandas_ta_classic as ta
+import ssl
+# 解决某些环境下 akshare 接口的 SSL 握手问题
+try:
+    ssl._create_default_https_context = ssl._create_unverified_context
+except:
+    pass
 try:
     from libsql_experimental import connect
 except ImportError:
     connect = None
+
+from pypinyin import pinyin, Style
 
 # ============================================================
 # 配置
@@ -173,9 +181,20 @@ def init_db():
 
 
 def sync_stock_meta():
-    """同步股票基础信息 (名称、市场)"""
+    """同步股票基础信息 (名称、市场、拼音)"""
     print("\n📦 同步股票元数据...")
     
+    def get_pinyin_info(name):
+        """生成全拼和首字母简写"""
+        try:
+            # 转换为全拼 (不带声调): 'pingan'
+            full_pinyin = "".join([i[0] for i in pinyin(name, style=Style.NORMAL)])
+            # 转换为首字母简写: 'pa'
+            abbr_pinyin = "".join([i[0][0] for i in pinyin(name, style=Style.FIRST_LETTER)])
+            return full_pinyin.lower(), abbr_pinyin.lower()
+        except:
+            return "", ""
+
     try:
         now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         all_records = []
@@ -188,25 +207,68 @@ def sync_stock_meta():
                 name_col = "名称" if "名称" in hk_stocks.columns else "name"
                 for _, row in hk_stocks.iterrows():
                     symbol = str(row[symbol_col])
+                    name = str(row[name_col])
                     if symbol.isdigit():
-                        all_records.append((symbol, row[name_col], "HK", now_str))
+                        py, abbr = get_pinyin_info(name)
+                        all_records.append((symbol, name, "HK", now_str, py, abbr))
                 print(f"   已获取 {len(hk_stocks)} 条港股元数据")
         except Exception as e:
             print(f"   ⚠️ 港股列表获取失败: {e}")
 
-        # 2. 获取 A 股列表
+        # 2. 获取 A 股列表 (分市场获取以提高稳定性)
         try:
-            a_stocks = ak.stock_zh_a_spot_em()
-            if not a_stocks.empty:
-                symbol_col = "代码" if "代码" in a_stocks.columns else "symbol"
-                name_col = "名称" if "名称" in a_stocks.columns else "name"
-                for _, row in a_stocks.iterrows():
-                    symbol = str(row[symbol_col])
-                    if symbol.isdigit():
-                        all_records.append((symbol, row[name_col], "CN", now_str))
-                print(f"   已获取 {len(a_stocks)} 条 A 股元数据")
+            print("   正在获取 A 股列表...")
+            # 尝试通过 stock_info_a_code_name 获取全量 A 股 (含北交所)
+            try:
+                a_stocks = ak.stock_info_a_code_name()
+                if not a_stocks.empty:
+                    symbol_col = "code" if "code" in a_stocks.columns else "代码"
+                    name_col = "name" if "name" in a_stocks.columns else "名称"
+                    for _, row in a_stocks.iterrows():
+                        symbol = str(row[symbol_col])
+                        name = str(row[name_col])
+                        if symbol.isdigit():
+                            py, abbr = get_pinyin_info(name)
+                            all_records.append((symbol, name, "CN", now_str, py, abbr))
+                    print(f"   已通过 A 股总表获取 {len(a_stocks)} 条元数据")
+            except Exception as e_a:
+                print(f"   ⚠️ A 股总表获取失败 ({e_a})，尝试分交易所获取...")
+                # 备选方案: 分交易所获取
+                for market_type in ["sh", "sz", "bj"]:
+                    try:
+                        if market_type == "sh": m_df = ak.stock_info_sh_name_code()
+                        elif market_type == "sz": m_df = ak.stock_info_sz_name_code(indicator="A股列表")
+                        else: m_df = ak.stock_info_bj_name_code()
+                        
+                        if not m_df.empty:
+                            # 灵活匹配代码列
+                            symbol_col = None
+                            for c in ["证券代码", "A股代码", "代码", "code"]:
+                                if c in m_df.columns:
+                                    symbol_col = c
+                                    break
+                            
+                            # 灵活匹配名称列
+                            name_col = None
+                            for c in ["证券简称", "A股简称", "名称", "name"]:
+                                if c in m_df.columns:
+                                    name_col = c
+                                    break
+                                    
+                            if symbol_col and name_col:
+                                for _, row in m_df.iterrows():
+                                    symbol = str(row[symbol_col]).strip()
+                                    name = str(row[name_col]).strip()
+                                    if symbol.isdigit():
+                                        py, abbr = get_pinyin_info(name)
+                                        all_records.append((symbol, name, "CN", now_str, py, abbr))
+                                print(f"   已获取 {market_type.upper()} 交易所 {len(m_df)} 条元数据")
+                            else:
+                                print(f"   ⚠️ {market_type.upper()} 交易所列名匹配失败: {m_df.columns.tolist()}")
+                    except Exception as e_m:
+                        print(f"   ⚠️ {market_type.upper()} 交易所获取失败: {e_m}")
         except Exception as e:
-            print(f"   ⚠️ A 股列表获取失败: {e}")
+            print(f"   ⚠️ A 股列表整体获取异常: {e}")
 
         if not all_records:
             return
@@ -215,12 +277,12 @@ def sync_stock_meta():
         conn = get_connection()
         cursor = conn.cursor()
         cursor.executemany("""
-            INSERT OR REPLACE INTO stock_meta (symbol, name, market, last_updated)
-            VALUES (?, ?, ?, ?)
+            INSERT OR REPLACE INTO stock_meta (symbol, name, market, last_updated, pinyin, pinyin_abbr)
+            VALUES (?, ?, ?, ?, ?, ?)
         """, all_records)
         conn.commit()
         conn.close()
-        print(f"✅ 元数据同步完成，共已更新 {len(all_records)} 条记录")
+        print(f"✅ 元数据同步完成，共已更新 {len(all_records)} 条记录 (包含拼音索引)")
 
     except Exception as e:
         print(f"❌ 元数据同步失败: {e}")
@@ -240,21 +302,52 @@ def get_last_date(symbol: str, table: str = "daily_prices") -> str:
 # 数据处理
 # ============================================================
 
+def get_market(symbol: str) -> str:
+    """获取股票所属市场 (CN/HK)"""
+    # 优先从数据库查询
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT market FROM stock_meta WHERE symbol = ?", (symbol,))
+        row = cursor.fetchone()
+        conn.close()
+        if row:
+            return row[0]
+    except:
+        pass
+    
+    # 启发式判断: 5位是港股，6位是A股
+    if len(symbol) == 5:
+        return "HK"
+    return "CN"
+
+
 def fetch_stock_data(symbol: str, period: str = "daily", start_date: str = None) -> pd.DataFrame:
-    """获取历史行情数据"""
+    """获取历史行情数据 (支持 A/H)"""
     if not start_date:
         start_date = (datetime.now() - timedelta(days=365)).strftime("%Y%m%d")
     
-    print(f"📡 正在获取 {symbol} {period} 数据 (从 {start_date} 起)...")
+    market = get_market(symbol)
+    print(f"📡 正在获取 {market}:{symbol} {period} 数据 (从 {start_date} 起)...")
     
     try:
-        df = ak.stock_hk_hist(
-            symbol=symbol,
-            period=period,  # "daily", "weekly", "monthly"
-            start_date=start_date,
-            end_date=datetime.now().strftime("%Y%m%d"),
-            adjust="qfq"
-        )
+        if market == "HK":
+            df = ak.stock_hk_hist(
+                symbol=symbol,
+                period=period,
+                start_date=start_date,
+                end_date=datetime.now().strftime("%Y%m%d"),
+                adjust="qfq"
+            )
+        else:
+            # A 股处理
+            df = ak.stock_zh_a_hist(
+                symbol=symbol,
+                period=period,
+                start_date=start_date,
+                end_date=datetime.now().strftime("%Y%m%d"),
+                adjust="qfq"
+            )
         return df
     except Exception as e:
         print(f"❌ {symbol} {period} 获取失败: {e}")
@@ -603,21 +696,29 @@ def show_latest_data(symbol: str, period: str = "daily", limit: int = 3):
 
 if __name__ == "__main__":
     import sys
-    is_realtime = len(sys.argv) > 1 and sys.argv[1] == "--realtime"
-    single_symbol = None
-    if "--symbol" in sys.argv:
-        idx = sys.argv.index("--symbol")
-        if idx + 1 < len(sys.argv):
-            single_symbol = sys.argv[idx + 1]
+    import argparse
+    
+    parser = argparse.ArgumentParser(description='StockWise ETL Pipeline')
+    parser.add_argument('--realtime', action='store_true', help='执行盘中实时同步')
+    parser.add_argument('--sync-meta', action='store_true', help='仅同步股票基础元数据')
+    parser.add_argument('--symbol', type=str, help='同步特定股票')
+    
+    args = parser.parse_args()
 
     print("=" * 60)
-    print(f"StockWise ETL Pipeline - [{'SINGLE:'+single_symbol if single_symbol else ('REALTIME' if is_realtime else 'FULL')}] Sync Mode")
+    mode = "META" if args.sync_meta else ("REALTIME" if args.realtime else ("SINGLE:"+args.symbol if args.symbol else "FULL"))
+    print(f"StockWise ETL Pipeline - [{mode}] Sync Mode")
     print("=" * 60)
     
     init_db()
     
-    if single_symbol:
-        target_stocks = [single_symbol]
+    if args.sync_meta:
+        sync_stock_meta()
+        print("\n✅ 元数据同步任务结束。")
+        sys.exit(0)
+
+    if args.symbol:
+        target_stocks = [args.symbol]
     else:
         # 获取核心股票池
         target_stocks = get_stock_pool()
@@ -636,12 +737,12 @@ if __name__ == "__main__":
 
     print(f"\n📊 目标股票池: {len(target_stocks)} 只股票")
 
-    if single_symbol:
+    if args.symbol:
         # 单独同步模式
-        print(f"\n🚀 [即时同步] 处理股票: {single_symbol}")
-        process_stock_period(single_symbol, period="daily")
-        process_stock_period(single_symbol, period="weekly")
-    elif is_realtime:
+        print(f"\n🚀 [即时同步] 处理股票: {args.symbol}")
+        process_stock_period(args.symbol, period="daily")
+        process_stock_period(args.symbol, period="weekly")
+    elif args.realtime:
         # 实时同步模式 (5分钟一次，由外部调度或简易循环)
         sync_spot_prices(target_stocks)
     else:
