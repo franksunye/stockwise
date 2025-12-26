@@ -13,7 +13,7 @@ export async function GET(request: Request) {
     try {
         let rows;
         const sql = `
-            SELECT symbol, name, pinyin_abbr,
+            SELECT symbol, name, market, pinyin_abbr,
             (CASE 
                 WHEN symbol = ? THEN 100
                 WHEN pinyin_abbr = ? THEN 95

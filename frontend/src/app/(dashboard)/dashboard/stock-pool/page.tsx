@@ -22,7 +22,7 @@ export default function StockPoolPage() {
   const [loading, setLoading] = useState(true);
   const [newSymbol, setNewSymbol] = useState('');
   const [showAdd, setShowAdd] = useState(false);
-  const [searchResults, setSearchResults] = useState<{symbol: string; name: string}[]>([]);
+  const [searchResults, setSearchResults] = useState<{symbol: string; name: string; market?: string}[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [stockToDelete, setStockToDelete] = useState<StockSnapshot | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -165,25 +165,37 @@ export default function StockPoolPage() {
               <div className="relative">
                 <input 
                   autoFocus
-                  placeholder="搜索代码或名称..."
+                  placeholder="输入代码、名称或拼音首字母 (如: GZMT)"
                   value={newSymbol}
                   onChange={(e) => setNewSymbol(e.target.value)}
                   className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 mono text-sm focus:outline-none focus:border-indigo-500/50"
                 />
                 {showSuggestions && searchResults.length > 0 && (
                   <div className="mt-4 space-y-2 max-h-60 overflow-y-auto">
-                    {searchResults.map(item => (
-                      <button key={item.symbol} onClick={() => handleAdd(item.symbol, item.name)} className="w-full flex items-center justify-between p-4 bg-white/5 rounded-2xl hover:bg-white/10 transition-colors">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-[10px] font-black italic text-indigo-400">{item.symbol.slice(-2)}</div>
-                          <div className="text-left">
-                             <p className="text-sm font-bold">{item.name}</p>
-                             <p className="text-[10px] text-slate-500 mono uppercase">{item.symbol}.HK</p>
+                    {searchResults.map(item => {
+                      const isHK = item.market === 'HK';
+                      const suffix = isHK ? '.HK' : (item.symbol.startsWith('6') ? '.SH' : '.SZ');
+                      return (
+                        <button key={item.symbol} onClick={() => handleAdd(item.symbol, item.name)} className="w-full flex items-center justify-between p-4 bg-white/5 rounded-2xl hover:bg-white/10 transition-colors">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-[10px] font-black ${isHK ? 'bg-blue-500/10 text-blue-400' : 'bg-rose-500/10 text-rose-400'}`}>
+                              {isHK ? '港' : 'A'}
+                            </div>
+                            <div className="text-left">
+                               <p className="text-sm font-bold">{item.name}</p>
+                               <p className="text-[10px] text-slate-500 mono uppercase">{item.symbol}{suffix}</p>
+                            </div>
                           </div>
-                        </div>
-                        <Plus size={16} className="text-slate-500" />
-                      </button>
-                    ))}
+                          <Plus size={16} className="text-slate-500" />
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+                {showSuggestions && searchResults.length === 0 && newSymbol.trim().length > 0 && (
+                  <div className="mt-4 py-8 text-center text-slate-500 text-xs">
+                    <p className="mb-1">未找到匹配的股票</p>
+                    <p className="text-[10px] text-slate-600">试试输入完整代码或拼音首字母</p>
                   </div>
                 )}
               </div>
