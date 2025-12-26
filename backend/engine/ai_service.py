@@ -9,26 +9,33 @@ def generate_ai_prediction(symbol: str, today_data: pd.Series):
     close = today_data.get('close', 0)
     ma20 = today_data.get('ma20', 0)
     rsi = today_data.get('rsi', 50)
+    macd_hist = today_data.get('macd_hist', 0)
+    macd_status = "金叉" if macd_hist > 0 else "死叉"
     support_price = today_data.get('ma20', close * 0.95)
     
     # 策略决策
     conn = get_connection()
     cursor = conn.cursor()
     
-    # 获取月度参考数据
+    # 获取月度/周度参考数据 (战略与波段背景)
     cursor.execute("""
-        SELECT close, ma20, change_percent 
-        FROM monthly_prices 
-        WHERE symbol = ? 
-        ORDER BY date DESC LIMIT 1
+        SELECT close, ma20 FROM monthly_prices 
+        WHERE symbol = ? ORDER BY date DESC LIMIT 1
     """, (symbol,))
     m_row = cursor.fetchone()
     monthly_trend = "Bull" if m_row and m_row[0] > m_row[1] else "Bear"
+
+    cursor.execute("""
+        SELECT close, ma20 FROM weekly_prices 
+        WHERE symbol = ? ORDER BY date DESC LIMIT 1
+    """, (symbol,))
+    w_row = cursor.fetchone()
+    weekly_trend = "Bull" if w_row and w_row[0] > w_row[1] else "Bear"
     
+    # 基础信号判定 (基于日线)
     if close < support_price * 0.98:
         signal = 'Short'
     elif close > ma20:
-        # 如果日线做多且月线也看好，置信度更高
         signal = 'Long'
     else:
         signal = 'Side'
@@ -36,12 +43,21 @@ def generate_ai_prediction(symbol: str, today_data: pd.Series):
     if 45 <= rsi <= 55 and signal != 'Short': 
         signal = 'Side'
 
-    # 置信度调整：月线与日线共振时提高置信度
-    confidence = 0.5
+    # 置信度权重分配：基于三期共振
+    # 规则：多周期方向一致则大幅提升置信度
+    confidence = 0.60
+    resonance_count = 0
     if signal == 'Long':
-        confidence = 0.85 if monthly_trend == "Bull" else 0.72
+        if monthly_trend == "Bull": resonance_count += 1
+        if weekly_trend == "Bull": resonance_count += 1
     elif signal == 'Short':
-        confidence = 0.85 if monthly_trend == "Bear" else 0.72
+        if monthly_trend == "Bear": resonance_count += 1
+        if weekly_trend == "Bear": resonance_count += 1
+    
+    # 根据共振程度计算置信度
+    confidence_map = {0: 0.65, 1: 0.75, 2: 0.88}
+    confidence = confidence_map.get(resonance_count, 0.60)
+    if signal == 'Side': confidence = 0.50
     
     # 构建更详细的战术建议
     tactics = {
@@ -65,32 +81,22 @@ def generate_ai_prediction(symbol: str, today_data: pd.Series):
     reasoning_trace = [
         {
             "step": "trend",
-            "data": f"价格 {close:.2f} 对比起 MA20 {ma20:.2f}",
-            "conclusion": "顺势行情" if close > ma20 else "压力位下方"
-        },
-        {
-            "step": "trend",
-            "data": f"月线级别处于 {'多头' if monthly_trend == 'Bull' else '空头'} 区域",
-            "conclusion": "大势稳健" if monthly_trend == 'Bull' else "长线承压"
+            "data": f"月:{'多' if monthly_trend=='Bull' else '空'} | 周:{'多' if weekly_trend=='Bull' else '空'}",
+            "conclusion": "周期共振" if resonance_count == 2 else "长短博弈"
         },
         {
             "step": "momentum",
-            "data": f"日线 RSI 处于 {rsi:.0f} 水平",
-            "conclusion": "动能健康" if 40 <= rsi <= 60 else ("超买警惕" if rsi > 70 else "超卖反弹")
+            "data": f"日线 RSI({rsi:.0f}) | MACD {macd_status}",
+            "conclusion": "动能健康" if 40 <= rsi <= 60 else "极端行情"
         },
         {
             "step": "volume",
-            "data": "成交量能表现稳定" if today_data.get('volume', 0) > 100000 else "量能萎缩观望",
-            "conclusion": "支持趋势" if today_data.get('volume', 0) > 100000 else "动能不足"
-        },
-        {
-            "step": "history",
-            "data": "规则引擎历史一致性回顾",
-            "conclusion": "信号平稳" if signal == 'Side' else "尝试变盘"
+            "data": f"今日成交 {int(today_data['volume']):,}",
+            "conclusion": "量能稳定" if today_data['volume'] > 1000000 else "缩量震荡"
         },
         {
             "step": "decision",
-            "data": f"基于趋势/动能综合判定信号为 {signal}",
+            "data": f"共振得分: {resonance_count}/2 | 信号: {signal}",
             "conclusion": "执行防御" if signal != 'Long' else "执行进攻"
         }
     ]
@@ -109,12 +115,11 @@ def generate_ai_prediction(symbol: str, today_data: pd.Series):
     }
     
     reasoning = json.dumps(reasoning_data, ensure_ascii=False)
-    confidence = 0.72 if signal != 'Side' else 0.5
 
     # 存储到数据库
     today_str = today_data.get('date')
     if not today_str:
-        return
+        return None
         
     dt = datetime.strptime(today_str, "%Y-%m-%d")
     target_date = (dt + timedelta(days=1)).strftime("%Y-%m-%d")
@@ -127,5 +132,12 @@ def generate_ai_prediction(symbol: str, today_data: pd.Series):
     
     conn.commit()
     conn.close()
-    print(f"   🔮 系统建议 ({today_str}): 信号={signal}")
-    return signal, support_price
+    print(f"   🔮 系统建议 ({today_str}): 信号={signal}, 置信度={confidence:.0%}, 共振={resonance_count}/2")
+    
+    return {
+        "signal": signal,
+        "confidence": confidence,
+        "resonance_count": resonance_count,
+        "support_price": support_price,
+        **reasoning_data
+    }

@@ -33,24 +33,46 @@ def generate_full_prompt(symbol: str):
     data = dict(zip(columns, row))
     
     # 3. 获取历史行情
-    # 日线：获取近5日历史行情（用于短期趋势）
+    # 3.1 日线：获取近10日历史行情（战术触发层）
     cursor.execute("""
         SELECT date, open, high, low, close, change_percent, volume
         FROM daily_prices 
         WHERE symbol = ? 
-        ORDER BY date DESC LIMIT 5
+        ORDER BY date DESC LIMIT 10
     """, (symbol,))
     history_rows = cursor.fetchall()
 
-    # 月线：获取最新月度数据（用于大周期背景）
+    # 3.2 周线：获取近12周数据（周期趋势层：8周明细 + 12周统计）
     cursor.execute("""
-        SELECT * FROM monthly_prices 
+        SELECT date, open, high, low, close, change_percent, volume, ma20, rsi
+        FROM weekly_prices 
         WHERE symbol = ? 
-        ORDER BY date DESC LIMIT 1
+        ORDER BY date DESC LIMIT 12
     """, (symbol,))
-    m_columns = [desc[0] for desc in cursor.description]
-    m_row = cursor.fetchone()
-    m_data = dict(zip(m_columns, m_row)) if m_row else None
+    weekly_rows = cursor.fetchall()
+    
+    weekly_detail = weekly_rows[:8] if weekly_rows else []
+    weekly_stats = {
+        "high": max([w[2] for w in weekly_rows]) if weekly_rows else 0,
+        "low": min([w[3] for w in weekly_rows]) if weekly_rows else 0,
+    }
+
+    # 3.3 月线：获取近12个月数据（战略背景层：3个月明细 + 12个月统计）
+    cursor.execute("""
+        SELECT date, open, high, low, close, change_percent, volume, ma20, rsi
+        FROM monthly_prices 
+        WHERE symbol = ? 
+        ORDER BY date DESC LIMIT 12
+    """, (symbol,))
+    monthly_rows = cursor.fetchall()
+    
+    monthly_detail = monthly_rows[:3] if monthly_rows else []
+    monthly_stats = {
+        "high": max([m[2] for m in monthly_rows]) if monthly_rows else 0,
+        "low": min([m[3] for m in monthly_rows]) if monthly_rows else 0,
+        "ma20": monthly_rows[0][7] if monthly_rows else 0,
+        "rsi": monthly_rows[0][8] if monthly_rows else 0
+    }
 
     # 4. 获取近5次 AI 预测记录（用于闭环反馈）
     cursor.execute("""
@@ -130,9 +152,23 @@ def generate_full_prompt(symbol: str):
     
     trend_narrative = ""
     if consecutive_days >= 2:
-        trend_narrative = f"**趋势信号**: 连续 {consecutive_days} 日{consecutive_direction}，累计涨跌幅 {cumulative_change:+.2f}%"
+        trend_narrative = f"**日线趋势**: 连续 {consecutive_days} 日{consecutive_direction}，最近10日累计涨跌幅 {cumulative_change:+.2f}%"
     else:
-        trend_narrative = f"**趋势信号**: 近期震荡，5日累计涨跌幅 {cumulative_change:+.2f}%"
+        trend_narrative = f"**日线趋势**: 近期震荡，10日累计涨跌幅 {cumulative_change:+.2f}%"
+
+    # 构建周线摘要
+    weekly_summary = []
+    for w_row in weekly_detail:
+        w_date, w_open, w_high, w_low, w_close, w_change, w_volume, w_ma20, w_rsi = w_row
+        w_trend = "📈" if (w_change or 0) > 0 else "📉"
+        weekly_summary.append(f"| {w_date} | {w_close} | {w_change:+.2f}% {w_trend} | MA20:{w_ma20:.2f} | RSI:{w_rsi:.1f} |")
+
+    # 构建月线摘要
+    monthly_summary = []
+    for m_row in monthly_detail:
+        m_date, m_open, m_high, m_low, m_close, m_change, m_volume, m_ma20, m_rsi = m_row
+        m_trend = "📈" if (m_change or 0) > 0 else "📉"
+        monthly_summary.append(f"| {m_date} | {m_close} | {m_change:+.2f}% {m_trend} |")
 
     # 3. 准备模板数据
     target_date = "下一个交易日"
@@ -236,42 +272,44 @@ def generate_full_prompt(symbol: str):
 - **代码**: {symbol}.HK
 - **日期**: {data['date']}
 
-## 近5日行情走势
+## 近10日行情走势 (Tactical)
 | 日期 | 开盘 | 最高 | 最低 | 收盘 | 涨跌幅 | 成交量 |
 |------|------|------|------|------|--------|--------|
 {chr(10).join(history_summary)}
 
 {trend_narrative}
 
-## 今日行情数据（最新）
-| 指标 | 数值 |
-|------|------|
-| 开盘价 | {data['open']} |
-| 最高价 | {data['high']} |
-| 最低价 | {data['low']} |
-| 收盘价 | {data['close']} |
-| 涨跌幅 | {data['change_percent']}% |
-| 成交量 | {int(data['volume'])} |
-
-## 技术指标
+## 最新技术指标 (Indicators)
 | 指标 | 数值 | 状态 |
 |------|------|------|
-| MA5 | {data['ma5']} | - |
-| MA10 | {data['ma10']} | - |
-| MA20 | {data['ma20']} | - |
-| MA60 | {data['ma60']} | - |
+| MA5/10/20 | {data['ma5']}/{data['ma10']}/{data['ma20']} | { "多头排列" if data['ma5']>data['ma10']>data['ma20'] else "均线纠缠/空头" } |
+| MA60 | {data['ma60']} | {"价格在支撑线上方" if data['close']>data['ma60'] else "价格在压力线下方"} |
 | RSI(14) | {rsi} | {rsi_status} |
 | MACD | DIF={data['macd']}, DEA={data['macd_signal']}, 柱={data['macd_hist']} | {macd_status} |
 | KDJ | K={data['kdj_k']}, D={data['kdj_d']}, J={data['kdj_j']} | - |
 | 布林带 | 上轨={data['boll_upper']}, 中轨={data['boll_mid']}, 下轨={data['boll_lower']} | - |
 
-## 月度行情及大周期背景 (Monthly)
-{f'''
-- **参考月报日期**: {m_data["date"]}
-- **大周期趋势**: {"月线收阳" if m_data["change_percent"] > 0 else "月线收阴"} (本月: {m_data["change_percent"]:+.2f}%)
-- **月线关键位**: MA20={m_data["ma20"]}, RSI={m_data["rsi"]:.1f}
-- **趋势关系**: {"股价运行在 20 月线上方，长线看好" if m_data["close"] > m_data["ma20"] else "月线级别承压，警惕长线风险"}
-''' if m_data else "- 暂无月线数据 -"}
+## 周线行情及波段趋势 (Meso)
+### 最近8周数据
+| 周末日期 | 收盘价 | 周涨跌幅 | 周MA20 | 周RSI |
+|----------|--------|----------|--------|-------|
+{chr(10).join(weekly_summary)}
+
+### 季度统计 (近12周)
+- **12周最高**: {weekly_stats['high']}
+- **12周最低**: {weekly_stats['low']}
+
+## 月度行情及战略背景 (Macro)
+### 最近3个月数据
+| 月末日期 | 收盘价 | 月涨跌幅 |
+|----------|--------|----------|
+{chr(10).join(monthly_summary)}
+
+### 年度统计 (近12个月)
+- **12个月最高**: {monthly_stats['high']}
+- **12个月最低**: {monthly_stats['low']}
+- **月线关键指标**: MA20={monthly_stats['ma20']:.2f}, RSI={monthly_stats['rsi']:.1f}
+- **长线定位**: {"股价在20月线上方，处于大周期上升通道" if data['close'] > monthly_stats['ma20'] else "股价在20月线下方，大周期处于弱势调整期"}
 
 {prediction_review}
 ## 请求
