@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 
 from config import BEIJING_TZ
 from database import init_db, get_connection, get_stock_pool
-from fetchers import sync_stock_meta, fetch_stock_data
+from fetchers import sync_stock_meta, fetch_stock_data, sync_profiles, sync_spot_prices
 from utils import send_wecom_notification
 from engine.indicators import calculate_indicators
 from engine.ai_service import generate_ai_prediction
@@ -176,6 +176,8 @@ if __name__ == "__main__":
     
     if args.sync_meta:
         sync_stock_meta()
+        # 同步完基础列表后，顺便更新一波公司概况 (每次20个)
+        sync_profiles(limit=20)
     elif args.symbol:
         # On-Demand Sync: 需要错误处理和通知
         start_time = time.time()

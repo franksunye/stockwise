@@ -189,7 +189,7 @@ def sync_stock_meta():
                 INSERT OR REPLACE INTO stock_meta (symbol, name, market, last_updated, pinyin, pinyin_abbr)
                 VALUES {placeholders}
             """, flat_values)
-            if (i + batch_size) % 2000 == 0 or i + batch_size >= total:
+        if (i + batch_size) % 2000 == 0 or i + batch_size >= total:
                 print(f"   💾 已写入 {min(i + batch_size, total)}/{total} 条...")
         
         conn.commit()
@@ -209,3 +209,81 @@ def sync_stock_meta():
         report += f"- **A 股**: {cn_count} 条\n"
         report += f"- **耗时**: {duration:.1f}s"
         send_wecom_notification(report)
+
+def sync_profiles(limit=20):
+    """
+    同步股票基本面概况 (Company Profile)
+    策略: 优先同步有人关注的股票 (global_stock_pool)，其次补全 stock_meta 中缺失的信息
+    限制: 默认每次只同步 20 个，避免接口限流
+    """
+    print(f"📡 开始同步公司概况 (Limit: {limit})...")
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    # 1. 找出所有关注的股票
+    # 注意: 我们优先更新那些已经被关注但还没有 industry 信息的股票
+    try:
+        # 获取关注列表 (Left join to check if profile exists)
+        # 假设 global_stock_pool 只有 symbol 字段，我们需要关联 stock_meta
+        query = """
+            SELECT p.symbol, m.name 
+            FROM global_stock_pool p
+            JOIN stock_meta m ON p.symbol = m.symbol
+            WHERE m.industry IS NULL OR m.industry = ''
+            LIMIT ?
+        """
+        cursor.execute(query, (limit,))
+        targets = cursor.fetchall()
+        
+        if not targets:
+            print("✨ 所有关注股票的概况信息已是最新的。")
+            conn.close()
+            return
+
+        print(f"🔍 发现 {len(targets)} 只关注股票缺失概况信息，开始更新...")
+        
+        success_count = 0
+        for symbol, name in targets:
+            print(f"   Getting profile for {symbol} ({name})...")
+            try:
+                # 尝试 A 股接口
+                df = ak.stock_profile_cninfo(symbol=symbol)
+                if not df.empty:
+                    record = df.iloc[0]
+                    industry = record.get("所属行业", "")
+                    main_bus = record.get("主营业务", "")
+                    # 处理科创板可能没有经营范围的情况，使用机构简介代替或结合
+                    desc = record.get("经营范围")
+                    intro = record.get("机构简介", "")
+                    
+                    if not desc or len(str(desc)) < 5:
+                        desc = intro
+                    else:
+                        # 如果简介也很长，可以截断或者只存经营范围
+                        pass 
+
+                    # 截断过长文本
+                    if desc and len(desc) > 500:
+                        desc = desc[:497] + "..."
+
+                    cursor.execute("""
+                        UPDATE stock_meta 
+                        SET industry = ?, main_business = ?, description = ?
+                        WHERE symbol = ?
+                    """, (industry, main_bus, desc, symbol))
+                    conn.commit()
+                    success_count += 1
+                else:
+                    print(f"   ⚠️ 无数据: {symbol}")
+            except Exception as e:
+                print(f"   ❌ 失败 {symbol}: {e}")
+                import time
+                time.sleep(1) # 出错歇一秒
+
+        print(f"✅ 公司概况同步完成: 成功 {success_count}/{len(targets)}")
+        
+    except Exception as e:
+        print(f"❌ 同步公司概况失败: {e}")
+    finally:
+        conn.close()
+

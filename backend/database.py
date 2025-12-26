@@ -49,10 +49,34 @@ def init_db():
             market TEXT NOT NULL,
             last_updated TEXT,
             pinyin TEXT,
-            pinyin_abbr TEXT
+            pinyin_abbr TEXT,
+            industry TEXT,
+            main_business TEXT,
+            description TEXT
         )
     """)
-    
+
+    # 检查所有必要的列是否存在，如果不存在则添加 (Schema Evolution)
+    # 对于 SQLite/Turso，不能通过 CREATE TABLE IF NOT EXISTS 自动添加新列
+    # 需要手动检查并 ALTER TABLE
+    try:
+        cursor.execute("PRAGMA table_info(stock_meta)")
+        columns = [info[1] for info in cursor.fetchall()]
+        
+        expected_columns = {
+            "industry": "TEXT",
+            "main_business": "TEXT", 
+            "description": "TEXT"
+        }
+        
+        for col_name, col_type in expected_columns.items():
+            if col_name not in columns:
+                print(f"🛠️ 更新数据库: 添加 stock_meta.{col_name}")
+                cursor.execute(f"ALTER TABLE stock_meta ADD COLUMN {col_name} {col_type}")
+                
+    except Exception as e:
+        print(f"⚠️ 检查/更新表结构失败: {e}")
+
     # 3. 核心股票池
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS stock_pool (
