@@ -5,6 +5,10 @@ on:
   # 参见: cloudflare-worker/README.md
   workflow_dispatch: # 由 Cloudflare Worker 或手动触发
 
+concurrency:
+  group: realtime-sync
+  cancel-in-progress: true
+
 
 jobs:
   sync:

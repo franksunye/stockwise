@@ -25,6 +25,10 @@ def calculate_indicators(df: pd.DataFrame) -> pd.DataFrame:
         df["macd"] = macd.iloc[:, 0]
         df["macd_signal"] = macd.iloc[:, 1]
         df["macd_hist"] = macd.iloc[:, 2]
+    else:
+        df["macd"] = 0
+        df["macd_signal"] = 0
+        df["macd_hist"] = 0
     
     # BBANDS
     bbands = ta.bbands(df["close"], length=20, std=2)
@@ -32,6 +36,10 @@ def calculate_indicators(df: pd.DataFrame) -> pd.DataFrame:
         df["boll_lower"] = bbands.iloc[:, 0]
         df["boll_mid"] = bbands.iloc[:, 1]
         df["boll_upper"] = bbands.iloc[:, 2]
+    else:
+        df["boll_lower"] = 0
+        df["boll_mid"] = 0
+        df["boll_upper"] = 0
     
     # RSI
     df["rsi"] = ta.rsi(df["close"], length=14)
@@ -44,6 +52,10 @@ def calculate_indicators(df: pd.DataFrame) -> pd.DataFrame:
         df["kdj_k"] = stoch.iloc[:, 0]
         df["kdj_d"] = stoch.iloc[:, 1]
         df["kdj_j"] = 3 * stoch.iloc[:, 0] - 2 * stoch.iloc[:, 1]
+    else:
+        df["kdj_k"] = 0
+        df["kdj_d"] = 0
+        df["kdj_j"] = 0
     
     # 填充缺失值并类型转换
     df = df.fillna(0).infer_objects(copy=False)
