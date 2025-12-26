@@ -45,3 +45,34 @@ export interface AIPrediction {
     validation_status: 'Pending' | 'Correct' | 'Incorrect' | 'Neutral';
     actual_change: number | null;
 }
+
+// 战术建议明细
+export interface Tactic {
+    p: string; // 优先级 P1, P2...
+    a: string; // 动作 Action
+    c: string; // 触发条件 Condition
+    r: string; // 理由 Reason
+}
+
+// 战术数据包 (AI Reasoning 的解析格式)
+export interface TacticalData {
+    summary: string;
+    tactics: {
+        holding: Tactic[];
+        empty: Tactic[];
+    };
+    conflict: string;
+}
+
+// Dashboard 页面聚合数据
+export interface StockData {
+    symbol: string;
+    name: string;
+    price: DailyPrice | null;
+    prediction: AIPrediction | null;
+    previousPrediction: AIPrediction | null;
+    history: AIPrediction[];
+    lastUpdated: string;
+    rule: UserRule | null;
+    loading: boolean;
+}

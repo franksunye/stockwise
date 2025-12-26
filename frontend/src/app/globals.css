@@ -90,16 +90,33 @@ body {
 
 /* 警告脉冲动画 (用于跌破支撑位) */
 .warning-pulse {
-  animation: warning-bg-pulse 2s ease-in-out infinite;
+  animation: warning-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-@keyframes warning-bg-pulse {
-  0% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0); }
-  50% { box-shadow: 0 0 30px 5px rgba(244, 63, 94, 0.2); background: rgba(244, 63, 94, 0.05); }
-  100% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0); }
+@keyframes warning-pulse {
+
+  0%,
+  100% {
+    border-color: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  50% {
+    border-color: rgba(244, 63, 94, 0.3);
+    background: rgba(244, 63, 94, 0.04);
+  }
 }
 
 /* 隐藏滚动条 */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 ::-webkit-scrollbar {
   display: none;
 }

@@ -7,7 +7,9 @@ import {
   ChevronRight, X as CloseIcon, Info, Grid, ChevronDown, 
   TrendingUp, TrendingDown, Minus, History
 } from 'lucide-react';
-import { DailyPrice, UserRule, AIPrediction } from '@/lib/types';
+import { DailyPrice, UserRule, AIPrediction, StockData, TacticalData } from '@/lib/types';
+import { VerticalIndicator } from '@/components/dashboard/VerticalIndicator';
+import { HistoricalCard } from '@/components/dashboard/HistoricalCard';
 import { getRule } from '@/lib/storage';
 import { getIndicatorReviews } from '@/lib/analysis';
 import { getMarketScene } from '@/lib/date-utils';
@@ -23,25 +25,6 @@ const COLORS = {
   muted: '#64748b' 
 };
 
-// --- Types ---
-interface Tactic { p: string; a: string; c: string; r: string; }
-interface TacticalData {
-  summary: string;
-  tactics: { holding: Tactic[]; empty: Tactic[]; };
-  conflict: string;
-}
-
-interface StockData {
-  symbol: string;
-  name: string;
-  price: DailyPrice | null;
-  prediction: AIPrediction | null;
-  previousPrediction: AIPrediction | null;
-  history: AIPrediction[];
-  lastUpdated: string;
-  rule: UserRule | null;
-  loading: boolean;
-}
 
 // --- Sub-Components ---
 
@@ -280,109 +263,6 @@ function StockDashboardCard({ data, onShowTactics }: { data: StockData, onShowTa
   );
 }
 
-function VerticalIndicator({ container, onScroll }: { container: HTMLDivElement | null, onScroll?: (top: number) => void }) {
-  const [progress, setProgress] = useState(0);
-  const [isVisible, setIsVisible] = useState(false);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    if (!container) return;
-
-    const handleScroll = () => {
-      const { scrollTop, scrollHeight, clientHeight } = container;
-      const total = scrollHeight - clientHeight;
-      if (total > 0) setProgress(scrollTop / total);
-      
-      if (onScroll) onScroll(scrollTop);
-
-      setIsVisible(true);
-      if (timerRef.current) clearTimeout(timerRef.current);
-      timerRef.current = setTimeout(() => setIsVisible(false), 1500);
-    };
-
-    container.addEventListener('scroll', handleScroll, { passive: true });
-    return () => {
-      container.removeEventListener('scroll', handleScroll);
-      if (timerRef.current) clearTimeout(timerRef.current);
-    };
-  }, [container, onScroll]);
-
-  return (
-    <div className="absolute inset-0 z-[100] pointer-events-none overflow-hidden">
-      <AnimatePresence>
-        {isVisible && (
-          <motion.div 
-            initial={{ opacity: 0, x: 5 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 5 }}
-            transition={{ duration: 0.2 }}
-            className="absolute right-1 top-1/3 bottom-1/3 w-0.5 bg-white/10 rounded-full"
-          >
-            <motion.div 
-              className="absolute left-0 right-0 bg-white/45 rounded-full"
-              style={{ 
-                height: '20%', 
-                top: `${progress * 80}%`
-              }}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
-function HistoricalCard({ data }: { data: AIPrediction }) {
-  const isUp = data.signal === 'Long';
-  const isDown = data.signal === 'Short';
-  
-  // 尝试解析 JSON 理由
-  let displayReason = data.ai_reasoning;
-  try {
-    const parsed = JSON.parse(data.ai_reasoning);
-    displayReason = parsed.summary || data.ai_reasoning;
-  } catch (e) {
-    // 如果不是 JSON，则保持原样
-  }
-
-  return (
-    <div className="h-full w-full flex flex-col items-center justify-center px-6 snap-start">
-      <div className="w-full max-w-md glass-card p-8 border-white/5 relative overflow-hidden active:scale-[0.99] transition-transform">
-        <div className="flex items-center gap-3 mb-8">
-          <div className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-black text-slate-500 tracking-widest mono uppercase">
-            {data.date}
-          </div>
-          <div className="h-px flex-1 bg-white/5" />
-          <div className={`flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest ${
-            data.validation_status === 'Correct' ? 'text-emerald-500' : 'text-rose-500'
-          }`}>
-            {data.validation_status === 'Correct' ? <><ShieldCheck size={12} /> 准确</> : <><TrendingDown size={12} /> 偏离回顾</>}
-          </div>
-        </div>
-
-        <h3 className="text-3xl font-black italic mb-6 tracking-tighter" style={{ color: isUp ? COLORS.up : isDown ? COLORS.down : COLORS.hold }}>
-          {isUp ? '建议做多' : isDown ? '建议避险' : '建议观望'}
-        </h3>
-        
-        <p className="text-base text-slate-300 leading-relaxed italic mb-10 font-medium">
-          &quot;{displayReason.length > 80 ? displayReason.slice(0, 80) + '...' : displayReason}&quot;
-        </p>
-
-        <div className="grid grid-cols-2 pt-8 border-t border-white/5">
-           <div>
-              <span className="text-[10px] text-slate-500 font-bold uppercase block mb-1 tracking-widest">建议参考价</span>
-              <p className="text-2xl font-black mono text-white">{data.support_price?.toFixed(2) || '--'}</p>
-           </div>
-           <div className="text-right">
-              <span className="text-[10px] text-slate-500 font-bold uppercase block mb-1 tracking-widest">实盘变动</span>
-              <p className={`text-xl font-black mono ${data.actual_change && data.actual_change >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                {data.actual_change ? (data.actual_change >= 0 ? '+' : '') + data.actual_change.toFixed(2) + '%' : '已结算'}
-              </p>
-           </div>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function StockVerticalFeed({ stock, onShowTactics, onVerticalScroll, scrollRequest }: { 
   stock: StockData, 
@@ -706,13 +586,6 @@ function DashboardPageContent() {
         } catch { return null; }
       })}
 
-      <style jsx global>{`
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-        .glass-card { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 32px; }
-        @keyframes warning-pulse { 0%, 100% { border-color: rgba(255, 255, 255, 0.05); } 50% { border-color: rgba(244, 63, 94, 0.3); background: rgba(244, 63, 94, 0.02); } }
-        .warning-pulse { animation: warning-pulse 2s infinite; }
-      `}</style>
     </main>
   );
 }
