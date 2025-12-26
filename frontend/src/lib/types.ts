@@ -75,4 +75,5 @@ export interface StockData {
     lastUpdated: string;
     rule: UserRule | null;
     loading: boolean;
+    justUpdated?: boolean; // 标记刚刚更新，用于触发UI动画
 }

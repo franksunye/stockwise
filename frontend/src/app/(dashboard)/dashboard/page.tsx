@@ -2,7 +2,7 @@
 
 import { useState, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LayoutGrid as Grid, Settings, ChevronDown, MessageSquare } from 'lucide-react';
+import { LayoutGrid as Grid, Settings, ChevronDown, MessageSquare, RefreshCw } from 'lucide-react';
 import { StockData } from '@/lib/types';
 import { 
   TacticalBriefDrawer, 
@@ -20,8 +20,15 @@ const SettingsModal = dynamic(() => import('@/components/SettingsModal').then(mo
   loading: () => null
 });
 
+// 格式化倒计时
+function formatCountdown(ms: number): string {
+  const minutes = Math.floor(ms / 60000);
+  const seconds = Math.floor((ms % 60000) / 1000);
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+}
+
 function DashboardContent() {
-  const { stocks, loadingPool, refresh } = useDashboardData();
+  const { stocks, loadingPool, refresh, isRefreshing, nextRefreshIn } = useDashboardData();
   const {
     currentIndex,
     scrollRef,
@@ -71,12 +78,28 @@ function DashboardContent() {
           <Link href="/dashboard/stock-pool" className="pointer-events-auto p-3 rounded-2xl bg-white/5 border border-white/10 active:scale-95 transition-all">
             <Grid className="w-5 h-5 text-indigo-400" />
           </Link>
-          <button 
-            onClick={() => setSettingsOpen(true)}
-            className="pointer-events-auto p-3 rounded-2xl bg-white/5 border border-white/10 active:scale-95 transition-all"
-          >
-            <Settings className="w-5 h-5 text-slate-400" />
-          </button>
+          
+          {/* 刷新指示器 + 设置按钮 */}
+          <div className="flex items-center gap-2 pointer-events-auto">
+            {/* 下次刷新倒计时 / 刷新中状态 */}
+            <button 
+              onClick={() => refresh()}
+              disabled={isRefreshing}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/5 border border-white/10 active:scale-95 transition-all disabled:opacity-50"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 text-slate-500 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <span className="text-[10px] font-bold text-slate-500 mono tabular-nums">
+                {isRefreshing ? '刷新中' : formatCountdown(nextRefreshIn)}
+              </span>
+            </button>
+            
+            <button 
+              onClick={() => setSettingsOpen(true)}
+              className="p-3 rounded-2xl bg-white/5 border border-white/10 active:scale-95 transition-all"
+            >
+              <Settings className="w-5 h-5 text-slate-400" />
+            </button>
+          </div>
         </div>
       </header>
 
