@@ -218,59 +218,71 @@ def sync_stock_meta():
         # 2. 获取 A 股列表 (分层次尝试以提高稳定性)
         try:
             print("   正在获取 A 股列表...")
-            # 策略 A: 尝试通过东财实时行情接口获取全量 (最稳定，包含 5000+ 股票)
+            # 策略 A: 直接调用东财 HTTP 接口 (跳过 SSL 问题，最快最全)
             try:
-                # 尝试关闭 SSL 验证提升稳定性
                 import requests
-                from urllib3.exceptions import InsecureRequestWarning
-                requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
-                os.environ['CURL_CA_BUNDLE'] = ''
-                os.environ['REQUESTS_CA_BUNDLE'] = ''
-                
-                a_stocks = ak.stock_zh_a_spot_em()
-                if not a_stocks.empty:
-                    symbol_col = "代码" if "代码" in a_stocks.columns else "symbol"
-                    name_col = "名称" if "名称" in a_stocks.columns else "name"
-                    for _, row in a_stocks.iterrows():
-                        symbol = str(row[symbol_col])
-                        name = str(row[name_col])
+                # 包含沪深主要板块的 A 股 (m:0 t:6, m:1 t:2, m:1 t:23)
+                url = "http://82.push2.eastmoney.com/api/qt/clist/get"
+                params = {
+                    "pn": "1", "pz": "6000", "po": "1", "np": "1", 
+                    "ut": "bd1d9ddb04089700cf9c27f6f7426281",
+                    "fltt": "2", "invt": "2", "fid": "f12",
+                    "fs": "m:0+t:6,m:1+t:2,m:1+t:23,m:0+t:80", # 沪深+北交所
+                    "fields": "f12,f14"
+                }
+                resp = requests.get(url, params=params, timeout=10)
+                data = resp.json()
+                stocks = data.get("data", {}).get("diff", [])
+                if stocks:
+                    for s in stocks:
+                        symbol = str(s["f12"])
+                        name = str(s["f14"])
                         if symbol.isdigit():
                             py, abbr = get_pinyin_info(name)
                             all_records.append((symbol, name, "CN", now_str, py, abbr))
-                    print(f"   ✅ 已成功获取 {len(a_stocks)} 条 A 股全量元数据")
-            except Exception as e_em:
-                print(f"   ⚠️ 全量列表获取失败 ({e_em})，尝试分交易所获取...")
-                # 策略 B: 分交易所获取备份
-                exchange_configs = [
-                    ("SH", ak.stock_info_sh_name_code, ["主板A股", "科创板"]),
-                    ("SZ", ak.stock_info_sz_name_code, ["A股列表"]),
-                    ("BJ", ak.stock_info_bj_name_code, [None]) # 北交所通常不带参数
-                ]
-                
-                for ex_name, func, symbols in exchange_configs:
-                    for sym in symbols:
-                        try:
-                            if sym: m_df = func(symbol=sym)
-                            else: m_df = func()
-                            
-                            if not m_df.empty:
-                                # 灵活匹配代码列
-                                s_col = next((c for c in ["证券代码", "A股代码", "代码", "code"] if c in m_df.columns), None)
-                                # 灵活匹配名称列
-                                n_col = next((c for c in ["证券简称", "A股简称", "名称", "name"] if c in m_df.columns), None)
-                                        
-                                if s_col and n_col:
-                                    count = 0
-                                    for _, row in m_df.iterrows():
-                                        symbol = str(row[s_col]).strip()
-                                        name = str(row[n_col]).strip()
-                                        if symbol.isdigit():
-                                            py, abbr = get_pinyin_info(name)
-                                            all_records.append((symbol, name, "CN", now_str, py, abbr))
-                                            count += 1
-                                    print(f"   已从 {ex_name}:{sym or 'ALL'} 获取 {count} 条元数据")
-                        except Exception as e_m:
-                            print(f"   ⚠️ {ex_name}:{sym} 获取失败: {e_m}")
+                    print(f"   ✅ 已通过 HTTP API 成功获取 {len(stocks)} 条 A 股全量元数据")
+            except Exception as e_http:
+                print(f"   ⚠️ HTTP 接口获取失败 ({e_http})，尝试策略 B (AkShare)...")
+                # 策略 B: 尝试通过 AkShare 官方推荐接口
+                try:
+                    a_stocks = ak.stock_zh_a_spot_em()
+                    if not a_stocks.empty:
+                        symbol_col = "代码" if "代码" in a_stocks.columns else "symbol"
+                        name_col = "名称" if "名称" in a_stocks.columns else "name"
+                        for _, row in a_stocks.iterrows():
+                            symbol = str(row[symbol_col])
+                            name = str(row[name_col])
+                            if symbol.isdigit():
+                                py, abbr = get_pinyin_info(name)
+                                all_records.append((symbol, name, "CN", now_str, py, abbr))
+                        print(f"   ✅ 已成功通过 AkShare 获取 {len(a_stocks)} 条 A 股元数据")
+                except Exception as e_em:
+                    print(f"   ⚠️ AkShare 获取失败 ({e_em})，尝试策略 C (分交易所备份)...")
+                    # 策略 C: 分交易所获取备份
+                    exchange_configs = [
+                        ("SH", ak.stock_info_sh_name_code, ["主板A股", "科创板"]),
+                        ("SZ", ak.stock_info_sz_name_code, ["A股列表", "创业板"]),
+                        ("BJ", ak.stock_info_bj_name_code, [None])
+                    ]
+                    for ex_name, func, symbols in exchange_configs:
+                        for sym in symbols:
+                            try:
+                                m_df = func(symbol=sym) if sym else func()
+                                if not m_df.empty:
+                                    s_col = next((c for c in ["证券代码", "A股代码", "代码", "code"] if c in m_df.columns), None)
+                                    n_col = next((c for c in ["证券简称", "A股简称", "名称", "name"] if c in m_df.columns), None)
+                                    if s_col and n_col:
+                                        count = 0
+                                        for _, row in m_df.iterrows():
+                                            symbol = str(row[s_col]).strip()
+                                            name = str(row[n_col]).strip()
+                                            if symbol.isdigit():
+                                                py, abbr = get_pinyin_info(name)
+                                                all_records.append((symbol, name, "CN", now_str, py, abbr))
+                                                count += 1
+                                        print(f"   已从 {ex_name}:{sym or 'ALL'} 获取 {count} 条元数据")
+                            except Exception as e_m:
+                                print(f"   ⚠️ {ex_name}:{sym} 获取失败: {e_m}")
         except Exception as e:
             print(f"   ⚠️ A 股列表整体获取异常: {e}")
 
