@@ -184,7 +184,7 @@ def sync_stock_meta():
             batch = all_records[i:i+batch_size]
             # 使用单条 INSERT 语句批量插入
             placeholders = ",".join(["(?, ?, ?, ?, ?, ?)"] * len(batch))
-            flat_values = [val for record in batch for val in record]
+            flat_values = tuple(val for record in batch for val in record)
             cursor.execute(f"""
                 INSERT OR REPLACE INTO stock_meta (symbol, name, market, last_updated, pinyin, pinyin_abbr)
                 VALUES {placeholders}
