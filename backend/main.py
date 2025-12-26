@@ -15,6 +15,10 @@ import akshare as ak
 import pandas as pd
 import pandas_ta_classic as ta
 import ssl
+
+# 解决 Pandas 2.2+ 的 FutureWarnings
+pd.set_option('future.no_silent_downcasting', True)
+
 # 解决某些环境下 akshare 接口的 SSL 握手问题
 try:
     ssl._create_default_https_context = ssl._create_unverified_context
@@ -650,7 +654,7 @@ def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool =
         df["kdj_d"] = stoch.iloc[:, 1]
         df["kdj_j"] = 3 * stoch.iloc[:, 0] - 2 * stoch.iloc[:, 1]
     
-    df = df.fillna(0)
+    df = df.fillna(0).infer_objects(copy=False)
     df["ai_summary"] = None
     
     # 6. 批量写入
