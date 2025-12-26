@@ -2,7 +2,7 @@
 
 import { Zap, Target, ShieldCheck, ChevronDown } from 'lucide-react';
 import { StockData, TacticalData } from '@/lib/types';
-import { getMarketScene } from '@/lib/date-utils';
+import { getMarketScene, formatStockSymbol } from '@/lib/date-utils';
 import { COLORS } from './constants';
 
 interface StockDashboardCardProps {
@@ -61,7 +61,7 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
           <div className="flex items-center justify-center gap-3 text-[10px] font-bold text-slate-600">
             <span className="flex items-center gap-1 uppercase tracking-widest"><Target className="w-3 h-3" /> 置信度 {((displayPrediction?.confidence || 0) * 100).toFixed(0)}%</span>
             <span className="w-0.5 h-0.5 rounded-full bg-slate-800" />
-            <span className="uppercase tracking-widest italic">{data.symbol}.HK</span>
+            <span className="uppercase tracking-widest italic">{formatStockSymbol(data.symbol)}</span>
           </div>
         </section>
 
@@ -91,10 +91,10 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
                           &quot;{tData.summary || displayPrediction?.ai_reasoning}&quot;
                         </p>
                         {p1 && <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 w-full overflow-hidden">
-                          <span className="text-[9px] font-black bg-indigo-500 text-white px-1 py-0.5 rounded italic shrink-0">P1</span>
+                          <span className="text-[9px] font-black bg-indigo-500 text-white px-1 py-0.5 rounded italic shrink-0">{p1.priority}</span>
                           <div className="flex items-center gap-1 min-w-0">
-                            <span className="text-[10px] font-bold text-indigo-400 shrink-0">{p1.a}:</span>
-                            <span className="text-[10px] text-slate-400 font-medium truncate">{p1.c}</span>
+                            <span className="text-[10px] font-bold text-indigo-400 shrink-0">{p1.action}:</span>
+                            <span className="text-[10px] text-slate-400 font-medium truncate">{p1.trigger}</span>
                           </div>
                         </div>}
                       </>

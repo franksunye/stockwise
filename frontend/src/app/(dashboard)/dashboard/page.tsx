@@ -14,6 +14,7 @@ import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { useTikTokScroll } from '@/hooks/useTikTokScroll';
+import { formatStockSymbol } from '@/lib/date-utils';
 
 const SettingsModal = dynamic(() => import('@/components/SettingsModal').then(mod => mod.SettingsModal), {
   ssr: false,
@@ -124,7 +125,7 @@ function DashboardContent() {
               </div>
               <div className="flex flex-col">
                 <span className="text-xs font-black italic group-hover:text-indigo-400 transition-colors uppercase">{currentStock?.name}</span>
-                <span className="text-[9px] text-slate-600 font-bold mono">{currentStock?.symbol}.HK</span>
+                <span className="text-[9px] text-slate-600 font-bold mono">{formatStockSymbol(currentStock?.symbol || '')}</span>
               </div>
            </div>
 

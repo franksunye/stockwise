@@ -22,22 +22,39 @@ def generate_ai_prediction(symbol: str, today_data: pd.Series):
     if 45 <= rsi <= 55 and signal != 'Short': 
         signal = 'Side'
     
-    # 构建决策树
+    # 构建更详细的战术建议
     tactics = {
         "holding": [
-            {"p": "P1", "a": "止损/减仓", "c": f"跌破 {support_price:.2f} 且30分钟不收回", "r": "防止趋势转盈为亏"},
-            {"p": "P2", "a": "持仓待涨", "c": "股价运行在MA20上方", "r": "跟随趋势"}
+            {"priority": "P1", "action": "持仓待涨", "trigger": "股价保持在 MA20 上方", "reason": "跟随趋势"} if signal == 'Long' else 
+            {"priority": "P1", "action": "分批减仓", "trigger": f"反弹至 {ma20:.2f} 遇阻", "reason": "降低风险"},
+            {"priority": "P2", "action": "止损离场", "trigger": f"跌破 {support_price:.2f} 且30分钟不收回", "reason": "防止亏损扩大"}
         ],
         "empty": [
-            {"p": "P1", "a": "观望/谨慎", "c": f"等待站稳 {ma20:.2f} 且放量", "r": "右侧交易更稳健"},
-            {"p": "P2", "a": "小仓试错", "c": f"回踩 {support_price:.2f} 不破", "r": "博取反弹"}
+            {"priority": "P1", "action": "小仓试错", "trigger": f"回踩 {support_price:.2f} 不破且放量", "reason": "博取反弹"} if signal != 'Short' else
+            {"priority": "P1", "action": "观望/谨慎", "trigger": f"等待站稳 {ma20:.2f}", "reason": "右侧交易更稳健"},
+            {"priority": "P2", "action": "加入自选", "trigger": "量能缩至极致后出现倍量", "reason": "识别变盘信号"}
+        ],
+        "general": [
+            {"priority": "P3", "action": "关注板块", "trigger": "港股生物医药板块整体回暖", "reason": "板块共振提高胜率"},
+            {"priority": "P3", "action": "风控提醒", "trigger": "若大盘跌破关键支撑", "reason": "系统性风险需防范"}
         ]
     }
     
     reasoning_data = {
-        "summary": f"当前价 {'站稳' if close > ma20 else '跌破'} MA20，RSI 指标显示{'动能充沛' if rsi > 50 else '超卖反弹需求'}。",
+        "summary": "缩量震荡，维持观望" if signal == 'Side' else ("顺势做多" if signal == 'Long' else "避险为主"),
+        "analysis": {
+            "trend": f"价格在 MA20 {'上方' if close > ma20 else '下方'}运行，短期趋势{'偏强' if close > ma20 else '偏弱'}。",
+            "momentum": f"RSI 读数 {rsi:.0f}，{'进入超买区' if rsi > 70 else ('进入超卖区' if rsi < 30 else '处于中性区域')}。",
+            "volume": f"成交量 {'正常' if today_data.get('volume', 0) > 100 else '低迷'}"
+        },
         "tactics": tactics,
-        "conflict": "趋势优先（MA20） > 动能（RSI）"
+        "key_levels": {
+            "support": round(support_price, 3),
+            "resistance": round(ma20 * 1.05, 3),
+            "stop_loss": round(support_price * 0.97, 3)
+        },
+        "conflict_resolution": "趋势优先（MA20） > 动能（RSI）",
+        "tomorrow_focus": f"能否有效突破 {ma20:.2f} 并实现量比 > 1.2"
     }
     
     reasoning = json.dumps(reasoning_data, ensure_ascii=False)

@@ -26,3 +26,23 @@ export function getMarketScene(): MarketScene {
     // 交易中 (09:30 - 16:00)
     return 'trading';
 }
+
+/**
+ * 格式化股票代码，根据代码特征添加市场后缀
+ */
+export function formatStockSymbol(symbol: string): string {
+    if (!symbol) return "";
+
+    // 港股通常是 5 位 (如 01398, 00700)
+    if (symbol.length === 5) {
+        return `${symbol}.HK`;
+    }
+
+    // A 股通常是 6 位
+    if (symbol.length === 6) {
+        if (symbol.startsWith('6')) return `${symbol}.SH`;
+        return `${symbol}.SZ`;
+    }
+
+    return symbol;
+}

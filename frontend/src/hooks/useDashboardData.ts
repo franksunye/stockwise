@@ -34,7 +34,7 @@ export function useDashboardData() {
         }
 
         try {
-            const poolRes = await fetch(`/api/stock-pool?userId=${user.userId}`);
+            const poolRes = await fetch(`/api/stock-pool?userId=${user.userId}`, { cache: 'no-store' });
             const poolData = await poolRes.json();
             const watchlist = poolData.stocks || [{ symbol: '02171', name: '科济药业' }];
 
@@ -59,8 +59,8 @@ export function useDashboardData() {
             const stockPromises = watchlist.map(async (stock: { symbol: string; name: string }) => {
                 try {
                     const [stockRes, historyRes] = await Promise.all([
-                        fetch(`/api/stock?symbol=${stock.symbol}`),
-                        fetch(`/api/predictions?symbol=${stock.symbol}&limit=5`)
+                        fetch(`/api/stock?symbol=${stock.symbol}`, { cache: 'no-store' }),
+                        fetch(`/api/predictions?symbol=${stock.symbol}&limit=5`, { cache: 'no-store' })
                     ]);
                     const sData = await stockRes.json();
                     const hData = await historyRes.json();

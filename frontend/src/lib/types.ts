@@ -48,20 +48,32 @@ export interface AIPrediction {
 
 // 战术建议明细
 export interface Tactic {
-    p: string; // 优先级 P1, P2...
-    a: string; // 动作 Action
-    c: string; // 触发条件 Condition
-    r: string; // 理由 Reason
+    priority: "P1" | "P2" | "P3";
+    action: string;
+    trigger: string;
+    reason: string;
 }
 
 // 战术数据包 (AI Reasoning 的解析格式)
 export interface TacticalData {
     summary: string;
+    analysis?: {
+        trend: string;
+        momentum: string;
+        volume: string;
+    };
     tactics: {
         holding: Tactic[];
         empty: Tactic[];
+        general?: Tactic[];
     };
-    conflict: string;
+    key_levels?: {
+        support: number;
+        resistance: number;
+        stop_loss: number;
+    };
+    conflict_resolution: string;
+    tomorrow_focus?: string;
 }
 
 // Dashboard 页面聚合数据

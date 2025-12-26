@@ -1,19 +1,6 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@libsql/client';
-import Database from 'better-sqlite3';
-import path from 'path';
-
-function getDbClient() {
-    const url = process.env.TURSO_DB_URL;
-    const authToken = process.env.TURSO_AUTH_TOKEN;
-
-    if (url && authToken) {
-        return createClient({ url, authToken });
-    } else {
-        const dbPath = path.join(process.cwd(), '..', 'data', 'stockwise.db');
-        return new Database(dbPath, { readonly: true });
-    }
-}
+export const dynamic = 'force-dynamic';
+import { getDbClient } from '@/lib/db';
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);

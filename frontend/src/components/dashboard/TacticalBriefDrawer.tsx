@@ -14,7 +14,9 @@ interface TacticalBriefDrawerProps {
 export function TacticalBriefDrawer({ 
   isOpen, onClose, data, userPos 
 }: TacticalBriefDrawerProps) {
-  const tactics = data?.tactics?.[userPos === 'none' ? 'empty' : userPos] || [];
+// 核心逻辑：获取当前场景建议 + 通用建议
+  const currentTactics = data?.tactics?.[userPos === 'holding' ? 'holding' : 'empty'] || [];
+  const generalTactics = data?.tactics?.general || [];
   
   return (
     <AnimatePresence>
@@ -45,7 +47,7 @@ export function TacticalBriefDrawer({
                <div className="w-12 h-1 rounded-full bg-white/20" />
             </div>
 
-            <div className="p-8 pt-4 flex flex-col">
+            <div className="p-8 pt-4 flex flex-col max-h-[85vh] overflow-y-auto scrollbar-hide">
               <header className="flex items-center justify-between mb-8">
                 <div>
                   <span className="text-xs uppercase tracking-[0.3em] text-slate-500 font-bold">智能决策核心</span>
@@ -55,27 +57,47 @@ export function TacticalBriefDrawer({
                   <CloseIcon size={20} />
                 </button>
               </header>
-              <div className="space-y-8">
+              <div className="space-y-8 pb-8">
                 <section>
                   <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
                     <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" /> 当前场景建议 ({userPos === 'holding' ? '已持仓' : '未建仓'})
                   </h3>
                   <div className="space-y-3">
-                    {tactics.map((t, idx) => (
+                    {currentTactics.map((t, idx) => (
                       <div key={idx} className="glass-card p-4 border-white/5 bg-white/[0.02]">
                         <div className="flex items-center gap-2 mb-2">
-                          <span className={`text-xs font-black px-1.5 py-0.5 rounded italic ${t.p === 'P1' ? 'bg-indigo-500 text-white' : 'bg-slate-700 text-slate-300'}`}>{t.p}</span>
-                          <span className="text-sm font-bold text-white">{t.a}</span>
+                          <span className={`text-[10px] font-black px-1.5 py-0.5 rounded italic ${t.priority === 'P1' ? 'bg-indigo-500 text-white' : 'bg-slate-700 text-slate-300'}`}>{t.priority}</span>
+                          <span className="text-sm font-bold text-white">{t.action}</span>
                         </div>
-                        <p className="text-xs text-slate-400 mb-1">触发: <span className="text-slate-200">{t.c}</span></p>
-                        <p className="text-xs text-slate-500 font-medium italic">理由: {t.r}</p>
+                        <p className="text-xs text-slate-400 mb-1">触发: <span className="text-slate-200">{t.trigger}</span></p>
+                        <p className="text-xs text-slate-500 font-medium italic">理由: {t.reason}</p>
                       </div>
                     ))}
                   </div>
                 </section>
-                <section className="p-4 rounded-2xl bg-indigo-500/5 border border-indigo-500/10 mb-8">
+
+                {generalTactics.length > 0 && (
+                  <section>
+                    <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-slate-500" /> 通用观察维度
+                    </h3>
+                    <div className="grid grid-cols-1 gap-3">
+                      {generalTactics.map((t, idx) => (
+                        <div key={idx} className="p-4 rounded-2xl border border-white/5 bg-white/[0.01]">
+                          <div className="flex items-center gap-2 mb-2">
+                             <div className="w-1 h-1 rounded-full bg-slate-700" />
+                             <span className="text-xs font-bold text-slate-300">{t.action}</span>
+                          </div>
+                          <p className="text-[11px] text-slate-500 leading-relaxed"><span className="text-slate-400">条件:</span> {t.trigger}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                <section className="p-4 rounded-2xl bg-indigo-500/5 border border-indigo-500/10">
                   <h3 className="text-xs font-black text-indigo-400 uppercase tracking-widest mb-2 flex items-center gap-2"><Info size={12} /> 核心冲突处理原则</h3>
-                  <p className="text-sm text-indigo-300/70 leading-relaxed italic">{data.conflict || "遵循趋势优先原则。"}</p>
+                  <p className="text-sm text-indigo-300/70 leading-relaxed italic">{data.conflict_resolution || "遵循趋势优先原则。"}</p>
                 </section>
               </div>
             </div>
