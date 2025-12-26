@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Trash2, Plus, Download } from 'lucide-react';
+import { Trash2, Plus, Download, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
 
 interface Stock {
   symbol: string;
@@ -102,8 +103,13 @@ export default function CorePoolAdmin() {
     <div className="min-h-screen bg-slate-950 text-slate-50 p-4">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold">股票池管理</h1>
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <Link href="/admin" className="p-2.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-all active:scale-90">
+              <ArrowLeft className="w-5 h-5 text-slate-400" />
+            </Link>
+            <h1 className="text-2xl font-bold">股票池管理</h1>
+          </div>
           <button
             onClick={handleExport}
             className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition"

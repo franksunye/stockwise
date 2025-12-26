@@ -1,35 +1,17 @@
 import { NextResponse } from 'next/server';
-import Database from 'better-sqlite3';
-import path from 'path';
-import { createClient } from '@libsql/client';
-
-const DB_PATH = path.join(process.cwd(), '..', 'data', 'stockwise.db');
-const TURSO_DB_URL = process.env.TURSO_DB_URL;
-const TURSO_AUTH_TOKEN = process.env.TURSO_AUTH_TOKEN;
-
-function getDb() {
-    if (TURSO_DB_URL) {
-        return createClient({
-            url: TURSO_DB_URL,
-            authToken: TURSO_AUTH_TOKEN,
-        });
-    }
-    return null;
-}
-
-function getLocalDb() {
-    return new Database(DB_PATH, { readonly: false });
-}
+import { getDbClient } from '@/lib/db';
 
 export async function GET() {
     try {
-        const turso = getDb();
-        if (turso) {
-            const result = await turso.execute('SELECT * FROM stock_pool ORDER BY added_at DESC');
+        const client = getDbClient();
+        const strategy = process.env.DB_STRATEGY || 'local';
+
+        if (strategy === 'cloud') {
+            const result = await (client as any).execute('SELECT symbol, name, first_watched_at as added_at FROM global_stock_pool ORDER BY first_watched_at DESC');
             return NextResponse.json({ stocks: result.rows });
         } else {
-            const db = getLocalDb();
-            const stocks = db.prepare('SELECT * FROM stock_pool ORDER BY added_at DESC').all();
+            const db = client as any;
+            const stocks = db.prepare('SELECT symbol, name, first_watched_at as added_at FROM global_stock_pool ORDER BY first_watched_at DESC').all();
             db.close();
             return NextResponse.json({ stocks });
         }
@@ -48,10 +30,12 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Symbol required' }, { status: 400 });
         }
 
-        const turso = getDb();
+        const client = getDbClient();
+        const strategy = process.env.DB_STRATEGY || 'local';
         let stockName = name;
 
-        if (turso) {
+        if (strategy === 'cloud') {
+            const turso = client as any;
             // 1. 尝试从 stock_meta 获取名称
             if (!stockName) {
                 const metaResult = await turso.execute({
@@ -67,14 +51,14 @@ export async function POST(request: Request) {
                 return NextResponse.json({ error: '未找到股票信息，请手动输入名称' }, { status: 404 });
             }
 
-            // 2. 插入股票池
+            // 2. 插入或忽略全局股票池（由 user_watchlist 逻辑统一管理，这里作为管理员补丁）
             await turso.execute({
-                sql: 'INSERT INTO stock_pool (symbol, name) VALUES (?, ?)',
-                args: [symbol, stockName]
+                sql: 'INSERT OR IGNORE INTO global_stock_pool (symbol, name, first_watched_at) VALUES (?, ?, ?)',
+                args: [symbol, stockName, new Date().toISOString()]
             });
             return NextResponse.json({ success: true, name: stockName });
         } else {
-            const db = getLocalDb();
+            const db = client as any;
             if (!stockName) {
                 const meta = db.prepare('SELECT name FROM stock_meta WHERE symbol = ?').get(symbol) as { name: string } | undefined;
                 if (meta) stockName = meta.name;
@@ -85,7 +69,7 @@ export async function POST(request: Request) {
                 return NextResponse.json({ error: '未找到股票基本信息' }, { status: 404 });
             }
 
-            db.prepare('INSERT INTO stock_pool (symbol, name) VALUES (?, ?)').run(symbol, stockName);
+            db.prepare('INSERT OR IGNORE INTO global_stock_pool (symbol, name, first_watched_at) VALUES (?, ?, ?)').run(symbol, stockName, new Date().toISOString());
             db.close();
             return NextResponse.json({ success: true, name: stockName });
         }
