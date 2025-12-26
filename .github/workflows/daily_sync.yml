@@ -32,7 +32,7 @@ jobs:
           python -c "import libsql_experimental; print(f'libsql_experimental: OK')"
           echo "All imports successful!"
 
-      - name: Run ETL Pipeline
+      - name: Run Multi-Period ETL Pipeline (Daily, Weekly, Monthly)
         env:
           PYTHONUNBUFFERED: "1"
           TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}

@@ -35,13 +35,20 @@ def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool =
         print(f"\n🔍 检查 {period} 状态: {symbol}")
     
     last_date_str = get_last_date(symbol, table_name)
-    buffer_days = 80 if period == "daily" else 150 * 7
     
+    # 动态确定回溯天数，确保指标计算有足够上下文
+    if period == "daily":
+        buffer_days = 80
+    elif period == "weekly":
+        buffer_days = 365 * 2  # 2年历史确保周均线准确
+    else:
+        buffer_days = 365 * 10 # 10年历史确保月均线准确
+
     if last_date_str:
         last_dt = datetime.strptime(last_date_str, "%Y-%m-%d")
         fetch_start_str = (last_dt - timedelta(days=buffer_days)).strftime("%Y%m%d")
     else:
-        fetch_start_str = (datetime.now() - timedelta(days=365 * 3)).strftime("%Y%m%d")
+        fetch_start_str = (datetime.now() - timedelta(days=buffer_days)).strftime("%Y%m%d")
 
     # 1. 抓取
     df = fetch_stock_data(symbol, period=period, start_date=fetch_start_str)
@@ -144,6 +151,7 @@ def run_full_sync():
         try:
             process_stock_period(stock, period="daily")
             process_stock_period(stock, period="weekly")
+            process_stock_period(stock, period="monthly")
             success_count += 1
         except Exception as e:
             errors.append(f"{stock} error: {str(e)[:100]}")
@@ -151,7 +159,9 @@ def run_full_sync():
     duration = time.time() - start_time
     report = f"### 📊 StockWise: Daily Full Sync\n"
     report += f"> **Status**: {'✅' if not errors else '⚠️'}\n"
-    report += f"- **Processed**: {success_count}/{len(target_stocks)}\n"
+    report += f"- **Target**: {len(target_stocks)} Stocks\n"
+    report += f"- **Periods**: 日线(D), 周线(W), 月线(M) ✅\n"
+    report += f"- **Processed**: {success_count} Success, {len(errors)} Errors\n"
     report += f"- **Duration**: {duration:.1f}s"
     send_wecom_notification(report)
 
@@ -169,6 +179,7 @@ if __name__ == "__main__":
     elif args.symbol:
         process_stock_period(args.symbol, period="daily")
         process_stock_period(args.symbol, period="weekly")
+        process_stock_period(args.symbol, period="monthly")
     elif args.realtime:
         sync_spot_prices(get_stock_pool())
     else:

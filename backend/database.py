@@ -39,6 +39,7 @@ def init_db():
 
     cursor.execute(create_table_sql("daily_prices"))
     cursor.execute(create_table_sql("weekly_prices"))
+    cursor.execute(create_table_sql("monthly_prices"))
     
     # 2. 股票元数据表
     cursor.execute("""

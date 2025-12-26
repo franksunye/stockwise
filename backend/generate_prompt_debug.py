@@ -32,7 +32,8 @@ def generate_full_prompt(symbol: str):
 
     data = dict(zip(columns, row))
     
-    # 3. 获取近5日历史行情（用于趋势感知）
+    # 3. 获取历史行情
+    # 日线：获取近5日历史行情（用于短期趋势）
     cursor.execute("""
         SELECT date, open, high, low, close, change_percent, volume
         FROM daily_prices 
@@ -40,7 +41,17 @@ def generate_full_prompt(symbol: str):
         ORDER BY date DESC LIMIT 5
     """, (symbol,))
     history_rows = cursor.fetchall()
-    
+
+    # 月线：获取最新月度数据（用于大周期背景）
+    cursor.execute("""
+        SELECT * FROM monthly_prices 
+        WHERE symbol = ? 
+        ORDER BY date DESC LIMIT 1
+    """, (symbol,))
+    m_columns = [desc[0] for desc in cursor.description]
+    m_row = cursor.fetchone()
+    m_data = dict(zip(m_columns, m_row)) if m_row else None
+
     # 4. 获取近5次 AI 预测记录（用于闭环反馈）
     cursor.execute("""
         SELECT date, signal, confidence, ai_reasoning, validation_status, actual_change
@@ -248,10 +259,19 @@ def generate_full_prompt(symbol: str):
 | MA5 | {data['ma5']} | - |
 | MA10 | {data['ma10']} | - |
 | MA20 | {data['ma20']} | - |
+| MA60 | {data['ma60']} | - |
 | RSI(14) | {rsi} | {rsi_status} |
 | MACD | DIF={data['macd']}, DEA={data['macd_signal']}, 柱={data['macd_hist']} | {macd_status} |
 | KDJ | K={data['kdj_k']}, D={data['kdj_d']}, J={data['kdj_j']} | - |
 | 布林带 | 上轨={data['boll_upper']}, 中轨={data['boll_mid']}, 下轨={data['boll_lower']} | - |
+
+## 月度行情及大周期背景 (Monthly)
+{f'''
+- **参考月报日期**: {m_data["date"]}
+- **大周期趋势**: {"月线收阳" if m_data["change_percent"] > 0 else "月线收阴"} (本月: {m_data["change_percent"]:+.2f}%)
+- **月线关键位**: MA20={m_data["ma20"]}, RSI={m_data["rsi"]:.1f}
+- **趋势关系**: {"股价运行在 20 月线上方，长线看好" if m_data["close"] > m_data["ma20"] else "月线级别承压，警惕长线风险"}
+''' if m_data else "- 暂无月线数据 -"}
 
 {prediction_review}
 ## 请求

@@ -12,15 +12,36 @@ def generate_ai_prediction(symbol: str, today_data: pd.Series):
     support_price = today_data.get('ma20', close * 0.95)
     
     # 策略决策
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    # 获取月度参考数据
+    cursor.execute("""
+        SELECT close, ma20, change_percent 
+        FROM monthly_prices 
+        WHERE symbol = ? 
+        ORDER BY date DESC LIMIT 1
+    """, (symbol,))
+    m_row = cursor.fetchone()
+    monthly_trend = "Bull" if m_row and m_row[0] > m_row[1] else "Bear"
+    
     if close < support_price * 0.98:
         signal = 'Short'
     elif close > ma20:
+        # 如果日线做多且月线也看好，置信度更高
         signal = 'Long'
     else:
         signal = 'Side'
         
     if 45 <= rsi <= 55 and signal != 'Short': 
         signal = 'Side'
+
+    # 置信度调整：月线与日线共振时提高置信度
+    confidence = 0.5
+    if signal == 'Long':
+        confidence = 0.85 if monthly_trend == "Bull" else 0.72
+    elif signal == 'Short':
+        confidence = 0.85 if monthly_trend == "Bear" else 0.72
     
     # 构建更详细的战术建议
     tactics = {
@@ -48,8 +69,13 @@ def generate_ai_prediction(symbol: str, today_data: pd.Series):
             "conclusion": "顺势行情" if close > ma20 else "压力位下方"
         },
         {
+            "step": "trend",
+            "data": f"月线级别处于 {'多头' if monthly_trend == 'Bull' else '空头'} 区域",
+            "conclusion": "大势稳健" if monthly_trend == 'Bull' else "长线承压"
+        },
+        {
             "step": "momentum",
-            "data": f"RSI 处于 {rsi:.0f} 水平",
+            "data": f"日线 RSI 处于 {rsi:.0f} 水平",
             "conclusion": "动能健康" if 40 <= rsi <= 60 else ("超买警惕" if rsi > 70 else "超卖反弹")
         },
         {
@@ -86,9 +112,6 @@ def generate_ai_prediction(symbol: str, today_data: pd.Series):
     confidence = 0.72 if signal != 'Side' else 0.5
 
     # 存储到数据库
-    conn = get_connection()
-    cursor = conn.cursor()
-    
     today_str = today_data.get('date')
     if not today_str:
         return
