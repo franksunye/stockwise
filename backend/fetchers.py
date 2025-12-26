@@ -171,13 +171,41 @@ def sync_stock_meta():
 
     print(f"   📊 A 股合计: {cn_count} 条")
 
+    # 批量写入数据库 (每 500 条一批，优化 Turso 远程写入性能)
     if all_records:
+        import time
+        start_time = time.time()
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.executemany("""
-            INSERT OR REPLACE INTO stock_meta (symbol, name, market, last_updated, pinyin, pinyin_abbr)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """, all_records)
+        
+        batch_size = 500
+        total = len(all_records)
+        for i in range(0, total, batch_size):
+            batch = all_records[i:i+batch_size]
+            # 使用单条 INSERT 语句批量插入
+            placeholders = ",".join(["(?, ?, ?, ?, ?, ?)"] * len(batch))
+            flat_values = [val for record in batch for val in record]
+            cursor.execute(f"""
+                INSERT OR REPLACE INTO stock_meta (symbol, name, market, last_updated, pinyin, pinyin_abbr)
+                VALUES {placeholders}
+            """, flat_values)
+            if (i + batch_size) % 2000 == 0 or i + batch_size >= total:
+                print(f"   💾 已写入 {min(i + batch_size, total)}/{total} 条...")
+        
         conn.commit()
         conn.close()
-        print(f"✅ 元数据同步完成 ({len(all_records)} 条)")
+        
+        duration = time.time() - start_time
+        hk_count = len([r for r in all_records if r[2] == "HK"])
+        cn_count = len([r for r in all_records if r[2] == "CN"])
+        
+        print(f"✅ 元数据同步完成 ({total} 条, 耗时 {duration:.1f}s)")
+        
+        # 发送企微通知
+        from utils import send_wecom_notification
+        report = f"### 📦 StockWise: 元数据同步\n"
+        report += f"> **Status**: ✅ 完成\n"
+        report += f"- **港股**: {hk_count} 条\n"
+        report += f"- **A 股**: {cn_count} 条\n"
+        report += f"- **耗时**: {duration:.1f}s"
+        send_wecom_notification(report)
