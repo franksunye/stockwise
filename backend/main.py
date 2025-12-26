@@ -177,10 +177,45 @@ if __name__ == "__main__":
     if args.sync_meta:
         sync_stock_meta()
     elif args.symbol:
-        process_stock_period(args.symbol, period="daily")
-        process_stock_period(args.symbol, period="weekly")
-        process_stock_period(args.symbol, period="monthly")
+        # On-Demand Sync: 需要错误处理和通知
+        start_time = time.time()
+        success = True
+        error_msg = None
+        
+        try:
+            process_stock_period(args.symbol, period="daily")
+            process_stock_period(args.symbol, period="weekly")
+            process_stock_period(args.symbol, period="monthly")
+        except Exception as e:
+            success = False
+            error_msg = str(e)
+            print(f"❌ {args.symbol} 同步失败: {e}")
+            import traceback
+            traceback.print_exc()
+        
+        duration = time.time() - start_time
+        
+        # 发送通知
+        if success:
+            report = f"### ✅ StockWise: On-Demand Sync\n"
+            report += f"> **Symbol**: {args.symbol}\n"
+            report += f"- **Status**: 成功\n"
+            report += f"- **Periods**: 日线 + 周线 + 月线\n"
+            report += f"- **Duration**: {duration:.1f}s"
+        else:
+            report = f"### ❌ StockWise: On-Demand Sync Failed\n"
+            report += f"> **Symbol**: {args.symbol}\n"
+            report += f"- **Status**: 失败\n"
+            report += f"- **Error**: {error_msg[:200]}\n"
+            report += f"- **Duration**: {duration:.1f}s"
+        
+        send_wecom_notification(report)
+        
+        # 确保失败时返回非零退出码
+        if not success:
+            sys.exit(1)
     elif args.realtime:
         sync_spot_prices(get_stock_pool())
     else:
         run_full_sync()
+
