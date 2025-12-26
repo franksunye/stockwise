@@ -24,11 +24,15 @@ interface Stats {
     prices: number;
     predictions: number;
     users: number;
+    stock_meta_total: number;
+    stock_meta_hk: number;
+    stock_meta_cn: number;
   };
   lastUpdates: {
     stocks: string | null;
     prices: string | null;
     predictions: string | null;
+    stock_meta: string | null;
   };
 }
 
@@ -125,6 +129,33 @@ export default function AdminDashboard() {
           ))}
         </section>
 
+        {/* Stock Meta Stats */}
+        <section className="glass-card p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2">
+              <Database className="w-4 h-4 text-indigo-400" />
+              <h2 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">股票元数据库</h2>
+            </div>
+            <p className="text-[10px] mono text-slate-600">
+              最后同步: {stats?.lastUpdates.stock_meta ? new Date(stats.lastUpdates.stock_meta).toLocaleString('zh-CN', { hour12: false }) : '-'}
+            </p>
+          </div>
+          <div className="grid grid-cols-3 gap-4">
+            <div className="bg-white/5 rounded-2xl p-5 text-center">
+              <p className="text-4xl font-black mono text-white mb-2">{(stats?.counts.stock_meta_total || 0).toLocaleString()}</p>
+              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">总股票数</p>
+            </div>
+            <div className="bg-rose-500/5 border border-rose-500/10 rounded-2xl p-5 text-center">
+              <p className="text-4xl font-black mono text-rose-400 mb-2">{(stats?.counts.stock_meta_cn || 0).toLocaleString()}</p>
+              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">A 股</p>
+            </div>
+            <div className="bg-blue-500/5 border border-blue-500/10 rounded-2xl p-5 text-center">
+              <p className="text-4xl font-black mono text-blue-400 mb-2">{(stats?.counts.stock_meta_hk || 0).toLocaleString()}</p>
+              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">港 股</p>
+            </div>
+          </div>
+        </section>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Data Timelines */}
           <section className="glass-card p-8 space-y-8">
@@ -134,6 +165,7 @@ export default function AdminDashboard() {
             </div>
             <div className="space-y-6">
               {[
+                { label: '元数据同步', date: stats?.lastUpdates.stock_meta, color: 'bg-pink-500' },
                 { label: '核心资产同步', date: stats?.lastUpdates.stocks, color: 'bg-indigo-500' },
                 { label: '行情数据对齐', date: stats?.lastUpdates.prices, color: 'bg-emerald-500' },
                 { label: '策略模型更新', date: stats?.lastUpdates.predictions, color: 'bg-amber-500' },
@@ -141,7 +173,7 @@ export default function AdminDashboard() {
                 <div key={i} className="flex items-center gap-4">
                   <div className="flex flex-col items-center gap-1">
                     <div className={`w-1.5 h-1.5 rounded-full ${item.color}`} />
-                    {i < 2 && <div className="w-0.5 h-8 bg-white/5 rounded-full" />}
+                    {i < 3 && <div className="w-0.5 h-8 bg-white/5 rounded-full" />}
                   </div>
                   <div className="flex-1">
                     <div className="flex justify-between items-baseline">
