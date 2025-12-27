@@ -2,7 +2,7 @@
 
 import { Zap, Target, ShieldCheck, ChevronDown } from 'lucide-react';
 import { StockData, TacticalData } from '@/lib/types';
-import { getMarketScene, formatStockSymbol } from '@/lib/date-utils';
+import { getMarketScene, formatStockSymbol, getPredictionTitle, getClosePriceLabelFromData, getValidationLabelFromData } from '@/lib/date-utils';
 import { COLORS } from './constants';
 
 interface StockDashboardCardProps {
@@ -31,8 +31,8 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
   const displayPrediction = data.prediction;
   const isTriggered = displayPrediction?.support_price && data.price.close < displayPrediction.support_price;
 
-  // 1. 标题文案逻辑
-  const mainTitle = isPostMarket ? '明日建议' : '今日建议';
+  // 1. 智能标题文案（基于交易日历）
+  const mainTitle = getPredictionTitle(scene);
   
   // 2. 信号文案简化展示
   const getSignalText = (signal?: string) => {
@@ -51,7 +51,7 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
         <section className="text-center space-y-1 py-2">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-1">
             <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-ping" />
-            <span className="text-[9px] font-bold text-slate-500 tracking-wider uppercase">{mainTitle} ({data.lastUpdated})</span>
+            <span className="text-[9px] font-bold text-slate-500 tracking-wider uppercase">{mainTitle}</span>
           </div>
           <h2 className="text-4xl font-black tracking-tighter" style={{ 
             color: displayPrediction?.signal === 'Long' ? COLORS.up : displayPrediction?.signal === 'Short' ? COLORS.down : COLORS.hold 
@@ -111,7 +111,7 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
               <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/5">
                 <div>
                   <span className="text-[10px] text-slate-600 uppercase font-black tracking-widest block mb-0.5">
-                    {isPostMarket ? '今日收盘价' : '当前成交价'}
+                    {getClosePriceLabelFromData(scene, data.price.date)}
                   </span>
                   <div className="flex items-baseline gap-1.5">
                     <span className="text-xl font-black mono tracking-tight">{data.price.close.toFixed(2)}</span>
@@ -124,7 +124,7 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
                 {/* 仅在收市后显示今日验证结果 */}
                 {isPostMarket && (
                   <div className="text-right">
-                    <span className="text-[10px] text-slate-600 uppercase font-black tracking-widest block mb-1">今日验证</span>
+                    <span className="text-[10px] text-slate-600 uppercase font-black tracking-widest block mb-1">{getValidationLabelFromData(data.price.date)}</span>
                     <div className="flex items-center justify-end gap-1.5 font-bold text-[11px]">
                       {!data.previousPrediction ? (
                         <span className="text-slate-600 italic">首日入池</span>
