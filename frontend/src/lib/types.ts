@@ -44,6 +44,7 @@ export interface AIPrediction {
     ai_reasoning: string;
     validation_status: 'Pending' | 'Correct' | 'Incorrect' | 'Neutral';
     actual_change: number | null;
+    close_price?: number; // 添加历史收盘价支持
 }
 
 // 战术建议明细

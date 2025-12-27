@@ -2,7 +2,7 @@
 
 import { Zap, Target, ShieldCheck, ChevronDown } from 'lucide-react';
 import { StockData, TacticalData } from '@/lib/types';
-import { getMarketScene, formatStockSymbol, getPredictionTitle, getClosePriceLabelFromData, getValidationLabelFromData } from '@/lib/date-utils';
+import { getMarketScene, formatStockSymbol, getPredictionTitle, getClosePriceLabelFromData, getValidationLabelFromData, isTradingDay, getHKTime } from '@/lib/date-utils';
 import { COLORS } from './constants';
 
 interface StockDashboardCardProps {
@@ -106,64 +106,104 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
               </div>
             </div>
 
-            {/* 动态价格与验证区块：开市前留白 */}
-            {!isPreMarket && (
-              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/5">
-                <div>
-                  <span className="text-[10px] text-slate-600 uppercase font-black tracking-widest block mb-0.5">
-                    {getClosePriceLabelFromData(scene, data.price.date)}
-                  </span>
-                  <div className="flex items-baseline gap-1.5">
-                    <span className="text-xl font-black mono tracking-tight">{data.price.close.toFixed(2)}</span>
-                    <span className="text-[10px] font-bold" style={{ color: data.price.change_percent >= 0 ? COLORS.up : COLORS.down }}>
-                      {data.price.change_percent >= 0 ? '+' : ''}{data.price.change_percent.toFixed(2)}%
-                    </span>
-                  </div>
-                </div>
-                
-                {/* 仅在收市后显示今日验证结果 */}
-                {isPostMarket && (
-                  <div className="text-right">
-                    <span className="text-[10px] text-slate-600 uppercase font-black tracking-widest block mb-1">{getValidationLabelFromData(data.price.date)}</span>
-                    <div className="flex items-center justify-end gap-1.5 font-bold text-[11px]">
-                      {!data.previousPrediction ? (
-                        <span className="text-slate-600 italic">首日入池</span>
-                      ) : data.previousPrediction.validation_status === 'Correct' ? (
-                        <span className="text-emerald-500/80 flex items-center gap-1"><ShieldCheck size={12} /> 结果准确</span>
-                      ) : data.previousPrediction.validation_status === 'Incorrect' ? (
-                        <span className="text-rose-500/80">❌ 偏差回顾</span>
-                      ) : (
-                        <span className="text-slate-600 italic">待验证</span>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
+            {/* AI 脑图卡片下方原本的成交价与验证已移至底部【事实区】 */}
           </div>
         </section>
 
-        {/* 3. 底部 AI 关键位与市场情绪 */}
+        {/* 3. 底部信息区：事实与履约 (Fact & Reality) */}
         <section className="grid grid-cols-2 gap-4 pb-2">
-           <div className="glass-card p-4 flex flex-col justify-between">
-              <span className="text-[9px] text-slate-600 font-black uppercase tracking-widest">AI 支撑位</span>
-              <p className="text-xl font-black mono text-rose-500/90 mt-1">{displayPrediction?.support_price?.toFixed(2) || '--'}</p>
+           {/* 左侧：市场事实 (Market Reality) */}
+           <div className="glass-card p-4 flex flex-col justify-between overflow-hidden">
+              {(() => {
+                const isMarketOpenSoon = isTradingDay() && isPreMarket;
+                return (
+                  <>
+                    <div className="relative group">
+                      <span className="text-[9px] text-slate-600 font-black uppercase tracking-widest block mb-1 transition-colors group-hover:text-slate-400">
+                        {isMarketOpenSoon ? '今日成交价' : getClosePriceLabelFromData(scene, data.price.date)}
+                      </span>
+                      {isMarketOpenSoon ? (
+                        <div className="flex items-baseline gap-1.5 h-7">
+                          <span className="text-xl font-black mono tracking-tight text-white/20 animate-pulse">--</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-baseline gap-1.5 overflow-hidden">
+                          <span className="text-xl font-black mono tracking-tight text-slate-100">{data.price.close.toFixed(2)}</span>
+                          <span className="text-[10px] font-bold" style={{ color: data.price.change_percent >= 0 ? COLORS.up : COLORS.down }}>
+                            {data.price.change_percent >= 0 ? '+' : ''}{data.price.change_percent.toFixed(2)}%
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* RSI 仅在事实已发生时显示 */}
+                    {isTradingDay() && !isPreMarket && (
+                      <div className="mt-2 pt-2 border-t border-white/5 flex items-center justify-between">
+                        <span className="text-[8px] text-slate-600 font-bold uppercase">RSI</span>
+                        <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-full bg-white/5 ${
+                          data.price.rsi > 70 ? 'text-rose-500' : data.price.rsi < 30 ? 'text-emerald-500' : 'text-slate-500'
+                        }`}>
+                          {data.price.rsi.toFixed(0)} · {data.price.rsi > 70 ? '超买' : data.price.rsi < 30 ? '超卖' : '稳定'}
+                        </span>
+                      </div>
+                    )}
+                    
+                    {/* 周一盘前显示一条微弱的提示线 */}
+                    {isMarketOpenSoon && (
+                      <div className="mt-2 pt-2 border-t border-dashed border-white/5">
+                        <span className="text-[8px] text-slate-700 font-bold italic">等待 09:30 事实流入</span>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
            </div>
            
-           {/* RSI 仅在有价格数据时（非开市前）显示 */}
-           {!isPreMarket ? (
-             <div className="glass-card p-4 flex flex-col justify-between">
-                <span className="text-[9px] text-slate-600 font-black uppercase tracking-widest">市场情绪 (RSI)</span>
-                <div className="flex items-baseline gap-2 mt-1">
-                  <p className="text-xl font-black mono">{data.price.rsi.toFixed(0)}</p>
-                  <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-white/5 text-slate-600 whitespace-nowrap">{data.price.rsi > 70 ? '超买' : data.price.rsi < 30 ? '超卖' : '运行稳健'}</span>
-                </div>
-             </div>
-           ) : (
-             <div className="glass-card p-4 flex items-center justify-center opacity-30 border-dashed">
-                <span className="text-[9px] text-slate-500 font-black uppercase tracking-widest italic">盘中开启监控</span>
-             </div>
-           )}
+           {/* 右侧：上期履约 (Last Implementation) */}
+           <div className="glass-card p-4 flex flex-col justify-between">
+              {(() => {
+                const isMarketOpenSoon = isTradingDay() && isPreMarket;
+                // 事实锚点日期：周一盘前看今天，其他时段看价格数据的日期
+                const realityDate = isMarketOpenSoon 
+                  ? getHKTime().toISOString().split('T')[0] 
+                  : data.price.date;
+                
+                // 精准匹配：寻找目标日期等于事实锚点的预测记录
+                const factPrediction = [data.prediction, data.previousPrediction].find(
+                  p => p?.target_date === realityDate
+                );
+
+                return (
+                  <>
+                    <span className="text-[9px] text-slate-600 font-black uppercase tracking-widest">
+                      {getValidationLabelFromData(realityDate)}
+                    </span>
+                    <div className="mt-1">
+                      {!factPrediction ? (
+                        <p className="text-[11px] font-bold text-slate-600 italic">待定 / 首日入池</p>
+                      ) : (
+                        <div className="flex flex-col gap-1">
+                          <div className="flex items-center gap-1.5 font-black text-xs leading-none">
+                            {factPrediction.validation_status === 'Correct' ? (
+                              <span className="text-emerald-500 flex items-center gap-1"><ShieldCheck size={14} /> 预测准确</span>
+                            ) : factPrediction.validation_status === 'Incorrect' ? (
+                              <span className="text-rose-500">❌ 产生偏差</span>
+                            ) : (
+                              <span className="text-slate-500 italic">待收盘验证</span>
+                            )}
+                          </div>
+                          {factPrediction.actual_change !== null && (
+                            <span className="text-[9px] font-bold text-slate-500 mono">
+                              实际变动: {factPrediction.actual_change >= 0 ? '+' : ''}{factPrediction.actual_change.toFixed(2)}%
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </>
+                );
+              })()}
+           </div>
         </section>
 
         {data.history.length > 1 && (

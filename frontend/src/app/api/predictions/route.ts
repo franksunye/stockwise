@@ -17,15 +17,24 @@ export async function GET(request: Request) {
 
         if ('execute' in client) {
             const rs = await client.execute({
-                sql: 'SELECT * FROM ai_predictions WHERE symbol = ? ORDER BY date DESC LIMIT ?',
+                sql: `
+                    SELECT p.*, d.close as close_price
+                    FROM ai_predictions p
+                    LEFT JOIN daily_prices d ON p.symbol = d.symbol AND p.date = d.date
+                    WHERE p.symbol = ? 
+                    ORDER BY p.date DESC 
+                    LIMIT ?
+                `,
                 args: [symbol, limit]
             });
             rows = rs.rows;
         } else {
             rows = client.prepare(`
-                SELECT * FROM ai_predictions 
-                WHERE symbol = ? 
-                ORDER BY date DESC 
+                SELECT p.*, d.close as close_price
+                FROM ai_predictions p
+                LEFT JOIN daily_prices d ON p.symbol = d.symbol AND p.date = d.date
+                WHERE p.symbol = ? 
+                ORDER BY p.date DESC 
                 LIMIT ?
             `).all(symbol, limit);
             client.close();

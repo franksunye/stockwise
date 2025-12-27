@@ -94,11 +94,20 @@ export function HistoricalCard({ data }: HistoricalCardProps) {
           </p>
         </div>
 
-        {/* 底部：实盘变动（简化，移除"建议参考价"） */}
+        {/* 底部：客观股票数据 */}
         <div className="pt-6 border-t border-white/5">
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-[10px] text-slate-500 font-bold uppercase block mb-1 tracking-widest">次日实盘变动</span>
+              <span className="text-[10px] text-slate-500 font-bold uppercase block mb-1 tracking-widest">
+                {formatDate(data.date)} 价格
+              </span>
+              <p className="text-2xl font-black mono text-slate-100">
+                {data.close_price ? data.close_price.toFixed(2) : '--'}
+              </p>
+            </div>
+            
+            <div className="text-right">
+              <span className="text-[10px] text-slate-500 font-bold uppercase block mb-1 tracking-widest">实际涨跌</span>
               <p className={`text-2xl font-black mono ${
                 (data.actual_change || 0) >= 0 ? 'text-emerald-500' : 'text-rose-500'
               }`}>
@@ -106,14 +115,6 @@ export function HistoricalCard({ data }: HistoricalCardProps) {
                   ? `${data.actual_change >= 0 ? '+' : ''}${data.actual_change.toFixed(2)}%`
                   : '--'
                 }
-              </p>
-            </div>
-            
-            {/* 置信度指示 */}
-            <div className="text-right">
-              <span className="text-[10px] text-slate-500 font-bold uppercase block mb-1 tracking-widest">AI 置信度</span>
-              <p className="text-lg font-black mono text-slate-300">
-                {((data.confidence || 0) * 100).toFixed(0)}%
               </p>
             </div>
           </div>

@@ -48,15 +48,29 @@ export async function GET(request: Request) {
                 args: [symbol]
             });
             const rsPred = await client.execute({
-                sql: 'SELECT * FROM ai_predictions WHERE symbol = ? ORDER BY date DESC LIMIT 2',
+                sql: `
+                    SELECT p.*, d.close as close_price
+                    FROM ai_predictions p
+                    LEFT JOIN daily_prices d ON p.symbol = d.symbol AND p.date = d.date
+                    WHERE p.symbol = ? 
+                    ORDER BY p.date DESC 
+                    LIMIT 2
+                `,
                 args: [symbol]
             });
             row = rsPrice.rows[0];
             latestPrediction = rsPred.rows[0];
-            prevPrediction = rsPred.rows[1]; // 第二条就是昨日的预测
+            prevPrediction = rsPred.rows[1];
         } else {
             row = client.prepare('SELECT * FROM daily_prices WHERE symbol = ? ORDER BY date DESC LIMIT 1').get(symbol);
-            const predictions = client.prepare('SELECT * FROM ai_predictions WHERE symbol = ? ORDER BY date DESC LIMIT 2').all(symbol) as Record<string, unknown>[];
+            const predictions = client.prepare(`
+                SELECT p.*, d.close as close_price
+                FROM ai_predictions p
+                LEFT JOIN daily_prices d ON p.symbol = d.symbol AND p.date = d.date
+                WHERE p.symbol = ? 
+                ORDER BY p.date DESC 
+                LIMIT 2
+            `).all(symbol) as Record<string, unknown>[];
             latestPrediction = predictions[0];
             prevPrediction = predictions[1];
             client.close();

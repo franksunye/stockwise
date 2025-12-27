@@ -284,10 +284,8 @@ export function getValidationLabelFromData(dataDateStr?: string): string {
 }
 
 /**
- * 根据当前时间判断市场场景 (港股)
- * S1: 开市前 (00:00 - 09:30)
- * S2: 交易中 (09:30 - 16:00)
- * S3: 收市后 (16:00 - 24:00)
+ * 根据当前时间判定市场场景 (港股)
+ * 逻辑增强：非交易日统一判定为 post_market (展示既定事实)
  */
 export function getMarketScene(): MarketScene {
     const now = new Date();
@@ -295,17 +293,22 @@ export function getMarketScene(): MarketScene {
     const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
     const hkTime = new Date(utc + (3600000 * 8));
 
+    // 如果今天不是交易日，无论几点，都视为上一周期的 post_market 状态
+    if (isMarketClosed(hkTime)) {
+        return 'post_market';
+    }
+
     const hours = hkTime.getHours();
     const minutes = hkTime.getMinutes();
     const totalMinutes = hours * 60 + minutes;
 
-    // 收市后 (>= 16:00 = 960m)
+    // 交易日收市后 (>= 16:00 = 960m)
     if (totalMinutes >= 960) return 'post_market';
 
-    // 开市前 (< 09:30 = 570m)
+    // 交易日开市前 (< 09:30 = 570m)
     if (totalMinutes < 570) return 'pre_market';
 
-    // 交易中 (09:30 - 16:00)
+    // 交易日交易中 (09:30 - 16:00)
     return 'trading';
 }
 
