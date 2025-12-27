@@ -132,13 +132,14 @@ export function getPredictionTitle(scene: MarketScene): string {
     const nextDate = nextDay.getDate();
     const nextDayOfWeek = nextDay.getDay();
 
-    if (daysDiff === 1) {
-        return '明日建议';
-    }
-
-    // 如果是下周一（间隔2-3天，跨越周末）
+    // 如果是下周一（间隔3天内，跨越周末）
+    // 优先判读：避免周日时显示"明日建议"（虽然物理上正确，但在深夜/周末语境下容易造成"明日是周日"的误解）
     if (daysDiff <= 3 && nextDayOfWeek === 1) {
         return '下周一建议';
+    }
+
+    if (daysDiff === 1) {
+        return '明日建议';
     }
 
     // 间隔在一周内
