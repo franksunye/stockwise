@@ -192,11 +192,6 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
                               <span className="text-slate-500 italic">待收盘验证</span>
                             )}
                           </div>
-                          {factPrediction.actual_change !== null && (
-                            <span className="text-[9px] font-bold text-slate-500 mono">
-                              实际变动: {factPrediction.actual_change >= 0 ? '+' : ''}{factPrediction.actual_change.toFixed(2)}%
-                            </span>
-                          )}
                         </div>
                       )}
                     </div>
