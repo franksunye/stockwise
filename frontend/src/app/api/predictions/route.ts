@@ -20,7 +20,7 @@ export async function GET(request: Request) {
                 sql: `
                     SELECT p.*, d.close as close_price
                     FROM ai_predictions p
-                    LEFT JOIN daily_prices d ON p.symbol = d.symbol AND p.date = d.date
+                    LEFT JOIN daily_prices d ON p.symbol = d.symbol AND p.target_date = d.date
                     WHERE p.symbol = ? 
                     ORDER BY p.date DESC 
                     LIMIT ?
@@ -32,7 +32,7 @@ export async function GET(request: Request) {
             rows = client.prepare(`
                 SELECT p.*, d.close as close_price
                 FROM ai_predictions p
-                LEFT JOIN daily_prices d ON p.symbol = d.symbol AND p.date = d.date
+                LEFT JOIN daily_prices d ON p.symbol = d.symbol AND p.target_date = d.date
                 WHERE p.symbol = ? 
                 ORDER BY p.date DESC 
                 LIMIT ?

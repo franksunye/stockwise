@@ -60,7 +60,7 @@ export function HistoricalCard({ data }: HistoricalCardProps) {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <div className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-[11px] font-black text-slate-400 tracking-widest mono">
-              {formatDate(data.date)}
+              {formatDate(data.target_date)}
             </div>
             <div className="h-px w-8 bg-white/10" />
           </div>
@@ -99,7 +99,7 @@ export function HistoricalCard({ data }: HistoricalCardProps) {
           <div className="flex items-center justify-between">
             <div>
               <span className="text-[10px] text-slate-500 font-bold uppercase block mb-1 tracking-widest">
-                {formatDate(data.date)} 价格
+                {formatDate(data.target_date)} 价格
               </span>
               <p className="text-2xl font-black mono text-slate-100">
                 {data.close_price ? data.close_price.toFixed(2) : '--'}

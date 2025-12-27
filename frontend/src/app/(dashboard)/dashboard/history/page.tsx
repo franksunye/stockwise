@@ -105,7 +105,7 @@ function HistoryContent() {
                    <Minus size={14} style={{ color: COLORS.hold }} />}
                 </div>
                 <div>
-                  <p className="text-xs font-black mono text-slate-300">{item.date.split('-').slice(1).join('.')}</p>
+                  <p className="text-xs font-black mono text-slate-300">{item.target_date.split('-').slice(1).join('.')}</p>
                   <p className="text-xs font-bold uppercase tracking-widest" style={{ 
                     color: item.signal === 'Long' ? COLORS.up : item.signal === 'Short' ? COLORS.down : COLORS.hold 
                   }}>
