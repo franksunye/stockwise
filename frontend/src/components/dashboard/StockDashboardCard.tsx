@@ -143,10 +143,10 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
           </div>
         </section>
 
-        {/* 3. 底部建议价与市场情绪 */}
+        {/* 3. 底部 AI 关键位与市场情绪 */}
         <section className="grid grid-cols-2 gap-4 pb-2">
            <div className="glass-card p-4 flex flex-col justify-between">
-              <span className="text-[9px] text-slate-600 font-black uppercase tracking-widest">{data.rule?.position === 'holding' ? '止损预警' : '策略支撑'}</span>
+              <span className="text-[9px] text-slate-600 font-black uppercase tracking-widest">AI 支撑位</span>
               <p className="text-xl font-black mono text-rose-500/90 mt-1">{displayPrediction?.support_price?.toFixed(2) || '--'}</p>
            </div>
            
