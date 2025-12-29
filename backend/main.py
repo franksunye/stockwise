@@ -298,4 +298,7 @@ if __name__ == "__main__":
         sync_spot_prices(get_stock_pool())
     else:
         run_full_sync(market_filter=args.market)
+        
+    # 强制退出，防止 libsql-client 后台线程导致进程挂起
+    sys.exit(0)
 

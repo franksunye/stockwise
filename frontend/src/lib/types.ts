@@ -65,6 +65,7 @@ export interface ReasoningStep {
 // 战术数据包 (AI Reasoning 的解析格式)
 export interface TacticalData {
     summary: string;
+    news_analysis?: string[]; // AI 抓取的关键新闻摘要
     reasoning_trace: ReasoningStep[]; // 5步推理链，替代原 analysis
     tactics: {
         holding: Tactic[];

@@ -143,6 +143,24 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
                             <span className="text-[10px] text-slate-400 font-medium truncate">{p1.trigger}</span>
                           </div>
                         </div>}
+
+                        {/* 新闻情报雷达 - 仅当有新闻时显示 */}
+                        {tData.news_analysis && tData.news_analysis.length > 0 && (
+                          <div className="mt-3 pt-3 border-t border-white/5 space-y-2">
+                             <div className="flex items-center gap-1.5 text-[9px] font-black text-slate-500 uppercase tracking-widest">
+                                <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse"></span>
+                                重点情报 (Last 48h)
+                             </div>
+                             <div className="space-y-1.5">
+                               {tData.news_analysis.slice(0, 2).map((news, idx) => (
+                                 <div key={idx} className="flex gap-2 items-start">
+                                    <span className="text-[10px] mt-0.5 opacity-50">📰</span>
+                                    <p className="text-[10px] text-slate-400 leading-snug line-clamp-2">{news}</p>
+                                 </div>
+                               ))}
+                             </div>
+                          </div>
+                        )}
                       </>
                     );
                   } catch {

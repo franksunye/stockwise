@@ -162,102 +162,96 @@ def prepare_stock_analysis_prompt(symbol: str):
     macd_hist = data.get('macd_hist', 0)
     macd_status = "金叉/多头" if macd_hist > 0 else "死叉/空头"
 
-    # 系统提示词
+    # System Prompt (融合版：由简入繁，既要格式也要灵魂)
     system_prompt = """你是 StockWise 的 AI 决策助手，专门为个人投资者提供股票操作建议。
 
-## 你的核心原则：
+## 你的核心原则
 1. **理性锚点**：你不预测涨跌，你提供"执行纪律"的触发条件。
 2. **个性化**：根据用户是"已持仓"还是"未建仓"，提供差异化的行动建议。
 3. **可验证**：每条建议都有明确的触发条件，事后可验证对错。
 4. **简洁直白**：使用普通人能秒懂的语言，避免晦涩术语。
-5. **严禁搜索**：禁止调用任何搜索工具或进行联网搜索，仅基于提供的上下文进行分析。
+5. **板块联动**：请结合你对该公司所属行业、板块特性及市场环境的理解，给出更有背景的建议。
+6. **事件驱动**：如果你具备搜索能力，请尝试搜索该公司近期的重大新闻、公告或事件，并将其纳入分析（如无搜索能力可跳过此步）。
 
-## 你的输出格式：
-你必须严格按照以下 JSON 格式输出，**禁止在 JSON 内容中嵌套代码块或特殊标记**：
+## 任务目标
+根据提供的股票数据，生成 JSON 格式的操作建议。
+
+## 严格约束
+1. **必须输出纯 JSON**：不要包含 ```json 或 ``` 标记，不要包含任何前言或后记。
+2. **严禁幻觉**：仅根据提供的数据分析，不要编造新闻。
+3. **格式保证**：确保所有括号正确闭合，确保是合法的 JSON 对象。
+
+## 输出结构示例
 {
-  "signal": "Long" | "Side" | "Short",
-  "confidence": 0.0 ~ 1.0,
-  "summary": "一句话核心结论（15字以内）",
+  "signal": "Long",
+  "confidence": 0.85,
+  "summary": "趋势向上，回调买入",
   "reasoning_trace": [
-    { "step": "trend", "data": "趋势数据（简短）", "conclusion": "判断（≤15字）" },
-    { "step": "momentum", "data": "指标数据（简短）", "conclusion": "判断（≤15字）" },
-    { "step": "volume", "data": "量能数据", "conclusion": "量能判断（≤15字）" },
-    { "step": "history", "data": "历史数据说明", "conclusion": "总结（≤15字）" },
-    { "step": "decision", "data": "关键原因", "conclusion": "最终决策（≤15字）" }
+    { "step": "trend", "data": "MA20向上，均线多头", "conclusion": "中期看涨" },
+    { "step": "momentum", "data": "RSI金叉，MACD水上", "conclusion": "动能增强" },
+    { "step": "volume", "data": "成交量温和放大", "conclusion": "资金流入" },
+    { "step": "level", "data": "回踩30日线支撑有效", "conclusion": "支撑确认" },
+    { "step": "decision", "data": "多头趋势共振", "conclusion": "确立买入" }
+  ],
+  "news_analysis": [
+    "财报利好：净利润同比增长30%，超出预期",
+    "行业政策：发改委发布新规，利好板块估值修复"
   ],
   "tactics": {
-    "holding": [
-        { "priority": "P1", "action": "...", "trigger": "...", "reason": "..." },
-        { "priority": "P2", "action": "...", "trigger": "...", "reason": "..." }
-    ],
-    "empty": [
-        { "priority": "P1", "action": "...", "trigger": "...", "reason": "..." },
-        { "priority": "P2", "action": "...", "trigger": "...", "reason": "..." }
-    ],
-    "general": [
-        { "priority": "P3", "action": "...", "trigger": "...", "reason": "..." }
-    ]
+    "holding": [{"priority": "P1", "action": "持仓", "trigger": "不破MA20", "reason": "趋势延续"}],
+    "empty": [{"priority": "P1", "action": "买入", "trigger": "回踩MA20", "reason": "低吸机会"}],
+    "general": [{"priority": "P2", "action": "观察", "trigger": "大盘转弱", "reason": "系统风险"}]
   },
   "key_levels": {
-    "support": 数值,
-    "resistance": 数值,
-    "stop_loss": 数值
+    "support": 10.5,
+    "resistance": 11.2,
+    "stop_loss": 10.2
   },
-  "conflict_resolution": "指标冲突决策原则",
-  "tomorrow_focus": "关注重点"
-}
+  "conflict_resolution": "以趋势为主",
+  "tomorrow_focus": "量能变化"
+}"""
 
-请确保不要在 data 或 conclusion 字段中包含诸如 ```json 等内容。直接输出合法的 JSON 字符串。"""
+    # 用户输入提示词 (优化版，末尾增强指令)
+    user_prompt = f"""# 股票数据输入
 
-    # 用户输入提示词
-    user_prompt = f"""# 用户输入 (User Input)
-
-## 股票信息
-- **名称**: {stock_name}
-- **代码**: {symbol}.HK
-- **日期**: {data['date']}
-
+## 1. 基础信息
+- **{stock_name}** ({symbol}.HK)
+- 日期: {data['date']}
 {profile_section}
 
-## 近10日行情走势 (Tactical)
+## 2. 价格行为 (Price Action)
+近10日行情:
 | 日期 | 开盘 | 最高 | 最低 | 收盘 | 涨跌幅 | 成交量 |
 |------|------|------|------|------|--------|--------|
 {chr(10).join(history_summary)}
 
-## 最新技术指标 (Indicators)
-| 指标 | 数值 | 状态 |
-|------|------|------|
-| MA5/10/20 | {data['ma5']}/{data['ma10']}/{data['ma20']} | { "多头排列" if data['ma5']>data['ma10']>data['ma20'] else "均线纠缠/空头" } |
-| MA60 | {data['ma60']} | {"价格在支撑线上方" if data['close']>data['ma60'] else "价格在压力线下方"} |
-| RSI(14) | {rsi} | {rsi_status} |
-| MACD | DIF={data['macd']}, DEA={data['macd_signal']}, 柱={data['macd_hist']} | {macd_status} |
-| KDJ | K={data['kdj_k']}, D={data['kdj_d']}, J={data['kdj_j']} | - |
-| 布林带 | 上轨={data['boll_upper']}, 中轨={data['boll_mid']}, 下轨={data['boll_lower']} | - |
+## 3. 技术指标 (Indicators - 日线)
+- **趋势**: MA20={data['ma20']}, MA60={data['ma60']} ({ "多头" if data['close']>data['ma20'] else "空头/震荡" })
+- **动能**: RSI={rsi:.1f} ({rsi_status}), MACD={macd_status}
+- **位置**: 收盘{data['close']}, 布林上轨{data['boll_upper']}, 下轨{data['boll_lower']}
 
-## 周线行情及波段趋势 (Meso)
-### 最近8周数据
-| 周末日期 | 收盘价 | 周涨跌幅 | 周MA20 | 周RSI |
-|----------|--------|----------|--------|-------|
+## 4. 周期背景 (Context)
+### 周线透视 (最近8周)
+| 周末日期 | 收盘 | 涨跌幅 | MA20 | RSI |
+|----------|------|--------|------|-----|
 {chr(10).join(weekly_summary)}
+- **季度区间(近12周)**: {weekly_stats['low']} ~ {weekly_stats['high']}
 
-### 季度统计 (近12周)
-- **12周最高**: {weekly_stats['high']}
-- **12周最低**: {weekly_stats['low']}
-
-## 月度行情及战略背景 (Macro)
-### 最近3个月数据
-| 月末日期 | 收盘价 | 月涨跌幅 |
-|----------|--------|----------|
+### 月线透视 (最近3个月)
+| 月末日期 | 收盘 | 涨跌幅 |
+|----------|------|--------|
 {chr(10).join(monthly_summary)}
-
-### 年度统计 (近12个月)
-- **12个月最高**: {monthly_stats['high']}
-- **12个月最低**: {monthly_stats['low']}
-- **月线关键指标**: MA20={monthly_stats['ma20']:.2f}, RSI={monthly_stats['rsi']:.1f}
-- **长线定位**: {"股价在20月线上方，处于大周期上升通道" if data['close'] > monthly_stats['ma20'] else "股价在20月线下方，大周期处于弱势调整期"}
+- **年度区间(近12个月)**: {monthly_stats['low']} ~ {monthly_stats['high']}
+- **长期趋势**: {"牛市" if data['close'] > monthly_stats['ma20'] else "熊市/调整"} (当前价 vs 20月线)
 
 {prediction_review}
-## 请求
-请基于以上数据，为该股票生成明日的操作建议。"""
+
+## 核心指令
+请基于上述数据进行推理，并生成**严格合法的 JSON**响应。
+重点关注：如果信号是 Long，必须有明确的止损位；如果信号是 Side，置信度不应超过 0.6。
+👉 **如果具备联网能力，请务必搜索该股票在过去48小时内的重磅新闻（财报、监管、重大合同），并将新闻影响纳入决策。**
+(直接输出 JSON，不要 Markdown)"""
+
+    return system_prompt, user_prompt
 
     return system_prompt, user_prompt

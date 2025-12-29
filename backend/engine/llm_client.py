@@ -52,7 +52,7 @@ class LLMClient:
         messages: list,
         model: str = None,
         temperature: float = 0.7,
-        max_tokens: int = 2000
+        max_tokens: int = 4096
     ) -> Tuple[Optional[str], Dict[str, Any]]:
         """
         发送聊天请求
@@ -220,70 +220,58 @@ class LLMClient:
     
     def _parse_json_response(self, content: str) -> Optional[Dict[str, Any]]:
         """
-        解析 LLM 返回的 JSON 内容（处理 markdown 代码块、嵌套及不完整内容）
+        解析 LLM 返回的 JSON 内容（深度清洗版）
+        针对: Markdown 块、非标准引号、开头结尾乱码、自动截断修复
         """
         if not content:
             return None
-            
-        # 清理常见的干扰字符
-        content = content.strip()
         
-        # 1. 尝试直接解析
+        # 1. 尝试标准解析
         try:
             return json.loads(content)
-        except json.JSONDecodeError:
+        except:
             pass
             
         import re
         
-        # 2. 尝试提取完整闭合的 ```json ... ``` 块（非贪婪匹配）
-        # 优先尝试最前面的块，因为后面的块可能是重复且截断的
-        json_blocks = re.findall(r'```json\s*(.*?)\s*```', content, re.DOTALL)
-        
-        for block in json_blocks:
-            try:
-                # 再次清理块内可能存在的嵌套幻觉（截断到下一个 ``` 之前）
-                clean_block = block.split('```')[0].strip()
-                return json.loads(clean_block)
-            except json.JSONDecodeError:
-                continue
-                
-        # 3. 如果没找到完整的，尝试处理只有开始没有结束的代码块（截断情况）
-        # 我们只关心第一个 ```json 开始的内容
-        match = re.search(r'```json\s*(.*)', content, re.DOTALL)
-        if match:
-            # 截取到下一个 ``` 出现之前（如果有的话，可能是重复输出的开始）
-            raw_block = match.group(1)
-            # 查找是否还有下一个 ``` (说明有重复输出)
-            next_marker = raw_block.find('```')
-            if next_marker != -1:
-                raw_block = raw_block[:next_marker]
-            
-            clean_block = raw_block.strip()
-            try:
-                return json.loads(clean_block)
-            except json.JSONDecodeError as e:
-                # 尝试修复由于截断导致的 JSON 不完整 (只针对没有下一个标记的情况，如果有下一个标记通常意味着第一块是完整的)
-                # 但如果是重复输出，raw_block 已经被截断到完整的第一部分了，应该能解析。
-                # 如果还是解析不了，说明第一部分本身也被截断了，或者格式错误。
-                pass
-
-        # 4. 尝试寻找第一个 { 和与之匹配的 } (使用简单的计数器或正则)
-        # 这种方式对付没有 markdown 标记的输出很有效
+        # 2. 移除常见的 Markdown 标记
+        content_clean = re.sub(r'^```json\s*', '', content, flags=re.MULTILINE)
+        content_clean = re.sub(r'^```\s*', '', content_clean, flags=re.MULTILINE)
+        content_clean = re.sub(r'```$', '', content_clean, flags=re.MULTILINE)
         try:
+            return json.loads(content_clean)
+        except:
+            pass
+            
+        # 3. 暴力提取最外层的 {}
+        try:
+            # 找到第一个 {
+            start_idx = content.find('{')
+            if start_idx != -1:
+                # 倒序找到最后一个 }
+                end_idx = content.rfind('}')
+                if end_idx != -1 and end_idx > start_idx:
+                    possible_json = content[start_idx : end_idx + 1]
+                    # 尝试清理可能混入的换行符问题
+                    possible_json = re.sub(r',\s*}', '}', possible_json) # 移除尾随逗号
+                    return json.loads(possible_json)
+        except:
+            pass
+
+        # 4. 如果还是不行，尝试使用栈平衡法找到完整的对象 (针对粘包/截断)
+        try:
+            balance = 0
             start = content.find('{')
             if start != -1:
-                # 寻找匹配的闭合括号
-                balance = 0
                 for i in range(start, len(content)):
-                    if content[i] == '{':
+                    char = content[i]
+                    if char == '{':
                         balance += 1
-                    elif content[i] == '}':
+                    elif char == '}':
                         balance -= 1
                         if balance == 0:
-                            # 找到完整闭合的 JSON 对象
-                            possible_json = content[start:i+1]
-                            return json.loads(possible_json)
+                            # 找到了一个完整的顶层对象
+                            return json.loads(content[start:i+1])
         except:
             pass
             
