@@ -13,15 +13,97 @@ if sys.stdout.encoding != 'utf-8':
 from config import DB_PATH, TURSO_DB_URL, TURSO_AUTH_TOKEN
 
 try:
-    from libsql_experimental import connect
+    import libsql_client
 except ImportError:
-    connect = None
+    libsql_client = None
+
+# --- LibSQL (Turso) 适配器 ---
+# 用于将 libsql_client (HTTP) 伪装成 sqlite3 (Native) 的接口
+class LibSQLCursorAdapter:
+    def __init__(self, client):
+        self.client = client
+        self._rows = []
+        self._idx = 0
+        self.rowcount = 0
+        self.description = None
+
+    def execute(self, sql, params=None):
+        try:
+            # libsql_client 要求 params 为 list 或 dict，sqlite3 有时传入 tuple
+            if params and isinstance(params, tuple):
+                params = list(params)
+                
+            # 使用 create_client_sync 创建的 client 是同步的
+            result = self.client.execute(sql, params)
+            self._rows = result.rows
+            self._idx = 0
+            self.rowcount = result.rows_affected
+            
+            # 构造 description (pandas 需要)
+            # result 应该有 columns 属性 (如果是查询)
+            # 如果是 update/insert，columns 可能是空的
+            if hasattr(result, 'columns') and result.columns:
+                # 构造符合 DBAPI 2.0 的 description: (name, type_code, display_size, internal_size, precision, scale, null_ok)
+                self.description = [(col, None, None, None, None, None, None) for col in result.columns]
+            else:
+                self.description = None
+                
+            return self
+        except Exception as e:
+            # 忽略一些非关键错误 (如 table already exists)
+            if "already exists" not in str(e):
+                print(f"❌ SQL执行失败: {sql[:50]}... -> {e}")
+            raise e
+
+    def executemany(self, sql, seq_of_parameters):
+        stmts = []
+        for params in seq_of_parameters:
+            if isinstance(params, tuple):
+                params = list(params)
+            stmts.append(libsql_client.Statement(sql, params))
+        
+        try:
+            self.client.batch(stmts)
+        except Exception as e:
+            print(f"❌ 批量执行失败: {e}")
+            raise e
+
+    def fetchone(self):
+        if self._idx < len(self._rows):
+            row = self._rows[self._idx]
+            self._idx += 1
+            return row
+        return None
+
+    def fetchall(self):
+        return self._rows
+
+    def close(self):
+        # HTTP cursor 无需关闭，但需满足 DBAPI 接口
+        pass
+
+class LibSQLConnectionAdapter:
+    def __init__(self, url, auth_token):
+        self.client = libsql_client.create_client_sync(url=url, auth_token=auth_token)
+
+    def cursor(self):
+        return LibSQLCursorAdapter(self.client)
+
+    def commit(self):
+        pass
+
+    def close(self):
+        self.client.close()
 
 def get_connection():
     """获取数据库连接 (支持本地 SQLite 或 Turso)"""
     if TURSO_DB_URL:
-        print(f"🔗 连接 Turso: {TURSO_DB_URL[:50]}...")
-        return connect(TURSO_DB_URL, auth_token=TURSO_AUTH_TOKEN)
+        if not libsql_client:
+             print("❌ 未安装 libsql-client，无法连接 Turso。请运行: pip install libsql-client")
+             sys.exit(1)
+             
+        print(f"🔗 连接 Turso: {TURSO_DB_URL[:40]}...")
+        return LibSQLConnectionAdapter(TURSO_DB_URL, TURSO_AUTH_TOKEN)
     else:
         print(f"⚠️ TURSO_DB_URL 未设置，使用本地 SQLite: {DB_PATH}")
         DB_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -154,7 +236,18 @@ def init_db():
     # 字段自动升级 (Schema Evolution) - 为了给旧数据库添加字段
     try:
         cursor.execute("PRAGMA table_info(ai_predictions)")
-        columns = [info[1] for info in cursor.fetchall()]
+        raw_rows = cursor.fetchall()
+        
+        # 兼容处理：支持 Tuple 和 Row 对象
+        columns = []
+        for row in raw_rows:
+            # 如果是 tuple/list (sqlite3): row[1] 是 name
+            try:
+                columns.append(row[1])
+            except (IndexError, TypeError):
+                # 如果是 Row 对象 (libsql_client)
+                if hasattr(row, 'name'):
+                     columns.append(row.name)
         
         # 定义需要补全的字段及其类型
         expected_ai_columns = {

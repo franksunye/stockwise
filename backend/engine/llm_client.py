@@ -164,54 +164,56 @@ class LLMClient:
         except json.JSONDecodeError:
             pass
             
-        # 2. 尝试提取所有 ```json ... ``` 块并解析（优先从后往前找）
         import re
+        
+        # 2. 尝试提取完整闭合的 ```json ... ``` 块（非贪婪匹配）
+        # 优先尝试最前面的块，因为后面的块可能是重复且截断的
         json_blocks = re.findall(r'```json\s*(.*?)\s*```', content, re.DOTALL)
-        if not json_blocks:
-            # 尝试处理只有开始没有结束的代码块（截断情况），同样优先后方的
-            json_blocks = re.findall(r'```json\s*(.*)', content, re.DOTALL)
-            
-        if json_blocks:
-            # 从后往前尝试解析，因为模型幻觉往往是在后面重新输出了正确的完整块
-            for block in reversed(json_blocks):
-                try:
-                    # 再次清理块内可能存在的嵌套幻觉（截断到下一个 ``` 之前）
-                    clean_block = block.split('```')[0].strip()
-                    return json.loads(clean_block)
-                except json.JSONDecodeError as e:
-                    # 尝试修复由于截断导致的 JSON 不完整
-                    if "Expecting ',' delimiter" in str(e) or "Expecting value" in str(e) or "Unterminated string" in str(e):
-                        try:
-                            # 尝试在末尾补全封闭字符（仅当确实有内容时）
-                            if len(clean_block) > 50:
-                                for suffix in [" }", '" }', '" } ] }', ' } ] }']:
-                                    try:
-                                        return json.loads(clean_block + suffix)
-                                    except:
-                                        continue
-                        except:
-                            pass
-                    continue
-                
-        # 3. 尝试提取简单的 ``` ... ``` 块
-        code_blocks = re.findall(r'```\s*(.*?)\s*```', content, re.DOTALL)
-        for block in code_blocks:
+        
+        for block in json_blocks:
             try:
-                # 再次检查是否含有嵌套的 json 标识
-                clean_block = re.sub(r'^json\s*', '', block.strip())
+                # 再次清理块内可能存在的嵌套幻觉（截断到下一个 ``` 之前）
+                clean_block = block.split('```')[0].strip()
                 return json.loads(clean_block)
             except json.JSONDecodeError:
                 continue
                 
-        # 4. 尝试寻找第一个 { 和最后一个 }
+        # 3. 如果没找到完整的，尝试处理只有开始没有结束的代码块（截断情况）
+        # 我们只关心第一个 ```json 开始的内容
+        match = re.search(r'```json\s*(.*)', content, re.DOTALL)
+        if match:
+            # 截取到下一个 ``` 出现之前（如果有的话，可能是重复输出的开始）
+            raw_block = match.group(1)
+            # 查找是否还有下一个 ``` (说明有重复输出)
+            next_marker = raw_block.find('```')
+            if next_marker != -1:
+                raw_block = raw_block[:next_marker]
+            
+            clean_block = raw_block.strip()
+            try:
+                return json.loads(clean_block)
+            except json.JSONDecodeError as e:
+                # 尝试修复由于截断导致的 JSON 不完整 (只针对没有下一个标记的情况，如果有下一个标记通常意味着第一块是完整的)
+                # 但如果是重复输出，raw_block 已经被截断到完整的第一部分了，应该能解析。
+                # 如果还是解析不了，说明第一部分本身也被截断了，或者格式错误。
+                pass
+
+        # 4. 尝试寻找第一个 { 和与之匹配的 } (使用简单的计数器或正则)
+        # 这种方式对付没有 markdown 标记的输出很有效
         try:
             start = content.find('{')
-            end = content.rfind('}') + 1
-            if start >= 0 and end > start:
-                json_str = content[start:end]
-                # 移除可能存在的中间 markdown 标记
-                json_str = re.sub(r'```json|```', '', json_str)
-                return json.loads(json_str)
+            if start != -1:
+                # 寻找匹配的闭合括号
+                balance = 0
+                for i in range(start, len(content)):
+                    if content[i] == '{':
+                        balance += 1
+                    elif content[i] == '}':
+                        balance -= 1
+                        if balance == 0:
+                            # 找到完整闭合的 JSON 对象
+                            possible_json = content[start:i+1]
+                            return json.loads(possible_json)
         except:
             pass
             

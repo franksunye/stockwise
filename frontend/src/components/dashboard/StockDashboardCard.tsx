@@ -208,13 +208,30 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
            {/* 右侧：验证结果 (Validation) */}
            <div className="glass-card p-4 flex flex-col justify-between">
               {(() => {
-                // 验证区核心逻辑（简化版）：
-                // displayPrediction 已经根据场景正确选择了：
-                // - 交易中/盘前：今日预测 → 验证今日 → 显示"待收盘验证"
-                // - 收市后：今日预测（已验证）→ 显示验证结果
-                // - 周末：上周五预测（已验证）→ 显示验证结果
-                // 所以直接使用 displayPrediction 即可
-                const validationDate = displayPrediction?.target_date;
+                // 验证区独立逻辑：
+                // - 交易中/盘前：验证的是"今日预测" (Target=Today) -> 显示"待收盘验证"
+                // - 收市后：验证的是"今日表现" (Target=Today) -> 也就是 validationPrediction 应该是那个 Target=Today 的预测
+                //   注意：在 Post-Market，data.prediction 已经是"明日预测"了，所以我们需要找 Target=Today 的。
+                //   如果 data.prediction.target_date == Today (说明还没生成明日的)，那就用它。
+                //   如果 data.prediction.target_date > Today (说明生成了明日的)，那就用 data.previousPrediction (Target=Today)。
+                
+                let validationPrediction = todayPrediction; // 默认尝试找 target=today 的
+
+                if (isPostMarket) {
+                    // 收盘后，主卡片显示的是明日建议。验证卡片需要显示对今日的验证。
+                    // 尝试从 previousPrediction 中找，或者如果 prediction 还没更新，它可能就是今日的。
+                    const latestIsTomorrow = data.prediction?.target_date && data.prediction.target_date > todayStr;
+                    if (latestIsTomorrow) {
+                        // 如果最新的是明天的，那验证用的就是前一个 (理论上是今天的)
+                        validationPrediction = data.previousPrediction;
+                    } else {
+                        // 如果最新的就是今天的 (数据还没更新)，那就验证它
+                        validationPrediction = data.prediction;
+                    }
+                }
+
+                const validationDate = validationPrediction?.target_date;
+                const status = validationPrediction?.validation_status;
 
                 return (
                   <>
@@ -222,14 +239,14 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
                       {getValidationLabelFromData(validationDate || '')}
                     </span>
                     <div className="mt-1">
-                      {!displayPrediction ? (
-                        <p className="text-[11px] font-bold text-slate-600 italic">待定 / 首日入池</p>
+                      {!validationPrediction ? (
+                        <p className="text-[11px] font-bold text-slate-600 italic">暂无历史验证</p>
                       ) : (
                         <div className="flex flex-col gap-1">
                           <div className="flex items-center gap-1.5 font-black text-xs leading-none">
-                            {displayPrediction.validation_status === 'Correct' ? (
+                            {status === 'Correct' ? (
                               <span className="text-emerald-500 flex items-center gap-1"><ShieldCheck size={14} /> 预测准确</span>
-                            ) : displayPrediction.validation_status === 'Incorrect' ? (
+                            ) : status === 'Incorrect' ? (
                               <span className="text-rose-500">❌ 产生偏差</span>
                             ) : (
                               <span className="text-slate-500 italic">待收盘验证</span>

@@ -10,6 +10,24 @@ BASE_DIR = Path(__file__).parent.parent
 DB_PATH = BASE_DIR / "data" / "stockwise.db"
 
 # 数据库连接配置
+# 尝试加载本地 .env 文件 (简单的手动解析，避免增加依赖)
+env_path = BASE_DIR / ".env"
+if env_path.exists():
+    try:
+        with open(env_path, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("#"): continue
+                if "=" in line:
+                    key, value = line.split("=", 1)
+                    # 去除可能存在的引号
+                    value = value.strip().strip("'").strip('"')
+                    if key.strip() not in os.environ:
+                        os.environ[key.strip()] = value
+        print(f"📖 已加载环境变量: {env_path}")
+    except Exception as e:
+        print(f"⚠️ 加载 .env 失败: {e}")
+
 TURSO_DB_URL = os.getenv("TURSO_DB_URL")
 TURSO_AUTH_TOKEN = os.getenv("TURSO_AUTH_TOKEN")
 
