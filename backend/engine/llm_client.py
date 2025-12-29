@@ -5,9 +5,10 @@ LLM 客户端模块
 
 import json
 import requests
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, Tuple
 import time
 from config import LLM_CONFIG
+from .llm_tracker import get_tracker, estimate_tokens
 
 
 class LLMClient:
@@ -52,7 +53,7 @@ class LLMClient:
         model: str = None,
         temperature: float = 0.7,
         max_tokens: int = 2000
-    ) -> Optional[str]:
+    ) -> Tuple[Optional[str], Dict[str, Any]]:
         """
         发送聊天请求
         
@@ -63,7 +64,8 @@ class LLMClient:
             max_tokens: 最大输出 token 数
             
         Returns:
-            LLM 返回的文本内容，失败返回 None
+            Tuple: (LLM 返回的文本内容, 元数据 dict)
+            元数据包含: input_tokens, output_tokens, total_tokens, latency_ms, error
         """
         payload = {
             "model": model or self.model,
@@ -77,6 +79,14 @@ class LLMClient:
             "Authorization": f"Bearer {self.api_key}"
         }
         
+        meta = {
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "total_tokens": 0,
+            "latency_ms": 0,
+            "error": None
+        }
+        
         try:
             start_time = time.time()
             response = requests.post(
@@ -86,42 +96,68 @@ class LLMClient:
                 timeout=self.timeout
             )
             elapsed = time.time() - start_time
+            meta["latency_ms"] = int(elapsed * 1000)
             
             if response.status_code == 200:
                 data = response.json()
+                
+                # 提取 Token 使用量 (如果 API 返回)
+                usage = data.get('usage', {})
+                if usage:
+                    meta["input_tokens"] = usage.get('prompt_tokens', 0)
+                    meta["output_tokens"] = usage.get('completion_tokens', 0)
+                    meta["total_tokens"] = usage.get('total_tokens', 0)
+                
                 if data.get('choices'):
                     content = data['choices'][0].get('message', {}).get('content')
-                    print(f"   🤖 LLM 响应成功 ({elapsed:.1f}s)")
-                    return content
+                    
+                    # 如果 API 没有返回 token 数，使用估算
+                    if not meta["input_tokens"]:
+                        input_text = " ".join([m.get('content', '') for m in messages])
+                        meta["input_tokens"] = estimate_tokens(input_text)
+                    if not meta["output_tokens"] and content:
+                        meta["output_tokens"] = estimate_tokens(content)
+                    if not meta["total_tokens"]:
+                        meta["total_tokens"] = meta["input_tokens"] + meta["output_tokens"]
+                    
+                    print(f"   🤖 LLM 响应成功 ({elapsed:.1f}s, {meta['total_tokens']} tokens)")
+                    return content, meta
                 else:
+                    meta["error"] = f"响应格式异常: {data}"
                     print(f"   ⚠️ LLM 响应格式异常: {data}")
-                    return None
+                    return None, meta
             else:
+                meta["error"] = f"HTTP {response.status_code}"
                 print(f"   ❌ LLM 请求失败: HTTP {response.status_code}")
-                return None
+                return None, meta
                 
         except requests.exceptions.Timeout:
+            meta["error"] = f"请求超时 ({self.timeout}s)"
             print(f"   ❌ LLM 请求超时 ({self.timeout}s)")
-            return None
+            return None, meta
         except requests.exceptions.ConnectionError:
+            meta["error"] = f"无法连接 LLM 服务: {self.base_url}"
             print(f"   ❌ 无法连接 LLM 服务: {self.base_url}")
-            return None
+            return None, meta
         except Exception as e:
+            meta["error"] = str(e)
             print(f"   ❌ LLM 请求异常: {e}")
-            return None
+            return None, meta
     
     def generate_stock_prediction(
         self,
         system_prompt: str,
         user_prompt: str,
+        symbol: str = None,
         retries: int = 2
     ) -> Optional[Dict[str, Any]]:
         """
-        生成股票预测（带 JSON 解析和重试）
+        生成股票预测（带 JSON 解析、重试和追踪）
         
         Args:
             system_prompt: 系统提示词（定义输出格式）
             user_prompt: 用户输入（股票数据）
+            symbol: 股票代码（用于追踪）
             retries: 重试次数
             
         Returns:
@@ -132,21 +168,55 @@ class LLMClient:
             {"role": "user", "content": user_prompt}
         ]
         
+        # 开始追踪
+        tracker = get_tracker()
+        tracker.start_trace(symbol=symbol, model=self.model)
+        tracker.set_prompts(system_prompt, user_prompt)
+        
+        final_content = None
+        final_result = None
+        last_meta = {}
+        
         for attempt in range(retries + 1):
             if attempt > 0:
                 print(f"   🔄 重试 {attempt}/{retries}...")
+                tracker.increment_retry()
                 
-            content = self.chat(messages, temperature=0.5)
+            content, meta = self.chat(messages, temperature=0.5)
+            last_meta = meta
             
             if content:
+                final_content = content
                 # 尝试解析 JSON
                 result = self._parse_json_response(content)
                 if result:
-                    return result
+                    final_result = result
+                    break
                 else:
-                    print(f"   ⚠️ JSON 解析失败，原始内容:\n{content}")
-            
-        return None
+                    print(f"   ⚠️ JSON 解析失败，原始内容:\n{content[:500]}...")
+        
+        # 记录追踪结果
+        tracker.set_tokens(
+            input_tokens=last_meta.get("input_tokens", 0),
+            output_tokens=last_meta.get("output_tokens", 0),
+            total_tokens=last_meta.get("total_tokens", 0)
+        )
+        tracker.set_response(final_content, final_result)
+        
+        if final_result:
+            tracker.set_status("success")
+        elif final_content:
+            tracker.set_status("parse_failed", "JSON 解析失败")
+        else:
+            tracker.set_status("error", last_meta.get("error", "未知错误"))
+        
+        # 结束追踪并保存
+        trace = tracker.end_trace()
+        if trace:
+            status_emoji = "✅" if trace.status == "success" else "❌"
+            print(f"   📊 追踪完成: {status_emoji} {trace.latency_ms}ms | {trace.total_tokens} tokens | 重试 {trace.retry_count} 次")
+        
+        return final_result
     
     def _parse_json_response(self, content: str) -> Optional[Dict[str, Any]]:
         """
@@ -240,9 +310,10 @@ def test_llm_connection() -> bool:
         return False
     
     print("✅ LLM 服务连接成功")
-    response = client.chat([{"role": "user", "content": "回复'OK'"}])
+    response, meta = client.chat([{"role": "user", "content": "回复'OK'"}])
     if response:
         print(f"   测试响应: {response[:50]}...")
+        print(f"   Token 使用: {meta.get('total_tokens', 'N/A')}")
         return True
     return False
 

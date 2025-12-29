@@ -82,8 +82,21 @@ class LibSQLCursorAdapter:
         # HTTP cursor 无需关闭，但需满足 DBAPI 接口
         pass
 
+import os
+
 class LibSQLConnectionAdapter:
     def __init__(self, url, auth_token):
+        # 区分环境：在 GitHub Actions 中强制使用 HTTPS 以避免 WebSocket 握手问题
+        # 在本地环境，尽量也推荐 HTTPS，但允许用户保留原配置
+        is_ci = os.getenv("GITHUB_ACTIONS") == "true"
+        
+        if url:
+             # 如果是 CI 环境 或者 URL 明确是 libsql:// 开头，为了稳定性转为 https://
+             if (is_ci or url.startswith("libsql://")):
+                 if "turso.io" in url:
+                     # 针对 Turso 的特殊优化：强制走 HTTP 协议
+                     url = url.replace("libsql://", "https://", 1).replace("wss://", "https://", 1)
+                 
         self.client = libsql_client.create_client_sync(url=url, auth_token=auth_token)
 
     def cursor(self):
@@ -232,6 +245,30 @@ def init_db():
             PRIMARY KEY (symbol, date)
         )
     """)
+
+    # 7. LLM 调用追踪表
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS llm_traces (
+            trace_id TEXT PRIMARY KEY,
+            symbol TEXT,
+            model TEXT,
+            system_prompt TEXT,
+            user_prompt TEXT,
+            response_raw TEXT,
+            response_parsed TEXT,
+            input_tokens INTEGER DEFAULT 0,
+            output_tokens INTEGER DEFAULT 0,
+            total_tokens INTEGER DEFAULT 0,
+            latency_ms INTEGER DEFAULT 0,
+            status TEXT DEFAULT 'pending',
+            error_message TEXT,
+            retry_count INTEGER DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_llm_traces_symbol ON llm_traces(symbol)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_llm_traces_status ON llm_traces(status)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_llm_traces_created ON llm_traces(created_at)")
 
     # 字段自动升级 (Schema Evolution) - 为了给旧数据库添加字段
     try:

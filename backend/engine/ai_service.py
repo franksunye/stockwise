@@ -20,7 +20,7 @@ def generate_ai_prediction(symbol: str, today_data: pd.Series):
             system_prompt, user_prompt = prepare_stock_analysis_prompt(symbol)
             
             client = get_llm_client()
-            ai_result = client.generate_stock_prediction(system_prompt, user_prompt)
+            ai_result = client.generate_stock_prediction(system_prompt, user_prompt, symbol=symbol)
             
             if ai_result and "signal" in ai_result:
                 # 成功获取 LLM 预测
