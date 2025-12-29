@@ -16,7 +16,7 @@ import { useDashboardData } from '@/hooks/useDashboardData';
 import { useTikTokScroll } from '@/hooks/useTikTokScroll';
 import { formatStockSymbol } from '@/lib/date-utils';
 
-const SettingsModal = dynamic(() => import('@/components/SettingsModal').then(mod => mod.SettingsModal), {
+const UserCenterDrawer = dynamic(() => import('@/components/UserCenterDrawer').then(mod => mod.UserCenterDrawer), {
   ssr: false,
   loading: () => null
 });
@@ -40,7 +40,7 @@ function DashboardContent() {
     scrollToToday
   } = useTikTokScroll(stocks);
 
-  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [userCenterOpen, setUserCenterOpen] = useState(false);
   const [showTactics, setShowTactics] = useState<string | null>(null);
   const [profileStock, setProfileStock] = useState<StockData | null>(null);
 
@@ -104,7 +104,7 @@ function DashboardContent() {
       <div 
         ref={scrollRef}
         onScroll={handleScroll}
-        className={`h-full w-full flex overflow-x-scroll snap-x snap-mandatory scrollbar-hide transition-opacity duration-300 ${(profileStock || settingsOpen) ? 'opacity-40 pointer-events-none touch-none' : 'opacity-100'}`}
+        className={`h-full w-full flex overflow-x-scroll snap-x snap-mandatory scrollbar-hide transition-opacity duration-300 ${(profileStock || userCenterOpen) ? 'opacity-40 pointer-events-none touch-none' : 'opacity-100'}`}
       >
         {stocks.map((stock, idx) => (
           <StockVerticalFeed 
@@ -145,7 +145,7 @@ function DashboardContent() {
           </Link>
           
            <button 
-             onClick={() => setSettingsOpen(true)} 
+             onClick={() => setUserCenterOpen(true)} 
              className="w-11 h-11 rounded-full bg-white/5 border border-white/10 flex items-center justify-center transition-all active:scale-90 hover:bg-white/10 shrink-0"
            >
              <User className="w-5 h-5 text-slate-400" />
@@ -167,11 +167,9 @@ function DashboardContent() {
         onClose={() => setProfileStock(null)}
       />
 
-      <SettingsModal 
-        symbol={currentStock?.symbol || ''}
-        isOpen={settingsOpen}
-        onClose={() => setSettingsOpen(false)}
-        onSave={refresh}
+      <UserCenterDrawer 
+        isOpen={userCenterOpen}
+        onClose={() => setUserCenterOpen(false)}
       />
     </main>
   );

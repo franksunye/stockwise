@@ -1,8 +1,10 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { X as CloseIcon } from 'lucide-react';
+import { X as CloseIcon, Briefcase, Eye, User, Check } from 'lucide-react';
 import { StockData } from '@/lib/types';
+import { getRule, saveRule } from '@/lib/storage';
+import { useState, useEffect } from 'react';
 
 interface StockProfileProps {
   stock: StockData | null;
@@ -12,6 +14,22 @@ interface StockProfileProps {
 
 export function StockProfile({ stock, isOpen, onClose }: StockProfileProps) {
   if (!stock) return null; // 渲染守护
+  
+  const [position, setPosition] = useState<'holding' | 'empty' | 'none'>('none');
+
+  useEffect(() => {
+    if (isOpen && stock) {
+      const rule = getRule(stock.symbol);
+      setPosition(rule?.position || 'none');
+    }
+  }, [isOpen, stock]);
+
+  const handlePositionChange = (newPos: 'holding' | 'empty' | 'none') => {
+    setPosition(newPos);
+    if (stock) {
+      saveRule(stock.symbol, { position: newPos });
+    }
+  };
 
   const winCount = stock.history?.filter(h => h.validation_status === 'Correct').length || 0;
   const totalCount = stock.history?.filter(h => h.validation_status !== 'Pending').length || 0;
@@ -63,6 +81,36 @@ export function StockProfile({ stock, isOpen, onClose }: StockProfileProps) {
                 <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest block mb-2">累计验证</span>
                 <p className="text-3xl font-black mono text-white">{totalCount}</p>
               </div>
+            </div>
+
+            {/* 持仓配置 (极简模式) */}
+            <div className="mb-8">
+               <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 px-2">持仓状态 (AI 决策上下文)</h3>
+               <div className="grid grid-cols-3 gap-3">
+                 {[
+                   { id: 'holding', label: '已持仓', icon: Briefcase, activeColor: 'bg-emerald-500 text-white' },
+                   { id: 'empty', label: '未建仓', icon: Eye, activeColor: 'bg-blue-500 text-white' },
+                   { id: 'none', label: '观望', icon: User, activeColor: 'bg-slate-600 text-white' }
+                 ].map(opt => {
+                   const isActive = position === opt.id;
+                   const Icon = opt.icon;
+                   return (
+                     <button
+                       key={opt.id}
+                       onClick={() => handlePositionChange(opt.id as any)}
+                       className={`flex flex-col items-center justify-center py-4 rounded-2xl border transition-all ${
+                         isActive 
+                           ? `${opt.activeColor} border-transparent shadow-[0_8px_16px_rgba(0,0,0,0.3)] scale-105` 
+                           : 'bg-white/5 border-white/5 text-slate-500 hover:bg-white/10'
+                       }`}
+                     >
+                       <Icon size={20} className="mb-2" />
+                       <span className="text-xs font-bold">{opt.label}</span>
+                       {isActive && <div className="absolute top-2 right-2"><Check size={12} /></div>}
+                     </button>
+                   );
+                 })}
+               </div>
             </div>
 
             <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 px-2">复盘矩阵 (最近 30 天)</h3>
