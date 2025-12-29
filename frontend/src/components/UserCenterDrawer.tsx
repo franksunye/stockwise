@@ -65,8 +65,8 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
               // 同步成功后，如果记录了 invite，可以清除以防重复提交（可选）
               // localStorage.removeItem('STOCKWISE_REFERRED_BY');
           }
-        } catch (_e) {
-            console.error(_e);
+        } catch (e) {
+            console.error(e);
         } finally {
             setLoading(false);
         }
@@ -93,7 +93,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
           } else {
               setRedeemMsg({ type: 'error', text: data.error || '激活失败' });
           }
-        } catch (_e) {
+        } catch {
             setRedeemMsg({ type: 'error', text: '网络请求失败' });
         } finally {
             setRedeeming(false);

@@ -13,7 +13,7 @@ export default function DashboardLayout({
 
   useEffect(() => {
     const checkAuth = async () => {
-      let uid = localStorage.getItem('STOCKWISE_USER_ID');
+      const uid = localStorage.getItem('STOCKWISE_USER_ID');
       
       // 注意：ReferralTracker 可能在根布局正在运行
       // 如果没有 UID，尝试等一小会儿，或者直接进入未授权状态

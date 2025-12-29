@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { Lock, ArrowRight, Loader2, ShieldCheck, Zap } from 'lucide-react';
 
 interface Props {
@@ -36,7 +36,7 @@ export function InviteWall({ onSuccess }: Props) {
       } else {
         setError(data.error || '无效的激活码');
       }
-    } catch (err) {
+    } catch {
       setError('网络请求失败，请稍后重试');
     } finally {
       setLoading(false);

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LayoutGrid as Grid, Settings, ChevronDown, RefreshCw, User } from 'lucide-react';
+import { LayoutGrid as Grid, ChevronDown, RefreshCw, User } from 'lucide-react';
 import { StockData } from '@/lib/types';
 import { 
   TacticalBriefDrawer, 
@@ -47,7 +47,7 @@ function DashboardContent() {
 
   useEffect(() => {
     const fetchTier = async () => {
-      let uid = localStorage.getItem('STOCKWISE_USER_ID');
+      const uid = localStorage.getItem('STOCKWISE_USER_ID');
       if (!uid) return;
       try {
         const res = await fetch('/api/user/profile', {
