@@ -1,0 +1,51 @@
+name: Admin - Manage Invitation Codes
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to perform'
+        required: true
+        default: 'gen'
+        type: choice
+        options:
+        - gen
+        - list
+      count:
+        description: 'Number of codes to generate (for gen action)'
+        required: false
+        default: '5'
+        type: string
+      days:
+        description: 'Validity period in days'
+        required: false
+        default: '30'
+        type: string
+
+jobs:
+  manage-codes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          pip install -r backend/requirements.txt
+
+      - name: Execute Management Script
+        env:
+          TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+        run: |
+          if [ "${{ inputs.action }}" = "gen" ]; then
+            python backend/manage_codes.py gen -c ${{ inputs.count }} -d ${{ inputs.days }}
+          else
+            python backend/manage_codes.py list --all
+          fi
