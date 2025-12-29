@@ -174,10 +174,13 @@ export function TacticalBriefDrawer({
                           exit={{ height: 0, opacity: 0 }}
                           className="overflow-hidden"
                         >
-                          <div className="p-6 rounded-2xl bg-white/[0.01] border border-white/[0.03] space-y-0 relative before:absolute before:left-[35px] before:top-8 before:bottom-8 before:w-[1px] before:bg-white/5">
+                          {/* 调整：p-6->p-4, left-[35px]->left-[19px] 对齐标题圆点 */}
+                          <div className="p-4 rounded-2xl bg-white/[0.01] border border-white/[0.03] space-y-0 relative before:absolute before:left-[19px] before:top-6 before:bottom-6 before:w-[1px] before:bg-white/5">
                             {data.reasoning_trace.map((step, idx) => (
-                              <div key={idx} className="relative pl-9 pb-6 last:pb-2 group">
-                                <div className="absolute left-[8px] top-1.5 w-1.5 h-1.5 rounded-full border border-white/20 bg-[#0a0a0f] group-hover:border-indigo-500 transition-colors z-10" />
+                              /* 调整：pl-9->pl-6 减少左侧留白 */
+                              <div key={idx} className="relative pl-6 pb-6 last:pb-2 group">
+                                {/* 调整：left-[8px]->left-0 圆点左对齐 */}
+                                <div className="absolute left-0 top-1.5 w-1.5 h-1.5 rounded-full border border-white/20 bg-[#0a0a0f] group-hover:border-indigo-500 transition-colors z-10" />
                                 
                                 <div className="flex flex-col gap-2">
                                   <div className="flex items-center justify-between">
