@@ -232,6 +232,10 @@ def init_db():
             print("🛠️ 更新数据库: 添加 users.subscription_expires_at")
             cursor.execute("ALTER TABLE users ADD COLUMN subscription_expires_at TIMESTAMP")
             
+        if "referred_by" not in columns:
+            print("🛠️ 更新数据库: 添加 users.referred_by")
+            cursor.execute("ALTER TABLE users ADD COLUMN referred_by TEXT")
+            
     except Exception as e:
         print(f"⚠️ 检查/更新 users 表结构失败: {e}")
 

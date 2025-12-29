@@ -5,9 +5,9 @@
  * 支持隐式注册 (匿名用户) 和显式注册 (注册用户)
  */
 
-const USER_ID_KEY = 'stockwise_user_id';
-const USER_TYPE_KEY = 'stockwise_user_type';
-const USERNAME_KEY = 'stockwise_username';
+const USER_ID_KEY = 'STOCKWISE_USER_ID';
+const USER_TYPE_KEY = 'STOCKWISE_USER_TYPE';
+const USERNAME_KEY = 'STOCKWISE_USERNAME';
 
 export type RegistrationType = 'anonymous' | 'explicit';
 

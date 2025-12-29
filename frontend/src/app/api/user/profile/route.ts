@@ -3,7 +3,7 @@ import { getDbClient } from '@/lib/db';
 
 export async function POST(request: Request) {
     try {
-        const { userId, watchlist } = await request.json();
+        const { userId, watchlist, referredBy } = await request.json();
 
         if (!userId) {
             return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
@@ -24,23 +24,70 @@ export async function POST(request: Request) {
         } else {
             user = db.prepare("SELECT * FROM users WHERE user_id = ?").get(userId);
         }
-
         if (!user) {
             // Create new free user
             const now = new Date().toISOString();
+
+            // If referred by someone, maybe give a trial or just record it
+            // For now, let's just record it. We can add reward logic later or now.
+            // Let's give 7 days Pro if referred? (Optional, based on requirement)
+            let initialTier = 'free';
+            let expiresAt = null;
+
+            if (referredBy && referredBy !== userId) {
+                // 1. Referee Reward (New User)
+                const expiryDate = new Date();
+                expiryDate.setDate(expiryDate.getDate() + 7);
+                initialTier = 'pro';
+                expiresAt = expiryDate.toISOString();
+
+                // 2. Referrer Reward (The person who shared the link)
+                try {
+                    let referrer;
+                    if (isCloud) {
+                        const res = await db.execute({
+                            sql: "SELECT subscription_tier, subscription_expires_at FROM users WHERE user_id = ?",
+                            args: [referredBy]
+                        });
+                        referrer = res.rows[0];
+                    } else {
+                        referrer = db.prepare("SELECT subscription_tier, subscription_expires_at FROM users WHERE user_id = ?").get(referredBy);
+                    }
+
+                    if (referrer) {
+                        const currentExpiry = referrer.subscription_expires_at ? new Date(referrer.subscription_expires_at) : new Date();
+                        const baseDate = currentExpiry > new Date() ? currentExpiry : new Date();
+                        baseDate.setDate(baseDate.getDate() + 7);
+                        const newExpiry = baseDate.toISOString();
+
+                        if (isCloud) {
+                            await db.execute({
+                                sql: "UPDATE users SET subscription_tier = 'pro', subscription_expires_at = ? WHERE user_id = ?",
+                                args: [newExpiry, referredBy]
+                            });
+                        } else {
+                            db.prepare("UPDATE users SET subscription_tier = 'pro', subscription_expires_at = ? WHERE user_id = ?").run(newExpiry, referredBy);
+                        }
+                    }
+                } catch (referErr) {
+                    console.error('Referrer reward failed:', referErr);
+                }
+            }
+
             if (isCloud) {
                 await db.execute({
-                    sql: "INSERT INTO users (user_id, registration_type, subscription_tier, created_at) VALUES (?, 'anonymous', 'free', ?)",
-                    args: [userId, now]
+                    sql: "INSERT INTO users (user_id, registration_type, subscription_tier, subscription_expires_at, referred_by, created_at) VALUES (?, 'anonymous', ?, ?, ?, ?)",
+                    args: [userId, initialTier, expiresAt, referredBy || null, now]
                 });
             } else {
-                db.prepare("INSERT INTO users (user_id, registration_type, subscription_tier, created_at) VALUES (?, 'anonymous', 'free', ?)").run(userId, now);
+                db.prepare("INSERT INTO users (user_id, registration_type, subscription_tier, subscription_expires_at, referred_by, created_at) VALUES (?, 'anonymous', ?, ?, ?, ?)").run(userId, initialTier, expiresAt, referredBy || null, now);
             }
 
             user = {
                 user_id: userId,
-                subscription_tier: 'free',
-                subscription_expires_at: null
+                subscription_tier: initialTier,
+                subscription_expires_at: expiresAt,
+                referred_by: referredBy || null
             };
         }
 

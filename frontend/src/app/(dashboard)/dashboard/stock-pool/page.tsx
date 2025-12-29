@@ -26,12 +26,29 @@ export default function StockPoolPage() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [stockToDelete, setStockToDelete] = useState<StockSnapshot | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [tier, setTier] = useState<'free' | 'pro'>('free');
+  const [limitMsg, setLimitMsg] = useState<string | null>(null);
 
   const scene = getMarketScene();
   const isPreMarket = scene === 'pre_market';
 
   useEffect(() => {
-    getCurrentUser().then(setUser);
+    const init = async () => {
+        const u = await getCurrentUser();
+        setUser(u);
+        
+        // Fetch real tier
+        try {
+            const res = await fetch('/api/user/profile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: u.userId, watchlist: [] })
+            });
+            const data = await res.json();
+            setTier(data.tier || 'free');
+        } catch (e) { console.error(e); }
+    };
+    init();
   }, []);
 
   const fetchStockData = useCallback(async () => {
@@ -89,6 +106,14 @@ export default function StockPoolPage() {
     const targetSymbol = symbolOverride || newSymbol.trim();
     if (!targetSymbol || !user) return;
     setLoading(true);
+    const limit = tier === 'pro' ? 10 : 3;
+    if (stocks.length >= limit) {
+      setLimitMsg(`已达到${tier === 'pro' ? 'Pro 10只' : '免费版 3只'}上限，请前往个人中心提升额度`);
+      setLoading(false);
+      setTimeout(() => setLimitMsg(null), 3000);
+      return;
+    }
+
     try {
       const response = await fetch('/api/stock-pool', {
         method: 'POST',
@@ -170,6 +195,18 @@ export default function StockPoolPage() {
                   onChange={(e) => setNewSymbol(e.target.value)}
                   className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 mono text-sm focus:outline-none focus:border-indigo-500/50"
                 />
+                <AnimatePresence>
+                  {limitMsg && (
+                    <motion.p 
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      className="mt-3 text-rose-400 text-[10px] font-bold text-center uppercase tracking-widest"
+                    >
+                      {limitMsg}
+                    </motion.p>
+                  )}
+                </AnimatePresence>
                 {showSuggestions && searchResults.length > 0 && (
                   <div className="mt-4 space-y-2 max-h-60 overflow-y-auto">
                     {searchResults.map(item => {

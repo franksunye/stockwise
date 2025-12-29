@@ -20,6 +20,8 @@ export const viewport: Viewport = {
   userScalable: false,
 };
 
+import { ReferralTracker } from "@/components/ReferralTracker";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -28,6 +30,7 @@ export default function RootLayout({
   return (
     <html lang="zh-CN">
       <body className="antialiased">
+        <ReferralTracker />
         {children}
       </body>
     </html>

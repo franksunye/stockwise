@@ -45,9 +45,10 @@ const getStepConfig = (step: string) => {
 };
 
 export function TacticalBriefDrawer({ 
-  isOpen, onClose, data, userPos 
+  isOpen, onClose, data, userPos, tier
 }: TacticalBriefDrawerProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const isFree = tier === 'free';
   
   // 核心逻辑：获取当前场景建议 + 通用建议
   const currentTactics = data?.tactics?.[userPos === 'holding' ? 'holding' : 'empty'] || [];
@@ -155,11 +156,11 @@ export function TacticalBriefDrawer({
 
                 {/* 重点情报 (News Radar) */}
                 {data.news_analysis && data.news_analysis.length > 0 && (
-                  <section>
+                  <section className="relative">
                     <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
                       <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> 重点情报 (Last 48h)
                     </h3>
-                    <div className="p-4 rounded-2xl bg-gradient-to-br from-emerald-500/[0.05] to-transparent border border-emerald-500/10 space-y-3">
+                    <div className={`p-4 rounded-2xl bg-gradient-to-br from-emerald-500/[0.05] to-transparent border border-emerald-500/10 space-y-3 ${isFree ? 'blur-md select-none pointer-events-none opacity-40' : ''}`}>
                       {data.news_analysis.map((news, idx) => (
                          <div key={idx} className="flex gap-3 items-start">
                             <span className="text-slate-500 mt-0.5"><Newspaper size={12} /></span>
@@ -167,15 +168,20 @@ export function TacticalBriefDrawer({
                          </div>
                       ))}
                     </div>
+                    {isFree && (
+                        <div className="absolute inset-x-0 bottom-4 flex justify-center z-10">
+                            <span className="px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-[10px] font-bold text-white uppercase tracking-wider">升级 Pro 解锁情报</span>
+                        </div>
+                    )}
                   </section>
                 )}
 
                 {/* 分析过程 - 推理链 (带折叠交互) */}
                 {data.reasoning_trace && data.reasoning_trace.length > 0 && (
-                  <section className="space-y-4">
+                  <section className="space-y-4 relative">
                     <button 
-                      onClick={() => setIsExpanded(!isExpanded)}
-                      className="w-full flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/5 group active:scale-[0.98] transition-all"
+                      onClick={() => !isFree && setIsExpanded(!isExpanded)}
+                      className={`w-full flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/5 group active:scale-[0.98] transition-all ${isFree ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
                       <div className="flex items-center gap-3">
                          <div className={`w-1.5 h-1.5 rounded-full bg-indigo-500 transition-all duration-500 ${isExpanded ? 'shadow-[0_0_12px_rgba(99,102,241,0.8)] scale-125' : 'opacity-40'}`} />
@@ -188,21 +194,25 @@ export function TacticalBriefDrawer({
                          <ChevronDown size={16} />
                       </motion.div>
                     </button>
+                    {isFree && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="px-4 py-2 rounded-2xl bg-indigo-500/20 backdrop-blur-xl border border-indigo-500/30 text-[10px] font-black italic text-indigo-400 uppercase tracking-widest shadow-2xl">
+                                UPGRADE TO PRO TO UNLOCK REASONING
+                            </div>
+                        </div>
+                    )}
 
                     <AnimatePresence>
-                      {isExpanded && (
+                      {isExpanded && !isFree && (
                         <motion.div
                           initial={{ height: 0, opacity: 0 }}
                           animate={{ height: 'auto', opacity: 1 }}
                           exit={{ height: 0, opacity: 0 }}
                           className="overflow-hidden"
                         >
-                          {/* 调整：p-6->p-4, left-[35px]->left-[19px] 对齐标题圆点 */}
                           <div className="p-4 rounded-2xl bg-white/[0.01] border border-white/[0.03] space-y-0 relative before:absolute before:left-[19px] before:top-6 before:bottom-6 before:w-[1px] before:bg-white/5">
                             {data.reasoning_trace.map((step, idx) => (
-                              /* 调整：pl-9->pl-6 减少左侧留白 */
                               <div key={idx} className="relative pl-6 pb-6 last:pb-2 group">
-                                {/* 调整：left-[8px]->left-0 圆点左对齐 */}
                                 <div className="absolute left-0 top-1.5 w-1.5 h-1.5 rounded-full border border-white/20 bg-[#0a0a0f] group-hover:border-indigo-500 transition-colors z-10" />
                                 
                                 <div className="flex flex-col gap-2">

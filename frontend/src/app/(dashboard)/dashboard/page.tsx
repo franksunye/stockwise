@@ -43,6 +43,24 @@ function DashboardContent() {
   const [userCenterOpen, setUserCenterOpen] = useState(false);
   const [showTactics, setShowTactics] = useState<string | null>(null);
   const [profileStock, setProfileStock] = useState<StockData | null>(null);
+  const [tier, setTier] = useState<'free' | 'pro'>('free');
+
+  useEffect(() => {
+    const fetchTier = async () => {
+      let uid = localStorage.getItem('STOCKWISE_USER_ID');
+      if (!uid) return;
+      try {
+        const res = await fetch('/api/user/profile', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: uid, watchlist: [] })
+        });
+        const data = await res.json();
+        setTier(data.tier || 'free');
+      } catch (e) { console.error(e); }
+    };
+    fetchTier();
+  }, []);
 
   if (loadingPool) {
     return (
@@ -157,6 +175,7 @@ function DashboardContent() {
       <TacticalBriefDrawer 
         isOpen={!!showTactics} 
         onClose={() => setShowTactics(null)} 
+        tier={tier}
         data={JSON.parse(stocks.find(s => s.symbol === showTactics)?.prediction?.ai_reasoning || '{}')}
         userPos={stocks.find(s => s.symbol === showTactics)?.rule?.position || 'none'}
       />

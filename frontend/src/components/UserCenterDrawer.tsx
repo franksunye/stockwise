@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, User, Crown, Zap, ShieldCheck, Loader2, ArrowRight } from 'lucide-react';
+import { X, User, Crown, Zap, ShieldCheck, Loader2, ArrowRight, Share2, Check } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getWatchlist } from '@/lib/storage';
 
@@ -37,11 +37,12 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
       setWatchlistCount(list.length);
 
       // 3. 获取服务端会员状态
-      fetchProfile(uid);
+      const referredBy = localStorage.getItem('STOCKWISE_REFERRED_BY');
+      fetchProfile(uid, referredBy);
     }
   }, [isOpen]);
 
-  const fetchProfile = async (uid: string) => {
+  const fetchProfile = async (uid: string, referredBy: string | null = null) => {
       setLoading(true);
       try {
           // 获取本地 watchlist
@@ -52,13 +53,17 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
               method: 'POST',
               body: JSON.stringify({
                   userId: uid,
-                  watchlist: localWatchlist
+                  watchlist: localWatchlist,
+                  referredBy: referredBy
               })
           });
           const data = await res.json();
           if (data.tier) {
               setTier(data.tier);
               setExpiresAt(data.expiresAt);
+              
+              // 同步成功后，如果记录了 invite，可以清除以防重复提交（可选）
+              // localStorage.removeItem('STOCKWISE_REFERRED_BY');
           }
         } catch (_e) {
             console.error(_e);
@@ -196,7 +201,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
 
               {/* 激活码兑换区域 (Beta) */}
               {tier === 'free' && (
-                  <div className="mt-auto">
+                  <div className="mt-8">
                       <div className="flex items-center gap-2 mb-2">
                           <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">拥有激活码?</span>
                           {redeemMsg && (
@@ -223,6 +228,38 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                       </div>
                   </div>
               )}
+
+              {/* 邀请好友区域 (Loot Logic) */}
+              <div className="mt-auto pt-8">
+                  <div className="p-5 rounded-[24px] bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-white/5 relative overflow-hidden group">
+                      <div className="relative z-10">
+                          <div className="flex items-center justify-between mb-2">
+                              <h4 className="text-sm font-black italic text-white flex items-center gap-2">
+                                  邀请好友领 Pro
+                                  <span className="px-1.5 py-0.5 rounded bg-emerald-500 text-[8px] font-black uppercase not-italic">+7 Days</span>
+                              </h4>
+                              <Share2 className="w-4 h-4 text-indigo-400 opacity-50" />
+                          </div>
+                          <p className="text-[10px] text-slate-500 leading-tight mb-4">
+                              每邀请 1 位新用户入池，你与好友均可自动获得 7 天 Pro 会员权益。
+                          </p>
+                          <button 
+                            onClick={() => {
+                                const url = `${window.location.origin}/dashboard?invite=${userId}`;
+                                navigator.clipboard.writeText(url);
+                                // Simple toast equivalent
+                                setRedeemMsg({ type: 'success', text: '邀请链接已复制！' });
+                                setTimeout(() => setRedeemMsg(null), 2000);
+                            }}
+                            className="w-full py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-xs font-bold text-indigo-300"
+                          >
+                              {redeemMsg?.text === '邀请链接已复制！' ? <Check size={14} className="text-emerald-400" /> : <Share2 size={14} />}
+                              {redeemMsg?.text === '邀请链接已复制！' ? '已复制' : '复制分享链接'}
+                          </button>
+                      </div>
+                      <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-indigo-500/5 blur-[40px] rounded-full group-hover:bg-indigo-500/10 transition-colors" />
+                  </div>
+              </div>
               
             </div>
           </motion.div>
