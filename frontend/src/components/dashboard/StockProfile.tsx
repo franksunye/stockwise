@@ -75,7 +75,7 @@ export function StockProfile({ stock, isOpen, onClose }: StockProfileProps) {
                     h.validation_status === 'Incorrect' ? 'bg-rose-500/10 text-rose-500/50' : 'bg-white/5 text-slate-700'
                   }`}
                 >
-                  {h.date.split('-').slice(1).join('/')}
+                  {h.target_date.split('-').slice(1).join('/')}
                 </div>
               ))}
             </div>
