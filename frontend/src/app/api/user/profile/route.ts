@@ -9,31 +9,32 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
         }
 
-        const db = getDbClient();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const db: any = getDbClient();
         const isCloud = 'execute' in db && typeof db.execute === 'function' && !('prepare' in db);
 
         // 1. Get or Create User
         let user;
         if (isCloud) {
-            const res = await (db as any).execute({
+            const res = await db.execute({
                 sql: "SELECT * FROM users WHERE user_id = ?",
                 args: [userId]
             });
             user = res.rows[0];
         } else {
-            user = (db as any).prepare("SELECT * FROM users WHERE user_id = ?").get(userId);
+            user = db.prepare("SELECT * FROM users WHERE user_id = ?").get(userId);
         }
 
         if (!user) {
             // Create new free user
             const now = new Date().toISOString();
             if (isCloud) {
-                await (db as any).execute({
+                await db.execute({
                     sql: "INSERT INTO users (user_id, registration_type, subscription_tier, created_at) VALUES (?, 'anonymous', 'free', ?)",
                     args: [userId, now]
                 });
             } else {
-                (db as any).prepare("INSERT INTO users (user_id, registration_type, subscription_tier, created_at) VALUES (?, 'anonymous', 'free', ?)").run(userId, now);
+                db.prepare("INSERT INTO users (user_id, registration_type, subscription_tier, created_at) VALUES (?, 'anonymous', 'free', ?)").run(userId, now);
             }
 
             user = {
@@ -52,10 +53,10 @@ export async function POST(request: Request) {
                         sql: "INSERT OR IGNORE INTO user_watchlist (user_id, symbol) VALUES (?, ?)",
                         args: [userId, symbol]
                     }));
-                    await (db as any).batch(stmts);
+                    await db.batch(stmts);
                 } else {
-                    const insertStmt = (db as any).prepare("INSERT OR IGNORE INTO user_watchlist (user_id, symbol) VALUES (?, ?)");
-                    const transaction = (db as any).transaction((items: string[]) => {
+                    const insertStmt = db.prepare("INSERT OR IGNORE INTO user_watchlist (user_id, symbol) VALUES (?, ?)");
+                    const transaction = db.transaction((items: string[]) => {
                         for (const item of items) insertStmt.run(userId, item);
                     });
                     transaction(watchlist);
@@ -81,8 +82,8 @@ export async function POST(request: Request) {
             expiresAt: user.subscription_expires_at
         });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Profile error:', error);
-        return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+        return NextResponse.json({ error: (error as Error).message || 'Internal Server Error' }, { status: 500 });
     }
 }

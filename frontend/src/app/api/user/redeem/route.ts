@@ -9,35 +9,23 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Missing userId or code' }, { status: 400 });
         }
 
-        const db = getDbClient();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const db: any = getDbClient();
         const now = new Date().toISOString();
         const normalizedCode = code.trim().toUpperCase();
 
-        // 1. Check if user exists (create if not, though Profile API should handle this)
-        // For safety, ensure user exists regarding the new columns
-        // Use SQL based on client type (LibSQL vs Better-SQLite3)
-        // Luckily getDbClient returns either. But their APIs are slightly different (`execute` vs `prepare().run()`).
-        // This is a pain point. I should verify how getDbClient is used elsewhere.
-        // Based on step 168 (db logic refactoring), maybe I should wrap this. 
-        // BUT for now, let's assume I need to handle both or db.ts abstracts it? No, db.ts returns the raw client instance.
-
-        // Check usage in `src/lib/db.ts`... it returns `createClient` result OR `new Database()`.
-        // LibSQL: `await client.execute({sql, args})`
-        // BetterSQLite3: `db.prepare(sql).run(args)` or `get(args)`
-
-        // I need a helper to unify this or explicit check.
         const isCloud = 'execute' in db && typeof db.execute === 'function' && !('prepare' in db);
 
         // 1. Verify Code
         let codeRecord;
         if (isCloud) {
-            const res = await (db as any).execute({
+            const res = await db.execute({
                 sql: "SELECT * FROM invitation_codes WHERE code = ? AND is_used = 0",
                 args: [normalizedCode]
             });
             codeRecord = res.rows[0];
         } else {
-            codeRecord = (db as any).prepare("SELECT * FROM invitation_codes WHERE code = ? AND is_used = 0").get(normalizedCode);
+            codeRecord = db.prepare("SELECT * FROM invitation_codes WHERE code = ? AND is_used = 0").get(normalizedCode);
         }
 
         if (!codeRecord) {
@@ -57,7 +45,7 @@ export async function POST(request: Request) {
         // Update User
         if (isCloud) {
             // Upsert user to ensure they exist, then set tier
-            await (db as any).batch([
+            await db.batch([
                 {
                     sql: `INSERT INTO users (user_id, subscription_tier, subscription_expires_at) 
                       VALUES (?, 'pro', ?) 
@@ -72,8 +60,8 @@ export async function POST(request: Request) {
                 }
             ]);
         } else {
-            const transaction = (db as any).transaction(() => {
-                (db as any).prepare(`
+            const transaction = db.transaction(() => {
+                db.prepare(`
                 INSERT INTO users (user_id, subscription_tier, subscription_expires_at, registration_type) 
                 VALUES (?, 'pro', ?, 'anonymous') 
                 ON CONFLICT(user_id) DO UPDATE SET 
@@ -81,7 +69,7 @@ export async function POST(request: Request) {
                 subscription_expires_at = ?
              `).run(userId, expiryStr, expiryStr);
 
-                (db as any).prepare("UPDATE invitation_codes SET is_used = 1, used_by_user_id = ?, used_at = ? WHERE code = ?")
+                db.prepare("UPDATE invitation_codes SET is_used = 1, used_by_user_id = ?, used_at = ? WHERE code = ?")
                     .run(userId, now, normalizedCode);
             });
             transaction();
@@ -93,8 +81,8 @@ export async function POST(request: Request) {
             expiresAt: expiryStr
         });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Redeem error:', error);
-        return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+        return NextResponse.json({ error: (error as Error).message || 'Internal Server Error' }, { status: 500 });
     }
 }

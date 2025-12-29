@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, User, Crown, Zap, ShieldCheck, Check, Loader2, ArrowRight } from 'lucide-react';
+import { X, User, Crown, Zap, ShieldCheck, Loader2, ArrowRight } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getWatchlist } from '@/lib/storage';
 
@@ -60,11 +60,11 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
               setTier(data.tier);
               setExpiresAt(data.expiresAt);
           }
-      } catch (e) {
-          console.error(e);
-      } finally {
-          setLoading(false);
-      }
+        } catch (_e) {
+            console.error(_e);
+        } finally {
+            setLoading(false);
+        }
   };
 
   const handleRedeem = async () => {
@@ -88,11 +88,11 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
           } else {
               setRedeemMsg({ type: 'error', text: data.error || '激活失败' });
           }
-      } catch (e) {
-          setRedeemMsg({ type: 'error', text: '网络请求失败' });
-      } finally {
-          setRedeeming(false);
-      }
+        } catch (_e) {
+            setRedeemMsg({ type: 'error', text: '网络请求失败' });
+        } finally {
+            setRedeeming(false);
+        }
   };
 
   return (
@@ -137,7 +137,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                 )}
                 <div className="bg-[#0f0f16]/90 backdrop-blur rounded-[22px] p-6 flex items-center gap-5">
                    <div className={`w-16 h-16 rounded-full border-2 flex items-center justify-center relative ${tier === 'pro' ? 'border-amber-500/50 bg-amber-500/10' : 'bg-white/5 border-white/10'}`}>
-                     <User className={`w-8 h-8 ${tier === 'pro' ? 'text-amber-200' : 'text-slate-400'}`} />
+                      {loading ? <Loader2 className="w-8 h-8 text-slate-400 animate-spin" /> : <User className={`w-8 h-8 ${tier === 'pro' ? 'text-amber-200' : 'text-slate-400'}`} />}
                    </div>
                    <div className="flex-1">
                      <div className="flex items-center gap-2 mb-1">

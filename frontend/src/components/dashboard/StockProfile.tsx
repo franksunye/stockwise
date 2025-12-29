@@ -13,8 +13,6 @@ interface StockProfileProps {
 }
 
 export function StockProfile({ stock, isOpen, onClose }: StockProfileProps) {
-  if (!stock) return null; // 渲染守护
-  
   const [position, setPosition] = useState<'holding' | 'empty' | 'none'>('none');
 
   useEffect(() => {
@@ -23,6 +21,8 @@ export function StockProfile({ stock, isOpen, onClose }: StockProfileProps) {
       setPosition(rule?.position || 'none');
     }
   }, [isOpen, stock]);
+
+  if (!stock) return null; // 渲染守护
 
   const handlePositionChange = (newPos: 'holding' | 'empty' | 'none') => {
     setPosition(newPos);
@@ -97,7 +97,7 @@ export function StockProfile({ stock, isOpen, onClose }: StockProfileProps) {
                    return (
                      <button
                        key={opt.id}
-                       onClick={() => handlePositionChange(opt.id as any)}
+                        onClick={() => handlePositionChange(opt.id as 'holding' | 'empty' | 'none')}
                        className={`flex flex-col items-center justify-center py-4 rounded-2xl border transition-all ${
                          isActive 
                            ? `${opt.activeColor} border-transparent shadow-[0_8px_16px_rgba(0,0,0,0.3)] scale-105` 
