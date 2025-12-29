@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LayoutGrid as Grid, Settings, ChevronDown, RefreshCw, User } from 'lucide-react';
 import { StockData } from '@/lib/types';
