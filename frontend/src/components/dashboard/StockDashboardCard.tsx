@@ -27,13 +27,20 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
   const isPostMarket = scene === 'post_market';
   const isPreMarket = scene === 'pre_market';
   
-  // 核心预测数据选择逻辑：
-  // - 交易中/盘前：显示"今日建议" → 使用 target_date = 今天 的预测
-  //   后端返回的 prediction 是最新预测（target_date = 明天），所以交易中要用 previousPrediction
-  // - 收市后/休市日：显示"明日建议/下周一建议" → 使用最新预测 (prediction)
-  const displayPrediction = (scene === 'trading' || isPreMarket) 
-    ? data.previousPrediction   // 今日预测（昨天生成，target_date = 今天）
-    : data.prediction;          // 明日预测（今天生成，target_date = 明天）
+  // 获取今天的日期字符串 (YYYY-MM-DD)
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  
+  // 核心预测数据选择逻辑（基于 target_date 匹配）：
+  // - 交易中/盘前：找 target_date = 今天 的预测（今日预测）
+  // - 收市后/休市日：找最新的预测（明日/下周一预测）
+  const todayPrediction = [data.prediction, data.previousPrediction].find(
+    p => p?.target_date === todayStr
+  );
+  
+  const displayPrediction = (scene === 'trading' || isPreMarket)
+    ? (todayPrediction || data.prediction)  // 优先使用今日预测，否则降级到最新预测
+    : data.prediction;                       // 收市后使用最新预测
   
   const isTriggered = displayPrediction?.support_price && data.price.close < displayPrediction.support_price;
 
