@@ -30,7 +30,7 @@ function HistoryContent() {
   const [stats, setStats] = useState({ winRate: 0, returns: 0 });
 
   useEffect(() => {
-    fetch(`/api/predictions?symbol=${SYMBOL}&limit=30`)
+    fetch(`/api/predictions?symbol=${SYMBOL}&limit=30`, { cache: 'no-store' })
       .then(r => r.json())
       .then(data => {
         if (!data.predictions) return;
