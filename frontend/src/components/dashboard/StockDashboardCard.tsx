@@ -2,7 +2,7 @@
 
 import { Zap, Target, ShieldCheck, ChevronDown } from 'lucide-react';
 import { StockData, TacticalData } from '@/lib/types';
-import { getMarketScene, formatStockSymbol, getPredictionTitle, getClosePriceLabelFromData, getValidationLabelFromData, isTradingDay, getHKTime } from '@/lib/date-utils';
+import { getMarketScene, formatStockSymbol, getPredictionTitle, getClosePriceLabelFromData, getValidationLabelFromData, isTradingDay, getHKTime, getLastTradingDay } from '@/lib/date-utils';
 import { COLORS } from './constants';
 
 interface StockDashboardCardProps {
@@ -163,20 +163,41 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
            <div className="glass-card p-4 flex flex-col justify-between">
               {(() => {
                 const isMarketOpenSoon = isTradingDay() && isPreMarket;
-                // 事实锚点日期：周一盘前看今天，其他时段看价格数据的日期
-                const realityDate = isMarketOpenSoon 
-                  ? getHKTime().toISOString().split('T')[0] 
-                  : data.price.date;
                 
-                // 精准匹配：寻找目标日期等于事实锚点的预测记录
+                // 验证区逻辑重写：
+                // 1. 盘前（等待开盘）: 验证日期 = 今天（即将验证今日的预测）
+                // 2. 交易中 & 收市后: 验证日期 = 上一个交易日（验证已完成的交易日）
+                // 3. 休市日（周末/假期）: 验证日期 = 上一个交易日
+                let validationDate: string;
+                
+                if (isMarketOpenSoon) {
+                  // 盘前：今天即将验证
+                  validationDate = getHKTime().toISOString().split('T')[0];
+                } else if (scene === 'trading') {
+                  // 交易中：验证上一交易日（如周一盘中，验证周五）
+                  const lastDay = getLastTradingDay();
+                  validationDate = `${lastDay.getFullYear()}-${String(lastDay.getMonth() + 1).padStart(2, '0')}-${String(lastDay.getDate()).padStart(2, '0')}`;
+                } else {
+                  // 收市后或非交易日：
+                  // - 如果今天是交易日，验证今天
+                  // - 如果今天不是交易日，验证上一个交易日
+                  if (isTradingDay()) {
+                    validationDate = getHKTime().toISOString().split('T')[0];
+                  } else {
+                    const lastDay = getLastTradingDay();
+                    validationDate = `${lastDay.getFullYear()}-${String(lastDay.getMonth() + 1).padStart(2, '0')}-${String(lastDay.getDate()).padStart(2, '0')}`;
+                  }
+                }
+                
+                // 精准匹配：寻找目标日期等于验证锚点的预测记录
                 const factPrediction = [data.prediction, data.previousPrediction].find(
-                  p => p?.target_date === realityDate
+                  p => p?.target_date === validationDate
                 );
 
                 return (
                   <>
                     <span className="text-[9px] text-slate-600 font-black uppercase tracking-widest">
-                      {getValidationLabelFromData(realityDate)}
+                      {getValidationLabelFromData(validationDate)}
                     </span>
                     <div className="mt-1">
                       {!factPrediction ? (
