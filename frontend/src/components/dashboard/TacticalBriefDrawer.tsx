@@ -139,7 +139,7 @@ export function TacticalBriefDrawer({
                     <div className="p-4 rounded-2xl bg-gradient-to-br from-emerald-500/[0.05] to-transparent border border-emerald-500/10 space-y-3">
                       {data.news_analysis.map((news, idx) => (
                          <div key={idx} className="flex gap-3 items-start">
-                            <span className="text-xs mt-0.5 opacity-60">📰</span>
+                            <span className="text-slate-500 mt-0.5"><Newspaper size={12} /></span>
                             <p className="text-xs text-slate-300 leading-relaxed font-medium">{news}</p>
                          </div>
                       ))}
