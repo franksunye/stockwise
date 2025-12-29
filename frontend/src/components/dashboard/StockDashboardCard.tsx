@@ -90,12 +90,12 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
             {isDataStale ? (
               <>
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                <span className="text-[9px] font-bold text-amber-500/80 tracking-wider uppercase">{mainTitle} · 数据待同步</span>
+                <span className="text-[10px] font-bold text-amber-500/80 tracking-wider uppercase">{mainTitle} · 数据待同步</span>
               </>
             ) : (
               <>
                 <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-ping" />
-                <span className="text-[9px] font-bold text-slate-500 tracking-wider uppercase">{mainTitle}</span>
+                <span className="text-[10px] font-bold text-slate-500 tracking-wider uppercase">{mainTitle}</span>
               </>
             )}
           </div>
@@ -137,10 +137,10 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
                           &quot;{tData.summary || displayPrediction?.ai_reasoning}&quot;
                         </p>
                         {p1 && <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 w-full overflow-hidden">
-                          <span className="text-[9px] font-black bg-indigo-500 text-white px-1 py-0.5 rounded italic shrink-0">{p1.priority}</span>
+                          <span className="text-[10px] font-black bg-indigo-500 text-white px-1 py-0.5 rounded italic shrink-0">{p1.priority}</span>
                           <div className="flex items-center gap-1 min-w-0">
                             <span className="text-[10px] font-bold text-indigo-400 shrink-0">{p1.action}:</span>
-                            <span className="text-[10px] text-slate-400 font-medium truncate">{p1.trigger}</span>
+                            <span className="text-xs text-slate-400 font-medium truncate">{p1.trigger}</span>
                           </div>
                         </div>}
                       </>
@@ -185,8 +185,8 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
                     {/* RSI 仅在事实已发生时显示 */}
                     {isTradingDay() && !isPreMarket && (
                       <div className="mt-2 pt-2 border-t border-white/5 flex items-center justify-between">
-                        <span className="text-[8px] text-slate-600 font-bold uppercase">RSI</span>
-                        <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-full bg-white/5 ${
+                        <span className="text-[10px] text-slate-600 font-bold uppercase">RSI</span>
+                        <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-full bg-white/5 ${
                           data.price.rsi > 70 ? 'text-rose-500' : data.price.rsi < 30 ? 'text-emerald-500' : 'text-slate-500'
                         }`}>
                           {data.price.rsi.toFixed(0)} · {data.price.rsi > 70 ? '超买' : data.price.rsi < 30 ? '超卖' : '稳定'}
@@ -197,7 +197,7 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
                     {/* 周一盘前显示一条微弱的提示线 */}
                     {isMarketOpenSoon && (
                       <div className="mt-2 pt-2 border-t border-dashed border-white/5">
-                        <span className="text-[8px] text-slate-700 font-bold italic">等待 09:30 事实流入</span>
+                        <span className="text-[10px] text-slate-700 font-bold italic">等待 09:30 事实流入</span>
                       </div>
                     )}
                   </>
@@ -235,13 +235,13 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
 
                 return (
                   <>
-                    <span className="text-[9px] text-slate-600 font-black uppercase tracking-widest absolute top-4 left-4">
+                    <span className="text-[10px] text-slate-600 font-black uppercase tracking-widest absolute top-4 left-4">
                       {getValidationLabelFromData(validationDate || '')}
                     </span>
                     
                     <div className="flex-1 flex flex-col items-center justify-center pt-4">
                       {!validationPrediction ? (
-                        <p className="text-[11px] font-bold text-slate-600 italic">暂无历史验证</p>
+                        <p className="text-xs font-bold text-slate-600 italic">暂无历史验证</p>
                       ) : (
                         <>
                            {status === 'Correct' ? (
@@ -271,7 +271,7 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
 
         {data.history.length > 1 && (
           <div className="flex flex-col items-center gap-1.5 pt-2 opacity-20">
-            <span className="text-[8px] font-black tracking-[0.2em] text-slate-500 uppercase">上划追溯历史轨迹</span>
+            <span className="text-[10px] font-black tracking-[0.2em] text-slate-500 uppercase">上划追溯历史轨迹</span>
             <ChevronDown size={14} className="animate-bounce" />
           </div>
         )}
