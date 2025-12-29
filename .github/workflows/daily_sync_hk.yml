@@ -1,24 +1,13 @@
-name: Daily Sync - Full (All Markets)
-
-# 此 Workflow 已被 daily_sync_cn.yml 和 daily_sync_hk.yml 替代
-# 保留作为手动触发的全量同步备用方案
+name: Daily Sync - Hong Kong (HK)
 
 on:
-  # 移除定时触发，仅支持手动
-  workflow_dispatch:
-    inputs:
-      market:
-        description: '选择市场 (留空则同步全部)'
-        required: false
-        default: ''
-        type: choice
-        options:
-          - ''
-          - CN
-          - HK
+  schedule:
+    # 每日北京时间 17:00 (UTC 09:00) 执行 - 港股16:00收盘后1小时
+    - cron: '0 9 * * 1-5'
+  workflow_dispatch: # 支持手动触发
 
 jobs:
-  sync:
+  sync-hk:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -35,7 +24,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
 
-      - name: Run ETL Pipeline
+      - name: Run Hong Kong ETL Pipeline
         env:
           PYTHONUNBUFFERED: "1"
           TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
@@ -43,8 +32,4 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           WECOM_ROBOT_KEY: ${{ secrets.WECOM_ROBOT_KEY }}
         run: |
-          if [ -n "${{ github.event.inputs.market }}" ]; then
-            python -u backend/main.py --market ${{ github.event.inputs.market }}
-          else
-            python -u backend/main.py
-          fi
+          python -u backend/main.py --market HK

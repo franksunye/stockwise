@@ -130,11 +130,31 @@ def sync_spot_prices(symbols: list):
     report += f"- **Duration**: {duration:.1f}s"
     send_wecom_notification(report)
 
-def run_full_sync():
-    """每日全量同步"""
+def run_full_sync(market_filter: str = None):
+    """每日全量同步
+    
+    Args:
+        market_filter: 可选，过滤市场 ("CN" 或 "HK")，None 表示全部
+    """
     target_stocks = get_stock_pool()
     if not target_stocks:
         print("⚠️ 股票池为空")
+        return
+    
+    # 按市场过滤
+    if market_filter:
+        filtered_stocks = []
+        for symbol in target_stocks:
+            is_hk = len(symbol) == 5
+            if market_filter == "HK" and is_hk:
+                filtered_stocks.append(symbol)
+            elif market_filter == "CN" and not is_hk:
+                filtered_stocks.append(symbol)
+        target_stocks = filtered_stocks
+        print(f"📍 过滤市场: {market_filter}，共 {len(target_stocks)} 只股票")
+
+    if not target_stocks:
+        print(f"⚠️ {market_filter} 市场股票池为空")
         return
 
     start_time = time.time()
@@ -151,7 +171,8 @@ def run_full_sync():
             errors.append(f"{stock} error: {str(e)[:100]}")
     
     duration = time.time() - start_time
-    report = f"### 📊 StockWise: Daily Full Sync\n"
+    market_label = f" ({market_filter})" if market_filter else ""
+    report = f"### 📊 StockWise: Daily Sync{market_label}\n"
     report += f"> **Status**: {'✅' if not errors else '⚠️'}\n"
     report += f"- **Target**: {len(target_stocks)} Stocks\n"
     report += f"- **Periods**: 日线(D), 周线(W), 月线(M) ✅\n"
@@ -164,6 +185,7 @@ if __name__ == "__main__":
     parser.add_argument('--realtime', action='store_true', help='执行盘中实时同步')
     parser.add_argument('--sync-meta', action='store_true', help='仅同步股票元数据')
     parser.add_argument('--symbol', type=str, help='同步特定股票')
+    parser.add_argument('--market', type=str, choices=['CN', 'HK'], help='只同步特定市场 (CN=A股, HK=港股)')
     
     args = parser.parse_args()
     init_db()
@@ -213,5 +235,5 @@ if __name__ == "__main__":
     elif args.realtime:
         sync_spot_prices(get_stock_pool())
     else:
-        run_full_sync()
+        run_full_sync(market_filter=args.market)
 
