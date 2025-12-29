@@ -33,3 +33,18 @@ jobs:
           WECOM_ROBOT_KEY: ${{ secrets.WECOM_ROBOT_KEY }}
         run: |
           python -u backend/main.py --market CN
+
+      - name: Run AI Analysis
+        if: success()
+        env:
+          PYTHONUNBUFFERED: "1"
+          TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          # 即使以下 Key 为空，代码也会回退到规则引擎
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_BASE_URL: ${{ secrets.LLM_BASE_URL }}
+          LLM_MODEL: ${{ secrets.LLM_MODEL }}
+          LLM_ENABLED: "true"
+        run: |
+          python -u backend/main.py --analyze --market CN
