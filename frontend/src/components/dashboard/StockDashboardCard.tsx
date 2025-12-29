@@ -42,10 +42,34 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
     ? (todayPrediction || data.prediction)  // 优先使用今日预测，否则降级到最新预测
     : data.prediction;                       // 收市后使用最新预测
   
+  // 数据新鲜度检测：判断数据是否过时
+  // - 交易中/盘前：如果没有找到 target_date = 今天 的预测，则数据过时
+  // - 收市后：数据通常都是"明日预测"，不存在过时问题
+  const isDataStale = (scene === 'trading' || isPreMarket) && !todayPrediction;
+  
   const isTriggered = displayPrediction?.support_price && data.price.close < displayPrediction.support_price;
 
-  // 1. 智能标题文案（基于交易日历）
-  const mainTitle = getPredictionTitle(scene);
+  // 1. 智能标题文案：优先从实际数据推断，而非仅依赖交易日历
+  // 这确保标题与内容一致
+  const getSmartTitle = () => {
+    if (!displayPrediction?.target_date) return getPredictionTitle(scene);
+    
+    const targetDate = displayPrediction.target_date;
+    
+    // 如果 target_date = 今天，显示"今日建议"
+    if (targetDate === todayStr) return '今日建议';
+    
+    // 如果数据过时（target_date < 今天），显示带日期的标题
+    if (targetDate < todayStr) {
+      const [, m, d] = targetDate.split('-');
+      return `${parseInt(m)}/${parseInt(d)} 建议`;
+    }
+    
+    // target_date > 今天，使用日历推算的标题
+    return getPredictionTitle(scene);
+  };
+  
+  const mainTitle = getSmartTitle();
   
   // 2. 信号文案简化展示
   const getSignalText = (signal?: string) => {
@@ -63,8 +87,17 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
         {/* 1. AI 顶层核心结论 */}
         <section className="text-center space-y-1 py-2">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-ping" />
-            <span className="text-[9px] font-bold text-slate-500 tracking-wider uppercase">{mainTitle}</span>
+            {isDataStale ? (
+              <>
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                <span className="text-[9px] font-bold text-amber-500/80 tracking-wider uppercase">{mainTitle} · 数据待同步</span>
+              </>
+            ) : (
+              <>
+                <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-ping" />
+                <span className="text-[9px] font-bold text-slate-500 tracking-wider uppercase">{mainTitle}</span>
+              </>
+            )}
           </div>
           <h2 className="text-4xl font-black tracking-tighter" style={{ 
             color: displayPrediction?.signal === 'Long' ? COLORS.up : displayPrediction?.signal === 'Short' ? COLORS.down : COLORS.hold 
