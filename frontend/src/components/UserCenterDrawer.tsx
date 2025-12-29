@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, User, Crown, Zap, ShieldCheck } from 'lucide-react';
+import { X, User, Crown, Zap, ShieldCheck, Check, Loader2, ArrowRight } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getWatchlist } from '@/lib/storage';
 
@@ -12,13 +12,88 @@ interface Props {
 
 export function UserCenterDrawer({ isOpen, onClose }: Props) {
   const [watchlistCount, setWatchlistCount] = useState(0);
+  const [userId, setUserId] = useState<string>('');
+  const [tier, setTier] = useState<'free' | 'pro'>('free');
+  const [expiresAt, setExpiresAt] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  
+  // Redemption State
+  const [redeemCode, setRedeemCode] = useState('');
+  const [redeeming, setRedeeming] = useState(false);
+  const [redeemMsg, setRedeemMsg] = useState<{type: 'success'|'error', text: string} | null>(null);
 
   useEffect(() => {
     if (isOpen) {
+      // 1. 获取/生成 UserID
+      let uid = localStorage.getItem('STOCKWISE_USER_ID');
+      if (!uid) {
+          uid = 'user_' + Math.random().toString(36).substr(2, 9);
+          localStorage.setItem('STOCKWISE_USER_ID', uid);
+      }
+      setUserId(uid);
+
+      // 2. 获取本地监控数据
       const list = getWatchlist();
       setWatchlistCount(list.length);
+
+      // 3. 获取服务端会员状态
+      fetchProfile(uid);
     }
   }, [isOpen]);
+
+  const fetchProfile = async (uid: string) => {
+      setLoading(true);
+      try {
+          // 获取本地 watchlist
+          const localWatchlist = getWatchlist();
+          
+          // 使用 POST 请求同步数据并获取资料
+          const res = await fetch('/api/user/profile', {
+              method: 'POST',
+              body: JSON.stringify({
+                  userId: uid,
+                  watchlist: localWatchlist
+              })
+          });
+          const data = await res.json();
+          if (data.tier) {
+              setTier(data.tier);
+              setExpiresAt(data.expiresAt);
+          }
+      } catch (e) {
+          console.error(e);
+      } finally {
+          setLoading(false);
+      }
+  };
+
+  const handleRedeem = async () => {
+      if (!redeemCode || redeeming) return;
+      setRedeeming(true);
+      setRedeemMsg(null);
+      
+      try {
+          const res = await fetch('/api/user/redeem', {
+              method: 'POST',
+              body: JSON.stringify({ userId, code: redeemCode })
+          });
+          const data = await res.json();
+          
+          if (data.success) {
+              setRedeemMsg({ type: 'success', text: '激活成功！欢迎成为 Pro 会员' });
+              setTier('pro');
+              setExpiresAt(data.expiresAt);
+              setRedeemCode('');
+              setTimeout(() => setRedeemMsg(null), 3000);
+          } else {
+              setRedeemMsg({ type: 'error', text: data.error || '激活失败' });
+          }
+      } catch (e) {
+          setRedeemMsg({ type: 'error', text: '网络请求失败' });
+      } finally {
+          setRedeeming(false);
+      }
+  };
 
   return (
     <AnimatePresence>
@@ -42,7 +117,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                <div className="w-12 h-1 rounded-full bg-white/20" />
             </div>
 
-            <div className="p-8 pt-4 flex flex-col min-h-[50vh]">
+            <div className="p-8 pt-4 flex flex-col min-h-[60vh]">
               <header className="flex items-center justify-between mb-8">
                 <div>
                    <span className="text-[10px] uppercase tracking-[0.3em] text-slate-500 font-bold">MEMBER CENTER</span>
@@ -54,17 +129,35 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
               </header>
 
               {/* 用户卡片 */}
-              <div className="mb-8 p-1 rounded-3xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-white/10">
-                <div className="bg-[#0f0f16] rounded-[22px] p-6 flex items-center gap-5">
-                   <div className="w-16 h-16 rounded-full bg-white/5 border-2 border-white/10 flex items-center justify-center">
-                     <User className="w-8 h-8 text-slate-400" />
+              <div className="mb-8 p-1 rounded-3xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-white/10 relative overflow-hidden">
+                {tier === 'pro' && (
+                    <div className="absolute top-0 right-0 p-3">
+                        <Crown className="text-amber-400 w-6 h-6 drop-shadow-[0_0_8px_rgba(251,191,36,0.5)]" />
+                    </div>
+                )}
+                <div className="bg-[#0f0f16]/90 backdrop-blur rounded-[22px] p-6 flex items-center gap-5">
+                   <div className={`w-16 h-16 rounded-full border-2 flex items-center justify-center relative ${tier === 'pro' ? 'border-amber-500/50 bg-amber-500/10' : 'bg-white/5 border-white/10'}`}>
+                     <User className={`w-8 h-8 ${tier === 'pro' ? 'text-amber-200' : 'text-slate-400'}`} />
                    </div>
                    <div className="flex-1">
                      <div className="flex items-center gap-2 mb-1">
-                       <h3 className="text-lg font-black italic text-white">Guest User</h3>
-                       <span className="px-2 py-0.5 rounded-md bg-slate-700/50 border border-white/5 text-[10px] font-bold text-slate-300 uppercase">Free Plan</span>
+                       <h3 className="text-lg font-black italic text-white">
+                           {tier === 'pro' ? 'Pro Member' : 'Guest User'}
+                       </h3>
+                       <span className={`px-2 py-0.5 rounded-md border text-[10px] font-bold uppercase ${
+                           tier === 'pro' 
+                           ? 'bg-amber-500/20 border-amber-500/30 text-amber-400' 
+                           : 'bg-slate-700/50 border-white/5 text-slate-300'
+                       }`}>
+                           {tier === 'pro' ? 'Pro Plan' : 'Free Plan'}
+                       </span>
                      </div>
-                     <p className="text-xs text-slate-500">ID: anon-8823...92a</p>
+                     <p className="text-xs text-slate-500 mono">ID: {userId.slice(0, 12)}...</p>
+                     {expiresAt && tier === 'pro' && (
+                         <p className="text-[10px] text-emerald-500/80 mt-1">
+                             有效期至: {expiresAt.split('T')[0]}
+                         </p>
+                     )}
                    </div>
                 </div>
               </div>
@@ -78,30 +171,58 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                    </div>
                    <div className="flex items-end gap-1.5">
                      <span className="text-2xl font-black text-white">{watchlistCount}</span>
-                     <span className="text-sm font-bold text-slate-600 mb-1">/ 3</span>
+                     <span className="text-sm font-bold text-slate-600 mb-1">/ {tier === 'pro' ? '10' : '3'}</span>
                    </div>
                    <div className="w-full h-1 bg-white/10 rounded-full mt-3 overflow-hidden">
-                     <div className="h-full bg-indigo-500" style={{ width: `${(watchlistCount/3)*100}%` }} />
+                     <div className={`h-full ${tier === 'pro' ? 'bg-amber-500' : 'bg-indigo-500'}`} style={{ width: `${Math.min((watchlistCount / (tier === 'pro' ? 10 : 3)) * 100, 100)}%` }} />
                    </div>
                 </div>
 
-                <div className="glass-card p-5 opacity-60">
-                   <div className="flex items-center gap-2 mb-3 text-slate-400">
+                <div className={`glass-card p-5 ${tier === 'pro' ? 'border-amber-500/20 bg-amber-500/5' : 'opacity-60'}`}>
+                   <div className={`flex items-center gap-2 mb-3 ${tier === 'pro' ? 'text-amber-200' : 'text-slate-400'}`}>
                      <Zap size={16} />
                      <span className="text-xs font-bold uppercase">AI 分析</span>
                    </div>
                    <div className="flex items-end gap-1.5">
-                     <span className="text-sm font-bold text-white">基础版</span>
+                     <span className={`text-sm font-bold ${tier === 'pro' ? 'text-amber-100' : 'text-white'}`}>
+                         {tier === 'pro' ? '深度推理链' : '基础版'}
+                     </span>
                    </div>
-                   <p className="text-[10px] text-slate-500 mt-2 leading-tight">升级 Pro 解锁深度推理链</p>
+                   <p className={`text-[10px] mt-2 leading-tight ${tier === 'pro' ? 'text-amber-500/70' : 'text-slate-500'}`}>
+                       {tier === 'pro' ? '已解锁 Gemini Pro 完整能力' : '升级 Pro 解锁深度推理链'}
+                   </p>
                 </div>
               </div>
 
-              {/* 升级引导 */}
-              <button disabled className="mt-auto w-full py-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-black italic shadow-[0_10px_30px_rgba(79,70,229,0.4)] flex items-center justify-center gap-2 opacity-80">
-                 <Crown size={18} />
-                 <span>升级 StockWise Pro (即将上线)</span>
-              </button>
+              {/* 激活码兑换区域 (Beta) */}
+              {tier === 'free' && (
+                  <div className="mt-auto">
+                      <div className="flex items-center gap-2 mb-2">
+                          <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">拥有激活码?</span>
+                          {redeemMsg && (
+                              <span className={`text-xs ${redeemMsg.type === 'success' ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                  {redeemMsg.text}
+                              </span>
+                          )}
+                      </div>
+                      <div className="flex gap-2">
+                          <input 
+                            type="text" 
+                            value={redeemCode}
+                            onChange={(e) => setRedeemCode(e.target.value.toUpperCase())}
+                            placeholder="输入 PRO-XXXXXX"
+                            className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 transition-colors uppercase font-mono"
+                          />
+                          <button 
+                            onClick={handleRedeem}
+                            disabled={!redeemCode || redeeming}
+                            className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white px-5 rounded-xl font-bold transition-all active:scale-95 flex items-center justify-center"
+                          >
+                             {redeeming ? <Loader2 className="animate-spin w-5 h-5" /> : <ArrowRight className="w-5 h-5" />}
+                          </button>
+                      </div>
+                  </div>
+              )}
               
             </div>
           </motion.div>

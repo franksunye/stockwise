@@ -212,10 +212,42 @@ def init_db():
             email TEXT,
             registration_type TEXT NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            last_active_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            last_active_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            subscription_tier TEXT DEFAULT 'free',
+            subscription_expires_at TIMESTAMP
         )
     """)
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_registration_type ON users(registration_type)")
+
+    # 检查 users 表的新字段 (Schema Evolution)
+    try:
+        cursor.execute("PRAGMA table_info(users)")
+        columns = [info[1] for info in cursor.fetchall()]
+        
+        if "subscription_tier" not in columns:
+            print("🛠️ 更新数据库: 添加 users.subscription_tier")
+            cursor.execute("ALTER TABLE users ADD COLUMN subscription_tier TEXT DEFAULT 'free'")
+            
+        if "subscription_expires_at" not in columns:
+            print("🛠️ 更新数据库: 添加 users.subscription_expires_at")
+            cursor.execute("ALTER TABLE users ADD COLUMN subscription_expires_at TIMESTAMP")
+            
+    except Exception as e:
+        print(f"⚠️ 检查/更新 users 表结构失败: {e}")
+
+    # 6. 邀请码表 (第0阶段内测)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS invitation_codes (
+            code TEXT PRIMARY KEY,
+            type TEXT NOT NULL, -- 'pro_monthly', 'premium_yearly'
+            duration_days INTEGER DEFAULT 30,
+            is_used BOOLEAN DEFAULT 0,
+            used_by_user_id TEXT,
+            used_at TIMESTAMP,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_invitation_code ON invitation_codes(code)")
 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS user_watchlist (
