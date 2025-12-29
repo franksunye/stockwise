@@ -1,11 +1,8 @@
 
 export type MarketScene = 'pre_market' | 'trading' | 'post_market';
+export type MarketType = 'HK' | 'CN';
 
-/**
- * 港股 2025 年休市日 (不含周末)
- * 数据来源: 香港交易所官网
- * 维护说明: 每年年初更新一次
- */
+// ============ 港股 (HK) 交易日历 ============
 const HK_HOLIDAYS_2025: string[] = [
     '2025-01-01', // 元旦
     '2025-01-29', // 农历新年
@@ -23,9 +20,6 @@ const HK_HOLIDAYS_2025: string[] = [
     '2025-12-26', // 圣诞节翌日
 ];
 
-/**
- * 港股 2026 年休市日 (不含周末) - 预填，待官方确认后更新
- */
 const HK_HOLIDAYS_2026: string[] = [
     '2026-01-01', // 元旦
     '2026-02-17', // 农历新年 (预估)
@@ -41,10 +35,90 @@ const HK_HOLIDAYS_2026: string[] = [
     '2026-12-25', // 圣诞节
 ];
 
-const ALL_HOLIDAYS = new Set([...HK_HOLIDAYS_2025, ...HK_HOLIDAYS_2026]);
+const HK_HOLIDAYS = new Set([...HK_HOLIDAYS_2025, ...HK_HOLIDAYS_2026]);
+
+// ============ A股 (CN) 交易日历 ============
+// 数据来源: 中国证监会官方公告
+const CN_HOLIDAYS_2025: string[] = [
+    '2025-01-01', // 元旦
+    '2025-01-28', // 春节 (1/28 - 2/4)
+    '2025-01-29',
+    '2025-01-30',
+    '2025-01-31',
+    '2025-02-01',
+    '2025-02-02',
+    '2025-02-03',
+    '2025-02-04',
+    '2025-04-04', // 清明节 (4/4 - 4/6)
+    '2025-04-05',
+    '2025-04-06',
+    '2025-05-01', // 劳动节 (5/1 - 5/5)
+    '2025-05-02',
+    '2025-05-03',
+    '2025-05-04',
+    '2025-05-05',
+    '2025-05-31', // 端午节 (5/31 - 6/2)
+    '2025-06-01',
+    '2025-06-02',
+    '2025-10-01', // 国庆+中秋 (10/1 - 10/8)
+    '2025-10-02',
+    '2025-10-03',
+    '2025-10-04',
+    '2025-10-05',
+    '2025-10-06',
+    '2025-10-07',
+    '2025-10-08',
+];
+
+const CN_HOLIDAYS_2026: string[] = [
+    '2026-01-01', // 元旦 (预估)
+    '2026-01-02',
+    '2026-02-17', // 春节 (预估)
+    '2026-02-18',
+    '2026-02-19',
+    '2026-02-20',
+    '2026-02-21',
+    '2026-02-22',
+    '2026-02-23',
+    '2026-04-05', // 清明节 (预估)
+    '2026-04-06',
+    '2026-05-01', // 劳动节 (预估)
+    '2026-05-02',
+    '2026-05-03',
+    '2026-06-19', // 端午节 (预估)
+    '2026-06-20',
+    '2026-06-21',
+    '2026-10-01', // 国庆节 (预估)
+    '2026-10-02',
+    '2026-10-03',
+    '2026-10-04',
+    '2026-10-05',
+    '2026-10-06',
+    '2026-10-07',
+];
+
+const CN_HOLIDAYS = new Set([...CN_HOLIDAYS_2025, ...CN_HOLIDAYS_2026]);
 
 /**
- * 获取香港时间
+ * 根据股票代码判断市场类型
+ */
+export function getMarketFromSymbol(symbol?: string): MarketType {
+    if (!symbol) return 'HK';
+    // 港股通常是5位
+    if (symbol.length === 5) return 'HK';
+    // A股通常是6位
+    return 'CN';
+}
+
+/**
+ * 获取指定市场的假期列表
+ */
+function getHolidays(market: MarketType): Set<string> {
+    return market === 'HK' ? HK_HOLIDAYS : CN_HOLIDAYS;
+}
+
+/**
+ * 获取香港/北京时间 (UTC+8)
  */
 export function getHKTime(date?: Date): Date {
     const d = date || new Date();
@@ -63,36 +137,41 @@ function formatDateStr(date: Date): string {
 }
 
 /**
- * 判断指定日期是否为港股休市日 (周末或假期)
+ * 判断指定日期是否为休市日 (周末或假期)
+ * @param date 日期
+ * @param market 市场类型，默认 HK
  */
-export function isMarketClosed(date: Date): boolean {
+export function isMarketClosed(date: Date, market: MarketType = 'HK'): boolean {
     const dayOfWeek = date.getDay();
     // 周六(6)或周日(0)
     if (dayOfWeek === 0 || dayOfWeek === 6) return true;
     // 检查假期列表
-    return ALL_HOLIDAYS.has(formatDateStr(date));
+    return getHolidays(market).has(formatDateStr(date));
 }
 
 /**
  * 判断今天是否为交易日
+ * @param date 日期（可选）
+ * @param market 市场类型，默认 HK
  */
-export function isTradingDay(date?: Date): boolean {
+export function isTradingDay(date?: Date, market: MarketType = 'HK'): boolean {
     const hkDate = getHKTime(date);
-    return !isMarketClosed(hkDate);
+    return !isMarketClosed(hkDate, market);
 }
 
 /**
  * 获取下一个交易日
  * @param from 从哪一天开始计算（默认今天）
- * @returns 下一个交易日的 Date 对象（香港时间）
+ * @param market 市场类型，默认 HK
+ * @returns 下一个交易日的 Date 对象
  */
-export function getNextTradingDay(from?: Date): Date {
+export function getNextTradingDay(from?: Date, market: MarketType = 'HK'): Date {
     const hkNow = getHKTime(from);
     const next = new Date(hkNow);
     next.setDate(next.getDate() + 1);
 
     // 循环跳过所有休市日
-    while (isMarketClosed(next)) {
+    while (isMarketClosed(next, market)) {
         next.setDate(next.getDate() + 1);
     }
     return next;
@@ -154,15 +233,16 @@ export function getPredictionTitle(scene: MarketScene): string {
 /**
  * 获取上一个交易日
  * @param from 从哪一天开始往前算（默认今天）
- * @returns 上一个交易日的 Date 对象（香港时间）
+ * @param market 市场类型，默认 HK
+ * @returns 上一个交易日的 Date 对象
  */
-export function getLastTradingDay(from?: Date): Date {
+export function getLastTradingDay(from?: Date, market: MarketType = 'HK'): Date {
     const hkNow = getHKTime(from);
     const prev = new Date(hkNow);
     prev.setDate(prev.getDate() - 1);
 
     // 循环跳过所有休市日
-    while (isMarketClosed(prev)) {
+    while (isMarketClosed(prev, market)) {
         prev.setDate(prev.getDate() - 1);
     }
     return prev;
