@@ -61,8 +61,8 @@ def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool =
     })
     df["date"] = pd.to_datetime(df["date"]).dt.strftime("%Y-%m-%d")
     
-    # 3. 验证昨日预测
-    if period == "daily" and not df.empty:
+    # 3. 验证昨日预测（仅在全量同步时执行，盘中价格不稳定不适合验证）
+    if period == "daily" and not df.empty and not is_realtime:
         validate_previous_prediction(symbol, df.iloc[-1])
 
     # 4. 判断是否需要更新
