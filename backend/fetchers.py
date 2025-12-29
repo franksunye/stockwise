@@ -1,4 +1,14 @@
 import os
+import sys
+import io
+
+# 修复 Windows 控制台编码问题
+if sys.stdout.encoding != 'utf-8':
+    try:
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+    except (AttributeError, io.UnsupportedOperation):
+        pass
+
 import ssl
 import requests
 import akshare as ak

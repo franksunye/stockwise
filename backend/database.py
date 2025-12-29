@@ -1,4 +1,15 @@
 import sqlite3
+import sys
+import io
+from datetime import datetime
+
+# 修复 Windows 控制台编码问题
+if sys.stdout.encoding != 'utf-8':
+    try:
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+    except (AttributeError, io.UnsupportedOperation):
+        pass
+
 from config import DB_PATH, TURSO_DB_URL, TURSO_AUTH_TOKEN
 
 try:
@@ -133,9 +144,36 @@ def init_db():
             ai_reasoning TEXT,
             validation_status TEXT DEFAULT 'Pending',
             actual_change REAL,
+            model TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY (symbol, date)
         )
     """)
+
+    # 字段自动升级 (Schema Evolution) - 为了给旧数据库添加字段
+    try:
+        cursor.execute("PRAGMA table_info(ai_predictions)")
+        columns = [info[1] for info in cursor.fetchall()]
+        
+        # 定义需要补全的字段及其类型
+        expected_ai_columns = {
+            "model": "TEXT",
+            "created_at": "TIMESTAMP",
+            "updated_at": "TIMESTAMP"
+        }
+        
+        for col_name, col_type in expected_ai_columns.items():
+            if col_name not in columns:
+                print(f"🛠️ 更新数据库: 添加 ai_predictions.{col_name}")
+                cursor.execute(f"ALTER TABLE ai_predictions ADD COLUMN {col_name} {col_type}")
+                # 为旧数据赋予当前时间作为默认值
+                if "at" in col_name:
+                    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    cursor.execute(f"UPDATE ai_predictions SET {col_name} = ? WHERE {col_name} IS NULL", (now,))
+                
+    except Exception as e:
+        print(f"⚠️ 检查/更新 ai_predictions 表结构失败: {e}")
     
     conn.commit()
     conn.close()

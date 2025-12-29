@@ -6,6 +6,15 @@ StockWise ETL Pipeline - Orchestrator
 import sys
 import argparse
 import time
+import io
+
+# 修复 Windows 控制台编码问题
+if sys.stdout.encoding != 'utf-8':
+    try:
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+    except (AttributeError, io.UnsupportedOperation):
+        pass
+
 import pandas as pd
 from datetime import datetime, timedelta
 
@@ -103,9 +112,7 @@ def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool =
     conn.commit()
     conn.close()
     
-    # 7. 生成明日预测（仅在全量同步时执行，盘中同步不生成新预测）
-    if period == "daily" and not is_realtime:
-        generate_ai_prediction(symbol, df.iloc[-1])
+    # 注意: AI 预测逻辑已分离，请使用 --analyze 单独运行
 
 def sync_spot_prices(symbols: list):
     """盘中实时同步"""
@@ -129,6 +136,57 @@ def sync_spot_prices(symbols: list):
     report += f"- **Processed**: {success_count}/{len(symbols)}\n"
     report += f"- **Duration**: {duration:.1f}s"
     send_wecom_notification(report)
+
+def run_ai_analysis(symbol: str = None, market_filter: str = None):
+    """独立运行 AI 预测任务"""
+    targets = []
+    if symbol:
+        targets = [symbol]
+    else:
+        pool = get_stock_pool()
+        if not pool:
+            print("⚠️ 股票池为空")
+            return
+        
+        # 按市场过滤
+        if market_filter:
+            for s in pool:
+                is_hk = len(s) == 5
+                if (market_filter == "HK" and is_hk) or (market_filter == "CN" and not is_hk):
+                    targets.append(s)
+        else:
+            targets = pool
+    
+    print(f"\n🧠 开始执行 AI 分析任务，共 {len(targets)} 只股票...")
+    start_time = time.time()
+    success_count = 0
+    
+    conn = get_connection()
+    
+    for stock in targets:
+        try:
+            # 获取该股票最新的日线数据 (含指标)
+            query = f"SELECT * FROM daily_prices WHERE symbol = ? ORDER BY date DESC LIMIT 1"
+            df = pd.read_sql_query(query, conn, params=(stock,))
+            
+            if df.empty:
+                print(f"⚠️ {stock}: 无行情数据，跳过")
+                continue
+                
+            today_data = df.iloc[0]
+            print(f"\n>>> 分析 {stock} ({today_data['date']})")
+            
+            # 生成预测
+            generate_ai_prediction(stock, today_data)
+            success_count += 1
+            
+        except Exception as e:
+            print(f"❌ {stock} 分析失败: {e}")
+            
+    conn.close()
+    duration = time.time() - start_time
+    print(f"\n✅ AI 分析完成! 成功: {success_count}/{len(targets)}, 耗时: {duration:.1f}s")
+
 
 def run_full_sync(market_filter: str = None):
     """每日全量同步
@@ -184,8 +242,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='StockWise ETL Pipeline')
     parser.add_argument('--realtime', action='store_true', help='执行盘中实时同步')
     parser.add_argument('--sync-meta', action='store_true', help='仅同步股票元数据')
-    parser.add_argument('--symbol', type=str, help='同步特定股票')
-    parser.add_argument('--market', type=str, choices=['CN', 'HK'], help='只同步特定市场 (CN=A股, HK=港股)')
+    parser.add_argument('--analyze', action='store_true', help='执行 AI 预测分析 (独立任务)')
+    parser.add_argument('--symbol', type=str, help='指定股票代码')
+    parser.add_argument('--market', type=str, choices=['CN', 'HK'], help='只同步/分析特定市场')
     
     args = parser.parse_args()
     init_db()
@@ -194,6 +253,9 @@ if __name__ == "__main__":
         sync_stock_meta()
         # 同步完基础列表后，顺便更新一波公司概况 (每次20个)
         sync_profiles(limit=20)
+    elif args.analyze:
+        # 独立运行 AI 分析
+        run_ai_analysis(symbol=args.symbol, market_filter=args.market)
     elif args.symbol:
         # On-Demand Sync: 需要错误处理和通知
         start_time = time.time()
