@@ -1,6 +1,6 @@
 'use client';
 
-import { Zap, Target, ShieldCheck, ChevronDown } from 'lucide-react';
+import { Zap, Target, ShieldCheck, ChevronDown, Clock } from 'lucide-react';
 import { StockData, TacticalData } from '@/lib/types';
 import { getMarketScene, formatStockSymbol, getPredictionTitle, getClosePriceLabelFromData, getValidationLabelFromData, isTradingDay } from '@/lib/date-utils';
 import { COLORS } from './constants';
@@ -235,24 +235,32 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
 
                 return (
                   <>
-                    <span className="text-[9px] text-slate-600 font-black uppercase tracking-widest">
+                    <span className="text-[9px] text-slate-600 font-black uppercase tracking-widest absolute top-4 left-4">
                       {getValidationLabelFromData(validationDate || '')}
                     </span>
-                    <div className="mt-1">
+                    
+                    <div className="flex-1 flex flex-col items-center justify-center pt-4">
                       {!validationPrediction ? (
                         <p className="text-[11px] font-bold text-slate-600 italic">暂无历史验证</p>
                       ) : (
-                        <div className="flex flex-col gap-1">
-                          <div className="flex items-center gap-1.5 font-black text-xs leading-none">
-                            {status === 'Correct' ? (
-                              <span className="text-emerald-500 flex items-center gap-1"><ShieldCheck size={14} /> 预测准确</span>
-                            ) : status === 'Incorrect' ? (
-                              <span className="text-rose-500">❌ 产生偏差</span>
-                            ) : (
-                              <span className="text-slate-500 italic">待收盘验证</span>
-                            )}
-                          </div>
-                        </div>
+                        <>
+                           {status === 'Correct' ? (
+                             <div className="flex flex-col items-center gap-2">
+                               <ShieldCheck size={28} className="text-emerald-500" />
+                               <span className="text-xs font-black text-emerald-500 tracking-wide">预测准确</span>
+                             </div>
+                           ) : status === 'Incorrect' ? (
+                             <div className="flex flex-col items-center gap-2">
+                               <div className="text-rose-500 text-2xl font-black leading-none">❌</div>
+                               <span className="text-xs font-black text-rose-500 tracking-wide">产生偏差</span>
+                             </div>
+                           ) : (
+                             <div className="flex flex-col items-center gap-2">
+                               <Clock size={24} className="text-slate-700" />
+                               <span className="text-[10px] font-bold text-slate-500 italic">待收盘验证</span>
+                             </div>
+                           )}
+                        </>
                       )}
                     </div>
                   </>
