@@ -2,7 +2,7 @@
 
 import { useState, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LayoutGrid as Grid, Settings, ChevronDown, RefreshCw } from 'lucide-react';
+import { LayoutGrid as Grid, Settings, ChevronDown, RefreshCw, User } from 'lucide-react';
 import { StockData } from '@/lib/types';
 import { 
   TacticalBriefDrawer, 
@@ -73,7 +73,7 @@ function DashboardContent() {
         />
       </AnimatePresence>
 
-      {/* Header - 股票信息 + 设置 */}
+      {/* Header - 股票信息 + 刷新状态 */}
       <header className="fixed top-0 left-0 right-0 z-[100] p-8 pointer-events-none">
         <div className="w-full flex justify-between items-center pointer-events-auto">
            <div className="flex items-center gap-3 cursor-pointer group shrink-0" onClick={() => setProfileStock(currentStock)}>
@@ -86,12 +86,17 @@ function DashboardContent() {
               </div>
            </div>
 
-           <button 
-             onClick={() => setSettingsOpen(true)} 
-             className="w-11 h-11 rounded-[18px] bg-white/5 border border-white/10 flex items-center justify-center transition-all active:scale-90 hover:bg-white/10 shrink-0"
-           >
-             <Settings className="w-5 h-5 text-slate-400" />
-           </button>
+          {/* 刷新指示器 */}
+          <button 
+            onClick={() => refresh()}
+            disabled={isRefreshing}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/5 border border-white/10 active:scale-95 transition-all disabled:opacity-50"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 text-slate-500 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <span className="text-[10px] font-bold text-slate-500 mono tabular-nums">
+              {isRefreshing ? '刷新中' : formatCountdown(nextRefreshIn)}
+            </span>
+          </button>
         </div>
       </header>
 
@@ -112,7 +117,7 @@ function DashboardContent() {
         ))}
       </div>
 
-      {/* 底部导航 - Stock Pool + 刷新 */}
+      {/* 底部导航 - Stock Pool + 个人中心 */}
       <footer className="fixed bottom-0 left-0 right-0 p-10 px-8 flex flex-col items-center gap-6 z-[100] pointer-events-none">
         <AnimatePresence>
           {yScrollPosition > 100 && (
@@ -139,17 +144,12 @@ function DashboardContent() {
             <Grid className="w-5 h-5 text-indigo-400" />
           </Link>
           
-          {/* 刷新指示器 */}
-          <button 
-            onClick={() => refresh()}
-            disabled={isRefreshing}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/5 border border-white/10 active:scale-95 transition-all disabled:opacity-50"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 text-slate-500 ${isRefreshing ? 'animate-spin' : ''}`} />
-            <span className="text-[10px] font-bold text-slate-500 mono tabular-nums">
-              {isRefreshing ? '刷新中' : formatCountdown(nextRefreshIn)}
-            </span>
-          </button>
+           <button 
+             onClick={() => setSettingsOpen(true)} 
+             className="w-11 h-11 rounded-full bg-white/5 border border-white/10 flex items-center justify-center transition-all active:scale-90 hover:bg-white/10 shrink-0"
+           >
+             <User className="w-5 h-5 text-slate-400" />
+           </button>
         </div>
       </footer>
 
