@@ -123,7 +123,7 @@ export function TacticalBriefDrawer({
                              <div className="w-1 h-1 rounded-full bg-slate-700" />
                              <span className="text-xs font-bold text-slate-300">{t.action}</span>
                           </div>
-                          <p className="text-[11px] text-slate-500 leading-relaxed"><span className="text-slate-400">条件:</span> {t.trigger}</p>
+                          <p className="text-xs text-slate-500 leading-relaxed"><span className="text-slate-400">条件:</span> {t.trigger}</p>
                         </div>
                       ))}
                     </div>
@@ -195,7 +195,7 @@ export function TacticalBriefDrawer({
                                         </div>
                                       );
                                     })()}
-                                    <span className="text-[9px] font-black text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-full italic tracking-tight">
+                                    <span className="text-[10px] font-black text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-full italic tracking-tight">
                                       {step.conclusion}
                                     </span>
                                   </div>
