@@ -79,6 +79,7 @@ export interface TacticalData {
     };
     conflict_resolution: string;
     tomorrow_focus?: string;
+    is_llm?: boolean;
 }
 
 // Dashboard 页面聚合数据

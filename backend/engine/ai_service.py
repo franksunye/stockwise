@@ -7,14 +7,14 @@ from config import LLM_CONFIG
 from .llm_client import get_llm_client
 from .prompts import prepare_stock_analysis_prompt
 
-def generate_ai_prediction(symbol: str, today_data: pd.Series):
+def generate_ai_prediction(symbol: str, today_data: pd.Series, mode: str = 'ai'):
     """根据今日行情生成对明日的 AI 预测 (T 预测 T+1)"""
     today_str = today_data.get('date')
     if not today_str:
         return None
 
     # 1. 尝试使用 LLM 生成预测
-    if LLM_CONFIG.get("enabled", False):
+    if LLM_CONFIG.get("enabled", False) and mode == 'ai':
         try:
             print(f"   🤖 正在为 {symbol} 调用本地 LLM 进行分析...")
             system_prompt, user_prompt = prepare_stock_analysis_prompt(symbol)
