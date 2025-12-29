@@ -27,8 +27,14 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
   const isPostMarket = scene === 'post_market';
   const isPreMarket = scene === 'pre_market';
   
-  // 核心预测数据
-  const displayPrediction = data.prediction;
+  // 核心预测数据选择逻辑：
+  // - 交易中/盘前：显示"今日建议" → 使用 target_date = 今天 的预测
+  //   后端返回的 prediction 是最新预测（target_date = 明天），所以交易中要用 previousPrediction
+  // - 收市后/休市日：显示"明日建议/下周一建议" → 使用最新预测 (prediction)
+  const displayPrediction = (scene === 'trading' || isPreMarket) 
+    ? data.previousPrediction   // 今日预测（昨天生成，target_date = 今天）
+    : data.prediction;          // 明日预测（今天生成，target_date = 明天）
+  
   const isTriggered = displayPrediction?.support_price && data.price.close < displayPrediction.support_price;
 
   // 1. 智能标题文案（基于交易日历）
@@ -162,41 +168,28 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
            {/* 右侧：验证结果 (Validation) */}
            <div className="glass-card p-4 flex flex-col justify-between">
               {(() => {
-                // 验证区核心逻辑：
-                // 验证的日期 = 当前展示预测的 target_date
-                // - 交易中：今日预测 → target_date = 今天 → 显示"今日验证 → 待收盘验证"
-                // - 收市后：明日预测 → 但我们要验证的是今日预测 → 使用 previousPrediction
-                // - 周末：下周一预测 → 验证上周五预测 → 使用 previousPrediction
-                
-                // 简化策略：始终验证 displayPrediction 的 target_date
-                // displayPrediction 在顶部已经根据场景选好了（今日/明日/下周一的预测）
+                // 验证区核心逻辑（简化版）：
+                // displayPrediction 已经根据场景正确选择了：
+                // - 交易中/盘前：今日预测 → 验证今日 → 显示"待收盘验证"
+                // - 收市后：今日预测（已验证）→ 显示验证结果
+                // - 周末：上周五预测（已验证）→ 显示验证结果
+                // 所以直接使用 displayPrediction 即可
                 const validationDate = displayPrediction?.target_date;
-                
-                // 判断是否需要从 previousPrediction 获取验证结果
-                // 收市后/周末时，顶部显示的是"未来预测"，但验证区应该显示"上一个已完成预测"的结果
-                const shouldShowPreviousValidation = isPostMarket || !isTradingDay();
-                
-                // 选择要验证的预测记录
-                const predictionToValidate = shouldShowPreviousValidation 
-                  ? data.previousPrediction 
-                  : displayPrediction;
-                
-                const actualValidationDate = predictionToValidate?.target_date;
 
                 return (
                   <>
                     <span className="text-[9px] text-slate-600 font-black uppercase tracking-widest">
-                      {getValidationLabelFromData(actualValidationDate || '')}
+                      {getValidationLabelFromData(validationDate || '')}
                     </span>
                     <div className="mt-1">
-                      {!predictionToValidate ? (
+                      {!displayPrediction ? (
                         <p className="text-[11px] font-bold text-slate-600 italic">待定 / 首日入池</p>
                       ) : (
                         <div className="flex flex-col gap-1">
                           <div className="flex items-center gap-1.5 font-black text-xs leading-none">
-                            {predictionToValidate.validation_status === 'Correct' ? (
+                            {displayPrediction.validation_status === 'Correct' ? (
                               <span className="text-emerald-500 flex items-center gap-1"><ShieldCheck size={14} /> 预测准确</span>
-                            ) : predictionToValidate.validation_status === 'Incorrect' ? (
+                            ) : displayPrediction.validation_status === 'Incorrect' ? (
                               <span className="text-rose-500">❌ 产生偏差</span>
                             ) : (
                               <span className="text-slate-500 italic">待收盘验证</span>
