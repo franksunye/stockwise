@@ -2,6 +2,7 @@ import json
 import pandas as pd
 from datetime import datetime, timedelta
 from database import get_connection
+from trading_calendar import get_next_trading_day_str
 
 def generate_ai_prediction(symbol: str, today_data: pd.Series):
     """根据今日行情生成对明日的 AI 预测 (T 预测 T+1)"""
@@ -124,8 +125,8 @@ def generate_ai_prediction(symbol: str, today_data: pd.Series):
     if not today_str:
         return None
         
-    dt = datetime.strptime(today_str, "%Y-%m-%d")
-    target_date = (dt + timedelta(days=1)).strftime("%Y-%m-%d")
+    # 计算下一个交易日（考虑周末和假期）
+    target_date = get_next_trading_day_str(today_str)
 
     cursor.execute("""
         INSERT OR REPLACE INTO ai_predictions 

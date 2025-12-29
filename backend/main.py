@@ -68,12 +68,6 @@ def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool =
     # 4. 判断是否需要更新
     if last_date_str and df["date"].max() < last_date_str:
         print(f"✨ 数据已是最新 ({last_date_str})。")
-        if period == "daily":
-             conn = get_connection()
-             df_last = pd.read_sql(f"SELECT * FROM {table_name} WHERE symbol='{symbol}' ORDER BY date DESC LIMIT 1", conn)
-             conn.close()
-             if not df_last.empty:
-                 generate_ai_prediction(symbol, df_last.iloc[0])
         return
 
     # 5. 计算指标
@@ -109,8 +103,8 @@ def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool =
     conn.commit()
     conn.close()
     
-    # 7. 生成明日预测
-    if period == "daily":
+    # 7. 生成明日预测（仅在全量同步时执行，盘中同步不生成新预测）
+    if period == "daily" and not is_realtime:
         generate_ai_prediction(symbol, df.iloc[-1])
 
 def sync_spot_prices(symbols: list):
