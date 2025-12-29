@@ -23,6 +23,7 @@ interface TacticalBriefDrawerProps {
   onClose: () => void;
   data: TacticalData;
   userPos: 'holding' | 'empty' | 'none';
+  tier: 'free' | 'pro';
 }
 
 // 辅助函数：获取步骤对应的图标和标签配置
