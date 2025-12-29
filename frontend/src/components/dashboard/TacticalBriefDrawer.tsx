@@ -107,6 +107,23 @@ export function TacticalBriefDrawer({
                   </section>
                 )}
 
+                {/* 新增：重点情报 (News Radar) */}
+                {data.news_analysis && data.news_analysis.length > 0 && (
+                  <section>
+                    <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> 重点情报 (Last 48h)
+                    </h3>
+                    <div className="p-4 rounded-2xl bg-gradient-to-br from-emerald-500/[0.05] to-transparent border border-emerald-500/10 space-y-3">
+                      {data.news_analysis.map((news, idx) => (
+                         <div key={idx} className="flex gap-3 items-start">
+                            <span className="text-xs mt-0.5 opacity-60">📰</span>
+                            <p className="text-xs text-slate-300 leading-relaxed font-medium">{news}</p>
+                         </div>
+                      ))}
+                    </div>
+                  </section>
+                )}
+
                 {/* 第三层：分析过程 - 推理链 (带折叠交互) */}
                 {data.reasoning_trace && data.reasoning_trace.length > 0 && (
                   <section className="space-y-4">
