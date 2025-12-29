@@ -47,8 +47,8 @@ export async function POST(request: Request) {
             // Upsert user to ensure they exist, then set tier
             await db.batch([
                 {
-                    sql: `INSERT INTO users (user_id, subscription_tier, subscription_expires_at) 
-                      VALUES (?, 'pro', ?) 
+                    sql: `INSERT INTO users (user_id, subscription_tier, subscription_expires_at, registration_type) 
+                      VALUES (?, 'pro', ?, 'anonymous') 
                       ON CONFLICT(user_id) DO UPDATE SET 
                       subscription_tier = 'pro', 
                       subscription_expires_at = ?`,
