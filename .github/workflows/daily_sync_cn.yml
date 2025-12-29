@@ -45,6 +45,6 @@ jobs:
           LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
           LLM_BASE_URL: ${{ secrets.LLM_BASE_URL }}
           LLM_MODEL: ${{ secrets.LLM_MODEL }}
-          LLM_ENABLED: "true"
+          LLM_ENABLED: ${{ secrets.LLM_ENABLED }}
         run: |
           python -u backend/main.py --analyze --market CN
