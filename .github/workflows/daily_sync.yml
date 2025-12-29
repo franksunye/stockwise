@@ -35,16 +35,34 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
 
-      - name: Run ETL Pipeline
+      - name: 1. Sync Market Data (ETL)
         env:
           PYTHONUNBUFFERED: "1"
           TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
           TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           WECOM_ROBOT_KEY: ${{ secrets.WECOM_ROBOT_KEY }}
         run: |
           if [ -n "${{ github.event.inputs.market }}" ]; then
             python -u backend/main.py --market ${{ github.event.inputs.market }}
           else
             python -u backend/main.py
+          fi
+
+      - name: 2. Run AI Analysis
+        if: success()  # 仅当数据同步成功后才执行分析
+        env:
+          PYTHONUNBUFFERED: "1"
+          TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+          # 既支持 Gemini 也支持 OpenAI 格式的配置
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_BASE_URL: ${{ secrets.LLM_BASE_URL }}
+          LLM_MODEL: ${{ secrets.LLM_MODEL }}
+          LLM_ENABLED: "true"
+        run: |
+          if [ -n "${{ github.event.inputs.market }}" ]; then
+            python -u backend/main.py --analyze --market ${{ github.event.inputs.market }}
+          else
+            python -u backend/main.py --analyze
           fi
