@@ -2,7 +2,7 @@
 
 import { Zap, Target, ShieldCheck, ChevronDown } from 'lucide-react';
 import { StockData, TacticalData } from '@/lib/types';
-import { getMarketScene, formatStockSymbol, getPredictionTitle, getClosePriceLabelFromData, getValidationLabelFromData, isTradingDay, getHKTime, getLastTradingDay } from '@/lib/date-utils';
+import { getMarketScene, formatStockSymbol, getPredictionTitle, getClosePriceLabelFromData, getValidationLabelFromData, isTradingDay } from '@/lib/date-utils';
 import { COLORS } from './constants';
 
 interface StockDashboardCardProps {
@@ -159,55 +159,44 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
               })()}
            </div>
            
-           {/* 右侧：上期履约 (Last Implementation) */}
+           {/* 右侧：验证结果 (Validation) */}
            <div className="glass-card p-4 flex flex-col justify-between">
               {(() => {
-                const isMarketOpenSoon = isTradingDay() && isPreMarket;
+                // 验证区核心逻辑：
+                // 验证的日期 = 当前展示预测的 target_date
+                // - 交易中：今日预测 → target_date = 今天 → 显示"今日验证 → 待收盘验证"
+                // - 收市后：明日预测 → 但我们要验证的是今日预测 → 使用 previousPrediction
+                // - 周末：下周一预测 → 验证上周五预测 → 使用 previousPrediction
                 
-                // 验证区逻辑重写：
-                // 1. 盘前（等待开盘）: 验证日期 = 今天（即将验证今日的预测）
-                // 2. 交易中 & 收市后: 验证日期 = 上一个交易日（验证已完成的交易日）
-                // 3. 休市日（周末/假期）: 验证日期 = 上一个交易日
-                let validationDate: string;
+                // 简化策略：始终验证 displayPrediction 的 target_date
+                // displayPrediction 在顶部已经根据场景选好了（今日/明日/下周一的预测）
+                const validationDate = displayPrediction?.target_date;
                 
-                if (isMarketOpenSoon) {
-                  // 盘前：今天即将验证
-                  validationDate = getHKTime().toISOString().split('T')[0];
-                } else if (scene === 'trading') {
-                  // 交易中：验证上一交易日（如周一盘中，验证周五）
-                  const lastDay = getLastTradingDay();
-                  validationDate = `${lastDay.getFullYear()}-${String(lastDay.getMonth() + 1).padStart(2, '0')}-${String(lastDay.getDate()).padStart(2, '0')}`;
-                } else {
-                  // 收市后或非交易日：
-                  // - 如果今天是交易日，验证今天
-                  // - 如果今天不是交易日，验证上一个交易日
-                  if (isTradingDay()) {
-                    validationDate = getHKTime().toISOString().split('T')[0];
-                  } else {
-                    const lastDay = getLastTradingDay();
-                    validationDate = `${lastDay.getFullYear()}-${String(lastDay.getMonth() + 1).padStart(2, '0')}-${String(lastDay.getDate()).padStart(2, '0')}`;
-                  }
-                }
+                // 判断是否需要从 previousPrediction 获取验证结果
+                // 收市后/周末时，顶部显示的是"未来预测"，但验证区应该显示"上一个已完成预测"的结果
+                const shouldShowPreviousValidation = isPostMarket || !isTradingDay();
                 
-                // 精准匹配：寻找目标日期等于验证锚点的预测记录
-                const factPrediction = [data.prediction, data.previousPrediction].find(
-                  p => p?.target_date === validationDate
-                );
+                // 选择要验证的预测记录
+                const predictionToValidate = shouldShowPreviousValidation 
+                  ? data.previousPrediction 
+                  : displayPrediction;
+                
+                const actualValidationDate = predictionToValidate?.target_date;
 
                 return (
                   <>
                     <span className="text-[9px] text-slate-600 font-black uppercase tracking-widest">
-                      {getValidationLabelFromData(validationDate)}
+                      {getValidationLabelFromData(actualValidationDate || '')}
                     </span>
                     <div className="mt-1">
-                      {!factPrediction ? (
+                      {!predictionToValidate ? (
                         <p className="text-[11px] font-bold text-slate-600 italic">待定 / 首日入池</p>
                       ) : (
                         <div className="flex flex-col gap-1">
                           <div className="flex items-center gap-1.5 font-black text-xs leading-none">
-                            {factPrediction.validation_status === 'Correct' ? (
+                            {predictionToValidate.validation_status === 'Correct' ? (
                               <span className="text-emerald-500 flex items-center gap-1"><ShieldCheck size={14} /> 预测准确</span>
-                            ) : factPrediction.validation_status === 'Incorrect' ? (
+                            ) : predictionToValidate.validation_status === 'Incorrect' ? (
                               <span className="text-rose-500">❌ 产生偏差</span>
                             ) : (
                               <span className="text-slate-500 italic">待收盘验证</span>
