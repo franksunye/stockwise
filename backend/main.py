@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 
 from config import BEIJING_TZ
 from database import init_db, get_connection, get_stock_pool
-from fetchers import sync_stock_meta, fetch_stock_data, sync_profiles, sync_spot_prices
+from fetchers import sync_stock_meta, fetch_stock_data, sync_profiles
 from utils import send_wecom_notification
 from engine.indicators import calculate_indicators
 from engine.ai_service import generate_ai_prediction
