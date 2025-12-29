@@ -125,8 +125,8 @@ def generate_ai_prediction(symbol: str, today_data: pd.Series):
     if not today_str:
         return None
         
-    # 计算下一个交易日（考虑周末和假期）
-    target_date = get_next_trading_day_str(today_str)
+    # 计算下一个交易日（考虑周末和假期，根据股票代码自动选择市场日历）
+    target_date = get_next_trading_day_str(today_str, symbol=symbol)
 
     cursor.execute("""
         INSERT OR REPLACE INTO ai_predictions 
