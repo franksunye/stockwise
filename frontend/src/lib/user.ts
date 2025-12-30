@@ -18,14 +18,11 @@ export interface User {
 }
 
 /**
- * 生成 UUID v4
+ * 生成短格式 User ID (user_xxx)
+ * 统一的 ID 生成入口，确保全局一致性
  */
-function generateUUID(): string {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    const r = (Math.random() * 16) | 0;
-    const v = c === 'x' ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
+function generateShortId(): string {
+  return 'user_' + Math.random().toString(36).substr(2, 9);
 }
 
 /**
@@ -47,7 +44,7 @@ export async function getCurrentUser(): Promise<User> {
 
   // 如果没有 userId，创建新的匿名用户
   if (!userId) {
-    userId = generateUUID();
+    userId = generateShortId();
     userType = 'anonymous';
 
     // 保存到 localStorage

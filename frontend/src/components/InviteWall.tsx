@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Lock, ArrowRight, Loader2, ShieldCheck, Zap } from 'lucide-react';
+import { getCurrentUser } from '@/lib/user';
 
 interface Props {
   onSuccess: (tier: string, expiresAt: string | null) => void;
@@ -18,10 +19,9 @@ export function InviteWall({ onSuccess }: Props) {
     setLoading(true);
     setError(null);
 
-    const userId = localStorage.getItem('STOCKWISE_USER_ID') || 'user_' + Math.random().toString(36).substr(2, 9);
-    if (!localStorage.getItem('STOCKWISE_USER_ID')) {
-        localStorage.setItem('STOCKWISE_USER_ID', userId);
-    }
+    // 统一通过 getCurrentUser 获取/生成用户 ID
+    const user = await getCurrentUser();
+    const userId = user.userId;
 
     try {
       const res = await fetch('/api/user/redeem', {

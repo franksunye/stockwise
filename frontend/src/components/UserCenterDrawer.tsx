@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, User, Crown, Zap, ShieldCheck, Loader2, ArrowRight, Share2, Check } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getWatchlist } from '@/lib/storage';
+import { getCurrentUser } from '@/lib/user';
 
 interface Props {
   isOpen: boolean;
@@ -23,14 +24,12 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
   const [redeemMsg, setRedeemMsg] = useState<{type: 'success'|'error', text: string} | null>(null);
 
   useEffect(() => {
-    if (isOpen) {
-      // 1. 获取/生成 UserID
-      let uid = localStorage.getItem('STOCKWISE_USER_ID');
-      if (!uid) {
-          uid = 'user_' + Math.random().toString(36).substr(2, 9);
-          localStorage.setItem('STOCKWISE_USER_ID', uid);
-      }
-      setUserId(uid);
+    const initUser = async () => {
+      if (!isOpen) return;
+      
+      // 1. 统一通过 getCurrentUser 获取/生成用户 ID
+      const user = await getCurrentUser();
+      setUserId(user.userId);
 
       // 2. 获取本地监控数据
       const list = getWatchlist();
@@ -38,8 +37,9 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
 
       // 3. 获取服务端会员状态
       const referredBy = localStorage.getItem('STOCKWISE_REFERRED_BY');
-      fetchProfile(uid, referredBy);
-    }
+      fetchProfile(user.userId, referredBy);
+    };
+    initUser();
   }, [isOpen]);
 
   const fetchProfile = async (uid: string, referredBy: string | null = null) => {

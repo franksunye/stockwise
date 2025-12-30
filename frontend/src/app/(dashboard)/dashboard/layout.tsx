@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { InviteWall } from '@/components/InviteWall';
 import { getWatchlist } from '@/lib/storage';
+import { getCurrentUser } from '@/lib/user';
 
 export default function DashboardLayout({
   children,
@@ -13,14 +14,9 @@ export default function DashboardLayout({
 
   useEffect(() => {
     const checkAuth = async () => {
-      const uid = localStorage.getItem('STOCKWISE_USER_ID');
-      
-      // 注意：ReferralTracker 可能在根布局正在运行
-      // 如果没有 UID，尝试等一小会儿，或者直接进入未授权状态
-      if (!uid) {
-        setIsAuthorized(false);
-        return;
-      }
+      // 统一通过 getCurrentUser 获取/生成用户 ID
+      const currentUser = await getCurrentUser();
+      const uid = currentUser.userId;
 
       try {
         const referredBy = localStorage.getItem('STOCKWISE_REFERRED_BY');

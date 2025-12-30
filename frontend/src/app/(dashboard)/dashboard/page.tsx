@@ -15,6 +15,7 @@ import dynamic from 'next/dynamic';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { useTikTokScroll } from '@/hooks/useTikTokScroll';
 import { formatStockSymbol } from '@/lib/date-utils';
+import { getCurrentUser } from '@/lib/user';
 
 const UserCenterDrawer = dynamic(() => import('@/components/UserCenterDrawer').then(mod => mod.UserCenterDrawer), {
   ssr: false,
@@ -47,13 +48,12 @@ function DashboardContent() {
 
   useEffect(() => {
     const fetchTier = async () => {
-      const uid = localStorage.getItem('STOCKWISE_USER_ID');
-      if (!uid) return;
+      const user = await getCurrentUser();
       try {
         const res = await fetch('/api/user/profile', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId: uid, watchlist: [] })
+            body: JSON.stringify({ userId: user.userId, watchlist: [] })
         });
         const data = await res.json();
         setTier(data.tier || 'free');
