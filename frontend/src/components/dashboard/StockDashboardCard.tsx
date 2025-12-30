@@ -1,5 +1,7 @@
 'use client';
 
+import { useMemo } from 'react';
+
 import { Zap, Target, ShieldCheck, ChevronDown, Clock } from 'lucide-react';
 import { StockData, TacticalData } from '@/lib/types';
 import { getMarketScene, formatStockSymbol, getPredictionTitle, getClosePriceLabelFromData, getValidationLabelFromData, isTradingDay } from '@/lib/date-utils';
@@ -11,17 +13,7 @@ interface StockDashboardCardProps {
 }
 
 export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardProps) {
-  if (data.loading || !data.price) return (
-    <div className="h-full w-full flex flex-col items-center justify-center space-y-4">
-      <div className="w-20 h-20 rounded-[32px] bg-white/5 border border-white/10 flex items-center justify-center">
-        <Zap className="w-8 h-8 text-indigo-500 animate-pulse fill-indigo-500/20" />
-      </div>
-      <div className="text-center">
-        <h2 className="text-2xl font-black italic tracking-tighter text-white">{data.name}</h2>
-        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mt-1">核心数据同步中...</p>
-      </div>
-    </div>
-  );
+
 
   const scene = getMarketScene();
   const isPostMarket = scene === 'post_market';
@@ -41,6 +33,29 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
   const displayPrediction = (scene === 'trading' || isPreMarket)
     ? (todayPrediction || data.prediction)  // 优先使用今日预测，否则降级到最新预测
     : data.prediction;                       // 收市后使用最新预测
+  
+  // Optimization: Memoize the heavy JSON parsing operation
+  const tacticalData = useMemo(() => {
+    try {
+      return JSON.parse(displayPrediction?.ai_reasoning || '') as TacticalData;
+    } catch {
+      return null;
+    }
+  }, [displayPrediction?.ai_reasoning]);
+
+  if (data.loading || !data.price) return (
+    <div className="h-full w-full flex flex-col items-center justify-center space-y-4">
+      <div className="w-20 h-20 rounded-[32px] bg-white/5 border border-white/10 flex items-center justify-center">
+        <Zap className="w-8 h-8 text-indigo-500 animate-pulse fill-indigo-500/20" />
+      </div>
+      <div className="text-center">
+        <h2 className="text-2xl font-black italic tracking-tighter text-white">{data.name}</h2>
+        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mt-1">核心数据同步中...</p>
+      </div>
+    </div>
+  );
+
+
   
   // 数据新鲜度检测：判断数据是否过时
   // - 交易中/盘前：如果没有找到 target_date = 今天 的预测，则数据过时
@@ -80,6 +95,9 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
       default: return '持仓观望';
     }
   };
+
+  // Optimization: Memoize the heavy JSON parsing operation
+
 
   return (
     <div className="h-full w-full flex flex-col items-center justify-center px-4 snap-start pt-32 pb-32">
@@ -127,14 +145,13 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
               
               <div className="space-y-4">
                 {(() => {
-                  try {
-                    const tData = JSON.parse(displayPrediction?.ai_reasoning || '') as TacticalData;
+                  if (tacticalData) {
                     const userPos = data.rule?.position === 'holding' ? 'holding' : 'empty';
-                    const p1 = tData.tactics?.[userPos]?.[0];
+                    const p1 = tacticalData.tactics?.[userPos]?.[0];
                     return (
                       <>
                         <p className="text-sm leading-relaxed text-slate-300 font-medium italic pl-1 border-l-2 border-indigo-500/20">
-                          &quot;{tData.summary || displayPrediction?.ai_reasoning}&quot;
+                          &quot;{tacticalData.summary || displayPrediction?.ai_reasoning}&quot;
                         </p>
                         {p1 && <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 w-full overflow-hidden">
                           <span className="text-[10px] font-black bg-indigo-500 text-white px-1 py-0.5 rounded italic shrink-0">{p1.priority}</span>
@@ -145,7 +162,7 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
                         </div>}
                       </>
                     );
-                  } catch {
+                  } else {
                     return <p className="text-sm leading-relaxed text-slate-300 font-medium italic pl-1 border-l-2 border-indigo-500/20">&quot;{displayPrediction?.ai_reasoning || '正在评估行情...'}&quot;</p>;
                   }
                 })()}

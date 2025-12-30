@@ -27,7 +27,9 @@ export default function StockPoolPage() {
   const [stockToDelete, setStockToDelete] = useState<StockSnapshot | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [tier, setTier] = useState<'free' | 'pro'>('free');
+
   const [limitMsg, setLimitMsg] = useState<string | null>(null);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
 
   const scene = getMarketScene();
   const isPreMarket = scene === 'pre_market';
@@ -160,7 +162,22 @@ export default function StockPoolPage() {
   };
 
   return (
-    <div className="fixed inset-0 bg-[#050508] text-white overflow-hidden flex flex-col font-sans">
+    <div 
+      className="fixed inset-0 bg-[#050508] text-white overflow-hidden flex flex-col font-sans"
+      onTouchStart={(e) => setTouchStartX(e.touches[0].clientX)}
+      onTouchEnd={(e) => {
+        if (touchStartX === null) return;
+        const touchEndX = e.changedTouches[0].clientX;
+        const deltaX = touchEndX - touchStartX;
+        
+        // Swipe Left (Right to Left) -> Go back to Dashboard
+        // Threshold: -100px
+        if (deltaX < -100) {
+          router.push('/dashboard');
+        }
+        setTouchStartX(null);
+      }}
+    >
       <div className="fixed inset-0 opacity-[0.03] pointer-events-none bg-indigo-500 blur-[120px] scale-150" />
 
       <header className="fixed top-0 left-0 right-0 z-[100] p-8 flex items-center justify-between">

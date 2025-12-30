@@ -15,7 +15,7 @@ import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { useTikTokScroll } from '@/hooks/useTikTokScroll';
-import { AddStockDrawer } from '@/components/AddStockDrawer';
+
 import { getCurrentUser } from '@/lib/user';
 
 const UserCenterDrawer = dynamic(() => import('@/components/UserCenterDrawer').then(mod => mod.UserCenterDrawer), {
@@ -26,7 +26,7 @@ const UserCenterDrawer = dynamic(() => import('@/components/UserCenterDrawer').t
 function DashboardContent() {
   const router = useRouter();
   const [userCenterOpen, setUserCenterOpen] = useState(false);
-  const [addStockOpen, setAddStockOpen] = useState(false);
+
   const { stocks, loadingPool, refresh, isRefreshing } = useDashboardData();
   const {
     currentIndex,
@@ -38,7 +38,8 @@ function DashboardContent() {
     scrollToToday
   } = useTikTokScroll(stocks, {
     onOverscrollRight: () => setUserCenterOpen(true),
-    onOverscrollLeft: () => setAddStockOpen(true)
+    // 简化交互：左边缘右滑直接进入更完整的"监控池页面"，替代原本的简易浮层
+    onOverscrollLeft: () => router.push('/dashboard/stock-pool')
   });
 
   const [showTactics, setShowTactics] = useState<string | null>(null);
@@ -195,12 +196,7 @@ function DashboardContent() {
         onClose={() => setUserCenterOpen(false)}
       />
 
-      <AddStockDrawer
-        isOpen={addStockOpen}
-        onClose={() => setAddStockOpen(false)}
-        onGoToStockPool={() => router.push('/dashboard/stock-pool')}
-        onStockAdded={() => refresh()}
-      />
+
     </main>
   );
 }
