@@ -1,10 +1,10 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, User, Crown, Zap, ShieldCheck, Loader2, ArrowRight, Share2, Check } from 'lucide-react';
+import { X, User, Crown, Zap, ShieldCheck, Loader2, ArrowRight, Share2, Check, RefreshCw, Key } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getWatchlist } from '@/lib/storage';
-import { getCurrentUser } from '@/lib/user';
+import { getCurrentUser, restoreUserIdentity } from '@/lib/user';
 import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
 
 interface Props {
@@ -22,6 +22,12 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
   // Redemption State
   const [redeemCode, setRedeemCode] = useState('');
   const [redeeming, setRedeeming] = useState(false);
+  
+  // Identity Restore State (for iOS PWA)
+  const [showRestoreInput, setShowRestoreInput] = useState(false);
+  const [restoreId, setRestoreId] = useState('');
+  const [restoring, setRestoring] = useState(false);
+  const [restoreMsg, setRestoreMsg] = useState<{type: 'success'|'error', text: string} | null>(null);
   const [redeemMsg, setRedeemMsg] = useState<{type: 'success'|'error', text: string} | null>(null);
 
   useEffect(() => {
@@ -174,6 +180,14 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                              有效期至: {expiresAt.split('T')[0]}
                          </p>
                      )}
+                     {/* iOS PWA 身份恢复按钮 */}
+                     <button 
+                       onClick={() => setShowRestoreInput(!showRestoreInput)}
+                       className="text-[10px] text-indigo-400/70 hover:text-indigo-400 mt-1 flex items-center gap-1 transition-colors"
+                     >
+                       <Key size={10} />
+                       更换身份/恢复数据
+                     </button>
                    </div>
                 </div>
               </div>
@@ -273,6 +287,54 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                   </div>
               </div>
               )}
+
+              {/* 身份恢复区域 (iOS PWA 场景) */}
+              {showRestoreInput && (
+                <div className="mt-6 p-4 rounded-xl bg-amber-500/5 border border-amber-500/20">
+                    <div className="flex items-center gap-2 mb-3">
+                        <RefreshCw size={14} className="text-amber-400" />
+                        <span className="text-xs font-bold text-amber-300 uppercase tracking-wider">恢复身份</span>
+                    </div>
+                    <p className="text-[10px] text-slate-500 mb-3 leading-relaxed">
+                        如果您将应用添加到主屏幕后变成了新用户，可以在这里输入之前的用户 ID 来恢复数据。
+                    </p>
+                    {restoreMsg && (
+                        <p className={`text-xs mb-2 ${restoreMsg.type === 'success' ? 'text-emerald-400' : 'text-rose-400'}`}>
+                            {restoreMsg.text}
+                        </p>
+                    )}
+                    <div className="flex gap-2">
+                        <input 
+                          type="text" 
+                          value={restoreId}
+                          onChange={(e) => setRestoreId(e.target.value.toLowerCase())}
+                          placeholder="user_xxxxxxxxx"
+                          className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-amber-500 transition-colors font-mono"
+                        />
+                        <button 
+                          onClick={async () => {
+                              if (!restoreId || restoring) return;
+                              setRestoring(true);
+                              setRestoreMsg(null);
+                              const result = await restoreUserIdentity(restoreId);
+                              setRestoreMsg({ type: result.success ? 'success' : 'error', text: result.message });
+                              setRestoring(false);
+                              if (result.success) {
+                                  setTimeout(() => window.location.reload(), 1500);
+                              }
+                          }}
+                          disabled={!restoreId || restoring}
+                          className="bg-amber-600 hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 rounded-xl font-bold transition-all active:scale-95 flex items-center justify-center"
+                        >
+                           {restoring ? <Loader2 className="animate-spin w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
+                        </button>
+                    </div>
+                    <p className="text-[9px] text-slate-600 mt-2">
+                        提示：您可以在旧设备的用户中心找到完整的用户 ID
+                    </p>
+                </div>
+              )}
+              
               <div className="mt-4 pb-4 border-t border-white/5 pt-4">
                  <button 
                     onClick={async () => {
