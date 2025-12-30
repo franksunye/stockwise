@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Zap, ShieldCheck, Target, Clock } from 'lucide-react';
 import { getCurrentUser } from '@/lib/user';
@@ -33,17 +33,7 @@ export function OnboardingOverlay() {
   const [revealData, setRevealData] = useState(DEFAULT_REVEAL_DATA);
   const [recommendedStocks, setRecommendedStocks] = useState<RecommendedStock[]>([]);
 
-  useEffect(() => {
-    initialize();
-  }, []);
-
-  const initialize = async () => {
-    const user = await getCurrentUser();
-    await checkOnboardingStatus(user.userId);
-    await fetchRecommendedStocks();
-  };
-
-  const fetchRecommendedStocks = async () => {
+  const fetchRecommendedStocks = useCallback(async () => {
     try {
       const res = await fetch('/api/user/onboarding/stocks');
       const data = await res.json();
@@ -53,9 +43,9 @@ export function OnboardingOverlay() {
     } catch (e) {
       console.error("Fetch recommended stocks failed", e);
     }
-  };
+  }, []);
 
-  const checkOnboardingStatus = async (userId: string) => {
+  const checkOnboardingStatus = useCallback(async (userId: string) => {
     // 1. Check LocalStorage first to avoid flicker
     const localHasOnboarded = localStorage.getItem('STOCKWISE_HAS_ONBOARDED');
     if (localHasOnboarded) return;
@@ -75,7 +65,17 @@ export function OnboardingOverlay() {
     } catch (e) {
         console.error("Check onboarding failed", e);
     }
-  };
+  }, []);
+
+  const initialize = useCallback(async () => {
+    const user = await getCurrentUser();
+    await checkOnboardingStatus(user.userId);
+    await fetchRecommendedStocks();
+  }, [checkOnboardingStatus, fetchRecommendedStocks]);
+
+  useEffect(() => {
+    initialize();
+  }, [initialize]);
 
   const handleComplete = async () => {
     const user = await getCurrentUser();

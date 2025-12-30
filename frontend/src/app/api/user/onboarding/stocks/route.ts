@@ -8,6 +8,12 @@ export const dynamic = 'force-dynamic';
  * 获取含有近期 AI 预测结果的热门股票，用于 Onboarding 引导。
  * 逻辑：从 ai_predictions 中筛选 model != 'rule-based' 的最新 4 只股票。
  */
+interface Stock {
+    symbol: string;
+    name: string;
+    market: string;
+}
+
 export async function GET() {
     try {
         const db = getDbClient();
@@ -22,7 +28,7 @@ export async function GET() {
             LIMIT 4
         `;
 
-        let stocks: any[] = [];
+        let stocks: Stock[] = [];
 
         if ('execute' in db) {
             const res = await db.execute(sql);
@@ -33,13 +39,13 @@ export async function GET() {
                 market: String(row.market)
             }));
         } else {
-            const rows = db.prepare(sql).all();
-            stocks = rows as any[];
+            const rows = db.prepare(sql).all() as Stock[];
+            stocks = rows;
         }
 
         // 兜底逻辑：如果数据库里真的没有 AI 预测，或者全被去重了
         if (stocks.length < 4) {
-            const fallbacks = [
+            const fallbacks: Stock[] = [
                 { symbol: '688256', name: '寒武纪', market: 'CN' },
                 { symbol: '601398', name: '工商银行', market: 'CN' },
                 { symbol: '02171', name: '科济药业', market: 'HK' },
