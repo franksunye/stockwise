@@ -2,8 +2,8 @@ name: Daily Sync - Hong Kong (HK)
 
 on:
   schedule:
-    # 每日北京时间 17:00 (UTC 09:00) 执行 - 港股16:00收盘后1小时
-    - cron: '0 9 * * 1-5'
+    # 每日北京时间 16:30 (UTC 08:30) 执行 - 港股16:00收盘后30分钟
+    - cron: '30 8 * * 1-5'
   workflow_dispatch: # 支持手动触发
 
 jobs:
