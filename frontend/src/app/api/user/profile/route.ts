@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getDbClient } from '@/lib/db';
+import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
 
 export async function POST(request: Request) {
     try {
@@ -35,9 +36,9 @@ export async function POST(request: Request) {
             let expiresAt = null;
 
             if (referredBy && referredBy !== userId) {
-                // 1. Referee Reward (New User)
+                // 1. Referee Reward (New User) - 使用配置的天数
                 const expiryDate = new Date();
-                expiryDate.setDate(expiryDate.getDate() + 7);
+                expiryDate.setDate(expiryDate.getDate() + MEMBERSHIP_CONFIG.referral.refereeDays);
                 initialTier = 'pro';
                 expiresAt = expiryDate.toISOString();
 
@@ -57,7 +58,7 @@ export async function POST(request: Request) {
                     if (referrer) {
                         const currentExpiry = referrer.subscription_expires_at ? new Date(referrer.subscription_expires_at) : new Date();
                         const baseDate = currentExpiry > new Date() ? currentExpiry : new Date();
-                        baseDate.setDate(baseDate.getDate() + 7);
+                        baseDate.setDate(baseDate.getDate() + MEMBERSHIP_CONFIG.referral.referrerDays);
                         const newExpiry = baseDate.toISOString();
 
                         if (isCloud) {

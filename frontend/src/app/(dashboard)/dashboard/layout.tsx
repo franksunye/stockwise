@@ -18,8 +18,21 @@ export default function DashboardLayout({
       const currentUser = await getCurrentUser();
       const uid = currentUser.userId;
 
+      // 检测 URL 中的邀请参数（方案A：被邀请用户可绕过邀请墙）
+      const urlParams = new URLSearchParams(window.location.search);
+      const inviteFromUrl = urlParams.get('invite');
+      
+      // 优先使用 URL 参数，其次使用 localStorage 缓存
+      const referredBy = inviteFromUrl || localStorage.getItem('STOCKWISE_REFERRED_BY');
+      
+      // 如果是通过邀请链接进入，缓存邀请人 ID 并清理 URL 参数
+      if (inviteFromUrl && inviteFromUrl !== uid) {
+        localStorage.setItem('STOCKWISE_REFERRED_BY', inviteFromUrl);
+        // 清理 URL 参数，避免分享时暴露
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+
       try {
-        const referredBy = localStorage.getItem('STOCKWISE_REFERRED_BY');
         const res = await fetch('/api/user/profile', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -27,8 +40,11 @@ export default function DashboardLayout({
         });
         const data = await res.json();
         
+        // 只要是 Pro 用户（包括通过邀请获得的试用 Pro），都可进入
         if (data.tier === 'pro') {
           setIsAuthorized(true);
+          // 成功授权后清除缓存的邀请信息
+          localStorage.removeItem('STOCKWISE_REFERRED_BY');
         } else {
           setIsAuthorized(false);
         }
