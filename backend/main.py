@@ -25,7 +25,6 @@ from fetchers import sync_stock_meta, fetch_stock_data, sync_profiles
 from utils import send_wecom_notification
 from engine.indicators import calculate_indicators
 from engine.ai_service import generate_ai_prediction
-from engine.ai_service import generate_ai_prediction
 from engine.validator import validate_previous_prediction
 from logger import logger
 
@@ -150,7 +149,7 @@ def sync_spot_prices(symbols: list):
     report = f"### 🛠️ StockWise: Realtime Sync\n"
     report += f"> **Status**: {status}\n"
     report += f"- **Processed**: {success_count}/{len(symbols)}\n"
-    report += f"- **Duration**: {duration:.1f}s"
+    report += f"- **执行耗时**: {duration:.1f}s"
     send_wecom_notification(report)
 
 def check_stock_analysis_mode(symbol: str) -> str:
@@ -236,9 +235,16 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None):
             logger.error(f"❌ {stock} 分析失败: {e}")
             
     conn.close()
-    conn.close()
     duration = time.time() - start_time
     logger.info(f"✅ AI 分析完成! 成功: {success_count}/{len(targets)}, 耗时: {duration:.1f}s")
+    
+    # 发送企微通知
+    market_label = f" ({market_filter})" if market_filter else ""
+    report = f"### 🧠 StockWise: AI Analysis{market_label}\n"
+    report += f"> **Status**: ✅ 完成\n"
+    report += f"- **Processed**: {success_count}/{len(targets)} Stocks\n"
+    report += f"- **处理耗时**: {duration:.1f}s"
+    send_wecom_notification(report)
 
 
 def run_full_sync(market_filter: str = None):
@@ -314,7 +320,7 @@ def run_full_sync(market_filter: str = None):
     report += f"- **Target**: {len(target_stocks)} Stocks\n"
     report += f"- **Periods**: 日线(D), 周线(W), 月线(M) ✅\n"
     report += f"- **Processed**: {success_count} Success, {len(errors)} Errors\n"
-    report += f"- **Duration**: {duration:.1f}s"
+    report += f"- **处理耗时**: {duration:.1f}s"
     send_wecom_notification(report)
 
 if __name__ == "__main__":
@@ -360,13 +366,13 @@ if __name__ == "__main__":
             report += f"> **Symbol**: {args.symbol}\n"
             report += f"- **Status**: 成功\n"
             report += f"- **Periods**: 日线 + 周线 + 月线\n"
-            report += f"- **Duration**: {duration:.1f}s"
+            report += f"- **执行耗时**: {duration:.1f}s"
         else:
             report = f"### ❌ StockWise: On-Demand Sync Failed\n"
             report += f"> **Symbol**: {args.symbol}\n"
             report += f"- **Status**: 失败\n"
             report += f"- **Error**: {error_msg[:200]}\n"
-            report += f"- **Duration**: {duration:.1f}s"
+            report += f"- **执行耗时**: {duration:.1f}s"
         
         send_wecom_notification(report)
         

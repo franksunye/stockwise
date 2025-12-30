@@ -202,7 +202,7 @@ def sync_stock_meta():
         report += f"> **Status**: ✅ 完成\n"
         report += f"- **港股**: {hk_count} 条\n"
         report += f"- **A 股**: {cn_count} 条\n"
-        report += f"- **耗时**: {duration:.1f}s"
+        report += f"- **处理耗时**: {duration:.1f}s"
         send_wecom_notification(report)
 
 def sync_profiles(limit=20):
