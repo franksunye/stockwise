@@ -93,6 +93,75 @@ export async function POST(request: Request) {
                 subscription_expires_at: expiresAt,
                 referred_by: referredBy || null
             };
+        } else {
+            // ==========================================
+            // 处理已存在用户的邀请奖励
+            // ==========================================
+            // 如果是已存在的 Free 用户，且通过邀请链接进入，且之前没有使用过邀请
+            const shouldProcessExistingUserReferral =
+                MEMBERSHIP_CONFIG.switches.enableReferralReward &&
+                referredBy &&
+                referredBy !== userId &&
+                user.subscription_tier === 'free' &&
+                !user.referred_by;  // 确保用户之前没有使用过邀请
+
+            if (shouldProcessExistingUserReferral) {
+                console.log(`Processing referral for existing user: ${userId}, referred by: ${referredBy}`);
+
+                // 1. Referee Reward (Existing Free User) - 给予 Pro 试用
+                const expiryDate = new Date();
+                expiryDate.setDate(expiryDate.getDate() + MEMBERSHIP_CONFIG.referral.refereeDays);
+                const newExpiresAt = expiryDate.toISOString();
+
+                try {
+                    if (isCloud) {
+                        await db.execute({
+                            sql: "UPDATE users SET subscription_tier = 'pro', subscription_expires_at = ?, referred_by = ? WHERE user_id = ?",
+                            args: [newExpiresAt, referredBy, userId]
+                        });
+                    } else {
+                        db.prepare("UPDATE users SET subscription_tier = 'pro', subscription_expires_at = ?, referred_by = ? WHERE user_id = ?").run(newExpiresAt, referredBy, userId);
+                    }
+
+                    // 更新 user 对象以反映新状态
+                    user = {
+                        ...user,
+                        subscription_tier: 'pro',
+                        subscription_expires_at: newExpiresAt,
+                        referred_by: referredBy
+                    };
+
+                    // 2. Referrer Reward (The person who shared the link)
+                    let referrer;
+                    if (isCloud) {
+                        const res = await db.execute({
+                            sql: "SELECT subscription_tier, subscription_expires_at FROM users WHERE user_id = ?",
+                            args: [referredBy]
+                        });
+                        referrer = res.rows[0];
+                    } else {
+                        referrer = db.prepare("SELECT subscription_tier, subscription_expires_at FROM users WHERE user_id = ?").get(referredBy);
+                    }
+
+                    if (referrer) {
+                        const currentExpiry = referrer.subscription_expires_at ? new Date(referrer.subscription_expires_at) : new Date();
+                        const baseDate = currentExpiry > new Date() ? currentExpiry : new Date();
+                        baseDate.setDate(baseDate.getDate() + MEMBERSHIP_CONFIG.referral.referrerDays);
+                        const newExpiry = baseDate.toISOString();
+
+                        if (isCloud) {
+                            await db.execute({
+                                sql: "UPDATE users SET subscription_tier = 'pro', subscription_expires_at = ? WHERE user_id = ?",
+                                args: [newExpiry, referredBy]
+                            });
+                        } else {
+                            db.prepare("UPDATE users SET subscription_tier = 'pro', subscription_expires_at = ? WHERE user_id = ?").run(newExpiry, referredBy);
+                        }
+                    }
+                } catch (referErr) {
+                    console.error('Existing user referral reward failed:', referErr);
+                }
+            }
         }
 
         // 2. Sync Watchlist (Local -> Cloud)
