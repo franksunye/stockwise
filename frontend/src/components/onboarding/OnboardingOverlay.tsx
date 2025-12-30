@@ -25,10 +25,24 @@ export function OnboardingOverlay() {
   const [selectedStockName, setSelectedStockName] = useState<string | null>(null);
   const [analyzingStage, setAnalyzingStage] = useState(0); // 0: None, 1: Connecting, 2: Flows, 3: AI
   const [revealData, setRevealData] = useState(DEFAULT_REVEAL_DATA);
+  const [recommendedStocks, setRecommendedStocks] = useState<any[]>([]);
 
   useEffect(() => {
     checkOnboardingStatus();
+    fetchRecommendedStocks();
   }, []);
+
+  const fetchRecommendedStocks = async () => {
+    try {
+      const res = await fetch('/api/user/onboarding/stocks');
+      const data = await res.json();
+      if (data.stocks && data.stocks.length > 0) {
+        setRecommendedStocks(data.stocks);
+      }
+    } catch (e) {
+      console.error("Fetch recommended stocks failed", e);
+    }
+  };
 
   const checkOnboardingStatus = async () => {
     // 1. Check LocalStorage first to avoid flicker
@@ -232,12 +246,12 @@ export function OnboardingOverlay() {
                                 
                                 {/* Curated Stock List - Only stocks with AI predictions */}
                                 <div className="space-y-3 text-left">
-                                    {[
+                                    {(recommendedStocks.length > 0 ? recommendedStocks : [
                                         { symbol: '00700', name: '腾讯控股', market: 'HK' },
                                         { symbol: '600519', name: '贵州茅台', market: 'CN' },
                                         { symbol: '01398', name: '工商银行', market: 'HK' },
                                         { symbol: '688981', name: '中芯国际', market: 'CN' },
-                                    ].map(item => {
+                                    ]).map(item => {
                                         const isHK = item.market === 'HK';
                                         const suffix = isHK ? '.HK' : (item.symbol.startsWith('6') && item.symbol.length === 6 ? '.SH' : '.SZ');
                                         return (

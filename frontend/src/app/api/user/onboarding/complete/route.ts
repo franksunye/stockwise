@@ -61,18 +61,74 @@ export async function POST(request: Request) {
                 args: [newTier, newExpiresAt, userId]
             });
 
-            // If user selected a stock, ensure it's in watchlist
+            // If user selected a stock, ensure it's in watchlist AND global_stock_pool
             if (selectedStock) {
+                // 1. Add to user watchlist
                 await db.execute({
-                    sql: "INSERT OR IGNORE INTO user_watchlist (user_id, symbol) VALUES (?, ?)",
-                    args: [userId, selectedStock]
+                    sql: "INSERT OR IGNORE INTO user_watchlist (user_id, symbol, added_at) VALUES (?, ?, ?)",
+                    args: [userId, selectedStock, now.toISOString()]
                 });
+
+                // 2. Fetch stock name from meta
+                const metaRes = await db.execute({
+                    sql: "SELECT name FROM stock_meta WHERE symbol = ?",
+                    args: [selectedStock]
+                });
+                const stockName = metaRes.rows[0]?.name || `股票 ${selectedStock}`;
+
+                // 3. Update global_stock_pool
+                const existing = await db.execute({
+                    sql: 'SELECT watchers_count FROM global_stock_pool WHERE symbol = ?',
+                    args: [selectedStock],
+                });
+
+                if (existing.rows.length > 0) {
+                    await db.execute({
+                        sql: 'UPDATE global_stock_pool SET watchers_count = watchers_count + 1 WHERE symbol = ?',
+                        args: [selectedStock],
+                    });
+                } else {
+                    await db.execute({
+                        sql: 'INSERT INTO global_stock_pool (symbol, name, watchers_count, first_watched_at) VALUES (?, ?, 1, ?)',
+                        args: [selectedStock, stockName, now.toISOString()],
+                    });
+                }
+
+                // 4. Trigger background sync
+                try {
+                    const pat = process.env.GITHUB_PAT;
+                    if (pat) {
+                        fetch(`https://api.github.com/repos/franksunye/stockwise/actions/workflows/on-demand-sync.yml/dispatches`, {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/vnd.github+json',
+                                'Authorization': `Bearer ${pat}`,
+                                'X-GitHub-Api-Version': '2022-11-28',
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ ref: 'main', inputs: { symbol: selectedStock } }),
+                        }).catch(e => console.error('On-demand sync trigger failed:', e));
+                    }
+                } catch (e) {
+                    console.error('Failed to trigger sync:', e);
+                }
             }
         } else {
             db.prepare("UPDATE users SET has_onboarded = 1, subscription_tier = ?, subscription_expires_at = ? WHERE user_id = ?").run(newTier, newExpiresAt, userId);
 
             if (selectedStock) {
-                db.prepare("INSERT OR IGNORE INTO user_watchlist (user_id, symbol) VALUES (?, ?)").run(userId, selectedStock);
+                db.prepare("INSERT OR IGNORE INTO user_watchlist (user_id, symbol, added_at) VALUES (?, ?, ?)").run(userId, selectedStock, now.toISOString());
+
+                // SQLite logic for global pool
+                const meta = db.prepare("SELECT name FROM stock_meta WHERE symbol = ?").get(selectedStock);
+                const stockName = meta?.name || `股票 ${selectedStock}`;
+                const existing = db.prepare('SELECT watchers_count FROM global_stock_pool WHERE symbol = ?').get(selectedStock);
+
+                if (existing) {
+                    db.prepare('UPDATE global_stock_pool SET watchers_count = watchers_count + 1 WHERE symbol = ?').run(selectedStock);
+                } else {
+                    db.prepare('INSERT INTO global_stock_pool (symbol, name, watchers_count, first_watched_at) VALUES (?, ?, 1, ?)').run(selectedStock, stockName, now.toISOString());
+                }
             }
         }
 
