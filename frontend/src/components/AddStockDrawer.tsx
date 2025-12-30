@@ -162,10 +162,10 @@ export function AddStockDrawer({ isOpen, onClose, onGoToStockPool, onStockAdded 
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-2">
                     <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_#6366f1] animate-pulse" />
-                    <span className="text-[10px] uppercase tracking-[0.4em] text-slate-500 font-bold">Quick Engine</span>
+                    <span className="text-[10px] uppercase tracking-[0.4em] text-slate-500 font-bold">快速添加</span>
                   </div>
                   <h2 className="text-3xl font-black italic tracking-tighter text-white">
-                    ADD <span className="text-indigo-500 underline decoration-4 underline-offset-4">STOCK</span>
+                    添加股票 <span className="text-indigo-500 underline decoration-4 underline-offset-4" data-en="ADD">ADD</span>
                   </h2>
                 </div>
                 <button 
@@ -309,14 +309,14 @@ export function AddStockDrawer({ isOpen, onClose, onGoToStockPool, onStockAdded 
                       <LayoutGrid className="w-5 h-5 text-indigo-400" />
                     </div>
                     <div className="text-left flex flex-col justify-center">
-                      <p className="text-sm font-black text-white italic tracking-tight leading-none mb-1.5 flex items-center gap-2">
-                        MONITORING POOL
+                      <p className="text-lg font-black text-white italic tracking-tighter leading-none mb-1.5 flex items-center gap-2">
+                        监控中心
                       </p>
-                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-none">管理自选监控资产</p>
+                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-none">管理自选资产</p>
                     </div>
                   </div>
                   <div className="flex flex-col items-center gap-0.5 text-slate-600 group-hover:text-indigo-400 transition-colors">
-                    <span className="text-[8px] font-black uppercase tracking-tighter opacity-60">Swipe</span>
+                    <span className="text-[8px] font-black uppercase tracking-tighter opacity-60">滑动进入</span>
                     <ChevronRight className="w-4 h-4 animate-bounce-x" />
                   </div>
                 </div>

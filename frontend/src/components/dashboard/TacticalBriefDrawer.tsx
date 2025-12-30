@@ -86,9 +86,14 @@ export function TacticalBriefDrawer({
 
             <div className="p-8 pt-4 flex flex-col max-h-[85vh] overflow-y-auto scrollbar-hide">
               <header className="flex items-center justify-between mb-8">
-                <div>
-                  <span className="text-xs uppercase tracking-[0.3em] text-slate-500 font-bold">智能决策核心</span>
-                  <h2 className="text-xl font-black italic tracking-tighter text-white">TACTICAL <span className="text-indigo-500">BRIEF</span></h2>
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-2">
+                     <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_#6366f1] animate-pulse" />
+                     <span className="text-[10px] uppercase tracking-[0.4em] text-slate-500 font-bold">智能决策</span>
+                  </div>
+                  <h2 className="text-3xl font-black italic tracking-tighter text-white">
+                     战术简报 <span className="text-indigo-500 underline decoration-4 underline-offset-4 font-black" data-en="BRIEF">BRIEF</span>
+                  </h2>
                 </div>
                 <button onClick={onClose} className="p-2.5 rounded-full bg-white/5 border border-white/10 text-slate-400 active:scale-90 transition-all">
                   <CloseIcon size={20} />

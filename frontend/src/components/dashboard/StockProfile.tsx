@@ -62,9 +62,14 @@ export function StockProfile({ stock, isOpen, onClose }: StockProfileProps) {
                 <div className="w-14 h-14 rounded-[22px] bg-white/5 border border-white/10 flex items-center justify-center text-xl font-black italic text-indigo-500">
                   {stock.symbol.slice(-2)}
                 </div>
-                <div>
-                  <h2 className="text-2xl font-black italic tracking-tighter text-white">{stock.name}</h2>
-                  <p className="text-[10px] text-slate-500 font-bold tracking-[0.2em] uppercase">{stock.symbol}.HK · 统计档案</p>
+                <div className="space-y-1">
+                  <h2 className="text-3xl font-black italic tracking-tighter text-white">
+                    {stock.name}
+                  </h2>
+                  <p className="text-[10px] text-slate-500 font-bold tracking-[0.2em] uppercase flex items-center gap-1.5">
+                    <span className="w-1 h-1 rounded-full bg-indigo-500" />
+                    个股详情 <span className="opacity-50">PROFILE</span>
+                  </p>
                 </div>
               </div>
               <button onClick={onClose} className="p-2.5 rounded-full bg-white/5 border border-white/10 active:scale-90 transition-all">

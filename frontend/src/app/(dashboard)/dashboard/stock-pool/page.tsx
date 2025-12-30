@@ -168,9 +168,14 @@ export default function StockPoolPage() {
           <button onClick={() => router.push('/dashboard')} className="p-2.5 rounded-full bg-white/5 border border-white/10 active:scale-90 transition-all">
             <ArrowLeft className="w-5 h-5 text-slate-400" />
           </button>
-          <div className="flex flex-col">
-            <span className="text-[10px] uppercase tracking-[0.3em] text-slate-600 font-black">自选监控池</span>
-            <h1 className="text-xl font-black italic tracking-tighter">STOCK <span className="text-indigo-500 underline decoration-2 underline-offset-4">POOL</span></h1>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_#6366f1] animate-pulse" />
+              <span className="text-[10px] uppercase tracking-[0.4em] text-slate-500 font-bold">自选监控</span>
+            </div>
+            <h1 className="text-2xl font-black italic tracking-tighter text-white">
+              监控池 <span className="text-indigo-500 underline decoration-2 underline-offset-4" data-en="POOL">POOL</span>
+            </h1>
           </div>
         </div>
         <button onClick={() => setShowAdd(!showAdd)} className={`p-3 rounded-2xl border transition-all active:scale-95 ${showAdd ? 'bg-indigo-500 border-indigo-400 text-white' : 'bg-white/5 border-white/10 text-indigo-400'}`}>
