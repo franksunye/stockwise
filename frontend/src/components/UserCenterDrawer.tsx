@@ -174,20 +174,21 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                            {tier === 'pro' ? 'Pro Plan' : 'Free Plan'}
                        </span>
                      </div>
-                     <p className="text-xs text-slate-500 mono">ID: {userId.slice(0, 12)}...</p>
+                      <p className="text-xs text-slate-500 mono flex items-center gap-2">
+                        ID: {userId.slice(0, 12)}...
+                        <button 
+                          onClick={() => setShowRestoreInput(!showRestoreInput)}
+                          className="text-slate-600 hover:text-indigo-400 transition-colors p-0.5"
+                          title="恢复身份"
+                        >
+                          <Key size={10} />
+                        </button>
+                      </p>
                      {expiresAt && tier === 'pro' && (
                          <p className="text-[10px] text-emerald-500/80 mt-1">
                              有效期至: {expiresAt.split('T')[0]}
                          </p>
                      )}
-                     {/* iOS PWA 身份恢复按钮 */}
-                     <button 
-                       onClick={() => setShowRestoreInput(!showRestoreInput)}
-                       className="text-[10px] text-indigo-400/70 hover:text-indigo-400 mt-1 flex items-center gap-1 transition-colors"
-                     >
-                       <Key size={10} />
-                       更换身份/恢复数据
-                     </button>
                    </div>
                 </div>
               </div>
