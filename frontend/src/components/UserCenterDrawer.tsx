@@ -63,6 +63,11 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
               setTier(data.tier);
               setExpiresAt(data.expiresAt);
               
+              // 使用云端返回的 watchlistCount (source of truth)
+              if (typeof data.watchlistCount === 'number') {
+                  setWatchlistCount(data.watchlistCount);
+              }
+              
               // 同步成功后，如果记录了 invite，可以清除以防重复提交（可选）
               // localStorage.removeItem('STOCKWISE_REFERRED_BY');
           }

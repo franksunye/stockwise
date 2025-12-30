@@ -127,11 +127,29 @@ export async function POST(request: Request) {
             }
         }
 
+        // 4. Get actual watchlist count from database (cloud source of truth)
+        let watchlistCount = 0;
+        try {
+            if (isCloud) {
+                const countRes = await db.execute({
+                    sql: "SELECT COUNT(*) as count FROM user_watchlist WHERE user_id = ?",
+                    args: [userId]
+                });
+                watchlistCount = Number(countRes.rows[0]?.count || 0);
+            } else {
+                const countRow = db.prepare("SELECT COUNT(*) as count FROM user_watchlist WHERE user_id = ?").get(userId) as { count: number } | undefined;
+                watchlistCount = countRow?.count || 0;
+            }
+        } catch (countErr) {
+            console.error('Watchlist count error:', countErr);
+        }
+
         return NextResponse.json({
             userId: user.user_id,
             tier: isExpired ? 'free' : (user.subscription_tier || 'free'),
             expiresAt: user.subscription_expires_at,
-            hasOnboarded: Boolean(user.has_onboarded)
+            hasOnboarded: Boolean(user.has_onboarded),
+            watchlistCount: watchlistCount  // 返回云端真实的监控数量
         });
 
     } catch (error: unknown) {
