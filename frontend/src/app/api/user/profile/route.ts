@@ -35,7 +35,10 @@ export async function POST(request: Request) {
             let initialTier = 'free';
             let expiresAt = null;
 
-            if (referredBy && referredBy !== userId) {
+            // 只有当邀请奖励开关开启时，才处理邀请奖励
+            const shouldProcessReferral = MEMBERSHIP_CONFIG.switches.enableReferralReward && referredBy && referredBy !== userId;
+
+            if (shouldProcessReferral) {
                 // 1. Referee Reward (New User) - 使用配置的天数
                 const expiryDate = new Date();
                 expiryDate.setDate(expiryDate.getDate() + MEMBERSHIP_CONFIG.referral.refereeDays);

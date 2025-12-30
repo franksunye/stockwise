@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { InviteWall } from '@/components/InviteWall';
 import { getWatchlist } from '@/lib/storage';
 import { getCurrentUser } from '@/lib/user';
+import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
 
 export default function DashboardLayout({
   children,
@@ -14,22 +15,35 @@ export default function DashboardLayout({
 
   useEffect(() => {
     const checkAuth = async () => {
+      const { switches } = MEMBERSHIP_CONFIG;
+      
       // 统一通过 getCurrentUser 获取/生成用户 ID
       const currentUser = await getCurrentUser();
       const uid = currentUser.userId;
 
-      // 检测 URL 中的邀请参数（方案A：被邀请用户可绕过邀请墙）
-      const urlParams = new URLSearchParams(window.location.search);
-      const inviteFromUrl = urlParams.get('invite');
+      // 如果邀请墙关闭，直接放行（公测/正式期）
+      if (!switches.requireInvite) {
+        setIsAuthorized(true);
+        return;
+      }
+
+      // 邀请墙开启时，检查用户权限
+      let referredBy: string | null = null;
       
-      // 优先使用 URL 参数，其次使用 localStorage 缓存
-      const referredBy = inviteFromUrl || localStorage.getItem('STOCKWISE_REFERRED_BY');
-      
-      // 如果是通过邀请链接进入，缓存邀请人 ID 并清理 URL 参数
-      if (inviteFromUrl && inviteFromUrl !== uid) {
-        localStorage.setItem('STOCKWISE_REFERRED_BY', inviteFromUrl);
-        // 清理 URL 参数，避免分享时暴露
-        window.history.replaceState({}, '', window.location.pathname);
+      // 只有当邀请奖励开关开启时，才处理邀请链接
+      if (switches.enableReferralReward) {
+        const urlParams = new URLSearchParams(window.location.search);
+        const inviteFromUrl = urlParams.get('invite');
+        
+        // 优先使用 URL 参数，其次使用 localStorage 缓存
+        referredBy = inviteFromUrl || localStorage.getItem('STOCKWISE_REFERRED_BY');
+        
+        // 如果是通过邀请链接进入，缓存邀请人 ID 并清理 URL 参数
+        if (inviteFromUrl && inviteFromUrl !== uid) {
+          localStorage.setItem('STOCKWISE_REFERRED_BY', inviteFromUrl);
+          // 清理 URL 参数，避免分享时暴露
+          window.history.replaceState({}, '', window.location.pathname);
+        }
       }
 
       try {
@@ -66,7 +80,7 @@ export default function DashboardLayout({
     );
   }
 
-  // 未授权则显示邀请墙
+  // 未授权则显示邀请墙（仅在 requireInvite 开启时生效）
   if (isAuthorized === false) {
     return <InviteWall onSuccess={() => setIsAuthorized(true)} />;
   }

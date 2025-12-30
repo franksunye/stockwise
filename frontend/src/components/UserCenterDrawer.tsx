@@ -5,6 +5,7 @@ import { X, User, Crown, Zap, ShieldCheck, Loader2, ArrowRight, Share2, Check } 
 import { useState, useEffect } from 'react';
 import { getWatchlist } from '@/lib/storage';
 import { getCurrentUser } from '@/lib/user';
+import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
 
 interface Props {
   isOpen: boolean;
@@ -199,8 +200,8 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                 </div>
               </div>
 
-              {/* 激活码兑换区域 (Beta) */}
-              {tier === 'free' && (
+              {/* 激活码兑换区域 (Beta) - 仅在开关开启时显示 */}
+              {MEMBERSHIP_CONFIG.switches.enableRedemption && tier === 'free' && (
                   <div className="mt-8">
                       <div className="flex items-center gap-2 mb-2">
                           <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">拥有激活码?</span>
@@ -229,19 +230,20 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                   </div>
               )}
 
-              {/* 邀请好友区域 (Loot Logic) */}
+              {/* 邀请好友区域 (Loot Logic) - 仅在开关开启时显示 */}
+              {MEMBERSHIP_CONFIG.switches.enableReferralReward && (
               <div className="mt-auto pt-8">
                   <div className="p-5 rounded-[24px] bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-white/5 relative overflow-hidden group">
                       <div className="relative z-10">
                           <div className="flex items-center justify-between mb-2">
                               <h4 className="text-sm font-black italic text-white flex items-center gap-2">
                                   邀请好友领 Pro
-                                  <span className="px-1.5 py-0.5 rounded bg-emerald-500 text-[8px] font-black uppercase not-italic">+7 Days</span>
+                                  <span className="px-1.5 py-0.5 rounded bg-emerald-500 text-[8px] font-black uppercase not-italic">+{MEMBERSHIP_CONFIG.referral.referrerDays} Days</span>
                               </h4>
                               <Share2 className="w-4 h-4 text-indigo-400 opacity-50" />
                           </div>
                           <p className="text-[10px] text-slate-500 leading-tight mb-4">
-                              每邀请 1 位新用户入池，你与好友均可自动获得 7 天 Pro 会员权益。
+                              每邀请 1 位新用户入池，你与好友均可自动获得 {MEMBERSHIP_CONFIG.referral.refereeDays} 天 Pro 会员权益。
                           </p>
                           <button 
                             onClick={() => {
@@ -260,6 +262,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                       <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-indigo-500/5 blur-[40px] rounded-full group-hover:bg-indigo-500/10 transition-colors" />
                   </div>
               </div>
+              )}
               
             </div>
           </motion.div>

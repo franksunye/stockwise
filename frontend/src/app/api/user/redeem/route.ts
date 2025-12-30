@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getDbClient } from '@/lib/db';
+import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
 
 export async function POST(request: Request) {
     try {
@@ -7,6 +8,11 @@ export async function POST(request: Request) {
 
         if (!userId || !code) {
             return NextResponse.json({ error: 'Missing userId or code' }, { status: 400 });
+        }
+
+        // 检查激活码兑换开关
+        if (!MEMBERSHIP_CONFIG.switches.enableRedemption) {
+            return NextResponse.json({ error: '激活码功能已停用' }, { status: 403 });
         }
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
