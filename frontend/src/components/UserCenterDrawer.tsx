@@ -289,16 +289,13 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
               </div>
               )}
 
-              {/* 身份恢复区域 (iOS PWA 场景) */}
+              {/* 身份恢复区域 */}
               {showRestoreInput && (
-                <div className="mt-6 p-4 rounded-xl bg-amber-500/5 border border-amber-500/20">
+                <div className="mt-6 p-4 rounded-xl bg-white/5 border border-white/10">
                     <div className="flex items-center gap-2 mb-3">
-                        <RefreshCw size={14} className="text-amber-400" />
-                        <span className="text-xs font-bold text-amber-300 uppercase tracking-wider">恢复身份</span>
+                        <RefreshCw size={14} className="text-slate-400" />
+                        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">恢复身份</span>
                     </div>
-                    <p className="text-[10px] text-slate-500 mb-3 leading-relaxed">
-                        如果您将应用添加到主屏幕后变成了新用户，可以在这里输入之前的用户 ID 来恢复数据。
-                    </p>
                     {restoreMsg && (
                         <p className={`text-xs mb-2 ${restoreMsg.type === 'success' ? 'text-emerald-400' : 'text-rose-400'}`}>
                             {restoreMsg.text}
@@ -310,7 +307,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                           value={restoreId}
                           onChange={(e) => setRestoreId(e.target.value.toLowerCase())}
                           placeholder="user_xxxxxxxxx"
-                          className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-amber-500 transition-colors font-mono"
+                          className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 transition-colors font-mono"
                         />
                         <button 
                           onClick={async () => {
@@ -325,14 +322,11 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                               }
                           }}
                           disabled={!restoreId || restoring}
-                          className="bg-amber-600 hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 rounded-xl font-bold transition-all active:scale-95 flex items-center justify-center"
+                          className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 rounded-xl font-bold transition-all active:scale-95 flex items-center justify-center"
                         >
                            {restoring ? <Loader2 className="animate-spin w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
                         </button>
                     </div>
-                    <p className="text-[9px] text-slate-600 mt-2">
-                        提示：您可以在旧设备的用户中心找到完整的用户 ID
-                    </p>
                 </div>
               )}
               
