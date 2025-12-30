@@ -4,7 +4,7 @@ import { UserRule } from './types';
 
 const RULES_KEY = 'stock_rules';
 const WATCHLIST_KEY = 'stock_watchlist';
-const DEFAULT_WATCHLIST = ['02171', '01167']; // 保持专注，只关注科济药业和加科思
+const DEFAULT_WATCHLIST: string[] = []; // 初始关注列表为空，由用户在引导流程或手动添加
 
 export function getRule(symbol: string): UserRule | null {
     if (typeof window === 'undefined') return null;

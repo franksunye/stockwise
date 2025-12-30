@@ -34,13 +34,18 @@ export function OnboardingOverlay() {
   const [recommendedStocks, setRecommendedStocks] = useState<RecommendedStock[]>([]);
 
   useEffect(() => {
-    checkOnboardingStatus();
-    fetchRecommendedStocks();
+    initialize();
   }, []);
 
-  const fetchRecommendedStocks = async () => {
+  const initialize = async () => {
+    const user = await getCurrentUser();
+    await checkOnboardingStatus(user.userId);
+    await fetchRecommendedStocks(user.userId);
+  };
+
+  const fetchRecommendedStocks = async (userId: string) => {
     try {
-      const res = await fetch('/api/user/onboarding/stocks');
+      const res = await fetch(`/api/user/onboarding/stocks?userId=${userId}`);
       const data = await res.json();
       if (data.stocks && data.stocks.length > 0) {
         setRecommendedStocks(data.stocks);
@@ -50,17 +55,16 @@ export function OnboardingOverlay() {
     }
   };
 
-  const checkOnboardingStatus = async () => {
+  const checkOnboardingStatus = async (userId: string) => {
     // 1. Check LocalStorage first to avoid flicker
     const localHasOnboarded = localStorage.getItem('STOCKWISE_HAS_ONBOARDED');
     if (localHasOnboarded) return;
 
     // 2. Double check with API (in case user cleared cache but is old user)
-    const user = await getCurrentUser();
     try {
         const res = await fetch('/api/user/profile', {
             method: 'POST',
-            body: JSON.stringify({ userId: user.userId })
+            body: JSON.stringify({ userId })
         });
         const data = await res.json();
         if (!data.hasOnboarded) {
