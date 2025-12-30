@@ -55,6 +55,9 @@ def fetch_stock_data(symbol: str, period: str = "daily", start_date: str = None)
 
 def sync_stock_meta():
     """同步股票基础信息 (名称、市场、拼音)"""
+    import time
+    start_time = time.time()  # 统计完整同步耗时
+    
     print("\n📦 同步股票元数据...")
     now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     all_records = []
@@ -183,8 +186,6 @@ def sync_stock_meta():
 
     # 批量写入数据库 (每 500 条一批，优化 Turso 远程写入性能)
     if all_records:
-        import time
-        start_time = time.time()
         conn = get_connection()
         cursor = conn.cursor()
         
