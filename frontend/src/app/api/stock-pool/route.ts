@@ -70,6 +70,9 @@ export async function POST(request: Request) {
         const displayName = name || `股票 ${symbol}`;
         const now = new Date().toISOString();
 
+        // 标记是否为新股票（用于决定是否触发即时同步）
+        let isNewStock = false;
+
         if ('execute' in client) {
             // Turso
             // 1. 添加到用户关注列表
@@ -85,13 +88,14 @@ export async function POST(request: Request) {
             });
 
             if (existing.rows.length > 0) {
-                // 股票已存在，增加计数
+                // 股票已存在，增加计数（无需触发即时同步，常规同步会覆盖）
                 await client.execute({
                     sql: 'UPDATE global_stock_pool SET watchers_count = watchers_count + 1 WHERE symbol = ?',
                     args: [symbol],
                 });
             } else {
                 // 新股票，插入记录
+                isNewStock = true;
                 await client.execute({
                     sql: 'INSERT INTO global_stock_pool (symbol, name, watchers_count, first_watched_at) VALUES (?, ?, 1, ?)',
                     args: [symbol, displayName, now],
@@ -110,10 +114,13 @@ export async function POST(request: Request) {
                 .get(symbol);
 
             if (existing) {
+                // 股票已存在，增加计数（无需触发即时同步）
                 client
                     .prepare('UPDATE global_stock_pool SET watchers_count = watchers_count + 1 WHERE symbol = ?')
                     .run(symbol);
             } else {
+                // 新股票，插入记录
+                isNewStock = true;
                 client
                     .prepare('INSERT INTO global_stock_pool (symbol, name, watchers_count, first_watched_at) VALUES (?, ?, 1, ?)')
                     .run(symbol, displayName, now);
@@ -122,8 +129,14 @@ export async function POST(request: Request) {
             client.close();
         }
 
-        // 3. 异步触发 GitHub Action 进行即时同步
-        triggerGithubSync(symbol).catch(err => console.error('Failed to trigger GitHub sync:', err));
+        // 3. 只有新股票才触发 GitHub Action 即时同步
+        //    已存在的股票会被常规的10分钟/每日同步覆盖，无需重复触发
+        if (isNewStock) {
+            console.log(`🆕 New stock ${symbol} added, triggering on-demand sync...`);
+            triggerGithubSync(symbol).catch(err => console.error('Failed to trigger GitHub sync:', err));
+        } else {
+            console.log(`📋 Stock ${symbol} already in pool, skipping on-demand sync (covered by regular sync)`);
+        }
 
         return NextResponse.json({ success: true });
     } catch (error) {
