@@ -9,19 +9,15 @@ if sys.stdout.encoding != 'utf-8':
     except (AttributeError, io.UnsupportedOperation):
         pass
 
-import ssl
 import requests
 import akshare as ak
 import pandas as pd
 from datetime import datetime, timedelta
-from utils import get_market, get_pinyin_info
+from utils import get_market, get_pinyin_info, retry_request
 from database import get_connection
+from logger import logger
 
-# 解决某些环境下 akshare 接口的 SSL 握手问题
-try:
-    ssl._create_default_https_context = ssl._create_unverified_context
-except:
-    pass
+
 
 def fetch_stock_data(symbol: str, period: str = "daily", start_date: str = None) -> pd.DataFrame:
     """获取历史行情数据 (支持 A/H)"""
@@ -29,28 +25,25 @@ def fetch_stock_data(symbol: str, period: str = "daily", start_date: str = None)
         start_date = (datetime.now() - timedelta(days=365)).strftime("%Y%m%d")
     
     market = get_market(symbol)
-    print(f"📡 正在获取 {market}:{symbol} {period} 数据 (从 {start_date} 起)...")
+    logger.info(f"📡 正在获取 {market}:{symbol} {period} 数据 (从 {start_date} 起)...")
     
     try:
+    @retry_request(max_retries=3, delay=2.0)
+    def _fetch_hk():
+        return ak.stock_hk_hist(symbol=symbol, period=period, start_date=start_date, end_date=datetime.now().strftime("%Y%m%d"), adjust="qfq")
+
+    @retry_request(max_retries=3, delay=2.0)
+    def _fetch_cn():
+        return ak.stock_zh_a_hist(symbol=symbol, period=period, start_date=start_date, end_date=datetime.now().strftime("%Y%m%d"), adjust="qfq")
+
+    try:
         if market == "HK":
-            df = ak.stock_hk_hist(
-                symbol=symbol,
-                period=period,
-                start_date=start_date,
-                end_date=datetime.now().strftime("%Y%m%d"),
-                adjust="qfq"
-            )
+            df = _fetch_hk()
         else:
-            df = ak.stock_zh_a_hist(
-                symbol=symbol,
-                period=period,
-                start_date=start_date,
-                end_date=datetime.now().strftime("%Y%m%d"),
-                adjust="qfq"
-            )
+            df = _fetch_cn()
         return df
     except Exception as e:
-        print(f"❌ {symbol} {period} 获取失败: {e}")
+        logger.error(f"❌ {symbol} {period} 获取失败: {e}")
         return pd.DataFrame()
 
 def sync_stock_meta():
@@ -58,7 +51,7 @@ def sync_stock_meta():
     import time
     start_time = time.time()  # 统计完整同步耗时
     
-    print("\n📦 同步股票元数据...")
+    logger.info("\n📦 同步股票元数据...")
     now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     all_records = []
 
@@ -74,12 +67,12 @@ def sync_stock_meta():
                 if symbol.isdigit():
                     py, abbr = get_pinyin_info(name)
                     all_records.append((symbol, name, "HK", now_str, py, abbr))
-            print(f"   已获取 {len(hk_stocks)} 条港股元数据")
+            logger.info(f"   已获取 {len(hk_stocks)} 条港股元数据")
     except Exception as e:
-        print(f"   ⚠️ 港股列表获取失败: {e}")
+        logger.warning(f"   ⚠️ 港股列表获取失败: {e}")
 
     # 2. A 股列表 (分交易所独立获取，任一失败不影响其他)
-    print("   正在获取 A 股列表...")
+    logger.info("   正在获取 A 股列表...")
     cn_count = 0
     
     # 策略 A: 使用东财 HTTP API 获取全量沪深 A 股 (最稳定，覆盖 5000+ 只)
@@ -119,10 +112,10 @@ def sync_stock_meta():
                     py, abbr = get_pinyin_info(name)
                     all_records.append((symbol, name, "CN", now_str, py, abbr))
                     cn_count += 1
-            print(f"   ✅ [HTTP API] 沪深 A 股: {cn_count} 条")
+            logger.info(f"   ✅ [HTTP API] 沪深 A 股: {cn_count} 条")
             http_success = True
     except Exception as e_http:
-        print(f"   ⚠️ HTTP API 失败: {e_http}")
+        logger.warning(f"   ⚠️ HTTP API 失败: {e_http}")
 
     # 策略 B: 如果 HTTP 失败，使用 AkShare 分交易所获取 (每个独立容错)
     if not http_success:
@@ -136,9 +129,9 @@ def sync_stock_meta():
                     py, abbr = get_pinyin_info(name)
                     all_records.append((symbol, name, "CN", now_str, py, abbr))
                     cn_count += 1
-            print(f"   ✅ [AkShare] 上证主板: {len(sh_main)} 条")
+            logger.info(f"   ✅ [AkShare] 上证主板: {len(sh_main)} 条")
         except Exception as e:
-            print(f"   ⚠️ 上证主板获取失败: {e}")
+            logger.warning(f"   ⚠️ 上证主板获取失败: {e}")
 
         # B2: 上证科创板
         try:
@@ -182,7 +175,7 @@ def sync_stock_meta():
     except Exception as e:
         print(f"   ⚠️ 北交所获取失败 (可忽略，占比极小): {e}")
 
-    print(f"   📊 A 股合计: {cn_count} 条")
+    logger.info(f"   📊 A 股合计: {cn_count} 条")
 
     # 批量写入数据库 (每 500 条一批，优化 Turso 远程写入性能)
     if all_records:
@@ -201,7 +194,7 @@ def sync_stock_meta():
                 VALUES {placeholders}
             """, flat_values)
         if (i + batch_size) % 2000 == 0 or i + batch_size >= total:
-                print(f"   💾 已写入 {min(i + batch_size, total)}/{total} 条...")
+                logger.info(f"   💾 已写入 {min(i + batch_size, total)}/{total} 条...")
         
         conn.commit()
         conn.close()
@@ -210,7 +203,7 @@ def sync_stock_meta():
         hk_count = len([r for r in all_records if r[2] == "HK"])
         cn_count = len([r for r in all_records if r[2] == "CN"])
         
-        print(f"✅ 元数据同步完成 ({total} 条, 耗时 {duration:.1f}s)")
+        logger.info(f"✅ 元数据同步完成 ({total} 条, 耗时 {duration:.1f}s)")
         
         # 发送企微通知
         from utils import send_wecom_notification
@@ -227,7 +220,7 @@ def sync_profiles(limit=20):
     策略: 优先同步有人关注的股票 (global_stock_pool)，其次补全 stock_meta 中缺失的信息
     限制: 默认每次只同步 20 个，避免接口限流
     """
-    print(f"📡 开始同步公司概况 (Limit: {limit})...")
+    logger.info(f"📡 开始同步公司概况 (Limit: {limit})...")
     conn = get_connection()
     cursor = conn.cursor()
     
@@ -246,15 +239,15 @@ def sync_profiles(limit=20):
         targets = cursor.fetchall()
         
         if not targets:
-            print("✨ 所有关注股票的概况信息已是最新的。")
+            logger.info("✨ 所有关注股票的概况信息已是最新的。")
             conn.close()
             return
 
-        print(f"🔍 发现 {len(targets)} 只关注股票缺失概况信息，开始更新...")
+        logger.info(f"🔍 发现 {len(targets)} 只关注股票缺失概况信息，开始更新...")
         
         success_count = 0
         for symbol, name, market in targets:
-            print(f"   Getting profile for {symbol} ({name}) [{market}]...")
+            logger.info(f"   Getting profile for {symbol} ({name}) [{market}]...")
             try:
                 industry = ""
                 main_bus = ""
@@ -300,17 +293,17 @@ def sync_profiles(limit=20):
                     conn.commit()
                     success_count += 1
                 else:
-                    print(f"   ⚠️ 无数据: {symbol}")
+                    logger.warning(f"   ⚠️ 无数据: {symbol}")
                     
             except Exception as e:
-                print(f"   ❌ 失败 {symbol}: {e}")
+                logger.error(f"   ❌ 失败 {symbol}: {e}")
                 import time
                 time.sleep(1) # 出错歇一秒
 
-        print(f"✅ 公司概况同步完成: 成功 {success_count}/{len(targets)}")
+        logger.info(f"✅ 公司概况同步完成: 成功 {success_count}/{len(targets)}")
         
     except Exception as e:
-        print(f"❌ 同步公司概况失败: {e}")
+        logger.error(f"❌ 同步公司概况失败: {e}")
     finally:
         conn.close()
 

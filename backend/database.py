@@ -3,14 +3,9 @@ import sys
 import io
 from datetime import datetime
 
-# 修复 Windows 控制台编码问题
-if sys.stdout.encoding != 'utf-8':
-    try:
-        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
-    except (AttributeError, io.UnsupportedOperation):
-        pass
 
 from config import DB_PATH, TURSO_DB_URL, TURSO_AUTH_TOKEN
+from logger import logger
 
 try:
     import libsql_client
@@ -177,11 +172,11 @@ def init_db():
         
         for col_name, col_type in expected_columns.items():
             if col_name not in columns:
-                print(f"🛠️ 更新数据库: 添加 stock_meta.{col_name}")
+                logger.info(f"🛠️ 更新数据库: 添加 stock_meta.{col_name}")
                 cursor.execute(f"ALTER TABLE stock_meta ADD COLUMN {col_name} {col_type}")
                 
     except Exception as e:
-        print(f"⚠️ 检查/更新表结构失败: {e}")
+        logger.warning(f"⚠️ 检查/更新表结构失败: {e}")
 
     # 3. 核心股票池
     cursor.execute("""
@@ -225,19 +220,18 @@ def init_db():
         columns = [info[1] for info in cursor.fetchall()]
         
         if "subscription_tier" not in columns:
-            print("🛠️ 更新数据库: 添加 users.subscription_tier")
+            logger.info("🛠️ 更新数据库: 添加 users.subscription_tier")
             cursor.execute("ALTER TABLE users ADD COLUMN subscription_tier TEXT DEFAULT 'free'")
             
         if "subscription_expires_at" not in columns:
-            print("🛠️ 更新数据库: 添加 users.subscription_expires_at")
+            logger.info("🛠️ 更新数据库: 添加 users.subscription_expires_at")
             cursor.execute("ALTER TABLE users ADD COLUMN subscription_expires_at TIMESTAMP")
             
         if "referred_by" not in columns:
-            print("🛠️ 更新数据库: 添加 users.referred_by")
             cursor.execute("ALTER TABLE users ADD COLUMN referred_by TEXT")
             
     except Exception as e:
-        print(f"⚠️ 检查/更新 users 表结构失败: {e}")
+        logger.warning(f"⚠️ 检查/更新 users 表结构失败: {e}")
 
     # 6. 邀请码表 (第0阶段内测)
     cursor.execute("""
@@ -331,7 +325,7 @@ def init_db():
         
         for col_name, col_type in expected_ai_columns.items():
             if col_name not in columns:
-                print(f"🛠️ 更新数据库: 添加 ai_predictions.{col_name}")
+                logger.info(f"🛠️ 更新数据库: 添加 ai_predictions.{col_name}")
                 cursor.execute(f"ALTER TABLE ai_predictions ADD COLUMN {col_name} {col_type}")
                 # 为旧数据赋予当前时间作为默认值
                 if "at" in col_name:
@@ -339,11 +333,11 @@ def init_db():
                     cursor.execute(f"UPDATE ai_predictions SET {col_name} = ? WHERE {col_name} IS NULL", (now,))
                 
     except Exception as e:
-        print(f"⚠️ 检查/更新 ai_predictions 表结构失败: {e}")
+        logger.warning(f"⚠️ 检查/更新 ai_predictions 表结构失败: {e}")
     
     conn.commit()
     conn.close()
-    print("✅ 数据库结构检查/初始化完成")
+    logger.info("✅ 数据库结构检查/初始化完成")
 
 def get_stock_pool():
     """从全局股票池获取需要同步的股票 (仅同步有人关注的股票)"""

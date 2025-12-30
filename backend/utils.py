@@ -1,9 +1,45 @@
 import os
+import time
+import random
 import requests
+from functools import wraps
 from datetime import datetime
 from pypinyin import pinyin, Style
 from config import BEIJING_TZ, WECOM_ROBOT_KEY
 from database import get_connection
+from logger import logger
+
+def retry_request(max_retries=3, delay=1.0, backoff=2.0):
+    """
+    网络请求重试装饰器 (指数退避 + 随机抖动)
+    :param max_retries: 最大重试次数
+    :param delay: 初始等待秒数
+    :param backoff: 退避倍数
+    """
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            tries = 0
+            current_delay = delay
+            while tries <= max_retries:
+                try:
+                    return func(*args, **kwargs)
+                except Exception as e:
+                    tries += 1
+                    if tries > max_retries:
+                        # 超过重试次数，抛出异常
+                        logger.error(f"❌ 重试耗尽 ({max_retries}次): {func.__name__} - {e}")
+                        raise e
+                    
+                    # 随机抖动 (0 ~ 0.5s) 避免惊群效应
+                    jitter = random.uniform(0, 0.5)
+                    wait_time = current_delay + jitter
+                    
+                    logger.warning(f"⚠️ 网络波动，{wait_time:.1f}秒后第 {tries} 次重试... (Error: {str(e)[:50]}...)")
+                    time.sleep(wait_time)
+                    current_delay *= backoff
+        return wrapper
+    return decorator
 
 def get_market(symbol: str) -> str:
     """获取股票所属市场 (CN/HK)"""

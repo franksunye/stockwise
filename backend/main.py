@@ -7,6 +7,7 @@ import sys
 import argparse
 import time
 import io
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # 修复 Windows 控制台编码问题
 if sys.stdout.encoding != 'utf-8':
@@ -24,7 +25,9 @@ from fetchers import sync_stock_meta, fetch_stock_data, sync_profiles
 from utils import send_wecom_notification
 from engine.indicators import calculate_indicators
 from engine.ai_service import generate_ai_prediction
+from engine.ai_service import generate_ai_prediction
 from engine.validator import validate_previous_prediction
+from logger import logger
 
 def get_last_date(symbol: str, table: str = "daily_prices") -> str:
     """获取数据库中某支股票的最后日期"""
@@ -39,9 +42,9 @@ def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool =
     """增量处理特定周期的股票数据"""
     table_name = f"{period}_prices"
     if is_realtime:
-        print(f"\n⏱️ [实时重算] 正在更新盘中指标: {symbol}")
+        logger.info(f"⏱️ [实时重算] 正在更新盘中指标: {symbol}")
     else:
-        print(f"\n🔍 检查 {period} 状态: {symbol}")
+        logger.info(f"🔍 检查 {period} 状态: {symbol}")
     
     last_date_str = get_last_date(symbol, table_name)
     
@@ -76,7 +79,7 @@ def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool =
 
     # 4. 判断是否需要更新
     if last_date_str and df["date"].max() < last_date_str:
-        print(f"✨ 数据已是最新 ({last_date_str})。")
+        logger.info(f"✨ 数据已是最新 ({last_date_str})。")
         return
 
     # 5. 计算指标
@@ -120,13 +123,26 @@ def sync_spot_prices(symbols: list):
     success_count = 0
     errors = []
     
-    print(f"\n⚡ 正在执行盘中实时同步 - 针对 {len(symbols)} 只股票")
-    for symbol in symbols:
+    logger.info(f"⚡ 启动并发盘中同步 (Workers=4) - 针对 {len(symbols)} 只股票")
+    
+    def sync_single_realtime(stock):
         try:
-            process_stock_period(symbol, period="daily", is_realtime=True)
-            success_count += 1
+            process_stock_period(stock, period="daily", is_realtime=True)
+            return True
         except Exception as e:
-            errors.append(f"Stock {symbol} error: {str(e)[:100]}")
+            raise e
+
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        future_to_stock = {executor.submit(sync_single_realtime, sym): sym for sym in symbols}
+        
+        for i, future in enumerate(as_completed(future_to_stock)):
+            stock = future_to_stock[future]
+            try:
+                future.result()
+                success_count += 1
+            except Exception as e:
+                errors.append(f"Stock {stock} error: {str(e)[:100]}")
+                logger.error(f"❌ {stock} 实时同步失败: {e}")
 
     duration = time.time() - start_time
     status = "✅ SUCCESS" if success_count > 0 else "❌ FAILED"
@@ -161,13 +177,13 @@ def check_stock_analysis_mode(symbol: str) -> str:
         
         mode = 'ai' if count > 0 else 'rule'
         if mode == 'ai':
-            print(f"   💎 检测到 Pro 用户关注，启用 AI 深度分析")
+            logger.info(f"   💎 检测到 Pro 用户关注，启用 AI 深度分析")
         else:
-            print(f"   ⚪ 仅普通用户关注，使用规则引擎")
+            logger.info(f"   ⚪ 仅普通用户关注，使用规则引擎")
             
         return mode
     except Exception as e:
-        print(f"   ⚠️ 权限检查失败 ({e})，默认使用 AI")
+        logger.warning(f"   ⚠️ 权限检查失败 ({e})，默认使用 AI")
         return 'ai'
 
 def run_ai_analysis(symbol: str = None, market_filter: str = None):
@@ -178,7 +194,7 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None):
     else:
         pool = get_stock_pool()
         if not pool:
-            print("⚠️ 股票池为空")
+            logger.warning("⚠️ 股票池为空")
             return
         
         # 按市场过滤
@@ -190,7 +206,7 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None):
         else:
             targets = pool
     
-    print(f"\n🧠 开始执行 AI 分析任务，共 {len(targets)} 只股票...")
+    logger.info(f"🧠 开始执行 AI 分析任务，共 {len(targets)} 只股票...")
     start_time = time.time()
     success_count = 0
     
@@ -203,11 +219,11 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None):
             df = pd.read_sql_query(query, conn, params=(stock,))
             
             if df.empty:
-                print(f"⚠️ {stock}: 无行情数据，跳过")
+                logger.warning(f"⚠️ {stock}: 无行情数据，跳过")
                 continue
                 
             today_data = df.iloc[0]
-            print(f"\n>>> 分析 {stock} ({today_data['date']})")
+            logger.info(f">>> 分析 {stock} ({today_data['date']})")
             
             # 确定分析模式 (AI vs Rule)
             analysis_mode = check_stock_analysis_mode(stock)
@@ -217,11 +233,12 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None):
             success_count += 1
             
         except Exception as e:
-            print(f"❌ {stock} 分析失败: {e}")
+            logger.error(f"❌ {stock} 分析失败: {e}")
             
     conn.close()
+    conn.close()
     duration = time.time() - start_time
-    print(f"\n✅ AI 分析完成! 成功: {success_count}/{len(targets)}, 耗时: {duration:.1f}s")
+    logger.info(f"✅ AI 分析完成! 成功: {success_count}/{len(targets)}, 耗时: {duration:.1f}s")
 
 
 def run_full_sync(market_filter: str = None):
@@ -232,7 +249,7 @@ def run_full_sync(market_filter: str = None):
     """
     target_stocks = get_stock_pool()
     if not target_stocks:
-        print("⚠️ 股票池为空")
+        logger.warning("⚠️ 股票池为空")
         return
     
     # 按市场过滤
@@ -248,21 +265,47 @@ def run_full_sync(market_filter: str = None):
         print(f"📍 过滤市场: {market_filter}，共 {len(target_stocks)} 只股票")
 
     if not target_stocks:
-        print(f"⚠️ {market_filter} 市场股票池为空")
+        logger.warning(f"⚠️ {market_filter} 市场股票池为空")
         return
 
     start_time = time.time()
     success_count = 0
     errors = []
     
-    for stock in target_stocks:
+    # 使用线程池并发同步 (Max Workers = 4)
+    # 避免并发过高导致数据库被锁或 IP 被封
+    logger.info(f"🚀 启动并发同步 (Workers=4)...")
+    
+    def sync_single_stock(stock):
+        """单个股票的全量同步任务"""
         try:
+            # 日线是必须的
             process_stock_period(stock, period="daily")
-            process_stock_period(stock, period="weekly")
-            process_stock_period(stock, period="monthly")
-            success_count += 1
+            # 周月线偶尔失败不影响核心体验
+            try: process_stock_period(stock, period="weekly")
+            except: pass 
+            try: process_stock_period(stock, period="monthly")
+            except: pass
+            return True
         except Exception as e:
-            errors.append(f"{stock} error: {str(e)[:100]}")
+            raise e
+
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        future_to_stock = {executor.submit(sync_single_stock, stock): stock for stock in target_stocks}
+        
+        for i, future in enumerate(as_completed(future_to_stock)):
+            stock = future_to_stock[future]
+            try:
+                future.result()
+                success_count += 1
+            except Exception as e:
+                error_msg = str(e)
+                errors.append(f"{stock}: {error_msg}")
+                logger.error(f"❌ {stock} 同步失败: {error_msg}")
+            
+            # 进度条效果
+            if (i + 1) % 10 == 0:
+                logger.info(f"   ⏩ 进度: {i + 1}/{len(target_stocks)} ...")
     
     duration = time.time() - start_time
     market_label = f" ({market_filter})" if market_filter else ""
@@ -305,7 +348,7 @@ if __name__ == "__main__":
         except Exception as e:
             success = False
             error_msg = str(e)
-            print(f"❌ {args.symbol} 同步失败: {e}")
+            logger.error(f"❌ {args.symbol} 同步失败: {e}")
             import traceback
             traceback.print_exc()
         
