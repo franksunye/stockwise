@@ -16,6 +16,12 @@ const DEFAULT_REVEAL_DATA = {
   support: 95.00 
 };
 
+interface RecommendedStock {
+  symbol: string;
+  name: string;
+  market: string;
+}
+
 export function OnboardingOverlay() { 
   const [isVisible, setIsVisible] = useState(false);
   const [step, setStep] = useState(1);
@@ -25,7 +31,7 @@ export function OnboardingOverlay() {
   const [selectedStockName, setSelectedStockName] = useState<string | null>(null);
   const [analyzingStage, setAnalyzingStage] = useState(0); // 0: None, 1: Connecting, 2: Flows, 3: AI
   const [revealData, setRevealData] = useState(DEFAULT_REVEAL_DATA);
-  const [recommendedStocks, setRecommendedStocks] = useState<any[]>([]);
+  const [recommendedStocks, setRecommendedStocks] = useState<RecommendedStock[]>([]);
 
   useEffect(() => {
     checkOnboardingStatus();
