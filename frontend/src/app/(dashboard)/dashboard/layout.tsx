@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { InviteWall } from '@/components/InviteWall';
+import { OnboardingOverlay } from '@/components/onboarding/OnboardingOverlay';
 import { getWatchlist } from '@/lib/storage';
 import { getCurrentUser } from '@/lib/user';
 import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
@@ -85,6 +86,11 @@ export default function DashboardLayout({
     return <InviteWall onSuccess={() => setIsAuthorized(true)} />;
   }
 
-  // 已授权则显示子页面
-  return <>{children}</>;
+  // 已授权 → 显示 Onboarding（仅新用户）+ 子页面
+  return (
+    <>
+      <OnboardingOverlay />
+      {children}
+    </>
+  );
 }

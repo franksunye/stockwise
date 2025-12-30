@@ -268,6 +268,26 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                   </div>
               </div>
               )}
+              <div className="mt-4 pb-4 border-t border-white/5 pt-4">
+                 <button 
+                    onClick={async () => {
+                        // Reset both localStorage and database
+                        localStorage.removeItem('STOCKWISE_HAS_ONBOARDED');
+                        try {
+                            await fetch('/api/user/onboarding/reset', {
+                                method: 'POST',
+                                body: JSON.stringify({ userId })
+                            });
+                        } catch (e) {
+                            console.error('Reset onboarding failed', e);
+                        }
+                        window.location.reload();
+                    }}
+                    className="w-full py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-xs text-slate-500 font-bold flex items-center justify-center gap-2"
+                 >
+                    <Zap size={14} /> 重播引导流程 (演示用)
+                 </button>
+              </div>  
               
             </div>
           </motion.div>

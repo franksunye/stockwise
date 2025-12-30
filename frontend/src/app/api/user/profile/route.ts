@@ -130,7 +130,8 @@ export async function POST(request: Request) {
         return NextResponse.json({
             userId: user.user_id,
             tier: isExpired ? 'free' : (user.subscription_tier || 'free'),
-            expiresAt: user.subscription_expires_at
+            expiresAt: user.subscription_expires_at,
+            hasOnboarded: Boolean(user.has_onboarded)
         });
 
     } catch (error: unknown) {

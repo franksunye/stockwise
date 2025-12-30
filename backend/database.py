@@ -249,6 +249,10 @@ def init_db():
             
         if "referred_by" not in columns:
             cursor.execute("ALTER TABLE users ADD COLUMN referred_by TEXT")
+
+        if "has_onboarded" not in columns:
+            logger.info("🛠️ 更新数据库: 添加 users.has_onboarded")
+            cursor.execute("ALTER TABLE users ADD COLUMN has_onboarded BOOLEAN DEFAULT 0")
             
     except Exception as e:
         logger.warning(f"⚠️ 检查/更新 users 表结构失败: {e}")
