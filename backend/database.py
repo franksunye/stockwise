@@ -117,6 +117,30 @@ def get_connection():
         DB_PATH.parent.mkdir(parents=True, exist_ok=True)
         return sqlite3.connect(DB_PATH)
 
+def get_table_columns(cursor, table_name):
+    """
+    获取表的所有字段名 (兼容 SQLite3 Tuple 和 LibSQL Row 对象)
+    """
+    cursor.execute(f"PRAGMA table_info({table_name})")
+    rows = cursor.fetchall()
+    
+    columns = []
+    for row in rows:
+        # 策略 1: SQLite3 (tuple, index 1 is name)
+        if isinstance(row, tuple):
+            columns.append(row[1])
+        # 策略 2: LibSQL Row Object (has .name attribute)
+        elif hasattr(row, 'name'):
+            columns.append(row.name)
+        # 策略 3: LibSQL Dict-like
+        elif hasattr(row, '__getitem__'):
+             try:
+                 columns.append(row['name'])
+             except:
+                 try: columns.append(row[1])
+                 except: pass
+    return columns
+
 def init_db():
     """初始化数据库表结构"""
     conn = get_connection()
@@ -158,11 +182,8 @@ def init_db():
     """)
 
     # 检查所有必要的列是否存在，如果不存在则添加 (Schema Evolution)
-    # 对于 SQLite/Turso，不能通过 CREATE TABLE IF NOT EXISTS 自动添加新列
-    # 需要手动检查并 ALTER TABLE
     try:
-        cursor.execute("PRAGMA table_info(stock_meta)")
-        columns = [info[1] for info in cursor.fetchall()]
+        columns = get_table_columns(cursor, "stock_meta")
         
         expected_columns = {
             "industry": "TEXT",
@@ -216,8 +237,7 @@ def init_db():
 
     # 检查 users 表的新字段 (Schema Evolution)
     try:
-        cursor.execute("PRAGMA table_info(users)")
-        columns = [info[1] for info in cursor.fetchall()]
+        columns = get_table_columns(cursor, "users")
         
         if "subscription_tier" not in columns:
             logger.info("🛠️ 更新数据库: 添加 users.subscription_tier")
@@ -302,19 +322,7 @@ def init_db():
 
     # 字段自动升级 (Schema Evolution) - 为了给旧数据库添加字段
     try:
-        cursor.execute("PRAGMA table_info(ai_predictions)")
-        raw_rows = cursor.fetchall()
-        
-        # 兼容处理：支持 Tuple 和 Row 对象
-        columns = []
-        for row in raw_rows:
-            # 如果是 tuple/list (sqlite3): row[1] 是 name
-            try:
-                columns.append(row[1])
-            except (IndexError, TypeError):
-                # 如果是 Row 对象 (libsql_client)
-                if hasattr(row, 'name'):
-                     columns.append(row.name)
+        columns = get_table_columns(cursor, "ai_predictions")
         
         # 定义需要补全的字段及其类型
         expected_ai_columns = {

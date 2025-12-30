@@ -27,7 +27,7 @@ def fetch_stock_data(symbol: str, period: str = "daily", start_date: str = None)
     market = get_market(symbol)
     logger.info(f"📡 正在获取 {market}:{symbol} {period} 数据 (从 {start_date} 起)...")
     
-    try:
+
     @retry_request(max_retries=3, delay=2.0)
     def _fetch_hk():
         return ak.stock_hk_hist(symbol=symbol, period=period, start_date=start_date, end_date=datetime.now().strftime("%Y%m%d"), adjust="qfq")
@@ -70,6 +70,25 @@ def sync_stock_meta():
             logger.info(f"   已获取 {len(hk_stocks)} 条港股元数据")
     except Exception as e:
         logger.warning(f"   ⚠️ 港股列表获取失败: {e}")
+        
+    def _process_ak_dataframe(df, market_code="CN", symbol_col="证券代码", name_col="证券简称", label="列表"):
+        """Helper to process akshare stock list dataframe"""
+        count = 0
+        if df is None or df.empty: return 0
+        
+        try:
+            for _, row in df.iterrows():
+                symbol = str(row.get(symbol_col, "")).strip()
+                name = str(row.get(name_col, "")).strip()
+                if symbol.isdigit() and len(symbol) == 6:
+                    py, abbr = get_pinyin_info(name)
+                    all_records.append((symbol, name, market_code, now_str, py, abbr))
+                    count += 1
+            logger.info(f"   ✅ [AkShare] {label}: {count} 条")
+            return count
+        except Exception as e:
+            logger.warning(f"   ⚠️ {label} 处理异常: {e}")
+            return 0
 
     # 2. A 股列表 (分交易所独立获取，任一失败不影响其他)
     logger.info("   正在获取 A 股列表...")
@@ -121,59 +140,31 @@ def sync_stock_meta():
     if not http_success:
         # B1: 上证主板
         try:
-            sh_main = ak.stock_info_sh_name_code(symbol="主板A股")
-            for _, row in sh_main.iterrows():
-                symbol = str(row.get("证券代码", "")).strip()
-                name = str(row.get("证券简称", "")).strip()
-                if symbol.isdigit() and len(symbol) == 6:
-                    py, abbr = get_pinyin_info(name)
-                    all_records.append((symbol, name, "CN", now_str, py, abbr))
-                    cn_count += 1
-            logger.info(f"   ✅ [AkShare] 上证主板: {len(sh_main)} 条")
+            df = ak.stock_info_sh_name_code(symbol="主板A股")
+            cn_count += _process_ak_dataframe(df, label="上证主板")
         except Exception as e:
             logger.warning(f"   ⚠️ 上证主板获取失败: {e}")
 
         # B2: 上证科创板
         try:
-            sh_kcb = ak.stock_info_sh_name_code(symbol="科创板")
-            for _, row in sh_kcb.iterrows():
-                symbol = str(row.get("证券代码", "")).strip()
-                name = str(row.get("证券简称", "")).strip()
-                if symbol.isdigit() and len(symbol) == 6:
-                    py, abbr = get_pinyin_info(name)
-                    all_records.append((symbol, name, "CN", now_str, py, abbr))
-                    cn_count += 1
-            print(f"   ✅ [AkShare] 上证科创板: {len(sh_kcb)} 条")
+            df = ak.stock_info_sh_name_code(symbol="科创板")
+            cn_count += _process_ak_dataframe(df, label="上证科创板")
         except Exception as e:
-            print(f"   ⚠️ 上证科创板获取失败: {e}")
+            logger.warning(f"   ⚠️ 上证科创板获取失败: {e}")
 
         # B3: 深证 A 股 (含主板+创业板)
         try:
-            sz_a = ak.stock_info_sz_name_code(symbol="A股列表")
-            for _, row in sz_a.iterrows():
-                symbol = str(row.get("A股代码", "")).strip()
-                name = str(row.get("A股简称", "")).strip()
-                if symbol.isdigit() and len(symbol) == 6:
-                    py, abbr = get_pinyin_info(name)
-                    all_records.append((symbol, name, "CN", now_str, py, abbr))
-                    cn_count += 1
-            print(f"   ✅ [AkShare] 深证A股: {len(sz_a)} 条")
+            df = ak.stock_info_sz_name_code(symbol="A股列表")
+            cn_count += _process_ak_dataframe(df, symbol_col="A股代码", name_col="A股简称", label="深证A股")
         except Exception as e:
-            print(f"   ⚠️ 深证A股获取失败: {e}")
+            logger.warning(f"   ⚠️ 深证A股获取失败: {e}")
 
-    # 策略 C: 北交所 (独立获取，因为经常有 SSL 问题)
+    # 策略 C: 北交所 (独立获取)
     try:
-        bj = ak.stock_info_bj_name_code()
-        for _, row in bj.iterrows():
-            symbol = str(row.get("证券代码", "")).strip()
-            name = str(row.get("证券简称", "")).strip()
-            if symbol.isdigit() and len(symbol) == 6:
-                py, abbr = get_pinyin_info(name)
-                all_records.append((symbol, name, "CN", now_str, py, abbr))
-                cn_count += 1
-        print(f"   ✅ [AkShare] 北交所: {len(bj)} 条")
+        df = ak.stock_info_bj_name_code()
+        cn_count += _process_ak_dataframe(df, label="北交所")
     except Exception as e:
-        print(f"   ⚠️ 北交所获取失败 (可忽略，占比极小): {e}")
+        logger.warning(f"   ⚠️ 北交所获取失败: {e}")
 
     logger.info(f"   📊 A 股合计: {cn_count} 条")
 

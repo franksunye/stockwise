@@ -253,5 +253,3 @@ def prepare_stock_analysis_prompt(symbol: str):
 (直接输出 JSON，不要 Markdown)"""
 
     return system_prompt, user_prompt
-
-    return system_prompt, user_prompt
