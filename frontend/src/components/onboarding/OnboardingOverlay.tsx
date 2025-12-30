@@ -40,12 +40,12 @@ export function OnboardingOverlay() {
   const initialize = async () => {
     const user = await getCurrentUser();
     await checkOnboardingStatus(user.userId);
-    await fetchRecommendedStocks(user.userId);
+    await fetchRecommendedStocks();
   };
 
-  const fetchRecommendedStocks = async (userId: string) => {
+  const fetchRecommendedStocks = async () => {
     try {
-      const res = await fetch(`/api/user/onboarding/stocks?userId=${userId}`);
+      const res = await fetch('/api/user/onboarding/stocks');
       const data = await res.json();
       if (data.stocks && data.stocks.length > 0) {
         setRecommendedStocks(data.stocks);

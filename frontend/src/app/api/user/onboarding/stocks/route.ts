@@ -8,30 +8,24 @@ export const dynamic = 'force-dynamic';
  * 获取含有近期 AI 预测结果的热门股票，用于 Onboarding 引导。
  * 逻辑：从 ai_predictions 中筛选 model != 'rule-based' 的最新 4 只股票。
  */
-export async function GET(request: Request) {
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
-
+export async function GET() {
     try {
         const db = getDbClient();
 
-        // 方案：优先寻找近期有 gpt-3.5-turbo 深度分析的股票
-        // 如果有 userId，排除掉该用户已经关注的
+        // 方案：寻找近期有深度分析结果的最新 4 只股票
         const sql = `
             SELECT DISTINCT ap.symbol, sm.name, sm.market
             FROM ai_predictions ap
             JOIN stock_meta sm ON ap.symbol = sm.symbol
             WHERE ap.model != 'rule-based' AND ap.model IS NOT NULL
-            ${userId ? 'AND ap.symbol NOT IN (SELECT symbol FROM user_watchlist WHERE user_id = ?)' : ''}
             ORDER BY ap.date DESC, ap.confidence DESC
             LIMIT 4
         `;
 
-        const args = userId ? [userId] : [];
         let stocks: any[] = [];
 
         if ('execute' in db) {
-            const res = await db.execute({ sql, args });
+            const res = await db.execute(sql);
             // 确保将 Turso 的 Row 类型转换为普通对象数组
             stocks = res.rows.map(row => ({
                 symbol: String(row.symbol),
@@ -39,7 +33,7 @@ export async function GET(request: Request) {
                 market: String(row.market)
             }));
         } else {
-            const rows = userId ? db.prepare(sql).all(userId) : db.prepare(sql).all();
+            const rows = db.prepare(sql).all();
             stocks = rows as any[];
         }
 
