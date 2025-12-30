@@ -12,9 +12,10 @@ import {
 } from '@/components/dashboard';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
+import { useRouter } from 'next/navigation';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { useTikTokScroll } from '@/hooks/useTikTokScroll';
-import { formatStockSymbol } from '@/lib/date-utils';
+import { AddStockDrawer } from '@/components/AddStockDrawer';
 import { getCurrentUser } from '@/lib/user';
 
 const UserCenterDrawer = dynamic(() => import('@/components/UserCenterDrawer').then(mod => mod.UserCenterDrawer), {
@@ -22,15 +23,11 @@ const UserCenterDrawer = dynamic(() => import('@/components/UserCenterDrawer').t
   loading: () => null
 });
 
-// 格式化倒计时
-function formatCountdown(ms: number): string {
-  const minutes = Math.floor(ms / 60000);
-  const seconds = Math.floor((ms % 60000) / 1000);
-  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-}
-
 function DashboardContent() {
-  const { stocks, loadingPool, refresh, isRefreshing, nextRefreshIn } = useDashboardData();
+  const router = useRouter();
+  const [userCenterOpen, setUserCenterOpen] = useState(false);
+  const [addStockOpen, setAddStockOpen] = useState(false);
+  const { stocks, loadingPool, refresh, isRefreshing } = useDashboardData();
   const {
     currentIndex,
     scrollRef,
@@ -39,9 +36,11 @@ function DashboardContent() {
     handleVerticalScroll,
     backToTopCounter,
     scrollToToday
-  } = useTikTokScroll(stocks);
+  } = useTikTokScroll(stocks, {
+    onOverscrollRight: () => setUserCenterOpen(true),
+    onOverscrollLeft: () => setAddStockOpen(true)
+  });
 
-  const [userCenterOpen, setUserCenterOpen] = useState(false);
   const [showTactics, setShowTactics] = useState<string | null>(null);
   const [profileStock, setProfileStock] = useState<StockData | null>(null);
   const [tier, setTier] = useState<'free' | 'pro'>('free');
@@ -91,29 +90,34 @@ function DashboardContent() {
         />
       </AnimatePresence>
 
-      {/* Header - 股票信息 + 刷新状态 */}
-      <header className="fixed top-0 left-0 right-0 z-[100] p-8 pointer-events-none">
-        <div className="w-full flex justify-between items-center pointer-events-auto">
-           <div className="flex items-center gap-3 cursor-pointer group shrink-0" onClick={() => setProfileStock(currentStock)}>
-              <div className="w-11 h-11 rounded-[18px] bg-white/5 border border-white/10 flex items-center justify-center transition-all group-active:scale-90 group-hover:bg-white/10">
+      {/* Header - 极简刷新按钮 + 居中股票名称 */}
+      <header className="fixed top-0 left-0 right-0 z-[100] p-6 pointer-events-none">
+        <div className="w-full flex justify-between items-start pointer-events-auto">
+           {/* 左侧：点击打开股票档案 (无代码显示) */}
+           <div className="flex items-center gap-2 cursor-pointer group shrink-0" onClick={() => setProfileStock(currentStock)}>
+              <div className="w-10 h-10 rounded-[16px] bg-white/5 border border-white/10 flex items-center justify-center transition-all group-active:scale-90 group-hover:bg-white/10">
                  <div className="text-[10px] font-black italic text-indigo-500">{currentStock?.symbol.slice(-2)}</div>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xs font-black italic group-hover:text-indigo-400 transition-colors uppercase">{currentStock?.name}</span>
-                <span className="text-[9px] text-slate-600 font-bold mono">{formatStockSymbol(currentStock?.symbol || '')}</span>
               </div>
            </div>
 
-          {/* 刷新指示器 */}
+          {/* 中央：股票名称突出显示 */}
+          <div 
+            className="absolute left-1/2 transform -translate-x-1/2 top-6 cursor-pointer group"
+            onClick={() => setProfileStock(currentStock)}
+          >
+            <h1 className="text-xl font-black italic tracking-tight text-white group-hover:text-indigo-400 transition-colors text-center">
+              {currentStock?.name}
+            </h1>
+          </div>
+
+          {/* 右侧：极简刷新按钮 (隐藏倒计时) */}
           <button 
             onClick={() => refresh()}
             disabled={isRefreshing}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/5 border border-white/10 active:scale-95 transition-all disabled:opacity-50"
+            className="w-10 h-10 rounded-[16px] bg-white/5 border border-white/10 flex items-center justify-center active:scale-90 transition-all disabled:opacity-50 hover:bg-white/10"
+            title={isRefreshing ? '刷新中...' : '点击刷新'}
           >
-            <RefreshCw className={`w-3.5 h-3.5 text-slate-500 ${isRefreshing ? 'animate-spin' : ''}`} />
-            <span className="text-[10px] font-bold text-slate-500 mono tabular-nums">
-              {isRefreshing ? '刷新中' : formatCountdown(nextRefreshIn)}
-            </span>
+            <RefreshCw className={`w-4 h-4 text-slate-500 ${isRefreshing ? 'animate-spin' : ''}`} />
           </button>
         </div>
       </header>
@@ -189,6 +193,13 @@ function DashboardContent() {
       <UserCenterDrawer 
         isOpen={userCenterOpen}
         onClose={() => setUserCenterOpen(false)}
+      />
+
+      <AddStockDrawer
+        isOpen={addStockOpen}
+        onClose={() => setAddStockOpen(false)}
+        onGoToStockPool={() => router.push('/dashboard/stock-pool')}
+        onStockAdded={() => refresh()}
       />
     </main>
   );

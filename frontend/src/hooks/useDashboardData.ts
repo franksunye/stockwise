@@ -4,15 +4,23 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { StockData } from '@/lib/types';
 import { getCurrentUser } from '@/lib/user';
 import { getRule } from '@/lib/storage';
+import { getMarketScene } from '@/lib/date-utils';
 
-const REFRESH_INTERVAL = 10 * 60 * 1000; // 10分钟
+// 动态刷新间隔：交易时段5分钟，非交易时段10分钟
+const TRADING_REFRESH_INTERVAL = 5 * 60 * 1000;   // 5分钟
+const DEFAULT_REFRESH_INTERVAL = 10 * 60 * 1000;  // 10分钟
+
+function getRefreshInterval(): number {
+    const scene = getMarketScene();
+    return scene === 'trading' ? TRADING_REFRESH_INTERVAL : DEFAULT_REFRESH_INTERVAL;
+}
 
 export function useDashboardData() {
     const [stocks, setStocks] = useState<StockData[]>([]);
     const [loadingPool, setLoadingPool] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [lastRefreshTime, setLastRefreshTime] = useState<Date | null>(null);
-    const [nextRefreshIn, setNextRefreshIn] = useState<number>(REFRESH_INTERVAL);
+    const [nextRefreshIn, setNextRefreshIn] = useState<number>(getRefreshInterval());
 
     const lastFetchTimeRef = useRef<number>(0);
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -88,7 +96,7 @@ export function useDashboardData() {
 
             setStocks(validResults);
             setLastRefreshTime(new Date());
-            setNextRefreshIn(REFRESH_INTERVAL);
+            setNextRefreshIn(getRefreshInterval());
 
             // 2秒后清除 justUpdated 标记
             if (silent) {
@@ -137,7 +145,7 @@ export function useDashboardData() {
     // 定时刷新
     useEffect(() => {
         loadAllData();
-        intervalRef.current = setInterval(() => loadAllData(true), REFRESH_INTERVAL);
+        intervalRef.current = setInterval(() => loadAllData(true), getRefreshInterval());
         return () => {
             if (intervalRef.current) clearInterval(intervalRef.current);
         };

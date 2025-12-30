@@ -105,7 +105,7 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
             {getSignalText(displayPrediction?.signal)}
           </h2>
           <div className="flex items-center justify-center gap-3 text-[10px] font-bold text-slate-600">
-            <span className="flex items-center gap-1 uppercase tracking-widest"><Target className="w-3 h-3" /> 置信度 {((displayPrediction?.confidence || 0) * 100).toFixed(0)}%</span>
+            <span className="flex items-center gap-1 uppercase tracking-widest"><Target className="w-3 h-3" /> 把握 {((displayPrediction?.confidence || 0) * 100).toFixed(0)}%</span>
             <span className="w-0.5 h-0.5 rounded-full bg-slate-800" />
             <span className="uppercase tracking-widest italic">{formatStockSymbol(data.symbol)}</span>
           </div>
