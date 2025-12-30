@@ -57,7 +57,7 @@ export async function GET() {
 
         // 2. 随机打乱池子并取 4 只，让引导页每次看起来都有新鲜感
         const shuffled = uniquePool.sort(() => 0.5 - Math.random());
-        let stocks = shuffled.slice(0, 4);
+        const stocks = shuffled.slice(0, 4);
 
         // 3. 极端的兜底逻辑：如果数据库批次数据不够 4 只（理论上不应该，除非刚开始运行）
         if (stocks.length < 4) {
