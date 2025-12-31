@@ -13,7 +13,12 @@ self.addEventListener('push', function(event) {
         url: payload.url || '/dashboard'
       }
     };
-    event.waitUntil(self.registration.showNotification(title, options));
+    event.waitUntil(
+      Promise.all([
+        self.registration.showNotification(title, options),
+        navigator.setAppBadge ? navigator.setAppBadge(1) : Promise.resolve()
+      ])
+    );
   }
 });
 

@@ -66,6 +66,14 @@ function DashboardContent() {
     fetchTier();
   }, []);
 
+  // 进入 App 时清除角标 (小红点)
+  useEffect(() => {
+    if (typeof navigator !== 'undefined' && 'clearAppBadge' in navigator) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (navigator as any).clearAppBadge().catch(console.error);
+    }
+  }, []);
+
   // 深度链接: 从 URL 参数滚动到指定股票 (通知点击跳转)
   useEffect(() => {
     if (targetSymbol && stocks.length > 0 && scrollRef.current && !hasScrolledToTarget.current) {
