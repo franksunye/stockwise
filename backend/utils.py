@@ -92,3 +92,17 @@ def format_date(dt_str: str, format_in="%Y%m%d", format_out="%Y-%m-%d") -> str:
         return datetime.strptime(dt_str, format_in).strftime(format_out)
     except:
         return dt_str
+
+def format_volume(volume):
+    """
+    格式化成交量/成交额，使其更易读 (万/亿)
+    """
+    try:
+        val = float(volume)
+        if val >= 100000000:
+            return f"{val / 100000000:.2f}亿"
+        if val >= 10000:
+            return f"{val / 10000:.1f}万"
+        return str(int(val))
+    except:
+        return str(volume)

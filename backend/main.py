@@ -22,7 +22,7 @@ from datetime import datetime, timedelta
 from config import BEIJING_TZ
 from database import init_db, get_connection, get_stock_pool
 from fetchers import sync_stock_meta, fetch_stock_data, sync_profiles
-from utils import send_wecom_notification
+from utils import send_wecom_notification, format_volume
 from notifications import send_push_notification
 from engine.indicators import calculate_indicators
 from engine.ai_service import generate_ai_prediction
@@ -131,7 +131,7 @@ def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool =
         
         emoji = "🚀" if change >= 3 else ("📈" if change > 0 else ("🔹" if change == 0 else "📉"))
         title = f"{stock_name} ({symbol}) {emoji} {change:+.2f}%"
-        body = f"最新: {price} | 成交: {int(last_row['volume'])}"
+        body = f"最新: {price} | 成交: {format_volume(last_row['volume'])}"
         
         # 发送给关注该股票的用户，使用 symbol 作为 tag 实现同一个股票通知覆盖
         send_push_notification(
