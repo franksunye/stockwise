@@ -7,6 +7,8 @@ self.addEventListener('push', function(event) {
       body: payload.body,
       icon: '/globe.svg',
       badge: '/globe.svg',
+      tag: payload.tag, // 使用 tag 实现通知覆盖
+      renotify: !!payload.tag, // 如果有 tag，重新提醒
       data: {
         url: payload.url || '/dashboard'
       }

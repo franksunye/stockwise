@@ -3,7 +3,7 @@ import requests
 import json
 from logger import logger
 
-def send_push_notification(title, body, url=None, related_symbol=None, broadcast=False):
+def send_push_notification(title, body, url=None, related_symbol=None, broadcast=False, tag=None):
     """
     调用 Internal API 发送 Web Push 通知
     """
@@ -23,7 +23,8 @@ def send_push_notification(title, body, url=None, related_symbol=None, broadcast
         "body": body,
         "url": url,
         "related_symbol": related_symbol,
-        "broadcast": broadcast
+        "broadcast": broadcast,
+        "tag": tag
     }
 
     try:

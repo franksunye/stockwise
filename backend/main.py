@@ -117,16 +117,31 @@ def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool =
     
     # 7. 实时更新推送 (仅在盘中实时模式下触发)
     if is_realtime:
-        # 简单构建消息，实际可优化为涨跌幅判断
         last_row = df.iloc[-1]
         change = float(last_row['change_percent'])
         price = float(last_row['close'])
-        emoji = "📈" if change >= 0 else "📉"
-        title = f"{symbol} {emoji} {change:+.2f}%"
-        body = f"现价: {price} | 交易量: {int(last_row['volume'])}"
         
-        # 发送给关注该股票的用户
-        send_push_notification(title, body, url=f"/dashboard?symbol={symbol}", related_symbol=symbol)
+        # 尝试从数据库获取中文简称
+        stock_name = symbol
+        try:
+            cursor.execute("SELECT name FROM stock_meta WHERE symbol = ?", (symbol,))
+            row_meta = cursor.fetchone()
+            if row_meta:
+                stock_name = row_meta[0]
+        except: pass
+        
+        emoji = "🚀" if change >= 3 else ("📈" if change > 0 else ("🔹" if change == 0 else "📉"))
+        title = f"{stock_name} ({symbol}) {emoji} {change:+.2f}%"
+        body = f"最新: {price} | 成交: {int(last_row['volume'])}"
+        
+        # 发送给关注该股票的用户，使用 symbol 作为 tag 实现同一个股票通知覆盖
+        send_push_notification(
+            title=title, 
+            body=body, 
+            url=f"/dashboard?symbol={symbol}", 
+            related_symbol=symbol,
+            tag=f"price_update_{symbol}"
+        )
     
     # 注意: AI 预测逻辑已分离，请使用 --analyze 单独运行
 
@@ -265,7 +280,8 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None):
         title="🤖 AI 日报生成完毕",
         body=f"已完成 {len(targets)} 只股票的深度分析，点击查看今日重点情报。",
         url="/dashboard",
-        broadcast=True
+        broadcast=True,
+        tag="daily_report"
     )
 
 

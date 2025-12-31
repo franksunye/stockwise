@@ -29,7 +29,7 @@ export async function POST(request: Request) {
 
     try {
         const body = await request.json();
-        const { target_user_id, related_symbol, title, body: msgBody, url } = body;
+        const { target_user_id, related_symbol, title, body: msgBody, url, tag } = body;
 
         if (!title || !msgBody) {
             return NextResponse.json({ error: 'Missing title or body' }, { status: 400 });
@@ -92,7 +92,8 @@ export async function POST(request: Request) {
         const payload = JSON.stringify({
             title,
             body: msgBody,
-            url: url || '/dashboard'
+            url: url || '/dashboard',
+            tag: tag
         });
 
         const promises = subscriptions.map(async (sub) => {
