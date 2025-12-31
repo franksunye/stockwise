@@ -37,6 +37,40 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
   const [pushPermission, setPushPermission] = useState<NotificationPermission>('default');
   const [isSubscribing, setIsSubscribing] = useState(false);
   const [pushSupported, setPushSupported] = useState(false);
+  const [testingPush, setTestingPush] = useState(false);
+
+  // 测试推送通知
+  const handleTestPush = async () => {
+    if (testingPush) return;
+    setTestingPush(true);
+    setRedeemMsg(null);
+    
+    try {
+      // 检查 Service Worker 是否就绪
+      const registration = await navigator.serviceWorker.ready;
+      if (!registration) {
+        setRedeemMsg({ type: 'error', text: 'Service Worker 未就绪' });
+        return;
+      }
+      
+      // 通过 Service Worker 发送本地测试通知
+      await registration.showNotification('🔔 测试通知 - StockWise', {
+        body: `测试成功！当前时间: ${new Date().toLocaleTimeString('zh-CN')}`,
+        icon: '/icon-192.png',
+        badge: '/icon-192.png',
+        tag: 'test-notification',
+        data: { url: '/dashboard' }
+      });
+      
+      setRedeemMsg({ type: 'success', text: '测试通知已发送！' });
+      setTimeout(() => setRedeemMsg(null), 3000);
+    } catch (e) {
+      console.error('Test push failed:', e);
+      setRedeemMsg({ type: 'error', text: '测试失败: ' + (e instanceof Error ? e.message : String(e)) });
+    } finally {
+      setTestingPush(false);
+    }
+  };
 
   useEffect(() => {
     const initUser = async () => {
@@ -310,35 +344,54 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
 
               {/* Notification Switch (PWA Only) */}
               {pushSupported && (
-                 <div className="glass-card p-5 mb-8 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${pushPermission === 'granted' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-white/5 text-slate-400'}`}>
-                            <Bell size={20} />
+                 <div className="glass-card p-5 mb-8">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${pushPermission === 'granted' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-white/5 text-slate-400'}`}>
+                                <Bell size={20} />
+                            </div>
+                            <div>
+                                <h4 className="text-sm font-bold text-white">推送通知</h4>
+                                <p className="text-[10px] text-slate-500">获取股价异动与日报提醒</p>
+                            </div>
                         </div>
                         <div>
-                            <h4 className="text-sm font-bold text-white">推送通知</h4>
-                            <p className="text-[10px] text-slate-500">获取股价异动与日报提醒</p>
+                            {pushPermission === 'granted' ? (
+                                <button
+                                    onClick={handleEnableNotifications}
+                                    disabled={isSubscribing}
+                                    className="px-3 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20 hover:bg-emerald-500/20 transition-all"
+                                >
+                                    {isSubscribing ? '同步中...' : '已开启'}
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={handleEnableNotifications}
+                                    disabled={isSubscribing}
+                                    className="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg transition-all active:scale-95 disabled:opacity-50"
+                                >
+                                    {isSubscribing ? '开启中...' : '开启'}
+                                </button>
+                            )}
                         </div>
                     </div>
-                    <div>
-                        {pushPermission === 'granted' ? (
+                    
+                    {/* 测试推送按钮 - 仅当通知已授权时显示 */}
+                    {pushPermission === 'granted' && (
+                        <div className="mt-4 pt-4 border-t border-white/5">
                             <button
-                                onClick={handleEnableNotifications}
-                                disabled={isSubscribing}
-                                className="px-3 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20 hover:bg-emerald-500/20 transition-all"
+                                onClick={handleTestPush}
+                                disabled={testingPush}
+                                className="w-full py-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/20 text-amber-400 text-xs font-bold transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
                             >
-                                {isSubscribing ? '同步中...' : '已开启'}
+                                <Bell size={14} />
+                                {testingPush ? '发送中...' : '🧪 发送测试通知'}
                             </button>
-                        ) : (
-                            <button
-                                onClick={handleEnableNotifications}
-                                disabled={isSubscribing}
-                                className="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg transition-all active:scale-95 disabled:opacity-50"
-                            >
-                                {isSubscribing ? '开启中...' : '开启'}
-                            </button>
-                        )}
-                    </div>
+                            <p className="text-[10px] text-slate-600 text-center mt-2">
+                                点击后将收到一条本地测试通知
+                            </p>
+                        </div>
+                    )}
                  </div>
               )}
 
