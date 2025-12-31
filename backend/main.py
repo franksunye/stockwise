@@ -113,7 +113,6 @@ def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool =
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, records)
     conn.commit()
-    conn.close()
     
     # 7. 实时更新推送 (仅在盘中实时模式下触发)
     if is_realtime:
@@ -142,6 +141,8 @@ def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool =
             related_symbol=symbol,
             tag=f"price_update_{symbol}"
         )
+    
+    conn.close()
     
     # 注意: AI 预测逻辑已分离，请使用 --analyze 单独运行
 
@@ -503,6 +504,12 @@ def _analyze_stocks_for_date(conn, stocks: list, date_str: str) -> int:
             
         except Exception as e:
             logger.error(f"   ❌ {stock} 分析失败: {e}")
+
+        # 尝试验证前一天的预测 (利用当天数据验证 T-1)
+        try:
+             validate_previous_prediction(stock, row)
+        except Exception as e:
+             logger.warning(f"   ⚠️ {stock} 验证失败: {e}")
     
     return success_count
 
