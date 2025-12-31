@@ -128,6 +128,30 @@ def is_market_closed(date: datetime, market: str = "HK") -> bool:
     return date_str in get_holidays(market)
 
 
+def is_trading_day(date_str: str, symbol: str = None, market: str = None) -> bool:
+    """
+    判断指定日期是否为交易日
+    
+    Args:
+        date_str: 日期字符串，格式 "YYYY-MM-DD"
+        symbol: 股票代码（可选，用于自动推断市场）
+        market: 市场代码（可选，如果提供则优先使用）
+    
+    Returns:
+        bool: 是否为交易日
+    """
+    try:
+        date = datetime.strptime(date_str, '%Y-%m-%d')
+    except ValueError:
+        return False
+    
+    # 确定市场
+    if market is None:
+        market = get_market_from_symbol(symbol) if symbol else "CN"
+    
+    return not is_market_closed(date, market)
+
+
 def get_next_trading_day(from_date: datetime, market: str = "HK") -> datetime:
     """
     获取下一个交易日

@@ -1,11 +1,12 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, User, Crown, Zap, ShieldCheck, Loader2, ArrowRight, Share2, Check, RefreshCw, Key } from 'lucide-react';
+import { X, User, Crown, Zap, ShieldCheck, Loader2, ArrowRight, Share2, Check, RefreshCw, Key, Bell } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getWatchlist } from '@/lib/storage';
 import { getCurrentUser, restoreUserIdentity } from '@/lib/user';
 import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
+import { isPushSupported, subscribeUserToPush } from '@/lib/notifications';
 
 interface Props {
   isOpen: boolean;
@@ -28,7 +29,13 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
   const [restoreId, setRestoreId] = useState('');
   const [restoring, setRestoring] = useState(false);
   const [restoreMsg, setRestoreMsg] = useState<{type: 'success'|'error', text: string} | null>(null);
+  const [restoreMsg, setRestoreMsg] = useState<{type: 'success'|'error', text: string} | null>(null);
   const [redeemMsg, setRedeemMsg] = useState<{type: 'success'|'error', text: string} | null>(null);
+
+  // Notification State
+  const [pushPermission, setPushPermission] = useState<NotificationPermission>('default');
+  const [isSubscribing, setIsSubscribing] = useState(false);
+  const [pushSupported, setPushSupported] = useState(false);
 
   useEffect(() => {
     const initUser = async () => {
@@ -47,7 +54,56 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
       fetchProfile(user.userId, referredBy);
     };
     initUser();
+    initUser();
   }, [isOpen]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && isOpen) {
+        setPushSupported(isPushSupported());
+        if ('Notification' in window) {
+            setPushPermission(Notification.permission);
+        }
+    }
+  }, [isOpen]);
+
+  const handleEnableNotifications = async () => {
+    if (pushPermission === 'granted') return; // Already granted (maybe allow re-subscribe?)
+    
+    setIsSubscribing(true);
+    try {
+        const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+        if (!vapidKey) {
+             console.error('VAPID key not configured');
+             setRedeemMsg({ type: 'error', text: '系统配置错误' });
+             return;
+        }
+        
+        let perm = Notification.permission;
+        if (perm !== 'granted') {
+             perm = await Notification.requestPermission();
+             setPushPermission(perm);
+        }
+
+        if (perm === 'granted') {
+            const subscription = await subscribeUserToPush(vapidKey);
+            if (subscription && userId) {
+                // Send to backend
+                await fetch('/api/notifications/subscribe', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId, subscription })
+                });
+                setRedeemMsg({ type: 'success', text: '通知开启成功' });
+                setTimeout(() => setRedeemMsg(null), 3000);
+            }
+        }
+    } catch (e) {
+        console.error(e);
+        setRedeemMsg({ type: 'error', text: '开启失败' });
+    } finally {
+        setIsSubscribing(false);
+    }
+  };
 
   const fetchProfile = async (uid: string, referredBy: string | null = null) => {
       setLoading(true);
@@ -224,6 +280,34 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                    </p>
                 </div>
               </div>
+
+              {/* Notification Switch (PWA Only) */}
+              {pushSupported && (
+                 <div className="glass-card p-5 mb-8 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${pushPermission === 'granted' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-white/5 text-slate-400'}`}>
+                            <Bell size={20} />
+                        </div>
+                        <div>
+                            <h4 className="text-sm font-bold text-white">推送通知</h4>
+                            <p className="text-[10px] text-slate-500">获取股价异动与日报提醒</p>
+                        </div>
+                    </div>
+                    <div>
+                        {pushPermission === 'granted' ? (
+                            <span className="px-3 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20">已开启</span>
+                        ) : (
+                            <button
+                                onClick={handleEnableNotifications}
+                                disabled={isSubscribing}
+                                className="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg transition-all active:scale-95 disabled:opacity-50"
+                            >
+                                {isSubscribing ? '开启中...' : '开启'}
+                            </button>
+                        )}
+                    </div>
+                 </div>
+              )}
 
               {/* 激活码兑换区域 (Beta) - 仅在开关开启时显示 */}
               {MEMBERSHIP_CONFIG.switches.enableRedemption && tier === 'free' && (

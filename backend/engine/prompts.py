@@ -1,8 +1,15 @@
 import json
 from database import get_connection, get_stock_profile
 
-def prepare_stock_analysis_prompt(symbol: str):
-    """准备用于 LLM 分析的系统提示词和用户输入数据"""
+def prepare_stock_analysis_prompt(symbol: str, as_of_date: str = None):
+    """
+    准备用于 LLM 分析的系统提示词和用户输入数据
+    
+    Args:
+        symbol: 股票代码
+        as_of_date: 截止日期 (YYYY-MM-DD)，用于回填历史分析。
+                    如果为 None，则使用最新数据（正常每日分析场景）
+    """
     conn = get_connection()
     cursor = conn.cursor()
     
@@ -25,12 +32,20 @@ def prepare_stock_analysis_prompt(symbol: str):
 - **公司简介**: {desc_str}
 """
     
-    # 2. 获取最新行情和指标
-    cursor.execute(f"""
-        SELECT * FROM daily_prices 
-        WHERE symbol = ? 
-        ORDER BY date DESC LIMIT 1
-    """, (symbol,))
+    # 2. 获取行情和指标 (根据 as_of_date 决定是最新还是历史)
+    if as_of_date:
+        # 回填模式：获取指定日期的数据
+        cursor.execute("""
+            SELECT * FROM daily_prices 
+            WHERE symbol = ? AND date = ?
+        """, (symbol, as_of_date))
+    else:
+        # 正常模式：获取最新数据
+        cursor.execute("""
+            SELECT * FROM daily_prices 
+            WHERE symbol = ? 
+            ORDER BY date DESC LIMIT 1
+        """, (symbol,))
     
     # 获取列名映射
     columns = [description[0] for description in cursor.description]
@@ -38,27 +53,28 @@ def prepare_stock_analysis_prompt(symbol: str):
     
     if not row:
         conn.close()
-        return None, f"未找到股票 {symbol} 的行情数据"
+        return None, f"未找到股票 {symbol} 的行情数据" + (f" (日期: {as_of_date})" if as_of_date else "")
 
     data = dict(zip(columns, row))
+    analysis_date = data['date']  # 实际分析的日期
     
-    # 3. 获取历史行情
+    # 3. 获取历史行情 (以 analysis_date 为基准往前取)
     # 3.1 日线：获取近10日历史行情
     cursor.execute("""
         SELECT date, open, high, low, close, change_percent, volume
         FROM daily_prices 
-        WHERE symbol = ? 
+        WHERE symbol = ? AND date <= ?
         ORDER BY date DESC LIMIT 10
-    """, (symbol,))
+    """, (symbol, analysis_date))
     history_rows = cursor.fetchall()
 
-    # 3.2 周线：获取近12周数据
+    # 3.2 周线：获取近12周数据 (截止到 analysis_date)
     cursor.execute("""
         SELECT date, open, high, low, close, change_percent, volume, ma20, rsi
         FROM weekly_prices 
-        WHERE symbol = ? 
+        WHERE symbol = ? AND date <= ?
         ORDER BY date DESC LIMIT 12
-    """, (symbol,))
+    """, (symbol, analysis_date))
     weekly_rows = cursor.fetchall()
     
     weekly_detail = weekly_rows[:8] if weekly_rows else []
@@ -67,13 +83,13 @@ def prepare_stock_analysis_prompt(symbol: str):
         "low": min([w[3] for w in weekly_rows]) if weekly_rows else 0,
     }
 
-    # 3.3 月线：获取近12个月数据
+    # 3.3 月线：获取近12个月数据 (截止到 analysis_date)
     cursor.execute("""
         SELECT date, open, high, low, close, change_percent, volume, ma20, rsi
         FROM monthly_prices 
-        WHERE symbol = ? 
+        WHERE symbol = ? AND date <= ?
         ORDER BY date DESC LIMIT 12
-    """, (symbol,))
+    """, (symbol, analysis_date))
     monthly_rows = cursor.fetchall()
     
     monthly_detail = monthly_rows[:3] if monthly_rows else []
@@ -84,24 +100,24 @@ def prepare_stock_analysis_prompt(symbol: str):
         "rsi": monthly_rows[0][8] if monthly_rows else 0
     }
 
-    # 4. 获取历史 AI 预测记录
+    # 4. 获取历史 AI 预测记录 (截止到 analysis_date 之前)
     cursor.execute("""
         SELECT date, signal, confidence, ai_reasoning, validation_status, actual_change
         FROM ai_predictions 
-        WHERE symbol = ? AND validation_status != 'Pending'
+        WHERE symbol = ? AND validation_status != 'Pending' AND date < ?
         ORDER BY date DESC LIMIT 5
-    """, (symbol,))
+    """, (symbol, analysis_date))
     recent_predictions = cursor.fetchall()
     
-    # 5. 获取全局预测统计
+    # 5. 获取全局预测统计 (截止到 analysis_date 之前)
     cursor.execute("""
         SELECT 
             COUNT(*) as total,
             SUM(CASE WHEN validation_status = 'Correct' THEN 1 ELSE 0 END) as correct,
             SUM(CASE WHEN validation_status = 'Incorrect' THEN 1 ELSE 0 END) as incorrect
         FROM ai_predictions 
-        WHERE symbol = ? AND validation_status != 'Pending'
-    """, (symbol,))
+        WHERE symbol = ? AND validation_status != 'Pending' AND date < ?
+    """, (symbol, analysis_date))
     stats = cursor.fetchone()
     total_predictions, correct_count, incorrect_count = stats if stats else (0, 0, 0)
     accuracy_rate = (correct_count / total_predictions * 100) if total_predictions > 0 else 0

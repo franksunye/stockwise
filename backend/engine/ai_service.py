@@ -7,8 +7,16 @@ from config import LLM_CONFIG
 from .llm_client import get_llm_client
 from .prompts import prepare_stock_analysis_prompt
 
-def generate_ai_prediction(symbol: str, today_data: pd.Series, mode: str = 'ai'):
-    """根据今日行情生成对明日的 AI 预测 (T 预测 T+1)"""
+def generate_ai_prediction(symbol: str, today_data: pd.Series, mode: str = 'ai', as_of_date: str = None):
+    """
+    根据今日行情生成对明日的 AI 预测 (T 预测 T+1)
+    
+    Args:
+        symbol: 股票代码
+        today_data: 当日行情数据 (pandas Series)
+        mode: 分析模式 ('ai' 或 'rule')
+        as_of_date: 回填日期，传入此参数时会使用历史数据构建 prompt
+    """
     today_str = today_data.get('date')
     if not today_str:
         return None
@@ -17,7 +25,8 @@ def generate_ai_prediction(symbol: str, today_data: pd.Series, mode: str = 'ai')
     if LLM_CONFIG.get("enabled", False) and mode == 'ai':
         try:
             print(f"   🤖 正在为 {symbol} 调用本地 LLM 进行分析...")
-            system_prompt, user_prompt = prepare_stock_analysis_prompt(symbol)
+            # 传入 as_of_date 用于回填场景
+            system_prompt, user_prompt = prepare_stock_analysis_prompt(symbol, as_of_date=as_of_date)
             
             client = get_llm_client()
             ai_result = client.generate_stock_prediction(system_prompt, user_prompt, symbol=symbol)

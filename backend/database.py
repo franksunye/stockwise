@@ -324,6 +324,22 @@ def init_db():
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_llm_traces_status ON llm_traces(status)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_llm_traces_created ON llm_traces(created_at)")
 
+    # 8. Web Push 订阅表
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS push_subscriptions (
+            id TEXT PRIMARY KEY, 
+            user_id TEXT NOT NULL,
+            endpoint TEXT NOT NULL,
+            p256dh TEXT NOT NULL,
+            auth TEXT NOT NULL,
+            user_agent TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            last_used_at TIMESTAMP,
+            UNIQUE(user_id, endpoint)
+        )
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_push_subs_user_id ON push_subscriptions(user_id)")
+
     # 字段自动升级 (Schema Evolution) - 为了给旧数据库添加字段
     try:
         columns = get_table_columns(cursor, "ai_predictions")
