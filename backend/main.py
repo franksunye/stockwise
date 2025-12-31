@@ -23,7 +23,7 @@ from config import BEIJING_TZ
 from database import init_db, get_connection, get_stock_pool
 from fetchers import sync_stock_meta, fetch_stock_data, sync_profiles
 from utils import send_wecom_notification, format_volume
-from notifications import send_push_notification
+from notifications import send_push_notification, send_personalized_daily_report
 from engine.indicators import calculate_indicators
 from engine.ai_service import generate_ai_prediction
 from engine.validator import validate_previous_prediction
@@ -276,7 +276,21 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None):
     report += f"- **处理耗时**: {duration:.1f}s"
     send_wecom_notification(report)
     
-    # 发送 Web Push 广播 (所有订阅用户)
+    # 获取本次分析的基准日期 (取第一个分析成功的日期)
+    base_date = None
+    try:
+        # 尝试从最近一条预测中获取日期
+        cursor = conn.cursor()
+        cursor.execute("SELECT date FROM ai_predictions ORDER BY created_at DESC LIMIT 1")
+        row = cursor.fetchone()
+        if row:
+            base_date = row[0]
+        else:
+            base_date = datetime.now(BEIJING_TZ).strftime("%Y-%m-%d")
+    except:
+        base_date = datetime.now(BEIJING_TZ).strftime("%Y-%m-%d")
+
+    # 1. 发送 Web Push 广播 (作为兜底，或者给没有关注列表的用户)
     send_push_notification(
         title="🤖 AI 日报生成完毕",
         body=f"已完成 {len(targets)} 只股票的深度分析，点击查看今日重点情报。",
@@ -284,6 +298,14 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None):
         broadcast=True,
         tag="daily_report"
     )
+
+    # 2. 发送个性化推送 (针对性增强)
+    try:
+        # 稍微延迟一下，确保广播先到达（可选，但有助于体验）
+        time.sleep(1)
+        send_personalized_daily_report(targets, base_date)
+    except Exception as e:
+        logger.error(f"❌ 发送个性化推送失败: {e}")
 
 
 def run_ai_analysis_backfill(

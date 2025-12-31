@@ -46,5 +46,8 @@ jobs:
           LLM_BASE_URL: ${{ secrets.LLM_BASE_URL }}
           LLM_MODEL: ${{ secrets.LLM_MODEL }}
           LLM_ENABLED: ${{ secrets.LLM_ENABLED }}
+          WECOM_ROBOT_KEY: ${{ secrets.WECOM_ROBOT_KEY }}
+          INTERNAL_API_SECRET: ${{ secrets.INTERNAL_API_SECRET }}
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
         run: |
           python -u backend/main.py --analyze --market CN
