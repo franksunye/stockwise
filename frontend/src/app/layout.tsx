@@ -9,6 +9,25 @@ export const metadata: Metadata = {
     icon: "/logo.png",
     apple: "/logo.png",
   },
+  openGraph: {
+    title: "StockWise X | AI 炒股决策系统",
+    description: "极致简单的 AI 炒股决策工具，实时监控、深度复盘、智能决策",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "StockWise X - AI 驱动的炒股决策系统",
+      },
+    ],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "StockWise X | AI 炒股决策系统",
+    description: "极致简单的 AI 炒股决策工具",
+    images: ["/og-image.png"],
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
