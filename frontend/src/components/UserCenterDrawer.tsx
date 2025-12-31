@@ -73,9 +73,21 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
         if (!vapidKey) {
              console.error('VAPID key not configured');
              setRedeemMsg({ type: 'error', text: '系统配置错误' });
+             setIsSubscribing(false);
              return;
         }
         
+        // 1. 先注册 Service Worker
+        const { registerServiceWorker } = await import('@/lib/notifications');
+        const registration = await registerServiceWorker();
+        if (!registration) {
+            console.error('Service Worker registration failed');
+            setRedeemMsg({ type: 'error', text: 'Service Worker 注册失败' });
+            setIsSubscribing(false);
+            return;
+        }
+        
+        // 2. 请求通知权限
         let perm = Notification.permission;
         if (perm !== 'granted') {
              perm = await Notification.requestPermission();
@@ -83,20 +95,32 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
         }
 
         if (perm === 'granted') {
+            // 3. 订阅推送
             const subscription = await subscribeUserToPush(vapidKey);
             if (subscription && userId) {
-                // Send to backend
-                await fetch('/api/notifications/subscribe', {
+                // 4. 发送到后端保存
+                const response = await fetch('/api/notifications/subscribe', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ userId, subscription })
                 });
-                setRedeemMsg({ type: 'success', text: '通知开启成功' });
-                setTimeout(() => setRedeemMsg(null), 3000);
+                
+                if (response.ok) {
+                    setRedeemMsg({ type: 'success', text: '通知开启成功' });
+                    setTimeout(() => setRedeemMsg(null), 3000);
+                } else {
+                    const data = await response.json();
+                    console.error('Subscribe API error:', data);
+                    setRedeemMsg({ type: 'error', text: '保存订阅失败' });
+                }
+            } else {
+                setRedeemMsg({ type: 'error', text: '获取订阅失败' });
             }
+        } else {
+            setRedeemMsg({ type: 'error', text: '需要授权通知权限' });
         }
     } catch (e) {
-        console.error(e);
+        console.error('Notification setup error:', e);
         setRedeemMsg({ type: 'error', text: '开启失败' });
     } finally {
         setIsSubscribing(false);
