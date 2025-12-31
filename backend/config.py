@@ -52,11 +52,43 @@ else:
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 WECOM_ROBOT_KEY = os.getenv("WECOM_ROBOT_KEY")
 
-# 本地 LLM 代理配置
-LLM_CONFIG = {
-    "base_url": os.getenv("LLM_BASE_URL", "http://127.0.0.1:8045/v1"), # 默认保留本地 URL 方便开发
-    "api_key": os.getenv("LLM_API_KEY"), # ❌ 移除硬编码 Key，必须从环境变量获取
-    "model": os.getenv("LLM_MODEL", "gpt-3.5-turbo"),
-    "enabled": os.getenv("LLM_ENABLED", "true").lower() == "true",
+# 本地/云端 LLM 配置
+LLM_PROVIDER = os.getenv("LLM_PROVIDER", "openai").lower() # gemini, deepseek, openai, custom
+
+# 预定义默认值
+DEFAULTS = {
+    "deepseek": {
+        "api_key": os.getenv("DEEPSEEK_API_KEY"),
+        "base_url": os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com/v1"),
+        "model": os.getenv("DEEPSEEK_MODEL", "deepseek-chat"),
+    },
+    "gemini": {
+        "api_key": os.getenv("GEMINI_API_KEY"),
+        "model": os.getenv("GEMINI_MODEL", "gemini-pro"),
+    }
 }
+
+LLM_CONFIG = {
+    "provider": LLM_PROVIDER,
+    "enabled": os.getenv("LLM_ENABLED", "true").lower() == "true",
+    
+    # 基础配置 (兼容旧版环境变量，如果没有指定提供商则使用这些)
+    "api_key": os.getenv("LLM_API_KEY"),
+    "base_url": os.getenv("LLM_BASE_URL", "http://127.0.0.1:8045/v1"),
+    "model": os.getenv("LLM_MODEL", "gpt-3.5-turbo"),
+    
+    # 模块化配置
+    "deepseek": DEFAULTS["deepseek"],
+    "gemini": DEFAULTS["gemini"]
+}
+
+# 动态覆盖基础配置 (如果指定了提供商且有对应配置)
+if LLM_PROVIDER in DEFAULTS:
+    provider_cfg = DEFAULTS[LLM_PROVIDER]
+    if provider_cfg.get("api_key"):
+        LLM_CONFIG["api_key"] = provider_cfg["api_key"]
+    if provider_cfg.get("model"):
+        LLM_CONFIG["model"] = provider_cfg["model"]
+    if provider_cfg.get("base_url"):
+        LLM_CONFIG["base_url"] = provider_cfg["base_url"]
 

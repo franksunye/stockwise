@@ -16,6 +16,7 @@ class LLMClient:
     
     def __init__(
         self,
+        provider: str = None,
         base_url: str = None,
         api_key: str = None,
         model: str = None,
@@ -23,17 +24,37 @@ class LLMClient:
     ):
         """
         初始化 LLM 客户端
-        
-        Args:
-            base_url: API 基础地址，默认使用配置
-            api_key: API 密钥，默认使用配置
-            model: 模型名称，默认使用配置
-            timeout: 请求超时时间（秒）
         """
-        self.base_url = base_url or LLM_CONFIG.get("base_url", "http://127.0.0.1:8045/v1")
-        self.api_key = api_key or LLM_CONFIG.get("api_key", "")
-        self.model = model or LLM_CONFIG.get("model", "gpt-3.5-turbo")
+        self.provider = provider or LLM_CONFIG.get("provider", "openai")
         self.timeout = timeout
+        
+        # 根据提供商加载默认配置
+        if self.provider == "deepseek":
+            ds_config = LLM_CONFIG.get("deepseek", {})
+            self.base_url = base_url or ds_config.get("base_url") or "https://api.deepseek.com/v1"
+            self.api_key = api_key or ds_config.get("api_key") or LLM_CONFIG.get("api_key")
+            self.model = model or ds_config.get("model") or "deepseek-chat"
+        elif self.provider == "gemini":
+            gm_config = LLM_CONFIG.get("gemini", {})
+            self.api_key = api_key or gm_config.get("api_key") or LLM_CONFIG.get("api_key")
+            self.model = model or gm_config.get("model") or "gemini-pro"
+            self.base_url = base_url # Gemini native usually doesn't use base_url in standard requests
+        else: # openai, custom, or generic
+            self.base_url = base_url or LLM_CONFIG.get("base_url", "http://127.0.0.1:8045/v1")
+            self.api_key = api_key or LLM_CONFIG.get("api_key", "")
+            self.model = model or LLM_CONFIG.get("model", "gpt-3.5-turbo")
+
+        self.timeout = timeout
+        
+        # Gemini Native Client 缓存
+        self._gemini_model = None
+        if self.provider == "gemini" and self.api_key:
+            try:
+                import google.generativeai as genai
+                genai.configure(api_key=self.api_key)
+                self._gemini_model = genai.GenerativeModel(self.model)
+            except Exception as e:
+                print(f"⚠️ 初始化 Gemini SDK 失败: {e}")
         
     def is_available(self) -> bool:
         """检查 LLM 服务是否可用"""
@@ -54,24 +75,24 @@ class LLMClient:
         temperature: float = 0.7,
         max_tokens: int = 4096
     ) -> Tuple[Optional[str], Dict[str, Any]]:
-        """
-        发送聊天请求
-        
-        Args:
-            messages: 消息列表，格式 [{"role": "user/system/assistant", "content": "..."}]
-            model: 使用的模型（可覆盖默认）
-            temperature: 生成温度
-            max_tokens: 最大输出 token 数
-            
-        Returns:
-            Tuple: (LLM 返回的文本内容, 元数据 dict)
-            元数据包含: input_tokens, output_tokens, total_tokens, latency_ms, error
-        """
+        """发送聊天请求"""
+        if self.provider == "gemini" and self._gemini_model:
+            return self._chat_gemini(messages, temperature, max_tokens)
+        else:
+            return self._chat_openai_compatible(messages, model, temperature, max_tokens)
+
+    def _chat_openai_compatible(
+        self,
+        messages: list,
+        model: str = None,
+        temperature: float = 0.7,
+        max_tokens: int = 4096
+    ) -> Tuple[Optional[str], Dict[str, Any]]:
         payload = {
             "model": model or self.model,
             "messages": messages,
             "temperature": temperature,
-            "max_tokens": 4000, # 确保有足够的长度生成完整的 JSON
+            "max_tokens": 4000,
         }
         
         headers = {
@@ -79,29 +100,16 @@ class LLMClient:
             "Authorization": f"Bearer {self.api_key}"
         }
         
-        meta = {
-            "input_tokens": 0,
-            "output_tokens": 0,
-            "total_tokens": 0,
-            "latency_ms": 0,
-            "error": None
-        }
+        meta = {"input_tokens": 0, "output_tokens": 0, "total_tokens": 0, "latency_ms": 0, "error": None}
         
         try:
             start_time = time.time()
-            response = requests.post(
-                f"{self.base_url}/chat/completions",
-                headers=headers,
-                json=payload,
-                timeout=self.timeout
-            )
+            response = requests.post(f"{self.base_url}/chat/completions", headers=headers, json=payload, timeout=self.timeout)
             elapsed = time.time() - start_time
             meta["latency_ms"] = int(elapsed * 1000)
             
             if response.status_code == 200:
                 data = response.json()
-                
-                # 提取 Token 使用量 (如果 API 返回)
                 usage = data.get('usage', {})
                 if usage:
                     meta["input_tokens"] = usage.get('prompt_tokens', 0)
@@ -110,8 +118,6 @@ class LLMClient:
                 
                 if data.get('choices'):
                     content = data['choices'][0].get('message', {}).get('content')
-                    
-                    # 如果 API 没有返回 token 数，使用估算
                     if not meta["input_tokens"]:
                         input_text = " ".join([m.get('content', '') for m in messages])
                         meta["input_tokens"] = estimate_tokens(input_text)
@@ -120,28 +126,86 @@ class LLMClient:
                     if not meta["total_tokens"]:
                         meta["total_tokens"] = meta["input_tokens"] + meta["output_tokens"]
                     
-                    print(f"   🤖 LLM 响应成功 ({elapsed:.1f}s, {meta['total_tokens']} tokens)")
+                    print(f"   🤖 {self.provider.upper()} 响应成功 ({elapsed:.1f}s, {meta['total_tokens']} tokens)")
                     return content, meta
                 else:
                     meta["error"] = f"响应格式异常: {data}"
-                    print(f"   ⚠️ LLM 响应格式异常: {data}")
                     return None, meta
             else:
-                meta["error"] = f"HTTP {response.status_code}"
-                print(f"   ❌ LLM 请求失败: HTTP {response.status_code}")
+                meta["error"] = f"HTTP {response.status_code}: {response.text[:200]}"
+                print(f"   ❌ {self.provider.upper()} 请求失败: HTTP {response.status_code}")
                 return None, meta
-                
-        except requests.exceptions.Timeout:
-            meta["error"] = f"请求超时 ({self.timeout}s)"
-            print(f"   ❌ LLM 请求超时 ({self.timeout}s)")
-            return None, meta
-        except requests.exceptions.ConnectionError:
-            meta["error"] = f"无法连接 LLM 服务: {self.base_url}"
-            print(f"   ❌ 无法连接 LLM 服务: {self.base_url}")
-            return None, meta
         except Exception as e:
             meta["error"] = str(e)
-            print(f"   ❌ LLM 请求异常: {e}")
+            print(f"   ❌ {self.provider.upper()} 请求异常: {e}")
+            return None, meta
+
+    def _chat_gemini(
+        self, 
+        messages: list, 
+        temperature: float = 0.7, 
+        max_tokens: int = 4096
+    ) -> Tuple[Optional[str], Dict[str, Any]]:
+        meta = {"input_tokens": 0, "output_tokens": 0, "total_tokens": 0, "latency_ms": 0, "error": None}
+        try:
+            # 格式化 messages 为 Gemini 格式
+            import google.generativeai as genai
+            
+            # 提取 system 及 history
+            system_msg = ""
+            history = []
+            for m in messages:
+                if m["role"] == "system":
+                    system_msg = m["content"]
+                else:
+                    history.append({"role": "user" if m["role"] == "user" else "model", "parts": [m["content"]]})
+            
+            # Gemini 1.5 需要 system_instruction
+            if system_msg:
+                model_inst = genai.GenerativeModel(self.model, system_instruction=system_msg)
+            else:
+                model_inst = self._gemini_model
+
+            start_time = time.time()
+            # 最后一个作为 prompt，其余作为 history
+            last_user_msg = history.pop(-1)
+            chat = model_inst.start_chat(history=history or None)
+            
+            response = chat.send_message(
+                last_user_msg["parts"][0],
+                generation_config=genai.types.GenerationConfig(
+                    temperature=temperature,
+                    max_output_tokens=max_tokens,
+                )
+            )
+            elapsed = time.time() - start_time
+            meta["latency_ms"] = int(elapsed * 1000)
+            
+            content = response.text
+            
+            # 提取 Token 使用情况 (Gemini 1.5+ SDK)
+            try:
+                usage = response.usage_metadata
+                meta["input_tokens"] = usage.prompt_token_count
+                meta["output_tokens"] = usage.candidates_token_count
+                meta["total_tokens"] = usage.total_token_count
+            except:
+                # 备选方案: 使用 SDK 计算 (稍微耗时)
+                try:
+                    meta["input_tokens"] = model_inst.count_tokens(messages).total_tokens
+                    meta["output_tokens"] = model_inst.count_tokens(content).total_tokens
+                    meta["total_tokens"] = meta["input_tokens"] + meta["output_tokens"]
+                except:
+                    # 最后退路: 字符估算
+                    meta["input_tokens"] = estimate_tokens(str(messages))
+                    meta["output_tokens"] = estimate_tokens(content)
+                    meta["total_tokens"] = meta["input_tokens"] + meta["output_tokens"]
+            
+            print(f"   🤖 GEMINI 响应成功 ({elapsed:.1f}s, {meta['total_tokens']} tokens)")
+            return content, meta
+        except Exception as e:
+            meta["error"] = str(e)
+            print(f"   ❌ GEMINI 请求异常: {e}")
             return None, meta
     
     def generate_stock_prediction(
