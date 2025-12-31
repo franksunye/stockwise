@@ -60,15 +60,17 @@ def send_personalized_daily_report(targets, date_str):
     
     logger.info(f"发送个性化推送给关注了 {len(targets)} 只股票的用户...")
     
-    # 查找所有关注了这些股票的用户及其关注的股票详情
+    # 查找所有关注了这些股票且已订阅推送的用户及其关注的股票详情
     # 使用符号列表构造查询
+    # 添加 JOIN push_subscriptions 确保只向已订阅的用户发送推送
     placeholders = ','.join(['?'] * len(targets))
     query = f"""
-    SELECT u.user_id, w.symbol, sm.name, ap.signal
+    SELECT DISTINCT u.user_id, w.symbol, sm.name, ap.signal
     FROM users u
     JOIN user_watchlist w ON u.user_id = w.user_id
     JOIN stock_meta sm ON w.symbol = sm.symbol
     JOIN ai_predictions ap ON w.symbol = ap.symbol AND ap.date = ?
+    JOIN push_subscriptions ps ON u.user_id = ps.user_id
     WHERE w.symbol IN ({placeholders})
     """
     params = [date_str] + targets
@@ -83,7 +85,7 @@ def send_personalized_daily_report(targets, date_str):
         return
     
     if not rows:
-        logger.info("ℹ️ 没有发现需要个性化推送的活跃关注用户")
+        logger.info("ℹ️ 没有发现需要个性化推送的已订阅用户")
         return
 
     # 按用户分组
