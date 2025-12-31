@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X as CloseIcon, Briefcase, Eye, User, Check } from 'lucide-react';
 import { StockData, AIPrediction } from '@/lib/types';
 import { getRule, saveRule } from '@/lib/storage';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 interface StockProfileProps {
   stock: StockData | null;
@@ -12,23 +12,41 @@ interface StockProfileProps {
   onClose: () => void;
 }
 
+// 简单的内存缓存，避免短时间内重复请求
+const historyCache: Record<string, { data: AIPrediction[]; timestamp: number }> = {};
+const CACHE_TTL = 30 * 1000; // 30秒缓存
+
 export function StockProfile({ stock, isOpen, onClose }: StockProfileProps) {
   const [position, setPosition] = useState<'holding' | 'empty' | 'none'>('none');
   const [fullHistory, setFullHistory] = useState<AIPrediction[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
+  const lastSymbolRef = useRef<string | null>(null);
 
-  // 打开档案时请求完整的30条历史数据
+  // 打开档案时请求完整的30条历史数据（带缓存）
   useEffect(() => {
     if (isOpen && stock) {
       const rule = getRule(stock.symbol);
       setPosition(rule?.position || 'none');
       
-      // 请求完整历史数据用于精确计算胜率
+      // 检查缓存
+      const cached = historyCache[stock.symbol];
+      const now = Date.now();
+      
+      if (cached && (now - cached.timestamp) < CACHE_TTL) {
+        // 缓存有效，直接使用
+        setFullHistory(cached.data);
+        return;
+      }
+      
+      // 缓存无效或不存在，请求新数据
       setLoadingHistory(true);
       fetch(`/api/predictions?symbol=${stock.symbol}&limit=30`, { cache: 'no-store' })
         .then(r => r.json())
         .then(data => {
-          setFullHistory(data.predictions || []);
+          const predictions = data.predictions || [];
+          setFullHistory(predictions);
+          // 更新缓存
+          historyCache[stock.symbol] = { data: predictions, timestamp: Date.now() };
         })
         .catch(console.error)
         .finally(() => setLoadingHistory(false));
