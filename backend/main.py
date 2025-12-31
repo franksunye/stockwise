@@ -293,7 +293,7 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None):
     # 1. 发送 Web Push 广播 (作为兜底，或者给没有关注列表的用户)
     send_push_notification(
         title="🤖 AI 日报生成完毕",
-        body=f"已完成 {len(targets)} 只股票的深度分析，点击查看今日重点情报。",
+        body="今日深度分析报告已全量更新，点击查看实战行动建议。",
         url="/dashboard",
         broadcast=True,
         tag="daily_report"

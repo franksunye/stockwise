@@ -89,15 +89,19 @@ def send_personalized_daily_report(targets, date_str):
     # 按用户分组
     user_data = {}
     for row in rows:
-        # 兼容 tuple 和 Row 对象
-        if isinstance(row, tuple):
-            uid, symbol, name, signal = row[0], row[1], row[2], row[3]
-        else:
-            uid, symbol, name, signal = row.user_id, row.symbol, row.name, row.signal
+        # 统一使用索引访问，兼容 tuple 和 Row 对象 (libsql, sqlite3)
+        try:
+            uid = row[0]
+            symbol = row[1]
+            name = row[2]
+            signal = row[3]
             
-        if uid not in user_data:
-            user_data[uid] = []
-        user_data[uid].append({'symbol': symbol, 'name': name, 'signal': signal})
+            if uid not in user_data:
+                user_data[uid] = []
+            user_data[uid].append({'symbol': symbol, 'name': name, 'signal': signal})
+        except Exception as e:
+            logger.error(f"⚠️ 处理推送行数据失败: {e}, row: {row}")
+            continue
         
     logger.info(f"准备向 {len(user_data)} 位用户发送个性化日报...")
     
@@ -106,8 +110,8 @@ def send_personalized_daily_report(targets, date_str):
         if count == 0: continue
         
         # 挑选一个表现最突出的（看多 > 观望 > 看空）
-        bullish = [s for s in stocks if s['signal'] == 'Bullish']
-        neutral = [s for s in stocks if s['signal'] == 'Neutral']
+        bullish = [s for s in stocks if s['signal'] == 'Long']
+        neutral = [s for s in stocks if s['signal'] == 'Side']
         
         if bullish:
             top_stock = bullish[0]['name']
