@@ -1,8 +1,9 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Zap, ShieldCheck, BarChart3, ChevronRight } from 'lucide-react';
+import { ShieldCheck, BarChart3, ChevronRight, Zap } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function LandingPage() {
   return (
@@ -16,9 +17,13 @@ export default function LandingPage() {
       {/* 顶部导航 */}
       <nav className="relative z-50 flex items-center justify-between px-8 py-8 max-w-7xl mx-auto">
         <div className="flex items-center gap-2">
-          <div className="w-10 h-10 rounded-xl bg-indigo-500 flex items-center justify-center">
-            <Zap className="w-6 h-6 text-white fill-white" />
-          </div>
+          <Image 
+            src="/logo.png" 
+            alt="StockWise Logo" 
+            width={40} 
+            height={40} 
+            className="rounded-xl"
+          />
           <span className="text-xl font-black italic tracking-tighter">STOCKWISE <span className="text-indigo-500">X</span></span>
         </div>
         <div className="hidden md:flex items-center gap-8 text-sm font-bold text-slate-400">
@@ -90,10 +95,14 @@ export default function LandingPage() {
       <footer className="relative z-10 border-t border-white/5 py-20 px-8">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-10">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center">
-              <Zap className="w-4 h-4 text-indigo-400" />
-            </div>
-            <span className="text-sm font-black italic tracking-tighter italic">STOCKWISE X</span>
+            <Image 
+              src="/logo.png" 
+              alt="StockWise Logo" 
+              width={32} 
+              height={32} 
+              className="rounded-lg"
+            />
+            <span className="text-sm font-black italic tracking-tighter">STOCKWISE X</span>
           </div>
           <p className="text-xs text-slate-600 font-bold uppercase tracking-widest">© 2025 STOCKWISE TECHNOLOGY. ALL RIGHTS RESERVED.</p>
           <div className="flex gap-6 text-xs font-bold text-slate-500">
