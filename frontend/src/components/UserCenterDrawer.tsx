@@ -65,7 +65,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
   }, [isOpen]);
 
   const handleEnableNotifications = async () => {
-    if (pushPermission === 'granted') return; // Already granted (maybe allow re-subscribe?)
+    // 允许重新订阅，即使已授权
     
     setIsSubscribing(true);
     try {
@@ -317,7 +317,13 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                     </div>
                     <div>
                         {pushPermission === 'granted' ? (
-                            <span className="px-3 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20">已开启</span>
+                            <button
+                                onClick={handleEnableNotifications}
+                                disabled={isSubscribing}
+                                className="px-3 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20 hover:bg-emerald-500/20 transition-all"
+                            >
+                                {isSubscribing ? '同步中...' : '已开启'}
+                            </button>
                         ) : (
                             <button
                                 onClick={handleEnableNotifications}
