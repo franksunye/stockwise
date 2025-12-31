@@ -120,3 +120,36 @@ body {
 ::-webkit-scrollbar {
   display: none;
 }
+
+/* 🚀 Android 性能优化：渐进式降级方案 */
+body.is-android {
+  /* 1. 全局背景优化：减少动态渐变计算 */
+  background-attachment: scroll; 
+  background-image: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #050508 100%);
+}
+
+body.is-android .glass-card {
+  /* 2. 核心优化：移除 Android 最吃力的毛玻璃效果 */
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  /* 补偿：稍微提高背景不透明度，并通过边框增强质感 */
+  background: rgba(15, 15, 23, 0.95) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+body.is-android .hero-glow,
+body.is-android [class*="blur-"],
+body.is-android [class*="backdrop-blur"] {
+  /* 3. 视觉降级：超大范围的模糊在 Android 上是灾难 */
+  filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+body.is-android .animate-pulse,
+body.is-android .animate-ping,
+body.is-android .animate-bounce {
+  /* 4. 动画降级：减少持续性的 CPU 占用 */
+  animation-duration: 3s; 
+}

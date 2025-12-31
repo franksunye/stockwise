@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Zap, ShieldCheck, Target, Clock } from 'lucide-react';
 import { getCurrentUser } from '@/lib/user';
+import { shouldEnableHighPerformance } from '@/lib/device-utils';
 
 // Fallback data for the reveal step
 const DEFAULT_REVEAL_DATA = { 
@@ -23,6 +24,7 @@ interface RecommendedStock {
 }
 
 export function OnboardingOverlay() { 
+  const isHighPerformance = shouldEnableHighPerformance();
   const [isVisible, setIsVisible] = useState(false);
   const [step, setStep] = useState(1);
   const [persona, setPersona] = useState<string | null>(null);
@@ -148,8 +150,18 @@ export function OnboardingOverlay() {
     <div className="fixed inset-0 z-[999] bg-black text-white overflow-hidden flex flex-col items-center justify-center">
       {/* Background Ambience */}
       <div className="absolute inset-0 bg-[#050508]">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-900/20 blur-[120px] rounded-full" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-900/20 blur-[120px] rounded-full" />
+        {!isHighPerformance && (
+          <>
+            <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-900/20 blur-[120px] rounded-full" />
+            <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-900/20 blur-[120px] rounded-full" />
+          </>
+        )}
+        {isHighPerformance && (
+          <>
+            <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-indigo-900/10 via-black to-purple-900/10" />
+            <div className="absolute top-[-5%] left-[-5%] w-[40%] h-[40%] bg-indigo-900/10 rounded-full opacity-30" />
+          </>
+        )}
       </div>
 
       <div className="relative z-10 w-full max-w-md px-6 flex flex-col h-full max-h-[800px]">
@@ -174,7 +186,7 @@ export function OnboardingOverlay() {
                         className="text-center space-y-8"
                     >
                         <div className="relative inline-block">
-                             <div className="absolute inset-0 bg-indigo-500 blur-[40px] opacity-40 rounded-full" />
+                             {!isHighPerformance && <div className="absolute inset-0 bg-indigo-500 blur-[40px] opacity-40 rounded-full" />}
                              <Zap className="w-24 h-24 text-white relative z-10" />
                         </div>
                         <div className="space-y-4">
@@ -335,9 +347,11 @@ export function OnboardingOverlay() {
                         {/* HERO CARD UI */}
                         <div className="bg-[#1a1a24] border border-white/10 rounded-3xl p-6 shadow-2xl relative overflow-hidden group">
                            {/* Decorative Glow */}
-                           <div className={`absolute top-0 right-0 w-64 h-64 bg-gradient-to-br opacity-20 blur-[60px] rounded-full pointer-events-none ${
-                               revealData.signal === 'Long' ? 'from-emerald-500' : 'from-rose-500'
-                           }`} />
+                           {!isHighPerformance && (
+                              <div className={`absolute top-0 right-0 w-64 h-64 bg-gradient-to-br opacity-20 blur-[60px] rounded-full pointer-events-none ${
+                                  revealData.signal === 'Long' ? 'from-emerald-500' : 'from-rose-500'
+                              }`} />
+                           )}
 
                            <div className="relative z-10 space-y-6">
                                 {/* Header */}
@@ -419,7 +433,7 @@ export function OnboardingOverlay() {
                         className="text-center space-y-8"
                     >
                          <div className="relative inline-block">
-                             <div className="absolute inset-0 bg-emerald-500 blur-[40px] opacity-40 rounded-full" />
+                             {!isHighPerformance && <div className="absolute inset-0 bg-emerald-500 blur-[40px] opacity-40 rounded-full" />}
                              <div className="w-24 h-24 bg-emerald-500 rounded-full flex items-center justify-center relative z-10 mx-auto shadow-2xl">
                                  <Check className="w-12 h-12 text-white" />
                              </div>

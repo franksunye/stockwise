@@ -17,6 +17,7 @@ import {
   Hash
 } from 'lucide-react';
 import { TacticalData } from '@/lib/types';
+import { shouldEnableHighPerformance } from '@/lib/device-utils';
 
 interface TacticalBriefDrawerProps {
   isOpen: boolean;
@@ -48,6 +49,7 @@ const getStepConfig = (step: string) => {
 export function TacticalBriefDrawer({ 
   isOpen, onClose, data, userPos, tier
 }: TacticalBriefDrawerProps) {
+  const isHighPerformance = shouldEnableHighPerformance();
   const [isExpanded, setIsExpanded] = useState(false);
   const isFree = tier === 'free';
   
@@ -58,7 +60,7 @@ export function TacticalBriefDrawer({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[200] flex items-end justify-center bg-black/60 backdrop-blur-sm pointer-events-auto overflow-hidden">
+        <div className={`fixed inset-0 z-[200] flex items-end justify-center bg-black/60 pointer-events-auto overflow-hidden ${!isHighPerformance ? 'backdrop-blur-sm' : ''}`}>
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -70,13 +72,13 @@ export function TacticalBriefDrawer({
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
-            drag="y"
-            dragConstraints={{ top: 0, bottom: 0 }}
-            dragElastic={{ top: 0.1, bottom: 0.6 }}
             onDragEnd={(_, info) => {
               if (info.offset.y > 150) onClose();
             }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            transition={isHighPerformance 
+              ? { type: 'tween', ease: 'easeOut', duration: 0.25 }
+              : { type: 'spring', damping: 25, stiffness: 200 }
+            }
             className="w-full max-w-md bg-[#0a0a0f] border-t border-white/10 rounded-t-[32px] shadow-[0_-20px_50px_rgba(0,0,0,0.5)] overflow-hidden pointer-events-auto z-10"
           >
             {/* 顶部视觉拉手 */}
@@ -166,7 +168,7 @@ export function TacticalBriefDrawer({
                     <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
                       <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> 重点情报 (Last 48h)
                     </h3>
-                    <div className={`p-4 rounded-2xl bg-gradient-to-br from-emerald-500/[0.05] to-transparent border border-emerald-500/10 space-y-3 ${isFree ? 'blur-md select-none pointer-events-none opacity-40' : ''}`}>
+                    <div className={`p-4 rounded-2xl bg-gradient-to-br from-emerald-500/[0.05] to-transparent border border-emerald-500/10 space-y-3 ${isFree ? (isHighPerformance ? 'opacity-20 grayscale brightness-50 select-none pointer-events-none' : 'blur-md select-none pointer-events-none opacity-40') : ''}`}>
                       {data.news_analysis.map((news, idx) => (
                          <div key={idx} className="flex gap-3 items-start">
                             <span className="text-slate-500 mt-0.5"><Newspaper size={12} /></span>
@@ -176,7 +178,7 @@ export function TacticalBriefDrawer({
                     </div>
                     {isFree && (
                         <div className="absolute inset-x-0 bottom-4 flex justify-center z-10">
-                            <span className="px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-[10px] font-bold text-white uppercase tracking-wider">升级 Pro 解锁情报</span>
+                            <span className={`px-3 py-1 rounded-full border border-white/10 text-[10px] font-bold text-white uppercase tracking-wider ${!isHighPerformance ? 'bg-white/10 backdrop-blur-md' : 'bg-slate-800'}`}>升级 Pro 解锁情报</span>
                         </div>
                     )}
                   </section>
@@ -202,7 +204,7 @@ export function TacticalBriefDrawer({
                     </button>
                     {isFree && (
                         <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="px-4 py-2 rounded-2xl bg-indigo-500/20 backdrop-blur-xl border border-indigo-500/30 text-[10px] font-black italic text-indigo-400 uppercase tracking-widest shadow-2xl">
+                            <div className={`px-4 py-2 rounded-2xl border border-indigo-500/30 text-[10px] font-black italic text-indigo-400 uppercase tracking-widest shadow-2xl ${!isHighPerformance ? 'bg-indigo-500/20 backdrop-blur-xl' : 'bg-[#0f0f18]'}`}>
                                 UPGRADE TO PRO TO UNLOCK REASONING
                             </div>
                         </div>

@@ -7,6 +7,7 @@ import { getWatchlist } from '@/lib/storage';
 import { getCurrentUser, restoreUserIdentity } from '@/lib/user';
 import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
 import { isPushSupported, subscribeUserToPush } from '@/lib/notifications';
+import { shouldEnableHighPerformance } from '@/lib/device-utils';
 
 interface Props {
   isOpen: boolean;
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export function UserCenterDrawer({ isOpen, onClose }: Props) {
+  const isHighPerformance = shouldEnableHighPerformance();
   const [watchlistCount, setWatchlistCount] = useState(0);
   const [userId, setUserId] = useState<string>('');
   const [tier, setTier] = useState<'free' | 'pro'>('free');
@@ -193,7 +195,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[200] flex items-end justify-center bg-black/60 backdrop-blur-sm pointer-events-auto overflow-hidden">
+        <div className={`fixed inset-0 z-[200] flex items-end justify-center bg-black/60 pointer-events-auto overflow-hidden ${!isHighPerformance ? 'backdrop-blur-sm' : ''}`}>
           <motion.div 
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
@@ -204,7 +206,10 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
             onDragEnd={(_, info) => {
               if (info.offset.y > 150) onClose();
             }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            transition={isHighPerformance 
+              ? { type: 'tween', ease: 'easeOut', duration: 0.25 }
+              : { type: 'spring', damping: 25, stiffness: 200 }
+            }
             className="w-full max-w-md bg-[#0a0a0f] border-t border-white/10 rounded-t-[32px] shadow-[0_-20px_50px_rgba(0,0,0,0.5)] overflow-hidden pointer-events-auto"
           >
             {/* 视觉拉手 */}

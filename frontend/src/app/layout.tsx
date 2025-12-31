@@ -21,6 +21,7 @@ export const viewport: Viewport = {
 };
 
 import { ReferralTracker } from "@/components/ReferralTracker";
+import { PerformanceOptimizer } from "@/components/PerformanceOptimizer";
 
 export default function RootLayout({
   children,
@@ -30,6 +31,7 @@ export default function RootLayout({
   return (
     <html lang="zh-CN">
       <body className="antialiased">
+        <PerformanceOptimizer />
         <ReferralTracker />
         {children}
       </body>
