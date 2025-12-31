@@ -29,7 +29,6 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
   const [restoreId, setRestoreId] = useState('');
   const [restoring, setRestoring] = useState(false);
   const [restoreMsg, setRestoreMsg] = useState<{type: 'success'|'error', text: string} | null>(null);
-  const [restoreMsg, setRestoreMsg] = useState<{type: 'success'|'error', text: string} | null>(null);
   const [redeemMsg, setRedeemMsg] = useState<{type: 'success'|'error', text: string} | null>(null);
 
   // Notification State
@@ -53,7 +52,6 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
       const referredBy = localStorage.getItem('STOCKWISE_REFERRED_BY');
       fetchProfile(user.userId, referredBy);
     };
-    initUser();
     initUser();
   }, [isOpen]);
 
