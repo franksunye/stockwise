@@ -6,6 +6,7 @@ from trading_calendar import get_next_trading_day_str
 from config import LLM_CONFIG
 from .llm_client import get_llm_client
 from .prompts import prepare_stock_analysis_prompt
+from logger import logger
 
 def generate_ai_prediction(symbol: str, today_data: pd.Series, mode: str = 'ai', as_of_date: str = None):
     """
@@ -22,9 +23,10 @@ def generate_ai_prediction(symbol: str, today_data: pd.Series, mode: str = 'ai',
         return None
 
     # 1. 尝试使用 LLM 生成预测
-    if LLM_CONFIG.get("enabled", False) and mode == 'ai':
+    is_llm_enabled = LLM_CONFIG.get("enabled", False)
+    if is_llm_enabled and mode == 'ai':
         try:
-            print(f"   🤖 正在为 {symbol} 调用本地 LLM 进行分析...")
+            logger.info(f"   🤖 正在为 {symbol} 调用 {LLM_CONFIG.get('provider', 'LLM').upper()} 进行分析...")
             # 传入 as_of_date 用于回填场景
             system_prompt, user_prompt = prepare_stock_analysis_prompt(symbol, as_of_date=as_of_date)
             
@@ -34,12 +36,15 @@ def generate_ai_prediction(symbol: str, today_data: pd.Series, mode: str = 'ai',
             if ai_result and "signal" in ai_result:
                 # 成功获取 LLM 预测
                 ai_result["is_llm"] = True
-                model_name = LLM_CONFIG.get("model", "unknown-llm")
+                model_name = ai_result.get("model") or LLM_CONFIG.get("model", "unknown-llm")
                 return _process_and_store_prediction(symbol, today_str, ai_result, model=model_name)
             else:
-                print(f"   ⚠️ LLM 返回结果无效，将退回到规则引擎。")
+                logger.warning(f"   ⚠️ LLM 返回结果无效 (缺失 signal)，将退回到规则引擎。")
         except Exception as e:
-            print(f"   ❌ LLM 调用异常: {e}，将退回到规则引擎。")
+            logger.error(f"   ❌ LLM 调用异常: {e}，将退回到规则引擎。")
+    else:
+        reason = "LLM 已禁用" if not is_llm_enabled else "分析模式非 AI"
+        logger.info(f"   ⚪ 跳过 LLM 分析 ({reason})，正在进入规则引擎...")
 
     # 2. 规则引擎 (回退方案)
     return _generate_rule_based_prediction(symbol, today_data)

@@ -70,7 +70,7 @@ DEFAULTS = {
 
 LLM_CONFIG = {
     "provider": LLM_PROVIDER,
-    "enabled": os.getenv("LLM_ENABLED", "true").lower() == "true",
+    "enabled": os.getenv("LLM_ENABLED", "true").lower() != "false",
     
     # 基础配置 (兼容旧版环境变量，如果没有指定提供商则使用这些)
     "api_key": os.getenv("LLM_API_KEY"),
