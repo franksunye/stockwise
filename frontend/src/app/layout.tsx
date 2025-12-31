@@ -5,6 +5,10 @@ export const metadata: Metadata = {
   title: "StockWise X | AI 炒股决策系统",
   description: "极致简单的 AI 炒股决策工具",
   manifest: "/manifest.json",
+  icons: {
+    icon: "/logo.png",
+    apple: "/logo.png",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
