@@ -2,14 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ListFilter, LayoutDashboard, History } from 'lucide-react';
+import { ListFilter, LayoutDashboard } from 'lucide-react';
 
 export function BottomNav() {
   const pathname = usePathname();
   const links = [
     { href: '/dashboard/stock-pool', icon: ListFilter, label: '股票池' },
     { href: '/dashboard', icon: LayoutDashboard, label: '决策' },
-    { href: '/dashboard/history', icon: History, label: '复盘' },
   ];
 
   return (
