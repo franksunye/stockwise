@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LayoutGrid as Grid, ChevronDown, RefreshCw, User } from 'lucide-react';
 import { StockData } from '@/lib/types';
@@ -25,7 +26,10 @@ const UserCenterDrawer = dynamic(() => import('@/components/UserCenterDrawer').t
 
 function DashboardContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const targetSymbol = searchParams.get('symbol');
   const [userCenterOpen, setUserCenterOpen] = useState(false);
+  const hasScrolledToTarget = useRef(false);
 
   const { stocks, loadingPool, refresh, isRefreshing } = useDashboardData();
   const {
@@ -61,6 +65,19 @@ function DashboardContent() {
     };
     fetchTier();
   }, []);
+
+  // 深度链接: 从 URL 参数滚动到指定股票 (通知点击跳转)
+  useEffect(() => {
+    if (targetSymbol && stocks.length > 0 && scrollRef.current && !hasScrolledToTarget.current) {
+      const targetIndex = stocks.findIndex(s => s.symbol === targetSymbol || s.symbol.endsWith(targetSymbol));
+      if (targetIndex > 0) {
+        // 滚动到目标股票
+        const cardWidth = scrollRef.current.offsetWidth;
+        scrollRef.current.scrollTo({ left: targetIndex * cardWidth, behavior: 'smooth' });
+        hasScrolledToTarget.current = true;
+      }
+    }
+  }, [targetSymbol, stocks, scrollRef]);
 
   if (loadingPool) {
     return (
