@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 
 import { Zap, Target, ShieldCheck, ChevronDown, Clock } from 'lucide-react';
 import { StockData, TacticalData } from '@/lib/types';
-import { getMarketScene, formatStockSymbol, getPredictionTitle, getClosePriceLabelFromData, getValidationLabelFromData, isTradingDay } from '@/lib/date-utils';
+import { getMarketScene, formatStockSymbol, getPredictionTitle, getClosePriceLabelFromData, getValidationLabelFromData, isTradingDay, getMarketFromSymbol } from '@/lib/date-utils';
 import { COLORS } from './constants';
 
 interface StockDashboardCardProps {
@@ -67,7 +67,7 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
   // 1. 智能标题文案：优先从实际数据推断，而非仅依赖交易日历
   // 这确保标题与内容一致
   const getSmartTitle = () => {
-    if (!displayPrediction?.target_date) return getPredictionTitle(scene);
+    if (!displayPrediction?.target_date) return getPredictionTitle(scene, getMarketFromSymbol(data.symbol));
     
     const targetDate = displayPrediction.target_date;
     
@@ -81,7 +81,7 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
     }
     
     // target_date > 今天，使用日历推算的标题
-    return getPredictionTitle(scene);
+    return getPredictionTitle(scene, getMarketFromSymbol(data.symbol));
   };
   
   const mainTitle = getSmartTitle();

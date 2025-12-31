@@ -196,7 +196,7 @@ function getDaysDiff(from: Date, to: Date): number {
  * - 间隔 2-7 天 → "M/D 建议" (如 "12/30 建议")
  * - 间隔 > 7 天 → "下一交易日 (M/D) 建议"
  */
-export function getPredictionTitle(scene: MarketScene): string {
+export function getPredictionTitle(scene: MarketScene, market: MarketType = 'HK'): string {
     const hkNow = getHKTime();
 
     // 交易中或开市前：显示"今日建议"
@@ -204,8 +204,8 @@ export function getPredictionTitle(scene: MarketScene): string {
         return '今日建议';
     }
 
-    // 收市后：计算下一交易日
-    const nextDay = getNextTradingDay();
+    // 收市后：计算下一交易日（根据市场类型）
+    const nextDay = getNextTradingDay(undefined, market);
     const daysDiff = getDaysDiff(hkNow, nextDay);
     const nextMonth = nextDay.getMonth() + 1;
     const nextDate = nextDay.getDate();
