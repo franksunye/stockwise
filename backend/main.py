@@ -238,6 +238,8 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None):
     logger.info(f"🧠 开始执行 AI 分析任务，共 {len(targets)} 只股票...")
     start_time = time.time()
     success_count = 0
+    ai_count = 0
+    rule_count = 0
     
     conn = get_connection()
     
@@ -260,13 +262,16 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None):
             # 生成预测
             generate_ai_prediction(stock, today_data, mode=analysis_mode)
             success_count += 1
+            if analysis_mode == 'ai':
+                ai_count += 1
+            else:
+                rule_count += 1
             
         except Exception as e:
             logger.error(f"❌ {stock} 分析失败: {e}")
             
-    conn.close()
     duration = time.time() - start_time
-    logger.info(f"✅ AI 分析完成! 成功: {success_count}/{len(targets)}, 耗时: {duration:.1f}s")
+    logger.info(f"✅ AI 分析完成! 成功: {success_count}/{len(targets)} (AI: {ai_count}, Rule: {rule_count}), 耗时: {duration:.1f}s")
     
     # 发送企微通知
     market_label = f" ({market_filter})" if market_filter else ""
@@ -287,7 +292,8 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None):
             base_date = row[0]
         else:
             base_date = datetime.now(BEIJING_TZ).strftime("%Y-%m-%d")
-    except:
+    except Exception as e:
+        logger.debug(f"ℹ️ 获取最新预测日期失败 (可能库还没数据): {e}")
         base_date = datetime.now(BEIJING_TZ).strftime("%Y-%m-%d")
 
     # 1. 发送 Web Push 广播 (作为兜底，或者给没有关注列表的用户)
@@ -306,6 +312,12 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None):
         send_personalized_daily_report(targets, base_date)
     except Exception as e:
         logger.error(f"❌ 发送个性化推送失败: {e}")
+
+    # 最后关闭连接
+    try:
+        conn.close()
+    except:
+        pass
 
 
 def run_ai_analysis_backfill(

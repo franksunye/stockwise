@@ -9,6 +9,8 @@ from logger import logger
 
 try:
     import libsql_client
+    import asyncio
+    import inspect
 except ImportError:
     libsql_client = None
 
@@ -28,26 +30,37 @@ class LibSQLCursorAdapter:
             if params and isinstance(params, tuple):
                 params = list(params)
                 
-            # 使用 create_client_sync 创建的 client 是同步的
+            # 执行 SQL
             result = self.client.execute(sql, params)
+            
+            # 异常处理：如果是协程（coroutine），说明 SyncClient 配置不当或库版本差异
+            if inspect.iscoroutine(result):
+                # 在同步环境中，尝试通过新循环运行 (极端后备方案)
+                try:
+                    loop = asyncio.get_event_loop()
+                    if loop.is_running():
+                        # 如果已经在运行，这里会很难办，但我们的脚本通常是同步的
+                        logger.warning(f"⚠️ SQL 返回了协程且 EventLoop 正在运行: {sql[:50]}")
+                        # 这种情况下无法简单同步获取，只能跳过或抛错
+                    else:
+                        result = loop.run_until_complete(result)
+                except Exception as e:
+                    logger.error(f"❌ 无法同步执行 SQL 协程: {e}")
+                    raise e
+
             self._rows = result.rows
             self._idx = 0
             self.rowcount = result.rows_affected
             
-            # 构造 description (pandas 需要)
-            # result 应该有 columns 属性 (如果是查询)
-            # 如果是 update/insert，columns 可能是空的
             if hasattr(result, 'columns') and result.columns:
-                # 构造符合 DBAPI 2.0 的 description: (name, type_code, display_size, internal_size, precision, scale, null_ok)
                 self.description = [(col, None, None, None, None, None, None) for col in result.columns]
             else:
                 self.description = None
                 
             return self
         except Exception as e:
-            # 忽略一些非关键错误 (如 table already exists)
             if "already exists" not in str(e):
-                print(f"❌ SQL执行失败: {sql[:50]}... -> {e}")
+                logger.error(f"❌ SQL执行失败: {sql[:50]}... -> {e}")
             raise e
 
     def executemany(self, sql, seq_of_parameters):
