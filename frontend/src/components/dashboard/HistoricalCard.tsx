@@ -61,6 +61,13 @@ export function HistoricalCard({ data }: HistoricalCardProps) {
           <div className="flex items-center gap-3">
             <div className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-[11px] font-black text-slate-400 tracking-widest mono">
               {formatDate(data.target_date)}
+              {data.model && (
+                <span className="ml-2 text-[9px] text-indigo-500/50 italic opacity-80 uppercase tracking-tighter">
+                  {data.model.toLowerCase().includes('deepseek') ? 'DeepSeek' : 
+                   data.model.toLowerCase().includes('gemini') ? 'Gemini' : 
+                   data.model}
+                </span>
+              )}
             </div>
             <div className="h-px w-8 bg-white/10" />
           </div>

@@ -140,7 +140,16 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
                 <div className="w-5 h-5 rounded-md bg-indigo-600/20 flex items-center justify-center border border-indigo-500/30 ai-pulse">
                   <Zap className="w-2.5 h-2.5 text-indigo-400 fill-indigo-400/20" />
                 </div>
-                <h3 className="text-[10px] font-black text-slate-600 uppercase tracking-widest">AI 深度洞察</h3>
+                <h3 className="text-[10px] font-black text-slate-600 uppercase tracking-widest">
+                  AI 深度洞察 
+                  {displayPrediction?.model && (
+                    <span className="ml-2 text-indigo-500/60 font-black italic">
+                      · {displayPrediction.model.toLowerCase().includes('deepseek') ? 'DeepSeek' : 
+                         displayPrediction.model.toLowerCase().includes('gemini') ? 'Gemini' : 
+                         displayPrediction.model}
+                    </span>
+                  )}
+                </h3>
               </div>
               
               <div className="space-y-4">

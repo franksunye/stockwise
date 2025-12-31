@@ -25,6 +25,7 @@ interface TacticalBriefDrawerProps {
   data: TacticalData;
   userPos: 'holding' | 'empty' | 'none';
   tier: 'free' | 'pro';
+  model?: string;
 }
 
 // 辅助函数：获取步骤对应的图标和标签配置
@@ -47,7 +48,7 @@ const getStepConfig = (step: string) => {
 };
 
 export function TacticalBriefDrawer({ 
-  isOpen, onClose, data, userPos, tier
+  isOpen, onClose, data, userPos, tier, model
 }: TacticalBriefDrawerProps) {
   const isHighPerformance = shouldEnableHighPerformance();
   const [isExpanded, setIsExpanded] = useState(false);
@@ -119,7 +120,11 @@ export function TacticalBriefDrawer({
                           <Zap size={14} className="text-amber-400" />
                       </div>
                       <div className="flex-1">
-                          <p className="text-xs font-bold text-indigo-200">Gemini Pro 深度分析</p>
+                          <p className="text-xs font-bold text-indigo-200">
+                             {model?.toLowerCase().includes('deepseek') ? 'DeepSeek AI' : 
+                              model?.toLowerCase().includes('gemini') ? 'Gemini Pro' : 
+                              model ? model : 'LLM 深度推理版'}
+                          </p>
                           <p className="text-[10px] text-indigo-400/60 leading-tight mt-0.5">包含完整推理链与市场情绪感知</p>
                       </div>
                   </div>

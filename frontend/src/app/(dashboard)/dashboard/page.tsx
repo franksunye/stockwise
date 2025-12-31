@@ -208,6 +208,7 @@ function DashboardContent() {
         tier={tier}
         data={JSON.parse(stocks.find(s => s.symbol === showTactics)?.prediction?.ai_reasoning || '{}')}
         userPos={stocks.find(s => s.symbol === showTactics)?.rule?.position || 'none'}
+        model={stocks.find(s => s.symbol === showTactics)?.prediction?.model}
       />
 
       <StockProfile 
