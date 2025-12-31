@@ -27,6 +27,7 @@ from notifications import send_push_notification, send_personalized_daily_report
 from engine.indicators import calculate_indicators
 from engine.ai_service import generate_ai_prediction
 from engine.validator import validate_previous_prediction
+from trading_calendar import is_trading_day, is_market_closed
 from logger import logger
 
 def get_last_date(symbol: str, table: str = "daily_prices") -> str:
@@ -148,6 +149,10 @@ def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool =
 
 def sync_spot_prices(symbols: list):
     """盘中实时同步"""
+    # 如果全场休市，跳过实时同步
+    if check_trading_day_skip():
+        return
+
     start_time = time.time()
     success_count = 0
     errors = []
@@ -210,13 +215,35 @@ def check_stock_analysis_mode(symbol: str) -> str:
         else:
             logger.info(f"   ⚪ 仅普通用户关注，使用规则引擎")
             
-        return mode
+        return "ai"
     except Exception as e:
         logger.warning(f"   ⚠️ 权限检查失败 ({e})，默认使用 AI")
         return 'ai'
 
+def check_trading_day_skip(market: str = None) -> bool:
+    """检查今天是否为所属市场的交易日，如果不是则建议跳过分析"""
+    # 获取北京时间日期
+    today_str = datetime.now(BEIJING_TZ).strftime("%Y-%m-%d")
+    
+    # 如果指定了具体市场 (CN/HK)
+    if market:
+        if is_market_closed(datetime.now(BEIJING_TZ), market):
+            logger.info(f"📅 今日 ({today_str}) 为 {market} 市场休市日，跳过例行同步。")
+            return True
+    else:
+        # 如果没指定市场，检查 A 股和港股是否都休市
+        if is_market_closed(datetime.now(BEIJING_TZ), "CN") and is_market_closed(datetime.now(BEIJING_TZ), "HK"):
+            logger.info(f"📅 今日 ({today_str}) 为 A股/港股 全面休市日，跳过所有例行同步。")
+            return True
+            
+    return False
+
 def run_ai_analysis(symbol: str = None, market_filter: str = None):
     """独立运行 AI 预测任务"""
+    # 如果是例行运行（无特定代码），且该市场今天休市，则跳过
+    if not symbol and check_trading_day_skip(market_filter):
+        return
+        
     targets = []
     if symbol:
         targets = [symbol]
@@ -549,11 +576,11 @@ def _analyze_stocks_for_date(conn, stocks: list, date_str: str) -> int:
 
 
 def run_full_sync(market_filter: str = None):
-    """每日全量同步
-    
-    Args:
-        market_filter: 可选，过滤市场 ("CN" 或 "HK")，None 表示全部
-    """
+    """每日全量同步"""
+    # 如果是例行运行，且该市场今天休市，则跳过
+    if check_trading_day_skip(market_filter):
+        return
+        
     target_stocks = get_stock_pool()
     if not target_stocks:
         logger.warning("⚠️ 股票池为空")
