@@ -68,7 +68,7 @@ export function useDashboardData() {
                 try {
                     const [stockRes, historyRes] = await Promise.all([
                         fetch(`/api/stock?symbol=${stock.symbol}`, { cache: 'no-store' }),
-                        fetch(`/api/predictions?symbol=${stock.symbol}&limit=5`, { cache: 'no-store' })
+                        fetch(`/api/predictions?symbol=${stock.symbol}&limit=15`, { cache: 'no-store' })
                     ]);
                     const sData = await stockRes.json();
                     const hData = await historyRes.json();

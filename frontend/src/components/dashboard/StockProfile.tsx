@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { X as CloseIcon, Briefcase, Eye, User, Check } from 'lucide-react';
-import { StockData } from '@/lib/types';
+import { StockData, AIPrediction } from '@/lib/types';
 import { getRule, saveRule } from '@/lib/storage';
 import { useState, useEffect } from 'react';
 
@@ -14,11 +14,24 @@ interface StockProfileProps {
 
 export function StockProfile({ stock, isOpen, onClose }: StockProfileProps) {
   const [position, setPosition] = useState<'holding' | 'empty' | 'none'>('none');
+  const [fullHistory, setFullHistory] = useState<AIPrediction[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
 
+  // 打开档案时请求完整的30条历史数据
   useEffect(() => {
     if (isOpen && stock) {
       const rule = getRule(stock.symbol);
       setPosition(rule?.position || 'none');
+      
+      // 请求完整历史数据用于精确计算胜率
+      setLoadingHistory(true);
+      fetch(`/api/predictions?symbol=${stock.symbol}&limit=30`, { cache: 'no-store' })
+        .then(r => r.json())
+        .then(data => {
+          setFullHistory(data.predictions || []);
+        })
+        .catch(console.error)
+        .finally(() => setLoadingHistory(false));
     }
   }, [isOpen, stock]);
 
@@ -31,8 +44,10 @@ export function StockProfile({ stock, isOpen, onClose }: StockProfileProps) {
     }
   };
 
-  const winCount = stock.history?.filter(h => h.validation_status === 'Correct').length || 0;
-  const totalCount = stock.history?.filter(h => h.validation_status !== 'Pending').length || 0;
+  // 使用完整的历史数据计算胜率，如果还在加载则使用传入的数据
+  const historyToUse = fullHistory.length > 0 ? fullHistory : stock.history;
+  const winCount = historyToUse?.filter(h => h.validation_status === 'Correct').length || 0;
+  const totalCount = historyToUse?.filter(h => h.validation_status !== 'Pending').length || 0;
   const winRate = totalCount > 0 ? Math.round((winCount / totalCount) * 100) : 0;
 
   return (
@@ -118,9 +133,11 @@ export function StockProfile({ stock, isOpen, onClose }: StockProfileProps) {
                </div>
             </div>
 
-            <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 px-2">复盘矩阵 (最近 30 天)</h3>
+            <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 px-2">
+              复盘矩阵 (最近 30 天) {loadingHistory && <span className="text-indigo-500 animate-pulse">加载中...</span>}
+            </h3>
             <div className="grid grid-cols-4 gap-2">
-              {stock.history.map((h, i) => (
+              {historyToUse.map((h, i) => (
                 <div 
                   key={i} 
                   className={`aspect-square rounded-xl border border-white/5 flex items-center justify-center text-[10px] font-black ${
