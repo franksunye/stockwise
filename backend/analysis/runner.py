@@ -17,7 +17,8 @@ from logger import logger
 
 from trading_calendar import get_market_from_symbol, is_market_closed
 
-def run_ai_analysis(symbol: str = None, market_filter: str = None):
+
+def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool = False):
     """独立运行 AI 预测任务"""
     # 如果是例行运行（无特定代码），且该市场今天休市，则跳过
     if not symbol and check_trading_day_skip(market_filter):
@@ -48,6 +49,7 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None):
     rule_count = 0
     
     conn = get_connection()
+    cursor = conn.cursor()
     
     # 获取当前北京时间用于判断休市
     now_date = datetime.now(BEIJING_TZ)
@@ -55,10 +57,6 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None):
     for stock in targets:
         try:
             # 1. 检查该股票所属市场是否休市 (Cost Saving)
-            # 如果指定了特定股票(symbol)，不仅要看休市，还要允许用户强制(但不建议在 runner 级强制，
-            # 这里我们假设 runner 主要跑批，如果是单一调试通常不会太介意，但为了逻辑统一还是 check 一下好)
-            # 但用户如果手动指定 symbol，通常是想调试，暂不强制跳过。
-            # 只有批量跑的时候才严控交易日。
             if not symbol:
                 market = get_market_from_symbol(stock)
                 if is_market_closed(now_date, market):
@@ -74,7 +72,22 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None):
                 continue
                 
             today_data = df.iloc[0]
-            logger.info(f">>> 分析 {stock} ({today_data['date']})")
+            today_str = today_data['date']
+            
+            # --- Idempotency Check (幂等性检查) ---
+            # 除非指定 force=True，否则如果库里已经有了今天的 Pending 预测，就跳过。
+            if not force:
+                cursor.execute(
+                    "SELECT 1 FROM ai_predictions WHERE symbol = ? AND date = ? LIMIT 1",
+                    (stock, today_str)
+                )
+                if cursor.fetchone():
+                    logger.info(f"⏩ {stock}: {today_str} 预测已存在，跳过 (Cost Saving)")
+                    success_count += 1 # 视为成功
+                    continue
+            # --------------------------------------
+
+            logger.info(f">>> 分析 {stock} ({today_str})")
             
             # 确定分析模式 (AI vs Rule)
             analysis_mode = check_stock_analysis_mode(stock)

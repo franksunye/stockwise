@@ -39,6 +39,7 @@ if __name__ == "__main__":
     parser.add_argument('--end-date', type=str, help='日期范围结束 (YYYY-MM-DD)')
     parser.add_argument('--days', type=int, help='回填最近N天')
     parser.add_argument('--auto-fill', action='store_true', help='智能检测并补充缺失分析')
+    parser.add_argument('--force', action='store_true', help='强制重新分析 (即使今日已存在)')
     
     args = parser.parse_args()
     init_db()
@@ -63,7 +64,7 @@ if __name__ == "__main__":
         )
     elif args.analyze:
         # 独立运行 AI 分析 (分析最新数据)
-        run_ai_analysis(symbol=args.symbol, market_filter=args.market)
+        run_ai_analysis(symbol=args.symbol, market_filter=args.market, force=args.force)
     elif args.symbol:
         # On-Demand Sync: 需要错误处理和通知
         start_time = time.time()
