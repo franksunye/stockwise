@@ -56,8 +56,8 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
       // 通过 Service Worker 发送本地测试通知
       await registration.showNotification('🔔 测试通知 - StockWise', {
         body: `测试成功！当前时间: ${new Date().toLocaleTimeString('zh-CN')}`,
-        icon: '/icon-192.png',
-        badge: '/icon-192.png',
+        icon: '/logo.png',
+        badge: '/logo.png',
         tag: 'test-notification',
         data: { url: '/dashboard' }
       });
