@@ -87,7 +87,7 @@ async function triggerGitHubWorkflow(env) {
     throw new Error('Missing required environment variables');
   }
   
-  const workflowFile = GITHUB_WORKFLOW || 'realtime-sync.yml';
+  const workflowFile = GITHUB_WORKFLOW || 'data_sync_realtime.yml';
   const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/actions/workflows/${workflowFile}/dispatches`;
   
   const response = await fetch(url, {

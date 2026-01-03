@@ -66,7 +66,7 @@ wrangler secret put GITHUB_REPO
 # 输入: stockwise
 
 wrangler secret put GITHUB_WORKFLOW
-# 输入: realtime-sync.yml
+# 输入: data_sync_realtime.yml
 ```
 
 或者在 [Cloudflare Dashboard](https://dash.cloudflare.com/) 中：
@@ -75,12 +75,12 @@ wrangler secret put GITHUB_WORKFLOW
 3. **Settings** → **Variables and Secrets**
 4. 添加以下变量：
 
-| 变量名 | 值 | 类型 |
-|--------|-----|------|
-| `GITHUB_TOKEN` | `github_pat_xxxx...` | **Secret** |
-| `GITHUB_OWNER` | `franksunye` | Variable |
-| `GITHUB_REPO` | `stockwise` | Variable |
-| `GITHUB_WORKFLOW` | `realtime-sync.yml` | Variable |
+| 变量名            | 值                       | 类型       |
+| ----------------- | ------------------------ | ---------- |
+| `GITHUB_TOKEN`    | `github_pat_xxxx...`     | **Secret** |
+| `GITHUB_OWNER`    | `franksunye`             | Variable   |
+| `GITHUB_REPO`     | `stockwise`              | Variable   |
+| `GITHUB_WORKFLOW` | `data_sync_realtime.yml` | Variable   |
 
 ### 6. 验证部署
 
