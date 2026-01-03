@@ -49,8 +49,8 @@ def check_stock_analysis_mode(symbol: str) -> str:
             
         return "ai"
     except Exception as e:
-        logger.warning(f"   ⚠️ 权限检查失败 ({e})，默认使用 AI")
-        return 'ai'
+        logger.warning(f"   ⚠️ 权限检查失败 ({e})，默认使用规则引擎 (Cost Saving)")
+        return 'rule'
 
 
 def check_trading_day_skip(market: str = None) -> bool:

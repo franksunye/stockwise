@@ -15,6 +15,8 @@ from helpers import check_stock_analysis_mode, check_trading_day_skip
 from logger import logger
 
 
+from trading_calendar import get_market_from_symbol, is_market_closed
+
 def run_ai_analysis(symbol: str = None, market_filter: str = None):
     """独立运行 AI 预测任务"""
     # 如果是例行运行（无特定代码），且该市场今天休市，则跳过
@@ -47,8 +49,22 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None):
     
     conn = get_connection()
     
+    # 获取当前北京时间用于判断休市
+    now_date = datetime.now(BEIJING_TZ)
+
     for stock in targets:
         try:
+            # 1. 检查该股票所属市场是否休市 (Cost Saving)
+            # 如果指定了特定股票(symbol)，不仅要看休市，还要允许用户强制(但不建议在 runner 级强制，
+            # 这里我们假设 runner 主要跑批，如果是单一调试通常不会太介意，但为了逻辑统一还是 check 一下好)
+            # 但用户如果手动指定 symbol，通常是想调试，暂不强制跳过。
+            # 只有批量跑的时候才严控交易日。
+            if not symbol:
+                market = get_market_from_symbol(stock)
+                if is_market_closed(now_date, market):
+                    logger.debug(f"💤 {stock}: {market} 市场休市，跳过")
+                    continue
+
             # 获取该股票最新的日线数据 (含指标)
             query = f"SELECT * FROM daily_prices WHERE symbol = ? ORDER BY date DESC LIMIT 1"
             df = pd.read_sql_query(query, conn, params=(stock,))

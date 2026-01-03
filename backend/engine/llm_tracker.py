@@ -105,15 +105,11 @@ class LLMTracker:
         return None
     
     def _save_trace(self, trace: LLMTrace):
-        """保存追踪记录到本地 SQLite 数据库（不使用 Turso）"""
+        """保存追踪记录到数据库 (自动适配配置)"""
         try:
-            import sqlite3
-            from config import DB_PATH
+            from database import get_connection
             
-            # 确保目录存在
-            DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-            
-            conn = sqlite3.connect(DB_PATH)
+            conn = get_connection()
             cursor = conn.cursor()
             
             # 确保表存在
