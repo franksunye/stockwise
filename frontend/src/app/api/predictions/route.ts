@@ -18,7 +18,11 @@ export async function GET(request: Request) {
         if ('execute' in client) {
             const rs = await client.execute({
                 sql: `
-                    SELECT p.*, d.close as close_price
+                    SELECT p.*, 
+                           d.close as close_price,
+                           d.rsi, d.kdj_k, d.kdj_d, d.kdj_j, 
+                           d.macd, d.macd_signal, d.macd_hist, 
+                           d.boll_upper, d.boll_mid, d.boll_lower
                     FROM ai_predictions p
                     LEFT JOIN daily_prices d ON p.symbol = d.symbol AND p.target_date = d.date
                     WHERE p.symbol = ? 
@@ -30,7 +34,11 @@ export async function GET(request: Request) {
             rows = rs.rows;
         } else {
             rows = client.prepare(`
-                SELECT p.*, d.close as close_price
+                SELECT p.*, 
+                       d.close as close_price,
+                       d.rsi, d.kdj_k, d.kdj_d, d.kdj_j, 
+                       d.macd, d.macd_signal, d.macd_hist, 
+                       d.boll_upper, d.boll_mid, d.boll_lower
                 FROM ai_predictions p
                 LEFT JOIN daily_prices d ON p.symbol = d.symbol AND p.target_date = d.date
                 WHERE p.symbol = ? 
