@@ -1,6 +1,6 @@
 'use client';
 
-import { ShieldCheck, XCircle, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { ShieldCheck, XCircle, TrendingUp, TrendingDown, Minus, Target } from 'lucide-react';
 import { AIPrediction } from '@/lib/types';
 import { COLORS } from './constants';
 
@@ -118,6 +118,13 @@ export function HistoricalCard({ data, onClick }: { data: AIPrediction; onClick?
             }}>
               {isUp ? '建议做多' : isDown ? '建议避险' : '建议观望'}
             </h3>
+            {/* Confidence Badge */}
+            <div className="flex items-center gap-1 opacity-60 ml-1">
+                 <Target size={12} className={isUp ? 'text-emerald-500' : isDown ? 'text-rose-500' : 'text-slate-500'} />
+                 <span className="text-[10px] font-bold mono">
+                    {((data.confidence || 0) * 100).toFixed(0)}%
+                 </span>
+            </div>
           </div>
           
           <p className="text-sm text-slate-300 leading-relaxed italic font-medium pl-1 border-l-2 border-white/10">
