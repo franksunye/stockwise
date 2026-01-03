@@ -46,6 +46,17 @@ export interface AIPrediction {
     actual_change: number | null;
     model?: string; // 模型名称 (gemini, deepseek, 等)
     close_price?: number; // 添加历史收盘价支持
+    // 技术指标快照 (可选)
+    rsi?: number;
+    kdj_k?: number;
+    kdj_d?: number;
+    kdj_j?: number;
+    macd?: number;
+    macd_signal?: number;
+    macd_hist?: number;
+    boll_upper?: number;
+    boll_lower?: number;
+    boll_mid?: number;
 }
 
 // 战术建议明细

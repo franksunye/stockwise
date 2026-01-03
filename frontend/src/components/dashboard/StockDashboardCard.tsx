@@ -9,7 +9,7 @@ import { COLORS } from './constants';
 
 interface StockDashboardCardProps {
   data: StockData;
-  onShowTactics: () => void;
+  onShowTactics: (prediction: AIPrediction) => void;
 }
 
 export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardProps) {
@@ -131,7 +131,7 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
 
         {/* 2. AI 理由与动态价格区块 */}
         <section 
-          onClick={onShowTactics}
+          onClick={() => displayPrediction && onShowTactics(displayPrediction)}
           className={`glass-card relative overflow-hidden group cursor-pointer active:scale-[0.98] transition-all hover:bg-white/[0.04] ${isTriggered ? 'warning-pulse' : ''}`}
         >
           <div className="relative z-10 p-5">

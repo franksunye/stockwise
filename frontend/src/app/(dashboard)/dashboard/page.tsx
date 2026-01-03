@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LayoutGrid as Grid, ChevronDown, RefreshCw, User } from 'lucide-react';
-import { StockData } from '@/lib/types';
+import { StockData, AIPrediction } from '@/lib/types';
 import { 
   TacticalBriefDrawer, 
   StockProfile,
@@ -46,7 +46,7 @@ function DashboardContent() {
     onOverscrollLeft: () => router.push('/dashboard/stock-pool')
   });
 
-  const [showTactics, setShowTactics] = useState<string | null>(null);
+  const [selectedTactics, setSelectedTactics] = useState<{ symbol: string; prediction: AIPrediction } | null>(null);
   const [profileStock, setProfileStock] = useState<StockData | null>(null);
   const [tier, setTier] = useState<'free' | 'pro'>('free');
 
@@ -158,7 +158,7 @@ function DashboardContent() {
           <StockVerticalFeed 
             key={stock.symbol} 
             stock={stock} 
-            onShowTactics={() => setShowTactics(stock.symbol)} 
+            onShowTactics={(prediction) => setSelectedTactics({ symbol: stock.symbol, prediction })} 
             onVerticalScroll={handleVerticalScroll}
             scrollRequest={currentIndex === idx ? backToTopCounter : undefined}
           />
@@ -203,12 +203,12 @@ function DashboardContent() {
 
       {/* Modals & Drawers */}
       <TacticalBriefDrawer 
-        isOpen={!!showTactics} 
-        onClose={() => setShowTactics(null)} 
+        isOpen={!!selectedTactics} 
+        onClose={() => setSelectedTactics(null)} 
         tier={tier}
-        data={JSON.parse(stocks.find(s => s.symbol === showTactics)?.prediction?.ai_reasoning || '{}')}
-        userPos={stocks.find(s => s.symbol === showTactics)?.rule?.position || 'none'}
-        model={stocks.find(s => s.symbol === showTactics)?.prediction?.model}
+        data={JSON.parse(selectedTactics?.prediction?.ai_reasoning || '{}')}
+        userPos={stocks.find(s => s.symbol === selectedTactics?.symbol)?.rule?.position || 'none'}
+        model={selectedTactics?.prediction?.model}
       />
 
       <StockProfile 

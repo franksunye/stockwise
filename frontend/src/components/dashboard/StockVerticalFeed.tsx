@@ -1,14 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { StockData } from '@/lib/types';
+import { StockData, AIPrediction } from '@/lib/types';
 import { StockDashboardCard } from './StockDashboardCard';
 import { HistoricalCard } from './HistoricalCard';
 import { VerticalIndicator } from './VerticalIndicator';
 
 interface StockVerticalFeedProps {
   stock: StockData;
-  onShowTactics: () => void;
+  onShowTactics: (prediction: AIPrediction) => void;
   onVerticalScroll: (top: number) => void;
   scrollRequest?: number;
 }
@@ -37,7 +37,7 @@ export function StockVerticalFeed({
       >
         {/* Y轴 垂直内容 (TikTok Mode) */}
         <StockDashboardCard data={stock} onShowTactics={onShowTactics} />
-        {stock.history.slice(1).map((h, i) => <HistoricalCard key={i} data={h} />)}
+        {stock.history.slice(1).map((h, i) => <HistoricalCard key={i} data={h} onClick={onShowTactics} />)}
       </div>
     </div>
   );

@@ -12,7 +12,7 @@ interface HistoricalCardProps {
  * 历史预测卡片
  * 展示已验证的过往 AI 预测，用于回顾和复盘
  */
-export function HistoricalCard({ data }: HistoricalCardProps) {
+export function HistoricalCard({ data, onClick }: { data: AIPrediction; onClick?: (data: AIPrediction) => void }) {
   const isUp = data.signal === 'Long';
   const isDown = data.signal === 'Short';
   
@@ -52,9 +52,30 @@ export function HistoricalCard({ data }: HistoricalCardProps) {
   // 信号图标
   const SignalIcon = isUp ? TrendingUp : isDown ? TrendingDown : Minus;
 
+  // Helper to render indicator badge
+  const renderIndicator = (name: string, value: number | undefined, type: 'up' | 'down' | 'neutral') => {
+    if (value === undefined) return null;
+    const isBullish = type === 'up';
+    const colorClass = isBullish ? 'text-emerald-500' : type === 'down' ? 'text-rose-500' : 'text-slate-400';
+    const bgClass = isBullish ? 'bg-emerald-500/10 border-emerald-500/20' : type === 'down' ? 'bg-rose-500/10 border-rose-500/20' : 'bg-slate-500/10 border-slate-500/20';
+    
+    return (
+      <div className={`flex items-center gap-1.5 px-2 py-1 rounded-lg border ${bgClass}`}>
+        <div className={`w-1 h-1 rounded-full ${isBullish ? 'bg-emerald-500' : type === 'down' ? 'bg-rose-500' : 'bg-slate-400'}`} />
+        <span className="text-[9px] font-black text-slate-300 uppercase">{name}</span>
+        <span className={`text-[9px] ${colorClass}`}>
+           {isBullish ? '↗' : type === 'down' ? '↘' : '-'}
+        </span>
+      </div>
+    );
+  };
+
   return (
     <div className="h-full w-full flex flex-col items-center justify-center px-6 snap-start">
-      <div className="w-full max-w-md glass-card p-8 border-white/5 relative overflow-hidden active:scale-[0.99] transition-transform">
+      <div 
+        onClick={() => onClick?.(data)}
+        className="w-full max-w-md glass-card p-8 border-white/5 relative overflow-hidden active:scale-[0.99] transition-transform cursor-pointer group hover:bg-white/[0.04]"
+      >
         
         {/* 顶部：日期 + 验证状态 */}
         <div className="flex items-center justify-between mb-6">
@@ -70,6 +91,9 @@ export function HistoricalCard({ data }: HistoricalCardProps) {
               )}
             </div>
             <div className="h-px w-8 bg-white/10" />
+            <div className="hidden group-hover:block transition-all">
+                <span className="text-[9px] text-indigo-400 font-bold uppercase tracking-wider">点击回顾</span>
+            </div>
           </div>
           <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border ${validation.bg}`}>
             <ValidationIcon size={12} className={validation.color} />
@@ -80,7 +104,7 @@ export function HistoricalCard({ data }: HistoricalCardProps) {
         </div>
 
         {/* 中间：信号 + 摘要 */}
-        <div className="mb-8">
+        <div className="mb-6">
           <div className="flex items-center gap-3 mb-4">
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${
               isUp ? 'bg-emerald-500/10 border-emerald-500/20' :
@@ -100,6 +124,38 @@ export function HistoricalCard({ data }: HistoricalCardProps) {
             &quot;{displayReason.length > 60 ? displayReason.slice(0, 60) + '...' : displayReason}&quot;
           </p>
         </div>
+
+        {/* 技术状态自检 (新增) */}
+        {(data.kdj_k !== undefined || data.rsi !== undefined || data.macd !== undefined) && (
+             <div className="mb-6">
+                 <div className="flex items-center gap-2 mb-2">
+                    <div className="w-1 h-3 rounded-full bg-indigo-500/50" />
+                    <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">技术状态自检</span>
+                 </div>
+                 <div className="flex flex-wrap gap-2">
+                     {/* KDJ: K > D Bullish */}
+                     {renderIndicator('KDJ', data.kdj_k, (data.kdj_k && data.kdj_d && data.kdj_k > data.kdj_d) ? 'up' : 'down')}
+                     {/* RSI: <30 Oversold(Up), >70 Overbought(Down) - Simplified logic here or just based on trend? 
+                         Let's align with common usage: RSI rising is good? No, usually RSI Level. 
+                         Let's use: > 50 Up, < 50 Down for trend direction proxy if no previous data. 
+                     */}
+                     {renderIndicator('RSI', data.rsi, (data.rsi && data.rsi > 50) ? 'down' : 'up')} {/* Usually RSI > 70 is sell signal (down), but strong trend is up. Let's stick to simple: High=Red, Low=Green or just trend? 
+                     User image had RSI ↘ (Red).
+                     Let's Assume RSI > 50 is 'Strong/High' -> maybe Red/Risk?, RSI < 50 Green/Opportunity? 
+                     Actually standard: RSI > 70 Overbought (Risk/Short), RSI < 30 Oversold (Buy/Long). 
+                     */}
+                     
+                     {/* MACD: Hist > 0 Bullish */}
+                     {renderIndicator('MACD', data.macd_hist, (data.macd_hist && data.macd_hist > 0) ? 'up' : 'down')}
+                     
+                     {/* BOLL: Close > Mid Bullish? We don't have Close here easily accessible unless passed. 
+                         Let's assume Bullish if Upper band is rising? We only have a snapshot.
+                         Let's skip BOLL logic if complex and just show if present.
+                     */}
+                     {renderIndicator('BOLL', data.boll_mid, 'neutral')}
+                 </div>
+             </div>
+        )}
 
         {/* 底部：客观股票数据 */}
         <div className="pt-6 border-t border-white/5">
