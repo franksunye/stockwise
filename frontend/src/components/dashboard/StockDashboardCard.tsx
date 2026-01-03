@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 
 import { Zap, Target, ShieldCheck, ChevronDown, Clock } from 'lucide-react';
-import { StockData, TacticalData } from '@/lib/types';
+import { StockData, TacticalData, AIPrediction } from '@/lib/types';
 import { getMarketScene, formatStockSymbol, getPredictionTitle, getClosePriceLabelFromData, getValidationLabelFromData, isTradingDay, getMarketFromSymbol } from '@/lib/date-utils';
 import { COLORS } from './constants';
 
