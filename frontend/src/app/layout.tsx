@@ -45,6 +45,7 @@ export const viewport: Viewport = {
 
 import { ReferralTracker } from "@/components/ReferralTracker";
 import { PerformanceOptimizer } from "@/components/PerformanceOptimizer";
+import { BadgeManager } from "@/components/BadgeManager";
 
 export default function RootLayout({
   children,
@@ -56,6 +57,7 @@ export default function RootLayout({
       <body className="antialiased">
         <PerformanceOptimizer />
         <ReferralTracker />
+        <BadgeManager />
         {children}
       </body>
     </html>
