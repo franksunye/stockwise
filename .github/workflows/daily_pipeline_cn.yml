@@ -1,0 +1,22 @@
+name: Daily Pipeline - A-Share (CN)
+
+# 编排层：组合数据同步 + AI 分析，形成完整的每日流水线
+
+on:
+  schedule:
+    # 每日北京时间 16:00 (UTC 08:00) 执行 - A股15:00收盘后1小时
+    - cron: '0 8 * * 1-5'
+  workflow_dispatch: # 支持手动触发
+
+jobs:
+  # Step 1: 数据同步
+  sync:
+    uses: ./.github/workflows/data_sync_cn.yml
+    secrets: inherit
+
+  # Step 2: AI 分析 (仅当数据同步成功后执行)
+  analyze:
+    needs: sync
+    if: success()
+    uses: ./.github/workflows/ai_analyze_cn.yml
+    secrets: inherit

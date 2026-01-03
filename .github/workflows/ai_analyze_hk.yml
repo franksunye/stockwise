@@ -1,13 +1,13 @@
-name: Daily Sync - A-Share (CN)
+name: AI Analysis - Hong Kong (HK)
+
+# 职责：仅负责港股 AI 分析，不包含数据同步
 
 on:
-  schedule:
-    # 每日北京时间 16:00 (UTC 08:00) 执行 - A股15:00收盘后1小时
-    - cron: '0 8 * * 1-5'
   workflow_dispatch: # 支持手动触发
+  workflow_call:     # 支持被其他 workflow 调用
 
 jobs:
-  sync-cn:
+  analyze-hk:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -24,32 +24,23 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
 
-      - name: Run A-Share ETL Pipeline
+      - name: Run AI Analysis for Hong Kong
         env:
           PYTHONUNBUFFERED: "1"
+          # 数据库
           TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
           TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+          # AI 服务
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          WECOM_ROBOT_KEY: ${{ secrets.WECOM_ROBOT_KEY }}
-        run: |
-          python -u backend/main.py --market CN
-
-      - name: Run AI Analysis
-        if: success()
-        env:
-          PYTHONUNBUFFERED: "1"
-          TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
-          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          # 即使以下 Key 为空，代码也会回退到规则引擎
           LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
           LLM_BASE_URL: ${{ secrets.LLM_BASE_URL }}
           LLM_MODEL: ${{ secrets.LLM_MODEL }}
           LLM_ENABLED: ${{ secrets.LLM_ENABLED }}
           LLM_PROVIDER: deepseek
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          # 通知
           WECOM_ROBOT_KEY: ${{ secrets.WECOM_ROBOT_KEY }}
           INTERNAL_API_SECRET: ${{ secrets.INTERNAL_API_SECRET }}
           NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
         run: |
-          python -u backend/main.py --analyze --market CN
+          python -u backend/main.py --analyze --market HK
