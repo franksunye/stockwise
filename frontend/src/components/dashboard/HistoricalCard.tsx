@@ -155,11 +155,8 @@ export function HistoricalCard({ data, onClick }: { data: AIPrediction; onClick?
                      {/* MACD: Hist > 0 Bullish */}
                      {renderIndicator('MACD', data.macd_hist, (data.macd_hist && data.macd_hist > 0) ? 'up' : 'down')}
                      
-                     {/* BOLL: Close > Mid Bullish? We don't have Close here easily accessible unless passed. 
-                         Let's assume Bullish if Upper band is rising? We only have a snapshot.
-                         Let's skip BOLL logic if complex and just show if present.
-                     */}
-                     {renderIndicator('BOLL', data.boll_mid, 'neutral')}
+                     {/* BOLL: Trend based on Price position relative to Mid Band */}
+                     {renderIndicator('BOLL', data.boll_mid, (data.close_price && data.boll_mid && data.close_price > data.boll_mid) ? 'up' : 'down')}
                  </div>
              </div>
         )}
