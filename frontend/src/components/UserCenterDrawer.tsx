@@ -312,8 +312,8 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
 
               {/* 资源用量 */}
               <div className="grid grid-cols-2 gap-4 mb-8">
-                <div className="glass-card p-5">
-                   <div className="flex items-center gap-2 mb-3 text-slate-400">
+                <div className="glass-card p-5 flex flex-col justify-between h-24">
+                   <div className="flex items-center gap-2 text-slate-400">
                      <ShieldCheck size={16} />
                      <span className="text-xs font-bold uppercase">监控配额</span>
                    </div>
@@ -321,13 +321,10 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                      <span className="text-2xl font-black text-white">{watchlistCount}</span>
                      <span className="text-sm font-bold text-slate-600 mb-1">/ {tier === 'pro' ? '10' : '3'}</span>
                    </div>
-                   <div className="w-full h-1 bg-white/10 rounded-full mt-3 overflow-hidden">
-                     <div className={`h-full ${tier === 'pro' ? 'bg-amber-500' : 'bg-indigo-500'}`} style={{ width: `${Math.min((watchlistCount / (tier === 'pro' ? 10 : 3)) * 100, 100)}%` }} />
-                   </div>
                 </div>
 
-                <div className={`glass-card p-5 ${tier === 'pro' ? 'border-amber-500/20 bg-amber-500/5' : 'opacity-60'}`}>
-                   <div className={`flex items-center gap-2 mb-3 ${tier === 'pro' ? 'text-amber-200' : 'text-slate-400'}`}>
+                <div className={`glass-card p-5 flex flex-col justify-between h-24 ${tier === 'pro' ? 'border-amber-500/20 bg-amber-500/5' : 'opacity-60'}`}>
+                   <div className={`flex items-center gap-2 ${tier === 'pro' ? 'text-amber-200' : 'text-slate-400'}`}>
                      <Zap size={16} />
                      <span className="text-xs font-bold uppercase">AI 分析</span>
                    </div>
@@ -336,9 +333,6 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                          {tier === 'pro' ? '深度推理链' : '基础版'}
                      </span>
                    </div>
-                   <p className={`text-[10px] mt-2 leading-tight ${tier === 'pro' ? 'text-amber-500/70' : 'text-slate-500'}`}>
-                       {tier === 'pro' ? '已解锁 Gemini Pro 完整能力' : '升级 Pro 解锁深度推理链'}
-                   </p>
                 </div>
               </div>
 
@@ -352,7 +346,19 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                             </div>
                             <div>
                                 <h4 className="text-sm font-bold text-white">推送通知</h4>
-                                <p className="text-[10px] text-slate-500">获取股价异动与日报提醒</p>
+                                <div className="flex items-center gap-2">
+                                    <p className="text-[10px] text-slate-500">获取股价异动与日报提醒</p>
+                                    {/* 测试按钮 - 仅当通知已授权时显示，最小化设计 */}
+                                    {pushPermission === 'granted' && (
+                                        <button
+                                            onClick={handleTestPush}
+                                            disabled={testingPush}
+                                            className="text-[10px] text-indigo-400 hover:text-indigo-300 underline underline-offset-2 disabled:opacity-50"
+                                        >
+                                            {testingPush ? '发送中...' : '发送测试'}
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                         </div>
                         <div>
@@ -375,23 +381,6 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                             )}
                         </div>
                     </div>
-                    
-                    {/* 测试推送按钮 - 仅当通知已授权时显示 */}
-                    {pushPermission === 'granted' && (
-                        <div className="mt-4 pt-4 border-t border-white/5">
-                            <button
-                                onClick={handleTestPush}
-                                disabled={testingPush}
-                                className="w-full py-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/20 text-amber-400 text-xs font-bold transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
-                            >
-                                <Bell size={14} />
-                                {testingPush ? '发送中...' : '🧪 发送测试通知'}
-                            </button>
-                            <p className="text-[10px] text-slate-600 text-center mt-2">
-                                点击后将收到一条本地测试通知
-                            </p>
-                        </div>
-                    )}
                  </div>
               )}
 
