@@ -36,6 +36,23 @@ def generate_ai_prediction(symbol: str, today_data: pd.Series, mode: str = 'ai',
             if ai_result and "signal" in ai_result:
                 # 成功获取 LLM 预测
                 ai_result["is_llm"] = True
+                
+                # --- 置信度熔断 (Circuit Breaker) ---
+                # 即使 AI 给出了信号，如果置信度不足，强制转为观望。
+                # 这是 LLM "Rejection" 的风控兜底，抵消 Hallucination 和 Overconfidence。
+                SAFE_THRESHOLD = 0.75
+                raw_signal = ai_result.get("signal", "Side")
+                raw_confidence = ai_result.get("confidence", 0.0)
+
+                if raw_signal in ["Long", "Short"] and raw_confidence < SAFE_THRESHOLD:
+                    logger.warning(f"   🛡️ 触发风控熔断: {symbol} 原始信号 {raw_signal} (置信度 {raw_confidence:.2f} < {SAFE_THRESHOLD}) -> 强制观望")
+                    ai_result["signal"] = "Side"
+                    ai_result["confidence"] = 0.5  # 重置为中性分
+                    # 在摘要中追加说明，告知用户
+                    original_summary = ai_result.get("summary", "")
+                    ai_result["summary"] = f"[系统风控] 原始信心不足({raw_confidence:.0%})，强制防御。{original_summary}"
+                # ------------------------------------
+
                 model_name = ai_result.get("model") or LLM_CONFIG.get("model", "unknown-llm")
                 return _process_and_store_prediction(symbol, today_str, ai_result, model=model_name)
             else:
