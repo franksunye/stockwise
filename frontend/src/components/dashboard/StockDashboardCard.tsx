@@ -101,7 +101,7 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
 
   return (
     <div className="h-full w-full flex flex-col items-center justify-center px-4 snap-start pt-32 pb-32">
-      <div className="w-full max-w-md space-y-5">
+      <div className="w-full max-w-md space-y-5 mx-auto">
         {/* 1. AI 顶层核心结论 */}
         <section className="text-center space-y-1 py-2">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-1">
