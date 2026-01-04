@@ -4,6 +4,7 @@ StockWise ETL Pipeline - CLI 入口
 """
 
 import sys
+import os
 import argparse
 import time
 import io
@@ -14,6 +15,11 @@ if sys.stdout.encoding != 'utf-8':
         sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
     except (AttributeError, io.UnsupportedOperation):
         pass
+
+# Add current directory (backend/) to sys.path to support legacy imports
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+# Add project root to sys.path to support 'backend.*' imports
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from database import init_db, get_stock_pool
 from fetchers import sync_stock_meta, sync_profiles

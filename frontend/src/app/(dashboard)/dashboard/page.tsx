@@ -209,6 +209,8 @@ function DashboardContent() {
         data={JSON.parse(selectedTactics?.prediction?.ai_reasoning || '{}')}
         userPos={stocks.find(s => s.symbol === selectedTactics?.symbol)?.rule?.position || 'none'}
         model={selectedTactics?.prediction?.model}
+        symbol={selectedTactics?.symbol || ''}
+        targetDate={selectedTactics?.prediction?.target_date || ''}
       />
 
       <StockProfile 

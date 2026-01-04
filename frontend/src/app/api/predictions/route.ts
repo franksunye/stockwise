@@ -15,17 +15,23 @@ export async function GET(request: Request) {
         const client = getDbClient();
         let rows;
 
+        const mode = searchParams.get('mode') || 'simple';
+        const isPrimaryOnly = mode === 'simple';
+
         if ('execute' in client) {
             const rs = await client.execute({
                 sql: `
-                    SELECT p.*, 
+                    SELECT p.symbol, p.date, p.target_date, p.signal, p.confidence, 
+                           p.support_price, p.ai_reasoning, p.validation_status, p.actual_change,
+                           p.model_id as model, -- Alias for frontend compatibility
                            d.close as close_price,
                            d.rsi, d.kdj_k, d.kdj_d, d.kdj_j, 
                            d.macd, d.macd_signal, d.macd_hist, 
                            d.boll_upper, d.boll_mid, d.boll_lower
-                    FROM ai_predictions p
+                    FROM ai_predictions_v2 p
                     LEFT JOIN daily_prices d ON p.symbol = d.symbol AND p.target_date = d.date
                     WHERE p.symbol = ? 
+                    ${isPrimaryOnly ? 'AND p.is_primary = 1' : ''}
                     ORDER BY p.date DESC 
                     LIMIT ?
                 `,
@@ -33,18 +39,23 @@ export async function GET(request: Request) {
             });
             rows = rs.rows;
         } else {
-            rows = client.prepare(`
-                SELECT p.*, 
+            // Local SQLite
+            const query = `
+                SELECT p.symbol, p.date, p.target_date, p.signal, p.confidence, 
+                       p.support_price, p.ai_reasoning, p.validation_status, p.actual_change,
+                       p.model_id as model, -- Alias for frontend compatibility
                        d.close as close_price,
                        d.rsi, d.kdj_k, d.kdj_d, d.kdj_j, 
                        d.macd, d.macd_signal, d.macd_hist, 
                        d.boll_upper, d.boll_mid, d.boll_lower
-                FROM ai_predictions p
+                FROM ai_predictions_v2 p
                 LEFT JOIN daily_prices d ON p.symbol = d.symbol AND p.target_date = d.date
                 WHERE p.symbol = ? 
+                ${isPrimaryOnly ? 'AND p.is_primary = 1' : ''}
                 ORDER BY p.date DESC 
                 LIMIT ?
-            `).all(symbol, limit);
+             `;
+            rows = client.prepare(query).all(symbol, limit);
             client.close();
         }
 

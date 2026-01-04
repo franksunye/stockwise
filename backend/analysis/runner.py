@@ -2,6 +2,7 @@
 AI 分析主入口模块
 """
 import time
+import os
 from datetime import datetime
 
 import pandas as pd
@@ -89,16 +90,32 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool =
 
             logger.info(f">>> 分析 {stock} ({today_str})")
             
-            # 确定分析模式 (AI vs Rule)
-            analysis_mode = check_stock_analysis_mode(stock)
+            # 确定分析模式 (AI vs Rule) - Now handled by Race Mode internally, but we can keep log
+            # analysis_mode = check_stock_analysis_mode(stock) # Deprecated but harmless
             
-            # 生成预测
-            generate_ai_prediction(stock, today_data, mode=analysis_mode)
-            success_count += 1
-            if analysis_mode == 'ai':
-                ai_count += 1
-            else:
-                rule_count += 1
+            # 生成预测 (New Multi-Model Engine)
+            # Use local import to avoid circular dependency issues if any
+            try:
+                from engine.runner import PredictionRunner
+                import asyncio
+                
+                runner = PredictionRunner()
+                # Run async in sync context
+                # Windows might need policy ... assume main.py handles it or we do local
+                if os.name == 'nt':
+                     try:
+                         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+                     except: pass
+                     
+                asyncio.run(runner.run_analysis(stock, today_str))
+                
+                success_count += 1
+                ai_count += 1 # Assume all are AI now or hybrid
+                
+            except Exception as e:
+                logger.error(f"❌ {stock} AI Engine Failed: {e}")
+                # Fallback to old for safety? No, we trust new engine.
+                continue
             
         except Exception as e:
             logger.error(f"❌ {stock} 分析失败: {e}")
