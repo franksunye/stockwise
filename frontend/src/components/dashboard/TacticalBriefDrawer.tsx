@@ -84,14 +84,14 @@ export function TacticalBriefDrawer({
               ? { type: 'tween', ease: 'easeOut', duration: 0.25 }
               : { type: 'spring', damping: 25, stiffness: 200 }
             }
-            className="w-full max-w-md bg-[#0a0a0f] border-t border-white/10 rounded-t-[32px] shadow-[0_-20px_50px_rgba(0,0,0,0.5)] overflow-hidden pointer-events-auto z-10"
+            className="w-full max-w-md bg-[#0a0a0f] border-t border-white/10 rounded-t-[32px] shadow-[0_-20px_50px_rgba(0,0,0,0.5)] overflow-hidden pointer-events-auto z-10 h-[85vh] flex flex-col"
           >
             {/* 顶部视觉拉手 */}
-            <div className="w-full flex justify-center pt-3 pb-1">
+            <div className="w-full flex justify-center pt-3 pb-1 shrink-0">
                <div className="w-12 h-1 rounded-full bg-white/20" />
             </div>
 
-            <div className="p-6 pt-2 flex flex-col max-h-[85vh] overflow-y-auto scrollbar-hide">
+            <div className="p-6 pt-2 flex-1 overflow-y-auto scrollbar-hide">
               <header className="flex items-center justify-between mb-6 sticky top-0 z-20 py-3 -mx-2 px-2 bg-[#0a0a0f]/90 backdrop-blur-xl border-b border-white/5">
                  <div className="flex p-1 rounded-full bg-white/5 border border-white/10 relative">
                      <button 
