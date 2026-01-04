@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 
 import { Zap, Target, ShieldCheck, ChevronDown, Clock } from 'lucide-react';
 import { StockData, TacticalData, AIPrediction } from '@/lib/types';
-import { getMarketScene, formatStockSymbol, getPredictionTitle, getClosePriceLabelFromData, getValidationLabelFromData, isTradingDay, getMarketFromSymbol } from '@/lib/date-utils';
+import { getMarketScene, getPredictionTitle, getClosePriceLabelFromData, getValidationLabelFromData, isTradingDay, getMarketFromSymbol } from '@/lib/date-utils';
 import { COLORS } from './constants';
 
 interface StockDashboardCardProps {
@@ -124,8 +124,6 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
           </h2>
           <div className="flex items-center justify-center gap-3 text-[10px] font-bold text-slate-600">
             <span className="flex items-center gap-1 uppercase tracking-widest"><Target className="w-3 h-3" /> 把握 {((displayPrediction?.confidence || 0) * 100).toFixed(0)}%</span>
-            <span className="w-0.5 h-0.5 rounded-full bg-slate-800" />
-            <span className="uppercase tracking-widest italic">{formatStockSymbol(data.symbol)}</span>
           </div>
         </section>
 

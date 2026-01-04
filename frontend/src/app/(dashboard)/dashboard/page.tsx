@@ -11,6 +11,7 @@ import {
   StockVerticalFeed,
   COLORS 
 } from '@/components/dashboard';
+import { formatStockSymbol } from '@/lib/date-utils';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
@@ -128,12 +129,15 @@ function DashboardContent() {
 
           {/* 中央：股票名称突出显示 */}
           <div 
-            className="absolute left-1/2 transform -translate-x-1/2 top-6 cursor-pointer group"
+            className="absolute left-1/2 transform -translate-x-1/2 top-6 cursor-pointer group flex flex-col items-center"
             onClick={() => setProfileStock(currentStock)}
           >
             <h1 className="text-xl font-black italic tracking-tight text-white group-hover:text-indigo-400 transition-colors text-center">
               {currentStock?.name}
             </h1>
+            <span className="text-[10px] font-black italic text-slate-500 tracking-widest uppercase mt-0.5">
+              {currentStock ? formatStockSymbol(currentStock.symbol) : ''}
+            </span>
           </div>
 
           {/* 右侧：极简刷新按钮 (隐藏倒计时) */}
