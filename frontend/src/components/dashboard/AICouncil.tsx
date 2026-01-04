@@ -117,7 +117,7 @@ export function AICouncil({ symbol, targetDate }: AICouncilProps) {
                       ${pred.signal === 'Long' ? 'bg-emerald-500/20 text-emerald-400' : 
                         pred.signal === 'Short' ? 'bg-rose-500/20 text-rose-400' : 
                         'bg-amber-500/20 text-amber-400'}`}>
-                      {pred.signal}
+                       {pred.signal === 'Long' ? '做多' : pred.signal === 'Short' ? '做空' : '观望'}
                    </div>
                 </div>
                 
