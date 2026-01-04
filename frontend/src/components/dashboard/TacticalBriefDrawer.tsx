@@ -92,11 +92,12 @@ export function TacticalBriefDrawer({
             </div>
 
             <div className="p-6 pt-2 flex-1 overflow-y-auto scrollbar-hide">
-              <header className="flex items-center justify-between mb-6 sticky top-0 z-20 py-3 -mx-2 px-2 bg-[#0a0a0f]/90 backdrop-blur-xl border-b border-white/5">
-                 <div className="flex p-1 rounded-full bg-white/5 border border-white/10 relative">
+              <header className="relative flex items-center justify-center mb-6 sticky top-0 z-20 py-3 -mx-2 px-2 bg-[#0a0a0f] border-b border-white/5 shadow-lg shadow-black/20">
+                 {/* Center: Tabs */}
+                 <div className="flex p-1 rounded-full bg-white/5 border border-white/10 relative z-10">
                      <button 
                        onClick={() => setActiveTab('brief')}
-                       className={`relative z-10 px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-colors duration-200 ${activeTab === 'brief' ? 'text-white' : 'text-slate-500 hover:text-slate-300'}`}
+                       className={`relative z-10 px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-colors duration-200 ${activeTab === 'brief' ? 'text-white' : 'text-slate-500 hover:text-slate-300'}`}
                      >
                        战术简报
                        {activeTab === 'brief' && (
@@ -110,7 +111,7 @@ export function TacticalBriefDrawer({
                      </button>
                      <button 
                        onClick={() => setActiveTab('council')}
-                       className={`relative z-10 px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-colors duration-200 ${activeTab === 'council' ? 'text-white' : 'text-slate-500 hover:text-slate-300'}`}
+                       className={`relative z-10 px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-colors duration-200 ${activeTab === 'council' ? 'text-white' : 'text-slate-500 hover:text-slate-300'}`}
                      >
                        AI 智囊团
                        {activeTab === 'council' && (
@@ -124,7 +125,11 @@ export function TacticalBriefDrawer({
                      </button>
                  </div>
 
-                 <button onClick={onClose} className="p-2.5 rounded-full bg-white/5 border border-white/10 text-slate-400 active:scale-95 transition-all hover:bg-white/10 hover:text-white">
+                 {/* Right: Close Button */}
+                 <button 
+                   onClick={onClose} 
+                   className="absolute right-2 p-2.5 rounded-full bg-white/5 border border-white/10 text-slate-400 active:scale-95 transition-all hover:bg-white/10 hover:text-white z-20"
+                 >
                    <CloseIcon size={18} />
                  </button>
               </header>
