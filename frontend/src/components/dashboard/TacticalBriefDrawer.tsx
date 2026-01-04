@@ -194,7 +194,7 @@ export function TacticalBriefDrawer({
                   )}
 
                   {/* 重点情报 (News Radar) */}
-                  {data.news_analysis && data.news_analysis.length > 0 && (
+                  {Array.isArray(data.news_analysis) && data.news_analysis.length > 0 && (
                     <section className="relative">
                       <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> 重点情报 (Last 48h)
@@ -216,7 +216,7 @@ export function TacticalBriefDrawer({
                   )}
 
                   {/* 分析过程 - 推理链 (带折叠交互) */}
-                  {data.reasoning_trace && data.reasoning_trace.length > 0 && (
+                  {Array.isArray(data.reasoning_trace) && data.reasoning_trace.length > 0 && (
                     <section className="space-y-4 relative">
                       <button 
                         onClick={() => !isFree && setIsExpanded(!isExpanded)}
