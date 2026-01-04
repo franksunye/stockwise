@@ -194,18 +194,25 @@ export function TacticalBriefDrawer({
                   )}
 
                   {/* 重点情报 (News Radar) */}
-                  {Array.isArray(data.news_analysis) && data.news_analysis.length > 0 && (
+                  {data.news_analysis && (
                     <section className="relative">
                       <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> 重点情报 (Last 48h)
                       </h3>
                       <div className={`p-4 rounded-2xl bg-gradient-to-br from-emerald-500/[0.05] to-transparent border border-emerald-500/10 space-y-3 ${isFree ? (isHighPerformance ? 'opacity-20 grayscale brightness-50 select-none pointer-events-none' : 'blur-md select-none pointer-events-none opacity-40') : ''}`}>
-                        {data.news_analysis.map((news, idx) => (
-                           <div key={idx} className="flex gap-3 items-start">
-                              <span className="text-slate-500 mt-0.5"><Newspaper size={12} /></span>
-                              <p className="text-xs text-slate-300 leading-relaxed font-medium">{news}</p>
-                           </div>
-                        ))}
+                        {Array.isArray(data.news_analysis) ? (
+                          data.news_analysis.map((news, idx) => (
+                            <div key={idx} className="flex gap-3 items-start">
+                               <span className="text-slate-500 mt-0.5"><Newspaper size={12} /></span>
+                               <p className="text-xs text-slate-300 leading-relaxed font-medium">{news}</p>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="flex gap-3 items-start">
+                             <span className="text-slate-500 mt-0.5"><Newspaper size={12} /></span>
+                             <p className="text-xs text-slate-300 leading-relaxed font-medium">{data.news_analysis}</p>
+                          </div>
+                        )}
                       </div>
                       {isFree && (
                           <div className="absolute inset-x-0 bottom-4 flex justify-center z-10">
