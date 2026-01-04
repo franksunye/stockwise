@@ -49,10 +49,11 @@ export async function GET(request: Request) {
             });
             const rsPred = await client.execute({
                 sql: `
-                    SELECT p.*, d.close as close_price
-                    FROM ai_predictions p
+                    SELECT p.*, d.close as close_price, m.display_name as model
+                    FROM ai_predictions_v2 p
                     LEFT JOIN daily_prices d ON p.symbol = d.symbol AND p.date = d.date
-                    WHERE p.symbol = ? 
+                    LEFT JOIN prediction_models m ON p.model_id = m.model_id
+                    WHERE p.symbol = ? AND p.is_primary = 1
                     ORDER BY p.date DESC 
                     LIMIT 2
                 `,
@@ -64,10 +65,11 @@ export async function GET(request: Request) {
         } else {
             row = client.prepare('SELECT * FROM daily_prices WHERE symbol = ? ORDER BY date DESC LIMIT 1').get(symbol);
             const predictions = client.prepare(`
-                SELECT p.*, d.close as close_price
-                FROM ai_predictions p
+                SELECT p.*, d.close as close_price, m.display_name as model
+                FROM ai_predictions_v2 p
                 LEFT JOIN daily_prices d ON p.symbol = d.symbol AND p.date = d.date
-                WHERE p.symbol = ? 
+                LEFT JOIN prediction_models m ON p.model_id = m.model_id
+                WHERE p.symbol = ? AND p.is_primary = 1
                 ORDER BY p.date DESC 
                 LIMIT 2
             `).all(symbol) as Record<string, unknown>[];
