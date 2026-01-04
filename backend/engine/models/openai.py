@@ -11,19 +11,20 @@ class OpenAIAdapter(BasePredictionModel):
         super().__init__(model_id, config)
         self.api_key_env = config.get("api_key_env", "DEEPSEEK_API_KEY")
         self.api_key = os.getenv(self.api_key_env)
-        self.base_url = config.get("base_url", "https://api.deepseek.com/v1")
-        self.model_name = config.get("model_name", "deepseek-chat")
+        # Support base_url from env variable or direct config
+        base_url_env = config.get("base_url_env")
+        if base_url_env:
+            self.base_url = os.getenv(base_url_env, "https://api.deepseek.com/v1")
+        else:
+            self.base_url = config.get("base_url", "https://api.deepseek.com/v1")
+        self.model_name = config.get("model") or config.get("model_name", "deepseek-chat")
         self.max_tokens = config.get("max_tokens", 4096)
         self.temperature = config.get("temperature", 0.7)
         
     async def predict(self, symbol: str, date: str, data: Dict[str, Any]) -> Dict[str, Any]:
         if not self.api_key:
-            return {
-                "signal": "Side",
-                "confidence": 0.0,
-                "reasoning": f"Missing API Key for {self.model_id} ({self.api_key_env})",
-                "validation_status": "Invalid"
-            }
+            logger.warning(f"Skipping {self.model_id}: Missing API Key ({self.api_key_env})")
+            return None
 
         # Use existing prompt logic from backend/engine/prompts.py
         # We need to import it inside method or top level. 
@@ -60,8 +61,8 @@ class OpenAIAdapter(BasePredictionModel):
                 {"role": "user", "content": user_prompt}
             ],
             "max_tokens": self.max_tokens,
-            "temperature": self.temperature,
-            "response_format": {"type": "json_object"}
+            "temperature": self.temperature
+            # Note: response_format removed as local proxies may not support it
         }
 
         start_time = time.time()
@@ -74,8 +75,46 @@ class OpenAIAdapter(BasePredictionModel):
             result = response.json()
             usage = result.get('usage', {})
             content = result['choices'][0]['message']['content']
+            logger.info(f"📥 LLM Response: {len(content)} chars, starts with: {repr(content[:50])}")
+            # Inline robust JSON parsing (from llm_client._parse_json_response)
+            import re
+            parsed = None
+            # 1. Standard parse
+            try:
+                parsed = json.loads(content)
+            except:
+                pass
+            # 2. Remove markdown fences
+            if not parsed:
+                content_clean = re.sub(r'^```json\s*', '', content, flags=re.MULTILINE)
+                content_clean = re.sub(r'^```\s*', '', content_clean, flags=re.MULTILINE)
+                content_clean = re.sub(r'```$', '', content_clean, flags=re.MULTILINE)
+                try:
+                    parsed = json.loads(content_clean)
+                except:
+                    pass
+            # 3. Extract first {...} block using stack balance
+            if not parsed:
+                try:
+                    balance = 0
+                    start = content.find('{')
+                    if start != -1:
+                        for i in range(start, len(content)):
+                            if content[i] == '{':
+                                balance += 1
+                            elif content[i] == '}':
+                                balance -= 1
+                                if balance == 0:
+                                    json_str = content[start:i+1]
+                                    parsed = json.loads(json_str)
+                                    logger.info(f"Parsed JSON via stack balance: {len(json_str)} chars")
+                                    break
+                except Exception as e:
+                    logger.warning(f"Stack balance parse failed: {e}")
             
-            parsed = json.loads(content)
+            if not parsed:
+                logger.error(f"Failed to parse JSON response. Full content:\n{content}")
+                return None
             
             end_time = time.time()
             execution_time = int((end_time - start_time) * 1000)

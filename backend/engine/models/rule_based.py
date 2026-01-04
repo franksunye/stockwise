@@ -44,11 +44,12 @@ class RuleAdapter(BasePredictionModel):
                 "confidence": confidence,
                 "reasoning": reasoning,
                 "support_price": ma20,
-                "pressure_price": ma60 if 'ma60' in latest else ma20 * 1.1,
+                "pressure_price": latest.get('ma60') or (ma20 * 1.1),
                 "token_usage_input": 0,
                 "token_usage_output": 0,
                 "execution_time_ms": 10
             }
             
         except Exception as e:
-            return {"signal": "Side", "confidence": 0.0, "reasoning": f"Rule Error: {e}"}
+            logger.error(f"Rule Engine Error: {e}")
+            return None

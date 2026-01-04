@@ -23,12 +23,15 @@ export async function GET(request: Request) {
                 sql: `
                     SELECT p.symbol, p.date, p.target_date, p.signal, p.confidence, 
                            p.support_price, p.ai_reasoning, p.validation_status, p.actual_change,
-                           p.model_id as model, -- Alias for frontend compatibility
+                           p.is_primary,
+                           p.model_id as model, 
+                           m.display_name,
                            d.close as close_price,
                            d.rsi, d.kdj_k, d.kdj_d, d.kdj_j, 
                            d.macd, d.macd_signal, d.macd_hist, 
                            d.boll_upper, d.boll_mid, d.boll_lower
                     FROM ai_predictions_v2 p
+                    LEFT JOIN prediction_models m ON p.model_id = m.model_id
                     LEFT JOIN daily_prices d ON p.symbol = d.symbol AND p.target_date = d.date
                     WHERE p.symbol = ? 
                     ${isPrimaryOnly ? 'AND p.is_primary = 1' : ''}
@@ -43,12 +46,15 @@ export async function GET(request: Request) {
             const query = `
                 SELECT p.symbol, p.date, p.target_date, p.signal, p.confidence, 
                        p.support_price, p.ai_reasoning, p.validation_status, p.actual_change,
-                       p.model_id as model, -- Alias for frontend compatibility
+                       p.is_primary,
+                       p.model_id as model, 
+                       m.display_name,
                        d.close as close_price,
                        d.rsi, d.kdj_k, d.kdj_d, d.kdj_j, 
                        d.macd, d.macd_signal, d.macd_hist, 
                        d.boll_upper, d.boll_mid, d.boll_lower
                 FROM ai_predictions_v2 p
+                LEFT JOIN prediction_models m ON p.model_id = m.model_id
                 LEFT JOIN daily_prices d ON p.symbol = d.symbol AND p.target_date = d.date
                 WHERE p.symbol = ? 
                 ${isPrimaryOnly ? 'AND p.is_primary = 1' : ''}

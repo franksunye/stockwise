@@ -44,8 +44,10 @@ export interface AIPrediction {
     ai_reasoning: string;
     validation_status: 'Pending' | 'Correct' | 'Incorrect' | 'Neutral';
     actual_change: number | null;
-    model?: string; // 模型名称 (gemini, deepseek, 等)
-    close_price?: number; // 添加历史收盘价支持
+    model?: string; // model_id (legacy or identifier)
+    display_name?: string; // Display name from DB
+    is_primary?: number | boolean; // Whether it is the primary prediction
+    close_price?: number;
     // 技术指标快照 (可选)
     rsi?: number;
     kdj_k?: number;

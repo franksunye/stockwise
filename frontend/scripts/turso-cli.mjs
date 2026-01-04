@@ -100,7 +100,7 @@ Turso CLI 工具 - 使用方法:
         `);
     }
   } catch (error) {
-    console.error('❌ 执行失败:', error.message);
+    console.error('❌ 执行失败:', error);
     process.exit(1);
   }
 

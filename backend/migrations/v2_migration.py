@@ -31,7 +31,8 @@ def migrate():
         # 2. Seed initial models
         logger.info("🌱 Seeding prediction models...")
         models = [
-            ('deepseek-v3', 'DeepSeek V3 (Cloud)', 'adapter-openai', 1, 100, '{"model": "deepseek-chat"}', '{"cost": "medium"}'),
+            ('deepseek-v3', 'DeepSeek V3', 'adapter-openai', 1, 100, '{"model": "deepseek-chat", "api_key_env": "DEEPSEEK_API_KEY"}', '{"cost": "medium"}'),
+            ('gemini-3-flash', 'Gemini 3 Flash', 'adapter-openai', 1, 90, '{"model": "gemini-1.5-flash", "api_key_env": "GEMINI_API_KEY"}', '{"cost": "low"}'),
             ('rule-engine', '量化规则引擎 (Base)', 'rule-engine', 1, 50, '{}', '{"cost": "zero"}'),
             ('legacy-ai', 'Legacy AI Records', 'legacy', 0, 0, '{}', '{}'),
             ('mock-dev', '开发测试 Mock', 'mock', 0, 0, '{}', '{}')

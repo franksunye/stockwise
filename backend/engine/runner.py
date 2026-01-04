@@ -5,7 +5,7 @@ from datetime import datetime
 
 from backend.database import get_connection
 from backend.engine.models.factory import ModelFactory
-# from backend.fetchers import get_stock_data_with_indicators # Assume this exists or will be adapted
+from backend.trading_calendar import get_next_trading_day_str
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +19,7 @@ class PredictionRunner:
         """
         logger.info(f"🏁 Starting Multi-Model Analysis for {symbol} on {date}")
         
-        # 1. Get Active Models
+        # 1. Get Active Models (Already sorted by priority DESC)
         models = ModelFactory.get_active_models()
         if not models:
             logger.warning("⚠️ No active models found!")
@@ -31,9 +31,6 @@ class PredictionRunner:
         conn = get_connection()
         try:
             if not data:
-                # Fetch only latest row for Rule Engine mainly, 
-                # LLM (OpenAIAdapter) fetches its own full history via prompts.py
-                # But RuleAdapter needs 'price_data' as a list or dict.
                 cursor = conn.cursor()
                 if date:
                     cursor.execute("SELECT * FROM daily_prices WHERE symbol = ? AND date = ?", (symbol, date))
@@ -43,24 +40,18 @@ class PredictionRunner:
                 row = cursor.fetchone()
                 if row:
                     columns = [d[0] for d in cursor.description]
+                    # Robust dict conversion
                     if isinstance(row, (tuple, list)):
                          row_dict = dict(zip(columns, row))
                     elif hasattr(row, 'keys'):
                          row_dict = dict(row)
                     else:
-                         try:
-                             row_dict = dict(zip(columns, row))
-                         except:
-                             row_dict = {}
-                             for i, col in enumerate(columns):
-                                 try:
-                                     row_dict[col] = row[i]
-                                 except:
-                                     pass
+                         row_dict = {}
+                         for i, col in enumerate(columns):
+                             try: row_dict[col] = row[i]
+                             except: pass
                     
-                    # Pass as list of 1 for rule adapter compatibility (it expects list)
                     data = {'price_data': [row_dict]}
-                    
                     if not date:
                          date = row_dict['date']
                 else:
@@ -74,42 +65,29 @@ class PredictionRunner:
         for model in models:
             tasks.append(self._safe_predict(model, symbol, date, data))
             
-        # Run all
         predictions = await asyncio.gather(*tasks)
         
         # 4. Save Results & Determine Primary
+        # valid_predictions preserves the order of 'models'
+        
         conn = get_connection()
         cursor = conn.cursor()
         
-        # Filter out Nones
-        valid_predictions = [p for p in predictions if p]
+        primary_assigned = False
+        saved_count = 0
         
-        if not valid_predictions:
-            logger.error(f"❌ All models failed for {symbol}")
-            conn.close()
-            return
-
-        # Simple Selector Logic: Highest Priority with Confidence > 0.6
-        # Sort by Priority DESC
-        # Need to know priority? It's in model config or we can join with model def.
-        # Here we rely on the fact that `models` list was sorted by priority DESC from Factory.
-        # So we just match results back to models.
-        
-        primary_set = False
-        
-        for i, pred in enumerate(valid_predictions):
-            model_id = pred['model_id']
-            # Find model priority from the model object (assuming order matches or we look it up)
-            # Better: _safe_predict returns model_id so we know who it is.
-            
-            # Default logic: The first one (highest priority) is primary
-            # Ideally we check confidence threshold too.
-            is_primary = False
-            if not primary_set:
-                is_primary = True
-                primary_set = True
+        for i, pred in enumerate(predictions):
+            if not pred:
+                continue
                 
-            # Insert into DB
+            model_id = pred['model_id']
+            
+            # Selector Logic: The first successful result (highest priority) is Primary
+            is_primary = 0
+            if not primary_assigned:
+                is_primary = 1
+                primary_assigned = True
+                
             try:
                 cursor.execute("""
                     INSERT OR REPLACE INTO ai_predictions_v2 
@@ -122,7 +100,7 @@ class PredictionRunner:
                     symbol,
                     date,
                     model_id,
-                    pred.get('target_date'), # Should be calculated or returned
+                    pred.get('target_date'), 
                     pred.get('signal'),
                     pred.get('confidence'),
                     pred.get('support_price'),
@@ -133,24 +111,31 @@ class PredictionRunner:
                     pred.get('execution_time_ms', 0),
                     is_primary
                 ))
+                saved_count += 1
             except Exception as e:
                 logger.error(f"Failed to save result for {model_id}: {e}")
 
         conn.commit()
         conn.close()
-        logger.info(f"✅ Analysis completed for {symbol}. Saved {len(valid_predictions)} results.")
+        logger.info(f"✅ Analysis completed for {symbol}. Saved {saved_count} results. Primary: {primary_assigned}")
 
     async def _safe_predict(self, model, symbol, date, data):
         try:
-            # We assume model.predict returns a dict
             result = await model.predict(symbol, date, data)
+            if result is None:
+                return None
+                
             result['model_id'] = model.model_id
             
-            # Simple Target Date logic (T+1)
-            # TODO: Improve calendar logic
-            result['target_date'] = date # Placeholder
+            # Accurate Target Date logic: Next Trading Day after 'date'
+            try:
+                result['target_date'] = get_next_trading_day_str(date, symbol=symbol)
+            except Exception as te:
+                logger.warning(f"Failed to calculate target_date for {date}: {te}")
+                result['target_date'] = date # Fallback
             
             return result
         except Exception as e:
             logger.error(f"❌ Model {model.model_id} failed: {e}")
             return None
+

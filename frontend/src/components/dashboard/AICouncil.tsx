@@ -101,7 +101,7 @@ export function AICouncil({ symbol, targetDate }: AICouncilProps) {
       {/* Model List */}
       <div className="space-y-3">
         {predictions.map((pred, idx) => {
-           const isPrimary = pred.model?.includes('deepseek') || idx === 0; // Fallback primary check
+           const isPrimary = typeof pred.is_primary === 'number' ? pred.is_primary === 1 : pred.is_primary === true;
            return (
              <div key={idx} className={`p-4 rounded-xl border ${isPrimary ? 'bg-indigo-500/10 border-indigo-500/20' : 'bg-white/[0.02] border-white/5'}`}>
                 <div className="flex items-center justify-between mb-3">
@@ -110,7 +110,7 @@ export function AICouncil({ symbol, targetDate }: AICouncilProps) {
                          <Zap size={12} className={isPrimary ? 'text-indigo-400' : 'text-slate-400'} />
                       </div>
                       <span className={`text-xs font-black uppercase tracking-wider ${isPrimary ? 'text-indigo-300' : 'text-slate-400'}`}>
-                         {pred.model || 'Legacy Model'}
+                         {pred.display_name || pred.model || 'Legacy Model'}
                       </span>
                    </div>
                    <div className={`px-2 py-1 rounded text-[10px] font-black uppercase tracking-wide
