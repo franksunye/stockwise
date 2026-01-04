@@ -130,16 +130,16 @@ export function TacticalBriefDrawer({
               {activeTab === 'brief' ? (
                 <div className="space-y-8 pb-8 animate-in fade-in slide-in-from-right-4 duration-300">
                   {/* 源类型标记 */}
-                  {data.is_llm || (data.model && data.model !== 'rule-based') ? (
+                  {data.is_llm || (model && model !== 'rule-based') ? (
                       <div className="mb-6 px-4 py-3 rounded-xl bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 flex items-center gap-3">
                           <div className="p-1.5 rounded-full bg-indigo-500/20">
                               <Zap size={14} className="text-amber-400" />
                           </div>
                           <div className="flex-1">
                               <p className="text-xs font-bold text-indigo-200">
-                                 {data.model?.toLowerCase().includes('deepseek') ? 'DeepSeek AI' : 
-                                  data.model?.toLowerCase().includes('gemini') ? 'Gemini Pro' : 
-                                  data.model ? data.model : 'LLM 深度推理版'}
+                                 {model?.toLowerCase().includes('deepseek') ? 'DeepSeek AI' : 
+                                  model?.toLowerCase().includes('gemini') ? 'Gemini Pro' : 
+                                  model ? model : 'LLM 深度推理版'}
                               </p>
                               <p className="text-[10px] text-indigo-400/60 leading-tight mt-0.5">包含完整推理链与市场情绪感知</p>
                           </div>
