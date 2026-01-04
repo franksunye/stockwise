@@ -87,12 +87,12 @@ export function TacticalBriefDrawer({
             className="w-full max-w-md bg-[#0a0a0f] border-t border-white/10 rounded-t-[32px] shadow-[0_-20px_50px_rgba(0,0,0,0.5)] overflow-hidden pointer-events-auto z-10 h-[85vh] flex flex-col"
           >
             {/* 顶部视觉拉手 */}
-            <div className="w-full flex justify-center pt-3 pb-1 shrink-0">
+            <div className="w-full flex justify-center pt-3 pb-1 shrink-0 bg-[#0a0a0f]">
                <div className="w-12 h-1 rounded-full bg-white/20" />
             </div>
 
-            <div className="p-6 pt-2 flex-1 overflow-y-auto scrollbar-hide">
-              <header className="relative flex items-center justify-center mb-6 sticky top-0 z-20 py-3 -mx-2 px-2 bg-[#0a0a0f] border-b border-white/5 shadow-lg shadow-black/20">
+            {/* 固定 Header，不再随内容滚动，彻底消除缝隙穿透 */}
+            <header className="relative flex items-center justify-center py-2 px-6 bg-[#0a0a0f] border-b border-white/5 shadow-lg shadow-black/20 shrink-0 z-20">
                  {/* Center: Tabs */}
                  <div className="flex p-1 rounded-full bg-white/5 border border-white/10 relative z-10">
                      <button 
@@ -128,11 +128,13 @@ export function TacticalBriefDrawer({
                  {/* Right: Close Button */}
                  <button 
                    onClick={onClose} 
-                   className="absolute right-2 p-2.5 rounded-full bg-white/5 border border-white/10 text-slate-400 active:scale-95 transition-all hover:bg-white/10 hover:text-white z-20"
+                   className="absolute right-4 p-2.5 rounded-full bg-white/5 border border-white/10 text-slate-400 active:scale-95 transition-all hover:bg-white/10 hover:text-white z-20"
                  >
                    <CloseIcon size={18} />
                  </button>
-              </header>
+            </header>
+
+            <div className="p-6 pt-4 flex-1 overflow-y-auto scrollbar-hide">
 
               {activeTab === 'brief' ? (
                 <div className="space-y-8 pb-8 animate-in fade-in slide-in-from-right-4 duration-300">
