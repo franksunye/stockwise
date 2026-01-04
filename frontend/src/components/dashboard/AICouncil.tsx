@@ -109,10 +109,10 @@ export function AICouncil({ symbol, targetDate }: AICouncilProps) {
                       <div className={`p-1.5 rounded-md ${isPrimary ? 'bg-indigo-500/20' : 'bg-slate-700/30'}`}>
                          <Zap size={12} className={isPrimary ? 'text-indigo-400' : 'text-slate-400'} />
                       </div>
-                      <span className={`text-xs font-black uppercase tracking-wider ${isPrimary ? 'text-indigo-300' : 'text-slate-400'}`}>
-                         {pred.display_name || pred.model || 'Legacy Model'}
-                      </span>
-                   </div>
+                       <span className={`text-xs font-black uppercase tracking-wider ${isPrimary ? 'text-indigo-300' : 'text-slate-400'}`}>
+                          {pred.display_name || pred.model || 'Legacy Model'}
+                       </span>
+                    </div>
                    <div className={`px-2 py-1 rounded text-[10px] font-black uppercase tracking-wide
                       ${pred.signal === 'Long' ? 'bg-emerald-500/20 text-emerald-400' : 
                         pred.signal === 'Short' ? 'bg-rose-500/20 text-rose-400' : 
