@@ -101,9 +101,9 @@ export function TacticalBriefDrawer({
                        战术简报
                        {activeTab === 'brief' && (
                          <motion.div 
-                           layoutId="activeTabPill"
+                           layoutId={`tab-pill-${symbol}`}
                            className="absolute inset-0 bg-indigo-500 rounded-full -z-10 shadow-lg shadow-indigo-500/20"
-                           transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                           transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                          />
                        )}
                      </button>
@@ -114,9 +114,9 @@ export function TacticalBriefDrawer({
                        AI 智囊团
                        {activeTab === 'council' && (
                          <motion.div 
-                           layoutId="activeTabPill"
+                           layoutId={`tab-pill-${symbol}`}
                            className="absolute inset-0 bg-indigo-500 rounded-full -z-10 shadow-lg shadow-indigo-500/20"
-                           transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                           transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                          />
                        )}
                      </button>
