@@ -34,7 +34,7 @@ export function AICouncil({ symbol, targetDate }: AICouncilProps) {
         
         setPredictions(relevantPreds);
       } catch (err) {
-        setError('无法连接 AI 议事厅');
+        setError('无法连接 AI 智囊团');
       } finally {
         setLoading(false);
       }
@@ -86,7 +86,7 @@ export function AICouncil({ symbol, targetDate }: AICouncilProps) {
       {/* Consensus Header */}
       <div className="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/10">
         <div>
-           <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">AI 委员会结论</p>
+           <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">AI 智囊团结论</p>
            <h3 className={`text-xl font-black tracking-tight ${consensusColor} flex items-center gap-2`}>
               {consensusText}
               {(longCount === total || shortCount === total || sideCount === total) && <ShieldCheck size={18} />}

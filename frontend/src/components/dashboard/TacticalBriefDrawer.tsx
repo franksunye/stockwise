@@ -91,37 +91,41 @@ export function TacticalBriefDrawer({
                <div className="w-12 h-1 rounded-full bg-white/20" />
             </div>
 
-            <div className="p-8 pt-4 flex flex-col max-h-[85vh] overflow-y-auto scrollbar-hide">
-              <header className="flex items-center justify-between mb-8">
-                <div className="space-y-1.5">
-                  <div className="flex items-center gap-2">
-                     <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_#6366f1] animate-pulse" />
-                     <span className="text-[10px] uppercase tracking-[0.4em] text-slate-500 font-bold">智能决策</span>
-                  </div>
-                  <h2 className="text-3xl font-black italic tracking-tighter text-white">
-                     战术简报 <span className="text-indigo-500 underline decoration-4 underline-offset-4 font-black" data-en="BRIEF">BRIEF</span>
-                  </h2>
-                </div>
-                <button onClick={onClose} className="p-2.5 rounded-full bg-white/5 border border-white/10 text-slate-400 active:scale-90 transition-all">
-                  <CloseIcon size={20} />
-                </button>
-              </header>
+            <div className="p-6 pt-2 flex flex-col max-h-[85vh] overflow-y-auto scrollbar-hide">
+              <header className="flex items-center justify-between mb-6 sticky top-0 z-20 py-3 -mx-2 px-2 bg-[#0a0a0f]/90 backdrop-blur-xl border-b border-white/5">
+                 <div className="flex p-1 rounded-full bg-white/5 border border-white/10 relative">
+                     <button 
+                       onClick={() => setActiveTab('brief')}
+                       className={`relative z-10 px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-colors duration-200 ${activeTab === 'brief' ? 'text-white' : 'text-slate-500 hover:text-slate-300'}`}
+                     >
+                       战术简报
+                       {activeTab === 'brief' && (
+                         <motion.div 
+                           layoutId="activeTabPill"
+                           className="absolute inset-0 bg-indigo-500 rounded-full -z-10 shadow-lg shadow-indigo-500/20"
+                           transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                         />
+                       )}
+                     </button>
+                     <button 
+                       onClick={() => setActiveTab('council')}
+                       className={`relative z-10 px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-colors duration-200 ${activeTab === 'council' ? 'text-white' : 'text-slate-500 hover:text-slate-300'}`}
+                     >
+                       AI 智囊团
+                       {activeTab === 'council' && (
+                         <motion.div 
+                           layoutId="activeTabPill"
+                           className="absolute inset-0 bg-indigo-500 rounded-full -z-10 shadow-lg shadow-indigo-500/20"
+                           transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                         />
+                       )}
+                     </button>
+                 </div>
 
-              {/* Tab Switcher */}
-              <div className="flex items-center gap-2 mb-6 p-1 rounded-xl bg-white/5 border border-white/5">
-                 <button 
-                   onClick={() => setActiveTab('brief')}
-                   className={`flex-1 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'brief' ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-500 hover:text-slate-300'}`}
-                 >
-                   战术简报
+                 <button onClick={onClose} className="p-2.5 rounded-full bg-white/5 border border-white/10 text-slate-400 active:scale-95 transition-all hover:bg-white/10 hover:text-white">
+                   <CloseIcon size={18} />
                  </button>
-                 <button 
-                   onClick={() => setActiveTab('council')}
-                   className={`flex-1 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'council' ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-500 hover:text-slate-300'}`}
-                 >
-                   AI 议事厅
-                 </button>
-              </div>
+              </header>
 
               {activeTab === 'brief' ? (
                 <div className="space-y-8 pb-8 animate-in fade-in slide-in-from-right-4 duration-300">
