@@ -9,6 +9,7 @@ from typing import Optional, Dict, Any, Tuple
 import time
 from config import LLM_CONFIG
 from .llm_tracker import get_tracker, estimate_tokens
+from .schema_normalizer import normalize_ai_response
 
 
 class LLMClient:
@@ -254,6 +255,8 @@ class LLMClient:
                 # 尝试解析 JSON
                 result = self._parse_json_response(content)
                 if result:
+                    # 标准化数据结构 / Normalize schema
+                    result = normalize_ai_response(result)
                     final_result = result
                     break
                 else:
