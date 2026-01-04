@@ -126,10 +126,14 @@ class OpenAIAdapter(BasePredictionModel):
             # The prompt output has 'key_levels': {'support': ..., 'resistance': ...}
             key_levels = parsed.get("key_levels", {})
             
+            # Store the clean parsed JSON as reasoning (without markdown blocks)
+            # This ensures frontend can parse it consistently
+            clean_reasoning = json.dumps(parsed, ensure_ascii=False)
+            
             return {
                 "signal": parsed.get("signal", "Side"),
                 "confidence": float(parsed.get("confidence", 0.5)),
-                "reasoning": content, # Store full JSON string as reasoning for detailed display
+                "reasoning": clean_reasoning,
                 "support_price": key_levels.get("support"),
                 "pressure_price": key_levels.get("resistance"),
                 "token_usage_input": usage.get('prompt_tokens', 0),

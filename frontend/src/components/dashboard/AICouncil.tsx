@@ -135,8 +135,8 @@ export function AICouncil({ symbol, targetDate }: AICouncilProps) {
                 </p>
 
                 <div className="mt-3 flex items-center gap-4 text-[10px] text-slate-500 font-bold">
-                   <span>Confidence: {(pred.confidence * 100).toFixed(0)}%</span>
-                   {pred.support_price && <span>Support: {pred.support_price}</span>}
+                   <span>把握: {(pred.confidence * 100).toFixed(0)}%</span>
+                   {pred.support_price && <span>支撑位: {pred.support_price}</span>}
                 </div>
              </div>
            );

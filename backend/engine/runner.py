@@ -67,12 +67,16 @@ class PredictionRunner:
             
         predictions = await asyncio.gather(*tasks)
         
-        # 4. Save Results & Determine Primary
-        # valid_predictions preserves the order of 'models'
-        
+        # 4. Save Results & Determine Primary (Reset primary first for this day)
         conn = get_connection()
         cursor = conn.cursor()
         
+        try:
+            # Reset existing primary flags for this day to avoid conflicts
+            cursor.execute("UPDATE ai_predictions_v2 SET is_primary = 0 WHERE symbol = ? AND date = ?", (symbol, date))
+        except Exception as e:
+            logger.warning(f"Could not reset primary flags: {e}")
+
         primary_assigned = False
         saved_count = 0
         
