@@ -232,7 +232,7 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
            </div>
            
            {/* 右侧：验证结果 (Validation) */}
-           <div className="glass-card p-4 flex flex-col justify-between">
+           <div className="glass-card p-4 flex flex-col justify-between relative">
               {(() => {
                 // 验证区独立逻辑：
                 // - 交易中/盘前：验证的是"今日预测" (Target=Today) -> 显示"待收盘验证"
