@@ -58,7 +58,7 @@ class PredictionRunner:
                      logger.warning(f"No daily price found for {symbol}")
                      data = {'price_data': []}
         finally:
-            pass  # Don't close global connection
+            conn.close()
             
         # 3. Parallel Execution (The Race)
         tasks = []
@@ -120,7 +120,7 @@ class PredictionRunner:
                 logger.error(f"Failed to save result for {model_id}: {e}")
 
         conn.commit()
-        # Don't close global connection
+        conn.close()
         logger.info(f"✅ Analysis completed for {symbol}. Saved {saved_count} results. Primary: {primary_assigned}")
 
     async def _safe_predict(self, model, symbol, date, data):

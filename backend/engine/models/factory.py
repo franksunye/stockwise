@@ -15,10 +15,12 @@ class ModelFactory:
         # 1. Fetch config from DB
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM prediction_models WHERE model_id = ?", (model_id,))
-        # Adapt to row format
-        row = cursor.fetchone()
-        # Don't close global connection
+        try:
+            cursor.execute("SELECT * FROM prediction_models WHERE model_id = ?", (model_id,))
+            # Adapt to row format
+            row = cursor.fetchone()
+        finally:
+            conn.close()
         
         if not row:
             raise ValueError(f"Model ID '{model_id}' not found in registry.")
@@ -69,9 +71,11 @@ class ModelFactory:
     def get_active_models(cls):
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT model_id FROM prediction_models WHERE is_active = 1 ORDER BY priority DESC")
-        rows = cursor.fetchall()
-        # Don't close global connection
+        try:
+            cursor.execute("SELECT model_id FROM prediction_models WHERE is_active = 1 ORDER BY priority DESC")
+            rows = cursor.fetchall()
+        finally:
+            conn.close()
         
         models = []
         for row in rows:

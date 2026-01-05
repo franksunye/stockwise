@@ -26,9 +26,7 @@ def get_connection():
         # logger.debug(f"📂 [Raw] Connecting to Local SQLite...")
         return sqlite3.connect(str(DB_PATH), timeout=30.0)
 
-def close_global_connection():
-    """兼容性桩函数，实际无需操作"""
-    pass
+
 
 def get_table_columns(cursor, table_name):
     try:
