@@ -25,11 +25,11 @@ def load_env_file(path):
                 if not line or line.startswith("#"): continue
                 if "=" in line:
                     key, value = line.split("=", 1)
+                    key = key.strip()
                     value = value.strip().strip("'").strip('"')
-                    # 总是覆盖 (Allow Overwrite) 以支持 backend/.env 覆盖 root/.env
-                    # 或者如果遵循 "已存在不覆盖"，则 backend/.env 应该先加载但要注意顺序
-                    # 这里策略：先加载 root, 再加载 backend (覆盖之)
-                    os.environ[key.strip()] = value
+                    # 命令行环境变量优先：如果已存在则不覆盖
+                    if key not in os.environ:
+                        os.environ[key] = value
     except Exception as e:
         logger.warning(f"⚠️ 加载 {path} 失败: {e}")
 
