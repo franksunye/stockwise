@@ -8,23 +8,25 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.pool import QueuePool
 from sqlalchemy.engine import Engine
 from sqlalchemy.engine.url import make_url
-from sqlalchemy.dialects.sqlite.base import SQLiteDialect
+from sqlalchemy.dialects import registry
 
-class LibSQLDialect(SQLiteDialect):
-    """
-    LibSQL 专用方言，基于最基础的 SQLiteDialect。
-    完全避开 SQLiteDialect_pysqlite (由于它会强制调用 create_function)。
-    """
-    driver = 'libsql'
-    supports_statement_cache = True
-    
-    @classmethod
-    def import_dbapi(cls):
-        return libsql
+from config import DB_PATH, TURSO_DB_URL, TURSO_AUTH_TOKEN
+from logger import logger
 
-    def on_connect(self):
-        # 显式返回 None，确保没有任何连接钩子被注册
-        return None
+# 注册方言: "sqlite.libsql" -> backend.db_dialect.LibSQLDialect
+registry.register("sqlite.libsql", "backend.db_dialect", "LibSQLDialect")
+
+
+def _get_libsql_connection():
+    """创建 libsql 原始连接"""
+    if TURSO_DB_URL:
+        logger.debug(f"🔗 连接 Turso: {TURSO_DB_URL[:40]}...")
+        return libsql.connect(database=TURSO_DB_URL, auth_token=TURSO_AUTH_TOKEN)
+    else:
+        DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+        logger.debug(f"📂 使用本地数据库: {DB_PATH}")
+        # 30秒超时，避免本地锁冲突
+        return libsql.connect(database=str(DB_PATH), timeout=30.0)
 
 def create_sa_engine():
     """
@@ -33,13 +35,12 @@ def create_sa_engine():
     """
     from sqlalchemy.pool import NullPool
     
-    dialect = LibSQLDialect()
-    # 强制标记 dbapi 已加载，防止 SQLAlchemy 尝试重新导入 pysqlite
-    dialect._loaded_dbapi = libsql
+    # 这里的 dialect 实例仅用于传递 dbapi，实际上不仅需要实例，还需要注册
+    # 为了解决 create_function 问题，必须通过 URL 路由到我们自定义的 LibSQLDialect 类
     
     if TURSO_DB_URL:
         return create_engine(
-            "sqlite://",
+            "sqlite+libsql://",  # 使用自定义 scheme
             creator=_get_libsql_connection,
             poolclass=QueuePool,
             pool_size=10,
@@ -47,22 +48,20 @@ def create_sa_engine():
             pool_recycle=300,
             pool_pre_ping=True,
             pool_use_lifo=True,
-            dialect=dialect
+            module=libsql # 明确传入 module
         )
     else:
         return create_engine(
-            "sqlite://",
+            "sqlite+libsql://", # 使用自定义 scheme
             creator=_get_libsql_connection,
             poolclass=NullPool,
-            dialect=dialect
+            module=libsql # 明确传入 module
         )
 
 # 使用工厂函数创建全局 Engine
 engine = create_sa_engine()
 
 
-# 全局 Engine 实例
-engine = create_sa_engine()
 
 
 # --- 兼容层 ---
