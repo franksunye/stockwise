@@ -8,75 +8,48 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.pool import QueuePool
 from sqlalchemy.engine import Engine
 from sqlalchemy.engine.url import make_url
-from sqlalchemy.dialects.sqlite.pysqlite import SQLiteDialect_pysqlite
+from sqlalchemy.dialects.sqlite.base import SQLiteDialect
 
-from config import DB_PATH, TURSO_DB_URL, TURSO_AUTH_TOKEN
-from logger import logger
-
-
-class LibSQLDialect(SQLiteDialect_pysqlite):
+class LibSQLDialect(SQLiteDialect):
     """
-    LibSQL 专用方言，禁用所有不兼容的 on_connect 钩子。
+    LibSQL 专用方言，基于最基础的 SQLiteDialect。
+    完全避开 SQLiteDialect_pysqlite (由于它会强制调用 create_function)。
     """
-    name = 'sqlite'
     driver = 'libsql'
     supports_statement_cache = True
-    
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        # 强制设置 dbapi
-        self.dbapi = libsql
     
     @classmethod
     def import_dbapi(cls):
         return libsql
-    
-    # 禁用 on_connect (这是关键!)
+
     def on_connect(self):
+        # 显式返回 None，确保没有任何连接钩子被注册
         return None
-
-
-def _get_libsql_connection():
-    """创建 libsql 原始连接"""
-    if TURSO_DB_URL:
-        logger.debug(f"🔗 连接 Turso: {TURSO_DB_URL[:40]}...")
-        return libsql.connect(database=TURSO_DB_URL, auth_token=TURSO_AUTH_TOKEN)
-    else:
-        DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-        logger.debug(f"📂 使用本地数据库: {DB_PATH}")
-        # 增加 timeout 避免锁冲突时立即失败
-        return libsql.connect(database=str(DB_PATH), timeout=30.0)
-
 
 def create_sa_engine():
     """
     创建 SQLAlchemy Engine。
-    - 远程 Turso: 使用 QueuePool 进行连接池管理
-    - 本地 SQLite: 使用 NullPool 避免锁死问题
+    远程 Turso 使用连接池，本地使用 NullPool。
     """
     from sqlalchemy.pool import NullPool
     
-    # 1. 实例化自定义方言
     dialect = LibSQLDialect()
+    # 强制标记 dbapi 已加载，防止 SQLAlchemy 尝试重新导入 pysqlite
     dialect._loaded_dbapi = libsql
     
-    # 2. 根据环境选择连接池策略
     if TURSO_DB_URL:
-        # 远程 Turso: 使用连接池
-        # pool_use_lifo=True 倾向于重用最近使用的连接，保持连接“活跃”
         return create_engine(
             "sqlite://",
             creator=_get_libsql_connection,
             poolclass=QueuePool,
             pool_size=10,
             max_overflow=20,
-            pool_recycle=300,   # 缩短回收时间到 5 分钟，防止 stream 超时
+            pool_recycle=300,
             pool_pre_ping=True,
             pool_use_lifo=True,
             dialect=dialect
         )
     else:
-        # 本地 SQLite: 不使用池
         return create_engine(
             "sqlite://",
             creator=_get_libsql_connection,
@@ -84,7 +57,7 @@ def create_sa_engine():
             dialect=dialect
         )
 
-# 使用工厂函数直接创建 Engine
+# 使用工厂函数创建全局 Engine
 engine = create_sa_engine()
 
 
