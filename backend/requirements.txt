@@ -1,9 +1,7 @@
 akshare
 pandas
 pandas-ta-classic
-sqlalchemy
 libsql
-sqlalchemy-libsql
 google-generativeai
 requests
 pypinyin

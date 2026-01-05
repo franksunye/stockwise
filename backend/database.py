@@ -1,149 +1,50 @@
 """
-StockWise Database Module (SQLAlchemy Core + libsql)
+StockWise Database Module (Raw Interface - No ORM)
 
-使用 SQLAlchemy 管理连接池，通过 libsql SDK 连接 Turso 或本地 SQLite。
+回归纯粹的 DB-API 2.0 接口，放弃 SQLAlchemy。
+在 Serverless (Turso) 环境下，无状态的短连接比连接池更稳定。
 """
+import sqlite3
 import libsql
-from sqlalchemy import create_engine, text
-from sqlalchemy.pool import QueuePool
-from sqlalchemy.engine import Engine
-from sqlalchemy.engine.url import make_url
-from sqlalchemy.dialects import registry
+import os
+from pathlib import Path
 
 from config import DB_PATH, TURSO_DB_URL, TURSO_AUTH_TOKEN
 from logger import logger
 
-# 注册方言: "sqlite.libsql" -> backend.db_dialect.LibSQLDialect
-registry.register("sqlite.libsql", "backend.db_dialect", "LibSQLDialect")
-
-
-def _get_libsql_connection():
-    """创建 libsql 原始连接"""
+def get_connection():
+    """
+    创建原始数据库连接。
+    Strategy: Always New Connection (NullPool equivalent).
+    """
     if TURSO_DB_URL:
-        logger.debug(f"🔗 连接 Turso: {TURSO_DB_URL[:40]}...")
+        # logger.debug(f"🔗 [Raw] Connecting to Turso...")
+        # sync client from libsql-experimental
         return libsql.connect(database=TURSO_DB_URL, auth_token=TURSO_AUTH_TOKEN)
     else:
         DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-        logger.debug(f"📂 使用本地数据库: {DB_PATH}")
-        # 30秒超时，避免本地锁冲突
-        return libsql.connect(database=str(DB_PATH), timeout=30.0)
-
-def create_sa_engine():
-    """
-    创建 SQLAlchemy Engine。
-    远程 Turso 和本地都使用 NullPool (禁用连接池) 以确保稳定性。
-    """
-    from sqlalchemy.pool import NullPool
-    
-    # 这里的 dialect 实例仅用于传递 dbapi，实际上不仅需要实例，还需要注册
-    # 为了解决 create_function 问题，必须通过 URL 路由到我们自定义的 LibSQLDialect 类
-    
-    if TURSO_DB_URL:
-        # 远程 Turso 连接如果不稳定 (stream not found)，建议使用 NullPool 禁用连接池
-        # 每次操作创建新连接，虽然有握手开销，但能彻底避免复用过期流的问题
-        return create_engine(
-            "sqlite+libsql://",  # 使用自定义 scheme
-            creator=_get_libsql_connection,
-            poolclass=NullPool,
-            module=libsql # 明确传入 module
-        )
-    else:
-        return create_engine(
-            "sqlite+libsql://", # 使用自定义 scheme
-            creator=_get_libsql_connection,
-            poolclass=NullPool,
-            module=libsql # 明确传入 module
-        )
-
-# 使用工厂函数创建全局 Engine
-engine = create_sa_engine()
-
-
-
-
-# --- 兼容层 ---
-
-class CursorShim:
-    def __init__(self, sa_conn):
-        self.sa_conn = sa_conn
-        self.result = None
-        self.description = None
-        self.rowcount = 0
-
-    def execute(self, sql, params=None):
-        if params:
-            if isinstance(params, (tuple, list)):
-                new_sql = sql
-                new_params = {}
-                for i, val in enumerate(params):
-                    new_sql = new_sql.replace("?", f":p{i}", 1)
-                    new_params[f"p{i}"] = val
-                self.result = self.sa_conn.execute(text(new_sql), new_params)
-            else:
-                self.result = self.sa_conn.execute(text(sql), params)
-        else:
-            self.result = self.sa_conn.execute(text(sql))
-        
-        if self.result.returns_rows:
-            self.description = [(col, None, None, None, None, None, None) for col in self.result.keys()]
-        self.rowcount = self.result.rowcount
-        return self
-
-    def executemany(self, sql, seq_of_parameters):
-        for params in seq_of_parameters:
-            self.execute(sql, params)
-        return self
-
-    def fetchone(self):
-        if not self.result: return None
-        row = self.result.fetchone()
-        return tuple(row) if row else None
-
-    def fetchall(self):
-        if not self.result: return []
-        return [tuple(row) for row in self.result.fetchall()]
-    
-    def close(self):
-        pass
-
-
-class ConnectionShim:
-    def __init__(self, sa_conn):
-        self.sa_conn = sa_conn
-        
-    def cursor(self):
-        return CursorShim(self.sa_conn)
-    
-    def commit(self):
-        self.sa_conn.commit()
-        
-    def rollback(self):
-        self.sa_conn.rollback()
-        
-    def close(self):
-        self.sa_conn.close()
-
-
-def get_connection(force_new=False):
-    return ConnectionShim(engine.connect())
-
+        # logger.debug(f"📂 [Raw] Connecting to Local SQLite...")
+        return sqlite3.connect(str(DB_PATH), timeout=30.0)
 
 def close_global_connection():
-    logger.info("🔌 正在释放数据库连接池...")
-    engine.dispose()
+    """兼容性桩函数，实际无需操作"""
+    pass
 
-
-# --- 数据库初始化 ---
-
-def get_table_columns(conn, table_name):
-    result = conn.execute(text(f"PRAGMA table_info({table_name})"))
-    return [row[1] for row in result.fetchall()]
-
+def get_table_columns(cursor, table_name):
+    try:
+        cursor.execute(f"PRAGMA table_info({table_name})")
+        return [row[1] for row in cursor.fetchall()]
+    except Exception:
+        return []
 
 def init_db():
-    with engine.begin() as conn:
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    try:
+        # 1. Price Tables
         for table in ["daily_prices", "weekly_prices", "monthly_prices"]:
-            conn.execute(text(f"""
+            cursor.execute(f"""
                 CREATE TABLE IF NOT EXISTS {table} (
                     symbol TEXT NOT NULL, date TEXT NOT NULL,
                     open REAL, high REAL, low REAL, close REAL, volume REAL, change_percent REAL,
@@ -153,26 +54,33 @@ def init_db():
                     rsi REAL, kdj_k REAL, kdj_d REAL, kdj_j REAL, ai_summary TEXT,
                     PRIMARY KEY (symbol, date)
                 )
-            """))
+            """)
         
-        conn.execute(text("""
+        # 2. Meta & Pool
+        cursor.execute("""
             CREATE TABLE IF NOT EXISTS stock_meta (
                 symbol TEXT PRIMARY KEY, name TEXT NOT NULL, market TEXT NOT NULL,
                 last_updated TEXT, pinyin TEXT, pinyin_abbr TEXT,
                 industry TEXT, main_business TEXT, description TEXT
             )
-        """))
-        conn.execute(text("CREATE TABLE IF NOT EXISTS stock_pool (symbol TEXT PRIMARY KEY, name TEXT NOT NULL, added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)"))
-        conn.execute(text("CREATE TABLE IF NOT EXISTS global_stock_pool (symbol TEXT PRIMARY KEY, name TEXT NOT NULL, first_watched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, watchers_count INTEGER DEFAULT 1, last_synced_at TIMESTAMP)"))
-        conn.execute(text("CREATE TABLE IF NOT EXISTS users (user_id TEXT PRIMARY KEY, username TEXT, email TEXT, registration_type TEXT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, last_active_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, subscription_tier TEXT DEFAULT 'free', subscription_expires_at TIMESTAMP)"))
-        conn.execute(text("CREATE TABLE IF NOT EXISTS user_watchlist (user_id TEXT NOT NULL, symbol TEXT NOT NULL, added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (user_id, symbol))"))
-        conn.execute(text("CREATE TABLE IF NOT EXISTS invitation_codes (code TEXT PRIMARY KEY, type TEXT NOT NULL, duration_days INTEGER DEFAULT 30, is_used BOOLEAN DEFAULT 0, used_by_user_id TEXT, used_at TIMESTAMP, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)"))
-        conn.execute(text("CREATE TABLE IF NOT EXISTS ai_predictions (symbol TEXT NOT NULL, date TEXT NOT NULL, target_date TEXT NOT NULL, signal TEXT, confidence REAL, support_price REAL, ai_reasoning TEXT, validation_status TEXT DEFAULT 'Pending', actual_change REAL, model TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (symbol, date))"))
-        conn.execute(text("CREATE TABLE IF NOT EXISTS llm_traces (trace_id TEXT PRIMARY KEY, symbol TEXT, model TEXT, system_prompt TEXT, user_prompt TEXT, response_raw TEXT, response_parsed TEXT, input_tokens INTEGER DEFAULT 0, output_tokens INTEGER DEFAULT 0, total_tokens INTEGER DEFAULT 0, latency_ms INTEGER DEFAULT 0, status TEXT DEFAULT 'pending', error_message TEXT, retry_count INTEGER DEFAULT 0, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)"))
-        conn.execute(text("CREATE TABLE IF NOT EXISTS push_subscriptions (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, endpoint TEXT NOT NULL, p256dh TEXT NOT NULL, auth TEXT NOT NULL, user_agent TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, last_used_at TIMESTAMP, UNIQUE(user_id, endpoint))"))
+        """)
+        cursor.execute("CREATE TABLE IF NOT EXISTS stock_pool (symbol TEXT PRIMARY KEY, name TEXT NOT NULL, added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)")
+        cursor.execute("CREATE TABLE IF NOT EXISTS global_stock_pool (symbol TEXT PRIMARY KEY, name TEXT NOT NULL, first_watched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, watchers_count INTEGER DEFAULT 1, last_synced_at TIMESTAMP)")
+        
+        # 3. User System
+        cursor.execute("CREATE TABLE IF NOT EXISTS users (user_id TEXT PRIMARY KEY, username TEXT, email TEXT, registration_type TEXT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, last_active_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, subscription_tier TEXT DEFAULT 'free', subscription_expires_at TIMESTAMP)")
+        cursor.execute("CREATE TABLE IF NOT EXISTS user_watchlist (user_id TEXT NOT NULL, symbol TEXT NOT NULL, added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (user_id, symbol))")
+        cursor.execute("CREATE TABLE IF NOT EXISTS invitation_codes (code TEXT PRIMARY KEY, type TEXT NOT NULL, duration_days INTEGER DEFAULT 30, is_used BOOLEAN DEFAULT 0, used_by_user_id TEXT, used_at TIMESTAMP, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)")
 
-        # 多模型预测系统 (V2)
-        conn.execute(text("""
+        # 4. AI & Traces
+        cursor.execute("CREATE TABLE IF NOT EXISTS ai_predictions (symbol TEXT NOT NULL, date TEXT NOT NULL, target_date TEXT NOT NULL, signal TEXT, confidence REAL, support_price REAL, ai_reasoning TEXT, validation_status TEXT DEFAULT 'Pending', actual_change REAL, model TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (symbol, date))")
+        cursor.execute("CREATE TABLE IF NOT EXISTS llm_traces (trace_id TEXT PRIMARY KEY, symbol TEXT, model TEXT, system_prompt TEXT, user_prompt TEXT, response_raw TEXT, response_parsed TEXT, input_tokens INTEGER DEFAULT 0, output_tokens INTEGER DEFAULT 0, total_tokens INTEGER DEFAULT 0, latency_ms INTEGER DEFAULT 0, status TEXT DEFAULT 'pending', error_message TEXT, retry_count INTEGER DEFAULT 0, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)")
+        
+        # 5. Push Subs
+        cursor.execute("CREATE TABLE IF NOT EXISTS push_subscriptions (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, endpoint TEXT NOT NULL, p256dh TEXT NOT NULL, auth TEXT NOT NULL, user_agent TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, last_used_at TIMESTAMP, UNIQUE(user_id, endpoint))")
+
+        # 6. Multi-Model V2
+        cursor.execute("""
             CREATE TABLE IF NOT EXISTS prediction_models (
                 model_id TEXT PRIMARY KEY,
                 display_name TEXT NOT NULL,
@@ -183,8 +91,8 @@ def init_db():
                 capabilities_json TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
-        """))
-        conn.execute(text("""
+        """)
+        cursor.execute("""
             CREATE TABLE IF NOT EXISTS ai_predictions_v2 (
                 symbol TEXT NOT NULL,
                 date TEXT NOT NULL,
@@ -207,18 +115,37 @@ def init_db():
                 PRIMARY KEY (symbol, date, model_id),
                 FOREIGN KEY (model_id) REFERENCES prediction_models(model_id)
             )
-        """))
-
-    logger.info("✅ 数据库结构初始化完成 (SQLAlchemy Core)")
-
+        """)
+        
+        conn.commit()
+        logger.info("✅ 数据库结构初始化完成 (Raw SQL - No ORM)")
+        
+    except Exception as e:
+        logger.error(f"❌ 数据库初始化失败: {e}")
+        raise e
+    finally:
+        conn.close()
 
 def get_stock_pool():
-    with engine.connect() as conn:
-        result = conn.execute(text("SELECT symbol FROM global_stock_pool WHERE watchers_count > 0 ORDER BY watchers_count DESC"))
-        return [row[0] for row in result.fetchall()]
-
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT symbol FROM global_stock_pool WHERE watchers_count > 0 ORDER BY watchers_count DESC")
+        return [row[0] for row in cursor.fetchall()]
+    finally:
+        conn.close()
 
 def get_stock_profile(symbol: str):
-    with engine.connect() as conn:
-        result = conn.execute(text("SELECT industry, main_business, description FROM stock_meta WHERE symbol = :symbol"), {"symbol": symbol})
-        return result.fetchone()
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        # Handle dict access by converting tuple to dict if needed, or return tuple
+        # But legacy code expects tuple-like or dict-like access?
+        # Step 8 sync_profiles uses fetchone() and dict access via column name... wait.
+        # Step 28 code yielded a RowProxy which supports both.
+        # Raw sqlite3 Row supports both if row_factory is set.
+        cursor.execute("SELECT industry, main_business, description FROM stock_meta WHERE symbol = ?", (symbol,))
+        row = cursor.fetchone()
+        return row
+    finally:
+        conn.close()
