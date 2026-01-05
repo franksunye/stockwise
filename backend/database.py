@@ -63,26 +63,29 @@ def create_sa_engine():
     # 2. 根据环境选择连接池策略
     if TURSO_DB_URL:
         # 远程 Turso: 使用连接池
-        pool = QueuePool(
+        # pool_use_lifo=True 倾向于重用最近使用的连接，保持连接“活跃”
+        return create_engine(
+            "sqlite://",
             creator=_get_libsql_connection,
-            pool_size=5,
-            max_overflow=10,
-            recycle=1800,
-            pre_ping=True,
+            poolclass=QueuePool,
+            pool_size=10,
+            max_overflow=20,
+            pool_recycle=300,   # 缩短回收时间到 5 分钟，防止 stream 超时
+            pool_pre_ping=True,
+            pool_use_lifo=True,
             dialect=dialect
         )
     else:
-        # 本地 SQLite: 不使用池 (每次创建新连接，避免锁)
-        pool = NullPool(
+        # 本地 SQLite: 不使用池
+        return create_engine(
+            "sqlite://",
             creator=_get_libsql_connection,
+            poolclass=NullPool,
             dialect=dialect
         )
-    
-    # 3. 创建 URL
-    url = make_url("sqlite://")
-    
-    # 4. 直接构造 Engine
-    return Engine(pool, dialect, url)
+
+# 使用工厂函数直接创建 Engine
+engine = create_sa_engine()
 
 
 # 全局 Engine 实例
