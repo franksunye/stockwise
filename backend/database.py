@@ -4,7 +4,7 @@ StockWise Database Module (SQLAlchemy Core + libsql)
 使用 SQLAlchemy 管理连接池，通过 libsql SDK 连接 Turso 或本地 SQLite。
 """
 import libsql
-from sqlalchemy import text
+from sqlalchemy import create_engine, text
 from sqlalchemy.pool import QueuePool
 from sqlalchemy.engine import Engine
 from sqlalchemy.engine.url import make_url
