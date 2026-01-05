@@ -116,19 +116,72 @@ class LibSQLConnectionAdapter:
     def close(self):
         self.client.close()
 
-def get_connection():
-    """获取数据库连接 (支持本地 SQLite 或 Turso)"""
+# --- 全局连接单例 (避免频繁创建连接) ---
+_global_conn = None
+_connection_count = 0
+
+def get_connection(force_new: bool = False):
+    """
+    获取数据库连接 (支持本地 SQLite 或 Turso)
+    
+    默认使用全局单例连接以避免频繁创建/销毁连接导致的性能问题。
+    如果需要独立连接（如在多线程场景），可设置 force_new=True。
+    """
+    global _global_conn, _connection_count
+    
+    # 如果已有全局连接且不强制新建，直接返回
+    if _global_conn is not None and not force_new:
+        return _global_conn
+    
     if TURSO_DB_URL:
         if not libsql_client:
              print("❌ 未安装 libsql-client，无法连接 Turso。请运行: pip install libsql-client")
              sys.exit(1)
-             
-        print(f"🔗 连接 Turso: {TURSO_DB_URL[:40]}...")
-        return LibSQLConnectionAdapter(TURSO_DB_URL, TURSO_AUTH_TOKEN)
+        
+        # 只在第一次连接时打印日志
+        if _connection_count == 0:
+            print(f"🔗 连接 Turso: {TURSO_DB_URL[:40]}...")
+        
+        conn = LibSQLConnectionAdapter(TURSO_DB_URL, TURSO_AUTH_TOKEN)
     else:
-        print(f"⚠️ TURSO_DB_URL 未设置，使用本地 SQLite: {DB_PATH}")
+        if _connection_count == 0:
+            print(f"⚠️ TURSO_DB_URL 未设置，使用本地 SQLite: {DB_PATH}")
         DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-        return sqlite3.connect(DB_PATH)
+        conn = sqlite3.connect(DB_PATH)
+    
+    _connection_count += 1
+    
+    # 如果不是强制新建，设为全局单例
+    if not force_new:
+        _global_conn = conn
+    
+    return conn
+
+def close_global_connection():
+    """显式关闭全局连接（在程序结束时调用）"""
+    global _global_conn
+    if _global_conn is not None:
+        try:
+            logger.debug("🔌 正在关闭全局数据库连接...")
+            # 使用线程超时保护，避免 close() 永久阻塞
+            import threading
+            def _close():
+                try:
+                    _global_conn.close()
+                except:
+                    pass
+            
+            t = threading.Thread(target=_close, daemon=True)
+            t.start()
+            t.join(timeout=3)  # 最多等待 3 秒
+            
+            if t.is_alive():
+                logger.warning("⚠️ 关闭连接超时，跳过")
+            else:
+                logger.debug("✅ 全局连接已关闭")
+        except Exception as e:
+            logger.warning(f"⚠️ 关闭全局连接时出错: {e}")
+        _global_conn = None
 
 def get_table_columns(cursor, table_name):
     """
@@ -377,7 +430,7 @@ def init_db():
         logger.warning(f"⚠️ 检查/更新 ai_predictions 表结构失败: {e}")
     
     conn.commit()
-    conn.close()
+    # init_db doesn't close the global connection - it will be reused
     logger.info("✅ 数据库结构检查/初始化完成")
 
 def get_stock_pool():
@@ -390,7 +443,7 @@ def get_stock_pool():
         ORDER BY watchers_count DESC
     """)
     rows = cursor.fetchall()
-    conn.close()
+    # Don't close global connection
     return [row[0] for row in rows]
 
 def get_stock_profile(symbol: str):
@@ -402,5 +455,5 @@ def get_stock_profile(symbol: str):
     cursor = conn.cursor()
     cursor.execute("SELECT industry, main_business, description FROM stock_meta WHERE symbol = ?", (symbol,))
     row = cursor.fetchone()
-    conn.close()
+    # Don't close global connection
     return row

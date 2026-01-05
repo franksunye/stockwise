@@ -78,10 +78,9 @@ def send_personalized_daily_report(targets, date_str):
     try:
         cursor.execute(query, params)
         rows = cursor.fetchall()
-        conn.close()
+        # Don't close global connection
     except Exception as e:
         logger.error(f"❌ 查询个性化推送数据失败: {e}")
-        if conn: conn.close()
         return
     
     if not rows:

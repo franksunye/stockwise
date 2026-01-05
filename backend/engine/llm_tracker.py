@@ -151,7 +151,7 @@ class LLMTracker:
             ))
             
             conn.commit()
-            conn.close()
+            # Don't close global connection
             
         except Exception as e:
             # 追踪失败不应该影响主流程

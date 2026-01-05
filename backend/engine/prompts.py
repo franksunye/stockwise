@@ -52,7 +52,7 @@ def prepare_stock_analysis_prompt(symbol: str, as_of_date: str = None):
     row = cursor.fetchone()
     
     if not row:
-        conn.close()
+        # Don't close global connection
         return None, f"未找到股票 {symbol} 的行情数据" + (f" (日期: {as_of_date})" if as_of_date else "")
 
     data = dict(zip(columns, row))
@@ -122,7 +122,7 @@ def prepare_stock_analysis_prompt(symbol: str, as_of_date: str = None):
     total_predictions, correct_count, incorrect_count = stats if stats else (0, 0, 0)
     accuracy_rate = (correct_count / total_predictions * 100) if total_predictions > 0 else 0
     
-    conn.close()
+    # Don't close global connection
 
     # 构建历史预测回顾
     prediction_review = ""

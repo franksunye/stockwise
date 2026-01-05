@@ -8,7 +8,7 @@ from datetime import datetime
 import pandas as pd
 
 from config import BEIJING_TZ
-from database import get_connection, get_stock_pool
+from database import get_connection, get_stock_pool, close_global_connection
 from utils import send_wecom_notification
 from notifications import send_push_notification, send_personalized_daily_report
 from engine.ai_service import generate_ai_prediction
@@ -163,8 +163,5 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool =
     except Exception as e:
         logger.error(f"❌ 发送个性化推送失败: {e}")
 
-    # 最后关闭连接
-    try:
-        conn.close()
-    except:
-        pass
+    # 最后关闭全局连接
+    close_global_connection()

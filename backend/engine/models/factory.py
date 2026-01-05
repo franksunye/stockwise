@@ -18,7 +18,7 @@ class ModelFactory:
         cursor.execute("SELECT * FROM prediction_models WHERE model_id = ?", (model_id,))
         # Adapt to row format
         row = cursor.fetchone()
-        conn.close()
+        # Don't close global connection
         
         if not row:
             raise ValueError(f"Model ID '{model_id}' not found in registry.")
@@ -71,7 +71,7 @@ class ModelFactory:
         cursor = conn.cursor()
         cursor.execute("SELECT model_id FROM prediction_models WHERE is_active = 1 ORDER BY priority DESC")
         rows = cursor.fetchall()
-        conn.close()
+        # Don't close global connection
         
         models = []
         for row in rows:
