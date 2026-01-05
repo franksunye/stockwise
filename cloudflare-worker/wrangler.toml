@@ -12,5 +12,5 @@ crons = ["*/10 * * * *"]
 # [vars]
 # GITHUB_OWNER = "franksunye"
 # GITHUB_REPO = "stockwise"
-# GITHUB_WORKFLOW = "realtime-sync.yml"
+# GITHUB_WORKFLOW = "data_sync_realtime.yml"
 # GITHUB_TOKEN 必须在 Dashboard 中设置为 Secret
