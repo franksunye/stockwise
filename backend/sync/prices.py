@@ -66,15 +66,13 @@ def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool =
     df = calculate_indicators(df)
     
     # 6. 入库
-    conn = get_connection()
-    cursor = conn.cursor()
-    records = []
-    
+    # 6. 入库
     # 定义舍入函数
     def r2(x): return round(float(x), 2) if x else 0
     def r3(x): return round(float(x), 3) if x else 0
     def r1(x): return round(float(x), 1) if x else 0
-
+    
+    records = []
     for _, row in df.iterrows():
         records.append((
             symbol, row["date"], r2(row["open"]), r2(row["high"]), r2(row["low"]), r2(row["close"]),
@@ -83,16 +81,21 @@ def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool =
             r3(row["macd"]), r3(row["macd_signal"]), r3(row["macd_hist"]),
             r2(row["boll_upper"]), r2(row["boll_mid"]), r2(row["boll_lower"]),
             r1(row["rsi"]), r1(row["kdj_k"]), r1(row["kdj_d"]), r1(row["kdj_j"]), None
-        ))
-    
-    cursor.executemany(f"""
-        INSERT OR REPLACE INTO {table_name} 
-        (symbol, date, open, high, low, close, volume, change_percent,
-         ma5, ma10, ma20, ma60, macd, macd_signal, macd_hist,
-         boll_upper, boll_mid, boll_lower, rsi, kdj_k, kdj_d, kdj_j, ai_summary)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, records)
-    conn.commit()
+        )) # type: ignore
+
+    from database import execute_with_retry
+
+    def _save_prices(conn, _table, _records):
+        cur = conn.cursor()
+        cur.executemany(f"""
+            INSERT OR REPLACE INTO {_table} 
+            (symbol, date, open, high, low, close, volume, change_percent,
+             ma5, ma10, ma20, ma60, macd, macd_signal, macd_hist,
+             boll_upper, boll_mid, boll_lower, rsi, kdj_k, kdj_d, kdj_j, ai_summary)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, _records)
+
+    execute_with_retry(_save_prices, 3, table_name, records)
     
     # 7. 实时更新推送 (仅在盘中实时模式下触发)
     if is_realtime:
@@ -101,13 +104,16 @@ def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool =
         price = float(last_row['close'])
         
         # 尝试从数据库获取中文简称
-        stock_name = symbol
+        def _get_name(conn, sym):
+            cur = conn.cursor()
+            cur.execute("SELECT name FROM stock_meta WHERE symbol = ?", (sym,))
+            r = cur.fetchone()
+            return r[0] if r else sym
+
         try:
-            cursor.execute("SELECT name FROM stock_meta WHERE symbol = ?", (symbol,))
-            row_meta = cursor.fetchone()
-            if row_meta:
-                stock_name = row_meta[0]
-        except: pass
+            stock_name = execute_with_retry(_get_name, 2, symbol)
+        except:
+            stock_name = symbol
         
         emoji = "🚀" if change >= 3 else ("📈" if change > 0 else ("🔹" if change == 0 else "📉"))
         title = f"{stock_name} ({symbol}) {emoji} {change:+.2f}%"
@@ -121,8 +127,6 @@ def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool =
             related_symbol=symbol,
             tag=f"price_update_{symbol}"
         )
-    
-    conn.close()
 
 
 def run_full_sync(market_filter: str = None):

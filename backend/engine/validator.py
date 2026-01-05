@@ -9,9 +9,11 @@ NOISE_THRESHOLD = 1.0
 
 def validate_previous_prediction(symbol: str, today_data: pd.Series):
     """验证昨日的 AI 预测 (T-1 预测 T)"""
-    conn = get_connection()
+    from database import execute_with_retry # Delayed import to avoid circular dep if any
+    execute_with_retry(_validate_logic, 3, symbol, today_data)
+
+def _validate_logic(conn, symbol: str, today_data: pd.Series):
     cursor = conn.cursor()
-    
     today_str = today_data['date']
 
     # --- 1. Validate Legacy Table (ai_predictions) ---
@@ -38,6 +40,7 @@ def validate_previous_prediction(symbol: str, today_data: pd.Series):
             icon = "✅" if status == "Correct" else "❌"
             logger.info(f"   {icon} Validated [V1] ({pred_date}): Signal={signal}, Change={actual_change:+.2f}%, Result={status}")
     except Exception as e:
+        if "stream" in str(e).lower() or "404" in str(e): raise e
         logger.warning(f"   ⚠️ Validation V1 Error: {e}")
 
     # --- 2. Validate Multi-Model Table (ai_predictions_v2) ---
@@ -69,10 +72,8 @@ def validate_previous_prediction(symbol: str, today_data: pd.Series):
             logger.info(f"   🔍 Validated {validated_count} V2 models for {symbol} (Last: {p_date})")
 
     except Exception as e:
+        if "stream" in str(e).lower() or "404" in str(e): raise e
         logger.warning(f"   ⚠️ Validation V2 Error: {e}")
-        
-    conn.commit()
-    conn.close()
 
 def _calculate_status(signal, actual_change):
     """Helper to determine Open/Close/Hold result status"""

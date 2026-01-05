@@ -11,6 +11,40 @@ from pathlib import Path
 
 from config import DB_PATH, TURSO_DB_URL, TURSO_AUTH_TOKEN
 from logger import logger
+import time
+
+def execute_with_retry(func, max_retries=3, *args, **kwargs):
+    """
+    Executes a function with database connection retry logic.
+    The function `func` must accept `conn` as its first argument.
+    """
+    last_exception = None
+    for attempt in range(max_retries):
+        conn = None
+        try:
+            conn = get_connection()
+            result = func(conn, *args, **kwargs)
+            conn.commit()
+            return result
+        except Exception as e:
+            last_exception = e
+            # Check for transient errors (Hrana stream, lock, timeout)
+            error_msg = str(e).lower()
+            if "stream not found" in error_msg or "locked" in error_msg or "404" in error_msg:
+                logger.warning(f"🔄 Database Error (Attempt {attempt+1}/{max_retries}): {e} - Retrying...")
+                time.sleep(1 * (attempt + 1)) # Backoff
+            else:
+                # If it's a logic error, raise immediately
+                raise e
+        finally:
+            if conn:
+                try:
+                    conn.close()
+                except:
+                    pass
+    
+    logger.error(f"❌ Failed after {max_retries} attempts. Last error: {last_exception}")
+    raise last_exception
 
 def get_connection():
     """

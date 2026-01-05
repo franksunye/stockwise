@@ -4,42 +4,46 @@
 from datetime import datetime
 
 from config import BEIJING_TZ
-from database import get_connection
+from database import get_connection, execute_with_retry
 from trading_calendar import is_market_closed
 from logger import logger
 
 
 def get_last_date(symbol: str, table: str = "daily_prices") -> str:
     """获取数据库中某支股票的最后日期"""
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute(f"SELECT MAX(date) FROM {table} WHERE symbol = ?", (symbol,))
-    row = cursor.fetchone()
-    conn.close()
-    return row[0] if row and row[0] else None
+    def _logic(conn, sym, tbl):
+        cur = conn.cursor()
+        cur.execute(f"SELECT MAX(date) FROM {tbl} WHERE symbol = ?", (sym,))
+        return cur.fetchone()
+
+    try:
+        row = execute_with_retry(_logic, 3, symbol, table)
+        return row[0] if row and row[0] else None
+    except Exception:
+        return None
 
 
 def check_stock_analysis_mode(symbol: str) -> str:
     """检查股票分析模式：如果有 Pro/Premium 用户关注，则使用 AI，否则使用 Rules"""
     try:
-        conn = get_connection()
-        cursor = conn.cursor()
-        
-        # 获取当前 UTC 时间字符串进行比较 (格式兼容 ISO)
-        now_str = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S")
-        
-        # 检查是否有有效期内的付费用户关注
-        query = """
-        SELECT COUNT(*) FROM users u
-        JOIN user_watchlist w ON u.user_id = w.user_id
-        WHERE w.symbol = ? 
-        AND u.subscription_tier IN ('pro', 'premium')
-        AND (u.subscription_expires_at IS NULL OR u.subscription_expires_at > ?)
-        """
-        cursor.execute(query, (symbol, now_str))
-        row = cursor.fetchone()
+        def _logic(conn, sym):
+            cursor = conn.cursor()
+            # 获取当前 UTC 时间字符串进行比较 (格式兼容 ISO)
+            now_str = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S")
+            
+            # 检查是否有有效期内的付费用户关注
+            query = """
+            SELECT COUNT(*) FROM users u
+            JOIN user_watchlist w ON u.user_id = w.user_id
+            WHERE w.symbol = ? 
+            AND u.subscription_tier IN ('pro', 'premium')
+            AND (u.subscription_expires_at IS NULL OR u.subscription_expires_at > ?)
+            """
+            cursor.execute(query, (sym, now_str))
+            return cursor.fetchone()
+
+        row = execute_with_retry(_logic, 3, symbol)
         count = row[0] if row else 0
-        conn.close()
         
         mode = 'ai' if count > 0 else 'rule'
         if mode == 'ai':
