@@ -1,5 +1,6 @@
 import pandas as pd
 from database import get_connection
+from logger import logger
 
 # Industry Standard: Noise Threshold (1%)
 # "Side" signals are considered correct if the price moves within this range (noise),
@@ -35,9 +36,9 @@ def validate_previous_prediction(symbol: str, today_data: pd.Series):
             """, (status, actual_change, symbol, pred_date))
             
             icon = "✅" if status == "Correct" else "❌"
-            print(f"   {icon} Validated [V1] ({pred_date}): Signal={signal}, Change={actual_change:+.2f}%, Result={status}")
+            logger.info(f"   {icon} Validated [V1] ({pred_date}): Signal={signal}, Change={actual_change:+.2f}%, Result={status}")
     except Exception as e:
-        print(f"   ⚠️ Validation V1 Error: {e}")
+        logger.warning(f"   ⚠️ Validation V1 Error: {e}")
 
     # --- 2. Validate Multi-Model Table (ai_predictions_v2) ---
     try:
@@ -65,10 +66,10 @@ def validate_previous_prediction(symbol: str, today_data: pd.Series):
                 """, (status, actual_change, symbol, p_date, m_id))
                 validated_count += 1
                 
-            print(f"   Note: Validated {validated_count} V2 models for {symbol}")
+            logger.info(f"   🔍 Validated {validated_count} V2 models for {symbol} (Last: {p_date})")
 
     except Exception as e:
-        print(f"   ⚠️ Validation V2 Error: {e}")
+        logger.warning(f"   ⚠️ Validation V2 Error: {e}")
         
     conn.commit()
     conn.close()
