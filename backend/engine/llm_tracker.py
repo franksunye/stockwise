@@ -106,6 +106,7 @@ class LLMTracker:
     
     def _save_trace(self, trace: LLMTrace):
         """保存追踪记录到数据库 (自动适配配置)"""
+        conn = None
         try:
             from database import get_connection
             
@@ -151,11 +152,16 @@ class LLMTracker:
             ))
             
             conn.commit()
-            # Don't close global connection
             
         except Exception as e:
             # 追踪失败不应该影响主流程
             print(f"   ⚠️ 追踪记录保存失败: {e}")
+        finally:
+            if conn:
+                try:
+                    conn.close()
+                except:
+                    pass
     
     def get_current_trace(self) -> Optional[LLMTrace]:
         """获取当前追踪"""

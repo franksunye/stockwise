@@ -67,10 +67,17 @@ class PredictionRunner:
             
         predictions = await asyncio.gather(*tasks)
         
-        # 4. Save Results & Determine Primary (Reset primary first for this day)
+        # 4. Save Results & Determine Primary
         conn = get_connection()
         cursor = conn.cursor()
         
+        # Only proceed if we have at least one successful prediction
+        valid_predictions = [p for p in predictions if p]
+        if not valid_predictions:
+            logger.warning(f"⚠️ No successful predictions for {symbol}, aborting save.")
+            conn.close()
+            return
+
         try:
             # Reset existing primary flags for this day to avoid conflicts
             cursor.execute("UPDATE ai_predictions_v2 SET is_primary = 0 WHERE symbol = ? AND date = ?", (symbol, date))
@@ -79,6 +86,7 @@ class PredictionRunner:
 
         primary_assigned = False
         saved_count = 0
+        primary_pred = None
         
         for i, pred in enumerate(predictions):
             if not pred:
@@ -91,8 +99,10 @@ class PredictionRunner:
             if not primary_assigned:
                 is_primary = 1
                 primary_assigned = True
+                primary_pred = pred
                 
             try:
+                # Save to V2 Table
                 cursor.execute("""
                     INSERT OR REPLACE INTO ai_predictions_v2 
                     (symbol, date, model_id, target_date, signal, confidence, 
@@ -101,27 +111,39 @@ class PredictionRunner:
                      is_primary, created_at, updated_at)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
                 """, (
-                    symbol,
-                    date,
-                    model_id,
-                    pred.get('target_date'), 
-                    pred.get('signal'),
-                    pred.get('confidence'),
-                    pred.get('support_price'),
-                    pred.get('pressure_price'),
-                    pred.get('reasoning'),
-                    pred.get('token_usage_input', 0),
-                    pred.get('token_usage_output', 0),
-                    pred.get('execution_time_ms', 0),
-                    is_primary
+                    symbol, date, model_id,
+                    pred.get('target_date'), pred.get('signal'), pred.get('confidence'),
+                    pred.get('support_price'), pred.get('pressure_price'), pred.get('reasoning'),
+                    pred.get('token_usage_input', 0), pred.get('token_usage_output', 0),
+                    pred.get('execution_time_ms', 0), is_primary
                 ))
                 saved_count += 1
             except Exception as e:
-                logger.error(f"Failed to save result for {model_id}: {e}")
+                logger.error(f"Failed to save V2 result for {model_id}: {e}")
+
+        # 5. Compatibility: Sync Primary to Legacy Table (ai_predictions)
+        if primary_pred:
+            try:
+                cursor.execute("""
+                    INSERT OR REPLACE INTO ai_predictions 
+                    (symbol, date, target_date, signal, confidence, support_price, ai_reasoning, model, created_at, updated_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                """, (
+                    symbol, date, 
+                    primary_pred.get('target_date'),
+                    primary_pred.get('signal'),
+                    primary_pred.get('confidence'),
+                    primary_pred.get('support_price'),
+                    primary_pred.get('reasoning'),
+                    primary_pred['model_id']
+                ))
+                logger.debug(f"✅ Synced primary ({primary_pred['model_id']}) to legacy table.")
+            except Exception as e:
+                logger.error(f"Failed to sync to legacy table: {e}")
 
         conn.commit()
         conn.close()
-        logger.info(f"✅ Analysis completed for {symbol}. Saved {saved_count} results. Primary: {primary_assigned}")
+        logger.info(f"✅ Analysis completed for {symbol}. Saved {saved_count} results. Primary: {primary_pred['model_id'] if primary_pred else 'None'}")
 
     async def _safe_predict(self, model, symbol, date, data):
         try:

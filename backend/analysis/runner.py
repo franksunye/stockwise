@@ -76,14 +76,14 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool =
             today_str = today_data['date']
             
             # --- Idempotency Check (幂等性检查) ---
-            # 除非指定 force=True，否则如果库里已经有了今天的 Pending 预测，就跳过。
+            # 除非指定 force=True，否则如果库里已经有了今天的 V2 预测，就跳过。
             if not force:
                 cursor.execute(
-                    "SELECT 1 FROM ai_predictions WHERE symbol = ? AND date = ? LIMIT 1",
+                    "SELECT 1 FROM ai_predictions_v2 WHERE symbol = ? AND date = ? LIMIT 1",
                     (stock, today_str)
                 )
                 if cursor.fetchone():
-                    logger.info(f"⏩ {stock}: {today_str} 预测已存在，跳过 (Cost Saving)")
+                    logger.info(f"⏩ {stock}: {today_str} V2 预测已存在，跳过 (Cost Saving)")
                     success_count += 1 # 视为成功
                     continue
             # --------------------------------------
