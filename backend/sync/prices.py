@@ -160,8 +160,8 @@ def run_full_sync(market_filter: str = None):
     success_count = 0
     errors = []
     
-    # 使用线程池并发同步 (Max Workers = 4)
-    logger.info(f"🚀 启动并发同步 (Workers=4)...")
+    # 使用线程池并发同步 (Max Workers = 2)
+    logger.info(f"🚀 启动并发同步 (Workers=2)...")
     
     def sync_single_stock(stock):
         """单个股票的全量同步任务"""
@@ -177,7 +177,7 @@ def run_full_sync(market_filter: str = None):
         except Exception as e:
             raise e
 
-    with ThreadPoolExecutor(max_workers=4) as executor:
+    with ThreadPoolExecutor(max_workers=2) as executor:
         future_to_stock = {executor.submit(sync_single_stock, stock): stock for stock in target_stocks}
         
         for i, future in enumerate(as_completed(future_to_stock)):
