@@ -31,7 +31,7 @@ def _get_libsql_connection():
 def create_sa_engine():
     """
     创建 SQLAlchemy Engine。
-    远程 Turso 使用连接池，本地使用 NullPool。
+    远程 Turso 和本地都使用 NullPool (禁用连接池) 以确保稳定性。
     """
     from sqlalchemy.pool import NullPool
     
@@ -39,15 +39,12 @@ def create_sa_engine():
     # 为了解决 create_function 问题，必须通过 URL 路由到我们自定义的 LibSQLDialect 类
     
     if TURSO_DB_URL:
+        # 远程 Turso 连接如果不稳定 (stream not found)，建议使用 NullPool 禁用连接池
+        # 每次操作创建新连接，虽然有握手开销，但能彻底避免复用过期流的问题
         return create_engine(
             "sqlite+libsql://",  # 使用自定义 scheme
             creator=_get_libsql_connection,
-            poolclass=QueuePool,
-            pool_size=10,
-            max_overflow=20,
-            pool_recycle=300,
-            pool_pre_ping=True,
-            pool_use_lifo=True,
+            poolclass=NullPool,
             module=libsql # 明确传入 module
         )
     else:

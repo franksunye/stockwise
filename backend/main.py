@@ -34,6 +34,7 @@ from logger import logger
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='StockWise ETL Pipeline')
     parser.add_argument('--realtime', action='store_true', help='执行盘中实时同步')
+    parser.add_argument('--sync', action='store_true', help='执行行情同步 (配合 --symbol 使用)')
     parser.add_argument('--sync-meta', action='store_true', help='仅同步股票元数据')
     parser.add_argument('--analyze', action='store_true', help='执行 AI 预测分析 (独立任务)')
     parser.add_argument('--symbol', type=str, help='指定股票代码')
@@ -92,6 +93,7 @@ if __name__ == "__main__":
         
         # 发送通知
         if success:
+            logger.info(f"✅ {args.symbol} 同步完成，耗时 {duration:.2f}s")
             report = f"### ✅ StockWise: On-Demand Sync\n"
             report += f"> **Symbol**: {args.symbol}\n"
             report += f"- **Status**: 成功\n"
