@@ -42,59 +42,46 @@ export function useDashboardData() {
         }
 
         try {
-            const poolRes = await fetch(`/api/stock-pool?userId=${user.userId}`, { cache: 'no-store' });
-            const poolData = await poolRes.json();
-            const watchlist = poolData.stocks || [{ symbol: '02171', name: '科济药业' }];
-
-            // 如果是静默刷新且已有数据，不重置为loading状态
-            if (!silent || stocks.length === 0) {
-                const initialStocks = watchlist.map((s: { symbol: string; name: string }) => ({
-                    symbol: s.symbol,
-                    name: s.name,
-                    price: null,
-                    prediction: null,
-                    previousPrediction: null,
-                    history: [],
-                    lastUpdated: '--:--',
-                    rule: getRule(s.symbol),
-                    loading: true
-                }));
-                setStocks(initialStocks);
-            }
-            setLoadingPool(false);
-
-            // 并行请求每只股票的数据
-            const stockPromises = watchlist.map(async (stock: { symbol: string; name: string }) => {
-                try {
-                    const [stockRes, historyRes] = await Promise.all([
-                        fetch(`/api/stock?symbol=${stock.symbol}`, { cache: 'no-store' }),
-                        fetch(`/api/predictions?symbol=${stock.symbol}&limit=15`, { cache: 'no-store' })
-                    ]);
-                    const sData = await stockRes.json();
-                    const hData = await historyRes.json();
-
-                    return {
-                        symbol: stock.symbol,
-                        name: stock.name,
-                        price: sData.price,
-                        prediction: sData.prediction,
-                        previousPrediction: sData.previousPrediction,
-                        lastUpdated: sData.last_update_time || '--:--',
-                        history: hData.predictions || [],
-                        rule: getRule(stock.symbol),
-                        loading: false,
-                        justUpdated: silent // 标记刚刚更新，用于触发UI动画
-                    };
-                } catch (e) {
-                    console.error(`Failed to load ${stock.symbol}`, e);
-                    return null;
-                }
+            // 🚀 使用批量 API，将原来的 41 个请求合并为 1 个
+            const startTime = performance.now();
+            const dashboardRes = await fetch(`/api/dashboard?userId=${user.userId}&historyLimit=15`, {
+                cache: 'no-store'
             });
+            const dashboardData = await dashboardRes.json();
 
-            const results = await Promise.all(stockPromises);
-            const validResults = results.filter(Boolean) as StockData[];
+            if (dashboardData.error) {
+                console.error('Dashboard API error:', dashboardData.error);
+                setLoadingPool(false);
+                return;
+            }
+
+            const fetchTime = Math.round(performance.now() - startTime);
+            console.log(`📊 Dashboard loaded: ${dashboardData.stocks?.length || 0} stocks in ${fetchTime}ms (server: ${dashboardData.queryTime}ms)`);
+
+            // 组装前端需要的数据格式
+            const validResults = (dashboardData.stocks || []).map((stock: {
+                symbol: string;
+                name: string;
+                price: unknown;
+                prediction: unknown;
+                previousPrediction: unknown;
+                history: unknown[];
+                lastUpdated: string;
+            }) => ({
+                symbol: stock.symbol,
+                name: stock.name,
+                price: stock.price,
+                prediction: stock.prediction,
+                previousPrediction: stock.previousPrediction,
+                lastUpdated: stock.lastUpdated || '--:--',
+                history: stock.history || [],
+                rule: getRule(stock.symbol),
+                loading: false,
+                justUpdated: silent
+            })) as StockData[];
 
             setStocks(validResults);
+            setLoadingPool(false);
             setLastRefreshTime(new Date());
             setNextRefreshIn(getRefreshInterval());
 
@@ -105,7 +92,7 @@ export function useDashboardData() {
                 }, 2000);
             }
         } catch (e) {
-            console.error(e);
+            console.error('Dashboard fetch error:', e);
             setLoadingPool(false);
         } finally {
             setIsRefreshing(false);
