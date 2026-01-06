@@ -3,11 +3,16 @@ LLM 稳定性与 JSON 解析压力测试脚本
 用于验证 Prompt 结构和客户端解析器的鲁棒性
 """
 import sys
+import os
 import time
 import pandas as pd
-from engine.llm_client import get_llm_client
-from engine.prompts import prepare_stock_analysis_prompt
-from database import get_connection
+
+# Add project root to path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from backend.engine.llm_client import get_llm_client
+from backend.engine.prompts import prepare_stock_analysis_prompt
+from backend.database import get_connection
 
 def get_test_symbol():
     """获取一个有数据的股票代码用于测试"""

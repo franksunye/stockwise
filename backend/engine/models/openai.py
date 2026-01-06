@@ -58,26 +58,27 @@ class OpenAIAdapter(BasePredictionModel):
         ]
         
         # Initialize LLM Tracker
+        # Initialize LLM Tracker
         tracker = get_tracker()
-        tracker.start_trace(symbol=symbol, model=self.model_id)
-        tracker.set_prompts(system_prompt, user_prompt)
-
+        
         start_time = time.time()
         
         # Retry configuration
         max_retries = 3
-        retry_delay = 2  # Initial delay in seconds (exponential backoff: 2, 4, 8)
+        retry_delay = 2
         
         last_error = None
         parsed = None
-        meta = {}
         final_content = None
-        retry_count = 0
         
         for attempt in range(max_retries + 1):
-            # Execute Chat via LLMClient
-            # Since LLMClient is synchronous, we run it in a thread to avoid blocking the async loop
-            # This restores true parallelism for the Runner.
+            # Start a FRESH trace for each attempt (Full Fidelity Logging)
+            tracker.start_trace(symbol=symbol, model=self.model_id)
+            tracker.set_prompts(system_prompt, user_prompt)
+            if attempt > 0:
+                tracker._current_trace.retry_count = attempt
+
+            # Execute Chat via LLMClient in thread
             try:
                 loop = asyncio.get_event_loop()
                 content, meta = await loop.run_in_executor(
@@ -92,18 +93,31 @@ class OpenAIAdapter(BasePredictionModel):
             except Exception as e:
                 last_error = f"Client Error: {str(e)}"
                 logger.error(f"LLM Client execution failed (attempt {attempt + 1}/{max_retries + 1}): {e}")
+                
+                # Record Failure Trace IMMEDIATELY
+                tracker.set_status("error", last_error)
+                tracker.end_trace()
+                
                 if attempt < max_retries:
-                    retry_count += 1
-                    tracker.increment_retry()
                     await asyncio.sleep(retry_delay * (2 ** attempt))
                 continue
+
+            # Record Token Usage for this attempt
+            tracker.set_tokens(
+                input_tokens=meta.get("input_tokens", 0),
+                output_tokens=meta.get("output_tokens", 0),
+                total_tokens=meta.get("total_tokens", 0)
+            )
 
             if not content:
                 last_error = meta.get("error", "Empty response from LLM")
                 logger.error(f"LLM request failed (attempt {attempt + 1}/{max_retries + 1}): {last_error}")
+                
+                # Record Failure Trace
+                tracker.set_status("error", last_error)
+                tracker.end_trace()
+                
                 if attempt < max_retries:
-                    retry_count += 1
-                    tracker.increment_retry()
                     await asyncio.sleep(retry_delay * (2 ** attempt))
                 continue
 
@@ -112,45 +126,47 @@ class OpenAIAdapter(BasePredictionModel):
 
             # Reuse robust parsing logic from LLMClient
             parsed = self.client._parse_json_response(content)
+            tracker.set_response(final_content, parsed)
             
             if not parsed:
                 last_error = "Failed to parse AI response"
                 logger.warning(f"Failed to parse JSON response for {self.model_id} (attempt {attempt + 1}/{max_retries + 1})")
+                
+                # Record Parse Failure Trace
+                tracker.set_status("parse_failed", "JSON 解析失败")
+                tracker.end_trace()
+                
                 if attempt < max_retries:
                     logger.info(f"🔄 Retrying in {retry_delay * (2 ** attempt)}s...")
-                    retry_count += 1
-                    tracker.increment_retry()
                     await asyncio.sleep(retry_delay * (2 ** attempt))
                 continue
             
-            # Success - break out of retry loop
-            break
+            # Success!
+            tracker.set_status("success")
+            trace = tracker.end_trace()
+            if trace:
+                logger.info(f"📊 Trace: ✅ {trace.latency_ms}ms | {trace.total_tokens} tokens | attempt: {attempt + 1}")
+            
+            # Normalize and Return
+            end_time = time.time()
+            execution_time = int((end_time - start_time) * 1000)
+            parsed = normalize_ai_response(parsed)
+            key_levels = parsed.get("key_levels", {})
+            clean_reasoning = json.dumps(parsed, ensure_ascii=False)
+            
+            return {
+                "signal": parsed.get("signal", "Side"),
+                "confidence": float(parsed.get("confidence", 0.5)),
+                "reasoning": clean_reasoning,
+                "support_price": key_levels.get("support"),
+                "pressure_price": key_levels.get("resistance"),
+                "token_usage_input": meta.get("input_tokens", 0),
+                "token_usage_output": meta.get("output_tokens", 0),
+                "execution_time_ms": execution_time
+            }
         
-        end_time = time.time()
-        execution_time = int((end_time - start_time) * 1000)
-        
-        # Record tracking data
-        tracker.set_tokens(
-            input_tokens=meta.get("input_tokens", 0),
-            output_tokens=meta.get("output_tokens", 0),
-            total_tokens=meta.get("total_tokens", 0)
-        )
-        tracker.set_response(final_content, parsed)
-        
-        if not parsed:
-            logger.error(f"Failed to parse JSON response for {self.model_id} after {max_retries + 1} attempts")
-            if final_content:
-                tracker.set_status("parse_failed", "JSON 解析失败")
-            else:
-                tracker.set_status("error", last_error or "未知错误")
-            tracker.end_trace()
-            return self._error_result(f"Parse Failed: {last_error}")
-        
-        # Mark success and save trace
-        tracker.set_status("success")
-        trace = tracker.end_trace()
-        if trace:
-            logger.info(f"📊 Trace: ✅ {trace.latency_ms}ms | {trace.total_tokens} tokens | retries: {trace.retry_count}")
+        # If loop finishes without success
+        return self._error_result(f"Failed after {max_retries + 1} attempts. Last Error: {last_error}")
         
         # Normalize schema (Anti-Corruption Layer)
         parsed = normalize_ai_response(parsed)
