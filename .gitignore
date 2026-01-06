@@ -36,3 +36,5 @@ out/
 # Logs
 *.log
 npm-debug.log*
+data/stockwise.db-shm
+data/stockwise.db-wal
