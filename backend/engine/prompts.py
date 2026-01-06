@@ -187,13 +187,15 @@ def prepare_stock_analysis_prompt(symbol: str, as_of_date: str = None):
 3. **可验证**：每条建议都有明确的触发条件，事后可验证对错。
 4. **简洁直白**：使用普通人能秒懂的语言，避免晦涩术语。
 5. **板块联动**：请结合你对该公司所属行业、板块特性及市场环境的理解，给出更有背景的建议。
-6. **事件驱动**：如果你具备搜索能力，请尝试搜索该公司近期的重大新闻、公告或事件，并将其纳入分析（如无搜索能力可跳过此步）。
+6. **事件驱动**：如果你具备搜索能力，请尝试搜索该公司近期的重大新闻、公告或事件，并将其纳入分析。如无法联网，请在 news_impact 和 news_analysis 中注明"基于历史数据分析，无实时新闻"，严禁编造。
 
 ## 任务目标
 根据提供的股票数据，生成 JSON 格式的操作建议。
 
 ## 严格约束
 1. **必须输出纯 JSON**：不要包含 ```json 或 ``` 标记，不要包含任何前言或后记。
+   ❌ 错误: ```json {"signal": "Side"} ```
+   ✅ 正确: {"signal": "Side", ...}
 2. **严禁幻觉**：仅根据提供的数据分析，不要编造新闻。
 3. **格式保证**：确保所有括号正确闭合，确保是合法的 JSON 对象。
 
@@ -223,6 +225,28 @@ def prepare_stock_analysis_prompt(symbol: str, as_of_date: str = None):
   "key_levels": { "support": 31.6, "resistance": 33.88, "stop_loss": 31.0 },
   "conflict_resolution": "技术面超买与基本面风险共振，优先风控。",
   "tomorrow_focus": "能否守住31.6元支撑"
+}
+
+### 示例 2: 做多信号 (Long) - 关键字段
+{
+  "signal": "Long",
+  "confidence": 0.85,
+  "summary": "多周期共振向上，突破关键阻力位，量价配合良好。",
+  "reasoning_trace": [
+    { "step": "trend", "data": "MA20/60金叉，周月线趋势向上", "conclusion": "趋势健康" },
+    { "step": "decision", "data": "多周期共振+突破+量能配合", "conclusion": "做多" }
+  ]
+}
+
+### 示例 3: 避险信号 (Short) - 关键字段
+{
+  "signal": "Short",
+  "confidence": 0.80,
+  "summary": "跌破关键支撑，均线空头排列，建议避险。",
+  "reasoning_trace": [
+    { "step": "trend", "data": "MA20/60死叉，周线破位下行", "conclusion": "趋势恶化" },
+    { "step": "decision", "data": "多周期共振下跌+破位+放量", "conclusion": "避险" }
+  ]
 }"""
 
     # Dynamic Context Instruction
