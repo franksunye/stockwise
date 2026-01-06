@@ -109,7 +109,7 @@ class PredictionRunner:
                      support_price, pressure_price, ai_reasoning,
                      token_usage_input, token_usage_output, execution_time_ms,
                      is_primary, created_at, updated_at)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now', '+8 hours'), datetime('now', '+8 hours'))
                 """, (
                     symbol, date, model_id,
                     pred.get('target_date'), pred.get('signal'), pred.get('confidence'),
@@ -127,7 +127,7 @@ class PredictionRunner:
                 cursor.execute("""
                     INSERT OR REPLACE INTO ai_predictions 
                     (symbol, date, target_date, signal, confidence, support_price, ai_reasoning, model, created_at, updated_at)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now', '+8 hours'), datetime('now', '+8 hours'))
                 """, (
                     symbol, date, 
                     primary_pred.get('target_date'),

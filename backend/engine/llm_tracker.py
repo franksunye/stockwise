@@ -130,7 +130,7 @@ class LLMTracker:
                     status TEXT DEFAULT 'pending',
                     error_message TEXT,
                     retry_count INTEGER DEFAULT 0,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    created_at TIMESTAMP DEFAULT (datetime('now', '+8 hours'))
                 )
             """)
             

@@ -64,7 +64,7 @@ def _validate_logic(conn, symbol: str, today_data: pd.Series):
                 
                 cursor.execute("""
                     UPDATE ai_predictions_v2
-                    SET validation_status = ?, actual_change = ?, updated_at = CURRENT_TIMESTAMP
+                    SET validation_status = ?, actual_change = ?, updated_at = datetime('now', '+8 hours')
                     WHERE symbol = ? AND date = ? AND model_id = ?
                 """, (status, actual_change, symbol, p_date, m_id))
                 validated_count += 1
