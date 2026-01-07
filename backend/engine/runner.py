@@ -29,8 +29,8 @@ class PredictionRunner:
             logger.warning("⚠️ No active models found!")
             return
         
-        # Apply model filter if specified
-        if self.model_filter:
+        # Apply model filter if specified (and not 'all')
+        if self.model_filter and self.model_filter != 'all':
             models = [m for m in models if m.model_id == self.model_filter]
             if not models:
                 logger.warning(f"⚠️ Model '{self.model_filter}' not found or not active!")

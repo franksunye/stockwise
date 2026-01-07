@@ -24,7 +24,8 @@ def run_ai_analysis_backfill(
     start_date: str = None,
     end_date: str = None,
     days: int = None,
-    auto_fill: bool = False
+    auto_fill: bool = False,
+    model_filter: str = None
 ):
     """
     AI 分析回填功能
@@ -99,7 +100,7 @@ def run_ai_analysis_backfill(
         for date_str in sorted(dates_with_stocks.keys()):
             stocks_to_fill = dates_with_stocks[date_str]
             logger.info(f"\n🧠 开始补充 {date_str}...")
-            success = _analyze_stocks_for_date(conn, stocks_to_fill, date_str)
+            success = _analyze_stocks_for_date(conn, stocks_to_fill, date_str, model_filter=model_filter)
             total_success += success
         
         conn.close()
@@ -180,7 +181,7 @@ def run_ai_analysis_backfill(
         logger.info(f"🗓️ 分析日期: {date_str}")
         logger.info(f"{'='*50}")
         
-        success = _analyze_stocks_for_date(conn, targets, date_str)
+        success = _analyze_stocks_for_date(conn, targets, date_str, model_filter=model_filter)
         total_success += success
     
     conn.close()
@@ -200,9 +201,22 @@ def run_ai_analysis_backfill(
     send_wecom_notification(report)
 
 
-def _analyze_stocks_for_date(conn, stocks: list, date_str: str) -> int:
+def _analyze_stocks_for_date(conn, stocks: list, date_str: str, model_filter: str = None) -> int:
     """为指定日期分析一组股票，返回成功数量"""
     success_count = 0
+    
+    # Use PredictionRunner for multi-model support
+    from engine.runner import PredictionRunner
+    import asyncio
+    import os
+    
+    runner = PredictionRunner(model_filter=model_filter)
+    
+    # Windows event loop policy
+    if os.name == 'nt':
+        try:
+            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+        except: pass
     
     for stock in stocks:
         try:
@@ -222,22 +236,23 @@ def _analyze_stocks_for_date(conn, stocks: list, date_str: str) -> int:
                 continue
             
             logger.info(f"   >>> 分析 {stock} ({date_str})")
-            logger.info(f"       ✅ 数据校验: 收盘={row['close']}, MA5={row['ma5']:.2f}, RSI={row['rsi']:.1f}")
             
-            # 确定分析模式
-            analysis_mode = check_stock_analysis_mode(stock)
+            # Prepare data for PredictionRunner
+            # PredictionRunner expects {'price_data': [dict]}
+            row_dict = row.to_dict()
+            data = {'price_data': [row_dict]}
             
-            # 生成预测 (传入 as_of_date 用于回填场景，确保 prompt 使用历史数据)
-            generate_ai_prediction(stock, row, mode=analysis_mode, as_of_date=date_str)
+            # Run prediction
+            asyncio.run(runner.run_analysis(stock, date_str, data=data))
             success_count += 1
+            
+            # Sync back validation logic
+            try:
+                 validate_previous_prediction(stock, row)
+            except Exception as e:
+                 logger.warning(f"   ⚠️ {stock} 验证失败: {e}")
             
         except Exception as e:
             logger.error(f"   ❌ {stock} 分析失败: {e}")
-
-        # 尝试验证前一天的预测 (利用当天数据验证 T-1)
-        try:
-             validate_previous_prediction(stock, row)
-        except Exception as e:
-             logger.warning(f"   ⚠️ {stock} 验证失败: {e}")
     
     return success_count
