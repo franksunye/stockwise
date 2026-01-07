@@ -116,7 +116,7 @@ class LLMClient:
             "model": model or self.model,
             "messages": messages,
             "temperature": temperature,
-            "max_tokens": 4000,
+            "max_tokens": max_tokens,
         }
         
         headers = {
