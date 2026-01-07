@@ -99,73 +99,79 @@ def _process_and_store_prediction(symbol, date, ai_result, model="rule-based"):
 
 
 def _generate_rule_based_prediction(symbol: str, today_data: pd.Series):
-    """基于硬编码规则的预测逻辑（回退方案）"""
-    close = today_data.get('close', 0)
-    ma20 = today_data.get('ma20', 0)
-    rsi = today_data.get('rsi', 50)
-    macd_hist = today_data.get('macd_hist', 0)
-    macd_status = "金叉" if macd_hist > 0 else "死叉"
-    support_price = today_data.get('ma20', close * 0.95)
+    """基于 QuantEngine 的预测逻辑（回退方案）"""
     today_str = today_data.get('date')
     
     conn = get_connection()
     cursor = conn.cursor()
     
     # 获取月度/周度参考数据
-    cursor.execute("SELECT close, ma20 FROM monthly_prices WHERE symbol = ? ORDER BY date DESC LIMIT 1", (symbol,))
+    cursor.execute("SELECT * FROM monthly_prices WHERE symbol = ? ORDER BY date DESC LIMIT 1", (symbol,))
     m_row = cursor.fetchone()
-    monthly_trend = "Bull" if m_row and m_row[0] > m_row[1] else "Bear"
-
-    cursor.execute("SELECT close, ma20 FROM weekly_prices WHERE symbol = ? ORDER BY date DESC LIMIT 1", (symbol,))
-    w_row = cursor.fetchone()
-    weekly_trend = "Bull" if w_row and w_row[0] > w_row[1] else "Bear"
-    
-    # 基础信号判定
-    if close < support_price * 0.98:
-        signal = 'Short'
-    elif close > ma20:
-        signal = 'Long'
+    if m_row:
+        m_cols = [d[0] for d in cursor.description]
+        monthly_series = pd.Series(dict(zip(m_cols, m_row)))
     else:
-        signal = 'Side'
-        
-    if 45 <= rsi <= 55 and signal != 'Short': 
-        signal = 'Side'
+        monthly_series = None
 
-    resonance_count = 0
-    if signal == 'Long':
-        if monthly_trend == "Bull": resonance_count += 1
-        if weekly_trend == "Bull": resonance_count += 1
-    elif signal == 'Short':
-        if monthly_trend == "Bear": resonance_count += 1
-        if weekly_trend == "Bear": resonance_count += 1
+    cursor.execute("SELECT * FROM weekly_prices WHERE symbol = ? ORDER BY date DESC LIMIT 1", (symbol,))
+    w_row = cursor.fetchone()
+    if w_row:
+         w_cols = [d[0] for d in cursor.description]
+         weekly_series = pd.Series(dict(zip(w_cols, w_row)))
+    else:
+         weekly_series = None
     
-    confidence_map = {0: 0.65, 1: 0.75, 2: 0.88}
-    confidence = confidence_map.get(resonance_count, 0.60)
-    if signal == 'Side': confidence = 0.50
+    conn.close()
+
+    # Call Quant Engine
+    from backend.quant.engine import QuantEngine
+    engine = QuantEngine()
     
-    # 构建战术建议 (保持与 LLM 格式一致)
+    context = {
+        'daily_row': today_data,
+        'weekly_row': weekly_series,
+        'monthly_row': monthly_series
+    }
+    
+    # Run Strategy
+    analysis_result = engine.run(symbol, context, strategy_name="trend")
+    sig = analysis_result.signal
+    
+    # Convert back to legacy dictionary format for compatibility
+    # Explicitly mapping QuantSignal fields to the dictionary expected by _process_and_store_prediction
+    
+    # Re-construct reasoning trace to match legacy format EXACTLY for frontend compatibility
+    monthly_trend = sig.factors.get('monthly_trend', 'Unknown')
+    weekly_trend = sig.factors.get('weekly_trend', 'Unknown')
+    resonance_count = sig.factors.get('resonance', 0)
+    rsi = sig.factors.get('rsi', 0)
+    macd_hist = sig.factors.get('macd_hist', 0)
+    macd_status = "金叉" if macd_hist > 0 else "死叉"
+    
     ai_result = {
-        "signal": signal,
-        "confidence": confidence,
-        "summary": "缩量震荡，维持观望" if signal == 'Side' else ("顺势做多" if signal == 'Long' else "避险为主"),
+        "signal": sig.action,
+        "confidence": sig.confidence,
+        "summary": "缩量震荡，维持观望" if sig.action == 'Side' else ("顺势做多" if sig.action == 'Long' else "避险为主"),
         "reasoning_trace": [
             {"step": "trend", "data": f"月:{'多' if monthly_trend=='Bull' else '空'} | 周:{'多' if weekly_trend=='Bull' else '空'}", "conclusion": "周期共振" if resonance_count == 2 else "长短博弈"},
             {"step": "momentum", "data": f"日线 RSI({rsi:.0f}) | MACD {macd_status}", "conclusion": "动能健康" if 40 <= rsi <= 60 else "极端行情"},
-            {"step": "decision", "data": f"规则引擎计算", "conclusion": "执行策略库建议"}
+            {"step": "decision", "data": f"QuantEngine ({sig.source_model})", "conclusion": f"{sig.reason}"}
         ],
         "tactics": {
-            "holding": [{"priority": "P1", "action": "持仓待涨" if signal == 'Long' else "分批减仓", "trigger": "均线支撑", "reason": "跟随趋势"}],
-            "empty": [{"priority": "P1", "action": "小仓试错" if signal != 'Short' else "观望", "trigger": "跌破点位", "reason": "风控"}],
+            "holding": [{"priority": "P1", "action": "持仓待涨" if sig.action == 'Long' else "分批减仓", "trigger": "均线支撑", "reason": "跟随趋势"}],
+            "empty": [{"priority": "P1", "action": "小仓试错" if sig.action != 'Short' else "观望", "trigger": "跌破点位", "reason": "风控"}],
             "general": [{"priority": "P3", "action": "关注板块", "trigger": "整体行情", "reason": "大盘环境"}]
         },
         "key_levels": {
-            "support": round(float(support_price), 3),
-            "resistance": round(float(ma20) * 1.05, 3),
-            "stop_loss": round(float(support_price) * 0.97, 3)
+            # Recalculate or use what we have. Support was roughly ma20. 
+            # TrendStrategy doesn't return key_levels explicitly in factors yet, but factors has ma20.
+            "support": round(float(sig.factors.get('ma20', 0)), 3),
+            "resistance": round(float(sig.factors.get('ma20', 0)) * 1.05, 3),
+            "stop_loss": round(float(sig.factors.get('ma20', 0)) * 0.97, 3)
         },
         "is_llm": False
     }
     
-    conn.close()
     return _process_and_store_prediction(symbol, today_str, ai_result)
 
