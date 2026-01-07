@@ -44,4 +44,4 @@ jobs:
           INTERNAL_API_SECRET: ${{ secrets.INTERNAL_API_SECRET }}
           NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
         run: |
-          python -u backend/main.py --analyze --market HK --model deepseek-v3
+          python -u backend/main.py --analyze --market HK --model rule-engine
