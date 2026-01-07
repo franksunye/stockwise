@@ -39,6 +39,7 @@ if __name__ == "__main__":
     parser.add_argument('--analyze', action='store_true', help='执行 AI 预测分析 (独立任务)')
     parser.add_argument('--symbol', type=str, help='指定股票代码')
     parser.add_argument('--market', type=str, choices=['CN', 'HK'], help='只同步/分析特定市场')
+    parser.add_argument('--model', type=str, help='指定 AI 模型 (deepseek-v3, gemini-3-flash, rule-engine)')
     
     # 回填功能参数
     parser.add_argument('--date', type=str, help='指定分析日期 (YYYY-MM-DD)')
@@ -71,7 +72,7 @@ if __name__ == "__main__":
         )
     elif args.analyze:
         # 独立运行 AI 分析 (分析最新数据)
-        run_ai_analysis(symbol=args.symbol, market_filter=args.market, force=args.force)
+        run_ai_analysis(symbol=args.symbol, market_filter=args.market, force=args.force, model_filter=args.model)
     elif args.symbol:
         # On-Demand Sync: 需要错误处理和通知
         start_time = time.time()

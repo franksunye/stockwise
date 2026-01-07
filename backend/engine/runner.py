@@ -7,11 +7,15 @@ from backend.database import get_connection
 from backend.engine.models.factory import ModelFactory
 from backend.trading_calendar import get_next_trading_day_str
 
-logger = logging.getLogger(__name__)
+from backend.logger import logger
 
 class PredictionRunner:
-    def __init__(self):
-        pass
+    def __init__(self, model_filter: str = None):
+        """
+        Args:
+            model_filter: 指定要使用的模型 ID，如果为 None 则使用所有活动模型
+        """
+        self.model_filter = model_filter
 
     async def run_analysis(self, symbol: str, date: str = None, data: Dict[str, Any] = None):
         """
@@ -24,6 +28,14 @@ class PredictionRunner:
         if not models:
             logger.warning("⚠️ No active models found!")
             return
+        
+        # Apply model filter if specified
+        if self.model_filter:
+            models = [m for m in models if m.model_id == self.model_filter]
+            if not models:
+                logger.warning(f"⚠️ Model '{self.model_filter}' not found or not active!")
+                return
+            logger.info(f"🎯 指定模型: {self.model_filter}")
         
         logger.info(f"🤖 Active Models: {[m.model_id for m in models]}")
 

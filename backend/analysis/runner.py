@@ -19,8 +19,12 @@ from logger import logger
 from trading_calendar import get_market_from_symbol, is_market_closed
 
 
-def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool = False):
-    """独立运行 AI 预测任务"""
+def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool = False, model_filter: str = None):
+    """独立运行 AI 预测任务
+    
+    Args:
+        model_filter: 指定使用的模型 ID (deepseek-v3, gemini-3-flash, rule-engine)
+    """
     # 如果是例行运行（无特定代码），且该市场今天休市，则跳过
     if not symbol and check_trading_day_skip(market_filter):
         return
@@ -99,7 +103,7 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool =
                 from engine.runner import PredictionRunner
                 import asyncio
                 
-                runner = PredictionRunner()
+                runner = PredictionRunner(model_filter=model_filter)
                 # Run async in sync context
                 # Windows might need policy ... assume main.py handles it or we do local
                 if os.name == 'nt':
