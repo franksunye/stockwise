@@ -40,6 +40,12 @@ class LLMClient:
             self.api_key = api_key or gm_config.get("api_key") or LLM_CONFIG.get("api_key")
             self.model = model or gm_config.get("model") or "gemini-pro"
             self.base_url = base_url # Gemini native usually doesn't use base_url in standard requests
+        elif self.provider == "gemini_local":
+            # 新增: 通过 Gemini SDK 连接本地代理 (Antigravity Tools)
+            gm_local_config = LLM_CONFIG.get("gemini_local", {})
+            self.base_url = base_url or gm_local_config.get("base_url") or "http://127.0.0.1:8045"
+            self.api_key = api_key or gm_local_config.get("api_key") or LLM_CONFIG.get("api_key")
+            self.model = model or gm_local_config.get("model") or "gemini-3-flash"
         else: # openai, custom, or generic
             self.base_url = base_url or LLM_CONFIG.get("base_url", "http://127.0.0.1:8045/v1")
             self.api_key = api_key or LLM_CONFIG.get("api_key", "")
@@ -47,7 +53,7 @@ class LLMClient:
 
         self.timeout = timeout
         
-        # Gemini Native Client 缓存
+        # Gemini Native Client 缓存 (用于云端 Gemini)
         self._gemini_model = None
         if self.provider == "gemini" and self.api_key:
             try:
@@ -56,6 +62,21 @@ class LLMClient:
                 self._gemini_model = genai.GenerativeModel(self.model)
             except Exception as e:
                 print(f"⚠️ 初始化 Gemini SDK 失败: {e}")
+        
+        # Gemini Local Client 缓存 (用于本地代理)
+        self._gemini_local_model = None
+        if self.provider == "gemini_local" and self.api_key:
+            try:
+                import google.generativeai as genai
+                genai.configure(
+                    api_key=self.api_key,
+                    transport='rest',
+                    client_options={'api_endpoint': self.base_url}
+                )
+                self._gemini_local_model = genai.GenerativeModel(self.model)
+                print(f"✅ Gemini Local SDK 初始化成功 -> {self.base_url}")
+            except Exception as e:
+                print(f"⚠️ 初始化 Gemini Local SDK 失败: {e}")
         
     def is_available(self) -> bool:
         """检查 LLM 服务是否可用"""
@@ -79,6 +100,8 @@ class LLMClient:
         """发送聊天请求"""
         if self.provider == "gemini" and self._gemini_model:
             return self._chat_gemini(messages, temperature, max_tokens)
+        elif self.provider == "gemini_local" and self._gemini_local_model:
+            return self._chat_gemini_local(messages, temperature, max_tokens)
         else:
             return self._chat_openai_compatible(messages, model, temperature, max_tokens)
 
@@ -207,6 +230,75 @@ class LLMClient:
         except Exception as e:
             meta["error"] = str(e)
             print(f"   ❌ GEMINI 请求异常: {e}")
+            return None, meta
+    
+    def _chat_gemini_local(
+        self, 
+        messages: list, 
+        temperature: float = 0.7, 
+        max_tokens: int = 4096
+    ) -> Tuple[Optional[str], Dict[str, Any]]:
+        """
+        通过本地代理调用 Gemini 协议 (Antigravity Tools)
+        使用 google-generativeai SDK，但 api_endpoint 指向本地服务
+        注意: 本地代理不支持 system_instruction，需要将 system 消息合并到 user 消息中
+        """
+        meta = {"input_tokens": 0, "output_tokens": 0, "total_tokens": 0, "latency_ms": 0, "error": None}
+        try:
+            import google.generativeai as genai
+            
+            # 提取 system 及 history
+            # 注意: 本地代理不支持 system_instruction，我们将 system 消息合并到第一个 user 消息
+            system_msg = ""
+            history = []
+            for m in messages:
+                if m["role"] == "system":
+                    system_msg = m["content"]
+                else:
+                    history.append({"role": "user" if m["role"] == "user" else "model", "parts": [m["content"]]})
+            
+            # 如果有 system 消息，合并到第一个 user 消息
+            if system_msg and history:
+                first_user_content = history[0]["parts"][0]
+                history[0]["parts"][0] = f"[系统指令] {system_msg}\n\n[用户消息] {first_user_content}"
+            
+            # 使用预配置的本地模型 (不使用 system_instruction)
+            model_inst = self._gemini_local_model
+
+            start_time = time.time()
+            # 最后一个作为 prompt，其余作为 history
+            last_user_msg = history.pop(-1) if history else {"parts": [""]}
+            chat = model_inst.start_chat(history=history or None)
+            
+            response = chat.send_message(
+                last_user_msg["parts"][0],
+                generation_config=genai.types.GenerationConfig(
+                    temperature=temperature,
+                    max_output_tokens=max_tokens,
+                )
+            )
+            elapsed = time.time() - start_time
+            meta["latency_ms"] = int(elapsed * 1000)
+            
+            content = response.text
+            
+            # 提取 Token 使用情况
+            try:
+                usage = response.usage_metadata
+                meta["input_tokens"] = usage.prompt_token_count
+                meta["output_tokens"] = usage.candidates_token_count
+                meta["total_tokens"] = usage.total_token_count
+            except:
+                # 本地代理可能不返回 usage，使用字符估算
+                meta["input_tokens"] = estimate_tokens(str(messages))
+                meta["output_tokens"] = estimate_tokens(content)
+                meta["total_tokens"] = meta["input_tokens"] + meta["output_tokens"]
+            
+            print(f"   🤖 GEMINI_LOCAL 响应成功 ({elapsed:.1f}s, {meta['total_tokens']} tokens)")
+            return content, meta
+        except Exception as e:
+            meta["error"] = str(e)
+            print(f"   ❌ GEMINI_LOCAL 请求异常: {e}")
             return None, meta
     
     def generate_stock_prediction(

@@ -65,6 +65,11 @@ DEFAULTS = {
     "gemini": {
         "api_key": os.getenv("GEMINI_API_KEY"),
         "model": os.getenv("GEMINI_MODEL", "gemini-pro"),
+    },
+    "gemini_local": {
+        "api_key": os.getenv("GEMINI_LOCAL_API_KEY", os.getenv("LLM_API_KEY")),
+        "base_url": os.getenv("GEMINI_LOCAL_BASE_URL", "http://127.0.0.1:8045"),
+        "model": os.getenv("GEMINI_LOCAL_MODEL", "gemini-3-flash"),
     }
 }
 
@@ -79,7 +84,8 @@ LLM_CONFIG = {
     
     # 模块化配置
     "deepseek": DEFAULTS["deepseek"],
-    "gemini": DEFAULTS["gemini"]
+    "gemini": DEFAULTS["gemini"],
+    "gemini_local": DEFAULTS["gemini_local"]
 }
 
 # 动态覆盖基础配置 (如果指定了提供商且有对应配置)
