@@ -13,6 +13,27 @@ from config import DB_PATH, TURSO_DB_URL, TURSO_AUTH_TOKEN
 from logger import logger
 import time
 
+# Turso/libSQL 瞬态错误模式列表
+# 这些错误通常是网络层问题，重试后可恢复
+TRANSIENT_ERROR_PATTERNS = [
+    "stream not found",      # Hrana HTTP/2 流过期
+    "locked",                # SQLite 锁冲突
+    "404",                   # 数据库冷启动
+    "tls handshake",         # TLS 握手中断
+    "eof",                   # 连接意外关闭
+    "connection reset",      # TCP 连接重置
+    "hrana",                 # Hrana 协议错误
+    "timeout",               # 超时
+    "connection refused",    # 连接被拒绝
+    "network",               # 通用网络错误
+    "client_closed",         # 客户端连接关闭
+]
+
+def is_transient_error(e: Exception) -> bool:
+    """检查是否为可重试的瞬态错误"""
+    error_msg = str(e).lower()
+    return any(pattern in error_msg for pattern in TRANSIENT_ERROR_PATTERNS)
+
 def execute_with_retry(func, max_retries=3, *args, **kwargs):
     """
     Executes a function with database connection retry logic.
@@ -28,11 +49,10 @@ def execute_with_retry(func, max_retries=3, *args, **kwargs):
             return result
         except Exception as e:
             last_exception = e
-            # Check for transient errors (Hrana stream, lock, timeout)
-            error_msg = str(e).lower()
-            if "stream not found" in error_msg or "locked" in error_msg or "404" in error_msg:
-                logger.warning(f"🔄 Database Error (Attempt {attempt+1}/{max_retries}): {e} - Retrying...")
-                time.sleep(1 * (attempt + 1)) # Backoff
+            if is_transient_error(e):
+                wait_time = 1 * (attempt + 1)  # 指数退避: 1s, 2s, 3s
+                logger.warning(f"🔄 Database Error (Attempt {attempt+1}/{max_retries}): {e} - Retrying in {wait_time}s...")
+                time.sleep(wait_time)
             else:
                 # If it's a logic error, raise immediately
                 raise e
@@ -46,19 +66,33 @@ def execute_with_retry(func, max_retries=3, *args, **kwargs):
     logger.error(f"❌ Failed after {max_retries} attempts. Last error: {last_exception}")
     raise last_exception
 
-def get_connection():
+
+def get_connection(max_retries: int = 3):
     """
     创建原始数据库连接。
     Strategy: Always New Connection (NullPool equivalent).
+    Includes retry logic for transient connection errors.
     """
-    if TURSO_DB_URL:
-        # logger.debug(f"🔗 [Raw] Connecting to Turso...")
-        # sync client from libsql-experimental
-        return libsql.connect(database=TURSO_DB_URL, auth_token=TURSO_AUTH_TOKEN)
-    else:
-        DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-        # logger.debug(f"📂 [Raw] Connecting to Local SQLite...")
-        return sqlite3.connect(str(DB_PATH), timeout=30.0)
+    last_exception = None
+    for attempt in range(max_retries):
+        try:
+            if TURSO_DB_URL:
+                # sync client from libsql-experimental
+                return libsql.connect(database=TURSO_DB_URL, auth_token=TURSO_AUTH_TOKEN)
+            else:
+                DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+                return sqlite3.connect(str(DB_PATH), timeout=30.0)
+        except Exception as e:
+            last_exception = e
+            if is_transient_error(e):
+                wait_time = 1 * (attempt + 1)
+                logger.warning(f"🔄 Connection Failed (Attempt {attempt+1}/{max_retries}): {e} - Retrying in {wait_time}s...")
+                time.sleep(wait_time)
+            else:
+                raise e
+    
+    logger.error(f"❌ Failed to connect after {max_retries} attempts. Last error: {last_exception}")
+    raise last_exception
 
 
 
