@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getDbClient } from '@/lib/db';
+import { getDbClient, executeWithRetry } from '@/lib/db';
 import { Client } from '@libsql/client';
 import Database from 'better-sqlite3';
 import crypto from 'crypto';
@@ -15,7 +15,6 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
         }
 
-        const client = getDbClient();
         const strategy = process.env.DB_STRATEGY || 'local';
         const userAgent = request.headers.get('user-agent') || '';
 
@@ -26,15 +25,17 @@ export async function POST(request: Request) {
         const auth = subscription.keys.auth;
 
         if (strategy === 'cloud') {
-            const turso = client as Client;
-            await turso.execute({
-                sql: `INSERT OR REPLACE INTO push_subscriptions 
-                      (id, user_id, endpoint, p256dh, auth, user_agent, last_used_at) 
-                      VALUES (?, ?, ?, ?, ?, ?, ?)`,
-                args: [id, userId, endpoint, p256dh, auth, userAgent, new Date().toISOString()]
+            // Use retry wrapper for cloud Turso
+            await executeWithRetry(async (client) => {
+                await client.execute({
+                    sql: `INSERT OR REPLACE INTO push_subscriptions 
+                          (id, user_id, endpoint, p256dh, auth, user_agent, last_used_at) 
+                          VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                    args: [id, userId, endpoint, p256dh, auth, userAgent, new Date().toISOString()]
+                });
             });
         } else {
-            const db = client as Database.Database;
+            const db = getDbClient() as Database.Database;
             const stmt = db.prepare(`
                 INSERT OR REPLACE INTO push_subscriptions 
                 (id, user_id, endpoint, p256dh, auth, user_agent, last_used_at) 
@@ -44,6 +45,7 @@ export async function POST(request: Request) {
             db.close();
         }
 
+        console.log('✅ Subscription saved successfully for user:', userId);
         return NextResponse.json({ success: true });
     } catch (error) {
         console.error('Error saving subscription:', error);
