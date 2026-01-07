@@ -59,11 +59,52 @@ export default function LandingPage() {
             >
               立刻开始体验 <ChevronRight size={20} />
             </Link>
-            <button className="px-10 py-5 rounded-3xl bg-white/5 border border-white/10 text-white font-black text-lg hover:bg-white/10 transition-all">
-              了解全部功能
-            </button>
+            <Link href="#features" className="px-10 py-5 rounded-3xl bg-white/5 border border-white/10 text-white font-black text-lg hover:bg-white/10 transition-all">
+              了解核心功能
+            </Link>
           </div>
         </motion.div>
+
+        {/* Product Preview */}
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 0.3 }}
+          className="mt-20 relative"
+        >
+          <div className="absolute inset-0 bg-gradient-to-t from-[#050508] via-transparent to-transparent z-10 pointer-events-none" />
+          <Image 
+            src="/dashboard-preview.png" 
+            alt="StockWise Dashboard Preview" 
+            width={600} 
+            height={400} 
+            className="rounded-3xl shadow-2xl shadow-indigo-500/20 border border-white/10"
+          />
+        </motion.div>
+
+        {/* How It Works */}
+        <section className="pt-40 w-full max-w-4xl">
+          <h2 className="text-3xl font-black italic tracking-tighter text-center mb-16">
+            如何使用 <span className="text-indigo-500">3 步开始</span>
+          </h2>
+          <div className="grid md:grid-cols-3 gap-8 text-center">
+            <div className="space-y-4">
+              <div className="w-16 h-16 rounded-full bg-indigo-500/10 flex items-center justify-center mx-auto text-2xl font-black text-indigo-400">1</div>
+              <h3 className="font-bold text-lg">添加自选股</h3>
+              <p className="text-slate-500 text-sm">搜索并添加您关注的港股或 A 股到监控列表</p>
+            </div>
+            <div className="space-y-4">
+              <div className="w-16 h-16 rounded-full bg-purple-500/10 flex items-center justify-center mx-auto text-2xl font-black text-purple-400">2</div>
+              <h3 className="font-bold text-lg">盘后 AI 复盘</h3>
+              <p className="text-slate-500 text-sm">每日收盘后，AI 自动分析并生成明日作战计划</p>
+            </div>
+            <div className="space-y-4">
+              <div className="w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto text-2xl font-black text-emerald-400">3</div>
+              <h3 className="font-bold text-lg">盘中触发提醒</h3>
+              <p className="text-slate-500 text-sm">当行情触发预设条件时，即时推送通知</p>
+            </div>
+          </div>
+        </section>
 
         {/* Feature Grid */}
         <section id="features" className="pt-60 grid md:grid-cols-3 gap-8 w-full">
@@ -90,87 +131,54 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* FAQ Section */}
-        <section id="faq" className="py-40 w-full max-w-5xl space-y-16">
+        {/* FAQ Section - Simplified */}
+        <section id="faq" className="py-40 w-full max-w-4xl space-y-12">
           <div className="text-center space-y-4">
             <h2 className="text-4xl md:text-5xl font-black italic tracking-tighter">
               常见问题 <span className="text-indigo-500">FAQ</span>
             </h2>
-            <p className="text-slate-400 font-medium">关于产品、AI 决策与量化规则</p>
+            <p className="text-slate-400 font-medium">快速了解 StockWise</p>
           </div>
 
-          {/* 产品相关 */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-black uppercase tracking-widest text-slate-500 pl-2">关于产品</h3>
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="glass-card p-6 border-slate-500/10">
-                <p className="text-white font-bold mb-2">StockWise X 是什么？</p>
-                <p className="text-slate-400 text-sm">一款 AI 驱动的港股/A股决策辅助工具，帮助个人投资者做出更理性的交易决策。</p>
-              </div>
-              <div className="glass-card p-6 border-slate-500/10">
-                <p className="text-white font-bold mb-2">支持哪些市场？</p>
-                <p className="text-slate-400 text-sm">目前支持港股 (HK) 和 A 股 (CN) 市场。</p>
-              </div>
-              <div className="glass-card p-6 border-slate-500/10">
-                <p className="text-white font-bold mb-2">数据多久更新一次？</p>
-                <p className="text-slate-400 text-sm">盘中每 10 分钟同步一次实时行情，盘后进行全量日线更新。</p>
-              </div>
-              <div className="glass-card p-6 border-slate-500/10">
-                <p className="text-white font-bold mb-2">免费使用吗？</p>
-                <p className="text-slate-400 text-sm">基础功能免费。PRO 用户可解锁更多自选股监控额度和高级功能。</p>
-              </div>
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="glass-card p-6 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
+              <p className="text-white font-bold mb-2">StockWise X 是什么？</p>
+              <p className="text-slate-400 text-sm">一款 AI 驱动的港股/A股决策辅助工具，帮助个人投资者做出更理性的交易决策。</p>
+            </div>
+            <div className="glass-card p-6 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
+              <p className="text-white font-bold mb-2">支持哪些市场？</p>
+              <p className="text-slate-400 text-sm">目前支持港股 (HK) 和 A 股 (CN) 市场。</p>
+            </div>
+            <div className="glass-card p-6 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
+              <p className="text-white font-bold mb-2">AI 的判断准确吗？</p>
+              <p className="text-slate-400 text-sm">我们每日盘后自动验证 AI 预测准确率，历史胜率公开透明，可在个股页面查看。</p>
+            </div>
+            <div className="glass-card p-6 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
+              <p className="text-white font-bold mb-2">为什么经常建议观望？</p>
+              <p className="text-slate-400 text-sm">当 AI 置信度低于 75% 时，系统会自动熔断，强制输出观望以保护您的本金。</p>
+            </div>
+            <div className="glass-card p-6 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
+              <p className="text-white font-bold mb-2">信号是怎么判定的？</p>
+              <p className="text-slate-400 text-sm">价格站上 MA20 → 做多；跌破 MA20 的 98% → 做空；RSI 在 45-55 震荡区 → 观望。</p>
+            </div>
+            <div className="glass-card p-6 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
+              <p className="text-white font-bold mb-2">免费使用吗？</p>
+              <p className="text-slate-400 text-sm">基础功能免费。PRO 用户可解锁更多自选股监控额度和高级功能。</p>
             </div>
           </div>
+        </section>
 
-          {/* AI 决策相关 */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-black uppercase tracking-widest text-indigo-400 pl-2">关于 AI 决策</h3>
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="glass-card p-6 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
-                <p className="text-white font-bold mb-2">AI 用的是什么模型？</p>
-                <p className="text-slate-400 text-sm">我们使用 Google Gemini、DeepSeek 等大语言模型进行综合研判。</p>
-              </div>
-              <div className="glass-card p-6 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
-                <p className="text-white font-bold mb-2">AI 的判断准确吗？</p>
-                <p className="text-slate-400 text-sm">我们每日盘后自动验证 AI 预测准确率，历史胜率公开透明，可在个股页面查看。</p>
-              </div>
-              <div className="glass-card p-6 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
-                <p className="text-white font-bold mb-2">为什么经常建议观望？</p>
-                <p className="text-slate-400 text-sm">当 AI 置信度低于 75% 时，系统会自动熔断，强制输出观望以保护您的本金。</p>
-              </div>
-              <div className="glass-card p-6 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
-                <p className="text-white font-bold mb-2">AI 会考虑新闻和基本面吗？</p>
-                <p className="text-slate-400 text-sm">是的。AI 会综合分析公司简介、行业背景以及近期市场情绪。</p>
-              </div>
-            </div>
-          </div>
-
-          {/* 量化规则相关 */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-black uppercase tracking-widest text-purple-400 pl-2">关于量化规则</h3>
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="glass-card p-6 border-purple-500/10 bg-gradient-to-br from-purple-500/[0.02] to-transparent">
-                <p className="text-white font-bold mb-2">信号是怎么判定的？</p>
-                <p className="text-slate-400 text-sm">价格站上 MA20 → 做多；跌破 MA20 的 98% → 做空；RSI 在 45-55 震荡区 → 观望。</p>
-              </div>
-              <div className="glass-card p-6 border-purple-500/10 bg-gradient-to-br from-purple-500/[0.02] to-transparent">
-                <p className="text-white font-bold mb-2">什么是 MA20？</p>
-                <p className="text-slate-400 text-sm">20 日移动平均线。价格站上 MA20 视为多头趋势，跌破则视为空头趋势。</p>
-              </div>
-              <div className="glass-card p-6 border-purple-500/10 bg-gradient-to-br from-purple-500/[0.02] to-transparent">
-                <p className="text-white font-bold mb-2">什么是 RSI？</p>
-                <p className="text-slate-400 text-sm">相对强弱指数 (0-100)。RSI 在 45-55 区间表示市场震荡无方向，系统会建议观望。</p>
-              </div>
-              <div className="glass-card p-6 border-purple-500/10 bg-gradient-to-br from-purple-500/[0.02] to-transparent">
-                <p className="text-white font-bold mb-2">什么是多周期共振？</p>
-                <p className="text-slate-400 text-sm">当日线、周线、月线趋势方向一致时，信号置信度会显著提升（最高 88%）。</p>
-              </div>
-              <div className="glass-card p-6 border-purple-500/10 bg-gradient-to-br from-purple-500/[0.02] to-transparent">
-                <p className="text-white font-bold mb-2">置信度百分比怎么算的？</p>
-                <p className="text-slate-400 text-sm">基础置信度 65%，周线共振 +10%，月线共振 +13%。无共振或观望时为 50%。</p>
-              </div>
-            </div>
-          </div>
+        {/* CTA Banner */}
+        <section className="py-20 w-full max-w-3xl text-center space-y-8">
+          <h2 className="text-3xl md:text-4xl font-black italic tracking-tighter">
+            准备好让 AI 成为你的<span className="text-indigo-500">纪律合伙人</span>了吗？
+          </h2>
+          <Link 
+            href="/dashboard" 
+            className="inline-flex items-center gap-2 px-10 py-5 rounded-3xl bg-indigo-500 text-white font-black italic text-lg shadow-[0_20px_40px_rgba(99,102,241,0.3)] hover:scale-105 active:scale-95 transition-all"
+          >
+            立刻开始体验 <ChevronRight size={20} />
+          </Link>
         </section>
       </main>
 
@@ -187,7 +195,7 @@ export default function LandingPage() {
             />
             <span className="text-sm font-black italic tracking-tighter">STOCKWISE X</span>
           </div>
-          <p className="text-xs text-slate-600 font-bold uppercase tracking-widest">© 2025 STOCKWISE TECHNOLOGY. ALL RIGHTS RESERVED.</p>
+          <p className="text-xs text-slate-600 font-bold uppercase tracking-widest">© 2026 STOCKWISE TECHNOLOGY. ALL RIGHTS RESERVED.</p>
           <div className="flex gap-6 text-xs font-bold text-slate-500">
             <Link href="#" className="hover:text-white transition-colors">隐私协议</Link>
             <Link href="#" className="hover:text-white transition-colors">服务条款</Link>
