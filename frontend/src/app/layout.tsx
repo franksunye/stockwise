@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
   title: "StockWise X | AI 炒股决策系统",
   description: "极致简单的 AI 炒股决策工具",
   manifest: "/manifest.json",
