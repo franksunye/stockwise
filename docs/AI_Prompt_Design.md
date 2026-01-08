@@ -371,3 +371,104 @@ python generate_prompt_debug.py 02171
 ```
 
 输出可直接复制到 Gemini / DeepSeek Chat 进行测试。
+
+---
+
+## 📰 每日简报 (Daily Brief) 提示词设计
+
+> **模块位置**: `backend/engine/brief_generator.py`  
+> **角色定位**: **The Reporter (记者)** - 遵循 `Reliability_Protocol.md` 的职能隔离原则
+
+### 设计理念
+
+根据 `Reliability_Protocol.md`：
+> **The Reporter (记者)** 的唯一任务是把 Analyst 的结论翻译成"人话"。它**不被允许做分析**。
+
+简报生成器的 LLM 调用是一个"格式转换"过程，而非"智能分析"过程。我们必须确保：
+1.  **所有观点 100% 继承自数据库** (Signal, ai_reasoning)
+2.  **所有事实必须可溯源** (价格、RSI、支撑位等来自 `daily_prices` / `ai_predictions_v2`)
+3.  **新闻仅作背景** (Tavily 返回的内容仅供 LLM 翻译，不用于生成新观点)
+
+---
+
+### 数据锚定 (Data Grounding) 清单
+
+#### 🔴 当前已传入的数据 (Before Audit)
+
+| 数据项       | 来源                | 问题                                |
+| ------------ | ------------------- | ----------------------------------- |
+| `signal`     | `ai_predictions_v2` | ⚠️ 查询字段错误 (date → target_date) |
+| `confidence` | `ai_predictions_v2` | ⚠️ 同上                              |
+| `rsi`        | **硬编码 50**       | ❌ Mock 数据                         |
+| `news`       | Tavily API          | ✅ 正常                              |
+
+#### 🟢 应当传入的完整数据 (After Optimization)
+
+| 数据项            | 来源表              | 字段                                 | Prompt 中的作用                   |
+| ----------------- | ------------------- | ------------------------------------ | --------------------------------- |
+| **信号**          | `ai_predictions_v2` | `signal` (target_date, is_primary=1) | 核心结论锚定                      |
+| **置信度**        | `ai_predictions_v2` | `confidence`                         | 表达强度                          |
+| **AI 原始推理**   | `ai_predictions_v2` | `ai_reasoning`                       | ⭐ **最重要**: Reporter 翻译的素材 |
+| **支撑/压力位**   | `ai_predictions_v2` | `support_price`, `pressure_price`    | 关键价位提示                      |
+| **收盘价/涨跌幅** | `daily_prices`      | `close`, `change_percent`            | 行情事实                          |
+| **RSI**           | `daily_prices`      | `rsi`                                | 技术面背书                        |
+| **MACD**          | `daily_prices`      | `macd`, `macd_signal`                | 技术面背书                        |
+| **KDJ**           | `daily_prices`      | `kdj_k`, `kdj_d`, `kdj_j`            | 超买超卖状态                      |
+| **新闻摘要**      | Tavily API          | 搜索结果                             | 消息面背景                        |
+
+---
+
+### 优化后的 Prompt 结构
+
+```
+# System Prompt
+你是一位资深财经记者，正在为中国投资者撰写股票每日简报。
+你的任务是将"分析师报告"翻译成简洁、专业的中文摘要。
+
+## 核心原则：
+1. **不做分析**: 你不产生新观点，只翻译和总结已有的"分析师结论"。
+2. **事实锚定**: 每一个数字必须来自"硬数据"部分，禁止虚构。
+3. **简洁专业**: 投资者时间宝贵，用最少的文字传达最多的信息。
+
+# User Input
+Subject: 00700 (腾讯控股)
+
+[硬数据 - 来自数据库，禁止虚构]
+- 今日收盘: 412.60 HKD (+1.25%)
+- AI 信号: Long (置信度 70%)
+- 支撑位: 400.00 | 压力位: 425.00
+- RSI: 52.3 | KDJ: K=45/D=42/J=51 | MACD: 看涨背离中
+
+[分析师推理 - 来自 AI Analyst，你只需翻译]
+{ai_reasoning 原文}
+
+[今日新闻 - 来自 Tavily，提供背景]
+- **标题1**: 正文摘要...
+- **标题2**: 正文摘要...
+
+任务: 输出中文每日简报。结构如下：
+1. **综合分析** (一段话，~50字)
+2. **关键新闻** (1-2条中文要点)
+```
+
+---
+
+### 实施计划
+
+| 步骤 | 修改内容                                    | 优先级   |
+| ---- | ------------------------------------------- | -------- |
+| 1    | 修复 `target_date` 查询 + `is_primary` 过滤 | ✅ 已完成 |
+| 2    | 从 `daily_prices` 获取真实 RSI              | ✅ 已完成 |
+| 3    | 传入 `ai_reasoning` (Analyst 原始推理)      | 🔜 下一步 |
+| 4    | 传入 `close`, `change_percent`              | 🔜 下一步 |
+| 5    | 传入 `support_price`, `pressure_price`      | 🔜 下一步 |
+| 6    | 传入 KDJ/MACD 关键指标                      | 🔜 下一步 |
+| 7    | 更新 System Prompt 强化"不做分析"约束       | 🔜 下一步 |
+
+---
+
+### 验证标准
+
+1.  **Signal 正确性**: push_hook 中的"看涨/看跌"数量必须与 `ai_predictions_v2.signal` 一致。
+2.  **RSI 真实性**: 简报中出现的 RSI 值必须与 `daily_prices.rsi` 匹配。
+3.  **无幻觉**: 简报中不应出现 `ai_reasoning` 或 `news` 中未提及的公司事件。

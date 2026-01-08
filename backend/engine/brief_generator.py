@@ -73,29 +73,78 @@ async def fetch_news_for_stock(symbol: str, stock_name: str) -> str:
 
 
 async def analyze_stock_context(symbol: str, stock_name: str, news: str, technical_data: Dict) -> str:
-    """Analyze stock using Local LLM (Chinese Output)."""
-    logger.info(f"🧠 [Analyst] Analyzing {symbol}...")
+    """Analyze stock using Local LLM (Chinese Output) - The Reporter role."""
+    logger.info(f"🧠 [Reporter] Generating brief for {symbol}...")
     
-    system_prompt = "You are a Senior Investment Analyst writing for a Chinese audience. Synthesize 'Hard Data' with 'News Context'. Be concise, professional, and decisive."
+    # System prompt: Enforce "Reporter" role - no analysis, only translation
+    system_prompt = """你是一位资深财经记者，正在为中国投资者撰写股票每日简报。
+你的任务是将"分析师报告"翻译成简洁、专业的中文摘要。
+
+核心原则：
+1. **不做分析**: 你不产生新观点，只翻译和总结已有的"分析师结论"。
+2. **事实锚定**: 每一个数字必须来自"硬数据"部分，禁止虚构。
+3. **简洁专业**: 投资者时间宝贵，用最少的文字传达最多的信息。"""
     
-    user_prompt = f"""
-    Subject: {symbol} ({stock_name})
+    # Build hard data section
+    signal = technical_data.get('signal', 'Side')
+    confidence = technical_data.get('confidence', 0)
+    conf_pct = int(confidence * 100) if confidence <= 1 else int(confidence)
     
-    [Hard Data]
-    Signal: {technical_data.get('signal')}
-    Confidence: {technical_data.get('confidence')}%
-    RSI: {technical_data.get('rsi')}
+    hard_data_lines = [
+        f"- AI 信号: {signal} (置信度 {conf_pct}%)",
+    ]
     
-    [News Context]
-    {news}
+    # Price data
+    if technical_data.get('close'):
+        change = technical_data.get('change_percent', 0)
+        change_str = f"+{change:.2f}%" if change >= 0 else f"{change:.2f}%"
+        hard_data_lines.append(f"- 今日收盘: {technical_data['close']:.2f} ({change_str})")
     
-    Task: Write a Daily Briefing in Chinese.
-    Structure:
-    1. **Analysis**: One concise paragraph (approx 50 words) determining if News confirms/contradicts Technicals.
-    2. **Key News**: Summarize the 1-2 most important news points from the context into Chinese bullet points.
+    # Key levels
+    support = technical_data.get('support_price')
+    pressure = technical_data.get('pressure_price')
+    if support or pressure:
+        levels = []
+        if support: levels.append(f"支撑位 {support:.2f}")
+        if pressure: levels.append(f"压力位 {pressure:.2f}")
+        hard_data_lines.append(f"- 关键价位: {' | '.join(levels)}")
     
-    Output MUST be entirely in Chinese.
-    """
+    # Technical indicators
+    rsi = technical_data.get('rsi')
+    kdj_k = technical_data.get('kdj_k')
+    macd = technical_data.get('macd')
+    
+    indicators = []
+    if rsi is not None: indicators.append(f"RSI={rsi:.1f}")
+    if kdj_k is not None: 
+        kdj_d = technical_data.get('kdj_d', 0)
+        indicators.append(f"KDJ(K={kdj_k:.0f}/D={kdj_d:.0f})")
+    if macd is not None: indicators.append(f"MACD={macd:.3f}")
+    if indicators:
+        hard_data_lines.append(f"- 技术指标: {' | '.join(indicators)}")
+    
+    hard_data_section = "\n".join(hard_data_lines)
+    
+    # AI Reasoning section (from Analyst)
+    ai_reasoning = technical_data.get('ai_reasoning', '')
+    reasoning_section = ai_reasoning[:500] if ai_reasoning else "（无分析师推理记录）"
+    
+    user_prompt = f"""Subject: {symbol} ({stock_name})
+
+[硬数据 - 来自数据库，禁止虚构]
+{hard_data_section}
+
+[分析师推理 - 来自 AI Analyst，你只需翻译总结]
+{reasoning_section}
+
+[今日新闻 - 来自搜索引擎，提供背景]
+{news}
+
+任务: 输出中文每日简报。结构如下：
+1. **综合分析** (一段话，约50字，综合信号+推理+新闻)
+2. **关键新闻** (1-2条中文要点，如无重要新闻可省略)
+
+输出必须全部为中文。"""
     
     try:
         response = await asyncio.to_thread(
@@ -148,15 +197,39 @@ async def generate_stock_briefs_batch(date_str: str, specific_symbols: List[str]
 
         logger.info(f"🚀 [Phase 1] Starting batch analysis for {len(unique_stocks)} unique stocks...")
 
-        # 2. Get AI Predictions for context
+        # 2. Get AI Predictions for context (use target_date, not date; filter by is_primary)
         symbols_list = [s[0] for s in unique_stocks]
         placeholders = ','.join(['?' for _ in symbols_list])
         cursor.execute(f"""
-            SELECT symbol, signal, confidence
+            SELECT symbol, signal, confidence, ai_reasoning, support_price, pressure_price
             FROM ai_predictions_v2
-            WHERE symbol IN ({placeholders}) AND date = ?
+            WHERE symbol IN ({placeholders}) AND target_date = ? AND is_primary = 1
         """, (*symbols_list, date_str))
-        predictions = {row[0]: {'signal': row[1], 'confidence': row[2]} for row in cursor.fetchall()}
+        predictions = {row[0]: {
+            'signal': row[1], 
+            'confidence': row[2],
+            'ai_reasoning': row[3],
+            'support_price': row[4],
+            'pressure_price': row[5]
+        } for row in cursor.fetchall()}
+
+        # 2b. Get Real Technical Data from daily_prices (latest available)
+        cursor.execute(f"""
+            SELECT symbol, close, change_percent, rsi, kdj_k, kdj_d, kdj_j, macd, macd_signal
+            FROM daily_prices
+            WHERE symbol IN ({placeholders})
+            AND date = (SELECT MAX(date) FROM daily_prices WHERE symbol = daily_prices.symbol)
+        """, symbols_list)
+        price_data = {row[0]: {
+            'close': row[1],
+            'change_percent': row[2],
+            'rsi': row[3],
+            'kdj_k': row[4],
+            'kdj_d': row[5],
+            'kdj_j': row[6],
+            'macd': row[7],
+            'macd_signal': row[8]
+        } for row in cursor.fetchall()}
 
         # 3. Process each stock
         processed_count = 0
@@ -173,10 +246,24 @@ async def generate_stock_briefs_batch(date_str: str, specific_symbols: List[str]
             news = await fetch_news_for_stock(symbol, stock_name)
             
             pred = predictions.get(symbol, {})
+            prices = price_data.get(symbol, {})
+            
             tech_data = {
+                # From AI predictions
                 'signal': pred.get('signal', 'Side'),
-                'confidence': pred.get('confidence', 50),
-                'rsi': 50 # TODO: Fetch real RSI
+                'confidence': pred.get('confidence', 0),
+                'ai_reasoning': pred.get('ai_reasoning', ''),
+                'support_price': pred.get('support_price'),
+                'pressure_price': pred.get('pressure_price'),
+                # From daily_prices
+                'close': prices.get('close'),
+                'change_percent': prices.get('change_percent'),
+                'rsi': prices.get('rsi'),
+                'kdj_k': prices.get('kdj_k'),
+                'kdj_d': prices.get('kdj_d'),
+                'kdj_j': prices.get('kdj_j'),
+                'macd': prices.get('macd'),
+                'macd_signal': prices.get('macd_signal'),
             }
 
             analysis = await analyze_stock_context(symbol, stock_name, news, tech_data)
