@@ -52,7 +52,7 @@ async def fetch_news_for_stock(symbol: str, stock_name: str) -> str:
             query=query,
             search_depth="advanced",
             topic="news",
-            max_results=3
+            max_results=5
         )
         
         results = response.get('results', [])
@@ -63,7 +63,8 @@ async def fetch_news_for_stock(symbol: str, stock_name: str) -> str:
         for result in results:
             title = result.get('title', 'No Title')
             content = result.get('content', '')[:300]
-            context.append(f"- **{title}**: {content}...")
+            url = result.get('url', '')
+            context.append(f"- **{title}**: {content} (Source: {url})")
             
         return "\n".join(context)
         
@@ -76,14 +77,16 @@ async def analyze_stock_context(symbol: str, stock_name: str, news: str, technic
     """Analyze stock using Local LLM (Chinese Output) - The Reporter role."""
     logger.info(f"🧠 [Reporter] Generating brief for {symbol}...")
     
-    # System prompt: Enforce "Reporter" role - no analysis, only translation
-    system_prompt = """你是一位资深财经记者，正在为中国投资者撰写股票每日简报。
-你的任务是将"分析师报告"翻译成简洁、专业的中文摘要。
+    # System prompt: Role - Financial Columnist (Narrative > Data)
+    system_prompt = """你是一位 StockWise 的首席财经主笔。你的目标是编写一份**通俗易懂、聚焦市场叙事**的个股日报。
 
-核心原则：
-1. **不做分析**: 你不产生新观点，只翻译和总结已有的"分析师结论"。
-2. **事实锚定**: 每一个数字必须来自"硬数据"部分，禁止虚构。
-3. **简洁专业**: 投资者时间宝贵，用最少的文字传达最多的信息。"""
+核心写作原则：
+1. **新闻驱动逻辑**：优先简述"发生了什么"（新闻/行业动态），以此解释股价表现。
+2. **数据隐形化**：**严禁**直接罗列 RSI、KDJ、MA 等技术指标数值。
+   - ❌ 错误：RSI 为 75，MA5 上穿 MA20。
+   - ✅ 正确：短期动能强劲，股价呈现加速上行态势。
+3. **AI 观点自然融入**：将 AI 的信号（Bullish/Bearish）转化为对趋势的定性描述（如"上涨趋势稳固"、"短期面临调整压力"），不要提及"AI 信号"这个词。
+4. **说人话**：让没有金融背景的用户也能一眼看懂是"好"还是"坏"。"""
     
     # Build hard data section
     signal = technical_data.get('signal', 'Side')
@@ -131,20 +134,26 @@ async def analyze_stock_context(symbol: str, stock_name: str, news: str, technic
     
     user_prompt = f"""Subject: {symbol} ({stock_name})
 
-[硬数据 - 来自数据库，禁止虚构]
+[硬数据支撑 - 仅供你参考，作为"隐性逻辑"，不要直接展示数据]
 {hard_data_section}
 
-[分析师推理 - 来自 AI Analyst，你只需翻译总结]
+[分析师推理 - 供参考逻辑]
 {reasoning_section}
 
-[今日新闻 - 来自搜索引擎，提供背景]
+[今日新闻 - 作为叙事核心]
 {news}
 
-任务: 输出中文每日简报。结构如下：
-1. **综合分析** (一段话，约50字，综合信号+推理+新闻)
-2. **关键新闻** (1-2条中文要点，如无重要新闻可省略)
+任务: 撰写每日简报（不要包含任何标题）。格式如下：
 
-输出必须全部为中文。"""
+1. **综合分析** (约60-80字)：
+   - 以今日核心新闻或行业动态开头。
+   - 结合股价表现，用自然的语言描述当前趋势（基于 AI 信号和技术面）。
+   - **禁止**出现具体技术指标名称和数值。
+
+2. **核心新闻 (附出处)** (最多3条，格式：**[标题]**：摘要。[出处链接](URL))
+   - 如果没有重大新闻，此部分显示"今日无重大公开新闻"，通过技术面形态略作补充。
+
+输出语言：专业、流畅、有温度的中文。"""
     
     try:
         response = await asyncio.to_thread(

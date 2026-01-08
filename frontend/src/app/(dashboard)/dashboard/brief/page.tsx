@@ -177,6 +177,16 @@ export default function BriefPage() {
                 ul: ({children}) => <ul className="space-y-2 mb-4 list-disc pl-4 marker:text-indigo-500/50">{children}</ul>,
                 li: ({children}) => <li className="text-sm text-slate-400 pl-1">{children}</li>,
                 strong: ({children}) => <span className="text-indigo-200 font-bold">{children}</span>,
+                a: ({href, children}) => (
+                  <a 
+                    href={href} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-indigo-400 hover:text-indigo-300 font-bold underline decoration-indigo-500/30 underline-offset-4 transition-colors inline-flex items-center gap-1"
+                  >
+                    {children}
+                  </a>
+                ),
                 blockquote: ({children}) => (
                   <blockquote className="border-l-2 border-indigo-500/30 pl-4 py-2 my-6 bg-white/[0.02] rounded-r-xl italic text-slate-400">
                     {children}
