@@ -152,22 +152,14 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool =
         logger.debug(f"ℹ️ 获取最新预测日期失败 (可能库还没数据): {e}")
         base_date = datetime.now(BEIJING_TZ).strftime("%Y-%m-%d")
 
-    # 1. 发送 Web Push 广播 (作为兜底，或者给没有关注列表的用户)
+    # 1. 发送 Web Push 广播 (通知用户 AI 预测已更新)
     send_push_notification(
-        title="🤖 AI 日报生成完毕",
-        body="今日深度分析报告已全量更新，点击查看实战行动建议。",
+        title="🤖 AI 预测已更新",
+        body="今日 AI 智囊团分析报告已就绪，点击查看最新投资建议。",
         url="/dashboard",
         broadcast=True,
-        tag="daily_report"
+        tag="ai_analysis"
     )
-
-    # 2. 发送个性化推送 (针对性增强)
-    try:
-        # 稍微延迟一下，确保广播先到达（可选，但有助于体验）
-        time.sleep(1)
-        send_personalized_daily_report(base_date)
-    except Exception as e:
-        logger.error(f"❌ 发送个性化推送失败: {e}")
 
     # 最后关闭连接
     conn.close()
