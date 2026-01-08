@@ -38,6 +38,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
   const [isSubscribing, setIsSubscribing] = useState(false);
   const [pushSupported, setPushSupported] = useState(false);
   const [testingPush, setTestingPush] = useState(false);
+  const [isSubscribed, setIsSubscribed] = useState(false);
 
   // 测试推送通知
   const handleTestPush = async () => {
@@ -92,72 +93,173 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
   }, [isOpen]);
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && isOpen) {
-        setPushSupported(isPushSupported());
-        if ('Notification' in window) {
-            setPushPermission(Notification.permission);
+    const checkPushState = async () => {
+        if (typeof window !== 'undefined' && isOpen) {
+            setPushSupported(isPushSupported());
+            if ('Notification' in window) {
+                setPushPermission(Notification.permission);
+            }
+            // 检查是否已有订阅
+            if ('serviceWorker' in navigator && Notification.permission === 'granted') {
+                try {
+                    const registration = await navigator.serviceWorker.ready;
+                    const subscription = await registration.pushManager.getSubscription();
+                    setIsSubscribed(!!subscription);
+                } catch (e) {
+                    console.error('Error checking subscription:', e);
+                }
+            }
         }
-    }
+    };
+    checkPushState();
   }, [isOpen]);
 
   const handleEnableNotifications = async () => {
     // 允许重新订阅，即使已授权
     
     setIsSubscribing(true);
+    console.log('🔔 [Push] Starting notification subscription flow...');
+    
     try {
+        // 0. 确保 userId 已加载
+        let currentUserId = userId;
+        if (!currentUserId) {
+            console.log('🔔 [Push] userId not loaded, fetching from getCurrentUser...');
+            const user = await getCurrentUser();
+            currentUserId = user.userId;
+            setUserId(currentUserId);
+        }
+        console.log('🔔 [Push] Using userId:', currentUserId);
+        
         const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
         if (!vapidKey) {
-             console.error('VAPID key not configured');
+             console.error('🔔 [Push] VAPID key not configured');
              setRedeemMsg({ type: 'error', text: '系统配置错误' });
              setIsSubscribing(false);
              return;
         }
+        console.log('🔔 [Push] VAPID key loaded');
         
         // 1. 先注册 Service Worker
         const { registerServiceWorker } = await import('@/lib/notifications');
         const registration = await registerServiceWorker();
         if (!registration) {
-            console.error('Service Worker registration failed');
+            console.error('🔔 [Push] Service Worker registration failed');
             setRedeemMsg({ type: 'error', text: 'Service Worker 注册失败' });
             setIsSubscribing(false);
             return;
         }
+        console.log('🔔 [Push] Service Worker ready');
         
         // 2. 请求通知权限
         let perm = Notification.permission;
+        console.log('🔔 [Push] Current permission:', perm);
         if (perm !== 'granted') {
              perm = await Notification.requestPermission();
              setPushPermission(perm);
+             console.log('🔔 [Push] Permission after request:', perm);
         }
 
         if (perm === 'granted') {
-            // 3. 订阅推送
-            const subscription = await subscribeUserToPush(vapidKey);
-            if (subscription && userId) {
-                // 4. 发送到后端保存
+            // 3. 获取现有订阅或创建新订阅
+            const swRegistration = await navigator.serviceWorker.ready;
+            let subscription = await swRegistration.pushManager.getSubscription();
+            
+            if (subscription) {
+                console.log('🔔 [Push] Using existing subscription');
+            } else {
+                // 没有现有订阅，创建新的
+                console.log('🔔 [Push] No existing subscription, creating new one...');
+                subscription = await subscribeUserToPush(vapidKey);
+                console.log('🔔 [Push] New subscription created:', subscription ? 'SUCCESS' : 'FAILED');
+            }
+            
+            if (subscription && currentUserId) {
+                // 4. 无论是现有订阅还是新订阅，都发送到后端保存
+                // 这样即使之前后端保存失败，再次点击也能成功
+                console.log('🔔 [Push] Sending subscription to backend...');
                 const response = await fetch('/api/notifications/subscribe', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId, subscription })
+                    body: JSON.stringify({ userId: currentUserId, subscription: subscription.toJSON() })
                 });
                 
                 if (response.ok) {
+                    console.log('🔔 [Push] ✅ Subscription saved to backend successfully!');
+                    setIsSubscribed(true);
                     setRedeemMsg({ type: 'success', text: '通知开启成功' });
                     setTimeout(() => setRedeemMsg(null), 3000);
                 } else {
                     const data = await response.json();
-                    console.error('Subscribe API error:', data);
-                    setRedeemMsg({ type: 'error', text: '保存订阅失败' });
+                    console.error('🔔 [Push] ❌ Subscribe API error:', data);
+                    setRedeemMsg({ type: 'error', text: '保存订阅失败: ' + (data.error || '未知错误') });
                 }
             } else {
+                console.error('🔔 [Push] ❌ Missing subscription or userId', { subscription: !!subscription, userId: currentUserId });
                 setRedeemMsg({ type: 'error', text: '获取订阅失败' });
             }
         } else {
+            console.log('🔔 [Push] Permission denied');
             setRedeemMsg({ type: 'error', text: '需要授权通知权限' });
         }
     } catch (e) {
-        console.error('Notification setup error:', e);
-        setRedeemMsg({ type: 'error', text: '开启失败' });
+        console.error('🔔 [Push] ❌ Notification setup error:', e);
+        setRedeemMsg({ type: 'error', text: '开启失败: ' + (e instanceof Error ? e.message : String(e)) });
+    } finally {
+        setIsSubscribing(false);
+    }
+  };
+
+  // 取消订阅推送通知
+  const handleDisableNotifications = async () => {
+    setIsSubscribing(true);
+    console.log('🔔 [Push] Starting unsubscribe flow...');
+    
+    try {
+        // 确保 userId 已加载
+        let currentUserId = userId;
+        if (!currentUserId) {
+            const user = await getCurrentUser();
+            currentUserId = user.userId;
+        }
+        
+        // 1. 获取当前订阅
+        const swRegistration = await navigator.serviceWorker.ready;
+        const subscription = await swRegistration.pushManager.getSubscription();
+        
+        if (subscription) {
+            const endpoint = subscription.endpoint;
+            
+            // 2. 取消浏览器订阅
+            await subscription.unsubscribe();
+            console.log('🔔 [Push] Browser subscription removed');
+            
+            // 3. 通知后端删除订阅记录
+            const response = await fetch('/api/notifications/unsubscribe', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: currentUserId, endpoint })
+            });
+            
+            if (response.ok) {
+                console.log('🔔 [Push] ✅ Subscription removed from backend');
+                setIsSubscribed(false);
+                setPushPermission('default'); // 重置权限状态显示
+                setRedeemMsg({ type: 'success', text: '已关闭通知' });
+                setTimeout(() => setRedeemMsg(null), 3000);
+            } else {
+                console.error('🔔 [Push] ❌ Backend unsubscribe failed');
+                setRedeemMsg({ type: 'error', text: '后端取消失败' });
+            }
+        } else {
+            console.log('🔔 [Push] No subscription to remove');
+            setIsSubscribed(false);
+            setRedeemMsg({ type: 'success', text: '已关闭通知' });
+            setTimeout(() => setRedeemMsg(null), 3000);
+        }
+    } catch (e) {
+        console.error('🔔 [Push] ❌ Unsubscribe error:', e);
+        setRedeemMsg({ type: 'error', text: '关闭失败: ' + (e instanceof Error ? e.message : String(e)) });
     } finally {
         setIsSubscribing(false);
     }
@@ -348,8 +450,8 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                 <h4 className="text-sm font-bold text-white">推送通知</h4>
                                 <div className="flex items-center gap-2">
                                     <p className="text-[10px] text-slate-500">获取股价异动与日报提醒</p>
-                                    {/* 测试按钮 - 仅当通知已授权时显示，最小化设计 */}
-                                    {pushPermission === 'granted' && (
+                                    {/* 测试按钮 - 仅当通知已订阅时显示，最小化设计 */}
+                                    {isSubscribed && (
                                         <button
                                             onClick={handleTestPush}
                                             disabled={testingPush}
@@ -362,13 +464,14 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                             </div>
                         </div>
                         <div>
-                            {pushPermission === 'granted' ? (
+                            {isSubscribed ? (
                                 <button
-                                    onClick={handleEnableNotifications}
+                                    onClick={handleDisableNotifications}
                                     disabled={isSubscribing}
-                                    className="px-3 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20 hover:bg-emerald-500/20 transition-all"
+                                    className="px-3 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20 hover:bg-emerald-500/20 hover:text-red-400 hover:border-red-500/30 transition-all group/btn"
                                 >
-                                    {isSubscribing ? '同步中...' : '已开启'}
+                                    <span className="group-hover/btn:hidden">{isSubscribing ? '处理中...' : '已开启'}</span>
+                                    <span className="hidden group-hover/btn:inline">关闭</span>
                                 </button>
                             ) : (
                                 <button
