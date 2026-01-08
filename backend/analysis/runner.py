@@ -165,7 +165,7 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool =
     try:
         # 稍微延迟一下，确保广播先到达（可选，但有助于体验）
         time.sleep(1)
-        send_personalized_daily_report(targets, base_date)
+        send_personalized_daily_report(base_date)
     except Exception as e:
         logger.error(f"❌ 发送个性化推送失败: {e}")
 
