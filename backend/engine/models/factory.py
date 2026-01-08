@@ -55,6 +55,12 @@ class ModelFactory:
         capabilities_json = row_dict.get('capabilities_json') or '{}'
         display_name = row_dict.get('display_name')
 
+        # === DEBUG LOGGING ===
+        print(f"🔍 [DEBUG] model_id: {model_id}")
+        print(f"🔍 [DEBUG] config_json type: {type(config_json)}")
+        print(f"🔍 [DEBUG] config_json repr: {repr(config_json[:50] if config_json else 'None')}")
+        print(f"🔍 [DEBUG] config_json first char ord: {ord(config_json[0]) if config_json else 'N/A'}")
+        # === END DEBUG ===
              
         config = json.loads(config_json)
         config['capabilities_json'] = json.loads(capabilities_json)
