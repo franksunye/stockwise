@@ -1,0 +1,59 @@
+name: Daily Brief & Push (Global)
+
+# 职责：每日生成 AI 简报并推送给订阅用户
+# 触发：手动触发 (线上自动触发暂禁用，待本地验证稳定后启用)
+# 启用定时: 取消下方 schedule 注释
+
+on:
+  # schedule:
+  #   - cron: '30 9 * * 1-5'  # CST 17:30
+  workflow_dispatch:
+
+jobs:
+  generate-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Generate Briefs (Phase 1 & 2)
+        env:
+          # Database (Turso)
+          TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+          
+          # Tavily News
+          TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
+          
+          # LLM (Map Remote DeepSeek/Gemini to Local Env Vars)
+          # In CI, we use the remote provider defined in secrets
+          GEMINI_LOCAL_BASE_URL: ${{ secrets.DEEPSEEK_BASE_URL }}
+          LLM_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          GEMINI_LOCAL_MODEL: deepseek-chat 
+        run: |
+          # Run the full daily pipeline (Batch Analysis + User Assembly)
+          python backend/engine/brief_generator.py
+
+      - name: Broadcast Notifications
+        env:
+          # Database
+          TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+          
+          # Push Service
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+          INTERNAL_API_SECRET: ${{ secrets.INTERNAL_API_SECRET }}
+        run: |
+          # Send pushes based on generated briefs
+          python backend/notifications.py --action push_daily

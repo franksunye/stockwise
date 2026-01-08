@@ -145,6 +145,34 @@ def init_db():
         # 5. Push Subs
         cursor.execute("CREATE TABLE IF NOT EXISTS push_subscriptions (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, endpoint TEXT NOT NULL, p256dh TEXT NOT NULL, auth TEXT NOT NULL, user_agent TEXT, created_at TIMESTAMP DEFAULT (datetime('now', '+8 hours')), last_used_at TIMESTAMP, UNIQUE(user_id, endpoint))")
 
+        # 5b. Daily Briefs (AI-generated personalized briefings)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS daily_briefs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id TEXT NOT NULL,
+                date TEXT NOT NULL,
+                content TEXT NOT NULL,
+                push_hook TEXT,
+                created_at TIMESTAMP DEFAULT (datetime('now', '+8 hours')),
+                UNIQUE(user_id, date)
+            )
+        """)
+
+        # 5c. Stock Briefs (Phase 1 cache - stock-level analysis, shared across users)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS stock_briefs (
+                symbol TEXT NOT NULL,
+                date TEXT NOT NULL,
+                stock_name TEXT,
+                analysis_markdown TEXT NOT NULL,
+                raw_news TEXT,
+                signal TEXT,
+                confidence REAL,
+                created_at TIMESTAMP DEFAULT (datetime('now', '+8 hours')),
+                PRIMARY KEY (symbol, date)
+            )
+        """)
+
         # 6. Multi-Model V2
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS prediction_models (

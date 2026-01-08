@@ -46,94 +46,66 @@ def send_push_notification(title, body, url=None, related_symbol=None, broadcast
     except Exception as e:
         logger.error(f"❌ 推送请求异常: {e}")
 
-def send_personalized_daily_report(targets, date_str):
+def send_personalized_daily_report(date_str):
     """
-    为关注了这些股票的用户发送个性化通知
+    Broadcast push notifications to users who have a generated brief for the given date.
+    Purely consumes 'daily_briefs' table. Does NOT trigger generation.
     """
     from database import get_connection
     
-    if not targets:
-        return
-        
     conn = get_connection()
-    cursor = conn.cursor()
-    
-    logger.info(f"发送个性化推送给关注了 {len(targets)} 只股票的用户...")
-    
-    # 查找所有关注了这些股票且已订阅推送的用户及其关注的股票详情
-    # 使用符号列表构造查询
-    # 添加 JOIN push_subscriptions 确保只向已订阅的用户发送推送
-    placeholders = ','.join(['?'] * len(targets))
-    query = f"""
-    SELECT DISTINCT u.user_id, w.symbol, sm.name, ap.signal
-    FROM users u
-    JOIN user_watchlist w ON u.user_id = w.user_id
-    JOIN stock_meta sm ON w.symbol = sm.symbol
-    JOIN ai_predictions ap ON w.symbol = ap.symbol AND ap.date = ?
-    JOIN push_subscriptions ps ON u.user_id = ps.user_id
-    WHERE w.symbol IN ({placeholders})
-    """
-    params = [date_str] + targets
-    
     try:
-        cursor.execute(query, params)
-        rows = cursor.fetchall()
-        conn.close()
-    except Exception as e:
-        logger.error(f"❌ 查询个性化推送数据失败: {e}")
-        return
-    
-    if not rows:
-        logger.info("ℹ️ 没有发现需要个性化推送的已订阅用户")
-        return
+        cursor = conn.cursor()
+        
+        # Join daily_briefs with push_subscriptions to find valid targets
+        cursor.execute("""
+            SELECT DISTINCT db.user_id, db.push_hook
+            FROM daily_briefs db
+            JOIN push_subscriptions ps ON db.user_id = ps.user_id
+            WHERE db.date = ?
+        """, (date_str,))
+        
+        targets = cursor.fetchall()
+        
+        if not targets:
+            logger.info(f"ℹ️ No briefs found for {date_str} (or no subscribed users). Pipeline sequence error?")
+            return
 
-    # 按用户分组
-    user_data = {}
-    for row in rows:
-        # 统一使用索引访问，兼容 tuple 和 Row 对象 (libsql, sqlite3)
-        try:
-            uid = row[0]
-            symbol = row[1]
-            name = row[2]
-            signal = row[3]
-            
-            if uid not in user_data:
-                user_data[uid] = []
-            user_data[uid].append({'symbol': symbol, 'name': name, 'signal': signal})
-        except Exception as e:
-            logger.error(f"⚠️ 处理推送行数据失败: {e}, row: {row}")
-            continue
+        logger.info(f"📤 Sending push notifications to {len(targets)} users...")
         
-    logger.info(f"准备向 {len(user_data)} 位用户发送个性化日报...")
+        success_count = 0
+        for user_id, push_hook in targets:
+            try:
+                # Send push notification
+                send_push_notification(
+                    title="📊 每日简报已生成",
+                    body=push_hook or "点击查看今日 AI 复盘",
+                    url="/dashboard/brief",
+                    target_user_id=user_id,
+                    tag="daily_brief"
+                )
+                success_count += 1
+                time.sleep(0.2) # Rate limit protection
+                
+            except Exception as e:
+                logger.error(f"❌ Failed to push to {user_id}: {e}")
+                
+        logger.info(f"✅ Batch push completed. Sent: {success_count}/{len(targets)}")
+        
+    except Exception as e:
+        logger.error(f"❌ Broadcast error: {e}")
+    finally:
+        conn.close()
+
+if __name__ == "__main__":
+    import argparse
+    from datetime import datetime
     
-    for uid, stocks in user_data.items():
-        count = len(stocks)
-        if count == 0: continue
-        
-        # 挑选一个表现最突出的（看多 > 观望 > 看空）
-        bullish = [s for s in stocks if s['signal'] == 'Long']
-        neutral = [s for s in stocks if s['signal'] == 'Side']
-        
-        if bullish:
-            top_stock = bullish[0]['name']
-            emoji = "🚀"
-            body = f"您关注的 {count} 只股票已更新。AI看多 {top_stock}，点击查看实战建议。"
-        elif neutral:
-            top_stock = neutral[0]['name']
-            emoji = "⚖️"
-            body = f"您关注的 {count} 只股票已更新。{top_stock} 建议观望，点击查看逻辑。"
-        else:
-            top_stock = stocks[0]['name']
-            emoji = "📉"
-            body = f"您关注的 {count} 只股票已更新。{top_stock} 建议减仓风险，点击查看详情。"
-            
-        # 发送推送 (这里可以稍微加点延时避免并发瞬间冲垮 API)
-        send_push_notification(
-            title=f"{emoji} AI 个性化日报已生成",
-            body=body,
-            url="/dashboard",
-            target_user_id=uid,
-            tag="daily_report"
-        )
-        # 频率限制：每秒最多发几个? 系统规模小暂不强制限制，但稍微休眠下
-        # time.sleep(0.1) 
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--action", choices=["push_daily"], required=True)
+    parser.add_argument("--date", help="Date YYYY-MM-DD")
+    args = parser.parse_args()
+    
+    if args.action == "push_daily":
+        target_date = args.date or datetime.now().strftime("%Y-%m-%d")
+        send_personalized_daily_report(target_date) 

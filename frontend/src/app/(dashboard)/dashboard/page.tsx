@@ -3,12 +3,13 @@
 import { useState, useEffect, Suspense, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LayoutGrid as Grid, ChevronDown, RefreshCw, User } from 'lucide-react';
+import { LayoutGrid as Grid, ChevronDown, RefreshCw, User, FileText } from 'lucide-react';
 import { StockData, AIPrediction } from '@/lib/types';
 import { 
   TacticalBriefDrawer, 
   StockProfile,
   StockVerticalFeed,
+  BriefDrawer,
   COLORS 
 } from '@/components/dashboard';
 import { formatStockSymbol } from '@/lib/date-utils';
@@ -30,6 +31,7 @@ function DashboardContent() {
   const searchParams = useSearchParams();
   const targetSymbol = searchParams.get('symbol');
   const [userCenterOpen, setUserCenterOpen] = useState(false);
+  const [briefOpen, setBriefOpen] = useState(false);
   const hasScrolledToTarget = useRef(false);
 
   const { stocks, loadingPool, refresh, isRefreshing } = useDashboardData();
@@ -140,14 +142,12 @@ function DashboardContent() {
             </span>
           </div>
 
-          {/* 右侧：极简刷新按钮 (隐藏倒计时) */}
+          {/* 右侧：Brief 入口 (替代刷新) */}
           <button 
-            onClick={() => refresh()}
-            disabled={isRefreshing}
-            className="w-10 h-10 rounded-[16px] bg-white/5 border border-white/10 flex items-center justify-center active:scale-90 transition-all disabled:opacity-50 hover:bg-white/10"
-            title={isRefreshing ? '刷新中...' : '点击刷新'}
+            onClick={() => setBriefOpen(true)}
+            className="w-10 h-10 rounded-[16px] bg-white/5 border border-white/10 flex items-center justify-center active:scale-90 transition-all hover:bg-white/10 group"
           >
-            <RefreshCw className={`w-4 h-4 text-slate-500 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <FileText className="w-5 h-5 text-slate-400 group-hover:text-indigo-400 transition-colors" />
           </button>
         </div>
       </header>
@@ -196,12 +196,12 @@ function DashboardContent() {
             <Grid className="w-5 h-5 text-indigo-400" />
           </Link>
           
-           <button 
-             onClick={() => setUserCenterOpen(true)} 
-             className="w-11 h-11 rounded-full bg-white/5 border border-white/10 flex items-center justify-center transition-all active:scale-90 hover:bg-white/10 shrink-0"
-           >
-             <User className="w-5 h-5 text-slate-400" />
-           </button>
+          <button 
+            onClick={() => setUserCenterOpen(true)} 
+            className="w-11 h-11 rounded-full bg-white/5 border border-white/10 flex items-center justify-center transition-all active:scale-90 hover:bg-white/10 shrink-0"
+          >
+            <User className="w-5 h-5 text-slate-400" />
+          </button>
         </div>
       </footer>
 
@@ -228,6 +228,11 @@ function DashboardContent() {
         onClose={() => setUserCenterOpen(false)}
       />
 
+      <BriefDrawer 
+        isOpen={briefOpen}
+        onClose={() => setBriefOpen(false)}
+        limitToSymbol={currentStock?.symbol}
+      />
 
     </main>
   );
