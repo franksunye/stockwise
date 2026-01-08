@@ -80,16 +80,18 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool =
             today_str = today_data['date']
             
             # --- Idempotency Check (幂等性检查) ---
-            # 除非指定 force=True，否则如果库里已经有了今天的 V2 预测，就跳过。
+            # 改良逻辑：如果是单模型运行，只检查该模型。如果是 all 运行，交给 PredictionRunner 内部处理。
             if not force:
-                cursor.execute(
-                    "SELECT 1 FROM ai_predictions_v2 WHERE symbol = ? AND date = ? LIMIT 1",
-                    (stock, today_str)
-                )
-                if cursor.fetchone():
-                    logger.info(f"⏩ {stock}: {today_str} V2 预测已存在，跳过 (Cost Saving)")
-                    success_count += 1 # 视为成功
-                    continue
+                if model_filter and model_filter != 'all':
+                    cursor.execute(
+                        "SELECT 1 FROM ai_predictions_v2 WHERE symbol = ? AND date = ? AND model_id = ? LIMIT 1",
+                        (stock, today_str, model_filter)
+                    )
+                    if cursor.fetchone():
+                        logger.info(f"⏩ {stock}: {today_str} ({model_filter}) 预测已存在，跳过")
+                        success_count += 1
+                        continue
+                # 如果是 all，这里不再做整体跳过，让子引擎去判断具体哪个模型没跑
             # --------------------------------------
 
             logger.info(f">>> 分析 {stock} ({today_str})")
@@ -103,7 +105,7 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool =
                 from engine.runner import PredictionRunner
                 import asyncio
                 
-                runner = PredictionRunner(model_filter=model_filter)
+                runner = PredictionRunner(model_filter=model_filter, force=force)
                 # Run async in sync context
                 # Windows might need policy ... assume main.py handles it or we do local
                 if os.name == 'nt':

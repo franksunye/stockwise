@@ -10,17 +10,21 @@ from backend.trading_calendar import get_next_trading_day_str
 from backend.logger import logger
 
 class PredictionRunner:
-    def __init__(self, model_filter: str = None):
+    def __init__(self, model_filter: str = None, force: bool = False):
         """
         Args:
             model_filter: 指定要使用的模型 ID，如果为 None 则使用所有活动模型
+            force: 是否强制重新运行已存在的预测
         """
         self.model_filter = model_filter
+        self.force = force
 
-    async def run_analysis(self, symbol: str, date: str = None, data: Dict[str, Any] = None):
+    async def run_analysis(self, symbol: str, date: str = None, data: Dict[str, Any] = None, force: bool = False):
         """
         Run multi-model analysis for a given stock.
         """
+        # Use instance force or method force
+        effective_force = force or self.force
         logger.info(f"🏁 Starting Multi-Model Analysis for {symbol} on {date}")
         
         # 1. Get Active Models (Already sorted by priority DESC)
@@ -75,7 +79,7 @@ class PredictionRunner:
         # 3. Parallel Execution (The Race)
         tasks = []
         for model in models:
-            tasks.append(self._safe_predict(model, symbol, date, data))
+            tasks.append(self._safe_predict(model, symbol, date, data, force=effective_force))
             
         predictions = await asyncio.gather(*tasks)
         
@@ -157,8 +161,24 @@ class PredictionRunner:
         conn.close()
         logger.info(f"✅ Analysis completed for {symbol}. Saved {saved_count} results. Primary: {primary_pred['model_id'] if primary_pred else 'None'}")
 
-    async def _safe_predict(self, model, symbol, date, data):
+    async def _safe_predict(self, model, symbol, date, data, force: bool = False):
         try:
+            # 1. Idempotency check per model
+            if not force:
+                conn = get_connection()
+                cursor = conn.cursor()
+                try:
+                    cursor.execute(
+                        "SELECT 1 FROM ai_predictions_v2 WHERE symbol = ? AND date = ? AND model_id = ? LIMIT 1",
+                        (symbol, date, model.model_id)
+                    )
+                    if cursor.fetchone():
+                        logger.debug(f"⏩ Model {model.model_id} already has prediction for {symbol} on {date}, bypassing.")
+                        return None
+                finally:
+                    conn.close()
+
+            # 2. Execute prediction
             result = await model.predict(symbol, date, data)
             if result is None:
                 return None
