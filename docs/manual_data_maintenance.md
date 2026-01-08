@@ -136,8 +136,17 @@ python backend/notifications.py --action push_daily
 
 #### PowerShell (Windows)
 ```powershell
-# 临时设置环境变量并运行
-$env:DB_SOURCE="cloud"; python backend/engine/brief_generator.py; $env:DB_SOURCE="local"
+# 单用户 + 线上数据库
+$env:DB_SOURCE="cloud"; python backend/engine/brief_generator.py --user "user_kks6hezt3"
+
+# 全量 + 线上数据库
+$env:DB_SOURCE="cloud"; python backend/engine/brief_generator.py
+```
+
+#### 查询线上用户列表
+如果您不知道线上有哪些用户，可以先查询：
+```powershell
+node frontend/scripts/turso-cli.mjs query "SELECT user_id, COUNT(symbol) as cnt FROM user_watchlist WHERE user_id LIKE 'user_%' GROUP BY user_id"
 ```
 
 #### Bash (Linux/Mac)
