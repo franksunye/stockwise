@@ -33,6 +33,7 @@ def migrate():
         models = [
             ('deepseek-v3', 'DeepSeek V3', 'adapter-openai', 1, 100, '{"model": "deepseek-chat", "api_key_env": "DEEPSEEK_API_KEY"}', '{"cost": "medium"}'),
             ('gemini-3-flash', 'Gemini 3 Flash', 'adapter-openai', 1, 90, '{"model": "gemini-1.5-flash", "api_key_env": "GEMINI_API_KEY"}', '{"cost": "low"}'),
+            ('hunyuan-lite', '腾讯混元 Hunyuan-Lite', 'adapter-openai', 1, 85, '{"model": "hunyuan-lite", "api_key_env": "HUNYUAN_API_KEY", "base_url": "https://api.hunyuan.cloud.tencent.com/v1"}', '{"cost": "low"}'),
             ('rule-engine', '量化规则引擎 (Base)', 'rule-engine', 1, 50, '{}', '{"cost": "zero"}'),
             ('legacy-ai', 'Legacy AI Records', 'legacy', 0, 0, '{}', '{}'),
             ('mock-dev', '开发测试 Mock', 'mock', 0, 0, '{}', '{}')

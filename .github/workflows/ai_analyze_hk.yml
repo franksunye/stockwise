@@ -39,9 +39,10 @@ jobs:
           LLM_PROVIDER: deepseek
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           DEEPSEEK_BASE_URL: ${{ secrets.DEEPSEEK_BASE_URL }}
+          HUNYUAN_API_KEY: ${{ secrets.HUNYUAN_API_KEY }}
           # 通知
           WECOM_ROBOT_KEY: ${{ secrets.WECOM_ROBOT_KEY }}
           INTERNAL_API_SECRET: ${{ secrets.INTERNAL_API_SECRET }}
           NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
         run: |
-          python -u backend/main.py --analyze --market HK --model rule-engine
+          python -u backend/main.py --analyze --market HK --model all

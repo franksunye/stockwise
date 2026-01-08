@@ -40,7 +40,7 @@ if __name__ == "__main__":
     parser.add_argument('--symbol', type=str, help='指定股票代码')
     parser.add_argument('--market', type=str, choices=['CN', 'HK'], help='只同步/分析特定市场')
     parser.add_argument('--model', type=str, default='rule-engine', 
-                        choices=['all', 'deepseek-v3', 'gemini-3-flash', 'rule-engine'],
+                        choices=['all', 'deepseek-v3', 'gemini-3-flash', 'hunyuan-lite', 'rule-engine'],
                         help='指定 AI 模型 (默认: rule-engine)')
     
     # 回填功能参数

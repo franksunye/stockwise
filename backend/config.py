@@ -77,6 +77,11 @@ DEFAULTS = {
         "api_key": os.getenv("GEMINI_LOCAL_API_KEY", os.getenv("LLM_API_KEY")),
         "base_url": os.getenv("GEMINI_LOCAL_BASE_URL", "http://127.0.0.1:8045"),
         "model": os.getenv("GEMINI_LOCAL_MODEL", "gemini-3-flash"),
+    },
+    "hunyuan": {
+        "api_key": os.getenv("HUNYUAN_API_KEY"),
+        "base_url": os.getenv("HUNYUAN_BASE_URL", "https://api.hunyuan.cloud.tencent.com/v1"),
+        "model": os.getenv("HUNYUAN_MODEL", "hunyuan-lite"),
     }
 }
 
@@ -92,7 +97,8 @@ LLM_CONFIG = {
     # 模块化配置
     "deepseek": DEFAULTS["deepseek"],
     "gemini": DEFAULTS["gemini"],
-    "gemini_local": DEFAULTS["gemini_local"]
+    "gemini_local": DEFAULTS["gemini_local"],
+    "hunyuan": DEFAULTS["hunyuan"]
 }
 
 # 动态覆盖基础配置 (如果指定了提供商且有对应配置)
