@@ -70,3 +70,20 @@
     *   *Check*: 如果 Input Signal 是 `Short`，但 Output 文本包含 "Buy" / "Bullish"，直接丢弃并告警。
 
 通过这一套协议，我们将 "AI 创作" 的不确定性，限制在了 "文风" 层面，而将 "事实" 和 "观点" 牢牢锁定在数据库的结构化记录中。
+
+---
+
+## 技术附录：搜索能力的可靠性保障 (The Search Reliability Strategy)
+
+针对 **"如何确保能搜到准确的港股/A股新闻"** 这一挑战，我们采用 **混合模型策略 (Hybrid Model Strategy)**：
+
+1.  **News Hunter (猎人)**: 使用 **Gemini 2.0 Flash (with Google Search Grounding)**。
+    *   *优势*: Gemini 原生集成了 Google 搜索能力，能够实时索引中文财经新闻，并且会自动过滤低质量内容，提供 Source Link。
+    *   *任务*: "搜索腾讯控股今日发生的重大新闻，只保留来自权威财经媒体（如财新、新浪财经、Bloomberg）的内容。"
+
+2.  **Logic Engine (大脑)**: 使用 **DeepSeek-V3/Reasoning**。
+    *   *优势*: 逻辑推理能力极强，懂中国市场语境。
+    *   *任务*: 接收 Gemini 搜到的 "新闻摘要" + 数据库里的 "硬指标"，进行最终的 **"利好/利空演绎推理"**。
+
+**结论**: 我们不依赖单一模型的幻觉。我们用 **Google 的搜索技术** 找新闻，用 **DeepSeek 的推理技术** 做判断，用 **本地数据库** 做事实锚定。
+
