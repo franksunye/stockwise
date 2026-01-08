@@ -8,6 +8,7 @@ from database import get_stock_pool
 from utils import send_wecom_notification
 from helpers import check_trading_day_skip
 from sync.prices import process_stock_period
+from config import SYNC_CONFIG
 from logger import logger
 
 
@@ -21,7 +22,8 @@ def sync_spot_prices(symbols: list):
     success_count = 0
     errors = []
     
-    logger.info(f"⚡ 启动并发盘中同步 (Workers=4) - 针对 {len(symbols)} 只股票")
+    workers = SYNC_CONFIG["realtime_workers"]
+    logger.info(f"⚡ 启动并发盘中同步 (Workers={workers}) - 针对 {len(symbols)} 只股票")
     
     def sync_single_realtime(stock):
         try:
@@ -30,7 +32,7 @@ def sync_spot_prices(symbols: list):
         except Exception as e:
             raise e
 
-    with ThreadPoolExecutor(max_workers=4) as executor:
+    with ThreadPoolExecutor(max_workers=workers) as executor:
         future_to_stock = {executor.submit(sync_single_realtime, sym): sym for sym in symbols}
         
         for i, future in enumerate(as_completed(future_to_stock)):

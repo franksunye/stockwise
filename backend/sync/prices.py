@@ -9,6 +9,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import pandas as pd
 
 from database import get_connection, get_stock_pool
+from config import SYNC_CONFIG
 from fetchers import fetch_stock_data
 from utils import send_wecom_notification, format_volume
 from notifications import send_push_notification
@@ -160,8 +161,9 @@ def run_full_sync(market_filter: str = None):
     success_count = 0
     errors = []
     
-    # 使用线程池并发同步 (Max Workers = 2)
-    logger.info(f"🚀 启动并发同步 (Workers=2)...")
+    # 使用线程池并发同步
+    workers = SYNC_CONFIG["daily_workers"]
+    logger.info(f"🚀 启动并发同步 (Workers={workers})...")
     
     def sync_single_stock(stock):
         """单个股票的全量同步任务"""
@@ -177,7 +179,7 @@ def run_full_sync(market_filter: str = None):
         except Exception as e:
             raise e
 
-    with ThreadPoolExecutor(max_workers=2) as executor:
+    with ThreadPoolExecutor(max_workers=workers) as executor:
         future_to_stock = {executor.submit(sync_single_stock, stock): stock for stock in target_stocks}
         
         for i, future in enumerate(as_completed(future_to_stock)):

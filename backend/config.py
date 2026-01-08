@@ -48,7 +48,14 @@ else:
     TURSO_DB_URL = os.getenv("TURSO_DB_URL")
     TURSO_AUTH_TOKEN = os.getenv("TURSO_AUTH_TOKEN")
 
-# API 配置
+# 3. 同步并发配置
+# 控制 ThreadPoolExecutor 的并发线程数，避免 Turso/libSQL 压力过大
+SYNC_CONFIG = {
+    "realtime_workers": int(os.getenv("SYNC_REALTIME_WORKERS", "2")),
+    "daily_workers": int(os.getenv("SYNC_DAILY_WORKERS", "2")),
+}
+
+# 4. API 配置
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 WECOM_ROBOT_KEY = os.getenv("WECOM_ROBOT_KEY")
 
