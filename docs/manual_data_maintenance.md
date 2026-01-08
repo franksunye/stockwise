@@ -84,3 +84,68 @@ done
 
 ### 3. "AI 分析完成! 成功: 0/1"
 如果是 0/1 且没有明显报错，通常是因为没有加 `--force` 参数，且数据库中已经存在今日的预测记录。加上 `--force` 即可。
+
+## 步骤 3: 每日简报生成验证 (本地调试模式)
+
+如果您需要验证“每日简报生成”模块 (Tavily + Local LLM)，请确保已配置本地 LLM 环境。
+
+### 前置条件 (.env)
+```ini
+# Tavily 搜索密钥 (必须)
+TAVILY_API_KEY=tvly-xxxxxxxx
+
+# 本地 LLM 配置 (OpenAI 兼容协议)
+GEMINI_LOCAL_BASE_URL=http://127.0.0.1:8045/v1  # 注意 /v1 后缀
+GEMINI_LOCAL_MODEL=gemini-3-flash              # 本地对应模型名
+LLM_API_KEY=sk-any-string                      # 本地通常不校验 Key
+```
+
+### 命令
+该脚本支持两种模式：全量生成（生产模式）和单用户生成（调试模式）。
+
+#### 1. 调试单个用户 (Phase 1 + Phase 2)
+这将强制为指定用户生成 Phase 1 的股票分析和 Phase 2 的简报组装。
+```powershell
+python backend/engine/brief_generator.py --user "user_r8gscc58m"
+```
+*   **用途**: 快速验证 LLM 的中文输出和 Tavily 的新闻抓取是否正常。
+*   **结果**: 检查控制台输出的日志，以及数据库 `stock_briefs` 和 `daily_briefs` 表。
+
+#### 2. 全量运行 (模拟生产 CI 环境)
+这会为数据库中的**所有活跃用户**生成简报。
+```powershell
+python backend/engine/brief_generator.py
+```
+
+#### 3. 仅测试推送 (不生成，仅广播)
+如果您只想测试 `notifications.py` 能否正确读取数据库并发送 WebPush，可以使用：
+```powershell
+python backend/notifications.py --action push_daily
+```
+
+
+> **注意**: 本地运行时，请确保您的 VPN/代理允许访问 Tavily API，同时本地 LLM 服务 (8045端口) 处于运行状态。
+
+### 关键配置：切换本地/线上数据库 (`DB_SOURCE`)
+
+默认情况下，如果您在本地开发环境配置了 `.env` 并设置了 `DB_SOURCE=local`，上述命令只会修改 **本地 SQLite 数据库 (`data/stockwise.db`)**。
+
+**如果您想在本地直接生成并写入 线上 Turso 数据库 (Production Data)：**
+
+必须在运行命令时临时覆盖 `DB_SOURCE` 环境变量为 `cloud`。
+
+#### PowerShell (Windows)
+```powershell
+# 临时设置环境变量并运行
+$env:DB_SOURCE="cloud"; python backend/engine/brief_generator.py; $env:DB_SOURCE="local"
+```
+
+#### Bash (Linux/Mac)
+```bash
+DB_SOURCE=cloud python backend/engine/brief_generator.py
+```
+
+**验证方法**:
+运行后，检查终端日志。
+*   如果看到 `🔧 模式切换: 强制使用本地 SQLite` -> 正在操作 **本地库**。
+*   如果看到 `Using Turso DB...` (或没有上述提示) -> 正在操作 **线上库**。
