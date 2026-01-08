@@ -25,11 +25,17 @@ param(
     [switch]$AutoFill        # 智能补充
 )
 
-$EnvFile = "..\.env"
+# 确定脚本所在目录并切换到项目根目录
+$ScriptDir = $PSScriptRoot
+$ProjectRoot = Resolve-Path "$ScriptDir\.."
+Push-Location $ProjectRoot
+
+$EnvFile = "backend\.env"
 
 if (-not (Test-Path $EnvFile)) {
-    Write-Host "X Error: .env file not found." -ForegroundColor Red
-    Write-Host "Please copy .env.example to .env and fill in your Turso credentials." -ForegroundColor Yellow
+    Write-Host "X Error: .env file not found at $EnvFile" -ForegroundColor Red
+    Write-Host "Please ensure you are running this from the project root or scripts directory." -ForegroundColor Yellow
+    Pop-Location
     exit 1
 }
 
@@ -37,7 +43,7 @@ if (-not (Test-Path $EnvFile)) {
 $env:PYTHONIOENCODING = "utf-8"
 
 # Build command arguments
-$pythonArgs = @("main.py", "--analyze")
+$pythonArgs = @("backend\main.py", "--analyze")
 
 # 判断是否为回填模式
 $isBackfillMode = $Date -or $StartDate -or $EndDate -or $Days -or $AutoFill
@@ -103,3 +109,5 @@ if ($LASTEXITCODE -eq 0) {
 } else {
     Write-Host "`n>>> FAILED: Please check the logs above." -ForegroundColor Red
 }
+
+Pop-Location

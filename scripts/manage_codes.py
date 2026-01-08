@@ -3,7 +3,12 @@ import random
 import string
 import sqlite3
 import sys
+import os
 from datetime import datetime
+
+# Add backend directory to sys.path to allow imports when run from scripts/
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../backend')))
+
 from database import get_connection, init_db
 
 # 确保数据库已初始化

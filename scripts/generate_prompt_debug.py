@@ -1,6 +1,12 @@
 import json
 import sqlite3
+import sys
+import os
 from datetime import datetime
+
+# Add backend directory to sys.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../backend')))
+
 from database import get_connection, get_stock_profile
 
 def generate_full_prompt(symbol: str):

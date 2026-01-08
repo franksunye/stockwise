@@ -4,11 +4,11 @@ import json
 import asyncio
 from dotenv import load_dotenv
 
-# Add backend to path
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+# Add backend directory to sys.path to allow imports when run from scripts/
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../backend')))
 
 # Load env configuration
-load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env'))
+load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../backend/.env'))
 
 # --- Configuration ---
 # 1. Search Provider: Tavily
