@@ -94,11 +94,36 @@ done
 # Tavily 搜索密钥 (必须)
 TAVILY_API_KEY=tvly-xxxxxxxx
 
-# 本地 LLM 配置 (OpenAI 兼容协议)
-GEMINI_LOCAL_BASE_URL=http://127.0.0.1:8045/v1  # 注意 /v1 后缀
-GEMINI_LOCAL_MODEL=gemini-3-flash              # 本地对应模型名
-LLM_API_KEY=sk-any-string                      # 本地通常不校验 Key
+# 本地 LLM 配置 - Gemini SDK 模式 (推荐)
+LLM_PROVIDER=gemini_local
+GEMINI_LOCAL_BASE_URL=http://127.0.0.1:8045  # 注意: 不需要 /v1 后缀
+GEMINI_LOCAL_MODEL=gemini-3-flash            # 本地对应模型名
+LLM_API_KEY=sk-any-string                    # 本地通常不校验 Key
 ```
+
+### 数据库模型配置 (重要)
+
+如果使用 Gemini Local 模式进行 AI 预测，需要确保 `prediction_models` 表中的配置正确：
+
+```sql
+-- 查看当前配置
+SELECT model_id, provider, config_json FROM prediction_models WHERE model_id = 'gemini-3-flash';
+
+-- 正确的配置应该是:
+-- provider = 'adapter-gemini-local'
+-- config_json = '{"model":"gemini-3-flash","api_key_env":"LLM_API_KEY","base_url_env":"GEMINI_LOCAL_BASE_URL","max_tokens":8192}'
+
+-- 如果配置错误，执行以下 SQL 修复:
+UPDATE prediction_models 
+SET provider = 'adapter-gemini-local',
+    config_json = '{"model":"gemini-3-flash","api_key_env":"LLM_API_KEY","base_url_env":"GEMINI_LOCAL_BASE_URL","max_tokens":8192}' 
+WHERE model_id = 'gemini-3-flash';
+```
+
+**常见配置错误**:
+- `provider` 设置为 `adapter-openai` 而不是 `adapter-gemini-local`
+- `config_json` 中 `model` 设置为 `gpt-3.5-turbo` 而不是 `gemini-3-flash`
+- `config_json` 中 `base_url_env` 设置为 `LLM_BASE_URL` 而不是 `GEMINI_LOCAL_BASE_URL`
 
 ### 命令
 该脚本支持两种模式：全量生成（生产模式）和单用户生成（调试模式）。
