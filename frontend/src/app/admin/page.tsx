@@ -203,6 +203,21 @@ export default function AdminDashboard() {
                </div>
              </Link>
 
+             <Link href="/admin/traces" className="group block">
+               <div className="glass-card p-8 flex items-center justify-between hover:bg-white/[0.04] transition-all border-emerald-500/20">
+                 <div className="flex items-center gap-6">
+                   <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center group-hover:bg-emerald-500/20 transition-all">
+                     <Terminal className="w-7 h-7 text-emerald-500" />
+                   </div>
+                   <div>
+                     <h2 className="text-xl font-black italic tracking-tighter mb-1">Chain 调试终端</h2>
+                     <p className="text-xs text-slate-500 font-medium">可视化查看 LLM 执行全链路 (Prompt & Response)</p>
+                   </div>
+                 </div>
+                 <ArrowRight className="text-slate-700 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all" />
+               </div>
+             </Link>
+
              <div className="glass-card p-8 flex items-center opacity-40 grayscale cursor-not-allowed">
                <div className="flex items-center gap-6">
                  <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center">
