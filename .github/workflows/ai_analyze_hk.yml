@@ -10,6 +10,11 @@ on:
         type: boolean
         required: false
         default: false
+      date:
+        description: 'Specify date (YYYY-MM-DD)'
+        type: string
+        required: false
+        default: ''
   workflow_call:     # 支持被其他 workflow 调用
     inputs:
       force:
@@ -17,6 +22,11 @@ on:
         type: boolean
         required: false
         default: false
+      date:
+        description: 'Specify date'
+        type: string
+        required: false
+        default: ''
 
 jobs:
   analyze-hk:
@@ -64,5 +74,12 @@ jobs:
           else
             echo "ℹ️ Force mode disabled."
           fi
-          echo "🚀 Executing: python -u backend/main.py --analyze --market HK --model all $FORCE_FLAG"
-          python -u backend/main.py --analyze --market HK --model all $FORCE_FLAG
+
+          DATE_FLAG=""
+          if [ -n "${{ inputs.date }}" ]; then
+            DATE_FLAG="--date ${{ inputs.date }}"
+            echo "📅 Target date set to: ${{ inputs.date }}"
+          fi
+
+          echo "🚀 Executing: python -u backend/main.py --analyze --market HK --model all $FORCE_FLAG $DATE_FLAG"
+          python -u backend/main.py --analyze --market HK --model all $FORCE_FLAG $DATE_FLAG
