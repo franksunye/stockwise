@@ -11,9 +11,30 @@ from config import LLM_CONFIG
 from .llm_tracker import get_tracker, estimate_tokens
 from .schema_normalizer import normalize_ai_response
 
+import asyncio
+
+class AsyncRateLimiter:
+    """简单的异步速率限制器 (Token Bucket 思想)"""
+    def __init__(self, rate: float):
+        self._interval = 1.0 / rate if rate > 0 else 0
+        self._last_check = 0.0
+        self._lock = asyncio.Lock()
+
+    async def acquire(self):
+        if self._interval <= 0: return
+        async with self._lock:
+            now = time.time()
+            elapsed = now - self._last_check
+            wait_time = self._interval - elapsed
+            if wait_time > 0:
+                await asyncio.sleep(wait_time)
+            self._last_check = time.time() + (wait_time if wait_time > 0 else 0)
 
 class LLMClient:
     """本地 LLM 代理客户端"""
+    
+    # 全局共享的限流器 (Provider -> AsyncRateLimiter)
+    _rate_limiters = {}
     
     def __init__(
         self,
@@ -28,6 +49,11 @@ class LLMClient:
         """
         self.provider = provider or LLM_CONFIG.get("provider", "openai")
         self.timeout = timeout
+        
+        # 自动注册 Hunyuan 限流器
+        if self.provider == "hunyuan" and "hunyuan" not in self._rate_limiters:
+            qps = LLM_CONFIG.get("hunyuan", {}).get("qps_limit", 2.0)
+            self._rate_limiters["hunyuan"] = AsyncRateLimiter(qps)
         
         # 根据提供商加载默认配置
         if self.provider == "deepseek":
@@ -107,8 +133,27 @@ class LLMClient:
             return self._chat_gemini(messages, temperature, max_tokens)
         elif self.provider == "gemini_local" and self._gemini_local_model:
             return self._chat_gemini_local(messages, temperature, max_tokens)
-        else:
-            return self._chat_openai_compatible(messages, model, temperature, max_tokens)
+        
+        return self._chat_openai_compatible(messages, model, temperature, max_tokens)
+
+    async def chat_async(
+        self,
+        messages: list,
+        model: str = None,
+        temperature: float = 0.7,
+        max_tokens: int = 4096
+    ) -> Tuple[Optional[str], Dict[str, Any]]:
+        """Async wrapper for chat (using executor)"""
+        # Rate Limiting Check
+        if self.provider in self._rate_limiters:
+            await self._rate_limiters[self.provider].acquire()
+
+        import asyncio
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(
+            None, 
+            lambda: self.chat(messages, model, temperature, max_tokens)
+        )
 
     def _chat_openai_compatible(
         self,

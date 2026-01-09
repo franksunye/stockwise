@@ -210,6 +210,39 @@ def init_db():
                 FOREIGN KEY (model_id) REFERENCES prediction_models(model_id)
             )
         """)
+
+        # 7. Chain Execution Traces (For Multi-turn debugging & observability)
+        # Optimized for "Delayed Write" to reduce lock contention on Turso
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS chain_execution_traces (
+                trace_id TEXT PRIMARY KEY,
+                symbol TEXT NOT NULL,
+                date TEXT NOT NULL,
+                model_id TEXT NOT NULL,
+                strategy_name TEXT NOT NULL,
+                
+                -- Execution Details
+                steps_executed TEXT,  -- JSON list of step names
+                steps_details TEXT,   -- JSON detailed metrics per step
+                
+                -- Artifacts (The core value prop for debugging)
+                chain_artifacts TEXT,  -- JSON dictionary of step outputs
+                
+                -- Metrics
+                total_duration_ms INTEGER,
+                total_tokens INTEGER,
+                retry_count INTEGER DEFAULT 0,
+                
+                -- Final Outcome
+                final_result TEXT,     -- JSON of the final synthesis
+                status TEXT,           -- 'success', 'failed'
+                error_step TEXT,
+                error_reason TEXT,
+                
+                created_at TIMESTAMP DEFAULT (datetime('now', '+8 hours')),
+                FOREIGN KEY (model_id) REFERENCES prediction_models(model_id)
+            )
+        """)
         
         conn.commit()
         logger.info("✅ 数据库结构初始化完成 (Raw SQL - No ORM)")

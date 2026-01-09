@@ -82,6 +82,7 @@ DEFAULTS = {
         "api_key": os.getenv("HUNYUAN_API_KEY"),
         "base_url": os.getenv("HUNYUAN_BASE_URL", "https://api.hunyuan.cloud.tencent.com/v1"),
         "model": os.getenv("HUNYUAN_MODEL", "hunyuan-lite"),
+        "qps_limit": float(os.getenv("HUNYUAN_QPS_LIMIT", "2.0")),
     }
 }
 
@@ -110,4 +111,23 @@ if LLM_PROVIDER in DEFAULTS:
         LLM_CONFIG["model"] = provider_cfg["model"]
     if provider_cfg.get("base_url"):
         LLM_CONFIG["base_url"] = provider_cfg["base_url"]
+
+
+# -----------------------------------------------------------------------------
+# Chain Engine Strategies (LLM Multi-turn Workflows)
+# -----------------------------------------------------------------------------
+CHAIN_STRATEGIES = {
+    # 策略名必须与 ModelFactory 中的 ID 匹配
+    "hunyuan-lite": {
+        "steps": [
+            {"type": "anchor", "config": {"include_profile": True}},
+            {"type": "indicator", "config": {}},
+            {"type": "multi_period", "config": {}},
+            {"type": "synthesis", "config": {"conservative": True}}
+        ],
+        # GitHub Actions 环境下，我们可以容忍更长的执行时间换取质量
+        "max_retries_per_step": 2, 
+        "total_timeout": 120
+    }
+}
 
