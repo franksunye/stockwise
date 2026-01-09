@@ -114,6 +114,7 @@ def prepare_stock_analysis_prompt(symbol: str, as_of_date: str = None):
     if "error" in ctx:
         return None, ctx["error"]
 
+    stock_name = ctx.get("name", "未知股票")
     data = ctx["latest_data"]
     profile = ctx["profile"]
     
