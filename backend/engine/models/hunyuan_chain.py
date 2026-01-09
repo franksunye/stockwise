@@ -45,22 +45,16 @@ class HunyuanChainModel(BasePredictionModel):
             if not result:
                 raise ValueError("Chain finished but returned no result (Synthesis step failed?)")
                 
-            # Normalize result keys to match BasePredictionModel expectations
-            # Chain synthesis output matches the schema: signal, confidence, reasoning_trace...
-            # But the DB expects 'ai_reasoning' as a string, not a JSON object?
-            # Let's check BasePredictionModel or runner usage. 
-            # Actually, standard output usually has 'reasoning'. 
-            # But our new schema has 'reasoning_trace'.
-            # We should probably flatten it or serialize it for the 'ai_reasoning' column.
+            # Format for database and frontend compatibility
+            # 1. Map top-level prices for PredictionRunner
+            key_levels = result.get("key_levels", {})
+            result["support_price"] = key_levels.get("support")
+            result["pressure_price"] = key_levels.get("resistance")
             
-            # For backward compatibility with 'ai_reasoning' text column:
-            if "reasoning_trace" in result:
-                # Convert structured trace to readable text
-                trace_text = "\n".join([
-                    f"[{step['step']}] {step['conclusion']} ({step['data']})"
-                    for step in result.get("reasoning_trace", [])
-                ])
-                result["reasoning"] = trace_text
+            # 2. Add 'reasoning' for PredictionRunner (mapped to ai_reasoning column)
+            # We store the FULL structured result as JSON string, 
+            # so the frontend can parse 'summary' and 'reasoning_trace'.
+            result["reasoning"] = json.dumps(result, ensure_ascii=False)
             
             return result
             
