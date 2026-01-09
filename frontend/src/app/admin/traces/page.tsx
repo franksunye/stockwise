@@ -26,6 +26,7 @@ interface TraceSummary {
   total_duration_ms: number;
   created_at: string;
   error_reason?: string;
+  error_step?: string;
 }
 
 interface TraceDetail extends TraceSummary {

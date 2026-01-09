@@ -7,10 +7,10 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(
     request: Request,
-    context: any
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const traceId = context.params.id;
+        const { id: traceId } = await params;
         const client = getDbClient();
         const strategy = process.env.DB_STRATEGY || 'local';
 
