@@ -13,7 +13,21 @@ class SynthesisStep(BaseStep):
         d = context.input_data
         ai_history = d.get('ai_history', [])
         
-        # Build AI review section similar to benchmark
+        # --- Dynamic Key Levels Calculation ---
+        # Extract from latest daily price data for guidance
+        daily_prices = d.get('daily_prices', [])
+        latest = daily_prices[-1] if daily_prices else {}
+        
+        boll_lower = latest.get('boll_lower', 0)
+        boll_upper = latest.get('boll_upper', 0)
+        ma20 = latest.get('ma20', 0)
+        close = latest.get('close', 0)
+        
+        # Calculate 10-day high/low for reference
+        high_10d = max([p.get('high', 0) for p in daily_prices[-10:]]) if daily_prices else 0
+        low_10d = min([p.get('low', float('inf')) for p in daily_prices[-10:]]) if daily_prices else 0
+        
+        # Build AI review section
         prediction_review = ""
         if ai_history:
             rows = []
@@ -39,6 +53,14 @@ class SynthesisStep(BaseStep):
 2. **宁缺毋滥**：如果没有80%的把握（即日线+周线共振，且量能配合），不要给"Long"。
 3. **拒绝公式**：输出中的所有数值必须是计算好的结果，严禁输出 Excel 公式。
 
+## 当前技术位参考（用于填写 key_levels）
+- 布林下轨: {boll_lower:.2f}
+- MA20: {ma20:.2f}
+- 布林上轨: {boll_upper:.2f}
+- 近10日最高价: {high_10d:.2f}
+- 近10日最低价: {low_10d:.2f}
+- 当前收盘价: {close:.2f}
+
 ## 输出要求
 必须输出纯 JSON 格式，严格遵守以下 Schema：
 {{
@@ -46,24 +68,31 @@ class SynthesisStep(BaseStep):
   "confidence": 0.0 - 1.0 (观望建议 0.6-0.75),
   "summary": "一句话总结 (中文)",
   "reasoning_trace": [
-    {{ "step": "trend", "data": "MA20/周线状态", "conclusion": "趋势结论" }},
-    {{ "step": "momentum", "data": "MACD/RSI状态", "conclusion": "动能结论" }},
-    {{ "step": "risk", "data": "背离/压力位", "conclusion": "风险结论" }},
+    {{ "step": "trend", "data": "均线相关描述（必须填入实际数值）", "conclusion": "趋势结论" }},
+    {{ "step": "momentum", "data": "RSI/MACD相关（必须填入实际状态）", "conclusion": "动能结论" }},
+    {{ "step": "level", "data": "布林带/压力位相关（必须填入实际数值）", "conclusion": "位置结论" }},
     {{ "step": "decision", "data": "综合判断", "conclusion": "最终结论" }}
   ],
+  "news_analysis": ["新闻1", "新闻2"] (若无新闻则填 ["无实时新闻输入，仅基于技术面分析"]),
   "tactics": {{
-    "holding": [
-      {{ "priority": "P1", "action": "持仓策略", "trigger": "止盈/止损位", "reason": "理由" }}
-    ],
-    "empty": [
-      {{ "priority": "P1", "action": "空仓策略", "trigger": "进场位或继续观望", "reason": "理由" }}
-    ]
+    "holding": [{{ "priority": "P1", "action": "具体持仓动作", "trigger": "具体触发价位", "reason": "理由" }}],
+    "empty": [{{ "priority": "P1", "action": "具体空仓动作", "trigger": "具体进场条件", "reason": "理由" }}],
+    "general": [{{ "priority": "P2", "action": "通用建议", "trigger": "触发条件", "reason": "理由" }}]
   }},
-  "key_levels": {{
-    "support": 123.45,
-    "resistance": 456.78
-  }}
+  "key_levels": {{ 
+    "support": <使用布林下轨{boll_lower:.2f}或MA20({ma20:.2f})作为参考>,
+    "resistance": <使用近10日最高价{high_10d:.2f}或布林上轨{boll_upper:.2f}作为参考>,
+    "stop_loss": <通常设置在支撑位下方约3%>
+  }},
+  "conflict_resolution": "解释本次分析中的主要矛盾点如何权衡",
+  "tomorrow_focus": "明日重点关注的价格位或事件"
 }}
+
+**IMPORTANT**: 
+1. `reasoning_trace` 中的 `data` 字段必须填入实际数值，不能用占位符。
+2. `tactics` 中的 `holding` 和 `empty` 必须各至少包含一条具体策略，不能为空数组。
+3. `key_levels` 中的数值必须是基于上方技术位参考计算的实际数字，严禁使用示例值。
+4. 必须包含 `news_analysis`, `conflict_resolution`, `tomorrow_focus` 字段。
 """
         return prompt
     
