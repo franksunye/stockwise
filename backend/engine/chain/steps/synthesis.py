@@ -68,10 +68,10 @@ class SynthesisStep(BaseStep):
   "confidence": 0.0 - 1.0 (观望建议 0.6-0.75),
   "summary": "一句话总结 (中文)",
   "reasoning_trace": [
-    {{ "step": "trend", "data": "均线相关描述（必须填入实际数值）", "conclusion": "趋势结论" }},
-    {{ "step": "momentum", "data": "RSI/MACD相关（必须填入实际状态）", "conclusion": "动能结论" }},
-    {{ "step": "level", "data": "布林带/压力位相关（必须填入实际数值）", "conclusion": "位置结论" }},
-    {{ "step": "decision", "data": "综合判断", "conclusion": "最终结论" }}
+    {{ "step": "trend", "data": "MA20={ma20:.2f}，周线收盘xxx", "conclusion": "多头/空头/震荡" }},
+    {{ "step": "momentum", "data": "RSI=xx，MACD金叉/死叉", "conclusion": "动能强/弱" }},
+    {{ "step": "level", "data": "收盘{close:.2f}，布林上轨{boll_upper:.2f}", "conclusion": "超买/正常/超卖" }},
+    {{ "step": "decision", "data": "综合判断描述", "conclusion": "做多/观望/避险" }}
   ],
   "news_analysis": ["新闻1", "新闻2"] (若无新闻则填 ["无实时新闻输入，仅基于技术面分析"]),
   "tactics": {{
@@ -89,10 +89,11 @@ class SynthesisStep(BaseStep):
 }}
 
 **IMPORTANT**: 
-1. `reasoning_trace` 中的 `data` 字段必须填入实际数值，不能用占位符。
-2. `tactics` 中的 `holding` 和 `empty` 必须各至少包含一条具体策略，不能为空数组。
-3. `key_levels` 中的数值必须是基于上方技术位参考计算的实际数字，严禁使用示例值。
-4. 必须包含 `news_analysis`, `conflict_resolution`, `tomorrow_focus` 字段。
+1. `reasoning_trace.data` 必须填入实际数值（如 MA20=607.83），不能只写占位符。
+2. `reasoning_trace.conclusion` 必须是简短标签（3-8个字，如"多头强势"、"动能减弱"），严禁写完整句子。
+3. `tactics.holding` 和 `tactics.empty` 必须各至少包含一条具体策略，不能为空数组。
+4. `key_levels` 的数值必须基于上方技术位参考计算，严禁使用示例值。
+5. 必须包含 `news_analysis`, `conflict_resolution`, `tomorrow_focus` 字段。
 """
         return prompt
     
