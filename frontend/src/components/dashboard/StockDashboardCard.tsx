@@ -132,9 +132,9 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
           onClick={() => displayPrediction && onShowTactics(displayPrediction)}
           className={`glass-card relative overflow-hidden group cursor-pointer active:scale-[0.98] transition-all hover:bg-white/[0.04] ${isTriggered ? 'warning-pulse' : ''}`}
         >
-          <div className="relative z-10 p-5">
-            <div className="mb-5">
-              <div className="flex items-center gap-2 mb-3">
+          <div className="relative z-10 px-5 py-3">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
                 <div className="w-5 h-5 rounded-md bg-indigo-600/20 flex items-center justify-center border border-indigo-500/30 ai-pulse">
                   <Zap className="w-2.5 h-2.5 text-indigo-400 fill-indigo-400/20" />
                 </div>
