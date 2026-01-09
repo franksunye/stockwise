@@ -99,6 +99,9 @@ class SynthesisStep(BaseStep):
         return prompt
     
     async def parse_response(self, response: str, context: ChainContext):
+        # Store raw response for debugging/transparency (User Request)
+        context.artifacts["synthesis_raw"] = response
+
         parsed = self._clean_and_parse_json(response)
         
         # --- Post-Processing Fallback Logic ---

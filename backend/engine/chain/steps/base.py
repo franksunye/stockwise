@@ -42,6 +42,9 @@ class BaseStep(ABC):
                 # 3. Construct Message Chain (Context Compression)
                 messages = context.get_optimized_history(self.step_name)
                 messages.append({"role": "user", "content": final_prompt})
+
+                # --- Capture Trace Artifacts (User Request) ---
+                context.artifacts[f"{self.step_name}_prompt"] = final_prompt
                 
                 # 4. Call LLM
                 params = {"temperature": self.config.get("temperature", 0.5)}
