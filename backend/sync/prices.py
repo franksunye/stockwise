@@ -86,6 +86,29 @@ def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool =
 
     from database import execute_with_retry
 
+    # 6.1 对于周/月线：删除当前周期的旧记录（防止每日同步产生重复）
+    # akshare 每天返回的"当前周/月"日期会变化，需要清理再插入
+    if period in ("weekly", "monthly") and records:
+        latest_date = records[-1][1]  # 最新记录的日期
+        latest_dt = pd.to_datetime(latest_date)
+        
+        def _cleanup_current_period(conn, _table, _symbol, _latest_dt, _period):
+            cur = conn.cursor()
+            if _period == "weekly":
+                # 删除同一周的所有记录 (ISO 周)
+                week_start = _latest_dt - pd.Timedelta(days=_latest_dt.weekday())
+                cur.execute(f"DELETE FROM {_table} WHERE symbol = ? AND date >= ?", 
+                           (_symbol, week_start.strftime('%Y-%m-%d')))
+                logger.debug(f"🧹 清理 {_symbol} 本周旧记录 (从 {week_start.strftime('%Y-%m-%d')} 起)")
+            elif _period == "monthly":
+                # 删除同月的所有记录
+                month_start = _latest_dt.strftime('%Y-%m-01')
+                cur.execute(f"DELETE FROM {_table} WHERE symbol = ? AND date >= ?", 
+                           (_symbol, month_start))
+                logger.debug(f"🧹 清理 {_symbol} 本月旧记录 (从 {month_start} 起)")
+        
+        execute_with_retry(_cleanup_current_period, 3, table_name, symbol, latest_dt, period)
+
     def _save_prices(conn, _table, _records):
         cur = conn.cursor()
         cur.executemany(f"""
