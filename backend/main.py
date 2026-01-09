@@ -71,7 +71,8 @@ if __name__ == "__main__":
             end_date=getattr(args, 'end_date', None),
             days=args.days,
             auto_fill=args.auto_fill,
-            model_filter=args.model
+            model_filter=args.model,
+            force=args.force
         )
     elif args.analyze:
         # 独立运行 AI 分析 (分析最新数据)

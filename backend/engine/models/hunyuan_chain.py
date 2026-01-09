@@ -1,4 +1,5 @@
 from typing import Dict, Any, Optional
+import json
 from loguru import logger
 
 from .base import BasePredictionModel
