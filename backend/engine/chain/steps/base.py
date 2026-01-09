@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Dict, Any, List
 import asyncio
-from ..context import ChainContext
-from ...llm_client import LLMClient
+from engine.chain.context import ChainContext
+from engine.llm_client import LLMClient
 from loguru import logger
 
 class StepExecutionError(Exception):

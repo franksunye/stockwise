@@ -2,10 +2,10 @@ from typing import Dict, Any, Optional
 from loguru import logger
 
 from .base import BasePredictionModel
-from ..chain.runner import ChainRunner
-from ..chain.step_factory import StepFactory
-from ...config import CHAIN_STRATEGIES
-from ..llm_client import LLMClient
+from engine.chain.runner import ChainRunner
+from engine.chain.step_factory import StepFactory
+from config import CHAIN_STRATEGIES
+from engine.llm_client import LLMClient
 
 class HunyuanChainModel(BasePredictionModel):
     """

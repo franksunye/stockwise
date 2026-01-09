@@ -1,6 +1,6 @@
 from typing import List, Dict, Any
 from .base import BaseStep
-from ..context import ChainContext
+from engine.chain.context import ChainContext
 
 class DataAnchorStep(BaseStep):
     """

@@ -1,6 +1,6 @@
 from typing import Dict, Any, List
 from .base import BaseStep
-from ..context import ChainContext
+from engine.chain.context import ChainContext
 
 class IndicatorStep(BaseStep):
     """

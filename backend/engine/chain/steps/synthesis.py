@@ -2,7 +2,7 @@ import json
 import re
 from typing import Dict, Any
 from .base import BaseStep, StepExecutionError
-from ..context import ChainContext
+from engine.chain.context import ChainContext
 
 class SynthesisStep(BaseStep):
     """
