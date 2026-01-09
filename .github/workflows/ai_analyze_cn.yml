@@ -4,7 +4,19 @@ name: AI Analysis - A-Share (CN)
 
 on:
   workflow_dispatch: # 支持手动触发
+    inputs:
+      force:
+        description: 'Force re-analysis (overwrite existing)'
+        type: boolean
+        required: false
+        default: false
   workflow_call:     # 支持被其他 workflow 调用
+    inputs:
+      force:
+        description: 'Force re-analysis'
+        type: boolean
+        required: false
+        default: false
 
 jobs:
   analyze-cn:
@@ -45,4 +57,8 @@ jobs:
           INTERNAL_API_SECRET: ${{ secrets.INTERNAL_API_SECRET }}
           NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
         run: |
-          python -u backend/main.py --analyze --market CN --model all
+          FORCE_FLAG=""
+          if [ "${{ inputs.force }}" == "true" ]; then
+            FORCE_FLAG="--force"
+          fi
+          python -u backend/main.py --analyze --market CN --model all $FORCE_FLAG
