@@ -11,15 +11,16 @@ class DataAnchorStep(BaseStep):
     async def build_prompt(self, context: ChainContext) -> str:
         d = context.input_data
         
+        profile = d.get('profile', {})
         prompt = f"""### 步骤1：基础锚定数据投喂
 请精准记录以下股票基础数据及近10日行情：
 
 ## 1. 基础信息
 - **{d.get('name', 'Unknown')}** ({context.symbol})
 - **日期**: {context.date}
-- **行业**: {d.get('industry', '暂无')}
-- **主营业务**: {d.get('main_business', '暂无')}
-- **公司简介**: {d.get('description', '暂无')[:200]}...
+- **行业**: {profile.get('industry', '暂无')}
+- **主营业务**: {profile.get('main_business', '暂无')}
+- **公司简介**: {profile.get('description', '暂无')[:200]}...
 
 ## 2. 价格行为 (近10日日线)
 | 日期 | 收盘 | 涨跌幅 | 成交量 | 状态 |
