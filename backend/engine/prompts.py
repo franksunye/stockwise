@@ -41,14 +41,24 @@ def fetch_full_analysis_context(symbol: str, as_of_date: str = None) -> Dict[str
     analysis_date = latest_data['date']
     
     # 3. History
-    # 3.1 Daily (10 days)
+    # 3.1 Daily (10 days) - Include technical indicators for IndicatorStep & SynthesisStep
     cursor.execute("""
-        SELECT date, open, high, low, close, change_percent, volume
+        SELECT date, open, high, low, close, change_percent, volume,
+               ma5, ma10, ma20, ma60,
+               macd, macd_signal, macd_hist,
+               rsi, kdj_k, kdj_d, kdj_j,
+               boll_upper, boll_mid, boll_lower
         FROM daily_prices 
         WHERE symbol = ? AND date <= ?
         ORDER BY date DESC LIMIT 10
     """, (symbol, analysis_date))
-    daily_history = [dict(zip(["date", "open", "high", "low", "close", "change_percent", "volume"], h)) for h in cursor.fetchall()]
+    daily_history = [dict(zip([
+        "date", "open", "high", "low", "close", "change_percent", "volume",
+        "ma5", "ma10", "ma20", "ma60",
+        "macd", "macd_signal", "macd_hist",
+        "rsi", "kdj_k", "kdj_d", "kdj_j",
+        "boll_upper", "boll_mid", "boll_lower"
+    ], h)) for h in cursor.fetchall()]
 
     # 3.2 Weekly (12 weeks)
     cursor.execute("""
