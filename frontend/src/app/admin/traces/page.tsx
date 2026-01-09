@@ -88,24 +88,24 @@ export default function TraceViewer() {
     <div className="min-h-screen bg-[#050508] text-slate-300 font-sans flex flex-col md:flex-row h-screen overflow-hidden">
       
       {/* Sidebar List */}
-      <div className="w-full md:w-96 border-r border-white/5 flex flex-col bg-[#08080c]">
+      <div className="w-full md:w-72 border-r border-white/5 flex flex-col bg-[#08080c]">
         {/* Header */}
-        <div className="p-4 border-b border-white/5">
-          <div className="flex items-center gap-2 mb-4">
+        <div className="p-3 border-b border-white/5">
+          <div className="flex items-center gap-2 mb-3">
             <Link href="/admin" className="text-slate-500 hover:text-white transition-colors">
-              <ArrowLeft className="w-4 h-4" />
+              <ArrowLeft className="w-3.5 h-3.5" />
             </Link>
-            <h1 className="text-lg font-black italic text-white tracking-tight">TRACE LOGS</h1>
+            <h1 className="text-base font-black italic text-white tracking-tight">TRACE LOGS</h1>
           </div>
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
             <input 
               type="text" 
               placeholder="Filter by symbol..." 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && fetchTraces()}
-              className="w-full bg-white/5 border border-white/10 rounded-xl pl-9 pr-4 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
+              className="w-full bg-white/5 border border-white/10 rounded-lg pl-8 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500 transition-colors"
             />
           </div>
         </div>
@@ -122,7 +122,7 @@ export default function TraceViewer() {
                 <div 
                   key={trace.trace_id}
                   onClick={() => setSelectedId(trace.trace_id)}
-                  className={`p-4 cursor-pointer hover:bg-white/5 transition-colors ${selectedId === trace.trace_id ? 'bg-indigo-500/10 border-l-2 border-indigo-500' : 'border-l-2 border-transparent'}`}
+                  className={`p-3 cursor-pointer hover:bg-white/5 transition-colors ${selectedId === trace.trace_id ? 'bg-indigo-500/10 border-l-2 border-indigo-500' : 'border-l-2 border-transparent'}`}
                 >
                   <div className="flex justify-between items-start mb-1">
                     <span className="font-bold text-white">{trace.symbol}</span>
