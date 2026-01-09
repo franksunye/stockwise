@@ -5,3 +5,4 @@ libsql
 google-generativeai
 requests
 pypinyin
+loguru
