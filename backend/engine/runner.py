@@ -82,26 +82,43 @@ class PredictionRunner:
             return
 
         try:
-            # Reset existing primary flags for this day to avoid conflicts
-            cursor.execute("UPDATE ai_predictions_v2 SET is_primary = 0 WHERE symbol = ? AND date = ?", (symbol, date))
+            # Check existing primary model's priority for this symbol/date
+            cursor.execute("""
+                SELECT p.model_id, m.priority 
+                FROM ai_predictions_v2 p 
+                JOIN prediction_models m ON p.model_id = m.model_id
+                WHERE p.symbol = ? AND p.date = ? AND p.is_primary = 1
+            """, (symbol, date))
+            existing_primary = cursor.fetchone()
+            existing_priority = existing_primary[1] if existing_primary else -1
         except Exception as e:
-            logger.warning(f"Could not reset primary flags: {e}")
+            logger.warning(f"Could not check existing primary: {e}")
+            existing_priority = -1
 
-        primary_assigned = False
         saved_count = 0
         primary_pred = None
+        
+        # Get priority map for ALL models from database (to handle filtered case)
+        try:
+            cursor.execute("SELECT model_id, priority FROM prediction_models")
+            model_priorities = {row[0]: row[1] for row in cursor.fetchall()}
+        except:
+            model_priorities = {m.model_id: m.priority for m in models}
         
         for i, pred in enumerate(predictions):
             if not pred:
                 continue
                 
             model_id = pred['model_id']
+            model_priority = model_priorities.get(model_id, 0)
             
-            # Selector Logic: The first successful result (highest priority) is Primary
+            # Selector Logic: Set primary only if this model has higher priority than existing primary
             is_primary = 0
-            if not primary_assigned:
+            if model_priority > existing_priority:
+                # Reset old primary and set new one
+                cursor.execute("UPDATE ai_predictions_v2 SET is_primary = 0 WHERE symbol = ? AND date = ?", (symbol, date))
                 is_primary = 1
-                primary_assigned = True
+                existing_priority = model_priority  # Update for next iteration
                 primary_pred = pred
                 
             try:
