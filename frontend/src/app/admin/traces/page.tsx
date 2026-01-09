@@ -8,7 +8,6 @@ import {
   CheckCircle2, 
   XCircle, 
   Cpu, 
-  ChevronRight, 
   FileJson, 
   MessageSquare, 
   AlignLeft,
@@ -44,17 +43,6 @@ export default function TraceViewer() {
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [search, setSearch] = useState('');
 
-  // Fetch List
-  useEffect(() => {
-    fetchTraces();
-  }, []);
-
-  // Fetch Detail when selected
-  useEffect(() => {
-    if (!selectedId) return;
-    fetchDetail(selectedId);
-  }, [selectedId]);
-
   const fetchTraces = async () => {
     setLoadingList(true);
     try {
@@ -81,6 +69,19 @@ export default function TraceViewer() {
       setLoadingDetail(false);
     }
   };
+
+  // Fetch List
+  useEffect(() => {
+    fetchTraces();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Fetch Detail when selected
+  useEffect(() => {
+    if (!selectedId) return;
+    fetchDetail(selectedId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedId]);
 
   return (
     <div className="min-h-screen bg-[#050508] text-slate-300 font-sans flex flex-col md:flex-row h-screen overflow-hidden">
@@ -197,7 +198,7 @@ function TraceDetailView({ trace }: { trace: TraceDetail }) {
             <div className="absolute left-[19px] top-4 bottom-4 w-0.5 bg-white/10" />
 
             {steps.map((stepName: string, i: number) => {
-              const stepDuration = details.find((d: any) => d.step === stepName)?.duration_ms || 0;
+              const stepDuration = details.find((d: { step: string; duration_ms: number }) => d.step === stepName)?.duration_ms || 0;
               const prompt = artifacts[`${stepName}_prompt`] || "No prompt captured";
               const result = artifacts[stepName] || artifacts[`${stepName}_raw`] || "No output";
               
@@ -238,14 +239,21 @@ function TraceDetailView({ trace }: { trace: TraceDetail }) {
   );
 }
 
-function StepCard({ index, name, duration, prompt, result, parsed }: any) {
+function StepCard({ index, name, duration, prompt, result, parsed }: { 
+  index: number; 
+  name: string; 
+  duration: number; 
+  prompt: string; 
+  result: string | Record<string, unknown>; 
+  parsed: Record<string, unknown> | null; 
+}) {
   const [activeTab, setActiveTab] = useState<'prompt' | 'result' | 'parsed'>('result');
   
   // Default to prompt if result is missing (unlikely now)
   // Default to Parsed if available (Synthesis)
   useEffect(() => {
     if (parsed) setActiveTab('parsed');
-  }, []);
+  }, [parsed]);
 
   return (
     <div className="relative pl-12 group">
@@ -306,7 +314,7 @@ function StepCard({ index, name, duration, prompt, result, parsed }: any) {
   );
 }
 
-function parseSafe(str: string, fallback: any) {
+function parseSafe(str: string, fallback: unknown) {
   try {
     return JSON.parse(str);
   } catch {
