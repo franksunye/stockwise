@@ -60,5 +60,9 @@ jobs:
           FORCE_FLAG=""
           if [ "${{ inputs.force }}" == "true" ]; then
             FORCE_FLAG="--force"
+            echo "⚠️ Force mode enabled via input."
+          else
+            echo "ℹ️ Force mode disabled."
           fi
+          echo "🚀 Executing: python -u backend/main.py --analyze --market CN --model all $FORCE_FLAG"
           python -u backend/main.py --analyze --market CN --model all $FORCE_FLAG
