@@ -43,38 +43,25 @@ class PredictionRunner:
         
         logger.info(f"🤖 Active Models: {[m.model_id for m in models]}")
 
-        # 2. Fetch Data if not provided (needed for Rule Engine)
-        conn = get_connection()
-        try:
-            if not data:
-                cursor = conn.cursor()
-                if date:
-                    cursor.execute("SELECT * FROM daily_prices WHERE symbol = ? AND date = ?", (symbol, date))
-                else:
-                    cursor.execute("SELECT * FROM daily_prices WHERE symbol = ? ORDER BY date DESC LIMIT 1", (symbol,))
+        # 2. Fetch Data if not provided (Ensure Strict Parity)
+        if not data:
+            try:
+                from backend.engine.prompts import fetch_full_analysis_context
+                data = fetch_full_analysis_context(symbol, date)
                 
-                row = cursor.fetchone()
-                if row:
-                    columns = [d[0] for d in cursor.description]
-                    # Robust dict conversion
-                    if isinstance(row, (tuple, list)):
-                         row_dict = dict(zip(columns, row))
-                    elif hasattr(row, 'keys'):
-                         row_dict = dict(row)
-                    else:
-                         row_dict = {}
-                         for i, col in enumerate(columns):
-                             try: row_dict[col] = row[i]
-                             except: pass
+                if "error" in data:
+                    logger.warning(f"⚠️ Data context fetch failed: {data['error']}")
+                    return
+                
+                # Align date if it was None
+                if not date:
+                    date = data['date']
                     
-                    data = {'price_data': [row_dict]}
-                    if not date:
-                         date = row_dict['date']
-                else:
-                     logger.warning(f"No daily price found for {symbol}")
-                     data = {'price_data': []}
-        finally:
-            conn.close()
+                logger.info(f"📊 Rich context fetched for {symbol} on {date}")
+            except Exception as e:
+                logger.error(f"❌ Failed to fetch full context: {e}")
+                return
+
             
         # 3. Parallel Execution (The Race)
         tasks = []

@@ -58,9 +58,12 @@ export function TacticalBriefDrawer({
   const [activeTab, setActiveTab] = useState<'brief' | 'council'>('brief');
   const isFree = tier === 'free';
   
-  // 核心逻辑：获取当前场景建议 + 通用建议
-  const currentTactics = data?.tactics?.[userPos === 'holding' ? 'holding' : 'empty'] || [];
-  const generalTactics = data?.tactics?.general || [];
+  // 核心逻辑：获取当前场景建议 + 通用建议 (添加强力检测，防御对象格式)
+  const rawCurrent = data?.tactics?.[userPos === 'holding' ? 'holding' : 'empty'];
+  const currentTactics = Array.isArray(rawCurrent) ? rawCurrent : (rawCurrent ? [rawCurrent] : []);
+  
+  const rawGeneral = data?.tactics?.general;
+  const generalTactics = Array.isArray(rawGeneral) ? rawGeneral : (rawGeneral ? [rawGeneral] : []);
   
   return (
     <AnimatePresence>

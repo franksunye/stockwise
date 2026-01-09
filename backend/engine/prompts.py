@@ -1,177 +1,190 @@
 import json
+from typing import Dict, Any, List
 from database import get_connection, get_stock_profile
 
-def prepare_stock_analysis_prompt(symbol: str, as_of_date: str = None):
+def fetch_full_analysis_context(symbol: str, as_of_date: str = None) -> Dict[str, Any]:
     """
-    准备用于 LLM 分析的系统提示词和用户输入数据
-    
-    Args:
-        symbol: 股票代码
-        as_of_date: 截止日期 (YYYY-MM-DD)，用于回填历史分析。
-                    如果为 None，则使用最新数据（正常每日分析场景）
+    Fetch all raw data needed for a comprehensive stock analysis.
+    This ensures strict parity between different models/run modes.
     """
     conn = get_connection()
     cursor = conn.cursor()
     
-    # 1. 获取股票基础信息
+    # 1. Basic Meta
     cursor.execute("SELECT name FROM stock_meta WHERE symbol = ?", (symbol,))
     name_row = cursor.fetchone()
     stock_name = name_row[0] if name_row else "未知股票"
 
-    # 1.1 获取公司概况 (Profile)
+    # 1.1 Profile
     profile_row = get_stock_profile(symbol)
-    profile_section = ""
+    profile = {}
     if profile_row:
         industry, main_bus, desc = profile_row
-        main_bus_str = main_bus if main_bus else "暂无"
-        # 简介只要前 100 字，避免太长
-        desc_str = f"{desc[:100]}..." if desc else "暂无简介"
-        profile_section = f"""## 公司基本面 (Profile)
-- **行业**: {industry or '未知'}
-- **主营业务**: {main_bus_str}
-- **公司简介**: {desc_str}
-"""
+        profile = {
+            "industry": industry or "未知",
+            "main_business": main_bus or "暂无",
+            "description": desc or "暂无简介"
+        }
     
-    # 2. 获取行情和指标 (根据 as_of_date 决定是最新还是历史)
+    # 2. Latest/Target Day Price Action
     if as_of_date:
-        # 回填模式：获取指定日期的数据
-        cursor.execute("""
-            SELECT * FROM daily_prices 
-            WHERE symbol = ? AND date = ?
-        """, (symbol, as_of_date))
+        cursor.execute("SELECT * FROM daily_prices WHERE symbol = ? AND date = ?", (symbol, as_of_date))
     else:
-        # 正常模式：获取最新数据
-        cursor.execute("""
-            SELECT * FROM daily_prices 
-            WHERE symbol = ? 
-            ORDER BY date DESC LIMIT 1
-        """, (symbol,))
+        cursor.execute("SELECT * FROM daily_prices WHERE symbol = ? ORDER BY date DESC LIMIT 1", (symbol,))
     
-    # 获取列名映射
     columns = [description[0] for description in cursor.description]
     row = cursor.fetchone()
-    
     if not row:
-        # Don't close global connection
-        return None, f"未找到股票 {symbol} 的行情数据" + (f" (日期: {as_of_date})" if as_of_date else "")
+        return {"error": f"未找到股票 {symbol} 的行情数据" + (f" (日期: {as_of_date})" if as_of_date else "")}
 
-    data = dict(zip(columns, row))
-    analysis_date = data['date']  # 实际分析的日期
+    latest_data = dict(zip(columns, row))
+    analysis_date = latest_data['date']
     
-    # 3. 获取历史行情 (以 analysis_date 为基准往前取)
-    # 3.1 日线：获取近10日历史行情
+    # 3. History
+    # 3.1 Daily (10 days)
     cursor.execute("""
         SELECT date, open, high, low, close, change_percent, volume
         FROM daily_prices 
         WHERE symbol = ? AND date <= ?
         ORDER BY date DESC LIMIT 10
     """, (symbol, analysis_date))
-    history_rows = cursor.fetchall()
+    daily_history = [dict(zip(["date", "open", "high", "low", "close", "change_percent", "volume"], h)) for h in cursor.fetchall()]
 
-    # 3.2 周线：获取近12周数据 (截止到 analysis_date)
+    # 3.2 Weekly (12 weeks)
     cursor.execute("""
-        SELECT date, open, high, low, close, change_percent, volume, ma20, rsi
+        SELECT date, open, high, low, close, change_percent, volume, ma20, rsi, macd_hist
         FROM weekly_prices 
         WHERE symbol = ? AND date <= ?
         ORDER BY date DESC LIMIT 12
     """, (symbol, analysis_date))
-    weekly_rows = cursor.fetchall()
+    weekly_history = [dict(zip(["date", "open", "high", "low", "close", "change_percent", "volume", "ma20", "rsi", "macd_hist"], w)) for w in cursor.fetchall()]
     
-    weekly_detail = weekly_rows[:8] if weekly_rows else []
-    weekly_stats = {
-        "high": max([w[2] for w in weekly_rows]) if weekly_rows else 0,
-        "low": min([w[3] for w in weekly_rows]) if weekly_rows else 0,
-    }
-
-    # 3.3 月线：获取近12个月数据 (截止到 analysis_date)
+    # 3.3 Monthly (12 months)
     cursor.execute("""
-        SELECT date, open, high, low, close, change_percent, volume, ma20, rsi
+        SELECT date, open, high, low, close, change_percent, volume, ma20, rsi, macd_hist
         FROM monthly_prices 
         WHERE symbol = ? AND date <= ?
         ORDER BY date DESC LIMIT 12
     """, (symbol, analysis_date))
-    monthly_rows = cursor.fetchall()
-    
-    monthly_detail = monthly_rows[:3] if monthly_rows else []
-    monthly_stats = {
-        "high": max([m[2] for m in monthly_rows]) if monthly_rows else 0,
-        "low": min([m[3] for m in monthly_rows]) if monthly_rows else 0,
-        "ma20": monthly_rows[0][7] if monthly_rows else 0,
-        "rsi": monthly_rows[0][8] if monthly_rows else 0
-    }
+    monthly_history = [dict(zip(["date", "open", "high", "low", "close", "change_percent", "volume", "ma20", "rsi", "macd_hist"], m)) for m in cursor.fetchall()]
 
-    # 4. 获取历史 AI 预测记录 (截止到 analysis_date 之前)
+    # 4. AI History (last 5)
     cursor.execute("""
         SELECT date, signal, confidence, ai_reasoning, validation_status, actual_change
         FROM ai_predictions 
         WHERE symbol = ? AND validation_status != 'Pending' AND date < ?
         ORDER BY date DESC LIMIT 5
     """, (symbol, analysis_date))
-    recent_predictions = cursor.fetchall()
-    
-    # 5. 获取全局预测统计 (截止到 analysis_date 之前)
+    ai_history = [dict(zip(["date", "signal", "confidence", "ai_reasoning", "validation_status", "actual_change"], a)) for a in cursor.fetchall()]
+
+    # 5. Accuracy Stats
     cursor.execute("""
-        SELECT 
-            COUNT(*) as total,
-            SUM(CASE WHEN validation_status = 'Correct' THEN 1 ELSE 0 END) as correct,
-            SUM(CASE WHEN validation_status = 'Incorrect' THEN 1 ELSE 0 END) as incorrect
+        SELECT COUNT(*) as total,
+               SUM(CASE WHEN validation_status = 'Correct' THEN 1 ELSE 0 END) as correct
         FROM ai_predictions 
         WHERE symbol = ? AND validation_status != 'Pending' AND date < ?
     """, (symbol, analysis_date))
-    stats = cursor.fetchone()
-    total_predictions, correct_count, incorrect_count = stats if stats else (0, 0, 0)
+    stats_row = cursor.fetchone()
+    total_predictions = stats_row[0] if stats_row else 0
+    correct_count = stats_row[1] if stats_row else 0
     accuracy_rate = (correct_count / total_predictions * 100) if total_predictions > 0 else 0
-    
-    # Don't close global connection
 
-    # 构建历史预测回顾
+    return {
+        "symbol": symbol,
+        "name": stock_name,
+        "date": analysis_date,
+        "profile": profile,
+        "latest_data": latest_data,
+        "daily_prices": daily_history[::-1], # Oldest first for tables? Or newest first? Benchmark uses DESC but then iterates.
+        "weekly_prices": weekly_history,
+        "monthly_prices": monthly_history,
+        "ai_history": ai_history,
+        "accuracy": {
+            "total": total_predictions,
+            "rate": accuracy_rate
+        }
+    }
+
+def prepare_stock_analysis_prompt(symbol: str, as_of_date: str = None):
+    """
+    准备用于 LLM 分析的系统提示词和用户输入数据
+    (One-shot 模式专用，内部调用 fetch_full_analysis_context)
+    """
+    ctx = fetch_full_analysis_context(symbol, as_of_date)
+    if "error" in ctx:
+        return None, ctx["error"]
+
+    data = ctx["latest_data"]
+    profile = ctx["profile"]
+    
+    # 1. Profile Section
+    profile_section = f"""## 公司基本面 (Profile)
+- **行业**: {profile.get('industry', '未知')}
+- **主营业务**: {profile.get('main_business', '暂无')}
+- **公司简介**: {profile.get('description', '暂无')[:100]}...
+"""
+    
+    # 2. History Table
+    history_summary = []
+    for h in ctx["daily_prices"][::-1]: # Use reverse to restore chronological for string generation if needed, but benchmark used latest first?
+        # Re-check benchmark: history_rows fetched LIMIT 10 ORDER BY date DESC. 
+        # So it's [Latest, T-1, ... T-9].
+        # In implementation_plan.md I should keep it identical.
+        date_str = h['date']
+        trend_icon = "📈" if (h['change_percent'] or 0) > 0 else ("📉" if (h['change_percent'] or 0) < 0 else "➡️")
+        history_summary.append(f"| {date_str} | {h['open']} | {h['high']} | {h['low']} | {h['close']} | {h['change_percent']:+.2f}% {trend_icon} | {int(h['volume'])} |")
+    
+    # 3. Weekly Summary
+    weekly_summary = []
+    weekly_detail = ctx["weekly_prices"][:8]
+    for w in weekly_detail:
+        w_trend = "📈" if (w['change_percent'] or 0) > 0 else "📉"
+        weekly_summary.append(f"| {w['date']} | {w['close']} | {w['change_percent']:+.2f}% {w_trend} | MA20:{w['ma20']:.2f} | RSI:{w['rsi']:.1f} |")
+
+    weekly_stats = {
+        "high": max([w['high'] for w in ctx["weekly_prices"]]) if ctx["weekly_prices"] else 0,
+        "low": min([w['low'] for w in ctx["weekly_prices"]]) if ctx["weekly_prices"] else 0,
+    }
+
+    # 4. Monthly Summary
+    monthly_summary = []
+    monthly_detail = ctx["monthly_prices"][:3]
+    for m in monthly_detail:
+        m_trend = "📈" if (m['change_percent'] or 0) > 0 else "📉"
+        monthly_summary.append(f"| {m['date']} | {m['close']} | {m['change_percent']:+.2f}% {m_trend} |")
+
+    monthly_stats = {
+        "high": max([m['high'] for m in ctx["monthly_prices"]]) if ctx["monthly_prices"] else 0,
+        "low": min([m['low'] for m in ctx["monthly_prices"]]) if ctx["monthly_prices"] else 0,
+        "ma20": ctx["monthly_prices"][0]['ma20'] if ctx["monthly_prices"] else 0,
+        # "rsi": monthly_rows[0][8] ... matching monthly_history zip
+    }
+
+    # 5. AI Review
     prediction_review = ""
-    if recent_predictions:
+    if ctx["ai_history"]:
         prediction_rows = []
-        for pred in recent_predictions:
-            pred_date, pred_signal, pred_confidence, pred_reasoning, pred_status, pred_actual = pred
-            signal_cn = {"Long": "做多", "Side": "观望", "Short": "避险"}.get(pred_signal, pred_signal)
-            status_icon = "✅" if pred_status == "Correct" else ("❌" if pred_status == "Incorrect" else "➖")
+        for pred in ctx["ai_history"]:
+            pred_date = pred['date']
+            signal_cn = {"Long": "做多", "Side": "观望", "Short": "避险"}.get(pred['signal'], pred['signal'])
+            status_icon = "✅" if pred['validation_status'] == "Correct" else ("❌" if pred['validation_status'] == "Incorrect" else "➖")
             
+            summary = ""
             try:
-                reasoning_data = json.loads(pred_reasoning) if pred_reasoning else {}
+                reasoning_data = json.loads(pred['ai_reasoning']) if pred['ai_reasoning'] else {}
                 summary = reasoning_data.get("summary", "")[:15]
-            except:
-                summary = ""
+            except: pass
             
-            actual_str = f"{pred_actual:+.2f}%" if pred_actual is not None else "N/A"
-            prediction_rows.append(f"| {pred_date} | {signal_cn} | {pred_confidence:.0%} | {summary} | {status_icon} | {actual_str} |")
+            actual_str = f"{pred['actual_change']:+.2f}%" if pred['actual_change'] is not None else "N/A"
+            prediction_rows.append(f"| {pred_date} | {signal_cn} | {pred['confidence']:.0%} | {summary} | {status_icon} | {actual_str} |")
         
         prediction_review = f"""## AI 历史预测回顾（近5次）
 | 预测日期 | 信号 | 置信度 | 核心判断 | 结果 | 实际涨跌 |
 |----------|------|--------|----------|------|----------|
 {chr(10).join(prediction_rows)}
 
-**历史准确率**: 累计预测 {total_predictions} 次，准确率 **{accuracy_rate:.1f}%**
+**历史准确率**: 累计预测 {ctx['accuracy']['total']} 次，准确率 **{ctx['accuracy']['rate']:.1f}%**
 """
-
-    # 构建历史行情摘要
-    history_summary = []
-    cumulative_change = 0
-    for h_row in history_rows:
-        h_date, h_open, h_high, h_low, h_close, h_change, h_volume = h_row
-        cumulative_change += (h_change or 0)
-        trend_icon = "📈" if (h_change or 0) > 0 else ("📉" if (h_change or 0) < 0 else "➡️")
-        history_summary.append(f"| {h_date} | {h_open} | {h_high} | {h_low} | {h_close} | {h_change:+.2f}% {trend_icon} | {int(h_volume)} |")
-    
-    # 构建周线摘要
-    weekly_summary = []
-    for w_row in weekly_detail:
-        w_date, w_open, w_high, w_low, w_close, w_change, w_volume, w_ma20, w_rsi = w_row
-        w_trend = "📈" if (w_change or 0) > 0 else "📉"
-        weekly_summary.append(f"| {w_date} | {w_close} | {w_change:+.2f}% {w_trend} | MA20:{w_ma20:.2f} | RSI:{w_rsi:.1f} |")
-
-    # 构建月线摘要
-    monthly_summary = []
-    for m_row in monthly_detail:
-        m_date, m_open, m_high, m_low, m_close, m_change, m_volume, m_ma20, m_rsi = m_row
-        m_trend = "📈" if (m_change or 0) > 0 else "📉"
-        monthly_summary.append(f"| {m_date} | {m_close} | {m_change:+.2f}% {m_trend} |")
 
     rsi = data.get('rsi', 0)
     rsi_status = "超买" if rsi > 70 else ("超卖" if rsi < 30 else "运行稳健")

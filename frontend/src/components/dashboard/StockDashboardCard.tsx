@@ -154,7 +154,9 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
                 {(() => {
                   if (tacticalData) {
                     const userPos = data.rule?.position === 'holding' ? 'holding' : 'empty';
-                    const p1 = tacticalData.tactics?.[userPos]?.[0];
+                    const rawTactics = tacticalData.tactics?.[userPos];
+                    const tacticsArr = Array.isArray(rawTactics) ? rawTactics : (rawTactics ? [rawTactics] : []);
+                    const p1 = tacticsArr[0];
                     return (
                       <>
                         <p className="text-sm leading-relaxed text-slate-300 font-medium italic pl-1 border-l-2 border-indigo-500/20">

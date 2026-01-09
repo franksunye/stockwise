@@ -10,11 +10,29 @@ class SynthesisStep(BaseStep):
     The final arbiter that produces the structured signal.
     """
     async def build_prompt(self, context: ChainContext) -> str:
-        # Context is already injected via context.get_compressed_history() in BaseStep
-        # So here we just focus on the task.
+        d = context.input_data
+        ai_history = d.get('ai_history', [])
         
-        prompt = """### 步骤4：最终结论推导 (Synthesis)
+        # Build AI review section similar to benchmark
+        prediction_review = ""
+        if ai_history:
+            rows = []
+            for pred in ai_history:
+                signal_cn = {"Long": "做多", "Side": "观望", "Short": "避险"}.get(pred['signal'], pred['signal'])
+                status_icon = "✅" if pred['validation_status'] == "Correct" else ("❌" if pred['validation_status'] == "Incorrect" else "➖")
+                rows.append(f"| {pred['date']} | {signal_cn} | {pred['confidence']:.0%} | {status_icon} | {pred.get('actual_change', 'N/A')}% |")
+            
+            prediction_review = f"""
+## AI 历史预测回顾
+| 预测日期 | 信号 | 置信度 | 结果 | 实际涨跌 |
+|----------|------|--------|------|----------|
+{chr(10).join(rows)}
+历史准确率: {d.get('accuracy', {}).get('rate', 0):.1f}%
+"""
+
+        prompt = f"""### 步骤4：最终结论推导 (Synthesis)
 整合以上所有信息（基础数据 + 日线指标 + 周月线趋势），生成最终操作建议 JSON。
+{prediction_review}
 
 ## 核心逻辑 (Conservative Trader)
 1. **风险厌恶**：你是一个极其保守的资深交易员。只要有"背离"或"多周期冲突"，就默认"Side"（观望）。
@@ -23,25 +41,29 @@ class SynthesisStep(BaseStep):
 
 ## 输出要求
 必须输出纯 JSON 格式，严格遵守以下 Schema：
-{
+{{
   "signal": "Long" | "Short" | "Side",
   "confidence": 0.0 - 1.0 (观望建议 0.6-0.75),
   "summary": "一句话总结 (中文)",
   "reasoning_trace": [
-    { "step": "trend", "data": "MA20/周线状态", "conclusion": "趋势结论" },
-    { "step": "momentum", "data": "MACD/RSI状态", "conclusion": "动能结论" },
-    { "step": "risk", "data": "背离/压力位", "conclusion": "风险结论" },
-    { "step": "decision", "data": "综合判断", "conclusion": "最终结论" }
+    {{ "step": "trend", "data": "MA20/周线状态", "conclusion": "趋势结论" }},
+    {{ "step": "momentum", "data": "MACD/RSI状态", "conclusion": "动能结论" }},
+    {{ "step": "risk", "data": "背离/压力位", "conclusion": "风险结论" }},
+    {{ "step": "decision", "data": "综合判断", "conclusion": "最终结论" }}
   ],
-  "tactics": {
-    "holding": { "action": "持仓策略", "trigger": "止盈/止损位", "reason": "理由" },
-    "empty": { "action": "空仓策略", "trigger": "进场位或继续观望", "reason": "理由" }
-  },
-  "key_levels": {
+  "tactics": {{
+    "holding": [
+      {{ "priority": "P1", "action": "持仓策略", "trigger": "止盈/止损位", "reason": "理由" }}
+    ],
+    "empty": [
+      {{ "priority": "P1", "action": "空仓策略", "trigger": "进场位或继续观望", "reason": "理由" }}
+    ]
+  }},
+  "key_levels": {{
     "support": 123.45,
     "resistance": 456.78
-  }
-}
+  }}
+}}
 """
         return prompt
     

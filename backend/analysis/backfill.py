@@ -238,13 +238,8 @@ def _analyze_stocks_for_date(conn, stocks: list, date_str: str, model_filter: st
             
             logger.info(f"   >>> 分析 {stock} ({date_str})")
             
-            # Prepare data for PredictionRunner
-            # PredictionRunner expects {'price_data': [dict]}
-            row_dict = row.to_dict()
-            data = {'price_data': [row_dict]}
-            
-            # Run prediction
-            asyncio.run(runner.run_analysis(stock, date_str, data=data, force=force))
+            # Run prediction - Pass data=None to force PredictionRunner to fetch FULL context (Strict Parity)
+            asyncio.run(runner.run_analysis(stock, date_str, data=None, force=force))
             success_count += 1
             
             # Sync back validation logic

@@ -210,7 +210,13 @@ function DashboardContent() {
         isOpen={!!selectedTactics} 
         onClose={() => setSelectedTactics(null)} 
         tier={tier}
-        data={JSON.parse(selectedTactics?.prediction?.ai_reasoning || '{}')}
+        data={(() => {
+          try {
+            return JSON.parse(selectedTactics?.prediction?.ai_reasoning || '{}');
+          } catch {
+            return {};
+          }
+        })()}
         userPos={stocks.find(s => s.symbol === selectedTactics?.symbol)?.rule?.position || 'none'}
         model={selectedTactics?.prediction?.model}
         symbol={selectedTactics?.symbol || ''}
