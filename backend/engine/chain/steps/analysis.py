@@ -75,9 +75,9 @@ class MultiPeriodStep(BaseStep):
         w_prices = context.input_data.get('weekly_prices', [])
         m_prices = context.input_data.get('monthly_prices', [])
         
-        # Get latest weekly/monthly data (if available)
-        last_w = w_prices[-1] if w_prices else {}
-        last_m = m_prices[-1] if m_prices else {}
+        # Get latest weekly/monthly data (if available) - context.input_data structure uses newest first for history
+        last_w = w_prices[0] if w_prices else {}
+        last_m = m_prices[0] if m_prices else {}
         
         prompt = f"""### 步骤3：多周期共振验证
 为了避免"日线骗线"，我们需要检查周线和月线的大趋势。
