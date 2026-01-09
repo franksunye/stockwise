@@ -11,7 +11,8 @@ import {
   ShieldCheck,
   Zap,
   Clock,
-  LayoutGrid
+  LayoutGrid,
+  Terminal
 } from 'lucide-react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
