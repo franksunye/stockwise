@@ -123,7 +123,7 @@ CHAIN_STRATEGIES = {
             {"type": "anchor", "config": {"include_profile": True}},
             {"type": "indicator", "config": {}},
             {"type": "multi_period", "config": {}},
-            {"type": "synthesis", "config": {"conservative": True}}
+            {"type": "synthesis", "config": {"conservative": True, "inject_hard_facts": True}}
         ],
         # GitHub Actions 环境下，我们可以容忍更长的执行时间换取质量
         "max_retries_per_step": 2, 

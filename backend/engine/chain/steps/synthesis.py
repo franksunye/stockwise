@@ -3,6 +3,7 @@ import re
 from typing import Dict, Any
 from .base import BaseStep, StepExecutionError
 from engine.chain.context import ChainContext
+from engine.analysis.technical import TechnicalAnalyzer
 
 class SynthesisStep(BaseStep):
     """
@@ -28,6 +29,22 @@ class SynthesisStep(BaseStep):
         low_10d = min([p.get('low', float('inf')) for p in daily_prices[-10:]]) if daily_prices else 0
         stop_ref = boll_lower * 0.97 if boll_lower > 0 else close * 0.95
 
+        stop_ref = boll_lower * 0.97 if boll_lower > 0 else close * 0.95
+
+        # --- Indicator Pre-calculation (Anti-Hallucination) ---
+        # Hybrid Architecture: Use TechnicalAnalyzer for Quant-verified facts
+        technical_facts = ""
+        if self.config.get("inject_hard_facts", False):
+            try:
+                # Use the complete analysis module
+                analyzer = TechnicalAnalyzer()
+                # Assuming daily_prices format matches what TechnicalAnalyzer expects
+                metrics = analyzer.analyze(daily_prices)
+                technical_facts = analyzer.generate_fact_sheet(metrics)
+            except Exception as e:
+                # Fallback to empty if analyzer fails (should not happen)
+                technical_facts = f"\n<!-- Technical Analysis Failed: {str(e)} -->\n"
+
         # Build AI review section
         prediction_review = ""
         if ai_history:
@@ -51,6 +68,8 @@ class SynthesisStep(BaseStep):
 - 数据锚定: {context.structured_memory.get('anchor_summary', '正常')[:100]}
 - 日线技术: {context.structured_memory.get('technical_insight', '趋势未明')[:150]}  
 - 多周期验证: {context.structured_memory.get('period_insight', '无冲突')[:150]}
+
+{technical_facts}
 
 ## 预计算的关键价位（直接使用，无需重新计算）
 - **支撑位 (support)**: {boll_lower:.2f} (布林下轨参考)
