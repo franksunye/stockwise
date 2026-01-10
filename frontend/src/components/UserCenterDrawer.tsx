@@ -118,6 +118,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
     // 允许重新订阅，即使已授权
     
     setIsSubscribing(true);
+    setRedeemMsg(null);
     console.log('🔔 [Push] Starting notification subscription flow...');
     
     try {
@@ -134,13 +135,14 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
         const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
         if (!vapidKey) {
              console.error('🔔 [Push] VAPID key not configured');
-             setRedeemMsg({ type: 'error', text: '系统配置错误' });
+             setRedeemMsg({ type: 'error', text: 'VAPID Key 未配置' });
              setIsSubscribing(false);
              return;
         }
         console.log('🔔 [Push] VAPID key loaded');
         
-        // 1. 先注册 Service Worker
+        // 1. 先注册/更新 Service Worker
+        console.log('🔔 [Push] Registering/Updating Service Worker...');
         const { registerServiceWorker } = await import('@/lib/notifications');
         const registration = await registerServiceWorker();
         if (!registration) {
@@ -149,39 +151,52 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
             setIsSubscribing(false);
             return;
         }
-        console.log('🔔 [Push] Service Worker ready');
+        console.log('🔔 [Push] Service Worker registration successful');
+        
+        // 确保 SW 处于激活状态
+        const swReady = await navigator.serviceWorker.ready;
+        console.log('🔔 [Push] Service Worker ready, active state:', swReady.active?.state);
         
         // 2. 请求通知权限
         let perm = Notification.permission;
-        console.log('🔔 [Push] Current permission:', perm);
+        console.log('🔔 [Push] Current permission status:', perm);
         if (perm !== 'granted') {
+             console.log('🔔 [Push] Requesting permission...');
              perm = await Notification.requestPermission();
              setPushPermission(perm);
-             console.log('🔔 [Push] Permission after request:', perm);
+             console.log('🔔 [Push] Permission result:', perm);
         }
 
         if (perm === 'granted') {
             // 3. 获取现有订阅或创建新订阅
-            const swRegistration = await navigator.serviceWorker.ready;
-            let subscription = await swRegistration.pushManager.getSubscription();
+            console.log('🔔 [Push] Checking for existing subscription...');
+            let subscription = await swReady.pushManager.getSubscription();
             
             if (subscription) {
-                console.log('🔔 [Push] Using existing subscription');
+                console.log('🔔 [Push] Found existing subscription. Checking if it matches current VAPID...');
+                // 如果后端看到的不是最新的，或者 VAPID 变了，可能需要重新订阅
+                // 这里暂时直接尝试再次发送到后端，确保一致
+                console.log('🔔 [Push] Subscription endpoint:', subscription.endpoint);
             } else {
                 // 没有现有订阅，创建新的
                 console.log('🔔 [Push] No existing subscription, creating new one...');
                 subscription = await subscribeUserToPush(vapidKey);
-                console.log('🔔 [Push] New subscription created:', subscription ? 'SUCCESS' : 'FAILED');
+                console.log('🔔 [Push] New subscription result:', subscription ? 'SUCCESS' : 'FAILED');
             }
             
-            if (subscription && currentUserId) {
+            if (subscription) {
                 // 4. 无论是现有订阅还是新订阅，都发送到后端保存
-                // 这样即使之前后端保存失败，再次点击也能成功
-                console.log('🔔 [Push] Sending subscription to backend...');
+                console.log('🔔 [Push] Sending subscription object to backend...');
+                const subJSON = subscription.toJSON();
+                console.log('🔔 [Push] Payload preview:', { userId: currentUserId, endpointShort: subJSON.endpoint?.slice(-20) });
+
                 const response = await fetch('/api/notifications/subscribe', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId: currentUserId, subscription: subscription.toJSON() })
+                    body: JSON.stringify({ 
+                        userId: currentUserId, 
+                        subscription: subJSON
+                    })
                 });
                 
                 if (response.ok) {
@@ -190,21 +205,21 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                     setRedeemMsg({ type: 'success', text: '通知开启成功' });
                     setTimeout(() => setRedeemMsg(null), 3000);
                 } else {
-                    const data = await response.json();
-                    console.error('🔔 [Push] ❌ Subscribe API error:', data);
-                    setRedeemMsg({ type: 'error', text: '保存订阅失败: ' + (data.error || '未知错误') });
+                    const data = await response.json().catch(() => ({ error: 'Parse Error' }));
+                    console.error('🔔 [Push] ❌ Subscribe API error:', response.status, data);
+                    setRedeemMsg({ type: 'error', text: `保存失败(${response.status}): ` + (data.error || '未知错误') });
                 }
             } else {
-                console.error('🔔 [Push] ❌ Missing subscription or userId', { subscription: !!subscription, userId: currentUserId });
-                setRedeemMsg({ type: 'error', text: '获取订阅失败' });
+                console.error('🔔 [Push] ❌ Failed to obtain subscription object');
+                setRedeemMsg({ type: 'error', text: '获取订阅对象失败' });
             }
         } else {
-            console.log('🔔 [Push] Permission denied');
-            setRedeemMsg({ type: 'error', text: '需要授权通知权限' });
+            console.warn('🔔 [Push] Permission was not granted');
+            setRedeemMsg({ type: 'error', text: '请在浏览器设置中允许此站点的通知权限' });
         }
     } catch (e) {
-        console.error('🔔 [Push] ❌ Notification setup error:', e);
-        setRedeemMsg({ type: 'error', text: '开启失败: ' + (e instanceof Error ? e.message : String(e)) });
+        console.error('🔔 [Push] ❌ Fatal setup error:', e);
+        setRedeemMsg({ type: 'error', text: '启动流程异常: ' + (e instanceof Error ? e.message : String(e)) });
     } finally {
         setIsSubscribing(false);
     }

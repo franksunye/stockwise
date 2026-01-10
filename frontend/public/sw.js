@@ -2,6 +2,17 @@
 const DB_NAME = 'stockwise-sw';
 const STORE_NAME = 'badge';
 const BADGE_KEY = 'unread_count';
+const MAX_BADGE_COUNT = 99;
+
+// 强制更新机制：当新 Service Worker 下载后，立即跳过等待
+self.addEventListener('install', (event) => {
+  self.skipWaiting();
+});
+
+// 立即获取所有页面的控制权
+self.addEventListener('activate', (event) => {
+  event.waitUntil(clients.claim());
+});
 
 // 打开或创建 IndexedDB 数据库
 function openDB() {
@@ -51,7 +62,7 @@ async function setBadgeCount(count) {
 }
 
 // 徽章显示的最大值（行业标准：iOS/微信等超过99显示99+，PWA API只支持数字所以显示99）
-const MAX_BADGE_COUNT = 99;
+// MAX_BADGE_COUNT 已移至顶部
 
 // 增加徽章计数并更新显示
 async function incrementBadge() {
