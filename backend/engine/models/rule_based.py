@@ -9,6 +9,7 @@ class RuleAdapter(BasePredictionModel):
         Rule Engine based on MA alignment.
         Returns reasoning in JSON format consistent with LLM models.
         """
+        logger.info(f"⚙️ Running Rule Engine for {symbol} on {date}")
         prices = data.get('daily_prices', [])
         if not prices:
              return {"signal": "Side", "confidence": 0.0, "reasoning": self._build_reasoning("Side", "数据缺失", "无法获取价格数据")}
