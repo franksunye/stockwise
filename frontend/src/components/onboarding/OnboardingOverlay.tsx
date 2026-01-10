@@ -101,19 +101,34 @@ export function OnboardingOverlay() {
     setSelectedStockName(name || symbol);
     setAnalyzingStage(1);
     
-    // Fetch real stock data
+    // Simulate Steps Timeline (Ensures progress even if API is slow)
+    const stage2Timer = setTimeout(() => setAnalyzingStage(2), 2000);
+    const stage3Timer = setTimeout(() => setAnalyzingStage(3), 4500);
+    const step4Timer = setTimeout(() => setStep(4), 7000); // 兜底进入下一步
+
+    // Fetch real stock data with timeout
     try {
-      const res = await fetch(`/api/stock?symbol=${symbol}`);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 6000); // 6秒请求超时
+
+      const res = await fetch(`/api/stock?symbol=${symbol}`, { signal: controller.signal });
+      clearTimeout(timeoutId);
+      
+      if (!res.ok) throw new Error(`API status: ${res.status}`);
       const data = await res.json();
       
       if (data.price || data.prediction) {
-        // Parse ai_reasoning JSON to get summary (same logic as Dashboard)
+        // Parse ai_reasoning JSON
         let reasoningSummary = '基于近期市场表现和技术指标的综合分析结论。';
         try {
-          const tacticalData = JSON.parse(data.prediction?.ai_reasoning || '');
-          reasoningSummary = tacticalData?.summary || data.prediction?.ai_reasoning || reasoningSummary;
+          const rawReasoning = data.prediction?.ai_reasoning || '';
+          if (rawReasoning.startsWith('{')) {
+              const tacticalData = JSON.parse(rawReasoning);
+              reasoningSummary = tacticalData?.summary || tacticalData?.conclusion || reasoningSummary;
+          } else {
+              reasoningSummary = rawReasoning || reasoningSummary;
+          }
         } catch {
-          // If parsing fails, use raw ai_reasoning or default
           reasoningSummary = data.prediction?.ai_reasoning || reasoningSummary;
         }
         
@@ -128,20 +143,20 @@ export function OnboardingOverlay() {
         });
       }
     } catch (e) {
-      console.error('Fetch stock data failed', e);
-      // Use default data on error
+      console.warn('Onboarding fetch failed/timed out, using fallback:', e);
+      // Data is already set to default or will be updated if fetch eventually succeeds before step 4
       setRevealData({
         ...DEFAULT_REVEAL_DATA,
         name: name || symbol
       });
     }
 
-    // Simulate Steps
-    setTimeout(() => setAnalyzingStage(2), 1500);
-    setTimeout(() => setAnalyzingStage(3), 3000);
-    setTimeout(() => {
-        setStep(4);
-    }, 4500);
+    // Cleanup timers if we manually change step (optional, but good practice if logic evolves)
+    return () => {
+        clearTimeout(stage2Timer);
+        clearTimeout(stage3Timer);
+        clearTimeout(step4Timer);
+    };
   };
 
   if (!isVisible) return null;

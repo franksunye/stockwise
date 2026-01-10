@@ -90,5 +90,12 @@ export async function POST(request: Request) {
     } catch (error: unknown) {
         console.error('Redeem error:', error);
         return NextResponse.json({ error: (error as Error).message || 'Internal Server Error' }, { status: 500 });
+    } finally {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const db: any = getDbClient();
+        // 只有本地 SQLite 模式需要关闭
+        if (!('execute' in db && typeof db.execute === 'function')) {
+            db.close();
+        }
     }
 }

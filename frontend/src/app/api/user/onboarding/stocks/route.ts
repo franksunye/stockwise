@@ -88,5 +88,11 @@ export async function GET() {
                 { symbol: '01167', name: '加科思', market: 'HK' }
             ]
         });
+    } finally {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const db: any = getDbClient();
+        if (!('execute' in db && typeof db.execute === 'function')) {
+            db.close();
+        }
     }
 }

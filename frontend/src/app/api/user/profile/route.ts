@@ -224,5 +224,11 @@ export async function POST(request: Request) {
     } catch (error: unknown) {
         console.error('Profile error:', error);
         return NextResponse.json({ error: (error as Error).message || 'Internal Server Error' }, { status: 500 });
+    } finally {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const db: any = getDbClient();
+        if (!('execute' in db && typeof db.execute === 'function')) {
+            db.close();
+        }
     }
 }
