@@ -32,31 +32,10 @@ export async function registerServiceWorker() {
 
     try {
         const registration = await navigator.serviceWorker.register('/sw.js');
-        console.log('🔔 [SW] Registered:', registration);
-
-        // 强制触发更新检查
-        registration.update().catch(err => console.warn('🔔 [SW] Update check failed:', err));
-
-        // 监听新 SW 的发现
-        registration.onupdatefound = () => {
-            const installingWorker = registration.installing;
-            if (installingWorker) {
-                installingWorker.onstatechange = () => {
-                    if (installingWorker.state === 'installed') {
-                        if (navigator.serviceWorker.controller) {
-                            console.log('🔔 [SW] New content is available; please refresh.');
-                            // 可以在这里触发 UI 提醒或者自动刷新
-                        } else {
-                            console.log('🔔 [SW] Content is cached for offline use.');
-                        }
-                    }
-                };
-            }
-        };
-
+        console.log('Service Worker registered:', registration);
         return registration;
     } catch (error) {
-        console.error('🔔 [SW] Registration failed:', error);
+        console.error('Service Worker registration failed:', error);
         return null;
     }
 }
