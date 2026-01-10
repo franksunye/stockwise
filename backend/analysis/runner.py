@@ -26,8 +26,9 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool =
         model_filter: 指定使用的模型 ID (deepseek-v3, gemini-3-flash, rule-engine)
     """
     # 如果是例行运行（无特定代码），且该市场今天休市，则跳过
-    if not symbol and check_trading_day_skip(market_filter):
-        return
+    # logic moved to scheduler level
+    # if not symbol and check_trading_day_skip(market_filter):
+    #    return
         
     targets = []
     if symbol:
@@ -62,11 +63,12 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool =
     for stock in targets:
         try:
             # 1. 检查该股票所属市场是否休市 (Cost Saving)
-            if not symbol:
-                market = get_market_from_symbol(stock)
-                if is_market_closed(now_date, market):
-                    logger.debug(f"💤 {stock}: {market} 市场休市，跳过")
-                    continue
+            # logic moved to scheduler level or implied by data availability
+            # if not symbol:
+            #     market = get_market_from_symbol(stock)
+            #     if is_market_closed(now_date, market):
+            #         logger.debug(f"💤 {stock}: {market} 市场休市，跳过")
+            #         continue
 
             # 获取该股票最新的日线数据 (含指标)
             query = f"SELECT * FROM daily_prices WHERE symbol = ? ORDER BY date DESC LIMIT 1"

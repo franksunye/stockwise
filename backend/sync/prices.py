@@ -156,8 +156,9 @@ def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool =
 def run_full_sync(market_filter: str = None):
     """每日全量同步"""
     # 如果是例行运行，且该市场今天休市，则跳过
-    if check_trading_day_skip(market_filter):
-        return
+    # logic moved to scheduler level, execution level should follow command
+    # if check_trading_day_skip(market_filter):
+    #     return
         
     target_stocks = get_stock_pool()
     if not target_stocks:
