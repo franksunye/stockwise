@@ -33,18 +33,23 @@ export async function POST(request: Request) {
         const client = getDbClient();
         const now = new Date().toISOString();
 
-        if ('execute' in client) {
-            // Turso
-            await client.execute({
-                sql: `UPDATE users SET last_active_at = ? WHERE user_id = ?`,
-                args: [now, userId],
-            });
-        } else {
-            // SQLite
-            client
-                .prepare(`UPDATE users SET last_active_at = ? WHERE user_id = ?`)
-                .run(now, userId);
-            client.close();
+        try {
+            if ('execute' in client) {
+                // Turso
+                await client.execute({
+                    sql: `UPDATE users SET last_active_at = ? WHERE user_id = ?`,
+                    args: [now, userId],
+                });
+            } else {
+                // SQLite
+                client
+                    .prepare(`UPDATE users SET last_active_at = ? WHERE user_id = ?`)
+                    .run(now, userId);
+            }
+        } finally {
+            if (client && !('execute' in client)) {
+                client.close();
+            }
         }
 
         return NextResponse.json({ success: true });

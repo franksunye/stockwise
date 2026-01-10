@@ -108,8 +108,11 @@ export async function getCurrentUser(): Promise<User> {
     // 保存到 localStorage 和 Cookie
     syncUserIdToStorage(userId, userType);
 
-    // 调用后端 API 注册用户
+    // 调用后端 API 注册用户 (带超时控制)
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
+
       await fetch('/api/user/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -117,10 +120,12 @@ export async function getCurrentUser(): Promise<User> {
           userId,
           registrationType: 'anonymous',
         }),
+        signal: controller.signal
       });
+      clearTimeout(timeoutId);
       console.log('✅ 匿名用户注册成功:', userId);
     } catch (error) {
-      console.error('❌ 匿名用户注册失败:', error);
+      console.error('❌ 匿名用户注册失败或超时:', error);
     }
   } else {
     // 确保 Cookie 也同步了（用于未来的 PWA 恢复）

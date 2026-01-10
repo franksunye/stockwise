@@ -44,9 +44,17 @@ export function useDashboardData() {
         try {
             // 🚀 使用批量 API，将原来的 41 个请求合并为 1 个
             const startTime = performance.now();
+
+            // 添加 10 秒超时控制
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000);
+
             const dashboardRes = await fetch(`/api/dashboard?userId=${user.userId}&historyLimit=15`, {
-                cache: 'no-store'
+                cache: 'no-store',
+                signal: controller.signal
             });
+            clearTimeout(timeoutId);
+
             const dashboardData = await dashboardRes.json();
 
             if (dashboardData.error) {

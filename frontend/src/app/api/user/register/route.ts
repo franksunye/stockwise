@@ -33,22 +33,27 @@ export async function POST(request: Request) {
         const client = getDbClient();
         const now = new Date().toISOString();
 
-        if ('execute' in client) {
-            // Turso
-            await client.execute({
-                sql: `INSERT OR IGNORE INTO users (user_id, registration_type, created_at, last_active_at)
-                      VALUES (?, ?, ?, ?)`,
-                args: [userId, registrationType, now, now],
-            });
-        } else {
-            // SQLite
-            client
-                .prepare(
-                    `INSERT OR IGNORE INTO users (user_id, registration_type, created_at, last_active_at)
-                     VALUES (?, ?, ?, ?)`
-                )
-                .run(userId, registrationType, now, now);
-            client.close();
+        try {
+            if ('execute' in client) {
+                // Turso
+                await client.execute({
+                    sql: `INSERT OR IGNORE INTO users (user_id, registration_type, created_at, last_active_at)
+                          VALUES (?, ?, ?, ?)`,
+                    args: [userId, registrationType, now, now],
+                });
+            } else {
+                // SQLite
+                client
+                    .prepare(
+                        `INSERT OR IGNORE INTO users (user_id, registration_type, created_at, last_active_at)
+                         VALUES (?, ?, ?, ?)`
+                    )
+                    .run(userId, registrationType, now, now);
+            }
+        } finally {
+            if (client && !('execute' in client)) {
+                client.close();
+            }
         }
 
         return NextResponse.json({ success: true, userId });
