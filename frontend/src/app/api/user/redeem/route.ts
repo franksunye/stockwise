@@ -3,6 +3,8 @@ import { getDbClient } from '@/lib/db';
 import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
 
 export async function POST(request: Request) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let db: any;
     try {
         const { userId, code } = await request.json();
 
@@ -15,8 +17,7 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: '激活码功能已停用' }, { status: 403 });
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const db: any = getDbClient();
+        db = getDbClient();
         const now = new Date().toISOString();
         const normalizedCode = code.trim().toUpperCase();
 
@@ -39,18 +40,13 @@ export async function POST(request: Request) {
         }
 
         // 2. Calculate Expiry
-        const durationDays = isCloud ? codeRecord.duration_days : codeRecord.duration_days;
-        // LibSQL: row is object-like (columns). BetterSQLite3: object.
-
+        const durationDays = codeRecord.duration_days;
         const expiryDate = new Date();
         expiryDate.setDate(expiryDate.getDate() + durationDays);
         const expiryStr = expiryDate.toISOString();
 
-        // 3. Execute Updates (Transaction ideally, but simple sequential for now)
-
-        // Update User
+        // 3. Execute Updates
         if (isCloud) {
-            // Upsert user to ensure they exist, then set tier
             await db.batch([
                 {
                     sql: `INSERT INTO users (user_id, subscription_tier, subscription_expires_at, registration_type) 
@@ -91,10 +87,7 @@ export async function POST(request: Request) {
         console.error('Redeem error:', error);
         return NextResponse.json({ error: (error as Error).message || 'Internal Server Error' }, { status: 500 });
     } finally {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const db: any = getDbClient();
-        // 只有本地 SQLite 模式需要关闭
-        if (!('execute' in db && typeof db.execute === 'function')) {
+        if (db && typeof db.close === 'function') {
             db.close();
         }
     }

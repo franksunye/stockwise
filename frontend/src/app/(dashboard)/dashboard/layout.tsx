@@ -48,11 +48,16 @@ export default function DashboardLayout({
       }
 
       try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
+
         const res = await fetch('/api/user/profile', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: uid, watchlist: getWatchlist(), referredBy })
+          body: JSON.stringify({ userId: uid, watchlist: getWatchlist(), referredBy }),
+          signal: controller.signal
         });
+        clearTimeout(timeoutId);
         const data = await res.json();
         
         // 只要是 Pro 用户（包括通过邀请获得的试用 Pro），都可进入
@@ -64,8 +69,9 @@ export default function DashboardLayout({
           setIsAuthorized(false);
         }
       } catch (e) {
-        console.error('Auth verification failed', e);
-        setIsAuthorized(false);
+        console.error('Auth verification failed or timed out', e);
+        // 保守降级：如果验证接口超时，允许进入主界面（防止永久卡死）
+        setIsAuthorized(true);
       }
     };
     

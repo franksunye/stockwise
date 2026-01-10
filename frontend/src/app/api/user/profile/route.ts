@@ -3,6 +3,8 @@ import { getDbClient } from '@/lib/db';
 import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
 
 export async function POST(request: Request) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let db: any;
     try {
         const { userId, watchlist, referredBy } = await request.json();
 
@@ -10,8 +12,7 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const db: any = getDbClient();
+        db = getDbClient();
         const isCloud = 'execute' in db && typeof db.execute === 'function' && !('prepare' in db);
 
         // 1. Get or Create User
@@ -25,13 +26,10 @@ export async function POST(request: Request) {
         } else {
             user = db.prepare("SELECT * FROM users WHERE user_id = ?").get(userId);
         }
+
         if (!user) {
             // Create new free user
             const now = new Date().toISOString();
-
-            // If referred by someone, maybe give a trial or just record it
-            // For now, let's just record it. We can add reward logic later or now.
-            // Let's give 7 days Pro if referred? (Optional, based on requirement)
             let initialTier = 'free';
             let expiresAt = null;
 
@@ -97,18 +95,15 @@ export async function POST(request: Request) {
             // ==========================================
             // 处理已存在用户的邀请奖励
             // ==========================================
-            // 如果是已存在的 Free 用户，且通过邀请链接进入，且之前没有使用过邀请
             const shouldProcessExistingUserReferral =
                 MEMBERSHIP_CONFIG.switches.enableReferralReward &&
                 referredBy &&
                 referredBy !== userId &&
                 user.subscription_tier === 'free' &&
-                !user.referred_by;  // 确保用户之前没有使用过邀请
+                !user.referred_by;
 
             if (shouldProcessExistingUserReferral) {
                 console.log(`Processing referral for existing user: ${userId}, referred by: ${referredBy}`);
-
-                // 1. Referee Reward (Existing Free User) - 给予 Pro 试用
                 const expiryDate = new Date();
                 expiryDate.setDate(expiryDate.getDate() + MEMBERSHIP_CONFIG.referral.refereeDays);
                 const newExpiresAt = expiryDate.toISOString();
@@ -123,7 +118,6 @@ export async function POST(request: Request) {
                         db.prepare("UPDATE users SET subscription_tier = 'pro', subscription_expires_at = ?, referred_by = ? WHERE user_id = ?").run(newExpiresAt, referredBy, userId);
                     }
 
-                    // 更新 user 对象以反映新状态
                     user = {
                         ...user,
                         subscription_tier: 'pro',
@@ -131,7 +125,6 @@ export async function POST(request: Request) {
                         referred_by: referredBy
                     };
 
-                    // 2. Referrer Reward (The person who shared the link)
                     let referrer;
                     if (isCloud) {
                         const res = await db.execute({
@@ -164,8 +157,7 @@ export async function POST(request: Request) {
             }
         }
 
-        // 2. Sync Watchlist (Local -> Cloud)
-        // We strictly add local items to cloud. We do not delete cloud items.
+        // 2. Sync Watchlist
         if (watchlist && Array.isArray(watchlist) && watchlist.length > 0) {
             try {
                 if (isCloud) {
@@ -183,7 +175,6 @@ export async function POST(request: Request) {
                 }
             } catch (err) {
                 console.error('Watchlist sync error:', err);
-                // Non-blocking error
             }
         }
 
@@ -196,7 +187,7 @@ export async function POST(request: Request) {
             }
         }
 
-        // 4. Get actual watchlist count from database (cloud source of truth)
+        // 4. Get actual watchlist count
         let watchlistCount = 0;
         try {
             if (isCloud) {
@@ -218,16 +209,14 @@ export async function POST(request: Request) {
             tier: isExpired ? 'free' : (user.subscription_tier || 'free'),
             expiresAt: user.subscription_expires_at,
             hasOnboarded: Boolean(user.has_onboarded),
-            watchlistCount: watchlistCount  // 返回云端真实的监控数量
+            watchlistCount: watchlistCount
         });
 
     } catch (error: unknown) {
         console.error('Profile error:', error);
         return NextResponse.json({ error: (error as Error).message || 'Internal Server Error' }, { status: 500 });
     } finally {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const db: any = getDbClient();
-        if (!('execute' in db && typeof db.execute === 'function')) {
+        if (db && typeof db.close === 'function') {
             db.close();
         }
     }

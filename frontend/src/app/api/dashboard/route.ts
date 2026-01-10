@@ -214,7 +214,7 @@ export async function GET(request: Request) {
                 queryTime
             });
         } finally {
-            if (client && !('execute' in client)) {
+            if (client && typeof client.close === 'function') {
                 client.close();
             }
         }

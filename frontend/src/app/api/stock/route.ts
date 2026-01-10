@@ -103,7 +103,7 @@ export async function GET(request: Request) {
                 last_update_time: getLastUpdateTime()
             });
         } finally {
-            if (client && !('execute' in client)) {
+            if (client && typeof client.close === 'function') {
                 client.close();
             }
         }
