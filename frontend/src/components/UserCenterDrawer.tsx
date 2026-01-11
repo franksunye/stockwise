@@ -200,9 +200,6 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                     setRedeemMsg({ type: 'error', text: '保存失败: ' + (data.error || response.status) });
                     setSubStatus('');
                 }
-            } else {
-                setRedeemMsg({ type: 'error', text: '获取订阅失败' });
-                setSubStatus('');
             }
         } else {
             setRedeemMsg({ type: 'error', text: '请允许通知权限' });
@@ -210,9 +207,16 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
         }
     } catch (e) {
         console.error('🔔 [Push] Error:', e);
-        setRedeemMsg({ type: 'error', text: '开启异常: ' + (e instanceof Error ? e.message : '未知') });
+        // 显示详细错误信息，帮助排查 Android 问题
+        const errMsg = e instanceof Error ? e.message : String(e);
+        const detailedMsg = errMsg.includes('no supported') ? '设备不支持推送' :
+                          errMsg.includes('Registration failed') ? 'FCM/服务连接失败' :
+                          '开启异常: ' + errMsg;
+        
+        setRedeemMsg({ type: 'error', text: detailedMsg });
         setSubStatus('');
-    } finally {
+        // 延长错误消息显示时间
+        setTimeout(() => setRedeemMsg(null), 6000);
         setIsSubscribing(false);
     }
   };

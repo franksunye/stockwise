@@ -58,6 +58,6 @@ export async function subscribeUserToPush(vapidPublicKey: string) {
         return subscription;
     } catch (error) {
         console.error('Failed to subscribe the user: ', error);
-        return null;
+        throw error; // Propagate error to caller for UI display
     }
 }
