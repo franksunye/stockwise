@@ -114,19 +114,14 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
     checkPushState();
   }, [isOpen]);
 
-  const [subStatus, setSubStatus] = useState<string>('');
-
   const handleEnableNotifications = async () => {
     setIsSubscribing(true);
     setRedeemMsg(null);
-    setSubStatus('正在启动...');
-    console.log('🔔 [Push] Starting notification subscription flow...');
     
     try {
         // 0. 准备身份
         let currentUserId = userId;
         if (!currentUserId) {
-            setSubStatus('获取用户信息...');
             const user = await getCurrentUser();
             currentUserId = user.userId;
             setUserId(currentUserId);
@@ -136,54 +131,36 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
         if (!vapidKey) {
              setRedeemMsg({ type: 'error', text: 'VAPID Key 未配置' });
              setIsSubscribing(false);
-             setSubStatus('');
              return;
         }
         
         // 1. 注册/更新 Service Worker
-        setSubStatus('注册后台服务...');
         const { registerServiceWorker } = await import('@/lib/notifications');
         const registration = await registerServiceWorker();
         if (!registration) {
             setRedeemMsg({ type: 'error', text: 'Service Worker 注册失败' });
             setIsSubscribing(false);
-            setSubStatus('');
             return;
         }
         
-        // 2. 特殊处理：解决 Android Ready 挂起问题 (设置 5秒超时)
-        setSubStatus('等待服务就绪...');
-        const swReadyPromise = navigator.serviceWorker.ready;
-        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('SW 就绪超时')), 5000));
-        
-        try {
-            await Promise.race([swReadyPromise, timeoutPromise]);
-        } catch (e) {
-            console.warn('🔔 [Push] SW ready timed out, attempting to continue anyway...');
-        }
-        
-        // 3. 请求通知权限
+        // 2. 请求通知权限
         let perm = Notification.permission;
         if (perm !== 'granted') {
-             setSubStatus('请求通知权限...');
              perm = await Notification.requestPermission();
              setPushPermission(perm);
         }
 
         if (perm === 'granted') {
-            // 4. 获取/创建订阅
-            setSubStatus('获取订阅密钥...');
+            // 3. 获取/创建订阅
             const swRegistration = await navigator.serviceWorker.ready;
             let subscription = await swRegistration.pushManager.getSubscription();
             
             if (!subscription) {
-                setSubStatus('创建新订阅...');
                 subscription = await subscribeUserToPush(vapidKey);
             }
             
             if (subscription) {
-                // 5. 保存到后端
-                setSubStatus('同步到服务器...');
+                // 4. 保存到后端
                 const response = await fetch('/api/notifications/subscribe', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -193,30 +170,21 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                 if (response.ok) {
                     setIsSubscribed(true);
                     setRedeemMsg({ type: 'success', text: '通知开启成功' });
-                    setSubStatus('');
                     setTimeout(() => setRedeemMsg(null), 3000);
                 } else {
                     const data = await response.json().catch(() => ({}));
                     setRedeemMsg({ type: 'error', text: '保存失败: ' + (data.error || response.status) });
-                    setSubStatus('');
                 }
+            } else {
+                 setRedeemMsg({ type: 'error', text: '无法获取推送权限' });
             }
         } else {
             setRedeemMsg({ type: 'error', text: '请允许通知权限' });
-            setSubStatus('');
         }
     } catch (e) {
         console.error('🔔 [Push] Error:', e);
-        // 显示详细错误信息，帮助排查 Android 问题
-        const errMsg = e instanceof Error ? e.message : String(e);
-        const detailedMsg = errMsg.includes('no supported') ? '设备不支持推送' :
-                          errMsg.includes('Registration failed') ? 'FCM/服务连接失败' :
-                          '开启异常: ' + errMsg;
-        
-        setRedeemMsg({ type: 'error', text: detailedMsg });
-        setSubStatus('');
-        // 延长错误消息显示时间
-        setTimeout(() => setRedeemMsg(null), 6000);
+        setRedeemMsg({ type: 'error', text: '开启失败，请重试' });
+    } finally {
         setIsSubscribing(false);
     }
   };
@@ -460,12 +428,9 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                             <div>
                                 <h4 className="text-sm font-bold text-white">推送通知</h4>
                                 <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2">
                                     <p className="text-[10px] text-slate-500">获取股价异动与日报提醒</p>
-                                    {subStatus && (
-                                        <span className="text-[10px] text-indigo-400 font-bold animate-pulse">
-                                            [{subStatus}]
-                                        </span>
-                                    )}
+                                    
                                     {/* 测试按钮 - 仅当通知已订阅时显示，最小化设计 */}
                                     {isSubscribed && (
                                         <button
