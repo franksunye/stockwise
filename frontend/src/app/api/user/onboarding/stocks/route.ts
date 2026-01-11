@@ -29,7 +29,8 @@ export async function GET() {
 
         if ('execute' in db) {
             const res = await db.execute(sql);
-            pool = res.rows.map(row => ({
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            pool = res.rows.map((row: any) => ({
                 symbol: String(row.symbol),
                 name: String(row.name),
                 market: String(row.market)
