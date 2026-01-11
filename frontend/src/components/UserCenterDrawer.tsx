@@ -114,70 +114,76 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
     checkPushState();
   }, [isOpen]);
 
+  const [subStatus, setSubStatus] = useState<string>('');
+
   const handleEnableNotifications = async () => {
-    // 允许重新订阅，即使已授权
-    
     setIsSubscribing(true);
+    setRedeemMsg(null);
+    setSubStatus('正在启动...');
     console.log('🔔 [Push] Starting notification subscription flow...');
     
     try {
-        // 0. 确保 userId 已加载
+        // 0. 准备身份
         let currentUserId = userId;
         if (!currentUserId) {
-            console.log('🔔 [Push] userId not loaded, fetching from getCurrentUser...');
+            setSubStatus('获取用户信息...');
             const user = await getCurrentUser();
             currentUserId = user.userId;
             setUserId(currentUserId);
         }
-        console.log('🔔 [Push] Using userId:', currentUserId);
         
         const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
         if (!vapidKey) {
-             console.error('🔔 [Push] VAPID key not configured');
-             setRedeemMsg({ type: 'error', text: '系统配置错误' });
+             setRedeemMsg({ type: 'error', text: 'VAPID Key 未配置' });
              setIsSubscribing(false);
+             setSubStatus('');
              return;
         }
-        console.log('🔔 [Push] VAPID key loaded');
         
-        // 1. 先注册 Service Worker
+        // 1. 注册/更新 Service Worker
+        setSubStatus('注册后台服务...');
         const { registerServiceWorker } = await import('@/lib/notifications');
         const registration = await registerServiceWorker();
         if (!registration) {
-            console.error('🔔 [Push] Service Worker registration failed');
             setRedeemMsg({ type: 'error', text: 'Service Worker 注册失败' });
             setIsSubscribing(false);
+            setSubStatus('');
             return;
         }
-        console.log('🔔 [Push] Service Worker ready');
         
-        // 2. 请求通知权限
+        // 2. 特殊处理：解决 Android Ready 挂起问题 (设置 5秒超时)
+        setSubStatus('等待服务就绪...');
+        const swReadyPromise = navigator.serviceWorker.ready;
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('SW 就绪超时')), 5000));
+        
+        try {
+            await Promise.race([swReadyPromise, timeoutPromise]);
+        } catch (e) {
+            console.warn('🔔 [Push] SW ready timed out, attempting to continue anyway...');
+        }
+        
+        // 3. 请求通知权限
         let perm = Notification.permission;
-        console.log('🔔 [Push] Current permission:', perm);
         if (perm !== 'granted') {
+             setSubStatus('请求通知权限...');
              perm = await Notification.requestPermission();
              setPushPermission(perm);
-             console.log('🔔 [Push] Permission after request:', perm);
         }
 
         if (perm === 'granted') {
-            // 3. 获取现有订阅或创建新订阅
+            // 4. 获取/创建订阅
+            setSubStatus('获取订阅密钥...');
             const swRegistration = await navigator.serviceWorker.ready;
             let subscription = await swRegistration.pushManager.getSubscription();
             
-            if (subscription) {
-                console.log('🔔 [Push] Using existing subscription');
-            } else {
-                // 没有现有订阅，创建新的
-                console.log('🔔 [Push] No existing subscription, creating new one...');
+            if (!subscription) {
+                setSubStatus('创建新订阅...');
                 subscription = await subscribeUserToPush(vapidKey);
-                console.log('🔔 [Push] New subscription created:', subscription ? 'SUCCESS' : 'FAILED');
             }
             
-            if (subscription && currentUserId) {
-                // 4. 无论是现有订阅还是新订阅，都发送到后端保存
-                // 这样即使之前后端保存失败，再次点击也能成功
-                console.log('🔔 [Push] Sending subscription to backend...');
+            if (subscription) {
+                // 5. 保存到后端
+                setSubStatus('同步到服务器...');
                 const response = await fetch('/api/notifications/subscribe', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -185,26 +191,27 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                 });
                 
                 if (response.ok) {
-                    console.log('🔔 [Push] ✅ Subscription saved to backend successfully!');
                     setIsSubscribed(true);
                     setRedeemMsg({ type: 'success', text: '通知开启成功' });
+                    setSubStatus('');
                     setTimeout(() => setRedeemMsg(null), 3000);
                 } else {
-                    const data = await response.json();
-                    console.error('🔔 [Push] ❌ Subscribe API error:', data);
-                    setRedeemMsg({ type: 'error', text: '保存订阅失败: ' + (data.error || '未知错误') });
+                    const data = await response.json().catch(() => ({}));
+                    setRedeemMsg({ type: 'error', text: '保存失败: ' + (data.error || response.status) });
+                    setSubStatus('');
                 }
             } else {
-                console.error('🔔 [Push] ❌ Missing subscription or userId', { subscription: !!subscription, userId: currentUserId });
                 setRedeemMsg({ type: 'error', text: '获取订阅失败' });
+                setSubStatus('');
             }
         } else {
-            console.log('🔔 [Push] Permission denied');
-            setRedeemMsg({ type: 'error', text: '需要授权通知权限' });
+            setRedeemMsg({ type: 'error', text: '请允许通知权限' });
+            setSubStatus('');
         }
     } catch (e) {
-        console.error('🔔 [Push] ❌ Notification setup error:', e);
-        setRedeemMsg({ type: 'error', text: '开启失败: ' + (e instanceof Error ? e.message : String(e)) });
+        console.error('🔔 [Push] Error:', e);
+        setRedeemMsg({ type: 'error', text: '开启异常: ' + (e instanceof Error ? e.message : '未知') });
+        setSubStatus('');
     } finally {
         setIsSubscribing(false);
     }
@@ -450,6 +457,11 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                 <h4 className="text-sm font-bold text-white">推送通知</h4>
                                 <div className="flex items-center gap-2">
                                     <p className="text-[10px] text-slate-500">获取股价异动与日报提醒</p>
+                                    {subStatus && (
+                                        <span className="text-[10px] text-indigo-400 font-bold animate-pulse">
+                                            [{subStatus}]
+                                        </span>
+                                    )}
                                     {/* 测试按钮 - 仅当通知已订阅时显示，最小化设计 */}
                                     {isSubscribed && (
                                         <button

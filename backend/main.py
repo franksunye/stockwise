@@ -116,8 +116,6 @@ if __name__ == "__main__":
         # 确保失败时返回非零退出码
         if not success:
             sys.exit(1)
-    elif args.realtime:
-        sync_spot_prices(get_stock_pool())
     else:
         run_full_sync(market_filter=args.market)
         
