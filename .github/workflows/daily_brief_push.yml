@@ -5,8 +5,8 @@ name: Daily Brief & Push (Global)
 # 启用定时: 取消下方 schedule 注释
 
 on:
-  # schedule:
-  #   - cron: '30 9 * * 1-5'  # CST 17:30
+  schedule:
+    - cron: '30 9 * * 1-5'  # CST 17:30 (M-F)
   workflow_dispatch:
 
 jobs:
@@ -36,14 +36,13 @@ jobs:
           # Tavily News
           TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
           
-          # LLM (Map Remote DeepSeek/Gemini to Local Env Vars)
-          # In CI, we use the remote provider defined in secrets
-          GEMINI_LOCAL_BASE_URL: ${{ secrets.DEEPSEEK_BASE_URL }}
-          LLM_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
-          GEMINI_LOCAL_MODEL: deepseek-chat 
+          # LLM (Hunyuan Lite)
+          BRIEF_MODEL_PROVIDER: hunyuan
+          HUNYUAN_API_KEY: ${{ secrets.HUNYUAN_API_KEY }}
+          
         run: |
           # Run the full daily pipeline (Batch Analysis + User Assembly)
-          python backend/engine/brief_generator.py
+          python -m backend.engine.brief_generator
 
       - name: Broadcast Notifications
         env:
