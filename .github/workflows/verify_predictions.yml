@@ -1,13 +1,14 @@
-name: Data Sync - Hong Kong (HK)
+name: Verify AI Predictions
 
-# 职责：仅负责港股数据同步，不包含 AI 分析
+# 职责：验证历史 AI 预测的准确性 (T+1 验证)
+# 这是一个通用组件，被 Daily Pipeline 调用
 
 on:
-  workflow_dispatch: # 支持手动触发
-  workflow_call:     # 支持被其他 workflow 调用
+  workflow_call:
+  workflow_dispatch:
 
 jobs:
-  sync-hk-data:
+  verify:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -24,13 +25,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
 
-      - name: Sync Hong Kong Market Data
+      - name: Run Global Verification
         env:
           PYTHONUNBUFFERED: "1"
           TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
           TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
-          WECOM_ROBOT_KEY: ${{ secrets.WECOM_ROBOT_KEY }}
         run: |
-          python -u backend/main.py --market HK
-
-
+          python -u backend/main.py --verify

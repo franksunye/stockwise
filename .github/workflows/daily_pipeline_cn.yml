@@ -14,6 +14,13 @@ jobs:
     uses: ./.github/workflows/data_sync_cn.yml
     secrets: inherit
 
+  # Step 2: 验证历史预测 (数据同步后立即执行)
+  verify:
+    needs: sync
+    if: success()
+    uses: ./.github/workflows/verify_predictions.yml
+    secrets: inherit
+
   # Step 2: AI 分析 (仅当数据同步成功后执行)
   analyze:
     needs: sync
