@@ -38,9 +38,10 @@ export function BriefDrawer({ isOpen, onClose, limitToSymbol }: BriefDrawerProps
     // Find the section that contains our symbol in the title line
     // Format is "Name (Symbol)"
     const match = sections.find(section => {
-      // Check first line only to avoid false positives in body text
-      const firstLine = section.split('\n')[0];
-      return firstLine.includes(`(${safeSymbol})`);
+      // Relaxed check: Just look for the symbol code. 
+      // This handles cases where format might be "(00700)" or "(00700.HK)" or "00700" 
+      // without strictly requiring surrounding parens, as long as it's in the title line.
+      return firstLine.includes(safeSymbol);
     });
 
     if (match) {
