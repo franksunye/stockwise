@@ -41,6 +41,7 @@ export function BriefDrawer({ isOpen, onClose, limitToSymbol }: BriefDrawerProps
       // Relaxed check: Just look for the symbol code. 
       // This handles cases where format might be "(00700)" or "(00700.HK)" or "00700" 
       // without strictly requiring surrounding parens, as long as it's in the title line.
+      const firstLine = section.split('\n')[0];
       return firstLine.includes(safeSymbol);
     });
 

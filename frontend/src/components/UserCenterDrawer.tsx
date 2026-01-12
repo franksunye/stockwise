@@ -428,7 +428,6 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                             <div>
                                 <h4 className="text-sm font-bold text-white">推送通知</h4>
                                 <div className="flex items-center gap-2">
-                                <div className="flex items-center gap-2">
                                     <p className="text-[10px] text-slate-500">获取股价异动与日报提醒</p>
                                     
                                     {/* 测试按钮 - 仅当通知已订阅时显示，最小化设计 */}
@@ -441,8 +440,8 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                             {testingPush ? '发送中...' : '发送测试'}
                                         </button>
                                     )}
-                                </div>
                             </div>
+                        </div>
                         </div>
                         <div>
                             {isSubscribed ? (
