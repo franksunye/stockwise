@@ -14,7 +14,7 @@ from fetchers import fetch_stock_data
 from utils import send_wecom_notification, format_volume
 from notifications import send_push_notification
 from engine.indicators import calculate_indicators
-from engine.validator import validate_previous_prediction
+# from engine.validator import validate_previous_prediction  <-- Decoupled
 from helpers import get_last_date, check_trading_day_skip
 from logger import logger
 
@@ -54,9 +54,9 @@ def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool =
     })
     df["date"] = pd.to_datetime(df["date"]).dt.strftime("%Y-%m-%d")
     
-    # 3. 验证昨日预测（仅在全量同步时执行，盘中价格不稳定不适合验证）
-    if period == "daily" and not df.empty and not is_realtime:
-        validate_previous_prediction(symbol, df.iloc[-1])
+    # 3. 验证昨日预测 (Validation Decoupled -> Run via --verify)
+    # if period == "daily" and not df.empty and not is_realtime:
+    #    validate_previous_prediction(symbol, df.iloc[-1])
 
     # 4. 判断是否需要更新
     if last_date_str and df["date"].max() < last_date_str:

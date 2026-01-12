@@ -31,4 +31,12 @@ jobs:
           TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
           WECOM_ROBOT_KEY: ${{ secrets.WECOM_ROBOT_KEY }}
         run: |
+        run: |
           python -u backend/main.py --market HK
+
+      - name: Verify Previous Predictions
+        env:
+            TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
+            TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+        run: |
+            python -u backend/main.py --verify

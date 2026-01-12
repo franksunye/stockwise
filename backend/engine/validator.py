@@ -12,7 +12,65 @@ def validate_previous_prediction(symbol: str, today_data: pd.Series):
     from database import execute_with_retry # Delayed import to avoid circular dep if any
     execute_with_retry(_validate_logic, 3, symbol, today_data)
 
-def _validate_logic(conn, symbol: str, today_data: pd.Series):
+
+def verify_all_pending():
+    """
+    Batch verify all pending predictions against the latest available price data.
+    This replaces the realtime hook in the sync loop.
+    """
+    from database import get_connection
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        
+        # 1. Find all symbols with Pending predictions
+        # We check both tables (v1 legacy and v2)
+        symbols_v1 = cursor.execute("SELECT DISTINCT symbol FROM ai_predictions WHERE validation_status='Pending'").fetchall()
+        symbols_v2 = cursor.execute("SELECT DISTINCT symbol FROM ai_predictions_v2 WHERE validation_status='Pending'").fetchall()
+        
+        # Flatten and unique
+        all_symbols = set([r[0] for r in symbols_v1] + [r[0] for r in symbols_v2])
+        
+        if not all_symbols:
+            logger.info("✨ No pending predictions to verify.")
+            return
+
+        logger.info(f"🔍 strict verification check for {len(all_symbols)} stocks...")
+        
+        count = 0
+        for symbol in all_symbols:
+            # 2. Get the LATEST price record for this symbol
+            # We treat the latest price as "Today" (T) and verify predictions made strictly BEFORE it (< T)
+            # This logic aligns with _validate_logic: "WHERE date < today_str"
+            
+            # Fetch as dict/series-like
+            price_row = cursor.execute("""
+                SELECT * FROM daily_prices 
+                WHERE symbol = ? 
+                ORDER BY date DESC LIMIT 1
+            """, (symbol,)).fetchone()
+            
+            if not price_row:
+                continue
+                
+            # Convert tuple to dict/series-like object for _validate_logic
+            # We need to know column names. 
+            # SQLite cursor.description provides column names.
+            cols = [d[0] for d in cursor.description]
+            today_data = dict(zip(cols, price_row))
+            
+            # 3. Reuse existing logic
+            _validate_logic(conn, symbol, today_data)
+            count += 1
+            
+        logger.info(f"✅ Batch verification completed for {count} stocks.")
+        
+    except Exception as e:
+        logger.error(f"❌ Batch verification failed: {e}")
+    finally:
+        conn.close()
+
+def _validate_logic(conn, symbol: str, today_data: dict):
     cursor = conn.cursor()
     today_str = today_data['date']
 

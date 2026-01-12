@@ -39,6 +39,7 @@ if __name__ == "__main__":
     parser.add_argument('--sync', action='store_true', help='执行行情同步 (配合 --symbol 使用)')
     parser.add_argument('--sync-meta', action='store_true', help='仅同步股票元数据')
     parser.add_argument('--analyze', action='store_true', help='执行 AI 预测分析 (独立任务)')
+    parser.add_argument('--verify', action='store_true', help='执行预测结果验证 (独立任务)')
     parser.add_argument('--symbol', type=str, help='指定股票代码')
     parser.add_argument('--market', type=str, choices=['CN', 'HK'], help='只同步/分析特定市场')
     parser.add_argument('--model', type=str, default='rule-engine', 
@@ -58,6 +59,11 @@ if __name__ == "__main__":
     
     # Register Analysis Models (Lazy Load)
     register_all_models()
+
+    if args.verify:
+        from engine.validator import verify_all_pending
+        verify_all_pending()
+        sys.exit(0)
     
     # 判断是否为回填模式
     is_backfill_mode = args.date or args.start_date or args.end_date or args.days or args.auto_fill
