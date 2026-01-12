@@ -9,8 +9,14 @@ import libsql
 import os
 from pathlib import Path
 
-from config import DB_PATH, TURSO_DB_URL, TURSO_AUTH_TOKEN
-from logger import logger
+try:
+    from backend.config import DB_PATH, TURSO_DB_URL, TURSO_AUTH_TOKEN
+except ImportError:
+    from config import DB_PATH, TURSO_DB_URL, TURSO_AUTH_TOKEN
+try:
+    from backend.logger import logger
+except ImportError:
+    from logger import logger
 import time
 
 # Turso/libSQL 瞬态错误模式列表

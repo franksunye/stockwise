@@ -7,7 +7,10 @@ import json
 import requests
 from typing import Optional, Dict, Any, Tuple
 import time
-from config import LLM_CONFIG
+try:
+    from backend.config import LLM_CONFIG
+except ImportError:
+    from config import LLM_CONFIG
 from .llm_tracker import get_tracker, estimate_tokens
 from .schema_normalizer import normalize_ai_response
 

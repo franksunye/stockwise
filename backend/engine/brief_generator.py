@@ -1,10 +1,12 @@
 """
 StockWise Brief Generator Module (Two-Phase Architecture)
+Version: 2.0 (Dual Pipeline + Trace Visualization)
 
 Phase 1: Stock-Level Analysis (Batch)
 - Iterates ALL unique stocks from user watchlists.
-- Fetches news (Tavily) & Analyzes (Local LLM) ONCE per stock.
+- Fetches news (Tavily) & Analyzes (LLM Strategy) ONCE per stock.
 - Caches result to `stock_briefs` table.
+- Logs FULL execution trace to `chain_execution_traces` for Admin UI visualization.
 
 Phase 2: User-Level Assembly
 - Assembles cached stock briefs into a personalized report.
@@ -13,38 +15,117 @@ Phase 2: User-Level Assembly
 import os
 import sys
 import asyncio
+import uuid
+import time
+import json
 from datetime import datetime
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, Any
 
 # Add backend to path for standalone execution
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from openai import OpenAI
 from tavily import TavilyClient
 
 from database import get_connection
 from logger import logger
+from config import TAVILY_API_KEY
+from engine.models.brief_strategies import StrategyFactory
 
-# --- Configuration ---
-TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
-tavily_client = TavilyClient(api_key=TAVILY_API_KEY) if TAVILY_API_KEY else None
+# --- Tracing Helper ---
+class DetailedTraceRecorder:
+    """
+    Records trace in the format compatible with 'chain_execution_traces'.
+    Designed to mimic ChainRunner's output structure so the Frontend works out-of-the-box.
+    """
+    def __init__(self, symbol: str, date: str, model_id: str):
+        self.trace_id = str(uuid.uuid4())
+        self.symbol = symbol
+        self.date = date
+        self.model_id = model_id
+        self.start_time = time.time()
+        
+        # Schema for chain_execution_traces
+        self.steps_executed = [] # List[str]
+        self.steps_details = []  # List[Dict] -> {step, duration_ms, tokens...}
+        self.chain_artifacts = {} # Dict[str, Any]
+        
+        self.total_tokens = 0
+        self.error = None
 
-LOCAL_LLM_URL = os.getenv("GEMINI_LOCAL_BASE_URL", "http://127.0.0.1:8045")
-if not LOCAL_LLM_URL.endswith("/v1"):
-    LOCAL_LLM_URL = f"{LOCAL_LLM_URL}/v1"
+    def record_step(self, step_name: str, duration_ms: int, input_data: Any, output_data: Any, meta: Dict = None):
+        """Record a step completion."""
+        self.steps_executed.append(step_name)
+        
+        # 1. Detail Metrics
+        step_meta = {
+            "step": step_name,
+            "duration_ms": duration_ms,
+            "status": "success",
+            "input_preview": str(input_data)[:50] if input_data else "",
+            "output_preview": str(output_data)[:50] if output_data else ""
+        }
+        if meta:
+            step_meta.update(meta)
+            self.total_tokens += meta.get("total_tokens", 0)
+            
+        self.steps_details.append(step_meta)
+        
+        # 2. Artifacts (Full Payload)
+        # Store prompt if available
+        if isinstance(input_data, dict) and 'prompt' in input_data:
+             self.chain_artifacts[f"{step_name}_prompt"] = input_data['prompt']
+        elif isinstance(input_data, str):
+             self.chain_artifacts[f"{step_name}_prompt"] = input_data
+             
+        # Store output
+        self.chain_artifacts[step_name] = output_data
+        # Legacy/Compatibility field for raw text
+        if isinstance(output_data, str):
+            self.chain_artifacts[f"{step_name}_raw"] = output_data
 
-LOCAL_LLM_KEY = os.getenv("LLM_API_KEY", "sk-stockwise")
-LOCAL_LLM_MODEL = os.getenv("GEMINI_LOCAL_MODEL", "gemini-3-flash")
+    def fail(self, step_name: str, error_msg: str):
+        self.error = (step_name, error_msg)
+        
+    def save(self):
+        """Save to DB."""
+        duration_ms = int((time.time() - self.start_time) * 1000)
+        status = 'failed' if self.error else 'success'
+        error_step = self.error[0] if self.error else None
+        error_reason = self.error[1] if self.error else None
+        
+        conn = get_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute("""
+                INSERT INTO chain_execution_traces 
+                (trace_id, symbol, date, model_id, strategy_name, steps_executed, steps_details, 
+                 chain_artifacts, total_duration_ms, total_tokens, status, error_step, error_reason)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                self.trace_id, self.symbol, self.date, self.model_id, 
+                "daily_brief", # Fixed strategy name for filtering
+                json.dumps(self.steps_executed),
+                json.dumps(self.steps_details),
+                json.dumps(self.chain_artifacts, ensure_ascii=False),
+                duration_ms, self.total_tokens, status, error_step, error_reason
+            ))
+            conn.commit()
+            logger.debug(f"📝 [Trace] Saved chain trace {self.trace_id} for {self.symbol}")
+        except Exception as e:
+            logger.error(f"❌ Failed to save trace: {e}")
+        finally:
+            conn.close()
 
-llm_client = OpenAI(api_key=LOCAL_LLM_KEY, base_url=LOCAL_LLM_URL)
-
+# --- Logic Impl ---
 
 async def fetch_news_for_stock(symbol: str, stock_name: str) -> str:
     """Fetch news using Tavily."""
-    if not tavily_client:
+    if not TAVILY_API_KEY:
         return "News unavailable (Config Error)."
-        
-    logger.info(f"🔎 [Hunter] Fetching news for {symbol} ({stock_name})...")
+    
+    tavily_client = TavilyClient(api_key=TAVILY_API_KEY)
+    
+    # logger.info(f"🔎 [Hunter] Fetching news for {symbol} ({stock_name})...")
     try:
         query = f"latest financial news events for {symbol} ({stock_name}) stock last 24 hours earning reports regulatory changes"
         response = await asyncio.to_thread(
@@ -73,10 +154,27 @@ async def fetch_news_for_stock(symbol: str, stock_name: str) -> str:
         return f"News retrieval failed."
 
 
-async def analyze_stock_context(symbol: str, stock_name: str, news: str, technical_data: Dict) -> str:
-    """Analyze stock using Local LLM (Chinese Output) - The Reporter role."""
-    logger.info(f"🧠 [Reporter] Generating brief for {symbol}...")
+async def analyze_stock_context(
+    symbol: str, 
+    stock_name: str, 
+    news: str, 
+    technical_data: Dict, 
+    date_str: str,
+    strategy_provider: str
+) -> str:
+    """Analyze stock using the selected Strategy."""
     
+    # Init Strategy
+    strategy = StrategyFactory.get_strategy(strategy_provider)
+    model_id = f"brief-{strategy_provider}"
+    
+    # Start Trace
+    recorder = DetailedTraceRecorder(symbol, date_str, model_id)
+    
+    # 1. Record Step: Search (Already done, but we record the input/output here)
+    recorder.record_step("search", 0, {"query": "latest news"}, news)
+
+    # 2. Prepare Prompt
     # System prompt: Role - Financial Columnist (Narrative > Data)
     system_prompt = """你是一位 StockWise 的首席财经主笔。你的目标是编写一份**通俗易懂、聚焦市场叙事**的个股日报。
 
@@ -88,7 +186,7 @@ async def analyze_stock_context(symbol: str, stock_name: str, news: str, technic
 3. **AI 观点自然融入**：将 AI 的信号（Bullish/Bearish）转化为对趋势的定性描述（如"上涨趋势稳固"、"短期面临调整压力"），不要提及"AI 信号"这个词。
 4. **说人话**：让没有金融背景的用户也能一眼看懂是"好"还是"坏"。"""
     
-    # Build hard data section
+    # Build data description
     signal = technical_data.get('signal', 'Side')
     confidence = technical_data.get('confidence', 0)
     conf_pct = int(confidence * 100) if confidence <= 1 else int(confidence)
@@ -97,7 +195,6 @@ async def analyze_stock_context(symbol: str, stock_name: str, news: str, technic
         f"- AI 信号: {signal} (置信度 {conf_pct}%)",
     ]
     
-    # Price data
     if technical_data.get('close'):
         change = technical_data.get('change_percent', 0)
         change_str = f"+{change:.2f}%" if change >= 0 else f"{change:.2f}%"
@@ -106,36 +203,19 @@ async def analyze_stock_context(symbol: str, stock_name: str, news: str, technic
     # Key levels
     support = technical_data.get('support_price')
     pressure = technical_data.get('pressure_price')
-    if support or pressure:
-        levels = []
-        if support: levels.append(f"支撑位 {support:.2f}")
-        if pressure: levels.append(f"压力位 {pressure:.2f}")
-        hard_data_lines.append(f"- 关键价位: {' | '.join(levels)}")
+    levels = []
+    if support: levels.append(f"支撑位 {support:.2f}")
+    if pressure: levels.append(f"压力位 {pressure:.2f}")
+    if levels: hard_data_lines.append(f"- 关键价位: {' | '.join(levels)}")
     
-    # Technical indicators
-    rsi = technical_data.get('rsi')
-    kdj_k = technical_data.get('kdj_k')
-    macd = technical_data.get('macd')
-    
-    indicators = []
-    if rsi is not None: indicators.append(f"RSI={rsi:.1f}")
-    if kdj_k is not None: 
-        kdj_d = technical_data.get('kdj_d', 0)
-        indicators.append(f"KDJ(K={kdj_k:.0f}/D={kdj_d:.0f})")
-    if macd is not None: indicators.append(f"MACD={macd:.3f}")
-    if indicators:
-        hard_data_lines.append(f"- 技术指标: {' | '.join(indicators)}")
-    
-    hard_data_section = "\n".join(hard_data_lines)
-    
-    # AI Reasoning section (from Analyst)
+    # AI Reasoning section
     ai_reasoning = technical_data.get('ai_reasoning', '')
     reasoning_section = ai_reasoning[:500] if ai_reasoning else "（无分析师推理记录）"
     
     user_prompt = f"""Subject: {symbol} ({stock_name})
 
 [硬数据支撑 - 仅供你参考，作为"隐性逻辑"，不要直接展示数据]
-{hard_data_section}
+{chr(10).join(hard_data_lines)}
 
 [分析师推理 - 供参考逻辑]
 {reasoning_section}
@@ -150,33 +230,41 @@ async def analyze_stock_context(symbol: str, stock_name: str, news: str, technic
    - 结合股价表现，用自然的语言描述当前趋势（基于 AI 信号和技术面）。
    - **禁止**出现具体技术指标名称和数值。
 
-2. **核心新闻 (附出处)** (最多3条，格式：**[标题]**：摘要。[出处链接](URL))
+2. **核心新闻 (附出处)** (最多3条，格式：**[中文标题]**：中文摘要。[出处链接](URL))
+   - **必须**将原始内容（包括英文标题和内容）翻译为流畅的中文。
    - 如果没有重大新闻，此部分显示"今日无重大公开新闻"，通过技术面形态略作补充。
 
 输出语言：专业、流畅、有温度的中文。"""
-    
+
+    # 3. Execute Step: Synthesis
+    start_ts = time.time()
     try:
-        response = await asyncio.to_thread(
-            llm_client.chat.completions.create,
-            model=LOCAL_LLM_MODEL,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt},
-            ],
-            temperature=0.3,
-            stream=False
-        )
-        return response.choices[0].message.content
+        result = await strategy.generate_brief(system_prompt, user_prompt)
+        
+        duration = int((time.time() - start_ts) * 1000)
+        content = result["content"]
+        
+        # Record success
+        recorder.record_step("synthesis", duration, 
+                             {"prompt": user_prompt, "system": system_prompt}, 
+                             content, 
+                             meta=result["usage"])
+        
+        recorder.save()
+        return content
+        
     except Exception as e:
-        logger.error(f"❌ [Analyst] LLM Error: {e}")
-        return f"Analysis unavailable (LLM Error)."
+        duration = int((time.time() - start_ts) * 1000)
+        logger.error(f"❌ Brief Generation Failed: {e}")
+        recorder.fail("synthesis", str(e))
+        recorder.save()
+        return "Brief generation failed."
 
 
 # --- Phase 1: Stock-Level Batch Analysis ---
 async def generate_stock_briefs_batch(date_str: str, specific_symbols: List[str] = None):
     """
     Phase 1: Analyze unique stocks and cache results in `stock_briefs`.
-    If specific_symbols is provided, only process those (useful for on-demand).
     """
     conn = get_connection()
     try:
@@ -188,7 +276,6 @@ async def generate_stock_briefs_batch(date_str: str, specific_symbols: List[str]
             placeholders = ','.join(['?' for _ in specific_symbols])
             cursor.execute(f"SELECT symbol, name FROM stock_meta WHERE symbol IN ({placeholders})", specific_symbols)
             targets = cursor.fetchall()
-            # If stock_meta missing, use symbol as name
             target_map = {t[0]: t[1] for t in targets}
             unique_stocks = [(s, target_map.get(s, s)) for s in specific_symbols]
         else:
@@ -232,50 +319,40 @@ async def generate_stock_briefs_batch(date_str: str, specific_symbols: List[str]
         price_data = {row[0]: {
             'close': row[1],
             'change_percent': row[2],
-            'rsi': row[3],
-            'kdj_k': row[4],
-            'kdj_d': row[5],
-            'kdj_j': row[6],
-            'macd': row[7],
-            'macd_signal': row[8]
+            'rsi': row[3]
         } for row in cursor.fetchall()}
 
         # 3. Process each stock
         processed_count = 0
+        provider = os.getenv("BRIEF_MODEL_PROVIDER", "hunyuan").lower() # Configurable provider
+        
         for symbol, stock_name in unique_stocks:
             # Check cache first
             cursor.execute("SELECT 1 FROM stock_briefs WHERE symbol = ? AND date = ?", (symbol, date_str))
-            if cursor.fetchone():
-                logger.info(f"⏭️ [Skip] {symbol} already analyzed for {date_str}.")
-                continue
+#            if cursor.fetchone():
+#                 logger.info(f"⏭️ [Skip] {symbol} already analyzed for {date_str}.")
+#                 continue
 
             # Fetch & Analyze
             logger.info(f"⚡ Processing {symbol} ({processed_count + 1}/{len(unique_stocks)})...")
             
-            news = await fetch_news_for_stock(symbol, stock_name)
+            news_task = fetch_news_for_stock(symbol, stock_name)
+            news = await news_task
             
             pred = predictions.get(symbol, {})
             prices = price_data.get(symbol, {})
             
             tech_data = {
-                # From AI predictions
                 'signal': pred.get('signal', 'Side'),
                 'confidence': pred.get('confidence', 0),
                 'ai_reasoning': pred.get('ai_reasoning', ''),
                 'support_price': pred.get('support_price'),
                 'pressure_price': pred.get('pressure_price'),
-                # From daily_prices
                 'close': prices.get('close'),
                 'change_percent': prices.get('change_percent'),
-                'rsi': prices.get('rsi'),
-                'kdj_k': prices.get('kdj_k'),
-                'kdj_d': prices.get('kdj_d'),
-                'kdj_j': prices.get('kdj_j'),
-                'macd': prices.get('macd'),
-                'macd_signal': prices.get('macd_signal'),
             }
 
-            analysis = await analyze_stock_context(symbol, stock_name, news, tech_data)
+            analysis = await analyze_stock_context(symbol, stock_name, news, tech_data, date_str, provider)
 
             # Store in DB
             cursor.execute("""
@@ -406,9 +483,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--user", help="Run Phase 2 for specific user only")
     parser.add_argument("--date", help="Date YYYY-MM-DD")
+    parser.add_argument("--provider", help="Override LLM Provider (gemini/hunyuan)", default=None)
     args = parser.parse_args()
     
     target_date = args.date or datetime.now().strftime("%Y-%m-%d")
+    
+    if args.provider:
+        os.environ["BRIEF_MODEL_PROVIDER"] = args.provider
     
     if args.user:
         # Test Mode: Ensure stocks for this user are analyzed, then assemble

@@ -1,7 +1,10 @@
 import os
 from pathlib import Path
 from datetime import timedelta, timezone
-from logger import logger
+try:
+    from backend.logger import logger
+except ImportError:
+    from logger import logger
 
 # 时区配置
 BEIJING_TZ = timezone(timedelta(hours=8))
@@ -58,6 +61,7 @@ SYNC_CONFIG = {
 # 4. API 配置
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 WECOM_ROBOT_KEY = os.getenv("WECOM_ROBOT_KEY")
+TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
 
 # 本地/云端 LLM 配置
 LLM_PROVIDER = os.getenv("LLM_PROVIDER", "openai").lower() # gemini, deepseek, openai, custom

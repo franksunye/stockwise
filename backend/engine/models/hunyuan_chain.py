@@ -3,10 +3,16 @@ import json
 from loguru import logger
 
 from .base import BasePredictionModel
-from engine.chain.runner import ChainRunner
-from engine.chain.step_factory import StepFactory
-from config import CHAIN_STRATEGIES
-from engine.llm_client import LLMClient
+try:
+    from backend.engine.chain.runner import ChainRunner
+    from backend.engine.chain.step_factory import StepFactory
+    from backend.config import CHAIN_STRATEGIES
+    from backend.engine.llm_client import LLMClient
+except ImportError:
+    from engine.chain.runner import ChainRunner
+    from engine.chain.step_factory import StepFactory
+    from config import CHAIN_STRATEGIES
+    from engine.llm_client import LLMClient
 
 class HunyuanChainModel(BasePredictionModel):
     """

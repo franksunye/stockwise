@@ -27,8 +27,10 @@ from utils import send_wecom_notification
 from sync.prices import process_stock_period, run_full_sync
 from sync.realtime import sync_spot_prices
 from analysis.runner import run_ai_analysis
+from analysis.runner import run_ai_analysis
 from analysis.backfill import run_ai_analysis_backfill
 from logger import logger
+from engine import register_all_models
 
 
 if __name__ == "__main__":
@@ -53,6 +55,9 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
     init_db()
+    
+    # Register Analysis Models (Lazy Load)
+    register_all_models()
     
     # 判断是否为回填模式
     is_backfill_mode = args.date or args.start_date or args.end_date or args.days or args.auto_fill
