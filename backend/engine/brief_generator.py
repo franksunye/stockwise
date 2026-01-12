@@ -470,12 +470,11 @@ async def run_daily_pipeline(date_str: str = None):
     finally:
         conn.close()
     
-    # 3. Phase 3: Send personalized push notifications
-    from notifications import send_personalized_daily_report
-    logger.info(f"📤 [Phase 3] Sending personalized push notifications for {date_str}...")
-    send_personalized_daily_report(date_str)
+    # 3. Notification Phase Copuled? NO.
+    # Notifications should be triggered separately (e.g., via GitHub Actions step or separate cron).
+    # This ensures "Generation" and "Delivery" are decoupled.
     
-    logger.info("🎉 Daily Pipeline Completed!")
+    logger.info("🎉 Daily Pipeline Completed! Check 'daily_briefs' table.")
 
 
 if __name__ == "__main__":
