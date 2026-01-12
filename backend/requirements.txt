@@ -6,3 +6,4 @@ google-genai
 requests
 pypinyin
 loguru
+tavily-python

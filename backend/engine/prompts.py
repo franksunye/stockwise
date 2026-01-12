@@ -78,21 +78,21 @@ def fetch_full_analysis_context(symbol: str, as_of_date: str = None) -> Dict[str
     """, (symbol, analysis_date))
     monthly_history = [dict(zip(["date", "open", "high", "low", "close", "change_percent", "volume", "ma20", "rsi", "macd_hist"], m)) for m in cursor.fetchall()]
 
-    # 4. AI History (last 5)
+    # 4. AI History (last 5 - from V2 Primary)
     cursor.execute("""
-        SELECT date, signal, confidence, ai_reasoning, validation_status, actual_change
-        FROM ai_predictions 
-        WHERE symbol = ? AND validation_status != 'Pending' AND date < ?
+        SELECT date, signal, confidence, ai_reasoning, validation_status, actual_change, model_id
+        FROM ai_predictions_v2 
+        WHERE symbol = ? AND is_primary = 1 AND validation_status != 'Pending' AND date < ?
         ORDER BY date DESC LIMIT 5
     """, (symbol, analysis_date))
-    ai_history = [dict(zip(["date", "signal", "confidence", "ai_reasoning", "validation_status", "actual_change"], a)) for a in cursor.fetchall()]
+    ai_history = [dict(zip(["date", "signal", "confidence", "ai_reasoning", "validation_status", "actual_change", "model"], a)) for a in cursor.fetchall()]
 
     # 5. Accuracy Stats
     cursor.execute("""
         SELECT COUNT(*) as total,
                SUM(CASE WHEN validation_status = 'Correct' THEN 1 ELSE 0 END) as correct
-        FROM ai_predictions 
-        WHERE symbol = ? AND validation_status != 'Pending' AND date < ?
+        FROM ai_predictions_v2 
+        WHERE symbol = ? AND is_primary = 1 AND validation_status != 'Pending' AND date < ?
     """, (symbol, analysis_date))
     stats_row = cursor.fetchone()
     total_predictions = stats_row[0] if stats_row else 0
@@ -237,7 +237,12 @@ def prepare_stock_analysis_prompt(symbol: str, as_of_date: str = None):
     { "step": "volume", "data": "成交量显著放大，高位换手率增高", "conclusion": "筹码松动风险" },
     { "step": "level", "data": "股价远离布林上轨，乖离率过大", "conclusion": "超买需回归" },
     { "step": "fundamentals", "data": "市盈率为负，业绩不支持高估值", "conclusion": "基本面风险" },
+    { "step": "news_impact", "data": "公司发布股价异动公告，警示炒作风险", "conclusion": "事件风险" },
     { "step": "decision", "data": "技术超买叠加基本面风险，风险大于机会", "conclusion": "观望" }
+  ],
+  "news_analysis": [
+    "2025年12月28日，公司发布股价异动公告，警示非理性炒作风险。",
+    "公告澄清前三季度净利润亏损，商业航天业务占比不足1%。"
   ],
   "tactics": {
     "holding": [{"priority": "P1", "action": "止盈/减仓", "trigger": "跌破MA5", "reason": "获利回吐压力大"}],

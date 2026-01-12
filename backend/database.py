@@ -145,7 +145,7 @@ def init_db():
         cursor.execute("CREATE TABLE IF NOT EXISTS invitation_codes (code TEXT PRIMARY KEY, type TEXT NOT NULL, duration_days INTEGER DEFAULT 30, is_used BOOLEAN DEFAULT 0, used_by_user_id TEXT, used_at TIMESTAMP, created_at TIMESTAMP DEFAULT (datetime('now', '+8 hours')))")
 
         # 4. AI & Traces
-        cursor.execute("CREATE TABLE IF NOT EXISTS ai_predictions (symbol TEXT NOT NULL, date TEXT NOT NULL, target_date TEXT NOT NULL, signal TEXT, confidence REAL, support_price REAL, ai_reasoning TEXT, validation_status TEXT DEFAULT 'Pending', actual_change REAL, model TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (symbol, date))")
+        # cursor.execute("CREATE TABLE IF NOT EXISTS ai_predictions ...") - DEPRECATED
         cursor.execute("CREATE TABLE IF NOT EXISTS llm_traces (trace_id TEXT PRIMARY KEY, symbol TEXT, model TEXT, system_prompt TEXT, user_prompt TEXT, response_raw TEXT, response_parsed TEXT, input_tokens INTEGER DEFAULT 0, output_tokens INTEGER DEFAULT 0, total_tokens INTEGER DEFAULT 0, latency_ms INTEGER DEFAULT 0, status TEXT DEFAULT 'pending', error_message TEXT, retry_count INTEGER DEFAULT 0, created_at TIMESTAMP DEFAULT (datetime('now', '+8 hours')))")
         
         # 5. Push Subs

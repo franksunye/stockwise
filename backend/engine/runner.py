@@ -141,25 +141,8 @@ class PredictionRunner:
             except Exception as e:
                 logger.error(f"Failed to save V2 result for {model_id}: {e}")
 
-        # 5. Compatibility: Sync Primary to Legacy Table (ai_predictions)
-        if primary_pred:
-            try:
-                cursor.execute("""
-                    INSERT OR REPLACE INTO ai_predictions 
-                    (symbol, date, target_date, signal, confidence, support_price, ai_reasoning, model, created_at, updated_at)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now', '+8 hours'), datetime('now', '+8 hours'))
-                """, (
-                    symbol, date, 
-                    primary_pred.get('target_date'),
-                    primary_pred.get('signal'),
-                    primary_pred.get('confidence'),
-                    primary_pred.get('support_price'),
-                    primary_pred.get('reasoning'),
-                    primary_pred['model_id']
-                ))
-                logger.debug(f"✅ Synced primary ({primary_pred['model_id']}) to legacy table.")
-            except Exception as e:
-                logger.error(f"Failed to sync to legacy table: {e}")
+        # 5. Compatibility: Sync Primary to Legacy Table (ai_predictions) - REMOVED
+        # Data is now fully managed in ai_predictions_v2
 
         conn.commit()
         conn.close()
