@@ -57,7 +57,23 @@ if __name__ == "__main__":
     # 判断是否为回填模式
     is_backfill_mode = args.date or args.start_date or args.end_date or args.days or args.auto_fill
     
-    if args.sync_meta:
+    is_backfill_mode = args.date or args.start_date or args.end_date or args.days or args.auto_fill
+    
+    if args.realtime:
+        # Realtime Sync: 仅同步日线数据 (盘中)
+        target_stocks = []
+        if args.symbol:
+            target_stocks = [args.symbol]
+        else:
+            all_stocks = get_stock_pool()
+            if args.market:
+                # 简单根据代码长度过滤 (HK: 5位, CN: 6位)
+                target_stocks = [s for s in all_stocks if (args.market == 'HK' and len(s) == 5) or (args.market == 'CN' and len(s) != 5)]
+            else:
+                target_stocks = all_stocks
+        
+        sync_spot_prices(target_stocks)
+    elif args.sync_meta:
         sync_stock_meta()
         # 同步完基础列表后，顺便更新一波公司概况 (每次20个)
         sync_profiles(limit=20)
