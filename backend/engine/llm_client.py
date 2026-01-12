@@ -13,6 +13,10 @@ except ImportError:
     from config import LLM_CONFIG
 from .llm_tracker import get_tracker, estimate_tokens
 from .schema_normalizer import normalize_ai_response
+try:
+    from backend.logger import logger
+except ImportError:
+    from logger import logger
 
 import asyncio
 
@@ -169,6 +173,14 @@ class LLMClient:
             "temperature": temperature,
             "max_tokens": max_tokens,
         }
+
+        # [Guardrail] Explicitly log the model being used to detect config overrides
+        used_model = payload["model"]
+        print(f"   🤖 [LLM] Sending request to {self.provider.upper()} using model: {used_model}")
+
+        # [Cost Alert] Warn if expensive reasoning model is detected for DeepSeek
+        if self.provider == "deepseek" and "reasoner" in used_model:
+             logger.warning(f"⚠️  DETECTED EXPENSIVE REASONING MODEL: {used_model}. Please verify costs!")
         
         headers = {
             "Content-Type": "application/json",

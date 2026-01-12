@@ -26,11 +26,10 @@ from fetchers import sync_stock_meta, sync_profiles
 from utils import send_wecom_notification
 from sync.prices import process_stock_period, run_full_sync
 from sync.realtime import sync_spot_prices
-from analysis.runner import run_ai_analysis
-from analysis.runner import run_ai_analysis
-from analysis.backfill import run_ai_analysis_backfill
-from logger import logger
-from engine import register_all_models
+from backend.analysis.runner import run_ai_analysis
+from backend.analysis.backfill import run_ai_analysis_backfill
+from backend.logger import logger
+from backend.engine import register_all_models
 
 
 if __name__ == "__main__":

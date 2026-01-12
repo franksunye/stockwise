@@ -91,9 +91,15 @@ class OpenAIAdapter(BasePredictionModel):
                     )
                 )
             except Exception as e:
-                last_error = f"Client Error: {str(e)}"
+                error_str = str(e)
+                last_error = f"Client Error: {error_str}"
                 logger.error(f"LLM Client execution failed (attempt {attempt + 1}/{max_retries + 1}): {e}")
                 
+                # Check retry policy
+                if not self._should_retry(error_str):
+                     logger.error(f"🛑 Fatal error detected. Aborting retries. ({error_str[:100]}...)")
+                     return self._error_result(f"Fatal Error: {error_str}")
+
                 # Record Failure Trace IMMEDIATELY
                 tracker.set_status("error", last_error)
                 tracker.end_trace()
@@ -113,6 +119,11 @@ class OpenAIAdapter(BasePredictionModel):
                 last_error = meta.get("error", "Empty response from LLM")
                 logger.error(f"LLM request failed (attempt {attempt + 1}/{max_retries + 1}): {last_error}")
                 
+                # Check retry policy for non-exception errors
+                if not self._should_retry(str(last_error)):
+                    logger.error(f"🛑 Fatal error detected. Aborting retries.")
+                    return self._error_result(f"Fatal Error: {last_error}")
+
                 # Record Failure Trace
                 tracker.set_status("error", last_error)
                 tracker.end_trace()
@@ -193,4 +204,33 @@ class OpenAIAdapter(BasePredictionModel):
             "reasoning": reason, 
             "validation_status": "Error"
         }
+
+    def _should_retry(self, error_msg: str) -> bool:
+        """
+        Determine if the error is transient and worth retrying.
+        Industry Standard Policies:
+        - Retry: 429 (Rate Limit), 5xx (Server/Gateway), Connection Errors, Timeouts
+        - Abort: 401 (Auth), 403 (Permission), 400 (Bad Request), 404 (Not Found), 422 (Validation)
+        """
+        error_msg = str(error_msg).lower()
+        
+        # 1. Non-Retryable / Fatal Errors
+        fatal_indicators = [
+            "401", "authentication", "unauthorized", # Auth Error
+            "403", "forbidden",                      # Permission Error
+            "404", "not found",                      # Model/Path Error
+            "400", "bad request",                    # Application Error (e.g. context too long)
+            "422", "unprocessable",                  # Validation Error
+            "context_length_exceeded"                # Token Limit Exceeded
+        ]
+        
+        for fatal in fatal_indicators:
+            if fatal in error_msg:
+                return False
+                
+        # 2. Retryable Errors (Implicitly anything else, but essentially:)
+        # - 429 (Too Many Requests)
+        # - 500, 502, 503, 504 (Server Errors)
+        # - ConnectionError, Timeout
+        return True
 

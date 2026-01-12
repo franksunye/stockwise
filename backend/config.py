@@ -71,6 +71,8 @@ DEFAULTS = {
     "deepseek": {
         "api_key": os.getenv("DEEPSEEK_API_KEY"),
         "base_url": os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com/v1"),
+        # 'deepseek-chat' (V3) is standard cost-effective mode.
+        # 'deepseek-reasoner' (R1) is Chain-of-Thought mode with higher reasoning costs.
         "model": os.getenv("DEEPSEEK_MODEL", "deepseek-chat"),
     },
     "gemini": {

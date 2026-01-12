@@ -104,7 +104,7 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool =
             # 生成预测 (New Multi-Model Engine)
             # Use local import to avoid circular dependency issues if any
             try:
-                from engine.runner import PredictionRunner
+                from backend.engine.runner import PredictionRunner
                 import asyncio
                 
                 runner = PredictionRunner(model_filter=model_filter, force=force)
