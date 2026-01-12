@@ -2,7 +2,7 @@ akshare
 pandas
 pandas-ta-classic
 libsql
-google-generativeai
+google-genai
 requests
 pypinyin
 loguru

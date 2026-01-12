@@ -88,29 +88,27 @@ class LLMClient:
         self.timeout = timeout
         
         # Gemini Native Client 缓存 (用于云端 Gemini)
-        self._gemini_model = None
+        self._gemini_client = None
         if self.provider == "gemini" and self.api_key:
             try:
-                import google.generativeai as genai
-                genai.configure(api_key=self.api_key)
-                self._gemini_model = genai.GenerativeModel(self.model)
+                from google import genai
+                self._gemini_client = genai.Client(api_key=self.api_key)
             except Exception as e:
-                print(f"⚠️ 初始化 Gemini SDK 失败: {e}")
+                print(f"⚠️ 初始化 Gemini V2 SDK 失败: {e}")
         
         # Gemini Local Client 缓存 (用于本地代理)
-        self._gemini_local_model = None
+        self._gemini_local_client = None
         if self.provider == "gemini_local" and self.api_key:
             try:
-                import google.generativeai as genai
-                genai.configure(
+                from google import genai
+                # V2 SDK support custom endpoint via http_options
+                self._gemini_local_client = genai.Client(
                     api_key=self.api_key,
-                    transport='rest',
-                    client_options={'api_endpoint': self.base_url}
+                    http_options={'base_url': self.base_url}
                 )
-                self._gemini_local_model = genai.GenerativeModel(self.model)
-                print(f"✅ Gemini Local SDK 初始化成功 -> {self.base_url}")
+                print(f"✅ Gemini Local V2 SDK 初始化成功 -> {self.base_url}")
             except Exception as e:
-                print(f"⚠️ 初始化 Gemini Local SDK 失败: {e}")
+                print(f"⚠️ 初始化 Gemini Local V2 SDK 失败: {e}")
         
     def is_available(self) -> bool:
         """检查 LLM 服务是否可用"""
@@ -132,9 +130,9 @@ class LLMClient:
         max_tokens: int = 4096
     ) -> Tuple[Optional[str], Dict[str, Any]]:
         """发送聊天请求"""
-        if self.provider == "gemini" and self._gemini_model:
+        if self.provider == "gemini" and self._gemini_client:
             return self._chat_gemini(messages, temperature, max_tokens)
-        elif self.provider == "gemini_local" and self._gemini_local_model:
+        elif self.provider == "gemini_local" and self._gemini_local_client:
             return self._chat_gemini_local(messages, temperature, max_tokens)
         
         return self._chat_openai_compatible(messages, model, temperature, max_tokens)
@@ -225,58 +223,58 @@ class LLMClient:
     ) -> Tuple[Optional[str], Dict[str, Any]]:
         meta = {"input_tokens": 0, "output_tokens": 0, "total_tokens": 0, "latency_ms": 0, "error": None}
         try:
-            # 格式化 messages 为 Gemini 格式
-            import google.generativeai as genai
-            
             # 提取 system 及 history
             system_msg = ""
             history = []
+            
+            # 格式转换：Role 必须是 'user' 或 'model'
+            # System message 通过 config 传递
             for m in messages:
                 if m["role"] == "system":
                     system_msg = m["content"]
-                else:
-                    history.append({"role": "user" if m["role"] == "user" else "model", "parts": [m["content"]]})
+                elif m["role"] == "user":
+                    history.append({"role": "user", "parts": [{"text": m["content"]}]})
+                elif m["role"] == "assistant":
+                    history.append({"role": "model", "parts": [{"text": m["content"]}]})
             
-            # Gemini 1.5 需要 system_instruction
-            if system_msg:
-                model_inst = genai.GenerativeModel(self.model, system_instruction=system_msg)
-            else:
-                model_inst = self._gemini_model
-
+            client = self._gemini_client
             start_time = time.time()
-            # 最后一个作为 prompt，其余作为 history
-            last_user_msg = history.pop(-1)
-            chat = model_inst.start_chat(history=history or None)
             
-            response = chat.send_message(
-                last_user_msg["parts"][0],
-                generation_config=genai.types.GenerationConfig(
-                    temperature=temperature,
-                    max_output_tokens=max_tokens,
-                )
+            # 使用 V2 SDK 调用
+            # 注意: V2 SDK 的 Chat 接口略有不同，这里使用 models.generate_content 配合 history 实现单次调用
+            # 或者使用 chats.create
+            
+            # 简单起见，我们使用 generate_content (Stateless)
+            # 需要把 history 构造为 contents
+            # 最后一个作为 prompt? No, generate_content 接受完整列表
+            
+            contents = history # V2 contents format: list of Content or dict
+            
+            from google import genai
+            from google.genai import types
+            
+            config = types.GenerateContentConfig(
+                temperature=temperature,
+                max_output_tokens=max_tokens,
+                system_instruction=system_msg if system_msg else None
             )
+            
+            response = client.models.generate_content(
+                model=self.model,
+                contents=contents,
+                config=config
+            )
+            
             elapsed = time.time() - start_time
             meta["latency_ms"] = int(elapsed * 1000)
             
             content = response.text
             
-            # 提取 Token 使用情况 (Gemini 1.5+ SDK)
-            try:
-                usage = response.usage_metadata
-                meta["input_tokens"] = usage.prompt_token_count
-                meta["output_tokens"] = usage.candidates_token_count
-                meta["total_tokens"] = usage.total_token_count
-            except:
-                # 备选方案: 使用 SDK 计算 (稍微耗时)
-                try:
-                    meta["input_tokens"] = model_inst.count_tokens(messages).total_tokens
-                    meta["output_tokens"] = model_inst.count_tokens(content).total_tokens
-                    meta["total_tokens"] = meta["input_tokens"] + meta["output_tokens"]
-                except:
-                    # 最后退路: 字符估算
-                    meta["input_tokens"] = estimate_tokens(str(messages))
-                    meta["output_tokens"] = estimate_tokens(content)
-                    meta["total_tokens"] = meta["input_tokens"] + meta["output_tokens"]
+            # 提取 Token 使用情况
+            if response.usage_metadata:
+                meta["input_tokens"] = response.usage_metadata.prompt_token_count
+                meta["output_tokens"] = response.usage_metadata.candidates_token_count
+                meta["total_tokens"] = response.usage_metadata.total_token_count
             
             print(f"   🤖 GEMINI 响应成功 ({elapsed:.1f}s, {meta['total_tokens']} tokens)")
             return content, meta
@@ -292,61 +290,61 @@ class LLMClient:
         max_tokens: int = 4096
     ) -> Tuple[Optional[str], Dict[str, Any]]:
         """
-        通过本地代理调用 Gemini 协议 (Antigravity Tools)
-        使用 google-generativeai SDK，但 api_endpoint 指向本地服务
-        注意: 本地代理不支持 system_instruction，需要将 system 消息合并到 user 消息中
+        通过本地代理调用 Gemini V2 SDK
         """
         meta = {"input_tokens": 0, "output_tokens": 0, "total_tokens": 0, "latency_ms": 0, "error": None}
         try:
-            import google.generativeai as genai
-            
-            # 提取 system 及 history
-            # 注意: 本地代理不支持 system_instruction，我们将 system 消息合并到第一个 user 消息
+            # 构造内容
+            # 注意：如果本地代理还不支持 system_instruction, 需要手动合并
             system_msg = ""
-            history = []
+            contents = []
+            
             for m in messages:
-                if m["role"] == "system":
+                role = "user"
+                if m["role"] == "assistant": role = "model"
+                elif m["role"] == "system": 
                     system_msg = m["content"]
-                else:
-                    history.append({"role": "user" if m["role"] == "user" else "model", "parts": [m["content"]]})
+                    continue # merge later
+                
+                contents.append({"role": role, "parts": [{"text": m["content"]}]})
             
-            # 如果有 system 消息，合并到第一个 user 消息
-            if system_msg and history:
-                first_user_content = history[0]["parts"][0]
-                history[0]["parts"][0] = f"[系统指令] {system_msg}\n\n[用户消息] {first_user_content}"
+            # 手动合并 System Prompt 到第一个 User Message
+            if system_msg and contents:
+                 first_part = contents[0]["parts"][0]["text"]
+                 contents[0]["parts"][0]["text"] = f"[系统指令] {system_msg}\n\n[用户消息] {first_part}"
             
-            # 使用预配置的本地模型 (不使用 system_instruction)
-            model_inst = self._gemini_local_model
-
+            client = self._gemini_local_client
             start_time = time.time()
-            # 最后一个作为 prompt，其余作为 history
-            last_user_msg = history.pop(-1) if history else {"parts": [""]}
-            chat = model_inst.start_chat(history=history or None)
             
-            response = chat.send_message(
-                last_user_msg["parts"][0],
-                generation_config=genai.types.GenerationConfig(
-                    temperature=temperature,
-                    max_output_tokens=max_tokens,
-                )
+            from google import genai
+            from google.genai import types
+            
+            config = types.GenerateContentConfig(
+                temperature=temperature,
+                max_output_tokens=max_tokens
             )
+            
+            response = client.models.generate_content(
+                model=self.model,
+                contents=contents,
+                config=config
+            )
+            
             elapsed = time.time() - start_time
             meta["latency_ms"] = int(elapsed * 1000)
             
             content = response.text
-            
-            # 提取 Token 使用情况
-            try:
-                usage = response.usage_metadata
-                meta["input_tokens"] = usage.prompt_token_count
-                meta["output_tokens"] = usage.candidates_token_count
-                meta["total_tokens"] = usage.total_token_count
-            except:
-                # 本地代理可能不返回 usage，使用字符估算
+             
+            # Token Usage
+            if response.usage_metadata:
+                meta["input_tokens"] = response.usage_metadata.prompt_token_count
+                meta["output_tokens"] = response.usage_metadata.candidates_token_count
+                meta["total_tokens"] = response.usage_metadata.total_token_count
+            else:
                 meta["input_tokens"] = estimate_tokens(str(messages))
                 meta["output_tokens"] = estimate_tokens(content)
                 meta["total_tokens"] = meta["input_tokens"] + meta["output_tokens"]
-            
+                
             print(f"   🤖 GEMINI_LOCAL 响应成功 ({elapsed:.1f}s, {meta['total_tokens']} tokens)")
             return content, meta
         except Exception as e:

@@ -34,22 +34,21 @@ class GeminiLocalAdapter(BasePredictionModel):
         self.temperature = config.get("temperature", 0.7)
         
         # 初始化 Gemini SDK (指向本地代理)
-        self._model = None
+        self._client = None
         if self.api_key:
             try:
-                import google.generativeai as genai
-                genai.configure(
+                from google import genai
+                # V2 SDK support custom endpoint via http_options
+                self._client = genai.Client(
                     api_key=self.api_key,
-                    transport='rest',
-                    client_options={'api_endpoint': self.base_url}
+                    http_options={'base_url': self.base_url}
                 )
-                self._model = genai.GenerativeModel(self.model_name)
-                logger.info(f"✅ GeminiLocalAdapter 初始化成功 -> {self.base_url}")
+                logger.info(f"✅ GeminiLocalAdapter V2 初始化成功 -> {self.base_url}")
             except Exception as e:
-                logger.warning(f"⚠️ GeminiLocalAdapter 初始化失败: {e}")
+                logger.warning(f"⚠️ GeminiLocalAdapter V2 初始化失败: {e}")
         
     async def predict(self, symbol: str, date: str, data: Dict[str, Any]) -> Dict[str, Any]:
-        if not self.api_key or not self._model:
+        if not self.api_key or not self._client:
             logger.warning(f"Skipping {self.model_id}: Missing API Key ({self.api_key_env})")
             return None
 
@@ -163,49 +162,64 @@ class GeminiLocalAdapter(BasePredictionModel):
     
     async def _chat_gemini_local(self, system_prompt: str, user_prompt: str) -> Tuple[str, Dict[str, Any]]:
         """
-        通过 Gemini SDK 调用本地代理
-        注意: 本地代理不支持 system_instruction，需要将 system 消息合并到 user 消息
+        通过 Gemini V2 SDK 调用本地代理
         """
-        import google.generativeai as genai
-        
         meta = {"input_tokens": 0, "output_tokens": 0, "total_tokens": 0, "latency_ms": 0, "error": None}
         
-        # 合并 system 和 user prompt
-        combined_prompt = f"[系统指令] {system_prompt}\n\n[用户消息] {user_prompt}"
+        # 合并 system 和 user prompt (本地代理不支持 system_instruction)
+        # combined_prompt = f"[系统指令] {system_prompt}\n\n[用户消息] {user_prompt}"
+        # V2 SDK generic call usually takes 'contents'
+        
+        # We manually construct contents list
+        contents = [
+            {"role": "user", "parts": [{"text": f"[系统指令] {system_prompt}\n\n[用户消息] {user_prompt}"}]}
+        ]
         
         start_time = time.time()
         
-        # Run in thread pool to avoid blocking
-        loop = asyncio.get_event_loop()
-        response = await loop.run_in_executor(
-            None,
-            lambda: self._model.generate_content(
-                combined_prompt,
-                generation_config=genai.types.GenerationConfig(
-                    temperature=self.temperature,
-                    max_output_tokens=self.max_tokens,
-                )
-            )
-        )
-        
-        elapsed = time.time() - start_time
-        meta["latency_ms"] = int(elapsed * 1000)
-        
-        content = response.text
-        
-        # Token usage
         try:
-            usage = response.usage_metadata
-            meta["input_tokens"] = usage.prompt_token_count
-            meta["output_tokens"] = usage.candidates_token_count
-            meta["total_tokens"] = usage.total_token_count
-        except:
-            meta["input_tokens"] = estimate_tokens(combined_prompt)
-            meta["output_tokens"] = estimate_tokens(content)
-            meta["total_tokens"] = meta["input_tokens"] + meta["output_tokens"]
-        
-        logger.info(f"   🤖 GEMINI_LOCAL 响应成功 ({elapsed:.1f}s, {meta['total_tokens']} tokens)")
-        return content, meta
+            from google import genai
+            from google.genai import types
+            
+            config = types.GenerateContentConfig(
+                temperature=self.temperature,
+                max_output_tokens=self.max_tokens
+            )
+            
+            # Run in thread pool to avoid blocking
+            loop = asyncio.get_event_loop()
+            
+            def _call():
+                return self._client.models.generate_content(
+                    model=self.model_name,
+                    contents=contents,
+                    config=config
+                )
+
+            response = await loop.run_in_executor(None, _call)
+            
+            elapsed = time.time() - start_time
+            meta["latency_ms"] = int(elapsed * 1000)
+            
+            content = response.text
+             
+            # Token Usage
+            if response.usage_metadata:
+                meta["input_tokens"] = response.usage_metadata.prompt_token_count
+                meta["output_tokens"] = response.usage_metadata.candidates_token_count
+                meta["total_tokens"] = response.usage_metadata.total_token_count
+            else:
+                 # Local proxy fallback
+                meta["input_tokens"] = estimate_tokens(str(contents))
+                meta["output_tokens"] = estimate_tokens(content)
+                meta["total_tokens"] = meta["input_tokens"] + meta["output_tokens"]
+            
+            logger.info(f"   🤖 GEMINI_LOCAL 响应成功 ({elapsed:.1f}s, {meta['total_tokens']} tokens)")
+            return content, meta
+            
+        except Exception as e:
+            logger.error(f"Gemini Local Call Error: {e}")
+            raise e
         
     def _error_result(self, reason: str) -> Dict[str, Any]:
         return {
