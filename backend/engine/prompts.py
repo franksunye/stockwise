@@ -197,36 +197,82 @@ def prepare_stock_analysis_prompt(symbol: str, as_of_date: str = None):
 **历史准确率**: 累计预测 {ctx['accuracy']['total']} 次，准确率 **{ctx['accuracy']['rate']:.1f}%**
 """
 
-    rsi = data.get('rsi', 0)
-    rsi_status = "超买" if rsi > 70 else ("超卖" if rsi < 30 else "运行稳健")
+    # --- World-Class Technical Analysis Upgrade ---
     
-    # MACD 状态判断（增加趋势描述）
+    # 1. Trend Analysis (MA Confluence)
+    ma5, ma10, ma20, ma60 = data.get('ma5', 0), data.get('ma10', 0), data.get('ma20', 0), data.get('ma60', 0)
+    close = data.get('close', 0)
+    
+    if ma5 > ma10 > ma20:
+        ma_alignment = "短期多头排列 (MA5>10>20)"
+    elif ma5 < ma10 < ma20:
+        ma_alignment = "短期空头排列 (MA5<10<20)"
+    else:
+        ma_alignment = "均线纠缠震荡"
+        
+    if close > ma5:
+        price_status = "站上MA5"
+    elif close > ma20:
+        price_status = "回踩MA20"
+    else:
+        price_status = "跌破MA20"
+        
+    trend_summary = f"{ma_alignment}, 价格{price_status}"
+    if not ma60: trend_summary += " (MA60数据不足)"
+
+    # 2. Momentum Analysis (Triad: RSI + MACD + KDJ)
+    # RSI
+    rsi = data.get('rsi', 50)
+    if rsi > 70: rsi_desc = "超买区"
+    elif rsi < 30: rsi_desc = "超卖区"
+    else: rsi_desc = "中性区"
+    
+    # KDJ
+    k, d, j = data.get('kdj_k', 50), data.get('kdj_d', 50), data.get('kdj_j', 50)
+    kdj_desc = "J值触顶" if j > 100 else ("J值触底" if j < 0 else ("金叉向上" if k > d else "死叉向下"))
+    
+    # MACD (Existing logic optimized)
     macd_hist = data.get('macd_hist', 0)
     cross_type = "金叉" if macd_hist > 0 else "死叉"
-    
-    # 获取前一日的 macd_hist 来判断趋势
+    # Trend detection from history
     daily_history = ctx.get("daily_prices", [])
-    # daily_prices 是按时间正序排列（oldest first），最后一个是最新的
     if len(daily_history) >= 2:
         prev_hist = daily_history[-2].get('macd_hist', 0) or 0
         curr_hist = macd_hist or 0
-        
         if curr_hist > prev_hist:
-            # 柱状图在变大（向上）
-            if curr_hist < 0:
-                trend_desc = "快线上行收敛中"  # 死叉但在好转
-            else:
-                trend_desc = "多头动能增强"  # 金叉且在加强
+            macd_trend = "快线上行收敛" if curr_hist < 0 else "多头动能增强"
         else:
-            # 柱状图在变小（向下）
-            if curr_hist > 0:
-                trend_desc = "多头动能减弱"  # 金叉但在衰减
-            else:
-                trend_desc = "空头动能加剧"  # 死叉且在恶化
+            macd_trend = "多头动能减弱" if curr_hist > 0 else "空头动能发散"
     else:
-        trend_desc = "多头" if macd_hist > 0 else "空头"
+        macd_trend = "动能不明"
+        
+    momentum_summary = f"RSI({rsi:.1f}){rsi_desc}, MACD{cross_type}({macd_trend}), KDJ{kdj_desc}"
+
+    # 3. Position Analysis (Bollinger Bands)
+    b_up = data.get('boll_upper', 0)
+    b_mid = data.get('boll_mid', 0)
+    b_low = data.get('boll_lower', 0)
     
-    macd_status = f"{cross_type}，{trend_desc}"
+    boll_desc = "通道无效"
+    if b_up and b_low and b_up > b_low:
+        # Calculate %B
+        pct_b = (close - b_low) / (b_up - b_low) * 100
+        if pct_b > 90: boll_desc = f"触及上轨压力 ({pct_b:.0f}%)"
+        elif pct_b > 70: boll_desc = f"上轨强势区 ({pct_b:.0f}%)"
+        elif pct_b > 30: boll_desc = f"中轨平衡区 ({pct_b:.0f}%)"
+        elif pct_b > 10: boll_desc = f"弱势调整区 ({pct_b:.0f}%)"
+        else: boll_desc = f"触及下轨支撑 ({pct_b:.0f}%)"
+
+    # 4. Confluence Score (Simple heuristic for clearer direction)
+    score = 0
+    if close > ma20: score += 1
+    if macd_hist > 0: score += 1
+    if rsi > 50: score += 1
+    if k > d: score += 1
+    
+    confluence_status = "偏多" if score >= 3 else ("偏空" if score <= 1 else "震荡/分歧")
+
+    # --- End Upgrade ---
 
     # System Prompt (融合版：由简入繁，既要格式也要灵魂)
     system_prompt = """你是 StockWise 的 AI 决策助手，专门为个人投资者提供股票操作建议。
@@ -308,6 +354,136 @@ def prepare_stock_analysis_prompt(symbol: str, as_of_date: str = None):
     else:
         context_instruction = f"👉 **实时分析**：今天是 {data['date']}。请基于提供的数据判断。"
 
+    # --- World-Class Technical Analysis Upgrade (Signal Dashboard) ---
+
+    # 1. 趋势健康度 (Trend Health)
+    ma5, ma10, ma20, ma60 = data.get('ma5', 0), data.get('ma10', 0), data.get('ma20', 0), data.get('ma60', 0)
+    close = data.get('close', 0)
+    
+    # 均线排列判断
+    if ma5 and ma10 and ma20:
+        if ma5 > ma10 > ma20:
+            ma_alignment = f"MA5({ma5}) > MA10({ma10}) > MA20({ma20}) ✅ 短期多头"
+            trend_score = 2
+        elif ma5 < ma10 < ma20:
+            ma_alignment = f"MA5({ma5}) < MA10({ma10}) < MA20({ma20}) ❌ 短期空头"
+            trend_score = -2
+        else:
+            ma_alignment = "均线纠缠震荡"
+            trend_score = 0
+    else:
+        ma_alignment = "均线数据不足"
+        trend_score = 0
+        
+    # 价格位置判断
+    if close > ma5: price_pos_desc = "站上所有短期均线 ✅"
+    elif close > ma20: price_pos_desc = "回踩MA20支撑"
+    else: price_pos_desc = "跌破MA20支撑 ❌"
+    
+    # 中期趋势
+    mid_term_desc = f"MA60({ma60}) {'向上' if close > ma60 else '承压'}" if ma60 else "MA60 数据不足"
+
+    # 2. 动能状态 (Momentum Triad)
+    # RSI
+    rsi = data.get('rsi', 50)
+    if rsi > 70: 
+        rsi_desc = "超买 (Overbought)"
+        rsi_score = -1 # 超买视为风险
+    elif rsi < 30: 
+        rsi_desc = "超卖 (Oversold)"
+        rsi_score = 1 # 超卖视为机会（反弹）
+    else: 
+        rsi_desc = "中性区间"
+        rsi_score = 0
+    
+    # KDJ
+    k, d, j = data.get('kdj_k', 50), data.get('kdj_d', 50), data.get('kdj_j', 50)
+    if k > d:
+        kdj_desc = "K>D 金叉向上"
+        kdj_score = 1
+    else:
+        kdj_desc = "K<D 死叉向下"
+        kdj_score = -1
+        
+    # MACD (Trend Aware)
+    macd = data.get('macd', 0)
+    macd_hist = data.get('macd_hist', 0)
+    # Get previous hist for trend
+    daily_history = ctx.get("daily_prices", [])
+    prev_hist = daily_history[-2].get('macd_hist', 0) if len(daily_history) >= 2 else 0
+    
+    if macd_hist > 0:
+        macd_desc = "金叉 (多头)"
+        macd_score = 1
+        if macd_hist < prev_hist: 
+            macd_desc += " ⚠️ 动能减弱"
+            macd_score = 0 # 金叉但减弱，中性
+    else:
+        macd_desc = "死叉 (空头)"
+        macd_score = -1
+        if macd_hist > prev_hist: 
+            macd_desc += " 💡 快线收敛中"
+            macd_score = 0 # 死叉但收敛，中性/潜在转折
+
+    # 3. 价格位置 (Bollinger Position)
+    b_up = data.get('boll_upper', 0)
+    b_mid = data.get('boll_mid', 0)
+    b_low = data.get('boll_lower', 0)
+    
+    boll_score = 0
+    if b_up and b_low and b_up > b_low:
+        pct_b = (close - b_low) / (b_up - b_low) * 100
+        if pct_b > 90:
+            boll_desc = f"{pct_b:.0f}% (触及上轨压力)"
+            boll_score = -1 # 压力位
+        elif pct_b > 70:
+            boll_desc = f"{pct_b:.0f}% (强势区)"
+            boll_score = 1 # 趋势延续
+        elif pct_b > 30:
+            boll_desc = f"{pct_b:.0f}% (中轨平衡区)"
+            boll_score = 0
+        elif pct_b > 10:
+            boll_desc = f"{pct_b:.0f}% (弱势区)"
+            boll_score = -1
+        else:
+            boll_desc = f"{pct_b:.0f}% (触及下轨支撑)"
+            boll_score = 1 # 支撑位
+    else:
+        boll_desc = "通道无效"
+        
+    # 4. Total Score
+    total_score = trend_score + rsi_score + kdj_score + macd_score + boll_score
+    score_meaning = "强烈看多" if total_score >= 4 else ("偏多" if total_score > 0 else ("强烈看空" if total_score <= -4 else ("偏空" if total_score < 0 else "完全中性")))
+    
+    # Generate Dashboard String
+    tech_dashboard = f"""## 3. 技术信号摘要 (Daily Signal Dashboard)
+    
+### 📊 趋势健康度
+- **均线排列**: {ma_alignment}
+- **价格位置**: {price_pos_desc}
+- **中期确认**: {mid_term_desc}
+
+### ⚡ 动能状态
+- **MACD**: {macd_desc}
+- **RSI**: {rsi:.1f} ({rsi_desc})
+- **KDJ**: K{k:.1f}/D{d:.1f} → {kdj_desc}
+
+### 📍 价格位置
+- **布林带位置**: {boll_desc}
+
+### 🎯 信号共振评估 (Confluence Score)
+| 维度 | 信号方向 | 数值 |
+|------|----------|------|
+| 趋势 | {"多 ✅" if trend_score > 0 else ("空 ❌" if trend_score < 0 else "平 ➖")} | {trend_score:+d} |
+| MACD | {"多 ✅" if macd_score > 0 else ("空 ❌" if macd_score < 0 else "平 ➖")} | {macd_score:+d} |
+| RSI  | {"多 ✅" if rsi_score > 0 else ("空 ❌" if rsi_score < 0 else "平 ➖")} | {rsi_score:+d} |
+| KDJ  | {"多 ✅" if kdj_score > 0 else ("空 ❌" if kdj_score < 0 else "平 ➖")} | {kdj_score:+d} |
+| 位置 | {"多 ✅" if boll_score > 0 else ("空 ❌" if boll_score < 0 else "平 ➖")} | {boll_score:+d} |
+
+**综合评分: {total_score:+d} ({score_meaning})**
+"""
+    # --- End Dashboard Generation ---
+
     # 用户输入提示词 (优化版，末尾增强指令)
     user_prompt = f"""# 股票数据输入
 
@@ -322,10 +498,7 @@ def prepare_stock_analysis_prompt(symbol: str, as_of_date: str = None):
 |------|------|------|------|------|--------|--------|
 {chr(10).join(history_summary)}
 
-## 3. 技术指标 (Indicators - 日线)
-- **趋势**: MA20={data['ma20']}, MA60={data['ma60']} ({ "多头" if data['close']>data['ma20'] else "空头/震荡" })
-- **动能**: RSI={rsi:.1f} ({rsi_status}), MACD={macd_status}
-- **位置**: 收盘{data['close']}, 布林上轨{data['boll_upper']}, 下轨{data['boll_lower']}
+{tech_dashboard}
 
 ## 4. 周期背景 (Context)
 ### 周线透视 (最近8周)
