@@ -12,7 +12,8 @@ import {
   Zap,
   Clock,
   LayoutGrid,
-  Terminal
+  Terminal,
+  MessageSquare
 } from 'lucide-react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
