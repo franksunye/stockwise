@@ -110,7 +110,7 @@ export default function LLMTraceViewer() {
             <Link href="/admin" className="text-slate-500 hover:text-white transition-colors">
               <ArrowLeft className="w-3.5 h-3.5" />
             </Link>
-            <h1 className="text-base font-black italic text-white tracking-tight">LLM TRACES</h1>
+            <h1 className="text-base font-black italic text-white tracking-tight">LLM CALLS</h1>
           </div>
           
           <div className="space-y-2">
