@@ -199,8 +199,34 @@ def prepare_stock_analysis_prompt(symbol: str, as_of_date: str = None):
 
     rsi = data.get('rsi', 0)
     rsi_status = "超买" if rsi > 70 else ("超卖" if rsi < 30 else "运行稳健")
+    
+    # MACD 状态判断（增加趋势描述）
     macd_hist = data.get('macd_hist', 0)
-    macd_status = "金叉/多头" if macd_hist > 0 else "死叉/空头"
+    cross_type = "金叉" if macd_hist > 0 else "死叉"
+    
+    # 获取前一日的 macd_hist 来判断趋势
+    daily_history = ctx.get("daily_prices", [])
+    # daily_prices 是按时间正序排列（oldest first），最后一个是最新的
+    if len(daily_history) >= 2:
+        prev_hist = daily_history[-2].get('macd_hist', 0) or 0
+        curr_hist = macd_hist or 0
+        
+        if curr_hist > prev_hist:
+            # 柱状图在变大（向上）
+            if curr_hist < 0:
+                trend_desc = "快线上行收敛中"  # 死叉但在好转
+            else:
+                trend_desc = "多头动能增强"  # 金叉且在加强
+        else:
+            # 柱状图在变小（向下）
+            if curr_hist > 0:
+                trend_desc = "多头动能减弱"  # 金叉但在衰减
+            else:
+                trend_desc = "空头动能加剧"  # 死叉且在恶化
+    else:
+        trend_desc = "多头" if macd_hist > 0 else "空头"
+    
+    macd_status = f"{cross_type}，{trend_desc}"
 
     # System Prompt (融合版：由简入繁，既要格式也要灵魂)
     system_prompt = """你是 StockWise 的 AI 决策助手，专门为个人投资者提供股票操作建议。
