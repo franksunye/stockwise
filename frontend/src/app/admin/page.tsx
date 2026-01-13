@@ -71,12 +71,12 @@ export default function AdminDashboard() {
     );
   }
 
-  const statCards = [
-    { label: '注册用户', value: stats?.counts.users || 0, icon: Users, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-    { label: '核心股票池', value: stats?.counts.global_stocks || 0, icon: Database, color: 'text-indigo-500', bg: 'bg-indigo-500/10' },
-    { label: '总关注记录', value: stats?.counts.watchlists || 0, icon: LayoutGrid, color: 'text-purple-500', bg: 'bg-purple-500/10' },
-    { label: 'AI 预测总量', value: stats?.counts.predictions || 0, icon: Zap, color: 'text-amber-500', bg: 'bg-amber-500/10' },
-    { label: '价格快照', value: stats?.counts.prices || 0, icon: TrendingUp, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+    const statCards = [
+    { label: '注册用户', value: stats?.counts?.users || 0, icon: Users, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+    { label: '核心股票池', value: stats?.counts?.global_stocks || 0, icon: Database, color: 'text-indigo-500', bg: 'bg-indigo-500/10' },
+    { label: '总关注记录', value: stats?.counts?.watchlists || 0, icon: LayoutGrid, color: 'text-purple-500', bg: 'bg-purple-500/10' },
+    { label: 'AI 预测总量', value: stats?.counts?.predictions || 0, icon: Zap, color: 'text-amber-500', bg: 'bg-amber-500/10' },
+    { label: '价格快照', value: stats?.counts?.prices || 0, icon: TrendingUp, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
   ];
 
   return (

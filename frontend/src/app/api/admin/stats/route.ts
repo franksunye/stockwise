@@ -36,14 +36,14 @@ export async function GET() {
                 turso.execute('SELECT COUNT(*) as count FROM global_stock_pool'),
                 turso.execute('SELECT COUNT(*) as count FROM user_watchlist'),
                 turso.execute('SELECT COUNT(*) as count FROM daily_prices'),
-                turso.execute('SELECT COUNT(*) as count FROM ai_predictions'),
+                turso.execute('SELECT COUNT(*) as count FROM ai_predictions_v2'),
                 turso.execute('SELECT COUNT(*) as count FROM users'),
                 turso.execute('SELECT COUNT(*) as count FROM stock_meta'),
                 turso.execute("SELECT COUNT(*) as count FROM stock_meta WHERE market = 'HK'"),
                 turso.execute("SELECT COUNT(*) as count FROM stock_meta WHERE market = 'CN'"),
                 turso.execute('SELECT MAX(last_synced_at) as last FROM global_stock_pool'),
                 turso.execute('SELECT MAX(date) as last FROM daily_prices'),
-                turso.execute('SELECT MAX(date) as last FROM ai_predictions'),
+                turso.execute('SELECT MAX(date) as last FROM ai_predictions_v2'),
                 turso.execute('SELECT MAX(last_updated) as last FROM stock_meta')
             ];
 
@@ -69,7 +69,7 @@ export async function GET() {
             stats.counts.global_stocks = Number((db.prepare('SELECT COUNT(*) as count FROM global_stock_pool').get() as DbResult).count);
             stats.counts.watchlists = Number((db.prepare('SELECT COUNT(*) as count FROM user_watchlist').get() as DbResult).count);
             stats.counts.prices = Number((db.prepare('SELECT COUNT(*) as count FROM daily_prices').get() as DbResult).count);
-            stats.counts.predictions = Number((db.prepare('SELECT COUNT(*) as count FROM ai_predictions').get() as DbResult).count);
+            stats.counts.predictions = Number((db.prepare('SELECT COUNT(*) as count FROM ai_predictions_v2').get() as DbResult).count);
             stats.counts.users = Number((db.prepare('SELECT COUNT(*) as count FROM users').get() as DbResult).count);
             stats.counts.stock_meta_total = Number((db.prepare('SELECT COUNT(*) as count FROM stock_meta').get() as DbResult).count);
             stats.counts.stock_meta_hk = Number((db.prepare("SELECT COUNT(*) as count FROM stock_meta WHERE market = 'HK'").get() as DbResult).count);
@@ -77,7 +77,7 @@ export async function GET() {
 
             stats.lastUpdates.stocks = (db.prepare('SELECT MAX(last_synced_at) as last FROM global_stock_pool').get() as LastSyncResult).last;
             stats.lastUpdates.prices = (db.prepare('SELECT MAX(date) as last FROM daily_prices').get() as LastSyncResult).last;
-            stats.lastUpdates.predictions = (db.prepare('SELECT MAX(date) as last FROM ai_predictions').get() as LastSyncResult).last;
+            stats.lastUpdates.predictions = (db.prepare('SELECT MAX(date) as last FROM ai_predictions_v2').get() as LastSyncResult).last;
             stats.lastUpdates.stock_meta = (db.prepare('SELECT MAX(last_updated) as last FROM stock_meta').get() as LastSyncResult).last;
 
             db.close();
