@@ -49,11 +49,13 @@ class DataAnchorStep(BaseStep):
             
             prompt += f"| {date_str} | {close} | {pct_str} | {vol} | {status} |\n"
 
-        prompt += """
+        latest_date = recent_prices[-1].get('date', 'Unknown') if recent_prices else 'Unknown'
+
+        prompt += f"""
 ## 任务指令
-1. **数据确认**：简要复述当前的最新价格、5日涨跌幅。
-2. **异常扫描**：指出这10天内是否有任何异常的放量或暴跌（跌幅>5%）。
-3. **输出结论**：如果数据看起来完整且合理，输出「[Data Anchored] 数据完整，准备进入技术分析」。
+1. **行情快照**：确认 **最新日期 ({latest_date})** 的收盘价和涨跌幅。
+2. **波动检查**：列表中是否有单日涨跌幅超过 **±9%** 的极端行情？（回答：是/否，若有请列出日期）
+3. **输出结论**：如果数据看起来完整，输出「[Data Anchored] 数据完整，准备进入技术分析」。
 """
         return prompt
 
