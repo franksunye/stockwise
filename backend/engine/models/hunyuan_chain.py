@@ -47,6 +47,9 @@ class HunyuanChainModel(BasePredictionModel):
         Delegates completely to ChainRunner.
         """
         try:
+            # Inject model_name into data for downstream steps to use
+            data["model_name"] = self.model_id
+            
             result = await self.runner.run(symbol, date, data)
             
             if not result:
