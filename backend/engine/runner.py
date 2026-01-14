@@ -65,8 +65,22 @@ class PredictionRunner:
             
         # 3. Parallel Execution (The Race)
         tasks = []
+        from backend.engine.prompts import fetch_ai_history_for_model
+        
         for model in models:
-            tasks.append(self._safe_predict(model, symbol, date, data, force=effective_force))
+            # Model-specific data context: each model reviews its own history
+            # This ensures individual model accountability and prevents 'groupthink' in trajectories.
+            model_specific_data = data.copy() if data else {}
+            
+            try:
+                # Overwrite the global primary history with model-specific historical data
+                history_data = fetch_ai_history_for_model(symbol, date, model_id=model.model_id)
+                model_specific_data.update(history_data)
+                logger.info(f"📜 {model.model_id} history loaded: {len(model_specific_data['ai_history'])} records, {model_specific_data['accuracy']['rate']:.1f}% acc")
+            except Exception as e:
+                logger.warning(f"⚠️ Failed to fetch specific history for {model.model_id}: {e}")
+            
+            tasks.append(self._safe_predict(model, symbol, date, model_specific_data, force=effective_force))
             
         predictions = await asyncio.gather(*tasks)
         

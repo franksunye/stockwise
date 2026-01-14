@@ -44,7 +44,7 @@ class OpenAIAdapter(BasePredictionModel):
         # Prepare prompts
         try:
              from ..prompts import prepare_stock_analysis_prompt
-             system_prompt, user_prompt = prepare_stock_analysis_prompt(symbol, date)
+             system_prompt, user_prompt = prepare_stock_analysis_prompt(symbol, date, ctx=data)
              
              if not user_prompt:
                  return self._error_result("Failed to generate prompt (No data)")

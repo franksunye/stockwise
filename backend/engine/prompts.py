@@ -78,26 +78,10 @@ def fetch_full_analysis_context(symbol: str, as_of_date: str = None) -> Dict[str
     """, (symbol, analysis_date))
     monthly_history = [dict(zip(["date", "open", "high", "low", "close", "change_percent", "volume", "ma20", "rsi", "macd_hist"], m)) for m in cursor.fetchall()]
 
-    # 4. AI History (last 5 - from V2 Primary)
-    cursor.execute("""
-        SELECT date, signal, confidence, ai_reasoning, validation_status, actual_change, model_id
-        FROM ai_predictions_v2 
-        WHERE symbol = ? AND is_primary = 1 AND validation_status != 'Pending' AND date < ?
-        ORDER BY date DESC LIMIT 5
-    """, (symbol, analysis_date))
-    ai_history = [dict(zip(["date", "signal", "confidence", "ai_reasoning", "validation_status", "actual_change", "model"], a)) for a in cursor.fetchall()]
-
-    # 5. Accuracy Stats
-    cursor.execute("""
-        SELECT COUNT(*) as total,
-               SUM(CASE WHEN validation_status = 'Correct' THEN 1 ELSE 0 END) as correct
-        FROM ai_predictions_v2 
-        WHERE symbol = ? AND is_primary = 1 AND validation_status != 'Pending' AND date < ?
-    """, (symbol, analysis_date))
-    stats_row = cursor.fetchone()
-    total_predictions = stats_row[0] if stats_row else 0
-    correct_count = stats_row[1] if stats_row else 0
-    accuracy_rate = (correct_count / total_predictions * 100) if total_predictions > 0 else 0
+    # 4 & 5. AI History & Accuracy
+    history_data = fetch_ai_history_for_model(symbol, analysis_date, cursor=cursor)
+    ai_history = history_data["ai_history"]
+    accuracy_stats = history_data["accuracy"]
 
     return {
         "symbol": symbol,
@@ -105,22 +89,68 @@ def fetch_full_analysis_context(symbol: str, as_of_date: str = None) -> Dict[str
         "date": analysis_date,
         "profile": profile,
         "latest_data": latest_data,
-        "daily_prices": daily_history[::-1], # Oldest first for tables? Or newest first? Benchmark uses DESC but then iterates.
+        "daily_prices": daily_history[::-1], 
         "weekly_prices": weekly_history,
         "monthly_prices": monthly_history,
         "ai_history": ai_history,
-        "accuracy": {
-            "total": total_predictions,
-            "rate": accuracy_rate
-        }
+        "accuracy": accuracy_stats
     }
 
-def prepare_stock_analysis_prompt(symbol: str, as_of_date: str = None):
+def fetch_ai_history_for_model(symbol: str, analysis_date: str, model_id: str = None, cursor = None) -> Dict[str, Any]:
+    """
+    Fetch historical predictions for a specific model or the primary decisions.
+    """
+    _conn = None
+    if cursor is None:
+        _conn = get_connection()
+        cursor = _conn.cursor()
+    
+    # If model_id is None, use is_primary = 1
+    filter_sql = "is_primary = 1" if model_id is None else "model_id = ?"
+    params = (symbol, analysis_date) if model_id is None else (symbol, model_id, analysis_date)
+
+    try:
+        # History
+        cursor.execute(f"""
+            SELECT date, signal, confidence, ai_reasoning, validation_status, actual_change, model_id
+            FROM ai_predictions_v2 
+            WHERE symbol = ? AND {filter_sql} AND validation_status != 'Pending' AND date < ?
+            ORDER BY date DESC LIMIT 5
+        """, params)
+        
+        ai_history = [dict(zip(["date", "signal", "confidence", "ai_reasoning", "validation_status", "actual_change", "model"], a)) for a in cursor.fetchall()]
+
+        # Stats
+        cursor.execute(f"""
+            SELECT COUNT(*) as total,
+                   SUM(CASE WHEN validation_status = 'Correct' THEN 1 ELSE 0 END) as correct
+            FROM ai_predictions_v2 
+            WHERE symbol = ? AND {filter_sql} AND validation_status != 'Pending' AND date < ?
+        """, params)
+        
+        stats_row = cursor.fetchone()
+        total_predictions = stats_row[0] if stats_row else 0
+        correct_count = stats_row[1] if stats_row else 0
+        accuracy_rate = (correct_count / total_predictions * 100) if total_predictions > 0 else 0
+        
+        return {
+            "ai_history": ai_history,
+            "accuracy": {
+                "total": total_predictions,
+                "rate": accuracy_rate
+            }
+        }
+    finally:
+        if _conn:
+            _conn.close()
+
+def prepare_stock_analysis_prompt(symbol: str, as_of_date: str = None, ctx: Dict[str, Any] = None):
     """
     准备用于 LLM 分析的系统提示词和用户输入数据
-    (One-shot 模式专用，内部调用 fetch_full_analysis_context)
+    (One-shot 模式专用)
     """
-    ctx = fetch_full_analysis_context(symbol, as_of_date)
+    if ctx is None:
+        ctx = fetch_full_analysis_context(symbol, as_of_date)
     if "error" in ctx:
         return None, ctx["error"]
 
