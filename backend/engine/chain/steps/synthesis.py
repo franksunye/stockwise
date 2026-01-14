@@ -280,6 +280,23 @@ class SynthesisStep(BaseStep):
             parsed['signal'] = 'Side'
         if not parsed.get('confidence') or not isinstance(parsed.get('confidence'), (int, float)):
             parsed['confidence'] = 0.5
+
+        # 5. LITE MODEL OVERRIDE: Force pre-calculated values (model can't follow instructions)
+        d = context.input_data
+        model_name = d.get('model_name', '').lower()
+        if 'lite' in model_name:
+            daily_prices = d.get('daily_prices', [])
+            latest = daily_prices[-1] if daily_prices else {}
+            boll_lower = latest.get('boll_lower', 0) or 0
+            high_10d = max([p.get('high', 0) for p in daily_prices[-10:]]) if daily_prices else 0
+            stop_ref = boll_lower * 0.97 if boll_lower > 0 else (latest.get('close', 0) or 0) * 0.95
+            
+            # Force key_levels to use pre-calculated values
+            parsed['key_levels'] = {
+                "support": round(boll_lower, 2),
+                "resistance": round(high_10d, 2),
+                "stop_loss": round(stop_ref, 2)
+            }
             
         if "signal" not in parsed:
             raise ValueError("JSON missing 'signal' field")
