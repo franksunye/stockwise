@@ -117,6 +117,19 @@ class SynthesisStep(BaseStep):
                 holding_action = "持股待变"
                 holding_trigger = f"方向确认后"
                 empty_action = "观望"
+            # Pre-calculate decision and conflict resolution
+            if score_val > 0:
+                decision_conclusion = "偏多观望"
+                conflict_text = "短期技术面偏多，但等待更强确认信号"
+                focus_text = f"关注能否突破{high_10d:.2f}阻力"
+            elif score_val < 0:
+                decision_conclusion = "偏空避险"
+                conflict_text = "技术面转弱，以防守为主"
+                focus_text = f"关注能否守住{boll_lower:.2f}支撑"
+            else:
+                decision_conclusion = "中性观望"
+                conflict_text = "多空力量均衡，等待方向选择"
+                focus_text = "关注成交量变化确认方向"
 
             prompt = f"""### 任务：量化信号翻译 (Zero-Shot JSON Generation)
 你是一个**金融数据翻译官**。请将下方的分析数据翻译成 JSON 格式。
@@ -127,36 +140,19 @@ class SynthesisStep(BaseStep):
 
 ---
 ## ⚠️ 数据锚定校验 (CRITICAL - 必须使用以下数值)
-在生成 JSON 之前，请确认你将使用的是**以下真实数据**：
 - **当前收盘价**: {close:.2f}
 - **MA20**: {ma20:.2f}
 - **支撑位**: {boll_lower:.2f}
 - **阻力位**: {high_10d:.2f}
 - **止损位**: {stop_ref:.2f}
 - **综合评分**: {score_val:+d}
-
 ---
 
-## 强制执行字段 (系统已计算，请直接填入)
-- `"signal"`: "{calculated_signal}"
-- `"confidence"`: {calculated_conf}
-- `"key_levels"`: {{ "support": {boll_lower:.2f}, "resistance": {high_10d:.2f}, "stop_loss": {stop_ref:.2f} }}
-
-## 策略适配 (根据评分方向 {score_val:+d})
-- `"tactics.holding"`: action = "{holding_action}", trigger = "{holding_trigger}"
-- `"tactics.empty"`: action = "{empty_action}"
-
-## JSON Schema (请按此结构输出)
-```
+## 强制执行字段 (系统已计算，请直接填入，不要修改)
+```json
 {{
-  "signal": "<强制值: {calculated_signal}>",
-  "confidence": <强制值: {calculated_conf}>,
-  "summary": "<用1句话总结技术面评分和趋势状态>",
-  "reasoning_trace": [
-    {{ "step": "trend", "data": "<填入MA均线真实数据>", "conclusion": "<3-6字结论>" }},
-    {{ "step": "momentum", "data": "<填入MACD/RSI真实数据>", "conclusion": "<3-6字结论>" }},
-    {{ "step": "decision", "data": "<综合判断>", "conclusion": "<观望/做多/避险>" }}
-  ],
+  "signal": "{calculated_signal}",
+  "confidence": {calculated_conf},
   "key_levels": {{ "support": {boll_lower:.2f}, "resistance": {high_10d:.2f}, "stop_loss": {stop_ref:.2f} }},
   "tactics": {{
     "holding": [{{ "priority": "P1", "action": "{holding_action}", "trigger": "{holding_trigger}", "reason": "技术面触发" }}],
@@ -164,14 +160,23 @@ class SynthesisStep(BaseStep):
     "general": [{{ "priority": "P2", "action": "关注", "trigger": "成交量变化", "reason": "动能确认" }}]
   }},
   "news_analysis": ["无实时新闻"],
-  "conflict_resolution": "<多空冲突如何解决>",
-  "tomorrow_focus": "<明日关注重点>"
+  "conflict_resolution": "{conflict_text}",
+  "tomorrow_focus": "{focus_text}"
 }}
 ```
 
-请直接输出 JSON，不要添加任何解释或 markdown 代码块标记：
+## 需要你填写的字段
+仅需填写以下 3 个字段，其他字段请直接复制上方强制值：
+1. `"summary"`: 用1句话总结当前技术面状态（评分{score_val:+d}）
+2. `"reasoning_trace"`: 填入真实的 MA/MACD 数据
+   - trend.data: 从上方分析中提取 MA5/MA10/MA20 数值
+   - momentum.data: 从上方提取 MACD/RSI 状态
+   - decision.conclusion: "{decision_conclusion}"
+
+请直接输出完整 JSON，不要添加任何解释：
 """
             return prompt
+
 
 
         # --- STANDARD PROMPT (Analyst Mode) ---
