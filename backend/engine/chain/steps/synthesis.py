@@ -298,6 +298,52 @@ class SynthesisStep(BaseStep):
                 "stop_loss": round(stop_ref, 2)
             }
             
+        # 6. Normalize reasoning_trace (Fix for Lite models returning dict instead of list)
+        rt = parsed.get('reasoning_trace')
+        if isinstance(rt, dict):
+            # Convert dict to standard list format
+            new_rt = []
+            
+            # Extract Trend
+            trend_data = rt.get('trend.data') or rt.get('trend') or "均线系统分析"
+            if isinstance(trend_data, dict) or isinstance(trend_data, list):
+                trend_data = str(trend_data)
+            new_rt.append({ "step": "trend", "data": trend_data, "conclusion": "趋势跟踪" })
+            
+            # Extract Momentum
+            mom_data = rt.get('momentum.data') or rt.get('momentum') or "MACD/RSI指标分析"
+            if isinstance(mom_data, dict) or isinstance(mom_data, list):
+                mom_data = str(mom_data)
+            new_rt.append({ "step": "momentum", "data": mom_data, "conclusion": "动能评估" })
+            
+            # Extract Decision
+            dec_data = rt.get('decision.data') or rt.get('decision_conclusion') or "综合研判"
+            new_rt.append({ "step": "decision", "data": "综合评分模型", "conclusion": str(dec_data) })
+            
+            parsed['reasoning_trace'] = new_rt
+            
+        # Ensure it's always a list at the end
+        if not isinstance(parsed.get('reasoning_trace'), list):
+            parsed['reasoning_trace'] = [
+                { "step": "trend", "data": "N/A", "conclusion": "N/A" },
+                { "step": "momentum", "data": "N/A", "conclusion": "N/A" },
+                { "step": "decision", "data": "N/A", "conclusion": "N/A" }
+            ]
+        model_name = d.get('model_name', '').lower()
+        if 'lite' in model_name:
+            daily_prices = d.get('daily_prices', [])
+            latest = daily_prices[-1] if daily_prices else {}
+            boll_lower = latest.get('boll_lower', 0) or 0
+            high_10d = max([p.get('high', 0) for p in daily_prices[-10:]]) if daily_prices else 0
+            stop_ref = boll_lower * 0.97 if boll_lower > 0 else (latest.get('close', 0) or 0) * 0.95
+            
+            # Force key_levels to use pre-calculated values
+            parsed['key_levels'] = {
+                "support": round(boll_lower, 2),
+                "resistance": round(high_10d, 2),
+                "stop_loss": round(stop_ref, 2)
+            }
+            
         if "signal" not in parsed:
             raise ValueError("JSON missing 'signal' field")
             
