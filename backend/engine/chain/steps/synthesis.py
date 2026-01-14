@@ -273,6 +273,14 @@ class SynthesisStep(BaseStep):
 
         context.artifacts["synthesis"] = parsed
         
+        # 4. Backfill signal and confidence if missing or placeholder
+        valid_signals = ["Long", "Side", "Short"]
+        if not parsed.get('signal') or parsed.get('signal') not in valid_signals:
+            # Check if it's a placeholder like "<强制值: Side>"
+            parsed['signal'] = 'Side'
+        if not parsed.get('confidence') or not isinstance(parsed.get('confidence'), (int, float)):
+            parsed['confidence'] = 0.5
+            
         if "signal" not in parsed:
             raise ValueError("JSON missing 'signal' field")
             
