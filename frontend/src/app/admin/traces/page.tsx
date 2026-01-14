@@ -250,12 +250,23 @@ function StepCard({ index, name, duration, prompt, result, parsed }: {
   parsed: Record<string, unknown> | null; 
 }) {
   const [activeTab, setActiveTab] = useState<'prompt' | 'result' | 'parsed'>('result');
+  const [copied, setCopied] = useState(false);
   
   // Default to prompt if result is missing (unlikely now)
   // Default to Parsed if available (Synthesis)
   useEffect(() => {
     if (parsed) setActiveTab('parsed');
   }, [parsed]);
+
+  const handleCopy = () => {
+    const text = activeTab === 'prompt' ? prompt : 
+                 activeTab === 'parsed' ? JSON.stringify(parsed, null, 2) : 
+                 (typeof result === 'string' ? result : JSON.stringify(result, null, 2));
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
 
   return (
     <div className="relative pl-12 group">
@@ -306,15 +317,10 @@ function StepCard({ index, name, duration, prompt, result, parsed }: {
           {/* Copy Button */}
           <div className="absolute top-2 right-2 z-10 opacity-0 group-hover/code:opacity-100 transition-opacity">
             <button 
-              onClick={() => {
-                const text = activeTab === 'prompt' ? prompt : 
-                             activeTab === 'parsed' ? JSON.stringify(parsed, null, 2) : 
-                             (typeof result === 'string' ? result : JSON.stringify(result, null, 2));
-                navigator.clipboard.writeText(text);
-              }}
-              className="flex items-center gap-1.5 bg-white/10 hover:bg-white/20 text-white text-[10px] px-2 py-1 rounded backdrop-blur-sm transition-colors"
+              onClick={handleCopy}
+              className={`flex items-center gap-1.5 text-white text-[10px] px-2 py-1 rounded backdrop-blur-sm transition-all ${copied ? 'bg-emerald-500/30' : 'bg-white/10 hover:bg-white/20'}`}
             >
-              <Copy className="w-3 h-3" /> Copy
+              {copied ? <><CheckCircle2 className="w-3 h-3 text-emerald-400" /> Copied!</> : <><Copy className="w-3 h-3" /> Copy</>}
             </button>
           </div>
           <div className="max-h-[500px] overflow-y-auto custom-scrollbar p-6">
