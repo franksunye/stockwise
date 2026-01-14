@@ -31,14 +31,14 @@ class PredictionRunner:
         models = ModelFactory.get_active_models()
         if not models:
             logger.warning("⚠️ No active models found!")
-            return
+            return False
         
         # Apply model filter if specified (and not 'all')
         if self.model_filter and self.model_filter != 'all':
             models = [m for m in models if m.model_id == self.model_filter]
             if not models:
                 logger.warning(f"⚠️ Model '{self.model_filter}' not found or not active!")
-                return
+                return False
             logger.info(f"🎯 指定模型: {self.model_filter}")
         
         logger.info(f"🤖 Active Models: {[m.model_id for m in models]}")
@@ -51,7 +51,7 @@ class PredictionRunner:
                 
                 if "error" in data:
                     logger.warning(f"⚠️ Data context fetch failed: {data['error']}")
-                    return
+                    return False
                 
                 # Align date if it was None
                 if not date:
@@ -60,7 +60,7 @@ class PredictionRunner:
                 logger.info(f"📊 Rich context fetched for {symbol} on {date}")
             except Exception as e:
                 logger.error(f"❌ Failed to fetch full context: {e}")
-                return
+                return False
 
             
         # 3. Parallel Execution (The Race)
@@ -79,7 +79,7 @@ class PredictionRunner:
         if not valid_predictions:
             logger.warning(f"⚠️ No successful predictions for {symbol}, aborting save.")
             conn.close()
-            return
+            return False
 
         try:
             # Check existing primary model's priority for this symbol/date
@@ -90,9 +90,11 @@ class PredictionRunner:
                 WHERE p.symbol = ? AND p.date = ? AND p.is_primary = 1
             """, (symbol, date))
             existing_primary = cursor.fetchone()
+            existing_primary_model_id = existing_primary[0] if existing_primary else None
             existing_priority = existing_primary[1] if existing_primary else -1
         except Exception as e:
             logger.warning(f"Could not check existing primary: {e}")
+            existing_primary_model_id = None
             existing_priority = -1
 
         saved_count = 0
@@ -112,13 +114,19 @@ class PredictionRunner:
             model_id = pred['model_id']
             model_priority = model_priorities.get(model_id, 0)
             
-            # Selector Logic: Set primary only if this model has higher priority than existing primary
+            # Selector Logic: Set primary if this model has higher or equal priority than existing primary,
+            # or if this model was already the primary (force re-run case)
             is_primary = 0
-            if model_priority > existing_priority:
+            should_be_primary = (
+                model_priority > existing_priority or 
+                model_id == existing_primary_model_id  # Keep primary if same model (force re-run)
+            )
+            if should_be_primary:
                 # Reset old primary and set new one
                 cursor.execute("UPDATE ai_predictions_v2 SET is_primary = 0 WHERE symbol = ? AND date = ?", (symbol, date))
                 is_primary = 1
                 existing_priority = model_priority  # Update for next iteration
+                existing_primary_model_id = model_id
                 primary_pred = pred
                 
             try:
@@ -147,6 +155,7 @@ class PredictionRunner:
         conn.commit()
         conn.close()
         logger.info(f"✅ Analysis completed for {symbol}. Saved {saved_count} results. Primary: {primary_pred['model_id'] if primary_pred else 'None'}")
+        return True
 
     async def _safe_predict(self, model, symbol, date, data, force: bool = False):
         try:
