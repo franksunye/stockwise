@@ -11,7 +11,8 @@ import {
   FileJson, 
   MessageSquare, 
   AlignLeft,
-  ArrowLeft
+  ArrowLeft,
+  Copy
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -302,6 +303,20 @@ function StepCard({ index, name, duration, prompt, result, parsed }: {
 
         {/* Content */}
         <div className="bg-[#050508] p-0 relative group/code">
+          {/* Copy Button */}
+          <div className="absolute top-2 right-2 z-10 opacity-0 group-hover/code:opacity-100 transition-opacity">
+            <button 
+              onClick={() => {
+                const text = activeTab === 'prompt' ? prompt : 
+                             activeTab === 'parsed' ? JSON.stringify(parsed, null, 2) : 
+                             (typeof result === 'string' ? result : JSON.stringify(result, null, 2));
+                navigator.clipboard.writeText(text);
+              }}
+              className="flex items-center gap-1.5 bg-white/10 hover:bg-white/20 text-white text-[10px] px-2 py-1 rounded backdrop-blur-sm transition-colors"
+            >
+              <Copy className="w-3 h-3" /> Copy
+            </button>
+          </div>
           <div className="max-h-[500px] overflow-y-auto custom-scrollbar p-6">
              <pre className="text-xs font-mono text-slate-400 whitespace-pre-wrap leading-relaxed">
                {activeTab === 'prompt' && prompt}
