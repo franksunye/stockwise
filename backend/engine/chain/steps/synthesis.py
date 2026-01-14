@@ -104,60 +104,76 @@ class SynthesisStep(BaseStep):
                 except:
                     pass
 
-            prompt = f"""### 任务：量化信号翻译 (Quantitative Signal Translation)
-你是一个**金融数据翻译官**。你的任务是将下方的【量化技术评估】(Quantitative Technical Assessment) 翻译成结构化的 JSON 格式。
+            # 2. Determine strategy based on score direction
+            if score_val > 0:
+                holding_action = "持股观察"
+                holding_trigger = f"跌破{boll_lower:.2f}"
+                empty_action = "逢低介入"
+            elif score_val < 0:
+                holding_action = "逢高减仓"
+                holding_trigger = f"反弹至{high_10d:.2f}"
+                empty_action = "观望等待"
+            else:
+                holding_action = "持股待变"
+                holding_trigger = f"方向确认后"
+                empty_action = "观望"
+
+            prompt = f"""### 任务：量化信号翻译 (Zero-Shot JSON Generation)
+你是一个**金融数据翻译官**。请将下方的分析数据翻译成 JSON 格式。
 
 {prediction_review}
 
 {prior_analysis}
 
-## 核心指令 (Translator Protocol)
-1. **强制执行信号与置信度**：系统已根据评分算出建议值。
-    - **当前评分**: {score_val:+d}
-    - **强制信号**: "{calculated_signal}"
-    - **强制置信度**: {calculated_conf}
-    - 请直接将上述值填入 json 对应字段，不要修改。
-2. **保守原则**：Lite 模型必须严格服从上述强制指令。
-3. **策略适配 (关键)**：
-    - **Holding 策略必须匹配评分方向**！
-    - 当前是正分 (+) -> 策略必须是 "持有" 或 "观察"，**严禁**抄袭示例中的 "清仓"。
-    - 示例中的 "清仓" 仅适用于负分 (-4) 情况。
-    - **Holding 策略必须匹配评分方向**！
-    - 当前是正分 (+) -> 策略必须是 "持有" 或 "观察"，**严禁**抄袭示例中的 "清仓"。
-    - 示例中的 "清仓" 仅适用于负分 (-4) 情况。
-3. **策略适配 (关键)**：
-    - **Holding 策略必须匹配评分方向**！
-    - 当前是正分 (+) -> 策略必须是 "持有" 或 "观察"，**严禁**抄袭示例中的 "清仓"。
-    - 示例中的 "清仓" 仅适用于负分 (-4) 情况。
-4. **禁止抄袭**：下方的“1-Shot 示例”仅作格式参考，**严禁抄袭示例中的数据**！必须使用上方真实的分析数据。
-5. **去术语化**：在 summary 和 reasoning 中，不要提及 "Dashboard" 或 "面板"，请使用 "技术面评分"、"量化系统" 或 "指标系统" 代替。
+---
+## ⚠️ 数据锚定校验 (CRITICAL - 必须使用以下数值)
+在生成 JSON 之前，请确认你将使用的是**以下真实数据**：
+- **当前收盘价**: {close:.2f}
+- **MA20**: {ma20:.2f}
+- **支撑位**: {boll_lower:.2f}
+- **阻力位**: {high_10d:.2f}
+- **止损位**: {stop_ref:.2f}
+- **综合评分**: {score_val:+d}
 
-## 1-Shot 示例 (仅供格式参考，数据是虚构的负面案例)
-[输入]: 综合评分: -4 (强烈看空)
-[输出]:
+❌ **绝对禁止**: 不要使用 607.83, 632.5, 588.52, 638.5 等任何非上述数值！
+---
+
+## 强制执行字段 (系统已计算，请直接填入)
+- `"signal"`: "{calculated_signal}"
+- `"confidence"`: {calculated_conf}
+- `"key_levels"`: {{ "support": {boll_lower:.2f}, "resistance": {high_10d:.2f}, "stop_loss": {stop_ref:.2f} }}
+
+## 策略适配 (根据评分方向 {score_val:+d})
+- `"tactics.holding"`: action = "{holding_action}", trigger = "{holding_trigger}"
+- `"tactics.empty"`: action = "{empty_action}"
+
+## JSON Schema (请按此结构输出)
+```
 {{
-  "signal": "Side",
-  "confidence": 0.10,
-  "summary": "量化评分-4，技术面极度疲软，所有指标均提示风险",
+  "signal": "<强制值: {calculated_signal}>",
+  "confidence": <强制值: {calculated_conf}>,
+  "summary": "<用1句话总结技术面评分和趋势状态>",
   "reasoning_trace": [
-    {{ "step": "trend", "data": "MA5<MA10<MA20", "conclusion": "空头排列" }},
-    {{ "step": "momentum", "data": "MACD死叉且绿柱放大", "conclusion": "下跌加速" }},
-    {{ "step": "decision", "data": "技术面评分-4，属于高危区域", "conclusion": "避险" }}
+    {{ "step": "trend", "data": "<填入MA均线真实数据>", "conclusion": "<3-6字结论>" }},
+    {{ "step": "momentum", "data": "<填入MACD/RSI真实数据>", "conclusion": "<3-6字结论>" }},
+    {{ "step": "decision", "data": "<综合判断>", "conclusion": "<观望/做多/避险>" }}
   ],
   "key_levels": {{ "support": {boll_lower:.2f}, "resistance": {high_10d:.2f}, "stop_loss": {stop_ref:.2f} }},
   "tactics": {{
-    "holding": [{{ "priority": "P1", "action": "清仓", "trigger": "跌破支撑", "reason": "趋势走坏" }}],
-    "empty": [{{ "priority": "P1", "action": "观望", "trigger": "无止跌迹象", "reason": "风险极高" }}],
-    "general": [{{ "priority": "P2", "action": "预警", "trigger": "乖离率过大", "reason": "超卖但未企稳" }}]
+    "holding": [{{ "priority": "P1", "action": "{holding_action}", "trigger": "{holding_trigger}", "reason": "技术面触发" }}],
+    "empty": [{{ "priority": "P1", "action": "{empty_action}", "trigger": "价格企稳", "reason": "等待机会" }}],
+    "general": [{{ "priority": "P2", "action": "关注", "trigger": "成交量变化", "reason": "动能确认" }}]
   }},
-  "news_analysis": ["无重大新闻"],
-  "conflict_resolution": "所有周期指标共振看空",
-  "tomorrow_focus": "关注能否守住前低"
+  "news_analysis": ["无实时新闻"],
+  "conflict_resolution": "<多空冲突如何解决>",
+  "tomorrow_focus": "<明日关注重点>"
 }}
+```
 
-请基于**真实数据**（而非示例数据），生成 JSON：
+请直接输出 JSON，不要添加任何解释或 markdown 代码块标记：
 """
             return prompt
+
 
         # --- STANDARD PROMPT (Analyst Mode) ---
         prompt = f"""### 步骤4：最终结论推导 (Synthesis)
