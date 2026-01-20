@@ -160,6 +160,7 @@ def init_db():
                 content TEXT NOT NULL,
                 push_hook TEXT,
                 created_at TIMESTAMP DEFAULT (datetime('now', '+8 hours')),
+                notified_at TIMESTAMP,
                 UNIQUE(user_id, date)
             )
         """)
@@ -249,6 +250,18 @@ def init_db():
                 FOREIGN KEY (model_id) REFERENCES prediction_models(model_id)
             )
         """)
+        
+        # 8. Schema Migrations (Add missing columns to existing tables)
+        # Add notified_at to daily_briefs if it doesn't exist
+        daily_briefs_cols = get_table_columns(cursor, 'daily_briefs')
+        if 'notified_at' not in daily_briefs_cols:
+            try:
+                cursor.execute("ALTER TABLE daily_briefs ADD COLUMN notified_at TIMESTAMP")
+                logger.info("✅ Added notified_at column to daily_briefs table")
+            except Exception as e:
+                # Column might already exist in some edge cases
+                if "duplicate column" not in str(e).lower():
+                    logger.warning(f"⚠️ Could not add notified_at column: {e}")
         
         conn.commit()
         logger.info("✅ 数据库结构初始化完成 (Raw SQL - No ORM)")

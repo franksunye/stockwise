@@ -54,6 +54,11 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool =
     ai_count = 0
     rule_count = 0
     
+    # [NEW] Initialize User Completion Tracker
+    from backend.analysis.user_tracker import UserCompletionTracker, notify_user_prediction_updated
+    tracker = UserCompletionTracker()
+    tracker.load_watchlists(targets)
+    
     conn = get_connection()
     cursor = conn.cursor()
     
@@ -92,6 +97,12 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool =
                     if cursor.fetchone():
                         logger.info(f"⏩ {stock}: {today_str} ({model_filter}) 预测已存在，跳过")
                         success_count += 1
+                        
+                        # [NEW] Still mark as complete for tracker (data already exists)
+                        ready_users = tracker.mark_stock_complete(stock)
+                        for uid in ready_users:
+                            notify_user_prediction_updated(uid)
+                        
                         continue
                 # 如果是 all，这里不再做整体跳过，让子引擎去判断具体哪个模型没跑
             # --------------------------------------
@@ -120,9 +131,15 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool =
                 success_count += 1
                 ai_count += 1 # Assume all are AI now or hybrid
                 
+                # [NEW] Mark stock complete and notify ready users
+                ready_users = tracker.mark_stock_complete(stock)
+                for uid in ready_users:
+                    notify_user_prediction_updated(uid)
+                
             except Exception as e:
                 logger.error(f"❌ {stock} AI Engine Failed: {e}")
                 # Fallback to old for safety? No, we trust new engine.
+                # Don't mark as complete if failed
                 continue
             
         except Exception as e:
@@ -130,6 +147,10 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool =
             
     duration = time.time() - start_time
     logger.info(f"✅ AI 分析完成! 成功: {success_count}/{len(targets)} (AI: {ai_count}, Rule: {rule_count}), 耗时: {duration:.1f}s")
+    
+    # [NEW] Cleanup tracker to free memory
+    tracker.clear()
+    del tracker
     
     # 发送企微通知
     market_label = f" ({market_filter})" if market_filter else ""
@@ -139,29 +160,9 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool =
     report += f"- **处理耗时**: {duration:.1f}s"
     send_wecom_notification(report)
     
-    # 获取本次分析的基准日期 (取第一个分析成功的日期)
-    base_date = None
-    try:
-        # 尝试从最近一条预测中获取日期
-        cursor = conn.cursor()
-        cursor.execute("SELECT date FROM ai_predictions ORDER BY created_at DESC LIMIT 1")
-        row = cursor.fetchone()
-        if row:
-            base_date = row[0]
-        else:
-            base_date = datetime.now(BEIJING_TZ).strftime("%Y-%m-%d")
-    except Exception as e:
-        logger.debug(f"ℹ️ 获取最新预测日期失败 (可能库还没数据): {e}")
-        base_date = datetime.now(BEIJING_TZ).strftime("%Y-%m-%d")
-
-    # 1. 发送 Web Push 广播 (通知用户 AI 预测已更新)
-    send_push_notification(
-        title="🤖 AI 预测已更新",
-        body="今日 AI 智囊团分析报告已就绪，点击查看最新投资建议。",
-        url="/dashboard",
-        broadcast=True,
-        tag="ai_analysis"
-    )
+    # [REMOVED] Old broadcast notification
+    # Individual users are now notified as their watchlists complete
+    # See user_tracker.py::notify_user_prediction_updated()
 
     # 最后关闭连接
     conn.close()

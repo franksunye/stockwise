@@ -26,10 +26,16 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from tavily import TavilyClient
 
-from database import get_connection
-from logger import logger
-from config import TAVILY_API_KEY
-from engine.models.brief_strategies import StrategyFactory
+try:
+    from backend.database import get_connection
+    from backend.logger import logger
+    from backend.config import TAVILY_API_KEY
+    from backend.engine.models.brief_strategies import StrategyFactory
+except ImportError:
+    from database import get_connection
+    from logger import logger
+    from config import TAVILY_API_KEY
+    from engine.models.brief_strategies import StrategyFactory
 
 # --- Tracing Helper ---
 class DetailedTraceRecorder:
@@ -444,6 +450,78 @@ async def assemble_user_brief(user_id: str, date_str: str) -> Optional[str]:
         conn.close()
 
 
+# --- Notification Helpers ---
+async def notify_user_brief_ready(user_id: str, date_str: str):
+    """
+    Send push notification to user immediately after their brief is ready.
+    Includes idempotency protection and comprehensive error handling.
+    """
+    try:
+        from backend.notifications import send_push_notification
+    except ImportError:
+        from notifications import send_push_notification
+    
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        
+        # 1. Idempotency Check: Has this user already been notified for this date?
+        cursor.execute(
+            "SELECT notified_at FROM daily_briefs WHERE user_id = ? AND date = ?",
+            (user_id, date_str)
+        )
+        row = cursor.fetchone()
+        
+        if not row:
+            logger.warning(f"⚠️ [Notify] User {user_id} has no brief for {date_str}, skipping notification")
+            return
+        
+        if row[0]:  # notified_at is not NULL
+            logger.debug(f"ℹ️ [Notify] User {user_id} already notified at {row[0]}, skipping")
+            return
+        
+        # 2. Subscription Check: Does user have push subscription?
+        cursor.execute(
+            "SELECT 1 FROM push_subscriptions WHERE user_id = ? LIMIT 1",
+            (user_id,)
+        )
+        if not cursor.fetchone():
+            logger.info(f"ℹ️ [Notify] User {user_id} has no push subscription, skipping notification")
+            return
+        
+        # 3. Get push_hook for notification body
+        cursor.execute(
+            "SELECT push_hook FROM daily_briefs WHERE user_id = ? AND date = ?",
+            (user_id, date_str)
+        )
+        row = cursor.fetchone()
+        push_hook = row[0] if row and row[0] else "点击查看今日 AI 复盘"
+        
+        # 4. Send notification (with error handling in send_push_notification itself)
+        send_push_notification(
+            title="📊 每日简报已生成",
+            body=push_hook,
+            url="/dashboard/brief",
+            target_user_id=user_id,
+            tag="daily_brief"
+        )
+        
+        # 5. Mark as notified (idempotency protection)
+        cursor.execute(
+            "UPDATE daily_briefs SET notified_at = datetime('now', '+8 hours') WHERE user_id = ? AND date = ?",
+            (user_id, date_str)
+        )
+        conn.commit()
+        
+        logger.info(f"✅ [Notify] User {user_id} notified for brief {date_str}")
+        
+    except Exception as e:
+        logger.error(f"❌ [Notify] Failed to notify user {user_id}: {e}")
+        # Don't raise - allow pipeline to continue for other users
+    finally:
+        conn.close()
+
+
 # --- CLI / Orchestrator ---
 async def run_daily_pipeline(date_str: str = None):
     """Run the Full Pipeline (Phase 1 + Phase 2 for all users)"""
@@ -464,15 +542,24 @@ async def run_daily_pipeline(date_str: str = None):
         
         logger.info(f"👥 [Phase 2] Assembling briefs for {len(users)} users...")
         for user_id in users:
-            await assemble_user_brief(user_id, date_str)
-            logger.info(f"   - Prepared brief for {user_id}")
+            try:
+                await assemble_user_brief(user_id, date_str)
+                logger.info(f"   - Prepared brief for {user_id}")
+                
+                # [NEW] Notify user immediately after their brief is ready
+                await notify_user_brief_ready(user_id, date_str)
+                
+            except Exception as e:
+                logger.error(f"❌ [Phase 2] Failed to process user {user_id}: {e}")
+                # Continue with next user
+                continue
             
     finally:
         conn.close()
     
-    # 3. Notification Phase Copuled? NO.
-    # Notifications should be triggered separately (e.g., via GitHub Actions step or separate cron).
-    # This ensures "Generation" and "Delivery" are decoupled.
+    # 3. Notification Phase Decoupled
+    # Individual notifications are now sent immediately in Phase 2 loop.
+    # The old batch notification function (send_personalized_daily_report) is deprecated.
     
     logger.info("🎉 Daily Pipeline Completed! Check 'daily_briefs' table.")
 

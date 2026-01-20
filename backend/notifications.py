@@ -50,8 +50,17 @@ def send_personalized_daily_report(date_str):
     """
     Broadcast push notifications to users who have a generated brief for the given date.
     Purely consumes 'daily_briefs' table. Does NOT trigger generation.
+    
+    DEPRECATED: This function is for batch notification and is no longer used in the main pipeline.
+    The new approach sends notifications immediately after each user's brief is generated
+    (see brief_generator.py::notify_user_brief_ready).
+    
+    This function is retained for manual re-notification or compatibility with legacy workflows.
     """
-    from database import get_connection
+    try:
+        from backend.database import get_connection
+    except ImportError:
+        from database import get_connection
     
     conn = get_connection()
     try:
