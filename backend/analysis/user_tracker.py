@@ -126,7 +126,7 @@ def notify_user_prediction_updated(user_id: str):
     try:
         send_push_notification(
             title="🤖 AI 预测已更新",
-            body="您关注的股票信号已全部更新，点击查看最新趋势。",
+            body="您关注的 AI 预测数据已全部更新，点击查看最新趋势。",
             url="/dashboard",
             target_user_id=user_id,
             tag="ai_prediction"
