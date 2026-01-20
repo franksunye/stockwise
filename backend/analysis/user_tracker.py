@@ -38,8 +38,13 @@ class UserCompletionTracker:
             cursor = conn.cursor()
             
             # Fetch all watchlist entries (user_id, symbol pairs)
-            # We fetch all and filter in Python to avoid large IN clauses
-            cursor.execute("SELECT user_id, symbol FROM user_watchlist")
+            # [OPTIMIZED] Only track users who have at least one active push subscription
+            query = """
+                SELECT w.user_id, w.symbol 
+                FROM user_watchlist w
+                WHERE EXISTS (SELECT 1 FROM push_subscriptions s WHERE s.user_id = w.user_id)
+            """
+            cursor.execute(query)
             all_watchlist = cursor.fetchall()
             
             target_set = set(target_stocks)
