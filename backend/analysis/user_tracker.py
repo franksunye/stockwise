@@ -111,27 +111,38 @@ class UserCompletionTracker:
         logger.debug("🧹 [Tracker] Cleared all tracking data")
 
 
-def notify_user_prediction_updated(user_id: str):
+def notify_user_prediction_updated(user_id: str, market: str = None):
     """
     Send push notification to user when their watchlist predictions are complete.
     
     Args:
         user_id: User to notify
+        market: Market code (CN, HK, US) for personalization
     """
     try:
         from backend.notifications import send_push_notification
     except ImportError:
         from notifications import send_push_notification
     
+    # Market display name mapping
+    market_name = ""
+    if market:
+        if market == "CN": market_name = "A股"
+        elif market == "HK": market_name = "港股"
+        elif market == "US": market_name = "美股"
+        else: market_name = market
+    
+    body_text = f"您关注的 {market_name} AI 预测数据已全部更新，点击查看最新趋势。" if market_name else "您关注的 AI 预测数据已全部更新，点击查看最新趋势。"
+
     try:
         send_push_notification(
             title="🤖 AI 预测已更新",
-            body="您关注的 AI 预测数据已全部更新，点击查看最新趋势。",
+            body=body_text,
             url="/dashboard",
             target_user_id=user_id,
             tag="ai_prediction"
         )
-        logger.info(f"✅ [Notify] User {user_id} notified for prediction update")
+        logger.info(f"✅ [Notify] User {user_id} notified for prediction update ({market_name or 'All'})")
         
     except Exception as e:
         logger.error(f"❌ [Notify] Failed to notify user {user_id} for prediction: {e}")

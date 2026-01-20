@@ -253,7 +253,11 @@ def _analyze_stocks_for_date(conn, stocks: list, date_str: str, model_filter: st
                     from backend.analysis.user_tracker import notify_user_prediction_updated
                     ready_users = tracker.mark_stock_complete(stock)
                     for uid in ready_users:
-                        notify_user_prediction_updated(uid)
+                        # Infer market from stock symbol if model_filter/market_filter not explicit
+                        mkt = "CN" if len(stock) > 5 else "HK"
+                        if model_filter and model_filter in ["CN", "HK"]:
+                            mkt = model_filter
+                        notify_user_prediction_updated(uid, market=mkt)
             
             # Sync back validation logic
             try:

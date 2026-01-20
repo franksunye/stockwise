@@ -133,8 +133,9 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool =
                 
                 # [NEW] Mark stock complete and notify ready users
                 ready_users = tracker.mark_stock_complete(stock)
+                # Notify immediately
                 for uid in ready_users:
-                    notify_user_prediction_updated(uid)
+                    notify_user_prediction_updated(uid, market=market_filter or "CN")
                 
             except Exception as e:
                 logger.error(f"❌ {stock} AI Engine Failed: {e}")
