@@ -57,6 +57,11 @@ def run_ai_analysis_backfill(
     
     conn = get_connection()
     
+    # [NEW] Initialize Tracker for notifications
+    from backend.analysis.user_tracker import UserCompletionTracker, notify_user_prediction_updated
+    tracker = UserCompletionTracker()
+    tracker.load_watchlists(targets)
+    
     # 2. 确定目标日期列表
     target_dates = []
     today = datetime.now(BEIJING_TZ).strftime("%Y-%m-%d")
@@ -182,7 +187,7 @@ def run_ai_analysis_backfill(
         logger.info(f"🗓️ 分析日期: {date_str}")
         logger.info(f"{'='*50}")
         
-        success = _analyze_stocks_for_date(conn, targets, date_str, model_filter=model_filter, force=force)
+        success = _analyze_stocks_for_date(conn, targets, date_str, model_filter=model_filter, force=force, tracker=tracker)
         total_success += success
     
     conn.close()
@@ -202,7 +207,7 @@ def run_ai_analysis_backfill(
     send_wecom_notification(report)
 
 
-def _analyze_stocks_for_date(conn, stocks: list, date_str: str, model_filter: str = None, force: bool = False) -> int:
+def _analyze_stocks_for_date(conn, stocks: list, date_str: str, model_filter: str = None, force: bool = False, tracker=None) -> int:
     """为指定日期分析一组股票，返回成功数量"""
     success_count = 0
     
@@ -242,6 +247,13 @@ def _analyze_stocks_for_date(conn, stocks: list, date_str: str, model_filter: st
             result = asyncio.run(runner.run_analysis(stock, date_str, data=None, force=force))
             if result:
                 success_count += 1
+                
+                # [NEW] Notifications for backfill (especially when date=today)
+                if tracker:
+                    from backend.analysis.user_tracker import notify_user_prediction_updated
+                    ready_users = tracker.mark_stock_complete(stock)
+                    for uid in ready_users:
+                        notify_user_prediction_updated(uid)
             
             # Sync back validation logic
             try:
