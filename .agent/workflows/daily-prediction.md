@@ -11,7 +11,7 @@ description: 每日全自动执行本地 AI 股票预测流程
    `git pull`
 
 2. **执行预测脚本**
-   利用 `local-ai-prediction` 技能中的标准脚本执行预测。
+   利用 `local-data-ops` 技能中的标准脚本执行预测。
    `C:\cygwin64\home\frank\StockWise\backend\scripts\run_prediction.ps1`
 
 3. **结果验证**
