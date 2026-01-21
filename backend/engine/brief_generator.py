@@ -21,20 +21,25 @@ import json
 from datetime import datetime
 from typing import Optional, Dict, List, Any
 
-# Add backend to path for standalone execution
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Add likely paths for standalone execution
+current_file = os.path.abspath(__file__)
+engine_dir = os.path.dirname(current_file)
+backend_dir = os.path.dirname(engine_dir)
+root_dir = os.path.dirname(backend_dir)
+sys.path.insert(0, root_dir)
+sys.path.insert(0, backend_dir)
 
-from tavily import TavilyClient
+import requests
+import re
+
 
 try:
     from backend.database import get_connection
     from backend.logger import logger
-    from backend.config import TAVILY_API_KEY
     from backend.engine.models.brief_strategies import StrategyFactory
 except ImportError:
     from database import get_connection
     from logger import logger
-    from config import TAVILY_API_KEY
     from engine.models.brief_strategies import StrategyFactory
 
 # --- Tracing Helper ---
@@ -125,39 +130,93 @@ class DetailedTraceRecorder:
 # --- Logic Impl ---
 
 async def fetch_news_for_stock(symbol: str, stock_name: str) -> str:
-    """Fetch news using Tavily."""
-    if not TAVILY_API_KEY:
-        return "News unavailable (Config Error)."
+    """Fetch news using EastMoney API (Free & Real-time for CN/HK)."""
     
-    tavily_client = TavilyClient(api_key=TAVILY_API_KEY)
-    
-    # logger.info(f"🔎 [Hunter] Fetching news for {symbol} ({stock_name})...")
-    try:
-        query = f"latest financial news events for {symbol} ({stock_name}) stock last 24 hours earning reports regulatory changes"
-        response = await asyncio.to_thread(
-            tavily_client.search,
-            query=query,
-            search_depth="advanced",
-            topic="news",
-            max_results=5
-        )
+    def _fetch_sync():
+        url = "http://search-api-web.eastmoney.com/search/jsonp"
+        params = {
+            "cb": "jQuery_callback",
+            "param": json.dumps({
+                "uid": "",
+                "keyword": symbol, # Search by symbol primarily
+                "type": ["cmsArticle"],
+                "client": "web",
+                "clientType": "web", 
+                "clientVersion": "curr",
+                "param": {
+                    "cmsArticle": {
+                        "searchScope": "default",
+                        "sort": "default",
+                        "pageIndex": 1,
+                        "pageSize": 50, # Fetch more to filter later
+                        "preTag": "",
+                        "postTag": ""
+                    }
+                }
+            })
+        }
         
-        results = response.get('results', [])
-        if not results:
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+            "Referer": f"https://so.eastmoney.com/news/s?keyword={symbol}"
+        }
+
+        try:
+            resp = requests.get(url, params=params, headers=headers, timeout=10)
+            return resp.text
+        except Exception as e:
+            logger.error(f"⚠️ [EastMoney] Request failed for {symbol}: {e}")
+            return None
+
+    # Execute request in thread pool to avoid blocking
+    resp_text = await asyncio.to_thread(_fetch_sync)
+    
+    if not resp_text:
+        return "News retrieval failed."
+
+    # Parse JSONP
+    match = re.search(r'^[^(]*\((.*)\);?$', resp_text.strip(), re.DOTALL)
+    if not match:
+        return "No significant news found."
+
+    try:
+        data = json.loads(match.group(1))
+        # Ensure 'result' and 'cmsArticle' exist, handle None or missing keys gracefully
+        result = data.get("result") or {}
+        if not result:
              return "No significant news found."
+             
+        articles = result.get("cmsArticle", [])
+        
+        # Filter: Symbol OR Name in title
+        # EastMoney search by 'keyword' (symbol) might return irrelevant results if we don't filter
+        filter_terms = [symbol]
+        if stock_name:
+            filter_terms.append(stock_name)
+            
+        focused_articles = [
+            a for a in articles
+            if any(term.lower() in a.get("title", "").lower() for term in filter_terms)
+        ]
+        
+        if not focused_articles:
+             return "No significant news found directly related to this stock."
 
         context = []
-        for result in results:
-            title = result.get('title', 'No Title')
-            content = result.get('content', '')[:300]
-            url = result.get('url', '')
-            context.append(f"- **{title}**: {content} (Source: {url})")
+        for a in focused_articles[:5]: # Top 5
+            title = a.get('title', '').replace("<em>", "").replace("</em>", "")
+            content = a.get('content', '')[:300] # EastMoney provides summary/content
+            date = a.get('date', '')
+            media = a.get('mediaName', 'EastMoney')
+            # url = a.get('url', '') # URL not strictly present in all responses, rely on content
+            
+            context.append(f"- **{title}** ({date}): {content} (Source: {media})")
             
         return "\n".join(context)
-        
+
     except Exception as e:
-        logger.error(f"⚠️ [Hunter] Failed for {symbol}: {e}")
-        return f"News retrieval failed."
+        logger.error(f"⚠️ [EastMoney] Parse failed for {symbol}: {e}")
+        return f"News parsing failed: {e}"
 
 
 async def analyze_stock_context(

@@ -1,4 +1,6 @@
 # 个股新闻获取方案
+> **Update (2026-01-21):** 已正式使用 **东财 API 直连** 替代 Tavily。
+> 本文档描述了 StockWise 项目中获取个股实时新闻的技术方案。
 
 > 本文档描述了 StockWise 项目中获取个股实时新闻的技术方案，用于替代昂贵的 Gemini Search Grounding。
 
