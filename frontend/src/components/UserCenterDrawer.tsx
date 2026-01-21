@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, User, Crown, Zap, ShieldCheck, Loader2, ArrowRight, Share2, Check, RefreshCw, Key, Bell } from 'lucide-react';
+import { X, User, Crown, Zap, ShieldCheck, Loader2, ArrowRight, Share2, Check, RefreshCw, Key, Bell, ChevronDown } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getWatchlist } from '@/lib/storage';
 import { getCurrentUser, restoreUserIdentity } from '@/lib/user';
@@ -34,11 +34,27 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
   const [redeemMsg, setRedeemMsg] = useState<{type: 'success'|'error', text: string} | null>(null);
 
   // Notification State
-  const [pushPermission, setPushPermission] = useState<NotificationPermission>('default');
+  const [_pushPermission, setPushPermission] = useState<NotificationPermission>('default');
   const [isSubscribing, setIsSubscribing] = useState(false);
   const [pushSupported, setPushSupported] = useState(false);
   const [testingPush, setTestingPush] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
+
+  // Notification Settings State
+  const [showNotificationSettings, setShowNotificationSettings] = useState(false);
+  const [notificationSettings, setNotificationSettings] = useState<{
+    enabled: boolean;
+    types: Record<string, { enabled: boolean; priority: string }>;
+  }>({
+    enabled: true,
+    types: {
+      signal_flip: { enabled: true, priority: 'high' },
+      morning_call: { enabled: true, priority: 'medium' },
+      validation_glory: { enabled: true, priority: 'medium' },
+      prediction_updated: { enabled: true, priority: 'low' },
+      daily_brief: { enabled: true, priority: 'low' },
+    },
+  });
 
   // 测试推送通知
   const handleTestPush = async () => {
@@ -110,9 +126,22 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                 }
             }
         }
+        
+        // Load notification settings if subscribed
+        if (isSubscribed && userId) {
+          try {
+            const res = await fetch(`/api/user/notification-settings?userId=${userId}`);
+            const data = await res.json();
+            if (data.settings) {
+              setNotificationSettings(data.settings);
+            }
+          } catch (e) {
+            console.error('Failed to load notification settings:', e);
+          }
+        }
     };
     checkPushState();
-  }, [isOpen]);
+  }, [isOpen, isSubscribed, userId]);
 
   const handleEnableNotifications = async () => {
     setIsSubscribing(true);
@@ -417,53 +446,113 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                 </div>
               </div>
 
-              {/* Notification Switch (PWA Only) */}
+              {/* Notification Switch (PWA Only) - Upgraded with Type Settings */}
               {pushSupported && (
-                 <div className="glass-card p-5 mb-8">
+                 <div className="glass-card p-4 mb-6">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${pushPermission === 'granted' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-white/5 text-slate-400'}`}>
-                                <Bell size={20} />
+                            <div className={`w-9 h-9 rounded-full flex items-center justify-center ${isSubscribed ? 'bg-emerald-500/20 text-emerald-400' : 'bg-white/5 text-slate-400'}`}>
+                                <Bell size={18} />
                             </div>
                             <div>
                                 <h4 className="text-sm font-bold text-white">推送通知</h4>
                                 <div className="flex items-center gap-2">
-                                    <p className="text-[10px] text-slate-500">获取股价异动与日报提醒</p>
-                                    
-                                    {/* 测试按钮 - 仅当通知已订阅时显示，最小化设计 */}
+                                    <p className="text-[10px] text-slate-500">AI 信号与日报提醒</p>
                                     {isSubscribed && (
-                                        <button
-                                            onClick={handleTestPush}
-                                            disabled={testingPush}
-                                            className="text-[10px] text-indigo-400 hover:text-indigo-300 underline underline-offset-2 disabled:opacity-50"
-                                        >
-                                            {testingPush ? '发送中...' : '发送测试'}
+                                        <button onClick={handleTestPush} disabled={testingPush} className="text-[10px] text-indigo-400 hover:text-indigo-300 underline underline-offset-2 disabled:opacity-50">
+                                            {testingPush ? '...' : '测试'}
                                         </button>
                                     )}
+                                </div>
                             </div>
-                        </div>
                         </div>
                         <div>
                             {isSubscribed ? (
-                                <button
-                                    onClick={handleDisableNotifications}
-                                    disabled={isSubscribing}
-                                    className="px-3 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20 hover:bg-emerald-500/20 hover:text-red-400 hover:border-red-500/30 transition-all group/btn"
-                                >
-                                    <span className="group-hover/btn:hidden">{isSubscribing ? '处理中...' : '已开启'}</span>
-                                    <span className="hidden group-hover/btn:inline">关闭</span>
+                                <button onClick={handleDisableNotifications} disabled={isSubscribing} className="px-3 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/30 transition-all">
+                                    {isSubscribing ? '...' : '已开启'}
                                 </button>
                             ) : (
-                                <button
-                                    onClick={handleEnableNotifications}
-                                    disabled={isSubscribing}
-                                    className="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg transition-all active:scale-95 disabled:opacity-50"
-                                >
-                                    {isSubscribing ? '开启中...' : '开启'}
+                                <button onClick={handleEnableNotifications} disabled={isSubscribing} className="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg transition-all active:scale-95 disabled:opacity-50">
+                                    {isSubscribing ? '...' : '开启'}
                                 </button>
                             )}
                         </div>
                     </div>
+                    
+                    {/* Expandable Notification Type Settings */}
+                    {isSubscribed && (
+                      <div className="mt-3 pt-3 border-t border-white/5">
+                        <button
+                          onClick={() => setShowNotificationSettings(!showNotificationSettings)}
+                          className="w-full flex items-center justify-between text-xs text-slate-400 hover:text-indigo-400 transition-colors py-1"
+                        >
+                          <span className="font-bold">通知类型设置</span>
+                          <ChevronDown className={`w-4 h-4 transition-transform ${showNotificationSettings ? 'rotate-180' : ''}`} />
+                        </button>
+                        
+                        <AnimatePresence>
+                          {showNotificationSettings && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: 'auto', opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.2 }}
+                              className="overflow-hidden"
+                            >
+                              <div className="mt-3 space-y-2">
+                                {[
+                                  { key: 'signal_flip', icon: '🚨', label: '信号翻转', desc: 'AI观点重大转变' },
+                                  { key: 'morning_call', icon: '☕', label: '每日早报', desc: '08:30 开盘提醒' },
+                                  { key: 'validation_glory', icon: '🏅', label: '验证战报', desc: '预测成功反馈' },
+                                  { key: 'prediction_updated', icon: '🤖', label: '预测更新', desc: '分析完成通知' },
+                                  { key: 'daily_brief', icon: '📊', label: '简报生成', desc: '个性化简报就绪' },
+                                ].map((type) => {
+                                  const isEnabled = notificationSettings.types[type.key]?.enabled ?? true;
+                                  return (
+                                    <div key={type.key} className="flex items-center justify-between py-1">
+                                      <div className="flex items-center gap-2 flex-1">
+                                        <span className="text-base">{type.icon}</span>
+                                        <div className="flex-1">
+                                          <p className="text-[11px] font-bold text-white">{type.label}</p>
+                                          <p className="text-[9px] text-slate-600">{type.desc}</p>
+                                        </div>
+                                      </div>
+                                      <button
+                                        onClick={async () => {
+                                          const newSettings = {
+                                            ...notificationSettings,
+                                            types: {
+                                              ...notificationSettings.types,
+                                              [type.key]: { ...notificationSettings.types[type.key], enabled: !isEnabled },
+                                            },
+                                          };
+                                          setNotificationSettings(newSettings);
+                                          try {
+                                            await fetch('/api/user/notification-settings', {
+                                              method: 'POST',
+                                              headers: { 'Content-Type': 'application/json' },
+                                              body: JSON.stringify({ userId, settings: newSettings }),
+                                            });
+                                            setRedeemMsg({ type: 'success', text: '设置已保存' });
+                                            setTimeout(() => setRedeemMsg(null), 1500);
+                                          } catch (e) {
+                                            console.error('Failed to save settings:', e);
+                                            setRedeemMsg({ type: 'error', text: '保存失败' });
+                                          }
+                                        }}
+                                        className={`w-9 h-5 rounded-full transition-all flex items-center px-0.5 ${isEnabled ? 'bg-indigo-600 justify-end' : 'bg-slate-700 justify-start'}`}
+                                      >
+                                        <motion.div className="w-4 h-4 bg-white rounded-full shadow" layout transition={{ type: 'spring', stiffness: 500, damping: 30 }} />
+                                      </button>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    )}
                  </div>
               )}
 

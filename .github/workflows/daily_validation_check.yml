@@ -1,0 +1,42 @@
+name: Daily Validation Check (Smart)
+
+# 职责：每日收盘后校验 AI 预测准确度并发送成功战报
+# 触发：北京时间 16:30 (M-F)
+
+on:
+  schedule:
+    - cron: '30 8 * * 1-5'  # 08:30 UTC = 16:30 CST
+  workflow_dispatch:
+
+jobs:
+  validation-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Run Validation Check
+        env:
+          # Database (Turso)
+          TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+          
+          # Push Service
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+          INTERNAL_API_SECRET: ${{ secrets.INTERNAL_API_SECRET }}
+          
+          # Logic Control
+          ENABLE_SMART_NOTIFICATIONS: "true"
+        run: |
+          python backend/scripts/daily_validation_check.py

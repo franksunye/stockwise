@@ -169,7 +169,9 @@ class PredictionRunner:
         conn.commit()
         conn.close()
         logger.info(f"✅ Analysis completed for {symbol}. Saved {saved_count} results. Primary: {primary_pred['model_id'] if primary_pred else 'None'}")
-        return True
+        
+        # Return the primary prediction result for use in notifications
+        return primary_pred if primary_pred else True
 
     async def _safe_predict(self, model, symbol, date, data, force: bool = False):
         try:

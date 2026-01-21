@@ -59,6 +59,18 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool =
     tracker = UserCompletionTracker()
     tracker.load_watchlists(targets)
     
+    # [NEW] Initialize Smart Notification Manager if enabled
+    from backend.config import ENABLE_SMART_NOTIFICATIONS
+    from backend.notification_service import NotificationManager
+    notif_manager = None
+    if ENABLE_SMART_NOTIFICATIONS:
+        notif_manager = NotificationManager()
+        # Pre-load signal states for users involved in this run
+        involved_users = set()
+        for users in tracker.stock_subscribers.values():
+            involved_users.update(users)
+        notif_manager.load_signal_states(list(involved_users), targets)
+    
     conn = get_connection()
     cursor = conn.cursor()
     
@@ -119,17 +131,27 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool =
                 import asyncio
                 
                 runner = PredictionRunner(model_filter=model_filter, force=force)
-                # Run async in sync context
-                # Windows might need policy ... assume main.py handles it or we do local
-                if os.name == 'nt':
-                     try:
-                         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-                     except: pass
-                     
-                asyncio.run(runner.run_analysis(stock, today_str))
                 
+                # Run async in sync context
+                if os.name == 'nt':
+                    try:
+                        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+                    except: pass
+                     
+                primary_result = asyncio.run(runner.run_analysis(stock, today_str))
+                
+                # [NEW] Check for Signal Flips for each subscriber
+                if notif_manager and isinstance(primary_result, dict):
+                    subscribers = tracker.stock_subscribers.get(stock, set())
+                    for uid in subscribers:
+                        notif_manager.check_signal_flip(
+                            uid, stock, 
+                            primary_result.get('signal'), 
+                            primary_result.get('confidence')
+                        )
+
                 success_count += 1
-                ai_count += 1 # Assume all are AI now or hybrid
+                ai_count += 1 
                 
                 # [NEW] Mark stock complete and notify ready users
                 ready_users = tracker.mark_stock_complete(stock)
@@ -139,12 +161,15 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool =
                 
             except Exception as e:
                 logger.error(f"❌ {stock} AI Engine Failed: {e}")
-                # Fallback to old for safety? No, we trust new engine.
-                # Don't mark as complete if failed
                 continue
             
         except Exception as e:
             logger.error(f"❌ {stock} 分析失败: {e}")
+
+    # [NEW] Finalize Smart Notifications (Flush updates and send aggregated)
+    if notif_manager:
+        notif_manager.flush()
+        logger.info("📢 [Runner] Smart notification flush completed")
             
     duration = time.time() - start_time
     logger.info(f"✅ AI 分析完成! 成功: {success_count}/{len(targets)} (AI: {ai_count}, Rule: {rule_count}), 耗时: {duration:.1f}s")

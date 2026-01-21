@@ -137,3 +137,9 @@ CHAIN_STRATEGIES = {
     }
 }
 
+# -----------------------------------------------------------------------------
+# Notification System Config
+# -----------------------------------------------------------------------------
+ENABLE_SMART_NOTIFICATIONS = os.getenv("ENABLE_SMART_NOTIFICATIONS", "false").lower() == "true"
+INTERNAL_API_SECRET = os.getenv("INTERNAL_API_SECRET")
+NEXT_PUBLIC_SITE_URL = os.getenv("NEXT_PUBLIC_SITE_URL", "http://localhost:3000")

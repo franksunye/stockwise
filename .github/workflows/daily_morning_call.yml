@@ -1,0 +1,42 @@
+name: Daily Morning Call (Smart)
+
+# 职责：每日早盘前发送个性化 AI 交易计划提醒
+# 触发：北京时间 08:30 (M-F)
+
+on:
+  schedule:
+    - cron: '30 0 * * 1-5'  # 00:30 UTC = 08:30 CST
+  workflow_dispatch:
+
+jobs:
+  morning-call:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Run Morning Call
+        env:
+          # Database (Turso)
+          TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+          
+          # Push Service
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+          INTERNAL_API_SECRET: ${{ secrets.INTERNAL_API_SECRET }}
+          
+          # Logic Control
+          ENABLE_SMART_NOTIFICATIONS: "true"
+        run: |
+          python backend/scripts/daily_morning_call.py

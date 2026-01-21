@@ -263,6 +263,46 @@ def init_db():
                 if "duplicate column" not in str(e).lower():
                     logger.warning(f"⚠️ Could not add notified_at column: {e}")
         
+        # 9. Notification System Tables (Phase 1 of Smart Notifications)
+        # notification_logs: Track sent notifications for de-duplication and analytics
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS notification_logs (
+                id TEXT PRIMARY KEY,
+                user_id TEXT NOT NULL,
+                type TEXT NOT NULL,
+                related_symbols TEXT,
+                title TEXT,
+                body TEXT,
+                url TEXT,
+                sent_at TIMESTAMP DEFAULT (datetime('now', '+8 hours')),
+                clicked_at TIMESTAMP,
+                channel TEXT DEFAULT 'push'
+            )
+        """)
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_notif_logs_user_type ON notification_logs(user_id, type, sent_at)")
+        
+        # signal_states: Track last notified signal for each user/stock pair (for Signal Flip detection)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS signal_states (
+                user_id TEXT NOT NULL,
+                symbol TEXT NOT NULL,
+                last_signal TEXT,
+                last_confidence REAL,
+                last_notified_at TIMESTAMP,
+                PRIMARY KEY (user_id, symbol)
+            )
+        """)
+        
+        # 10. Add notification_settings column to users table (if exists)
+        # This column stores user preferences for notification types as JSON
+        try:
+            cursor.execute("ALTER TABLE users ADD COLUMN notification_settings TEXT")
+            logger.info("✅ Added notification_settings column to users table")
+        except Exception as e:
+            # Column might already exist or table might not exist yet
+            if "duplicate column" not in str(e).lower() and "no such table" not in str(e).lower():
+                logger.debug(f"ℹ️ notification_settings column: {e}")
+        
         conn.commit()
         logger.info("✅ 数据库结构初始化完成 (Raw SQL - No ORM)")
         
