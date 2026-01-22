@@ -8,6 +8,7 @@ import { getCurrentUser } from '@/lib/user';
 import { getHKTime, getLastTradingDay } from '@/lib/date-utils';
 
 interface BriefData {
+  date: string;
   content: string;
   push_hook: string;
   created_at: string;
@@ -155,7 +156,7 @@ export function BriefDrawer({ isOpen, onClose, limitToSymbol }: BriefDrawerProps
                     <p className="text-[10px] text-slate-500 font-bold tracking-[0.2em] uppercase flex items-center gap-1.5">
                       <span className="w-1 h-1 rounded-full bg-indigo-500" />
                       {isSpecificStock ? `STOCK REVIEW: ${limitToSymbol}` : 'DAILY REVIEW'} 
-                      <span className="opacity-50 ml-2">{new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase()}</span>
+                      {brief ? (brief.date.split('-')[1] + '/' + brief.date.split('-')[2]) : new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase()}
                     </p>
                   </div>
                </div>
@@ -276,7 +277,7 @@ export function BriefDrawer({ isOpen, onClose, limitToSymbol }: BriefDrawerProps
                           onClick={() => setShowGlobal(true)}
                           className="w-full py-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-xs text-indigo-300 font-bold tracking-wider uppercase transition-all active:scale-[0.98] flex items-center justify-center gap-2"
                         >
-                          <Sparkles size={14} /> 阅读完整日报 ({new Date().toISOString().split('T')[0]})
+                          <Sparkles size={14} /> 阅读完整日报 ({brief.date})
                         </button>
                      )}
 

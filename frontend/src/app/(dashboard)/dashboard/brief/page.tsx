@@ -7,6 +7,7 @@ import ReactMarkdown from 'react-markdown'
 import { getCurrentUser } from '@/lib/user'
 
 interface BriefData {
+  date: string
   content: string
   push_hook: string
   created_at: string
@@ -143,7 +144,7 @@ export default function BriefPage() {
             <p className="text-[10px] text-slate-500 font-bold tracking-[0.2em] uppercase flex items-center gap-1.5">
               <span className="w-1 h-1 rounded-full bg-indigo-500" />
               DAILY REVIEW
-              <span className="opacity-50 ml-2">{new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase()}</span>
+              {brief ? (brief.date.split('-')[1] + '/' + brief.date.split('-')[2]) : new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase()}
             </p>
           </div>
         </div>

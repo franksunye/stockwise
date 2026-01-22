@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
         if ('execute' in db) {
             // Turso/libsql
             const result = await db.execute({
-                sql: `SELECT content, push_hook, created_at FROM daily_briefs WHERE user_id = ? AND date = ?`,
+                sql: `SELECT date, content, push_hook, created_at FROM daily_briefs WHERE user_id = ? AND date = ?`,
                 args: [userId, date]
             })
 
@@ -32,6 +32,7 @@ export async function GET(request: NextRequest) {
             const row = result.rows[0]
             return NextResponse.json({
                 brief: {
+                    date: row.date,
                     content: row.content,
                     push_hook: row.push_hook,
                     created_at: row.created_at
@@ -39,8 +40,8 @@ export async function GET(request: NextRequest) {
             })
         } else {
             // Local SQLite (better-sqlite3)
-            const stmt = db.prepare(`SELECT content, push_hook, created_at FROM daily_briefs WHERE user_id = ? AND date = ?`)
-            const row = stmt.get(userId, date) as { content: string; push_hook: string; created_at: string } | undefined
+            const stmt = db.prepare(`SELECT date, content, push_hook, created_at FROM daily_briefs WHERE user_id = ? AND date = ?`)
+            const row = stmt.get(userId, date) as { date: string; content: string; push_hook: string; created_at: string } | undefined
 
             if (!row) {
                 return NextResponse.json({ brief: null })
@@ -48,6 +49,7 @@ export async function GET(request: NextRequest) {
 
             return NextResponse.json({
                 brief: {
+                    date: row.date,
                     content: row.content,
                     push_hook: row.push_hook,
                     created_at: row.created_at
