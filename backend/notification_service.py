@@ -103,13 +103,21 @@ class NotificationManager:
         old_signal = None
         
         if not cached_state:
-            # Initial prediction for this user/stock
-            is_flip = True
-            old_signal = "None"
+            # Initial prediction: Update state but DO NOT notify (avoid spam on new watchlist)
+            is_flip = False
+            old_signal = None
         elif cached_state["signal"] != new_signal:
             is_flip = True
             old_signal = cached_state["signal"]
             
+        # Always update the registry with the latest state
+        self.pending_state_updates.append({
+            "user_id": user_id,
+            "symbol": symbol,
+            "signal": new_signal,
+            "confidence": new_confidence
+        })
+
         if is_flip:
             self.stats["flips_detected"] += 1
             flip_event = {
@@ -122,14 +130,6 @@ class NotificationManager:
             
             # Queue for aggregation
             self.queue_notification(user_id, "signal_flip", flip_event)
-            
-            # Prepare state update
-            self.pending_state_updates.append({
-                "user_id": user_id,
-                "symbol": symbol,
-                "signal": new_signal,
-                "confidence": new_confidence
-            })
             
             return flip_event
             

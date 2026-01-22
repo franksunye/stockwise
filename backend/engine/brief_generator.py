@@ -161,12 +161,24 @@ async def fetch_news_for_stock(symbol: str, stock_name: str) -> str:
             "Referer": f"https://so.eastmoney.com/news/s?keyword={symbol}"
         }
 
-        try:
-            resp = requests.get(url, params=params, headers=headers, timeout=10)
-            return resp.text
-        except Exception as e:
-            logger.error(f"⚠️ [EastMoney] Request failed for {symbol}: {e}")
-            return None
+        max_retries = 3
+        retry_delay = 2
+        
+        for attempt in range(max_retries):
+            try:
+                resp = requests.get(url, params=params, headers=headers, timeout=10)
+                resp.raise_for_status()  # Raise on HTTP errors (4xx, 5xx)
+                return resp.text
+            except requests.exceptions.RequestException as e:
+                if attempt < max_retries - 1:
+                    wait_time = retry_delay * (2 ** attempt)
+                    logger.warning(f"⚠️ [EastMoney] Attempt {attempt + 1}/{max_retries} failed for {symbol}: {e}. Retrying in {wait_time}s...")
+                    import time as time_module
+                    time_module.sleep(wait_time)
+                else:
+                    logger.error(f"❌ [EastMoney] All {max_retries} attempts failed for {symbol}: {e}")
+                    return None
+        return None
 
     # Execute request in thread pool to avoid blocking
     resp_text = await asyncio.to_thread(_fetch_sync)
@@ -249,7 +261,10 @@ async def analyze_stock_context(
    - ❌ 错误：RSI 为 75，MA5 上穿 MA20。
    - ✅ 正确：短期动能强劲，股价呈现加速上行态势。
 3. **AI 观点自然融入**：将 AI 的信号（Bullish/Bearish）转化为对趋势的定性描述（如"上涨趋势稳固"、"短期面临调整压力"），不要提及"AI 信号"这个词。
-4. **说人话**：让没有金融背景的用户也能一眼看懂是"好"还是"坏"。"""
+4. **说人话**：让没有金融背景的用户也能一眼看懂是"好"还是"坏"。
+5. **视觉优化**：
+   - 必须使用 Emoji 增强可读性 (如 📈, 📉, ⚠️, 💡)。
+   - **关键观点**和**趋势判断**请使用加粗强调，但满篇加粗是禁止的。"""
     
     # Build data description
     signal = technical_data.get('signal', 'Side')
@@ -491,7 +506,27 @@ async def assemble_user_brief(user_id: str, date_str: str) -> Optional[str]:
         brief_sections.append(f"*StockWise AI 生成于 {timestamp}*")
         
         full_brief = "\n".join(brief_sections)
-        push_hook = f"今日复盘：{bullish}只看涨，{bearish}只看跌。点击查看您的专属简报。"
+        # Intelligent Hook Generation
+        bullish_stocks = []
+        bearish_stocks = []
+        
+        for symbol, name, _, signal in stock_reports:
+             s_name = name or symbol
+             if signal and ('Long' in signal or 'Bullish' in signal):
+                 bullish_stocks.append(s_name)
+             elif signal and ('Short' in signal or 'Bearish' in signal):
+                 bearish_stocks.append(s_name)
+        
+        if bullish_stocks:
+            top_stocks = "、".join(bullish_stocks[:2])
+            etc = "等" if len(bullish_stocks) > 2 else ""
+            push_hook = f"📈 {top_stocks}{etc}出现看涨信号，点击查看今日 AI 复盘。"
+        elif bearish_stocks:
+            top_stocks = "、".join(bearish_stocks[:2])
+            etc = "等" if len(bearish_stocks) > 2 else ""
+            push_hook = f"⚠️ {top_stocks}{etc}面临调整压力，点击查看风险提示。"
+        else:
+            push_hook = f"今日复盘：{len(watchlist)} 只股票走势平稳，点击查看详情。"
 
         # 4. Save User Brief
         cursor.execute("""
