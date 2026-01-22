@@ -18,32 +18,37 @@ export default function BriefPage() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const fetchBrief = async () => {
-      try {
-        const user = await getCurrentUser()
-        
-        // Get today's date in YYYY-MM-DD format (local timezone)
-        const now = new Date()
-        const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
-        const res = await fetch(`/api/brief?date=${today}`, {
-          headers: {
-            'x-user-id': user.userId
+        const fetchBrief = async () => {
+          try {
+            const user = await getCurrentUser()
+            const today = new Date().toISOString().split('T')[0]
+            
+            let res = await fetch(`/api/brief?date=${today}`, {
+              headers: { 'x-user-id': user.userId }
+            })
+            
+            let data = await res.json()
+            
+            // Fallback to yesterday if today is null
+            if (!data.brief) {
+              const yesterday = new Date()
+              yesterday.setDate(yesterday.getDate() - 1)
+              const yesterdayStr = yesterday.toISOString().split('T')[0]
+              
+              res = await fetch(`/api/brief?date=${yesterdayStr}`, {
+                headers: { 'x-user-id': user.userId }
+              })
+              data = await res.json()
+            }
+            
+            setBrief(data.brief)
+          } catch (err) {
+            setError('无法加载简报')
+            console.error(err)
+          } finally {
+            setLoading(false)
           }
-        })
-        
-        if (!res.ok) {
-          throw new Error('Failed to fetch brief')
         }
-        
-        const data = await res.json()
-        setBrief(data.brief)
-      } catch (err) {
-        setError('无法加载今日简报')
-        console.error(err)
-      } finally {
-        setLoading(false)
-      }
-    }
 
     fetchBrief()
   }, [])

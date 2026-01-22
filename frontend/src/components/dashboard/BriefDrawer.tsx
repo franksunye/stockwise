@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X as CloseIcon, Share2, FileText, Loader2, Sparkles, NotebookText } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { getCurrentUser } from '@/lib/user';
-import { formatStockSymbol } from '@/lib/date-utils';
+import { getHKTime, getLastTradingDay } from '@/lib/date-utils';
 
 interface BriefData {
   content: string;
@@ -70,26 +70,33 @@ export function BriefDrawer({ isOpen, onClose, limitToSymbol }: BriefDrawerProps
         const fetchBrief = async () => {
           try {
             const user = await getCurrentUser();
-            const today = new Date().toISOString().split('T')[0];
             
-            // Assuming the API returns the GLOBAL brief for the user
-            const res = await fetch(`/api/brief?date=${today}`, {
-              headers: {
-                'x-user-id': user.userId
-              }
+            // 🎯 智能日期逻辑：先试今天，没有则试上一交易日
+            const today = getHKTime().toISOString().split('T')[0];
+            const yesterday = getLastTradingDay().toISOString().split('T')[0];
+            
+            // 1. 尝试获取今日简报
+            let res = await fetch(`/api/brief?date=${today}`, {
+              headers: { 'x-user-id': user.userId }
             });
+            let data = await res.json();
             
-            if (!res.ok) throw new Error('Failed to fetch');
+            // 2. 如果今日简报暂无，尝试获取最近一个交易日的简报
+            if (!data.brief) {
+              res = await fetch(`/api/brief?date=${yesterday}`, {
+                headers: { 'x-user-id': user.userId }
+              });
+              data = await res.json();
+            }
             
-            const data = await res.json();
             setBrief(data.brief);
           } catch (err) {
             console.error(err);
-            setError('暂无今日简报');
+            setError('暂无可用简报');
           } finally {
             setLoading(false);
           }
-      };
+        };
       fetchBrief();
     }
   }, [isOpen]);
