@@ -10,12 +10,13 @@ const getDefaultSettings = () => ({
     validation_glory: { enabled: true, priority: 'medium' },
     prediction_updated: { enabled: true, priority: 'low' },
     daily_brief: { enabled: true, priority: 'low' },
+    price_update: { enabled: false, priority: 'low' },  // 实时价格更新，默认关闭避免打扰
   },
 });
 
 export async function GET(req: NextRequest) {
   const userId = req.nextUrl.searchParams.get('userId');
-  
+
   if (!userId) {
     return NextResponse.json({ settings: getDefaultSettings() });
   }
@@ -27,7 +28,7 @@ export async function GET(req: NextRequest) {
     const isCloud = 'execute' in db && typeof db.execute === 'function' && !('prepare' in db);
 
     let settingsJson: string | null = null;
-    
+
     if (isCloud) {
       const result = await db.execute({
         sql: 'SELECT notification_settings FROM users WHERE user_id = ?',
@@ -39,7 +40,7 @@ export async function GET(req: NextRequest) {
       settingsJson = row?.notification_settings || null;
     }
 
-    const settings = settingsJson 
+    const settings = settingsJson
       ? JSON.parse(settingsJson)
       : getDefaultSettings();
 

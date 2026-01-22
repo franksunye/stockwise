@@ -140,7 +140,7 @@ def notify_user_prediction_updated(user_id: str, market: str = None):
             body=body_text,
             url="/dashboard",
             target_user_id=user_id,
-            tag="ai_prediction"
+            tag="prediction_updated"
         )
         logger.info(f"✅ [Notify] User {user_id} notified for prediction update ({market_name or 'All'})")
         

@@ -88,7 +88,39 @@ export async function POST(request: Request) {
 
         console.log(`Found ${subscriptions.length} subscriptions for push.`);
 
-        // 3. 发送推送 (并行)
+        // 3. 获取用户偏好设置 (用于过滤)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const userPreferences: Map<string, any> = new Map();
+
+        // 从 tag 映射到 notification type key
+        // tag 可能是 "price_update_600519" 格式，需要提取基础类型
+        let notifTypeKey = tag || 'unknown';
+        if (notifTypeKey.startsWith('price_update_')) {
+            notifTypeKey = 'price_update';
+        }
+
+        // 只有在有订阅者时才查询偏好
+        if (subscriptions.length > 0) {
+            const userIds = [...new Set(subscriptions.map(s => s.user_id))];
+            const placeholders = userIds.map(() => '?').join(',');
+            const prefSql = `SELECT user_id, notification_settings FROM users WHERE user_id IN (${placeholders})`;
+
+            if (strategy === 'cloud') {
+                const res = await (client as Client).execute({ sql: prefSql, args: userIds });
+                for (const row of res.rows) {
+                    userPreferences.set(row.user_id as string, row.notification_settings);
+                }
+            } else {
+                const db = getDbClient() as Database.Database;
+                const rows = db.prepare(prefSql).all(...userIds);
+                for (const row of rows as { user_id: string; notification_settings: string }[]) {
+                    userPreferences.set(row.user_id, row.notification_settings);
+                }
+                db.close();
+            }
+        }
+
+        // 4. 发送推送 (并行) - 检查用户偏好
         const payload = JSON.stringify({
             title,
             body: msgBody,
@@ -97,6 +129,28 @@ export async function POST(request: Request) {
         });
 
         const promises = subscriptions.map(async (sub) => {
+            // 检查用户是否禁用了此类型的通知
+            const settingsJson = userPreferences.get(sub.user_id as string);
+            if (settingsJson) {
+                try {
+                    const settings = typeof settingsJson === 'string' ? JSON.parse(settingsJson) : settingsJson;
+                    // 全局开关
+                    if (settings.enabled === false) {
+                        console.log(`[Notify] User ${sub.user_id} has notifications disabled globally, skipping`);
+                        return { status: 'skipped', id: sub.id, reason: 'user_disabled_all' };
+                    }
+                    // 类型开关
+                    const typeSettings = settings.types?.[notifTypeKey];
+                    if (typeSettings?.enabled === false) {
+                        console.log(`[Notify] User ${sub.user_id} has '${notifTypeKey}' notifications disabled, skipping`);
+                        return { status: 'skipped', id: sub.id, reason: 'user_disabled_type' };
+                    }
+                } catch (e) {
+                    console.warn(`[Notify] Failed to parse settings for ${sub.user_id}:`, e);
+                    // 解析失败时继续发送
+                }
+            }
+
             const pushConfig = {
                 endpoint: sub.endpoint,
                 keys: {
@@ -115,11 +169,6 @@ export async function POST(request: Request) {
                 // 如果是 410 (Gone)，说明订阅失效，删除之
                 if (pushError.statusCode === 410 || pushError.statusCode === 404) {
                     console.log(`Subscription ${sub.id} expired/gone. Marking for deletion...`);
-                    // 删除逻辑移入外层统一处理
-                    // 注意：better-sqlite3 如果 close 了，下面再用会报错。
-                    // 优化策略: 在最后 try/finally 中 close，或者重新获取。
-                    // 为简单起见，这里暂不重新实现 DB 操作，留待完善
-                    // 可以在外层循环后统一处理删除
                     return { status: 'rejected', id: sub.id, reason: 'expired' };
                 }
                 return { status: 'rejected', id: sub.id, error };

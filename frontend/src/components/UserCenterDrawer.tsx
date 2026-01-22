@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, User, Crown, Zap, ShieldCheck, Loader2, ArrowRight, Share2, Check, RefreshCw, Key, Bell, ChevronDown, ArrowLeftRight, Sun, Trophy, Sparkles, FileText } from 'lucide-react';
+import { X, User, Crown, Zap, ShieldCheck, Loader2, ArrowRight, Share2, Check, RefreshCw, Key, Bell, ChevronDown, ArrowLeftRight, Sun, Trophy, Sparkles, FileText, TrendingUp } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getWatchlist } from '@/lib/storage';
 import { getCurrentUser, restoreUserIdentity } from '@/lib/user';
@@ -53,6 +53,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
       validation_glory: { enabled: true, priority: 'medium' },
       prediction_updated: { enabled: true, priority: 'low' },
       daily_brief: { enabled: true, priority: 'low' },
+      price_update: { enabled: false, priority: 'low' },
     },
   });
 
@@ -506,6 +507,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                   { key: 'validation_glory', icon: Trophy, label: '验证战报', badge: '成功推送' },
                                   { key: 'prediction_updated', icon: Sparkles, label: '预测更新', badge: '分析完成' },
                                   { key: 'daily_brief', icon: FileText, label: '简报生成', badge: '17:30' },
+                                  { key: 'price_update', icon: TrendingUp, label: '实时行情', badge: '盘中推送' },
                                 ].map((type) => {
                                   const isEnabled = notificationSettings.types[type.key]?.enabled ?? true;
                                   const IconComponent = type.icon;
