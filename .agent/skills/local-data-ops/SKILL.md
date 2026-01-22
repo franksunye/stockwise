@@ -140,6 +140,10 @@ If using `gemini-3-flash` locally, ensure the `prediction_models` table is corre
 *   **Cause**: Data for today already exists, and `--force` was not used.
 *   **Fix**: Add the `--force` flag to the command.
 
+### 4. PowerShell Encoding/Parsing Errors
+*   **Cause**: PowerShell scripts with non-ASCII characters or incorrect encoding (e.g., UTF-8 with BOM) can fail on some Windows systems.
+*   **Fix**: Ensure the script is saved as UTF-8 (no BOM) and use English for prompts/logs within the script to maximize compatibility across environments. The current `run_prediction.ps1` has been updated to use English and a more robust regex for extracting symbols.
+
 ## ⚠️ Critical Rules
 
 1.  **Never** execute a batch run without a cooling mechanism (`Sleep 5s`).

@@ -183,7 +183,19 @@ class NotificationManager:
         if not events:
             return None
             
-        # Example: Group by type
+        # 1. Handle Morning Call (Take the first one if multiple, usually just one)
+        mc_events = [e for e in events if e["type"] == "morning_call"]
+        if mc_events:
+            e = mc_events[0]
+            return {
+                "title": e["title"],
+                "body": e["body"],
+                "url": e["url"],
+                "type": "morning_call",
+                "related_symbols": e.get("related_symbols", [])
+            }
+
+        # 2. Handle Signal Flips
         flips = [e for e in events if e["type"] == "signal_flip"]
         
         if flips:
