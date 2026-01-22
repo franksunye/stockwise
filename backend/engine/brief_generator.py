@@ -256,15 +256,12 @@ async def analyze_stock_context(
     system_prompt = """你是一位 StockWise 的首席财经主笔。你的目标是编写一份**通俗易懂、聚焦市场叙事**的个股日报。
 
 核心写作原则：
-1. **新闻驱动逻辑**：优先简述"发生了什么"（新闻/行业动态），以此解释股价表现。
-2. **数据隐形化**：**严禁**直接罗列 RSI、KDJ、MA 等技术指标数值。
-   - ❌ 错误：RSI 为 75，MA5 上穿 MA20。
-   - ✅ 正确：短期动能强劲，股价呈现加速上行态势。
-3. **AI 观点自然融入**：将 AI 的信号（Bullish/Bearish）转化为对趋势的定性描述（如"上涨趋势稳固"、"短期面临调整压力"），不要提及"AI 信号"这个词。
-4. **说人话**：让没有金融背景的用户也能一眼看懂是"好"还是"坏"。
-5. **视觉优化**：
-   - 必须使用 Emoji 增强可读性 (如 📈, 📉, ⚠️, 💡)。
-   - **关键观点**和**趋势判断**请使用加粗强调，但满篇加粗是禁止的。"""
+1. **事实第一原则**：简报必须严格基于[第一事实：今日收盘表现]和[第二事实：今日核心新闻]进行创作。
+2. **逻辑一致性**：如果[参考逻辑：AI分析师推理]中描述的内容与今日股价表现（涨跌幅）存在明显矛盾（例如：推理说暴涨，事实是微跌），请**务必以今日事实为准**，将推理视为“情绪背景”或“近期趋势参考”，严禁输出逻辑自相矛盾的内容。
+3. **新闻驱动逻辑**：优先简述"发生了什么"（新闻/行业动态），以此解释股价表现。
+4. **数据隐形化**：**严禁**直接罗列 RSI、KDJ、MA 等技术指标数值。用口语化描述代替，如“超买”改为“近期涨幅较大，已积累一定调整压力”。
+5. **视觉优化**：必须使用 Emoji 增强可读性 (📈, 📉, ⚠️, 💡)。关键观点加粗，但严禁过度加粗。
+6. **说人话**：输出专业、流畅、有温度的中文。让非专业用户也能听懂。"""
     
     # Build data description
     signal = technical_data.get('signal', 'Side')
@@ -294,14 +291,14 @@ async def analyze_stock_context(
     
     user_prompt = f"""Subject: {symbol} ({stock_name})
 
-[硬数据支撑 - 仅供你参考，作为"隐性逻辑"，不要直接展示数据]
+[第一事实：今日收盘表现]
 {chr(10).join(hard_data_lines)}
 
-[分析师推理 - 供参考逻辑]
-{reasoning_section}
-
-[今日新闻 - 作为叙事核心]
+[第二事实：今日核心新闻]
 {news}
+
+[参考逻辑：AI 分析师推理记录（若与第一事实冲突，请以第一事实为准）]
+{reasoning_section}
 
 任务: 撰写每日简报（不要包含任何标题）。格式如下：
 
@@ -379,7 +376,7 @@ async def generate_stock_briefs_batch(date_str: str, specific_symbols: List[str]
         cursor.execute(f"""
             SELECT symbol, signal, confidence, ai_reasoning, support_price, pressure_price
             FROM ai_predictions_v2
-            WHERE symbol IN ({placeholders}) AND target_date = ? AND is_primary = 1
+            WHERE symbol IN ({placeholders}) AND date = ? AND is_primary = 1
         """, (*symbols_list, date_str))
         predictions = {row[0]: {
             'signal': row[1], 
