@@ -27,13 +27,14 @@ def generate_morning_calls(dry_run=False):
     conn = get_connection()
     cursor = conn.cursor()
     
-    # 1. Fetch Global Market Sentiment (Latest Brief)
-    # We look for a brief from today or yesterday
+    # 1. Fetch Market Sentiment (from latest stock analysis)
+    # The daily_briefs table doesn't have a 'type' column - it's user-specific
+    # Use stock_briefs for a sample market sentiment instead
     today_str = datetime.now(BEIJING_TZ).strftime("%Y-%m-%d")
     cursor.execute("""
-        SELECT content FROM daily_briefs 
-        WHERE type = 'Market' ORDER BY date DESC LIMIT 1
-    """)
+        SELECT analysis_markdown FROM stock_briefs 
+        WHERE date = ? ORDER BY created_at DESC LIMIT 1
+    """, (today_str,))
     brief_row = cursor.fetchone()
     market_sentiment = brief_row[0] if brief_row else "市场情绪稳定，关注 AI 交易计划。"
     
