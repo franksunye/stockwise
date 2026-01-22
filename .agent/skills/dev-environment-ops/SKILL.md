@@ -33,6 +33,35 @@ We are running in **Powershell Core** on Windows. This environment has specific 
     *   *Bad*: `git commit -m "fix: "hello""`
     *   *Good*: `git commit -m "fix: 'hello'"`
 
+### ⚠️ Terminal Command Status Synchronization
+
+**Problem**: Some commands (especially `git commit` with long messages, or interactive commands) may appear as "RUNNING" in `command_status` even though they have **already completed** in the terminal.
+
+**Root Cause**: The `command_status` tool relies on async callbacks which may not update immediately. The terminal output is the **source of truth**.
+
+**Solution**: When a command seems stuck or `command_status` keeps returning "RUNNING":
+
+1.  **Use `read_terminal` instead of `command_status`**:
+    ```
+    read_terminal(ProcessID: "<id>", Name: "<name>")
+    ```
+    This directly reads the terminal buffer and shows the actual output, including the prompt (e.g., `PS C:\...\>`) which confirms command completion.
+
+2.  **Look for completion indicators**:
+    *   Git commit success: `[branch hash] commit message`
+    *   Git push success: `To https://... branch -> branch`
+    *   Command prompt returned: `PS C:\path\>`
+
+3.  **When user mentions terminal via `@[TerminalName: ..., ProcessId: ...]`**:
+    Always use `read_terminal` to check the actual state before making assumptions.
+
+**Example**:
+```
+# If command_status shows RUNNING but user says it's done:
+read_terminal(ProcessID: "17556", Name: "Antigravity Agent")
+# Check output for: "[main 3af9ca7] fix: ..." or prompt "PS C:\...>"
+```
+
 ## 2. Database Operations
 
 The project uses a hybrid architecture:
