@@ -560,7 +560,7 @@ async def notify_user_brief_ready(user_id: str, date_str: str):
         send_push_notification(
             title="📊 每日简报已生成",
             body=push_hook,
-            url="/dashboard/brief",
+            url="/dashboard?brief=true",
             target_user_id=user_id,
             tag="daily_brief"
         )

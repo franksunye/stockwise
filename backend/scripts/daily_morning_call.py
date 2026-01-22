@@ -78,7 +78,7 @@ def generate_morning_calls(dry_run=False, target_date=None):
         else:
             body = f"📉 今日市场观望为主。{sentiment_snippet}"
             
-        url = "/daily-brief?utm_source=push&utm_medium=morning_call"
+        url = "/dashboard?brief=true&utm_source=push&utm_medium=morning_call"
         
         # Log and Queue
         nm.queue_notification(user_id, "morning_call", {

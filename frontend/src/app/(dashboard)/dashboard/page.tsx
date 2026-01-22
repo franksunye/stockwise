@@ -90,6 +90,13 @@ function DashboardContent() {
     }
   }, [targetSymbol, stocks, scrollRef]);
 
+  // 深度链接: 从 URL 参数打开简报
+  useEffect(() => {
+    if (searchParams.get('brief') === 'true') {
+      setBriefOpen(true);
+    }
+  }, [searchParams]);
+
   if (loadingPool) {
     return (
       <div className="min-h-screen bg-[#050508] flex items-center justify-center text-slate-500 text-xs font-bold tracking-widest animate-pulse">
