@@ -33,10 +33,10 @@ export function BriefDrawer({ isOpen, onClose, limitToSymbol }: BriefDrawerProps
     const safeSymbol = limitToSymbol.trim();
     
     // Robust parsing using regex to capture from stock header to next stock header
-    // Pattern: Find "### StockName (SYMBOL)" and capture everything until the next "### " stock header or end
-    // We need to match the symbol in parens, then capture all content including nested ### sub-headers
+    // Pattern: Find "### StockName (SYMBOL)" and capture everything until the next STOCK header (with code) or end
+    // Key insight: Sub-headers like "### 综合分析" should be INCLUDED, only stop at next stock like "### XXX (01167)"
     const stockHeaderPattern = new RegExp(
-      `### [^(]+\\(${safeSymbol}(?:\\.HK|\\.SZ|\\.SH)?\\)([\\s\\S]*?)(?=\\n### [^#]|\\n---\\n|$)`,
+      `### [^\\n]*\\(${safeSymbol}(?:\\.HK|\\.SZ|\\.SH)?\\)([\\s\\S]*?)(?=\\n### [^\\n]+\\([A-Z0-9]{5,6}\\)|\\n---\\n|$)`,
       'i'
     );
     
