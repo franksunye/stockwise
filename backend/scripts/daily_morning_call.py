@@ -17,11 +17,12 @@ from notification_service import NotificationManager
 from config import BEIJING_TZ
 
 
-def generate_morning_calls(dry_run=False):
+def generate_morning_calls(dry_run=False, target_date=None):
     """
     Generate and send personalized morning calls for all active users.
     """
-    logger.info(f"🌅 Starting Daily Morning Call generation (Dry Run: {dry_run})")
+    today_str = target_date or datetime.now(BEIJING_TZ).strftime("%Y-%m-%d")
+    logger.info(f"🌅 Starting Daily Morning Call generation for {today_str} (Dry Run: {dry_run})")
     
     nm = NotificationManager(dry_run=dry_run)
     conn = get_connection()
@@ -30,7 +31,6 @@ def generate_morning_calls(dry_run=False):
     # 1. Fetch Market Sentiment (from latest stock analysis)
     # The daily_briefs table doesn't have a 'type' column - it's user-specific
     # Use stock_briefs for a sample market sentiment instead
-    today_str = datetime.now(BEIJING_TZ).strftime("%Y-%m-%d")
     cursor.execute("""
         SELECT analysis_markdown FROM stock_briefs 
         WHERE date = ? ORDER BY created_at DESC LIMIT 1
@@ -99,6 +99,7 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("--dry-run", action="store_true", help="Simulate without sending")
+    parser.add_argument("--date", type=str, help="Specify date in YYYY-MM-DD format")
     args = parser.parse_args()
     
-    generate_morning_calls(dry_run=args.dry_run)
+    generate_morning_calls(dry_run=args.dry_run, target_date=args.date)
