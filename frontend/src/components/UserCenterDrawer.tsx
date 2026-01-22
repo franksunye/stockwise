@@ -379,7 +379,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
               </header>
 
               {/* 用户卡片 */}
-              <div className="mb-8 p-1 rounded-3xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-white/10 relative overflow-hidden">
+              <div className="mb-5 p-1 rounded-3xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-white/10 relative overflow-hidden">
                 {tier === 'pro' && (
                     <div className="absolute top-0 right-0 p-3">
                         <Crown className="text-amber-400 w-6 h-6 drop-shadow-[0_0_8px_rgba(251,191,36,0.5)]" />
@@ -422,7 +422,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
               </div>
 
               {/* 资源用量 */}
-              <div className="grid grid-cols-2 gap-4 mb-8">
+              <div className="grid grid-cols-2 gap-3 mb-4">
                 <div className="glass-card p-5 flex flex-col justify-between h-24">
                    <div className="flex items-center gap-2 text-slate-400">
                      <ShieldCheck size={16} />
@@ -449,7 +449,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
 
               {/* Notification Switch (PWA Only) - Upgraded with Type Settings */}
               {pushSupported && (
-                 <div className="glass-card p-4 mb-6">
+                 <div className="glass-card p-4 mb-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <div className={`w-9 h-9 rounded-full flex items-center justify-center ${isSubscribed ? 'bg-emerald-500/20 text-emerald-400' : 'bg-white/5 text-slate-400'}`}>
@@ -591,8 +591,8 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
 
               {/* 邀请好友区域 (Loot Logic) - 仅在开关开启时显示 */}
               {MEMBERSHIP_CONFIG.switches.enableReferralReward && (
-              <div className="mt-auto pt-8">
-                  <div className="p-5 rounded-[24px] bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-white/5 relative overflow-hidden group">
+              <div className="mt-auto pt-4">
+                  <div className="p-4 rounded-[20px] bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-white/5 relative overflow-hidden group">
                       <div className="relative z-10">
                           <div className="flex items-center justify-between mb-2">
                               <h4 className="text-sm font-black italic text-white flex items-center gap-2">
