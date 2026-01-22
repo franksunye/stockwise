@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.dirname(backend_path))
 from database import get_connection
 from logger import logger
 from notification_service import NotificationManager
-from backfill_validation import backfill_validation
+from engine.validator import verify_all_pending
 
 
 def run_validation_notifications(dry_run=False):
@@ -30,9 +30,9 @@ def run_validation_notifications(dry_run=False):
     
     # Step 1: Sync DB validation status
     try:
-        backfill_validation(days=3)
+        verify_all_pending()
     except Exception as e:
-        logger.error(f"❌ Failed to run backfill_validation: {e}")
+        logger.error(f"❌ Failed to run verify_all_pending: {e}")
         # Continue to notify even if backfill failed, maybe it was already updated
     
     nm = NotificationManager(dry_run=dry_run)
