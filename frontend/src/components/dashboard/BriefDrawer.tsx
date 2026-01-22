@@ -32,29 +32,32 @@ export function BriefDrawer({ isOpen, onClose, limitToSymbol }: BriefDrawerProps
     if (!brief || !limitToSymbol) return brief?.content;
     const safeSymbol = limitToSymbol.trim();
     
-    // Robust parsing: Split by headers "### "
-    // This avoids complex regex issues with newlines/special chars
-    const sections = brief.content.split('### ');
+    // Robust parsing using regex to capture from stock header to next stock header
+    // Pattern: Find "### StockName (SYMBOL)" and capture everything until the next "### " stock header or end
+    // We need to match the symbol in parens, then capture all content including nested ### sub-headers
+    const stockHeaderPattern = new RegExp(
+      `### [^(]+\\(${safeSymbol}(?:\\.HK|\\.SZ|\\.SH)?\\)([\\s\\S]*?)(?=\\n### [^#]|\\n---\\n|$)`,
+      'i'
+    );
     
-    // Find the section that contains our symbol in the title line
-    // Format is "Name (Symbol)"
-    const match = sections.find(section => {
-      // Relaxed check: Just look for the symbol code. 
-      // This handles cases where format might be "(00700)" or "(00700.HK)" or "00700" 
-      // without strictly requiring surrounding parens, as long as it's in the title line.
-      const firstLine = section.split('\n')[0];
-      return firstLine.includes(safeSymbol);
-    });
-
+    const match = brief.content.match(stockHeaderPattern);
+    
     if (match) {
-        // If it's the last section, it might contain the footer ("--- ...")
-        // We should strip the footer if present
-        const content = match.trim();
-        const footerIndex = content.indexOf('\n---');
-        if (footerIndex !== -1) {
-            return content.substring(0, footerIndex).trim();
-        }
-        return content;
+      // match[0] is full match including header, match[1] is content after header
+      const fullSection = match[0].trim();
+      return fullSection;
+    }
+    
+    // Fallback: Simple includes check (less precise but more lenient)
+    const sections = brief.content.split(/(?=\n### [^\n]+\([A-Z0-9]+\))/);
+    const fallbackMatch = sections.find(section => section.includes(`(${safeSymbol})`));
+    
+    if (fallbackMatch) {
+      const footerIndex = fallbackMatch.indexOf('\n---');
+      if (footerIndex !== -1) {
+        return fallbackMatch.substring(0, footerIndex).trim();
+      }
+      return fallbackMatch.trim();
     }
     
     return null;
@@ -155,8 +158,8 @@ export function BriefDrawer({ isOpen, onClose, limitToSymbol }: BriefDrawerProps
                     </h2>
                     <p className="text-[10px] text-slate-500 font-bold tracking-[0.2em] uppercase flex items-center gap-1.5">
                       <span className="w-1 h-1 rounded-full bg-indigo-500" />
-                      {isSpecificStock ? `STOCK REVIEW: ${limitToSymbol}` : 'DAILY REVIEW'} 
-                      {brief ? (brief.date.split('-')[1] + '/' + brief.date.split('-')[2]) : new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase()}
+                      {isSpecificStock ? `STOCK REVIEW: ${limitToSymbol}` : 'DAILY REVIEW'}
+                      <span className="opacity-50 ml-2">{brief ? (brief.date.split('-')[1] + '/' + brief.date.split('-')[2]) : new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase()}</span>
                     </p>
                   </div>
                </div>
