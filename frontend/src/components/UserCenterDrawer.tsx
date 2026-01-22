@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, User, Crown, Zap, ShieldCheck, Loader2, ArrowRight, Share2, Check, RefreshCw, Key, Bell, ChevronDown } from 'lucide-react';
+import { X, User, Crown, Zap, ShieldCheck, Loader2, ArrowRight, Share2, Check, RefreshCw, Key, Bell, ChevronDown, ArrowLeftRight, Sun, Trophy, Sparkles, FileText } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getWatchlist } from '@/lib/storage';
 import { getCurrentUser, restoreUserIdentity } from '@/lib/user';
@@ -499,23 +499,24 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                               transition={{ duration: 0.2 }}
                               className="overflow-hidden"
                             >
-                              <div className="mt-3 space-y-2">
+                              <div className="mt-3 space-y-1.5">
                                 {[
-                                  { key: 'signal_flip', icon: '🚨', label: '信号翻转', desc: 'AI观点重大转变' },
-                                  { key: 'morning_call', icon: '☕', label: '每日早报', desc: '08:30 开盘提醒' },
-                                  { key: 'validation_glory', icon: '🏅', label: '验证战报', desc: '预测成功反馈' },
-                                  { key: 'prediction_updated', icon: '🤖', label: '预测更新', desc: '分析完成通知' },
-                                  { key: 'daily_brief', icon: '📊', label: '简报生成', desc: '个性化简报就绪' },
+                                  { key: 'signal_flip', icon: ArrowLeftRight, label: '信号翻转', badge: '观点转变' },
+                                  { key: 'morning_call', icon: Sun, label: '每日早报', badge: '08:30' },
+                                  { key: 'validation_glory', icon: Trophy, label: '验证战报', badge: '成功推送' },
+                                  { key: 'prediction_updated', icon: Sparkles, label: '预测更新', badge: '分析完成' },
+                                  { key: 'daily_brief', icon: FileText, label: '简报生成', badge: '17:30' },
                                 ].map((type) => {
                                   const isEnabled = notificationSettings.types[type.key]?.enabled ?? true;
+                                  const IconComponent = type.icon;
                                   return (
-                                    <div key={type.key} className="flex items-center justify-between py-1">
-                                      <div className="flex items-center gap-2 flex-1">
-                                        <span className="text-base">{type.icon}</span>
-                                        <div className="flex-1">
-                                          <p className="text-[11px] font-bold text-white">{type.label}</p>
-                                          <p className="text-[9px] text-slate-600">{type.desc}</p>
+                                    <div key={type.key} className="flex items-center justify-between py-1.5">
+                                      <div className="flex items-center gap-2.5 flex-1">
+                                        <div className="w-6 h-6 rounded-md bg-slate-800/80 flex items-center justify-center">
+                                          <IconComponent className="w-3.5 h-3.5 text-indigo-400" />
                                         </div>
+                                        <span className="text-[11px] font-medium text-white">{type.label}</span>
+                                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-slate-800/60 text-slate-500">{type.badge}</span>
                                       </div>
                                       <button
                                         onClick={async () => {
