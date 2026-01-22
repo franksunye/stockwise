@@ -12,6 +12,11 @@ on:
         description: 'Target Date (YYYY-MM-DD), e.g., 2026-01-21'
         required: false
         default: ''
+      dry_run:
+        description: 'Dry Run (Simulate only)'
+        type: boolean
+        required: false
+        default: false
 
 jobs:
   morning-call:
@@ -44,9 +49,14 @@ jobs:
           # Logic Control
           ENABLE_SMART_NOTIFICATIONS: "true"
           TARGET_DATE: ${{ github.event.inputs.date }}
+          DRY_RUN: ${{ github.event.inputs.dry_run }}
         run: |
-          if [ -n "$TARGET_DATE" ]; then
-            python backend/scripts/daily_morning_call.py --date "$TARGET_DATE"
-          else
-            python backend/scripts/daily_morning_call.py
+          ARGS=""
+          if [ "$DRY_RUN" = "true" ]; then
+            ARGS="$ARGS --dry-run"
           fi
+          if [ -n "$TARGET_DATE" ]; then
+            ARGS="$ARGS --date $TARGET_DATE"
+          fi
+          
+          python backend/scripts/daily_morning_call.py $ARGS
