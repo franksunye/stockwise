@@ -8,8 +8,11 @@ import os
 import json
 from datetime import datetime, timedelta
 
-# Add backend to path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Add backend to path (legacy support)
+backend_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, backend_path)
+# Add project root to path (support 'backend.*' imports)
+sys.path.insert(0, os.path.dirname(backend_path))
 
 from database import get_connection
 from logger import logger
