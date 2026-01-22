@@ -7,6 +7,11 @@ on:
   schedule:
     - cron: '30 0 * * 1-5'  # 00:30 UTC = 08:30 CST
   workflow_dispatch:
+    inputs:
+      date:
+        description: 'Target Date (YYYY-MM-DD), e.g., 2026-01-21'
+        required: false
+        default: ''
 
 jobs:
   morning-call:
@@ -38,5 +43,10 @@ jobs:
           
           # Logic Control
           ENABLE_SMART_NOTIFICATIONS: "true"
+          TARGET_DATE: ${{ github.event.inputs.date }}
         run: |
-          python backend/scripts/daily_morning_call.py
+          if [ -n "$TARGET_DATE" ]; then
+            python backend/scripts/daily_morning_call.py --date "$TARGET_DATE"
+          else
+            python backend/scripts/daily_morning_call.py
+          fi
