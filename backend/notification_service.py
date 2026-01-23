@@ -217,6 +217,19 @@ class NotificationManager:
                 "type": "signal_flip",
                 "related_symbols": [e["symbol"] for e in flips]
             }
+
+        # 3. Handle Validation Glory (AI Wins)
+        wins = [e for e in events if e["type"] == "validation_glory"]
+        if wins:
+            # Usually only one per run, but we take the most recent
+            e = wins[0]
+            return {
+                "title": e["title"],
+                "body": e["body"],
+                "url": e["url"],
+                "type": "validation_glory",
+                "related_symbols": e.get("related_symbols", [])
+            }
             
         return None
 

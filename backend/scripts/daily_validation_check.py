@@ -33,26 +33,31 @@ def run_validation_notifications(dry_run=False):
         verify_all_pending()
     except Exception as e:
         logger.error(f"❌ Failed to run verify_all_pending: {e}")
-        # Continue to notify even if backfill failed, maybe it was already updated
     
+    # 🎯 方案二核心：基于业务日期（target_date）进行用户导向的通知
+    # 获取北京时间的今天日期字符串
+    from config import BEIJING_TZ
+    today_str = datetime.now(BEIJING_TZ).strftime('%Y-%m-%d')
+    logger.info(f"📅 Looking for successful predictions targeting: {today_str}")
+
     nm = NotificationManager(dry_run=dry_run)
     conn = get_connection()
     cursor = conn.cursor()
     
-    # Step 2: Find 'Correct' predictions from today or yesterday
-    # We look for validated records updated today
+    # Step 2: Find 'Correct' predictions targeting TODAY
     cursor.execute("""
         SELECT symbol, signal, actual_change, date
         FROM ai_predictions_v2
-        WHERE validation_status = 'Correct' 
-        AND updated_at >= date('now', '-1 day')
+        WHERE target_date = ? 
+        AND validation_status = 'Correct' 
         AND is_primary = 1
         ORDER BY ABS(actual_change) DESC
-    """)
+    """, (today_str,))
     successes = cursor.fetchall()
     
     if not successes:
-        logger.info("ℹ️ No new 'Correct' predictions found to notify.")
+        logger.info(f"ℹ️ No 'Correct' predictions found for target_date {today_str}.")
+        conn.close()
         return
 
     # Map stock to results for easy lookup

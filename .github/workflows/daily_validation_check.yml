@@ -5,7 +5,7 @@ name: Daily Validation Check (Smart)
 
 on:
   schedule:
-    - cron: '30 8 * * 1-5'  # 08:30 UTC = 16:30 CST
+    - cron: '30 9 * * 1-5'  # 09:30 UTC = 17:30 CST
   workflow_dispatch:
 
 jobs:

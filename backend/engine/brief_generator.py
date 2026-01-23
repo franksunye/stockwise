@@ -467,6 +467,11 @@ async def generate_stock_briefs_batch(date_str: str, specific_symbols: List[str]
 
             # Generate briefs for each tier (free: hunyuan, pro: deepseek)
             for tier in SUPPORTED_TIERS:
+                # [Optimization] Skip FREE tier if requested
+                if tier == "free" and os.getenv("BRIEF_SKIP_FREE", "false").lower() == "true":
+                    logger.debug(f"⏭️ [System] Skipping FREE tier analysis as requested.")
+                    continue
+
                 # Check cache first
                 cursor.execute("SELECT 1 FROM stock_briefs WHERE symbol = ? AND date = ? AND tier = ?", 
                               (symbol, date_str, tier))
@@ -477,7 +482,25 @@ async def generate_stock_briefs_batch(date_str: str, specific_symbols: List[str]
                 provider = TIER_PROVIDER_MAP[tier]
                 logger.info(f"   📝 Generating {tier.upper()} brief using {provider}...")
                 
-                analysis = await analyze_stock_context(symbol, stock_name, news, tech_data, date_str, tier)
+                analysis = None
+                max_retries = 3
+                for attempt in range(max_retries):
+                    try:
+                        analysis = await analyze_stock_context(symbol, stock_name, news, tech_data, date_str, tier)
+                        if analysis:
+                            break
+                    except Exception as e:
+                        if "429" in str(e) or "rate limit" in str(e).lower():
+                            wait_time = (attempt + 1) * 5
+                            logger.warning(f"⚠️  Rate limit (429) hit for {symbol}/{tier}. Waiting {wait_time}s... (Attempt {attempt+1}/{max_retries})")
+                            await asyncio.sleep(wait_time)
+                        else:
+                            logger.error(f"❌ [Attempt {attempt+1}] Error generating brief: {e}")
+                            await asyncio.sleep(2)
+                
+                if not analysis:
+                    logger.error(f"💀 Failed to generate brief for {symbol}/{tier} after {max_retries} attempts.")
+                    continue
 
                 # Store in DB with tier
                 cursor.execute("""
