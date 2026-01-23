@@ -399,18 +399,13 @@ async def generate_stock_briefs_batch(date_str: str, specific_symbols: List[str]
             'rsi': row[3]
         } for row in cursor.fetchall()}
 
-        # 3. Process each stock
+        # 3. Process each stock (generate briefs for each tier)
+        from engine.models.brief_strategies import SUPPORTED_TIERS, TIER_PROVIDER_MAP
+        
         processed_count = 0
-        provider = os.getenv("BRIEF_MODEL_PROVIDER", "hunyuan").lower() # Configurable provider
         
         for symbol, stock_name in unique_stocks:
-            # Check cache first
-            cursor.execute("SELECT 1 FROM stock_briefs WHERE symbol = ? AND date = ?", (symbol, date_str))
-#            if cursor.fetchone():
-#                 logger.info(f"⏭️ [Skip] {symbol} already analyzed for {date_str}.")
-#                 continue
-
-            # Fetch & Analyze
+            # Fetch news once (shared across tiers)
             logger.info(f"⚡ Processing {symbol} ({processed_count + 1}/{len(unique_stocks)})...")
             
             news_task = fetch_news_for_stock(symbol, stock_name)
@@ -429,19 +424,32 @@ async def generate_stock_briefs_batch(date_str: str, specific_symbols: List[str]
                 'change_percent': prices.get('change_percent'),
             }
 
-            analysis = await analyze_stock_context(symbol, stock_name, news, tech_data, date_str, provider)
+            # Generate briefs for each tier (free: hunyuan, pro: deepseek)
+            for tier in SUPPORTED_TIERS:
+                # Check cache first
+                cursor.execute("SELECT 1 FROM stock_briefs WHERE symbol = ? AND date = ? AND tier = ?", 
+                              (symbol, date_str, tier))
+                if cursor.fetchone():
+                    logger.debug(f"⏭️ [Skip] {symbol}/{tier} already analyzed for {date_str}.")
+                    continue
+                
+                provider = TIER_PROVIDER_MAP[tier]
+                logger.info(f"   📝 Generating {tier.upper()} brief using {provider}...")
+                
+                analysis = await analyze_stock_context(symbol, stock_name, news, tech_data, date_str, provider)
 
-            # Store in DB
-            cursor.execute("""
-                INSERT OR REPLACE INTO stock_briefs 
-                (symbol, date, stock_name, analysis_markdown, raw_news, signal, confidence)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-            """, (symbol, date_str, stock_name, analysis, news, tech_data['signal'], tech_data['confidence']))
+                # Store in DB with tier
+                cursor.execute("""
+                    INSERT OR REPLACE INTO stock_briefs 
+                    (symbol, date, tier, stock_name, analysis_markdown, raw_news, signal, confidence)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """, (symbol, date_str, tier, stock_name, analysis, news, tech_data['signal'], tech_data['confidence']))
+                
+                conn.commit()
             
-            conn.commit()
             processed_count += 1
         
-        logger.info(f"✅ [Phase 1] Completed. Analyzed {processed_count} new stocks.")
+        logger.info(f"✅ [Phase 1] Completed. Analyzed {processed_count} stocks x {len(SUPPORTED_TIERS)} tiers.")
 
     except Exception as e:
         logger.error(f"❌ [Phase 1] Error: {e}")
@@ -454,10 +462,17 @@ async def assemble_user_brief(user_id: str, date_str: str) -> Optional[str]:
     """
     Phase 2: Assemble personalized brief from `stock_briefs`.
     Zero LLM cost.
+    Fetches briefs matching user's subscription tier.
     """
     conn = get_connection()
     try:
         cursor = conn.cursor()
+        
+        # 0. Get user subscription tier
+        cursor.execute("SELECT subscription_tier FROM users WHERE user_id = ?", (user_id,))
+        tier_row = cursor.fetchone()
+        user_tier = tier_row[0] if tier_row and tier_row[0] else 'free'
+        logger.info(f"👤 User {user_id} tier: {user_tier}")
         
         # 1. Get user watchlist
         cursor.execute("SELECT symbol FROM user_watchlist WHERE user_id = ?", (user_id,))
@@ -466,18 +481,28 @@ async def assemble_user_brief(user_id: str, date_str: str) -> Optional[str]:
         if not watchlist:
             return None
 
-        # 2. Fetch cached briefs
+        # 2. Fetch cached briefs (matching user's tier, with fallback to 'free')
         placeholders = ','.join(['?' for _ in watchlist])
         cursor.execute(f"""
             SELECT symbol, stock_name, analysis_markdown, signal
             FROM stock_briefs
-            WHERE symbol IN ({placeholders}) AND date = ?
-        """, (*watchlist, date_str))
+            WHERE symbol IN ({placeholders}) AND date = ? AND tier = ?
+        """, (*watchlist, date_str, user_tier))
         
         stock_reports = cursor.fetchall()
         
+        # Fallback: If PRO user has no pro briefs, try free tier as backup
+        if not stock_reports and user_tier == 'pro':
+            logger.warning(f"⚠️ No PRO briefs for user {user_id}, falling back to FREE tier...")
+            cursor.execute(f"""
+                SELECT symbol, stock_name, analysis_markdown, signal
+                FROM stock_briefs
+                WHERE symbol IN ({placeholders}) AND date = ? AND tier = 'free'
+            """, (*watchlist, date_str))
+            stock_reports = cursor.fetchall()
+        
         if not stock_reports:
-            logger.warning(f"⚠️ User {user_id} has watchlist but no stock briefs found for {date_str}. Did Phase 1 run?")
+            logger.warning(f"⚠️ User {user_id} (tier={user_tier}) has watchlist but no stock briefs found for {date_str}. Did Phase 1 run?")
             return None
 
         # 3. Assemble Markdown

@@ -11,6 +11,21 @@ from logger import logger
 from engine.llm_client import LLMClient
 from config import DEFAULTS
 
+# Tier to Provider Mapping (用户等级 -> LLM Provider)
+# free: 免费用户使用 Hunyuan Lite (免费模型)
+# pro:  PRO 用户使用 DeepSeek (高质量付费模型)
+# 
+# 可通过环境变量覆盖:
+#   BRIEF_PROVIDER_FREE=hunyuan (默认)
+#   BRIEF_PROVIDER_PRO=deepseek (默认) 或 gemini_local (本地开发)
+TIER_PROVIDER_MAP = {
+    "free": os.getenv("BRIEF_PROVIDER_FREE", "hunyuan"),
+    "pro": os.getenv("BRIEF_PROVIDER_PRO", "deepseek")
+}
+
+# 支持的 tier 列表
+SUPPORTED_TIERS = list(TIER_PROVIDER_MAP.keys())
+
 class BriefGenerationStrategy(abc.ABC):
     """Abstract base class for brief generation strategies."""
     
@@ -69,3 +84,24 @@ class StrategyFactory:
             
         logger.info(f"🏭 StrategyFactory: Creating strategy for provider '{provider}'")
         return StandardLLMStrategy(provider=provider)
+    
+    @staticmethod
+    def get_strategy_for_tier(tier: str) -> BriefGenerationStrategy:
+        """
+        根据用户等级获取对应的策略
+        
+        Args:
+            tier: 用户等级 ('free' or 'pro')
+            
+        Returns:
+            对应的 BriefGenerationStrategy 实例
+        """
+        provider = TIER_PROVIDER_MAP.get(tier, "hunyuan")
+        logger.info(f"🏭 StrategyFactory: Tier '{tier}' -> Provider '{provider}'")
+        return StandardLLMStrategy(provider=provider)
+    
+    @staticmethod
+    def get_provider_for_tier(tier: str) -> str:
+        """根据 tier 获取 provider 名称"""
+        return TIER_PROVIDER_MAP.get(tier, "hunyuan")
+

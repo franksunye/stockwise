@@ -84,10 +84,45 @@ After execution, you MUST verify the data integrity.
 
 ### Phase 4: Daily Brief Generation
 
-After generating stock predictions (Phase 2), you often need to generate the "Daily Brief" for users.
+The system now supports **Multi-Tier Generation**, creating distinct analyses for `FREE` (Hunyuan) and `PRO` (DeepSeek/Gemini) users.
 
 *   **Script**: `backend/engine/brief_generator.py`
 *   **Env Var**: Just like prediction, you MUST set `DB_SOURCE="cloud"` to write to production.
+
+#### 🌍 Multi-Tier Configuration (Environment Variables)
+
+You can override the default models using environment variables. This is crucial for **local testing** of PRO features without incurring high API costs or if you don't have a DeepSeek key.
+
+| Env Var               | Default    | Description                                     |
+| :-------------------- | :--------- | :---------------------------------------------- |
+| `BRIEF_PROVIDER_FREE` | `hunyuan`  | Provider for Free users (usually low cost/free) |
+| `BRIEF_PROVIDER_PRO`  | `deepseek` | Provider for PRO users (high quality)           |
+
+#### 🔬 Local Testing for PRO Analysis
+
+To test PRO-level analysis locally using your local Gemini proxy (`gemini_local`):
+
+1.  **Set Environment Variables**:
+    ```powershell
+    $env:DB_SOURCE="cloud"
+    $env:BRIEF_PROVIDER_PRO="gemini_local"
+    ```
+    *(Optionally set `BRIEF_PROVIDER_FREE` if needed)*
+
+2.  **Run Generator**:
+    ```powershell
+    # Generate for a specific user (will use their tier + fallback logic)
+    python backend/engine/brief_generator.py --user "user_id_here"
+    
+    # Or generate for ALL users for today
+    python backend/engine/brief_generator.py
+    ```
+
+3.  **Verify Results**:
+    Check the `stock_briefs` table for records with `tier='pro'`.
+    ```powershell
+    node frontend/scripts/turso-cli.mjs query "SELECT symbol, tier, signal FROM stock_briefs WHERE date = DATE('now', '+8 hours')"
+    ```
 
 #### Execution Modes
 
