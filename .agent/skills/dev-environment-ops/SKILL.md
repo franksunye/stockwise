@@ -65,7 +65,7 @@ read_terminal(ProcessID: "17556", Name: "Antigravity Agent")
 ## 2. Database Operations
 
 The project uses a hybrid architecture:
-1.  **Local Dev**: `backend/stockwise.db` (SQLite)
+1.  **Local Dev**: `data/stockwise.db` (SQLite)
 2.  **Production**: Turso Cloud (LibSQL) via `TURSO_DB_URL`
 
 ### 🌐 Online (Cloud) Database Operations
@@ -91,22 +91,22 @@ To query the **Production** database, use the `turso-cli.mjs` script. It automat
 ### 🏠 Local Development Database Operations
 **Primary Tool**: `sqlite3` (CLI) or Python Scripts
 
-The local database is a file at `backend/stockwise.db`. The `turso-cli.mjs` tool is **hardcoded** to read `.env` and connect to Turso. Do NOT use it for local DB by default.
+The local database is a file at `data/stockwise.db`. The `turso-cli.mjs` tool is **hardcoded** to read `.env` and connect to Turso. Do NOT use it for local DB by default.
 
 *   **Accessing Local DB**:
     *   If `sqlite3` is in your path:
         ```powershell
-        sqlite3 backend/stockwise.db "SELECT name FROM sqlite_master WHERE type='table';"
+        sqlite3 data/stockwise.db "SELECT name FROM sqlite_master WHERE type='table';"
         ```
     *   **Using Python (Recommended)**:
         Most backend scripts respect the `DB_STRATEGY` (or `DB_SOURCE`) environment variable.
-        *   `local`: Uses `backend/stockwise.db`
+        *   `local`: Uses `data/stockwise.db`
         *   `cloud`: Uses Turso
 
 *   **Example: Running Query Locally via Python**:
     Create a quick one-off script:
     ```powershell
-    python -c "import sqlite3; conn = sqlite3.connect('backend/stockwise.db'); print(conn.execute('SELECT COUNT(*) FROM daily_prices').fetchone())"
+    python -c "import sqlite3; conn = sqlite3.connect('data/stockwise.db'); print(conn.execute('SELECT COUNT(*) FROM daily_prices').fetchone())"
     ```
 
 *   **Switching Contexts**:
@@ -125,7 +125,7 @@ The local database is a file at `backend/stockwise.db`. The `turso-cli.mjs` tool
 | Task                   | Command / Pattern                                              |
 | :--------------------- | :------------------------------------------------------------- |
 | **Check Product Data** | `node frontend/scripts/turso-cli.mjs query "SELECT ..."`       |
-| **Check Local Data**   | `sqlite3 backend/stockwise.db "SELECT ..."`                    |
+| **Check Local Data**   | `sqlite3 data/stockwise.db "SELECT ..."`                       |
 | **Run Python (Prod)**  | `$env:DB_SOURCE="cloud"; python backend/script.py`             |
 | **Run Python (Dev)**   | `$env:DB_SOURCE="local"; python backend/script.py`             |
 | **Search Code**        | Use Agent Tool `grep_search` or `Select-String` (avoid `grep`) |
