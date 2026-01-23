@@ -64,7 +64,7 @@ def generate_morning_calls(dry_run=False, target_date=None):
         cursor.execute(f"""
             SELECT symbol, signal, confidence, ai_reasoning 
             FROM ai_predictions_v2
-            WHERE symbol IN ({placeholders}) AND date = ? AND is_primary = 1
+            WHERE symbol IN ({placeholders}) AND target_date = ? AND is_primary = 1
         """, (*watchlist, today_str))
         predictions = cursor.fetchall()
         
