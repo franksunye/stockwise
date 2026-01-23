@@ -205,6 +205,24 @@ def run_full_sync(market_filter: str = None):
     
     # 使用线程池并发同步
     workers = SYNC_CONFIG["daily_workers"]
+
+    # [NEW] Force Inject Market Anchors (Ensure indices are fetched)
+    # This solves the "Where does the market data come from?" problem.
+    from engine.context_service import MARKET_ANCHORS
+    
+    # Merge and deduplicate
+    current_set = set(target_stocks)
+    for anchor in MARKET_ANCHORS:
+        # Check market filter compatibility (simple heuristic)
+        if market_filter:
+            is_hk_anchor = len(anchor) == 5
+            if market_filter == "HK" and not is_hk_anchor: continue
+            if market_filter == "CN" and is_hk_anchor: continue
+        
+        if anchor not in current_set:
+            target_stocks.append(anchor)
+            logger.info(f"⚓ Auto-injecting Market Anchor: {anchor}")
+
     logger.info(f"🚀 启动并发同步 (Workers={workers})...")
     
     def sync_single_stock(stock):

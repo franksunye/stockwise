@@ -34,7 +34,41 @@ def fetch_stock_data(symbol: str, period: str = "daily", start_date: str = None)
 
     @retry_request(max_retries=3, delay=2.0)
     def _fetch_cn():
-        return ak.stock_zh_a_hist(symbol=symbol, period=period, start_date=start_date, end_date=datetime.now().strftime("%Y%m%d"), adjust="qfq")
+        # 1. 尝试个股接口 (Stock)
+        try:
+            df = ak.stock_zh_a_hist(symbol=symbol, period=period, start_date=start_date, end_date=datetime.now().strftime("%Y%m%d"), adjust="qfq")
+            if not df.empty: return df
+        except: pass
+        
+        # 2. 尝试 ETF 接口 (Fund)
+        # 51xxxx, 15xxxx 等
+        try:
+            df = ak.fund_etf_hist_em(symbol=symbol, period=period, start_date=start_date, end_date=datetime.now().strftime("%Y%m%d"), adjust="qfq")
+            if not df.empty: return df
+        except: pass
+
+        # 3. 尝试指数接口 (Index)
+        # e.g. sh000001
+        try:
+            df = ak.stock_zh_index_daily(symbol=symbol)
+            # Index API returns all history, filter by date
+            if not df.empty:
+                df['date'] = pd.to_datetime(df['date']).dt.strftime('%Y-%m-%d') # Index uses 'date' col
+                # Filter date
+                s_dt = datetime.strptime(start_date, "%Y%m%d").strftime("%Y-%m-%d")
+                df = df[df['date'] >= s_dt]
+                # Standardize columns to match stock interface for downstream processing
+                # Index API: date, open, high, low, close, volume
+                df = df.rename(columns={
+                    "date": "日期", "open": "开盘", "high": "最高", "low": "最低", "close": "收盘", "volume": "成交量"
+                })
+                # Add dummy change percent if missing (or calc it)
+                if "涨跌幅" not in df.columns:
+                    df["涨跌幅"] = df["收盘"].pct_change() * 100
+                return df
+        except: pass
+        
+        return pd.DataFrame()
 
     try:
         if market == "HK":
