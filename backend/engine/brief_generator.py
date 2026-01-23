@@ -646,7 +646,15 @@ async def notify_user_brief_ready(user_id: str, date_str: str):
             logger.info(f"ℹ️ [Notify] User {user_id} has no push subscription, skipping notification")
             return
         
-        # 3. Get push_hook for notification body
+        # 3. Get user tier for differentiated notification
+        cursor.execute(
+            "SELECT subscription_tier FROM users WHERE user_id = ?",
+            (user_id,)
+        )
+        tier_row = cursor.fetchone()
+        user_tier = tier_row[0] if tier_row and tier_row[0] else 'free'
+        
+        # 4. Get push_hook for notification body
         cursor.execute(
             "SELECT push_hook FROM daily_briefs WHERE user_id = ? AND date = ?",
             (user_id, date_str)
@@ -654,10 +662,17 @@ async def notify_user_brief_ready(user_id: str, date_str: str):
         row = cursor.fetchone()
         push_hook = row[0] if row and row[0] else "点击查看今日 AI 复盘"
         
-        # 4. Send notification (with error handling in send_push_notification itself)
+        # 5. Send tier-differentiated notification
+        if user_tier == 'pro':
+            notify_title = "⭐ Pro 深度复盘已就绪"
+            notify_body = f"{push_hook} | 首席主笔深度解读"
+        else:
+            notify_title = "📊 今日简报已生成"
+            notify_body = push_hook
+        
         send_push_notification(
-            title="📊 每日简报已生成",
-            body=push_hook,
+            title=notify_title,
+            body=notify_body,
             url="/dashboard?brief=true",
             target_user_id=user_id,
             tag="daily_brief"

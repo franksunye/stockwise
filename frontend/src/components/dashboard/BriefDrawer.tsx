@@ -18,12 +18,14 @@ interface BriefDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   limitToSymbol?: string;
+  onUpgrade?: () => void;
 }
 
-export function BriefDrawer({ isOpen, onClose, limitToSymbol }: BriefDrawerProps) {
+export function BriefDrawer({ isOpen, onClose, limitToSymbol, onUpgrade }: BriefDrawerProps) {
   const [brief, setBrief] = useState<BriefData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [tier, setTier] = useState<'free' | 'pro'>('free');
 
   const [showGlobal, setShowGlobal] = useState(false);
 
@@ -74,6 +76,20 @@ export function BriefDrawer({ isOpen, onClose, limitToSymbol }: BriefDrawerProps
         const fetchBrief = async () => {
           try {
             const user = await getCurrentUser();
+            
+            // 🎯 获取用户 tier 信息
+            try {
+              const profileRes = await fetch('/api/user/profile', {
+                method: 'POST',
+                body: JSON.stringify({ userId: user.userId })
+              });
+              const profileData = await profileRes.json();
+              if (profileData.tier) {
+                setTier(profileData.tier);
+              }
+            } catch (e) {
+              console.error('Failed to fetch user tier:', e);
+            }
             
             // 🎯 智能日期逻辑：先试今天，没有则试上一交易日
             const today = getHKTime().toISOString().split('T')[0];
@@ -153,9 +169,16 @@ export function BriefDrawer({ isOpen, onClose, limitToSymbol }: BriefDrawerProps
                     <NotebookText className="w-7 h-7 text-indigo-500" />
                   </div>
                   <div className="space-y-1">
-                    <h2 className="text-3xl font-black italic tracking-tighter text-white">
-                      {isSpecificStock ? '个股简报' : '每日简报'}
-                    </h2>
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-3xl font-black italic tracking-tighter text-white">
+                        {isSpecificStock ? '个股简报' : '每日简报'}
+                      </h2>
+                      {tier === 'pro' && (
+                        <span className="px-2 py-0.5 rounded-md bg-amber-500/20 border border-amber-500/30 text-amber-400 text-[10px] font-black uppercase tracking-wider">
+                          ⭐ Pro
+                        </span>
+                      )}
+                    </div>
                     <p className="text-[10px] text-slate-500 font-bold tracking-[0.2em] uppercase flex items-center gap-1.5">
                       <span className="w-1 h-1 rounded-full bg-indigo-500" />
                       {isSpecificStock ? `STOCK REVIEW: ${limitToSymbol}` : 'DAILY REVIEW'}
@@ -294,9 +317,39 @@ export function BriefDrawer({ isOpen, onClose, limitToSymbol }: BriefDrawerProps
                         </button>
                      )}
 
+                     {/* Upgrade CTA for Free Users */}
+                     {tier === 'free' && (
+                        <div className="w-full p-4 rounded-2xl bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20 relative overflow-hidden group">
+                          <div className="absolute top-0 right-0 w-20 h-20 bg-amber-500/5 blur-xl rounded-full group-hover:bg-amber-500/10 transition-colors" />
+                          <div className="relative z-10 flex items-center justify-between">
+                            <div className="flex-1">
+                              <h4 className="text-sm font-black text-amber-200 flex items-center gap-2 mb-1">
+                                ⭐ 解锁 Pro 深度复盘
+                              </h4>
+                              <p className="text-[10px] text-amber-400/70 leading-relaxed">
+                                专属首席主笔深度解读，叙事驱动的专业分析
+                              </p>
+                            </div>
+                            <button 
+                              onClick={() => {
+                                if (onUpgrade) {
+                                  onClose();
+                                  onUpgrade();
+                                } else {
+                                  window.location.href = '/pricing';
+                                }
+                              }}
+                              className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-xs font-black tracking-wider uppercase transition-all active:scale-95 whitespace-nowrap"
+                            >
+                              升级
+                            </button>
+                          </div>
+                        </div>
+                     )}
+
                     <p className="text-[10px] text-slate-600 font-bold uppercase tracking-widest flex items-center justify-center gap-2 mt-4">
                       <span className="w-1 h-1 rounded-full bg-indigo-500" />
-                      Generated by StockWise AI
+                      Generated by StockWise AI {tier === 'pro' && '| Pro Edition'}
                       <span className="w-1 h-1 rounded-full bg-indigo-500" />
                     </p>
                   </div>

@@ -506,19 +506,20 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                   { key: 'morning_call', icon: Sun, label: '每日早报', badge: '08:30' },
                                   { key: 'validation_glory', icon: Trophy, label: '验证战报', badge: '成功推送' },
                                   { key: 'prediction_updated', icon: Sparkles, label: '预测更新', badge: '分析完成' },
-                                  { key: 'daily_brief', icon: FileText, label: '简报生成', badge: '17:30' },
+                                  { key: 'daily_brief', icon: FileText, label: tier === 'pro' ? 'Pro 深度复盘' : '简报生成', badge: tier === 'pro' ? '⭐ 专属' : '17:30', isPro: tier === 'pro' },
                                   { key: 'price_update', icon: TrendingUp, label: '实时行情', badge: '盘中推送' },
                                 ].map((type) => {
                                   const isEnabled = notificationSettings.types[type.key]?.enabled ?? true;
                                   const IconComponent = type.icon;
+                                  const isPro = 'isPro' in type && type.isPro;
                                   return (
-                                    <div key={type.key} className="flex items-center justify-between py-1.5">
+                                    <div key={type.key} className={`flex items-center justify-between py-1.5 ${isPro ? 'bg-amber-500/5 -mx-2 px-2 rounded-lg' : ''}`}>
                                       <div className="flex items-center gap-2.5 flex-1">
-                                        <div className="w-6 h-6 rounded-md bg-slate-800/80 flex items-center justify-center">
-                                          <IconComponent className="w-3.5 h-3.5 text-indigo-400" />
+                                        <div className={`w-6 h-6 rounded-md flex items-center justify-center ${isPro ? 'bg-amber-500/20' : 'bg-slate-800/80'}`}>
+                                          <IconComponent className={`w-3.5 h-3.5 ${isPro ? 'text-amber-400' : 'text-indigo-400'}`} />
                                         </div>
-                                        <span className="text-[11px] font-medium text-white">{type.label}</span>
-                                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-slate-800/60 text-slate-500">{type.badge}</span>
+                                        <span className={`text-[11px] font-medium ${isPro ? 'text-amber-200' : 'text-white'}`}>{type.label}</span>
+                                        <span className={`text-[9px] px-1.5 py-0.5 rounded ${isPro ? 'bg-amber-500/20 text-amber-400 font-bold' : 'bg-slate-800/60 text-slate-500'}`}>{type.badge}</span>
                                       </div>
                                       <button
                                         onClick={async () => {

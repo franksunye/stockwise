@@ -245,6 +245,7 @@ function DashboardContent() {
         isOpen={briefOpen}
         onClose={() => setBriefOpen(false)}
         limitToSymbol={currentStock?.symbol}
+        onUpgrade={() => setUserCenterOpen(true)}
       />
 
     </main>
