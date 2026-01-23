@@ -263,19 +263,19 @@ async def analyze_stock_context(
 5. **视觉优化**：必须使用 Emoji 增强可读性 (📈, 📉, ⚠️, 💡)。关键观点加粗，但严禁过度加粗。
 6. **说人话**：输出专业、流畅、有温度的中文。让非专业用户也能听懂。"""
     
-    # Build data description
+    # Build data description (with citation sources)
     signal = technical_data.get('signal', 'Side')
     confidence = technical_data.get('confidence', 0)
     conf_pct = int(confidence * 100) if confidence <= 1 else int(confidence)
     
     hard_data_lines = [
-        f"- AI 信号: {signal} (置信度 {conf_pct}%)",
+        f"- AI 信号: {signal} (置信度 {conf_pct}%) [来源: StockWise AI]",
     ]
     
     if technical_data.get('close'):
         change = technical_data.get('change_percent', 0)
         change_str = f"+{change:.2f}%" if change >= 0 else f"{change:.2f}%"
-        hard_data_lines.append(f"- 今日收盘: {technical_data['close']:.2f} ({change_str})")
+        hard_data_lines.append(f"- 今日收盘: {technical_data['close']:.2f} ({change_str}) [来源: AkShare]")
     
     # Key levels
     support = technical_data.get('support_price')
@@ -283,7 +283,7 @@ async def analyze_stock_context(
     levels = []
     if support: levels.append(f"支撑位 {support:.2f}")
     if pressure: levels.append(f"压力位 {pressure:.2f}")
-    if levels: hard_data_lines.append(f"- 关键价位: {' | '.join(levels)}")
+    if levels: hard_data_lines.append(f"- 关键价位: {' | '.join(levels)} [来源: StockWise AI]")
     
     # AI Reasoning section
     ai_reasoning = technical_data.get('ai_reasoning', '')

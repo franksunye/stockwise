@@ -63,11 +63,29 @@ def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool =
         logger.info(f"✨ 数据已是最新 ({last_date_str})。")
         return
 
-    # 5. 计算指标
+    # 5. 数据校验 (Data Validation)
+    original_count = len(df)
+    
+    # 5.1 基本价格校验: close > 0
+    df = df[df["close"] > 0]
+    
+    # 5.2 成交量校验: volume >= 0
+    df = df[df["volume"] >= 0]
+    
+    # 注: 不校验涨跌幅范围，因为新股首日和港股可能大幅波动
+    
+    filtered_count = original_count - len(df)
+    if filtered_count > 0:
+        logger.warning(f"⚠️ {symbol}: 过滤了 {filtered_count} 条异常数据 (原 {original_count} 条)")
+    
+    if df.empty:
+        logger.warning(f"⚠️ {symbol}: 校验后无有效数据")
+        return
+
+    # 6. 计算指标
     df = calculate_indicators(df)
     
-    # 6. 入库
-    # 6. 入库
+    # 7. 入库
     # 定义舍入函数
     def r2(x): return round(float(x), 2) if x else 0
     def r3(x): return round(float(x), 3) if x else 0
