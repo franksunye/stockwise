@@ -9,6 +9,7 @@ env/
 
 # Database
 data/*.db
+backend/*.db
 
 # IDE
 .idea/
