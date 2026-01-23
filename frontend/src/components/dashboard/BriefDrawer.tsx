@@ -187,22 +187,14 @@ export function BriefDrawer({ isOpen, onClose, limitToSymbol, onUpgrade }: Brief
                   </div>
                </div>
 
-               <div className="flex items-center gap-2">
-                 {brief && (
-                   <button 
-                     onClick={handleShare}
-                     className="p-2.5 rounded-full bg-white/5 border border-white/10 active:scale-90 transition-all text-slate-400 hover:text-white"
-                   >
-                     <Share2 size={18} />
-                   </button>
-                 )}
-                 <button 
-                   onClick={onClose} 
-                   className="p-2.5 rounded-full bg-white/5 border border-white/10 active:scale-90 transition-all"
-                 >
-                   <CloseIcon className="w-5 h-5 text-slate-400" />
-                 </button>
-               </div>
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={onClose} 
+                    className="p-2.5 rounded-full bg-white/5 border border-white/10 active:scale-90 transition-all"
+                  >
+                    <CloseIcon className="w-5 h-5 text-slate-400" />
+                  </button>
+                </div>
             </header>
 
             {/* Content Area */}
