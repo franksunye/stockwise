@@ -37,10 +37,13 @@ try:
     from backend.database import get_connection
     from backend.logger import logger
     from backend.engine.models.brief_strategies import StrategyFactory
+    from backend.engine.context_service import ContextService
 except ImportError:
     from database import get_connection
     from logger import logger
     from engine.models.brief_strategies import StrategyFactory
+    from engine.context_service import ContextService
+    from engine.context_service import ContextService
 
 # --- Tracing Helper ---
 class DetailedTraceRecorder:
@@ -237,32 +240,22 @@ async def analyze_stock_context(
     news: str, 
     technical_data: Dict, 
     date_str: str,
-    strategy_provider: str
+    tier: str = "free"
 ) -> str:
-    """Analyze stock using the selected Strategy."""
+    """Analyze stock using the selected Strategy for a specific tier."""
     
-    # Init Strategy
-    strategy = StrategyFactory.get_strategy(strategy_provider)
-    model_id = f"brief-{strategy_provider}"
+    # Init Strategy for the tier
+    strategy = StrategyFactory.get_strategy_for_tier(tier)
+    provider = StrategyFactory.get_provider_for_tier(tier)
+    model_id = f"brief-{tier}"
     
     # Start Trace
     recorder = DetailedTraceRecorder(symbol, date_str, model_id)
     
-    # 1. Record Step: Search (Already done, but we record the input/output here)
-    recorder.record_step("search", 0, {"query": "latest news"}, news)
+    # 1. Record Step: Search
+    recorder.record_step("search", 0, {"query": "latest news", "tier": tier}, news)
 
-    # 2. Prepare Prompt
-    # System prompt: Role - Financial Columnist (Narrative > Data)
-    system_prompt = """你是一位 StockWise 的首席财经主笔。你的目标是编写一份**通俗易懂、聚焦市场叙事**的个股日报。
-
-核心写作原则：
-1. **事实第一原则**：简报必须严格基于[第一事实：今日收盘表现]和[第二事实：今日核心新闻]进行创作。
-2. **逻辑一致性**：如果[参考逻辑：AI分析师推理]中描述的内容与今日股价表现（涨跌幅）存在明显矛盾（例如：推理说暴涨，事实是微跌），请**务必以今日事实为准**，将推理视为“情绪背景”或“近期趋势参考”，严禁输出逻辑自相矛盾的内容。
-3. **新闻驱动逻辑**：优先简述"发生了什么"（新闻/行业动态），以此解释股价表现。
-4. **数据隐形化**：**严禁**直接罗列 RSI、KDJ、MA 等技术指标数值。用口语化描述代替，如“超买”改为“近期涨幅较大，已积累一定调整压力”。
-5. **视觉优化**：必须使用 Emoji 增强可读性 (📈, 📉, ⚠️, 💡)。关键观点加粗，但严禁过度加粗。
-6. **说人话**：输出专业、流畅、有温度的中文。让非专业用户也能听懂。"""
-    
+    # 2. Prepare User Prompt (Data remains the same, but strategy decides the personality)
     # Build data description (with citation sources)
     signal = technical_data.get('signal', 'Side')
     confidence = technical_data.get('confidence', 0)
@@ -289,6 +282,35 @@ async def analyze_stock_context(
     ai_reasoning = technical_data.get('ai_reasoning', '')
     reasoning_section = ai_reasoning[:500] if ai_reasoning else "（无分析师推理记录）"
     
+    # [NEW] Use ContextService (Data Fact Layer) for robust facts
+    ctx_service = ContextService()
+    facts = ctx_service.get_context_facts(symbol, date_str)
+    
+    deep_facts = []
+    if facts.get("market_mood"): 
+        deep_facts.append(f"- 市场大环境: {facts['market_mood']}")
+    
+    # Altitude Context
+    alt = facts.get("altitude", {})
+    if alt.get("year_stats"): deep_facts.append(f"- 长线战略水位: {alt['year_stats']}")
+    if alt.get("month_stats"): deep_facts.append(f"- 短线战术水位: {alt['month_stats']}")
+    
+    # Volume Context
+    if facts.get("volume_status"): deep_facts.append(f"- 量能状态: {facts['volume_status']}")
+
+    deep_facts_str = chr(10).join(deep_facts) if deep_facts else "（暂无多周期回溯数据）"
+    
+    # 4. Reflection Data (Yesterday's performance)
+    reflection = technical_data.get('reflection', {})
+    prev_sig = reflection.get('prev_signal')
+    prev_status = reflection.get('prev_status', 'Pending')
+    prev_change = reflection.get('prev_change')
+    
+    refl_msg = "（昨日无预测记录或尚未验证）"
+    if prev_sig:
+        change_text = f"{prev_change:+.2f}%" if prev_change is not None else "未知"
+        refl_msg = f"- 昨日预测信号: {prev_sig}\n- 验证结果: {prev_status} (实际涨跌: {change_text})"
+
     user_prompt = f"""Subject: {symbol} ({stock_name})
 
 [第一事实：今日收盘表现]
@@ -296,6 +318,12 @@ async def analyze_stock_context(
 
 [第二事实：今日核心新闻]
 {news}
+
+[第三事实：多周期与大盘背景]
+{deep_facts_str}
+
+[第四事实：昨日预测复盘]
+{refl_msg}
 
 [参考逻辑：AI 分析师推理记录（若与第一事实冲突，请以第一事实为准）]
 {reasoning_section}
@@ -316,7 +344,10 @@ async def analyze_stock_context(
     # 3. Execute Step: Synthesis
     start_ts = time.time()
     try:
-        result = await strategy.generate_brief(system_prompt, user_prompt)
+        # Get system prompt from strategy (Tier-specific)
+        system_prompt = strategy.get_system_prompt()
+        
+        result = await strategy.generate_brief(user_prompt)
         
         duration = int((time.time() - start_ts) * 1000)
         content = result["content"]
@@ -370,20 +401,30 @@ async def generate_stock_briefs_batch(date_str: str, specific_symbols: List[str]
 
         logger.info(f"🚀 [Phase 1] Starting batch analysis for {len(unique_stocks)} unique stocks...")
 
-        # 2. Get AI Predictions for context (use target_date, not date; filter by is_primary)
+        # 2. Get AI Predictions for context (v3 with Historical Reflection)
         symbols_list = [s[0] for s in unique_stocks]
         placeholders = ','.join(['?' for _ in symbols_list])
         cursor.execute(f"""
-            SELECT symbol, signal, confidence, ai_reasoning, support_price, pressure_price
-            FROM ai_predictions_v2
-            WHERE symbol IN ({placeholders}) AND date = ? AND is_primary = 1
+            SELECT 
+                p.symbol, p.signal, p.confidence, p.ai_reasoning, p.support_price, p.pressure_price, 
+                prev.signal as prev_signal, prev.validation_status as prev_status, prev.actual_change as prev_change
+            FROM ai_predictions_v2 p
+            LEFT JOIN ai_predictions_v2 prev ON p.symbol = prev.symbol 
+                 AND prev.date = date(p.date, '-1 day') 
+                 AND prev.is_primary = 1
+            WHERE p.symbol IN ({placeholders}) AND p.date = ? AND p.is_primary = 1
         """, (*symbols_list, date_str))
         predictions = {row[0]: {
             'signal': row[1], 
             'confidence': row[2],
             'ai_reasoning': row[3],
             'support_price': row[4],
-            'pressure_price': row[5]
+            'pressure_price': row[5],
+            'reflection': {
+                'prev_signal': row[6],
+                'prev_status': row[7],
+                'prev_change': row[8],
+            }
         } for row in cursor.fetchall()}
 
         # 2b. Get Real Technical Data from daily_prices (latest available)
@@ -436,7 +477,7 @@ async def generate_stock_briefs_batch(date_str: str, specific_symbols: List[str]
                 provider = TIER_PROVIDER_MAP[tier]
                 logger.info(f"   📝 Generating {tier.upper()} brief using {provider}...")
                 
-                analysis = await analyze_stock_context(symbol, stock_name, news, tech_data, date_str, provider)
+                analysis = await analyze_stock_context(symbol, stock_name, news, tech_data, date_str, tier)
 
                 # Store in DB with tier
                 cursor.execute("""
