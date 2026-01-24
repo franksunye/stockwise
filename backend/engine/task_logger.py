@@ -52,15 +52,11 @@ class TaskLogger:
             conn = get_connection()
             cursor = conn.cursor()
             
-            now = datetime.now()
+            now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             
             # Check if entry exists for this task/date/agent
             # Note: We technically allow multiple runs of same task_name if repeated, 
             # but for 'daily plan' logic usually we update the latest one.
-            # However, for activity log, we might want discrete entries if re-run?
-            # Let's stick to "Update if Pending/Running, Insert if New or Finished?"
-            # For simplicity: Update the *latest* entry if it matches task_name and date.
-            
             cursor.execute(
                 """SELECT id, status FROM task_logs 
                    WHERE task_name = ? AND date = ? AND agent_id = ? 
@@ -84,7 +80,7 @@ class TaskLogger:
                 
                 if start:
                     update_fields.append("start_time = ?")
-                    params.append(now)
+                    params.append(now_str)
                     # If starting, we might want to update display_name/type/dims if provided
                     if display_name:
                         update_fields.append("display_name = ?")
@@ -98,7 +94,7 @@ class TaskLogger:
                 
                 if end:
                     update_fields.append("end_time = ?")
-                    params.append(now)
+                    params.append(now_str)
                     
                 if meta_json:
                     update_fields.append("metadata = ?")
@@ -109,13 +105,6 @@ class TaskLogger:
                 sql = f"UPDATE task_logs SET {', '.join(update_fields)} WHERE id = ?"
                 cursor.execute(sql, params)
             else:
-                # Insert new entry (if not exists or if previous was already finished and we are restarting)
-                # But wait, 'start' method implies a new run.
-                if not start and not row:
-                     # Trying to update a non-existent task? Insert it as finished/failed?
-                     # Let's simple INSERT if we are starting.
-                     pass
-                
                 if start or not row:
                     cursor.execute("""
                         INSERT INTO task_logs 
@@ -126,8 +115,8 @@ class TaskLogger:
                     """, (
                         self.agent_id, self.task_name, display_name or self.task_name, task_type or 'unknown', self.date,
                         status, self.triggered_by, 
-                        now if start else None, 
-                        now if end else None, 
+                        now_str if start else None, 
+                        now_str if end else None, 
                         dim_json, message, meta_json
                     ))
             
