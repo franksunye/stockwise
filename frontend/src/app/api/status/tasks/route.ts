@@ -36,14 +36,6 @@ const DAILY_PLAN_TEMPLATE = [
         expected_start: "16:00"
     },
     {
-        name: "validation",
-        display_name: "Accuracy Validation & Glory",
-        agent_id: "system_guardian",
-        type: "maintenance",
-        dimensions: {},
-        expected_start: "16:15"
-    },
-    {
         name: "ingestion_hk",
         display_name: "HK Stock Data Sync",
         agent_id: "market_observer",
@@ -52,12 +44,20 @@ const DAILY_PLAN_TEMPLATE = [
         expected_start: "16:30"
     },
     {
+        name: "validation",
+        display_name: "Accuracy Validation & Glory",
+        agent_id: "system_guardian",
+        type: "maintenance",
+        dimensions: {},
+        expected_start: "16:45"
+    },
+    {
         name: "ai_analysis",
         display_name: "Next-Day Strategy Formulation",
         agent_id: "quant_mind",
         type: "reasoning",
         dimensions: { model: "mixed" },
-        expected_start: "16:45"
+        expected_start: "17:00"
     },
     {
         name: "brief_gen",

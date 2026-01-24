@@ -94,8 +94,8 @@ DAILY_TASK_PLAN_TEMPLATE = [
         "display_name": "Accuracy Validation & Glory",
         "agent_id": "system_guardian",
         "type": "maintenance",
-        "expected_start": "16:15",
-        "dependencies": ["ingestion_cn"],
+        "expected_start": "16:45",
+        "dependencies": ["ingestion_hk"],
         "dimensions": {}
     },
 
@@ -105,7 +105,7 @@ DAILY_TASK_PLAN_TEMPLATE = [
         "display_name": "Next-Day Strategy Formulation",
         "agent_id": "quant_mind",
         "type": "reasoning",
-        "expected_start": "16:45",
+        "expected_start": "17:00",
         "dependencies": ["validation"],
         "dimensions": {"model": "mixed"}
     },
