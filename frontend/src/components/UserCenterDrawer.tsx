@@ -1,7 +1,8 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, User, Crown, Zap, ShieldCheck, Loader2, ArrowRight, Share2, Check, RefreshCw, Key, Bell, ChevronDown, ArrowLeftRight, Sun, Trophy, Sparkles, FileText, TrendingUp } from 'lucide-react';
+import { X, User, Crown, Zap, ShieldCheck, Loader2, ArrowRight, Share2, Check, RefreshCw, Key, Bell, ChevronDown, ArrowLeftRight, Sun, Trophy, Sparkles, FileText, TrendingUp, Star, ChevronRight } from 'lucide-react';
+import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { getWatchlist } from '@/lib/storage';
 import { getCurrentUser, restoreUserIdentity } from '@/lib/user';
@@ -445,6 +446,26 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                      </span>
                    </div>
                 </div>
+              </div>
+
+              {/* Pricing Page Link */}
+              <div className="mb-6 px-1">
+                 <Link 
+                   href="/pricing"
+                   className="w-full py-4 px-5 rounded-[24px] bg-gradient-to-r from-indigo-500/5 to-purple-500/5 border border-white/5 hover:border-indigo-500/20 transition-all flex items-center justify-between group"
+                   onClick={() => onClose()}
+                 >
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center group-hover:bg-indigo-500/20 transition-colors">
+                            <Star size={18} className="text-indigo-400" />
+                        </div>
+                        <div>
+                            <span className="block text-sm font-black italic text-white">查看详细价格权益</span>
+                            <span className="block text-[10px] text-slate-500 font-bold uppercase tracking-wider">Pricing Strategy</span>
+                        </div>
+                    </div>
+                    <ChevronRight size={16} className="text-slate-600 group-hover:text-indigo-400 transition-colors" />
+                 </Link>
               </div>
 
               {/* Notification Switch (PWA Only) - Upgraded with Type Settings */}

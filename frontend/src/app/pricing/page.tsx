@@ -1,0 +1,250 @@
+'use client';
+
+import { motion } from 'framer-motion';
+import { Check, ChevronRight, Zap, Crown, ShieldCheck, Star } from 'lucide-react';
+import Link from 'next/link';
+import Image from 'next/image';
+
+const pricingPlans = [
+  {
+    name: '基础版',
+    enName: 'Free',
+    price: '0',
+    period: '永久免费',
+    description: '适合刚接触 AI 投资的个人投资者',
+    features: [
+      '基础个股日级别简报',
+      '每日 3 只自选股监控额度',
+      '延迟数据分析',
+      '社区技术支持',
+    ],
+    cta: '立即开始',
+    href: '/dashboard',
+    highlight: false,
+    icon: Zap,
+    color: 'slate',
+  },
+  {
+    name: 'Pro 会员',
+    enName: 'Pro',
+    price: '29.9',
+    period: '每月 / ¥299 每年',
+    description: '专为追求深度见解的专业投资者设计',
+    features: [
+      'Matt Levine 风格深度叙事复盘',
+      '10 只自选股监控额度',
+      '所有技术因子全维度解锁',
+      '实时信号翻转推送（战报）',
+      '⭐ Pro 专属身份勋章',
+    ],
+    cta: '升级为 PRO',
+    href: '/dashboard?upgrade=true',
+    highlight: true,
+    icon: Crown,
+    color: 'indigo',
+  },
+  {
+    name: '机构/大户版',
+    enName: 'Alpha',
+    price: '1,999',
+    period: '每年',
+    description: '顶级阿尔法收益工具，实时深度监控',
+    features: [
+      '实时盘中突发事件 AI 分析',
+      '1对1 AI 专属策略看板',
+      '专属深度研报自动生成',
+      'API 原始数据访问接口',
+      '行业专家优先支持',
+    ],
+    cta: '联系我们',
+    href: 'mailto:support@stockwise.ai',
+    highlight: false,
+    icon: ShieldCheck,
+    color: 'emerald',
+  },
+];
+
+export default function PricingPage() {
+  return (
+    <div className="min-h-screen bg-[#050508] text-white overflow-x-hidden font-sans">
+      {/* 动态背景 */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-600/10 blur-[120px] rounded-full" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600/10 blur-[120px] rounded-full" />
+        <div className="absolute inset-0 opacity-20 overflow-hidden">
+          <Image 
+            src="/pricing-bg.png" 
+            alt="Background Gradient" 
+            fill 
+            className="object-cover scale-110"
+          />
+        </div>
+      </div>
+
+      {/* 顶部导航 */}
+      <nav className="relative z-50 flex items-center justify-between px-8 py-8 max-w-7xl mx-auto">
+        <Link href="/" className="flex items-center gap-2">
+          <Image 
+            src="/logo.png" 
+            alt="StockWise Logo" 
+            width={40} 
+            height={40} 
+            className="rounded-xl"
+          />
+          <span className="text-xl font-black italic tracking-tighter">STOCKWISE <span className="text-indigo-500">X</span></span>
+        </Link>
+        <div className="hidden md:flex items-center gap-8 text-sm font-bold text-slate-400">
+          <Link href="/#features" className="hover:text-white transition-colors">功能</Link>
+          <Link href="/pricing" className="text-white transition-colors">价格</Link>
+          <Link href="/dashboard" className="px-5 py-2.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-white">进入应用</Link>
+        </div>
+      </nav>
+
+      <main className="relative z-10 max-w-7xl mx-auto px-8 pt-20 pb-40">
+        <div className="text-center space-y-4 mb-20">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-black uppercase tracking-widest mb-4"
+          >
+            <Star size={12} className="fill-indigo-500" />
+            Pricing Strategy
+          </motion.div>
+          <h1 className="text-5xl md:text-7xl font-black tracking-tighter italic leading-tight">
+            选择您的 <br /> 
+            <span className="bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">决策加速引擎</span>
+          </h1>
+          <p className="text-lg text-slate-400 font-medium max-w-xl mx-auto leading-relaxed mt-6">
+            StockWise 利用 AI 击穿专业投研成本，为您提供高性价比的金融决策辅助方案。
+          </p>
+        </div>
+
+        {/* 价格方案矩阵 */}
+        <div className="grid lg:grid-cols-3 gap-8 mb-20">
+          {pricingPlans.map((plan, index) => (
+            <motion.div
+              key={plan.name}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              className={`glass-card p-8 flex flex-col relative overflow-hidden ${
+                plan.highlight ? 'border-indigo-500/40 ring-1 ring-indigo-500/20' : 'border-white/5'
+              }`}
+            >
+              {plan.highlight && (
+                <div className="absolute top-5 right-[-35px] rotate-45 bg-indigo-600 text-white text-[10px] font-black px-10 py-1 uppercase tracking-tighter">
+                  Popular
+                </div>
+              )}
+              
+              <div className="mb-8">
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-6 ${
+                  plan.color === 'indigo' ? 'bg-indigo-500/10 text-indigo-400' :
+                  plan.color === 'emerald' ? 'bg-emerald-500/10 text-emerald-400' :
+                  'bg-slate-500/10 text-slate-400'
+                }`}>
+                  <plan.icon size={24} />
+                </div>
+                <h3 className="text-2xl font-black italic mb-1">{plan.name}</h3>
+                <p className="text-slate-500 text-sm font-bold uppercase tracking-wider">{plan.enName}</p>
+              </div>
+
+              <div className="mb-8">
+                <div className="flex items-baseline gap-1">
+                  <span className="text-sm font-bold">¥</span>
+                  <span className="text-5xl font-black tracking-tighter">{plan.price}</span>
+                  <span className="text-slate-500 text-sm ml-2">{plan.period}</span>
+                </div>
+                <p className="text-slate-400 text-sm mt-4 leading-relaxed italic">
+                  {plan.description}
+                </p>
+              </div>
+
+              <div className="space-y-4 mb-10 flex-1">
+                {plan.features.map((feature) => (
+                  <div key={feature} className="flex items-start gap-3 text-sm">
+                    <div className="mt-1 w-4 h-4 rounded-full bg-white/5 flex items-center justify-center flex-shrink-0">
+                      <Check size={10} className={plan.highlight ? 'text-indigo-400' : 'text-slate-500'} />
+                    </div>
+                    <span className="text-slate-300 font-medium">{feature}</span>
+                  </div>
+                ))}
+              </div>
+
+              <Link 
+                href={plan.href}
+                className={`w-full py-4 rounded-2xl flex items-center justify-center gap-2 font-black italic transition-all active:scale-95 ${
+                  plan.highlight 
+                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-500 hover:shadow-indigo-600/40' 
+                  : 'bg-white/5 border border-white/10 hover:bg-white/10 text-white'
+                }`}
+              >
+                {plan.cta}
+                <ChevronRight size={18} />
+              </Link>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* 底部免责声明 */}
+        <div className="glass-card p-6 md:p-10 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.03] to-transparent text-center max-w-4xl mx-auto">
+          <div className="flex items-center justify-center gap-3 mb-4 text-emerald-400">
+            <ShieldCheck size={20} />
+            <span className="text-sm font-black uppercase tracking-widest">Risk Disclosure</span>
+          </div>
+          <p className="text-slate-500 text-sm leading-relaxed max-w-2xl mx-auto italic font-medium">
+            股市有风险，投资需谨慎。本应用生成的所有简报、预测及分析内容均由 AI 驱动，仅供参考，不构成任何形式的投资建议或财务咨询。StockWise 不对因使用本服务内容而导致的任何投资损失承担直接或间接责任。
+          </p>
+        </div>
+
+        {/* 商业对标 */}
+        <section className="mt-40 text-center">
+            <h2 className="text-3xl font-black italic tracking-tighter mb-12">
+               为什么选择 <span className="text-indigo-500">StockWise?</span>
+            </h2>
+            <div className="grid md:grid-cols-3 gap-8">
+                <div className="p-6">
+                    <h4 className="text-white font-bold mb-3">比通用 AI 更懂股票</h4>
+                    <p className="text-slate-500 text-sm font-medium">垂直集成了 2026 最新金融语境，专门针对 A 股/港股逻辑进行深度指令集建模。</p>
+                </div>
+                <div className="p-6">
+                    <h4 className="text-white font-bold mb-3">比传统终端更懂叙事</h4>
+                    <p className="text-slate-500 text-sm font-medium">不只是罗列冰冷的技术数据，我们将复杂的价格行为转化为 Matt Levine 式的逻辑白话。</p>
+                </div>
+                <div className="p-6">
+                    <h4 className="text-white font-bold mb-3">极致性价比</h4>
+                    <p className="text-slate-500 text-sm font-medium">利用 Gemini 3 Flash 的批处理分布式架构，将年费控制在竞品的 1/5 以下。</p>
+                </div>
+            </div>
+        </section>
+      </main>
+
+      {/* Footer */}
+      <footer className="relative z-10 border-t border-white/5 py-20 px-8">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-10">
+          <Link href="/" className="flex items-center gap-2">
+            <Image 
+              src="/logo.png" 
+              alt="StockWise Logo" 
+              width={32} 
+              height={32} 
+              className="rounded-lg"
+            />
+            <span className="text-sm font-black italic tracking-tighter">STOCKWISE X</span>
+          </Link>
+          <p className="text-xs text-slate-600 font-bold uppercase tracking-widest">© 2026 STOCKWISE TECHNOLOGY. ALL RIGHTS RESERVED.</p>
+          <div className="flex gap-6 text-xs font-bold text-slate-500">
+             <Link href="/status" className="hover:text-white transition-colors">系统状态</Link>
+             <Link href="/pricing" className="text-white">价格说明</Link>
+            <Link href="#" className="hover:text-white transition-colors">隐私协议</Link>
+            <Link href="#" className="hover:text-white transition-colors">服务条款</Link>
+          </div>
+        </div>
+      </footer>
+
+      <style jsx global>{`
+        .glass-card { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 40px; }
+      `}</style>
+    </div>
+  );
+}
