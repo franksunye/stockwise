@@ -1,13 +1,7 @@
 import { NextResponse } from 'next/server';
-import path from 'path';
-import Database from 'better-sqlite3';
+import { createClient } from '@libsql/client';
 
-// Reusing the Backend's plan definition logic (Re-implemented in TS or fetched?
-// For simpler syncing, we can define the plan structure here too, 
-// OR simpler: query DB for logs, and if no log exists for a "Known Plan Item", return it as pending.
-
-// Let's define the static plan here to match `task_registry.py`
-// In a real microservice we'd fetch this from the backend, but shared config is fine for now.
+// Reusing the Backend's plan definition logic
 const DAILY_PLAN_TEMPLATE = [
     {
         name: "ingestion_cn",
@@ -74,23 +68,6 @@ const AGENTS = {
     "system_guardian": { name: "System Guardian", persona: "Sylar", avatar: "/avatars/sylar.png", color: "gray" }
 };
 
-// DB Log Interface
-interface TaskLog {
-    id: number;
-    agent_id: string;
-    task_name: string;
-    display_name: string;
-    task_type: string;
-    date: string;
-    status: string;
-    triggered_by: string;
-    start_time: string | null;
-    end_time: string | null;
-    dimensions: string; // JSON string in DB
-    message: string | null;
-    metadata: string | null; // JSON string in DB
-}
-
 // Output Interface matching frontend Task
 interface ApiTask {
     name: string;
@@ -113,24 +90,46 @@ export async function GET(request: Request) {
     const date = searchParams.get('date') || new Date().toISOString().split('T')[0];
 
     try {
-        // Path to backend DB
-        const dbPath = process.env.DB_PATH || path.resolve(process.cwd(), '../../backend/StockWise.db');
-        const db = new Database(dbPath, { readonly: true });
+        const url = process.env.TURSO_DB_URL;
+        const authToken = process.env.TURSO_AUTH_TOKEN;
+
+        if (!url || !authToken) {
+            console.error("Missing Turso Credentials");
+            return NextResponse.json({ error: "Database configuration missing" }, { status: 500 });
+        }
+
+        const client = createClient({
+            url: url,
+            authToken: authToken,
+        });
 
         // Query Logs
-        const stmt = db.prepare(`
-            SELECT * FROM task_logs 
-            WHERE date = ? 
-            ORDER BY start_time ASC
-        `);
-        // Cast the result to typed array
-        const logs = stmt.all(date) as TaskLog[];
+        const rs = await client.execute({
+            sql: "SELECT * FROM task_logs WHERE date = ? ORDER BY start_time ASC",
+            args: [date]
+        });
+
+        // Map generic rows to our known structure
+        // LibSQL client usually returns rows as objects matching column names
+        const logs = rs.rows.map(row => ({
+            id: row.id,
+            agent_id: row.agent_id as string,
+            task_name: row.task_name as string,
+            display_name: row.display_name as string,
+            task_type: row.task_type as string,
+            date: row.date as string,
+            status: row.status as string,
+            triggered_by: row.triggered_by as string,
+            start_time: row.start_time as string | null,
+            end_time: row.end_time as string | null,
+            dimensions: row.dimensions as string,
+            message: row.message as string | null,
+            metadata: row.metadata as string | null
+        }));
 
         // Merge Plan + Actual
         // 1. Start with Plan
-        // Use a more specific type than 'any' for the result array items if possible, but map returns inferred type
         const result: ApiTask[] = DAILY_PLAN_TEMPLATE.map(planItem => {
-            // Find execution log for this plan item
             const logEntry = logs.find((l) => l.task_name === planItem.name);
 
             return {
@@ -145,7 +144,7 @@ export async function GET(request: Request) {
             };
         });
 
-        // 2. Add Ad-hoc tasks (Manual syncs, Validation, etc that are NOT in plan)
+        // 2. Add Ad-hoc tasks
         logs.forEach((log) => {
             const inPlan = DAILY_PLAN_TEMPLATE.find(p => p.name === log.task_name);
             if (!inPlan) {
@@ -179,6 +178,9 @@ export async function GET(request: Request) {
             const timeB = b.start_time || b.expected_start;
             if (!timeA) return 1;
             if (!timeB) return -1;
+            if (timeA === null && timeB === null) return 0;
+            if (timeA === null) return 1;
+            if (timeB === null) return -1;
             return timeA.localeCompare(timeB);
         });
 
