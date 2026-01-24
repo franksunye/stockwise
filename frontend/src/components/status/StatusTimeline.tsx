@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { StatusBadge } from './StatusBadge';
 import { format } from 'date-fns';
 
-interface Task {
+export interface Task {
   name: string;
   display_name: string;
   agent: {
