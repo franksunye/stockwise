@@ -97,13 +97,13 @@ interface ApiTask {
     display_name: string;
     agent_id: string;
     type: string;
-    dimensions: any; // or Record<string, string>
+    dimensions: Record<string, unknown>;
     expected_start: string | null;
     status: string;
     start_time: string | null;
     end_time: string | null;
     message: string | null;
-    metadata: any;
+    metadata: Record<string, unknown> | null;
     triggered_by: string | null;
     is_planned: boolean;
 }
