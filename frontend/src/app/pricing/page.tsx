@@ -86,12 +86,12 @@ export default function PricingPage() {
         <Link href="/" className="flex items-center gap-2">
           <Image 
             src="/logo.png" 
-            alt="StockWise Logo" 
+              alt="StockWise AI Logo" 
             width={40} 
             height={40} 
             className="rounded-xl"
           />
-          <span className="text-xl font-black italic tracking-tighter">STOCKWISE <span className="text-indigo-500">X</span></span>
+          <span className="text-xl font-black italic tracking-tighter">STOCKWISE <span className="text-indigo-500">AI</span></span>
         </Link>
         <div className="hidden md:flex items-center gap-8 text-sm font-bold text-slate-400">
           <Link href="/#features" className="hover:text-white transition-colors">功能</Link>
@@ -115,7 +115,7 @@ export default function PricingPage() {
             <span className="bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">决策加速引擎</span>
           </h1>
           <p className="text-lg text-slate-400 font-medium max-w-xl mx-auto leading-relaxed mt-6">
-            StockWise 利用 AI 击穿专业投研成本，为您提供高性价比的金融决策辅助方案。
+            StockWise AI 利用 AI 击穿专业投研成本，为您提供高性价比的金融决策辅助方案。
           </p>
         </div>
 
@@ -193,14 +193,14 @@ export default function PricingPage() {
             <span className="text-sm font-black uppercase tracking-widest">Risk Disclosure</span>
           </div>
           <p className="text-slate-500 text-sm leading-relaxed max-w-2xl mx-auto italic font-medium">
-            股市有风险，投资需谨慎。本应用生成的所有简报、预测及分析内容均由 AI 驱动，仅供参考，不构成任何形式的投资建议或财务咨询。StockWise 不对因使用本服务内容而导致的任何投资损失承担直接或间接责任。
+            股市有风险，投资需谨慎。本应用生成的所有简报、预测及分析内容均由 AI 驱动，仅供参考，不构成任何形式的投资建议或财务咨询。StockWise AI 不对因使用本服务内容而导致的任何投资损失承担直接或间接责任。
           </p>
         </div>
 
         {/* 商业对标 */}
         <section className="mt-40 text-center">
             <h2 className="text-3xl font-black italic tracking-tighter mb-12">
-               为什么选择 <span className="text-indigo-500">StockWise?</span>
+               为什么选择 <span className="text-indigo-500">StockWise AI?</span>
             </h2>
             <div className="grid md:grid-cols-3 gap-8">
                 <div className="p-6">
@@ -225,14 +225,14 @@ export default function PricingPage() {
           <Link href="/" className="flex items-center gap-2">
             <Image 
               src="/logo.png" 
-              alt="StockWise Logo" 
+                alt="StockWise AI Logo" 
               width={32} 
               height={32} 
               className="rounded-lg"
             />
-            <span className="text-sm font-black italic tracking-tighter">STOCKWISE X</span>
+            <span className="text-sm font-black italic tracking-tighter">STOCKWISE AI</span>
           </Link>
-          <p className="text-xs text-slate-600 font-bold uppercase tracking-widest">© 2026 STOCKWISE TECHNOLOGY. ALL RIGHTS RESERVED.</p>
+          <p className="text-xs text-slate-600 font-bold uppercase tracking-widest">© 2026 STOCKWISE AI TECHNOLOGY. ALL RIGHTS RESERVED.</p>
           <div className="flex gap-6 text-xs font-bold text-slate-500">
              <Link href="/status" className="hover:text-white transition-colors">系统状态</Link>
              <Link href="/pricing" className="text-white">价格说明</Link>

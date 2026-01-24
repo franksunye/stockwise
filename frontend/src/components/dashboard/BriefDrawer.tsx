@@ -125,7 +125,7 @@ export function BriefDrawer({ isOpen, onClose, limitToSymbol, onUpgrade }: Brief
     if (navigator.share && brief) {
       try {
         await navigator.share({
-          title: 'StockWise 每日简报',
+          title: 'StockWise AI 每日简报',
           text: brief.push_hook,
           url: window.location.origin + '/dashboard', 
         });

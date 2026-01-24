@@ -58,7 +58,7 @@ export default function BriefPage() {
     if (navigator.share && brief) {
       try {
         await navigator.share({
-          title: '每日简报 - StockWise',
+          title: '每日简报 - StockWise AI',
           text: brief.push_hook,
           url: window.location.href,
         })

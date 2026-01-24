@@ -16,7 +16,7 @@ export function PerformanceOptimizer() {
         
         if (isAndroid) {
             document.body.classList.add('is-android');
-            console.log('🚀 StockWise: Android detected, enabling high performance mode.');
+            console.log('🚀 StockWise AI: Android detected, enabling high performance mode.');
         } else {
             document.body.classList.remove('is-android');
         }

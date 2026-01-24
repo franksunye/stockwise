@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * StockWise 用户管理工具
+ * StockWise AI 用户管理工具
  * 支持隐式注册 (匿名用户) 和显式注册 (注册用户)
  * 
  * iOS PWA 兼容性说明：

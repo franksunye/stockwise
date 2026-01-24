@@ -61,7 +61,7 @@ export function InviteWall({ onSuccess }: Props) {
             <Lock className="w-10 h-10 text-white" />
           </div>
           <h1 className="text-4xl font-black italic tracking-tighter mb-4">
-            STOCKWISE <span className="text-indigo-500">BETA</span>
+            STOCKWISE AI <span className="text-indigo-500">BETA</span>
           </h1>
           <p className="text-slate-400 font-medium leading-relaxed px-4">
             目前处于邀请制内测阶段。请输入您的专属激活码以解锁 AI 决策系统。

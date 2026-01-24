@@ -1,6 +1,6 @@
 {
-    "name": "StockWise X",
-    "short_name": "StockWise",
+    "name": "StockWise AI",
+    "short_name": "StockWise AI",
     "description": "智能炒股决策控制台",
     "start_url": "/dashboard",
     "display": "standalone",

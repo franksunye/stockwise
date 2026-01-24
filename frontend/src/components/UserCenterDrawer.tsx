@@ -73,7 +73,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
       }
       
       // 通过 Service Worker 发送本地测试通知
-      await registration.showNotification('🔔 测试通知 - StockWise', {
+      await registration.showNotification('🔔 测试通知 - StockWise AI', {
         body: `测试成功！当前时间: ${new Date().toLocaleTimeString('zh-CN')}`,
         icon: '/logo.png',
         badge: '/logo.png',
@@ -371,6 +371,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                     <span className="text-[10px] uppercase tracking-[0.4em] text-slate-500 font-bold">Member Center</span>
                    </div>
                    <h2 className="text-3xl font-black italic tracking-tighter text-white">
+                    <span className="text-sm font-black italic tracking-tighter">STOCKWISE AI</span>
                     个人中心 <span className="text-indigo-500 underline decoration-4 underline-offset-4" data-en="USER">USER</span>
                    </h2>
                 </div>

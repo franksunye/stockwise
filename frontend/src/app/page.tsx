@@ -19,12 +19,12 @@ export default function LandingPage() {
         <div className="flex items-center gap-2">
           <Image 
             src="/logo.png" 
-            alt="StockWise Logo" 
+            alt="StockWise AI Logo" 
             width={40} 
             height={40} 
             className="rounded-xl"
           />
-          <span className="text-xl font-black italic tracking-tighter">STOCKWISE <span className="text-indigo-500">X</span></span>
+          <span className="text-xl font-black italic tracking-tighter">STOCKWISE <span className="text-indigo-500">AI</span></span>
         </div>
         <div className="hidden md:flex items-center gap-8 text-sm font-bold text-slate-400">
           <Link href="#features" className="hover:text-white transition-colors">功能</Link>
@@ -138,12 +138,12 @@ export default function LandingPage() {
             <h2 className="text-4xl md:text-5xl font-black italic tracking-tighter">
               常见问题 <span className="text-indigo-500">FAQ</span>
             </h2>
-            <p className="text-slate-400 font-medium">快速了解 StockWise</p>
+            <p className="text-slate-400 font-medium">快速了解 StockWise AI</p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-4">
             <div className="glass-card p-6 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
-              <p className="text-white font-bold mb-2">StockWise X 是什么？</p>
+              <p className="text-white font-bold mb-2">StockWise AI 是什么？</p>
               <p className="text-slate-400 text-sm">一款 AI 驱动的港股/A股决策辅助工具，帮助个人投资者做出更理性的交易决策。</p>
             </div>
             <div className="glass-card p-6 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
@@ -189,14 +189,14 @@ export default function LandingPage() {
           <div className="flex items-center gap-2">
             <Image 
               src="/logo.png" 
-              alt="StockWise Logo" 
+              alt="StockWise AI Logo" 
               width={32} 
               height={32} 
               className="rounded-lg"
             />
-            <span className="text-sm font-black italic tracking-tighter">STOCKWISE X</span>
+            <span className="text-sm font-black italic tracking-tighter">STOCKWISE AI</span>
           </div>
-          <p className="text-xs text-slate-600 font-bold uppercase tracking-widest">© 2026 STOCKWISE TECHNOLOGY. ALL RIGHTS RESERVED.</p>
+          <p className="text-xs text-slate-600 font-bold uppercase tracking-widest">© 2026 STOCKWISE AI TECHNOLOGY. ALL RIGHTS RESERVED.</p>
           <div className="flex gap-6 text-xs font-bold text-slate-500">
             <Link href="/status" className="hover:text-white transition-colors">系统状态</Link>
             <Link href="/pricing" className="hover:text-white transition-colors">价格方案</Link>
