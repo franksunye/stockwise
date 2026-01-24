@@ -320,7 +320,8 @@ def init_db():
                 dimensions TEXT,                -- JSON: {market: CN, tier: PRO}
                 message TEXT,
                 metadata TEXT,                  -- JSON: {tokens: 150, rows: 500}
-                created_at TIMESTAMP DEFAULT (datetime('now', '+8 hours'))
+                created_at TIMESTAMP DEFAULT (datetime('now', '+8 hours')),
+                updated_at TIMESTAMP DEFAULT (datetime('now', '+8 hours'))
             )
         """)
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_task_logs_date_agent ON task_logs(date, agent_id)")
