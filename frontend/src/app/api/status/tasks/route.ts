@@ -128,8 +128,18 @@ export async function GET(request: Request) {
         }));
 
         // Merge Plan + Actual
+
+        // 0. Determine if it's a trading day (Simple Weekend Check)
+        // Note: Ideally we'd check holidays too, but this covers 90% of cases.
+        // We treat the input 'date' (YYYY-MM-DD) as local date to check day of week.
+        const targetDate = new Date(date);
+        const dayOfWeek = targetDate.getUTCDay(); // 0=Sun, 6=Sat (Using UTC to avoid TZ shifts on pure date strings)
+        const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+
+        const effectivePlan = isWeekend ? [] : DAILY_PLAN_TEMPLATE;
+
         // 1. Start with Plan
-        const result: ApiTask[] = DAILY_PLAN_TEMPLATE.map(planItem => {
+        const result: ApiTask[] = effectivePlan.map(planItem => {
             const logEntry = logs.find((l) => l.task_name === planItem.name);
 
             return {

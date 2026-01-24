@@ -5,7 +5,16 @@ import { StatusTimeline, Task } from '@/components/status/StatusTimeline';
 import { format, subDays, addDays } from 'date-fns';
 
 export default function StatusPage() {
-  const [date, setDate] = useState(new Date());
+  // Smart Default Date: If weekend, show next Monday
+  const getInitialDate = () => {
+      const today = new Date();
+      const day = today.getDay(); // 0=Sun, 6=Sat
+      if (day === 6) return addDays(today, 2); // Sat -> Mon
+      if (day === 0) return addDays(today, 1); // Sun -> Mon
+      return today;
+  };
+
+  const [date, setDate] = useState(getInitialDate());
   
   const [data, setData] = useState<{tasks: Task[], date: string} | null>(null);
   const [loading, setLoading] = useState(true);
