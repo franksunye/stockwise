@@ -18,7 +18,7 @@ interface Task {
   end_time: string | null;
   expected_start: string | null;
   message: string | null;
-  metadata: any;
+  metadata: Record<string, unknown> | null;
   dimensions: Record<string, string>;
   triggered_by: string | null;
 }
@@ -98,7 +98,7 @@ function TimelineItem({ task }: { task: Task }) {
                    {/* Metadata Row */}
                    <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                        {dimKeys.map(k => (
-                           <StatusBadge key={k} type={k as any} value={task.dimensions[k]} />
+                           <StatusBadge key={k} type={k as "market" | "tier" | "model"} value={task.dimensions[k]} />
                        ))}
                        {task.triggered_by && (
                            <div className="flex items-center gap-1 text-[10px] text-gray-500 ml-2 border-l border-white/10 pl-2">
