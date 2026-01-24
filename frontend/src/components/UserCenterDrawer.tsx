@@ -401,14 +401,12 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                 {tier === 'pro' ? 'Pro Plan' : 'Free Plan'}
                             </span>
                             </div>
-                            <p className="text-xs text-slate-500 mono flex items-center gap-2">
-                                ID: {userId ? (userId.slice(0, 8) + '...' + userId.slice(-4)) : '...'}
-                            </p>
-                            {expiresAt && tier === 'pro' && (
-                                <p className="text-[10px] text-emerald-500/80 mt-1 font-bold">
-                                    有效期至: {expiresAt.split('T')[0]}
-                                </p>
-                            )}
+                            <div className="flex items-center gap-2">
+                                <div className={`w-1.5 h-1.5 rounded-full ${tier === 'pro' ? 'bg-amber-400' : 'bg-emerald-400'}`} />
+                                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+                                    {tier === 'pro' ? 'AI 优先级：极高' : '公开版连接'}
+                                </span>
+                            </div>
                         </div>
                         </div>
                     </div>
@@ -429,74 +427,60 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                         <div className={`glass-card p-5 flex flex-col justify-between h-24 ${tier === 'pro' ? 'border-amber-500/20 bg-amber-500/5' : 'opacity-60'}`}>
                         <div className={`flex items-center gap-2 ${tier === 'pro' ? 'text-amber-200' : 'text-slate-400'}`}>
                             <Zap size={16} />
-                            <span className="text-xs font-bold uppercase">AI 分析</span>
+                            <span className="text-xs font-bold uppercase">AI 解析</span>
                         </div>
                         <div className="flex items-end gap-1.5">
-                            <span className={`text-sm font-bold ${tier === 'pro' ? 'text-amber-100' : 'text-white'}`}>
-                                {tier === 'pro' ? '深度推理链' : '基础版'}
+                            <span className={`text-[10px] font-black uppercase tracking-tighter ${tier === 'pro' ? 'text-amber-100' : 'text-slate-500'}`}>
+                                {tier === 'pro' ? 'Matt Levine 叙事模式' : '基础技术因子'}
                             </span>
                         </div>
                         </div>
                     </div>
 
-                    {/* High Quality Identity Center Entrance */}
-                    <div className="mb-4 px-1">
+                    {/* Action Grouping for cleaner UI */}
+                    <div className="space-y-3 mb-6">
                         <button 
-                        onClick={() => setShowIdentityCenter(true)}
-                        className={`w-full py-4 px-5 rounded-[24px] border transition-all flex items-center justify-between group ${
-                            tier === 'pro' 
-                            ? 'bg-amber-500/[0.03] border-amber-500/20 hover:border-amber-500/40 hover:bg-amber-500/[0.06]' 
-                            : 'bg-white/5 border-white/5 hover:border-indigo-500/20'
-                        }`}
+                            onClick={() => setShowIdentityCenter(true)}
+                            className={`w-full py-4 px-5 rounded-[24px] border transition-all flex items-center justify-between group ${
+                                tier === 'pro' 
+                                ? 'bg-amber-500/[0.03] border-amber-500/20 hover:border-amber-500/40 hover:bg-amber-500/[0.06]' 
+                                : 'bg-white/5 border-white/5 hover:border-white/10'
+                            }`}
                         >
                             <div className="flex items-center gap-3">
-                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${
-                                    tier === 'pro' ? 'bg-amber-500/20' : 'bg-indigo-500/10'
-                                }`}>
-                                    <ShieldCheck size={18} className={tier === 'pro' ? 'text-amber-400' : 'text-indigo-400'} />
-                                </div>
+                                <ShieldCheck size={18} className={tier === 'pro' ? 'text-amber-400' : 'text-indigo-400'} />
                                 <div className="text-left">
-                                    <span className={`block text-sm font-black italic ${tier === 'pro' ? 'text-amber-200' : 'text-white'}`}>身份备份与资产恢复</span>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Identity & Security</span>
-                                        {userEmail && (
-                                            <span className="flex items-center gap-1 text-[8px] px-1.5 py-0.25 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
-                                                <Mail size={8} /> 已挂载邮箱
-                                            </span>
-                                        )}
-                                    </div>
+                                    <span className={`block text-sm font-bold ${tier === 'pro' ? 'text-amber-100' : 'text-white'}`}>身份备份与资产恢复</span>
+                                    <span className="text-[9px] text-slate-500 font-bold uppercase">Digital ID & Recovery</span>
                                 </div>
                             </div>
                             <div className="flex items-center gap-2">
-                                {!userEmail && tier === 'pro' && (
-                                    <div className="w-1.5 h-1.5 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)] animate-pulse" />
+                                {userEmail ? (
+                                    <Mail size={12} className="text-emerald-500/50" />
+                                ) : tier === 'pro' && (
+                                    <div className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
                                 )}
-                                <ChevronRight size={16} className={`transition-colors ${tier === 'pro' ? 'text-amber-600 group-hover:text-amber-400' : 'text-slate-600 group-hover:text-indigo-400'}`} />
+                                <ChevronRight size={14} className="text-slate-600" />
                             </div>
                         </button>
-                    </div>
 
-                    {/* Pricing Page Link - Only for non-pro or recurring reminders */}
-                    {tier !== 'pro' && (
-                        <div className="mb-6 px-1">
+                        {tier !== 'pro' && (
                             <Link 
-                            href="/pricing"
-                            className="w-full py-4 px-5 rounded-[24px] bg-gradient-to-r from-indigo-500/5 to-purple-500/5 border border-white/5 hover:border-indigo-500/20 transition-all flex items-center justify-between group"
-                            onClick={() => onClose()}
+                                href="/pricing"
+                                className="w-full py-4 px-5 rounded-[24px] bg-indigo-500/5 border border-indigo-500/10 hover:border-indigo-500/20 transition-all flex items-center justify-between group"
+                                onClick={() => onClose()}
                             >
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center group-hover:bg-indigo-500/20 transition-colors">
-                                        <Star size={18} className="text-indigo-400" />
-                                    </div>
-                                    <div>
-                                        <span className="block text-sm font-black italic text-white">查看升级 Pro 权益</span>
-                                        <span className="block text-[10px] text-slate-500 font-bold uppercase tracking-wider">Pricing Strategy</span>
+                                    <Star size={18} className="text-amber-400" />
+                                    <div className="text-left">
+                                        <span className="block text-sm font-bold text-white">解锁专业投研权益</span>
+                                        <span className="text-[9px] text-slate-500 font-bold uppercase">Upgrade to Pro</span>
                                     </div>
                                 </div>
-                                <ChevronRight size={16} className="text-slate-600 group-hover:text-indigo-400 transition-colors" />
+                                <ChevronRight size={14} className="text-slate-600" />
                             </Link>
-                        </div>
-                    )}
+                        )}
+                    </div>
 
                     {/* Notification Switch */}
                     {pushSupported && (
@@ -508,14 +492,10 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                     </div>
                                     <div>
                                         <h4 className="text-sm font-bold text-white">推送通知</h4>
-                                        <div className="flex items-center gap-2">
-                                            <p className="text-[10px] text-slate-500 font-medium">信号与日报提醒</p>
-                                            {isSubscribed && (
-                                                <button onClick={handleTestPush} disabled={testingPush} className="text-[10px] text-indigo-400 hover:text-indigo-300 underline underline-offset-2 disabled:opacity-50">
-                                                    {testingPush ? '...' : '测试'}
-                                                </button>
-                                            )}
-                                        </div>
+                                    <div className="flex items-center gap-2">
+                                        <Info size={12} className="text-slate-600" />
+                                        <p className="text-[10px] text-slate-500 font-medium">信号与日报提醒</p>
+                                    </div>
                                     </div>
                                 </div>
                                 <div>
@@ -535,10 +515,15 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                             <div className="mt-3 pt-3 border-t border-white/5">
                                 <button
                                 onClick={() => setShowNotificationSettings(!showNotificationSettings)}
-                                className="w-full flex items-center justify-between text-xs text-slate-400 hover:text-indigo-400 transition-colors py-1"
+                                className="w-full flex items-center justify-between text-[10px] text-slate-500 hover:text-indigo-400 transition-colors py-1"
                                 >
-                                <span className="font-bold">深度定制通知类型</span>
-                                <ChevronDown className={`w-4 h-4 transition-transform ${showNotificationSettings ? 'rotate-180' : ''}`} />
+                                <span className="font-bold uppercase tracking-widest">高级通知偏好</span>
+                                <div className="flex items-center gap-3">
+                                    <button onClick={handleTestPush} disabled={testingPush} className="text-[9px] text-indigo-400/60 hover:text-indigo-400 font-black uppercase tracking-widest">
+                                        {testingPush ? 'Sending...' : 'Test Device'}
+                                    </button>
+                                    <ChevronDown className={`w-3 h-3 transition-transform ${showNotificationSettings ? 'rotate-180' : ''}`} />
+                                </div>
                                 </button>
                                 
                                 <AnimatePresence>
@@ -668,16 +653,16 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                     </div>
                     )}
 
-                    {/* Demo Tools */}
-                    <div className="mt-12 opacity-50 hover:opacity-100 transition-opacity">
+                    {/* Demo/Reset Tools - Very Minimal */}
+                    <div className="mt-12 text-center">
                         <button 
                             onClick={async () => {
                                 localStorage.removeItem('STOCKWISE_HAS_ONBOARDED');
                                 window.location.reload();
                             }}
-                            className="w-full py-3 rounded-xl bg-white/5 border border-white/5 text-[10px] text-slate-600 font-bold flex items-center justify-center gap-2 uppercase tracking-widest"
+                            className="text-[9px] text-slate-700 hover:text-slate-500 font-bold uppercase tracking-[0.2em] transition-colors"
                         >
-                            <Zap size={12} /> Reset Onboarding Flow (Demo)
+                            Reset System Context
                         </button>
                     </div>  
                 </div>
