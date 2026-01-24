@@ -102,7 +102,7 @@ DAILY_TASK_PLAN_TEMPLATE = [
     # --- Quant Mind Tasks ---
     {
         "name": "ai_analysis",
-        "display_name": "AI Prediction & Signal Flip",
+        "display_name": "Next-Day Strategy Formulation",
         "agent_id": "quant_mind",
         "type": "reasoning",
         "expected_start": "16:45",

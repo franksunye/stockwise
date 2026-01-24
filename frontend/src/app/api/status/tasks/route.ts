@@ -53,7 +53,7 @@ const DAILY_PLAN_TEMPLATE = [
     },
     {
         name: "ai_analysis",
-        display_name: "AI Prediction & Signal Flip",
+        display_name: "Next-Day Strategy Formulation",
         agent_id: "quant_mind",
         type: "reasoning",
         dimensions: { model: "mixed" },
