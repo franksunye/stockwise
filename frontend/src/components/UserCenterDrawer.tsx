@@ -401,11 +401,15 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                 {tier === 'pro' ? 'Pro Plan' : 'Free Plan'}
                             </span>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <div className={`w-1.5 h-1.5 rounded-full ${tier === 'pro' ? 'bg-amber-400' : 'bg-emerald-400'}`} />
-                                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
-                                    {tier === 'pro' ? `AI 优先级：极高 ${expiresAt ? `| ${expiresAt.split('T')[0]}` : ''}` : '公开版连接'}
-                                </span>
+                            <div className="space-y-1">
+                                <p className="text-[10px] text-slate-500 font-mono flex items-center gap-2">
+                                    ID: {userId ? (userId.slice(0, 8) + '...' + userId.slice(-4)) : '...'}
+                                </p>
+                                {expiresAt && tier === 'pro' && (
+                                    <p className="text-[10px] text-emerald-500/80 font-bold flex items-center gap-1.5">
+                                        <ShieldCheck size={10} /> 有效期至: {expiresAt.split('T')[0]}
+                                    </p>
+                                )}
                             </div>
                         </div>
                         </div>
@@ -427,17 +431,17 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                         <div className={`glass-card p-5 flex flex-col justify-between h-24 ${tier === 'pro' ? 'border-amber-500/20 bg-amber-500/5' : 'opacity-60'}`}>
                         <div className={`flex items-center gap-2 ${tier === 'pro' ? 'text-amber-200' : 'text-slate-400'}`}>
                             <Zap size={16} />
-                            <span className="text-xs font-bold uppercase">AI 解析</span>
+                            <span className="text-xs font-bold uppercase">AI 分析</span>
                         </div>
                         <div className="flex items-end gap-1.5">
                             <span className={`text-[10px] font-black uppercase tracking-tighter ${tier === 'pro' ? 'text-amber-100' : 'text-slate-500'}`}>
-                                {tier === 'pro' ? 'Matt Levine 叙事模式' : '基础技术因子'}
+                                {tier === 'pro' ? '混合架构推理链路' : '基础技术指标'}
                             </span>
                         </div>
                         </div>
                     </div>
 
-                    {/* Action Grouping for cleaner UI */}
+                    {/* Action Grouping */}
                     <div className="space-y-3 mb-6">
                         <button 
                             onClick={() => setShowIdentityCenter(true)}
@@ -450,14 +454,19 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                             <div className="flex items-center gap-3">
                                 <ShieldCheck size={18} className={tier === 'pro' ? 'text-amber-400' : 'text-indigo-400'} />
                                 <div className="text-left">
-                                    <span className={`block text-sm font-bold ${tier === 'pro' ? 'text-amber-100' : 'text-white'}`}>身份备份与资产恢复</span>
+                                    <div className="flex items-center gap-2">
+                                        <span className={`block text-sm font-bold ${tier === 'pro' ? 'text-amber-100' : 'text-white'}`}>身份备份与资产恢复</span>
+                                        {userEmail && (
+                                            <span className="flex items-center gap-1 text-[8px] px-1.5 py-0.25 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                                                <Mail size={8} /> 已挂载
+                                            </span>
+                                        )}
+                                    </div>
                                     <span className="text-[9px] text-slate-500 font-bold uppercase">Digital ID & Recovery</span>
                                 </div>
                             </div>
                             <div className="flex items-center gap-2">
-                                {userEmail ? (
-                                    <Mail size={12} className="text-emerald-500/50" />
-                                ) : tier === 'pro' && (
+                                {!userEmail && tier === 'pro' && (
                                     <div className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
                                 )}
                                 <ChevronRight size={14} className="text-slate-600" />
