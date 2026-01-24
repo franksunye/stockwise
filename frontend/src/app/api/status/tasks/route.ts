@@ -60,7 +60,7 @@ const DAILY_PLAN_TEMPLATE = [
     {
         name: "push_dispatch",
         display_name: "Push Notifications",
-        agent_id": "news_desk",
+        agent_id: "news_desk",
         type: "delivery",
         dimensions: {},
         expected_start: "08:30"
@@ -101,7 +101,7 @@ export async function GET(request: Request) {
             // Find execution log for this plan item
             // Matching by task_name
             const logEntry = logs.find((l: any) => l.task_name === planItem.name);
-            
+
             return {
                 ...planItem,
                 status: logEntry ? logEntry.status : 'pending',
@@ -152,7 +152,7 @@ export async function GET(request: Request) {
         });
 
         return NextResponse.json({ date, tasks: finalResponse });
-        
+
     } catch (error) {
         console.error("Database Error:", error);
         return NextResponse.json({ error: "Failed to fetch status" }, { status: 500 });
