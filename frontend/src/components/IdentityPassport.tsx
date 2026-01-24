@@ -31,19 +31,19 @@ export function IdentityPassport({ userId, tier, onLinkEmail, emailLinked }: Pro
                     <ShieldCheck size={18} />
                 </div>
                 <div>
-                   <h4 className="text-xs font-black uppercase tracking-widest text-slate-400 italic">Digital Passport</h4>
-                   <p className="text-[10px] text-slate-500 font-bold">STOCKWISE AI IDENTITY</p>
+                   <h4 className="text-xs font-black uppercase tracking-widest text-slate-400 italic">数字身份护照</h4>
+                   <p className="text-[10px] text-slate-500 font-bold">STOCKWISE 资产认证</p>
                 </div>
             </div>
             <div className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-tighter ${tier === 'pro' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-slate-500/10 text-slate-400 border border-white/5'}`}>
-                {tier === 'pro' ? 'Premium Identity' : 'Standard Guest'}
+                {tier === 'pro' ? '专业版身份已认证' : '标准访客身份'}
             </div>
           </div>
 
           {/* Card Body */}
           <div className="p-6 space-y-5">
             <div>
-                <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest block mb-2">User Access Secret</label>
+                <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest block mb-2">唯一识别密钥 (UID)</label>
                 <div className="flex items-center justify-between gap-2 bg-white/[0.03] border border-white/5 rounded-xl px-4 py-3 group">
                     <span className="font-mono text-sm text-indigo-200 tracking-wider">
                         {userId}
@@ -59,17 +59,17 @@ export function IdentityPassport({ userId, tier, onLinkEmail, emailLinked }: Pro
 
             <div className="grid grid-cols-2 gap-3">
                 <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3">
-                    <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest block mb-1">Status</span>
+                    <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest block mb-1">当前状态</span>
                     <div className="flex items-center gap-1.5">
                         <div className={`w-1.5 h-1.5 rounded-full ${tier === 'pro' ? 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.4)]' : 'bg-indigo-400 animate-pulse'}`} />
-                        <span className="text-[10px] font-bold text-slate-300 uppercase">{tier === 'pro' ? 'Encrypted PRO' : 'Active'}</span>
+                        <span className="text-[10px] font-bold text-slate-300 uppercase">{tier === 'pro' ? 'Pro 权益生效中' : '服务运行中'}</span>
                     </div>
                 </div>
                 <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3">
-                    <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest block mb-1">Backup</span>
+                    <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest block mb-1">备份检测</span>
                     <div className="flex items-center gap-1.5 text-emerald-500/80">
                         <Check size={10} />
-                        <span className="text-[10px] font-bold uppercase">Ready</span>
+                        <span className="text-[10px] font-bold uppercase">就绪</span>
                     </div>
                 </div>
             </div>
