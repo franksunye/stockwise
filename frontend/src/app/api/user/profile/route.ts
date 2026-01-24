@@ -209,7 +209,8 @@ export async function POST(request: Request) {
             tier: isExpired ? 'free' : (user.subscription_tier || 'free'),
             expiresAt: user.subscription_expires_at,
             hasOnboarded: Boolean(user.has_onboarded),
-            watchlistCount: watchlistCount
+            watchlistCount: watchlistCount,
+            email: user.email
         });
 
     } catch (error: unknown) {
