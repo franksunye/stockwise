@@ -116,7 +116,7 @@ function TimelineItem({ task }: { task: Task }) {
                    <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                        <span className="text-[10px] uppercase tracking-wider font-bold text-gray-600 bg-white/5 px-1.5 py-0.5 rounded">{task.agent.persona}</span>
                        {Object.keys(task.dimensions || {}).map(k => (
-                           <StatusBadge key={k} type={k as any} value={task.dimensions[k]} />
+                           <StatusBadge key={k} type={k as "market" | "tier" | "model"} value={task.dimensions[k] as string} />
                        ))}
                    </div>
                </div>
