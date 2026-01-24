@@ -39,24 +39,33 @@ AGENTS = {
 # Define the granular daily schedule
 # This is the "Plan" - what we expect to happen every day.
 DAILY_TASK_PLAN_TEMPLATE = [
-    # --- News Desk Tasks (Morning Phase) ---
+    # --- News Desk Tasks (Morning Engagement) ---
     {
         "name": "morning_call",
         "display_name": "Daily Morning Call",
         "agent_id": "news_desk",
         "type": "delivery",
-        "expected_start": "08:00",
+        "expected_start": "08:30",
         "dependencies": [],
         "dimensions": {}
     },
 
-    # --- Market Observer Tasks (Post-Market) ---
+    # --- Market Observer Tasks (Metadata & Data) ---
+    {
+        "name": "meta_sync",
+        "display_name": "Metadata Refresh",
+        "agent_id": "market_observer",
+        "type": "ingestion",
+        "expected_start": "06:00",
+        "dependencies": [],
+        "dimensions": {}
+    },
     {
         "name": "ingestion_cn",
         "display_name": "A-Share Data Sync",
         "agent_id": "market_observer",
         "type": "ingestion",
-        "expected_start": "15:30",
+        "expected_start": "16:00",
         "dependencies": [],
         "dimensions": {"market": "CN"}
     },
@@ -65,67 +74,49 @@ DAILY_TASK_PLAN_TEMPLATE = [
         "display_name": "HK Stock Data Sync",
         "agent_id": "market_observer",
         "type": "ingestion",
-        "expected_start": "15:45",
+        "expected_start": "16:30",
         "dependencies": [],
         "dimensions": {"market": "HK"}
-    },
-    {
-        "name": "meta_sync",
-        "display_name": "Metadata Refresh",
-        "agent_id": "market_observer",
-        "type": "ingestion",
-        "expected_start": "16:00",
-        "dependencies": ["ingestion_cn"],
-        "dimensions": {}
     },
 
     # --- System Guardian Tasks ---
     {
         "name": "validation",
-        "display_name": "Prediction Result Verification",
+        "display_name": "Post-Market Verification",
         "agent_id": "system_guardian",
         "type": "maintenance",
         "expected_start": "16:15",
-        "dependencies": ["meta_sync"],
+        "dependencies": ["ingestion_cn"],
         "dimensions": {}
     },
 
     # --- Quant Mind Tasks ---
     {
-        "name": "ai_analysis_pro",
-        "display_name": "DeepSeek Analysis (PRO)",
+        "name": "ai_analysis",
+        "display_name": "DeepSeek AI Analysis",
         "agent_id": "quant_mind",
         "type": "reasoning",
-        "expected_start": "16:30",
+        "expected_start": "16:45",
         "dependencies": ["validation"],
-        "dimensions": {"tier": "PRO", "model": "mixed"}
-    },
-    {
-        "name": "ai_analysis_free",
-        "display_name": "Standard Analysis (Free)",
-        "agent_id": "quant_mind",
-        "type": "reasoning",
-        "expected_start": "17:00",
-        "dependencies": ["validation"],
-        "dimensions": {"tier": "Free", "model": "rule-engine"}
+        "dimensions": {"model": "mixed"}
     },
 
-    # --- News Desk Tasks (Evening Phase) ---
+    # --- News Desk Tasks (Evening Delivery) ---
     {
         "name": "brief_gen",
         "display_name": "Daily Brief Generation",
         "agent_id": "news_desk",
         "type": "delivery",
-        "expected_start": "18:00",
-        "dependencies": ["ai_analysis_pro"],
+        "expected_start": "17:30",
+        "dependencies": ["ai_analysis"],
         "dimensions": {}
     },
     {
         "name": "push_dispatch",
-        "display_name": "Push Notifications",
+        "display_name": "Final Push Notification",
         "agent_id": "news_desk",
         "type": "delivery",
-        "expected_start": "18:30",
+        "expected_start": "17:45",
         "dependencies": ["brief_gen"],
         "dimensions": {}
     }

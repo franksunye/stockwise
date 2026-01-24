@@ -4,12 +4,20 @@ import { createClient } from '@libsql/client';
 // Reusing the Backend's plan definition logic
 const DAILY_PLAN_TEMPLATE = [
     {
+        name: "meta_sync",
+        display_name: "Metadata Refresh",
+        agent_id: "market_observer",
+        type: "ingestion",
+        dimensions: {},
+        expected_start: "06:00"
+    },
+    {
         name: "morning_call",
         display_name: "Daily Morning Call",
         agent_id: "news_desk",
         type: "delivery",
         dimensions: {},
-        expected_start: "08:00"
+        expected_start: "08:30"
     },
     {
         name: "ingestion_cn",
@@ -17,7 +25,15 @@ const DAILY_PLAN_TEMPLATE = [
         agent_id: "market_observer",
         type: "ingestion",
         dimensions: { market: "CN" },
-        expected_start: "15:30"
+        expected_start: "16:00"
+    },
+    {
+        name: "validation",
+        display_name: "Post-Market Verification",
+        agent_id: "system_guardian",
+        type: "maintenance",
+        dimensions: {},
+        expected_start: "16:15"
     },
     {
         name: "ingestion_hk",
@@ -25,39 +41,15 @@ const DAILY_PLAN_TEMPLATE = [
         agent_id: "market_observer",
         type: "ingestion",
         dimensions: { market: "HK" },
-        expected_start: "15:45"
-    },
-    {
-        name: "meta_sync",
-        display_name: "Metadata Refresh",
-        agent_id: "market_observer",
-        type: "ingestion",
-        dimensions: {},
-        expected_start: "16:00"
-    },
-    {
-        name: "validation",
-        display_name: "Prediction Result Verification",
-        agent_id: "system_guardian",
-        type: "maintenance",
-        dimensions: {},
-        expected_start: "16:15"
-    },
-    {
-        name: "ai_analysis_pro",
-        display_name: "DeepSeek Analysis (PRO)",
-        agent_id: "quant_mind",
-        type: "reasoning",
-        dimensions: { tier: "PRO", model: "mixed" },
         expected_start: "16:30"
     },
     {
-        name: "ai_analysis_free",
-        display_name: "Standard Analysis (Free)",
+        name: "ai_analysis",
+        display_name: "DeepSeek AI Analysis",
         agent_id: "quant_mind",
         type: "reasoning",
-        dimensions: { tier: "Free", model: "rule-engine" },
-        expected_start: "17:00"
+        dimensions: { model: "mixed" },
+        expected_start: "16:45"
     },
     {
         name: "brief_gen",
@@ -65,15 +57,15 @@ const DAILY_PLAN_TEMPLATE = [
         agent_id: "news_desk",
         type: "delivery",
         dimensions: {},
-        expected_start: "18:00"
+        expected_start: "17:30"
     },
     {
         name: "push_dispatch",
-        display_name: "Push Notifications",
+        display_name: "Final Push Notification",
         agent_id: "news_desk",
         type: "delivery",
         dimensions: {},
-        expected_start: "18:30"
+        expected_start: "17:45"
     }
 ];
 
