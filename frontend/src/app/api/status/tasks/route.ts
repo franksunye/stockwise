@@ -91,6 +91,23 @@ interface TaskLog {
     metadata: string | null; // JSON string in DB
 }
 
+// Output Interface matching frontend Task
+interface ApiTask {
+    name: string;
+    display_name: string;
+    agent_id: string;
+    type: string;
+    dimensions: any; // or Record<string, string>
+    expected_start: string | null;
+    status: string;
+    start_time: string | null;
+    end_time: string | null;
+    message: string | null;
+    metadata: any;
+    triggered_by: string | null;
+    is_planned: boolean;
+}
+
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const date = searchParams.get('date') || new Date().toISOString().split('T')[0];
@@ -112,7 +129,7 @@ export async function GET(request: Request) {
         // Merge Plan + Actual
         // 1. Start with Plan
         // Use a more specific type than 'any' for the result array items if possible, but map returns inferred type
-        const result = DAILY_PLAN_TEMPLATE.map(planItem => {
+        const result: ApiTask[] = DAILY_PLAN_TEMPLATE.map(planItem => {
             // Find execution log for this plan item
             const logEntry = logs.find((l) => l.task_name === planItem.name);
 
