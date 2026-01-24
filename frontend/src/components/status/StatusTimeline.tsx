@@ -34,7 +34,7 @@ export function StatusTimeline({ tasks, currentDate }: { tasks: Task[], currentD
       ))}
       
       {tasks.length === 0 && (
-           <div className="ml-12 text-gray-500 italic py-10">No tasks planned for this day.</div>
+           <div className="ml-12 text-gray-500 italic py-10">今日无预定计划任务。</div>
       )}
     </div>
   );
@@ -125,7 +125,7 @@ function TimelineItem({ task, currentDate }: { task: Task, currentDate: Date }) 
                    {timeDisplay}
                </div>
                {task.triggered_by && task.triggered_by !== 'scheduler' && (
-                   <div className="text-[10px] text-amber-500/80 mt-1">Manual</div>
+                   <div className="text-[10px] text-amber-500/80 mt-1">手动执行</div>
                )}
            </div>
         </div>

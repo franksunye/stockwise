@@ -5,7 +5,7 @@ import { createClient } from '@libsql/client';
 const DAILY_PLAN_TEMPLATE = [
     {
         name: "meta_sync",
-        display_name: "Metadata Refresh",
+        display_name: "股票元数据刷新",
         agent_id: "market_observer",
         type: "ingestion",
         dimensions: {},
@@ -13,7 +13,7 @@ const DAILY_PLAN_TEMPLATE = [
     },
     {
         name: "morning_call",
-        display_name: "Daily Morning Call",
+        display_name: "每日早报与策略提醒",
         agent_id: "news_desk",
         type: "delivery",
         dimensions: {},
@@ -21,31 +21,31 @@ const DAILY_PLAN_TEMPLATE = [
     },
     {
         name: "market_sentinel",
-        display_name: "Real-time Market Watch",
+        display_name: "盘中实时行情监控 (10m)",
         agent_id: "market_observer",
         type: "monitoring",
-        dimensions: { interval: "10m" },
+        dimensions: { interval: "10分" },
         expected_start: "09:30"
     },
     {
         name: "ingestion_cn",
-        display_name: "A-Share Data Sync",
+        display_name: "A股行情数据同步",
         agent_id: "market_observer",
         type: "ingestion",
-        dimensions: { market: "CN" },
+        dimensions: { market: "A股" },
         expected_start: "16:00"
     },
     {
         name: "ingestion_hk",
-        display_name: "HK Stock Data Sync",
+        display_name: "港股行情数据同步",
         agent_id: "market_observer",
         type: "ingestion",
-        dimensions: { market: "HK" },
+        dimensions: { market: "港股" },
         expected_start: "16:30"
     },
     {
         name: "validation",
-        display_name: "Accuracy Validation & Glory",
+        display_name: "预测准确性验证与战报",
         agent_id: "system_guardian",
         type: "maintenance",
         dimensions: {},
@@ -53,15 +53,15 @@ const DAILY_PLAN_TEMPLATE = [
     },
     {
         name: "ai_analysis",
-        display_name: "Next-Day Strategy Formulation",
+        display_name: "次日交易策略制定 (AI)",
         agent_id: "quant_mind",
         type: "reasoning",
-        dimensions: { model: "mixed" },
+        dimensions: { model: "混合模型" },
         expected_start: "17:00"
     },
     {
         name: "brief_gen",
-        display_name: "Daily Briefing & Push",
+        display_name: "每日深度复盘与推送",
         agent_id: "news_desk",
         type: "delivery",
         dimensions: {},
@@ -70,10 +70,10 @@ const DAILY_PLAN_TEMPLATE = [
 ];
 
 const AGENTS = {
-    "market_observer": { name: "Market Observer", persona: "Marcus", avatar: "/avatars/marcus.png", color: "blue" },
-    "quant_mind": { name: "Quant Mind", persona: "Quinn", avatar: "/avatars/quinn.png", color: "purple" },
-    "news_desk": { name: "News Desk", persona: "Nora", avatar: "/avatars/nora.png", color: "green" },
-    "system_guardian": { name: "System Guardian", persona: "Sylar", avatar: "/avatars/sylar.png", color: "gray" }
+    "market_observer": { name: "市场观察员", persona: "马库斯 (Marcus)", avatar: "/avatars/marcus.png", color: "blue" },
+    "quant_mind": { name: "量化大脑", persona: "奎因 (Quinn)", avatar: "/avatars/quinn.png", color: "purple" },
+    "news_desk": { name: "新闻编辑部", persona: "诺拉 (Nora)", avatar: "/avatars/nora.png", color: "green" },
+    "system_guardian": { name: "系统守护者", persona: "塞拉 (Sylar)", avatar: "/avatars/sylar.png", color: "gray" }
 };
 
 // Output Interface matching frontend Task

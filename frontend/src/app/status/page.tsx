@@ -53,9 +53,9 @@ export default function StatusPage() {
         <header className="mb-10 flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
-              Agent Command Center
+              智能特工指挥中心
             </h1>
-            <p className="text-gray-500 text-sm mt-1">Operational view of autonomous agents</p>
+            <p className="text-gray-500 text-sm mt-1">实时监控自主特工的任务执行状态与策略产出</p>
           </div>
           
           <div className="flex items-center gap-4 bg-white/5 rounded-lg p-1">
