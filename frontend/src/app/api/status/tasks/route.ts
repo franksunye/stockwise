@@ -4,6 +4,14 @@ import { createClient } from '@libsql/client';
 // Reusing the Backend's plan definition logic
 const DAILY_PLAN_TEMPLATE = [
     {
+        name: "morning_call",
+        display_name: "Daily Morning Call",
+        agent_id: "news_desk",
+        type: "delivery",
+        dimensions: {},
+        expected_start: "08:00"
+    },
+    {
         name: "ingestion_cn",
         display_name: "A-Share Data Sync",
         agent_id: "market_observer",

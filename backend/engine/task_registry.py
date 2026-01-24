@@ -39,7 +39,18 @@ AGENTS = {
 # Define the granular daily schedule
 # This is the "Plan" - what we expect to happen every day.
 DAILY_TASK_PLAN_TEMPLATE = [
-    # --- Market Observer Tasks ---
+    # --- News Desk Tasks (Morning Phase) ---
+    {
+        "name": "morning_call",
+        "display_name": "Daily Morning Call",
+        "agent_id": "news_desk",
+        "type": "delivery",
+        "expected_start": "08:00",
+        "dependencies": [],
+        "dimensions": {}
+    },
+
+    # --- Market Observer Tasks (Post-Market) ---
     {
         "name": "ingestion_cn",
         "display_name": "A-Share Data Sync",
@@ -99,7 +110,7 @@ DAILY_TASK_PLAN_TEMPLATE = [
         "dimensions": {"tier": "Free", "model": "rule-engine"}
     },
 
-    # --- News Desk Tasks ---
+    # --- News Desk Tasks (Evening Phase) ---
     {
         "name": "brief_gen",
         "display_name": "Daily Brief Generation",
