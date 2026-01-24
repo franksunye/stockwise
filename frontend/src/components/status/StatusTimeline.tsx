@@ -73,23 +73,12 @@ function TimelineItem({ task }: { task: Task }) {
   if (displayStatus === 'failed') dotClass = "bg-red-900/50 border-red-500 text-red-400";
   if (isSkipped) dotClass = "bg-gray-900 border-gray-800 text-gray-700";
 
-  // Avatar Icon Logic
-  const getAvatarIcon = (persona: string) => {
-      switch(persona) {
-          case 'Marcus': return <Activity size={14} />;
-          case 'Quinn': return <Brain size={14} />;
-          case 'Nora': return <Newspaper size={14} />;
-          case 'Sylar': return <Shield size={14} />;
-          default: return <User size={14} />;
-      }
-  }
+  // Avatar Logic
+  const avatarUrl = `https://api.dicebear.com/9.x/bottts-neutral/svg?seed=${task.agent.persona}`;
 
   return (
     <div className={`relative pl-12 py-4 group transition-all duration-300 ${isSkipped ? 'opacity-50 grayscale hover:grayscale-0 hover:opacity-80' : ''}`}>
-      {/* Timeline Dot (Absolute tied to line) */}
-      {/* Line is at left-[19px] (center of 40px width container effectively or manual placement) */}
-      {/* Let's place dot centered on the line. Line is at 19px. Dot w-4 is 16px. Center is 8px. 19-8 = 11px left. */}
-      
+      {/* Timeline Dot */}
       <div className={`absolute left-[11px] top-6 h-4 w-4 rounded-full border-2 flex items-center justify-center z-10 bg-[#050508] ${dotClass}`}>
          {displayStatus === 'success' && <div className="w-1.5 h-1.5 rounded-full bg-green-400" />}
          {displayStatus === 'failed' && <div className="w-1.5 h-1.5 rounded-full bg-red-400" />}
@@ -106,8 +95,12 @@ function TimelineItem({ task }: { task: Task }) {
            {/* Left: Agent & Content */}
            <div className="flex gap-4 items-center">
                {/* Avatar */}
-               <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ring-1 ring-white/10 bg-gradient-to-b from-white/10 to-transparent shadow-lg`}>
-                    {getAvatarIcon(task.agent.persona)}
+               <div className="flex-shrink-0 w-10 h-10 rounded-lg overflow-hidden bg-white/5 ring-1 ring-white/10">
+                    <img 
+                        src={avatarUrl} 
+                        alt={task.agent.persona}
+                        className="w-full h-full object-cover"
+                    />
                </div>
 
                {/* Text Info */}
@@ -116,7 +109,6 @@ function TimelineItem({ task }: { task: Task }) {
                        <h3 className={`font-medium text-sm ${task.status === 'failed' ? 'text-red-400' : 'text-gray-200'}`}>
                            {task.display_name}
                        </h3>
-                       {/* Only show badge if NOT running/success (redundant?) or keep for clarity */}
                        <StatusBadge type="status" value={displayStatus} />
                    </div>
                    
