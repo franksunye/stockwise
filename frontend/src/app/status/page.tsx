@@ -5,16 +5,7 @@ import { StatusTimeline, Task } from '@/components/status/StatusTimeline';
 import { format, subDays, addDays } from 'date-fns';
 
 export default function StatusPage() {
-  // Smart Default Date: If weekend, show next Monday
-  const getInitialDate = () => {
-      const today = new Date();
-      const day = today.getDay(); // 0=Sun, 6=Sat
-      if (day === 6) return addDays(today, 2); // Sat -> Mon
-      if (day === 0) return addDays(today, 1); // Sun -> Mon
-      return today;
-  };
-
-  const [date, setDate] = useState(getInitialDate());
+  const [date, setDate] = useState(new Date());
   
   const [data, setData] = useState<{tasks: Task[], date: string} | null>(null);
   const [loading, setLoading] = useState(true);
@@ -27,6 +18,19 @@ export default function StatusPage() {
         const res = await fetch(`/api/status/tasks?date=${dateStr}`);
         const result = await res.json();
         setData(result);
+        
+        // Smart Redirect Logic
+        // If user lands on Today (Weekend) and it's empty, auto-forward to Monday.
+        // But if there IS content (manual run), stay here.
+        const isTodayView = dateStr === format(new Date(), 'yyyy-MM-dd');
+        const day = new Date().getDay();
+        const isWeekend = day === 0 || day === 6;
+
+        if (isTodayView && isWeekend && result.tasks.length === 0) {
+            const daysToAdd = day === 6 ? 2 : 1;
+            setDate(addDays(new Date(), daysToAdd));
+        }
+
         setLoading(false);
       } catch (e) {
         console.error("Failed to fetch status", e);
