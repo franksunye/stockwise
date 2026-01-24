@@ -1,7 +1,7 @@
-"use client";
 import React, { useState } from 'react';
 import { StatusBadge } from './StatusBadge';
-import { format } from 'date-fns';
+import { format, isPast, parseISO, parse } from 'date-fns';
+import { User, Brain, Newspaper, Shield, Activity, Clock, CheckCircle2, XCircle } from 'lucide-react';
 
 export interface Task {
   name: string;
@@ -13,7 +13,7 @@ export interface Task {
     color: string;
   };
   type: string;
-  status: 'pending' | 'running' | 'success' | 'failed';
+  status: 'pending' | 'running' | 'success' | 'failed' | 'skipped';
   start_time: string | null;
   end_time: string | null;
   expected_start: string | null;
@@ -25,13 +25,16 @@ export interface Task {
 
 export function StatusTimeline({ tasks }: { tasks: Task[] }) {
   return (
-    <div className="relative border-l border-white/10 ml-6 space-y-8 py-4">
+    <div className="relative ml-4 md:ml-10 space-y-0 pb-10">
+      {/* Continuous Vertical Line */}
+      <div className="absolute left-[19px] top-4 bottom-0 w-px bg-white/10" />
+      
       {tasks.map((task, idx) => (
         <TimelineItem key={task.name + idx} task={task} />
       ))}
       
       {tasks.length === 0 && (
-           <div className="ml-6 text-gray-500 italic">No tasks planned for this day.</div>
+           <div className="ml-12 text-gray-500 italic py-10">No tasks planned for this day.</div>
       )}
     </div>
   );
@@ -40,99 +43,116 @@ export function StatusTimeline({ tasks }: { tasks: Task[] }) {
 function TimelineItem({ task }: { task: Task }) {
   const [expanded, setExpanded] = useState(false);
   
-  // Icon & Color Logic
-  const isRunning = task.status === 'running';
-  const isSuccess = task.status === 'success';
-  const isFailed = task.status === 'failed';
-  const isPending = task.status === 'pending';
+  // Logic to determine if "Pending" is actually "Missed"
+  // Assuming task.expected_start is meant for Today.
+  // This is a heuristic.
+  let displayStatus = task.status;
+  if (task.status === 'pending' && task.expected_start) {
+      const now = new Date();
+      const todayStr = format(now, 'yyyy-MM-dd');
+      // Construct a rough date object for the planned time today
+      // note: parsing strictly depends on format "HH:mm"
+      const planTime = parse(`${todayStr} ${task.expected_start}`, 'yyyy-MM-dd HH:mm', new Date());
+      
+      // If plan time is in past (by > 30 mins) and still pending, perform visual downgrade
+      if (isPast(planTime) && (now.getTime() - planTime.getTime() > 30 * 60000)) {
+          displayStatus = 'skipped';
+      }
+  }
 
+  const isRunning = displayStatus === 'running';
+  const isSkipped = displayStatus === 'skipped';
+  
   const timeDisplay = task.start_time 
       ? format(new Date(task.start_time), 'HH:mm') 
       : task.expected_start || '--:--';
 
-  let dotClass = "bg-gray-900 border-gray-700";
-  if (isRunning) dotClass = "bg-blue-900 border-blue-500 animate-ping"; // Pulse effect handled by wrapper maybe?
-  if (isSuccess) dotClass = "bg-green-900 border-green-500";
-  if (isFailed) dotClass = "bg-red-900 border-red-500";
+  let dotClass = "bg-gray-900 border-gray-700 text-gray-500";
+  if (isRunning) dotClass = "bg-blue-900/50 border-blue-500 text-blue-400 animate-pulse ring-2 ring-blue-500/20";
+  if (displayStatus === 'success') dotClass = "bg-green-900/50 border-green-500 text-green-400";
+  if (displayStatus === 'failed') dotClass = "bg-red-900/50 border-red-500 text-red-400";
+  if (isSkipped) dotClass = "bg-gray-900 border-gray-800 text-gray-700";
 
-  // Dimensions
-  const dimKeys = Object.keys(task.dimensions || {});
+  // Avatar Icon Logic
+  const getAvatarIcon = (persona: string) => {
+      switch(persona) {
+          case 'Marcus': return <Activity size={14} />;
+          case 'Quinn': return <Brain size={14} />;
+          case 'Nora': return <Newspaper size={14} />;
+          case 'Sylar': return <Shield size={14} />;
+          default: return <User size={14} />;
+      }
+  }
 
   return (
-    <div className="ml-6 relative group">
-      {/* Timeline Dot */}
-      <div className={`absolute -left-[31px] top-1 h-4 w-4 rounded-full border-2 ${dotClass} z-10 transition-colors`}>
-         {/* Inner static dot if pinging */}
-         {isRunning && <div className="absolute inset-0 rounded-full bg-blue-500 animate-none opacity-100 h-full w-full"></div>}
+    <div className={`relative pl-12 py-4 group transition-all duration-300 ${isSkipped ? 'opacity-50 grayscale hover:grayscale-0 hover:opacity-80' : ''}`}>
+      {/* Timeline Dot (Absolute tied to line) */}
+      {/* Line is at left-[19px] (center of 40px width container effectively or manual placement) */}
+      {/* Let's place dot centered on the line. Line is at 19px. Dot w-4 is 16px. Center is 8px. 19-8 = 11px left. */}
+      
+      <div className={`absolute left-[11px] top-6 h-4 w-4 rounded-full border-2 flex items-center justify-center z-10 bg-[#050508] ${dotClass}`}>
+         {displayStatus === 'success' && <div className="w-1.5 h-1.5 rounded-full bg-green-400" />}
+         {displayStatus === 'failed' && <div className="w-1.5 h-1.5 rounded-full bg-red-400" />}
       </div>
 
       {/* Main Card */}
       <div 
-        className={`p-4 rounded-lg bg-white/5 border border-white/5 hover:border-white/10 transition-all cursor-pointer ${expanded ? 'bg-white/10' : ''}`}
+        className={`p-4 rounded-xl border transition-all cursor-pointer 
+            ${isRunning ? 'bg-blue-950/10 border-blue-800/30' : 'bg-white/5 border-white/5 hover:border-white/10 hover:bg-white/[0.07]'}
+        `}
         onClick={() => setExpanded(!expanded)}
       >
         <div className="flex justify-between items-start">
            {/* Left: Agent & Content */}
-           <div className="flex gap-4">
+           <div className="flex gap-4 items-center">
                {/* Avatar */}
-               <div className="flex-shrink-0 text-center">
-                    {/* Placeholder Avatar if image missing, use initals */}
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-xs font-bold ring-1 ring-white/20">
-                        {task.agent.persona[0]}
-                    </div>
-                    <div className="text-[10px] text-gray-500 mt-1">{task.agent.persona}</div>
+               <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ring-1 ring-white/10 bg-gradient-to-b from-white/10 to-transparent shadow-lg`}>
+                    {getAvatarIcon(task.agent.persona)}
                </div>
 
                {/* Text Info */}
                <div>
-                   <div className="flex items-center gap-2">
-                       <h3 className={`font-medium text-sm ${isFailed ? 'text-red-400' : 'text-gray-200'}`}>
+                   <div className="flex items-center gap-3">
+                       <h3 className={`font-medium text-sm ${task.status === 'failed' ? 'text-red-400' : 'text-gray-200'}`}>
                            {task.display_name}
                        </h3>
-                       <StatusBadge type="status" value={task.status} />
-                       {isPending && task.expected_start && (
-                           <span className="text-xs text-gray-600">Plan: {task.expected_start}</span>
-                       )}
+                       {/* Only show badge if NOT running/success (redundant?) or keep for clarity */}
+                       <StatusBadge type="status" value={displayStatus} />
                    </div>
                    
                    {/* Metadata Row */}
                    <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                       {dimKeys.map(k => (
-                           <StatusBadge key={k} type={k as "market" | "tier" | "model"} value={task.dimensions[k]} />
+                       <span className="text-[10px] uppercase tracking-wider font-bold text-gray-600 bg-white/5 px-1.5 py-0.5 rounded">{task.agent.persona}</span>
+                       {Object.keys(task.dimensions || {}).map(k => (
+                           <StatusBadge key={k} type={k as any} value={task.dimensions[k]} />
                        ))}
-                       {task.triggered_by && (
-                           <div className="flex items-center gap-1 text-[10px] text-gray-500 ml-2 border-l border-white/10 pl-2">
-                               <span className="opacity-50">BY</span>
-                               <span>{task.triggered_by}</span>
-                           </div>
-                       )}
                    </div>
                </div>
            </div>
 
-           {/* Right: Time & Duration */}
-           <div className="text-right flex flex-col items-end">
-               <div className="text-sm font-mono text-gray-400">{timeDisplay}</div>
-               {task.end_time && task.start_time && (
-                   <div className="text-[10px] text-gray-600">
-                       {Math.round((new Date(task.end_time).getTime() - new Date(task.start_time).getTime()) / 1000)}s
-                   </div>
+           {/* Right: Time */}
+           <div className="text-right">
+               <div className={`text-sm font-mono font-medium ${isRunning ? 'text-blue-400' : 'text-gray-500'}`}>
+                   {timeDisplay}
+               </div>
+               {task.triggered_by && task.triggered_by !== 'scheduler' && (
+                   <div className="text-[10px] text-amber-500/80 mt-1">Manual</div>
                )}
            </div>
         </div>
 
         {/* Expandable Details */}
-        {(expanded || isFailed) && (
-             <div className="mt-3 pt-3 border-t border-white/5 text-sm">
+        {(expanded || isRunning || task.status === 'failed') && (
+             <div className="mt-4 pt-3 border-t border-white/5 text-sm grid grid-cols-1 gap-2 animate-in fade-in slide-in-from-top-1">
                  {task.message && (
-                     <div className={`mb-2 font-mono text-xs ${isFailed ? 'text-red-300' : 'text-gray-400'}`}>
-                         {isFailed ? '❌ ' : '📝 '}{task.message}
+                     <div className="font-mono text-xs text-gray-400">
+                         {task.message}
                      </div>
                  )}
                  {task.metadata && (
-                     <div className="bg-black/30 p-2 rounded text-xs font-mono text-gray-500 overflow-x-auto">
+                     <pre className="bg-black/30 p-2 rounded text-[10px] text-gray-500 overflow-x-auto border border-white/5">
                          {JSON.stringify(task.metadata, null, 2)}
-                     </div>
+                     </pre>
                  )}
              </div>
         )}
@@ -140,3 +160,4 @@ function TimelineItem({ task }: { task: Task }) {
     </div>
   );
 }
+
