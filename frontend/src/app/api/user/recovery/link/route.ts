@@ -6,6 +6,7 @@ import { getDbClient } from '@/lib/db';
  * This is a "soft-link" for recovery purposes.
  */
 export async function POST(request: Request) {
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     let db: any;
     try {
         const { userId, email } = await request.json();
@@ -35,9 +36,9 @@ export async function POST(request: Request) {
 
         return NextResponse.json({ success: true, message: 'Recovery email linked successfully' });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Recovery link error:', error);
-        return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+        return NextResponse.json({ error: (error as Error).message || 'Internal Server Error' }, { status: 500 });
     } finally {
         if (db && typeof db.close === 'function') {
             db.close();

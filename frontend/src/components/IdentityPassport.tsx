@@ -1,7 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { Copy, Check, Download, ShieldCheck, Mail, Key, Sparkles, User, Info } from 'lucide-react';
+import { Copy, Check, ShieldCheck, Mail, Info } from 'lucide-react';
 import { useState } from 'react';
 
 interface Props {

@@ -1,11 +1,11 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, User, Crown, Zap, ShieldCheck, Loader2, ArrowRight, Share2, Check, RefreshCw, Key, Bell, ChevronDown, ArrowLeftRight, Sun, Trophy, Sparkles, FileText, TrendingUp, Star, ChevronRight, Mail, Info } from 'lucide-react';
+import { X, User, Crown, Zap, ShieldCheck, Loader2, ArrowRight, Share2, Check, Key, Bell, ChevronDown, ArrowLeftRight, Sun, Trophy, FileText, Star, ChevronRight, Mail, Info } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { getWatchlist } from '@/lib/storage';
-import { getCurrentUser, restoreUserIdentity, RegistrationType } from '@/lib/user';
+import { getCurrentUser, restoreUserIdentity } from '@/lib/user';
 import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
 import { isPushSupported, subscribeUserToPush } from '@/lib/notifications';
 import { shouldEnableHighPerformance } from '@/lib/device-utils';
@@ -94,8 +94,8 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
               }
           }
       }
-    } catch (e) {
-        console.error(e);
+    } catch (err) {
+        console.error(err);
     } finally {
         setLoading(false);
     }
@@ -237,7 +237,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
         } else {
             setRedeemMsg({ type: 'error', text: data.error || '绑定失败' });
         }
-    } catch (e) {
+    } catch (err) {
         setRedeemMsg({ type: 'error', text: '网络请求失败' });
     } finally {
         setIsLinkingEmail(false);
@@ -404,7 +404,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                             <div className="flex items-center gap-2">
                                 <div className={`w-1.5 h-1.5 rounded-full ${tier === 'pro' ? 'bg-amber-400' : 'bg-emerald-400'}`} />
                                 <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
-                                    {tier === 'pro' ? 'AI 优先级：极高' : '公开版连接'}
+                                    {tier === 'pro' ? `AI 优先级：极高 ${expiresAt ? `| ${expiresAt.split('T')[0]}` : ''}` : '公开版连接'}
                                 </span>
                             </div>
                         </div>
