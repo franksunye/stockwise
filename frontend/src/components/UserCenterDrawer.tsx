@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, User, Crown, Zap, ShieldCheck, Loader2, ArrowRight, Share2, Check, Key, Bell, ChevronDown, ArrowLeftRight, Sun, Trophy, FileText, Star, ChevronRight, Mail, Info } from 'lucide-react';
+import { X, User, Crown, Zap, ShieldCheck, Loader2, ArrowRight, Share2, Check, RefreshCw, Key, Bell, ChevronDown, ArrowLeftRight, Sun, Trophy, FileText, Star, ChevronRight, Mail, Info } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { getWatchlist } from '@/lib/storage';
@@ -75,10 +75,16 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
       
       const watchlist = getWatchlist();
       
+      const referredBy = localStorage.getItem('STOCKWISE_REFERRED_BY');
+      
       const res = await fetch('/api/user/profile', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: user.userId, watchlist })
+          body: JSON.stringify({ 
+              userId: user.userId, 
+              watchlist,
+              referredBy: referredBy 
+          })
       });
       
       if (res.ok) {
@@ -336,7 +342,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                     <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-5">
                          <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-2">
-                                <Key size={14} className="text-slate-500" />
+                                <RefreshCw size={14} className="text-slate-500" />
                                 <span className="text-xs font-black uppercase tracking-widest text-slate-400">手动恢复身份</span>
                             </div>
                          </div>
@@ -473,22 +479,26 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                             </div>
                         </button>
 
-                        {tier !== 'pro' && (
-                            <Link 
-                                href="/pricing"
-                                className="w-full py-4 px-5 rounded-[24px] bg-indigo-500/5 border border-indigo-500/10 hover:border-indigo-500/20 transition-all flex items-center justify-between group"
-                                onClick={() => onClose()}
-                            >
-                                <div className="flex items-center gap-3">
-                                    <Star size={18} className="text-amber-400" />
-                                    <div className="text-left">
-                                        <span className="block text-sm font-bold text-white">解锁专业投研权益</span>
-                                        <span className="text-[9px] text-slate-500 font-bold uppercase">Upgrade to Pro</span>
-                                    </div>
+                        <Link 
+                            href="/pricing"
+                            className={`w-full py-4 px-5 rounded-[24px] border transition-all flex items-center justify-between group ${
+                                tier === 'pro' 
+                                ? 'bg-white/[0.02] border-white/5 hover:border-indigo-500/20' 
+                                : 'bg-indigo-500/5 border-indigo-500/10 hover:border-indigo-500/20'
+                            }`}
+                            onClick={() => onClose()}
+                        >
+                            <div className="flex items-center gap-3">
+                                <Star size={18} className={tier === 'pro' ? 'text-indigo-400/50' : 'text-amber-400'} />
+                                <div className="text-left">
+                                    <span className="block text-sm font-bold text-white">
+                                        {tier === 'pro' ? '查看价格权益计划' : '解锁专业投研权益'}
+                                    </span>
+                                    <span className="text-[9px] text-slate-500 font-bold uppercase">Pricing & Strategy</span>
                                 </div>
-                                <ChevronRight size={14} className="text-slate-600" />
-                            </Link>
-                        )}
+                            </div>
+                            <ChevronRight size={14} className="text-slate-600" />
+                        </Link>
                     </div>
 
                     {/* Notification Switch */}
@@ -549,7 +559,9 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                         { key: 'signal_flip', icon: ArrowLeftRight, label: '信号翻转', badge: '重要' },
                                         { key: 'morning_call', icon: Sun, label: '每日早报', badge: '08:30' },
                                         { key: 'validation_glory', icon: Trophy, label: '验证战报', badge: '胜率' },
+                                        { key: 'prediction_updated', icon: Zap, label: '预测更新', badge: '分析完成' },
                                         { key: 'daily_brief', icon: FileText, label: tier === 'pro' ? 'Pro 深度复盘' : '简报生成', badge: tier === 'pro' ? '⭐ 专属' : '17:30', isPro: tier === 'pro' },
+                                        { key: 'price_update', icon: Info, label: '实时行情', badge: '盘中推送' },
                                         ].map((type) => {
                                         const isEnabled = notificationSettings.types[type.key as keyof typeof notificationSettings.types]?.enabled ?? true;
                                         const IconComponent = type.icon;
@@ -667,11 +679,19 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                         <button 
                             onClick={async () => {
                                 localStorage.removeItem('STOCKWISE_HAS_ONBOARDED');
+                                try {
+                                    await fetch('/api/user/onboarding/reset', {
+                                        method: 'POST',
+                                        body: JSON.stringify({ userId })
+                                    });
+                                } catch (err) {
+                                    console.error('Reset onboarding failed', err);
+                                }
                                 window.location.reload();
                             }}
                             className="text-[9px] text-slate-700 hover:text-slate-500 font-bold uppercase tracking-[0.2em] transition-colors"
                         >
-                            Reset System Context
+                            Reset System Context & Onboarding
                         </button>
                     </div>  
                 </div>
