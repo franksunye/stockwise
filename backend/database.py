@@ -302,6 +302,28 @@ def init_db():
             # Column might already exist or table might not exist yet
             if "duplicate column" not in str(e).lower() and "no such table" not in str(e).lower():
                 logger.debug(f"ℹ️ notification_settings column: {e}")
+
+        # 11. Task Logs (For Agent Status Dashboard)
+        # Enhanced for "Agentic" view with attribution and dimensions
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS task_logs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                agent_id TEXT NOT NULL,         -- e.g. 'market_observer', 'quant_mind'
+                task_type TEXT NOT NULL,        -- e.g. 'ingestion', 'reasoning', 'delivery'
+                task_name TEXT NOT NULL,        -- machine name e.g. 'market_sync_cn'
+                display_name TEXT NOT NULL,     -- human readable e.g. 'Market Ingestion (CN)'
+                date TEXT NOT NULL,
+                status TEXT NOT NULL,           -- pending, running, success, failed
+                triggered_by TEXT,              -- e.g. 'scheduler', 'user:frank'
+                start_time TIMESTAMP,
+                end_time TIMESTAMP,
+                dimensions TEXT,                -- JSON: {market: CN, tier: PRO}
+                message TEXT,
+                metadata TEXT,                  -- JSON: {tokens: 150, rows: 500}
+                created_at TIMESTAMP DEFAULT (datetime('now', '+8 hours'))
+            )
+        """)
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_task_logs_date_agent ON task_logs(date, agent_id)")
         
         conn.commit()
         logger.info("✅ 数据库结构初始化完成 (Raw SQL - No ORM)")
