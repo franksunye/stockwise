@@ -74,33 +74,47 @@ const AGENTS = {
     "system_guardian": { name: "System Guardian", persona: "Sylar", avatar: "/avatars/sylar.png", color: "gray" }
 };
 
+// DB Log Interface
+interface TaskLog {
+    id: number;
+    agent_id: string;
+    task_name: string;
+    display_name: string;
+    task_type: string;
+    date: string;
+    status: string;
+    triggered_by: string;
+    start_time: string | null;
+    end_time: string | null;
+    dimensions: string; // JSON string in DB
+    message: string | null;
+    metadata: string | null; // JSON string in DB
+}
+
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const date = searchParams.get('date') || new Date().toISOString().split('T')[0];
 
     try {
         // Path to backend DB
-        // Assuming relative path from frontend to backend
-        // c:\cygwin64\home\frank\StockWise\backend\StockWise.db (from config)
-        // Let's guess standard location or use env
         const dbPath = process.env.DB_PATH || path.resolve(process.cwd(), '../../backend/StockWise.db');
         const db = new Database(dbPath, { readonly: true });
 
         // Query Logs
-        // task_logs: agent_id, task_name, display_name, status, start_time, end_time, message
         const stmt = db.prepare(`
             SELECT * FROM task_logs 
             WHERE date = ? 
             ORDER BY start_time ASC
         `);
-        const logs = stmt.all(date);
+        // Cast the result to typed array
+        const logs = stmt.all(date) as TaskLog[];
 
         // Merge Plan + Actual
         // 1. Start with Plan
+        // Use a more specific type than 'any' for the result array items if possible, but map returns inferred type
         const result = DAILY_PLAN_TEMPLATE.map(planItem => {
             // Find execution log for this plan item
-            // Matching by task_name
-            const logEntry = logs.find((l: any) => l.task_name === planItem.name);
+            const logEntry = logs.find((l) => l.task_name === planItem.name);
 
             return {
                 ...planItem,
@@ -115,7 +129,7 @@ export async function GET(request: Request) {
         });
 
         // 2. Add Ad-hoc tasks (Manual syncs, Validation, etc that are NOT in plan)
-        logs.forEach((log: any) => {
+        logs.forEach((log) => {
             const inPlan = DAILY_PLAN_TEMPLATE.find(p => p.name === log.task_name);
             if (!inPlan) {
                 result.push({
