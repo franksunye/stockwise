@@ -53,19 +53,11 @@ const DAILY_PLAN_TEMPLATE = [
     },
     {
         name: "brief_gen",
-        display_name: "Daily Brief Generation",
+        display_name: "Daily Briefing & Push",
         agent_id: "news_desk",
         type: "delivery",
         dimensions: {},
         expected_start: "17:30"
-    },
-    {
-        name: "push_dispatch",
-        display_name: "Final Push Notification",
-        agent_id: "news_desk",
-        type: "delivery",
-        dimensions: {},
-        expected_start: "17:45"
     }
 ];
 

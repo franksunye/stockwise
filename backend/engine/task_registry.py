@@ -104,20 +104,11 @@ DAILY_TASK_PLAN_TEMPLATE = [
     # --- News Desk Tasks (Evening Delivery) ---
     {
         "name": "brief_gen",
-        "display_name": "Daily Brief Generation",
+        "display_name": "Daily Briefing & Push",
         "agent_id": "news_desk",
         "type": "delivery",
         "expected_start": "17:30",
         "dependencies": ["ai_analysis"],
-        "dimensions": {}
-    },
-    {
-        "name": "push_dispatch",
-        "display_name": "Final Push Notification",
-        "agent_id": "news_desk",
-        "type": "delivery",
-        "expected_start": "17:45",
-        "dependencies": ["brief_gen"],
         "dimensions": {}
     }
 ]
