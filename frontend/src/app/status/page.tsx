@@ -73,7 +73,7 @@ export default function StatusPage() {
                 <div className="animate-spin h-8 w-8 border-2 border-blue-500 border-t-transparent rounded-full"></div>
             </div>
         ) : (
-            <StatusTimeline tasks={data?.tasks || []} />
+            <StatusTimeline tasks={data?.tasks || []} currentDate={date} />
         )}
       </div>
     </div>

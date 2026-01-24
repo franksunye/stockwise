@@ -23,14 +23,14 @@ export interface Task {
   triggered_by: string | null;
 }
 
-export function StatusTimeline({ tasks }: { tasks: Task[] }) {
+export function StatusTimeline({ tasks, currentDate }: { tasks: Task[], currentDate: Date }) {
   return (
     <div className="relative ml-4 md:ml-10 space-y-0 pb-10">
       {/* Continuous Vertical Line */}
       <div className="absolute left-[19px] top-4 bottom-0 w-px bg-white/10" />
       
       {tasks.map((task, idx) => (
-        <TimelineItem key={task.name + idx} task={task} />
+        <TimelineItem key={task.name + idx} task={task} currentDate={currentDate} />
       ))}
       
       {tasks.length === 0 && (
@@ -40,21 +40,18 @@ export function StatusTimeline({ tasks }: { tasks: Task[] }) {
   );
 }
 
-function TimelineItem({ task }: { task: Task }) {
+function TimelineItem({ task, currentDate }: { task: Task, currentDate: Date }) {
   const [expanded, setExpanded] = useState(false);
   
   // Logic to determine if "Pending" is actually "Missed"
-  // Assuming task.expected_start is meant for Today.
-  // This is a heuristic.
   let displayStatus = task.status;
   if (task.status === 'pending' && task.expected_start) {
       const now = new Date();
-      const todayStr = format(now, 'yyyy-MM-dd');
-      // Construct a rough date object for the planned time today
-      // note: parsing strictly depends on format "HH:mm"
-      const planTime = parse(`${todayStr} ${task.expected_start}`, 'yyyy-MM-dd HH:mm', new Date());
+      // Use the VIEWED date to construct the plan time, not today's date
+      const viewDateStr = format(currentDate, 'yyyy-MM-dd');
+      const planTime = parse(`${viewDateStr} ${task.expected_start}`, 'yyyy-MM-dd HH:mm', new Date());
       
-      // If plan time is in past (by > 30 mins) and still pending, perform visual downgrade
+      // Only mark as skipped if the plan time is truly in the past
       if (isPast(planTime) && (now.getTime() - planTime.getTime() > 30 * 60000)) {
           displayStatus = 'skipped';
       }
