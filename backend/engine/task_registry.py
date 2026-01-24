@@ -50,7 +50,7 @@ DAILY_TASK_PLAN_TEMPLATE = [
         "dimensions": {}
     },
 
-    # --- Market Observer Tasks (Metadata & Data) ---
+    # --- Market Observer Tasks (Metadata & Watch) ---
     {
         "name": "meta_sync",
         "display_name": "Metadata Refresh",
@@ -59,6 +59,15 @@ DAILY_TASK_PLAN_TEMPLATE = [
         "expected_start": "06:00",
         "dependencies": [],
         "dimensions": {}
+    },
+    {
+        "name": "market_sentinel",
+        "display_name": "Real-time Market Watch",
+        "agent_id": "market_observer",
+        "type": "monitoring",
+        "expected_start": "09:30",
+        "dependencies": [],
+        "dimensions": {"interval": "10m"}
     },
     {
         "name": "ingestion_cn",
@@ -82,7 +91,7 @@ DAILY_TASK_PLAN_TEMPLATE = [
     # --- System Guardian Tasks ---
     {
         "name": "validation",
-        "display_name": "Post-Market Verification",
+        "display_name": "Accuracy Validation & Glory",
         "agent_id": "system_guardian",
         "type": "maintenance",
         "expected_start": "16:15",
@@ -93,7 +102,7 @@ DAILY_TASK_PLAN_TEMPLATE = [
     # --- Quant Mind Tasks ---
     {
         "name": "ai_analysis",
-        "display_name": "DeepSeek AI Analysis",
+        "display_name": "AI Prediction & Signal Flip",
         "agent_id": "quant_mind",
         "type": "reasoning",
         "expected_start": "16:45",

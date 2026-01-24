@@ -19,6 +19,11 @@ from logger import logger
 from notification_service import NotificationManager
 from config import BEIJING_TZ
 
+try:
+    from backend.engine.task_logger import get_task_logger
+except ImportError:
+    from engine.task_logger import get_task_logger
+
 
 def generate_morning_calls(dry_run=False, target_date=None):
     """
@@ -27,6 +32,9 @@ def generate_morning_calls(dry_run=False, target_date=None):
     today_str = target_date or datetime.now(BEIJING_TZ).strftime("%Y-%m-%d")
     logger.info(f"🌅 Starting Daily Morning Call generation for {today_str} (Dry Run: {dry_run})")
     
+    t_logger = get_task_logger("news_desk", "morning_call")
+    t_logger.start("Daily Morning Call", "delivery", dimensions={})
+
     nm = NotificationManager(dry_run=dry_run)
     conn = get_connection()
     cursor = conn.cursor()
@@ -95,6 +103,7 @@ def generate_morning_calls(dry_run=False, target_date=None):
     # Flush all
     total_delivered = nm.flush()
     logger.info(f"✅ Morning Call Task Finished. Queued: {sent_count}, Delivered: {total_delivered}")
+    t_logger.success(f"Delivered briefing to {total_delivered} users.")
     conn.close()
 
 

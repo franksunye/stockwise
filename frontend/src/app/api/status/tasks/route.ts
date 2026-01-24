@@ -20,6 +20,14 @@ const DAILY_PLAN_TEMPLATE = [
         expected_start: "08:30"
     },
     {
+        name: "market_sentinel",
+        display_name: "Real-time Market Watch",
+        agent_id: "market_observer",
+        type: "monitoring",
+        dimensions: { interval: "10m" },
+        expected_start: "09:30"
+    },
+    {
         name: "ingestion_cn",
         display_name: "A-Share Data Sync",
         agent_id: "market_observer",
@@ -29,7 +37,7 @@ const DAILY_PLAN_TEMPLATE = [
     },
     {
         name: "validation",
-        display_name: "Post-Market Verification",
+        display_name: "Accuracy Validation & Glory",
         agent_id: "system_guardian",
         type: "maintenance",
         dimensions: {},
@@ -45,7 +53,7 @@ const DAILY_PLAN_TEMPLATE = [
     },
     {
         name: "ai_analysis",
-        display_name: "DeepSeek AI Analysis",
+        display_name: "AI Prediction & Signal Flip",
         agent_id: "quant_mind",
         type: "reasoning",
         dimensions: { model: "mixed" },

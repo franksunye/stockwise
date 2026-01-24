@@ -38,12 +38,13 @@ try:
     from backend.logger import logger
     from backend.engine.models.brief_strategies import StrategyFactory
     from backend.engine.context_service import ContextService
+    from backend.engine.task_logger import get_task_logger
 except ImportError:
     from database import get_connection
     from logger import logger
     from engine.models.brief_strategies import StrategyFactory
     from engine.context_service import ContextService
-    from engine.context_service import ContextService
+    from engine.task_logger import get_task_logger
 
 # --- Tracing Helper ---
 class DetailedTraceRecorder:
@@ -725,8 +726,12 @@ async def run_daily_pipeline(date_str: str = None):
     
     logger.info(f"🎬 Starting Daily Brief Pipeline for {date_str}")
     
-    # 1. Phase 1: Analyze Stocks
-    await generate_stock_briefs_batch(date_str)
+    t_logger = get_task_logger("news_desk", "brief_gen")
+    t_logger.start("Daily Briefing & Push", "delivery", dimensions={})
+
+    try:
+        # 1. Phase 1: Analyze Stocks
+        await generate_stock_briefs_batch(date_str)
     
     # 2. Phase 2: Assemble for ALL users
     conn = get_connection()
@@ -757,6 +762,7 @@ async def run_daily_pipeline(date_str: str = None):
     # The old batch notification function (send_personalized_daily_report) is deprecated.
     
     logger.info("🎉 Daily Pipeline Completed! Check 'daily_briefs' table.")
+    t_logger.success("Completed summary assembly and push broadcast.")
 
 
 if __name__ == "__main__":
