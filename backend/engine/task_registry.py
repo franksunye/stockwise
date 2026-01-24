@@ -45,7 +45,7 @@ DAILY_TASK_PLAN_TEMPLATE = [
         "display_name": "A-Share Data Sync",
         "agent_id": "market_observer",
         "type": "ingestion",
-        "expected_start": "16:00",
+        "expected_start": "15:30",
         "dependencies": [],
         "dimensions": {"market": "CN"}
     },
@@ -54,7 +54,7 @@ DAILY_TASK_PLAN_TEMPLATE = [
         "display_name": "HK Stock Data Sync",
         "agent_id": "market_observer",
         "type": "ingestion",
-        "expected_start": "16:15",
+        "expected_start": "15:45",
         "dependencies": [],
         "dimensions": {"market": "HK"}
     },
@@ -63,8 +63,19 @@ DAILY_TASK_PLAN_TEMPLATE = [
         "display_name": "Metadata Refresh",
         "agent_id": "market_observer",
         "type": "ingestion",
-        "expected_start": "16:30",
+        "expected_start": "16:00",
         "dependencies": ["ingestion_cn"],
+        "dimensions": {}
+    },
+
+    # --- System Guardian Tasks ---
+    {
+        "name": "validation",
+        "display_name": "Prediction Result Verification",
+        "agent_id": "system_guardian",
+        "type": "maintenance",
+        "expected_start": "16:15",
+        "dependencies": ["meta_sync"],
         "dimensions": {}
     },
 
@@ -74,8 +85,8 @@ DAILY_TASK_PLAN_TEMPLATE = [
         "display_name": "DeepSeek Analysis (PRO)",
         "agent_id": "quant_mind",
         "type": "reasoning",
-        "expected_start": "17:00",
-        "dependencies": ["meta_sync"],
+        "expected_start": "16:30",
+        "dependencies": ["validation"],
         "dimensions": {"tier": "PRO", "model": "mixed"}
     },
     {
@@ -83,8 +94,8 @@ DAILY_TASK_PLAN_TEMPLATE = [
         "display_name": "Standard Analysis (Free)",
         "agent_id": "quant_mind",
         "type": "reasoning",
-        "expected_start": "17:30",
-        "dependencies": ["meta_sync"],
+        "expected_start": "17:00",
+        "dependencies": ["validation"],
         "dimensions": {"tier": "Free", "model": "rule-engine"}
     },
 
@@ -94,7 +105,7 @@ DAILY_TASK_PLAN_TEMPLATE = [
         "display_name": "Daily Brief Generation",
         "agent_id": "news_desk",
         "type": "delivery",
-        "expected_start": "08:00", # Next Morning
+        "expected_start": "18:00",
         "dependencies": ["ai_analysis_pro"],
         "dimensions": {}
     },
@@ -103,7 +114,7 @@ DAILY_TASK_PLAN_TEMPLATE = [
         "display_name": "Push Notifications",
         "agent_id": "news_desk",
         "type": "delivery",
-        "expected_start": "08:30",
+        "expected_start": "18:30",
         "dependencies": ["brief_gen"],
         "dimensions": {}
     }
