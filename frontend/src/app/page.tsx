@@ -66,22 +66,6 @@ export default function LandingPage() {
           </div>
         </motion.div>
 
-        {/* Product Preview */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.3 }}
-          className="mt-20 relative"
-        >
-          <div className="absolute inset-0 bg-gradient-to-t from-[#050508] via-transparent to-transparent z-10 pointer-events-none" />
-          <Image 
-            src="/dashboard-preview.png" 
-            alt="StockWise Dashboard Preview" 
-            width={600} 
-            height={400} 
-            className="rounded-3xl shadow-2xl shadow-indigo-500/20 border border-white/10"
-          />
-        </motion.div>
 
         {/* How It Works */}
         <section className="pt-40 w-full max-w-4xl">
