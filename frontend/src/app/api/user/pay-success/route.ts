@@ -110,6 +110,7 @@ export async function POST(request: Request) {
             tier: 'pro'
         });
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         console.error('Payment processing error:', error);
         return NextResponse.json({ error: error.message || 'Internal Error' }, { status: 500 });
