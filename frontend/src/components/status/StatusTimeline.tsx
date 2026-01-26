@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { StatusBadge } from './StatusBadge';
-import { format, isPast, parseISO, parse } from 'date-fns';
-import { User, Brain, Newspaper, Shield, Activity, Clock, CheckCircle2, XCircle } from 'lucide-react';
+import { format, isPast, parse } from 'date-fns';
 
 export interface Task {
   name: string;

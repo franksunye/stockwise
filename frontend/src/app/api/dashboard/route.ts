@@ -13,7 +13,7 @@ export async function GET(request: Request) {
     const startTime = Date.now();
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');
-    const historyLimit = parseInt(searchParams.get('historyLimit') || '15');
+    const historyLimit = parseInt(searchParams.get('historyLimit') || '7');
 
     if (!userId) {
         return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
@@ -60,12 +60,11 @@ export async function GET(request: Request) {
             const placeholders = symbols.map(() => '?').join(',');
 
             let latestPrices: Record<string, unknown>[];
-            let allPredictions: Record<string, unknown>[];
             let allHistory: Record<string, unknown>[];
 
             if ('execute' in client) {
                 // Turso: 使用批量查询
-                const [pricesRs, predictionsRs, historyRs] = await Promise.all([
+                const [pricesRs, historyRs] = await Promise.all([
                     // 每只股票的最新价格
                     client.execute({
                         sql: `SELECT dp.* FROM daily_prices dp
@@ -77,36 +76,29 @@ export async function GET(request: Request) {
                               ) latest ON dp.symbol = latest.symbol AND dp.date = latest.max_date`,
                         args: symbols
                     }),
-                    // 所有股票的主要预测（最近2条用于today和previous）
+                    // 历史预测（合并查询，使用窗口函数限制条数）
                     client.execute({
-                        sql: `SELECT p.*, m.display_name as model
-                              FROM ai_predictions_v2 p
-                              LEFT JOIN prediction_models m ON p.model_id = m.model_id
-                              WHERE p.symbol IN (${placeholders}) 
-                              AND p.is_primary = 1
-                              ORDER BY p.symbol, p.date DESC`,
-                        args: symbols
-                    }),
-                    // 历史预测（用于历史卡片）
-                    client.execute({
-                        sql: `SELECT p.symbol, p.date, p.target_date, p.signal, p.confidence,
-                                     p.support_price, p.ai_reasoning, p.validation_status, p.actual_change,
-                                     p.is_primary, p.model_id as model, m.display_name,
-                                     d.close as close_price,
-                                     d.rsi, d.kdj_k, d.kdj_d, d.kdj_j,
-                                     d.macd, d.macd_signal, d.macd_hist,
-                                     d.boll_upper, d.boll_mid, d.boll_lower
-                              FROM ai_predictions_v2 p
-                              LEFT JOIN prediction_models m ON p.model_id = m.model_id
-                              LEFT JOIN daily_prices d ON p.symbol = d.symbol AND p.target_date = d.date
-                              WHERE p.symbol IN (${placeholders}) AND p.is_primary = 1
-                              ORDER BY p.symbol, p.date DESC`,
-                        args: symbols
+                        sql: `WITH RankedPredictions AS (
+                                  SELECT p.symbol, p.date, p.target_date, p.signal, p.confidence,
+                                         p.support_price, p.ai_reasoning, p.validation_status, p.actual_change,
+                                         p.is_primary, p.model_id as model, m.display_name,
+                                         d.close as close_price,
+                                         d.rsi, d.kdj_k, d.kdj_d, d.kdj_j,
+                                         d.macd, d.macd_signal, d.macd_hist,
+                                         d.boll_upper, d.boll_mid, d.boll_lower,
+                                         ROW_NUMBER() OVER (PARTITION BY p.symbol ORDER BY p.date DESC) as rn
+                                  FROM ai_predictions_v2 p
+                                  LEFT JOIN prediction_models m ON p.model_id = m.model_id
+                                  LEFT JOIN daily_prices d ON p.symbol = d.symbol AND p.target_date = d.date
+                                  WHERE p.symbol IN (${placeholders}) AND p.is_primary = 1
+                              )
+                              SELECT * FROM RankedPredictions WHERE rn <= ?
+                              ORDER BY symbol, date DESC`,
+                        args: [...symbols, historyLimit]
                     })
                 ]);
 
                 latestPrices = pricesRs.rows as Record<string, unknown>[];
-                allPredictions = predictionsRs.rows as Record<string, unknown>[];
                 allHistory = historyRs.rows as Record<string, unknown>[];
             } else {
                 // SQLite: 本地查询
@@ -120,54 +112,37 @@ export async function GET(request: Request) {
                      ) latest ON dp.symbol = latest.symbol AND dp.date = latest.max_date`
                 ).all(...symbols) as Record<string, unknown>[];
 
-                allPredictions = client.prepare(
-                    `SELECT p.*, m.display_name as model
-                     FROM ai_predictions_v2 p
-                     LEFT JOIN prediction_models m ON p.model_id = m.model_id
-                     WHERE p.symbol IN (${placeholders}) AND p.is_primary = 1
-                     ORDER BY p.symbol, p.date DESC`
-                ).all(...symbols) as Record<string, unknown>[];
-
                 allHistory = client.prepare(
-                    `SELECT p.symbol, p.date, p.target_date, p.signal, p.confidence,
-                            p.support_price, p.ai_reasoning, p.validation_status, p.actual_change,
-                            p.is_primary, p.model_id as model, m.display_name,
-                            d.close as close_price,
-                            d.rsi, d.kdj_k, d.kdj_d, d.kdj_j,
-                            d.macd, d.macd_signal, d.macd_hist,
-                            d.boll_upper, d.boll_mid, d.boll_lower
-                     FROM ai_predictions_v2 p
-                     LEFT JOIN prediction_models m ON p.model_id = m.model_id
-                     LEFT JOIN daily_prices d ON p.symbol = d.symbol AND p.target_date = d.date
-                     WHERE p.symbol IN (${placeholders}) AND p.is_primary = 1
-                     ORDER BY p.symbol, p.date DESC`
-                ).all(...symbols) as Record<string, unknown>[];
+                    `WITH RankedPredictions AS (
+                          SELECT p.symbol, p.date, p.target_date, p.signal, p.confidence,
+                                 p.support_price, p.ai_reasoning, p.validation_status, p.actual_change,
+                                 p.is_primary, p.model_id as model, m.display_name,
+                                 d.close as close_price,
+                                 d.rsi, d.kdj_k, d.kdj_d, d.kdj_j,
+                                 d.macd, d.macd_signal, d.macd_hist,
+                                 d.boll_upper, d.boll_mid, d.boll_lower,
+                                 ROW_NUMBER() OVER (PARTITION BY p.symbol ORDER BY p.date DESC) as rn
+                          FROM ai_predictions_v2 p
+                          LEFT JOIN prediction_models m ON p.model_id = m.model_id
+                          LEFT JOIN daily_prices d ON p.symbol = d.symbol AND p.target_date = d.date
+                          WHERE p.symbol IN (${placeholders}) AND p.is_primary = 1
+                      )
+                      SELECT * FROM RankedPredictions WHERE rn <= ?
+                      ORDER BY symbol, date DESC`
+                ).all(...symbols, historyLimit) as Record<string, unknown>[];
             }
 
             // Step 3: 组装数据
             const priceMap = new Map(latestPrices.map(p => [p.symbol as string, p]));
 
-            // 按股票分组预测
-            const predictionsBySymbol = new Map<string, Record<string, unknown>[]>();
-            for (const pred of allPredictions) {
-                const sym = pred.symbol as string;
-                if (!predictionsBySymbol.has(sym)) {
-                    predictionsBySymbol.set(sym, []);
-                }
-                predictionsBySymbol.get(sym)!.push(pred);
-            }
-
-            // 按股票分组历史
+            // 按股票分组历史 (包含最新的预测)
             const historyBySymbol = new Map<string, Record<string, unknown>[]>();
             for (const hist of allHistory) {
                 const sym = hist.symbol as string;
                 if (!historyBySymbol.has(sym)) {
                     historyBySymbol.set(sym, []);
                 }
-                const arr = historyBySymbol.get(sym)!;
-                if (arr.length < historyLimit) {
-                    arr.push(hist);
-                }
+                historyBySymbol.get(sym)!.push(hist);
             }
 
             // 计算最新更新时间
@@ -191,15 +166,18 @@ export async function GET(request: Request) {
 
             // 组装最终结果
             const stocks = watchlist.map(w => {
-                const preds = predictionsBySymbol.get(w.symbol) || [];
                 const history = historyBySymbol.get(w.symbol) || [];
 
-                // 🌟 数据安全：只显示最近 7 天内的预测，防止新关注股票拉出几年前的历史数据
+                // 🌟 数据安全：只显示最近 7 天内的预测 (Strict filtering)
                 const sevenDaysAgo = new Date();
                 sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
                 const sevenDaysAgoStr = sevenDaysAgo.toISOString().split('T')[0];
 
-                const validPreds = preds.filter(p => (p.date as string) >= sevenDaysAgoStr);
+                // Ensure history is typed correctly for filtering
+                const validPreds = (history as { date: string }[]).filter(p => p.date >= sevenDaysAgoStr);
+
+                // Sort by date desc just in case
+                // validPreds.sort((a, b) => b.date.localeCompare(a.date)); // Already sorted by SQL
 
                 return {
                     symbol: w.symbol,
@@ -207,7 +185,9 @@ export async function GET(request: Request) {
                     price: priceMap.get(w.symbol) || null,
                     prediction: validPreds[0] || null,
                     previousPrediction: validPreds[1] || null,
-                    history: history,
+                    history: history, // Return all fetched history (which is already limited by SQL LIMIT) or just validPreds? 
+                    // Previous logic returned 'history' (all fetched). SQL Limit is now 7.
+                    // So history contains at most 7 items.
                     lastUpdated: lastUpdateTime
                 };
             });

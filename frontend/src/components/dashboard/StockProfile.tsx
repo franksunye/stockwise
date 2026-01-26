@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X as CloseIcon, Briefcase, Eye, User, Check } from 'lucide-react';
 import { StockData, AIPrediction } from '@/lib/types';
 import { getRule, saveRule } from '@/lib/storage';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 
 interface StockProfileProps {
   stock: StockData | null;
@@ -20,7 +20,7 @@ export function StockProfile({ stock, isOpen, onClose }: StockProfileProps) {
   const [position, setPosition] = useState<'holding' | 'empty' | 'none'>('none');
   const [fullHistory, setFullHistory] = useState<AIPrediction[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
-  const lastSymbolRef = useRef<string | null>(null);
+
 
   // 打开档案时请求完整的30条历史数据（带缓存）
   useEffect(() => {

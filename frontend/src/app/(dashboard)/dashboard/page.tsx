@@ -34,7 +34,7 @@ function DashboardContent() {
   const [briefOpen, setBriefOpen] = useState(false);
   const hasScrolledToTarget = useRef(false);
 
-  const { stocks, loadingPool, refresh, isRefreshing } = useDashboardData();
+  const { stocks, loadingPool, refresh, isRefreshing, loadMoreHistory } = useDashboardData();
   const {
     currentIndex,
     scrollRef,
@@ -97,10 +97,32 @@ function DashboardContent() {
     }
   }, [searchParams]);
 
-  if (loadingPool) {
+  if (loadingPool && stocks.length === 0) {
     return (
-      <div className="min-h-screen bg-[#050508] flex items-center justify-center text-slate-500 text-xs font-bold tracking-widest animate-pulse">
-        核心系统初始化中...
+      <div className="min-h-screen bg-[#050508] relative overflow-hidden">
+        {/* Skeleton Header */}
+        <div className="flex justify-between p-6">
+          <div className="w-10 h-10 rounded-[16px] bg-white/5 animate-pulse" />
+          <div className="flex flex-col items-center gap-2">
+            <div className="w-32 h-6 bg-white/5 rounded animate-pulse" />
+            <div className="w-16 h-3 bg-white/5 rounded animate-pulse" />
+          </div>
+          <div className="w-10 h-10 rounded-[16px] bg-white/5 animate-pulse" />
+        </div>
+
+        {/* Skeleton Card */}
+        <div className="px-6 mt-10 space-y-4">
+           {/* Card Body */}
+           <div className="w-full aspect-[3/4] rounded-[32px] bg-white/5 border border-white/5 p-6 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent animate-shimmer" />
+              
+              <div className="space-y-6">
+                 <div className="w-16 h-16 rounded-2xl bg-white/10" />
+                 <div className="w-3/4 h-8 bg-white/10 rounded" />
+                 <div className="w-1/2 h-4 bg-white/5 rounded" />
+              </div>
+           </div>
+        </div>
       </div>
     );
   }
@@ -172,6 +194,7 @@ function DashboardContent() {
             onShowTactics={(prediction) => setSelectedTactics({ symbol: stock.symbol, prediction })} 
             onVerticalScroll={handleVerticalScroll}
             scrollRequest={currentIndex === idx ? backToTopCounter : undefined}
+            onLoadMore={loadMoreHistory}
           />
         ))}
       </div>

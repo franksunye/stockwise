@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X as CloseIcon, Share2, FileText, Loader2, Sparkles, NotebookText } from 'lucide-react';
+import { X as CloseIcon, FileText, Loader2, Sparkles, NotebookText } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { getCurrentUser } from '@/lib/user';
 import { getHKTime, getLastTradingDay } from '@/lib/date-utils';
@@ -121,19 +121,7 @@ export function BriefDrawer({ isOpen, onClose, limitToSymbol, onUpgrade }: Brief
     }
   }, [isOpen]);
 
-  const handleShare = async () => {
-    if (navigator.share && brief) {
-      try {
-        await navigator.share({
-          title: 'StockWise AI 每日简报',
-          text: brief.push_hook,
-          url: window.location.origin + '/dashboard', 
-        });
-      } catch (err) {
-        console.log('Share cancelled', err);
-      }
-    }
-  };
+
 
   const isSpecificStock = !!limitToSymbol && !showGlobal;
   const showContent = isSpecificStock ? extractedContent : brief?.content;

@@ -153,3 +153,12 @@ body.is-android .animate-bounce {
   /* 4. 动画降级：减少持续性的 CPU 占用 */
   animation-duration: 3s; 
 }
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.animate-shimmer {
+  animation: shimmer 2.5s infinite linear;
+}

@@ -243,7 +243,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
         } else {
             setRedeemMsg({ type: 'error', text: data.error || '绑定失败' });
         }
-    } catch (err) {
+    } catch {
         setRedeemMsg({ type: 'error', text: '网络请求失败' });
     } finally {
         setIsLinkingEmail(false);

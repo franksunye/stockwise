@@ -109,4 +109,6 @@ export interface StockData {
     rule: UserRule | null;
     loading: boolean;
     justUpdated?: boolean; // 标记刚刚更新，用于触发UI动画
+    loadingMore?: boolean;
+    hasMoreHistory?: boolean;
 }

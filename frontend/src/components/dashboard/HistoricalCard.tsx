@@ -4,9 +4,7 @@ import { ShieldCheck, XCircle, TrendingUp, TrendingDown, Minus, Target } from 'l
 import { AIPrediction } from '@/lib/types';
 import { COLORS } from './constants';
 
-interface HistoricalCardProps {
-  data: AIPrediction;
-}
+
 
 /**
  * 历史预测卡片

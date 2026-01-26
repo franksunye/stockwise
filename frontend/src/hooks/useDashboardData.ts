@@ -9,6 +9,8 @@ import { getMarketScene } from '@/lib/date-utils';
 // 动态刷新间隔：交易时段5分钟，非交易时段10分钟
 const TRADING_REFRESH_INTERVAL = 5 * 60 * 1000;   // 5分钟
 const DEFAULT_REFRESH_INTERVAL = 10 * 60 * 1000;  // 10分钟
+const CACHE_KEY = 'stockwise_dashboard_cache_v1';
+const CACHE_TTL = 24 * 60 * 60 * 1000; // 24小时过期
 
 function getRefreshInterval(): number {
     const scene = getMarketScene();
@@ -25,6 +27,26 @@ export function useDashboardData() {
     const lastFetchTimeRef = useRef<number>(0);
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+    // 1. 初始化：尝试从本地缓存读取，实现【秒开】
+    useEffect(() => {
+        try {
+            const cached = localStorage.getItem(CACHE_KEY);
+            if (cached) {
+                const { data, timestamp } = JSON.parse(cached);
+                const age = Date.now() - timestamp;
+
+                // 只有未过期的缓存才使用 (24小时)
+                if (age < CACHE_TTL && Array.isArray(data) && data.length > 0) {
+                    console.log(`🚀 Loaded ${data.length} stocks from local cache (${Math.round(age / 60000)}m ago)`);
+                    setStocks(data);
+                    setLoadingPool(false); // 立即关闭骨架屏
+                }
+            }
+        } catch (e) {
+            console.error('Cache load error', e);
+        }
+    }, []);
 
     const loadAllData = useCallback(async (silent = false) => {
         const user = await getCurrentUser();
@@ -93,6 +115,14 @@ export function useDashboardData() {
             setLastRefreshTime(new Date());
             setNextRefreshIn(getRefreshInterval());
 
+            // 💾 写入本地缓存 (后台静默)
+            try {
+                localStorage.setItem(CACHE_KEY, JSON.stringify({
+                    data: validResults,
+                    timestamp: Date.now()
+                }));
+            } catch (e) { console.error('Cache save error', e); }
+
             // 2秒后清除 justUpdated 标记
             if (silent) {
                 setTimeout(() => {
@@ -105,7 +135,7 @@ export function useDashboardData() {
         } finally {
             setIsRefreshing(false);
         }
-    }, [stocks.length]);
+    }, []);
 
     // 页面可见性检测：当用户切回页面时刷新数据
     useEffect(() => {
@@ -162,6 +192,48 @@ export function useDashboardData() {
         return loadAllData(false);
     }, [loadAllData]);
 
+    // 加载更多历史
+    const loadMoreHistory = useCallback(async (symbol: string, offset: number) => {
+        // 乐观更新：设置 loading 状态
+        setStocks(prev => prev.map(s => {
+            if (s.symbol === symbol) {
+                return { ...s, loadingMore: true };
+            }
+            return s;
+        }));
+
+        try {
+            const res = await fetch(`/api/history?symbol=${symbol}&offset=${offset}&limit=10`);
+            const data = await res.json();
+
+            if (data.predictions) {
+                setStocks(prev => prev.map(s => {
+                    if (s.symbol === symbol) {
+                        // 过滤重复数据 (以防万一)
+                        const existingDates = new Set(s.history.map(h => h.date));
+                        const newItems = (data.predictions as import('@/lib/types').AIPrediction[])
+                            .filter(p => !existingDates.has(p.date));
+
+                        const newHistory = [...s.history, ...newItems]
+                            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+                        return {
+                            ...s,
+                            history: newHistory,
+                            loadingMore: false,
+                            // 如果返回少于10条，说明没有更多了
+                            hasMoreHistory: data.predictions.length >= 10
+                        };
+                    }
+                    return s;
+                }));
+            }
+        } catch (e) {
+            console.error('Failed to load history', e);
+            setStocks(prev => prev.map(s => s.symbol === symbol ? { ...s, loadingMore: false } : s));
+        }
+    }, []);
+
     return {
         stocks,
         setStocks,
@@ -169,6 +241,7 @@ export function useDashboardData() {
         isRefreshing,
         lastRefreshTime,
         nextRefreshIn,
-        refresh: manualRefresh
+        refresh: manualRefresh,
+        loadMoreHistory
     };
 }
