@@ -24,6 +24,11 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
   const [expiresAt, setExpiresAt] = useState<string | null>(null);
   const [watchlistCount, setWatchlistCount] = useState(0);
   
+  // Referral Stats
+  const [referralBalance, setReferralBalance] = useState(0);
+  const [totalEarned, setTotalEarned] = useState(0);
+  const [commissionRate, setCommissionRate] = useState(0.1);
+  
   // Redeem State
   const [redeemCode, setRedeemCode] = useState('');
   const [redeeming, setRedeeming] = useState(false);
@@ -97,6 +102,11 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
               }
               if (data.email) {
                   setUserEmail(data.email);
+              }
+              if (typeof data.referralBalance === 'number') {
+                  setReferralBalance(data.referralBalance);
+                  setTotalEarned(data.totalEarned || 0);
+                  setCommissionRate(data.commissionRate || 0.1);
               }
           }
       }
@@ -657,6 +667,19 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                 <p className="text-[10px] text-slate-500 leading-tight mb-4 font-medium">
                                     每邀请 1 位新用户入池，你与好友均可自动获得 {MEMBERSHIP_CONFIG.referral.refereeDays} 天 Pro 会员权益。
                                 </p>
+
+                                {/* 收益看板 */}
+                                <div className="grid grid-cols-2 gap-2 mb-4">
+                                    <div className="bg-white/5 rounded-2xl p-3 border border-white/5">
+                                        <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-1">可提现余额</div>
+                                        <div className="text-lg font-black text-emerald-400">¥{referralBalance.toFixed(2)}</div>
+                                    </div>
+                                    <div className="bg-white/5 rounded-2xl p-3 border border-white/5">
+                                        <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-1">累计收益 ({commissionRate * 100}%)</div>
+                                        <div className="text-lg font-black text-white">¥{totalEarned.toFixed(2)}</div>
+                                    </div>
+                                </div>
+
                                 <button 
                                     onClick={() => {
                                         const url = `${window.location.origin}/dashboard?invite=${userId}`;

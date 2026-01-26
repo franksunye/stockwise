@@ -210,7 +210,10 @@ export async function POST(request: Request) {
             expiresAt: user.subscription_expires_at,
             hasOnboarded: Boolean(user.has_onboarded),
             watchlistCount: watchlistCount,
-            email: user.email
+            email: user.email,
+            referralBalance: user.referral_balance || 0,
+            totalEarned: user.total_earned || 0,
+            commissionRate: user.custom_commission_rate ?? MEMBERSHIP_CONFIG.referral.defaultCommissionRate
         });
 
     } catch (error: unknown) {
