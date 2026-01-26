@@ -733,36 +733,40 @@ async def run_daily_pipeline(date_str: str = None):
         # 1. Phase 1: Analyze Stocks
         await generate_stock_briefs_batch(date_str)
     
-    # 2. Phase 2: Assemble for ALL users
-    conn = get_connection()
-    try:
-        cursor = conn.cursor()
-        cursor.execute("SELECT DISTINCT user_id FROM user_watchlist")
-        users = [r[0] for r in cursor.fetchall()]
-        
-        logger.info(f"👥 [Phase 2] Assembling briefs for {len(users)} users...")
-        for user_id in users:
-            try:
-                await assemble_user_brief(user_id, date_str)
-                logger.info(f"   - Prepared brief for {user_id}")
-                
-                # [NEW] Notify user immediately after their brief is ready
-                await notify_user_brief_ready(user_id, date_str)
-                
-            except Exception as e:
-                logger.error(f"❌ [Phase 2] Failed to process user {user_id}: {e}")
-                # Continue with next user
-                continue
+        # 2. Phase 2: Assemble for ALL users
+        conn = get_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute("SELECT DISTINCT user_id FROM user_watchlist")
+            users = [r[0] for r in cursor.fetchall()]
             
-    finally:
-        conn.close()
-    
-    # 3. Notification Phase Decoupled
-    # Individual notifications are now sent immediately in Phase 2 loop.
-    # The old batch notification function (send_personalized_daily_report) is deprecated.
-    
-    logger.info("🎉 Daily Pipeline Completed! Check 'daily_briefs' table.")
-    t_logger.success("Completed summary assembly and push broadcast.")
+            logger.info(f"👥 [Phase 2] Assembling briefs for {len(users)} users...")
+            for user_id in users:
+                try:
+                    await assemble_user_brief(user_id, date_str)
+                    logger.info(f"   - Prepared brief for {user_id}")
+                    
+                    # [NEW] Notify user immediately after their brief is ready
+                    await notify_user_brief_ready(user_id, date_str)
+                    
+                except Exception as e:
+                    logger.error(f"❌ [Phase 2] Failed to process user {user_id}: {e}")
+                    # Continue with next user
+                    continue
+                
+        finally:
+            conn.close()
+        
+        # 3. Notification Phase Decoupled
+        # Individual notifications are now sent immediately in Phase 2 loop.
+        # The old batch notification function (send_personalized_daily_report) is deprecated.
+        
+        logger.info("🎉 Daily Pipeline Completed! Check 'daily_briefs' table.")
+        t_logger.success("Completed summary assembly and push broadcast.")
+    except Exception as e:
+        logger.error(f"❌ [Pipeline] Full pipeline failed: {e}")
+        t_logger.fail(f"Pipeline failed: {str(e)}")
+        raise e
 
 
 if __name__ == "__main__":
