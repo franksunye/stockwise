@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 
 import { Zap, Target, ShieldCheck, ChevronDown, Clock } from 'lucide-react';
 import { StockData, TacticalData, AIPrediction } from '@/lib/types';
-import { StockData, TacticalData, AIPrediction } from '@/lib/types';
+
 import { getMarketScene, getPredictionTitle, getClosePriceLabelFromData, getValidationLabelFromData, isTradingDay, getMarketFromSymbol, getLastTradingDay, getHKTime } from '@/lib/date-utils';
 import { COLORS } from './constants';
 
