@@ -16,7 +16,8 @@ interface StockDashboardCardProps {
 export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardProps) {
 
 
-  const scene = getMarketScene();
+  const marketType = getMarketFromSymbol(data.symbol);
+  const scene = getMarketScene(marketType);
   const isPostMarket = scene === 'post_market';
   const isPreMarket = scene === 'pre_market';
   
@@ -33,7 +34,6 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
   // 2. 确定数据有效性阈值 (Threshold)
   // - 交易中/盘前 (Active): 必须是 T (今日) 的数据。过期数据无效。
   // - 盘后/休市 (Closed): 允许 T (今日) 或 T-x (上一交易日) 的数据，方便周末复盘。
-  const marketType = getMarketFromSymbol(data.symbol);
   let thresholdDateStr = todayStr;
 
   if (isPostMarket) {
@@ -90,7 +90,7 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
   // 1. 智能标题文案：优先从实际数据推断，而非仅依赖交易日历
   // 这确保标题与内容一致
   const getSmartTitle = () => {
-    if (!displayPrediction?.target_date) return getPredictionTitle(scene, getMarketFromSymbol(data.symbol));
+    if (!displayPrediction?.target_date) return getPredictionTitle(scene, marketType);
     
     const targetDate = displayPrediction.target_date;
     
@@ -104,7 +104,7 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
     }
     
     // target_date > 今天，使用日历推算的标题
-    return getPredictionTitle(scene, getMarketFromSymbol(data.symbol));
+    return getPredictionTitle(scene, marketType);
   };
   
   const mainTitle = getSmartTitle();
@@ -230,7 +230,7 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
                   <>
                     <div className="relative group">
                       <span className="text-[9px] text-slate-600 font-black uppercase tracking-widest block mb-1 transition-colors group-hover:text-slate-400">
-                        {isMarketOpenSoon ? '今日成交价' : getClosePriceLabelFromData(scene, data.price.date)}
+                        {isMarketOpenSoon ? '今日成交价' : getClosePriceLabelFromData(scene, data.price.date, marketType)}
                       </span>
                       {isMarketOpenSoon ? (
                         <div className="flex items-baseline gap-1.5 h-7">
@@ -300,7 +300,7 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
                 return (
                   <>
                     <span className="text-[10px] text-slate-600 font-black uppercase tracking-widest absolute top-4 left-4">
-                      {getValidationLabelFromData(validationDate || '')}
+                      {getValidationLabelFromData(validationDate || '', marketType)}
                     </span>
                     
                     <div className="flex-1 flex flex-col items-center justify-center pt-4">

@@ -256,9 +256,9 @@ export function getLastTradingDay(from?: Date, market: MarketType = 'HK'): Date 
  * - 如果上一交易日是上周五（周末查看）→ "周五"
  * - 其他情况 → "M/D"（如 "12/24"）
  */
-export function getLastTradingDayLabel(): string {
+export function getLastTradingDayLabel(market: MarketType = 'HK'): string {
     const hkNow = getHKTime();
-    const todayIsTradingDay = !isMarketClosed(hkNow);
+    const todayIsTradingDay = !isMarketClosed(hkNow, market);
 
     // 如果今天是交易日，显示"今日"
     if (todayIsTradingDay) {
@@ -266,7 +266,7 @@ export function getLastTradingDayLabel(): string {
     }
 
     // 计算上一交易日
-    const lastDay = getLastTradingDay();
+    const lastDay = getLastTradingDay(undefined, market);
     const daysDiff = getDaysDiff(lastDay, hkNow);
     const lastDayOfWeek = lastDay.getDay();
 
@@ -292,12 +292,12 @@ export function getLastTradingDayLabel(): string {
  * - 今日收市后 → "今日收盘价"
  * - 周末/假期 → "周五收盘价" / "12/24 收盘价"
  */
-export function getClosePriceLabel(scene: MarketScene): string {
+export function getClosePriceLabel(scene: MarketScene, market: MarketType = 'HK'): string {
     if (scene === 'trading') {
         return '当前成交价';
     }
 
-    const label = getLastTradingDayLabel();
+    const label = getLastTradingDayLabel(market);
     return `${label}收盘价`;
 }
 
@@ -306,8 +306,8 @@ export function getClosePriceLabel(scene: MarketScene): string {
  * - 交易日收市后 → "今日验证"
  * - 周末/假期 → "周五验证" / "12/24 验证"
  */
-export function getValidationLabel(): string {
-    const label = getLastTradingDayLabel();
+export function getValidationLabel(market: MarketType = 'HK'): string {
+    const label = getLastTradingDayLabel(market);
     return `${label}验证`;
 }
 
@@ -318,8 +318,8 @@ export function getValidationLabel(): string {
  * @param dataDateStr 后端返回的日期字符串，格式如 "2025-12-24" 或 "2025/12/24"
  * @returns 如 "今日" / "昨日" / "周五" / "12/24"
  */
-export function formatDataDateLabel(dataDateStr: string): string {
-    if (!dataDateStr) return getLastTradingDayLabel(); // 无数据时降级到推算
+export function formatDataDateLabel(dataDateStr: string, market: MarketType = 'HK'): string {
+    if (!dataDateStr) return getLastTradingDayLabel(market); // 无数据时降级到推算
 
     // 解析日期字符串
     const normalized = dataDateStr.replace(/\//g, '-');
@@ -347,35 +347,37 @@ export function formatDataDateLabel(dataDateStr: string): string {
 /**
  * 获取收盘价标签（基于实际数据日期）
  */
-export function getClosePriceLabelFromData(scene: MarketScene, dataDateStr?: string): string {
+export function getClosePriceLabelFromData(scene: MarketScene, dataDateStr?: string, market: MarketType = 'HK'): string {
     if (scene === 'trading') {
         return '当前成交价';
     }
 
-    const label = dataDateStr ? formatDataDateLabel(dataDateStr) : getLastTradingDayLabel();
+    const label = dataDateStr ? formatDataDateLabel(dataDateStr, market) : getLastTradingDayLabel(market);
     return `${label}收盘价`;
 }
 
 /**
  * 获取验证结果标签（基于实际数据日期）
  */
-export function getValidationLabelFromData(dataDateStr?: string): string {
-    const label = dataDateStr ? formatDataDateLabel(dataDateStr) : getLastTradingDayLabel();
+export function getValidationLabelFromData(dataDateStr?: string, market: MarketType = 'HK'): string {
+    const label = dataDateStr ? formatDataDateLabel(dataDateStr, market) : getLastTradingDayLabel(market);
     return `${label}验证`;
 }
 
 /**
- * 根据当前时间判定市场场景 (港股)
- * 逻辑增强：非交易日统一判定为 post_market (展示既定事实)
+ * 根据当前时间判定市场场景
+ * 逻辑增强：
+ * 1. 区分市场收盘时间：A股 15:00，港股 16:00
+ * 2. 非交易日统一判定为 post_market (展示既定事实)
  */
-export function getMarketScene(): MarketScene {
+export function getMarketScene(market: MarketType = 'HK'): MarketScene {
     const now = new Date();
-    // 转换为 UTC+8 (香港时间)
+    // 转换为 UTC+8 (香港时间/北京时间)
     const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
     const hkTime = new Date(utc + (3600000 * 8));
 
     // 如果今天不是交易日，无论几点，都视为上一周期的 post_market 状态
-    if (isMarketClosed(hkTime)) {
+    if (isMarketClosed(hkTime, market)) {
         return 'post_market';
     }
 
@@ -383,13 +385,16 @@ export function getMarketScene(): MarketScene {
     const minutes = hkTime.getMinutes();
     const totalMinutes = hours * 60 + minutes;
 
-    // 交易日收市后 (>= 16:00 = 960m)
-    if (totalMinutes >= 960) return 'post_market';
+    // 不同市场的收盘判定
+    const closeThreshold = market === 'CN' ? 900 : 960; // 15:00 vs 16:00
+
+    // 交易日收市后
+    if (totalMinutes >= closeThreshold) return 'post_market';
 
     // 交易日开市前 (< 09:30 = 570m)
     if (totalMinutes < 570) return 'pre_market';
 
-    // 交易日交易中 (09:30 - 16:00)
+    // 交易日交易中
     return 'trading';
 }
 
