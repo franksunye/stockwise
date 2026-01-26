@@ -194,12 +194,19 @@ export async function GET(request: Request) {
                 const preds = predictionsBySymbol.get(w.symbol) || [];
                 const history = historyBySymbol.get(w.symbol) || [];
 
+                // 🌟 数据安全：只显示最近 7 天内的预测，防止新关注股票拉出几年前的历史数据
+                const sevenDaysAgo = new Date();
+                sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+                const sevenDaysAgoStr = sevenDaysAgo.toISOString().split('T')[0];
+
+                const validPreds = preds.filter(p => (p.date as string) >= sevenDaysAgoStr);
+
                 return {
                     symbol: w.symbol,
                     name: w.name,
                     price: priceMap.get(w.symbol) || null,
-                    prediction: preds[0] || null,
-                    previousPrediction: preds[1] || null,
+                    prediction: validPreds[0] || null,
+                    previousPrediction: validPreds[1] || null,
                     history: history,
                     lastUpdated: lastUpdateTime
                 };
