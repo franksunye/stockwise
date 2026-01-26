@@ -64,58 +64,77 @@ export function useDashboardData() {
         }
 
         try {
-            // 🚀 使用批量 API，将原来的 41 个请求合并为 1 个
             const startTime = performance.now();
-
-            // 添加 10 秒超时控制
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-            const dashboardRes = await fetch(`/api/dashboard?userId=${user.userId}&historyLimit=15`, {
-                cache: 'no-store',
+            // Step 1: 仅拉取轻量级的 Watchlist (私有API)
+            const watchlistRes = await fetch(`/api/dashboard?userId=${user.userId}`, {
+                cache: 'no-store', // 私有数据不缓存
+                signal: controller.signal
+            });
+
+            const watchlistData = await watchlistRes.json();
+
+            if (!watchlistData.watchlist || watchlistData.watchlist.length === 0) {
+                setStocks([]);
+                setLoadingPool(false);
+                clearTimeout(timeoutId);
+                setIsRefreshing(false);
+                return;
+            }
+
+            // Step 2: 拿着 ID 列表去 CDN 拉取公共数据 (公有API)
+            // 魔法：这里对 CDN 来说只是一个公共 URL
+            const symbols = (watchlistData.watchlist as { symbol: string }[]).map(w => w.symbol).join(',');
+            const batchRes = await fetch(`/api/stock/batch?symbols=${symbols}&historyLimit=15`, {
+                // 不强制 no-store，让浏览器也可以缓存一下 (或者 default)
+                // 但为了实时性，我们依靠 API 的 Cache-Control 头让 CDN 缓存，浏览器端视情况而定
+                // 这里我们暂且允许 swr 行为
                 signal: controller.signal
             });
             clearTimeout(timeoutId);
 
-            const dashboardData = await dashboardRes.json();
+            const batchData = await batchRes.json();
 
-            if (dashboardData.error) {
-                console.error('Dashboard API error:', dashboardData.error);
-                setLoadingPool(false);
-                return;
-            }
+            if (batchData.error) { throw new Error(batchData.error); }
 
             const fetchTime = Math.round(performance.now() - startTime);
-            console.log(`📊 Dashboard loaded: ${dashboardData.stocks?.length || 0} stocks in ${fetchTime}ms (server: ${dashboardData.queryTime}ms)`);
+            console.log(`📊 Dashboard loaded: ${watchlistData.watchlist?.length || 0} stocks in ${fetchTime}ms (2-step w/ Edge Cache)`);
 
-            // 组装前端需要的数据格式
-            const validResults = (dashboardData.stocks || []).map((stock: {
-                symbol: string;
-                name: string;
-                price: unknown;
-                prediction: unknown;
-                previousPrediction: unknown;
-                history: unknown[];
-                lastUpdated: string;
-            }) => ({
-                symbol: stock.symbol,
-                name: stock.name,
-                price: stock.price,
-                prediction: stock.prediction,
-                previousPrediction: stock.previousPrediction,
-                lastUpdated: stock.lastUpdated || '--:--',
-                history: stock.history || [],
-                rule: getRule(stock.symbol),
-                loading: false,
-                justUpdated: silent
-            })) as StockData[];
+            // Merge Watchlist Names with Batch Data
+            const validResults = (watchlistData.watchlist as { symbol: string; name: string }[]).map(item => {
+                const stockData = (batchData.stocks || []).find((s: { symbol: string }) => s.symbol === item.symbol);
+
+                // Fallback struct if CDN data missing
+                const base = stockData || {
+                    symbol: item.symbol,
+                    price: null,
+                    prediction: null,
+                    previousPrediction: null,
+                    history: []
+                };
+
+                return {
+                    symbol: item.symbol, // use watchlist symbol as truth
+                    name: item.name,
+                    price: base.price,
+                    prediction: base.prediction,
+                    previousPrediction: base.previousPrediction,
+                    lastUpdated: base.lastUpdated || '--:--',
+                    history: base.history || [],
+                    rule: getRule(item.symbol),
+                    loading: false,
+                    justUpdated: silent
+                };
+            }) as StockData[];
 
             setStocks(validResults);
             setLoadingPool(false);
             setLastRefreshTime(new Date());
             setNextRefreshIn(getRefreshInterval());
 
-            // 💾 写入本地缓存 (后台静默)
+            // 💾 写入本地缓存 (后台静默) - 结构保持不变
             try {
                 localStorage.setItem(CACHE_KEY, JSON.stringify({
                     data: validResults,
