@@ -34,9 +34,10 @@ export default {
     
     // ========== 早报任务检测 (08:30 北京时间) ==========
     const morningCallTime = 8 * 60 + 30; // 08:30
-    // 允许 5 分钟的窗口 (08:25 - 08:35)
-    if (currentMinutes >= morningCallTime - 5 && currentMinutes <= morningCallTime + 5) {
-      console.log(`☀️ Morning Call time (Beijing: ${beijingHour}:${String(beijingMinute).padStart(2, '0')}), triggering daily_morning_call...`);
+    
+    // 精确判定：仅在 08:30 这一分钟内执行
+    if (beijingHour === 8 && beijingMinute === 30) {
+      console.log(`☀️ Morning Call time (Beijing: 08:30), triggering daily_morning_call...`);
       const result = await triggerGitHubWorkflow(env, 'daily_morning_call.yml');
       console.log(`✅ Morning Call workflow triggered:`, result);
       return;
