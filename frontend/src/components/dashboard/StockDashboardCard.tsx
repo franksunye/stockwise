@@ -4,7 +4,8 @@ import { useMemo } from 'react';
 
 import { Zap, Target, ShieldCheck, ChevronDown, Clock } from 'lucide-react';
 import { StockData, TacticalData, AIPrediction } from '@/lib/types';
-import { getMarketScene, getPredictionTitle, getClosePriceLabelFromData, getValidationLabelFromData, isTradingDay, getMarketFromSymbol } from '@/lib/date-utils';
+import { StockData, TacticalData, AIPrediction } from '@/lib/types';
+import { getMarketScene, getPredictionTitle, getClosePriceLabelFromData, getValidationLabelFromData, isTradingDay, getMarketFromSymbol, getLastTradingDay, getHKTime } from '@/lib/date-utils';
 import { COLORS } from './constants';
 
 interface StockDashboardCardProps {
@@ -19,20 +20,41 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
   const isPostMarket = scene === 'post_market';
   const isPreMarket = scene === 'pre_market';
   
-  // 获取今天的日期字符串 (YYYY-MM-DD)
-  const today = new Date();
+  // 统一使用 HK 时间进行日期判定，避免客户端时区差异
+  const today = getHKTime();
   const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
   
-  // 核心预测数据选择逻辑（基于 target_date 匹配）：
-  // - 交易中/盘前：找 target_date = 今天 的预测（今日预测）
-  // - 收市后/休市日：找最新的预测（明日/下周一预测）
+  // 核心预测数据选择逻辑 (Strict Mode V2):
+  // 1. 寻找今日预测
   const todayPrediction = [data.prediction, data.previousPrediction].find(
     p => p?.target_date === todayStr
   );
   
-  const displayPrediction = (scene === 'trading' || isPreMarket)
-    ? (todayPrediction || data.prediction)  // 优先使用今日预测，否则降级到最新预测
-    : data.prediction;                       // 收市后使用最新预测
+  // 2. 确定数据有效性阈值 (Threshold)
+  // - 交易中/盘前 (Active): 必须是 T (今日) 的数据。过期数据无效。
+  // - 盘后/休市 (Closed): 允许 T (今日) 或 T-x (上一交易日) 的数据，方便周末复盘。
+  const marketType = getMarketFromSymbol(data.symbol);
+  let thresholdDateStr = todayStr;
+
+  if (isPostMarket) {
+      // 在盘后或周末，即使今天是周日，我们也能接受周五(上一交易日)的数据作为"最新状态"
+      const lastTrading = getLastTradingDay(undefined, marketType);
+      const y = lastTrading.getFullYear();
+      const m = String(lastTrading.getMonth() + 1).padStart(2, '0');
+      const d = String(lastTrading.getDate()).padStart(2, '0');
+      thresholdDateStr = `${y}-${m}-${d}`;
+  }
+
+  // 3. 筛选候选数据
+  // 优先取今日预测，若无则取最新(data.prediction)
+  const candidate = todayPrediction || data.prediction;
+
+  // 4. 应用阈值过滤
+  // 只有当数据日期 >= 阈值日期时，才认为是有效数据。
+  // 这解决了"僵尸复活"显示3天前无效数据的问题，同时保留了周末查看周五数据的能力。
+  const displayPrediction = (candidate && candidate.target_date >= thresholdDateStr) 
+      ? candidate 
+      : null;
   
   // Optimization: Memoize the heavy JSON parsing operation
   const tacticalData = useMemo(() => {
