@@ -20,7 +20,7 @@ export function AICouncil({ symbol, targetDate }: AICouncilProps) {
       try {
         setLoading(true);
         // Request detailed mode=full to get all models
-        const res = await fetch(`/api/predictions?symbol=${symbol}&limit=5&mode=full`);
+        const res = await fetch(`/api/predictions?symbol=${symbol}&limit=10&mode=full&targetDate=${targetDate}`);
         if (!res.ok) throw new Error('Failed to fetch council data');
         
         const data = await res.json();
