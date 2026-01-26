@@ -45,10 +45,11 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
       thresholdDateStr = `${y}-${m}-${d}`;
   }
 
-  // 3. 筛选候选数据
-  // 优先取今日预测，若无则取最新(data.prediction)
-  const candidate = todayPrediction || data.prediction;
-
+  // 3. 筛选候选数据 (Strict Mode V2.1)
+  // - 盘后 (Post-Market): 优先显示最新的预测 (通常是下一交易日的)，因为今日已成事实。
+  // - 盘中/盘前: 优先显示特定的"今日建议"，防止数据抢跑。
+  const candidate = (isPostMarket) ? data.prediction : (todayPrediction || data.prediction);
+  
   // 4. 应用阈值过滤
   // 只有当数据日期 >= 阈值日期时，才认为是有效数据。
   // 这解决了"僵尸复活"显示3天前无效数据的问题，同时保留了周末查看周五数据的能力。
