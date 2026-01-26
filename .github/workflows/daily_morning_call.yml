@@ -4,8 +4,8 @@ name: Daily Morning Call (Smart)
 # 触发：北京时间 08:30 (M-F)
 
 on:
-  schedule:
-    - cron: '30 0 * * 1-5'  # 00:30 UTC = 08:30 CST
+#  schedule:
+#    - cron: '30 0 * * 1-5'  # 00:30 UTC = 08:30 CST
   workflow_dispatch:
     inputs:
       date:
