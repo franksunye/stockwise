@@ -86,18 +86,15 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
   
   const mainTitle = getSmartTitle();
   
-  // 2. 信号文案简化展示
+  // 2. 信号文案简化展示 (Strict Mode)
   const getSignalText = (signal?: string) => {
     switch(signal) {
       case 'Long': return '建议做多';
       case 'Short': return '建议避险';
-      case 'Side': return '建议观望';
-      default: return '持仓观望';
+      case 'Side': return '建议观望'; // 明确的 AI 观望建议
+      default: return '等待分析';     // 数据为空时的系统状态
     }
   };
-
-  // Optimization: Memoize the heavy JSON parsing operation
-
 
   return (
     <div className="h-full w-full flex flex-col items-center justify-center px-4 snap-start pt-32 pb-32">
@@ -110,6 +107,12 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
                 <span className="text-[10px] font-bold text-amber-500/80 tracking-wider uppercase">{mainTitle} · 数据待同步</span>
               </>
+            ) : !displayPrediction ? (
+               // New: 针对全然无数据的新股
+               <>
+                 <span className="w-1.5 h-1.5 rounded-full bg-slate-500" />
+                 <span className="text-[10px] font-bold text-slate-500 tracking-wider uppercase">初始数据构建中</span>
+               </>
             ) : (
               <>
                 <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-ping" />
@@ -118,12 +121,19 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
             )}
           </div>
           <h2 className="text-4xl font-black tracking-tighter" style={{ 
-            color: displayPrediction?.signal === 'Long' ? COLORS.up : displayPrediction?.signal === 'Short' ? COLORS.down : COLORS.hold 
+            color: displayPrediction?.signal === 'Long' ? COLORS.up : 
+                   displayPrediction?.signal === 'Short' ? COLORS.down : 
+                   displayPrediction?.signal === 'Side' ? COLORS.hold : 
+                   '#94a3b8' // Slate-400 for 'Waiting/Null'
           }}>
             {getSignalText(displayPrediction?.signal)}
           </h2>
           <div className="flex items-center justify-center gap-3 text-[10px] font-bold text-slate-600">
-            <span className="flex items-center gap-1 uppercase tracking-widest"><Target className="w-3 h-3" /> 把握 {((displayPrediction?.confidence || 0) * 100).toFixed(0)}%</span>
+            {displayPrediction ? (
+                <span className="flex items-center gap-1 uppercase tracking-widest"><Target className="w-3 h-3" /> 把握 {((displayPrediction?.confidence || 0) * 100).toFixed(0)}%</span>
+            ) : (
+                <span className="flex items-center gap-1 uppercase tracking-widest italic">AI 引擎即将介入</span>
+            )}
           </div>
         </section>
 
@@ -172,7 +182,12 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
                       </>
                     );
                   } else {
-                    return <p className="text-sm leading-relaxed text-slate-300 font-medium italic pl-1 border-l-2 border-indigo-500/20">&quot;{displayPrediction?.ai_reasoning || '正在评估行情...'}&quot;</p>;
+                    // Fallback for No Data
+                    const pendingText = !displayPrediction 
+                        ? "该股票刚刚加入核心监控池。AI 量化引擎正在排队处理历史数据，预计将在下一个市场窗口（盘前或收盘后）生成深度策略。"
+                        : (displayPrediction?.ai_reasoning || '正在评估行情...');
+                    
+                    return <p className="text-sm leading-relaxed text-slate-400 font-medium italic pl-1 border-l-2 border-slate-500/20">&quot;{pendingText}&quot;</p>;
                   }
                 })()}
               </div>
