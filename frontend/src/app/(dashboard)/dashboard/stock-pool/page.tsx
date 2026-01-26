@@ -57,27 +57,37 @@ export default function StockPoolPage() {
     if (!user) return;
     setLoading(true);
     try {
+      // Step 1: 获取轻量级监控列表
       const poolRes = await fetch(`/api/stock-pool?userId=${user.userId}`, { cache: 'no-store' });
       const poolData = await poolRes.json();
       const watchlist = poolData.stocks || [];
-      const stockDataPromises = watchlist.map(async (item: { symbol: string, name: string }) => {
-        try {
-          const res = await fetch(`/api/stock?symbol=${item.symbol}`, { cache: 'no-store' });
-          const data = await res.json();
-          return {
-            symbol: item.symbol,
-            name: item.name || `股票 ${item.symbol}`,
-            price: data.price?.close || 0,
-            change: data.price?.change_percent || 0,
-            aiSignal: data.prediction?.signal || 'Side'
-          } as StockSnapshot;
-        } catch (e) {
-          console.error(`Failed to fetch ${item.symbol}`, e);
-          return null;
-        }
+      
+      if (watchlist.length === 0) {
+        setStocks([]);
+        setLoading(false);
+        return;
+      }
+
+      // Step 2: 批量获取行情与预测数据 (享受 Edge Cache)
+      const symbols = watchlist.map((w: { symbol: string }) => w.symbol).join(',');
+      const batchRes = await fetch(`/api/stock/batch?symbols=${symbols}`, {
+        // 使用默认缓存策略，利用我们在后端设置的 s-maxage=300
+      });
+      const batchData = await batchRes.json();
+
+      // Step 3: 合并数据
+      const results = watchlist.map((item: { symbol: string, name: string }) => {
+        const detail = (batchData.stocks || []).find((s: { symbol: string }) => s.symbol === item.symbol);
+        
+        return {
+          symbol: item.symbol,
+          name: item.name || detail?.name || `股票 ${item.symbol}`,
+          price: detail?.price?.close || 0,
+          change: detail?.price?.change_percent || 0,
+          aiSignal: detail?.prediction?.signal || 'Side'
+        } as StockSnapshot;
       });
 
-      const results = (await Promise.all(stockDataPromises)).filter((s): s is StockSnapshot => s !== null);
       setStocks(results);
     } catch (err) {
       console.error('Failed to load pool', err);
