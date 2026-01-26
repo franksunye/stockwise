@@ -140,7 +140,25 @@ def init_db():
         cursor.execute("CREATE TABLE IF NOT EXISTS global_stock_pool (symbol TEXT PRIMARY KEY, name TEXT NOT NULL, first_watched_at TIMESTAMP DEFAULT (datetime('now', '+8 hours')), watchers_count INTEGER DEFAULT 1, last_synced_at TIMESTAMP)")
         
         # 3. User System
-        cursor.execute("CREATE TABLE IF NOT EXISTS users (user_id TEXT PRIMARY KEY, username TEXT, email TEXT, registration_type TEXT NOT NULL, created_at TIMESTAMP DEFAULT (datetime('now', '+8 hours')), last_active_at TIMESTAMP DEFAULT (datetime('now', '+8 hours')), subscription_tier TEXT DEFAULT 'free', subscription_expires_at TIMESTAMP)")
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                user_id TEXT PRIMARY KEY, 
+                username TEXT, 
+                email TEXT, 
+                registration_type TEXT NOT NULL, 
+                created_at TIMESTAMP DEFAULT (datetime('now', '+8 hours')), 
+                last_active_at TIMESTAMP DEFAULT (datetime('now', '+8 hours')), 
+                subscription_tier TEXT DEFAULT 'free', 
+                subscription_expires_at TIMESTAMP,
+                referred_by TEXT,
+                has_onboarded BOOLEAN DEFAULT 0,
+                notification_settings TEXT,
+                referral_balance REAL DEFAULT 0,
+                total_earned REAL DEFAULT 0,
+                custom_commission_rate REAL,
+                referral_alias TEXT
+            )
+        """)
         cursor.execute("CREATE TABLE IF NOT EXISTS user_watchlist (user_id TEXT NOT NULL, symbol TEXT NOT NULL, added_at TIMESTAMP DEFAULT (datetime('now', '+8 hours')), PRIMARY KEY (user_id, symbol))")
         cursor.execute("CREATE TABLE IF NOT EXISTS invitation_codes (code TEXT PRIMARY KEY, type TEXT NOT NULL, duration_days INTEGER DEFAULT 30, is_used BOOLEAN DEFAULT 0, used_by_user_id TEXT, used_at TIMESTAMP, created_at TIMESTAMP DEFAULT (datetime('now', '+8 hours')))")
 
@@ -324,6 +342,32 @@ def init_db():
                 updated_at TIMESTAMP DEFAULT (datetime('now', '+8 hours'))
             )
         """)
+        
+        # 12. Robust Schema Migrations (Fixing production drift)
+        def add_column_if_missing(table, column, definition):
+            cols = get_table_columns(cursor, table)
+            if cols and column not in cols:
+                try:
+                    cursor.execute(f"ALTER TABLE {table} ADD COLUMN {column} {definition}")
+                    logger.info(f"✅ Migrated: Added {column} to {table}")
+                except Exception as e:
+                    if "duplicate column" not in str(e).lower():
+                        logger.warning(f"⚠️ Migration failed for {table}.{column}: {e}")
+
+        # Task Logs Migrations
+        add_column_if_missing('task_logs', 'updated_at', 'TIMESTAMP')
+        
+        # User Table Migrations
+        add_column_if_missing('users', 'referred_by', 'TEXT')
+        add_column_if_missing('users', 'has_onboarded', 'BOOLEAN DEFAULT 0')
+        add_column_if_missing('users', 'referral_balance', 'REAL DEFAULT 0')
+        add_column_if_missing('users', 'total_earned', 'REAL DEFAULT 0')
+        add_column_if_missing('users', 'custom_commission_rate', 'REAL')
+        add_column_if_missing('users', 'referral_alias', 'TEXT')
+
+        # Briefs Migrations
+        add_column_if_missing('daily_briefs', 'notified_at', 'TIMESTAMP')
+
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_task_logs_date_agent ON task_logs(date, agent_id)")
         
         conn.commit()
@@ -348,11 +392,6 @@ def get_stock_profile(symbol: str):
     conn = get_connection()
     try:
         cursor = conn.cursor()
-        # Handle dict access by converting tuple to dict if needed, or return tuple
-        # But legacy code expects tuple-like or dict-like access?
-        # Step 8 sync_profiles uses fetchone() and dict access via column name... wait.
-        # Step 28 code yielded a RowProxy which supports both.
-        # Raw sqlite3 Row supports both if row_factory is set.
         cursor.execute("SELECT industry, main_business, description FROM stock_meta WHERE symbol = ?", (symbol,))
         row = cursor.fetchone()
         return row
