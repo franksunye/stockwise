@@ -82,7 +82,7 @@ export default function TraceViewer() {
   useEffect(() => {
     if (!selectedId) return;
     fetchDetail(selectedId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [selectedId]);
 
   return (

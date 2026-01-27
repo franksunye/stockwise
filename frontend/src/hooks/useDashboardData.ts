@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+
 import { StockData } from '@/lib/types';
-import { getCurrentUser } from '@/lib/user';
 import { getRule } from '@/lib/storage';
 import { getMarketScene } from '@/lib/date-utils';
+import { useWatchlist } from './useWatchlist';
 
 // 动态刷新间隔：交易时段5分钟，非交易时段10分钟
 const TRADING_REFRESH_INTERVAL = 5 * 60 * 1000;   // 5分钟
@@ -18,6 +19,9 @@ function getRefreshInterval(): number {
 }
 
 export function useDashboardData() {
+    // Source of Truth for the List (Local First)
+    const { watchlist, loading: loadingWatchlist } = useWatchlist();
+
     const [stocks, setStocks] = useState<StockData[]>([]);
     const [loadingPool, setLoadingPool] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
@@ -49,64 +53,48 @@ export function useDashboardData() {
     }, []);
 
     const loadAllData = useCallback(async (silent = false) => {
-        const user = await getCurrentUser();
-        if (!user) return;
+        // 如果 watchlist 还在加载中，跳过
+        if (loadingWatchlist && watchlist.length === 0) return;
 
-        // 防抖：如果距离上次刷新不到30秒，跳过（除非是首次加载）
+        // 如果没有股票，清空
+        if (watchlist.length === 0) {
+            if (!loadingWatchlist) {
+                setStocks([]);
+                setLoadingPool(false);
+            }
+            return;
+        }
+
         const now = Date.now();
-        if (lastFetchTimeRef.current && now - lastFetchTimeRef.current < 30000) {
+        // 防抖: 30s内的重复刷新跳过 (除非 silent=true 强制刷新)
+        if (lastFetchTimeRef.current && now - lastFetchTimeRef.current < 30000 && !silent) {
             return;
         }
         lastFetchTimeRef.current = now;
 
-        if (!silent) {
-            setIsRefreshing(true);
-        }
+        if (!silent) setIsRefreshing(true);
 
         try {
             const startTime = performance.now();
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 10000);
+            const timeoutId = setTimeout(() => controller.abort(), 12000); // 12s timeout
 
-            // Step 1: 仅拉取轻量级的 Watchlist (私有API)
-            const watchlistRes = await fetch(`/api/dashboard?userId=${user.userId}`, {
-                cache: 'no-store', // 私有数据不缓存
-                signal: controller.signal
-            });
-
-            const watchlistData = await watchlistRes.json();
-
-            if (!watchlistData.watchlist || watchlistData.watchlist.length === 0) {
-                setStocks([]);
-                setLoadingPool(false);
-                clearTimeout(timeoutId);
-                setIsRefreshing(false);
-                return;
-            }
-
-            // Step 2: 拿着 ID 列表去 CDN 拉取公共数据 (公有API)
-            // 魔法：这里对 CDN 来说只是一个公共 URL
-            const symbols = (watchlistData.watchlist as { symbol: string }[]).map(w => w.symbol).join(',');
+            // Step 2: 拿着 watchlist 去 CDN 拉取公共数据 (公有API)
+            const symbols = watchlist.map(w => w.symbol).join(',');
             const batchRes = await fetch(`/api/stock/batch?symbols=${symbols}&historyLimit=15`, {
-                // 不强制 no-store，让浏览器也可以缓存一下 (或者 default)
-                // 但为了实时性，我们依靠 API 的 Cache-Control 头让 CDN 缓存，浏览器端视情况而定
-                // 这里我们暂且允许 swr 行为
                 signal: controller.signal
             });
             clearTimeout(timeoutId);
 
             const batchData = await batchRes.json();
-
             if (batchData.error) { throw new Error(batchData.error); }
 
             const fetchTime = Math.round(performance.now() - startTime);
-            console.log(`📊 Dashboard loaded: ${watchlistData.watchlist?.length || 0} stocks in ${fetchTime}ms (2-step w/ Edge Cache)`);
+            console.log(`📊 Dashboard loaded: ${watchlist.length} stocks in ${fetchTime}ms`);
 
-            // Merge Watchlist Names with Batch Data
-            const validResults = (watchlistData.watchlist as { symbol: string; name: string }[]).map(item => {
+            // Merge Watchlist with Batch Data
+            const validResults = watchlist.map(item => {
                 const stockData = (batchData.stocks || []).find((s: { symbol: string }) => s.symbol === item.symbol);
-
-                // Fallback struct if CDN data missing
                 const base = stockData || {
                     symbol: item.symbol,
                     price: null,
@@ -116,7 +104,7 @@ export function useDashboardData() {
                 };
 
                 return {
-                    symbol: item.symbol, // use watchlist symbol as truth
+                    symbol: item.symbol,
                     name: item.name,
                     price: base.price,
                     prediction: base.prediction,
@@ -126,8 +114,8 @@ export function useDashboardData() {
                     rule: getRule(item.symbol),
                     loading: false,
                     justUpdated: silent
-                };
-            }) as StockData[];
+                } as StockData;
+            });
 
             setStocks(validResults);
             setLoadingPool(false);
@@ -154,7 +142,7 @@ export function useDashboardData() {
         } finally {
             setIsRefreshing(false);
         }
-    }, []);
+    }, [watchlist, loadingWatchlist]);
 
     // 页面可见性检测：当用户切回页面时刷新数据
     useEffect(() => {

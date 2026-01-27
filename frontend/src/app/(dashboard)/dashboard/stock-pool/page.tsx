@@ -7,6 +7,8 @@ import { getCurrentUser, type User } from '@/lib/user';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getMarketScene } from '@/lib/date-utils';
 
+import { useWatchlist } from '@/hooks/useWatchlist';
+
 interface StockSnapshot {
   symbol: string;
   name: string;
@@ -18,8 +20,24 @@ interface StockSnapshot {
 export default function StockPoolPage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
-  const [stocks, setStocks] = useState<StockSnapshot[]>([]);
-  const [loading, setLoading] = useState(true);
+  
+  // New Hook Usage
+  const { watchlist, addStock, removeStock, loading: loadingList } = useWatchlist();
+  const [prices, setPrices] = useState<Record<string, Partial<StockSnapshot>>>({});
+  const [loadingPrices, setLoadingPrices] = useState(false);
+
+  // Derived State for UI
+  const stocks: StockSnapshot[] = watchlist.map(item => ({
+    symbol: item.symbol,
+    name: item.name,
+    price: prices[item.symbol]?.price || 0,
+    change: prices[item.symbol]?.change || 0,
+    aiSignal: prices[item.symbol]?.aiSignal || 'Side'
+  }));
+
+  // Compounded loading state
+  const loading = loadingList || (loadingPrices && Object.keys(prices).length === 0);
+  
   const [newSymbol, setNewSymbol] = useState('');
   const [showAdd, setShowAdd] = useState(false);
   const [searchResults, setSearchResults] = useState<{symbol: string; name: string; market?: string}[]>([]);
@@ -53,49 +71,43 @@ export default function StockPoolPage() {
     init();
   }, []);
 
-  const fetchStockData = useCallback(async () => {
-    if (!user) return;
-    setLoading(true);
+  // Hydrate Prices (Data Fetching)
+  // This runs whenever watchlist changes (add/remove), fetching fresh data for ALL.
+  // Ideally, we could optimize to only fetch new ones, but batch is efficient enough.
+  const fetchPrices = useCallback(async () => {
+    if (watchlist.length === 0) return;
+    setLoadingPrices(true);
+    
     try {
-      // Step 1: 获取轻量级监控列表
-      const poolRes = await fetch(`/api/stock-pool?userId=${user.userId}`, { cache: 'no-store' });
-      const poolData = await poolRes.json();
-      const watchlist = poolData.stocks || [];
-      
-      if (watchlist.length === 0) {
-        setStocks([]);
-        setLoading(false);
-        return;
-      }
-
-      // Step 2: 批量获取行情与预测数据 (享受 Edge Cache)
-      const symbols = watchlist.map((w: { symbol: string }) => w.symbol).join(',');
+      const symbols = watchlist.map(w => w.symbol).join(',');
       const batchRes = await fetch(`/api/stock/batch?symbols=${symbols}`, {
-        // 使用默认缓存策略，利用我们在后端设置的 s-maxage=300
+        // Use default cache strategy (browser/CDN)
       });
       const batchData = await batchRes.json();
-
-      // Step 3: 合并数据
-      const results = watchlist.map((item: { symbol: string, name: string }) => {
-        const detail = (batchData.stocks || []).find((s: { symbol: string }) => s.symbol === item.symbol);
-        
-        return {
-          symbol: item.symbol,
-          name: item.name || detail?.name || `股票 ${item.symbol}`,
-          price: detail?.price?.close || 0,
-          change: detail?.price?.change_percent || 0,
-          aiSignal: detail?.prediction?.signal || 'Side'
-        } as StockSnapshot;
+      
+      const newPrices: Record<string, Partial<StockSnapshot>> = {};
+      (batchData.stocks || []).forEach((detail: { symbol: string; price?: { close: number; change_percent: number }; prediction?: { signal: 'Long' | 'Short' | 'Side' } }) => {
+          newPrices[detail.symbol] = {
+              price: detail.price?.close || 0,
+              change: detail.price?.change_percent || 0,
+              aiSignal: detail.prediction?.signal || 'Side'
+          };
       });
-
-      setStocks(results);
+      setPrices(newPrices);
     } catch (err) {
-      console.error('Failed to load pool', err);
+      console.error('Failed to hydrate prices', err);
+    } finally {
+      setLoadingPrices(false);
     }
-    setLoading(false);
-  }, [user]);
+  }, [watchlist]);
 
-  useEffect(() => { if (user) fetchStockData(); }, [user, fetchStockData]);
+  useEffect(() => {
+      fetchPrices();
+      // Set up a refresh interval specifically for prices
+      const interval = setInterval(fetchPrices, 30000); // 30s refresh
+      return () => clearInterval(interval);
+  }, [fetchPrices]);
+
 
   useEffect(() => {
     const timer = setTimeout(async () => {
@@ -117,29 +129,23 @@ export default function StockPoolPage() {
   const handleAdd = async (symbolOverride?: string, nameOverride?: string) => {
     const targetSymbol = symbolOverride || newSymbol.trim();
     if (!targetSymbol || !user) return;
-    setLoading(true);
+    
     const limit = tier === 'pro' ? 10 : 3;
-    if (stocks.length >= limit) {
+    if (watchlist.length >= limit) {
       setLimitMsg(`已达到${tier === 'pro' ? 'Pro 10只' : '免费版 3只'}上限，请前往个人中心提升额度`);
-      setLoading(false);
       setTimeout(() => setLimitMsg(null), 3000);
       return;
     }
 
-    try {
-      const response = await fetch('/api/stock-pool', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.userId, symbol: targetSymbol, name: nameOverride })
-      });
-      if (response.ok) {
+    // Call Hook (Optimistic)
+    const success = await addStock(targetSymbol, nameOverride || targetSymbol);
+    
+    if (success) {
         setNewSymbol('');
         setShowAdd(false);
         setShowSuggestions(false);
-        await fetchStockData();
-      }
-    } catch (e) { console.error('Add failed', e); }
-    setLoading(false);
+        // Prices will naturally update due to useEffect dependency on watchlist
+    }
   };
 
   const handleRemoveClick = (e: React.MouseEvent, stock: StockSnapshot) => {
@@ -150,16 +156,11 @@ export default function StockPoolPage() {
   const confirmDelete = async () => {
     if (!stockToDelete || !user) return;
     setIsDeleting(true);
-    try {
-      const res = await fetch(`/api/stock-pool?userId=${user.userId}&symbol=${stockToDelete.symbol}`, { 
-        method: 'DELETE',
-        cache: 'no-store'
-      });
-      if (res.ok) {
-        await fetchStockData();
-        setStockToDelete(null);
-      }
-    } catch (e) { console.error('Delete failed', e); }
+    
+    // Call Hook (Optimistic)
+    await removeStock(stockToDelete.symbol);
+    
+    setStockToDelete(null);
     setIsDeleting(false);
   };
 

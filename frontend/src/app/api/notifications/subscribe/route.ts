@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { getDbClient, executeWithRetry } from '@/lib/db';
-import { Client } from '@libsql/client';
 import Database from 'better-sqlite3';
 import crypto from 'crypto';
 
