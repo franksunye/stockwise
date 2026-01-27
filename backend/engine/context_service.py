@@ -71,7 +71,7 @@ class ContextService:
             rows = cursor.fetchall()
             
             if not rows or len(rows) < 3: 
-                return proxy_msg if proxy_msg else ""
+                return proxy_msg if proxy_msg else "市场处于静默期或数据同步中。"
                 
             changes = [r[0] for r in rows if r[0] is not None]
             if not changes: return proxy_msg
@@ -80,9 +80,14 @@ class ContextService:
             down = sum(1 for c in changes if c < 0)
             median_change = np.median(changes)
             
-            breadth_msg = f"(全市场涨{up}/跌{down}，中位数{median_change:+.2f}%)"
+            # Determine Sample Scope Name
+            sample_size = len(changes)
+            scope_name = "全市场" if sample_size > 1000 else ("核心样本池" if sample_size > 50 else "今日观察池")
+            
+            breadth_msg = f"({scope_name}涨{up}/跌{down}，中位数{median_change:+.2f}%)"
             
             if proxy_msg:
+                # If we have index data (Anchor), we lead with that as the "Market Truth"
                 return f"{proxy_msg}，{breadth_msg}"
             
             # Fallback if no proxy found
@@ -92,7 +97,7 @@ class ContextService:
             elif median_change < -1.0: sentiment = "恐慌杀跌"
             elif median_change < -0.3: sentiment = "弱势回调"
             
-            return f"市场情绪{sentiment} {breadth_msg}"
+            return f"{scope_name}情绪{sentiment} {breadth_msg}"
             
         except Exception as e:
             logger.warning(f"⚠️ Market mood calc failed: {e}")

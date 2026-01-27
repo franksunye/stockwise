@@ -133,8 +133,8 @@ class DetailedTraceRecorder:
 
 # --- Logic Impl ---
 
-async def fetch_news_for_stock(symbol: str, stock_name: str) -> str:
-    """Fetch news using EastMoney API (Free & Real-time for CN/HK)."""
+async def fetch_news_for_stock(symbol: str, stock_name: str, target_date: str = None) -> str:
+    """Fetch news using EastMoney API (Free & Real-time for CN/HK) and filter by date if provided."""
     
     def _fetch_sync():
         url = "http://search-api-web.eastmoney.com/search/jsonp"
@@ -219,14 +219,42 @@ async def fetch_news_for_stock(symbol: str, stock_name: str) -> str:
              return "No significant news found directly related to this stock."
 
         context = []
-        for a in focused_articles[:5]: # Top 5
+        try:
+            target_dt = datetime.strptime(target_date, "%Y-%m-%d") if target_date else None
+        except Exception:
+            target_dt = None
+
+        for a in focused_articles:
+            # Date filter: Allow news within past 3 days of target_date
+            a_date = a.get('date', '')
+            
+            if target_dt and a_date:
+                try:
+                    # News date format is usually 'YYYY-MM-DD HH:MM:SS'
+                    news_dt = datetime.strptime(a_date[:10], "%Y-%m-%d")
+                    days_diff = (target_dt - news_dt).days
+                    
+                    if days_diff < 0 or days_diff > 5: # Allow today and past 5 days (covers full weekends)
+                        continue
+                except Exception:
+                    # If date parsing fails, fallback to strict match or ignore if unknown
+                    if not a_date.startswith(target_date):
+                        continue
+            elif target_date and not a_date.startswith(target_date):
+                continue
+                
             title = a.get('title', '').replace("<em>", "").replace("</em>", "")
-            content = a.get('content', '')[:300] # EastMoney provides summary/content
-            date = a.get('date', '')
+            content = a.get('content', '')[:300] 
+            date = a_date
             media = a.get('mediaName', 'EastMoney')
-            # url = a.get('url', '') # URL not strictly present in all responses, rely on content
             
             context.append(f"- **{title}** ({date}): {content} (Source: {media})")
+            
+            if len(context) >= 5: # Limit to 5 strictly valid news
+                break
+            
+        if not context:
+            return "No recent news found (Date mismatch or no significant updates today)."
             
         return "\n".join(context)
 
@@ -312,6 +340,35 @@ async def analyze_stock_context(
         change_text = f"{prev_change:+.2f}%" if prev_change is not None else "未知"
         refl_msg = f"- 昨日预测信号: {prev_sig}\n- 验证结果: {prev_status} (实际涨跌: {change_text})"
 
+    today_date = date_str  # Use passed date_str
+    
+    # 5. Construct User Prompt based on Tier
+    if tier == 'pro':
+        task_instruction = """任务: 撰写每日简报（不要包含任何标题）。格式如下：
+
+1. **预测校验与深度复盘** (约 100-150 字)：
+   - **必选开头 (The Verdict)**：明确回应昨日预测（参考 [第四事实]）。
+     - 若**预测准确**（如昨日看多，今日涨）：自信指出预判逻辑（如资金面、技术面）是如何兑现的。
+     - 若**预测失误**（如昨日看多，今日跌）：展现顶级分析师素养——**直面错误，随即复盘**。分析是受突发新闻冲击，还是主力资金博弈导致？**切勿找借口**。
+   - **叙事展开**：紧接着结合 [今日核心新闻]，将校验结果无缝融入今日行情分析。
+   - **禁止**出现具体技术指标名称和数值。
+
+2. **核心新闻 (附出处)** (最多3条，格式：**[中文标题]**：中文摘要。[出处名称](URL) 或 (Source: MediaName))
+   - **必须**将原始内容翻译为流畅的中文。
+   - 若无重大新闻，显示"今日无重大公开新闻"，通过技术面形态补充。"""
+    else:
+        # Free tier instruction (Original)
+        task_instruction = """任务: 撰写每日简报（不要包含任何标题）。格式如下：
+
+1. **综合分析** (约60-80字)：
+   - 以今日核心新闻或行业动态开头。
+   - 结合股价表现，用自然的语言描述当前趋势（基于 AI 信号和技术面）。
+   - **禁止**出现具体技术指标名称和数值。
+
+2. **核心新闻 (附出处)** (最多3条，格式：**[中文标题]**：中文摘要。[出处链接](URL))
+   - **必须**将原始内容翻译为流畅的中文。
+   - 如果没有重大新闻，此部分显示"今日无重大公开新闻"，通过技术面形态略作补充。"""
+
     user_prompt = f"""Subject: {symbol} ({stock_name})
 
 [第一事实：今日收盘表现]
@@ -329,16 +386,7 @@ async def analyze_stock_context(
 [参考逻辑：AI 分析师推理记录（若与第一事实冲突，请以第一事实为准）]
 {reasoning_section}
 
-任务: 撰写每日简报（不要包含任何标题）。格式如下：
-
-1. **综合分析** (约60-80字)：
-   - 以今日核心新闻或行业动态开头。
-   - 结合股价表现，用自然的语言描述当前趋势（基于 AI 信号和技术面）。
-   - **禁止**出现具体技术指标名称和数值。
-
-2. **核心新闻 (附出处)** (最多3条，格式：**[中文标题]**：中文摘要。[出处链接](URL))
-   - **必须**将原始内容（包括英文标题和内容）翻译为流畅的中文。
-   - 如果没有重大新闻，此部分显示"今日无重大公开新闻"，通过技术面形态略作补充。
+{task_instruction}
 
 输出语言：专业、流畅、有温度的中文。"""
 
@@ -371,7 +419,7 @@ async def analyze_stock_context(
 
 
 # --- Phase 1: Stock-Level Batch Analysis ---
-async def generate_stock_briefs_batch(date_str: str, specific_symbols: List[str] = None):
+async def generate_stock_briefs_batch(date_str: str, specific_symbols: List[str] = None, force: bool = False):
     """
     Phase 1: Analyze unique stocks and cache results in `stock_briefs`.
     """
@@ -450,7 +498,7 @@ async def generate_stock_briefs_batch(date_str: str, specific_symbols: List[str]
             # Fetch news once (shared across tiers)
             logger.info(f"⚡ Processing {symbol} ({processed_count + 1}/{len(unique_stocks)})...")
             
-            news_task = fetch_news_for_stock(symbol, stock_name)
+            news_task = fetch_news_for_stock(symbol, stock_name, date_str)
             news = await news_task
             
             pred = predictions.get(symbol, {})
@@ -464,6 +512,7 @@ async def generate_stock_briefs_batch(date_str: str, specific_symbols: List[str]
                 'pressure_price': pred.get('pressure_price'),
                 'close': prices.get('close'),
                 'change_percent': prices.get('change_percent'),
+                'reflection': pred.get('reflection', {}),
             }
 
             # Generate briefs for each tier (free: hunyuan, pro: deepseek)
@@ -473,12 +522,14 @@ async def generate_stock_briefs_batch(date_str: str, specific_symbols: List[str]
                     logger.debug(f"⏭️ [System] Skipping FREE tier analysis as requested.")
                     continue
 
-                # Check cache first
-                cursor.execute("SELECT 1 FROM stock_briefs WHERE symbol = ? AND date = ? AND tier = ?", 
-                              (symbol, date_str, tier))
-                if cursor.fetchone():
-                    logger.debug(f"⏭️ [Skip] {symbol}/{tier} already analyzed for {date_str}.")
-                    continue
+                if not force:
+                    cursor.execute("SELECT 1 FROM stock_briefs WHERE symbol = ? AND date = ? AND tier = ?", 
+                                  (symbol, date_str, tier))
+                    if cursor.fetchone():
+                        logger.debug(f"⏭️ [Skip] {symbol}/{tier} already analyzed for {date_str}.")
+                        continue
+                else:
+                    logger.debug(f"🔥 [Force] Re-generating {symbol}/{tier} despite existing record.")
                 
                 provider = TIER_PROVIDER_MAP[tier]
                 logger.info(f"   📝 Generating {tier.upper()} brief using {provider}...")
@@ -719,19 +770,19 @@ async def notify_user_brief_ready(user_id: str, date_str: str):
 
 
 # --- CLI / Orchestrator ---
-async def run_daily_pipeline(date_str: str = None):
+async def run_daily_pipeline(date_str: str = None, force: bool = False):
     """Run the Full Pipeline (Phase 1 + Phase 2 for all users)"""
     if not date_str:
         date_str = datetime.now().strftime("%Y-%m-%d")
     
-    logger.info(f"🎬 Starting Daily Brief Pipeline for {date_str}")
+    logger.info(f"🎬 Starting Daily Brief Pipeline for {date_str} (Force={force})")
     
     t_logger = get_task_logger("news_desk", "brief_gen")
     t_logger.start("Daily Briefing & Push", "delivery", dimensions={})
 
     try:
         # 1. Phase 1: Analyze Stocks
-        await generate_stock_briefs_batch(date_str)
+        await generate_stock_briefs_batch(date_str, force=force)
     
         # 2. Phase 2: Assemble for ALL users
         conn = get_connection()
@@ -775,6 +826,8 @@ if __name__ == "__main__":
     parser.add_argument("--user", help="Run Phase 2 for specific user only")
     parser.add_argument("--date", help="Date YYYY-MM-DD")
     parser.add_argument("--provider", help="Override LLM Provider (gemini/hunyuan)", default=None)
+    parser.add_argument("--force", action="store_true", help="Force re-generation of briefs")
+    parser.add_argument("--symbols", help="Comma-separated list of symbols to process (e.g. 00700,02171)")
     args = parser.parse_args()
     
     target_date = args.date or datetime.now().strftime("%Y-%m-%d")
@@ -786,20 +839,29 @@ if __name__ == "__main__":
         # Test Mode: Ensure stocks for this user are analyzed, then assemble
         print(f"Testing Two-Phase Pipeline for User: {args.user}")
         
-        # Optimized: Only analyze stocks for THIS user
-        conn = get_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT symbol FROM user_watchlist WHERE user_id = ?", (args.user,))
-        symbols = [r[0] for r in cursor.fetchall()]
-        conn.close()
+        # Determine which symbols to analyze
+        if args.symbols:
+            symbols = [s.strip() for s in args.symbols.split(",")]
+        else:
+            conn = get_connection()
+            cursor = conn.cursor()
+            cursor.execute("SELECT symbol FROM user_watchlist WHERE user_id = ?", (args.user,))
+            symbols = [r[0] for r in cursor.fetchall()]
+            conn.close()
         
         if symbols:
-            asyncio.run(generate_stock_briefs_batch(target_date, specific_symbols=symbols))
+            asyncio.run(generate_stock_briefs_batch(target_date, specific_symbols=symbols, force=args.force))
             asyncio.run(assemble_user_brief(args.user, target_date))
             print("\n✅ Verification Complete. Check 'daily_briefs' table.")
         else:
-            print("❌ User has no watchlist.")
+            print("❌ No symbols to process for this user.")
             
     else:
         # Production Mode: Run full pipeline
-        asyncio.run(run_daily_pipeline(target_date))
+        # If --symbols is passed in production mode, it only runs Phase 1 for those symbols
+        target_symbols = [s.strip() for s in args.symbols.split(",")] if args.symbols else None
+        if target_symbols:
+            print(f"Running targeted analysis for symbols: {target_symbols}")
+            asyncio.run(generate_stock_briefs_batch(target_date, specific_symbols=target_symbols, force=args.force))
+        else:
+            asyncio.run(run_daily_pipeline(target_date, force=args.force))
