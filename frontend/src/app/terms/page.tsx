@@ -80,6 +80,13 @@ export default function TermsOfService() {
                 在法律允许的最大范围内，StockWise AI 对您基于本站信息作出的任何交易决策所产生的盈利或损失概不负责。
               </p>
             </section>
+
+            <section className="space-y-4">
+              <h2 className="text-xl font-bold text-white italic">6. 联系我们</h2>
+              <p className="text-slate-400 leading-relaxed text-sm">
+                如有法律相关咨询，请联系：<span className="text-indigo-400 font-bold">legal@visutry.com</span>
+              </p>
+            </section>
           </div>
         </motion.div>
       </main>

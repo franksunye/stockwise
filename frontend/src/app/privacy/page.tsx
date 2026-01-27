@@ -75,7 +75,7 @@ export default function PrivacyPolicy() {
             <section className="space-y-4">
               <h2 className="text-xl font-bold text-white italic">5. 联系我们</h2>
               <p className="text-slate-400 leading-relaxed text-sm">
-                如果您对隐私政策有任何疑问，请通过邮件联系我们：<span className="text-indigo-400 font-bold">support@stockwise.ai</span>
+                如果您对隐私政策有任何疑问，请通过邮件联系我们：<span className="text-indigo-400 font-bold">privacy@visutry.com</span>
               </p>
             </section>
           </div>
