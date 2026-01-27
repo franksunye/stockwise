@@ -40,8 +40,8 @@ const pricingPlans = [
       '实时信号翻转推送（战报）',
       '⭐ Pro 专属身份勋章',
     ],
-    cta: '升级为 PRO',
     priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_MONTHLY || 'price_1Su1zqS3fDFObThpZbYXr2GG',
+    priceIdAnnual: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_YEARLY || 'price_1Su1zqS3fDFObThp7iG6X6bK', 
     highlight: true,
     icon: Crown,
     color: 'indigo',
@@ -253,32 +253,50 @@ function PricingContent() {
                 ))}
               </div>
 
-              {plan.priceId ? (
-                <button 
-                  onClick={() => handleUpgrade(plan.priceId!)}
-                  disabled={loadingPriceId === plan.priceId}
-                  className={`w-full py-4 rounded-2xl flex items-center justify-center gap-2 font-black italic transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${
-                    plan.highlight 
-                    ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-500 hover:shadow-indigo-600/40' 
-                    : 'bg-white/5 border border-white/10 hover:bg-white/10 text-white'
-                  }`}
-                >
-                  {loadingPriceId === plan.priceId ? '正在前往收银台...' : plan.cta}
-                  {loadingPriceId !== plan.priceId && <ChevronRight size={18} />}
-                </button>
-              ) : (
-                <Link 
-                  href={plan.href || '/'}
-                  className={`w-full py-4 rounded-2xl flex items-center justify-center gap-2 font-black italic transition-all active:scale-95 ${
-                    plan.highlight 
-                    ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-500 hover:shadow-indigo-600/40' 
-                    : 'bg-white/5 border border-white/10 hover:bg-white/10 text-white'
-                  }`}
-                >
-                  {plan.cta}
-                  <ChevronRight size={18} />
-                </Link>
-              )}
+              <div className="flex flex-col gap-3">
+                {plan.priceId && (
+                  <button 
+                    onClick={() => handleUpgrade(plan.priceId!)}
+                    disabled={!!loadingPriceId}
+                    className={`w-full py-4 rounded-2xl flex items-center justify-center gap-2 font-black italic transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${
+                      plan.highlight 
+                      ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-500 hover:shadow-indigo-600/40' 
+                      : 'bg-white/5 border border-white/10 hover:bg-white/10 text-white'
+                    }`}
+                  >
+                    {loadingPriceId === plan.priceId ? '正在前往收银台...' : (plan.priceIdAnnual ? '按月支付' : plan.cta)}
+                    {loadingPriceId !== plan.priceId && <ChevronRight size={18} />}
+                  </button>
+                )}
+
+                {plan.priceIdAnnual && (
+                  <button 
+                    onClick={() => handleUpgrade(plan.priceIdAnnual!)}
+                    disabled={!!loadingPriceId}
+                    className="w-full py-4 rounded-2xl flex flex-col items-center justify-center gap-0.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-black italic transition-all active:scale-95 shadow-lg shadow-orange-500/20 hover:from-amber-400 hover:to-orange-400 disabled:opacity-50"
+                  >
+                    <div className="flex items-center gap-2">
+                       {loadingPriceId === plan.priceIdAnnual ? '正在前往收银台...' : '按年支付 (¥299)'}
+                       {loadingPriceId !== plan.priceIdAnnual && <ChevronRight size={18} />}
+                    </div>
+                    <span className="text-[10px] uppercase tracking-widest opacity-80">最划算 - 节省 ¥60+</span>
+                  </button>
+                )}
+
+                {!plan.priceId && !plan.priceIdAnnual && (
+                  <Link 
+                    href={plan.href || '/'}
+                    className={`w-full py-4 rounded-2xl flex items-center justify-center gap-2 font-black italic transition-all active:scale-95 ${
+                      plan.highlight 
+                      ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-500 hover:shadow-indigo-600/40' 
+                      : 'bg-white/5 border border-white/10 hover:bg-white/10 text-white'
+                    }`}
+                  >
+                    {plan.cta}
+                    <ChevronRight size={18} />
+                  </Link>
+                )}
+              </div>
             </motion.div>
           ))}
         </div>
