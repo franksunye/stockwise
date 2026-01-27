@@ -144,41 +144,89 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
   const handleEnableNotifications = async () => {
     console.log('🔔 [Push] handleEnableNotifications called');
     setIsSubscribing(true);
+    setRedeemMsg(null);
+
     try {
-      // Use environment variable directly (original working approach)
+      // 0. 先准备身份
+      let currentUserId = userId;
+      if (!currentUserId) {
+        const user = await getCurrentUser();
+        currentUserId = user.userId;
+        setUserId(currentUserId);
+      }
+      console.log('🔔 [Push] User ID:', currentUserId);
+
       const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
       console.log('🔔 [Push] VAPID Key:', vapidKey ? `${vapidKey.substring(0, 20)}...` : 'MISSING');
       
       if (!vapidKey) {
-        console.error('🔔 [Push] ❌ VAPID Key not configured');
         setRedeemMsg({ type: 'error', text: 'VAPID Key 未配置' });
         setIsSubscribing(false);
         return;
       }
+
+      // 1. 注册/更新 Service Worker
+      console.log('🔔 [Push] Registering service worker...');
+      const { registerServiceWorker } = await import('@/lib/notifications');
+      const registration = await registerServiceWorker();
+      console.log('🔔 [Push] SW registration:', !!registration);
       
-      console.log('🔔 [Push] Calling subscribeUserToPush...');
-      const subscription = await subscribeUserToPush(vapidKey);
-      console.log('🔔 [Push] Subscription result:', subscription ? 'SUCCESS' : 'NULL');
-      
-      if (subscription) {
-        console.log('🔔 [Push] Saving subscription to backend...');
-        const res = await fetch('/api/notifications/subscribe', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId, subscription }),
-        });
-        console.log('🔔 [Push] Backend response status:', res.status);
-        
-        setIsSubscribed(true);
-        setRedeemMsg({ type: 'success', text: '推送通知已开启' });
-        setTimeout(() => setRedeemMsg(null), 3000);
-      } else {
-        console.warn('🔔 [Push] ⚠️ No subscription returned');
-        setRedeemMsg({ type: 'error', text: '订阅失败，请重试' });
+      if (!registration) {
+        setRedeemMsg({ type: 'error', text: 'Service Worker 注册失败' });
+        setIsSubscribing(false);
+        return;
       }
-    } catch (error) {
-      console.error('🔔 [Push] ❌ Failed to enable push:', error);
-      setRedeemMsg({ type: 'error', text: '开启失败，请检查浏览器权限' });
+
+      // 2. 请求通知权限
+      let perm = Notification.permission;
+      console.log('🔔 [Push] Current permission:', perm);
+      
+      if (perm !== 'granted') {
+        perm = await Notification.requestPermission();
+        setPushPermission(perm);
+        console.log('🔔 [Push] Permission after request:', perm);
+      }
+
+      if (perm === 'granted') {
+        // 3. 获取/创建订阅
+        console.log('🔔 [Push] Getting SW ready...');
+        const swRegistration = await navigator.serviceWorker.ready;
+        let subscription = await swRegistration.pushManager.getSubscription();
+        console.log('🔔 [Push] Existing subscription:', !!subscription);
+
+        if (!subscription) {
+          console.log('🔔 [Push] Creating new subscription...');
+          subscription = await subscribeUserToPush(vapidKey);
+          console.log('🔔 [Push] New subscription created:', !!subscription);
+        }
+
+        if (subscription) {
+          // 4. 保存到后端
+          console.log('🔔 [Push] Saving to backend...');
+          const response = await fetch('/api/notifications/subscribe', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: currentUserId, subscription: subscription.toJSON() })
+          });
+          console.log('🔔 [Push] Backend response:', response.status);
+
+          if (response.ok) {
+            setIsSubscribed(true);
+            setRedeemMsg({ type: 'success', text: '通知开启成功' });
+            setTimeout(() => setRedeemMsg(null), 3000);
+          } else {
+            const data = await response.json().catch(() => ({}));
+            setRedeemMsg({ type: 'error', text: '保存失败: ' + (data.error || response.status) });
+          }
+        } else {
+          setRedeemMsg({ type: 'error', text: '无法获取推送权限' });
+        }
+      } else {
+        setRedeemMsg({ type: 'error', text: '请允许通知权限' });
+      }
+    } catch (e) {
+      console.error('🔔 [Push] Error:', e);
+      setRedeemMsg({ type: 'error', text: '开启失败，请重试' });
     } finally {
       setIsSubscribing(false);
     }
