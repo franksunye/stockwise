@@ -152,7 +152,7 @@ async function triggerGithubSync(symbol: string) {
     const pat = process.env.GITHUB_PAT;
     const owner = 'franksunye';
     const repo = 'stockwise';
-    const workflowId = 'on-demand-sync.yml';
+    const workflowId = 'data_sync_single.yml';
 
     if (!pat) {
         console.warn('⚠️ GITHUB_PAT not found in environment, skipping on-demand sync');
