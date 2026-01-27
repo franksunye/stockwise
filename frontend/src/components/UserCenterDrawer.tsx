@@ -183,7 +183,6 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
       
       if (perm !== 'granted') {
         perm = await Notification.requestPermission();
-        setPushPermission(perm);
         console.log('🔔 [Push] Permission after request:', perm);
       }
 
