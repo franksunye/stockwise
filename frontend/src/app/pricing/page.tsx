@@ -294,6 +294,7 @@ function PricingContent() {
                 ))}
               </div>
 
+              <div className="flex flex-col gap-3">
                 {/* Show Manage Subscription if already Pro and looking at Pro card */}
                 {userTier === 'pro' && plan.enName === 'Pro' && (
                   <button 
