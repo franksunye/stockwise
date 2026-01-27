@@ -75,9 +75,6 @@ export async function POST(request: Request) {
                 address: 'auto',
                 name: 'auto',
             };
-        } else {
-            // New user -> Create new customer
-            sessionConfig.customer_creation = 'always';
         }
 
         // Create Stripe Checkout Session
