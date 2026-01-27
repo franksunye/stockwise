@@ -101,9 +101,9 @@ function PricingContent() {
       } else {
         throw new Error(data.error || '无法创建支付会话');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Checkout error:', error);
-      alert('支付系统暂时不可用，请稍后再试: ' + (error.message || 'Unknown error'));
+      alert('支付 system 暂时不可用，请稍后再试: ' + ((error as Error).message || 'Unknown error'));
     } finally {
       setLoadingPriceId(null);
     }

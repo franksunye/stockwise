@@ -4,7 +4,7 @@ import Stripe from 'stripe';
 import { getDbClient } from '@/lib/db';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-    apiVersion: '2025-01-27.acacia' as any,
+    apiVersion: '2025-12-15.clover',
 });
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -20,9 +20,9 @@ export async function POST(req: Request) {
             throw new Error('Missing stripe-signature or webhook secret');
         }
         event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
-    } catch (err: any) {
-        console.error(`❌ Webhook signature verification failed: ${err.message}`);
-        return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 });
+    } catch (err: unknown) {
+        console.error(`❌ Webhook signature verification failed: ${(err as Error).message}`);
+        return NextResponse.json({ error: `Webhook Error: ${(err as Error).message}` }, { status: 400 });
     }
 
     // Handle the event
@@ -50,19 +50,21 @@ export async function POST(req: Request) {
                 if (subscriptionId) {
                     try {
                         const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-                        expiryDate = new Date((subscription as any).current_period_end * 1000);
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        const subData = subscription as any;
+                        if (subData.current_period_end) {
+                            expiryDate = new Date(subData.current_period_end * 1000);
+                        }
 
                         // Fallback for customer ID if not in session
-                        if (!finalCustomerId && (subscription as any).customer) {
-                            finalCustomerId = (subscription as any).customer as string;
+                        if (!finalCustomerId && subData.customer) {
+                            finalCustomerId = subData.customer as string;
                         }
 
                         console.log(`📅 Subscription info: End=${expiryDate.toISOString()}, Customer=${finalCustomerId}`);
-                    } catch (err: any) {
-                        console.error('❌ Error retrieving subscription details:', err);
+                    } catch (err: unknown) {
+                        console.error('❌ Error retrieving subscription details:', (err as Error).message);
                     }
-                } else {
-                    // No subscriptionId in session
                 }
 
                 const expiryStr = expiryDate.toISOString();
@@ -76,12 +78,14 @@ export async function POST(req: Request) {
 
                 try {
                     if (isCloud) {
-                        await db.execute({
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        await (db as any).execute({
                             sql: "UPDATE users SET subscription_tier = 'pro', subscription_expires_at = ?, stripe_customer_id = ?, email = ? WHERE user_id = ?",
                             args: [expiryStr, finalCustomerId, emailToUpdate, userId]
                         });
                     } else {
-                        const stmt = db.prepare("UPDATE users SET subscription_tier = 'pro', subscription_expires_at = ?, stripe_customer_id = ?, email = ? WHERE user_id = ?");
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        const stmt = (db as any).prepare("UPDATE users SET subscription_tier = 'pro', subscription_expires_at = ?, stripe_customer_id = ?, email = ? WHERE user_id = ?");
                         const result = stmt.run(expiryStr, finalCustomerId, emailToUpdate, userId);
                         console.log('✅ SQLite update successful. Changes:', result.changes);
                     }
@@ -96,6 +100,7 @@ export async function POST(req: Request) {
             case 'invoice.paid': {
                 const invoice = event.data.object as Stripe.Invoice;
                 const customerId = invoice.customer as string;
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const subscriptionId = (invoice as any).subscription as string;
                 const customerEmail = invoice.customer_email;
 
@@ -104,19 +109,23 @@ export async function POST(req: Request) {
                 if (subscriptionId) {
                     try {
                         const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-                        const expiryDate = new Date((subscription as any).current_period_end * 1000);
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        const subData = subscription as any;
+                        const expiryDate = new Date(subData.current_period_end * 1000);
                         const expiryStr = expiryDate.toISOString();
 
                         const db = getDbClient();
                         const isCloud = 'execute' in db;
 
                         if (isCloud) {
-                            await db.execute({
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                            await (db as any).execute({
                                 sql: "UPDATE users SET subscription_tier = 'pro', subscription_expires_at = ?, stripe_customer_id = ? WHERE stripe_customer_id = ?",
                                 args: [expiryStr, customerId, customerId]
                             });
                         } else {
-                            db.prepare("UPDATE users SET subscription_tier = 'pro', subscription_expires_at = ?, stripe_customer_id = ? WHERE stripe_customer_id = ?")
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                            (db as any).prepare("UPDATE users SET subscription_tier = 'pro', subscription_expires_at = ?, stripe_customer_id = ? WHERE stripe_customer_id = ?")
                                 .run(expiryStr, customerId, customerId);
                         }
                         if ('close' in db && typeof db.close === 'function') db.close();
@@ -138,12 +147,14 @@ export async function POST(req: Request) {
                 const isCloud = 'execute' in db;
 
                 if (isCloud) {
-                    await db.execute({
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    await (db as any).execute({
                         sql: "UPDATE users SET subscription_tier = 'free', subscription_expires_at = NULL WHERE stripe_customer_id = ?",
                         args: [customerId]
                     });
                 } else {
-                    db.prepare("UPDATE users SET subscription_tier = 'free', subscription_expires_at = NULL WHERE stripe_customer_id = ?")
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    (db as any).prepare("UPDATE users SET subscription_tier = 'free', subscription_expires_at = NULL WHERE stripe_customer_id = ?")
                         .run(customerId);
                 }
 
@@ -151,13 +162,12 @@ export async function POST(req: Request) {
                 break;
             }
 
-            // Add more cases like invoice.payment_failed as needed
             default:
                 console.log(`ℹ️ Unhandled event type ${event.type}`);
         }
 
         return NextResponse.json({ received: true });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('❌ Webhook handler error:', error);
         return NextResponse.json({ error: 'Webhook handler failed' }, { status: 500 });
     }
