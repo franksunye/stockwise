@@ -47,6 +47,7 @@ export const viewport: Viewport = {
 import { ReferralTracker } from "@/components/ReferralTracker";
 import { PerformanceOptimizer } from "@/components/PerformanceOptimizer";
 import { BadgeManager } from "@/components/BadgeManager";
+import { Analytics } from "@vercel/analytics/react";
 
 export default function RootLayout({
   children,
@@ -60,6 +61,7 @@ export default function RootLayout({
         <ReferralTracker />
         <BadgeManager />
         {children}
+        <Analytics />
       </body>
     </html>
   );
