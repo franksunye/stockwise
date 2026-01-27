@@ -70,15 +70,56 @@ const pricingPlans = [
 function PricingContent() {
   const [loadingPriceId, setLoadingPriceId] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [userTier, setUserTier] = useState<string>('free');
+  const [loadingPortal, setLoadingPortal] = useState(false);
   const searchParams = useSearchParams();
 
   useEffect(() => {
     if (searchParams.get('session_id')) {
       setShowSuccess(true);
-      // Optional: Clear URL params without refresh
       window.history.replaceState({}, '', window.location.pathname);
     }
+    
+    // Check current user status
+    const userId = getCurrentUserId();
+    if (userId) {
+      fetch('/api/user/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.tier) setUserTier(data.tier);
+      })
+      .catch(err => console.error('Failed to fetch user status', err));
+    }
   }, [searchParams]);
+
+  const handleManageSubscription = async () => {
+    const userId = getCurrentUserId();
+    if (!userId) return;
+    
+    setLoadingPortal(true);
+    try {
+      const response = await fetch('/api/billing/portal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId }),
+      });
+      const data = await response.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(data.error || '无法打开订阅管理门户');
+      }
+    } catch (err) {
+      console.error('Portal error:', err);
+      alert('系统繁忙，请稍后再试');
+    } finally {
+      setLoadingPortal(false);
+    }
+  };
 
   const handleUpgrade = async (priceId: string) => {
     const userId = getCurrentUserId();
@@ -254,7 +295,7 @@ function PricingContent() {
               </div>
 
               <div className="flex flex-col gap-3">
-                {plan.priceId && (
+                {plan.priceId && (userTier !== 'pro' || plan.enName !== 'Pro') && (
                   <button 
                     onClick={() => handleUpgrade(plan.priceId!)}
                     disabled={!!loadingPriceId}
@@ -269,7 +310,18 @@ function PricingContent() {
                   </button>
                 )}
 
-                {plan.priceIdAnnual && (
+                {/* Show Manage Subscription if already Pro and looking at Pro card */}
+                {userTier === 'pro' && plan.enName === 'Pro' && (
+                  <button 
+                    onClick={handleManageSubscription}
+                    disabled={loadingPortal}
+                    className="w-full py-4 rounded-2xl flex items-center justify-center gap-2 font-black italic bg-white/10 border border-white/20 hover:bg-white/20 text-white transition-all active:scale-95 mt-[-10px] mb-2"
+                  >
+                    {loadingPortal ? '正在跳转...' : '管理我的订阅 / 取消'}
+                  </button>
+                )}
+
+                {plan.priceIdAnnual && userTier !== 'pro' && (
                   <button 
                     onClick={() => handleUpgrade(plan.priceIdAnnual!)}
                     disabled={!!loadingPriceId}
