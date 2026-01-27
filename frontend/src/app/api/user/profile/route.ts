@@ -94,6 +94,25 @@ export async function POST(request: Request) {
             };
         } else {
             // ==========================================
+            // 已存在用户：更新最后活跃时间 (Last Active)
+            // ==========================================
+            try {
+                const now = new Date().toISOString();
+                if (isCloud) {
+                    // Fire and forget update (awaiting only to ensure db instance is valid, but ignoring result)
+                    await db.execute({
+                        sql: "UPDATE users SET last_active_at = ? WHERE user_id = ?",
+                        args: [now, userId]
+                    });
+                } else {
+                    db.prepare("UPDATE users SET last_active_at = ? WHERE user_id = ?").run(now, userId);
+                }
+            } catch (activeErr) {
+                // Ignore errors here to not block the main flow
+                console.error('Failed to update last_active_at:', activeErr);
+            }
+
+            // ==========================================
             // 处理已存在用户的邀请奖励
             // ==========================================
             const shouldProcessExistingUserReferral =
