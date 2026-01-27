@@ -1,9 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ShieldCheck, AlertTriangle, Zap, CheckCircle2, XCircle, RotateCw } from 'lucide-react';
+import { ShieldCheck, AlertTriangle, Zap, RotateCw } from 'lucide-react';
 import { AIPrediction } from '@/lib/types';
-import { shouldEnableHighPerformance } from '@/lib/device-utils';
 
 interface AICouncilProps {
   symbol: string;
@@ -33,7 +32,8 @@ export function AICouncil({ symbol, targetDate }: AICouncilProps) {
         const relevantPreds = allPreds.filter(p => p.target_date === targetDate);
         
         setPredictions(relevantPreds);
-      } catch (err) {
+      } catch (err: unknown) {
+        console.error('Fetch council data error:', err);
         setError('无法连接 AI 智囊团');
       } finally {
         setLoading(false);
@@ -70,14 +70,13 @@ export function AICouncil({ symbol, targetDate }: AICouncilProps) {
   const shortCount = signals.filter(s => s === 'Short').length;
   const sideCount = signals.filter(s => s === 'Side').length;
   
-  let consensus = 'Divergence';
   let consensusColor = 'text-slate-400';
   let consensusText = '分歧';
   
   const total = predictions.length;
-  if (longCount === total) { consensus = 'Consensus Buy'; consensusColor = 'text-emerald-400'; consensusText = '做多共振'; }
-  else if (shortCount === total) { consensus = 'Consensus Sell'; consensusColor = 'text-rose-400'; consensusText = '做空共振'; }
-  else if (sideCount === total) { consensus = 'Consensus Wait'; consensusColor = 'text-amber-400'; consensusText = '观望共振'; }
+  if (longCount === total) { consensusColor = 'text-emerald-400'; consensusText = '做多共振'; }
+  else if (shortCount === total) { consensusColor = 'text-rose-400'; consensusText = '做空共振'; }
+  else if (sideCount === total) { consensusColor = 'text-amber-400'; consensusText = '观望共振'; }
   else if (longCount > shortCount && longCount > sideCount) { consensusText = '倾向做多'; consensusColor = 'text-emerald-400/80'; }
   else if (shortCount > longCount && shortCount > sideCount) { consensusText = '倾向做空'; consensusColor = 'text-rose-400/80'; }
 

@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
 import { StatusBadge } from './StatusBadge';
 import { format, isPast, parse } from 'date-fns';
+import Image from 'next/image';
+import { useState } from 'react';
 
 export interface Task {
   name: string;
@@ -91,11 +92,13 @@ function TimelineItem({ task, currentDate }: { task: Task, currentDate: Date }) 
            {/* Left: Agent & Content */}
            <div className="flex gap-4 items-center">
                {/* Avatar */}
-               <div className="flex-shrink-0 w-10 h-10 rounded-lg overflow-hidden bg-white/5 ring-1 ring-white/10">
-                    <img 
+               <div className="flex-shrink-0 w-10 h-10 rounded-lg overflow-hidden bg-white/5 ring-1 ring-white/10 relative">
+                    <Image 
                         src={avatarUrl} 
                         alt={task.agent.persona}
-                        className="w-full h-full object-cover"
+                        fill
+                        sizes="40px"
+                        className="object-cover"
                     />
                </div>
 

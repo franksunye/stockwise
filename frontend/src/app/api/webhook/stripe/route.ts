@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { getDbClient } from '@/lib/db';
+import Image from 'next/image';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
     apiVersion: '2025-12-15.clover',
@@ -51,7 +53,6 @@ export async function POST(req: Request) {
                     try {
                         console.log(`🔍 Fetching subscription details for: ${subscriptionId}`);
                         const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         const subData = subscription as any;
                         if (subData.current_period_end) {
                             expiryDate = new Date(subData.current_period_end * 1000);
@@ -111,7 +112,6 @@ export async function POST(req: Request) {
                 if (subscriptionId) {
                     try {
                         const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         const subData = subscription as any;
                         const expiryDate = new Date(subData.current_period_end * 1000);
                         const expiryStr = expiryDate.toISOString();
