@@ -142,30 +142,42 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
   };
 
   const handleEnableNotifications = async () => {
+    console.log('🔔 [Push] handleEnableNotifications called');
     setIsSubscribing(true);
     try {
       // Use environment variable directly (original working approach)
       const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+      console.log('🔔 [Push] VAPID Key:', vapidKey ? `${vapidKey.substring(0, 20)}...` : 'MISSING');
+      
       if (!vapidKey) {
+        console.error('🔔 [Push] ❌ VAPID Key not configured');
         setRedeemMsg({ type: 'error', text: 'VAPID Key 未配置' });
         setIsSubscribing(false);
         return;
       }
       
+      console.log('🔔 [Push] Calling subscribeUserToPush...');
       const subscription = await subscribeUserToPush(vapidKey);
+      console.log('🔔 [Push] Subscription result:', subscription ? 'SUCCESS' : 'NULL');
       
       if (subscription) {
-        await fetch('/api/notifications/subscribe', {
+        console.log('🔔 [Push] Saving subscription to backend...');
+        const res = await fetch('/api/notifications/subscribe', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId, subscription }),
         });
+        console.log('🔔 [Push] Backend response status:', res.status);
+        
         setIsSubscribed(true);
         setRedeemMsg({ type: 'success', text: '推送通知已开启' });
         setTimeout(() => setRedeemMsg(null), 3000);
+      } else {
+        console.warn('🔔 [Push] ⚠️ No subscription returned');
+        setRedeemMsg({ type: 'error', text: '订阅失败，请重试' });
       }
     } catch (error) {
-      console.error('Failed to enable push:', error);
+      console.error('🔔 [Push] ❌ Failed to enable push:', error);
       setRedeemMsg({ type: 'error', text: '开启失败，请检查浏览器权限' });
     } finally {
       setIsSubscribing(false);
