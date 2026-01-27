@@ -22,7 +22,7 @@ export async function GET(request: Request) {
         if ('execute' in client) {
             // Turso
             const rs = await client.execute({
-                sql: `SELECT uw.symbol, gp.name 
+                sql: `SELECT uw.symbol, gp.name, uw.added_at
                       FROM user_watchlist uw
                       LEFT JOIN global_stock_pool gp ON uw.symbol = gp.symbol
                       WHERE uw.user_id = ?
@@ -34,7 +34,7 @@ export async function GET(request: Request) {
             // SQLite
             stocks = client
                 .prepare(
-                    `SELECT uw.symbol, gp.name 
+                    `SELECT uw.symbol, gp.name, uw.added_at
                      FROM user_watchlist uw
                      LEFT JOIN global_stock_pool gp ON uw.symbol = gp.symbol
                      WHERE uw.user_id = ?
