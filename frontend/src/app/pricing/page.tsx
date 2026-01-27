@@ -1,9 +1,12 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { Check, ChevronRight, Zap, Crown, ShieldCheck, Star } from 'lucide-react';
+import { useState, useEffect, Suspense } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Check, ChevronRight, Zap, Crown, ShieldCheck, Star, PartyPopper, X } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
+import { getCurrentUserId } from '@/lib/user';
 
 const pricingPlans = [
   {
@@ -38,7 +41,7 @@ const pricingPlans = [
       '⭐ Pro 专属身份勋章',
     ],
     cta: '升级为 PRO',
-    href: '/dashboard?upgrade=true',
+    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_MONTHLY || 'price_1Su1zqS3fDFObThpZbYXr2GG',
     highlight: true,
     icon: Crown,
     color: 'indigo',
@@ -64,7 +67,48 @@ const pricingPlans = [
   },
 ];
 
-export default function PricingPage() {
+function PricingContent() {
+  const [loadingPriceId, setLoadingPriceId] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get('session_id')) {
+      setShowSuccess(true);
+      // Optional: Clear URL params without refresh
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, [searchParams]);
+
+  const handleUpgrade = async (priceId: string) => {
+    const userId = getCurrentUserId();
+    if (!userId) {
+      alert('请先登录或初始化您的账户');
+      return;
+    }
+
+    setLoadingPriceId(priceId);
+    try {
+      const response = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ priceId, userId }),
+      });
+
+      const data = await response.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error(data.error || '无法创建支付会话');
+      }
+    } catch (error: any) {
+      console.error('Checkout error:', error);
+      alert('支付系统暂时不可用，请稍后再试: ' + (error.message || 'Unknown error'));
+    } finally {
+      setLoadingPriceId(null);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#050508] text-white overflow-x-hidden font-sans">
       {/* 动态背景 */}
@@ -86,7 +130,7 @@ export default function PricingPage() {
         <Link href="/" className="flex items-center gap-2">
           <Image 
             src="/logo.png" 
-              alt="StockWise AI Logo" 
+            alt="StockWise AI Logo" 
             width={40} 
             height={40} 
             className="rounded-xl"
@@ -99,6 +143,44 @@ export default function PricingPage() {
           <Link href="/dashboard" className="px-5 py-2.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-white">进入应用</Link>
         </div>
       </nav>
+
+      {/* Success Modal */}
+      <AnimatePresence>
+        {showSuccess && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center px-4 bg-black/80 backdrop-blur-md"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              className="glass-card max-w-md w-full p-8 text-center relative border-indigo-500/50 shadow-2xl shadow-indigo-500/20"
+            >
+              <button 
+                onClick={() => setShowSuccess(false)}
+                className="absolute top-4 right-4 text-slate-500 hover:text-white transition-colors"
+              >
+                <X size={20} />
+              </button>
+              <div className="w-20 h-20 bg-indigo-500/20 text-indigo-400 rounded-full flex items-center justify-center mx-auto mb-6">
+                <PartyPopper size={40} />
+              </div>
+              <h2 className="text-3xl font-black italic mb-4">欢迎加入 PRO 会员!</h2>
+              <p className="text-slate-400 font-medium mb-8 leading-relaxed">
+                您的权限已自动激活。现在您可以享受深度复盘、更多监控额度以及实时战报推送。
+              </p>
+              <Link 
+                href="/dashboard"
+                className="block w-full py-4 rounded-2xl bg-indigo-600 text-white font-black italic hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-600/20"
+              >
+                进入仪表盘
+              </Link>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <main className="relative z-10 max-w-7xl mx-auto px-8 pt-20 pb-40">
         <div className="text-center space-y-4 mb-20">
@@ -171,17 +253,32 @@ export default function PricingPage() {
                 ))}
               </div>
 
-              <Link 
-                href={plan.href}
-                className={`w-full py-4 rounded-2xl flex items-center justify-center gap-2 font-black italic transition-all active:scale-95 ${
-                  plan.highlight 
-                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-500 hover:shadow-indigo-600/40' 
-                  : 'bg-white/5 border border-white/10 hover:bg-white/10 text-white'
-                }`}
-              >
-                {plan.cta}
-                <ChevronRight size={18} />
-              </Link>
+              {plan.priceId ? (
+                <button 
+                  onClick={() => handleUpgrade(plan.priceId!)}
+                  disabled={loadingPriceId === plan.priceId}
+                  className={`w-full py-4 rounded-2xl flex items-center justify-center gap-2 font-black italic transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${
+                    plan.highlight 
+                    ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-500 hover:shadow-indigo-600/40' 
+                    : 'bg-white/5 border border-white/10 hover:bg-white/10 text-white'
+                  }`}
+                >
+                  {loadingPriceId === plan.priceId ? '正在前往收银台...' : plan.cta}
+                  {loadingPriceId !== plan.priceId && <ChevronRight size={18} />}
+                </button>
+              ) : (
+                <Link 
+                  href={plan.href || '/'}
+                  className={`w-full py-4 rounded-2xl flex items-center justify-center gap-2 font-black italic transition-all active:scale-95 ${
+                    plan.highlight 
+                    ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-500 hover:shadow-indigo-600/40' 
+                    : 'bg-white/5 border border-white/10 hover:bg-white/10 text-white'
+                  }`}
+                >
+                  {plan.cta}
+                  <ChevronRight size={18} />
+                </Link>
+              )}
             </motion.div>
           ))}
         </div>
@@ -225,7 +322,7 @@ export default function PricingPage() {
           <Link href="/" className="flex items-center gap-2">
             <Image 
               src="/logo.png" 
-                alt="StockWise AI Logo" 
+              alt="StockWise AI Logo" 
               width={32} 
               height={32} 
               className="rounded-lg"
@@ -247,5 +344,13 @@ export default function PricingPage() {
         .glass-card { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 40px; }
       `}</style>
     </div>
+  );
+}
+
+export default function PricingPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#050508] flex items-center justify-center text-indigo-500">Loading...</div>}>
+      <PricingContent />
+    </Suspense>
   );
 }
