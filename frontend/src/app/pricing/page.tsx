@@ -294,8 +294,19 @@ function PricingContent() {
                 ))}
               </div>
 
-              <div className="flex flex-col gap-3">
-                {plan.priceId && (userTier !== 'pro' || plan.enName !== 'Pro') && (
+                {/* Show Manage Subscription if already Pro and looking at Pro card */}
+                {userTier === 'pro' && plan.enName === 'Pro' && (
+                  <button 
+                    onClick={handleManageSubscription}
+                    disabled={loadingPortal}
+                    className="w-full py-4 rounded-2xl flex items-center justify-center gap-2 font-black italic bg-white/10 border border-white/20 hover:bg-white/20 text-white transition-all active:scale-95 mt-[-10px] mb-4"
+                  >
+                    {loadingPortal ? '正在跳转...' : '管理我的订阅 / 取消'}
+                  </button>
+                )}
+
+                {/* Monthly Button - Always show, just change text if Pro */}
+                {plan.priceId && (
                   <button 
                     onClick={() => handleUpgrade(plan.priceId!)}
                     disabled={!!loadingPriceId}
@@ -305,33 +316,34 @@ function PricingContent() {
                       : 'bg-white/5 border border-white/10 hover:bg-white/10 text-white'
                     }`}
                   >
-                    {loadingPriceId === plan.priceId ? '正在前往收银台...' : (plan.priceIdAnnual ? '按月支付' : plan.cta)}
+                    {loadingPriceId === plan.priceId 
+                      ? '正在前往收银台...' 
+                      : (plan.priceIdAnnual 
+                          ? (userTier === 'pro' && plan.enName === 'Pro' ? '按月续费' : '按月支付') 
+                          : plan.cta
+                        )
+                    }
                     {loadingPriceId !== plan.priceId && <ChevronRight size={18} />}
                   </button>
                 )}
 
-                {/* Show Manage Subscription if already Pro and looking at Pro card */}
-                {userTier === 'pro' && plan.enName === 'Pro' && (
-                  <button 
-                    onClick={handleManageSubscription}
-                    disabled={loadingPortal}
-                    className="w-full py-4 rounded-2xl flex items-center justify-center gap-2 font-black italic bg-white/10 border border-white/20 hover:bg-white/20 text-white transition-all active:scale-95 mt-[-10px] mb-2"
-                  >
-                    {loadingPortal ? '正在跳转...' : '管理我的订阅 / 取消'}
-                  </button>
-                )}
-
-                {plan.priceIdAnnual && userTier !== 'pro' && (
+                {/* Annual Button - Always show */}
+                {plan.priceIdAnnual && (
                   <button 
                     onClick={() => handleUpgrade(plan.priceIdAnnual!)}
                     disabled={!!loadingPriceId}
-                    className="w-full py-4 rounded-2xl flex flex-col items-center justify-center gap-0.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-black italic transition-all active:scale-95 shadow-lg shadow-orange-500/20 hover:from-amber-400 hover:to-orange-400 disabled:opacity-50"
+                    className="w-full py-4 rounded-2xl flex flex-col items-center justify-center gap-0.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-black italic transition-all active:scale-95 shadow-lg shadow-orange-500/20 hover:from-amber-400 hover:to-orange-400 disabled:opacity-50 mt-3"
                   >
                     <div className="flex items-center gap-2">
-                       {loadingPriceId === plan.priceIdAnnual ? '正在前往收银台...' : '按年支付 (¥299)'}
+                       {loadingPriceId === plan.priceIdAnnual 
+                         ? '正在前往收银台...' 
+                         : (userTier === 'pro' && plan.enName === 'Pro' ? '按年续费 (¥299)' : '按年支付 (¥299)')
+                       }
                        {loadingPriceId !== plan.priceIdAnnual && <ChevronRight size={18} />}
                     </div>
-                    <span className="text-[10px] uppercase tracking-widest opacity-80">最划算 - 节省 ¥60+</span>
+                    <span className="text-[10px] uppercase tracking-widest opacity-80">
+                      {userTier === 'pro' && plan.enName === 'Pro' ? '延长会员有效期' : '最划算 - 节省 ¥60+'}
+                    </span>
                   </button>
                 )}
 
