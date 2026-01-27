@@ -44,20 +44,51 @@ export async function registerServiceWorker() {
  * Subscribes the user to push notifications
  */
 export async function subscribeUserToPush(vapidPublicKey: string) {
-    if (!isPushSupported()) return null;
+    console.log('🔔 [subscribeUserToPush] Starting...');
 
+    if (!isPushSupported()) {
+        console.warn('🔔 [subscribeUserToPush] Push not supported');
+        return null;
+    }
+
+    console.log('🔔 [subscribeUserToPush] Waiting for service worker ready...');
     const registration = await navigator.serviceWorker.ready;
-    if (!registration) return null;
+    console.log('🔔 [subscribeUserToPush] Service worker ready:', !!registration);
+
+    if (!registration) {
+        console.warn('🔔 [subscribeUserToPush] No registration');
+        return null;
+    }
+
+    // Check current permission
+    const permission = Notification.permission;
+    console.log('🔔 [subscribeUserToPush] Current permission:', permission);
+
+    // If permission is default, request it
+    if (permission === 'default') {
+        console.log('🔔 [subscribeUserToPush] Requesting permission...');
+        const newPermission = await Notification.requestPermission();
+        console.log('🔔 [subscribeUserToPush] Permission result:', newPermission);
+        if (newPermission !== 'granted') {
+            console.warn('🔔 [subscribeUserToPush] Permission denied');
+            throw new Error('通知权限被拒绝');
+        }
+    } else if (permission === 'denied') {
+        console.warn('🔔 [subscribeUserToPush] Permission was previously denied');
+        throw new Error('通知权限已被禁用，请在浏览器设置中开启');
+    }
 
     try {
+        console.log('🔔 [subscribeUserToPush] Calling pushManager.subscribe...');
         const subscription = await registration.pushManager.subscribe({
             userVisibleOnly: true,
             applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
         });
+        console.log('🔔 [subscribeUserToPush] Subscription success:', !!subscription);
 
         return subscription;
     } catch (error) {
-        console.error('Failed to subscribe the user: ', error);
+        console.error('🔔 [subscribeUserToPush] Failed to subscribe:', error);
         throw error; // Propagate error to caller for UI display
     }
 }
