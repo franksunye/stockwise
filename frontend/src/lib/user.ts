@@ -161,7 +161,13 @@ export async function restoreUserIdentity(targetUserId: string): Promise<{ succe
     }
 
     const data = await response.json();
-    if (!data.subscription_tier) {
+
+    // 如果是新创建的用户，说明该 ID 之前不存在 -> 恢复失败
+    if (data.isNewUser) {
+      return { success: false, message: '用户 ID 不存在' };
+    }
+
+    if (!data.tier) {
       return { success: false, message: '无法验证用户身份' };
     }
 

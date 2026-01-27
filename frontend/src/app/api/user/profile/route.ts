@@ -89,7 +89,8 @@ export async function POST(request: Request) {
                 user_id: userId,
                 subscription_tier: initialTier,
                 subscription_expires_at: expiresAt,
-                referred_by: referredBy || null
+                referred_by: referredBy || null,
+                is_new_user_flag: true
             };
         } else {
             // ==========================================
@@ -215,7 +216,8 @@ export async function POST(request: Request) {
             totalEarned: user.total_earned || 0,
 
             commissionRate: user.custom_commission_rate ?? MEMBERSHIP_CONFIG.referral.defaultCommissionRate,
-            hasStripeCustomer: !!user.stripe_customer_id
+            hasStripeCustomer: !!user.stripe_customer_id,
+            isNewUser: !!user.is_new_user_flag // We need to set this flag during creation
         });
 
     } catch (error: unknown) {
