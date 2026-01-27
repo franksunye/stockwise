@@ -26,7 +26,11 @@ export async function POST(request: Request) {
             client_reference_id: userId,
             success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?checkout=success`,
             cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing?checkout=cancelled`,
-            // For future: metadata can hold more info
+            subscription_data: {
+                metadata: {
+                    userId,
+                },
+            },
             metadata: {
                 userId,
             },

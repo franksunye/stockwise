@@ -100,7 +100,6 @@ export async function POST(req: Request) {
             case 'invoice.paid': {
                 const invoice = event.data.object as Stripe.Invoice;
                 const customerId = invoice.customer as string;
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const subscriptionId = (invoice as any).subscription as string;
                 const customerEmail = invoice.customer_email;
 
@@ -113,20 +112,36 @@ export async function POST(req: Request) {
                         const subData = subscription as any;
                         const expiryDate = new Date(subData.current_period_end * 1000);
                         const expiryStr = expiryDate.toISOString();
+                        const userIdFromMetadata = subData.metadata?.userId;
 
                         const db = getDbClient();
                         const isCloud = 'execute' in db;
 
+                        // Self-healing: if we can't find by customerId, try finding by userId from metadata
                         if (isCloud) {
-                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                            await (db as any).execute({
+                            // Try updating by customerId first
+                            const result = await (db as any).execute({
                                 sql: "UPDATE users SET subscription_tier = 'pro', subscription_expires_at = ?, stripe_customer_id = ? WHERE stripe_customer_id = ?",
                                 args: [expiryStr, customerId, customerId]
                             });
+
+                            // If no row affected and we have metadata userId, repair the record
+                            if (result.rowsAffected === 0 && userIdFromMetadata) {
+                                console.log(`🔧 Self-healing: Repairing user ${userIdFromMetadata} with customerId ${customerId}`);
+                                await (db as any).execute({
+                                    sql: "UPDATE users SET stripe_customer_id = ?, subscription_expires_at = ?, subscription_tier = 'pro' WHERE user_id = ?",
+                                    args: [customerId, expiryStr, userIdFromMetadata]
+                                });
+                            }
                         } else {
-                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                            (db as any).prepare("UPDATE users SET subscription_tier = 'pro', subscription_expires_at = ?, stripe_customer_id = ? WHERE stripe_customer_id = ?")
-                                .run(expiryStr, customerId, customerId);
+                            const stmt = (db as any).prepare("UPDATE users SET subscription_tier = 'pro', subscription_expires_at = ?, stripe_customer_id = ? WHERE stripe_customer_id = ?");
+                            const result = stmt.run(expiryStr, customerId, customerId);
+
+                            if (result.changes === 0 && userIdFromMetadata) {
+                                console.log(`🔧 Self-healing (Local): Repairing user ${userIdFromMetadata} with customerId ${customerId}`);
+                                (db as any).prepare("UPDATE users SET stripe_customer_id = ?, subscription_expires_at = ?, subscription_tier = 'pro' WHERE user_id = ?")
+                                    .run(customerId, expiryStr, userIdFromMetadata);
+                            }
                         }
                         if ('close' in db && typeof db.close === 'function') db.close();
                         console.log(`📅 Updated expiry for customer ${customerId} to ${expiryStr}`);
@@ -140,6 +155,7 @@ export async function POST(req: Request) {
             case 'customer.subscription.deleted': {
                 const subscription = event.data.object as Stripe.Subscription;
                 const customerId = subscription.customer as string;
+                const userIdFromMetadata = subscription.metadata?.userId;
 
                 console.log(`🔴 Subscription deleted for customer ${customerId}`);
 
@@ -147,15 +163,26 @@ export async function POST(req: Request) {
                 const isCloud = 'execute' in db;
 
                 if (isCloud) {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    await (db as any).execute({
+                    const result = await (db as any).execute({
                         sql: "UPDATE users SET subscription_tier = 'free', subscription_expires_at = NULL WHERE stripe_customer_id = ?",
                         args: [customerId]
                     });
+
+                    // If not found by customerId, try metadata
+                    if (result.rowsAffected === 0 && userIdFromMetadata) {
+                        await (db as any).execute({
+                            sql: "UPDATE users SET subscription_tier = 'free', subscription_expires_at = NULL WHERE user_id = ?",
+                            args: [userIdFromMetadata]
+                        });
+                    }
                 } else {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    (db as any).prepare("UPDATE users SET subscription_tier = 'free', subscription_expires_at = NULL WHERE stripe_customer_id = ?")
+                    const result = (db as any).prepare("UPDATE users SET subscription_tier = 'free', subscription_expires_at = NULL WHERE stripe_customer_id = ?")
                         .run(customerId);
+
+                    if (result.changes === 0 && userIdFromMetadata) {
+                        (db as any).prepare("UPDATE users SET subscription_tier = 'free', subscription_expires_at = NULL WHERE user_id = ?")
+                            .run(userIdFromMetadata);
+                    }
                 }
 
                 if ('close' in db && typeof db.close === 'function') db.close();
