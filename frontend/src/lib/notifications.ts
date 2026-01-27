@@ -60,24 +60,6 @@ export async function subscribeUserToPush(vapidPublicKey: string) {
         return null;
     }
 
-    // Check current permission
-    const permission = Notification.permission;
-    console.log('🔔 [subscribeUserToPush] Current permission:', permission);
-
-    // If permission is default, request it
-    if (permission === 'default') {
-        console.log('🔔 [subscribeUserToPush] Requesting permission...');
-        const newPermission = await Notification.requestPermission();
-        console.log('🔔 [subscribeUserToPush] Permission result:', newPermission);
-        if (newPermission !== 'granted') {
-            console.warn('🔔 [subscribeUserToPush] Permission denied');
-            throw new Error('通知权限被拒绝');
-        }
-    } else if (permission === 'denied') {
-        console.warn('🔔 [subscribeUserToPush] Permission was previously denied');
-        throw new Error('通知权限已被禁用，请在浏览器设置中开启');
-    }
-
     try {
         console.log('🔔 [subscribeUserToPush] Calling pushManager.subscribe...');
         const subscription = await registration.pushManager.subscribe({
