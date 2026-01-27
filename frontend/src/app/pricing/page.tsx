@@ -71,6 +71,7 @@ function PricingContent() {
   const [loadingPriceId, setLoadingPriceId] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [userTier, setUserTier] = useState<string>('free');
+  const [hasStripeCustomer, setHasStripeCustomer] = useState(false);
   const [loadingPortal, setLoadingPortal] = useState(false);
   const searchParams = useSearchParams();
 
@@ -91,6 +92,7 @@ function PricingContent() {
       .then(res => res.json())
       .then(data => {
         if (data.tier) setUserTier(data.tier);
+        if (typeof data.hasStripeCustomer === 'boolean') setHasStripeCustomer(data.hasStripeCustomer);
       })
       .catch(err => console.error('Failed to fetch user status', err));
     }
@@ -295,8 +297,8 @@ function PricingContent() {
               </div>
 
               <div className="flex flex-col gap-3">
-                {/* Show Manage Subscription if already Pro and looking at Pro card */}
-                {userTier === 'pro' && plan.enName === 'Pro' && (
+                {/* Show Manage Subscription ONLY if already Pro AND has Stripe Customer ID */}
+                {userTier === 'pro' && plan.enName === 'Pro' && hasStripeCustomer && (
                   <button 
                     onClick={handleManageSubscription}
                     disabled={loadingPortal}

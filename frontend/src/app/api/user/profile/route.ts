@@ -213,7 +213,9 @@ export async function POST(request: Request) {
             email: user.email,
             referralBalance: user.referral_balance || 0,
             totalEarned: user.total_earned || 0,
-            commissionRate: user.custom_commission_rate ?? MEMBERSHIP_CONFIG.referral.defaultCommissionRate
+
+            commissionRate: user.custom_commission_rate ?? MEMBERSHIP_CONFIG.referral.defaultCommissionRate,
+            hasStripeCustomer: !!user.stripe_customer_id
         });
 
     } catch (error: unknown) {
