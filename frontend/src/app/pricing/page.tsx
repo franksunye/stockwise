@@ -235,9 +235,10 @@ export default function PricingPage() {
           <p className="text-xs text-slate-600 font-bold uppercase tracking-widest">© 2026 STOCKWISE AI TECHNOLOGY. ALL RIGHTS RESERVED.</p>
           <div className="flex gap-6 text-xs font-bold text-slate-500">
              <Link href="/status" className="hover:text-white transition-colors">系统状态</Link>
-             <Link href="/pricing" className="text-white">价格说明</Link>
-            <Link href="#" className="hover:text-white transition-colors">隐私协议</Link>
-            <Link href="#" className="hover:text-white transition-colors">服务条款</Link>
+             <Link href="/pricing" className="hover:text-white">价格说明</Link>
+            <Link href="/privacy" className="hover:text-white transition-colors">隐私协议</Link>
+            <Link href="/terms" className="hover:text-white transition-colors">服务条款</Link>
+            <Link href="/refund" className="hover:text-white transition-colors">退款政策</Link>
           </div>
         </div>
       </footer>

@@ -184,8 +184,9 @@ export default function LandingPage() {
           <div className="flex gap-6 text-xs font-bold text-slate-500">
             <Link href="/status" className="hover:text-white transition-colors">系统状态</Link>
             <Link href="/pricing" className="hover:text-white transition-colors">价格方案</Link>
-            <Link href="#" className="hover:text-white transition-colors">隐私协议</Link>
-            <Link href="#" className="hover:text-white transition-colors">服务条款</Link>
+            <Link href="/privacy" className="hover:text-white transition-colors">隐私协议</Link>
+            <Link href="/terms" className="hover:text-white transition-colors">服务条款</Link>
+            <Link href="/refund" className="hover:text-white transition-colors">退款政策</Link>
           </div>
         </div>
       </footer>

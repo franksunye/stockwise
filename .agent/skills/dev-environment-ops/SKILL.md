@@ -111,9 +111,13 @@ The local database is a file at `data/stockwise.db`. The `turso-cli.mjs` tool is
 
 *   **Switching Contexts**:
     When running `daily_morning_call.py` or `brief_generator.py`, **explicitly set the target**:
-    *   **Target Cloud**:
+    *   **Target Cloud (Full Pipeline)**:
         ```powershell
-        $env:DB_SOURCE="cloud"; python backend/scripts/daily_morning_call.py --dry-run
+        $env:DB_SOURCE="cloud"; python -m backend.engine.brief_generator
+        ```
+    *   **Target Cloud (PRO Only - Fast)**:
+        ```powershell
+        $env:DB_SOURCE="cloud"; $env:BRIEF_SKIP_FREE="true"; python -m backend.engine.brief_generator
         ```
     *   **Target Local** (Default if env var missing, but be explicit):
         ```powershell

@@ -133,14 +133,28 @@ To test PRO-level analysis locally using your local Gemini proxy (`gemini_local`
         $env:DB_SOURCE="cloud"; python backend/engine/brief_generator.py --user "user_id_here"
         ```
 
-2.  **Full Production Run**
-    *   Generates briefs for ALL active users.
+2.  **Full Production Run** (Normal)
+    *   Generates briefs for ALL active users (both Free and Pro).
     *   Command:
         ```powershell
-        $env:DB_SOURCE="cloud"; python backend/engine/brief_generator.py
+        $env:DB_SOURCE="cloud"; python -m backend.engine.brief_generator
         ```
 
-3.  **Push Notification Test**
+3.  **Optimized Local Generation** (Recommended)
+    *   Skips the Free tier analysis (Hunyuan) to save time/cost. Focuses on Pro tier (Gemini/DeepSeek) generation.
+    *   Command:
+        ```powershell
+        $env:DB_SOURCE="cloud"; $env:BRIEF_SKIP_FREE="true"; python -m backend.engine.brief_generator
+        ```
+
+4.  **Targeted Date Generation**
+    *   Generates briefs for a specific date.
+    *   Command:
+        ```powershell
+        $env:DB_SOURCE="cloud"; $env:BRIEF_SKIP_FREE="true"; python -m backend.engine.brief_generator --date 2026-01-26
+        ```
+
+5.  **Push Notification Test**
     *   Tests the notification delivery system only.
     *   Command:
         ```powershell
