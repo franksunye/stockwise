@@ -172,6 +172,7 @@ export default function StockPoolPage() {
     }
   };
 
+  // Main Content
   return (
     <div 
       className="fixed inset-0 bg-[#050508] text-white overflow-hidden flex flex-col font-sans"
@@ -182,16 +183,14 @@ export default function StockPoolPage() {
         const deltaX = touchEndX - touchStartX;
         
         // Swipe Left (Right to Left) -> Go back to Dashboard
-        // Threshold: -100px
-        if (deltaX < -100) {
-          router.push('/dashboard');
-        }
+        if (deltaX < -100) router.push('/dashboard');
         setTouchStartX(null);
       }}
     >
       <div className="fixed inset-0 opacity-[0.03] pointer-events-none bg-indigo-500 blur-[120px] scale-150" />
 
-      <header className="fixed top-0 left-0 right-0 z-[100] p-8 flex items-center justify-between">
+      {/* Solid/Stable Header Structure (Like Brief Page) */}
+      <header className="shrink-0 z-20 p-8 flex items-center justify-between bg-[#050508] border-b border-white/5">
         <div className="flex items-center gap-4">
           <button onClick={() => router.push('/dashboard')} className="p-2.5 rounded-full bg-white/5 border border-white/10 active:scale-90 transition-all">
             <ArrowLeft className="w-5 h-5 text-slate-400" />
@@ -211,7 +210,7 @@ export default function StockPoolPage() {
         </button>
       </header>
 
-      <div className="flex-1 overflow-y-auto px-6 pt-32 pb-12 scrollbar-hide">
+      <div className="flex-1 overflow-y-auto px-6 py-6 scrollbar-hide">
         <AnimatePresence>
           {showAdd && (
             <motion.div 
