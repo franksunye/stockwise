@@ -17,10 +17,10 @@ export async function GET() {
 
         const sql = `
             SELECT DISTINCT ap.symbol, sm.name, sm.market, ap.date
-            FROM ai_predictions ap
+            FROM ai_predictions_v2 ap
             JOIN stock_meta sm ON ap.symbol = sm.symbol
-            WHERE ap.model != 'rule-based' AND ap.model IS NOT NULL
-            AND ap.date = (SELECT MAX(date) FROM ai_predictions WHERE model != 'rule-based')
+            WHERE ap.is_primary = 1
+            AND ap.date = (SELECT MAX(date) FROM ai_predictions_v2 WHERE is_primary = 1)
             ORDER BY ap.confidence DESC
             LIMIT 30
         `;
