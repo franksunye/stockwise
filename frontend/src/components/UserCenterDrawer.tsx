@@ -144,9 +144,14 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
   const handleEnableNotifications = async () => {
     setIsSubscribing(true);
     try {
-      const res = await fetch('/api/notifications/vapid-public-key');
-      const { publicKey } = await res.json();
-      const subscription = await subscribeUserToPush(publicKey);
+      // Use environment variable directly (original working approach)
+      const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+      if (!vapidKey) {
+        setRedeemMsg({ type: 'error', text: 'VAPID Key 未配置' });
+        return;
+      }
+      
+      const subscription = await subscribeUserToPush(vapidKey);
       
       if (subscription) {
         await fetch('/api/notifications/subscribe', {
