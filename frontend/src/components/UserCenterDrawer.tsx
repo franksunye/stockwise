@@ -148,6 +148,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
       const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
       if (!vapidKey) {
         setRedeemMsg({ type: 'error', text: 'VAPID Key 未配置' });
+        setIsSubscribing(false);
         return;
       }
       
