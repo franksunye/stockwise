@@ -44,27 +44,30 @@ export async function POST(req: Request) {
 
                 // Fetch subscription to get accurate period end and customer info
                 let expiryDate = new Date();
-                expiryDate.setFullYear(expiryDate.getFullYear() + 1); // Default to 1 year fallback
+                expiryDate.setDate(expiryDate.getDate() + 31); // Default to 31 days fallback (safer for monthly)
                 let finalCustomerId = customerId;
 
                 if (subscriptionId) {
                     try {
+                        console.log(`🔍 Fetching subscription details for: ${subscriptionId}`);
                         const subscription = await stripe.subscriptions.retrieve(subscriptionId);
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         const subData = subscription as any;
                         if (subData.current_period_end) {
                             expiryDate = new Date(subData.current_period_end * 1000);
+                            console.log(`✅ Subscription period end discovered: ${expiryDate.toISOString()}`);
                         }
 
                         // Fallback for customer ID if not in session
                         if (!finalCustomerId && subData.customer) {
                             finalCustomerId = subData.customer as string;
                         }
-
-                        console.log(`📅 Subscription info: End=${expiryDate.toISOString()}, Customer=${finalCustomerId}`);
                     } catch (err: unknown) {
-                        console.error('❌ Error retrieving subscription details:', (err as Error).message);
+                        console.error(`❌ Failed to retrieve subscription ${subscriptionId}:`, (err as Error).message);
+                        // Falls back to current + 31 days
                     }
+                } else {
+                    console.warn('⚠️ No subscriptionId found in session. Using 31-day fallback.');
                 }
 
                 const expiryStr = expiryDate.toISOString();
