@@ -517,31 +517,33 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
 
                     {/* Notification Switch */}
                     {pushSupported && (
-                        <div className="glass-card px-4 pt-4 pb-0 mb-4">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <div>
-                                        <h4 className="text-sm font-bold text-white">推送通知</h4>
+                        <div className="glass-card mb-4 overflow-hidden">
+                            <div className="p-4 pb-2">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div>
+                                            <h4 className="text-sm font-bold text-white">推送通知</h4>
+                                        </div>
                                     </div>
-                                </div>
-                                <div>
-                                    {isSubscribed ? (
-                                        <button onClick={handleDisableNotifications} disabled={isSubscribing} className="px-3 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/30 transition-all">
-                                            {isSubscribing ? '...' : '已开启'}
-                                        </button>
-                                    ) : (
-                                        <button onClick={handleEnableNotifications} disabled={isSubscribing} className="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg transition-all active:scale-95 disabled:opacity-50">
-                                            {isSubscribing ? '...' : '开启'}
-                                        </button>
-                                    )}
+                                    <div>
+                                        {isSubscribed ? (
+                                            <button onClick={handleDisableNotifications} disabled={isSubscribing} className="px-3 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/30 transition-all">
+                                                {isSubscribing ? '...' : '已开启'}
+                                            </button>
+                                        ) : (
+                                            <button onClick={handleEnableNotifications} disabled={isSubscribing} className="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg transition-all active:scale-95 disabled:opacity-50">
+                                                {isSubscribing ? '...' : '开启'}
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                             
                             {isSubscribed && (
-                            <div className="mt-2 pt-2 pb-1 border-t border-white/5">
+                            <div className="bg-white/[0.02] border-t border-white/5 px-4 py-1.5">
                                 <button
                                 onClick={() => setShowNotificationSettings(!showNotificationSettings)}
-                                className="w-full flex items-center justify-between text-[10px] text-slate-500 hover:text-indigo-400 transition-colors py-0.5"
+                                className="w-full flex items-center justify-between text-[10px] text-slate-500 hover:text-indigo-400 transition-colors"
                                 >
                                 <span className="font-bold uppercase tracking-widest">高级通知偏好</span>
                                 <div className="flex items-center gap-3">
@@ -662,8 +664,8 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                     {/* 邀请好友区域 (Loot Logic) */}
                     {MEMBERSHIP_CONFIG.switches.enableReferralReward && (
                     <div className="mt-4">
-                        <div className="glass-card px-4 pt-4 pb-0 relative overflow-hidden group">
-                            <div className="relative z-10">
+                        <div className="glass-card relative overflow-hidden group">
+                            <div className="relative z-10 p-4 pb-2">
                                 <div className="flex items-center justify-between mb-3">
                                     <h4 className="text-sm font-black italic text-white flex items-center gap-2">
                                         邀请好友领 Pro
@@ -684,11 +686,12 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                     {(redeemMsg?.text === '邀请链接已复制！') ? <Check size={14} className="text-emerald-400" /> : <Share2 size={14} />}
                                     {(redeemMsg?.text === '邀请链接已复制！') ? '已复制' : '复制分享链接'}
                                 </button>
+                            </div>
 
-                                <div className="mt-1.5 pt-1.5 pb-1 border-t border-white/5">
-                                    <button
-                                        onClick={() => setShowReferralDetails(!showReferralDetails)}
-                                        className="w-full flex items-center justify-between text-[10px] text-slate-500 hover:text-indigo-400 transition-colors py-0.5"
+                            <div className="bg-white/[0.02] border-t border-white/5 px-4 py-1.5 relative z-10">
+                                <button
+                                    onClick={() => setShowReferralDetails(!showReferralDetails)}
+                                    className="w-full flex items-center justify-between text-[10px] text-slate-500 hover:text-indigo-400 transition-colors"
                                     >
                                         <span className="font-medium">每邀请 1 位新用户入池，你与好友均可自动获得 {MEMBERSHIP_CONFIG.referral.refereeDays} 天 Pro 会员权益</span>
                                         <div className="flex items-center gap-3">
