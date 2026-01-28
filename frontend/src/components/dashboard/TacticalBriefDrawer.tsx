@@ -20,6 +20,8 @@ import { TacticalData } from '@/lib/types';
 import { shouldEnableHighPerformance } from '@/lib/device-utils';
 import { AICouncil } from './AICouncil';
 
+import { formatModelName } from '@/lib/model-names';
+
 interface TacticalBriefDrawerProps {
   isOpen: boolean;
   onClose: () => void;
@@ -149,9 +151,7 @@ export function TacticalBriefDrawer({
                           </div>
                           <div className="flex-1">
                               <p className="text-xs font-bold text-indigo-200">
-                                 {model?.toLowerCase().includes('deepseek') ? 'DeepSeek AI' : 
-                                  model?.toLowerCase().includes('gemini') ? 'Gemini Pro' : 
-                                  model ? model : 'LLM 深度推理版'}
+                                 {model ? formatModelName(model) : 'LLM 深度推理版'}
                               </p>
                               <p className="text-[10px] text-indigo-400/60 leading-tight mt-0.5">包含完整推理链与市场情绪感知</p>
                           </div>

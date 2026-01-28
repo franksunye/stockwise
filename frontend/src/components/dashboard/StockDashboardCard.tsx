@@ -8,6 +8,8 @@ import { StockData, TacticalData, AIPrediction } from '@/lib/types';
 import { getMarketScene, getPredictionTitle, getClosePriceLabelFromData, getValidationLabelFromData, isTradingDay, getMarketFromSymbol, getLastTradingDay, getHKTime } from '@/lib/date-utils';
 import { COLORS } from './constants';
 
+import { formatModelName } from '@/lib/model-names';
+
 interface StockDashboardCardProps {
   data: StockData;
   onShowTactics: (prediction: AIPrediction) => void;
@@ -175,9 +177,7 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
                   AI 深度洞察 
                   {displayPrediction?.model && (
                     <span className="ml-2 text-indigo-500/60 font-black italic">
-                      · {displayPrediction.model.toLowerCase().includes('deepseek') ? 'DeepSeek' : 
-                         displayPrediction.model.toLowerCase().includes('gemini') ? 'Gemini' : 
-                         displayPrediction.model}
+                      · {formatModelName(displayPrediction.model)}
                     </span>
                   )}
                 </h3>

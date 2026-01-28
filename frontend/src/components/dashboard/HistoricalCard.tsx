@@ -4,7 +4,7 @@ import { ShieldCheck, XCircle, TrendingUp, TrendingDown, Minus, Target } from 'l
 import { AIPrediction } from '@/lib/types';
 import { COLORS } from './constants';
 
-
+import { formatModelName } from '@/lib/model-names';
 
 /**
  * 历史预测卡片
@@ -82,9 +82,7 @@ export function HistoricalCard({ data, onClick }: { data: AIPrediction; onClick?
               {formatDate(data.target_date)}
               {data.model && (
                 <span className="ml-2 text-[9px] text-indigo-500/50 italic opacity-80 uppercase tracking-tighter">
-                  {data.model.toLowerCase().includes('deepseek') ? 'DeepSeek' : 
-                   data.model.toLowerCase().includes('gemini') ? 'Gemini' : 
-                   data.model}
+                  {formatModelName(data.model)}
                 </span>
               )}
             </div>

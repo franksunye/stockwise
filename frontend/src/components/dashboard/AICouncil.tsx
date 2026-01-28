@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { ShieldCheck, AlertTriangle, Zap, RotateCw } from 'lucide-react';
 import { AIPrediction } from '@/lib/types';
 
+import { formatModelName } from '@/lib/model-names';
+
 interface AICouncilProps {
   symbol: string;
   targetDate: string;
@@ -109,7 +111,7 @@ export function AICouncil({ symbol, targetDate }: AICouncilProps) {
                          <Zap size={12} className={isPrimary ? 'text-indigo-400' : 'text-slate-400'} />
                       </div>
                        <span className={`text-xs font-black uppercase tracking-wider ${isPrimary ? 'text-indigo-300' : 'text-slate-400'}`}>
-                          {pred.display_name || pred.model || 'Legacy Model'}
+                          {formatModelName(pred.display_name || pred.model)}
                        </span>
                     </div>
                    <div className={`px-2 py-1 rounded text-[10px] font-black uppercase tracking-wide
