@@ -49,9 +49,9 @@ def setup_mock_data(conn, user_id, symbol, today):
     # 2. 设置"昨天"的状态 (Bearish) -> 用于触发 Flip
     print(f"    - 设置前置状态: {symbol} = Bearish (看跌)")
     
-    # Ensure model exists for FK
-    cursor.execute("INSERT OR IGNORE INTO prediction_models (model_id, display_name, provider) VALUES (?, ?, ?)", 
-                   ('simulation-model', 'Simulation Model', 'simulation'))
+    # Ensure model exists for FK, but keep it INACTIVE to avoid 'Provider not supported' errors in runner.py
+    cursor.execute("INSERT OR REPLACE INTO prediction_models (model_id, display_name, provider, is_active) VALUES (?, ?, ?, ?)", 
+                   ('simulation-model', 'Simulation Model', 'simulation', 0))
 
     cursor.execute("""
         INSERT OR REPLACE INTO signal_states (user_id, symbol, last_signal, last_confidence, last_notified_at)

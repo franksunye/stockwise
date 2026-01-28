@@ -140,24 +140,27 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool =
                      
                 primary_result = asyncio.run(runner.run_analysis(stock, today_str))
                 
-                # [NEW] Check for Signal Flips for each subscriber
-                if notif_manager and isinstance(primary_result, dict):
-                    subscribers = tracker.stock_subscribers.get(stock, set())
-                    for uid in subscribers:
-                        notif_manager.check_signal_flip(
-                            uid, stock, 
-                            primary_result.get('signal'), 
-                            primary_result.get('confidence')
-                        )
+                if primary_result:
+                    # [NEW] Check for Signal Flips for each subscriber
+                    if notif_manager and isinstance(primary_result, dict):
+                        subscribers = tracker.stock_subscribers.get(stock, set())
+                        for uid in subscribers:
+                            notif_manager.check_signal_flip(
+                                uid, stock, 
+                                primary_result.get('signal'), 
+                                primary_result.get('confidence')
+                            )
 
-                success_count += 1
-                ai_count += 1 
-                
-                # [NEW] Mark stock complete and notify ready users
-                ready_users = tracker.mark_stock_complete(stock)
-                # Notify immediately
-                for uid in ready_users:
-                    notify_user_prediction_updated(uid, market=market_filter or "CN")
+                    success_count += 1
+                    ai_count += 1 
+                    
+                    # [NEW] Mark stock complete and notify ready users
+                    ready_users = tracker.mark_stock_complete(stock)
+                    # Notify immediately
+                    for uid in ready_users:
+                        notify_user_prediction_updated(uid, market=market_filter or "CN")
+                else:
+                    logger.warning(f"⚠️ {stock}: Analysis failed or returned no results.")
                 
             except Exception as e:
                 logger.error(f"❌ {stock} AI Engine Failed: {e}")
