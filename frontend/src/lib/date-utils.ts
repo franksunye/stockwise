@@ -409,12 +409,7 @@ export function formatStockSymbol(symbol: string): string {
         return `${symbol}.HK`;
     }
 
-    // A 股通常是 6 位
-    if (symbol.length === 6) {
-        if (symbol.startsWith('6')) return `${symbol}.SH`;
-        return `${symbol}.SZ`;
-    }
-
+    // A 股通常是 6 位，遵循用户需求不再显示 .SH/.SZ
     return symbol;
 }
 

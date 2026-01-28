@@ -64,7 +64,11 @@ export async function GET(request: Request) {
                                     LEFT JOIN prediction_models m ON p.model_id = m.model_id
                                     WHERE p.symbol IN (${placeholders}) AND p.is_primary = 1
                                 )
-                                SELECT * FROM RankedPredictions WHERE rn <= ${historyLimit}`,
+                                SELECT r.*, dp.close as close_price,
+                                       dp.rsi, dp.kdj_k, dp.kdj_d, dp.kdj_j, dp.macd, dp.macd_signal, dp.macd_hist, dp.boll_upper, dp.boll_mid, dp.boll_lower
+                                FROM RankedPredictions r
+                                LEFT JOIN daily_prices dp ON r.symbol = dp.symbol AND r.target_date = dp.date
+                                WHERE r.rn <= ${historyLimit} order by r.date desc`,
                         args: symbols
                     })
                 ]);
@@ -92,7 +96,11 @@ export async function GET(request: Request) {
                         LEFT JOIN prediction_models m ON p.model_id = m.model_id
                         WHERE p.symbol IN (${placeholders}) AND p.is_primary = 1
                     )
-                    SELECT * FROM RankedPredictions WHERE rn <= ${historyLimit}
+                    SELECT r.*, dp.close as close_price,
+                           dp.rsi, dp.kdj_k, dp.kdj_d, dp.kdj_j, dp.macd, dp.macd_signal, dp.macd_hist, dp.boll_upper, dp.boll_mid, dp.boll_lower
+                    FROM RankedPredictions r
+                    LEFT JOIN daily_prices dp ON r.symbol = dp.symbol AND r.target_date = dp.date
+                    WHERE r.rn <= ${historyLimit} order by r.date desc
                 `).all(...symbols) as Record<string, unknown>[];
             }
         } finally {

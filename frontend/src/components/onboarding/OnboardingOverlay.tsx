@@ -240,7 +240,7 @@ export function OnboardingOverlay() {
                                         { symbol: '688981', name: '中芯国际', market: 'CN' },
                                     ]).map(item => {
                                         const isHK = item.market === 'HK';
-                                        const suffix = isHK ? '.HK' : (item.symbol.startsWith('6') && item.symbol.length === 6 ? '.SH' : '.SZ');
+                                        const suffix = isHK ? '.HK' : '';
                                         return (
                                             <button 
                                                 key={item.symbol} 

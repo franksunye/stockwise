@@ -264,7 +264,7 @@ export default function StockPoolPage() {
                   <div className="mt-4 space-y-2 max-h-60 overflow-y-auto">
                     {searchResults.map(item => {
                       const isHK = item.market === 'HK';
-                      const suffix = isHK ? '.HK' : (item.symbol.startsWith('6') ? '.SH' : '.SZ');
+                      const suffix = isHK ? '.HK' : '';
                       return (
                         <button key={item.symbol} onClick={() => handleAdd(item.symbol, item.name)} className="w-full flex items-center justify-between p-4 bg-white/5 rounded-2xl hover:bg-white/10 transition-colors">
                           <div className="flex items-center gap-3">
