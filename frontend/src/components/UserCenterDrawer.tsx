@@ -303,11 +303,11 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
               <header className="flex items-center justify-between mb-8">
                 <div className="space-y-1.5">
                    <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_#6366f1] animate-pulse" />
-                    <span className="text-[10px] uppercase tracking-[0.4em] text-slate-500 font-bold">{showIdentityCenter ? 'Security Center' : 'Member Center'}</span>
+                    <div className="w-1.5 h-1.5 rounded-full bg-slate-500" />
+                    <span className="text-[10px] uppercase tracking-[0.2em] text-slate-500 font-bold">{showIdentityCenter ? 'Account' : 'Member Center'}</span>
                    </div>
-                   <h2 className="text-3xl font-black italic tracking-tighter text-white">
-                    {showIdentityCenter ? '安全核心' : '个人中心'} <span className="text-indigo-500 underline decoration-4 underline-offset-4" data-en={showIdentityCenter ? 'SECURE' : 'USER'}>{showIdentityCenter ? 'SECURE' : 'USER'}</span>
+                   <h2 className="text-xl font-bold text-white mt-1">
+                    {showIdentityCenter ? '账号信息' : '个人中心'}
                    </h2>
                 </div>
                 <button onClick={onClose} className="p-2.5 rounded-full bg-white/5 border border-white/10 active:scale-90 transition-all">
@@ -364,13 +364,12 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                     )}
 
                     <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-5">
-                         <div className="flex items-center justify-between mb-4">
+                         <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center gap-2">
                                 <RefreshCw size={14} className="text-slate-500" />
-                                <span className="text-xs font-black uppercase tracking-widest text-slate-400">手动恢复身份</span>
+                                <span className="text-xs font-bold text-slate-400">找回旧账号</span>
                             </div>
                          </div>
-                         <p className="text-[10px] text-slate-500 mb-4 font-medium italic">如果您在其他设备上有 PRO 权益，或由于系统重装导致状态丢失，请在此输入备份的 User ID。</p>
                          <div className="flex gap-2">
                              <input 
                                 type="text" 
