@@ -477,7 +477,6 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                             }`}
                         >
                             <div className="flex items-center gap-3">
-                                <ShieldCheck size={18} className={tier === 'pro' ? 'text-amber-400' : 'text-indigo-400'} />
                                 <div className="text-left">
                                     <div className="flex items-center gap-2">
                                         <span className={`block text-sm font-bold ${tier === 'pro' ? 'text-amber-100' : 'text-white'}`}>账号信息</span>
@@ -507,7 +506,6 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                             onClick={() => onClose()}
                         >
                             <div className="flex items-center gap-3">
-                                <Star size={18} className={tier === 'pro' ? 'text-indigo-400/50' : 'text-amber-400'} />
                                 <div className="text-left">
                                     <span className="block text-sm font-bold text-white">
                                         {tier === 'pro' ? '查看价格权益计划' : '解锁专业投研权益'}
@@ -523,9 +521,6 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                         <div className="glass-card px-4 pt-4 pb-0 mb-4">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
-                                    <div className={`w-9 h-9 rounded-full flex items-center justify-center ${isSubscribed ? 'bg-emerald-500/20 text-emerald-400' : 'bg-white/5 text-slate-400'}`}>
-                                        <Bell size={18} />
-                                    </div>
                                     <div>
                                         <h4 className="text-sm font-bold text-white">推送通知</h4>
                                     </div>
