@@ -480,7 +480,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                 <ShieldCheck size={18} className={tier === 'pro' ? 'text-amber-400' : 'text-indigo-400'} />
                                 <div className="text-left">
                                     <div className="flex items-center gap-2">
-                                        <span className={`block text-sm font-bold ${tier === 'pro' ? 'text-amber-100' : 'text-white'}`}>身份备份与资产恢复</span>
+                                        <span className={`block text-sm font-bold ${tier === 'pro' ? 'text-amber-100' : 'text-white'}`}>账号信息</span>
                                         {userEmail && (
                                             <span className="flex items-center gap-1 text-[8px] px-1.5 py-0.25 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
                                                 <Mail size={8} /> 已挂载
