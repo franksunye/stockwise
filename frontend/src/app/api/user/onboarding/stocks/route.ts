@@ -10,8 +10,7 @@ interface Stock {
 }
 
 export async function GET() {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let db: any;
+    let db: unknown;
     try {
         db = getDbClient();
 
@@ -27,16 +26,15 @@ export async function GET() {
 
         let pool: Stock[] = [];
 
-        if ('execute' in db) {
-            const res = await db.execute(sql);
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            pool = res.rows.map((row: any) => ({
+        if (db && typeof db === 'object' && 'execute' in db) {
+            const res = await (db as any).execute(sql);
+            pool = res.rows.map((row: { symbol: string, name: string, market: string }) => ({
                 symbol: String(row.symbol),
                 name: String(row.name),
                 market: String(row.market)
             }));
-        } else {
-            const rows = db.prepare(sql).all() as Stock[];
+        } else if (db && typeof db === 'object' && 'prepare' in db) {
+            const rows = (db as any).prepare(sql).all() as Stock[];
             pool = rows;
         }
 
@@ -81,8 +79,8 @@ export async function GET() {
             ]
         });
     } finally {
-        if (db && typeof db.close === 'function') {
-            db.close();
+        if (db && typeof db === 'object' && 'close' in db && typeof (db as any).close === 'function') {
+            (db as any).close();
         }
     }
 }

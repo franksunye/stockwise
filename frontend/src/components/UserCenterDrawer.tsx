@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, User, Crown, Zap, ShieldCheck, Loader2, ArrowRight, Share2, Check, RefreshCw, Key, Bell, ChevronDown, ArrowLeftRight, Sun, Trophy, FileText, Star, ChevronRight, Mail, Info } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { getWatchlist } from '@/lib/storage';
 import { getCurrentUser, restoreUserIdentity } from '@/lib/user';
 import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
 import { isPushSupported, subscribeUserToPush } from '@/lib/notifications';
@@ -103,7 +102,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
 
     try {
       // 0. 先准备身份
-      let currentUserId = userId;
+      const currentUserId = userId;
       console.log('🔔 [Push] User ID:', currentUserId);
 
       const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;

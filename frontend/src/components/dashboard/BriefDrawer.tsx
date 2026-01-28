@@ -109,7 +109,7 @@ export function BriefDrawer({ isOpen, onClose, limitToSymbol, onUpgrade }: Brief
         };
       fetchBrief();
     }
-  }, [isOpen]);
+  }, [isOpen, refreshProfile]);
 
 
 

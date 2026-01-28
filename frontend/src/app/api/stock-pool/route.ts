@@ -20,7 +20,7 @@ export async function GET(request: Request) {
     let client: any = null;
     try {
         client = getDbClient();
-        let stocks: any[] = [];
+        let stocks: { symbol: string, name?: string, added_at?: string }[] = [];
 
         if ('execute' in client) {
             // Turso
@@ -41,7 +41,7 @@ export async function GET(request: Request) {
                      FROM user_watchlist uw
                      LEFT JOIN global_stock_pool gp ON uw.symbol = gp.symbol
                      WHERE uw.user_id = ?
-                     ORDER BY uw.added_at DESC`
+                      ORDER BY uw.added_at DESC`
                 )
                 .all(userId);
         }
@@ -69,7 +69,7 @@ export async function GET(request: Request) {
                     }
 
                     if (!actualDate || String(actualDate) < expectedDate) {
-                        console.log(`📡 [GET 自愈] ${symbol}: 库中日期(${actualDate || '无'}) < 预期(${expectedDate})。触发布发同步...`);
+                        console.log(`📡[GET 自愈] ${symbol}: 库中日期(${actualDate || '无'}) < 预期(${expectedDate})。触发布发同步...`);
                         // 同步触发是真正的非阻塞异步调用
                         triggerOnDemandSync(symbol).catch(e => console.error(`Failed to sync ${symbol} in GET`, e));
                     }
@@ -106,11 +106,10 @@ export async function POST(request: Request) {
         }
 
         const client = getDbClient();
-        const displayName = name || `股票 ${symbol}`;
+        const displayName = name || `股票 ${symbol} `;
         const now = new Date().toISOString();
 
         // 标记是否为新股票（用于决定是否触发即时同步）
-        let isNewStock = false;
 
         if ('execute' in client) {
             // Turso
@@ -134,7 +133,6 @@ export async function POST(request: Request) {
                 });
             } else {
                 // 新股票，插入记录
-                isNewStock = true;
                 await client.execute({
                     sql: 'INSERT INTO global_stock_pool (symbol, name, watchers_count, first_watched_at) VALUES (?, ?, 1, ?)',
                     args: [symbol, displayName, now],
@@ -159,7 +157,6 @@ export async function POST(request: Request) {
                     .run(symbol);
             } else {
                 // 新股票，插入记录
-                isNewStock = true;
                 client
                     .prepare('INSERT INTO global_stock_pool (symbol, name, watchers_count, first_watched_at) VALUES (?, ?, 1, ?)')
                     .run(symbol, displayName, now);
@@ -196,8 +193,8 @@ export async function POST(request: Request) {
         }
 
         // 4. 清理连接 (仅针对 SQLite)
-        if (!('execute' in client) && typeof (client as any).close === 'function') {
-            (client as any).close();
+        if (!('execute' in client) && typeof (client as { close?: () => void }).close === 'function') {
+            (client as { close: () => void }).close();
         }
 
         return NextResponse.json({ success: true });
