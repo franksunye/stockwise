@@ -9,7 +9,7 @@ from config import BEIJING_TZ, WECOM_ROBOT_KEY
 from database import get_connection
 from logger import logger
 
-def retry_request(max_retries=3, delay=1.0, backoff=2.0):
+def retry_request(max_retries=5, delay=2.0, backoff=2.0):
     """
     网络请求重试装饰器 (指数退避 + 随机抖动)
     :param max_retries: 最大重试次数
