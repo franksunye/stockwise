@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getDbClient } from '@/lib/db';
+import { triggerOnDemandSync } from '@/lib/github-actions';
 
 export async function POST(request: Request) {
     try {
@@ -102,23 +103,7 @@ export async function POST(request: Request) {
                     }
 
                     // Trigger background sync only if new
-                    try {
-                        const pat = process.env.GITHUB_PAT;
-                        if (pat) {
-                            fetch(`https://api.github.com/repos/franksunye/stockwise/actions/workflows/on-demand-sync.yml/dispatches`, {
-                                method: 'POST',
-                                headers: {
-                                    'Accept': 'application/vnd.github+json',
-                                    'Authorization': `Bearer ${pat}`,
-                                    'X-GitHub-Api-Version': '2022-11-28',
-                                    'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify({ ref: 'main', inputs: { symbol: selectedStock } }),
-                            }).catch(e => console.error('On-demand sync trigger failed:', e));
-                        }
-                    } catch (e) {
-                        console.error('Failed to trigger sync:', e);
-                    }
+                    await triggerOnDemandSync(selectedStock);
                 }
             }
         } else {

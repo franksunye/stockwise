@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getDbClient } from '@/lib/db';
 import { Client } from '@libsql/client';
+import { triggerOnDemandSync } from '@/lib/github-actions';
 import Database from 'better-sqlite3';
 
 export async function GET() {
@@ -59,6 +60,10 @@ export async function POST(request: Request) {
                 sql: 'INSERT OR IGNORE INTO global_stock_pool (symbol, name, first_watched_at) VALUES (?, ?, ?)',
                 args: [symbol, stockName, new Date().toISOString()]
             });
+
+            // 3. 触发即时同步
+            await triggerOnDemandSync(symbol);
+
             return NextResponse.json({ success: true, name: stockName });
         } else {
             const db = client as Database.Database;
@@ -74,6 +79,10 @@ export async function POST(request: Request) {
 
             db.prepare('INSERT OR IGNORE INTO global_stock_pool (symbol, name, first_watched_at) VALUES (?, ?, ?)').run(symbol, stockName, new Date().toISOString());
             db.close();
+
+            // 触发即时同步 (SQLite 环境通常是本地开发，但统一逻辑)
+            await triggerOnDemandSync(symbol);
+
             return NextResponse.json({ success: true, name: stockName });
         }
     } catch (error) {

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 import { getDbClient } from '../../../lib/db';
+import { triggerOnDemandSync } from '@/lib/github-actions';
 
 
 /**
@@ -129,14 +130,10 @@ export async function POST(request: Request) {
             client.close();
         }
 
-        // 3. 只有新股票才触发 GitHub Action 即时同步
-        //    已存在的股票会被常规的10分钟/每日同步覆盖，无需重复触发
-        if (isNewStock) {
-            console.log(`🆕 New stock ${symbol} added, triggering on-demand sync...`);
-            triggerGithubSync(symbol).catch(err => console.error('Failed to trigger GitHub sync:', err));
-        } else {
-            console.log(`📋 Stock ${symbol} already in pool, skipping on-demand sync (covered by regular sync)`);
-        }
+        // 3. 无论是否为全站新股票，只要用户添加，就尝试触发一次即时同步
+        // 这样可以确保即时看到行情，而不需要等待每10分钟或每日的定时任务
+        console.log(`📡 Stock ${symbol} added/updated in watchlist, triggering on-demand sync...`);
+        await triggerOnDemandSync(symbol);
 
         return NextResponse.json({ success: true });
     } catch (error) {
@@ -145,48 +142,6 @@ export async function POST(request: Request) {
     }
 }
 
-/**
- * 触发 GitHub Action 异步同步特定股票数据
- */
-async function triggerGithubSync(symbol: string) {
-    const pat = process.env.GITHUB_PAT;
-    const owner = 'franksunye';
-    const repo = 'stockwise';
-    const workflowId = 'data_sync_single.yml';
-
-    if (!pat) {
-        console.warn('⚠️ GITHUB_PAT not found in environment, skipping on-demand sync');
-        return;
-    }
-
-    try {
-        const response = await fetch(
-            `https://api.github.com/repos/${owner}/${repo}/actions/workflows/${workflowId}/dispatches`,
-            {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/vnd.github+json',
-                    'Authorization': `Bearer ${pat}`,
-                    'X-GitHub-Api-Version': '2022-11-28',
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    ref: 'main',
-                    inputs: { symbol }
-                }),
-            }
-        );
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`GitHub API error: ${response.status} ${errorText}`);
-        }
-
-        console.log(`🚀 Successfully triggered GitHub sync for ${symbol}`);
-    } catch (error) {
-        console.error(`❌ Failed to trigger GitHub sync for ${symbol}:`, error);
-    }
-}
 
 /**
  * DELETE /api/stock-pool?userId=xxx&symbol=xxx
