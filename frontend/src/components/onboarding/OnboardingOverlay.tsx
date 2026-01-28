@@ -27,7 +27,6 @@ export function OnboardingOverlay() {
   const isHighPerformance = shouldEnableHighPerformance();
   const [isVisible, setIsVisible] = useState(false);
   const [step, setStep] = useState(1);
-  const [persona, setPersona] = useState<string | null>(null);
 
   const [selectedStock, setSelectedStock] = useState<string | null>(null);
   const [selectedStockName, setSelectedStockName] = useState<string | null>(null);
@@ -104,7 +103,7 @@ export function OnboardingOverlay() {
     // Simulate Steps Timeline (Ensures progress even if API is slow)
     const stage2Timer = setTimeout(() => setAnalyzingStage(2), 2000);
     const stage3Timer = setTimeout(() => setAnalyzingStage(3), 4500);
-    const step4Timer = setTimeout(() => setStep(4), 7000); // 兜底进入下一步
+    const step4Timer = setTimeout(() => setStep(3), 7000); // 兜底进入下一步
 
     // Fetch real stock data with timeout
     try {
@@ -183,7 +182,7 @@ export function OnboardingOverlay() {
         
         {/* Step Indicator */}
         <div className="flex gap-1 pt-8 mb-8 justify-center">
-            {[1, 2, 3, 4, 5].map(s => (
+            {[1, 2, 3, 4].map(s => (
                 <div key={s} className={`h-1 rounded-full transition-all duration-500 ${s <= step ? 'w-8 bg-indigo-500' : 'w-2 bg-white/10'}`} />
             ))}
         </div>
@@ -218,57 +217,8 @@ export function OnboardingOverlay() {
                     </motion.div>
                 )}
 
-                {/* STEP 2: PERSONA */}
+                {/* STEP 2: INTERACTIVE INPUT */}
                 {step === 2 && (
-                    <motion.div 
-                        key="step2"
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -20 }}
-                        className="space-y-8"
-                    >
-                        <div className="space-y-2 text-center">
-                            <h2 className="text-2xl font-bold">您的交易风格是?</h2>
-                            <p className="text-slate-400 text-sm">帮助 AI 更好地为您适配策略</p>
-                        </div>
-
-                        <div className="space-y-3">
-                            {[
-                                { id: 'steady', icon: '🐢', title: '稳健型', desc: '长期持有，价值投资，厌恶风险' },
-                                { id: 'balanced', icon: '🦅', title: '平衡型', desc: '成长与安全并重，波段操作' },
-                                { id: 'aggressive', icon: '🐅', title: '激进型', desc: '短线博弈，追求高爆发' },
-                            ].map((item) => (
-                                <button
-                                    key={item.id}
-                                    onClick={() => setPersona(item.id)}
-                                    className={`w-full p-5 rounded-2xl border text-left transition-all flex items-center gap-4 group ${
-                                        persona === item.id 
-                                        ? 'bg-indigo-600 border-indigo-500 shadow-xl scale-[1.02]' 
-                                        : 'bg-white/5 border-white/10 hover:bg-white/10'
-                                    }`}
-                                >
-                                    <span className="text-3xl filter grayscale group-hover:grayscale-0 transition-all">{item.icon}</span>
-                                    <div>
-                                        <div className={`font-bold text-lg ${persona === item.id ? 'text-white' : 'text-slate-200'}`}>{item.title}</div>
-                                        <div className={`text-xs ${persona === item.id ? 'text-indigo-200' : 'text-slate-500'}`}>{item.desc}</div>
-                                    </div>
-                                    {persona === item.id && <Check className="ml-auto text-indigo-200" />}
-                                </button>
-                            ))}
-                        </div>
-
-                        <button 
-                            disabled={!persona}
-                            onClick={() => setStep(3)} 
-                            className="w-full py-4 bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-lg rounded-2xl active:scale-95 transition-all"
-                        >
-                            继续
-                        </button>
-                    </motion.div>
-                )}
-
-                {/* STEP 3: INTERACTIVE INPUT */}
-                {step === 3 && (
                     <motion.div 
                         key="step3"
                         initial={{ opacity: 0, scale: 0.9 }}
@@ -344,8 +294,8 @@ export function OnboardingOverlay() {
                     </motion.div>
                 )}
 
-                {/* STEP 4: REVEAL (THE WOW MOMENT) */}
-                {step === 4 && (
+                {/* STEP 3: REVEAL (THE WOW MOMENT) */}
+                {step === 3 && (
                     <motion.div 
                         key="step4"
                         initial={{ opacity: 0 }}
@@ -432,15 +382,15 @@ export function OnboardingOverlay() {
                         </div>
 
                         <div className="mt-8 space-y-3">
-                             <button onClick={() => setStep(5)} className="w-full py-4 bg-indigo-600 text-white font-bold text-lg rounded-2xl active:scale-95 transition-all shadow-lg hover:bg-indigo-500">
+                             <button onClick={() => setStep(4)} className="w-full py-4 bg-indigo-600 text-white font-bold text-lg rounded-2xl active:scale-95 transition-all shadow-lg hover:bg-indigo-500">
                                 收下这份洞察
                              </button>
                         </div>
                     </motion.div>
                 )}
 
-                {/* STEP 5: COMPLETION */}
-                {step === 5 && (
+                {/* STEP 4: COMPLETION */}
+                {step === 4 && (
                     <motion.div 
                         key="step5"
                         initial={{ opacity: 0, scale: 0.9 }}
