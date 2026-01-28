@@ -693,7 +693,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                     onClick={() => setShowReferralDetails(!showReferralDetails)}
                                     className="w-full flex items-center justify-between text-[10px] text-slate-500 hover:text-indigo-400 transition-colors"
                                     >
-                                        <span className="font-medium">每邀请 1 位新用户入池，你与好友均可自动获得 {MEMBERSHIP_CONFIG.referral.refereeDays} 天 Pro 会员权益</span>
+                                        <span className="font-bold uppercase tracking-widest">查看奖励规则</span>
                                         <div className="flex items-center gap-3">
                                             <ChevronDown className={`w-3 h-3 transition-transform ${showReferralDetails ? 'rotate-180' : ''}`} />
                                         </div>
@@ -708,8 +708,13 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                                 transition={{ duration: 0.2 }}
                                                 className="overflow-hidden"
                                             >
-                                                {/* 收益看板 */}
-                                                <div className="grid grid-cols-2 gap-2 mt-3 mb-1">
+                                                {/* 规则说明 + 收益看板 */}
+                                                <div className="px-1 mt-2 mb-3">
+                                                    <p className="text-[10px] text-slate-500 leading-relaxed">
+                                                        每邀请 1 位新用户入池，你与好友均可自动获得 <span className="text-emerald-400 font-bold">{MEMBERSHIP_CONFIG.referral.refereeDays} 天</span> Pro 会员权益。
+                                                    </p>
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-2 mt-2 mb-1">
                                                     <div className="bg-white/5 rounded-2xl p-3 border border-white/5">
                                                         <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-1">可提现余额</div>
                                                         <div className="text-lg font-black text-emerald-400">¥{referralBalance.toFixed(2)}</div>
