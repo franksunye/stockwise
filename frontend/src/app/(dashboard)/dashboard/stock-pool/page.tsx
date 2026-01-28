@@ -153,7 +153,7 @@ export default function StockPoolPage() {
     
     const limit = tier === 'pro' ? 10 : 3;
     if (watchlist.length >= limit) {
-      setLimitMsg(`已达到${tier === 'pro' ? 'Pro 10只' : '免费版 3只'}上限，请前往个人中心提升额度`);
+      setLimitMsg(tier === 'pro' ? '已达到 Pro 版 10 只监控上限' : '已达到免费版 3 只上限，升级 Pro 可扩展至 10 只');
       setTimeout(() => setLimitMsg(null), 3000);
       return;
     }
