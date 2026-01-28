@@ -439,30 +439,19 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                         </div>
                     </div>
 
-                    {/* 资源用量 */}
-                    <div className="grid grid-cols-2 gap-3 mb-3">
-                        <div className="glass-card rounded-[24px] !p-5 flex flex-col justify-between h-24">
-                        <div className="flex items-center gap-2 text-slate-400">
-                            <ShieldCheck size={16} />
-                            <span className="text-xs font-bold uppercase">监控配额</span>
-                        </div>
-                        <div className="flex items-end gap-1.5">
-                            <span className="text-2xl font-black text-white">{watchlistCount}</span>
-                            <span className="text-sm font-bold text-slate-600 mb-1">/ {tier === 'pro' ? '10' : '3'}</span>
-                        </div>
-                        </div>
-
-                        <div className={`glass-card rounded-[24px] !p-5 flex flex-col justify-between h-24 ${tier === 'pro' ? 'border-amber-500/20 bg-amber-500/5' : 'opacity-60'}`}>
-                        <div className={`flex items-center gap-2 ${tier === 'pro' ? 'text-amber-200' : 'text-slate-400'}`}>
-                            <Zap size={16} />
-                            <span className="text-xs font-bold uppercase">AI 分析</span>
-                        </div>
-                        <div className="flex items-end gap-1.5">
-                            <span className={`text-[10px] font-black uppercase tracking-tighter ${tier === 'pro' ? 'text-amber-100' : 'text-slate-500'}`}>
-                                {tier === 'pro' ? '混合架构推理链路' : '基础技术指标'}
-                            </span>
-                        </div>
-                        </div>
+                    {/* 资源状态 */}
+                    <div className="glass-card !p-0 rounded-[24px] mb-3 overflow-hidden border-white/5 bg-white/[0.02]">
+                         <div className="px-5 py-4 flex items-center justify-between">
+                            <span className="text-sm font-bold text-slate-400 uppercase tracking-wide">监控配额使用情况</span>
+                            <div className="flex items-center gap-2">
+                                <span className={`text-base font-black ${watchlistCount >= (tier === 'pro' ? 10 : 3) ? 'text-amber-400' : 'text-white'}`}>
+                                    {watchlistCount}
+                                </span>
+                                <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">
+                                    / {tier === 'pro' ? '10' : '3'} 名额
+                                </span>
+                            </div>
+                         </div>
                     </div>
 
                     {/* Action Grouping */}
@@ -477,17 +466,15 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                         >
                             <div className="flex items-center gap-3">
                                 <div className="text-left">
-                                    <div className="flex items-center gap-2">
-                                        <span className={`block text-sm font-bold ${tier === 'pro' ? 'text-amber-100' : 'text-white'}`}>账号信息</span>
-                                        {userEmail && (
-                                            <span className="flex items-center gap-1 text-[8px] px-1.5 py-0.25 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
-                                                <ShieldCheck size={8} /> 已保护
-                                            </span>
-                                        )}
-                                    </div>
+                                    <span className={`block text-sm font-bold ${tier === 'pro' ? 'text-amber-100' : 'text-white'}`}>账号信息</span>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-3">
+                                {userEmail && (
+                                    <span className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 text-xs font-bold border border-emerald-500/20">
+                                        <ShieldCheck size={12} /> 已保护
+                                    </span>
+                                )}
                                 {!userEmail && tier === 'pro' && (
                                     <div className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
                                 )}
