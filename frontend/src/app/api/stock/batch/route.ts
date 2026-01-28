@@ -40,72 +40,65 @@ export async function GET(request: Request) {
         let latestPrices: Record<string, unknown>[];
         let allHistory: Record<string, unknown>[];
 
-        if ('execute' in client) {
-            // Turso
-            const [pricesRs, historyRs] = await Promise.all([
-                client.execute({
-                    sql: `SELECT dp.* FROM daily_prices dp
-                            INNER JOIN (
-                                SELECT symbol, MAX(date) as max_date
-                                FROM daily_prices
-                                WHERE symbol IN (${placeholders})
-                                GROUP BY symbol
-                            ) latest ON dp.symbol = latest.symbol AND dp.date = latest.max_date`,
-                    args: symbols
-                }),
-                client.execute({
-                    sql: `WITH RankedPredictions AS (
-                                SELECT p.symbol, p.date, p.target_date, p.signal, p.confidence,
-                                        p.support_price, p.ai_reasoning, p.validation_status, p.actual_change,
-                                        p.is_primary, p.model_id as model, m.display_name,
-                                        d.close as close_price,
-                                        d.rsi, d.kdj_k, d.kdj_d, d.kdj_j,
-                                        d.macd, d.macd_signal, d.macd_hist,
-                                        d.boll_upper, d.boll_mid, d.boll_lower,
-                                        ROW_NUMBER() OVER (PARTITION BY p.symbol ORDER BY p.date DESC) as rn
-                                FROM ai_predictions_v2 p
-                                LEFT JOIN prediction_models m ON p.model_id = m.model_id
-                                LEFT JOIN daily_prices d ON p.symbol = d.symbol AND p.target_date = d.date
-                                WHERE p.symbol IN (${placeholders}) AND p.is_primary = 1
-                            )
-                            SELECT * FROM RankedPredictions WHERE rn <= ?
-                            ORDER BY symbol, date DESC`,
-                    args: [...symbols, historyLimit]
-                })
-            ]);
-
-            latestPrices = pricesRs.rows as Record<string, unknown>[];
-            allHistory = historyRs.rows as Record<string, unknown>[];
-        } else {
-            // SQLite Local
-            latestPrices = client.prepare(
-                `SELECT dp.* FROM daily_prices dp
+        try {
+            if ('execute' in client) {
+                // Turso
+                const [pricesRs, historyRs] = await Promise.all([
+                    client.execute({
+                        sql: `SELECT dp.* FROM daily_prices dp
+                                INNER JOIN (
+                                    SELECT symbol, MAX(date) as max_date
+                                    FROM daily_prices
+                                    WHERE symbol IN (${placeholders})
+                                    GROUP BY symbol
+                                ) latest ON dp.symbol = latest.symbol AND dp.date = latest.max_date`,
+                        args: symbols
+                    }),
+                    client.execute({
+                        sql: `WITH RankedPredictions AS (
+                                    SELECT p.symbol, p.date, p.target_date, p.signal, p.confidence,
+                                            p.support_price, p.ai_reasoning, p.validation_status, p.actual_change,
+                                            p.is_primary, p.model_id as model, m.display_name,
+                                            ROW_NUMBER() OVER (PARTITION BY p.symbol ORDER BY p.date DESC) as rn
+                                    FROM ai_predictions_v2 p
+                                    LEFT JOIN prediction_models m ON p.model_id = m.model_id
+                                    WHERE p.symbol IN (${placeholders}) AND p.is_primary = 1
+                                )
+                                SELECT * FROM RankedPredictions WHERE rn <= ${historyLimit}`,
+                        args: symbols
+                    })
+                ]);
+                latestPrices = pricesRs.rows as Record<string, unknown>[];
+                allHistory = historyRs.rows as Record<string, unknown>[];
+            } else {
+                // SQLite
+                latestPrices = client.prepare(`
+                    SELECT dp.* FROM daily_prices dp
                     INNER JOIN (
                         SELECT symbol, MAX(date) as max_date
                         FROM daily_prices
                         WHERE symbol IN (${placeholders})
                         GROUP BY symbol
-                    ) latest ON dp.symbol = latest.symbol AND dp.date = latest.max_date`
-            ).all(...symbols) as Record<string, unknown>[];
+                    ) latest ON dp.symbol = latest.symbol AND dp.date = latest.max_date
+                `).all(...symbols) as Record<string, unknown>[];
 
-            allHistory = client.prepare(
-                `WITH RankedPredictions AS (
+                allHistory = client.prepare(`
+                    WITH RankedPredictions AS (
                         SELECT p.symbol, p.date, p.target_date, p.signal, p.confidence,
                                 p.support_price, p.ai_reasoning, p.validation_status, p.actual_change,
                                 p.is_primary, p.model_id as model, m.display_name,
-                                d.close as close_price,
-                                d.rsi, d.kdj_k, d.kdj_d, d.kdj_j,
-                                d.macd, d.macd_signal, d.macd_hist,
-                                d.boll_upper, d.boll_mid, d.boll_lower,
                                 ROW_NUMBER() OVER (PARTITION BY p.symbol ORDER BY p.date DESC) as rn
                         FROM ai_predictions_v2 p
                         LEFT JOIN prediction_models m ON p.model_id = m.model_id
-                        LEFT JOIN daily_prices d ON p.symbol = d.symbol AND p.target_date = d.date
                         WHERE p.symbol IN (${placeholders}) AND p.is_primary = 1
                     )
-                    SELECT * FROM RankedPredictions WHERE rn <= ?
-                    ORDER BY symbol, date DESC`
-            ).all(...symbols, historyLimit) as Record<string, unknown>[];
+                    SELECT * FROM RankedPredictions WHERE rn <= ${historyLimit}
+                `).all(...symbols) as Record<string, unknown>[];
+            }
+        } finally {
+            if (client && typeof (client as any).close === 'function') {
+                (client as any).close();
+            }
         }
 
         // 组装逻辑

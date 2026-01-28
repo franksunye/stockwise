@@ -32,11 +32,17 @@ export async function GET(request: Request) {
             LIMIT ? OFFSET ?
         `;
 
-        if ('execute' in client) {
-            const rs = await client.execute({ sql, args: [symbol, limit, offset] });
-            rows = rs.rows;
-        } else {
-            rows = client.prepare(sql).all(symbol, limit, offset) as Record<string, unknown>[];
+        try {
+            if ('execute' in client) {
+                const rs = await client.execute({ sql, args: [symbol, limit, offset] });
+                rows = rs.rows;
+            } else {
+                rows = client.prepare(sql).all(symbol, limit, offset) as Record<string, unknown>[];
+            }
+        } finally {
+            if (client && typeof (client as any).close === 'function') {
+                (client as any).close();
+            }
         }
 
         return NextResponse.json({ predictions: rows });

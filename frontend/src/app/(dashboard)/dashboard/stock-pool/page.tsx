@@ -18,6 +18,8 @@ interface StockSnapshot {
   updateTag?: string;
 }
 
+const POOL_CACHE_KEY = 'stockwise_pool_prices_v1';
+
 export default function StockPoolPage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
@@ -26,6 +28,22 @@ export default function StockPoolPage() {
   const { watchlist, addStock, removeStock, loading: loadingList } = useWatchlist();
   const [prices, setPrices] = useState<Record<string, Partial<StockSnapshot>>>({});
   const [loadingPrices, setLoadingPrices] = useState(false);
+
+  // 1. 初始化：尝试从本地缓存读取行情，实现【秒开】
+  useEffect(() => {
+    try {
+        const cached = localStorage.getItem(POOL_CACHE_KEY);
+        if (cached) {
+            const parsed = JSON.parse(cached);
+            if (parsed && typeof parsed === 'object') {
+                console.log('🚀 Loading pool prices from local cache');
+                setPrices(parsed);
+            }
+        }
+    } catch (e) {
+        console.error('Failed to load pool cache', e);
+    }
+  }, []);
 
   // Derived State for UI
   const stocks: StockSnapshot[] = watchlist.map(item => ({
@@ -100,6 +118,12 @@ export default function StockPoolPage() {
           };
       });
       setPrices(newPrices);
+      
+      // 2. 写入缓存：确保下次进入页面能瞬间看到最后一次行情
+      try {
+        localStorage.setItem(POOL_CACHE_KEY, JSON.stringify(newPrices));
+      } catch (e) { console.error('Cache save error', e); }
+      
     } catch (err) {
       console.error('Failed to hydrate prices', err);
     } finally {

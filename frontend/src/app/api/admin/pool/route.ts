@@ -3,6 +3,7 @@ import { getDbClient } from '@/lib/db';
 import { Client } from '@libsql/client';
 import { triggerOnDemandSync } from '@/lib/github-actions';
 import Database from 'better-sqlite3';
+import { getMarketFromSymbol, getExpectedLatestDataDate } from '@/lib/date-utils';
 
 export async function GET() {
     try {
@@ -55,14 +56,26 @@ export async function POST(request: Request) {
                 return NextResponse.json({ error: '未找到股票信息，请手动输入名称' }, { status: 404 });
             }
 
-            // 2. 插入或忽略全局股票池（由 user_watchlist 逻辑统一管理，这里作为管理员补丁）
+            // 2. 插入或忽略全局股票池
             await turso.execute({
                 sql: 'INSERT OR IGNORE INTO global_stock_pool (symbol, name, first_watched_at) VALUES (?, ?, ?)',
                 args: [symbol, stockName, new Date().toISOString()]
             });
 
-            // 3. 触发即时同步
-            await triggerOnDemandSync(symbol);
+            // 3. 智能同步判断
+            const market = getMarketFromSymbol(symbol);
+            const expectedDate = getExpectedLatestDataDate(market);
+
+            const priceRes = await turso.execute({
+                sql: 'SELECT MAX(date) as last_date FROM daily_prices WHERE symbol = ?',
+                args: [symbol]
+            });
+            const actualLatestDate = priceRes.rows[0]?.last_date;
+
+            if (!actualLatestDate || String(actualLatestDate) < expectedDate) {
+                console.log(`📡 [Admin] ${symbol}: Data missing or stale (${actualLatestDate} < ${expectedDate}). Syncing...`);
+                await triggerOnDemandSync(symbol);
+            }
 
             return NextResponse.json({ success: true, name: stockName });
         } else {
@@ -78,10 +91,18 @@ export async function POST(request: Request) {
             }
 
             db.prepare('INSERT OR IGNORE INTO global_stock_pool (symbol, name, first_watched_at) VALUES (?, ?, ?)').run(symbol, stockName, new Date().toISOString());
-            db.close();
 
-            // 触发即时同步 (SQLite 环境通常是本地开发，但统一逻辑)
-            await triggerOnDemandSync(symbol);
+            // 3. 智能同步判断 (Local)
+            const market = getMarketFromSymbol(symbol);
+            const expectedDate = getExpectedLatestDataDate(market);
+            const priceRow = db.prepare('SELECT MAX(date) as last_date FROM daily_prices WHERE symbol = ?').get(symbol) as { last_date: string } | undefined;
+            const actualLatestDate = priceRow?.last_date;
+
+            if (!actualLatestDate || String(actualLatestDate) < expectedDate) {
+                await triggerOnDemandSync(symbol);
+            }
+
+            db.close();
 
             return NextResponse.json({ success: true, name: stockName });
         }

@@ -16,9 +16,11 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let client: any = null;
     try {
-        const client = getDbClient();
-        let stocks;
+        client = getDbClient();
+        let stocks: any[] = [];
 
         if ('execute' in client) {
             // Turso
@@ -42,13 +44,49 @@ export async function GET(request: Request) {
                      ORDER BY uw.added_at DESC`
                 )
                 .all(userId);
-            client.close();
+        }
+
+        // 核心增强：数据自愈 (Self-healing on Read)
+        // 既然用户打开了列表，我们就顺便检查列表中的股票是否真的有“预期”的数据
+        // 我们在这里 await 以确保连接在 check 期间保持开启，因查询 MAX(date) 有索引且极快，对延迟影响微乎其微
+        if (stocks.length > 0) {
+            try {
+                for (const stock of stocks) {
+                    const symbol = stock.symbol;
+                    const market = getMarketFromSymbol(symbol);
+                    const expectedDate = getExpectedLatestDataDate(market);
+
+                    let actualDate = null;
+                    if ('execute' in client) {
+                        const res = await client.execute({
+                            sql: 'SELECT MAX(date) as last_date FROM daily_prices WHERE symbol = ?',
+                            args: [symbol],
+                        });
+                        actualDate = res.rows[0]?.last_date;
+                    } else {
+                        const row = client.prepare('SELECT MAX(date) as last_date FROM daily_prices WHERE symbol = ?').get(symbol) as { last_date: string } | undefined;
+                        actualDate = row?.last_date;
+                    }
+
+                    if (!actualDate || String(actualDate) < expectedDate) {
+                        console.log(`📡 [GET 自愈] ${symbol}: 库中日期(${actualDate || '无'}) < 预期(${expectedDate})。触发布发同步...`);
+                        // 同步触发是真正的非阻塞异步调用
+                        triggerOnDemandSync(symbol).catch(e => console.error(`Failed to sync ${symbol} in GET`, e));
+                    }
+                }
+            } catch (e) {
+                console.error('Self-healing check failed:', e);
+            }
         }
 
         return NextResponse.json({ stocks });
     } catch (error) {
         console.error('Fetch user watchlist error:', error);
         return NextResponse.json({ stocks: [] }, { status: 500 });
+    } finally {
+        if (client && typeof client.close === 'function') {
+            client.close();
+        }
     }
 }
 

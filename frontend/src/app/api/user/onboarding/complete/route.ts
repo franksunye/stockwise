@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getDbClient } from '@/lib/db';
 import { triggerOnDemandSync } from '@/lib/github-actions';
+import { getMarketFromSymbol, getExpectedLatestDataDate } from '@/lib/date-utils';
 
 export async function POST(request: Request) {
     try {
@@ -31,21 +32,17 @@ export async function POST(request: Request) {
         }
 
         // 2. Grant Trial if applicable
-        // Only grant if currently 'free' or expired
         const now = new Date();
         const currentTier = user.subscription_tier || 'free';
         let newTier = currentTier;
         let newExpiresAt = user.subscription_expires_at;
 
-        // Check if currently active pro
         const isActivePro = currentTier !== 'free' && user.subscription_expires_at && new Date(user.subscription_expires_at) > now;
 
         if (!isActivePro) {
-            // Check if already onboarded (Anti-abuse)
             if (user.has_onboarded) {
                 console.log(`User ${userId} already onboarded, skipping trial grant.`);
             } else {
-                // GRANT TRIAL (First time only)
                 const trialDays = 3;
                 const expiryDate = new Date();
                 expiryDate.setDate(expiryDate.getDate() + trialDays);
@@ -62,9 +59,7 @@ export async function POST(request: Request) {
                 args: [newTier, newExpiresAt, userId]
             });
 
-            // If user selected a stock, ensure it's in watchlist AND global_stock_pool
             if (selectedStock) {
-                // 1. Check if user already has it (to avoid double counting in global_stock_pool)
                 const checkRes = await db.execute({
                     sql: "SELECT 1 FROM user_watchlist WHERE user_id = ? AND symbol = ?",
                     args: [userId, selectedStock]
@@ -72,13 +67,11 @@ export async function POST(request: Request) {
                 const isNewForUser = checkRes.rows.length === 0;
 
                 if (isNewForUser) {
-                    // Add to user watchlist
                     await db.execute({
                         sql: "INSERT OR IGNORE INTO user_watchlist (user_id, symbol, added_at) VALUES (?, ?, ?)",
                         args: [userId, selectedStock, now.toISOString()]
                     });
 
-                    // Update global_stock_pool watchers_count
                     const existing = await db.execute({
                         sql: 'SELECT watchers_count FROM global_stock_pool WHERE symbol = ?',
                         args: [selectedStock],
@@ -102,8 +95,18 @@ export async function POST(request: Request) {
                         });
                     }
 
-                    // Trigger background sync only if new
-                    await triggerOnDemandSync(selectedStock);
+                    // Smart synchronization jugement
+                    const market = getMarketFromSymbol(selectedStock);
+                    const expectedDate = getExpectedLatestDataDate(market);
+                    const priceRes = await db.execute({
+                        sql: 'SELECT MAX(date) as last_date FROM daily_prices WHERE symbol = ?',
+                        args: [selectedStock]
+                    });
+                    const actualLatestDate = priceRes.rows[0]?.last_date;
+
+                    if (!actualLatestDate || String(actualLatestDate) < expectedDate) {
+                        await triggerOnDemandSync(selectedStock);
+                    }
                 }
             }
         } else {
@@ -115,7 +118,6 @@ export async function POST(request: Request) {
                 if (!alreadyWatched) {
                     db.prepare("INSERT OR IGNORE INTO user_watchlist (user_id, symbol, added_at) VALUES (?, ?, ?)").run(userId, selectedStock, now.toISOString());
 
-                    // SQLite logic for global pool
                     const existing = db.prepare('SELECT watchers_count FROM global_stock_pool WHERE symbol = ?').get(selectedStock);
 
                     if (existing) {
@@ -125,8 +127,19 @@ export async function POST(request: Request) {
                         const stockName = meta?.name || `股票 ${selectedStock}`;
                         db.prepare('INSERT INTO global_stock_pool (symbol, name, watchers_count, first_watched_at) VALUES (?, ?, 1, ?)').run(selectedStock, stockName, now.toISOString());
                     }
+
+                    // Smart sync (Local)
+                    const market = getMarketFromSymbol(selectedStock);
+                    const expectedDate = getExpectedLatestDataDate(market);
+                    const row = db.prepare('SELECT MAX(date) as last_date FROM daily_prices WHERE symbol = ?').get(selectedStock);
+                    const actualLatestDate = row?.last_date;
+
+                    if (!actualLatestDate || String(actualLatestDate) < expectedDate) {
+                        await triggerOnDemandSync(selectedStock);
+                    }
                 }
             }
+            db.close();
         }
 
         return NextResponse.json({

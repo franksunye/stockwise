@@ -78,29 +78,27 @@ export async function GET(request: Request) {
                 return NextResponse.json({ error: '未找到该股票数据' }, { status: 404 });
             }
 
-            // 计算客观的最后更新时间
-            const getLastUpdateTime = () => {
-                const now = new Date();
-                const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-                const hkTime = new Date(utc + (3600000 * 8));
+            // 计算客观的最后更新时间 (Honest Label)
+            const now = new Date();
+            const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+            const hkTime = new Date(utc + (3600000 * 8));
+            const todayStr = hkTime.toISOString().split('T')[0];
 
-                const hours = hkTime.getHours();
-                const minutes = hkTime.getMinutes();
-                const totalMinutes = hours * 60 + minutes;
+            const hours = hkTime.getHours();
+            const roundedMinutes = Math.floor(hkTime.getMinutes() / 10) * 10;
+            const timeStr = `${hours.toString().padStart(2, '0')}:${roundedMinutes.toString().padStart(2, '0')}`;
 
-                if (totalMinutes >= 960) return "16:00";
-                if (totalMinutes < 570) return "16:00";
-                if (totalMinutes >= 720 && totalMinutes < 780) return "12:00";
-
-                const roundedMinutes = Math.floor(minutes / 10) * 10;
-                return `${hours.toString().padStart(2, '0')}:${roundedMinutes.toString().padStart(2, '0')}`;
-            };
+            let displayUpdateTime = timeStr;
+            const priceData = row as { date: string } | undefined;
+            if (priceData?.date && String(priceData.date) < todayStr) {
+                displayUpdateTime = `${String(priceData.date).substring(5)} ${timeStr}`;
+            }
 
             return NextResponse.json({
                 price: row,
                 prediction: latestPrediction || null,
                 previousPrediction: prevPrediction || null,
-                last_update_time: getLastUpdateTime()
+                last_update_time: displayUpdateTime
             });
         } finally {
             if (client && typeof client.close === 'function') {
