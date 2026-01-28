@@ -40,7 +40,7 @@ def is_transient_error(e: Exception) -> bool:
     error_msg = str(e).lower()
     return any(pattern in error_msg for pattern in TRANSIENT_ERROR_PATTERNS)
 
-def execute_with_retry(func, max_retries=3, *args, **kwargs):
+def execute_with_retry(func, max_retries=5, *args, **kwargs):
     """
     Executes a function with database connection retry logic.
     The function `func` must accept `conn` as its first argument.
@@ -56,7 +56,11 @@ def execute_with_retry(func, max_retries=3, *args, **kwargs):
         except Exception as e:
             last_exception = e
             if is_transient_error(e):
-                wait_time = 1 * (attempt + 1)  # 指数退避: 1s, 2s, 3s
+                # 针对 Hrana stream not found 错误，采用更激进的退避策略
+                is_stream_err = "stream not found" in str(e).lower()
+                base_wait = 2.0 if is_stream_err else 1.0
+                wait_time = base_wait * (attempt + 1) + (2.0 if is_stream_err else 0)
+                
                 logger.warning(f"🔄 Database Error (Attempt {attempt+1}/{max_retries}): {e} - Retrying in {wait_time}s...")
                 time.sleep(wait_time)
             else:
