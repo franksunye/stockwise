@@ -19,9 +19,9 @@ import { useRouter } from 'next/navigation';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { useTikTokScroll } from '@/hooks/useTikTokScroll';
 
-import { getCurrentUser } from '@/lib/user';
+import { useUserProfile } from '@/hooks/useUserProfile';
 
-const UserCenterDrawer = dynamic(() => import('@/components/UserCenterDrawer').then(mod => mod.UserCenterDrawer), {
+const UserCenterDrawer = dynamic(() => import('@/components/UserCenterDrawer'), {
   ssr: false,
   loading: () => null
 });
@@ -51,23 +51,7 @@ function DashboardContent() {
 
   const [selectedTactics, setSelectedTactics] = useState<{ symbol: string; prediction: AIPrediction } | null>(null);
   const [profileStock, setProfileStock] = useState<StockData | null>(null);
-  const [tier, setTier] = useState<'free' | 'pro'>('free');
-
-  useEffect(() => {
-    const fetchTier = async () => {
-      const user = await getCurrentUser();
-      try {
-        const res = await fetch('/api/user/profile', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId: user.userId, watchlist: [] })
-        });
-        const data = await res.json();
-        setTier(data.tier || 'free');
-      } catch (e) { console.error(e); }
-    };
-    fetchTier();
-  }, []);
+  const { tier } = useUserProfile();
 
   // 进入 App 时清除角标 (小红点)
   useEffect(() => {

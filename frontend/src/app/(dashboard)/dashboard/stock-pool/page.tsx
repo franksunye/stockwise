@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { getMarketScene } from '@/lib/date-utils';
 
 import { useWatchlist } from '@/hooks/useWatchlist';
+import { useUserProfile } from '@/hooks/useUserProfile';
 
 interface StockSnapshot {
   symbol: string;
@@ -64,7 +65,6 @@ export default function StockPoolPage() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [stockToDelete, setStockToDelete] = useState<StockSnapshot | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [tier, setTier] = useState<'free' | 'pro'>('free');
 
   const [limitMsg, setLimitMsg] = useState<string | null>(null);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
@@ -72,21 +72,12 @@ export default function StockPoolPage() {
   const scene = getMarketScene();
   const isPreMarket = scene === 'pre_market';
 
+  const { tier, userId } = useUserProfile();
+
   useEffect(() => {
     const init = async () => {
         const u = await getCurrentUser();
         setUser(u);
-        
-        // Fetch real tier
-        try {
-            const res = await fetch('/api/user/profile', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId: u.userId, watchlist: [] })
-            });
-            const data = await res.json();
-            setTier(data.tier || 'free');
-        } catch (e) { console.error(e); }
     };
     init();
   }, []);

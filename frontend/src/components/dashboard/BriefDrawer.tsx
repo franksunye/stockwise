@@ -6,6 +6,7 @@ import { X as CloseIcon, FileText, Loader2, Sparkles, NotebookText } from 'lucid
 import ReactMarkdown from 'react-markdown';
 import { getCurrentUser } from '@/lib/user';
 import { getHKTime, getLastTradingDay } from '@/lib/date-utils';
+import { useUserProfile } from '@/hooks/useUserProfile';
 
 interface BriefData {
   date: string;
@@ -25,7 +26,7 @@ export function BriefDrawer({ isOpen, onClose, limitToSymbol, onUpgrade }: Brief
   const [brief, setBrief] = useState<BriefData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [tier, setTier] = useState<'free' | 'pro'>('free');
+  const { tier, refreshProfile } = useUserProfile();
 
   const [showGlobal, setShowGlobal] = useState(false);
 
@@ -77,19 +78,8 @@ export function BriefDrawer({ isOpen, onClose, limitToSymbol, onUpgrade }: Brief
           try {
             const user = await getCurrentUser();
             
-            // 🎯 获取用户 tier 信息
-            try {
-              const profileRes = await fetch('/api/user/profile', {
-                method: 'POST',
-                body: JSON.stringify({ userId: user.userId })
-              });
-              const profileData = await profileRes.json();
-              if (profileData.tier) {
-                setTier(profileData.tier);
-              }
-            } catch (e) {
-              console.error('Failed to fetch user tier:', e);
-            }
+            // Centralized profile refresh
+            refreshProfile();
             
             // 🎯 智能日期逻辑：先试今天，没有则试上一交易日
             const today = getHKTime().toISOString().split('T')[0];

@@ -10,6 +10,7 @@ import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
 import { isPushSupported, subscribeUserToPush } from '@/lib/notifications';
 import { shouldEnableHighPerformance } from '@/lib/device-utils';
 import { IdentityPassport } from '@/components/IdentityPassport';
+import { useUserProfile } from '@/hooks/useUserProfile';
 
 interface Props {
   isOpen: boolean;
@@ -18,16 +19,15 @@ interface Props {
 }
 
 export function UserCenterDrawer({ isOpen, onClose }: Props) {
-  const [loading, setLoading] = useState(true);
-  const [userId, setUserId] = useState<string>('');
-  const [tier, setTier] = useState<'free' | 'pro'>('free');
-  const [expiresAt, setExpiresAt] = useState<string | null>(null);
-  const [watchlistCount, setWatchlistCount] = useState(0);
-  
-  // Referral Stats
-  const [referralBalance, setReferralBalance] = useState(0);
-  const [totalEarned, setTotalEarned] = useState(0);
-  const [commissionRate, setCommissionRate] = useState(0.1);
+  const { profile, tier, userId, refreshProfile, loading } = useUserProfile();
+
+  // Local sync/display states (derived from profile)
+  const expiresAt = profile?.expiresAt || null;
+  const watchlistCount = profile?.watchlistCount || 0;
+  const referralBalance = profile?.referralBalance || 0;
+  const totalEarned = profile?.totalEarned || 0;
+  const commissionRate = profile?.commissionRate || 0.1;
+  const userEmail = profile?.email || null;
   
   // Redeem State
   const [redeemCode, setRedeemCode] = useState('');
@@ -49,7 +49,6 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
 
   // Identity & Recovery Stats
   const [showIdentityCenter, setShowIdentityCenter] = useState(false);
-  const [userEmail, setUserEmail] = useState<string | null>(null);
   const [isLinkingEmail, setIsLinkingEmail] = useState(false);
   const [tempEmail, setTempEmail] = useState('');
 
@@ -67,55 +66,11 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
   useEffect(() => {
     setIsHighPerformance(shouldEnableHighPerformance());
     if (isOpen) {
-      loadUserData();
+      refreshProfile();
       checkPushStatus();
     }
-  }, [isOpen]);
+  }, [isOpen, refreshProfile]);
 
-  const loadUserData = async () => {
-    setLoading(true);
-    try {
-      const user = await getCurrentUser();
-      setUserId(user.userId);
-      
-      const watchlist = getWatchlist();
-      
-      const referredBy = localStorage.getItem('STOCKWISE_REFERRED_BY');
-      
-      const res = await fetch('/api/user/profile', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-              userId: user.userId, 
-              watchlist,
-              referredBy: referredBy 
-          })
-      });
-      
-      if (res.ok) {
-          const data = await res.json();
-          if (data.tier) {
-              setTier(data.tier);
-              setExpiresAt(data.expiresAt);
-              if (typeof data.watchlistCount === 'number') {
-                  setWatchlistCount(data.watchlistCount);
-              }
-              if (data.email) {
-                  setUserEmail(data.email);
-              }
-              if (typeof data.referralBalance === 'number') {
-                  setReferralBalance(data.referralBalance);
-                  setTotalEarned(data.totalEarned || 0);
-                  setCommissionRate(data.commissionRate || 0.1);
-              }
-          }
-      }
-    } catch (err) {
-        console.error(err);
-    } finally {
-        setLoading(false);
-    }
-  };
 
   const checkPushStatus = async () => {
     const supported = isPushSupported();
@@ -149,11 +104,6 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
     try {
       // 0. 先准备身份
       let currentUserId = userId;
-      if (!currentUserId) {
-        const user = await getCurrentUser();
-        currentUserId = user.userId;
-        setUserId(currentUserId);
-      }
       console.log('🔔 [Push] User ID:', currentUserId);
 
       const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
@@ -286,8 +236,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
           
           if (data.success) {
               setRedeemMsg({ type: 'success', text: '激活成功！欢迎成为 Pro 会员' });
-              setTier('pro');
-              setExpiresAt(data.expiresAt);
+              refreshProfile(); // Use centralized refresh
               setRedeemCode('');
               setTimeout(() => setRedeemMsg(null), 3000);
           } else {
@@ -311,7 +260,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
         });
         const data = await res.json();
         if (data.success) {
-            setUserEmail(tempEmail);
+            refreshProfile(); // This will update the profile which includes email
             setRedeemMsg({ type: 'success', text: '恢复邮箱绑定成功' });
             setTimeout(() => setRedeemMsg(null), 3000);
             setIsLinkingEmail(false);
@@ -791,3 +740,5 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
     </AnimatePresence>
   );
 }
+
+export default UserCenterDrawer;
