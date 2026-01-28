@@ -420,14 +420,14 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                         <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
                             <h3 className="text-lg font-black italic text-white">
-                                {tier === 'pro' ? 'Pro Member' : 'Guest User'}
+                                {tier === 'pro' ? 'Pro 会员' : '普通用户'}
                             </h3>
                             <span className={`px-2 py-0.5 rounded-md border text-[10px] font-bold uppercase ${
                                 tier === 'pro' 
                                 ? 'bg-amber-500/20 border-amber-500/30 text-amber-400' 
                                 : 'bg-slate-700/50 border-white/5 text-slate-300'
                             }`}>
-                                {tier === 'pro' ? 'Pro Plan' : 'Free Plan'}
+                                {tier === 'pro' ? 'Pro 版' : '免费版'}
                             </span>
                             </div>
                             <div className="space-y-1">
@@ -491,7 +491,6 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                             </span>
                                         )}
                                     </div>
-                                    <span className="text-[9px] text-slate-500 font-bold uppercase">Digital ID & Recovery</span>
                                 </div>
                             </div>
                             <div className="flex items-center gap-2">
@@ -517,7 +516,6 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                     <span className="block text-sm font-bold text-white">
                                         {tier === 'pro' ? '查看价格权益计划' : '解锁专业投研权益'}
                                     </span>
-                                    <span className="text-[9px] text-slate-500 font-bold uppercase">Pricing & Strategy</span>
                                 </div>
                             </div>
                             <ChevronRight size={14} className="text-slate-600" />
@@ -534,10 +532,6 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                     </div>
                                     <div>
                                         <h4 className="text-sm font-bold text-white">推送通知</h4>
-                                    <div className="flex items-center gap-2">
-                                        <Info size={12} className="text-slate-600" />
-                                        <p className="text-[10px] text-slate-500 font-medium">信号与日报提醒</p>
-                                    </div>
                                     </div>
                                 </div>
                                 <div>
