@@ -44,6 +44,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
   const [isSubscribing, setIsSubscribing] = useState(false);
   const [testingPush, setTestingPush] = useState(false);
   const [showNotificationSettings, setShowNotificationSettings] = useState(false);
+  const [showReferralDetails, setShowReferralDetails] = useState(false);
   const [isHighPerformance, setIsHighPerformance] = useState(false);
 
   // Identity & Recovery Stats
@@ -669,31 +670,22 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                     )}
 
                     {/* 邀请好友区域 (Loot Logic) */}
+                    {/* 邀请好友区域 (Loot Logic) */}
                     {MEMBERSHIP_CONFIG.switches.enableReferralReward && (
-                    <div className="mt-8">
-                        <div className="p-4 rounded-[24px] bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-white/5 relative overflow-hidden group">
+                    <div className="mt-4">
+                        <div className="glass-card px-4 pt-4 pb-2.5 relative overflow-hidden group">
                             <div className="relative z-10">
-                                <div className="flex items-center justify-between mb-2">
-                                    <h4 className="text-sm font-black italic text-white flex items-center gap-2">
-                                        邀请好友领 Pro
-                                        <span className="px-1.5 py-0.5 rounded bg-emerald-500 text-[8px] font-black uppercase not-italic">+{MEMBERSHIP_CONFIG.referral.referrerDays} Days</span>
-                                    </h4>
-                                    <Share2 className="w-4 h-4 text-indigo-400 opacity-50" />
-                                </div>
-                                <p className="text-[10px] text-slate-500 leading-tight mb-4 font-medium">
-                                    每邀请 1 位新用户入池，你与好友均可自动获得 {MEMBERSHIP_CONFIG.referral.refereeDays} 天 Pro 会员权益。
-                                </p>
-
-                                {/* 收益看板 */}
-                                <div className="grid grid-cols-2 gap-2 mb-4">
-                                    <div className="bg-white/5 rounded-2xl p-3 border border-white/5">
-                                        <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-1">可提现余额</div>
-                                        <div className="text-lg font-black text-emerald-400">¥{referralBalance.toFixed(2)}</div>
+                                <div className="flex items-center justify-between mb-3">
+                                    <div className="space-y-1">
+                                        <h4 className="text-sm font-black italic text-white flex items-center gap-2">
+                                            邀请好友领 Pro
+                                            <span className="px-1.5 py-0.5 rounded bg-emerald-500 text-[8px] font-black uppercase not-italic">+{MEMBERSHIP_CONFIG.referral.referrerDays} Days</span>
+                                        </h4>
+                                        <p className="text-[10px] text-slate-500 leading-tight font-medium max-w-[200px]">
+                                            每邀请 1 位新用户入池，你与好友均可自动获得 {MEMBERSHIP_CONFIG.referral.refereeDays} 天 Pro 会员权益。
+                                        </p>
                                     </div>
-                                    <div className="bg-white/5 rounded-2xl p-3 border border-white/5">
-                                        <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-1">累计收益 ({commissionRate * 100}%)</div>
-                                        <div className="text-lg font-black text-white">¥{totalEarned.toFixed(2)}</div>
-                                    </div>
+                                    <Share2 className="w-8 h-8 text-indigo-500/10 absolute top-4 right-4" />
                                 </div>
 
                                 <button 
@@ -703,11 +695,47 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                         setRedeemMsg({ type: 'success', text: '邀请链接已复制！' });
                                         setTimeout(() => setRedeemMsg(null), 2000);
                                     }}
-                                    className="w-full py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-xs font-bold text-indigo-300"
+                                    className="w-full py-2.5 mb-3 rounded-xl bg-indigo-500/10 border border-indigo-500/20 hover:bg-indigo-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-xs font-bold text-indigo-300"
                                 >
                                     {(redeemMsg?.text === '邀请链接已复制！') ? <Check size={14} className="text-emerald-400" /> : <Share2 size={14} />}
                                     {(redeemMsg?.text === '邀请链接已复制！') ? '已复制' : '复制分享链接'}
                                 </button>
+
+                                <div className="mt-2.5 pt-2.5 border-t border-white/5">
+                                    <button
+                                        onClick={() => setShowReferralDetails(!showReferralDetails)}
+                                        className="w-full flex items-center justify-between text-[10px] text-slate-500 hover:text-indigo-400 transition-colors py-1"
+                                    >
+                                        <span className="font-bold uppercase tracking-widest">查看收益详情</span>
+                                        <div className="flex items-center gap-3">
+                                            <ChevronDown className={`w-3 h-3 transition-transform ${showReferralDetails ? 'rotate-180' : ''}`} />
+                                        </div>
+                                    </button>
+
+                                    <AnimatePresence>
+                                        {showReferralDetails && (
+                                            <motion.div
+                                                initial={{ height: 0, opacity: 0 }}
+                                                animate={{ height: 'auto', opacity: 1 }}
+                                                exit={{ height: 0, opacity: 0 }}
+                                                transition={{ duration: 0.2 }}
+                                                className="overflow-hidden"
+                                            >
+                                                {/* 收益看板 */}
+                                                <div className="grid grid-cols-2 gap-2 mt-3 mb-1">
+                                                    <div className="bg-white/5 rounded-2xl p-3 border border-white/5">
+                                                        <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-1">可提现余额</div>
+                                                        <div className="text-lg font-black text-emerald-400">¥{referralBalance.toFixed(2)}</div>
+                                                    </div>
+                                                    <div className="bg-white/5 rounded-2xl p-3 border border-white/5">
+                                                        <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-1">累计收益 ({commissionRate * 100}%)</div>
+                                                        <div className="text-lg font-black text-white">¥{totalEarned.toFixed(2)}</div>
+                                                    </div>
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
                             </div>
                         </div>
                     </div>
