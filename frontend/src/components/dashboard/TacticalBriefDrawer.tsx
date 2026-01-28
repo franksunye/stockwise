@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X as CloseIcon, 
@@ -60,15 +60,26 @@ export function TacticalBriefDrawer({
   const [activeTab, setActiveTab] = useState<'brief' | 'council'>('brief');
   const isFree = tier === 'free';
   
-  // 核心逻辑：获取当前场景建议 + 通用建议 (添加强力检测，防御对象格式)
-  const rawCurrent = data?.tactics?.[userPos === 'holding' ? 'holding' : 'empty'];
-  const currentTactics = Array.isArray(rawCurrent) ? rawCurrent : (rawCurrent ? [rawCurrent] : []);
-  
   const rawGeneral = data?.tactics?.general;
   const generalTactics = Array.isArray(rawGeneral) ? rawGeneral : (rawGeneral ? [rawGeneral] : []);
+
+  const [viewState, setViewState] = useState<'holding'|'empty'>(userPos === 'holding' ? 'holding' : 'empty');
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const scrollToView = (view: 'holding' | 'empty') => {
+      setViewState(view);
+      if (scrollRef.current) {
+          const width = scrollRef.current.offsetWidth;
+          scrollRef.current.scrollTo({
+              left: view === 'holding' ? 0 : width,
+              behavior: 'smooth'
+          });
+      }
+  };
   
   return (
     <AnimatePresence>
+
       {isOpen && (
         <div className={`fixed inset-0 z-[200] flex items-end justify-center bg-black/60 pointer-events-auto overflow-hidden ${!isHighPerformance ? 'backdrop-blur-sm' : ''}`}>
           <motion.div 
@@ -169,20 +180,93 @@ export function TacticalBriefDrawer({
                   )}
 
                   <section>
-                    <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" /> 当前场景建议 ({userPos === 'holding' ? '已持仓' : '未建仓'})
-                    </h3>
-                    <div className="space-y-3">
-                      {currentTactics.map((t, idx) => (
-                        <div key={idx} className="glass-card p-4 border-white/5 bg-white/[0.02]">
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className={`text-[10px] font-black px-1.5 py-0.5 rounded italic ${t.priority === 'P1' ? 'bg-indigo-500 text-white' : 'bg-slate-700 text-slate-300'}`}>{t.priority}</span>
-                            <span className="text-sm font-bold text-white">{t.action}</span>
-                          </div>
-                          <p className="text-xs text-slate-400 mb-1">触发: <span className="text-slate-200">{t.trigger}</span></p>
-                          <p className="text-xs text-slate-500 font-medium italic">理由: {t.reason}</p>
+                     {/* Header with Switcher */}
+                     <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                           <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" /> 场景建议
+                        </h3>
+                        
+                        {/* Apple Weather Style Switcher */}
+                        <div className="flex bg-white/5 rounded-full p-0.5 border border-white/5 relative">
+                           {/* Active Indicator Background */}
+                           <motion.div 
+                              className="absolute inset-y-0.5 bg-indigo-500 rounded-full shadow-lg shadow-indigo-500/20"
+                              layoutId="scenario-indicator"
+                              initial={false}
+                              animate={{ 
+                                left: viewState === 'holding' ? '2px' : '50%',
+                                width: 'calc(50% - 2px)'
+                              }}
+                              transition={{ type: "spring", bounce: 0.2, duration: 0.3 }}
+                           />
+                           
+                           <button 
+                              onClick={() => scrollToView('holding')}
+                              className="relative z-10 px-3 py-1 text-[10px] font-bold text-white transition-colors"
+                              style={{ opacity: viewState === 'holding' ? 1 : 0.5 }}
+                           >
+                              已持仓
+                           </button>
+                           <button 
+                              onClick={() => scrollToView('empty')}
+                              className="relative z-10 px-3 py-1 text-[10px] font-bold text-white transition-colors"
+                              style={{ opacity: viewState === 'empty' ? 1 : 0.5 }}
+                           >
+                              未建仓
+                           </button>
                         </div>
-                      ))}
+                     </div>
+
+                     {/* Horizontal Scroll Container for Scenarios */}
+                    <div 
+                        ref={scrollRef}
+                        onScroll={(e) => {
+                           const target = e.currentTarget;
+                           const isRight = target.scrollLeft > target.offsetWidth / 2;
+                           if (isRight && viewState !== 'empty') setViewState('empty');
+                           if (!isRight && viewState !== 'holding') setViewState('holding');
+                        }}
+                        className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide -mx-6 px-6 pb-4"
+                    >
+                       
+                       {/* CARD 1: HOLDING SCENARIO */}
+                       <div className="min-w-full snap-center space-y-3">
+                          <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest text-center mb-2 opacity-80">当前：已持仓视角</p>
+                          {(data?.tactics?.holding ? (Array.isArray(data.tactics.holding) ? data.tactics.holding : [data.tactics.holding]) : []).map((t, idx) => (
+                              <div key={idx} className="glass-card p-4 border-indigo-500/20 bg-indigo-500/5 relative overflow-hidden">
+                                 <div className="absolute right-0 top-0 p-2 opacity-10">
+                                    <Target size={40} />
+                                 </div>
+                                 <div className="flex items-center gap-2 mb-2 relative z-10">
+                                    <span className={`text-[10px] font-black px-1.5 py-0.5 rounded italic ${t.priority === 'P1' ? 'bg-indigo-500 text-white' : 'bg-slate-700 text-slate-300'}`}>{t.priority}</span>
+                                    <span className="text-sm font-bold text-white">{t.action}</span>
+                                 </div>
+                                 <p className="text-xs text-slate-400 mb-1 relative z-10">触发: <span className="text-slate-200">{t.trigger}</span></p>
+                                 <p className="text-xs text-slate-500 font-medium italic relative z-10">理由: {t.reason}</p>
+                              </div>
+                           ))}
+                       </div>
+
+                       {/* CARD 2: EMPTY SCENARIO */}
+                       <div className="min-w-full snap-center space-y-3">
+                          <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest text-center mb-2 opacity-80">当前：未建仓视角</p>
+                           {(data?.tactics?.empty ? (Array.isArray(data.tactics.empty) ? data.tactics.empty : [data.tactics.empty]) : []).map((t, idx) => (
+                              <div key={idx} className="glass-card p-4 border-white/5 bg-white/[0.02]">
+                                 <div className="flex items-center gap-2 mb-2">
+                                    <span className={`text-[10px] font-black px-1.5 py-0.5 rounded italic ${t.priority === 'P1' ? 'bg-indigo-500 text-white' : 'bg-slate-700 text-slate-300'}`}>{t.priority}</span>
+                                    <span className="text-sm font-bold text-white">{t.action}</span>
+                                 </div>
+                                 <p className="text-xs text-slate-400 mb-1">触发: <span className="text-slate-200">{t.trigger}</span></p>
+                                 <p className="text-xs text-slate-500 font-medium italic">理由: {t.reason}</p>
+                              </div>
+                           ))}
+                       </div>
+                    </div>
+                    
+                    {/* Pagination Dots */}
+                    <div className="flex justify-center gap-1.5 mt-[-10px] mb-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+                        <div className="w-1.5 h-1.5 rounded-full bg-white/20" />
                     </div>
                   </section>
 
