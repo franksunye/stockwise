@@ -696,7 +696,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                     {(redeemMsg?.text === '邀请链接已复制！') ? '已复制' : '复制分享链接'}
                                 </button>
 
-                                <div className="mt-2.5 pt-2.5 border-t border-white/5">
+                                <div className="mt-1.5 pt-1.5 border-t border-white/5">
                                     <button
                                         onClick={() => setShowReferralDetails(!showReferralDetails)}
                                         className="w-full flex items-center justify-between text-[10px] text-slate-500 hover:text-indigo-400 transition-colors py-1"
