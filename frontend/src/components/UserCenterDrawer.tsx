@@ -431,16 +431,11 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                 {tier === 'pro' ? 'Pro 版' : '免费版'}
                             </span>
                             </div>
-                            <div className="space-y-1">
-                                <p className="text-[10px] text-slate-500 font-mono flex items-center gap-2">
-                                    ID: {userId ? (userId.slice(0, 8) + '...' + userId.slice(-4)) : '...'}
+                            {expiresAt && tier === 'pro' && (
+                                <p className="text-[10px] text-emerald-500/80 font-bold flex items-center gap-1.5 mt-1">
+                                    <ShieldCheck size={10} /> 有效期至: {expiresAt.split('T')[0]}
                                 </p>
-                                {expiresAt && tier === 'pro' && (
-                                    <p className="text-[10px] text-emerald-500/80 font-bold flex items-center gap-1.5">
-                                        <ShieldCheck size={10} /> 有效期至: {expiresAt.split('T')[0]}
-                                    </p>
-                                )}
-                            </div>
+                            )}
                         </div>
                         </div>
                     </div>
