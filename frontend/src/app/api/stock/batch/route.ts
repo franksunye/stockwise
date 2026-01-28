@@ -96,8 +96,8 @@ export async function GET(request: Request) {
                 `).all(...symbols) as Record<string, unknown>[];
             }
         } finally {
-            if (client && typeof (client as any).close === 'function') {
-                (client as any).close();
+            if (client && typeof (client as { close?: () => void }).close === 'function') {
+                (client as { close: () => void }).close();
             }
         }
 
@@ -126,7 +126,7 @@ export async function GET(request: Request) {
 
         const stocks = symbols.map(sym => {
             const history = historyBySymbol.get(sym) || [];
-            const price = priceMap.get(sym) as any;
+            const price = priceMap.get(sym) as Record<string, unknown> | undefined;
 
             // 数据安全处理
             const sevenDaysAgo = new Date();

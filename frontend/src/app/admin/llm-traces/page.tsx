@@ -1,20 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { 
-  Search, 
-  Terminal, 
-  Clock, 
-  CheckCircle2, 
-  XCircle, 
-  Cpu, 
-  Copy, 
-  MessageSquare, 
-  AlignLeft,
-  ArrowLeft,
-  Bug,
-  Filter
-} from 'lucide-react';
+import { ArrowLeft, Search, Cpu, Clock, MessageSquare, Terminal, AlignLeft, CheckCircle2, Copy, XCircle, Bug } from 'lucide-react';
+import { useCallback, useState, useEffect } from 'react';
 import Link from 'next/link';
 
 // Types
@@ -48,15 +35,13 @@ export default function LLMTraceViewer() {
   
   // Filters
   const [search, setSearch] = useState('');
-  const [modelFilter, setModelFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
 
-  const fetchTraces = async () => {
+  const fetchTraces = useCallback(async () => {
     setLoadingList(true);
     try {
       const params = new URLSearchParams();
       if (search) params.append('symbol', search);
-      if (modelFilter) params.append('model', modelFilter);
       if (statusFilter) params.append('status', statusFilter);
       params.append('limit', '100');
 
@@ -68,9 +53,9 @@ export default function LLMTraceViewer() {
     } finally {
       setLoadingList(false);
     }
-  };
+  }, [search, statusFilter]);
 
-  const fetchDetail = async (id: string) => {
+  const fetchDetail = useCallback(async (id: string) => {
     setLoadingDetail(true);
     try {
       const res = await fetch(`/api/admin/llm-traces/${id}`);
@@ -81,7 +66,7 @@ export default function LLMTraceViewer() {
     } finally {
       setLoadingDetail(false);
     }
-  };
+  }, []);
 
   // Fetch List on Filter Change
   useEffect(() => {
@@ -89,15 +74,13 @@ export default function LLMTraceViewer() {
         fetchTraces();
     }, 500); // Debounce
     return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, modelFilter, statusFilter]);
+  }, [search, statusFilter, fetchTraces]);
 
   // Fetch Detail when selected
   useEffect(() => {
     if (!selectedId) return;
     fetchDetail(selectedId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedId]);
+  }, [selectedId, fetchDetail]);
 
   return (
     <div className="min-h-screen bg-[#050508] text-slate-300 font-sans flex flex-col md:flex-row h-screen overflow-hidden">

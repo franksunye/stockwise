@@ -45,7 +45,7 @@ export default function BriefPage() {
             setBrief(data.brief)
           } catch (err) {
             setError('无法加载简报')
-            console.error(err)
+            console.error('Failed to fetch brief:', err)
           } finally {
             setLoading(false)
           }
@@ -62,7 +62,7 @@ export default function BriefPage() {
           text: brief.push_hook,
           url: window.location.href,
         })
-      } catch (err) {
+      } catch {
         console.log('Share cancelled')
       }
     }

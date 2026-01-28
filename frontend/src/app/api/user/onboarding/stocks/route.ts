@@ -27,14 +27,14 @@ export async function GET() {
         let pool: Stock[] = [];
 
         if (db && typeof db === 'object' && 'execute' in db) {
-            const res = await (db as any).execute(sql);
-            pool = res.rows.map((row: { symbol: string, name: string, market: string }) => ({
+            const res = await (db as { execute: (sql: string) => Promise<{ rows: unknown[] }> }).execute(sql);
+            pool = (res.rows as { symbol: unknown, name: unknown, market: unknown }[]).map((row) => ({
                 symbol: String(row.symbol),
                 name: String(row.name),
                 market: String(row.market)
             }));
         } else if (db && typeof db === 'object' && 'prepare' in db) {
-            const rows = (db as any).prepare(sql).all() as Stock[];
+            const rows = (db as { prepare: (sql: string) => { all: () => Stock[] } }).prepare(sql).all();
             pool = rows;
         }
 
@@ -79,8 +79,8 @@ export async function GET() {
             ]
         });
     } finally {
-        if (db && typeof db === 'object' && 'close' in db && typeof (db as any).close === 'function') {
-            (db as any).close();
+        if (db && typeof db === 'object' && 'close' in db && typeof (db as { close?: () => void }).close === 'function') {
+            (db as { close: () => void }).close();
         }
     }
 }

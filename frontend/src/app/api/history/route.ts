@@ -40,8 +40,9 @@ export async function GET(request: Request) {
                 rows = client.prepare(sql).all(symbol, limit, offset) as Record<string, unknown>[];
             }
         } finally {
-            if (client && typeof (client as any).close === 'function') {
-                (client as any).close();
+            // Ensure client is an object and has a close method before calling it
+            if (client && typeof client === 'object' && 'close' in client && typeof (client as { close?: () => void }).close === 'function') {
+                (client as { close: () => void }).close();
             }
         }
 

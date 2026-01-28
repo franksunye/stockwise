@@ -72,7 +72,7 @@ export default function StockPoolPage() {
   const scene = getMarketScene();
   const isPreMarket = scene === 'pre_market';
 
-  const { tier, userId } = useUserProfile();
+  const { tier } = useUserProfile();
 
   useEffect(() => {
     const init = async () => {

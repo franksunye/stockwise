@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LayoutGrid as Grid, ChevronDown, RefreshCw, User, FileText } from 'lucide-react';
+import { LayoutGrid as Grid, ChevronDown, User, FileText } from 'lucide-react';
 import { StockData, AIPrediction } from '@/lib/types';
 import { 
   TacticalBriefDrawer, 
@@ -34,7 +34,7 @@ function DashboardContent() {
   const [briefOpen, setBriefOpen] = useState(false);
   const hasScrolledToTarget = useRef(false);
 
-  const { stocks, loadingPool, refresh, isRefreshing, loadMoreHistory } = useDashboardData();
+  const { stocks, loadingPool, loadMoreHistory } = useDashboardData();
   const {
     currentIndex,
     scrollRef,
