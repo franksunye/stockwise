@@ -299,7 +299,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                <div className="w-12 h-1 rounded-full bg-white/20" />
             </div>
 
-            <div className="p-8 pt-4 flex flex-col min-h-[60vh]">
+            <div className="px-8 pt-4 pb-4 flex flex-col min-h-[60vh]">
               <header className="flex items-center justify-between mb-8">
                 <div className="space-y-1.5">
                    <div className="flex items-center gap-2">
@@ -735,7 +735,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
 
 
                     {/* Demo/Reset Tools - Very Minimal */}
-                    <div className="mt-12 text-center">
+                    <div className="mt-6 text-center">
                         <button 
                             onClick={async () => {
                                 localStorage.removeItem('STOCKWISE_HAS_ONBOARDED');
