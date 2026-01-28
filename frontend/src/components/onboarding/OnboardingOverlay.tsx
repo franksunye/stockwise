@@ -220,7 +220,7 @@ export function OnboardingOverlay() {
                 {/* STEP 2: INTERACTIVE INPUT */}
                 {step === 2 && (
                     <motion.div 
-                        key="step3"
+                        key="step2"
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 1.1 }}
@@ -297,7 +297,7 @@ export function OnboardingOverlay() {
                 {/* STEP 3: REVEAL (THE WOW MOMENT) */}
                 {step === 3 && (
                     <motion.div 
-                        key="step4"
+                        key="step3"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
@@ -392,7 +392,7 @@ export function OnboardingOverlay() {
                 {/* STEP 4: COMPLETION */}
                 {step === 4 && (
                     <motion.div 
-                        key="step5"
+                        key="step4"
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         className="text-center space-y-8"
