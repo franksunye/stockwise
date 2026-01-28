@@ -539,10 +539,10 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                             </div>
                             
                             {isSubscribed && (
-                            <div className="mt-2.5 pt-2.5 pb-2.5 border-t border-white/5">
+                            <div className="mt-2 pt-2 pb-1 border-t border-white/5">
                                 <button
                                 onClick={() => setShowNotificationSettings(!showNotificationSettings)}
-                                className="w-full flex items-center justify-between text-[10px] text-slate-500 hover:text-indigo-400 transition-colors py-1"
+                                className="w-full flex items-center justify-between text-[10px] text-slate-500 hover:text-indigo-400 transition-colors py-0.5"
                                 >
                                 <span className="font-bold uppercase tracking-widest">高级通知偏好</span>
                                 <div className="flex items-center gap-3">
@@ -680,16 +680,16 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                         setRedeemMsg({ type: 'success', text: '邀请链接已复制！' });
                                         setTimeout(() => setRedeemMsg(null), 2000);
                                     }}
-                                    className="w-full py-2.5 mb-3 rounded-xl bg-indigo-500/10 border border-indigo-500/20 hover:bg-indigo-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-xs font-bold text-indigo-300"
+                                    className="w-full py-2.5 mb-2 rounded-xl bg-indigo-500/10 border border-indigo-500/20 hover:bg-indigo-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-xs font-bold text-indigo-300"
                                 >
                                     {(redeemMsg?.text === '邀请链接已复制！') ? <Check size={14} className="text-emerald-400" /> : <Share2 size={14} />}
                                     {(redeemMsg?.text === '邀请链接已复制！') ? '已复制' : '复制分享链接'}
                                 </button>
 
-                                <div className="mt-1.5 pt-1.5 pb-1.5 border-t border-white/5">
+                                <div className="mt-1.5 pt-1.5 pb-1 border-t border-white/5">
                                     <button
                                         onClick={() => setShowReferralDetails(!showReferralDetails)}
-                                        className="w-full flex items-center justify-between text-[10px] text-slate-500 hover:text-indigo-400 transition-colors py-1"
+                                        className="w-full flex items-center justify-between text-[10px] text-slate-500 hover:text-indigo-400 transition-colors py-0.5"
                                     >
                                         <span className="font-medium">每邀请 1 位新用户入池，你与好友均可自动获得 {MEMBERSHIP_CONFIG.referral.refereeDays} 天 Pro 会员权益</span>
                                         <div className="flex items-center gap-3">
