@@ -407,7 +407,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                 /* --- MAIN MEMBER CENTER VIEW --- */
                 <div className="animate-in fade-in slide-in-from-left-4 duration-300">
                     {/* 用户卡片 */}
-                    <div className="mb-5 p-1 rounded-3xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-white/10 relative overflow-hidden">
+                    <div className="mb-3 p-1 rounded-[24px] bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-white/10 relative overflow-hidden">
                         {tier === 'pro' && (
                             <div className="absolute top-0 right-0 p-3">
                                 <Crown className="text-amber-400 w-6 h-6 drop-shadow-[0_0_8px_rgba(251,191,36,0.5)]" />
@@ -440,8 +440,8 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                     </div>
 
                     {/* 资源用量 */}
-                    <div className="grid grid-cols-2 gap-3 mb-4">
-                        <div className="glass-card p-5 flex flex-col justify-between h-24">
+                    <div className="grid grid-cols-2 gap-3 mb-3">
+                        <div className="glass-card rounded-[24px] p-5 flex flex-col justify-between h-24">
                         <div className="flex items-center gap-2 text-slate-400">
                             <ShieldCheck size={16} />
                             <span className="text-xs font-bold uppercase">监控配额</span>
@@ -452,7 +452,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                         </div>
                         </div>
 
-                        <div className={`glass-card p-5 flex flex-col justify-between h-24 ${tier === 'pro' ? 'border-amber-500/20 bg-amber-500/5' : 'opacity-60'}`}>
+                        <div className={`glass-card rounded-[24px] p-5 flex flex-col justify-between h-24 ${tier === 'pro' ? 'border-amber-500/20 bg-amber-500/5' : 'opacity-60'}`}>
                         <div className={`flex items-center gap-2 ${tier === 'pro' ? 'text-amber-200' : 'text-slate-400'}`}>
                             <Zap size={16} />
                             <span className="text-xs font-bold uppercase">AI 分析</span>
@@ -466,7 +466,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                     </div>
 
                     {/* Action Grouping */}
-                    <div className="space-y-3 mb-6">
+                    <div className="space-y-3 mb-3">
                         <button 
                             onClick={() => setShowIdentityCenter(true)}
                             className={`w-full py-4 px-5 rounded-[24px] border transition-all flex items-center justify-between group ${
@@ -517,8 +517,8 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
 
                     {/* Notification Switch */}
                     {pushSupported && (
-                        <div className="glass-card mb-4 overflow-hidden">
-                            <div className="p-4 pb-2">
+                        <div className="glass-card rounded-[24px] mb-3 overflow-hidden">
+                            <div className="p-5 pb-2">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-3">
                                         <div>
@@ -540,7 +540,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                             </div>
                             
                             {isSubscribed && (
-                            <div className="bg-white/[0.02] border-t border-white/5 px-4 py-1.5">
+                            <div className="bg-white/[0.02] border-t border-white/5 px-5 py-2">
                                 <button
                                 onClick={() => setShowNotificationSettings(!showNotificationSettings)}
                                 className="w-full flex items-center justify-between text-[10px] text-slate-500 hover:text-indigo-400 transition-colors"
@@ -663,9 +663,9 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                     {/* 邀请好友区域 (Loot Logic) */}
                     {/* 邀请好友区域 (Loot Logic) */}
                     {MEMBERSHIP_CONFIG.switches.enableReferralReward && (
-                    <div className="mt-4">
-                        <div className="glass-card relative overflow-hidden group">
-                            <div className="relative z-10 p-4 pb-2">
+                    <div className="mt-3">
+                        <div className="glass-card rounded-[24px] relative overflow-hidden group">
+                            <div className="relative z-10 p-5 pb-2">
                                 <div className="flex items-center justify-between mb-3">
                                     <h4 className="text-sm font-black italic text-white flex items-center gap-2">
                                         邀请好友领 Pro
@@ -688,7 +688,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                 </button>
                             </div>
 
-                            <div className="bg-white/[0.02] border-t border-white/5 px-4 py-1.5 relative z-10">
+                            <div className="bg-white/[0.02] border-t border-white/5 px-5 py-2 relative z-10">
                                 <button
                                     onClick={() => setShowReferralDetails(!showReferralDetails)}
                                     className="w-full flex items-center justify-between text-[10px] text-slate-500 hover:text-indigo-400 transition-colors"
@@ -725,7 +725,6 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                 </div>
                             </div>
                         </div>
-                    </div>
                     )}
 
 
