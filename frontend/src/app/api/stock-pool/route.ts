@@ -130,10 +130,35 @@ export async function POST(request: Request) {
             client.close();
         }
 
-        // 3. 无论是否为全站新股票，只要用户添加，就尝试触发一次即时同步
-        // 这样可以确保即时看到行情，而不需要等待每10分钟或每日的定时任务
-        console.log(`📡 Stock ${symbol} added/updated in watchlist, triggering on-demand sync...`);
-        await triggerOnDemandSync(symbol);
+        // 3. 核心改进：基于“数据实质内容”判断是否触发同步 (方案 B 升级版)
+        // 逻辑：查询该股票在 daily_prices 中的最新日期，与市场应有的 ECD (Expected Content Date) 对比
+        const { getMarketFromSymbol, getExpectedLatestDataDate } = require('@/lib/date-utils');
+        const market = getMarketFromSymbol(symbol);
+        const expectedDate = getExpectedLatestDataDate(market);
+
+        let actualLatestDate = null;
+        if ('execute' in client) {
+            const res = await client.execute({
+                sql: 'SELECT MAX(date) as last_date FROM daily_prices WHERE symbol = ?',
+                args: [symbol],
+            });
+            actualLatestDate = res.rows[0]?.last_date;
+        } else {
+            const row = client.prepare('SELECT MAX(date) as last_date FROM daily_prices WHERE symbol = ?').get(symbol) as { last_date: string } | undefined;
+            actualLatestDate = row?.last_date;
+        }
+
+        // 判定实质性缺失
+        // 1. 从未有过价格数据 (actualLatestDate 为空) 
+        // 2. 存量数据的日期落后于预期日期 (actualLatestDate < expectedDate)
+        const isDataMissing = !actualLatestDate || String(actualLatestDate) < expectedDate;
+
+        if (isDataMissing) {
+            console.log(`📡 [数据实质缺失] ${symbol}: 库中最新(${actualLatestDate || '无'}) < 预期(${expectedDate})。触发同步...`);
+            await triggerOnDemandSync(symbol);
+        } else {
+            console.log(`✅ [数据实质完备] ${symbol}: 库中最新(${actualLatestDate}) >= 预期(${expectedDate})。跳过冗余同步。`);
+        }
 
         return NextResponse.json({ success: true });
     } catch (error) {

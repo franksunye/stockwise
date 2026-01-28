@@ -417,3 +417,27 @@ export function formatStockSymbol(symbol: string): string {
 
     return symbol;
 }
+
+/**
+ * 获取市场当前应有的最新数据日期 (Expected Content Date)
+ * @param market 市场类型
+ * @returns YYYY-MM-DD
+ */
+export function getExpectedLatestDataDate(market: MarketType = 'HK'): string {
+    const hkNow = getHKTime();
+
+    // 不同市场的收盘同步缓冲时间 (例如 15:30 和 16:30)
+    // CN 15:00 收盘，15:30 数据通常就绪
+    // HK 16:00 收盘，16:30 数据通常就绪
+    const syncThreshold = market === 'CN' ? 930 : 990;
+    const totalMinutes = hkNow.getHours() * 60 + hkNow.getMinutes();
+
+    // 如果今天是交易日，且已经过了同步阈值时间
+    if (!isMarketClosed(hkNow, market) && totalMinutes >= syncThreshold) {
+        return formatDateStr(hkNow);
+    }
+
+    // 否则，预期日期应该是上一个交易日 (如果是交易日但还没收盘，也是上一个)
+    const lastTradingDay = getLastTradingDay(hkNow, market);
+    return formatDateStr(lastTradingDay);
+}
