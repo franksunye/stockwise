@@ -15,6 +15,7 @@ interface StockSnapshot {
   price: number;
   change: number;
   aiSignal: 'Long' | 'Short' | 'Side';
+  updateTag?: string;
 }
 
 export default function StockPoolPage() {
@@ -32,7 +33,8 @@ export default function StockPoolPage() {
     name: item.name,
     price: prices[item.symbol]?.price || 0,
     change: prices[item.symbol]?.change || 0,
-    aiSignal: prices[item.symbol]?.aiSignal || 'Side'
+    aiSignal: prices[item.symbol]?.aiSignal || 'Side',
+    updateTag: prices[item.symbol]?.updateTag
   }));
 
   // Compounded loading state
@@ -72,39 +74,43 @@ export default function StockPoolPage() {
   }, []);
 
   // Hydrate Prices (Data Fetching)
-  // This runs whenever watchlist changes (add/remove), fetching fresh data for ALL.
-  // Ideally, we could optimize to only fetch new ones, but batch is efficient enough.
-  const fetchPrices = useCallback(async () => {
+  const fetchPrices = useCallback(async (silent = false) => {
     if (watchlist.length === 0) return;
-    setLoadingPrices(true);
+    if (!silent) setLoadingPrices(true);
     
     try {
       const symbols = watchlist.map(w => w.symbol).join(',');
-      const batchRes = await fetch(`/api/stock/batch?symbols=${symbols}`, {
-        // Use default cache strategy (browser/CDN)
-      });
+      // 只有非静默刷新（手动进入或添加）时刺穿缓存，后台轮询依然走 CDN
+      const url = `/api/stock/batch?symbols=${symbols}${!silent ? `&t=${Date.now()}` : ''}`;
+      const batchRes = await fetch(url);
       const batchData = await batchRes.json();
       
       const newPrices: Record<string, Partial<StockSnapshot>> = {};
-      (batchData.stocks || []).forEach((detail: { symbol: string; price?: { close: number; change_percent: number }; prediction?: { signal: 'Long' | 'Short' | 'Side' } }) => {
+      (batchData.stocks || []).forEach((detail: { 
+          symbol: string; 
+          price?: { close: number; change_percent: number }; 
+          prediction?: { signal: 'Long' | 'Short' | 'Side' };
+          lastUpdated?: string;
+      }) => {
           newPrices[detail.symbol] = {
               price: detail.price?.close || 0,
               change: detail.price?.change_percent || 0,
-              aiSignal: detail.prediction?.signal || 'Side'
+              aiSignal: detail.prediction?.signal || 'Side',
+              updateTag: detail.lastUpdated
           };
       });
       setPrices(newPrices);
     } catch (err) {
       console.error('Failed to hydrate prices', err);
     } finally {
-      setLoadingPrices(false);
+      if (!silent) setLoadingPrices(false);
     }
   }, [watchlist]);
 
   useEffect(() => {
       fetchPrices();
-      // Set up a refresh interval specifically for prices
-      const interval = setInterval(fetchPrices, 30000); // 30s refresh
+      // 后台自动轮询设置 silent = true，这样会命中 CDN 缓存，保护服务器
+      const interval = setInterval(() => fetchPrices(true), 30000); 
       return () => clearInterval(interval);
   }, [fetchPrices]);
 
@@ -313,11 +319,16 @@ export default function StockPoolPage() {
                              <p className="text-xl font-black mono tracking-tighter text-white">
                                {stock.price > 0 ? stock.price.toFixed(2) : '--.--'}
                              </p>
-                             <p className={`text-[10px] font-black mono ${stock.change > 0 ? 'text-emerald-500' : stock.change < 0 ? 'text-rose-500' : 'text-slate-500'}`}>
-                               {stock.price > 0 ? `${stock.change >= 0 ? '+' : ''}${stock.change.toFixed(2)}%` : '数据中'}
-                             </p>
-                           </>
-                         ) : (
+                               <p className={`text-[10px] font-black mono ${stock.change > 0 ? 'text-emerald-500' : stock.change < 0 ? 'text-rose-500' : 'text-slate-500'}`}>
+                                 {stock.price > 0 ? `${stock.change >= 0 ? '+' : ''}${stock.change.toFixed(2)}%` : '同步中...'}
+                               </p>
+                               {stock.updateTag && (
+                                 <p className="text-[8px] text-slate-500 mono mt-1 font-bold">
+                                   {stock.updateTag}
+                                 </p>
+                               )}
+                             </>
+                           ) : (
                            <p className="text-[10px] text-slate-600 font-black italic uppercase tracking-widest">盘前静默</p>
                          )}
                        </div>

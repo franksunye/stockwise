@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 import { getDbClient } from '../../../lib/db';
 import { triggerOnDemandSync } from '@/lib/github-actions';
-
+import { getMarketFromSymbol, getExpectedLatestDataDate } from '@/lib/date-utils';
 
 /**
  * GET /api/stock-pool?userId=xxx
@@ -126,13 +126,10 @@ export async function POST(request: Request) {
                     .prepare('INSERT INTO global_stock_pool (symbol, name, watchers_count, first_watched_at) VALUES (?, ?, 1, ?)')
                     .run(symbol, displayName, now);
             }
-
-            client.close();
         }
 
         // 3. 核心改进：基于“数据实质内容”判断是否触发同步 (方案 B 升级版)
         // 逻辑：查询该股票在 daily_prices 中的最新日期，与市场应有的 ECD (Expected Content Date) 对比
-        const { getMarketFromSymbol, getExpectedLatestDataDate } = require('@/lib/date-utils');
         const market = getMarketFromSymbol(symbol);
         const expectedDate = getExpectedLatestDataDate(market);
 
@@ -158,6 +155,11 @@ export async function POST(request: Request) {
             await triggerOnDemandSync(symbol);
         } else {
             console.log(`✅ [数据实质完备] ${symbol}: 库中最新(${actualLatestDate}) >= 预期(${expectedDate})。跳过冗余同步。`);
+        }
+
+        // 4. 清理连接 (仅针对 SQLite)
+        if (!('execute' in client) && typeof (client as any).close === 'function') {
+            (client as any).close();
         }
 
         return NextResponse.json({ success: true });

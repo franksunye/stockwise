@@ -133,6 +133,7 @@ export async function GET(request: Request) {
 
         const stocks = symbols.map(sym => {
             const history = historyBySymbol.get(sym) || [];
+            const price = priceMap.get(sym) as any;
 
             // 数据安全处理
             const sevenDaysAgo = new Date();
@@ -140,13 +141,24 @@ export async function GET(request: Request) {
             const sevenDaysAgoStr = sevenDaysAgo.toISOString().split('T')[0];
             const validPreds = (history as { date: string }[]).filter(p => p.date >= sevenDaysAgoStr);
 
+            // 真实的最后更新标签: 如果价格数据是今天的，显示时间；否则显示日期
+            let displayUpdateTime = lastUpdateTime;
+            if (price?.date) {
+                const priceDate = String(price.date);
+                const todayStr = hkTime.toISOString().split('T')[0];
+                if (priceDate < todayStr) {
+                    // 如果数据不是今天的，显示日期前缀来提醒用户
+                    displayUpdateTime = `${priceDate.substring(5)} ${lastUpdateTime}`;
+                }
+            }
+
             return {
                 symbol: sym,
-                price: priceMap.get(sym) || null,
+                price: price || null,
                 prediction: validPreds[0] || null,
                 previousPrediction: validPreds[1] || null,
                 history: history,
-                lastUpdated: lastUpdateTime
+                lastUpdated: displayUpdateTime
             };
         });
 
