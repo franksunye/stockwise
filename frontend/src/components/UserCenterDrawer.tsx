@@ -713,6 +713,8 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                     </div>
                     )}
 
+
+
                     {/* Demo/Reset Tools - Very Minimal */}
                     <div className="mt-12 text-center">
                         <button 
@@ -730,7 +732,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                             }}
                             className="text-[9px] text-slate-700 hover:text-slate-500 font-bold uppercase tracking-[0.2em] transition-colors"
                         >
-                            Reset System Context & Onboarding
+                            重新进入激活引导
                         </button>
                     </div>  
                 </div>
