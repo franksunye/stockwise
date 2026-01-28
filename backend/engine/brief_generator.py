@@ -39,12 +39,18 @@ try:
     from backend.engine.models.brief_strategies import StrategyFactory
     from backend.engine.context_service import ContextService
     from backend.engine.task_logger import get_task_logger
+    from backend.engine.brief_prompts import BRIEF_PRO_INSTRUCTION, BRIEF_FREE_INSTRUCTION
+    from backend.engine.services.news_service import fetch_news_for_stock
+    from backend.engine.services.brief_assembler import assemble_user_brief, notify_user_brief_ready
 except ImportError:
     from database import get_connection
     from logger import logger
     from engine.models.brief_strategies import StrategyFactory
     from engine.context_service import ContextService
-    from engine.task_logger import get_task_logger
+    from task_logger import get_task_logger
+    from engine.brief_prompts import BRIEF_PRO_INSTRUCTION, BRIEF_FREE_INSTRUCTION
+    from engine.services.news_service import fetch_news_for_stock
+    from engine.services.brief_assembler import assemble_user_brief, notify_user_brief_ready
 
 # --- Tracing Helper ---
 class DetailedTraceRecorder:
@@ -133,134 +139,7 @@ class DetailedTraceRecorder:
 
 # --- Logic Impl ---
 
-async def fetch_news_for_stock(symbol: str, stock_name: str, target_date: str = None) -> str:
-    """Fetch news using EastMoney API (Free & Real-time for CN/HK) and filter by date if provided."""
-    
-    def _fetch_sync():
-        url = "http://search-api-web.eastmoney.com/search/jsonp"
-        params = {
-            "cb": "jQuery_callback",
-            "param": json.dumps({
-                "uid": "",
-                "keyword": symbol, # Search by symbol primarily
-                "type": ["cmsArticle"],
-                "client": "web",
-                "clientType": "web", 
-                "clientVersion": "curr",
-                "param": {
-                    "cmsArticle": {
-                        "searchScope": "default",
-                        "sort": "default",
-                        "pageIndex": 1,
-                        "pageSize": 50, # Fetch more to filter later
-                        "preTag": "",
-                        "postTag": ""
-                    }
-                }
-            })
-        }
-        
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-            "Referer": f"https://so.eastmoney.com/news/s?keyword={symbol}"
-        }
-
-        max_retries = 3
-        retry_delay = 2
-        
-        for attempt in range(max_retries):
-            try:
-                resp = requests.get(url, params=params, headers=headers, timeout=10)
-                resp.raise_for_status()  # Raise on HTTP errors (4xx, 5xx)
-                return resp.text
-            except requests.exceptions.RequestException as e:
-                if attempt < max_retries - 1:
-                    wait_time = retry_delay * (2 ** attempt)
-                    logger.warning(f"⚠️ [EastMoney] Attempt {attempt + 1}/{max_retries} failed for {symbol}: {e}. Retrying in {wait_time}s...")
-                    import time as time_module
-                    time_module.sleep(wait_time)
-                else:
-                    logger.error(f"❌ [EastMoney] All {max_retries} attempts failed for {symbol}: {e}")
-                    return None
-        return None
-
-    # Execute request in thread pool to avoid blocking
-    resp_text = await asyncio.to_thread(_fetch_sync)
-    
-    if not resp_text:
-        return "News retrieval failed."
-
-    # Parse JSONP
-    match = re.search(r'^[^(]*\((.*)\);?$', resp_text.strip(), re.DOTALL)
-    if not match:
-        return "No significant news found."
-
-    try:
-        data = json.loads(match.group(1))
-        # Ensure 'result' and 'cmsArticle' exist, handle None or missing keys gracefully
-        result = data.get("result") or {}
-        if not result:
-             return "No significant news found."
-             
-        articles = result.get("cmsArticle", [])
-        
-        # Filter: Symbol OR Name in title
-        # EastMoney search by 'keyword' (symbol) might return irrelevant results if we don't filter
-        filter_terms = [symbol]
-        if stock_name:
-            filter_terms.append(stock_name)
-            
-        focused_articles = [
-            a for a in articles
-            if any(term.lower() in a.get("title", "").lower() for term in filter_terms)
-        ]
-        
-        if not focused_articles:
-             return "No significant news found directly related to this stock."
-
-        context = []
-        try:
-            target_dt = datetime.strptime(target_date, "%Y-%m-%d") if target_date else None
-        except Exception:
-            target_dt = None
-
-        for a in focused_articles:
-            # Date filter: Allow news within past 3 days of target_date
-            a_date = a.get('date', '')
-            
-            if target_dt and a_date:
-                try:
-                    # News date format is usually 'YYYY-MM-DD HH:MM:SS'
-                    news_dt = datetime.strptime(a_date[:10], "%Y-%m-%d")
-                    days_diff = (target_dt - news_dt).days
-                    
-                    if days_diff < 0 or days_diff > 5: # Allow today and past 5 days (covers full weekends)
-                        continue
-                except Exception:
-                    # If date parsing fails, fallback to strict match or ignore if unknown
-                    if not a_date.startswith(target_date):
-                        continue
-            elif target_date and not a_date.startswith(target_date):
-                continue
-                
-            title = a.get('title', '').replace("<em>", "").replace("</em>", "")
-            content = a.get('content', '')[:300] 
-            date = a_date
-            media = a.get('mediaName', 'EastMoney')
-            
-            context.append(f"- **{title}** ({date}): {content} (Source: {media})")
-            
-            if len(context) >= 5: # Limit to 5 strictly valid news
-                break
-            
-        if not context:
-            return "No recent news found (Date mismatch or no significant updates today)."
-            
-        return "\n".join(context)
-
-    except Exception as e:
-        logger.error(f"⚠️ [EastMoney] Parse failed for {symbol}: {e}")
-        return f"News parsing failed: {e}"
+# fetch_news_for_stock moved to services/news_service.py
 
 
 async def analyze_stock_context(
@@ -269,7 +148,8 @@ async def analyze_stock_context(
     news: str, 
     technical_data: Dict, 
     date_str: str,
-    tier: str = "free"
+    tier: str = "free",
+    facts: Dict = None
 ) -> str:
     """Analyze stock using the selected Strategy for a specific tier."""
     
@@ -311,9 +191,10 @@ async def analyze_stock_context(
     ai_reasoning = technical_data.get('ai_reasoning', '')
     reasoning_section = ai_reasoning[:500] if ai_reasoning else "（无分析师推理记录）"
     
-    # [NEW] Use ContextService (Data Fact Layer) for robust facts
-    ctx_service = ContextService()
-    facts = ctx_service.get_context_facts(symbol, date_str)
+    # [World Class] Facts are now passed from outside, or fallback to Service
+    if facts is None:
+        ctx_service = ContextService()
+        facts = await ctx_service.get_comprehensive_context(symbol, date_str, stock_name)
     
     deep_facts = []
     if facts.get("market_mood"): 
@@ -342,32 +223,8 @@ async def analyze_stock_context(
 
     today_date = date_str  # Use passed date_str
     
-    # 5. Construct User Prompt based on Tier
-    if tier == 'pro':
-        task_instruction = """任务: 撰写每日简报（不要包含任何标题）。格式如下：
-
-1. **预测校验与深度复盘** (约 100-150 字)：
-   - **必选开头 (The Verdict)**：明确回应昨日预测（参考 [第四事实]）。
-     - 若**预测准确**（如昨日看多，今日涨）：自信指出预判逻辑（如资金面、技术面）是如何兑现的。
-     - 若**预测失误**（如昨日看多，今日跌）：展现顶级分析师素养——**直面错误，随即复盘**。分析是受突发新闻冲击，还是主力资金博弈导致？**切勿找借口**。
-   - **叙事展开**：紧接着结合 [今日核心新闻]，将校验结果无缝融入今日行情分析。
-   - **禁止**出现具体技术指标名称和数值。
-
-2. **核心新闻 (附出处)** (最多3条，格式：**[中文标题]**：中文摘要。[出处名称](URL) 或 (Source: MediaName))
-   - **必须**将原始内容翻译为流畅的中文。
-   - 若无重大新闻，显示"今日无重大公开新闻"，通过技术面形态补充。"""
-    else:
-        # Free tier instruction (Original)
-        task_instruction = """任务: 撰写每日简报（不要包含任何标题）。格式如下：
-
-1. **综合分析** (约60-80字)：
-   - 以今日核心新闻或行业动态开头。
-   - 结合股价表现，用自然的语言描述当前趋势（基于 AI 信号和技术面）。
-   - **禁止**出现具体技术指标名称和数值。
-
-2. **核心新闻 (附出处)** (最多3条，格式：**[中文标题]**：中文摘要。[出处链接](URL))
-   - **必须**将原始内容翻译为流畅的中文。
-   - 如果没有重大新闻，此部分显示"今日无重大公开新闻"，通过技术面形态略作补充。"""
+    # 5. Construct User Prompt based on Tier (Instructions now imported from brief_prompts.py)
+    task_instruction = BRIEF_PRO_INSTRUCTION if tier == 'pro' else BRIEF_FREE_INSTRUCTION
 
     user_prompt = f"""Subject: {symbol} ({stock_name})
 
@@ -419,9 +276,10 @@ async def analyze_stock_context(
 
 
 # --- Phase 1: Stock-Level Batch Analysis ---
-async def generate_stock_briefs_batch(date_str: str, specific_symbols: List[str] = None, force: bool = False):
+async def generate_stock_briefs_batch(date_str: str, specific_symbols: List[str] = None, force: bool = False, target_tier: str = None):
     """
     Phase 1: Analyze unique stocks and cache results in `stock_briefs`.
+    If target_tier is specified, only processes stocks and generates briefs for that tier.
     """
     conn = get_connection()
     try:
@@ -429,20 +287,48 @@ async def generate_stock_briefs_batch(date_str: str, specific_symbols: List[str]
         
         # 1. Identify stocks to process
         if specific_symbols:
-            # Get names for specific symbols
+            # Manual override: Assume these need the target_tier (or both if none)
             placeholders = ','.join(['?' for _ in specific_symbols])
             cursor.execute(f"SELECT symbol, name FROM stock_meta WHERE symbol IN ({placeholders})", specific_symbols)
             targets = cursor.fetchall()
             target_map = {t[0]: t[1] for t in targets}
-            unique_stocks = [(s, target_map.get(s, s)) for s in specific_symbols]
+            # For manual symbols, we treat them as "watched" by the requested tier
+            unique_stocks = [(s, target_map.get(s, s), True if target_tier == "pro" or not target_tier else False) for s in specific_symbols]
         else:
-            # Default: Get ALL unique symbols from valid watchlists
-            cursor.execute("""
-                SELECT DISTINCT uw.symbol, IFNULL(sm.name, uw.symbol)
-                FROM user_watchlist uw
-                LEFT JOIN stock_meta sm ON uw.symbol = sm.symbol
-            """)
-            unique_stocks = cursor.fetchall()
+            # Default: Get symbols based on requested tier
+            if target_tier == "pro":
+                logger.info("🎯 Mode: PRO Tier Only (Filtering for PRO user stocks)")
+                cursor.execute("""
+                    SELECT DISTINCT uw.symbol, IFNULL(sm.name, uw.symbol)
+                    FROM user_watchlist uw
+                    JOIN users u ON uw.user_id = u.user_id
+                    LEFT JOIN stock_meta sm ON uw.symbol = sm.symbol
+                    WHERE u.subscription_tier = 'pro'
+                """)
+                unique_stocks = [(row[0], row[1], True) for row in cursor.fetchall()]
+            elif target_tier == "free":
+                logger.info("🎯 Mode: FREE Tier Only")
+                cursor.execute("""
+                    SELECT DISTINCT uw.symbol, IFNULL(sm.name, uw.symbol)
+                    FROM user_watchlist uw
+                    JOIN users u ON uw.user_id = u.user_id
+                    LEFT JOIN stock_meta sm ON uw.symbol = sm.symbol
+                    WHERE u.subscription_tier = 'free'
+                """)
+                unique_stocks = [(row[0], row[1], False) for row in cursor.fetchall()]
+            else:
+                # Full Mode: Existing logic to tag is_pro_watched
+                cursor.execute("""
+                    SELECT 
+                        uw.symbol, 
+                        IFNULL(sm.name, uw.symbol),
+                        MAX(CASE WHEN u.subscription_tier = 'pro' THEN 1 ELSE 0 END) as is_pro_watched
+                    FROM user_watchlist uw
+                    LEFT JOIN stock_meta sm ON uw.symbol = sm.symbol
+                    LEFT JOIN users u ON uw.user_id = u.user_id
+                    GROUP BY uw.symbol
+                """)
+                unique_stocks = [(row[0], row[1], bool(row[2])) for row in cursor.fetchall()]
 
         if not unique_stocks:
             logger.info("ℹ️ No stocks to analyze.")
@@ -450,86 +336,64 @@ async def generate_stock_briefs_batch(date_str: str, specific_symbols: List[str]
 
         logger.info(f"🚀 [Phase 1] Starting batch analysis for {len(unique_stocks)} unique stocks...")
 
-        # 2. Get AI Predictions for context (v3 with Historical Reflection)
+        # 2. Get AI Predictions & Technical Facts using World-Class ContextService
+        ctx_service = ContextService()
         symbols_list = [s[0] for s in unique_stocks]
-        placeholders = ','.join(['?' for _ in symbols_list])
-        cursor.execute(f"""
-            SELECT 
-                p.symbol, p.signal, p.confidence, p.ai_reasoning, p.support_price, p.pressure_price, 
-                prev.signal as prev_signal, prev.validation_status as prev_status, prev.actual_change as prev_change
-            FROM ai_predictions_v2 p
-            LEFT JOIN ai_predictions_v2 prev ON p.symbol = prev.symbol 
-                 AND prev.date = date(p.date, '-1 day') 
-                 AND prev.is_primary = 1
-            WHERE p.symbol IN ({placeholders}) AND p.date = ? AND p.is_primary = 1
-        """, (*symbols_list, date_str))
-        predictions = {row[0]: {
-            'signal': row[1], 
-            'confidence': row[2],
-            'ai_reasoning': row[3],
-            'support_price': row[4],
-            'pressure_price': row[5],
-            'reflection': {
-                'prev_signal': row[6],
-                'prev_status': row[7],
-                'prev_change': row[8],
-            }
-        } for row in cursor.fetchall()}
-
-        # 2b. Get Real Technical Data from daily_prices (latest available)
-        cursor.execute(f"""
-            SELECT symbol, close, change_percent, rsi, kdj_k, kdj_d, kdj_j, macd, macd_signal
-            FROM daily_prices
-            WHERE symbol IN ({placeholders})
-            AND date = (SELECT MAX(date) FROM daily_prices WHERE symbol = daily_prices.symbol)
-        """, symbols_list)
-        price_data = {row[0]: {
-            'close': row[1],
-            'change_percent': row[2],
-            'rsi': row[3]
-        } for row in cursor.fetchall()}
+        
+        predictions = await ctx_service.get_batch_predictions_and_reflection(symbols_list, date_str)
+        price_data = await ctx_service.get_batch_technical_facts(symbols_list)
 
         # 3. Process each stock (generate briefs for each tier)
         from engine.models.brief_strategies import SUPPORTED_TIERS, TIER_PROVIDER_MAP
         
         processed_count = 0
         
-        for symbol, stock_name in unique_stocks:
+        for symbol, stock_name, is_pro_watched in unique_stocks:
             # Fetch news once (shared across tiers)
             logger.info(f"⚡ Processing {symbol} ({processed_count + 1}/{len(unique_stocks)})...")
             
+            # Step A: Enrichment - Get comprehensive facts (including altitude, volume, etc.)
+            facts = await ctx_service.get_comprehensive_context(symbol, date_str, stock_name)
+            
+            # Step B: News Fetching
             news_task = fetch_news_for_stock(symbol, stock_name, date_str)
             news = await news_task
             
+            # Step C: Prepare data for synthesis
             pred = predictions.get(symbol, {})
             prices = price_data.get(symbol, {})
             
             tech_data = {
                 'signal': pred.get('signal', 'Side'),
                 'confidence': pred.get('confidence', 0),
-                'ai_reasoning': pred.get('ai_reasoning', ''),
-                'support_price': pred.get('support_price'),
-                'pressure_price': pred.get('pressure_price'),
+                'ai_reasoning': pred.get('reasoning', ''),
+                'support_price': pred.get('support'),
+                'pressure_price': pred.get('pressure'),
                 'close': prices.get('close'),
-                'change_percent': prices.get('change_percent'),
+                'change_percent': prices.get('change'),
                 'reflection': pred.get('reflection', {}),
             }
 
-            # Generate briefs for each tier (free: hunyuan, pro: deepseek)
-            for tier in SUPPORTED_TIERS:
-                # [Optimization] Skip FREE tier if requested
+            # Determine which tiers to generate for this stock
+            tiers_to_run = [target_tier] if target_tier else SUPPORTED_TIERS
+            
+            for tier in tiers_to_run:
+                # [Filter] Non-PRO stocks don't get PRO briefs in Full Mode
+                if not target_tier and tier == "pro" and not is_pro_watched:
+                    continue
+                
+                # [Optimization] Skip based on User Tier demand
                 if tier == "free" and os.getenv("BRIEF_SKIP_FREE", "false").lower() == "true":
                     logger.debug(f"⏭️ [System] Skipping FREE tier analysis as requested.")
                     continue
 
+                # Check if exists (idempotency)
                 if not force:
                     cursor.execute("SELECT 1 FROM stock_briefs WHERE symbol = ? AND date = ? AND tier = ?", 
                                   (symbol, date_str, tier))
                     if cursor.fetchone():
                         logger.debug(f"⏭️ [Skip] {symbol}/{tier} already analyzed for {date_str}.")
                         continue
-                else:
-                    logger.debug(f"🔥 [Force] Re-generating {symbol}/{tier} despite existing record.")
                 
                 provider = TIER_PROVIDER_MAP[tier]
                 logger.info(f"   📝 Generating {tier.upper()} brief using {provider}...")
@@ -538,34 +402,30 @@ async def generate_stock_briefs_batch(date_str: str, specific_symbols: List[str]
                 max_retries = 3
                 for attempt in range(max_retries):
                     try:
-                        analysis = await analyze_stock_context(symbol, stock_name, news, tech_data, date_str, tier)
+                        # Call synthesis with rich facts
+                        analysis = await analyze_stock_context(symbol, stock_name, news, tech_data, date_str, tier, facts=facts)
                         if analysis:
                             break
                     except Exception as e:
                         if "429" in str(e) or "rate limit" in str(e).lower():
                             wait_time = (attempt + 1) * 5
-                            logger.warning(f"⚠️  Rate limit (429) hit for {symbol}/{tier}. Waiting {wait_time}s... (Attempt {attempt+1}/{max_retries})")
+                            logger.warning(f"⚠️  Rate limit (429) hit. Waiting {wait_time}s...")
                             await asyncio.sleep(wait_time)
                         else:
-                            logger.error(f"❌ [Attempt {attempt+1}] Error generating brief: {e}")
+                            logger.error(f"❌ [Attempt {attempt+1}] Error: {e}")
                             await asyncio.sleep(2)
                 
-                if not analysis:
-                    logger.error(f"💀 Failed to generate brief for {symbol}/{tier} after {max_retries} attempts.")
-                    continue
-
-                # Store in DB with tier
-                cursor.execute("""
-                    INSERT OR REPLACE INTO stock_briefs 
-                    (symbol, date, tier, stock_name, analysis_markdown, raw_news, signal, confidence)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                """, (symbol, date_str, tier, stock_name, analysis, news, tech_data['signal'], tech_data['confidence']))
-                
-                conn.commit()
+                if analysis:
+                    cursor.execute("""
+                        INSERT OR REPLACE INTO stock_briefs 
+                        (symbol, date, tier, stock_name, analysis_markdown, raw_news, signal, confidence)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    """, (symbol, date_str, tier, stock_name, analysis, news, tech_data['signal'], tech_data['confidence']))
+                    conn.commit()
             
             processed_count += 1
         
-        logger.info(f"✅ [Phase 1] Completed. Analyzed {processed_count} stocks x {len(SUPPORTED_TIERS)} tiers.")
+        logger.info(f"✅ [Phase 1] Completed. Analyzed {processed_count} stocks.")
 
     except Exception as e:
         logger.error(f"❌ [Phase 1] Error: {e}")
@@ -573,222 +433,35 @@ async def generate_stock_briefs_batch(date_str: str, specific_symbols: List[str]
         conn.close()
 
 
-# --- Phase 2: User-Level Assembly ---
-async def assemble_user_brief(user_id: str, date_str: str) -> Optional[str]:
-    """
-    Phase 2: Assemble personalized brief from `stock_briefs`.
-    Zero LLM cost.
-    Fetches briefs matching user's subscription tier.
-    """
-    conn = get_connection()
-    try:
-        cursor = conn.cursor()
-        
-        # 0. Get user subscription tier
-        cursor.execute("SELECT subscription_tier FROM users WHERE user_id = ?", (user_id,))
-        tier_row = cursor.fetchone()
-        user_tier = tier_row[0] if tier_row and tier_row[0] else 'free'
-        logger.info(f"👤 User {user_id} tier: {user_tier}")
-        
-        # 1. Get user watchlist
-        cursor.execute("SELECT symbol FROM user_watchlist WHERE user_id = ?", (user_id,))
-        watchlist = [r[0] for r in cursor.fetchall()]
-        
-        if not watchlist:
-            return None
-
-        # 2. Fetch cached briefs (matching user's tier, with fallback to 'free')
-        placeholders = ','.join(['?' for _ in watchlist])
-        cursor.execute(f"""
-            SELECT symbol, stock_name, analysis_markdown, signal
-            FROM stock_briefs
-            WHERE symbol IN ({placeholders}) AND date = ? AND tier = ?
-        """, (*watchlist, date_str, user_tier))
-        
-        stock_reports = cursor.fetchall()
-        
-        # Fallback: If PRO user has no pro briefs, try free tier as backup
-        if not stock_reports and user_tier == 'pro':
-            logger.warning(f"⚠️ No PRO briefs for user {user_id}, falling back to FREE tier...")
-            cursor.execute(f"""
-                SELECT symbol, stock_name, analysis_markdown, signal
-                FROM stock_briefs
-                WHERE symbol IN ({placeholders}) AND date = ? AND tier = 'free'
-            """, (*watchlist, date_str))
-            stock_reports = cursor.fetchall()
-        
-        if not stock_reports:
-            logger.warning(f"⚠️ User {user_id} (tier={user_tier}) has watchlist but no stock briefs found for {date_str}. Did Phase 1 run?")
-            return None
-
-        # 3. Assemble Markdown
-        brief_sections = []
-        brief_sections.append(f"# 📊 每日简报 - {date_str}\n")
-        brief_sections.append(f"个人定制，基于您关注的 {len(watchlist)} 只股票。\n\n---\n")
-        
-        bullish = 0
-        bearish = 0
-
-        for symbol, name, analysis, signal in stock_reports:
-            stock_name = name or symbol
-            brief_sections.append(f"### {stock_name} ({symbol})")
-            brief_sections.append(f"{analysis}\n\n")
-            
-            if signal and ('Long' in signal or 'Bullish' in signal):
-                bullish += 1
-            elif signal and ('Short' in signal or 'Bearish' in signal):
-                bearish += 1
-
-        timestamp = datetime.now().strftime("%H:%M")
-        brief_sections.append("---\n")
-        brief_sections.append(f"*StockWise AI 生成于 {timestamp}*")
-        
-        full_brief = "\n".join(brief_sections)
-        # Intelligent Hook Generation
-        bullish_stocks = []
-        bearish_stocks = []
-        
-        for symbol, name, _, signal in stock_reports:
-             s_name = name or symbol
-             if signal and ('Long' in signal or 'Bullish' in signal):
-                 bullish_stocks.append(s_name)
-             elif signal and ('Short' in signal or 'Bearish' in signal):
-                 bearish_stocks.append(s_name)
-        
-        if bullish_stocks:
-            top_stocks = "、".join(bullish_stocks[:2])
-            etc = "等" if len(bullish_stocks) > 2 else ""
-            push_hook = f"📈 {top_stocks}{etc}出现看涨信号，点击查看今日 AI 复盘。"
-        elif bearish_stocks:
-            top_stocks = "、".join(bearish_stocks[:2])
-            etc = "等" if len(bearish_stocks) > 2 else ""
-            push_hook = f"⚠️ {top_stocks}{etc}面临调整压力，点击查看风险提示。"
-        else:
-            push_hook = f"今日复盘：{len(watchlist)} 只股票走势平稳，点击查看详情。"
-
-        # 4. Save User Brief
-        cursor.execute("""
-            INSERT OR REPLACE INTO daily_briefs (user_id, date, content, push_hook)
-            VALUES (?, ?, ?, ?)
-        """, (user_id, date_str, full_brief, push_hook))
-        conn.commit()
-        
-        return full_brief
-
-    except Exception as e:
-        logger.error(f"❌ [Phase 2] Error assembling brief for {user_id}: {e}")
-        return None
-    finally:
-        conn.close()
-
-
-# --- Notification Helpers ---
-async def notify_user_brief_ready(user_id: str, date_str: str):
-    """
-    Send push notification to user immediately after their brief is ready.
-    Includes idempotency protection and comprehensive error handling.
-    """
-    try:
-        from backend.notifications import send_push_notification
-    except ImportError:
-        from notifications import send_push_notification
-    
-    conn = get_connection()
-    try:
-        cursor = conn.cursor()
-        
-        # 1. Idempotency Check: Has this user already been notified for this date?
-        cursor.execute(
-            "SELECT notified_at FROM daily_briefs WHERE user_id = ? AND date = ?",
-            (user_id, date_str)
-        )
-        row = cursor.fetchone()
-        
-        if not row:
-            logger.warning(f"⚠️ [Notify] User {user_id} has no brief for {date_str}, skipping notification")
-            return
-        
-        if row[0]:  # notified_at is not NULL
-            logger.debug(f"ℹ️ [Notify] User {user_id} already notified at {row[0]}, skipping")
-            return
-        
-        # 2. Subscription Check: Does user have push subscription?
-        cursor.execute(
-            "SELECT 1 FROM push_subscriptions WHERE user_id = ? LIMIT 1",
-            (user_id,)
-        )
-        if not cursor.fetchone():
-            logger.info(f"ℹ️ [Notify] User {user_id} has no push subscription, skipping notification")
-            return
-        
-        # 3. Get user tier for differentiated notification
-        cursor.execute(
-            "SELECT subscription_tier FROM users WHERE user_id = ?",
-            (user_id,)
-        )
-        tier_row = cursor.fetchone()
-        user_tier = tier_row[0] if tier_row and tier_row[0] else 'free'
-        
-        # 4. Get push_hook for notification body
-        cursor.execute(
-            "SELECT push_hook FROM daily_briefs WHERE user_id = ? AND date = ?",
-            (user_id, date_str)
-        )
-        row = cursor.fetchone()
-        push_hook = row[0] if row and row[0] else "点击查看今日 AI 复盘"
-        
-        # 5. Send tier-differentiated notification
-        if user_tier == 'pro':
-            notify_title = "⭐ Pro 深度复盘已就绪"
-            notify_body = f"{push_hook} | 首席主笔深度解读"
-        else:
-            notify_title = "📊 今日简报已生成"
-            notify_body = push_hook
-        
-        send_push_notification(
-            title=notify_title,
-            body=notify_body,
-            url="/dashboard?brief=true",
-            target_user_id=user_id,
-            tag="daily_brief"
-        )
-        
-        # 5. Mark as notified (idempotency protection)
-        cursor.execute(
-            "UPDATE daily_briefs SET notified_at = datetime('now', '+8 hours') WHERE user_id = ? AND date = ?",
-            (user_id, date_str)
-        )
-        conn.commit()
-        
-        logger.info(f"✅ [Notify] User {user_id} notified for brief {date_str}")
-        
-    except Exception as e:
-        logger.error(f"❌ [Notify] Failed to notify user {user_id}: {e}")
-        # Don't raise - allow pipeline to continue for other users
-    finally:
-        conn.close()
+# Phase 2 and Notification moved to services/brief_assembler.py
 
 
 # --- CLI / Orchestrator ---
-async def run_daily_pipeline(date_str: str = None, force: bool = False):
+async def run_daily_pipeline(date_str: str = None, force: bool = False, target_tier: str = None):
     """Run the Full Pipeline (Phase 1 + Phase 2 for all users)"""
     if not date_str:
         date_str = datetime.now().strftime("%Y-%m-%d")
     
-    logger.info(f"🎬 Starting Daily Brief Pipeline for {date_str} (Force={force})")
+    tier_info = f" ({target_tier} only)" if target_tier else ""
+    logger.info(f"🎬 Starting Daily Brief Pipeline for {date_str}{tier_info} (Force={force})")
     
     t_logger = get_task_logger("news_desk", "brief_gen")
-    t_logger.start("Daily Briefing & Push", "delivery", dimensions={})
+    t_logger.start(f"Daily Briefing{tier_info}", "delivery", dimensions={"tier": target_tier or "all"})
 
     try:
         # 1. Phase 1: Analyze Stocks
-        await generate_stock_briefs_batch(date_str, force=force)
+        await generate_stock_briefs_batch(date_str, force=force, target_tier=target_tier)
     
-        # 2. Phase 2: Assemble for ALL users
+        # 2. Phase 2: Assemble for relevant users
         conn = get_connection()
         try:
             cursor = conn.cursor()
-            cursor.execute("SELECT DISTINCT user_id FROM user_watchlist")
+            # If target_tier is set, only process users of that tier
+            if target_tier:
+                cursor.execute("SELECT DISTINCT u.user_id FROM users u JOIN user_watchlist w ON u.user_id = w.user_id WHERE u.subscription_tier = ?", (target_tier,))
+            else:
+                cursor.execute("SELECT DISTINCT user_id FROM user_watchlist")
+            
             users = [r[0] for r in cursor.fetchall()]
             
             logger.info(f"👥 [Phase 2] Assembling briefs for {len(users)} users...")
@@ -828,6 +501,7 @@ if __name__ == "__main__":
     parser.add_argument("--provider", help="Override LLM Provider (gemini/hunyuan)", default=None)
     parser.add_argument("--force", action="store_true", help="Force re-generation of briefs")
     parser.add_argument("--symbols", help="Comma-separated list of symbols to process (e.g. 00700,02171)")
+    parser.add_argument("--tier", choices=["free", "pro"], help="Run for specific tier only")
     args = parser.parse_args()
     
     target_date = args.date or datetime.now().strftime("%Y-%m-%d")
@@ -850,7 +524,7 @@ if __name__ == "__main__":
             conn.close()
         
         if symbols:
-            asyncio.run(generate_stock_briefs_batch(target_date, specific_symbols=symbols, force=args.force))
+            asyncio.run(generate_stock_briefs_batch(target_date, specific_symbols=symbols, force=args.force, target_tier=args.tier))
             asyncio.run(assemble_user_brief(args.user, target_date))
             print("\n✅ Verification Complete. Check 'daily_briefs' table.")
         else:
@@ -862,6 +536,6 @@ if __name__ == "__main__":
         target_symbols = [s.strip() for s in args.symbols.split(",")] if args.symbols else None
         if target_symbols:
             print(f"Running targeted analysis for symbols: {target_symbols}")
-            asyncio.run(generate_stock_briefs_batch(target_date, specific_symbols=target_symbols, force=args.force))
+            asyncio.run(generate_stock_briefs_batch(target_date, specific_symbols=target_symbols, force=args.force, target_tier=args.tier))
         else:
-            asyncio.run(run_daily_pipeline(target_date, force=args.force))
+            asyncio.run(run_daily_pipeline(target_date, force=args.force, target_tier=args.tier))
