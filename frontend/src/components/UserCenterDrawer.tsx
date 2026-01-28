@@ -441,7 +441,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
 
                     {/* 资源用量 */}
                     <div className="grid grid-cols-2 gap-3 mb-3">
-                        <div className="glass-card rounded-[24px] p-5 flex flex-col justify-between h-24">
+                        <div className="glass-card rounded-[24px] !p-5 flex flex-col justify-between h-24">
                         <div className="flex items-center gap-2 text-slate-400">
                             <ShieldCheck size={16} />
                             <span className="text-xs font-bold uppercase">监控配额</span>
@@ -452,7 +452,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                         </div>
                         </div>
 
-                        <div className={`glass-card rounded-[24px] p-5 flex flex-col justify-between h-24 ${tier === 'pro' ? 'border-amber-500/20 bg-amber-500/5' : 'opacity-60'}`}>
+                        <div className={`glass-card rounded-[24px] !p-5 flex flex-col justify-between h-24 ${tier === 'pro' ? 'border-amber-500/20 bg-amber-500/5' : 'opacity-60'}`}>
                         <div className={`flex items-center gap-2 ${tier === 'pro' ? 'text-amber-200' : 'text-slate-400'}`}>
                             <Zap size={16} />
                             <span className="text-xs font-bold uppercase">AI 分析</span>
@@ -517,8 +517,8 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
 
                     {/* Notification Switch */}
                     {pushSupported && (
-                        <div className="glass-card rounded-[24px] mb-3 overflow-hidden">
-                            <div className="p-5 pb-2">
+                        <div className="glass-card !p-0 rounded-[24px] mb-3 overflow-hidden">
+                            <div className="px-5 py-4 pb-2">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-3">
                                         <div>
@@ -664,8 +664,8 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                     {/* 邀请好友区域 (Loot Logic) */}
                     {MEMBERSHIP_CONFIG.switches.enableReferralReward && (
                     <div className="mt-3">
-                        <div className="glass-card rounded-[24px] relative overflow-hidden group">
-                            <div className="relative z-10 p-5 pb-2">
+                        <div className="glass-card !p-0 rounded-[24px] relative overflow-hidden group">
+                            <div className="relative z-10 px-5 py-4 pb-2">
                                 <div className="flex items-center justify-between mb-3">
                                     <h4 className="text-sm font-black italic text-white flex items-center gap-2">
                                         邀请好友领 Pro
