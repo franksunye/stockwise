@@ -524,7 +524,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
 
                     {/* Notification Switch */}
                     {pushSupported && (
-                        <div className="glass-card p-4 mb-4">
+                        <div className="glass-card px-4 pt-4 pb-2.5 mb-4">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
                                     <div className={`w-9 h-9 rounded-full flex items-center justify-center ${isSubscribed ? 'bg-emerald-500/20 text-emerald-400' : 'bg-white/5 text-slate-400'}`}>
@@ -548,7 +548,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                             </div>
                             
                             {isSubscribed && (
-                            <div className="mt-3 pt-3 border-t border-white/5">
+                            <div className="mt-2.5 pt-2.5 border-t border-white/5">
                                 <button
                                 onClick={() => setShowNotificationSettings(!showNotificationSettings)}
                                 className="w-full flex items-center justify-between text-[10px] text-slate-500 hover:text-indigo-400 transition-colors py-1"
