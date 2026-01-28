@@ -569,7 +569,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                     transition={{ duration: 0.2 }}
                                     className="overflow-hidden"
                                     >
-                                    <div className="mt-3 space-y-1.5 pb-2">
+                                    <div className="mt-3 space-y-1.5">
                                         {[
                                         { key: 'signal_flip', icon: ArrowLeftRight, label: '信号翻转', badge: '重要' },
                                         { key: 'morning_call', icon: Sun, label: '每日早报', badge: '08:30' },
@@ -617,11 +617,11 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                         })}
 
                                         {/* Test Device Button - Moved to bottom */}
-                                        <div className="pt-2 mt-2 border-t border-white/5 flex justify-center">
+                                        <div className="pt-1.5 mt-1.5 border-t border-white/5 flex justify-center">
                                             <button 
                                                 onClick={handleTestPush} 
                                                 disabled={testingPush} 
-                                                className="flex items-center gap-2 py-2 px-4 rounded-xl hover:bg-white/5 transition-colors text-[10px] text-slate-500 hover:text-indigo-400 font-bold uppercase tracking-wider disabled:opacity-50"
+                                                className="flex items-center gap-2 py-1.5 px-4 rounded-xl hover:bg-white/5 transition-colors text-[10px] text-slate-500 hover:text-indigo-400 font-bold uppercase tracking-wider disabled:opacity-50"
                                             >
                                                 <Bell size={12} />
                                                 {testingPush ? '正在发送...' : '测试当前设备推送'}
