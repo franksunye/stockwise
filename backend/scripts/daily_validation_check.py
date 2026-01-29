@@ -97,17 +97,10 @@ def run_validation_notifications(dry_run=False):
         # Identify the single best win in this batch for the user
         max_gain = max([abs(success_map[s]['change']) for s in symbols])
         
-        title, body = NotificationTemplates.render(
-            "validation_glory",
-            tier=user_tier,
-            stock_names=stock_names,
-            max_gain=f"{max_gain:+.1f}"
-        )
         url = "/dashboard?utm_source=push&utm_medium=validation_glory"
-        
         nm.queue_notification(user_id, "validation_glory", {
-            "title": title,
-            "body": body,
+            "stock_names": stock_names,
+            "max_gain": f"{max_gain:+.1f}",
             "url": url,
             "related_symbols": symbols
         })

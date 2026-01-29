@@ -269,8 +269,7 @@ class NotificationManager:
             title, body = NotificationTemplates.render(
                 "validation_glory", 
                 tier=user_tier, 
-                title=e["title"], 
-                body=e["body"]
+                **e
             )
             return {
                 "title": title,
