@@ -7,8 +7,8 @@ import { getCurrentUser, type User } from '@/lib/user';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getMarketScene } from '@/lib/date-utils';
 
-import { useWatchlist } from '@/hooks/useWatchlist';
 import { useUserProfile } from '@/hooks/useUserProfile';
+import { useStocks } from '@/context/StockContext';
 
 interface StockSnapshot {
   symbol: string;
@@ -19,45 +19,35 @@ interface StockSnapshot {
   updateTag?: string;
 }
 
-const POOL_CACHE_KEY = 'stockwise_pool_prices_v1';
+
 
 export default function StockPoolPage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   
   // New Hook Usage
-  const { watchlist, addStock, removeStock, loading: loadingList } = useWatchlist();
-  const [prices, setPrices] = useState<Record<string, Partial<StockSnapshot>>>({});
-  const [loadingPrices, setLoadingPrices] = useState(false);
-
-  // 1. 初始化：尝试从本地缓存读取行情，实现【秒开】
-  useEffect(() => {
-    try {
-        const cached = localStorage.getItem(POOL_CACHE_KEY);
-        if (cached) {
-            const parsed = JSON.parse(cached);
-            if (parsed && typeof parsed === 'object') {
-                console.log('🚀 Loading pool prices from local cache');
-                setPrices(parsed);
-            }
-        }
-    } catch (e) {
-        console.error('Failed to load pool cache', e);
-    }
-  }, []);
-
-  // Derived State for UI
-  const stocks: StockSnapshot[] = watchlist.map(item => ({
-    symbol: item.symbol,
-    name: item.name,
-    price: prices[item.symbol]?.price || 0,
-    change: prices[item.symbol]?.change || 0,
-    aiSignal: prices[item.symbol]?.aiSignal || 'Side',
-    updateTag: prices[item.symbol]?.updateTag
+  // Global Data Context
+  const { 
+    stocks: globalStocks, 
+    loadingPool, 
+    watchlist, 
+    addStock, 
+    removeStock, 
+    loadingList 
+  } = useStocks();
+  
+  // Derived State for UI - Map global StockData to local StockSnapshot
+  const stocks: StockSnapshot[] = globalStocks.map(s => ({
+    symbol: s.symbol,
+    name: s.name,
+    price: s.price?.close || 0,
+    change: s.price?.change_percent || 0,
+    aiSignal: s.prediction?.signal || 'Side',
+    updateTag: s.lastUpdated
   }));
 
   // Compounded loading state
-  const loading = loadingList || (loadingPrices && Object.keys(prices).length === 0);
+  const loading = loadingList || loadingPool;
   
   const [newSymbol, setNewSymbol] = useState('');
   const [showAdd, setShowAdd] = useState(false);
@@ -65,6 +55,7 @@ export default function StockPoolPage() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [stockToDelete, setStockToDelete] = useState<StockSnapshot | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [navigatingTo, setNavigatingTo] = useState<string | null>(null);
 
   const [limitMsg, setLimitMsg] = useState<string | null>(null);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
@@ -82,52 +73,12 @@ export default function StockPoolPage() {
     init();
   }, []);
 
-  // Hydrate Prices (Data Fetching)
-  const fetchPrices = useCallback(async (silent = false) => {
-    if (watchlist.length === 0) return;
-    if (!silent) setLoadingPrices(true);
-    
-    try {
-      const symbols = watchlist.map(w => w.symbol).join(',');
-      // 只有非静默刷新（手动进入或添加）时刺穿缓存，后台轮询依然走 CDN
-      const url = `/api/stock/batch?symbols=${symbols}${!silent ? `&t=${Date.now()}` : ''}`;
-      const batchRes = await fetch(url);
-      const batchData = await batchRes.json();
-      
-      const newPrices: Record<string, Partial<StockSnapshot>> = {};
-      (batchData.stocks || []).forEach((detail: { 
-          symbol: string; 
-          price?: { close: number; change_percent: number }; 
-          prediction?: { signal: 'Long' | 'Short' | 'Side' };
-          lastUpdated?: string;
-      }) => {
-          newPrices[detail.symbol] = {
-              price: detail.price?.close || 0,
-              change: detail.price?.change_percent || 0,
-              aiSignal: detail.prediction?.signal || 'Side',
-              updateTag: detail.lastUpdated
-          };
-      });
-      setPrices(newPrices);
-      
-      // 2. 写入缓存：确保下次进入页面能瞬间看到最后一次行情
-      try {
-        localStorage.setItem(POOL_CACHE_KEY, JSON.stringify(newPrices));
-      } catch (e) { console.error('Cache save error', e); }
-      
-    } catch (err) {
-      console.error('Failed to hydrate prices', err);
-    } finally {
-      if (!silent) setLoadingPrices(false);
-    }
-  }, [watchlist]);
+
 
   useEffect(() => {
-      fetchPrices();
-      // 后台自动轮询设置 silent = true，这样会命中 CDN 缓存，保护服务器
-      const interval = setInterval(() => fetchPrices(true), 30000); 
-      return () => clearInterval(interval);
-  }, [fetchPrices]);
+      // 预加载详情页，提升离线/弱网时的响应速度
+      router.prefetch('/dashboard');
+  }, [router]);
 
 
   useEffect(() => {
@@ -309,8 +260,12 @@ export default function StockPoolPage() {
                 <motion.div 
                   key={stock.symbol}
                   layout
-                  onClick={() => router.push(`/dashboard?symbol=${stock.symbol}`)}
-                  className="glass-card p-5 group hover:bg-white/[0.04] transition-all cursor-pointer relative"
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => {
+                    setNavigatingTo(stock.symbol);
+                    router.push(`/dashboard?symbol=${stock.symbol}`);
+                  }}
+                  className={`glass-card p-5 group transition-all cursor-pointer relative ${navigatingTo === stock.symbol ? 'bg-white/10 border-indigo-500/30' : 'hover:bg-white/[0.04]'}`}
                 >
                   <div className="flex items-center justify-between">
                      <div className="flex items-center gap-4">
@@ -354,7 +309,13 @@ export default function StockPoolPage() {
                          <Trash2 size={20} />
                        </button>
                      </div>
-                  </div>
+                      
+                      {navigatingTo === stock.symbol && (
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                          <div className="w-4 h-4 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
+                        </div>
+                      )}
+                   </div>
                 </motion.div>
               );
             })

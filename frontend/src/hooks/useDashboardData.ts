@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { StockData } from '@/lib/types';
 import { getRule } from '@/lib/storage';
 import { getMarketScene } from '@/lib/date-utils';
-import { useWatchlist } from './useWatchlist';
+import { WatchlistItem } from './useWatchlist';
 
 // 动态刷新间隔：交易时段5分钟，非交易时段10分钟
 const TRADING_REFRESH_INTERVAL = 5 * 60 * 1000;   // 5分钟
@@ -18,9 +18,8 @@ function getRefreshInterval(): number {
     return scene === 'trading' ? TRADING_REFRESH_INTERVAL : DEFAULT_REFRESH_INTERVAL;
 }
 
-export function useDashboardData() {
-    // Source of Truth for the List (Local First)
-    const { watchlist, loading: loadingWatchlist } = useWatchlist();
+export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: boolean) {
+    // Watchlist passed from props to avoid redundant hook calls in unified context
 
     const [stocks, setStocks] = useState<StockData[]>([]);
     const [loadingPool, setLoadingPool] = useState(true);

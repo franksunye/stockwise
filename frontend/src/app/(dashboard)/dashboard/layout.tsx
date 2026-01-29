@@ -6,6 +6,7 @@ import { OnboardingOverlay } from '@/components/onboarding/OnboardingOverlay';
 import { getWatchlist } from '@/lib/storage';
 import { getCurrentUser } from '@/lib/user';
 import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
+import { StockProvider } from '@/context/StockContext';
 
 export default function DashboardLayout({
   children,
@@ -94,9 +95,9 @@ export default function DashboardLayout({
 
   // 已授权 → 显示 Onboarding（仅新用户）+ 子页面
   return (
-    <>
+    <StockProvider>
       <OnboardingOverlay />
       {children}
-    </>
+    </StockProvider>
   );
 }

@@ -16,7 +16,7 @@ import { formatStockSymbol } from '@/lib/date-utils';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
-import { useDashboardData } from '@/hooks/useDashboardData';
+import { useStocks } from '@/context/StockContext';
 import { useTikTokScroll } from '@/hooks/useTikTokScroll';
 
 import { useUserProfile } from '@/hooks/useUserProfile';
@@ -34,7 +34,7 @@ function DashboardContent() {
   const [briefOpen, setBriefOpen] = useState(false);
   const hasScrolledToTarget = useRef(false);
 
-  const { stocks, loadingPool, loadMoreHistory } = useDashboardData();
+  const { stocks, loadingPool, loadMoreHistory } = useStocks();
   const {
     currentIndex,
     scrollRef,
@@ -65,7 +65,7 @@ function DashboardContent() {
   useEffect(() => {
     if (targetSymbol && stocks.length > 0 && scrollRef.current && !hasScrolledToTarget.current) {
       const targetIndex = stocks.findIndex(s => s.symbol === targetSymbol || s.symbol.endsWith(targetSymbol));
-      if (targetIndex > 0) {
+      if (targetIndex >= 0) {
         // 滚动到目标股票
         const cardWidth = scrollRef.current.offsetWidth;
         scrollRef.current.scrollTo({ left: targetIndex * cardWidth, behavior: 'smooth' });
