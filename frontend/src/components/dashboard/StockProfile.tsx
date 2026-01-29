@@ -5,6 +5,7 @@ import { X as CloseIcon } from 'lucide-react';
 import { StockData, AIPrediction } from '@/lib/types';
 
 import { useState, useEffect } from 'react';
+import { getCurrentUserId } from '@/lib/user';
 
 interface StockProfileProps {
   stock: StockData | null;
@@ -37,7 +38,11 @@ export function StockProfile({ stock, isOpen, onClose }: StockProfileProps) {
       
       // 缓存无效或不存在，请求新数据
       setLoadingHistory(true);
-      fetch(`/api/predictions?symbol=${stock.symbol}&limit=30`, { cache: 'no-store' })
+      const userId = getCurrentUserId();
+      fetch(`/api/predictions?symbol=${stock.symbol}&limit=30`, { 
+        cache: 'no-store',
+        headers: userId ? { 'x-user-id': userId } : {}
+      })
         .then(r => r.json())
         .then(data => {
           const predictions = data.predictions || [];

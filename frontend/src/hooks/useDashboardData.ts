@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-
+import { getCurrentUserId } from '@/lib/user';
 import { StockData } from '@/lib/types';
 import { getRule } from '@/lib/storage';
 import { getMarketScene } from '@/lib/date-utils';
@@ -82,8 +82,10 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
             const symbols = watchlist.map(w => w.symbol).join(',');
             // 如果是非静默刷新（手动点击或初始化），增加一个 cache-buster 扰动缓存
             const url = `/api/stock/batch?symbols=${symbols}&historyLimit=15${!silent ? `&t=${Date.now()}` : ''}`;
+            const userId = getCurrentUserId();
             const batchRes = await fetch(url, {
-                signal: controller.signal
+                signal: controller.signal,
+                headers: userId ? { 'x-user-id': userId } : {}
             });
             clearTimeout(timeoutId);
 
@@ -211,7 +213,10 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
         }));
 
         try {
-            const res = await fetch(`/api/history?symbol=${symbol}&offset=${offset}&limit=10`);
+            const userId = getCurrentUserId();
+            const res = await fetch(`/api/history?symbol=${symbol}&offset=${offset}&limit=10`, {
+                headers: userId ? { 'x-user-id': userId } : {}
+            });
             const data = await res.json();
 
             if (data.predictions) {
