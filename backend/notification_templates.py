@@ -79,14 +79,14 @@ class NotificationTemplates:
         "validation_glory": {
             "free": {
                  "zh": {
-                    "title": "🏅 AI 预测验证成功!",
-                    "body": "昨日为您追踪的 {win_details_text} 走势符合 AI 预期。点击查看复盘对比。"
+                    "title": "🏅 验证成功：AI 再次击败市场",
+                    "body": "您关注的 {stock_names} 走势完美符合昨日预测（最高涨幅 {max_gain}%）。这就是 AI 的力量！"
                 }
             },
             "pro": {
                  "zh": {
-                    "title": "🏆 精准捕获：AI 策略大获成功",
-                    "body": "正如昨日 Pro 预测，{win_details_text} 走势极其精准。点击查看复盘与明日策略。"
+                    "title": "🏆 精准复盘：Pro 策略价值验证",
+                    "body": "昨日 Pro 级预测点中 {stock_names} 关键变盘，最高捕获 {max_gain}% 波动。明日策略已生成，请速查看。"
                 }
             }
         },

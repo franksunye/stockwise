@@ -45,14 +45,15 @@ def run_validation_notifications(dry_run=False):
     conn = get_connection()
     cursor = conn.cursor()
     
-    # Step 2: Find 'Correct' predictions targeting TODAY
+    # Step 2: Find 'Correct' predictions targeting TODAY (JOIN with stock_meta for names)
     cursor.execute("""
-        SELECT symbol, signal, actual_change, date
-        FROM ai_predictions_v2
-        WHERE target_date = ? 
-        AND validation_status = 'Correct' 
-        AND is_primary = 1
-        ORDER BY ABS(actual_change) DESC
+        SELECT p.symbol, p.signal, p.actual_change, p.date, m.name
+        FROM ai_predictions_v2 p
+        JOIN stock_meta m ON p.symbol = m.symbol
+        WHERE p.target_date = ? 
+        AND p.validation_status = 'Correct' 
+        AND p.is_primary = 1
+        ORDER BY ABS(p.actual_change) DESC
     """, (today_str,))
     successes = cursor.fetchall()
     
@@ -62,7 +63,7 @@ def run_validation_notifications(dry_run=False):
         return
 
     # Map stock to results for easy lookup
-    success_map = {s[0]: {"signal": s[1], "change": s[2], "date": s[3]} for s in successes}
+    success_map = {s[0]: {"signal": s[1], "change": s[2], "date": s[3], "name": s[4]} for s in successes}
     valid_symbols = list(success_map.keys())
 
     # Step 3: Find users watching these symbols
@@ -89,13 +90,18 @@ def run_validation_notifications(dry_run=False):
         tier_row = cursor.fetchone()
         user_tier = tier_row[0] if tier_row and tier_row[0] else "free"
 
-        win_details = [f"{s}({success_map[s]['change']:+.1f}%)" for s in symbols[:3]]
-        win_details_text = ", ".join(win_details)
+        # Prepare descriptive placeholders
+        stock_names_list = [success_map[s]['name'] for s in symbols[:3]]
+        stock_names = ", ".join(stock_names_list)
+        
+        # Identify the single best win in this batch for the user
+        max_gain = max([abs(success_map[s]['change']) for s in symbols])
         
         title, body = NotificationTemplates.render(
             "validation_glory",
             tier=user_tier,
-            win_details_text=win_details_text
+            stock_names=stock_names,
+            max_gain=f"{max_gain:+.1f}"
         )
         url = "/dashboard?utm_source=push&utm_medium=validation_glory"
         
