@@ -36,10 +36,13 @@ jobs:
           # Tavily News
           TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
           
-          # LLM (Hunyuan Lite)
-          BRIEF_MODEL_PROVIDER: hunyuan
-          HUNYUAN_API_KEY: ${{ secrets.HUNYUAN_API_KEY }}
+          # Tiered LLM Providers
+          BRIEF_PROVIDER_FREE: hunyuan
+          BRIEF_PROVIDER_PRO: deepseek
           
+          # API Keys
+          HUNYUAN_API_KEY: ${{ secrets.HUNYUAN_API_KEY }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
         run: |
           # Run the full daily pipeline (Batch Analysis + User Assembly)
           python -m backend.engine.brief_generator
