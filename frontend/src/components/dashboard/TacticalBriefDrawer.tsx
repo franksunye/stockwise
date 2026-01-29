@@ -63,7 +63,7 @@ export function TacticalBriefDrawer({
   const rawGeneral = data?.tactics?.general;
   const generalTactics = Array.isArray(rawGeneral) ? rawGeneral : (rawGeneral ? [rawGeneral] : []);
 
-  const [viewState, setViewState] = useState<'holding'|'empty'>(userPos === 'holding' ? 'holding' : 'empty');
+  const [viewState, setViewState] = useState<'holding'|'empty'>('holding');
   const scrollRef = useRef<HTMLDivElement>(null);
 
 
@@ -225,9 +225,9 @@ export function TacticalBriefDrawer({
                     </div>
                     
                     {/* Pagination Dots */}
-                    <div className="flex justify-center gap-1.5 mt-[-10px] mb-2">
-                        <div className={`w-1.5 h-1.5 rounded-full transition-colors duration-300 ${viewState === 'holding' ? 'bg-indigo-500' : 'bg-white/20'}`} />
-                        <div className={`w-1.5 h-1.5 rounded-full transition-colors duration-300 ${viewState === 'empty' ? 'bg-indigo-500' : 'bg-white/20'}`} />
+                    <div className="flex justify-center gap-2 mt-[-8px] mb-2">
+                        <div className={`h-1 rounded-full transition-all duration-300 ${viewState === 'holding' ? 'w-6 bg-white' : 'w-1 bg-white/20'}`} />
+                        <div className={`h-1 rounded-full transition-all duration-300 ${viewState === 'empty' ? 'w-6 bg-white' : 'w-1 bg-white/20'}`} />
                     </div>
                   </section>
 
