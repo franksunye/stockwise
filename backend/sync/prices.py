@@ -98,7 +98,13 @@ def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool =
                 WHERE symbol = ? 
                 ORDER BY date DESC LIMIT 100
             """
-            hist_df = pd.read_sql_query(hist_query, conn, params=(symbol,))
+            
+            # Suppress pandas warning about non-SQLAlchemy connection (LibSQL)
+            import warnings
+            with warnings.catch_warnings():
+                warnings.filterwarnings("ignore", category=UserWarning, message=".*pandas only supports SQLAlchemy.*")
+                hist_df = pd.read_sql_query(hist_query, conn, params=(symbol,))
+                
             conn.close()
             
             if not hist_df.empty:
