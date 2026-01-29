@@ -93,7 +93,7 @@ DEFAULTS = {
     "qwen": {
         "api_key": os.getenv("QWEN_API_KEY"),
         "base_url": os.getenv("QWEN_VS_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1"),
-        "model": os.getenv("QWEN_MODEL", "qwen2.5-coder-32b-instruct"),
+        "model": os.getenv("QWEN_MODEL", "deepseek-v3"),
     }
 }
 
