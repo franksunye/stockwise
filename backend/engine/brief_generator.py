@@ -465,6 +465,9 @@ async def run_daily_pipeline(date_str: str = None, force: bool = False, target_t
             users = [r[0] for r in cursor.fetchall()]
             
             logger.info(f"👥 [Phase 2] Assembling briefs for {len(users)} users...")
+            success_users = 0
+            failed_users = 0
+            
             for user_id in users:
                 try:
                     await assemble_user_brief(user_id, date_str)
@@ -472,9 +475,11 @@ async def run_daily_pipeline(date_str: str = None, force: bool = False, target_t
                     
                     # [NEW] Notify user immediately after their brief is ready
                     await notify_user_brief_ready(user_id, date_str)
+                    success_users += 1
                     
                 except Exception as e:
                     logger.error(f"❌ [Phase 2] Failed to process user {user_id}: {e}")
+                    failed_users += 1
                     # Continue with next user
                     continue
                 
@@ -486,7 +491,22 @@ async def run_daily_pipeline(date_str: str = None, force: bool = False, target_t
         # The old batch notification function (send_personalized_daily_report) is deprecated.
         
         logger.info("🎉 Daily Pipeline Completed! Check 'daily_briefs' table.")
-        t_logger.success("Completed summary assembly and push broadcast.")
+        
+        status = "✅ SUCCESS" if failed_users == 0 else "⚠️ PARTIAL" if success_users > 0 else "❌ FAILED"
+        
+        report = f"### 📰 StockWise: Daily Brief Gen{tier_info}\n"
+        report += f"> **Status**: {status}\n"
+        report += f"- **Users**: {len(users)}\n"
+        report += f"- **Success**: {success_users} users\n"
+        
+        if failed_users > 0:
+            report += f"- **Failed**: {failed_users} users\n"
+            
+        t_logger.success(f"Pipeline finished: {success_users}/{len(users)} users generated.")
+        
+        # Manually send report via wecom as t_logger might only log task outcome
+        from utils import send_wecom_notification
+        send_wecom_notification(report)
     except Exception as e:
         logger.error(f"❌ [Pipeline] Full pipeline failed: {e}")
         t_logger.fail(f"Pipeline failed: {str(e)}")
