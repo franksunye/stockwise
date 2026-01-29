@@ -42,16 +42,13 @@ jobs:
           
           # API Keys
           QWEN_API_KEY: ${{ secrets.QWEN_API_KEY }}
-          QWEN_MODEL: deepseek-v3
-          # Hardcode Aliyun URL to avoid extra secrets
-          QWEN_VS_URL: https://dashscope.aliyuncs.com/compatible-mode/v1
+          # QWEN Configuration is now loaded from Database (model: deepseek-aliyun)
           
           HUNYUAN_API_KEY: ${{ secrets.HUNYUAN_API_KEY }}
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
         run: |
-          # Run the full daily pipeline (Batch Analysis + User Assembly)
-          python -m backend.engine.brief_generator
-
+          echo "🚀 Executing: python -u backend/main.py --analyze --market HK --model deepseek-aliyun $FORCE_FLAG $DATE_FLAG"
+          python -u backend/main.py --analyze --market HK --model deepseek-aliyun $FORCE_FLAG $DATE_FLAG
       - name: Broadcast Notifications
         env:
           # Database
