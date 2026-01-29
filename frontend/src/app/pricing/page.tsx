@@ -368,6 +368,54 @@ function PricingContent() {
           ))}
         </div>
 
+        {/* 详细功能对照表 (Comparison Table) */}
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="mb-32 hidden md:block"
+        >
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-black italic tracking-tighter">功能深度对照</h2>
+            <p className="text-slate-500 text-sm mt-2">为您透明展示不同等级下的底层技术差异</p>
+          </div>
+
+          <div className="glass-card overflow-hidden border-white/5 bg-white/[0.01]">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-white/5 bg-white/[0.02]">
+                  <th className="py-6 px-8 text-sm font-black uppercase tracking-widest text-slate-500">能力维度</th>
+                  <th className="py-6 px-8 text-sm font-black italic">基础版 (FREE)</th>
+                  <th className="py-6 px-8 text-sm font-black italic text-indigo-400">PRO 会员</th>
+                </tr>
+              </thead>
+              <tbody className="text-sm font-medium">
+                {[
+                  { label: 'AI 智力内核', free: '混元 Lite (通用大模型)', pro: 'Gemini Pro + DeepSeek (顶级推理)', highlight: true },
+                  { label: '决策叙事引擎', free: '标准数据汇总', pro: 'Matt Levine 风格叙事逻辑', highlight: true },
+                  { label: '自选股监控名额', free: '3 只', pro: '10 只', highlight: true },
+                  { label: '量化模型底座', free: '基于规则的深度量化', pro: '基于规则的深度量化', common: true },
+                  { label: '行情覆盖范围', free: 'A股 / 港股 全覆盖', pro: 'A股 / 港股 全覆盖', common: true },
+                  { label: '通知推送逻辑', free: '基础事件提醒', pro: '决策级推理结论推送', highlight: true },
+                  { label: '预测验证战报', free: '标准验证报告', pro: 'Pro 级收益复盘战报', highlight: true },
+                  { label: '数据更新频率', free: '同步实时行情', pro: '同步实时行情', common: true },
+                  { label: '专属身份标识', free: '-', pro: '⭐ 专属 Pro 勋章' },
+                ].map((row, i) => (
+                  <tr key={i} className="border-b border-white/[0.03] hover:bg-white/[0.01] transition-colors">
+                    <td className="py-5 px-8 text-slate-400 font-bold">{row.label}</td>
+                    <td className="py-5 px-8 text-slate-500">
+                      {row.common ? <div className="flex items-center gap-2"><Check size={14} className="text-slate-600" /> {row.free}</div> : row.free}
+                    </td>
+                    <td className={`py-5 px-8 ${row.highlight ? 'text-indigo-100 font-black' : 'text-slate-300'}`}>
+                      {row.common ? <div className="flex items-center gap-2"><Check size={14} className="text-indigo-500" /> {row.pro}</div> : row.pro}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </motion.div>
+
         {/* 底部免责声明 */}
         <div className="glass-card p-6 md:p-10 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.03] to-transparent text-center max-w-4xl mx-auto">
           <div className="flex items-center justify-center gap-3 mb-4 text-emerald-400">
