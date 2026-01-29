@@ -54,8 +54,8 @@ else:
 # 3. 同步并发配置
 # 控制 ThreadPoolExecutor 的并发线程数，避免 Turso/libSQL 压力过大
 SYNC_CONFIG = {
-    "realtime_workers": int(os.getenv("SYNC_REALTIME_WORKERS", "2")),
-    "daily_workers": int(os.getenv("SYNC_DAILY_WORKERS", "2")),
+    "realtime_workers": int(os.getenv("SYNC_REALTIME_WORKERS", "1")),
+    "daily_workers": int(os.getenv("SYNC_DAILY_WORKERS", "1")),
 }
 
 # 4. API 配置
