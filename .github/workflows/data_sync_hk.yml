@@ -4,6 +4,12 @@ name: Data Sync - Hong Kong (HK)
 
 on:
   workflow_dispatch: # 支持手动触发
+    inputs:
+      force_full:
+        description: '强制同步全周期 (周/月线)'
+        type: boolean
+        default: false
+        required: false
   workflow_call:     # 支持被其他 workflow 调用
 
 jobs:
@@ -31,6 +37,6 @@ jobs:
           TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
           WECOM_ROBOT_KEY: ${{ secrets.WECOM_ROBOT_KEY }}
         run: |
-          python -u backend/main.py --market HK
+          python -u backend/main.py --market HK ${{ inputs.force_full == true && '--full-periods' || '' }}
 
 

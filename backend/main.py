@@ -53,6 +53,8 @@ if __name__ == "__main__":
     parser.add_argument('--auto-fill', action='store_true', help='智能检测并补充缺失分析')
     parser.add_argument('--force', action='store_true', help='强制重新分析 (即使今日已存在)')
     
+    parser.add_argument('--full-periods', action='store_true', help='强制同步周线和月线(即使不是周五)')
+    
     args = parser.parse_args()
     init_db()
     
@@ -211,7 +213,7 @@ if __name__ == "__main__":
         t_logger = get_task_logger("market_observer", "full_daily_sync", triggered_by=trigger)
         t_logger.start("Full Market Sync", "ingestion", dimensions={})
         try:
-            run_full_sync(market_filter=args.market)
+            run_full_sync(market_filter=args.market, force_full=args.full_periods)
             t_logger.success("Full sync completed")
         except Exception as e:
             t_logger.fail(str(e))

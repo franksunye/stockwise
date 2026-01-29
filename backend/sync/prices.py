@@ -245,7 +245,7 @@ def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool =
     return True
 
 
-def run_full_sync(market_filter: str = None):
+def run_full_sync(market_filter: str = None, force_full: bool = False):
     """每日全量同步"""
     # 如果是例行运行，且该市场今天休市，则跳过
     # logic moved to scheduler level, execution level should follow command
@@ -256,6 +256,22 @@ def run_full_sync(market_filter: str = None):
     if not target_stocks:
         logger.warning("⚠️ 股票池为空")
         return
+    
+    # 智能调度策略：
+    # 1. 强制模式 (--full-periods): 总是同步所有周期
+    # 2. 自动模式: 
+    #    - 周一至周四: 仅同步日线 (Daily)
+    #    - 周五: 同步日线 + 周线 + 月线 (Daily, Weekly, Monthly)
+    weekday = datetime.now().weekday() # 0=Mon, 4=Fri
+    is_friday = (weekday == 4)
+    
+    sync_weekly = force_full or is_friday
+    sync_monthly = force_full or is_friday
+    
+    mode_label = "Daily Only"
+    if sync_weekly: mode_label = "Full (D/W/M)"
+    
+    logger.info(f"📅 Sync Strategy: {mode_label} (Friday={is_friday}, Force={force_full})")
     
     # 按市场过滤
     if market_filter:
@@ -304,15 +320,19 @@ def run_full_sync(market_filter: str = None):
         try:
             # 日线是必须的
             process_stock_period(stock, period="daily")
-            time.sleep(0.5) # Slight delay to avoid DB connection burst
             
-            # 周月线偶尔失败不影响核心体验
-            try: 
-                process_stock_period(stock, period="weekly")
-                time.sleep(0.5)
-            except: pass 
-            try: process_stock_period(stock, period="monthly")
-            except: pass
+            if sync_weekly:
+                time.sleep(0.5) # Slight delay to avoid DB connection burst
+                # 周月线偶尔失败不影响核心体验
+                try: 
+                    process_stock_period(stock, period="weekly")
+                    time.sleep(0.5)
+                except: pass 
+                
+            if sync_monthly:
+                try: process_stock_period(stock, period="monthly")
+                except: pass
+                
             return True
         except Exception as e:
             raise e
@@ -336,10 +356,13 @@ def run_full_sync(market_filter: str = None):
     
     duration = time.time() - start_time
     market_label = f" ({market_filter})" if market_filter else ""
+    periods_msg = "Periods: Daily Only"
+    if sync_weekly: periods_msg = "Periods: Daily(D), Weekly(W), Monthly(M) ✅"
+    
     report = f"### 📊 StockWise: Daily Sync{market_label}\n"
     report += f"> **Status**: {'✅' if not errors else '⚠️'}\n"
     report += f"- **Target**: {len(target_stocks)} Stocks\n"
-    report += f"- **Periods**: 日线(D), 周线(W), 月线(M) ✅\n"
+    report += f"- **Strategy**: {mode_label}\n"
     report += f"- **Processed**: {success_count} Success, {len(errors)} Errors\n"
     report += f"- **处理耗时**: {duration:.1f}s"
     send_wecom_notification(report)
