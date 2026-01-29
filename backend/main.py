@@ -99,10 +99,21 @@ if __name__ == "__main__":
         t_logger.start(f"Realtime Sync ({market_code})", "ingestion", dimensions={"market": market_code})
         
         try:
-            sync_spot_prices(target_stocks)
-            t_logger.success(f"Synced {len(target_stocks)} stocks")
+            success_count, failed_count = sync_spot_prices(target_stocks)
+            
+            if failed_count == 0:
+                t_logger.success(f"Synced {success_count} stocks")
+            elif success_count > 0:
+                # Partial success is better than total failure, but worthy of note
+                t_logger.success(f"⚠️ Partial Sync: {success_count} OK, {failed_count} Fail")
+            else:
+                # Total failure
+                t_logger.fail(f"❌ All {failed_count} stocks failed sync")
+                # Return non-zero to signal orchestrator of failure
+                sys.exit(1)
         except Exception as e:
             t_logger.fail(str(e))
+            sys.exit(1)
             
     elif args.sync_meta:
         # Meta Sync: Market Observer

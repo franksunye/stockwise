@@ -65,3 +65,7 @@ def sync_spot_prices(symbols: list):
              
     report += f"- **执行耗时**: {duration:.1f}s"
     send_wecom_notification(report)
+    
+    return success_count, len(errors)
+    
+    return success_count, len(errors)
