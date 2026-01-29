@@ -85,5 +85,5 @@ jobs:
             echo "📅 Target date set to: ${{ inputs.date }}"
           fi
 
-          echo "🚀 Executing: python -u backend/main.py --analyze --market HK --model deepseek-aliyun $FORCE_FLAG $DATE_FLAG"
-          python -u backend/main.py --analyze --market HK --model deepseek-aliyun $FORCE_FLAG $DATE_FLAG
+          echo "🚀 Executing: python -u backend/main.py --analyze --market HK --model all $FORCE_FLAG $DATE_FLAG"
+          python -u backend/main.py --analyze --market HK --model all $FORCE_FLAG $DATE_FLAG
