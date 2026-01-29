@@ -31,7 +31,8 @@ def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool =
     
     # 动态确定回溯天数，确保指标计算有足够上下文
     if period == "daily":
-        buffer_days = 80
+        # [Optimization] Realtime sync only needs recent data + local history
+        buffer_days = 15 if is_realtime else 80
     elif period == "weekly":
         buffer_days = 365 * 2  # 2年历史确保周均线准确
     else:
@@ -82,8 +83,56 @@ def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool =
         logger.warning(f"⚠️ {symbol}: 校验后无有效数据")
         return
 
+    # [Optimization] Splice local history for realtime calculation
+    # Only keep track of new rows to insert later
+    new_rows_mask = None
+    
+    if is_realtime and period == "daily":
+        try:
+            conn = get_connection()
+            # We need enough history for MA60 (approx 60 trading days, so 90 calendar days safe buffer)
+            # Use 100 limit to be safe
+            hist_query = f"""
+                SELECT date, open, high, low, close, volume, change_percent 
+                FROM {table_name} 
+                WHERE symbol = ? 
+                ORDER BY date DESC LIMIT 100
+            """
+            hist_df = pd.read_sql_query(hist_query, conn, params=(symbol,))
+            conn.close()
+            
+            if not hist_df.empty:
+                # Ensure types match
+                hist_df['date'] = hist_df['date'].astype(str)
+                # Combine: History (Old -> New) + New Fetched
+                # Note: hist_df is DESC, need to reverse
+                hist_df = hist_df.iloc[::-1]
+                
+                # Exclude overlaps (if any dates in hist_df already in df)
+                # Usually fetch_start is dynamic so overlaps exist
+                min_new_date = df['date'].min()
+                hist_df = hist_df[hist_df['date'] < min_new_date]
+                
+                if not hist_df.empty:
+                    # Mark which rows are new (from the original df)
+                    # We will calculate on the FULL set, but only insert the NEW set
+                    df['__is_new'] = True
+                    hist_df['__is_new'] = False
+                    
+                    full_df = pd.concat([hist_df, df], ignore_index=True)
+                    df = full_df # Replace df with full context
+        except Exception as e:
+            logger.warning(f"⚠️ Context splicing failed for {symbol}: {e}")
+
     # 6. 计算指标
     df = calculate_indicators(df)
+    
+    # [Optimization] Filter back to only new rows for insertion (Realtime only)
+    if is_realtime and period == "daily" and '__is_new' in df.columns:
+        # Only save the rows that were actually fetched/updated
+        df = df[df['__is_new'] == True].copy()
+        # Clean up temp col
+        del df['__is_new']
     
     # 7. 入库
     # 定义舍入函数
