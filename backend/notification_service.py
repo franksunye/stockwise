@@ -6,6 +6,10 @@ Handles notification logic, state tracking, and aggregation.
 import json
 import uuid
 from datetime import datetime
+try:
+    from backend.config import BEIJING_TZ
+except ImportError:
+    from config import BEIJING_TZ
 from typing import List, Dict, Set, Optional
 
 from database import get_connection, execute_with_retry
@@ -127,7 +131,7 @@ class NotificationManager:
                 "old_signal": old_signal,
                 "new_signal": new_signal,
                 "confidence": new_confidence,
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now(BEIJING_TZ).isoformat()
             }
             
             # Queue for aggregation
@@ -374,7 +378,7 @@ class NotificationManager:
         conn = self._get_conn()
         try:
             cursor = conn.cursor()
-            now = datetime.now().isoformat()
+            now = datetime.now(BEIJING_TZ).isoformat()
             
             for update in self.pending_state_updates:
                 cursor.execute("""

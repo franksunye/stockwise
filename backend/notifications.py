@@ -109,6 +109,14 @@ def send_personalized_daily_report(date_str):
 if __name__ == "__main__":
     import argparse
     from datetime import datetime
+    try:
+        from backend.config import BEIJING_TZ
+    except ImportError:
+        try:
+             from config import BEIJING_TZ
+        except:
+             from datetime import timezone, timedelta
+             BEIJING_TZ = timezone(timedelta(hours=8))
     
     parser = argparse.ArgumentParser()
     parser.add_argument("--action", choices=["push_daily"], required=True)
@@ -116,5 +124,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     if args.action == "push_daily":
-        target_date = args.date or datetime.now().strftime("%Y-%m-%d")
+        target_date = args.date or datetime.now(BEIJING_TZ).strftime("%Y-%m-%d")
         send_personalized_daily_report(target_date) 

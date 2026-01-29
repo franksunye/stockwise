@@ -7,6 +7,10 @@ import uuid
 import time
 import json
 from datetime import datetime
+try:
+    from backend.config import BEIJING_TZ
+except ImportError:
+    from config import BEIJING_TZ
 from typing import Optional, Dict, Any
 from dataclasses import dataclass, field, asdict
 
@@ -40,7 +44,7 @@ class LLMTrace:
     retry_count: int = 0
     
     # 时间戳
-    created_at: str = field(default_factory=lambda: datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    created_at: str = field(default_factory=lambda: datetime.now(BEIJING_TZ).strftime("%Y-%m-%d %H:%M:%S"))
     
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)

@@ -1,5 +1,9 @@
 import json
 from datetime import datetime
+try:
+    from backend.config import BEIJING_TZ
+except ImportError:
+    from config import BEIJING_TZ
 from backend.database import get_connection
 from backend.logger import logger
 from backend.engine.task_registry import AGENTS
@@ -24,7 +28,7 @@ class TaskLogger:
         if date:
             self.date = date
         else:
-            self.date = datetime.now().strftime("%Y-%m-%d")
+            self.date = datetime.now(BEIJING_TZ).strftime("%Y-%m-%d")
 
     def start(self, display_name: str, task_type: str, dimensions: dict = None, message: str = None, metadata: dict = None):
         """Log task start."""
@@ -52,7 +56,7 @@ class TaskLogger:
             conn = get_connection()
             cursor = conn.cursor()
             
-            now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            now_str = datetime.now(BEIJING_TZ).strftime("%Y-%m-%d %H:%M:%S")
             
             # Check if entry exists for this task/date/agent
             # Note: We technically allow multiple runs of same task_name if repeated, 

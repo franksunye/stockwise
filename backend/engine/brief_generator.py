@@ -19,6 +19,10 @@ import uuid
 import time
 import json
 from datetime import datetime
+try:
+    from backend.config import BEIJING_TZ
+except ImportError:
+    from config import BEIJING_TZ
 from typing import Optional, Dict, List, Any
 
 # Add likely paths for standalone execution
@@ -524,7 +528,7 @@ if __name__ == "__main__":
     parser.add_argument("--tier", choices=["free", "pro"], help="Run for specific tier only")
     args = parser.parse_args()
     
-    target_date = args.date or datetime.now().strftime("%Y-%m-%d")
+    target_date = args.date or datetime.now(BEIJING_TZ).strftime("%Y-%m-%d")
     
     if args.provider:
         os.environ["BRIEF_MODEL_PROVIDER"] = args.provider

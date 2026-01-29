@@ -1,6 +1,10 @@
 import asyncio
 import os
 from datetime import datetime
+try:
+    from backend.config import BEIJING_TZ
+except ImportError:
+    from config import BEIJING_TZ
 from typing import Optional, List, Dict, Any
 
 try:
@@ -74,7 +78,7 @@ async def assemble_user_brief(user_id: str, date_str: str) -> Optional[str]:
             brief_sections.append(f"### {stock_name} ({symbol})")
             brief_sections.append(f"{analysis}\n\n")
 
-        timestamp = datetime.now().strftime("%H:%M")
+        timestamp = datetime.now(BEIJING_TZ).strftime("%H:%M")
         brief_sections.append("---\n")
         brief_sections.append(f"*StockWise AI 生成于 {timestamp}*")
         
