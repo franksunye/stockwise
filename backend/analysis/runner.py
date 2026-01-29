@@ -54,22 +54,60 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool =
     ai_count = 0
     rule_count = 0
     
-    # [NEW] Initialize User Completion Tracker
-    from backend.analysis.user_tracker import UserCompletionTracker, notify_user_prediction_updated
-    tracker = UserCompletionTracker()
-    tracker.load_watchlists(targets)
-    
     # [NEW] Initialize Smart Notification Manager if enabled
     from backend.config import ENABLE_SMART_NOTIFICATIONS
     from backend.notification_service import NotificationManager
+    
     notif_manager = None
+    stock_subscribers = {} # symbol -> set[uid]
+    
     if ENABLE_SMART_NOTIFICATIONS:
         notif_manager = NotificationManager()
-        # Pre-load signal states for users involved in this run
-        involved_users = set()
-        for users in tracker.stock_subscribers.values():
-            involved_users.update(users)
-        notif_manager.load_signal_states(list(involved_users), targets)
+        
+        # Pre-load signal states and subscribers for optimization
+        # We need to know which users are watching the target stocks
+        try:
+            conn = get_connection()
+            cursor = conn.cursor()
+            
+            # Optimization: If targets list is too long (e.g. full market), don't use IN clause
+            # Just fetch all relevant watchlists.
+            if len(targets) > 500:
+                query = """
+                    SELECT w.symbol, w.user_id
+                    FROM user_watchlist w
+                    WHERE EXISTS (SELECT 1 FROM push_subscriptions s WHERE s.user_id = w.user_id)
+                """
+                cursor.execute(query)
+            else:
+                placeholders = ','.join(['?'] * len(targets))
+                query = f"""
+                    SELECT w.symbol, w.user_id
+                    FROM user_watchlist w
+                    WHERE w.symbol IN ({placeholders})
+                    AND EXISTS (SELECT 1 FROM push_subscriptions s WHERE s.user_id = w.user_id)
+                """
+                cursor.execute(query, list(targets))
+                
+            rows = cursor.fetchall()
+            involved_users = set()
+            
+            for sym, uid in rows:
+                if sym not in stock_subscribers:
+                    stock_subscribers[sym] = set()
+                stock_subscribers[sym].add(uid)
+                involved_users.add(uid)
+            
+            # Pre-load previous signal states for these users/stocks
+            if involved_users:
+                 notif_manager.load_signal_states(list(involved_users), targets)
+            
+            conn.close()
+            logger.info(f"🔔 [SmartNotif] Loaded subscribers for {len(stock_subscribers)} stocks.")
+            
+        except Exception as e:
+            logger.warning(f"⚠️ [SmartNotif] Failed to load subscribers: {e}")
+            stock_subscribers = {} # Fallback: No notifications will send
     
     conn = get_connection()
     cursor = conn.cursor()
@@ -109,12 +147,7 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool =
                     if cursor.fetchone():
                         logger.info(f"⏩ {stock}: {today_str} ({model_filter}) 预测已存在，跳过")
                         success_count += 1
-                        
-                        # [NEW] Still mark as complete for tracker (data already exists)
-                        ready_users = tracker.mark_stock_complete(stock)
-                        for uid in ready_users:
-                            notify_user_prediction_updated(uid, tier=tracker.user_tiers.get(uid, "free"))
-                        
+                        # No notification here for skipped items in new logic
                         continue
                 # 如果是 all，这里不再做整体跳过，让子引擎去判断具体哪个模型没跑
             # --------------------------------------
@@ -143,7 +176,7 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool =
                 if primary_result:
                     # [NEW] Check for Signal Flips for each subscriber
                     if notif_manager and isinstance(primary_result, dict):
-                        subscribers = tracker.stock_subscribers.get(stock, set())
+                        subscribers = stock_subscribers.get(stock, set())
                         for uid in subscribers:
                             notif_manager.check_signal_flip(
                                 uid, stock, 
@@ -154,11 +187,6 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool =
                     success_count += 1
                     ai_count += 1 
                     
-                    # [NEW] Mark stock complete and notify ready users
-                    ready_users = tracker.mark_stock_complete(stock)
-                    # Notify immediately
-                    for uid in ready_users:
-                        notify_user_prediction_updated(uid, market=market_filter or "CN", tier=tracker.user_tiers.get(uid, "free"))
                 else:
                     logger.warning(f"⚠️ {stock}: Analysis failed or returned no results.")
                 
@@ -176,10 +204,6 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool =
             
     duration = time.time() - start_time
     logger.info(f"✅ AI 分析完成! 成功: {success_count}/{len(targets)} (AI: {ai_count}, Rule: {rule_count}), 耗时: {duration:.1f}s")
-    
-    # [NEW] Cleanup tracker to free memory
-    tracker.clear()
-    del tracker
     
     # 发送企微通知
     # 发送企微通知
