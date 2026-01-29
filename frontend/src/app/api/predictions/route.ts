@@ -1,12 +1,15 @@
 import { NextResponse } from 'next/server';
-export const dynamic = 'force-dynamic';
 import { getDbClient } from '@/lib/db';
+import { headers } from 'next/headers';
+import { getUserTier } from '@/lib/user-server';
+import { getModelSqlFilter } from '@/lib/membership-config';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const symbol = searchParams.get('symbol');
     const limit = parseInt(searchParams.get('limit') || '30');
-
     const targetDate = searchParams.get('targetDate');
 
     if (!symbol) {
@@ -14,33 +17,32 @@ export async function GET(request: Request) {
     }
 
     try {
-        const client = getDbClient();
-        let rows;
+        const headersList = await headers();
+        const userId = headersList.get('x-user-id');
+        const userTier = await getUserTier(userId);
+        const tierFilter = getModelSqlFilter(userTier);
 
         const mode = searchParams.get('mode') || 'simple';
         const isPrimaryOnly = mode === 'simple';
 
-        // 构建基础查询条件
+        // 构建 SQL
         let whereClause = 'p.symbol = ?';
         const queryArgs: (string | number)[] = [symbol];
 
         if (isPrimaryOnly) {
-            whereClause += ' AND p.is_primary = 1';
+            whereClause += ` AND ${tierFilter}`;
         }
 
         if (targetDate) {
             whereClause += ' AND p.target_date = ?';
             queryArgs.push(targetDate);
         }
-
         queryArgs.push(limit);
 
         const sql = `
             SELECT p.symbol, p.date, p.target_date, p.signal, p.confidence, 
                     p.support_price, p.ai_reasoning, p.validation_status, p.actual_change,
-                    p.is_primary,
-                    p.model_id as model, 
-                    m.display_name,
+                    p.is_primary, p.model_id as model, m.display_name,
                     d.close as close_price,
                     d.rsi, d.kdj_k, d.kdj_d, d.kdj_j, 
                     d.macd, d.macd_signal, d.macd_hist, 
@@ -49,22 +51,28 @@ export async function GET(request: Request) {
             LEFT JOIN prediction_models m ON p.model_id = m.model_id
             LEFT JOIN daily_prices d ON p.symbol = d.symbol AND p.target_date = d.date
             WHERE ${whereClause}
-            ORDER BY p.date DESC 
+            ORDER BY p.date DESC, m.priority DESC
             LIMIT ?
         `;
 
-        if ('execute' in client) {
-            const rs = await client.execute({ sql, args: queryArgs });
-            rows = rs.rows;
-        } else {
-            // Local SQLite
-            rows = client.prepare(sql).all(...queryArgs);
-            client.close();
+        const client = getDbClient();
+        let rows;
+        try {
+            if ('execute' in client) {
+                const rs = await client.execute({ sql, args: queryArgs });
+                rows = rs.rows;
+            } else {
+                rows = client.prepare(sql).all(...queryArgs);
+            }
+        } finally {
+            if (client && typeof (client as { close?: () => void }).close === 'function') {
+                (client as { close: () => void }).close();
+            }
         }
 
-        return NextResponse.json({ predictions: rows });
+        return NextResponse.json({ predictions: rows, tier: userTier });
     } catch (error) {
-        console.error('API Error:', error);
+        console.error('Predictions API Error:', error);
         return NextResponse.json({ error: 'Database error' }, { status: 500 });
     }
 }

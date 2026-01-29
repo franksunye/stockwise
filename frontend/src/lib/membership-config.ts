@@ -49,10 +49,22 @@ export const MEMBERSHIP_CONFIG = {
         free: {
             maxStocks: 3,
             analysisMode: 'rule' as const,
+            allowedModels: ['hunyuan-lite', 'rule-engine'],
+            sqlFilter: "p.model_id IN ('hunyuan-lite', 'rule-engine')"
         },
         pro: {
             maxStocks: 10,
             analysisMode: 'ai' as const,
+            allowedModels: ['deepseek-v3', 'gemini-3-flash', 'hunyuan-lite', 'rule-engine'],
+            sqlFilter: "p.is_primary = 1" // Pro 始终看到最高优先级模型
         },
-    },
+    } as const,
 };
+
+/**
+ * 根据等级获取 SQL 过滤片段
+ */
+export function getModelSqlFilter(tier: string = 'free'): string {
+    const t = (tier === 'pro' ? 'pro' : 'free') as keyof typeof MEMBERSHIP_CONFIG.tiers;
+    return MEMBERSHIP_CONFIG.tiers[t].sqlFilter;
+}

@@ -1,17 +1,11 @@
 import { NextResponse } from 'next/server';
 import { getDbClient } from '@/lib/db';
+import { headers } from 'next/headers';
+import { getUserTier } from '@/lib/user-server';
+import { getModelSqlFilter } from '@/lib/membership-config';
 
-export const dynamic = 'force-dynamic'; // Next.js 默认动态，通过 Header 控制 CDN 缓存
+export const dynamic = 'force-dynamic';
 
-/**
- * 公有数据接口：批量获取股票行情与预测
- * GET /api/stock/batch?symbols=00700,09988
- * 
- * 核心策略：
- * 1. 纯公共数据，不含用户信息
- * 2. 设置 Cache-Control 头，允许 CDN (Cloudflare/Vercel) 缓存
- * 3. 50万用户高并发下的流量挡板
- */
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const symbolsParam = searchParams.get('symbols');
@@ -22,18 +16,17 @@ export async function GET(request: Request) {
     }
 
     const symbols = symbolsParam.split(',').filter(s => s.trim().length > 0);
-    if (symbols.length === 0) {
-        return NextResponse.json({ stocks: [] });
-    }
-
-    // 限制单次最大查询数量，防止 URL 过长或 SQL 压力过大
-    if (symbols.length > 50) {
-        return NextResponse.json({ error: 'Too many symbols' }, { status: 400 });
-    }
+    if (symbols.length === 0) return NextResponse.json({ stocks: [] });
+    if (symbols.length > 50) return NextResponse.json({ error: 'Too many symbols' }, { status: 400 });
 
     const startTime = Date.now();
 
     try {
+        const headersList = await headers();
+        const userId = headersList.get('x-user-id');
+        const userTier = await getUserTier(userId);
+        const tierFilter = getModelSqlFilter(userTier);
+
         const client = getDbClient();
         const placeholders = symbols.map(() => '?').join(',');
 
@@ -42,7 +35,6 @@ export async function GET(request: Request) {
 
         try {
             if ('execute' in client) {
-                // Turso
                 const [pricesRs, historyRs] = await Promise.all([
                     client.execute({
                         sql: `SELECT dp.* FROM daily_prices dp
@@ -59,10 +51,10 @@ export async function GET(request: Request) {
                                     SELECT p.symbol, p.date, p.target_date, p.signal, p.confidence,
                                             p.support_price, p.ai_reasoning, p.validation_status, p.actual_change,
                                             p.is_primary, p.model_id as model, m.display_name,
-                                            ROW_NUMBER() OVER (PARTITION BY p.symbol ORDER BY p.date DESC) as rn
+                                            ROW_NUMBER() OVER (PARTITION BY p.symbol ORDER BY p.date DESC, m.priority DESC) as rn
                                     FROM ai_predictions_v2 p
                                     LEFT JOIN prediction_models m ON p.model_id = m.model_id
-                                    WHERE p.symbol IN (${placeholders}) AND p.is_primary = 1
+                                    WHERE p.symbol IN (${placeholders}) AND (${tierFilter})
                                 )
                                 SELECT r.*, dp.close as close_price,
                                        dp.rsi, dp.kdj_k, dp.kdj_d, dp.kdj_j, dp.macd, dp.macd_signal, dp.macd_hist, dp.boll_upper, dp.boll_mid, dp.boll_lower
@@ -75,7 +67,6 @@ export async function GET(request: Request) {
                 latestPrices = pricesRs.rows as Record<string, unknown>[];
                 allHistory = historyRs.rows as Record<string, unknown>[];
             } else {
-                // SQLite
                 latestPrices = client.prepare(`
                     SELECT dp.* FROM daily_prices dp
                     INNER JOIN (
@@ -91,10 +82,10 @@ export async function GET(request: Request) {
                         SELECT p.symbol, p.date, p.target_date, p.signal, p.confidence,
                                 p.support_price, p.ai_reasoning, p.validation_status, p.actual_change,
                                 p.is_primary, p.model_id as model, m.display_name,
-                                ROW_NUMBER() OVER (PARTITION BY p.symbol ORDER BY p.date DESC) as rn
+                                ROW_NUMBER() OVER (PARTITION BY p.symbol ORDER BY p.date DESC, m.priority DESC) as rn
                         FROM ai_predictions_v2 p
                         LEFT JOIN prediction_models m ON p.model_id = m.model_id
-                        WHERE p.symbol IN (${placeholders}) AND p.is_primary = 1
+                        WHERE p.symbol IN (${placeholders}) AND (${tierFilter})
                     )
                     SELECT r.*, dp.close as close_price,
                            dp.rsi, dp.kdj_k, dp.kdj_d, dp.kdj_j, dp.macd, dp.macd_signal, dp.macd_hist, dp.boll_upper, dp.boll_mid, dp.boll_lower
@@ -109,76 +100,36 @@ export async function GET(request: Request) {
             }
         }
 
-        // 组装逻辑
         const priceMap = new Map(latestPrices.map(p => [p.symbol as string, p]));
         const historyBySymbol = new Map<string, Record<string, unknown>[]>();
-
         for (const hist of allHistory) {
             const sym = hist.symbol as string;
-            if (!historyBySymbol.has(sym)) {
-                historyBySymbol.set(sym, []);
-            }
+            if (!historyBySymbol.has(sym)) historyBySymbol.set(sym, []);
             historyBySymbol.get(sym)!.push(hist);
         }
 
-        // 计算最后更新时间 (UTC+8) -> 此处只是数据层面的时间，实际上 CDN 缓存后这个时间也是缓存的
-        // 真实性：对于公有数据，这个“最后更新时间”应该是数据本身的时间，而不是查询时间
-        // 但为了复用之前的 UI 逻辑，我们先计算出来
-        const now = new Date();
-        const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-        const hkTime = new Date(utc + (3600000 * 8));
-        const hours = hkTime.getHours();
-        const minutes = hkTime.getMinutes();
-        const roundedMinutes = Math.floor(minutes / 10) * 10;
-        const lastUpdateTime = `${hours.toString().padStart(2, '0')}:${roundedMinutes.toString().padStart(2, '0')}`;
+        const hkTime = new Date(new Date().getTime() + (new Date().getTimezoneOffset() * 60000) + (3600000 * 8));
+        const lastUpdateTime = `${hkTime.getHours().toString().padStart(2, '0')}:${(Math.floor(hkTime.getMinutes() / 10) * 10).toString().padStart(2, '0')}`;
 
         const stocks = symbols.map(sym => {
             const history = historyBySymbol.get(sym) || [];
             const price = priceMap.get(sym) as Record<string, unknown> | undefined;
-
-            // 数据安全处理
-            const sevenDaysAgo = new Date();
-            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-            const sevenDaysAgoStr = sevenDaysAgo.toISOString().split('T')[0];
-            const validPreds = (history as { date: string }[]).filter(p => p.date >= sevenDaysAgoStr);
-
-            // 真实的最后更新标签: 如果价格数据是今天的，显示时间；否则显示日期
-            let displayUpdateTime = lastUpdateTime;
-            if (price?.date) {
-                const priceDate = String(price.date);
-                const todayStr = hkTime.toISOString().split('T')[0];
-                if (priceDate < todayStr) {
-                    // 如果数据不是今天的，显示日期前缀来提醒用户
-                    displayUpdateTime = `${priceDate.substring(5)} ${lastUpdateTime}`;
-                }
-            }
+            const validPreds = (history as { date: string }[]).filter(p => p.date >= new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0]);
 
             return {
                 symbol: sym,
                 price: price || null,
                 prediction: validPreds[0] || null,
                 previousPrediction: validPreds[1] || null,
-                history: history,
-                lastUpdated: displayUpdateTime
+                history,
+                lastUpdated: (price?.date && String(price.date) < hkTime.toISOString().split('T')[0]) ? `${String(price.date).substring(5)} ${lastUpdateTime}` : lastUpdateTime
             };
         });
 
-        const queryTime = Date.now() - startTime;
-
-        // 🚀🔥 核心魔法：设置 CDN 缓存头
-        // s-maxage=300: 边缘节点缓存 5 分钟
-        // stale-while-revalidate=60: 过期后 60秒内，允许先返回旧的，后台再去取新的 (丝滑)
-        const response = NextResponse.json({
-            stocks,
-            queryTime
-        });
-
-        response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=60');
-        response.headers.set('CDN-Cache-Control', 'public, s-maxage=300, stale-while-revalidate=60'); // Cloudflare Specific
-        response.headers.set('Vercel-CDN-Cache-Control', 'public, s-maxage=300, stale-while-revalidate=60'); // Vercel Specific
-
+        const response = NextResponse.json({ stocks, tier: userTier, queryTime: Date.now() - startTime });
+        response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=30');
+        response.headers.set('Vary', 'x-user-id');
         return response;
-
     } catch (error) {
         console.error('Batch Stock API Error:', error);
         return NextResponse.json({ error: 'Database error' }, { status: 500 });

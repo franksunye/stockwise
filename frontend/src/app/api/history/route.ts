@@ -1,5 +1,10 @@
 import { NextResponse } from 'next/server';
 import { getDbClient } from '@/lib/db';
+import { headers } from 'next/headers';
+import { getUserTier } from '@/lib/user-server';
+import { getModelSqlFilter } from '@/lib/membership-config';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
@@ -12,9 +17,10 @@ export async function GET(request: Request) {
     }
 
     try {
-        const client = getDbClient();
-
-        let rows: Record<string, unknown>[];
+        const headersList = await headers();
+        const userId = headersList.get('x-user-id');
+        const userTier = await getUserTier(userId);
+        const tierFilter = getModelSqlFilter(userTier);
 
         const sql = `
             SELECT p.symbol, p.date, p.target_date, p.signal, p.confidence,
@@ -27,29 +33,29 @@ export async function GET(request: Request) {
             FROM ai_predictions_v2 p
             LEFT JOIN prediction_models m ON p.model_id = m.model_id
             LEFT JOIN daily_prices d ON p.symbol = d.symbol AND p.target_date = d.date
-            WHERE p.symbol = ? AND p.is_primary = 1
-            ORDER BY p.date DESC
+            WHERE p.symbol = ? AND (${tierFilter})
+            ORDER BY p.date DESC, m.priority DESC
             LIMIT ? OFFSET ?
         `;
 
+        const client = getDbClient();
+        let rows: Record<string, unknown>[];
         try {
             if ('execute' in client) {
                 const rs = await client.execute({ sql, args: [symbol, limit, offset] });
-                rows = rs.rows;
+                rows = rs.rows as Record<string, unknown>[];
             } else {
                 rows = client.prepare(sql).all(symbol, limit, offset) as Record<string, unknown>[];
             }
         } finally {
-            // Ensure client is an object and has a close method before calling it
             if (client && typeof client === 'object' && 'close' in client && typeof (client as { close?: () => void }).close === 'function') {
                 (client as { close: () => void }).close();
             }
         }
 
-        return NextResponse.json({ predictions: rows });
-
+        return NextResponse.json({ predictions: rows, tier: userTier });
     } catch (error) {
         console.error('History API Error:', error);
-        return NextResponse.json({ error: 'Database error', details: String(error) }, { status: 500 });
+        return NextResponse.json({ error: 'Database error' }, { status: 500 });
     }
 }
