@@ -37,7 +37,7 @@ jobs:
           TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
           
           # Tiered LLM Providers
-          BRIEF_PROVIDER_FREE: qwen
+          BRIEF_PROVIDER_FREE: hunyuan
           BRIEF_PROVIDER_PRO: qwen
           
           # API Keys
