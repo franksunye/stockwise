@@ -47,8 +47,11 @@ jobs:
           HUNYUAN_API_KEY: ${{ secrets.HUNYUAN_API_KEY }}
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
         run: |
-          echo "🚀 Executing: python -u backend/main.py --analyze --market HK --model deepseek-aliyun $FORCE_FLAG $DATE_FLAG"
-          python -u backend/main.py --analyze --market HK --model deepseek-aliyun $FORCE_FLAG $DATE_FLAG
+          # 1. 确保所有激活的模型都跑一遍分析 (包括 deepseek-aliyun)
+          python -u backend/main.py --analyze --market HK --model all
+          
+          # 2. 生成每日简报并汇总
+          python -m backend.engine.brief_generator
       - name: Broadcast Notifications
         env:
           # Database
