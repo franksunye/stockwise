@@ -320,25 +320,23 @@ def run_full_sync(market_filter: str = None, force_full: bool = False):
     
     def sync_single_stock(stock):
         """单个股票的全量同步任务"""
-        try:
-            # 日线是必须的
-            process_stock_period(stock, period="daily")
+        # 日线是必须的，如果失败（返回 False），抛出异常以便外层捕获
+        if not process_stock_period(stock, period="daily"):
+            raise ValueError("Daily sync failed (empty or network error)")
+        
+        if sync_weekly:
+            time.sleep(0.5) # Slight delay to avoid DB connection burst
+            # 周月线偶尔失败不影响核心体验，故仅记录不抛出异常
+            try: 
+                process_stock_period(stock, period="weekly")
+                time.sleep(0.5)
+            except: pass 
             
-            if sync_weekly:
-                time.sleep(0.5) # Slight delay to avoid DB connection burst
-                # 周月线偶尔失败不影响核心体验
-                try: 
-                    process_stock_period(stock, period="weekly")
-                    time.sleep(0.5)
-                except: pass 
-                
-            if sync_monthly:
-                try: process_stock_period(stock, period="monthly")
-                except: pass
-                
-            return True
-        except Exception as e:
-            raise e
+        if sync_monthly:
+            try: process_stock_period(stock, period="monthly")
+            except: pass
+            
+        return True
 
     with ThreadPoolExecutor(max_workers=workers) as executor:
         future_to_stock = {executor.submit(sync_single_stock, stock): stock for stock in target_stocks}
