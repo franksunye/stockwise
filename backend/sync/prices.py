@@ -46,7 +46,8 @@ def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool =
 
     # 1. 抓取
     df = fetch_stock_data(symbol, period=period, start_date=fetch_start_str)
-    if df.empty: return
+    # [Fix] Explicitly return False if fetch failed or no data, so caller knows it wasn't updated
+    if df.empty: return False
     
     # 2. 清洗
     df = df.rename(columns={
@@ -62,7 +63,7 @@ def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool =
     # 4. 判断是否需要更新
     if last_date_str and df["date"].max() < last_date_str:
         logger.info(f"✨ 数据已是最新 ({last_date_str})。")
-        return
+        return True
 
     # 5. 数据校验 (Data Validation)
     original_count = len(df)
@@ -81,7 +82,7 @@ def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool =
     
     if df.empty:
         logger.warning(f"⚠️ {symbol}: 校验后无有效数据")
-        return
+        return False
 
     # [Optimization] Splice local history for realtime calculation
     # Only keep track of new rows to insert later
@@ -240,6 +241,8 @@ def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool =
             related_symbol=symbol,
             tag=f"price_update_{symbol}"
         )
+        
+    return True
 
 
 def run_full_sync(market_filter: str = None):

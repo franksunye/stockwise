@@ -27,7 +27,9 @@ def sync_spot_prices(symbols: list):
     
     def sync_single_realtime(stock):
         try:
-            process_stock_period(stock, period="daily", is_realtime=True)
+            result = process_stock_period(stock, period="daily", is_realtime=True)
+            if result is False:
+                raise Exception("Fetch returned empty data (Network error or No Trade)")
             return True
         except Exception as e:
             raise e
