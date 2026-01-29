@@ -45,10 +45,23 @@ def sync_spot_prices(symbols: list):
                 logger.error(f"❌ {stock} 实时同步失败: {e}")
 
     duration = time.time() - start_time
-    status = "✅ SUCCESS" if success_count > 0 else "❌ FAILED"
+    
+    if len(errors) == 0:
+        status = "✅ SUCCESS"
+    elif success_count > 0:
+        status = "⚠️ PARTIAL"
+    else:
+        status = "❌ FAILED"
     
     report = f"### 🛠️ StockWise: Realtime Sync\n"
     report += f"> **Status**: {status}\n"
-    report += f"- **Processed**: {success_count}/{len(symbols)}\n"
+    report += f"- **Success**: {success_count}/{len(symbols)}\n"
+    if errors:
+        report += f"- **Failed**: {len(errors)}\n"
+        # Extract stock codes from error messages somewhat loosely
+        failed_stocks = [e.split()[1] for e in errors if "Stock" in e]
+        if failed_stocks:
+             report += f"> ❌ Failures: {', '.join(failed_stocks[:5])}{'...' if len(failed_stocks)>5 else ''}\n"
+             
     report += f"- **执行耗时**: {duration:.1f}s"
     send_wecom_notification(report)
