@@ -55,10 +55,24 @@ class NotificationTemplates:
             }
         },
         "morning_call": {
+            "free": {
+                "zh": {
+                    "title": "☕ 今日早报: AI 交易提醒",
+                    "body": "📊 关注股中 {stock_names} 等有看多信号。{sentiment_snippet}"
+                }
+            },
+            "pro": {
+                "zh": {
+                    "title": "☀️ Pro 专属：今日必读市场内参",
+                    "body": "💡 重点关注：{stock_names} 等出现高胜率信号。{sentiment_snippet}"
+                }
+            }
+        },
+        "morning_call_neutral": {
             "all": {
                 "zh": {
-                    "title": "{title}", # For legacy reasons, sometimes title is passed as payload
-                    "body": "{body}"
+                    "title": "☕ 今日早报: 市场观望",
+                    "body": "📉 今日市场整体观望为主。{sentiment_snippet}"
                 }
             }
         },

@@ -207,20 +207,20 @@ class NotificationManager:
             return None
             
         # 1. Handle Morning Call (Take the first one if multiple, usually just one)
-        mc_events = [e for e in events if e["type"] == "morning_call"]
+        mc_events = [e for e in events if e["type"] in ("morning_call", "morning_call_neutral")]
         if mc_events:
             e = mc_events[0]
+            # Use all fields from event as context for template rendering
             title, body = NotificationTemplates.render(
-                "morning_call", 
+                e["type"], 
                 tier=user_tier, 
-                title=e["title"], 
-                body=e["body"]
+                **e
             )
             return {
                 "title": title,
                 "body": body,
                 "url": e["url"],
-                "type": "morning_call",
+                "type": e["type"],
                 "related_symbols": e.get("related_symbols", [])
             }
 

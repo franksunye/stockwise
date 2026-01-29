@@ -67,12 +67,13 @@ def generate_morning_calls(dry_run=False, target_date=None):
         if not watchlist:
             continue
             
-        # Fetch today's AI plans for these stocks
+        # Fetch today's AI plans for these stocks (with names)
         placeholders = ",".join(["?"] * len(watchlist))
         cursor.execute(f"""
-            SELECT symbol, signal, confidence, ai_reasoning 
-            FROM ai_predictions_v2
-            WHERE symbol IN ({placeholders}) AND target_date = ? AND is_primary = 1
+            SELECT p.symbol, p.signal, p.confidence, p.ai_reasoning, m.name
+            FROM ai_predictions_v2 p
+            JOIN stock_meta m ON p.symbol = m.symbol
+            WHERE p.symbol IN ({placeholders}) AND p.target_date = ? AND p.is_primary = 1
         """, (*watchlist, today_str))
         predictions = cursor.fetchall()
         
@@ -80,22 +81,17 @@ def generate_morning_calls(dry_run=False, target_date=None):
             logger.debug(f"⏩ Skip user {user_id}: No predictions for watchlist today.")
             continue
             
-        # Compose personalized message
-        buy_signals = [p[0] for p in predictions if p[1] in ('Buy', 'Strong Buy', 'Long')]
+        # Compose personalized message placeholders
+        buy_signals = [f"{p[4]}" for p in predictions if p[1] in ('Buy', 'Strong Buy', 'Long')]
         
-        title = "☕ 今日早报: AI 交易提醒"
-        if buy_signals:
-            body = f"📊 您的关注股中 {', '.join(buy_signals[:3])} 等有看多信号。{sentiment_snippet}"
-        else:
-            body = f"📉 今日市场观望为主。{sentiment_snippet}"
-            
-        url = "/dashboard?brief=true&utm_source=push&utm_medium=morning_call"
+        # Decide which template type to use
+        notif_type = "morning_call" if buy_signals else "morning_call_neutral"
         
-        # Log and Queue
-        nm.queue_notification(user_id, "morning_call", {
-            "title": title,
-            "body": body,
-            "url": url,
+        # Queue for NotificationManager to handle (it will fetch tier and render during flush)
+        nm.queue_notification(user_id, notif_type, {
+            "stock_names": ", ".join(buy_signals[:3]),
+            "sentiment_snippet": sentiment_snippet,
+            "url": "/dashboard?brief=true&utm_source=push&utm_medium=morning_call",
             "related_symbols": watchlist
         })
         sent_count += 1
