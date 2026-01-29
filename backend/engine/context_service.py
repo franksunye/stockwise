@@ -16,6 +16,10 @@ except ImportError:
     from logger import logger
     from database import get_connection
 
+# Global Market Anchors for mood calculation
+MARKET_ANCHORS = ["02800", "sh000001", "510300"]
+MARKET_SYMBOL_MAP = {"02800": "恒生指数(ETF)", "sh000001": "上证指数", "510300": "沪深300"}
+
 class ContextService:
     _instance = None
     _lock = threading.Lock()
@@ -79,8 +83,7 @@ class ContextService:
         1. Query Index Proxies (02800, sh000001, 510300).
         2. Calculate Market Breadth (Advancers vs Decliners).
         """
-        MARKET_ANCHORS = ["02800", "sh000001", "510300"]
-        symbol_map = {"02800": "恒生指数(ETF)", "sh000001": "上证指数", "510300": "沪深300"}
+        symbol_map = MARKET_SYMBOL_MAP
         
         conn = get_connection()
         try:

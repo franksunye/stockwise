@@ -298,7 +298,10 @@ def run_full_sync(market_filter: str = None, force_full: bool = False):
 
     # [NEW] Force Inject Market Anchors (Ensure indices are fetched)
     # This solves the "Where does the market data come from?" problem.
-    from engine.context_service import MARKET_ANCHORS
+    try:
+        from backend.engine.context_service import MARKET_ANCHORS
+    except ImportError:
+        from engine.context_service import MARKET_ANCHORS
     
     # Merge and deduplicate
     current_set = set(target_stocks)
