@@ -3,9 +3,14 @@ User Completion Tracker for AI Analysis.
 Helps track when a user's entire watchlist has been analyzed to send a single notification.
 """
 from typing import List, Dict, Set
-from database import get_connection
-from logger import logger
-from notifications import send_push_notification
+try:
+    from backend.database import get_connection
+    from backend.logger import logger
+    from backend.notifications import send_push_notification
+except ImportError:
+    from database import get_connection
+    from logger import logger
+    from notifications import send_push_notification
 
 class UserCompletionTracker:
     def __init__(self):
