@@ -20,6 +20,7 @@ class UserCompletionTracker:
         self.pending_counts: Dict[str, int] = {}  # user_id -> remaining stock count
         self.stock_subscribers: Dict[str, Set[str]] = {}  # symbol -> set of user_ids
         self.notified_users: Set[str] = set()  # users already notified
+        self.user_tiers: Dict[str, str] = {}  # user_id -> tier
         
     def load_watchlists(self, target_stocks: List[str]):
         """
@@ -39,9 +40,12 @@ class UserCompletionTracker:
             
             # Fetch all watchlist entries (user_id, symbol pairs)
             # [OPTIMIZED] Only track users who have at least one active push subscription
+            # [OPTIMIZED] Only track users who have at least one active push subscription
+            # Joining with users to get subscription_tier for personalized notifications
             query = """
-                SELECT w.user_id, w.symbol 
+                SELECT w.user_id, w.symbol, u.subscription_tier
                 FROM user_watchlist w
+                JOIN users u ON w.user_id = u.user_id
                 WHERE EXISTS (SELECT 1 FROM push_subscriptions s WHERE s.user_id = w.user_id)
             """
             cursor.execute(query)
@@ -50,7 +54,7 @@ class UserCompletionTracker:
             target_set = set(target_stocks)
             
             # Build reverse index and count pending stocks per user
-            for user_id, symbol in all_watchlist:
+            for user_id, symbol, tier in all_watchlist:
                 if symbol not in target_set:
                     continue  # Skip stocks not in this run's scope
                 
@@ -58,6 +62,9 @@ class UserCompletionTracker:
                 if symbol not in self.stock_subscribers:
                     self.stock_subscribers[symbol] = set()
                 self.stock_subscribers[symbol].add(user_id)
+                
+                # Store tier
+                self.user_tiers[user_id] = tier or "free"
                 
                 # Increment user's pending count
                 if user_id not in self.pending_counts:
@@ -108,21 +115,25 @@ class UserCompletionTracker:
         self.pending_counts.clear()
         self.stock_subscribers.clear()
         self.notified_users.clear()
+        self.user_tiers.clear()
         logger.debug("🧹 [Tracker] Cleared all tracking data")
 
 
-def notify_user_prediction_updated(user_id: str, market: str = None):
+def notify_user_prediction_updated(user_id: str, market: str = None, tier: str = "free"):
     """
     Send push notification to user when their watchlist predictions are complete.
     
     Args:
         user_id: User to notify
         market: Market code (CN, HK, US) for personalization
+        tier: User subscription tier
     """
     try:
         from backend.notifications import send_push_notification
+        from backend.notification_templates import NotificationTemplates
     except ImportError:
         from notifications import send_push_notification
+        from notification_templates import NotificationTemplates
     
     # Market display name mapping
     market_name = ""
@@ -130,14 +141,19 @@ def notify_user_prediction_updated(user_id: str, market: str = None):
         if market == "CN": market_name = "A股"
         elif market == "HK": market_name = "港股"
         elif market == "US": market_name = "美股"
-        else: market_name = market
+        else: market_name = f"{market} "
     
-    body_text = f"您关注的 {market_name} AI 预测数据已全部更新，点击查看最新趋势。" if market_name else "您关注的 AI 预测数据已全部更新，点击查看最新趋势。"
+    # Render from templates
+    notify_title, notify_body = NotificationTemplates.render(
+        "prediction_updated",
+        tier=tier,
+        market_name=market_name
+    )
 
     try:
         send_push_notification(
-            title="🤖 AI 预测已更新",
-            body=body_text,
+            title=notify_title,
+            body=notify_body,
             url="/dashboard",
             target_user_id=user_id,
             tag="prediction_updated"

@@ -113,7 +113,7 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool =
                         # [NEW] Still mark as complete for tracker (data already exists)
                         ready_users = tracker.mark_stock_complete(stock)
                         for uid in ready_users:
-                            notify_user_prediction_updated(uid)
+                            notify_user_prediction_updated(uid, tier=tracker.user_tiers.get(uid, "free"))
                         
                         continue
                 # 如果是 all，这里不再做整体跳过，让子引擎去判断具体哪个模型没跑
@@ -158,7 +158,7 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool =
                     ready_users = tracker.mark_stock_complete(stock)
                     # Notify immediately
                     for uid in ready_users:
-                        notify_user_prediction_updated(uid, market=market_filter or "CN")
+                        notify_user_prediction_updated(uid, market=market_filter or "CN", tier=tracker.user_tiers.get(uid, "free"))
                 else:
                     logger.warning(f"⚠️ {stock}: Analysis failed or returned no results.")
                 

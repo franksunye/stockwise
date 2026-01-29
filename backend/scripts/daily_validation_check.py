@@ -17,6 +17,7 @@ sys.path.insert(0, os.path.dirname(backend_path))
 from database import get_connection
 from logger import logger
 from notification_service import NotificationManager
+from notification_templates import NotificationTemplates
 from engine.validator import verify_all_pending
 
 
@@ -83,10 +84,19 @@ def run_validation_notifications(dry_run=False):
         if not symbols:
             continue
             
+        # Get user tier for personalization
+        cursor.execute("SELECT subscription_tier FROM users WHERE user_id = ?", (user_id,))
+        tier_row = cursor.fetchone()
+        user_tier = tier_row[0] if tier_row and tier_row[0] else "free"
+
         win_details = [f"{s}({success_map[s]['change']:+.1f}%)" for s in symbols[:3]]
+        win_details_text = ", ".join(win_details)
         
-        title = "🏅 AI 预测验证成功!"
-        body = f"昨日为您追踪的 {', '.join(win_details)} 走势符合 AI 预期。点击查看复盘对比。"
+        title, body = NotificationTemplates.render(
+            "validation_glory",
+            tier=user_tier,
+            win_details_text=win_details_text
+        )
         url = "/dashboard?utm_source=push&utm_medium=validation_glory"
         
         nm.queue_notification(user_id, "validation_glory", {

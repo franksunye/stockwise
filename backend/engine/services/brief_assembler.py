@@ -166,13 +166,26 @@ async def notify_user_brief_ready(user_id: str, date_str: str):
         row = cursor.fetchone()
         push_hook = row[0] if row and row[0] else "点击查看今日 AI 复盘"
         
-        # 5. Send notification
-        if user_tier == 'pro':
-            notify_title = "⭐ Pro 深度复盘已就绪"
-            notify_body = f"{push_hook} | 首席主笔深度解读"
-        else:
-            notify_title = "📊 今日简报已生成"
-            notify_body = push_hook
+        # 5. Render & Send notification using unified template engine
+        try:
+            from notification_templates import NotificationTemplates
+        except ImportError:
+            try:
+                from backend.notification_templates import NotificationTemplates
+            except ImportError:
+                # Basic mock for absolute safety during refactor
+                class NotificationTemplates:
+                    @staticmethod
+                    def render(ntype, tier, **kwargs):
+                        if tier == 'pro': 
+                            return "⭐ Pro 深度复盘已就绪", f"{kwargs.get('push_hook')} | 首席主笔深度解读"
+                        return "📊 今日简报已生成", kwargs.get('push_hook')
+
+        notify_title, notify_body = NotificationTemplates.render(
+            "daily_brief", 
+            tier=user_tier, 
+            push_hook=push_hook
+        )
         
         send_push_notification(
             title=notify_title,

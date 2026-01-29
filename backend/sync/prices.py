@@ -158,13 +158,29 @@ def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool =
             stock_name = symbol
         
         emoji = "🚀" if change >= 3 else ("📈" if change > 0 else ("🔹" if change == 0 else "📉"))
-        title = f"{stock_name} ({symbol}) {emoji} {change:+.2f}%"
-        body = f"最新: {price} | 成交: {format_volume(last_row['volume'])}"
+        
+        # [NEW] Use unified template engine for consistent messaging
+        try:
+            from notification_templates import NotificationTemplates
+        except ImportError:
+            # Fallback if templates are missing
+            notify_title = f"{stock_name} ({symbol}) {emoji} {change:+.2f}%"
+            notify_body = f"最新: {price} | 成交: {format_volume(last_row['volume'])}"
+        else:
+            notify_title, notify_body = NotificationTemplates.render(
+                "price_update",
+                stock_name=stock_name,
+                symbol=symbol,
+                emoji=emoji,
+                change_pct=f"{change:+.2f}",
+                price=price,
+                volume_formatted=format_volume(last_row['volume'])
+            )
         
         # 发送给关注该股票的用户，使用 symbol 作为 tag 实现同一个股票通知覆盖
         send_push_notification(
-            title=title, 
-            body=body, 
+            title=notify_title, 
+            body=notify_body,  
             url=f"/dashboard?symbol={symbol}", 
             related_symbol=symbol,
             tag=f"price_update_{symbol}"

@@ -11,6 +11,7 @@ from typing import List, Dict, Set, Optional
 from database import get_connection, execute_with_retry
 from logger import logger
 from notifications import send_push_notification
+from notification_templates import NotificationTemplates
 
 
 class NotificationManager:
@@ -30,6 +31,7 @@ class NotificationManager:
         self.queued_notifications: Dict[str, List[dict]] = {}  # user_id -> List[event]
         self.signal_cache: Dict[str, Dict[str, dict]] = {}  # user_id -> {symbol -> state_dict}
         self.pending_state_updates: List[dict] = []  # List of state updates to flush to DB
+        self.user_tier_cache: Dict[str, str] = {}  # user_id -> tier
         
         # Internal stats
         self.stats = {
@@ -159,7 +161,9 @@ class NotificationManager:
             if not events:
                 continue
                 
-            payload = self._aggregate_notifications(user_id, events)
+            # Pre-fetch user tier for rendering
+            user_tier = self._get_user_tier(user_id)
+            payload = self._aggregate_notifications(user_id, events, user_tier)
             if payload:
                 success = self._send_notification(user_id, payload)
                 if success:
@@ -176,7 +180,26 @@ class NotificationManager:
         
         return total_sent
 
-    def _aggregate_notifications(self, user_id: str, events: List[dict]) -> Optional[dict]:
+    def _get_user_tier(self, user_id: str) -> str:
+        """Fetch or return cached user tier."""
+        if user_id in self.user_tier_cache:
+            return self.user_tier_cache[user_id]
+        
+        conn = self._get_conn()
+        try:
+            cursor = conn.cursor()
+            cursor.execute("SELECT subscription_tier FROM users WHERE user_id = ?", (user_id,))
+            row = cursor.fetchone()
+            tier = row[0] if row and row[0] else "free"
+            self.user_tier_cache[user_id] = tier
+            return tier
+        except Exception:
+            return "free"
+        finally:
+            if not self.conn:
+                conn.close()
+
+    def _aggregate_notifications(self, user_id: str, events: List[dict], user_tier: str = "free") -> Optional[dict]:
         """
         Logic to merge multiple notifications into a single, clean push message.
         """
@@ -187,9 +210,15 @@ class NotificationManager:
         mc_events = [e for e in events if e["type"] == "morning_call"]
         if mc_events:
             e = mc_events[0]
+            title, body = NotificationTemplates.render(
+                "morning_call", 
+                tier=user_tier, 
+                title=e["title"], 
+                body=e["body"]
+            )
             return {
-                "title": e["title"],
-                "body": e["body"],
+                "title": title,
+                "body": body,
                 "url": e["url"],
                 "type": "morning_call",
                 "related_symbols": e.get("related_symbols", [])
@@ -201,13 +230,23 @@ class NotificationManager:
         if flips:
             if len(flips) == 1:
                 e = flips[0]
-                title = f"🚨 AI 信号转向: {e['symbol']}"
-                body = f"评级已从 [{e['old_signal']}] 调整为 [{e['new_signal']}]。信心指数: {int(e['confidence']*100)}%。"
+                title, body = NotificationTemplates.render(
+                    "signal_flip", 
+                    tier=user_tier, 
+                    symbol=e["symbol"], 
+                    old_signal=e["old_signal"], 
+                    new_signal=e["new_signal"],
+                    confidence_pct=int(e["confidence"]*100)
+                )
                 url = f"/dashboard?symbol={e['symbol']}&utm_source=push&utm_medium=smart_notify"
             else:
                 symbols = [e["symbol"] for e in flips]
-                title = f"🎯 {len(flips)} 只关注股信号更新"
-                body = f"{', '.join(symbols)} 等股票出现新的交易信号，点击查看 AI 深度复盘。"
+                title, body = NotificationTemplates.render(
+                    "signal_flip_batch", 
+                    tier=user_tier, 
+                    count=len(flips),
+                    symbols=", ".join(symbols)
+                )
                 url = f"/dashboard?utm_source=push&utm_medium=smart_notify_batch"
                 
             return {
@@ -223,9 +262,15 @@ class NotificationManager:
         if wins:
             # Usually only one per run, but we take the most recent
             e = wins[0]
+            title, body = NotificationTemplates.render(
+                "validation_glory", 
+                tier=user_tier, 
+                title=e["title"], 
+                body=e["body"]
+            )
             return {
-                "title": e["title"],
-                "body": e["body"],
+                "title": title,
+                "body": body,
                 "url": e["url"],
                 "type": "validation_glory",
                 "related_symbols": e.get("related_symbols", [])
