@@ -66,48 +66,50 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool =
         
         # Pre-load signal states and subscribers for optimization
         # We need to know which users are watching the target stocks
-        try:
-            conn = get_connection()
-            cursor = conn.cursor()
-            
-            # Optimization: If targets list is too long (e.g. full market), don't use IN clause
-            # Just fetch all relevant watchlists.
-            if len(targets) > 500:
-                query = """
-                    SELECT w.symbol, w.user_id
-                    FROM user_watchlist w
-                    WHERE EXISTS (SELECT 1 FROM push_subscriptions s WHERE s.user_id = w.user_id)
-                """
-                cursor.execute(query)
-            else:
-                placeholders = ','.join(['?'] * len(targets))
-                query = f"""
-                    SELECT w.symbol, w.user_id
-                    FROM user_watchlist w
-                    WHERE w.symbol IN ({placeholders})
-                    AND EXISTS (SELECT 1 FROM push_subscriptions s WHERE s.user_id = w.user_id)
-                """
-                cursor.execute(query, list(targets))
+        # [Precision Fix] Ensure targets exists before query to avoid invalid SQL 'IN ()'
+        if targets:
+            try:
+                conn = get_connection()
+                cursor = conn.cursor()
                 
-            rows = cursor.fetchall()
-            involved_users = set()
-            
-            for sym, uid in rows:
-                if sym not in stock_subscribers:
-                    stock_subscribers[sym] = set()
-                stock_subscribers[sym].add(uid)
-                involved_users.add(uid)
-            
-            # Pre-load previous signal states for these users/stocks
-            if involved_users:
-                 notif_manager.load_signal_states(list(involved_users), targets)
-            
-            conn.close()
-            logger.info(f"🔔 [SmartNotif] Loaded subscribers for {len(stock_subscribers)} stocks.")
-            
-        except Exception as e:
-            logger.warning(f"⚠️ [SmartNotif] Failed to load subscribers: {e}")
-            stock_subscribers = {} # Fallback: No notifications will send
+                # Optimization: If targets list is too long (e.g. full market), don't use IN clause
+                # Just fetch all relevant watchlists.
+                if len(targets) > 500:
+                    query = """
+                        SELECT w.symbol, w.user_id
+                        FROM user_watchlist w
+                        WHERE EXISTS (SELECT 1 FROM push_subscriptions s WHERE s.user_id = w.user_id)
+                    """
+                    cursor.execute(query)
+                else:
+                    placeholders = ','.join(['?'] * len(targets))
+                    query = f"""
+                        SELECT w.symbol, w.user_id
+                        FROM user_watchlist w
+                        WHERE w.symbol IN ({placeholders})
+                        AND EXISTS (SELECT 1 FROM push_subscriptions s WHERE s.user_id = w.user_id)
+                    """
+                    cursor.execute(query, list(targets))
+                    
+                rows = cursor.fetchall()
+                involved_users = set()
+                
+                for sym, uid in rows:
+                    if sym not in stock_subscribers:
+                        stock_subscribers[sym] = set()
+                    stock_subscribers[sym].add(uid)
+                    involved_users.add(uid)
+                
+                # Pre-load previous signal states for these users/stocks
+                if involved_users:
+                     notif_manager.load_signal_states(list(involved_users), targets)
+                
+                conn.close()
+                logger.info(f"🔔 [SmartNotif] Loaded subscribers for {len(stock_subscribers)} stocks.")
+                
+            except Exception as e:
+                logger.warning(f"⚠️ [SmartNotif] Failed to load subscribers: {e}")
+                stock_subscribers = {} # Fallback: No notifications will send
     
     conn = get_connection()
     cursor = conn.cursor()
