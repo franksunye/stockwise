@@ -84,6 +84,11 @@ class LLMClient:
             self.base_url = base_url or hy_config.get("base_url") or "https://api.hunyuan.cloud.tencent.com/v1"
             self.api_key = api_key or hy_config.get("api_key")
             self.model = model or hy_config.get("model") or "hunyuan-lite"
+        elif self.provider == "qwen":
+            qw_config = LLM_CONFIG.get("qwen", {})
+            self.base_url = base_url or qw_config.get("base_url") or "https://dashscope.aliyuncs.com/compatible-mode/v1"
+            self.api_key = api_key or qw_config.get("api_key")
+            self.model = model or qw_config.get("model") or "qwen2.5-coder-32b-instruct"
         else: # openai, custom, or generic
             self.base_url = base_url or LLM_CONFIG.get("base_url", "http://127.0.0.1:8045/v1")
             self.api_key = api_key or LLM_CONFIG.get("api_key", "")

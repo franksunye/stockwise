@@ -37,10 +37,15 @@ jobs:
           TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
           
           # Tiered LLM Providers
-          BRIEF_PROVIDER_FREE: hunyuan
-          BRIEF_PROVIDER_PRO: deepseek
+          BRIEF_PROVIDER_FREE: qwen
+          BRIEF_PROVIDER_PRO: qwen
           
           # API Keys
+          QWEN_API_KEY: ${{ secrets.QWEN_API_KEY }}
+          QWEN_MODEL: deepseek-v3
+          # Hardcode Aliyun URL to avoid extra secrets
+          QWEN_VS_URL: https://dashscope.aliyuncs.com/compatible-mode/v1
+          
           HUNYUAN_API_KEY: ${{ secrets.HUNYUAN_API_KEY }}
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
         run: |

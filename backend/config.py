@@ -89,6 +89,11 @@ DEFAULTS = {
         "base_url": os.getenv("HUNYUAN_BASE_URL", "https://api.hunyuan.cloud.tencent.com/v1"),
         "model": os.getenv("HUNYUAN_MODEL", "hunyuan-lite"),
         "qps_limit": float(os.getenv("HUNYUAN_QPS_LIMIT", "2.0")),
+    },
+    "qwen": {
+        "api_key": os.getenv("QWEN_API_KEY"),
+        "base_url": os.getenv("QWEN_VS_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1"),
+        "model": os.getenv("QWEN_MODEL", "qwen2.5-coder-32b-instruct"),
     }
 }
 
@@ -105,7 +110,9 @@ LLM_CONFIG = {
     "deepseek": DEFAULTS["deepseek"],
     "gemini": DEFAULTS["gemini"],
     "gemini_local": DEFAULTS["gemini_local"],
-    "hunyuan": DEFAULTS["hunyuan"]
+    "gemini_local": DEFAULTS["gemini_local"],
+    "hunyuan": DEFAULTS["hunyuan"],
+    "qwen": DEFAULTS["qwen"]
 }
 
 # 动态覆盖基础配置 (如果指定了提供商且有对应配置)
