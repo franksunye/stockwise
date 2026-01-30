@@ -16,9 +16,9 @@ const pricingPlans = [
     period: '永久免费',
     description: '适合刚接触 AI 投资的个人投资者',
     features: [
-      '基础个股日级别简报',
+      '基于规则的量化信号',
+      '混元 Lite 模型基础简报',
       '每日 3 只自选股监控额度',
-      '延迟数据分析',
       '社区技术支持',
     ],
     cta: '立即开始',
@@ -34,7 +34,8 @@ const pricingPlans = [
     period: '每月 / ¥299 每年',
     description: '专为追求深度见解的专业投资者设计',
     features: [
-      'Matt Levine 风格深度叙事复盘',
+      'DeepSeek V3 驱动深度复盘',
+      'Matt Levine 风格叙事逻辑',
       '10 只自选股监控额度',
       '所有技术因子全维度解锁',
       '实时信号翻转推送（战报）',
@@ -391,8 +392,8 @@ function PricingContent() {
               </thead>
               <tbody className="text-sm font-medium">
                 {[
-                  { label: 'AI 智力内核', free: '混元 Lite (通用大模型)', pro: 'Gemini Pro + DeepSeek (顶级推理)', highlight: true },
-                  { label: '决策叙事引擎', free: '标准数据汇总', pro: 'Matt Levine 风格叙事逻辑', highlight: true },
+                  { label: 'AI 智力内核', free: '规则引擎 + 混元 Lite', pro: 'DeepSeek V3 (顶级推理)', highlight: true },
+                  { label: '决策叙事引擎', free: '基础数据汇总', pro: 'Matt Levine 风格深度叙事', highlight: true },
                   { label: '自选股监控名额', free: '3 只', pro: '10 只', highlight: true },
                   { label: '量化模型底座', free: '基于规则的深度量化', pro: '基于规则的深度量化', common: true },
                   { label: '行情覆盖范围', free: 'A股 / 港股 全覆盖', pro: 'A股 / 港股 全覆盖', common: true },

@@ -18,7 +18,7 @@ except ImportError:
 # --- Tier to Provider Mapping ---
 TIER_PROVIDER_MAP = {
     "free": os.getenv("BRIEF_PROVIDER_FREE", "hunyuan"),
-    "pro": os.getenv("BRIEF_PROVIDER_PRO", "gemini_local")
+    "pro": os.getenv("BRIEF_PROVIDER_PRO", "deepseek")
 }
 SUPPORTED_TIERS = list(TIER_PROVIDER_MAP.keys())
 
