@@ -78,7 +78,7 @@ else:
 
 # 3. 同步并发配置
 SYNC_CONFIG = {
-    "realtime_workers": int(os.getenv("SYNC_REALTIME_WORKERS", "1")),
+    "realtime_workers": int(os.getenv("SYNC_REALTIME_WORKERS", "2")),
     "daily_workers": int(os.getenv("SYNC_DAILY_WORKERS", "5")),
 }
 
@@ -121,6 +121,10 @@ WECOM_ROBOT_KEY = os.getenv("WECOM_ROBOT_KEY")
 # 7. 系统路径
 DB_PATH = os.path.join(root_dir, "data", "stockwise.db")
 
+# 7.1 通知密钥
+INTERNAL_API_SECRET = os.getenv("INTERNAL_API_SECRET")
+NEXT_PUBLIC_SITE_URL = os.getenv("NEXT_PUBLIC_SITE_URL", "https://swx.visutry.com")
+
 # 8. 默认北京时间
 def get_now_beijing():
     return datetime.now(BEIJING_TZ)
@@ -140,10 +144,10 @@ TIER_PROVIDER_MAP = {
 CHAIN_STRATEGIES = {
     "hunyuan-lite": {
         "steps": [
-            {"type": "anchor", "config": {}},
+            {"type": "anchor", "config": {"include_profile": True}},
             {"type": "indicator", "config": {}},
             {"type": "multi_period", "config": {}},
-            {"type": "synthesis", "config": {}}
+            {"type": "synthesis", "config": {"conservative": True, "inject_hard_facts": True}}
         ]
     }
 }
