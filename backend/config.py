@@ -88,6 +88,28 @@ LLM_CONFIG = {
     "base_url": os.getenv("LLM_BASE_URL"),
     "model": os.getenv("LLM_MODEL", "gpt-3.5-turbo"),
     "timeout": int(os.getenv("LLM_TIMEOUT", "60")),
+    "provider": os.getenv("LLM_PROVIDER", "openai"),
+    
+    # 供应商特定配置
+    "deepseek": {
+        "api_key": os.getenv("DEEPSEEK_API_KEY"),
+        "base_url": os.getenv("DEEPSEEK_BASE_URL"),
+        "model": os.getenv("DEEPSEEK_MODEL"),
+    },
+    "gemini": {
+        "api_key": os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY"),
+        "model": os.getenv("GEMINI_MODEL"),
+    },
+    "hunyuan": {
+        "api_key": os.getenv("HUNYUAN_API_KEY"),
+        "base_url": os.getenv("HUNYUAN_BASE_URL"),
+        "model": os.getenv("HUNYUAN_MODEL"),
+    },
+    "qwen": {
+        "api_key": os.getenv("QWEN_API_KEY"),
+        "base_url": os.getenv("QWEN_BASE_URL") or os.getenv("QWEN_VS_URL"),
+        "model": os.getenv("QWEN_MODEL"),
+    }
 }
 
 # 5. 时区与时间
