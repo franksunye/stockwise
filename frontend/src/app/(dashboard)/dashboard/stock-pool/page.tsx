@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Plus, Trash2, ArrowLeft, TrendingUp, TrendingDown, Minus, LayoutGrid } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { getCurrentUser, type User } from '@/lib/user';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getMarketScene } from '@/lib/date-utils';
@@ -164,9 +165,9 @@ export default function StockPoolPage() {
       {/* Solid/Stable Header Structure (Like Brief Page) */}
       <header className="shrink-0 z-20 p-8 flex items-center justify-between bg-[#050508] border-b border-white/5">
         <div className="flex items-center gap-4">
-          <button onClick={() => router.push('/dashboard')} className="p-2.5 rounded-full bg-white/5 border border-white/10 active:scale-90 transition-all">
+          <Link href="/dashboard" className="p-2.5 rounded-full bg-white/5 border border-white/10 active:scale-90 transition-all">
             <ArrowLeft className="w-5 h-5 text-slate-400" />
-          </button>
+          </Link>
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_#6366f1] animate-pulse" />
@@ -257,17 +258,19 @@ export default function StockPoolPage() {
             stocks.map(stock => {
               const meta = getSignalMeta(stock.aiSignal);
               return (
-                <motion.div 
+                <motion.div
                   key={stock.symbol}
                   layout
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => {
-                    setNavigatingTo(stock.symbol);
-                    router.push(`/dashboard?symbol=${stock.symbol}`);
-                  }}
-                  className={`glass-card p-5 group transition-all cursor-pointer relative ${navigatingTo === stock.symbol ? 'bg-white/10 border-indigo-500/30' : 'hover:bg-white/[0.04]'}`}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
                 >
-                  <div className="flex items-center justify-between">
+                  <Link 
+                    href={`/dashboard?symbol=${stock.symbol}`}
+                    onClick={() => setNavigatingTo(stock.symbol)}
+                    className={`glass-card p-5 group transition-all relative block active:scale-95 ${navigatingTo === stock.symbol ? 'bg-white/10 border-indigo-500/30 ring-1 ring-indigo-500/20' : 'hover:bg-white/[0.04]'}`}
+                  >
+                   <div className="flex items-center justify-between">
                      <div className="flex items-center gap-4">
                        <div className={`w-14 h-14 rounded-[22px] flex items-center justify-center border-2 ${meta.bgColor}`}>
                           {stock.aiSignal === 'Long' ? <TrendingUp className={meta.iconColor} /> :
@@ -303,8 +306,8 @@ export default function StockPoolPage() {
                          )}
                        </div>
                        <button 
-                         onClick={(e) => { e.stopPropagation(); handleRemoveClick(e, stock); }}
-                         className="p-3 opacity-60 hover:opacity-100 transition-all text-slate-500 hover:text-rose-500 active:scale-75 z-20 relative"
+                         onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleRemoveClick(e, stock); }}
+                         className="p-3 opacity-60 hover:opacity-100 transition-all text-slate-500 hover:text-rose-500 active:scale-75 z-20 relative rounded-full hover:bg-white/5"
                        >
                          <Trash2 size={20} />
                        </button>
@@ -316,6 +319,7 @@ export default function StockPoolPage() {
                         </div>
                       )}
                    </div>
+                  </Link>
                 </motion.div>
               );
             })

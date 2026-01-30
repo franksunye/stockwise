@@ -206,7 +206,11 @@ function DashboardContent() {
           ))}
         </div>
         <div className="w-full flex justify-between items-center pointer-events-auto">
-          <Link href="/dashboard/stock-pool" className="p-3 rounded-2xl bg-white/5 border border-white/10 active:scale-95 transition-all">
+          <Link 
+            href="/dashboard/stock-pool" 
+            prefetch={true}
+            className="p-3 rounded-2xl bg-white/5 border border-white/10 active:scale-95 transition-all pointer-events-auto"
+          >
             <Grid className="w-5 h-5 text-indigo-400" />
           </Link>
           
