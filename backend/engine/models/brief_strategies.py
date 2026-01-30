@@ -9,7 +9,6 @@ import json
 
 from logger import logger
 from engine.llm_client import LLMClient
-from config import DEFAULTS
 try:
     from backend.engine.brief_prompts import BRIEF_ASSISTANT_SYSTEM_PROMPT, BRIEF_COLUMNIST_SYSTEM_PROMPT
 except ImportError:
