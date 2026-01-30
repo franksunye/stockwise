@@ -11,12 +11,20 @@ on:
         type: boolean
         default: false
         required: false
+      date:
+        description: '指定重跑分析日期 (YYYY-MM-DD)'
+        type: string
+        required: false
   workflow_dispatch:
     inputs:
       force:
         description: '强制重新验证所有预测'
         type: boolean
         default: false
+        required: false
+      date:
+        description: '指定重跑分析日期 (YYYY-MM-DD)'
+        type: string
         required: false
 
 jobs:
@@ -43,4 +51,6 @@ jobs:
           TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
           TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
         run: |
-          python -u backend/main.py --verify ${{ (inputs.force == true || github.event.inputs.force == 'true') && '--force' || '' }}
+          FORCE_ARG="${{ (inputs.force == true || github.event.inputs.force == 'true') && '--force' || '' }}"
+          DATE_ARG="${{ (inputs.date != '' && format('--date {0}', inputs.date)) || (github.event.inputs.date != '' && format('--date {0}', github.event.inputs.date)) || '' }}"
+          python -u backend/main.py --verify $FORCE_ARG $DATE_ARG

@@ -73,7 +73,8 @@ if __name__ == "__main__":
         logger_sys.start("Data Validation", "maintenance", dimensions={})
         try:
             from engine.validator import verify_all_pending
-            verify_all_pending(force=args.force)
+            # Use args.date as the target_date for selective re-verification
+            verify_all_pending(force=args.force, target_date=args.date)
             logger_sys.success("Validation completed")
         except Exception as e:
             logger_sys.fail(str(e))
