@@ -80,8 +80,14 @@ def fetch_full_analysis_context(symbol: str, as_of_date: str = None) -> Dict[str
 
     # 4 & 5. AI History & Accuracy
     history_data = fetch_ai_history_for_model(symbol, analysis_date, cursor=cursor)
-    ai_history = history_data["ai_history"]
-    accuracy_stats = history_data["accuracy"]
+    ai_history = history_data.get("ai_history", [])
+    accuracy_stats = history_data.get("accuracy", {})
+
+    # 6. Global Market Context (Synthetic Layer)
+    from backend.engine.context_service import ContextService
+    ctx_service = ContextService()
+    market_context = ctx_service._get_cached_market_mood(analysis_date)
+    altitude_context = ctx_service._calculate_altitude(symbol, analysis_date)
 
     return {
         "symbol": symbol,
@@ -93,7 +99,9 @@ def fetch_full_analysis_context(symbol: str, as_of_date: str = None) -> Dict[str
         "weekly_prices": weekly_history,
         "monthly_prices": monthly_history,
         "ai_history": ai_history,
-        "accuracy": accuracy_stats
+        "accuracy": accuracy_stats,
+        "market_context": market_context,
+        "altitude_context": altitude_context
     }
 
 def fetch_ai_history_for_model(symbol: str, analysis_date: str, model_id: str = None, cursor = None) -> Dict[str, Any]:
@@ -158,6 +166,15 @@ def prepare_stock_analysis_prompt(symbol: str, as_of_date: str = None, ctx: Dict
     data = ctx["latest_data"]
     profile = ctx["profile"]
     
+    # 0. Market Context
+    market_context = ctx.get("market_context", "数据同步中，请以此个股分析为主")
+    altitude = ctx.get("altitude_context", {})
+    altitude_str = "短期(20d) {} | 中期(60d) {} | 长期(250d) {}".format(
+        altitude.get('short_term_20d', '-'),
+        altitude.get('medium_term_60d', '-'),
+        altitude.get('long_term_250d', '-')
+    )
+
     # 1. Profile Section
     profile_section = f"""## 公司基本面 (Profile)
 - **行业**: {profile.get('industry', '未知')}
@@ -518,8 +535,10 @@ def prepare_stock_analysis_prompt(symbol: str, as_of_date: str = None, ctx: Dict
     user_prompt = f"""# 股票数据输入
 
 ## 1. 基础信息
-- **{stock_name}** ({symbol}.HK)
+- **{stock_name}** ({symbol})
 - 日期: {data['date']}
+- **整体市场背景**: {market_context}
+- **股价位置(Altitude)**: {altitude_str}
 {profile_section}
 
 ## 2. 价格行为 (Price Action)
