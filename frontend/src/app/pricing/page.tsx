@@ -16,10 +16,12 @@ const pricingPlans = [
     period: '永久免费',
     description: '适合刚接触 AI 投资的个人投资者',
     features: [
-      '基于规则的量化信号',
-      '混元 Lite 模型基础简报',
-      '每日 3 只自选股监控额度',
-      '社区技术支持',
+      'AI 趋势信号 (量化多空判断)',
+      '每日市场复盘 (基础行情摘要)',
+      '每日 3 次个股 AI 诊断',
+      '投资者共学社区权限',
+      '每日 3 次个股 AI 诊断',
+      '投资者共学社区权限',
     ],
     cta: '立即开始',
     href: '/dashboard',
@@ -32,14 +34,14 @@ const pricingPlans = [
     enName: 'Pro',
     price: '29.9',
     period: '每月 / ¥299 每年',
-    description: '专为追求深度见解的专业投资者设计',
+    description: '专为追求深度认知与交易纪律的进阶投资者设计',
     features: [
-      'DeepSeek V3 驱动深度复盘',
-      'Matt Levine 风格叙事逻辑',
-      '10 只自选股监控额度',
-      '所有技术因子全维度解锁',
-      '实时信号翻转推送（战报）',
-      '⭐ Pro 专属身份勋章',
+      'DeepSeek 深度推理 (揭示涨跌逻辑)',
+      '教练式 AI 研报 (拒绝术语堆砌)',
+      '10 只自选股全权托管 (覆盖主力持仓)',
+      '主力情绪与资金关键指标解锁',
+      '关键变盘点实时推送 (纪律提醒)',
+      '⭐ 专属 Pro 身份勋章',
     ],
     priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_MONTHLY || 'price_1Su1zqS3fDFObThpZbYXr2GG',
     priceIdAnnual: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_YEARLY || 'price_1Su1zqS3fDFObThp7iG6X6bK', 
@@ -238,10 +240,10 @@ function PricingContent() {
           </motion.div>
           <h1 className="text-5xl md:text-7xl font-black tracking-tighter italic leading-tight">
             选择您的 <br /> 
-            <span className="bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">决策加速引擎</span>
+            <span className="bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">AI 投资决策合伙人</span>
           </h1>
           <p className="text-lg text-slate-400 font-medium max-w-xl mx-auto leading-relaxed mt-6">
-            StockWise AI 利用 AI 击穿专业投研成本，为您提供高性价比的金融决策辅助方案。
+            StockWise AI 帮您克服情绪干扰，把专业的盘后复盘变成简单的日常习惯，让每一次交易决策都有据可依。
           </p>
         </div>
 
@@ -392,14 +394,14 @@ function PricingContent() {
               </thead>
               <tbody className="text-sm font-medium">
                 {[
-                  { label: 'AI 智力内核', free: '规则引擎 + 混元 Lite', pro: 'DeepSeek V3 (顶级推理)', highlight: true },
-                  { label: '决策叙事引擎', free: '基础数据汇总', pro: 'Matt Levine 风格深度叙事', highlight: true },
-                  { label: '自选股监控名额', free: '3 只', pro: '10 只', highlight: true },
-                  { label: '量化模型底座', free: '基于规则的深度量化', pro: '基于规则的深度量化', common: true },
+                  { label: 'AI 分析深度', free: '规则引擎 + 基础 AI', pro: 'DeepSeek V3 (顶级思维链模型)', highlight: true },
+                  { label: '复盘叙事逻辑', free: '基础数据罗列', pro: '像真人教练一样深度推演与归因', highlight: true },
+                  { label: '监控托管数量', free: '3 只 (尝鲜体验)', pro: '10 只 (覆盖主力持仓)', highlight: true },
+                  { label: '量化信号底座', free: '标准趋势判断', pro: '标准趋势判断', common: true },
                   { label: '行情覆盖范围', free: 'A股 / 港股 全覆盖', pro: 'A股 / 港股 全覆盖', common: true },
-                  { label: '通知推送逻辑', free: '基础事件提醒', pro: '决策级推理结论推送', highlight: true },
-                  { label: '预测验证战报', free: '标准验证报告', pro: 'Pro 级收益复盘战报', highlight: true },
-                  { label: '数据更新频率', free: '同步实时行情', pro: '同步实时行情', common: true },
+                  { label: '核心指标解锁', free: '仅收盘价', pro: '主力情绪、支撑压力位、量能状态', highlight: true },
+                  { label: '通知与纪律', free: '无', pro: '关键变盘点 / 突发异动 实时推送', highlight: true },
+                  { label: '数据时效性', free: '盘后同步', pro: '盘后同步', common: true },
                   { label: '专属身份标识', free: '-', pro: '⭐ 专属 Pro 勋章' },
                 ].map((row, i) => (
                   <tr key={i} className="border-b border-white/[0.03] hover:bg-white/[0.01] transition-colors">
