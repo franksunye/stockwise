@@ -201,13 +201,13 @@ async def analyze_stock_context(
         facts = await ctx_service.get_comprehensive_context(symbol, date_str, stock_name)
     
     deep_facts = []
-    if facts.get("market_mood"): 
-        deep_facts.append(f"- 市场大环境: {facts['market_mood']}")
+    if facts.get("market_context"): 
+        deep_facts.append(f"- 市场大环境: {facts['market_context']}")
     
     # Altitude Context
-    alt = facts.get("altitude", {})
-    if alt.get("year_stats"): deep_facts.append(f"- 长线战略水位: {alt['year_stats']}")
-    if alt.get("month_stats"): deep_facts.append(f"- 短线战术水位: {alt['month_stats']}")
+    alt = facts.get("price_altitude", {})
+    if alt.get("long_term_250d"): deep_facts.append(f"- 长线战略水位: {alt['long_term_250d']}")
+    if alt.get("short_term_20d"): deep_facts.append(f"- 短线战术水位: {alt['short_term_20d']}")
     
     # Volume Context
     if facts.get("volume_status"): deep_facts.append(f"- 量能状态: {facts['volume_status']}")
