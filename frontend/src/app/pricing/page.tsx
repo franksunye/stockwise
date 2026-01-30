@@ -228,22 +228,14 @@ function PricingContent() {
         )}
       </AnimatePresence>
 
-      <main className="relative z-10 max-w-7xl mx-auto px-8 pt-20 pb-40">
+      <main className="relative z-10 max-w-7xl mx-auto px-8 pt-12 pb-40">
         <div className="text-center space-y-4 mb-20">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-black uppercase tracking-widest mb-4"
-          >
-            <Star size={12} className="fill-indigo-500" />
-            Pricing Strategy
-          </motion.div>
-          <h1 className="text-5xl md:text-7xl font-black tracking-tighter italic leading-tight">
+          <h1 className="text-4xl md:text-6xl font-black tracking-tighter italic leading-tight">
             选择您的 <br /> 
-            <span className="bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">AI 投资决策合伙人</span>
+            <span className="bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">AI 投资助手</span>
           </h1>
           <p className="text-lg text-slate-400 font-medium max-w-xl mx-auto leading-relaxed mt-6">
-            StockWise AI 帮您克服情绪干扰，把专业的盘后复盘变成简单的日常习惯，让每一次交易决策都有据可依。
+            StockWise AI 帮您克服情绪干扰，把专业的复盘变成简单的日常习惯，让每一次交易决策都有据可依。
           </p>
         </div>
 
