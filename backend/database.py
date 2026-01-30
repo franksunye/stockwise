@@ -90,8 +90,9 @@ def get_connection(max_retries: int = 3):
                 # sync client from libsql-experimental
                 return libsql.connect(database=TURSO_DB_URL, auth_token=TURSO_AUTH_TOKEN)
             else:
-                DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-                return sqlite3.connect(str(DB_PATH), timeout=30.0)
+                db_file = Path(DB_PATH)
+                db_file.parent.mkdir(parents=True, exist_ok=True)
+                return sqlite3.connect(str(db_file), timeout=30.0)
         except Exception as e:
             last_exception = e
             if is_transient_error(e):
