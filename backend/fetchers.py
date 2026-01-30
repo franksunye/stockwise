@@ -28,41 +28,79 @@ def fetch_stock_data(symbol: str, period: str = "daily", start_date: str = None)
     logger.info(f"📡 正在获取 {market}:{symbol} {period} 数据 (从 {start_date} 起)...")
     
 
-    @retry_request(max_retries=3, delay=2.0)
+    @retry_request(max_retries=3, delay=3.0)
     def _fetch_hk():
-        return ak.stock_hk_hist(symbol=symbol, period=period, start_date=start_date, end_date=datetime.now().strftime("%Y%m%d"), adjust="qfq")
+        # 1. EastMoney (Primary)
+        # Note: Proxy bypass is handled via NO_PROXY env var in config.py
+        try:
+            return ak.stock_hk_hist(symbol=symbol, period=period, start_date=start_date, end_date=datetime.now().strftime("%Y%m%d"), adjust="qfq")
+        except: pass
+        
+        # 2. Sina (Fallback)
+        try:
+            # Sina uses 5 digit symbol for HK
+            df = ak.stock_hk_daily(symbol=symbol, adjust="qfq")
+            if not df.empty:
+                if "date" in df.columns:
+                    s_dt = datetime.strptime(start_date, "%Y%m%d").date()
+                    df["date"] = pd.to_datetime(df["date"]).dt.date
+                    df = df[df["date"] >= s_dt]
+                    
+                df = df.rename(columns={
+                    "date": "日期", "open": "开盘", "high": "最高", "low": "最低", "close": "收盘", "volume": "成交量"
+                })
+                if "涨跌幅" not in df.columns:
+                    df["涨跌幅"] = df["收盘"].pct_change() * 100
+                return df
+        except Exception as e:
+            # logger.debug(f"HK Sina failed: {e}")
+            pass
+        return pd.DataFrame()
 
-    @retry_request(max_retries=3, delay=2.0)
+    @retry_request(max_retries=3, delay=3.0)
     def _fetch_cn():
-        # 1. 尝试个股接口 (Stock)
+        # 1. EastMoney (Primary)
         try:
             df = ak.stock_zh_a_hist(symbol=symbol, period=period, start_date=start_date, end_date=datetime.now().strftime("%Y%m%d"), adjust="qfq")
             if not df.empty: return df
-        except: pass
+        except Exception as e:
+            pass
         
-        # 2. 尝试 ETF 接口 (Fund)
-        # 51xxxx, 15xxxx 等
+        # 2. Sina (Fallback - Daily Only)
+        if period == "daily":
+            try:
+                sina_sym = symbol
+                if symbol.startswith(('6', '9')): sina_sym = f"sh{symbol}"
+                elif symbol.startswith(('0', '3', '2')): sina_sym = f"sz{symbol}"
+                elif symbol.startswith(('4', '8')): sina_sym = f"bj{symbol}"
+                
+                df = ak.stock_zh_a_daily(symbol=sina_sym, start_date=start_date, end_date=datetime.now().strftime("%Y%m%d"), adjust="qfq")
+                if not df.empty:
+                    df = df.rename(columns={
+                        "date": "日期", "open": "开盘", "high": "最高", "low": "最低", "close": "收盘", "volume": "成交量"
+                    })
+                    if "涨跌幅" not in df.columns:
+                        df["涨跌幅"] = df["收盘"].pct_change() * 100
+                    return df
+            except Exception as e:
+                pass
+
+        # 3. ETF (Fund)
         try:
             df = ak.fund_etf_hist_em(symbol=symbol, period=period, start_date=start_date, end_date=datetime.now().strftime("%Y%m%d"), adjust="qfq")
             if not df.empty: return df
         except: pass
 
-        # 3. 尝试指数接口 (Index)
-        # e.g. sh000001
+        # 4. Index
         try:
             df = ak.stock_zh_index_daily(symbol=symbol)
-            # Index API returns all history, filter by date
             if not df.empty:
-                df['date'] = pd.to_datetime(df['date']).dt.strftime('%Y-%m-%d') # Index uses 'date' col
-                # Filter date
+                df['date'] = pd.to_datetime(df['date']).dt.strftime('%Y-%m-%d')
                 s_dt = datetime.strptime(start_date, "%Y%m%d").strftime("%Y-%m-%d")
                 df = df[df['date'] >= s_dt]
-                # Standardize columns to match stock interface for downstream processing
-                # Index API: date, open, high, low, close, volume
                 df = df.rename(columns={
                     "date": "日期", "open": "开盘", "high": "最高", "low": "最低", "close": "收盘", "volume": "成交量"
                 })
-                # Add dummy change percent if missing (or calc it)
                 if "涨跌幅" not in df.columns:
                     df["涨跌幅"] = df["收盘"].pct_change() * 100
                 return df

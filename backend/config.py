@@ -39,6 +39,40 @@ def load_env_file(path):
 load_env_file(root_env)
 load_env_file(backend_env)
 
+# -----------------------------------------------------------------------------
+# Proxy Configuration Strategy (Production Grade)
+# -----------------------------------------------------------------------------
+# For domestic stock data sources (AkShare/EastMoney/Sina), we must bypass proxies
+# to avoid 403 Forbidden/Conn Reset errors often caused by proxy IPs.
+# This logic ensures requests lib respects NO_PROXY automatically.
+if os.environ.get("HTTP_PROXY") or os.environ.get("HTTPS_PROXY"):
+    logger.info("🌍 Proxy Environment Detected. Auto-configuring NO_PROXY for stock sources...")
+    
+    # Standard list of domestic domains to bypass
+    dom_domains = [
+        "eastmoney.com", "sina.com.cn", "163.com", "qq.com", 
+        "cninfo.com.cn", "chinamoney.com.cn", "shfe.com.cn", 
+        "dce.com.cn", "czce.com.cn", "cffex.com.cn"
+    ]
+    
+    current_no_proxy = os.environ.get("NO_PROXY", "")
+    new_domains = []
+    
+    for d in dom_domains:
+        if d not in current_no_proxy:
+            new_domains.append(d)
+            
+    if new_domains:
+        # Append to existing (comma separated)
+        suffix = ",".join(new_domains)
+        if current_no_proxy:
+            os.environ["NO_PROXY"] = current_no_proxy + "," + suffix
+        else:
+            os.environ["NO_PROXY"] = suffix
+            
+        logger.info(f"🛡️  Added {len(new_domains)} domains to NO_PROXY rules.")
+
+
 # 2. 数据库源选择 (Cloud vs Local)
 # 默认为 'cloud'，如果在 .env 中设置 DB_SOURCE=local 则强制使用本地 SQLite
 DB_SOURCE = os.getenv("DB_SOURCE", "cloud").lower()
