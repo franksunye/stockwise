@@ -305,7 +305,14 @@ def run_full_sync(market_filter: str = None, force_full: bool = False):
     
     # Merge and deduplicate
     current_set = set(target_stocks)
-    for anchor in MARKET_ANCHORS:
+    all_anchors = []
+    if isinstance(MARKET_ANCHORS, dict):
+        for m_anchors in MARKET_ANCHORS.values():
+            all_anchors.extend(m_anchors)
+    else:
+        all_anchors = MARKET_ANCHORS
+
+    for anchor in all_anchors:
         # Check market filter compatibility (simple heuristic)
         if market_filter:
             is_hk_anchor = len(anchor) == 5
