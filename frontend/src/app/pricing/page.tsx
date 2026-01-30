@@ -415,7 +415,7 @@ function PricingContent() {
         <div className="glass-card p-6 md:p-10 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.03] to-transparent text-center max-w-4xl mx-auto">
           <div className="flex items-center justify-center gap-3 mb-4 text-emerald-400">
             <ShieldCheck size={20} />
-            <span className="text-sm font-black uppercase tracking-widest">Risk Disclosure</span>
+            <span className="text-sm font-black uppercase tracking-widest">风险免责声明</span>
           </div>
           <p className="text-slate-500 text-sm leading-relaxed max-w-2xl mx-auto italic font-medium">
             股市有风险，投资需谨慎。本应用生成的所有简报、预测及分析内容均由 AI 驱动，仅供参考，不构成任何形式的投资建议或财务咨询。StockWise AI 不对因使用本服务内容而导致的任何投资损失承担直接或间接责任。
