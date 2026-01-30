@@ -43,6 +43,11 @@ on:
         required: false
         type: string
         default: '7'
+      force:
+        description: 'Forced overwrite (即使已存在)'
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   backfill:
@@ -81,6 +86,11 @@ jobs:
         run: |
           # 构建命令参数
           CMD="python -u backend/main.py --analyze"
+       
+          # 强制标志
+          if [ "${{ inputs.force }}" == "true" ]; then
+            CMD="$CMD --force"
+          fi
           
           # 市场过滤
           if [ -n "${{ inputs.market }}" ]; then
