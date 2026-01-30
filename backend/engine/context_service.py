@@ -214,7 +214,7 @@ class ContextService:
     async def get_batch_predictions_and_reflection(self, symbols: List[str], date_str: str) -> Dict[str, Dict]:
         """
         World-Class Batch Fetching:
-        Gets AI predictions, yesterday's signals, and reflection meta in ONE query.
+        Gets AI predictions and a history of previous signals for reflection.
         """
         if not symbols: return {}
         
@@ -223,28 +223,73 @@ class ContextService:
             cursor = conn.cursor()
             placeholders = ','.join(['?' for _ in symbols])
             
-            sql = f"""
-                SELECT 
-                    p.symbol, p.signal, p.confidence, p.ai_reasoning, p.support_price, p.pressure_price, 
-                    prev.signal as prev_signal, prev.validation_status as prev_status, prev.actual_change as prev_change
-                FROM ai_predictions_v2 p
-                LEFT JOIN ai_predictions_v2 prev ON p.symbol = prev.symbol 
-                     AND prev.date = date(p.date, '-1 day') 
-                     AND prev.is_primary = 1
-                WHERE p.symbol IN ({placeholders}) AND p.date = ? AND p.is_primary = 1
+            # 1. Fetch current primary predictions
+            sql_curr = f"""
+                SELECT symbol, signal, confidence, ai_reasoning, support_price, pressure_price
+                FROM ai_predictions_v2 
+                WHERE symbol IN ({placeholders}) AND date = ? AND is_primary = 1
             """
-            cursor.execute(sql, (*symbols, date_str))
+            cursor.execute(sql_curr, (*symbols, date_str))
             
-            results = {}
+            curr_results = {}
             for row in cursor.fetchall():
-                results[row[0]] = {
+                curr_results[row[0]] = {
                     'signal': row[1], 'confidence': row[2], 'reasoning': row[3],
-                    'support': row[4], 'pressure': row[5],
-                    'reflection': {
-                        'prev_signal': row[6], 'prev_status': row[7], 'prev_change': row[8],
-                    }
+                    'support': row[4], 'pressure': row[5]
                 }
-            return results
+            
+            # 2. Fetch history (Last 3 predictions before date_str)
+            sql_hist = f"""
+                SELECT symbol, date, signal, validation_status, actual_change, confidence, support_price, pressure_price, model_id
+                FROM (
+                    SELECT 
+                        symbol, date, signal, validation_status, actual_change, confidence, support_price, pressure_price, model_id,
+                        ROW_NUMBER() OVER (PARTITION BY symbol ORDER BY date DESC) as rn
+                    FROM ai_predictions_v2
+                    WHERE symbol IN ({placeholders}) AND date < ? AND is_primary = 1
+                )
+                WHERE rn <= 3
+                ORDER BY symbol, date DESC
+            """
+            cursor.execute(sql_hist, (*symbols, date_str))
+            
+            hist_by_symbol = {}
+            for row in cursor.fetchall():
+                sym = row[0]
+                if sym not in hist_by_symbol: hist_by_symbol[sym] = []
+                hist_by_symbol[sym].append({
+                    'date': row[1],
+                    'signal': row[2],
+                    'status': row[3],
+                    'change': row[4],
+                    'confidence': row[5],
+                    'support': row[6],
+                    'pressure': row[7],
+                    'model_id': row[8]
+                })
+            
+            # 3. Assemble combined results
+            final_results = {}
+            for sym in symbols:
+                p = curr_results.get(sym, {})
+                h = hist_by_symbol.get(sym, [])
+                
+                reflection = {}
+                if h:
+                    latest_h = h[0]
+                    reflection = {
+                        'prev_signal': latest_h['signal'],
+                        'prev_status': latest_h['status'],
+                        'prev_change': latest_h['change'],
+                        'history': h 
+                    }
+                
+                final_results[sym] = {
+                    **p,
+                    'reflection': reflection
+                }
+                
+            return final_results
         finally:
             conn.close()
 
@@ -258,12 +303,17 @@ class ContextService:
             placeholders = ','.join(['?' for _ in symbols])
             
             sql = f"""
-                SELECT symbol, close, change_percent, rsi, macd
+                SELECT symbol, close, change_percent, rsi, macd, high, low
                 FROM daily_prices
                 WHERE symbol IN ({placeholders})
                 AND date = (SELECT MAX(date) FROM daily_prices WHERE symbol = daily_prices.symbol)
             """
             cursor.execute(sql, symbols)
-            return {row[0]: {'close': row[1], 'change': row[2], 'rsi': row[3], 'macd': row[4]} for row in cursor.fetchall()}
+            return {
+                row[0]: {
+                    'close': row[1], 'change': row[2], 'rsi': row[3], 
+                    'macd': row[4], 'high': row[5], 'low': row[6]
+                } for row in cursor.fetchall()
+            }
         finally:
             conn.close()

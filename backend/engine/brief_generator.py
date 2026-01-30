@@ -193,7 +193,7 @@ async def analyze_stock_context(
     
     # AI Reasoning section
     ai_reasoning = technical_data.get('ai_reasoning', '')
-    reasoning_section = ai_reasoning[:500] if ai_reasoning else "（无分析师推理记录）"
+    reasoning_section = ai_reasoning if ai_reasoning else "（无分析师推理记录）"
     
     # [World Class] Facts are now passed from outside, or fallback to Service
     if facts is None:
@@ -214,16 +214,41 @@ async def analyze_stock_context(
 
     deep_facts_str = chr(10).join(deep_facts) if deep_facts else "（暂无多周期回溯数据）"
     
-    # 4. Reflection Data (Yesterday's performance)
+    # 4. Reflection Data (Historical Performance Review)
     reflection = technical_data.get('reflection', {})
-    prev_sig = reflection.get('prev_signal')
-    prev_status = reflection.get('prev_status', 'Pending')
-    prev_change = reflection.get('prev_change')
+    history = reflection.get('history', [])
     
-    refl_msg = "（昨日无预测记录或尚未验证）"
-    if prev_sig:
-        change_text = f"{prev_change:+.2f}%" if prev_change is not None else "未知"
-        refl_msg = f"- 昨日预测信号: {prev_sig}\n- 验证结果: {prev_status} (实际涨跌: {change_text})"
+    refl_msg = "（近期无预测记录或尚未验证）"
+    if history:
+        history_items = []
+        # Today's actual range for precision check
+        curr_high = technical_data.get('high')
+        curr_low = technical_data.get('low')
+        
+        for i, p in enumerate(history):
+            sig_cn = {"Long": "做多", "Side": "观望", "Short": "避险"}.get(p['signal'], p['signal'])
+            status_icon = "✅" if p['status'] == "Correct" else ("❌" if p['status'] == "Incorrect" else "➖")
+            change_text = f"{p['change']:+.2f}%" if p['change'] is not None else "待验证"
+            
+            # Model name cleanup
+            model_tag = p.get('model_id', '').split('-')[0].capitalize()
+            
+            # Precision level check for ALL history items (a level from 2 days ago might hit today)
+            precision_note = ""
+            if curr_low and p.get('support'):
+                diff_pct = abs(curr_low - p['support']) / p['support']
+                if diff_pct < 0.005: 
+                    precision_note = f" [🎯 精准支撑: 预判{p['support']:.2f} vs 今日实际最低{curr_low:.2f}]"
+                elif curr_low >= p['support'] and curr_low <= p['support'] * 1.01:
+                    precision_note = f" [🛡️ 支撑有效: 今日最低{curr_low:.2f} 守住 {p['support']:.2f}]"
+
+            if curr_high and p.get('pressure'):
+                diff_pct_hi = abs(curr_high - p['pressure']) / p['pressure']
+                if diff_pct_hi < 0.005:
+                    precision_note += f" [🎯 精准压力: 预判{p['pressure']:.2f} vs 今日实际最高{curr_high:.2f}]"
+
+            history_items.append(f"- {p['date']} ({model_tag}) 预判: {sig_cn} {status_icon} (验证涨跌 {change_text}){precision_note}")
+        refl_msg = "\n".join(history_items)
 
     today_date = date_str  # Use passed date_str
     
@@ -241,7 +266,7 @@ async def analyze_stock_context(
 [第三事实：多周期与大盘背景]
 {deep_facts_str}
 
-[第四事实：昨日预测复盘]
+[第四事实：近期预测复盘 (多日连贯复盘)]
 {refl_msg}
 
 [参考逻辑：AI 分析师推理记录（若与第一事实冲突，请以第一事实为准）]
@@ -375,6 +400,8 @@ async def generate_stock_briefs_batch(date_str: str, specific_symbols: List[str]
                 'pressure_price': pred.get('pressure'),
                 'close': prices.get('close'),
                 'change_percent': prices.get('change'),
+                'high': prices.get('high'),
+                'low': prices.get('low'),
                 'reflection': pred.get('reflection', {}),
             }
 
