@@ -1,80 +1,71 @@
 import os
-from pathlib import Path
-from datetime import timedelta, timezone
+import sys
+import logging
+from datetime import datetime
 try:
-    from backend.logger import logger
+    from zoneinfo import ZoneInfo
 except ImportError:
-    from logger import logger
+    from backports.zoneinfo import ZoneInfo
 
-# 时区配置
-BEIJING_TZ = timezone(timedelta(hours=8))
+# Configure Logger for config module
+logger = logging.getLogger("config")
+if not logger.handlers:
+    handler = logging.StreamHandler()
+    formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s (%(filename)s:%(lineno)d)')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    logger.setLevel(logging.INFO)
 
-# 路径配置
-BASE_DIR = Path(__file__).parent.parent
-DB_PATH = BASE_DIR / "data" / "stockwise.db"
+def load_env_file(env_path):
+    if not os.path.exists(env_path):
+        return
+    logger.info(f"📖 加载环境配置: {env_path}")
+    with open(env_path, 'r', encoding='utf-8') as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith('#'):
+                continue
+            if '=' in line:
+                key, val = line.split('=', 1)
+                key = key.strip()
+                if key not in os.environ:
+                    os.environ[key] = val.strip().strip('"').strip("'")
 
-# 数据库连接配置
-# 1. 加载优先级: backend/.env > ../.env (Root)
-root_env = BASE_DIR / ".env"
-backend_env = Path(__file__).parent / ".env"
-
-def load_env_file(path):
-    if not path.exists(): return
-    try:
-        logger.info(f"📖 加载环境配置: {path}")
-        with open(path, "r", encoding="utf-8") as f:
-            for line in f:
-                line = line.strip()
-                if not line or line.startswith("#"): continue
-                if "=" in line:
-                    key, value = line.split("=", 1)
-                    key = key.strip()
-                    value = value.strip().strip("'").strip('"')
-                    # 命令行环境变量优先：如果已存在则不覆盖
-                    if key not in os.environ:
-                        os.environ[key] = value
-    except Exception as e:
-        logger.warning(f"⚠️ 加载 {path} 失败: {e}")
+# 1. 加载环境变量 (优先级: Current Env > .env)
+root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+root_env = os.path.join(root_dir, ".env")
+backend_env = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
 
 load_env_file(root_env)
 load_env_file(backend_env)
 
 # -----------------------------------------------------------------------------
-# Proxy Configuration Strategy (Production Grade)
+# Proxy Configuration Strategy
 # -----------------------------------------------------------------------------
-# For domestic stock data sources (AkShare/EastMoney/Sina), we must bypass proxies
-# to avoid 403 Forbidden/Conn Reset errors often caused by proxy IPs.
-# This logic ensures requests lib respects NO_PROXY automatically.
 if os.environ.get("HTTP_PROXY") or os.environ.get("HTTPS_PROXY"):
     logger.info("🌍 Proxy Environment Detected. Auto-configuring NO_PROXY for stock sources...")
     
-    # Standard list of domestic domains to bypass
     dom_domains = [
         "eastmoney.com", "sina.com.cn", "163.com", "qq.com", 
         "cninfo.com.cn", "chinamoney.com.cn", "shfe.com.cn", 
-        "dce.com.cn", "czce.com.cn", "cffex.com.cn"
+        "dce.com.cn", "czce.com.cn", "cffex.com.cn",
+        "sse.com.cn", "szse.cn", "bjs.com.cn", "akshare.xyz",
+        ".eastmoney.com", ".sina.com.cn", ".akshare.xyz",
+        "88.push2.eastmoney.com", "33.push2his.eastmoney.com",
+        "push2his.eastmoney.com", "push2.eastmoney.com"
     ]
     
-    current_no_proxy = os.environ.get("NO_PROXY", "")
-    new_domains = []
+    current_no_proxy = os.environ.get("NO_PROXY", os.environ.get("no_proxy", ""))
+    new_no_proxy = ",".join(dom_domains)
+    if current_no_proxy:
+        new_no_proxy = f"{new_no_proxy},{current_no_proxy}"
     
-    for d in dom_domains:
-        if d not in current_no_proxy:
-            new_domains.append(d)
-            
-    if new_domains:
-        # Append to existing (comma separated)
-        suffix = ",".join(new_domains)
-        if current_no_proxy:
-            os.environ["NO_PROXY"] = current_no_proxy + "," + suffix
-        else:
-            os.environ["NO_PROXY"] = suffix
-            
-        logger.info(f"🛡️  Added {len(new_domains)} domains to NO_PROXY rules.")
+    os.environ["NO_PROXY"] = new_no_proxy
+    os.environ["no_proxy"] = new_no_proxy
+    logger.info(f"🛡️  Added {len(dom_domains)} domains to NO_PROXY rules.")
 
 
-# 2. 数据库源选择 (Cloud vs Local)
-# 默认为 'cloud'，如果在 .env 中设置 DB_SOURCE=local 则强制使用本地 SQLite
+# 2. 数据库源选择
 DB_SOURCE = os.getenv("DB_SOURCE", "cloud").lower()
 
 if DB_SOURCE == "local":
@@ -86,101 +77,54 @@ else:
     TURSO_AUTH_TOKEN = os.getenv("TURSO_AUTH_TOKEN")
 
 # 3. 同步并发配置
-# 控制 ThreadPoolExecutor 的并发线程数，避免 Turso/libSQL 压力过大
 SYNC_CONFIG = {
     "realtime_workers": int(os.getenv("SYNC_REALTIME_WORKERS", "1")),
-    "daily_workers": int(os.getenv("SYNC_DAILY_WORKERS", "1")),
+    "daily_workers": int(os.getenv("SYNC_DAILY_WORKERS", "5")),
 }
 
-# 4. API 配置
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-WECOM_ROBOT_KEY = os.getenv("WECOM_ROBOT_KEY")
-TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
-
-# 本地/云端 LLM 配置
-LLM_PROVIDER = os.getenv("LLM_PROVIDER", "openai").lower() # gemini, deepseek, openai, custom
-
-# 预定义默认值
-DEFAULTS = {
-    "deepseek": {
-        "api_key": os.getenv("DEEPSEEK_API_KEY"),
-        "base_url": os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com/v1"),
-        # 'deepseek-chat' (V3) is standard cost-effective mode.
-        # 'deepseek-reasoner' (R1) is Chain-of-Thought mode with higher reasoning costs.
-        "model": os.getenv("DEEPSEEK_MODEL", "deepseek-chat"),
-    },
-    "gemini": {
-        "api_key": os.getenv("GEMINI_API_KEY"),
-        "model": os.getenv("GEMINI_MODEL", "gemini-pro"),
-    },
-    "gemini_local": {
-        "api_key": os.getenv("GEMINI_LOCAL_API_KEY", os.getenv("LLM_API_KEY")),
-        "base_url": os.getenv("GEMINI_LOCAL_BASE_URL", "http://127.0.0.1:8045"),
-        "model": os.getenv("GEMINI_LOCAL_MODEL", "gemini-3-flash"),
-    },
-    "hunyuan": {
-        "api_key": os.getenv("HUNYUAN_API_KEY"),
-        "base_url": os.getenv("HUNYUAN_BASE_URL", "https://api.hunyuan.cloud.tencent.com/v1"),
-        "model": os.getenv("HUNYUAN_MODEL", "hunyuan-lite"),
-        "qps_limit": float(os.getenv("HUNYUAN_QPS_LIMIT", "2.0")),
-    },
-    "qwen": {
-        "api_key": os.getenv("QWEN_API_KEY"),
-        "base_url": os.getenv("QWEN_VS_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1"),
-        "model": os.getenv("QWEN_MODEL", "deepseek-v3"),
-    }
-}
-
+# 4. LLM 配置
 LLM_CONFIG = {
-    "provider": LLM_PROVIDER,
-    "enabled": os.getenv("LLM_ENABLED", "true").lower() != "false",
-    
-    # 基础配置 (兼容旧版环境变量，如果没有指定提供商则使用这些)
     "api_key": os.getenv("LLM_API_KEY"),
-    "base_url": os.getenv("LLM_BASE_URL", "http://127.0.0.1:8045/v1"),
+    "base_url": os.getenv("LLM_BASE_URL"),
     "model": os.getenv("LLM_MODEL", "gpt-3.5-turbo"),
-    
-    # 模块化配置
-    "deepseek": DEFAULTS["deepseek"],
-    "gemini": DEFAULTS["gemini"],
-    "gemini_local": DEFAULTS["gemini_local"],
-    "gemini_local": DEFAULTS["gemini_local"],
-    "hunyuan": DEFAULTS["hunyuan"],
-    "qwen": DEFAULTS["qwen"]
+    "timeout": int(os.getenv("LLM_TIMEOUT", "60")),
 }
 
-# 动态覆盖基础配置 (如果指定了提供商且有对应配置)
-if LLM_PROVIDER in DEFAULTS:
-    provider_cfg = DEFAULTS[LLM_PROVIDER]
-    if provider_cfg.get("api_key"):
-        LLM_CONFIG["api_key"] = provider_cfg["api_key"]
-    if provider_cfg.get("model"):
-        LLM_CONFIG["model"] = provider_cfg["model"]
-    if provider_cfg.get("base_url"):
-        LLM_CONFIG["base_url"] = provider_cfg["base_url"]
+# 5. 时区与时间
+BEIJING_TZ = ZoneInfo("Asia/Shanghai")
 
+# 6. 企业微信机器人
+WECOM_ROBOT_KEY = os.getenv("WECOM_ROBOT_KEY")
 
-# -----------------------------------------------------------------------------
-# Chain Engine Strategies (LLM Multi-turn Workflows)
-# -----------------------------------------------------------------------------
+# 7. 系统路径
+DB_PATH = os.path.join(root_dir, "data", "stockwise.db")
+
+# 8. 默认北京时间
+def get_now_beijing():
+    return datetime.now(BEIJING_TZ)
+
+# Extra configs if any were lost (Best guess based on common project patterns)
+# Admin/Special Users
+ADMIN_USER_IDS = os.getenv("ADMIN_USER_IDS", "").split(",")
+PRO_USER_IDS = os.getenv("PRO_USER_IDS", "").split(",")
+
+# Tiers
+TIER_PROVIDER_MAP = {
+    "free": os.getenv("LLM_MODEL_FREE", "gpt-3.5-turbo"),
+    "pro": os.getenv("LLM_MODEL_PRO", "gpt-4"),
+}
+
+# Chain Engine Strategies
 CHAIN_STRATEGIES = {
-    # 策略名必须与 ModelFactory 中的 ID 匹配
     "hunyuan-lite": {
         "steps": [
-            {"type": "anchor", "config": {"include_profile": True}},
+            {"type": "anchor", "config": {}},
             {"type": "indicator", "config": {}},
             {"type": "multi_period", "config": {}},
-            {"type": "synthesis", "config": {"conservative": True, "inject_hard_facts": True}}
-        ],
-        # GitHub Actions 环境下，我们可以容忍更长的执行时间换取质量
-        "max_retries_per_step": 2, 
-        "total_timeout": 120
+            {"type": "synthesis", "config": {}}
+        ]
     }
 }
 
-# -----------------------------------------------------------------------------
-# Notification System Config
-# -----------------------------------------------------------------------------
-ENABLE_SMART_NOTIFICATIONS = os.getenv("ENABLE_SMART_NOTIFICATIONS", "false").lower() == "true"
-INTERNAL_API_SECRET = os.getenv("INTERNAL_API_SECRET")
-NEXT_PUBLIC_SITE_URL = os.getenv("NEXT_PUBLIC_SITE_URL", "http://localhost:3000")
+# Notification Settings
+ENABLE_SMART_NOTIFICATIONS = os.getenv("ENABLE_SMART_NOTIFICATIONS", "true").lower() == "true"
