@@ -7,6 +7,9 @@ StockWise Database Module (Raw Interface - No ORM)
 import sqlite3
 import libsql
 import os
+import time
+import requests
+import json
 from pathlib import Path
 
 try:
@@ -17,7 +20,6 @@ try:
     from backend.logger import logger
 except ImportError:
     from logger import logger
-import time
 
 # Turso/libSQL 瞬态错误模式列表
 # 这些错误通常是网络层问题，重试后可恢复
@@ -77,6 +79,188 @@ def execute_with_retry(func, max_retries=5, *args, **kwargs):
     raise last_exception
 
 
+
+
+
+class TursoHttpCursor:
+    """
+    A custom cursor implementation that talks to Turso via HTTP Pipeline API.
+    Designed to work identically to sqlite3.Cursor but stateless over HTTP.
+    Crucial for bypassing proxy issues in certain local environments.
+    """
+    def __init__(self, conn):
+        self.conn = conn
+        self.rowcount = -1
+        self.lastrowid = None
+        self.description = None
+        self._rows = []
+        self._idx = 0
+
+    def execute(self, sql, params=None):
+        args = []
+        if params:
+            for p in params:
+                if p is None:
+                    args.append({"type": "null", "value": None})
+                elif isinstance(p, int):
+                    args.append({"type": "integer", "value": str(p)})
+                elif isinstance(p, float):
+                    args.append({"type": "float", "value": float(p)})
+                else:
+                    args.append({"type": "text", "value": str(p)})
+        
+        stmt = { "sql": sql }
+        if args:
+            stmt["args"] = args
+
+        payload = {
+            "requests": [
+                { "type": "execute", "stmt": stmt },
+                { "type": "close" }
+            ]
+        }
+        
+        resp = self.conn._send(payload)
+        self._process_response(resp)
+        return self
+
+    def executemany(self, sql, seq_of_parameters):
+        # Turso pipeline supports multiple requests in one batch
+        reqs = []
+        for params in seq_of_parameters:
+            args = []
+            for p in params:
+                if p is None:
+                    args.append({"type": "null", "value": None})
+                elif isinstance(p, int):
+                    args.append({"type": "integer", "value": str(p)})
+                elif isinstance(p, float):
+                    args.append({"type": "float", "value": float(p)})
+                else:
+                    args.append({"type": "text", "value": str(p)})
+            reqs.append({
+                "type": "execute", 
+                "stmt": { "sql": sql, "args": args }
+            })
+        
+        reqs.append({ "type": "close" })
+        
+        # Batching logic to avoid payload size limits
+        BATCH_LIMIT = 50
+        
+        self.rowcount = 0
+        data_reqs = reqs[:-1] # All execute requests
+        
+        for i in range(0, len(data_reqs), BATCH_LIMIT):
+            chunk = data_reqs[i:i+BATCH_LIMIT]
+            chunk.append({ "type": "close" })
+            
+            payload = { "requests": chunk }
+            resp = self.conn._send(payload)
+            
+            if resp:    
+                for res in resp.get('results', []):
+                    if res.get('type') == 'ok' and res.get('response', {}).get('type') == 'execute':
+                        self.rowcount += res['response']['result']['affected_row_count']
+        
+        return self
+
+    def _process_response(self, resp_json):
+        if not resp_json: return
+        results = resp_json.get('results', [])
+        if not results: return
+        
+        # Check first result for execute response
+        exec_res = results[0]
+        if exec_res.get('type') == 'error':
+            raise Exception(f"Turso Error: {exec_res.get('error')}")
+            
+        if exec_res.get('type') == 'ok':
+            result = exec_res['response']['result']
+            self.rowcount = result.get('affected_row_count', 0)
+            self.lastrowid = result.get('last_insert_rowid')
+            
+            # Parse Columns
+            cols = result.get('cols', [])
+            if cols:
+                self.description = [ (c['name'], c.get('decltype')) for c in cols ]
+            else:
+                self.description = None
+            
+            # Parse Rows
+            self._rows = []
+            raw_rows = result.get('rows', [])
+            for r in raw_rows:
+                converted = []
+                for cell in r:
+                    val = cell['value']
+                    t = cell['type']
+                    if t == 'integer': value = int(val)
+                    elif t == 'float': value = float(val)
+                    elif t == 'null': value = None
+                    else: value = str(val) # text, blob
+                    converted.append(value)
+                self._rows.append(tuple(converted))
+            self._idx = 0
+
+    def fetchone(self):
+        if self._idx < len(self._rows):
+            res = self._rows[self._idx]
+            self._idx += 1
+            return res
+        return None
+
+    def fetchall(self):
+        res = self._rows[self._idx:]
+        self._idx = len(self._rows)
+        return res
+        
+    def close(self):
+        pass
+
+class TursoHttpConnection:
+    """
+    A custom connection class for Turso HTTP API.
+    Use this when standard libsql client fails due to network/proxy issues.
+    """
+    def __init__(self, url, token):
+        # Convert libsql:// or wss:// to https://
+        self.url = f"{url.replace('libsql://', 'https://').replace('wss://', 'https://')}/v2/pipeline"
+        self.token = token
+        self.headers = {
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json"
+        }
+    
+    def cursor(self):
+        return TursoHttpCursor(self)
+    
+    def commit(self):
+        # HTTP requests are auto-committed by default in this pipeline mode
+        pass
+        
+    def close(self):
+        pass
+        
+    def _send(self, payload):
+        try:
+            # Explicitly bypass proxies to verify direct connectivity
+            # regardless of local system proxy settings.
+            r = requests.post(
+                self.url, 
+                headers=self.headers, 
+                json=payload, 
+                timeout=30,
+                proxies={"http": None, "https": None}
+            )
+            if r.status_code != 200:
+                raise Exception(f"HTTP {r.status_code}: {r.text}")
+            return r.json()
+        except Exception as e:
+            raise e
+
+
+
 def get_connection(max_retries: int = 3):
     """
     创建原始数据库连接。
@@ -84,11 +268,20 @@ def get_connection(max_retries: int = 3):
     Includes retry logic for transient connection errors.
     """
     last_exception = None
+    
+    # Check DB_SOURCE
+    # We can import DB_SOURCE from config, but config imports this? No, config doesn't import database.
+    # database imports config.
+    try:
+        from config import DB_SOURCE
+    except:
+        DB_SOURCE = "cloud"
+
     for attempt in range(max_retries):
         try:
-            if TURSO_DB_URL:
-                # sync client from libsql-experimental
-                return libsql.connect(database=TURSO_DB_URL, auth_token=TURSO_AUTH_TOKEN)
+            if DB_SOURCE == "cloud" and TURSO_DB_URL:
+                # Use Custom HTTP Connection for robustness in proxy/windows envs
+                return TursoHttpConnection(TURSO_DB_URL, TURSO_AUTH_TOKEN)
             else:
                 db_file = Path(DB_PATH)
                 db_file.parent.mkdir(parents=True, exist_ok=True)
