@@ -13,11 +13,10 @@ def validate_previous_prediction(symbol: str, today_data: pd.Series):
     execute_with_retry(_validate_logic, 3, symbol, today_data)
 
 
-def verify_all_pending():
+def verify_all_pending(force: bool = False):
     """
-    Batch verify all pending predictions against their SPECIFIC target date price data.
-    This ensures that old pending predictions are validated against the correct historical day,
-    not just the latest available price.
+    Batch verify predictions against their SPECIFIC target date price data.
+    If force is True, it will re-calculate even for non-Pending statuses.
     """
     from database import get_connection
     conn = get_connection()
@@ -26,12 +25,17 @@ def verify_all_pending():
         
         # --- 1. Validate Multi-Model Table (ai_predictions_v2) ---
         # We use target_date to match exactly with daily_prices
-        logger.info("🔍 Verifying pending V2 predictions...")
+        if force:
+            logger.info("🔍 Re-verifying ALL V2 predictions (Force mode)...")
+            where_clause = "1=1"
+        else:
+            logger.info("🔍 Verifying pending V2 predictions...")
+            where_clause = "validation_status='Pending'"
         
-        pending_v2 = cursor.execute("""
+        pending_v2 = cursor.execute(f"""
             SELECT symbol, date, target_date, model_id, signal
             FROM ai_predictions_v2 
-            WHERE validation_status='Pending'
+            WHERE {where_clause}
         """).fetchall()
 
         validated_count_v2 = 0

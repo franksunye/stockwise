@@ -73,7 +73,7 @@ if __name__ == "__main__":
         logger_sys.start("Data Validation", "maintenance", dimensions={})
         try:
             from engine.validator import verify_all_pending
-            verify_all_pending()
+            verify_all_pending(force=args.force)
             logger_sys.success("Validation completed")
         except Exception as e:
             logger_sys.fail(str(e))

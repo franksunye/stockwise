@@ -5,7 +5,19 @@ name: Verify AI Predictions
 
 on:
   workflow_call:
+    inputs:
+      force:
+        description: '强制重新验证所有预测'
+        type: boolean
+        default: false
+        required: false
   workflow_dispatch:
+    inputs:
+      force:
+        description: '强制重新验证所有预测'
+        type: boolean
+        default: false
+        required: false
 
 jobs:
   verify:
@@ -31,4 +43,4 @@ jobs:
           TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
           TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
         run: |
-          python -u backend/main.py --verify
+          python -u backend/main.py --verify ${{ (inputs.force == true || github.event.inputs.force == 'true') && '--force' || '' }}
