@@ -17,8 +17,16 @@ except ImportError:
     from database import get_connection
 
 # Global Market Anchors for mood calculation
-MARKET_ANCHORS = ["02800", "sh000001", "510300"]
-MARKET_SYMBOL_MAP = {"02800": "恒生指数(ETF)", "sh000001": "上证指数", "510300": "沪深300"}
+MARKET_ANCHORS = {
+    "HK": ["02800"],
+    "CN": ["sh000001", "sh000300", "510300"]
+}
+MARKET_SYMBOL_MAP = {
+    "02800": "恒生指数(ETF)", 
+    "sh000001": "上证指数", 
+    "sh000300": "沪深300",
+    "510300": "沪深300ETF"
+}
 
 class ContextService:
     _instance = None
@@ -44,7 +52,7 @@ class ContextService:
         Combines macro, meso, and micro facts.
         """
         # 1. Macro: Market Mood
-        market_mood = self._get_cached_market_mood(date_str)
+        market_mood = self._get_cached_market_mood(date_str, symbol)
         
         # 2. Meso: Price Altitude (Positioning in cycles)
         altitude = self._calculate_altitude(symbol, date_str)
@@ -67,17 +75,21 @@ class ContextService:
             "timestamp": datetime.now().isoformat()
         }
 
-    def _get_cached_market_mood(self, date_str: str) -> str:
-        """Fetch market mood with date-based caching."""
-        cache_key = f"market_mood_{date_str}"
+    def _get_cached_market_mood(self, date_str: str, target_symbol: str = None) -> str:
+        """Fetch market mood with date and market-based caching."""
+        market = "CN"
+        if target_symbol and len(target_symbol) == 5:
+            market = "HK"
+            
+        cache_key = f"market_mood_{market}_{date_str}"
         if cache_key in self._global_cache:
             return self._global_cache[cache_key]
         
-        mood = self._calculate_market_mood(date_str)
+        mood = self._calculate_market_mood(date_str, market)
         self._global_cache[cache_key] = mood
         return mood
 
-    def _calculate_market_mood(self, date_str: str) -> str:
+    def _calculate_market_mood(self, date_str: str, market: str = "CN") -> str:
         """
         Analyze market sentiment:
         1. Query Index Proxies (02800, sh000001, 510300).
@@ -89,8 +101,10 @@ class ContextService:
         try:
             cursor = conn.cursor()
             
-            # Index performance
-            anchor_placeholders = ','.join([f"'{a}'" for a in MARKET_ANCHORS])
+            # Index performance (Filtered by Market)
+            market_anchors = MARKET_ANCHORS.get(market, [])
+            anchor_placeholders = ','.join([f"'{a}'" for a in market_anchors])
+            
             cursor.execute(f"""
                 SELECT symbol, change_percent 
                 FROM daily_prices 
@@ -104,8 +118,19 @@ class ContextService:
                 proxy_parts.append(f"{name} {'涨' if chg > 0 else '跌'} {abs(chg):.2f}%")
             proxy_msg = "，".join(proxy_parts)
             
-            # Market Breadth
-            cursor.execute("SELECT change_percent FROM daily_prices WHERE date = ?", (date_str,))
+            # Market Breadth (Filtered by Market)
+            if market == "HK":
+                # HK stocks have 5 digits
+                cursor.execute("""
+                    SELECT change_percent FROM daily_prices 
+                    WHERE date = ? AND length(symbol) = 5
+                """, (date_str,))
+            else:
+                # CN stocks have != 5 digits (usually 6)
+                cursor.execute("""
+                    SELECT change_percent FROM daily_prices 
+                    WHERE date = ? AND length(symbol) != 5
+                """, (date_str,))
             rows = cursor.fetchall()
             
             if not rows or len(rows) < 5: 
@@ -117,10 +142,10 @@ class ContextService:
             median_chg = np.median(changes)
             
             sample_size = len(changes)
-            scope = "全市场" if sample_size > 1000 else "核心观察池"
+            scope = f"{market}市场" if sample_size > 500 else f"{market}核心池"
             breadth = f"({scope}涨{up}/跌{down}，中位数{median_chg:+.2f}%)"
             
-            return f"{proxy_msg}，{breadth}" if proxy_msg else f"{scope}情绪{breadth}"
+            return f"{proxy_msg}，{breadth}" if proxy_msg else f"{market}情绪{breadth}"
             
         except Exception as e:
             logger.warning(f"⚠️ Market mood error: {e}")
