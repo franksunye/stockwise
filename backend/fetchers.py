@@ -91,6 +91,26 @@ def fetch_stock_data(symbol: str, period: str = "daily", start_date: str = None)
             if not df.empty: return df
         except: pass
 
+        # 3b. ETF Sina Fallback (Sina is often more accessible in proxy environments)
+        if period == "daily":
+            try:
+                # Sina requires prefixed symbol for funds sometimes, or try both
+                prefix = "sh" if symbol.startswith('5') else "sz"
+                df = ak.fund_etf_hist_sina(symbol=f"{prefix}{symbol}")
+                if not df.empty:
+                    df['date'] = pd.to_datetime(df['date']).dt.strftime('%Y-%m-%d')
+                    s_dt = datetime.strptime(start_date, "%Y%m%d").strftime("%Y-%m-%d")
+                    df = df[df['date'] >= s_dt]
+                    df = df.rename(columns={
+                        "date": "日期", "open": "开盘", "high": "最高", "low": "最低", "close": "收盘", "volume": "成交量"
+                    })
+                    if "涨跌幅" not in df.columns:
+                        df["涨跌幅"] = df["收盘"].pct_change() * 100
+                    return df
+            except Exception as e:
+                # logger.debug(f"ETF Sina fallback failed for {symbol}: {e}")
+                pass
+
         # 4. Index
         try:
             df = ak.stock_zh_index_daily(symbol=symbol)
