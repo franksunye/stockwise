@@ -35,7 +35,7 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <main className="relative z-10 max-w-7xl mx-auto px-8 pt-20 pb-40 flex flex-col items-center text-center">
+      <main className="relative z-10 max-w-7xl mx-auto px-8 pt-12 pb-40 flex flex-col items-center text-center">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -44,9 +44,9 @@ export default function LandingPage() {
         >
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-black uppercase tracking-widest mb-4">
             <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
-            AI 纪律合伙人
+            AI 投资助手
           </div>
-          <h1 className="text-6xl md:text-8xl font-black tracking-tighter italic leading-tight">
+          <h1 className="text-5xl md:text-7xl font-black tracking-tighter italic leading-tight">
             让交易 <br /> 
             <span className="bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">更简单，更智能</span>
           </h1>
@@ -119,7 +119,7 @@ export default function LandingPage() {
         {/* FAQ Section - Simplified */}
         <section id="faq" className="py-40 w-full max-w-4xl space-y-12">
           <div className="text-center space-y-4">
-            <h2 className="text-4xl md:text-5xl font-black italic tracking-tighter">
+            <h2 className="text-3xl md:text-4xl font-black italic tracking-tighter">
               常见问题 <span className="text-indigo-500">FAQ</span>
             </h2>
             <p className="text-slate-400 font-medium">快速了解 StockWise AI</p>
@@ -155,7 +155,7 @@ export default function LandingPage() {
 
         {/* CTA Banner */}
         <section className="py-20 w-full max-w-3xl text-center space-y-8">
-          <h2 className="text-3xl md:text-4xl font-black italic tracking-tighter">
+          <h2 className="text-2xl md:text-3xl font-black italic tracking-tighter">
             准备好让 AI 成为你的<span className="text-indigo-500">纪律合伙人</span>了吗？
           </h2>
           <Link 
