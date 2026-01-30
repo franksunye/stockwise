@@ -72,6 +72,7 @@ jobs:
           
           python -m backend.engine.brief_generator $SYMBOLS_ARG $USER_ARG $DATE_ARG $FORCE_ARG
       - name: Broadcast Notifications
+        if: github.event_name == 'schedule' || (github.event.inputs.symbols == '' && github.event.inputs.user == '')
         env:
           # Database
           TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
