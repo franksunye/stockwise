@@ -29,7 +29,7 @@ class ChainRunner:
         Executes the chain and returns the final result artifact.
         Persists trace to DB *after* completion (Delayed Write).
         """
-        trace_id = str(uuid.uuid4())
+        trace_id = input_data.get("trace_id") or str(uuid.uuid4())
         context = ChainContext(symbol=symbol, date=date, input_data=input_data)
         
         start_time = time.time()
@@ -112,7 +112,8 @@ class ChainRunner:
         # Fire and forget-ish (don't block main flow too long, but await properly)
         try:
             conn = get_connection()
-            conn.execute(sql, params)
+            cursor = conn.cursor()
+            cursor.execute(sql, params)
             conn.commit()
             conn.close()
             logger.info(f"💾 Trace persisted: {trace_id}")
