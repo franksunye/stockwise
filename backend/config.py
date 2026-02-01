@@ -7,14 +7,20 @@ try:
 except ImportError:
     from backports.zoneinfo import ZoneInfo
 
-# Configure Logger for config module
-logger = logging.getLogger("config")
-if not logger.handlers:
-    handler = logging.StreamHandler()
-    formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s (%(filename)s:%(lineno)d)')
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-    logger.setLevel(logging.INFO)
+# Configure Logger
+try:
+    from backend.logger import logger
+except ImportError:
+    try:
+        from logger import logger
+    except ImportError:
+        logger = logging.getLogger("config")
+        if not logger.handlers:
+            handler = logging.StreamHandler()
+            formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s (%(filename)s:%(lineno)d)')
+            handler.setFormatter(formatter)
+            logger.addHandler(handler)
+            logger.setLevel(logging.INFO)
 
 def load_env_file(env_path):
     if not os.path.exists(env_path):

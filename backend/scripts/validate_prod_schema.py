@@ -10,8 +10,10 @@ from database import get_connection, get_table_columns
 from config import DB_SOURCE, TURSO_DB_URL
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("ProdValidator")
+try:
+    from backend.logger import logger
+except ImportError:
+    from logger import logger
 
 def check_table_schema(conn, table_name, expected_columns):
     logger.info(f"🔍 Checking table: {table_name}")

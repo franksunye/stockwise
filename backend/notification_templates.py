@@ -3,10 +3,11 @@ Centralized Notification Template Engine.
 Industrial-grade implementation for StockWise scalability (Supports 5M+ users).
 Handles rendering of localized, tier-based, and type-specific messaging.
 """
-import logging
 from typing import Dict, Any, Optional, Tuple
-
-logger = logging.getLogger("stockwise")
+try:
+    from backend.logger import logger
+except ImportError:
+    from logger import logger
 
 class NotificationTemplates:
     """
