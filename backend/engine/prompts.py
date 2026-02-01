@@ -341,6 +341,10 @@ def prepare_stock_analysis_prompt(symbol: str, as_of_date: str = None, ctx: Dict
     else:
         context_instruction = f"👉 **实时分析**：今天是 {data['date']}。请基于提供的数据判断。"
 
+    # Get Version
+    from backend.templating import get_template_version
+    final_version = get_template_version('prompts/stock_analysis_system.j2', default="v1.0")
+
     # Render User Prompt
     try:
         user_prompt = render_template('prompts/stock_analysis_user.j2',
@@ -369,4 +373,4 @@ def prepare_stock_analysis_prompt(symbol: str, as_of_date: str = None, ctx: Dict
         print(f"User Template rendering failed: {e}")
         return None, f"User Template Error: {e}"
 
-    return system_prompt, user_prompt
+    return system_prompt, user_prompt, final_version

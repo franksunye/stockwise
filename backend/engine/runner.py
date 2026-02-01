@@ -162,7 +162,7 @@ class PredictionRunner:
                     symbol, date, model_id,
                     pred.get('target_date'), pred.get('signal'), pred.get('confidence'),
                     pred.get('support_price'), pred.get('pressure_price'), pred.get('reasoning'),
-                    pred.get('prompt_version', 'v1'), # Default prompt version
+                    pred.get('prompt_version', 'v1'), # Validated version from Adapter
                     pred.get('token_usage_input', 0), pred.get('token_usage_output', 0),
                     pred.get('execution_time_ms', 0), is_primary, trace_id
                 ))

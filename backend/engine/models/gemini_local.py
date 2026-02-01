@@ -55,7 +55,13 @@ class GeminiLocalAdapter(BasePredictionModel):
         # Prepare prompts
         try:
             from backend.engine.prompts import prepare_stock_analysis_prompt
-            system_prompt, user_prompt = prepare_stock_analysis_prompt(symbol, date, ctx=data)
+            prompt_result = prepare_stock_analysis_prompt(symbol, date, ctx=data)
+            
+            if len(prompt_result) == 3:
+                 system_prompt, user_prompt, prompt_version = prompt_result
+            else:
+                 system_prompt, user_prompt = prompt_result
+                 prompt_version = "v1.0"
             
             if not user_prompt:
                 return self._error_result("Failed to generate prompt (No data)")
@@ -154,7 +160,8 @@ class GeminiLocalAdapter(BasePredictionModel):
                 "pressure_price": key_levels.get("resistance"),
                 "token_usage_input": meta.get("input_tokens", 0),
                 "token_usage_output": meta.get("output_tokens", 0),
-                "execution_time_ms": execution_time
+                "execution_time_ms": execution_time,
+                "prompt_version": prompt_version
             }
         
         # If loop finishes without success
