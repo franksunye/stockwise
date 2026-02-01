@@ -447,62 +447,21 @@ class LLMClient:
     
     def _parse_json_response(self, content: str) -> Optional[Dict[str, Any]]:
         """
-        解析 LLM 返回的 JSON 内容（深度清洗版）
-        针对: Markdown 块、非标准引号、开头结尾乱码、自动截断修复
+        解析 LLM 返回的 JSON 内容 (Delegated to ResponseParser)
         """
         if not content:
             return None
-        
-        # 1. 尝试标准解析
-        try:
-            return json.loads(content)
-        except:
-            pass
             
-        import re
-        
-        # 2. 移除常见的 Markdown 标记
-        content_clean = re.sub(r'^```json\s*', '', content, flags=re.MULTILINE)
-        content_clean = re.sub(r'^```\s*', '', content_clean, flags=re.MULTILINE)
-        content_clean = re.sub(r'```$', '', content_clean, flags=re.MULTILINE)
         try:
-            return json.loads(content_clean)
-        except:
-            pass
-            
-        # 3. 暴力提取最外层的 {}
-        try:
-            # 找到第一个 {
-            start_idx = content.find('{')
-            if start_idx != -1:
-                # 倒序找到最后一个 }
-                end_idx = content.rfind('}')
-                if end_idx != -1 and end_idx > start_idx:
-                    possible_json = content[start_idx : end_idx + 1]
-                    # 尝试清理可能混入的换行符问题
-                    possible_json = re.sub(r',\s*}', '}', possible_json) # 移除尾随逗号
-                    return json.loads(possible_json)
-        except:
-            pass
-
-        # 4. 如果还是不行，尝试使用栈平衡法找到完整的对象 (针对粘包/截断)
-        try:
-            balance = 0
-            start = content.find('{')
-            if start != -1:
-                for i in range(start, len(content)):
-                    char = content[i]
-                    if char == '{':
-                        balance += 1
-                    elif char == '}':
-                        balance -= 1
-                        if balance == 0:
-                            # 找到了一个完整的顶层对象
-                            return json.loads(content[start:i+1])
-        except:
-            pass
-            
-        return None
+            from backend.engine.parsers import parse_ai_response
+            result_model = parse_ai_response(content)
+            return result_model.dict()
+        except Exception as e:
+            # Only log detailed error if it's not a common "searching" failure
+            # But here we want to know why schema validation failed
+            if "Invalid JSON syntax" not in str(e):
+                 print(f"   ⚠️ Response Parser Validation Error: {e}")
+            return None
 
 
 # 全局客户端实例（懒加载）

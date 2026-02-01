@@ -230,36 +230,15 @@ class GeminiLocalAdapter(BasePredictionModel):
         }
     
     def _parse_json_response(self, content: str) -> Dict[str, Any]:
-        """解析 LLM 返回的 JSON"""
+        """解析 LLM 返回的 JSON (Delegated to ResponseParser)"""
         if not content:
             return None
         
-        import re
-        
-        # 1. 直接解析
         try:
-            return json.loads(content)
-        except:
-            pass
-        
-        # 2. 移除 Markdown 标记
-        content_clean = re.sub(r'^```json\s*', '', content, flags=re.MULTILINE)
-        content_clean = re.sub(r'^```\s*', '', content_clean, flags=re.MULTILINE)
-        content_clean = re.sub(r'```$', '', content_clean, flags=re.MULTILINE)
-        try:
-            return json.loads(content_clean)
-        except:
-            pass
-        
-        # 3. 提取 {}
-        try:
-            start_idx = content.find('{')
-            end_idx = content.rfind('}')
-            if start_idx != -1 and end_idx != -1 and end_idx > start_idx:
-                possible_json = content[start_idx : end_idx + 1]
-                possible_json = re.sub(r',\s*}', '}', possible_json)
-                return json.loads(possible_json)
-        except:
-            pass
-        
-        return None
+            from backend.engine.parsers import parse_ai_response
+            result_model = parse_ai_response(content)
+            # Convert Pydantic model to dict for downstream compatibility
+            return result_model.dict()
+        except Exception as e:
+            logger.warning(f"Response Parsing Failed: {e}")
+            return None
