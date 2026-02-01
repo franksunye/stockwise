@@ -2,6 +2,7 @@ import os
 import sys
 import io
 from abc import ABC, abstractmethod
+from typing import List, Optional
 
 # 修复 Windows 控制台编码问题
 if sys.stdout.encoding != 'utf-8':
@@ -144,12 +145,41 @@ class AkShareFetcher(BaseFetcher):
             return pd.DataFrame()
 
 
+class EODHDFetcher(BaseFetcher):
+    """EODHD 數據獲取器 (全球數據，收費源 - 佔位實現)"""
+    
+    def fetch_history(self, symbol: str, period: str = "daily", start_date: str = None) -> pd.DataFrame:
+        # TODO: 未來集成 EODHD API
+        logger.warning(f"⚠️ EODHDFetcher 尚未實現，跳過 {symbol}")
+        return pd.DataFrame()
+
+
+class SmartFetcher(BaseFetcher):
+    """智能獲取器：集成多個 Fetcher 並實現降級邏輯"""
+    
+    def __init__(self, fetchers: List[BaseFetcher] = None):
+        self.fetchers = fetchers or [AkShareFetcher(), EODHDFetcher()]
+        
+    def fetch_history(self, symbol: str, period: str = "daily", start_date: str = None) -> pd.DataFrame:
+        for fetcher in self.fetchers:
+            try:
+                df = fetcher.fetch_history(symbol, period, start_date)
+                if not df.empty:
+                    return df
+                logger.warning(f"⚠️ {fetcher.__class__.__name__} 返回空數據，嘗試下一個源...")
+            except Exception as e:
+                logger.error(f"❌ {fetcher.__class__.__name__} 執行異常: {e}")
+        
+        logger.error(f"❌ 所有數據源均失效: {symbol}")
+        return pd.DataFrame()
+
+
 
 def fetch_stock_data(symbol: str, period: str = "daily", start_date: str = None) -> pd.DataFrame:
     """获取历史行情数据 (支持 A/H) - Standard interface supporting multi-provider migration."""
     # Note: Transitioning to Abstract Fetcher Factory pattern
-    # For now, default to AkShareFetcher
-    fetcher = AkShareFetcher()
+    # Use SmartFetcher with automated fallback mechanism
+    fetcher = SmartFetcher()
     return fetcher.fetch_history(symbol, period, start_date)
 
 def sync_stock_meta():
