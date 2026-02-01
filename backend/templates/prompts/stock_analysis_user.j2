@@ -1,0 +1,84 @@
+# 股票数据输入
+
+## 1. 基础信息
+- **{{ stock_name }}** ({{ symbol }})
+- 日期: {{ date }}
+- **整体市场背景**: {{ market_context }}
+- **股价位置(Altitude)**: {{ altitude_str }}
+## 公司基本面 (Profile)
+- **行业**: {{ profile.industry | default('未知') }}
+- **主营业务**: {{ profile.main_business | default('暂无') }}
+- **公司简介**: {{ (profile.description | default('暂无'))[:100] }}...
+
+
+## 2. 价格行为 (Price Action)
+近10日行情:
+| 日期 | 开盘 | 最高 | 最低 | 收盘 | 涨跌幅 | 成交量 |
+|------|------|------|------|------|--------|--------|
+{% for h in daily_history -%}
+| {{ h.date }} | {{ h.open }} | {{ h.high }} | {{ h.low }} | {{ h.close }} | {{ "%+.2f"|format(h.change_percent or 0) }}% {{ "📈" if (h.change_percent or 0) > 0 else ("📉" if (h.change_percent or 0) < 0 else "➡️") }} | {{ h.volume | int }} |
+{% endfor %}
+## 3. 技术信号摘要 (Daily Signal Dashboard)
+    
+### 📊 趋势健康度
+- **均线排列**: {{ tech.ma_alignment }}
+- **价格位置**: {{ tech.price_pos_desc }}
+- **中期确认**: {{ tech.mid_term_desc }}
+
+### ⚡ 动能状态
+- **MACD**: {{ tech.macd_desc }}
+- **RSI**: {{ "%.1f"|format(tech.rsi) }} ({{ tech.rsi_desc }})
+- **KDJ**: K{{ "%.1f"|format(tech.k) }}/D{{ "%.1f"|format(tech.d) }} → {{ tech.kdj_desc }}
+
+### 📍 价格位置
+- **布林带位置**: {{ tech.boll_desc }}
+
+### 🎯 信号共振评估 (Confluence Score)
+| 维度 | 信号方向 | 数值 |
+|------|----------|------|
+| 趋势 | {{ "多 ✅" if tech.trend_score > 0 else ("空 ❌" if tech.trend_score < 0 else "平 ➖") }} | {{ "%+d"|format(tech.trend_score) }} |
+| MACD | {{ "多 ✅" if tech.macd_score > 0 else ("空 ❌" if tech.macd_score < 0 else "平 ➖") }} | {{ "%+d"|format(tech.macd_score) }} |
+| RSI  | {{ "多 ✅" if tech.rsi_score > 0 else ("空 ❌" if tech.rsi_score < 0 else "平 ➖") }} | {{ "%+d"|format(tech.rsi_score) }} |
+| KDJ  | {{ "多 ✅" if tech.kdj_score > 0 else ("空 ❌" if tech.kdj_score < 0 else "平 ➖") }} | {{ "%+d"|format(tech.kdj_score) }} |
+| 位置 | {{ "多 ✅" if tech.boll_score > 0 else ("空 ❌" if tech.boll_score < 0 else "平 ➖") }} | {{ "%+d"|format(tech.boll_score) }} |
+
+**综合评分: {{ "%+d"|format(tech.total_score) }} ({{ tech.score_meaning }})**
+
+
+## 4. 周期背景 (Context)
+### 周线透视 (最近8周)
+| 周末日期 | 收盘 | 涨跌幅 | MA20 | RSI |
+|----------|------|--------|------|-----|
+{% for w in weekly_history -%}
+| {{ w.date }} | {{ w.close }} | {{ "%+.2f"|format(w.change_percent or 0) }}% {{ "📈" if (w.change_percent or 0) > 0 else "📉" }} | MA20:{{ "%.2f"|format(w.ma20) }} | RSI:{{ "%.1f"|format(w.rsi) }} |
+{% endfor -%}
+- **季度区间(近12周)**: {{ weekly_stats.low }} ~ {{ weekly_stats.high }}
+
+### 月线透视 (最近3个月)
+| 月末日期 | 收盘 | 涨跌幅 |
+|----------|------|--------|
+{% for m in monthly_history -%}
+| {{ m.date }} | {{ m.close }} | {{ "%+.2f"|format(m.change_percent or 0) }}% {{ "📈" if (m.change_percent or 0) > 0 else "📉" }} |
+{% endfor -%}
+- **年度区间(近12个月)**: {{ monthly_stats.low }} ~ {{ monthly_stats.high }}
+- **长期趋势**: {{ long_term_trend }} (当前价 vs 20月线)
+{% if ai_history %}
+## AI 历史预测回顾（近5次）
+| 预测日期 | 信号 | 置信度 | 核心判断 | 结果 | 实际涨跌 |
+|----------|------|--------|----------|------|----------|
+{% for pred in ai_history -%}
+| {{ pred.date }} | {{ {"Long": "做多", "Side": "观望", "Short": "避险"}.get(pred.signal, pred.signal) }} | {{ "%.0f"|format(pred.confidence * 100) }}% | {{ pred.summary }} | {{ "✅" if pred.validation_status == "Correct" else ("❌" if pred.validation_status == "Incorrect" else "➖") }} | {{ "%+.2f"|format(pred.actual_change) }}% |
+{% endfor %}
+**历史准确率**: 累计预测 {{ ai_accuracy.total }} 次，准确率 **{{ "%.1f"|format(ai_accuracy.rate) }}%**
+{% endif %}
+
+## 核心指令
+请基于上述数据进行推理，并生成**严格合法的 JSON**响应。
+
+👉 **核心原则：宁缺勿滥 (Better safe than sorry)。**
+- **默认观望**：请默认输出 **Side**。只有当你发现胜率超过 **80%** 的极佳机会（多周期共振、且有明确催化剂）时，才允许输出 **Long** 或 **Short**。
+- **拒识机制**：对于任何模棱两可、缺乏关键催化剂、或风险收益比不佳的情况，请坚决输出 **Side**。
+
+{{ context_instruction }}
+
+    **IMPORTANT OUTPUT RULE**: Generate PURE JSON only. NO Markdown. NO ```json fencing. Ensure the JSON is valid and closed with '}'.

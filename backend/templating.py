@@ -5,7 +5,7 @@ import os
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 env = Environment(
     loader=FileSystemLoader(template_dir),
-    autoescape=select_autoescape(['html', 'xml', 'j2'])
+    autoescape=False # Disable autoescape for Prompts (Text/Markdown)
 )
 
 def render_template(template_name: str, **kwargs) -> str:
