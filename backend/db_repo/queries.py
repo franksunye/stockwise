@@ -42,10 +42,10 @@ GET_USER_NOTIF_SETTINGS_QUERY = "SELECT notification_settings FROM users WHERE u
 SAVE_PREDICTION_V2_QUERY = """
     INSERT OR REPLACE INTO ai_predictions_v2 
     (symbol, date, model_id, target_date, signal, confidence, 
-     support_price, pressure_price, ai_reasoning,
+     support_price, pressure_price, ai_reasoning, prompt_version,
      token_usage_input, token_usage_output, execution_time_ms,
-     is_primary, created_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now', '+8 hours'), datetime('now', '+8 hours'))
+     is_primary, trace_id, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now', '+8 hours'), datetime('now', '+8 hours'))
 """
 CHECK_PREDICTION_V2_EXISTS_QUERY = "SELECT 1 FROM ai_predictions_v2 WHERE symbol = ? AND date = ? AND model_id = ? LIMIT 1"
 FETCH_PREDICTION_HISTORY_QUERY = "SELECT date, signal, confidence, ai_reasoning, validation_status, actual_change, model_id FROM ai_predictions_v2 WHERE symbol = ? AND {filter_sql} AND validation_status != 'Pending' AND date < ? ORDER BY date DESC LIMIT ?"

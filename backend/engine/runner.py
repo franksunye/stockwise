@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import uuid
 from typing import List, Dict, Any
 from datetime import datetime
 
@@ -25,9 +26,12 @@ class PredictionRunner:
         """
         Run multi-model analysis for a given stock.
         """
+        # 0. Initialize Trace & Context
+        trace_id = (data or {}).get("trace_id") or f"tr-{uuid.uuid4().hex[:12]}"
+        
         # Use instance force or method force
         effective_force = force or self.force
-        logger.info(f"🏁 Starting Multi-Model Analysis for {symbol} on {date}")
+        logger.info(f"🏁 [{trace_id}] Starting Multi-Model Analysis for {symbol} on {date}")
         
         # 1. Get Active Models (Already sorted by priority DESC)
         models = ModelFactory.get_active_models()
@@ -74,6 +78,8 @@ class PredictionRunner:
         for model in models:
             # Model-specific data context: each model reviews its own history
             model_specific_data = data.copy() if data else {}
+            # Ensure trace_id is available to models if they need it
+            model_specific_data['trace_id'] = trace_id
             
             try:
                 # Use ctx for model history caching
@@ -98,7 +104,7 @@ class PredictionRunner:
         # Only proceed if we have at least one successful prediction
         valid_predictions = [p for p in predictions if p]
         if not valid_predictions:
-            logger.warning(f"⚠️ No successful predictions for {symbol}, aborting save.")
+            logger.warning(f"⚠️ [{trace_id}] No successful predictions for {symbol}, aborting save.")
             conn.close()
             return False
 
@@ -156,8 +162,9 @@ class PredictionRunner:
                     symbol, date, model_id,
                     pred.get('target_date'), pred.get('signal'), pred.get('confidence'),
                     pred.get('support_price'), pred.get('pressure_price'), pred.get('reasoning'),
+                    pred.get('prompt_version', 'v1'), # Default prompt version
                     pred.get('token_usage_input', 0), pred.get('token_usage_output', 0),
-                    pred.get('execution_time_ms', 0), is_primary
+                    pred.get('execution_time_ms', 0), is_primary, trace_id
                 ))
                 saved_count += 1
             except Exception as e:
