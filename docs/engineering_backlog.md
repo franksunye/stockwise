@@ -21,7 +21,7 @@
 ### 阶段 2: 数据接入层重构 (Ingestion Refactor)
 | ID   | 任务项                                   | 风险等级 | 等价性验证 (DoD)                                  | 状态 |
 | :--- | :--------------------------------------- | :------- | :------------------------------------------------ | :--- |
-| T-4  | **Fetcher 接口抽象化 (AbstractFetcher)** | 🔴 高     | `fetch_stock_data` 与旧版输出 DataFrame 100% 一致 | [ ]  |
+| T-4  | **Fetcher 接口抽象化 (AbstractFetcher)** | 🔴 高     | `fetch_stock_data` 与旧版输出 DataFrame 100% 一致 | [x]  |
 | T-5  | **数据源降级逻辑实现**                   | 🟡 中     | 模拟 AkShare 失败，自动切换备用源验证             | [ ]  |
 
 ### 阶段 3: AI 引擎与上下文优化 (AI & Context)

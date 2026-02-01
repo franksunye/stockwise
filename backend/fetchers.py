@@ -1,6 +1,7 @@
 import os
 import sys
 import io
+from abc import ABC, abstractmethod
 
 # 修复 Windows 控制台编码问题
 if sys.stdout.encoding != 'utf-8':
@@ -19,85 +20,106 @@ from backend.db_repo.queries import BULK_INSERT_STOCK_META_BASE, UPDATE_STOCK_PR
 from backend.logger import logger
 
 
-
-def fetch_stock_data(symbol: str, period: str = "daily", start_date: str = None) -> pd.DataFrame:
-    """获取历史行情数据 (支持 A/H)"""
-    if not start_date:
-        start_date = (datetime.now() - timedelta(days=365)).strftime("%Y%m%d")
+class BaseFetcher(ABC):
+    """數據獲取器基類，定義統一接口"""
     
-    market = get_market(symbol)
-    logger.info(f"📡 正在获取 {market}:{symbol} {period} 数据 (从 {start_date} 起)...")
+    @abstractmethod
+    def fetch_history(self, symbol: str, period: str = "daily", start_date: str = None) -> pd.DataFrame:
+        """獲取歷史行情數據"""
+        pass
+
+
+class AkShareFetcher(BaseFetcher):
+    """AkShare 數據獲取器實現"""
     
-
-    @retry_request(max_retries=3, delay=3.0)
-    def _fetch_hk():
-        # 1. EastMoney (Primary)
-        # Note: Proxy bypass is handled via NO_PROXY env var in config.py
-        try:
-            return ak.stock_hk_hist(symbol=symbol, period=period, start_date=start_date, end_date=datetime.now().strftime("%Y%m%d"), adjust="qfq")
-        except: pass
+    def fetch_history(self, symbol: str, period: str = "daily", start_date: str = None) -> pd.DataFrame:
+        if not start_date:
+            start_date = (datetime.now() - timedelta(days=365)).strftime("%Y%m%d")
         
-        # 2. Sina (Fallback)
-        try:
-            # Sina uses 5 digit symbol for HK
-            df = ak.stock_hk_daily(symbol=symbol, adjust="qfq")
-            if not df.empty:
-                if "date" in df.columns:
-                    s_dt = datetime.strptime(start_date, "%Y%m%d").date()
-                    df["date"] = pd.to_datetime(df["date"]).dt.date
-                    df = df[df["date"] >= s_dt]
-                    
-                df = df.rename(columns={
-                    "date": "日期", "open": "开盘", "high": "最高", "low": "最低", "close": "收盘", "volume": "成交量"
-                })
-                if "涨跌幅" not in df.columns:
-                    df["涨跌幅"] = df["收盘"].pct_change() * 100
-                return df
-        except Exception as e:
-            # logger.debug(f"HK Sina failed: {e}")
-            pass
-        return pd.DataFrame()
-
-    @retry_request(max_retries=3, delay=3.0)
-    def _fetch_cn():
-        # 1. EastMoney (Primary)
-        try:
-            df = ak.stock_zh_a_hist(symbol=symbol, period=period, start_date=start_date, end_date=datetime.now().strftime("%Y%m%d"), adjust="qfq")
-            if not df.empty: return df
-        except Exception as e:
-            pass
+        market = get_market(symbol)
+        logger.info(f"📡 [AkShare] 正在获取 {market}:{symbol} {period} 数据 (从 {start_date} 起)...")
         
-        # 2. Sina (Fallback - Daily Only)
-        if period == "daily":
+        @retry_request(max_retries=3, delay=3.0)
+        def _fetch_hk():
+            # 1. EastMoney (Primary)
             try:
-                sina_sym = symbol
-                if symbol.startswith(('6', '9')): sina_sym = f"sh{symbol}"
-                elif symbol.startswith(('0', '3', '2')): sina_sym = f"sz{symbol}"
-                elif symbol.startswith(('4', '8')): sina_sym = f"bj{symbol}"
-                
-                df = ak.stock_zh_a_daily(symbol=sina_sym, start_date=start_date, end_date=datetime.now().strftime("%Y%m%d"), adjust="qfq")
+                return ak.stock_hk_hist(symbol=symbol, period=period, start_date=start_date, 
+                                        end_date=datetime.now().strftime("%Y%m%d"), adjust="qfq")
+            except: pass
+            
+            # 2. Sina (Fallback)
+            try:
+                df = ak.stock_hk_daily(symbol=symbol, adjust="qfq")
                 if not df.empty:
+                    if "date" in df.columns:
+                        s_dt = datetime.strptime(start_date, "%Y%m%d").date()
+                        df["date"] = pd.to_datetime(df["date"]).dt.date
+                        df = df[df["date"] >= s_dt]
+                        
                     df = df.rename(columns={
                         "date": "日期", "open": "开盘", "high": "最高", "low": "最低", "close": "收盘", "volume": "成交量"
                     })
                     if "涨跌幅" not in df.columns:
                         df["涨跌幅"] = df["收盘"].pct_change() * 100
                     return df
-            except Exception as e:
-                pass
+            except: pass
+            return pd.DataFrame()
 
-        # 3. ETF (Fund)
-        try:
-            df = ak.fund_etf_hist_em(symbol=symbol, period=period, start_date=start_date, end_date=datetime.now().strftime("%Y%m%d"), adjust="qfq")
-            if not df.empty: return df
-        except: pass
-
-        # 3b. ETF Sina Fallback (Sina is often more accessible in proxy environments)
-        if period == "daily":
+        @retry_request(max_retries=3, delay=3.0)
+        def _fetch_cn():
+            # 1. EastMoney (Primary)
             try:
-                # Sina requires prefixed symbol for funds sometimes, or try both
-                prefix = "sh" if symbol.startswith('5') else "sz"
-                df = ak.fund_etf_hist_sina(symbol=f"{prefix}{symbol}")
+                df = ak.stock_zh_a_hist(symbol=symbol, period=period, start_date=start_date, 
+                                        end_date=datetime.now().strftime("%Y%m%d"), adjust="qfq")
+                if not df.empty: return df
+            except: pass
+            
+            # 2. Sina (Fallback - Daily Only)
+            if period == "daily":
+                try:
+                    sina_sym = symbol
+                    if symbol.startswith(('6', '9')): sina_sym = f"sh{symbol}"
+                    elif symbol.startswith(('0', '3', '2')): sina_sym = f"sz{symbol}"
+                    elif symbol.startswith(('4', '8')): sina_sym = f"bj{symbol}"
+                    
+                    df = ak.stock_zh_a_daily(symbol=sina_sym, start_date=start_date, 
+                                             end_date=datetime.now().strftime("%Y%m%d"), adjust="qfq")
+                    if not df.empty:
+                        df = df.rename(columns={
+                            "date": "日期", "open": "开盘", "high": "最高", "low": "最低", "close": "收盘", "volume": "成交量"
+                        })
+                        if "涨跌幅" not in df.columns:
+                            df["涨跌幅"] = df["收盘"].pct_change() * 100
+                        return df
+                except: pass
+
+            # 3. ETF (Fund)
+            try:
+                df = ak.fund_etf_hist_em(symbol=symbol, period=period, start_date=start_date, 
+                                         end_date=datetime.now().strftime("%Y%m%d"), adjust="qfq")
+                if not df.empty: return df
+            except: pass
+
+            # 3b. ETF Sina Fallback (Sina is often more accessible in proxy environments)
+            if period == "daily":
+                try:
+                    prefix = "sh" if symbol.startswith('5') else "sz"
+                    df = ak.fund_etf_hist_sina(symbol=f"{prefix}{symbol}")
+                    if not df.empty:
+                        df['date'] = pd.to_datetime(df['date']).dt.strftime('%Y-%m-%d')
+                        s_dt = datetime.strptime(start_date, "%Y%m%d").strftime("%Y-%m-%d")
+                        df = df[df['date'] >= s_dt]
+                        df = df.rename(columns={
+                            "date": "日期", "open": "开盘", "high": "最高", "low": "最低", "close": "收盘", "volume": "成交量"
+                        })
+                        if "涨跌幅" not in df.columns:
+                            df["涨跌幅"] = df["收盘"].pct_change() * 100
+                        return df
+                except: pass
+
+            # 4. Index
+            try:
+                df = ak.stock_zh_index_daily(symbol=symbol)
                 if not df.empty:
                     df['date'] = pd.to_datetime(df['date']).dt.strftime('%Y-%m-%d')
                     s_dt = datetime.strptime(start_date, "%Y%m%d").strftime("%Y-%m-%d")
@@ -108,36 +130,27 @@ def fetch_stock_data(symbol: str, period: str = "daily", start_date: str = None)
                     if "涨跌幅" not in df.columns:
                         df["涨跌幅"] = df["收盘"].pct_change() * 100
                     return df
-            except Exception as e:
-                # logger.debug(f"ETF Sina fallback failed for {symbol}: {e}")
-                pass
+            except: pass
+            
+            return pd.DataFrame()
 
-        # 4. Index
         try:
-            df = ak.stock_zh_index_daily(symbol=symbol)
-            if not df.empty:
-                df['date'] = pd.to_datetime(df['date']).dt.strftime('%Y-%m-%d')
-                s_dt = datetime.strptime(start_date, "%Y%m%d").strftime("%Y-%m-%d")
-                df = df[df['date'] >= s_dt]
-                df = df.rename(columns={
-                    "date": "日期", "open": "开盘", "high": "最高", "low": "最低", "close": "收盘", "volume": "成交量"
-                })
-                if "涨跌幅" not in df.columns:
-                    df["涨跌幅"] = df["收盘"].pct_change() * 100
-                return df
-        except: pass
-        
-        return pd.DataFrame()
+            if market == "HK":
+                return _fetch_hk()
+            else:
+                return _fetch_cn()
+        except Exception as e:
+            logger.error(f"❌ AkShareFetcher {symbol} 获取失败: {e}")
+            return pd.DataFrame()
 
-    try:
-        if market == "HK":
-            df = _fetch_hk()
-        else:
-            df = _fetch_cn()
-        return df
-    except Exception as e:
-        logger.error(f"❌ {symbol} {period} 获取失败: {e}")
-        return pd.DataFrame()
+
+
+def fetch_stock_data(symbol: str, period: str = "daily", start_date: str = None) -> pd.DataFrame:
+    """获取历史行情数据 (支持 A/H) - Standard interface supporting multi-provider migration."""
+    # Note: Transitioning to Abstract Fetcher Factory pattern
+    # For now, default to AkShareFetcher
+    fetcher = AkShareFetcher()
+    return fetcher.fetch_history(symbol, period, start_date)
 
 def sync_stock_meta():
     """同步股票基础信息 (名称、市场、拼音)"""
