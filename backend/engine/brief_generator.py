@@ -43,7 +43,7 @@ try:
     from backend.engine.models.brief_strategies import StrategyFactory
     from backend.engine.context_service import ContextService
     from backend.engine.task_logger import get_task_logger
-    from backend.engine.brief_prompts import BRIEF_PRO_INSTRUCTION, BRIEF_FREE_INSTRUCTION
+
     from backend.engine.services.news_service import fetch_news_for_stock
     from backend.engine.services.brief_assembler import assemble_user_brief, notify_user_brief_ready
 except ImportError:
@@ -52,7 +52,7 @@ except ImportError:
     from engine.models.brief_strategies import StrategyFactory
     from engine.context_service import ContextService
     from task_logger import get_task_logger
-    from engine.brief_prompts import BRIEF_PRO_INSTRUCTION, BRIEF_FREE_INSTRUCTION
+
     from engine.services.news_service import fetch_news_for_stock
     from engine.services.brief_assembler import assemble_user_brief, notify_user_brief_ready
 
@@ -252,29 +252,28 @@ async def analyze_stock_context(
 
     today_date = date_str  # Use passed date_str
     
-    # 5. Construct User Prompt based on Tier (Instructions now imported from brief_prompts.py)
-    task_instruction = BRIEF_PRO_INSTRUCTION if tier == 'pro' else BRIEF_FREE_INSTRUCTION
-
-    user_prompt = f"""Subject: {symbol} ({stock_name})
-
-[第一事实：今日收盘表现]
-{chr(10).join(hard_data_lines)}
-
-[第二事实：今日核心新闻]
-{news}
-
-[第三事实：多周期与大盘背景]
-{deep_facts_str}
-
-[第四事实：近期预测复盘 (多日连贯复盘)]
-{refl_msg}
-
-[参考逻辑：AI 分析师推理记录（若与第一事实冲突，请以第一事实为准）]
-{reasoning_section}
-
-{task_instruction}
-
-输出语言：专业、流畅、有温度的中文。"""
+    today_date = date_str  # Use passed date_str
+    
+    # 5. Construct User Prompt via Jinja2 Template
+    from backend.templating import render_template
+    try:
+        user_prompt = render_template('prompts/briefs/user.j2',
+            symbol=symbol,
+            stock_name=stock_name,
+            signal=signal,
+            confidence=conf_pct,
+            close=technical_data.get('close'),
+            change_str=f"+{technical_data.get('change_percent', 0):.2f}%" if technical_data.get('change_percent', 0) >= 0 else f"{technical_data.get('change_percent', 0):.2f}%",
+            levels=levels,
+            news=news,
+            deep_facts=deep_facts_str,
+            reflection=refl_msg,
+            reasoning=reasoning_section,
+            tier=tier
+        )
+    except Exception as e:
+        logger.error(f"Failed to render brief user prompt: {e}")
+        return "Prompt rendering failed."
 
     # 3. Execute Step: Synthesis
     start_ts = time.time()

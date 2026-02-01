@@ -9,10 +9,7 @@ import json
 
 from logger import logger
 from engine.llm_client import LLMClient
-try:
-    from backend.engine.brief_prompts import BRIEF_ASSISTANT_SYSTEM_PROMPT, BRIEF_COLUMNIST_SYSTEM_PROMPT
-except ImportError:
-    from engine.brief_prompts import BRIEF_ASSISTANT_SYSTEM_PROMPT, BRIEF_COLUMNIST_SYSTEM_PROMPT
+
 
 # --- Tier to Provider Mapping ---
 TIER_PROVIDER_MAP = {
@@ -47,9 +44,10 @@ class TieredLLMStrategy(BriefGenerationStrategy):
         
     def get_system_prompt(self, tier: str = None) -> str:
         active_tier = tier or self.tier
+        from backend.templating import render_template
         if active_tier == "pro":
-            return BRIEF_COLUMNIST_SYSTEM_PROMPT
-        return BRIEF_ASSISTANT_SYSTEM_PROMPT
+            return render_template('prompts/briefs/system_pro.j2')
+        return render_template('prompts/briefs/system_free.j2')
 
     async def generate_brief(self, user_prompt: str, temperature: float = 0.3) -> Dict[str, Any]:
         system_prompt = self.get_system_prompt()
