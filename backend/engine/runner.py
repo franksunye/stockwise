@@ -8,6 +8,7 @@ from backend.engine.models.factory import ModelFactory
 from backend.trading_calendar import get_next_trading_day_str
 
 from backend.db_repo.queries import SAVE_PREDICTION_V2_QUERY, CHECK_PREDICTION_V2_EXISTS_QUERY
+from backend.engine.context import SessionContext
 from backend.logger import logger
 
 class PredictionRunner:
@@ -44,11 +45,12 @@ class PredictionRunner:
         
         logger.info(f"🤖 Active Models: {[m.model_id for m in models]}")
 
-        # 2. Fetch Data if not provided (Ensure Strict Parity)
+        # 2. Fetch Data (with SessionContext caching)
+        ctx = SessionContext(symbol, date)
         if not data:
             try:
                 from backend.engine.prompts import fetch_full_analysis_context
-                data = fetch_full_analysis_context(symbol, date)
+                data = fetch_full_analysis_context(symbol, date, ctx=ctx)
                 
                 if "error" in data:
                     logger.warning(f"⚠️ Data context fetch failed: {data['error']}")
@@ -57,6 +59,7 @@ class PredictionRunner:
                 # Align date if it was None
                 if not date:
                     date = data['date']
+                    ctx.date = date # Update context date
                     
                 logger.info(f"📊 Rich context fetched for {symbol} on {date}")
             except Exception as e:
@@ -70,20 +73,23 @@ class PredictionRunner:
         
         for model in models:
             # Model-specific data context: each model reviews its own history
-            # This ensures individual model accountability and prevents 'groupthink' in trajectories.
             model_specific_data = data.copy() if data else {}
             
             try:
-                # Overwrite the global primary history with model-specific historical data
-                history_data = fetch_ai_history_for_model(symbol, date, model_id=model.model_id)
+                # Use ctx for model history caching
+                history_data = fetch_ai_history_for_model(symbol, date, model_id=model.model_id, ctx=ctx)
                 model_specific_data.update(history_data)
-                logger.info(f"📜 {model.model_id} history loaded: {len(model_specific_data['ai_history'])} records, {model_specific_data['accuracy']['rate']:.1f}% acc")
+                
+                total_hist = len(model_specific_data['ai_history'])
+                acc_rate = model_specific_data['accuracy']['rate']
+                logger.info(f"📜 {model.model_id} history loaded: {total_hist} records, {acc_rate:.1f}% acc")
             except Exception as e:
                 logger.warning(f"⚠️ Failed to fetch specific history for {model.model_id}: {e}")
             
             tasks.append(self._safe_predict(model, symbol, date, model_specific_data, force=effective_force))
             
         predictions = await asyncio.gather(*tasks)
+        logger.info(f"🏁 Analysis round finished. {ctx.stats()}")
         
         # 4. Save Results & Determine Primary
         conn = get_connection()

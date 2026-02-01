@@ -195,12 +195,12 @@ class TursoHttpCursor:
             for r in raw_rows:
                 converted = []
                 for cell in r:
-                    val = cell['value']
-                    t = cell['type']
-                    if t == 'integer': value = int(val)
-                    elif t == 'float': value = float(val)
+                    val = cell.get('value')
+                    t = cell.get('type', 'text')
+                    if t == 'integer': value = int(val) if val is not None else None
+                    elif t == 'float': value = float(val) if val is not None else None
                     elif t == 'null': value = None
-                    else: value = str(val) # text, blob
+                    else: value = str(val) if val is not None else None
                     converted.append(value)
                 self._rows.append(tuple(converted))
             self._idx = 0

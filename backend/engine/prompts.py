@@ -7,12 +7,29 @@ from backend.db_repo.queries import (
     FETCH_ACCURACY_STATS_QUERY,
     get_fetch_history_sql
 )
+from backend.engine.context import SessionContext
 
-def fetch_full_analysis_context(symbol: str, as_of_date: str = None) -> Dict[str, Any]:
+def fetch_full_analysis_context(symbol: str, as_of_date: str = None, ctx: SessionContext = None) -> Dict[str, Any]:
     """
     Fetch all raw data needed for a comprehensive stock analysis.
-    This ensures strict parity between different models/run modes.
+    Supports SessionContext for caching across multiple model runs.
     """
+    # 0. Check Cache
+    if ctx and ctx.metadata and ctx.price_data["daily"]:
+        ctx.hits += 1
+        return {
+            "symbol": symbol,
+            "name": ctx.metadata.get("name"),
+            "date": ctx.date,
+            "profile": ctx.metadata.get("profile"),
+            "latest_data": ctx.metadata.get("latest_data"),
+            "daily_prices": ctx.price_data["daily"],
+            "weekly_prices": ctx.price_data["weekly"],
+            "monthly_prices": ctx.price_data["monthly"],
+            "market_context": ctx.market_mood,
+            "altitude_context": ctx.altitude
+        }
+
     conn = get_connection()
     cursor = conn.cursor()
     
@@ -46,8 +63,8 @@ def fetch_full_analysis_context(symbol: str, as_of_date: str = None) -> Dict[str
     latest_data = dict(zip(columns, row))
     analysis_date = latest_data['date']
     
-    # 3. History
-    # 3.1 Daily (10 days) - Include technical indicators for IndicatorStep & SynthesisStep
+    # 3. History (Cacheable)
+    # 3.1 Daily (10 days)
     cursor.execute("""
         SELECT date, open, high, low, close, change_percent, volume,
                ma5, ma10, ma20, ma60,
@@ -65,6 +82,7 @@ def fetch_full_analysis_context(symbol: str, as_of_date: str = None) -> Dict[str
         "rsi", "kdj_k", "kdj_d", "kdj_j",
         "boll_upper", "boll_mid", "boll_lower"
     ], h)) for h in cursor.fetchall()]
+    daily_history = daily_history[::-1]
 
     # 3.2 Weekly (12 weeks)
     cursor.execute("""
@@ -84,16 +102,20 @@ def fetch_full_analysis_context(symbol: str, as_of_date: str = None) -> Dict[str
     """, (symbol, analysis_date))
     monthly_history = [dict(zip(["date", "open", "high", "low", "close", "change_percent", "volume", "ma20", "rsi", "macd_hist"], m)) for m in cursor.fetchall()]
 
-    # 4 & 5. AI History & Accuracy
-    history_data = fetch_ai_history_for_model(symbol, analysis_date, cursor=cursor)
-    ai_history = history_data.get("ai_history", [])
-    accuracy_stats = history_data.get("accuracy", {})
-
-    # 6. Global Market Context (Synthetic Layer)
+    # 4. Global Market Context
     from backend.engine.context_service import ContextService
     ctx_service = ContextService()
-    market_context = ctx_service._get_cached_market_mood(analysis_date)
+    market_context = ctx_service._get_cached_market_mood(analysis_date, symbol)
     altitude_context = ctx_service._calculate_altitude(symbol, analysis_date)
+
+    # 5. Populate Context if provided
+    if ctx:
+        ctx.metadata = {"name": stock_name, "profile": profile, "latest_data": latest_data}
+        ctx.price_data["daily"] = daily_history
+        ctx.price_data["weekly"] = weekly_history
+        ctx.price_data["monthly"] = monthly_history
+        ctx.market_mood = market_context
+        ctx.altitude = altitude_context
 
     return {
         "symbol": symbol,
@@ -101,19 +123,24 @@ def fetch_full_analysis_context(symbol: str, as_of_date: str = None) -> Dict[str
         "date": analysis_date,
         "profile": profile,
         "latest_data": latest_data,
-        "daily_prices": daily_history[::-1], 
+        "daily_prices": daily_history, 
         "weekly_prices": weekly_history,
         "monthly_prices": monthly_history,
-        "ai_history": ai_history,
-        "accuracy": accuracy_stats,
         "market_context": market_context,
         "altitude_context": altitude_context
     }
 
-def fetch_ai_history_for_model(symbol: str, analysis_date: str, model_id: str = None, cursor = None) -> Dict[str, Any]:
+def fetch_ai_history_for_model(symbol: str, analysis_date: str, model_id: str = None, cursor = None, ctx: SessionContext = None) -> Dict[str, Any]:
     """
     Fetch historical predictions for a specific model or the primary decisions.
+    Supports SessionContext for caching.
     """
+    # 0. Check Cache
+    cache_key = model_id if model_id else "primary"
+    if ctx:
+        cached = ctx.get_model_history(cache_key)
+        if cached: return cached
+
     _conn = None
     if cursor is None:
         _conn = get_connection()
@@ -124,26 +151,30 @@ def fetch_ai_history_for_model(symbol: str, analysis_date: str, model_id: str = 
     params = (symbol, analysis_date) if model_id is None else (symbol, model_id, analysis_date)
 
     try:
-        # History
+        # 1. History
         cursor.execute(FETCH_PREDICTION_HISTORY_QUERY.format(filter_sql=filter_sql), params + (5,))
-        
         ai_history = [dict(zip(["date", "signal", "confidence", "ai_reasoning", "validation_status", "actual_change", "model"], a)) for a in cursor.fetchall()]
 
-        # Stats
+        # 2. Accuracy Stats
         cursor.execute(FETCH_ACCURACY_STATS_QUERY.format(filter_sql=filter_sql), params)
-        
         stats_row = cursor.fetchone()
         total_predictions = stats_row[0] if stats_row else 0
         correct_count = stats_row[1] if stats_row else 0
         accuracy_rate = (correct_count / total_predictions * 100) if total_predictions > 0 else 0
         
-        return {
+        result = {
             "ai_history": ai_history,
             "accuracy": {
                 "total": total_predictions,
                 "rate": accuracy_rate
             }
         }
+        
+        # 3. Save to Cache
+        if ctx:
+            ctx.set_model_history(cache_key, result)
+            
+        return result
     finally:
         if _conn:
             _conn.close()
