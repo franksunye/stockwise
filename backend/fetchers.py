@@ -15,7 +15,8 @@ import pandas as pd
 from datetime import datetime, timedelta
 from utils import get_market, get_pinyin_info, retry_request
 from database import get_connection
-from logger import logger
+from backend.db_repo.queries import BULK_INSERT_STOCK_META_BASE, UPDATE_STOCK_PROFILE_QUERY
+from backend.logger import logger
 
 
 
@@ -273,8 +274,7 @@ def sync_stock_meta():
             placeholders = ",".join(["(?, ?, ?, ?, ?, ?)"] * len(batch))
             flat_values = tuple(val for record in batch for val in record)
             cursor.execute(f"""
-                INSERT OR REPLACE INTO stock_meta (symbol, name, market, last_updated, pinyin, pinyin_abbr)
-                VALUES {placeholders}
+                {BULK_INSERT_STOCK_META_BASE} {placeholders}
             """, flat_values)
         if (i + batch_size) % 2000 == 0 or i + batch_size >= total:
                 logger.info(f"   💾 已写入 {min(i + batch_size, total)}/{total} 条...")
@@ -368,11 +368,7 @@ def sync_profiles(limit=20):
                     if desc and len(str(desc)) > 500:
                         desc = str(desc)[:497] + "..."
                     
-                    cursor.execute("""
-                        UPDATE stock_meta 
-                        SET industry = ?, main_business = ?, description = ?
-                        WHERE symbol = ?
-                    """, (industry, main_bus, desc, symbol))
+                    cursor.execute(UPDATE_STOCK_PROFILE_QUERY, (industry, main_bus, desc, symbol))
                     conn.commit()
                     success_count += 1
                 else:

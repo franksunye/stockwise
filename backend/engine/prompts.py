@@ -1,6 +1,12 @@
 import json
 from typing import Dict, Any, List
 from database import get_connection, get_stock_profile
+from backend.db_repo.queries import (
+    GET_STOCK_NAME_QUERY, 
+    FETCH_PREDICTION_HISTORY_QUERY, 
+    FETCH_ACCURACY_STATS_QUERY,
+    get_fetch_history_sql
+)
 
 def fetch_full_analysis_context(symbol: str, as_of_date: str = None) -> Dict[str, Any]:
     """
@@ -11,7 +17,7 @@ def fetch_full_analysis_context(symbol: str, as_of_date: str = None) -> Dict[str
     cursor = conn.cursor()
     
     # 1. Basic Meta
-    cursor.execute("SELECT name FROM stock_meta WHERE symbol = ?", (symbol,))
+    cursor.execute(GET_STOCK_NAME_QUERY, (symbol,))
     name_row = cursor.fetchone()
     stock_name = name_row[0] if name_row else "未知股票"
 
@@ -119,22 +125,12 @@ def fetch_ai_history_for_model(symbol: str, analysis_date: str, model_id: str = 
 
     try:
         # History
-        cursor.execute(f"""
-            SELECT date, signal, confidence, ai_reasoning, validation_status, actual_change, model_id
-            FROM ai_predictions_v2 
-            WHERE symbol = ? AND {filter_sql} AND validation_status != 'Pending' AND date < ?
-            ORDER BY date DESC LIMIT 5
-        """, params)
+        cursor.execute(FETCH_PREDICTION_HISTORY_QUERY.format(filter_sql=filter_sql), params + (5,))
         
         ai_history = [dict(zip(["date", "signal", "confidence", "ai_reasoning", "validation_status", "actual_change", "model"], a)) for a in cursor.fetchall()]
 
         # Stats
-        cursor.execute(f"""
-            SELECT COUNT(*) as total,
-                   SUM(CASE WHEN validation_status = 'Correct' THEN 1 ELSE 0 END) as correct
-            FROM ai_predictions_v2 
-            WHERE symbol = ? AND {filter_sql} AND validation_status != 'Pending' AND date < ?
-        """, params)
+        cursor.execute(FETCH_ACCURACY_STATS_QUERY.format(filter_sql=filter_sql), params)
         
         stats_row = cursor.fetchone()
         total_predictions = stats_row[0] if stats_row else 0

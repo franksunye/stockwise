@@ -13,7 +13,14 @@ except ImportError:
 from typing import List, Dict, Set, Optional
 
 from database import get_connection, execute_with_retry
-from logger import logger
+from backend.db_repo.queries import (
+    SAVE_NOTIFICATION_LOG_QUERY, 
+    GET_SIGNAL_STATE_QUERY, 
+    UPDATE_SIGNAL_STATE_QUERY,
+    GET_USER_TIER_QUERY,
+    GET_USER_NOTIF_SETTINGS_QUERY
+)
+from backend.logger import logger
 from notifications import send_push_notification
 from notification_templates import NotificationTemplates
 
@@ -192,7 +199,7 @@ class NotificationManager:
         conn = self._get_conn()
         try:
             cursor = conn.cursor()
-            cursor.execute("SELECT subscription_tier FROM users WHERE user_id = ?", (user_id,))
+            cursor.execute(GET_USER_TIER_QUERY, (user_id,))
             row = cursor.fetchone()
             tier = row[0] if row and row[0] else "free"
             self.user_tier_cache[user_id] = tier
@@ -289,7 +296,7 @@ class NotificationManager:
         conn = self._get_conn()
         try:
             cursor = conn.cursor()
-            cursor.execute("SELECT notification_settings FROM users WHERE user_id = ?", (user_id,))
+            cursor.execute(GET_USER_NOTIF_SETTINGS_QUERY, (user_id,))
             row = cursor.fetchone()
             
             if not row or not row[0]:
@@ -356,10 +363,7 @@ class NotificationManager:
         conn = self._get_conn()
         try:
             cursor = conn.cursor()
-            cursor.execute("""
-                INSERT INTO notification_logs (id, user_id, type, related_symbols, title, body, url)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-            """, (
+            cursor.execute(SAVE_NOTIFICATION_LOG_QUERY, (
                 log_id, user_id, payload["type"], 
                 json.dumps(payload.get("related_symbols", [])), 
                 payload["title"], payload["body"], payload["url"]
@@ -380,10 +384,7 @@ class NotificationManager:
             now = datetime.now(BEIJING_TZ).isoformat()
             
             for update in self.pending_state_updates:
-                cursor.execute("""
-                    INSERT OR REPLACE INTO signal_states (user_id, symbol, last_signal, last_confidence, last_notified_at)
-                    VALUES (?, ?, ?, ?, ?)
-                """, (
+                cursor.execute(UPDATE_SIGNAL_STATE_QUERY, (
                     update["user_id"], update["symbol"], 
                     update["signal"], update["confidence"], now
                 ))

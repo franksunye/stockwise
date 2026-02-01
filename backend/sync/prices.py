@@ -16,7 +16,8 @@ from notifications import send_push_notification
 from engine.indicators import calculate_indicators
 # from engine.validator import validate_previous_prediction  <-- Decoupled
 from helpers import get_last_date, check_trading_day_skip
-from logger import logger
+from backend.db_repo.queries import get_cleanup_sql, get_save_prices_sql, GET_STOCK_NAME_QUERY
+from backend.logger import logger
 
 
 def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool = False):
@@ -171,13 +172,13 @@ def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool =
             if _period == "weekly":
                 # 删除同一周的所有记录 (ISO 周)
                 week_start = _latest_dt - pd.Timedelta(days=_latest_dt.weekday())
-                cur.execute(f"DELETE FROM {_table} WHERE symbol = ? AND date >= ?", 
+                cur.execute(get_cleanup_sql(_table), 
                            (_symbol, week_start.strftime('%Y-%m-%d')))
                 logger.debug(f"🧹 清理 {_symbol} 本周旧记录 (从 {week_start.strftime('%Y-%m-%d')} 起)")
             elif _period == "monthly":
                 # 删除同月的所有记录
                 month_start = _latest_dt.strftime('%Y-%m-01')
-                cur.execute(f"DELETE FROM {_table} WHERE symbol = ? AND date >= ?", 
+                cur.execute(get_cleanup_sql(_table), 
                            (_symbol, month_start))
                 logger.debug(f"🧹 清理 {_symbol} 本月旧记录 (从 {month_start} 起)")
         
@@ -185,13 +186,7 @@ def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool =
 
     def _save_prices(conn, _table, _records):
         cur = conn.cursor()
-        cur.executemany(f"""
-            INSERT OR REPLACE INTO {_table} 
-            (symbol, date, open, high, low, close, volume, change_percent,
-             ma5, ma10, ma20, ma60, macd, macd_signal, macd_hist,
-             boll_upper, boll_mid, boll_lower, rsi, kdj_k, kdj_d, kdj_j, ai_summary)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, _records)
+        cur.executemany(get_save_prices_sql(_table), _records)
 
     execute_with_retry(_save_prices, 3, table_name, records)
     
@@ -204,7 +199,7 @@ def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool =
         # 尝试从数据库获取中文简称
         def _get_name(conn, sym):
             cur = conn.cursor()
-            cur.execute("SELECT name FROM stock_meta WHERE symbol = ?", (sym,))
+            cur.execute(GET_STOCK_NAME_QUERY, (sym,))
             r = cur.fetchone()
             return r[0] if r else sym
 

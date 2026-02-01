@@ -21,6 +21,8 @@ try:
 except ImportError:
     from logger import logger
 
+from backend.db_repo.queries import GET_STOCK_POOL_QUERY, GET_STOCK_PROFILE_QUERY
+
 # Turso/libSQL 瞬态错误模式列表
 # 这些错误通常是网络层问题，重试后可恢复
 TRANSIENT_ERROR_PATTERNS = [
@@ -581,7 +583,7 @@ def get_stock_pool():
     conn = get_connection()
     try:
         cursor = conn.cursor()
-        cursor.execute("SELECT symbol FROM global_stock_pool WHERE watchers_count > 0 ORDER BY watchers_count DESC")
+        cursor.execute(GET_STOCK_POOL_QUERY)
         return [row[0] for row in cursor.fetchall()]
     finally:
         conn.close()
@@ -590,7 +592,7 @@ def get_stock_profile(symbol: str):
     conn = get_connection()
     try:
         cursor = conn.cursor()
-        cursor.execute("SELECT industry, main_business, description FROM stock_meta WHERE symbol = ?", (symbol,))
+        cursor.execute(GET_STOCK_PROFILE_QUERY, (symbol,))
         row = cursor.fetchone()
         return row
     finally:

@@ -7,6 +7,7 @@ from backend.database import get_connection
 from backend.engine.models.factory import ModelFactory
 from backend.trading_calendar import get_next_trading_day_str
 
+from backend.db_repo.queries import SAVE_PREDICTION_V2_QUERY, CHECK_PREDICTION_V2_EXISTS_QUERY
 from backend.logger import logger
 
 class PredictionRunner:
@@ -145,14 +146,7 @@ class PredictionRunner:
                 
             try:
                 # Save to V2 Table
-                cursor.execute("""
-                    INSERT OR REPLACE INTO ai_predictions_v2 
-                    (symbol, date, model_id, target_date, signal, confidence, 
-                     support_price, pressure_price, ai_reasoning,
-                     token_usage_input, token_usage_output, execution_time_ms,
-                     is_primary, created_at, updated_at)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now', '+8 hours'), datetime('now', '+8 hours'))
-                """, (
+                cursor.execute(SAVE_PREDICTION_V2_QUERY, (
                     symbol, date, model_id,
                     pred.get('target_date'), pred.get('signal'), pred.get('confidence'),
                     pred.get('support_price'), pred.get('pressure_price'), pred.get('reasoning'),
@@ -181,8 +175,8 @@ class PredictionRunner:
                 cursor = conn.cursor()
                 try:
                     cursor.execute(
-                        "SELECT 1 FROM ai_predictions_v2 WHERE symbol = ? AND date = ? AND model_id = ? LIMIT 1",
-                        (symbol, date, model.model_id)
+                    CHECK_PREDICTION_V2_EXISTS_QUERY,
+                    (symbol, date, model.model_id)
                     )
                     if cursor.fetchone():
                         logger.debug(f"⏩ Model {model.model_id} already has prediction for {symbol} on {date}, bypassing.")

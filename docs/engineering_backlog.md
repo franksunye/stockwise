@@ -12,11 +12,11 @@
 ## 📅 任务列表
 
 ### 阶段 1: 基础设施与标准化 (Infrastructure & Models)
-| ID   | 任务项                                  | 风险等级 | 等价性验证 (DoD)                                    | 状态 |
-| :--- | :-------------------------------------- | :------- | :-------------------------------------------------- | :--- |
-| T-1  | **定义 K 线行情 Pydantic 模型**         | 🟢 低     | `pydantic` 校验通过，字段覆盖 `daily_prices` 所有列 | [x]  |
-| T-2  | **日志系统实例化统一**                  | 🟢 低     | 全局 `from backend.logger import logger`            | [x]  |
-| T-3  | **数据库 SQL 语句外部化 (Query Layer)** | 🟡 中     | 运行 `verify_parity.py` 确认 SQL 语句逻辑无变动     | [ ]  |
+| ID   | 任务项                                  | 风险等级 | 等价性验证 (DoD)                                        | 状态 |
+| :--- | :-------------------------------------- | :------- | :------------------------------------------------------ | :--- |
+| T-1  | **定义 K 线行情 Pydantic 模型**         | 🟢 低     | `pydantic` 校验通过，字段覆盖 `daily_prices` 所有列     | [x]  |
+| T-2  | **日志系统实例化统一**                  | 🟢 低     | 全局 `from backend.logger import logger`                | [x]  |
+| T-3  | **数据库 SQL 语句外部化 (Query Layer)** | 🟡 中     | 运行 `scripts/verify_parity.py` 确认 SQL 语句逻辑无变动 | [x]  |
 
 ### 阶段 2: 数据接入层重构 (Ingestion Refactor)
 | ID   | 任务项                                   | 风险等级 | 等价性验证 (DoD)                                  | 状态 |
@@ -33,7 +33,7 @@
 ---
 
 ## 🛠️ 认证脚本状态
-- `scripts/verify_parity.py`: 🟡 待创建
+- `scripts/verify_parity.py`: 🟢 已创建并验证通过
 - `tests/test_models.py`: 🟡 待创建
 
 ---

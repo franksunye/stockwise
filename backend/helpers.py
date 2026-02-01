@@ -6,14 +6,15 @@ from datetime import datetime
 from config import BEIJING_TZ
 from database import get_connection, execute_with_retry
 from trading_calendar import is_market_closed
-from logger import logger
+from backend.db_repo.queries import LAST_DATE_QUERY, CHECK_PRO_WATCHER_QUERY
+from backend.logger import logger
 
 
 def get_last_date(symbol: str, table: str = "daily_prices") -> str:
     """获取数据库中某支股票的最后日期"""
     def _logic(conn, sym, tbl):
         cur = conn.cursor()
-        cur.execute(f"SELECT MAX(date) FROM {tbl} WHERE symbol = ?", (sym,))
+        cur.execute(LAST_DATE_QUERY.format(table=tbl), (sym,))
         return cur.fetchone()
 
     try:
@@ -32,14 +33,7 @@ def check_stock_analysis_mode(symbol: str) -> str:
             now_str = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S")
             
             # 检查是否有有效期内的付费用户关注
-            query = """
-            SELECT COUNT(*) FROM users u
-            JOIN user_watchlist w ON u.user_id = w.user_id
-            WHERE w.symbol = ? 
-            AND u.subscription_tier IN ('pro', 'premium')
-            AND (u.subscription_expires_at IS NULL OR u.subscription_expires_at > ?)
-            """
-            cursor.execute(query, (sym, now_str))
+            cursor.execute(CHECK_PRO_WATCHER_QUERY, (sym, now_str))
             return cursor.fetchone()
 
         row = execute_with_retry(_logic, 3, symbol)
