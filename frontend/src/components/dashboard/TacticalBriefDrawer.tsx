@@ -372,7 +372,7 @@ export function TacticalBriefDrawer({
                   )}
 
                   {/* 重点情报 (News Radar) */}
-                  {data.news_analysis && (
+                  {((Array.isArray(data.news_analysis) && data.news_analysis.length > 0) || (typeof data.news_analysis === 'string' && data.news_analysis.trim() !== '')) && (
                     <section className="relative">
                       <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> 重点情报 (Last 48h)
