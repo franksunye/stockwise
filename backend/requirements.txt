@@ -7,3 +7,5 @@ requests
 pypinyin
 loguru
 tavily-python
+Jinja2
+pydantic
