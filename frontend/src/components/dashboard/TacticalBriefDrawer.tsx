@@ -308,7 +308,7 @@ export function TacticalBriefDrawer({
                    {generalTactics.length > 0 && (
                     <section>
                       <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-slate-500" /> 基础市场研判 (GENERAL)
+                        <div className="w-1.5 h-1.5 rounded-full bg-slate-500" /> 基础市场研判
                       </h3>
                       <div className="grid grid-cols-1 gap-3">
                         {generalTactics.map((t, idx) => (
@@ -328,7 +328,7 @@ export function TacticalBriefDrawer({
                   {data.key_levels && (
                       <section className="animate-in fade-in slide-in-from-bottom-2 duration-700">
                           <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
-                            <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.5)]" /> 关键价位参考 (LEVELS)
+                            <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.5)]" /> 关键价位参考
                           </h3>
                           <div className="grid grid-cols-2 gap-3">
                               <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5">
