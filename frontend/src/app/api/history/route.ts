@@ -4,16 +4,21 @@ import { headers } from 'next/headers';
 import { getUserTier } from '@/lib/user-server';
 import { getModelSqlFilter } from '@/lib/membership-config';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 300; // 5 minutes cache
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
-    const symbol = searchParams.get('symbol');
+    let symbol = searchParams.get('symbol');
     const offset = parseInt(searchParams.get('offset') || '0');
     const limit = parseInt(searchParams.get('limit') || '10');
 
     if (!symbol) {
         return NextResponse.json({ error: 'Missing symbol' }, { status: 400 });
+    }
+
+    // Sanitize symbol: remove suffix like .SZ or .SS
+    if (symbol.includes('.')) {
+        symbol = symbol.split('.')[0];
     }
 
     try {
