@@ -57,7 +57,8 @@ class TieredLLMStrategy(BriefGenerationStrategy):
             {"role": "user", "content": user_prompt}
         ]
         
-        logger.info(f"🧠 Generating {self.tier.upper()} brief via {self.provider} ({self.model})...")
+        display_provider = "aliyun" if self.provider == "qwen" else self.provider
+        logger.info(f"🧠 Generating {self.tier.upper()} brief via {display_provider} ({self.model})...")
         
         content, meta = await self.client.chat_async(
             messages=messages,
@@ -93,4 +94,5 @@ class StrategyFactory:
     @staticmethod
     def get_provider_for_tier(tier: str) -> str:
         """根据 tier 获取 provider 名称"""
-        return TIER_PROVIDER_MAP.get(tier, "hunyuan")
+        prov = TIER_PROVIDER_MAP.get(tier, "hunyuan")
+        return "aliyun" if prov == "qwen" else prov

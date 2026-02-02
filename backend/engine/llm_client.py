@@ -56,7 +56,9 @@ class LLMClient:
         """
         self.provider = provider or LLM_CONFIG.get("provider", "openai")
         self.timeout = timeout
-        
+        if self.provider == "aliyun":
+            self.provider = "qwen"
+            
         # 自动注册 Hunyuan 限流器
         if self.provider == "hunyuan" and "hunyuan" not in self._rate_limiters:
             qps = LLM_CONFIG.get("hunyuan", {}).get("qps_limit", 2.0)
@@ -88,7 +90,8 @@ class LLMClient:
             qw_config = LLM_CONFIG.get("qwen", {})
             self.base_url = base_url or qw_config.get("base_url") or "https://dashscope.aliyuncs.com/compatible-mode/v1"
             self.api_key = api_key or qw_config.get("api_key")
-            self.model = model or qw_config.get("model") or "qwen2.5-coder-32b-instruct"
+            # If used for DeepSeek on Aliyun, naturally fallback to deepseek-v3 instead of qwen-coder
+            self.model = model or qw_config.get("model") or LLM_CONFIG.get("model") or "deepseek-v3"
         else: # openai, custom, or generic
             self.base_url = base_url or LLM_CONFIG.get("base_url", "http://127.0.0.1:8045/v1")
             self.api_key = api_key or LLM_CONFIG.get("api_key", "")
@@ -181,7 +184,8 @@ class LLMClient:
 
         # [Guardrail] Explicitly log the model being used to detect config overrides
         used_model = payload["model"]
-        print(f"   🤖 [LLM] Sending request to {self.provider.upper()} using model: {used_model}")
+        display_prov = "ALIYUN" if self.provider == "qwen" else self.provider.upper()
+        print(f"   🤖 [LLM] Sending request to {display_prov} using model: {used_model}")
 
         # [Cost Alert] Warn if expensive reasoning model is detected for DeepSeek
         if self.provider == "deepseek" and "reasoner" in used_model:
@@ -218,18 +222,18 @@ class LLMClient:
                     if not meta["total_tokens"]:
                         meta["total_tokens"] = meta["input_tokens"] + meta["output_tokens"]
                     
-                    print(f"   🤖 {self.provider.upper()} 响应成功 ({elapsed:.1f}s, {meta['total_tokens']} tokens)")
+                    print(f"   🤖 {display_prov} 响应成功 ({elapsed:.1f}s, {meta['total_tokens']} tokens)")
                     return content, meta
                 else:
                     meta["error"] = f"响应格式异常: {data}"
                     return None, meta
             else:
                 meta["error"] = f"HTTP {response.status_code}: {response.text[:200]}"
-                print(f"   ❌ {self.provider.upper()} 请求失败: HTTP {response.status_code}")
+                print(f"   ❌ {display_prov} 请求失败: HTTP {response.status_code}")
                 return None, meta
         except Exception as e:
             meta["error"] = str(e)
-            print(f"   ❌ {self.provider.upper()} 请求异常: {e}")
+            print(f"   ❌ {display_prov} 请求异常: {e}")
             return None, meta
 
     def _chat_gemini(
