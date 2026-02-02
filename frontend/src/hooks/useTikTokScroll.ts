@@ -13,6 +13,8 @@ export function useTikTokScroll(stocks: StockData[], options?: UseTikTokScrollOp
     const [currentIndex, setCurrentIndex] = useState(0);
     const [yPositions, setYPositions] = useState<{ [index: number]: number }>({});
     const [backToTopCounter, setBackToTopCounter] = useState(0);
+    const [isSnapped, setIsSnapped] = useState(true);
+    const isReturningToTop = useRef(false);
 
     const scrollRef = useRef<HTMLDivElement>(null);
     const searchParams = useSearchParams();
@@ -30,18 +32,24 @@ export function useTikTokScroll(stocks: StockData[], options?: UseTikTokScrollOp
         const scrollLeft = scrollRef.current.scrollLeft;
         const width = scrollRef.current.clientWidth;
         const scrollWidth = scrollRef.current.scrollWidth;
-        const newIndex = Math.round(scrollLeft / width);
 
+        // 1. 索引切换逻辑 (保持原样)
+        const newIndex = Math.round(scrollLeft / width);
         if (newIndex !== currentIndex) {
             setCurrentIndex(newIndex);
         }
 
-        // 检测是否已滑到最右边（最后一个股票）
-        const maxScrollLeft = scrollWidth - width;
-        isAtRightEdge.current = scrollLeft >= maxScrollLeft - 5; // 5px 容差
+        // 2. 稳定态（吸附）检测：只要偏离中心超过 5px，就认为是在滑动中
+        const offset = scrollLeft % width;
+        const stable = offset < 5 || offset > width - 5;
+        if (stable !== isSnapped) {
+            setIsSnapped(stable);
+        }
 
-        // 检测是否在最左边（第一个股票）
-        isAtLeftEdge.current = scrollLeft <= 5; // 5px 容差
+        // 3. 边界检测
+        const maxScrollLeft = scrollWidth - width;
+        isAtRightEdge.current = scrollLeft >= maxScrollLeft - 5;
+        isAtLeftEdge.current = scrollLeft <= 5;
     };
 
     // 处理触摸开始
@@ -83,8 +91,13 @@ export function useTikTokScroll(stocks: StockData[], options?: UseTikTokScrollOp
 
     // 处理纵向滚动 (复盘)
     const handleVerticalScroll = useCallback((top: number, index: number) => {
+        // 如果正在回弹过程中，且高度还没归零，则忽略更新以防止按钮闪烁
+        if (isReturningToTop.current) {
+            if (top <= 0) isReturningToTop.current = false;
+            return;
+        }
+
         setYPositions(prev => {
-            // Optimization: Only update if changed significantly or cross threshold
             if (prev[index] === top) return prev;
             return { ...prev, [index]: top };
         });
@@ -92,8 +105,8 @@ export function useTikTokScroll(stocks: StockData[], options?: UseTikTokScrollOp
 
     // 触发回到当前股票的"今天"界面
     const scrollToToday = () => {
+        isReturningToTop.current = true; // 开启回弹锁
         setBackToTopCounter(prev => prev + 1);
-        // Clear current position optimistic
         setYPositions(prev => ({ ...prev, [currentIndex]: 0 }));
     };
 
@@ -121,7 +134,8 @@ export function useTikTokScroll(stocks: StockData[], options?: UseTikTokScrollOp
         setCurrentIndex,
         scrollRef,
         handleScroll,
-        yScrollPosition: yPositions[currentIndex] || 0,
+        // 关键：只有在吸附状态且滚动超过阈值时，才认为 yScrollPosition 有效
+        yScrollPosition: isSnapped ? (yPositions[currentIndex] || 0) : 0,
         handleVerticalScroll,
         backToTopCounter,
         scrollToToday
