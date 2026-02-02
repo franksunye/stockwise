@@ -455,7 +455,8 @@ class LLMClient:
         try:
             from backend.engine.parsers import parse_ai_response
             result_model = parse_ai_response(content)
-            return result_model.dict()
+            # Use model_dump(mode='json') to ensure Enums are serialized to their values (e.g., "Side" not SignalEnum.SIDE)
+            return result_model.model_dump(mode='json')
         except Exception as e:
             # Only log detailed error if it's not a common "searching" failure
             # But here we want to know why schema validation failed

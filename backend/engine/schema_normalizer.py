@@ -8,6 +8,18 @@ def normalize_ai_response(data: Dict[str, Any]) -> Dict[str, Any]:
     if not isinstance(data, dict):
         return {}
 
+    # 0. Normalize Signal (Must be "Long", "Short", or "Side")
+    # Handle cases where Enum string representation might have leaked (e.g. "SignalEnum.SIDE")
+    if "signal" in data:
+        sig = str(data["signal"])
+        if "LONG" in sig.upper(): data["signal"] = "Long"
+        elif "SHORT" in sig.upper(): data["signal"] = "Short"
+        elif "SIDE" in sig.upper(): data["signal"] = "Side"
+        elif sig not in ["Long", "Short", "Side"]:
+            data["signal"] = "Side" # Default fallback
+    else:
+        data["signal"] = "Side"
+
     # 1. Normalize news_analysis (Must be List[str])
     # Ensure it's in the dict first
     if "news_analysis" not in data:
