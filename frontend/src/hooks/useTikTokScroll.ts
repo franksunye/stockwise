@@ -11,7 +11,7 @@ interface UseTikTokScrollOptions {
 
 export function useTikTokScroll(stocks: StockData[], options?: UseTikTokScrollOptions) {
     const [currentIndex, setCurrentIndex] = useState(0);
-    const [yScrollPosition, setYScrollPosition] = useState(0);
+    const [yPositions, setYPositions] = useState<{ [index: number]: number }>({});
     const [backToTopCounter, setBackToTopCounter] = useState(0);
 
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -82,13 +82,19 @@ export function useTikTokScroll(stocks: StockData[], options?: UseTikTokScrollOp
     }, [handleTouchStart, handleTouchEnd]);
 
     // 处理纵向滚动 (复盘)
-    const handleVerticalScroll = useCallback((top: number) => {
-        setYScrollPosition(top);
+    const handleVerticalScroll = useCallback((top: number, index: number) => {
+        setYPositions(prev => {
+            // Optimization: Only update if changed significantly or cross threshold
+            if (prev[index] === top) return prev;
+            return { ...prev, [index]: top };
+        });
     }, []);
 
     // 触发回到当前股票的"今天"界面
     const scrollToToday = () => {
         setBackToTopCounter(prev => prev + 1);
+        // Clear current position optimistic
+        setYPositions(prev => ({ ...prev, [currentIndex]: 0 }));
     };
 
     // 处理从股票池跳转过来的定位逻辑
@@ -115,7 +121,7 @@ export function useTikTokScroll(stocks: StockData[], options?: UseTikTokScrollOp
         setCurrentIndex,
         scrollRef,
         handleScroll,
-        yScrollPosition,
+        yScrollPosition: yPositions[currentIndex] || 0,
         handleVerticalScroll,
         backToTopCounter,
         scrollToToday

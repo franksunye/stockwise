@@ -176,7 +176,7 @@ function DashboardContent() {
             key={stock.symbol} 
             stock={stock} 
             onShowTactics={(prediction) => setSelectedTactics({ symbol: stock.symbol, prediction })} 
-            onVerticalScroll={handleVerticalScroll}
+            onVerticalScroll={(top) => handleVerticalScroll(top, idx)}
             scrollRequest={currentIndex === idx ? backToTopCounter : undefined}
             onLoadMore={loadMoreHistory}
           />
@@ -191,7 +191,12 @@ function DashboardContent() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
-              onClick={scrollToToday}
+              onClick={() => {
+                scrollToToday();
+                if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
+                  window.navigator.vibrate(10); // Subtle haptic buzz
+                }
+              }}
               className="flex items-center gap-2 bg-indigo-500 text-white px-5 py-2.5 rounded-full shadow-[0_10px_30px_rgba(99,102,241,0.3)] active:scale-90 transition-all pointer-events-auto"
             >
               <ChevronDown className="w-4 h-4 rotate-180" />
