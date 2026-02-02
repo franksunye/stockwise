@@ -1,8 +1,22 @@
 import os
+import sys
 import requests
 import json
 import time
-from logger import logger
+
+# --- Path Guidance (Ensures 'backend' is findable whether run from root or internally) ---
+current_file = os.path.abspath(__file__)
+backend_dir = os.path.dirname(current_file)
+root_dir = os.path.dirname(backend_dir)
+if root_dir not in sys.path:
+    sys.path.insert(0, root_dir)
+if backend_dir not in sys.path:
+    sys.path.insert(0, backend_dir)
+
+try:
+    from backend.logger import logger
+except ImportError:
+    from logger import logger
 
 def send_push_notification(title, body, url=None, related_symbol=None, broadcast=False, tag=None, target_user_id=None):
     """

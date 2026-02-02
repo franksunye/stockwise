@@ -7,18 +7,26 @@ StockWise Database Module (Raw Interface - No ORM)
 import sqlite3
 import libsql
 import os
-import time
+import sys
 import requests
 import json
-from pathlib import Path
+import time
+from typing import Optional, List, Dict, Any, Callable
+
+# --- Path Guidance ---
+current_file = os.path.abspath(__file__)
+backend_dir = os.path.dirname(current_file)
+root_dir = os.path.dirname(backend_dir)
+if root_dir not in sys.path:
+    sys.path.insert(0, root_dir)
+if backend_dir not in sys.path:
+    sys.path.insert(0, backend_dir)
 
 try:
-    from backend.config import DB_PATH, TURSO_DB_URL, TURSO_AUTH_TOKEN
-except ImportError:
-    from config import DB_PATH, TURSO_DB_URL, TURSO_AUTH_TOKEN
-try:
+    from backend.config import TURSO_DB_URL, TURSO_AUTH_TOKEN
     from backend.logger import logger
 except ImportError:
+    from config import TURSO_DB_URL, TURSO_AUTH_TOKEN
     from logger import logger
 
 from backend.db_repo.queries import GET_STOCK_POOL_QUERY, GET_STOCK_PROFILE_QUERY
