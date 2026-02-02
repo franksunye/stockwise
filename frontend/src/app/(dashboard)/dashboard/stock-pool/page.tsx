@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Plus, Trash2, ArrowLeft, TrendingUp, TrendingDown, Minus, LayoutGrid } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -22,6 +22,97 @@ interface StockSnapshot {
 
 
 
+const getSignalMeta = (signal: string) => {
+  switch(signal) {
+    case 'Long': return { text: '建议做多', color: 'bg-emerald-500', iconColor: 'text-emerald-500', bgColor: 'bg-emerald-500/10 border-emerald-500/20' };
+    case 'Short': return { text: '建议避险', color: 'bg-rose-500', iconColor: 'text-rose-500', bgColor: 'bg-rose-500/10 border-rose-500/20' };
+    default: return { text: '建议观望', color: 'bg-amber-500', iconColor: 'text-amber-500', bgColor: 'bg-amber-500/10 border-amber-500/20' };
+  }
+};
+
+const StockItem = memo(({ 
+  stock, 
+  navigatingTo, 
+  isPreMarket, 
+  onRemove,
+  setNavigatingTo 
+}: { 
+  stock: StockSnapshot, 
+  navigatingTo: string | null, 
+  isPreMarket: boolean, 
+  onRemove: (e: React.MouseEvent, stock: StockSnapshot) => void,
+  setNavigatingTo: (symbol: string) => void
+}) => {
+  const meta = getSignalMeta(stock.aiSignal);
+  
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      className="transform-gpu will-change-transform"
+    >
+      <Link 
+        href={`/dashboard?symbol=${stock.symbol}`}
+        onClick={() => setNavigatingTo(stock.symbol)}
+        className={`glass-card p-5 group transition-all relative block active:scale-95 ${navigatingTo === stock.symbol ? 'bg-white/10 border-indigo-500/30 ring-1 ring-indigo-500/20' : 'hover:bg-white/[0.04]'}`}
+      >
+       <div className="flex items-center justify-between">
+         <div className="flex items-center gap-4">
+           <div className={`w-14 h-14 rounded-[22px] flex items-center justify-center border-2 ${meta.bgColor}`}>
+              {stock.aiSignal === 'Long' ? <TrendingUp className={meta.iconColor} /> :
+               stock.aiSignal === 'Short' ? <TrendingDown className={meta.iconColor} /> : <Minus className={meta.iconColor} />}
+           </div>
+           <div>
+             <h3 className="text-base font-black italic tracking-tighter text-white">{stock.name}</h3>
+             <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest flex items-center gap-1.5 mt-0.5">
+               <span className={`w-1 h-1 rounded-full ${meta.color}`} />
+               {meta.text}
+             </p>
+           </div>
+         </div>
+         
+         <div className="flex items-center gap-6">
+           <div className="text-right">
+             {!isPreMarket ? (
+               <>
+                 <p className="text-xl font-black mono tracking-tighter text-white">
+                   {stock.price > 0 ? stock.price.toFixed(2) : '--.--'}
+                 </p>
+                   <p className={`text-[10px] font-black mono ${stock.change > 0 ? 'text-emerald-500' : stock.change < 0 ? 'text-rose-500' : 'text-slate-500'}`}>
+                     {stock.price > 0 ? `${stock.change >= 0 ? '+' : ''}${stock.change.toFixed(2)}%` : '同步中...'}
+                   </p>
+                   {stock.updateTag && (
+                     <p className="text-[8px] text-slate-500 mono mt-1 font-bold">
+                       {stock.updateTag}
+                     </p>
+                   )}
+                 </>
+               ) : (
+               <p className="text-[10px] text-slate-600 font-black italic uppercase tracking-widest">盘前静默</p>
+             )}
+           </div>
+           <button 
+             onClick={(e) => { e.preventDefault(); e.stopPropagation(); onRemove(e, stock); }}
+             className="p-3 opacity-60 hover:opacity-100 transition-all text-slate-500 hover:text-rose-500 active:scale-75 z-20 relative rounded-full hover:bg-white/5"
+           >
+             <Trash2 size={20} />
+           </button>
+         </div>
+          
+          {navigatingTo === stock.symbol && (
+            <div className="absolute right-4 top-1/2 -translate-y-1/2">
+              <div className="w-4 h-4 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
+            </div>
+          )}
+       </div>
+      </Link>
+    </motion.div>
+  );
+});
+StockItem.displayName = 'StockItem';
+
 export default function StockPoolPage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
@@ -38,14 +129,14 @@ export default function StockPoolPage() {
   } = useStocks();
   
   // Derived State for UI - Map global StockData to local StockSnapshot
-  const stocks: StockSnapshot[] = globalStocks.map(s => ({
+  const stocks = useMemo(() => globalStocks.map(s => ({
     symbol: s.symbol,
     name: s.name,
     price: s.price?.close || 0,
     change: s.price?.change_percent || 0,
-    aiSignal: s.prediction?.signal || 'Side',
+    aiSignal: s.prediction?.signal || 'Side' as const,
     updateTag: s.lastUpdated
-  }));
+  })), [globalStocks]);
 
   // Compounded loading state
   const loading = loadingList || loadingPool;
@@ -121,10 +212,10 @@ export default function StockPoolPage() {
     }
   };
 
-  const handleRemoveClick = (e: React.MouseEvent, stock: StockSnapshot) => {
+  const handleRemoveClick = useCallback((e: React.MouseEvent, stock: StockSnapshot) => {
     e.preventDefault(); e.stopPropagation();
     setStockToDelete(stock);
-  };
+  }, []);
 
   const confirmDelete = async () => {
     if (!stockToDelete || !user) return;
@@ -137,13 +228,6 @@ export default function StockPoolPage() {
     setIsDeleting(false);
   };
 
-  const getSignalMeta = (signal: string) => {
-    switch(signal) {
-      case 'Long': return { text: '建议做多', color: 'bg-emerald-500', iconColor: 'text-emerald-500', bgColor: 'bg-emerald-500/10 border-emerald-500/20' };
-      case 'Short': return { text: '建议避险', color: 'bg-rose-500', iconColor: 'text-rose-500', bgColor: 'bg-rose-500/10 border-rose-500/20' };
-      default: return { text: '建议观望', color: 'bg-amber-500', iconColor: 'text-amber-500', bgColor: 'bg-amber-500/10 border-amber-500/20' };
-    }
-  };
 
   // Main Content
   return (
@@ -255,74 +339,16 @@ export default function StockPoolPage() {
               <p className="text-xs font-black uppercase tracking-widest">暂无资产</p>
             </div>
           ) : (
-            stocks.map(stock => {
-              const meta = getSignalMeta(stock.aiSignal);
-              return (
-                <motion.div
-                  key={stock.symbol}
-                  layout
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                >
-                  <Link 
-                    href={`/dashboard?symbol=${stock.symbol}`}
-                    onClick={() => setNavigatingTo(stock.symbol)}
-                    className={`glass-card p-5 group transition-all relative block active:scale-95 ${navigatingTo === stock.symbol ? 'bg-white/10 border-indigo-500/30 ring-1 ring-indigo-500/20' : 'hover:bg-white/[0.04]'}`}
-                  >
-                   <div className="flex items-center justify-between">
-                     <div className="flex items-center gap-4">
-                       <div className={`w-14 h-14 rounded-[22px] flex items-center justify-center border-2 ${meta.bgColor}`}>
-                          {stock.aiSignal === 'Long' ? <TrendingUp className={meta.iconColor} /> :
-                           stock.aiSignal === 'Short' ? <TrendingDown className={meta.iconColor} /> : <Minus className={meta.iconColor} />}
-                       </div>
-                       <div>
-                         <h3 className="text-base font-black italic tracking-tighter text-white">{stock.name}</h3>
-                         <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest flex items-center gap-1.5 mt-0.5">
-                           <span className={`w-1 h-1 rounded-full ${meta.color}`} />
-                           {meta.text}
-                         </p>
-                       </div>
-                     </div>
-                     
-                     <div className="flex items-center gap-6">
-                       <div className="text-right">
-                         {!isPreMarket ? (
-                           <>
-                             <p className="text-xl font-black mono tracking-tighter text-white">
-                               {stock.price > 0 ? stock.price.toFixed(2) : '--.--'}
-                             </p>
-                               <p className={`text-[10px] font-black mono ${stock.change > 0 ? 'text-emerald-500' : stock.change < 0 ? 'text-rose-500' : 'text-slate-500'}`}>
-                                 {stock.price > 0 ? `${stock.change >= 0 ? '+' : ''}${stock.change.toFixed(2)}%` : '同步中...'}
-                               </p>
-                               {stock.updateTag && (
-                                 <p className="text-[8px] text-slate-500 mono mt-1 font-bold">
-                                   {stock.updateTag}
-                                 </p>
-                               )}
-                             </>
-                           ) : (
-                           <p className="text-[10px] text-slate-600 font-black italic uppercase tracking-widest">盘前静默</p>
-                         )}
-                       </div>
-                       <button 
-                         onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleRemoveClick(e, stock); }}
-                         className="p-3 opacity-60 hover:opacity-100 transition-all text-slate-500 hover:text-rose-500 active:scale-75 z-20 relative rounded-full hover:bg-white/5"
-                       >
-                         <Trash2 size={20} />
-                       </button>
-                     </div>
-                      
-                      {navigatingTo === stock.symbol && (
-                        <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                          <div className="w-4 h-4 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
-                        </div>
-                      )}
-                   </div>
-                  </Link>
-                </motion.div>
-              );
-            })
+            stocks.map(stock => (
+              <StockItem
+                key={stock.symbol}
+                stock={stock}
+                navigatingTo={navigatingTo}
+                isPreMarket={isPreMarket}
+                onRemove={handleRemoveClick}
+                setNavigatingTo={setNavigatingTo}
+              />
+            ))
           )}
         </div>
       </div>
@@ -376,7 +402,7 @@ export default function StockPoolPage() {
       <style jsx global>{`
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-        .glass-card { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 32px; }
+        .glass-card { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 32px; }
       `}</style>
     </div>
   );
