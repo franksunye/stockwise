@@ -82,7 +82,8 @@ def verify_all_pending(force: bool = False, target_date: str = None):
             # --- 4. Evaluate Trajectory ---
             trajectory = []
             cumulative_change = 0.0
-            max_favorable = -999.0 if signal == 'Long' else 999.0
+            # Initialize with 0 instead of extreme values to capture small movements correctly
+            max_favorable = 0.0 
             
             final_status = 'Verifying'
             days_evaluated = 0
@@ -101,6 +102,10 @@ def verify_all_pending(force: bool = False, target_date: str = None):
                         max_favorable = max(max_favorable, cumulative_change)
                     elif signal == 'Short':
                         max_favorable = min(max_favorable, cumulative_change)
+                    elif signal == 'Side':
+                        # For Side, track the largest absolute deviation
+                        if abs(cumulative_change) > abs(max_favorable):
+                            max_favorable = cumulative_change
                     
                     trajectory.append({
                         "date": d,
