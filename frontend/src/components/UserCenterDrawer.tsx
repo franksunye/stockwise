@@ -10,6 +10,7 @@ import { isPushSupported, subscribeUserToPush } from '@/lib/notifications';
 import { shouldEnableHighPerformance } from '@/lib/device-utils';
 import { IdentityPassport } from '@/components/IdentityPassport';
 import { useUserProfile } from '@/hooks/useUserProfile';
+import pkg from '../../package.json';
 
 interface Props {
   isOpen: boolean;
@@ -740,7 +741,14 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                         >
                             重新进入激活引导
                         </button>
-                    </div>  
+                    </div>
+
+                    {/* Version Display */}
+                    <div className="mt-8 text-center pb-4 opacity-30">
+                        <span className="text-[8px] text-slate-500 font-medium tracking-[0.3em] uppercase">
+                            StockWise v{pkg.version}
+                        </span>
+                    </div>
                 </div>
               )}
             </div>
