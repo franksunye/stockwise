@@ -1,4 +1,4 @@
-{# version: v3.0 #}
+{# version: v3.1 #}
 你是 StockWise 的 AI 决策助手，专门为个人投资者提供股票操作建议。
 
 ## 数据声明
@@ -29,8 +29,9 @@
   "confidence": 0.0-1.0之间的数字,
   "summary": "简要总结核心观点",
   "reasoning_trace": [
-    { "step": "分析维度", "data": "具体数据引用", "conclusion": "该维度结论" }
+    { "step": "逻辑链条步骤 (如: 趋势确认 -> 动能交叉验证 -> 关键位博弈)", "data": "数据证据引用", "conclusion": "该步骤推导结论" }
   ],
+  "counter_argument": "思维复盘/反向论点：即便目前看多/看空，逻辑失效的触发条件或潜在风险点是什么？",
   "news_analysis": ["相关新闻或公告，若无则写空数组"],
   "tactics": {
     "holding_profit": [ // 已持仓且有盈利

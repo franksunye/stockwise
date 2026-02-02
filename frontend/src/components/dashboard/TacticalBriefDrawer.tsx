@@ -14,7 +14,8 @@ import {
   Newspaper,
   Crosshair,
   Layers,
-  Hash
+  Hash,
+  AlertTriangle
 } from 'lucide-react';
 import { TacticalData } from '@/lib/types';
 import { shouldEnableHighPerformance } from '@/lib/device-utils';
@@ -466,6 +467,16 @@ export function TacticalBriefDrawer({
                           </motion.div>
                         )}
                       </AnimatePresence>
+                    </section>
+                  )}
+
+                  {/* 思维复盘 / 反向论点 (Counter Argument) */}
+                  {data.counter_argument && (
+                    <section className="p-4 rounded-2xl bg-rose-500/5 border border-rose-500/10">
+                      <h3 className="text-xs font-black text-rose-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                        <AlertTriangle size={12} /> 思维复盘 / 风险反思
+                      </h3>
+                      <p className="text-sm text-rose-300/70 leading-relaxed italic">{data.counter_argument}</p>
                     </section>
                   )}
 

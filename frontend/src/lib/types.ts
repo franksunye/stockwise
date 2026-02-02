@@ -82,7 +82,7 @@ export interface Tactic {
 
 // 推理链步骤（用于三层体验的"分析过程"展示）
 export interface ReasoningStep {
-    step: 'trend' | 'momentum' | 'volume' | 'history' | 'decision';
+    step: string;
     data: string;       // 关键数据点（≤20字）
     conclusion: string; // 判断结论（≤15字）
 }
@@ -115,6 +115,7 @@ export interface TacticalData {
     };
     conflict_resolution: string;
     tomorrow_focus?: string;
+    counter_argument?: string;
     is_llm?: boolean;
     model?: string;
 }

@@ -65,6 +65,7 @@ class StockAnalysisResult(BaseModel):
     key_levels: KeyLevels = Field(default_factory=KeyLevels)
     conflict_resolution: Optional[str] = ""
     tomorrow_focus: Optional[str] = ""
+    counter_argument: Optional[str] = Field(default="", description="思辨复盘：反向逻辑或潜在风险点")
     
     # Allow extra fields for forward compatibility
     class Config:

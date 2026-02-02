@@ -32,6 +32,11 @@ def normalize_ai_response(data: Dict[str, Any]) -> Dict[str, Any]:
     trace = data["reasoning_trace"]
     if not isinstance(trace, list):
         data["reasoning_trace"] = []
+    # 2.5 Normalize counter_argument (Must be str)
+    if "counter_argument" not in data:
+        data["counter_argument"] = ""
+    elif not isinstance(data["counter_argument"], str):
+        data["counter_argument"] = str(data["counter_argument"])
     
     # 3. Normalize tactics (Must be Dict with 'holding_profit', 'holding_loss', 'empty')
     if "tactics" not in data or not isinstance(data["tactics"], dict):
