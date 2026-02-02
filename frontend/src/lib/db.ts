@@ -30,13 +30,19 @@ function sleep(ms: number): Promise<void> {
 export function getDbClient() {
     const url = process.env.TURSO_DB_URL;
     const authToken = process.env.TURSO_AUTH_TOKEN;
-    const strategy = process.env.DB_STRATEGY || 'local';
+    const strategy = process.env.DB_STRATEGY;
 
-    if (strategy === 'cloud' && url && authToken) {
+    // 优先使用云端数据库：
+    // 1. 除非明确指定 DB_STRATEGY='local'
+    // 2. 并且存在云端配置 (URL + Token)
+    const forceLocal = strategy === 'local';
+    const canUseCloud = url && authToken && url.startsWith('libsql://');
+
+    if (!forceLocal && canUseCloud) {
         // 显式连接云端 Turso
-        return createClient({ url, authToken });
+        return createClient({ url: url!, authToken: authToken! });
     } else {
-        // 显式连接本地 SQLite
+        // 连接本地 SQLite
         // 优先使用环境变量 LOCAL_DB_PATH，如果没有则 fallback 
         const localPath = process.env.LOCAL_DB_PATH || path.join(process.cwd(), '..', 'data', 'stockwise.db');
         return new Database(localPath);
@@ -51,7 +57,7 @@ export async function executeWithRetry<T>(
     maxRetries: number = 3
 ): Promise<T> {
     let lastError: unknown = null;
-    
+
     for (let attempt = 0; attempt < maxRetries; attempt++) {
         const client = getDbClient() as Client;
         try {
@@ -68,7 +74,7 @@ export async function executeWithRetry<T>(
             }
         }
     }
-    
+
     console.error(`❌ Failed after ${maxRetries} attempts. Last error:`, lastError);
     throw lastError;
 }

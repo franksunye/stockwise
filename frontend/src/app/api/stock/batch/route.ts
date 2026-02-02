@@ -34,33 +34,47 @@ export async function GET(request: Request) {
         let allHistory: Record<string, unknown>[];
 
         try {
+            const sql = `
+                    WITH RankedPredictions AS (
+                        SELECT p.symbol, p.date, p.target_date, p.signal, p.confidence,
+                                p.support_price, p.ai_reasoning, p.validation_status, p.actual_change,
+                                p.max_perf_in_window,
+                                p.is_primary, p.model_id as model, m.display_name,
+                                ROW_NUMBER() OVER (PARTITION BY p.symbol, p.target_date ORDER BY m.priority DESC) as rn_daily
+                        FROM ai_predictions_v2 p
+                        LEFT JOIN prediction_models m ON p.model_id = m.model_id
+                        WHERE p.symbol IN (${placeholders}) AND (${tierFilter})
+                    ),
+                    DailyBest AS (
+                        SELECT * FROM RankedPredictions WHERE rn_daily = 1
+                    ),
+                    HistoryRanked AS (
+                        SELECT d.*, 
+                               ROW_NUMBER() OVER (PARTITION BY symbol ORDER BY target_date DESC) as rn_history
+                        FROM DailyBest d
+                    )
+                    SELECT h.*, dp.close as close_price,
+                           dp.rsi, dp.kdj_k, dp.kdj_d, dp.kdj_j, dp.macd, dp.macd_signal, dp.macd_hist, dp.boll_upper, dp.boll_mid, dp.boll_lower
+                    FROM HistoryRanked h
+                    LEFT JOIN daily_prices dp ON h.symbol = dp.symbol AND h.target_date = dp.date
+                    WHERE h.rn_history <= ${historyLimit}
+                    ORDER BY h.target_date DESC
+                `;
+
             if ('execute' in client) {
                 const [pricesRs, historyRs] = await Promise.all([
                     client.execute({
                         sql: `SELECT dp.* FROM daily_prices dp
-                                INNER JOIN (
-                                    SELECT symbol, MAX(date) as max_date
-                                    FROM daily_prices
-                                    WHERE symbol IN (${placeholders})
-                                    GROUP BY symbol
-                                ) latest ON dp.symbol = latest.symbol AND dp.date = latest.max_date`,
+                                    INNER JOIN (
+                                        SELECT symbol, MAX(date) as max_date
+                                        FROM daily_prices
+                                        WHERE symbol IN (${placeholders})
+                                        GROUP BY symbol
+                                    ) latest ON dp.symbol = latest.symbol AND dp.date = latest.max_date`,
                         args: symbols
                     }),
                     client.execute({
-                        sql: `WITH RankedPredictions AS (
-                                    SELECT p.symbol, p.date, p.target_date, p.signal, p.confidence,
-                                            p.support_price, p.ai_reasoning, p.validation_status, p.actual_change,
-                                            p.is_primary, p.model_id as model, m.display_name,
-                                            ROW_NUMBER() OVER (PARTITION BY p.symbol ORDER BY p.date DESC, m.priority DESC) as rn
-                                    FROM ai_predictions_v2 p
-                                    LEFT JOIN prediction_models m ON p.model_id = m.model_id
-                                    WHERE p.symbol IN (${placeholders}) AND (${tierFilter})
-                                )
-                                SELECT r.*, dp.close as close_price,
-                                       dp.rsi, dp.kdj_k, dp.kdj_d, dp.kdj_j, dp.macd, dp.macd_signal, dp.macd_hist, dp.boll_upper, dp.boll_mid, dp.boll_lower
-                                FROM RankedPredictions r
-                                LEFT JOIN daily_prices dp ON r.symbol = dp.symbol AND r.target_date = dp.date
-                                WHERE r.rn <= ${historyLimit} order by r.date desc`,
+                        sql,
                         args: symbols
                     })
                 ]);
@@ -68,31 +82,16 @@ export async function GET(request: Request) {
                 allHistory = historyRs.rows as Record<string, unknown>[];
             } else {
                 latestPrices = client.prepare(`
-                    SELECT dp.* FROM daily_prices dp
-                    INNER JOIN (
-                        SELECT symbol, MAX(date) as max_date
-                        FROM daily_prices
-                        WHERE symbol IN (${placeholders})
-                        GROUP BY symbol
-                    ) latest ON dp.symbol = latest.symbol AND dp.date = latest.max_date
-                `).all(...symbols) as Record<string, unknown>[];
+                        SELECT dp.* FROM daily_prices dp
+                        INNER JOIN (
+                            SELECT symbol, MAX(date) as max_date
+                            FROM daily_prices
+                            WHERE symbol IN (${placeholders})
+                            GROUP BY symbol
+                        ) latest ON dp.symbol = latest.symbol AND dp.date = latest.max_date
+                    `).all(...symbols) as Record<string, unknown>[];
 
-                allHistory = client.prepare(`
-                    WITH RankedPredictions AS (
-                        SELECT p.symbol, p.date, p.target_date, p.signal, p.confidence,
-                                p.support_price, p.ai_reasoning, p.validation_status, p.actual_change,
-                                p.is_primary, p.model_id as model, m.display_name,
-                                ROW_NUMBER() OVER (PARTITION BY p.symbol ORDER BY p.date DESC, m.priority DESC) as rn
-                        FROM ai_predictions_v2 p
-                        LEFT JOIN prediction_models m ON p.model_id = m.model_id
-                        WHERE p.symbol IN (${placeholders}) AND (${tierFilter})
-                    )
-                    SELECT r.*, dp.close as close_price,
-                           dp.rsi, dp.kdj_k, dp.kdj_d, dp.kdj_j, dp.macd, dp.macd_signal, dp.macd_hist, dp.boll_upper, dp.boll_mid, dp.boll_lower
-                    FROM RankedPredictions r
-                    LEFT JOIN daily_prices dp ON r.symbol = dp.symbol AND r.target_date = dp.date
-                    WHERE r.rn <= ${historyLimit} order by r.date desc
-                `).all(...symbols) as Record<string, unknown>[];
+                allHistory = client.prepare(sql).all(...symbols) as Record<string, unknown>[];
             }
         } finally {
             if (client && typeof (client as { close?: () => void }).close === 'function') {
