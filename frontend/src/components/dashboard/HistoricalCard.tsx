@@ -172,8 +172,10 @@ export function HistoricalCard({ data, onClick }: { data: AIPrediction; onClick?
                 })()}
               </span>
               <p className="text-2xl font-black mono text-slate-100">
-                {(data.validation_status === 'Correct' || data.validation_status === 'Incorrect') && data.max_perf_in_window !== undefined
-                   ? `${data.max_perf_in_window >= 0 ? '+' : ''}${data.max_perf_in_window.toFixed(2)}%`
+                {(data.validation_status === 'Correct' || data.validation_status === 'Incorrect')
+                   ? (data.max_perf_in_window !== undefined && data.max_perf_in_window !== 0 
+                      ? `${data.max_perf_in_window >= 0 ? '+' : ''}${data.max_perf_in_window.toFixed(2)}%`
+                      : '0.00%')
                    : (data.close_price ? data.close_price.toFixed(2) : '--')}
               </p>
             </div>
