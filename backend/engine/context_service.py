@@ -51,29 +51,114 @@ class ContextService:
         API: Get a rich, structured context for a specific stock on a specific date.
         Combines macro, meso, and micro facts.
         """
-        # 1. Macro: Market Mood
-        market_mood = self._get_cached_market_mood(date_str, symbol)
-        
-        # 2. Meso: Price Altitude (Positioning in cycles)
-        altitude = self._calculate_altitude(symbol, date_str)
-        
-        # 3. Micro: Volume and Momentum
-        volume_status = self._analyze_volume(symbol, date_str)
-        
-        # 4. Fundamental/Meta
-        meta = {
-            "symbol": symbol,
-            "name": stock_name or symbol,
-            "date": date_str
-        }
+        # Fallback to batch-of-one
+        results = await self.get_batch_comprehensive_context([symbol], date_str, {symbol: stock_name or symbol})
+        return results.get(symbol, {})
 
-        return {
-            "meta": meta,
-            "market_context": market_mood,
-            "price_altitude": altitude,
-            "volume_status": volume_status,
-            "timestamp": datetime.now().isoformat()
-        }
+    async def get_batch_comprehensive_context(self, symbols: List[str], date_str: str, name_map: Dict[str, str] = None) -> Dict[str, Dict]:
+        """
+        High-Performance Batch Context Fetching:
+        Calculates altitude, volume and market mood for multiple symbols in optimized queries.
+        """
+        if not symbols: return {}
+        name_map = name_map or {}
+        
+        # 1. Macro: Market Mood (Cached by market within the call)
+        # We need to know which market each symbol belongs to
+        markets = set()
+        for s in symbols:
+            markets.add("HK" if len(s) == 5 else "CN")
+        
+        moods = {m: self._get_cached_market_mood(date_str, "02800" if m == "HK" else "sh000001") for m in markets}
+        
+        # 2. Meso & Micro: Altitude and Volume (The heavy lifting)
+        # Use optimized SQL to calculate stats for all symbols
+        conn = get_connection()
+        try:
+            cursor = conn.cursor()
+            placeholders = ','.join(['?' for _ in symbols])
+            
+            # This query calculates:
+            # - Current price (rn=1)
+            # - Max/Min over different windows (20, 60, 250)
+            # - Current vs Avg Volume
+            sql = f"""
+                WITH RankedPrices AS (
+                    SELECT 
+                        symbol, date, close, volume,
+                        ROW_NUMBER() OVER (PARTITION BY symbol ORDER BY date DESC) as rn
+                    FROM daily_prices
+                    WHERE symbol IN ({placeholders}) AND date <= ?
+                )
+                SELECT 
+                    symbol,
+                    MAX(CASE WHEN rn = 1 THEN close END) as curr_price,
+                    MAX(CASE WHEN rn = 1 THEN volume END) as curr_vol,
+                    -- Altitude ranges
+                    MAX(CASE WHEN rn <= 20 THEN close END) as hi_20,
+                    MIN(CASE WHEN rn <= 20 THEN close END) as lo_20,
+                    MAX(CASE WHEN rn <= 60 THEN close END) as hi_60,
+                    MIN(CASE WHEN rn <= 60 THEN close END) as lo_60,
+                    MAX(CASE WHEN rn <= 250 THEN close END) as hi_250,
+                    MIN(CASE WHEN rn <= 250 THEN close END) as lo_250,
+                    -- Volume avg (2-6)
+                    AVG(CASE WHEN rn BETWEEN 2 AND 6 THEN volume END) as avg_vol_prev
+                FROM RankedPrices
+                WHERE rn <= 250
+                GROUP BY symbol
+            """
+            cursor.execute(sql, (*symbols, date_str))
+            rows = cursor.fetchall()
+            
+            batch_results = {}
+            for row in rows:
+                sym, curr_p, curr_v, hi20, lo20, hi60, lo60, hi250, lo250, avg_v = row
+                
+                # helper to determine zone
+                def get_zone(p, hi, lo):
+                    if not hi or not lo or hi == lo: return "横盘"
+                    pct = (p - lo) / (hi - lo) * 100
+                    zone = "历史高位" if pct > 85 else ("风险位" if pct > 70 else ("中位" if pct > 40 else ("机会位" if pct > 15 else "底部强支撑")))
+                    return f"{zone} ({pct:.0f}%)"
+
+                # helper for volume
+                vol_status = "量能平稳"
+                if curr_v and avg_v and avg_v > 0:
+                    ratio = curr_v / avg_v
+                    if ratio > 2.2: vol_status = f"异常放量 (量比 {ratio:.1f}x)"
+                    elif ratio > 1.5: vol_status = f"温和放量 (量比 {ratio:.1f}x)"
+                    elif ratio < 0.5: vol_status = f"极度缩量 (量比 {ratio:.1f}x)"
+                
+                m = "HK" if len(sym) == 5 else "CN"
+                batch_results[sym] = {
+                    "meta": {"symbol": sym, "name": name_map.get(sym, sym), "date": date_str},
+                    "market_context": moods.get(m),
+                    "price_altitude": {
+                        "short_term_20d": get_zone(curr_p, hi20, lo20) if hi20 else "数据不足",
+                        "medium_term_60d": get_zone(curr_p, hi60, lo60) if hi60 else "数据不足",
+                        "long_term_250d": get_zone(curr_p, hi250, lo250) if hi250 else "数据不足"
+                    },
+                    "volume_status": vol_status,
+                    "timestamp": datetime.now().isoformat()
+                }
+            
+            # Fill missing with empty context
+            for sym in symbols:
+                if sym not in batch_results:
+                    m = "HK" if len(sym) == 5 else "CN"
+                    batch_results[sym] = {
+                        "meta": {"symbol": sym, "name": name_map.get(sym, sym), "date": date_str},
+                        "market_context": moods.get(m),
+                        "price_altitude": {"info": "历史数据不足"},
+                        "volume_status": "量能未知"
+                    }
+                    
+            return batch_results
+        except Exception as e:
+            logger.error(f"❌ Batch Context Failed: {e}")
+            return {}
+        finally:
+            conn.close()
 
     def _get_cached_market_mood(self, date_str: str, target_symbol: str = None) -> str:
         """Fetch market mood with date and market-based caching."""

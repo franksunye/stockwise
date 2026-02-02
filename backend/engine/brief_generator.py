@@ -367,9 +367,25 @@ async def generate_stock_briefs_batch(date_str: str, specific_symbols: List[str]
         # 2. Get AI Predictions & Technical Facts using World-Class ContextService
         ctx_service = ContextService()
         symbols_list = [s[0] for s in unique_stocks]
+        name_map = {s[0]: s[1] for s in unique_stocks}
         
         predictions = await ctx_service.get_batch_predictions_and_reflection(symbols_list, date_str)
         price_data = await ctx_service.get_batch_technical_facts(symbols_list)
+        
+        # [Optimization] Batch fetch comprehensive context (altitude, volume, market mood)
+        all_facts = await ctx_service.get_batch_comprehensive_context(symbols_list, date_str, name_map=name_map)
+
+        # [NEW] Pre-fetch all news in parallel with controlled concurrency (Semaphore 10)
+        logger.info(f"📰 Pre-fetching news for {len(unique_stocks)} stocks (Parallel=10)...")
+        news_semaphore = asyncio.Semaphore(10)
+        
+        async def fetch_with_sem(s_id, s_name):
+            async with news_semaphore:
+                return s_id, await fetch_news_for_stock(s_id, s_name, date_str)
+        
+        news_tasks = [fetch_with_sem(s[0], s[1]) for s in unique_stocks]
+        news_results = await asyncio.gather(*news_tasks)
+        news_cache = {s_id: content for s_id, content in news_results}
 
         # 3. Process each stock (generate briefs for each tier)
         from engine.models.brief_strategies import SUPPORTED_TIERS, TIER_PROVIDER_MAP
@@ -377,83 +393,87 @@ async def generate_stock_briefs_batch(date_str: str, specific_symbols: List[str]
         processed_count = 0
         
         for symbol, stock_name, is_pro_watched in unique_stocks:
-            # Fetch news once (shared across tiers)
-            logger.info(f"⚡ Processing {symbol} ({processed_count + 1}/{len(unique_stocks)})...")
-            
-            # Step A: Enrichment - Get comprehensive facts (including altitude, volume, etc.)
-            facts = await ctx_service.get_comprehensive_context(symbol, date_str, stock_name)
-            
-            # Step B: News Fetching
-            news_task = fetch_news_for_stock(symbol, stock_name, date_str)
-            news = await news_task
-            
-            # Step C: Prepare data for synthesis
-            pred = predictions.get(symbol, {})
-            prices = price_data.get(symbol, {})
-            
-            tech_data = {
-                'signal': pred.get('signal', 'Side'),
-                'confidence': pred.get('confidence', 0),
-                'ai_reasoning': pred.get('reasoning', ''),
-                'support_price': pred.get('support'),
-                'pressure_price': pred.get('pressure'),
-                'close': prices.get('close'),
-                'change_percent': prices.get('change'),
-                'high': prices.get('high'),
-                'low': prices.get('low'),
-                'reflection': pred.get('reflection', {}),
-            }
-
-            # Determine which tiers to generate for this stock
-            tiers_to_run = [target_tier] if target_tier else SUPPORTED_TIERS
-            
-            for tier in tiers_to_run:
-                # [Filter] Non-PRO stocks don't get PRO briefs in Full Mode
-                if not target_tier and tier == "pro" and not is_pro_watched:
-                    continue
+            try:
+                # Fetch news from cache
+                logger.info(f"⚡ Processing {symbol} ({processed_count + 1}/{len(unique_stocks)})...")
                 
-                # [Optimization] Skip based on User Tier demand
-                if tier == "free" and os.getenv("BRIEF_SKIP_FREE", "false").lower() == "true":
-                    logger.debug(f"⏭️ [System] Skipping FREE tier analysis as requested.")
-                    continue
+                # Step A: Enrichment - Use pre-fetched context
+                facts = all_facts.get(symbol, {})
+                
+                # Step B: News Fetching (From Cache)
+                news = news_cache.get(symbol, "News retrieval failed or not found.")
+                
+                # Step C: Prepare data for synthesis
+                pred = predictions.get(symbol, {})
+                prices = price_data.get(symbol, {})
+                
+                tech_data = {
+                    'signal': pred.get('signal', 'Side'),
+                    'confidence': pred.get('confidence', 0),
+                    'ai_reasoning': pred.get('reasoning', ''),
+                    'support_price': pred.get('support'),
+                    'pressure_price': pred.get('pressure'),
+                    'close': prices.get('close'),
+                    'change_percent': prices.get('change'),
+                    'high': prices.get('high'),
+                    'low': prices.get('low'),
+                    'reflection': pred.get('reflection', {}),
+                }
 
-                # Check if exists (idempotency)
-                if not force:
-                    cursor.execute("SELECT 1 FROM stock_briefs WHERE symbol = ? AND date = ? AND tier = ?", 
-                                  (symbol, date_str, tier))
-                    if cursor.fetchone():
-                        logger.debug(f"⏭️ [Skip] {symbol}/{tier} already analyzed for {date_str}.")
+                # Determine which tiers to generate for this stock
+                tiers_to_run = [target_tier] if target_tier else SUPPORTED_TIERS
+                
+                for tier in tiers_to_run:
+                    # [Filter] Non-PRO stocks don't get PRO briefs in Full Mode
+                    if not target_tier and tier == "pro" and not is_pro_watched:
                         continue
+                    
+                    # [Optimization] Skip based on User Tier demand
+                    if tier == "free" and os.getenv("BRIEF_SKIP_FREE", "false").lower() == "true":
+                        logger.debug(f"⏭️ [System] Skipping FREE tier analysis as requested.")
+                        continue
+
+                    # Check if exists (idempotency)
+                    if not force:
+                        cursor.execute("SELECT 1 FROM stock_briefs WHERE symbol = ? AND date = ? AND tier = ?", 
+                                      (symbol, date_str, tier))
+                        if cursor.fetchone():
+                            logger.debug(f"⏭️ [Skip] {symbol}/{tier} already analyzed for {date_str}.")
+                            continue
+                    
+                    provider = TIER_PROVIDER_MAP[tier]
+                    logger.info(f"   📝 Generating {tier.upper()} brief using {provider}...")
+                    
+                    analysis = None
+                    max_retries = 3
+                    for attempt in range(max_retries):
+                        try:
+                            # Call synthesis with rich facts
+                            analysis = await analyze_stock_context(symbol, stock_name, news, tech_data, date_str, tier, facts=facts)
+                            if analysis:
+                                break
+                        except Exception as e:
+                            if "429" in str(e) or "rate limit" in str(e).lower():
+                                wait_time = (attempt + 1) * 5
+                                logger.warning(f"⚠️  Rate limit (429) hit. Waiting {wait_time}s...")
+                                await asyncio.sleep(wait_time)
+                            else:
+                                logger.error(f"❌ [Attempt {attempt+1}] Synthesis Error: {e}")
+                                await asyncio.sleep(2)
+                    
+                    if analysis:
+                        cursor.execute("""
+                            INSERT OR REPLACE INTO stock_briefs 
+                            (symbol, date, tier, stock_name, analysis_markdown, raw_news, signal, confidence)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                        """, (symbol, date_str, tier, stock_name, analysis, news, tech_data['signal'], tech_data['confidence']))
+                        conn.commit()
                 
-                provider = TIER_PROVIDER_MAP[tier]
-                logger.info(f"   📝 Generating {tier.upper()} brief using {provider}...")
-                
-                analysis = None
-                max_retries = 3
-                for attempt in range(max_retries):
-                    try:
-                        # Call synthesis with rich facts
-                        analysis = await analyze_stock_context(symbol, stock_name, news, tech_data, date_str, tier, facts=facts)
-                        if analysis:
-                            break
-                    except Exception as e:
-                        if "429" in str(e) or "rate limit" in str(e).lower():
-                            wait_time = (attempt + 1) * 5
-                            logger.warning(f"⚠️  Rate limit (429) hit. Waiting {wait_time}s...")
-                            await asyncio.sleep(wait_time)
-                        else:
-                            logger.error(f"❌ [Attempt {attempt+1}] Error: {e}")
-                            await asyncio.sleep(2)
-                
-                if analysis:
-                    cursor.execute("""
-                        INSERT OR REPLACE INTO stock_briefs 
-                        (symbol, date, tier, stock_name, analysis_markdown, raw_news, signal, confidence)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                    """, (symbol, date_str, tier, stock_name, analysis, news, tech_data['signal'], tech_data['confidence']))
-                    conn.commit()
-            
-            processed_count += 1
+                processed_count += 1
+            except Exception as e:
+                logger.error(f"❌ [Phase 1] Critical error processing {symbol}: {e}")
+                # We do NOT commit the partial transaction for this stock but continue to others
+                continue
         
         logger.info(f"✅ [Phase 1] Completed. Analyzed {processed_count} stocks.")
 

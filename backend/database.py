@@ -37,6 +37,11 @@ TRANSIENT_ERROR_PATTERNS = [
     "connection refused",    # 连接被拒绝
     "network",               # 通用网络错误
     "client_closed",         # 客户端连接关闭
+    "502",                   # Bad Gateway
+    "503",                   # Service Unavailable
+    "504",                   # Gateway Timeout
+    "bad gateway",
+    "gateway timeout",
 ]
 
 def is_transient_error(e: Exception) -> bool:
@@ -245,21 +250,41 @@ class TursoHttpConnection:
         pass
         
     def _send(self, payload):
-        try:
-            # Explicitly bypass proxies to verify direct connectivity
-            # regardless of local system proxy settings.
-            r = requests.post(
-                self.url, 
-                headers=self.headers, 
-                json=payload, 
-                timeout=30,
-                proxies={"http": None, "https": None}
-            )
-            if r.status_code != 200:
-                raise Exception(f"HTTP {r.status_code}: {r.text}")
-            return r.json()
-        except Exception as e:
-            raise e
+        max_retries = 3
+        last_exception = None
+        
+        for attempt in range(max_retries):
+            try:
+                # Explicitly bypass proxies to verify direct connectivity
+                # regardless of local system proxy settings.
+                # Increased timeout to 60s for batch operations
+                r = requests.post(
+                    self.url, 
+                    headers=self.headers, 
+                    json=payload, 
+                    timeout=60,
+                    proxies={"http": None, "https": None}
+                )
+                
+                # Handle non-200 responses as potential transient errors
+                if r.status_code != 200:
+                    err_msg = f"HTTP {r.status_code}: {r.text}"
+                    if r.status_code in [502, 503, 504]:
+                        raise Exception(f"Transient HTTP Error: {err_msg}")
+                    else:
+                        raise Exception(err_msg)
+                
+                return r.json()
+            except Exception as e:
+                last_exception = e
+                if is_transient_error(e) and attempt < max_retries - 1:
+                    wait_time = (attempt + 1) * 2
+                    logger.warning(f"🔄 Turso HTTP Retry ({attempt+1}/{max_retries}): {e} - Retrying in {wait_time}s...")
+                    time.sleep(wait_time)
+                else:
+                    raise e
+        
+        raise last_exception
 
 
 
