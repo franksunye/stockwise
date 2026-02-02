@@ -65,7 +65,7 @@ def fetch_full_analysis_context(symbol: str, as_of_date: str = None, ctx: Sessio
     analysis_date = latest_data['date']
     
     # 3. History (Cacheable)
-    # 3.1 Daily (10 days)
+    # 3.1 Daily (Increased to 30 days for better support/resistance discovery)
     cursor.execute("""
         SELECT date, open, high, low, close, change_percent, volume,
                ma5, ma10, ma20, ma60,
@@ -74,7 +74,7 @@ def fetch_full_analysis_context(symbol: str, as_of_date: str = None, ctx: Sessio
                boll_upper, boll_mid, boll_lower
         FROM daily_prices 
         WHERE symbol = ? AND date <= ?
-        ORDER BY date DESC LIMIT 10
+        ORDER BY date DESC LIMIT 30
     """, (symbol, analysis_date))
     daily_history = [dict(zip([
         "date", "open", "high", "low", "close", "change_percent", "volume",
@@ -248,6 +248,45 @@ def prepare_stock_analysis_prompt(symbol: str, as_of_date: str = None, ctx: Dict
         
     macd = data.get('macd', 0)
     macd_hist = data.get('macd_hist', 0)
+
+    # --- Structural levels & Volatility Insights ---
+    daily_history = ctx.get("daily_prices", [])
+    
+    # 1. ATR-14 calculation (Approximate using 14-day history)
+    atr_14 = 0
+    if len(daily_history) >= 15:
+        # TR = max(high - low, abs(high - prev_close), abs(low - prev_close))
+        trs = []
+        for i in range(1, 15):
+            curr = daily_history[-(i)]
+            prev = daily_history[-(i+1)]
+            tr = max(
+                curr['high'] - curr['low'],
+                abs(curr['high'] - prev['close']),
+                abs(curr['low'] - prev['close'])
+            )
+            trs.append(tr)
+        atr_14 = sum(trs) / len(trs)
+
+    # 2. Support/Resistance (20-day range)
+    hist_20 = daily_history[-20:] if len(daily_history) >= 20 else daily_history
+    high_20d = max([h['high'] for h in hist_20]) if hist_20 else close
+    low_20d = min([h['low'] for h in hist_20]) if hist_20 else close
+    
+    # 3. Heavy Volume Area (Price of the highest volume day in 20 days)
+    heavy_volume_price = 0
+    if hist_20:
+        max_vol_day = max(hist_20, key=lambda x: x['volume'] or 0)
+        heavy_volume_price = max_vol_day['close']
+    
+    structural_hints = {
+        "atr_14": round(atr_14, 3),
+        "high_20d": high_20d,
+        "low_20d": low_20d,
+        "heavy_volume_anchor": heavy_volume_price,
+        "ma60": ma60,
+        "ma20": ma20
+    }
     # Get previous hist for trend
     daily_history = ctx.get("daily_prices", [])
     prev_hist = daily_history[-2].get('macd_hist', 0) if len(daily_history) >= 2 else 0
@@ -367,6 +406,7 @@ def prepare_stock_analysis_prompt(symbol: str, as_of_date: str = None, ctx: Dict
             ai_history=processed_ai_history,
             ai_accuracy=ctx.get("accuracy", {"total":0, "rate":0}),
             tech=tech_data,
+            structural_hints=structural_hints,
             context_instruction=context_instruction
         )
     except Exception as e:

@@ -62,6 +62,14 @@
 {% endfor -%}
 - **年度区间(近12个月)**: {{ monthly_stats.low }} ~ {{ monthly_stats.high }}
 - **长期趋势**: {{ long_term_trend }} (当前价 vs 20月线)
+
+## 5. 结构位与波动率 (Structural Hints)
+*用于精准制定止盈止损及入场位*
+- **ATR-14 (波动基准)**: {{ structural_hints.atr_14 }} (建议止损范围 1.5~2.0 ATR)
+- **20日高位 (波段压力)**: {{ structural_hints.high_20d }}
+- **20日低位 (波段支撑)**: {{ structural_hints.low_20d }}
+- **密集成交锚点 (筹码位)**: {{ structural_hints.heavy_volume_anchor }}
+- **均线参考**: MA20({{ structural_hints.ma20 }}) / MA60({{ structural_hints.ma60 }})
 {% if ai_history %}
 ## AI 历史预测回顾（近5次）
 | 预测日期 | 信号 | 置信度 | 核心判断 | 结果 | 实际涨跌 |
