@@ -42,8 +42,15 @@ export interface AIPrediction {
     confidence: number;
     support_price: number;
     ai_reasoning: string;
-    validation_status: 'Pending' | 'Correct' | 'Incorrect' | 'Neutral';
+    validation_status: 'Pending' | 'Correct' | 'Incorrect' | 'Neutral' | 'Verifying';
     actual_change: number | null;
+    validation_data?: {
+        window: number;
+        days_evaluated: number;
+        trajectory: Array<{ date: string, change: number, cum_change: number }>;
+        max_perf: number;
+    } | string;
+    max_perf_in_window?: number;
     model?: string; // model_id (legacy or identifier)
     display_name?: string; // Display name from DB
     is_primary?: number | boolean; // Whether it is the primary prediction
@@ -83,7 +90,7 @@ export interface ReasoningStep {
 // 战术数据包 (AI Reasoning 的解析格式)
 export interface TacticalData {
     summary: string;
-    news_analysis?: string[]; // AI 抓取的关键新闻摘要
+    news_analysis?: string[] | string; // AI 抓取的关键新闻摘要
     reasoning_trace: ReasoningStep[]; // 5步推理链，替代原 analysis
     tactics: {
         holding_profit: Tactic[];
@@ -100,7 +107,7 @@ export interface TacticalData {
         strong_resistance?: number | string;
         breakout_confirmation_level?: number | string;
         stop_loss_reference?: number | string;
-        
+
         // 兼容字段
         support: number;
         resistance: number;

@@ -1,6 +1,6 @@
 'use client';
 
-import { ShieldCheck, XCircle, TrendingUp, TrendingDown, Minus, Target } from 'lucide-react';
+import { ShieldCheck, XCircle, TrendingUp, TrendingDown, Minus, Target, Clock } from 'lucide-react';
 import { AIPrediction } from '@/lib/types';
 import { COLORS } from './constants';
 
@@ -36,9 +36,11 @@ export function HistoricalCard({ data, onClick }: { data: AIPrediction; onClick?
   const getValidationStyle = () => {
     switch (data.validation_status) {
       case 'Correct':
-        return { icon: ShieldCheck, color: 'text-emerald-500', bg: 'bg-emerald-500/10 border-emerald-500/20', label: '预测准确' };
+        return { icon: ShieldCheck, color: 'text-emerald-500', bg: 'bg-emerald-500/10 border-emerald-500/20', label: '周期验证准确' };
       case 'Incorrect':
         return { icon: XCircle, color: 'text-rose-500', bg: 'bg-rose-500/10 border-rose-500/20', label: '产生偏差' };
+      case 'Verifying':
+        return { icon: Clock, color: 'text-indigo-400', bg: 'bg-indigo-500/10 border-indigo-500/20', label: '验证中' };
       default:
         return { icon: Minus, color: 'text-slate-500', bg: 'bg-slate-500/10 border-slate-500/20', label: '待验证' };
     }
@@ -162,21 +164,27 @@ export function HistoricalCard({ data, onClick }: { data: AIPrediction; onClick?
           <div className="flex items-center justify-between">
             <div>
               <span className="text-[10px] text-slate-500 font-bold uppercase block mb-1 tracking-widest">
-                {formatDate(data.target_date)} 价格
+                {data.validation_status === 'Correct' ? '3日窗口峰值' : `${formatDate(data.target_date)} 价格`}
               </span>
               <p className="text-2xl font-black mono text-slate-100">
-                {data.close_price ? data.close_price.toFixed(2) : '--'}
+                {data.validation_status === 'Correct' && data.max_perf_in_window !== undefined
+                   ? `${data.max_perf_in_window >= 0 ? '+' : ''}${data.max_perf_in_window.toFixed(2)}%`
+                   : (data.close_price ? data.close_price.toFixed(2) : '--')}
               </p>
             </div>
             
             <div className="text-right">
-              <span className="text-[10px] text-slate-500 font-bold uppercase block mb-1 tracking-widest">实际涨跌</span>
+              <span className="text-[10px] text-slate-500 font-bold uppercase block mb-1 tracking-widest">
+                {data.validation_status === 'Correct' ? '验证窗口' : '实际涨跌'}
+              </span>
               <p className={`text-2xl font-black mono ${
                 (data.actual_change || 0) >= 0 ? 'text-emerald-500' : 'text-rose-500'
               }`}>
-                {data.actual_change !== null && data.actual_change !== undefined
-                  ? `${data.actual_change >= 0 ? '+' : ''}${data.actual_change.toFixed(2)}%`
-                  : '--'
+                {data.validation_status === 'Correct'
+                  ? '3个交易日'
+                  : (data.actual_change !== null && data.actual_change !== undefined
+                    ? `${data.actual_change >= 0 ? '+' : ''}${data.actual_change.toFixed(2)}%`
+                    : '--')
                 }
               </p>
             </div>

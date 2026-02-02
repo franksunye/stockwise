@@ -1,109 +1,176 @@
-import pandas as pd
+import json
+from datetime import datetime
 from backend.database import get_connection
 from backend.logger import logger
+from backend.trading_calendar import get_next_trading_day_str, get_market_from_symbol
 
 # Industry Standard: Noise Threshold (1%)
 # "Side" signals are considered correct if the price moves within this range (noise),
 # as staying out of the market during low-volatility/low-gain days is a valid strategy.
 NOISE_THRESHOLD = 1.0  
+VALIDATION_WINDOW = 3 # Default 3-day window
 
-def validate_previous_prediction(symbol: str, today_data: pd.Series):
-    """验证昨日的 AI 预测 (T-1 预测 T)"""
-    from database import execute_with_retry # Delayed import to avoid circular dep if any
-    execute_with_retry(_validate_logic, 3, symbol, today_data)
-
+def validate_previous_prediction(symbol: str, today_data: any):
+    """
+    Legacy compatibility wrapper. 
+    New multi-day validation is handled by verify_all_pending().
+    """
+    pass
 
 def verify_all_pending(force: bool = False, target_date: str = None):
     """
-    Batch verify predictions against their SPECIFIC target date price data.
-    If force is True, it will re-calculate even for non-Pending statuses.
-    If target_date is provided (YYYY-MM-DD), only verify predictions for that target date.
+    Batch verify predictions against a multi-day window (default 3 days).
+    Stores trajectory in validation_data JSON.
     """
-    from database import get_connection
     conn = get_connection()
     try:
         cursor = conn.cursor()
         
-        # --- 1. Validate Multi-Model Table (ai_predictions_v2) ---
-        # We use target_date to match exactly with daily_prices
+        # --- 1. Filter Predictions ---
         conditions = []
         if not force:
-            conditions.append("validation_status='Pending'")
+            # We also re-verify 'Pending' or previously 'Incorrect' if still within window?
+            # For simplicity, let's re-verify anything that isn't 'Correct' if it's within the last week.
+            conditions.append("(validation_status = 'Pending' OR validation_status = 'Verifying' OR validation_status = 'Incorrect')")
         
         if target_date:
             conditions.append(f"target_date='{target_date}'")
             logger.info(f"🔍 Verifying V2 predictions for target date: {target_date}...")
-        elif force:
-            logger.info("🔍 Re-verifying ALL V2 predictions (Force mode)...")
         else:
-            logger.info("🔍 Verifying pending V2 predictions...")
+            # Only look at recent predictions (last 10 days) to avoid heavy scans
+            conditions.append("date >= date('now', '-10 days')")
+            logger.info("🔍 Verifying recent V2 predictions (Window mode)...")
 
         where_clause = " AND ".join(conditions) if conditions else "1=1"
         
         pending_v2 = cursor.execute(f"""
-            SELECT symbol, date, target_date, model_id, signal
+            SELECT symbol, date, target_date, model_id, signal, confidence
             FROM ai_predictions_v2 
             WHERE {where_clause}
         """).fetchall()
 
-        validated_count_v2 = 0
+        validated_count = 0
         
         for row in pending_v2:
-            symbol, p_date, target_date, model_id, signal = row
+            symbol, p_date, t0_date, model_id, signal, confidence = row
+            market = get_market_from_symbol(symbol)
             
-            # Find price data specifically for the target_date
-            price_row = cursor.execute("""
-                SELECT change_percent FROM daily_prices 
-                WHERE symbol = ? AND date = ?
-            """, (symbol, target_date)).fetchone()
+            # --- 2. Calculate Window Dates ---
+            # Window starts at target_date (T+1 relative to prediction date T)
+            # We want T+1, T+2, T+3
+            window_dates = [t0_date]
+            current_t = t0_date
+            for _ in range(VALIDATION_WINDOW - 1):
+                current_t = get_next_trading_day_str(current_t, market=market)
+                window_dates.append(current_t)
             
-            if price_row:
-                actual_change = price_row[0]
-                status = _calculate_status(signal, actual_change)
-                
-                cursor.execute("""
-                    UPDATE ai_predictions_v2
-                    SET validation_status = ?, actual_change = ?, updated_at = datetime('now', '+8 hours')
-                    WHERE symbol = ? AND date = ? AND model_id = ?
-                """, (status, actual_change, symbol, p_date, model_id))
-                
-                validated_count_v2 += 1
-                logger.info(f"   ✅ Validated V2 {symbol} ({p_date} -> {target_date}): {signal} vs {actual_change}% = {status}")
+            # --- 3. Fetch Price Data for Window ---
+            # Get T0 price (for baseline comparison)
+            # Actually baseline is typically the close of the PREDICTION date (T)
+            # but our current 'actual_change' in daily_prices is T relative to T-1.
+            # So T+1's change_percent is (T+1_close - T_close) / T_close.
             
-            # If no price data found for target_date yet, we skip (it remains Pending)
+            price_map = {}
+            for d in window_dates:
+                p_row = cursor.execute("SELECT change_percent, close FROM daily_prices WHERE symbol=? AND date=?", (symbol, d)).fetchone()
+                if p_row:
+                    price_map[d] = {"change": p_row[0], "close": p_row[1]}
+
+            if not price_map:
+                continue
+
+            # --- 4. Evaluate Trajectory ---
+            trajectory = []
+            cumulative_change = 0.0
+            max_favorable = -999.0 if signal == 'Long' else 999.0
+            
+            final_status = 'Verifying'
+            days_evaluated = 0
+            
+            for d in window_dates:
+                if d in price_map:
+                    day_change = price_map[d]['change']
+                    # Simple additive cumulative change for the window
+                    # Professional way: (1 + c1)(1 + c2) - 1
+                    # But for 3 days 1% + 1% is approx 2%.
+                    # Since we store individual changes, we can be flexible.
+                    cumulative_change += day_change
+                    days_evaluated += 1
+                    
+                    if signal == 'Long':
+                        max_favorable = max(max_favorable, cumulative_change)
+                    elif signal == 'Short':
+                        max_favorable = min(max_favorable, cumulative_change)
+                    
+                    trajectory.append({
+                        "date": d,
+                        "change": day_change,
+                        "cum_change": round(cumulative_change, 2)
+                    })
+                else:
+                    # Break if we hit a date with no data yet
+                    break
+
+            # --- 5. Determine Final Verdict ---
+            # Logic: 
+            # Long: Peak >= 1.5% OR Final Cumulative > 0
+            # Short: Peak <= -1.5% OR Final Cumulative < 0
+            # Side: all days within +/- 1.5%
+            
+            is_final = (days_evaluated == VALIDATION_WINDOW)
+            verdict = 'Verifying'
+            
+            if signal == 'Long':
+                if max_favorable >= 1.5 or (is_final and cumulative_change > 0):
+                    verdict = 'Correct'
+                elif is_final:
+                    verdict = 'Incorrect'
+            elif signal == 'Short':
+                if max_favorable <= -1.5 or (is_final and cumulative_change < 0):
+                    verdict = 'Correct'
+                elif is_final:
+                    verdict = 'Incorrect'
+            elif signal == 'Side':
+                if is_final:
+                    # Check if ANY day in window went outside +/- 1.5%
+                    is_volatile = any(abs(t['cum_change']) > 1.5 for t in trajectory)
+                    verdict = 'Correct' if not is_volatile else 'Incorrect'
+                else:
+                    # Check if ALREADY volatile
+                    if any(abs(t['cum_change']) > 1.5 for t in trajectory):
+                        verdict = 'Incorrect'
+            
+            # --- 6. Update Database ---
+            val_data = {
+                "window": VALIDATION_WINDOW,
+                "days_evaluated": days_evaluated,
+                "trajectory": trajectory,
+                "max_perf": round(max_favorable, 2) if abs(max_favorable) < 500 else 0
+            }
+            
+            # Legacy field: actual_change (store T+1 change for backward compatibility)
+            t1_change = trajectory[0]['change'] if trajectory else 0.0
+
+            cursor.execute("""
+                UPDATE ai_predictions_v2
+                SET validation_status = ?, 
+                    actual_change = ?, 
+                    validation_data = ?, 
+                    max_perf_in_window = ?,
+                    updated_at = datetime('now', '+8 hours')
+                WHERE symbol = ? AND date = ? AND model_id = ?
+            """, (verdict, t1_change, json.dumps(val_data), val_data['max_perf'], symbol, p_date, model_id))
+            
+            validated_count += 1
+            if verdict != 'Verifying':
+                logger.info(f"   ✅ {symbol} ({p_date}) -> {verdict} (Peak: {val_data['max_perf']}%, Days: {days_evaluated})")
 
         conn.commit()
-        logger.info(f"✨ Validation Complete: {validated_count_v2} V2 predictions.")
+        logger.info(f"✨ Validation Complete: {validated_count} predictions updated.")
         
     except Exception as e:
         logger.error(f"❌ Batch verification failed: {e}")
+        import traceback
+        traceback.print_exc()
     finally:
         conn.close()
-
-def _validate_logic(conn, symbol: str, today_data: dict):
-    """
-    Legacy helper kept for compatibility if needed, but verify_all_pending is preferred.
-    This just redirects to the batch logic for that specific symbol if called.
-    """
-    # For now, we simply warn that this is deprecated or redirect to batch logic
-    # But since arguments differ, we'll just leave it as a no-op or partial implementation 
-    # if other code relies on it. To be safe, let's implement a single-symbol version of the new logic.
-    pass # Replaced by batch logic consistent across all predictions
-
-def _calculate_status(signal, actual_change):
-    """Helper to determine Open/Close/Hold result status"""
-    if signal == 'Long':
-        return 'Correct' if actual_change > 0 else 'Incorrect'
-    elif signal == 'Short':
-        return 'Correct' if actual_change < 0 else 'Incorrect'
-    elif signal == 'Side':
-        if actual_change <= NOISE_THRESHOLD and actual_change >= -NOISE_THRESHOLD:
-             return 'Correct'
-        # If it dropped significantly, Side was "Correct" (avoided crash)?
-        # Original logic: if actual_change <= NOISE_THRESHOLD -> Correct.
-        # This implies if it crashed (-5%), Side (Wait) was a good call.
-        if actual_change <= NOISE_THRESHOLD:
-            return 'Correct'
-        else:
-            return 'Incorrect' # Missed opportunity (price went up > 1%)
-    return 'Incorrect'

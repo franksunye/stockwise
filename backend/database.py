@@ -428,6 +428,8 @@ def init_db():
                 execution_time_ms INTEGER,
                 validation_status TEXT DEFAULT 'Pending',
                 actual_change REAL,
+                validation_data TEXT, -- JSON for multi-day trajectories
+                max_perf_in_window REAL, -- Peak/Bottom performance indicator
                 is_primary BOOLEAN DEFAULT 0,
                 created_at TIMESTAMP DEFAULT (datetime('now', '+8 hours')),
                 updated_at TIMESTAMP DEFAULT (datetime('now', '+8 hours')),
@@ -567,6 +569,10 @@ def init_db():
 
         # Briefs Migrations
         add_column_if_missing('daily_briefs', 'notified_at', 'TIMESTAMP')
+
+        # Prediction Table Migrations
+        add_column_if_missing('ai_predictions_v2', 'validation_data', 'TEXT')
+        add_column_if_missing('ai_predictions_v2', 'max_perf_in_window', 'REAL')
 
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_task_logs_date_agent ON task_logs(date, agent_id)")
         
