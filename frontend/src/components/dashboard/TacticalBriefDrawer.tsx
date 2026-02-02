@@ -63,7 +63,7 @@ export function TacticalBriefDrawer({
   const rawGeneral = data?.tactics?.general;
   const generalTactics = Array.isArray(rawGeneral) ? rawGeneral : (rawGeneral ? [rawGeneral] : []);
 
-  const [viewState, setViewState] = useState<'holding'|'empty'>('holding');
+  const [viewState, setViewState] = useState<'holding_profit'|'holding_loss'|'empty'>('holding_profit');
   const scrollRef = useRef<HTMLDivElement>(null);
 
 
@@ -183,42 +183,115 @@ export function TacticalBriefDrawer({
                         ref={scrollRef}
                         onScroll={(e) => {
                            const target = e.currentTarget;
-                           const isRight = target.scrollLeft > target.offsetWidth / 2;
-                           if (isRight && viewState !== 'empty') setViewState('empty');
-                           if (!isRight && viewState !== 'holding') setViewState('holding');
+                           const scrollPos = target.scrollLeft;
+                           const cardWidth = target.offsetWidth;
+                           
+                           if (scrollPos < cardWidth * 0.5) {
+                               if (viewState !== 'holding_profit') setViewState('holding_profit');
+                           } else if (scrollPos < cardWidth * 1.5) {
+                               if (viewState !== 'holding_loss') setViewState('holding_loss');
+                           } else {
+                               if (viewState !== 'empty') setViewState('empty');
+                           }
                         }}
                         className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide -mx-6 px-6 pb-4"
                     >
                        
-                       {/* CARD 1: HOLDING SCENARIO */}
+                       {/* CARD 1: HOLDING PROFIT */}
                        <div className="min-w-full snap-center space-y-3">
-                          {(data?.tactics?.holding ? (Array.isArray(data.tactics.holding) ? data.tactics.holding : [data.tactics.holding]) : []).map((t, idx) => (
-                              <div key={idx} className="glass-card p-4 border-indigo-500/20 bg-indigo-500/5 relative overflow-hidden">
-                                 <span className="absolute top-2 right-2 text-[9px] font-black text-indigo-300/30 uppercase tracking-widest pointer-events-none">已持仓视角</span>
-                                 <div className="absolute right-0 top-6 p-2 opacity-5 pointer-events-none">
-                                    <Target size={40} />
-                                 </div>
-                                 <div className="flex items-center gap-2 mb-2 relative z-10">
-                                    <span className={`text-[10px] font-black px-1.5 py-0.5 rounded italic ${t.priority === 'P1' ? 'bg-indigo-500 text-white' : 'bg-slate-700 text-slate-300'}`}>{t.priority}</span>
-                                    <span className="text-sm font-bold text-white">{t.action}</span>
-                                 </div>
-                                 <p className="text-xs text-slate-400 mb-1 relative z-10">触发: <span className="text-slate-200">{t.trigger}</span></p>
-                                 <p className="text-xs text-slate-500 font-medium italic relative z-10">理由: {t.reason}</p>
-                              </div>
-                           ))}
+                          {(() => {
+                            const profit = data?.tactics?.holding_profit || [];
+                            const legacy = data?.tactics?.holding || [];
+                            const allProfit = [...profit, ...legacy];
+                            
+                            if (allProfit.length === 0) return (
+                                <div className="p-10 text-center opacity-30 italic text-[10px] text-slate-500 border border-white/5 rounded-2xl">
+                                   该标的目前暂无盈利持仓特定对策
+                                </div>
+                            );
+
+                            return allProfit.map((t, idx) => (
+                                <div key={idx} className="glass-card p-4 relative overflow-hidden border-indigo-500/20 bg-indigo-500/5">
+                                   <span className="absolute top-2 right-2 text-[9px] font-black opacity-30 uppercase tracking-widest pointer-events-none text-indigo-300">已持仓 (有盈)</span>
+                                   <div className="absolute right-0 top-6 p-2 opacity-5 pointer-events-none">
+                                      <TrendingUp size={40} className="text-emerald-400" />
+                                   </div>
+                                   <div className="flex items-center gap-2 mb-2 relative z-10">
+                                      <span className={`text-[10px] font-black px-1.5 py-0.5 rounded italic ${t.priority === 'P1' ? 'bg-indigo-500' : 'bg-slate-700'} text-white`}>{t.priority}</span>
+                                      <span className="text-sm font-bold text-white">{t.action}</span>
+                                   </div>
+                                   <div className="space-y-1.5 relative z-10">
+                                       <p className="text-xs text-slate-400">触发: <span className="text-slate-200">{t.trigger}</span></p>
+                                       {(t.target_price || t.stop_advance_price) && (
+                                            <div className="flex flex-wrap gap-x-4 gap-y-1 py-1 px-2 bg-white/5 rounded-lg w-fit">
+                                                {t.target_price && <p className="text-[10px] text-emerald-400 font-bold uppercase">目标: {t.target_price}</p>}
+                                                {t.stop_advance_price && <p className="text-[10px] text-amber-400 font-bold uppercase">移动止盈: {t.stop_advance_price}</p>}
+                                            </div>
+                                       )}
+                                       <p className="text-xs text-slate-500 font-medium italic border-t border-white/5 pt-1.5 mt-1.5">理由: {t.reason}</p>
+                                   </div>
+                                </div>
+                            ));
+                          })()}
                        </div>
 
-                       {/* CARD 2: EMPTY SCENARIO */}
+                       {/* CARD 2: HOLDING LOSS */}
                        <div className="min-w-full snap-center space-y-3">
-                           {(data?.tactics?.empty ? (Array.isArray(data.tactics.empty) ? data.tactics.empty : [data.tactics.empty]) : []).map((t, idx) => (
+                          {(() => {
+                            const loss = data?.tactics?.holding_loss || [];
+                            
+                            if (loss.length === 0) return (
+                                <div className="p-10 text-center opacity-30 italic text-[10px] text-slate-500 border border-white/5 rounded-2xl">
+                                   该标的目前暂无亏损持仓特定对策
+                                </div>
+                            );
+
+                            return loss.map((t, idx) => (
+                                <div key={idx} className="glass-card p-4 relative overflow-hidden border-rose-500/20 bg-rose-500/5">
+                                   <span className="absolute top-2 right-2 text-[9px] font-black opacity-30 uppercase tracking-widest pointer-events-none text-rose-300">已持仓 (亏损)</span>
+                                   <div className="absolute right-0 top-6 p-2 opacity-5 pointer-events-none">
+                                      <Target size={40} className="text-rose-400" />
+                                   </div>
+                                   <div className="flex items-center gap-2 mb-2 relative z-10">
+                                      <span className={`text-[10px] font-black px-1.5 py-0.5 rounded italic ${t.priority === 'P1' ? 'bg-rose-500' : 'bg-slate-700'} text-white`}>{t.priority}</span>
+                                      <span className="text-sm font-bold text-white">{t.action}</span>
+                                   </div>
+                                   <div className="space-y-1.5 relative z-10">
+                                       <p className="text-xs text-slate-400">触发: <span className="text-slate-200">{t.trigger}</span></p>
+                                       {t.stop_loss_price && (
+                                            <div className="py-1 px-2 bg-rose-500/10 rounded-lg w-fit">
+                                                <p className="text-[10px] text-rose-400 font-bold uppercase">止损价: {t.stop_loss_price}</p>
+                                            </div>
+                                       )}
+                                       <p className="text-xs text-slate-500 font-medium italic border-t border-rose-500/10 pt-1.5 mt-1.5">理由: {t.reason}</p>
+                                   </div>
+                                </div>
+                            ));
+                          })()}
+                       </div>
+
+                       {/* CARD 3: EMPTY SCENARIO */}
+                       <div className="min-w-full snap-center space-y-3">
+                           {(data?.tactics?.empty || []).length === 0 ? (
+                               <div className="p-10 text-center opacity-30 italic text-[10px] text-slate-500 border border-white/5 rounded-2xl">
+                                  该标的目前暂无空仓观察建议
+                               </div>
+                           ) : (data?.tactics?.empty || []).map((t, idx) => (
                               <div key={idx} className="glass-card p-4 border-white/5 bg-white/[0.02] relative">
                                  <span className="absolute top-2 right-2 text-[9px] font-black text-slate-500/30 uppercase tracking-widest pointer-events-none">未建仓视角</span>
                                  <div className="flex items-center gap-2 mb-2">
                                     <span className={`text-[10px] font-black px-1.5 py-0.5 rounded italic ${t.priority === 'P1' ? 'bg-indigo-500 text-white' : 'bg-slate-700 text-slate-300'}`}>{t.priority}</span>
                                     <span className="text-sm font-bold text-white">{t.action}</span>
                                  </div>
-                                 <p className="text-xs text-slate-400 mb-1">触发: <span className="text-slate-200">{t.trigger}</span></p>
-                                 <p className="text-xs text-slate-500 font-medium italic">理由: {t.reason}</p>
+                                 <div className="space-y-1.5">
+                                     <p className="text-xs text-slate-400">触发: <span className="text-slate-200">{t.trigger}</span></p>
+                                     {t.buy_zone_price && (
+                                         <div className="py-1 px-2 bg-indigo-500/10 rounded-lg w-fit">
+                                             <p className="text-[10px] text-indigo-400 font-bold uppercase italic">理想买入区: {t.buy_zone_price}</p>
+                                         </div>
+                                     )}
+                                     <p className="text-xs text-slate-500 font-medium italic border-t border-white/10 pt-1.5 mt-1.5">理由: {t.reason}</p>
+                                 </div>
                               </div>
                            ))}
                        </div>
@@ -226,12 +299,13 @@ export function TacticalBriefDrawer({
                     
                     {/* Pagination Dots */}
                     <div className="flex justify-center gap-2 mt-[-8px] mb-2">
-                        <div className={`h-1 rounded-full transition-all duration-300 ${viewState === 'holding' ? 'w-6 bg-white' : 'w-1 bg-white/20'}`} />
+                        <div className={`h-1 rounded-full transition-all duration-300 ${viewState === 'holding_profit' ? 'w-6 bg-white' : 'w-1 bg-white/20'}`} />
+                        <div className={`h-1 rounded-full transition-all duration-300 ${viewState === 'holding_loss' ? 'w-6 bg-white' : 'w-1 bg-white/20'}`} />
                         <div className={`h-1 rounded-full transition-all duration-300 ${viewState === 'empty' ? 'w-6 bg-white' : 'w-1 bg-white/20'}`} />
                     </div>
                   </section>
 
-                  {generalTactics.length > 0 && (
+                   {generalTactics.length > 0 && (
                     <section>
                       <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
                         <div className="w-1.5 h-1.5 rounded-full bg-slate-500" /> 基础市场研判 (GENERAL)
@@ -248,6 +322,53 @@ export function TacticalBriefDrawer({
                         ))}
                       </div>
                     </section>
+                  )}
+
+                  {/* 关键关键价位 (Key Levels) - 新增展示 */}
+                  {data.key_levels && (
+                      <section className="animate-in fade-in slide-in-from-bottom-2 duration-700">
+                          <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                            <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.5)]" /> 关键价位参考 (LEVELS)
+                          </h3>
+                          <div className="grid grid-cols-2 gap-3">
+                              <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5">
+                                  <p className="text-[9px] font-black text-slate-600 uppercase mb-2 tracking-tighter">支撑防御</p>
+                                  <div className="space-y-1">
+                                      <p className="text-sm font-black text-emerald-400">
+                                          {data.key_levels.strong_support || data.key_levels.support || '--'}
+                                      </p>
+                                      <p className="text-[10px] text-slate-500 font-bold">支撑位</p>
+                                  </div>
+                              </div>
+                              <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5">
+                                  <p className="text-[9px] font-black text-slate-600 uppercase mb-2 tracking-tighter">压力挑战</p>
+                                  <div className="space-y-1">
+                                      <p className="text-sm font-black text-rose-400">
+                                          {data.key_levels.strong_resistance || data.key_levels.resistance || '--'}
+                                      </p>
+                                      <p className="text-[10px] text-slate-500 font-bold">压力位</p>
+                                  </div>
+                              </div>
+                              <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5">
+                                  <p className="text-[9px] font-black text-slate-600 uppercase mb-2 tracking-tighter">突破信号</p>
+                                  <div className="space-y-1">
+                                      <p className="text-sm font-black text-indigo-400">
+                                          {data.key_levels.breakout_confirmation_level || '--'}
+                                      </p>
+                                      <p className="text-[10px] text-slate-500 font-bold">确认位</p>
+                                  </div>
+                              </div>
+                              <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5">
+                                  <p className="text-[9px] font-black text-slate-600 uppercase mb-2 tracking-tighter">极端止损</p>
+                                  <div className="space-y-1">
+                                      <p className="text-sm font-black text-slate-200">
+                                          {data.key_levels.stop_loss_reference || data.key_levels.stop_loss || '--'}
+                                      </p>
+                                      <p className="text-[10px] text-slate-500 font-bold">止损线</p>
+                                  </div>
+                              </div>
+                          </div>
+                      </section>
                   )}
 
                   {/* 重点情报 (News Radar) */}

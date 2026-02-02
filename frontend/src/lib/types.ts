@@ -66,6 +66,10 @@ export interface Tactic {
     priority: "P1" | "P2" | "P3";
     action: string;
     trigger: string;
+    target_price?: number | string;
+    stop_advance_price?: number | string;
+    stop_loss_price?: number | string;
+    buy_zone_price?: number | string;
     reason: string;
 }
 
@@ -82,11 +86,22 @@ export interface TacticalData {
     news_analysis?: string[]; // AI 抓取的关键新闻摘要
     reasoning_trace: ReasoningStep[]; // 5步推理链，替代原 analysis
     tactics: {
-        holding: Tactic[];
+        holding_profit: Tactic[];
+        holding_loss: Tactic[];
         empty: Tactic[];
+        holding?: Tactic[]; // Legacy
         general?: Tactic[];
     };
     key_levels?: {
+        // 新型粒度字段
+        immediate_support?: number[];
+        immediate_resistance?: number[];
+        strong_support?: number | string;
+        strong_resistance?: number | string;
+        breakout_confirmation_level?: number | string;
+        stop_loss_reference?: number | string;
+        
+        // 兼容字段
         support: number;
         resistance: number;
         stop_loss: number;
