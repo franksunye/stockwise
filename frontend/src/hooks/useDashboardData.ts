@@ -51,7 +51,7 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
         }
     }, []);
 
-    const loadAllData = useCallback(async (silent = false) => {
+    const loadAllData = useCallback(async (silent = false, ignoreDebounce = false) => {
         // 如果 watchlist 还在加载中，跳过
         if (loadingWatchlist && watchlist.length === 0) return;
 
@@ -65,10 +65,29 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
         }
 
         const now = Date.now();
-        // 防抖: 30s内的重复刷新跳过 (除非 silent=true 强制刷新)
-        if (lastFetchTimeRef.current && now - lastFetchTimeRef.current < 30000 && !silent) {
+        // 防抖: 30s内的重复刷新跳过 (除非 silent=true 或 ignoreDebounce=true)
+        if (lastFetchTimeRef.current && now - lastFetchTimeRef.current < 30000 && !silent && !ignoreDebounce) {
+            // [Critical Fix] Even if we debounce the Network Request, 
+            // we MUST re-map the stocks if the watchlist itself has changed (e.g. user added/removed item).
+            // Current `stocks` might be stale compared to `watchlist`.
+            // Check if we need a quick local sync without network
+            if (watchlist.length !== stocks.length) {
+                // Fallback: Local re-map using existing data + new placeholder
+                const remapped = watchlist.map(item => {
+                    const existing = stocks.find(s => s.symbol === item.symbol);
+                    if (existing) return existing;
+                    return {
+                        symbol: item.symbol, name: item.name, price: null,
+                        change: 0, lastUpdated: '...', history: [], loading: true,
+                        prediction: null, previousPrediction: null, rule: null
+                    } as StockData; // Placeholder
+                });
+                setStocks(remapped);
+                return;
+            }
             return;
         }
+
         lastFetchTimeRef.current = now;
 
         if (!silent) setIsRefreshing(true);
@@ -141,11 +160,33 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
             }
         } catch (e) {
             console.error('Dashboard fetch error:', e);
+            // [Fix] Even on error, we should ensure UI reflects the watchlist
+            // If network fails, at least show the items in watchlist with error state
+            if (watchlist.length > 0) {
+                const fallback = watchlist.map(item => {
+                    const existing = stocks.find(s => s.symbol === item.symbol);
+                    return existing || {
+                        symbol: item.symbol, name: item.name, price: null, loading: false,
+                        change: 0, lastUpdated: '...', history: [],
+                        prediction: null, previousPrediction: null, rule: null
+                    } as StockData;
+                });
+                setStocks(fallback);
+            }
             setLoadingPool(false);
         } finally {
             setIsRefreshing(false);
         }
-    }, [watchlist, loadingWatchlist]);
+    }, [watchlist, loadingWatchlist]); // Important: depends on watchlist
+
+    // Watchlist 变更时，强制触发一次刷新 (Ignore Debounce)
+    useEffect(() => {
+        if (!loadingWatchlist && watchlist.length > 0) {
+            loadAllData(false, true); // silent=false, ignoreDebounce=true
+        } else if (watchlist.length === 0 && !loadingWatchlist) {
+            setStocks([]);
+        }
+    }, [watchlist, loadingWatchlist, loadAllData]);
 
     // 页面可见性检测：当用户切回页面时刷新数据
     useEffect(() => {
