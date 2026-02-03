@@ -550,7 +550,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                     >
                                     <div className="mt-3 space-y-1.5">
                                         {[
-                                        { key: 'signal_flip', icon: ArrowLeftRight, label: '信号翻转', badge: '重要' },
+                                        { key: 'signal_flip', icon: ArrowLeftRight, label: '趋势反转', badge: '重要' },
                                         { key: 'morning_call', icon: Sun, label: '每日早报', badge: '08:30' },
                                         { key: 'validation_glory', icon: Trophy, label: '验证战报', badge: '胜率' },
                                         { key: 'prediction_updated', icon: Zap, label: '预测更新', badge: '分析完成' },
