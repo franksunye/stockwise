@@ -201,15 +201,15 @@ export default function StockPoolPage() {
       return;
     }
 
-    // Call Hook (Optimistic)
-    const success = await addStock(targetSymbol, nameOverride || targetSymbol);
+    // Call Hook (Optimistic) - No Await needed for UI blocking
+    // Fix: Fire and forget to close modal instantly
+    addStock(targetSymbol, nameOverride || targetSymbol);
     
-    if (success) {
-        setNewSymbol('');
-        setShowAdd(false);
-        setShowSuggestions(false);
-        // Prices will naturally update due to useEffect dependency on watchlist
-    }
+    // Instant UI Feedback
+    setNewSymbol('');
+    setShowAdd(false);
+    setShowSuggestions(false);
+    // Prices will naturally update due to useEffect dependency on watchlist
   };
 
   const handleRemoveClick = useCallback((e: React.MouseEvent, stock: StockSnapshot) => {
@@ -221,8 +221,8 @@ export default function StockPoolPage() {
     if (!stockToDelete || !user) return;
     setIsDeleting(true);
     
-    // Call Hook (Optimistic)
-    await removeStock(stockToDelete.symbol);
+    // Call Hook (Optimistic) - Fire and Forget
+    removeStock(stockToDelete.symbol);
     
     setStockToDelete(null);
     setIsDeleting(false);

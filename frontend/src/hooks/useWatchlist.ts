@@ -12,9 +12,10 @@ export interface WatchlistItem {
 export function useWatchlist() {
     const [watchlist, setWatchlist] = useState<WatchlistItem[]>([]);
     const [loading, setLoading] = useState(true);
+    const lastMutationTime = useRef<number>(0);
     const isSyncing = useRef(false);
 
-    // 1. Init: Load from local storage immediately (Sync, synchronous if possible for speed, but useEffect is fine)
+    // 1. Init: Load from local storage immediately
     useEffect(() => {
         try {
             const stored = localStorage.getItem(WATCHLIST_STORAGE_KEY);
@@ -32,6 +33,15 @@ export function useWatchlist() {
     useEffect(() => {
         const sync = async () => {
             if (isSyncing.current) return;
+
+            // [Fix] Anti-Zombie Protection
+            // If user performed an action recently (last 5 seconds), skip sync.
+            // This prevents "read-after-write" consistency lag from reverting user changes.
+            if (Date.now() - lastMutationTime.current < 5000) {
+                console.log('⏳ Skipping sync due to recent mutation');
+                return;
+            }
+
             isSyncing.current = true;
 
             const user = await getCurrentUser();
@@ -42,10 +52,14 @@ export function useWatchlist() {
 
             try {
                 // Fetch source of truth from server
-                const res = await fetch(`/api/stock-pool?userId=${user.userId}`);
+                // [Fix] Add timestamp to bust iOS aggressive cache
+                const res = await fetch(`/api/stock-pool?userId=${user.userId}&t=${Date.now()}`);
                 if (res.ok) {
                     const data = await res.json();
-                    // Map to our internal structure
+
+                    // Double check mutation time again after fetch returns
+                    if (Date.now() - lastMutationTime.current < 5000) return;
+
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     const remoteList: WatchlistItem[] = (data.stocks || []).map((s: any) => ({
                         symbol: s.symbol,
@@ -53,8 +67,10 @@ export function useWatchlist() {
                         addedAt: s.added_at ? new Date(s.added_at).getTime() : Date.now()
                     }));
 
-                    // Compare and update if necessary (Remote wins in this simple strategy)
                     setWatchlist(current => {
+                        // Re-check mutation one last time inside the setter to be atomic
+                        if (Date.now() - lastMutationTime.current < 5000) return current;
+
                         const currentStr = JSON.stringify(current.map(i => i.symbol).sort());
                         const remoteStr = JSON.stringify(remoteList.map(i => i.symbol).sort());
 
@@ -74,7 +90,6 @@ export function useWatchlist() {
             }
         };
 
-        // Execute after a short delay to prioritize UI painting
         const timer = setTimeout(sync, 500);
         return () => clearTimeout(timer);
     }, []);
@@ -82,6 +97,9 @@ export function useWatchlist() {
     const addStock = useCallback(async (symbol: string, name: string) => {
         const user = await getCurrentUser();
         if (!user) return false;
+
+        // [Fix] Update mutation time
+        lastMutationTime.current = Date.now();
 
         const newItem: WatchlistItem = { symbol, name, addedAt: Date.now() };
 
