@@ -331,12 +331,15 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
               ) : showIdentityCenter ? (
                 /* --- IDENTITY CENTER VIEW --- */
                 <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+                <div className="flex items-center gap-2 mb-4">
                     <button 
                         onClick={() => setShowIdentityCenter(false)}
-                        className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-xs font-bold"
+                        className="flex items-center gap-1 text-slate-400 hover:text-white transition-colors text-xs font-bold uppercase tracking-wider"
                     >
-                        <ArrowLeftRight className="w-4 h-4 rotate-180" /> 返回个人中心
+                        <ArrowLeftRight className="w-4 h-4 rotate-180" /> 返回
                     </button>
+                    <span className="text-white font-black italic flex-1 text-right text-lg">账号信息</span>
+                </div>
 
                     <IdentityPassport 
                         userId={userId}
@@ -541,7 +544,10 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                             {isSubscribed && (
                             <div className="bg-white/[0.02] border-t border-white/5 px-5 py-2">
                                 <button
-                                onClick={() => setShowNotificationSettings(!showNotificationSettings)}
+                                onClick={() => {
+                                    setShowNotificationSettings(!showNotificationSettings);
+                                    if (!showNotificationSettings) setShowReferralDetails(false);
+                                }}
                                 className="w-full flex items-center justify-between text-[10px] text-slate-500 hover:text-indigo-400 transition-colors"
                                 >
                                 <span className="font-bold uppercase tracking-widest">高级通知偏好</span>
@@ -689,7 +695,10 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
 
                             <div className="bg-white/[0.02] border-t border-white/5 px-5 py-2 relative z-10">
                                 <button
-                                    onClick={() => setShowReferralDetails(!showReferralDetails)}
+                                    onClick={() => {
+                                        setShowReferralDetails(!showReferralDetails);
+                                        if (!showReferralDetails) setShowNotificationSettings(false);
+                                    }}
                                     className="w-full flex items-center justify-between text-[10px] text-slate-500 hover:text-indigo-400 transition-colors"
                                     >
                                         <span className="font-bold uppercase tracking-widest">查看奖励规则</span>
