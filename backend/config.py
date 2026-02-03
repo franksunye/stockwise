@@ -92,7 +92,7 @@ SYNC_CONFIG = {
 LLM_CONFIG = {
     "api_key": os.getenv("LLM_API_KEY"),
     "base_url": os.getenv("LLM_BASE_URL"),
-    "model": os.getenv("LLM_MODEL", "gpt-3.5-turbo"),
+    "model": os.getenv("LLM_MODEL"),
     "timeout": int(os.getenv("LLM_TIMEOUT", "60")),
     "provider": os.getenv("LLM_PROVIDER", "openai"),
     
