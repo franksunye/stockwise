@@ -70,6 +70,10 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
     if (isOpen) {
       refreshProfile();
       checkPushStatus();
+    } else {
+      // Reset sub-views when drawer closes so user returns to main view on reopen
+      setShowPricing(false);
+      setShowIdentityCenter(false);
     }
   }, [isOpen, refreshProfile]);
 
