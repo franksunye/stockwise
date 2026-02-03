@@ -25,11 +25,28 @@ def sync_spot_prices(symbols: list):
     workers = SYNC_CONFIG["realtime_workers"]
     logger.info(f"⚡ 启动并发盘中同步 (Workers={workers}) - 针对 {len(symbols)} 只股票")
     
+
+    # Lazy Import IntradayMonitor to avoid circular deps
+    try:
+        from sync.intraday_monitor import IntradayMonitor
+        monitor = IntradayMonitor()
+        monitor.load_rules() # Ensure rules are loaded
+    except ImportError:
+        monitor = None
+        logger.warning("⚠️ IntradayMonitor not available")
+
     def sync_single_realtime(stock):
         try:
             result = process_stock_period(stock, period="daily", is_realtime=True)
-            if result is False:
-                raise Exception("Fetch returned empty data (Network error or No Trade)")
+            if result is False: # Explicit False means fetch failed
+                # Don't raise, just return False to count as partial fail or skip
+                # Actually original logic raised Exception to count as Error
+                raise Exception("Fetch failed")
+            
+            # [Intraday Rule Check]
+            if isinstance(result, dict) and monitor:
+                monitor.check(result['symbol'], result['price'], result['change'])
+                
             return True
         except Exception as e:
             raise e
@@ -43,8 +60,11 @@ def sync_spot_prices(symbols: list):
                 future.result()
                 success_count += 1
             except Exception as e:
-                errors.append(f"Stock {stock} error: {str(e)[:100]}")
-                logger.error(f"❌ {stock} 实时同步失败: {e}")
+                # errors.append(f"Stock {stock} error: {str(e)[:100]}")
+                # Use less verbose logging for realtime errors (common network jitters)
+                logger.debug(f"❌ {stock} Realtime Sync Failed: {e}")
+                errors.append(f"Error {stock}") 
+
 
     duration = time.time() - start_time
     

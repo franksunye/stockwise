@@ -237,6 +237,14 @@ def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool =
             tag=f"price_update_{symbol}"
         )
         
+        return {
+            "success": True,
+            "symbol": symbol,
+            "price": price,
+            "change": change,
+            "volume": last_row['volume']
+        }
+
     return True
 
 

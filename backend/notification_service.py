@@ -424,3 +424,60 @@ class NotificationManager:
         finally:
             if not self.conn:
                 conn.close()
+
+    def broadcast_price_alert(self, symbol: str, title: str, body: str, alert_type: str):
+        """
+        Intraday specific: Send immediate alert to all users watching this stock.
+        Used by IntradayMonitor.
+        """
+        conn = get_connection()
+        try:
+            cursor = conn.cursor()
+            # 1. Get all users watching this stock
+            cursor.execute("SELECT user_id FROM user_watchlist WHERE symbol = ?", (symbol,))
+            users = [r[0] for r in cursor.fetchall()]
+            
+            if not users:
+                logger.info(f"🔕 No watchers for {symbol}, alert skipped.")
+                return
+
+            logger.info(f"📢 Broadcasting {alert_type} for {symbol} to {len(users)} users...")
+            
+            # 2. Filter & Send
+            # Note: For Intraday, we skip the 'Queue' and send immediately for speed.
+            # But we respect settings.
+            
+            for uid in users:
+                # Check settings (Default to specific type, fallback to 'price_update')
+                # Load efficient user settings cache? Doing DB query per user is slow for broadcast.
+                # Optimized: We do one-by-one for now as user base is manageable.
+                
+                # Fetch settings
+                cursor.execute("SELECT notification_settings FROM users WHERE user_id = ?", (uid,))
+                row = cursor.fetchone()
+                settings = {}
+                if row and row[0]:
+                    try:
+                        settings = json.loads(row[0])
+                    except: pass
+                
+                # Check specific type or 'price_update' (Phase 1 key)
+                types = settings.get('types', {})
+                # Key maps to UI setting "Price Update"
+                is_enabled = types.get('price_update', {}).get('enabled', True) 
+                
+                if not is_enabled:
+                    continue
+                    
+                # Send Push
+                try:
+                    send_push_notification(uid, title, body, url=f"/dashboard/stock/{symbol}")
+                    self.stats["notifications_sent"] += 1
+                except Exception as e:
+                    logger.error(f"Failed to push to {uid}: {e}")
+                    self.stats["errors"] += 1
+                    
+        except Exception as e:
+            logger.error(f"❌ Broadcast failed: {e}")
+        finally:
+            conn.close()
