@@ -71,7 +71,7 @@ export function UserPricingView({ onBack, currentTier }: Props) {
   };
 
   return (
-    <div className="animate-in fade-in slide-in-from-right-4 duration-300 h-full flex flex-col overflow-hidden">
+    <div className="animate-in fade-in slide-in-from-right-4 duration-300 h-full flex flex-col overflow-hidden bg-slate-950">
        {/* Header - Fixed at top */}
        <div className="flex items-center gap-2 mb-4 shrink-0">
             <button 
@@ -86,9 +86,9 @@ export function UserPricingView({ onBack, currentTier }: Props) {
        </div>
 
        {/* Scrollable content area */}
-       <div className="flex-1 overflow-y-auto overscroll-contain space-y-4 pb-6 -mx-2 px-2">
+       <div className="flex-1 overflow-y-auto overscroll-contain space-y-4 pb-10 -mx-2 px-2 [scroll-behavior:smooth] [WebkitOverflowScrolling:touch] transform-gpu">
             {currentTier === 'free' && (
-                 <div className="p-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-xl shadow-indigo-500/20 mb-6">
+                 <div className="p-4 rounded-2xl bg-indigo-600 text-white shadow-lg shadow-indigo-600/10 mb-6 transform-gpu">
                     <h3 className="font-black italic text-lg mb-1">限时升级 Pro</h3>
                     <p className="text-xs font-medium text-indigo-100 opacity-90 mb-0">
                         解锁 DeepSeek 深度推理与实时信号推送，让 AI 真正接管您的交易纪律。
@@ -105,9 +105,9 @@ export function UserPricingView({ onBack, currentTier }: Props) {
                         key={plan.name}
                         className={`relative p-5 rounded-[24px] border ${
                             plan.highlight 
-                            ? 'bg-gradient-to-b from-[#1a1a24] to-[#0f0f13] border-indigo-500/30' 
+                            ? 'bg-[#1a1a24] border-indigo-500/30' 
                             : 'bg-white/5 border-white/5'
-                        }`}
+                        } transform-gpu will-change-transform [contain:paint]`}
                     >
                         {plan.highlight && (
                              <div className="absolute top-0 right-0 px-3 py-1 bg-indigo-600 rounded-bl-2xl rounded-tr-[22px] text-[9px] font-black uppercase tracking-widest text-white">
@@ -204,7 +204,7 @@ export function UserPricingView({ onBack, currentTier }: Props) {
                     <p className="text-[10px] text-slate-500 font-medium leading-relaxed mb-5">支持 RMB 直接转账、对公转账或处理支付被拒。备注“Pro开通”即可。</p>
                     
                     <div className="relative group">
-                        <div className="absolute inset-0 bg-indigo-500 blur-[30px] opacity-10 rounded-full"></div>
+                        <div className="absolute inset-0 bg-indigo-500/10 blur-xl rounded-full transform-gpu"></div>
                         <div className="relative z-10 p-2 bg-white rounded-2xl shadow-xl">
                             <Image 
                                 src="/support-qr.png" 

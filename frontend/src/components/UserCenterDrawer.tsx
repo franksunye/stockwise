@@ -283,12 +283,12 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className={`fixed inset-0 z-[200] flex items-end justify-center bg-black/60 pointer-events-auto overflow-hidden ${!isHighPerformance ? 'backdrop-blur-sm' : ''}`}>
+        <div className={`fixed inset-0 z-[200] flex items-end justify-center bg-black/60 pointer-events-auto overflow-hidden ${(!isHighPerformance && !showPricing) ? 'backdrop-blur-sm' : ''}`}>
           <motion.div 
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
-            drag="y"
+            drag={!showPricing ? "y" : false}
             dragConstraints={{ top: 0, bottom: 0 }}
             dragElastic={{ top: 0.1, bottom: 0.6 }}
             onDragEnd={(_, info) => {
