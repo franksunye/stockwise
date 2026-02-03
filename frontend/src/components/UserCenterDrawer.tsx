@@ -305,7 +305,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                <div className="w-12 h-1 rounded-full bg-white/20" />
             </div>
 
-            <div className={`px-8 pt-4 pb-4 flex flex-col min-h-0 ${showPricing ? 'h-[75vh] overflow-hidden' : 'flex-1 max-h-[calc(90vh-48px)] overflow-y-auto'}`}>
+            <div className={`px-8 pt-4 pb-4 flex flex-col ${showPricing ? 'h-[80vh] overflow-hidden' : 'min-h-[60vh]'}`}>
               {!showPricing && (
               <header className="flex items-center justify-between mb-8">
                 <div className="space-y-1.5">
