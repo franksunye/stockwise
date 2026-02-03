@@ -42,13 +42,43 @@ class TaskLogger:
             start=True
         )
 
-    def success(self, message: str = None, metadata: dict = None):
+
+    # Repo base URL for manual trigger construction
+    REPO_ACTIONS_URL = "https://github.com/franksunye/stockwise/actions/workflows"
+
+    def success(self, message: str = None, metadata: dict = None, notify: bool = False):
         """Log task success."""
         self._log(status="success", message=message, metadata=metadata, end=True)
+        if notify:
+            from backend.utils import send_wecom_notification
+            icon = "✅"
+            # Success: No @ mention, clean info
+            send_wecom_notification(f"{icon} [{self.task_name}] Task Completed\n> {message or ''}")
 
-    def fail(self, message: str = None, metadata: dict = None):
-        """Log task failure."""
+    def fail(self, message: str = None, metadata: dict = None, notify: bool = True, channel_alert: bool = True, rerun_workflow: str = None):
+        """
+        Log task failure.
+        :param notify: Send notification? (Default True for failures)
+        :param channel_alert: If True, will @all or @admin.
+        :param rerun_workflow: Filename of the workflow (e.g. 'daily_morning_call.yml') to generate link.
+        """
         self._log(status="failed", message=message, metadata=metadata, end=True)
+        if notify:
+            from backend.utils import send_wecom_notification
+            icon = "❌"
+            
+            content = f"{icon} [{self.task_name}] Task Failed\n> {message or ''}"
+            mentions = None
+            
+            if channel_alert:
+                mentions = ["@all"]
+                
+                if rerun_workflow:
+                    url = f"{self.REPO_ACTIONS_URL}/{rerun_workflow}"
+                    # Add clickable link for operations
+                    content += f"\n\n🔗 [运维重跑]({url})"
+            
+            send_wecom_notification(content, mentioned_mobile_list=mentions)
 
     def _log(self, status: str, display_name: str = None, task_type: str = None, dimensions: dict = None, 
              message: str = None, metadata: dict = None, start: bool = False, end: bool = False):

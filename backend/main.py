@@ -111,11 +111,11 @@ if __name__ == "__main__":
                 t_logger.success(f"⚠️ Partial Sync: {success_count} OK, {failed_count} Fail")
             else:
                 # Total failure
-                t_logger.fail(f"❌ All {failed_count} stocks failed sync")
+                t_logger.fail(f"❌ All {failed_count} stocks failed sync", notify=True, rerun_workflow="data_sync_realtime.yml")
                 # Return non-zero to signal orchestrator of failure
                 sys.exit(1)
         except Exception as e:
-            t_logger.fail(str(e))
+            t_logger.fail(str(e), notify=True, rerun_workflow="data_sync_realtime.yml")
             sys.exit(1)
             
     elif args.sync_meta:
@@ -127,7 +127,7 @@ if __name__ == "__main__":
             sync_profiles(limit=20)
             t_logger.success("Meta sync completed")
         except Exception as e:
-            t_logger.fail(str(e))
+            t_logger.fail(str(e), notify=True, rerun_workflow="meta_sync.yml")
 
     elif args.analyze and is_backfill_mode:
         # Backfill: Quant Mind
@@ -148,7 +148,7 @@ if __name__ == "__main__":
             )
             t_logger.success("Backfill completed")
         except Exception as e:
-            t_logger.fail(str(e))
+            t_logger.fail(str(e), notify=True, rerun_workflow="ai_backfill.yml")
             
     elif args.analyze:
         # Daily Analysis: Quant Mind
@@ -159,9 +159,10 @@ if __name__ == "__main__":
         
         try:
             run_ai_analysis(symbol=args.symbol, market_filter=args.market, force=args.force, model_filter=args.model)
-            t_logger.success("Daily analysis completed")
+            t_logger.success("Daily analysis completed", notify=True)
         except Exception as e:
-            t_logger.fail(str(e))
+            wf_file = "ai_analyze_hk.yml" if args.market == "HK" else "ai_analyze_cn.yml"
+            t_logger.fail(str(e), notify=True, rerun_workflow=wf_file)
 
     elif args.symbol:
         # On-Demand: User Initiated usually
@@ -215,9 +216,10 @@ if __name__ == "__main__":
         t_logger.start("Full Market Sync", "ingestion", dimensions={})
         try:
             run_full_sync(market_filter=args.market, force_full=args.full_periods)
-            t_logger.success("Full sync completed")
+            t_logger.success("Full sync completed", notify=True)
         except Exception as e:
-            t_logger.fail(str(e))
+            wf_file = f"data_sync_{args.market.lower()}.yml" if args.market else "data_sync_cn.yml"
+            t_logger.fail(str(e), notify=True, rerun_workflow=wf_file)
         
     # 强制退出，防止 libsql-client 后台线程导致进程挂起
     sys.exit(0)
