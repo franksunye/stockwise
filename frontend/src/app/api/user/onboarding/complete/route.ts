@@ -59,7 +59,9 @@ export async function POST(request: Request) {
                 args: [newTier, newExpiresAt, userId]
             });
 
-            if (selectedStock) {
+            // Only process selectedStock if this is the FIRST time onboarding.
+            // This prevents users from abusing this API to bypass watchlist limits.
+            if (selectedStock && !user.has_onboarded) {
                 const checkRes = await db.execute({
                     sql: "SELECT 1 FROM user_watchlist WHERE user_id = ? AND symbol = ?",
                     args: [userId, selectedStock]
@@ -112,7 +114,7 @@ export async function POST(request: Request) {
         } else {
             db.prepare("UPDATE users SET has_onboarded = 1, subscription_tier = ?, subscription_expires_at = ? WHERE user_id = ?").run(newTier, newExpiresAt, userId);
 
-            if (selectedStock) {
+            if (selectedStock && !user.has_onboarded) {
                 const alreadyWatched = db.prepare("SELECT 1 FROM user_watchlist WHERE user_id = ? AND symbol = ?").get(userId, selectedStock);
 
                 if (!alreadyWatched) {
@@ -139,6 +141,7 @@ export async function POST(request: Request) {
                     }
                 }
             }
+
             db.close();
         }
 
