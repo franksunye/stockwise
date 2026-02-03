@@ -99,30 +99,24 @@ class NotificationManager:
             if not self.conn:
                 conn.close()
 
+    # Signal Weights definition
+    SIGNAL_WEIGHTS = {
+        "Strong Bullish": 2,
+        "Bullish": 1,
+        "Neutral": 0,
+        "Bearish": -1,
+        "Strong Bearish": -2
+    }
+
     def check_signal_flip(self, user_id: str, symbol: str, new_signal: str, new_confidence: float) -> Optional[dict]:
         """
         Compare new prediction with cached state to detect a 'Signal Flip'.
+        Implements Cross-Zero Logic: Only notifies if trend direction changes fundamentally.
         """
         self.stats["processed"] += 1
         
         cached_state = self.signal_cache.get(user_id, {}).get(symbol)
         
-        # Flip logic:
-        # 1. No previous state -> Initial flip (Silent or Notify? Usually Notify if significant)
-        # 2. Signal changed (e.g. Side -> Long, Long -> Short) -> Notify
-        # 3. Confidence improved significantly (Optional, maybe for Phase 4)
-        
-        is_flip = False
-        old_signal = None
-        
-        if not cached_state:
-            # Initial prediction: Update state but DO NOT notify (avoid spam on new watchlist)
-            is_flip = False
-            old_signal = None
-        elif cached_state["signal"] != new_signal:
-            is_flip = True
-            old_signal = cached_state["signal"]
-            
         # Always update the registry with the latest state
         self.pending_state_updates.append({
             "user_id": user_id,
@@ -131,6 +125,39 @@ class NotificationManager:
             "confidence": new_confidence
         })
 
+        if not cached_state:
+            # Initial state: No flip notification to avoid spam
+            return None
+
+        old_signal = cached_state["signal"]
+        
+        # --- Cross-Zero Logic Implementation ---
+        
+        old_weight = self.SIGNAL_WEIGHTS.get(old_signal, 0)
+        new_weight = self.SIGNAL_WEIGHTS.get(new_signal, 0)
+        
+        # Criteria 1: Zero-Crossing (Fundamental Direction Change)
+        # Examples: -1 -> 1 (Flip), 1 -> -1 (Flip), 0 -> 1 (Flip), 1 -> 0 (Exit Signal - Optional)
+        
+        # We define a "Flip" as entering a NEW active territory (Bullish or Bearish)
+        # from a different territory (Opposite or Neutral).
+        
+        is_flip = False
+        
+        # Case A: Bullish Entry (Previous was Neutral or Bearish)
+        if new_weight > 0 and old_weight <= 0:
+            is_flip = True
+            
+        # Case B: Bearish Entry (Previous was Neutral or Bullish)
+        elif new_weight < 0 and old_weight >= 0:
+            is_flip = True
+            
+        # Note: We intentionally ignore:
+        # 1. 1 -> 2 (Strengthening): Good, but not a "Flip"
+        # 2. 2 -> 1 (Weakening): Still bullish, hold.
+        # 3. 1 -> 0 (Neutralizing): This is an 'Exit' signal, could be treated separately, 
+        #    but for now we focus on 'Entry' flips based on user feedback.
+        
         if is_flip:
             self.stats["flips_detected"] += 1
             flip_event = {
