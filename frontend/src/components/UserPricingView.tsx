@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Check, ChevronRight, ArrowLeftRight } from 'lucide-react';
+import { Check, ChevronRight, ArrowLeftRight, Zap } from 'lucide-react';
+import Image from 'next/image';
 import { getCurrentUserId } from '@/lib/user';
 import { pricingPlans } from '@/lib/pricing-data';
 
@@ -192,11 +193,35 @@ export function UserPricingView({ onBack, currentTier }: Props) {
                 );
             })}
             
-            <div className="px-2 pt-2 pb-6">
-                <p className="text-[10px] text-center text-slate-600 font-medium leading-relaxed">
-                    订阅即代表同意 <span className="underline">服务条款</span> 与 <span className="underline">隐私协议</span>。
+            <div className="mt-8 mb-6">
+                <div className="p-5 rounded-[24px] border border-white/10 bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-transparent flex flex-col items-center text-center">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-bold uppercase tracking-wider mb-4">
+                        <Zap size={10} className="fill-current" />
+                        <span>人工专属通道</span>
+                    </div>
+                    <h3 className="text-sm font-black italic text-white mb-2">支付有问题？添加服务官</h3>
+                    <p className="text-[10px] text-slate-500 font-medium leading-relaxed mb-5">支持 RMB 直接转账、对公转账或处理支付被拒。备注“Pro开通”即可。</p>
+                    
+                    <div className="relative group">
+                        <div className="absolute inset-0 bg-indigo-500 blur-[30px] opacity-10 rounded-full"></div>
+                        <div className="relative z-10 p-2 bg-white rounded-2xl shadow-xl">
+                            <Image 
+                                src="/support-qr.png" 
+                                alt="Customer Support QR Code" 
+                                width={120} 
+                                height={120}
+                                className="rounded-lg"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div className="px-2 pt-2 pb-10">
+                <p className="text-[10px] text-center text-slate-600 font-medium leading-relaxed italic">
+                    股市有风险，投资需谨慎。本应用生成的所有内容由 AI 驱动，仅供参考。
                     <br/>
-                    支持随时取消，下个计费周期生效。
+                    订阅即代表同意 <span className="underline">服务条款</span> 与 <span className="underline">隐私协议</span>。
                 </p>
             </div>
        </div>
