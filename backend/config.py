@@ -89,6 +89,36 @@ SYNC_CONFIG = {
 }
 
 # 4. LLM 配置
+# -----------------------------------------------------------------------------
+# LLM Provider Registry (Centralized knowledge of providers)
+# -----------------------------------------------------------------------------
+LLM_PROVIDER_REGISTRY = {
+    "deepseek": {
+        "base_url": "https://api.deepseek.com/v1",
+        "default_model": "deepseek-chat",
+    },
+    "gemini": {
+        "default_model": "gemini-pro",
+    },
+    "gemini_local": {
+        "base_url": "http://127.0.0.1:8045",
+        "default_model": "gemini-3-flash",
+    },
+    "hunyuan": {
+        "base_url": "https://api.hunyuan.cloud.tencent.com/v1",
+        "default_model": "hunyuan-lite",
+        "qps_limit": 2.0
+    },
+    "aliyun": {
+        "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+        "default_model": "deepseek-v3",
+    },
+    "openai": {
+        "base_url": "http://127.0.0.1:8045/v1",
+        "default_model": "gpt-3.5-turbo",
+    }
+}
+
 LLM_CONFIG = {
     "api_key": os.getenv("LLM_API_KEY"),
     "base_url": os.getenv("LLM_BASE_URL"),
@@ -96,25 +126,41 @@ LLM_CONFIG = {
     "timeout": int(os.getenv("LLM_TIMEOUT", "60")),
     "provider": os.getenv("LLM_PROVIDER", "openai"),
     
-    # 供应商特定配置
+    # 供应商特定配置 (从 Registry 获取保底值)
     "deepseek": {
         "api_key": os.getenv("DEEPSEEK_API_KEY"),
-        "base_url": os.getenv("DEEPSEEK_BASE_URL"),
-        "model": os.getenv("DEEPSEEK_MODEL"),
+        "base_url": os.getenv("DEEPSEEK_BASE_URL") or LLM_PROVIDER_REGISTRY["deepseek"]["base_url"],
+        "model": os.getenv("DEEPSEEK_MODEL") or LLM_PROVIDER_REGISTRY["deepseek"]["default_model"],
     },
     "gemini": {
         "api_key": os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY"),
-        "model": os.getenv("GEMINI_MODEL"),
+        "model": os.getenv("GEMINI_MODEL") or LLM_PROVIDER_REGISTRY["gemini"]["default_model"],
+    },
+    "gemini_local": {
+        "api_key": os.getenv("GEMINI_LOCAL_API_KEY"),
+        "base_url": os.getenv("GEMINI_LOCAL_BASE_URL") or LLM_PROVIDER_REGISTRY["gemini_local"]["base_url"],
+        "model": os.getenv("GEMINI_LOCAL_MODEL") or LLM_PROVIDER_REGISTRY["gemini_local"]["default_model"],
     },
     "hunyuan": {
         "api_key": os.getenv("HUNYUAN_API_KEY"),
-        "base_url": os.getenv("HUNYUAN_BASE_URL"),
-        "model": os.getenv("HUNYUAN_MODEL"),
+        "base_url": os.getenv("HUNYUAN_BASE_URL") or LLM_PROVIDER_REGISTRY["hunyuan"]["base_url"],
+        "model": os.getenv("HUNYUAN_MODEL") or LLM_PROVIDER_REGISTRY["hunyuan"]["default_model"],
+        "qps_limit": float(os.getenv("HUNYUAN_QPS_LIMIT", "2.0")),
     },
-    "qwen": {
-        "api_key": os.getenv("QWEN_API_KEY"),
-        "base_url": os.getenv("QWEN_BASE_URL") or os.getenv("QWEN_VS_URL"),
-        "model": os.getenv("QWEN_MODEL"),
+    "aliyun": {
+        "api_key": os.getenv("ALIYUN_API_KEY") or os.getenv("QWEN_API_KEY"),
+        "base_url": os.getenv("ALIYUN_BASE_URL") or os.getenv("QWEN_BASE_URL") or os.getenv("QWEN_VS_URL") or LLM_PROVIDER_REGISTRY["aliyun"]["base_url"],
+        "model": os.getenv("ALIYUN_MODEL") or os.getenv("QWEN_MODEL") or LLM_PROVIDER_REGISTRY["aliyun"]["default_model"],
+    },
+    "gemini_local": {
+        "api_key": os.getenv("GEMINI_LOCAL_API_KEY") or os.getenv("LLM_API_KEY"),
+        "base_url": os.getenv("GEMINI_LOCAL_BASE_URL") or LLM_PROVIDER_REGISTRY["gemini_local"]["base_url"],
+        "model": os.getenv("GEMINI_LOCAL_MODEL") or LLM_PROVIDER_REGISTRY["gemini_local"]["default_model"],
+    },
+    "openai": {
+        "api_key": os.getenv("OPENAI_API_KEY") or os.getenv("LLM_API_KEY"),
+        "base_url": os.getenv("OPENAI_BASE_URL") or os.getenv("LLM_BASE_URL") or LLM_PROVIDER_REGISTRY["openai"]["base_url"],
+        "model": os.getenv("OPENAI_MODEL") or os.getenv("LLM_MODEL") or LLM_PROVIDER_REGISTRY["openai"]["default_model"],
     }
 }
 

@@ -54,48 +54,28 @@ class LLMClient:
         """
         初始化 LLM 客户端
         """
+        # 1. 确定 Provider
         self.provider = provider or LLM_CONFIG.get("provider", "openai")
-        self.timeout = timeout
-        if self.provider == "aliyun":
-            self.provider = "qwen"
             
-        # 自动注册 Hunyuan 限流器
-        if self.provider == "hunyuan" and "hunyuan" not in self._rate_limiters:
-            qps = LLM_CONFIG.get("hunyuan", {}).get("qps_limit", 2.0)
-            self._rate_limiters["hunyuan"] = AsyncRateLimiter(qps)
+        self.timeout = timeout or LLM_CONFIG.get("timeout", 120)
+
+        # 2. 从 LLM_CONFIG 获取该供应商的预设配置
+        prov_config = LLM_CONFIG.get(self.provider, {})
         
-        # 根据提供商加载默认配置
-        if self.provider == "deepseek":
-            ds_config = LLM_CONFIG.get("deepseek", {})
-            self.base_url = base_url or ds_config.get("base_url") or "https://api.deepseek.com/v1"
-            self.api_key = api_key or ds_config.get("api_key") or LLM_CONFIG.get("api_key")
-            self.model = model or ds_config.get("model") or "deepseek-chat"
-        elif self.provider == "gemini":
-            gm_config = LLM_CONFIG.get("gemini", {})
-            self.api_key = api_key or gm_config.get("api_key") or LLM_CONFIG.get("api_key")
-            self.model = model or gm_config.get("model") or "gemini-pro"
-            self.base_url = base_url # Gemini native usually doesn't use base_url in standard requests
-        elif self.provider == "gemini_local":
-            # 新增: 通过 Gemini SDK 连接本地代理 (Antigravity Tools)
-            gm_local_config = LLM_CONFIG.get("gemini_local", {})
-            self.base_url = base_url or gm_local_config.get("base_url") or "http://127.0.0.1:8045"
-            self.api_key = api_key or gm_local_config.get("api_key") or LLM_CONFIG.get("api_key")
-            self.model = model or gm_local_config.get("model") or "gemini-3-flash"
-        elif self.provider == "hunyuan":
-            hy_config = LLM_CONFIG.get("hunyuan", {})
-            self.base_url = base_url or hy_config.get("base_url") or "https://api.hunyuan.cloud.tencent.com/v1"
-            self.api_key = api_key or hy_config.get("api_key")
-            self.model = model or hy_config.get("model") or "hunyuan-lite"
-        elif self.provider == "qwen":
-            qw_config = LLM_CONFIG.get("qwen", {})
-            self.base_url = base_url or qw_config.get("base_url") or "https://dashscope.aliyuncs.com/compatible-mode/v1"
-            self.api_key = api_key or qw_config.get("api_key")
-            # If used for DeepSeek on Aliyun, naturally fallback to deepseek-v3 instead of qwen-coder
-            self.model = model or qw_config.get("model") or LLM_CONFIG.get("model") or "deepseek-v3"
-        else: # openai, custom, or generic
-            self.base_url = base_url or LLM_CONFIG.get("base_url", "http://127.0.0.1:8045/v1")
-            self.api_key = api_key or LLM_CONFIG.get("api_key", "")
-            self.model = model or LLM_CONFIG.get("model", "gpt-3.5-turbo")
+        # 3. 按照优先级赋值: 显式传入 > 供应商特定配置 > 全局配置
+        self.base_url = base_url or prov_config.get("base_url") or LLM_CONFIG.get("base_url")
+        self.api_key = api_key or prov_config.get("api_key") or LLM_CONFIG.get("api_key") or ""
+        self.model = model or prov_config.get("model") or LLM_CONFIG.get("model")
+        
+        # 4. 模型名称兜底 (如果上述链路均未获取到模型)
+        if not self.model:
+            from backend.config import LLM_PROVIDER_REGISTRY
+            self.model = LLM_PROVIDER_REGISTRY.get(self.provider, {}).get("default_model", "gpt-3.5-turbo")
+
+        # 5. 自动注册供应商限流器 (目前仅针对腾讯混元)
+        if self.provider == "hunyuan" and "hunyuan" not in self._rate_limiters:
+            qps = prov_config.get("qps_limit", 2.0)
+            self._rate_limiters["hunyuan"] = AsyncRateLimiter(qps)
 
         self.timeout = timeout
         

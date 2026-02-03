@@ -14,7 +14,7 @@ from engine.llm_client import LLMClient
 # --- Tier to Provider Mapping ---
 TIER_PROVIDER_MAP = {
     "free": os.getenv("BRIEF_PROVIDER_FREE", "hunyuan"),
-    "pro": os.getenv("BRIEF_PROVIDER_PRO", "deepseek")
+    "pro": os.getenv("BRIEF_PROVIDER_PRO", "aliyun")
 }
 SUPPORTED_TIERS = list(TIER_PROVIDER_MAP.keys())
 
@@ -57,7 +57,7 @@ class TieredLLMStrategy(BriefGenerationStrategy):
             {"role": "user", "content": user_prompt}
         ]
         
-        display_provider = "aliyun" if self.provider == "qwen" else self.provider
+        display_provider = self.provider
         logger.info(f"🧠 Generating {self.tier.upper()} brief via {display_provider} ({self.model})...")
         
         content, meta = await self.client.chat_async(
@@ -94,5 +94,4 @@ class StrategyFactory:
     @staticmethod
     def get_provider_for_tier(tier: str) -> str:
         """根据 tier 获取 provider 名称"""
-        prov = TIER_PROVIDER_MAP.get(tier, "hunyuan")
-        return "aliyun" if prov == "qwen" else prov
+        return TIER_PROVIDER_MAP.get(tier, "hunyuan")
