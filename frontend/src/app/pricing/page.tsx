@@ -438,7 +438,7 @@ function PricingContent() {
                 </div>
                 <div className="p-6">
                     <h4 className="text-white font-bold mb-3">极致性价比</h4>
-                    <p className="text-slate-500 text-sm font-medium">利用 Gemini 3 Flash 的批处理分布式架构，将年费控制在竞品的 1/5 以下。</p>
+                    <p className="text-slate-500 text-sm font-medium">利用 DeepSeek V3 的批处理分布式架构，将年费控制在竞品的 1/5 以下。</p>
                 </div>
             </div>
         </section>
