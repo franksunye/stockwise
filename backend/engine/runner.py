@@ -177,8 +177,11 @@ class PredictionRunner:
         conn.close()
         logger.info(f"✅ Analysis completed for {symbol}. Saved {saved_count} results. Primary: {primary_pred['model_id'] if primary_pred else 'None'}")
         
-        # Return the primary prediction result for use in notifications
-        return primary_pred if primary_pred else True
+        # Return a summarized success object instead of just the primary prediction
+        return {
+            "primary": primary_pred,
+            "models": [p['model_id'] for p in valid_predictions if p] # All models that succeeded
+        } if valid_predictions else False
 
     async def _safe_predict(self, model, symbol, date, data, force: bool = False):
         try:

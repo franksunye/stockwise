@@ -173,9 +173,13 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool =
                         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
                     except: pass
                      
-                primary_result = asyncio.run(runner.run_analysis(stock, today_str))
+                analysis_result = asyncio.run(runner.run_analysis(stock, today_str))
                 
-                if primary_result:
+                if analysis_result:
+                    # analysis_result is now a dict: {"primary": ..., "models": [...]}
+                    primary_result = analysis_result.get('primary')
+                    all_models = analysis_result.get('models', [])
+                    
                     # [NEW] Check for Signal Flips for each subscriber
                     if notif_manager and isinstance(primary_result, dict):
                         subscribers = stock_subscribers.get(stock, set())
@@ -187,7 +191,12 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool =
                             )
 
                     success_count += 1
-                    ai_count += 1 
+                    
+                    # Distinguish AI and Rule successes for reporting
+                    if any(m != 'rule-engine' for m in all_models):
+                        ai_count += 1
+                    if 'rule-engine' in all_models:
+                        rule_count += 1
                     
                 else:
                     logger.warning(f"⚠️ {stock}: Analysis failed or returned no results.")
