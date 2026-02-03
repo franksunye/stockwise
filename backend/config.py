@@ -140,6 +140,9 @@ def get_now_beijing():
 ADMIN_USER_IDS = os.getenv("ADMIN_USER_IDS", "").split(",")
 PRO_USER_IDS = os.getenv("PRO_USER_IDS", "").split(",")
 
+# Admin Mobiles for WeCom Alerts (e.g. "13800000000,13900000000")
+ADMIN_MOBILES = [m.strip() for m in os.getenv("ADMIN_MOBILES", "").split(",") if m.strip()]
+
 # Tiers
 TIER_PROVIDER_MAP = {
     "free": os.getenv("LLM_MODEL_FREE", "gpt-3.5-turbo"),

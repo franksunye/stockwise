@@ -71,7 +71,9 @@ class TaskLogger:
             mentions = None
             
             if channel_alert:
-                mentions = ["@all"]
+                # Use configured admin mobiles if available, otherwise fallback to @all
+                from backend.config import ADMIN_MOBILES
+                mentions = ADMIN_MOBILES if ADMIN_MOBILES else ["@all"]
                 
                 if rerun_workflow:
                     url = f"{self.REPO_ACTIONS_URL}/{rerun_workflow}"
