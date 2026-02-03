@@ -149,7 +149,7 @@ function PricingContent() {
       }
     } catch (error: unknown) {
       console.error('Checkout error:', error);
-      alert('支付 system 暂时不可用，请稍后再试: ' + ((error as Error).message || 'Unknown error'));
+      alert('⚠️ 支付暂时受阻。\n\n如多次尝试无效，请直接添加页面下方的【人工客服】（支持微信/支付宝转账开通）。\n\nError: ' + ((error as Error).message || 'Unknown error'));
     } finally {
       setLoadingPriceId(null);
     }
@@ -422,8 +422,52 @@ function PricingContent() {
           </p>
         </div>
 
+        {/* 人工服务通道 (New Section) */}
+        <div className="mb-32 mt-20">
+             <div className="glass-card p-1 border-white/10 bg-gradient-to-r from-indigo-500/20 via-purple-500/10 to-transparent">
+                <div className="bg-[#0a0a0e] rounded-[38px] p-8 md:p-12 flex flex-col md:flex-row items-center gap-10">
+                    <div className="flex-1 text-left">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-bold uppercase tracking-wider mb-4">
+                            <Zap size={12} className="fill-current" />
+                            <span>人工专属通道</span>
+                        </div>
+                        <h2 className="text-3xl font-black italic tracking-tighter mb-4 text-white">
+                            支付遇到问题？<br className="md:hidden" />
+                            <span className="text-slate-500">添加服务官处理</span>
+                        </h2>
+                        <p className="text-slate-400 font-medium leading-relaxed max-w-lg mb-6">
+                            如果您遇到 Stripe 支付被拒、没有外币信用卡，或者需要**企业对公转账**、**支付宝/微信直接转账**开通服务。
+                            <br /><br />
+                            请直接扫码添加官方客服，我们将手动为您开通权限。（备注：Pro开通）
+                        </p>
+                        <div className="flex items-center gap-4 text-sm font-bold text-slate-500">
+                             <span className="flex items-center gap-2"><Check size={14} className="text-emerald-500" /> 极速响应</span>
+                             <span className="flex items-center gap-2"><Check size={14} className="text-emerald-500" /> 支持RMB支付</span>
+                             <span className="flex items-center gap-2"><Check size={14} className="text-emerald-500" /> 发票支持</span>
+                        </div>
+                    </div>
+                    
+                    <div className="relative group">
+                        <div className="absolute inset-0 bg-indigo-500 blur-[60px] opacity-20 group-hover:opacity-40 transition-opacity rounded-full"></div>
+                        <div className="relative z-10 p-4 bg-white rounded-3xl shadow-2xl shadow-indigo-500/20 transform group-hover:scale-105 transition-transform duration-300">
+                            <Image 
+                                src="/support-qr.png" 
+                                alt="Customer Support QR Code" 
+                                width={180} 
+                                height={180}
+                                className="rounded-xl"
+                            />
+                            <div className="mt-3 text-center">
+                                <p className="text-[#050508] font-black text-xs tracking-widest uppercase">SCAN TO CHAT</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         {/* 商业对标 */}
-        <section className="mt-40 text-center">
+        <section className="text-center">
             <h2 className="text-3xl font-black italic tracking-tighter mb-12">
                为什么选择 <span className="text-indigo-500">StockWise AI?</span>
             </h2>
