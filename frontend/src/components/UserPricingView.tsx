@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { Check, ChevronRight, Zap, Crown, ArrowLeftRight } from 'lucide-react';
+import { Check, ChevronRight, Zap, Crown, ShieldCheck, ArrowLeftRight } from 'lucide-react';
 import { getCurrentUserId } from '@/lib/user';
 
+// IMPORTANT: This MUST stay in sync with frontend/src/app/pricing/page.tsx
 const pricingPlans = [
   {
     name: '基础版',
@@ -16,8 +17,11 @@ const pricingPlans = [
       '每日市场复盘 (基础行情摘要)',
       '每日 3 次个股 AI 诊断',
       '投资者共学社区权限',
+      '每日 3 次个股 AI 诊断',
+      '投资者共学社区权限',
     ],
-    cta: '当前方案',
+    cta: '立即开始',
+    href: '/dashboard',
     highlight: false,
     icon: Zap,
     color: 'slate',
@@ -41,7 +45,26 @@ const pricingPlans = [
     highlight: true,
     icon: Crown,
     color: 'indigo',
-  }
+  },
+  {
+    name: '机构/大户版',
+    enName: 'Alpha',
+    price: '1,999',
+    period: '每年',
+    description: '顶级阿尔法收益工具，实时深度监控',
+    features: [
+      '实时盘中突发事件 AI 分析',
+      '1对1 AI 专属策略看板',
+      '专属深度研报自动生成',
+      'API 原始数据访问接口',
+      '行业专家优先支持',
+    ],
+    cta: '联系我们',
+    href: 'mailto:support@visutry.com',
+    highlight: false,
+    icon: ShieldCheck,
+    color: 'emerald',
+  },
 ];
 
 interface Props {
@@ -153,7 +176,9 @@ export function UserPricingView({ onBack, currentTier }: Props) {
 
                         <div className="flex items-center gap-4 mb-4">
                             <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                                plan.color === 'indigo' ? 'bg-indigo-500/20 text-indigo-400' : 'bg-slate-500/20 text-slate-400'
+                                plan.color === 'indigo' ? 'bg-indigo-500/20 text-indigo-400' :
+                                plan.color === 'emerald' ? 'bg-emerald-500/20 text-emerald-400' :
+                                'bg-slate-500/20 text-slate-400'
                             }`}>
                                 <plan.icon size={20} />
                             </div>
@@ -211,6 +236,18 @@ export function UserPricingView({ onBack, currentTier }: Props) {
                                     </button>
                                 )}
                             </div>
+                        ) : 'href' in plan && plan.href ? (
+                            <a 
+                                href={plan.href}
+                                className={`w-full py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-95 ${
+                                    plan.color === 'emerald' 
+                                    ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20'
+                                    : 'bg-white/5 border border-white/10 text-white hover:bg-white/10'
+                                }`}
+                            >
+                                {plan.cta}
+                                <ChevronRight size={14} />
+                            </a>
                         ) : null}
                     </div>
                 );
