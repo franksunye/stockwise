@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getDbClient } from '@/lib/db';
 import { triggerOnDemandSync } from '@/lib/github-actions';
 import { getMarketFromSymbol, getExpectedLatestDataDate } from '@/lib/date-utils';
+import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
 
 export async function POST(request: Request) {
     try {
@@ -43,7 +44,7 @@ export async function POST(request: Request) {
             if (user.has_onboarded) {
                 console.log(`User ${userId} already onboarded, skipping trial grant.`);
             } else {
-                const trialDays = 3;
+                const trialDays = MEMBERSHIP_CONFIG.onboarding.trialDays;
                 const expiryDate = new Date();
                 expiryDate.setDate(expiryDate.getDate() + trialDays);
 

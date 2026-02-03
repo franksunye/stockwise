@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Zap, ShieldCheck, Target, Clock } from 'lucide-react';
 import { getCurrentUser } from '@/lib/user';
 import { shouldEnableHighPerformance } from '@/lib/device-utils';
+import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
 
 // Fallback data for the reveal step
 const DEFAULT_REVEAL_DATA = { 
@@ -27,6 +28,7 @@ export function OnboardingOverlay() {
   const isHighPerformance = shouldEnableHighPerformance();
   const [isVisible, setIsVisible] = useState(false);
   const [step, setStep] = useState(1);
+  const [trialDays, setTrialDays] = useState(MEMBERSHIP_CONFIG.onboarding.trialDays);
 
   const [selectedStock, setSelectedStock] = useState<string | null>(null);
   const [selectedStockName, setSelectedStockName] = useState<string | null>(null);
@@ -60,6 +62,13 @@ export function OnboardingOverlay() {
         const data = await res.json();
         if (!data.hasOnboarded) {
              setIsVisible(true);
+             // If they are already Pro (via referral), check their expiry to show correct trial length
+             if (data.tier === 'pro' && data.expiresAt) {
+                 const expiry = new Date(data.expiresAt);
+                 const now = new Date();
+                 const diffDays = Math.ceil((expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+                 if (diffDays > 3) setTrialDays(diffDays);
+             }
         } else {
              localStorage.setItem('STOCKWISE_HAS_ONBOARDED', 'true');
         }
@@ -414,7 +423,7 @@ export function OnboardingOverlay() {
                             <div className="bg-gradient-to-br from-indigo-900/40 to-black border border-indigo-500/30 p-6 rounded-2xl relative overflow-hidden">
                                 <div className="relative z-10">
                                      <h3 className="text-indigo-300 font-bold uppercase tracking-widest text-xs mb-2">特别礼物</h3>
-                                     <p className="text-white font-bold text-lg mb-1">已激活 3 天 Pro 体验权</p>
+                                      <p className="text-white font-bold text-lg mb-1">已激活 {trialDays} 天 Pro 体验权</p>
                                      <p className="text-slate-400 text-xs">可监控 10 只股票，解锁 AI 核心逻辑与止损建议。</p>
                                 </div>
                                 <Clock className="absolute -bottom-4 -right-4 w-24 h-24 text-indigo-500/10" />
