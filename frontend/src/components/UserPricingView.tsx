@@ -1,71 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { Check, ChevronRight, Zap, Crown, ShieldCheck, ArrowLeftRight } from 'lucide-react';
+import { Check, ChevronRight, ArrowLeftRight } from 'lucide-react';
 import { getCurrentUserId } from '@/lib/user';
+import { pricingPlans } from '@/lib/pricing-data';
 
-// IMPORTANT: This MUST stay in sync with frontend/src/app/pricing/page.tsx
-const pricingPlans = [
-  {
-    name: '基础版',
-    enName: 'Free',
-    price: '0',
-    period: '永久免费',
-    description: '适合刚接触 AI 投资的个人投资者',
-    features: [
-      'AI 趋势信号 (量化多空判断)',
-      '每日市场复盘 (基础行情摘要)',
-      '每日 3 次个股 AI 诊断',
-      '投资者共学社区权限',
-      '每日 3 次个股 AI 诊断',
-      '投资者共学社区权限',
-    ],
-    cta: '立即开始',
-    href: '/dashboard',
-    highlight: false,
-    icon: Zap,
-    color: 'slate',
-  },
-  {
-    name: 'Pro 会员',
-    enName: 'Pro',
-    price: '29.9',
-    period: '每月 / ¥299 每年',
-    description: '专为追求深度认知与交易纪律的进阶投资者设计',
-    features: [
-      'DeepSeek 深度推理 (揭示涨跌逻辑)',
-      '教练式 AI 研报 (拒绝术语堆砌)',
-      '10 只自选股全权托管 (覆盖主力持仓)',
-      '主力情绪与资金关键指标解锁',
-      '关键变盘点实时推送 (纪律提醒)',
-      '⭐ 专属 Pro 身份勋章',
-    ],
-    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_MONTHLY || 'price_1Su1zqS3fDFObThpZbYXr2GG',
-    priceIdAnnual: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_YEARLY || 'price_1Su1zqS3fDFObThp7iG6X6bK', 
-    highlight: true,
-    icon: Crown,
-    color: 'indigo',
-  },
-  {
-    name: '机构/大户版',
-    enName: 'Alpha',
-    price: '1,999',
-    period: '每年',
-    description: '顶级阿尔法收益工具，实时深度监控',
-    features: [
-      '实时盘中突发事件 AI 分析',
-      '1对1 AI 专属策略看板',
-      '专属深度研报自动生成',
-      'API 原始数据访问接口',
-      '行业专家优先支持',
-    ],
-    cta: '联系我们',
-    href: 'mailto:support@visutry.com',
-    highlight: false,
-    icon: ShieldCheck,
-    color: 'emerald',
-  },
-];
 
 interface Props {
   onBack: () => void;
