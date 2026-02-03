@@ -28,6 +28,13 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
     const [nextRefreshIn, setNextRefreshIn] = useState<number>(getRefreshInterval());
 
     const lastFetchTimeRef = useRef<number>(0);
+    const stocksRef = useRef<StockData[]>(stocks);
+
+    // Sync ref with state
+    useEffect(() => {
+        stocksRef.current = stocks;
+    }, [stocks]);
+
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -71,10 +78,10 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
             // we MUST re-map the stocks if the watchlist itself has changed (e.g. user added/removed item).
             // Current `stocks` might be stale compared to `watchlist`.
             // Check if we need a quick local sync without network
-            if (watchlist.length !== stocks.length) {
+            if (watchlist.length !== stocksRef.current.length) {
                 // Fallback: Local re-map using existing data + new placeholder
                 const remapped = watchlist.map(item => {
-                    const existing = stocks.find(s => s.symbol === item.symbol);
+                    const existing = stocksRef.current.find(s => s.symbol === item.symbol);
                     if (existing) return existing;
                     return {
                         symbol: item.symbol, name: item.name, price: null,
@@ -164,7 +171,7 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
             // If network fails, at least show the items in watchlist with error state
             if (watchlist.length > 0) {
                 const fallback = watchlist.map(item => {
-                    const existing = stocks.find(s => s.symbol === item.symbol);
+                    const existing = stocksRef.current.find(s => s.symbol === item.symbol);
                     return existing || {
                         symbol: item.symbol, name: item.name, price: null, loading: false,
                         change: 0, lastUpdated: '...', history: [],

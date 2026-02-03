@@ -1,15 +1,15 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, User, Crown, Zap, ShieldCheck, Loader2, ArrowRight, Share2, Check, RefreshCw, Key, Bell, ChevronDown, ArrowLeftRight, Sun, Trophy, FileText, Star, ChevronRight, Mail, Info } from 'lucide-react';
+import { X, User, Crown, Zap, ShieldCheck, Loader2, ArrowRight, Share2, Check, RefreshCw, Key, Bell, ChevronDown, ArrowLeftRight, Sun, Trophy, FileText, ChevronRight, Mail, Info } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { getCurrentUser, restoreUserIdentity } from '@/lib/user';
 import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
 import { isPushSupported, subscribeUserToPush } from '@/lib/notifications';
 import { shouldEnableHighPerformance } from '@/lib/device-utils';
 import { IdentityPassport } from '@/components/IdentityPassport';
 import { useUserProfile } from '@/hooks/useUserProfile';
+import { UserPricingView } from './UserPricingView';
 import pkg from '../../package.json';
 
 interface Props {
@@ -50,6 +50,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
 
   // Identity & Recovery Stats
   const [showIdentityCenter, setShowIdentityCenter] = useState(false);
+  const [showPricing, setShowPricing] = useState(false);
   const [isLinkingEmail, setIsLinkingEmail] = useState(false);
   const [tempEmail, setTempEmail] = useState('');
 
@@ -301,6 +302,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
             </div>
 
             <div className="px-8 pt-4 pb-4 flex flex-col min-h-[60vh]">
+              {!showPricing && (
               <header className="flex items-center justify-between mb-8">
                 <div className="space-y-1.5">
                    <div className="flex items-center gap-2">
@@ -315,8 +317,14 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                   <X className="w-5 h-5 text-slate-400" />
                 </button>
               </header>
+              )}
 
-              {showIdentityCenter ? (
+              {showPricing ? (
+                 <UserPricingView 
+                    onBack={() => setShowPricing(false)} 
+                    currentTier={tier} 
+                 />
+              ) : showIdentityCenter ? (
                 /* --- IDENTITY CENTER VIEW --- */
                 <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
                     <button 
@@ -483,14 +491,13 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                             </div>
                         </button>
 
-                        <Link 
-                            href="/pricing"
+                        <button 
                             className={`w-full py-4 px-5 rounded-[24px] border transition-all flex items-center justify-between group ${
                                 tier === 'pro' 
                                 ? 'bg-white/[0.02] border-white/5 hover:border-indigo-500/20' 
                                 : 'bg-indigo-500/5 border-indigo-500/10 hover:border-indigo-500/20'
                             }`}
-                            onClick={() => onClose()}
+                            onClick={() => setShowPricing(true)}
                         >
                             <div className="flex items-center gap-3">
                                 <div className="text-left">
@@ -500,7 +507,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                 </div>
                             </div>
                             <ChevronRight size={14} className="text-slate-600" />
-                        </Link>
+                        </button>
                     </div>
 
                     {/* Notification Switch */}

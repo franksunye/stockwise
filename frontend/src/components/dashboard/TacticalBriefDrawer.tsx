@@ -54,7 +54,7 @@ const getStepConfig = (step: string) => {
 };
 
 export function TacticalBriefDrawer({ 
-  isOpen, onClose, data, userPos, tier, model, symbol, targetDate
+  isOpen, onClose, data, tier, model, symbol, targetDate
 }: TacticalBriefDrawerProps) {
   const isHighPerformance = shouldEnableHighPerformance();
   const [isExpanded, setIsExpanded] = useState(false);

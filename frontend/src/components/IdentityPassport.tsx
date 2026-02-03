@@ -1,6 +1,6 @@
 'use client';
 
-import { Copy, Check, ShieldCheck, Mail, Info } from 'lucide-react';
+import { Copy, Check, Mail } from 'lucide-react';
 import { useState } from 'react';
 
 interface Props {
@@ -10,7 +10,7 @@ interface Props {
   emailLinked?: string | null;
 }
 
-export function IdentityPassport({ userId, tier, onLinkEmail, emailLinked }: Props) {
+export function IdentityPassport({ userId, onLinkEmail, emailLinked }: Props) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, ChevronRight, Zap, Crown, ShieldCheck, Star, PartyPopper, X } from 'lucide-react';
+import { Check, ChevronRight, Zap, Crown, ShieldCheck, PartyPopper, X } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';

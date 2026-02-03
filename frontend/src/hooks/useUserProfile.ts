@@ -18,6 +18,7 @@ export interface UserProfile {
     totalEarned?: number;
     commissionRate?: number;
     hasOnboarded?: boolean;
+    hasStripeCustomer?: boolean;
 }
 
 export function useUserProfile() {
@@ -74,7 +75,8 @@ export function useUserProfile() {
                     referralBalance: data.referralBalance,
                     totalEarned: data.totalEarned,
                     commissionRate: data.commissionRate,
-                    hasOnboarded: data.hasOnboarded
+                    hasOnboarded: data.hasOnboarded,
+                    hasStripeCustomer: data.hasStripeCustomer
                 };
 
                 setProfile(newProfile);

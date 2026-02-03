@@ -214,7 +214,7 @@ export async function POST(request: Request) {
                             db.execute({
                                 sql: "UPDATE users SET subscription_tier = 'free' WHERE user_id = ?",
                                 args: [userId]
-                            }).catch((e: any) => console.error('Lazy correction failed:', e));
+                            }).catch((e: unknown) => console.error('Lazy correction failed:', e));
                         } else {
                             db.prepare("UPDATE users SET subscription_tier = 'free' WHERE user_id = ?").run(userId);
                         }
