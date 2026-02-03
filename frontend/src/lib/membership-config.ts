@@ -55,7 +55,7 @@ export const MEMBERSHIP_CONFIG = {
         pro: {
             maxStocks: 10,
             analysisMode: 'ai' as const,
-            allowedModels: ['deepseek-v3', 'gemini-3-flash', 'hunyuan-lite', 'rule-engine'],
+            allowedModels: ['deepseek-v3', 'hunyuan-lite', 'rule-engine'],
             sqlFilter: "p.is_primary = 1" // Pro 始终看到最高优先级模型
         },
     } as const,
