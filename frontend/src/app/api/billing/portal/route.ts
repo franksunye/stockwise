@@ -3,11 +3,10 @@ import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { getDbClient } from '@/lib/db';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-    apiVersion: '2025-12-15.clover',
-});
-
 export async function POST(request: Request) {
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
+        apiVersion: '2025-12-15.clover',
+    });
     let db: any;
     try {
         const { userId } = await request.json();
