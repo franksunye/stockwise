@@ -204,6 +204,24 @@ export async function POST(request: Request) {
             const expiry = new Date(user.subscription_expires_at);
             if (expiry < new Date()) {
                 isExpired = true;
+                // --- Lazy Correction: Update DB immediately ---
+                // Only if the DB still says they are PRO/PREMIUM
+                if (user.subscription_tier !== 'free') {
+                    console.log(`🧹 Lazy correction: Downgrading expired user ${userId} to free`);
+                    try {
+                        if (isCloud) {
+                            // Don't await this, let it run in background to keep API fast
+                            db.execute({
+                                sql: "UPDATE users SET subscription_tier = 'free' WHERE user_id = ?",
+                                args: [userId]
+                            }).catch((e: any) => console.error('Lazy correction failed:', e));
+                        } else {
+                            db.prepare("UPDATE users SET subscription_tier = 'free' WHERE user_id = ?").run(userId);
+                        }
+                    } catch (e) {
+                        console.error('Lazy correction error:', e);
+                    }
+                }
             }
         }
 
