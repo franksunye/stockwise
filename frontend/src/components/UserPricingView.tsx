@@ -71,9 +71,9 @@ export function UserPricingView({ onBack, currentTier }: Props) {
   };
 
   return (
-    <div className="animate-in fade-in slide-in-from-right-4 duration-300 h-full flex flex-col">
-       {/* Header */}
-       <div className="flex items-center gap-2 mb-6">
+    <div className="animate-in fade-in slide-in-from-right-4 duration-300 h-full flex flex-col overflow-hidden">
+       {/* Header - Fixed at top */}
+       <div className="flex items-center gap-2 mb-4 shrink-0">
             <button 
                 onClick={onBack}
                 className="flex items-center gap-1 text-slate-400 hover:text-white transition-colors text-xs font-bold uppercase tracking-wider"
@@ -85,7 +85,8 @@ export function UserPricingView({ onBack, currentTier }: Props) {
             </span>
        </div>
 
-       <div className="flex-1 overflow-y-auto pr-1 -mr-2 space-y-4 pb-10 custom-scrollbar">
+       {/* Scrollable content area */}
+       <div className="flex-1 overflow-y-auto overscroll-contain space-y-4 pb-6 -mx-2 px-2">
             {currentTier === 'free' && (
                  <div className="p-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-xl shadow-indigo-500/20 mb-6">
                     <h3 className="font-black italic text-lg mb-1">限时升级 Pro</h3>
