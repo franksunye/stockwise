@@ -71,7 +71,7 @@ function TimelineItem({ task, currentDate }: { task: Task, currentDate: Date }) 
   if (isSkipped) dotClass = "bg-gray-900 border-gray-800 text-gray-700";
 
   // Avatar Logic
-  const avatarUrl = `https://api.dicebear.com/9.x/bottts-neutral/svg?seed=${task.agent.persona}`;
+  const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${task.agent.persona}&mood=happy`;
 
   return (
     <div className={`relative pl-12 py-4 group transition-all duration-300 ${isSkipped ? 'opacity-50 grayscale hover:grayscale-0 hover:opacity-80' : ''}`}>
