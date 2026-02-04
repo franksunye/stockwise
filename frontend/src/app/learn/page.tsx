@@ -31,7 +31,7 @@ export default async function LearnPage() {
           <Link href="/dashboard" className="p-2 -ml-2 rounded-full hover:bg-white/5 active:scale-95 transition-all text-slate-400 hover:text-white">
             <ChevronLeft size={20} />
           </Link>
-          <div className="font-bold text-lg tracking-tight">StockWise <span className="text-indigo-500">Learn</span></div>
+          <div className="font-bold text-lg tracking-tight">StockWise <span className="text-indigo-500">101</span></div>
           <div className="w-8" /> {/* Balance */}
         </div>
       </nav>
