@@ -254,7 +254,6 @@ export default function StockPoolPage() {
           </Link>
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_#6366f1] animate-pulse" />
               <span className="text-[10px] uppercase tracking-[0.4em] text-slate-500 font-bold">自选监控</span>
             </div>
             <h1 className="text-2xl font-black italic tracking-tighter text-white">
