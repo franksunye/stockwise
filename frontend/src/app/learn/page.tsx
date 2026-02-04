@@ -59,15 +59,15 @@ export default async function LearnPage() {
         </div>
 
         <div className="max-w-5xl mx-auto px-6 relative z-10 text-center space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-1">
-            <BookOpen size={10} className="text-indigo-400" />
-            知守日课 · Retail Survival Manual
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em] mb-1">
+            <Sparkles size={10} className="animate-pulse" />
+            知守投研委员会 · 全天候智力支持
           </div>
           <h1 className="text-2xl md:text-4xl font-black tracking-tighter italic leading-tight">
             从散户到 <span className="bg-gradient-to-r from-indigo-500 via-purple-300 to-indigo-500 bg-clip-text text-transparent">理性交易者</span>
           </h1>
           <p className="text-slate-500 max-w-xl mx-auto text-sm md:text-base leading-relaxed font-medium">
-            这里是你的理性避难所。不教你一夜暴富，只教你如何用 AI 和概率论在黑暗森林里活下来。
+            这里是你的理性避难所。由 <span className="text-indigo-400/80">知守投研委员会</span> 维护的 40 篇生存日课，教你如何在黑暗森林里活下来。
           </p>
           
           <div className="pt-4 flex flex-wrap justify-center gap-3 text-[10px] font-bold text-slate-500">
