@@ -20,7 +20,7 @@ export default function LandingPage() {
         <div className="flex items-center gap-2">
           <Image 
             src="/logo.png" 
-            alt="StockWise AI Logo" 
+            alt="ZISO AI Logo" 
             width={40} 
             height={40} 
             className="rounded-xl"
@@ -189,12 +189,12 @@ export default function LandingPage() {
             <h2 className="text-3xl md:text-4xl font-black italic tracking-tighter">
               常见问题 <span className="text-indigo-500">FAQ</span>
             </h2>
-            <p className="text-slate-400 font-medium">快速了解 StockWise AI</p>
+            <p className="text-slate-400 font-medium">快速了解 ZISO AI</p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-4">
             <div className="glass-card p-6 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
-              <p className="text-white font-bold mb-2">StockWise AI 是什么？</p>
+              <p className="text-white font-bold mb-2">ZISO AI 是什么？</p>
               <p className="text-slate-400 text-sm">一款 AI 驱动的港股/A股决策辅助工具，帮助个人投资者做出更理性的交易决策。</p>
             </div>
             <div className="glass-card p-6 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
@@ -242,14 +242,14 @@ export default function LandingPage() {
           <div className="flex items-center gap-2">
             <Image 
               src="/logo.png" 
-              alt="StockWise AI Logo" 
+              alt="ZISO AI Logo" 
               width={32} 
               height={32} 
               className="rounded-lg"
             />
-            <span className="text-sm font-black italic tracking-tighter">STOCKWISE AI</span>
+            <span className="text-sm font-black italic tracking-tighter">ZISO AI</span>
           </div>
-          <p className="text-xs text-slate-600 font-bold uppercase tracking-widest">© 2026 STOCKWISE AI TECHNOLOGY. ALL RIGHTS RESERVED.</p>
+          <p className="text-xs text-slate-600 font-bold uppercase tracking-widest">© 2026 ZISO AI TECHNOLOGY. ALL RIGHTS RESERVED.</p>
           <div className="flex gap-6 text-xs font-bold text-slate-500">
             <Link href="/learn" className="hover:text-white transition-colors">101 手册</Link>
             <Link href="/status" className="hover:text-white transition-colors">系统状态</Link>

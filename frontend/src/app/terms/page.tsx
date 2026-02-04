@@ -41,7 +41,7 @@ export default function TermsOfService() {
           <div className="glass-card p-6 border-amber-500/20 bg-amber-500/[0.02] flex gap-4 items-start">
             <AlertTriangle className="text-amber-500 shrink-0 mt-1" size={20} />
             <div className="text-sm text-amber-200/80 leading-relaxed font-medium">
-              重要声明：StockWise AI 提供的所有预测、分析和报告均由人工智能自动生成，仅供技术参考，不构成任何投资建议、财务咨询或法律意见。股市有风险，投资需谨慎。
+              重要声明：ZISO AI 提供的所有预测、分析和报告均由人工智能自动生成，仅供技术参考，不构成任何投资建议、财务咨询或法律意见。股市有风险，投资需谨慎。
             </div>
           </div>
 
@@ -49,7 +49,7 @@ export default function TermsOfService() {
             <section className="space-y-4">
               <h2 className="text-xl font-bold text-white italic">1. 服务说明</h2>
               <p className="text-slate-400 leading-relaxed text-sm">
-                StockWise AI 是一家提供基于 AI 的股票市场分析、预测简报及实时提醒服务的平台。您知悉并接受 AI 生成内容的局限性及市场波动预测的不确定性。
+                ZISO AI 是一家提供基于 AI 的股票市场分析、预测简报及实时提醒服务的平台。您知悉并接受 AI 生成内容的局限性及市场波动预测的不确定性。
               </p>
             </section>
 
@@ -77,7 +77,7 @@ export default function TermsOfService() {
             <section className="space-y-4">
               <h2 className="text-xl font-bold text-white italic">5. 免责限制</h2>
               <p className="text-slate-400 leading-relaxed text-sm">
-                在法律允许的最大范围内，StockWise AI 对您基于本站信息作出的任何交易决策所产生的盈利或损失概不负责。
+                在法律允许的最大范围内，ZISO AI 对您基于本站信息作出的任何交易决策所产生的盈利或损失概不负责。
               </p>
             </section>
 
@@ -92,7 +92,7 @@ export default function TermsOfService() {
       </main>
 
       <footer className="py-20 text-center text-xs text-slate-600 font-bold uppercase tracking-widest">
-        © 2026 STOCKWISE AI TECHNOLOGY. ALL RIGHTS RESERVED.
+        © 2026 ZISO AI TECHNOLOGY. ALL RIGHTS RESERVED.
       </footer>
 
       <style jsx global>{`

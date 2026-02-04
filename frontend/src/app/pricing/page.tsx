@@ -116,7 +116,7 @@ function PricingContent() {
         <Link href="/" className="flex items-center gap-2">
           <Image 
             src="/logo.png" 
-            alt="StockWise AI Logo" 
+            alt="ZISO AI Logo" 
             width={40} 
             height={40} 
             className="rounded-xl"
@@ -351,7 +351,7 @@ function PricingContent() {
             <span className="text-sm font-black uppercase tracking-widest">风险免责声明</span>
           </div>
           <p className="text-slate-500 text-sm leading-relaxed max-w-2xl mx-auto italic font-medium">
-            股市有风险，投资需谨慎。本应用生成的所有简报、预测及分析内容均由 AI 驱动，仅供参考，不构成任何形式的投资建议或财务咨询。StockWise AI 不对因使用本服务内容而导致的任何投资损失承担直接或间接责任。
+            股市有风险，投资需谨慎。本应用生成的所有简报、预测及分析内容均由 AI 驱动，仅供参考，不构成任何形式的投资建议或财务咨询。ZISO AI 不对因使用本服务内容而导致的任何投资损失承担直接或间接责任。
           </p>
         </div>
 
@@ -402,7 +402,7 @@ function PricingContent() {
         {/* 商业对标 */}
         <section className="text-center">
             <h2 className="text-3xl font-black italic tracking-tighter mb-12">
-               为什么选择 <span className="text-indigo-500">StockWise AI?</span>
+               为什么选择 <span className="text-indigo-500">ZISO AI?</span>
             </h2>
             <div className="grid md:grid-cols-3 gap-8">
                 <div className="p-6">
@@ -427,14 +427,14 @@ function PricingContent() {
           <Link href="/" className="flex items-center gap-2">
             <Image 
               src="/logo.png" 
-              alt="StockWise AI Logo" 
+              alt="ZISO AI Logo" 
               width={32} 
               height={32} 
               className="rounded-lg"
             />
-            <span className="text-sm font-black italic tracking-tighter">STOCKWISE AI</span>
+            <span className="text-sm font-black italic tracking-tighter">ZISO AI</span>
           </Link>
-          <p className="text-xs text-slate-600 font-bold uppercase tracking-widest">© 2026 STOCKWISE AI TECHNOLOGY. ALL RIGHTS RESERVED.</p>
+          <p className="text-xs text-slate-600 font-bold uppercase tracking-widest">© 2026 ZISO AI TECHNOLOGY. ALL RIGHTS RESERVED.</p>
           <div className="flex gap-6 text-xs font-bold text-slate-500">
              <Link href="/status" className="hover:text-white transition-colors">系统状态</Link>
              <Link href="/pricing" className="hover:text-white">价格说明</Link>

@@ -84,7 +84,7 @@ export default function RefundPolicy() {
       </main>
 
       <footer className="py-20 text-center text-xs text-slate-600 font-bold uppercase tracking-widest">
-        © 2026 STOCKWISE AI TECHNOLOGY. ALL RIGHTS RESERVED.
+        © 2026 ZISO AI TECHNOLOGY. ALL RIGHTS RESERVED.
       </footer>
 
       <style jsx global>{`

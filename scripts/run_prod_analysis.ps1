@@ -1,4 +1,4 @@
-# Run StockWise AI Analysis for Production (Turso)
+# Run ZISO AI Analysis for Production (Turso)
 # 
 # 使用方法：
 # ============ 基础模式 ============
@@ -93,9 +93,9 @@ if ($AutoFill) {
 # 普通模式的提示
 if (-not $isBackfillMode) {
     if ($Symbol) {
-        Write-Host ">>> Starting StockWise AI Analysis for: $Symbol" -ForegroundColor Cyan
+        Write-Host ">>> Starting ZISO AI Analysis for: $Symbol" -ForegroundColor Cyan
     } elseif ($Market) {
-        Write-Host ">>> Starting StockWise AI Analysis for Market: $Market" -ForegroundColor Cyan
+        Write-Host ">>> Starting ZISO AI Analysis for Market: $Market" -ForegroundColor Cyan
     } else {
         Write-Host ">>> Starting StockWise Remote Analysis (Full Pool)..." -ForegroundColor Cyan
     }

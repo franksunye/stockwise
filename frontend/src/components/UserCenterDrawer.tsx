@@ -216,7 +216,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
       const registration = await navigator.serviceWorker.ready;
       if (!registration) return;
       
-      await registration.showNotification('🔔 测试通知 - StockWise AI', {
+      await registration.showNotification('🔔 测试通知 - ZISO AI', {
         body: `测试成功！当前时间: ${new Date().toLocaleTimeString('zh-CN')}`,
         icon: '/logo.png',
         badge: '/logo.png',
