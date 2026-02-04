@@ -128,11 +128,15 @@ export default async function LearnPage() {
                              <div className="text-slate-600 text-[10px] font-mono tracking-tighter">
                                 {article.slug.split('-')[1]} • {article.readingTime} MIN READ
                              </div>
-                             {article.image && (
-                               <div className="w-12 h-12 rounded-xl overflow-hidden border border-white/10 opacity-60 group-hover:opacity-100 transition-opacity">
-                                  <Image src={article.image} alt={article.title} width={80} height={80} className="w-full h-full object-cover" />
-                               </div>
-                             )}
+                             <div className={`w-12 h-12 rounded-xl border border-white/10 flex items-center justify-center overflow-hidden transition-all duration-500 flex-shrink-0
+                                ${article.image ? 'opacity-60 group-hover:opacity-100' : `${style.bg} ${style.border} opacity-80 group-hover:opacity-100 group-hover:scale-110`}
+                             `}>
+                                {article.image ? (
+                                   <Image src={article.image} alt={article.title} width={80} height={80} className="w-full h-full object-cover" />
+                                ) : (
+                                   <style.icon size={20} className={style.color} />
+                                )}
+                             </div>
                           </div>
                           
                           <h3 className="text-xl font-bold text-slate-200 group-hover:text-white transition-colors mb-4 leading-[1.3]">
