@@ -38,6 +38,13 @@ async function main() {
     switch (command) {
       case 'query':
       case 'sql':
+        // Check for --raw flag
+        const rawIndex = args.indexOf('--raw');
+        const isRaw = rawIndex !== -1;
+        if (isRaw) {
+          args.splice(rawIndex, 1);
+        }
+
         // 执行任意 SQL
         const sql = args.join(' ');
         if (!sql) {
@@ -45,11 +52,23 @@ async function main() {
           console.error('   示例: node scripts/turso-cli.mjs query "SELECT * FROM stock_pool"');
           process.exit(1);
         }
-        console.log(`📝 执行: ${sql}\n`);
+        
+        if (!isRaw) {
+          console.log(`📝 执行: ${sql}\n`);
+        }
+        
         const result = await client.execute(sql);
-        console.log(`✅ 影响行数: ${result.rowsAffected}`);
+        
+        if (!isRaw) {
+           console.log(`✅ 影响行数: ${result.rowsAffected}`);
+        }
+
         if (result.rows.length > 0) {
-          console.table(result.rows);
+          if (isRaw) {
+            console.log(JSON.stringify(result.rows, null, 2));
+          } else {
+            console.table(result.rows);
+          }
         }
         break;
 

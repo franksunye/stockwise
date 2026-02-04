@@ -173,7 +173,8 @@ class SynthesisStep(BaseStep):
    - momentum.data: 从上方提取 MACD/RSI 状态
    - decision.conclusion: "{decision_conclusion}"
 
-请直接输出完整 JSON，不要添加任何解释：
+请直接输出完整 JSON，不要添加任何解释。
+特别注意：**所有文本值（例如 "未提供" 或 "N/A"）都必须包含在双引号中**。
 """
             return prompt
 
@@ -347,23 +348,43 @@ class SynthesisStep(BaseStep):
         if "signal" not in parsed:
             raise ValueError("JSON missing 'signal' field")
             
+    
     def _clean_and_parse_json(self, text: str) -> Dict[str, Any]:
         """
         Robust JSON parser for messy LLM output.
         """
-        try:
-            # 1. Strip markdown code blocks
-            text = re.sub(r"```json\s*", "", text, flags=re.IGNORECASE)
-            text = re.sub(r"```", "", text)
-            text = text.strip()
-            
-            # 2. Extract JSON object if embedded in text
-            start = text.find("{")
-            end = text.rfind("}")
-            if start != -1 and end != -1:
-                text = text[start : end + 1]
-                
+        # 1. Strip markdown code blocks
+        text = re.sub(r"```json\s*", "", text, flags=re.IGNORECASE)
+        text = re.sub(r"```", "", text)
+        text = text.strip()
+        
+        # 2. Extract JSON object if embedded in text
+        start = text.find("{")
+        end = text.rfind("}")
+        if start != -1 and end != -1:
+            text = text[start : end + 1]
+
+        try:     
             return json.loads(text)
         except json.JSONDecodeError as e:
-            # Retry mechanism handles exceptions at step level
-            raise StepExecutionError(self.step_name, f"Failed to parse JSON: {e}")
+            # Try to fix unquoted string values (common weak model error)
+            # Pattern: Field: Value (where Value is not quoted and not a number/bool/null/object/array)
+            # We look for: Key (quoted) : Value (no quote, no digit, no { [ t f n -)
+            try:
+                from loguru import logger
+                logger.warning(f"Initial JSON parse failed, attempting regex repair. Error: {e}")
+                
+                # Regex Explanation:
+                # ("\w+") : Key
+                # \s*:\s* : Separator
+                # ([^"\d{\[\s\-tfn][^,}\]]*) : Value. 
+                #    Start must NOT be quote, digit, {, [, whitespace, -, t(rue), f(alse), n(ull).
+                #    Rest must capture until comma or closing brace
+                # ([,}]) : End separator
+                pattern = r'("\w+")\s*:\s*([^"\d{\[\s\-tfn][^,}\]]*)([,}])' 
+                
+                fixed_text = re.sub(pattern, r'\1: "\2"\3', text)
+                return json.loads(fixed_text)
+            except Exception as e2:
+                # Retry mechanism handles exceptions at step level
+                raise StepExecutionError(self.step_name, f"Failed to parse JSON: {e}. Repair failed: {e2}")
