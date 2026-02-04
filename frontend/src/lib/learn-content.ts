@@ -23,7 +23,7 @@ function parseFrontmatter(fileContent: string): { meta: Omit<ArticleMeta, 'slug'
     const frontmatterRegex = /---\s*([\s\S]*?)\s*---/;
     const match = frontmatterRegex.exec(fileContent);
 
-    const meta: any = {};
+    const meta: Record<string, string> = {};
     let content = fileContent;
 
     if (match) {

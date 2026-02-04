@@ -31,21 +31,23 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
   }
 
   // Custom Markdown Components for Premium Styling
-  const MarkdownComponents: any = {
-    h1: ({ children }: any) => <h1 className="text-3xl md:text-4xl font-black tracking-tight text-white mb-8 mt-12 first:mt-0">{children}</h1>,
-    h2: ({ children }: any) => <h2 className="text-2xl font-bold tracking-tight text-indigo-200 mb-6 mt-12 border-l-4 border-indigo-500 pl-4">{children}</h2>,
-    h3: ({ children }: any) => <h3 className="text-xl font-bold text-white mb-4 mt-8">{children}</h3>,
-    p: ({ children }: any) => <p className="text-slate-300 leading-8 mb-6 text-lg">{children}</p>,
-    ul: ({ children }: any) => <ul className="list-disc list-outside ml-6 space-y-2 mb-6 text-slate-300">{children}</ul>,
-    ol: ({ children }: any) => <ol className="list-decimal list-outside ml-6 space-y-2 mb-6 text-slate-300">{children}</ol>,
-    li: ({ children }: any) => <li className="pl-2">{children}</li>,
-    blockquote: ({ children }: any) => (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const MarkdownComponents: Record<string, React.FC<any>> = {
+    h1: ({ children }) => <h1 className="text-3xl md:text-4xl font-black tracking-tight text-white mb-8 mt-12 first:mt-0">{children}</h1>,
+    h2: ({ children }) => <h2 className="text-2xl font-bold tracking-tight text-indigo-200 mb-6 mt-12 border-l-4 border-indigo-500 pl-4">{children}</h2>,
+    h3: ({ children }) => <h3 className="text-xl font-bold text-white mb-4 mt-8">{children}</h3>,
+    p: ({ children }) => <p className="text-slate-300 leading-8 mb-6 text-lg">{children}</p>,
+    ul: ({ children }) => <ul className="list-disc list-outside ml-6 space-y-2 mb-6 text-slate-300">{children}</ul>,
+    ol: ({ children }) => <ol className="list-decimal list-outside ml-6 space-y-2 mb-6 text-slate-300">{children}</ol>,
+    li: ({ children }) => <li className="pl-2">{children}</li>,
+    blockquote: ({ children }) => (
       <blockquote className="border-l-4 border-indigo-500/50 bg-indigo-500/5 p-6 rounded-r-xl my-8 italic text-indigo-200 text-lg">
         {children}
       </blockquote>
     ),
-    code: ({ node, inline, className, children, ...props }: any) => {
-      const match = /language-(\w+)/.exec(className || '');
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    code: ({ node, inline, className, children, ...props }) => {
+      // const match = /language-(\w+)/.exec(className || '');
       return !inline ? (
         <div className="bg-[#111] border border-white/10 rounded-xl p-4 my-6 overflow-x-auto">
           <code className={className} {...props}>
@@ -59,8 +61,8 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
       );
     },
     hr: () => <hr className="border-white/10 my-12" />,
-    a: ({ href, children }: any) => <a href={href} className="text-indigo-400 hover:text-indigo-300 underline underline-offset-4 decoration-indigo-500/30">{children}</a>,
-    strong: ({ children }: any) => <strong className="font-bold text-white">{children}</strong>,
+    a: ({ href, children }) => <a href={href} className="text-indigo-400 hover:text-indigo-300 underline underline-offset-4 decoration-indigo-500/30">{children}</a>,
+    strong: ({ children }) => <strong className="font-bold text-white">{children}</strong>,
   };
 
   return (
@@ -111,7 +113,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
              <div className="mt-8 p-4 rounded-xl bg-gradient-to-br from-indigo-900/20 to-purple-900/20 border border-indigo-500/10 flex items-center justify-center min-h-[200px] text-center">
                 <div className="text-indigo-300/50 text-sm italic max-w-md">
                    🖼️ [Image Placeholder]<br/>
-                   "{article.image_prompt}"
+                   &quot;{article.image_prompt}&quot;
                 </div>
              </div>
           )}

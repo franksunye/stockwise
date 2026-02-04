@@ -53,8 +53,8 @@ export default async function LearnPage() {
 
         {/* Content List */}
         <div className="grid gap-4">
-          {articles.map((article, idx) => {
-            // @ts-ignore
+          {articles.map((article) => {
+            // @ts-expect-error - Dynamic key access based on string category
             const style = CATEGORY_STYLE[article.category] || { icon: BookOpen, color: 'text-slate-400', bg: 'bg-white/5', border: 'border-white/10' };
             const Icon = style.icon;
 
