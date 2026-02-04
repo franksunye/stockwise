@@ -1,0 +1,50 @@
+---
+title: "101-63: 上下文工程"
+subtitle: "为什么让 AI 深度阅读，比让它大算力计算更重要？"
+date: "2026-02-04"
+category: "The Machine"
+image: "/images/learn/context_engineering.png"
+image_prompt: "**Concept**: A conceptual 3D illustration of layered intelligence. **Style**: Swiss Design, Geometric, Minimalist, Clean, Dark Mode (#050508). **Subject**: A series of horizontal Indigo glass plates stacked vertically. A white light is shining from the top, passing through all the plates. **Action**: Every time the light passes through a plate, it becomes more focused and detailed. **Materials**: Polished glass, high-intensity light beam. **Colors**: Indigo (#6366f1) for the context layers. **Constraints**: NO text. NO blur. Center composition."
+---
+
+# 上下文：AI 投研的灵魂
+
+> *"一段没有上下文的价格，只是一个随机波动的数字。"* —— StockWise 首席架构师
+
+如果你看到一个数据：**“某股票成交额放大 10 倍”**。
+*   如果上下文是：该股刚发布重大利好。—— 结论：主升浪开启，追！
+*   如果上下文是：该股正处于历史高位，且大股东刚宣布减持。—— 结论：出货陷阱，跑！
+
+这就是**上下文 (Context)** 的魔力。
+
+---
+
+## 💎 StockWise 的“情报拼图”
+
+我们为 AI 构建的上下文工程包括四个维度：
+1.  **量价历史**：过去一年的支撑位、压力位、筹码密集区。
+2.  **即时舆情**：过去 24 小时的全网新闻、社区情绪。
+3.  **行业对比**：同板块标的的联动表现。
+4.  **宏观指标**：当前的利率环境与政策导向。
+
+---
+
+## 📉 为什么普通 AI 炒股会赔钱？
+
+因为它们通常只看单一维度。
+一个只会看 K 线算法的 AI，无法理解“马斯克发推”带来的非线性冲击。一个只会读新闻的 AI，无法理解“上方套牢盘”带来的物理阻力。
+
+---
+
+## ⚖️ 实战：深度简报的价值
+
+**Actionable Tactic：逻辑链条检查**
+当你阅读 StockWise 的深度简报时，请注意它的 **“推理逻辑链”**。
+1.  **起因**：发现了什么异常？
+2.  **背景**：在这个位置历史上出现过什么？
+3.  **结论**：目前的赔率是否划算？
+
+**AI 的价值不在于它给你的那个“买入”或“卖出”字样，而在于它帮你把散落在四处的碎片，拼成了一幅完整的猎场地图。**
+
+---
+*下一篇：[101-81] 实战案例分析：从 0 到 1 构建你的 AI 投研流。*

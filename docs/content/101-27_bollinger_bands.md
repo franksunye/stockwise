@@ -1,0 +1,53 @@
+---
+title: "101-27: 布林带 (Bollinger Bands)"
+subtitle: "理解市场的呼吸，识别波动的边界"
+date: "2026-02-04"
+category: "The Method"
+image: "/images/learn/bollinger_bands.png"
+image_prompt: "**Concept**: A conceptual 3D illustration of an elastic membrane expanding and contracting. **Style**: Swiss Design, Geometric, Minimalist, Clean, Dark Mode (#050508). **Subject**: Two semi-transparent, glowing Indigo arcs flanking a central white core. The arcs are bending slightly outward. **Action**: A sphere in the center is pushing against one of the arcs, creating a tension effect. **Materials**: Elastic glass appearance, soft glow. **Colors**: Indigo (#6366f1) for the bands, White for the core. **Constraints**: NO text. NO blur. Center composition."
+---
+
+# 布林带：波动的牢笼
+
+> *"价格会在 95% 的时间内留在布林带内。重要的不是它在里面的时候，而是它撞击边缘的时候。"* —— 约翰·布林 (John Bollinger)
+
+布林带由三条线组成：中轨（均线）、上轨和下轨。它的本质不是为了预测方向，而是为了衡量**相对高低**和**波动率 (Volatility)**。
+
+---
+
+## 💎 核心规律：呼吸效应
+
+市场像呼吸一样运动：**收缩（走势平淡） -> 扩张（大趋势爆发） -> 收缩。**
+
+### 1. 挤压 (The Squeeze)
+当上下轨靠得极近，甚至像一条窄带时，意味着市场在积累动能。这通常是大风暴来临前的死寂。
+*   *策略*：这时候不要操作，等待扩张。
+
+### 2. 张嘴 (The Walk)
+当价格沿着上轨或下轨不断爬升，且带状区域大幅张开时。
+*   *策略*：这是强趋势的体现。不要急着去做反向动作。
+
+---
+
+## 📉 散户最常犯的错误：撞轨就买卖
+
+很多人看到价格撞到下轨就买，撞到上轨就卖。
+**这是自杀行为。** 
+
+在强趋势中，价格会“沿着轨道行走”(Walking the Bands)。盲目逆市会被活活踩死。
+
+---
+
+## ⚖️ 实战：StockWise 的边界防御
+
+StockWise 不会将布林带作为唯一依据，我们利用它进行**“波动率感知”**：
+
+**Actionable Tactic：边界过滤器**
+1.  **观察挤压**：当 StockWise 的热图显示波动率降至冰点，此时出现的单边突破信号极具价值。
+2.  **验证强度**：如果价格突破上轨，但 StockWise 的 AI 评分在下降，这大概率是一个中继陷阱，是假突破。
+3.  **回归均值**：当价格远离布林带上轨太多（发散太厉害），这时是止盈的绝佳时机，因为重力法则必然会将价格拉回中轨。
+
+**记住：布林带是上限和下限，它告诉你的是“空间”，而不是“时间”。**
+
+---
+*下一篇：[101-28] 左侧与右侧交易：接飞刀还是骑牛。*

@@ -1,0 +1,46 @@
+---
+title: "101-56: 投资组合的相关性风险"
+subtitle: "为什么持有 5 只科技股，不叫分散投资？"
+date: "2026-02-04"
+category: "The Money"
+image: "/images/learn/portfolio_correlation.png"
+image_prompt: "**Concept**: A conceptual 3D illustration of connected objects falling together. **Style**: Swiss Design, Geometric, Minimalist, Clean, Dark Mode (#050508). **Subject**: Five separate Indigo glass cubes suspended in space. They are all connected by thin, invisible-looking wires. **Action**: One cube is tilted and glowing red, and because of the wires, all the others are tilting in the same direction. **Materials**: Polished glass cubes, high contrast. **Colors**: Indigo (#6366f1) as the base, Rose Red (#f43f5e) for the risk propagation. **Constraints**: NO text. NO blur. Center composition."
+---
+
+# 相关性：你以为的分散只是幻觉
+
+> *"在危机时刻，所有的资产相关性都会变成 1。"* —— 华尔街生存定律
+
+很多散户得意地说：“我买了 10 只股票，分散了风险。” 打开一看：腾讯、阿里、京东、网易、百度。
+这不叫分散投资，这叫 **“在不同的篮子里，装了同一种随时会碎的鸡蛋”**。
+
+---
+
+## 💎 什么是相关性风险？
+
+相关性 (Correlation) 衡量的是两只股票同步运动的程度。
+*   如果两只股票同时涨跌，相关性接近 +1。
+*   如果一涨一跌，相关性为 -1。
+
+如果你买了一篮子相关性高达 0.8 以上的股票，当行业黑天鹅降临时，它们会像多米诺骨牌一样同步归零。
+
+---
+
+## 📉 伪分散的代价
+
+当市场整体调整时，高度相关的持仓会导致你的账户净值产生剧烈的波动。
+这种剧烈波动会摧毁你的 **Mind**（心态），让你在最不该割肉的时候被动出局。
+
+---
+
+## ⚖️ 实战：StockWise 跨领域扫描
+
+**Actionable Tactic：账户净化**
+1.  **标签化检查**：检查你的持仓。如果它们都属于“科技”、“中概”或“成长”，你需要警惕。
+2.  **寻找镜像资产**：试着在你的组合中加入一些与大盘相关性较低的标的（如高股息资产、防御性公用事业、或者黄金相关）。
+3.  **核心逻辑**：你的盈利逻辑不应全部仰仗于“牛市来了”。 
+
+**分散投资是唯一的“免费午餐”，但前提是你要懂得如何科学配餐。**
+
+---
+*下一篇：[101-57] 1% 准则：职业投资者的最后一套防弹衣。*

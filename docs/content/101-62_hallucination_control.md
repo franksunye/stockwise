@@ -1,0 +1,45 @@
+---
+title: "101-62: AI 幻觉的封印术"
+subtitle: "如何确保你的 AI 不在金融数据上瞎编？"
+date: "2026-02-04"
+category: "The Machine"
+image: "/images/learn/hallucination_control.png"
+image_prompt: "**Concept**: A conceptual 3D illustration of truth anchoring. **Style**: Swiss Design, Geometric, Minimalist, Clean, Dark Mode (#050508). **Subject**: A semi-transparent Indigo cube that is trying to shift its shape, but is held firmly in place by four heavy Emerald anchors at its corners. **Action**: The anchors are glowing, emitting a stabilizing field. **Materials**: Shifting glass cube, solid metal weight. **Colors**: Indigo (#6366f1) for the AI, Emerald (#10b981) for the data anchors. **Constraints**: NO text. NO blur. Center composition."
+---
+
+# 幻觉：AI 投资最大的敌人
+
+> *"AI 的天性是取悦你，而投资者的天性是质疑一切。"* 
+
+如果你问一个原始的 LLM：“昨天小米的财报如何？” 它可能会用极其流畅且自信的语气，给你编出一套完美的虚假数据。这就是 **AI 幻觉 (Hallucination)**。
+
+在投资领域，这种幻觉是致命的。
+
+---
+
+## 💎 StockWise 的三重防御
+
+为了封印幻觉，我们为 AI 戴上了三道枷锁：
+
+### 1. 数据锁定 (RAG 架构)
+AI 并不被允许直接使用它大脑里的旧知识。
+我们先从专业的金融数据库中提取 **“此时此刻”** 的真实行情、公告和新闻，然后喂给 AI 强制它基于这些事实进行总结。
+
+### 2. 角色限制 (System Prompts)
+StockWise 的 AI 接受了严格的指令：**“如果数据缺失，请直接说不知道。禁止任何无证据的推演。”**
+
+### 3. 多模型交叉校验
+针对核心的买卖逻辑，我们会同时启用不同的模型进行评分，如果分歧过大，系统会直接预警。
+
+---
+
+## ⚖️ 实战：作为用户的你该如何使用？
+
+**Actionable Tactic：信息源追溯**
+1.  **看锚点**：在 StockWise 生成的简报中，每一个核心观点背后通常都有对应的时间轴和量价位点。
+2.  **质疑概率**：AI 给出的是概率分析，不是先知预测。 
+
+**我们不生产真相，我们只做真相的搬运工和深度编译器。**
+
+---
+*下一篇：[101-63] 上下文工程：为什么 AI 读了新闻后变得更聪明。*
