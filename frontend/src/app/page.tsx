@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { ShieldCheck, BarChart3, ChevronRight, Zap } from 'lucide-react';
+import { ShieldCheck, BarChart3, ChevronRight, Zap, BookOpen } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -93,28 +93,41 @@ export default function LandingPage() {
         </section>
 
         {/* Feature Grid */}
-        <section id="features" className="pt-60 grid md:grid-cols-3 gap-8 w-full">
-          <div className="glass-card p-10 text-left border-indigo-500/10 bg-indigo-500/[0.02]">
+        <section id="features" className="pt-60 grid sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full">
+          <div className="glass-card p-8 text-left border-indigo-500/10 bg-indigo-500/[0.02]">
             <div className="w-12 h-12 rounded-[20px] bg-indigo-500/10 flex items-center justify-center mb-6">
               <Zap className="text-indigo-400" />
             </div>
             <h3 className="text-xl font-black italic mb-3">盘后规划</h3>
             <p className="text-slate-500 text-sm leading-relaxed font-medium">市场收盘后，AI 自动整理当日得失，帮您在最冷静的时候制定明日作战计划。</p>
           </div>
-          <div className="glass-card p-10 text-left border-purple-500/10 bg-purple-500/[0.02]">
+          
+          <div className="glass-card p-8 text-left border-purple-500/10 bg-purple-500/[0.02]">
             <div className="w-12 h-12 rounded-[20px] bg-purple-500/10 flex items-center justify-center mb-6">
               <ShieldCheck className="text-purple-400" />
             </div>
             <h3 className="text-xl font-black italic mb-3">风控熔断</h3>
             <p className="text-slate-500 text-sm leading-relaxed font-medium">当 AI 信心不足或指标混沌时，强制建议观望。不亏就是赚，本金优先。</p>
           </div>
-          <div className="glass-card p-10 text-left border-emerald-500/10 bg-emerald-500/[0.02]">
+
+          <div className="glass-card p-8 text-left border-emerald-500/10 bg-emerald-500/[0.02]">
             <div className="w-12 h-12 rounded-[20px] bg-emerald-500/10 flex items-center justify-center mb-6">
               <BarChart3 className="text-emerald-400" />
             </div>
             <h3 className="text-xl font-black italic mb-3">盘中执行</h3>
             <p className="text-slate-500 text-sm leading-relaxed font-medium">当行情触发昨晚设定的剧本时，推送提醒。让您像机器人一样冷静交易。</p>
           </div>
+
+          <Link href="/learn" className="glass-card p-8 text-left border-amber-500/20 bg-amber-500/[0.03] hover:bg-amber-500/[0.06] transition-all group scale-100 hover:scale-[1.02] active:scale-95">
+            <div className="w-12 h-12 rounded-[20px] bg-amber-500/10 flex items-center justify-center mb-6 group-hover:bg-amber-500/20 transition-colors">
+              <BookOpen className="text-amber-400" />
+            </div>
+            <h3 className="text-xl font-black italic mb-3 flex items-center gap-2">
+              101 手册
+              <span className="text-[10px] not-italic font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-500 uppercase tracking-tighter">必读</span>
+            </h3>
+            <p className="text-slate-500 text-sm leading-relaxed font-medium group-hover:text-slate-400 transition-colors">不只是工具，更是心法。内置深度指南，涵盖心态、术法与工具，助您建立完整的理性投研体系。</p>
+          </Link>
         </section>
 
         {/* FAQ Section - Simplified */}
