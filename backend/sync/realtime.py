@@ -35,67 +35,9 @@ def sync_spot_prices(symbols: list):
         monitor = None
         logger.warning("⚠️ IntradayMonitor not available")
 
-    # [Optimization] Bulk fetch spot prices once to avoid repeated network calls
-    spot_map = {}
-    from utils import retry_request
-    
-    @retry_request(max_retries=3, delay=1.0)
-    def _fetch_all_cn_spot():
-        return ak.stock_zh_a_spot_em()
-
-    @retry_request(max_retries=3, delay=1.0)
-    def _fetch_all_hk_spot():
-        return ak.stock_hk_spot_em()
-
-    try:
-        import akshare as ak
-        logger.info("📡 正在获取全场实时行情以供对齐...")
-        # 1. CN Spot
-        try:
-            cn_spot = _fetch_all_cn_spot()
-            if not cn_spot.empty:
-                for _, row in cn_spot.iterrows():
-                    symbol = str(row['代码'])
-                    spot_map[symbol] = {
-                        'price': float(row['最新价']),
-                        'change': float(row['涨跌幅']),
-                        'open': float(row['开盘']),
-                        'high': float(row['最高']),
-                        'low': float(row['最低']),
-                        'volume': float(row['成交量']),
-                    }
-                logger.info(f"✅ 已缓存 {len(spot_map)} 条 CN 实时行情")
-        except Exception as e:
-            logger.warning(f"⚠️ CN Spot fetch failed after retries: {e}")
-            
-        # 2. HK Spot
-        try:
-            hk_spot = _fetch_all_hk_spot()
-            if not hk_spot.empty:
-                count = 0
-                for _, row in hk_spot.iterrows():
-                    symbol = str(row['代码'])
-                    spot_map[symbol] = {
-                        'price': float(row['最新价']),
-                        'change': float(row['涨跌幅']),
-                        'open': float(row['开盘']),
-                        'high': float(row['最高']),
-                        'low': float(row['最低']),
-                        'volume': float(row['成交量']),
-                    }
-                    count += 1
-                logger.info(f"✅ 已缓存 {count} 条 HK 实时行情")
-        except Exception as e:
-            logger.warning(f"⚠️ HK Spot fetch failed after retries: {e}")
-            
-    except Exception as e:
-        logger.warning(f"⚠️ Global spot fetch failed: {e}")
-
     def sync_single_realtime(stock):
         try:
-            # Pass pre-fetched spot data for the specific stock
-            stock_spot = spot_map.get(stock)
-            result = process_stock_period(stock, period="daily", is_realtime=True, spot_data=stock_spot)
+            result = process_stock_period(stock, period="daily", is_realtime=True)
             if result is False: # Explicit False means fetch failed
                 raise Exception("Fetch failed")
             

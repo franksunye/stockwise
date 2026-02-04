@@ -20,7 +20,7 @@ from backend.db_repo.queries import get_cleanup_sql, get_save_prices_sql, GET_ST
 from backend.logger import logger
 
 
-def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool = False, spot_data: dict = None):
+def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool = False):
     """增量处理特定周期的股票数据"""
     table_name = f"{period}_prices"
     if is_realtime:
@@ -58,23 +58,6 @@ def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool =
     df["date"] = pd.to_datetime(df["date"]).dt.strftime("%Y-%m-%d")
     logger.debug(f"📊 {symbol} Raw Data: {len(df)} rows, Range: {df['date'].min()} to {df['date'].max()}")
     
-    # [NEW] Realtime Injection: If hist source lags, inject spot price
-    if is_realtime and period == "daily" and spot_data:
-        today_str = datetime.now(BEIJING_TZ).strftime("%Y-%m-%d")
-        if today_str not in df["date"].values:
-            logger.info(f"💉 [Spot Injection] 数据源延迟 ({df['date'].max()})，正在注入实时价格: {symbol} @ {spot_data['price']}")
-            new_row = {
-                "date": today_str,
-                "open": spot_data["open"],
-                "high": spot_data["high"],
-                "low": spot_data["low"],
-                "close": spot_data["price"],
-                "volume": spot_data["volume"],
-                "change_percent": spot_data["change"]
-            }
-            df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
-        else:
-            logger.info(f"✨ [Realtime Match] 数据源已是最新: {symbol} @ {df['date'].max()}")
     
     # 3. 验证昨日预测 (Validation Decoupled -> Run via --verify)
     # if period == "daily" and not df.empty and not is_realtime:
