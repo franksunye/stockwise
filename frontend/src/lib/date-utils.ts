@@ -414,30 +414,42 @@ export function formatStockSymbol(symbol: string): string {
 }
 
 /**
- * 获取市场当前应有的最新数据日期 (Expected Content Date)
- * @param market 市场类型
- * @returns YYYY-MM-DD
+ * 获取用于"数据完整性校验"的预期日期 (Expected Content Date)
+ * 
+ * 设计原则：
+ * 1. 日线数据只有在收盘后才是"完整"的
+ * 2. 开盘前/盘中，预期的完整日线仍是上一交易日
+ * 3. 实时行情由独立的价格推送系统处理，不在此函数职责范围内
+ * 
+ * 使用场景：
+ * - On-Demand Sync：判断是否需要为新加入的股票补充历史数据
+ * - 数据自愈：检测数据库中的日线是否落后
+ * 
+ * @param market 市场类型 ('HK' | 'CN')
+ * @returns YYYY-MM-DD 格式的日期字符串
  */
 export function getExpectedLatestDataDate(market: MarketType = 'HK'): string {
     const hkNow = getHKTime();
 
-    // 如果今天不是交易日，预期日期应该是上一个交易日
+    // 非交易日 → 预期为上一交易日
     if (isMarketClosed(hkNow, market)) {
         const lastTradingDay = getLastTradingDay(hkNow, market);
         return formatDateStr(lastTradingDay);
     }
 
-    // 如果今天是交易日：
+    // 交易日：根据当前时间判断
     const totalMinutes = hkNow.getHours() * 60 + hkNow.getMinutes();
 
-    // 9:30 以后 (570分钟)，市场已经开始，我们期望能看到今天的数据（即使是盘中的）
-    // 之前我们限制在 15:30 以后才期待今天的“日线”
-    // 但对于“按需同步”，只要开市了，我们就希望能触发一次以获取最新价格
-    if (totalMinutes >= 570) {
+    // 收盘阈值：A股 15:00 (900分), 港股 16:00 (960分)
+    const closeThreshold = market === 'CN' ? 900 : 960;
+
+    // 收盘后 → 期待今日完整日线
+    if (totalMinutes >= closeThreshold) {
         return formatDateStr(hkNow);
     }
 
-    // 9:30 以前，预期日期还是上一交易日
+    // 开盘前或盘中 → 期待上一交易日的完整日线
+    // 注意：盘中实时价格由实时行情 API 单独处理，与日线数据补全是两套机制
     const lastTradingDay = getLastTradingDay(hkNow, market);
     return formatDateStr(lastTradingDay);
 }

@@ -69,8 +69,8 @@ export async function GET(request: Request) {
                     }
 
                     if (!actualDate || String(actualDate) < expectedDate) {
-                        console.log(`📡[GET 自愈] ${symbol}: 库中日期(${actualDate || '无'}) < 预期(${expectedDate})。触发布发同步...`);
-                        // 同步触发是真正的非阻塞异步调用
+                        console.log(`📡[日线自愈] ${symbol}: 库中最新(${actualDate || '无'}) < 预期完整日线(${expectedDate})。触发同步...`);
+                        // 数据自愈：补全缺失的历史日线数据（非实时行情）
                         triggerOnDemandSync(symbol).catch(e => console.error(`Failed to sync ${symbol} in GET`, e));
                     }
                 }
@@ -186,10 +186,10 @@ export async function POST(request: Request) {
         const isDataMissing = !actualLatestDate || String(actualLatestDate) < expectedDate;
 
         if (isDataMissing) {
-            console.log(`📡 [数据实质缺失] ${symbol}: 库中最新(${actualLatestDate || '无'}) < 预期(${expectedDate})。触发同步...`);
+            console.log(`📡[日线补全] ${symbol}: 库中最新(${actualLatestDate || '无'}) < 预期完整日线(${expectedDate})。触发同步...`);
             await triggerOnDemandSync(symbol);
         } else {
-            console.log(`✅ [数据实质完备] ${symbol}: 库中最新(${actualLatestDate}) >= 预期(${expectedDate})。跳过冗余同步。`);
+            console.log(`✅[日线完备] ${symbol}: 库中最新(${actualLatestDate}) >= 预期(${expectedDate})。跳过冗余同步。`);
         }
 
         // 4. 清理连接 (仅针对 SQLite)
