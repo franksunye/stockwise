@@ -105,7 +105,8 @@ function TimelineItem({ task, currentDate }: { task: Task, currentDate: Date }) 
                {/* Text Info */}
                <div>
                    <div className="flex items-center gap-3">
-                       <h3 className={`font-medium text-sm ${task.status === 'failed' ? 'text-red-400' : 'text-gray-200'}`}>
+                       <h3 className={`font-medium text-sm flex items-center gap-2 ${task.status === 'failed' ? 'text-red-400' : 'text-gray-200'}`}>
+                           <span className="text-gray-500 font-bold">{task.agent.name}:</span>
                            {task.display_name}
                        </h3>
                        <StatusBadge type="status" value={displayStatus} />

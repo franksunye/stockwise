@@ -92,6 +92,58 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* Digital Agent Team */}
+        <section className="pt-60 w-full space-y-16">
+          <div className="text-center space-y-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">
+                Meet The Agents
+            </div>
+            <h2 className="text-4xl md:text-5xl font-black italic tracking-tighter">
+              由 <span className="text-indigo-500">知守 Agent</span> 团队驱动
+            </h2>
+            <p className="text-slate-500 font-medium max-w-2xl mx-auto">
+              我们的平台并非简单的算法堆砌，而是由一群分工明确、自主进化的智能特工协同运行，为您提供 24/7 的专业投研支持。
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              { name: "知守 · 马库斯", role: "市场观察员", desc: "实时扫描全球市场异动，捕捉每一秒的量价背离。", color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20", persona: "Marcus" },
+              { name: "知守 · 奎因", role: "量化大脑", desc: "构建多因子概率模型，将混沌的市场数据转化为确定性评分。", color: "text-purple-400", bg: "bg-purple-500/10", border: "border-purple-500/20", persona: "Quinn" },
+              { name: "知守 · 诺拉", role: "新闻编辑部", desc: "深度解析全球财经动态，过滤噪音，提取影响股价的灵魂资讯。", color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20", persona: "Nora" },
+              { name: "知守 · 塞拉", role: "系统守护者", desc: "全天候监控预测准确率，负责系统的冷酷熔断与风险保护。", color: "text-slate-400", bg: "bg-slate-500/10", border: "border-slate-500/20", persona: "Sylar" },
+            ].map((agent, i) => (
+              <motion.div 
+                key={i}
+                whileHover={{ y: -5 }}
+                className={`glass-card p-6 border ${agent.border} ${agent.bg} relative overflow-hidden group`}
+              >
+                <div className="flex flex-col items-center text-center space-y-4 relative z-10">
+                  <div className="w-20 h-20 rounded-2xl bg-white/5 ring-1 ring-white/10 overflow-hidden relative mb-2">
+                    <Image 
+                      src={`https://api.dicebear.com/9.x/bottts-neutral/svg?seed=${agent.persona}`}
+                      alt={agent.name}
+                      fill
+                      className="object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
+                  </div>
+                  <div>
+                    <h3 className={`font-black italic text-lg ${agent.color}`}>{agent.name}</h3>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mt-1">{agent.role}</p>
+                  </div>
+                  <p className="text-slate-400 text-xs leading-relaxed font-bold">
+                    {agent.desc}
+                  </p>
+                </div>
+                {/* Background Accent */}
+                <div className={`absolute -right-4 -bottom-4 w-24 h-24 rounded-full blur-[40px] opacity-20 transition-opacity group-hover:opacity-40 
+                   ${i === 0 ? 'bg-blue-500' : i === 1 ? 'bg-purple-500' : i === 2 ? 'bg-emerald-500' : 'bg-slate-500'}
+                `} />
+              </motion.div>
+            ))}
+          </div>
+        </section>
+
         {/* Feature Grid */}
         <section id="features" className="pt-60 grid sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full">
           <div className="glass-card p-8 text-left border-indigo-500/10 bg-indigo-500/[0.02]">
