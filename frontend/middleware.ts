@@ -21,9 +21,11 @@ export function middleware(request: NextRequest) {
 
     // 1. 如果是通过 App 域名访问
     if (isAppDomain) {
-        // 当访问根路径 '/' 时，重写到 '/dashboard'
+        // 当访问根路径 '/' 时，重定向到 '/dashboard'
+        // 临时使用 redirect 而非 rewrite，用于诊断问题
         if (url.pathname === '/') {
-            return NextResponse.rewrite(new URL('/dashboard', request.url));
+            console.log(`[Middleware] Redirecting ${hostname}/ -> /dashboard`);
+            return NextResponse.redirect(new URL('/dashboard', request.url));
         }
     }
 
