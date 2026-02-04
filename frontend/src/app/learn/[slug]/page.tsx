@@ -2,15 +2,24 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getArticleBySlug, getAllArticles } from '@/lib/learn-content';
 import ReactMarkdown from 'react-markdown';
-import { ChevronLeft, Calendar, Share2 } from 'lucide-react';
+import { ChevronLeft, Brain, Zap, Shield, Sparkles, BookOpen } from 'lucide-react';
+
+// Map categories to icons, colors, and CHINESE LABELS
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const CATEGORY_STYLE: Record<string, any> = {
+  'The Mind': { label: '心法篇', icon: Brain, color: 'text-rose-400', bg: 'bg-rose-500/10', border: 'border-rose-500/20' },
+  'The Method': { label: '术法篇', icon: Zap, color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20' },
+  'The Money': { label: '资金篇', icon: Shield, color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
+  'The Machine': { label: '工具篇', icon: Sparkles, color: 'text-indigo-400', bg: 'bg-indigo-500/10', border: 'border-indigo-500/20' },
+};
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const article = await getArticleBySlug(slug);
-  if (!article) return {};
+  if (!article) return { title: 'Article Not Found' };
   
   return {
-    title: `${article.title} - StockWise Learn`,
+    title: `${article.title} - StockWise 101`,
     description: article.subtitle,
   };
 }
@@ -29,6 +38,10 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
   if (!article) {
     notFound();
   }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const style = CATEGORY_STYLE[article.category] || { label: article.category, icon: BookOpen, color: 'text-slate-400', bg: 'bg-white/5', border: 'border-white/10' };
+  const Icon = style.icon;
 
   // Custom Markdown Components for Premium Styling
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
