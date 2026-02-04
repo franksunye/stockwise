@@ -7,7 +7,7 @@
 ```
 Cloudflare Worker (Cron: */10 * * * *)
         ↓
-检查是否在交易时段 (北京时间 09:10-16:10, 周一至周五)
+检查是否在交易时段 (北京时间 09:15-16:30, 周一至周五)
         ↓
 触发 GitHub Actions workflow_dispatch
         ↓
