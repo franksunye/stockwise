@@ -47,36 +47,35 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
   // Custom Markdown Components for Premium Styling
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const MarkdownComponents: Record<string, React.FC<any>> = {
-    h1: ({ children }) => <h1 className="text-3xl md:text-4xl font-black tracking-tight text-white mb-8 mt-12 first:mt-0">{children}</h1>,
-    h2: ({ children }) => <h2 className="text-2xl font-bold tracking-tight text-indigo-200 mb-6 mt-12 border-l-4 border-indigo-500 pl-4">{children}</h2>,
-    h3: ({ children }) => <h3 className="text-xl font-bold text-white mb-4 mt-8">{children}</h3>,
-    p: ({ children }) => <p className="text-slate-300 leading-8 mb-6 text-lg">{children}</p>,
-    ul: ({ children }) => <ul className="list-disc list-outside ml-6 space-y-2 mb-6 text-slate-300">{children}</ul>,
-    ol: ({ children }) => <ol className="list-decimal list-outside ml-6 space-y-2 mb-6 text-slate-300">{children}</ol>,
-    li: ({ children }) => <li className="pl-2">{children}</li>,
+    h1: ({ children }) => <h1 className="text-3xl md:text-4xl font-black tracking-tight text-white mb-10 mt-16 first:mt-0">{children}</h1>,
+    h2: ({ children }) => <h2 className="text-2xl md:text-3xl font-black tracking-tight text-white mb-8 mt-16 border-l-4 border-indigo-500 pl-5 leading-tight">{children}</h2>,
+    h3: ({ children }) => <h3 className="text-xl md:text-2xl font-bold text-indigo-100 mb-6 mt-12">{children}</h3>,
+    p: ({ children }) => <p className="text-slate-300 leading-[1.8] mb-8 text-[1.1rem] tracking-wide">{children}</p>,
+    ul: ({ children }) => <ul className="list-disc list-outside ml-6 space-y-3 mb-8 text-slate-300 text-[1.1rem]">{children}</ul>,
+    ol: ({ children }) => <ol className="list-decimal list-outside ml-6 space-y-3 mb-8 text-slate-300 text-[1.1rem]">{children}</ol>,
+    li: ({ children }) => <li className="pl-2 leading-[1.8]">{children}</li>,
     blockquote: ({ children }) => (
-      <blockquote className="border-l-4 border-indigo-500/50 bg-indigo-500/5 p-6 rounded-r-xl my-8 italic text-indigo-200 text-lg">
+      <blockquote className="border-l-4 border-indigo-500/50 bg-white/[0.03] p-8 rounded-r-2xl my-10 italic text-indigo-100 text-lg leading-relaxed [&_p]:mb-0">
         {children}
       </blockquote>
     ),
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     code: ({ node, inline, className, children, ...props }) => {
-      // const match = /language-(\w+)/.exec(className || '');
       return !inline ? (
-        <div className="bg-[#111] border border-white/10 rounded-xl p-4 my-6 overflow-x-auto">
-          <code className={className} {...props}>
+        <div className="bg-[#111] border border-white/10 rounded-xl p-6 my-8 overflow-x-auto">
+          <code className={`${className} text-emerald-400 font-mono text-sm`} {...props}>
             {children}
           </code>
         </div>
       ) : (
-        <code className="bg-white/10 text-indigo-300 px-1.5 py-0.5 rounded text-sm font-mono" {...props}>
+        <code className="bg-white/10 text-indigo-300 px-1.5 py-0.5 rounded text-sm font-mono mx-0.5" {...props}>
           {children}
         </code>
       );
     },
-    hr: () => <hr className="border-white/10 my-12" />,
-    a: ({ href, children }) => <a href={href} className="text-indigo-400 hover:text-indigo-300 underline underline-offset-4 decoration-indigo-500/30">{children}</a>,
-    strong: ({ children }) => <strong className="font-bold text-white">{children}</strong>,
+    hr: () => <hr className="border-white/10 my-16" />,
+    a: ({ href, children }) => <a href={href} className="text-indigo-400 hover:text-indigo-300 underline underline-offset-4 decoration-indigo-500/30 font-medium transition-colors">{children}</a>,
+    strong: ({ children }) => <strong className="font-black text-white px-0.5">{children}</strong>,
   };
 
   return (
@@ -133,20 +132,8 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
         ) : null}
 
         {/* Content */}
-        <div className="prose prose-invert prose-lg max-w-none 
-          prose-headings:font-bold prose-headings:tracking-tight prose-headings:text-white
-          prose-p:text-slate-300 prose-p:leading-8
-          prose-strong:text-white prose-strong:font-black
-          prose-a:text-indigo-400 prose-a:no-underline hover:prose-a:underline
-          prose-blockquote:border-l-indigo-500 prose-blockquote:bg-white/[0.02] prose-blockquote:py-2 prose-blockquote:px-6 prose-blockquote:rounded-r-lg
-          prose-code:text-emerald-400 prose-code:bg-emerald-500/10 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none
-          prose-hr:border-white/10
-          ">
-            <ReactMarkdown
-              components={{
-                h2: ({children}) => <h2 className="text-2xl mt-12 mb-6 text-white border-l-4 border-indigo-500 pl-4">{children}</h2>,
-              }}
-            >
+        <div className="selection:bg-indigo-500/30">
+            <ReactMarkdown components={MarkdownComponents}>
               {article.content}
             </ReactMarkdown>
         </div>
