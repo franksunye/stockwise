@@ -8,9 +8,16 @@ export const metadata = {
   description: 'AI 时代的散户交易知识库，涵盖交易心理、技术分析与风控系统。',
 };
 
+interface CategoryStyle {
+  label: string;
+  icon: React.ElementType;
+  color: string;
+  bg: string;
+  border: string;
+}
+
 // Map categories to icons, colors, and CHINESE LABELS
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const CATEGORY_STYLE: Record<string, any> = {
+const CATEGORY_STYLE: Record<string, CategoryStyle> = {
   'The Mind': { label: '心法篇', icon: Brain, color: 'text-rose-400', bg: 'bg-rose-500/10', border: 'border-rose-500/20' },
   'The Method': { label: '术法篇', icon: Zap, color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20' },
   'The Money': { label: '资金篇', icon: Shield, color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
@@ -70,7 +77,7 @@ export default async function LearnPage() {
                          <span className={`text-[10px] font-black uppercase tracking-widest ${style.color} px-2 py-0.5 rounded bg-white/5`}>
                            {style.label}
                          </span>
-                         <span className="text-slate-500 text-xs font-mono">{article.date}</span>
+                         <span className="text-slate-500 text-xs font-mono">{article.readingTime} 分钟阅读</span>
                       </div>
                       
                       <h2 className="text-xl font-bold text-slate-200 group-hover:text-white transition-colors mb-3 leading-tight">

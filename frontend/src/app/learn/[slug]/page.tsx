@@ -5,9 +5,16 @@ import { getArticleBySlug, getAllArticles } from '@/lib/learn-content';
 import ReactMarkdown from 'react-markdown';
 import { ChevronLeft, Brain, Zap, Shield, Sparkles, BookOpen } from 'lucide-react';
 
+interface CategoryStyle {
+  label: string;
+  icon: React.ElementType;
+  color: string;
+  bg: string;
+  border: string;
+}
+
 // Map categories to icons, colors, and CHINESE LABELS
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const CATEGORY_STYLE: Record<string, any> = {
+const CATEGORY_STYLE: Record<string, CategoryStyle> = {
   'The Mind': { label: '心法篇', icon: Brain, color: 'text-rose-400', bg: 'bg-rose-500/10', border: 'border-rose-500/20' },
   'The Method': { label: '术法篇', icon: Zap, color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20' },
   'The Money': { label: '资金篇', icon: Shield, color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
@@ -40,13 +47,11 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
     notFound();
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const style = CATEGORY_STYLE[article.category] || { label: article.category, icon: BookOpen, color: 'text-slate-400', bg: 'bg-white/5', border: 'border-white/10' };
   const Icon = style.icon;
 
   // Custom Markdown Components for Premium Styling
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const MarkdownComponents: Record<string, React.FC<any>> = {
+  const MarkdownComponents: Record<string, React.ElementType> = {
     h1: ({ children }) => <h1 className="text-3xl md:text-4xl font-black tracking-tight text-white mb-10 mt-16 first:mt-0">{children}</h1>,
     h2: ({ children }) => <h2 className="text-2xl md:text-3xl font-black tracking-tight text-white mb-8 mt-16 border-l-4 border-indigo-500 pl-5 leading-tight">{children}</h2>,
     h3: ({ children }) => <h3 className="text-xl md:text-2xl font-bold text-indigo-100 mb-6 mt-12">{children}</h3>,
@@ -101,7 +106,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
               <Icon size={12} />
               {style.label}
             </span>
-            <span className="text-slate-500 text-xs font-mono">{article.date}</span>
+            <span className="text-slate-500 text-xs font-mono">{article.readingTime} 分钟阅读</span>
           </div>
 
           <h1 className="text-3xl md:text-5xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white via-white to-slate-400 leading-tight">

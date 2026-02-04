@@ -8,11 +8,12 @@ const CONTENT_DIR = path.join(process.cwd(), '..', 'docs', 'content');
 export interface ArticleMeta {
     slug: string;
     title: string;
-    subtitle?: string;
+    subtitle: string;
     date: string;
     category: string;
     image?: string;
     image_prompt?: string;
+    readingTime: number;
 }
 
 export interface Article extends ArticleMeta {
@@ -20,7 +21,7 @@ export interface Article extends ArticleMeta {
 }
 
 // Simple Frontmatter Parser
-function parseFrontmatter(fileContent: string): { meta: Omit<ArticleMeta, 'slug'>, content: string } {
+function parseFrontmatter(fileContent: string): { meta: Partial<ArticleMeta>, content: string } {
     const frontmatterRegex = /---\s*([\s\S]*?)\s*---/;
     const match = frontmatterRegex.exec(fileContent);
 
@@ -47,7 +48,7 @@ function parseFrontmatter(fileContent: string): { meta: Omit<ArticleMeta, 'slug'
     }
 
     return {
-        meta: meta as Omit<ArticleMeta, 'slug'>,
+        meta: meta as Partial<ArticleMeta>,
         content
     };
 }
@@ -67,10 +68,16 @@ export async function getAllArticles(): Promise<ArticleMeta[]> {
 
             return {
                 slug: file.replace('.md', ''),
-                ...meta
-            };
+                title: meta.title || 'Untitled',
+                subtitle: meta.subtitle || '',
+                date: meta.date || '',
+                category: meta.category || 'Uncategorized',
+                image: meta.image,
+                image_prompt: meta.image_prompt,
+                readingTime: Math.max(1, Math.ceil(fileContent.length / 400))
+            } as ArticleMeta;
         })
-        .sort((a, b) => (a.slug > b.slug ? 1 : -1)); // Sort by slug (which contains number like 101-01) for correct order
+        .sort((a, b) => (a.slug > b.slug ? 1 : -1));
 
     return articles;
 }
@@ -87,8 +94,14 @@ export async function getArticleBySlug(slug: string): Promise<Article | null> {
 
     return {
         slug,
-        ...meta,
-        content
+        title: meta.title || 'Untitled',
+        subtitle: meta.subtitle || '',
+        date: meta.date || '',
+        category: meta.category || 'Uncategorized',
+        image: meta.image,
+        image_prompt: meta.image_prompt,
+        content,
+        readingTime: Math.max(1, Math.ceil(fileContent.length / 400))
     };
 }
 
