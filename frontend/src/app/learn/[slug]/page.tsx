@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!article) return { title: 'Article Not Found' };
   
   return {
-    title: `${article.title.split(': ')[1] || article.title} | StockWise 101 | 知守日课`,
+    title: `${article.title.split(': ')[1] || article.title} | ZISO AI 101 | 知守日课`,
     description: article.subtitle,
   };
 }
@@ -93,7 +93,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
           <Link href="/learn" className="p-2 -ml-2 rounded-full hover:bg-white/5 active:scale-95 transition-all text-slate-400 hover:text-white">
             <ChevronLeft size={20} />
           </Link>
-          <div className="font-bold text-lg tracking-tight">StockWise <span className="text-indigo-500">101</span></div>
+          <div className="font-bold text-lg tracking-tight">ZISO AI <span className="text-indigo-500">101</span></div>
           <div className="w-8" />
         </div>
       </nav>

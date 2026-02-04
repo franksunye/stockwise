@@ -17,7 +17,7 @@ export default function RefundPolicy() {
       <nav className="relative z-50 flex items-center justify-between px-8 py-8 max-w-7xl mx-auto">
         <Link href="/" className="flex items-center gap-2">
           <Image src="/logo.png" alt="Logo" width={32} height={32} className="rounded-lg" />
-          <span className="text-lg font-black italic tracking-tighter">STOCKWISE <span className="text-indigo-500">AI</span></span>
+          <span className="text-lg font-black italic tracking-tighter">ZISO <span className="text-indigo-500">AI</span></span>
         </Link>
         <Link href="/" className="flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-white transition-colors">
           <ChevronLeft size={16} /> 返回首页
@@ -62,7 +62,7 @@ export default function RefundPolicy() {
             <section className="space-y-4">
               <h2 className="text-xl font-bold text-white italic">2. 申请流程</h2>
               <p className="text-slate-400 leading-relaxed text-sm">
-                要申请退款，请发送邮件至 <span className="text-indigo-400 font-bold">refunds@visutry.com</span>。邮件主题请注明：[退款申请] + 您的账户邮箱。我们通常在 1-3 个工作日内处理。
+                要申请退款，请发送邮件至 <span className="text-indigo-400 font-bold">support@ziso.cc</span>。邮件主题请注明：[退款申请] + 您的账户邮箱。我们通常在 1-3 个工作日内处理。
               </p>
             </section>
 

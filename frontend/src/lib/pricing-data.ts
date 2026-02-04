@@ -77,7 +77,7 @@ export const pricingPlans: PricingPlan[] = [
             '行业专家优先支持',
         ],
         cta: '联系我们',
-        href: 'mailto:support@visutry.com',
+        href: 'mailto:support@ziso.cc',
         highlight: false,
         icon: ShieldCheck,
         color: 'emerald',

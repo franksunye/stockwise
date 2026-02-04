@@ -4,7 +4,7 @@ import { getAllArticles } from '@/lib/learn-content';
 import { ChevronLeft, ChevronRight, BookOpen, Brain, Zap, Shield, Sparkles, Target } from 'lucide-react';
 
 export const metadata = {
-  title: 'StockWise 101 | 知守日课',
+  title: 'ZISO AI 101 | 知守日课',
   description: '你的理性避难所。教你如何用 AI 和概率论在市场中活下来。',
 };
 
@@ -33,7 +33,7 @@ export default async function LearnPage() {
     { id: 'The Mind', label: '心法篇', icon: Brain, desc: '认知与决策心理学', color: 'text-rose-400' },
     { id: 'The Method', label: '方法篇', icon: Zap, desc: '技术面与量价分析', color: 'text-amber-400' },
     { id: 'The Money', label: '资金篇', icon: Shield, desc: '仓位管理与风控系统', color: 'text-emerald-400' },
-    { id: 'The Machine', label: '工具篇', icon: Sparkles, desc: 'AI 投研与 StockWise 机制', color: 'text-indigo-400' },
+    { id: 'The Machine', label: '工具篇', icon: Sparkles, desc: 'AI 投研与 ZISO AI 机制', color: 'text-indigo-400' },
     { id: 'The Case', label: '案例篇', icon: Target, desc: '从历史中学习：实战复盘', color: 'text-blue-400' },
   ];
 
@@ -46,7 +46,7 @@ export default async function LearnPage() {
           <Link href="/" className="p-2 -ml-2 rounded-full hover:bg-white/5 active:scale-95 transition-all text-slate-400 hover:text-white">
             <ChevronLeft size={20} />
           </Link>
-          <div className="font-bold text-lg tracking-tight">StockWise <span className="text-indigo-500">101</span></div>
+          <div className="font-bold text-lg tracking-tight">ZISO AI <span className="text-indigo-500">101</span></div>
           <div className="w-8" />
         </div>
       </nav>

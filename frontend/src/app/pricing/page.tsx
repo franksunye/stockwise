@@ -121,7 +121,7 @@ function PricingContent() {
             height={40} 
             className="rounded-xl"
           />
-          <span className="text-xl font-black italic tracking-tighter">STOCKWISE <span className="text-indigo-500">AI</span></span>
+          <span className="text-xl font-black italic tracking-tighter">ZISO <span className="text-indigo-500">AI</span></span>
         </Link>
         <div className="hidden md:flex items-center gap-8 text-sm font-bold text-slate-400">
           <Link href="/#features" className="hover:text-white transition-colors">功能</Link>
