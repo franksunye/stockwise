@@ -19,7 +19,7 @@ interface CategoryStyle {
 // Map categories to icons, colors, and CHINESE LABELS
 const CATEGORY_STYLE: Record<string, CategoryStyle> = {
   'The Mind': { label: '心法篇', icon: Brain, color: 'text-rose-400', bg: 'bg-rose-500/10', border: 'border-rose-500/20' },
-  'The Method': { label: '术法篇', icon: Zap, color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20' },
+  'The Method': { label: '方法篇', icon: Zap, color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20' },
   'The Money': { label: '资金篇', icon: Shield, color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
   'The Machine': { label: '工具篇', icon: Sparkles, color: 'text-indigo-400', bg: 'bg-indigo-500/10', border: 'border-indigo-500/20' },
   'The Case': { label: '案例篇', icon: Target, color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
@@ -31,7 +31,7 @@ export default async function LearnPage() {
   // Group articles by category
   const categories = [
     { id: 'The Mind', label: '心法篇', icon: Brain, desc: '认知与决策心理学', color: 'text-rose-400' },
-    { id: 'The Method', label: '术法篇', icon: Zap, desc: '技术面与量价分析', color: 'text-amber-400' },
+    { id: 'The Method', label: '方法篇', icon: Zap, desc: '技术面与量价分析', color: 'text-amber-400' },
     { id: 'The Money', label: '资金篇', icon: Shield, desc: '仓位管理与风控系统', color: 'text-emerald-400' },
     { id: 'The Machine', label: '工具篇', icon: Sparkles, desc: 'AI 投研与 StockWise 机制', color: 'text-indigo-400' },
     { id: 'The Case', label: '案例篇', icon: Target, desc: '从历史中学习：实战复盘', color: 'text-blue-400' },
