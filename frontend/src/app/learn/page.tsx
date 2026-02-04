@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { getAllArticles } from '@/lib/learn-content';
-import { ChevronLeft, BookOpen, Brain, Zap, Shield, Sparkles } from 'lucide-react';
+import { ChevronLeft, ChevronRight, BookOpen, Brain, Zap, Shield, Sparkles } from 'lucide-react';
 
 export const metadata = {
   title: 'StockWise 101 | 散户生存手册',
@@ -27,98 +27,137 @@ const CATEGORY_STYLE: Record<string, CategoryStyle> = {
 export default async function LearnPage() {
   const articles = await getAllArticles();
   
-  // Group by category but maintain number order within
-  // Or just display in 101 order which is already sorted by slug
-  
+  // Group articles by category
+  const categories = [
+    { id: 'The Mind', label: '心法篇', icon: Brain, desc: '认知与决策心理学', color: 'text-rose-400' },
+    { id: 'The Method', label: '术法篇', icon: Zap, desc: '技术面与量价分析', color: 'text-amber-400' },
+    { id: 'The Money', label: '资金篇', icon: Shield, desc: '仓位管理与风控系统', color: 'text-emerald-400' },
+    { id: 'The Machine', label: '工具篇', icon: Sparkles, desc: 'AI 投研与 StockWise 机制', color: 'text-indigo-400' },
+  ];
+
   return (
     <div className="min-h-screen bg-[#050508] text-white font-sans selection:bg-indigo-500/30">
       
       {/* Navbar */}
-      <nav className="sticky top-0 z-50 bg-[#050508]/80 backdrop-blur-xl border-b border-white/5">
-        <div className="max-w-4xl mx-auto px-6 h-16 flex items-center justify-between">
+      <nav className="sticky top-0 z-[60] bg-[#050508]/80 backdrop-blur-xl border-b border-white/5">
+        <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="p-2 -ml-2 rounded-full hover:bg-white/5 active:scale-95 transition-all text-slate-400 hover:text-white">
             <ChevronLeft size={20} />
           </Link>
           <div className="font-bold text-lg tracking-tight">StockWise <span className="text-indigo-500">101</span></div>
-          <div className="w-8" /> {/* Balance */}
+          <div className="w-8" />
         </div>
       </nav>
 
-      <main className="max-w-4xl mx-auto px-6 py-12 space-y-12">
-        
-        {/* Hero */}
-        <div className="space-y-6 text-center py-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-indigo-400 text-xs font-bold uppercase tracking-widest">
-            <BookOpen size={12} />
-            散户生存手册
+      {/* Hero */}
+      <section className="relative overflow-hidden pt-20 pb-16 border-b border-white/5">
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+            <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-indigo-600/5 blur-[120px] rounded-full" />
+            <div className="absolute top-[20%] -right-[10%] w-[30%] h-[30%] bg-purple-600/5 blur-[120px] rounded-full" />
+        </div>
+
+        <div className="max-w-5xl mx-auto px-6 relative z-10 text-center space-y-6">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4">
+            <BookOpen size={12} className="text-indigo-400" />
+            Retail Survival Manual
           </div>
-          <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white via-white to-slate-500">
-            StockWise 101
+          <h1 className="text-5xl md:text-7xl font-black tracking-tighter italic leading-tight">
+            从散户到 <br /> 
+            <span className="bg-gradient-to-r from-indigo-500 via-purple-400 to-indigo-500 bg-clip-text text-transparent">理性交易者</span>
           </h1>
-          <p className="text-slate-400 max-w-xl mx-auto text-lg leading-relaxed">
-            交易很难，但你不必独自面对。这里是你的理性避难所，教你如何用 AI 和概率论在市场中活下来。
+          <p className="text-slate-400 max-w-2xl mx-auto text-lg md:text-xl leading-relaxed font-medium">
+            这里是你的理性避难所。不教你一夜暴富，只教你如何用 AI 和概率论在黑暗森林里活下来。
           </p>
+          
+          <div className="pt-8 flex flex-wrap justify-center gap-4 text-xs font-bold text-slate-500">
+             <div className="px-4 py-2 rounded-full bg-white/[0.02] border border-white/5"><span className="text-white">20+</span> 深度指南</div>
+             <div className="px-4 py-2 rounded-full bg-white/[0.02] border border-white/5"><span className="text-white">4</span> 大核心领域</div>
+             <div className="px-4 py-2 rounded-full bg-white/[0.02] border border-white/5">预计阅读 <span className="text-white">90</span> 分钟</div>
+          </div>
         </div>
+      </section>
 
-        {/* Content List */}
-        <div className="grid gap-4">
-          {articles.map((article) => {
-            // Dynamic key access based on string category
-            const style = CATEGORY_STYLE[article.category] || { label: article.category, icon: BookOpen, color: 'text-slate-400', bg: 'bg-white/5', border: 'border-white/10' };
-            const Icon = style.icon;
+      {/* Sticky Sub-nav */}
+      <nav className="sticky top-16 z-50 bg-[#050508]/80 backdrop-blur-xl border-b border-white/5 py-4 scrollbar-hide overflow-x-auto">
+        <div className="max-w-5xl mx-auto px-6 flex items-center justify-center gap-2 md:gap-4 min-w-max">
+          {categories.map((cat) => (
+            <a 
+              key={cat.id} 
+              href={`#${cat.id}`}
+              className="px-4 py-2 rounded-full text-xs font-black tracking-widest uppercase transition-all bg-white/5 border border-white/10 hover:border-indigo-500/50 hover:text-white text-slate-400"
+            >
+              {cat.label}
+            </a>
+          ))}
+        </div>
+      </nav>
 
-            return (
-              <Link key={article.slug} href={`/learn/${article.slug}`}>
-                <div className="group relative p-6 rounded-2xl bg-white/[0.03] border border-white/10 hover:bg-white/[0.06] hover:border-white/20 transition-all active:scale-[0.99] overflow-hidden">
-                  <div className="flex flex-col-reverse sm:flex-row items-start justify-between gap-6 relative z-10">
-                    
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-3 mb-3">
-                         <span className={`text-[10px] font-black uppercase tracking-widest ${style.color} px-2 py-0.5 rounded bg-white/5`}>
-                           {style.label}
-                         </span>
-                         <span className="text-slate-500 text-xs font-mono">{article.readingTime} 分钟阅读</span>
-                      </div>
-                      
-                      <h2 className="text-xl font-bold text-slate-200 group-hover:text-white transition-colors mb-3 leading-tight">
-                        {article.subtitle || article.title}
-                      </h2>
-                      
-                      <p className="text-sm text-slate-400 line-clamp-2 leading-relaxed font-medium">
-                        {article.subtitle ? article.title : '点击阅读全文...'}
-                      </p>
-                    </div>
+      <main className="max-w-5xl mx-auto px-6 py-20 space-y-32">
+        {categories.map((cat) => {
+          const categoryArticles = articles.filter(a => a.category === cat.id);
+          if (categoryArticles.length === 0) return null;
+          const CatIcon = cat.icon;
 
-                    {/* Thumbnail Logic */}
-                    {article.image ? (
-                      <div className="w-full sm:w-24 sm:h-24 shrink-0 rounded-xl overflow-hidden border border-white/10 shadow-lg group-hover:shadow-indigo-500/10 transition-all relative">
-                        <Image 
-                          src={article.image} 
-                          alt={article.title}
-                          width={200}
-                          height={200}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                        />
-                      </div>
-                    ) : (
-                      <div className={`mt-1 p-3 rounded-xl ${style.bg} ${style.border} border hidden sm:flex items-center justify-center shrink-0 w-16 h-16`}>
-                        <Icon className={`w-8 h-8 ${style.color}`} />
-                      </div>
-                    )}
-
+          return (
+            <section key={cat.id} id={cat.id} className="scroll-mt-40 space-y-10">
+              {/* Category Header */}
+              <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-white/5">
+                <div className="space-y-3">
+                  <div className={`flex items-center gap-3 ${cat.color} font-black tracking-[0.2em] text-xs uppercase`}>
+                    <CatIcon size={20} />
+                    {cat.id}
                   </div>
+                  <h2 className="text-3xl md:text-4xl font-black tracking-tight">{cat.label}</h2>
+                  <p className="text-slate-500 font-medium">{cat.desc}</p>
                 </div>
-              </Link>
-            );
-          })}
-        </div>
+                <div className="text-slate-600 text-[10px] font-black tracking-widest uppercase">
+                  {categoryArticles.length} ARTICLES
+                </div>
+              </div>
 
-        <div className="text-center pt-12 pb-24">
-           <p className="text-slate-600 text-sm">
-             更多章节正在连载中...
+              {/* Grid Layout */}
+              <div className="grid md:grid-cols-2 gap-6">
+                {categoryArticles.map((article) => {
+                  const style = CATEGORY_STYLE[article.category] || { label: article.category, icon: BookOpen, color: 'text-slate-400', bg: 'bg-white/5', border: 'border-white/10' };
+                  return (
+                    <Link key={article.slug} href={`/learn/${article.slug}`} className="group relative block h-full">
+                      <div className="h-full p-8 rounded-3xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] hover:border-indigo-500/20 transition-all active:scale-[0.98] flex flex-col justify-between">
+                        <div>
+                          <div className="flex items-center justify-between mb-6">
+                             <div className="text-slate-600 text-[10px] font-mono tracking-tighter">
+                                {article.slug.split('-')[1]} • {article.readingTime} MIN READ
+                             </div>
+                             {article.image && (
+                               <div className="w-12 h-12 rounded-xl overflow-hidden border border-white/10 opacity-60 group-hover:opacity-100 transition-opacity">
+                                  <Image src={article.image} alt={article.title} width={80} height={80} className="w-full h-full object-cover" />
+                               </div>
+                             )}
+                          </div>
+                          
+                          <h3 className="text-xl font-bold text-slate-200 group-hover:text-white transition-colors mb-4 leading-[1.3]">
+                            {article.subtitle || article.title}
+                          </h3>
+                        </div>
+
+                        <div className="pt-6 flex items-center justify-between text-xs font-black tracking-widest uppercase">
+                           <span className={style.color}>{article.title.includes(':') ? article.title.split(':')[1].trim() : 'READ MORE'}</span>
+                           <ChevronRight size={14} className="text-slate-700 group-hover:translate-x-1 transition-transform group-hover:text-indigo-500" />
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </section>
+          );
+        })}
+
+        {/* Closing */}
+        <div className="text-center py-20 border-t border-white/5">
+           <p className="text-slate-600 text-sm font-medium">
+             这只是开始。更多的实战案例与 AI 投资教程正在连载中...
            </p>
         </div>
-
       </main>
     </div>
   );
