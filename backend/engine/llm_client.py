@@ -43,6 +43,11 @@ class LLMClient:
     # 全局共享的限流器 (Provider -> AsyncRateLimiter)
     _rate_limiters = {}
     
+    # Provider alias mapping (canonical name resolution)
+    PROVIDER_ALIASES = {
+        "qwen": "aliyun",  # Qwen models are hosted on Aliyun DashScope
+    }
+    
     def __init__(
         self,
         provider: str = None,
@@ -54,8 +59,9 @@ class LLMClient:
         """
         初始化 LLM 客户端
         """
-        # 1. 确定 Provider
-        self.provider = provider or LLM_CONFIG.get("provider", "openai")
+        # 1. 确定 Provider (resolve aliases to canonical names)
+        raw_provider = provider or LLM_CONFIG.get("provider", "openai")
+        self.provider = self.PROVIDER_ALIASES.get(raw_provider, raw_provider)
             
         self.timeout = timeout or LLM_CONFIG.get("timeout", 120)
 
@@ -164,7 +170,7 @@ class LLMClient:
 
         # [Guardrail] Explicitly log the model being used to detect config overrides
         used_model = payload["model"]
-        display_prov = "ALIYUN" if self.provider == "qwen" else self.provider.upper()
+        display_prov = self.provider.upper()
         print(f"   🤖 [LLM] Sending request to {display_prov} using model: {used_model}")
 
         # [Cost Alert] Warn if expensive reasoning model is detected for DeepSeek
