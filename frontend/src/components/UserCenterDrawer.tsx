@@ -1,7 +1,8 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, User, Crown, Zap, ShieldCheck, Loader2, ArrowRight, Share2, Check, RefreshCw, Key, Bell, ChevronDown, ArrowLeftRight, Sun, Trophy, FileText, ChevronRight, Mail, Info } from 'lucide-react';
+import { X, User, Crown, Zap, ShieldCheck, Loader2, ArrowRight, Share2, Check, RefreshCw, Key, Bell, ChevronDown, ArrowLeftRight, Sun, Trophy, FileText, ChevronRight, Mail, Info, BookOpen } from 'lucide-react';
+import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { getCurrentUser, restoreUserIdentity } from '@/lib/user';
 import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
@@ -515,6 +516,21 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                             </div>
                             <ChevronRight size={14} className="text-slate-600" />
                         </button>
+
+                        <Link 
+                            href="/learn"
+                            onClick={onClose}
+                            className="w-full py-4 px-5 rounded-[24px] border border-white/5 bg-white/[0.02] hover:border-indigo-500/20 transition-all flex items-center justify-between group"
+                        >
+                            <div className="flex items-center gap-3">
+                                <BookOpen className="w-5 h-5 text-indigo-400" />
+                                <div className="text-left">
+                                    <span className="block text-sm font-bold text-white">101 手册</span>
+                                    <span className="block text-[10px] text-slate-500 font-medium">散户避坑与生存指南</span>
+                                </div>
+                            </div>
+                            <ChevronRight size={14} className="text-slate-600" />
+                        </Link>
                     </div>
 
                     {/* Notification Switch */}

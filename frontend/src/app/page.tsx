@@ -28,6 +28,7 @@ export default function LandingPage() {
         </div>
         <div className="hidden md:flex items-center gap-8 text-sm font-bold text-slate-400">
           <Link href="#features" className="hover:text-white transition-colors">功能</Link>
+          <Link href="/learn" className="hover:text-white transition-colors">101 手册</Link>
           <Link href="/pricing" className="hover:text-white transition-colors">价格</Link>
           <Link href="#faq" className="hover:text-white transition-colors">FAQ</Link>
           <Link href="/dashboard" className="px-5 py-2.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-white">进入应用</Link>
@@ -60,8 +61,8 @@ export default function LandingPage() {
             >
               立刻开始体验 <ChevronRight size={20} />
             </Link>
-            <Link href="#features" className="px-10 py-5 rounded-3xl bg-white/5 border border-white/10 text-white font-black text-lg hover:bg-white/10 transition-all">
-              了解核心功能
+            <Link href="/learn" className="px-10 py-5 rounded-3xl bg-white/5 border border-white/10 text-white font-black text-lg hover:bg-white/10 transition-all">
+              阅读 101 手册
             </Link>
           </div>
         </motion.div>
@@ -182,6 +183,7 @@ export default function LandingPage() {
           </div>
           <p className="text-xs text-slate-600 font-bold uppercase tracking-widest">© 2026 STOCKWISE AI TECHNOLOGY. ALL RIGHTS RESERVED.</p>
           <div className="flex gap-6 text-xs font-bold text-slate-500">
+            <Link href="/learn" className="hover:text-white transition-colors">101 手册</Link>
             <Link href="/status" className="hover:text-white transition-colors">系统状态</Link>
             <Link href="/pricing" className="hover:text-white transition-colors">价格方案</Link>
             <Link href="/privacy" className="hover:text-white transition-colors">隐私协议</Link>
