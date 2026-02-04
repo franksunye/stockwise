@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { getArticleBySlug, getAllArticles } from '@/lib/learn-content';
 import ReactMarkdown from 'react-markdown';
@@ -115,9 +116,14 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
 
         {/* Featured Image */}
         {article.image ? (
-            <div className="mb-12 rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-indigo-500/10">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={article.image} alt={article.title} className="w-full h-auto" />
+            <div className="mb-12 rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-indigo-500/10 relative aspect-video">
+                <Image 
+                  src={article.image} 
+                  alt={article.title} 
+                  fill
+                  priority
+                  className="object-cover" 
+                />
             </div>
         ) : article.image_prompt ? (
              <div className="mb-12 p-8 rounded-2xl bg-white/5 border border-white/10 border-dashed text-center">

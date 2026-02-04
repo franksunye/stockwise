@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { getAllArticles } from '@/lib/learn-content';
 import { ChevronLeft, BookOpen, Brain, Zap, Shield, Sparkles } from 'lucide-react';
 
@@ -83,11 +84,12 @@ export default async function LearnPage() {
 
                     {/* Thumbnail Logic */}
                     {article.image ? (
-                      <div className="w-full sm:w-24 sm:h-24 shrink-0 rounded-xl overflow-hidden border border-white/10 shadow-lg group-hover:shadow-indigo-500/10 transition-all">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img 
+                      <div className="w-full sm:w-24 sm:h-24 shrink-0 rounded-xl overflow-hidden border border-white/10 shadow-lg group-hover:shadow-indigo-500/10 transition-all relative">
+                        <Image 
                           src={article.image} 
                           alt={article.title}
+                          width={200}
+                          height={200}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                         />
                       </div>
