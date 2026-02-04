@@ -1,6 +1,6 @@
 ---
-title: "101-03: Loss Aversion"
-subtitle: "The Pain of Selling"
+title: "101-03: 厌恶损失 (Loss Aversion)"
+subtitle: "为什么我们会死扛亏损，却拿不住利润？"
 date: "2026-02-04"
 category: "The Mind"
 image: "/images/learn/loss_aversion.png"

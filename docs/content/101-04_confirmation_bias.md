@@ -1,6 +1,6 @@
 ---
-title: "101-04: Confirmation Bias"
-subtitle: "The Echo Chamber of Failure"
+title: "101-04: 确认偏误 (Confirmation Bias)"
+subtitle: "为什么你只听得进你想听的消息？"
 date: "2026-02-04"
 category: "The Mind"
 image: "/images/learn/confirmation_bias.png"

@@ -7,12 +7,12 @@ export const metadata = {
   description: 'AI 时代的散户交易知识库，涵盖交易心理、技术分析与风控系统。',
 };
 
-// Map categories to icons and colors
-const CATEGORY_STYLE = {
-  'The Mind': { icon: Brain, color: 'text-rose-400', bg: 'bg-rose-500/10', border: 'border-rose-500/20' },
-  'The Method': { icon: Zap, color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20' },
-  'The Money': { icon: Shield, color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
-  'The Machine': { icon: Sparkles, color: 'text-indigo-400', bg: 'bg-indigo-500/10', border: 'border-indigo-500/20' },
+// Map categories to icons, colors, and CHINESE LABELS
+const CATEGORY_STYLE: Record<string, any> = {
+  'The Mind': { label: '心法篇', icon: Brain, color: 'text-rose-400', bg: 'bg-rose-500/10', border: 'border-rose-500/20' },
+  'The Method': { label: '术法篇', icon: Zap, color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20' },
+  'The Money': { label: '资金篇', icon: Shield, color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
+  'The Machine': { label: '工具篇', icon: Sparkles, color: 'text-indigo-400', bg: 'bg-indigo-500/10', border: 'border-indigo-500/20' },
 };
 
 export default async function LearnPage() {
@@ -41,7 +41,7 @@ export default async function LearnPage() {
         <div className="space-y-6 text-center py-8">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-indigo-400 text-xs font-bold uppercase tracking-widest">
             <BookOpen size={12} />
-            Survival Manual
+            散户生存手册
           </div>
           <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white via-white to-slate-500">
             StockWise 101
@@ -55,7 +55,7 @@ export default async function LearnPage() {
         <div className="grid gap-4">
           {articles.map((article) => {
             // @ts-expect-error - Dynamic key access based on string category
-            const style = CATEGORY_STYLE[article.category] || { icon: BookOpen, color: 'text-slate-400', bg: 'bg-white/5', border: 'border-white/10' };
+            const style = CATEGORY_STYLE[article.category] || { label: article.category, icon: BookOpen, color: 'text-slate-400', bg: 'bg-white/5', border: 'border-white/10' };
             const Icon = style.icon;
 
             return (
@@ -65,13 +65,13 @@ export default async function LearnPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-3 mb-2">
                          <span className={`text-[10px] font-black uppercase tracking-widest ${style.color} px-2 py-0.5 rounded bg-white/5`}>
-                           {article.category}
+                           {style.label}
                          </span>
                          <span className="text-slate-500 text-xs font-mono">{article.date}</span>
                       </div>
                       
                       <h2 className="text-xl font-bold text-slate-200 group-hover:text-white transition-colors mb-2 line-clamp-1">
-                        {article.slug.split('-')[1]}-{article.slug.split('-')[2]}: {article.title.split(': ')[1] || article.title}
+                        {article.title}
                       </h2>
                       
                       <p className="text-sm text-slate-400 line-clamp-2 leading-relaxed">

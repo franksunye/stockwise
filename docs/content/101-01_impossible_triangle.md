@@ -1,6 +1,6 @@
 ---
-title: "101-01: The Retail Investor's Impossible Triangle"
-subtitle: "Why 90% of Retail Investors Fail"
+title: "101-01: 散户的不可能三角"
+subtitle: "为什么 90% 的散户注定亏损？"
 date: "2026-02-04"
 category: "The Mind"
 image: "/images/learn/impossible_triangle.png"

@@ -1,6 +1,6 @@
 ---
-title: "101-25: Support & Resistance"
-subtitle: "The Psychology of Price Levels"
+title: "101-25: 支撑与压力 (Support & Resistance)"
+subtitle: "为什么整数关口是心理战壕？"
 date: "2026-02-04"
 category: "The Method"
 image: "/images/learn/support_resistance.png"

@@ -1,6 +1,6 @@
 ---
-title: "101-24: Volume Analysis"
-subtitle: "Price Can Lie, Volume Cannot"
+title: "101-24: 成交量分析 (Volume)"
+subtitle: "价格会撒谎，但成交量不会"
 date: "2026-02-04"
 category: "The Method"
 image: "/images/learn/volume_iceberg.png"

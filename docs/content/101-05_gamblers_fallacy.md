@@ -1,6 +1,6 @@
 ---
-title: "101-05: The Gambler's Fallacy"
-subtitle: "Markets Have No Memory"
+title: "101-05: 赌徒谬误 (Gambler's Fallacy)"
+subtitle: "市场没有记忆，不要试图抄底"
 date: "2026-02-04"
 category: "The Mind"
 image: "/images/learn/gamblers_fallacy.png"

@@ -1,6 +1,6 @@
 ---
-title: "101-21: RSI Decoded"
-subtitle: "Beyond 'Overbought' and 'Oversold'"
+title: "101-21: RSI 指标新解"
+subtitle: "别再傻傻地看超买超卖了"
 date: "2026-02-04"
 category: "The Method"
 image: "/images/learn/rsi_divergence.png"

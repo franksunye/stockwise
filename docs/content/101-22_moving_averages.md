@@ -1,6 +1,6 @@
 ---
-title: "101-22: Moving Averages"
-subtitle: "It's Not a Line, It's Cost"
+title: "101-22: 均线系统 (Moving Averages)"
+subtitle: "均线不是线，是市场的心理成本"
 date: "2026-02-04"
 category: "The Method"
 image: "/images/learn/moving_average.png"
