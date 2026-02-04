@@ -318,17 +318,7 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
                                <Clock size={24} className="text-indigo-400 animate-pulse" />
                                <div className="flex flex-col items-center">
                                  <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">验证中</span>
-                                 {(() => {
-                                   try {
-                                     const vData = typeof validationPrediction.validation_data === 'string' 
-                                       ? JSON.parse(validationPrediction.validation_data) 
-                                       : validationPrediction.validation_data;
-                                     if (vData?.days_evaluated !== undefined) {
-                                       return <span className="text-[9px] font-bold text-slate-500">({vData.days_evaluated}/{vData.window || 3}天)</span>;
-                                     }
-                                   } catch {}
-                                   return <span className="text-[9px] font-bold text-slate-500 italic">正在追踪...</span>;
-                                 })()}
+                                 <span className="text-[9px] font-bold text-slate-500 italic">正在追踪收盘表现...</span>
                                </div>
                              </div>
                            ) : status === 'Incorrect' ? (

@@ -8,7 +8,7 @@ from backend.trading_calendar import get_next_trading_day_str, get_market_from_s
 # "Side" signals are considered correct if the price moves within this range (noise),
 # as staying out of the market during low-volatility/low-gain days is a valid strategy.
 NOISE_THRESHOLD = 1.0  
-VALIDATION_WINDOW = 3 # Default 3-day window
+VALIDATION_WINDOW = 1 # Reverted to 1-day (Daily) validation
 
 def validate_previous_prediction(symbol: str, today_data: any):
     """
@@ -39,7 +39,7 @@ def verify_all_pending(force: bool = False, target_date: str = None):
         else:
             # Only look at recent predictions (last 10 days) to avoid heavy scans
             conditions.append("date >= date('now', '-10 days')")
-            logger.info("🔍 Verifying recent V2 predictions (Window mode)...")
+            logger.info("🔍 Verifying recent V2 predictions (Daily mode)...")
 
         where_clause = " AND ".join(conditions) if conditions else "1=1"
         
@@ -126,24 +126,21 @@ def verify_all_pending(force: bool = False, target_date: str = None):
             verdict = 'Verifying'
             
             if signal == 'Long':
-                if max_favorable >= 1.5 or (is_final and cumulative_change > 0):
+                # Simplified: Correct if price went up on T+1
+                if cumulative_change > 0:
                     verdict = 'Correct'
                 elif is_final:
                     verdict = 'Incorrect'
             elif signal == 'Short':
-                if max_favorable <= -1.5 or (is_final and cumulative_change < 0):
+                # Simplified: Correct if price went down on T+1
+                if cumulative_change < 0:
                     verdict = 'Correct'
                 elif is_final:
                     verdict = 'Incorrect'
             elif signal == 'Side':
                 if is_final:
-                    # Check if ANY day in window went outside +/- 1.5%
-                    is_volatile = any(abs(t['cum_change']) > 1.5 for t in trajectory)
-                    verdict = 'Correct' if not is_volatile else 'Incorrect'
-                else:
-                    # Check if ALREADY volatile
-                    if any(abs(t['cum_change']) > 1.5 for t in trajectory):
-                        verdict = 'Incorrect'
+                    # Side is correct if it stayed within the noise threshold
+                    verdict = 'Correct' if abs(cumulative_change) <= NOISE_THRESHOLD else 'Incorrect'
             
             # --- 6. Update Database ---
             val_data = {

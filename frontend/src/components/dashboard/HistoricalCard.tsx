@@ -166,9 +166,9 @@ export function HistoricalCard({ data, onClick }: { data: AIPrediction; onClick?
               <span className="text-[10px] text-slate-500 font-bold uppercase block mb-1 tracking-widest leading-tight">
                 {(() => {
                   if (data.validation_status !== 'Correct' && data.validation_status !== 'Incorrect') return `${formatDate(data.target_date)} 价格`;
-                  if (isUp) return '3日最高涨幅';
-                  if (isDown) return '3日最大跌幅';
-                  return '3日区间涨跌';
+                  if (isUp) return '当日最高涨幅';
+                  if (isDown) return '当日最大跌幅';
+                  return '当日综合涨跌';
                 })()}
               </span>
               <p className="text-2xl font-black mono text-slate-100">
@@ -184,9 +184,9 @@ export function HistoricalCard({ data, onClick }: { data: AIPrediction; onClick?
               <span className="text-[10px] text-slate-500 font-bold uppercase block mb-1 tracking-widest leading-tight">
                 {(() => {
                   if (data.validation_status !== 'Correct' && data.validation_status !== 'Incorrect') return '实际涨跌';
-                  if (isUp) return '3日累计涨幅';
-                  if (isDown) return '3日累计跌幅';
-                  return '周期综合表现';
+                  if (isUp) return '当日收盘涨幅';
+                  if (isDown) return '当日收盘跌幅';
+                  return '收盘表现';
                 })()}
               </span>
               <p className={`text-2xl font-black mono ${
