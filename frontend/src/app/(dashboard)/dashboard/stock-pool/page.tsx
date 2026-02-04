@@ -24,8 +24,8 @@ interface StockSnapshot {
 
 const getSignalMeta = (signal: string) => {
   switch(signal) {
-    case 'Long': return { text: '建议做多', color: 'bg-emerald-500', iconColor: 'text-emerald-500', bgColor: 'bg-emerald-500/10 border-emerald-500/20' };
-    case 'Short': return { text: '建议避险', color: 'bg-rose-500', iconColor: 'text-rose-500', bgColor: 'bg-rose-500/10 border-rose-500/20' };
+    case 'Long': return { text: '建议做多', color: 'bg-rose-500', iconColor: 'text-rose-500', bgColor: 'bg-rose-500/10 border-rose-500/20' };
+    case 'Short': return { text: '建议避险', color: 'bg-emerald-500', iconColor: 'text-emerald-500', bgColor: 'bg-emerald-500/10 border-emerald-500/20' };
     default: return { text: '建议观望', color: 'bg-amber-500', iconColor: 'text-amber-500', bgColor: 'bg-amber-500/10 border-amber-500/20' };
   }
 };
@@ -80,7 +80,7 @@ const StockItem = memo(({
                  <p className="text-xl font-black mono tracking-tighter text-white">
                    {stock.price > 0 ? stock.price.toFixed(2) : '--.--'}
                  </p>
-                   <p className={`text-[10px] font-black mono ${stock.change > 0 ? 'text-emerald-500' : stock.change < 0 ? 'text-rose-500' : 'text-slate-500'}`}>
+                   <p className={`text-[10px] font-black mono ${stock.change > 0 ? 'text-rose-500' : stock.change < 0 ? 'text-emerald-500' : 'text-slate-500'}`}>
                      {stock.price > 0 ? `${stock.change >= 0 ? '+' : ''}${stock.change.toFixed(2)}%` : '同步中...'}
                    </p>
                    {stock.updateTag && (
