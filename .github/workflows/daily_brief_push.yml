@@ -55,11 +55,10 @@ jobs:
           
           # Tiered LLM Providers
           BRIEF_PROVIDER_FREE: hunyuan
-          BRIEF_PROVIDER_PRO: qwen
+          BRIEF_PROVIDER_PRO: aliyun
           
           # API Keys
-          QWEN_API_KEY: ${{ secrets.QWEN_API_KEY }}
-          # QWEN Configuration is now loaded from Database (model: deepseek-aliyun)
+          ALIYUN_API_KEY: ${{ secrets.ALIYUN_API_KEY }}
           
           HUNYUAN_API_KEY: ${{ secrets.HUNYUAN_API_KEY }}
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}

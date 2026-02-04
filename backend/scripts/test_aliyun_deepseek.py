@@ -5,7 +5,7 @@ import os
 
 # User provided API Key from the previous step
 # Using DashScope endpoint for DeepSeek model
-API_KEY = os.getenv("QWEN_API_KEY", "sk-cc191c6af76e4ab1a7367befb7b2b6af")
+API_KEY = os.getenv("ALIYUN_API_KEY", "sk-cc191c6af76e4ab1a7367befb7b2b6af")
 
 # Aliyun DashScope OpenAI-compatible endpoint
 BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions"

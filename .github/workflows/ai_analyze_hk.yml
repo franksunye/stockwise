@@ -58,10 +58,10 @@ jobs:
           LLM_BASE_URL: ${{ secrets.LLM_BASE_URL }}
           LLM_MODEL: ${{ secrets.LLM_MODEL }}
           LLM_ENABLED: ${{ secrets.LLM_ENABLED }}
-          LLM_PROVIDER: qwen
-          QWEN_API_KEY: ${{ secrets.QWEN_API_KEY }}
-          QWEN_MODEL: deepseek-v3
-          QWEN_VS_URL: https://dashscope.aliyuncs.com/compatible-mode/v1
+          LLM_PROVIDER: aliyun
+          ALIYUN_API_KEY: ${{ secrets.ALIYUN_API_KEY }}
+          ALIYUN_MODEL: deepseek-v3
+          ALIYUN_BASE_URL: https://dashscope.aliyuncs.com/compatible-mode/v1
           
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           DEEPSEEK_BASE_URL: ${{ secrets.DEEPSEEK_BASE_URL }}

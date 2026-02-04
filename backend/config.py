@@ -150,9 +150,9 @@ LLM_CONFIG = {
         "qps_limit": float(os.getenv("HUNYUAN_QPS_LIMIT", "2.0")),
     },
     "aliyun": {
-        "api_key": os.getenv("ALIYUN_API_KEY") or os.getenv("QWEN_API_KEY"),
-        "base_url": os.getenv("ALIYUN_BASE_URL") or os.getenv("QWEN_BASE_URL") or os.getenv("QWEN_VS_URL") or LLM_PROVIDER_REGISTRY["aliyun"]["base_url"],
-        "model": os.getenv("ALIYUN_MODEL") or os.getenv("QWEN_MODEL") or LLM_PROVIDER_REGISTRY["aliyun"]["default_model"],
+        "api_key": os.getenv("ALIYUN_API_KEY"),
+        "base_url": os.getenv("ALIYUN_BASE_URL") or LLM_PROVIDER_REGISTRY["aliyun"]["base_url"],
+        "model": os.getenv("ALIYUN_MODEL") or LLM_PROVIDER_REGISTRY["aliyun"]["default_model"],
     },
     "gemini_local": {
         "api_key": os.getenv("GEMINI_LOCAL_API_KEY") or os.getenv("LLM_API_KEY"),

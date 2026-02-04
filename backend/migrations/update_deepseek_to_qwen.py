@@ -21,7 +21,7 @@ def update_model_config():
         # New configuration for Aliyun DeepSeek
         aliyun_config = {
             "model": "deepseek-v3", # Aliyun uses same model name usually, or explicit params
-            "api_key_env": "QWEN_API_KEY", 
+            "api_key_env": "ALIYUN_API_KEY", 
             "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
         }
         
