@@ -70,10 +70,10 @@ const DAILY_PLAN_TEMPLATE = [
 ];
 
 const AGENTS = {
-    "market_observer": { name: "知守 · 马库斯", persona: "Marcus", role: "市场观察员", color: "blue" },
-    "quant_mind": { name: "知守 · 奎因", persona: "Quinn", role: "量化大脑", color: "purple" },
-    "news_desk": { name: "知守 · 诺拉", persona: "Nora", role: "新闻编辑部", color: "green" },
-    "system_guardian": { name: "知守 · 塞拉", persona: "Sylar", role: "系统守护者", color: "gray" }
+    "market_observer": { name: "知守 · 马库斯", persona: "Marcus", role: "首席观察员", color: "blue" },
+    "quant_mind": { name: "知守 · 奎因", persona: "Quinn", role: "策略精算师", color: "purple" },
+    "news_desk": { name: "知守 · 诺拉", persona: "Nora", role: "首席情报官", color: "green" },
+    "system_guardian": { name: "知守 · 塞拉", persona: "Sylar", role: "风控执行官", color: "gray" }
 };
 
 // Output Interface matching frontend Task

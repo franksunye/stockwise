@@ -89,9 +89,9 @@ export function UserPricingView({ onBack, currentTier }: Props) {
        <div className="flex-1 overflow-y-auto overscroll-contain space-y-4 pb-10 -mx-2 px-2 [scroll-behavior:smooth] [WebkitOverflowScrolling:touch] transform-gpu">
             {currentTier === 'free' && (
                  <div className="p-4 rounded-2xl bg-indigo-600 text-white shadow-lg shadow-indigo-600/10 mb-6 transform-gpu">
-                    <h3 className="font-black italic text-lg mb-1">限时升级 Pro</h3>
+                    <h3 className="font-black italic text-lg mb-1">联络委员会</h3>
                     <p className="text-xs font-medium text-indigo-100 opacity-90 mb-0">
-                        解锁 DeepSeek 深度推理与实时信号推送，让 AI 真正接管您的交易纪律。
+                        解锁专家级投研推演，让专属委员会成员接管您的交易纪律与研究深度。
                     </p>
                  </div>
             )}

@@ -45,21 +45,21 @@ export default function LandingPage() {
         >
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-black uppercase tracking-widest mb-4">
             <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
-            AI 投资助手
+            投研委员会联合推演 · JOINT RESEARCH
           </div>
           <h1 className="text-5xl md:text-7xl font-black tracking-tighter italic leading-tight">
             让交易 <br /> 
-            <span className="bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">更简单，更智能</span>
+            <span className="bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">更理性，更自主</span>
           </h1>
           <p className="text-lg md:text-xl text-slate-400 font-medium max-w-xl mx-auto leading-relaxed">
-            Plan the Trade, Trade the Plan. 用 AI 帮您在盘后冷静规划，在盘中理性执行。
+            不再孤军奋战。由 <span className="text-white">知守 · 专家委员会</span> 为您全线布防，用理性逻辑构建您的纪律避难所。
           </p>
           <div className="pt-10 flex flex-col md:flex-row items-center justify-center gap-4">
             <Link 
               href="/dashboard" 
               className="px-10 py-5 rounded-3xl bg-indigo-500 text-white font-black italic text-lg shadow-[0_20px_40px_rgba(99,102,241,0.3)] hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
             >
-              立刻开始体验 <ChevronRight size={20} />
+              邀请专家委员会协助我 <ChevronRight size={20} />
             </Link>
             <Link href="/learn" className="px-10 py-5 rounded-3xl bg-white/5 border border-white/10 text-white font-black text-lg hover:bg-white/10 transition-all">
               阅读 101 手册
@@ -96,22 +96,22 @@ export default function LandingPage() {
         <section className="pt-60 w-full space-y-16">
           <div className="text-center space-y-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">
-                Meet The Agents
+                Meet The Committee
             </div>
             <h2 className="text-4xl md:text-5xl font-black italic tracking-tighter">
-              由 <span className="text-indigo-500">知守 Agent</span> 团队驱动
+              由 <span className="text-indigo-500">知守 · 专家委员会</span> 驱动
             </h2>
             <p className="text-slate-500 font-medium max-w-2xl mx-auto">
-              我们的平台并非简单的算法堆砌，而是由一群分工明确、自主进化的智能特工协同运行，为您提供 24/7 的专业投研支持。
+              伟大的交易决策源于多维度的视角冲突与共识。我们的专业委员会 24 小时待命，为您提供如同顶级私募机构般的专家级投研支持。
             </p>
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { name: "知守 · 马库斯", role: "市场观察员", desc: "实时扫描全球市场异动，捕捉每一秒的量价背离。", color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20", persona: "Marcus" },
-              { name: "知守 · 奎因", role: "量化大脑", desc: "构建多因子概率模型，将混沌的市场数据转化为确定性评分。", color: "text-purple-400", bg: "bg-purple-500/10", border: "border-purple-500/20", persona: "Quinn" },
-              { name: "知守 · 诺拉", role: "新闻编辑部", desc: "深度解析全球财经动态，过滤噪音，提取影响股价的灵魂资讯。", color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20", persona: "Nora" },
-              { name: "知守 · 塞拉", role: "系统守护者", desc: "全天候监控预测准确率，负责系统的冷酷熔断与风险保护。", color: "text-slate-400", bg: "bg-slate-500/10", border: "border-slate-500/20", persona: "Sylar" },
+              { name: "马库斯 (Marcus)", role: "首席观察员", desc: "拥有敏锐的市场嗅觉，负责捕捉波动中稍纵即逝的量价离群机会。", color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20", persona: "Marcus" },
+              { name: "奎因 (Quinn)", role: "策略精算师", desc: "痴迷于数据逻辑，通过多因子建模在海量随机波动中萃取确定性规律。", color: "text-purple-400", bg: "bg-purple-500/10", border: "border-purple-500/20", persona: "Quinn" },
+              { name: "诺拉 (Nora)", role: "首席情报官", desc: "擅长在新闻噪音中抽丝剥茧，为您过滤无效信息，直击事件背后的灵魂资讯。", color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20", persona: "Nora" },
+              { name: "塞拉 (Sylar)", role: "风控执行官", desc: "极度理性的铁腕派，负责监控系统准确率，执行冷酷的风险规避与底线保护。", color: "text-slate-400", bg: "bg-slate-500/10", border: "border-slate-500/20", persona: "Sylar" },
             ].map((agent, i) => (
               <motion.div 
                 key={i}
@@ -119,9 +119,9 @@ export default function LandingPage() {
                 className={`glass-card p-6 border ${agent.border} ${agent.bg} relative overflow-hidden group`}
               >
                 <div className="flex flex-col items-center text-center space-y-4 relative z-10">
-                  <div className="w-20 h-20 rounded-2xl bg-white/5 ring-1 ring-white/10 overflow-hidden relative mb-2">
+                  <div className="w-20 h-20 rounded-full bg-white/5 ring-1 ring-white/10 overflow-hidden relative mb-2 grayscale group-hover:grayscale-0 transition-all duration-500">
                     <Image 
-                      src={`https://api.dicebear.com/9.x/bottts-neutral/svg?seed=${agent.persona}`}
+                      src={`https://api.dicebear.com/9.x/avataaars-neutral/svg?seed=${agent.persona}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf`}
                       alt={agent.name}
                       fill
                       className="object-cover group-hover:scale-110 transition-transform duration-500"
@@ -222,13 +222,13 @@ export default function LandingPage() {
         {/* CTA Banner */}
         <section className="py-20 w-full max-w-3xl text-center space-y-8">
           <h2 className="text-2xl md:text-3xl font-black italic tracking-tighter">
-            准备好让 AI 成为你的<span className="text-indigo-500">纪律合伙人</span>了吗？
+            准备好让 <span className="text-indigo-500">知守委员会</span> 成为你的纪律合伙人了吗？
           </h2>
           <Link 
             href="/dashboard" 
             className="inline-flex items-center gap-2 px-10 py-5 rounded-3xl bg-indigo-500 text-white font-black italic text-lg shadow-[0_20px_40px_rgba(99,102,241,0.3)] hover:scale-105 active:scale-95 transition-all"
           >
-            立刻开始体验 <ChevronRight size={20} />
+            立刻获取专家委员会支持 <ChevronRight size={20} />
           </Link>
         </section>
       </main>

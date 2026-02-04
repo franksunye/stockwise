@@ -170,12 +170,15 @@ function PricingContent() {
 
       <main className="relative z-10 max-w-7xl mx-auto px-8 pt-12 pb-40">
         <div className="text-center space-y-4 mb-20">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4">
+              Native Agentic Support
+          </div>
           <h1 className="text-4xl md:text-6xl font-black tracking-tighter italic leading-tight">
-            选择您的 <br /> 
-            <span className="bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">AI 投资助手</span>
+            选聘您的 <br /> 
+            <span className="bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">知守 · 投研委员会</span>
           </h1>
           <p className="text-lg text-slate-400 font-medium max-w-xl mx-auto leading-relaxed mt-6">
-            StockWise AI 帮您克服情绪干扰，把专业的复盘变成简单的日常习惯，让每一次交易决策都有据可依。
+            订阅不仅是购买功能，更是雇佣了一组 24/7 在岗的专业交易委员会。让知守委员会帮您克服情绪干扰，构建理性的复盘习惯。
           </p>
         </div>
 
