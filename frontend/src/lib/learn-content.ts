@@ -11,6 +11,7 @@ export interface ArticleMeta {
     subtitle?: string;
     date: string;
     category: string;
+    image?: string;
     image_prompt?: string;
 }
 

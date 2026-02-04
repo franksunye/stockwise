@@ -3,6 +3,7 @@ title: "101-21: RSI Decoded"
 subtitle: "Beyond 'Overbought' and 'Oversold'"
 date: "2026-02-04"
 category: "The Method"
+image: "/images/learn/rsi_divergence.png"
 image_prompt: "A minimalist line chart showing price making a higher peak, while a glowing neon line below (RSI) makes a lower peak. A red warning triangle floats between them. Dark background, cyber-financial aesthetic."
 ---
 

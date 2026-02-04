@@ -3,6 +3,7 @@ title: "101-01: The Retail Investor's Impossible Triangle"
 subtitle: "Why 90% of Retail Investors Fail"
 date: "2026-02-04"
 category: "The Mind"
+image: "/images/learn/impossible_triangle.png"
 image_prompt: "A minimalist isometric illustration of a triangle floating in a dark void. The three corners are labeled 'Emotion', 'Discipline', and 'Vision'. The center of the triangle is glowing red with the word 'LOSS'. Cyberpunk style, dark background, neon accents."
 ---
 

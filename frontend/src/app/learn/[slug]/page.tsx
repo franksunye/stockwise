@@ -108,15 +108,23 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
             </p>
           )}
 
-          {/* Prompt visualization hint (In future can replace with real image) */}
-          {article.image_prompt && (
+          {article.image ? (
+            <div className="mt-8 rounded-xl overflow-hidden border border-white/10 shadow-2xl shadow-indigo-500/10">
+               {/* eslint-disable-next-line @next/next/no-img-element */}
+               <img 
+                 src={article.image} 
+                 alt={article.title}
+                 className="w-full h-auto object-cover max-h-[500px]"
+               />
+            </div>
+          ) : article.image_prompt ? (
              <div className="mt-8 p-4 rounded-xl bg-gradient-to-br from-indigo-900/20 to-purple-900/20 border border-indigo-500/10 flex items-center justify-center min-h-[200px] text-center">
                 <div className="text-indigo-300/50 text-sm italic max-w-md">
                    🖼️ [Image Placeholder]<br/>
                    &quot;{article.image_prompt}&quot;
                 </div>
              </div>
-          )}
+          ) : null}
         </header>
 
         {/* Markdown Content */}
