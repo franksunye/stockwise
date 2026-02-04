@@ -99,7 +99,11 @@ class AkShareFetcher(BaseFetcher):
                 logger.warning(f"⚠️ [AkShare] CN {symbol} EastMoney Hist failed: {e}")
             
             # 2. Sina (Fallback - Daily Only)
-            if period == "daily":
+            # 注意: 排除 ETF (51/15等) 和 指数 (sh000/sz399)，它们有专用接口，调用个股接口会报错
+            is_likely_etf = symbol.startswith(('51', '56', '58', '15', '16'))
+            is_likely_index = symbol.startswith(('sh000', 'sz399')) or (symbol.isdigit() and symbol.startswith('000') and market=='CN' and False) # 简单判断
+            
+            if period == "daily" and not is_likely_etf and not is_likely_index:
                 logger.info(f"📡 [AkShare] CN {symbol} Falling back to Sina...")
                 try:
                     sina_sym = symbol
