@@ -130,34 +130,6 @@ export function HistoricalCard({ data, onClick }: { data: AIPrediction; onClick?
           </p>
         </div>
 
-        {/* 技术状态自检 (新增) */}
-        {(data.kdj_k !== undefined || data.rsi !== undefined || data.macd !== undefined) && (
-             <div className="mb-6">
-                 <div className="flex items-center gap-2 mb-2">
-                    <div className="w-1 h-3 rounded-full bg-indigo-500/50" />
-                    <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">技术状态自检</span>
-                 </div>
-                 <div className="flex flex-wrap gap-2">
-                     {/* KDJ: K > D Bullish */}
-                     {renderIndicator('KDJ', data.kdj_k, (data.kdj_k && data.kdj_d && data.kdj_k > data.kdj_d) ? 'up' : 'down')}
-                     {/* RSI: <30 Oversold(Up), >70 Overbought(Down) - Simplified logic here or just based on trend? 
-                         Let's align with common usage: RSI rising is good? No, usually RSI Level. 
-                         Let's use: > 50 Up, < 50 Down for trend direction proxy if no previous data. 
-                     */}
-                     {renderIndicator('RSI', data.rsi, (data.rsi && data.rsi > 50) ? 'down' : 'up')} {/* Usually RSI > 70 is sell signal (down), but strong trend is up. Let's stick to simple: High=Red, Low=Green or just trend? 
-                     User image had RSI ↘ (Red).
-                     Let's Assume RSI > 50 is 'Strong/High' -> maybe Red/Risk?, RSI < 50 Green/Opportunity? 
-                     Actually standard: RSI > 70 Overbought (Risk/Short), RSI < 30 Oversold (Buy/Long). 
-                     */}
-                     
-                     {/* MACD: Hist > 0 Bullish */}
-                     {renderIndicator('MACD', data.macd_hist, (data.macd_hist && data.macd_hist > 0) ? 'up' : 'down')}
-                     
-                     {/* BOLL: Trend based on Price position relative to Mid Band */}
-                     {renderIndicator('BOLL', data.boll_mid, (data.close_price && data.boll_mid && data.close_price > data.boll_mid) ? 'up' : 'down')}
-                 </div>
-             </div>
-        )}
 
         {/* 底部：客观股票数据 */}
         <div className="pt-6 border-t border-white/5">
