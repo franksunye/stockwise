@@ -32,7 +32,7 @@ export default function LandingPage() {
           <Link href="/learn" className="hover:text-white transition-colors">101 手册</Link>
           <Link href="/pricing" className="hover:text-white transition-colors">价格</Link>
           <Link href="#faq" className="hover:text-white transition-colors">FAQ</Link>
-          <Link href="https://app.ziso.cc" className="px-5 py-2.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-white">进入应用</Link>
+          <Link href="https://app.ziso.cc" target="_blank" rel="noopener noreferrer" className="px-5 py-2.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-white">进入应用</Link>
         </div>
       </nav>
 
@@ -57,7 +57,9 @@ export default function LandingPage() {
           </p>
           <div className="pt-10 flex flex-col md:flex-row items-center justify-center gap-4">
             <Link 
-              href="https://app.ziso.cc" 
+              href="https://app.ziso.cc"
+              target="_blank"
+              rel="noopener noreferrer"
               className="px-10 py-5 rounded-3xl bg-indigo-500 text-white font-black italic text-lg shadow-[0_20px_40px_rgba(99,102,241,0.3)] hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
             >
               邀请专家委员会协助我 <ChevronRight size={20} />
@@ -224,7 +226,9 @@ export default function LandingPage() {
             准备好让 <span className="text-indigo-500">知守委员会</span> 成为你的纪律合伙人了吗？
           </h2>
           <Link 
-            href="https://app.ziso.cc" 
+            href="https://app.ziso.cc"
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-10 py-5 rounded-3xl bg-indigo-500 text-white font-black italic text-lg shadow-[0_20px_40px_rgba(99,102,241,0.3)] hover:scale-105 active:scale-95 transition-all"
           >
             立刻获取专家委员会支持 <ChevronRight size={20} />
