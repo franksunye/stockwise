@@ -1,0 +1,48 @@
+---
+title: "101-66: 投研 Prompt 工程"
+subtitle: "如何让通用大模型变成专业的二级市场专家？"
+date: "2026-02-04"
+category: "The Machine"
+image: "/images/learn/prompt_engineering.png"
+image_prompt: "**Concept**: A conceptual 3D illustration of a precision tool shaping raw data. **Style**: Swiss Design, Geometric, Minimalist, Clean, Dark Mode (#050508). **Subject**: A complex, glowing Indigo lattice (the LLM) being directed by a single, sharp white needle (the Prompt). **Action**: The needle is poking into a specific node of the lattice, causing that section to glow with organized Emerald data. **Materials**: Energy lattice, chrome needle. **Colors**: Indigo (#6366f1) as the base, Emerald (#10b981) for the result. **Constraints**: NO text. NO blur. Center composition."
+---
+
+# 炼金术：数据的灵魂刻画
+
+> *"给 AI 一个身份，它就还你一个世界。"* 
+
+如果你直接问 ChatGPT“明天股票会涨吗？”，它会给你一段废话。但如果你用 **StockWise 的投研 Prompt** 询问，它会进行深度的逻辑推演。这就是我们的技术核心。
+
+---
+
+## 💎 从“聊天”到“投研”的飞跃
+
+我们为 AI 定义了一套精密的 **System Persona**：
+1.  **冷酷理性**：它被要求无视一切煽动性的描述，只关注事实锚点。
+2.  **多空两端分析**：它不能只看多，必须强制给出反例和风险风险。
+3.  **引用透明**：它必须为每一个结论找到对应的行情数据或新闻出处。
+
+---
+
+## 🛠️ 三层提示词结构
+
+*   **L1 原始情报收集**：只提取核心数字和新闻原话。
+*   **L2 逻辑关系推导**：将这些碎片联系起来（由于 A，所以 B，这对行业 C 是利好）。
+*   **L3 风险/收益建模**：最终产出评分并与历史规律进行匹配。
+
+---
+
+## ⚖️ 实战：你可以学到什么？
+
+你不需要学习写代码，但你可以学习这种**“结构化思考”**。
+
+**Actionable Tactic：逻辑链拆解**
+当你对某只股票产生买入冲动时，尝试用 AI 喜欢的方式反问自己：
+1.  **输入端**：目前影响这只股的核心变量是什么？
+2.  **逻辑端**：这个变量是否真实改变了公司的盈利能力？
+3.  **输出端**：在目前的赔率下，亏损 5% 和盈利 15% 哪个可能性更大？
+
+**如果你能像 StockWise 一样思考，你就已经跑赢了 90% 的感性散户。**
+
+---
+*下一篇：[101-67] 混合系统：AI 辅助下的终极决策。*

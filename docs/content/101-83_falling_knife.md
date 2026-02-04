@@ -1,0 +1,48 @@
+---
+title: "101-83: 实战案例：避开下坠飞刀"
+subtitle: "当全网喊你“估值极低”时，你为什么该等一等？"
+date: "2026-02-04"
+category: "The Machine"
+image: "/images/learn/case_falling_knife.png"
+image_prompt: "**Concept**: A conceptual 3D illustration of gravity and danger. **Style**: Swiss Design, Geometric, Minimalist, Clean, Dark Mode (#050508). **Subject**: A series of sharp, Rose Red shards falling vertically through a dark void. **Action**: An Indigo magnetic field is below them, but it is not strong enough to stop the fall yet. **Materials**: Sharp obsidian-like shards, glowing energy lines. **Colors**: Rose Red (#f43f5e) for the shards. **Constraints**: NO text. NO blur. Center composition."
+---
+
+# 案例：估值陷阱
+
+这是最让“价值投资者”破防的场景：越便宜，越跌。
+
+---
+
+## 💎 场景回放
+
+某行业巨头跌去了 80%，PE 已经到了历史最低。股民们群情激奋：“这是捡钱的机会啊！”
+*   **状态 A**：股价连跌 5 个月。
+*   **状态 B**：StockWise 的 AI 评分持续在 0.1 - 0.3 徘徊。
+*   **状态 C**：均线系统（MA20/60/250）呈现完美的空头排列。
+
+---
+
+## 🛡️ AI 的冷酷判断
+
+1.  **拒绝左侧**：AI 不关心它以前值多少钱，AI 只关心现在有没有人买。
+2.  **动能失速**：EMA20 一直压着股价走。在均线没有走平反转前，任何买入都是在抵抗重力。
+3.  **语义挖掘**：AI 发现该行业的潜在逻辑已经发生了永久性的破坏（比如监管变动或技术颠覆）。
+
+---
+
+## 📉 结局
+
+股价在接下来的半年里又腰斩了一次。那些“抄底”的人彻底爆仓或卸载软件。
+
+---
+
+## ⚖️ 启示：敬畏趋势
+
+**Actionable Tactic：趋势确认件**
+1.  **均线不抬头不进场**：至少要等到 EMA20 走平并开始向上勾头。
+2.  **不买“最便宜”的**：买那些已经被市场证明“有人开始买”的股。
+
+**便宜不是买入的理由，止跌才是。**
+
+---
+*恭喜你！至此你已经完成了 StockWise 101 的全部核心指南。你已经比 95% 的散户更懂这个市场的生存法则。*

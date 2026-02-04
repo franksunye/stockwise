@@ -1,0 +1,51 @@
+---
+title: "101-58: 止盈的艺术"
+subtitle: "会买的是徒弟，会卖才是师傅"
+date: "2026-02-04"
+category: "The Money"
+image: "/images/learn/profit_taking.png"
+image_prompt: "**Concept**: A conceptual 3D illustration of Harvesting. **Style**: Swiss Design, Geometric, Minimalist, Clean, Dark Mode (#050508). **Subject**: A large Emerald crystal being sliced by a vertical Indigo laser beam. A smaller piece is already separated and stored. **Action**: The laser is precisely dividing the growth. **Materials**: Crystalline Emerald, glowing Indigo light. **Colors**: Emerald (#10b981) for the profit, Indigo (#6366f1) for the active decision. **Constraints**: NO text. NO blur. Center composition."
+---
+
+# 止盈：让利润落袋的勇气
+
+> *"没有卖出的盈利，只是纸上的富贵。"* 
+
+新手面对亏损犹豫不决，面对盈利更是一头雾水。涨了 10%，怕跌回去想卖；卖了之后又涨了 20%，后悔得拍大腿。
+
+---
+
+## 💎 动态止盈的三大策略
+
+### 1. 目标位止盈 (Target Exit)
+利用 StockWise 标记的“历史强阻力位”或斐波那契回撤点。到位置，不废话，先卖一半。
+
+### 2. 移动止盈 (Trailing Stop)
+不预设终点，而是预设**“回撤限额”**。比如：只要价格不跌破 EMA20，我就一直拿着。如果从最高点回撤 5%，我就清仓。
+*   *核心*：让利润尽情奔跑。
+
+### 3. 分阶段撤退 (Scaling Out)
+*   **涨 10%**：卖出 1/3，收回部分成本。
+*   **涨 20%**：卖出 1/3，确保这笔交易不可能亏损。
+*   **剩下 1/3**：跟随大势直到出现卖出信号。
+
+---
+
+## 📉 后悔是交易者的天敌
+
+很多散户因为卖完又涨了而感到愤怒，甚至追高。
+**记住：交易的目的不是为了卖在最高点，而是为了带走属于你的那一部分利润。** 
+
+---
+
+## ⚖️ 实战：StockWise 风险度量
+
+**Actionable Tactic：利润保护法**
+1.  **设置保本止损**：当股价脱离成本区 5% 以上，将你的初始止损位移至**买入成本价**。
+2.  **观察背离**：如果股价创新高但 StockWise 的 AI 评分在跳水，这是极致的止盈信号。
+3.  **接受波动**：如果你选择了 Trailng Stop，就要接受损失最后一小截利润的代价。
+
+**你永远赚不到不属于你认知的钱。**
+
+---
+*下一篇：[101-64] 盘后分析 vs 盘中博弈。*

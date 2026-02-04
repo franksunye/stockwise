@@ -1,0 +1,50 @@
+---
+title: "101-64: 盘后分析 vs 盘中博弈"
+subtitle: "为什么“睡一觉”的 AI 预测更值得信任？"
+date: "2026-02-04"
+category: "The Machine"
+image: "/images/learn/eod_vs_intraday.png"
+image_prompt: "**Concept**: A conceptual 3D illustration of Focus vs Noise. **Style**: Swiss Design, Geometric, Minimalist, Clean, Dark Mode (#050508). **Subject**: A chaotic cloud of tiny, flickering white dots (Intraday noise) being filtered into a single, steady, glowing Indigo beam (EOD analysis). **Action**: The beam emerges clean and powerful from a funnel-like structure. **Materials**: Glass funnel, energetic particle dots. **Colors**: Indigo (#6366f1) for the clear signal. **Constraints**: NO text. NO blur. Center composition."
+---
+
+# 节奏：噪音与信号的博弈
+
+> *"盘中是情绪的狂欢，盘后是理性的审视。"* —— StockWise 算法逻辑
+
+很多初学者希望 StockWise 给出秒级的实时买卖建议。但我们认为，对散户最友好的战场是 **EOD (End of Day) - 静态盘后分析**。
+
+---
+
+## 💎 盘中的致命噪音
+
+盘中每一秒钟的波动都包含着大量的**随机性**。
+*   一个大手笔挂单可能只是为了测试盘面。
+*   一个假突破可能分分钟被拉回。
+*   AI 在处理这些极短周期的秒级行情时，也会产生“焦虑”，评分会剧烈跳动。
+
+---
+
+## 🛡️ 盘后分析的结构性优势
+
+### 1. 尘埃落定
+收盘价是博弈各方最终达成的共识。大资金该买的买完了，该撤的撤了。这个价格比日内任何一个价格都具参考价值。
+
+### 2. 情报完整性
+盘后，AI 可以调取全天的新闻、龙虎榜数据、板块联动数据和更完整的深度简报。这种“慢思考”的质量远高于日内抢时间。
+
+### 3. 剥离情绪
+盘后的你，没有账户盈亏的实时闪烁，心跳平稳。此时制定的计划，才是真正的计划。
+
+---
+
+## ⚖️ 实战：StockWise 运行逻辑
+
+**Actionable Tactic：静态计划法**
+1.  **当晚 8 点后**：查看 StockWise 针对当日行情的深度简报和评分。
+2.  **制定次日计划**：设定好触发位和止损位，在脑海中演习一遍。
+3.  **次日执行**：除非发生重大黑天鹅，否则只执行昨晚制定的计划。
+
+**我们不预测跳动，我们只识别结构。**
+
+---
+*下一篇：[101-65] 置信度解码：当 AI 说“不确定”时，你在听吗？*
