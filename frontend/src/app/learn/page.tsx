@@ -8,6 +8,7 @@ export const metadata = {
 };
 
 // Map categories to icons, colors, and CHINESE LABELS
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const CATEGORY_STYLE: Record<string, any> = {
   'The Mind': { label: '心法篇', icon: Brain, color: 'text-rose-400', bg: 'bg-rose-500/10', border: 'border-rose-500/20' },
   'The Method': { label: '术法篇', icon: Zap, color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20' },
