@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { getArticleBySlug, getAllArticles } from '@/lib/learn-content';
 import ReactMarkdown from 'react-markdown';
-import { ChevronLeft, Brain, Zap, Shield, Sparkles, BookOpen } from 'lucide-react';
+import { ChevronLeft, Calendar, Clock, BookOpen, Brain, Zap, Shield, Sparkles, Target } from 'lucide-react';
 
 interface CategoryStyle {
   label: string;
@@ -19,6 +19,7 @@ const CATEGORY_STYLE: Record<string, CategoryStyle> = {
   'The Method': { label: '术法篇', icon: Zap, color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20' },
   'The Money': { label: '资金篇', icon: Shield, color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
   'The Machine': { label: '工具篇', icon: Sparkles, color: 'text-indigo-400', bg: 'bg-indigo-500/10', border: 'border-indigo-500/20' },
+  'The Case': { label: '案例篇', icon: Target, color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
 };
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {

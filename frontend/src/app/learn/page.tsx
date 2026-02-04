@@ -1,11 +1,11 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { getAllArticles } from '@/lib/learn-content';
-import { ChevronLeft, ChevronRight, BookOpen, Brain, Zap, Shield, Sparkles } from 'lucide-react';
+import { ChevronLeft, ChevronRight, BookOpen, Brain, Zap, Shield, Sparkles, Target } from 'lucide-react';
 
 export const metadata = {
   title: 'StockWise 101 | 散户生存手册',
-  description: 'AI 时代的散户交易知识库，涵盖交易心理、技术分析与风控系统。',
+  description: '你的理性避难所。教你如何用 AI 和概率论在市场中活下来。',
 };
 
 interface CategoryStyle {
@@ -22,6 +22,7 @@ const CATEGORY_STYLE: Record<string, CategoryStyle> = {
   'The Method': { label: '术法篇', icon: Zap, color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20' },
   'The Money': { label: '资金篇', icon: Shield, color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
   'The Machine': { label: '工具篇', icon: Sparkles, color: 'text-indigo-400', bg: 'bg-indigo-500/10', border: 'border-indigo-500/20' },
+  'The Case': { label: '案例篇', icon: Target, color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
 };
 
 export default async function LearnPage() {
@@ -33,6 +34,7 @@ export default async function LearnPage() {
     { id: 'The Method', label: '术法篇', icon: Zap, desc: '技术面与量价分析', color: 'text-amber-400' },
     { id: 'The Money', label: '资金篇', icon: Shield, desc: '仓位管理与风控系统', color: 'text-emerald-400' },
     { id: 'The Machine', label: '工具篇', icon: Sparkles, desc: 'AI 投研与 StockWise 机制', color: 'text-indigo-400' },
+    { id: 'The Case', label: '案例篇', icon: Target, desc: '从历史中学习：实战复盘', color: 'text-blue-400' },
   ];
 
   return (
@@ -50,29 +52,28 @@ export default async function LearnPage() {
       </nav>
 
       {/* Hero */}
-      <section className="relative overflow-hidden pt-20 pb-16 border-b border-white/5">
+      <section className="relative overflow-hidden pt-12 pb-10 border-b border-white/5">
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
             <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-indigo-600/5 blur-[120px] rounded-full" />
             <div className="absolute top-[20%] -right-[10%] w-[30%] h-[30%] bg-purple-600/5 blur-[120px] rounded-full" />
         </div>
 
-        <div className="max-w-5xl mx-auto px-6 relative z-10 text-center space-y-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4">
+        <div className="max-w-5xl mx-auto px-6 relative z-10 text-center space-y-5">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-2">
             <BookOpen size={12} className="text-indigo-400" />
             Retail Survival Manual
           </div>
-          <h1 className="text-5xl md:text-7xl font-black tracking-tighter italic leading-tight">
-            从散户到 <br /> 
-            <span className="bg-gradient-to-r from-indigo-500 via-purple-400 to-indigo-500 bg-clip-text text-transparent">理性交易者</span>
+          <h1 className="text-3xl md:text-5xl font-black tracking-tighter italic leading-tight">
+            从散户到 <span className="bg-gradient-to-r from-indigo-500 via-purple-400 to-indigo-500 bg-clip-text text-transparent">理性交易者</span>
           </h1>
-          <p className="text-slate-400 max-w-2xl mx-auto text-lg md:text-xl leading-relaxed font-medium">
+          <p className="text-slate-500 max-w-2xl mx-auto text-base md:text-lg leading-relaxed font-medium">
             这里是你的理性避难所。不教你一夜暴富，只教你如何用 AI 和概率论在黑暗森林里活下来。
           </p>
           
-          <div className="pt-8 flex flex-wrap justify-center gap-4 text-xs font-bold text-slate-500">
-             <div className="px-4 py-2 rounded-full bg-white/[0.02] border border-white/5"><span className="text-white">20+</span> 深度指南</div>
-             <div className="px-4 py-2 rounded-full bg-white/[0.02] border border-white/5"><span className="text-white">4</span> 大核心领域</div>
-             <div className="px-4 py-2 rounded-full bg-white/[0.02] border border-white/5">预计阅读 <span className="text-white">90</span> 分钟</div>
+          <div className="pt-4 flex flex-wrap justify-center gap-3 text-[10px] font-bold text-slate-500">
+             <div className="px-3 py-1.5 rounded-full bg-white/[0.02] border border-white/5"><span className="text-white">40+</span> 深度指南</div>
+             <div className="px-3 py-1.5 rounded-full bg-white/[0.02] border border-white/5"><span className="text-white">5</span> 大核心模块</div>
+             <div className="px-3 py-1.5 rounded-full bg-white/[0.02] border border-white/5">预计阅读 <span className="text-white">180</span> 分钟</div>
           </div>
         </div>
       </section>

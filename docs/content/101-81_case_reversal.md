@@ -2,7 +2,7 @@
 title: "101-81: 实战案例：结构化反转"
 subtitle: "如何捕捉深跌后的第一抹曙光？"
 date: "2026-02-04"
-category: "The Machine"
+category: "The Case"
 image: "/images/learn/case_reversal.png"
 image_prompt: "**Concept**: A conceptual 3D illustration of a trend reversal. **Style**: Swiss Design, Geometric, Minimalist, Clean, Dark Mode (#050508). **Subject**: A descending path of Rose Red slabs that abruptly stops. The next slab is Indigo and is tilted upwards. **Action**: A small white sphere is perfectly balanced on the corner where the direction changes. **Materials**: Matte blocks, glowing transition. **Colors**: Rose Red (#f43f5e) for the fall, Indigo (#6366f1) for the rise. **Constraints**: NO text. NO blur. Center composition."
 ---

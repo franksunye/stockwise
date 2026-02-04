@@ -2,7 +2,7 @@
 title: "101-82: 实战案例：识别虚假突破"
 subtitle: "为什么“创新高”有时是骗子给的剧本？"
 date: "2026-02-04"
-category: "The Machine"
+category: "The Case"
 image: "/images/learn/case_false_breakout.png"
 image_prompt: "**Concept**: A conceptual 3D illustration of a hollow shell. **Style**: Swiss Design, Geometric, Minimalist, Clean, Dark Mode (#050508). **Subject**: A large, glowing Indigo door that is actually a 2D facade, revealing an empty space behind it. **Action**: A path leads right through the door and directly off a cliff. **Materials**: Glowing glass facade, matte platform. **Colors**: Indigo (#6366f1) for the deceptive appearance, Rose Red (#f43f5e) for the risk. **Constraints**: NO text. NO blur. Center composition."
 ---
