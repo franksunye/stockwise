@@ -62,16 +62,17 @@ export default async function LearnPage() {
             return (
               <Link key={article.slug} href={`/learn/${article.slug}`}>
                 <div className="group relative p-6 rounded-2xl bg-white/[0.03] border border-white/10 hover:bg-white/[0.06] hover:border-white/20 transition-all active:scale-[0.99] overflow-hidden">
-                  <div className="flex items-start justify-between gap-4 relative z-10">
+                  <div className="flex flex-col-reverse sm:flex-row items-start justify-between gap-6 relative z-10">
+                    
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-3 mb-2">
+                      <div className="flex items-center gap-3 mb-3">
                          <span className={`text-[10px] font-black uppercase tracking-widest ${style.color} px-2 py-0.5 rounded bg-white/5`}>
                            {style.label}
                          </span>
                          <span className="text-slate-500 text-xs font-mono">{article.date}</span>
                       </div>
                       
-                      <h2 className="text-xl font-bold text-slate-200 group-hover:text-white transition-colors mb-2 line-clamp-1">
+                      <h2 className="text-xl font-bold text-slate-200 group-hover:text-white transition-colors mb-3 leading-tight">
                         {article.title}
                       </h2>
                       
@@ -80,9 +81,22 @@ export default async function LearnPage() {
                       </p>
                     </div>
 
-                    <div className={`mt-1 p-3 rounded-xl ${style.bg} ${style.border} border hidden sm:flex items-center justify-center shrink-0`}>
-                      <Icon className={`w-6 h-6 ${style.color}`} />
-                    </div>
+                    {/* Thumbnail Logic */}
+                    {article.image ? (
+                      <div className="w-full sm:w-24 sm:h-24 shrink-0 rounded-xl overflow-hidden border border-white/10 shadow-lg group-hover:shadow-indigo-500/10 transition-all">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img 
+                          src={article.image} 
+                          alt={article.title}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        />
+                      </div>
+                    ) : (
+                      <div className={`mt-1 p-3 rounded-xl ${style.bg} ${style.border} border hidden sm:flex items-center justify-center shrink-0 w-16 h-16`}>
+                        <Icon className={`w-8 h-8 ${style.color}`} />
+                      </div>
+                    )}
+
                   </div>
                 </div>
               </Link>
