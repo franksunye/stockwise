@@ -29,7 +29,7 @@ export default async function LearnPage() {
       {/* Navbar */}
       <nav className="sticky top-0 z-50 bg-[#050508]/80 backdrop-blur-xl border-b border-white/5">
         <div className="max-w-4xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/dashboard" className="p-2 -ml-2 rounded-full hover:bg-white/5 active:scale-95 transition-all text-slate-400 hover:text-white">
+          <Link href="/" className="p-2 -ml-2 rounded-full hover:bg-white/5 active:scale-95 transition-all text-slate-400 hover:text-white">
             <ChevronLeft size={20} />
           </Link>
           <div className="font-bold text-lg tracking-tight">StockWise <span className="text-indigo-500">101</span></div>
