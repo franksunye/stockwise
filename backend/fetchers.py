@@ -50,7 +50,9 @@ class AkShareFetcher(BaseFetcher):
             try:
                 df = ak.stock_hk_hist(symbol=symbol, period=period, start_date=start_date, 
                                         end_date=end_date, adjust="qfq")
-                if not df.empty: return df
+                if not df.empty: 
+                    logger.info(f"✅ [AkShare] HK {symbol} fetched from EastMoney ({len(df)} rows)")
+                    return df
             except Exception as e:
                 logger.warning(f"⚠️ [AkShare] HK {symbol} EastMoney Hist failed: {e}")
             
@@ -69,6 +71,7 @@ class AkShareFetcher(BaseFetcher):
                     })
                     if "涨跌幅" not in df.columns:
                         df["涨跌幅"] = df["收盘"].pct_change() * 100
+                    logger.info(f"✅ [AkShare] HK {symbol} fetched from Sina Fallback")
                     return df
             except Exception as e:
                 logger.error(f"❌ [AkShare] HK {symbol} Sina Fallback failed: {e}")
@@ -80,7 +83,9 @@ class AkShareFetcher(BaseFetcher):
             try:
                 df = ak.stock_zh_a_hist(symbol=symbol, period=period, start_date=start_date, 
                                         end_date=end_date, adjust="qfq")
-                if not df.empty: return df
+                if not df.empty: 
+                    logger.info(f"✅ [AkShare] CN {symbol} fetched from EastMoney ({len(df)} rows)")
+                    return df
             except Exception as e:
                 logger.warning(f"⚠️ [AkShare] CN {symbol} EastMoney Hist failed: {e}")
             
@@ -101,6 +106,7 @@ class AkShareFetcher(BaseFetcher):
                         })
                         if "涨跌幅" not in df.columns:
                             df["涨跌幅"] = df["收盘"].pct_change() * 100
+                        logger.info(f"✅ [AkShare] CN {symbol} fetched from Sina Fallback")
                         return df
                 except Exception as e:
                     logger.error(f"❌ [AkShare] CN {symbol} Sina Fallback failed: {e}")
