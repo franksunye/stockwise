@@ -4,7 +4,7 @@ import { getAllArticles } from '@/lib/learn-content';
 import { ChevronLeft, ChevronRight, BookOpen, Brain, Zap, Shield, Sparkles, Target } from 'lucide-react';
 
 export const metadata = {
-  title: 'StockWise 101 | 散户生存手册',
+  title: 'StockWise 101 | 知守日课',
   description: '你的理性避难所。教你如何用 AI 和概率论在市场中活下来。',
 };
 
@@ -61,7 +61,7 @@ export default async function LearnPage() {
         <div className="max-w-5xl mx-auto px-6 relative z-10 text-center space-y-4">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-1">
             <BookOpen size={10} className="text-indigo-400" />
-            Retail Survival Manual
+            知守日课 · Retail Survival Manual
           </div>
           <h1 className="text-2xl md:text-4xl font-black tracking-tighter italic leading-tight">
             从散户到 <span className="bg-gradient-to-r from-indigo-500 via-purple-300 to-indigo-500 bg-clip-text text-transparent">理性交易者</span>

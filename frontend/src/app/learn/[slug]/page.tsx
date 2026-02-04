@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!article) return { title: 'Article Not Found' };
   
   return {
-    title: `${article.title} - StockWise 101`,
+    title: `${article.title.split(': ')[1] || article.title} | StockWise 101 | 知守日课`,
     description: article.subtitle,
   };
 }

@@ -1,5 +1,5 @@
-# StockWise 101: The Retail Investor's Survival Manual
-> **Subtitle**: Surviving the Market in the Age of AI
+# StockWise 101: 知守日课 (The Survival Manual)
+> **Subtitle**: 知其白，守其黑。AI 时代的散户生存日课。
 > **Philosophy**: Rationality, Discipline, and Data-Driven Decision Making.
 
 This is the master syllabus for the StockWise content strategy. It is designed to be a comprehensive guide that educates users, builds trust, and establishes StockWise as a thought leader in AI-assisted investing.
