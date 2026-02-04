@@ -2,29 +2,39 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
-    const hostname = request.headers.get('host') || '';
+    // 优先从 nextUrl 获取 hostname，这通常是最准确的
+    let hostname = request.nextUrl.hostname;
+
+    // 如果是 Vercel 部署，有时候 host header 是更原始的请求头
+    const hostHeader = request.headers.get('host');
+    if (hostHeader) {
+        hostname = hostHeader.split(':')[0]; // 去除端口号
+    }
+
     const url = request.nextUrl;
 
-    // 检测是否是 App 域名 (app.ziso.cc 或本地测试时的 app.localhost)
-    // 这样既支持线上环境，也方便您本地测试 (需要在 hosts 文件配置)
-    const isAppDomain = hostname.startsWith('app.');
+    // 调试日志：在 Vercel Functions Logs 中可见
+    // console.log(`[Middleware] Host: ${hostname}, Path: ${url.pathname}`);
 
-    // 如果是通过 App 域名访问
+    // 检测是否是 App 域名 (app.ziso.cc 或 app.localhost)
+    const isAppDomain = hostname === 'app.ziso.cc' || hostname.startsWith('app.');
+
+    // 1. 如果是通过 App 域名访问
     if (isAppDomain) {
-        // 1. 访问根路径 '/' 时，在后台“偷梁换柱”加载 '/dashboard' 的内容
-        // 浏览器地址栏依然显示: app.ziso.cc
+        // 当访问根路径 '/' 时，重写到 '/dashboard'
         if (url.pathname === '/') {
             return NextResponse.rewrite(new URL('/dashboard', request.url));
         }
-
-        // 2. (可选优化) 如果用户顽固地输入 '/dashboard'，可以重定向到 '/'
-        // 让地址栏始终保持干净的 'app.ziso.cc'
-        // if (url.pathname === '/dashboard') {
-        //   return NextResponse.redirect(new URL('/', request.url));
-        // }
     }
 
-    // 其他情况（如 ziso.cc）保持原样
+    // 2. (可选) 反向保护：如果是官网域名 (ziso.cc) 访问 '/dashboard'，可以重定向回 App
+    // 这样用户如果在官网手输 /dashboard，也会被“赶”到 app.ziso.cc 去
+    /*
+    if (hostname === 'ziso.cc' && url.pathname.startsWith('/dashboard')) {
+         return NextResponse.redirect(new URL(`https://app.ziso.cc${url.pathname}`, request.url));
+    }
+    */
+
     return NextResponse.next();
 }
 

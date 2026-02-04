@@ -4,6 +4,17 @@ import Stripe from 'stripe';
 import { getDbClient } from '@/lib/db';
 
 export async function POST(request: Request) {
+    // 强制依赖明确的环境变量配置，拒绝硬编码兜底，确保运维逻辑清晰
+    // NEXT_PUBLIC_APP_URL: 应用主入口 (e.g. https://app.ziso.cc)
+    // NEXT_PUBLIC_SITE_URL: 官网主入口 (e.g. https://ziso.cc)
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+
+    if (!appUrl || !siteUrl) {
+        console.error("❌ Missing required environment variables: NEXT_PUBLIC_APP_URL or NEXT_PUBLIC_SITE_URL");
+        return NextResponse.json({ error: "Server configuration error" }, { status: 500 });
+    }
+
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
         apiVersion: '2025-12-15.clover',
     });
@@ -53,8 +64,8 @@ export async function POST(request: Request) {
                 },
             ],
             client_reference_id: userId,
-            success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?checkout=success`,
-            cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing?checkout=cancelled`,
+            success_url: `${appUrl}/dashboard?checkout=success`,
+            cancel_url: `${siteUrl}/pricing?checkout=cancelled`,
             subscription_data: {
                 metadata: {
                     userId,
