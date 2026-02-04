@@ -45,8 +45,8 @@ def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool =
     else:
         fetch_start_str = (datetime.now() - timedelta(days=buffer_days)).strftime("%Y%m%d")
 
-    # 1. 抓取
-    df = fetch_stock_data(symbol, period=period, start_date=fetch_start_str)
+    # 1. 抓取 (Pass is_realtime flag to use optimized Sina Spot path)
+    df = fetch_stock_data(symbol, period=period, start_date=fetch_start_str, is_realtime=is_realtime)
     # [Fix] Explicitly return False if fetch failed or no data, so caller knows it wasn't updated
     if df.empty: return False
     

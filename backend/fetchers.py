@@ -29,11 +29,20 @@ class BaseFetcher(ABC):
     def fetch_history(self, symbol: str, period: str = "daily", start_date: str = None) -> pd.DataFrame:
         """獲取歷史行情數據"""
         pass
+        
+    def fetch_realtime(self, symbol: str) -> dict:
+        """获取并返回包含价格/时间/涨跌幅的实时字典 (Optional)"""
+        return None
 
 
 class AkShareFetcher(BaseFetcher):
     """AkShare 數據獲取器實現"""
     
+    def fetch_realtime(self, symbol: str) -> dict:
+        """使用 AkShare 通道获取实时数据 (AkShare 实现较重，建议优先使用 SmartFetcher 的轻量级实现)"""
+        # 为保持一致性，AkSharefetcher 主要用于历史数据，实时数据由专门的逻辑处理
+        return None
+
     def fetch_history(self, symbol: str, period: str = "daily", start_date: str = None) -> pd.DataFrame:
         beijing_now = datetime.now(BEIJING_TZ)
         end_date = beijing_now.strftime("%Y%m%d")
@@ -172,12 +181,124 @@ class EODHDFetcher(BaseFetcher):
         return pd.DataFrame()
 
 
+class SinaSpotFetcher(BaseFetcher):
+    """
+    轻量级 HTTP 实时数据获取器 (Sina)
+    Bypasses AkShare wrapper for maximum speed and stability.
+    """
+    def fetch_history(self, symbol: str, period: str = "daily", start_date: str = None) -> pd.DataFrame:
+        # Sina 历史接口实现复杂且不稳定，这里只做实时
+        return pd.DataFrame()
+        
+    def fetch_realtime(self, symbol: str) -> dict:
+        headers = {'Referer': 'http://finance.sina.com.cn/'}
+        market = get_market(symbol)
+        
+        # 1. 构建 Code
+        if market == 'HK':
+            code = f"rt_hk{symbol}"
+        else:
+            # A 股
+            if symbol.startswith('6'): code = f"sh{symbol}"
+            elif symbol.startswith(('0', '3')): code = f"sz{symbol}"
+            elif symbol.startswith(('4', '8')): code = f"bj{symbol}"
+            else: code = f"sz{symbol}" # Fallback
+            
+        url = f"http://hq.sinajs.cn/list={code}"
+        
+        try:
+            resp = requests.get(url, headers=headers, timeout=4)
+            text = resp.text.strip()
+            
+            # Format Check
+            if not text or '=""' in text:
+                return None
+                
+            content = text.split('=')[1].strip('";').split(',')
+            if len(content) < 3: return None
+            
+            result = {}
+            beijing_now = datetime.now(BEIJING_TZ)
+            
+            if market == 'HK':
+                # HK: 6=Last, 7=Change, 8=Pct, 17=Date, 18=Time
+                # Volume is at index 12 (Shares), Turnover at 11 (Amount in HKD) check?
+                # Actually for HK: 
+                # 0:EnName, 1:CnName, 2:Open, 3:PrevClose, 4:High, 5:Low, 6:Last, 7:Diff, 8:Pct, 9:Bid, 10:Ask, 11:Turnover, 12:Vol
+                price = float(content[6])
+                date_str = content[17].replace('/', '-') # 2026/02/04 -> 2026-02-04
+                
+                result = {
+                    'symbol': symbol,
+                    'price': price,
+                    'open': float(content[2]),
+                    'high': float(content[4]),
+                    'low': float(content[5]),
+                    'close': price, # Realtime close = current
+                    'volume': float(content[12]), # Use Volume (Shares)
+                    'change_pct': float(content[8]),
+                    'date': date_str,
+                    'time': f"{date_str} {content[18]}"
+                }
+            else:
+                # CN: 1=Open, 2=PrevClose, 3=Current, 4=High, 5=Low, 8=Vol(Share), 30=Date, 31=Time
+                # Note: CN Volume is in Shares (Hand? No, usually Shares)
+                # Sina CN Volume (index 8) is in SHARES (股).
+                current_price = float(content[3])
+                prev_close = float(content[2])
+                change_pct = ((current_price - prev_close) / prev_close) * 100 if prev_close > 0 else 0
+                
+                result = {
+                    'symbol': symbol,
+                    'price': current_price,
+                    'open': float(content[1]),
+                    'high': float(content[4]),
+                    'low': float(content[5]),
+                    'close': current_price,
+                    'volume': float(content[8]), 
+                    'change_pct': change_pct,
+                    'date': content[30],
+                    'time': f"{content[30]} {content[31]}"
+                }
+            
+            # 补丁：Sina 成交量单位问题
+            # A股 Sina 返回的是 股数，我们数据库存的是 股数，一致。
+            # 港股 Sina 返回的是 股数，一致。
+            
+            return result
+            
+        except Exception as e:
+            logger.warning(f"⚠️ [SinaSpot] {symbol} fetch failed: {e}")
+            return None
+
+
 class SmartFetcher(BaseFetcher):
     """智能獲取器：集成多個 Fetcher 並實現降級邏輯"""
     
     def __init__(self, fetchers: List[BaseFetcher] = None):
-        self.fetchers = fetchers or [AkShareFetcher(), EODHDFetcher()]
+        # Default: History=AkShare, Realtime=Sina
+        self.fetchers = fetchers or [AkShareFetcher()]
+        self.realtime_fetcher = SinaSpotFetcher()
         
+    def fetch_realtime(self, symbol: str) -> pd.DataFrame:
+        """
+        Special method to return a 1-row DataFrame containing realtime data.
+        Returns empty DataFrame if failed.
+        """
+        data = self.realtime_fetcher.fetch_realtime(symbol)
+        if data:
+            # Convert dict to DataFrame matching standard schema
+            df = pd.DataFrame([data])
+            # Remap columns to match what prices.py expects from akshare
+            # prices.py expects:
+            # 日期, 开盘, 收盘, 最高, 最低, 成交量, 涨跌幅
+            df = df.rename(columns={
+                "date": "日期", "open": "开盘", "close": "收盘",
+                "high": "最高", "low": "最低", "volume": "成交量", "change_pct": "涨跌幅"
+            })
+            return df
+        return pd.DataFrame()
+
     def fetch_history(self, symbol: str, period: str = "daily", start_date: str = None) -> pd.DataFrame:
         for fetcher in self.fetchers:
             try:
@@ -193,11 +314,20 @@ class SmartFetcher(BaseFetcher):
 
 
 
-def fetch_stock_data(symbol: str, period: str = "daily", start_date: str = None) -> pd.DataFrame:
+def fetch_stock_data(symbol: str, period: str = "daily", start_date: str = None, is_realtime: bool = False) -> pd.DataFrame:
     """获取历史行情数据 (支持 A/H) - Standard interface supporting multi-provider migration."""
     # Note: Transitioning to Abstract Fetcher Factory pattern
     # Use SmartFetcher with automated fallback mechanism
     fetcher = SmartFetcher()
+    
+    # [Opt] Realtime Route: Use lightweight Sina Spot API
+    if is_realtime and period == "daily":
+        logger.info(f"⚡ [Realtime] Fetching snapshot for {symbol} via Sina...")
+        df = fetcher.fetch_realtime(symbol)
+        if not df.empty:
+            return df
+        logger.warning(f"⚠️ [Realtime] Sina Spot failed for {symbol}, falling back to daily history...")
+        
     return fetcher.fetch_history(symbol, period, start_date)
 
 def sync_stock_meta():
