@@ -43,9 +43,9 @@ export default {
       return;
     }
     
-    // ========== 实时同步任务检测 (09:10 - 16:10) ==========
-    const tradingStart = 9 * 60 + 10;  // 09:10
-    const tradingEnd = 16 * 60 + 10;   // 16:10
+    // ========== 实时同步任务检测 (09:15 - 16:30) ==========
+    const tradingStart = 9 * 60 + 15;  // 09:15
+    const tradingEnd = 16 * 60 + 30;   // 16:30
     
     if (currentMinutes < tradingStart || currentMinutes > tradingEnd) {
       console.log(`🌙 Outside trading hours (Beijing: ${beijingHour}:${String(beijingMinute).padStart(2, '0')}), skipping realtime sync...`);
