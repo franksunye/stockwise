@@ -4,68 +4,50 @@ subtitle: "数学告诉我们：到底该买多少？"
 date: "2026-02-04"
 category: "The Money"
 image: "/images/learn/kelly_formula.png"
-image_prompt: "A digital scale balancing a pile of gold coins against a complex mathematical equation written in floating neon letters. Concept of precise mathematical betting."
+image_prompt: "**Concept**: A conceptual 3D illustration of Mathematical Balance in betting. **Style**: Swiss Design, Geometric, Minimalist, Clean, Dark Mode (#050508). **Subject**: A floating mathematical equation symbols (f, p, b) arranged in a perfect circle around a central Emerald cube. **Action**: The symbols are perfectly balanced, held together by thin Indigo light rays. **Materials**: Glass-like symbols, matte central cube. **Colors**: Emerald (#10b981) for the core, Indigo (#6366f1) for the connecting rays. **Constraints**: NO text. NO blur. Center composition."
 ---
 
 # 凯利公式：告别“拍脑袋”仓位法
 
 > *"只要你一直全仓，你迟早有一天会输光。"* —— 华尔街古老谚语
 
-很多散户遇到看好的股票，要么就是全仓一把梭（All-in），要么就是象征性买个几百块。
-他们赢了，本金太少没赚头；输了，全仓爆破伤筋动骨。
+很多散户看好一只票，要么全仓一把梭，要么象征性买点。赢了，本金太少没赚头；输了，全仓爆破。
 
-如何科学地分配你的子弹？1956 年，贝尔实验室的科学家约翰·凯利给出了答案：**凯利公式**。
+科学分配子弹的答案是：**凯利公式**。
 
 ---
 
-## 1. 凯利公式的极简版
+## 📐 凯利公式：长期财富的最大化
 
-$$f = \frac{p \cdot b - q}{b}$$
+$$f = \frac{p \cdot b - (1-p)}{b}$$
 
-*   **f**：最优的下单比例（你应该投入本金的百分之几）。
+*   **f**：最优下单比例。
 *   **p**：胜率（你赢的概率）。
 *   **b**：赔率（盈亏比，赢了赚多少 / 输了亏多少）。
-*   **q**：败率（即 1 - p）。
 
-这个公式的核心逻辑只有一句话：**在有限次的博弈中，为了让财富长期增长率最大化，你买多少取决于你的胜率和赔率。**
-
----
-
-## 2. 股市中的实际应用
-
-在复杂的股市里，我们无法得到精确的 p 和 b，但我们可以估算。
-
-假设 StockWise 对某只标的的评分为 0.8，趋势强劲。
-*   **估算胜率 p** = 60% (0.6)
-*   **估算盈亏比 b** = 2 (设定止盈 10% 止损 5%)
-*   **计算公式**：$(0.6 \cdot 2 - 0.4) / 2 = 0.4$
-
-公式建议你可以投入 **40%** 的仓位。
+即便你是个天才，如果在赔率不占优的情况下重仓，复利也会最终把你清零。
 
 ---
 
-## 3. 散户必须注意的：半凯利原则 (Half-Kelly)
+## ⚖️ 实战：StockWise 仓位计算
 
-现实是残酷的。因为我们估算的胜率往往会被主观修正。
-**大多数专业投资者会采用“半凯利”策略：即算出结果后，再砍一半。**
-在上面的例子中，我们实际投入 **20%**。
+股市里无法得到精确的胜率，但可以通过系统估算。
 
-这样做的好处是：**即便估算有误，你也能在这场漫长的马拉松中活下来。**
+**Actionable Tactic：科学建仓步法**
+假设 StockWise 对某标的评分为 0.8，止盈 10% 止损 5%（盈亏比 2:1）。
+1.  **保守胜率估计 (p)**：给系统评测值打个 8 折（假设 60%）。
+2.  **计算 (f)**：$(0.6 \cdot 2 - 0.4) / 2 = 0.4$。
+3.  **遵循“半凯利”法则**：将计算结果再减半。最终投入 **20%** 仓位。
 
----
-
-## 4. StockWise 如何辅助你计算？
-
-我们在每一份分析报告中，都不简单地说“买不买”，而是提供**支持位**和**目标位**。
-通过这两个位置，你可以轻松算出你的**盈亏比 (b)**。
-再配合我们的**评分系统（作为胜率 p 的参考）**，你的仓位就不再是“拍脑袋”决定的，而是基于统计学的理性决策。
+这样做的好处是：**即便估算有误，你也能在这场漫长的马拉松中存活。**
 
 ---
 
-### 💊 药方：不要尝试暴富
+## 🎯 总结：不破产是第一要务
 
-凯利公式的本意不是让你一夜暴富，而是让你**永远不破产**。
-只有不破产，复利的力量才会真正生效。
+凯利公式的本意不是让你暴富，而是通过数学防止你破产。只有不破产，复利才会真正生效。
+
+我们在每一份分析报告中提供的 **“风险阈值”** 和 **“目标位”**，就是为了帮你算出那个关键的 **b (赔率)**。
 
 **没有数学支撑的重仓，本质上都是在给市场捐款。**
 
