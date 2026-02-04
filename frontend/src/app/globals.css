@@ -3,8 +3,8 @@
 :root {
   --bg-dark: #050508;
   --card-bg: rgba(20, 20, 30, 0.4);
-  --accent-up: #10b981;
-  --accent-down: #f43f5e;
+  --accent-up: #f43f5e;
+  --accent-down: #10b981;
   --accent-hold: #f59e0b;
   --glass-border: rgba(255, 255, 255, 0.08);
   --text-primary: #f8fafc;
@@ -102,8 +102,8 @@ body {
   }
 
   50% {
-    border-color: rgba(244, 63, 94, 0.3);
-    background: rgba(244, 63, 94, 0.04);
+    border-color: rgba(16, 185, 129, 0.3);
+    background: rgba(16, 185, 129, 0.04);
   }
 }
 
@@ -124,7 +124,7 @@ body {
 /* 🚀 Android 性能优化：渐进式降级方案 */
 body.is-android {
   /* 1. 全局背景优化：减少动态渐变计算 */
-  background-attachment: scroll; 
+  background-attachment: scroll;
   background-image: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #050508 100%);
 }
 
@@ -151,12 +151,17 @@ body.is-android .animate-pulse,
 body.is-android .animate-ping,
 body.is-android .animate-bounce {
   /* 4. 动画降级：减少持续性的 CPU 占用 */
-  animation-duration: 3s; 
+  animation-duration: 3s;
 }
 
 @keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 .animate-shimmer {

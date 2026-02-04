@@ -11,7 +11,7 @@ interface Props {
 
 type Signal = 'buy' | 'sell' | 'hold' | 'none';
 
-const COLORS = { up: '#10b981', down: '#f43f5e', hold: '#f59e0b', muted: '#6b7280' };
+const COLORS = { up: '#f43f5e', down: '#10b981', hold: '#f59e0b', muted: '#6b7280' };
 
 function getSignal(price: DailyPrice, rule: UserRule | null): Signal {
   if (!rule?.support_price) return 'none';

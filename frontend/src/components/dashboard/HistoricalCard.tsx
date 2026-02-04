@@ -56,12 +56,12 @@ export function HistoricalCard({ data, onClick }: { data: AIPrediction; onClick?
   const renderIndicator = (name: string, value: number | undefined, type: 'up' | 'down' | 'neutral') => {
     if (value === undefined) return null;
     const isBullish = type === 'up';
-    const colorClass = isBullish ? 'text-emerald-500' : type === 'down' ? 'text-rose-500' : 'text-slate-400';
-    const bgClass = isBullish ? 'bg-emerald-500/10 border-emerald-500/20' : type === 'down' ? 'bg-rose-500/10 border-rose-500/20' : 'bg-slate-500/10 border-slate-500/20';
+    const colorClass = isBullish ? 'text-rose-500' : type === 'down' ? 'text-emerald-500' : 'text-slate-400';
+    const bgClass = isBullish ? 'bg-rose-500/10 border-rose-500/20' : type === 'down' ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-slate-500/10 border-slate-500/20';
     
     return (
       <div className={`flex items-center gap-1.5 px-2 py-1 rounded-lg border ${bgClass}`}>
-        <div className={`w-1 h-1 rounded-full ${isBullish ? 'bg-emerald-500' : type === 'down' ? 'bg-rose-500' : 'bg-slate-400'}`} />
+        <div className={`w-1 h-1 rounded-full ${isBullish ? 'bg-rose-500' : type === 'down' ? 'bg-emerald-500' : 'bg-slate-400'}`} />
         <span className="text-[9px] font-black text-slate-300 uppercase">{name}</span>
         <span className={`text-[9px] ${colorClass}`}>
            {isBullish ? '↗' : type === 'down' ? '↘' : '-'}
@@ -105,8 +105,8 @@ export function HistoricalCard({ data, onClick }: { data: AIPrediction; onClick?
         <div className="mb-6">
           <div className="flex items-center gap-3 mb-4">
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${
-              isUp ? 'bg-emerald-500/10 border-emerald-500/20' :
-              isDown ? 'bg-rose-500/10 border-rose-500/20' :
+              isUp ? 'bg-rose-500/10 border-rose-500/20' :
+              isDown ? 'bg-emerald-500/10 border-emerald-500/20' :
               'bg-amber-500/10 border-amber-500/20'
             }`}>
               <SignalIcon size={18} style={{ color: isUp ? COLORS.up : isDown ? COLORS.down : COLORS.hold }} />
@@ -118,7 +118,7 @@ export function HistoricalCard({ data, onClick }: { data: AIPrediction; onClick?
             </h3>
             {/* Confidence Badge */}
             <div className="flex items-center gap-1 opacity-60 ml-1">
-                 <Target size={12} className={isUp ? 'text-emerald-500' : isDown ? 'text-rose-500' : 'text-slate-500'} />
+                 <Target size={12} className={isUp ? 'text-rose-500' : isDown ? 'text-emerald-500' : 'text-slate-500'} />
                  <span className="text-[10px] font-bold mono">
                     {((data.confidence || 0) * 100).toFixed(0)}%
                  </span>
@@ -190,7 +190,7 @@ export function HistoricalCard({ data, onClick }: { data: AIPrediction; onClick?
                 })()}
               </span>
               <p className={`text-2xl font-black mono ${
-                (data.actual_change || 0) >= 0 ? 'text-emerald-500' : 'text-rose-500'
+                (data.actual_change || 0) >= 0 ? 'text-rose-500' : 'text-emerald-500'
               }`}>
                 {data.actual_change !== null && data.actual_change !== undefined
                   ? `${data.actual_change >= 0 ? '+' : ''}${data.actual_change.toFixed(2)}%`
