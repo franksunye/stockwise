@@ -52,21 +52,21 @@ export default async function LearnPage() {
       </nav>
 
       {/* Hero */}
-      <section className="relative overflow-hidden pt-12 pb-10 border-b border-white/5">
+      <section className="relative overflow-hidden pt-10 pb-8 border-b border-white/5">
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
             <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-indigo-600/5 blur-[120px] rounded-full" />
             <div className="absolute top-[20%] -right-[10%] w-[30%] h-[30%] bg-purple-600/5 blur-[120px] rounded-full" />
         </div>
 
-        <div className="max-w-5xl mx-auto px-6 relative z-10 text-center space-y-5">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-2">
-            <BookOpen size={12} className="text-indigo-400" />
+        <div className="max-w-5xl mx-auto px-6 relative z-10 text-center space-y-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-1">
+            <BookOpen size={10} className="text-indigo-400" />
             Retail Survival Manual
           </div>
-          <h1 className="text-3xl md:text-5xl font-black tracking-tighter italic leading-tight">
-            从散户到 <span className="bg-gradient-to-r from-indigo-500 via-purple-400 to-indigo-500 bg-clip-text text-transparent">理性交易者</span>
+          <h1 className="text-2xl md:text-4xl font-black tracking-tighter italic leading-tight">
+            从散户到 <span className="bg-gradient-to-r from-indigo-500 via-purple-300 to-indigo-500 bg-clip-text text-transparent">理性交易者</span>
           </h1>
-          <p className="text-slate-500 max-w-2xl mx-auto text-base md:text-lg leading-relaxed font-medium">
+          <p className="text-slate-500 max-w-xl mx-auto text-sm md:text-base leading-relaxed font-medium">
             这里是你的理性避难所。不教你一夜暴富，只教你如何用 AI 和概率论在黑暗森林里活下来。
           </p>
           
