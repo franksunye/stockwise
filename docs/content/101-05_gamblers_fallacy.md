@@ -3,6 +3,7 @@ title: "101-05: The Gambler's Fallacy"
 subtitle: "Markets Have No Memory"
 date: "2026-02-04"
 category: "The Mind"
+image: "/images/learn/gamblers_fallacy.png"
 image_prompt: "A roulette wheel where every number is red. A gambler is aggressively betting on black, sweating profusely. The background is a stock chart forming a waterfall decline."
 ---
 

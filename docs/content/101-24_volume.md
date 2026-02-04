@@ -3,6 +3,7 @@ title: "101-24: Volume Analysis"
 subtitle: "Price Can Lie, Volume Cannot"
 date: "2026-02-04"
 category: "The Method"
+image: "/images/learn/volume_iceberg.png"
 image_prompt: "A dark chart. The price candles are misty and translucent (ghostly). The volume bars at the bottom are solid blocks of concrete and steel, glowing with internal heat. Text overlay: 'FUEL'."
 ---
 

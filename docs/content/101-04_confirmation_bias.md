@@ -3,6 +3,7 @@ title: "101-04: Confirmation Bias"
 subtitle: "The Echo Chamber of Failure"
 date: "2026-02-04"
 category: "The Mind"
+image: "/images/learn/confirmation_bias.png"
 image_prompt: "A person wearing VR goggles labeled 'Bullish View'. They are looking at a chart that is clearly crashing, but through the goggles, the red candles are filtered out and only green candles are visible. The background is a chaotic newsroom."
 ---
 

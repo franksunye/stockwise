@@ -3,6 +3,7 @@ title: "101-25: Support & Resistance"
 subtitle: "The Psychology of Price Levels"
 date: "2026-02-04"
 category: "The Method"
+image: "/images/learn/support_resistance.png"
 image_prompt: "A war map. A fortress wall labeled '$100.00' is being bombarded by green arrows from below. The wall is cracked but holding. Behind it, defenders (bears) are reinforcing the breach."
 ---
 

@@ -3,6 +3,7 @@ title: "101-03: Loss Aversion"
 subtitle: "The Pain of Selling"
 date: "2026-02-04"
 category: "The Mind"
+image: "/images/learn/loss_aversion.png"
 image_prompt: "A split brain illustration. One side is holding a small diamond (Gain) and looks happy. The other side is holding a burning coal (Loss) of the exact same size, but looks in excruciating pain. The pain side is 2x larger than the pleasure side."
 ---
 

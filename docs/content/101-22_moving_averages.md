@@ -3,6 +3,7 @@ title: "101-22: Moving Averages"
 subtitle: "It's Not a Line, It's Cost"
 date: "2026-02-04"
 category: "The Method"
+image: "/images/learn/moving_average.png"
 image_prompt: "A 3D visualization of a stock chart where the Moving Average lines are actually rivers. The price candles are boats floating on the river. MA20 is a fast stream, MA250 is a deep, slow ocean current."
 ---
 
