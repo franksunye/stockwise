@@ -35,12 +35,55 @@ def sync_spot_prices(symbols: list):
         monitor = None
         logger.warning("⚠️ IntradayMonitor not available")
 
+    # [Optimization] Bulk fetch spot prices once to avoid repeated network calls
+    spot_map = {}
+    try:
+        import akshare as ak
+        logger.info("📡 正在获取全场实时行情以供对齐...")
+        # 1. CN Spot
+        try:
+            cn_spot = ak.stock_zh_a_spot_em()
+            if not cn_spot.empty:
+                for _, row in cn_spot.iterrows():
+                    symbol = str(row['代码'])
+                    spot_map[symbol] = {
+                        'price': float(row['最新价']),
+                        'change': float(row['涨跌幅']),
+                        'open': float(row['开盘']),
+                        'high': float(row['最高']),
+                        'low': float(row['最低']),
+                        'volume': float(row['成交量']),
+                    }
+        except Exception as e:
+            logger.warning(f"⚠️ CN Spot fetch failed: {e}")
+            
+        # 2. HK Spot
+        try:
+            hk_spot = ak.stock_hk_spot_em()
+            if not hk_spot.empty:
+                # HK Spot EM columns: '代码', '最新价', '涨跌幅', ...
+                for _, row in hk_spot.iterrows():
+                    symbol = str(row['代码'])
+                    spot_map[symbol] = {
+                        'price': float(row['最新价']),
+                        'change': float(row['涨跌幅']),
+                        'open': float(row['开盘']),
+                        'high': float(row['最高']),
+                        'low': float(row['最低']),
+                        'volume': float(row['成交量']),
+                    }
+        except Exception as e:
+            logger.warning(f"⚠️ HK Spot fetch failed: {e}")
+            
+    except Exception as e:
+        logger.warning(f"⚠️ Global spot fetch failed: {e}")
+
     def sync_single_realtime(stock):
         try:
-            result = process_stock_period(stock, period="daily", is_realtime=True)
+            # Pass pre-fetched spot data for the specific stock
+            stock_spot = spot_map.get(stock)
+            result = process_stock_period(stock, period="daily", is_realtime=True, spot_data=stock_spot)
             if result is False: # Explicit False means fetch failed
-                # Don't raise, just return False to count as partial fail or skip
-                # Actually original logic raised Exception to count as Error
                 raise Exception("Fetch failed")
             
             # [Intraday Rule Check]

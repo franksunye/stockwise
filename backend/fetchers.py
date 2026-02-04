@@ -15,6 +15,7 @@ import requests
 import akshare as ak
 import pandas as pd
 from datetime import datetime, timedelta
+from config import BEIJING_TZ
 from utils import get_market, get_pinyin_info, retry_request
 from database import get_connection
 from backend.db_repo.queries import BULK_INSERT_STOCK_META_BASE, UPDATE_STOCK_PROFILE_QUERY
@@ -34,8 +35,11 @@ class AkShareFetcher(BaseFetcher):
     """AkShare 數據獲取器實現"""
     
     def fetch_history(self, symbol: str, period: str = "daily", start_date: str = None) -> pd.DataFrame:
+        beijing_now = datetime.now(BEIJING_TZ)
+        end_date = beijing_now.strftime("%Y%m%d")
+        
         if not start_date:
-            start_date = (datetime.now() - timedelta(days=365)).strftime("%Y%m%d")
+            start_date = (beijing_now - timedelta(days=365)).strftime("%Y%m%d")
         
         market = get_market(symbol)
         logger.info(f"📡 [AkShare] 正在获取 {market}:{symbol} {period} 数据 (从 {start_date} 起)...")
@@ -44,11 +48,14 @@ class AkShareFetcher(BaseFetcher):
         def _fetch_hk():
             # 1. EastMoney (Primary)
             try:
-                return ak.stock_hk_hist(symbol=symbol, period=period, start_date=start_date, 
-                                        end_date=datetime.now().strftime("%Y%m%d"), adjust="qfq")
-            except: pass
+                df = ak.stock_hk_hist(symbol=symbol, period=period, start_date=start_date, 
+                                        end_date=end_date, adjust="qfq")
+                if not df.empty: return df
+            except Exception as e:
+                logger.warning(f"⚠️ [AkShare] HK {symbol} EastMoney Hist failed: {e}")
             
             # 2. Sina (Fallback)
+            logger.info(f"📡 [AkShare] HK {symbol} Falling back to Sina...")
             try:
                 df = ak.stock_hk_daily(symbol=symbol, adjust="qfq")
                 if not df.empty:
@@ -63,7 +70,8 @@ class AkShareFetcher(BaseFetcher):
                     if "涨跌幅" not in df.columns:
                         df["涨跌幅"] = df["收盘"].pct_change() * 100
                     return df
-            except: pass
+            except Exception as e:
+                logger.error(f"❌ [AkShare] HK {symbol} Sina Fallback failed: {e}")
             return pd.DataFrame()
 
         @retry_request(max_retries=3, delay=3.0)
@@ -71,12 +79,14 @@ class AkShareFetcher(BaseFetcher):
             # 1. EastMoney (Primary)
             try:
                 df = ak.stock_zh_a_hist(symbol=symbol, period=period, start_date=start_date, 
-                                        end_date=datetime.now().strftime("%Y%m%d"), adjust="qfq")
+                                        end_date=end_date, adjust="qfq")
                 if not df.empty: return df
-            except: pass
+            except Exception as e:
+                logger.warning(f"⚠️ [AkShare] CN {symbol} EastMoney Hist failed: {e}")
             
             # 2. Sina (Fallback - Daily Only)
             if period == "daily":
+                logger.info(f"📡 [AkShare] CN {symbol} Falling back to Sina...")
                 try:
                     sina_sym = symbol
                     if symbol.startswith(('6', '9')): sina_sym = f"sh{symbol}"
@@ -84,7 +94,7 @@ class AkShareFetcher(BaseFetcher):
                     elif symbol.startswith(('4', '8')): sina_sym = f"bj{symbol}"
                     
                     df = ak.stock_zh_a_daily(symbol=sina_sym, start_date=start_date, 
-                                             end_date=datetime.now().strftime("%Y%m%d"), adjust="qfq")
+                                             end_date=end_date, adjust="qfq")
                     if not df.empty:
                         df = df.rename(columns={
                             "date": "日期", "open": "开盘", "high": "最高", "low": "最低", "close": "收盘", "volume": "成交量"
@@ -92,16 +102,17 @@ class AkShareFetcher(BaseFetcher):
                         if "涨跌幅" not in df.columns:
                             df["涨跌幅"] = df["收盘"].pct_change() * 100
                         return df
-                except: pass
+                except Exception as e:
+                    logger.error(f"❌ [AkShare] CN {symbol} Sina Fallback failed: {e}")
 
             # 3. ETF (Fund)
             try:
                 df = ak.fund_etf_hist_em(symbol=symbol, period=period, start_date=start_date, 
-                                         end_date=datetime.now().strftime("%Y%m%d"), adjust="qfq")
+                                         end_date=end_date, adjust="qfq")
                 if not df.empty: return df
             except: pass
 
-            # 3b. ETF Sina Fallback (Sina is often more accessible in proxy environments)
+            # 3b. ETF Sina Fallback
             if period == "daily":
                 try:
                     prefix = "sh" if symbol.startswith('5') else "sz"
@@ -134,6 +145,7 @@ class AkShareFetcher(BaseFetcher):
             except: pass
             
             return pd.DataFrame()
+
 
         try:
             if market == "HK":
