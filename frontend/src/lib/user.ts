@@ -53,7 +53,13 @@ function setCookie(name: string, value: string, days: number = 365): void {
   expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
   // SameSite=Lax 以支持 PWA 场景，Secure 在 https 下启用
   const secure = window.location.protocol === 'https:' ? '; Secure' : '';
-  document.cookie = `${name}=${value}; expires=${expires.toUTCString()}; path=/; SameSite=Lax${secure}`;
+
+  // 关键修改：设置 Domain 为顶级域名（.ziso.cc），以便在 app.ziso.cc 和 ziso.cc 之间共享 Cookie
+  // 本地开发 (localhost) 时不设置 Domain
+  const hostname = window.location.hostname;
+  const domainAttr = hostname.includes('ziso.cc') ? '; domain=.ziso.cc' : '';
+
+  document.cookie = `${name}=${value}; expires=${expires.toUTCString()}; path=/; SameSite=Lax${secure}${domainAttr}`;
 }
 
 /**
