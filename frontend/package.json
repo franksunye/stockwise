@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@libsql/client": "^0.15.15",
+    "@multiavatar/multiavatar": "^1.0.7",
     "@types/better-sqlite3": "^7.6.13",
     "@vercel/analytics": "^1.6.1",
     "better-sqlite3": "^12.5.0",

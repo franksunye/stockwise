@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { ShieldCheck, BarChart3, ChevronRight, Zap, BookOpen } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import Multiavatar from '@/components/Multiavatar';
 
 export default function LandingPage() {
   return (
@@ -120,12 +121,9 @@ export default function LandingPage() {
               >
                 <div className="flex flex-col items-center text-center space-y-4 relative z-10">
                   <div className="w-20 h-20 rounded-full bg-white/5 ring-1 ring-white/10 overflow-hidden relative mb-2 grayscale group-hover:grayscale-0 transition-all duration-500">
-                    <Image 
-                      src={`https://api.multiavatar.com/${agent.persona}.svg`}
-                      alt={agent.name}
-                      fill
-                      className="object-cover group-hover:scale-110 transition-transform duration-500"
-                      unoptimized
+                    <Multiavatar 
+                      name={agent.persona}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                   </div>
                   <div>
