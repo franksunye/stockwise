@@ -121,10 +121,11 @@ export default function LandingPage() {
                 <div className="flex flex-col items-center text-center space-y-4 relative z-10">
                   <div className="w-20 h-20 rounded-full bg-white/5 ring-1 ring-white/10 overflow-hidden relative mb-2 grayscale group-hover:grayscale-0 transition-all duration-500">
                     <Image 
-                      src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${agent.persona}&mood=happy`}
+                      src={`https://api.multiavatar.com/${agent.persona}.svg`}
                       alt={agent.name}
                       fill
                       className="object-cover group-hover:scale-110 transition-transform duration-500"
+                      unoptimized
                     />
                   </div>
                   <div>
