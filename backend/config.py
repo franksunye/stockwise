@@ -57,8 +57,10 @@ if os.environ.get("HTTP_PROXY") or os.environ.get("HTTPS_PROXY"):
         "dce.com.cn", "czce.com.cn", "cffex.com.cn",
         "sse.com.cn", "szse.cn", "bjs.com.cn", "akshare.xyz",
         ".eastmoney.com", ".sina.com.cn", ".akshare.xyz",
-        "88.push2.eastmoney.com", "33.push2his.eastmoney.com",
-        "push2his.eastmoney.com", "push2.eastmoney.com"
+        # [NEW] Targeted subdomains for EastMoney data feeds
+        "82.push2.eastmoney.com", "88.push2.eastmoney.com", 
+        "33.push2his.eastmoney.com", "push2his.eastmoney.com", 
+        "push2.eastmoney.com"
     ]
     
     current_no_proxy = os.environ.get("NO_PROXY", os.environ.get("no_proxy", ""))

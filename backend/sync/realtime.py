@@ -37,12 +37,22 @@ def sync_spot_prices(symbols: list):
 
     # [Optimization] Bulk fetch spot prices once to avoid repeated network calls
     spot_map = {}
+    from utils import retry_request
+    
+    @retry_request(max_retries=3, delay=1.0)
+    def _fetch_all_cn_spot():
+        return ak.stock_zh_a_spot_em()
+
+    @retry_request(max_retries=3, delay=1.0)
+    def _fetch_all_hk_spot():
+        return ak.stock_hk_spot_em()
+
     try:
         import akshare as ak
         logger.info("📡 正在获取全场实时行情以供对齐...")
         # 1. CN Spot
         try:
-            cn_spot = ak.stock_zh_a_spot_em()
+            cn_spot = _fetch_all_cn_spot()
             if not cn_spot.empty:
                 for _, row in cn_spot.iterrows():
                     symbol = str(row['代码'])
@@ -54,14 +64,15 @@ def sync_spot_prices(symbols: list):
                         'low': float(row['最低']),
                         'volume': float(row['成交量']),
                     }
+                logger.info(f"✅ 已缓存 {len(spot_map)} 条 CN 实时行情")
         except Exception as e:
-            logger.warning(f"⚠️ CN Spot fetch failed: {e}")
+            logger.warning(f"⚠️ CN Spot fetch failed after retries: {e}")
             
         # 2. HK Spot
         try:
-            hk_spot = ak.stock_hk_spot_em()
+            hk_spot = _fetch_all_hk_spot()
             if not hk_spot.empty:
-                # HK Spot EM columns: '代码', '最新价', '涨跌幅', ...
+                count = 0
                 for _, row in hk_spot.iterrows():
                     symbol = str(row['代码'])
                     spot_map[symbol] = {
@@ -72,8 +83,10 @@ def sync_spot_prices(symbols: list):
                         'low': float(row['最低']),
                         'volume': float(row['成交量']),
                     }
+                    count += 1
+                logger.info(f"✅ 已缓存 {count} 条 HK 实时行情")
         except Exception as e:
-            logger.warning(f"⚠️ HK Spot fetch failed: {e}")
+            logger.warning(f"⚠️ HK Spot fetch failed after retries: {e}")
             
     except Exception as e:
         logger.warning(f"⚠️ Global spot fetch failed: {e}")
