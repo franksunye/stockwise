@@ -139,8 +139,9 @@ def verify_all_pending(force: bool = False, target_date: str = None):
                     verdict = 'Incorrect'
             elif signal == 'Side':
                 if is_final:
-                    # Side is correct if it stayed within the noise threshold
-                    verdict = 'Correct' if abs(cumulative_change) <= NOISE_THRESHOLD else 'Incorrect'
+                    # Side is correct if it stayed flat or dropped (avoided loss/stayed out of noise)
+                    # Incorrect only if it rallied significantly (missed opportunity)
+                    verdict = 'Correct' if cumulative_change <= NOISE_THRESHOLD else 'Incorrect'
             
             # --- 6. Update Database ---
             val_data = {
