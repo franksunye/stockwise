@@ -66,82 +66,86 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
   };
 
   return (
-    <article className="min-h-screen bg-[#050508] text-white font-sans selection:bg-indigo-500/30">
+    <div className="min-h-screen bg-[#050508] text-white font-sans selection:bg-indigo-500/30 pb-20">
       
-      {/* Top Nav */}
-      <nav className="sticky top-0 z-50 bg-[#050508]/90 backdrop-blur border-b border-white/5">
+      {/* Navbar */}
+      <nav className="sticky top-0 z-50 bg-[#050508]/80 backdrop-blur-xl border-b border-white/5">
         <div className="max-w-3xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/learn" className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors">
+          <Link href="/learn" className="p-2 -ml-2 rounded-full hover:bg-white/5 active:scale-95 transition-all text-slate-400 hover:text-white">
             <ChevronLeft size={20} />
-            <span className="font-medium text-sm">Back</span>
           </Link>
-          <div className="text-sm font-bold tracking-tight opacity-0 animate-fade-in md:opacity-100">
-             {article.slug.split('-')[0]}-{article.slug.split('-')[1]}
+          <div className="font-bold text-sm text-slate-400 tracking-tight truncate max-w-[200px]">
+            {article.title}
           </div>
-          <button className="p-2 -mr-2 text-slate-400 hover:text-white transition-colors">
-            <Share2 size={20} />
-          </button>
+          <div className="w-8" />
         </div>
       </nav>
 
-      <div className="max-w-3xl mx-auto px-6 py-12">
+      <article className="max-w-3xl mx-auto px-6 py-12">
         
         {/* Header */}
-        <header className="mb-12 border-b border-white/10 pb-12">
-          <div className="flex items-center gap-3 mb-6">
-            <span className="text-[10px] font-black uppercase tracking-widest bg-indigo-500/10 text-indigo-400 px-2 py-1 rounded border border-indigo-500/20">
-              {article.category}
+        <header className="mb-12 text-center space-y-6">
+          <div className="flex items-center justify-center gap-2 mb-6">
+            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest ${style.bg} ${style.color} border ${style.border}`}>
+              <Icon size={12} />
+              {style.label}
             </span>
-            <div className="flex items-center gap-1 text-slate-500 text-xs font-mono">
-              <Calendar size={12} />
-              {article.date}
-            </div>
+            <span className="text-slate-500 text-xs font-mono">{article.date}</span>
           </div>
-          
-          <h1 className="text-3xl md:text-5xl font-black leading-tight tracking-tight text-white mb-6">
+
+          <h1 className="text-3xl md:text-5xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white via-white to-slate-400 leading-tight">
             {article.title}
           </h1>
-          
-          {article.subtitle && (
-            <p className="text-xl md:text-2xl text-slate-400 font-light leading-relaxed">
-              {article.subtitle}
-            </p>
-          )}
 
-          {article.image ? (
-            <div className="mt-8 rounded-xl overflow-hidden border border-white/10 shadow-2xl shadow-indigo-500/10">
-               {/* eslint-disable-next-line @next/next/no-img-element */}
-               <img 
-                 src={article.image} 
-                 alt={article.title}
-                 className="w-full h-auto object-cover max-h-[500px]"
-               />
-            </div>
-          ) : article.image_prompt ? (
-             <div className="mt-8 p-4 rounded-xl bg-gradient-to-br from-indigo-900/20 to-purple-900/20 border border-indigo-500/10 flex items-center justify-center min-h-[200px] text-center">
-                <div className="text-indigo-300/50 text-sm italic max-w-md">
-                   🖼️ [Image Placeholder]<br/>
-                   &quot;{article.image_prompt}&quot;
-                </div>
-             </div>
-          ) : null}
+          <p className="text-xl text-slate-400 font-medium leading-relaxed max-w-2xl mx-auto">
+            {article.subtitle}
+          </p>
         </header>
 
-        {/* Markdown Content */}
-        <main className="pb-24">
-          <ReactMarkdown components={MarkdownComponents}>
-            {article.content}
-          </ReactMarkdown>
-        </main>
+        {/* Featured Image */}
+        {article.image ? (
+            <div className="mb-12 rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-indigo-500/10">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={article.image} alt={article.title} className="w-full h-auto" />
+            </div>
+        ) : article.image_prompt ? (
+             <div className="mb-12 p-8 rounded-2xl bg-white/5 border border-white/10 border-dashed text-center">
+                <p className="text-xs text-slate-500 uppercase tracking-widest mb-2">Image Prompt</p>
+                <p className="text-slate-400 italic font-mono text-sm max-w-lg mx-auto">&quot;{article.image_prompt}&quot;</p>
+            </div>
+        ) : null}
 
-        {/* Footer Navigation */}
-        <footer className="border-t border-white/10 pt-12">
-          <Link href="/learn" className="inline-flex items-center justify-center w-full py-4 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 font-bold transition-all">
-            Return to Index
-          </Link>
-        </footer>
+        {/* Content */}
+        <div className="prose prose-invert prose-lg max-w-none 
+          prose-headings:font-bold prose-headings:tracking-tight prose-headings:text-white
+          prose-p:text-slate-300 prose-p:leading-8
+          prose-strong:text-white prose-strong:font-black
+          prose-a:text-indigo-400 prose-a:no-underline hover:prose-a:underline
+          prose-blockquote:border-l-indigo-500 prose-blockquote:bg-white/[0.02] prose-blockquote:py-2 prose-blockquote:px-6 prose-blockquote:rounded-r-lg
+          prose-code:text-emerald-400 prose-code:bg-emerald-500/10 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none
+          prose-hr:border-white/10
+          ">
+            <ReactMarkdown
+              components={{
+                h2: ({children}) => <h2 className="text-2xl mt-12 mb-6 text-white border-l-4 border-indigo-500 pl-4">{children}</h2>,
+              }}
+            >
+              {article.content}
+            </ReactMarkdown>
+        </div>
 
-      </div>
-    </article>
+        {/* Footer */}
+        <div className="mt-20 pt-10 border-t border-white/10 flex justify-center">
+            <Link 
+              href="/learn"
+              className="group flex items-center gap-2 px-6 py-3 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all text-slate-400 hover:text-white"
+            >
+              <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+              <span className="font-bold text-sm">返回学院首页</span>
+            </Link>
+        </div>
+
+      </article>
+    </div>
   );
 }
