@@ -73,11 +73,11 @@ export default async function LearnPage() {
                       </div>
                       
                       <h2 className="text-xl font-bold text-slate-200 group-hover:text-white transition-colors mb-3 leading-tight">
-                        {article.title}
+                        {article.subtitle || article.title}
                       </h2>
                       
-                      <p className="text-sm text-slate-400 line-clamp-2 leading-relaxed">
-                        {article.subtitle || '点击阅读全文...'}
+                      <p className="text-sm text-slate-400 line-clamp-2 leading-relaxed font-medium">
+                        {article.subtitle ? article.title : '点击阅读全文...'}
                       </p>
                     </div>
 
