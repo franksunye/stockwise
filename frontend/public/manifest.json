@@ -1,7 +1,7 @@
 {
-    "name": "StockWise AI",
-    "short_name": "StockWise AI",
-    "description": "智能炒股决策控制台",
+    "name": "ZISO AI",
+    "short_name": "ZISO",
+    "description": "投资决策智能体",
     "start_url": "/dashboard",
     "display": "standalone",
     "background_color": "#050508",
