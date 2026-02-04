@@ -164,19 +164,10 @@ export function HistoricalCard({ data, onClick }: { data: AIPrediction; onClick?
           <div className="flex items-center justify-between">
             <div>
               <span className="text-[10px] text-slate-500 font-bold uppercase block mb-1 tracking-widest leading-tight">
-                {(() => {
-                  if (data.validation_status !== 'Correct' && data.validation_status !== 'Incorrect') return `${formatDate(data.target_date)} 价格`;
-                  if (isUp) return '当日最高涨幅';
-                  if (isDown) return '当日最大跌幅';
-                  return '当日综合涨跌';
-                })()}
+                {formatDate(data.target_date)} 收盘价
               </span>
               <p className="text-2xl font-black mono text-slate-100">
-                {(data.validation_status === 'Correct' || data.validation_status === 'Incorrect')
-                   ? (typeof data.max_perf_in_window === 'number' && data.max_perf_in_window !== 0 
-                      ? `${data.max_perf_in_window >= 0 ? '+' : ''}${data.max_perf_in_window.toFixed(2)}%`
-                      : '0.00%')
-                   : (data.close_price ? data.close_price.toFixed(2) : '--')}
+                {data.close_price ? data.close_price.toFixed(2) : '--'}
               </p>
             </div>
             
