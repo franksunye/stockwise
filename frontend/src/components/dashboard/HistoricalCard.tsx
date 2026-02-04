@@ -52,23 +52,7 @@ export function HistoricalCard({ data, onClick }: { data: AIPrediction; onClick?
   // 信号图标
   const SignalIcon = isUp ? TrendingUp : isDown ? TrendingDown : Minus;
 
-  // Helper to render indicator badge
-  const renderIndicator = (name: string, value: number | undefined, type: 'up' | 'down' | 'neutral') => {
-    if (value === undefined) return null;
-    const isBullish = type === 'up';
-    const colorClass = isBullish ? 'text-rose-500' : type === 'down' ? 'text-emerald-500' : 'text-slate-400';
-    const bgClass = isBullish ? 'bg-rose-500/10 border-rose-500/20' : type === 'down' ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-slate-500/10 border-slate-500/20';
-    
-    return (
-      <div className={`flex items-center gap-1.5 px-2 py-1 rounded-lg border ${bgClass}`}>
-        <div className={`w-1 h-1 rounded-full ${isBullish ? 'bg-rose-500' : type === 'down' ? 'bg-emerald-500' : 'bg-slate-400'}`} />
-        <span className="text-[9px] font-black text-slate-300 uppercase">{name}</span>
-        <span className={`text-[9px] ${colorClass}`}>
-           {isBullish ? '↗' : type === 'down' ? '↘' : '-'}
-        </span>
-      </div>
-    );
-  };
+
 
   return (
     <div className="h-full w-full flex flex-col items-center justify-center px-6 snap-start">
