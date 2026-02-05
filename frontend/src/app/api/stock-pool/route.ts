@@ -3,6 +3,8 @@ export const dynamic = 'force-dynamic';
 import { getDbClient } from '../../../lib/db';
 import { triggerOnDemandSync } from '@/lib/github-actions';
 import { getMarketFromSymbol, getExpectedLatestDataDate } from '@/lib/date-utils';
+import { Client } from '@libsql/client';
+import type { Database } from 'better-sqlite3';
 
 /**
  * GET /api/stock-pool?userId=xxx
@@ -16,10 +18,8 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let client: any = null;
+    const client = getDbClient() as Client | Database;
     try {
-        client = getDbClient();
         let stocks: { symbol: string, name?: string, added_at?: string }[] = [];
 
         if ('execute' in client) {
@@ -46,27 +46,40 @@ export async function GET(request: Request) {
                 .all(userId);
         }
 
-        // 核心增强：数据自愈 (Self-healing on Read)
-        // 既然用户打开了列表，我们就顺便检查列表中的股票是否真的有“预期”的数据
-        // 我们在这里 await 以确保连接在 check 期间保持开启，因查询 MAX(date) 有索引且极快，对延迟影响微乎其微
+        // 核心增强：数据自愈 (Self-healing on Read) - 批量优化版
         if (stocks.length > 0) {
             try {
+                const symbols = stocks.map(s => s.symbol);
+                const placeholders = symbols.map(() => '?').join(',');
+
+                const lastDateMap = new Map<string, string>();
+
+                if ('execute' in client) {
+                    // Turso 批量查询
+                    const res = await client.execute({
+                        sql: `SELECT symbol, MAX(date) as last_date FROM daily_prices WHERE symbol IN (${placeholders}) GROUP BY symbol`,
+                        args: symbols,
+                    });
+                    (res.rows as unknown as { symbol: string, last_date: string }[]).forEach((r) => {
+                        if (r.symbol && r.last_date) {
+                            lastDateMap.set(String(r.symbol), String(r.last_date));
+                        }
+                    });
+                } else {
+                    // SQLite 批量查询
+                    const rows = client.prepare(`SELECT symbol, MAX(date) as last_date FROM daily_prices WHERE symbol IN (${placeholders}) GROUP BY symbol`).all(...symbols) as { symbol: string, last_date: string }[];
+                    rows.forEach(row => {
+                        if (row.symbol && row.last_date) {
+                            lastDateMap.set(String(row.symbol), String(row.last_date));
+                        }
+                    });
+                }
+
                 for (const stock of stocks) {
                     const symbol = stock.symbol;
                     const market = getMarketFromSymbol(symbol);
                     const expectedDate = getExpectedLatestDataDate(market);
-
-                    let actualDate = null;
-                    if ('execute' in client) {
-                        const res = await client.execute({
-                            sql: 'SELECT MAX(date) as last_date FROM daily_prices WHERE symbol = ?',
-                            args: [symbol],
-                        });
-                        actualDate = res.rows[0]?.last_date;
-                    } else {
-                        const row = client.prepare('SELECT MAX(date) as last_date FROM daily_prices WHERE symbol = ?').get(symbol) as { last_date: string } | undefined;
-                        actualDate = row?.last_date;
-                    }
+                    const actualDate = lastDateMap.get(symbol);
 
                     if (!actualDate || String(actualDate) < expectedDate) {
                         console.log(`📡[日线自愈] ${symbol}: 库中最新(${actualDate || '无'}) < 预期完整日线(${expectedDate})。触发同步...`);
