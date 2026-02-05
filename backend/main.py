@@ -178,6 +178,12 @@ if __name__ == "__main__":
             process_stock_period(args.symbol, period="daily")
             process_stock_period(args.symbol, period="weekly")
             process_stock_period(args.symbol, period="monthly")
+            
+            # [Fix] Explicitly fetch realtime snapshot to ensure T+0 data is available immediately
+            # Otherwise, 'daily' sync only provides T-1 data, causing "stale price" perception on frontend
+            logger.info(f"⚡ [On-Demand] Fetching realtime snapshot for {args.symbol}...")
+            sync_spot_prices([args.symbol])
+            
             logger_manual.success()
         except Exception as e:
             success = False

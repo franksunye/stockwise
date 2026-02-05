@@ -22,35 +22,39 @@ export function StockProfile({ stock, onClose }: StockProfileProps) {
   const [loadingHistory, setLoadingHistory] = useState(false);
 
 
-  // 打开档案时请求完整的30条历史数据（带缓存）
+  // 优化：将数据请求推迟到动画结束之后，避免 IO/State 更新操作阻塞 iOS 的动画主线程
+  // 典型的 "Interaction First, Data Later" 模式
   useEffect(() => {
     if (stock) {
-      // 检查缓存
+      // 检查缓存 - 如果有缓存，可以立即显示，因为它是同步的，不会造成太多闪烁
       const cached = historyCache[stock.symbol];
       const now = Date.now();
       
       if (cached && (now - cached.timestamp) < CACHE_TTL) {
-        // 缓存有效，直接使用
         setFullHistory(cached.data);
         return;
       }
       
-      // 缓存无效或不存在，请求新数据
-      setLoadingHistory(true);
-      const userId = getCurrentUserId();
-      fetch(`/api/predictions?symbol=${stock.symbol}&limit=30`, { 
-        cache: 'no-store',
-        headers: userId ? { 'x-user-id': userId } : {}
-      })
-        .then(r => r.json())
-        .then(data => {
-          const predictions = data.predictions || [];
-          setFullHistory(predictions);
-          // 更新缓存
-          historyCache[stock.symbol] = { data: predictions, timestamp: Date.now() };
+      // 如果没有缓存，我们设置一个定时器，等动画跑完（约300-400ms）再发起请求
+      // 这样保证了“点击->弹出”这关键的 100ms 是纯 UI 线程在跑
+      const timer = setTimeout(() => {
+        setLoadingHistory(true);
+        const userId = getCurrentUserId();
+        fetch(`/api/predictions?symbol=${stock.symbol}&limit=30`, { 
+          cache: 'no-store',
+          headers: userId ? { 'x-user-id': userId } : {}
         })
-        .catch(console.error)
-        .finally(() => setLoadingHistory(false));
+          .then(r => r.json())
+          .then(data => {
+            const predictions = data.predictions || [];
+            setFullHistory(predictions);
+            historyCache[stock.symbol] = { data: predictions, timestamp: Date.now() };
+          })
+          .catch(console.error)
+          .finally(() => setLoadingHistory(false));
+      }, 400); // 400ms 延迟，确保 spring 动画最剧烈的部分已经完成
+
+      return () => clearTimeout(timer);
     }
   }, [stock]);
 
