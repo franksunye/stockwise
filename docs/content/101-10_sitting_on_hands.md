@@ -3,7 +3,7 @@ title: "101-10: 空仓的艺术"
 subtitle: "为什么“坐着不动”价值百万？"
 date: "2026-02-04"
 category: "The Mind"
-image: "/images/learn/empty_position.png"
+image: "/images/learn/sitting_on_hands.png"
 image_prompt: "**Concept**: A conceptual 3D illustration of Patience and Discipline in trading. **Style**: Swiss Design, Geometric, Minimalist, Clean, Dark Mode (#050508). **Subject**: A single, perfectly smooth Indigo cylinder standing still in the center of a chaotic, spiraling vortex of white lines. **Action**: The cylinder remains vertical and unaffected by the surrounding motion. **Materials**: Matte finish for the cylinder, glowing ethereal lines for the vortex. **Colors**: Indigo (#6366f1) for the central subject. **Constraints**: NO text. NO blur. Center composition."
 ---
 

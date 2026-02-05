@@ -3,7 +3,7 @@ title: "101-22: 均线系统 (Moving Averages)"
 subtitle: "均线不是线，是市场的心理成本"
 date: "2026-02-04"
 category: "The Method"
-image: "/images/learn/moving_average.png"
+image: "/images/learn/moving_averages.png"
 image_prompt: "A 3D visualization of a stock chart where the Moving Average lines are actually rivers. The price candles are boats floating on the river. MA20 is a fast stream, MA250 is a deep, slow ocean current."
 ---
 
