@@ -6,8 +6,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { LayoutGrid as Grid, ChevronDown, User, FileText } from 'lucide-react';
 import { StockData, AIPrediction } from '@/lib/types';
 import { 
-  TacticalBriefDrawer, 
-  StockProfile,
   StockVerticalFeed,
   BriefDrawer,
   COLORS 
@@ -22,6 +20,16 @@ import { useTikTokScroll } from '@/hooks/useTikTokScroll';
 import { useUserProfile } from '@/hooks/useUserProfile';
 
 const UserCenterDrawer = dynamic(() => import('@/components/UserCenterDrawer'), {
+  ssr: false,
+  loading: () => null
+});
+
+const StockProfile = dynamic(() => import('@/components/dashboard/StockProfile').then(mod => mod.StockProfile), {
+  ssr: false,
+  loading: () => null
+});
+
+const TacticalBriefDrawer = dynamic(() => import('@/components/dashboard/TacticalBriefDrawer').then(mod => mod.TacticalBriefDrawer), {
   ssr: false,
   loading: () => null
 });
@@ -178,7 +186,7 @@ function DashboardContent() {
       <div 
         ref={scrollRef}
         onScroll={handleScroll}
-        className={`h-full w-full flex overflow-x-scroll snap-x snap-mandatory scrollbar-hide transition-opacity duration-300 ${(profileStock || userCenterOpen) ? 'opacity-40 pointer-events-none touch-none' : 'opacity-100'}`}
+        className="h-full w-full flex overflow-x-scroll snap-x snap-mandatory scrollbar-hide"
       >
         {stocks.map((stock, idx) => (
           <StockVerticalFeed 
@@ -256,14 +264,11 @@ function DashboardContent() {
         targetDate={selectedTactics?.prediction?.target_date || ''}
       />
 
-      <AnimatePresence>
-        {profileStock && (
-          <StockProfile 
-            stock={profileStock}
-            onClose={() => setProfileStock(null)}
-          />
-        )}
-      </AnimatePresence>
+      <StockProfile 
+        stock={profileStock}
+        isOpen={!!profileStock}
+        onClose={() => setProfileStock(null)}
+      />
 
       <UserCenterDrawer 
         isOpen={userCenterOpen}
