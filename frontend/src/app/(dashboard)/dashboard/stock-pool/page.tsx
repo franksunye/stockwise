@@ -56,7 +56,7 @@ const StockItem = memo(({
       <Link 
         href={`/dashboard?symbol=${stock.symbol}`}
         onClick={() => setNavigatingTo(stock.symbol)}
-        className={`glass-card p-5 group transition-all relative block active:scale-95 ${navigatingTo === stock.symbol ? 'bg-white/10 border-indigo-500/30 ring-1 ring-indigo-500/20' : 'hover:bg-white/[0.04]'}`}
+        className={`glass-card p-5 group transition-all relative block active:scale-95 touch-optimized ${navigatingTo === stock.symbol ? 'bg-white/10 border-indigo-500/30 ring-1 ring-indigo-500/20' : 'hover:bg-white/[0.04]'}`}
       >
        <div className="flex items-center justify-between">
          <div className="flex items-center gap-4">
@@ -95,7 +95,7 @@ const StockItem = memo(({
            </div>
            <button 
              onClick={(e) => { e.preventDefault(); e.stopPropagation(); onRemove(e, stock); }}
-             className="p-3 opacity-60 hover:opacity-100 transition-all text-slate-500 hover:text-rose-500 active:scale-75 z-20 relative rounded-full hover:bg-white/5"
+             className="p-3 opacity-60 hover:opacity-100 transition-all text-slate-500 hover:text-rose-500 active:scale-75 z-20 relative rounded-full hover:bg-white/5 touch-optimized"
            >
              <Trash2 size={20} />
            </button>
@@ -411,6 +411,14 @@ export default function StockPoolPage() {
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
         .glass-card { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 32px; }
+        
+        /* iOS Long Press Fix */
+        .touch-optimized {
+          -webkit-touch-callout: none !important;
+          -webkit-user-select: none !important;
+          user-select: none !important;
+          -webkit-tap-highlight-color: transparent;
+        }
       `}</style>
     </div>
   );
