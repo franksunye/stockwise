@@ -47,11 +47,11 @@ const StockItem = memo(({
   
   return (
     <motion.div
-      layout
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      className="transform-gpu will-change-transform"
+      transition={{ duration: 0.15 }}
+      className="transform-gpu"
     >
       <Link 
         href={`/dashboard?symbol=${stock.symbol}`}
@@ -150,7 +150,8 @@ export default function StockPoolPage() {
   const [navigatingTo, setNavigatingTo] = useState<string | null>(null);
 
   const [limitMsg, setLimitMsg] = useState<string | null>(null);
-  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+
+  const [isIOS, setIsIOS] = useState(false);
 
   const scene = getMarketScene();
   const isPreMarket = scene === 'pre_market';
@@ -163,6 +164,9 @@ export default function StockPoolPage() {
         setUser(u);
     };
     init();
+    // iOS Detection
+    const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    setIsIOS(iOS);
   }, []);
 
 
@@ -233,18 +237,9 @@ export default function StockPoolPage() {
   return (
     <div 
       className="fixed inset-0 bg-[#050508] text-white overflow-hidden flex flex-col font-sans"
-      onTouchStart={(e) => setTouchStartX(e.touches[0].clientX)}
-      onTouchEnd={(e) => {
-        if (touchStartX === null) return;
-        const touchEndX = e.changedTouches[0].clientX;
-        const deltaX = touchEndX - touchStartX;
-        
-        // Swipe Left (Right to Left) -> Go back to Dashboard
-        if (deltaX < -100) router.push('/dashboard');
-        setTouchStartX(null);
-      }}
     >
-      <div className="fixed inset-0 opacity-[0.03] pointer-events-none bg-indigo-500 blur-[120px] scale-150" />
+      {/* Background glow - conditionally render for non-iOS */}
+      {!isIOS && <div className="fixed inset-0 opacity-[0.03] pointer-events-none bg-indigo-500 blur-[120px] scale-150" />}
 
       {/* Solid/Stable Header Structure (Like Brief Page) */}
       <header className="shrink-0 z-20 p-8 flex items-center justify-between bg-[#050508] border-b border-white/5">
