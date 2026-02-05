@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { X as CloseIcon } from 'lucide-react';
 import { StockData, AIPrediction } from '@/lib/types';
 
@@ -63,7 +63,7 @@ export function StockProfile({ stock, isOpen, onClose }: StockProfileProps) {
 
 
   // 使用完整的历史数据计算胜率，如果还在加载则使用传入的数据
-  const historyToUse = fullHistory.length > 0 ? fullHistory : stock.history;
+  const historyToUse = fullHistory.length > 0 ? fullHistory : (stock?.history || []);
   const winCount = historyToUse?.filter(h => h.validation_status === 'Correct').length || 0;
   const totalCount = historyToUse?.filter(h => h.validation_status !== 'Pending').length || 0;
   const winRate = totalCount > 0 ? Math.round((winCount / totalCount) * 100) : 0;
