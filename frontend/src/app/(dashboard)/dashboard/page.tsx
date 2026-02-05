@@ -123,7 +123,11 @@ function DashboardContent() {
       <header className="fixed top-0 left-0 right-0 z-[100] p-6 pointer-events-none">
         <div className="w-full flex justify-between items-start pointer-events-auto">
            {/* 左侧：点击打开股票档案 (无代码显示) */}
-           <div className="flex items-center gap-2 cursor-pointer group shrink-0" onClick={() => setProfileStock(currentStock)}>
+           {/* 性能优化：使用 onPointerDown 消除 iOS 300ms 点击延迟 */}
+           <div 
+             className="flex items-center gap-2 cursor-pointer group shrink-0 touch-manipulation" 
+             onPointerDown={(e) => { e.preventDefault(); setProfileStock(currentStock); }}
+           >
               <div className="w-10 h-10 rounded-[16px] bg-white/5 border border-white/10 flex items-center justify-center transition-all group-active:scale-90 group-hover:bg-white/10">
                  <div className="text-[10px] font-black italic text-indigo-500">{currentStock?.symbol.slice(-2)}</div>
               </div>
@@ -131,8 +135,8 @@ function DashboardContent() {
 
           {/* 中央：股票名称突出显示 */}
           <div 
-            className="absolute left-1/2 transform -translate-x-1/2 top-6 cursor-pointer group flex flex-col items-center"
-            onClick={() => setProfileStock(currentStock)}
+            className="absolute left-1/2 transform -translate-x-1/2 top-6 cursor-pointer group flex flex-col items-center touch-manipulation"
+            onPointerDown={(e) => { e.preventDefault(); setProfileStock(currentStock); }}
           >
             <h1 className="text-xl font-black italic tracking-tight text-white group-hover:text-indigo-400 transition-colors text-center">
               {currentStock?.name}

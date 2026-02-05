@@ -4,8 +4,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X as CloseIcon } from 'lucide-react';
 import { StockData, AIPrediction } from '@/lib/types';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useLayoutEffect } from 'react';
 import { getCurrentUserId } from '@/lib/user';
+import { shouldEnableHighPerformance } from '@/lib/device-utils';
 
 interface StockProfileProps {
   stock: StockData | null;
@@ -21,6 +22,12 @@ export function StockProfile({ stock, isOpen, onClose }: StockProfileProps) {
 
   const [fullHistory, setFullHistory] = useState<AIPrediction[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
+  
+  // 性能模式检测：在低端设备上简化动画
+  const [isHighPerf, setIsHighPerf] = useState(false);
+  useLayoutEffect(() => {
+    setIsHighPerf(shouldEnableHighPerformance());
+  }, []);
 
 
   // 打开档案时请求完整的30条历史数据（带缓存）
@@ -72,13 +79,18 @@ export function StockProfile({ stock, isOpen, onClose }: StockProfileProps) {
           initial={{ y: '100%' }}
           animate={{ y: 0 }}
           exit={{ y: '100%' }}
-          drag="y"
+          // 性能优化：高性能模式下禁用 drag 物理计算
+          drag={isHighPerf ? false : "y"}
           dragConstraints={{ top: 0, bottom: 0 }}
           dragElastic={{ top: 0.1, bottom: 0.6 }}
           onDragEnd={(_, info) => {
             if (info.offset.y > 150) onClose();
           }}
-          transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+          // 性能优化：简化动画类型
+          transition={isHighPerf 
+            ? { type: 'tween', ease: 'easeOut', duration: 0.2 }
+            : { type: 'spring', damping: 25, stiffness: 200 }
+          }
           className="fixed inset-0 z-[200] bg-[#050508] flex flex-col pointer-events-auto shadow-[0_-20px_60px_rgba(0,0,0,0.8)]"
         >
           {/* 顶部视觉拉手 */}
@@ -102,7 +114,11 @@ export function StockProfile({ stock, isOpen, onClose }: StockProfileProps) {
                   </p>
                 </div>
               </div>
-              <button onClick={onClose} className="p-2.5 rounded-full bg-white/5 border border-white/10 active:scale-90 transition-all">
+              {/* 性能优化：使用 onPointerDown 消除 iOS 300ms 点击延迟 */}
+              <button 
+                onPointerDown={(e) => { e.preventDefault(); onClose(); }}
+                className="p-2.5 rounded-full bg-white/5 border border-white/10 active:scale-90 transition-all touch-manipulation"
+              >
                 <CloseIcon className="w-5 h-5 text-slate-400" />
               </button>
             </header>
