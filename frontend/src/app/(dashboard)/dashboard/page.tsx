@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense, useRef } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LayoutGrid as Grid, ChevronDown, User, FileText } from 'lucide-react';
@@ -29,10 +29,8 @@ const UserCenterDrawer = dynamic(() => import('@/components/UserCenterDrawer'), 
 function DashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const targetSymbol = searchParams.get('symbol');
   const [userCenterOpen, setUserCenterOpen] = useState(false);
   const [briefOpen, setBriefOpen] = useState(false);
-  const hasScrolledToTarget = useRef(false);
 
   const { stocks, loadingPool, loadMoreHistory } = useStocks();
   const {
@@ -61,18 +59,7 @@ function DashboardContent() {
     }
   }, []);
 
-  // 深度链接: 从 URL 参数滚动到指定股票 (通知点击跳转)
-  useEffect(() => {
-    if (targetSymbol && stocks.length > 0 && scrollRef.current && !hasScrolledToTarget.current) {
-      const targetIndex = stocks.findIndex(s => s.symbol === targetSymbol || s.symbol.endsWith(targetSymbol));
-      if (targetIndex >= 0) {
-        // 滚动到目标股票
-        const cardWidth = scrollRef.current.offsetWidth;
-        scrollRef.current.scrollTo({ left: targetIndex * cardWidth, behavior: 'smooth' });
-        hasScrolledToTarget.current = true;
-      }
-    }
-  }, [targetSymbol, stocks, scrollRef]);
+  // 深度链接: 滚动逻辑已委托给 useTikTokScroll hook 处理，避免重复滚动导致抖动
 
   // 深度链接: 从 URL 参数打开简报
   useEffect(() => {
