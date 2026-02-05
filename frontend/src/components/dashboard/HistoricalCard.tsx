@@ -1,16 +1,16 @@
 'use client';
 
+import { memo } from 'react';
 import { ShieldCheck, XCircle, TrendingUp, TrendingDown, Minus, Target, Clock } from 'lucide-react';
 import { AIPrediction } from '@/lib/types';
 import { COLORS } from './constants';
-
 import { formatModelName } from '@/lib/model-names';
 
 /**
  * 历史预测卡片
  * 展示已验证的过往 AI 预测，用于回顾和复盘
  */
-export function HistoricalCard({ data, onClick }: { data: AIPrediction; onClick?: (data: AIPrediction) => void }) {
+export const HistoricalCard = memo(function HistoricalCard({ data, onClick }: { data: AIPrediction; onClick?: (data: AIPrediction) => void }) {
   const isUp = data.signal === 'Long';
   const isDown = data.signal === 'Short';
   
@@ -52,8 +52,6 @@ export function HistoricalCard({ data, onClick }: { data: AIPrediction; onClick?
   // 信号图标
   const SignalIcon = isUp ? TrendingUp : isDown ? TrendingDown : Minus;
 
-
-
   return (
     <div className="h-full w-full flex flex-col items-center justify-center px-6 snap-start">
       <div 
@@ -68,7 +66,7 @@ export function HistoricalCard({ data, onClick }: { data: AIPrediction; onClick?
               {formatDate(data.target_date)}
               {data.model && (
                 <span className="ml-2 text-[9px] text-indigo-500/50 italic opacity-80 uppercase tracking-tighter">
-                  {formatModelName(data.model)}
+                   {formatModelName(data.model)}
                 </span>
               )}
             </div>
@@ -149,4 +147,4 @@ export function HistoricalCard({ data, onClick }: { data: AIPrediction; onClick?
       </div>
     </div>
   );
-}
+});

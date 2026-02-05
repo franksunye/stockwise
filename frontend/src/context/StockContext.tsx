@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, ReactNode } from 'react';
+import React, { createContext, useContext, ReactNode, useMemo } from 'react';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { useWatchlist, WatchlistItem } from '@/hooks/useWatchlist';
 import { StockData } from '@/lib/types';
@@ -25,13 +25,13 @@ export function StockProvider({ children }: { children: ReactNode }) {
     const { watchlist, loading: loadingList, addStock, removeStock } = useWatchlist();
     const stockData = useDashboardData(watchlist, loadingList);
 
-    const value = {
+    const value = useMemo(() => ({
         ...stockData,
         watchlist,
         loadingList,
         addStock,
         removeStock
-    };
+    }), [stockData, watchlist, loadingList, addStock, removeStock]);
 
     return (
         <StockContext.Provider value={value}>

@@ -3,7 +3,7 @@
 import { X as CloseIcon } from 'lucide-react';
 import { StockData, AIPrediction } from '@/lib/types';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 import { getCurrentUserId } from '@/lib/user';
 
 interface StockProfileProps {
@@ -16,7 +16,7 @@ interface StockProfileProps {
 const historyCache: Record<string, { data: AIPrediction[]; timestamp: number }> = {};
 const CACHE_TTL = 30 * 1000; // 30秒缓存
 
-export function StockProfile({ stock, isOpen, onClose }: StockProfileProps) {
+export const StockProfile = memo(function StockProfile({ stock, isOpen, onClose }: StockProfileProps) {
 
   const [fullHistory, setFullHistory] = useState<AIPrediction[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
@@ -128,4 +128,4 @@ export function StockProfile({ stock, isOpen, onClose }: StockProfileProps) {
       </div>
     </div>
   );
-}
+});

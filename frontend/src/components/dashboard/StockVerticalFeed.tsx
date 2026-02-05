@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, memo } from 'react';
 import { StockData, AIPrediction } from '@/lib/types';
 import { StockDashboardCard } from './StockDashboardCard';
 import { HistoricalCard } from './HistoricalCard';
@@ -12,7 +12,7 @@ interface StockVerticalFeedProps {
   scrollRequest?: number;
 }
 
-export function StockVerticalFeed({ 
+export const StockVerticalFeed = memo(function StockVerticalFeed({ 
   stock, 
   onShowTactics, 
   onVerticalScroll, 
@@ -74,4 +74,4 @@ export function StockVerticalFeed({
       </div>
     </div>
   );
-}
+});

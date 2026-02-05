@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { LayoutGrid as Grid, ChevronDown, User, FileText } from 'lucide-react';
 import { StockData, AIPrediction } from '@/lib/types';
@@ -31,6 +31,10 @@ function DashboardContent() {
   const [briefOpen, setBriefOpen] = useState(false);
 
   const { stocks, loadingPool, loadMoreHistory } = useStocks();
+  
+  const handleOverscrollRight = useCallback(() => setUserCenterOpen(true), []);
+  const handleOverscrollLeft = useCallback(() => router.push('/dashboard/stock-pool'), [router]);
+
   const {
     currentIndex,
     scrollRef,
@@ -40,13 +44,26 @@ function DashboardContent() {
     backToTopCounter,
     scrollToToday
   } = useTikTokScroll(stocks, {
-    onOverscrollRight: () => setUserCenterOpen(true),
-    onOverscrollLeft: () => router.push('/dashboard/stock-pool')
+    onOverscrollRight: handleOverscrollRight,
+    onOverscrollLeft: handleOverscrollLeft
   });
 
   const [selectedTactics, setSelectedTactics] = useState<{ symbol: string; prediction: AIPrediction } | null>(null);
   const [profileStock, setProfileStock] = useState<StockData | null>(null);
   const { tier } = useUserProfile();
+
+  const handleShowTactics = useCallback((symbol: string, prediction: AIPrediction) => {
+    setSelectedTactics({ symbol, prediction });
+  }, []);
+
+  const handleVerticalScrollIdx = useCallback((top: number, idx: number) => {
+    handleVerticalScroll(top, idx);
+  }, [handleVerticalScroll]);
+
+  const handleCloseProfile = useCallback(() => setProfileStock(null), []);
+  const handleCloseTactics = useCallback(() => setSelectedTactics(null), []);
+  const handleCloseUserCenter = useCallback(() => setUserCenterOpen(false), []);
+  const handleCloseBrief = useCallback(() => setBriefOpen(false), []);
 
   useEffect(() => {
     if (typeof navigator !== 'undefined' && 'clearAppBadge' in navigator) {
@@ -133,8 +150,8 @@ function DashboardContent() {
           <StockVerticalFeed 
             key={stock.symbol} 
             stock={stock} 
-            onShowTactics={(prediction) => setSelectedTactics({ symbol: stock.symbol, prediction })} 
-            onVerticalScroll={(top) => handleVerticalScroll(top, idx)}
+            onShowTactics={(prediction) => handleShowTactics(stock.symbol, prediction)} 
+            onVerticalScroll={(top) => handleVerticalScrollIdx(top, idx)}
             scrollRequest={currentIndex === idx ? backToTopCounter : undefined}
             onLoadMore={loadMoreHistory}
           />
@@ -172,7 +189,7 @@ function DashboardContent() {
       {/* Overlays */}
       <TacticalBriefDrawer 
         isOpen={!!selectedTactics} 
-        onClose={() => setSelectedTactics(null)} 
+        onClose={handleCloseTactics} 
         tier={tier}
         data={(() => {
           try { return JSON.parse(selectedTactics?.prediction?.ai_reasoning || '{}'); } catch { return {}; }
@@ -183,9 +200,9 @@ function DashboardContent() {
         targetDate={selectedTactics?.prediction?.target_date || ''}
       />
 
-      <StockProfile stock={profileStock} isOpen={!!profileStock} onClose={() => setProfileStock(null)} />
-      <UserCenterDrawer isOpen={userCenterOpen} onClose={() => setUserCenterOpen(false)} />
-      <BriefDrawer isOpen={briefOpen} onClose={() => setBriefOpen(false)} limitToSymbol={currentStock?.symbol} onUpgrade={() => setUserCenterOpen(true)} />
+      <StockProfile stock={profileStock} isOpen={!!profileStock} onClose={handleCloseProfile} />
+      <UserCenterDrawer isOpen={userCenterOpen} onClose={handleCloseUserCenter} />
+      <BriefDrawer isOpen={briefOpen} onClose={handleCloseBrief} limitToSymbol={currentStock?.symbol} onUpgrade={() => setUserCenterOpen(true)} />
     </main>
   );
 }
