@@ -6,14 +6,16 @@ import { VerticalIndicator } from './VerticalIndicator';
 
 interface StockVerticalFeedProps {
   stock: StockData;
-  onShowTactics: (prediction: AIPrediction) => void;
-  onVerticalScroll: (top: number) => void;
+  index: number;
+  onShowTactics: (symbol: string, prediction: AIPrediction) => void;
+  onVerticalScroll: (top: number, index: number) => void;
   onLoadMore?: (symbol: string, offset: number) => void;
   scrollRequest?: number;
 }
 
 export const StockVerticalFeed = memo(function StockVerticalFeed({ 
   stock, 
+  index,
   onShowTactics, 
   onVerticalScroll, 
   onLoadMore,
@@ -51,16 +53,20 @@ export const StockVerticalFeed = memo(function StockVerticalFeed({
     return () => observer.disconnect();
   }, [container, stock.loadingMore, stock.hasMoreHistory, stock.history.length, onLoadMore, stock.symbol]);
 
+  // Stable wrappers for children
+  const handleShowTactics = (prediction: AIPrediction) => onShowTactics(stock.symbol, prediction);
+  const handleScroll = (top: number) => onVerticalScroll(top, index);
+
   return (
     <div className="min-w-full h-full relative snap-center overflow-hidden">
-      <VerticalIndicator container={container} onScroll={onVerticalScroll} />
+      <VerticalIndicator container={container} onScroll={handleScroll} />
       <div 
         ref={setContainer}
         className="w-full h-full absolute inset-0 overflow-y-scroll snap-y snap-mandatory scrollbar-hide"
       >
         {/* Y轴 垂直内容 (TikTok Mode) */}
-        <StockDashboardCard data={stock} onShowTactics={onShowTactics} />
-        {stock.history.slice(1).map((h, i) => <HistoricalCard key={i} data={h} onClick={onShowTactics} />)}
+        <StockDashboardCard data={stock} onShowTactics={handleShowTactics} />
+        {stock.history.slice(1).map((h, i) => <HistoricalCard key={i} data={h} onClick={handleShowTactics} />)}
         
         {/* 底部加载触发区 */}
         <div ref={loaderRef} className="w-full py-8 flex items-center justify-center min-h-[60px] snap-end">

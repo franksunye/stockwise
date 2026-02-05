@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense, useRef } from 'react';
+import { useState, useEffect, Suspense, useRef, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LayoutGrid as Grid, ChevronDown, User, FileText } from 'lucide-react';
@@ -52,6 +52,15 @@ function DashboardContent() {
   const [selectedTactics, setSelectedTactics] = useState<{ symbol: string; prediction: AIPrediction } | null>(null);
   const [profileStock, setProfileStock] = useState<StockData | null>(null);
   const { tier } = useUserProfile();
+
+  // Stable handlers for Feed to prevent re-renders
+  const handleShowTactics = useCallback((symbol: string, prediction: AIPrediction) => {
+    setSelectedTactics({ symbol, prediction });
+  }, []);
+
+  const handleVerticalScrollStable = useCallback((top: number, index: number) => {
+    handleVerticalScroll(top, index);
+  }, [handleVerticalScroll]);
 
   // 进入 App 时清除角标 (小红点)
   useEffect(() => {
@@ -174,9 +183,10 @@ function DashboardContent() {
         {stocks.map((stock, idx) => (
           <StockVerticalFeed 
             key={stock.symbol} 
+            index={idx}
             stock={stock} 
-            onShowTactics={(prediction) => setSelectedTactics({ symbol: stock.symbol, prediction })} 
-            onVerticalScroll={(top) => handleVerticalScroll(top, idx)}
+            onShowTactics={handleShowTactics} 
+            onVerticalScroll={handleVerticalScrollStable}
             scrollRequest={currentIndex === idx ? backToTopCounter : undefined}
             onLoadMore={loadMoreHistory}
           />
@@ -246,11 +256,14 @@ function DashboardContent() {
         targetDate={selectedTactics?.prediction?.target_date || ''}
       />
 
-      <StockProfile 
-        stock={profileStock}
-        isOpen={!!profileStock}
-        onClose={() => setProfileStock(null)}
-      />
+      <AnimatePresence>
+        {profileStock && (
+          <StockProfile 
+            stock={profileStock}
+            onClose={() => setProfileStock(null)}
+          />
+        )}
+      </AnimatePresence>
 
       <UserCenterDrawer 
         isOpen={userCenterOpen}

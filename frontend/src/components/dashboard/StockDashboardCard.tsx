@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, memo } from 'react';
 
 import { Zap, Target, ShieldCheck, ChevronDown, Clock } from 'lucide-react';
 import { StockData, TacticalData, AIPrediction } from '@/lib/types';
@@ -15,7 +15,7 @@ interface StockDashboardCardProps {
   onShowTactics: (prediction: AIPrediction) => void;
 }
 
-export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardProps) {
+export const StockDashboardCard = memo(function StockDashboardCard({ data, onShowTactics }: StockDashboardCardProps) {
 
 
   const marketType = getMarketFromSymbol(data.symbol);
@@ -350,4 +350,4 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
       </div>
     </div>
   );
-}
+});
