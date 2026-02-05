@@ -32,7 +32,7 @@ export async function GET(request: Request) {
                       ORDER BY uw.added_at DESC`,
                 args: [userId],
             });
-            stocks = rs.rows;
+            stocks = rs.rows as unknown as { symbol: string, name?: string, added_at?: string }[];
         } else {
             // SQLite
             stocks = client
@@ -43,7 +43,7 @@ export async function GET(request: Request) {
                      WHERE uw.user_id = ?
                       ORDER BY uw.added_at DESC`
                 )
-                .all(userId);
+                .all(userId) as { symbol: string, name?: string, added_at?: string }[];
         }
 
         // 核心增强：数据自愈 (Self-healing on Read) - 批量优化版
