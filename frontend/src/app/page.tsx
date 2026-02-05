@@ -45,7 +45,7 @@ export default function LandingPage() {
           className="space-y-6 max-w-3xl"
         >
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-black uppercase tracking-widest mb-4">
-            <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
+            <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
             投研委员会联合推演 · JOINT RESEARCH
           </div>
           <h1 className="text-5xl md:text-7xl font-black tracking-tighter italic leading-tight">

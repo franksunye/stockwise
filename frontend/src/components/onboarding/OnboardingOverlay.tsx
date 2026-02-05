@@ -283,7 +283,7 @@ export function OnboardingOverlay() {
                                         <circle cx="50" cy="50" r="45" stroke="currentColor" strokeWidth="2" fill="none" className="text-indigo-500" strokeDasharray="283" strokeDashoffset="100" />
                                     </svg>
                                     <div className="absolute inset-0 flex items-center justify-center">
-                                        <Zap className="w-10 h-10 text-indigo-400 animate-pulse" />
+                                        <Zap className="w-10 h-10 text-indigo-400" />
                                     </div>
                                 </div>
                                 <div className="space-y-2 h-16">
@@ -313,7 +313,7 @@ export function OnboardingOverlay() {
                         className="relative"
                     >
                         <div className="absolute -top-10 left-0 right-0 text-center mb-4">
-                            <span className="inline-block px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-bold border border-amber-500/30 uppercase tracking-widest animate-pulse">
+                            <span className="inline-block px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-bold border border-amber-500/30 uppercase tracking-widest">
                                 Pro Feature Unlocked
                             </span>
                         </div>
@@ -392,7 +392,7 @@ export function OnboardingOverlay() {
 
                         <div className="mt-8 space-y-3">
                              <button onClick={() => setStep(4)} className="w-full py-4 bg-indigo-600 text-white font-bold text-lg rounded-2xl active:scale-95 transition-all shadow-lg hover:bg-indigo-500">
-                                收下这份洞察
+                                 收下这份洞察
                              </button>
                         </div>
                     </motion.div>

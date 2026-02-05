@@ -95,7 +95,7 @@ export default function AdminDashboard() {
           </div>
           <div className="flex items-center gap-4">
             <div className={`px-4 py-2 rounded-2xl border flex items-center gap-3 transition-colors ${stats?.strategy === 'cloud' ? 'bg-indigo-500/10 border-indigo-500/30' : 'bg-amber-500/10 border-amber-500/30'}`}>
-              <div className={`w-2 h-2 rounded-full animate-pulse ${stats?.strategy === 'cloud' ? 'bg-indigo-500' : 'bg-amber-500'}`} />
+              <div className={`w-2 h-2 rounded-full ${stats?.strategy === 'cloud' ? 'bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.5)]' : 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]'}`} />
               <span className="text-xs font-black uppercase tracking-widest">
                 {stats?.strategy === 'cloud' ? '☁️ 云端模式 (Turso)' : '🏠 本地模式 (SQLite)'}
               </span>

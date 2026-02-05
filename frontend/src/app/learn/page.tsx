@@ -60,7 +60,7 @@ export default async function LearnPage() {
 
         <div className="max-w-5xl mx-auto px-6 relative z-10 text-center space-y-4">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em] mb-1">
-            <Sparkles size={10} className="animate-pulse" />
+            <Sparkles size={10} className="text-white" />
             知守投研委员会 · 全天候智力支持
           </div>
           <h1 className="text-2xl md:text-4xl font-black tracking-tighter italic leading-tight">

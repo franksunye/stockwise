@@ -71,7 +71,7 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
   if (data.loading || !data.price) return (
     <div className="h-full w-full flex flex-col items-center justify-center space-y-4">
       <div className="w-20 h-20 rounded-[32px] bg-white/5 border border-white/10 flex items-center justify-center">
-        <Zap className="w-8 h-8 text-indigo-500 animate-pulse fill-indigo-500/20" />
+        <Zap className="w-8 h-8 text-indigo-500 fill-indigo-500/20" />
       </div>
       <div className="text-center">
         <h2 className="text-2xl font-black italic tracking-tighter text-white">{data.name}</h2>
@@ -140,7 +140,7 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
                </>
             ) : (
               <>
-                <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-ping" />
+                <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
                 <span className="text-[10px] font-bold text-slate-500 tracking-wider uppercase">{mainTitle}</span>
               </>
             )}
@@ -170,7 +170,7 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
           <div className="relative z-10 px-5 py-3">
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <div className="w-5 h-5 rounded-md bg-indigo-600/20 flex items-center justify-center border border-indigo-500/30 ai-pulse">
+                <div className="w-5 h-5 rounded-md bg-indigo-600/20 flex items-center justify-center border border-indigo-500/30">
                   <Zap className="w-2.5 h-2.5 text-indigo-400 fill-indigo-400/20" />
                 </div>
                 <h3 className="text-[10px] font-black text-slate-600 uppercase tracking-widest">
@@ -234,7 +234,7 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
                       </span>
                       {isMarketOpenSoon ? (
                         <div className="flex items-baseline gap-1.5 h-7">
-                          <span className="text-xl font-black mono tracking-tight text-white/20 animate-pulse">--</span>
+                          <span className="text-xl font-black mono tracking-tight text-white/20">--</span>
                         </div>
                       ) : (
                         <div className="flex items-baseline gap-1.5 overflow-hidden">
@@ -315,7 +315,7 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
                              </div>
                            ) : status === 'Verifying' ? (
                              <div className="flex flex-col items-center gap-2">
-                               <Clock size={24} className="text-indigo-400 animate-pulse" />
+                               <Clock size={24} className="text-indigo-400" />
                                <div className="flex flex-col items-center">
                                  <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">验证中</span>
                                  <span className="text-[9px] font-bold text-slate-500 italic">正在追踪收盘表现...</span>
@@ -344,7 +344,7 @@ export function StockDashboardCard({ data, onShowTactics }: StockDashboardCardPr
         {data.history.length > 1 && (
           <div className="flex flex-col items-center gap-1.5 pt-2 opacity-20">
             <span className="text-[10px] font-black tracking-[0.2em] text-slate-500 uppercase">上划追溯历史轨迹</span>
-            <ChevronDown size={14} className="animate-bounce" />
+            <ChevronDown size={14} />
           </div>
         )}
       </div>
