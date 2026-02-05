@@ -1,11 +1,13 @@
 'use client';
 
-import { useState, useEffect, useMemo, memo } from 'react';
-import { Plus, Trash2, ArrowLeft, TrendingUp, TrendingDown, Minus, LayoutGrid, Loader2 } from 'lucide-react';
+import { useState, useEffect, useCallback, useMemo, memo } from 'react';
+import { Plus, Trash2, ArrowLeft, TrendingUp, TrendingDown, Minus, LayoutGrid } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { getCurrentUser } from '@/lib/user';
+import { getCurrentUser, type User } from '@/lib/user';
+import { motion, AnimatePresence } from 'framer-motion';
 import { getMarketScene } from '@/lib/date-utils';
+
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useStocks } from '@/context/StockContext';
 
@@ -17,6 +19,8 @@ interface StockSnapshot {
   aiSignal: 'Long' | 'Short' | 'Side';
   updateTag?: string;
 }
+
+
 
 const getSignalMeta = (signal: string) => {
   switch(signal) {
@@ -40,12 +44,19 @@ const StockItem = memo(({
   setNavigatingTo: (symbol: string) => void
 }) => {
   const meta = getSignalMeta(stock.aiSignal);
+  
   return (
-    <div className="animate-in fade-in scale-95 duration-200">
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      transition={{ duration: 0.15 }}
+      className="transform-gpu"
+    >
       <Link 
         href={`/dashboard?symbol=${stock.symbol}`}
         onClick={() => setNavigatingTo(stock.symbol)}
-        className={`glass-card p-5 group transition-all relative block active:scale-95 touch-optimized ${navigatingTo === stock.symbol ? 'bg-white/10 border-indigo-500/30' : 'hover:bg-white/[0.04]'}`}
+        className={`glass-card p-5 group transition-all relative block active:scale-95 touch-optimized ${navigatingTo === stock.symbol ? 'bg-white/10 border-indigo-500/30 ring-1 ring-indigo-500/20' : 'hover:bg-white/[0.04]'}`}
       >
        <div className="flex items-center justify-between">
          <div className="flex items-center gap-4">
@@ -69,37 +80,55 @@ const StockItem = memo(({
                  <p className="text-xl font-black mono tracking-tighter text-white">
                    {stock.price > 0 ? stock.price.toFixed(2) : '--.--'}
                  </p>
-                 <p className={`text-[10px] font-black mono ${stock.change > 0 ? 'text-rose-500' : stock.change < 0 ? 'text-emerald-500' : 'text-slate-500'}`}>
-                   {stock.price > 0 ? `${stock.change >= 0 ? '+' : ''}${stock.change.toFixed(2)}%` : '同步中...'}
-                 </p>
-               </>
-             ) : (
-               <p className="text-[10px] text-slate-600 font-black italic uppercase tracking-widest">静默期</p>
+                   <p className={`text-[10px] font-black mono ${stock.change > 0 ? 'text-rose-500' : stock.change < 0 ? 'text-emerald-500' : 'text-slate-500'}`}>
+                     {stock.price > 0 ? `${stock.change >= 0 ? '+' : ''}${stock.change.toFixed(2)}%` : '同步中...'}
+                   </p>
+                   {stock.updateTag && (
+                     <p className="text-[8px] text-slate-500 mono mt-1 font-bold">
+                       {stock.updateTag}
+                     </p>
+                   )}
+                 </>
+               ) : (
+               <p className="text-[10px] text-slate-600 font-black italic uppercase tracking-widest">盘前静默</p>
              )}
            </div>
            <button 
-             onClick={(e) => { e.preventDefault(); onRemove(e, stock); }}
-             className="p-3 opacity-60 hover:opacity-100 text-slate-500 hover:text-rose-500 active:scale-75 z-20 relative rounded-full hover:bg-white/5"
+             onClick={(e) => { e.preventDefault(); e.stopPropagation(); onRemove(e, stock); }}
+             className="p-3 opacity-60 hover:opacity-100 transition-all text-slate-500 hover:text-rose-500 active:scale-75 z-20 relative rounded-full hover:bg-white/5 touch-optimized"
            >
              <Trash2 size={20} />
            </button>
          </div>
-         {navigatingTo === stock.symbol && (
-           <div className="absolute right-4 top-1/2 -translate-y-1/2">
-             <Loader2 size={16} className="text-indigo-500 animate-spin" />
-           </div>
-         )}
+          
+          {navigatingTo === stock.symbol && (
+            <div className="absolute right-4 top-1/2 -translate-y-1/2">
+              <div className="w-4 h-4 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
+            </div>
+          )}
        </div>
       </Link>
-    </div>
+    </motion.div>
   );
 });
 StockItem.displayName = 'StockItem';
 
 export default function StockPoolPage() {
   const router = useRouter();
-  const { stocks: globalStocks, loadingPool, watchlist, addStock, removeStock, loadingList } = useStocks();
+  const [user, setUser] = useState<User | null>(null);
   
+  // New Hook Usage
+  // Global Data Context
+  const { 
+    stocks: globalStocks, 
+    loadingPool, 
+    watchlist, 
+    addStock, 
+    removeStock, 
+    loadingList 
+  } = useStocks();
+  
+  // Derived State for UI - Map global StockData to local StockSnapshot
   const stocks = useMemo(() => globalStocks.map(s => ({
     symbol: s.symbol,
     name: s.name,
@@ -109,7 +138,9 @@ export default function StockPoolPage() {
     updateTag: s.lastUpdated
   })), [globalStocks]);
 
+  // Compounded loading state
   const loading = loadingList || loadingPool;
+  
   const [newSymbol, setNewSymbol] = useState('');
   const [showAdd, setShowAdd] = useState(false);
   const [searchResults, setSearchResults] = useState<{symbol: string; name: string; market?: string}[]>([]);
@@ -117,15 +148,34 @@ export default function StockPoolPage() {
   const [stockToDelete, setStockToDelete] = useState<StockSnapshot | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [navigatingTo, setNavigatingTo] = useState<string | null>(null);
+
   const [limitMsg, setLimitMsg] = useState<string | null>(null);
+
+  const [isIOS, setIsIOS] = useState(false);
+
+  const scene = getMarketScene();
+  const isPreMarket = scene === 'pre_market';
+
   const { tier } = useUserProfile();
 
-  const isPreMarket = getMarketScene() === 'pre_market';
+  useEffect(() => {
+    const init = async () => {
+        const u = await getCurrentUser();
+        setUser(u);
+    };
+    init();
+    // iOS Detection
+    const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    setIsIOS(iOS);
+  }, []);
+
+
 
   useEffect(() => {
-    getCurrentUser();
-    router.prefetch('/dashboard');
+      // 预加载详情页，提升离线/弱网时的响应速度
+      router.prefetch('/dashboard');
   }, [router]);
+
 
   useEffect(() => {
     const timer = setTimeout(async () => {
@@ -135,83 +185,157 @@ export default function StockPoolPage() {
           const data = await res.json();
           setSearchResults(data.results || []);
           setShowSuggestions(true);
-        } catch (e) { console.error(e); }
+        } catch (e) { console.error('Search failed', e); }
       } else {
+        setSearchResults([]);
         setShowSuggestions(false);
       }
     }, 300);
     return () => clearTimeout(timer);
   }, [newSymbol]);
 
-  const handleAdd = (symbol: string, name: string) => {
+  const handleAdd = async (symbolOverride?: string, nameOverride?: string) => {
+    const targetSymbol = symbolOverride || newSymbol.trim();
+    if (!targetSymbol || !user) return;
+    
     const limit = tier === 'pro' ? 10 : 3;
     if (watchlist.length >= limit) {
-      setLimitMsg(tier === 'pro' ? '已达到 10 只上限' : '已达到 3 只上限');
+      setLimitMsg(tier === 'pro' ? '已达到 Pro 版 10 只监控上限' : '已达到免费版 3 只上限，升级 Pro 可扩展至 10 只');
       setTimeout(() => setLimitMsg(null), 3000);
       return;
     }
-    addStock(symbol, name);
+
+    // Call Hook (Optimistic) - No Await needed for UI blocking
+    // Fix: Fire and forget to close modal instantly
+    addStock(targetSymbol, nameOverride || targetSymbol);
+    
+    // Instant UI Feedback
     setNewSymbol('');
     setShowAdd(false);
     setShowSuggestions(false);
+    // Prices will naturally update due to useEffect dependency on watchlist
   };
 
+  const handleRemoveClick = useCallback((e: React.MouseEvent, stock: StockSnapshot) => {
+    e.preventDefault(); e.stopPropagation();
+    setStockToDelete(stock);
+  }, []);
+
   const confirmDelete = async () => {
-    if (!stockToDelete) return;
+    if (!stockToDelete || !user) return;
     setIsDeleting(true);
+    
+    // Call Hook (Optimistic) - Fire and Forget
     removeStock(stockToDelete.symbol);
+    
     setStockToDelete(null);
     setIsDeleting(false);
   };
 
+
+  // Main Content
   return (
-    <div className="fixed inset-0 bg-[#050508] text-white overflow-hidden flex flex-col font-sans">
+    <div 
+      className="fixed inset-0 bg-[#050508] text-white overflow-hidden flex flex-col font-sans"
+    >
+      {/* Background glow - conditionally render for non-iOS */}
+      {!isIOS && <div className="fixed inset-0 opacity-[0.03] pointer-events-none bg-indigo-500 blur-[120px] scale-150" />}
+
+      {/* Solid/Stable Header Structure (Like Brief Page) */}
       <header className="shrink-0 z-20 p-8 flex items-center justify-between bg-[#050508] border-b border-white/5">
         <div className="flex items-center gap-4">
           <Link href="/dashboard" className="p-2.5 rounded-full bg-white/5 border border-white/10 active:scale-90 transition-all">
             <ArrowLeft className="w-5 h-5 text-slate-400" />
           </Link>
-          <div>
-            <span className="text-[10px] uppercase tracking-[0.4em] text-slate-500 font-bold block">自选监控</span>
-            <h1 className="text-2xl font-black italic tracking-tighter text-white">监控池 <span className="text-indigo-500">POOL</span></h1>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] uppercase tracking-[0.4em] text-slate-500 font-bold">自选监控</span>
+            </div>
+            <h1 className="text-2xl font-black italic tracking-tighter text-white">
+              监控池 <span className="text-indigo-500 underline decoration-2 underline-offset-4" data-en="POOL">POOL</span>
+            </h1>
           </div>
         </div>
         <div className="flex items-center gap-3">
           <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
-            <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
-            <span className="text-[10px] font-medium text-slate-500 uppercase tracking-widest">15M REFRESH</span>
+            <div className="relative flex h-1.5 w-1.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-indigo-500"></span>
+            </div>
+            <span className="text-[10px] font-medium text-slate-500 tracking-wide uppercase">15分钟 / 轮询</span>
           </div>
-          <button onClick={() => setShowAdd(!showAdd)} className={`p-3 rounded-2xl border transition-all ${showAdd ? 'bg-indigo-500 border-indigo-400 text-white' : 'bg-white/5 border-white/10 text-indigo-400'}`}>
+          <button onClick={() => setShowAdd(!showAdd)} className={`p-3 rounded-2xl border transition-all active:scale-95 ${showAdd ? 'bg-indigo-500 border-indigo-400 text-white' : 'bg-white/5 border-white/10 text-indigo-400'}`}>
              <Plus className={`w-5 h-5 transition-transform duration-300 ${showAdd ? 'rotate-45' : ''}`} />
           </button>
         </div>
       </header>
 
       <div className="flex-1 overflow-y-auto px-6 py-6 scrollbar-hide">
-        {showAdd && (
-          <div className="mb-8 glass-card p-4 border-indigo-500/20 bg-indigo-500/5 animate-in slide-in-from-top-4 duration-300">
-            <input autoFocus placeholder="输入代码或名称" value={newSymbol} onChange={(e) => setNewSymbol(e.target.value)} className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-sm text-white focus:border-indigo-500/50 outline-none" />
-            {limitMsg && <p className="mt-3 text-rose-400 text-[10px] font-bold text-center uppercase">{limitMsg}</p>}
-            {showSuggestions && searchResults.length > 0 && (
-              <div className="mt-4 space-y-2 max-h-60 overflow-y-auto">
-                {searchResults.map(item => (
-                  <button key={item.symbol} onClick={() => handleAdd(item.symbol, item.name)} className="w-full flex items-center justify-between p-4 bg-white/5 rounded-2xl hover:bg-white/10 transition-colors">
-                    <div className="text-left">
-                       <p className="text-sm font-bold text-white">{item.name}</p>
-                       <p className="text-[10px] text-slate-500 uppercase font-mono">{item.symbol}</p>
-                    </div>
-                    <Plus size={16} className="text-slate-500" />
-                  </button>
-                ))}
+        <AnimatePresence>
+          {showAdd && (
+            <motion.div 
+              initial={{ opacity: 0, y: -20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -20, scale: 0.95 }}
+              className="mb-8 glass-card p-4 border-indigo-500/20 bg-indigo-500/5"
+            >
+              <div className="relative">
+                <input 
+                  autoFocus
+                  placeholder="输入代码、名称或拼音首字母 (如: GZMT)"
+                  value={newSymbol}
+                  onChange={(e) => setNewSymbol(e.target.value)}
+                  className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 mono text-sm focus:outline-none focus:border-indigo-500/50"
+                />
+                <AnimatePresence>
+                  {limitMsg && (
+                    <motion.p 
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      className="mt-3 text-rose-400 text-[10px] font-bold text-center uppercase tracking-widest"
+                    >
+                      {limitMsg}
+                    </motion.p>
+                  )}
+                </AnimatePresence>
+                {showSuggestions && searchResults.length > 0 && (
+                  <div className="mt-4 space-y-2 max-h-60 overflow-y-auto">
+                    {searchResults.map(item => {
+                      const isHK = item.market === 'HK';
+                      const suffix = isHK ? '.HK' : '';
+                      return (
+                        <button key={item.symbol} onClick={() => handleAdd(item.symbol, item.name)} className="w-full flex items-center justify-between p-4 bg-white/5 rounded-2xl hover:bg-white/10 transition-colors">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-[10px] font-black ${isHK ? 'bg-blue-500/10 text-blue-400' : 'bg-rose-500/10 text-rose-400'}`}>
+                              {isHK ? '港' : 'A'}
+                            </div>
+                            <div className="text-left">
+                               <p className="text-sm font-bold">{item.name}</p>
+                               <p className="text-[10px] text-slate-500 mono uppercase">{item.symbol}{suffix}</p>
+                            </div>
+                          </div>
+                          <Plus size={16} className="text-slate-500" />
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+                {showSuggestions && searchResults.length === 0 && newSymbol.trim().length > 0 && (
+                  <div className="mt-4 py-8 text-center text-slate-500 text-xs">
+                    <p className="mb-1">未找到匹配的股票</p>
+                    <p className="text-[10px] text-slate-600">试试输入完整代码或拼音首字母</p>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <div className="space-y-4">
-          <h2 className="text-[10px] font-black text-slate-600 uppercase tracking-widest px-2 mb-4">监控标的 ({stocks.length})</h2>
+          <h2 className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] px-2 mb-4">监控标的 ({stocks.length})</h2>
           {loading && !stocks.length ? (
-            [1, 2, 3].map(i => <div key={i} className="glass-card h-24 bg-white/5 animate-pulse" />)
+            [1, 2, 3].map(i => <div key={i} className="glass-card h-24 animate-pulse" />)
           ) : stocks.length === 0 ? (
             <div className="py-20 flex flex-col items-center opacity-20 text-center">
               <LayoutGrid size={48} className="mb-4" />
@@ -219,33 +343,77 @@ export default function StockPoolPage() {
             </div>
           ) : (
             stocks.map(stock => (
-              <StockItem key={stock.symbol} stock={stock} navigatingTo={navigatingTo} isPreMarket={isPreMarket} onRemove={(e) => { e.preventDefault(); setStockToDelete(stock); }} setNavigatingTo={setNavigatingTo} />
+              <StockItem
+                key={stock.symbol}
+                stock={stock}
+                navigatingTo={navigatingTo}
+                isPreMarket={isPreMarket}
+                onRemove={handleRemoveClick}
+                setNavigatingTo={setNavigatingTo}
+              />
             ))
           )}
         </div>
       </div>
 
-      {stockToDelete && (
-        <div className="fixed inset-0 z-[1000] flex items-center justify-center px-6 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="relative w-full max-w-sm glass-card p-8 border-rose-500/20 bg-[#0a0a0f] text-center animate-in zoom-in-95 duration-200">
-            <Trash2 className="text-rose-500 w-12 h-12 mx-auto mb-6" />
-            <h3 className="text-xl font-black italic text-white mb-2">确认移除？</h3>
-            <p className="text-sm text-slate-400 mb-8 leading-relaxed">确定要从监控池中移除 <span className="text-white font-bold">{stockToDelete.name}</span> 吗？</p>
-            <div className="flex gap-3">
-              <button onClick={() => setStockToDelete(null)} className="flex-1 py-4 rounded-2xl bg-white/5 border border-white/10 text-xs font-black uppercase">取消</button>
-              <button onClick={confirmDelete} disabled={isDeleting} className="flex-1 py-4 rounded-2xl bg-rose-500 text-white text-xs font-black uppercase flex items-center justify-center gap-2">
-                {isDeleting ? <Loader2 size={16} className="animate-spin" /> : '确认移除'}
-              </button>
-            </div>
+      <AnimatePresence>
+        {stockToDelete && (
+          <div className="fixed inset-0 z-[1000] flex items-center justify-center px-6">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => !isDeleting && setStockToDelete(null)}
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-sm glass-card p-8 border-rose-500/20 bg-[#0a0a0f] shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
+            >
+              <div className="flex flex-col items-center text-center">
+                <div className="w-16 h-16 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center mb-6">
+                  <Trash2 className="text-rose-500" size={28} />
+                </div>
+                <h3 className="text-xl font-black italic tracking-tighter mb-2 text-white">确认移除？</h3>
+                <p className="text-sm text-slate-400 mb-8 leading-relaxed">
+                  确定要从监控池中移除 <span className="text-white font-bold">{stockToDelete.name} ({stockToDelete.symbol})</span> 吗？此操作不可撤销。
+                </p>
+                <div className="flex gap-3 w-full">
+                  <button 
+                    disabled={isDeleting}
+                    onClick={() => setStockToDelete(null)}
+                    className="flex-1 px-6 py-4 rounded-2xl bg-white/5 border border-white/10 text-xs font-black uppercase tracking-widest active:scale-95 transition-all disabled:opacity-50"
+                  >
+                    取消
+                  </button>
+                  <button 
+                    disabled={isDeleting}
+                    onClick={confirmDelete}
+                    className="flex-1 px-6 py-4 rounded-2xl bg-rose-500 text-white text-xs font-black uppercase tracking-widest active:scale-95 transition-all shadow-[0_10px_20px_rgba(244,63,94,0.3)] disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {isDeleting ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : '确认移除'}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
 
       <style jsx global>{`
-        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
-        .glass-card { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 32px; }
-        .touch-optimized { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        .glass-card { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 32px; }
+        
+        /* iOS Long Press Fix */
+        .touch-optimized {
+          -webkit-touch-callout: none !important;
+          -webkit-user-select: none !important;
+          user-select: none !important;
+          -webkit-tap-highlight-color: transparent;
+        }
       `}</style>
     </div>
   );

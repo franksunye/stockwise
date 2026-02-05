@@ -31,7 +31,7 @@ export default function LandingPage() {
           <Link href="#features" className="hover:text-white transition-colors">功能</Link>
           <Link href="/learn" className="hover:text-white transition-colors">101 手册</Link>
           <Link href="/pricing" className="hover:text-white transition-colors">价格</Link>
-          <Link href="/support" className="hover:text-white transition-colors">支持中心</Link>
+          <Link href="#faq" className="hover:text-white transition-colors">FAQ</Link>
           <Link href="https://app.ziso.cc" target="_blank" rel="noopener noreferrer" className="px-5 py-2.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-white">进入应用</Link>
         </div>
       </nav>
@@ -45,7 +45,7 @@ export default function LandingPage() {
           className="space-y-6 max-w-3xl"
         >
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-black uppercase tracking-widest mb-4">
-            <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+            <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
             投研委员会联合推演 · JOINT RESEARCH
           </div>
           <h1 className="text-5xl md:text-7xl font-black tracking-tighter italic leading-tight">
@@ -67,9 +67,6 @@ export default function LandingPage() {
             <Link href="/learn" className="px-10 py-5 rounded-3xl bg-white/5 border border-white/10 text-white font-black text-lg hover:bg-white/10 transition-all">
               阅读 101 手册
             </Link>
-            <p className="mt-4 text-xs text-slate-500 font-medium">
-              遇到安装或账户问题？访问我们的 <Link href="/support" className="text-indigo-400 hover:text-indigo-300 underline underline-offset-4">支持中心</Link>
-            </p>
           </div>
         </motion.div>
 
@@ -221,15 +218,6 @@ export default function LandingPage() {
               <p className="text-slate-400 text-sm">基础功能免费。PRO 用户可解锁更多自选股监控额度和高级功能。</p>
             </div>
           </div>
-
-          <div className="pt-8 text-center">
-            <Link 
-              href="/support" 
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-white/5 border border-white/10 text-sm font-bold text-slate-400 hover:text-white hover:bg-white/10 transition-all group"
-            >
-              没找到答案？前往支持中心查看完整指南 <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </div>
         </section>
 
         {/* CTA Banner */}
@@ -264,7 +252,6 @@ export default function LandingPage() {
           <p className="text-xs text-slate-600 font-bold uppercase tracking-widest">© 2026 ZISO AI TECHNOLOGY. ALL RIGHTS RESERVED.</p>
           <div className="flex gap-6 text-xs font-bold text-slate-500">
             <Link href="/learn" className="hover:text-white transition-colors">101 手册</Link>
-            <Link href="/support" className="hover:text-white transition-colors">支持中心</Link>
             <Link href="/status" className="hover:text-white transition-colors">系统状态</Link>
             <Link href="/pricing" className="hover:text-white transition-colors">价格方案</Link>
             <Link href="/privacy" className="hover:text-white transition-colors">隐私协议</Link>

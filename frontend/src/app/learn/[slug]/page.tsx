@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { getArticleBySlug, getAllArticles } from '@/lib/learn-content';
 import ReactMarkdown from 'react-markdown';
-import { ChevronLeft, BookOpen, Brain, Zap, Shield, Sparkles, Target } from 'lucide-react';
+import { ChevronLeft, Calendar, Clock, BookOpen, Brain, Zap, Shield, Sparkles, Target } from 'lucide-react';
 
 interface CategoryStyle {
   label: string;
