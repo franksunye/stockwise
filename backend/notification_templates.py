@@ -33,6 +33,48 @@ class NotificationTemplates:
                 }
             }
         },
+        "daily_brief_bullish": {
+            "free": {
+                "zh": {
+                    "title": "🚀 机会预警：多只股票看涨",
+                    "body": "{push_hook}"
+                }
+            },
+            "pro": {
+                "zh": {
+                    "title": "🟢 强力买入信号确认",
+                    "body": "{push_hook} | Pro 级策略详情已解锁"
+                }
+            }
+        },
+        "daily_brief_bearish": {
+            "free": {
+                "zh": {
+                    "title": "🛡️ 风险提示：持仓出现抛压",
+                    "body": "{push_hook}"
+                }
+            },
+            "pro": {
+                "zh": {
+                    "title": "🔴 关键避险信号触发",
+                    "body": "{push_hook} | 机构减仓迹象深度分析"
+                }
+            }
+        },
+        "daily_brief_neutral": {
+            "free": {
+                "zh": {
+                    "title": "📊 今日简报：市场平稳",
+                    "body": "{push_hook}"
+                }
+            },
+            "pro": {
+                "zh": {
+                    "title": "⚪ 震荡市策略更新",
+                    "body": "{push_hook} | 观望与低吸区间分析"
+                }
+            }
+        },
         "signal_flip": {
             "free": {
                 "zh": {

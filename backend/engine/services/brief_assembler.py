@@ -185,8 +185,17 @@ async def notify_user_brief_ready(user_id: str, date_str: str):
                             return "⭐ Pro 深度复盘已就绪", f"{kwargs.get('push_hook')} | 首席主笔深度解读"
                         return "📊 今日简报已生成", kwargs.get('push_hook')
 
+        # Determine Sentiment Type from Hook Prefix
+        notif_type = "daily_brief" # Default
+        if "📈" in push_hook:
+            notif_type = "daily_brief_bullish"
+        elif "⚠️" in push_hook:
+            notif_type = "daily_brief_bearish"
+        elif "平稳" in push_hook:
+            notif_type = "daily_brief_neutral"
+
         notify_title, notify_body = NotificationTemplates.render(
-            "daily_brief", 
+            notif_type, 
             tier=user_tier, 
             push_hook=push_hook
         )
