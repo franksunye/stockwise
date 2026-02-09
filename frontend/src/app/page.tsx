@@ -32,6 +32,7 @@ export default function LandingPage() {
           <Link href="/learn" className="hover:text-white transition-colors">101 手册</Link>
           <Link href="/about" className="hover:text-white transition-colors">关于</Link>
           <Link href="/pricing" className="hover:text-white transition-colors">价格</Link>
+          <Link href="/support" className="hover:text-white transition-colors">支持</Link>
           <Link href="#faq" className="hover:text-white transition-colors">FAQ</Link>
           <Link href="https://app.ziso.cc" target="_blank" rel="noopener noreferrer" className="px-5 py-2.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-white">进入应用</Link>
         </div>
@@ -275,6 +276,7 @@ export default function LandingPage() {
           <div className="flex gap-6 text-xs font-bold text-slate-500">
             <Link href="/learn" className="hover:text-white transition-colors">101 手册</Link>
             <Link href="/status" className="hover:text-white transition-colors">系统状态</Link>
+            <Link href="/support" className="hover:text-white transition-colors">支持中心</Link>
             <Link href="/pricing" className="hover:text-white transition-colors">价格方案</Link>
             <Link href="/about" className="hover:text-white transition-colors">关于我们</Link>
             <Link href="/privacy" className="hover:text-white transition-colors">隐私协议</Link>
