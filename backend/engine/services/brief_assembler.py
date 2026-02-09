@@ -84,7 +84,7 @@ async def assemble_user_brief(user_id: str, date_str: str) -> Optional[str]:
         
         full_brief = "\n".join(brief_sections)
         
-        # Intelligent Hook Generation
+        # Intelligent Hook Generation via Centralized Templates
         bullish_stocks = []
         bearish_stocks = []
         
@@ -95,16 +95,21 @@ async def assemble_user_brief(user_id: str, date_str: str) -> Optional[str]:
              elif signal and ('Short' in signal or 'Bearish' in signal):
                  bearish_stocks.append(s_name)
         
+        try:
+            from backend.notification_templates import NotificationTemplates
+        except ImportError:
+            from notification_templates import NotificationTemplates
+
         if bullish_stocks:
-            top_stocks = "、".join(bullish_stocks[:2])
+            stocks_str = "、".join(bullish_stocks[:2])
             etc = "等" if len(bullish_stocks) > 2 else ""
-            push_hook = f"📈 {top_stocks}{etc}出现看涨信号，点击查看今日 AI 复盘。"
+            _, push_hook = NotificationTemplates.render("brief_hook_bullish", stocks=stocks_str, etc=etc)
         elif bearish_stocks:
-            top_stocks = "、".join(bearish_stocks[:2])
+            stocks_str = "、".join(bearish_stocks[:2])
             etc = "等" if len(bearish_stocks) > 2 else ""
-            push_hook = f"⚠️ {top_stocks}{etc}面临调整压力，点击查看风险提示。"
+            _, push_hook = NotificationTemplates.render("brief_hook_bearish", stocks=stocks_str, etc=etc)
         else:
-            push_hook = f"今日复盘：{len(watchlist)} 只股票走势平稳，点击查看详情。"
+            _, push_hook = NotificationTemplates.render("brief_hook_neutral", count=len(watchlist))
 
         # 4. Save User Brief
         cursor.execute("""
@@ -200,13 +205,21 @@ async def notify_user_brief_ready(user_id: str, date_str: str):
             push_hook=push_hook
         )
         
-        send_push_notification(
-            title=notify_title,
-            body=notify_body,
-            url="/dashboard?brief=true",
-            target_user_id=user_id,
-            tag="daily_brief"
-        )
+        try:
+            from backend.notification_service import NotificationManager
+        except ImportError:
+            from notification_service import NotificationManager
+
+        nm = NotificationManager(conn=conn)
+        nm.user_tier_cache[user_id] = user_tier
+
+        # Queue and Flush (Ensures logging to DB via nm.flush -> _send_notification -> _log_to_db)
+        nm.queue_notification(user_id, notif_type, {
+            "push_hook": push_hook,
+            "url": "/dashboard?brief=true",
+            "related_symbols": []
+        })
+        nm.flush()
         
         # 6. Mark as notified (UTC+8 workaround)
         cursor.execute(

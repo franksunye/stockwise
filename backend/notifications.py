@@ -97,18 +97,35 @@ def send_personalized_daily_report(date_str):
         logger.info(f"📤 Sending push notifications to {len(targets)} users...")
         
         success_count = 0
+        from backend.notification_templates import NotificationTemplates
+        from backend.notification_service import NotificationManager
+        
+        # We'll use a local manager to fetch tiers efficiently
+        nm = NotificationManager(conn=conn)
+        
         for user_id, push_hook in targets:
             try:
+                # Resolve tier for premium title branding
+                user_tier = nm._get_user_tier(user_id)
+                
+                # Render via centralized templates
+                # Note: We use 'daily_brief' as the category, and push_hook as the rendered content
+                title, _ = NotificationTemplates.render(
+                    "daily_brief", 
+                    tier=user_tier, 
+                    push_hook=push_hook
+                )
+                
                 # Send push notification
                 send_push_notification(
-                    title="📊 每日简报已生成",
+                    title=title,
                     body=push_hook or "点击查看今日 AI 复盘",
                     url="/dashboard?brief=true",
                     target_user_id=user_id,
                     tag="daily_brief"
                 )
                 success_count += 1
-                time.sleep(0.2) # Rate limit protection
+                time.sleep(0.1) # Rate limit protection
                 
             except Exception as e:
                 logger.error(f"❌ Failed to push to {user_id}: {e}")

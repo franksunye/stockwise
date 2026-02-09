@@ -154,6 +154,37 @@ class NotificationTemplates:
                     "body": "最新: {price} | 成交: {volume_formatted}"
                 }
             }
+        },
+        # --- Service Hooks (Short strings for previews/hooks) ---
+        "brief_hook_bullish": {
+            "all": {
+                "zh": {
+                    "body": "📈 {stocks}{etc}出现看涨信号，点击查看今日 AI 复盘。"
+                }
+            }
+        },
+        "brief_hook_bearish": {
+            "all": {
+                "zh": {
+                    "body": "⚠️ {stocks}{etc}面临调整压力，点击查看风险提示。"
+                }
+            }
+        },
+        "brief_hook_neutral": {
+            "all": {
+                "zh": {
+                    "body": "今日复盘：{count} 只股票走势平稳，点击查看详情。"
+                }
+            }
+        },
+        # --- Internal Admin / Monitoring Reports (Markdown supported) ---
+        "admin_task_report": {
+            "all": {
+                "zh": {
+                    "title": "### 🧠 StockWise: {task_title}\n",
+                    "body": "> **Status**: {status}\n- **Target**: {total} Stocks\n- **Success**: {success} (AI: {ai}, Rule: {rule})\n- **Failed**: {failed}\n- **Duration**: {duration}s"
+                }
+            }
         }
     }
 

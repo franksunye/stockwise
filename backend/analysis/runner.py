@@ -189,6 +189,12 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool =
                                 primary_result.get('signal'), 
                                 primary_result.get('confidence')
                             )
+                            # Queue service-level update notification ("Data Ready")
+                            notif_manager.queue_notification(
+                                uid, 
+                                "prediction_updated", 
+                                {"symbol": stock, "market": market_filter or "CN"}
+                            )
 
                     success_count += 1
                     
@@ -225,20 +231,24 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool =
     else:
         status = "❌ FAILED"
         
-    market_label = f" ({market_filter})" if market_filter else ""
-    report = f"### 🧠 StockWise: AI Analysis{market_label}\n"
-    report += f"> **Status**: {status}\n"
-    report += f"- **Target**: {len(targets)} Stocks\n"
-    report += f"- **Success**: {success_count} (AI: {ai_count}, Rule: {rule_count})\n"
-    
-    failed_count = len(targets) - success_count
-    if failed_count > 0:
-        report += f"- **Failed**: {failed_count}\n"
-        # Since we don't track fail list explicitly in a list, we might miss sending names.
-        # But this is better than fake success.
-    
-    report += f"- **处理耗时**: {duration:.1f}s"
-    send_wecom_notification(report)
+    market_label = f"({market_filter})" if market_filter else ""
+    try:
+        from backend.notification_templates import NotificationTemplates
+    except ImportError:
+        from notification_templates import NotificationTemplates
+
+    title, body = NotificationTemplates.render(
+        "admin_task_report",
+        task_title=f"AI Analysis {market_label}",
+        status=status,
+        total=len(targets),
+        success=success_count,
+        ai=ai_count,
+        rule=rule_count,
+        failed=len(targets) - success_count,
+        duration=round(duration, 1)
+    )
+    send_wecom_notification(title + body)
     
     # [REMOVED] Old broadcast notification
     # Individual users are now notified as their watchlists complete

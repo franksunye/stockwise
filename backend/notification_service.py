@@ -312,6 +312,27 @@ class NotificationManager:
                 "type": "validation_glory",
                 "related_symbols": e.get("related_symbols", [])
             }
+
+        # 4. Handle Prediction Updated (Service Level)
+        updates = [e for e in events if e["type"] == "prediction_updated"]
+        if updates:
+            # Aggregate: "HK Market updated" or "5 stocks updated"
+            market_names = {e.get("market", "CN") for e in updates} # distinct markets
+            m_str = "/".join(list(market_names)) + " 市场"
+            
+            title, body = NotificationTemplates.render(
+                "prediction_updated",
+                tier=user_tier,
+                market_name=m_str
+            )
+            
+            return {
+                "title": title,
+                "body": body,
+                "url": "/dashboard?utm_source=push&utm_medium=prediction_updated",
+                "type": "prediction_updated",
+                "related_symbols": [e["symbol"] for e in updates]
+            }
             
         return None
 
@@ -471,7 +492,24 @@ class NotificationManager:
                     
                 # Send Push
                 try:
-                    send_push_notification(uid, title, body, url=f"/dashboard/stock/{symbol}")
+                    log_id = f"price_{uuid.uuid4().hex[:12]}"
+                    send_push_notification(
+                        target_user_id=uid, 
+                        title=title, 
+                        body=body, 
+                        url=f"/dashboard/stock/{symbol}",
+                        tag="price_update"
+                    )
+                    
+                    # Log for audit trail
+                    self._log_to_db(log_id, uid, {
+                        "type": "price_update",
+                        "related_symbols": [symbol],
+                        "title": title,
+                        "body": body,
+                        "url": f"/dashboard/stock/{symbol}"
+                    })
+                    
                     self.stats["notifications_sent"] += 1
                 except Exception as e:
                     logger.error(f"Failed to push to {uid}: {e}")
