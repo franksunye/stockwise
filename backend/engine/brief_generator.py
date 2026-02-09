@@ -263,7 +263,7 @@ async def analyze_stock_context(
             signal=signal,
             confidence=conf_pct,
             close=technical_data.get('close'),
-            change_str=f"+{technical_data.get('change_percent', 0):.2f}%" if technical_data.get('change_percent', 0) >= 0 else f"{technical_data.get('change_percent', 0):.2f}%",
+            change_str=f"+{(technical_data.get('change_percent') or 0.0):.2f}%" if (technical_data.get('change_percent') or 0.0) >= 0 else f"{(technical_data.get('change_percent') or 0.0):.2f}%",
             levels=levels,
             news=news,
             deep_facts=deep_facts_str,
