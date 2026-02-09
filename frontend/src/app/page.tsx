@@ -87,11 +87,13 @@ export default function LandingPage() {
                whileHover={{ x: -20, rotateY: -10 }}
                className="absolute left-[5%] md:left-[15%] w-[45%] md:w-[25%] aspect-[9/19] bg-[#0A0A10] rounded-[30px] border border-white/10 shadow-2xl z-10 -rotate-12 origin-bottom-right hidden sm:flex items-center justify-center p-2"
             >
-               <div className="w-full h-full bg-[#050508] rounded-[22px] border border-white/5 flex flex-col items-center justify-center p-4 text-center">
-                  <div className="text-[10px] font-black italic text-slate-700 uppercase tracking-widest leading-relaxed">
-                    AI Analysis<br />Deep Dive<br />
-                    <span className="text-[8px] opacity-40 mt-2 block font-normal">Recommend: 390 x 844px</span>
-                  </div>
+               <div className="w-full h-full bg-[#050508] rounded-[22px] border border-white/5 overflow-hidden relative">
+                  <Image 
+                    src="/images/landing/analysis-depth.png"
+                    alt="AI Analysis Detail"
+                    fill
+                    className="object-cover"
+                  />
                </div>
             </motion.div>
 
@@ -100,11 +102,13 @@ export default function LandingPage() {
                whileHover={{ x: 20, rotateY: 10 }}
                className="absolute right-[5%] md:right-[15%] w-[45%] md:w-[25%] aspect-[9/19] bg-[#0A0A10] rounded-[30px] border border-white/10 shadow-2xl z-10 rotate-12 origin-bottom-left hidden sm:flex items-center justify-center p-2"
             >
-               <div className="w-full h-full bg-[#050508] rounded-[22px] border border-white/5 flex flex-col items-center justify-center p-4 text-center">
-                  <div className="text-[10px] font-black italic text-slate-700 uppercase tracking-widest leading-relaxed">
-                    Confidence<br />Circuit Breaker<br />
-                    <span className="text-[8px] opacity-40 mt-2 block font-normal">Recommend: 390 x 844px</span>
-                  </div>
+               <div className="w-full h-full bg-[#050508] rounded-[22px] border border-white/5 overflow-hidden relative">
+                  <Image 
+                    src="/images/landing/alert-popup.png"
+                    alt="Circuit Breaker Alert"
+                    fill
+                    className="object-cover"
+                  />
                </div>
             </motion.div>
 
@@ -113,14 +117,15 @@ export default function LandingPage() {
                whileHover={{ scale: 1.02 }}
                className="relative w-[70%] sm:w-[50%] md:w-[32%] aspect-[9/19] bg-[#1A1A25] rounded-[40px] border border-white/20 shadow-[0_0_100px_rgba(99,102,241,0.2)] z-30 flex items-center justify-center p-2 md:p-3"
             >
-               <div className="w-full h-full bg-[#050508] rounded-[30px] border border-white/10 flex flex-col items-center justify-center p-6 text-center overflow-hidden relative">
-                  <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-indigo-500/10 to-transparent" />
-                  <div className="text-sm font-black italic text-slate-500 uppercase tracking-[0.2em] relative z-10">
-                    Main<br />Dashboard<br />
-                    <span className="text-[10px] tracking-widest mt-4 block opacity-50 font-normal">390 x 844px</span>
-                  </div>
+               <div className="w-full h-full bg-[#050508] rounded-[30px] border border-white/10 overflow-hidden relative">
+                  <Image 
+                    src="/images/landing/main-dashboard.png"
+                    alt="Main Dashboard Preview"
+                    fill
+                    className="object-cover"
+                  />
                   {/* Mock Notch */}
-                  <div className="absolute top-4 left-1/2 -translate-x-1/2 w-20 h-5 bg-black rounded-full border border-white/5" />
+                  <div className="absolute top-4 left-1/2 -translate-x-1/2 w-20 h-5 bg-black rounded-full border border-white/5 z-20" />
                </div>
             </motion.div>
 
@@ -168,25 +173,27 @@ export default function LandingPage() {
               ))}
             </ul>
           </div>
-          <div className="glass-card aspect-square bg-[#0A0A10] rounded-[40px] flex items-center justify-center border border-white/5 relative p-8">
-             <div className="text-slate-800 font-black italic text-lg uppercase tracking-widest text-center select-none">
-                AI Prediction Card<br />Mockup Preview<br />
-                <span className="text-[10px] mt-4 block opacity-30 tracking-normal font-normal">Size: 600x600px</span>
-             </div>
-             {/* Abstract UI Elements */}
-             <div className="absolute inset-8 border border-white/[0.02] rounded-3xl" />
-          </div>
+           <div className="glass-card aspect-square bg-[#0A0A10] rounded-[40px] overflow-hidden border border-white/5 relative">
+              <Image 
+                src="/images/landing/prediction-card-detail.png"
+                alt="AI Prediction Detail"
+                fill
+                className="object-cover opacity-80 hover:opacity-100 transition-opacity duration-700"
+              />
+           </div>
         </section>
 
         {/* Feature 2: Confidence Breaker (Left Image, Right Text) */}
         <section className="pt-40 w-full grid md:grid-cols-2 gap-20 items-center text-left">
-          <div className="order-2 md:order-1 glass-card aspect-square bg-[#0A0A10] rounded-[40px] flex items-center justify-center border border-white/5 relative p-8 bg-gradient-to-br from-red-500/5 to-transparent">
-             <div className="text-slate-800 font-black italic text-lg uppercase tracking-widest text-center select-none">
-                Confidence Circuit<br />Breaker Visual<br />
-                <span className="text-[10px] mt-4 block opacity-30 tracking-normal font-normal">Size: 600x600px</span>
-             </div>
-             <ShieldCheck size={120} className="absolute opacity-[0.02] text-red-500" />
-          </div>
+           <div className="order-2 md:order-1 glass-card aspect-square bg-[#0A0A10] rounded-[40px] overflow-hidden border border-white/5 relative">
+              <Image 
+                src="/images/landing/circuit-breaker-logic.png"
+                alt="Circuit Breaker Logic"
+                fill
+                className="object-cover opacity-80 hover:opacity-100 transition-opacity duration-700"
+              />
+              <ShieldCheck size={120} className="absolute bottom-4 right-4 opacity-[0.1] text-red-500 pointer-events-none" />
+           </div>
           <div className="order-1 md:order-2 space-y-8">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] font-black uppercase tracking-[0.2em]">
                Safety System
