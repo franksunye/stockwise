@@ -192,7 +192,8 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
     try {
       const res = await fetch('/api/user/redeem', {
         method: 'POST',
-        body: JSON.stringify({ userId, code: redeemCode })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, code: redeemCode.trim().toUpperCase() })
       });
       const data = await res.json();
       if (data.success) {
@@ -401,36 +402,43 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                         </div>
                         {isSubscribed && (
                           <div className="bg-white/[0.02] border-t border-white/5 px-5 py-2">
-                            <button onClick={() => setShowNotificationSettings(!showNotificationSettings)} className="w-full flex items-center justify-between text-[10px] text-slate-500 hover:text-indigo-400 transition-colors uppercase font-bold tracking-widest">
+                            <button onClick={() => {
+                                setShowNotificationSettings(!showNotificationSettings);
+                                if (!showNotificationSettings) setShowReferralDetails(false);
+                            }} className="w-full flex items-center justify-between text-[10px] text-slate-500 hover:text-indigo-400 transition-colors uppercase font-bold tracking-widest">
                                 高级通知偏好
                                 <ChevronDown className={`w-3 h-3 transition-transform ${showNotificationSettings ? 'rotate-180' : ''}`} />
                             </button>
                             <AnimatePresence>
                               {showNotificationSettings && (
-                                <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                                <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
                                   <div className="mt-3 space-y-1.5 pb-2">
                                     {[
                                       { key: 'signal_flip', icon: ArrowLeftRight, label: '趋势反转', badge: '重要' },
                                       { key: 'morning_call', icon: Sun, label: '每日早报', badge: '08:30' },
                                       { key: 'validation_glory', icon: Trophy, label: '验证战报', badge: '胜率' },
                                       { key: 'prediction_updated', icon: Zap, label: '预测更新', badge: '分析完成' },
-                                      { key: 'daily_brief', icon: FileText, label: tier === 'pro' ? 'Pro 深度复盘' : '简报生成', badge: tier === 'pro' ? '★ 专属' : '17:30' },
+                                      { key: 'daily_brief', icon: FileText, label: tier === 'pro' ? 'Pro 深度复盘' : '简报生成', badge: tier === 'pro' ? '★ 专属' : '17:30', isPro: tier === 'pro' },
                                       { key: 'price_update', icon: Info, label: '实时行情', badge: '盘中推送' },
                                     ].map((type) => {
                                       const isEnabled = notificationSettings.types[type.key as keyof typeof notificationSettings.types]?.enabled ?? true;
+                                      const isPro = 'isPro' in type && type.isPro;
+                                      const IconComponent = type.icon;
                                       return (
-                                        <div key={type.key} className="flex items-center justify-between py-1.5">
+                                        <div key={type.key} className={`flex items-center justify-between py-1.5 ${isPro ? 'bg-amber-500/5 -mx-1 px-1 rounded-lg' : ''}`}>
                                           <div className="flex items-center gap-2.5 flex-1">
-                                            <div className="w-6 h-6 rounded-md bg-white/5 flex items-center justify-center"><type.icon className="w-3.5 h-3.5 text-indigo-400" /></div>
-                                            <span className="text-[11px] font-medium text-slate-200">{type.label}</span>
-                                            <span className="text-[9px] px-1.5 py-0.5 rounded bg-slate-800/60 text-slate-500 font-bold">{type.badge}</span>
+                                            <div className={`w-6 h-6 rounded-md flex items-center justify-center ${isPro ? 'bg-amber-500/20' : 'bg-white/5'}`}>
+                                                <IconComponent className={`w-3.5 h-3.5 ${isPro ? 'text-amber-400' : 'text-indigo-400'}`} />
+                                            </div>
+                                            <span className={`text-[11px] font-medium ${isPro ? 'text-amber-200' : 'text-slate-200'}`}>{type.label}</span>
+                                            <span className={`text-[9px] px-1.5 py-0.5 rounded ${isPro ? 'bg-amber-500/20 text-amber-400 font-black' : 'bg-slate-800/60 text-slate-500 font-bold'}`}>{type.badge}</span>
                                           </div>
                                           <button onClick={async () => {
                                             const newSettings = { ...notificationSettings, types: { ...notificationSettings.types, [type.key]: { enabled: !isEnabled } } };
                                             setNotificationSettings(newSettings);
                                             try { await fetch('/api/user/notification-settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId, settings: newSettings }) }); } catch (e) { console.error(e); }
                                           }} className={`w-9 h-5 rounded-full transition-all flex items-center px-0.5 ${isEnabled ? 'bg-indigo-600 justify-end' : 'bg-slate-700 justify-start'}`}>
-                                            <motion.div className="w-4 h-4 bg-white rounded-full shadow" layout />
+                                            <motion.div className="w-4 h-4 bg-white rounded-full shadow" layout transition={{ type: 'spring', stiffness: 500, damping: 30 }} />
                                           </button>
                                         </div>
                                       );
@@ -449,52 +457,64 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                       </div>
                     )}
 
-                    {/* Referral Section */}
+                    {/* Referral Section (Loot Logic UI) */}
                     {MEMBERSHIP_CONFIG.switches.enableReferralReward && (
-                      <div className="glass-card !bg-indigo-500/5 !border-indigo-500/10 p-5 rounded-[24px] overflow-hidden relative">
-                        <Share2 className="w-12 h-12 text-indigo-500/10 absolute -top-2 -right-2 rotate-12" />
-                        <div className="flex items-center justify-between mb-4 relative z-10">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center"><Share2 size={18} className="text-indigo-400" /></div>
-                            <div className="text-left">
-                              <p className="text-sm font-bold text-white italic">邀请好友领 Pro</p>
-                              <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest">+{MEMBERSHIP_CONFIG.referral.referrerDays} Days / 提成 {commissionRate * 100}%</p>
-                            </div>
+                      <div className="mt-3">
+                        <div className="glass-card !p-0 rounded-[24px] overflow-hidden relative group border-white/5 bg-white/[0.02]">
+                          <div className="relative z-10 px-5 py-4 pb-2">
+                             <div className="flex items-center justify-between mb-3">
+                                <h4 className="text-sm font-black italic text-white flex items-center gap-2">
+                                    邀请好友领 Pro
+                                    <span className="px-1.5 py-0.5 rounded bg-emerald-500 text-[8px] font-black uppercase not-italic">+{MEMBERSHIP_CONFIG.referral.referrerDays} Days</span>
+                                </h4>
+                                <Share2 className="w-8 h-8 text-indigo-500/10 absolute top-4 right-4" />
+                             </div>
+
+                             <button 
+                                onClick={() => {
+                                    const url = `${window.location.origin}/dashboard?invite=${userId}`;
+                                    navigator.clipboard.writeText(url);
+                                    setRedeemMsg({ type: 'success', text: '邀请链接已复制！' });
+                                    setTimeout(() => setRedeemMsg(null), 2000);
+                                }}
+                                className="w-full py-2.5 mb-2 rounded-xl bg-indigo-500/10 border border-indigo-500/20 hover:bg-indigo-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-xs font-bold text-indigo-300"
+                             >
+                                {(redeemMsg?.text === '邀请链接已复制！') ? <Check size={14} className="text-emerald-400" /> : <Share2 size={14} />}
+                                {(redeemMsg?.text === '邀请链接已复制！') ? '已复制' : '复制分享链接'}
+                             </button>
                           </div>
-                          <button onClick={() => setShowReferralDetails(!showReferralDetails)} className="p-2 text-slate-500"><ChevronRight className={`transition-transform ${showReferralDetails ? 'rotate-90' : ''}`} /></button>
-                        </div>
-                        <AnimatePresence>
-                          {showReferralDetails && (
-                            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-                              <div className="pt-4 border-t border-white/5 space-y-4">
-                                <div className="space-y-2 text-left">
-                                    <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">每邀请 1 位新用户入池，你与好友均可获 <span className="text-emerald-400 font-black">{MEMBERSHIP_CONFIG.referral.refereeDays} 天</span> Pro 会员。</p>
-                                    <div className="bg-black/40 border border-white/5 rounded-xl px-4 py-3 text-xs text-indigo-300 font-mono flex items-center justify-between">
-                                        ZISO-{userId?.slice(-6).toUpperCase()}
-                                        <button onClick={() => {
-                                            navigator.clipboard.writeText(`https://app.ziso.cc?invite=${userId}`);
-                                            setRedeemMsg({ type: 'success', text: '邀请链接已复制' });
-                                            setTimeout(() => setRedeemMsg(null), 2000);
-                                        }} className="text-indigo-500 font-black uppercase tracking-tighter hover:text-indigo-400 transition-colors flex items-center gap-1.5">
-                                          {redeemMsg?.text === '邀请链接已复制' ? <Check size={12} className="text-emerald-400" /> : null}
-                                          复制分享链接
-                                        </button>
+
+                          <div className="bg-white/[0.02] border-t border-white/5 px-5 py-2 relative z-10">
+                            <button onClick={() => {
+                                setShowReferralDetails(!showReferralDetails);
+                                if (!showReferralDetails) setShowNotificationSettings(false);
+                            }} className="w-full flex items-center justify-between text-[10px] text-slate-500 hover:text-indigo-400 transition-colors uppercase font-bold tracking-widest">
+                                查看奖励规则
+                                <ChevronDown className={`w-3 h-3 transition-transform ${showReferralDetails ? 'rotate-180' : ''}`} />
+                            </button>
+                            <AnimatePresence>
+                              {showReferralDetails && (
+                                <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
+                                  <div className="px-1 mt-2 mb-3">
+                                      <p className="text-[10px] text-slate-500 leading-relaxed text-left">
+                                        每邀请 1 位新用户入池，你与好友均可自动获得 <span className="text-emerald-400 font-bold">{MEMBERSHIP_CONFIG.referral.refereeDays} 天</span> Pro 会员权益。
+                                      </p>
+                                  </div>
+                                  <div className="grid grid-cols-2 gap-2 mt-2 mb-1">
+                                    <div className="bg-white/5 rounded-2xl p-3 border border-white/5 text-left">
+                                      <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-1">可提现余额</div>
+                                      <div className="text-lg font-black text-emerald-400">¥{referralBalance.toFixed(2)}</div>
                                     </div>
-                                </div>
-                                <div className="grid grid-cols-2 gap-2 text-left">
-                                  <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
-                                    <p className="text-[9px] text-slate-500 uppercase font-black tracking-widest mb-1">提现余额</p>
-                                    <p className="text-xl font-black text-emerald-400">¥{referralBalance.toFixed(2)}</p>
+                                    <div className="bg-white/5 rounded-2xl p-3 border border-white/5 text-left">
+                                      <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-1">累计收益 ({commissionRate * 100}%)</div>
+                                      <div className="text-lg font-black text-white">¥{totalEarned.toFixed(2)}</div>
+                                    </div>
                                   </div>
-                                  <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
-                                    <p className="text-[9px] text-slate-500 uppercase font-black tracking-widest mb-1">累计收益</p>
-                                    <p className="text-xl font-black text-white">¥{totalEarned.toFixed(2)}</p>
-                                  </div>
-                                </div>
-                              </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+                        </div>
                       </div>
                     )}
 
@@ -506,22 +526,41 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
 
                     {/* Footer Tools */}
                     <div className="pt-8 border-t border-white/5 text-center">
-                        <div className="flex items-center justify-between mb-3 px-1 text-left">
-                           <div className="flex items-center gap-2">
-                             <Key size={14} className="text-slate-500" />
-                             <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">使用激活码</span>
-                           </div>
-                           {redeemMsg && <span className={`text-[10px] font-black uppercase ${redeemMsg.type === 'success' ? 'text-emerald-400' : 'text-rose-400'}`}>{redeemMsg.text}</span>}
-                        </div>
-                        <div className="flex gap-2">
-                           <input type="text" value={redeemCode} onChange={(e) => setRedeemCode(e.target.value.toUpperCase())} placeholder="PRO-XXXX" className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-sm text-white uppercase font-mono focus:border-indigo-500 transition-colors" />
-                           <button onClick={handleRedeem} disabled={!redeemCode || redeeming} className="bg-indigo-600 px-5 rounded-xl text-white active:scale-95 transition-all">
-                              {redeeming ? <Loader2 className="animate-spin w-5 h-5" /> : <ArrowRight className="w-5 h-5" />}
-                           </button>
-                        </div>
+                        {/* 激活码兑换区域 (Beta) */}
+                        {MEMBERSHIP_CONFIG.switches.enableRedemption && tier === 'free' && (
+                          <div className="mb-10">
+                            <div className="flex items-center justify-between mb-3 px-1 text-left">
+                               <div className="flex items-center gap-2">
+                                 <Key size={14} className="text-slate-500" />
+                                 <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">使用激活码</span>
+                               </div>
+                               {redeemMsg && <span className={`text-[10px] font-black uppercase ${redeemMsg.type === 'success' ? 'text-emerald-400' : 'text-rose-400'}`}>{redeemMsg.text}</span>}
+                            </div>
+                            <div className="flex gap-2">
+                               <input type="text" value={redeemCode} onChange={(e) => setRedeemCode(e.target.value.toUpperCase())} placeholder="PRO-XXXX" className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-sm text-white uppercase font-mono focus:border-indigo-500 transition-colors" />
+                               <button onClick={handleRedeem} disabled={!redeemCode || redeeming} className="bg-indigo-600 px-5 rounded-xl text-white active:scale-95 transition-all">
+                                  {redeeming ? <Loader2 className="animate-spin w-5 h-5" /> : <ArrowRight className="w-5 h-5" />}
+                               </button>
+                            </div>
+                          </div>
+                        )}
                         
-                        <div className="mt-10">
-                          <button onClick={() => { localStorage.removeItem('STOCKWISE_HAS_ONBOARDED'); window.location.reload(); }} className="text-[9px] text-slate-700 hover:text-slate-500 font-bold uppercase tracking-[0.3em] transition-colors">重新进入激活引导</button>
+                        <div className="mt-4">
+                          <button 
+                            onClick={async () => { 
+                                localStorage.removeItem('STOCKWISE_HAS_ONBOARDED'); 
+                                try {
+                                    await fetch('/api/user/onboarding/reset', {
+                                        method: 'POST',
+                                        body: JSON.stringify({ userId })
+                                    });
+                                } catch (err) { console.error('Reset onboarding failed', err); }
+                                window.location.reload(); 
+                            }} 
+                            className="text-[9px] text-slate-700 hover:text-slate-500 font-bold uppercase tracking-[0.3em] transition-colors"
+                          >
+                            重新进入激活引导
+                          </button>
                           <div className="mt-4 opacity-30 text-[8px] text-slate-500 uppercase tracking-widest font-medium">ZISO AI v{pkg.version}</div>
                         </div>
                     </div>
