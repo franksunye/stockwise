@@ -47,14 +47,15 @@ export default function LandingPage() {
         >
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-black uppercase tracking-widest mb-4">
             <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
-            投研委员会联合推演 · JOINT RESEARCH
+            知其博弈 · 守其方寸
           </div>
           <h1 className="text-5xl md:text-7xl font-black tracking-tighter italic leading-tight">
             让交易 <br /> 
-            <span className="bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">更理性，更自主</span>
+            <span className="bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">回归理性的从容</span>
           </h1>
-          <p className="text-lg md:text-xl text-slate-400 font-medium max-w-xl mx-auto leading-relaxed">
-            不再孤军奋战。由 <span className="text-white">知守 · 专家委员会</span> 为您全线布防，用理性逻辑构建您的纪律避难所。
+          <p className="text-lg md:text-xl text-slate-400 font-medium max-w-2xl mx-auto leading-relaxed">
+            看透市场的复杂博弈，守住属于自己的那份从容方寸。 <br className="hidden md:block" />
+            不做波动的赌徒，只做 <span className="text-white">有纪律的知守者</span>。
           </p>
           <div className="pt-10 flex flex-col md:flex-row items-center justify-center gap-4">
             <Link 
@@ -63,7 +64,7 @@ export default function LandingPage() {
               rel="noopener noreferrer"
               className="px-10 py-5 rounded-3xl bg-indigo-500 text-white font-black italic text-lg shadow-[0_20px_40px_rgba(99,102,241,0.3)] hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
             >
-              邀请专家委员会协助我 <ChevronRight size={20} />
+              立即开启 AI 复盘 <ChevronRight size={20} />
             </Link>
             <Link href="/learn" className="px-10 py-5 rounded-3xl bg-white/5 border border-white/10 text-white font-black text-lg hover:bg-white/10 transition-all">
               阅读 101 手册
@@ -112,10 +113,30 @@ export default function LandingPage() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { name: "马库斯 (Marcus)", role: "首席观察员", desc: "拥有敏锐的市场嗅觉，负责捕捉波动中稍纵即逝的量价离群机会。", color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20", persona: "Marcus" },
-              { name: "奎因 (Quinn)", role: "策略精算师", desc: "痴迷于数据逻辑，通过多因子建模在海量随机波动中萃取确定性规律。", color: "text-purple-400", bg: "bg-purple-500/10", border: "border-purple-500/20", persona: "Quinn" },
-              { name: "诺拉 (Nora)", role: "首席情报官", desc: "擅长在新闻噪音中抽丝剥茧，为您过滤无效信息，直击事件背后的灵魂资讯。", color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20", persona: "Nora" },
-              { name: "塞拉 (Sylar)", role: "风控执行官", desc: "极度理性的铁腕派，负责监控系统准确率，执行冷酷的风险规避与底线保护。", color: "text-slate-400", bg: "bg-slate-500/10", border: "border-slate-500/20", persona: "Sylar" },
+              { 
+                name: "马库斯 (Marcus)", 
+                role: "首席观察员 · CHIEF OBSERVER", 
+                desc: "早年深耕于高频盘口监测。在马库斯的逻辑里，量价关系是市场唯一的真话。他负责穿透波动的假象，为您标记分时数据中主力留下的每一处“指纹”，确保决策永远锚定在事实之上。", 
+                color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20", persona: "Marcus" 
+              },
+              { 
+                name: "奎因 (Quinn)", 
+                role: "策略精算师 · STRATEGIST", 
+                desc: "在他的世界里没有“感觉”，只有“期望值”。奎因负责通过多周期算法过滤底噪，寻求风险收益比的极致最优解，确保委员会的每一份建议都站在概率的一侧。", 
+                color: "text-purple-400", bg: "bg-purple-500/10", border: "border-purple-500/20", persona: "Quinn" 
+              },
+              { 
+                name: "诺拉 (Nora)", 
+                role: "首席情报官 · CIO", 
+                desc: "善于在新闻噪音中抽丝剥茧，寻找被隐藏的“灵魂因子”。诺拉的任务是为算法注入宏观与行业的情报底噪，防止委员会在决策时陷入单纯的数据盲区。", 
+                color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20", persona: "Nora" 
+              },
+              { 
+                name: "塞拉 (Sylar)", 
+                role: "风控执行官 · CRO", 
+                desc: "委员会中最被“敬畏”的存在。塞拉从不关心利润，他只关心亏损。他负责冷酷复盘信号表现，并在任何可能导致非理性回撤的时刻，一票否决冲动决策。", 
+                color: "text-slate-400", bg: "bg-slate-500/10", border: "border-slate-500/20", persona: "Sylar" 
+              },
             ].map((agent, i) => (
               <motion.div 
                 key={i}
@@ -160,8 +181,8 @@ export default function LandingPage() {
             <div className="w-12 h-12 rounded-[20px] bg-purple-500/10 flex items-center justify-center mb-6">
               <ShieldCheck className="text-purple-400" />
             </div>
-            <h3 className="text-xl font-black italic mb-3">风控熔断</h3>
-            <p className="text-slate-500 text-sm leading-relaxed font-medium">当 AI 信心不足或指标混沌时，强制建议观望。不亏就是赚，本金优先。</p>
+            <h3 className="text-xl font-black italic mb-3">信心熔断</h3>
+            <p className="text-slate-500 text-sm leading-relaxed font-medium">拒绝情绪化博弈。当 AI 决策置信度低于 75% 时，系统将强制启动防御姿态输出观望建议，为您冷酷守住本金红线。</p>
           </div>
 
           <div className="glass-card p-8 text-left border-emerald-500/10 bg-emerald-500/[0.02]">
@@ -232,7 +253,7 @@ export default function LandingPage() {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-10 py-5 rounded-3xl bg-indigo-500 text-white font-black italic text-lg shadow-[0_20px_40px_rgba(99,102,241,0.3)] hover:scale-105 active:scale-95 transition-all"
           >
-            立刻获取专家委员会支持 <ChevronRight size={20} />
+            立即进入应用 <ChevronRight size={20} />
           </Link>
         </section>
       </main>
