@@ -8,7 +8,7 @@ import { pricingPlans } from '@/lib/pricing-data';
 
 
 interface Props {
-  onBack: () => void;
+  onBack?: () => void;
   currentTier: string;
 }
 
