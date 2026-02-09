@@ -241,30 +241,32 @@ export default function StockPoolPage() {
       {/* Background glow - conditionally render for non-iOS */}
       {!isIOS && <div className="fixed inset-0 opacity-[0.03] pointer-events-none bg-indigo-500 blur-[120px] scale-150" />}
 
-      {/* Solid/Stable Header Structure (Like Brief Page) */}
-      <header className="shrink-0 z-20 p-8 flex items-center justify-between bg-[#050508] border-b border-white/5">
-        <div className="flex items-center gap-4">
-          <Link href="/dashboard" className="p-2.5 rounded-full bg-white/5 border border-white/10 active:scale-90 transition-all">
-            <ArrowLeft className="w-5 h-5 text-slate-400" />
+      {/* Solid/Stable Header Structure (Centered Title) */}
+      <header className="shrink-0 z-20 px-6 py-4 flex items-center justify-between bg-[#050508] border-b border-white/5">
+        <div className="w-12">
+          <Link href="/dashboard" className="p-2 rounded-full hover:bg-white/5 active:scale-90 transition-all text-slate-400 flex items-center justify-center">
+            <ArrowLeft className="w-5 h-5" />
           </Link>
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] uppercase tracking-[0.4em] text-slate-500 font-bold">自选监控</span>
-            </div>
-            <h1 className="text-2xl font-black italic tracking-tighter text-white">
-              监控池 <span className="text-indigo-500 underline decoration-2 underline-offset-4" data-en="POOL">POOL</span>
-            </h1>
-          </div>
         </div>
-        <div className="flex items-center gap-3">
+        
+        <div className="flex-1 text-center">
+          <h1 className="text-xl font-black italic tracking-tighter text-white uppercase">
+            监控池 <span className="text-indigo-500 underline decoration-2 underline-offset-4" data-en="POOL">POOL</span>
+          </h1>
+        </div>
+
+        <div className="flex items-center gap-3 min-w-[3rem] justify-end">
           <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
             <div className="relative flex h-1.5 w-1.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-indigo-500"></span>
             </div>
-            <span className="text-[10px] font-medium text-slate-500 tracking-wide uppercase">15分钟 / 轮询</span>
+            <span className="text-[10px] font-medium text-slate-500 tracking-wide uppercase">实时同步</span>
           </div>
-          <button onClick={() => setShowAdd(!showAdd)} className={`p-3 rounded-2xl border transition-all active:scale-95 ${showAdd ? 'bg-indigo-500 border-indigo-400 text-white' : 'bg-white/5 border-white/10 text-indigo-400'}`}>
+          <button 
+            onClick={() => setShowAdd(!showAdd)} 
+            className={`p-2.5 rounded-xl border transition-all active:scale-95 ${showAdd ? 'bg-indigo-500 border-indigo-400 text-white' : 'bg-white/5 border-white/10 text-indigo-400'}`}
+          >
              <Plus className={`w-5 h-5 transition-transform duration-300 ${showAdd ? 'rotate-45' : ''}`} />
           </button>
         </div>
