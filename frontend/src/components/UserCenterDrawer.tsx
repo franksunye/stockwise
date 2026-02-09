@@ -271,7 +271,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
               </div>
               <div className="flex-1 text-center">
                 <h2 className="text-xl font-black italic tracking-tighter text-white uppercase mt-1">
-                  {showPricing ? '权限升级' : showIdentityCenter ? '账号信息' : '个人中心'}
+                  {showPricing ? '订阅方案' : showIdentityCenter ? '账号设置' : '个人中心'}
                 </h2>
               </div>
               <div className="w-10 flex justify-end">
@@ -366,7 +366,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                     {/* Nav Buttons */}
                     <div className="space-y-3">
                       <button onClick={() => setShowIdentityCenter(true)} className={`w-full py-4 px-5 rounded-[24px] border transition-all flex items-center justify-between group ${tier === 'pro' ? 'bg-amber-500/[0.03] border-amber-500/20 hover:border-amber-500/40 hover:bg-amber-500/[0.06]' : 'bg-white/5 border-white/5 hover:border-white/10'}`}>
-                        <span className={`text-sm font-bold ${tier === 'pro' ? 'text-amber-100' : 'text-white'} uppercase`}>账号信息</span>
+                        <span className={`text-sm font-bold ${tier === 'pro' ? 'text-amber-100' : 'text-white'} uppercase`}>账号设置</span>
                         <div className="flex items-center gap-3">
                             {userEmail && <span className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 text-xs font-bold border border-emerald-500/20"><ShieldCheck size={12} /> 已保护</span>}
                             {!userEmail && tier === 'pro' && <div className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />}
@@ -374,7 +374,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                         </div>
                       </button>
                       <button onClick={() => setShowPricing(true)} className={`w-full py-4 px-5 rounded-[24px] border transition-all flex items-center justify-between group ${tier === 'pro' ? 'bg-white/[0.02] border-white/5 hover:border-indigo-500/20' : 'bg-indigo-500/5 border-indigo-500/10 hover:border-indigo-500/20'}`}>
-                        <span className="text-sm font-bold text-white uppercase text-left">{tier === 'pro' ? '查看全球定价计划' : '解锁专业研发权益'}</span>
+                        <span className="text-sm font-bold text-white uppercase text-left">{tier === 'pro' ? '订阅方案' : '解锁 PRO 权益'}</span>
                         <ChevronRight size={14} className="text-slate-600 group-hover:text-white transition-colors" />
                       </button>
                       <Link href="/learn" onClick={onClose} className="w-full py-4 px-5 rounded-[24px] border border-white/5 bg-white/[0.02] hover:border-indigo-500/20 transition-all flex items-center justify-between group">
