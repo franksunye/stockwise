@@ -38,5 +38,9 @@ jobs:
           
           # Logic Control
           ENABLE_SMART_NOTIFICATIONS: "true"
+          
+          # Notification Secrets
+          WECOM_ROBOT_KEY: ${{ secrets.WECOM_ROBOT_KEY }}
+          ADMIN_MOBILES: ${{ secrets.ADMIN_MOBILES }}
         run: |
           python backend/scripts/daily_validation_check.py

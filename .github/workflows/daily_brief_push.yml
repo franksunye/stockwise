@@ -64,6 +64,10 @@ jobs:
           
           HUNYUAN_API_KEY: ${{ secrets.HUNYUAN_API_KEY }}
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          
+          # Notification Secrets
+          WECOM_ROBOT_KEY: ${{ secrets.WECOM_ROBOT_KEY }}
+          ADMIN_MOBILES: ${{ secrets.ADMIN_MOBILES }}
         run: |
           # 1. 生成每日简报并汇总
           SYMBOLS_ARG="${{ github.event.inputs.symbols != '' && format('--symbols {0}', github.event.inputs.symbols) || '' }}"

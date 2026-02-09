@@ -50,6 +50,10 @@ jobs:
           ENABLE_SMART_NOTIFICATIONS: "true"
           TARGET_DATE: ${{ github.event.inputs.date }}
           DRY_RUN: ${{ github.event.inputs.dry_run }}
+          
+          # Notification Secrets
+          WECOM_ROBOT_KEY: ${{ secrets.WECOM_ROBOT_KEY }}
+          ADMIN_MOBILES: ${{ secrets.ADMIN_MOBILES }}
         run: |
           ARGS=""
           if [ "$DRY_RUN" = "true" ]; then
