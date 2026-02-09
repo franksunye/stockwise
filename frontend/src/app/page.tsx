@@ -44,7 +44,7 @@ export default function LandingPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="space-y-6 max-w-3xl"
+          className="space-y-6 max-w-3xl mb-16"
         >
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-black uppercase tracking-widest mb-4">
             <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
@@ -73,28 +73,166 @@ export default function LandingPage() {
           </div>
         </motion.div>
 
+        {/* Product Preview - Triple Mobile Overlap for Mobile-First App */}
+        <motion.div 
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 1 }}
+          className="w-full max-w-5xl relative mt-20"
+        >
+          <div className="relative h-[500px] md:h-[700px] w-full flex items-center justify-center">
+            
+            {/* Left Phone - Analysis Depth */}
+            <motion.div 
+               whileHover={{ x: -20, rotateY: -10 }}
+               className="absolute left-[5%] md:left-[15%] w-[45%] md:w-[25%] aspect-[9/19] bg-[#0A0A10] rounded-[30px] border border-white/10 shadow-2xl z-10 -rotate-12 origin-bottom-right hidden sm:flex items-center justify-center p-2"
+            >
+               <div className="w-full h-full bg-[#050508] rounded-[22px] border border-white/5 flex flex-col items-center justify-center p-4 text-center">
+                  <div className="text-[10px] font-black italic text-slate-700 uppercase tracking-widest leading-relaxed">
+                    AI Analysis<br />Deep Dive<br />
+                    <span className="text-[8px] opacity-40 mt-2 block font-normal">Recommend: 390 x 844px</span>
+                  </div>
+               </div>
+            </motion.div>
 
-        {/* How It Works */}
-        <section className="pt-40 w-full max-w-4xl">
-          <h2 className="text-3xl font-black italic tracking-tighter text-center mb-16">
-            如何使用 <span className="text-indigo-500">3 步开始</span>
-          </h2>
-          <div className="grid md:grid-cols-3 gap-8 text-center">
-            <div className="space-y-4">
-              <div className="w-16 h-16 rounded-full bg-indigo-500/10 flex items-center justify-center mx-auto text-2xl font-black text-indigo-400">1</div>
-              <h3 className="font-bold text-lg">添加自选股</h3>
-              <p className="text-slate-500 text-sm">搜索并添加您关注的港股或 A 股到监控列表</p>
+            {/* Right Phone - Real-time Alert */}
+            <motion.div 
+               whileHover={{ x: 20, rotateY: 10 }}
+               className="absolute right-[5%] md:right-[15%] w-[45%] md:w-[25%] aspect-[9/19] bg-[#0A0A10] rounded-[30px] border border-white/10 shadow-2xl z-10 rotate-12 origin-bottom-left hidden sm:flex items-center justify-center p-2"
+            >
+               <div className="w-full h-full bg-[#050508] rounded-[22px] border border-white/5 flex flex-col items-center justify-center p-4 text-center">
+                  <div className="text-[10px] font-black italic text-slate-700 uppercase tracking-widest leading-relaxed">
+                    Confidence<br />Circuit Breaker<br />
+                    <span className="text-[8px] opacity-40 mt-2 block font-normal">Recommend: 390 x 844px</span>
+                  </div>
+               </div>
+            </motion.div>
+
+            {/* Center Phone - MAIN DASHBOARD */}
+            <motion.div 
+               whileHover={{ scale: 1.02 }}
+               className="relative w-[70%] sm:w-[50%] md:w-[32%] aspect-[9/19] bg-[#1A1A25] rounded-[40px] border border-white/20 shadow-[0_0_100px_rgba(99,102,241,0.2)] z-30 flex items-center justify-center p-2 md:p-3"
+            >
+               <div className="w-full h-full bg-[#050508] rounded-[30px] border border-white/10 flex flex-col items-center justify-center p-6 text-center overflow-hidden relative">
+                  <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-indigo-500/10 to-transparent" />
+                  <div className="text-sm font-black italic text-slate-500 uppercase tracking-[0.2em] relative z-10">
+                    Main<br />Dashboard<br />
+                    <span className="text-[10px] tracking-widest mt-4 block opacity-50 font-normal">390 x 844px</span>
+                  </div>
+                  {/* Mock Notch */}
+                  <div className="absolute top-4 left-1/2 -translate-x-1/2 w-20 h-5 bg-black rounded-full border border-white/5" />
+               </div>
+            </motion.div>
+
+            {/* Desktop-only: Extra stats card floating next to main phone */}
+            <div className="absolute top-[20%] right-[10%] z-40 hidden xl:block animate-bounce-slow">
+               <div className="glass-card p-5 border-emerald-500/20 bg-emerald-500/[0.02]">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                    <span className="text-[10px] font-black text-slate-400">WIN RATE VERIFIED</span>
+                  </div>
+                  <div className="text-xl font-black italic text-white">78.4%</div>
+               </div>
             </div>
-            <div className="space-y-4">
-              <div className="w-16 h-16 rounded-full bg-purple-500/10 flex items-center justify-center mx-auto text-2xl font-black text-purple-400">2</div>
-              <h3 className="font-bold text-lg">盘后 AI 复盘</h3>
-              <p className="text-slate-500 text-sm">每日收盘后，AI 自动分析并生成明日作战计划</p>
+          </div>
+          
+          {/* Decorative background glow */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] h-[60%] bg-indigo-600/10 blur-[120px] -z-10 rounded-full" />
+        </motion.div>
+
+        {/* Feature 1: The EOD Review (Right Image, Left Text) */}
+        <section className="pt-60 w-full grid md:grid-cols-2 gap-20 items-center text-left">
+          <div className="space-y-8">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em]">
+               Plan The Trade
             </div>
-            <div className="space-y-4">
-              <div className="w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto text-2xl font-black text-emerald-400">3</div>
-              <h3 className="font-bold text-lg">盘中触发提醒</h3>
-              <p className="text-slate-500 text-sm">当行情触发预设条件时，即时推送通知</p>
+            <h2 className="text-4xl md:text-5xl font-black italic tracking-tighter leading-tight uppercase">
+              在冷静时复盘 <br />
+              <span className="text-indigo-500">制定明日剧本</span>
+            </h2>
+            <p className="text-slate-400 font-medium leading-relaxed">
+              职业交易员的核心秘密不在于盘中的手感，而在于闭市后的功课。ZISO AI 在每日收盘后自动接入海量行情与新闻，为您生成多维度的决策逻辑。不提供随机预测，只提供可执行的博弈边界。
+            </p>
+            <ul className="space-y-4">
+              {[
+                "多周期趋势共振捕捉 (MA/RSI/MACD)",
+                "量价异动深度溯源",
+                "基于历史胜率的置信度评分"
+              ].map((item, i) => (
+                <li key={i} className="flex items-center gap-3 text-sm font-bold text-slate-300">
+                  <div className="w-5 h-5 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-500">
+                    <ChevronRight size={14} />
+                  </div>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="glass-card aspect-square bg-[#0A0A10] rounded-[40px] flex items-center justify-center border border-white/5 relative p-8">
+             <div className="text-slate-800 font-black italic text-lg uppercase tracking-widest text-center select-none">
+                AI Prediction Card<br />Mockup Preview<br />
+                <span className="text-[10px] mt-4 block opacity-30 tracking-normal font-normal">Size: 600x600px</span>
+             </div>
+             {/* Abstract UI Elements */}
+             <div className="absolute inset-8 border border-white/[0.02] rounded-3xl" />
+          </div>
+        </section>
+
+        {/* Feature 2: Confidence Breaker (Left Image, Right Text) */}
+        <section className="pt-40 w-full grid md:grid-cols-2 gap-20 items-center text-left">
+          <div className="order-2 md:order-1 glass-card aspect-square bg-[#0A0A10] rounded-[40px] flex items-center justify-center border border-white/5 relative p-8 bg-gradient-to-br from-red-500/5 to-transparent">
+             <div className="text-slate-800 font-black italic text-lg uppercase tracking-widest text-center select-none">
+                Confidence Circuit<br />Breaker Visual<br />
+                <span className="text-[10px] mt-4 block opacity-30 tracking-normal font-normal">Size: 600x600px</span>
+             </div>
+             <ShieldCheck size={120} className="absolute opacity-[0.02] text-red-500" />
+          </div>
+          <div className="order-1 md:order-2 space-y-8">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] font-black uppercase tracking-[0.2em]">
+               Safety System
             </div>
+            <h2 className="text-4xl md:text-5xl font-black italic tracking-tighter leading-tight uppercase">
+              即便在最疯狂的行情 <br />
+              <span className="text-red-500">也要恪守 75% 闸门</span>
+            </h2>
+            <p className="text-slate-400 font-medium leading-relaxed">
+              知其博弈，也要守其方寸。如果 AI 对于次日的逻辑推演置信度低于 75%，系统将冷酷通过“熔断指令”强制阻断所有看多/看空行为，建议持币观望。不亏损，是您在市场中长期生存并最终获胜的第一条铁律。
+            </p>
+            <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/5 space-y-4">
+               <div className="flex justify-between items-center text-xs font-black uppercase tracking-widest">
+                  <span className="text-slate-500 uppercase">AI Confidence Limit</span>
+                  <span className="text-red-500">Breaker Triggered</span>
+               </div>
+               <div className="h-3 w-full bg-white/5 rounded-full overflow-hidden">
+                  <div className="h-full w-[64%] bg-red-500/50" />
+               </div>
+               <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tighter">Current Signal: SIDE (Defense Mode Active)</p>
+            </div>
+          </div>
+        </section>
+
+        {/* How It Works - Re-styled as a summary flow */}
+        <section className="pt-60 w-full">
+           <div className="text-center mb-20">
+              <h2 className="text-4xl md:text-5xl font-black italic tracking-tighter uppercase">
+                 <span className="text-indigo-500 tracking-normal">3 步</span> 开启独立交易系统
+              </h2>
+           </div>
+          <div className="grid md:grid-cols-3 gap-12">
+            {[
+              { num: "01", title: "资产锁定", desc: "将您关注的标的加入知守列表，系统将立即开始 250 天历史数据的同步与建模。" },
+              { num: "02", title: "获取作战计划", desc: "每日收盘 30 分钟内，由委员会联合为您呈递包含具体支撑位、压力位与止损红线的作战简报。" },
+              { num: "03", title: "盘中纪律执行", desc: "不再被盘中的随机分时波动绑架。当行情触及昨晚设定的剧本时，委员会将即时唤醒您的理智执行。" }
+            ].map((step, i) => (
+              <div key={i} className="text-left space-y-6 relative group">
+                <div className="text-7xl font-black italic text-white/[0.03] group-hover:text-indigo-500/10 transition-colors absolute -top-10 -left-4">
+                  {step.num}
+                </div>
+                <h3 className="font-extrabold text-2xl italic relative z-10">{step.title}</h3>
+                <p className="text-slate-500 text-sm leading-relaxed font-medium relative z-10">{step.desc}</p>
+                <div className="w-12 h-1 bg-white/5 rounded-full group-hover:w-20 group-hover:bg-indigo-500/30 transition-all duration-500" />
+              </div>
+            ))}
           </div>
         </section>
 
@@ -108,7 +246,7 @@ export default function LandingPage() {
               由 <span className="text-indigo-500">知守 · 专家委员会</span> 驱动
             </h2>
             <p className="text-slate-500 font-medium max-w-2xl mx-auto">
-              伟大的交易决策源于多维度的视角冲突与共识。我们的专业委员会 24 小时待命，为您提供如同顶级私募机构般的专家级投研支持。
+              每一行建议背后，都是四位拥有独立算法偏好的“数字合伙人”相互冲突与妥协后的结果。这模拟了私募机构最严谨的决策评审流程。
             </p>
           </div>
 
@@ -142,7 +280,7 @@ export default function LandingPage() {
               <motion.div 
                 key={i}
                 whileHover={{ y: -5 }}
-                className={`glass-card p-6 border ${agent.border} ${agent.bg} relative overflow-hidden group`}
+                className={`glass-card p-6 border ${agent.border} ${agent.bg} relative overflow-hidden group min-h-[420px]`}
               >
                 <div className="flex flex-col items-center text-center space-y-4 relative z-10">
                   <div className="w-20 h-20 rounded-full bg-white/5 ring-1 ring-white/10 overflow-hidden relative mb-2 grayscale group-hover:grayscale-0 transition-all duration-500">
@@ -168,96 +306,61 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Feature Grid */}
-        <section id="features" className="pt-60 grid sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full">
-          <div className="glass-card p-8 text-left border-indigo-500/10 bg-indigo-500/[0.02]">
-            <div className="w-12 h-12 rounded-[20px] bg-indigo-500/10 flex items-center justify-center mb-6">
-              <Zap className="text-indigo-400" />
-            </div>
-            <h3 className="text-xl font-black italic mb-3">盘后规划</h3>
-            <p className="text-slate-500 text-sm leading-relaxed font-medium">市场收盘后，AI 自动整理当日得失，帮您在最冷静的时候制定明日作战计划。</p>
-          </div>
-          
-          <div className="glass-card p-8 text-left border-purple-500/10 bg-purple-500/[0.02]">
-            <div className="w-12 h-12 rounded-[20px] bg-purple-500/10 flex items-center justify-center mb-6">
-              <ShieldCheck className="text-purple-400" />
-            </div>
-            <h3 className="text-xl font-black italic mb-3">信心熔断</h3>
-            <p className="text-slate-500 text-sm leading-relaxed font-medium">拒绝情绪化博弈。当 AI 决策置信度低于 75% 时，系统将强制启动防御姿态输出观望建议，为您冷酷守住本金红线。</p>
-          </div>
-
-          <div className="glass-card p-8 text-left border-emerald-500/10 bg-emerald-500/[0.02]">
-            <div className="w-12 h-12 rounded-[20px] bg-emerald-500/10 flex items-center justify-center mb-6">
-              <BarChart3 className="text-emerald-400" />
-            </div>
-            <h3 className="text-xl font-black italic mb-3">盘中执行</h3>
-            <p className="text-slate-500 text-sm leading-relaxed font-medium">当行情触发昨晚设定的剧本时，推送提醒。让您像机器人一样冷静交易。</p>
-          </div>
-
-          <Link href="/learn" className="glass-card p-8 text-left border-amber-500/20 bg-amber-500/[0.03] hover:bg-amber-500/[0.06] transition-all group scale-100 hover:scale-[1.02] active:scale-95">
-            <div className="w-12 h-12 rounded-[20px] bg-amber-500/10 flex items-center justify-center mb-6 group-hover:bg-amber-500/20 transition-colors">
-              <BookOpen className="text-amber-400" />
-            </div>
-            <h3 className="text-xl font-black italic mb-3 flex items-center gap-2">
-              101 手册
-              <span className="text-[10px] not-italic font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-500 uppercase tracking-tighter">必读</span>
-            </h3>
-            <p className="text-slate-500 text-sm leading-relaxed font-medium group-hover:text-slate-400 transition-colors">不只是工具，更是心法。内置深度指南，涵盖心态、术法与工具，助您建立完整的理性投研体系。</p>
-          </Link>
-        </section>
-
-        {/* FAQ Section - Simplified */}
-        <section id="faq" className="py-40 w-full max-w-4xl space-y-12">
+        {/* FAQ Section */}
+        <section id="faq" className="py-60 w-full max-w-4xl space-y-12">
           <div className="text-center space-y-4">
-            <h2 className="text-3xl md:text-4xl font-black italic tracking-tighter">
-              常见问题 <span className="text-indigo-500">FAQ</span>
+            <h2 className="text-3xl md:text-4xl font-black italic tracking-tighter uppercase">
+              常见问题 <span className="text-indigo-500 uppercase">FAQ</span>
             </h2>
-            <p className="text-slate-400 font-medium">快速了解 ZISO AI</p>
+            <p className="text-slate-400 font-medium">深入认知 ZISO AI 的底层逻辑</p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-4">
-            <div className="glass-card p-6 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
-              <p className="text-white font-bold mb-2">ZISO AI 是什么？</p>
-              <p className="text-slate-400 text-sm">一款 AI 驱动的港股/A股决策辅助工具，帮助个人投资者做出更理性的交易决策。</p>
+            <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent text-left">
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter">ZISO AI 是什么？</p>
+              <p className="text-slate-400 text-sm leading-relaxed">一款由 AI 专家委员会驱动的港股/A股决策外脑，不提供“小道消息”，只提供可验证的“纪律参考”。</p>
             </div>
-            <div className="glass-card p-6 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
-              <p className="text-white font-bold mb-2">支持哪些市场？</p>
-              <p className="text-slate-400 text-sm">目前支持港股 (HK) 和 A 股 (CN) 市场。</p>
+            <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent text-left">
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter">AI 的判断准吗？</p>
+              <p className="text-slate-400 text-sm leading-relaxed">我们每日收盘后对昨日信号进行“全量核销”。历史胜率在个股档案中公开透明，准确率是 ZISO 的生命线。</p>
             </div>
-            <div className="glass-card p-6 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
-              <p className="text-white font-bold mb-2">AI 的判断准确吗？</p>
-              <p className="text-slate-400 text-sm">我们每日盘后自动验证 AI 预测准确率，历史胜率公开透明，可在个股页面查看。</p>
+            <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent text-left">
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter">为什么要设定 75% 门槛？</p>
+              <p className="text-slate-400 text-sm leading-relaxed">胜率不足 70% 的博弈在数学上是长期负期望的。知其白而守其黑，守住本金是我们对普通用户最大的价值。</p>
             </div>
-            <div className="glass-card p-6 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
-              <p className="text-white font-bold mb-2">为什么经常建议观望？</p>
-              <p className="text-slate-400 text-sm">当 AI 置信度低于 75% 时，系统会自动熔断，强制输出观望以保护您的本金。</p>
-            </div>
-            <div className="glass-card p-6 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
-              <p className="text-white font-bold mb-2">信号是怎么判定的？</p>
-              <p className="text-slate-400 text-sm">价格站上 MA20 → 做多；跌破 MA20 的 98% → 做空；RSI 在 45-55 震荡区 → 观望。</p>
-            </div>
-            <div className="glass-card p-6 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
-              <p className="text-white font-bold mb-2">免费使用吗？</p>
-              <p className="text-slate-400 text-sm">基础功能免费。PRO 用户可解锁更多自选股监控额度和高级功能。</p>
+            <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent text-left">
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter">支持所有股票吗？</p>
+              <p className="text-slate-400 text-sm leading-relaxed">支持香港联交所、上交所、深交所的所有主流标的。新股或成交极其低迷的标的由于缺乏锚定点，系统会自动降级。</p>
             </div>
           </div>
         </section>
 
         {/* CTA Banner */}
-        <section className="py-20 w-full max-w-3xl text-center space-y-8">
-          <h2 className="text-2xl md:text-3xl font-black italic tracking-tighter">
-            准备好让 <span className="text-indigo-500">知守委员会</span> 成为你的纪律合伙人了吗？
+        <section className="py-40 w-full max-w-4xl text-center space-y-10">
+          <h2 className="text-3xl md:text-5xl font-black italic tracking-tighter uppercase leading-tight">
+            准好让 <span className="text-indigo-500 uppercase">ZISO 委员会</span> <br className="hidden md:block" />
+            接管您的交易纪律吗？
           </h2>
-          <Link 
-            href="https://app.ziso.cc"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-10 py-5 rounded-3xl bg-indigo-500 text-white font-black italic text-lg shadow-[0_20px_40px_rgba(99,102,241,0.3)] hover:scale-105 active:scale-95 transition-all"
-          >
-            立即进入应用 <ChevronRight size={20} />
-          </Link>
+          <div className="flex flex-col md:flex-row items-center justify-center gap-6">
+            <Link 
+              href="https://app.ziso.cc"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-12 py-6 rounded-3xl bg-indigo-500 text-white font-black italic text-xl shadow-[0_20px_40px_rgba(99,102,241,0.3)] hover:scale-105 active:scale-95 transition-all flex items-center gap-3"
+            >
+              立即进入应用 <ChevronRight size={24} />
+            </Link>
+            <div className="text-left">
+               <div className="flex items-center gap-2 text-xs font-black uppercase text-slate-500">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  Free Trial Available
+               </div>
+               <div className="text-[10px] text-slate-600 font-bold uppercase tracking-widest mt-1">Join 2,000+ Disciplined Traders</div>
+            </div>
+          </div>
         </section>
       </main>
+
 
       {/* Footer */}
       <footer className="relative z-10 border-t border-white/5 py-20 px-8">
