@@ -92,7 +92,7 @@ def generate_morning_calls(dry_run=False, target_date=None):
             nm.queue_notification(user_id, notif_type, {
                 "stock_names": ", ".join(buy_signals[:3]),
                 "sentiment_snippet": sentiment_snippet,
-                "url": "/dashboard?brief=true&utm_source=push&utm_medium=morning_call",
+                "url": "/monitor?utm_source=push&utm_medium=morning_call",
                 "related_symbols": watchlist
             })
             sent_count += 1
