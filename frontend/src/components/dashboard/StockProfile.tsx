@@ -109,23 +109,21 @@ export function StockProfile({ stock, isOpen, onClose }: StockProfileProps) {
 
             <div className="h-full w-full p-8 pt-4 flex flex-col overflow-y-auto scrollbar-hide">
               <header className="flex items-center justify-between mb-8 shrink-0">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-[22px] bg-white/5 border border-white/10 flex items-center justify-center text-xl font-black italic text-indigo-500">
+                <div className="w-10">
+                  <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-xs font-black italic text-indigo-500">
                     {stock.symbol.slice(-2)}
                   </div>
-                  <div className="space-y-1">
-                    <h2 className="text-2xl font-black italic tracking-tighter text-white">
-                      {stock.name}
-                    </h2>
-                    <p className="text-[10px] text-slate-500 font-bold tracking-[0.2em] uppercase flex items-center gap-1.5">
-                      <span className="w-1 h-1 rounded-full bg-indigo-500" />
-                      个股详情 <span className="opacity-50">PROFILE</span>
-                    </p>
-                  </div>
                 </div>
-                <button onClick={onClose} className="p-2.5 rounded-full bg-white/5 border border-white/10 active:scale-90 transition-all">
-                  <CloseIcon className="w-5 h-5 text-slate-400" />
-                </button>
+                <div className="flex-1 text-center">
+                  <h2 className="text-xl font-black italic tracking-tighter text-white uppercase">
+                    {stock.name}
+                  </h2>
+                </div>
+                <div className="w-10 flex justify-end">
+                  <button onClick={onClose} className="p-2 rounded-full hover:bg-white/5 active:scale-90 transition-all">
+                    <CloseIcon className="w-5 h-5 text-slate-400" />
+                  </button>
+                </div>
               </header>
 
               <div className="grid grid-cols-2 gap-4 mb-8 shrink-0">
