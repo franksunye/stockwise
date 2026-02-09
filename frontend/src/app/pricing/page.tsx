@@ -172,7 +172,7 @@ function PricingContent() {
       <main className="relative z-10 max-w-7xl mx-auto px-8 pt-12 pb-40">
         <div className="text-center space-y-4 mb-20">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4">
-              Native Agentic Support
+              知其白 · 守其黑 | Native Agentic Support
           </div>
           <h1 className="text-4xl md:text-6xl font-black tracking-tighter italic leading-tight">
             选聘您的 <br /> 
@@ -433,7 +433,7 @@ function PricingContent() {
               height={32} 
               className="rounded-lg"
             />
-            <span className="text-sm font-black italic tracking-tighter">ZISO AI</span>
+            <span className="text-sm font-black italic tracking-tighter">ZISO AI | 知其白，守其黑</span>
           </Link>
           <p className="text-xs text-slate-600 font-bold uppercase tracking-widest">© 2026 ZISO AI TECHNOLOGY. ALL RIGHTS RESERVED.</p>
           <div className="flex gap-6 text-xs font-bold text-slate-500">

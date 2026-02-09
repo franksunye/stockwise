@@ -48,7 +48,7 @@ export default function LandingPage() {
         >
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-black uppercase tracking-widest mb-4">
             <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
-            知其博弈 · 守其方寸
+            知其白 · 守其黑 | 知其博弈 · 守其方寸
           </div>
           <h1 className="text-5xl md:text-7xl font-black tracking-tighter italic leading-tight">
             让交易 <br /> 
@@ -270,7 +270,7 @@ export default function LandingPage() {
               height={32} 
               className="rounded-lg"
             />
-            <span className="text-sm font-black italic tracking-tighter">ZISO AI</span>
+            <span className="text-sm font-black italic tracking-tighter">ZISO AI | 知其白，守其黑</span>
           </div>
           <p className="text-xs text-slate-600 font-bold uppercase tracking-widest">© 2026 ZISO AI TECHNOLOGY. ALL RIGHTS RESERVED.</p>
           <div className="flex gap-6 text-xs font-bold text-slate-500">

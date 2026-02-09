@@ -72,8 +72,8 @@ export default function AboutPage() {
             <div className="glass-card p-1 relative group">
               <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-[38px] blur-xl opacity-50 group-hover:opacity-100 transition-opacity" />
               <div className="bg-[#0a0a0f] rounded-[38px] p-8 relative z-10 space-y-4">
-                <div className="text-indigo-400 font-black italic text-xl">“知其不可而守其常。”</div>
-                <p className="text-slate-500 text-xs">这就是 ZISO AI 名称的由来 —— 在混沌的市场中，坚守那些经过验证的成功常识。</p>
+                <div className="text-indigo-400 font-black italic text-xl">“知其白，守其黑。”</div>
+                <p className="text-slate-500 text-xs">这就是 ZISO AI 名称的由来 —— 在光影流转的市场（白）中洞察先机，在深沉内敛的原则（黑）中恪守方寸。</p>
               </div>
             </div>
           </div>
@@ -144,7 +144,7 @@ export default function AboutPage() {
       <footer className="relative z-10 border-t border-white/5 py-20 px-8 text-center sm:text-left">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-10">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-black italic tracking-tighter uppercase">ZISO AI</span>
+            <span className="text-sm font-black italic tracking-tighter uppercase">ZISO AI | 知其白，守其黑</span>
           </div>
           <div className="flex flex-wrap justify-center gap-6 text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">
             <Link href="/" className="hover:text-white transition-colors">首页</Link>
