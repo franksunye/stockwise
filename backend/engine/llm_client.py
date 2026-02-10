@@ -59,22 +59,15 @@ class LLMClient:
             
         self.timeout = timeout or LLM_CONFIG.get("timeout", 120)
 
-        # 2. 从 LLM_CONFIG 获取该供应商的预设配置
-        prov_config = LLM_CONFIG.get(self.provider, {})
+        # 2. 从 LLM_CONFIG 获取基础配置
+        # 注意：现在大部分参数由 LLMRegistry 从数据库解析后直接传入
+        self.base_url = base_url or LLM_CONFIG.get("base_url")
+        self.api_key = api_key or LLM_CONFIG.get("api_key") or ""
+        self.model = model or LLM_CONFIG.get("model")
         
-        # 3. 按照优先级赋值: 显式传入 > 供应商特定配置 > 全局配置
-        self.base_url = base_url or prov_config.get("base_url") or LLM_CONFIG.get("base_url")
-        self.api_key = api_key or prov_config.get("api_key") or LLM_CONFIG.get("api_key") or ""
-        self.model = model or prov_config.get("model") or LLM_CONFIG.get("model")
-        
-        # 4. 模型名称兜底 (如果上述链路均未获取到模型)
-        if not self.model:
-            from backend.config import LLM_PROVIDER_REGISTRY
-            self.model = LLM_PROVIDER_REGISTRY.get(self.provider, {}).get("default_model", "gpt-3.5-turbo")
-
-        # 5. 自动注册供应商限流器 (目前仅针对腾讯混元)
+        # 3. 自动注册供应商限流器 (目前主要针对腾讯混元)
         if self.provider == "hunyuan" and "hunyuan" not in self._rate_limiters:
-            qps = prov_config.get("qps_limit", 2.0)
+            qps = LLM_CONFIG.get("hunyuan_qps", 2.0)
             self._rate_limiters["hunyuan"] = AsyncRateLimiter(qps)
 
         self.timeout = timeout

@@ -90,77 +90,21 @@ SYNC_CONFIG = {
     "daily_workers": int(os.getenv("SYNC_DAILY_WORKERS", "5")),
 }
 
-# 4. LLM 配置
+# 4. LLM 配置 (Unified & DB-Driven)
 # -----------------------------------------------------------------------------
-# LLM Provider Registry (Centralized knowledge of providers)
+# 生产环境的模型路由和配置已全部移至数据库表 `prediction_models`。
+# 如需管理模型（启用/暂停/切换），请直接操作数据库或使用 Admin UI。
+# 这里的 LLM_CONFIG 仅保留全局基础参数和本地测试用的环境变量加载。
 # -----------------------------------------------------------------------------
-LLM_PROVIDER_REGISTRY = {
-    "deepseek": {
-        "base_url": "https://api.deepseek.com/v1",
-        "default_model": "deepseek-chat",
-    },
-    "gemini": {
-        "default_model": "gemini-pro",
-    },
-    "gemini_local": {
-        "base_url": "http://127.0.0.1:8045",
-        "default_model": "gemini-3-flash",
-    },
-    "hunyuan": {
-        "base_url": "https://api.hunyuan.cloud.tencent.com/v1",
-        "default_model": "hunyuan-lite",
-        "qps_limit": 2.0
-    },
-    "aliyun": {
-        "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
-        "default_model": "deepseek-v3.2-exp",
-    },
-    "openai": {
-        "base_url": "http://127.0.0.1:8045/v1",
-        "default_model": "gpt-3.5-turbo",
-    }
-}
-
 LLM_CONFIG = {
     "api_key": os.getenv("LLM_API_KEY"),
     "base_url": os.getenv("LLM_BASE_URL"),
     "model": os.getenv("LLM_MODEL"),
-    "timeout": int(os.getenv("LLM_TIMEOUT", "60")),
+    "timeout": int(os.getenv("LLM_TIMEOUT", "120")),
     "provider": os.getenv("LLM_PROVIDER", "openai"),
     
-    # NOTE: Production model routing is managed by LLMRegistry (DB-driven).
-    # These blocks below are FALLBACK configs for LLMClient direct usage only.
-    # To add/modify/switch models, update the `prediction_models` DB table.
-    "deepseek": {
-        "api_key": os.getenv("DEEPSEEK_API_KEY"),
-        "base_url": os.getenv("DEEPSEEK_BASE_URL") or LLM_PROVIDER_REGISTRY["deepseek"]["base_url"],
-        "model": os.getenv("DEEPSEEK_MODEL") or LLM_PROVIDER_REGISTRY["deepseek"]["default_model"],
-    },
-    "gemini": {
-        "api_key": os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY"),
-        "model": os.getenv("GEMINI_MODEL") or LLM_PROVIDER_REGISTRY["gemini"]["default_model"],
-    },
-    "gemini_local": {
-        "api_key": os.getenv("GEMINI_LOCAL_API_KEY") or os.getenv("LLM_API_KEY"),
-        "base_url": os.getenv("GEMINI_LOCAL_BASE_URL") or LLM_PROVIDER_REGISTRY["gemini_local"]["base_url"],
-        "model": os.getenv("GEMINI_LOCAL_MODEL") or LLM_PROVIDER_REGISTRY["gemini_local"]["default_model"],
-    },
-    "hunyuan": {
-        "api_key": os.getenv("HUNYUAN_API_KEY"),
-        "base_url": os.getenv("HUNYUAN_BASE_URL") or LLM_PROVIDER_REGISTRY["hunyuan"]["base_url"],
-        "model": os.getenv("HUNYUAN_MODEL") or LLM_PROVIDER_REGISTRY["hunyuan"]["default_model"],
-        "qps_limit": float(os.getenv("HUNYUAN_QPS_LIMIT", "2.0")),
-    },
-    "aliyun": {
-        "api_key": os.getenv("ALIYUN_API_KEY"),
-        "base_url": os.getenv("ALIYUN_BASE_URL") or LLM_PROVIDER_REGISTRY["aliyun"]["base_url"],
-        "model": os.getenv("ALIYUN_MODEL") or LLM_PROVIDER_REGISTRY["aliyun"]["default_model"],
-    },
-    "openai": {
-        "api_key": os.getenv("OPENAI_API_KEY") or os.getenv("LLM_API_KEY"),
-        "base_url": os.getenv("OPENAI_BASE_URL") or os.getenv("LLM_BASE_URL") or LLM_PROVIDER_REGISTRY["openai"]["base_url"],
-        "model": os.getenv("OPENAI_MODEL") or os.getenv("LLM_MODEL") or LLM_PROVIDER_REGISTRY["openai"]["default_model"],
-    }
+    # 基础限流配置 (通过环境变量微调)
+    "hunyuan_qps": float(os.getenv("HUNYUAN_QPS_LIMIT", "2.0")),
 }
 
 # 5. 时区与时间
