@@ -113,7 +113,7 @@ LLM_PROVIDER_REGISTRY = {
     },
     "aliyun": {
         "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
-        "default_model": "deepseek-v3",
+        "default_model": "deepseek-v3.2-exp",
     },
     "openai": {
         "base_url": "http://127.0.0.1:8045/v1",
@@ -153,6 +153,11 @@ LLM_CONFIG = {
         "api_key": os.getenv("ALIYUN_API_KEY"),
         "base_url": os.getenv("ALIYUN_BASE_URL") or LLM_PROVIDER_REGISTRY["aliyun"]["base_url"],
         "model": os.getenv("ALIYUN_MODEL") or LLM_PROVIDER_REGISTRY["aliyun"]["default_model"],
+    },
+    "qwen": {
+        "api_key": os.getenv("QWEN_API_KEY"),
+        "base_url": os.getenv("QWEN_VS_URL") or LLM_PROVIDER_REGISTRY["aliyun"]["base_url"],
+        "model": os.getenv("QWEN_MODEL") or LLM_PROVIDER_REGISTRY["aliyun"]["default_model"],
     },
     "gemini_local": {
         "api_key": os.getenv("GEMINI_LOCAL_API_KEY") or os.getenv("LLM_API_KEY"),
