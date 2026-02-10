@@ -439,6 +439,7 @@ def init_db():
                 provider TEXT NOT NULL,
                 is_active BOOLEAN DEFAULT 1,
                 priority INTEGER DEFAULT 0,
+                roles TEXT,
                 config_json TEXT,
                 capabilities_json TEXT,
                 created_at TIMESTAMP DEFAULT (datetime('now', '+8 hours'))
@@ -606,6 +607,9 @@ def init_db():
         # Prediction Table Migrations
         add_column_if_missing('ai_predictions_v2', 'validation_data', 'TEXT')
         add_column_if_missing('ai_predictions_v2', 'max_perf_in_window', 'REAL')
+
+        # LLM Registry: Add roles column for unified model routing
+        add_column_if_missing('prediction_models', 'roles', 'TEXT')
 
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_task_logs_date_agent ON task_logs(date, agent_id)")
         

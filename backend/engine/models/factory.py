@@ -72,7 +72,12 @@ class ModelFactory:
         conn = get_connection()
         cursor = conn.cursor()
         try:
-            cursor.execute("SELECT model_id FROM prediction_models WHERE is_active = 1 ORDER BY priority DESC")
+            cursor.execute("""
+                SELECT model_id FROM prediction_models 
+                WHERE is_active = 1 
+                  AND (roles LIKE '%"prediction"%' OR roles IS NULL)
+                ORDER BY priority DESC
+            """)
             rows = cursor.fetchall()
         finally:
             conn.close()

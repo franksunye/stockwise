@@ -128,7 +128,9 @@ LLM_CONFIG = {
     "timeout": int(os.getenv("LLM_TIMEOUT", "60")),
     "provider": os.getenv("LLM_PROVIDER", "openai"),
     
-    # 供应商特定配置 (从 Registry 获取保底值)
+    # NOTE: Production model routing is managed by LLMRegistry (DB-driven).
+    # These blocks below are FALLBACK configs for LLMClient direct usage only.
+    # To add/modify/switch models, update the `prediction_models` DB table.
     "deepseek": {
         "api_key": os.getenv("DEEPSEEK_API_KEY"),
         "base_url": os.getenv("DEEPSEEK_BASE_URL") or LLM_PROVIDER_REGISTRY["deepseek"]["base_url"],
@@ -139,7 +141,7 @@ LLM_CONFIG = {
         "model": os.getenv("GEMINI_MODEL") or LLM_PROVIDER_REGISTRY["gemini"]["default_model"],
     },
     "gemini_local": {
-        "api_key": os.getenv("GEMINI_LOCAL_API_KEY"),
+        "api_key": os.getenv("GEMINI_LOCAL_API_KEY") or os.getenv("LLM_API_KEY"),
         "base_url": os.getenv("GEMINI_LOCAL_BASE_URL") or LLM_PROVIDER_REGISTRY["gemini_local"]["base_url"],
         "model": os.getenv("GEMINI_LOCAL_MODEL") or LLM_PROVIDER_REGISTRY["gemini_local"]["default_model"],
     },
@@ -153,16 +155,6 @@ LLM_CONFIG = {
         "api_key": os.getenv("ALIYUN_API_KEY"),
         "base_url": os.getenv("ALIYUN_BASE_URL") or LLM_PROVIDER_REGISTRY["aliyun"]["base_url"],
         "model": os.getenv("ALIYUN_MODEL") or LLM_PROVIDER_REGISTRY["aliyun"]["default_model"],
-    },
-    "qwen": {
-        "api_key": os.getenv("QWEN_API_KEY"),
-        "base_url": os.getenv("QWEN_VS_URL") or LLM_PROVIDER_REGISTRY["aliyun"]["base_url"],
-        "model": os.getenv("QWEN_MODEL") or LLM_PROVIDER_REGISTRY["aliyun"]["default_model"],
-    },
-    "gemini_local": {
-        "api_key": os.getenv("GEMINI_LOCAL_API_KEY") or os.getenv("LLM_API_KEY"),
-        "base_url": os.getenv("GEMINI_LOCAL_BASE_URL") or LLM_PROVIDER_REGISTRY["gemini_local"]["base_url"],
-        "model": os.getenv("GEMINI_LOCAL_MODEL") or LLM_PROVIDER_REGISTRY["gemini_local"]["default_model"],
     },
     "openai": {
         "api_key": os.getenv("OPENAI_API_KEY") or os.getenv("LLM_API_KEY"),
