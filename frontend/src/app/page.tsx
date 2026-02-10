@@ -1,12 +1,15 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { ShieldCheck, BarChart3, ChevronRight, Zap, BookOpen } from 'lucide-react';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ShieldCheck, BarChart3, ChevronRight, Zap, BookOpen, Menu, X } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import Multiavatar from '@/components/Multiavatar';
 
 export default function LandingPage() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-[#050508] text-white overflow-x-hidden font-sans">
       {/* 动态背景 */}
@@ -36,7 +39,55 @@ export default function LandingPage() {
           <Link href="#faq" className="hover:text-white transition-colors">FAQ</Link>
           <Link href="https://app.ziso.cc" target="_blank" rel="noopener noreferrer" className="px-5 py-2.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-white">进入应用</Link>
         </div>
+        {/* Mobile Hamburger Button */}
+        <button
+          className="md:hidden p-2 rounded-xl bg-white/5 border border-white/10 text-white"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label="Toggle menu"
+        >
+          {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+        </button>
       </nav>
+
+      {/* Mobile Menu Overlay */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-40 bg-[#050508]/98 backdrop-blur-xl flex flex-col items-center justify-center gap-6 md:hidden"
+          >
+            {[
+              { href: "#features", label: "功能" },
+              { href: "/learn", label: "101 手册" },
+              { href: "/about", label: "关于" },
+              { href: "/pricing", label: "价格" },
+              { href: "/support", label: "支持" },
+              { href: "#faq", label: "FAQ" },
+            ].map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-2xl font-black italic tracking-tighter text-slate-300 hover:text-white transition-colors"
+              >
+                {item.label}
+              </Link>
+            ))}
+            <Link
+              href="https://app.ziso.cc"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setMobileMenuOpen(false)}
+              className="mt-4 px-10 py-4 rounded-3xl bg-indigo-500 text-white font-black italic text-lg shadow-[0_20px_40px_rgba(99,102,241,0.3)] flex items-center gap-2"
+            >
+              进入应用 <ChevronRight size={20} />
+            </Link>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Hero Section */}
       <main className="relative z-10 max-w-7xl mx-auto px-8 pt-12 pb-40 flex flex-col items-center text-center">
@@ -278,7 +329,7 @@ export default function LandingPage() {
               <motion.div 
                 key={i}
                 whileHover={{ y: -5 }}
-                className={`glass-card p-6 border ${agent.border} ${agent.bg} relative overflow-hidden group min-h-[420px]`}
+                className={`glass-card p-6 border ${agent.border} ${agent.bg} relative overflow-hidden group lg:min-h-[420px]`}
               >
                 <div className="flex flex-col items-center text-center space-y-4 relative z-10">
                   <div className="w-20 h-20 rounded-full bg-white/5 ring-1 ring-white/10 overflow-hidden relative mb-2 grayscale group-hover:grayscale-0 transition-all duration-500">
@@ -353,7 +404,6 @@ export default function LandingPage() {
                   <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                   Free Trial Available
                </div>
-               <div className="text-[10px] text-slate-600 font-bold uppercase tracking-widest mt-1">Join 2,000+ Disciplined Traders</div>
             </div>
           </div>
         </section>
@@ -374,7 +424,7 @@ export default function LandingPage() {
             <span className="text-sm font-black italic tracking-tighter">ZISO AI | 知其白，守其黑</span>
           </div>
           <p className="text-xs text-slate-600 font-bold uppercase tracking-widest">© 2026 ZISO AI TECHNOLOGY. ALL RIGHTS RESERVED.</p>
-          <div className="flex gap-6 text-xs font-bold text-slate-500">
+          <div className="flex flex-wrap justify-center gap-x-6 gap-y-3 text-xs font-bold text-slate-500">
             <Link href="/learn" className="hover:text-white transition-colors">101 手册</Link>
             <Link href="/status" className="hover:text-white transition-colors">系统状态</Link>
             <Link href="/support" className="hover:text-white transition-colors">支持中心</Link>
