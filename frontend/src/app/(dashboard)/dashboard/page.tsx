@@ -264,11 +264,14 @@ function DashboardContent() {
         targetDate={selectedTactics?.prediction?.target_date || ''}
       />
 
-      <StockProfile 
-        stock={profileStock}
-        isOpen={!!profileStock}
-        onClose={() => setProfileStock(null)}
-      />
+      <AnimatePresence>
+        {profileStock && (
+          <StockProfile 
+            stock={profileStock}
+            onClose={() => setProfileStock(null)}
+          />
+        )}
+      </AnimatePresence>
 
       <UserCenterDrawer 
         isOpen={userCenterOpen}
