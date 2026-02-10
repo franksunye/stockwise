@@ -129,16 +129,7 @@ export default function LandingPage() {
                </div>
             </motion.div>
 
-            {/* Desktop-only: Extra stats card floating next to main phone */}
-            <div className="absolute top-[20%] right-[10%] z-40 hidden xl:block animate-bounce-slow">
-               <div className="glass-card p-5 border-emerald-500/20 bg-emerald-500/[0.02]">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                    <span className="text-[10px] font-black text-slate-400">WIN RATE VERIFIED</span>
-                  </div>
-                  <div className="text-xl font-black italic text-white">78.4%</div>
-               </div>
-            </div>
+
           </div>
           
           {/* Decorative background glow */}
