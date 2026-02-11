@@ -136,17 +136,14 @@ export async function POST(request: Request) {
                     const settings = typeof settingsJson === 'string' ? JSON.parse(settingsJson) : settingsJson;
                     // 全局开关
                     if (settings.enabled === false) {
-                        console.log(`[Notify] User ${sub.user_id} has notifications disabled globally, skipping`);
                         return { status: 'skipped', id: sub.id, reason: 'user_disabled_all' };
                     }
                     // 类型开关
                     const typeSettings = settings.types?.[notifTypeKey];
                     if (typeSettings?.enabled === false) {
-                        console.log(`[Notify] User ${sub.user_id} has '${notifTypeKey}' notifications disabled, skipping`);
                         return { status: 'skipped', id: sub.id, reason: 'user_disabled_type' };
                     }
                 } catch (e) {
-                    console.warn(`[Notify] Failed to parse settings for ${sub.user_id}:`, e);
                     // 解析失败时继续发送
                 }
             }
@@ -161,29 +158,97 @@ export async function POST(request: Request) {
 
             try {
                 await webpush.sendNotification(pushConfig, payload);
-                return { status: 'fulfilled', id: sub.id };
+                return { status: 'fulfilled', id: sub.id, userId: sub.user_id };
             } catch (error: unknown) {
                 const pushError = error as { statusCode?: number };
                 console.error(`Error sending push to ${sub.id}:`, error);
 
                 // 如果是 410 (Gone)，说明订阅失效，删除之
                 if (pushError.statusCode === 410 || pushError.statusCode === 404) {
-                    console.log(`Subscription ${sub.id} expired/gone. Marking for deletion...`);
                     return { status: 'rejected', id: sub.id, reason: 'expired' };
                 }
                 return { status: 'rejected', id: sub.id, error };
             }
         });
 
-        const results = await Promise.all(promises);
-        const successCount = results.filter(r => r.status === 'fulfilled').length;
-        const expiredIds = results
-            .filter((r): r is { status: 'rejected'; id: string; reason: string } =>
-                r.status === 'rejected' && 'reason' in r && r.reason === 'expired'
-            )
-            .map(r => r.id);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const results = await Promise.all(promises) as any[]; // Cast to any to access custom props
+        const successCount = results.filter((r: any) => r.status === 'fulfilled').length;
 
-        // 4. 清理失效订阅 (异步)
+        // Collect successful user IDs for logging (deduplicated)
+        const successfulUserIds = new Set<string>();
+        results.forEach((r: any) => {
+            if (r.status === 'fulfilled' && r.userId) {
+                successfulUserIds.add(r.userId);
+            }
+        });
+
+        // 5. Log notifications to DB for history
+        if (successfulUserIds.size > 0) {
+            const logOps: any[] = [];
+            const timestamp = new Date().toISOString();
+            // Note: DB defaults to 'now', +8 hours, but consistent JS time is safer if we want exact sync
+
+            for (const uid of successfulUserIds) {
+                const logId = `notif_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+                logOps.push({
+                    sql: `INSERT INTO notification_logs (id, user_id, type, related_symbols, title, body, url, sent_at, channel) 
+                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'push')`,
+                    args: [
+                        logId,
+                        uid,
+                        notifTypeKey,
+                        related_symbol || null,
+                        title,
+                        msgBody,
+                        url || '/dashboard',
+                        timestamp
+                    ]
+                });
+            }
+
+            try {
+                if (strategy === 'cloud') {
+                    if ((client as any).batch) {
+                        await (client as any).batch(logOps);
+                    } else {
+                        // Fallback sequential
+                        for (const op of logOps) {
+                            await (client as Client).execute(op);
+                        }
+                    }
+                } else {
+                    const db = client as Database.Database; // Client is already fresh or needs reopen? 
+                    // Note: `client` variable was opened at start of function.
+                    // Local DB might be closed if we closed it inside `else` blocks above? 
+                    // Let's re-check code flow.
+                    // Above: `db.close()` was called in `else` blocks for querying subscriptions.
+                    // So we need a new connection or handle specifically.
+
+                    // Actually, the previous blocks closed `db`. We must get a new client for logging.
+                    const logDb = getDbClient() as Database.Database;
+                    const logStmt = logDb.prepare(`INSERT INTO notification_logs (id, user_id, type, related_symbols, title, body, url, sent_at, channel) 
+                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'push')`);
+
+                    const transaction = logDb.transaction((ops) => {
+                        for (const op of ops) {
+                            logStmt.run(...op.args);
+                        }
+                    });
+                    transaction(logOps);
+                    logDb.close();
+                }
+                console.log(`✅ Logged ${successfulUserIds.size} notifications.`);
+            } catch (logErr) {
+                console.error('Failed to insert notification logs:', logErr);
+            }
+        }
+
+        const expiredIds = results
+            .filter((r: any) => r.status === 'rejected' && r.reason === 'expired')
+            .map((r: any) => r.id);
+
+        // 6. 清理失效订阅 (异步)
         if (expiredIds.length > 0) {
             // Re-open DB or use a new client instance
             const cleanupClient = getDbClient();
