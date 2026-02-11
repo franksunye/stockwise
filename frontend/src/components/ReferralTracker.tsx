@@ -10,26 +10,34 @@ function ReferralTrackerContent() {
   useEffect(() => {
     const invite = searchParams.get('invite');
     if (invite) {
-      // Check if we already have a referrer stored (First-click attribution)
-      if (!localStorage.getItem('STOCKWISE_REFERRED_BY')) {
-          // Case 1: Standard User ID
-          if (invite.startsWith('user_')) {
-              localStorage.setItem('STOCKWISE_REFERRED_BY', invite);
-              console.log('Referral caught (ID):', invite);
-          } 
-          // Case 2: Vanity Alias (e.g. "VIP888")
-          else {
-              // Valid aliases should be reasonably short to avoid DOS
-              if (invite.length > 50) return;
-              
-              resolveReferralCode(invite).then(data => {
-                  if (data?.success && data.userId) {
-                      localStorage.setItem('STOCKWISE_REFERRED_BY', data.userId);
-                      console.log('Referral resolved (Alias):', invite, '->', data.userId);
-                  }
-              });
-          }
-      }
+      // 归因逻辑
+      const handleAttribution = async () => {
+        // Check if we already have a referrer stored (First-click attribution)
+        if (!localStorage.getItem('STOCKWISE_REFERRED_BY')) {
+            // Case 1: Standard User ID
+            if (invite.startsWith('user_')) {
+                localStorage.setItem('STOCKWISE_REFERRED_BY', invite);
+                console.log('Referral caught (ID):', invite);
+            } 
+            // Case 2: Vanity Alias (e.g. "VIP888")
+            else {
+                if (invite.length > 50) return;
+                const data = await resolveReferralCode(invite);
+                if (data?.success && data.userId) {
+                    localStorage.setItem('STOCKWISE_REFERRED_BY', data.userId);
+                    console.log('Referral resolved (Alias):', invite, '->', data.userId);
+                }
+            }
+        }
+        
+        // 极致美化：捕获完成后立即清理 URL 参数
+        // 我们使用原生的 replaceState，这样不会触发 Next.js 的路由变化，体验最平滑
+        const url = new URL(window.location.href);
+        url.searchParams.delete('invite');
+        window.history.replaceState({}, '', url.pathname + url.search);
+      };
+
+      handleAttribution();
     }
   }, [searchParams]);
 
