@@ -484,9 +484,12 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
 
                              <button 
                                 onClick={() => {
+                                    const base = window.location.hostname.includes('ziso.cc') 
+                                        ? 'https://ziso.cc' 
+                                        : window.location.origin;
                                     const url = referralAlias 
-                                        ? `${window.location.origin}/v/${referralAlias}` 
-                                        : `${window.location.origin}/v/${userId}`;
+                                        ? `${base}/v/${referralAlias}` 
+                                        : `${base}/v/${userId}`;
                                     navigator.clipboard.writeText(url);
                                     setRedeemMsg({ type: 'success', text: '邀请链接已复制！' });
                                     setTimeout(() => setRedeemMsg(null), 2000);
