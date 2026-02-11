@@ -22,26 +22,34 @@ export default function ReferralGateway() {
     }
 
     async function handleAttribution() {
+      let inviteId: string | null = null;
       try {
         console.log(`🚀 ZISO Attribution Gateway: Resolving ${code}...`);
         
         // 1. Is it a direct ID? (Fallback support)
         if (code.startsWith('user_')) {
-            localStorage.setItem('STOCKWISE_REFERRED_BY', code);
+            inviteId = code;
         } else {
             // 2. Resolve Vanity Alias
             const data = await resolveReferralCode(code);
             if (data?.success && data.userId) {
-                localStorage.setItem('STOCKWISE_REFERRED_BY', data.userId);
-                console.log('✅ Referral attributed:', data.userId);
+                inviteId = data.userId;
+                console.log('✅ Referral attributed:', inviteId);
             }
         }
       } catch (err) {
         console.error('Attribution error:', err);
       } finally {
-        // 3. Silent Redirect to Dashboard
-        // We use replace to keep the history clean
-        router.replace('/dashboard');
+        // 3. Jump to the App Subdomain with the resolved ID
+        const base = window.location.hostname.includes('ziso.cc') 
+            ? 'https://app.ziso.cc' 
+            : window.location.origin;
+        
+        const target = inviteId 
+            ? `${base}/dashboard?invite=${inviteId}` 
+            : `${base}/dashboard`;
+            
+        window.location.href = target;
       }
     }
 
