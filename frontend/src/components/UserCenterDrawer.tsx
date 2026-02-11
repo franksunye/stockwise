@@ -34,6 +34,10 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
   const totalEarned = profile?.totalEarned || 0;
   const commissionRate = profile?.commissionRate || 0.1;
   const userEmail = profile?.email || null;
+  const isChannel = profile?.isChannel || false;
+  const referralAlias = profile?.referralAlias || null;
+  const referralCount = profile?.referralCount || 0;
+  const recentTransactions = profile?.recentTransactions || [];
   
   // UI States
   const [redeemCode, setRedeemCode] = useState('');
@@ -477,9 +481,18 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                           <div className="relative z-10 px-5 py-4 pb-2">
                              <div className="flex items-center justify-between mb-3">
                                 <h4 className="text-sm font-black italic text-white flex items-center gap-2">
-                                    邀请好友领 Pro
-                                    <span className="px-1.5 py-0.5 rounded bg-emerald-500 text-[8px] font-black uppercase not-italic">+{MEMBERSHIP_CONFIG.referral.referrerDays} Days</span>
+                                    {isChannel ? (referralAlias || '渠道合伙人') : '邀请好友领 Pro'}
+                                    {isChannel ? (
+                                        <span className="px-1.5 py-0.5 rounded bg-amber-500 text-[8px] font-black uppercase not-italic text-black">渠道</span>
+                                    ) : (
+                                        <span className="px-1.5 py-0.5 rounded bg-emerald-500 text-[8px] font-black uppercase not-italic">+{MEMBERSHIP_CONFIG.referral.referrerDays} Days</span>
+                                    )}
                                 </h4>
+                                {referralCount > 0 && (
+                                    <span className="px-2 py-0.5 rounded-full bg-indigo-500/20 text-[10px] font-black text-indigo-300">
+                                        已邀请 {referralCount} 人
+                                    </span>
+                                )}
                                 <Share2 className="w-8 h-8 text-indigo-500/10 absolute top-4 right-4" />
                              </div>
 
@@ -502,27 +515,61 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                 setShowReferralDetails(!showReferralDetails);
                                 if (!showReferralDetails) setShowNotificationSettings(false);
                             }} className="w-full flex items-center justify-between text-[10px] text-slate-500 hover:text-indigo-400 transition-colors uppercase font-bold tracking-widest">
-                                查看奖励规则
+                                {isChannel ? '渠道分润详情' : '查看奖励规则'}
                                 <ChevronDown className={`w-3 h-3 transition-transform ${showReferralDetails ? 'rotate-180' : ''}`} />
                             </button>
                             <AnimatePresence>
                               {showReferralDetails && (
                                 <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
-                                  <div className="px-1 mt-2 mb-3">
-                                      <p className="text-[10px] text-slate-500 leading-relaxed text-left">
-                                        每邀请 1 位新用户入池，你与好友均可自动获得 <span className="text-emerald-400 font-bold">{MEMBERSHIP_CONFIG.referral.refereeDays} 天</span> Pro 会员权益。
-                                      </p>
-                                  </div>
+                                  {/* Rules for general users */}
+                                  {!isChannel && (
+                                    <div className="px-1 mt-2 mb-3">
+                                        <p className="text-[10px] text-slate-500 leading-relaxed text-left">
+                                          每邀请 1 位新用户入池，你与好友均可自动获得 <span className="text-emerald-400 font-bold">{MEMBERSHIP_CONFIG.referral.refereeDays} 天</span> Pro 会员权益。
+                                        </p>
+                                    </div>
+                                  )}
+
+                                  {/* Earnings Dashboard (shown for all, enhanced for channels) */}
                                   <div className="grid grid-cols-2 gap-2 mt-2 mb-1">
-                                    <div className="bg-white/5 rounded-2xl p-3 border border-white/5 text-left">
-                                      <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-1">可提现余额</div>
-                                      <div className="text-lg font-black text-emerald-400">¥{referralBalance.toFixed(2)}</div>
+                                    <div className={`rounded-2xl p-3 border text-left ${isChannel ? 'bg-amber-500/5 border-amber-500/10' : 'bg-white/5 border-white/5'}`}>
+                                      <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-1">{isChannel ? '分润余额' : '可提现余额'}</div>
+                                      <div className={`text-lg font-black ${isChannel ? 'text-amber-400' : 'text-emerald-400'}`}>¥{referralBalance.toFixed(2)}</div>
                                     </div>
                                     <div className="bg-white/5 rounded-2xl p-3 border border-white/5 text-left">
-                                      <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-1">累计收益 ({commissionRate * 100}%)</div>
+                                      <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-1">累计收益 ({(commissionRate * 100).toFixed(0)}%)</div>
                                       <div className="text-lg font-black text-white">¥{totalEarned.toFixed(2)}</div>
                                     </div>
                                   </div>
+
+                                  {/* Channel-specific: Transaction History */}
+                                  {isChannel && recentTransactions.length > 0 && (
+                                    <div className="mt-3 mb-1">
+                                      <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-2 px-1">最近交易</div>
+                                      <div className="space-y-1 max-h-[160px] overflow-y-auto">
+                                        {recentTransactions.map((tx, i) => (
+                                          <div key={i} className="flex items-center justify-between py-1.5 px-2 rounded-lg bg-white/[0.02]">
+                                            <div className="flex items-center gap-2">
+                                              <div className={`w-5 h-5 rounded-md flex items-center justify-center ${tx.type === 'commission' ? 'bg-amber-500/20' : 'bg-emerald-500/20'}`}>
+                                                {tx.type === 'commission' ? <Zap className="w-3 h-3 text-amber-400" /> : <Check className="w-3 h-3 text-emerald-400" />}
+                                              </div>
+                                              <span className="text-[10px] text-slate-400 truncate max-w-[120px]">{tx.note || tx.type}</span>
+                                            </div>
+                                            <span className={`text-[11px] font-bold ${tx.type === 'commission' ? 'text-amber-400' : 'text-emerald-400'}`}>+¥{tx.amount.toFixed(2)}</span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* Channel stats summary */}
+                                  {isChannel && (
+                                    <div className="mt-2 mb-1 px-1">
+                                      <p className="text-[10px] text-slate-600 leading-relaxed text-left">
+                                        渠道佣金比例 <span className="text-amber-400 font-bold">{(commissionRate * 100).toFixed(0)}%</span> · 已推荐 <span className="text-white font-bold">{referralCount}</span> 人
+                                      </p>
+                                    </div>
+                                  )}
                                 </motion.div>
                               )}
                             </AnimatePresence>

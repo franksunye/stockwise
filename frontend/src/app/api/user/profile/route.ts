@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getDbClient } from '@/lib/db';
 import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
+import { sendInternalNotification } from '@/lib/server-notify';
 
 export async function POST(request: Request) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -67,9 +68,29 @@ export async function POST(request: Request) {
                                 sql: "UPDATE users SET subscription_tier = 'pro', subscription_expires_at = ? WHERE user_id = ?",
                                 args: [newExpiry, referredBy]
                             });
+
+                            // A. Record transaction
+                            const txId = `tx_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+                            await db.execute({
+                                sql: "INSERT INTO referral_transactions (id, referrer_id, referred_id, type, amount, status, created_at, note) VALUES (?, ?, ?, 'reward', 0, 'completed', ?, ?)",
+                                args: [txId, referredBy, userId, new Date().toISOString(), `+${MEMBERSHIP_CONFIG.referral.referrerDays}天 PRO (邀请奖励)`]
+                            });
                         } else {
                             db.prepare("UPDATE users SET subscription_tier = 'pro', subscription_expires_at = ? WHERE user_id = ?").run(newExpiry, referredBy);
+
+                            // A. Record transaction
+                            const txId = `tx_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+                            db.prepare("INSERT INTO referral_transactions (id, referrer_id, referred_id, type, amount, status, created_at, note) VALUES (?, ?, ?, 'reward', 0, 'completed', ?, ?)").run(txId, referredBy, userId, new Date().toISOString(), `+${MEMBERSHIP_CONFIG.referral.referrerDays}天 PRO (邀请奖励)`);
                         }
+
+                        // B. Send Notification
+                        sendInternalNotification({
+                            target_user_id: referredBy,
+                            title: '🎁 邀请奖励已到账',
+                            body: `你的好友已加入，+${MEMBERSHIP_CONFIG.referral.referrerDays}天 PRO 会员已存入你的账户！`,
+                            url: '/dashboard',
+                            tag: 'referral_reward'
+                        }).catch((e: unknown) => console.error('Failed to send referral notification:', e));
                     }
                 } catch (referErr) {
                     console.error('Referrer reward failed:', referErr);
@@ -242,6 +263,34 @@ export async function POST(request: Request) {
             console.error('Watchlist count error:', countErr);
         }
 
+        // 5. Get referral stats (invite count + recent earnings)
+        let referralCount = 0;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let recentTransactions: any[] = [];
+        try {
+            if (isCloud) {
+                const refCountRes = await db.execute({
+                    sql: "SELECT COUNT(*) as count FROM users WHERE referred_by = ?",
+                    args: [userId]
+                });
+                referralCount = Number(refCountRes.rows[0]?.count || 0);
+
+                const txRes = await db.execute({
+                    sql: "SELECT type, amount, status, created_at, note FROM referral_transactions WHERE referrer_id = ? ORDER BY created_at DESC LIMIT 20",
+                    args: [userId]
+                });
+                recentTransactions = txRes.rows || [];
+            } else {
+                const refCountRow = db.prepare("SELECT COUNT(*) as count FROM users WHERE referred_by = ?").get(userId) as { count: number } | undefined;
+                referralCount = refCountRow?.count || 0;
+                recentTransactions = db.prepare("SELECT type, amount, status, created_at, note FROM referral_transactions WHERE referrer_id = ? ORDER BY created_at DESC LIMIT 20").all(userId);
+            }
+        } catch (refErr) {
+            console.error('Referral stats error:', refErr);
+        }
+
+        const isChannel = user.custom_commission_rate != null;
+
         return NextResponse.json({
             userId: user.user_id,
             tier: isExpired ? 'free' : (user.subscription_tier || 'free'),
@@ -251,10 +300,15 @@ export async function POST(request: Request) {
             email: user.email,
             referralBalance: user.referral_balance || 0,
             totalEarned: user.total_earned || 0,
-
             commissionRate: user.custom_commission_rate ?? MEMBERSHIP_CONFIG.referral.defaultCommissionRate,
             hasStripeCustomer: !!user.stripe_customer_id,
-            isNewUser: !!user.is_new_user_flag // We need to set this flag during creation
+            isNewUser: !!user.is_new_user_flag, // We need to set this flag during creation
+
+            // Referral & Channel data
+            isChannel,
+            referralAlias: user.referral_alias || null,
+            referralCount,
+            recentTransactions,
         });
 
     } catch (error: unknown) {

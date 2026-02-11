@@ -394,6 +394,20 @@ def init_db():
         """)
         cursor.execute("CREATE TABLE IF NOT EXISTS user_watchlist (user_id TEXT NOT NULL, symbol TEXT NOT NULL, added_at TIMESTAMP DEFAULT (datetime('now', '+8 hours')), PRIMARY KEY (user_id, symbol))")
         cursor.execute("CREATE TABLE IF NOT EXISTS invitation_codes (code TEXT PRIMARY KEY, type TEXT NOT NULL, duration_days INTEGER DEFAULT 30, is_used BOOLEAN DEFAULT 0, used_by_user_id TEXT, used_at TIMESTAMP, created_at TIMESTAMP DEFAULT (datetime('now', '+8 hours')))")
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS referral_transactions (
+                id TEXT PRIMARY KEY,
+                referrer_id TEXT NOT NULL,
+                referred_id TEXT NOT NULL,
+                type TEXT NOT NULL,
+                amount REAL NOT NULL,
+                status TEXT NOT NULL,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                processed_at DATETIME,
+                note TEXT
+            )
+        """)
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_referral_tx_referrer ON referral_transactions(referrer_id, created_at)")
 
         # 4. AI & Traces
         # cursor.execute("CREATE TABLE IF NOT EXISTS ai_predictions ...") - DEPRECATED

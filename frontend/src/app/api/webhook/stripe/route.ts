@@ -3,6 +3,8 @@ import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { getDbClient } from '@/lib/db';
+import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
+import { sendInternalNotification } from '@/lib/server-notify';
 
 export async function POST(req: Request) {
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
@@ -93,7 +95,87 @@ export async function POST(req: Request) {
                     console.error('❌ Database update failed:', dbErr);
                 }
 
-                if ('close' in db && typeof db.close === 'function') (db as any).close();
+                // 💰 Commission Logic: If the paying user was referred, allocate commission
+                try {
+                    const cloudDb = db as unknown as { execute: (q: any) => Promise<any>, batch?: (stmts: any[]) => Promise<any> };
+                    const localDb = db as unknown as { prepare: (q: string) => any };
+
+                    // Get user's referrer
+                    let payingUser;
+                    if (isCloud) {
+                        const userRes = await cloudDb.execute({
+                            sql: "SELECT referred_by FROM users WHERE user_id = ?",
+                            args: [userId]
+                        });
+                        payingUser = userRes.rows[0];
+                    } else {
+                        payingUser = localDb.prepare("SELECT referred_by FROM users WHERE user_id = ?").get(userId);
+                    }
+
+                    if (payingUser?.referred_by) {
+                        const referrerId = payingUser.referred_by;
+
+                        // Get referrer's commission rate
+                        let referrer;
+                        if (isCloud) {
+                            const refRes = await cloudDb.execute({
+                                sql: "SELECT custom_commission_rate FROM users WHERE user_id = ?",
+                                args: [referrerId]
+                            });
+                            referrer = refRes.rows[0];
+                        } else {
+                            referrer = localDb.prepare("SELECT custom_commission_rate FROM users WHERE user_id = ?").get(referrerId);
+                        }
+
+                        if (referrer) {
+                            const commissionRate = referrer.custom_commission_rate ?? MEMBERSHIP_CONFIG.referral.defaultCommissionRate;
+                            // session.amount_total is in cents
+                            const paymentAmount = (session.amount_total || 0) / 100;
+                            const commissionAmount = paymentAmount * commissionRate;
+
+                            if (commissionAmount > 0) {
+                                const txId = `tx_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+                                const now = new Date().toISOString();
+
+                                const commissionOps = [
+                                    {
+                                        sql: `INSERT INTO referral_transactions (id, referrer_id, referred_id, type, amount, status, created_at, note) 
+                                              VALUES (?, ?, ?, 'commission', ?, 'converted', ?, ?)`,
+                                        args: [txId, referrerId, userId, commissionAmount, now, `Stripe payment ${session.id}`]
+                                    },
+                                    {
+                                        sql: "UPDATE users SET referral_balance = referral_balance + ?, total_earned = total_earned + ? WHERE user_id = ?",
+                                        args: [commissionAmount, commissionAmount, referrerId]
+                                    }
+                                ];
+
+
+                                if (isCloud && cloudDb.batch) {
+                                    await cloudDb.batch(commissionOps);
+                                } else {
+                                    for (const op of commissionOps) {
+                                        localDb.prepare(op.sql).run(...op.args);
+                                    }
+                                }
+                                console.log(`💰 Commission allocated: ¥${commissionAmount.toFixed(2)} (${commissionRate * 100}%) to referrer ${referrerId}`);
+
+                                // C. Send Notification
+                                sendInternalNotification({
+                                    target_user_id: referrerId,
+                                    title: '💰 分润已入账',
+                                    body: `你的推荐用户已付费，伙伴礼金 ¥${commissionAmount.toFixed(2)} 已入账！`,
+                                    url: '/dashboard',
+                                    tag: 'commission_reward'
+                                }).catch((e: unknown) => console.error('Failed to send commission notification:', e));
+                            }
+                        }
+                    }
+                } catch (commErr) {
+                    // Non-fatal: commission failure should not break the webhook
+                    console.error('⚠️ Commission allocation failed (non-fatal):', commErr);
+                }
+
+                if ('close' in db && typeof (db as any).close === 'function') (db as any).close();
                 break;
             }
 

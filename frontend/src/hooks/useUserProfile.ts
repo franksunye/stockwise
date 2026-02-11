@@ -8,6 +8,14 @@ const PROFILE_CACHE_KEY = 'stockwise_user_profile_v1';
 
 export type Tier = 'free' | 'pro';
 
+export interface ReferralTransaction {
+    type: string;
+    amount: number;
+    status: string;
+    created_at: string;
+    note: string | null;
+}
+
 export interface UserProfile {
     userId: string;
     tier: Tier;
@@ -19,6 +27,11 @@ export interface UserProfile {
     commissionRate?: number;
     hasOnboarded?: boolean;
     hasStripeCustomer?: boolean;
+    // Referral & Channel
+    isChannel?: boolean;
+    referralAlias?: string | null;
+    referralCount?: number;
+    recentTransactions?: ReferralTransaction[];
 }
 
 export function useUserProfile() {
@@ -76,7 +89,12 @@ export function useUserProfile() {
                     totalEarned: data.totalEarned,
                     commissionRate: data.commissionRate,
                     hasOnboarded: data.hasOnboarded,
-                    hasStripeCustomer: data.hasStripeCustomer
+                    hasStripeCustomer: data.hasStripeCustomer,
+                    // Referral & Channel
+                    isChannel: data.isChannel,
+                    referralAlias: data.referralAlias,
+                    referralCount: data.referralCount,
+                    recentTransactions: data.recentTransactions,
                 };
 
                 setProfile(newProfile);

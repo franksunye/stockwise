@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getDbClient } from '@/lib/db';
 import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
+import { sendInternalNotification } from '@/lib/server-notify';
 
 /**
  * POST /api/user/pay-success
@@ -51,6 +52,7 @@ export async function POST(request: Request) {
         ];
 
         // 3. 处理分润逻辑 (Commission Calculation)
+        let commissionAmount = 0;
         if (user.referred_by) {
             const referrerId = user.referred_by;
 
@@ -69,7 +71,7 @@ export async function POST(request: Request) {
             if (referrer) {
                 // 计算比例：优先使用自定义比例，否则使用全局默认 10%
                 const commissionRate = referrer.custom_commission_rate ?? MEMBERSHIP_CONFIG.referral.defaultCommissionRate;
-                const commissionAmount = amount * commissionRate;
+                commissionAmount = amount * commissionRate;
                 const txId = `tx_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 
                 // 准备记账操作
@@ -101,7 +103,20 @@ export async function POST(request: Request) {
                 }
             });
             transaction();
+            // Don't close here if we need it later, but we've used it for all SQLs
             db.close();
+        }
+
+        // 5. 发送通知 (异步)
+        if (user.referred_by && commissionAmount > 0) {
+            const referrerId = user.referred_by;
+            sendInternalNotification({
+                target_user_id: referrerId,
+                title: '💰 分润已入账',
+                body: `你的推荐用户已付费，伙伴礼金 ¥${commissionAmount.toFixed(2)} 已入账！`,
+                url: '/dashboard',
+                tag: 'commission_reward'
+            }).catch((e: unknown) => console.error('Failed to send commission notification:', e));
         }
 
         return NextResponse.json({
