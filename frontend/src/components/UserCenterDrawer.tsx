@@ -6,7 +6,6 @@ import {
   Check, RefreshCw, Key, Bell, ChevronDown, ArrowLeftRight, Sun, 
   Trophy, FileText, ChevronRight, Mail, HelpCircle, BookOpen, Info 
 } from 'lucide-react';
-import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { getCurrentUser, restoreUserIdentity } from '@/lib/user';
 import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
@@ -16,6 +15,7 @@ import { IdentityPassport } from '@/components/IdentityPassport';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { UserPricingView } from './UserPricingView';
 import { SupportCenterView } from './SupportCenterView';
+import { LearnCenterView } from './LearnCenterView';
 import pkg from '../../package.json';
 
 interface Props {
@@ -55,6 +55,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
   const [showIdentityCenter, setShowIdentityCenter] = useState(false);
   const [showPricing, setShowPricing] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
+  const [showLearn, setShowLearn] = useState(false);
   const [isLinkingEmail, setIsLinkingEmail] = useState(false);
   const [tempEmail, setTempEmail] = useState('');
 
@@ -78,6 +79,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
       setShowPricing(false);
       setShowIdentityCenter(false);
       setShowSupport(false);
+      setShowLearn(false);
       setShowNotificationSettings(false);
       setShowReferralDetails(false);
     }
@@ -250,7 +252,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
 
           <motion.div 
             initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
-            drag={!showPricing && !showSupport ? "y" : false}
+            drag={!showPricing && !showSupport && !showLearn ? "y" : false}
             dragConstraints={{ top: 0, bottom: 0 }}
             dragElastic={{ top: 0.1, bottom: 0.6 }}
             onDragEnd={(_, info) => { if (info.offset.y > 150) onClose(); }}
@@ -266,15 +268,15 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
             {/* Navigation Header */}
             <header className="shrink-0 z-20 px-6 py-4 flex items-center justify-between border-b border-white/5 bg-[#0a0a0f]/80 backdrop-blur-xl">
               <div className="w-10">
-                {(showIdentityCenter || showPricing || showSupport) && (
-                  <button onClick={() => { setShowPricing(false); setShowIdentityCenter(false); setShowSupport(false); }} className="p-2 rounded-full hover:bg-white/5 active:scale-90 transition-all text-slate-400">
+                {(showIdentityCenter || showPricing || showSupport || showLearn) && (
+                  <button onClick={() => { setShowPricing(false); setShowIdentityCenter(false); setShowSupport(false); setShowLearn(false); }} className="p-2 rounded-full hover:bg-white/5 active:scale-90 transition-all text-slate-400">
                     <ArrowLeftRight className="w-5 h-5 rotate-180" />
                   </button>
                 )}
               </div>
               <div className="flex-1 text-center">
                 <h2 className="text-xl font-black italic tracking-tighter text-white uppercase mt-1">
-                  {showPricing ? '订阅方案' : showIdentityCenter ? '账号设置' : showSupport ? '帮助与支持' : '个人中心'}
+                  {showPricing ? '订阅方案' : showIdentityCenter ? '账号设置' : showSupport ? '帮助与支持' : showLearn ? '101 手册' : '个人中心'}
                 </h2>
               </div>
               <div className="w-10 flex justify-end">
@@ -338,6 +340,10 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                   <motion.div key="support" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.25 }}>
                     <SupportCenterView />
                   </motion.div>
+                ) : showLearn ? (
+                  <motion.div key="learn" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.25 }}>
+                    <LearnCenterView />
+                  </motion.div>
                 ) : (
                   /* MAIN MAIN VIEW */
                   <motion.div key="main" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.25 }} className="space-y-6 pb-12">
@@ -384,7 +390,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                         <span className="text-sm font-bold text-white uppercase text-left">{tier === 'pro' ? '订阅方案' : '解锁 PRO 权益'}</span>
                         <ChevronRight size={14} className="text-slate-600 group-hover:text-white transition-colors" />
                       </button>
-                      <Link href="/learn" onClick={onClose} className="w-full py-4 px-5 rounded-[24px] border border-white/5 bg-white/[0.02] hover:border-indigo-500/20 transition-all flex items-center justify-between group">
+                      <button onClick={() => setShowLearn(true)} className="w-full py-4 px-5 rounded-[24px] border border-white/5 bg-white/[0.02] hover:border-indigo-500/20 transition-all flex items-center justify-between group">
                         <div className="flex items-center gap-3">
                           <BookOpen className="w-5 h-5 text-indigo-400" />
                           <div className="text-left">
@@ -393,7 +399,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                           </div>
                         </div>
                         <ChevronRight size={14} className="text-slate-600" />
-                      </Link>
+                      </button>
                     </div>
 
                     {/* Push Switch */}
