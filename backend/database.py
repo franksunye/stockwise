@@ -408,6 +408,7 @@ def init_db():
             )
         """)
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_referral_tx_referrer ON referral_transactions(referrer_id, created_at)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_referred_by ON users(referred_by)")
 
         # 4. AI & Traces
         # cursor.execute("CREATE TABLE IF NOT EXISTS ai_predictions ...") - DEPRECATED
