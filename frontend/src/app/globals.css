@@ -138,6 +138,16 @@ body.is-android .glass-card {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
+body.is-ios .glass-card,
+body.is-ios [class*="backdrop-blur"] {
+  /* 🍎 iOS Safari 隐私模式/低功耗模式性能补丁 */
+  /* 针对 Safari 的渲染 Bug：当 backdrop-filter 逻辑过重且背景包含渐变时，偶尔会渲染为纯紫色/红色块 */
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  /* 补偿：添加一点点不透明度，确保计算失败时仍有保底背景色 */
+  background-color: rgba(15, 15, 23, 0.8) !important;
+}
+
 body.is-android .hero-glow,
 body.is-android [class*="blur-"],
 body.is-android [class*="backdrop-blur"] {
