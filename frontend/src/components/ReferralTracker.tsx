@@ -9,11 +9,29 @@ function ReferralTrackerContent() {
   useEffect(() => {
     const invite = searchParams.get('invite');
     if (invite) {
-      // 保存到 sessionStorage，生命周期为当前会话，确保只在首次注册时有效
-      // 也可以根据需求选 localStorage
+      // Check if we already have a referrer stored (First-click attribution)
       if (!localStorage.getItem('STOCKWISE_REFERRED_BY')) {
-          localStorage.setItem('STOCKWISE_REFERRED_BY', invite);
-          console.log('Referral caught:', invite);
+          // Case 1: Standard User ID
+          if (invite.startsWith('user_')) {
+              localStorage.setItem('STOCKWISE_REFERRED_BY', invite);
+              console.log('Referral caught (ID):', invite);
+          } 
+          // Case 2: Vanity Alias (e.g. "VIP888")
+          else {
+              // Valid aliases should be reasonably short to avoid DOS
+              if (invite.length > 50) return;
+              
+              const code = encodeURIComponent(invite);
+              fetch(`/api/user/resolve-referral?code=${code}`)
+                  .then(res => res.json())
+                  .then(data => {
+                      if (data.success && data.userId) {
+                          localStorage.setItem('STOCKWISE_REFERRED_BY', data.userId);
+                          console.log('Referral resolved (Alias):', invite, '->', data.userId);
+                      }
+                  })
+                  .catch(err => console.error('Referral resolution failed:', err));
+          }
       }
     }
   }, [searchParams]);
