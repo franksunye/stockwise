@@ -2,6 +2,7 @@
 
 import { useSearchParams } from 'next/navigation';
 import { useEffect, Suspense } from 'react';
+import { resolveReferralCode } from '@/lib/referral-resolver';
 
 function ReferralTrackerContent() {
   const searchParams = useSearchParams();
@@ -21,16 +22,12 @@ function ReferralTrackerContent() {
               // Valid aliases should be reasonably short to avoid DOS
               if (invite.length > 50) return;
               
-              const code = encodeURIComponent(invite);
-              fetch(`/api/user/resolve-referral?code=${code}`)
-                  .then(res => res.json())
-                  .then(data => {
-                      if (data.success && data.userId) {
-                          localStorage.setItem('STOCKWISE_REFERRED_BY', data.userId);
-                          console.log('Referral resolved (Alias):', invite, '->', data.userId);
-                      }
-                  })
-                  .catch(err => console.error('Referral resolution failed:', err));
+              resolveReferralCode(invite).then(data => {
+                  if (data?.success && data.userId) {
+                      localStorage.setItem('STOCKWISE_REFERRED_BY', data.userId);
+                      console.log('Referral resolved (Alias):', invite, '->', data.userId);
+                  }
+              });
           }
       }
     }

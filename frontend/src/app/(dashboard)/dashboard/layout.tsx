@@ -7,6 +7,7 @@ import { getWatchlist } from '@/lib/storage';
 import { getCurrentUser } from '@/lib/user';
 import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
 import { StockProvider } from '@/context/StockContext';
+import { resolveReferralCode } from '@/lib/referral-resolver';
 
 export default function DashboardLayout({
   children,
@@ -41,17 +42,11 @@ export default function DashboardLayout({
         if (inviteCode) {
             // A. 如果是别名（不以 user_ 开头），需要先解析
             if (!inviteCode.startsWith('user_')) {
-                try {
-                    const resolveRes = await fetch(`/api/user/resolve-referral?code=${encodeURIComponent(inviteCode)}`);
-                    const resolveData = await resolveRes.json();
-                    if (resolveData.success && resolveData.userId) {
-                        inviteCode = resolveData.userId;
-                    } else {
-                        inviteCode = null; // 解析失败，视为无效
-                    }
-                } catch (e) {
-                    console.error('Alias resolution failed in dashboard', e);
-                    inviteCode = null;
+                const resolveData = await resolveReferralCode(inviteCode);
+                if (resolveData?.success && resolveData.userId) {
+                    inviteCode = resolveData.userId;
+                } else {
+                    inviteCode = null; // 解析失败，视为无效
                 }
             }
 
