@@ -390,20 +390,6 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                             <ChevronRight size={14} className="text-slate-600 group-hover:text-white transition-colors" />
                         </div>
                       </button>
-                      <button onClick={() => setShowPricing(true)} className={`w-full py-4 px-5 rounded-[24px] border transition-all flex items-center justify-between group ${tier === 'pro' ? 'bg-white/[0.02] border-white/5 hover:border-indigo-500/20' : 'bg-indigo-500/5 border-indigo-500/10 hover:border-indigo-500/20'}`}>
-                        <span className="text-sm font-bold text-white uppercase text-left">{tier === 'pro' ? '订阅方案' : '解锁 PRO 权益'}</span>
-                        <ChevronRight size={14} className="text-slate-600 group-hover:text-white transition-colors" />
-                      </button>
-                      <button onClick={() => setShowLearn(true)} className="w-full py-4 px-5 rounded-[24px] border border-white/5 bg-white/[0.02] hover:border-indigo-500/20 transition-all flex items-center justify-between group">
-                        <div className="flex items-center gap-3">
-                          <BookOpen className="w-5 h-5 text-indigo-400" />
-                          <div className="text-left">
-                            <span className="block text-sm font-bold text-white">101 手册</span>
-                            <span className="block text-[10px] text-slate-500 font-medium">散户避坑与生存指南</span>
-                          </div>
-                        </div>
-                        <ChevronRight size={14} className="text-slate-600" />
-                      </button>
                     </div>
 
                     {/* Push Switch */}
@@ -594,10 +580,28 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                     )}
 
                     {/* Support & Links */}
-                    <button onClick={() => setShowSupport(true)} className="w-full py-4 px-5 rounded-[24px] bg-white/5 border border-white/5 flex items-center justify-between group">
-                        <div className="flex items-center gap-3"><HelpCircle className="text-emerald-400" size={18} /><span className="text-sm font-bold text-white uppercase tracking-tight">常见问题与支持</span></div>
+                    <div className="space-y-3">
+                      <button onClick={() => setShowSupport(true)} className="w-full py-4 px-5 rounded-[24px] bg-white/5 border border-white/5 flex items-center justify-between group">
+                          <div className="flex items-center gap-3"><HelpCircle className="text-emerald-400" size={18} /><span className="text-sm font-bold text-white uppercase tracking-tight">常见问题与支持</span></div>
+                          <ChevronRight size={14} className="text-slate-600 group-hover:text-white transition-colors" />
+                      </button>
+                      
+                      <button onClick={() => setShowLearn(true)} className="w-full py-4 px-5 rounded-[24px] border border-white/5 bg-white/[0.02] hover:border-indigo-500/20 transition-all flex items-center justify-between group">
+                        <div className="flex items-center gap-3">
+                          <BookOpen className="w-5 h-5 text-indigo-400" />
+                          <div className="text-left">
+                            <span className="block text-sm font-bold text-white">101 手册</span>
+                            <span className="block text-[10px] text-slate-500 font-medium">散户避坑与生存指南</span>
+                          </div>
+                        </div>
                         <ChevronRight size={14} className="text-slate-600 group-hover:text-white transition-colors" />
-                    </button>
+                      </button>
+
+                      <button onClick={() => setShowPricing(true)} className={`w-full py-4 px-5 rounded-[24px] border transition-all flex items-center justify-between group ${tier === 'pro' ? 'bg-white/[0.02] border-white/5 hover:border-indigo-500/20' : 'bg-indigo-500/5 border-indigo-500/10 hover:border-indigo-500/20'}`}>
+                        <span className="text-sm font-bold text-white uppercase text-left">{tier === 'pro' ? '订阅方案' : '解锁 PRO 权益'}</span>
+                        <ChevronRight size={14} className="text-slate-600 group-hover:text-white transition-colors" />
+                      </button>
+                    </div>
 
                     {/* Footer Tools */}
                     <div className="pt-8 border-t border-white/5 text-center">
