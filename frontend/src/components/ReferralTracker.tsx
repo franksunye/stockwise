@@ -30,11 +30,15 @@ function ReferralTrackerContent() {
             }
         }
         
-        // 极致美化：捕获完成后立即清理 URL 参数
-        // 我们使用原生的 replaceState，这样不会触发 Next.js 的路由变化，体验最平滑
-        const url = new URL(window.location.href);
-        url.searchParams.delete('invite');
-        window.history.replaceState({}, '', url.pathname + url.search);
+        // 关键逻辑：如果是官网主域名，立即清理 URL
+        // 如果是 App 子域名，我们交给 DashboardLayout 逻辑去清理，
+        // 确保 Auth 流程能读到参数
+        const isAppSubdomain = window.location.hostname.startsWith('app.');
+        if (!isAppSubdomain) {
+            const url = new URL(window.location.href);
+            url.searchParams.delete('invite');
+            window.history.replaceState({}, '', url.pathname + url.search);
+        }
       };
 
       handleAttribution();

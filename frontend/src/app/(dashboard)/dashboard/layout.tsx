@@ -88,8 +88,8 @@ export default function DashboardLayout({
         }
       } catch (e) {
         console.error('Auth verification failed or timed out', e);
-        // 保守降级：如果验证接口超时，允许进入主界面（防止永久卡死）
-        setIsAuthorized(true);
+        // 安全降级：如果验证失败或超时，默认不放行（显示邀请墙），确保系统封闭性
+        setIsAuthorized(false);
       }
     };
     
