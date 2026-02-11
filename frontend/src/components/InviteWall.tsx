@@ -72,7 +72,7 @@ export function InviteWall({ onSuccess }: Props) {
           <div className="space-y-6">
             <div>
               <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-3 ml-1">
-                ENTER INVITE CODE
+                输入邀请码
               </label>
               <div className="relative group">
                 <input 
