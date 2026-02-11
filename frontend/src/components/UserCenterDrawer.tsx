@@ -598,7 +598,10 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                       </button>
 
                       <button onClick={() => setShowPricing(true)} className={`w-full py-4 px-5 rounded-[24px] border transition-all flex items-center justify-between group ${tier === 'pro' ? 'bg-white/[0.02] border-white/5 hover:border-indigo-500/20' : 'bg-indigo-500/5 border-indigo-500/10 hover:border-indigo-500/20'}`}>
-                        <span className="text-sm font-bold text-white uppercase text-left">{tier === 'pro' ? '订阅方案' : '解锁 PRO 权益'}</span>
+                        <div className="flex items-center gap-3">
+                          <Crown className={`w-5 h-5 ${tier === 'pro' ? 'text-slate-400' : 'text-amber-400'}`} />
+                          <span className="text-sm font-bold text-white uppercase text-left">{tier === 'pro' ? '订阅方案' : '解锁 PRO 权益'}</span>
+                        </div>
                         <ChevronRight size={14} className="text-slate-600 group-hover:text-white transition-colors" />
                       </button>
                     </div>
