@@ -13,12 +13,19 @@ export function PerformanceOptimizer() {
     useEffect(() => {
         const ua = navigator.userAgent;
         const isAndroid = /Android/i.test(ua);
+        const isIOS = /iPhone|iPad|iPod/i.test(ua);
+        const isMobile = isAndroid || isIOS;
         
-        if (isAndroid) {
-            document.body.classList.add('is-android');
-            console.log('🚀 ZISO AI: Android detected, enabling high performance mode.');
-        } else {
-            document.body.classList.remove('is-android');
+        if (isMobile) {
+            document.body.classList.add('is-mobile');
+            if (isAndroid) {
+                document.body.classList.add('is-android');
+                console.log('🚀 ZISO AI: Android detected, enabling high performance mode.');
+            }
+            if (isIOS) {
+                document.body.classList.add('is-ios');
+                console.log('🍎 ZISO AI: iOS detected, optimization applied.');
+            }
         }
     }, []);
 

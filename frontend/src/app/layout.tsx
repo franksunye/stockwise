@@ -56,6 +56,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-CN">
+      <head>
+        {/* 高级工程优化：预连接应用子域名和核心资源，极大减少移动端握手延迟 */}
+        <link rel="preconnect" href="https://app.ziso.cc" />
+        <link rel="dns-prefetch" href="https://app.ziso.cc" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://va.vercel-scripts.com" />
+      </head>
       <body className="antialiased">
         <PerformanceOptimizer />
         <ReferralTracker />

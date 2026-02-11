@@ -101,7 +101,7 @@ export default function LandingPage() {
             <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
             知其白 · 守其黑 | 知其博弈 · 守其方寸
           </div>
-          <h1 className="text-5xl md:text-7xl font-black tracking-tighter italic leading-tight">
+          <h1 className="text-5xl md:text-7xl font-black tracking-tighter italic leading-tight will-change-transform">
             让交易 <br /> 
             <span className="bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">回归理性的从容</span>
           </h1>
@@ -225,9 +225,13 @@ export default function LandingPage() {
            </div>
         </section>
 
-        {/* Feature 2: Confidence Breaker (Left Image, Right Text) */}
         <section className="pt-40 w-full grid md:grid-cols-2 gap-20 items-center text-left">
-           <div className="order-2 md:order-1 glass-card aspect-square bg-[#0A0A10] rounded-[40px] overflow-hidden border border-white/5 relative">
+         <motion.div 
+               initial={{ opacity: 0, scale: 0.95 }}
+               whileInView={{ opacity: 1, scale: 1 }}
+               viewport={{ once: true }}
+               className="order-2 md:order-1 glass-card aspect-square bg-[#0A0A10] rounded-[40px] overflow-hidden border border-white/5 relative"
+            >
               <Image 
                 src="/images/landing/circuit-breaker-logic.png"
                 alt="Circuit Breaker Logic"
@@ -235,7 +239,7 @@ export default function LandingPage() {
                 className="object-cover opacity-80 hover:opacity-100 transition-opacity duration-700"
               />
               <ShieldCheck size={120} className="absolute bottom-4 right-4 opacity-[0.1] text-red-500 pointer-events-none" />
-           </div>
+          </motion.div>
           <div className="order-1 md:order-2 space-y-8">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] font-black uppercase tracking-[0.2em]">
                Safety System
