@@ -16,24 +16,40 @@ export function middleware(request: NextRequest) {
     // 调试日志：在 Vercel Functions Logs 中可见
     // console.log(`[Middleware] Host: ${hostname}, Path: ${url.pathname}`);
 
-    // 检测是否是 App 域名 (app.ziso.cc 或 app.localhost)
+    // 针对不同的域名实施不同的路由策略
     const isAppDomain = hostname === 'app.ziso.cc' || hostname.startsWith('app.');
+    const isMainDomain = hostname === 'ziso.cc';
 
-    // 1. 如果是通过 App 域名访问
+    // 1. App 子域名策略 (app.ziso.cc)
     if (isAppDomain) {
-        // 当访问根路径 '/' 时，重写到 '/dashboard'（地址栏保持 app.ziso.cc 不变）
+        // 当访问根路径 '/' 时，重写到 '/dashboard'（地址栏保持根路径不变）
         if (url.pathname === '/') {
             return NextResponse.rewrite(new URL('/dashboard', request.url));
         }
+
+        // 核心：URL 洗白逻辑
+        // 如果用户尝试访问 /dashboard 或其子路径，强制重定向到根路径
+        // 这是为了保持 app.ziso.cc 地址栏永远干净
+        if (url.pathname === '/dashboard') {
+            // 构造不带 /dashboard 的 URL，但保留查询参数（如 ?invite=...）
+            const cleanUrl = request.nextUrl.clone();
+            cleanUrl.pathname = '/';
+            return NextResponse.redirect(cleanUrl);
+        }
     }
 
-    // 2. (可选) 反向保护：如果是官网域名 (ziso.cc) 访问 '/dashboard'，可以重定向回 App
-    // 这样用户如果在官网手输 /dashboard，也会被“赶”到 app.ziso.cc 去
-    /*
-    if (hostname === 'ziso.cc' && url.pathname.startsWith('/dashboard')) {
-         return NextResponse.redirect(new URL(`https://app.ziso.cc${url.pathname}`, request.url));
+    // 2. 官网主域名策略 (ziso.cc)
+    if (isMainDomain) {
+        // 如果在官网上访问应用路径，将其引导到正确的子域名
+        if (url.pathname.startsWith('/dashboard')) {
+            const appUrl = new URL(`https://app.ziso.cc`, request.url);
+            // 将子路径透传（如果有的话）
+            appUrl.pathname = url.pathname.replace('/dashboard', '');
+            if (appUrl.pathname === '') appUrl.pathname = '/';
+            appUrl.search = url.search;
+            return NextResponse.redirect(appUrl);
+        }
     }
-    */
 
     return NextResponse.next();
 }

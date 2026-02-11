@@ -45,9 +45,10 @@ export default function ReferralGateway() {
             ? 'https://app.ziso.cc' 
             : window.location.origin;
         
+        // Redirect to / instead of /dashboard to keep the URL clean
         const target = inviteId 
-            ? `${base}/dashboard?invite=${inviteId}` 
-            : `${base}/dashboard`;
+            ? `${base}/?invite=${inviteId}` 
+            : `${base}/`;
             
         window.location.href = target;
       }

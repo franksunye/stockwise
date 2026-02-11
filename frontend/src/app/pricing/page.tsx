@@ -127,7 +127,7 @@ function PricingContent() {
           <Link href="/#features" className="hover:text-white transition-colors">功能</Link>
           <Link href="/about" className="hover:text-white transition-colors">关于</Link>
           <Link href="/pricing" className="text-white transition-colors">价格</Link>
-          <Link href="/dashboard" className="px-5 py-2.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-white">进入应用</Link>
+          <Link href="/" className="px-5 py-2.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-white">进入应用</Link>
         </div>
       </nav>
 
@@ -159,7 +159,7 @@ function PricingContent() {
                 您的权限已自动激活。现在您可以享受深度复盘、更多监控额度以及实时战报推送。
               </p>
               <Link 
-                href="/dashboard"
+                href="/"
                 className="block w-full py-4 rounded-2xl bg-indigo-600 text-white font-black italic hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-600/20"
               >
                 进入仪表盘
