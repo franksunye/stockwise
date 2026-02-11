@@ -15,6 +15,7 @@ import { shouldEnableHighPerformance } from '@/lib/device-utils';
 import { IdentityPassport } from '@/components/IdentityPassport';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { UserPricingView } from './UserPricingView';
+import { SupportCenterView } from './SupportCenterView';
 import pkg from '../../package.json';
 
 interface Props {
@@ -53,6 +54,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
   const [isHighPerformance, setIsHighPerformance] = useState(false);
   const [showIdentityCenter, setShowIdentityCenter] = useState(false);
   const [showPricing, setShowPricing] = useState(false);
+  const [showSupport, setShowSupport] = useState(false);
   const [isLinkingEmail, setIsLinkingEmail] = useState(false);
   const [tempEmail, setTempEmail] = useState('');
 
@@ -75,6 +77,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
     } else {
       setShowPricing(false);
       setShowIdentityCenter(false);
+      setShowSupport(false);
       setShowNotificationSettings(false);
       setShowReferralDetails(false);
     }
@@ -247,7 +250,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
 
           <motion.div 
             initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
-            drag={!showPricing ? "y" : false}
+            drag={!showPricing && !showSupport ? "y" : false}
             dragConstraints={{ top: 0, bottom: 0 }}
             dragElastic={{ top: 0.1, bottom: 0.6 }}
             onDragEnd={(_, info) => { if (info.offset.y > 150) onClose(); }}
@@ -263,15 +266,15 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
             {/* Navigation Header */}
             <header className="shrink-0 z-20 px-6 py-4 flex items-center justify-between border-b border-white/5 bg-[#0a0a0f]/80 backdrop-blur-xl">
               <div className="w-10">
-                {(showIdentityCenter || showPricing) && (
-                  <button onClick={() => { setShowPricing(false); setShowIdentityCenter(false); }} className="p-2 rounded-full hover:bg-white/5 active:scale-90 transition-all text-slate-400">
+                {(showIdentityCenter || showPricing || showSupport) && (
+                  <button onClick={() => { setShowPricing(false); setShowIdentityCenter(false); setShowSupport(false); }} className="p-2 rounded-full hover:bg-white/5 active:scale-90 transition-all text-slate-400">
                     <ArrowLeftRight className="w-5 h-5 rotate-180" />
                   </button>
                 )}
               </div>
               <div className="flex-1 text-center">
                 <h2 className="text-xl font-black italic tracking-tighter text-white uppercase mt-1">
-                  {showPricing ? '订阅方案' : showIdentityCenter ? '账号设置' : '个人中心'}
+                  {showPricing ? '订阅方案' : showIdentityCenter ? '账号设置' : showSupport ? '帮助与支持' : '个人中心'}
                 </h2>
               </div>
               <div className="w-10 flex justify-end">
@@ -330,6 +333,10 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                       </div>
                       {restoreMsg && <p className={`text-[10px] mt-2 text-left ${restoreMsg.type === 'success' ? 'text-emerald-400' : 'text-rose-400'}`}>{restoreMsg.text}</p>}
                     </div>
+                  </motion.div>
+                ) : showSupport ? (
+                  <motion.div key="support" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.25 }}>
+                    <SupportCenterView />
                   </motion.div>
                 ) : (
                   /* MAIN MAIN VIEW */
@@ -519,10 +526,10 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                     )}
 
                     {/* Support & Links */}
-                    <Link href="/support" onClick={onClose} className="w-full py-4 px-5 rounded-[24px] bg-white/5 border border-white/5 flex items-center justify-between group">
+                    <button onClick={() => setShowSupport(true)} className="w-full py-4 px-5 rounded-[24px] bg-white/5 border border-white/5 flex items-center justify-between group">
                         <div className="flex items-center gap-3"><HelpCircle className="text-emerald-400" size={18} /><span className="text-sm font-bold text-white uppercase tracking-tight">常见问题与支持</span></div>
                         <ChevronRight size={14} className="text-slate-600 group-hover:text-white transition-colors" />
-                    </Link>
+                    </button>
 
                     {/* Footer Tools */}
                     <div className="pt-8 border-t border-white/5 text-center">
