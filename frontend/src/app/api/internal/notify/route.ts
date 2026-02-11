@@ -143,7 +143,7 @@ export async function POST(request: Request) {
                     if (typeSettings?.enabled === false) {
                         return { status: 'skipped', id: sub.id, reason: 'user_disabled_type' };
                     }
-                } catch (e) {
+                } catch {
                     // 解析失败时继续发送
                 }
             }
@@ -171,13 +171,20 @@ export async function POST(request: Request) {
             }
         });
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const results = await Promise.all(promises) as any[]; // Cast to any to access custom props
-        const successCount = results.filter((r: any) => r.status === 'fulfilled').length;
+        interface NotificationResult {
+            status: 'fulfilled' | 'rejected' | 'skipped';
+            id: string;
+            userId?: string;
+            reason?: string;
+            error?: unknown;
+        }
+
+        const results = (await Promise.all(promises)) as NotificationResult[];
+        const successCount = results.filter((r) => r.status === 'fulfilled').length;
 
         // Collect successful user IDs for logging (deduplicated)
         const successfulUserIds = new Set<string>();
-        results.forEach((r: any) => {
+        results.forEach((r) => {
             if (r.status === 'fulfilled' && r.userId) {
                 successfulUserIds.add(r.userId);
             }
@@ -185,7 +192,8 @@ export async function POST(request: Request) {
 
         // 5. Log notifications to DB for history
         if (successfulUserIds.size > 0) {
-            const logOps: any[] = [];
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const logOps: { sql: string; args: any[] }[] = [];
             const timestamp = new Date().toISOString();
             // Note: DB defaults to 'now', +8 hours, but consistent JS time is safer if we want exact sync
 
@@ -209,17 +217,18 @@ export async function POST(request: Request) {
 
             try {
                 if (strategy === 'cloud') {
-                    if ((client as any).batch) {
-                        await (client as any).batch(logOps);
+                    const cloudClient = client as Client;
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    if ((cloudClient as any).batch) { // batch might not be on Client type directly
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        await (cloudClient as any).batch(logOps);
                     } else {
                         // Fallback sequential
                         for (const op of logOps) {
-                            await (client as Client).execute(op);
+                            await cloudClient.execute(op);
                         }
                     }
                 } else {
-                    const db = client as Database.Database; // Client is already fresh or needs reopen? 
-                    // Note: `client` variable was opened at start of function.
                     // Local DB might be closed if we closed it inside `else` blocks above? 
                     // Let's re-check code flow.
                     // Above: `db.close()` was called in `else` blocks for querying subscriptions.
@@ -245,8 +254,8 @@ export async function POST(request: Request) {
         }
 
         const expiredIds = results
-            .filter((r: any) => r.status === 'rejected' && r.reason === 'expired')
-            .map((r: any) => r.id);
+            .filter((r) => r.status === 'rejected' && r.reason === 'expired')
+            .map((r) => r.id);
 
         // 6. 清理失效订阅 (异步)
         if (expiredIds.length > 0) {
