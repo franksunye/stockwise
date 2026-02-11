@@ -2,37 +2,42 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
-    // 优先从 nextUrl 获取 hostname，这通常是最准确的
-    let hostname = request.nextUrl.hostname;
+    // 根本原因优化：更稳健的域名检测
+    // 在 Vercel/Cloudflare 等层级中，x-forwarding-host 是最可信的
+    const forwardedHost = request.headers.get('x-forwarded-host');
+    let hostname = forwardedHost ? forwardedHost.split(':')[0] : request.nextUrl.hostname;
 
-    // 如果是 Vercel 部署，有时候 host header 是更原始的请求头
+    // 备选方案：host header
     const hostHeader = request.headers.get('host');
-    if (hostHeader) {
-        hostname = hostHeader.split(':')[0]; // 去除端口号
+    if (!forwardedHost && hostHeader) {
+        hostname = hostHeader.split(':')[0];
     }
 
     const url = request.nextUrl;
+    const pathname = url.pathname;
 
-    // 调试日志：在 Vercel Functions Logs 中可见
-    // console.log(`[Middleware] Host: ${hostname}, Path: ${url.pathname}`);
+    // 防止循环重定向的关键：检查是否已经是重写后的请求
+    // Next.js 在 rewrite 后有时会重新触发 middleware
+    const isRewritten = request.headers.has('x-ziso-rewrite');
 
     // 针对不同的域名实施不同的路由策略
     const isAppDomain = hostname === 'app.ziso.cc' || hostname.startsWith('app.');
-    const isMainDomain = hostname === 'ziso.cc';
+    const isMainDomain = hostname === 'ziso.cc' || hostname === 'www.ziso.cc';
 
     // 1. App 子域名策略 (app.ziso.cc)
     if (isAppDomain) {
-        // 当访问根路径 '/' 时，重写到 '/dashboard'（地址栏保持根路径不变）
-        if (url.pathname === '/') {
-            return NextResponse.rewrite(new URL('/dashboard', request.url));
+        // 当访问根路径 '/' 时，重写到 '/dashboard'
+        if (pathname === '/') {
+            const response = NextResponse.rewrite(new URL('/dashboard', request.url));
+            // 标记这是一个重写，防止下方逻辑误判为直接访问 /dashboard 导致循环
+            response.headers.set('x-ziso-rewrite', 'true');
+            return response;
         }
 
         // 核心：URL 洗白逻辑
-        // 如果用户尝试访问 /dashboard 或其子路径，强制重定向到根路径
-        // 这是为了保持 app.ziso.cc 地址栏永远干净
-        if (url.pathname === '/dashboard') {
-            // 构造不带 /dashboard 的 URL，但保留查询参数（如 ?invite=...）
-            const cleanUrl = request.nextUrl.clone();
+        // 只有当用户直接在地址栏输入 /dashboard 且不是内部重写时，才重定向到根路径
+        if (pathname === '/dashboard' && !isRewritten) {
+            const cleanUrl = url.clone();
             cleanUrl.pathname = '/';
             return NextResponse.redirect(cleanUrl);
         }
@@ -40,11 +45,9 @@ export function middleware(request: NextRequest) {
 
     // 2. 官网主域名策略 (ziso.cc)
     if (isMainDomain) {
-        // 如果在官网上访问应用路径，将其引导到正确的子域名
-        if (url.pathname.startsWith('/dashboard')) {
+        if (pathname.startsWith('/dashboard')) {
             const appUrl = new URL(`https://app.ziso.cc`, request.url);
-            // 将子路径透传（如果有的话）
-            appUrl.pathname = url.pathname.replace('/dashboard', '');
+            appUrl.pathname = pathname.replace('/dashboard', '');
             if (appUrl.pathname === '') appUrl.pathname = '/';
             appUrl.search = url.search;
             return NextResponse.redirect(appUrl);
