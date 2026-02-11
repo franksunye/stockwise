@@ -523,24 +523,39 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                 <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
                                   {/* Rules for general users */}
                                   {!isChannel && (
-                                    <div className="px-1 mt-2 mb-3">
-                                        <p className="text-[10px] text-slate-500 leading-relaxed text-left">
-                                          每邀请 1 位新用户入池，你与好友均可自动获得 <span className="text-emerald-400 font-bold">{MEMBERSHIP_CONFIG.referral.refereeDays} 天</span> Pro 会员权益。
-                                        </p>
-                                    </div>
+                                    <>
+                                      <div className="grid grid-cols-2 gap-2 mt-2 mb-2">
+                                        <div className="bg-white/5 rounded-2xl p-3 border border-white/5 text-left">
+                                          <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-1">已邀请好友</div>
+                                          <div className="text-lg font-black text-indigo-300">{referralCount} <span className="text-xs font-bold text-slate-500">人</span></div>
+                                        </div>
+                                        <div className="bg-white/5 rounded-2xl p-3 border border-white/5 text-left">
+                                          <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-1">累计获赠时长</div>
+                                          <div className="text-lg font-black text-emerald-400">{referralCount * MEMBERSHIP_CONFIG.referral.referrerDays} <span className="text-xs font-bold text-slate-500">天</span></div>
+                                        </div>
+                                      </div>
+                                      <div className="px-1 mb-3">
+                                          <p className="text-[10px] text-slate-500 leading-relaxed text-left">
+                                            每邀请 1 位新用户入池，你与好友均可自动获得 <span className="text-emerald-400 font-bold">{MEMBERSHIP_CONFIG.referral.refereeDays} 天</span> Pro 会员权益。
+                                          </p>
+                                      </div>
+                                    </>
                                   )}
 
                                   {/* Earnings Dashboard (shown for all, enhanced for channels) */}
-                                  <div className="grid grid-cols-2 gap-2 mt-2 mb-1">
-                                    <div className={`rounded-2xl p-3 border text-left ${isChannel ? 'bg-amber-500/5 border-amber-500/10' : 'bg-white/5 border-white/5'}`}>
-                                      <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-1">{isChannel ? '分润余额' : '可提现余额'}</div>
-                                      <div className={`text-lg font-black ${isChannel ? 'text-amber-400' : 'text-emerald-400'}`}>¥{referralBalance.toFixed(2)}</div>
+                                  {/* Earnings Dashboard (shown for channels only) */}
+                                  {isChannel && (
+                                    <div className="grid grid-cols-2 gap-2 mt-2 mb-1">
+                                      <div className="rounded-2xl p-3 border text-left bg-amber-500/5 border-amber-500/10">
+                                        <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-1">分润余额</div>
+                                        <div className="text-lg font-black text-amber-400">¥{referralBalance.toFixed(2)}</div>
+                                      </div>
+                                      <div className="bg-white/5 rounded-2xl p-3 border border-white/5 text-left">
+                                        <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-1">累计收益 ({(commissionRate * 100).toFixed(0)}%)</div>
+                                        <div className="text-lg font-black text-white">¥{totalEarned.toFixed(2)}</div>
+                                      </div>
                                     </div>
-                                    <div className="bg-white/5 rounded-2xl p-3 border border-white/5 text-left">
-                                      <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-1">累计收益 ({(commissionRate * 100).toFixed(0)}%)</div>
-                                      <div className="text-lg font-black text-white">¥{totalEarned.toFixed(2)}</div>
-                                    </div>
-                                  </div>
+                                  )}
 
                                   {/* Channel-specific: Transaction History */}
                                   {isChannel && recentTransactions.length > 0 && (
