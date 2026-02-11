@@ -484,7 +484,9 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
 
                              <button 
                                 onClick={() => {
-                                    const url = `${window.location.origin}/dashboard?invite=${userId}`;
+                                    const url = referralAlias 
+                                        ? `${window.location.origin}/v/${referralAlias}` 
+                                        : `${window.location.origin}/v/${userId}`;
                                     navigator.clipboard.writeText(url);
                                     setRedeemMsg({ type: 'success', text: '邀请链接已复制！' });
                                     setTimeout(() => setRedeemMsg(null), 2000);
