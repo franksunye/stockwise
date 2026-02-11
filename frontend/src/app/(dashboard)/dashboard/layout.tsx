@@ -35,16 +35,38 @@ export default function DashboardLayout({
       // 只有当邀请奖励开关开启时，才处理邀请链接
       if (switches.enableReferralReward) {
         const urlParams = new URLSearchParams(window.location.search);
-        const inviteFromUrl = urlParams.get('invite');
+        let inviteCode = urlParams.get('invite');
         
-        // 优先使用 URL 参数，其次使用 localStorage 缓存
-        referredBy = inviteFromUrl || localStorage.getItem('STOCKWISE_REFERRED_BY');
+        // 如果 URL 中有邀请码，优先处理
+        if (inviteCode) {
+            // A. 如果是别名（不以 user_ 开头），需要先解析
+            if (!inviteCode.startsWith('user_')) {
+                try {
+                    const resolveRes = await fetch(`/api/user/resolve-referral?code=${encodeURIComponent(inviteCode)}`);
+                    const resolveData = await resolveRes.json();
+                    if (resolveData.success && resolveData.userId) {
+                        inviteCode = resolveData.userId;
+                    } else {
+                        inviteCode = null; // 解析失败，视为无效
+                    }
+                } catch (e) {
+                    console.error('Alias resolution failed in dashboard', e);
+                    inviteCode = null;
+                }
+            }
+
+            // B. 经过解析或本身是 ID，且不是自己邀请自己
+            if (inviteCode && inviteCode !== uid && inviteCode.startsWith('user_')) {
+                referredBy = inviteCode;
+                localStorage.setItem('STOCKWISE_REFERRED_BY', inviteCode);
+                // 清理 URL 参数
+                window.history.replaceState({}, '', window.location.pathname);
+            }
+        } 
         
-        // 如果是通过邀请链接进入，缓存邀请人 ID 并清理 URL 参数
-        if (inviteFromUrl && inviteFromUrl !== uid) {
-          localStorage.setItem('STOCKWISE_REFERRED_BY', inviteFromUrl);
-          // 清理 URL 参数，避免分享时暴露
-          window.history.replaceState({}, '', window.location.pathname);
+        // 如果 URL 没有（或解析失败），尝试读取缓存
+        if (!referredBy) {
+            referredBy = localStorage.getItem('STOCKWISE_REFERRED_BY');
         }
       }
 
