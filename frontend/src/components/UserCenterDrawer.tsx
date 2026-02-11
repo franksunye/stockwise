@@ -467,9 +467,9 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                           <div className="relative z-10 px-5 py-4 pb-2">
                              <div className="flex items-center justify-between mb-3">
                                 <h4 className="text-sm font-black italic text-white flex items-center gap-2">
-                                    {isChannel ? (referralAlias || '渠道合伙人') : '邀请好友领 Pro'}
+                                    {isChannel ? (referralAlias || '合伙人') : '邀请好友领 Pro'}
                                     {isChannel ? (
-                                        <span className="px-1.5 py-0.5 rounded bg-amber-500 text-[8px] font-black uppercase not-italic text-black">渠道</span>
+                                        <span className="px-1.5 py-0.5 rounded bg-amber-500 text-[8px] font-black uppercase not-italic text-black">C</span>
                                     ) : (
                                         <span className="px-1.5 py-0.5 rounded bg-emerald-500 text-[8px] font-black uppercase not-italic">+{MEMBERSHIP_CONFIG.referral.referrerDays} Days</span>
                                     )}
@@ -506,7 +506,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                 setShowReferralDetails(!showReferralDetails);
                                 if (!showReferralDetails) setShowNotificationSettings(false);
                             }} className="w-full flex items-center justify-between text-[10px] text-slate-500 hover:text-indigo-400 transition-colors uppercase font-bold tracking-widest">
-                                {isChannel ? '渠道分润详情' : '查看奖励规则'}
+                                {isChannel ? '分润详情' : '查看奖励规则'}
                                 <ChevronDown className={`w-3 h-3 transition-transform ${showReferralDetails ? 'rotate-180' : ''}`} />
                             </button>
                             <AnimatePresence>
@@ -572,7 +572,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                   {isChannel && (
                                     <div className="mt-2 mb-1 px-1">
                                       <p className="text-[10px] text-slate-600 leading-relaxed text-left">
-                                        渠道佣金比例 <span className="text-amber-400 font-bold">{(commissionRate * 100).toFixed(0)}%</span> · 已推荐 <span className="text-white font-bold">{referralCount}</span> 人
+                                        佣金比例 <span className="text-amber-400 font-bold">{(commissionRate * 100).toFixed(0)}%</span> · 已推荐 <span className="text-white font-bold">{referralCount}</span> 人
                                       </p>
                                     </div>
                                   )}
