@@ -2,7 +2,7 @@
     "name": "ZISO AI",
     "short_name": "ZISO",
     "description": "投资决策智能体",
-    "start_url": "/dashboard",
+    "start_url": "/",
     "display": "standalone",
     "background_color": "#050508",
     "theme_color": "#6366f1",
