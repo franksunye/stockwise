@@ -270,7 +270,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
             <div className="w-full flex justify-center pt-3 pb-1 shrink-0"><div className="w-12 h-1 rounded-full bg-white/20" /></div>
 
             {/* Navigation Header */}
-            <header className="shrink-0 z-20 px-6 py-4 flex items-center justify-between border-b border-white/5 bg-[#0a0a0f]/80 backdrop-blur-xl">
+            <header className="shrink-0 z-20 px-5 py-3 flex items-center justify-between border-b border-white/5 bg-[#0a0a0f]/80 backdrop-blur-xl">
               <div className="w-10">
                 {(showIdentityCenter || showPricing || showSupport || showLearn) && (
                   <button onClick={() => { setShowPricing(false); setShowIdentityCenter(false); setShowSupport(false); setShowLearn(false); }} className="p-2 rounded-full hover:bg-white/5 active:scale-90 transition-all text-slate-400">
@@ -354,14 +354,14 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                     {/* User Card */}
                     <div className="p-1 rounded-[24px] bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-white/10 overflow-hidden relative">
                       {tier === 'pro' && <div className="absolute top-0 right-0 p-3"><Crown className="text-amber-400 w-6 h-6 drop-shadow-[0_0_8px_rgba(251,191,36,0.5)]" /></div>}
-                      <div className="bg-[#0f0f16]/90 backdrop-blur rounded-[22px] p-6 flex items-center gap-5">
-                        <div className={`w-16 h-16 rounded-full border-2 flex items-center justify-center relative ${tier === 'pro' ? 'border-amber-500/50 bg-amber-500/10' : 'bg-white/5 border-white/10'}`}>
-                           {loading ? <Loader2 className="w-8 h-8 text-slate-400 animate-spin" /> : <User className={`w-8 h-8 ${tier === 'pro' ? 'text-amber-200' : 'text-slate-400'}`} />}
+                      <div className="bg-[#0f0f16]/90 backdrop-blur rounded-[22px] p-4 flex items-center gap-4">
+                        <div className={`w-14 h-14 rounded-full border-2 flex items-center justify-center relative ${tier === 'pro' ? 'border-amber-500/50 bg-amber-500/10' : 'bg-white/5 border-white/10'}`}>
+                           {loading ? <Loader2 className="w-7 h-7 text-slate-400 animate-spin" /> : <User className={`w-7 h-7 ${tier === 'pro' ? 'text-amber-200' : 'text-slate-400'}`} />}
                         </div>
                         <div className="flex-1 text-left">
-                          <h3 className="text-lg font-black italic text-white uppercase">{tier === 'pro' ? 'Pro 会员' : '普通用户'}</h3>
+                          <h3 className="text-base font-black italic text-white uppercase">{tier === 'pro' ? 'Pro 会员' : '普通用户'}</h3>
                           {expiresAt && tier === 'pro' && (
-                            <p className="text-[10px] text-emerald-500/80 font-bold flex items-center gap-1.5 mt-1">
+                            <p className="text-[10px] text-emerald-500/80 font-bold flex items-center gap-1.5 mt-0.5">
                                 <ShieldCheck size={10} /> 有效期至: {expiresAt.split('T')[0]}
                             </p>
                           )}
