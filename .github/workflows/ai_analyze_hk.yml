@@ -15,6 +15,18 @@ on:
         type: string
         required: false
         default: ''
+      model:
+        description: 'Specify Model (default: all)'
+        type: choice
+        required: false
+        default: 'all'
+        options:
+        - all
+        - hunyuan-lite
+        - deepseek-v3
+        - deepseek-v3.2-exp
+        - gemini-3-flash
+        - rule-engine
   workflow_call:     # 支持被其他 workflow 调用
     inputs:
       force:
@@ -27,6 +39,11 @@ on:
         type: string
         required: false
         default: ''
+      model:
+        description: 'Specify Model'
+        type: string
+        required: false
+        default: 'all'
 
 jobs:
   analyze-hk:
@@ -86,6 +103,11 @@ jobs:
             DATE_FLAG="--date ${{ inputs.date }}"
             echo "📅 Target date set to: ${{ inputs.date }}"
           fi
+          
+          MODEL_FLAG="--model ${{ inputs.model }}"
+          if [ -z "${{ inputs.model }}" ]; then
+             MODEL_FLAG="--model all"
+          fi
 
-          echo "🚀 Executing: python -u backend/main.py --analyze --market HK --model all $FORCE_FLAG $DATE_FLAG"
-          python -u backend/main.py --analyze --market HK --model all $FORCE_FLAG $DATE_FLAG
+          echo "🚀 Executing: python -u backend/main.py --analyze --market HK $MODEL_FLAG $FORCE_FLAG $DATE_FLAG"
+          python -u backend/main.py --analyze --market HK $MODEL_FLAG $FORCE_FLAG $DATE_FLAG
