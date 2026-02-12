@@ -1,5 +1,7 @@
 from typing import Dict, Any, List
 
+import re
+
 def normalize_ai_response(data: Dict[str, Any]) -> Dict[str, Any]:
     """
     Standardize the data format returned by LLM to ensure consistent storage structure.
@@ -41,8 +43,20 @@ def normalize_ai_response(data: Dict[str, Any]) -> Dict[str, Any]:
     if "reasoning_trace" not in data:
         data["reasoning_trace"] = []
     
-    trace = data["reasoning_trace"]
-    if not isinstance(trace, list):
+    trace = data.get("reasoning_trace")
+    if isinstance(trace, str) and trace:
+        # Handle string-based trace (common in weak models)
+        # Try to split by semicolon or comma to separate trend from momentum
+        parts = re.split(r'[；;，,]', trace)
+        if len(parts) > 1:
+            data["reasoning_trace"] = [
+                { "step": "trend", "data": parts[0].strip(), "conclusion": "趋势观察" },
+                { "step": "momentum", "data": parts[1].strip(), "conclusion": "动能监测" },
+                { "step": "decision", "data": "综合研判", "conclusion": str(data.get('summary', '观望'))[:10] }
+            ]
+        else:
+            data["reasoning_trace"] = [{"step": "analysis", "data": trace, "conclusion": "AI综述"}]
+    elif not isinstance(trace, list):
         data["reasoning_trace"] = []
     # 2.5 Normalize counter_argument (Must be str)
     if "counter_argument" not in data:

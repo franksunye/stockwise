@@ -166,12 +166,13 @@ class SynthesisStep(BaseStep):
 ```
 
 ## 需要你填写的字段
-仅需填写以下 3 个字段，其他字段请直接复制上方强制值：
+**仅需填写以下 3 个字段**，其他字段请直接复制上方强制值，组合成一个完整的 JSON：
 1. `"summary"`: 用1句话总结当前技术面状态（评分{score_val:+d}）
-2. `"reasoning_trace"`: 填入真实的 MA/MACD 数据
+2. `"reasoning_trace"`: 必须包含以下 3 个步骤的详细数据：
    - trend.data: 从上方分析中提取 MA5/MA10/MA20 数值
    - momentum.data: 从上方提取 MACD/RSI 状态
    - decision.conclusion: "{decision_conclusion}"
+3. `"signal"`: {calculated_signal} (请直接填入)
 
 请直接输出完整 JSON，不要添加任何解释。
 特别注意：**所有文本值（例如 "未提供" 或 "N/A"）都必须包含在双引号中**。
@@ -231,16 +232,20 @@ class SynthesisStep(BaseStep):
         d = context.input_data
         daily_prices = d.get('daily_prices', [])
         latest = daily_prices[-1] if daily_prices else {}
+        boll_lower = latest.get('boll_lower', 0) or 0
         ma20 = latest.get('ma20', 0)
-        boll_lower = latest.get('boll_lower', 0)
         
-        # 1. Backfill key_levels if missing
-        if not parsed.get('key_levels') or not parsed['key_levels'].get('support'):
-            parsed['key_levels'] = {
-                "support": boll_lower or ma20,
-                "resistance": max([p.get('high', 0) for p in daily_prices[-10:]]) if daily_prices else 0,
-                "stop_loss": (boll_lower or ma20) * 0.97
-            }
+        # 1. Backfill key_levels if missing (only for non-lite models, lite models have it forced later)
+        model_name = d.get('model_name', '').lower()
+        if 'lite' not in model_name:
+            if not parsed.get('key_levels') or not parsed['key_levels'].get('support'):
+                high_10d = max([p.get('high', 0) for p in daily_prices[-10:]]) if daily_prices else 0
+                stop_ref = boll_lower * 0.97 if boll_lower > 0 else (latest.get('close', 0) or 0) * 0.95
+                parsed['key_levels'] = {
+                    "support": round(boll_lower or ma20, 2),
+                    "resistance": round(high_10d, 2),
+                    "stop_loss": round(stop_ref, 2)
+                }
             
         # 2. Backfill tactics if missing or empty
         if not parsed.get('tactics') or not parsed['tactics'].get('holding'):
@@ -252,13 +257,13 @@ class SynthesisStep(BaseStep):
                 "holding": [{
                     "priority": "P1", 
                     "action": base_holding, 
-                    "trigger": f"跌破{parsed['key_levels']['support']:.2f}", 
+                    "trigger": f"跌破{parsed['key_levels'].get('support', 0):.2f}", 
                     "reason": "技术面触发风控"
                 }],
                 "empty": [{
                     "priority": "P1", 
                     "action": base_empty, 
-                    "trigger": f"回踩{parsed['key_levels']['support']:.2f}企稳", 
+                    "trigger": f"回踩{parsed['key_levels'].get('support', 0):.2f}企稳", 
                     "reason": "等待更有利位置"
                 }],
                 "general": []
@@ -268,12 +273,10 @@ class SynthesisStep(BaseStep):
         if "conflict_resolution" not in parsed:
             parsed["conflict_resolution"] = "综合多周期指标与市场情绪，当前处于关键决策点。"
         if "tomorrow_focus" not in parsed:
-            parsed["tomorrow_focus"] = f"关注价格能否站稳 {parsed['key_levels']['support']:.2f} 支撑位。"
+            parsed["tomorrow_focus"] = f"关注价格能否站稳 {parsed['key_levels'].get('support', 0):.2f} 支撑位。"
         if "news_analysis" not in parsed:
             parsed["news_analysis"] = ["无实时新闻输入，仅基于技术面分析"]
 
-        context.artifacts["synthesis"] = parsed
-        
         # 4. Backfill signal and confidence if missing or placeholder
         valid_signals = ["Long", "Side", "Short"]
         if not parsed.get('signal') or parsed.get('signal') not in valid_signals:
@@ -283,67 +286,65 @@ class SynthesisStep(BaseStep):
             parsed['confidence'] = 0.5
 
         # 5. LITE MODEL OVERRIDE: Force pre-calculated values (model can't follow instructions)
-        d = context.input_data
         model_name = d.get('model_name', '').lower()
         if 'lite' in model_name:
-            daily_prices = d.get('daily_prices', [])
-            latest = daily_prices[-1] if daily_prices else {}
-            boll_lower = latest.get('boll_lower', 0) or 0
+            # Re-calculate or use from outer scope
+            # Ensure key_levels to use pre-calculated values
             high_10d = max([p.get('high', 0) for p in daily_prices[-10:]]) if daily_prices else 0
             stop_ref = boll_lower * 0.97 if boll_lower > 0 else (latest.get('close', 0) or 0) * 0.95
             
-            # Force key_levels to use pre-calculated values
             parsed['key_levels'] = {
                 "support": round(boll_lower, 2),
                 "resistance": round(high_10d, 2),
                 "stop_loss": round(stop_ref, 2)
             }
             
-        # 6. Normalize reasoning_trace (Fix for Lite models returning dict instead of list)
+        # 6. Normalize reasoning_trace (Fix for Lite models returning dict or string instead of list)
         rt = parsed.get('reasoning_trace')
         if isinstance(rt, dict):
             # Convert dict to standard list format
             new_rt = []
             
             # Extract Trend
-            trend_data = rt.get('trend.data') or rt.get('trend') or "均线系统分析"
-            if isinstance(trend_data, dict) or isinstance(trend_data, list):
+            trend_data = rt.get('trend.data') or rt.get('trend') or rt.get('trend_data') or "均线系统分析"
+            if isinstance(trend_data, (dict, list)):
                 trend_data = str(trend_data)
             new_rt.append({ "step": "trend", "data": trend_data, "conclusion": "趋势跟踪" })
             
             # Extract Momentum
-            mom_data = rt.get('momentum.data') or rt.get('momentum') or "MACD/RSI指标分析"
-            if isinstance(mom_data, dict) or isinstance(mom_data, list):
+            mom_data = rt.get('momentum.data') or rt.get('momentum') or rt.get('momentum_data') or "MACD/RSI指标分析"
+            if isinstance(mom_data, (dict, list)):
                 mom_data = str(mom_data)
             new_rt.append({ "step": "momentum", "data": mom_data, "conclusion": "动能评估" })
             
             # Extract Decision
-            dec_data = rt.get('decision.data') or rt.get('decision_conclusion') or "综合研判"
+            dec_data = rt.get('decision.data') or rt.get('decision_conclusion') or rt.get('decision') or "综合研判"
             new_rt.append({ "step": "decision", "data": "综合评分模型", "conclusion": str(dec_data) })
             
             parsed['reasoning_trace'] = new_rt
+        elif isinstance(rt, str) and rt:
+            # Handle string-based trace (common in weak models)
+            # Try to split by semicolon or comma to separate trend from momentum
+            parts = re.split(r'[；;，,]', rt)
+            trend_part = parts[0].strip() if len(parts) > 0 else rt
+            mom_part = parts[1].strip() if len(parts) > 1 else "详见趋势分析"
+            
+            parsed['reasoning_trace'] = [
+                { "step": "trend", "data": trend_part, "conclusion": "趋势观察" },
+                { "step": "momentum", "data": mom_part, "conclusion": "动能监测" },
+                { "step": "decision", "data": "综合研判", "conclusion": parsed.get('summary', '观望')[:10] }
+            ]
             
         # Ensure it's always a list at the end
         if not isinstance(parsed.get('reasoning_trace'), list):
             parsed['reasoning_trace'] = [
-                { "step": "trend", "data": "N/A", "conclusion": "N/A" },
-                { "step": "momentum", "data": "N/A", "conclusion": "N/A" },
-                { "step": "decision", "data": "N/A", "conclusion": "N/A" }
+                { "step": "trend", "data": "根据日线均线分析", "conclusion": "趋势分析" },
+                { "step": "momentum", "data": "根据MACD及RSI指标", "conclusion": "动能评估" },
+                { "step": "decision", "data": "综合各周期信号", "conclusion": parsed.get('summary', '观望')[:10] }
             ]
-        model_name = d.get('model_name', '').lower()
-        if 'lite' in model_name:
-            daily_prices = d.get('daily_prices', [])
-            latest = daily_prices[-1] if daily_prices else {}
-            boll_lower = latest.get('boll_lower', 0) or 0
-            high_10d = max([p.get('high', 0) for p in daily_prices[-10:]]) if daily_prices else 0
-            stop_ref = boll_lower * 0.97 if boll_lower > 0 else (latest.get('close', 0) or 0) * 0.95
-            
-            # Force key_levels to use pre-calculated values
-            parsed['key_levels'] = {
-                "support": round(boll_lower, 2),
-                "resistance": round(high_10d, 2),
-                "stop_loss": round(stop_ref, 2)
-            }
+
+        context.artifacts["synthesis"] = parsed
+
             
         if "signal" not in parsed:
             raise ValueError("JSON missing 'signal' field")
