@@ -4,7 +4,7 @@ subtitle: "为什么“睡一觉”的 AI 预测更值得信任？"
 date: "2026-02-04"
 category: "The Machine"
 image: "/images/learn/eod_vs_intraday.png"
-image_prompt: "**Concept**: A conceptual 3D illustration of Focus vs Noise. **Style**: Swiss Design, Geometric, Minimalist, Clean, Dark Mode (#050508). **Subject**: A chaotic cloud of tiny, flickering white dots (Intraday noise) being filtered into a single, steady, glowing Indigo beam (EOD analysis). **Action**: The beam emerges clean and powerful from a funnel-like structure. **Materials**: Glass funnel, energetic particle dots. **Colors**: Indigo (#6366f1) for the clear signal. **Constraints**: NO text. NO blur. Center composition."
+image_prompt: "**Concept**: Scale of time decomposition. **Style**: Minimalist. **Subject**: A long Indigo prism. **Action**: A portion of it is sliced into micro-thin glowing Emerald layers. **Colors**: Indigo/Emerald. **Constraints**: NO text."
 ---
 
 # 节奏：噪音与信号的博弈

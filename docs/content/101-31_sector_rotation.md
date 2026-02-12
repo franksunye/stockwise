@@ -4,7 +4,7 @@ subtitle: "寻找大资金迁徙的“北极星”"
 date: "2026-02-04"
 category: "The Method"
 image: "/images/learn/sector_rotation.png"
-image_prompt: "**Concept**: A conceptual 3D illustration of interconnected gears moving at different speeds. **Style**: Swiss Design, Geometric, Minimalist, Clean, Dark Mode (#050508). **Subject**: Four massive gears of different sizes and materials (Stone, Metal, Glass, Neon). **Action**: One gear (Neon) is starting to glow and spin faster, while another (Stone) is slowing down. **Materials**: Matte Stone, Polished Metal, Glowing Neon. **Colors**: Indigo (#6366f1) for the active gear. **Constraints**: NO text. NO blur. Center composition."
+image_prompt: "**Concept**: Sequential activation in a cycle. **Style**: Minimalist. **Subject**: A circular arrangement of 8 small cubes. **Action**: One cube is glowing Emerald (#10b981), others are dim Indigo. **Colors**: Emerald vs Indigo contrast. **Constraints**: NO text."
 ---
 
 # 行业轮动：钱在流向哪里？

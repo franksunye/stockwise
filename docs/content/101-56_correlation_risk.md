@@ -3,8 +3,8 @@ title: "101-56: 投资组合的相关性风险"
 subtitle: "为什么持有 5 只科技股，不叫分散投资？"
 date: "2026-02-04"
 category: "The Money"
-image: "/images/learn/portfolio_correlation.png"
-image_prompt: "**Concept**: A conceptual 3D illustration of connected objects falling together. **Style**: Swiss Design, Geometric, Minimalist, Clean, Dark Mode (#050508). **Subject**: Five separate Indigo glass cubes suspended in space. They are all connected by thin, invisible-looking wires. **Action**: One cube is tilted and glowing red, and because of the wires, all the others are tilting in the same direction. **Materials**: Polished glass cubes, high contrast. **Colors**: Indigo (#6366f1) as the base, Rose Red (#f43f5e) for the risk propagation. **Constraints**: NO text. NO blur. Center composition."
+image: "/images/learn/correlation_risk.png"
+image_prompt: "**Concept**: Interconnected failure. **Style**: Minimalist. **Subject**: Three interlocking glass gears. **Action**: They move in unison, showing dependency. **Colors**: Indigo, Rose, and Emerald. **Constraints**: NO text."
 ---
 
 # 相关性：你以为的分散只是幻觉

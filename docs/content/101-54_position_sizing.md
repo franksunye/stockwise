@@ -4,7 +4,7 @@ subtitle: "不要一次性梭哈的艺术"
 date: "2026-02-04"
 category: "The Money"
 image: "/images/learn/position_sizing.png"
-image_prompt: "**Concept**: A conceptual 3D illustration of Incremental Position Building. **Style**: Swiss Design, Geometric, Minimalist, Clean, Dark Mode (#050508). **Subject**: A series of three Indigo rectangular blocks of increasing size, stacked like steps. **Action**: A small white light is essence-like, migrating from the smallest block to the medium one. **Materials**: Semi-transparent Indigo glass for the blocks. **Colors**: Indigo (#6366f1) for the steps. **Constraints**: NO text. NO blur. Center composition."
+image_prompt: "**Concept**: Allocation within a grid. **Style**: Swiss Geometric. **Subject**: A dark matte grid with holes. **Action**: Only 2 or 3 holes are filled with glowing Indigo (#6366f1) spheres. **Colors**: Minimalist Indigo. **Constraints**: NO text."
 ---
 
 # 仓位管理：把你的本金当成军队

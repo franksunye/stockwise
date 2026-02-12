@@ -4,7 +4,7 @@ subtitle: "会买的是徒弟，会卖才是师傅"
 date: "2026-02-04"
 category: "The Money"
 image: "/images/learn/profit_taking.png"
-image_prompt: "**Concept**: A conceptual 3D illustration of Harvesting. **Style**: Swiss Design, Geometric, Minimalist, Clean, Dark Mode (#050508). **Subject**: A large Emerald crystal being sliced by a vertical Indigo laser beam. A smaller piece is already separated and stored. **Action**: The laser is precisely dividing the growth. **Materials**: Crystalline Emerald, glowing Indigo light. **Colors**: Emerald (#10b981) for the profit, Indigo (#6366f1) for the active decision. **Constraints**: NO text. NO blur. Center composition."
+image_prompt: "**Concept**: Cashing out. **Style**: 3D Illustration. **Subject**: A clear glass cube. **Action**: Particles flowing from a funnel above into the cube, filling it halfway. **Colors**: Emerald Green (#10b981). **Constraints**: NO text."
 ---
 
 # 止盈：让利润落袋的勇气

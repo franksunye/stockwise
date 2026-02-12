@@ -4,7 +4,7 @@ subtitle: "为什么“解套”是世界上最难的事？"
 date: "2026-02-04"
 category: "The Money"
 image: "/images/learn/drawdown_math.png"
-image_prompt: "**Concept**: A conceptual 3D illustration of Non-linear Recovery. **Style**: Swiss Design, Geometric, Minimalist, Clean, Dark Mode (#050508). **Subject**: A red downward-sloping line (loss) and an Indigo upward-sloping curve (recovery). **Action**: The Indigo curve has a much steeper, more difficult angle to reach the same height as the red line. **Materials**: Matte finish, glowing lines. **Colors**: Rose Red (#f43f5e) for loss, Indigo (#6366f1) for recovery. **Constraints**: NO text. NO blur. Center composition."
+image_prompt: "**Concept**: The cost of recovery. **Style**: 3D Isometric. **Subject**: A smooth white ramp. **Action**: A rectangular portion of the ramp has collapsed downward into shadows. **Colors**: Sharp contrast, dark void. **Constraints**: NO text."
 ---
 
 # 回撤数学：为什么你输不起？

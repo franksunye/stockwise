@@ -4,7 +4,7 @@ subtitle: "预测未来，还是解释未来？"
 date: "2026-02-04"
 category: "The Machine"
 image: "/images/learn/llm_vs_quant.png"
-image_prompt: "**Concept**: A conceptual 3D illustration comparing human-like intelligence and cold mathematical precision. **Style**: Swiss Design, Geometric, Minimalist, Clean, Dark Mode (#050508). **Subject**: A soft, organic glowing sphere of Indigo particles (LLM) and a sharp, rigid Emerald crystal structure (Quant). **Action**: The two forms are floating side-by-side, subtly interacting through a thin data tether. **Materials**: Particle clouds, crystalline lattice. **Colors**: Indigo (#6366f1) for LLM, Emerald (#10b981) for Quant. **Constraints**: NO text. NO blur. Center composition."
+image_prompt: "**Concept**: Integration of fluid logic and rigid math. **Style**: Cyberpunk Swiss. **Subject**: A glowing Indigo liquid blob merging into a rigid white wireframe grid. **Action**: The two forms intertwine. **Colors**: Indigo, White, Black. **Constraints**: NO text."
 ---
 
 # 投研新纪元：语义与数字的合流

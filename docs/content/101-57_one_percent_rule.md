@@ -4,7 +4,7 @@ subtitle: "职业投资者的最后一套防弹衣"
 date: "2026-02-04"
 category: "The Money"
 image: "/images/learn/one_percent_rule.png"
-image_prompt: "**Concept**: A conceptual 3D illustration of a thin but unbreakable barrier. **Style**: Swiss Design, Geometric, Minimalist, Clean, Dark Mode (#050508). **Subject**: A massive grey wall being stopped by a tiny, glowing Emerald sliver (representing 1%). **Action**: The sliver is standing firm against the immense pressure of the wall. **Materials**: Concrete-like texture for the wall, crystalline glow for the sliver. **Colors**: Emerald (#10b981) for the protective sliver. **Constraints**: NO text. NO blur. Center composition."
+image_prompt: "**Concept**: Isolation of small risk. **Style**: Swiss Grid. **Subject**: A large 10x10 array of dim grey cubes. **Action**: One single cube in the corner glows intensely with Indigo (#6366f1). **Colors**: Dark contrast. **Constraints**: NO text."
 ---
 
 # 1% 准则：控制亏损的“核反应堆”

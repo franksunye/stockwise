@@ -3,8 +3,8 @@ title: "101-53: 盈亏比 (Risk/Reward Ratio)"
 subtitle: "为什么不需要经常对，也能赚大钱？"
 date: "2026-02-04"
 category: "The Money"
-image: "/images/learn/risk_reward.png"
-image_prompt: "**Concept**: A conceptual 3D illustration of Risk vs. Reward Ratio. **Style**: Swiss Design, Geometric, Minimalist, Clean, Dark Mode (#050508). **Subject**: A high-tech seesaw. On the 'Risk' side, a small red cube. On the 'Reward' side, a massive Emerald block consisting of several units. **Action**: The seesaw is tilted heavily towards the Emerald side. **Materials**: Glass, matte plastic, glowing edges. **Colors**: Emerald (#10b981) for the large blocks, Rose Red (#f43f5e) for the small cube. **Constraints**: NO text. NO blur. Center composition."
+image: "/images/learn/risk_reward_ratio.png"
+image_prompt: "**Concept**: Leverage and disproportion. **Style**: Clean 3D. **Subject**: A simple fulcrum with a long bar. **Action**: A small Rose cube on the short end balanced against a giant Emerald cube. **Colors**: Rose vs Emerald. **Constraints**: NO text."
 ---
 
 # 盈亏比：成功交易的数学秘密

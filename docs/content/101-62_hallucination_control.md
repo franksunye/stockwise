@@ -4,7 +4,7 @@ subtitle: "如何确保你的 AI 不在金融数据上瞎编？"
 date: "2026-02-04"
 category: "The Machine"
 image: "/images/learn/hallucination_control.png"
-image_prompt: "**Concept**: A conceptual 3D illustration of truth anchoring. **Style**: Swiss Design, Geometric, Minimalist, Clean, Dark Mode (#050508). **Subject**: A semi-transparent Indigo cube that is trying to shift its shape, but is held firmly in place by four heavy Emerald anchors at its corners. **Action**: The anchors are glowing, emitting a stabilizing field. **Materials**: Shifting glass cube, solid metal weight. **Colors**: Indigo (#6366f1) for the AI, Emerald (#10b981) for the data anchors. **Constraints**: NO text. NO blur. Center composition."
+image_prompt: "**Concept**: Filtering for clarity. **Style**: Geometric. **Subject**: A blurred grey orb. **Action**: It passes through a series of 3 Indigo (#6366f1) planes and emerges as a sharp Emerald cube. **Colors**: Indigo/Emerald. **Constraints**: NO text."
 ---
 
 # 幻觉：AI 投资最大的敌人

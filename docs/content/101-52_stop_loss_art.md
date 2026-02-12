@@ -3,8 +3,8 @@ title: "101-52: 止损的艺术"
 subtitle: "在哪儿下车，决定了你能不能活到终点"
 date: "2026-02-04"
 category: "The Money"
-image: "/images/learn/stop_loss.png"
-image_prompt: "**Concept**: A conceptual 3D illustration of a Safety Cut-off mechanism. **Style**: Swiss Design, Geometric, Minimalist, Clean, Dark Mode (#050508). **Subject**: A sleek Indigo rail with a sharp Rose Red gap in the middle. A small, perfect sphere is approaching the gap. **Action**: The gap (representing stop loss) is positioned to eject the sphere into safety before the rail collapses further. **Materials**: Brushed metal rail, glowing Rose Red indicator. **Colors**: Rose Red (#f43f5e) for the 'cut' zone, Indigo (#6366f1) for the main path. **Constraints**: NO text. NO blur. Center composition."
+image: "/images/learn/stop_loss_art.png"
+image_prompt: "**Concept**: A safety barrier blocking a fall. **Style**: Geometric. **Subject**: An Indigo prism falling vertically. **Action**: A Rose Red (#f43f5e) horizontal laser plane slicing through the path. **Colors**: Rose Red vs Dark Indigo. **Constraints**: NO text."
 ---
 
 # 止损：交易者的唯一保险单

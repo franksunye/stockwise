@@ -4,7 +4,7 @@ subtitle: "为什么让 AI 深度阅读，比让它大算力计算更重要？"
 date: "2026-02-04"
 category: "The Machine"
 image: "/images/learn/context_engineering.png"
-image_prompt: "**Concept**: A conceptual 3D illustration of layered intelligence. **Style**: Swiss Design, Geometric, Minimalist, Clean, Dark Mode (#050508). **Subject**: A series of horizontal Indigo glass plates stacked vertically. A white light is shining from the top, passing through all the plates. **Action**: Every time the light passes through a plate, it becomes more focused and detailed. **Materials**: Polished glass, high-intensity light beam. **Colors**: Indigo (#6366f1) for the context layers. **Constraints**: NO text. NO blur. Center composition."
+image_prompt: "**Concept**: Layered information. **Style**: Multi-layer 3D. **Subject**: Stacked glass sheets. **Action**: Data fragments (voxels) organized on different vertical layers. **Colors**: Shades of Indigo. **Constraints**: NO text."
 ---
 
 # 上下文：AI 投研的灵魂

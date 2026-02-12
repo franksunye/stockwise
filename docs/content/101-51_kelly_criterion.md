@@ -3,8 +3,8 @@ title: "101-51: 凯利公式 (The Kelly Criterion)"
 subtitle: "数学告诉我们：到底该买多少？"
 date: "2026-02-04"
 category: "The Money"
-image: "/images/learn/kelly_formula.png"
-image_prompt: "**Concept**: A conceptual 3D illustration of Mathematical Balance in betting. **Style**: Swiss Design, Geometric, Minimalist, Clean, Dark Mode (#050508). **Subject**: A floating mathematical equation symbols (f, p, b) arranged in a perfect circle around a central Emerald cube. **Action**: The symbols are perfectly balanced, held together by thin Indigo light rays. **Materials**: Glass-like symbols, matte central cube. **Colors**: Emerald (#10b981) for the core, Indigo (#6366f1) for the connecting rays. **Constraints**: NO text. NO blur. Center composition."
+image: "/images/learn/kelly_criterion.png"
+image_prompt: "**Concept**: Mathematical balance and sizing. **Style**: Swiss Design. **Subject**: A nested set of 3 transparent rings. **Action**: An Emerald sphere floats at the exact center, perfectly positioned. **Colors**: Emerald Green (#10b981) core. **Constraints**: NO text."
 ---
 
 # 凯利公式：告别“拍脑袋”仓位法
