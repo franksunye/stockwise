@@ -47,10 +47,10 @@ export default function AboutPage() {
           </div>
           <h1 className="text-4xl md:text-6xl font-black tracking-tighter italic leading-tight uppercase">
             为普通投资者 <br />
-            <span className="bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">构建理性的堡垒</span>
+            <span className="bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">构建理性的交易防线</span>
           </h1>
           <p className="text-lg text-slate-400 font-medium leading-relaxed max-w-2xl">
-            在波诡云谲的金融市场中，散户最大的敌人往往不是信息不对称，而是人性中的贪婪、恐惧与优柔寡断。
+            它是你口袋里的分析助手、随身的决策参谋，更是一位恪守原则的交易助理。
           </p>
         </motion.div>
 
