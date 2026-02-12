@@ -197,10 +197,11 @@ class SynthesisStep(BaseStep):
   "confidence": 0.7,
   "summary": "股价处于超买区间，MACD死叉提示动能减弱",
   "reasoning_trace": [
-    {{ "step": "trend", "data": "MA20=607.83，收盘632.5", "conclusion": "多头排列" }},
-    {{ "step": "momentum", "data": "RSI=62，MACD死叉", "conclusion": "动能减弱" }},
-    {{ "step": "level", "data": "收盘632.5，布林上轨627.13", "conclusion": "超买状态" }},
-    {{ "step": "decision", "data": "综合判断：虽然趋势向上，但面临短期回调风险", "conclusion": "观望" }}
+    {{ "step": "trend", "data": "MA5/10/20呈空头排列，价格回撤至MA60支撑位附近", "conclusion": "趋势转向" }},
+    {{ "step": "momentum", "data": "MACD高度收敛且出现金叉预兆，RSI回撤至40附近企稳", "conclusion": "动能筑底" }},
+    {{ "step": "levels", "data": "下方支撑位在6.06密集区，上方阻力位于10日均线6.29处", "conclusion": "空间受限" }},
+    {{ "step": "context", "data": "大盘情绪低迷，但个股所属行业表现强于基准，具一定韧性", "conclusion": "防御性强" }},
+    {{ "step": "decision", "data": "综合判断：指标虽低位修复但缺乏显著增量确认，维持观望", "conclusion": "观望" }}
   ],
   "key_levels": {{ "support": 588.52, "resistance": 638.5, "stop_loss": 571.07 }},
   "tactics": {{
