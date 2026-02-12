@@ -169,9 +169,9 @@ class SynthesisStep(BaseStep):
 **仅需填写以下 3 个字段**，其他字段请直接复制上方强制值，组合成一个完整的 JSON：
 1. `"summary"`: 用1句话总结当前技术面状态（评分{score_val:+d}）
 2. `"reasoning_trace"`: 必须输出包含以下 3 个对象的列表结构：
-   - { "step": "trend", "data": "从上方分析中详细提取 MA5/MA10/MA20 数值及均线状态", "conclusion": "趋势结论" }
-   - { "step": "momentum", "data": "从上方提取记录的 MACD 柱状值/RSI 数值/KDJ 状态", "conclusion": "动能评估" }
-   - { "step": "decision", "data": "综合以上技术信号的最终评级和裁决理由", "conclusion": "{decision_conclusion}" }
+   - {{ "step": "trend", "data": "从上方分析中详细提取 MA5/MA10/MA20 数值及均线状态", "conclusion": "趋势结论" }}
+   - {{ "step": "momentum", "data": "从上方提取记录的 MACD 柱状值/RSI 数值/KDJ 状态", "conclusion": "动能评估" }}
+   - {{ "step": "decision", "data": "综合以上技术信号的最终评级和裁决理由", "conclusion": "{decision_conclusion}" }}
 3. `"signal"`: {calculated_signal} (请直接填入)
 
 请直接输出完整 JSON，不要添加任何解释。
