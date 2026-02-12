@@ -236,17 +236,22 @@ class SynthesisStep(BaseStep):
         boll_lower = latest.get('boll_lower', 0) or 0
         ma20 = latest.get('ma20', 0)
         
-        # 1. Backfill key_levels if missing (only for non-lite models, lite models have it forced later)
+        # 0. Pre-initialization to prevent KeyError
+        if "key_levels" not in parsed:
+            parsed["key_levels"] = {}
+        
+        # 1. Backfill key_levels if missing or incomplete
         model_name = d.get('model_name', '').lower()
-        if 'lite' not in model_name:
-            if not parsed.get('key_levels') or not parsed['key_levels'].get('support'):
-                high_10d = max([p.get('high', 0) for p in daily_prices[-10:]]) if daily_prices else 0
-                stop_ref = boll_lower * 0.97 if boll_lower > 0 else (latest.get('close', 0) or 0) * 0.95
-                parsed['key_levels'] = {
-                    "support": round(boll_lower or ma20, 2),
-                    "resistance": round(high_10d, 2),
-                    "stop_loss": round(stop_ref, 2)
-                }
+        # Non-lite models: Fill if missing support
+        # Lite models: Explicitly forced later, but initialize here to allow tactics backfill
+        if not parsed['key_levels'].get('support'):
+            high_10d = max([p.get('high', 0) for p in daily_prices[-10:]]) if daily_prices else 0
+            stop_ref = boll_lower * 0.97 if boll_lower > 0 else (latest.get('close', 0) or 0) * 0.95
+            parsed['key_levels'].update({
+                "support": round(boll_lower or ma20, 2),
+                "resistance": round(high_10d, 2),
+                "stop_loss": round(stop_ref, 2)
+            })
             
         # 2. Backfill tactics if missing or empty
         if not parsed.get('tactics') or not parsed['tactics'].get('holding'):
