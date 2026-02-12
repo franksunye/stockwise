@@ -1,5 +1,6 @@
 from typing import Dict, Any, Optional
 import json
+import os
 from loguru import logger
 
 from .base import BasePredictionModel
@@ -30,8 +31,17 @@ class HunyuanChainModel(BasePredictionModel):
         # 2. Instantiate Steps
         self.steps = StepFactory.create_steps(self.strategy_config["steps"])
         
-        # 3. Setup Client (using existing backend 'hunyuan' config)
-        self.client = LLMClient(provider="hunyuan")
+        # 3. Setup Client (using database config)
+        api_key = os.getenv(self.config.get("api_key_env", ""), "")
+        base_url = self.config.get("base_url")
+        model_name = self.config.get("model", "hunyuan-lite")
+        
+        self.client = LLMClient(
+            provider="hunyuan",
+            base_url=base_url,
+            api_key=api_key,
+            model=model_name
+        )
         
         # 4. Instantiate Runner
         self.runner = ChainRunner(
