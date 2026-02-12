@@ -34,12 +34,12 @@ image_prompt: "**Concept**: Leverage and disproportion. **Style**: Clean 3D. **S
 
 ---
 
-## 🛡️ StockWise 如何优化你的 R/R？
+## 🛡️ ZISO 如何优化你的 R/R？
 
 我们强烈反对在“压力位下方”买入。StockWise 的核心评估逻辑之一就是 **“赔率扫描”**。
 
 **Actionable Tactic：三倍原则**
-在按下“买入”键前，在 StockWise 图表上画三道线：
+在按下“买入”键前，在 ZISO 图表上画三道线：
 1.  **风险线 (Risk)**：止损价到买入价的距离。
 2.  **目标线 (Reward)**：买入价到目标位的距离。
 3.  **决策**：如果 **Reward 小于 Risk 的 3 倍**，请放弃这笔交易。 

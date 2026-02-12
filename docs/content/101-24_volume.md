@@ -21,7 +21,7 @@ image_prompt: "A dark chart. The price candles are misty and translucent (ghostl
 
 ## 1. 量价关系的四大定律
 
-StockWise 的 AI 引擎使用了经典的 **VPA (Volume Price Analysis)** 逻辑来验证每一个信号的真伪。
+ZISO 的 AI 引擎使用了经典的 **VPA (Volume Price Analysis)** 逻辑来验证每一个信号的真伪。
 
 ### A. 放量上涨 (Volume Up, Price Up) ✅
 *   **解读**：多头力量强劲，且大家都不想卖（惜售）。新的买盘不断涌入。
@@ -53,7 +53,7 @@ StockWise 的 AI 引擎使用了经典的 **VPA (Volume Price Analysis)** 逻辑
 
 ---
 
-## 3. StockWise AI 的"天量法则"
+## 3. ZISO AI 的"天量法则"
 
 我们的 AI 有一个特殊的风控参数：**Extreme Volume Alert (天量预警)**。
 

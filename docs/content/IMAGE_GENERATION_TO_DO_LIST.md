@@ -1,6 +1,6 @@
-# StockWise 101: 视觉资产待办清单 (Detailed Image Ops)
+# ZISO 101: 视觉资产待办清单 (Detailed Image Ops)
 
-此清单旨在指导完成 StockWise Academy 所有文章的视觉配图补全。所有设计必须符合 **"Silent Math" (沉默的数学)** 品牌调性：**几何、极简、深色背景、Indigo(#6366f1)/Rose(#f43f5e)/Emerald(#10b981) 配色**。
+此清单旨在指导完成 ZISO Academy 所有文章的视觉配图补全。所有设计必须符合 **"Silent Math" (沉默的数学)** 品牌调性：**几何、极简、深色背景、Indigo(#6366f1)/Rose(#f43f5e)/Emerald(#10b981) 配色**。
 
 ---
 

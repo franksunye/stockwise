@@ -34,11 +34,11 @@ image_prompt: "**Concept**: Allocation within a grid. **Style**: Swiss Geometric
 
 ---
 
-## ⚖️ 实战：StockWise 仓位级配
+## ⚖️ 实战：ZISO 仓位级配
 
 **Actionable Tactic：金字塔建仓法**
-1.  **观察段**：StockWise 信号初现，建立底仓。
-2.  **加仓段**：股价放量突破 StockWise 标记的“强阻力位”，利润已超过 5%，加仓。
+1.  **观察段**：ZISO 信号初现，建立底仓。
+2.  **加仓段**：股价放量突破 ZISO 标记的“强阻力位”，利润已超过 5%，加仓。
 3.  **保护段**：将止损位移至成本价，确保这笔交易不再亏损。
 
 **学会分段撤退。不要在第一波冲锋就派上所有的预备队。**

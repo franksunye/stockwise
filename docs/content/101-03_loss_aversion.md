@@ -47,11 +47,11 @@ image_prompt: "A split brain illustration. One side is holding a small diamond (
 
 ---
 
-## 3. StockWise 的解法：AI 没有自尊心
+## 3. ZISO 的解法：AI 没有自尊心
 
 AI 不知道什么是"疼"，也不在乎"面子"。
 
-在 StockWise 的算法里，每一天都是**Day 1**。
+在 ZISO 的算法里，每一天都是**Day 1**。
 AI 不会管你的持仓成本是多少（Cost Basis）。它只看未来：
 *   **问题**："基于目前的势头，明天涨的概率大，还是跌的概率大？"
 *   **如果跌的概率大**：AI 会发出 **Short/Side** 信号，建议离场。

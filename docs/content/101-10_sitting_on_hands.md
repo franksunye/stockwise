@@ -30,12 +30,12 @@ image_prompt: "**Concept**: A conceptual 3D illustration of Patience and Discipl
 
 ---
 
-## ⚖️ 实战：StockWise 的“守猎”哲学
+## ⚖️ 实战：ZISO 的“守猎”哲学
 
-StockWise 并不鼓励每天冲杀。
+ZISO 并不鼓励每天冲杀。
 
 **Actionable Tactic：猎人日记**
-1.  **信号过滤**：只有当 StockWise 的 AI 评分超过 0.7 且趋势一致时才考虑出击。
+1.  **信号过滤**：只有当 ZISO 的 AI 评分超过 0.7 且趋势一致时才考虑出击。
 2.  **强制休息**：当市场处于震荡市（EMA 指向混乱）时，强制从交易终端移除资金。
 3.  **现金也是头寸**：在你的资产配置表里，给“现金”留一个位置。
 

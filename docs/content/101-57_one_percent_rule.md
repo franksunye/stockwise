@@ -33,11 +33,11 @@ image_prompt: "**Concept**: Isolation of small risk. **Style**: Swiss Grid. **Su
 
 ---
 
-## ⚖️ 实战：StockWise 仓位倒推法
+## ⚖️ 实战：ZISO 仓位倒推法
 
 **Actionable Tactic：逆向仓位公式**
 在你按下买入键前，执行以下三步：
-1.  **确定止损位**：利用 StockWise 标记的“风险阈值”（比如下方 5% 处）。
+1.  **确定止损位**：利用 ZISO 标记的“风险阈值”（比如下方 5% 处）。
 2.  **计算损失限额**：本金 $1,000,000 \cdot 1\% = 10,000$。
 3.  **确定买入金额**：$10,000 / 0.05 = 200,000$。
 

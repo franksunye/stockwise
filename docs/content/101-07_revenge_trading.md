@@ -36,12 +36,12 @@ image_prompt: "**Concept**: A conceptual 3D illustration of Revenge Trading. **S
 
 ---
 
-## ⚖️ 实战：StockWise 的“熔断机制”
+## ⚖️ 实战：ZISO 的“熔断机制”
 
-StockWise 是如何防止这种冲动的？
+ZISO 是如何防止这种冲动的？
 
 ### 1. 强制静态化
-StockWise 提倡 **“Plan the Trade, Trade the Plan.”** 所有的交易信号都应该在开盘前的冷静状态下产生。如果有信号在盘中突然冒出，且不符合预设规则，AI 评分会显著降低，提醒你回归理性。
+ZISO 提倡 **“Plan the Trade, Trade the Plan.”** 所有的交易信号都应该在开盘前的冷静状态下产生。如果有信号在盘中突然冒出，且不符合预设规则，AI 评分会显著降低，提醒你回归理性。
 
 ### 2. 账户隔离思维
 请执行以下 **Actionable Tactic**：

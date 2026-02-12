@@ -34,12 +34,12 @@ image_prompt: "**Concept**: A conceptual 3D illustration of two paths moving in 
 
 ---
 
-## ⚖️ 实战：StockWise 的动能锚点
+## ⚖️ 实战：ZISO 的动能锚点
 
 背离并不代表股价会立刻反转。背离可能持续很久（所谓的“背了又背”）。
 
 **Actionable Tactic：双重验证法**
-1.  **观察背离**：当 StockWise 的指标面板中 RSI 或 MACD 出现明显与价格相反的走势。
+1.  **观察背离**：当 ZISO 的指标面板中 RSI 或 MACD 出现明显与价格相反的走势。
 2.  **等待结构破坏**：背离只是预警。你需要在背离发生后，看到价格跌破最近的一个支撑位或趋势线（右侧确认），方可视为变盘信号。
 3.  **大周期优先**：周线级别的背离一旦发生，破坏力/修复力是日线级别的数倍。
 

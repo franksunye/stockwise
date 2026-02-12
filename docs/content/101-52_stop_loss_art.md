@@ -11,7 +11,7 @@ image_prompt: "**Concept**: A safety barrier blocking a fall. **Style**: Geometr
 
 > *"如果不幸买入了烂股票，最好的方法就是立刻卖掉。"* —— 杰西·利弗莫尔 (Jesse Livermore)
 
-在 StockWise 的哲学里，**“止损”不是亏损，它是成本。** 就像做生意要交房租一样，止损是你在市场中获取盈利必须付出的租金。
+在 ZISO 的哲学里，**“止损”不是亏损，它是成本。** 就像做生意要交房租一样，止损是你在市场中获取盈利必须付出的租金。
 
 不愿交租金的人，最终会被市场连人带货一起扔到大街上。
 
@@ -30,7 +30,7 @@ image_prompt: "**Concept**: A safety barrier blocking a fall. **Style**: Geometr
 ### 1. 固定百分比止损 (Static Cut)
 设定买入价 -5% 或 -10% 为红线。简单，但容易被市场噪音（随机波动）误伤。
 
-### 2. 结构化止损 (Structural Stop) - **StockWise 推荐**
+### 2. 结构化止损 (Structural Stop) - **ZISO 推荐**
 将止损位设在关键支撑位、前低或整数关口下方。如果这些位置被跌破，说明你的买入逻辑已经**失效**。
 
 ### 3. 波动率止损 (ATR-based Stop)
@@ -38,7 +38,7 @@ image_prompt: "**Concept**: A safety barrier blocking a fall. **Style**: Geometr
 
 ---
 
-## ⚖️ 实战：StockWise 的“防火墙”
+## ⚖️ 实战：ZISO 的“防火墙”
 
 AI 每一份报告都会标记 **“风险阈值”**。
 

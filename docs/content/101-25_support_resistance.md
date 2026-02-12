@@ -48,10 +48,10 @@ image_prompt: "A war map. A fortress wall labeled '$100.00' is being bombarded b
 
 ---
 
-## 3. StockWise 的 AI 怎么画线？
+## 3. ZISO 的 AI 怎么画线？
 
 你不需要自己去连线。
-StockWise 的 `Quantitative Engine` 会扫描过去 250 天的 K 线，通过聚类算法自动寻找：
+ZISO 的 `Quantitative Engine` 会扫描过去 250 天的 K 线，通过聚类算法自动寻找：
 
 *   **Swing Highs/Lows**：那些最尖锐的转折点。
 *   **Volume Nodes**：成交量最密集的成交区（筹码峰）。
@@ -66,7 +66,7 @@ AI 会告诉你：
 看着大涨，兴奋地追进去买入。结果刚买进去，股价就在 $100 见顶回落。
 因为你买在了碉堡门口。
 
-**StockWise AI 的纪律建议**：
+**ZISO AI 的纪律建议**：
 *   **做多**：在支撑位附近买（盈亏比极高），或者等等效突破压力位并**回踩确认**后买。
 *   **做空**：在压力位附近卖，或者等跌破支撑位并**反抽不过**后卖。
 

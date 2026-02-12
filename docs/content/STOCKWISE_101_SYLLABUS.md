@@ -1,8 +1,8 @@
-# StockWise 101: 知守日课 (The Survival Manual)
+# ZISO 101: 知守日课 (The Survival Manual)
 > **Subtitle**: 知其白，守其黑。AI 时代的散户生存日课。
 > **Philosophy**: Rationality, Discipline, and Data-Driven Decision Making.
 
-This is the master syllabus for the StockWise content strategy. It is designed to be a comprehensive guide that educates users, builds trust, and establishes StockWise as a thought leader in AI-assisted investing.
+This is the master syllabus for the ZISO content strategy. It is designed to be a comprehensive guide that educates users, builds trust, and establishes ZISO as a thought leader in AI-assisted investing.
 
 ---
 
@@ -79,13 +79,13 @@ This is the master syllabus for the StockWise content strategy. It is designed t
 
 ---
 
-## Module 4: The Machine (AI & StockWise Mechanics)
+## Module 4: The Machine (AI & ZISO Mechanics)
 *Demystifying the Black Box.*
 
 - **101-61**: **LLMs vs. Quant Models**
   - *Concept*: Understanding the difference between statistical probability and semantic reasoning.
 - **101-62**: **The "Hallucination" Problem**
-  - *Concept*: How StockWise constrains AI with hard data anchors.
+  - *Concept*: How ZISO constrains AI with hard data anchors.
 - **101-63**: **Context Engineering**
   - *Concept*: Feeding the AI more than just price (News, Sentiment, Fundamentals).
 - **101-64**: **EOD (End-of-Day) Analysis vs. Real-time**

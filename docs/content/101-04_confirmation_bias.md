@@ -46,16 +46,16 @@ image_prompt: "A person wearing VR goggles labeled 'Bullish View'. They are look
 
 ---
 
-## 3. StockWise 的解法：AI 是那个唱反调的人 (Devil's Advocate)
+## 3. ZISO 的解法：AI 是那个唱反调的人 (Devil's Advocate)
 
-StockWise 的人工智能设计初衷，就是打破你的回音室。
+ZISO 的人工智能设计初衷，就是打破你的回音室。
 
 我们的新闻抓取引擎（News Engine）被设定为 **"中性 (Neutral)"** 甚至 **"逆向 (Contrarian)"**。
 
 ### 🔍 事实注入 (Fact Injection)
 当 AI 分析一只股票时，它不仅搜索利好，它会**强制搜索风险**。
 
-在 StockWise 的 Prompt（提示词）中，有一条核心指令：
+在 ZISO 的 Prompt（提示词）中，有一条核心指令：
 > *"Critical Thinking: actively search for bearish factors even if the trend is bullish. What could go wrong?"*
 > *(批判性思维：即使趋势看涨，也要主动寻找利空因素。可能会出什么问题？)*
 
@@ -65,7 +65,7 @@ StockWise 的人工智能设计初衷，就是打破你的回音室。
 2.  **Hard Facts**: RSI 背离、量价配合度低、主力资金流出。
 3.  **Risk Alert**: "虽然虽然所有人在吹多，但技术指标显示动能衰竭。"
 
-如果你买入了，而 StockWise 给你发了一个红色的警告。
+如果你买入了，而 ZISO 给你发了一个红色的警告。
 请不要关掉通知。**那个刺耳的声音，才是你在这场只有赢家和输家的游戏中，唯一的朋友。**
 
 ---

@@ -33,7 +33,7 @@ image_prompt: "**Concept**: Interconnected failure. **Style**: Minimalist. **Sub
 
 ---
 
-## ⚖️ 实战：StockWise 跨领域扫描
+## ⚖️ 实战：ZISO 跨领域扫描
 
 **Actionable Tactic：账户净化**
 1.  **标签化检查**：检查你的持仓。如果它们都属于“科技”、“中概”或“成长”，你需要警惕。

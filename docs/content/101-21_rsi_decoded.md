@@ -54,7 +54,7 @@ RSI 就是**油门深浅**的读数。
 
 ---
 
-## 3. StockWise 的 AI 怎么用 RSI？
+## 3. ZISO 的 AI 怎么用 RSI？
 
 我们的 AI 并不关心 RSI 是 70 还是 30。它关心的是 **"RSI 处于哪个区间" (Regime)** 和 **"结构" (Structure)**。
 

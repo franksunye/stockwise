@@ -17,7 +17,7 @@ image_prompt: "**Concept**: A conceptual 3D illustration of a hollow shell. **St
 
 某热门股在平台整理了三个月，突然放出一根大阳线，股价创出近期新高。全网大 V 都在喊“突破了，上车！”
 *   **信号 A**：价格确实冲过了阻力位。
-*   **信号 B**：StockWise 的 AI 评分只有 0.4。
+*   **信号 B**：ZISO 的 AI 评分只有 0.4。
 *   **信号 C**：成交量虽然放大了，但主要集中在开盘前 30 分钟，随后一路缩量走低。
 
 ---
@@ -40,7 +40,7 @@ image_prompt: "**Concept**: A conceptual 3D illustration of a hollow shell. **St
 
 **Actionable Tactic：三日观察法**
 突破发生后，如果第 3 天收盘价依然能站在突破位上方，这才是有效突破。
-**StockWise 存在的目的，就是为了在你热血沸腾想梭哈时，泼上一盆冷水，让你看看水面下的暗礁。**
+**ZISO 存在的目的，就是为了在你热血沸腾想梭哈时，泼上一盆冷水，让你看看水面下的暗礁。**
 
 ---
 *下一篇：[101-83] 实战案例：避开下坠飞刀。*

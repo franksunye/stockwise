@@ -17,7 +17,7 @@ image_prompt: "**Concept**: A conceptual 3D illustration of gravity and danger. 
 
 某行业巨头跌去了 80%，PE 已经到了历史最低。股民们群情激奋：“这是捡钱的机会啊！”
 *   **状态 A**：股价连跌 5 个月。
-*   **状态 B**：StockWise 的 AI 评分持续在 0.1 - 0.3 徘徊。
+*   **状态 B**：ZISO 的 AI 评分持续在 0.1 - 0.3 徘徊。
 *   **状态 C**：均线系统（MA20/60/250）呈现完美的空头排列。
 
 ---
@@ -45,4 +45,4 @@ image_prompt: "**Concept**: A conceptual 3D illustration of gravity and danger. 
 **便宜不是买入的理由，止跌才是。**
 
 ---
-*恭喜你！至此你已经完成了 StockWise 101 的全部核心指南。你已经比 95% 的散户更懂这个市场的生存法则。*
+*恭喜你！至此你已经完成了 ZISO 101 的全部核心指南。你已经比 95% 的散户更懂这个市场的生存法则。*

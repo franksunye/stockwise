@@ -19,7 +19,7 @@ image_prompt: "**Concept**: A conceptual 3D illustration of a candlestick patter
 
 ## 💎 AI 真正看重的两个形态
 
-在 StockWise 的语义识别中，我们并不给成百上千的复杂形态建模，我们只抓取最具**能量转换 (Energy Shift)** 特征的两类：
+在 ZISO 的语义识别中，我们并不给成百上千的复杂形态建模，我们只抓取最具**能量转换 (Energy Shift)** 特征的两类：
 
 ### 1. 影线长针 (The Pin Bar / Trap)
 无论是上影线还是下影线。长影线代表了**极速的拒绝**。
@@ -40,9 +40,9 @@ image_prompt: "**Concept**: A conceptual 3D illustration of a candlestick patter
 
 ---
 
-## ⚖️ 实战：StockWise 的形态过滤法
+## ⚖️ 实战：ZISO 的形态过滤法
 
-我们不会因为一个 K 线形态就给出买入建议。StockWise 会进行以下多维验证：
+我们不会因为一个 K 线形态就给出买入建议。ZISO 会进行以下多维验证：
 
 **Actionable Tactic：形态三部曲**
 1.  **形态确认**：出现了类似 Pin Bar 或 Engulfing 的高能量形态。

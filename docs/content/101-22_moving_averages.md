@@ -36,7 +36,7 @@ image_prompt: "A 3D visualization of a stock chart where the Moving Average line
 
 ---
 
-## 2. StockWise 的三条生命线
+## 2. ZISO 的三条生命线
 
 我们的 AI 不看那些乱七八糟的均线（什么 MA7, MA13... 那是玄学）。我们只看三条基于**交易周期**的均线：
 
@@ -47,7 +47,7 @@ image_prompt: "A 3D visualization of a stock chart where the Moving Average line
 ### 🐘 生命线 (MA60 - The Quarter)
 *   **意义**：中期趋势。机构的季度考核线。
 *   **用法**：MA60 向上，说明中期处于多头市场。只要这条线不拐头向下，中途的每一次大跌（只要不破线）都是**黄金坑**。
-*   **AI 逻辑**：如果 MA60 向下（空头排列），StockWise AI 绝不会给出置信度 > 0.6 的 "Long" 信号。因为你在逆大势。
+*   **AI 逻辑**：如果 MA60 向下（空头排列），ZISO AI 绝不会给出置信度 > 0.6 的 "Long" 信号。因为你在逆大势。
 
 ### 🐳 战略线 (MA250 - The Year)
 *   **意义**：牛熊分界线。
@@ -58,7 +58,7 @@ image_prompt: "A 3D visualization of a stock chart where the Moving Average line
 
 ## 3. "葛兰维尔八大法则"的 AI 版
 
-在 StockWise 里，我们将经典的葛兰维尔法则（Granville Rules）简化为两条核心 AI 规则：
+在 ZISO 里，我们将经典的葛兰维尔法则（Granville Rules）简化为两条核心 AI 规则：
 
 1.  **回踩确认 (The Kiss)**：
     *   股价突破均线后，缩量回踩不破均线，再次拉起。

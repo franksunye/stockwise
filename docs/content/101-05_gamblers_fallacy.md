@@ -47,21 +47,21 @@ image_prompt: "A roulette wheel where every number is red. A gambler is aggressi
 
 ---
 
-## 3. StockWise 的解法：趋势跟踪 (Trend Following)
+## 3. ZISO 的解法：趋势跟踪 (Trend Following)
 
-StockWise 的核心 AI 逻辑是 **"顺势而为"**。
+ZISO 的核心 AI 逻辑是 **"顺势而为"**。
 
 当 AI 看到一只股票连跌 5 天时，它不会思考"它是不是跌过头了"，它会计算：
 *   **动能 (Momentum)**：下跌是否在加速？
 *   **量能 (Volume)**：抛压是否有枯竭的迹象？
 
-如果动能依然强劲，StockWise 会给出一个反直觉的建议：**"不要接飞刀 (Don't catch a falling knife)"**。
+如果动能依然强劲，ZISO 会给出一个反直觉的建议：**"不要接飞刀 (Don't catch a falling knife)"**。
 
 ### AI 的信号逻辑
 我们的模型通过学习数百万次历史行情发现：
 > **一只刚刚创新低的股票，继续创新低的概率，远大于立即反转的概率。**
 
-所以，当你在心里默念"快反弹、快反弹"的时候，StockWise 的 AI 会冷冷地推送：
+所以，当你在心里默念"快反弹、快反弹"的时候，ZISO 的 AI 会冷冷地推送：
 > **Signal: Side/Short**
 > **Reason**: Downward momentum accelerating. No sign of bottom structure. Wait for stabilization.
 > *(下行动能加速。无底部结构迹象。建议等待企稳。)*

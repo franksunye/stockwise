@@ -11,7 +11,7 @@ image_prompt: "**Concept**: A conceptual 3D illustration of a precision tool sha
 
 > *"给 AI 一个身份，它就还你一个世界。"* 
 
-如果你直接问 ChatGPT“明天股票会涨吗？”，它会给你一段废话。但如果你用 **StockWise 的投研 Prompt** 询问，它会进行深度的逻辑推演。这就是我们的技术核心。
+如果你直接问 ChatGPT“明天股票会涨吗？”，它会给你一段废话。但如果你用 **ZISO 的投研 Prompt** 询问，它会进行深度的逻辑推演。这就是我们的技术核心。
 
 ---
 
@@ -42,7 +42,7 @@ image_prompt: "**Concept**: A conceptual 3D illustration of a precision tool sha
 2.  **逻辑端**：这个变量是否真实改变了公司的盈利能力？
 3.  **输出端**：在目前的赔率下，亏损 5% 和盈利 15% 哪个可能性更大？
 
-**如果你能像 StockWise 一样思考，你就已经跑赢了 90% 的感性散户。**
+**如果你能像 ZISO 一样思考，你就已经跑赢了 90% 的感性散户。**
 
 ---
 *下一篇：[101-67] 混合系统：AI 辅助下的终极决策。*

@@ -35,12 +35,12 @@ image_prompt: "**Concept**: A conceptual 3D illustration of Looking Backward vs 
 
 ---
 
-## ⚖️ 实战：StockWise 的“时间戳记录法”
+## ⚖️ 实战：ZISO 的“时间戳记录法”
 
-StockWise 强调 **“静态计划”** 的原因就在于此：
+ZISO 强调 **“静态计划”** 的原因就在于此：
 
 **Actionable Tactic：客观复盘**
-1.  **保存快照**：在开盘前，截取 StockWise 的分析评分。无论涨跌，以此时的评分为准。
+1.  **保存快照**：在开盘前，截取 ZISO 的分析评分。无论涨跌，以此时的评分为准。
 2.  **不准修正**：盘后复盘时，必须翻看盘前的计划。如果计划里没写买入，那即便涨停了，也与你无关。
 3.  **接受随机性**：承认有些事情就是无法预知的。
 

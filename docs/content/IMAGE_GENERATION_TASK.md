@@ -1,4 +1,4 @@
-# StockWise 101 Image Generation Task List
+# ZISO 101 Image Generation Task List
 
 ## 📌 Status Dashboard
 - **Total Articles**: 40

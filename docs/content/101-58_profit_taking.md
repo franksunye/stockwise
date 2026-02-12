@@ -18,7 +18,7 @@ image_prompt: "**Concept**: Cashing out. **Style**: 3D Illustration. **Subject**
 ## 💎 动态止盈的三大策略
 
 ### 1. 目标位止盈 (Target Exit)
-利用 StockWise 标记的“历史强阻力位”或斐波那契回撤点。到位置，不废话，先卖一半。
+利用 ZISO 标记的“历史强阻力位”或斐波那契回撤点。到位置，不废话，先卖一半。
 
 ### 2. 移动止盈 (Trailing Stop)
 不预设终点，而是预设**“回撤限额”**。比如：只要价格不跌破 EMA20，我就一直拿着。如果从最高点回撤 5%，我就清仓。
@@ -38,11 +38,11 @@ image_prompt: "**Concept**: Cashing out. **Style**: 3D Illustration. **Subject**
 
 ---
 
-## ⚖️ 实战：StockWise 风险度量
+## ⚖️ 实战：ZISO 风险度量
 
 **Actionable Tactic：利润保护法**
 1.  **设置保本止损**：当股价脱离成本区 5% 以上，将你的初始止损位移至**买入成本价**。
-2.  **观察背离**：如果股价创新高但 StockWise 的 AI 评分在跳水，这是极致的止盈信号。
+2.  **观察背离**：如果股价创新高但 ZISO 的 AI 评分在跳水，这是极致的止盈信号。
 3.  **接受波动**：如果你选择了 Trailng Stop，就要接受损失最后一小截利润的代价。
 
 **你永远赚不到不属于你认知的钱。**

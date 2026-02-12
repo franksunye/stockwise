@@ -9,7 +9,7 @@ image_prompt: "**Concept**: Layered information. **Style**: Multi-layer 3D. **Su
 
 # 上下文：AI 投研的灵魂
 
-> *"一段没有上下文的价格，只是一个随机波动的数字。"* —— StockWise 首席架构师
+> *"一段没有上下文的价格，只是一个随机波动的数字。"* —— ZISO 首席架构师
 
 如果你看到一个数据：**“某股票成交额放大 10 倍”**。
 *   如果上下文是：该股刚发布重大利好。—— 结论：主升浪开启，追！
@@ -19,7 +19,7 @@ image_prompt: "**Concept**: Layered information. **Style**: Multi-layer 3D. **Su
 
 ---
 
-## 💎 StockWise 的“情报拼图”
+## 💎 ZISO 的“情报拼图”
 
 我们为 AI 构建的上下文工程包括四个维度：
 1.  **量价历史**：过去一年的支撑位、压力位、筹码密集区。
@@ -39,7 +39,7 @@ image_prompt: "**Concept**: Layered information. **Style**: Multi-layer 3D. **Su
 ## ⚖️ 实战：深度简报的价值
 
 **Actionable Tactic：逻辑链条检查**
-当你阅读 StockWise 的深度简报时，请注意它的 **“推理逻辑链”**。
+当你阅读 ZISO 的深度简报时，请注意它的 **“推理逻辑链”**。
 1.  **起因**：发现了什么异常？
 2.  **背景**：在这个位置历史上出现过什么？
 3.  **结论**：目前的赔率是否划算？

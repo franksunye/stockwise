@@ -9,9 +9,9 @@ image_prompt: "**Concept**: Scale of time decomposition. **Style**: Minimalist. 
 
 # 节奏：噪音与信号的博弈
 
-> *"盘中是情绪的狂欢，盘后是理性的审视。"* —— StockWise 算法逻辑
+> *"盘中是情绪的狂欢，盘后是理性的审视。"* —— ZISO 算法逻辑
 
-很多初学者希望 StockWise 给出秒级的实时买卖建议。但我们认为，对散户最友好的战场是 **EOD (End of Day) - 静态盘后分析**。
+很多初学者希望 ZISO 给出秒级的实时买卖建议。但我们认为，对散户最友好的战场是 **EOD (End of Day) - 静态盘后分析**。
 
 ---
 
@@ -37,10 +37,10 @@ image_prompt: "**Concept**: Scale of time decomposition. **Style**: Minimalist. 
 
 ---
 
-## ⚖️ 实战：StockWise 运行逻辑
+## ⚖️ 实战：ZISO 运行逻辑
 
 **Actionable Tactic：静态计划法**
-1.  **当晚 8 点后**：查看 StockWise 针对当日行情的深度简报和评分。
+1.  **当晚 8 点后**：查看 ZISO 针对当日行情的深度简报和评分。
 2.  **制定次日计划**：设定好触发位和止损位，在脑海中演习一遍。
 3.  **次日执行**：除非发生重大黑天鹅，否则只执行昨晚制定的计划。
 

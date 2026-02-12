@@ -39,10 +39,10 @@ image_prompt: "**Concept**: The cost of recovery. **Style**: 3D Isometric. **Sub
 
 ## ⚖️ 实战：StockWise 的防御底线
 
-StockWise 的所有 AI 算法，首要任务都是 **“防止大额回撤”**。
+ZISO 的所有 AI 算法，首要任务都是 **“防止大额回撤”**。
 
 **Actionable Tactic：强制切断**
-1.  **5% 预警**：当单笔亏损到达 5%，检查 StockWise 信号是否依然存在。
+1.  **5% 预警**：当单笔亏损到达 5%，检查 ZISO 信号是否依然存在。
 2.  **10% 刚性熔断**：任何交易，无论基本面多好，亏损到达 10% 必须无条件离场。
 3.  **子弹保留**：告诉自己，只要筹码还在，你就还有翻盘的机会。
 

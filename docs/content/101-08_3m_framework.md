@@ -37,9 +37,9 @@ image_prompt: "**Concept**: A conceptual 3D illustration of the 3M Framework. **
 
 ---
 
-## ⚖️ 实战：StockWise 的 3M 辅助系统
+## ⚖️ 实战：ZISO 的 3M 辅助系统
 
-StockWise 的设计初衷就是为了平衡这三个支点：
+ZISO 的设计初衷就是为了平衡这三个支点：
 
 **Actionable Tactic：深度自省**
 1.  **Mind**：通过 **“静态分析”** 杜绝盘中临时起意的冲动。 
