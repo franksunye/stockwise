@@ -38,22 +38,16 @@ interface TacticalBriefDrawerProps {
 const getStepConfig = (step: string) => {
   const s = step.toLowerCase();
   
-  if (s.includes('trend') || s.includes('趋势')) return { icon: <TrendingUp size={12} />, label: 'TREND' };
-  if (s.includes('momentum') || s.includes('动能')) return { icon: <Zap size={12} />, label: 'MOMENTUM' };
-  if (s.includes('volume') || s.includes('成交') || s.includes('成交量')) return { icon: <BarChart3 size={12} />, label: 'VOLUME' };
-  if (s.includes('history') || s.includes('历史')) return { icon: <RotateCcw size={12} />, label: 'HISTORY' };
-  if (s.includes('decision') || s.includes('决策')) return { icon: <Target size={12} />, label: 'DECISION' };
+  if (s.includes('trend')) return { icon: <TrendingUp size={12} />, label: 'TREND' };
+  if (s.includes('momentum')) return { icon: <Zap size={12} />, label: 'MOMENTUM' };
+  if (s.includes('volume')) return { icon: <BarChart3 size={12} />, label: 'VOLUME' };
+  if (s.includes('history')) return { icon: <RotateCcw size={12} />, label: 'HISTORY' };
+  if (s.includes('decision')) return { icon: <Target size={12} />, label: 'DECISION' };
   
   // 新增映射
-  if (s.includes('news') || s.includes('fundamental') || s.includes('情报') || s.includes('基本面')) {
-    return { icon: <Newspaper size={12} />, label: 'INTELLIGENCE' };
-  }
-  if (s.includes('position') || s.includes('level') || s.includes('price') || s.includes('价位') || s.includes('关键位')) {
-    return { icon: <Crosshair size={12} />, label: 'PRICE ACTION' };
-  }
-  if (s.includes('context') || s.includes('环境') || s.includes('背景')) {
-    return { icon: <Layers size={12} />, label: 'CONTEXT' };
-  }
+  if (s.includes('news') || s.includes('fundamental')) return { icon: <Newspaper size={12} />, label: 'INTELLIGENCE' };
+  if (s.includes('position') || s.includes('level') || s.includes('price')) return { icon: <Crosshair size={12} />, label: 'PRICE ACTION' };
+  if (s.includes('context')) return { icon: <Layers size={12} />, label: 'CONTEXT' };
 
   // 兜底
   return { icon: <Hash size={12} />, label: step.toUpperCase().replace(/_/g, ' ') };
