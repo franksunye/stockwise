@@ -61,19 +61,19 @@ export default function AboutPage() {
               <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center">
                 <Target className="text-indigo-400" />
               </div>
-              <h2 className="text-3xl font-black italic tracking-tighter">我们的愿景</h2>
+              <h2 className="text-3xl font-black italic tracking-tighter">我们的使命</h2>
               <p className="text-slate-400 leading-relaxed font-bold">
-                ZISO AI (知守 AI) 的诞生，源于一个简单的信念：<span className="text-white">让技术服务于纪律。</span>
+                ZISO AI (知守 AI) 的诞生，源于一个明确的目标：<span className="text-white">让普通人像机构一样专业地交易。</span>
               </p>
               <p className="text-slate-500 text-sm leading-relaxed">
-                我们不承诺任何“暴富”的神话。相反，我们致力于通过 AI 专家委员会的多维研究，为您提供冷酷、理性、重复可验证的交易逻辑。我们希望帮助每一位用户从情绪化的赌徒，蜕变为拥有自主研判能力的纪律执行者。
+                散户在市场中不仅面临信息落差，更缺乏能时刻保持冷静的工具。我们通过多维 Agent 的深度协作，为您提供客观、高频、可复用的分析逻辑。我们希望辅助每位用户从“凭感觉交易”，迭代为拥有 AI 参谋辅助、严格执行纪律的理性交易者。
               </p>
             </div>
             <div className="glass-card p-1 relative group">
               <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-[38px] blur-xl opacity-50 group-hover:opacity-100 transition-opacity" />
               <div className="bg-[#0a0a0f] rounded-[38px] p-8 relative z-10 space-y-4">
                 <div className="text-indigo-400 font-black italic text-xl">“知其白，守其黑。”</div>
-                <p className="text-slate-500 text-xs">这就是 ZISO AI 名称的由来 —— 在光影流转的市场（白）中洞察先机，在深沉内敛的原则（黑）中恪守方寸。</p>
+                <p className="text-slate-500 text-xs text-justify">这就是 ZISO AI 名称的由来 —— 洞察先机的“知”是我们的<b>分析助手</b>，恪守底线的“守”是我们的<b>风控助理</b>。在变幻莫测的市场中，为你守住那一份确定性。</p>
               </div>
             </div>
           </div>
@@ -110,9 +110,9 @@ export default function AboutPage() {
           {/* Our Values */}
           <div className="grid md:grid-cols-3 gap-8">
              {[
-               { title: "理性逻辑", desc: "拒绝小道消息，拒绝盘感依赖。每一条信号都源于可量化的数学模型。", icon: ShieldCheck },
-               { title: "独立决策", desc: "AI 不是指示灯，而是您的研究员。最终的扣动扳机由您，基于理性的决策。", icon: Users },
-               { title: "纪律避难所", desc: "在行情过热或极度恐惧时，为您提供冷酷的熔断建议，保护核心本金。", icon: Sparkles },
+               { title: "深度分析助手", desc: "拒绝盲从，拒绝盘感。基于多维因子模型，将杂乱的 K 线数据转化为颗粒度清晰的技术信号分析。", icon: ShieldCheck },
+               { title: "动态策略参谋", desc: "AI 不是指示灯，而是您的数字智囊。根据行情变动实时推演博弈场景，辅助您做出独立决策。", icon: Users },
+               { title: "恪守原则助理", desc: "在行情过热或极端恐惧时，为您提供冷酷的风险对冲建议。我们不预测奇迹，我们只负责守住净值。", icon: Sparkles },
              ].map((value, i) => (
                <div key={i} className="glass-card p-10 space-y-6 border-white/5">
                  <value.icon className="text-indigo-400 w-8 h-8" />
@@ -127,7 +127,7 @@ export default function AboutPage() {
         <section className="pt-60 text-center space-y-12">
            <h2 className="text-3xl md:text-5xl font-black italic tracking-tighter uppercase leading-tight">
              不再孤军奋战 <br />
-             <span className="text-indigo-500">加入理性的交易部落</span>
+             <span className="text-indigo-500">全面开启 AI 决策增强模式</span>
            </h2>
            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link href="https://app.ziso.cc" className="px-10 py-5 rounded-3xl bg-indigo-500 text-white font-black italic shadow-lg hover:scale-105 transition-all">
