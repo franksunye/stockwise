@@ -237,13 +237,13 @@ export function getPredictionTitle(scene: MarketScene, market: MarketType = 'HK'
         return '明日建议';
     }
 
-    // 间隔在一周内
-    if (daysDiff <= 7) {
+    // 间隔在 3 天内（普通周末）
+    if (daysDiff <= 3) {
         return `${nextMonth}/${nextDate} 建议`;
     }
 
-    // 长假期（如春节）
-    return `下一交易日 (${nextMonth}/${nextDate}) 建议`;
+    // 长假期（如春节、国庆）
+    return `下一个交易日 (${nextMonth}/${nextDate}) 建议`;
 }
 
 /**
