@@ -70,26 +70,30 @@ export async function POST(request: Request) {
 
             if (referrer) {
                 // 计算比例：优先使用自定义比例，否则使用全局默认 10%
-                const commissionRate = referrer.custom_commission_rate ?? MEMBERSHIP_CONFIG.referral.defaultCommissionRate;
+                // 计算比例：优先使用自定义比例，否则默认为 0
+                const commissionRate = referrer.custom_commission_rate ?? 0;
                 commissionAmount = amount * commissionRate;
-                const txId = `tx_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 
-                // 准备记账操作
-                updateOps.push(
-                    // A. 插入交易流水
-                    {
-                        sql: `INSERT INTO referral_transactions (id, referrer_id, referred_id, type, amount, status, created_at, note) 
-                              VALUES (?, ?, ?, 'commission', ?, 'converted', ?, ?)`,
-                        args: [txId, referrerId, userId, commissionAmount, now, `Earned from ${planId} plan`]
-                    },
-                    // B. 更新推荐人的钱包余额
-                    {
-                        sql: "UPDATE users SET referral_balance = referral_balance + ?, total_earned = total_earned + ? WHERE user_id = ?",
-                        args: [commissionAmount, commissionAmount, referrerId]
-                    }
-                );
+                if (commissionAmount > 0) {
+                    const txId = `tx_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 
-                console.log(`💰 Commission allocated: ${commissionAmount} to referrer ${referrerId}`);
+                    // 准备记账操作
+                    updateOps.push(
+                        // A. 插入交易流水
+                        {
+                            sql: `INSERT INTO referral_transactions (id, referrer_id, referred_id, type, amount, status, created_at, note) 
+                                  VALUES (?, ?, ?, 'commission', ?, 'converted', ?, ?)`,
+                            args: [txId, referrerId, userId, commissionAmount, now, `Earned from ${planId} plan`]
+                        },
+                        // B. 更新推荐人的钱包余额
+                        {
+                            sql: "UPDATE users SET referral_balance = referral_balance + ?, total_earned = total_earned + ? WHERE user_id = ?",
+                            args: [commissionAmount, commissionAmount, referrerId]
+                        }
+                    );
+
+                    console.log(`💰 Commission allocated: ${commissionAmount} to referrer ${referrerId}`);
+                }
             }
         }
 

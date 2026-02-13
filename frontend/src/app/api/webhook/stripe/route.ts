@@ -128,7 +128,7 @@ export async function POST(req: Request) {
                         }
 
                         if (referrer) {
-                            const commissionRate = referrer.custom_commission_rate ?? MEMBERSHIP_CONFIG.referral.defaultCommissionRate;
+                            const commissionRate = referrer.custom_commission_rate ?? 0;
                             // session.amount_total is in cents
                             const paymentAmount = (session.amount_total || 0) / 100;
                             const commissionAmount = paymentAmount * commissionRate;

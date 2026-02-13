@@ -38,8 +38,6 @@ export const MEMBERSHIP_CONFIG = {
         refereeDays: 7,
         /** 邀请人获得的 Pro 奖励天数 */
         referrerDays: 7,
-        /** 默认现金分润比例 (10%) */
-        defaultCommissionRate: 0.10,
     },
 
     // ==========================================
