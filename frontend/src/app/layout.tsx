@@ -49,6 +49,8 @@ import { PerformanceOptimizer } from "@/components/PerformanceOptimizer";
 import { BadgeManager } from "@/components/BadgeManager";
 import { Analytics } from "@vercel/analytics/react";
 
+import { SystemSync } from "@/components/SystemSync";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -64,6 +66,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://va.vercel-scripts.com" />
       </head>
       <body className="antialiased">
+        <SystemSync />
         <PerformanceOptimizer />
         <ReferralTracker />
         <BadgeManager />
@@ -73,3 +76,4 @@ export default function RootLayout({
     </html>
   );
 }
+

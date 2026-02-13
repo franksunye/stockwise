@@ -5,9 +5,21 @@
 """
 
 from datetime import datetime, timedelta
+import logging
 
-# ============ 港股 (HK) 交易日历 ============
-HK_HOLIDAYS_2025 = {
+try:
+    from backend.database import get_connection
+except ImportError:
+    # Fallback for standalone scripts or different import paths
+    try:
+        from database import get_connection
+    except:
+        get_connection = None
+
+logger = logging.getLogger(__name__)
+
+# ============ 港股 (HK) 交易日历 (Fallback) ============
+HK_HOLIDAYS_DEFAULT = {
     '2025-01-01',  # 元旦
     '2025-01-29',  # 农历新年
     '2025-01-30',  # 农历年初二
@@ -22,9 +34,7 @@ HK_HOLIDAYS_2025 = {
     '2025-10-07',  # 重阳节
     '2025-12-25',  # 圣诞节
     '2025-12-26',  # 圣诞节翌日
-}
-
-HK_HOLIDAYS_2026 = {
+    # 2026
     '2026-01-01',  # New Year
     '2026-02-17',  # Lunar New Year
     '2026-02-18',
@@ -41,11 +51,8 @@ HK_HOLIDAYS_2026 = {
     '2026-12-25',  # Christmas
 }
 
-HK_HOLIDAYS = HK_HOLIDAYS_2025 | HK_HOLIDAYS_2026
-
-# ============ A股 (CN) 交易日历 ============
-# 数据来源: 中国证监会官方公告
-CN_HOLIDAYS_2025 = {
+# ============ A股 (CN) 交易日历 (Fallback) ============
+CN_HOLIDAYS_DEFAULT = {
     '2025-01-01',  # 元旦
     '2025-01-28',  # 春节 (1/28 - 2/4)
     '2025-01-29',
@@ -74,9 +81,7 @@ CN_HOLIDAYS_2025 = {
     '2025-10-06',
     '2025-10-07',
     '2025-10-08',
-}
-
-CN_HOLIDAYS_2026 = {
+    # 2026
     '2026-01-01',  # 元旦
     '2026-01-02',
     '2026-02-15',  # 春节 (2/15 - 2/23)
@@ -108,21 +113,83 @@ CN_HOLIDAYS_2026 = {
     '2026-10-07',
 }
 
-CN_HOLIDAYS = CN_HOLIDAYS_2025 | CN_HOLIDAYS_2026
+# --- Cache State ---
+_HOLIDAYS_CACHE = {
+    "HK": None,
+    "CN": None
+}
+_LAST_CACHE_TIME = 0
+CACHE_TTL = 3600 * 24  # Cache for 24 hours
 
+def refresh_holidays_from_db():
+    """
+    Attempt to load holidays from database.
+    Updates global cache on success.
+    """
+    global _HOLIDAYS_CACHE, _LAST_CACHE_TIME
+    
+    if not get_connection:
+        return
+        
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        
+        # Check if table exists (SQLite/LibSQL specific check)
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='market_holidays'")
+        if not cursor.fetchone():
+            return
+            
+        cursor.execute("SELECT date, market FROM market_holidays")
+        rows = cursor.fetchall()
+        
+        hk_set = set()
+        cn_set = set()
+        
+        for date_str, market in rows:
+            if market == 'HK':
+                hk_set.add(date_str)
+            elif market == 'CN':
+                cn_set.add(date_str)
+        
+        # Only update if we got data
+        if hk_set:
+            _HOLIDAYS_CACHE["HK"] = hk_set
+        if cn_set:
+            _HOLIDAYS_CACHE["CN"] = cn_set
+            
+        _LAST_CACHE_TIME = datetime.now().timestamp()
+        
+        # Important: Close the connection
+        if hasattr(conn, 'close'):
+            conn.close()
+        
+    except Exception as e:
+        logger.warning(f"Failed to load holidays from DB: {e}")
 
 def get_market_from_symbol(symbol: str) -> str:
     """根据股票代码判断市场"""
-    if len(symbol) == 5:
-        return "HK"  # 港股通常是5位
-    return "CN"  # A股通常是6位
+    if symbol and len(symbol) == 5:
+        return "HK"
+    return "CN"
 
 
 def get_holidays(market: str) -> set:
-    """获取指定市场的假期列表"""
+    """获取指定市场的假期列表 (Priority: DB Cache > Hardcoded Default)"""
+    global _HOLIDAYS_CACHE
+    
+    # Init or Refresh Cache
+    if _HOLIDAYS_CACHE.get(market) is None:
+        refresh_holidays_from_db()
+        
+    cached = _HOLIDAYS_CACHE.get(market)
+    if cached:
+        return cached
+        
+    # Fallback to default
     if market == "HK":
-        return HK_HOLIDAYS
-    return CN_HOLIDAYS
+        return HK_HOLIDAYS_DEFAULT
+    return CN_HOLIDAYS_DEFAULT
 
 
 def is_market_closed(date: datetime, market: str = "HK") -> bool:
@@ -138,17 +205,12 @@ def is_market_closed(date: datetime, market: str = "HK") -> bool:
 def is_trading_day(date_str: str, symbol: str = None, market: str = None) -> bool:
     """
     判断指定日期是否为交易日
-    
-    Args:
-        date_str: 日期字符串，格式 "YYYY-MM-DD"
-        symbol: 股票代码（可选，用于自动推断市场）
-        market: 市场代码（可选，如果提供则优先使用）
-    
-    Returns:
-        bool: 是否为交易日
     """
     try:
-        date = datetime.strptime(date_str, '%Y-%m-%d')
+        if isinstance(date_str, datetime):
+            date = date_str
+        else:
+            date = datetime.strptime(date_str, '%Y-%m-%d')
     except ValueError:
         return False
     
@@ -162,13 +224,6 @@ def is_trading_day(date_str: str, symbol: str = None, market: str = None) -> boo
 def get_next_trading_day(from_date: datetime, market: str = "HK") -> datetime:
     """
     获取下一个交易日
-    
-    Args:
-        from_date: 从哪一天开始计算
-        market: 市场代码 ("HK" 或 "CN")
-    
-    Returns:
-        下一个交易日的 datetime 对象
     """
     next_day = from_date + timedelta(days=1)
     
@@ -181,14 +236,6 @@ def get_next_trading_day(from_date: datetime, market: str = "HK") -> datetime:
 def get_next_trading_day_str(from_date_str: str, symbol: str = None, market: str = None) -> str:
     """
     获取下一个交易日（字符串版本）
-    
-    Args:
-        from_date_str: 日期字符串，格式 "YYYY-MM-DD"
-        symbol: 股票代码（可选，用于自动推断市场）
-        market: 市场代码（可选，如果提供则优先使用）
-    
-    Returns:
-        下一个交易日的字符串，格式 "YYYY-MM-DD"
     """
     from_date = datetime.strptime(from_date_str, '%Y-%m-%d')
     

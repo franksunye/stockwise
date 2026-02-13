@@ -22,6 +22,7 @@ const HK_HOLIDAYS_2025: string[] = [
 
 const HK_HOLIDAYS_2026: string[] = [
     '2026-01-01', // 元旦
+    '2026-02-16', // 农历新年补假 (Added)
     '2026-02-17', // 农历新年 (预估)
     '2026-02-18',
     '2026-02-19',
@@ -35,7 +36,7 @@ const HK_HOLIDAYS_2026: string[] = [
     '2026-12-25', // 圣诞节
 ];
 
-const HK_HOLIDAYS = new Set([...HK_HOLIDAYS_2025, ...HK_HOLIDAYS_2026]);
+let HK_HOLIDAYS = new Set([...HK_HOLIDAYS_2025, ...HK_HOLIDAYS_2026]);
 
 // ============ A股 (CN) 交易日历 ============
 // 数据来源: 中国证监会官方公告
@@ -73,7 +74,9 @@ const CN_HOLIDAYS_2025: string[] = [
 const CN_HOLIDAYS_2026: string[] = [
     '2026-01-01', // 元旦 (预估)
     '2026-01-02',
-    '2026-02-17', // 春节 (预估)
+    '2026-02-15', // 春节 (预估)
+    '2026-02-16', // 春节补假 (Added)
+    '2026-02-17',
     '2026-02-18',
     '2026-02-19',
     '2026-02-20',
@@ -97,7 +100,20 @@ const CN_HOLIDAYS_2026: string[] = [
     '2026-10-07',
 ];
 
-const CN_HOLIDAYS = new Set([...CN_HOLIDAYS_2025, ...CN_HOLIDAYS_2026]);
+let CN_HOLIDAYS = new Set([...CN_HOLIDAYS_2025, ...CN_HOLIDAYS_2026]);
+
+/**
+ * Update holiday lists from remote source (Database/API)
+ * Call this on app initialization to sync valid holidays.
+ */
+export function updateHolidays(holidays: { HK: string[], CN: string[] }) {
+    if (holidays.HK && holidays.HK.length > 0) {
+        HK_HOLIDAYS = new Set(holidays.HK);
+    }
+    if (holidays.CN && holidays.CN.length > 0) {
+        CN_HOLIDAYS = new Set(holidays.CN);
+    }
+}
 
 /**
  * 根据股票代码判断市场类型
