@@ -35,18 +35,13 @@ export async function POST(request: Request) {
             let expiresAt = null;
 
             // 只有当邀请奖励开关开启时，才处理邀请奖励
+            // 只有当邀请奖励开关开启时，才处理邀请奖励
             const shouldProcessReferral = MEMBERSHIP_CONFIG.switches.enableReferralReward && referredBy && referredBy !== userId;
 
             if (shouldProcessReferral) {
-                // 1. Referee Reward (New User) - 使用配置的天数
-                const expiryDate = new Date();
-                expiryDate.setDate(expiryDate.getDate() + MEMBERSHIP_CONFIG.referral.refereeDays);
-                initialTier = 'pro';
-                expiresAt = expiryDate.toISOString();
-
-                // 2. Referrer Reward (The person who shared the link)
+                // 1. Security Check: Verify Referrer Exists FIRST
+                let referrer;
                 try {
-                    let referrer;
                     if (isCloud) {
                         const res = await db.execute({
                             sql: "SELECT subscription_tier, subscription_expires_at FROM users WHERE user_id = ?",
@@ -56,20 +51,34 @@ export async function POST(request: Request) {
                     } else {
                         referrer = db.prepare("SELECT subscription_tier, subscription_expires_at FROM users WHERE user_id = ?").get(referredBy);
                     }
+                } catch (e) {
+                    console.error('Failed to verify referrer:', e);
+                }
 
-                    if (referrer) {
+                if (referrer) {
+                    // ✅ Referrer exists! Grant rewards to BOTH.
+
+                    // A. Referee Reward (New User)
+                    const expiryDate = new Date();
+                    expiryDate.setDate(expiryDate.getDate() + MEMBERSHIP_CONFIG.referral.refereeDays);
+                    initialTier = 'pro';
+                    expiresAt = expiryDate.toISOString();
+
+                    // B. Referrer Reward (The person who shared)
+                    try {
                         const currentExpiry = referrer.subscription_expires_at ? new Date(referrer.subscription_expires_at) : new Date();
                         const baseDate = currentExpiry > new Date() ? currentExpiry : new Date();
                         baseDate.setDate(baseDate.getDate() + MEMBERSHIP_CONFIG.referral.referrerDays);
                         const newExpiry = baseDate.toISOString();
 
+                        // Update Referrer
                         if (isCloud) {
                             await db.execute({
                                 sql: "UPDATE users SET subscription_tier = 'pro', subscription_expires_at = ? WHERE user_id = ?",
                                 args: [newExpiry, referredBy]
                             });
 
-                            // A. Record transaction
+                            // Record transaction
                             const txId = `tx_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
                             await db.execute({
                                 sql: "INSERT INTO referral_transactions (id, referrer_id, referred_id, type, amount, status, created_at, note) VALUES (?, ?, ?, 'reward', 0, 'completed', ?, ?)",
@@ -78,12 +87,12 @@ export async function POST(request: Request) {
                         } else {
                             db.prepare("UPDATE users SET subscription_tier = 'pro', subscription_expires_at = ? WHERE user_id = ?").run(newExpiry, referredBy);
 
-                            // A. Record transaction
+                            // Record transaction
                             const txId = `tx_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
                             db.prepare("INSERT INTO referral_transactions (id, referrer_id, referred_id, type, amount, status, created_at, note) VALUES (?, ?, ?, 'reward', 0, 'completed', ?, ?)").run(txId, referredBy, userId, new Date().toISOString(), `+${MEMBERSHIP_CONFIG.referral.referrerDays}天 PRO (邀请奖励)`);
                         }
 
-                        // B. Send Notification
+                        // Send Notification
                         sendInternalNotification({
                             target_user_id: referredBy,
                             title: '🎁 邀请奖励已到账',
@@ -91,9 +100,12 @@ export async function POST(request: Request) {
                             url: '/dashboard',
                             tag: 'referral_reward'
                         }).catch((e: unknown) => console.error('Failed to send referral notification:', e));
+
+                    } catch (referErr) {
+                        console.error('Referrer reward failed:', referErr);
                     }
-                } catch (referErr) {
-                    console.error('Referrer reward failed:', referErr);
+                } else {
+                    console.warn(`Referral skipped: Referrer ${referredBy} not found`);
                 }
             }
 
@@ -188,9 +200,29 @@ export async function POST(request: Request) {
                                 sql: "UPDATE users SET subscription_tier = 'pro', subscription_expires_at = ? WHERE user_id = ?",
                                 args: [newExpiry, referredBy]
                             });
+
+                            // Record transaction
+                            const txId = `tx_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+                            await db.execute({
+                                sql: "INSERT INTO referral_transactions (id, referrer_id, referred_id, type, amount, status, created_at, note) VALUES (?, ?, ?, 'reward', 0, 'completed', ?, ?)",
+                                args: [txId, referredBy, userId, new Date().toISOString(), `+${MEMBERSHIP_CONFIG.referral.referrerDays}天 PRO (邀请奖励)`]
+                            });
                         } else {
                             db.prepare("UPDATE users SET subscription_tier = 'pro', subscription_expires_at = ? WHERE user_id = ?").run(newExpiry, referredBy);
+
+                            // Record transaction
+                            const txId = `tx_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+                            db.prepare("INSERT INTO referral_transactions (id, referrer_id, referred_id, type, amount, status, created_at, note) VALUES (?, ?, ?, 'reward', 0, 'completed', ?, ?)").run(txId, referredBy, userId, new Date().toISOString(), `+${MEMBERSHIP_CONFIG.referral.referrerDays}天 PRO (邀请奖励)`);
                         }
+
+                        // Send Notification
+                        sendInternalNotification({
+                            target_user_id: referredBy,
+                            title: '🎁 邀请奖励已到账',
+                            body: `你的好友已加入，+${MEMBERSHIP_CONFIG.referral.referrerDays}天 PRO 会员已存入你的账户！`,
+                            url: '/dashboard',
+                            tag: 'referral_reward'
+                        }).catch((e: unknown) => console.error('Failed to send referral notification:', e));
                     }
                 } catch (referErr) {
                     console.error('Existing user referral reward failed:', referErr);

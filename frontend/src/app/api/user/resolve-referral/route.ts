@@ -12,8 +12,11 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ success: false, error: 'Code is required' }, { status: 400 });
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let db: any;
+
     try {
-        const db = getDbClient();
+        db = getDbClient();
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const client = db as any;
 
@@ -46,5 +49,9 @@ export async function GET(request: NextRequest) {
     } catch (error) {
         console.error('Error resolving referral alias:', error);
         return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
+    } finally {
+        if (db && typeof db.close === 'function') {
+            db.close();
+        }
     }
 }
