@@ -12,6 +12,7 @@ import requests
 import json
 import time
 from typing import Optional, List, Dict, Any, Callable
+from pathlib import Path
 
 # --- Path Guidance ---
 current_file = os.path.abspath(__file__)
@@ -23,10 +24,10 @@ if backend_dir not in sys.path:
     sys.path.insert(0, backend_dir)
 
 try:
-    from backend.config import TURSO_DB_URL, TURSO_AUTH_TOKEN
+    from backend.config import TURSO_DB_URL, TURSO_AUTH_TOKEN, DB_PATH
     from backend.logger import logger
 except ImportError:
-    from config import TURSO_DB_URL, TURSO_AUTH_TOKEN
+    from config import TURSO_DB_URL, TURSO_AUTH_TOKEN, DB_PATH
     from logger import logger
 
 from backend.db_repo.queries import GET_STOCK_POOL_QUERY, GET_STOCK_PROFILE_QUERY
