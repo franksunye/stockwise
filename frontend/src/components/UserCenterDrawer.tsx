@@ -483,15 +483,21 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                              </div>
 
                              <button 
-                                onClick={() => {
+                                onClick={async () => {
                                     const base = window.location.hostname.includes('ziso.cc') 
                                         ? 'https://ziso.cc' 
                                         : window.location.origin;
                                     const url = referralAlias 
                                         ? `${base}/v/${referralAlias}` 
                                         : `${base}/v/${userId}`;
-                                    navigator.clipboard.writeText(url);
-                                    setRedeemMsg({ type: 'success', text: '邀请链接已复制！' });
+                                    
+                                    try {
+                                        await navigator.clipboard.writeText(url);
+                                        setRedeemMsg({ type: 'success', text: '邀请链接已复制！' });
+                                    } catch (err) {
+                                        console.error('Copy failed', err);
+                                        setRedeemMsg({ type: 'error', text: '复制失败，请手动长按复制' });
+                                    }
                                     setTimeout(() => setRedeemMsg(null), 2000);
                                 }}
                                 className="w-full py-2.5 mb-2 rounded-xl bg-indigo-500/10 border border-indigo-500/20 hover:bg-indigo-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-xs font-bold text-indigo-300"
