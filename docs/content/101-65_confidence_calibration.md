@@ -4,7 +4,7 @@ subtitle: "AI 也有不敢确定的时刻，那才是最关键的预警"
 date: "2026-02-04"
 category: "The Machine"
 image: "/images/learn/confidence_calibration.png"
-image_prompt: "**Concept**: A conceptual 3D illustration of Probability Distribution. **Style**: Swiss Design, Geometric, Minimalist, Clean, Dark Mode (#050508). **Subject**: A single Indigo bar standing tall (High Confidence) next to a blurred, spread-out cloud of Grey points (Low Confidence). **Action**: A small sensor is hovering above, detecting the clarity of the bar. **Materials**: Solid pillar, ethereal cloud. **Colors**: Indigo (#6366f1) for the clear signal, Grey for the noise. **Constraints**: NO text. NO blur (except symbolic cloud). Center composition."
+image_prompt: "**Concept**: Precision within probability. **Style**: Swiss Design. **Subject**: A 3D bell curve shape made of light lines. **Action**: A central narrow vertical band is highlighted in Emerald. **Colors**: Indigo/Emerald. **Constraints**: NO text."
 ---
 
 # 置信度：AI 的底牌

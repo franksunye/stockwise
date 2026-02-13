@@ -4,7 +4,7 @@ subtitle: "如何让通用大模型变成专业的二级市场专家？"
 date: "2026-02-04"
 category: "The Machine"
 image: "/images/learn/prompt_engineering.png"
-image_prompt: "**Concept**: A conceptual 3D illustration of a precision tool shaping raw data. **Style**: Swiss Design, Geometric, Minimalist, Clean, Dark Mode (#050508). **Subject**: A complex, glowing Indigo lattice (the LLM) being directed by a single, sharp white needle (the Prompt). **Action**: The needle is poking into a specific node of the lattice, causing that section to glow with organized Emerald data. **Materials**: Energy lattice, chrome needle. **Colors**: Indigo (#6366f1) as the base, Emerald (#10b981) for the result. **Constraints**: NO text. NO blur. Center composition."
+image_prompt: "**Concept**: Directional focus. **Style**: High Contrast. **Subject**: A dark wall with a tiny geometric aperture. **Action**: A intense Indigo beam shooting through the hole, expanding into a pattern. **Colors**: Indigo. **Constraints**: NO text."
 ---
 
 # 炼金术：数据的灵魂刻画

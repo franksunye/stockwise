@@ -4,7 +4,7 @@ subtitle: "为什么“半人半马”才是投资界的终极形态？"
 date: "2026-02-04"
 category: "The Machine"
 image: "/images/learn/hybrid_system.png"
-image_prompt: "**Concept**: A conceptual 3D illustration of two hands reaching towards the same center — one organic, one mechanical. **Style**: Swiss Design, Geometric, Minimalist, Clean, Dark Mode (#050508). **Subject**: A simplified, stylized organic hand and a matching geometric Indigo robot hand. **Action**: They are both touching a glowing white sphere positioned in the exact center. **Materials**: Matte finish for the organic hand, glowing glass for the robot hand. **Colors**: Indigo (#6366f1) for the robot part. **Constraints**: NO text. NO blur. Center composition."
+image_prompt: "**Concept**: Complex synthesis. **Style**: Clean 3D. **Subject**: A large sphere composed of different smaller geometric shapes (cones, cubes, toruses). **Action**: It rotates as a single unit. **Colors**: Multiple Indigo shades. **Constraints**: NO text."
 ---
 
 # 混合决策：不迷信，不懈怠

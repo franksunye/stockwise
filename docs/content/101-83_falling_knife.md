@@ -3,8 +3,8 @@ title: "101-83: 实战案例：避开下坠飞刀"
 subtitle: "当全网喊你“估值极低”时，你为什么该等一等？"
 date: "2026-02-04"
 category: "The Case"
-image: "/images/learn/case_falling_knife.png"
-image_prompt: "**Concept**: A conceptual 3D illustration of gravity and danger. **Style**: Swiss Design, Geometric, Minimalist, Clean, Dark Mode (#050508). **Subject**: A series of sharp, Rose Red shards falling vertically through a dark void. **Action**: An Indigo magnetic field is below them, but it is not strong enough to stop the fall yet. **Materials**: Sharp obsidian-like shards, glowing energy lines. **Colors**: Rose Red (#f43f5e) for the shards. **Constraints**: NO text. NO blur. Center composition."
+image: "/images/learn/falling_knife.png"
+image_prompt: "**Concept**: High-speed impact. **Style**: Dark Geometric. **Subject**: A sharp Rose Red (#f43f5e) prism. **Action**: It is shown frozen mid-air, pointed downwards, with motion blur streaks. **Colors**: Rose Red highlight. **Constraints**: NO text."
 ---
 
 # 案例：估值陷阱

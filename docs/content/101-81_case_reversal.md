@@ -4,7 +4,7 @@ subtitle: "如何捕捉深跌后的第一抹曙光？"
 date: "2026-02-04"
 category: "The Case"
 image: "/images/learn/case_reversal.png"
-image_prompt: "**Concept**: A conceptual 3D illustration of a trend reversal. **Style**: Swiss Design, Geometric, Minimalist, Clean, Dark Mode (#050508). **Subject**: A descending path of Rose Red slabs that abruptly stops. The next slab is Indigo and is tilted upwards. **Action**: A small white sphere is perfectly balanced on the corner where the direction changes. **Materials**: Matte blocks, glowing transition. **Colors**: Rose Red (#f43f5e) for the fall, Indigo (#6366f1) for the rise. **Constraints**: NO text. NO blur. Center composition."
+image_prompt: "**Concept**: Abrupt change in momentum. **Style**: High Contrast. **Subject**: A trail of white particles falling. **Action**: At the bottom, they suddenly transform into a bright Indigo beam shooting upwards. **Colors**: Indigo. **Constraints**: NO text."
 ---
 
 # 案例：死里逃生的底部逻辑
