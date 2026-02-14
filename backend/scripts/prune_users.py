@@ -16,13 +16,21 @@ if root_dir not in sys.path:
 
 from database import get_connection
 from logger import logger
+from backend.engine.task_logger import get_task_logger
 
 def prune_expired_users(dry_run=False):
     """
     Scans for users who have a 'pro' tier but have expired subscription dates.
     Downgrades them to 'free'.
     """
-    logger.info("🧹 Starting expired user pruning task...")
+    agent_id = "system_guardian"
+    task_name = "user_maintenance"
+    
+    # Initialize Task Logger
+    t_logger = get_task_logger(agent_id, task_name, triggered_by="scheduler")
+    
+    mode_str = "DRY RUN" if dry_run else "ACTIVE"
+    t_logger.start(f"Daily User Maintenance ({mode_str})", "maintenance", dimensions={"mode": mode_str})
     
     conn = get_connection()
     cursor = conn.cursor()
@@ -42,13 +50,13 @@ def prune_expired_users(dry_run=False):
         user_ids = row[1]
         
         if count == 0:
-            logger.info("✅ No expired users found. Database is clean.")
+            t_logger.success("✅ No expired users found. System healthy.", notify=True)
             return
 
         logger.info(f"⚠️ Found {count} expired users still marked as PRO: {user_ids}")
 
         if dry_run:
-            logger.info("🚫 Dry Run mode: No changes made.")
+            t_logger.success(f"🚫 [Dry Run] Found {count} expired users: {user_ids}", notify=True)
             return
 
         # 2. Execute Update
@@ -71,10 +79,10 @@ def prune_expired_users(dry_run=False):
         if affected == -1: 
             affected = count
             
-        logger.info(f"✅ Successfully downgraded {affected} users to FREE.")
+        t_logger.success(f"✅ Successfully pruned {affected} expired users.", notify=True)
         
     except Exception as e:
-        logger.error(f"❌ Failed to prune users: {e}")
+        t_logger.fail(f"❌ Failed to prune users: {e}", notify=True, rerun_workflow="user_maintenance.yml")
         raise e
     finally:
         conn.close()
