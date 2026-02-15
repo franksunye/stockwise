@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { getArticleBySlug, getAllArticles } from '@/lib/learn-content';
 import ReactMarkdown from 'react-markdown';
 import { ChevronLeft, BookOpen, Brain, Zap, Shield, Sparkles, Target } from 'lucide-react';
+import MarketingFooter from '@/components/MarketingFooter';
 
 interface CategoryStyle {
   label: string;
@@ -156,6 +157,8 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
         </div>
 
       </article>
+
+      <MarketingFooter />
     </div>
   );
 }

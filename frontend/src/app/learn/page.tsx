@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { getAllArticles } from '@/lib/learn-content';
 import { ChevronLeft, ChevronRight, BookOpen, Brain, Zap, Shield, Sparkles, Target } from 'lucide-react';
+import MarketingFooter from '@/components/MarketingFooter';
 
 export const metadata = {
   title: 'ZISO AI 101 | 知守日课',
@@ -164,6 +165,8 @@ export default async function LearnPage() {
            </p>
         </div>
       </main>
+
+      <MarketingFooter />
     </div>
   );
 }

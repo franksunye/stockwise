@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { 
-  ChevronLeft, Search, Brain, 
+import {
+  ChevronLeft, Search, Brain,
   ShieldCheck, Zap, RefreshCw, MessageCircle, ChevronRight,
   User, Gift, Bell, Cpu, Gauge
 } from 'lucide-react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import MarketingFooter from '@/components/MarketingFooter';
 
 // Content structure following the Manifesto logic (40 articles across 8 sections)
 const SUPPORT_SECTIONS = [
@@ -262,6 +263,8 @@ export default function SupportPage() {
            </div>
         </section>
       </main>
+
+      <MarketingFooter />
 
       <style jsx global>{`
         .glass-card { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(20px); border-radius: 40px; }

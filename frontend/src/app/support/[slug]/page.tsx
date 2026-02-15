@@ -6,6 +6,7 @@ import { ChevronLeft, Calendar, Share2, Sparkles, BookOpen } from 'lucide-react'
 import ReactMarkdown from 'react-markdown';
 import { getArticleBySlug } from '@/lib/support-content';
 import { motion } from 'framer-motion';
+import MarketingFooter from '@/components/MarketingFooter';
 
 export default function SupportDetail() {
   const params = useParams();
@@ -130,6 +131,8 @@ export default function SupportDetail() {
           </footer>
         </motion.div>
       </main>
+
+      <MarketingFooter />
     </div>
   );
 }
