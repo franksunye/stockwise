@@ -8,6 +8,10 @@ import { getCurrentUser } from '@/lib/user';
 import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
 import { StockProvider } from '@/context/StockContext';
 import { resolveReferralCode } from '@/lib/referral-resolver';
+import { SystemSync } from '@/components/SystemSync';
+import { PerformanceOptimizer } from '@/components/PerformanceOptimizer';
+import { ReferralTracker } from '@/components/ReferralTracker';
+import { BadgeManager } from '@/components/BadgeManager';
 
 export default function DashboardLayout({
   children,
@@ -15,6 +19,14 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
+  const appBootstrap = (
+    <>
+      <SystemSync />
+      <PerformanceOptimizer />
+      <ReferralTracker />
+      <BadgeManager />
+    </>
+  );
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -99,22 +111,33 @@ export default function DashboardLayout({
   // 初始加载状态
   if (isAuthorized === null) {
     return (
-      <div className="min-h-screen bg-[#050508] flex items-center justify-center text-slate-500 text-xs font-bold tracking-widest animate-pulse">
-        系统验证中...
-      </div>
+      <>
+        {appBootstrap}
+        <div className="min-h-screen bg-[#050508] flex items-center justify-center text-slate-500 text-xs font-bold tracking-widest animate-pulse">
+          系统验证中...
+        </div>
+      </>
     );
   }
 
   // 未授权则显示邀请墙（仅在 requireInvite 开启时生效）
   if (isAuthorized === false) {
-    return <InviteWall onSuccess={() => setIsAuthorized(true)} />;
+    return (
+      <>
+        {appBootstrap}
+        <InviteWall onSuccess={() => setIsAuthorized(true)} />
+      </>
+    );
   }
 
   // 已授权 → 显示 Onboarding（仅新用户）+ 子页面
   return (
-    <StockProvider>
-      <OnboardingOverlay />
-      {children}
-    </StockProvider>
+    <>
+      {appBootstrap}
+      <StockProvider>
+        <OnboardingOverlay />
+        {children}
+      </StockProvider>
+    </>
   );
 }

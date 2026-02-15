@@ -44,12 +44,7 @@ export const viewport: Viewport = {
   userScalable: false,
 };
 
-import { ReferralTracker } from "@/components/ReferralTracker";
-import { PerformanceOptimizer } from "@/components/PerformanceOptimizer";
-import { BadgeManager } from "@/components/BadgeManager";
 import { Analytics } from "@vercel/analytics/react";
-
-import { SystemSync } from "@/components/SystemSync";
 
 export default function RootLayout({
   children,
@@ -62,18 +57,12 @@ export default function RootLayout({
         {/* 高级工程优化：预连接应用子域名和核心资源，极大减少移动端握手延迟 */}
         <link rel="preconnect" href="https://app.ziso.cc" />
         <link rel="dns-prefetch" href="https://app.ziso.cc" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://va.vercel-scripts.com" />
       </head>
       <body className="antialiased">
-        <SystemSync />
-        <PerformanceOptimizer />
-        <ReferralTracker />
-        <BadgeManager />
         {children}
         <Analytics />
       </body>
     </html>
   );
 }
-

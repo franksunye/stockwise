@@ -1,16 +1,11 @@
-'use client';
-
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ShieldCheck, ChevronRight, Menu, X } from 'lucide-react';
+import { ShieldCheck, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import Multiavatar from '@/components/Multiavatar';
 import MarketingFooter from '@/components/MarketingFooter';
+import LandingMobileMenu from '@/components/LandingMobileMenu';
 
 export default function LandingPage() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
   return (
     <div className="min-h-screen bg-[#050508] text-white overflow-x-hidden font-sans">
       {/* 动态背景 */}
@@ -33,71 +28,19 @@ export default function LandingPage() {
         </div>
         <div className="hidden md:flex items-center gap-8 text-sm font-bold text-slate-400">
           <Link href="#features" className="hover:text-white transition-colors">功能</Link>
-          <Link href="/learn" className="hover:text-white transition-colors">101 手册</Link>
-          <Link href="/about" className="hover:text-white transition-colors">关于</Link>
-          <Link href="/pricing" className="hover:text-white transition-colors">价格</Link>
-          <Link href="/support" className="hover:text-white transition-colors">支持</Link>
+          <Link href="/learn" prefetch={false} className="hover:text-white transition-colors">101 手册</Link>
+          <Link href="/about" prefetch={false} className="hover:text-white transition-colors">关于</Link>
+          <Link href="/pricing" prefetch={false} className="hover:text-white transition-colors">价格</Link>
+          <Link href="/support" prefetch={false} className="hover:text-white transition-colors">支持</Link>
           <Link href="#faq" className="hover:text-white transition-colors">FAQ</Link>
           <Link href="https://app.ziso.cc" target="_blank" rel="noopener noreferrer" className="px-5 py-2.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-white">进入应用</Link>
         </div>
-        {/* Mobile Hamburger Button */}
-        <button
-          className="md:hidden p-2 rounded-xl bg-white/5 border border-white/10 text-white"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          aria-label="Toggle menu"
-        >
-          {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
-        </button>
+        <LandingMobileMenu />
       </nav>
-
-      {/* Mobile Menu Overlay */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-40 bg-[#050508]/98 backdrop-blur-xl flex flex-col items-center justify-center gap-6 md:hidden"
-          >
-            {[
-              { href: "#features", label: "功能" },
-              { href: "/learn", label: "101 手册" },
-              { href: "/about", label: "关于" },
-              { href: "/pricing", label: "价格" },
-              { href: "/support", label: "支持" },
-              { href: "#faq", label: "FAQ" },
-            ].map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setMobileMenuOpen(false)}
-                className="text-2xl font-black italic tracking-tighter text-slate-300 hover:text-white transition-colors"
-              >
-                {item.label}
-              </Link>
-            ))}
-            <Link
-              href="https://app.ziso.cc"
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => setMobileMenuOpen(false)}
-              className="mt-4 px-10 py-4 rounded-3xl bg-indigo-500 text-white font-black italic text-lg shadow-[0_20px_40px_rgba(99,102,241,0.3)] flex items-center gap-2"
-            >
-              进入应用 <ChevronRight size={20} />
-            </Link>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Hero Section */}
       <main className="relative z-10 max-w-7xl mx-auto px-8 pt-12 pb-40 flex flex-col items-center text-center">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="space-y-6 max-w-3xl mb-16"
-        >
+        <div className="space-y-6 max-w-3xl mb-16">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-black uppercase tracking-widest mb-4">
             <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
             知其白 · 守其黑 | 知其博弈 · 守其方寸
@@ -119,74 +62,64 @@ export default function LandingPage() {
             >
               立即开启 AI 复盘 <ChevronRight size={20} />
             </Link>
-            <Link href="/learn" className="px-10 py-5 rounded-3xl bg-white/5 border border-white/10 text-white font-black text-lg hover:bg-white/10 transition-all">
+            <Link href="/learn" prefetch={false} className="px-10 py-5 rounded-3xl bg-white/5 border border-white/10 text-white font-black text-lg hover:bg-white/10 transition-all">
               阅读 101 手册
             </Link>
           </div>
-        </motion.div>
+        </div>
 
         {/* Product Preview - Triple Mobile Overlap for Mobile-First App */}
-        <motion.div 
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 1 }}
-          className="w-full max-w-5xl relative mt-20"
-        >
+        <div className="w-full max-w-5xl relative mt-20">
           <div className="relative h-[500px] md:h-[700px] w-full flex items-center justify-center">
             
             {/* Left Phone - Analysis Depth */}
-            <motion.div 
-               whileHover={{ x: -20, rotateY: -10 }}
-               className="absolute left-[5%] md:left-[15%] w-[45%] md:w-[25%] aspect-[9/19] bg-[#0A0A10] rounded-[30px] border border-white/10 shadow-2xl z-10 -rotate-12 origin-bottom-right hidden sm:flex items-center justify-center p-2"
-            >
+            <div className="absolute left-[5%] md:left-[15%] w-[45%] md:w-[25%] aspect-[9/19] bg-[#0A0A10] rounded-[30px] border border-white/10 shadow-2xl z-10 -rotate-12 origin-bottom-right hidden sm:flex items-center justify-center p-2 transition-transform hover:-translate-x-2">
                <div className="w-full h-full bg-[#050508] rounded-[22px] border border-white/5 overflow-hidden relative">
                   <Image 
                     src="/images/landing/analysis-depth.png"
                     alt="AI Analysis Detail"
                     fill
+                    sizes="(min-width: 768px) 25vw, 45vw"
                     className="object-cover"
                   />
                </div>
-            </motion.div>
+            </div>
 
             {/* Right Phone - Real-time Alert */}
-            <motion.div 
-               whileHover={{ x: 20, rotateY: 10 }}
-               className="absolute right-[5%] md:right-[15%] w-[45%] md:w-[25%] aspect-[9/19] bg-[#0A0A10] rounded-[30px] border border-white/10 shadow-2xl z-10 rotate-12 origin-bottom-left hidden sm:flex items-center justify-center p-2"
-            >
+            <div className="absolute right-[5%] md:right-[15%] w-[45%] md:w-[25%] aspect-[9/19] bg-[#0A0A10] rounded-[30px] border border-white/10 shadow-2xl z-10 rotate-12 origin-bottom-left hidden sm:flex items-center justify-center p-2 transition-transform hover:translate-x-2">
                <div className="w-full h-full bg-[#050508] rounded-[22px] border border-white/5 overflow-hidden relative">
                   <Image 
                     src="/images/landing/alert-popup.png"
                     alt="Circuit Breaker Alert"
                     fill
+                    sizes="(min-width: 768px) 25vw, 45vw"
                     className="object-cover"
                   />
                </div>
-            </motion.div>
+            </div>
 
             {/* Center Phone - MAIN DASHBOARD */}
-            <motion.div 
-               whileHover={{ scale: 1.02 }}
-               className="relative w-[70%] sm:w-[50%] md:w-[32%] aspect-[9/19] bg-[#1A1A25] rounded-[40px] border border-white/20 shadow-[0_0_100px_rgba(99,102,241,0.2)] z-30 flex items-center justify-center p-2 md:p-3"
-            >
+            <div className="relative w-[70%] sm:w-[50%] md:w-[32%] aspect-[9/19] bg-[#1A1A25] rounded-[40px] border border-white/20 shadow-[0_0_100px_rgba(99,102,241,0.2)] z-30 flex items-center justify-center p-2 md:p-3 transition-transform hover:scale-[1.02]">
                <div className="w-full h-full bg-[#050508] rounded-[30px] border border-white/10 overflow-hidden relative">
                   <Image 
                     src="/images/landing/main-dashboard.png"
                     alt="Main Dashboard Preview"
                     fill
+                    priority
+                    sizes="(min-width: 1024px) 32vw, (min-width: 640px) 50vw, 70vw"
                     className="object-cover"
                   />
                   {/* Mock Notch */}
                   <div className="absolute top-4 left-1/2 -translate-x-1/2 w-20 h-5 bg-black rounded-full border border-white/5 z-20" />
                </div>
-            </motion.div>
+            </div>
 
 
           </div>
           
           {/* Decorative background glow */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] h-[60%] bg-indigo-600/10 blur-[120px] -z-10 rounded-full" />
-        </motion.div>
+        </div>
 
         {/* Feature 1: The EOD Review (Right Image, Left Text) */}
         <section className="pt-60 w-full grid md:grid-cols-2 gap-20 items-center text-left">
@@ -227,20 +160,16 @@ export default function LandingPage() {
         </section>
 
         <section className="pt-40 w-full grid md:grid-cols-2 gap-20 items-center text-left">
-         <motion.div 
-               initial={{ opacity: 0, scale: 0.95 }}
-               whileInView={{ opacity: 1, scale: 1 }}
-               viewport={{ once: true }}
-               className="order-2 md:order-1 glass-card aspect-square bg-[#0A0A10] rounded-[40px] overflow-hidden border border-white/5 relative"
-            >
+         <div className="order-2 md:order-1 glass-card aspect-square bg-[#0A0A10] rounded-[40px] overflow-hidden border border-white/5 relative">
               <Image 
                 src="/images/landing/circuit-breaker-logic.png"
                 alt="Circuit Breaker Logic"
                 fill
+                sizes="(min-width: 768px) 45vw, 100vw"
                 className="object-cover opacity-80 hover:opacity-100 transition-opacity duration-700"
               />
               <ShieldCheck size={120} className="absolute bottom-4 right-4 opacity-[0.1] text-red-500 pointer-events-none" />
-          </motion.div>
+          </div>
           <div className="order-1 md:order-2 space-y-8">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] font-black uppercase tracking-[0.2em]">
                Safety System
@@ -304,6 +233,7 @@ export default function LandingPage() {
             </p>
             <Link
               href="/about"
+              prefetch={false}
               className="inline-flex items-center gap-2 text-sm font-bold text-indigo-400 hover:text-indigo-300 transition-colors"
             >
               查看团队与方法论 <ChevronRight size={16} />
@@ -360,9 +290,8 @@ export default function LandingPage() {
                 color: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20", persona: "Verifier"
               }
             ].map((agent, i) => (
-              <motion.div 
+              <div 
                 key={i}
-                whileHover={{ y: -5 }}
                 className={`glass-card p-6 border ${agent.border} ${agent.bg} relative overflow-hidden group lg:min-h-[420px]`}
               >
                 <div className="flex flex-col items-center text-center space-y-4 relative z-10">
@@ -384,7 +313,7 @@ export default function LandingPage() {
                 <div className={`absolute -right-4 -bottom-4 w-24 h-24 rounded-full blur-[40px] opacity-20 transition-opacity group-hover:opacity-40 
                    ${i === 0 ? 'bg-cyan-500' : i === 1 ? 'bg-purple-500' : i === 2 ? 'bg-emerald-500' : i === 3 ? 'bg-slate-500' : 'bg-amber-500'}
                 `} />
-              </motion.div>
+              </div>
             ))}
           </div>
           <p className="text-center text-xs text-slate-600 font-bold">
@@ -448,10 +377,6 @@ export default function LandingPage() {
 
 
       <MarketingFooter />
-
-      <style jsx global>{`
-        .glass-card { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 40px; }
-      `}</style>
     </div>
   );
 }

@@ -62,9 +62,8 @@ export const config = {
          * - api (API 路由)
          * - _next/static (静态文件)
          * - _next/image (图片优化文件)
-         * - favicon.ico (浏览器图标)
-         * - public 目录下的常见静态资源后缀 (svg, png, jpg, jpeg, gif, webp)
+         * - 常见静态资源文件与 manifest/sw 等
          */
-        '/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+        '/((?!api|_next/static|_next/image|favicon.ico|manifest.json|sw.js|robots.txt|sitemap.xml|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|map|txt|xml|json|woff|woff2|ttf)$).*)',
     ],
 };
