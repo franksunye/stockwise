@@ -1,6 +1,15 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import {
+    createElement,
+    createContext,
+    useCallback,
+    useContext,
+    useEffect,
+    useRef,
+    useState,
+} from 'react';
+import type { ReactNode } from 'react';
 import { getCurrentUser } from '@/lib/user';
 import { getWatchlist } from '@/lib/storage';
 
@@ -34,7 +43,22 @@ export interface UserProfile {
     recentTransactions?: ReferralTransaction[];
 }
 
-export function useUserProfile() {
+type RefreshProfileOptions = {
+    watchlist?: string[];
+    force?: boolean;
+};
+
+type UserProfileContextValue = {
+    profile: UserProfile | null;
+    tier: Tier;
+    userId: string;
+    loading: boolean;
+    refreshProfile: (options?: RefreshProfileOptions) => Promise<UserProfile | null>;
+};
+
+const UserProfileContext = createContext<UserProfileContextValue | undefined>(undefined);
+
+function useUserProfileStore(): UserProfileContextValue {
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const [loading, setLoading] = useState(true);
     const profileRef = useRef<UserProfile | null>(null);
@@ -60,7 +84,7 @@ export function useUserProfile() {
     }, []);
 
     // 2. 获取/刷新 Profile
-    const refreshProfile = useCallback(async (options?: { watchlist?: string[], force?: boolean }) => {
+    const refreshProfile = useCallback(async (options?: RefreshProfileOptions) => {
         // 增加频率限制：30秒内不重复请求，除非 force 为 true
         const now = Date.now();
         const lastSync = parseInt(sessionStorage.getItem('last_profile_sync') || '0');
@@ -135,4 +159,17 @@ export function useUserProfile() {
         loading,
         refreshProfile
     };
+}
+
+export function UserProfileProvider({ children }: { children: ReactNode }) {
+    const value = useUserProfileStore();
+    return createElement(UserProfileContext.Provider, { value }, children);
+}
+
+export function useUserProfile() {
+    const context = useContext(UserProfileContext);
+    if (!context) {
+        throw new Error('useUserProfile must be used within UserProfileProvider');
+    }
+    return context;
 }

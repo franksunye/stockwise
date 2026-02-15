@@ -13,7 +13,7 @@ import { SystemSync } from '@/components/SystemSync';
 import { PerformanceOptimizer } from '@/components/PerformanceOptimizer';
 import { ReferralTracker } from '@/components/ReferralTracker';
 import { BadgeManager } from '@/components/BadgeManager';
-import type { Tier } from '@/hooks/useUserProfile';
+import { UserProfileProvider, type Tier } from '@/hooks/useUserProfile';
 
 export default function DashboardLayout({
   children,
@@ -152,10 +152,12 @@ export default function DashboardLayout({
     <>
       {appBootstrap}
       <DashboardAuthProvider tier={tier}>
-        <StockProvider>
-          <OnboardingOverlay />
-          {children}
-        </StockProvider>
+        <UserProfileProvider>
+          <StockProvider>
+            <OnboardingOverlay />
+            {children}
+          </StockProvider>
+        </UserProfileProvider>
       </DashboardAuthProvider>
     </>
   );
