@@ -3,7 +3,8 @@
 import { useState, useMemo } from 'react';
 import {
   Search, Brain, Target, ShieldCheck, Zap,
-  ChevronRight, ChevronLeft, Calendar
+  ChevronRight, ChevronLeft, Calendar,
+  User, Gift, Bell, Server, Cpu, History, Gauge
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
@@ -13,43 +14,91 @@ import { getArticleBySlug } from '@/lib/support-content';
 // Data source: support-content.ts (shared with /support web pages)
 const SECTIONS = [
   {
-    id: 'get-started', title: '快速开始', icon: Zap,
+    id: 'experience', title: '交互与导航', icon: Zap,
     color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20',
     items: [
-      { q: '什么是 PWA？', slug: 'what-is-pwa' },
-      { q: 'iOS 如何安装？', slug: 'install-ios' },
-      { q: 'Android 如何安装？', slug: 'install-android' },
-      { q: '初次入场 3 个核心动作', slug: 'first-moves' }
+      { q: '时光机模式 (Time Machine)', slug: 'time-machine-feed' },
+      { q: '交互优先策略 (Interaction First)', slug: 'interaction-first' },
+      { q: '横向滑动地图 (Snap-X)', slug: 'nav-map-logic' },
+      { q: '性能自适应模式 (Auto-Perf)', slug: 'perf-adaptation' },
+      { q: '深度链接引导 (Deep Linking)', slug: 'deep-linking-usage' },
+      { q: 'TikTok 式沉浸滚动 (Snap-Y)', slug: 'snap-y-dynamics' },
+      { q: '搜索联想与秒速响应', slug: 'smart-search' },
+      { q: 'iOS 专项性能优化 (Safari)', slug: 'ios-tuning' }
     ]
   },
   {
-    id: 'ai-logic', title: '底层智能', icon: Brain,
+    id: 'ai-logic', title: 'AI 智慧与分析', icon: Brain,
     color: 'text-indigo-400', bg: 'bg-indigo-500/10', border: 'border-indigo-500/20',
     items: [
-      { q: '战术简报的推理逻辑', slug: 'brief-logic' },
-      { q: '智囊团是如何"共鸣"的？', slug: 'ai-council' },
-      { q: '为什么有数据延迟？', slug: 'data-delay' },
-      { q: '风险反思：对抗确认偏差', slug: 'counter-argument' }
+      { q: 'AI 智囊团：群体决策机制', slug: 'ai-council-logic' },
+      { q: '战术简报解读 (Tactical Brief)', slug: 'tactical-brief-guide' },
+      { q: '关键价位图解 (Key Levels)', slug: 'key-levels-mapping' },
+      { q: '胜率历史矩阵 (Win-Rate)', slug: 'history-matrix-viz' },
+      { q: '智能上下文提取机制', slug: 'context-extraction' },
+      { q: '失败回溯审计 (Failure Audit)', slug: 'failure-retrospective' }
     ]
   },
   {
-    id: 'trading', title: '交易实战', icon: Target,
+    id: 'quant', title: '量化逻辑与纪律', icon: Gauge,
     color: 'text-rose-400', bg: 'bg-rose-500/10', border: 'border-rose-500/20',
     items: [
-      { q: '历史卡片：如何回顾？', slug: 'historical-cards' },
-      { q: '验证系统工作流程', slug: 'validation-logic' },
-      { q: '盈利与亏损战术差异', slug: 'scenario-tactics' },
-      { q: '如何解读关键价位？', slug: 'key-levels' }
+      { q: '严格模式：防未来函数', slug: 'anti-future-function' },
+      { q: '智能标题逻辑 (Smart Title)', slug: 'smart-title-logic' },
+      { q: 'RSI 颜色隐喻 (RSI Metaphor)', slug: 'rsi-color-metaphor' },
+      { q: '脉冲与共振 (Pulse Logic)', slug: 'ai-pulse-resonance' },
+      { q: '置信度百分比解读', slug: 'confidence-explained' },
+      { q: '触感反馈的心理暗示', slug: 'haptic-sync' }
     ]
   },
   {
-    id: 'account', title: '账号与安全', icon: ShieldCheck,
+    id: 'trust', title: '验证与诚信', icon: ShieldCheck,
     color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20',
     items: [
-      { q: '身份护照的重要性', slug: 'identity-passport' },
-      { q: '如何绑定恢复邮箱？', slug: 'recovery-email' },
-      { q: '多端登录与权益同步', slug: 'cross-device' },
-      { q: '专业版与免费版对比', slug: 'pro-vs-free' }
+      { q: 'T+3 多日验证机制', slug: 'multi-day-verification' },
+      { q: '验证的三种状态说明', slug: 'verification-states' },
+      { q: '失败的价值 (Value of Failure)', slug: 'value-of-failure' }
+    ]
+  },
+  {
+    id: 'account', title: '账号与安全', icon: User,
+    color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20',
+    items: [
+      { q: '身份护照系统 (Identity ID)', slug: 'identity-passport' },
+      { q: '邮箱绑定机制 (Email)', slug: 'email-sync-logic' },
+      { q: '身份找回流程 (Recovery)', slug: 'identity-restore-flow' },
+      { q: '隐私承诺 (Privacy Pledge)', slug: 'privacy-pledge' },
+      { q: '角标清除与数字减压', slug: 'badge-hygiene' }
+    ]
+  },
+  {
+    id: 'growth', title: '权益与增长', icon: Gift,
+    color: 'text-fuchsia-400', bg: 'bg-fuchsia-500/10', border: 'border-fuchsia-500/20',
+    items: [
+      { q: '推荐激励 (Referral Rewards)', slug: 'referral-rewards' },
+      { q: '渠道分润看板 (Partners)', slug: 'channel-revenue-guide' },
+      { q: '权益兑换码 (Redeem Codes)', slug: 'redeem-code-usage' },
+      { q: '免费版与 Pro 版对比', slug: 'tiers-explained' }
+    ]
+  },
+  {
+    id: 'notifications', title: '通知与触达', icon: Bell,
+    color: 'text-cyan-400', bg: 'bg-cyan-500/10', border: 'border-cyan-500/20',
+    items: [
+      { q: '智能反转推送逻辑', slug: 'signal-flip-push' },
+      { q: '精细化控制面板', slug: 'notification-preference' },
+      { q: 'Web Push 开启指南', slug: 'web-push-setup' },
+      { q: '通知连通性测试工具', slug: 'push-debug' }
+    ]
+  },
+  {
+    id: 'infra', title: '数据与服务保障', icon: Cpu,
+    color: 'text-violet-400', bg: 'bg-violet-500/10', border: 'border-violet-500/20',
+    items: [
+      { q: '乐观更新机制 (Optimistic)', slug: 'optimistic-ui-logic' },
+      { q: '实时盘中拼接技术', slug: 'realtime-data-splicing' },
+      { q: '按需同步调度算法', slug: 'on-demand-sync' },
+      { q: '多源降级数据保障', slug: 'data-resiliency' }
     ]
   }
 ];
