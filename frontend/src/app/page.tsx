@@ -300,8 +300,14 @@ export default function LandingPage() {
               由 <span className="text-indigo-500">知守 · 专家委员会</span> 驱动
             </h2>
             <p className="text-slate-500 font-medium max-w-2xl mx-auto">
-              每一行建议背后，都是四位拥有独立算法偏好的“数字合伙人”相互冲突与妥协后的结果。这模拟了私募机构最严谨的决策评审流程。
+              每条建议来自四个独立角色的交叉审视：量价观察、策略建模、情报过滤、风险执行。
             </p>
+            <Link
+              href="/about"
+              className="inline-flex items-center gap-2 text-sm font-bold text-indigo-400 hover:text-indigo-300 transition-colors"
+            >
+              查看团队与方法论 <ChevronRight size={16} />
+            </Link>
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -309,25 +315,25 @@ export default function LandingPage() {
               { 
                 name: "马库斯 (Marcus)", 
                 role: "首席观察员 · CHIEF OBSERVER", 
-                desc: "早年深耕于高频盘口监测。在马库斯的逻辑里，量价关系是市场唯一的真话。他负责穿透波动的假象，为您标记分时数据中主力留下的每一处“指纹”，确保决策永远锚定在事实之上。", 
+                desc: "负责量价结构识别，先确认事实，再进入判断。", 
                 color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20", persona: "Marcus" 
               },
               { 
                 name: "奎因 (Quinn)", 
                 role: "策略精算师 · STRATEGIST", 
-                desc: "在他的世界里没有“感觉”，只有“期望值”。奎因负责通过多周期算法过滤底噪，寻求风险收益比的极致最优解，确保委员会的每一份建议都站在概率的一侧。", 
+                desc: "负责多周期建模，把噪音过滤成可执行条件。", 
                 color: "text-purple-400", bg: "bg-purple-500/10", border: "border-purple-500/20", persona: "Quinn" 
               },
               { 
                 name: "诺拉 (Nora)", 
                 role: "首席情报官 · CIO", 
-                desc: "善于在新闻噪音中抽丝剥茧，寻找被隐藏的“灵魂因子”。诺拉的任务是为算法注入宏观与行业的情报底噪，防止委员会在决策时陷入单纯的数据盲区。", 
+                desc: "负责新闻与宏观信号过滤，补全数据上下文。", 
                 color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20", persona: "Nora" 
               },
               { 
                 name: "塞拉 (Sylar)", 
                 role: "风控执行官 · CRO", 
-                desc: "委员会中最被“敬畏”的存在。塞拉从不关心利润，他只关心亏损。他负责冷酷复盘信号表现，并在任何可能导致非理性回撤的时刻，一票否决冲动决策。", 
+                desc: "负责风险闸门与否决权，置信度不足时强制观望。", 
                 color: "text-slate-400", bg: "bg-slate-500/10", border: "border-slate-500/20", persona: "Sylar" 
               },
             ].map((agent, i) => (
