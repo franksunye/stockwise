@@ -56,13 +56,15 @@ export async function GET(request: Request) {
         `;
 
         const client = getDbClient();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const db = client as any;
         let rows;
         try {
-            if ('execute' in client) {
-                const rs = await client.execute({ sql, args: queryArgs });
+            if (client.$type === 'cloud') {
+                const rs = await db.execute({ sql, args: queryArgs });
                 rows = rs.rows;
             } else {
-                rows = client.prepare(sql).all(...queryArgs);
+                rows = db.prepare(sql).all(...queryArgs);
             }
         } finally {
             if (client && typeof (client as { close?: () => void }).close === 'function') {

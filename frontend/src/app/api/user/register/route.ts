@@ -21,7 +21,7 @@ export async function POST(request: Request) {
         client = getDbClient();
         const now = new Date().toISOString();
 
-        if ('execute' in client) {
+        if (client.$type === 'cloud') {
             // Turso
             await client.execute({
                 sql: `INSERT OR IGNORE INTO users (user_id, registration_type, created_at, last_active_at)

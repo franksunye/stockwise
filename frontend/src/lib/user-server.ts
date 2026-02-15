@@ -11,8 +11,10 @@ export async function getUserTier(userId: string | null): Promise<'free' | 'pro'
 
     const client = getDbClient();
     try {
-        if ('execute' in client) {
-            const rs = await client.execute({
+        if (client.$type === 'cloud') {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const cloudClient = client as any;
+            const rs = await cloudClient.execute({
                 sql: "SELECT subscription_tier FROM users WHERE user_id = ? LIMIT 1",
                 args: [userId]
             });
@@ -20,7 +22,9 @@ export async function getUserTier(userId: string | null): Promise<'free' | 'pro'
                 return (rs.rows[0].subscription_tier as 'free' | 'pro') || 'free';
             }
         } else {
-            const row = client.prepare("SELECT subscription_tier FROM users WHERE user_id = ? LIMIT 1").get(userId) as { subscription_tier: string } | undefined;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const localDb = client as any;
+            const row = localDb.prepare("SELECT subscription_tier FROM users WHERE user_id = ? LIMIT 1").get(userId) as { subscription_tier: string } | undefined;
             if (row) return (row.subscription_tier as 'free' | 'pro') || 'free';
         }
     } catch (e) {

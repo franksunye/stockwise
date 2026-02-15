@@ -16,11 +16,13 @@ export async function GET(request: NextRequest) {
         }
 
         const db = getDbClient()
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const client = db as any;
 
         // Check if db is Turso (async) or SQLite (sync)
-        if ('execute' in db) {
+        if (db.$type === 'cloud') {
             // Turso/libsql
-            const result = await db.execute({
+            const result = await client.execute({
                 sql: `SELECT date, content, push_hook, created_at FROM daily_briefs WHERE user_id = ? AND date = ?`,
                 args: [userId, date]
             })
@@ -40,7 +42,7 @@ export async function GET(request: NextRequest) {
             })
         } else {
             // Local SQLite (better-sqlite3)
-            const stmt = db.prepare(`SELECT date, content, push_hook, created_at FROM daily_briefs WHERE user_id = ? AND date = ?`)
+            const stmt = client.prepare(`SELECT date, content, push_hook, created_at FROM daily_briefs WHERE user_id = ? AND date = ?`)
             const row = stmt.get(userId, date) as { date: string; content: string; push_hook: string; created_at: string } | undefined
 
             if (!row) {
