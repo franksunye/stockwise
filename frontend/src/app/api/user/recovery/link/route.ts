@@ -28,12 +28,14 @@ export async function POST(request: Request) {
 
         // Update user email
         if (isCloud) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const client = db as any;
             await client.execute({
                 sql: "UPDATE users SET email = ? WHERE user_id = ?",
                 args: [email, userId]
             });
         } else {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const localDb = db as any;
             localDb.prepare("UPDATE users SET email = ? WHERE user_id = ?").run(email, userId);
         }

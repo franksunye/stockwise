@@ -13,19 +13,21 @@ export async function POST(request: Request) {
         }
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const db: any = getDbClient();
-        const isCloud = 'execute' in db && typeof db.execute === 'function' && !('prepare' in db);
+        const db = getDbClient();
+        const isCloud = db.$type === 'cloud';
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const client = db as any;
 
         // 1. Get current user status
         let user;
         if (isCloud) {
-            const res = await db.execute({
+            const res = await client.execute({
                 sql: "SELECT * FROM users WHERE user_id = ?",
                 args: [userId]
             });
             user = res.rows[0];
         } else {
-            user = db.prepare("SELECT * FROM users WHERE user_id = ?").get(userId);
+            user = client.prepare("SELECT * FROM users WHERE user_id = ?").get(userId);
         }
 
         if (!user) {
@@ -55,7 +57,7 @@ export async function POST(request: Request) {
 
         // 3. Update User (has_onboarded + Trial)
         if (isCloud) {
-            await db.execute({
+            await client.execute({
                 sql: "UPDATE users SET has_onboarded = 1, subscription_tier = ?, subscription_expires_at = ? WHERE user_id = ?",
                 args: [newTier, newExpiresAt, userId]
             });
@@ -63,36 +65,36 @@ export async function POST(request: Request) {
             // Only process selectedStock if this is the FIRST time onboarding.
             // This prevents users from abusing this API to bypass watchlist limits.
             if (selectedStock && !user.has_onboarded) {
-                const checkRes = await db.execute({
+                const checkRes = await client.execute({
                     sql: "SELECT 1 FROM user_watchlist WHERE user_id = ? AND symbol = ?",
                     args: [userId, selectedStock]
                 });
                 const isNewForUser = checkRes.rows.length === 0;
 
                 if (isNewForUser) {
-                    await db.execute({
+                    await client.execute({
                         sql: "INSERT OR IGNORE INTO user_watchlist (user_id, symbol, added_at) VALUES (?, ?, ?)",
                         args: [userId, selectedStock, now.toISOString()]
                     });
 
-                    const existing = await db.execute({
+                    const existing = await client.execute({
                         sql: 'SELECT watchers_count FROM global_stock_pool WHERE symbol = ?',
                         args: [selectedStock],
                     });
 
                     if (existing.rows.length > 0) {
-                        await db.execute({
+                        await client.execute({
                             sql: 'UPDATE global_stock_pool SET watchers_count = watchers_count + 1 WHERE symbol = ?',
                             args: [selectedStock],
                         });
                     } else {
-                        const metaRes = await db.execute({
+                        const metaRes = await client.execute({
                             sql: "SELECT name FROM stock_meta WHERE symbol = ?",
                             args: [selectedStock]
                         });
                         const stockName = metaRes.rows[0]?.name || `股票 ${selectedStock}`;
 
-                        await db.execute({
+                        await client.execute({
                             sql: 'INSERT INTO global_stock_pool (symbol, name, watchers_count, first_watched_at) VALUES (?, ?, 1, ?)',
                             args: [selectedStock, stockName, now.toISOString()],
                         });
@@ -101,7 +103,7 @@ export async function POST(request: Request) {
                     // Smart synchronization jugement
                     const market = getMarketFromSymbol(selectedStock);
                     const expectedDate = getExpectedLatestDataDate(market);
-                    const priceRes = await db.execute({
+                    const priceRes = await client.execute({
                         sql: 'SELECT MAX(date) as last_date FROM daily_prices WHERE symbol = ?',
                         args: [selectedStock]
                     });
@@ -113,28 +115,28 @@ export async function POST(request: Request) {
                 }
             }
         } else {
-            db.prepare("UPDATE users SET has_onboarded = 1, subscription_tier = ?, subscription_expires_at = ? WHERE user_id = ?").run(newTier, newExpiresAt, userId);
+            client.prepare("UPDATE users SET has_onboarded = 1, subscription_tier = ?, subscription_expires_at = ? WHERE user_id = ?").run(newTier, newExpiresAt, userId);
 
             if (selectedStock && !user.has_onboarded) {
-                const alreadyWatched = db.prepare("SELECT 1 FROM user_watchlist WHERE user_id = ? AND symbol = ?").get(userId, selectedStock);
+                const alreadyWatched = client.prepare("SELECT 1 FROM user_watchlist WHERE user_id = ? AND symbol = ?").get(userId, selectedStock);
 
                 if (!alreadyWatched) {
-                    db.prepare("INSERT OR IGNORE INTO user_watchlist (user_id, symbol, added_at) VALUES (?, ?, ?)").run(userId, selectedStock, now.toISOString());
+                    client.prepare("INSERT OR IGNORE INTO user_watchlist (user_id, symbol, added_at) VALUES (?, ?, ?)").run(userId, selectedStock, now.toISOString());
 
-                    const existing = db.prepare('SELECT watchers_count FROM global_stock_pool WHERE symbol = ?').get(selectedStock);
+                    const existing = client.prepare('SELECT watchers_count FROM global_stock_pool WHERE symbol = ?').get(selectedStock);
 
                     if (existing) {
-                        db.prepare('UPDATE global_stock_pool SET watchers_count = watchers_count + 1 WHERE symbol = ?').run(selectedStock);
+                        client.prepare('UPDATE global_stock_pool SET watchers_count = watchers_count + 1 WHERE symbol = ?').run(selectedStock);
                     } else {
-                        const meta = db.prepare("SELECT name FROM stock_meta WHERE symbol = ?").get(selectedStock);
+                        const meta = client.prepare("SELECT name FROM stock_meta WHERE symbol = ?").get(selectedStock);
                         const stockName = meta?.name || `股票 ${selectedStock}`;
-                        db.prepare('INSERT INTO global_stock_pool (symbol, name, watchers_count, first_watched_at) VALUES (?, ?, 1, ?)').run(selectedStock, stockName, now.toISOString());
+                        client.prepare('INSERT INTO global_stock_pool (symbol, name, watchers_count, first_watched_at) VALUES (?, ?, 1, ?)').run(selectedStock, stockName, now.toISOString());
                     }
 
                     // Smart sync (Local)
                     const market = getMarketFromSymbol(selectedStock);
                     const expectedDate = getExpectedLatestDataDate(market);
-                    const row = db.prepare('SELECT MAX(date) as last_date FROM daily_prices WHERE symbol = ?').get(selectedStock);
+                    const row = client.prepare('SELECT MAX(date) as last_date FROM daily_prices WHERE symbol = ?').get(selectedStock);
                     const actualLatestDate = row?.last_date;
 
                     if (!actualLatestDate || String(actualLatestDate) < expectedDate) {
@@ -143,7 +145,7 @@ export async function POST(request: Request) {
                 }
             }
 
-            db.close();
+            client.close();
         }
 
         return NextResponse.json({

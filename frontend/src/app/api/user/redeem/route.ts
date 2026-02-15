@@ -18,21 +18,23 @@ export async function POST(request: Request) {
         }
 
         db = getDbClient();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const client = db as any;
         const now = new Date().toISOString();
         const normalizedCode = code.trim().toUpperCase();
 
-        const isCloud = 'execute' in db && typeof db.execute === 'function' && !('prepare' in db);
+        const isCloud = db.$type === 'cloud';
 
         // 1. Verify Code
         let codeRecord;
         if (isCloud) {
-            const res = await db.execute({
+            const res = await client.execute({
                 sql: "SELECT * FROM invitation_codes WHERE code = ? AND is_used = 0",
                 args: [normalizedCode]
             });
             codeRecord = res.rows[0];
         } else {
-            codeRecord = db.prepare("SELECT * FROM invitation_codes WHERE code = ? AND is_used = 0").get(normalizedCode);
+            codeRecord = client.prepare("SELECT * FROM invitation_codes WHERE code = ? AND is_used = 0").get(normalizedCode);
         }
 
         if (!codeRecord) {
@@ -47,7 +49,7 @@ export async function POST(request: Request) {
 
         // 3. Execute Updates
         if (isCloud) {
-            await db.batch([
+            await client.batch([
                 {
                     sql: `INSERT INTO users (user_id, subscription_tier, subscription_expires_at, registration_type) 
                       VALUES (?, 'pro', ?, 'anonymous') 
@@ -62,8 +64,8 @@ export async function POST(request: Request) {
                 }
             ]);
         } else {
-            const transaction = db.transaction(() => {
-                db.prepare(`
+            const transaction = client.transaction(() => {
+                client.prepare(`
                 INSERT INTO users (user_id, subscription_tier, subscription_expires_at, registration_type) 
                 VALUES (?, 'pro', ?, 'anonymous') 
                 ON CONFLICT(user_id) DO UPDATE SET 
@@ -71,7 +73,7 @@ export async function POST(request: Request) {
                 subscription_expires_at = ?
              `).run(userId, expiryStr, expiryStr);
 
-                db.prepare("UPDATE invitation_codes SET is_used = 1, used_by_user_id = ?, used_at = ? WHERE code = ?")
+                client.prepare("UPDATE invitation_codes SET is_used = 1, used_by_user_id = ?, used_at = ? WHERE code = ?")
                     .run(userId, now, normalizedCode);
             });
             transaction();

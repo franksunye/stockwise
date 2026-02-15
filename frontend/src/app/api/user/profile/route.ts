@@ -14,18 +14,20 @@ export async function POST(request: Request) {
         }
 
         db = getDbClient();
-        const isCloud = 'execute' in db && typeof db.execute === 'function' && !('prepare' in db);
+        const isCloud = db.$type === 'cloud';
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const client = db as any;
 
         // 1. Get or Create User
         let user;
         if (isCloud) {
-            const res = await db.execute({
+            const res = await client.execute({
                 sql: "SELECT * FROM users WHERE user_id = ?",
                 args: [userId]
             });
             user = res.rows[0];
         } else {
-            user = db.prepare("SELECT * FROM users WHERE user_id = ?").get(userId);
+            user = client.prepare("SELECT * FROM users WHERE user_id = ?").get(userId);
         }
 
         if (!user) {
@@ -43,13 +45,13 @@ export async function POST(request: Request) {
                 let referrer;
                 try {
                     if (isCloud) {
-                        const res = await db.execute({
+                        const res = await client.execute({
                             sql: "SELECT subscription_tier, subscription_expires_at FROM users WHERE user_id = ?",
                             args: [referredBy]
                         });
                         referrer = res.rows[0];
                     } else {
-                        referrer = db.prepare("SELECT subscription_tier, subscription_expires_at FROM users WHERE user_id = ?").get(referredBy);
+                        referrer = client.prepare("SELECT subscription_tier, subscription_expires_at FROM users WHERE user_id = ?").get(referredBy);
                     }
                 } catch (e) {
                     console.error('Failed to verify referrer:', e);
@@ -74,23 +76,23 @@ export async function POST(request: Request) {
 
                         // Update Referrer
                         if (isCloud) {
-                            await db.execute({
+                            await client.execute({
                                 sql: "UPDATE users SET subscription_tier = 'pro', subscription_expires_at = ? WHERE user_id = ?",
                                 args: [newExpiry, referredBy]
                             });
 
                             // Record transaction
                             const txId = `tx_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-                            await db.execute({
+                            await client.execute({
                                 sql: "INSERT INTO referral_transactions (id, referrer_id, referred_id, type, amount, status, created_at, note) VALUES (?, ?, ?, 'reward', 0, 'completed', ?, ?)",
                                 args: [txId, referredBy, userId, new Date().toISOString(), `+${MEMBERSHIP_CONFIG.referral.referrerDays}天 PRO (邀请奖励)`]
                             });
                         } else {
-                            db.prepare("UPDATE users SET subscription_tier = 'pro', subscription_expires_at = ? WHERE user_id = ?").run(newExpiry, referredBy);
+                            client.prepare("UPDATE users SET subscription_tier = 'pro', subscription_expires_at = ? WHERE user_id = ?").run(newExpiry, referredBy);
 
                             // Record transaction
                             const txId = `tx_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-                            db.prepare("INSERT INTO referral_transactions (id, referrer_id, referred_id, type, amount, status, created_at, note) VALUES (?, ?, ?, 'reward', 0, 'completed', ?, ?)").run(txId, referredBy, userId, new Date().toISOString(), `+${MEMBERSHIP_CONFIG.referral.referrerDays}天 PRO (邀请奖励)`);
+                            client.prepare("INSERT INTO referral_transactions (id, referrer_id, referred_id, type, amount, status, created_at, note) VALUES (?, ?, ?, 'reward', 0, 'completed', ?, ?)").run(txId, referredBy, userId, new Date().toISOString(), `+${MEMBERSHIP_CONFIG.referral.referrerDays}天 PRO (邀请奖励)`);
                         }
 
                         // Send Notification
@@ -111,12 +113,12 @@ export async function POST(request: Request) {
             }
 
             if (isCloud) {
-                await db.execute({
+                await client.execute({
                     sql: "INSERT INTO users (user_id, registration_type, subscription_tier, subscription_expires_at, referred_by, created_at) VALUES (?, 'anonymous', ?, ?, ?, ?)",
                     args: [userId, initialTier, expiresAt, validReferrerId, now]
                 });
             } else {
-                db.prepare("INSERT INTO users (user_id, registration_type, subscription_tier, subscription_expires_at, referred_by, created_at) VALUES (?, 'anonymous', ?, ?, ?, ?)").run(userId, initialTier, expiresAt, validReferrerId, now);
+                client.prepare("INSERT INTO users (user_id, registration_type, subscription_tier, subscription_expires_at, referred_by, created_at) VALUES (?, 'anonymous', ?, ?, ?, ?)").run(userId, initialTier, expiresAt, validReferrerId, now);
             }
 
             user = {
@@ -134,12 +136,12 @@ export async function POST(request: Request) {
                 const now = new Date().toISOString();
                 if (isCloud) {
                     // Fire and forget update (awaiting only to ensure db instance is valid, but ignoring result)
-                    await db.execute({
+                    await client.execute({
                         sql: "UPDATE users SET last_active_at = ? WHERE user_id = ?",
                         args: [now, userId]
                     });
                 } else {
-                    db.prepare("UPDATE users SET last_active_at = ? WHERE user_id = ?").run(now, userId);
+                    client.prepare("UPDATE users SET last_active_at = ? WHERE user_id = ?").run(now, userId);
                 }
             } catch (activeErr) {
                 // Ignore errors here to not block the main flow
@@ -163,13 +165,13 @@ export async function POST(request: Request) {
                 let referrer;
                 try {
                     if (isCloud) {
-                        const res = await db.execute({
+                        const res = await client.execute({
                             sql: "SELECT subscription_tier, subscription_expires_at FROM users WHERE user_id = ?",
                             args: [referredBy]
                         });
                         referrer = res.rows[0];
                     } else {
-                        referrer = db.prepare("SELECT subscription_tier, subscription_expires_at FROM users WHERE user_id = ?").get(referredBy);
+                        referrer = client.prepare("SELECT subscription_tier, subscription_expires_at FROM users WHERE user_id = ?").get(referredBy);
                     }
                 } catch (e) {
                     console.error('Failed to verify referrer for existing user:', e);
@@ -183,12 +185,12 @@ export async function POST(request: Request) {
 
                     try {
                         if (isCloud) {
-                            await db.execute({
+                            await client.execute({
                                 sql: "UPDATE users SET subscription_tier = 'pro', subscription_expires_at = ?, referred_by = ? WHERE user_id = ?",
                                 args: [newExpiresAt, referredBy, userId]
                             });
                         } else {
-                            db.prepare("UPDATE users SET subscription_tier = 'pro', subscription_expires_at = ?, referred_by = ? WHERE user_id = ?").run(newExpiresAt, referredBy, userId);
+                            client.prepare("UPDATE users SET subscription_tier = 'pro', subscription_expires_at = ?, referred_by = ? WHERE user_id = ?").run(newExpiresAt, referredBy, userId);
                         }
 
                         user = {
@@ -205,23 +207,23 @@ export async function POST(request: Request) {
                         const newExpiry = baseDate.toISOString();
 
                         if (isCloud) {
-                            await db.execute({
+                            await client.execute({
                                 sql: "UPDATE users SET subscription_tier = 'pro', subscription_expires_at = ? WHERE user_id = ?",
                                 args: [newExpiry, referredBy]
                             });
 
                             // Record transaction
                             const txId = `tx_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-                            await db.execute({
+                            await client.execute({
                                 sql: "INSERT INTO referral_transactions (id, referrer_id, referred_id, type, amount, status, created_at, note) VALUES (?, ?, ?, 'reward', 0, 'completed', ?, ?)",
                                 args: [txId, referredBy, userId, new Date().toISOString(), `+${MEMBERSHIP_CONFIG.referral.referrerDays}天 PRO (邀请奖励)`]
                             });
                         } else {
-                            db.prepare("UPDATE users SET subscription_tier = 'pro', subscription_expires_at = ? WHERE user_id = ?").run(newExpiry, referredBy);
+                            client.prepare("UPDATE users SET subscription_tier = 'pro', subscription_expires_at = ? WHERE user_id = ?").run(newExpiry, referredBy);
 
                             // Record transaction
                             const txId = `tx_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-                            db.prepare("INSERT INTO referral_transactions (id, referrer_id, referred_id, type, amount, status, created_at, note) VALUES (?, ?, ?, 'reward', 0, 'completed', ?, ?)").run(txId, referredBy, userId, new Date().toISOString(), `+${MEMBERSHIP_CONFIG.referral.referrerDays}天 PRO (邀请奖励)`);
+                            client.prepare("INSERT INTO referral_transactions (id, referrer_id, referred_id, type, amount, status, created_at, note) VALUES (?, ?, ?, 'reward', 0, 'completed', ?, ?)").run(txId, referredBy, userId, new Date().toISOString(), `+${MEMBERSHIP_CONFIG.referral.referrerDays}天 PRO (邀请奖励)`);
                         }
 
                         // Send Notification
@@ -250,10 +252,10 @@ export async function POST(request: Request) {
                         sql: "INSERT OR IGNORE INTO user_watchlist (user_id, symbol) VALUES (?, ?)",
                         args: [userId, symbol]
                     }));
-                    await db.batch(stmts);
+                    await client.batch(stmts);
                 } else {
-                    const insertStmt = db.prepare("INSERT OR IGNORE INTO user_watchlist (user_id, symbol) VALUES (?, ?)");
-                    const transaction = db.transaction((items: string[]) => {
+                    const insertStmt = client.prepare("INSERT OR IGNORE INTO user_watchlist (user_id, symbol) VALUES (?, ?)");
+                    const transaction = client.transaction((items: string[]) => {
                         for (const item of items) insertStmt.run(userId, item);
                     });
                     transaction(watchlist);
@@ -276,12 +278,12 @@ export async function POST(request: Request) {
                     try {
                         if (isCloud) {
                             // Don't await this, let it run in background to keep API fast
-                            db.execute({
+                            client.execute({
                                 sql: "UPDATE users SET subscription_tier = 'free' WHERE user_id = ?",
                                 args: [userId]
                             }).catch((e: unknown) => console.error('Lazy correction failed:', e));
                         } else {
-                            db.prepare("UPDATE users SET subscription_tier = 'free' WHERE user_id = ?").run(userId);
+                            client.prepare("UPDATE users SET subscription_tier = 'free' WHERE user_id = ?").run(userId);
                         }
                     } catch (e) {
                         console.error('Lazy correction error:', e);
@@ -294,13 +296,13 @@ export async function POST(request: Request) {
         let watchlistCount = 0;
         try {
             if (isCloud) {
-                const countRes = await db.execute({
+                const countRes = await client.execute({
                     sql: "SELECT COUNT(*) as count FROM user_watchlist WHERE user_id = ?",
                     args: [userId]
                 });
                 watchlistCount = Number(countRes.rows[0]?.count || 0);
             } else {
-                const countRow = db.prepare("SELECT COUNT(*) as count FROM user_watchlist WHERE user_id = ?").get(userId) as { count: number } | undefined;
+                const countRow = client.prepare("SELECT COUNT(*) as count FROM user_watchlist WHERE user_id = ?").get(userId) as { count: number } | undefined;
                 watchlistCount = countRow?.count || 0;
             }
         } catch (countErr) {
@@ -313,21 +315,21 @@ export async function POST(request: Request) {
         let recentTransactions: any[] = [];
         try {
             if (isCloud) {
-                const refCountRes = await db.execute({
+                const refCountRes = await client.execute({
                     sql: "SELECT COUNT(*) as count FROM users WHERE referred_by = ?",
                     args: [userId]
                 });
                 referralCount = Number(refCountRes.rows[0]?.count || 0);
 
-                const txRes = await db.execute({
+                const txRes = await client.execute({
                     sql: "SELECT type, amount, status, created_at, note FROM referral_transactions WHERE referrer_id = ? ORDER BY created_at DESC LIMIT 20",
                     args: [userId]
                 });
                 recentTransactions = txRes.rows || [];
             } else {
-                const refCountRow = db.prepare("SELECT COUNT(*) as count FROM users WHERE referred_by = ?").get(userId) as { count: number } | undefined;
+                const refCountRow = client.prepare("SELECT COUNT(*) as count FROM users WHERE referred_by = ?").get(userId) as { count: number } | undefined;
                 referralCount = refCountRow?.count || 0;
-                recentTransactions = db.prepare("SELECT type, amount, status, created_at, note FROM referral_transactions WHERE referrer_id = ? ORDER BY created_at DESC LIMIT 20").all(userId);
+                recentTransactions = client.prepare("SELECT type, amount, status, created_at, note FROM referral_transactions WHERE referrer_id = ? ORDER BY created_at DESC LIMIT 20").all(userId);
             }
         } catch (refErr) {
             console.error('Referral stats error:', refErr);

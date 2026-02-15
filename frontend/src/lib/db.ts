@@ -43,6 +43,7 @@ export function getDbClient(): DbClient {
     if (!forceLocal && canUseCloud) {
         // 显式连接云端 Turso
         const client = createClient({ url: url!, authToken: authToken! });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (client as any).$type = 'cloud';
         return client as DbClient;
     } else {
@@ -50,6 +51,7 @@ export function getDbClient(): DbClient {
         // 优先使用环境变量 LOCAL_DB_PATH，如果没有则 fallback 
         const localPath = process.env.LOCAL_DB_PATH || path.join(process.cwd(), '..', 'data', 'stockwise.db');
         const db = new Database(localPath);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (db as any).$type = 'local';
         return db as DbClient;
     }

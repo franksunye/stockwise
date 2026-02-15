@@ -25,18 +25,20 @@ export async function GET(req: NextRequest) {
   let db: any;
   try {
     db = getDbClient();
-    const isCloud = 'execute' in db && typeof db.execute === 'function' && !('prepare' in db);
+    const isCloud = db.$type === 'cloud';
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const client = db as any;
 
     let settingsJson: string | null = null;
 
     if (isCloud) {
-      const result = await db.execute({
+      const result = await client.execute({
         sql: 'SELECT notification_settings FROM users WHERE user_id = ?',
         args: [userId],
       });
       settingsJson = result.rows[0]?.notification_settings || null;
     } else {
-      const row = db.prepare('SELECT notification_settings FROM users WHERE user_id = ?').get(userId) as { notification_settings?: string } | undefined;
+      const row = client.prepare('SELECT notification_settings FROM users WHERE user_id = ?').get(userId) as { notification_settings?: string } | undefined;
       settingsJson = row?.notification_settings || null;
     }
 
@@ -66,17 +68,19 @@ export async function POST(req: NextRequest) {
     }
 
     db = getDbClient();
-    const isCloud = 'execute' in db && typeof db.execute === 'function' && !('prepare' in db);
+    const isCloud = db.$type === 'cloud';
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const client = db as any;
 
     const settingsJson = JSON.stringify(settings);
 
     if (isCloud) {
-      await db.execute({
+      await client.execute({
         sql: 'UPDATE users SET notification_settings = ? WHERE user_id = ?',
         args: [settingsJson, userId],
       });
     } else {
-      db.prepare('UPDATE users SET notification_settings = ? WHERE user_id = ?').run(settingsJson, userId);
+      client.prepare('UPDATE users SET notification_settings = ? WHERE user_id = ?').run(settingsJson, userId);
     }
 
     return NextResponse.json({ success: true });
