@@ -60,6 +60,8 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
   const [showPricing, setShowPricing] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
   const [showLearn, setShowLearn] = useState(false);
+  // Fix: Separate visibility state from loading state
+  const [showEmailForm, setShowEmailForm] = useState(false);
   const [isLinkingEmail, setIsLinkingEmail] = useState(false);
   const [tempEmail, setTempEmail] = useState('');
   const [emailMsg, setEmailMsg] = useState<{type: 'success' | 'error', text: string} | null>(null);
@@ -87,6 +89,10 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
       setShowLearn(false);
       setShowNotificationSettings(false);
       setShowReferralDetails(false);
+      setShowEmailForm(false);
+      setIsLinkingEmail(false);
+      setTempEmail('');
+      setEmailMsg(null);
     }
   }, [isOpen, refreshProfile]);
 
@@ -238,6 +244,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
         setTimeout(() => {
           setEmailMsg(null);
           setIsLinkingEmail(false);
+          setShowEmailForm(false);
         }, 2000);
       } else {
         setEmailMsg({ type: 'error', text: data.error || '绑定失败' });
@@ -301,15 +308,15 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                   </motion.div>
                 ) : showIdentityCenter ? (
                   <motion.div key="identity" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.25 }} className="space-y-6">
-                    <IdentityPassport userId={userId} tier={tier} emailLinked={userEmail} onLinkEmail={() => setIsLinkingEmail(true)} />
-                    {isLinkingEmail && !userEmail && (
+                    <IdentityPassport userId={userId} tier={tier} emailLinked={userEmail} onLinkEmail={() => setShowEmailForm(true)} />
+                    {showEmailForm && !userEmail && (
                       <div className="p-5 rounded-2xl bg-indigo-500/5 border border-indigo-500/20 space-y-4">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                                 <Mail size={14} className="text-indigo-400" />
                                 <span className="text-xs font-bold text-indigo-200 uppercase tracking-widest">绑定支付/恢复邮箱</span>
                             </div>
-                            <button onClick={() => setIsLinkingEmail(false)} className="text-slate-600 hover:text-slate-400"><X size={12} /></button>
+                            <button onClick={() => setShowEmailForm(false)} className="text-slate-600 hover:text-slate-400"><X size={12} /></button>
                         </div>
                         <p className="text-[10px] text-slate-500 leading-relaxed text-left">
                             绑定邮箱后，即使更换设备、重装应用或清空缓存，只要通过验证该邮箱，即可找回所有付费权益。
