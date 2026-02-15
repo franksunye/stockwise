@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { getCurrentUser } from '@/lib/user';
 import { getWatchlist } from '@/lib/storage';
 
@@ -37,6 +37,11 @@ export interface UserProfile {
 export function useUserProfile() {
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const [loading, setLoading] = useState(true);
+    const profileRef = useRef<UserProfile | null>(null);
+
+    useEffect(() => {
+        profileRef.current = profile;
+    }, [profile]);
 
     // 1. 从缓存初始化
     useEffect(() => {
@@ -46,6 +51,7 @@ export function useUserProfile() {
                 const parsed = JSON.parse(cached);
                 if (parsed && parsed.userId) {
                     setProfile(parsed);
+                    profileRef.current = parsed;
                 }
             } catch (e) {
                 console.error('Failed to parse profile cache', e);
@@ -58,8 +64,8 @@ export function useUserProfile() {
         // 增加频率限制：30秒内不重复请求，除非 force 为 true
         const now = Date.now();
         const lastSync = parseInt(sessionStorage.getItem('last_profile_sync') || '0');
-        if (!options?.force && now - lastSync < 30000 && profile) {
-            return profile;
+        if (!options?.force && now - lastSync < 30000 && profileRef.current) {
+            return profileRef.current;
         }
 
         setLoading(true);
@@ -105,6 +111,7 @@ export function useUserProfile() {
             };
 
             setProfile(newProfile);
+            profileRef.current = newProfile;
             localStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify(newProfile));
             sessionStorage.setItem('last_profile_sync', now.toString());
             return newProfile;
@@ -114,7 +121,7 @@ export function useUserProfile() {
             setLoading(false);
         }
         return null;
-    }, [profile]);
+    }, []);
 
     // 自动刷新
     useEffect(() => {
