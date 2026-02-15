@@ -11,20 +11,24 @@ export async function POST(request: Request) {
     try {
         const { userId, email } = await request.json();
 
-        if (!userId || !email) {
+        if (!userId || !email || typeof email !== 'string') {
             return NextResponse.json({ error: 'Missing userId or email' }, { status: 400 });
         }
 
+        const normalizedEmail = email.trim().toLowerCase();
+
         // Basic email validation
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
+        if (!emailRegex.test(normalizedEmail)) {
             return NextResponse.json({ error: 'Invalid email format' }, { status: 400 });
         }
 
         db = getDbClient();
         const isCloud = db.$type === 'cloud';
 
-        console.log(`[Email Link] Linking ${email} to ${userId} (Mode: ${db.$type})`);
+        console.log(`[Email Link] Linking ${normalizedEmail} to ${userId} (Mode: ${db.$type})`);
+
+        let linkedEmail: string | null = null;
 
         // Update user email
         if (isCloud) {
@@ -32,15 +36,34 @@ export async function POST(request: Request) {
             const client = db as any;
             await client.execute({
                 sql: "UPDATE users SET email = ? WHERE user_id = ?",
-                args: [email, userId]
+                args: [normalizedEmail, userId]
             });
+
+            const verifyRes = await client.execute({
+                sql: "SELECT email FROM users WHERE user_id = ?",
+                args: [userId]
+            });
+            const row = verifyRes.rows?.[0] as { email?: string | null } | undefined;
+            if (!row) {
+                return NextResponse.json({ error: 'User not found' }, { status: 404 });
+            }
+            linkedEmail = row.email || null;
         } else {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const localDb = db as any;
-            localDb.prepare("UPDATE users SET email = ? WHERE user_id = ?").run(email, userId);
+            localDb.prepare("UPDATE users SET email = ? WHERE user_id = ?").run(normalizedEmail, userId);
+            const row = localDb.prepare("SELECT email FROM users WHERE user_id = ?").get(userId) as { email?: string | null } | undefined;
+            if (!row) {
+                return NextResponse.json({ error: 'User not found' }, { status: 404 });
+            }
+            linkedEmail = row.email || null;
         }
 
-        return NextResponse.json({ success: true, message: 'Recovery email linked successfully' });
+        return NextResponse.json({
+            success: true,
+            message: 'Recovery email linked successfully',
+            email: linkedEmail
+        });
 
     } catch (error: unknown) {
         console.error('Recovery link error:', error);

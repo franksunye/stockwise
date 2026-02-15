@@ -62,6 +62,7 @@ export function useUserProfile() {
             return profile;
         }
 
+        setLoading(true);
         try {
             const user = await getCurrentUser();
             const watchlist = options?.watchlist || getWatchlist();
@@ -70,6 +71,7 @@ export function useUserProfile() {
             const res = await fetch('/api/user/profile', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                cache: 'no-store',
                 body: JSON.stringify({
                     userId: user.userId,
                     watchlist,
@@ -77,31 +79,35 @@ export function useUserProfile() {
                 })
             });
 
-            if (res.ok) {
-                const data = await res.json();
-                const newProfile: UserProfile = {
-                    userId: data.userId,
-                    tier: data.tier || 'free',
-                    expiresAt: data.expiresAt,
-                    watchlistCount: data.watchlistCount,
-                    email: data.email,
-                    referralBalance: data.referralBalance,
-                    totalEarned: data.totalEarned,
-                    commissionRate: data.commissionRate,
-                    hasOnboarded: data.hasOnboarded,
-                    hasStripeCustomer: data.hasStripeCustomer,
-                    // Referral & Channel
-                    isChannel: data.isChannel,
-                    referralAlias: data.referralAlias,
-                    referralCount: data.referralCount,
-                    recentTransactions: data.recentTransactions,
-                };
-
-                setProfile(newProfile);
-                localStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify(newProfile));
-                sessionStorage.setItem('last_profile_sync', now.toString());
-                return newProfile;
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                console.error('Refresh profile failed', data?.error || `status ${res.status}`);
+                return null;
             }
+
+            const data = await res.json();
+            const newProfile: UserProfile = {
+                userId: data.userId,
+                tier: data.tier || 'free',
+                expiresAt: data.expiresAt,
+                watchlistCount: data.watchlistCount,
+                email: data.email,
+                referralBalance: data.referralBalance,
+                totalEarned: data.totalEarned,
+                commissionRate: data.commissionRate,
+                hasOnboarded: data.hasOnboarded,
+                hasStripeCustomer: data.hasStripeCustomer,
+                // Referral & Channel
+                isChannel: data.isChannel,
+                referralAlias: data.referralAlias,
+                referralCount: data.referralCount,
+                recentTransactions: data.recentTransactions,
+            };
+
+            setProfile(newProfile);
+            localStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify(newProfile));
+            sessionStorage.setItem('last_profile_sync', now.toString());
+            return newProfile;
         } catch (e) {
             console.error('Refresh profile failed', e);
         } finally {

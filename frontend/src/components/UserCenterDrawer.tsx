@@ -80,7 +80,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
   useEffect(() => {
     setIsHighPerformance(shouldEnableHighPerformance());
     if (isOpen) {
-      refreshProfile();
+      refreshProfile({ force: true });
       checkPushStatus();
     } else {
       setShowPricing(false);
@@ -214,7 +214,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
       const data = await res.json();
       if (data.success) {
         setRedeemMsg({ type: 'success', text: '激活成功！欢迎成为 Pro 会员' });
-        refreshProfile();
+        await refreshProfile({ force: true });
         setRedeemCode('');
         setTimeout(() => setRedeemMsg(null), 3000);
       } else {
@@ -229,33 +229,47 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
 
   const handleLinkEmail = async () => {
     if (!tempEmail || isLinkingEmail) return;
+    if (!userId) {
+      setEmailMsg({ type: 'error', text: '用户信息未就绪，请稍后重试' });
+      return;
+    }
+
+    const normalizedEmail = tempEmail.trim().toLowerCase();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(normalizedEmail)) {
+      setEmailMsg({ type: 'error', text: '邮箱格式不正确' });
+      return;
+    }
+
     setIsLinkingEmail(true);
     setEmailMsg(null);
     try {
       const res = await fetch('/api/user/recovery/link', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, email: tempEmail.trim() })
+        body: JSON.stringify({ userId, email: normalizedEmail })
       });
-      const data = await res.json();
-      if (data.success) {
-        refreshProfile();
-        setEmailMsg({ type: 'success', text: '恢复邮箱绑定成功' });
-        setTimeout(() => {
-          setEmailMsg(null);
-          setIsLinkingEmail(false);
-          setShowEmailForm(false);
-        }, 2000);
-      } else {
-        setEmailMsg({ type: 'error', text: data.error || '绑定失败' });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.success) {
+        setEmailMsg({ type: 'error', text: data.error || `绑定失败 (${res.status})` });
+        return;
       }
+
+      const refreshed = await refreshProfile({ force: true });
+      const linkedEmail = refreshed?.email || data.email || normalizedEmail;
+      setEmailMsg({ type: 'success', text: `绑定成功：${linkedEmail}` });
+      setTempEmail('');
+      setTimeout(() => {
+        setEmailMsg(null);
+        setShowEmailForm(false);
+      }, 1200);
     } catch {
       setEmailMsg({ type: 'error', text: '网络请求失败' });
     } finally {
       setIsLinkingEmail(false);
     }
   };
-
   return (
     <AnimatePresence>
       {isOpen && (
