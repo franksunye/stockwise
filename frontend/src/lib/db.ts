@@ -27,25 +27,31 @@ function sleep(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-export function getDbClient() {
+export type DbClient = (Client | Database.Database) & { $type: 'cloud' | 'local' };
+
+export function getDbClient(): DbClient {
     const url = process.env.TURSO_DB_URL;
     const authToken = process.env.TURSO_AUTH_TOKEN;
-    const strategy = process.env.DB_STRATEGY;
+    const strategy = process.env.DB_STRATEGY || process.env.DB_SOURCE; // Support both
 
     // 优先使用云端数据库：
-    // 1. 除非明确指定 DB_STRATEGY='local'
+    // 1. 除非明确指定 DB_STRATEGY/DB_SOURCE='local'
     // 2. 并且存在云端配置 (URL + Token)
     const forceLocal = strategy === 'local';
     const canUseCloud = url && authToken && url.startsWith('libsql://');
 
     if (!forceLocal && canUseCloud) {
         // 显式连接云端 Turso
-        return createClient({ url: url!, authToken: authToken! });
+        const client = createClient({ url: url!, authToken: authToken! });
+        (client as any).$type = 'cloud';
+        return client as DbClient;
     } else {
         // 连接本地 SQLite
         // 优先使用环境变量 LOCAL_DB_PATH，如果没有则 fallback 
         const localPath = process.env.LOCAL_DB_PATH || path.join(process.cwd(), '..', 'data', 'stockwise.db');
-        return new Database(localPath);
+        const db = new Database(localPath);
+        (db as any).$type = 'local';
+        return db as DbClient;
     }
 }
 

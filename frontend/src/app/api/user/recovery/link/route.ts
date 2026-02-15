@@ -22,16 +22,20 @@ export async function POST(request: Request) {
         }
 
         db = getDbClient();
-        const isCloud = 'execute' in db && typeof db.execute === 'function' && !('prepare' in db);
+        const isCloud = db.$type === 'cloud';
+
+        console.log(`[Email Link] Linking ${email} to ${userId} (Mode: ${db.$type})`);
 
         // Update user email
         if (isCloud) {
-            await db.execute({
+            const client = db as any;
+            await client.execute({
                 sql: "UPDATE users SET email = ? WHERE user_id = ?",
                 args: [email, userId]
             });
         } else {
-            db.prepare("UPDATE users SET email = ? WHERE user_id = ?").run(email, userId);
+            const localDb = db as any;
+            localDb.prepare("UPDATE users SET email = ? WHERE user_id = ?").run(email, userId);
         }
 
         return NextResponse.json({ success: true, message: 'Recovery email linked successfully' });
