@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { getDbClient } from '@/lib/db';
-import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
 import { sendInternalNotification } from '@/lib/server-notify';
 
 /**

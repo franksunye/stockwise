@@ -2,9 +2,9 @@
 
 import { useState, useMemo } from 'react';
 import { 
-  ChevronLeft, Search, Brain, Target, 
+  ChevronLeft, Search, Brain, 
   ShieldCheck, Zap, RefreshCw, MessageCircle, ChevronRight,
-  User, Gift, Bell, Cpu, History, Gauge
+  User, Gift, Bell, Cpu, Gauge
 } from 'lucide-react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';

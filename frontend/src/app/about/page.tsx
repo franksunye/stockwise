@@ -1,10 +1,11 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { ShieldCheck, Target, Users, Sparkles, ChevronRight, ArrowLeft } from 'lucide-react';
+import { ShieldCheck, Target, Users, Sparkles, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import Multiavatar from '@/components/Multiavatar';
+import MarketingFooter from '@/components/MarketingFooter';
 
 export default function AboutPage() {
   return (
@@ -140,21 +141,7 @@ export default function AboutPage() {
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="relative z-10 border-t border-white/5 py-20 px-8 text-center sm:text-left">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-10">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-black italic tracking-tighter uppercase">ZISO AI | 知其白，守其黑</span>
-          </div>
-          <div className="flex flex-wrap justify-center gap-6 text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">
-            <Link href="/" className="hover:text-white transition-colors">首页</Link>
-            <Link href="/learn" className="hover:text-white transition-colors">101 手册</Link>
-            <Link href="/pricing" className="hover:text-white transition-colors">价格</Link>
-            <Link href="/privacy" className="hover:text-white transition-colors">隐私</Link>
-            <Link href="/terms" className="hover:text-white transition-colors">条款</Link>
-          </div>
-        </div>
-      </footer>
+      <MarketingFooter />
 
       <style jsx global>{`
         .glass-card { 

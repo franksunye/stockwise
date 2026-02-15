@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { FileText, ChevronLeft, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import MarketingFooter from '@/components/MarketingFooter';
 
 export default function TermsOfService() {
   return (
@@ -91,9 +92,7 @@ export default function TermsOfService() {
         </motion.div>
       </main>
 
-      <footer className="py-20 text-center text-xs text-slate-600 font-bold uppercase tracking-widest">
-        © 2026 ZISO AI TECHNOLOGY. ALL RIGHTS RESERVED.
-      </footer>
+      <MarketingFooter />
 
       <style jsx global>{`
         .glass-card { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 40px; }

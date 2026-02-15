@@ -12,7 +12,6 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const db = getDbClient();
         const isCloud = db.$type === 'cloud';
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

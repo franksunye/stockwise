@@ -105,7 +105,7 @@ async function main() {
     });
 
     // Query 3: 获取价格历史
-    const q3Avg = await benchmark('Query 3: 价格历史(30条)', async () => {
+    await benchmark('Query 3: 价格历史(30条)', async () => {
         await client.execute({
             sql: 'SELECT * FROM daily_prices WHERE symbol = ? ORDER BY date DESC LIMIT 30',
             args: [testSymbol]

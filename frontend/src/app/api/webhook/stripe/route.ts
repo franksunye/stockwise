@@ -3,7 +3,6 @@ import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { getDbClient } from '@/lib/db';
-import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
 import { sendInternalNotification } from '@/lib/server-notify';
 
 export async function POST(req: Request) {

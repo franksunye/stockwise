@@ -8,6 +8,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { getCurrentUserId } from '@/lib/user';
 import { pricingPlans, featureComparison } from '@/lib/pricing-data';
+import MarketingFooter from '@/components/MarketingFooter';
 
 
 function PricingContent() {
@@ -422,31 +423,7 @@ function PricingContent() {
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="relative z-10 border-t border-white/5 py-20 px-8">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-10">
-          <Link href="/" className="flex items-center gap-2">
-            <Image 
-              src="/logo.png" 
-              alt="ZISO AI Logo" 
-              width={32} 
-              height={32} 
-              className="rounded-lg"
-            />
-            <span className="text-sm font-black italic tracking-tighter">ZISO AI | 知其白，守其黑</span>
-          </Link>
-          <p className="text-xs text-slate-600 font-bold uppercase tracking-widest">© 2026 ZISO AI TECHNOLOGY. ALL RIGHTS RESERVED.</p>
-          <div className="flex gap-6 text-xs font-bold text-slate-500">
-             <Link href="/status" className="hover:text-white transition-colors">系统状态</Link>
-             <Link href="/support" className="hover:text-white transition-colors">支持中心</Link>
-             <Link href="/pricing" className="hover:text-white">价格说明</Link>
-             <Link href="/about" className="hover:text-white transition-colors">关于我们</Link>
-             <Link href="/privacy" className="hover:text-white transition-colors">隐私协议</Link>
-             <Link href="/terms" className="hover:text-white transition-colors">服务条款</Link>
-             <Link href="/refund" className="hover:text-white transition-colors">退款政策</Link>
-          </div>
-        </div>
-      </footer>
+      <MarketingFooter />
 
       <style jsx global>{`
         .glass-card { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 40px; }

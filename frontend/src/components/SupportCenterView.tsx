@@ -2,9 +2,9 @@
 
 import { useState, useMemo } from 'react';
 import {
-  Search, Brain, Target, ShieldCheck, Zap,
+  Search, Brain, ShieldCheck, Zap,
   ChevronRight, ChevronLeft, Calendar,
-  User, Gift, Bell, Server, Cpu, History, Gauge
+  User, Gift, Bell, Cpu, Gauge
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';

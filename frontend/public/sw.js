@@ -29,7 +29,7 @@ async function getBadgeCount() {
       request.onsuccess = () => resolve(request.result || 0);
       request.onerror = () => resolve(0);
     });
-  } catch (e) {
+  } catch {
     return 0;
   }
 }
@@ -45,7 +45,7 @@ async function setBadgeCount(count) {
       tx.oncomplete = () => resolve();
       tx.onerror = () => resolve();
     });
-  } catch (e) {
+  } catch {
     // 忽略错误
   }
 }
