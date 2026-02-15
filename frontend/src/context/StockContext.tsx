@@ -10,10 +10,6 @@ interface StockContextType {
     watchlist: WatchlistItem[];
     loadingPool: boolean;
     loadingList: boolean;
-    isRefreshing: boolean;
-    lastRefreshTime: Date | null;
-    nextRefreshIn: number;
-    refresh: () => Promise<void>;
     loadMoreHistory: (symbol: string, offset: number) => Promise<void>;
     addStock: (symbol: string, name: string) => Promise<boolean>;
     removeStock: (symbol: string) => Promise<boolean>;
@@ -23,15 +19,17 @@ const StockContext = createContext<StockContextType | undefined>(undefined);
 
 export function StockProvider({ children }: { children: ReactNode }) {
     const { watchlist, loading: loadingList, addStock, removeStock } = useWatchlist();
-    const stockData = useDashboardData(watchlist, loadingList);
+    const { stocks, loadingPool, loadMoreHistory } = useDashboardData(watchlist, loadingList);
 
     const value = useMemo(() => ({
-        ...stockData,
+        stocks,
+        loadingPool,
+        loadMoreHistory,
         watchlist,
         loadingList,
         addStock,
         removeStock
-    }), [stockData, watchlist, loadingList, addStock, removeStock]);
+    }), [stocks, loadingPool, loadMoreHistory, watchlist, loadingList, addStock, removeStock]);
 
     return (
         <StockContext.Provider value={value}>

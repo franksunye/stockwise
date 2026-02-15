@@ -46,52 +46,6 @@ export async function GET(request: Request) {
                 .all(userId) as { symbol: string, name?: string, added_at?: string }[];
         }
 
-        // 核心增强：数据自愈 (Self-healing on Read) - 批量优化版
-        if (stocks.length > 0) {
-            try {
-                const symbols = stocks.map(s => s.symbol);
-                const placeholders = symbols.map(() => '?').join(',');
-
-                const lastDateMap = new Map<string, string>();
-
-                if ('execute' in client) {
-                    // Turso 批量查询
-                    const res = await client.execute({
-                        sql: `SELECT symbol, MAX(date) as last_date FROM daily_prices WHERE symbol IN (${placeholders}) GROUP BY symbol`,
-                        args: symbols,
-                    });
-                    (res.rows as unknown as { symbol: string, last_date: string }[]).forEach((r) => {
-                        if (r.symbol && r.last_date) {
-                            lastDateMap.set(String(r.symbol), String(r.last_date));
-                        }
-                    });
-                } else {
-                    // SQLite 批量查询
-                    const rows = client.prepare(`SELECT symbol, MAX(date) as last_date FROM daily_prices WHERE symbol IN (${placeholders}) GROUP BY symbol`).all(...symbols) as { symbol: string, last_date: string }[];
-                    rows.forEach(row => {
-                        if (row.symbol && row.last_date) {
-                            lastDateMap.set(String(row.symbol), String(row.last_date));
-                        }
-                    });
-                }
-
-                for (const stock of stocks) {
-                    const symbol = stock.symbol;
-                    const market = getMarketFromSymbol(symbol);
-                    const expectedDate = getExpectedLatestDataDate(market);
-                    const actualDate = lastDateMap.get(symbol);
-
-                    if (!actualDate || String(actualDate) < expectedDate) {
-                        console.log(`📡[日线自愈] ${symbol}: 库中最新(${actualDate || '无'}) < 预期完整日线(${expectedDate})。触发同步...`);
-                        // 数据自愈：补全缺失的历史日线数据（非实时行情）
-                        triggerOnDemandSync(symbol).catch(e => console.error(`Failed to sync ${symbol} in GET`, e));
-                    }
-                }
-            } catch (e) {
-                console.error('Self-healing check failed:', e);
-            }
-        }
-
         return NextResponse.json({ stocks });
     } catch (error) {
         console.error('Fetch user watchlist error:', error);

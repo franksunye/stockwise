@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo, memo } from 'react';
+import { useState, useEffect, useCallback, useMemo, memo, useRef } from 'react';
 import { Plus, Trash2, ArrowLeft, TrendingUp, TrendingDown, Minus, LayoutGrid } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -8,8 +8,8 @@ import { getCurrentUser, type User } from '@/lib/user';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getMarketScene } from '@/lib/date-utils';
 
-import { useUserProfile } from '@/hooks/useUserProfile';
 import { useStocks } from '@/context/StockContext';
+import { useDashboardAuth } from '@/context/DashboardAuthContext';
 
 interface StockSnapshot {
   symbol: string;
@@ -148,6 +148,7 @@ export default function StockPoolPage() {
   const [stockToDelete, setStockToDelete] = useState<StockSnapshot | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [navigatingTo, setNavigatingTo] = useState<string | null>(null);
+  const searchAbortRef = useRef<AbortController | null>(null);
 
   const [limitMsg, setLimitMsg] = useState<string | null>(null);
 
@@ -156,7 +157,7 @@ export default function StockPoolPage() {
   const scene = getMarketScene();
   const isPreMarket = scene === 'pre_market';
 
-  const { tier } = useUserProfile();
+  const { tier } = useDashboardAuth();
 
   useEffect(() => {
     const init = async () => {
@@ -179,19 +180,35 @@ export default function StockPoolPage() {
 
   useEffect(() => {
     const timer = setTimeout(async () => {
-      if (newSymbol.trim()) {
+      const query = newSymbol.trim();
+      if (query) {
         try {
-          const res = await fetch(`/api/stock/search?q=${newSymbol}`);
+          searchAbortRef.current?.abort();
+          const controller = new AbortController();
+          searchAbortRef.current = controller;
+
+          const res = await fetch(`/api/stock/search?q=${encodeURIComponent(query)}`, {
+            signal: controller.signal
+          });
+          if (!res.ok) throw new Error('Search request failed');
           const data = await res.json();
           setSearchResults(data.results || []);
           setShowSuggestions(true);
-        } catch (e) { console.error('Search failed', e); }
+        } catch (e) {
+          if ((e as Error).name !== 'AbortError') {
+            console.error('Search failed', e);
+          }
+        }
       } else {
+        searchAbortRef.current?.abort();
         setSearchResults([]);
         setShowSuggestions(false);
       }
     }, 300);
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      searchAbortRef.current?.abort();
+    };
   }, [newSymbol]);
 
   const handleAdd = async (symbolOverride?: string, nameOverride?: string) => {
@@ -205,9 +222,12 @@ export default function StockPoolPage() {
       return;
     }
 
-    // Call Hook (Optimistic) - No Await needed for UI blocking
-    // Fix: Fire and forget to close modal instantly
-    addStock(targetSymbol, nameOverride || targetSymbol);
+    const ok = await addStock(targetSymbol, nameOverride || targetSymbol);
+    if (!ok) {
+      setLimitMsg('添加失败，请稍后重试');
+      setTimeout(() => setLimitMsg(null), 3000);
+      return;
+    }
     
     // Instant UI Feedback
     setNewSymbol('');
@@ -225,11 +245,14 @@ export default function StockPoolPage() {
     if (!stockToDelete || !user) return;
     setIsDeleting(true);
     
-    // Call Hook (Optimistic) - Fire and Forget
-    removeStock(stockToDelete.symbol);
-    
-    setStockToDelete(null);
+    const ok = await removeStock(stockToDelete.symbol);
     setIsDeleting(false);
+    if (ok) {
+      setStockToDelete(null);
+    } else {
+      setLimitMsg('移除失败，请重试');
+      setTimeout(() => setLimitMsg(null), 3000);
+    }
   };
 
 
@@ -273,6 +296,18 @@ export default function StockPoolPage() {
       </header>
 
       <div className="flex-1 overflow-y-auto px-6 py-6 scrollbar-hide">
+        <AnimatePresence>
+          {limitMsg && !showAdd && (
+            <motion.p
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              className="mb-4 text-rose-400 text-[10px] font-bold text-center uppercase tracking-widest"
+            >
+              {limitMsg}
+            </motion.p>
+          )}
+        </AnimatePresence>
         <AnimatePresence>
           {showAdd && (
             <motion.div 

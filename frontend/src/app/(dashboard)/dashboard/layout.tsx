@@ -7,11 +7,13 @@ import { getWatchlist } from '@/lib/storage';
 import { getCurrentUser } from '@/lib/user';
 import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
 import { StockProvider } from '@/context/StockContext';
+import { DashboardAuthProvider } from '@/context/DashboardAuthContext';
 import { resolveReferralCode } from '@/lib/referral-resolver';
 import { SystemSync } from '@/components/SystemSync';
 import { PerformanceOptimizer } from '@/components/PerformanceOptimizer';
 import { ReferralTracker } from '@/components/ReferralTracker';
 import { BadgeManager } from '@/components/BadgeManager';
+import type { Tier } from '@/hooks/useUserProfile';
 
 export default function DashboardLayout({
   children,
@@ -19,6 +21,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
+  const [tier, setTier] = useState<Tier>('free');
   const appBootstrap = (
     <>
       <SystemSync />
@@ -39,6 +42,19 @@ export default function DashboardLayout({
       // 如果邀请墙关闭，直接放行（公测/正式期）
       if (!switches.requireInvite) {
         setIsAuthorized(true);
+        try {
+          const res = await fetch('/api/user/profile', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: uid, watchlist: getWatchlist() }),
+          });
+          if (res.ok) {
+            const data = await res.json();
+            setTier((data.tier || 'free') as Tier);
+          }
+        } catch (e) {
+          console.warn('Tier warmup failed (invite disabled mode):', e);
+        }
         return;
       }
 
@@ -89,6 +105,7 @@ export default function DashboardLayout({
         });
         clearTimeout(timeoutId);
         const data = await res.json();
+        setTier((data.tier || 'free') as Tier);
         
         // 只要是 Pro 用户（包括通过邀请获得的试用 Pro），都可进入
         if (data.tier === 'pro') {
@@ -134,10 +151,12 @@ export default function DashboardLayout({
   return (
     <>
       {appBootstrap}
-      <StockProvider>
-        <OnboardingOverlay />
-        {children}
-      </StockProvider>
+      <DashboardAuthProvider tier={tier}>
+        <StockProvider>
+          <OnboardingOverlay />
+          {children}
+        </StockProvider>
+      </DashboardAuthProvider>
     </>
   );
 }

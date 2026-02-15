@@ -25,7 +25,6 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
     const [loadingPool, setLoadingPool] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [lastRefreshTime, setLastRefreshTime] = useState<Date | null>(null);
-    const [nextRefreshIn, setNextRefreshIn] = useState<number>(getRefreshInterval());
 
     const lastFetchTimeRef = useRef<number>(0);
     const stocksRef = useRef<StockData[]>(stocks);
@@ -36,7 +35,6 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
     }, [stocks]);
 
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-    const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     // 1. 初始化：尝试从本地缓存读取，实现【秒开】
     useEffect(() => {
@@ -149,7 +147,6 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
             setStocks(validResults);
             setLoadingPool(false);
             setLastRefreshTime(new Date());
-            setNextRefreshIn(getRefreshInterval());
 
             // 💾 写入本地缓存 (后台静默) - 结构保持不变
             try {
@@ -234,16 +231,6 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
         };
     }, [loadAllData]);
 
-    // 倒计时更新
-    useEffect(() => {
-        countdownRef.current = setInterval(() => {
-            setNextRefreshIn(prev => Math.max(0, prev - 1000));
-        }, 1000);
-        return () => {
-            if (countdownRef.current) clearInterval(countdownRef.current);
-        };
-    }, []);
-
     // 手动刷新函数
     const manualRefresh = useCallback(() => {
         lastFetchTimeRef.current = 0; // 重置防抖
@@ -301,7 +288,6 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
         loadingPool,
         isRefreshing,
         lastRefreshTime,
-        nextRefreshIn,
         refresh: manualRefresh,
         loadMoreHistory
     };
