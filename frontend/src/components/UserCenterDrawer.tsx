@@ -62,6 +62,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
   const [showLearn, setShowLearn] = useState(false);
   const [isLinkingEmail, setIsLinkingEmail] = useState(false);
   const [tempEmail, setTempEmail] = useState('');
+  const [emailMsg, setEmailMsg] = useState<{type: 'success' | 'error', text: string} | null>(null);
 
   const [notificationSettings, setNotificationSettings] = useState({
     types: {
@@ -223,23 +224,26 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
   const handleLinkEmail = async () => {
     if (!tempEmail || isLinkingEmail) return;
     setIsLinkingEmail(true);
+    setEmailMsg(null);
     try {
       const res = await fetch('/api/user/recovery/link', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, email: tempEmail })
+        body: JSON.stringify({ userId, email: tempEmail.trim() })
       });
       const data = await res.json();
       if (data.success) {
         refreshProfile();
-        setRedeemMsg({ type: 'success', text: '恢复邮箱绑定成功' });
-        setTimeout(() => setRedeemMsg(null), 3000);
-        setIsLinkingEmail(false);
+        setEmailMsg({ type: 'success', text: '恢复邮箱绑定成功' });
+        setTimeout(() => {
+          setEmailMsg(null);
+          setIsLinkingEmail(false);
+        }, 2000);
       } else {
-        setRedeemMsg({ type: 'error', text: data.error || '绑定失败' });
+        setEmailMsg({ type: 'error', text: data.error || '绑定失败' });
       }
     } catch {
-      setRedeemMsg({ type: 'error', text: '网络请求失败' });
+      setEmailMsg({ type: 'error', text: '网络请求失败' });
     } finally {
       setIsLinkingEmail(false);
     }
@@ -311,9 +315,23 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                             绑定邮箱后，即使更换设备、重装应用或清空缓存，只要通过验证该邮箱，即可找回所有付费权益。
                         </p>
                         <div className="flex gap-2">
-                          <input type="email" value={tempEmail} onChange={(e) => setTempEmail(e.target.value)} placeholder="your@email.com" className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-indigo-500" />
-                          <button onClick={handleLinkEmail} disabled={!tempEmail || isLinkingEmail} className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs font-bold active:scale-95 transition-all">确定</button>
+                          <input 
+                            type="email" 
+                            value={tempEmail} 
+                            onChange={(e) => setTempEmail(e.target.value)} 
+                            placeholder="your@email.com" 
+                            disabled={isLinkingEmail}
+                            className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 disabled:opacity-50" 
+                          />
+                          <button 
+                            onClick={handleLinkEmail} 
+                            disabled={!tempEmail || isLinkingEmail} 
+                            className="bg-indigo-600 text-white min-w-[70px] px-4 py-2 rounded-xl text-xs font-bold active:scale-95 transition-all flex items-center justify-center disabled:opacity-50"
+                          >
+                            {isLinkingEmail ? <Loader2 size={14} className="animate-spin" /> : '确定'}
+                          </button>
                         </div>
+                        {emailMsg && <p className={`text-[10px] font-bold mt-1 ${emailMsg.type === 'success' ? 'text-emerald-400' : 'text-rose-400'}`}>{emailMsg.text}</p>}
                       </div>
                     )}
                     <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-5">
