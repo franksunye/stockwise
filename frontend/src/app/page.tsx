@@ -290,17 +290,17 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Digital Agent Team */}
+        {/* Team */}
         <section className="pt-60 w-full space-y-16">
           <div className="text-center space-y-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">
-                Meet The Committee
+                The Team
             </div>
             <h2 className="text-4xl md:text-5xl font-black italic tracking-tighter">
-              由 <span className="text-indigo-500">知守 · 专家委员会</span> 驱动
+              由 <span className="text-indigo-500">双创始人 + AI 执行团队</span> 驱动
             </h2>
             <p className="text-slate-500 font-medium max-w-2xl mx-auto">
-              每条建议来自四个独立角色的交叉审视：量价观察、策略建模、情报过滤、风险执行。
+              2 位创始人定义方法与边界，5 位 AI Agent 在每个交易日执行分析、风控与复盘。
             </p>
             <Link
               href="/about"
@@ -310,32 +310,55 @@ export default function LandingPage() {
             </Link>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="glass-card p-8 border-white/10 bg-white/[0.02] space-y-4">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400">AI 创始人 · AI FOUNDER</p>
+              <h3 className="text-2xl font-black italic">安德烈·谷（Andre Gu）</h3>
+              <p className="text-slate-400 text-sm font-medium leading-relaxed">
+                AI 创始人与系统架构发起者。持续负责代码实现、流程自动化与工程迭代。
+              </p>
+            </div>
+            <div className="glass-card p-8 border-white/10 bg-white/[0.02] space-y-4">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400">联合创始人 · CO-FOUNDER</p>
+              <h3 className="text-2xl font-black italic">弗兰克·孙（Frank Sun）</h3>
+              <p className="text-slate-400 text-sm font-medium leading-relaxed">
+                联合创始人。负责产品策略、交易框架与风控边界，确保系统输出可解释、可执行、可复盘。
+              </p>
+            </div>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-6">
             {[
               { 
-                name: "马库斯 (Marcus)", 
-                role: "首席观察员 · CHIEF OBSERVER", 
-                desc: "负责量价结构识别，先确认事实，再进入判断。", 
-                color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20", persona: "Marcus" 
+                name: "混元 Lite（Hunyuan Lite）", 
+                role: "初筛分析助理 · SCOUT ANALYST",
+                desc: "负责收盘后批量初筛，给出首轮结构化线索。",
+                color: "text-cyan-400", bg: "bg-cyan-500/10", border: "border-cyan-500/20", persona: "Hunyuan" 
               },
               { 
-                name: "奎因 (Quinn)", 
-                role: "策略精算师 · STRATEGIST", 
-                desc: "负责多周期建模，把噪音过滤成可执行条件。", 
+                name: "DeepSeek（深寻）", 
+                role: "深度推演分析师 · REASONING ANALYST", 
+                desc: "负责多周期推演与交易条件拆解，形成次日剧本。", 
                 color: "text-purple-400", bg: "bg-purple-500/10", border: "border-purple-500/20", persona: "Quinn" 
               },
               { 
                 name: "诺拉 (Nora)", 
-                role: "首席情报官 · CIO", 
+                role: "情报上下文官 · CONTEXT OFFICER", 
                 desc: "负责新闻与宏观信号过滤，补全数据上下文。", 
                 color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20", persona: "Nora" 
               },
               { 
                 name: "塞拉 (Sylar)", 
-                role: "风控执行官 · CRO", 
+                role: "风控执行官 · RISK OFFICER", 
                 desc: "负责风险闸门与否决权，置信度不足时强制观望。", 
                 color: "text-slate-400", bg: "bg-slate-500/10", border: "border-slate-500/20", persona: "Sylar" 
               },
+              {
+                name: "维尔（Verifier）",
+                role: "验证审计官 · VALIDATION AUDITOR",
+                desc: "负责收盘后验证回写与历史准确性追踪。",
+                color: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20", persona: "Verifier"
+              }
             ].map((agent, i) => (
               <motion.div 
                 key={i}
@@ -359,11 +382,14 @@ export default function LandingPage() {
                 </div>
                 {/* Background Accent */}
                 <div className={`absolute -right-4 -bottom-4 w-24 h-24 rounded-full blur-[40px] opacity-20 transition-opacity group-hover:opacity-40 
-                   ${i === 0 ? 'bg-blue-500' : i === 1 ? 'bg-purple-500' : i === 2 ? 'bg-emerald-500' : 'bg-slate-500'}
+                   ${i === 0 ? 'bg-cyan-500' : i === 1 ? 'bg-purple-500' : i === 2 ? 'bg-emerald-500' : i === 3 ? 'bg-slate-500' : 'bg-amber-500'}
                 `} />
               </motion.div>
             ))}
           </div>
+          <p className="text-center text-xs text-slate-600 font-bold">
+            注：安德烈·谷为 AI 原生角色与系统化身，用于代表自动化研发与执行能力。
+          </p>
         </section>
 
         {/* FAQ Section */}

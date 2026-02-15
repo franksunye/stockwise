@@ -79,21 +79,39 @@ export default function AboutPage() {
             </div>
           </div>
 
-          {/* The Committee Deep Dive */}
+          {/* The Team Deep Dive */}
           <div className="space-y-16">
             <div className="text-center space-y-4">
-              <h2 className="text-3xl font-black italic tracking-tighter uppercase">专家委员会的诞生</h2>
+              <h2 className="text-3xl font-black italic tracking-tighter uppercase">团队与执行体系</h2>
               <p className="text-slate-500 max-w-2xl mx-auto text-sm">
-                我们认为，单一的 AI 模型容易产生偏差。因此，我们构建了一支拥有不同性格与专长的“数字专家团队”。
+                ZISO 由 2 位创始人定义规则与边界，再由 5 位 AI Agent 在每个交易日执行完整闭环。
               </p>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="glass-card p-8 space-y-4 border-white/10 bg-white/[0.02]">
+                <div className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400">AI 创始人 · AI FOUNDER</div>
+                <h3 className="text-2xl font-black italic">安德烈·谷（Andre Gu）</h3>
+                <p className="text-slate-400 text-sm leading-relaxed font-medium">
+                  AI 创始人与系统架构发起者，持续负责代码实现、自动化工程与产品迭代交付。
+                </p>
+              </div>
+              <div className="glass-card p-8 space-y-4 border-white/10 bg-white/[0.02]">
+                <div className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400">联合创始人 · CO-FOUNDER</div>
+                <h3 className="text-2xl font-black italic">弗兰克·孙（Frank Sun）</h3>
+                <p className="text-slate-400 text-sm leading-relaxed font-medium">
+                  联合创始人，负责产品策略、交易方法与风控边界，确保系统输出可解释、可执行、可复盘。
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
               {[
-                { name: "Marcus", role: "量价捕捉", img: "Marcus", color: "from-blue-500/20" },
-                { name: "Quinn", role: "因子建模", img: "Quinn", color: "from-purple-500/20" },
-                { name: "Nora", role: "舆情过滤", img: "Nora", color: "from-emerald-500/20" },
-                { name: "Sylar", role: "风控底线", img: "Sylar", color: "from-slate-500/20" },
+                { name: "混元 Lite（Hunyuan Lite）", role: "初筛分析助理 · SCOUT ANALYST", img: "Hunyuan", color: "from-cyan-500/20" },
+                { name: "DeepSeek（深寻）", role: "深度推演分析师 · REASONING ANALYST", img: "Quinn", color: "from-purple-500/20" },
+                { name: "诺拉（Nora）", role: "情报上下文官 · CONTEXT OFFICER", img: "Nora", color: "from-emerald-500/20" },
+                { name: "塞拉（Sylar）", role: "风控执行官 · RISK OFFICER", img: "Sylar", color: "from-slate-500/20" },
+                { name: "维尔（Verifier）", role: "验证审计官 · VALIDATION AUDITOR", img: "Verifier", color: "from-amber-500/20" },
               ].map((member, i) => (
                 <div key={i} className={`p-6 rounded-[32px] bg-gradient-to-b ${member.color} to-transparent border border-white/5 flex flex-col items-center text-center space-y-4`}>
                   <div className="w-16 h-16 rounded-full bg-black/40 border border-white/10 overflow-hidden grayscale">
@@ -106,6 +124,9 @@ export default function AboutPage() {
                 </div>
               ))}
             </div>
+            <p className="text-center text-xs text-slate-600 font-bold">
+              注：安德烈·谷为 AI 原生角色与系统化身，用于代表自动化研发与执行能力。
+            </p>
           </div>
 
           {/* Our Values */}
