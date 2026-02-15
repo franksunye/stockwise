@@ -11,228 +11,228 @@ export const SUPPORT_ARTICLES: Record<string, SupportArticle> = {
     // --- 1. Experience & Navigation (交互与导航) ---
     'time-machine-feed': {
         slug: 'time-machine-feed',
-        title: '时光机模式 (Time Machine)',
+        title: '时光机模式：拒绝“马后炮”',
         category: '交互与导航',
         lastUpdated: '2026-02-15',
         content: `
-ZISO AI 的垂直信息流本质上是一个“时空复盘引擎”。
+为什么要往回刷？不是为了翻旧帐，是为了让你“穿越”。
 
-### 为什么要向上滑动？
-向上滑动不仅是为了看历史预测，更是为了**复原当时的决策环境**。当你停留在上周五的卡片时，你看到的是 AI 在当时的市场信息集下做出的研判，这能帮你摆脱“后视镜偏差”。
+### 别做“事后诸葛亮”
+很多软件习惯拿之后的价格来证明之前多准，那叫“未来函数”。在 ZISO，你往回刷，看到的是 AI 在**当时那个瞬间**眼里的市场。这种复盘能帮你掐死心里名为“早知道就……”的那个念头，看清市场当时到底在想什么。
         `
     },
     'interaction-first': {
         slug: 'interaction-first',
-        title: '交互优先策略 (Interaction First)',
+        title: '交互优先：手感不能断',
         category: '交互与导航',
         lastUpdated: '2026-02-15',
         content: `
-我们坚信：交易应用应当像游戏一样流畅。
+我们坚信：交易软件应该像游戏一样快。
 
-- **60fps 动画**：动画响应是 0 延迟的，优先保证你的手感。
-- **400ms 异步加载**：核心数据会在动画开始后的 400ms 内填入。这 400ms 的等待换取了极致的视觉连续性。
+点下去没反应最糟心。在 ZISO，按钮响应是 0 延迟的，动画先跑，数据慢个零点几秒填进来没关系，但**你的手感和节奏绝对不能断**。
         `
     },
     'nav-map-logic': {
         slug: 'nav-map-logic',
-        title: '横向滑动地图 (Snap-X)',
+        title: '左右滑：你的三个战场',
         category: '交互与导航',
         lastUpdated: '2026-02-15',
         content: `
-ZISO AI 采用了极致的横向空间划分：
-- **向左滑**：进入“监控池 (Stock Pool)”，打理你的自选股。
-- **中心位**：主信息流 (Feed)，AI 的实时战场。
-- **向右滑**：个人中心与设置。
+别在一堆菜单里乱找了，三个方向解决战斗：
+- **往左滑**：你的“监控池”。盯着你买入或想买的票，看它们的心跳。
+- **中间位**：主战场。看 AI 的最新研判。
+- **往右滑**：你的身份。管好你的会员权益和设置。
         `
     },
     'perf-adaptation': {
         slug: 'perf-adaptation',
-        title: '性能自适应模式 (Auto-Performance)',
+        title: '性能降级：省电也是战斗力',
         category: '交互与导航',
         lastUpdated: '2026-02-15',
         content: `
-系统会自动检测设备性能：
-- **高性能设备**：开启 Spring (弹簧) 物理动画。
-- **普通设备**：自动降级为 Tween (渐变) 动画以节省电量并保持帧率。
+如果你的手机发烫或电量告急，App 会自动“变聪明”。
+它会把华丽的弹簧动画关掉，换成省电的匀速滑动。虽然视觉上没那么炫了，但能保证你在关键时刻不卡顿，不掉链子。
         `
     },
     'deep-linking-usage': {
         slug: 'deep-linking-usage',
-        title: '深度链接引导 (Deep Linking)',
+        title: '深度链接：一键直达“战场”',
         category: '交互与导航',
         lastUpdated: '2026-02-15',
         content: `
-通过链接直接定位：
-- \`ziso.cc/?s=600519\` 直接打开贵州茅台的 AI 卡片。
-- \`ziso.cc/?open=brief\` 直接展开最新简报。
+想直接看某只票？不用搜。
+直接在网址后面加个 \`?s=股票代码\`。或者分享给哥们，他点开就能看到你正在研究的那份简报，不用再对半屏截图猜半天。
         `
     },
     'snap-y-dynamics': {
         slug: 'snap-y-dynamics',
-        title: 'TikTok 式沉浸滚动 (Snap-Y)',
+        title: '单点对焦：别让散乱害了你',
         category: '交互与导航',
         lastUpdated: '2026-02-15',
         content: `
-为什么要全屏垂直翻页？
-为了**单点对焦**。在金融世界里，分散注意力就是增加错误。我们通过垂直吸附逻辑，确保你每次只深入研究一个标的。
+为什么要一页只放一只票？
+因为散户最大的敌人就是“分心”。看一眼茅台，又瞄一眼宁德，结果哪个都没看透。咱们这儿强迫你垂直翻页，一次只盯一个，看透了逻辑再划下一个。
         `
     },
     'smart-search': {
         slug: 'smart-search',
-        title: '搜索联想与秒速响应',
+        title: '聪明搜索：这才是量化速度',
         category: '交互与导航',
         lastUpdated: '2026-02-15',
         content: `
-- **多模识别**：支持股票代码、拼音首字母、中文全称。
-- **300ms 防抖**：在你输入停止后的瞬时触发，平衡速度与算力。
+搜股票，越快越好。
+不管是代码、拼音头（比如 GZMT）、还是中文名字，你怎么顺手怎么搜。我们专门做了防抖优化，手滑输入错一个字母，它也能尽量猜出你要找谁。
         `
     },
     'ios-tuning': {
         slug: 'ios-tuning',
-        title: 'iOS 专项性能优化 (Safari)',
+        title: 'iOS 特供：极致跟手感',
         category: '交互与导航',
         lastUpdated: '2026-02-15',
         content: `
-在 iOS 端，我们主动禁用了部分“毛玻璃”特效。
-这是为了在 120Hz 的 ProMotion 屏幕上维持绝对的跟手感。**流畅度永远优先于华丽度。**
+在 iPhone 上，我们主动把一些华而不实的“毛玻璃”背景关了。
+这不是偷懒，是为了让你的 ProMotion 屏幕满帧跑。**手感要像黄油一样顺滑**，你下单的时候才会有信心。
         `
     },
 
     // --- 2. AI Intelligence & Analysis (AI 智慧与分析) ---
     'ai-council-logic': {
         slug: 'ai-council-logic',
-        title: 'AI 智囊团：群体决策机制',
+        title: 'AI 智囊团：多听几个人的意见',
         category: 'AI 智慧与分析',
         lastUpdated: '2026-02-15',
         content: `
-单一模型会有幻觉，但智囊团不会。
-当 DeepSeek、Gemini 和我们的量化引擎观点重合时，信号强度将呈几何级倍增。
+一个模型容易钻牛角尖。
+我们让 DeepSeek 负责技术流，Gemini 负责看大势，再加上咱们自己的量化库做保。只有他们几位都点头说“这票靠谱”时，信号才叫“共振”。一个人的错觉叫幻觉，五个人的共识才叫真相。
         `
     },
     'tactical-brief-guide': {
         slug: 'tactical-brief-guide',
-        title: '战术简报解读 (Tactical Brief)',
+        title: '战术简报：怎么看干货？',
         category: 'AI 智慧与分析',
         lastUpdated: '2026-02-15',
         content: `
-点击卡片即可查看。简报不仅有涨跌预判，更包含：
-- **博弈背景**：当前筹码谁在主导？
-- **潜在风险**：什么情况下预测会失效？
+点击卡片，别只看涨跌。
+去读那个“风险反思”。AI 会告诉你：“虽然我看多，但要是某某价位跌破了，我就认错。”这才是真干货。无脑吹牛的内容，外面到处都是，我们要的是应对方案。
         `
     },
     'key-levels-mapping': {
         slug: 'key-levels-mapping',
-        title: '关键价位图解 (Key Levels)',
+        title: '关键价位：市场的防线',
         category: 'AI 智慧与分析',
         lastUpdated: '2026-02-15',
         content: `
-- **支撑位**：空头力竭点。
-- **压力位**：多头反攻障碍。
-我们的所有价位并非静态线，而是基于交易密集区的动态估值。
+- **支撑位**：跌到这儿，大多有人想护盘。
+- **压力位**：涨到这儿，解套的想跑，获利的也想跑。
+这就是市场的“心理防区”。AI 帮你钉死了这几条线，破了线，逻辑就全变了。
         `
     },
     'history-matrix-viz': {
         slug: 'history-matrix-viz',
-        title: '胜率历史矩阵 (Win-Rate Matrix)',
+        title: '胜率矩阵：摸清 AI 的脾气',
         category: 'AI 智慧与分析',
         lastUpdated: '2026-02-15',
         content: `
-30 个色块代表过去一个月的历史表现。
-- **红色**：预测准确。
-- **灰色**：预测有偏差。
-矩阵越红，说明该个股目前越符合 AI 的逻辑模型。
+那一排小方块就是 AI 的“模拟考成绩单”。
+如果最近全是红的，说明这只票正处在 AI 最擅长的行情里。如果灰的多，可能是这段时间市场太乱，AI 也没摸准。跟着状态好的 AI 走，别跟它较真。
         `
     },
     'context-extraction': {
         slug: 'context-extraction',
-        title: '智能上下文提取',
+        title: '上下文提取：只看我想要的',
         category: 'AI 智慧与分析',
         lastUpdated: '2026-02-15',
         content: `
-AI 会从全局万字日报中，利用正则引擎精准剔除无用信息，只为你摘录与当前个股直接相关的核心见解。
+每天市场消息上万字，跟你那只股票相关的可能就两句。
+AI 的正则引擎会帮你把那堆废话滤掉，直接把日报里最关键的那句拎到卡片上。不用通读全篇，也能知道你关心的票出啥事了。
         `
     },
     'failure-retrospective': {
         slug: 'failure-retrospective',
-        title: '失败回溯审计 (Failure Retrospective)',
+        title: '认错审计：出错不可怕',
         category: 'AI 智慧与分析',
         lastUpdated: '2026-02-15',
         content: `
-我们对偏差进行 T+1/2/3 维度的分级审计。识别“因为市场黑天鹅”还是“模型逻辑失效”。
+没谁能 100% 稳赢。
+如果 AI 昨天看错了，系统会自动复盘。是市场出了黑天鹅？还是模型没算对？**敢于公开承认并分析错误**，才是咱们能越跑越准的原因。
         `
     },
 
     // --- 3. Quant Logic & Discipline (量化逻辑与纪律) ---
     'anti-future-function': {
         slug: 'anti-future-function',
-        title: '严格模式：防未来函数 (Anti-Future)',
+        title: '拒绝“未来函数”：咱们不玩虚的',
         category: '量化逻辑与纪律',
         lastUpdated: '2026-02-15',
         content: `
-量化投资的大忌是“抢跑数据”。
-我们严格锁死时间戳（thresholdDateStr），确保你在盘前只能看到盘前的数据，绝不混淆。
+炒股最怕看“马后炮”指标。
+很多软件拿收盘后的结果来反推开盘前的预判，那是在忽悠你。我们后台加了硬锁，盘前就是盘前的，盘后就是盘后的。逻辑硬，咱才敢这么玩。
         `
     },
     'smart-title-logic': {
         slug: 'smart-title-logic',
-        title: '智能标题逻辑',
+        title: '智能标题：随盘面“变脸”',
         category: '量化逻辑与纪律',
         lastUpdated: '2026-02-15',
         content: `
-标题会随盘面呼吸：
-- **盘前**：显示“交易策略 (Suggestion)”。
-- **盘后**：转为“复盘复核 (Recap)”。
+标题这玩意儿也有讲究：
+- **开盘前**：给你的是“建议”，帮你想好怎么打。
+- **收盘后**：转成“复盘”，看看咱昨儿想的对不对。
+这就是交易节奏感。
         `
     },
     'rsi-color-metaphor': {
         slug: 'rsi-color-metaphor',
-        title: 'RSI 颜色隐喻 (RSI Metaphor)',
+        title: '颜色反转：戒掉“追涨杀跌”',
         category: '量化逻辑与纪律',
         lastUpdated: '2026-02-15',
         content: `
-**反本能视觉训练：**
-- **绿色**：对应 <30 (超卖)，意味着安全与机会。
-- **红色**：对应 >70 (超买)，意味着危险与风险。
+**注意！咱们这儿颜色是反着来的：**
+- **看到绿色**：别怕，这代表“安全区”（跌透了）。
+- **看到红色**：慢着，这代表“危险区”（涨过头了）。
+强制让你养成逆向思维。要是看大红就想冲，那你就离被套不远了。
         `
     },
     'ai-pulse-resonance': {
         slug: 'ai-pulse-resonance',
-        title: '脉冲与共振 (Pulse & Resonance)',
+        title: '脉冲频率：信号强度一眼看',
         category: '量化逻辑与纪律',
         lastUpdated: '2026-02-15',
         content: `
-卡片上的呼吸频率代表 AI 的计算活跃度。
-当所有模型逻辑达成共鸣（Resonance）时，脉冲频率会显著加快，提示信号极度强悍。
+卡片上那个一闪一闪的频率。
+闪得越急，说明 AI 逻辑之间的“共振”越响，算出来的信心越足。如果半天不动弹，那说明信号不够强，咱还是先观望比较稳。
         `
     },
     'confidence-explained': {
         slug: 'confidence-explained',
-        title: '置信度百分比解读',
+        title: '置信度：这不是胜算，是把握',
         category: '量化逻辑与纪律',
         lastUpdated: '2026-02-15',
         content: `
-置信度不是胜率。
-它是衡量当前市场结构是“有序 (Order)”还是“混沌 (Chaos)”的度量衡。
+置信度 80% 并不代表 80% 会涨。
+它衡量的是现在市场是“有规矩”还是“乱套了”。置信度高，说明市场现在的路数正好在 AI 的知识圈里；置信度低，说明市场在瞎跳，AI 看不懂。看不懂咱就不动手。
         `
     },
     'haptic-sync': {
         slug: 'haptic-sync',
-        title: '触感反馈的心理暗示',
+        title: '触反馈：心跳与信号同步',
         category: '量化逻辑与纪律',
         lastUpdated: '2026-02-15',
         content: `
-在执行如“回归今日”等核心重定位操作时，系统会触发微弱震动，利用生理反馈增强你的心理确认感。
+当你一键刷回“今天”的时候，手机会有个微弱的小震动。
+这不是为了炫技，是为了给你的大脑发个信号：“归位了，准备战斗。”这种生理上的小暗示，能帮你瞬间找回交易状态。
         `
     },
 
     // --- 4. Validation & Trust (验证与诚信) ---
     'multi-day-verification': {
         slug: 'multi-day-verification',
-        title: 'T+3 多日验证机制',
+        title: 'T+3 验证：趋势需要时间',
         category: '验证与诚信',
         lastUpdated: '2026-02-15',
         content: `
-我们不只验证明天。我们追踪预测后的 72 小时峰值收益轨迹。因为真正的策略需要时间让价值回归。
+咱不玩那种“一秒钟涨跌”的游戏，那叫赌博。
+一个好策略需要 2-3 天来释放价值。所以我们追踪预测后的 72 小时轨迹。只要这三天里最高涨幅达到了预期，这票就算赢。这才是做大趋势该有的格局。
         `
     },
     'verification-states': {
@@ -241,180 +241,197 @@ AI 会从全局万字日报中，利用正则引擎精准剔除无用信息，�
         category: '验证与诚信',
         lastUpdated: '2026-02-15',
         content: `
-- **Verifying**：正在进行的博弈。
-- **Correct**：逻辑与走势契合。
-- **Incorrect**：市场与逻辑出现背离。
+- **正在跑**：比赛还没结束，多空还在搏斗。
+- **中了**：走势印证了逻辑，这一局咱拿下了。
+- **偏了**：市场不给面子，逻辑失效，咱撤退重来。
         `
     },
     'value-of-failure': {
         slug: 'value-of-failure',
-        title: '失败的价值 (Value of Failure)',
+        title: '认错的价值：咱们不删帖',
         category: '验证与诚信',
         lastUpdated: '2026-02-15',
         content: `
-我们从不删除历史上的灰色“X”。透明的失败是 AI 安全机制自我进化的养料。
+咱们的历史轴里有很多灰色的“X”。
+我们从不删错贴。**诚信是量化投资的命根子。** 每一个错误都是 AI 下次进化的养料，也是让你看清 AI “边界”在哪里的最好教具。
         `
     },
 
     // --- 5. Identity & Security (身份与安全) ---
     'identity-passport': {
         slug: 'identity-passport',
-        title: '身份护照系统 (Identity)',
+        title: '身份护照：UserID 就是你的命',
         category: '账号与安全',
         lastUpdated: '2026-02-15',
         content: `
-UserID 是你在 ZISO 宇宙的唯一指纹。它不需要电话或身份证，是完全匿名的理性通行证。
+在这个 App 里，你不叫“张三”或“李四”，你就是那串 UserID。
+我们不需要你的手机号，也不需要你的身份证。这就是你的全匿名通行证，管好它，别让人偷看。
         `
     },
     'email-sync-logic': {
         slug: 'email-sync-logic',
-        title: '邮箱绑定机制 (Email Binding)',
+        title: '绑定邮箱：唯一的“救命稻草”',
         category: '账号与安全',
         lastUpdated: '2026-02-15',
         content: `
-由于 PWA 不依赖应用商店，请务必绑定邮箱以确保护航权益不会随浏览器清理而丢失。
+因为咱不存你的手机号，一旦你换手机或者清理了浏览器缓存，你的权益就丢了。
+**绑定个邮箱吧！** 这是你找回 Pro 会员权益的唯一办法。别等丢了再哭，现在就去绑定。
         `
     },
     'identity-restore-flow': {
         slug: 'identity-restore-flow',
-        title: '身份找回流程 (Account Recovery)',
+        title: '一键找回：权益瞬间同步',
         category: '账号与安全',
         lastUpdated: '2026-02-15',
         content: `
-通过你的恢复邮箱，可以在任何新手机或浏览器上瞬时恢复你的监控池和 Pro 会员状态。
+换了手机？别急。
+在设置里输一下你的恢复邮箱，刷的一下，你的监控股、你的 Pro 时间就全都回来了。就像什么都没发生过一样。
         `
     },
     'privacy-pledge': {
         slug: 'privacy-pledge',
-        title: '隐私承诺 (Privacy Pledge)',
+        title: '隐私承诺：这是你的避风港',
         category: '账号与安全',
         lastUpdated: '2026-02-15',
         content: `
-我们只记录你的股票偏好。不收集银行、位置或社交数据。这里是你的数据避风港。
+我们对你赚多少钱不感兴趣。
+我们只记录你的股票偏好，而且全是加密的。不收集通讯录，不看地理位置。在这里，你可以安安静静地打磨你的交易系统。
         `
     },
     'badge-hygiene': {
         slug: 'badge-hygiene',
-        title: '角标清除与数字减压',
+        title: '角标清除：别被红点牵着走',
         category: '账号与安全',
         lastUpdated: '2026-02-15',
         content: `
-进入 App 后，系统会自动清除系统的红点角标。我们希望你专注于决策，而不是被红点驱使。
+当你打开 App，手机系统那个红点角标会自动消失。
+我们希望你是为了交易才打开 App，而不是为了消灭那个该死的红点。**做一个理性的交易员，从控制多巴胺开始。**
         `
     },
 
     // --- 6. Benefits & Growth (权益与增长) ---
     'referral-rewards': {
         slug: 'referral-rewards',
-        title: '推荐激励 (Referral Program)',
+        title: '推荐激励：有福同享',
         category: '权益与增长',
         lastUpdated: '2026-02-15',
         content: `
-分享即收益。邀请好友入场，双方都将获得“Loot Box”奖励，包含 Pro 会员时长。
+觉得咱这儿准？拉哥们一把。
+只要他入场，你们俩都能领到一个“Loot Box”，里面装着 Pro 会员天数。独乐乐不如众乐乐。
         `
     },
     'channel-revenue-guide': {
         slug: 'channel-revenue-guide',
-        title: '渠道分润看板',
+        title: '渠道分润：共同赚钱',
         category: '权益与增长',
         lastUpdated: '2026-02-15',
         content: `
-合作伙伴专用。透明显示佣金比例、推广用户活跃度与提现流水。
+专门给合伙人准备的。
+你带来了多少活跃用户，账户里躺了多少佣金，什么时候能提现，全都透明。咱是干量化的，数据上绝不掺假。
         `
     },
     'redeem-code-usage': {
         slug: 'redeem-code-usage',
-        title: '权益兑换码 (Redeem Codes)',
+        title: '兑换码：手动给权益充值',
         category: '权益与增长',
         lastUpdated: '2026-02-15',
         content: `
-支持手动输入 PRO-XXXX 兑换码。通常通过社区活动、公测奖励或合作伙伴发放。
+拿到 \`PRO-XXXX\` 的码了？
+去个人中心手动填上。通常这是公测、参加活动或者合伙人送你的特别礼包。手慢无！
         `
     },
     'tiers-explained': {
         slug: 'tiers-explained',
-        title: '免费版与 Pro 版阶梯对比',
+        title: 'Free 与 Pro：差距在哪？',
         category: '权益与增长',
         lastUpdated: '2026-02-15',
         content: `
-- **Free**：3 只监控股，基础 AI 结论。
-- **Pro**：10 只监控股，解锁深度解析链与历史回溯。
+- **免费版**：给你 3 个监控位，看点基础结论，这叫“入个门”。
+- **Pro 版**：10 个监控位，看全模型的推理链条，还有历史全回溯。这叫“打擂台”。
+想靠这个吃饭，Pro 版是刚需。
         `
     },
 
     // --- 7. Notifications & Reach (通知与触达) ---
     'signal-flip-push': {
         slug: 'signal-flip-push',
-        title: '智能反转推送逻辑',
+        title: '反转推送：只盯“大转折”',
         category: '通知与触达',
         lastUpdated: '2026-02-15',
         content: `
-我们只在“多转空”或“空转多”的奇点推送。震荡期的无聊波动不会骚扰你。
+我们不会一天烦你八百次。
+只有当多空趋势发生“大反转”（比如多转空）的时候，我们才会给你弹通知。平时那些小水花，咱不操那个心，安安稳稳持股就好。
         `
     },
     'notification-preference': {
         slug: 'notification-preference',
-        title: '精细化控制面板',
+        title: '通知开关：不喜欢就关了',
         category: '通知与触达',
         lastUpdated: '2026-02-15',
         content: `
-支持独立开关：早报推送、信号反转、价格异动、系统公告。
+早报、反转、异动、公告……一共 6 类推送，你嫌哪个烦就关哪个。
+我们要的是**高效的信息流**，不是垃圾短信轰炸。
         `
     },
     'web-push-setup': {
         slug: 'web-push-setup',
-        title: 'Web Push 开启指南',
+        title: '推送指南：不错过每一秒',
         category: '通知与触达',
         lastUpdated: '2026-02-15',
         content: `
-iOS 必须手动点击“添加到主屏幕”后才能在 Safari 中开启推送权限。
+iOS 用户注意：一定要在 Safari 里点“添加到主屏幕”，之后才能在 App 里开启通知权限。浏览器里是弹不出来的。这是苹果公司的锅，咱得绕着走。
         `
     },
     'push-debug': {
         slug: 'push-debug',
-        title: '通知连通性测试工具',
+        title: '测测通没通：别被系统拦了',
         category: '通知与触达',
         lastUpdated: '2026-02-15',
         content: `
-设置中的“测试推送”按钮可以模拟真实信号，验证你的手机管家是否拦截了 ZISO AI。
+设了半天收不到通知？
+点一下那个“测试推送”按钮。要是手机没响，那准是你的系统防火墙或者省电模式把咱给拦了。去设置里给点权限。
         `
     },
 
     // --- 8. Data & Infrastructure (数据与服务保障) ---
     'optimistic-ui-logic': {
         slug: 'optimistic-ui-logic',
-        title: '乐观更新机制',
+        title: '乐观更新：不用等圈圈转',
         category: '数据与服务保障',
         lastUpdated: '2026-02-15',
         content: `
-当你添加股票时，UI 会瞬间反应。网络同步在后台静默进行，不让网络波动中断你的思考流。
+当你点“添加股票”的时候，UI 会瞬间反应过来。
+网络慢点没关系，系统会在后台慢慢跟服务器对账。我们不希望网络的小转圈打断了你的思路。
         `
     },
     'realtime-data-splicing': {
         slug: 'realtime-data-splicing',
-        title: '实时盘中拼接技术',
+        title: '数据拼接：最新指标不求人',
         category: '数据与服务保障',
         lastUpdated: '2026-02-15',
         content: `
-我们的指标计算采用了 Splicing 技术。将历史收盘数据与当前的 15 分钟实时行情在客户端本地拼接，动态生成最新的 MA/MACD。
+咱们显示的 MA（均线）和指标是“热乎”的。
+系统会拿昨天的历史数据，直接缝合从行情源拿到的最新的 15 分钟实时价。不用等收盘，你在盘中看到的线也是准确的。
         `
     },
     'on-demand-sync': {
         slug: 'on-demand-sync',
-        title: '按需同步调度算法',
+        title: '按需更新：好钢用在刀刃上',
         category: '数据与服务保障',
         lastUpdated: '2026-02-15',
         content: `
-系统会优先调度监控池内标的的云端算力。无人关注的边缘股票更新频率会自动降低。
+全市场几千只票，我们优先更新你监控池里的那几只。
+大家都不看的票，更新频率会自动降低。省下的算力，全用来伺候你最关心的标的了。
         `
     },
     'data-resiliency': {
         slug: 'data-resiliency',
-        title: '多源降级数据保障',
+        title: '多线热切：永不断线',
         category: '数据与服务保障',
         lastUpdated: '2026-02-15',
         content: `
-AbstractFetcher 能够自动探测主数据源健康度。一旦 AkShare 延迟，将切换至 Yahoo Finance 备线。
+如果主数据源（AkShare）卡了，系统会自动切到备用走廊（Yahoo Finance）。
+行情软件要是断了线就是在谋财害命。我们准备了多套Fetcher，就是为了保证你在关键时刻永远能连得上。
         `
     }
 };
