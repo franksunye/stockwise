@@ -2,12 +2,13 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X as CloseIcon, FileText, Loader2, Sparkles, NotebookText } from 'lucide-react';
+import { X as CloseIcon, FileText, Loader2, Sparkles, NotebookText, Bot, CheckCircle2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { getCurrentUser } from '@/lib/user';
 import { getHKTime, getLastTradingDay } from '@/lib/date-utils';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { shouldEnableHighPerformance } from '@/lib/device-utils';
+import Multiavatar from '@/components/Multiavatar';
 
 interface BriefData {
   date: string;
@@ -193,8 +194,36 @@ export function BriefDrawer({ isOpen, onClose, limitToSymbol, onUpgrade }: Brief
                           </div>
                         </div>
                      )}
-                    <p className="text-[9px] text-slate-700 font-black uppercase tracking-[0.4em] flex items-center justify-center gap-2 mt-4"><div className="w-1 h-1 rounded-full bg-slate-800" /> ZISO AI Intelligence {tier === 'pro' && 'Pro'} <div className="w-1 h-1 rounded-full bg-slate-800" /></p>
+                  <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-purple-500/10 border border-purple-500/20 overflow-hidden shrink-0 grayscale hover:grayscale-0 transition-all duration-500">
+                        <Multiavatar name="Quinn" className="w-full h-full" />
+                      </div>
+                      <div className="space-y-0.5">
+                        <div className="flex items-center gap-2">
+                           <span className="text-sm font-black text-white">DeepSeek</span>
+                           <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-purple-500/20 text-purple-300 uppercase tracking-wider flex items-center gap-1">
+                             <CheckCircle2 size={10} />
+                             Reasoning Analyst
+                           </span>
+                        </div>
+                        <p className="text-[10px] text-slate-500 font-medium font-mono">
+                           Generated at {(() => {
+                              const match = brief.content.match(/StockWise AI 生成于\s*(\d{1,2}:\d{2})/);
+                              return match ? match[1] : (brief.created_at ? new Date(brief.created_at).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit', hour12: false}) : '--:--');
+                           })()}
+                        </p>
+                      </div>
+                    </div>
+                    {tier === 'pro' && (
+                       <div className="opacity-30 grayscale hover:opacity-100 hover:grayscale-0 transition-all">
+                          <div className="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center border border-amber-500/30">
+                              <Sparkles size={14} className="text-amber-400" />
+                          </div>
+                       </div>
+                    )}
                   </div>
+                </div>
                 </div>
               )}
             </div>
