@@ -163,7 +163,7 @@ export function BriefDrawer({ isOpen, onClose, limitToSymbol, onUpgrade }: Brief
                       components={{
                         h1: ({children}) => <h3 className="text-lg font-black text-white mt-8 mb-4 tracking-tight uppercase italic">{children}</h3>,
                         h2: ({children}) => <h4 className="text-base font-bold text-slate-200 mt-6 mb-3">{children}</h4>,
-                        h3: ({children}) => <h5 className="text-[11px] font-black text-indigo-400 mt-4 mb-2 uppercase tracking-widest flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />{children}</h5>,
+                        h3: ({children}) => <h5 className="text-base font-black text-indigo-400 mt-6 mb-3 flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0" />{children}</h5>,
                         p: ({children}) => <p className="text-sm text-slate-400 leading-relaxed mb-4 text-justify">{children}</p>,
                         ul: ({children}) => <ul className="space-y-2 mb-4 list-disc pl-4 marker:text-indigo-500/50">{children}</ul>,
                         li: ({children}) => <li className="text-sm text-slate-400 pl-1">{children}</li>,
