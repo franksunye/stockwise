@@ -172,7 +172,7 @@ export function BriefDrawer({ isOpen, onClose, limitToSymbol, onUpgrade }: Brief
                         hr: () => <hr className="border-white/5 my-8" />,
                       }}
                     >
-                      {showContent || ''}
+                      {showContent?.replace(/StockWise AI 生成于\s*\d{1,2}:\d{2}/g, '').trim() || ''}
                     </ReactMarkdown>
                   </div>
                   
