@@ -201,7 +201,7 @@ export function BriefDrawer({ isOpen, onClose, limitToSymbol, onUpgrade }: Brief
                       </div>
                       <div className="space-y-0.5">
                         <div className="flex items-center gap-2">
-                           <span className="text-sm font-black text-white">DeepSeek (深寻)</span>
+                           <span className="text-sm font-black text-white">深寻</span>
                            <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-purple-500/20 text-purple-300 uppercase tracking-wider flex items-center gap-1">
                              <CheckCircle2 size={10} />
                              深度推演分析师
