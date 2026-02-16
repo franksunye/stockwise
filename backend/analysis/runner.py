@@ -248,6 +248,29 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool =
         failed=len(targets) - success_count,
         duration=round(duration, 1)
     )
+    # Append Data Health Diagnostics
+    try:
+        from backend.context.provider import MarketContextProvider
+        stats = MarketContextProvider().get_diagnostics()
+        
+        warnings = []
+        if stats.get('macro_attempts', 0) > 0 and stats.get('macro_success', 0) == 0:
+            warnings.append("⚠️ Macro Data Unavailable")
+        
+        flow_attempts = stats.get('stock_flow_attempts', 0)
+        flow_success = stats.get('stock_flow_success', 0)
+        if flow_attempts > 0:
+            fail_rate = (flow_attempts - flow_success) / flow_attempts
+            if fail_rate > 0.5:
+                warnings.append(f"⚠️ High Flow Data Failure ({fail_rate:.0%})")
+        
+        if warnings:
+            body += "\n\n**Data Health Issues:**\n" + "\n".join(f"- {w}" for w in warnings)
+            title = title.replace("✅", "⚠️") if "✅" in title else title
+            
+    except Exception as stat_e:
+        logger.warning(f"Failed to append diagnostics: {stat_e}")
+
     send_wecom_notification(title + body)
     
     # [REMOVED] Old broadcast notification

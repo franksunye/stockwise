@@ -3,8 +3,14 @@
 ## 1. 基础信息
 - **{{ stock_name }}** ({{ symbol }})
 - 日期: {{ date }}
-- **整体市场背景**: {{ market_context }}
+- **整体市场背景**: {{ market_context }} (北向净流入: {{ market_flow_context.northbound_net_inflow | default('N/A') }})
 - **股价位置(Altitude)**: {{ altitude_str }}
+
+## 1.1 宏观与资金 (Macro & Flow)
+- **宏观数据**: GDP {{ macro_context.gdp | default('N/A') }} | CPI {{ macro_context.cpi | default('N/A') }} | 10年期国债 {{ macro_context.bond_10y | default('N/A') }}
+- **市场资金**: 领涨板块 [{{ market_flow_context.top_inflow_sectors | default('暂无') }}]
+- **个股资金**: 主力大单净流入 **{{ stock_flow_context.big_order_inflow | default('N/A') }}** (👉 {{ stock_flow_context.interpretation | default('暂无解释') }})
+
 ## 公司基本面 (Profile)
 - **行业**: {{ profile.industry | default('未知') }}
 - **主营业务**: {{ profile.main_business | default('暂无') }}

@@ -45,6 +45,10 @@ class ContextService:
         # Prevent re-initialization if using singleton
         if hasattr(self, '_initialized'): return
         self._initialized = True
+        
+        # Initialize Context Provider for external data (AkShare)
+        from backend.context.provider import MarketContextProvider
+        self.provider = MarketContextProvider()
 
     async def get_comprehensive_context(self, symbol: str, date_str: str, stock_name: str = None) -> Dict[str, Any]:
         """
@@ -59,11 +63,23 @@ class ContextService:
         """
         High-Performance Batch Context Fetching:
         Calculates altitude, volume and market mood for multiple symbols in optimized queries.
+        Augmented with Macro and Money Flow data.
         """
         if not symbols: return {}
         name_map = name_map or {}
         
-        # 1. Macro: Market Mood (Cached by market within the call)
+        # 1. Macro & Market Flow (Fetched once per batch)
+        # Note: These operations might take time if not cached, so we do them serially for now.
+        # Ideally, we should async these, but AkShare is sync requests.
+        try:
+            macro_ctx = self.provider.get_macro_context()
+            market_flow_ctx = self.provider.get_market_flow_context()
+        except Exception as e:
+            logger.error(f"Context Provider Error: {e}")
+            macro_ctx = {"summary": "数据暂缺"}
+            market_flow_ctx = {"summary": "数据暂缺"}
+
+        # 2. Market Mood (Cached by market within the call)
         # We need to know which market each symbol belongs to
         markets = set()
         for s in symbols:
@@ -71,7 +87,7 @@ class ContextService:
         
         moods = {m: self._get_cached_market_mood(date_str, "02800" if m == "HK" else "sh000001") for m in markets}
         
-        # 2. Meso & Micro: Altitude and Volume (The heavy lifting)
+        # 3. Meso & Micro: Altitude and Volume (The heavy lifting)
         # Use optimized SQL to calculate stats for all symbols
         conn = get_connection()
         try:
@@ -114,13 +130,18 @@ class ContextService:
             for row in rows:
                 sym, curr_p, curr_v, hi20, lo20, hi60, lo60, hi250, lo250, avg_v = row
                 
+                # Fetch Stock specific flow (Individual Big Orders)
+                # This might be slow if batch is large. 
+                # For small batches (daily prediction usually runs in chunks), it is acceptable.
+                stock_flow_ctx = self.provider.get_stock_flow_context(sym)
+
                 # helper to determine zone
                 def get_zone(p, hi, lo):
                     if not hi or not lo or hi == lo: return "横盘"
                     pct = (p - lo) / (hi - lo) * 100
                     zone = "历史高位" if pct > 85 else ("风险位" if pct > 70 else ("中位" if pct > 40 else ("机会位" if pct > 15 else "底部强支撑")))
                     return f"{zone} ({pct:.0f}%)"
-
+                
                 # helper for volume
                 vol_status = "量能平稳"
                 if curr_v and avg_v and avg_v > 0:
@@ -133,6 +154,9 @@ class ContextService:
                 batch_results[sym] = {
                     "meta": {"symbol": sym, "name": name_map.get(sym, sym), "date": date_str},
                     "market_context": moods.get(m),
+                    "macro_context": macro_ctx,         # Added
+                    "market_flow_context": market_flow_ctx, # Added
+                    "stock_flow_context": stock_flow_ctx,   # Added
                     "price_altitude": {
                         "short_term_20d": get_zone(curr_p, hi20, lo20) if hi20 else "数据不足",
                         "medium_term_60d": get_zone(curr_p, hi60, lo60) if hi60 else "数据不足",
@@ -149,6 +173,9 @@ class ContextService:
                     batch_results[sym] = {
                         "meta": {"symbol": sym, "name": name_map.get(sym, sym), "date": date_str},
                         "market_context": moods.get(m),
+                        "macro_context": macro_ctx,
+                        "market_flow_context": market_flow_ctx,
+                        "stock_flow_context": {"summary": "无数据"},
                         "price_altitude": {"info": "历史数据不足"},
                         "volume_status": "量能未知"
                     }

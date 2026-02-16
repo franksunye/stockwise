@@ -1,3 +1,4 @@
+import asyncio
 import json
 from typing import Dict, Any, List
 from database import get_connection, get_stock_profile
@@ -10,7 +11,7 @@ from backend.db_repo.queries import (
 from backend.engine.context import SessionContext
 from backend.templating import render_template
 
-def fetch_full_analysis_context(symbol: str, as_of_date: str = None, ctx: SessionContext = None) -> Dict[str, Any]:
+async def fetch_full_analysis_context(symbol: str, as_of_date: str = None, ctx: SessionContext = None) -> Dict[str, Any]:
     """
     Fetch all raw data needed for a comprehensive stock analysis.
     Supports SessionContext for caching across multiple model runs.
@@ -28,7 +29,10 @@ def fetch_full_analysis_context(symbol: str, as_of_date: str = None, ctx: Sessio
             "weekly_prices": ctx.price_data["weekly"],
             "monthly_prices": ctx.price_data["monthly"],
             "market_context": ctx.market_mood,
-            "altitude_context": ctx.altitude
+            "altitude_context": ctx.altitude,
+            "macro_context": ctx.metadata.get("macro_context"),
+            "market_flow_context": ctx.metadata.get("market_flow_context"),
+            "stock_flow_context": ctx.metadata.get("stock_flow_context")
         }
 
     conn = get_connection()
@@ -103,15 +107,29 @@ def fetch_full_analysis_context(symbol: str, as_of_date: str = None, ctx: Sessio
     """, (symbol, analysis_date))
     monthly_history = [dict(zip(["date", "open", "high", "low", "close", "change_percent", "volume", "ma20", "rsi", "macd_hist"], m)) for m in cursor.fetchall()]
 
-    # 4. Global Market Context
+    # 4. Global Market Context (Via ContextService)
     from backend.engine.context_service import ContextService
     ctx_service = ContextService()
-    market_context = ctx_service._get_cached_market_mood(analysis_date, symbol)
-    altitude_context = ctx_service._calculate_altitude(symbol, analysis_date)
+    
+    # Use comprehensive context fetcher
+    comprehensive_ctx = await ctx_service.get_comprehensive_context(symbol, analysis_date, stock_name)
+    
+    market_context = comprehensive_ctx.get("market_context", "数据同步中")
+    altitude_context = comprehensive_ctx.get("price_altitude", {})
+    macro_context = comprehensive_ctx.get("macro_context", {})
+    market_flow_context = comprehensive_ctx.get("market_flow_context", {})
+    stock_flow_context = comprehensive_ctx.get("stock_flow_context", {})
 
     # 5. Populate Context if provided
     if ctx:
-        ctx.metadata = {"name": stock_name, "profile": profile, "latest_data": latest_data}
+        ctx.metadata = {
+            "name": stock_name, 
+            "profile": profile, 
+            "latest_data": latest_data,
+            "macro_context": macro_context,
+            "market_flow_context": market_flow_context,
+            "stock_flow_context": stock_flow_context
+        }
         ctx.price_data["daily"] = daily_history
         ctx.price_data["weekly"] = weekly_history
         ctx.price_data["monthly"] = monthly_history
@@ -128,7 +146,10 @@ def fetch_full_analysis_context(symbol: str, as_of_date: str = None, ctx: Sessio
         "weekly_prices": weekly_history,
         "monthly_prices": monthly_history,
         "market_context": market_context,
-        "altitude_context": altitude_context
+        "altitude_context": altitude_context,
+        "macro_context": macro_context,
+        "market_flow_context": market_flow_context,
+        "stock_flow_context": stock_flow_context
     }
 
 def fetch_ai_history_for_model(symbol: str, analysis_date: str, model_id: str = None, cursor = None, ctx: SessionContext = None) -> Dict[str, Any]:
@@ -186,7 +207,13 @@ def prepare_stock_analysis_prompt(symbol: str, as_of_date: str = None, ctx: Dict
     (One-shot 模式专用) - 已迁移至 Jinja2 模板
     """
     if ctx is None:
-        ctx = fetch_full_analysis_context(symbol, as_of_date)
+        # Backward-compatible sync bridge for callers that still use this helper
+        # outside async execution (e.g., legacy ai_service/test scripts).
+        try:
+            asyncio.get_running_loop()
+            return None, "prepare_stock_analysis_prompt requires pre-fetched ctx when called inside async loop"
+        except RuntimeError:
+            ctx = asyncio.run(fetch_full_analysis_context(symbol, as_of_date))
     if "error" in ctx:
         return None, ctx["error"]
 
@@ -391,6 +418,9 @@ def prepare_stock_analysis_prompt(symbol: str, as_of_date: str = None, ctx: Dict
             symbol=symbol,
             date=data['date'],
             market_context=ctx.get("market_context", "数据同步中，请以此个股分析为主"),
+            macro_context=ctx.get("macro_context") or {},
+            market_flow_context=ctx.get("market_flow_context") or {},
+            stock_flow_context=ctx.get("stock_flow_context") or {},
             altitude_str="短期(20d) {} | 中期(60d) {} | 长期(250d) {}".format(
                 ctx.get("altitude_context", {}).get('short_term_20d', '-'),
                 ctx.get("altitude_context", {}).get('medium_term_60d', '-'),
