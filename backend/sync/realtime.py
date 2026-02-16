@@ -16,7 +16,8 @@ def sync_spot_prices(symbols: list):
     """盘中实时同步"""
     # 如果全场休市，跳过实时同步
     if check_trading_day_skip():
-        return
+        # Keep return shape stable for callers that unpack (success_count, failed_count)
+        return 0, 0
 
     start_time = time.time()
     success_count = 0
@@ -85,7 +86,5 @@ def sync_spot_prices(symbols: list):
              
     report += f"- **执行耗时**: {duration:.1f}s"
     send_wecom_notification(report)
-    
-    return success_count, len(errors)
     
     return success_count, len(errors)
