@@ -36,7 +36,7 @@ def run_validation_notifications(dry_run=False):
     except ImportError:
         from engine.task_logger import get_task_logger
         
-    t_logger = get_task_logger("news_desk", "validation_check")
+    t_logger = get_task_logger("validation_auditor", "validation_check")
     t_logger.start("Daily Validation Check", "validation")
 
     try:

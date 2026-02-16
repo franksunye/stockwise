@@ -1,6 +1,6 @@
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
-# Define the Agent Personas
+# Agent Persona Registry (single source for backend task attribution)
 AGENTS = {
     "market_observer": {
         "name": "市场观察员",
@@ -8,7 +8,7 @@ AGENTS = {
         "role": "数据接入与实时监控",
         "color": "blue",
         "avatar": "/avatars/marcus.png",
-        "description": "监控全球市场动态，管理海量行情数据接入。"
+        "description": "监控全市场动态，管理行情接入与盘中巡检。",
     },
     "quant_mind": {
         "name": "量化大脑",
@@ -16,7 +16,7 @@ AGENTS = {
         "role": "核心分析与策略建模",
         "color": "purple",
         "avatar": "/avatars/quinn.png",
-        "description": "运行复杂的 AI 多模态预测模型与量化规则引擎。"
+        "description": "运行多模型推演与策略生成，输出次日交易剧本。",
     },
     "news_desk": {
         "name": "新闻编辑部",
@@ -24,22 +24,29 @@ AGENTS = {
         "role": "内容合成与用户交付",
         "color": "green",
         "avatar": "/avatars/nora.png",
-        "description": "将碎片化情报合成为高价值简报，负责全渠道推送。"
+        "description": "整合情报与结论，形成可读战报并完成分发。",
     },
     "system_guardian": {
         "name": "系统守护者",
         "persona_name": "塞拉 (Sylar)",
-        "role": "运维监控与合规验证",
+        "role": "运维监控与系统健康",
         "color": "gray",
         "avatar": "/avatars/sylar.png",
-        "description": "确保系统健康运行、数据备份以及预测结果的准确性回测。"
-    }
+        "description": "负责系统稳定性、告警治理与日常维护。",
+    },
+    "validation_auditor": {
+        "name": "验证审计官",
+        "persona_name": "维尔 (Verifier)",
+        "role": "收盘验证与审计回写",
+        "color": "amber",
+        "avatar": "/avatars/verifier.png",
+        "description": "专职追踪预测兑现并回写验证结果与准确率审计。",
+    },
 }
 
-# Define the granular daily schedule
-# This is the "Plan" - what we expect to happen every day.
+
+# Daily execution plan template
 DAILY_TASK_PLAN_TEMPLATE = [
-    # --- News Desk Tasks (Morning Engagement) ---
     {
         "name": "morning_call",
         "display_name": "每日早报与策略提醒",
@@ -47,10 +54,8 @@ DAILY_TASK_PLAN_TEMPLATE = [
         "type": "delivery",
         "expected_start": "08:30",
         "dependencies": [],
-        "dimensions": {}
+        "dimensions": {},
     },
-
-    # --- Market Observer Tasks (Metadata & Watch) ---
     {
         "name": "meta_sync",
         "display_name": "股票元数据刷新",
@@ -58,7 +63,7 @@ DAILY_TASK_PLAN_TEMPLATE = [
         "type": "ingestion",
         "expected_start": "06:00",
         "dependencies": [],
-        "dimensions": {}
+        "dimensions": {},
     },
     {
         "name": "market_sentinel",
@@ -67,7 +72,7 @@ DAILY_TASK_PLAN_TEMPLATE = [
         "type": "monitoring",
         "expected_start": "09:30",
         "dependencies": [],
-        "dimensions": {"interval": "10分"}
+        "dimensions": {"interval": "10分"},
     },
     {
         "name": "ingestion_cn",
@@ -76,7 +81,7 @@ DAILY_TASK_PLAN_TEMPLATE = [
         "type": "ingestion",
         "expected_start": "16:00",
         "dependencies": [],
-        "dimensions": {"market": "A股"}
+        "dimensions": {"market": "A股"},
     },
     {
         "name": "ingestion_hk",
@@ -85,21 +90,17 @@ DAILY_TASK_PLAN_TEMPLATE = [
         "type": "ingestion",
         "expected_start": "16:30",
         "dependencies": [],
-        "dimensions": {"market": "港股"}
+        "dimensions": {"market": "港股"},
     },
-
-    # --- System Guardian Tasks ---
     {
         "name": "validation",
         "display_name": "预测准确性验证与战报",
-        "agent_id": "system_guardian",
+        "agent_id": "validation_auditor",
         "type": "maintenance",
         "expected_start": "16:45",
         "dependencies": ["ingestion_hk"],
-        "dimensions": {}
+        "dimensions": {},
     },
-
-    # --- Quant Mind Tasks ---
     {
         "name": "ai_analysis",
         "display_name": "次日交易策略制定 (AI)",
@@ -107,10 +108,8 @@ DAILY_TASK_PLAN_TEMPLATE = [
         "type": "reasoning",
         "expected_start": "17:00",
         "dependencies": ["validation"],
-        "dimensions": {"model": "混合模型"}
+        "dimensions": {"model": "混合模型"},
     },
-
-    # --- News Desk Tasks (Evening Delivery) ---
     {
         "name": "brief_gen",
         "display_name": "每日深度复盘与推送",
@@ -118,21 +117,19 @@ DAILY_TASK_PLAN_TEMPLATE = [
         "type": "delivery",
         "expected_start": "17:30",
         "dependencies": ["ai_analysis"],
-        "dimensions": {}
-    }
+        "dimensions": {},
+    },
 ]
 
+
 def get_daily_plan(date_str: str) -> List[Dict[str, Any]]:
-    """
-    Returns the task plan for a specific date.
-    """
+    """Return the expected daily task plan for a given business date."""
     plan = []
     for task in DAILY_TASK_PLAN_TEMPLATE:
-        t = task.copy()
-        t['date'] = date_str
-        t['status'] = 'pending' 
-        # Default dimensions if not present
-        if 'dimensions' not in t:
-            t['dimensions'] = {}
-        plan.append(t)
+        item = task.copy()
+        item["date"] = date_str
+        item["status"] = "pending"
+        if "dimensions" not in item:
+            item["dimensions"] = {}
+        plan.append(item)
     return plan

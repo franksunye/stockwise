@@ -69,7 +69,7 @@ if __name__ == "__main__":
     trigger = 'scheduler' 
 
     if args.verify:
-        logger_sys = get_task_logger("system_guardian", "validation", triggered_by=trigger)
+        logger_sys = get_task_logger("validation_auditor", "validation", triggered_by=trigger)
         logger_sys.start("Data Validation", "maintenance", dimensions={})
         try:
             from engine.validator import verify_all_pending
