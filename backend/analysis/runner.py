@@ -10,9 +10,7 @@ import pandas as pd
 from config import BEIJING_TZ
 from database import get_connection, get_stock_pool
 from utils import send_wecom_notification
-from notifications import send_push_notification, send_personalized_daily_report
-from engine.ai_service import generate_ai_prediction
-from helpers import check_stock_analysis_mode, check_trading_day_skip
+from helpers import check_trading_day_skip
 from logger import logger
 
 
@@ -25,10 +23,10 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool =
     Args:
         model_filter: 指定使用的模型 ID (deepseek-v3, gemini-3-flash, rule-engine)
     """
-    # 如果是例行运行（无特定代码），且该市场今天休市，则跳过
-    # logic moved to scheduler level
-    # if not symbol and check_trading_day_skip(market_filter):
-    #    return
+    # Logic to skip execution on market holidays
+    # This prevents wasted API calls and compute resources when markets are closed (e.g. Lunar New Year)
+    if not symbol and not force and check_trading_day_skip(market_filter):
+        return
         
     targets = []
     if symbol:
@@ -120,15 +118,18 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool =
     for stock in targets:
         try:
             # 1. 检查该股票所属市场是否休市 (Cost Saving)
-            # logic moved to scheduler level or implied by data availability
-            # if not symbol:
-            #     market = get_market_from_symbol(stock)
-            #     if is_market_closed(now_date, market):
-            #         logger.debug(f"💤 {stock}: {market} 市场休市，跳过")
-            #         continue
+            # If running in batch mode (no symbol specified) without force flag, skip closed markets
+            if not symbol and not force:
+                market = get_market_from_symbol(stock)
+                # Only need to check individual stock market if we aren't filtering by a specific market 
+                # (if we filtered, the top-level check would have caught it)
+                # OR if the top-level check passed but strict per-stock checking is desired.
+                if is_market_closed(now_date, market):
+                    logger.debug(f"💤 {stock}: {market} 市场休市，跳过")
+                    continue
 
             # 获取该股票最新的日线数据 (含指标)
-            query = f"SELECT * FROM daily_prices WHERE symbol = ? ORDER BY date DESC LIMIT 1"
+            query = "SELECT * FROM daily_prices WHERE symbol = ? ORDER BY date DESC LIMIT 1"
             df = pd.read_sql_query(query, conn, params=(stock,))
             
             if df.empty:
