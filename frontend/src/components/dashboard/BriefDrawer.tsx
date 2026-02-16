@@ -106,22 +106,18 @@ export function BriefDrawer({ isOpen, onClose, limitToSymbol, onUpgrade }: Brief
                   <div className="w-11 h-11 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
                     <NotebookText className="w-5 h-5 text-indigo-500" />
                   </div>
-                  <div className="space-y-0.5">
-                    <div className="flex items-center gap-2">
-                      <h2 className="text-xl font-black italic tracking-tighter text-white">
-                        {isSpecificStock ? '个股简报' : '每日简报'}
-                      </h2>
-                      {tier === 'pro' && (
-                        <span className="px-1.5 py-0.5 rounded-md bg-amber-500/20 border border-amber-500/30 text-amber-400 text-[8px] font-black uppercase tracking-wider">
-                          ⭐ Pro
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-[9px] text-slate-500 font-bold tracking-[0.15em] uppercase flex items-center gap-1.5">
-                      <span className="w-1 h-1 rounded-full bg-indigo-500" />
-                      {isSpecificStock ? (limitToSymbol) : 'DAILY REVIEW'}
-                      <span className="opacity-50 ml-1">{brief ? (brief.date.split('-')[1] + '/' + brief.date.split('-')[2]) : '--/--'}</span>
-                    </p>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-xl font-black italic tracking-tighter text-white flex items-baseline gap-2">
+                      {isSpecificStock ? '个股简报' : '每日简报'}
+                      <span className="text-sm font-bold text-slate-500 not-italic tracking-normal font-mono">
+                        {brief ? (brief.date.split('-')[1] + '/' + brief.date.split('-')[2]) : '--/--'}
+                      </span>
+                    </h2>
+                    {tier === 'pro' && (
+                      <span className="px-1.5 py-0.5 rounded-md bg-amber-500/20 border border-amber-500/30 text-amber-400 text-[8px] font-black uppercase tracking-wider translate-y-[-1px]">
+                        PRO
+                      </span>
+                    )}
                   </div>
                </div>
                <button onClick={onClose} className="p-2.5 rounded-full bg-white/5 border border-white/10 text-slate-400 hover:text-white active:scale-90 transition-all">
