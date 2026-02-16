@@ -3,9 +3,9 @@
 import { motion } from 'framer-motion';
 import { ShieldCheck, Target, Users, Sparkles, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
-import Image from 'next/image';
 import Multiavatar from '@/components/Multiavatar';
 import MarketingFooter from '@/components/MarketingFooter';
+import MarketingHeader from '@/components/MarketingHeader';
 
 export default function AboutPage() {
   return (
@@ -17,23 +17,7 @@ export default function AboutPage() {
       </div>
 
       {/* 顶部导航 */}
-      <nav className="relative z-50 flex items-center justify-between px-8 py-8 max-w-7xl mx-auto">
-        <Link href="/" className="flex items-center gap-2 group">
-          <Image 
-            src="/logo.png" 
-            alt="ZISO AI Logo" 
-            width={32} 
-            height={32} 
-            className="rounded-lg group-hover:scale-110 transition-transform"
-          />
-          <span className="text-lg font-black italic tracking-tighter">ZISO <span className="text-indigo-500">AI</span></span>
-        </Link>
-        <div className="flex items-center gap-6 text-xs font-bold text-slate-400 uppercase tracking-widest">
-          <Link href="/learn" className="hover:text-white transition-colors">101 手册</Link>
-          <Link href="/pricing" className="hover:text-white transition-colors">订阅</Link>
-          <Link href="https://app.ziso.cc" className="px-4 py-2 rounded-full bg-indigo-500 text-white hover:bg-indigo-400 transition-all">进入应用</Link>
-        </div>
-      </nav>
+      <MarketingHeader currentPage="about" />
 
       {/* Hero Section */}
       <main className="relative z-10 max-w-4xl mx-auto px-8 pt-20 pb-40">

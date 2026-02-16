@@ -4,7 +4,14 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Menu, X, ChevronRight } from 'lucide-react';
 
-const links = [
+export interface MarketingMenuLink {
+  href: string;
+  label: string;
+  prefetch?: boolean;
+  isActive?: boolean;
+}
+
+const defaultLinks: MarketingMenuLink[] = [
   { href: '#features', label: '功能' },
   { href: '/learn', label: '101 手册', prefetch: false },
   { href: '/about', label: '关于', prefetch: false },
@@ -13,7 +20,11 @@ const links = [
   { href: '#faq', label: 'FAQ' },
 ];
 
-export default function LandingMobileMenu() {
+interface LandingMobileMenuProps {
+  links?: MarketingMenuLink[];
+}
+
+export default function LandingMobileMenu({ links = defaultLinks }: LandingMobileMenuProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -37,7 +48,9 @@ export default function LandingMobileMenu() {
             href={item.href}
             prefetch={item.prefetch}
             onClick={() => setOpen(false)}
-            className="text-2xl font-black italic tracking-tighter text-slate-300 hover:text-white transition-colors"
+            className={`text-2xl font-black italic tracking-tighter transition-colors ${
+              item.isActive ? 'text-white' : 'text-slate-300 hover:text-white'
+            }`}
           >
             {item.label}
           </Link>

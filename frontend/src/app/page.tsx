@@ -3,7 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import Multiavatar from '@/components/Multiavatar';
 import MarketingFooter from '@/components/MarketingFooter';
-import LandingMobileMenu from '@/components/LandingMobileMenu';
+import MarketingHeader from '@/components/MarketingHeader';
 
 export default function LandingPage() {
   return (
@@ -15,28 +15,7 @@ export default function LandingPage() {
       </div>
 
       {/* 顶部导航 */}
-      <nav className="relative z-50 flex items-center justify-between px-8 py-8 max-w-7xl mx-auto">
-        <div className="flex items-center gap-2">
-          <Image 
-            src="/logo.png" 
-            alt="ZISO AI Logo" 
-            width={40} 
-            height={40} 
-            className="rounded-xl"
-          />
-          <span className="text-xl font-black italic tracking-tighter">ZISO <span className="text-indigo-500">AI</span></span>
-        </div>
-        <div className="hidden md:flex items-center gap-8 text-sm font-bold text-slate-400">
-          <Link href="#features" className="hover:text-white transition-colors">功能</Link>
-          <Link href="/learn" prefetch={false} className="hover:text-white transition-colors">101 手册</Link>
-          <Link href="/about" prefetch={false} className="hover:text-white transition-colors">关于</Link>
-          <Link href="/pricing" prefetch={false} className="hover:text-white transition-colors">价格</Link>
-          <Link href="/support" prefetch={false} className="hover:text-white transition-colors">支持</Link>
-          <Link href="#faq" className="hover:text-white transition-colors">FAQ</Link>
-          <Link href="https://app.ziso.cc" target="_blank" rel="noopener noreferrer" className="px-5 py-2.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-white">进入应用</Link>
-        </div>
-        <LandingMobileMenu />
-      </nav>
+      <MarketingHeader currentPage="home" />
 
       {/* Hero Section */}
       <main className="relative z-10 max-w-7xl mx-auto px-8 pt-12 pb-40 flex flex-col items-center text-center">

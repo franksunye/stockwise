@@ -9,6 +9,7 @@ import Image from 'next/image';
 import { getCurrentUserId } from '@/lib/user';
 import { pricingPlans, featureComparison } from '@/lib/pricing-data';
 import MarketingFooter from '@/components/MarketingFooter';
+import MarketingHeader from '@/components/MarketingHeader';
 
 
 function PricingContent() {
@@ -113,24 +114,7 @@ function PricingContent() {
       </div>
 
       {/* 顶部导航 */}
-      <nav className="relative z-50 flex items-center justify-between px-8 py-8 max-w-7xl mx-auto">
-        <Link href="/" className="flex items-center gap-2">
-          <Image 
-            src="/logo.png" 
-            alt="ZISO AI Logo" 
-            width={40} 
-            height={40} 
-            className="rounded-xl"
-          />
-          <span className="text-xl font-black italic tracking-tighter">ZISO <span className="text-indigo-500">AI</span></span>
-        </Link>
-        <div className="hidden md:flex items-center gap-8 text-sm font-bold text-slate-400">
-          <Link href="/#features" className="hover:text-white transition-colors">功能</Link>
-          <Link href="/about" className="hover:text-white transition-colors">关于</Link>
-          <Link href="/pricing" className="text-white transition-colors">价格</Link>
-          <Link href="/" className="px-5 py-2.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-white">进入应用</Link>
-        </div>
-      </nav>
+      <MarketingHeader currentPage="pricing" />
 
       {/* Success Modal */}
       <AnimatePresence>
