@@ -101,7 +101,7 @@ export default function LandingPage() {
         </div>
 
         {/* Feature 1: The EOD Review (Right Image, Left Text) */}
-        <section className="pt-60 w-full grid md:grid-cols-2 gap-20 items-center text-left">
+        <section id="features" className="pt-60 w-full grid md:grid-cols-2 gap-20 items-center text-left">
           <div className="space-y-8">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em]">
                Plan The Trade
