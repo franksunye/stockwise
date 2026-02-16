@@ -2,7 +2,7 @@ import json
 from datetime import datetime
 from backend.database import get_connection
 from backend.logger import logger
-from backend.trading_calendar import get_next_trading_day_str, get_market_from_symbol
+from backend.trading_calendar import get_next_trading_day_str, get_market_from_symbol, is_trading_day
 
 # Industry Standard: Noise Threshold (1%)
 # "Side" signals are considered correct if the price moves within this range (noise),
@@ -58,8 +58,12 @@ def verify_all_pending(force: bool = False, target_date: str = None):
             # --- 2. Calculate Window Dates ---
             # Window starts at target_date (T+1 relative to prediction date T)
             # We want T+1, T+2, T+3
-            window_dates = [t0_date]
-            current_t = t0_date
+            start_date = t0_date
+            if not is_trading_day(start_date, market=market):
+                start_date = get_next_trading_day_str(start_date, market=market)
+
+            window_dates = [start_date]
+            current_t = start_date
             for _ in range(VALIDATION_WINDOW - 1):
                 current_t = get_next_trading_day_str(current_t, market=market)
                 window_dates.append(current_t)

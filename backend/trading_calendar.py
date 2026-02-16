@@ -36,6 +36,7 @@ HK_HOLIDAYS_DEFAULT = {
     '2025-12-26',  # 圣诞节翌日
     # 2026
     '2026-01-01',  # New Year
+    '2026-02-16',  # Lunar New Year Eve (Half-day; treated as closed for daily prediction)
     '2026-02-17',  # Lunar New Year
     '2026-02-18',
     '2026-02-19',
@@ -120,17 +121,20 @@ _HOLIDAYS_CACHE = {
 }
 _LAST_CACHE_TIME = 0
 CACHE_TTL = 3600 * 24  # Cache for 24 hours
+_DB_CALENDAR_READY = False
 
 def refresh_holidays_from_db():
     """
     Attempt to load holidays from database.
     Updates global cache on success.
+    Returns True if DB calendar is loaded, otherwise False.
     """
-    global _HOLIDAYS_CACHE, _LAST_CACHE_TIME
+    global _HOLIDAYS_CACHE, _LAST_CACHE_TIME, _DB_CALENDAR_READY
     
     if not get_connection:
-        return
+        return False
         
+    conn = None
     try:
         conn = get_connection()
         cursor = conn.cursor()
@@ -138,7 +142,8 @@ def refresh_holidays_from_db():
         # Check if table exists (SQLite/LibSQL specific check)
         cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='market_holidays'")
         if not cursor.fetchone():
-            return
+            _DB_CALENDAR_READY = False
+            return False
             
         cursor.execute("SELECT date, market FROM market_holidays")
         rows = cursor.fetchall()
@@ -152,20 +157,21 @@ def refresh_holidays_from_db():
             elif market == 'CN':
                 cn_set.add(date_str)
         
-        # Only update if we got data
-        if hk_set:
-            _HOLIDAYS_CACHE["HK"] = hk_set
-        if cn_set:
-            _HOLIDAYS_CACHE["CN"] = cn_set
+        # DB is authoritative once loaded, even if one market list is empty
+        _HOLIDAYS_CACHE["HK"] = hk_set
+        _HOLIDAYS_CACHE["CN"] = cn_set
             
         _LAST_CACHE_TIME = datetime.now().timestamp()
-        
-        # Important: Close the connection
-        if hasattr(conn, 'close'):
-            conn.close()
+        _DB_CALENDAR_READY = True
+        return True
         
     except Exception as e:
+        _DB_CALENDAR_READY = False
         logger.warning(f"Failed to load holidays from DB: {e}")
+        return False
+    finally:
+        if conn and hasattr(conn, 'close'):
+            conn.close()
 
 def get_market_from_symbol(symbol: str) -> str:
     """根据股票代码判断市场"""
@@ -176,13 +182,18 @@ def get_market_from_symbol(symbol: str) -> str:
 
 def get_holidays(market: str) -> set:
     """获取指定市场的假期列表 (Priority: DB Cache > Hardcoded Default)"""
-    global _HOLIDAYS_CACHE
+    global _HOLIDAYS_CACHE, _LAST_CACHE_TIME, _DB_CALENDAR_READY
     
     # Init or Refresh Cache
-    if _HOLIDAYS_CACHE.get(market) is None:
+    now_ts = datetime.now().timestamp()
+    cache_stale = (_LAST_CACHE_TIME == 0) or ((now_ts - _LAST_CACHE_TIME) > CACHE_TTL)
+    if _HOLIDAYS_CACHE.get(market) is None or cache_stale:
         refresh_holidays_from_db()
         
     cached = _HOLIDAYS_CACHE.get(market)
+    # If DB calendar is ready, always trust DB cache (including empty set)
+    if _DB_CALENDAR_READY and cached is not None:
+        return cached
     if cached:
         return cached
         

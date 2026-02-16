@@ -107,12 +107,8 @@ let CN_HOLIDAYS = new Set([...CN_HOLIDAYS_2025, ...CN_HOLIDAYS_2026]);
  * Call this on app initialization to sync valid holidays.
  */
 export function updateHolidays(holidays: { HK: string[], CN: string[] }) {
-    if (holidays.HK && holidays.HK.length > 0) {
-        HK_HOLIDAYS = new Set(holidays.HK);
-    }
-    if (holidays.CN && holidays.CN.length > 0) {
-        CN_HOLIDAYS = new Set(holidays.CN);
-    }
+    HK_HOLIDAYS = new Set(Array.isArray(holidays.HK) ? holidays.HK : []);
+    CN_HOLIDAYS = new Set(Array.isArray(holidays.CN) ? holidays.CN : []);
 }
 
 /**
@@ -358,6 +354,27 @@ export function formatDataDateLabel(dataDateStr: string, market: MarketType = 'H
 
     // 其他情况显示日期
     return `${month}/${day}`;
+}
+
+/**
+ * Normalize a date string to the next trading day for the given market.
+ * Useful when historical predictions were generated before holiday calendar updates.
+ */
+export function normalizeToTradingDate(dataDateStr?: string, market: MarketType = 'HK'): string {
+    if (!dataDateStr) return '';
+
+    const normalized = dataDateStr.replace(/\//g, '-');
+    const parts = normalized.split('-').map(Number);
+    if (parts.length !== 3 || parts.some(Number.isNaN)) return dataDateStr;
+
+    const [year, month, day] = parts;
+    const date = new Date(year, month - 1, day);
+
+    while (isMarketClosed(date, market)) {
+        date.setDate(date.getDate() + 1);
+    }
+
+    return formatDateStr(date);
 }
 
 /**

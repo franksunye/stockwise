@@ -5,7 +5,7 @@ import { useMemo, memo } from 'react';
 import { Zap, Target, ShieldCheck, ChevronDown, Clock } from 'lucide-react';
 import { StockData, TacticalData, AIPrediction } from '@/lib/types';
 
-import { getMarketScene, getPredictionTitle, getClosePriceLabelFromData, getValidationLabelFromData, isTradingDay, getMarketFromSymbol, getLastTradingDay, getHKTime } from '@/lib/date-utils';
+import { getMarketScene, getPredictionTitle, getClosePriceLabelFromData, getValidationLabelFromData, isTradingDay, getMarketFromSymbol, getLastTradingDay, getHKTime, normalizeToTradingDate } from '@/lib/date-utils';
 import { COLORS } from './constants';
 
 import { formatModelName } from '@/lib/model-names';
@@ -26,11 +26,12 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
   // 统一使用 HK 时间进行日期判定，避免客户端时区差异
   const today = getHKTime();
   const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  const normalizeTargetDate = (targetDate?: string) => normalizeToTradingDate(targetDate, marketType);
   
   // 核心预测数据选择逻辑 (Strict Mode V2):
   // 1. 寻找今日预测
   const todayPrediction = [data.prediction, data.previousPrediction].find(
-    p => p?.target_date === todayStr
+    p => normalizeTargetDate(p?.target_date) === todayStr
   );
   
   // 2. 确定数据有效性阈值 (Threshold)
@@ -55,7 +56,7 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
   // 4. 应用阈值过滤
   // 只有当数据日期 >= 阈值日期时，才认为是有效数据。
   // 这解决了"僵尸复活"显示3天前无效数据的问题，同时保留了周末查看周五数据的能力。
-  const displayPrediction = (candidate && candidate.target_date >= thresholdDateStr) 
+  const displayPrediction = (candidate && normalizeTargetDate(candidate.target_date) >= thresholdDateStr) 
       ? candidate 
       : null;
   
@@ -94,7 +95,7 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
   const getSmartTitle = () => {
     if (!displayPrediction?.target_date) return getPredictionTitle(scene, marketType);
     
-    const targetDate = displayPrediction.target_date;
+    const targetDate = normalizeTargetDate(displayPrediction.target_date);
     
     // 如果 target_date = 今天，显示"今日建议"
     if (targetDate === todayStr) return '今日建议';
@@ -225,7 +226,7 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
            {/* 左侧：市场事实 (Market Reality) */}
            <div className="glass-card p-4 flex flex-col justify-between overflow-hidden">
               {(() => {
-                const isMarketOpenSoon = isTradingDay() && isPreMarket;
+                const isMarketOpenSoon = isTradingDay(undefined, marketType) && isPreMarket;
                 return (
                   <>
                     <div className="relative group">
@@ -247,7 +248,7 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
                     </div>
 
                     {/* RSI 仅在事实已发生时显示 */}
-                    {isTradingDay() && !isPreMarket && (
+                    {isTradingDay(undefined, marketType) && !isPreMarket && (
                       <div className="mt-2 pt-2 border-t border-white/5 flex items-center justify-between">
                         <span className="text-[10px] text-slate-600 font-bold uppercase">RSI</span>
                         <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-full bg-white/5 ${
@@ -284,7 +285,8 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
                 if (isPostMarket) {
                     // 收盘后，主卡片显示的是明日建议。验证卡片需要显示对今日的验证。
                     // 尝试从 previousPrediction 中找，或者如果 prediction 还没更新，它可能就是今日的。
-                    const latestIsTomorrow = data.prediction?.target_date && data.prediction.target_date > todayStr;
+                    const latestTargetDate = normalizeTargetDate(data.prediction?.target_date);
+                    const latestIsTomorrow = latestTargetDate && latestTargetDate > todayStr;
                     if (latestIsTomorrow) {
                         // 如果最新的是明天的，那验证用的就是前一个 (理论上是今天的)
                         validationPrediction = data.previousPrediction;
@@ -294,7 +296,7 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
                     }
                 }
 
-                const validationDate = validationPrediction?.target_date;
+                const validationDate = normalizeTargetDate(validationPrediction?.target_date);
                 const status = validationPrediction?.validation_status;
 
                 return (

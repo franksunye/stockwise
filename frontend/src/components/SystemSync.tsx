@@ -15,7 +15,7 @@ export function SystemSync() {
         const res = await fetch("/api/system/calendar");
         if (res.ok) {
           const data = await res.json();
-          if (data && (data.HK || data.CN)) {
+          if (data && !data.error && Array.isArray(data.HK) && Array.isArray(data.CN)) {
             console.log("📅 System Sync: Market holidays updated from DB");
             updateHolidays(data);
           }
