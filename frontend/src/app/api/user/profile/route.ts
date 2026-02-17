@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getDbClient } from '@/lib/db';
 import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
-import { sendInternalNotification } from '@/lib/server-notify';
 
 export async function POST(request: Request) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -42,71 +41,32 @@ export async function POST(request: Request) {
 
             if (shouldProcessReferral) {
                 // 1. Security Check: Verify Referrer Exists FIRST
-                let referrer;
+                let referrerExists = false;
                 try {
                     if (isCloud) {
                         const res = await client.execute({
-                            sql: "SELECT subscription_tier, subscription_expires_at FROM users WHERE user_id = ?",
+                            sql: "SELECT 1 FROM users WHERE user_id = ?",
                             args: [referredBy]
                         });
-                        referrer = res.rows[0];
+                        referrerExists = res.rows.length > 0;
                     } else {
-                        referrer = client.prepare("SELECT subscription_tier, subscription_expires_at FROM users WHERE user_id = ?").get(referredBy);
+                        referrerExists = !!client.prepare("SELECT 1 FROM users WHERE user_id = ?").get(referredBy);
                     }
                 } catch (e) {
                     console.error('Failed to verify referrer:', e);
                 }
 
-                if (referrer) {
-                    // ✅ Referrer exists! Grant rewards to BOTH.
+                if (referrerExists) {
+                    // ✅ Referrer exists! Record relationship + grant referee Pro.
+                    // NOTE: Referrer reward is deferred to onboarding completion
+                    // to ensure the invited user truly engages with the product.
                     validReferrerId = referredBy;
 
-                    // A. Referee Reward (New User)
+                    // Referee Reward (New User gets Pro trial immediately)
                     const expiryDate = new Date();
                     expiryDate.setDate(expiryDate.getDate() + MEMBERSHIP_CONFIG.referral.refereeDays);
                     initialTier = 'pro';
                     expiresAt = expiryDate.toISOString();
-
-                    // B. Referrer Reward (The person who shared)
-                    try {
-                        const currentExpiry = referrer.subscription_expires_at ? new Date(referrer.subscription_expires_at) : new Date();
-                        const baseDate = currentExpiry > new Date() ? currentExpiry : new Date();
-                        baseDate.setDate(baseDate.getDate() + MEMBERSHIP_CONFIG.referral.referrerDays);
-                        const newExpiry = baseDate.toISOString();
-
-                        // Update Referrer
-                        if (isCloud) {
-                            await client.execute({
-                                sql: "UPDATE users SET subscription_tier = 'pro', subscription_expires_at = ? WHERE user_id = ?",
-                                args: [newExpiry, referredBy]
-                            });
-
-                            // Record transaction
-                            const txId = `tx_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-                            await client.execute({
-                                sql: "INSERT INTO referral_transactions (id, referrer_id, referred_id, type, amount, status, created_at, note) VALUES (?, ?, ?, 'reward', 0, 'completed', ?, ?)",
-                                args: [txId, referredBy, userId, new Date().toISOString(), `+${MEMBERSHIP_CONFIG.referral.referrerDays}天 PRO (邀请奖励)`]
-                            });
-                        } else {
-                            client.prepare("UPDATE users SET subscription_tier = 'pro', subscription_expires_at = ? WHERE user_id = ?").run(newExpiry, referredBy);
-
-                            // Record transaction
-                            const txId = `tx_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-                            client.prepare("INSERT INTO referral_transactions (id, referrer_id, referred_id, type, amount, status, created_at, note) VALUES (?, ?, ?, 'reward', 0, 'completed', ?, ?)").run(txId, referredBy, userId, new Date().toISOString(), `+${MEMBERSHIP_CONFIG.referral.referrerDays}天 PRO (邀请奖励)`);
-                        }
-
-                        // Send Notification
-                        sendInternalNotification({
-                            target_user_id: referredBy,
-                            title: '🎁 邀请奖励已到账',
-                            body: `你的好友已加入，+${MEMBERSHIP_CONFIG.referral.referrerDays}天 PRO 会员已存入你的账户！`,
-                            url: '/dashboard',
-                            tag: 'referral_reward'
-                        }).catch((e: unknown) => console.error('Failed to send referral notification:', e));
-
-                    } catch (referErr) {
-                        console.error('Referrer reward failed:', referErr);
-                    }
                 } else {
                     console.warn(`Referral skipped: Referrer ${referredBy} not found`);
                 }
@@ -149,7 +109,8 @@ export async function POST(request: Request) {
             }
 
             // ==========================================
-            // 处理已存在用户的邀请奖励
+            // 处理已存在用户的邀请奖励（仅记录关系 + 给被邀请人 Pro）
+            // NOTE: 邀请人奖励延迟到 onboarding 完成时发放
             // ==========================================
             const shouldProcessExistingUserReferral =
                 MEMBERSHIP_CONFIG.switches.enableReferralReward &&
@@ -161,24 +122,25 @@ export async function POST(request: Request) {
             if (shouldProcessExistingUserReferral) {
                 console.log(`Processing referral for existing user: ${userId}, referred by: ${referredBy}`);
 
-                // 1. Security Check: Verify Referrer Exists FIRST (Fix P0 Vulnerability)
-                let referrer;
+                // 1. Security Check: Verify Referrer Exists FIRST
+                let referrerExists = false;
                 try {
                     if (isCloud) {
                         const res = await client.execute({
-                            sql: "SELECT subscription_tier, subscription_expires_at FROM users WHERE user_id = ?",
+                            sql: "SELECT 1 FROM users WHERE user_id = ?",
                             args: [referredBy]
                         });
-                        referrer = res.rows[0];
+                        referrerExists = res.rows.length > 0;
                     } else {
-                        referrer = client.prepare("SELECT subscription_tier, subscription_expires_at FROM users WHERE user_id = ?").get(referredBy);
+                        referrerExists = !!client.prepare("SELECT 1 FROM users WHERE user_id = ?").get(referredBy);
                     }
                 } catch (e) {
                     console.error('Failed to verify referrer for existing user:', e);
                 }
 
-                if (referrer) {
-                    // ✅ Referrer verified. Proceed with upgrade.
+                if (referrerExists) {
+                    // ✅ Referrer verified. Upgrade referee only.
+                    // Referrer reward deferred to onboarding completion.
                     const expiryDate = new Date();
                     expiryDate.setDate(expiryDate.getDate() + MEMBERSHIP_CONFIG.referral.refereeDays);
                     const newExpiresAt = expiryDate.toISOString();
@@ -199,44 +161,8 @@ export async function POST(request: Request) {
                             subscription_expires_at: newExpiresAt,
                             referred_by: referredBy
                         };
-
-                        // Referrer Reward Logic
-                        const currentExpiry = referrer.subscription_expires_at ? new Date(referrer.subscription_expires_at) : new Date();
-                        const baseDate = currentExpiry > new Date() ? currentExpiry : new Date();
-                        baseDate.setDate(baseDate.getDate() + MEMBERSHIP_CONFIG.referral.referrerDays);
-                        const newExpiry = baseDate.toISOString();
-
-                        if (isCloud) {
-                            await client.execute({
-                                sql: "UPDATE users SET subscription_tier = 'pro', subscription_expires_at = ? WHERE user_id = ?",
-                                args: [newExpiry, referredBy]
-                            });
-
-                            // Record transaction
-                            const txId = `tx_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-                            await client.execute({
-                                sql: "INSERT INTO referral_transactions (id, referrer_id, referred_id, type, amount, status, created_at, note) VALUES (?, ?, ?, 'reward', 0, 'completed', ?, ?)",
-                                args: [txId, referredBy, userId, new Date().toISOString(), `+${MEMBERSHIP_CONFIG.referral.referrerDays}天 PRO (邀请奖励)`]
-                            });
-                        } else {
-                            client.prepare("UPDATE users SET subscription_tier = 'pro', subscription_expires_at = ? WHERE user_id = ?").run(newExpiry, referredBy);
-
-                            // Record transaction
-                            const txId = `tx_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-                            client.prepare("INSERT INTO referral_transactions (id, referrer_id, referred_id, type, amount, status, created_at, note) VALUES (?, ?, ?, 'reward', 0, 'completed', ?, ?)").run(txId, referredBy, userId, new Date().toISOString(), `+${MEMBERSHIP_CONFIG.referral.referrerDays}天 PRO (邀请奖励)`);
-                        }
-
-                        // Send Notification
-                        sendInternalNotification({
-                            target_user_id: referredBy,
-                            title: '🎁 邀请奖励已到账',
-                            body: `你的好友已加入，+${MEMBERSHIP_CONFIG.referral.referrerDays}天 PRO 会员已存入你的账户！`,
-                            url: '/dashboard',
-                            tag: 'referral_reward'
-                        }).catch((e: unknown) => console.error('Failed to send referral notification:', e));
-
                     } catch (referErr) {
-                        console.error('Existing user referral reward failed:', referErr);
+                        console.error('Existing user referral upgrade failed:', referErr);
                     }
                 } else {
                     console.warn(`Existing user referral skipped: Referrer ${referredBy} not found`);
