@@ -16,7 +16,11 @@ import { useInstallPrompt } from '@/hooks/useInstallPrompt';
 export function InstallGuide() {
   const { guide, cnBrowser, visible, promptInstall, dismiss, canPrompt } = useInstallPrompt();
 
-  if (!visible) return null;
+  // Don't show install guide until onboarding is complete.
+  // Otherwise the guide flashes briefly before being covered by the full-screen OnboardingOverlay.
+  const hasOnboarded = typeof window !== 'undefined' && localStorage.getItem('STOCKWISE_HAS_ONBOARDED');
+
+  if (!visible || !hasOnboarded) return null;
 
   return (
     <AnimatePresence>
