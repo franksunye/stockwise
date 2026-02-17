@@ -6,7 +6,7 @@ import { Check, ChevronRight, PartyPopper, X, ShieldCheck, Zap } from 'lucide-re
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { getCurrentUserId } from '@/lib/user';
+import { getCurrentUserId, getCurrentUser } from '@/lib/user';
 import { pricingPlans, featureComparison } from '@/lib/pricing-data';
 import MarketingFooter from '@/components/MarketingFooter';
 import MarketingHeader from '@/components/MarketingHeader';
@@ -21,14 +21,11 @@ function PricingContent() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    if (searchParams.get('session_id')) {
-      setShowSuccess(true);
-      window.history.replaceState({}, '', window.location.pathname);
-    }
-    
-    // Check current user status
-    const userId = getCurrentUserId();
-    if (userId) {
+    // 确保身份初始化，解决新用户进入定价页可能没有 ID 的问题
+    getCurrentUser().then((user) => {
+      const userId = user.userId;
+      
+      // Check current user status
       fetch('/api/user/profile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -40,6 +37,11 @@ function PricingContent() {
         if (typeof data.hasStripeCustomer === 'boolean') setHasStripeCustomer(data.hasStripeCustomer);
       })
       .catch(err => console.error('Failed to fetch user status', err));
+    });
+
+    if (searchParams.get('session_id') || searchParams.get('checkout') === 'success') {
+      setShowSuccess(true);
+      window.history.replaceState({}, '', window.location.pathname);
     }
   }, [searchParams]);
 

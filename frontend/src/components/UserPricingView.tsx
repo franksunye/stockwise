@@ -16,14 +16,14 @@ export function UserPricingView({ currentTier, hasStripeCustomer }: Props) {
   const [loadingPortal, setLoadingPortal] = useState(false);
 
   const handleUpgrade = async (priceId: string) => {
-    const userId = getCurrentUserId();
-    if (!userId) {
-      alert('请先登录或初始化您的账户');
-      return;
-    }
-
     setLoadingPriceId(priceId);
     try {
+      // 核心改进：确保在支付前用户 identity 已经完成初始化（自动静默注册）
+      // 避免新用户点击时因 getCurrentUserId 为空而弹窗报错，消除“要命”的摩擦
+      const { getCurrentUser } = await import('@/lib/user');
+      const user = await getCurrentUser();
+      const userId = user.userId;
+
       const response = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -38,7 +38,13 @@ export function UserPricingView({ currentTier, hasStripeCustomer }: Props) {
       }
     } catch (error: unknown) {
       console.error('Checkout error:', error);
-      alert('⚠️ 支付暂时受阻。\n\n如多次尝试无效，请添加客服进行人工处理。\n\nError: ' + ((error as Error).message || 'Unknown error'));
+      const msg = (error as Error).message || 'Unknown error';
+      // 区分技术错误与配置错误，提供更人性化的引导
+      if (msg.includes('Missing required environment variables')) {
+        alert('⚠️ 支付系统配置中，请稍后再试或联系客服。');
+      } else {
+        alert(`⚠️ 支付发起失败 (${msg})\n\n请检查网络连接，或添加页面下方客服二维码进行直接开通。`);
+      }
     } finally {
       setLoadingPriceId(null);
     }
