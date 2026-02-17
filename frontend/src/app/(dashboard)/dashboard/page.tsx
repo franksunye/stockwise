@@ -139,12 +139,10 @@ function DashboardContent() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 0.1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 pointer-events-none"
+          className="fixed inset-0 pointer-events-none blur-[150px] scale-150"
           style={{ 
             backgroundColor: currentStock?.prediction?.signal === 'Long' ? COLORS.up : 
                             currentStock?.prediction?.signal === 'Short' ? COLORS.down : COLORS.hold,
-            filter: 'blur(150px)', 
-            scale: 1.5
           }}
         />
       </AnimatePresence>

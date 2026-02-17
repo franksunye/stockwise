@@ -121,45 +121,57 @@ body {
   display: none;
 }
 
-/* 🚀 Android 性能优化：渐进式降级方案 */
-body.is-android {
+/* 🚀 移动端性能优化：统一的安全模式 */
+body.is-android,
+body.is-ios {
   /* 1. 全局背景优化：减少动态渐变计算 */
   background-attachment: scroll;
+  /* 统一使用深色背景，减少透明度计算 */
   background-image: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #050508 100%);
 }
 
-body.is-android .glass-card {
-  /* 2. 核心优化：移除 Android 最吃力的毛玻璃效果 */
+body.is-android .glass-card,
+body.is-ios .glass-card,
+body.is-ios [class*="backdrop-blur"],
+body.is-android [class*="backdrop-blur"] {
+  /* 2. 核心优化：彻底移除毛玻璃效果 */
+  /* iOS Safari 在高负载下渲染 backdrop-filter 极易崩溃，必须强制关闭 */
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
-  /* 补偿：稍微提高背景不透明度，并通过边框增强质感 */
-  background: rgba(15, 15, 23, 0.95) !important;
+  /* 补偿：使用高不透明度背景和边框增强质感 */
+  background-color: rgba(15, 15, 23, 0.95) !important;
   border: 1px solid rgba(255, 255, 255, 0.12) !important;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
-body.is-ios .glass-card,
-body.is-ios [class*="backdrop-blur"] {
-  /* 🍎 iOS Safari 隐私模式/低功耗模式性能补丁 */
-  /* 针对 Safari 的渲染 Bug：当 backdrop-filter 逻辑过重且背景包含渐变时，偶尔会渲染为纯紫色/红色块 */
-  backdrop-filter: blur(8px) !important;
-  -webkit-backdrop-filter: blur(8px) !important;
-  /* 补偿：添加一点点不透明度，确保计算失败时仍有保底背景色 */
-  background-color: rgba(15, 15, 23, 0.8) !important;
-}
-
 body.is-android .hero-glow,
+body.is-ios .hero-glow,
 body.is-android [class*="blur-"],
-body.is-android [class*="backdrop-blur"] {
-  /* 3. 视觉降级：超大范围的模糊在 Android 上是灾难 */
+body.is-ios [class*="blur-"],
+body.is-android [class*="backdrop-blur"],
+body.is-ios [class*="backdrop-blur"] {
+  /* 3. 视觉降级：移除大范围模糊计算 */
   filter: none !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
 
+/* 彻底隐藏可能导致 Crash 的超大光晕物体 */
+body.is-ios .bg-glow-orb {
+  display: none !important;
+}
+
+/* 防止 iOS 上 will-change 导致过多的层合成内存占用 */
+body.is-ios .will-change-transform {
+  will-change: auto !important;
+}
+
 body.is-android .animate-pulse,
+body.is-ios .animate-pulse,
 body.is-android .animate-ping,
-body.is-android .animate-bounce {
+body.is-ios .animate-ping,
+body.is-android .animate-bounce,
+body.is-ios .animate-bounce {
   /* 4. 动画降级：减少持续性的 CPU 占用 */
   animation-duration: 3s;
 }

@@ -60,6 +60,23 @@ export default function RootLayout({
         <link rel="preconnect" href="https://va.vercel-scripts.com" />
       </head>
       <body className="antialiased">
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var ua = window.navigator.userAgent;
+                  var isIOS = /iPhone|iPad|iPod/i.test(ua);
+                  var isAndroid = /Android/i.test(ua);
+                  var isMobile = isIOS || isAndroid;
+                  if (isIOS) document.body.classList.add('is-ios');
+                  if (isAndroid) document.body.classList.add('is-android');
+                  if (isMobile) document.body.classList.add('is-mobile');
+                } catch(e) {}
+              })();
+            `,
+          }}
+        />
         {children}
         <Analytics />
       </body>

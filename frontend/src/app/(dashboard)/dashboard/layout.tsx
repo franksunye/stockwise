@@ -10,7 +10,6 @@ import { StockProvider } from '@/context/StockContext';
 import { DashboardAuthProvider } from '@/context/DashboardAuthContext';
 import { resolveReferralCode } from '@/lib/referral-resolver';
 import { SystemSync } from '@/components/SystemSync';
-import { PerformanceOptimizer } from '@/components/PerformanceOptimizer';
 import { ReferralTracker } from '@/components/ReferralTracker';
 import { BadgeManager } from '@/components/BadgeManager';
 import { ServiceWorkerRegistrar } from '@/components/ServiceWorkerRegistrar';
@@ -27,7 +26,6 @@ export default function DashboardLayout({
   const appBootstrap = (
     <>
       <SystemSync />
-      <PerformanceOptimizer />
       <ReferralTracker />
       <BadgeManager />
       <ServiceWorkerRegistrar />
