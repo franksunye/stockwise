@@ -490,7 +490,22 @@ async def generate_stock_briefs_batch(date_str: str, specific_symbols: List[str]
 async def run_daily_pipeline(date_str: str = None, force: bool = False, target_tier: str = None):
     """Run the Full Pipeline (Phase 1 + Phase 2 for all users)"""
     if not date_str:
-        date_str = datetime.now().strftime("%Y-%m-%d")
+        date_str = datetime.now(BEIJING_TZ).strftime("%Y-%m-%d")
+    
+    # --- Defense-in-depth: Python-level Trading Day Guard ---
+    # Even if the GitHub Actions gate is bypassed (e.g., manual trigger),
+    # this ensures we don't waste LLM costs on non-trading days.
+    if not force:
+        try:
+            from trading_calendar import is_market_closed
+            check_date = datetime.strptime(date_str, "%Y-%m-%d")
+            cn_closed = is_market_closed(check_date, "CN")
+            hk_closed = is_market_closed(check_date, "HK")
+            if cn_closed and hk_closed:
+                logger.info(f"📅 [TradingDayGuard] {date_str} 为全市场休市日 (CN+HK)，跳过简报生成。")
+                return
+        except Exception as e:
+            logger.warning(f"⚠️ [TradingDayGuard] Calendar check failed: {e}, proceeding anyway.")
     
     tier_label = f" ({target_tier})" if target_tier else ""
     

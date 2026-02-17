@@ -1,6 +1,7 @@
 name: Daily Pipeline - Hong Kong (HK)
 
 # 编排层：组合数据同步 + AI 分析，形成完整的每日流水线
+# 安全：通过 Trading Day Gate 闸门确保仅在 HK 市场交易日执行
 
 on:
   schedule:
@@ -9,8 +10,22 @@ on:
   workflow_dispatch: # 支持手动触发
 
 jobs:
+  # Step 0: Trading Day Gate (仅 schedule 触发时检查)
+  gate:
+    if: github.event_name == 'schedule'
+    uses: ./.github/workflows/trading_day_gate.yml
+    with:
+      market: 'HK'
+    secrets: inherit
+
   # Step 1: 数据同步
   sync:
+    needs: [gate]
+    if: |
+      always() && (
+        github.event_name == 'workflow_dispatch' ||
+        needs.gate.outputs.should_run == 'true'
+      )
     uses: ./.github/workflows/data_sync_hk.yml
     secrets: inherit
 
@@ -21,7 +36,7 @@ jobs:
     uses: ./.github/workflows/verify_predictions.yml
     secrets: inherit
 
-  # Step 2: AI 分析 (仅当数据同步成功后执行)
+  # Step 3: AI 分析 (仅当数据同步成功后执行)
   analyze:
     needs: sync
     if: success()

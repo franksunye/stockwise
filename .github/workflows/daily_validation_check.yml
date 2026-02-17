@@ -1,7 +1,8 @@
 name: Daily Validation Check (Smart)
 
 # 职责：每日收盘后校验 AI 预测准确度并发送成功战报
-# 触发：北京时间 16:30 (M-F)
+# 触发：北京时间 17:30 (M-F)
+# 安全：通过 Trading Day Gate 闸门确保仅在交易日执行
 
 on:
   schedule:
@@ -9,9 +10,29 @@ on:
   workflow_dispatch:
 
 jobs:
+  # Step 0: Trading Day Gate (仅 schedule 触发时检查)
+  gate:
+    if: github.event_name == 'schedule'
+    uses: ./.github/workflows/trading_day_gate.yml
+    with:
+      market: 'ALL'
+    secrets: inherit
+
+  # Step 1: Validation Check
   validation-check:
+    needs: [gate]
+    if: |
+      always() && (
+        github.event_name == 'workflow_dispatch' ||
+        needs.gate.outputs.should_run == 'true'
+      )
     runs-on: ubuntu-latest
     steps:
+      - name: Log Gate Decision
+        if: github.event_name == 'schedule'
+        run: |
+          echo "📅 Trading Day Gate: ${{ needs.gate.outputs.reason }}"
+
       - name: Checkout Code
         uses: actions/checkout@v4
 

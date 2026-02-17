@@ -1,0 +1,108 @@
+name: Trading Day Gate
+
+# 可复用的"交易日闸门"工作流
+# 职责：在被调度触发时，检查今天是否为交易日。
+#       如果不是，输出 should_run=false，所有下游 Job 将跳过。
+# 设计：统一解决"假期仍执行 Job"的问题，避免每个 Workflow 重复实现日历逻辑。
+
+on:
+  workflow_call:
+    inputs:
+      market:
+        description: '目标市场 (CN / HK / ALL). ALL = CN 和 HK 都休市才跳过.'
+        type: string
+        required: false
+        default: 'ALL'
+      force:
+        description: '强制放行 (跳过交易日检查)'
+        type: boolean
+        required: false
+        default: false
+    outputs:
+      should_run:
+        description: '今天是否应该执行（true 或 false）'
+        value: ${{ jobs.check.outputs.should_run }}
+      reason:
+        description: '判定原因说明'
+        value: ${{ jobs.check.outputs.reason }}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.gate.outputs.should_run }}
+      reason: ${{ steps.gate.outputs.reason }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Check Trading Day
+        id: gate
+        env:
+          TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+        run: |
+          python -c "
+          import sys, os
+          sys.path.insert(0, os.path.join(os.getcwd(), 'backend'))
+          from datetime import datetime
+          from config import BEIJING_TZ
+          from trading_calendar import is_market_closed
+
+          market = '${{ inputs.market }}'
+          force = '${{ inputs.force }}' == 'true'
+
+          now = datetime.now(BEIJING_TZ)
+          today_str = now.strftime('%Y-%m-%d (%A)')
+
+          if force:
+              print(f'🟢 FORCE mode: bypassing gate. Today={today_str}')
+              print('should_run=true', flush=True)
+              print('reason=Force mode enabled', flush=True)
+              with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+                  f.write('should_run=true\n')
+                  f.write(f'reason=Force mode enabled ({today_str})\n')
+              sys.exit(0)
+
+          if market == 'ALL':
+              cn_closed = is_market_closed(now, 'CN')
+              hk_closed = is_market_closed(now, 'HK')
+              all_closed = cn_closed and hk_closed
+              if all_closed:
+                  reason = f'{today_str}: CN={\"休市\" if cn_closed else \"开市\"}, HK={\"休市\" if hk_closed else \"开市\"} → 全部休市'
+                  print(f'🔴 {reason}')
+                  with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+                      f.write('should_run=false\n')
+                      f.write(f'reason={reason}\n')
+              else:
+                  reason = f'{today_str}: CN={\"休市\" if cn_closed else \"开市\"}, HK={\"休市\" if hk_closed else \"开市\"} → 部分开市'
+                  print(f'🟢 {reason}')
+                  with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+                      f.write('should_run=true\n')
+                      f.write(f'reason={reason}\n')
+          else:
+              closed = is_market_closed(now, market)
+              if closed:
+                  reason = f'{today_str}: {market} 市场休市'
+                  print(f'🔴 {reason}')
+                  with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+                      f.write('should_run=false\n')
+                      f.write(f'reason={reason}\n')
+              else:
+                  reason = f'{today_str}: {market} 市场开市'
+                  print(f'🟢 {reason}')
+                  with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+                      f.write('should_run=true\n')
+                      f.write(f'reason={reason}\n')
+          "
