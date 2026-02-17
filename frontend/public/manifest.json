@@ -1,28 +1,72 @@
 {
     "name": "ZISO AI",
     "short_name": "ZISO AI",
-    "description": "投资决策智能体",
+    "description": "极致简单的 AI 炒股决策工具，实时监控、深度复盘、智能决策。",
     "start_url": "/",
+    "scope": "/",
     "display": "standalone",
+    "orientation": "portrait",
     "background_color": "#050508",
     "theme_color": "#6366f1",
+    "lang": "zh-CN",
+    "categories": [
+        "finance",
+        "business",
+        "productivity"
+    ],
     "icons": [
         {
             "src": "/logo.png",
             "sizes": "192x192",
             "type": "image/png",
-            "purpose": "any maskable"
+            "purpose": "any"
+        },
+        {
+            "src": "/logo.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
         },
         {
             "src": "/logo.png",
             "sizes": "512x512",
             "type": "image/png",
-            "purpose": "any maskable"
+            "purpose": "any"
         },
         {
             "src": "/logo.png",
-            "sizes": "1024x1024",
-            "type": "image/png"
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ],
+    "screenshots": [
+        {
+            "src": "/og-image.png",
+            "sizes": "1200x630",
+            "type": "image/png",
+            "form_factor": "wide",
+            "label": "ZISO AI 全局概览"
+        },
+        {
+            "src": "/dashboard-preview.png",
+            "sizes": "750x1334",
+            "type": "image/png",
+            "form_factor": "narrow",
+            "label": "ZISO AI 移动端仪表盘"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "查看仪表盘",
+            "short_name": "仪表盘",
+            "url": "/",
+            "icons": [
+                {
+                    "src": "/logo.png",
+                    "sizes": "192x192"
+                }
+            ]
         }
     ]
 }

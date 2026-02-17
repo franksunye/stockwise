@@ -13,6 +13,8 @@ import { SystemSync } from '@/components/SystemSync';
 import { PerformanceOptimizer } from '@/components/PerformanceOptimizer';
 import { ReferralTracker } from '@/components/ReferralTracker';
 import { BadgeManager } from '@/components/BadgeManager';
+import { ServiceWorkerRegistrar } from '@/components/ServiceWorkerRegistrar';
+import { InstallGuide } from '@/components/InstallGuide';
 import { UserProfileProvider, type Tier } from '@/hooks/useUserProfile';
 
 export default function DashboardLayout({
@@ -28,6 +30,8 @@ export default function DashboardLayout({
       <PerformanceOptimizer />
       <ReferralTracker />
       <BadgeManager />
+      <ServiceWorkerRegistrar />
+      <InstallGuide />
     </>
   );
 

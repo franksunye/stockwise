@@ -7,6 +7,64 @@ export const isAndroid = (): boolean => {
     return /Android/i.test(navigator.userAgent);
 };
 
+/**
+ * 检测是否在微信/企业微信内置浏览器中
+ */
+export const isWeChat = (): boolean => {
+    if (typeof window === 'undefined') return false;
+    const ua = navigator.userAgent;
+    return /MicroMessenger/i.test(ua) || /WxWork/i.test(ua);
+};
+
+/**
+ * 检测是否已经以 PWA standalone 模式运行（已添加到桌面）
+ */
+export const isStandalone = (): boolean => {
+    if (typeof window === 'undefined') return false;
+    return (
+        window.matchMedia('(display-mode: standalone)').matches ||
+        (navigator as unknown as Record<string, unknown>).standalone === true
+    );
+};
+
+/**
+ * 检测是否在 iOS Safari 中（非 standalone，非 Chrome/Edge/Firefox on iOS）
+ */
+export const isIOSSafari = (): boolean => {
+    if (typeof window === 'undefined') return false;
+    const ua = navigator.userAgent;
+    const isIOSDevice = /iPhone|iPad|iPod/i.test(ua);
+    const isSafari = /Safari/i.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS/i.test(ua);
+    return isIOSDevice && isSafari && !isWeChat();
+};
+
+/**
+ * 检测是否在 Android Chrome/Edge 中（支持 beforeinstallprompt 的浏览器）
+ */
+export const isAndroidChromium = (): boolean => {
+    if (typeof window === 'undefined') return false;
+    const ua = navigator.userAgent;
+    return isAndroid() && /Chrome|Edg/i.test(ua) && !/MicroMessenger|UCBrowser|HuaweiBrowser|MiuiBrowser|MQQBrowser|QQBrowser/i.test(ua);
+};
+
+/**
+ * 获取中国市场的浏览器品牌标识
+ * 返回 null 表示无法识别为主流国产浏览器
+ */
+export type CNBrowserBrand = 'huawei' | 'xiaomi' | 'uc' | 'quark' | 'qq' | 'sogou' | 'baidu' | null;
+export const getCNBrowserBrand = (): CNBrowserBrand => {
+    if (typeof window === 'undefined') return null;
+    const ua = navigator.userAgent;
+    if (/HuaweiBrowser/i.test(ua)) return 'huawei';
+    if (/MiuiBrowser/i.test(ua)) return 'xiaomi';
+    if (/UCBrowser/i.test(ua)) return 'uc';
+    if (/Quark/i.test(ua)) return 'quark';
+    if (/MQQBrowser|QQBrowser/i.test(ua)) return 'qq';
+    if (/SogouMobileBrowser/i.test(ua)) return 'sogou';
+    if (/baiduboxapp|baidubrowser/i.test(ua)) return 'baidu';
+    return null;
+};
+
 export const isIOS = (): boolean => {
     if (typeof window === 'undefined') return false;
     return /iPhone|iPad|iPod/i.test(navigator.userAgent);
