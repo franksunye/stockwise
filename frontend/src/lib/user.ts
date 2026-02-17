@@ -117,7 +117,7 @@ export async function getCurrentUser(): Promise<User> {
     // 调用后端 API 注册用户 (带超时控制)
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 8000);
+      const timeoutId = setTimeout(() => controller.abort(), 20000); // Increased from 8s to 20s
 
       await fetch('/api/user/register', {
         method: 'POST',

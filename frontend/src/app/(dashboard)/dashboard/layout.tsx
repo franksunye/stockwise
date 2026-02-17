@@ -99,7 +99,7 @@ export default function DashboardLayout({
 
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000);
+        const timeoutId = setTimeout(() => controller.abort(), 20000); // Increased from 8s to 20s
 
         const res = await fetch('/api/user/profile', {
           method: 'POST',
