@@ -25,12 +25,33 @@ except ImportError:
     from engine.task_logger import get_task_logger
 
 
-def generate_morning_calls(dry_run=False, target_date=None):
+def generate_morning_calls(dry_run=False, target_date=None, force=False):
     """
     Generate and send personalized morning calls for all active users.
     """
     today_str = target_date or datetime.now(BEIJING_TZ).strftime("%Y-%m-%d")
-    logger.info(f"🌅 Starting Daily Morning Call generation for {today_str} (Dry Run: {dry_run})")
+    
+    # --- Defense-in-depth: Python-level Trading Day Guard ---
+    if not force:
+        try:
+            # Lazy import to avoid circular dependency
+            import sys
+            sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+            from trading_calendar import is_market_closed
+            
+            check_date = datetime.strptime(today_str, "%Y-%m-%d")
+            # Morning Call usually targets opening markets. If CN is closed, no morning call.
+            # Assuming Morning Call is primarily for A-share/HK open.
+            if is_market_closed(check_date, "CN") and is_market_closed(check_date, "HK"):
+                logger.info(f"📅 [TradingDayGuard] {today_str} 为全市场休市日，跳过早报推送。")
+                return
+        except ImportError:
+            # Fallback if trading_calendar not found (e.g. strict path issues)
+            logger.warning("⚠️ [TradingDayGuard] Could not import trading_calendar, skipping check.")
+        except Exception as e:
+            logger.warning(f"⚠️ [TradingDayGuard] Check failed: {e}, proceeding.")
+
+    logger.info(f"🌅 Starting Daily Morning Call generation for {today_str} (Dry Run: {dry_run}, Force: {force})")
     
     t_logger = get_task_logger("news_desk", "morning_call")
     t_logger.start("Daily Morning Call", "delivery", dimensions={})
@@ -114,6 +135,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--dry-run", action="store_true", help="Simulate without sending")
     parser.add_argument("--date", type=str, help="Specify date in YYYY-MM-DD format")
+    parser.add_argument("--force", action="store_true", help="Force execution on holidays")
     args = parser.parse_args()
     
-    generate_morning_calls(dry_run=args.dry_run, target_date=args.date)
+    generate_morning_calls(dry_run=args.dry_run, target_date=args.date, force=args.force)

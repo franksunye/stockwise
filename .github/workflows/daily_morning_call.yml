@@ -19,9 +19,28 @@ on:
         default: false
 
 jobs:
+  # Step 0: Trading Day Gate (仅 schedule 触发时检查)
+  gate:
+    if: github.event_name == 'schedule'
+    uses: ./.github/workflows/trading_day_gate.yml
+    with:
+      market: 'ALL'
+    secrets: inherit
+
   morning-call:
+    needs: [gate]
+    if: |
+      always() && (
+        github.event_name == 'workflow_dispatch' ||
+        needs.gate.outputs.should_run == 'true'
+      )
     runs-on: ubuntu-latest
     steps:
+      - name: Log Gate Decision
+        if: github.event_name == 'schedule'
+        run: |
+          echo "📅 Trading Day Gate: ${{ needs.gate.outputs.reason }}"
+
       - name: Checkout Code
         uses: actions/checkout@v4
 
