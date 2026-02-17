@@ -112,22 +112,37 @@ export function useTikTokScroll(stocks: StockData[], options?: UseTikTokScrollOp
 
     // 处理从股票池跳转过来的定位逻辑
     useEffect(() => {
-        if (targetSymbol && stocks.length > 0 && scrollRef.current && !hasAutoScrolled.current) {
-            const index = stocks.findIndex(s => s.symbol === targetSymbol);
+        const container = scrollRef.current;
+        if (targetSymbol && stocks.length > 0 && container && !hasAutoScrolled.current) {
+            const index = stocks.findIndex(s => s.symbol === targetSymbol || s.symbol.endsWith(targetSymbol));
             if (index !== -1) {
                 hasAutoScrolled.current = true;
+
+                // 1. 同步更新索引，确保背景色等 UI 状态立即对齐
                 setCurrentIndex(index);
-                const container = scrollRef.current;
+
+                // 2. 立即执行物理滚动，消除 setTimeout 导致的视觉延迟
+                // 在极少数情况下 clientWidth 可能由于渲染未完成为 0，添加兜底逻辑
+                const width = container.clientWidth || window.innerWidth;
+                container.scrollTo({
+                    left: index * width,
+                    behavior: 'instant'
+                });
+
+                // 3. 稳健性兜底：针对某些浏览器内核可能的渲染延迟，在下一帧再次校准
                 const timer = setTimeout(() => {
-                    container.scrollTo({
-                        left: index * container.clientWidth,
-                        behavior: 'instant'
-                    });
-                }, 50);
+                    if (container.scrollLeft !== index * container.clientWidth) {
+                        container.scrollTo({
+                            left: index * container.clientWidth,
+                            behavior: 'instant'
+                        });
+                    }
+                }, 0);
+
                 return () => clearTimeout(timer);
             }
         }
-    }, [targetSymbol, stocks.length, stocks]);
+    }, [targetSymbol, stocks.filter(s => s.symbol).length, stocks]);
 
     return {
         currentIndex,

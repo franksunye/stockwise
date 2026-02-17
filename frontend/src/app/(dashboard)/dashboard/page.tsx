@@ -78,19 +78,6 @@ function DashboardContent() {
     }
   }, []);
 
-  // 深度链接: 从 URL 参数滚动到指定股票 (通知点击跳转)
-  useEffect(() => {
-    if (targetSymbol && stocks.length > 0 && scrollRef.current && !hasScrolledToTarget.current) {
-      const targetIndex = stocks.findIndex(s => s.symbol === targetSymbol || s.symbol.endsWith(targetSymbol));
-      if (targetIndex >= 0) {
-        // 滚动到目标股票
-        const cardWidth = scrollRef.current.offsetWidth;
-        scrollRef.current.scrollTo({ left: targetIndex * cardWidth, behavior: 'smooth' });
-        hasScrolledToTarget.current = true;
-      }
-    }
-  }, [targetSymbol, stocks, scrollRef]);
-
   // 深度链接: 从 URL 参数打开简报
   useEffect(() => {
     if (searchParams.get('brief') === 'true') {
