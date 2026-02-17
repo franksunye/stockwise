@@ -38,7 +38,7 @@ export const pricingPlans: PricingPlan[] = [
             '投资者共学社区权限',
         ],
         cta: '立即开始',
-        href: '/dashboard',
+        href: process.env.NEXT_PUBLIC_APP_URL || 'https://app.ziso.cc',
         highlight: false,
         icon: Zap,
         color: 'slate',
