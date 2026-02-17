@@ -38,6 +38,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
   const referralAlias = profile?.referralAlias || null;
   const referralCount = profile?.referralCount || 0;
   const recentTransactions = profile?.recentTransactions || [];
+  const hasStripeCustomer = profile?.hasStripeCustomer || false;
   
   // UI States
   const [redeemCode, setRedeemCode] = useState('');
@@ -318,7 +319,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
               <AnimatePresence mode="wait">
                 {showPricing ? (
                   <motion.div key="pricing" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.25 }}>
-                    <UserPricingView currentTier={tier} />
+                    <UserPricingView currentTier={tier} hasStripeCustomer={hasStripeCustomer} />
                   </motion.div>
                 ) : showIdentityCenter ? (
                   <motion.div key="identity" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.25 }} className="space-y-6">

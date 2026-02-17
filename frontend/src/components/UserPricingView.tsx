@@ -8,10 +8,12 @@ import { pricingPlans } from '@/lib/pricing-data';
 
 interface Props {
   currentTier: string;
+  hasStripeCustomer?: boolean;
 }
 
-export function UserPricingView({ currentTier }: Props) {
+export function UserPricingView({ currentTier, hasStripeCustomer }: Props) {
   const [loadingPriceId, setLoadingPriceId] = useState<string | null>(null);
+  const [loadingPortal, setLoadingPortal] = useState(false);
 
   const handleUpgrade = async (priceId: string) => {
     const userId = getCurrentUserId();
@@ -46,9 +48,7 @@ export function UserPricingView({ currentTier }: Props) {
     const userId = getCurrentUserId();
     if (!userId) return;
     
-    const start = confirm('即将跳转到 Stripe 订阅管理门户？');
-    if (!start) return;
-
+    setLoadingPortal(true);
     try {
       const response = await fetch('/api/billing/portal', {
         method: 'POST',
@@ -64,6 +64,8 @@ export function UserPricingView({ currentTier }: Props) {
     } catch (err) {
       console.error('Portal error:', err);
       alert('系统繁忙，请稍后再试');
+    } finally {
+      setLoadingPortal(false);
     }
   };
 
@@ -81,6 +83,7 @@ export function UserPricingView({ currentTier }: Props) {
       {pricingPlans.map((plan) => {
         const isCurrent = (plan.enName.toLowerCase() === 'free' && currentTier === 'free') || 
                           (plan.enName.toLowerCase() === 'pro' && currentTier === 'pro');
+        const isPro = currentTier === 'pro';
         
         return (
           <div 
@@ -125,41 +128,56 @@ export function UserPricingView({ currentTier }: Props) {
             </ul>
 
             {/* Actions */}
-            {isCurrent && plan.enName === 'Pro' ? (
-              <button 
-                onClick={handleManageSubscription}
-                className="w-full py-3 rounded-xl bg-white/5 border border-white/10 text-white text-xs font-bold flex items-center justify-center gap-2"
-              >
-                管理订阅 / 续费
-              </button>
-            ) : isCurrent ? (
-              <button disabled className="w-full py-3 rounded-xl bg-white/5 border border-white/5 text-slate-500 text-xs font-bold cursor-default">
-                当前订阅
-              </button>
-            ) : plan.priceId ? (
-              <div className="flex flex-col gap-2">
-                <button
-                  onClick={() => handleUpgrade(plan.priceId!)}
-                  disabled={!!loadingPriceId}
-                  className="w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-95 transition-all text-white text-xs font-black italic flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/20"
+            <div className="flex flex-col gap-2">
+              {/* Show Manage Subscription ONLY if already Pro AND is the Pro plan card AND has Stripe Customer ID */}
+              {isPro && plan.enName === 'Pro' && hasStripeCustomer && (
+                <button 
+                  onClick={handleManageSubscription}
+                  disabled={loadingPortal}
+                  className="w-full py-3 rounded-xl bg-white/5 border border-white/10 text-white text-[10px] font-bold flex items-center justify-center gap-2 mb-1"
                 >
-                  {loadingPriceId === plan.priceId ? '处理中...' : (plan.priceIdAnnual ? '按月订阅' : plan.cta)}
-                  {!loadingPriceId && <ChevronRight size={14} />}
+                  {loadingPortal ? '正在跳转...' : '管理现有订阅 / 取消'}
                 </button>
-                {plan.priceIdAnnual && (
+              )}
+
+              {isCurrent && plan.enName === 'Free' ? (
+                <button disabled className="w-full py-3 rounded-xl bg-white/5 border border-white/5 text-slate-500 text-xs font-bold cursor-default">
+                  当前账户状态
+                </button>
+              ) : plan.priceId ? (
+                <>
                   <button
-                    onClick={() => handleUpgrade(plan.priceIdAnnual!)}
+                    onClick={() => handleUpgrade(plan.priceId!)}
                     disabled={!!loadingPriceId}
-                    className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 active:scale-95 transition-all text-white text-xs font-black italic flex items-center justify-center gap-2 shadow-lg shadow-orange-500/20"
+                    className="w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-95 transition-all text-white text-xs font-black italic flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/20"
                   >
-                    <div className="flex flex-col items-center leading-none gap-0.5">
-                      <span>按年订阅 (¥299/年)</span>
-                      <span className="text-[8px] opacity-80 uppercase tracking-wider font-bold">节省约 17%</span>
-                    </div>
+                    {loadingPriceId === plan.priceId 
+                      ? '处理中...' 
+                      : (plan.priceIdAnnual ? (isPro ? '按月续费' : '按月订阅') : plan.cta)
+                    }
+                    {!loadingPriceId && <ChevronRight size={14} />}
                   </button>
-                )}
-              </div>
-            ) : null}
+                  {plan.priceIdAnnual && (
+                    <button
+                      onClick={() => handleUpgrade(plan.priceIdAnnual!)}
+                      disabled={!!loadingPriceId}
+                      className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 active:scale-95 transition-all text-white text-xs font-black italic flex items-center justify-center gap-2 shadow-lg shadow-orange-500/20"
+                    >
+                      <div className="flex flex-col items-center leading-none gap-0.5">
+                        <span>{isPro ? '按年续费 (¥299/年)' : '按年订阅 (¥299/年)'}</span>
+                        <span className="text-[8px] opacity-80 uppercase tracking-wider font-bold">
+                          {isPro ? '延长会员有效期' : '节省约 17%'}
+                        </span>
+                      </div>
+                    </button>
+                  )}
+                </>
+              ) : (
+                <button className="w-full py-3 rounded-xl bg-white/5 border border-white/10 text-white text-xs font-bold flex items-center justify-center gap-2">
+                  {plan.cta || '立即开始'}
+                </button>
+              )}
+            </div>
           </div>
         );
       })}
