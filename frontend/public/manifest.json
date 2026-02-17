@@ -30,18 +30,18 @@
     ],
     "screenshots": [
         {
-            "src": "/og-image.png",
-            "sizes": "1024x1024",
+            "src": "/images/landing/prediction-card-detail.png",
+            "sizes": "1125x1125",
             "type": "image/png",
             "form_factor": "wide",
-            "label": "ZISO AI 全局概览"
+            "label": "ZISO AI 策略深度分析"
         },
         {
-            "src": "/dashboard-preview.png",
-            "sizes": "1024x1024",
+            "src": "/images/landing/main-dashboard.png",
+            "sizes": "1125x2436",
             "type": "image/png",
             "form_factor": "narrow",
-            "label": "ZISO AI 移动端仪表盘"
+            "label": "ZISO AI 智能仪表盘"
         }
     ],
     "shortcuts": [
