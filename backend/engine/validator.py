@@ -57,7 +57,6 @@ def verify_all_pending(force: bool = False, target_date: str = None):
             
             # --- 2. Calculate Window Dates ---
             # Window starts at target_date (T+1 relative to prediction date T)
-            # We want T+1, T+2, T+3
             start_date = t0_date
             if not is_trading_day(start_date, market=market):
                 start_date = get_next_trading_day_str(start_date, market=market)
@@ -69,11 +68,6 @@ def verify_all_pending(force: bool = False, target_date: str = None):
                 window_dates.append(current_t)
             
             # --- 3. Fetch Price Data for Window ---
-            # Get T0 price (for baseline comparison)
-            # Actually baseline is typically the close of the PREDICTION date (T)
-            # but our current 'actual_change' in daily_prices is T relative to T-1.
-            # So T+1's change_percent is (T+1_close - T_close) / T_close.
-            
             price_map = {}
             for d in window_dates:
                 p_row = cursor.execute("SELECT change_percent, close FROM daily_prices WHERE symbol=? AND date=?", (symbol, d)).fetchone()
@@ -86,19 +80,12 @@ def verify_all_pending(force: bool = False, target_date: str = None):
             # --- 4. Evaluate Trajectory ---
             trajectory = []
             cumulative_change = 0.0
-            # Initialize with 0 instead of extreme values to capture small movements correctly
             max_favorable = 0.0 
-            
-            final_status = 'Verifying'
             days_evaluated = 0
             
             for d in window_dates:
                 if d in price_map:
                     day_change = price_map[d]['change']
-                    # Simple additive cumulative change for the window
-                    # Professional way: (1 + c1)(1 + c2) - 1
-                    # But for 3 days 1% + 1% is approx 2%.
-                    # Since we store individual changes, we can be flexible.
                     cumulative_change += day_change
                     days_evaluated += 1
                     
@@ -107,7 +94,6 @@ def verify_all_pending(force: bool = False, target_date: str = None):
                     elif signal == 'Short':
                         max_favorable = min(max_favorable, cumulative_change)
                     elif signal == 'Side':
-                        # For Side, track the largest absolute deviation
                         if abs(cumulative_change) > abs(max_favorable):
                             max_favorable = cumulative_change
                     
@@ -117,34 +103,24 @@ def verify_all_pending(force: bool = False, target_date: str = None):
                         "cum_change": round(cumulative_change, 2)
                     })
                 else:
-                    # Break if we hit a date with no data yet
                     break
 
             # --- 5. Determine Final Verdict ---
-            # Logic: 
-            # Long: Peak >= 1.5% OR Final Cumulative > 0
-            # Short: Peak <= -1.5% OR Final Cumulative < 0
-            # Side: all days within +/- 1.5%
-            
             is_final = (days_evaluated == VALIDATION_WINDOW)
             verdict = 'Verifying'
             
             if signal == 'Long':
-                # Simplified: Correct if price went up on T+1
                 if cumulative_change > 0:
                     verdict = 'Correct'
                 elif is_final:
                     verdict = 'Incorrect'
             elif signal == 'Short':
-                # Simplified: Correct if price went down on T+1
                 if cumulative_change < 0:
                     verdict = 'Correct'
                 elif is_final:
                     verdict = 'Incorrect'
             elif signal == 'Side':
                 if is_final:
-                    # Side is correct if it stayed flat or dropped (avoided loss/stayed out of noise)
-                    # Incorrect only if it rallied significantly (missed opportunity)
                     verdict = 'Correct' if cumulative_change <= NOISE_THRESHOLD else 'Incorrect'
             
             # --- 6. Update Database ---
@@ -155,7 +131,6 @@ def verify_all_pending(force: bool = False, target_date: str = None):
                 "max_perf": round(max_favorable, 2) if abs(max_favorable) < 500 else 0
             }
             
-            # Legacy field: actual_change (store T+1 change for backward compatibility)
             t1_change = trajectory[0]['change'] if trajectory else 0.0
 
             cursor.execute("""
@@ -175,9 +150,16 @@ def verify_all_pending(force: bool = False, target_date: str = None):
         conn.commit()
         logger.info(f"✨ Validation Complete: {validated_count} predictions updated.")
         
+        return {
+            "validated_count": validated_count,
+            "target_date_filter": target_date or "Recent 10 Days",
+            "condition": "Pending/Verifying" if not force else "All"
+        }
+        
     except Exception as e:
         logger.error(f"❌ Batch verification failed: {e}")
         import traceback
         traceback.print_exc()
+        raise e
     finally:
         conn.close()

@@ -191,20 +191,15 @@ def run_ai_analysis_backfill(
         total_success += success
     
     conn.close()
-    duration = time.time() - start_time
+    duration = round(time.time() - start_time, 1)
     
-    logger.info(f"\n✅ 回填完成!")
-    logger.info(f"   成功: {total_success} 条")
-    logger.info(f"   跳过: {total_skipped} 天 (非交易日)")
-    logger.info(f"   耗时: {duration:.1f}s")
-    
-    # 发送通知
-    report = f"### 📅 StockWise: AI Backfill\n"
-    report += f"> **Status**: ✅ 完成\n"
-    report += f"- **日期**: {target_dates[0] if len(target_dates)==1 else f'{target_dates[0]} ~ {target_dates[-1]}'}\n"
-    report += f"- **成功**: {total_success} 条分析\n"
-    report += f"- **耗时**: {duration:.1f}s"
-    send_wecom_notification(report)
+    # [Refactored] Use JobGuard to handle notification
+    return {
+        "success": total_success,
+        "skipped_days": total_skipped,
+        "period": f"{target_dates[0]} ~ {target_dates[-1]}" if len(target_dates) > 1 else target_dates[0],
+        "duration": duration
+    }
 
 
 def _analyze_stocks_for_date(conn, stocks: list, date_str: str, model_filter: str = None, force: bool = False, tracker=None) -> int:

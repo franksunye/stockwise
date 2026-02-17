@@ -67,6 +67,7 @@ def get_pinyin_info(name: str):
     except:
         return "", ""
 
+@retry_request(max_retries=3, delay=1.0)
 def send_wecom_notification(content: str, mentioned_mobile_list: list = None):
     """
     发送企业微信机器人通知
@@ -74,9 +75,13 @@ def send_wecom_notification(content: str, mentioned_mobile_list: list = None):
     :param mentioned_mobile_list: 需要 @ 的手机号列表 (["138...", "@all"])
     """
     if not WECOM_ROBOT_KEY:
+        logger.warning("⚠️ WECOM_ROBOT_KEY not found in environment. Notification skipped.")
         return
     
-    url = f"https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key={WECOM_ROBOT_KEY}"
+    if WECOM_ROBOT_KEY.startswith("http"):
+        url = WECOM_ROBOT_KEY
+    else:
+        url = f"https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key={WECOM_ROBOT_KEY}"
     
     payload = {
         "msgtype": "markdown",

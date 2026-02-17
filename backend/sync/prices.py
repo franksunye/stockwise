@@ -368,14 +368,13 @@ def run_full_sync(market_filter: str = None, force_full: bool = False):
                 logger.info(f"   ⏩ 进度: {i + 1}/{len(target_stocks)} ...")
     
     duration = time.time() - start_time
-    market_label = f" ({market_filter})" if market_filter else ""
-    periods_msg = "Periods: Daily Only"
-    if sync_weekly: periods_msg = "Periods: Daily(D), Weekly(W), Monthly(M) ✅"
-    
-    report = f"### 📊 StockWise: Daily Sync{market_label}\n"
-    report += f"> **Status**: {'✅' if not errors else '⚠️'}\n"
-    report += f"- **Target**: {len(target_stocks)} Stocks\n"
-    report += f"- **Strategy**: {mode_label}\n"
-    report += f"- **Processed**: {success_count} Success, {len(errors)} Errors\n"
-    report += f"- **处理耗时**: {duration:.1f}s"
-    send_wecom_notification(report)
+    # [Refactored] Use JobGuard to send notification
+    return {
+        "success_count": success_count,
+        "error_count": len(errors),
+        "target_count": len(target_stocks),
+        "strategy": mode_label,
+        "is_friday": is_friday,
+        "sync_weekly": sync_weekly,
+        "errors": errors[:5] if errors else None # Only show first 5 errors in summary
+    }

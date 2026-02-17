@@ -220,63 +220,41 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool =
         notif_manager.flush()
         logger.info("📢 [Runner] Smart notification flush completed")
             
-    duration = time.time() - start_time
-    logger.info(f"✅ AI 分析完成! 成功: {success_count}/{len(targets)} (AI: {ai_count}, Rule: {rule_count}), 耗时: {duration:.1f}s")
+    duration = round(time.time() - start_time, 1)
     
-    # 发送企微通知
-    # 发送企微通知
-    if success_count == len(targets):
-        status = "✅ SUCCESS"
-    elif success_count > 0:
-        status = "⚠️ PARTIAL"
-    else:
-        status = "❌ FAILED"
-        
-    market_label = f"({market_filter})" if market_filter else ""
-    try:
-        from backend.notification_templates import NotificationTemplates
-    except ImportError:
-        from notification_templates import NotificationTemplates
+    # [Refactored] Gather stats for JobGuard
+    stats = {
+        "total": len(targets),
+        "success": success_count,
+        "ai_models": ai_count,
+        "rule_engine": rule_count,
+        "failed": len(targets) - success_count,
+        "duration": duration
+    }
 
-    title, body = NotificationTemplates.render(
-        "admin_task_report",
-        task_title=f"AI Analysis {market_label}",
-        status=status,
-        total=len(targets),
-        success=success_count,
-        ai=ai_count,
-        rule=rule_count,
-        failed=len(targets) - success_count,
-        duration=round(duration, 1)
-    )
-    # Append Data Health Diagnostics
+    # Add Data Health Diagnostics to stats
     try:
         from backend.context.provider import MarketContextProvider
-        stats = MarketContextProvider().get_diagnostics()
+        diag = MarketContextProvider().get_diagnostics()
         
-        warnings = []
-        if stats.get('macro_attempts', 0) > 0 and stats.get('macro_success', 0) == 0:
-            warnings.append("⚠️ Macro Data Unavailable")
+        health_warnings = []
+        if diag.get('macro_attempts', 0) > 0 and diag.get('macro_success', 0) == 0:
+            health_warnings.append("Macro Data Unavailable")
         
-        flow_attempts = stats.get('stock_flow_attempts', 0)
-        flow_success = stats.get('stock_flow_success', 0)
+        flow_attempts = diag.get('stock_flow_attempts', 0)
+        flow_success = diag.get('stock_flow_success', 0)
         if flow_attempts > 0:
             fail_rate = (flow_attempts - flow_success) / flow_attempts
             if fail_rate > 0.5:
-                warnings.append(f"⚠️ High Flow Data Failure ({fail_rate:.0%})")
+                health_warnings.append(f"High Flow Data Failure ({fail_rate:.0%})")
         
-        if warnings:
-            body += "\n\n**Data Health Issues:**\n" + "\n".join(f"- {w}" for w in warnings)
-            title = title.replace("✅", "⚠️") if "✅" in title else title
+        if health_warnings:
+            stats["data_health"] = ", ".join(health_warnings)
             
     except Exception as stat_e:
-        logger.warning(f"Failed to append diagnostics: {stat_e}")
-
-    send_wecom_notification(title + body)
-    
-    # [REMOVED] Old broadcast notification
-    # Individual users are now notified as their watchlists complete
-    # See user_tracker.py::notify_user_prediction_updated()
+        logger.warning(f"Failed to gather diagnostics: {stat_e}")
 
     # 最后关闭连接
     conn.close()
+    
+    return stats

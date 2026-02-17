@@ -51,33 +51,31 @@ class TaskLogger:
         self._log(status="success", message=message, metadata=metadata, end=True)
         if notify:
             from backend.utils import send_wecom_notification
-            icon = "✅"
-            # Success: No @ mention, clean info
-            send_wecom_notification(f"{icon} [{self.task_name}] Task Completed\n> {message or ''}")
+            content = f"### ✅ StockWise: {self.task_name}\n"
+            content += f"> **Status**: Success\n"
+            if message:
+                content += f"- **Message**: {message}\n"
+            if metadata:
+                for k, v in metadata.items():
+                    content += f"- **{str(k).title()}**: {v}\n"
+            send_wecom_notification(content)
 
     def fail(self, message: str = None, metadata: dict = None, notify: bool = True, channel_alert: bool = True, rerun_workflow: str = None):
-        """
-        Log task failure.
-        :param notify: Send notification? (Default True for failures)
-        :param channel_alert: If True, will @all or @admin.
-        :param rerun_workflow: Filename of the workflow (e.g. 'daily_morning_call.yml') to generate link.
-        """
+        """Log task failure."""
         self._log(status="failed", message=message, metadata=metadata, end=True)
         if notify:
             from backend.utils import send_wecom_notification
-            icon = "❌"
+            content = f"### ❌ StockWise: {self.task_name} FAILED\n"
+            content += f"> **Status**: Failed\n"
+            content += f"- **Error**: `{message or 'Unknown Error'}`"
             
-            content = f"{icon} [{self.task_name}] Task Failed\n> {message or ''}"
             mentions = None
-            
             if channel_alert:
-                # Use configured admin mobiles if available, otherwise fallback to @all
                 from backend.config import ADMIN_MOBILES
                 mentions = ADMIN_MOBILES if ADMIN_MOBILES else ["@all"]
                 
                 if rerun_workflow:
                     url = f"{self.REPO_ACTIONS_URL}/{rerun_workflow}"
-                    # Add clickable link for operations
                     content += f"\n\n🔗 [运维重跑]({url})"
             
             send_wecom_notification(content, mentioned_mobile_list=mentions)

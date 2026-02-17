@@ -492,13 +492,10 @@ async def run_daily_pipeline(date_str: str = None, force: bool = False, target_t
     if not date_str:
         date_str = datetime.now().strftime("%Y-%m-%d")
     
-    tier_info = f" ({target_tier} only)" if target_tier else ""
-    logger.info(f"🎬 Starting Daily Brief Pipeline for {date_str}{tier_info} (Force={force})")
+    tier_label = f" ({target_tier})" if target_tier else ""
     
-    t_logger = get_task_logger("news_desk", "brief_gen")
-    t_logger.start(f"Daily Briefing{tier_info}", "delivery", dimensions={"tier": target_tier or "all"})
-
-    try:
+    from backend.job_guard import JobGuard
+    with JobGuard(f"Daily Briefing{tier_label}", channel_alert=True) as job:
         # 1. Phase 1: Analyze Stocks
         await generate_stock_briefs_batch(date_str, force=force, target_tier=target_tier)
     
@@ -506,7 +503,6 @@ async def run_daily_pipeline(date_str: str = None, force: bool = False, target_t
         conn = get_connection()
         try:
             cursor = conn.cursor()
-            # If target_tier is set, only process users of that tier
             if target_tier:
                 cursor.execute("SELECT DISTINCT u.user_id FROM users u JOIN user_watchlist w ON u.user_id = w.user_id WHERE u.subscription_tier = ?", (target_tier,))
             else:
@@ -521,46 +517,25 @@ async def run_daily_pipeline(date_str: str = None, force: bool = False, target_t
             for user_id in users:
                 try:
                     await assemble_user_brief(user_id, date_str)
-                    logger.info(f"   - Prepared brief for {user_id}")
-                    
-                    # [NEW] Notify user immediately after their brief is ready
                     await notify_user_brief_ready(user_id, date_str)
                     success_users += 1
-                    
                 except Exception as e:
                     logger.error(f"❌ [Phase 2] Failed to process user {user_id}: {e}")
                     failed_users += 1
-                    # Continue with next user
                     continue
-                
+            
+            job.set_stats(
+                total_users=len(users),
+                success_users=success_users,
+                failed_users=failed_users
+            )
+            
+            if failed_users > 0 and success_users == 0:
+                # If everything failed, explicitly tell JobGuard
+                job.set_stats(success=False, error="All users assembly failed")
+
         finally:
             conn.close()
-        
-        # 3. Notification Phase Decoupled
-        # Individual notifications are now sent immediately in Phase 2 loop.
-        # The old batch notification function (send_personalized_daily_report) is deprecated.
-        
-        logger.info("🎉 Daily Pipeline Completed! Check 'daily_briefs' table.")
-        
-        status = "✅ SUCCESS" if failed_users == 0 else "⚠️ PARTIAL" if success_users > 0 else "❌ FAILED"
-        
-        report = f"### 📰 StockWise: Daily Brief Gen{tier_info}\n"
-        report += f"> **Status**: {status}\n"
-        report += f"- **Users**: {len(users)}\n"
-        report += f"- **Success**: {success_users} users\n"
-        
-        if failed_users > 0:
-            report += f"- **Failed**: {failed_users} users\n"
-            
-        t_logger.success(f"Pipeline finished: {success_users}/{len(users)} users generated.")
-        
-        # Manually send report via wecom as t_logger might only log task outcome
-        from utils import send_wecom_notification
-        send_wecom_notification(report)
-    except Exception as e:
-        logger.error(f"❌ [Pipeline] Full pipeline failed: {e}")
-        t_logger.fail(f"Pipeline failed: {str(e)}")
-        raise e
 
 
 if __name__ == "__main__":

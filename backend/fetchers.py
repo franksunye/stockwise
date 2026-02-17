@@ -483,14 +483,12 @@ def sync_stock_meta():
         
         logger.info(f"✅ 元数据同步完成 ({total} 条, 耗时 {duration:.1f}s)")
         
-        # 发送企微通知
-        from utils import send_wecom_notification
-        report = f"### 📦 StockWise: 元数据同步\n"
-        report += f"> **Status**: ✅ 完成\n"
-        report += f"- **港股**: {hk_count} 条\n"
-        report += f"- **A 股**: {cn_count} 条\n"
-        report += f"- **处理耗时**: {duration:.1f}s"
-        send_wecom_notification(report)
+        return {
+            "total_records": total,
+            "hk_count": hk_count,
+            "cn_count": cn_count,
+            "duration_seconds": round(duration, 1)
+        }
 
 def sync_profiles(limit=20):
     """

@@ -16,8 +16,13 @@ def sync_spot_prices(symbols: list):
     """盘中实时同步"""
     # 如果全场休市，跳过实时同步
     if check_trading_day_skip():
-        # Keep return shape stable for callers that unpack (success_count, failed_count)
-        return 0, 0
+        return {
+            "success_count": 0,
+            "failed_count": 0,
+            "total_count": len(symbols),
+            "duration": 0,
+            "message": "Market closed, skipping."
+        }
 
     start_time = time.time()
     success_count = 0
@@ -59,32 +64,18 @@ def sync_spot_prices(symbols: list):
                 future.result()
                 success_count += 1
             except Exception as e:
-                # errors.append(f"Stock {stock} error: {str(e)[:100]}")
                 # Use less verbose logging for realtime errors (common network jitters)
                 logger.debug(f"❌ {stock} Realtime Sync Failed: {e}")
                 errors.append(f"Error {stock}") 
 
 
-    duration = time.time() - start_time
+    duration = round(time.time() - start_time, 1)
     
-    if len(errors) == 0:
-        status = "✅ SUCCESS"
-    elif success_count > 0:
-        status = "⚠️ PARTIAL"
-    else:
-        status = "❌ FAILED"
-    
-    report = f"### 🛠️ StockWise: Realtime Sync\n"
-    report += f"> **Status**: {status}\n"
-    report += f"- **Success**: {success_count}/{len(symbols)}\n"
-    if errors:
-        report += f"- **Failed**: {len(errors)}\n"
-        # Extract stock codes from error messages somewhat loosely
-        failed_stocks = [e.split()[1] for e in errors if "Stock" in e]
-        if failed_stocks:
-             report += f"> ❌ Failures: {', '.join(failed_stocks[:5])}{'...' if len(failed_stocks)>5 else ''}\n"
-             
-    report += f"- **执行耗时**: {duration:.1f}s"
-    send_wecom_notification(report)
-    
-    return success_count, len(errors)
+    # [Refactored] Use JobGuard to handle notification
+    return {
+        "success_count": success_count,
+        "failed_count": len(errors),
+        "total_count": len(symbols),
+        "duration": duration,
+        "failed_samples": [e.replace("Error ", "") for e in errors][:5]
+    }
