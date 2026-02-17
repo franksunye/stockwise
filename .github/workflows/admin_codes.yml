@@ -45,7 +45,7 @@ jobs:
           TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
         run: |
           if [ "${{ inputs.action }}" = "gen" ]; then
-            python backend/manage_codes.py gen -c ${{ inputs.count }} -d ${{ inputs.days }}
+            python scripts/manage_codes.py gen -c ${{ inputs.count }} -d ${{ inputs.days }}
           else
-            python backend/manage_codes.py list --all
+            python scripts/manage_codes.py list --all
           fi
