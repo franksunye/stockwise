@@ -32,6 +32,9 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
+  // RULE 0: Only handle http/https (ignore chrome-extension://, etc.)
+  if (url.protocol !== 'https:' && url.protocol !== 'http:') return;
+
   // RULE 1: Bypass for all API requests (CRITICAL)
   if (url.pathname.includes('/api/')) {
     return; // Let browser handle it normally
