@@ -199,7 +199,7 @@ export default function DashboardLayout({
     <div className="bg-[#050508] min-h-screen overflow-hidden">
       {appBootstrap}
       
-      <AnimatePresence>
+      <AnimatePresence initial={false}>
         {/* 1. 初始加载状态 或 验证状态 (显示骨架屏) */}
         {isAuthorized === null && (
           <motion.div 
