@@ -71,7 +71,7 @@ export async function POST(request: Request) {
             ],
             client_reference_id: userId,
             success_url: `${appUrl}/dashboard?checkout=success`,
-            cancel_url: `${siteUrl}/pricing?checkout=cancelled`,
+            cancel_url: `${appUrl}/pricing?checkout=cancelled`,
             subscription_data: {
                 metadata: {
                     userId,
