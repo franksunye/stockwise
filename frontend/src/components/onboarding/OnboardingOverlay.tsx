@@ -170,7 +170,7 @@ export function OnboardingOverlay() {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed inset-0 z-[999] bg-black text-white overflow-hidden flex flex-col items-center justify-center">
+    <div className="fixed inset-0 z-[999] bg-[#050508] text-white overflow-y-auto">
       {/* Background Ambience */}
       <div className="absolute inset-0 bg-[#050508]">
         {!isHighPerformance && (
@@ -187,7 +187,7 @@ export function OnboardingOverlay() {
         )}
       </div>
 
-      <div className="relative z-10 w-full max-w-md px-6 flex flex-col h-full max-h-[800px]">
+      <div className="relative z-10 w-full max-w-md px-6 mx-auto flex flex-col min-h-full pb-12">
         
         {/* Step Indicator */}
         <div className="flex gap-1 pt-8 mb-8 justify-center">
@@ -196,7 +196,7 @@ export function OnboardingOverlay() {
             ))}
         </div>
 
-        <div className="flex-1 flex flex-col justify-center">
+        <div className="flex-1 flex flex-col justify-center py-4">
             <AnimatePresence mode='wait'>
                 
                 {/* STEP 1: WELCOME */}
