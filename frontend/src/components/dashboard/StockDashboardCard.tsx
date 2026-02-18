@@ -273,36 +273,24 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
            {/* 右侧：验证结果 (Validation) */}
            <div className="glass-card p-4 flex flex-col justify-between relative">
               {(() => {
-                // 验证区独立逻辑：
-                // - 交易中/盘前：验证的是"今日预测" (Target=Today) -> 显示"待收盘验证"
-                // - 收市后：验证的是"今日表现" (Target=Today) -> 也就是 validationPrediction 应该是那个 Target=Today 的预测
-                //   注意：在 Post-Market，data.prediction 已经是"明日预测"了，所以我们需要找 Target=Today 的。
-                //   如果 data.prediction.target_date == Today (说明还没生成明日的)，那就用它。
-                //   如果 data.prediction.target_date > Today (说明生成了明日的)，那就用 data.previousPrediction (Target=Today)。
+                // 验证区逻辑 (Strict Date-Fact Alignment):
+                // 1. 锚点日期：以左侧显示的“事实日期”为准
+                const anchorDate = data.price?.date;
                 
-                let validationPrediction = todayPrediction; // 默认尝试找 target=today 的
+                // 2. 在全量历史记录中寻找目标日期匹配的预测
+                // 确保只有当预测的 target_date 与事实日期完全一致时才展示验证结果
+                const validationPrediction = data.history?.find(
+                    p => p.target_date && normalizeTargetDate(p.target_date) === anchorDate
+                );
 
-                if (isPostMarket) {
-                    // 收盘后，主卡片显示的是明日建议。验证卡片需要显示对今日的验证。
-                    // 尝试从 previousPrediction 中找，或者如果 prediction 还没更新，它可能就是今日的。
-                    const latestTargetDate = normalizeTargetDate(data.prediction?.target_date);
-                    const latestIsTomorrow = latestTargetDate && latestTargetDate > todayStr;
-                    if (latestIsTomorrow) {
-                        // 如果最新的是明天的，那验证用的就是前一个 (理论上是今天的)
-                        validationPrediction = data.previousPrediction;
-                    } else {
-                        // 如果最新的就是今天的 (数据还没更新)，那就验证它
-                        validationPrediction = data.prediction;
-                    }
-                }
-
-                const validationDate = normalizeTargetDate(validationPrediction?.target_date);
+                // 3. 标签日期：如果有预测用预测日，否则用事实日进行展示
+                const labelDate = validationPrediction ? normalizeTargetDate(validationPrediction.target_date) : anchorDate;
                 const status = validationPrediction?.validation_status;
 
                 return (
                   <>
                     <span className="text-[10px] text-slate-600 font-black uppercase tracking-widest absolute top-4 left-4">
-                      {getValidationLabelFromData(validationDate || '', marketType)}
+                      {getValidationLabelFromData(labelDate || '', marketType)}
                     </span>
                     
                     <div className="flex-1 flex flex-col items-center justify-center pt-4">
