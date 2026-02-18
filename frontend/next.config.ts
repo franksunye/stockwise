@@ -12,6 +12,39 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+
+  // ── 工业级缓存头配置 ──
+  // Service Worker 文件必须禁止浏览器缓存，否则用户可能永远卡在旧版本。
+  // 这是 Google 官方 PWA 最佳实践的强制要求。
+  // See: https://web.dev/articles/service-worker-lifecycle#avoid_changing_the_url
+  async headers() {
+    return [
+      {
+        // sw.js 必须每次从服务器获取最新版本
+        source: '/sw.js',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-cache, no-store, must-revalidate',
+          },
+          {
+            key: 'Content-Type',
+            value: 'application/javascript; charset=utf-8',
+          },
+        ],
+      },
+      {
+        // manifest.json 短期缓存（1小时），确保 PWA 元数据及时更新
+        source: '/manifest.json',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=3600, must-revalidate',
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;
