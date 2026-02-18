@@ -15,6 +15,8 @@ import { BadgeManager } from '@/components/BadgeManager';
 import { ServiceWorkerRegistrar } from '@/components/ServiceWorkerRegistrar';
 import { InstallGuide } from '@/components/InstallGuide';
 import { UserProfileProvider, type Tier } from '@/hooks/useUserProfile';
+import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // ── 本地 Auth 缓存 ──
 // 已验证的 Pro 用户信息缓存在 localStorage 中，
@@ -193,40 +195,55 @@ export default function DashboardLayout({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // 初始加载状态 — 仅在没有缓存时显示
-  if (isAuthorized === null) {
-    return (
-      <>
-        {appBootstrap}
-        <div className="min-h-screen bg-[#050508] flex items-center justify-center text-slate-500 text-xs font-bold tracking-widest animate-pulse">
-          系统验证中...
-        </div>
-      </>
-    );
-  }
-
-  // 未授权则显示邀请墙（仅在 requireInvite 开启时生效）
-  if (isAuthorized === false) {
-    return (
-      <>
-        {appBootstrap}
-        <InviteWall onSuccess={() => setIsAuthorized(true)} />
-      </>
-    );
-  }
-
-  // 已授权 → 显示 Onboarding（仅新用户）+ 子页面
   return (
-    <>
+    <div className="bg-[#050508] min-h-screen overflow-hidden">
       {appBootstrap}
-      <DashboardAuthProvider tier={tier}>
-        <UserProfileProvider>
-          <StockProvider>
-            <OnboardingOverlay />
-            {children}
-          </StockProvider>
-        </UserProfileProvider>
-      </DashboardAuthProvider>
-    </>
+      
+      <AnimatePresence>
+        {/* 1. 初始加载状态 或 验证状态 (显示骨架屏) */}
+        {isAuthorized === null && (
+          <motion.div 
+            key="skeleton"
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <DashboardSkeleton />
+          </motion.div>
+        )}
+
+        {/* 2. 未授权状态 (显示邀请墙) */}
+        {isAuthorized === false && (
+          <motion.div 
+            key="invite-wall"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <InviteWall onSuccess={() => setIsAuthorized(true)} />
+          </motion.div>
+        )}
+
+        {/* 3. 已授权状态 (显示正式内容) */}
+        {isAuthorized === true && (
+          <motion.div 
+            key="dashboard-content"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4 }}
+          >
+            <DashboardAuthProvider tier={tier}>
+              <UserProfileProvider>
+                <StockProvider>
+                  <OnboardingOverlay />
+                  {children}
+                </StockProvider>
+              </UserProfileProvider>
+            </DashboardAuthProvider>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }

@@ -34,6 +34,9 @@ export const metadata: Metadata = {
     statusBarStyle: "black-translucent",
     title: "ZISO AI",
   },
+  other: {
+    "color-scheme": "dark",
+  },
 };
 
 export const viewport: Viewport = {
