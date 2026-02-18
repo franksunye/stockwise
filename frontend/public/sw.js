@@ -1,16 +1,16 @@
 // =============================================================================
-// ZISO AI — Service Worker v4 (Industrial-Grade PWA)
+// ZISO AI — Service Worker v5 (Industrial-Grade PWA — 秒开)
 // =============================================================================
 // Architecture:
 //   - Install:  Pre-cache critical App Shell (offline.html, manifest, logo)
-//   - Navigate: NetworkFirst + Cache fallback → offline.html as last resort
+//   - Navigate: CacheFirst + Background Revalidate → instant cold-start (秒开)
 //   - Static:   CacheFirst (with network fallback) for _next/static/*
 //   - Assets:   CacheFirst for images/fonts/css/js, StaleWhileRevalidate
 //   - API:      Always bypass (never cache API responses in SW)
 //   - Push:     Preserve existing notification handling
 // =============================================================================
 
-const CACHE_VERSION = 'ziso-v4';
+const CACHE_VERSION = 'ziso-v5';
 
 // Critical resources that MUST be available offline for the App Shell
 const PRECACHE_URLS = [
@@ -50,7 +50,7 @@ self.addEventListener('activate', (event) => {
         );
       })
       .then(() => {
-        console.log('[SW] Activated v4, claiming clients');
+        console.log('[SW] Activated v5, claiming clients');
         return self.clients.claim();
       })
   );
@@ -70,31 +70,73 @@ function getCache() {
 }
 
 /**
+ * NavigationCacheFirst strategy (StaleWhileRevalidate for navigations):
+ * 1. If cache has the page → return it INSTANTLY (秒开)
+ * 2. Background: fetch from network and update cache for next visit
+ * 3. If no cache → fall back to network (first visit / cache cleared)
+ * 4. If both fail → return offline.html
+ *
+ * This is the single most critical optimization for PWA cold-start on iOS.
+ * The cached HTML shell loads instantly, then React hydrates and uses its
+ * own auth cache (localStorage) to render content without waiting for APIs.
+ */
+async function navigationCacheFirst(request, fallbackUrl) {
+  const cache = await getCache();
+
+  // 1. Try cache first — this is what makes "秒开" possible
+  const cachedResponse = await cache.match(request);
+  if (cachedResponse) {
+    // Background revalidate: update cache silently for next visit
+    fetch(request)
+      .then((freshResponse) => {
+        if (freshResponse.ok) {
+          cache.put(request, freshResponse);
+        }
+      })
+      .catch(() => { /* silent — user already has cached content */ });
+
+    return cachedResponse;
+  }
+
+  // 2. No cache (first visit) → try network
+  try {
+    const networkResponse = await fetch(request);
+    if (networkResponse.ok) {
+      cache.put(request, networkResponse.clone());
+    }
+    return networkResponse;
+  } catch (err) {
+    // 3. Both failed → offline fallback
+    if (fallbackUrl) {
+      const fallback = await cache.match(fallbackUrl);
+      if (fallback) return fallback;
+    }
+    throw err;
+  }
+}
+
+/**
  * NetworkFirst strategy:
  * Try network, cache the response, fall back to cache, then to fallback.
+ * Used for non-navigation dynamic content (e.g. _next/data/*.json).
  */
 async function networkFirst(request, fallbackUrl) {
   const cache = await getCache();
   try {
     const networkResponse = await fetch(request);
-    // Only cache successful responses
     if (networkResponse.ok) {
-      // Clone before caching (response body can only be consumed once)
       cache.put(request, networkResponse.clone());
     }
     return networkResponse;
   } catch (err) {
-    // Network failed — try cache
     const cachedResponse = await cache.match(request);
     if (cachedResponse) {
       return cachedResponse;
     }
-    // Last resort: return the pre-cached fallback page
     if (fallbackUrl) {
       const fallback = await cache.match(fallbackUrl);
       if (fallback) return fallback;
     }
-    // If even the fallback isn't available, throw so the browser shows its error
     throw err;
   }
 }
@@ -157,9 +199,9 @@ self.addEventListener('fetch', (event) => {
   // ─── RULE 2: Only intercept GET requests ───
   if (request.method !== 'GET') return;
 
-  // ─── RULE 3: Navigation — NetworkFirst with offline fallback ───
+  // ─── RULE 3: Navigation — CacheFirst + Background Revalidate (秒开) ───
   if (request.mode === 'navigate') {
-    event.respondWith(networkFirst(request, '/offline.html'));
+    event.respondWith(navigationCacheFirst(request, '/offline.html'));
     return;
   }
 
