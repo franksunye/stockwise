@@ -22,15 +22,15 @@ export default function LandingPage() {
         <div className="space-y-6 max-w-3xl mb-16">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-black uppercase tracking-widest mb-4">
             <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
-            知其白 · 守其黑 | 知其博弈 · 守其方寸
+            知守 AI (ZISO AI) | 替你做股市功课，带你看投资门道
           </div>
           <h1 className="text-5xl md:text-7xl font-black tracking-tighter italic leading-tight will-change-transform">
             让交易 <br /> 
             <span className="bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">回归理性的从容</span>
           </h1>
           <p className="text-lg md:text-xl text-slate-400 font-medium max-w-2xl mx-auto leading-relaxed">
-            看透市场的复杂博弈，守住属于自己的那份从容方寸。 <br className="hidden md:block" />
-            不做波动的赌徒，只做 <span className="text-white">有纪律的知守者</span>。
+            复杂的分析交给 AI，简单的决策留给你。 <br className="hidden md:block" />
+            ZISO AI 自动为你完成复盘与数据建模，让 <span className="text-white">普通投资者也能拥有机构级的投研能力</span>。
           </p>
           <div className="pt-10 flex flex-col md:flex-row items-center justify-center gap-4">
             <Link 
@@ -183,7 +183,7 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-3 gap-12">
             {[
               { num: "01", title: "资产锁定", desc: "将您关注的标的加入知守列表，系统将立即开始 250 天历史数据的同步与建模。" },
-              { num: "02", title: "获取作战计划", desc: "每日收盘 30 分钟内，由委员会联合为您呈递包含具体支撑位、压力位与止损红线的作战简报。" },
+              { num: "02", title: "获取复盘简报", desc: "每日收盘 30 分钟内，由 AI 投研助理为您呈递包含具体支撑位、压力位与决策门道的复盘简报。" },
               { num: "03", title: "盘中纪律执行", desc: "不再被盘中的随机分时波动绑架。当行情触及昨晚设定的剧本时，委员会将即时唤醒您的理智执行。" }
             ].map((step, i) => (
               <div key={i} className="text-left space-y-6 relative group">
@@ -312,11 +312,11 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-2 gap-4">
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent text-left">
               <p className="text-white font-bold mb-3 uppercase tracking-tighter">ZISO AI 是什么？</p>
-              <p className="text-slate-400 text-sm leading-relaxed">一款由 AI 专家委员会驱动的港股/A股决策外脑，不提供“小道消息”，只提供可验证的“纪律参考”。</p>
+              <p className="text-slate-400 text-sm leading-relaxed">一个不仅替你完成股市功课，还能带你看清投资门道的 AI 投研助理。它通过海量历史回测与 AI 智囊团会诊，将复杂的行情分析转化为具体的决策剧本。</p>
             </div>
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent text-left">
               <p className="text-white font-bold mb-3 uppercase tracking-tighter">AI 的判断准吗？</p>
-              <p className="text-slate-400 text-sm leading-relaxed">我们每日收盘后对昨日信号进行“全量核销”。历史胜率在个股档案中公开透明，准确率是 ZISO 的生命线。</p>
+              <p className="text-slate-400 text-sm leading-relaxed">AI 复盘的结果支持全量核销。我们不仅替你做功课，更对每一笔“功课”的质量负责。历史预测的胜率在个股档案中公开透明。</p>
             </div>
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent text-left">
               <p className="text-white font-bold mb-3 uppercase tracking-tighter">为什么要设定 75% 门槛？</p>
@@ -332,8 +332,8 @@ export default function LandingPage() {
         {/* CTA Banner */}
         <section className="py-40 w-full max-w-4xl text-center space-y-10">
           <h2 className="text-3xl md:text-5xl font-black italic tracking-tighter uppercase leading-tight">
-            准好让 <span className="text-indigo-500 uppercase">ZISO 委员会</span> <br className="hidden md:block" />
-            接管您的交易纪律吗？
+            准好让 <span className="text-indigo-500 uppercase">ZISO AI</span> <br className="hidden md:block" />
+            替你打理股市功课了吗？
           </h2>
           <div className="flex flex-col md:flex-row items-center justify-center gap-6">
             <Link 
