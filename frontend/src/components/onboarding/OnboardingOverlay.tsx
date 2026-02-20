@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Zap, ShieldCheck, Target, Clock } from 'lucide-react';
-import { getCurrentUser } from '@/lib/user';
+import { useUserProfile } from '@/hooks/useUserProfile';
 import { shouldEnableHighPerformance } from '@/lib/device-utils';
 import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
 
@@ -35,10 +35,12 @@ export function OnboardingOverlay() {
   const [analyzingStage, setAnalyzingStage] = useState(0); // 0: None, 1: Connecting, 2: Flows, 3: AI
   const [revealData, setRevealData] = useState(DEFAULT_REVEAL_DATA);
   const [recommendedStocks, setRecommendedStocks] = useState<RecommendedStock[]>([]);
+  const { profile, loading: profileLoading } = useUserProfile();
 
   const fetchRecommendedStocks = useCallback(async () => {
     try {
       const res = await fetch('/api/user/onboarding/stocks');
+      if (!res.ok) return;
       const data = await res.json();
       if (data.stocks && data.stocks.length > 0) {
         setRecommendedStocks(data.stocks);
@@ -48,51 +50,34 @@ export function OnboardingOverlay() {
     }
   }, []);
 
-  const checkOnboardingStatus = useCallback(async (userId: string) => {
-    // 1. Check LocalStorage first to avoid flicker
-    const localHasOnboarded = localStorage.getItem('STOCKWISE_HAS_ONBOARDED');
-    if (localHasOnboarded) return;
-
-    // 2. Double check with API (in case user cleared cache but is old user)
-    try {
-        const res = await fetch('/api/user/profile', {
-            method: 'POST',
-            body: JSON.stringify({ userId })
-        });
-        const data = await res.json();
-        if (!data.hasOnboarded) {
-             setIsVisible(true);
-             // If they are already Pro (via referral), check their expiry to show correct trial length
-             if (data.tier === 'pro' && data.expiresAt) {
-                 const expiry = new Date(data.expiresAt);
-                 const now = new Date();
-                 const diffDays = Math.ceil((expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-                 if (diffDays > 3) setTrialDays(diffDays);
-             }
-        } else {
-             localStorage.setItem('STOCKWISE_HAS_ONBOARDED', 'true');
+  useEffect(() => {
+    if (!profileLoading && profile) {
+      if (!profile.hasOnboarded) {
+        setIsVisible(true);
+        // If they are already Pro (via referral), check their expiry to show correct trial length
+        if (profile.tier === 'pro' && profile.expiresAt) {
+          const expiry = new Date(profile.expiresAt);
+          const now = new Date();
+          const diffDays = Math.ceil((expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+          if (diffDays > 3) setTrialDays(diffDays);
         }
-    } catch (e) {
-        console.error("Check onboarding failed", e);
+      } else {
+        localStorage.setItem('STOCKWISE_HAS_ONBOARDED', 'true');
+        setIsVisible(false);
+      }
     }
-  }, []);
-
-  const initialize = useCallback(async () => {
-    const user = await getCurrentUser();
-    await checkOnboardingStatus(user.userId);
-    await fetchRecommendedStocks();
-  }, [checkOnboardingStatus, fetchRecommendedStocks]);
+  }, [profile, profileLoading]);
 
   useEffect(() => {
-    initialize();
-  }, [initialize]);
+    fetchRecommendedStocks();
+  }, [fetchRecommendedStocks]);
 
   const handleComplete = async () => {
-    const user = await getCurrentUser();
+    if (!profile?.userId) return;
     try {
          await fetch('/api/user/onboarding/complete', {
             method: 'POST',
-            body: JSON.stringify({ userId: user.userId, selectedStock })
+            body: JSON.stringify({ userId: profile.userId, selectedStock })
         });
         localStorage.setItem('STOCKWISE_HAS_ONBOARDED', 'true');
         setIsVisible(false);

@@ -221,7 +221,11 @@ export default function DashboardLayout({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <InviteWall onSuccess={() => setIsAuthorized(true)} />
+            <InviteWall onSuccess={(newTier) => {
+              // 关键修复：当邀请码成功时，立即更新 tier 并授权进入
+              if (newTier) setTier(newTier as Tier);
+              setIsAuthorized(true);
+            }} />
           </motion.div>
         )}
 
