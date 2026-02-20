@@ -199,10 +199,10 @@ export function OnboardingOverlay() {
                         </div>
                         <div className="space-y-4">
                             <h1 className="text-4xl font-black italic tracking-tighter">
-                                Trade Smarter,<br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Not Harder.</span>
+                                你好，我是 ZISO<br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">你的 AI 投研助理</span>
                             </h1>
                             <p className="text-slate-400 text-lg font-medium leading-relaxed max-w-xs mx-auto">
-                                让 AI 处理复杂的市场分析，<br/>您只需要负责做决定。
+                                我会替你做股市功课，<br/>带你从容看清投资门道。
                             </p>
                         </div>
                         <button onClick={() => setStep(2)} className="w-full py-4 bg-white text-black font-black text-lg rounded-2xl active:scale-95 transition-all shadow-[0_0_40px_rgba(255,255,255,0.3)] hover:shadow-[0_0_60px_rgba(255,255,255,0.5)]">

@@ -24,7 +24,7 @@ export default function MarketingFooter() {
             height={32}
             className="rounded-lg"
           />
-          <span className="text-sm font-black italic tracking-tighter">ZISO AI | 知其白，守其黑</span>
+          <span className="text-sm font-black italic tracking-tighter">ZISO AI | 替你做股市功课，带你看投资门道</span>
         </Link>
         <p className="text-xs text-slate-600 font-bold uppercase tracking-widest">
           © 2026 ZISO AI TECHNOLOGY. ALL RIGHTS RESERVED.
