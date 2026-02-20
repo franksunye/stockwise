@@ -216,6 +216,7 @@ class MarketContextProvider:
                 return entry["data"]
 
         logger.info(f"📡 Fetching Flow Data for {symbol}...")
+        try:
             # 1. Individual Flow (stock_individual_fund_flow)
             market_code = "sh" if symbol.startswith("6") else "sz"
             if symbol.startswith("4") or symbol.startswith("8"): market_code = "bj"
@@ -254,18 +255,20 @@ class MarketContextProvider:
                 main_net = latest.get('主力净流入-净额', 0)
                 
                 def fmt_flow(val):
-                        v = float(val)
-                        if abs(v) > 100000000: return f"{v/100000000:+.2f}亿"
-                        if abs(v) > 10000: return f"{v/10000:+.2f}万"
-                        return f"{v:+.0f}"
+                    v = float(val)
+                    if abs(v) > 100000000: return f"{v/100000000:+.2f}亿"
+                    if abs(v) > 10000: return f"{v/10000:+.2f}万"
+                    return f"{v:+.0f}"
 
                 big_order_val = fmt_flow(main_net)
                 
                 # Semantic interpretation
+                try:
                     net_float = float(main_net)
                     if net_float > 0: flow_summary = "主力净流入 (吸筹)"
                     elif net_float < 0: flow_summary = "主力净流出 (出货)"
                     else: flow_summary = "资金平衡"
+                except (ValueError, TypeError):
                     flow_summary = "数据解析错误"
 
             result = {
