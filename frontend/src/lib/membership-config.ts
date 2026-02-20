@@ -35,9 +35,9 @@ export const MEMBERSHIP_CONFIG = {
     // ==========================================
     referral: {
         /** 被邀请人获得的 Pro 试用天数 */
-        refereeDays: 7,
+        refereeDays: 5,
         /** 邀请人获得的 Pro 奖励天数 */
-        referrerDays: 7,
+        referrerDays: 5,
     },
 
     // ==========================================
