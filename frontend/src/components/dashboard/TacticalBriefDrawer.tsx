@@ -38,19 +38,19 @@ interface TacticalBriefDrawerProps {
 const getStepConfig = (step: string) => {
   const s = step.toLowerCase();
   
-  if (s.includes('trend')) return { icon: <TrendingUp size={12} />, label: 'TREND' };
-  if (s.includes('momentum')) return { icon: <Zap size={12} />, label: 'MOMENTUM' };
-  if (s.includes('volume')) return { icon: <BarChart3 size={12} />, label: 'VOLUME' };
-  if (s.includes('history')) return { icon: <RotateCcw size={12} />, label: 'HISTORY' };
-  if (s.includes('decision')) return { icon: <Target size={12} />, label: 'DECISION' };
+  if (s.includes('trend')) return { icon: <TrendingUp size={12} />, label: '趋势' };
+  if (s.includes('momentum')) return { icon: <Zap size={12} />, label: '动能' };
+  if (s.includes('volume')) return { icon: <BarChart3 size={12} />, label: '成交量' };
+  if (s.includes('history')) return { icon: <RotateCcw size={12} />, label: '历史' };
+  if (s.includes('decision')) return { icon: <Target size={12} />, label: '决策' };
   
   // 新增映射
-  if (s.includes('news') || s.includes('fundamental')) return { icon: <Newspaper size={12} />, label: 'INTELLIGENCE' };
-  if (s.includes('position') || s.includes('level') || s.includes('price')) return { icon: <Crosshair size={12} />, label: 'PRICE ACTION' };
-  if (s.includes('context')) return { icon: <Layers size={12} />, label: 'CONTEXT' };
+  if (s.includes('news') || s.includes('fundamental')) return { icon: <Newspaper size={12} />, label: '情报' };
+  if (s.includes('position') || s.includes('level') || s.includes('price')) return { icon: <Crosshair size={12} />, label: '价格行为' };
+  if (s.includes('context')) return { icon: <Layers size={12} />, label: '上下文' };
 
   // 兜底
-  return { icon: <Hash size={12} />, label: step.toUpperCase().replace(/_/g, ' ') };
+  return { icon: <Hash size={12} />, label: '分析步' };
 };
 
 export function TacticalBriefDrawer({ 
@@ -165,7 +165,7 @@ export function TacticalBriefDrawer({
                               <BarChart3 size={14} className="text-slate-400" />
                           </div>
                           <div className="flex-1">
-                              <p className="text-xs font-bold text-slate-300">基础规则版</p>
+                              <p className="text-xs font-bold text-slate-300">量化规则版</p>
                               <p className="text-[10px] text-slate-500 leading-tight mt-0.5">升级 Pro 解锁 LLM 深度推理与情报分析</p>
                           </div>
                       </div>
@@ -422,7 +422,7 @@ export function TacticalBriefDrawer({
                       {isFree && (
                           <div className="absolute inset-0 flex items-center justify-center">
                               <div className={`px-4 py-2 rounded-2xl border border-indigo-500/30 text-[10px] font-black italic text-indigo-400 uppercase tracking-widest shadow-2xl ${!isHighPerformance ? 'bg-indigo-500/20 backdrop-blur-xl' : 'bg-[#0f0f18]'}`}>
-                                  UPGRADE TO PRO TO UNLOCK REASONING
+                                  升级 PRO 解锁 AI 推理详情
                               </div>
                           </div>
                       )}

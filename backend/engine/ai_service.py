@@ -142,8 +142,8 @@ def _generate_rule_based_prediction(symbol: str, today_data: pd.Series):
     # Explicitly mapping QuantSignal fields to the dictionary expected by _process_and_store_prediction
     
     # Re-construct reasoning trace to match legacy format EXACTLY for frontend compatibility
-    monthly_trend = sig.factors.get('monthly_trend', 'Unknown')
-    weekly_trend = sig.factors.get('weekly_trend', 'Unknown')
+    monthly_trend = sig.factors.get('monthly_trend', '未知')
+    weekly_trend = sig.factors.get('weekly_trend', '未知')
     resonance_count = sig.factors.get('resonance', 0)
     rsi = sig.factors.get('rsi', 0)
     macd_hist = sig.factors.get('macd_hist', 0)
@@ -154,9 +154,9 @@ def _generate_rule_based_prediction(symbol: str, today_data: pd.Series):
         "confidence": sig.confidence,
         "summary": "缩量震荡，维持观望" if sig.action == 'Side' else ("顺势做多" if sig.action == 'Long' else "避险为主"),
         "reasoning_trace": [
-            {"step": "trend", "data": f"月:{'多' if monthly_trend=='Bull' else '空'} | 周:{'多' if weekly_trend=='Bull' else '空'}", "conclusion": "周期共振" if resonance_count == 2 else "长短博弈"},
-            {"step": "momentum", "data": f"日线 RSI({rsi:.0f}) | MACD {macd_status}", "conclusion": "动能健康" if 40 <= rsi <= 60 else "极端行情"},
-            {"step": "decision", "data": f"QuantEngine ({sig.source_model})", "conclusion": f"{sig.reason}"}
+            {"step": "trend", "data": f"月:{monthly_trend} | 周:{weekly_trend}", "conclusion": "周期共振" if resonance_count == 2 else "长短博弈"},
+            {"step": "momentum", "data": f"日线 RSI({rsi:.0f}) | MACD {macd_status}", "conclusion": "动能健康" if 40 <= rsi <= 60 else "行情极端"},
+            {"step": "decision", "data": f"量化引擎 ({sig.source_model})", "conclusion": f"{sig.reason}"}
         ],
         "tactics": {
             "holding": [{"priority": "P1", "action": "持仓待涨" if sig.action == 'Long' else "分批减仓", "trigger": "均线支撑", "reason": "跟随趋势"}],
