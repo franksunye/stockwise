@@ -57,8 +57,8 @@ export default function AboutPage() {
             <div className="glass-card p-1 relative group">
               <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-[38px] blur-xl opacity-50 group-hover:opacity-100 transition-opacity" />
               <div className="bg-[#0a0a0f] rounded-[38px] p-8 relative z-10 space-y-4">
-                <div className="text-indigo-400 font-black italic text-xl">“知其白，守其黑。”</div>
-                <p className="text-slate-500 text-xs text-justify">这就是 ZISO AI 名称的由来 —— 知，是 <b>90% 的深度研判</b>，帮你看清行情细节与博弈剧本；守，是那 <b>10% 的风控红线</b>，在关键时刻为你守住确定性。</p>
+                <div className="text-indigo-400 font-black italic text-xl leading-tight">“知其白，守其黑，为天下式。<br/>常德不忒，复归于无极。”</div>
+                <p className="text-slate-500 text-xs text-justify leading-relaxed">这就是 <b>ZISO AI (知守)</b> 名称的由来 —— <b>知其白</b>，是 90% 的深度研判功课，帮你看清行情门道；<b>守其黑</b>，是那 10% 的“常德”（恒久原则），在关键时刻为你守护确定性。知其博弈，守其方寸，最终复归于理性的从容。</p>
               </div>
             </div>
           </div>
