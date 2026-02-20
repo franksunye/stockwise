@@ -187,7 +187,7 @@ function DashboardContent() {
       </div>
 
       {/* 底部导航 - Stock Pool + 个人中心 */}
-      <footer className="fixed bottom-0 left-0 right-0 p-10 px-8 flex flex-col items-center gap-6 z-[100] pointer-events-none">
+      <footer className="fixed bottom-0 left-0 right-0 pt-10 px-8 pb-[max(2.5rem,env(safe-area-inset-bottom))] flex flex-col items-center gap-6 z-[100] pointer-events-none">
         <AnimatePresence>
           {yScrollPosition > 100 && (
             <motion.button 
@@ -217,14 +217,14 @@ function DashboardContent() {
           <Link 
             href="/dashboard/stock-pool" 
             prefetch={true}
-            className="p-3 rounded-2xl bg-white/5 border border-white/10 active:scale-95 transition-all pointer-events-auto"
+            className="p-3 rounded-2xl bg-white/5 border border-white/10 active:scale-95 transition-all pointer-events-auto inline-flex items-center justify-center cursor-pointer touch-manipulation"
           >
             <Grid className="w-5 h-5 text-indigo-400" />
           </Link>
           
           <button 
             onClick={() => setUserCenterOpen(true)} 
-            className="w-11 h-11 rounded-full bg-white/5 border border-white/10 flex items-center justify-center transition-all active:scale-90 hover:bg-white/10 shrink-0"
+            className="w-11 h-11 rounded-full bg-white/5 border border-white/10 flex items-center justify-center transition-all active:scale-90 hover:bg-white/10 shrink-0 cursor-pointer touch-manipulation"
           >
             <User className="w-5 h-5 text-slate-400" />
           </button>

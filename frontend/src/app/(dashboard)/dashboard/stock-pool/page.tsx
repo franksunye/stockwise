@@ -259,7 +259,7 @@ export default function StockPoolPage() {
   // Main Content
   return (
     <div 
-      className="fixed inset-0 bg-[#050508] text-white overflow-hidden flex flex-col font-sans"
+      className="fixed top-0 left-0 right-0 bottom-0 h-[100dvh] w-full bg-[#050508] text-white overflow-hidden flex flex-col font-sans overscroll-none"
     >
       {/* Background glow - conditionally render for non-iOS */}
       {!isIOS && <div className="fixed inset-0 opacity-[0.03] pointer-events-none bg-indigo-500 blur-[120px] scale-150" />}
@@ -295,7 +295,7 @@ export default function StockPoolPage() {
         </div>
       </header>
 
-      <div className="flex-1 overflow-y-auto px-6 py-6 scrollbar-hide">
+      <div className="flex-1 overflow-y-auto px-6 py-6 scrollbar-hide shrink min-h-0 overscroll-y-auto [-webkit-overflow-scrolling:touch]">
         <AnimatePresence>
           {limitMsg && !showAdd && (
             <motion.p
