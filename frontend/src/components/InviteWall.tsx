@@ -115,7 +115,7 @@ export function InviteWall({ onSuccess }: Props) {
         </div>
 
         <p className="mt-10 text-center text-xs font-bold text-slate-600 uppercase tracking-widest">
-            没有邀请码? 关注官方社群获取
+            没有邀请码? 关注官方公众号“知守AI”获取
         </p>
       </motion.div>
 
