@@ -32,19 +32,26 @@ def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool =
     
     # 动态确定回溯天数，确保指标计算有足够上下文
     if period == "daily":
-        # [Optimization] Realtime sync only needs recent data + local history
-        buffer_days = 15 if is_realtime else 80
+        # 如果已有数据，fetch 窗口减小到 7 天（覆盖最近可能的数据缺失），背景历史由 DB 补齐
+        # 这样可以大幅减少 AkShare 的数据拉取压力和耗时
+        if last_date_str:
+            last_dt = datetime.strptime(last_date_str, "%Y-%m-%d")
+            fetch_start_str = (last_dt - timedelta(days=7)).strftime("%Y%m%d")
+        else:
+            # 新股票初次同步，必须拉取足够长的历史来计算指标 (如 MA60)
+            buffer_days = 120
+            fetch_start_str = (datetime.now() - timedelta(days=buffer_days)).strftime("%Y%m%d")
     elif period == "weekly":
-        buffer_days = 365 * 2  # 2年历史确保周均线准确
+        buffer_days = 365 * 2
     else:
-        buffer_days = 365 * 10 # 10年历史确保月均线准确
+        buffer_days = 365 * 10
 
-    if last_date_str:
-        last_dt = datetime.strptime(last_date_str, "%Y-%m-%d")
-        fetch_start_str = (last_dt - timedelta(days=buffer_days)).strftime("%Y%m%d")
-    else:
-        fetch_start_str = (datetime.now() - timedelta(days=buffer_days)).strftime("%Y%m%d")
-
+    if period != "daily":
+        if last_date_str:
+            last_dt = datetime.strptime(last_date_str, "%Y-%m-%d")
+            fetch_start_str = (last_dt - timedelta(days=buffer_days)).strftime("%Y%m%d")
+        else:
+            fetch_start_str = (datetime.now() - timedelta(days=buffer_days)).strftime("%Y%m%d")
     # 1. 抓取 (Pass is_realtime flag to use optimized Sina Spot path)
     df = fetch_stock_data(symbol, period=period, start_date=fetch_start_str, is_realtime=is_realtime)
     # [Fix] Explicitly return False if fetch failed or no data, so caller knows it wasn't updated
@@ -87,20 +94,21 @@ def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool =
         logger.warning(f"⚠️ {symbol}: 校验后无有效数据")
         return False
 
-    # [Optimization] Splice local history for realtime calculation
-    # Only keep track of new rows to insert later
+    # [Optimization] Splice local history for indicator calculation
+    # For any daily sync (standard or realtime) that has previous data,
+    # we prepend historical rows from DB to ensure sliding windows (like MA60) work correctly.
     new_rows_mask = None
     
-    if is_realtime and period == "daily":
+    if period == "daily" and (is_realtime or last_date_str):
         try:
             conn = get_connection()
             # We need enough history for MA60 (approx 60 trading days, so 90 calendar days safe buffer)
-            # Use 100 limit to be safe
+            # Use 120 limit to be safe
             hist_query = f"""
                 SELECT date, open, high, low, close, volume, change_percent 
                 FROM {table_name} 
                 WHERE symbol = ? 
-                ORDER BY date DESC LIMIT 100
+                ORDER BY date DESC LIMIT 120
             """
             
             # Suppress pandas warning about non-SQLAlchemy connection (LibSQL)
@@ -137,8 +145,8 @@ def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool =
     # 6. 计算指标
     df = calculate_indicators(df)
     
-    # [Optimization] Filter back to only new rows for insertion (Realtime only)
-    if is_realtime and period == "daily" and '__is_new' in df.columns:
+    # [Optimization] Filter back to only new rows for insertion
+    if period == "daily" and '__is_new' in df.columns:
         # Only save the rows that were actually fetched/updated
         df = df[df['__is_new'] == True].copy()
         # Clean up temp col
