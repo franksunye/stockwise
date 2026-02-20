@@ -577,7 +577,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                       </div>
                                       <div className="px-1 mb-3">
                                           <p className="text-[10px] text-slate-500 leading-relaxed text-left">
-                                            每邀请 1 位新用户入池，你与好友均可自动获得 <span className="text-emerald-400 font-bold">{MEMBERSHIP_CONFIG.referral.refereeDays} 天</span> Pro 会员权益。
+                                            每成功邀请 1 位新用户入池，你与好友均可自动获得 <span className="text-emerald-400 font-bold">{MEMBERSHIP_CONFIG.referral.refereeDays} 天</span> Pro 会员权益。
                                           </p>
                                       </div>
                                     </>
