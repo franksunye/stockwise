@@ -164,8 +164,24 @@ class MarketContextProvider:
                     top3 = df_sector.head(3)
                     for _, row in top3.iterrows():
                         name = row.get('名称', '')
-                        flow = row.get('今日主力净流入', '') # formatted string with unit
-                        top_sectors.append(f"{name}({flow})")
+                        # High-Standard Robust Extraction
+                        flow = None
+                        for field in ['今日主力净流入-净额', '今日主力净流入', '今日主力净流入-净额量', '净流入']:
+                            val = row.get(field)
+                            if val is not None and str(val).lower() != 'nan':
+                                flow = val
+                                break
+                        if flow is not None and not isinstance(flow, str):
+                            try:
+                                v = float(flow)
+                                import math
+                                if math.isnan(v): flow = ''
+                                else:
+                                    if abs(v) > 100000000: flow = f'{v/100000000:+.2f}亿'
+                                    elif abs(v) > 10000: flow = f'{v/10000:+.1f}万'
+                                    else: flow = f'{v:+.0f}'
+                            except: flow = str(flow)
+                        top_sectors.append(f"{name}({flow})" if flow else name)
             except Exception as e:
                 logger.warning(f"Sector flow fetch failed: {e}")
 
@@ -200,7 +216,6 @@ class MarketContextProvider:
                 return entry["data"]
 
         logger.info(f"📡 Fetching Flow Data for {symbol}...")
-        try:
             # 1. Individual Flow (stock_individual_fund_flow)
             market_code = "sh" if symbol.startswith("6") else "sz"
             if symbol.startswith("4") or symbol.startswith("8"): market_code = "bj"
@@ -239,22 +254,18 @@ class MarketContextProvider:
                 main_net = latest.get('主力净流入-净额', 0)
                 
                 def fmt_flow(val):
-                    try:
                         v = float(val)
                         if abs(v) > 100000000: return f"{v/100000000:+.2f}亿"
                         if abs(v) > 10000: return f"{v/10000:+.2f}万"
                         return f"{v:+.0f}"
-                    except: return str(val)
 
                 big_order_val = fmt_flow(main_net)
                 
                 # Semantic interpretation
-                try:
                     net_float = float(main_net)
                     if net_float > 0: flow_summary = "主力净流入 (吸筹)"
                     elif net_float < 0: flow_summary = "主力净流出 (出货)"
                     else: flow_summary = "资金平衡"
-                except:
                     flow_summary = "数据解析错误"
 
             result = {
