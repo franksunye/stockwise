@@ -104,7 +104,7 @@ export default function LandingPage() {
         <section id="features" className="pt-60 w-full grid md:grid-cols-2 gap-20 items-center text-left">
           <div className="space-y-8">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em]">
-               Plan The Trade
+                制定交易计划
             </div>
             <h2 className="text-4xl md:text-5xl font-black italic tracking-tighter leading-tight uppercase">
               在冷静时复盘 <br />
@@ -151,7 +151,7 @@ export default function LandingPage() {
           </div>
           <div className="order-1 md:order-2 space-y-8">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] font-black uppercase tracking-[0.2em]">
-               Safety System
+                安全风控系统
             </div>
             <h2 className="text-4xl md:text-5xl font-black italic tracking-tighter leading-tight uppercase">
               即便在最疯狂的行情 <br />
@@ -162,13 +162,13 @@ export default function LandingPage() {
             </p>
             <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/5 space-y-4">
                <div className="flex justify-between items-center text-xs font-black uppercase tracking-widest">
-                  <span className="text-slate-500 uppercase">AI Confidence Limit</span>
-                  <span className="text-red-500">Breaker Triggered</span>
+                   <span className="text-slate-500 uppercase">AI 预测信心</span>
+                  <span className="text-red-500">已触发自动熔断</span>
                </div>
                <div className="h-3 w-full bg-white/5 rounded-full overflow-hidden">
                   <div className="h-full w-[64%] bg-red-500/50" />
                </div>
-               <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tighter">Current Signal: SIDE (Defense Mode Active)</p>
+                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tighter">当前信号：空仓观望（防御模式开启）</p>
             </div>
           </div>
         </section>
@@ -202,7 +202,7 @@ export default function LandingPage() {
         <section className="pt-60 w-full space-y-16">
           <div className="text-center space-y-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">
-                The Team
+                我们的团队
             </div>
             <h2 className="text-4xl md:text-5xl font-black italic tracking-tighter">
               由 <span className="text-indigo-500">双创始人 + AI 执行团队</span> 驱动
@@ -344,12 +344,7 @@ export default function LandingPage() {
             >
               立即进入应用 <ChevronRight size={24} />
             </Link>
-            <div className="text-left">
-               <div className="flex items-center gap-2 text-xs font-black uppercase text-slate-500">
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                  Free Trial Available
-               </div>
-            </div>
+            {/* Free Trial Badge Removed */}
           </div>
         </section>
       </main>
