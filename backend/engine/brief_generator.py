@@ -389,11 +389,19 @@ async def generate_stock_briefs_batch(date_str: str, specific_symbols: List[str]
 
         # 3. Process each stock (generate briefs for each tier)
         from engine.models.brief_strategies import SUPPORTED_TIERS, TIER_PROVIDER_MAP
+        from trading_calendar import get_market_from_symbol, is_market_closed
         
+        check_date = datetime.strptime(date_str, "%Y-%m-%d")
         processed_count = 0
         
         for symbol, stock_name, is_pro_watched in unique_stocks:
             try:
+                if not force:
+                    market = get_market_from_symbol(symbol)
+                    if is_market_closed(check_date, market):
+                        logger.info(f"⏭️ [Skip] {symbol} ({market}) market is closed on {date_str}.")
+                        continue
+
                 # Fetch news from cache
                 logger.info(f"⚡ Processing {symbol} ({processed_count + 1}/{len(unique_stocks)})...")
                 

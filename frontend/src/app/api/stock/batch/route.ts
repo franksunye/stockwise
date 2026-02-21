@@ -109,11 +109,16 @@ export async function GET(request: Request) {
 
         const hkTime = new Date(new Date().getTime() + (new Date().getTimezoneOffset() * 60000) + (3600000 * 8));
         const lastUpdateTime = `${hkTime.getHours().toString().padStart(2, '0')}:${(Math.floor(hkTime.getMinutes() / 10) * 10).toString().padStart(2, '0')}`;
+        const hkDateStr = hkTime.toISOString().split('T')[0];
+
+        // Calculate the threshold string exactly once to avoid redundant allocations inside the loop
+        const PREDICTION_VALIDITY_DAYS = 20;
+        const validDateThreshold = new Date(Date.now() - PREDICTION_VALIDITY_DAYS * 86400000).toISOString().split('T')[0];
 
         const stocks = symbols.map(sym => {
             const history = historyBySymbol.get(sym) || [];
             const price = priceMap.get(sym) as Record<string, unknown> | undefined;
-            const validPreds = (history as { date: string }[]).filter(p => p.date >= new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0]);
+            const validPreds = (history as { date: string }[]).filter(p => p.date >= validDateThreshold);
 
             return {
                 symbol: sym,
@@ -121,7 +126,7 @@ export async function GET(request: Request) {
                 prediction: validPreds[0] || null,
                 previousPrediction: validPreds[1] || null,
                 history,
-                lastUpdated: (price?.date && String(price.date) < hkTime.toISOString().split('T')[0]) ? `${String(price.date).substring(5)} ${lastUpdateTime}` : lastUpdateTime
+                lastUpdated: (price?.date && String(price.date) < hkDateStr) ? `${String(price.date).substring(5)} ${lastUpdateTime}` : lastUpdateTime
             };
         });
 
