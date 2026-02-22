@@ -10,7 +10,7 @@
 //   - Push:     Preserve existing notification handling
 // =============================================================================
 
-const CACHE_VERSION = 'ziso-v5';
+const CACHE_VERSION = 'ziso-v7';
 
 // Critical resources that MUST be available offline for the App Shell
 const PRECACHE_URLS = [
@@ -60,6 +60,30 @@ self.addEventListener('activate', (event) => {
 // 3. FETCH — Strategy-based routing
 // =============================================================================
 
+// =============================================================================
+// 2.5 HELPER — Fetch with Timeout
+// =============================================================================
+function fetchWithTimeout(request, timeoutMs = 4000) {
+  if (!navigator.onLine) {
+    return Promise.reject(new Error('Browser is offline'));
+  }
+  return new Promise((resolve, reject) => {
+    const timeoutId = setTimeout(() => {
+      reject(new Error(`Network timeout after ${timeoutMs}ms`));
+    }, timeoutMs);
+    
+    fetch(request)
+      .then((response) => {
+        clearTimeout(timeoutId);
+        resolve(response);
+      })
+      .catch((err) => {
+        clearTimeout(timeoutId);
+        reject(err);
+      });
+  });
+}
+
 // Shared cache accessor (singleton pattern for performance)
 let _cachePromise = null;
 function getCache() {
@@ -100,7 +124,7 @@ async function navigationCacheFirst(request, fallbackUrl) {
 
   // 2. No cache (first visit) → try network
   try {
-    const networkResponse = await fetch(request);
+    const networkResponse = await fetchWithTimeout(request, 8000);
     if (networkResponse.ok) {
       cache.put(request, networkResponse.clone());
     }
@@ -116,14 +140,57 @@ async function navigationCacheFirst(request, fallbackUrl) {
 }
 
 /**
+ * RSC CacheFirst strategy (StaleWhileRevalidate for Next.js soft navigations):
+ * This matches the "秒开本地内容，后台更新" strategy perfectly.
+ * 1. Normalize URL to strip `_rsc` so we can match it consistently.
+ * 2. If cached -> Return instantly (Client Router proceeds with old tree, no spinner).
+ * 3. Background -> Fetch fresh RSC payload and update cache.
+ */
+async function rscCacheFirst(request) {
+  const cache = await getCache();
+  const url = new URL(request.url);
+  // Remove _rsc param to consolidate cache keys for the same route
+  url.searchParams.delete('_rsc');
+  const cacheKey = url.toString();
+
+  // ignoreVary is critical because Next.js changes Next-Router-State-Tree etc.
+  const cachedResponse = await cache.match(cacheKey, { ignoreVary: true });
+
+  if (cachedResponse) {
+    // Background update
+    fetchWithTimeout(request, 8000)
+      .then((networkResponse) => {
+        if (networkResponse.ok) {
+          cache.put(cacheKey, networkResponse);
+        }
+      })
+      .catch(() => { /* silent */ });
+    
+    return cachedResponse;
+  }
+
+  // First visit cache miss
+  try {
+    const networkResponse = await fetchWithTimeout(request, 8000);
+    if (networkResponse.ok) {
+      cache.put(cacheKey, networkResponse.clone());
+    }
+    return networkResponse;
+  } catch (err) {
+    // Return a 504 to force Next.js to hard-navigate, which will hit the App Shell
+    return new Response('Offline or Timeout', { status: 504, statusText: 'Gateway Timeout' });
+  }
+}
+
+/**
  * NetworkFirst strategy:
  * Try network, cache the response, fall back to cache, then to fallback.
  * Used for non-navigation dynamic content (e.g. _next/data/*.json).
  */
-async function networkFirst(request, fallbackUrl) {
+async function networkFirst(request, fallbackUrl, timeoutMs = 4000) {
   const cache = await getCache();
   try {
-    const networkResponse = await fetch(request);
+    const networkResponse = await fetchWithTimeout(request, timeoutMs);
     if (networkResponse.ok) {
       cache.put(request, networkResponse.clone());
     }
@@ -168,7 +235,7 @@ async function cacheFirst(request) {
 
   // 2. Cache miss → try network
   try {
-    const networkResponse = await fetch(request);
+    const networkResponse = await fetchWithTimeout(request, 8000);
     if (networkResponse.ok) {
       cache.put(request, networkResponse.clone());
     }
@@ -198,6 +265,15 @@ self.addEventListener('fetch', (event) => {
 
   // ─── RULE 2: Only intercept GET requests ───
   if (request.method !== 'GET') return;
+
+  // ─── RULE 2.5: Next.js App Router RSC/Data Requests (拦截软路由数据) ───
+  // Using SWR (Stale-While-Revalidate) ensures instant soft-navigations.
+  // This achieves "秒开本地内容，然后后台更新" for Next.js transitions.
+  const isRSC = request.headers.has('RSC') || url.searchParams.has('_rsc');
+  if (isRSC) {
+    event.respondWith(rscCacheFirst(request));
+    return;
+  }
 
   // ─── RULE 3: Navigation — CacheFirst + Background Revalidate (秒开) ───
   if (request.mode === 'navigate') {
