@@ -474,11 +474,6 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
                   {isCapturing ? <Loader2 className="animate-spin" size={18} /> : <Download size={18} />}
                </button>
             </div>
-
-            {/* Micro-brand (visible in generated image) */}
-            <div className="absolute bottom-6 left-0 right-0 flex justify-center opacity-30 pointer-events-none">
-               <span className="text-[10px] font-black uppercase tracking-[0.5em] text-slate-500">Powered by ZISO AI · 知守智囊团</span>
-            </div>
           </motion.div>
         </div>
       )}
