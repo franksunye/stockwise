@@ -167,15 +167,39 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
     const dataUrl = await generateImage();
     setIsCapturing(false);
     
-    if (dataUrl) {
-      const link = document.createElement('a');
-      link.download = `ZISO_AI_${stockName}_${prediction.target_date.replace(/-/g, '')}.png`;
-      link.href = dataUrl;
-      link.click();
-      showToast('图片已保存至本地，快去秀一把吧！');
-    } else {
+    if (!dataUrl) {
       showToast('图片生成失败，请稍后重试');
+      return;
     }
+
+    // Detect iOS to bypass the "Preview" hurdle
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+    if (isIOS && navigator.canShare) {
+      try {
+        const response = await fetch(dataUrl);
+        const blob = await response.blob();
+        const file = new File([blob], `ZISO_AI_${stockName.replace(/\s+/g, '_')}.png`, { type: 'image/png' });
+        
+        if (navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: '保存投资黄历',
+          });
+          return;
+        }
+      } catch (err) {
+        console.error('iOS Share-to-Save failed', err);
+      }
+    }
+
+    // Default Download Behavior (PC/Android)
+    const link = document.createElement('a');
+    link.download = `ZISO_AI_${stockName}_${prediction.target_date.replace(/-/g, '')}.png`;
+    link.href = dataUrl;
+    link.click();
+    showToast('图片已准备好下载');
   };
 
   const handleShare = async (activeStory: VisualStory) => {
