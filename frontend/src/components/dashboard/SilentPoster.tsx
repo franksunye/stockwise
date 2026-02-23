@@ -313,7 +313,7 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
             <div className={`absolute inset-0 opacity-20 pointer-events-none bg-gradient-to-b from-transparent via-${activeStory.aesthetic.hue.split('-')[0]}-500/10 to-${activeStory.aesthetic.hue.split('-')[1]}-500/20`} />
             
             {/* Top Bar */}
-            <div className="relative z-10 p-6 flex justify-between items-start">
+            <div className="relative z-10 px-6 pt-6 pb-2 flex justify-between items-start">
               <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mt-2">ZISO AI · 投资黄历</span>
               <button 
                 onClick={onClose}
@@ -324,7 +324,7 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
             </div>
 
             {/* Main Content: The "Silent Math" Symbol & Token */}
-            <div className="relative z-10 flex-1 flex flex-col items-center justify-start px-6 text-center pt-8 min-h-0 overflow-hidden">
+            <div className="relative z-10 flex-1 flex flex-col items-center justify-start px-6 text-center pt-2 min-h-0 overflow-hidden">
                 
                 {/* Centered Large Date (Almanac Style) - Positioned higher */}
                 <div className="mb-2 flex flex-col items-center justify-center relative">
