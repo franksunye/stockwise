@@ -124,12 +124,28 @@ The local database is a file at `data/stockwise.db`. The `turso-cli.mjs` tool is
         $env:DB_SOURCE="local"; python backend/scripts/daily_morning_call.py --dry-run
         ```
 
+### 2.3 Safe Data Purging SOP (Administrative)
+When tasked with deleting sensitive production data (e.g., "Delete user X and all their traces"):
+
+1.  **Dependency Discovery**: Identify all tables containing the ID. Common tables include:
+    *   `users` (root)
+    *   `user_watchlist`, `daily_briefs`, `notification_logs`, `push_subscriptions`
+    *   `invitation_codes` (references as logical owner)
+    *   `referral_transactions`
+2.  **Impact Verification**: Run a single query to count rows across all suspected tables before deleting.
+3.  **Safe Sequence**:
+    *   **Delete Child/Log Data First**: `daily_briefs`, `notification_logs`, etc.
+    *   **Unbind Reusable Resources**: For `invitation_codes`, set `used_by_user_id = NULL` rather than deleting the code itself.
+    *   **Delete Root Last**: `DELETE FROM users WHERE user_id = '...'`.
+4.  **Final Audit**: Re-run the count query to confirm 0 records remain.
+
 ## 3. Workflow Summary (Cheatsheet)
 
-| Task                   | Command / Pattern                                              |
-| :--------------------- | :------------------------------------------------------------- |
-| **Check Product Data** | `node frontend/scripts/turso-cli.mjs query "SELECT ..."`       |
-| **Check Local Data**   | `sqlite3 data/stockwise.db "SELECT ..."`                       |
-| **Run Python (Prod)**  | `$env:DB_SOURCE="cloud"; python backend/script.py`             |
-| **Run Python (Dev)**   | `$env:DB_SOURCE="local"; python backend/script.py`             |
-| **Search Code**        | Use Agent Tool `grep_search` or `Select-String` (avoid `grep`) |
+| Task                   | Command / Pattern                                                           |
+| :--------------------- | :-------------------------------------------------------------------------- |
+| **Check Product Data** | `node frontend/scripts/turso-cli.mjs query "SELECT ..."`                    |
+| **Check Local Data**   | `sqlite3 data/stockwise.db "SELECT ..."`                                    |
+| **Purge User Data**    | Follow Section 2.3 sequence (Verify -> Purge Logs -> Unbind -> Delete Root) |
+| **Run Python (Prod)**  | `$env:DB_SOURCE="cloud"; python backend/script.py`                          |
+| **Run Python (Dev)**   | `$env:DB_SOURCE="local"; python backend/script.py`                          |
+| **Search Code**        | Use Agent Tool `grep_search` or `Select-String` (avoid `grep`)              |
