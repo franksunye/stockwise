@@ -149,10 +149,8 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
   const supportStr = keyLevels?.stop_loss_reference || keyLevels?.strong_support || keyLevels?.support || '';
 
   let intelligence = '';
-  if (Array.isArray(tacticalData?.news_analysis) && tacticalData.news_analysis.length > 0) {
-    intelligence = tacticalData.news_analysis[0];
-  } else if (typeof tacticalData?.news_analysis === 'string' && tacticalData.news_analysis) {
-    intelligence = tacticalData.news_analysis;
+  if (tacticalData?.summary) {
+    intelligence = tacticalData.summary;
   } else if (tacticalData?.reasoning_trace && tacticalData.reasoning_trace.length > 0) {
     intelligence = tacticalData.reasoning_trace[0].data;
   }
