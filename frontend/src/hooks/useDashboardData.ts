@@ -100,7 +100,7 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
         try {
             const startTime = performance.now();
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 12000); // 12s timeout
+            const timeoutId = setTimeout(() => controller.abort('请求超时 (12s)'), 12000); // 12s timeout
 
             // Step 2: 拿着 watchlist 去 CDN 拉取公共数据 (公有API)
             const symbols = watchlist.map(w => w.symbol).join(',');
