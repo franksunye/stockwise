@@ -327,7 +327,7 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
             <div className="relative z-10 flex-1 flex flex-col items-center justify-start px-6 text-center pt-8 min-h-0 overflow-hidden">
                 
                 {/* Centered Large Date (Almanac Style) - Positioned higher */}
-                <div className="mb-6 flex flex-col items-center justify-center relative">
+                <div className="mb-2 flex flex-col items-center justify-center relative">
                    {prediction.target_date.includes('-') ? (
                      <>
                        <div className="text-[10px] font-black text-slate-500/80 tracking-[0.4em] mb-1">{prediction.target_date.split('-')[0]}</div>
@@ -343,7 +343,7 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
                 </div>
 
                 {/* Visual State Icon */}
-                <div className="mb-4 relative">
+                <div className="mb-2 relative">
                    <div className={`absolute inset-0 ${prediction?.signal === 'Long' ? 'bg-emerald-500/20' : prediction?.signal === 'Short' ? 'bg-rose-500/20' : 'bg-slate-500/10'} blur-[40px] rounded-full animate-pulse capture-hidden`} />
                    <div className="relative w-16 h-16 flex items-center justify-center">
                       {prediction?.signal === 'Long' ? (
@@ -391,7 +391,7 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
                 )}
 
                 {/* --- NEW ALMANAC DATA INSIGHTS --- */}
-                <div className="w-full max-w-[280px] mt-3 space-y-1 text-left relative z-10 capture-show flex flex-col justify-center">
+                <div className="w-full max-w-[280px] mt-1 space-y-1 text-left relative z-10 capture-show flex flex-col justify-center">
                    {/* 阵眼结界 */}
                    {(resistanceStr || supportStr) && (
                      <div className="px-2.5 py-2 rounded-xl bg-white/5 border border-white/5 backdrop-blur-md flex items-center justify-between shadow-sm">
@@ -432,7 +432,7 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
             </div>
 
             {/* Footer: Data Hook */}
-            <div className="relative z-10 px-8 pb-4 pt-4 bg-gradient-to-t from-[#0a0a0b] via-black/80 to-transparent flex-shrink-0">
+            <div className="relative z-10 px-8 pb-3 pt-2 bg-gradient-to-t from-[#0a0a0b] via-[#0a0a0b]/80 to-transparent flex-shrink-0">
                <div className="flex justify-between items-end">
                   <div className="space-y-0.5">
                     <h2 className="text-xl font-black tracking-tighter text-white">{stockName}</h2>
@@ -450,7 +450,7 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
             </div>
 
             {/* Action Buttons */}
-            <div className="relative z-10 px-6 pb-4 flex gap-3 capture-hidden">
+            <div className="relative z-10 px-6 pb-2 flex gap-3 capture-hidden">
                <button 
                   onClick={() => handleShare(activeStory)}
                   disabled={isCapturing}
