@@ -1,7 +1,7 @@
 # StockWise 里里程碑与执行进度日志 (Milestones Execution Log)
 
-> **当前版本**: v3.0 (团队协同版)
-> **状态**: 基础架构加固由团队推进中；核心体验创新 (Project Muse) 提前启动。
+> **当前版本**: v3.1 (P0 完成同步版)
+> **状态**: P0 三项架构基线已完成；进入 P1 治理与收口阶段，核心体验创新 (Project Muse) 持续推进。
 
 ---
 
@@ -15,13 +15,15 @@
 - [x] **v2.9: 商业化闭环**: 集成了分布式身份、邀请裂变及初版支付流。
 - [x] **v3.2: 安全防御基线**: 强制执行全量 SQL 参数化，修复 Admin 接口漏洞。 (Team Completed ✅)
 - [x] **v3.3: 数据链路收敛**: 彻底停用旧版 `ai_predictions` 写入，统一迁移至 `v2` 语义。 (Team Completed ✅)
+- [x] **v3.6: 发布质量门禁**: 建立 `verify:release`、API 鉴权契约测试与前端/PWA 基线冒烟。 (Team Completed ✅)
 
 ---
 
 ## 🛠️ 2. 当前正在进行 (Current Sprints: v3.1 - 4.x)
 
 ### A. 团队并行任务 (Infrastructure Hardening)
-- [ ] **[v3.1] 零信任鉴权改造**: 建立加密 Session/JWT 会话模型，移除客户端 `userId`。 (Team In-Progress 🚧)
+- [x] **[v3.1] 零信任鉴权改造**: 已建立签名 Session 身份层并移除业务 API 对客户端 `userId` 信任。 (Team Completed ✅)
+- [ ] **[v3.1a] 迁移收口**: 生产关闭 `ALLOW_LEGACY_USERID_BOOTSTRAP` 并移除 legacy bootstrap 兼容分支。 (Team Planned)
 - [ ] **[v3.4] 量化规则插件化**: 重构 `backend/quant` 支持策略热插拔。 (Team Assigned)
 - [ ] **[v3.5] 可观测性看板**: 建立 API 延迟与 AI 置信度实时监测。 (Team Assigned)
 

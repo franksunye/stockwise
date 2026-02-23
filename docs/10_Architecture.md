@@ -1,7 +1,7 @@
 ﻿# StockWise 架构文档（生产基线与演进方案）
 
 > **更新时间**: 2026-02-23
-> **版本**: v3.0（架构评审修订版）
+> **版本**: v3.1（P0 完成基线版）
 > **适用范围**: `frontend/`、`backend/`、`docs/` 当前仓库实现
 
 ## 1. 文档目标与边界
@@ -43,13 +43,15 @@
 
 #### 2.2.3 鉴权与身份现状
 - `frontend/src/app/(dashboard)/dashboard/layout.tsx` 使用本地缓存（`AUTH_CACHE_KEY`）提升首屏体验与离线可用性。
-- 多个 API 仍接受客户端传入的 `userId` 或 `x-user-id`（示例：`frontend/src/app/api/user/profile/route.ts`、`frontend/src/app/api/stock-pool/route.ts`、`frontend/src/app/api/stock/batch/route.ts`）。
-- 这意味着“体验层鉴权”和“权限层鉴权”尚未完全分离。
+- 已落地服务端会话身份层：`frontend/src/lib/user-session.ts`（`HttpOnly` 签名 Cookie）。
+- 业务 API 已统一改为 `requireUserSession(request)` 获取可信 `userId`，不再信任客户端 `userId` / `x-user-id`。
+- 当前仅保留迁移开关 `ALLOW_LEGACY_USERID_BOOTSTRAP`（`/api/user/register` 兼容路径），用于旧客户端平滑迁移。
 
 #### 2.2.4 API 层现状
 - API 路由集中于 `frontend/src/app/api/*`。
 - `internal/notify` 已有 `Authorization: Bearer <INTERNAL_API_SECRET>` 校验。
-- `admin/*` 目前未形成统一的管理员鉴权中间件。
+- `admin/*` 已接入统一管理员会话鉴权与 API 密钥鉴权（登录会话 + `ADMIN_API_SECRET` 双通道）。
+- `api/admin/*` 已完成 SQL 参数化改造，移除字符串拼接查询。
 
 ### 2.3 后端架构现状
 
@@ -65,8 +67,8 @@
 
 #### 2.3.3 AI 推理链路
 - 主链路（多模型）：`backend/engine/runner.py` -> `ai_predictions_v2`。
-- 历史兼容链路：`backend/engine/ai_service.py` 仍涉及旧表 `ai_predictions`。
-- 回填逻辑中仍有旧表引用（`backend/analysis/backfill.py`）。
+- 旧表 `ai_predictions` 新写入已冻结。
+- 回填链路已迁移到 v2 语义，`ai_predictions_v2` 为唯一生产写入目标。
 
 ### 2.4 数据架构现状
 
@@ -89,7 +91,9 @@ flowchart LR
     U[User Browser / PWA]
     MW[Next.js Middleware<br/>domain & route dispatch]
     WEB[Next.js App Router UI]
+    SESSION[Session Identity Layer<br/>frontend/src/lib/user-session.ts]
     API[Next.js API Routes<br/>frontend/src/app/api/*]
+    ADMIN[Admin APIs<br/>session + ADMIN_API_SECRET]
     DBTS[frontend/src/lib/db.ts<br/>cloud/local switch]
     TURSO[(Turso / libSQL)]
     SQLITE[(Local SQLite)]
@@ -97,13 +101,15 @@ flowchart LR
     CLI[backend/main.py + JobGuard]
     SYNC[sync/prices.py + fetchers.py]
     RUNNER[engine/runner.py<br/>multi-model prediction]
-    BACKFILL[analysis/backfill.py<br/>legacy path exists]
+    BACKFILL[analysis/backfill.py<br/>v2 semantics]
     MODELS[LLM / Rule Engine]
     TABLES[(ai_predictions_v2<br/>daily_prices<br/>task_logs<br/>traces)]
 
     U --> MW --> WEB
-    WEB --> API
+    WEB --> SESSION --> API
+    API --> ADMIN
     API --> DBTS
+    ADMIN --> DBTS
     DBTS --> TURSO
     DBTS --> SQLITE
 
@@ -121,40 +127,40 @@ flowchart LR
 
 ## 3. 关键风险评估（按严重级别）
 
-### 3.1 Critical：身份可信边界不足（越权风险）
+### 3.1 High：身份收口仍有迁移兼容窗口（残余风险）
 
 **事实**
-- 服务端接口普遍信任客户端提交身份字段（`userId` / `x-user-id`）。
+- 业务 API 主链路已使用服务端会话身份，客户端 `userId`/`x-user-id` 信任路径已移除。
+- `api/user/register` 仍保留 `ALLOW_LEGACY_USERID_BOOTSTRAP` 兼容开关。
 
 **影响**
-- 存在 IDOR（不安全对象直接引用）风险：可读取/修改他人数据。
+- 在迁移窗口期，如开关配置不当会引入额外身份绑定复杂度。
 
 **目标状态**
-- API 仅信任服务端会话上下文，不信任客户端声明身份。
+- 生产将 `ALLOW_LEGACY_USERID_BOOTSTRAP=false`，并在下一版本移除兼容分支代码。
 
-### 3.2 Critical：管理接口安全基线不足
+### 3.2 Medium：管理面安全基线已建立，仍需运营侧固化
 
 **事实**
-- `api/admin/*` 缺少统一鉴权门禁。
-- 部分管理查询存在字符串拼接 SQL。
+- `api/admin/*` 已接入统一鉴权（管理员会话 + API 密钥）与 SQL 参数化。
 
 **影响**
-- 管理数据面暴露风险。
-- SQL 注入风险。
+- 主要风险从“代码漏洞”转为“运维配置”与“密钥轮换”执行质量。
 
 **目标状态**
-- 管理接口统一鉴权（admin claim），SQL 全参数化。
+- 固化密钥轮换、最小权限和审计复核节奏。
 
-### 3.3 High：预测链路存在 v1/v2 双轨漂移
+### 3.3 Medium：预测链路主事实源已统一，仍有历史兼容债务
 
 **事实**
-- 主流程已使用 `ai_predictions_v2`，但仍有旧表 `ai_predictions` 的写入/读取残留。
+- 旧表 `ai_predictions` 已冻结新写入。
+- 生产写入与回填已迁移到 `ai_predictions_v2`。
 
 **影响**
-- 指标口径不一致，回填与验证复杂度高。
+- 主要剩余影响是代码可维护性与历史兼容路径清理成本。
 
 **目标状态**
-- `ai_predictions_v2` 成为唯一事实源，旧链路只读迁移后下线。
+- 下线旧表相关兼容分支与脚本，完成只读归档。
 
 ### 3.4 High：SQL 治理与文档目标不一致
 
@@ -308,14 +314,21 @@ flowchart LR
 ## 6. 分阶段落地计划（30/60/90 天）
 
 ### 0-30 天（P0）
-1. 封堵 `api/admin/*` 鉴权缺口并完成 SQL 参数化改造。
-2. 建立统一会话身份层，移除业务 API 对 `userId` 明文信任。
-3. 冻结旧预测表写入，回填入口切换至 v2。
+1. [已完成] 封堵 `api/admin/*` 鉴权缺口并完成 SQL 参数化改造。
+2. [已完成] 建立统一会话身份层，移除业务 API 对 `userId` 明文信任。
+3. [已完成] 冻结旧预测表写入，回填入口切换至 v2。
 
 **验收标准**
 - 越权测试通过。
 - 注入测试通过。
 - 新产生预测记录仅在 `ai_predictions_v2`。
+
+**完成状态（截至 2026-02-23）**
+- 代码层 P0 三项均已落地并通过构建/回归门禁。
+- 已新增前端发布质量门禁（`verify:release`）与 API 鉴权契约测试。
+- 剩余收口动作：
+  1. 生产配置将 `ALLOW_LEGACY_USERID_BOOTSTRAP=false`。
+  2. 下一版本移除 `/api/user/register` 的 legacy bootstrap 分支。
 
 ### 31-60 天（P1）
 1. 建立 SQL 治理规则（目录白名单 + CI）。
