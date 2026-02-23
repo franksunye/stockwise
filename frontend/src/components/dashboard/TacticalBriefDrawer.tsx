@@ -39,10 +39,7 @@ interface TacticalBriefDrawerProps {
   stockName?: string;
 }
 
-const SilentPoster = dynamic(() => import('./SilentPoster').then(mod => mod.SilentPoster), {
-  ssr: false,
-  loading: () => null
-});
+import { SilentPoster } from './SilentPoster';
 
 // 辅助函数：获取步骤对应的图标和标签配置
 const getStepConfig = (step: string) => {
