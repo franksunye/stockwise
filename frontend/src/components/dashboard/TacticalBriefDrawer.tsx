@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X as CloseIcon, 
@@ -66,7 +66,12 @@ const getStepConfig = (step: string) => {
 export function TacticalBriefDrawer({ 
   isOpen, onClose, data, tier, model, symbol, targetDate, signal, confidence, stockName
 }: TacticalBriefDrawerProps) {
+  const [isMounted, setIsMounted] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
   const isHighPerformance = shouldEnableHighPerformance();
   const [isExpanded, setIsExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState<'brief' | 'council'>('brief');
@@ -89,6 +94,8 @@ export function TacticalBriefDrawer({
     validation_status: 'Pending',
     actual_change: null
   };
+
+  if (!isMounted) return null;
 
   return (
     <>
