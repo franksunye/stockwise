@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense, useRef, useCallback } from 'react';
+import { useState, useEffect, Suspense, useRef, useCallback, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LayoutGrid as Grid, ChevronDown, User, FileText, Share2, Copy } from 'lucide-react';
@@ -46,10 +46,12 @@ function DashboardContent() {
   const { stocks, loadingPool, loadMoreHistory } = useStocks();
 
   // Create an extended array where the first item is the Market Almanac
-  const displayStocks = [
-    { symbol: 'MARKET_ALMANAC', name: 'ZISO AI · 投资黄历', prediction: { signal: 'Side' } } as unknown as StockData,
-    ...stocks
-  ];
+  const displayStocks = useMemo(() => {
+    return [
+      { symbol: 'MARKET_ALMANAC', name: 'ZISO AI · 投资黄历', prediction: { signal: 'Almanac' } } as unknown as StockData,
+      ...stocks
+    ];
+  }, [stocks]);
 
   const {
     currentIndex,
@@ -137,7 +139,8 @@ function DashboardContent() {
           exit={{ opacity: 0 }}
           className="fixed inset-0 pointer-events-none blur-[150px] scale-150"
           style={{ 
-            backgroundColor: currentStock?.prediction?.signal === 'Long' ? COLORS.up : 
+            backgroundColor: isMarketAlmanac ? '#4F46E5' : // Indigo for Almanac
+                            currentStock?.prediction?.signal === 'Long' ? COLORS.up : 
                             currentStock?.prediction?.signal === 'Short' ? COLORS.down : COLORS.hold,
           }}
         />
@@ -148,28 +151,72 @@ function DashboardContent() {
         <div className="w-full flex justify-between items-start pointer-events-auto">
            {/* 左侧：点击打开股票档案 / 分享（黄历） */}
            <div className="flex items-center gap-2 cursor-pointer group shrink-0" onClick={() => !isMarketAlmanac && setProfileStock(currentStock)}>
-              <div className="w-10 h-10 rounded-[16px] bg-white/5 border border-white/10 flex items-center justify-center transition-all group-active:scale-90 group-hover:bg-white/10">
-                 {isMarketAlmanac ? (
-                   <Share2 className="w-5 h-5 text-indigo-400 group-hover:text-white transition-colors" />
-                 ) : (
-                   <div className="text-[10px] font-black italic text-indigo-500">{currentStock?.symbol?.slice(-2) || ''}</div>
-                 )}
+              <div className="w-10 h-10 rounded-[16px] bg-white/5 border border-white/10 flex items-center justify-center transition-all group-active:scale-90 group-hover:bg-white/10 overflow-hidden relative">
+                 <AnimatePresence mode="wait">
+                   {isMarketAlmanac ? (
+                     <motion.div
+                       key="almanac-left"
+                       initial={{ opacity: 0, scale: 0.8 }}
+                       animate={{ opacity: 1, scale: 1 }}
+                       exit={{ opacity: 0, scale: 0.8 }}
+                       transition={{ duration: 0.15 }}
+                       className="absolute inset-0 flex items-center justify-center"
+                     >
+                       <Share2 className="w-5 h-5 text-indigo-400 group-hover:text-white transition-colors" />
+                     </motion.div>
+                   ) : (
+                     <motion.div
+                       key="stock-left"
+                       initial={{ opacity: 0, scale: 0.8 }}
+                       animate={{ opacity: 1, scale: 1 }}
+                       exit={{ opacity: 0, scale: 0.8 }}
+                       transition={{ duration: 0.15 }}
+                       className="absolute inset-0 flex items-center justify-center"
+                     >
+                       <div className="text-[10px] font-black italic text-indigo-500">{currentStock?.symbol?.slice(-2) || ''}</div>
+                     </motion.div>
+                   )}
+                 </AnimatePresence>
               </div>
            </div>
 
           {/* 中央：股票名称突出显示 / 市场黄历标题 */}
           <div 
-            className="absolute left-1/2 transform -translate-x-1/2 top-6 cursor-pointer group flex flex-col items-center"
+            className="absolute left-1/2 transform -translate-x-1/2 top-4 cursor-pointer group flex flex-col items-center h-12 justify-center"
             onClick={() => !isMarketAlmanac && setProfileStock(currentStock)}
           >
-            <h1 className="text-xl font-black italic tracking-tight text-white group-hover:text-indigo-400 transition-colors text-center drop-shadow-md">
-              {isMarketAlmanac ? "ZISO AI · 投资黄历" : currentStock?.name}
-            </h1>
-            {!isMarketAlmanac && (
-              <span className="text-[10px] font-black italic text-slate-500 tracking-widest uppercase mt-0.5">
-                {currentStock ? formatStockSymbol(currentStock.symbol) : ''}
-              </span>
-            )}
+            <AnimatePresence mode="wait">
+              {isMarketAlmanac ? (
+                <motion.div
+                  key="almanac-center"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.15 }}
+                  className="flex flex-col items-center"
+                >
+                  <h1 className="text-xl font-black italic tracking-tight text-white group-hover:text-indigo-400 transition-colors text-center drop-shadow-md">
+                    ZISO AI · 投资黄历
+                  </h1>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="stock-center"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.15 }}
+                  className="flex flex-col items-center"
+                >
+                  <h1 className="text-xl font-black italic tracking-tight text-white group-hover:text-indigo-400 transition-colors text-center">
+                    {currentStock?.name}
+                  </h1>
+                  <span className="text-[10px] font-black italic text-slate-500 tracking-widest uppercase mt-0.5 leading-none">
+                    {currentStock ? formatStockSymbol(currentStock.symbol) : ''}
+                  </span>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           {/* 右侧：Brief 入口 / 复制（黄历） */}
@@ -181,13 +228,33 @@ function DashboardContent() {
                 setBriefOpen(true);
               }
             }}
-            className="w-10 h-10 rounded-[16px] bg-white/5 border border-white/10 flex items-center justify-center active:scale-90 transition-all hover:bg-white/10 group"
+            className="w-10 h-10 rounded-[16px] bg-white/5 border border-white/10 flex items-center justify-center active:scale-90 transition-all hover:bg-white/10 group overflow-hidden relative"
           >
-            {isMarketAlmanac ? (
-              <Copy className="w-5 h-5 text-slate-400 group-hover:text-indigo-400 transition-colors" />
-            ) : (
-              <FileText className="w-5 h-5 text-slate-400 group-hover:text-indigo-400 transition-colors" />
-            )}
+            <AnimatePresence mode="wait">
+              {isMarketAlmanac ? (
+                <motion.div
+                  key="almanac-right"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute inset-0 flex items-center justify-center"
+                >
+                  <Copy className="w-5 h-5 text-slate-400 group-hover:text-indigo-400 transition-colors" />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="stock-right"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute inset-0 flex items-center justify-center"
+                >
+                  <FileText className="w-5 h-5 text-slate-400 group-hover:text-indigo-400 transition-colors" />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </button>
         </div>
       </header>
