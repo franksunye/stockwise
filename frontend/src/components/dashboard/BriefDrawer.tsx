@@ -172,7 +172,7 @@ export function BriefDrawer({ isOpen, onClose, limitToSymbol, onUpgrade }: Brief
                         hr: () => <hr className="border-white/5 my-8" />,
                       }}
                     >
-                      {showContent?.replace(/StockWise AI 生成于\s*\d{1,2}:\d{2}/g, '').trim() || ''}
+                      {showContent?.replace(/(ZISO|StockWise) AI 生成于\s*\d{1,2}:\d{2}/g, '').trim() || ''}
                     </ReactMarkdown>
                   </div>
                   
@@ -209,8 +209,8 @@ export function BriefDrawer({ isOpen, onClose, limitToSymbol, onUpgrade }: Brief
                         </div>
                         <p className="text-[10px] text-slate-500 font-medium font-mono">
                            发布于 {(() => {
-                              const match = brief.content.match(/StockWise AI 生成于\s*(\d{1,2}:\d{2})/);
-                              return match ? match[1] : (brief.created_at ? new Date(brief.created_at).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit', hour12: false}) : '--:--');
+                              const match = brief.content.match(/(ZISO|StockWise) AI 生成于\s*(\d{1,2}:\d{2})/);
+                              return match ? match[2] : (brief.created_at ? new Date(brief.created_at).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit', hour12: false}) : '--:--');
                            })()}
                         </p>
                       </div>
