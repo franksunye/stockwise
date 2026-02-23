@@ -1,11 +1,15 @@
 import { NextResponse } from 'next/server';
 import { getDbClient } from '@/lib/db';
+import { requireAdminAuth } from '@/lib/admin-auth';
 import { Client } from '@libsql/client';
 import { triggerOnDemandSync } from '@/lib/github-actions';
 import Database from 'better-sqlite3';
 import { getMarketFromSymbol, getExpectedLatestDataDate } from '@/lib/date-utils';
 
-export async function GET() {
+export async function GET(request: Request) {
+    const unauthorized = requireAdminAuth(request);
+    if (unauthorized) return unauthorized;
+
     try {
         const client = getDbClient();
         const strategy = process.env.DB_STRATEGY || 'local';
@@ -27,6 +31,9 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+    const unauthorized = requireAdminAuth(request);
+    if (unauthorized) return unauthorized;
+
     try {
         const body = await request.json();
         const { symbol, name } = body;

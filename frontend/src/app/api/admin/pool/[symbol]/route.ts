@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getDbClient } from '@/lib/db';
+import { requireAdminAuth } from '@/lib/admin-auth';
 import { Client } from '@libsql/client';
 import Database from 'better-sqlite3';
 
@@ -7,6 +8,9 @@ export async function DELETE(
     request: Request,
     { params }: { params: Promise<{ symbol: string }> }
 ) {
+    const unauthorized = requireAdminAuth(request);
+    if (unauthorized) return unauthorized;
+
     try {
         const { symbol } = await params;
         const client = getDbClient();

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getDbClient } from '@/lib/db';
+import { requireAdminAuth } from '@/lib/admin-auth';
 import { Client } from '@libsql/client';
 import Database from 'better-sqlite3';
 
@@ -9,6 +10,9 @@ export async function GET(
     request: Request,
     { params }: { params: Promise<{ id: string }> }
 ) {
+    const unauthorized = requireAdminAuth(request);
+    if (unauthorized) return unauthorized;
+
     try {
         const { id: traceId } = await params;
         const client = getDbClient();

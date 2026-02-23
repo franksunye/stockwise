@@ -21,9 +21,9 @@ def backfill_predictions():
     conn = get_connection()
     cursor = conn.cursor()
     
-    # 清理本地旧预测
-    print("🧹 清理本地旧预测数据...")
-    cursor.execute("DELETE FROM ai_predictions")
+    # 清理本地旧预测（仅清理 v2 历史兼容模型，冻结旧表写入后不再触碰 ai_predictions）
+    print("🧹 清理本地旧预测数据 (ai_predictions_v2: legacy-ai/rule-engine)...")
+    cursor.execute("DELETE FROM ai_predictions_v2 WHERE model_id IN ('legacy-ai', 'rule-engine')")
     conn.commit()
     
     # 获取所有的活跃股票
@@ -33,11 +33,15 @@ def backfill_predictions():
     for symbol in stocks:
         print(f"\n📈 处理股票: {symbol}")
         # 获取所有真实价格
-        df = pd.read_sql(f"""
+        df = pd.read_sql(
+            """
             SELECT * FROM daily_prices 
-            WHERE symbol = '{symbol}' 
+            WHERE symbol = ?
             ORDER BY date ASC
-        """, conn)
+            """,
+            conn,
+            params=(symbol,),
+        )
         
         if df.empty:
             continue
