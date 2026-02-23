@@ -300,10 +300,10 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
             </div>
 
             {/* Main Content: The "Silent Math" Symbol & Token */}
-            <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 text-center mt-[-1rem] min-h-0 overflow-hidden">
+            <div className="relative z-10 flex-1 flex flex-col items-center justify-start px-6 text-center pt-8 min-h-0 overflow-hidden">
                 
-                {/* Centered Large Date (Almanac Style) */}
-                <div className="mb-4 flex flex-col items-center justify-center relative">
+                {/* Centered Large Date (Almanac Style) - Positioned higher */}
+                <div className="mb-6 flex flex-col items-center justify-center relative">
                    {prediction.target_date.includes('-') ? (
                      <>
                        <div className="text-[10px] font-black text-slate-500/80 tracking-[0.4em] mb-1">{prediction.target_date.split('-')[0]}</div>
