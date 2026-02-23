@@ -223,31 +223,31 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
             <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-8 text-center mt-[-2rem]">
                 
                 {/* Centered Large Date (Almanac Style) */}
-                <div className="mb-8 flex flex-col items-center justify-center relative">
+                <div className="mb-4 flex flex-col items-center justify-center relative">
                    {prediction.target_date.includes('-') ? (
                      <>
-                       <div className="text-[11px] font-black text-slate-400/80 tracking-[0.4em] mb-1">{prediction.target_date.split('-')[0]}</div>
-                       <div className="text-6xl font-black text-white tracking-tighter flex items-center" style={{ fontFamily: '"SF Pro Display", -apple-system, sans-serif' }}>
+                       <div className="text-[10px] font-black text-slate-400/80 tracking-[0.4em] mb-1">{prediction.target_date.split('-')[0]}</div>
+                       <div className="text-5xl font-black text-white tracking-tighter flex items-center leading-none" style={{ fontFamily: '"SF Pro Display", -apple-system, sans-serif' }}>
                          {prediction.target_date.split('-')[1]}
-                         <span className="text-4xl text-white/20 mx-1 font-light mt-1">/</span>
+                         <span className="text-3xl text-white/20 mx-1 font-light mt-1">/</span>
                          {prediction.target_date.split('-')[2]}
                        </div>
                      </>
                    ) : (
-                     <div className="text-4xl font-black text-white tracking-widest">{prediction.target_date}</div>
+                     <div className="text-4xl font-black text-white tracking-widest leading-none">{prediction.target_date}</div>
                    )}
                 </div>
 
                 {/* Visual State Icon */}
-                <div className="mb-6 relative">
-                   <div className="absolute inset-0 bg-indigo-500/20 blur-[60px] rounded-full animate-pulse capture-hidden" />
-                   <div className="relative w-24 h-24 flex items-center justify-center">
+                <div className="mb-4 relative">
+                   <div className="absolute inset-0 bg-indigo-500/20 blur-[50px] rounded-full animate-pulse capture-hidden" />
+                   <div className="relative w-16 h-16 flex items-center justify-center">
                       {prediction?.signal === 'Long' ? (
-                        <Wind className="w-12 h-12 text-emerald-400/80 stroke-[1]" />
+                        <Wind className="w-8 h-8 text-emerald-400/80 stroke-[1]" />
                       ) : prediction?.signal === 'Short' ? (
-                        <AlertTriangle className="w-12 h-12 text-rose-400/80 stroke-[1]" />
+                        <AlertTriangle className="w-8 h-8 text-rose-400/80 stroke-[1]" />
                       ) : (
-                        <Shield className="w-12 h-12 text-slate-400/80 stroke-[1]" />
+                        <Shield className="w-8 h-8 text-slate-400/80 stroke-[1]" />
                       )}
                    </div>
                 </div>
@@ -256,7 +256,7 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
-                  className="text-5xl font-black tracking-tighter text-white mb-2 italic"
+                  className="text-4xl font-black tracking-tighter text-white mb-1 italic"
                 >
                   {activeStory.token}
                 </motion.h1>
@@ -265,21 +265,21 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.3 }}
-                  className="text-lg font-medium text-slate-400 mb-8"
+                  className="text-sm font-medium text-slate-400 mb-3"
                 >
                   {activeStory.almanac}
                 </motion.p>
 
                 {/* Mood Tag */}
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-4">
-                  <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">气象：{activeStory.aesthetic.mood}</span>
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 mb-1">
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">气象：{activeStory.aesthetic.mood}</span>
                 </div>
 
                 {/* Dynamic Clues */}
                 {activeStory.aesthetic.dynamic_clues.length > 0 && (
-                  <div className="flex flex-wrap justify-center gap-2 mt-2 max-w-[80%] mx-auto">
+                  <div className="flex flex-wrap justify-center gap-1.5 mt-0.5 max-w-[80%] mx-auto opacity-60 hidden">
                     {activeStory.aesthetic.dynamic_clues.map((clue, idx) => (
-                      <span key={idx} className="text-[10px] font-bold text-indigo-400/60 transition-opacity">
+                      <span key={idx} className="text-[9px] font-bold text-indigo-400/60 transition-opacity">
                         #{clue}
                       </span>
                     ))}
