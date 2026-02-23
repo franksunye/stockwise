@@ -11,6 +11,7 @@ from backend.trading_calendar import get_next_trading_day_str
 from backend.db_repo.queries import SAVE_PREDICTION_V2_QUERY, CHECK_PREDICTION_V2_EXISTS_QUERY
 from backend.engine.context import SessionContext
 from backend.logger import logger
+from backend.engine.metaphor import metaphor_engine
 
 class PredictionRunner:
     def __init__(self, model_filter: str = None, force: bool = False):
@@ -157,6 +158,20 @@ class PredictionRunner:
                 primary_pred = pred
                 
             try:
+                # 4.5 Generate Visual Story (Silent Math Overlay)
+                # This is a "Side Effect" decoupled from core prediction logic.
+                try:
+                    latest_market_data = data.get('latest_data', {}) if data else {}
+                    visual_story = metaphor_engine.get_visual_story(pred, latest_market_data)
+                    
+                    # Inject into reasoning JSON to keep DB schema untouched
+                    reasoning_dict = json.loads(pred.get('reasoning', '{}'))
+                    reasoning_dict['visual_story'] = visual_story
+                    pred['reasoning'] = json.dumps(reasoning_dict, ensure_ascii=False)
+                    logger.debug(f"✨ Visual storyline injected for {symbol} ({model_id})")
+                except Exception as ve:
+                    logger.warning(f"⚠️ Metaphor Engine failed for {symbol}: {ve}")
+
                 # Save to V2 Table
                 cursor.execute(SAVE_PREDICTION_V2_QUERY, (
                     symbol, date, model_id,

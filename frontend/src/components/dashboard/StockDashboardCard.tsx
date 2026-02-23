@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, memo } from 'react';
+import { useMemo, memo, useState } from 'react';
 
 import { Zap, Target, ShieldCheck, ChevronDown, Clock } from 'lucide-react';
 import { StockData, TacticalData, AIPrediction } from '@/lib/types';
@@ -146,6 +146,7 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
               </>
             )}
           </div>
+
           <h2 className="text-4xl font-black tracking-tighter" style={{ 
             color: displayPrediction?.signal === 'Long' ? COLORS.up : 
                    displayPrediction?.signal === 'Short' ? COLORS.down : 
