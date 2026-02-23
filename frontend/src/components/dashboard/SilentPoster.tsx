@@ -226,15 +226,15 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
                 <div className="mb-4 flex flex-col items-center justify-center relative">
                    {prediction.target_date.includes('-') ? (
                      <>
-                       <div className="text-[10px] font-black text-slate-400/80 tracking-[0.4em] mb-1">{prediction.target_date.split('-')[0]}</div>
-                       <div className="text-5xl font-black text-white tracking-tighter flex items-center leading-none" style={{ fontFamily: '"SF Pro Display", -apple-system, sans-serif' }}>
+                       <div className="text-[10px] font-black text-slate-500/80 tracking-[0.4em] mb-1">{prediction.target_date.split('-')[0]}</div>
+                       <div className="text-4xl font-black text-white tracking-tighter flex items-center leading-none" style={{ fontFamily: '"SF Pro Display", -apple-system, sans-serif' }}>
                          {prediction.target_date.split('-')[1]}
-                         <span className="text-3xl text-white/20 mx-1 font-light mt-1">/</span>
+                         <span className="text-2xl text-white/20 mx-1 font-light">/</span>
                          {prediction.target_date.split('-')[2]}
                        </div>
                      </>
                    ) : (
-                     <div className="text-4xl font-black text-white tracking-widest leading-none">{prediction.target_date}</div>
+                     <div className="text-2xl font-black text-white tracking-widest leading-none">{prediction.target_date}</div>
                    )}
                 </div>
 
@@ -290,38 +290,38 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
                 <div className="w-full max-w-[280px] mt-4 space-y-1.5 text-left relative z-10 capture-show flex flex-col justify-center">
                    {/* 阵眼结界 */}
                    {(resistanceStr || supportStr) && (
-                     <div className="px-2.5 py-2 rounded-xl bg-white/5 border border-white/5 backdrop-blur-md flex items-center justify-between shadow-lg">
+                     <div className="px-2.5 py-2 rounded-xl bg-white/5 border border-white/5 backdrop-blur-md flex items-center justify-between shadow-sm">
                         <div className="flex gap-1.5 items-center tracking-widest leading-none">
                            <div className="flex gap-1 items-center">
-                              <div className="w-0.5 h-2 bg-rose-500 rounded-sm" />
-                              <span className="text-[8px] text-slate-400 font-black uppercase">上方阻厄</span>
+                              <div className="w-0.5 h-2 bg-slate-500 rounded-sm" />
+                              <span className="text-[8px] text-slate-500 font-bold uppercase">上方阻厄</span>
                            </div>
-                           <span className="text-[10px] font-black text-rose-300 ml-1">{resistanceStr || '--'}</span>
+                           <span className="text-[10px] font-black text-slate-300 ml-1">{resistanceStr || '--'}</span>
                         </div>
                         <div className="w-px h-2 bg-white/10 mx-1" />
                         <div className="flex gap-1.5 items-center tracking-widest leading-none">
                            <div className="flex gap-1 items-center">
-                              <div className="w-0.5 h-2 bg-emerald-500 rounded-sm" />
-                              <span className="text-[8px] text-slate-400 font-black uppercase">绝对防守</span>
+                              <div className="w-0.5 h-2 bg-slate-500 rounded-sm" />
+                              <span className="text-[8px] text-slate-500 font-bold uppercase">绝对防守</span>
                            </div>
-                           <span className="text-[10px] font-black text-emerald-300 ml-1">{supportStr || '--'}</span>
+                           <span className="text-[10px] font-black text-slate-300 ml-1">{supportStr || '--'}</span>
                         </div>
                      </div>
                    )}
 
                    {/* 天机情报 */}
                    {intelligence && (
-                     <div className="px-2.5 py-2 rounded-xl bg-white/5 border border-white/5 backdrop-blur-md flex gap-1.5 items-start shadow-lg">
-                        <span className="text-[8px] font-black text-amber-500/80 uppercase tracking-widest shrink-0 mt-[3px]">【天机】</span>
-                        <p className="text-[10px] text-slate-300 font-medium leading-[1.4] tracking-wider line-clamp-2">{intelligence}</p>
+                     <div className="px-2.5 py-2 rounded-xl bg-white/5 border border-white/5 backdrop-blur-md flex gap-1.5 items-start shadow-sm">
+                        <span className="text-[8px] font-bold text-slate-500 uppercase tracking-widest shrink-0 mt-[3px]">【天机】</span>
+                        <p className="text-[10px] text-slate-400 font-medium leading-[1.4] tracking-wider line-clamp-2">{intelligence}</p>
                      </div>
                    )}
 
                    {/* 冲煞锦囊 */}
                    {tacticStr && (
-                     <div className="px-2.5 py-2 rounded-xl bg-indigo-500/10 border border-indigo-500/20 backdrop-blur-md flex gap-1.5 items-start shadow-lg">
-                        <span className="text-[8px] font-black text-indigo-400 uppercase tracking-widest shrink-0 mt-[3px]">【锦囊】</span>
-                        <p className="text-[10px] text-indigo-200 font-bold leading-[1.4] tracking-wider line-clamp-2">{tacticStr}</p>
+                     <div className="px-2.5 py-2 rounded-xl bg-white/5 border border-white/5 backdrop-blur-md flex gap-1.5 items-start shadow-sm">
+                        <span className="text-[8px] font-bold text-slate-500 uppercase tracking-widest shrink-0 mt-[3px]">【锦囊】</span>
+                        <p className="text-[10px] text-slate-400 font-bold leading-[1.4] tracking-wider line-clamp-2">{tacticStr}</p>
                      </div>
                    )}
                 </div>
