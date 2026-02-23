@@ -3,12 +3,13 @@
 import { useState, useEffect, Suspense, useRef, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LayoutGrid as Grid, ChevronDown, User, FileText } from 'lucide-react';
+import { LayoutGrid as Grid, ChevronDown, User, FileText, Share2, Copy } from 'lucide-react';
 import { StockData, AIPrediction } from '@/lib/types';
 import { 
   StockVerticalFeed,
   BriefDrawer,
-  COLORS 
+  COLORS,
+  MarketAlmanacFeed
 } from '@/components/dashboard';
 import { formatStockSymbol } from '@/lib/date-utils';
 import Link from 'next/link';
@@ -43,6 +44,13 @@ function DashboardContent() {
   const hasScrolledToTarget = useRef(false);
 
   const { stocks, loadingPool, loadMoreHistory } = useStocks();
+
+  // Create an extended array where the first item is the Market Almanac
+  const displayStocks = [
+    { symbol: 'MARKET_ALMANAC', name: 'ZISO AI · 投资黄历', prediction: { signal: 'Side' } } as unknown as StockData,
+    ...stocks
+  ];
+
   const {
     currentIndex,
     scrollRef,
@@ -51,7 +59,7 @@ function DashboardContent() {
     handleVerticalScroll,
     backToTopCounter,
     scrollToToday
-  } = useTikTokScroll(stocks, {
+  } = useTikTokScroll(displayStocks, {
     onOverscrollRight: () => setUserCenterOpen(true),
     // 简化交互：左边缘右滑直接进入更完整的"监控池页面"，替代原本的简易浮层
     onOverscrollLeft: () => router.push('/dashboard/stock-pool')
@@ -115,7 +123,8 @@ function DashboardContent() {
     );
   }
 
-  const currentStock = stocks[currentIndex];
+  const currentStock = displayStocks[currentIndex];
+  const isMarketAlmanac = currentIndex === 0;
 
   return (
     <main className="fixed inset-0 bg-[#050508] text-white overflow-hidden select-none font-sans">
@@ -134,35 +143,51 @@ function DashboardContent() {
         />
       </AnimatePresence>
 
-      {/* Header - 极简刷新按钮 + 居中股票名称 */}
+      {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-[100] p-6 pointer-events-none">
         <div className="w-full flex justify-between items-start pointer-events-auto">
-           {/* 左侧：点击打开股票档案 (无代码显示) */}
-           <div className="flex items-center gap-2 cursor-pointer group shrink-0" onClick={() => setProfileStock(currentStock)}>
+           {/* 左侧：点击打开股票档案 / 分享（黄历） */}
+           <div className="flex items-center gap-2 cursor-pointer group shrink-0" onClick={() => !isMarketAlmanac && setProfileStock(currentStock)}>
               <div className="w-10 h-10 rounded-[16px] bg-white/5 border border-white/10 flex items-center justify-center transition-all group-active:scale-90 group-hover:bg-white/10">
-                 <div className="text-[10px] font-black italic text-indigo-500">{currentStock?.symbol.slice(-2)}</div>
+                 {isMarketAlmanac ? (
+                   <Share2 className="w-5 h-5 text-indigo-400 group-hover:text-white transition-colors" />
+                 ) : (
+                   <div className="text-[10px] font-black italic text-indigo-500">{currentStock?.symbol?.slice(-2) || ''}</div>
+                 )}
               </div>
            </div>
 
-          {/* 中央：股票名称突出显示 */}
+          {/* 中央：股票名称突出显示 / 市场黄历标题 */}
           <div 
             className="absolute left-1/2 transform -translate-x-1/2 top-6 cursor-pointer group flex flex-col items-center"
-            onClick={() => setProfileStock(currentStock)}
+            onClick={() => !isMarketAlmanac && setProfileStock(currentStock)}
           >
-            <h1 className="text-xl font-black italic tracking-tight text-white group-hover:text-indigo-400 transition-colors text-center">
-              {currentStock?.name}
+            <h1 className="text-xl font-black italic tracking-tight text-white group-hover:text-indigo-400 transition-colors text-center drop-shadow-md">
+              {isMarketAlmanac ? "ZISO AI · 投资黄历" : currentStock?.name}
             </h1>
-            <span className="text-[10px] font-black italic text-slate-500 tracking-widest uppercase mt-0.5">
-              {currentStock ? formatStockSymbol(currentStock.symbol) : ''}
-            </span>
+            {!isMarketAlmanac && (
+              <span className="text-[10px] font-black italic text-slate-500 tracking-widest uppercase mt-0.5">
+                {currentStock ? formatStockSymbol(currentStock.symbol) : ''}
+              </span>
+            )}
           </div>
 
-          {/* 右侧：Brief 入口 (替代刷新) */}
+          {/* 右侧：Brief 入口 / 复制（黄历） */}
           <button 
-            onClick={() => setBriefOpen(true)}
+            onClick={() => {
+              if (isMarketAlmanac) {
+                // TODO: Copy Almanac Action
+              } else {
+                setBriefOpen(true);
+              }
+            }}
             className="w-10 h-10 rounded-[16px] bg-white/5 border border-white/10 flex items-center justify-center active:scale-90 transition-all hover:bg-white/10 group"
           >
-            <FileText className="w-5 h-5 text-slate-400 group-hover:text-indigo-400 transition-colors" />
+            {isMarketAlmanac ? (
+              <Copy className="w-5 h-5 text-slate-400 group-hover:text-indigo-400 transition-colors" />
+            ) : (
+              <FileText className="w-5 h-5 text-slate-400 group-hover:text-indigo-400 transition-colors" />
+            )}
           </button>
         </div>
       </header>
@@ -173,17 +198,28 @@ function DashboardContent() {
         onScroll={handleScroll}
         className="h-full w-full flex overflow-x-scroll snap-x snap-mandatory scrollbar-hide"
       >
-        {stocks.map((stock, idx) => (
-          <StockVerticalFeed 
-            key={stock.symbol} 
-            index={idx}
-            stock={stock} 
-            onShowTactics={handleShowTactics} 
-            onVerticalScroll={handleVerticalScrollStable}
-            scrollRequest={currentIndex === idx ? backToTopCounter : undefined}
-            onLoadMore={loadMoreHistory}
-          />
-        ))}
+        {displayStocks.map((stock, idx) => {
+          if (idx === 0) {
+            return (
+              <MarketAlmanacFeed 
+                key="market-almanac" 
+                index={idx}
+                onVerticalScroll={handleVerticalScrollStable} 
+              />
+            );
+          }
+          return (
+            <StockVerticalFeed 
+              key={stock.symbol} 
+              index={idx}
+              stock={stock} 
+              onShowTactics={handleShowTactics} 
+              onVerticalScroll={handleVerticalScrollStable}
+              scrollRequest={currentIndex === idx ? backToTopCounter : undefined}
+              onLoadMore={loadMoreHistory}
+            />
+          );
+        })}
       </div>
 
       {/* 底部导航 - Stock Pool + 个人中心 */}
@@ -209,7 +245,7 @@ function DashboardContent() {
         </AnimatePresence>
 
         <div className="flex gap-2">
-          {stocks.map((_, idx) => (
+          {displayStocks.map((_, idx) => (
             <div key={idx} className={`h-1 rounded-full transition-all duration-300 ${idx === currentIndex ? 'w-6 bg-white' : 'w-1 bg-white/20'}`} />
           ))}
         </div>

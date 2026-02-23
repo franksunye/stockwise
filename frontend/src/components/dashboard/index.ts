@@ -6,3 +6,4 @@ export * from './VerticalIndicator';
 export * from './StockVerticalFeed';
 export * from './BriefDrawer';
 export * from './constants';
+export * from './MarketAlmanacFeed';
