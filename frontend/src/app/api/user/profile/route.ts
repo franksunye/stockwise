@@ -243,7 +243,7 @@ export async function POST(request: Request) {
         try {
             if (isCloud) {
                 const refCountRes = await client.execute({
-                    sql: "SELECT COUNT(*) as count FROM users WHERE referred_by = ?",
+                    sql: "SELECT COUNT(*) as count FROM users WHERE referred_by = ? AND has_onboarded = 1",
                     args: [userId]
                 });
                 referralCount = Number(refCountRes.rows[0]?.count || 0);
@@ -254,7 +254,7 @@ export async function POST(request: Request) {
                 });
                 recentTransactions = txRes.rows || [];
             } else {
-                const refCountRow = client.prepare("SELECT COUNT(*) as count FROM users WHERE referred_by = ?").get(userId) as { count: number } | undefined;
+                const refCountRow = client.prepare("SELECT COUNT(*) as count FROM users WHERE referred_by = ? AND has_onboarded = 1").get(userId) as { count: number } | undefined;
                 referralCount = refCountRow?.count || 0;
                 recentTransactions = client.prepare("SELECT type, amount, status, created_at, note FROM referral_transactions WHERE referrer_id = ? ORDER BY created_at DESC LIMIT 20").all(userId);
             }

@@ -24,25 +24,41 @@ class MetaphorEngine:
         # 1. Base Strategy: Interpret by Signal & Confidence
         if signal == 'Long':
             if confidence >= 0.8:
+<<<<<<< HEAD
                 theme = "Radiant Bloom"
+=======
+                theme = "能量涌现"
+>>>>>>> main
                 almanac = "宜：顺风起帆；吉：良辰吉日"
                 icon_state = "pulse_high"
                 color_hue = "indigo-emerald"
                 mood = "晴空"
             else:
+<<<<<<< HEAD
                 theme = "Rising Tide"
+=======
+                theme = "微光潜行"
+>>>>>>> main
                 almanac = "宜：逢低播种；平：静待花开"
                 icon_state = "breathing_up"
                 color_hue = "slate-indigo"
                 mood = "微光"
         elif signal == 'Short':
+<<<<<<< HEAD
             theme = "Shadow Guard"
+=======
+            theme = "暗影规避"
+>>>>>>> main
             almanac = "忌：高位接力；防：贪海无涯"
             icon_state = "constrict"
             color_hue = "rose-slate"
             mood = "雷阵雨"
         else: # Side / Waiting
+<<<<<<< HEAD
             theme = "Still Water"
+=======
+            theme = "静水深流"
+>>>>>>> main
             almanac = "宜：闭目养神；吉：深水潜伏"
             icon_state = "stable_circle"
             color_hue = "slate-gray"

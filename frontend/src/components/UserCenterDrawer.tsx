@@ -515,7 +515,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                 </h4>
                                 {referralCount > 0 && (
                                     <span className="px-2 py-0.5 rounded-full bg-indigo-500/20 text-[10px] font-black text-indigo-300">
-                                        已邀请 {referralCount} 人
+                                        成功邀请 {referralCount} 人
                                     </span>
                                 )}
                                 <Share2 className="w-8 h-8 text-indigo-500/10 absolute top-4 right-4" />
@@ -562,7 +562,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                     <>
                                       <div className="grid grid-cols-2 gap-2 mt-2 mb-2">
                                         <div className="bg-white/5 rounded-2xl p-3 border border-white/5 text-left">
-                                          <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-1">已邀请好友</div>
+                                          <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-1">成功邀请人数</div>
                                           <div className="text-lg font-black text-indigo-300">{referralCount} <span className="text-xs font-bold text-slate-500">人</span></div>
                                         </div>
                                         <div className="bg-white/5 rounded-2xl p-3 border border-white/5 text-left">
@@ -617,7 +617,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                   {isChannel && (
                                     <div className="mt-2 mb-1 px-1">
                                       <p className="text-[10px] text-slate-600 leading-relaxed text-left">
-                                        佣金比例 <span className="text-amber-400 font-bold">{(commissionRate * 100).toFixed(0)}%</span> · 已推荐 <span className="text-white font-bold">{referralCount}</span> 人
+                                        佣金比例 <span className="text-amber-400 font-bold">{(commissionRate * 100).toFixed(0)}%</span> · 成功推荐 <span className="text-white font-bold">{referralCount}</span> 人
                                       </p>
                                     </div>
                                   )}

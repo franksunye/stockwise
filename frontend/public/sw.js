@@ -10,7 +10,7 @@
 //   - Push:     Preserve existing notification handling
 // =============================================================================
 
-const CACHE_VERSION = 'ziso-v7';
+const CACHE_VERSION = 'ziso-v8';
 
 // Critical resources that MUST be available offline for the App Shell
 const PRECACHE_URLS = [
@@ -113,20 +113,31 @@ async function navigationCacheFirst(request, fallbackUrl) {
     // Background revalidate: update cache silently for next visit
     fetch(request)
       .then((freshResponse) => {
-        if (freshResponse.ok) {
+        // Only update if it's actually HTML (prevent RSC poisoning)
+        const contentType = freshResponse.headers.get('Content-Type') || '';
+        if (freshResponse.ok && contentType.includes('text/html')) {
           cache.put(request, freshResponse);
         }
       })
       .catch(() => { /* silent — user already has cached content */ });
 
-    return cachedResponse;
+    // VERIFICATION: If cache somehow contains RSC payload instead of HTML, bypass it
+    const cachedType = cachedResponse.headers.get('Content-Type') || '';
+    if (cachedType.includes('text/x-component')) {
+      console.warn('[SW] Detected RSC payload in Navigation cache, skipping...');
+    } else {
+      return cachedResponse;
+    }
   }
 
   // 2. No cache (first visit) → try network
   try {
     const networkResponse = await fetchWithTimeout(request, 8000);
     if (networkResponse.ok) {
-      cache.put(request, networkResponse.clone());
+      const contentType = networkResponse.headers.get('Content-Type') || '';
+      if (contentType.includes('text/html')) {
+        cache.put(request, networkResponse.clone());
+      }
     }
     return networkResponse;
   } catch (err) {
@@ -151,7 +162,8 @@ async function rscCacheFirst(request) {
   const url = new URL(request.url);
   // Remove _rsc param to consolidate cache keys for the same route
   url.searchParams.delete('_rsc');
-  const cacheKey = url.toString();
+  // KEY FIX: Append suffix to prevent collision with HTML pages sharing the same URL
+  const cacheKey = url.toString() + '__RSC';
 
   // ignoreVary is critical because Next.js changes Next-Router-State-Tree etc.
   const cachedResponse = await cache.match(cacheKey, { ignoreVary: true });
@@ -160,20 +172,34 @@ async function rscCacheFirst(request) {
     // Background update
     fetchWithTimeout(request, 8000)
       .then((networkResponse) => {
-        if (networkResponse.ok) {
+        const isRSC = networkResponse.headers.get('Content-Type')?.includes('text/x-component') || 
+                      networkResponse.headers.get('X-NextJS-Data') ||
+                      request.headers.has('RSC');
+        if (networkResponse.ok && isRSC) {
           cache.put(cacheKey, networkResponse);
         }
       })
       .catch(() => { /* silent */ });
     
-    return cachedResponse;
+    // VERIFICATION: Ensure we are not returning HTML for an RSC request
+    const contentType = cachedResponse.headers.get('Content-Type') || '';
+    if (contentType.includes('text/html')) {
+       console.warn('[SW] Detected HTML in RSC cache, skipping...');
+    } else {
+       return cachedResponse;
+    }
   }
 
   // First visit cache miss
   try {
     const networkResponse = await fetchWithTimeout(request, 8000);
     if (networkResponse.ok) {
-      cache.put(cacheKey, networkResponse.clone());
+      // Only cache if it actually looks like an RSC response
+      const isRSC = networkResponse.headers.get('Content-Type')?.includes('text/x-component') || 
+                    networkResponse.headers.get('X-NextJS-Data');
+      if (isRSC) {
+        cache.put(cacheKey, networkResponse.clone());
+      }
     }
     return networkResponse;
   } catch (err) {
@@ -236,6 +262,14 @@ async function cacheFirst(request) {
   // 2. Cache miss → try network
   try {
     const networkResponse = await fetchWithTimeout(request, 8000);
+    
+    // VERSION MISMATCH PROTECTION:
+    // If a request for a JS chunk returns 404, it means the build has updated.
+    // We should NOT cache this error, and potentially let the client handle it.
+    if (networkResponse.status === 404 && request.url.includes('/_next/static/')) {
+        return networkResponse;
+    }
+
     if (networkResponse.ok) {
       cache.put(request, networkResponse.clone());
     }

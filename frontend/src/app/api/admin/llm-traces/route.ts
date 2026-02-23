@@ -1,14 +1,19 @@
 import { NextResponse } from 'next/server';
 import { getDbClient } from '@/lib/db';
+import { requireAdminAuth } from '@/lib/admin-auth';
 import { Client } from '@libsql/client';
 import Database from 'better-sqlite3';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
+    const unauthorized = requireAdminAuth(request);
+    if (unauthorized) return unauthorized;
+
     try {
         const { searchParams } = new URL(request.url);
-        const limit = parseInt(searchParams.get('limit') || '100');
+        const parsedLimit = Number.parseInt(searchParams.get('limit') || '100', 10);
+        const limit = Number.isFinite(parsedLimit) ? Math.min(Math.max(parsedLimit, 1), 500) : 100;
         const symbol = searchParams.get('symbol');
         const model = searchParams.get('model');
         const status = searchParams.get('status');
@@ -16,11 +21,21 @@ export async function GET(request: Request) {
         const client = getDbClient();
         const strategy = process.env.DB_STRATEGY || 'local';
 
-        // Build WHERE clauses
         const conditions: string[] = [];
-        if (symbol) conditions.push(`symbol LIKE '%${symbol}%'`);
-        if (model) conditions.push(`model = '${model}'`);
-        if (status) conditions.push(`status = '${status}'`);
+        const args: Array<string | number> = [];
+        if (symbol) {
+            conditions.push('symbol LIKE ?');
+            args.push(`%${symbol}%`);
+        }
+        if (model) {
+            conditions.push('model = ?');
+            args.push(model);
+        }
+        if (status) {
+            conditions.push('status = ?');
+            args.push(status);
+        }
+        args.push(limit);
 
         const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
@@ -33,16 +48,16 @@ export async function GET(request: Request) {
             FROM llm_traces 
             ${whereClause}
             ORDER BY created_at DESC 
-            LIMIT ${limit}
+            LIMIT ?
         `;
 
         if (strategy === 'cloud') {
             const turso = client as Client;
-            const res = await turso.execute(sql);
+            const res = await turso.execute({ sql, args });
             traces = res.rows;
         } else {
             const db = client as Database.Database;
-            traces = db.prepare(sql).all();
+            traces = db.prepare(sql).all(...args);
             db.close();
         }
 

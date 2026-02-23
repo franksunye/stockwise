@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getDbClient } from '@/lib/db';
+import { requireAdminAuth } from '@/lib/admin-auth';
 import { Client } from '@libsql/client';
 import Database from 'better-sqlite3';
 
@@ -17,7 +18,10 @@ interface LastSyncResult {
     last: string | null;
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+    const unauthorized = requireAdminAuth(request);
+    if (unauthorized) return unauthorized;
+
     try {
         const client = getDbClient();
         const strategy = process.env.DB_STRATEGY || 'local';
