@@ -19,6 +19,40 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
   const posterRef = useRef<HTMLDivElement>(null);
   const [isCapturing, setIsCapturing] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [displayScale, setDisplayScale] = useState(1);
+
+  // Intelligent Auto-Scaling Engine for different screen heights
+  React.useEffect(() => {
+    const checkScale = () => {
+      if (typeof window === 'undefined') return;
+      
+      const vh = window.innerHeight;
+      const vw = window.innerWidth;
+      
+      // Target: We want the poster (which is ~700px tall) to have at least 15% vertical breathing room
+      // On narrow/short screens like iPhone SE (667px height), we scale down.
+      const basePosterHeight = 720; 
+      const safeHeight = vh * 0.92; // 8% total safe margin
+      
+      if (vh < basePosterHeight) {
+        // Calculate factor but clamp it between 0.75 and 1.0 to prevent micro-aliasing
+        const factor = Math.min(1, Math.max(0.75, safeHeight / basePosterHeight));
+        setDisplayScale(factor);
+      } else {
+        // For larger screens, check width. max-w-sm is 384px.
+        const safeWidth = vw * 0.95;
+        if (vw < 400) {
+           setDisplayScale(Math.min(1, safeWidth / 384));
+        } else {
+           setDisplayScale(1);
+        }
+      }
+    };
+
+    checkScale();
+    window.addEventListener('resize', checkScale);
+    return () => window.removeEventListener('resize', checkScale);
+  }, []);
 
   const tacticalData = React.useMemo(() => {
     try {
@@ -42,6 +76,12 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
   const generateImage = useCallback(async () => {
     if (!posterRef.current) return null;
     
+    // Save current scale to restore later if necessary, 
+    // although transform doesn't affect html-to-image internal rendering usually.
+    // However, resetting to 1 during capture ensures perfect pixel alignment.
+    const originalStyle = posterRef.current.style.transform;
+    posterRef.current.style.transform = 'none';
+    
     // Filter out interactive elements from the generated image
     const filter = (node: HTMLElement) => {
       if (node.classList?.contains('capture-hidden')) {
@@ -57,6 +97,9 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
         pixelRatio: 2,
         filter: filter as unknown as (domNode: HTMLElement) => boolean 
       });
+      
+      // Restore the display scale
+      posterRef.current.style.transform = originalStyle;
       return dataUrl;
     } catch (err) {
       console.error('Failed to generate poster', err);
@@ -200,10 +243,20 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
           {/* Poster Container */}
           <motion.div
             ref={posterRef}
-            initial={{ scale: 0.9, opacity: 0, y: 20 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.9, opacity: 0, y: 20 }}
-            className="relative w-full max-w-sm aspect-[9/16] bg-[#0a0a0b] rounded-[40px] shadow-2xl overflow-hidden border border-white/10 flex flex-col"
+            initial={{ scale: displayScale * 0.8, opacity: 0, y: 20 }}
+            animate={{ 
+              scale: displayScale,
+              opacity: 1, 
+              y: 0 
+            }}
+            transition={{ 
+              type: "spring", 
+              damping: 25, 
+              stiffness: 300,
+              scale: { duration: 0.4 }
+            }}
+            exit={{ scale: displayScale * 0.8, opacity: 0, y: 20 }}
+            className="relative w-full max-w-sm aspect-[9/16] bg-[#0a0a0b] rounded-[40px] shadow-2xl overflow-hidden border border-white/10 flex flex-col origin-center"
           >
             {/* Design Elements: Gradient Background */}
             <div className={`absolute inset-0 opacity-20 pointer-events-none bg-gradient-to-b from-transparent via-${activeStory.aesthetic.hue.split('-')[0]}-500/10 to-${activeStory.aesthetic.hue.split('-')[1]}-500/20`} />
@@ -220,7 +273,7 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
             </div>
 
             {/* Main Content: The "Silent Math" Symbol & Token */}
-            <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-8 text-center mt-[-2rem]">
+            <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 text-center mt-[-1.5rem] min-h-0 overflow-hidden">
                 
                 {/* Centered Large Date (Almanac Style) */}
                 <div className="mb-4 flex flex-col items-center justify-center relative">
@@ -287,7 +340,7 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
                 )}
 
                 {/* --- NEW ALMANAC DATA INSIGHTS --- */}
-                <div className="w-full max-w-[280px] mt-4 space-y-1.5 text-left relative z-10 capture-show flex flex-col justify-center">
+                <div className="w-full max-w-[280px] mt-3 space-y-1 text-left relative z-10 capture-show flex flex-col justify-center">
                    {/* 阵眼结界 */}
                    {(resistanceStr || supportStr) && (
                      <div className="px-2.5 py-2 rounded-xl bg-white/5 border border-white/5 backdrop-blur-md flex items-center justify-between shadow-sm">
@@ -346,7 +399,7 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
             </div>
 
             {/* Action Buttons */}
-            <div className="relative z-10 px-6 pb-6 flex gap-3 capture-hidden">
+            <div className="relative z-10 px-6 pb-5 flex gap-3 capture-hidden">
                <button 
                   onClick={() => handleShare(activeStory)}
                   disabled={isCapturing}
