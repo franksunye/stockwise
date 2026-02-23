@@ -64,6 +64,33 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
 
   const story = tacticalData?.visual_story;
 
+  // Almanac Insights Extraction
+  const keyLevels = tacticalData?.key_levels;
+  const resistanceStr = keyLevels?.strong_resistance || keyLevels?.resistance || '';
+  const supportStr = keyLevels?.stop_loss_reference || keyLevels?.strong_support || keyLevels?.support || '';
+
+  let intelligence = '';
+  if (tacticalData?.summary) {
+    intelligence = tacticalData.summary;
+  } else if (tacticalData?.reasoning_trace && tacticalData.reasoning_trace.length > 0) {
+    intelligence = tacticalData.reasoning_trace[0].data;
+  }
+  // Allow line-clamp to handle truncation, but have a higher max safety limit
+  if (intelligence.length > 70) {
+     intelligence = intelligence.substring(0, 69) + '...';
+  }
+
+  let topTactic = null;
+  if (userPos === 'holding') {
+    topTactic = tacticalData?.tactics?.holding_profit?.[0] || tacticalData?.tactics?.holding_loss?.[0];
+  } else {
+    topTactic = tacticalData?.tactics?.empty?.[0] || tacticalData?.tactics?.general?.[0];
+  }
+  if (!topTactic && tacticalData?.tactics) {
+    topTactic = tacticalData.tactics.empty?.[0] || tacticalData.tactics.holding_profit?.[0] || tacticalData.tactics.general?.[0];
+  }
+  const tacticStr = topTactic?.action || '';
+
   const showToast = useCallback((msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3000);
@@ -173,7 +200,7 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
         await navigator.share({
           files: filesArray,
           title: 'ZISO AI 投资黄历',
-          text: generateFallbackText(activeStory),
+          text: generateMarketingText(activeStory),
         });
         // Success silently
       } else {
@@ -183,7 +210,7 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
       if (err instanceof Error && err.name !== 'AbortError') {
         console.log('Falling back to clipboard + download...');
         try {
-           await navigator.clipboard.writeText(generateFallbackText(activeStory));
+           await navigator.clipboard.writeText(generateMarketingText(activeStory));
            const link = document.createElement('a');
            link.download = `ZISO_AI_${stockName}_${prediction.target_date.replace(/-/g, '')}.png`;
            link.href = dataUrl;
@@ -213,33 +240,6 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
 
   const activeStory = story || defaultStory;
   const signalColor = prediction?.signal === 'Long' ? COLORS.up : prediction?.signal === 'Short' ? COLORS.down : COLORS.hold;
-
-  // Almanac Insights Extraction
-  const keyLevels = tacticalData?.key_levels;
-  const resistanceStr = keyLevels?.strong_resistance || keyLevels?.resistance || '';
-  const supportStr = keyLevels?.stop_loss_reference || keyLevels?.strong_support || keyLevels?.support || '';
-
-  let intelligence = '';
-  if (tacticalData?.summary) {
-    intelligence = tacticalData.summary;
-  } else if (tacticalData?.reasoning_trace && tacticalData.reasoning_trace.length > 0) {
-    intelligence = tacticalData.reasoning_trace[0].data;
-  }
-  // Allow line-clamp to handle truncation, but have a higher max safety limit
-  if (intelligence.length > 70) {
-     intelligence = intelligence.substring(0, 69) + '...';
-  }
-
-  let topTactic = null;
-  if (userPos === 'holding') {
-    topTactic = tacticalData?.tactics?.holding_profit?.[0] || tacticalData?.tactics?.holding_loss?.[0];
-  } else {
-    topTactic = tacticalData?.tactics?.empty?.[0] || tacticalData?.tactics?.general?.[0];
-  }
-  if (!topTactic && tacticalData?.tactics) {
-    topTactic = tacticalData.tactics.empty?.[0] || tacticalData.tactics.holding_profit?.[0] || tacticalData.tactics.general?.[0];
-  }
-  const tacticStr = topTactic?.action || '';
 
   return (
     <AnimatePresence>
