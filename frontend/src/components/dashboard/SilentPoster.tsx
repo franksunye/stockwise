@@ -101,7 +101,6 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
     const confidence = (prediction.confidence * 100).toFixed(0);
     
     let text = `今日投资黄历｜${stockName} (${prediction.symbol})\n\n`;
-    text += `🌊 意境：${activeStory.token}\n`;
     text += `� 核心：${activeStory.almanac}，气象 ${activeStory.aesthetic.mood}\n\n`;
     
     if (intelligence) {
