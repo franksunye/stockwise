@@ -2,7 +2,7 @@
 
 import React, { useRef, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Share2, Download, Wind, Shield, AlertTriangle, Loader2 } from 'lucide-react';
+import { X, Share2, Download, Wind, Shield, AlertTriangle, Loader2, Copy, Check } from 'lucide-react';
 import { toPng } from 'html-to-image';
 import { AIPrediction, TacticalData, VisualStory } from '@/lib/types';
 import { COLORS } from './constants';
@@ -69,9 +69,37 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
     setTimeout(() => setToastMessage(null), 3000);
   }, []);
 
-  const generateFallbackText = useCallback((activeStory: VisualStory) => {
-    return `【ZISO AI · 投资黄历 · ${stockName}】\n🌊 意境：${activeStory.token}\n💡 核心：${activeStory.almanac}，气象 ${activeStory.aesthetic.mood}\n🔭 决策：${prediction.signal === 'Long' ? '看多' : prediction.signal === 'Short' ? '看空' : '观望'} (把握 ${(prediction.confidence * 100).toFixed(0)}%)\n——————————\n「AI做功课，带你看门道。」\n👉 知守智囊团 (ZISO AI)`;
-  }, [stockName, prediction]);
+  const generateMarketingText = useCallback((activeStory: VisualStory) => {
+    const signalText = prediction.signal === 'Long' ? '看多' : prediction.signal === 'Short' ? '看空' : '观望';
+    const confidence = (prediction.confidence * 100).toFixed(0);
+    
+    let text = `今日投资黄历｜${stockName} (${prediction.symbol})\n\n`;
+    text += `🌊 意境：${activeStory.token}\n`;
+    text += `� 核心：${activeStory.almanac}，气象 ${activeStory.aesthetic.mood}\n\n`;
+    
+    if (intelligence) {
+      text += `🔍 天机：${intelligence}\n`;
+    }
+    if (tacticStr) {
+      text += `💡 锦囊：${tacticStr}\n`;
+    }
+    
+    text += `\n🎯 决策：${signalText} (把握 ${confidence}%)\n\n`;
+    text += `—— ZISO AI：替你做股市功课，带你看投资门道。\n`;
+    text += `#ZISOAI #投资黄历 #股市复盘`;
+    
+    return text;
+  }, [stockName, prediction, intelligence, tacticStr]);
+
+  const handleCopyText = async () => {
+    const text = generateMarketingText(activeStory);
+    try {
+      await navigator.clipboard.writeText(text);
+      showToast('文案已复制，去朋友圈/小红书分享吧！');
+    } catch (err) {
+      showToast('复制失败，请手动长按文字');
+    }
+  };
 
   const generateImage = useCallback(async () => {
     if (!posterRef.current) return null;
@@ -407,6 +435,13 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
                 >
                   {isCapturing ? <Loader2 className="animate-spin" size={18} /> : <Share2 size={18} />}
                   分享意境
+               </button>
+               <button 
+                  onClick={handleCopyText}
+                  className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white active:scale-95 transition-transform"
+                  title="复制文案"
+                >
+                  <Copy size={18} />
                </button>
                <button 
                   onClick={handleDownload}
