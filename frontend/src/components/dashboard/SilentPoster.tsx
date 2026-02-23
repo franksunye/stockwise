@@ -184,7 +184,7 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
   };
 
   const activeStory = story || defaultStory;
-  const signalColor = prediction?.signal === 'Long' ? '#e2e8f0' : prediction?.signal === 'Short' ? '#cbd5e1' : '#94a3b8';
+  const signalColor = prediction?.signal === 'Long' ? COLORS.up : prediction?.signal === 'Short' ? COLORS.down : COLORS.hold;
 
   // Almanac Insights Extraction
   const keyLevels = tacticalData?.key_levels;
@@ -293,14 +293,14 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
 
                 {/* Visual State Icon */}
                 <div className="mb-4 relative">
-                   <div className="absolute inset-0 bg-white/10 blur-[40px] rounded-full animate-pulse capture-hidden" />
+                   <div className={`absolute inset-0 ${prediction?.signal === 'Long' ? 'bg-emerald-500/20' : prediction?.signal === 'Short' ? 'bg-rose-500/20' : 'bg-slate-500/10'} blur-[40px] rounded-full animate-pulse capture-hidden`} />
                    <div className="relative w-16 h-16 flex items-center justify-center">
                       {prediction?.signal === 'Long' ? (
-                        <Wind className="w-8 h-8 text-slate-300 stroke-[1]" />
+                        <Wind className="w-8 h-8 text-emerald-400/80 stroke-[1]" />
                       ) : prediction?.signal === 'Short' ? (
-                        <AlertTriangle className="w-8 h-8 text-slate-400 stroke-[1]" />
+                        <AlertTriangle className="w-8 h-8 text-rose-400/80 stroke-[1]" />
                       ) : (
-                        <Shield className="w-8 h-8 text-slate-500 stroke-[1]" />
+                        <Shield className="w-8 h-8 text-slate-400/80 stroke-[1]" />
                       )}
                    </div>
                 </div>
