@@ -87,6 +87,19 @@ export interface ReasoningStep {
     conclusion: string; // 判断结论（≤15字）
 }
 
+// 视觉叙事数据类型 (Silent Math)
+export interface VisualStory {
+    token: string;
+    almanac: string;
+    visual_state: string;
+    aesthetic: {
+        hue: string;
+        mood: string;
+        dynamic_clues: string[];
+    };
+    meta_version: string;
+}
+
 // 战术数据包 (AI Reasoning 的解析格式)
 export interface TacticalData {
     summary: string;
@@ -118,6 +131,7 @@ export interface TacticalData {
     counter_argument?: string;
     is_llm?: boolean;
     model?: string;
+    visual_story?: VisualStory;
 }
 
 // Dashboard 页面聚合数据

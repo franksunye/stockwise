@@ -15,9 +15,11 @@ import {
   Crosshair,
   Layers,
   Hash,
-  AlertTriangle
+  AlertTriangle,
+  Share2
 } from 'lucide-react';
-import { TacticalData } from '@/lib/types';
+import dynamic from 'next/dynamic';
+import { AIPrediction, TacticalData } from '@/lib/types';
 import { shouldEnableHighPerformance } from '@/lib/device-utils';
 import { AICouncil } from './AICouncil';
 
@@ -30,9 +32,17 @@ interface TacticalBriefDrawerProps {
   userPos: 'holding' | 'empty' | 'none';
   tier: 'free' | 'pro';
   model?: string;
-  symbol: string; // Add symbol
-  targetDate: string; // Add targetDate
+  symbol: string;
+  targetDate: string;
+  signal?: 'Long' | 'Short' | 'Side';
+  confidence?: number;
+  stockName?: string;
 }
+
+const SilentPoster = dynamic(() => import('./SilentPoster').then(mod => mod.SilentPoster), {
+  ssr: false,
+  loading: () => null
+});
 
 // 辅助函数：获取步骤对应的图标和标签配置
 const getStepConfig = (step: string) => {
@@ -54,8 +64,9 @@ const getStepConfig = (step: string) => {
 };
 
 export function TacticalBriefDrawer({ 
-  isOpen, onClose, data, tier, model, symbol, targetDate
+  isOpen, onClose, data, tier, model, symbol, targetDate, signal, confidence, stockName
 }: TacticalBriefDrawerProps) {
+  const [isShareOpen, setIsShareOpen] = useState(false);
   const isHighPerformance = shouldEnableHighPerformance();
   const [isExpanded, setIsExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState<'brief' | 'council'>('brief');
@@ -66,10 +77,21 @@ export function TacticalBriefDrawer({
 
   const [viewState, setViewState] = useState<'holding_profit'|'holding_loss'|'empty'>('holding_profit');
   const scrollRef = useRef<HTMLDivElement>(null);
-
-
   
+  const posterPrediction: AIPrediction = {
+    symbol,
+    target_date: targetDate,
+    signal: signal || 'Side',
+    confidence: confidence || 0,
+    ai_reasoning: JSON.stringify(data),
+    date: '',
+    support_price: 0,
+    validation_status: 'Pending',
+    actual_change: null
+  };
+
   return (
+    <>
     <AnimatePresence>
 
       {isOpen && (
@@ -101,6 +123,17 @@ export function TacticalBriefDrawer({
 
             {/* 固定 Header，不再随内容滚动，彻底消除缝隙穿透 */}
             <header className="relative flex items-center justify-center py-2 px-6 bg-[#0a0a0f] border-b border-white/5 shadow-lg shadow-black/20 shrink-0 z-20">
+                 {/* Left: Action */}
+                 <button 
+                   onClick={(e) => {
+                     e.stopPropagation();
+                     setIsShareOpen(true);
+                   }} 
+                   className="absolute left-4 p-2.5 rounded-full bg-white/5 border border-white/10 text-indigo-400 active:scale-95 transition-all hover:bg-white/10 hover:text-indigo-300 z-20"
+                 >
+                   <Share2 size={18} />
+                 </button>
+
                  {/* Center: Tabs */}
                  <div className="flex p-1 rounded-full bg-white/5 border border-white/10 relative z-10">
                      <button 
@@ -494,5 +527,15 @@ export function TacticalBriefDrawer({
         </div>
       )}
     </AnimatePresence>
+
+    {isOpen && (
+      <SilentPoster 
+        isOpen={isShareOpen}
+        onClose={() => setIsShareOpen(false)}
+        prediction={posterPrediction}
+        stockName={stockName || symbol}
+      />
+    )}
+    </>
   );
 }
