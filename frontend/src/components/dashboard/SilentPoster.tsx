@@ -301,7 +301,7 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
             </div>
 
             {/* Main Content: The "Silent Math" Symbol & Token */}
-            <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 text-center mt-[-1.5rem] min-h-0 overflow-hidden">
+            <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 text-center mt-[-1rem] min-h-0 overflow-hidden">
                 
                 {/* Centered Large Date (Almanac Style) */}
                 <div className="mb-4 flex flex-col items-center justify-center relative">
@@ -409,7 +409,7 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
             </div>
 
             {/* Footer: Data Hook */}
-            <div className="relative z-10 px-8 pb-4 pt-10 bg-gradient-to-t from-[#0a0a0b] via-black/80 to-transparent flex-shrink-0">
+            <div className="relative z-10 px-8 pb-4 pt-4 bg-gradient-to-t from-[#0a0a0b] via-black/80 to-transparent flex-shrink-0">
                <div className="flex justify-between items-end">
                   <div className="space-y-0.5">
                     <h2 className="text-xl font-black tracking-tighter text-white">{stockName}</h2>
@@ -427,7 +427,7 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
             </div>
 
             {/* Action Buttons */}
-            <div className="relative z-10 px-6 pb-5 flex gap-3 capture-hidden">
+            <div className="relative z-10 px-6 pb-4 flex gap-3 capture-hidden">
                <button 
                   onClick={() => handleShare(activeStory)}
                   disabled={isCapturing}
