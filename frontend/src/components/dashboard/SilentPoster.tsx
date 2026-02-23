@@ -154,8 +154,9 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
   } else if (tacticalData?.reasoning_trace && tacticalData.reasoning_trace.length > 0) {
     intelligence = tacticalData.reasoning_trace[0].data;
   }
-  if (intelligence.length > 30) {
-     intelligence = intelligence.substring(0, 29) + '...';
+  // Allow line-clamp to handle truncation, but have a higher max safety limit
+  if (intelligence.length > 70) {
+     intelligence = intelligence.substring(0, 69) + '...';
   }
 
   let topTactic = null;
@@ -286,58 +287,58 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
                 )}
 
                 {/* --- NEW ALMANAC DATA INSIGHTS --- */}
-                <div className="w-[110%] md:w-[125%] mt-6 space-y-2 text-left relative z-10 capture-show origin-top scale-90 md:scale-95">
+                <div className="w-full max-w-[280px] mt-4 space-y-1.5 text-left relative z-10 capture-show flex flex-col justify-center">
                    {/* 阵眼结界 */}
                    {(resistanceStr || supportStr) && (
-                     <div className="p-2.5 rounded-xl bg-white/5 border border-white/5 backdrop-blur-md flex items-center justify-between shadow-lg">
-                        <div className="flex gap-2 items-center tracking-widest leading-none">
-                           <div className="flex gap-1.5 items-center">
-                              <div className="w-1 h-2.5 bg-rose-500 rounded-sm" />
-                              <span className="text-[9px] text-slate-400 font-black uppercase">上方阻厄</span>
+                     <div className="px-2.5 py-2 rounded-xl bg-white/5 border border-white/5 backdrop-blur-md flex items-center justify-between shadow-lg">
+                        <div className="flex gap-1.5 items-center tracking-widest leading-none">
+                           <div className="flex gap-1 items-center">
+                              <div className="w-0.5 h-2 bg-rose-500 rounded-sm" />
+                              <span className="text-[8px] text-slate-400 font-black uppercase">上方阻厄</span>
                            </div>
-                           <span className="text-xs font-black text-rose-300">{resistanceStr || '--'}</span>
+                           <span className="text-[10px] font-black text-rose-300 ml-1">{resistanceStr || '--'}</span>
                         </div>
-                        <div className="w-px h-3 bg-white/10 mx-2" />
-                        <div className="flex gap-2 items-center tracking-widest leading-none">
-                           <div className="flex gap-1.5 items-center">
-                              <div className="w-1 h-2.5 bg-emerald-500 rounded-sm" />
-                              <span className="text-[9px] text-slate-400 font-black uppercase">绝对防守</span>
+                        <div className="w-px h-2 bg-white/10 mx-1" />
+                        <div className="flex gap-1.5 items-center tracking-widest leading-none">
+                           <div className="flex gap-1 items-center">
+                              <div className="w-0.5 h-2 bg-emerald-500 rounded-sm" />
+                              <span className="text-[8px] text-slate-400 font-black uppercase">绝对防守</span>
                            </div>
-                           <span className="text-xs font-black text-emerald-300">{supportStr || '--'}</span>
+                           <span className="text-[10px] font-black text-emerald-300 ml-1">{supportStr || '--'}</span>
                         </div>
                      </div>
                    )}
 
                    {/* 天机情报 */}
                    {intelligence && (
-                     <div className="p-2.5 rounded-xl bg-white/5 border border-white/5 backdrop-blur-md flex gap-2 items-start shadow-lg">
-                        <span className="text-[9px] font-black text-amber-500/80 uppercase tracking-widest shrink-0 mt-0.5">【天机】</span>
-                        <p className="text-[11px] text-slate-300 font-medium leading-[1.4] tracking-wider">{intelligence}</p>
+                     <div className="px-2.5 py-2 rounded-xl bg-white/5 border border-white/5 backdrop-blur-md flex gap-1.5 items-start shadow-lg">
+                        <span className="text-[8px] font-black text-amber-500/80 uppercase tracking-widest shrink-0 mt-[3px]">【天机】</span>
+                        <p className="text-[10px] text-slate-300 font-medium leading-[1.4] tracking-wider line-clamp-2">{intelligence}</p>
                      </div>
                    )}
 
                    {/* 冲煞锦囊 */}
                    {tacticStr && (
-                     <div className="p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 backdrop-blur-md flex gap-2 items-start shadow-lg">
-                        <span className="text-[9px] font-black text-indigo-400 uppercase tracking-widest shrink-0 mt-0.5">【锦囊】</span>
-                        <p className="text-[11px] text-indigo-200 font-bold leading-[1.4] tracking-wider">{tacticStr}</p>
+                     <div className="px-2.5 py-2 rounded-xl bg-indigo-500/10 border border-indigo-500/20 backdrop-blur-md flex gap-1.5 items-start shadow-lg">
+                        <span className="text-[8px] font-black text-indigo-400 uppercase tracking-widest shrink-0 mt-[3px]">【锦囊】</span>
+                        <p className="text-[10px] text-indigo-200 font-bold leading-[1.4] tracking-wider line-clamp-2">{tacticStr}</p>
                      </div>
                    )}
                 </div>
             </div>
 
             {/* Footer: Data Hook */}
-            <div className="relative z-10 p-10 bg-gradient-to-t from-black/60 to-transparent pt-16">
+            <div className="relative z-10 px-8 pb-4 pt-10 bg-gradient-to-t from-[#0a0a0b] via-black/80 to-transparent flex-shrink-0">
                <div className="flex justify-between items-end">
-                  <div className="space-y-1">
-                    <h2 className="text-2xl font-black tracking-tighter text-white">{stockName}</h2>
-                    <p className="text-sm font-bold text-slate-500 mono">{prediction?.symbol}</p>
+                  <div className="space-y-0.5">
+                    <h2 className="text-xl font-black tracking-tighter text-white">{stockName}</h2>
+                    <p className="text-xs font-bold text-slate-500 mono">{prediction?.symbol}</p>
                   </div>
                   <div className="text-right">
-                    <div className="text-3xl font-black italic tracking-tighter" style={{ color: signalColor }}>
+                    <div className="text-2xl font-black italic tracking-tighter" style={{ color: signalColor }}>
                       {prediction?.signal === 'Long' ? '看多' : prediction?.signal === 'Short' ? '看空' : '观望'}
                     </div>
-                    <div className="text-[10px] font-bold text-slate-600 uppercase tracking-widest mt-1">
+                    <div className="text-[9px] font-bold text-slate-600 uppercase tracking-widest">
                        把握 {(prediction?.confidence * 100).toFixed(0)}%
                     </div>
                   </div>
@@ -345,7 +346,7 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
             </div>
 
             {/* Action Buttons */}
-            <div className="relative z-10 px-8 pb-8 flex gap-3 capture-hidden">
+            <div className="relative z-10 px-6 pb-6 flex gap-3 capture-hidden">
                <button 
                   onClick={() => handleShare(activeStory)}
                   disabled={isCapturing}
