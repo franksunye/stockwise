@@ -60,14 +60,10 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   // ── 乐观初始化 ──
-  // 如果本地有 auth 缓存，直接用缓存值启动（秒开）。
-  // 如果没有缓存，才显示"验证中"加载状态。
-  const cachedAuth = typeof window !== 'undefined' ? getAuthCache() : null;
-
-  const [isAuthorized, setIsAuthorized] = useState<boolean | null>(
-    cachedAuth?.authorized ?? null
-  );
-  const [tier, setTier] = useState<Tier>(cachedAuth?.tier ?? 'free');
+  // 避免 React Hydration Mismatch (Error #418)：服务端和客户端初次渲染必须一致
+  // 我们以 null 初始化展示 Skeleton，立刻在 useEffect 中读取缓存"秒开"
+  const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
+  const [tier, setTier] = useState<Tier>('free');
 
   const appBootstrap = (
     <>
@@ -80,6 +76,13 @@ export default function DashboardLayout({
   );
 
   useEffect(() => {
+    // 1. 客户端挂载后立即尝试从缓存恢复，实现"秒开"
+    const cachedAuth = getAuthCache();
+    if (cachedAuth) {
+      setIsAuthorized(cachedAuth.authorized);
+      setTier(cachedAuth.tier);
+    }
+
     const checkAuth = async () => {
       const { switches } = MEMBERSHIP_CONFIG;
       
@@ -110,13 +113,7 @@ export default function DashboardLayout({
       }
 
       // ── 邀请墙开启时 ──
-      // 即使开着邀请墙，如果本地有可信的缓存（已通过验证），
-      // 也先展示内容（用缓存的 tier），然后后台静默验证。
-      // 这消除了"系统验证中"的加载闪屏。
       const hasOptimisticAuth = cachedAuth?.authorized === true;
-      if (hasOptimisticAuth && isAuthorized === null) {
-        // 已由 useState 初始化处理
-      }
 
       let referredBy: string | null = null;
       
