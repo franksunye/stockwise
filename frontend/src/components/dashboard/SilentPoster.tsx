@@ -100,8 +100,8 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
     const signalText = prediction.signal === 'Long' ? '看多' : prediction.signal === 'Short' ? '看空' : '观望';
     const confidence = (prediction.confidence * 100).toFixed(0);
     
-    let text = `今日投资黄历｜${stockName} (${prediction.symbol})\n\n`;
-    text += `� 核心：${activeStory.almanac}，气象 ${activeStory.aesthetic.mood}\n\n`;
+    let text = `投资黄历 (${prediction.target_date})｜${stockName} (${prediction.symbol})\n\n`;
+    text += `📜 核心：${activeStory.almanac}，气象 ${activeStory.aesthetic.mood}\n\n`;
     
     if (intelligence) {
       text += `🔍 天机：${intelligence}\n`;
