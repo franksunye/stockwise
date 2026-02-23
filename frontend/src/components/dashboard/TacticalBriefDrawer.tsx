@@ -66,16 +66,13 @@ const getStepConfig = (step: string) => {
 export function TacticalBriefDrawer({ 
   isOpen, onClose, data, tier, model, symbol, targetDate, signal, confidence, stockName
 }: TacticalBriefDrawerProps) {
-<<<<<<< HEAD
   const [isMounted, setIsMounted] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
-=======
-  const [isShareOpen, setIsShareOpen] = useState(false);
->>>>>>> main
+
   const isHighPerformance = shouldEnableHighPerformance();
   const [isExpanded, setIsExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState<'brief' | 'council'>('brief');
@@ -99,11 +96,8 @@ export function TacticalBriefDrawer({
     actual_change: null
   };
 
-<<<<<<< HEAD
   if (!isMounted) return null;
 
-=======
->>>>>>> main
   return (
     <>
     <AnimatePresence>

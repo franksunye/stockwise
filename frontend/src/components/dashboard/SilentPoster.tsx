@@ -45,11 +45,7 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
   return (
     <AnimatePresence>
       {isOpen && (
-<<<<<<< HEAD
         <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
-=======
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
->>>>>>> main
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -72,11 +68,7 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
             {/* Top Bar */}
             <div className="relative z-10 p-8 flex justify-between items-start">
               <div className="space-y-1">
-<<<<<<< HEAD
-                <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">StockWise · AI Almanac</span>
-=======
                 <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">ZISO AI · 投资黄历</span>
->>>>>>> main
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
                   <span className="text-[10px] font-bold text-slate-400">{prediction.target_date}</span>
@@ -150,11 +142,7 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
                   </div>
                   <div className="text-right">
                     <div className="text-3xl font-black italic tracking-tighter" style={{ color: signalColor }}>
-<<<<<<< HEAD
-                      {prediction.signal === 'Long' ? 'LONG' : prediction.signal === 'Short' ? 'SHORT' : 'SIDE'}
-=======
                       {prediction.signal === 'Long' ? '看多' : prediction.signal === 'Short' ? '看空' : '观望'}
->>>>>>> main
                     </div>
                     <div className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">
                        把握 {(prediction.confidence * 100).toFixed(0)}%
@@ -176,11 +164,7 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
 
             {/* Micro-brand */}
             <div className="absolute bottom-4 left-0 right-0 flex justify-center opacity-10">
-<<<<<<< HEAD
-               <span className="text-[8px] font-black uppercase tracking-[0.5em]">Powered by StockWise AICouncil</span>
-=======
                <span className="text-[8px] font-black uppercase tracking-[0.5em]">Powered by ZISO AI · 知守智囊团</span>
->>>>>>> main
             </div>
           </motion.div>
         </div>
