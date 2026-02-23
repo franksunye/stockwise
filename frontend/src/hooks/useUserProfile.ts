@@ -94,7 +94,7 @@ function useUserProfileStore(): UserProfileContextValue {
 
         setLoading(true);
         try {
-            const user = await getCurrentUser();
+            await getCurrentUser();
             const watchlist = options?.watchlist || getWatchlist();
             const referredBy = localStorage.getItem('STOCKWISE_REFERRED_BY');
 
@@ -103,7 +103,6 @@ function useUserProfileStore(): UserProfileContextValue {
                 headers: { 'Content-Type': 'application/json' },
                 cache: 'no-store',
                 body: JSON.stringify({
-                    userId: user.userId,
                     watchlist,
                     referredBy: referredBy
                 })

@@ -5,7 +5,7 @@ import { X as CloseIcon } from 'lucide-react';
 import { StockData, AIPrediction } from '@/lib/types';
 
 import { useState, useEffect } from 'react';
-import { getCurrentUserId } from '@/lib/user';
+import { getCurrentUser } from '@/lib/user';
 
 interface StockProfileProps {
   stock: StockData;
@@ -39,11 +39,10 @@ export function StockProfile({ stock, onClose }: StockProfileProps) {
       // 这样保证了“点击->弹出”这关键的 100ms 是纯 UI 线程在跑
       const timer = setTimeout(() => {
         setLoadingHistory(true);
-        const userId = getCurrentUserId();
-        fetch(`/api/predictions?symbol=${stock.symbol}&limit=30`, { 
-          cache: 'no-store',
-          headers: userId ? { 'x-user-id': userId } : {}
-        })
+        getCurrentUser()
+          .then(() => fetch(`/api/predictions?symbol=${stock.symbol}&limit=30`, {
+            cache: 'no-store'
+          }))
           .then(r => r.json())
           .then(data => {
             const predictions = data.predictions || [];

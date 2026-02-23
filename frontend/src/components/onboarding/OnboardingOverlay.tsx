@@ -6,6 +6,7 @@ import { Check, Zap, ShieldCheck, Target, Clock } from 'lucide-react';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { shouldEnableHighPerformance } from '@/lib/device-utils';
 import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
+import { getCurrentUser } from '@/lib/user';
 
 // Fallback data for the reveal step
 const DEFAULT_REVEAL_DATA = { 
@@ -73,11 +74,11 @@ export function OnboardingOverlay() {
   }, [fetchRecommendedStocks]);
 
   const handleComplete = async () => {
-    if (!profile?.userId) return;
+    await getCurrentUser();
     try {
          await fetch('/api/user/onboarding/complete', {
             method: 'POST',
-            body: JSON.stringify({ userId: profile.userId, selectedStock })
+            body: JSON.stringify({ selectedStock })
         });
         localStorage.setItem('STOCKWISE_HAS_ONBOARDED', 'true');
         setIsVisible(false);

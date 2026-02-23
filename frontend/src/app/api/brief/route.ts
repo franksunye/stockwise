@@ -1,19 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { getDbClient } from '@/lib/db'
-import { headers } from 'next/headers'
+import { requireUserSession } from '@/lib/user-session'
 
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const date = searchParams.get('date') || new Date().toISOString().split('T')[0]
 
     try {
-        // Get user ID from custom header (set by middleware or client)
-        const headersList = await headers()
-        const userId = headersList.get('x-user-id')
-
-        if (!userId) {
-            return NextResponse.json({ error: 'User ID required' }, { status: 400 })
-        }
+        const auth = requireUserSession(request)
+        if ('response' in auth) return auth.response
+        const userId = auth.userId
 
         const db = getDbClient()
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

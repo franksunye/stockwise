@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { ShieldCheck, AlertTriangle, Zap, RotateCw } from 'lucide-react';
-import { getCurrentUserId } from '@/lib/user';
+import { getCurrentUser } from '@/lib/user';
 import { AIPrediction } from '@/lib/types';
 
 import { formatModelName } from '@/lib/model-names';
@@ -22,10 +22,8 @@ export function AICouncil({ symbol, targetDate }: AICouncilProps) {
       try {
         setLoading(true);
         // Request detailed mode=full to get all models
-        const userId = getCurrentUserId();
-        const res = await fetch(`/api/predictions?symbol=${symbol}&limit=10&mode=full&targetDate=${targetDate}`, {
-          headers: userId ? { 'x-user-id': userId } : {}
-        });
+        await getCurrentUser();
+        const res = await fetch(`/api/predictions?symbol=${symbol}&limit=10&mode=full&targetDate=${targetDate}`);
         if (!res.ok) throw new Error('Failed to fetch council data');
         
         const data = await res.json();

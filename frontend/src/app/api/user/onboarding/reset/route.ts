@@ -2,16 +2,16 @@ import { NextResponse } from 'next/server';
 import { getDbClient } from '@/lib/db';
 import type { Client } from '@libsql/client';
 import type Database from 'better-sqlite3';
+import { requireUserSession } from '@/lib/user-session';
 
 export async function POST(request: Request) {
+    let db: Client | Database.Database | null = null;
     try {
-        const { userId } = await request.json();
+        const auth = requireUserSession(request);
+        if ('response' in auth) return auth.response;
+        const userId = auth.userId;
 
-        if (!userId) {
-            return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
-        }
-
-        const db = getDbClient() as Client | Database.Database;
+        db = getDbClient() as Client | Database.Database;
         const isCloud = 'execute' in db && typeof db.execute === 'function' && !('prepare' in db);
 
         // Reset has_onboarded to 0
@@ -31,5 +31,9 @@ export async function POST(request: Request) {
     } catch (error: unknown) {
         console.error('Onboarding reset error:', error);
         return NextResponse.json({ error: (error as Error).message || 'Internal Server Error' }, { status: 500 });
+    } finally {
+        if (db && typeof (db as { close?: () => void }).close === 'function') {
+            (db as { close: () => void }).close();
+        }
     }
 }

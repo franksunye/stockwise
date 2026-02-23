@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { getDbClient } from '@/lib/db';
+import { requireUserSession } from '@/lib/user-session';
 
 export async function POST(request: Request) {
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
@@ -9,11 +10,9 @@ export async function POST(request: Request) {
     });
     let db: any;
     try {
-        const { userId } = await request.json();
-
-        if (!userId) {
-            return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
-        }
+        const authResult = requireUserSession(request);
+        if ('response' in authResult) return authResult.response;
+        const userId = authResult.userId;
 
         db = getDbClient();
         const isCloud = 'execute' in db && typeof db.execute === 'function' && !('prepare' in db);

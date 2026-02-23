@@ -19,15 +19,14 @@ export function InviteWall({ onSuccess }: Props) {
     setLoading(true);
     setError(null);
 
-    // 统一通过 getCurrentUser 获取/生成用户 ID
-    const user = await getCurrentUser();
-    const userId = user.userId;
+    // Ensure user session is initialized before redemption.
+    await getCurrentUser();
 
     try {
       const res = await fetch('/api/user/redeem', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, code })
+        body: JSON.stringify({ code })
       });
       const data = await res.json();
 

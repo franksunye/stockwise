@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDbClient } from '@/lib/db';
+import { requireUserSession } from '@/lib/user-session';
 
 // Default notification settings
 const getDefaultSettings = () => ({
@@ -15,11 +16,9 @@ const getDefaultSettings = () => ({
 });
 
 export async function GET(req: NextRequest) {
-  const userId = req.nextUrl.searchParams.get('userId');
-
-  if (!userId) {
-    return NextResponse.json({ settings: getDefaultSettings() });
-  }
+  const auth = requireUserSession(req);
+  if ('response' in auth) return auth.response;
+  const userId = auth.userId;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let db: any;
@@ -61,11 +60,10 @@ export async function POST(req: NextRequest) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let db: any;
   try {
-    const { userId, settings } = await req.json();
-
-    if (!userId) {
-      return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
-    }
+    const auth = requireUserSession(req);
+    if ('response' in auth) return auth.response;
+    const userId = auth.userId;
+    const { settings } = await req.json();
 
     db = getDbClient();
     const isCloud = db.$type === 'cloud';

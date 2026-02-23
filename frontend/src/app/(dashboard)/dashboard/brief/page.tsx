@@ -21,12 +21,10 @@ export default function BriefPage() {
   useEffect(() => {
         const fetchBrief = async () => {
           try {
-            const user = await getCurrentUser()
+            await getCurrentUser()
             const today = new Date().toISOString().split('T')[0]
             
-            let res = await fetch(`/api/brief?date=${today}`, {
-              headers: { 'x-user-id': user.userId }
-            })
+            let res = await fetch(`/api/brief?date=${today}`)
             
             let data = await res.json()
             
@@ -36,9 +34,7 @@ export default function BriefPage() {
               yesterday.setDate(yesterday.getDate() - 1)
               const yesterdayStr = yesterday.toISOString().split('T')[0]
               
-              res = await fetch(`/api/brief?date=${yesterdayStr}`, {
-                headers: { 'x-user-id': user.userId }
-              })
+              res = await fetch(`/api/brief?date=${yesterdayStr}`)
               data = await res.json()
             }
             

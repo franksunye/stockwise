@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getDbClient } from '@/lib/db';
 import { sendInternalNotification } from '@/lib/server-notify';
+import { requireUserSession } from '@/lib/user-session';
 
 /**
  * POST /api/user/pay-success
@@ -11,9 +12,15 @@ export async function POST(request: Request) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let db: any;
     try {
-        const { userId, amount, planId } = await request.json();
+        const auth = requireUserSession(request);
+        if ('response' in auth) return auth.response;
+        const userId = auth.userId;
 
-        if (!userId || !amount) {
+        const { amount, planId } = await request.json().catch(() => ({}));
+        const normalizedAmount = Number(amount);
+        const normalizedPlanId = planId === 'yearly' ? 'yearly' : 'monthly';
+
+        if (!Number.isFinite(normalizedAmount) || normalizedAmount <= 0) {
             return NextResponse.json({ error: 'Missing parameters' }, { status: 400 });
         }
 
@@ -38,7 +45,7 @@ export async function POST(request: Request) {
         }
 
         // 2. 更新付款用户的会员状态
-        const durationDays = planId === 'yearly' ? 366 : 31;
+        const durationDays = normalizedPlanId === 'yearly' ? 366 : 31;
         const expiryDate = new Date();
         expiryDate.setDate(expiryDate.getDate() + durationDays);
         const expiresAt = expiryDate.toISOString();
@@ -71,7 +78,7 @@ export async function POST(request: Request) {
                 // 计算比例：优先使用自定义比例，否则使用全局默认 10%
                 // 计算比例：优先使用自定义比例，否则默认为 0
                 const commissionRate = referrer.custom_commission_rate ?? 0;
-                commissionAmount = amount * commissionRate;
+                commissionAmount = normalizedAmount * commissionRate;
 
                 if (commissionAmount > 0) {
                     const txId = `tx_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
@@ -82,7 +89,7 @@ export async function POST(request: Request) {
                         {
                             sql: `INSERT INTO referral_transactions (id, referrer_id, referred_id, type, amount, status, created_at, note) 
                                   VALUES (?, ?, ?, 'commission', ?, 'converted', ?, ?)`,
-                            args: [txId, referrerId, userId, commissionAmount, now, `Earned from ${planId} plan`]
+                            args: [txId, referrerId, userId, commissionAmount, now, `Earned from ${normalizedPlanId} plan`]
                         },
                         // B. 更新推荐人的钱包余额
                         {
@@ -106,8 +113,6 @@ export async function POST(request: Request) {
                 }
             });
             transaction();
-            // Don't close here if we need it later, but we've used it for all SQLs
-            db.close();
         }
 
         // 5. 发送通知 (异步)
@@ -132,5 +137,9 @@ export async function POST(request: Request) {
     } catch (error: any) {
         console.error('Payment processing error:', error);
         return NextResponse.json({ error: error.message || 'Internal Error' }, { status: 500 });
+    } finally {
+        if (db && typeof db.close === 'function') {
+            db.close();
+        }
     }
 }

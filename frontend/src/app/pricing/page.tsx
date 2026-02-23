@@ -6,7 +6,7 @@ import { Check, ChevronRight, PartyPopper, X, ShieldCheck, Zap } from 'lucide-re
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { getCurrentUserId, getCurrentUser } from '@/lib/user';
+import { getCurrentUser } from '@/lib/user';
 import { pricingPlans, featureComparison } from '@/lib/pricing-data';
 import MarketingFooter from '@/components/MarketingFooter';
 import MarketingHeader from '@/components/MarketingHeader';
@@ -23,13 +23,13 @@ function PricingContent() {
   useEffect(() => {
     // 确保身份初始化，解决新用户进入定价页可能没有 ID 的问题
     getCurrentUser().then((user) => {
-      const userId = user.userId;
+      void user;
       
       // Check current user status
       fetch('/api/user/profile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId })
+        body: JSON.stringify({})
       })
       .then(res => res.json())
       .then(data => {
@@ -46,15 +46,13 @@ function PricingContent() {
   }, [searchParams]);
 
   const handleManageSubscription = async () => {
-    const userId = getCurrentUserId();
-    if (!userId) return;
+    await getCurrentUser();
     
     setLoadingPortal(true);
     try {
       const response = await fetch('/api/billing/portal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId }),
       });
       const data = await response.json();
       if (data.url) {
@@ -71,18 +69,14 @@ function PricingContent() {
   };
 
   const handleUpgrade = async (priceId: string) => {
-    const userId = getCurrentUserId();
-    if (!userId) {
-      alert('请先登录或初始化您的账户');
-      return;
-    }
+    await getCurrentUser();
 
     setLoadingPriceId(priceId);
     try {
       const response = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ priceId, userId }),
+        body: JSON.stringify({ priceId }),
       });
 
       const data = await response.json();

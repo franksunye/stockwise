@@ -1,24 +1,22 @@
 import { NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 import { getDbClient } from '@/lib/db';
+import { requireUserSession } from '@/lib/user-session';
 
 /**
  * 批量 Dashboard API (私有部分)
  * 仅获取用户关注的股票列表 (Watchlist)
  * 
- * GET /api/dashboard?userId=xxx
+ * GET /api/dashboard
  * 返回: { watchlist: [{symbol: '00700', name: 'Tencent'}], timestamp: string }
  * 
  * 注意：具体的行情数据请拿着 symbol 列表去请求 /api/stock/batch
  */
 export async function GET(request: Request) {
     const startTime = Date.now();
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
-
-    if (!userId) {
-        return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
-    }
+    const auth = requireUserSession(request);
+    if ('response' in auth) return auth.response;
+    const userId = auth.userId;
 
     try {
         const client = getDbClient();

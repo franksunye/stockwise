@@ -53,7 +53,7 @@ export function useWatchlist() {
             try {
                 // Fetch source of truth from server
                 // [Fix] Add timestamp to bust iOS aggressive cache
-                const res = await fetch(`/api/stock-pool?userId=${user.userId}&t=${Date.now()}`);
+                const res = await fetch(`/api/stock-pool?t=${Date.now()}`);
                 if (res.ok) {
                     const data = await res.json();
 
@@ -116,7 +116,7 @@ export function useWatchlist() {
             await fetch('/api/stock-pool', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId: user.userId, symbol, name })
+                body: JSON.stringify({ symbol, name })
             });
             return true;
         } catch (e) {
@@ -152,7 +152,7 @@ export function useWatchlist() {
 
         // Background Sync
         try {
-            await fetch(`/api/stock-pool?userId=${user.userId}&symbol=${symbol}`, {
+            await fetch(`/api/stock-pool?symbol=${symbol}`, {
                 method: 'DELETE'
             });
             return true;

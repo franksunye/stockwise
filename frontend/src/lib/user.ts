@@ -14,6 +14,8 @@ const USER_ID_KEY = 'STOCKWISE_USER_ID';
 const USER_TYPE_KEY = 'STOCKWISE_USER_TYPE';
 const USERNAME_KEY = 'STOCKWISE_USERNAME';
 const USER_ID_COOKIE = 'stockwise_uid';
+const USER_SESSION_SYNC_KEY = 'STOCKWISE_USER_SESSION_SYNCED_AT';
+const USER_SESSION_SYNC_INTERVAL_MS = 5 * 60 * 1000;
 
 export type RegistrationType = 'anonymous' | 'explicit';
 
@@ -111,31 +113,56 @@ export async function getCurrentUser(): Promise<User> {
     userId = generateShortId();
     userType = 'anonymous';
 
-    // 保存到 localStorage 和 Cookie
+    // 先保存到 localStorage 和 Cookie，保证前端即时可用
     syncUserIdToStorage(userId, userType);
+  }
 
-    // 调用后端 API 注册用户 (带超时控制)
+  // 确保服务端会话存在（同时兼容老 userId 迁移）
+  const lastSyncAt = Number(sessionStorage.getItem(USER_SESSION_SYNC_KEY) || '0');
+  const shouldSyncSession = Date.now() - lastSyncAt > USER_SESSION_SYNC_INTERVAL_MS;
+  if (shouldSyncSession) {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 20000); // Increased from 8s to 20s
-
-      await fetch('/api/user/register', {
+      const timeoutId = setTimeout(() => controller.abort(), 20000);
+      const response = await fetch('/api/user/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId,
-          registrationType: 'anonymous',
+          registrationType: userType || 'anonymous',
         }),
         signal: controller.signal
       });
       clearTimeout(timeoutId);
-      console.log('✅ 匿名用户注册成功:', userId);
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data?.userId && data.userId !== userId) {
+          userId = data.userId;
+          userType = 'anonymous';
+        }
+
+        if (userId) {
+          syncUserIdToStorage(userId, userType || 'anonymous');
+        }
+        sessionStorage.setItem(USER_SESSION_SYNC_KEY, String(Date.now()));
+        console.log('✅ 用户会话已同步:', userId);
+      } else {
+        console.error('❌ 用户会话同步失败:', response.status);
+        if (userId) setCookie(USER_ID_COOKIE, userId);
+      }
     } catch (error) {
-      console.error('❌ 匿名用户注册失败或超时:', error);
+      console.error('❌ 用户会话同步失败或超时:', error);
+      if (userId) setCookie(USER_ID_COOKIE, userId);
     }
-  } else {
-    // 确保 Cookie 也同步了（用于未来的 PWA 恢复）
+  } else if (userId) {
     setCookie(USER_ID_COOKIE, userId);
+  }
+
+  if (!userId) {
+    userId = generateShortId();
+    userType = 'anonymous';
+    syncUserIdToStorage(userId, userType);
   }
 
   return {
@@ -155,26 +182,20 @@ export async function restoreUserIdentity(targetUserId: string): Promise<{ succe
   }
 
   try {
-    // 验证该用户是否存在于后端
-    const response = await fetch('/api/user/profile', {
+    // 通过 register 会话接口绑定目标身份（兼容历史 userId 迁移路径）
+    const response = await fetch('/api/user/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: targetUserId }),
+      body: JSON.stringify({ userId: targetUserId, registrationType: 'anonymous' }),
     });
 
     if (!response.ok) {
-      return { success: false, message: '用户 ID 不存在或已失效' };
+      return { success: false, message: '用户身份恢复失败，请稍后重试' };
     }
 
     const data = await response.json();
-
-    // 如果是新创建的用户，说明该 ID 之前不存在 -> 恢复失败
-    if (data.isNewUser) {
-      return { success: false, message: '用户 ID 不存在' };
-    }
-
-    if (!data.tier) {
-      return { success: false, message: '无法验证用户身份' };
+    if (!data?.userId || data.userId !== targetUserId) {
+      return { success: false, message: '目标身份无效或未授权恢复' };
     }
 
     // 恢复用户身份到本地存储
@@ -201,14 +222,13 @@ export function getCurrentUserId(): string | null {
  * 升级为注册用户 (显式注册)
  */
 export async function upgradeToExplicitUser(username: string): Promise<boolean> {
-  const user = await getCurrentUser();
+  await getCurrentUser();
 
   try {
     const response = await fetch('/api/user/upgrade', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        userId: user.userId,
         username,
       }),
     });
@@ -233,13 +253,12 @@ export async function upgradeToExplicitUser(username: string): Promise<boolean> 
  * 更新用户最后活跃时间
  */
 export async function updateLastActive(): Promise<void> {
-  const user = await getCurrentUser();
+  await getCurrentUser();
 
   try {
     await fetch('/api/user/activity', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: user.userId }),
     });
   } catch (error) {
     console.error('❌ 更新活跃时间失败:', error);

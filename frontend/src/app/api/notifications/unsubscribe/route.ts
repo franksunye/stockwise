@@ -1,17 +1,18 @@
 import { NextResponse } from 'next/server';
 import { getDbClient, executeWithRetry } from '@/lib/db';
 import Database from 'better-sqlite3';
+import { requireUserSession } from '@/lib/user-session';
 
 export async function POST(request: Request) {
     try {
+        const authResult = requireUserSession(request);
+        if ('response' in authResult) return authResult.response;
+        const userId = authResult.userId;
+
         const body = await request.json();
-        const { userId, endpoint } = body;
+        const { endpoint } = body;
 
         console.log('Received unsubscribe request:', { userId, endpoint: endpoint?.slice(0, 50) + '...' });
-
-        if (!userId) {
-            return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
-        }
 
         const strategy = process.env.DB_STRATEGY || 'local';
 

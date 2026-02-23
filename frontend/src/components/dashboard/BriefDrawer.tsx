@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X as CloseIcon, FileText, Loader2, Sparkles, NotebookText, Bot, CheckCircle2 } from 'lucide-react';
+import { X as CloseIcon, FileText, Loader2, Sparkles, NotebookText, CheckCircle2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { getCurrentUser } from '@/lib/user';
 import { getHKTime, getLastTradingDay } from '@/lib/date-utils';
@@ -40,14 +40,14 @@ export function BriefDrawer({ isOpen, onClose, limitToSymbol, onUpgrade }: Brief
       setShowGlobal(false);
       const fetchBrief = async () => {
         try {
-          const user = await getCurrentUser();
+          await getCurrentUser();
           refreshProfile();
           const today = getHKTime().toISOString().split('T')[0];
           const yesterday = getLastTradingDay().toISOString().split('T')[0];
-          let res = await fetch(`/api/brief?date=${today}`, { headers: { 'x-user-id': user.userId } });
+          let res = await fetch(`/api/brief?date=${today}`);
           let data = await res.json();
           if (!data.brief) {
-            res = await fetch(`/api/brief?date=${yesterday}`, { headers: { 'x-user-id': user.userId } });
+            res = await fetch(`/api/brief?date=${yesterday}`);
             data = await res.json();
           }
           setBrief(data.brief);

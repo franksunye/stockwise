@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { getDbClient } from '@/lib/db';
+import { requireUserSession } from '@/lib/user-session';
 
 export async function POST(request: Request) {
     // 强制依赖明确的环境变量配置，拒绝硬编码兜底，确保运维逻辑清晰
@@ -25,10 +26,13 @@ export async function POST(request: Request) {
         apiVersion: '2025-01-27.acacia' as any, // 锁定版本或使用最新稳定版
     });
     try {
-        const { priceId, userId } = await request.json();
+        const authResult = requireUserSession(request);
+        if ('response' in authResult) return authResult.response;
+        const userId = authResult.userId;
+        const { priceId } = await request.json();
 
-        if (!priceId || !userId) {
-            return NextResponse.json({ error: 'Missing priceId or userId' }, { status: 400 });
+        if (!priceId) {
+            return NextResponse.json({ error: 'Missing priceId' }, { status: 400 });
         }
 
         // 1. Lookup User to reuse Stripe Customer ID (Single Customer View)

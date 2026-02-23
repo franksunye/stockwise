@@ -2,15 +2,20 @@ import { NextResponse } from 'next/server';
 import { getDbClient, executeWithRetry } from '@/lib/db';
 import Database from 'better-sqlite3';
 import crypto from 'crypto';
+import { requireUserSession } from '@/lib/user-session';
 
 export async function POST(request: Request) {
     try {
+        const authResult = requireUserSession(request);
+        if ('response' in authResult) return authResult.response;
+        const userId = authResult.userId;
+
         const body = await request.json();
-        const { subscription, userId } = body;
+        const { subscription } = body;
 
         console.log('Received subscription request:', { userId });
 
-        if (!subscription || !subscription.endpoint || !userId) {
+        if (!subscription || !subscription.endpoint) {
             return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
         }
 

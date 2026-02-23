@@ -1,5 +1,24 @@
 import { NextResponse } from 'next/server';
 import { getDbClient } from '@/lib/db';
+import { randomBytes } from 'crypto';
+import {
+    createUserSessionToken,
+    getTrustedUserIdFromRequest,
+    setUserSessionCookie
+} from '@/lib/user-session';
+
+function generateUserId(): string {
+    return `user_${randomBytes(6).toString('base64url')}`;
+}
+
+function isValidUserId(input: unknown): input is string {
+    return typeof input === 'string' && /^user_[A-Za-z0-9_-]{6,64}$/.test(input);
+}
+
+interface RegisterBody {
+    registrationType?: 'anonymous' | 'explicit';
+    userId?: string;
+}
 
 /**
  * POST /api/user/register
@@ -9,13 +28,22 @@ export async function POST(request: Request) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let client: any;
     try {
-        const { userId, registrationType } = await request.json();
+        const body = (await request.json().catch(() => ({}))) as RegisterBody;
+        const registrationType = body.registrationType === 'explicit' ? 'explicit' : 'anonymous';
+        const sessionUserId = getTrustedUserIdFromRequest(request);
+        const allowLegacyBootstrap = process.env.ALLOW_LEGACY_USERID_BOOTSTRAP !== 'false';
 
-        if (!userId || !registrationType) {
-            return NextResponse.json(
-                { error: 'Missing userId or registrationType' },
-                { status: 400 }
-            );
+        let userId = sessionUserId;
+        let legacyBootstrapUsed = false;
+
+        if (!userId) {
+            if (allowLegacyBootstrap && isValidUserId(body.userId)) {
+                // Transitional path for existing clients: bind first session to existing local user ID.
+                userId = body.userId;
+                legacyBootstrapUsed = true;
+            } else {
+                userId = generateUserId();
+            }
         }
 
         client = getDbClient();
@@ -38,7 +66,20 @@ export async function POST(request: Request) {
                 .run(userId, registrationType, now, now);
         }
 
-        return NextResponse.json({ success: true, userId });
+        const sessionToken = createUserSessionToken(userId);
+        if (!sessionToken) {
+            console.error('[user-session] USER_SESSION_SECRET is not configured');
+            return NextResponse.json({ error: 'User session not configured' }, { status: 503 });
+        }
+
+        const response = NextResponse.json({
+            success: true,
+            userId,
+            sessionBound: true,
+            legacyBootstrapUsed
+        });
+        setUserSessionCookie(response, sessionToken);
+        return response;
     } catch (error) {
         console.error('User registration error:', error);
         return NextResponse.json(

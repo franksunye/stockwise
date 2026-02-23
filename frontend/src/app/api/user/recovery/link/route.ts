@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getDbClient } from '@/lib/db';
+import { requireUserSession } from '@/lib/user-session';
 
 /**
  * Link a recovery email to a user ID.
@@ -9,10 +10,13 @@ export async function POST(request: Request) {
     /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     let db: any;
     try {
-        const { userId, email } = await request.json();
+        const auth = requireUserSession(request);
+        if ('response' in auth) return auth.response;
+        const userId = auth.userId;
+        const { email } = await request.json();
 
-        if (!userId || !email || typeof email !== 'string') {
-            return NextResponse.json({ error: 'Missing userId or email' }, { status: 400 });
+        if (!email || typeof email !== 'string') {
+            return NextResponse.json({ error: 'Missing email' }, { status: 400 });
         }
 
         const normalizedEmail = email.trim().toLowerCase();

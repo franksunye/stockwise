@@ -1,16 +1,17 @@
 import { NextResponse } from 'next/server';
 import { getDbClient } from '@/lib/db';
 import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
+import { requireUserSession } from '@/lib/user-session';
 
 export async function POST(request: Request) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let db: any;
     try {
-        const { userId, watchlist, referredBy } = await request.json();
+        const auth = requireUserSession(request);
+        if ('response' in auth) return auth.response;
+        const userId = auth.userId;
 
-        if (!userId) {
-            return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
-        }
+        const { watchlist, referredBy } = await request.json().catch(() => ({}));
 
         db = getDbClient();
         const isCloud = db.$type === 'cloud';

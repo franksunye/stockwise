@@ -107,8 +107,8 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
 
       if (subscription) {
         try {
-          const user = await getCurrentUser();
-          const res = await fetch(`/api/user/notification-settings?userId=${user.userId}`);
+          await getCurrentUser();
+          const res = await fetch('/api/user/notification-settings');
           if (res.ok) {
             const data = await res.json();
             if (data.settings) setNotificationSettings(data.settings);
@@ -144,7 +144,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
           const response = await fetch('/api/notifications/subscribe', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId, subscription: subscription.toJSON() })
+            body: JSON.stringify({ subscription: subscription.toJSON() })
           });
           if (response.ok) {
             setIsSubscribed(true);
@@ -178,7 +178,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
         await fetch('/api/notifications/unsubscribe', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId, endpoint: subscription.endpoint }),
+          body: JSON.stringify({ endpoint: subscription.endpoint }),
         });
         setIsSubscribed(false);
       }
@@ -210,7 +210,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
       const res = await fetch('/api/user/redeem', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, code: redeemCode.trim().toUpperCase() })
+        body: JSON.stringify({ code: redeemCode.trim().toUpperCase() })
       });
       const data = await res.json();
       if (data.success) {
@@ -230,11 +230,6 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
 
   const handleLinkEmail = async () => {
     if (!tempEmail || isLinkingEmail) return;
-    if (!userId) {
-      setEmailMsg({ type: 'error', text: '用户信息未就绪，请稍后重试' });
-      return;
-    }
-
     const normalizedEmail = tempEmail.trim().toLowerCase();
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(normalizedEmail)) {
@@ -248,7 +243,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
       const res = await fetch('/api/user/recovery/link', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, email: normalizedEmail })
+        body: JSON.stringify({ email: normalizedEmail })
       });
 
       const data = await res.json().catch(() => ({}));
@@ -483,7 +478,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                           <button onClick={async () => {
                                             const newSettings = { ...notificationSettings, types: { ...notificationSettings.types, [type.key]: { enabled: !isEnabled } } };
                                             setNotificationSettings(newSettings);
-                                            try { await fetch('/api/user/notification-settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId, settings: newSettings }) }); } catch (e) { console.error(e); }
+                                            try { await fetch('/api/user/notification-settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ settings: newSettings }) }); } catch (e) { console.error(e); }
                                           }} className={`w-9 h-5 rounded-full transition-all flex items-center px-0.5 ${isEnabled ? 'bg-indigo-600 justify-end' : 'bg-slate-700 justify-start'}`}>
                                             <motion.div className="w-4 h-4 bg-white rounded-full shadow" layout transition={{ type: 'spring', stiffness: 500, damping: 30 }} />
                                           </button>
@@ -689,7 +684,6 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                 try {
                                     await fetch('/api/user/onboarding/reset', {
                                         method: 'POST',
-                                        body: JSON.stringify({ userId })
                                     });
                                 } catch (err) { console.error('Reset onboarding failed', err); }
                                 window.location.reload(); 

@@ -95,7 +95,7 @@ export default function DashboardLayout({
           const res = await fetch('/api/user/profile', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId: uid, watchlist: getWatchlist() }),
+            body: JSON.stringify({ watchlist: getWatchlist() }),
           });
           if (res.ok) {
             const data = await res.json();
@@ -159,7 +159,7 @@ export default function DashboardLayout({
         const res = await fetch('/api/user/profile', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: uid, watchlist: getWatchlist(), referredBy }),
+          body: JSON.stringify({ watchlist: getWatchlist(), referredBy }),
           signal: controller.signal
         });
         clearTimeout(timeoutId);

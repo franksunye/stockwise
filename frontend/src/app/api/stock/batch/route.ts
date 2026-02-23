@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getDbClient } from '@/lib/db';
-import { headers } from 'next/headers';
 import { getUserTier } from '@/lib/user-server';
 import { getModelSqlFilter } from '@/lib/membership-config';
+import { requireUserSession } from '@/lib/user-session';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,8 +22,9 @@ export async function GET(request: Request) {
     const startTime = Date.now();
 
     try {
-        const headersList = await headers();
-        const userId = headersList.get('x-user-id');
+        const auth = requireUserSession(request);
+        if ('response' in auth) return auth.response;
+        const userId = auth.userId;
         const userTier = await getUserTier(userId);
         const tierFilter = getModelSqlFilter(userTier);
 
@@ -131,8 +132,8 @@ export async function GET(request: Request) {
         });
 
         const response = NextResponse.json({ stocks, tier: userTier, queryTime: Date.now() - startTime });
-        response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=30');
-        response.headers.set('Vary', 'x-user-id');
+        response.headers.set('Cache-Control', 'private, max-age=60, stale-while-revalidate=30');
+        response.headers.set('Vary', 'Cookie');
         return response;
     } catch (error) {
         console.error('Batch Stock API Error:', error);

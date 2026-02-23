@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { Check, ChevronRight, Zap, Crown, Loader2, ArrowRight } from 'lucide-react';
 import Image from 'next/image';
-import { getCurrentUserId } from '@/lib/user';
 import { pricingPlans } from '@/lib/pricing-data';
 
 interface Props {
@@ -32,13 +31,12 @@ export function UserPricingView({ currentTier, hasStripeCustomer, expiresAt }: P
     setLoadingPriceId(priceId);
     try {
       const { getCurrentUser } = await import('@/lib/user');
-      const user = await getCurrentUser();
-      const userId = user.userId;
+      await getCurrentUser();
 
       const response = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ priceId, userId }),
+        body: JSON.stringify({ priceId }),
       });
 
       const data = await response.json();
@@ -62,15 +60,14 @@ export function UserPricingView({ currentTier, hasStripeCustomer, expiresAt }: P
   };
 
   const handleManageSubscription = async () => {
-    const userId = getCurrentUserId();
-    if (!userId) return;
+    const { getCurrentUser } = await import('@/lib/user');
+    await getCurrentUser();
     
     setLoadingPortal(true);
     try {
       const response = await fetch('/api/billing/portal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId }),
       });
       const data = await response.json();
       if (data.url) {

@@ -5,18 +5,16 @@ import { triggerOnDemandSync } from '@/lib/github-actions';
 import { getMarketFromSymbol, getExpectedLatestDataDate } from '@/lib/date-utils';
 import { Client } from '@libsql/client';
 import type { Database } from 'better-sqlite3';
+import { requireUserSession } from '@/lib/user-session';
 
 /**
- * GET /api/stock-pool?userId=xxx
- * 获取用户的股票池
+ * GET /api/stock-pool
+ * 获取当前会话用户的股票池
  */
 export async function GET(request: Request) {
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
-
-    if (!userId) {
-        return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
-    }
+    const auth = requireUserSession(request);
+    if ('response' in auth) return auth.response;
+    const userId = auth.userId;
 
     const client = getDbClient() as Client | Database;
     try {
@@ -63,11 +61,14 @@ export async function GET(request: Request) {
  */
 export async function POST(request: Request) {
     try {
-        const { userId, symbol, name } = await request.json();
+        const auth = requireUserSession(request);
+        if ('response' in auth) return auth.response;
+        const userId = auth.userId;
+        const { symbol, name } = await request.json();
 
-        if (!userId || !symbol) {
+        if (!symbol) {
             return NextResponse.json(
-                { error: 'Missing userId or symbol' },
+                { error: 'Missing symbol' },
                 { status: 400 }
             );
         }
@@ -173,17 +174,20 @@ export async function POST(request: Request) {
 
 
 /**
- * DELETE /api/stock-pool?userId=xxx&symbol=xxx
- * 从用户关注列表删除股票
+ * DELETE /api/stock-pool?symbol=xxx
+ * 从当前会话用户关注列表删除股票
  */
 export async function DELETE(request: Request) {
+    const auth = requireUserSession(request);
+    if ('response' in auth) return auth.response;
+    const userId = auth.userId;
+
     const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
     const symbol = searchParams.get('symbol');
 
-    if (!userId || !symbol) {
+    if (!symbol) {
         return NextResponse.json(
-            { error: 'Missing userId or symbol' },
+            { error: 'Missing symbol' },
             { status: 400 }
         );
     }

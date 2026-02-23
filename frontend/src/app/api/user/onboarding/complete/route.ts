@@ -4,16 +4,18 @@ import { triggerOnDemandSync } from '@/lib/github-actions';
 import { getMarketFromSymbol, getExpectedLatestDataDate } from '@/lib/date-utils';
 import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
 import { sendInternalNotification } from '@/lib/server-notify';
+import { requireUserSession } from '@/lib/user-session';
 
 export async function POST(request: Request) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let db: any;
     try {
-        const { userId, selectedStock } = await request.json();
+        const auth = requireUserSession(request);
+        if ('response' in auth) return auth.response;
+        const userId = auth.userId;
+        const { selectedStock } = await request.json();
 
-        if (!userId) {
-            return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
-        }
-
-        const db = getDbClient();
+        db = getDbClient();
         const isCloud = db.$type === 'cloud';
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const client = db as any;
@@ -211,7 +213,6 @@ export async function POST(request: Request) {
                 }
             }
 
-            client.close();
         }
 
         return NextResponse.json({
@@ -224,5 +225,9 @@ export async function POST(request: Request) {
     } catch (error: unknown) {
         console.error('Onboarding complete error:', error);
         return NextResponse.json({ error: (error as Error).message || 'Internal Server Error' }, { status: 500 });
+    } finally {
+        if (db && typeof db.close === 'function') {
+            db.close();
+        }
     }
 }

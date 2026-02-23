@@ -1,15 +1,19 @@
 import { NextResponse } from 'next/server';
 import { getDbClient } from '@/lib/db';
 import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
+import { requireUserSession } from '@/lib/user-session';
 
 export async function POST(request: Request) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let db: any;
     try {
-        const { userId, code } = await request.json();
+        const auth = requireUserSession(request);
+        if ('response' in auth) return auth.response;
+        const userId = auth.userId;
+        const { code } = await request.json();
 
-        if (!userId || !code) {
-            return NextResponse.json({ error: 'Missing userId or code' }, { status: 400 });
+        if (!code) {
+            return NextResponse.json({ error: 'Missing code' }, { status: 400 });
         }
 
         // 检查激活码兑换开关

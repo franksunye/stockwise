@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getDbClient } from '@/lib/db';
-import { headers } from 'next/headers';
 import { getUserTier } from '@/lib/user-server';
 import { getModelSqlFilter } from '@/lib/membership-config';
+import { requireUserSession } from '@/lib/user-session';
 
 export const revalidate = 300; // 5 minutes cache
 
@@ -22,8 +22,9 @@ export async function GET(request: Request) {
     }
 
     try {
-        const headersList = await headers();
-        const userId = headersList.get('x-user-id');
+        const auth = requireUserSession(request);
+        if ('response' in auth) return auth.response;
+        const userId = auth.userId;
         const userTier = await getUserTier(userId);
         const tierFilter = getModelSqlFilter(userTier);
 

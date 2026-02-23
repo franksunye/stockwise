@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getDbClient } from '@/lib/db';
+import { requireUserSession } from '@/lib/user-session';
 
 /**
  * POST /api/user/activity
@@ -9,14 +10,9 @@ export async function POST(request: Request) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let client: any;
     try {
-        const { userId } = await request.json();
-
-        if (!userId) {
-            return NextResponse.json(
-                { error: 'Missing userId' },
-                { status: 400 }
-            );
-        }
+        const auth = requireUserSession(request);
+        if ('response' in auth) return auth.response;
+        const userId = auth.userId;
 
         client = getDbClient();
         const now = new Date().toISOString();

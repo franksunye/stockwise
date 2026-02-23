@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@libsql/client';
 import Database from 'better-sqlite3';
 import path from 'path';
+import { requireUserSession } from '@/lib/user-session';
 
 function getDbClient() {
     const url = process.env.TURSO_DB_URL;
@@ -20,17 +21,21 @@ function getDbClient() {
  * 用户升级 (匿名用户 -> 注册用户)
  */
 export async function POST(request: Request) {
+    let client: ReturnType<typeof getDbClient> | null = null;
     try {
-        const { userId, username } = await request.json();
+        const auth = requireUserSession(request);
+        if ('response' in auth) return auth.response;
+        const userId = auth.userId;
+        const { username } = await request.json();
 
-        if (!userId || !username) {
+        if (!username) {
             return NextResponse.json(
-                { error: 'Missing userId or username' },
+                { error: 'Missing username' },
                 { status: 400 }
             );
         }
 
-        const client = getDbClient();
+        client = getDbClient();
 
         if ('execute' in client) {
             // Turso
@@ -49,7 +54,6 @@ export async function POST(request: Request) {
                      WHERE user_id = ?`
                 )
                 .run(username, new Date().toISOString(), userId);
-            client.close();
         }
 
         return NextResponse.json({ success: true });
@@ -59,5 +63,9 @@ export async function POST(request: Request) {
             { error: 'Upgrade failed' },
             { status: 500 }
         );
+    } finally {
+        if (client && typeof (client as { close?: () => void }).close === 'function') {
+            (client as { close: () => void }).close();
+        }
     }
 }
