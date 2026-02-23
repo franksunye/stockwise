@@ -181,14 +181,8 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
             <div className={`absolute inset-0 opacity-20 pointer-events-none bg-gradient-to-b from-transparent via-${activeStory.aesthetic.hue.split('-')[0]}-500/10 to-${activeStory.aesthetic.hue.split('-')[1]}-500/20`} />
             
             {/* Top Bar */}
-            <div className="relative z-10 p-8 flex justify-between items-start">
-              <div className="space-y-1">
-                <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">ZISO AI · 投资黄历</span>
-                <div className="flex items-center gap-2 capture-hidden">
-                  <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
-                  <span className="text-[10px] font-bold text-slate-400">{prediction.target_date}</span>
-                </div>
-              </div>
+            <div className="relative z-10 p-6 flex justify-between items-start">
+              <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mt-2">ZISO AI · 投资黄历</span>
               <button 
                 onClick={onClose}
                 className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-colors capture-hidden"
@@ -199,16 +193,33 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
 
             {/* Main Content: The "Silent Math" Symbol & Token */}
             <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-8 text-center mt-[-2rem]">
+                
+                {/* Centered Large Date (Almanac Style) */}
+                <div className="mb-8 flex flex-col items-center justify-center relative">
+                   {prediction.target_date.includes('-') ? (
+                     <>
+                       <div className="text-[11px] font-black text-slate-400/80 tracking-[0.4em] mb-1">{prediction.target_date.split('-')[0]}</div>
+                       <div className="text-6xl font-black text-white tracking-tighter flex items-center" style={{ fontFamily: '"SF Pro Display", -apple-system, sans-serif' }}>
+                         {prediction.target_date.split('-')[1]}
+                         <span className="text-4xl text-white/20 mx-1 font-light mt-1">/</span>
+                         {prediction.target_date.split('-')[2]}
+                       </div>
+                     </>
+                   ) : (
+                     <div className="text-4xl font-black text-white tracking-widest">{prediction.target_date}</div>
+                   )}
+                </div>
+
                 {/* Visual State Icon */}
-                <div className="mb-8 relative">
+                <div className="mb-6 relative">
                    <div className="absolute inset-0 bg-indigo-500/20 blur-[60px] rounded-full animate-pulse capture-hidden" />
-                   <div className="relative w-32 h-32 flex items-center justify-center">
+                   <div className="relative w-24 h-24 flex items-center justify-center">
                       {prediction?.signal === 'Long' ? (
-                        <Wind className="w-16 h-16 text-emerald-400/80 stroke-[1]" />
+                        <Wind className="w-12 h-12 text-emerald-400/80 stroke-[1]" />
                       ) : prediction?.signal === 'Short' ? (
-                        <AlertTriangle className="w-16 h-16 text-rose-400/80 stroke-[1]" />
+                        <AlertTriangle className="w-12 h-12 text-rose-400/80 stroke-[1]" />
                       ) : (
-                        <Shield className="w-16 h-16 text-slate-400/80 stroke-[1]" />
+                        <Shield className="w-12 h-12 text-slate-400/80 stroke-[1]" />
                       )}
                    </div>
                 </div>
