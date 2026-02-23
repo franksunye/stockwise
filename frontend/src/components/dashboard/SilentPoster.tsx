@@ -12,9 +12,10 @@ interface SilentPosterProps {
   onClose: () => void;
   prediction: AIPrediction;
   stockName: string;
+  userPos?: 'holding' | 'empty' | 'none';
 }
 
-export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, prediction, stockName }) => {
+export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, prediction, stockName, userPos = 'none' }) => {
   const posterRef = useRef<HTMLDivElement>(null);
   const [isCapturing, setIsCapturing] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -142,6 +143,34 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
   const activeStory = story || defaultStory;
   const signalColor = prediction?.signal === 'Long' ? COLORS.up : prediction?.signal === 'Short' ? COLORS.down : COLORS.hold;
 
+  // Almanac Insights Extraction
+  const keyLevels = tacticalData?.key_levels;
+  const resistanceStr = keyLevels?.strong_resistance || keyLevels?.resistance || '';
+  const supportStr = keyLevels?.stop_loss_reference || keyLevels?.strong_support || keyLevels?.support || '';
+
+  let intelligence = '';
+  if (Array.isArray(tacticalData?.news_analysis) && tacticalData.news_analysis.length > 0) {
+    intelligence = tacticalData.news_analysis[0];
+  } else if (typeof tacticalData?.news_analysis === 'string' && tacticalData.news_analysis) {
+    intelligence = tacticalData.news_analysis;
+  } else if (tacticalData?.reasoning_trace && tacticalData.reasoning_trace.length > 0) {
+    intelligence = tacticalData.reasoning_trace[0].data;
+  }
+  if (intelligence.length > 30) {
+     intelligence = intelligence.substring(0, 29) + '...';
+  }
+
+  let topTactic = null;
+  if (userPos === 'holding') {
+    topTactic = tacticalData?.tactics?.holding_profit?.[0] || tacticalData?.tactics?.holding_loss?.[0];
+  } else {
+    topTactic = tacticalData?.tactics?.empty?.[0] || tacticalData?.tactics?.general?.[0];
+  }
+  if (!topTactic && tacticalData?.tactics) {
+    topTactic = tacticalData.tactics.empty?.[0] || tacticalData.tactics.holding_profit?.[0] || tacticalData.tactics.general?.[0];
+  }
+  const tacticStr = topTactic?.action || '';
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -249,7 +278,7 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
 
                 {/* Dynamic Clues */}
                 {activeStory.aesthetic.dynamic_clues.length > 0 && (
-                  <div className="flex flex-wrap justify-center gap-2 mt-4 max-w-[80%] mx-auto">
+                  <div className="flex flex-wrap justify-center gap-2 mt-2 max-w-[80%] mx-auto">
                     {activeStory.aesthetic.dynamic_clues.map((clue, idx) => (
                       <span key={idx} className="text-[10px] font-bold text-indigo-400/60 transition-opacity">
                         #{clue}
@@ -257,6 +286,46 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
                     ))}
                   </div>
                 )}
+
+                {/* --- NEW ALMANAC DATA INSIGHTS --- */}
+                <div className="w-[110%] md:w-[125%] mt-6 space-y-2 text-left relative z-10 capture-show origin-top scale-90 md:scale-95">
+                   {/* 阵眼结界 */}
+                   {(resistanceStr || supportStr) && (
+                     <div className="p-2.5 rounded-xl bg-white/5 border border-white/5 backdrop-blur-md flex items-center justify-between shadow-lg">
+                        <div className="flex gap-2 items-center tracking-widest leading-none">
+                           <div className="flex gap-1.5 items-center">
+                              <div className="w-1 h-2.5 bg-rose-500 rounded-sm" />
+                              <span className="text-[9px] text-slate-400 font-black uppercase">上方阻厄</span>
+                           </div>
+                           <span className="text-xs font-black text-rose-300">{resistanceStr || '--'}</span>
+                        </div>
+                        <div className="w-px h-3 bg-white/10 mx-2" />
+                        <div className="flex gap-2 items-center tracking-widest leading-none">
+                           <div className="flex gap-1.5 items-center">
+                              <div className="w-1 h-2.5 bg-emerald-500 rounded-sm" />
+                              <span className="text-[9px] text-slate-400 font-black uppercase">绝对防守</span>
+                           </div>
+                           <span className="text-xs font-black text-emerald-300">{supportStr || '--'}</span>
+                        </div>
+                     </div>
+                   )}
+
+                   {/* 天机情报 */}
+                   {intelligence && (
+                     <div className="p-2.5 rounded-xl bg-white/5 border border-white/5 backdrop-blur-md flex gap-2 items-start shadow-lg">
+                        <span className="text-[9px] font-black text-amber-500/80 uppercase tracking-widest shrink-0 mt-0.5">【天机】</span>
+                        <p className="text-[11px] text-slate-300 font-medium leading-[1.4] tracking-wider">{intelligence}</p>
+                     </div>
+                   )}
+
+                   {/* 冲煞锦囊 */}
+                   {tacticStr && (
+                     <div className="p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 backdrop-blur-md flex gap-2 items-start shadow-lg">
+                        <span className="text-[9px] font-black text-indigo-400 uppercase tracking-widest shrink-0 mt-0.5">【锦囊】</span>
+                        <p className="text-[11px] text-indigo-200 font-bold leading-[1.4] tracking-wider">{tacticStr}</p>
+                     </div>
+                   )}
+                </div>
             </div>
 
             {/* Footer: Data Hook */}

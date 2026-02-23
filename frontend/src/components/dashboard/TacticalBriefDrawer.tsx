@@ -61,7 +61,7 @@ const getStepConfig = (step: string) => {
 };
 
 export function TacticalBriefDrawer({ 
-  isOpen, onClose, data, tier, model, symbol, targetDate, signal, confidence, stockName
+  isOpen, onClose, data, tier, model, symbol, targetDate, signal, confidence, stockName, userPos
 }: TacticalBriefDrawerProps) {
   const [isMounted, setIsMounted] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
@@ -539,6 +539,7 @@ export function TacticalBriefDrawer({
         onClose={() => setIsShareOpen(false)}
         prediction={posterPrediction}
         stockName={stockName || symbol}
+        userPos={userPos}
       />
     )}
     </>
