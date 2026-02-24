@@ -106,7 +106,7 @@ export async function GET(request: Request) {
                     try {
                         if (typeof a.market_entropy === 'string') a.market_entropy = JSON.parse(a.market_entropy);
                         if (typeof a.sector_currents === 'string') a.sector_currents = JSON.parse(a.sector_currents);
-                    } catch (e) { }
+                    } catch { }
                 });
             }
 

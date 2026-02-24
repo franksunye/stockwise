@@ -48,20 +48,21 @@ export async function GET(request: Request) {
 
 
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            let almanacs: any[] = [];
+            let almanacs: Record<string, any>[] = [];
             if ('execute' in client) {
                 const rsAlmanac = await client.execute({ sql: 'SELECT * FROM market_almanacs ORDER BY target_date DESC LIMIT 5', args: [] });
-                if (rsAlmanac.rows && rsAlmanac.rows.length > 0) almanacs = rsAlmanac.rows as any[];
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                if (rsAlmanac.rows && rsAlmanac.rows.length > 0) almanacs = rsAlmanac.rows as Record<string, any>[];
             } else {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                almanacs = (client as any).prepare('SELECT * FROM market_almanacs ORDER BY target_date DESC LIMIT 5').all();
+                almanacs = client.prepare('SELECT * FROM market_almanacs ORDER BY target_date DESC LIMIT 5').all() as Record<string, any>[];
             }
             if (almanacs.length > 0) {
                 almanacs.forEach(a => {
                     try {
                         if (typeof a.market_entropy === 'string') a.market_entropy = JSON.parse(a.market_entropy);
                         if (typeof a.sector_currents === 'string') a.sector_currents = JSON.parse(a.sector_currents);
-                    } catch (e) { }
+                    } catch { }
                 });
             }
 

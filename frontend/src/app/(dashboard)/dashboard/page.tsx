@@ -39,11 +39,11 @@ const TacticalBriefDrawer = dynamic(() => import('@/components/dashboard/Tactica
 function DashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const targetSymbol = searchParams.get('symbol');
+  // const targetSymbol = searchParams.get('symbol');
   const [userCenterOpen, setUserCenterOpen] = useState(false);
   const [briefOpen, setBriefOpen] = useState(false);
   const almanacRef = useRef<MarketAlmanacHandle>(null);
-  const hasScrolledToTarget = useRef(false);
+  // const hasScrolledToTarget = useRef(false);
 
   const { stocks, almanac, almanacs, loadingPool, loadMoreHistory } = useStocks();
 
@@ -92,7 +92,7 @@ function DashboardContent() {
 
   // 进入 App 时清除角标 (小红点)
   useEffect(() => {
-    interface ExtendedNavigator extends Navigator {
+    interface ExtendedNavigator {
       clearAppBadge?: () => Promise<void>;
     }
     const nav = navigator as ExtendedNavigator;
@@ -139,8 +139,7 @@ function DashboardContent() {
   }
 
   const currentStock = displayStocks[currentIndex];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const isMarketAlmanac = currentStock && (currentStock as any).isAlmanac;
+  const isMarketAlmanac = currentStock && 'isAlmanac' in currentStock && currentStock.isAlmanac;
 
   return (
     <main className="fixed inset-0 bg-[#050508] text-white overflow-hidden select-none font-sans">
@@ -290,12 +289,13 @@ function DashboardContent() {
       >
         {displayStocks.map((stock, idx) => {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          if ((stock as any).isAlmanac) {
+          if ('isAlmanac' in stock && (stock as any).isAlmanac) {
             return (
               <MarketAlmanacFeed 
                 ref={almanacRef}
                 key={stock.symbol} 
                 index={idx}
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 data={(stock as any).almanacData}
                 onVerticalScroll={handleVerticalScrollStable} 
               />

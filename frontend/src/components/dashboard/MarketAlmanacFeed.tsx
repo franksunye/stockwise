@@ -1,5 +1,5 @@
-import { memo, useRef, useImperativeHandle, forwardRef, useCallback, useState } from 'react';
-import { Share2, Copy, Shield, Sparkles, ChevronDown, Waves, Thermometer, Target, Zap, Loader2 } from 'lucide-react';
+import { memo, useRef, useImperativeHandle, forwardRef, useCallback, useState, useMemo } from 'react';
+import { Shield, Sparkles, ChevronDown, Waves, Thermometer, Target, Zap, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MarketAlmanacData } from '@/lib/types';
 
@@ -45,8 +45,8 @@ export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlma
   const meteorology = data?.meteorology || '微雨';
   const insight = data?.ai_insight || '股指进入混沌期，缺乏明确突破点。板块轮动加速，建议保持观望。';
   
-  const entropy = data?.market_entropy || { score: 50, label: '50% · 震荡', breadth: '震荡分化', volume_status: '量能平稳' };
-  const sectors = data?.sector_currents || { main: [{name: '待更新', flow: ''}], inverse: [{name: '待更新', flow: ''}] };
+  const entropy = useMemo(() => data?.market_entropy || { score: 50, label: '50% · 震荡', breadth: '震荡分化', volume_status: '量能平稳' }, [data?.market_entropy]);
+  const sectors = useMemo(() => data?.sector_currents || { main: [{name: '待更新', flow: ''}], inverse: [{name: '待更新', flow: ''}] }, [data?.sector_currents]);
 
   const generateMarketingText = useCallback(() => {
     let text = `ZISO AI 投资黄历 (${targetDate})\n\n`;
@@ -74,6 +74,7 @@ export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlma
       return true;
     };
 
+    const originalStyle = posterRef.current.style.transform;
     try {
       // Lazy load html-to-image to keep initial bundle lite
       const { toPng } = await import('html-to-image');
@@ -83,11 +84,13 @@ export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlma
         cacheBust: true, 
         pixelRatio: 2,
         backgroundColor: '#050508', // Match background color for smooth edges
-        filter: filter as unknown as (domNode: HTMLElement) => boolean 
+        filter: filter
       });
       return dataUrl;
-    } catch (err) {
-      console.error('Failed to generate market almanac poster', err);
+    } catch {
+      // Ensure transformation is restored even on error
+      if (posterRef.current) posterRef.current.style.transform = originalStyle;
+      console.error('Failed to generate poster');
       return null;
     }
   }, []);
@@ -98,7 +101,7 @@ export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlma
       try {
         await navigator.clipboard.writeText(text);
         showToast('黄历文案已复制！');
-      } catch (err) {
+      } catch {
         showToast('复制失败，请重试');
       }
     },
