@@ -34,7 +34,7 @@ export async function GET(request: Request) {
         let latestPrices: Record<string, unknown>[] = [];
         let allHistory: Record<string, unknown>[] = [];
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let almanac: any = null;
+        let almanacs: any[] = [];
 
 
         try {
@@ -85,8 +85,8 @@ export async function GET(request: Request) {
                 if (pricesRs.rows && pricesRs.rows.length > 0) latestPrices = pricesRs.rows as Record<string, unknown>[];
                 if (historyRs.rows && historyRs.rows.length > 0) allHistory = historyRs.rows as Record<string, unknown>[];
 
-                const rsAlmanac = await client.execute({ sql: 'SELECT * FROM market_almanacs ORDER BY target_date DESC LIMIT 1', args: [] });
-                if (rsAlmanac.rows && rsAlmanac.rows.length > 0) almanac = rsAlmanac.rows[0];
+                const rsAlmanac = await client.execute({ sql: 'SELECT * FROM market_almanacs ORDER BY target_date DESC LIMIT 5', args: [] });
+                if (rsAlmanac.rows && rsAlmanac.rows.length > 0) almanacs = rsAlmanac.rows;
             } else {
                 latestPrices = client.prepare(`
                         SELECT dp.* FROM daily_prices dp
@@ -99,13 +99,15 @@ export async function GET(request: Request) {
                     `).all(...symbols) as Record<string, unknown>[];
 
                 allHistory = client.prepare(sql).all(...symbols) as Record<string, unknown>[];
-                almanac = client.prepare('SELECT * FROM market_almanacs ORDER BY target_date DESC LIMIT 1').get();
+                almanacs = client.prepare('SELECT * FROM market_almanacs ORDER BY target_date DESC LIMIT 5').all();
             }
-            if (almanac) {
-                try {
-                    if (typeof almanac.market_entropy === 'string') almanac.market_entropy = JSON.parse(almanac.market_entropy);
-                    if (typeof almanac.sector_currents === 'string') almanac.sector_currents = JSON.parse(almanac.sector_currents);
-                } catch (e) { }
+            if (almanacs.length > 0) {
+                almanacs.forEach(a => {
+                    try {
+                        if (typeof a.market_entropy === 'string') a.market_entropy = JSON.parse(a.market_entropy);
+                        if (typeof a.sector_currents === 'string') a.sector_currents = JSON.parse(a.sector_currents);
+                    } catch (e) { }
+                });
             }
 
         } finally {
@@ -145,7 +147,13 @@ export async function GET(request: Request) {
             };
         });
 
-        const response = NextResponse.json({ stocks, almanac, tier: userTier, queryTime: Date.now() - startTime });
+        const response = NextResponse.json({
+            stocks,
+            almanacs,
+            almanac: almanacs[0] || null, // Keep for fallback
+            tier: userTier,
+            queryTime: Date.now() - startTime
+        });
         response.headers.set('Cache-Control', 'private, max-age=60, stale-while-revalidate=30');
         response.headers.set('Vary', 'Cookie');
         return response;

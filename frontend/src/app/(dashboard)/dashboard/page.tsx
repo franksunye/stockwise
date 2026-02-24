@@ -45,15 +45,23 @@ function DashboardContent() {
   const almanacRef = useRef<MarketAlmanacHandle>(null);
   const hasScrolledToTarget = useRef(false);
 
-  const { stocks, almanac, loadingPool, loadMoreHistory } = useStocks();
+  const { stocks, almanac, almanacs, loadingPool, loadMoreHistory } = useStocks();
 
-  // Create an extended array where the first item is the Market Almanac
+  // Create an extended array where the first items are the Market Almanacs (multi-day flipping)
   const displayStocks = useMemo(() => {
+    const almanacCards = (almanacs.length > 0 ? almanacs : (almanac ? [almanac] : [])).map(a => ({
+      symbol: `MARKET_ALMANAC_${a.target_date}`,
+      name: 'ZISO AI · 投资黄历',
+      prediction: { signal: 'Almanac' },
+      isAlmanac: true,
+      almanacData: a
+    } as unknown as StockData));
+
     return [
-      { symbol: 'MARKET_ALMANAC', name: 'ZISO AI · 投资黄历', prediction: { signal: 'Almanac' } } as unknown as StockData,
+      ...almanacCards,
       ...stocks
     ];
-  }, [stocks]);
+  }, [stocks, almanacs, almanac]);
 
   const {
     currentIndex,
@@ -131,7 +139,8 @@ function DashboardContent() {
   }
 
   const currentStock = displayStocks[currentIndex];
-  const isMarketAlmanac = currentIndex === 0;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const isMarketAlmanac = currentStock && (currentStock as any).isAlmanac;
 
   return (
     <main className="fixed inset-0 bg-[#050508] text-white overflow-hidden select-none font-sans">
@@ -280,13 +289,14 @@ function DashboardContent() {
         className="h-full w-full flex overflow-x-scroll snap-x snap-mandatory scrollbar-hide"
       >
         {displayStocks.map((stock, idx) => {
-          if (idx === 0) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          if ((stock as any).isAlmanac) {
             return (
               <MarketAlmanacFeed 
                 ref={almanacRef}
-                key="market-almanac" 
+                key={stock.symbol} 
                 index={idx}
-                data={almanac}
+                data={(stock as any).almanacData}
                 onVerticalScroll={handleVerticalScrollStable} 
               />
             );

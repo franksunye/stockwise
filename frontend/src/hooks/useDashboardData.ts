@@ -23,6 +23,7 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
 
     const [stocks, setStocks] = useState<StockData[]>([]);
     const [almanac, setAlmanac] = useState<MarketAlmanacData | null>(null);
+    const [almanacs, setAlmanacs] = useState<MarketAlmanacData[]>([]);
     const [loadingPool, setLoadingPool] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [lastRefreshTime, setLastRefreshTime] = useState<Date | null>(null);
@@ -119,6 +120,9 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
             // Actually, we modified dashboard route! Let's fetch almanac from there if we can, or modify stock/batch
 
             if (batchData.error) { throw new Error(batchData.error); }
+            if (batchData.almanacs) {
+                setAlmanacs(batchData.almanacs);
+            }
             if (batchData.almanac) {
                 setAlmanac(batchData.almanac);
             }
@@ -290,7 +294,7 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
     return {
         stocks,
         almanac,
-
+        almanacs,
         setStocks,
         loadingPool,
         isRefreshing,
