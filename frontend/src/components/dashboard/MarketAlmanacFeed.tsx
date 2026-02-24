@@ -296,8 +296,8 @@ export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlma
                              </div>
                              <div className="space-y-1.5 mb-2">
                                 <div className="flex justify-between items-center bg-white/5 px-2 py-1 rounded">
-                                   <span className="text-[10px] text-slate-400 font-bold">主向: {itemSectors.main[0].name}</span>
-                                   <span className="text-[10px] text-emerald-400 font-black italic">{itemSectors.main[0].flow}</span>
+                                   <span className="text-[10px] text-slate-400 font-bold">主向: {itemSectors.main?.[0]?.name || '--'}</span>
+                                   <span className="text-[10px] text-emerald-400 font-black italic">{itemSectors.main?.[0]?.flow || ''}</span>
                                 </div>
                                 <div className="flex justify-between items-center opacity-40 px-2">
                                    <span className="text-[9px] text-slate-500">逆向: {itemSectors.inverse?.[0]?.name || '--'}</span>
