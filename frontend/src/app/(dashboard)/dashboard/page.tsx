@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense, useRef, useCallback, useMemo } from 'react';
+import { useState, useEffect, Suspense, useRef, useCallback, useMemo, memo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LayoutGrid as Grid, ChevronDown, User, FileText, Share2, Copy } from 'lucide-react';
@@ -36,23 +36,41 @@ const TacticalBriefDrawer = dynamic(() => import('@/components/dashboard/Tactica
   loading: () => null
 });
 
+// 1. 性能组件：独立背景辉光 (隔离 Modal 开关带来的重绘)
+const DashboardBackground = memo(({ isAlmanac, signal }: { isAlmanac: boolean, signal?: string }) => {
+  const color = useMemo(() => {
+    if (isAlmanac) return '#4F46E5';
+    if (signal === 'Long') return COLORS.up;
+    if (signal === 'Short') return COLORS.down;
+    return COLORS.hold;
+  }, [isAlmanac, signal]);
+
+  return (
+    <motion.div 
+      initial={false}
+      animate={{ opacity: 0.15 }}
+      transition={{ duration: 0.3 }}
+      className="fixed inset-0 pointer-events-none scale-150"
+      style={{
+        background: `radial-gradient(circle at 50% 50%, ${color} 0%, transparent 70%)`
+      }}
+    />
+  );
+});
+DashboardBackground.displayName = 'DashboardBackground';
+
 function DashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  // const targetSymbol = searchParams.get('symbol');
   const [userCenterOpen, setUserCenterOpen] = useState(false);
   const [briefOpen, setBriefOpen] = useState(false);
   const almanacRef = useRef<MarketAlmanacHandle>(null);
-  // const hasScrolledToTarget = useRef(false);
 
-  const { stocks, almanac, almanacs, loadingPool, loadMoreHistory } = useStocks();
+  const { stocks, almanac, almanacs, loadMoreHistory } = useStocks();
 
-  // Create an extended array where the first items are the Market Almanacs (multi-day flipping)
-  // 保持索引稳定：无论黄历加载与否，黄历占位符永远位于 Index 0，防止 Index 漂移
+  // Create an extended array where the first items are the Market Almanacs
   const displayStocks = useMemo(() => {
     const almanacList = almanacs.length > 0 ? almanacs : (almanac ? [almanac] : []);
-    
-    // 强制占位 Index 0
     const almanacCard = {
       symbol: `MARKET_ALMANAC`,
       name: 'ZISO AI · 投资黄历',
@@ -61,15 +79,11 @@ function DashboardContent() {
       almanacData: almanacList
     } as unknown as StockData;
 
-    return [
-      almanacCard,
-      ...stocks
-    ];
+    return [almanacCard, ...stocks];
   }, [stocks, almanacs, almanac]);
 
   const scrollOptions = useMemo(() => ({
     onOverscrollRight: () => setUserCenterOpen(true),
-    // 简化交互：左边缘右滑直接进入更完整的"监控池页面"，替代原本的简易浮层
     onOverscrollLeft: () => router.push('/dashboard/stock-pool')
   }), [router]);
 
@@ -87,7 +101,14 @@ function DashboardContent() {
   const [profileStock, setProfileStock] = useState<StockData | null>(null);
   const { tier } = useUserProfile();
 
-  // Stable handlers for Feed to prevent re-renders
+  // 2. 缓存所有 Modal 处理函数 (极致稳定性)
+  const closeUserCenter = useCallback(() => setUserCenterOpen(false), []);
+  const openUserCenter = useCallback(() => setUserCenterOpen(true), []);
+  const closeBrief = useCallback(() => setBriefOpen(false), []);
+  const openBrief = useCallback(() => setBriefOpen(true), []);
+  const closeTactics = useCallback(() => setSelectedTactics(null), []);
+  const closeProfile = useCallback(() => setProfileStock(null), []);
+  
   const handleShowTactics = useCallback((symbol: string, prediction: AIPrediction) => {
     setSelectedTactics({ symbol, prediction });
   }, []);
@@ -96,18 +117,24 @@ function DashboardContent() {
     handleVerticalScroll(top, index);
   }, [handleVerticalScroll]);
 
-  // 进入 App 时清除角标 (小红点)
-  useEffect(() => {
-    interface ExtendedNavigator {
-      clearAppBadge?: () => Promise<void>;
+  // 预解析战术数据，避免渲染时 JSON.parse
+  const parsedTacticsData = useMemo(() => {
+    if (!selectedTactics?.prediction?.ai_reasoning) return {};
+    try {
+      return JSON.parse(selectedTactics.prediction.ai_reasoning);
+    } catch {
+      return {};
     }
+  }, [selectedTactics]);
+
+  useEffect(() => {
+    interface ExtendedNavigator { clearAppBadge?: () => Promise<void>; }
     const nav = navigator as ExtendedNavigator;
     if (typeof nav !== 'undefined' && nav.clearAppBadge) {
       nav.clearAppBadge().catch(console.error);
     }
   }, []);
 
-  // 深度链接: 从 URL 参数打开简报
   useEffect(() => {
     if (searchParams.get('brief') === 'true') {
       setBriefOpen(true);
@@ -119,33 +146,15 @@ function DashboardContent() {
 
   return (
     <main className="fixed inset-0 bg-[#050508] text-white overflow-hidden select-none font-sans">
-      {/* 动态背景辉光: 使用径向渐变代替原生 blur，极大降低 iOS 上的 GPU/渲染负担 */}
-      <motion.div 
-        animate={{ opacity: 0.15 }}
-        transition={{ duration: 0.3 }}
-        className="fixed inset-0 pointer-events-none scale-150"
-        style={{
-          background: `radial-gradient(circle at 50% 50%, ${
-            isMarketAlmanac ? '#4F46E5' : // Indigo
-            currentStock?.prediction?.signal === 'Long' ? COLORS.up : 
-            currentStock?.prediction?.signal === 'Short' ? COLORS.down : COLORS.hold
-          } 0%, transparent 70%)`
-        }}
+      <DashboardBackground 
+        isAlmanac={isMarketAlmanac} 
+        signal={currentStock?.prediction?.signal} 
       />
 
-      {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-[100] p-6 pointer-events-none">
         <div className="w-full flex justify-between items-start pointer-events-auto relative h-12">
-           {/* 左侧：点击打开股票档案 / 分享（黄历） */}
-           <div 
-             className="flex items-center gap-2 cursor-pointer group shrink-0" 
-             onClick={() => {
-               if (isMarketAlmanac) {
-                 almanacRef.current?.share();
-               } else {
-                 setProfileStock(currentStock);
-               }
-             }}
+           <div className="flex items-center gap-2 cursor-pointer group shrink-0" 
+             onClick={() => isMarketAlmanac ? almanacRef.current?.share() : setProfileStock(currentStock)}
            >
               <div className="w-10 h-10 rounded-[16px] bg-white/5 border border-white/10 flex items-center justify-center transition-all group-active:scale-90 group-hover:bg-white/10 overflow-hidden relative">
                   <div className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${isMarketAlmanac ? 'opacity-100 scale-100' : 'opacity-0 scale-75 pointer-events-none'}`}>
@@ -157,12 +166,9 @@ function DashboardContent() {
               </div>
            </div>
 
-          {/* 中央：股票名称突出显示 / 市场黄历标题 */}
-          <div 
-            className="absolute left-1/2 transform -translate-x-1/2 top-0 cursor-pointer group flex flex-col items-center h-12 justify-center w-48"
+          <div className="absolute left-1/2 transform -translate-x-1/2 top-0 cursor-pointer group flex flex-col items-center h-12 justify-center w-48"
             onClick={() => !isMarketAlmanac && setProfileStock(currentStock)}
           >
-            {/* 黄历标题：绝对定位居中，带隐形占位符对齐高度 */}
             <div className={`absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-300 ${isMarketAlmanac ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
                <h1 className="text-xl font-black italic tracking-tight text-white group-hover:text-indigo-400 transition-colors text-center">
                  ZISO AI · 投资黄历
@@ -171,8 +177,6 @@ function DashboardContent() {
                  ALMANAC_PLACEHOLDER
                </span>
             </div>
-            
-            {/* 股票标题：绝对定位居中 */}
             <div className={`absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-300 ${!isMarketAlmanac ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
                <h1 className="text-xl font-black italic tracking-tight text-white group-hover:text-indigo-400 transition-colors text-center">
                  {currentStock?.name}
@@ -183,15 +187,7 @@ function DashboardContent() {
             </div>
           </div>
 
-          {/* 右侧：Brief 入口 / 复制（黄历） */}
-          <button 
-            onClick={() => {
-              if (isMarketAlmanac) {
-                almanacRef.current?.copy();
-              } else {
-                setBriefOpen(true);
-              }
-            }}
+          <button onClick={() => isMarketAlmanac ? almanacRef.current?.copy() : openBrief()}
             className="w-10 h-10 rounded-[16px] bg-white/5 border border-white/10 flex items-center justify-center active:scale-90 transition-all hover:bg-white/10 group overflow-hidden relative"
           >
             <div className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${isMarketAlmanac ? 'opacity-100 scale-100' : 'opacity-0 scale-50 pointer-events-none'}`}>
@@ -204,21 +200,12 @@ function DashboardContent() {
         </div>
       </header>
 
-      {/* X轴 监控容器 (Weather Mode) */}
-      <div 
-        ref={scrollRef}
-        onScroll={handleScroll}
-        className="h-full w-full flex overflow-x-scroll snap-x snap-mandatory scrollbar-hide"
-      >
+      <div ref={scrollRef} onScroll={handleScroll} className="h-full w-full flex overflow-x-scroll snap-x snap-mandatory scrollbar-hide">
         {displayStocks.map((stock, idx) => {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           if ('isAlmanac' in stock && (stock as any).isAlmanac) {
             return (
               <MarketAlmanacFeed 
-                ref={almanacRef}
-                key={stock.symbol} 
-                index={idx}
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                ref={almanacRef} key={stock.symbol} index={idx}
                 data={(stock as any).almanacData}
                 onVerticalScroll={handleVerticalScrollStable} 
                 scrollRequest={backToTopCounter}
@@ -227,9 +214,7 @@ function DashboardContent() {
           }
           return (
             <StockVerticalFeed 
-              key={stock.symbol} 
-              index={idx}
-              stock={stock} 
+              key={stock.symbol} index={idx} stock={stock} 
               onShowTactics={handleShowTactics} 
               onVerticalScroll={handleVerticalScrollStable}
               scrollRequest={backToTopCounter}
@@ -239,20 +224,11 @@ function DashboardContent() {
         })}
       </div>
 
-      {/* 底部导航 - Stock Pool + 个人中心 */}
       <footer className="fixed bottom-0 left-0 right-0 pt-10 px-8 pb-[max(2.5rem,env(safe-area-inset-bottom))] flex flex-col items-center gap-6 z-[100] pointer-events-none">
         <AnimatePresence>
           {yScrollPosition > 100 && (
-            <motion.button 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 20 }}
-              onClick={() => {
-                scrollToToday();
-                if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
-                  window.navigator.vibrate(10); // Subtle haptic buzz
-                }
-              }}
+            <motion.button initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }}
+              onClick={() => { scrollToToday(); if (typeof window !== 'undefined' && window.navigator?.vibrate) window.navigator.vibrate(10); }}
               className="flex items-center gap-2 bg-indigo-500 text-white px-5 py-2.5 rounded-full shadow-[0_10px_30px_rgba(99,102,241,0.3)] active:scale-90 transition-all pointer-events-auto"
             >
               <ChevronDown className="w-4 h-4 rotate-180" />
@@ -267,35 +243,20 @@ function DashboardContent() {
           ))}
         </div>
         <div className="w-full flex justify-between items-center pointer-events-auto">
-          <Link 
-            href="/dashboard/stock-pool" 
-            prefetch={true}
-            className="p-3 rounded-2xl bg-white/5 border border-white/10 active:scale-95 transition-all pointer-events-auto inline-flex items-center justify-center cursor-pointer touch-manipulation"
-          >
+          <Link href="/dashboard/stock-pool" prefetch className="p-3 rounded-2xl bg-white/5 border border-white/10 active:scale-95 transition-all pointer-events-auto inline-flex items-center justify-center cursor-pointer">
             <Grid className="w-5 h-5 text-indigo-400" />
           </Link>
-          
-          <button 
-            onClick={() => setUserCenterOpen(true)} 
-            className="w-11 h-11 rounded-full bg-white/5 border border-white/10 flex items-center justify-center transition-all active:scale-90 hover:bg-white/10 shrink-0 cursor-pointer touch-manipulation"
-          >
+          <button onClick={openUserCenter} className="w-11 h-11 rounded-full bg-white/5 border border-white/10 flex items-center justify-center transition-all active:scale-90 hover:bg-white/10 shrink-0 cursor-pointer">
             <User className="w-5 h-5 text-slate-400" />
           </button>
         </div>
       </footer>
 
-      {/* Modals & Drawers */}
       <TacticalBriefDrawer 
         isOpen={!!selectedTactics} 
-        onClose={() => setSelectedTactics(null)} 
+        onClose={closeTactics} 
         tier={tier}
-        data={(() => {
-          try {
-            return JSON.parse(selectedTactics?.prediction?.ai_reasoning || '{}');
-          } catch {
-            return {};
-          }
-        })()}
+        data={parsedTacticsData}
         userPos={stocks.find(s => s.symbol === selectedTactics?.symbol)?.rule?.position || 'none'}
         model={selectedTactics?.prediction?.model}
         symbol={selectedTactics?.symbol || ''}
@@ -306,26 +267,11 @@ function DashboardContent() {
       />
 
       <AnimatePresence>
-        {profileStock && (
-          <StockProfile 
-            stock={profileStock}
-            onClose={() => setProfileStock(null)}
-          />
-        )}
+        {profileStock && <StockProfile stock={profileStock} onClose={closeProfile} />}
       </AnimatePresence>
 
-      <UserCenterDrawer 
-        isOpen={userCenterOpen}
-        onClose={() => setUserCenterOpen(false)}
-      />
-
-      <BriefDrawer 
-        isOpen={briefOpen}
-        onClose={() => setBriefOpen(false)}
-        limitToSymbol={currentStock?.symbol}
-        onUpgrade={() => setUserCenterOpen(true)}
-      />
-
+      <UserCenterDrawer isOpen={userCenterOpen} onClose={closeUserCenter} />
+      <BriefDrawer isOpen={briefOpen} onClose={closeBrief} limitToSymbol={currentStock?.symbol} onUpgrade={openUserCenter} />
     </main>
   );
 }
