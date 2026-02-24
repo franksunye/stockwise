@@ -1,5 +1,5 @@
 import { memo, useRef, useImperativeHandle, forwardRef, useCallback, useState, useMemo, useEffect } from 'react';
-import { Shield, Sparkles, ChevronDown, Waves, Thermometer, Target, Zap, Loader2, Check, X } from 'lucide-react';
+import { Shield, Sparkles, ChevronDown, Waves, Target, Zap, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MarketAlmanacData } from '@/lib/types';
 
@@ -16,18 +16,6 @@ export type MarketAlmanacHandle = {
 };
 
 // --- 1. Infrastructure & Utilities ---
-
-interface MarketAlmanacFeedProps {
-  index: number;
-  data?: MarketAlmanacData | MarketAlmanacData[] | null;
-  onVerticalScroll?: (top: number, index: number) => void;
-  scrollRequest?: number;
-}
-
-export type MarketAlmanacHandle = {
-  share: () => Promise<void>;
-  copy: () => Promise<void>;
-};
 
 /**
  * Robustly parses action strategy string into distinct Yi/Ji segments.
@@ -136,13 +124,13 @@ const AlmanacCard = memo(function AlmanacCard({
                 <h4 className="text-[9px] font-black text-slate-600 uppercase tracking-widest leading-none mt-0.5">板块洋流</h4>
               </div>
               <div className="space-y-1.5">
-                {sectors.main?.slice(0, 3).map((s: any, si: number) => (
+                {sectors.main?.slice(0, 3).map((s: { name: string; flow: string }, si: number) => (
                   <div key={`main-${si}`} className="flex justify-between items-center bg-white/5 px-2 py-1.5 rounded gap-1">
                     <span className="text-[10px] text-slate-400 font-bold truncate pr-1">{si === 0 ? '主向: ' : ''}{s.name}</span>
                     <span className="text-[10px] text-emerald-400 font-black italic whitespace-nowrap shrink-0">{s.flow}</span>
                   </div>
                 ))}
-                {sectors.inverse?.slice(0, 2).map((s: any, si: number) => (
+                {sectors.inverse?.slice(0, 2).map((s: { name: string; flow: string }, si: number) => (
                   <div key={`inv-${si}`} className="flex justify-between items-center opacity-40 px-2 py-0.5 mt-1 gap-1">
                     <span className="text-[9px] text-slate-500 truncate pr-1">逆向: {s.name}</span>
                     <span className="text-[9px] text-rose-400 font-bold italic whitespace-nowrap shrink-0">{s.flow}</span>
@@ -275,14 +263,12 @@ export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlma
   // Safely extract properties for the current viewed almanac (used for share/copy logic)
   const targetDate = currentAlmanac?.target_date || new Date().toISOString().split('T')[0];
   const moodTag = currentAlmanac?.mood_tag || '混沌未明';
-  const actionStrategy = currentAlmanac?.action_strategy || '宜：观望 / 忌：盲动';
   const meteorology = currentAlmanac?.meteorology || '微雨';
   const insight = currentAlmanac?.ai_insight || '股指进入混沌期，缺乏明确突破点。板块轮动加速，建议保持观望。';
   
-  const entropy = useMemo(() => typeof currentAlmanac?.market_entropy === 'object' && currentAlmanac?.market_entropy ? currentAlmanac?.market_entropy : { score: 50, label: '50% · 震荡', breadth: '震荡分化', volume_status: '量能平稳' }, [currentAlmanac?.market_entropy]);
   const sectors = useMemo(() => typeof currentAlmanac?.sector_currents === 'object' && currentAlmanac?.sector_currents ? currentAlmanac?.sector_currents : { main: [{name: '待更新', flow: ''}], inverse: [{name: '待更新', flow: ''}] }, [currentAlmanac?.sector_currents]);
 
-  const { yiTextMarketing, jiTextMarketing } = useMemo(() => 
+  const { yi: yiTextMarketing, ji: jiTextMarketing } = useMemo(() => 
     parseActionStrategy(currentAlmanac?.action_strategy || ''), 
     [currentAlmanac?.action_strategy]
   );
