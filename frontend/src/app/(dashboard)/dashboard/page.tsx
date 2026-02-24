@@ -184,7 +184,7 @@ function DashboardContent() {
         signal={currentStock?.prediction?.signal} 
       />
 
-      <header className="fixed top-0 left-0 right-0 z-[100] p-6 pointer-events-none">
+      <header className="fixed top-0 left-0 right-0 z-[100] px-6 pb-6 pointer-events-none" style={{ paddingTop: 'max(1.5rem, env(safe-area-inset-top))' }}>
         <div className="w-full flex justify-between items-start pointer-events-auto relative h-12">
            <div className="flex items-center gap-2 cursor-pointer group shrink-0" 
              onClick={() => isMarketAlmanac ? almanacRef.current?.share() : setProfileStock(currentStock)}

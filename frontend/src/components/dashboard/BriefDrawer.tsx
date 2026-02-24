@@ -97,7 +97,6 @@ export function BriefDrawer({ isOpen, onClose, limitToSymbol, onUpgrade }: Brief
             onDragEnd={(_, info) => { if (info.offset.y > 150) onClose(); }}
             transition={isHighPerformance ? { type: 'tween', ease: 'easeOut', duration: 0.25 } : { type: 'spring', damping: 25, stiffness: 200 }}
             className="w-full max-w-md h-[85vh] flex flex-col bg-[#050508] border-t border-white/10 rounded-t-[32px] shadow-[0_-20px_50px_rgba(0,0,0,0.5)] overflow-hidden pointer-events-auto z-10"
-            style={{ paddingTop: 'env(safe-area-inset-top)' }}
           >
             {/* Visual Handle */}
             <div className="w-full flex justify-center pt-3 pb-1 shrink-0"><div className="w-12 h-1 rounded-full bg-white/20" /></div>

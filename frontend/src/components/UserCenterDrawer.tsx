@@ -286,7 +286,6 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
               ? { type: 'tween', ease: 'easeOut', duration: 0.25 }
               : { type: 'spring', damping: 25, stiffness: 200 }
             }
-            style={{ paddingTop: 'env(safe-area-inset-top)' }}
             className="w-full max-w-md h-[85vh] flex flex-col bg-[#0a0a0f] border-t border-white/10 rounded-t-[32px] shadow-[0_-20px_50px_rgba(0,0,0,0.5)] overflow-hidden pointer-events-auto z-10"
           >
             {/* Visual Handle */}

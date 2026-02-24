@@ -120,7 +120,6 @@ export function TacticalBriefDrawer({
               : { type: 'spring', damping: 25, stiffness: 200 }
             }
             className="w-full max-w-md bg-[#0a0a0f] border-t border-white/10 rounded-t-[32px] shadow-[0_-20px_50px_rgba(0,0,0,0.5)] overflow-hidden pointer-events-auto z-10 h-[85vh] flex flex-col"
-            style={{ paddingTop: 'env(safe-area-inset-top)' }}
           >
             {/* 顶部视觉拉手 */}
             <div className="w-full flex justify-center pt-3 pb-1 shrink-0 bg-[#0a0a0f]">

@@ -265,7 +265,7 @@ export default function StockPoolPage() {
       {!isIOS && <div className="fixed inset-0 opacity-[0.03] pointer-events-none bg-indigo-500 blur-[120px] scale-150" />}
 
       {/* Solid/Stable Header Structure (Centered Title) */}
-      <header className="shrink-0 z-20 px-6 py-4 flex items-center justify-between bg-[#050508] border-b border-white/5">
+      <header className="shrink-0 z-20 px-6 pb-4 flex items-center justify-between bg-[#050508] border-b border-white/5" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
         <div className="w-12">
           <Link href="/dashboard" className="p-2 rounded-full hover:bg-white/5 active:scale-90 transition-all text-slate-400 flex items-center justify-center">
             <ArrowLeft className="w-5 h-5" />
