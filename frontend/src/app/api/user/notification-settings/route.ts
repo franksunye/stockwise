@@ -12,6 +12,7 @@ const getDefaultSettings = () => ({
     prediction_updated: { enabled: true, priority: 'low' },
     daily_brief: { enabled: true, priority: 'low' },
     price_update: { enabled: false, priority: 'low' },  // 实时价格更新，默认关闭避免打扰
+    market_almanac: { enabled: true, priority: 'medium' }, // 投资黄历
   },
 });
 

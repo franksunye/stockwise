@@ -74,7 +74,8 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
       validation_glory: { enabled: true },
       prediction_updated: { enabled: true },
       daily_brief: { enabled: true },
-      price_update: { enabled: true }
+      price_update: { enabled: true },
+      market_almanac: { enabled: true }
     },
   });
 
@@ -462,6 +463,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                       { key: 'prediction_updated', icon: Zap, label: '预测更新', badge: '分析完成' },
                                       { key: 'daily_brief', icon: FileText, label: tier === 'pro' ? 'Pro 深度复盘' : '简报生成', badge: tier === 'pro' ? '★ 专属' : '17:30', isPro: tier === 'pro' },
                                       { key: 'price_update', icon: Info, label: '实时行情', badge: '盘中推送' },
+                                      { key: 'market_almanac', icon: Sun, label: '投资黄历', badge: '每日双发' },
                                     ].map((type) => {
                                       const isEnabled = notificationSettings.types[type.key as keyof typeof notificationSettings.types]?.enabled ?? true;
                                       const isPro = 'isPro' in type && type.isPro;

@@ -334,6 +334,23 @@ class NotificationManager:
                 "related_symbols": [e["symbol"] for e in updates]
             }
             
+        # 5. Handle Market Almanac (New!)
+        almanacs = [e for e in events if e["type"] in ("almanac_preview", "almanac_ritual")]
+        if almanacs:
+            e = almanacs[0]
+            title, body = NotificationTemplates.render(
+                e["type"], 
+                tier=user_tier, 
+                **e
+            )
+            return {
+                "title": title,
+                "body": body,
+                "url": e["url"],
+                "type": e["type"],
+                "related_symbols": []
+            }
+
         return None
 
     def _check_user_preference(self, user_id: str, notif_type: str) -> bool:
@@ -357,7 +374,11 @@ class NotificationManager:
                 return False
             
             # Type-specific check
-            type_settings = settings.get("types", {}).get(notif_type, {})
+            pref_key = notif_type
+            if notif_type in ("almanac_preview", "almanac_ritual"):
+                pref_key = "market_almanac"
+
+            type_settings = settings.get("types", {}).get(pref_key, {})
             return type_settings.get("enabled", True)
             
         except Exception as e:

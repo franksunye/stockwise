@@ -120,3 +120,12 @@ jobs:
         run: |
           echo "🚀 Generating Daily Market Almanac for A-Share..."
           python -u backend/engine/almanac_generator.py
+
+      - name: Broadcast Market Almanac Preview
+        env:
+          PYTHONUNBUFFERED: "1"
+          TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+        run: |
+          echo "📜 Sending T+1 Almanac Preview to users..."
+          python -u backend/scripts/broadcast_almanac.py --phase preview

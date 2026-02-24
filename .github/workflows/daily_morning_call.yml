@@ -66,29 +66,27 @@ jobs:
 
       - name: Run Morning Call
         env:
-          # Database (Turso)
           TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
           TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
-          
-          # Push Service
           NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
           INTERNAL_API_SECRET: ${{ secrets.INTERNAL_API_SECRET }}
-          
-          # Logic Control
           ENABLE_SMART_NOTIFICATIONS: "true"
           TARGET_DATE: ${{ github.event.inputs.date }}
           DRY_RUN: ${{ github.event.inputs.dry_run }}
-          
-          # Notification Secrets
           WECOM_ROBOT_KEY: ${{ secrets.WECOM_ROBOT_KEY }}
-          ADMIN_MOBILES: ${{ secrets.ADMIN_MOBILES }}
         run: |
           ARGS=""
-          if [ "$DRY_RUN" = "true" ]; then
-            ARGS="$ARGS --dry-run"
-          fi
-          if [ -n "$TARGET_DATE" ]; then
-            ARGS="$ARGS --date $TARGET_DATE"
-          fi
-          
+          if [ "$DRY_RUN" = "true" ]; then ARGS="$ARGS --dry-run"; fi
+          if [ -n "$TARGET_DATE" ]; then ARGS="$ARGS --date $TARGET_DATE"; fi
           python backend/scripts/daily_morning_call.py $ARGS
+
+      - name: Broadcast Market Almanac Ritual
+        env:
+          PYTHONUNBUFFERED: "1"
+          TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+          TARGET_DATE: ${{ github.event.inputs.date }}
+        run: |
+          ARGS=""
+          if [ -n "$TARGET_DATE" ]; then ARGS="--date $TARGET_DATE"; fi
+          python backend/scripts/broadcast_almanac.py --phase ritual $ARGS

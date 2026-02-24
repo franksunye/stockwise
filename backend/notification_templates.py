@@ -155,6 +155,22 @@ class NotificationTemplates:
                 }
             }
         },
+        "almanac_preview": {
+            "all": {
+                "zh": {
+                    "title": "📜 明日投资黄历已出炉",
+                    "body": "意境：{mood_tag} | 宜：{strategy}。抢先查看明日市场内能分析。"
+                }
+            }
+        },
+        "almanac_ritual": {
+            "all": {
+                "zh": {
+                    "title": "📜 今日投资黄历：{mood_tag}",
+                    "body": "{strategy} | AI 天机：{insight_snippet}"
+                }
+            }
+        },
         # --- Service Hooks (Short strings for previews/hooks) ---
         "brief_hook_bullish": {
             "all": {
