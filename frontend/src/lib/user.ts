@@ -14,6 +14,7 @@ const USER_ID_KEY = 'STOCKWISE_USER_ID';
 const USER_TYPE_KEY = 'STOCKWISE_USER_TYPE';
 const USERNAME_KEY = 'STOCKWISE_USERNAME';
 const USER_ID_COOKIE = 'stockwise_uid';
+const USER_ID_URL_PARAM = 'uid';
 const USER_SESSION_SYNC_KEY = 'STOCKWISE_USER_SESSION_SYNCED_AT';
 const USER_SESSION_SYNC_INTERVAL_MS = 5 * 60 * 1000;
 
@@ -31,6 +32,10 @@ export interface User {
  */
 function generateShortId(): string {
   return 'user_' + Math.random().toString(36).substr(2, 9);
+}
+
+function isValidUserId(input: string | null | undefined): input is string {
+  return typeof input === 'string' && /^user_[A-Za-z0-9_-]{6,64}$/.test(input);
 }
 
 /**
@@ -64,6 +69,30 @@ function setCookie(name: string, value: string, days: number = 365): void {
   document.cookie = `${name}=${value}; expires=${expires.toUTCString()}; path=/; SameSite=Lax${secure}${domainAttr}`;
 }
 
+function getUserIdFromUrl(): string | null {
+  if (typeof window === 'undefined') return null;
+  const url = new URL(window.location.href);
+  const userId = url.searchParams.get(USER_ID_URL_PARAM);
+  return isValidUserId(userId) ? userId : null;
+}
+
+function syncUserIdToInstallUrl(userId: string): void {
+  if (typeof window === 'undefined') return;
+  const ua = navigator.userAgent;
+  const isIOS = /iPhone|iPad|iPod/i.test(ua);
+  const isStandalone =
+    window.matchMedia('(display-mode: standalone)').matches ||
+    (navigator as unknown as Record<string, unknown>).standalone === true;
+
+  // Only bridge in iOS browser mode so A2HS icon launch URL carries the same identity.
+  if (!isIOS || isStandalone) return;
+
+  const url = new URL(window.location.href);
+  if (url.searchParams.get(USER_ID_URL_PARAM) === userId) return;
+  url.searchParams.set(USER_ID_URL_PARAM, userId);
+  window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
+}
+
 /**
  * 同步用户 ID 到所有存储位置
  */
@@ -95,10 +124,22 @@ export async function getCurrentUser(): Promise<User> {
   let userType = localStorage.getItem(USER_TYPE_KEY) as RegistrationType;
   const username = localStorage.getItem(USERNAME_KEY) || undefined;
 
+  // A2HS bridge: recover from install URL if local storage is isolated (iOS standalone cold start).
+  if (!userId) {
+    const urlUserId = getUserIdFromUrl();
+    if (urlUserId) {
+      console.log('🔄 从 URL 恢复用户 ID（A2HS bridge）:', urlUserId);
+      userId = urlUserId;
+      userType = 'anonymous';
+      localStorage.setItem(USER_ID_KEY, userId);
+      localStorage.setItem(USER_TYPE_KEY, userType);
+    }
+  }
+
   // 如果 localStorage 没有 userId，尝试从 Cookie 恢复（iOS PWA 场景）
   if (!userId) {
     const cookieUserId = getCookie(USER_ID_COOKIE);
-    if (cookieUserId && cookieUserId.startsWith('user_')) {
+    if (isValidUserId(cookieUserId)) {
       console.log('🔄 从 Cookie 恢复用户 ID（iOS PWA 模式）:', cookieUserId);
       userId = cookieUserId;
       userType = 'anonymous';
@@ -115,6 +156,10 @@ export async function getCurrentUser(): Promise<User> {
 
     // 先保存到 localStorage 和 Cookie，保证前端即时可用
     syncUserIdToStorage(userId, userType);
+  }
+
+  if (userId) {
+    syncUserIdToInstallUrl(userId);
   }
 
   // 确保服务端会话存在（同时兼容老 userId 迁移）
