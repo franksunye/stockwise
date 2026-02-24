@@ -3,6 +3,7 @@ import { getDbClient } from '@/lib/db';
 import { randomBytes } from 'crypto';
 import {
     createUserSessionToken,
+    getCookieFromRequest,
     getTrustedUserIdFromRequest,
     setUserSessionCookie
 } from '@/lib/user-session';
@@ -31,18 +32,27 @@ export async function POST(request: Request) {
         const body = (await request.json().catch(() => ({}))) as RegisterBody;
         const registrationType = body.registrationType === 'explicit' ? 'explicit' : 'anonymous';
         const sessionUserId = getTrustedUserIdFromRequest(request);
+        const legacyCookieUserId = getCookieFromRequest(request, 'stockwise_uid');
         const allowLegacyBootstrap = process.env.ALLOW_LEGACY_USERID_BOOTSTRAP !== 'false';
 
         let userId = sessionUserId;
         let legacyBootstrapUsed = false;
+        let bootstrapSource: 'session' | 'body' | 'cookie' | 'generated' = 'session';
 
         if (!userId) {
             if (allowLegacyBootstrap && isValidUserId(body.userId)) {
                 // Transitional path for existing clients: bind first session to existing local user ID.
                 userId = body.userId;
                 legacyBootstrapUsed = true;
+                bootstrapSource = 'body';
+            } else if (allowLegacyBootstrap && isValidUserId(legacyCookieUserId)) {
+                // iOS A2HS fallback: recover from JS cookie when local/session storage is isolated.
+                userId = legacyCookieUserId;
+                legacyBootstrapUsed = true;
+                bootstrapSource = 'cookie';
             } else {
                 userId = generateUserId();
+                bootstrapSource = 'generated';
             }
         }
 
@@ -76,9 +86,22 @@ export async function POST(request: Request) {
             success: true,
             userId,
             sessionBound: true,
-            legacyBootstrapUsed
+            legacyBootstrapUsed,
+            bootstrapSource
         });
         setUserSessionCookie(response, sessionToken);
+        const requestHost = new URL(request.url).hostname;
+        const isZisoHost = requestHost === 'ziso.cc' || requestHost.endsWith('.ziso.cc');
+        response.cookies.set({
+            name: 'stockwise_uid',
+            value: userId,
+            httpOnly: false,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            path: '/',
+            maxAge: 60 * 60 * 24 * 365,
+            ...(isZisoHost ? { domain: '.ziso.cc' } : {})
+        });
         return response;
     } catch (error) {
         console.error('User registration error:', error);
