@@ -73,7 +73,7 @@ export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlma
       text += `🌊 主流方向：${sectors.main[0].name} (${sectors.main[0].flow})\n`;
     }
     text += `\n—— ZISO AI：替你做股市功课，带你看投资门道。\n`;
-    text += `#ZISOAI #投资黄历 #大盘分析`;
+    text += `#ZISOAI #知守AI #AI股票分析 #投资黄历 #大盘分析`;
     return text;
   }, [targetDate, moodTag, actionStrategy, meteorology, insight, entropy, sectors]);
 

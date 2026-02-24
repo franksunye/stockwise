@@ -112,7 +112,7 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
     
     text += `\n🎯 决策：${signalText} (把握 ${confidence}%)\n\n`;
     text += `—— ZISO AI：替你做股市功课，带你看投资门道。\n`;
-    text += `#ZISOAI #投资黄历 #股市复盘`;
+    text += `#ZISOAI #知守AI #AI股票分析 #投资黄历 #股市复盘`;
     
     return text;
   }, [stockName, prediction, intelligence, tacticStr]);
