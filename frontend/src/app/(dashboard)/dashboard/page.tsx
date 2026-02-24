@@ -101,6 +101,18 @@ function DashboardContent() {
   const [profileStock, setProfileStock] = useState<StockData | null>(null);
   const { tier } = useUserProfile();
 
+  const currentStock = displayStocks[currentIndex];
+  const isMarketAlmanac = currentStock && 'isAlmanac' in currentStock && currentStock.isAlmanac;
+
+  // 【核心修复：粘性标题】用来保持标题内容的“粘性”，防止在切换到黄历时由于数据过快切换而显示黄历的内部 ID
+  const stickyStockInfo = useRef({ name: '', symbol: '' });
+  if (currentStock && !isMarketAlmanac) {
+    stickyStockInfo.current = { name: currentStock.name, symbol: currentStock.symbol };
+  } else if (!stickyStockInfo.current.name && stocks.length > 0) {
+    // 初始状态下若在黄历，预填入第一个真实股票的信息作为备选
+    stickyStockInfo.current = { name: stocks[0].name, symbol: stocks[0].symbol };
+  }
+
   // 2. 缓存所有 Modal 处理函数 (极致稳定性)
   const closeUserCenter = useCallback(() => setUserCenterOpen(false), []);
   const openUserCenter = useCallback(() => setUserCenterOpen(true), []);
@@ -141,9 +153,6 @@ function DashboardContent() {
     }
   }, [searchParams]);
 
-  const currentStock = displayStocks[currentIndex];
-  const isMarketAlmanac = currentStock && 'isAlmanac' in currentStock && currentStock.isAlmanac;
-
   return (
     <main className="fixed inset-0 bg-[#050508] text-white overflow-hidden select-none font-sans">
       <DashboardBackground 
@@ -161,7 +170,7 @@ function DashboardContent() {
                       <Share2 className="w-5 h-5 text-indigo-400 group-hover:text-white transition-colors" />
                   </div>
                   <div className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${!isMarketAlmanac ? 'opacity-100 scale-100' : 'opacity-0 scale-75 pointer-events-none'}`}>
-                      <div className="text-[10px] font-black italic text-indigo-500">{currentStock?.symbol?.slice(-2) || ''}</div>
+                      <div className="text-[10px] font-black italic text-indigo-500">{stickyStockInfo.current.symbol?.slice(-2) || ''}</div>
                   </div>
               </div>
            </div>
@@ -177,12 +186,13 @@ function DashboardContent() {
                  ALMANAC_PLACEHOLDER
                </span>
             </div>
+            
             <div className={`absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-300 ${!isMarketAlmanac ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
                <h1 className="text-xl font-black italic tracking-tight text-white group-hover:text-indigo-400 transition-colors text-center">
-                 {currentStock?.name}
+                 {stickyStockInfo.current.name}
                </h1>
                <span className="text-[10px] font-black italic text-slate-500 tracking-widest uppercase mt-0.5 leading-none">
-                 {currentStock ? formatStockSymbol(currentStock.symbol) : ''}
+                 {stickyStockInfo.current.symbol ? formatStockSymbol(stickyStockInfo.current.symbol) : ''}
                </span>
             </div>
           </div>
