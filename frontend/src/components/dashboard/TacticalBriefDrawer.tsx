@@ -16,7 +16,7 @@ import {
   Layers,
   Hash,
   AlertTriangle,
-  Share2
+  Calendar
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { AIPrediction, TacticalData } from '@/lib/types';
@@ -128,15 +128,16 @@ export function TacticalBriefDrawer({
 
             {/* 固定 Header，不再随内容滚动，彻底消除缝隙穿透 */}
             <header className="relative flex items-center justify-center py-2 px-6 bg-[#0a0a0f] border-b border-white/5 shadow-lg shadow-black/20 shrink-0 z-20">
-                 {/* Left: Action */}
+                 {/* Left: Almanac (Historical/Humanistic Context) */}
                  <button 
                    onClick={(e) => {
                      e.stopPropagation();
                      setIsShareOpen(true);
                    }} 
                    className="absolute left-4 p-2.5 rounded-full bg-white/5 border border-white/10 text-indigo-400 active:scale-95 transition-all hover:bg-white/10 hover:text-indigo-300 z-20"
+                   title="查看投资黄历"
                  >
-                   <Share2 size={18} />
+                   <Calendar size={18} />
                  </button>
 
                  {/* Center: Tabs */}
