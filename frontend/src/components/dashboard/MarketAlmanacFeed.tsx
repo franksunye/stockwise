@@ -27,10 +27,13 @@ export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlma
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [currentVerticalIndex, setCurrentVerticalIndex] = useState(0);
 
-  // Handle back to top requests
+  // Handle back to top requests ONLY when counter increases (ignoring mount and blur)
+  const prevScrollRequestRef = useRef(scrollRequest || 0);
+
   useEffect(() => {
-    if (containerRef.current && scrollRequest !== undefined) {
+    if (containerRef.current && scrollRequest !== undefined && scrollRequest > prevScrollRequestRef.current) {
       containerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+      prevScrollRequestRef.current = scrollRequest;
     }
   }, [scrollRequest]);
 
@@ -202,7 +205,7 @@ export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlma
            const itemSectors = typeof almanacItem.sector_currents === 'object' && almanacItem.sector_currents ? almanacItem.sector_currents : { main: [{name: '待更新', flow: ''}], inverse: [{name: '待更新', flow: ''}] };
 
            return (
-              <div key={idx} className="w-full h-full shrink-0 flex flex-col items-center justify-center px-6 snap-center snap-always min-h-screen">
+              <div key={idx} className="w-full h-full shrink-0 flex flex-col items-center justify-center px-6 snap-center snap-always">
                  <div ref={el => { posterRefs.current[idx] = el; }} className="w-full max-w-md space-y-6 mx-auto relative">
                     {/* Header Branding (Visible in Share) */}
                     {isCapturing && idx === currentVerticalIndex && (

@@ -144,21 +144,17 @@ function DashboardContent() {
 
   return (
     <main className="fixed inset-0 bg-[#050508] text-white overflow-hidden select-none font-sans">
-      {/* 动态背景辉光 */}
-      <AnimatePresence mode="wait">
-        <motion.div 
-          key={currentIndex}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 0.1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 pointer-events-none blur-[150px] scale-150"
-          style={{ 
-            backgroundColor: isMarketAlmanac ? '#4F46E5' : // Indigo for Almanac
-                            currentStock?.prediction?.signal === 'Long' ? COLORS.up : 
-                            currentStock?.prediction?.signal === 'Short' ? COLORS.down : COLORS.hold,
-          }}
-        />
-      </AnimatePresence>
+      {/* 动态背景辉光: 移除 key 和 AnimatePresence 以避免滑动时的 GPU 销毁重建 */}
+      <motion.div 
+        animate={{ 
+          opacity: 0.1,
+          backgroundColor: isMarketAlmanac ? '#4F46E5' : // Indigo for Almanac
+                          currentStock?.prediction?.signal === 'Long' ? COLORS.up : 
+                          currentStock?.prediction?.signal === 'Short' ? COLORS.down : COLORS.hold
+        }}
+        transition={{ duration: 0.3 }}
+        className="fixed inset-0 pointer-events-none blur-[150px] scale-150"
+      />
 
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-[100] p-6 pointer-events-none">
@@ -299,7 +295,7 @@ function DashboardContent() {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 data={(stock as any).almanacData}
                 onVerticalScroll={handleVerticalScrollStable} 
-                scrollRequest={currentIndex === idx ? backToTopCounter : undefined}
+                scrollRequest={backToTopCounter}
               />
             );
           }
@@ -310,7 +306,7 @@ function DashboardContent() {
               stock={stock} 
               onShowTactics={handleShowTactics} 
               onVerticalScroll={handleVerticalScrollStable}
-              scrollRequest={currentIndex === idx ? backToTopCounter : undefined}
+              scrollRequest={backToTopCounter}
               onLoadMore={loadMoreHistory}
             />
           );

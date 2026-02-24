@@ -25,9 +25,11 @@ export const StockVerticalFeed = memo(function StockVerticalFeed({
   const loaderRef = useRef<HTMLDivElement>(null);
   
   // 监听回顶请求
+  const prevScrollRequestRef = useRef(scrollRequest || 0);
   useEffect(() => {
-    if (container && scrollRequest !== undefined) {
+    if (container && scrollRequest !== undefined && scrollRequest > prevScrollRequestRef.current) {
       container.scrollTo({ top: 0, behavior: 'smooth' });
+      prevScrollRequestRef.current = scrollRequest;
     }
   }, [container, scrollRequest]);
 
