@@ -95,9 +95,17 @@ export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlma
     text += `☁️ 气象：${meteorology}\n\n`;
     text += `🔍 市场天机：${insight}\n\n`;
     text += `⚖️ 全场热度：${entropy.label} (${entropy.breadth})\n`;
+    
     if (sectors.main && sectors.main.length > 0) {
-      text += `🌊 主流方向：${sectors.main[0].name} (${sectors.main[0].flow})\n`;
+      const mainStr = sectors.main.slice(0, 3).map(s => `${s.name}(${s.flow})`).join(', ');
+      text += `🌊 主流方向：${mainStr}\n`;
     }
+    
+    if (sectors.inverse && sectors.inverse.length > 0) {
+      const invStr = sectors.inverse.slice(0, 2).map(s => `${s.name}(${s.flow})`).join(', ');
+      text += `❄️ 逆向压力：${invStr}\n`;
+    }
+    
     text += `\n—— ZISO AI：替你做股市功课，带你看投资门道。\n`;
     text += `#ZISOAI #知守AI #AI股票分析 #投资黄历 #大盘分析`;
     return text;
@@ -295,14 +303,27 @@ export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlma
                                 <h4 className="text-[9px] font-black text-slate-600 uppercase tracking-widest leading-none mt-0.5">板块洋流</h4>
                              </div>
                              <div className="space-y-1.5 mb-2">
-                                <div className="flex justify-between items-center bg-white/5 px-2 py-1 rounded">
-                                   <span className="text-[10px] text-slate-400 font-bold">主向: {itemSectors.main?.[0]?.name || '--'}</span>
-                                   <span className="text-[10px] text-emerald-400 font-black italic">{itemSectors.main?.[0]?.flow || ''}</span>
-                                </div>
-                                <div className="flex justify-between items-center opacity-40 px-2">
-                                   <span className="text-[9px] text-slate-500">逆向: {itemSectors.inverse?.[0]?.name || '--'}</span>
-                                   <span className="text-[9px] text-rose-400 font-bold italic">{itemSectors.inverse?.[0]?.flow || '--'}</span>
-                                </div>
+                                {itemSectors.main?.slice(0, 2).map((s, si) => (
+                                   <div key={`main-${si}`} className="flex justify-between items-center bg-white/5 px-2 py-1.5 rounded gap-1">
+                                      <span className="text-[10px] text-slate-400 font-bold truncate pr-1">
+                                         {si === 0 ? '主向: ' : ''}{s.name}
+                                      </span>
+                                      <span className="text-[10px] text-emerald-400 font-black italic whitespace-nowrap shrink-0">
+                                         {s.flow}
+                                      </span>
+                                   </div>
+                                ))}
+                                
+                                {itemSectors.inverse?.slice(0, 1).map((s, si) => (
+                                   <div key={`inv-${si}`} className="flex justify-between items-center opacity-40 px-2 py-0.5 mt-1 gap-1">
+                                      <span className="text-[9px] text-slate-500 truncate pr-1">
+                                         逆向: {s.name}
+                                      </span>
+                                      <span className="text-[9px] text-rose-400 font-bold italic whitespace-nowrap shrink-0">
+                                         {s.flow}
+                                      </span>
+                                   </div>
+                                ))}
                              </div>
                           </div>
                           
@@ -323,17 +344,17 @@ export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlma
                                 <h4 className="text-[9px] font-black text-slate-600 uppercase tracking-widest leading-none mt-0.5">行动指南</h4>
                              </div>
                              <div className="space-y-2">
-                                <div className="flex items-center gap-2">
-                                   <div className="w-4 h-4 rounded bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30">
+                                <div className="flex items-start gap-2">
+                                   <div className="w-4 h-4 rounded bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30 shrink-0 mt-0.5">
                                       <span className="text-[8px] font-black text-indigo-400">宜</span>
                                    </div>
-                                   <span className="text-[10px] font-black text-slate-200">{itemStrategy.split(' / ')[0] || '观望'}</span>
+                                   <span className="text-[10px] font-black text-slate-200 leading-[1.3] text-left">{itemStrategy.split(' / ')[0] || '观望'}</span>
                                 </div>
-                                <div className="flex items-center gap-2 opacity-50">
-                                   <div className="w-4 h-4 rounded bg-rose-500/20 flex items-center justify-center border border-rose-500/30">
+                                <div className="flex items-start gap-2 opacity-50">
+                                   <div className="w-4 h-4 rounded bg-rose-500/20 flex items-center justify-center border border-rose-500/30 shrink-0 mt-0.5">
                                       <span className="text-[8px] font-black text-rose-400">忌</span>
                                    </div>
-                                   <span className="text-[10px] font-bold text-slate-400">{itemStrategy.split(' / ')[1] || '盲动'}</span>
+                                   <span className="text-[10px] font-bold text-slate-400 leading-[1.3] text-left">{itemStrategy.split(' / ')[1] || '盲动'}</span>
                                 </div>
                              </div>
                           </div>
