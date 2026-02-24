@@ -692,7 +692,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                           >
                             重新进入激活引导
                           </button>
-                          <div className="mt-4 opacity-30 text-[8px] text-slate-500 uppercase tracking-widest font-medium">ZISO AI v{pkg.version}</div>
+                          <div className="mt-4 opacity-60 text-[8px] text-slate-400 uppercase tracking-widest font-medium">ZISO AI v{pkg.version}</div>
                         </div>
                     </div>
                   </motion.div>
