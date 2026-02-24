@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { getCurrentUser } from '@/lib/user';
-import { StockData } from '@/lib/types';
+import { StockData, MarketAlmanacData } from '@/lib/types';
 import { getRule } from '@/lib/storage';
 import { getMarketScene } from '@/lib/date-utils';
 import { WatchlistItem } from './useWatchlist';
@@ -22,7 +22,7 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
     // Watchlist passed from props to avoid redundant hook calls in unified context
 
     const [stocks, setStocks] = useState<StockData[]>([]);
-    const [almanac, setAlmanac] = useState<unknown>(null);
+    const [almanac, setAlmanac] = useState<MarketAlmanacData | null>(null);
     const [loadingPool, setLoadingPool] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [lastRefreshTime, setLastRefreshTime] = useState<Date | null>(null);

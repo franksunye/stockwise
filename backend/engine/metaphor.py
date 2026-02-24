@@ -30,7 +30,7 @@ class MetaphorEngine:
         # but different stocks or different days get different ones.
         seed_str = f"{target_date}_{symbol}"
         seed_val = int(hashlib.md5(seed_str.encode()).hexdigest(), 16) % (2**32)
-        random.seed(seed_val)
+        rng = random.Random(seed_val)
 
         # 2. Market Condition Variables
         rsi = market_data.get('rsi', 50) if market_data else 50
@@ -75,9 +75,9 @@ class MetaphorEngine:
             category = "wait"
 
         selected = POOLS[category]
-        theme = random.choice(selected["tokens"])
-        almanac = random.choice(selected["actions"])
-        mood = random.choice(selected["moods"])
+        theme = rng.choice(selected["tokens"])
+        almanac = rng.choice(selected["actions"])
+        mood = rng.choice(selected["moods"])
         color_hue = selected["hues"]
 
         # 5. Meteorology Overlays based on RSI
@@ -114,8 +114,8 @@ class MetaphorEngine:
         ]
         
         wisdom = ""
-        if random.random() < 0.4:
-            wisdom = random.choice(WISDOM_POOL)
+        if rng.random() < 0.4:
+            wisdom = rng.choice(WISDOM_POOL)
 
         # 7. Aesthetic Visual State (for symbols)
         icon_state = "stable_circle"

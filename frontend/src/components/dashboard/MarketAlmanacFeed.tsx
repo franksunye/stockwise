@@ -2,26 +2,11 @@ import { memo, useRef, useImperativeHandle, forwardRef, useCallback, useState } 
 import { Share2, Copy, Shield, Sparkles, ChevronDown, Waves, Thermometer, Target, Zap, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toPng } from 'html-to-image';
+import { MarketAlmanacData } from '@/lib/types';
 
 interface MarketAlmanacFeedProps {
   index: number;
-  data?: {
-    target_date?: string;
-    mood_tag?: string;
-    action_strategy?: string;
-    meteorology?: string;
-    ai_insight?: string;
-    market_entropy?: {
-      score: number;
-      label: string;
-      breadth: string;
-      volume_status: string;
-    };
-    sector_currents?: {
-      main: Array<{name: string, flow: string}>;
-      inverse?: Array<{name: string, flow: string}>;
-    };
-  } | null;
+  data?: MarketAlmanacData | null;
   onVerticalScroll?: (top: number, index: number) => void;
 }
 

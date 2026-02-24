@@ -135,6 +135,25 @@ export interface TacticalData {
     visual_story?: VisualStory;
 }
 
+export interface MarketAlmanacData {
+    target_date: string;
+    mood_tag: string;
+    action_strategy: string;
+    meteorology: string;
+    market_entropy: {
+        score: number;
+        label: string;
+        breadth: string;
+        volume_status: string;
+    };
+    sector_currents: {
+        main: Array<{ name: string; flow: string }>;
+        inverse: Array<{ name: string; flow: string }>;
+    };
+    ai_insight: string;
+    created_at?: string;
+}
+
 // Dashboard 页面聚合数据
 export interface StockData {
     symbol: string;

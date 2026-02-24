@@ -283,8 +283,7 @@ function DashboardContent() {
                 ref={almanacRef}
                 key="market-almanac" 
                 index={idx}
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                data={almanac as any}
+                data={almanac}
                 onVerticalScroll={handleVerticalScrollStable} 
               />
             );

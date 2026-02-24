@@ -122,7 +122,7 @@ def generate_almanac(target_date=None):
         # Use target_date as seed for deterministic daily variety
         import random
         seed_val = int(target_date.replace('-', ''))
-        random.seed(seed_val)
+        rng = random.Random(seed_val)
 
         weekday = datetime.strptime(target_date, "%Y-%m-%d").weekday() # 0=Mon, 4=Fri
         is_monday = (weekday == 0)
@@ -148,8 +148,8 @@ def generate_almanac(target_date=None):
 
         # Select random actions based on market type
         pool = ACTIONS.get(breadth_type, ACTIONS["neutral"])
-        selected_yi = random.sample(pool["yi"], 2)
-        selected_ji = random.sample(pool["ji"], 2)
+        selected_yi = rng.sample(pool["yi"], 2)
+        selected_ji = rng.sample(pool["ji"], 2)
         action_strategy = f"宜：{' / '.join(selected_yi)} · 忌：{' / '.join(selected_ji)}"
 
         # 9-Quadrant Rich Templates (Massive Expansion)
@@ -212,7 +212,7 @@ def generate_almanac(target_date=None):
 
         # Select variant & add day modifiers
         variant_list = VARIANTS.get(rule_key, VARIANTS["low_neutral"])
-        selected = random.choice(variant_list)
+        selected = rng.choice(variant_list)
         
         mood_tag = selected["tag"]
         meteorology = selected["meteo"]
@@ -224,8 +224,8 @@ def generate_almanac(target_date=None):
         elif is_friday:
             template = "【周五收官】" + template + " 周末政策面动向及消息博弈将是关键。"
         
-        if random.random() < 0.4: # 40% chance for a "lucky charm" or extra advice
-            extra_suffix = random.choice([
+        if rng.random() < 0.4: # 40% chance for a "lucky charm" or extra advice
+            extra_suffix = rng.choice([
                 " 心如止水，方能看透迷雾。",
                 " 记住，本金比利润更重要。",
                 " 所有的机会都是等出来的。",
