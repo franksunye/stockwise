@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense, useRef, useCallback, useMemo, memo } fro
 import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LayoutGrid as Grid, ChevronDown, User, FileText, Share2, Copy } from 'lucide-react';
-import { StockData, AIPrediction } from '@/lib/types';
+import { StockData, AIPrediction, MarketAlmanacData } from '@/lib/types';
 import { 
   StockVerticalFeed,
   BriefDrawer,
@@ -35,6 +35,12 @@ const TacticalBriefDrawer = dynamic(() => import('@/components/dashboard/Tactica
   ssr: false,
   loading: () => null
 });
+
+// 扩展类型以包含黄历特有字段，消除 lint 错误
+interface ExtendedStockData extends StockData {
+  isAlmanac?: boolean;
+  almanacData?: MarketAlmanacData | MarketAlmanacData[];
+}
 
 // 1. 性能组件：独立背景辉光 (隔离 Modal 开关带来的重绘)
 const DashboardBackground = memo(({ isAlmanac, signal }: { isAlmanac: boolean, signal?: string }) => {
@@ -71,15 +77,32 @@ function DashboardContent() {
   // Create an extended array where the first items are the Market Almanacs
   const displayStocks = useMemo(() => {
     const almanacList = almanacs.length > 0 ? almanacs : (almanac ? [almanac] : []);
-    const almanacCard = {
+    const almanacCard: ExtendedStockData = {
       symbol: `MARKET_ALMANAC`,
       name: 'ZISO AI · 投资黄历',
-      prediction: { signal: 'Almanac' },
+      prediction: { 
+        signal: 'Almanac',
+        symbol: 'MARKET_ALMANAC',
+        date: '',
+        target_date: '',
+        confidence: 1,
+        support_price: 0,
+        ai_reasoning: '',
+        validation_status: 'Pending',
+        actual_change: null
+      } as unknown as AIPrediction,
       isAlmanac: true,
-      almanacData: almanacList
-    } as unknown as StockData;
+      almanacData: almanacList,
+      // 填充 StockData 必需字段
+      price: null,
+      previousPrediction: null,
+      history: [],
+      lastUpdated: new Date().toISOString(),
+      rule: null,
+      loading: false
+    };
 
-    return [almanacCard, ...stocks];
+    return [almanacCard, ...stocks] as ExtendedStockData[];
   }, [stocks, almanacs, almanac]);
 
   const scrollOptions = useMemo(() => ({
@@ -102,11 +125,12 @@ function DashboardContent() {
   const { tier } = useUserProfile();
 
   const currentStock = displayStocks[currentIndex];
-  const isMarketAlmanac = currentStock && 'isAlmanac' in currentStock && currentStock.isAlmanac;
+  // 严格布尔检查以消除警告
+  const isMarketAlmanac = !!(currentStock && currentStock.isAlmanac);
 
   // 【核心修复：粘性标题】用来保持标题内容的“粘性”，防止在切换到黄历时由于数据过快切换而显示黄历的内部 ID
   const stickyStockInfo = useRef({ name: '', symbol: '' });
-  if (currentStock && !isMarketAlmanac) {
+  if (currentStock && !currentStock.isAlmanac) {
     stickyStockInfo.current = { name: currentStock.name, symbol: currentStock.symbol };
   } else if (!stickyStockInfo.current.name && stocks.length > 0) {
     // 初始状态下若在黄历，预填入第一个真实股票的信息作为备选
@@ -212,11 +236,11 @@ function DashboardContent() {
 
       <div ref={scrollRef} onScroll={handleScroll} className="h-full w-full flex overflow-x-scroll snap-x snap-mandatory scrollbar-hide">
         {displayStocks.map((stock, idx) => {
-          if ('isAlmanac' in stock && (stock as any).isAlmanac) {
+          if (stock.isAlmanac) {
             return (
               <MarketAlmanacFeed 
                 ref={almanacRef} key={stock.symbol} index={idx}
-                data={(stock as any).almanacData}
+                data={stock.almanacData}
                 onVerticalScroll={handleVerticalScrollStable} 
                 scrollRequest={backToTopCounter}
               />
