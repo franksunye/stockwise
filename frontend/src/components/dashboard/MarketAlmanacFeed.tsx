@@ -2,6 +2,7 @@ import { memo, useRef, useImperativeHandle, forwardRef, useCallback, useState, u
 import { Shield, Sparkles, ChevronDown, Waves, Thermometer, Target, Zap, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MarketAlmanacData } from '@/lib/types';
+import { COLORS } from './constants';
 
 interface MarketAlmanacFeedProps {
   index: number;
@@ -194,20 +195,29 @@ export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlma
                     )}
 
                     {/* 1. Macro Mood & Summary */}
-                    <section className="text-center space-y-2 py-4">
-                       <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-2">
-                          <Sparkles className="w-3 h-3 text-indigo-400" />
-                          <span className="text-[10px] font-black text-slate-500 tracking-[0.2em] uppercase">{itemDateStr}</span>
+                    <section className="text-center space-y-1 py-2">
+                       <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-1">
+                          {idx === 0 ? <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-ping" /> : <span className="w-1.5 h-1.5 rounded-full bg-slate-500" />}
+                          <span className="text-[10px] font-bold text-slate-500 tracking-wider uppercase">{itemDateStr}</span>
                        </div>
                        
-                       <h2 className="text-5xl font-black italic tracking-tighter text-white drop-shadow-lg">
+                       <h2 
+                          className="text-4xl font-black tracking-tighter"
+                          style={{
+                             color: itemEntropy.score > 60 ? COLORS.up : itemEntropy.score < 40 ? COLORS.down : COLORS.hold
+                          }}
+                       >
                           {itemMood}
                        </h2>
-                       <div className="flex flex-col items-center gap-1">
-                          <p className="text-lg font-bold tracking-[0.2em] text-indigo-100/90">
-                          {itemStrategy.split(' / ')[0] || itemStrategy}
-                          </p>
-                          <div className="flex items-center gap-1.5 opacity-60">
+                       
+                       <div className="flex items-center justify-center gap-3 text-[10px] font-bold text-slate-600">
+                          <span className="flex items-center gap-1 uppercase tracking-widest">
+                            <Target className="w-3 h-3" /> {itemStrategy.split(' / ')[0] || itemStrategy}
+                          </span>
+                       </div>
+                       
+                       <div className="flex flex-col items-center mt-2 opacity-60">
+                          <div className="flex items-center gap-1.5">
                              <div className="w-1.5 h-1.5 rounded-full bg-slate-400" />
                              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">气象：{itemMeteorology}</span>
                           </div>
