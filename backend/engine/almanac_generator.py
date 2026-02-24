@@ -129,29 +129,48 @@ def generate_almanac(target_date=None, force_t_plus_1=True):
             breadth_label = "震荡分化"
             breadth_type = "neutral"
 
-        # --- 2. Sector Currents (Money Flow) --- #
+        # --- 2. Data Context Acquisition --- #
         provider = MarketContextProvider()
-        flow_data = provider.get_market_flow_context()
         
-        # Simplified parsing of AkShare's returned comma-separated string
-        # Expected: "A板块(+5.1亿), B板块(+2.3亿)"
-        top_sectors = flow_data.get("top_inflow_sectors", "")
-        sector_parts = [s.strip() for s in top_sectors.split(',') if s.strip()]
+        # 1. Macro Context (Global & Domestic)
+        macro_data = provider.get_macro_context()
+        nasdaq_change = macro_data.get("nasdaq", "N/A")
+        logger.info(f"📊 Global Context: Nasdaq Change = {nasdaq_change}")
+        
+        # 2. Sector Flows (Money Flow)
+        flow_data = provider.get_market_flow_context()
+        top_inflow = flow_data.get("top_inflow_sectors", "暂无数据")
+        top_outflow = flow_data.get("top_outflow_sectors", "暂无数据")
+        logger.info(f"📊 Market Flow: Inflow={top_inflow} | Outflow={top_outflow}")
+        inflow_parts = [s.strip() for s in top_inflow.split(',') if s.strip()]
         
         main_currents = []
-        if sector_parts and sector_parts[0] != "暂无数据":
-            for s in sector_parts:
+        if inflow_parts and inflow_parts[0] != "暂无数据":
+            for s in inflow_parts:
                 if '(' in s and ')' in s:
                     name = s[:s.index('(')].strip()
                     flow = s[s.index('(')+1:s.index(')')].strip()
                     main_currents.append({"name": name, "flow": flow})
                 else:
                     main_currents.append({"name": s, "flow": ""})
+                    
+        # Outflow (New)
+        top_outflow = flow_data.get("top_outflow_sectors", "暂无数据")
+        outflow_parts = [s.strip() for s in top_outflow.split(',') if s.strip()]
         
-        # Default fallback for inverse if API doesn't provide it via sector flows context
-        # In a full implementation we'd fetch Top Outflow, but here we synthesize
-        inverse_currents = [{"name": "高位接盘股", "flow": "退潮"}]
-        if breadth_type == "bull": inverse_currents = [{"name": "避险防守", "flow": "抽血"}]
+        inverse_currents = []
+        if outflow_parts and outflow_parts[0] != "暂无数据":
+            for s in outflow_parts:
+                if '(' in s and ')' in s:
+                    name = s[:s.index('(')].strip()
+                    flow = s[s.index('(')+1:s.index(')')].strip()
+                    inverse_currents.append({"name": name, "flow": flow})
+                else:
+                    inverse_currents.append({"name": s, "flow": ""})
+        else:
+            # Default fallback for inverse if API doesn't provide it
+            inverse_currents = [{"name": "高位接盘股", "flow": "退潮"}]
+            if breadth_type == "bull": inverse_currents = [{"name": "避险防守", "flow": "抽血"}]
 
         # --- 3. The Scorecard (Rules Engine - Dynamic & Humanistic) --- #
         # Use target_date as seed for deterministic daily variety
@@ -252,6 +271,16 @@ def generate_almanac(target_date=None, force_t_plus_1=True):
         mood_tag = selected["tag"]
         meteorology = selected["meteo"]
         template = selected["insight"]
+
+        # Global Enrichment (Nasdaq)
+        if nasdaq_change != "N/A":
+            try:
+                nasdaq_val = float(nasdaq_change.replace('%', ''))
+                if nasdaq_val > 1.0:
+                    template += f" 受到隔夜美股（纳指{nasdaq_change}）走强映射，今天 A 股有望迎来积极的开盘情绪。"
+                elif nasdaq_val < -1.2:
+                    template += f" 受隔夜纳指（{nasdaq_change}）压力传导，外围环境略显低迷，开盘需提防情绪砸盘。"
+            except: pass
 
         # Temporal Context Enrichment
         if is_monday:

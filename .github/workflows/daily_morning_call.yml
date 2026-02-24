@@ -4,8 +4,8 @@ name: Daily Morning Call (Smart)
 # 触发：北京时间 08:30 (M-F)
 
 on:
-#  schedule:
-#    - cron: '30 0 * * 1-5'  # 00:30 UTC = 08:30 CST
+  schedule:
+    - cron: '30 0 * * 1-5'  # 00:30 UTC = 08:30 CST
   workflow_dispatch:
     inputs:
       date:
@@ -54,6 +54,15 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
+
+      - name: Refresh Market Almanac with Overnight Data
+        env:
+          PYTHONUNBUFFERED: "1"
+          TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+        run: |
+          echo "🚀 Refreshing Almanac with closed US market data..."
+          python -u backend/engine/almanac_generator.py
 
       - name: Run Morning Call
         env:
