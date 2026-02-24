@@ -10,7 +10,7 @@ import { WatchlistItem } from './useWatchlist';
 // 动态刷新间隔：交易时段5分钟，非交易时段10分钟
 const TRADING_REFRESH_INTERVAL = 5 * 60 * 1000;   // 5分钟
 const DEFAULT_REFRESH_INTERVAL = 10 * 60 * 1000;  // 10分钟
-const CACHE_KEY = 'stockwise_dashboard_cache_v2';
+const CACHE_KEY = 'stockwise_dashboard_cache_v1';
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24小时过期
 
 function getRefreshInterval(): number {
@@ -44,7 +44,7 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
             const cached = localStorage.getItem(CACHE_KEY);
             if (cached) {
                 const parsed = JSON.parse(cached);
-                const { data, timestamp, almanac: cachedAlmanac, almanacs: cachedAlmanacs } = parsed;
+                const { data, timestamp } = parsed;
                 const age = Date.now() - timestamp;
 
                 // 只有未过期的缓存才使用 (24小时)
@@ -52,13 +52,12 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
                     console.log(`🚀 Loaded ${data.length} stocks from local cache (${Math.round(age / 60000)}m ago)`);
                     setStocks(data);
 
-                    if (cachedAlmanac) setAlmanac(cachedAlmanac);
-                    if (cachedAlmanacs) setAlmanacs(cachedAlmanacs);
+                    // 兼容性尝试性加载：即便缓存是 v1 版本的（没有 almanac），也不影响 stocks 的展示
+                    if (parsed.almanac) setAlmanac(parsed.almanac);
+                    if (parsed.almanacs) setAlmanacs(parsed.almanacs);
 
-                    // 只有当股票数据和 almanac 数据都存在时，才关闭骨架屏
-                    if (cachedAlmanac) {
-                        setLoadingPool(false);
-                    }
+                    // 【核心回归】只要股票恢复了，立即关掉骨架屏进入 App
+                    setLoadingPool(false);
                 }
             }
         } catch (e) {
