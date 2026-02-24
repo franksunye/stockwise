@@ -9,7 +9,8 @@ import {
   StockVerticalFeed,
   BriefDrawer,
   COLORS,
-  MarketAlmanacFeed
+  MarketAlmanacFeed,
+  type MarketAlmanacHandle
 } from '@/components/dashboard';
 import { formatStockSymbol } from '@/lib/date-utils';
 import Link from 'next/link';
@@ -41,6 +42,7 @@ function DashboardContent() {
   const targetSymbol = searchParams.get('symbol');
   const [userCenterOpen, setUserCenterOpen] = useState(false);
   const [briefOpen, setBriefOpen] = useState(false);
+  const almanacRef = useRef<MarketAlmanacHandle>(null);
   const hasScrolledToTarget = useRef(false);
 
   const { stocks, almanac, loadingPool, loadMoreHistory } = useStocks();
@@ -150,7 +152,16 @@ function DashboardContent() {
       <header className="fixed top-0 left-0 right-0 z-[100] p-6 pointer-events-none">
         <div className="w-full flex justify-between items-start pointer-events-auto">
            {/* 左侧：点击打开股票档案 / 分享（黄历） */}
-           <div className="flex items-center gap-2 cursor-pointer group shrink-0" onClick={() => !isMarketAlmanac && setProfileStock(currentStock)}>
+           <div 
+             className="flex items-center gap-2 cursor-pointer group shrink-0" 
+             onClick={() => {
+               if (isMarketAlmanac) {
+                 almanacRef.current?.share();
+               } else {
+                 setProfileStock(currentStock);
+               }
+             }}
+           >
               <div className="w-10 h-10 rounded-[16px] bg-white/5 border border-white/10 flex items-center justify-center transition-all group-active:scale-90 group-hover:bg-white/10 overflow-hidden relative">
                  <AnimatePresence mode="wait">
                    {isMarketAlmanac ? (
@@ -223,7 +234,7 @@ function DashboardContent() {
           <button 
             onClick={() => {
               if (isMarketAlmanac) {
-                // TODO: Copy Almanac Action
+                almanacRef.current?.copy();
               } else {
                 setBriefOpen(true);
               }
@@ -269,6 +280,7 @@ function DashboardContent() {
           if (idx === 0) {
             return (
               <MarketAlmanacFeed 
+                ref={almanacRef}
                 key="market-almanac" 
                 index={idx}
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any

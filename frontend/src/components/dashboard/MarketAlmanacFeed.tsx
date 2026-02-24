@@ -1,6 +1,7 @@
-import { memo } from 'react';
-import { Share2, Copy, Shield, Sparkles, ChevronDown, Waves, Thermometer, Target, Zap } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { memo, useRef, useImperativeHandle, forwardRef, useCallback, useState } from 'react';
+import { Share2, Copy, Shield, Sparkles, ChevronDown, Waves, Thermometer, Target, Zap, Loader2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { toPng } from 'html-to-image';
 
 interface MarketAlmanacFeedProps {
   index: number;
@@ -24,11 +25,25 @@ interface MarketAlmanacFeedProps {
   onVerticalScroll?: (top: number, index: number) => void;
 }
 
-export const MarketAlmanacFeed = memo(function MarketAlmanacFeed({ 
+export type MarketAlmanacHandle = {
+  share: () => Promise<void>;
+  copy: () => Promise<void>;
+};
+
+export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlmanacFeedProps>(function MarketAlmanacFeed({ 
   index,
   data,
   onVerticalScroll
-}: MarketAlmanacFeedProps) {
+}, ref) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const posterRef = useRef<HTMLDivElement>(null);
+  const [isCapturing, setIsCapturing] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = useCallback((msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3000);
+  }, []);
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     if (onVerticalScroll) {
@@ -47,13 +62,132 @@ export const MarketAlmanacFeed = memo(function MarketAlmanacFeed({
   const entropy = data?.market_entropy || { score: 50, label: '50% · 震荡', breadth: '震荡分化', volume_status: '量能平稳' };
   const sectors = data?.sector_currents || { main: [{name: '待更新', flow: ''}], inverse: [{name: '待更新', flow: ''}] };
 
+  const generateMarketingText = useCallback(() => {
+    let text = `ZISO AI 投资黄历 (${targetDate})\n\n`;
+    text += `📜 卦象：${moodTag}\n`;
+    text += `💡 策略：${actionStrategy}\n`;
+    text += `☁️ 气象：${meteorology}\n\n`;
+    text += `🔍 市场天机：${insight}\n\n`;
+    text += `⚖️ 全场热度：${entropy.label} (${entropy.breadth})\n`;
+    if (sectors.main && sectors.main.length > 0) {
+      text += `🌊 主流方向：${sectors.main[0].name} (${sectors.main[0].flow})\n`;
+    }
+    text += `\n—— ZISO AI：替你做股市功课，带你看投资门道。\n`;
+    text += `#ZISOAI #投资黄历 #大盘分析`;
+    return text;
+  }, [targetDate, moodTag, actionStrategy, meteorology, insight, entropy, sectors]);
+
+  const generateImage = useCallback(async () => {
+    if (!posterRef.current) return null;
+    
+    // Filter out interactive elements from the generated image
+    const filter = (node: HTMLElement) => {
+      if (node.classList?.contains('capture-hidden')) {
+        return false;
+      }
+      return true;
+    };
+
+    try {
+      // Use pixelRatio >= 2 for Retina quality exports
+      const dataUrl = await toPng(posterRef.current, { 
+        cacheBust: true, 
+        pixelRatio: 2,
+        backgroundColor: '#050508', // Match background color for smooth edges
+        filter: filter as unknown as (domNode: HTMLElement) => boolean 
+      });
+      return dataUrl;
+    } catch (err) {
+      console.error('Failed to generate market almanac poster', err);
+      return null;
+    }
+  }, []);
+
+  useImperativeHandle(ref, () => ({
+    copy: async () => {
+      const text = generateMarketingText();
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast('黄历文案已复制！');
+      } catch (err) {
+        showToast('复制失败，请重试');
+      }
+    },
+    share: async () => {
+      if (isCapturing) return;
+      setIsCapturing(true);
+      // Wait for React to render the branding before capturing
+      await new Promise(resolve => setTimeout(resolve, 100));
+      const dataUrl = await generateImage();
+      setIsCapturing(false);
+      
+      if (!dataUrl) {
+        showToast('图片生成失败');
+        return;
+      }
+
+      // Detect iOS to bypass the "Preview" hurdle
+      const isIOS = typeof navigator !== 'undefined' && 
+                    (/iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1));
+
+      if (isIOS && navigator.canShare) {
+        try {
+          const response = await fetch(dataUrl);
+          const blob = await response.blob();
+          const file = new File([blob], `Market_Almanac_${targetDate.replace(/-/g, '')}.png`, { type: 'image/png' });
+          
+          if (navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              files: [file],
+              title: '分享投资黄历',
+              text: generateMarketingText()
+            });
+            return;
+          }
+        } catch (err) {
+          console.error('iOS Share failed', err);
+        }
+      }
+
+      // Default Download Behavior
+      const link = document.createElement('a');
+      link.download = `Market_Almanac_${targetDate.replace(/-/g, '')}.png`;
+      link.href = dataUrl;
+      link.click();
+      showToast('黄历海报已下载！');
+    }
+  }), [generateMarketingText, targetDate, generateImage, isCapturing, showToast]);
+
   return (
     <div className="min-w-full h-full relative snap-center overflow-hidden">
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {toastMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: -20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+            className="fixed top-32 left-1/2 -translate-x-1/2 z-[400] bg-white text-black px-6 py-3 rounded-full shadow-2xl font-bold text-sm tracking-wide text-center min-w-[200px]"
+          >
+            {toastMessage}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div 
+        ref={containerRef}
         onScroll={handleScroll}
         className="w-full h-full absolute inset-0 overflow-y-scroll snap-y snap-mandatory scrollbar-hide flex flex-col items-center px-6 pt-32 pb-32"
       >
-        <div className="w-full max-w-md space-y-6 mx-auto">
+        <div ref={posterRef} className="w-full max-w-md space-y-6 mx-auto bg-[#050508] relative">
+          {/* Header Branding (Visible in Share) */}
+          {isCapturing && (
+            <div className="pt-8 pb-4 text-center">
+               <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">ZISO AI · 投资黄历</span>
+            </div>
+          )}
+
           {/* 1. Macro Mood & Summary */}
           <section className="text-center space-y-2 py-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-2">
@@ -98,69 +232,83 @@ export const MarketAlmanacFeed = memo(function MarketAlmanacFeed({
                <div>
                   <div className="flex items-center gap-1.5 mb-2">
                     <Waves className="w-3 h-3 text-indigo-400" />
-                    <span className="text-[9px] text-slate-600 font-black uppercase tracking-widest">板块洋流 · SECTORS</span>
+                    <h4 className="text-[9px] font-black text-slate-600 uppercase tracking-widest leading-none mt-0.5">板块洋流 · SECTORS</h4>
                   </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold text-slate-300">主向：{sectors.main[0]?.name || '-'}</span>
-                      <span className="text-[9px] font-black text-emerald-500">{sectors.main[0]?.flow ? `+${sectors.main[0]?.flow}` : ''}</span>
-                    </div>
-                    {sectors.inverse && sectors.inverse[0] && (
-                      <div className="flex items-center justify-between opacity-50">
-                        <span className="text-[10px] font-bold text-slate-400">逆向：{sectors.inverse[0]?.name || '-'}</span>
-                        <span className="text-[9px] font-black text-rose-500">{sectors.inverse[0]?.flow ? `-${sectors.inverse[0]?.flow}` : ''}</span>
-                      </div>
-                    )}
+                  <div className="space-y-1.5 mb-2">
+                     <div className="flex justify-between items-center bg-white/5 px-2 py-1 rounded">
+                        <span className="text-[10px] text-slate-400 font-bold">主向: {sectors.main[0].name}</span>
+                        <span className="text-[10px] text-emerald-400 font-black italic">{sectors.main[0].flow}</span>
+                     </div>
+                     <div className="flex justify-between items-center opacity-40 px-2">
+                        <span className="text-[9px] text-slate-500">逆向: {sectors.inverse?.[0]?.name || '--'}</span>
+                        <span className="text-[9px] text-rose-400 font-bold italic">{sectors.inverse?.[0]?.flow || '--'}</span>
+                     </div>
                   </div>
                </div>
                
-               <div className="pt-3 border-t border-white/5 flex items-center justify-between">
+               <div className="pt-2 border-t border-white/5 flex items-center justify-between">
                   <div className="flex items-center gap-1">
-                    <Thermometer className="w-3 h-3 text-amber-500" />
-                    <span className="text-[9px] text-slate-600 font-black uppercase tracking-widest">全场热度</span>
+                     <Thermometer className="w-2.5 h-2.5 text-amber-500" />
+                     <span className="text-[9px] text-slate-500 font-bold uppercase tracking-tighter">全场热度</span>
                   </div>
-                  <span className="text-[10px] font-black mono text-slate-200">{entropy.score}% · {entropy.breadth.substring(0,2)}</span>
+                  <span className="text-[10px] font-black text-white italic">{entropy.label}</span>
                </div>
             </div>
-            
-            {/* Right Box: Action Almanac */}
+
+            {/* Right Box: Actions & Stats */}
             <div className="glass-card p-4 flex flex-col justify-between min-h-[140px]">
-              <div>
-                <div className="flex items-center gap-1.5 mb-2">
-                  <Target className="w-3 h-3 text-indigo-400" />
-                  <span className="text-[9px] text-slate-600 font-black uppercase tracking-widest">行动指南 · ACTION</span>
-                </div>
-                <div className="space-y-1.5">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[9px] font-black bg-indigo-500/20 text-indigo-400 px-1 rounded">宜</span>
-                    <span className="text-[11px] font-bold text-slate-200">{(actionStrategy.split(' / ')[0] || '').replace('宜：', '')}</span>
+               <div>
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <Target className="w-3 h-3 text-indigo-400" />
+                    <h4 className="text-[9px] font-black text-slate-600 uppercase tracking-widest leading-none mt-0.5">行动指南 · ACTION</h4>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[9px] font-black bg-rose-500/10 text-rose-500/70 px-1 rounded">忌</span>
-                    <span className="text-[11px] font-bold text-slate-400">{(actionStrategy.split(' / ')[1] || '').replace('忌：', '')}</span>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                       <div className="w-4 h-4 rounded bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30">
+                          <span className="text-[8px] font-black text-indigo-400">宜</span>
+                       </div>
+                       <span className="text-[10px] font-black text-slate-200">{actionStrategy.split(' / ')[0] || '观望'}</span>
+                    </div>
+                    <div className="flex items-center gap-2 opacity-50">
+                       <div className="w-4 h-4 rounded bg-rose-500/20 flex items-center justify-center border border-rose-500/30">
+                          <span className="text-[8px] font-black text-rose-400">忌</span>
+                       </div>
+                       <span className="text-[10px] font-bold text-slate-400">{actionStrategy.split(' / ')[1] || '盲动'}</span>
+                    </div>
                   </div>
-                </div>
-              </div>
-              
-              <div className="mt-4 pt-3 border-t border-white/5 flex items-center gap-2">
-                 <Zap className="w-3 h-3 text-indigo-500 fill-indigo-500/20" />
-                 <div>
-                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block leading-none">全场量能状态</span>
-                    <span className="text-[10px] font-black mono text-slate-300">{entropy.volume_status}</span>
-                 </div>
-              </div>
+               </div>
+
+               <div className="pt-2 border-t border-white/5 flex items-center justify-between">
+                  <div className="flex items-center gap-1">
+                     <Zap className="w-2.5 h-2.5 text-indigo-400" />
+                     <span className="text-[9px] text-slate-500 font-bold uppercase tracking-tighter">全场量能状态</span>
+                  </div>
+               </div>
+               <div className="text-[10px] font-black text-white italic mt-1 pl-1">
+                  {entropy.volume_status}
+               </div>
             </div>
           </section>
 
+          {/* Loading Overlay (if captured) */}
+          {isCapturing && (
+            <div className="absolute inset-0 z-[500] bg-black/80 backdrop-blur-sm flex items-center justify-center capture-hidden">
+               <div className="flex flex-col items-center gap-3">
+                  <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
+                  <p className="text-sm font-black text-white italic tracking-widest">正在幻化意境图...</p>
+               </div>
+            </div>
+          )}
 
-
-          {/* 4. Scroll Indicator */}
-          <div className="flex flex-col items-center gap-1.5 pt-4 opacity-20">
-            <span className="text-[10px] font-black tracking-[0.2em] text-slate-500 uppercase">右滑进入个股洞察</span>
-            <ChevronDown size={14} className="rotate-[270deg] animate-pulse" />
-          </div>
+          {/* User Tip - Bottom */}
+          <section className="text-center pt-8 capture-hidden">
+             <p className="text-[10px] font-black italic text-slate-700 uppercase tracking-widest flex items-center justify-center gap-2">
+                右滑进入个股洞察
+                <ChevronDown className="w-3 h-3 -rotate-90 opacity-30" />
+             </p>
+          </section>
         </div>
       </div>
     </div>
   );
-});
+}));
