@@ -17,6 +17,7 @@ import { InstallGuide } from '@/components/InstallGuide';
 import { UserProfileProvider, type Tier } from '@/hooks/useUserProfile';
 import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton';
 import { motion, AnimatePresence } from 'framer-motion';
+import { isIOS, isStandalone } from '@/lib/device-utils';
 
 // ── 本地 Auth 缓存 ──
 // 已验证的 Pro 用户信息缓存在 localStorage 中，
@@ -138,8 +139,11 @@ export default function DashboardLayout({
             if (inviteCode && inviteCode !== uid && inviteCode.startsWith('user_')) {
                 referredBy = inviteCode;
                 localStorage.setItem('STOCKWISE_REFERRED_BY', inviteCode);
-                // 清理 URL 参数
-                window.history.replaceState({}, '', window.location.pathname);
+                // iOS Safari -> A2HS 时，桌面容器与浏览器容器可能隔离存储。
+                // 保留 invite 参数可让桌面首次打开仍能拿到邀请上下文，避免回到邀请墙。
+                if (!isIOS() || isStandalone()) {
+                  window.history.replaceState({}, '', window.location.pathname);
+                }
             }
         } 
         
