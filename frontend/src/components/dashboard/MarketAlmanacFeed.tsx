@@ -22,9 +22,10 @@ export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlma
   scrollRequest
 }, ref) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const posterRef = useRef<HTMLDivElement>(null);
+  const posterRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
   const [isCapturing, setIsCapturing] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [currentVerticalIndex, setCurrentVerticalIndex] = useState(0);
 
   // Handle back to top requests
   useEffect(() => {
@@ -39,23 +40,30 @@ export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlma
   }, []);
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const scrollTop = e.currentTarget.scrollTop;
+    const height = e.currentTarget.clientHeight;
+    const newIndex = Math.round(scrollTop / height);
+    if (newIndex !== currentVerticalIndex) {
+      setCurrentVerticalIndex(newIndex);
+    }
+    
     if (onVerticalScroll) {
-      onVerticalScroll(e.currentTarget.scrollTop, index);
+      onVerticalScroll(scrollTop, index);
     }
   };
 
   const almanacsList = Array.isArray(data) ? data : (data ? [data] : []);
-  const topAlmanac = almanacsList[0] || {} as MarketAlmanacData;
+  const currentAlmanac = almanacsList[currentVerticalIndex] || almanacsList[0] || {} as MarketAlmanacData;
 
-  // Safely extract properties for the top/first almanac (used for share/copy logic)
-  const targetDate = topAlmanac?.target_date || new Date().toISOString().split('T')[0];
-  const moodTag = topAlmanac?.mood_tag || '混沌未明';
-  const actionStrategy = topAlmanac?.action_strategy || '宜：观望 / 忌：盲动';
-  const meteorology = topAlmanac?.meteorology || '微雨';
-  const insight = topAlmanac?.ai_insight || '股指进入混沌期，缺乏明确突破点。板块轮动加速，建议保持观望。';
+  // Safely extract properties for the current viewed almanac (used for share/copy logic)
+  const targetDate = currentAlmanac?.target_date || new Date().toISOString().split('T')[0];
+  const moodTag = currentAlmanac?.mood_tag || '混沌未明';
+  const actionStrategy = currentAlmanac?.action_strategy || '宜：观望 / 忌：盲动';
+  const meteorology = currentAlmanac?.meteorology || '微雨';
+  const insight = currentAlmanac?.ai_insight || '股指进入混沌期，缺乏明确突破点。板块轮动加速，建议保持观望。';
   
-  const entropy = useMemo(() => typeof topAlmanac?.market_entropy === 'object' && topAlmanac?.market_entropy ? topAlmanac?.market_entropy : { score: 50, label: '50% · 震荡', breadth: '震荡分化', volume_status: '量能平稳' }, [topAlmanac?.market_entropy]);
-  const sectors = useMemo(() => typeof topAlmanac?.sector_currents === 'object' && topAlmanac?.sector_currents ? topAlmanac?.sector_currents : { main: [{name: '待更新', flow: ''}], inverse: [{name: '待更新', flow: ''}] }, [topAlmanac?.sector_currents]);
+  const entropy = useMemo(() => typeof currentAlmanac?.market_entropy === 'object' && currentAlmanac?.market_entropy ? currentAlmanac?.market_entropy : { score: 50, label: '50% · 震荡', breadth: '震荡分化', volume_status: '量能平稳' }, [currentAlmanac?.market_entropy]);
+  const sectors = useMemo(() => typeof currentAlmanac?.sector_currents === 'object' && currentAlmanac?.sector_currents ? currentAlmanac?.sector_currents : { main: [{name: '待更新', flow: ''}], inverse: [{name: '待更新', flow: ''}] }, [currentAlmanac?.sector_currents]);
 
   const generateMarketingText = useCallback(() => {
     let text = `ZISO AI 投资黄历 (${targetDate})\n\n`;
@@ -73,7 +81,8 @@ export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlma
   }, [targetDate, moodTag, actionStrategy, meteorology, insight, entropy, sectors]);
 
   const generateImage = useCallback(async () => {
-    if (!posterRef.current) return null;
+    const activePoster = posterRefs.current[currentVerticalIndex];
+    if (!activePoster) return null;
     
     // Filter out interactive elements from the generated image
     const filter = (node: HTMLElement) => {
@@ -83,13 +92,13 @@ export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlma
       return true;
     };
 
-    const originalStyle = posterRef.current.style.transform;
+    const originalStyle = activePoster.style.transform;
     try {
       // Lazy load html-to-image to keep initial bundle lite
       const { toPng } = await import('html-to-image');
       
       // Use pixelRatio >= 2 for Retina quality exports
-      const dataUrl = await toPng(posterRef.current, { 
+      const dataUrl = await toPng(activePoster, { 
         cacheBust: true, 
         pixelRatio: 2,
         backgroundColor: '#050508', // Match background color for smooth edges
@@ -98,11 +107,11 @@ export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlma
       return dataUrl;
     } catch {
       // Ensure transformation is restored even on error
-      if (posterRef.current) posterRef.current.style.transform = originalStyle;
+      if (activePoster) activePoster.style.transform = originalStyle;
       console.error('Failed to generate poster');
       return null;
     }
-  }, []);
+  }, [currentVerticalIndex]);
 
   useImperativeHandle(ref, () => ({
     copy: async () => {
@@ -194,9 +203,9 @@ export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlma
 
            return (
               <div key={idx} className="w-full h-full shrink-0 flex flex-col items-center justify-center px-6 snap-center snap-always min-h-screen">
-                 <div ref={idx === 0 ? posterRef : null} className="w-full max-w-md space-y-6 mx-auto relative">
+                 <div ref={el => { posterRefs.current[idx] = el; }} className="w-full max-w-md space-y-6 mx-auto relative">
                     {/* Header Branding (Visible in Share) */}
-                    {isCapturing && idx === 0 && (
+                    {isCapturing && idx === currentVerticalIndex && (
                        <div className="pt-8 pb-4 text-center">
                           <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">ZISO AI · 投资黄历</span>
                        </div>
