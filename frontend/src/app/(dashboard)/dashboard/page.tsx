@@ -49,13 +49,14 @@ function DashboardContent() {
 
   // Create an extended array where the first items are the Market Almanacs (multi-day flipping)
   const displayStocks = useMemo(() => {
-    const almanacCards = (almanacs.length > 0 ? almanacs : (almanac ? [almanac] : [])).map(a => ({
-      symbol: `MARKET_ALMANAC_${a.target_date}`,
+    const almanacList = almanacs.length > 0 ? almanacs : (almanac ? [almanac] : []);
+    const almanacCards = almanacList.length > 0 ? [{
+      symbol: `MARKET_ALMANAC`,
       name: 'ZISO AI · 投资黄历',
       prediction: { signal: 'Almanac' },
       isAlmanac: true,
-      almanacData: a
-    } as unknown as StockData));
+      almanacData: almanacList
+    } as unknown as StockData] : [];
 
     return [
       ...almanacCards,
