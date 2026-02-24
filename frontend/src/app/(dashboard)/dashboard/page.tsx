@@ -48,18 +48,21 @@ function DashboardContent() {
   const { stocks, almanac, almanacs, loadingPool, loadMoreHistory } = useStocks();
 
   // Create an extended array where the first items are the Market Almanacs (multi-day flipping)
+  // 保持索引稳定：无论黄历加载与否，黄历占位符永远位于 Index 0，防止 Index 漂移
   const displayStocks = useMemo(() => {
     const almanacList = almanacs.length > 0 ? almanacs : (almanac ? [almanac] : []);
-    const almanacCards = almanacList.length > 0 ? [{
+    
+    // 强制占位 Index 0
+    const almanacCard = {
       symbol: `MARKET_ALMANAC`,
       name: 'ZISO AI · 投资黄历',
       prediction: { signal: 'Almanac' },
       isAlmanac: true,
       almanacData: almanacList
-    } as unknown as StockData] : [];
+    } as unknown as StockData;
 
     return [
-      ...almanacCards,
+      almanacCard,
       ...stocks
     ];
   }, [stocks, almanacs, almanac]);
@@ -171,31 +174,22 @@ function DashboardContent() {
              }}
            >
               <div className="w-10 h-10 rounded-[16px] bg-white/5 border border-white/10 flex items-center justify-center transition-all group-active:scale-90 group-hover:bg-white/10 overflow-hidden relative">
-                 <AnimatePresence mode="wait">
+                 <motion.div
+                   animate={{ 
+                     opacity: 1, 
+                     scale: 1,
+                     rotate: isMarketAlmanac ? 0 : 0 
+                   }}
+                   key={isMarketAlmanac ? 'almanac-left' : 'stock-left'}
+                   initial={{ opacity: 0, scale: 0.8 }}
+                   className="absolute inset-0 flex items-center justify-center"
+                 >
                    {isMarketAlmanac ? (
-                     <motion.div
-                       key="almanac-left"
-                       initial={{ opacity: 0, scale: 0.8 }}
-                       animate={{ opacity: 1, scale: 1 }}
-                       exit={{ opacity: 0, scale: 0.8 }}
-                       transition={{ duration: 0.15 }}
-                       className="absolute inset-0 flex items-center justify-center"
-                     >
-                       <Share2 className="w-5 h-5 text-indigo-400 group-hover:text-white transition-colors" />
-                     </motion.div>
+                     <Share2 className="w-5 h-5 text-indigo-400 group-hover:text-white transition-colors" />
                    ) : (
-                     <motion.div
-                       key="stock-left"
-                       initial={{ opacity: 0, scale: 0.8 }}
-                       animate={{ opacity: 1, scale: 1 }}
-                       exit={{ opacity: 0, scale: 0.8 }}
-                       transition={{ duration: 0.15 }}
-                       className="absolute inset-0 flex items-center justify-center"
-                     >
-                       <div className="text-[10px] font-black italic text-indigo-500">{currentStock?.symbol?.slice(-2) || ''}</div>
-                     </motion.div>
+                     <div className="text-[10px] font-black italic text-indigo-500">{currentStock?.symbol?.slice(-2) || ''}</div>
                    )}
-                 </AnimatePresence>
+                 </motion.div>
               </div>
            </div>
 
@@ -204,38 +198,28 @@ function DashboardContent() {
             className="absolute left-1/2 transform -translate-x-1/2 top-4 cursor-pointer group flex flex-col items-center h-12 justify-center"
             onClick={() => !isMarketAlmanac && setProfileStock(currentStock)}
           >
-            <AnimatePresence mode="wait">
+            <motion.div
+              animate={{ opacity: 1, y: 0 }}
+              key={isMarketAlmanac ? 'almanac-center' : `stock-${currentStock?.symbol}`}
+              initial={{ opacity: 0, y: 10 }}
+              transition={{ duration: 0.15 }}
+              className="flex flex-col items-center"
+            >
               {isMarketAlmanac ? (
-                <motion.div
-                  key="almanac-center"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.15 }}
-                  className="flex flex-col items-center"
-                >
-                  <h1 className="text-xl font-black italic tracking-tight text-white group-hover:text-indigo-400 transition-colors text-center drop-shadow-md">
-                    ZISO AI · 投资黄历
-                  </h1>
-                </motion.div>
+                <h1 className="text-xl font-black italic tracking-tight text-white group-hover:text-indigo-400 transition-colors text-center drop-shadow-md">
+                  ZISO AI · 投资黄历
+                </h1>
               ) : (
-                <motion.div
-                  key="stock-center"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.15 }}
-                  className="flex flex-col items-center"
-                >
+                <>
                   <h1 className="text-xl font-black italic tracking-tight text-white group-hover:text-indigo-400 transition-colors text-center">
                     {currentStock?.name}
                   </h1>
                   <span className="text-[10px] font-black italic text-slate-500 tracking-widest uppercase mt-0.5 leading-none">
                     {currentStock ? formatStockSymbol(currentStock.symbol) : ''}
                   </span>
-                </motion.div>
+                </>
               )}
-            </AnimatePresence>
+            </motion.div>
           </div>
 
           {/* 右侧：Brief 入口 / 复制（黄历） */}
@@ -249,31 +233,19 @@ function DashboardContent() {
             }}
             className="w-10 h-10 rounded-[16px] bg-white/5 border border-white/10 flex items-center justify-center active:scale-90 transition-all hover:bg-white/10 group overflow-hidden relative"
           >
-            <AnimatePresence mode="wait">
+            <motion.div
+              animate={{ opacity: 1, scale: 1 }}
+              key={isMarketAlmanac ? 'almanac-right' : 'stock-right'}
+              initial={{ opacity: 0, scale: 0.8 }}
+              transition={{ duration: 0.15 }}
+              className="absolute inset-0 flex items-center justify-center"
+            >
               {isMarketAlmanac ? (
-                <motion.div
-                  key="almanac-right"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  transition={{ duration: 0.15 }}
-                  className="absolute inset-0 flex items-center justify-center"
-                >
-                  <Copy className="w-5 h-5 text-slate-400 group-hover:text-indigo-400 transition-colors" />
-                </motion.div>
+                <Copy className="w-5 h-5 text-slate-400 group-hover:text-indigo-400 transition-colors" />
               ) : (
-                <motion.div
-                  key="stock-right"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  transition={{ duration: 0.15 }}
-                  className="absolute inset-0 flex items-center justify-center"
-                >
-                  <FileText className="w-5 h-5 text-slate-400 group-hover:text-indigo-400 transition-colors" />
-                </motion.div>
+                <FileText className="w-5 h-5 text-slate-400 group-hover:text-indigo-400 transition-colors" />
               )}
-            </AnimatePresence>
+            </motion.div>
           </button>
         </div>
       </header>
@@ -282,7 +254,7 @@ function DashboardContent() {
       <div 
         ref={scrollRef}
         onScroll={handleScroll}
-        className="h-full w-full flex overflow-x-scroll snap-x snap-mandatory scrollbar-hide"
+        className="h-full w-full flex overflow-x-scroll snap-x snap-mandatory snap-always scrollbar-hide"
       >
         {displayStocks.map((stock, idx) => {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any

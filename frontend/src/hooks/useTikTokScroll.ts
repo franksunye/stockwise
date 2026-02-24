@@ -33,15 +33,19 @@ export function useTikTokScroll(stocks: StockData[], options?: UseTikTokScrollOp
         const width = scrollRef.current.clientWidth;
         const scrollWidth = scrollRef.current.scrollWidth;
 
-        // 1. 索引切换逻辑 (保持原样)
-        const newIndex = Math.round(scrollLeft / width);
+        if (width <= 0) return;
+
+        // 1. 索引切换逻辑：增加阈值，避免在 50% 位置反复横跳
+        const fractionalIndex = scrollLeft / width;
+        const newIndex = Math.round(fractionalIndex);
+
         if (newIndex !== currentIndex) {
             setCurrentIndex(newIndex);
         }
 
-        // 2. 稳定态（吸附）检测：只要偏离中心超过 5px，就认为是在滑动中
-        const offset = scrollLeft % width;
-        const stable = offset < 5 || offset > width - 5;
+        // 2. 稳定态（吸附）检测：只要偏离中心超过 2px，就认为是在滑动中
+        const offset = Math.abs((scrollLeft % width + width + width / 2) % width - width / 2);
+        const stable = offset < 2;
         if (stable !== isSnapped) {
             setIsSnapped(stable);
         }
