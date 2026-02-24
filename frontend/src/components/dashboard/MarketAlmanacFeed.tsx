@@ -1,4 +1,4 @@
-import { memo, useRef, useImperativeHandle, forwardRef, useCallback, useState, useMemo } from 'react';
+import { memo, useRef, useImperativeHandle, forwardRef, useCallback, useState, useMemo, useEffect } from 'react';
 import { Shield, Sparkles, ChevronDown, Waves, Thermometer, Target, Zap, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MarketAlmanacData } from '@/lib/types';
@@ -7,6 +7,7 @@ interface MarketAlmanacFeedProps {
   index: number;
   data?: MarketAlmanacData | MarketAlmanacData[] | null;
   onVerticalScroll?: (top: number, index: number) => void;
+  scrollRequest?: number;
 }
 
 export type MarketAlmanacHandle = {
@@ -17,12 +18,20 @@ export type MarketAlmanacHandle = {
 export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlmanacFeedProps>(function MarketAlmanacFeed({ 
   index,
   data,
-  onVerticalScroll
+  onVerticalScroll,
+  scrollRequest
 }, ref) {
   const containerRef = useRef<HTMLDivElement>(null);
   const posterRef = useRef<HTMLDivElement>(null);
   const [isCapturing, setIsCapturing] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Handle back to top requests
+  useEffect(() => {
+    if (containerRef.current && scrollRequest !== undefined) {
+      containerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [scrollRequest]);
 
   const showToast = useCallback((msg: string) => {
     setToastMessage(msg);

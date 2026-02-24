@@ -299,6 +299,7 @@ function DashboardContent() {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 data={(stock as any).almanacData}
                 onVerticalScroll={handleVerticalScrollStable} 
+                scrollRequest={currentIndex === idx ? backToTopCounter : undefined}
               />
             );
           }
