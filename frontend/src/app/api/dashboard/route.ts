@@ -46,12 +46,35 @@ export async function GET(request: Request) {
                     .all(userId) as { symbol: string; name: string }[];
             }
 
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            let almanacs: Record<string, any>[] = [];
+            if ('execute' in client) {
+                const rsAlmanac = await client.execute({ sql: 'SELECT * FROM market_almanacs ORDER BY target_date DESC LIMIT 5', args: [] });
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                if (rsAlmanac.rows && rsAlmanac.rows.length > 0) almanacs = rsAlmanac.rows as Record<string, any>[];
+            } else {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                almanacs = client.prepare('SELECT * FROM market_almanacs ORDER BY target_date DESC LIMIT 5').all() as Record<string, any>[];
+            }
+            if (almanacs.length > 0) {
+                almanacs.forEach(a => {
+                    try {
+                        if (typeof a.market_entropy === 'string') a.market_entropy = JSON.parse(a.market_entropy);
+                        if (typeof a.sector_currents === 'string') a.sector_currents = JSON.parse(a.sector_currents);
+                    } catch { }
+                });
+            }
+
             const queryTime = Date.now() - startTime;
+
 
             // ✂️ 只返回 Watchlist，不再返回具体的 Price/Prediction 数据
             // 前端需要拿到这个列表后，再去请求 /api/stock/batch
             return NextResponse.json({
                 watchlist,
+                almanacs,
+                almanac: almanacs[0] || null, // Fallback
                 timestamp: new Date().toISOString(),
                 queryTime
             });

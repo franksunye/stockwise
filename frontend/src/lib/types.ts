@@ -92,6 +92,7 @@ export interface VisualStory {
     token: string;
     almanac: string;
     visual_state: string;
+    wisdom?: string;
     aesthetic: {
         hue: string;
         mood: string;
@@ -132,6 +133,25 @@ export interface TacticalData {
     is_llm?: boolean;
     model?: string;
     visual_story?: VisualStory;
+}
+
+export interface MarketAlmanacData {
+    target_date: string;
+    mood_tag: string;
+    action_strategy: string;
+    meteorology: string;
+    market_entropy: {
+        score: number;
+        label: string;
+        breadth: string;
+        volume_status: string;
+    };
+    sector_currents: {
+        main: Array<{ name: string; flow: string }>;
+        inverse: Array<{ name: string; flow: string }>;
+    };
+    ai_insight: string;
+    created_at?: string;
 }
 
 // Dashboard 页面聚合数据

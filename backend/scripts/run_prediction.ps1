@@ -10,8 +10,12 @@ param (
 $env:DB_SOURCE = "cloud"
 Write-Host "Environment set to: DB_SOURCE=cloud (Production DB)" -ForegroundColor Yellow
 
+# 1.5 Generate Daily Market Almanac
+Write-Host "`nGenerating today's Market Almanac..." -ForegroundColor Cyan
+python backend/engine/almanac_generator.py
+
 # 2. Get PRO user watchlist
-Write-Host "Querying PRO user watchlist..." -ForegroundColor Cyan
+Write-Host "`nQuerying PRO user watchlist..." -ForegroundColor Cyan
 $query = "SELECT DISTINCT w.symbol FROM user_watchlist w JOIN users u ON w.user_id = u.user_id WHERE u.subscription_tier = 'pro'"
 $jsonOutput = node frontend/scripts/turso-cli.mjs query $query --raw
 

@@ -1,14 +1,16 @@
 'use client';
 
-import { useState, useEffect, Suspense, useRef, useCallback } from 'react';
+import { useState, useEffect, Suspense, useRef, useCallback, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LayoutGrid as Grid, ChevronDown, User, FileText } from 'lucide-react';
+import { LayoutGrid as Grid, ChevronDown, User, FileText, Share2, Copy } from 'lucide-react';
 import { StockData, AIPrediction } from '@/lib/types';
 import { 
   StockVerticalFeed,
   BriefDrawer,
-  COLORS 
+  COLORS,
+  MarketAlmanacFeed,
+  type MarketAlmanacHandle
 } from '@/components/dashboard';
 import { formatStockSymbol } from '@/lib/date-utils';
 import Link from 'next/link';
@@ -37,12 +39,30 @@ const TacticalBriefDrawer = dynamic(() => import('@/components/dashboard/Tactica
 function DashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const targetSymbol = searchParams.get('symbol');
+  // const targetSymbol = searchParams.get('symbol');
   const [userCenterOpen, setUserCenterOpen] = useState(false);
   const [briefOpen, setBriefOpen] = useState(false);
-  const hasScrolledToTarget = useRef(false);
+  const almanacRef = useRef<MarketAlmanacHandle>(null);
+  // const hasScrolledToTarget = useRef(false);
 
-  const { stocks, loadingPool, loadMoreHistory } = useStocks();
+  const { stocks, almanac, almanacs, loadingPool, loadMoreHistory } = useStocks();
+
+  // Create an extended array where the first items are the Market Almanacs (multi-day flipping)
+  const displayStocks = useMemo(() => {
+    const almanacCards = (almanacs.length > 0 ? almanacs : (almanac ? [almanac] : [])).map(a => ({
+      symbol: `MARKET_ALMANAC_${a.target_date}`,
+      name: 'ZISO AI · 投资黄历',
+      prediction: { signal: 'Almanac' },
+      isAlmanac: true,
+      almanacData: a
+    } as unknown as StockData));
+
+    return [
+      ...almanacCards,
+      ...stocks
+    ];
+  }, [stocks, almanacs, almanac]);
+
   const {
     currentIndex,
     scrollRef,
@@ -51,7 +71,7 @@ function DashboardContent() {
     handleVerticalScroll,
     backToTopCounter,
     scrollToToday
-  } = useTikTokScroll(stocks, {
+  } = useTikTokScroll(displayStocks, {
     onOverscrollRight: () => setUserCenterOpen(true),
     // 简化交互：左边缘右滑直接进入更完整的"监控池页面"，替代原本的简易浮层
     onOverscrollLeft: () => router.push('/dashboard/stock-pool')
@@ -72,9 +92,12 @@ function DashboardContent() {
 
   // 进入 App 时清除角标 (小红点)
   useEffect(() => {
-    if (typeof navigator !== 'undefined' && 'clearAppBadge' in navigator) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (navigator as any).clearAppBadge().catch(console.error);
+    interface ExtendedNavigator {
+      clearAppBadge?: () => Promise<void>;
+    }
+    const nav = navigator as ExtendedNavigator;
+    if (typeof nav !== 'undefined' && nav.clearAppBadge) {
+      nav.clearAppBadge().catch(console.error);
     }
   }, []);
 
@@ -115,7 +138,8 @@ function DashboardContent() {
     );
   }
 
-  const currentStock = stocks[currentIndex];
+  const currentStock = displayStocks[currentIndex];
+  const isMarketAlmanac = currentStock && 'isAlmanac' in currentStock && currentStock.isAlmanac;
 
   return (
     <main className="fixed inset-0 bg-[#050508] text-white overflow-hidden select-none font-sans">
@@ -128,41 +152,131 @@ function DashboardContent() {
           exit={{ opacity: 0 }}
           className="fixed inset-0 pointer-events-none blur-[150px] scale-150"
           style={{ 
-            backgroundColor: currentStock?.prediction?.signal === 'Long' ? COLORS.up : 
+            backgroundColor: isMarketAlmanac ? '#4F46E5' : // Indigo for Almanac
+                            currentStock?.prediction?.signal === 'Long' ? COLORS.up : 
                             currentStock?.prediction?.signal === 'Short' ? COLORS.down : COLORS.hold,
           }}
         />
       </AnimatePresence>
 
-      {/* Header - 极简刷新按钮 + 居中股票名称 */}
+      {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-[100] p-6 pointer-events-none">
         <div className="w-full flex justify-between items-start pointer-events-auto">
-           {/* 左侧：点击打开股票档案 (无代码显示) */}
-           <div className="flex items-center gap-2 cursor-pointer group shrink-0" onClick={() => setProfileStock(currentStock)}>
-              <div className="w-10 h-10 rounded-[16px] bg-white/5 border border-white/10 flex items-center justify-center transition-all group-active:scale-90 group-hover:bg-white/10">
-                 <div className="text-[10px] font-black italic text-indigo-500">{currentStock?.symbol.slice(-2)}</div>
+           {/* 左侧：点击打开股票档案 / 分享（黄历） */}
+           <div 
+             className="flex items-center gap-2 cursor-pointer group shrink-0" 
+             onClick={() => {
+               if (isMarketAlmanac) {
+                 almanacRef.current?.share();
+               } else {
+                 setProfileStock(currentStock);
+               }
+             }}
+           >
+              <div className="w-10 h-10 rounded-[16px] bg-white/5 border border-white/10 flex items-center justify-center transition-all group-active:scale-90 group-hover:bg-white/10 overflow-hidden relative">
+                 <AnimatePresence mode="wait">
+                   {isMarketAlmanac ? (
+                     <motion.div
+                       key="almanac-left"
+                       initial={{ opacity: 0, scale: 0.8 }}
+                       animate={{ opacity: 1, scale: 1 }}
+                       exit={{ opacity: 0, scale: 0.8 }}
+                       transition={{ duration: 0.15 }}
+                       className="absolute inset-0 flex items-center justify-center"
+                     >
+                       <Share2 className="w-5 h-5 text-indigo-400 group-hover:text-white transition-colors" />
+                     </motion.div>
+                   ) : (
+                     <motion.div
+                       key="stock-left"
+                       initial={{ opacity: 0, scale: 0.8 }}
+                       animate={{ opacity: 1, scale: 1 }}
+                       exit={{ opacity: 0, scale: 0.8 }}
+                       transition={{ duration: 0.15 }}
+                       className="absolute inset-0 flex items-center justify-center"
+                     >
+                       <div className="text-[10px] font-black italic text-indigo-500">{currentStock?.symbol?.slice(-2) || ''}</div>
+                     </motion.div>
+                   )}
+                 </AnimatePresence>
               </div>
            </div>
 
-          {/* 中央：股票名称突出显示 */}
+          {/* 中央：股票名称突出显示 / 市场黄历标题 */}
           <div 
-            className="absolute left-1/2 transform -translate-x-1/2 top-6 cursor-pointer group flex flex-col items-center"
-            onClick={() => setProfileStock(currentStock)}
+            className="absolute left-1/2 transform -translate-x-1/2 top-4 cursor-pointer group flex flex-col items-center h-12 justify-center"
+            onClick={() => !isMarketAlmanac && setProfileStock(currentStock)}
           >
-            <h1 className="text-xl font-black italic tracking-tight text-white group-hover:text-indigo-400 transition-colors text-center">
-              {currentStock?.name}
-            </h1>
-            <span className="text-[10px] font-black italic text-slate-500 tracking-widest uppercase mt-0.5">
-              {currentStock ? formatStockSymbol(currentStock.symbol) : ''}
-            </span>
+            <AnimatePresence mode="wait">
+              {isMarketAlmanac ? (
+                <motion.div
+                  key="almanac-center"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.15 }}
+                  className="flex flex-col items-center"
+                >
+                  <h1 className="text-xl font-black italic tracking-tight text-white group-hover:text-indigo-400 transition-colors text-center drop-shadow-md">
+                    ZISO AI · 投资黄历
+                  </h1>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="stock-center"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.15 }}
+                  className="flex flex-col items-center"
+                >
+                  <h1 className="text-xl font-black italic tracking-tight text-white group-hover:text-indigo-400 transition-colors text-center">
+                    {currentStock?.name}
+                  </h1>
+                  <span className="text-[10px] font-black italic text-slate-500 tracking-widest uppercase mt-0.5 leading-none">
+                    {currentStock ? formatStockSymbol(currentStock.symbol) : ''}
+                  </span>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
-          {/* 右侧：Brief 入口 (替代刷新) */}
+          {/* 右侧：Brief 入口 / 复制（黄历） */}
           <button 
-            onClick={() => setBriefOpen(true)}
-            className="w-10 h-10 rounded-[16px] bg-white/5 border border-white/10 flex items-center justify-center active:scale-90 transition-all hover:bg-white/10 group"
+            onClick={() => {
+              if (isMarketAlmanac) {
+                almanacRef.current?.copy();
+              } else {
+                setBriefOpen(true);
+              }
+            }}
+            className="w-10 h-10 rounded-[16px] bg-white/5 border border-white/10 flex items-center justify-center active:scale-90 transition-all hover:bg-white/10 group overflow-hidden relative"
           >
-            <FileText className="w-5 h-5 text-slate-400 group-hover:text-indigo-400 transition-colors" />
+            <AnimatePresence mode="wait">
+              {isMarketAlmanac ? (
+                <motion.div
+                  key="almanac-right"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute inset-0 flex items-center justify-center"
+                >
+                  <Copy className="w-5 h-5 text-slate-400 group-hover:text-indigo-400 transition-colors" />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="stock-right"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute inset-0 flex items-center justify-center"
+                >
+                  <FileText className="w-5 h-5 text-slate-400 group-hover:text-indigo-400 transition-colors" />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </button>
         </div>
       </header>
@@ -173,17 +287,32 @@ function DashboardContent() {
         onScroll={handleScroll}
         className="h-full w-full flex overflow-x-scroll snap-x snap-mandatory scrollbar-hide"
       >
-        {stocks.map((stock, idx) => (
-          <StockVerticalFeed 
-            key={stock.symbol} 
-            index={idx}
-            stock={stock} 
-            onShowTactics={handleShowTactics} 
-            onVerticalScroll={handleVerticalScrollStable}
-            scrollRequest={currentIndex === idx ? backToTopCounter : undefined}
-            onLoadMore={loadMoreHistory}
-          />
-        ))}
+        {displayStocks.map((stock, idx) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          if ('isAlmanac' in stock && (stock as any).isAlmanac) {
+            return (
+              <MarketAlmanacFeed 
+                ref={almanacRef}
+                key={stock.symbol} 
+                index={idx}
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                data={(stock as any).almanacData}
+                onVerticalScroll={handleVerticalScrollStable} 
+              />
+            );
+          }
+          return (
+            <StockVerticalFeed 
+              key={stock.symbol} 
+              index={idx}
+              stock={stock} 
+              onShowTactics={handleShowTactics} 
+              onVerticalScroll={handleVerticalScrollStable}
+              scrollRequest={currentIndex === idx ? backToTopCounter : undefined}
+              onLoadMore={loadMoreHistory}
+            />
+          );
+        })}
       </div>
 
       {/* 底部导航 - Stock Pool + 个人中心 */}
@@ -209,7 +338,7 @@ function DashboardContent() {
         </AnimatePresence>
 
         <div className="flex gap-2">
-          {stocks.map((_, idx) => (
+          {displayStocks.map((_, idx) => (
             <div key={idx} className={`h-1 rounded-full transition-all duration-300 ${idx === currentIndex ? 'w-6 bg-white' : 'w-1 bg-white/20'}`} />
           ))}
         </div>

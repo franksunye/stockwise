@@ -31,8 +31,11 @@ export async function GET(request: Request) {
         const client = getDbClient();
         const placeholders = symbols.map(() => '?').join(',');
 
-        let latestPrices: Record<string, unknown>[];
-        let allHistory: Record<string, unknown>[];
+        let latestPrices: Record<string, unknown>[] = [];
+        let allHistory: Record<string, unknown>[] = [];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let almanacs: any[] = [];
+
 
         try {
             const sql = `
@@ -79,8 +82,11 @@ export async function GET(request: Request) {
                         args: symbols
                     })
                 ]);
-                latestPrices = pricesRs.rows as Record<string, unknown>[];
-                allHistory = historyRs.rows as Record<string, unknown>[];
+                if (pricesRs.rows && pricesRs.rows.length > 0) latestPrices = pricesRs.rows as Record<string, unknown>[];
+                if (historyRs.rows && historyRs.rows.length > 0) allHistory = historyRs.rows as Record<string, unknown>[];
+
+                const rsAlmanac = await client.execute({ sql: 'SELECT * FROM market_almanacs ORDER BY target_date DESC LIMIT 5', args: [] });
+                if (rsAlmanac.rows && rsAlmanac.rows.length > 0) almanacs = rsAlmanac.rows;
             } else {
                 latestPrices = client.prepare(`
                         SELECT dp.* FROM daily_prices dp
@@ -93,7 +99,17 @@ export async function GET(request: Request) {
                     `).all(...symbols) as Record<string, unknown>[];
 
                 allHistory = client.prepare(sql).all(...symbols) as Record<string, unknown>[];
+                almanacs = client.prepare('SELECT * FROM market_almanacs ORDER BY target_date DESC LIMIT 5').all();
             }
+            if (almanacs.length > 0) {
+                almanacs.forEach(a => {
+                    try {
+                        if (typeof a.market_entropy === 'string') a.market_entropy = JSON.parse(a.market_entropy);
+                        if (typeof a.sector_currents === 'string') a.sector_currents = JSON.parse(a.sector_currents);
+                    } catch { }
+                });
+            }
+
         } finally {
             if (client && typeof (client as { close?: () => void }).close === 'function') {
                 (client as { close: () => void }).close();
@@ -131,7 +147,13 @@ export async function GET(request: Request) {
             };
         });
 
-        const response = NextResponse.json({ stocks, tier: userTier, queryTime: Date.now() - startTime });
+        const response = NextResponse.json({
+            stocks,
+            almanacs,
+            almanac: almanacs[0] || null, // Keep for fallback
+            tier: userTier,
+            queryTime: Date.now() - startTime
+        });
         response.headers.set('Cache-Control', 'private, max-age=60, stale-while-revalidate=30');
         response.headers.set('Vary', 'Cookie');
         return response;

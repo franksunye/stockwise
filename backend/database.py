@@ -432,6 +432,20 @@ def init_db():
                 UNIQUE(user_id, date)
             )
         """)
+        
+        # 5c. Market Almanacs (Global Market Dashboard Item - No LLM)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS market_almanacs (
+                target_date TEXT PRIMARY KEY,
+                mood_tag TEXT,
+                action_strategy TEXT,
+                meteorology TEXT,
+                market_entropy TEXT,
+                sector_currents TEXT,
+                ai_insight TEXT,
+                created_at TIMESTAMP DEFAULT (datetime('now', '+8 hours'))
+            )
+        """)
 
         # 5c. Stock Briefs (Phase 1 cache - stock-level analysis, shared across users)
         cursor.execute("""

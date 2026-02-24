@@ -3,7 +3,6 @@
 import React, { useRef, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Share2, Download, Wind, Shield, AlertTriangle, Loader2, Copy, Check } from 'lucide-react';
-import { toPng } from 'html-to-image';
 import { AIPrediction, TacticalData, VisualStory } from '@/lib/types';
 import { COLORS } from './constants';
 
@@ -99,12 +98,13 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
   const generateMarketingText = useCallback((activeStory: VisualStory) => {
     const signalText = prediction.signal === 'Long' ? '看多' : prediction.signal === 'Short' ? '看空' : '观望';
     const confidence = (prediction.confidence * 100).toFixed(0);
+    const weekday = new Date(prediction.target_date + 'T00:00:00').toLocaleDateString('zh-CN', { weekday: 'long' });
     
-    let text = `投资黄历 (${prediction.target_date})｜${stockName} (${prediction.symbol})\n\n`;
+    let text = `投资黄历 (${prediction.target_date} ${weekday})｜${stockName} (${prediction.symbol})\n\n`;
     text += `📜 核心：${activeStory.almanac}，气象 ${activeStory.aesthetic.mood}\n\n`;
     
     if (intelligence) {
-      text += `🔍 天机：${intelligence}\n`;
+      text += `🔍 天机：${intelligence}${activeStory.wisdom ? ' ' + activeStory.wisdom : ''}\n`;
     }
     if (tacticStr) {
       text += `💡 锦囊：${tacticStr}\n`;
@@ -112,7 +112,7 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
     
     text += `\n🎯 决策：${signalText} (把握 ${confidence}%)\n\n`;
     text += `—— ZISO AI：替你做股市功课，带你看投资门道。\n`;
-    text += `#ZISOAI #投资黄历 #股市复盘`;
+    text += `#ZISOAI #知守AI #AI股票分析 #投资黄历 #股市复盘`;
     
     return text;
   }, [stockName, prediction, intelligence, tacticStr]);
@@ -135,7 +135,7 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
     // However, resetting to 1 during capture ensures perfect pixel alignment.
     const originalStyle = posterRef.current.style.transform;
     posterRef.current.style.transform = 'none';
-    
+
     // Filter out interactive elements from the generated image
     const filter = (node: HTMLElement) => {
       if (node.classList?.contains('capture-hidden')) {
@@ -145,10 +145,13 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
     };
 
     try {
-      // Use pixelRatio >= 2 for Retina quality exports
+      // Lazy load html-to-image as it's a heavy utility
+      const { toPng } = await import('html-to-image');
+      
       const dataUrl = await toPng(posterRef.current, { 
         cacheBust: true, 
-        pixelRatio: 2,
+        pixelRatio: 2, // Standardize for high-res social sharing
+        backgroundColor: '#050508',
         filter: filter as unknown as (domNode: HTMLElement) => boolean 
       });
       
@@ -156,6 +159,8 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
       posterRef.current.style.transform = originalStyle;
       return dataUrl;
     } catch (err) {
+      // Ensure transformation is restored even on error
+      if (posterRef.current) posterRef.current.style.transform = originalStyle;
       console.error('Failed to generate poster', err);
       return null;
     }
@@ -172,34 +177,34 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
       return;
     }
 
-    // Detect iOS to bypass the "Preview" hurdle
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-                  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-
-    if (isIOS && navigator.canShare) {
-      try {
-        const response = await fetch(dataUrl);
-        const blob = await response.blob();
-        const file = new File([blob], `ZISO_AI_${stockName.replace(/\s+/g, '_')}.png`, { type: 'image/png' });
-        
-        if (navigator.canShare({ files: [file] })) {
-          await navigator.share({
-            files: [file],
-            title: '保存投资黄历',
-          });
-          return;
-        }
-      } catch (err) {
-        console.error('iOS Share-to-Save failed', err);
+    // Capability-First Sharing Strategy (Industrial Grade)
+    try {
+      const response = await fetch(dataUrl);
+      const blob = await response.blob();
+      const fileName = `ZISO_AI_${stockName}_${prediction.target_date.replace(/-/g, '')}.png`;
+      const file = new File([blob], fileName, { type: 'image/png' });
+      
+      // If the browser supports native file sharing (Modern iOS & Android Chrome)
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: `ZISO AI · ${stockName}预测`,
+          text: `【知守 AI】替你做股市功课：${stockName} 投资意境解析。#知守AI #AI股票分析`
+        });
+        return;
       }
+    } catch (err) {
+      console.error('Priority share failed, falling back to download', err);
     }
 
-    // Default Download Behavior (PC/Android)
+    // Default Fallback: Download (Reliable for Desktop and older mobile browsers)
     const link = document.createElement('a');
     link.download = `ZISO_AI_${stockName}_${prediction.target_date.replace(/-/g, '')}.png`;
     link.href = dataUrl;
+    document.body.appendChild(link);
     link.click();
-    showToast('图片已准备好下载');
+    document.body.removeChild(link);
+    showToast('海报已幻化完成，请在朋友圈分享！');
   };
 
   const handleShare = async (activeStory: VisualStory) => {
@@ -250,15 +255,15 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
 
   // Fallback if visual story is missing (for older data)
   const defaultStory: VisualStory = {
-    token: prediction?.signal === 'Long' ? '能量涌现' : prediction?.signal === 'Short' ? '暗影规避' : '静水深流',
-    almanac: prediction?.signal === 'Long' ? '宜：顺势而为' : prediction?.signal === 'Short' ? '忌：盲目抄底' : '宜：静待时机',
+    token: prediction?.signal === 'Long' ? (prediction.confidence >= 0.8 ? '能量涌现' : '微光潜行') : prediction?.signal === 'Short' ? '暗影规避' : '静水深流',
+    almanac: prediction?.signal === 'Long' ? '宜：顺势而为 / 忌：恐高做空' : prediction?.signal === 'Short' ? '忌：盲目抄底 / 宜：岸边观火' : '宜：静待时机 / 忌：盲动乱序',
     visual_state: 'stable',
     aesthetic: {
       hue: prediction?.signal === 'Long' ? 'indigo-emerald' : prediction?.signal === 'Short' ? 'rose-slate' : 'slate-gray',
       mood: prediction?.signal === 'Long' ? '微光' : prediction?.signal === 'Short' ? '阴云' : '晨雾',
       dynamic_clues: []
     },
-    meta_version: 'v1-fallback'
+    meta_version: 'v4-fallback'
   };
 
   const activeStory = story || defaultStory;
@@ -330,7 +335,9 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
                 <div className="mb-2 flex flex-col items-center justify-center relative">
                    {prediction.target_date.includes('-') ? (
                      <>
-                       <div className="text-[10px] font-black text-slate-500/80 tracking-[0.4em] mb-1">{prediction.target_date.split('-')[0]}</div>
+                       <div className="text-[10px] font-black text-slate-500/80 tracking-[0.4em] mb-1">
+                         {prediction.target_date.split('-')[0]} · {new Date(prediction.target_date + 'T00:00:00').toLocaleDateString('zh-CN', { weekday: 'long' })}
+                       </div>
                        <div className="text-4xl font-black text-white tracking-tighter flex items-center leading-none" style={{ fontFamily: '"SF Pro Display", -apple-system, sans-serif' }}>
                          {prediction.target_date.split('-')[1]}
                          <span className="text-xl text-white/20 mx-1 font-light">/</span>
@@ -417,7 +424,12 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
                    {intelligence && (
                      <div className="px-2.5 py-2 rounded-xl bg-white/5 border border-white/5 backdrop-blur-md flex gap-1.5 items-start shadow-sm">
                         <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest shrink-0 mt-[3px]">【天机】</span>
-                        <p className="text-[10px] text-slate-400 font-medium leading-[1.4] tracking-wider line-clamp-2">{intelligence}</p>
+                        <div className="flex flex-col gap-0.5">
+                           <p className="text-[10px] text-slate-400 font-medium leading-[1.4] tracking-wider line-clamp-2">{intelligence}</p>
+                           {activeStory.wisdom && (
+                             <p className="text-[9px] text-slate-500 italic font-bold leading-[1.4] tracking-wider animate-in fade-in slide-in-from-bottom-1 duration-700">{activeStory.wisdom}</p>
+                           )}
+                        </div>
                      </div>
                    )}
 
