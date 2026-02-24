@@ -22,6 +22,7 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
     // Watchlist passed from props to avoid redundant hook calls in unified context
 
     const [stocks, setStocks] = useState<StockData[]>([]);
+    const [almanac, setAlmanac] = useState<unknown>(null);
     const [loadingPool, setLoadingPool] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [lastRefreshTime, setLastRefreshTime] = useState<Date | null>(null);
@@ -113,7 +114,14 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
             clearTimeout(timeoutId);
 
             const batchData = await batchRes.json();
+
+            // Note: Since dashboard route is called by useWatchlist, we also need to get almanac from somewhere
+            // Actually, we modified dashboard route! Let's fetch almanac from there if we can, or modify stock/batch
+
             if (batchData.error) { throw new Error(batchData.error); }
+            if (batchData.almanac) {
+                setAlmanac(batchData.almanac);
+            }
 
             const fetchTime = Math.round(performance.now() - startTime);
             console.log(`📊 Dashboard loaded: ${watchlist.length} stocks in ${fetchTime}ms`);
@@ -281,6 +289,8 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
 
     return {
         stocks,
+        almanac,
+
         setStocks,
         loadingPool,
         isRefreshing,

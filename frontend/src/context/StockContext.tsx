@@ -13,13 +13,14 @@ interface StockContextType {
     loadMoreHistory: (symbol: string, offset: number) => Promise<void>;
     addStock: (symbol: string, name: string) => Promise<boolean>;
     removeStock: (symbol: string) => Promise<boolean>;
+    almanac: unknown;
 }
 
 const StockContext = createContext<StockContextType | undefined>(undefined);
 
 export function StockProvider({ children }: { children: ReactNode }) {
     const { watchlist, loading: loadingList, addStock, removeStock } = useWatchlist();
-    const { stocks, loadingPool, loadMoreHistory } = useDashboardData(watchlist, loadingList);
+    const { stocks, almanac, loadingPool, loadMoreHistory } = useDashboardData(watchlist, loadingList);
 
     const value = useMemo(() => ({
         stocks,
@@ -28,8 +29,9 @@ export function StockProvider({ children }: { children: ReactNode }) {
         watchlist,
         loadingList,
         addStock,
-        removeStock
-    }), [stocks, loadingPool, loadMoreHistory, watchlist, loadingList, addStock, removeStock]);
+        removeStock,
+        almanac
+    }), [stocks, loadingPool, loadMoreHistory, watchlist, loadingList, addStock, removeStock, almanac]);
 
     return (
         <StockContext.Provider value={value}>

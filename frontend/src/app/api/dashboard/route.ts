@@ -46,12 +46,31 @@ export async function GET(request: Request) {
                     .all(userId) as { symbol: string; name: string }[];
             }
 
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            let almanac: any = null;
+            if ('execute' in client) {
+                const rsAlmanac = await client.execute({ sql: 'SELECT * FROM market_almanacs ORDER BY target_date DESC LIMIT 1', args: [] });
+                if (rsAlmanac.rows && rsAlmanac.rows.length > 0) almanac = rsAlmanac.rows[0];
+            } else {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                almanac = (client as any).prepare('SELECT * FROM market_almanacs ORDER BY target_date DESC LIMIT 1').get();
+            }
+            if (almanac) {
+                try {
+                    if (typeof almanac.market_entropy === 'string') almanac.market_entropy = JSON.parse(almanac.market_entropy);
+                    if (typeof almanac.sector_currents === 'string') almanac.sector_currents = JSON.parse(almanac.sector_currents);
+                } catch (e) { }
+            }
+
             const queryTime = Date.now() - startTime;
+
 
             // ✂️ 只返回 Watchlist，不再返回具体的 Price/Prediction 数据
             // 前端需要拿到这个列表后，再去请求 /api/stock/batch
             return NextResponse.json({
                 watchlist,
+                almanac,
                 timestamp: new Date().toISOString(),
                 queryTime
             });

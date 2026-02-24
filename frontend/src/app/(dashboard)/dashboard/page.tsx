@@ -43,7 +43,7 @@ function DashboardContent() {
   const [briefOpen, setBriefOpen] = useState(false);
   const hasScrolledToTarget = useRef(false);
 
-  const { stocks, loadingPool, loadMoreHistory } = useStocks();
+  const { stocks, almanac, loadingPool, loadMoreHistory } = useStocks();
 
   // Create an extended array where the first item is the Market Almanac
   const displayStocks = useMemo(() => {
@@ -271,6 +271,8 @@ function DashboardContent() {
               <MarketAlmanacFeed 
                 key="market-almanac" 
                 index={idx}
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                data={almanac as any}
                 onVerticalScroll={handleVerticalScrollStable} 
               />
             );

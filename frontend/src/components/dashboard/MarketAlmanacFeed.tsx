@@ -4,11 +4,29 @@ import { motion } from 'framer-motion';
 
 interface MarketAlmanacFeedProps {
   index: number;
+  data?: {
+    target_date?: string;
+    mood_tag?: string;
+    action_strategy?: string;
+    meteorology?: string;
+    ai_insight?: string;
+    market_entropy?: {
+      score: number;
+      label: string;
+      breadth: string;
+      volume_status: string;
+    };
+    sector_currents?: {
+      main: Array<{name: string, flow: string}>;
+      inverse?: Array<{name: string, flow: string}>;
+    };
+  } | null;
   onVerticalScroll?: (top: number, index: number) => void;
 }
 
 export const MarketAlmanacFeed = memo(function MarketAlmanacFeed({ 
   index,
+  data,
   onVerticalScroll
 }: MarketAlmanacFeedProps) {
 
@@ -17,6 +35,17 @@ export const MarketAlmanacFeed = memo(function MarketAlmanacFeed({
       onVerticalScroll(e.currentTarget.scrollTop, index);
     }
   };
+
+  // Safely extract properties
+  const targetDate = data?.target_date || new Date().toISOString().split('T')[0];
+  const dateFormatted = targetDate.replace(/-/g, ' / ');
+  const moodTag = data?.mood_tag || '混沌未明';
+  const actionStrategy = data?.action_strategy || '宜：观望 / 忌：盲动';
+  const meteorology = data?.meteorology || '微雨';
+  const insight = data?.ai_insight || '股指进入混沌期，缺乏明确突破点。板块轮动加速，建议保持观望。';
+  
+  const entropy = data?.market_entropy || { score: 50, label: '50% · 震荡', breadth: '震荡分化', volume_status: '量能平稳' };
+  const sectors = data?.sector_currents || { main: [{name: '待更新', flow: ''}], inverse: [{name: '待更新', flow: ''}] };
 
   return (
     <div className="min-w-full h-full relative snap-center overflow-hidden">
@@ -29,19 +58,19 @@ export const MarketAlmanacFeed = memo(function MarketAlmanacFeed({
           <section className="text-center space-y-2 py-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-2">
                <Sparkles className="w-3 h-3 text-indigo-400" />
-               <span className="text-[10px] font-black text-slate-500 tracking-[0.2em] uppercase">2026 · 02 / 24</span>
+               <span className="text-[10px] font-black text-slate-500 tracking-[0.2em] uppercase">{dateFormatted}</span>
             </div>
             
             <h2 className="text-5xl font-black italic tracking-tighter text-white drop-shadow-lg">
-              静水深流
+              {moodTag}
             </h2>
             <div className="flex flex-col items-center gap-1">
               <p className="text-lg font-bold tracking-[0.2em] text-indigo-100/90">
-                宜：静待时机
+                {actionStrategy.split(' / ')[0] || actionStrategy}
               </p>
               <div className="flex items-center gap-1.5 opacity-60">
                  <div className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">气象：晨雾</span>
+                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">气象：{meteorology}</span>
               </div>
             </div>
           </section>
@@ -58,7 +87,7 @@ export const MarketAlmanacFeed = memo(function MarketAlmanacFeed({
             </div>
             
             <p className="text-sm leading-relaxed text-slate-300 font-medium italic pl-1 border-l-2 border-indigo-500/20">
-              &quot;股指短期反弹但中期仍承压，在此混沌期，缺乏明确突破催化剂，<span className="text-white font-bold">建议保持耐心，观望等待更明确方向</span>。&quot;
+              {insight}
             </p>
           </section>
 
@@ -73,13 +102,15 @@ export const MarketAlmanacFeed = memo(function MarketAlmanacFeed({
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold text-slate-300">主向：低空经济</span>
-                      <span className="text-[9px] font-black text-emerald-500">+4.2%</span>
+                      <span className="text-[10px] font-bold text-slate-300">主向：{sectors.main[0]?.name || '-'}</span>
+                      <span className="text-[9px] font-black text-emerald-500">{sectors.main[0]?.flow ? `+${sectors.main[0]?.flow}` : ''}</span>
                     </div>
-                    <div className="flex items-center justify-between opacity-50">
-                      <span className="text-[10px] font-bold text-slate-400">逆向：高位煤炭</span>
-                      <span className="text-[9px] font-black text-rose-500">-1.8%</span>
-                    </div>
+                    {sectors.inverse && sectors.inverse[0] && (
+                      <div className="flex items-center justify-between opacity-50">
+                        <span className="text-[10px] font-bold text-slate-400">逆向：{sectors.inverse[0]?.name || '-'}</span>
+                        <span className="text-[9px] font-black text-rose-500">{sectors.inverse[0]?.flow ? `-${sectors.inverse[0]?.flow}` : ''}</span>
+                      </div>
+                    )}
                   </div>
                </div>
                
@@ -88,7 +119,7 @@ export const MarketAlmanacFeed = memo(function MarketAlmanacFeed({
                     <Thermometer className="w-3 h-3 text-amber-500" />
                     <span className="text-[9px] text-slate-600 font-black uppercase tracking-widest">全场热度</span>
                   </div>
-                  <span className="text-[10px] font-black mono text-slate-200">42% · 温凉</span>
+                  <span className="text-[10px] font-black mono text-slate-200">{entropy.score}% · {entropy.breadth.substring(0,2)}</span>
                </div>
             </div>
             
@@ -102,11 +133,11 @@ export const MarketAlmanacFeed = memo(function MarketAlmanacFeed({
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-2">
                     <span className="text-[9px] font-black bg-indigo-500/20 text-indigo-400 px-1 rounded">宜</span>
-                    <span className="text-[11px] font-bold text-slate-200">低位试错 / 持币</span>
+                    <span className="text-[11px] font-bold text-slate-200">{(actionStrategy.split(' / ')[0] || '').replace('宜：', '')}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-[9px] font-black bg-rose-500/10 text-rose-500/70 px-1 rounded">忌</span>
-                    <span className="text-[11px] font-bold text-slate-400 line-through decoration-rose-500/30">盲目追涨 / 满仓</span>
+                    <span className="text-[11px] font-bold text-slate-400">{(actionStrategy.split(' / ')[1] || '').replace('忌：', '')}</span>
                   </div>
                 </div>
               </div>
@@ -114,8 +145,8 @@ export const MarketAlmanacFeed = memo(function MarketAlmanacFeed({
               <div className="mt-4 pt-3 border-t border-white/5 flex items-center gap-2">
                  <Zap className="w-3 h-3 text-indigo-500 fill-indigo-500/20" />
                  <div>
-                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block leading-none">含氧量 (成交额)</span>
-                    <span className="text-[10px] font-black mono text-slate-300">8,240亿 · 略微缩量</span>
+                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block leading-none">全场量能状态</span>
+                    <span className="text-[10px] font-black mono text-slate-300">{entropy.volume_status}</span>
                  </div>
               </div>
             </div>

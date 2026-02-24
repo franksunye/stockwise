@@ -111,3 +111,12 @@ jobs:
 
           echo "🚀 Executing: python -u backend/main.py --analyze --market CN $MODEL_FLAG $FORCE_FLAG $DATE_FLAG"
           python -u backend/main.py --analyze --market CN $MODEL_FLAG $FORCE_FLAG $DATE_FLAG
+
+      - name: Generate Market Almanac
+        env:
+          PYTHONUNBUFFERED: "1"
+          TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+        run: |
+          echo "🚀 Generating Daily Market Almanac for A-Share..."
+          python -u backend/engine/almanac_generator.py
