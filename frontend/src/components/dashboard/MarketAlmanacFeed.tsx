@@ -2,7 +2,6 @@ import { memo, useRef, useImperativeHandle, forwardRef, useCallback, useState, u
 import { Shield, Sparkles, ChevronDown, Waves, Thermometer, Target, Zap, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MarketAlmanacData } from '@/lib/types';
-import { COLORS } from './constants';
 
 interface MarketAlmanacFeedProps {
   index: number;
@@ -186,7 +185,7 @@ export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlma
 
            return (
               <div key={idx} className="w-full h-full shrink-0 flex flex-col items-center justify-center px-6 snap-center snap-always min-h-screen">
-                 <div ref={idx === 0 ? posterRef : null} className="w-full max-w-md space-y-6 mx-auto bg-[#050508] relative">
+                 <div ref={idx === 0 ? posterRef : null} className="w-full max-w-md space-y-6 mx-auto relative">
                     {/* Header Branding (Visible in Share) */}
                     {isCapturing && idx === 0 && (
                        <div className="pt-8 pb-4 text-center">
@@ -195,29 +194,20 @@ export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlma
                     )}
 
                     {/* 1. Macro Mood & Summary */}
-                    <section className="text-center space-y-1 py-2">
-                       <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-1">
-                          {idx === 0 ? <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-ping" /> : <span className="w-1.5 h-1.5 rounded-full bg-slate-500" />}
-                          <span className="text-[10px] font-bold text-slate-500 tracking-wider uppercase">{itemDateStr}</span>
+                    <section className="text-center space-y-2 py-4">
+                       <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-2">
+                          <Sparkles className="w-3 h-3 text-indigo-400" />
+                          <span className="text-[10px] font-black text-slate-500 tracking-[0.2em] uppercase">{itemDateStr}</span>
                        </div>
                        
-                       <h2 
-                          className="text-4xl font-black tracking-tighter"
-                          style={{
-                             color: itemEntropy.score > 60 ? COLORS.up : itemEntropy.score < 40 ? COLORS.down : COLORS.hold
-                          }}
-                       >
+                       <h2 className="text-5xl font-black italic tracking-tighter text-white drop-shadow-lg">
                           {itemMood}
                        </h2>
-                       
-                       <div className="flex items-center justify-center gap-3 text-[10px] font-bold text-slate-600">
-                          <span className="flex items-center gap-1 uppercase tracking-widest">
-                            <Target className="w-3 h-3" /> {itemStrategy.split(' / ')[0] || itemStrategy}
-                          </span>
-                       </div>
-                       
-                       <div className="flex flex-col items-center mt-2 opacity-60">
-                          <div className="flex items-center gap-1.5">
+                       <div className="flex flex-col items-center gap-1">
+                          <p className="text-lg font-bold tracking-[0.2em] text-indigo-100/90">
+                          {itemStrategy.split(' / ')[0] || itemStrategy}
+                          </p>
+                          <div className="flex items-center gap-1.5 opacity-60">
                              <div className="w-1.5 h-1.5 rounded-full bg-slate-400" />
                              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">气象：{itemMeteorology}</span>
                           </div>
@@ -243,53 +233,64 @@ export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlma
                     {/* 3. Bottom Grid: Data & Action (Mirroring Fact Grid) */}
                     <section className="grid grid-cols-2 gap-4">
                        {/* Left Box: Sector Currents & Entropy */}
-                       <div className="glass-card p-4 flex flex-col justify-between overflow-hidden">
+                       <div className="glass-card p-4 flex flex-col justify-between overflow-hidden min-h-[140px]">
                           <div>
-                             <span className="text-[9px] text-slate-600 font-black uppercase tracking-widest block mb-1">
-                                全场热度感知
-                             </span>
-                             <div className="flex items-baseline gap-1.5 overflow-hidden">
-                                <span className="text-xl font-black mono tracking-tight text-slate-100">{itemEntropy.score}%</span>
-                                <span className="text-[10px] font-bold" style={{ color: itemEntropy.score > 60 ? COLORS.up : itemEntropy.score < 40 ? COLORS.down : COLORS.hold }}>
-                                  {itemEntropy.label.split('·')[1]?.trim() || '震荡'}
-                                </span>
+                             <div className="flex items-center gap-1.5 mb-2">
+                                <Waves className="w-3 h-3 text-indigo-400" />
+                                <h4 className="text-[9px] font-black text-slate-600 uppercase tracking-widest leading-none mt-0.5">板块洋流</h4>
+                             </div>
+                             <div className="space-y-1.5 mb-2">
+                                <div className="flex justify-between items-center bg-white/5 px-2 py-1 rounded">
+                                   <span className="text-[10px] text-slate-400 font-bold">主向: {itemSectors.main[0].name}</span>
+                                   <span className="text-[10px] text-emerald-400 font-black italic">{itemSectors.main[0].flow}</span>
+                                </div>
+                                <div className="flex justify-between items-center opacity-40 px-2">
+                                   <span className="text-[9px] text-slate-500">逆向: {itemSectors.inverse?.[0]?.name || '--'}</span>
+                                   <span className="text-[9px] text-rose-400 font-bold italic">{itemSectors.inverse?.[0]?.flow || '--'}</span>
+                                </div>
                              </div>
                           </div>
                           
-                          <div>
-                             <div className="mt-2 pt-2 border-t border-white/5 flex items-center justify-between">
-                                <span className="text-[10px] text-slate-600 font-bold uppercase">主吸金位</span>
-                                <span className="text-[10px] font-black text-emerald-400">
-                                  {itemSectors.main[0].name}
-                                </span>
+                          <div className="pt-2 border-t border-white/5 flex items-center justify-between">
+                             <div className="flex items-center gap-1">
+                                <Thermometer className="w-2.5 h-2.5 text-amber-500" />
+                                <span className="text-[9px] text-slate-500 font-bold uppercase tracking-tighter">全场热度</span>
                              </div>
-                             
-                             <div className="mt-2 pt-2 border-t border-dashed border-white/5">
-                                <span className="text-[10px] text-slate-700 font-bold italic">流入强度：{itemSectors.main[0].flow}</span>
-                             </div>
+                             <span className="text-[10px] font-black text-white italic">{itemEntropy.label}</span>
                           </div>
                        </div>
 
                        {/* Right Box: Actions & Stats */}
-                       <div className="glass-card p-4 flex flex-col justify-between relative">
-                          <span className="text-[10px] text-slate-600 font-black uppercase tracking-widest absolute top-4 left-4">
-                             行动基调
-                          </span>
-                          
-                          <div className="flex-1 flex flex-col items-center justify-center pt-5">
-                             <div className="flex flex-col items-center gap-2">
-                                <Target size={28} className="text-indigo-400" />
-                                <span className="text-xs font-black text-indigo-400 tracking-wide">
-                                  {itemStrategy.split(' / ')[0].replace('宜：', '').replace('宜:', '') || '观望'}
-                                </span>
+                       <div className="glass-card p-4 flex flex-col justify-between min-h-[140px]">
+                          <div>
+                             <div className="flex items-center gap-1.5 mb-2">
+                                <Target className="w-3 h-3 text-indigo-400" />
+                                <h4 className="text-[9px] font-black text-slate-600 uppercase tracking-widest leading-none mt-0.5">行动指南</h4>
+                             </div>
+                             <div className="space-y-2">
+                                <div className="flex items-center gap-2">
+                                   <div className="w-4 h-4 rounded bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30">
+                                      <span className="text-[8px] font-black text-indigo-400">宜</span>
+                                   </div>
+                                   <span className="text-[10px] font-black text-slate-200">{itemStrategy.split(' / ')[0] || '观望'}</span>
+                                </div>
+                                <div className="flex items-center gap-2 opacity-50">
+                                   <div className="w-4 h-4 rounded bg-rose-500/20 flex items-center justify-center border border-rose-500/30">
+                                      <span className="text-[8px] font-black text-rose-400">忌</span>
+                                   </div>
+                                   <span className="text-[10px] font-bold text-slate-400">{itemStrategy.split(' / ')[1] || '盲动'}</span>
+                                </div>
                              </div>
                           </div>
-                          
-                          <div className="mt-2 pt-2 border-t border-white/5 flex items-center justify-between">
-                             <span className="text-[10px] text-slate-600 font-bold uppercase">全场量能</span>
-                             <span className="text-[10px] font-bold text-slate-500 italic">
-                                {itemEntropy.volume_status}
-                             </span>
+
+                          <div className="pt-2 border-t border-white/5 flex items-center justify-between">
+                             <div className="flex items-center gap-1">
+                                <Zap className="w-2.5 h-2.5 text-indigo-400" />
+                                <span className="text-[9px] text-slate-500 font-bold uppercase tracking-tighter">全场量能状态</span>
+                             </div>
+                          </div>
+                          <div className="text-[10px] font-black text-white italic mt-1 pl-1">
+                             {itemEntropy.volume_status}
                           </div>
                        </div>
                     </section>
