@@ -102,7 +102,7 @@ export function BriefDrawer({ isOpen, onClose, limitToSymbol, onUpgrade }: Brief
             <div className="w-full flex justify-center pt-3 pb-1 shrink-0"><div className="w-12 h-1 rounded-full bg-white/20" /></div>
 
             {/* Fixed Header */}
-            <header className="shrink-0 z-20 px-6 py-5 flex items-center justify-between border-b border-white/5 bg-[#050508]/80 backdrop-blur-xl">
+            <header className="shrink-0 z-20 px-6 py-5 flex items-center justify-between border-b border-white/5 bg-[#050508]">
                <div className="flex items-center gap-3">
                   <div className="w-11 h-11 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
                     <NotebookText className="w-5 h-5 text-indigo-500" />
