@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { Share2, Copy, Shield, Sparkles, ChevronDown } from 'lucide-react';
+import { Share2, Copy, Shield, Sparkles, ChevronDown, Waves, Thermometer, Target, Zap } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface MarketAlmanacFeedProps {
@@ -64,32 +64,73 @@ export const MarketAlmanacFeed = memo(function MarketAlmanacFeed({
 
           {/* 3. Bottom Grid: Data & Action (Mirroring Fact Grid) */}
           <section className="grid grid-cols-2 gap-4">
-            {/* Left Box: Key Levels */}
-            <div className="glass-card p-4 space-y-4">
+            {/* Left Box: Sector Currents & Entropy */}
+            <div className="glass-card p-4 flex flex-col justify-between overflow-hidden min-h-[140px]">
                <div>
-                  <span className="text-[9px] text-slate-600 font-black uppercase tracking-widest block mb-1">↑ 上方阻尼</span>
-                  <p className="text-xl font-black mono tracking-tight text-white">625</p>
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <Waves className="w-3 h-3 text-indigo-400" />
+                    <span className="text-[9px] text-slate-600 font-black uppercase tracking-widest">板块洋流 · SECTORS</span>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold text-slate-300">主向：低空经济</span>
+                      <span className="text-[9px] font-black text-emerald-500">+4.2%</span>
+                    </div>
+                    <div className="flex items-center justify-between opacity-50">
+                      <span className="text-[10px] font-bold text-slate-400">逆向：高位煤炭</span>
+                      <span className="text-[9px] font-black text-rose-500">-1.8%</span>
+                    </div>
+                  </div>
                </div>
-               <div className="pt-3 border-t border-white/5">
-                  <span className="text-[9px] text-slate-600 font-black uppercase tracking-widest block mb-1">↓ 绝对防守</span>
-                  <p className="text-xl font-black mono tracking-tight text-white">518</p>
+               
+               <div className="pt-3 border-t border-white/5 flex items-center justify-between">
+                  <div className="flex items-center gap-1">
+                    <Thermometer className="w-3 h-3 text-amber-500" />
+                    <span className="text-[9px] text-slate-600 font-black uppercase tracking-widest">全场热度</span>
+                  </div>
+                  <span className="text-[10px] font-black mono text-slate-200">42% · 温凉</span>
                </div>
             </div>
             
-            {/* Right Box: Tactics */}
-            <div className="glass-card p-4 flex flex-col justify-between">
+            {/* Right Box: Action Almanac */}
+            <div className="glass-card p-4 flex flex-col justify-between min-h-[140px]">
               <div>
-                <span className="text-[9px] text-slate-600 font-black uppercase tracking-widest block mb-2">今日锦囊</span>
-                <div className="px-2 py-1.5 rounded-lg bg-white/5 border border-white/10">
-                   <p className="text-xs font-bold text-white text-center">观望等待</p>
+                <div className="flex items-center gap-1.5 mb-2">
+                  <Target className="w-3 h-3 text-indigo-400" />
+                  <span className="text-[9px] text-slate-600 font-black uppercase tracking-widest">行动指南 · ACTION</span>
+                </div>
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[9px] font-black bg-indigo-500/20 text-indigo-400 px-1 rounded">宜</span>
+                    <span className="text-[11px] font-bold text-slate-200">低位试错 / 持币</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[9px] font-black bg-rose-500/10 text-rose-500/70 px-1 rounded">忌</span>
+                    <span className="text-[11px] font-bold text-slate-400 line-through decoration-rose-500/30">盲目追涨 / 满仓</span>
+                  </div>
                 </div>
               </div>
               
               <div className="mt-4 pt-3 border-t border-white/5 flex items-center gap-2">
-                 <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
-                 <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">战略重心：避险</span>
+                 <Zap className="w-3 h-3 text-indigo-500 fill-indigo-500/20" />
+                 <div>
+                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block leading-none">含氧量 (成交额)</span>
+                    <span className="text-[10px] font-black mono text-slate-300">8,240亿 · 略微缩量</span>
+                 </div>
               </div>
             </div>
+          </section>
+
+          {/* 4. Support & Resistance (Secondary Info) */}
+          <section className="w-full flex justify-between px-2 opacity-60">
+             <div className="flex flex-col">
+                <span className="text-[8px] font-black text-slate-600 uppercase tracking-[0.2em]">↑ 上方阻尼</span>
+                <span className="text-xs font-black mono text-slate-400">3,250.5</span>
+             </div>
+             <div className="flex flex-col text-right">
+                <span className="text-[8px] font-black text-slate-600 uppercase tracking-[0.2em]">↓ 绝对防守</span>
+                <span className="text-xs font-black mono text-slate-400">3,118.2</span>
+             </div>
           </section>
 
           {/* 4. Scroll Indicator */}
