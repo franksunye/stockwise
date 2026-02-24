@@ -84,9 +84,12 @@ function DashboardContent() {
 
   // 进入 App 时清除角标 (小红点)
   useEffect(() => {
-    if (typeof navigator !== 'undefined' && 'clearAppBadge' in navigator) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (navigator as any).clearAppBadge().catch(console.error);
+    interface ExtendedNavigator extends Navigator {
+      clearAppBadge?: () => Promise<void>;
+    }
+    const nav = navigator as ExtendedNavigator;
+    if (typeof nav !== 'undefined' && nav.clearAppBadge) {
+      nav.clearAppBadge().catch(console.error);
     }
   }, []);
 
