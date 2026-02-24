@@ -191,7 +191,22 @@ export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlma
         onScroll={handleScroll}
         className="w-full h-full absolute inset-0 overflow-y-scroll snap-y snap-mandatory scrollbar-hide flex flex-col items-center"
       >
-        {almanacsList.map((almanacItem, idx) => {
+        {almanacsList.length === 0 ? (
+          <div className="w-full h-full flex flex-col items-center justify-center px-6 animate-pulse">
+             <div className="w-full max-w-md space-y-8">
+                <div className="flex flex-col items-center space-y-4">
+                   <div className="w-48 h-4 bg-white/5 rounded-full" />
+                   <div className="w-64 h-16 bg-white/10 rounded-2xl" />
+                   <div className="w-32 h-6 bg-white/5 rounded-full" />
+                </div>
+                <div className="w-full h-40 bg-white/5 rounded-[32px]" />
+                <div className="grid grid-cols-2 gap-4">
+                   <div className="h-32 bg-white/5 rounded-[24px]" />
+                   <div className="h-32 bg-white/5 rounded-[24px]" />
+                </div>
+             </div>
+          </div>
+        ) : almanacsList.map((almanacItem, idx) => {
            const itemDate = almanacItem.target_date || new Date().toISOString().split('T')[0];
            const itemDateFormatted = itemDate.replace(/-/g, ' / ');
            const itemWeekday = new Date(itemDate + 'T00:00:00').toLocaleDateString('zh-CN', { weekday: 'long' });

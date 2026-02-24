@@ -10,7 +10,7 @@ import { WatchlistItem } from './useWatchlist';
 // 动态刷新间隔：交易时段5分钟，非交易时段10分钟
 const TRADING_REFRESH_INTERVAL = 5 * 60 * 1000;   // 5分钟
 const DEFAULT_REFRESH_INTERVAL = 10 * 60 * 1000;  // 10分钟
-const CACHE_KEY = 'stockwise_dashboard_cache_v1';
+const CACHE_KEY = 'stockwise_dashboard_cache_v2';
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24小时过期
 
 function getRefreshInterval(): number {
@@ -43,14 +43,22 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
         try {
             const cached = localStorage.getItem(CACHE_KEY);
             if (cached) {
-                const { data, timestamp } = JSON.parse(cached);
+                const parsed = JSON.parse(cached);
+                const { data, timestamp, almanac: cachedAlmanac, almanacs: cachedAlmanacs } = parsed;
                 const age = Date.now() - timestamp;
 
                 // 只有未过期的缓存才使用 (24小时)
                 if (age < CACHE_TTL && Array.isArray(data) && data.length > 0) {
                     console.log(`🚀 Loaded ${data.length} stocks from local cache (${Math.round(age / 60000)}m ago)`);
                     setStocks(data);
-                    setLoadingPool(false); // 立即关闭骨架屏
+
+                    if (cachedAlmanac) setAlmanac(cachedAlmanac);
+                    if (cachedAlmanacs) setAlmanacs(cachedAlmanacs);
+
+                    // 只有当股票数据和 almanac 数据都存在时，才关闭骨架屏
+                    if (cachedAlmanac) {
+                        setLoadingPool(false);
+                    }
                 }
             }
         } catch (e) {
@@ -104,11 +112,14 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort('请求超时 (12s)'), 12000); // 12s timeout
 
+            // Step 1: Ensure User Identity in background (Don't await to avoid blocking critical data fetch)
+            getCurrentUser().catch(err => console.error('Background user sync error:', err));
+
             // Step 2: 拿着 watchlist 去 CDN 拉取公共数据 (公有API)
             const symbols = watchlist.map(w => w.symbol).join(',');
             // 如果是非静默刷新（手动点击或初始化），增加一个 cache-buster 扰动缓存
             const url = `/api/stock/batch?symbols=${symbols}&historyLimit=15${!silent ? `&t=${Date.now()}` : ''}`;
-            await getCurrentUser();
+
             const batchRes = await fetch(url, {
                 signal: controller.signal
             });
@@ -159,10 +170,12 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
             setLoadingPool(false);
             setLastRefreshTime(new Date());
 
-            // 💾 写入本地缓存 (后台静默) - 结构保持不变
+            // 💾 写入本地缓存 (后台静默)
             try {
                 localStorage.setItem(CACHE_KEY, JSON.stringify({
                     data: validResults,
+                    almanac: batchData.almanac,
+                    almanacs: batchData.almanacs,
                     timestamp: Date.now()
                 }));
             } catch (e) { console.error('Cache save error', e); }
