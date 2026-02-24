@@ -135,7 +135,7 @@ function DashboardContent() {
 
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-[100] p-6 pointer-events-none">
-        <div className="w-full flex justify-between items-start pointer-events-auto">
+        <div className="w-full flex justify-between items-start pointer-events-auto relative h-12">
            {/* 左侧：点击打开股票档案 / 分享（黄历） */}
            <div 
              className="flex items-center gap-2 cursor-pointer group shrink-0" 
@@ -148,37 +148,32 @@ function DashboardContent() {
              }}
            >
               <div className="w-10 h-10 rounded-[16px] bg-white/5 border border-white/10 flex items-center justify-center transition-all group-active:scale-90 group-hover:bg-white/10 overflow-hidden relative">
-                 <motion.div
-                   animate={{ 
-                     opacity: 1, 
-                     scale: 1,
-                     rotate: isMarketAlmanac ? 0 : 0 
-                   }}
-                   key={isMarketAlmanac ? 'almanac-left' : 'stock-left'}
-                   initial={{ opacity: 0, scale: 0.8 }}
-                   className="absolute inset-0 flex items-center justify-center"
-                 >
-                   {isMarketAlmanac ? (
-                     <Share2 className="w-5 h-5 text-indigo-400 group-hover:text-white transition-colors" />
-                   ) : (
-                     <div className="text-[10px] font-black italic text-indigo-500">{currentStock?.symbol?.slice(-2) || ''}</div>
-                   )}
-                 </motion.div>
+                  <div className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${isMarketAlmanac ? 'opacity-100 scale-100' : 'opacity-0 scale-75 pointer-events-none'}`}>
+                      <Share2 className="w-5 h-5 text-indigo-400 group-hover:text-white transition-colors" />
+                  </div>
+                  <div className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${!isMarketAlmanac ? 'opacity-100 scale-100' : 'opacity-0 scale-75 pointer-events-none'}`}>
+                      <div className="text-[10px] font-black italic text-indigo-500">{currentStock?.symbol?.slice(-2) || ''}</div>
+                  </div>
               </div>
            </div>
 
           {/* 中央：股票名称突出显示 / 市场黄历标题 */}
           <div 
-            className="absolute left-1/2 transform -translate-x-1/2 top-4 cursor-pointer group flex flex-col items-center h-12 justify-center"
+            className="absolute left-1/2 transform -translate-x-1/2 top-0 cursor-pointer group flex flex-col items-center h-12 justify-center w-48"
             onClick={() => !isMarketAlmanac && setProfileStock(currentStock)}
           >
-            <div className={`flex flex-col items-center transition-opacity duration-300 ${isMarketAlmanac ? 'opacity-100' : 'opacity-0 absolute pointer-events-none'}`}>
-               <h1 className="text-xl font-black italic tracking-tight text-white group-hover:text-indigo-400 transition-colors text-center drop-shadow-md">
+            {/* 黄历标题：绝对定位居中，带隐形占位符对齐高度 */}
+            <div className={`absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-300 ${isMarketAlmanac ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+               <h1 className="text-xl font-black italic tracking-tight text-white group-hover:text-indigo-400 transition-colors text-center">
                  ZISO AI · 投资黄历
                </h1>
+               <span className="text-[10px] font-black italic opacity-0 mt-0.5 leading-none select-none">
+                 ALMANAC_PLACEHOLDER
+               </span>
             </div>
             
-            <div className={`flex flex-col items-center transition-opacity duration-300 ${!isMarketAlmanac ? 'opacity-100' : 'opacity-0 absolute pointer-events-none'}`}>
+            {/* 股票标题：绝对定位居中 */}
+            <div className={`absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-300 ${!isMarketAlmanac ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
                <h1 className="text-xl font-black italic tracking-tight text-white group-hover:text-indigo-400 transition-colors text-center">
                  {currentStock?.name}
                </h1>
