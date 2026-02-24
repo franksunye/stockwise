@@ -258,7 +258,7 @@ function DashboardContent() {
       <div 
         ref={scrollRef}
         onScroll={handleScroll}
-        className="h-full w-full flex overflow-x-scroll snap-x snap-mandatory snap-always scrollbar-hide"
+        className="h-full w-full flex overflow-x-scroll snap-x snap-mandatory scrollbar-hide"
       >
         {displayStocks.map((stock, idx) => {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any

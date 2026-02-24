@@ -42,18 +42,38 @@ export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlma
     setTimeout(() => setToastMessage(null), 3000);
   }, []);
 
-  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    const scrollTop = e.currentTarget.scrollTop;
-    const height = e.currentTarget.clientHeight;
-    const newIndex = Math.round(scrollTop / height);
-    if (newIndex !== currentVerticalIndex) {
-      setCurrentVerticalIndex(newIndex);
-    }
-    
-    if (onVerticalScroll) {
-      onVerticalScroll(scrollTop, index);
-    }
-  };
+  // Performance Fix: Avoid synchronous layout thrashing (clientHeight) on every scroll frame
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    let ticking = false;
+    const handlePassiveScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          if (!container) return;
+          const scrollTop = container.scrollTop;
+          
+          // Use innerHeight instead of querying clientHeight to prevent iOS layout deadlocks during animations
+          const height = window.innerHeight;
+          const newIndex = Math.round(scrollTop / height);
+          
+          if (newIndex !== currentVerticalIndex) {
+            setCurrentVerticalIndex(newIndex);
+          }
+          
+          if (onVerticalScroll) {
+            onVerticalScroll(scrollTop, index);
+          }
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    container.addEventListener('scroll', handlePassiveScroll, { passive: true });
+    return () => container.removeEventListener('scroll', handlePassiveScroll);
+  }, [currentVerticalIndex, index, onVerticalScroll]);
 
   const almanacsList = Array.isArray(data) ? data : (data ? [data] : []);
   const currentAlmanac = almanacsList[currentVerticalIndex] || almanacsList[0] || {} as MarketAlmanacData;
@@ -188,7 +208,6 @@ export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlma
 
       <div 
         ref={containerRef}
-        onScroll={handleScroll}
         className="w-full h-full absolute inset-0 overflow-y-scroll snap-y snap-mandatory scrollbar-hide flex flex-col items-center"
       >
         {almanacsList.length === 0 ? (

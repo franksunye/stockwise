@@ -69,13 +69,11 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
         // 如果 watchlist 还在加载中，跳过
         if (loadingWatchlist && watchlist.length === 0) return;
 
-        // 如果没有股票，清空
+        // 如果没有股票，清空 (但不能 return，因为仍然需要去拉取公共的 Market Almanac)
         if (watchlist.length === 0) {
             if (!loadingWatchlist) {
                 setStocks([]);
-                setLoadingPool(false);
             }
-            return;
         }
 
         const now = Date.now();
