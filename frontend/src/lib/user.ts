@@ -227,27 +227,27 @@ export async function restoreUserIdentity(targetUserId: string): Promise<{ succe
   }
 
   try {
-    // 通过 register 会话接口绑定目标身份（兼容历史 userId 迁移路径）
-    const response = await fetch('/api/user/register', {
+    // 使用专用恢复接口，不依赖当前 session（目的就是切换身份）
+    // 注意：不能走 /api/user/register，因为那个接口会优先信任 session cookie 中的当前身份
+    const response = await fetch('/api/user/recovery/restore', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: targetUserId, registrationType: 'anonymous' }),
+      body: JSON.stringify({ targetUserId }),
     });
 
-    if (!response.ok) {
-      return { success: false, message: '用户身份恢复失败，请稍后重试' };
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok || !data?.success) {
+      return { success: false, message: data?.error || '用户身份恢复失败，请稍后重试' };
     }
 
-    const data = await response.json();
-    if (!data?.userId || data.userId !== targetUserId) {
-      return { success: false, message: '目标身份无效或未授权恢复' };
-    }
-
-    // 恢复用户身份到本地存储
+    // 恢复用户身份到本地存储（服务端已同步更新 session cookie）
     syncUserIdToStorage(targetUserId, 'anonymous');
+    // 清除 session sync 标记，确保下次加载时重新同步
+    sessionStorage.removeItem(USER_SESSION_SYNC_KEY);
 
     console.log('✅ 用户身份恢复成功:', targetUserId);
-    return { success: true, message: '身份恢复成功！请刷新页面。' };
+    return { success: true, message: data.message || '身份恢复成功！请刷新页面。' };
   } catch (error) {
     console.error('❌ 身份恢复失败:', error);
     return { success: false, message: '恢复过程中出现错误，请稍后重试' };
