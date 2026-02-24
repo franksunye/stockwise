@@ -292,7 +292,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
             <div className="w-full flex justify-center pt-3 pb-1 shrink-0"><div className="w-12 h-1 rounded-full bg-white/20" /></div>
 
             {/* Navigation Header */}
-            <header className="shrink-0 z-20 px-5 py-4 flex items-center justify-between border-b border-white/5 bg-[#0a0a0f]">
+            <header className="shrink-0 z-20 px-5 py-4 flex items-center justify-between border-b border-white/5 bg-[#0a0a0f]/80 backdrop-blur-xl">
               <div className="w-10">
                 {(showIdentityCenter || showPricing || showSupport || showLearn) && (
                   <button onClick={() => { setShowPricing(false); setShowIdentityCenter(false); setShowSupport(false); setShowLearn(false); }} className="p-2 rounded-full hover:bg-white/5 active:scale-90 transition-all text-slate-400">
