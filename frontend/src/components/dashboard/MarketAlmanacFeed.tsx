@@ -1,5 +1,5 @@
 import { memo, useRef, useImperativeHandle, forwardRef, useCallback, useState, useMemo, useEffect } from 'react';
-import { Shield, Sparkles, ChevronDown, Waves, Thermometer, Target, Zap, Loader2 } from 'lucide-react';
+import { Shield, Sparkles, ChevronDown, Waves, Thermometer, Target, Zap, Loader2, Check, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MarketAlmanacData } from '@/lib/types';
 
@@ -14,6 +14,200 @@ export type MarketAlmanacHandle = {
   share: () => Promise<void>;
   copy: () => Promise<void>;
 };
+
+// --- 1. Infrastructure & Utilities ---
+
+interface MarketAlmanacFeedProps {
+  index: number;
+  data?: MarketAlmanacData | MarketAlmanacData[] | null;
+  onVerticalScroll?: (top: number, index: number) => void;
+  scrollRequest?: number;
+}
+
+export type MarketAlmanacHandle = {
+  share: () => Promise<void>;
+  copy: () => Promise<void>;
+};
+
+/**
+ * Robustly parses action strategy string into distinct Yi/Ji segments.
+ * Supports multiple delimiters used across different backend versions.
+ */
+function parseActionStrategy(strategy: string) {
+  const raw = strategy || '宜：观望 · 忌：盲动';
+  let yi = '观望';
+  let ji = '盲动';
+
+  const delimiters = [
+    { key: ' · 忌：', split: ' · 忌：' },
+    { key: ' / 忌：', split: ' / 忌：' },
+    { key: ' · ', split: ' · ' },
+    { key: ' / ', split: ' / ' }
+  ];
+
+  const matched = delimiters.find(d => raw.includes(d.key));
+  
+  if (matched) {
+    const parts = raw.split(matched.split);
+    yi = parts[0].replace(/^宜[：:]\s*/, '').trim();
+    ji = (parts[1] || '').replace(/^忌[：:]\s*/, '').trim();
+  } else {
+    yi = raw.replace(/^宜[：:]\s*/, '').trim();
+  }
+
+  return { yi: yi || '观望', ji: ji || '盲动' };
+}
+
+// --- 2. Sub-components ---
+
+interface AlmanacCardProps {
+  data: MarketAlmanacData;
+  idx: number;
+  isCapturing: boolean;
+  isCurrent: boolean;
+  posterRef: (el: HTMLDivElement | null) => void;
+}
+
+const AlmanacCard = memo(function AlmanacCard({ 
+  data, idx, isCapturing, isCurrent, posterRef 
+}: AlmanacCardProps) {
+  const { yi, ji } = useMemo(() => parseActionStrategy(data.action_strategy), [data.action_strategy]);
+  
+  const targetDate = data.target_date || new Date().toISOString().split('T')[0];
+  const dateFormatted = targetDate.replace(/-/g, ' / ');
+  const weekday = new Date(targetDate + 'T00:00:00').toLocaleDateString('zh-CN', { weekday: 'long' });
+  const dateStr = `${dateFormatted} · ${weekday}`;
+  
+  const sectors = useMemo(() => 
+    (typeof data.sector_currents === 'object' && data.sector_currents) 
+      ? data.sector_currents 
+      : { main: [], inverse: [] }, 
+    [data.sector_currents]
+  );
+
+  const entropy = useMemo(() => 
+    (typeof data.market_entropy === 'object' && data.market_entropy)
+      ? data.market_entropy
+      : { volume_status: '量能平稳' },
+    [data.market_entropy]
+  );
+
+  return (
+    <div className="w-full h-full shrink-0 flex flex-col items-center justify-center px-6 snap-center snap-always">
+      <div ref={posterRef} className="w-full max-w-md space-y-6 mx-auto relative">
+        {isCapturing && isCurrent && (
+          <div className="pt-8 pb-4 text-center">
+            <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">ZISO AI · 投资黄历</span>
+          </div>
+        )}
+
+        <section className="text-center space-y-2 py-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-2">
+            <Sparkles className="w-3 h-3 text-indigo-400" />
+            <span className="text-[10px] font-black text-slate-500 tracking-[0.2em] uppercase">{dateStr}</span>
+          </div>
+          <h2 className="text-5xl font-black italic tracking-tighter text-white drop-shadow-lg">{data.mood_tag || '混沌未明'}</h2>
+          <div className="flex flex-col items-center gap-1">
+            <p className="text-lg font-bold tracking-[0.2em] text-indigo-100/90">{yi}</p>
+            <div className="flex items-center gap-1.5 opacity-60">
+              <div className="w-1.5 h-1.5 rounded-full bg-slate-400" />
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">气象：{data.meteorology || '微雨'}</span>
+            </div>
+          </div>
+        </section>
+
+        <section className="glass-card p-5 relative overflow-hidden">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-5 h-5 rounded-md bg-indigo-600/20 flex items-center justify-center border border-indigo-500/30">
+              <Shield className="w-2.5 h-2.5 text-indigo-400 fill-indigo-400/20" />
+            </div>
+            <h3 className="text-[10px] font-black text-slate-600 uppercase tracking-widest">AI 市场天机</h3>
+          </div>
+          <p className="text-sm leading-relaxed text-slate-300 font-medium italic pl-1 border-l-2 border-indigo-500/20">
+            {data.ai_insight || '分析正在生成中...'}
+          </p>
+        </section>
+
+        <section className="grid grid-cols-2 gap-4">
+          <div className="glass-card p-4 flex flex-col justify-between overflow-hidden min-h-[140px]">
+            <div>
+              <div className="flex items-center gap-1.5 mb-2">
+                <Waves className="w-3 h-3 text-indigo-400" />
+                <h4 className="text-[9px] font-black text-slate-600 uppercase tracking-widest leading-none mt-0.5">板块洋流</h4>
+              </div>
+              <div className="space-y-1.5">
+                {sectors.main?.slice(0, 3).map((s: any, si: number) => (
+                  <div key={`main-${si}`} className="flex justify-between items-center bg-white/5 px-2 py-1.5 rounded gap-1">
+                    <span className="text-[10px] text-slate-400 font-bold truncate pr-1">{si === 0 ? '主向: ' : ''}{s.name}</span>
+                    <span className="text-[10px] text-emerald-400 font-black italic whitespace-nowrap shrink-0">{s.flow}</span>
+                  </div>
+                ))}
+                {sectors.inverse?.slice(0, 2).map((s: any, si: number) => (
+                  <div key={`inv-${si}`} className="flex justify-between items-center opacity-40 px-2 py-0.5 mt-1 gap-1">
+                    <span className="text-[9px] text-slate-500 truncate pr-1">逆向: {s.name}</span>
+                    <span className="text-[9px] text-rose-400 font-bold italic whitespace-nowrap shrink-0">{s.flow}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="glass-card p-4 flex flex-col justify-between min-h-[140px]">
+            <div>
+              <div className="flex items-center gap-1.5 mb-2">
+                <Target className="w-3 h-3 text-indigo-400" />
+                <h4 className="text-[9px] font-black text-slate-600 uppercase tracking-widest leading-none mt-0.5">行动指南</h4>
+              </div>
+              <div className="space-y-2.5">
+                <div className="flex items-start gap-2.5">
+                  <div className="w-4 h-4 rounded bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30 shrink-0 mt-0.5">
+                    <span className="text-[8px] font-black text-indigo-400">宜</span>
+                  </div>
+                  <span className="text-[10px] font-black text-slate-100 leading-[1.4] text-left">{yi}</span>
+                </div>
+                <div className="flex items-start gap-2.5 opacity-50">
+                  <div className="w-4 h-4 rounded bg-rose-500/20 flex items-center justify-center border border-rose-500/30 shrink-0 mt-0.5">
+                    <span className="text-[8px] font-black text-rose-400">忌</span>
+                  </div>
+                  <span className="text-[10px] font-bold text-slate-400 leading-[1.4] text-left">{ji}</span>
+                </div>
+              </div>
+            </div>
+            <div className="pt-2 border-t border-white/5 block">
+              <div className="flex items-center gap-1">
+                <Zap className="w-2.5 h-2.5 text-indigo-400" />
+                <span className="text-[9px] text-slate-500 font-bold uppercase tracking-tighter">全场量能状态</span>
+              </div>
+              <div className="text-[10px] font-black text-white italic mt-1 pl-1">
+                {entropy.volume_status}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {isCapturing && idx === 0 && (
+          <div className="absolute inset-0 z-[500] bg-[#050508]/90 flex items-center justify-center capture-hidden border border-white/10 rounded-[32px]">
+            <div className="flex flex-col items-center gap-3">
+              <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
+              <p className="text-sm font-black text-white italic tracking-widest">正在幻化意境图...</p>
+            </div>
+          </div>
+        )}
+
+        {idx === 0 && (
+          <section className="text-center pt-8 pb-4 capture-hidden">
+            <p className="text-[10px] font-black italic text-slate-700 uppercase tracking-widest flex items-center justify-center gap-2">
+              上滑查看历史黄历
+              <ChevronDown className="w-3 h-3 opacity-30" />
+            </p>
+          </section>
+        )}
+      </div>
+    </div>
+  );
+});
+
+// --- 3. Main Container Component ---
 
 export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlmanacFeedProps>(function MarketAlmanacFeed({ 
   index,
@@ -88,13 +282,18 @@ export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlma
   const entropy = useMemo(() => typeof currentAlmanac?.market_entropy === 'object' && currentAlmanac?.market_entropy ? currentAlmanac?.market_entropy : { score: 50, label: '50% · 震荡', breadth: '震荡分化', volume_status: '量能平稳' }, [currentAlmanac?.market_entropy]);
   const sectors = useMemo(() => typeof currentAlmanac?.sector_currents === 'object' && currentAlmanac?.sector_currents ? currentAlmanac?.sector_currents : { main: [{name: '待更新', flow: ''}], inverse: [{name: '待更新', flow: ''}] }, [currentAlmanac?.sector_currents]);
 
+  const { yiTextMarketing, jiTextMarketing } = useMemo(() => 
+    parseActionStrategy(currentAlmanac?.action_strategy || ''), 
+    [currentAlmanac?.action_strategy]
+  );
+
   const generateMarketingText = useCallback(() => {
     let text = `ZISO AI 投资黄历 (${targetDate})\n\n`;
     text += `📜 卦象：${moodTag}\n`;
-    text += `💡 策略：${actionStrategy}\n`;
+    text += `宜：${yiTextMarketing}\n`;
+    text += `忌：${jiTextMarketing}\n`;
     text += `☁️ 气象：${meteorology}\n\n`;
     text += `🔍 市场天机：${insight}\n\n`;
-    text += `⚖️ 全场热度：${entropy.label} (${entropy.breadth})\n`;
     
     if (sectors.main && sectors.main.length > 0) {
       const mainStr = sectors.main.slice(0, 3).map(s => `${s.name}(${s.flow})`).join(', ');
@@ -109,7 +308,7 @@ export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlma
     text += `\n—— ZISO AI：替你做股市功课，带你看投资门道。\n`;
     text += `#ZISOAI #知守AI #AI股票分析 #投资黄历 #大盘分析`;
     return text;
-  }, [targetDate, moodTag, actionStrategy, meteorology, insight, entropy, sectors]);
+  }, [targetDate, moodTag, yiTextMarketing, jiTextMarketing, meteorology, insight, sectors]);
 
   const generateImage = useCallback(async () => {
     const activePoster = posterRefs.current[currentVerticalIndex];
@@ -233,167 +432,18 @@ export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlma
                 </div>
              </div>
           </div>
-        ) : almanacsList.map((almanacItem, idx) => {
-           const itemDate = almanacItem.target_date || new Date().toISOString().split('T')[0];
-           const itemDateFormatted = itemDate.replace(/-/g, ' / ');
-           const itemWeekday = new Date(itemDate + 'T00:00:00').toLocaleDateString('zh-CN', { weekday: 'long' });
-           const itemDateStr = `${itemDateFormatted} · ${itemWeekday}`;
-           const itemMood = almanacItem.mood_tag || '混沌未明';
-           const itemStrategy = almanacItem.action_strategy || '宜：观望 / 忌：盲动';
-           const itemMeteorology = almanacItem.meteorology || '微雨';
-           const itemInsight = almanacItem.ai_insight || '股指进入混沌期，缺乏明确突破点。板块轮动加速，建议保持观望。';
-           
-           const itemEntropy = typeof almanacItem.market_entropy === 'object' && almanacItem.market_entropy ? almanacItem.market_entropy : { score: 50, label: '50% · 震荡', breadth: '震荡分化', volume_status: '量能平稳' };
-           const itemSectors = typeof almanacItem.sector_currents === 'object' && almanacItem.sector_currents ? almanacItem.sector_currents : { main: [{name: '待更新', flow: ''}], inverse: [{name: '待更新', flow: ''}] };
-
-           return (
-              <div key={idx} className="w-full h-full shrink-0 flex flex-col items-center justify-center px-6 snap-center snap-always">
-                 <div ref={el => { posterRefs.current[idx] = el; }} className="w-full max-w-md space-y-6 mx-auto relative">
-                    {/* Header Branding (Visible in Share) */}
-                    {isCapturing && idx === currentVerticalIndex && (
-                       <div className="pt-8 pb-4 text-center">
-                          <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">ZISO AI · 投资黄历</span>
-                       </div>
-                    )}
-
-                    {/* 1. Macro Mood & Summary */}
-                    <section className="text-center space-y-2 py-4">
-                       <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-2">
-                          <Sparkles className="w-3 h-3 text-indigo-400" />
-                          <span className="text-[10px] font-black text-slate-500 tracking-[0.2em] uppercase">{itemDateStr}</span>
-                       </div>
-                       
-                       <h2 className="text-5xl font-black italic tracking-tighter text-white drop-shadow-lg">
-                          {itemMood}
-                       </h2>
-                       <div className="flex flex-col items-center gap-1">
-                          <p className="text-lg font-bold tracking-[0.2em] text-indigo-100/90">
-                          {itemStrategy.split(' / ')[0] || itemStrategy}
-                          </p>
-                          <div className="flex items-center gap-1.5 opacity-60">
-                             <div className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-                             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">气象：{itemMeteorology}</span>
-                          </div>
-                       </div>
-                    </section>
-
-                    {/* 2. AI Market Insight (Mirroring Stock AI Insight) */}
-                    <section className="glass-card p-5 relative overflow-hidden group">
-                       <div className="flex items-center gap-2 mb-3">
-                          <div className="w-5 h-5 rounded-md bg-indigo-600/20 flex items-center justify-center border border-indigo-500/30">
-                          <Shield className="w-2.5 h-2.5 text-indigo-400 fill-indigo-400/20" />
-                          </div>
-                          <h3 className="text-[10px] font-black text-slate-600 uppercase tracking-widest">
-                          AI 市场天机
-                          </h3>
-                       </div>
-                       
-                       <p className="text-sm leading-relaxed text-slate-300 font-medium italic pl-1 border-l-2 border-indigo-500/20">
-                          {itemInsight}
-                       </p>
-                    </section>
-
-                    {/* 3. Bottom Grid: Data & Action (Mirroring Fact Grid) */}
-                    <section className="grid grid-cols-2 gap-4">
-                       {/* Left Box: Sector Currents & Entropy */}
-                       <div className="glass-card p-4 flex flex-col justify-between overflow-hidden min-h-[140px]">
-                          <div>
-                             <div className="flex items-center gap-1.5 mb-2">
-                                <Waves className="w-3 h-3 text-indigo-400" />
-                                <h4 className="text-[9px] font-black text-slate-600 uppercase tracking-widest leading-none mt-0.5">板块洋流</h4>
-                             </div>
-                             <div className="space-y-1.5 mb-2">
-                                {itemSectors.main?.slice(0, 2).map((s, si) => (
-                                   <div key={`main-${si}`} className="flex justify-between items-center bg-white/5 px-2 py-1.5 rounded gap-1">
-                                      <span className="text-[10px] text-slate-400 font-bold truncate pr-1">
-                                         {si === 0 ? '主向: ' : ''}{s.name}
-                                      </span>
-                                      <span className="text-[10px] text-emerald-400 font-black italic whitespace-nowrap shrink-0">
-                                         {s.flow}
-                                      </span>
-                                   </div>
-                                ))}
-                                
-                                {itemSectors.inverse?.slice(0, 1).map((s, si) => (
-                                   <div key={`inv-${si}`} className="flex justify-between items-center opacity-40 px-2 py-0.5 mt-1 gap-1">
-                                      <span className="text-[9px] text-slate-500 truncate pr-1">
-                                         逆向: {s.name}
-                                      </span>
-                                      <span className="text-[9px] text-rose-400 font-bold italic whitespace-nowrap shrink-0">
-                                         {s.flow}
-                                      </span>
-                                   </div>
-                                ))}
-                             </div>
-                          </div>
-                          
-                          <div className="pt-2 border-t border-white/5 flex items-center justify-between">
-                             <div className="flex items-center gap-1">
-                                <Thermometer className="w-2.5 h-2.5 text-amber-500" />
-                                <span className="text-[9px] text-slate-500 font-bold uppercase tracking-tighter">全场热度</span>
-                             </div>
-                             <span className="text-[10px] font-black text-white italic">{itemEntropy.label}</span>
-                          </div>
-                       </div>
-
-                       {/* Right Box: Actions & Stats */}
-                       <div className="glass-card p-4 flex flex-col justify-between min-h-[140px]">
-                          <div>
-                             <div className="flex items-center gap-1.5 mb-2">
-                                <Target className="w-3 h-3 text-indigo-400" />
-                                <h4 className="text-[9px] font-black text-slate-600 uppercase tracking-widest leading-none mt-0.5">行动指南</h4>
-                             </div>
-                             <div className="space-y-2">
-                                <div className="flex items-start gap-2">
-                                   <div className="w-4 h-4 rounded bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30 shrink-0 mt-0.5">
-                                      <span className="text-[8px] font-black text-indigo-400">宜</span>
-                                   </div>
-                                   <span className="text-[10px] font-black text-slate-200 leading-[1.3] text-left">{itemStrategy.split(' / ')[0] || '观望'}</span>
-                                </div>
-                                <div className="flex items-start gap-2 opacity-50">
-                                   <div className="w-4 h-4 rounded bg-rose-500/20 flex items-center justify-center border border-rose-500/30 shrink-0 mt-0.5">
-                                      <span className="text-[8px] font-black text-rose-400">忌</span>
-                                   </div>
-                                   <span className="text-[10px] font-bold text-slate-400 leading-[1.3] text-left">{itemStrategy.split(' / ')[1] || '盲动'}</span>
-                                </div>
-                             </div>
-                          </div>
-
-                          <div className="pt-2 border-t border-white/5 flex items-center justify-between">
-                             <div className="flex items-center gap-1">
-                                <Zap className="w-2.5 h-2.5 text-indigo-400" />
-                                <span className="text-[9px] text-slate-500 font-bold uppercase tracking-tighter">全场量能状态</span>
-                             </div>
-                          </div>
-                          <div className="text-[10px] font-black text-white italic mt-1 pl-1">
-                             {itemEntropy.volume_status}
-                          </div>
-                       </div>
-                    </section>
-
-                    {/* Loading Overlay (if captured) */}
-                    {isCapturing && idx === 0 && (
-                       <div className="absolute inset-0 z-[500] bg-[#050508]/90 flex items-center justify-center capture-hidden border border-white/10 rounded-[32px]">
-                          <div className="flex flex-col items-center gap-3">
-                             <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
-                             <p className="text-sm font-black text-white italic tracking-widest">正在幻化意境图...</p>
-                          </div>
-                       </div>
-                    )}
-
-                    {/* User Tip - Bottom */}
-                    {idx === 0 && (
-                       <section className="text-center pt-8 pb-4 capture-hidden">
-                          <p className="text-[10px] font-black italic text-slate-700 uppercase tracking-widest flex items-center justify-center gap-2">
-                             上滑查看历史黄历
-                             <ChevronDown className="w-3 h-3 opacity-30" />
-                          </p>
-                       </section>
-                    )}
-                 </div>
-              </div>
-           );
-        })}
+        ) : (
+          almanacsList.map((item, idx) => (
+            <AlmanacCard 
+              key={`${item.target_date}-${idx}`}
+              data={item}
+              idx={idx}
+              isCapturing={isCapturing}
+              isCurrent={idx === currentVerticalIndex}
+              posterRef={el => { posterRefs.current[idx] = el; }}
+            />
+          ))
+        )}
       </div>
     </div>
   );
