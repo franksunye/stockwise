@@ -30,12 +30,15 @@ def generate_almanac(target_date=None):
         cursor = conn.cursor()
         
         if not target_date:
-            cursor.execute("SELECT MAX(date) FROM daily_prices WHERE symbol = 'sh000001'")
+            # Check for the latest data across A-share and HK proxies
+            # This ensures we pick today if HK has resumed, even if CN is still on holiday
+            cursor.execute("SELECT MAX(date) FROM daily_prices WHERE symbol IN ('sh000001', '00700')")
             row = cursor.fetchone()
             if row and row[0]:
                 target_date = row[0]
             else:
-                target_date = datetime.now().strftime("%Y-%m-%d")
+                # Fallback to current calendar date (HK/CN Time)
+                target_date = (datetime.now() + timedelta(hours=8)).strftime("%Y-%m-%d")
 
         # --- 1. Fetch Entropy (Volume & Breadth) --- #
         # We use sh000001 as the volume proxy for market entropy
@@ -46,9 +49,15 @@ def generate_almanac(target_date=None):
         """, (target_date,))
         rows = cursor.fetchall()
         
-        if not rows or rows[0][0] != target_date:
-            logger.warning(f"No valid trading data for proxy sh000001 on {target_date}.")
+        if not rows:
+            logger.warning(f"No valid trading data for proxy sh000001 on or before {target_date}.")
             return False
+
+        # If the latest data date doesn't match target_date exactly (e.g. holiday or morning run), 
+        # we still proceed using the latest available prices as a sentiment proxy.
+        actual_price_date = rows[0][0]
+        if actual_price_date != target_date:
+            logger.info(f"Market Data Gap: Generating almanac for {target_date} using latest prices from {actual_price_date}")
 
         current_vol = rows[0][1]
         past_vols = [r[1] for r in rows[1:] if r[1] is not None]
@@ -56,7 +65,7 @@ def generate_almanac(target_date=None):
 
         vol_ratio = current_vol / avg_vol if avg_vol > 0 else 1.0
         
-        # Breadth
+        # Breadth (We search for the same date as the actual price data found)
         cursor.execute("""
             SELECT
                 SUM(CASE WHEN change_percent > 0 THEN 1 ELSE 0 END) as winners,
@@ -64,7 +73,7 @@ def generate_almanac(target_date=None):
                 COUNT(*) as total
             FROM daily_prices 
             WHERE date = ? AND length(symbol) != 5
-        """, (target_date,))
+        """, (actual_price_date,))
         b_row = cursor.fetchone()
         winners = b_row[0] or 0
         losers = b_row[1] or 0
