@@ -121,17 +121,7 @@ export const MarketAlmanacFeed = memo(function MarketAlmanacFeed({
             </div>
           </section>
 
-          {/* 4. Support & Resistance (Secondary Info) */}
-          <section className="w-full flex justify-between px-2 opacity-60">
-             <div className="flex flex-col">
-                <span className="text-[8px] font-black text-slate-600 uppercase tracking-[0.2em]">↑ 上方阻尼</span>
-                <span className="text-xs font-black mono text-slate-400">3,250.5</span>
-             </div>
-             <div className="flex flex-col text-right">
-                <span className="text-[8px] font-black text-slate-600 uppercase tracking-[0.2em]">↓ 绝对防守</span>
-                <span className="text-xs font-black mono text-slate-400">3,118.2</span>
-             </div>
-          </section>
+
 
           {/* 4. Scroll Indicator */}
           <div className="flex flex-col items-center gap-1.5 pt-4 opacity-20">
