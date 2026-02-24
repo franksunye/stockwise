@@ -1,0 +1,63 @@
+name: Almanac - Manual Maintenance
+
+# 职责：手动生成或重跑历史黄历数据
+# 场景：数据错误、补跑缺席日期、或者重新应用全新的文案模板到历史数据
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: '任务模式'
+        required: true
+        type: choice
+        options:
+          - single-date # 单日
+          - date-range  # 日期范围
+      date:
+        description: '单日模式: 日期 (YYYY-MM-DD), 留空则为最新交易日'
+        required: false
+        type: string
+      start_date:
+        description: '范围模式: 开始日期 (YYYY-MM-DD)'
+        required: false
+        type: string
+      end_date:
+        description: '范围模式: 结束日期 (YYYY-MM-DD)'
+        required: false
+        type: string
+
+jobs:
+  almanac-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Run Almanac Generator
+        env:
+          PYTHONUNBUFFERED: "1"
+          TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+        run: |
+          if [ "${{ inputs.mode }}" == "single-date" ]; then
+            DATE_ARG=""
+            if [ -n "${{ inputs.date }}" ]; then
+              DATE_ARG="--date ${{ inputs.date }}"
+            fi
+            echo "🚀 Executing: python backend/engine/almanac_generator.py $DATE_ARG"
+            python -u backend/engine/almanac_generator.py $DATE_ARG
+          else
+            echo "🚀 Executing: python backend/engine/almanac_generator.py --start-date ${{ inputs.start_date }} --end-date ${{ inputs.end_date }}"
+            python -u backend/engine/almanac_generator.py --start-date ${{ inputs.start_date }} --end-date ${{ inputs.end_date }}
+          fi

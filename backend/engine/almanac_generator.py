@@ -317,8 +317,21 @@ def generate_almanac(target_date=None):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--date", help="Target date in YYYY-MM-DD", default=None)
+    parser.add_argument("--date", help="Single target date (YYYY-MM-DD)", default=None)
+    parser.add_argument("--start-date", help="Batch start date (YYYY-MM-DD)", default=None)
+    parser.add_argument("--end-date", help="Batch end date (YYYY-MM-DD)", default=None)
     args = parser.parse_args()
     
-    logger.info(f"🚀 Starting Rule-based Almanac Generator for {args.date or 'today'}")
-    generate_almanac(args.date)
+    if args.start_date and args.end_date:
+        start = datetime.strptime(args.start_date, "%Y-%m-%d")
+        end = datetime.strptime(args.end_date, "%Y-%m-%d")
+        current = start
+        logger.info(f"🚀 Starting Batch Almanac Generation: {args.start_date} to {args.end_date}")
+        while current <= end:
+            d_str = current.strftime("%Y-%m-%d")
+            # Only generate for days that have trading data (sh000001)
+            generate_almanac(d_str)
+            current += timedelta(days=1)
+    else:
+        logger.info(f"🚀 Starting Rule-based Almanac Generator for {args.date or 'latest data'}")
+        generate_almanac(args.date)
