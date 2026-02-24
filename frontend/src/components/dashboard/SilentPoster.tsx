@@ -98,8 +98,9 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
   const generateMarketingText = useCallback((activeStory: VisualStory) => {
     const signalText = prediction.signal === 'Long' ? '看多' : prediction.signal === 'Short' ? '看空' : '观望';
     const confidence = (prediction.confidence * 100).toFixed(0);
+    const weekday = new Date(prediction.target_date + 'T00:00:00').toLocaleDateString('zh-CN', { weekday: 'long' });
     
-    let text = `投资黄历 (${prediction.target_date})｜${stockName} (${prediction.symbol})\n\n`;
+    let text = `投资黄历 (${prediction.target_date} ${weekday})｜${stockName} (${prediction.symbol})\n\n`;
     text += `📜 核心：${activeStory.almanac}，气象 ${activeStory.aesthetic.mood}\n\n`;
     
     if (intelligence) {
@@ -334,7 +335,9 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
                 <div className="mb-2 flex flex-col items-center justify-center relative">
                    {prediction.target_date.includes('-') ? (
                      <>
-                       <div className="text-[10px] font-black text-slate-500/80 tracking-[0.4em] mb-1">{prediction.target_date.split('-')[0]}</div>
+                       <div className="text-[10px] font-black text-slate-500/80 tracking-[0.4em] mb-1">
+                         {prediction.target_date.split('-')[0]} · {new Date(prediction.target_date + 'T00:00:00').toLocaleDateString('zh-CN', { weekday: 'long' })}
+                       </div>
                        <div className="text-4xl font-black text-white tracking-tighter flex items-center leading-none" style={{ fontFamily: '"SF Pro Display", -apple-system, sans-serif' }}>
                          {prediction.target_date.split('-')[1]}
                          <span className="text-xl text-white/20 mx-1 font-light">/</span>

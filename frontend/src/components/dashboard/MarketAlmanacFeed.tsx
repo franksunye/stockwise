@@ -38,6 +38,8 @@ export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlma
   // Safely extract properties
   const targetDate = data?.target_date || new Date().toISOString().split('T')[0];
   const dateFormatted = targetDate.replace(/-/g, ' / ');
+  const weekday = new Date(targetDate + 'T00:00:00').toLocaleDateString('zh-CN', { weekday: 'long' });
+  const dateWithWeekday = `${dateFormatted} · ${weekday}`;
   const moodTag = data?.mood_tag || '混沌未明';
   const actionStrategy = data?.action_strategy || '宜：观望 / 忌：盲动';
   const meteorology = data?.meteorology || '微雨';
@@ -177,7 +179,7 @@ export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlma
           <section className="text-center space-y-2 py-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-2">
                <Sparkles className="w-3 h-3 text-indigo-400" />
-               <span className="text-[10px] font-black text-slate-500 tracking-[0.2em] uppercase">{dateFormatted}</span>
+               <span className="text-[10px] font-black text-slate-500 tracking-[0.2em] uppercase">{dateWithWeekday}</span>
             </div>
             
             <h2 className="text-5xl font-black italic tracking-tighter text-white drop-shadow-lg">
@@ -201,7 +203,7 @@ export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlma
                 <Shield className="w-2.5 h-2.5 text-indigo-400 fill-indigo-400/20" />
               </div>
               <h3 className="text-[10px] font-black text-slate-600 uppercase tracking-widest">
-                AI 市场天机 · GLOBAL INSIGHT
+                AI 市场天机
               </h3>
             </div>
             
@@ -217,7 +219,7 @@ export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlma
                <div>
                   <div className="flex items-center gap-1.5 mb-2">
                     <Waves className="w-3 h-3 text-indigo-400" />
-                    <h4 className="text-[9px] font-black text-slate-600 uppercase tracking-widest leading-none mt-0.5">板块洋流 · SECTORS</h4>
+                    <h4 className="text-[9px] font-black text-slate-600 uppercase tracking-widest leading-none mt-0.5">板块洋流</h4>
                   </div>
                   <div className="space-y-1.5 mb-2">
                      <div className="flex justify-between items-center bg-white/5 px-2 py-1 rounded">
@@ -245,7 +247,7 @@ export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlma
                <div>
                   <div className="flex items-center gap-1.5 mb-2">
                     <Target className="w-3 h-3 text-indigo-400" />
-                    <h4 className="text-[9px] font-black text-slate-600 uppercase tracking-widest leading-none mt-0.5">行动指南 · ACTION</h4>
+                    <h4 className="text-[9px] font-black text-slate-600 uppercase tracking-widest leading-none mt-0.5">行动指南</h4>
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
