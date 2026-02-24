@@ -202,28 +202,20 @@ function DashboardContent() {
             className="absolute left-1/2 transform -translate-x-1/2 top-4 cursor-pointer group flex flex-col items-center h-12 justify-center"
             onClick={() => !isMarketAlmanac && setProfileStock(currentStock)}
           >
-            <motion.div
-              animate={{ opacity: 1, y: 0 }}
-              key={isMarketAlmanac ? 'almanac-center' : `stock-${currentStock?.symbol}`}
-              initial={{ opacity: 0, y: 10 }}
-              transition={{ duration: 0.15 }}
-              className="flex flex-col items-center"
-            >
-              {isMarketAlmanac ? (
-                <h1 className="text-xl font-black italic tracking-tight text-white group-hover:text-indigo-400 transition-colors text-center drop-shadow-md">
-                  ZISO AI · 投资黄历
-                </h1>
-              ) : (
-                <>
-                  <h1 className="text-xl font-black italic tracking-tight text-white group-hover:text-indigo-400 transition-colors text-center">
-                    {currentStock?.name}
-                  </h1>
-                  <span className="text-[10px] font-black italic text-slate-500 tracking-widest uppercase mt-0.5 leading-none">
-                    {currentStock ? formatStockSymbol(currentStock.symbol) : ''}
-                  </span>
-                </>
-              )}
-            </motion.div>
+            <div className={`flex flex-col items-center transition-opacity duration-300 ${isMarketAlmanac ? 'opacity-100' : 'opacity-0 absolute pointer-events-none'}`}>
+               <h1 className="text-xl font-black italic tracking-tight text-white group-hover:text-indigo-400 transition-colors text-center drop-shadow-md">
+                 ZISO AI · 投资黄历
+               </h1>
+            </div>
+            
+            <div className={`flex flex-col items-center transition-opacity duration-300 ${!isMarketAlmanac ? 'opacity-100' : 'opacity-0 absolute pointer-events-none'}`}>
+               <h1 className="text-xl font-black italic tracking-tight text-white group-hover:text-indigo-400 transition-colors text-center">
+                 {currentStock?.name}
+               </h1>
+               <span className="text-[10px] font-black italic text-slate-500 tracking-widest uppercase mt-0.5 leading-none">
+                 {currentStock ? formatStockSymbol(currentStock.symbol) : ''}
+               </span>
+            </div>
           </div>
 
           {/* 右侧：Brief 入口 / 复制（黄历） */}
@@ -237,19 +229,12 @@ function DashboardContent() {
             }}
             className="w-10 h-10 rounded-[16px] bg-white/5 border border-white/10 flex items-center justify-center active:scale-90 transition-all hover:bg-white/10 group overflow-hidden relative"
           >
-            <motion.div
-              animate={{ opacity: 1, scale: 1 }}
-              key={isMarketAlmanac ? 'almanac-right' : 'stock-right'}
-              initial={{ opacity: 0, scale: 0.8 }}
-              transition={{ duration: 0.15 }}
-              className="absolute inset-0 flex items-center justify-center"
-            >
-              {isMarketAlmanac ? (
-                <Copy className="w-5 h-5 text-slate-400 group-hover:text-indigo-400 transition-colors" />
-              ) : (
-                <FileText className="w-5 h-5 text-slate-400 group-hover:text-indigo-400 transition-colors" />
-              )}
-            </motion.div>
+            <div className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${isMarketAlmanac ? 'opacity-100 scale-100' : 'opacity-0 scale-50 pointer-events-none'}`}>
+              <Copy className="w-5 h-5 text-slate-400 group-hover:text-indigo-400 transition-colors" />
+            </div>
+            <div className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${!isMarketAlmanac ? 'opacity-100 scale-100' : 'opacity-0 scale-50 pointer-events-none'}`}>
+              <FileText className="w-5 h-5 text-slate-400 group-hover:text-indigo-400 transition-colors" />
+            </div>
           </button>
         </div>
       </header>
