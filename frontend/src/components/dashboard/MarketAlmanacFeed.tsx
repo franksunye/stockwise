@@ -1,7 +1,6 @@
 import { memo, useRef, useImperativeHandle, forwardRef, useCallback, useState } from 'react';
 import { Share2, Copy, Shield, Sparkles, ChevronDown, Waves, Thermometer, Target, Zap, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { toPng } from 'html-to-image';
 import { MarketAlmanacData } from '@/lib/types';
 
 interface MarketAlmanacFeedProps {
@@ -74,6 +73,9 @@ export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlma
     };
 
     try {
+      // Lazy load html-to-image to keep initial bundle lite
+      const { toPng } = await import('html-to-image');
+      
       // Use pixelRatio >= 2 for Retina quality exports
       const dataUrl = await toPng(posterRef.current, { 
         cacheBust: true, 
@@ -111,36 +113,34 @@ export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlma
         return;
       }
 
-      // Detect iOS to bypass the "Preview" hurdle
-      const isIOS = typeof navigator !== 'undefined' && 
-                    (/iPad|iPhone|iPod/.test(navigator.userAgent) || 
-                    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1));
-
-      if (isIOS && navigator.canShare) {
-        try {
-          const response = await fetch(dataUrl);
-          const blob = await response.blob();
-          const file = new File([blob], `Market_Almanac_${targetDate.replace(/-/g, '')}.png`, { type: 'image/png' });
-          
-          if (navigator.canShare({ files: [file] })) {
-            await navigator.share({
-              files: [file],
-              title: '分享投资黄历',
-              text: generateMarketingText()
-            });
-            return;
-          }
-        } catch (err) {
-          console.error('iOS Share failed', err);
+      // Capability-First Sharing Strategy (Industrial Grade)
+      try {
+        const response = await fetch(dataUrl);
+        const blob = await response.blob();
+        const fileName = `Market_Almanac_${targetDate.replace(/-/g, '')}.png`;
+        const file = new File([blob], fileName, { type: 'image/png' });
+        
+        // If the browser supports native file sharing (Modern iOS & Android Chrome)
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: '知守 AI · 投资黄历',
+            text: generateMarketingText()
+          });
+          return;
         }
+      } catch (err) {
+        console.error('Priority Share failed, falling back to download', err);
       }
 
-      // Default Download Behavior
+      // Default Fallback: Download (Reliable for Desktop and older mobile browsers)
       const link = document.createElement('a');
       link.download = `Market_Almanac_${targetDate.replace(/-/g, '')}.png`;
       link.href = dataUrl;
+      document.body.appendChild(link);
       link.click();
-      showToast('黄历海报已下载！');
+      document.body.removeChild(link);
+      showToast('黄历海报已幻化完成！');
     }
   }), [generateMarketingText, targetDate, generateImage, isCapturing, showToast]);
 
@@ -277,7 +277,7 @@ export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlma
 
           {/* Loading Overlay (if captured) */}
           {isCapturing && (
-            <div className="absolute inset-0 z-[500] bg-black/80 backdrop-blur-sm flex items-center justify-center capture-hidden">
+            <div className="absolute inset-0 z-[500] bg-[#050508]/90 flex items-center justify-center capture-hidden border border-white/10 rounded-[32px]">
                <div className="flex flex-col items-center gap-3">
                   <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
                   <p className="text-sm font-black text-white italic tracking-widest">正在幻化意境图...</p>

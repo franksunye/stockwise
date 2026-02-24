@@ -3,7 +3,6 @@
 import React, { useRef, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Share2, Download, Wind, Shield, AlertTriangle, Loader2, Copy, Check } from 'lucide-react';
-import { toPng } from 'html-to-image';
 import { AIPrediction, TacticalData, VisualStory } from '@/lib/types';
 import { COLORS } from './constants';
 
@@ -135,7 +134,7 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
     // However, resetting to 1 during capture ensures perfect pixel alignment.
     const originalStyle = posterRef.current.style.transform;
     posterRef.current.style.transform = 'none';
-    
+
     // Filter out interactive elements from the generated image
     const filter = (node: HTMLElement) => {
       if (node.classList?.contains('capture-hidden')) {
@@ -145,10 +144,13 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
     };
 
     try {
-      // Use pixelRatio >= 2 for Retina quality exports
+      // Lazy load html-to-image as it's a heavy utility
+      const { toPng } = await import('html-to-image');
+      
       const dataUrl = await toPng(posterRef.current, { 
         cacheBust: true, 
-        pixelRatio: 2,
+        pixelRatio: 2, // Standardize for high-res social sharing
+        backgroundColor: '#050508',
         filter: filter as unknown as (domNode: HTMLElement) => boolean 
       });
       
@@ -156,6 +158,8 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
       posterRef.current.style.transform = originalStyle;
       return dataUrl;
     } catch (err) {
+      // Ensure transformation is restored even on error
+      if (posterRef.current) posterRef.current.style.transform = originalStyle;
       console.error('Failed to generate poster', err);
       return null;
     }
@@ -172,34 +176,34 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
       return;
     }
 
-    // Detect iOS to bypass the "Preview" hurdle
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-                  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-
-    if (isIOS && navigator.canShare) {
-      try {
-        const response = await fetch(dataUrl);
-        const blob = await response.blob();
-        const file = new File([blob], `ZISO_AI_${stockName.replace(/\s+/g, '_')}.png`, { type: 'image/png' });
-        
-        if (navigator.canShare({ files: [file] })) {
-          await navigator.share({
-            files: [file],
-            title: '保存投资黄历',
-          });
-          return;
-        }
-      } catch (err) {
-        console.error('iOS Share-to-Save failed', err);
+    // Capability-First Sharing Strategy (Industrial Grade)
+    try {
+      const response = await fetch(dataUrl);
+      const blob = await response.blob();
+      const fileName = `ZISO_AI_${stockName}_${prediction.target_date.replace(/-/g, '')}.png`;
+      const file = new File([blob], fileName, { type: 'image/png' });
+      
+      // If the browser supports native file sharing (Modern iOS & Android Chrome)
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: `ZISO AI · ${stockName}预测`,
+          text: `【知守 AI】替你做股市功课：${stockName} 投资意境解析。#知守AI #AI股票分析`
+        });
+        return;
       }
+    } catch (err) {
+      console.error('Priority share failed, falling back to download', err);
     }
 
-    // Default Download Behavior (PC/Android)
+    // Default Fallback: Download (Reliable for Desktop and older mobile browsers)
     const link = document.createElement('a');
     link.download = `ZISO_AI_${stockName}_${prediction.target_date.replace(/-/g, '')}.png`;
     link.href = dataUrl;
+    document.body.appendChild(link);
     link.click();
-    showToast('图片已准备好下载');
+    document.body.removeChild(link);
+    showToast('海报已幻化完成，请在朋友圈分享！');
   };
 
   const handleShare = async (activeStory: VisualStory) => {
