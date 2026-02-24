@@ -20,37 +20,63 @@ except ImportError:
     from logger import logger
     from backend.context.provider import MarketContextProvider
 
-def generate_almanac(target_date=None):
+def get_next_trading_day(current_date_str, cursor):
+    """Calculates the next business day, skipping weekends and holidays from DB."""
+    current_date = datetime.strptime(current_date_str, "%Y-%m-%d")
+    next_day = current_date + timedelta(days=1)
+    
+    while True:
+        # 1. Skip Weekends
+        if next_day.weekday() >= 5: # Sat=5, Sun=6
+            next_day += timedelta(days=1)
+            continue
+            
+        # 2. Skip Holidays defined in DB
+        d_str = next_day.strftime("%Y-%m-%d")
+        cursor.execute("SELECT 1 FROM market_holidays WHERE date = ?", (d_str,))
+        if cursor.fetchone():
+            next_day += timedelta(days=1)
+            continue
+            
+        break
+    return next_day.strftime("%Y-%m-%d")
+
+def generate_almanac(target_date=None, force_t_plus_1=True):
     """
     Rules-based Global Market Almanac Generator.
     Zero-LLM dependency for maximum determinism and speed.
+    Now defaults to T+1 (Predictive Mode).
     """
     conn = get_connection()
     try:
         cursor = conn.cursor()
         
-        if not target_date:
-            # Check for the latest data across A-share and HK proxies
-            # This ensures we pick today if HK has resumed, even if CN is still on holiday
-            cursor.execute("SELECT MAX(date) FROM daily_prices WHERE symbol IN ('sh000001', '00700')")
-            row = cursor.fetchone()
-            if row and row[0]:
-                target_date = row[0]
-            else:
-                # Fallback to current calendar date (HK/CN Time)
-                target_date = (datetime.now() + timedelta(hours=8)).strftime("%Y-%m-%d")
+        # 0. Detect actual price context date (Latest market close)
+        cursor.execute("SELECT MAX(date) FROM daily_prices WHERE symbol IN ('sh000001', '00700')")
+        price_row = cursor.fetchone()
+        actual_price_date = price_row[0] if (price_row and price_row[0]) else (datetime.now() + timedelta(hours=8)).strftime("%Y-%m-%d")
 
-        # --- 1. Fetch Entropy (Volume & Breadth) --- #
+        # 1. Determine Target Date (The day this almanac applies to)
+        # If not provided, we predict for the NEXT trading day (T+1)
+        if not target_date:
+            if force_t_plus_1:
+                target_date = get_next_trading_day(actual_price_date, cursor)
+            else:
+                target_date = actual_price_date
+        
+        logger.info(f"🚀 Generating Almanac for Target Date: {target_date} (Using data context from {actual_price_date})")
+
+        # --- 2. Fetch Entropy (Volume & Breadth) --- #
         # We use sh000001 as the volume proxy for market entropy
         cursor.execute("""
             SELECT date, volume FROM daily_prices 
             WHERE symbol = 'sh000001' AND date <= ? 
             ORDER BY date DESC LIMIT 6
-        """, (target_date,))
+        """, (actual_price_date,))
         rows = cursor.fetchall()
         
         if not rows:
-            logger.warning(f"No valid trading data for proxy sh000001 on or before {target_date}.")
+            logger.warning(f"No valid trading data for proxy sh000001 on or before {actual_price_date}.")
             return False
 
         # If the latest data date doesn't match target_date exactly (e.g. holiday or morning run), 
