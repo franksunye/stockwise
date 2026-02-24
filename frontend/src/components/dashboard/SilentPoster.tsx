@@ -104,7 +104,7 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
     text += `📜 核心：${activeStory.almanac}，气象 ${activeStory.aesthetic.mood}\n\n`;
     
     if (intelligence) {
-      text += `🔍 天机：${intelligence}\n`;
+      text += `🔍 天机：${intelligence}${activeStory.wisdom ? ' ' + activeStory.wisdom : ''}\n`;
     }
     if (tacticStr) {
       text += `💡 锦囊：${tacticStr}\n`;
@@ -250,15 +250,15 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
 
   // Fallback if visual story is missing (for older data)
   const defaultStory: VisualStory = {
-    token: prediction?.signal === 'Long' ? '能量涌现' : prediction?.signal === 'Short' ? '暗影规避' : '静水深流',
-    almanac: prediction?.signal === 'Long' ? '宜：顺势而为' : prediction?.signal === 'Short' ? '忌：盲目抄底' : '宜：静待时机',
+    token: prediction?.signal === 'Long' ? (prediction.confidence >= 0.8 ? '能量涌现' : '微光潜行') : prediction?.signal === 'Short' ? '暗影规避' : '静水深流',
+    almanac: prediction?.signal === 'Long' ? '宜：顺势而为 / 忌：恐高做空' : prediction?.signal === 'Short' ? '忌：盲目抄底 / 宜：岸边观火' : '宜：静待时机 / 忌：盲动乱序',
     visual_state: 'stable',
     aesthetic: {
       hue: prediction?.signal === 'Long' ? 'indigo-emerald' : prediction?.signal === 'Short' ? 'rose-slate' : 'slate-gray',
       mood: prediction?.signal === 'Long' ? '微光' : prediction?.signal === 'Short' ? '阴云' : '晨雾',
       dynamic_clues: []
     },
-    meta_version: 'v1-fallback'
+    meta_version: 'v4-fallback'
   };
 
   const activeStory = story || defaultStory;
@@ -417,7 +417,12 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
                    {intelligence && (
                      <div className="px-2.5 py-2 rounded-xl bg-white/5 border border-white/5 backdrop-blur-md flex gap-1.5 items-start shadow-sm">
                         <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest shrink-0 mt-[3px]">【天机】</span>
-                        <p className="text-[10px] text-slate-400 font-medium leading-[1.4] tracking-wider line-clamp-2">{intelligence}</p>
+                        <div className="flex flex-col gap-0.5">
+                           <p className="text-[10px] text-slate-400 font-medium leading-[1.4] tracking-wider line-clamp-2">{intelligence}</p>
+                           {activeStory.wisdom && (
+                             <p className="text-[9px] text-slate-500 italic font-bold leading-[1.4] tracking-wider animate-in fade-in slide-in-from-bottom-1 duration-700">{activeStory.wisdom}</p>
+                           )}
+                        </div>
                      </div>
                    )}
 

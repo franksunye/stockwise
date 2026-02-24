@@ -92,6 +92,7 @@ export interface VisualStory {
     token: string;
     almanac: string;
     visual_state: string;
+    wisdom?: string;
     aesthetic: {
         hue: string;
         mood: string;
