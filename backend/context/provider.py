@@ -201,20 +201,39 @@ class MarketContextProvider:
                     # columns: 日期, 当日成交净买额, ...
                     latest = df_north.iloc[-1]
                     val = latest['当日成交净买额']
-                    if pd.notna(val):
-                        try:
-                            val_float = float(val)
-                            # Check for NaN again just in case
-                            if val_float != val_float: # Is NaN
-                                north_val = "N/A"
-                            elif abs(val_float) > 10000: 
-                                 # Unit usually RMB Yuan. 10亿 = 1,000,000,000
-                                 val_b = val_float / 100000000
-                                 north_val = f"{val_b:+.2f}亿"
-                            else:
-                                 north_val = f"{val_float:+.2f}"
-                        except:
-                            north_val = str(val)
+                else:
+                    # Fallback to HSGT summary
+                    logger.warning("Northbound hist empty, trying summary fallback...")
+                    df_north_sum = self._safe_ak_fetch(ak.stock_hsgt_fund_flow_summary_em)
+                    if not df_north_sum.empty:
+                        # Find "北向" row for latest day
+                        latest_row = df_north_sum[df_north_sum['资金方向'] == '北向'].head(2) # Sometimes latest is not the first row
+                        if not latest_row.empty:
+                            # Sum up "沪股通" and "深股通" for latest day if separate
+                            # Or just take the first matching if aggregated
+                            val = latest_row['成交净买额'].sum()
+                        else:
+                            raise ValueError("No Northbound data in summary")
+                    else:
+                        raise ValueError("Northbound summary empty")
+
+                if pd.notna(val):
+                    try:
+                        val_float = float(val)
+                        # Check for NaN again just in case
+                        if val_float != val_float: # Is NaN
+                            north_val = "N/A"
+                        elif abs(val_float) < 200: 
+                             # Unit might be 100M (亿) already in summary/EM
+                             north_val = f"{val_float:+.2f}亿"
+                        elif abs(val_float) > 10000: 
+                             # Unit usually RMB Yuan. 10亿 = 1,000,000,000
+                             val_b = val_float / 100000000
+                             north_val = f"{val_b:+.2f}亿"
+                        else:
+                             north_val = f"{val_float:+.2f}"
+                    except:
+                        north_val = str(val)
             except Exception as e:
                 logger.warning(f"Northbound fetch failed: {e}")
                 
@@ -254,44 +273,114 @@ class MarketContextProvider:
                     # Try raw fallback if AkShare returns empty but didn't throw
                     raise ValueError("AkShare returned empty sector data")
             except Exception as e:
-                logger.warning(f"Sector flow fetch failed (Attempt 1): {e}. Trying raw direct fetch...")
+                logger.warning(f"Sector flow fetch failed (Attempt 1 - EM): {e}. Trying Attempt 2 (THS)...")
                 try:
-                    # Final High-Quality Fallback: Manual direct fetch bypassing everything
-                    import requests
-                    import json
-                    url = "http://push2.eastmoney.com/api/qt/clist/get?pn=1&pz=50&po=1&np=1&ut=b2884a393a59ad64002292a3e90d46a5&fltt=2&invt=2&fid0=f62&fs=m%3A90+t%3A2&stat=1&fields=f12%2Cf14%2Cf62&rt=52975239"
-                    
-                    # Force a clean session with no proxies
-                    session = requests.Session()
-                    session.trust_env = False 
-                    
-                    r = session.get(url, timeout=10, proxies={'http': None, 'https': None}, headers={
-                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-                        "Referer": "https://quote.eastmoney.com/"
-                    })
-                    
-                    if r.status_code == 200:
-                        data = r.json()
-                        diff = data.get('data', {}).get('diff', [])
-                        if diff:
-                            # Sort by f62 (Capital Flow)
-                            sorted_diff = sorted(diff, key=lambda x: x.get('f62', 0) if x.get('f62') else 0, reverse=True)
-                            
-                            def fmt_item(item):
-                                name = item.get('f14', '未知')
-                                f = item.get('f62', 0)
-                                if abs(f) > 100000000: flow = f'{f/100000000:+.2f}亿'
-                                elif abs(f) > 10000: flow = f'{f/10000:+.1f}万'
-                                else: flow = f'{f:+.0f}'
-                                return f"{name}({flow})"
+                    df_ths = self._safe_ak_fetch(ak.stock_fund_flow_industry, symbol="即时")
+                    if not df_ths.empty:
+                        df_ths['net_inflow'] = pd.to_numeric(df_ths['净额'], errors='coerce')
+                        df_sorted = df_ths.dropna(subset=['net_inflow']).sort_values('net_inflow', ascending=False)
+                        
+                        def fmt_ths(row):
+                            name = row.get('行业', '')
+                            flow = row.get('net_inflow', 0)
+                            return f"{name}({flow:+.2f}亿)" if name else ""
 
-                            for item in sorted_diff[:3]:
-                                top_inflow.append(fmt_item(item))
-                            for item in sorted_diff[-2:]:
-                                top_outflow.append(fmt_item(item))
-                            logger.info(f"✅ Raw Direct Fetch Succeeded: {len(top_inflow)} inflows found.")
-                except Exception as raw_e:
-                    logger.error(f"❌ All sector flow attempts failed: {raw_e}")
+                        for _, row in df_sorted.head(3).iterrows():
+                            s = fmt_ths(row)
+                            if s: top_inflow.append(s)
+                            
+                        for _, row in df_sorted.tail(2).iterrows():
+                            s = fmt_ths(row)
+                            if s: top_outflow.append(s)
+                        
+                        logger.info(f"✅ THS Flow Direct Fetch Succeeded: {len(top_inflow)} inflows found.")
+                    else:
+                        raise ValueError("THS returned empty")
+                except Exception as ths_e:
+                    logger.warning(f"Sector flow fetch failed (Attempt 2 - THS): {ths_e}. Trying Attempt 3 (Northbound Rank)...")
+                    try:
+                        # Attempt 3: Northbound Sector Flow (often available when main is blocked)
+                        df_nb = self._safe_ak_fetch(ak.stock_hsgt_board_rank_em, symbol="北向资金增持行业板块排行", indicator="今日")
+                        if not df_nb.empty:
+                            def fmt_nb(row):
+                                name = row.get('名称', '') or row.get('板块', '')
+                                flow = row.get('今日增持估计-市值') or row.get('成交净买额')
+                                if flow is not None:
+                                    try:
+                                        f = float(flow)
+                                        if abs(f) > 100000000: flow_s = f'{f/100000000:+.2f}亿'
+                                        elif abs(f) > 10000: flow_s = f'{f/10000:+.1f}万'
+                                        else: flow_s = f'{f:+.0f}'
+                                        return f"{name}({flow_s})"
+                                    except: pass
+                                return name
+                            
+                            for _, row in df_nb.head(3).iterrows():
+                                top_inflow.append(fmt_nb(row))
+                            for _, row in df_nb.tail(2).iterrows():
+                                top_outflow.append(fmt_nb(row))
+                            logger.info(f"✅ Northbound Sector Rank Succeeded: {len(top_inflow)} inflows found.")
+                        else:
+                            raise ValueError("Northbound Rank returned empty")
+                    except Exception as nb_e:
+                        logger.warning(f"Sector flow fetch failed (Attempt 3 - NB): {nb_e}. Trying raw direct fetch...")
+                        try:
+                            # Final High-Quality Fallback: Manual direct fetch bypassing everything
+                            import requests
+                            import json
+                            url = "http://push2.eastmoney.com/api/qt/clist/get?pn=1&pz=50&po=1&np=1&ut=b2884a393a59ad64002292a3e90d46a5&fltt=2&invt=2&fid0=f62&fs=m%3A90+t%3A2&stat=1&fields=f12%2Cf14%2Cf62&rt=52975239"
+                            
+                            # Try HTTPS as well
+                            try:
+                                # Force a clean session with no proxies
+                                session = requests.Session()
+                                session.trust_env = False 
+                                
+                                r = session.get(url, timeout=10, proxies={'http': None, 'https': None}, headers={
+                                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                                    "Referer": "https://quote.eastmoney.com/"
+                                })
+                                
+                                if r.status_code != 200:
+                                    # Try HTTPS
+                                    r = session.get(url.replace("http://", "https://"), timeout=10, proxies={'http': None, 'https': None}, headers={
+                                        "User-Agent": "Mozilla/5.0",
+                                        "Referer": "https://quote.eastmoney.com/"
+                                    })
+
+                                if r.status_code == 200:
+                                    data = r.json()
+                                    diff = data.get('data', {}).get('diff', [])
+                                    if diff:
+                                        # Sort by f62 (Capital Flow)
+                                        sorted_diff = sorted(diff, key=lambda x: x.get('f62', 0) if x.get('f62') else 0, reverse=True)
+                                        
+                                        def fmt_item(item):
+                                            name = item.get('f14', '未知')
+                                            f = item.get('f62', 0)
+                                            if abs(f) > 100000000: flow = f'{f/100000000:+.2f}亿'
+                                            elif abs(f) > 10000: flow = f'{f/10000:+.1f}万'
+                                            else: flow = f'{f:+.0f}'
+                                            return f"{name}({flow})"
+
+                                        for item in sorted_diff[:3]:
+                                            top_inflow.append(fmt_item(item))
+                                        for item in sorted_diff[-2:]:
+                                            top_outflow.append(fmt_item(item))
+                                        logger.info(f"✅ Raw Direct Fetch Succeeded: {len(top_inflow)} inflows found.")
+                                    else:
+                                        # One last try: Broad Market Flow (Better than nothing)
+                                        logger.warning("Still no sector flow, falling back to broad market flow...")
+                                        df_m = self._safe_ak_fetch(ak.stock_market_fund_flow)
+                                        if not df_m.empty:
+                                            latest = df_m.iloc[-1]
+                                            m_flow = latest.get('主力净流入-净额', 0)
+                                            s_flow = f'{m_flow/100000000:+.1f}亿' if abs(m_flow) > 100000000 else str(m_flow)
+                                            top_inflow.append(f"全市场主力({s_flow})")
+                            except Exception as bypass_e:
+                                logger.error(f"❌ Raw bypass failed: {bypass_e}")
+                        except Exception as raw_e:
+                            logger.error(f"❌ All sector flow attempts failed: {raw_e}")
 
             result = {
                 "northbound_net_inflow": north_val,
