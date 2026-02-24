@@ -183,12 +183,10 @@ const AlmanacCard = memo(function AlmanacCard({
         )}
 
         {idx === 0 && (
-          <section className="text-center pt-8 pb-4 capture-hidden">
-            <p className="text-[10px] font-black italic text-slate-700 uppercase tracking-widest flex items-center justify-center gap-2">
-              上滑查看历史黄历
-              <ChevronDown className="w-3 h-3 opacity-30" />
-            </p>
-          </section>
+          <div className="flex flex-col items-center gap-1.5 pt-2 opacity-20 capture-hidden">
+            <span className="text-[10px] font-black tracking-[0.2em] text-slate-500 uppercase">上滑查看历史黄历</span>
+            <ChevronDown size={14} className="animate-bounce" />
+          </div>
         )}
       </div>
     </div>
