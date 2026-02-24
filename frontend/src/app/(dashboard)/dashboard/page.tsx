@@ -67,6 +67,12 @@ function DashboardContent() {
     ];
   }, [stocks, almanacs, almanac]);
 
+  const scrollOptions = useMemo(() => ({
+    onOverscrollRight: () => setUserCenterOpen(true),
+    // 简化交互：左边缘右滑直接进入更完整的"监控池页面"，替代原本的简易浮层
+    onOverscrollLeft: () => router.push('/dashboard/stock-pool')
+  }), [router]);
+
   const {
     currentIndex,
     scrollRef,
@@ -75,11 +81,7 @@ function DashboardContent() {
     handleVerticalScroll,
     backToTopCounter,
     scrollToToday
-  } = useTikTokScroll(displayStocks, {
-    onOverscrollRight: () => setUserCenterOpen(true),
-    // 简化交互：左边缘右滑直接进入更完整的"监控池页面"，替代原本的简易浮层
-    onOverscrollLeft: () => router.push('/dashboard/stock-pool')
-  });
+  } = useTikTokScroll(displayStocks, scrollOptions);
 
   const [selectedTactics, setSelectedTactics] = useState<{ symbol: string; prediction: AIPrediction } | null>(null);
   const [profileStock, setProfileStock] = useState<StockData | null>(null);
@@ -147,16 +149,18 @@ function DashboardContent() {
 
   return (
     <main className="fixed inset-0 bg-[#050508] text-white overflow-hidden select-none font-sans">
-      {/* 动态背景辉光: 移除 key 和 AnimatePresence 以避免滑动时的 GPU 销毁重建 */}
+      {/* 动态背景辉光: 使用径向渐变代替原生 blur，极大降低 iOS 上的 GPU/渲染负担 */}
       <motion.div 
-        animate={{ 
-          opacity: 0.1,
-          backgroundColor: isMarketAlmanac ? '#4F46E5' : // Indigo for Almanac
-                          currentStock?.prediction?.signal === 'Long' ? COLORS.up : 
-                          currentStock?.prediction?.signal === 'Short' ? COLORS.down : COLORS.hold
-        }}
+        animate={{ opacity: 0.15 }}
         transition={{ duration: 0.3 }}
-        className="fixed inset-0 pointer-events-none blur-[150px] scale-150"
+        className="fixed inset-0 pointer-events-none scale-150"
+        style={{
+          background: `radial-gradient(circle at 50% 50%, ${
+            isMarketAlmanac ? '#4F46E5' : // Indigo
+            currentStock?.prediction?.signal === 'Long' ? COLORS.up : 
+            currentStock?.prediction?.signal === 'Short' ? COLORS.down : COLORS.hold
+          } 0%, transparent 70%)`
+        }}
       />
 
       {/* Header */}

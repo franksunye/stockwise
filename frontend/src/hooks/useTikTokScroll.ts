@@ -27,7 +27,7 @@ export function useTikTokScroll(stocks: StockData[], options?: UseTikTokScrollOp
     const isAtLeftEdge = useRef<boolean>(true);  // 默认在左边缘
 
     // 处理横向滚动 (切股)
-    const handleScroll = () => {
+    const handleScroll = useCallback(() => {
         if (!scrollRef.current) return;
         const scrollLeft = scrollRef.current.scrollLeft;
         const width = scrollRef.current.clientWidth;
@@ -35,9 +35,9 @@ export function useTikTokScroll(stocks: StockData[], options?: UseTikTokScrollOp
 
         if (width <= 0) return;
 
-        // 1. 索引切换逻辑：增加阈值，避免在 50% 位置反复横跳
+        // 1. 索引切换逻辑：增加阈值，避免在 50% 位置反复横跳，并严格限制边界防止 iOS 橡皮筋效应导致越界 (-1 或超过长度)
         const fractionalIndex = scrollLeft / width;
-        const newIndex = Math.round(fractionalIndex);
+        const newIndex = Math.max(0, Math.min(Math.round(fractionalIndex), stocks.length - 1));
 
         if (newIndex !== currentIndex) {
             setCurrentIndex(newIndex);
@@ -54,7 +54,7 @@ export function useTikTokScroll(stocks: StockData[], options?: UseTikTokScrollOp
         const maxScrollLeft = scrollWidth - width;
         isAtRightEdge.current = scrollLeft >= maxScrollLeft - 5;
         isAtLeftEdge.current = scrollLeft <= 5;
-    };
+    }, [currentIndex, isSnapped, stocks.length]);
 
     // 处理触摸开始
     const handleTouchStart = useCallback((e: TouchEvent) => {
