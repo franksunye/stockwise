@@ -118,9 +118,18 @@ class LLMRegistry:
     def _resolve_config(cls, model: Dict) -> Dict[str, str]:
         """Resolve a model's config_json, replacing env-var references with actual values."""
         config = json.loads(model.get('config_json') or '{}')
+        
+        # Resolve base_url: env var takes priority, then static config fallback
+        base_url = None
+        base_url_env = config.get('base_url_env')
+        if base_url_env:
+            base_url = os.getenv(base_url_env)  # None if not set, '' if set but empty
+        if not base_url:
+            base_url = config.get('base_url', '')
+        
         return {
             'model': config.get('model', ''),
-            'base_url': config.get('base_url') or os.getenv(config.get('base_url_env', ''), ''),
+            'base_url': base_url,
             'api_key': os.getenv(config.get('api_key_env', ''), ''),
         }
 

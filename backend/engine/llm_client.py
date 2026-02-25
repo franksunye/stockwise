@@ -61,7 +61,7 @@ class LLMClient:
 
         # 2. 从 LLM_CONFIG 获取基础配置
         # 注意：现在大部分参数由 LLMRegistry 从数据库解析后直接传入
-        self.base_url = base_url or LLM_CONFIG.get("base_url")
+        self.base_url = base_url or LLM_CONFIG.get("base_url") or ""
         self.api_key = api_key or LLM_CONFIG.get("api_key") or ""
         self.model = model or LLM_CONFIG.get("model")
         
