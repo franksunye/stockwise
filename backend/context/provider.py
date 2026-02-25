@@ -1,11 +1,13 @@
-
 """
 Market Context Provider
 Integration with AkShare for Macro and Capital Flow Data.
 """
+import logging
+import time
+import random
 import akshare as ak
 import pandas as pd
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 from datetime import datetime
 import threading
 from backend.logger import logger
@@ -50,47 +52,32 @@ class MarketContextProvider:
 
     def _safe_ak_fetch(self, func, *args, **kwargs):
         """
-        Executes an AkShare function with a retry mechanism that handles 
-        ProxyErrors/SSLErrors by attempting a direct connection.
+        Executes an AkShare function with a robust retry mechanism.
+        Focuses on handling transient network failures with exponential backoff.
         """
-        import os
-        import time
-        from requests.exceptions import ProxyError, ConnectionError, SSLError
+        # Uses module-level time/random imports
         
         max_retries = 2
+        base_delay = 1.0
+        
         for i in range(max_retries + 1):
             try:
-                # First attempt: use standard akshare call (respects env proxies)
+                # Direct call. Proxy handling is now managed globally if needed.
                 return func(*args, **kwargs)
-            except (ProxyError, ConnectionError, SSLError, Exception) as e:
-                if i < max_retries:
-                    err_msg = str(e).lower()
-                    is_network_issue = any(x in err_msg for x in ["proxy", "ssleof", "remote end closed", "connection aborted", "max retries"])
-                    
-                    if is_network_issue:
-                        logger.warning(f"⚠️  AkShare Connection Issue (Attempt {i+1}): {e}. Retrying with direct connection bypass...")
-                        
-                        # Temporarily clear proxies for this retry
-                        old_http = os.environ.get("HTTP_PROXY")
-                        old_https = os.environ.get("HTTPS_PROXY")
-                        os.environ.pop("HTTP_PROXY", None)
-                        os.environ.pop("HTTPS_PROXY", None)
-                        
-                        try:
-                            # Small delay
-                            time.sleep(0.5)
-                            return func(*args, **kwargs)
-                        except Exception as retry_err:
-                            logger.error(f"❌ Direct bypass failed: {retry_err}")
-                            if i == max_retries - 1: raise retry_err
-                        finally:
-                            # Restore proxies 
-                            if old_http: os.environ["HTTP_PROXY"] = old_http
-                            if old_https: os.environ["HTTPS_PROXY"] = old_https
-                    else:
-                        time.sleep(1)
-                        continue
+            except Exception as e:
+                err_msg = str(e).lower()
+                # Determine if it's a retryable network error
+                is_retryable = any(x in err_msg for x in [
+                    "timeout", "remote end closed", "connection aborted", 
+                    "connection reset", "max retries", "connectionerror"
+                ])
+                
+                if i < max_retries and is_retryable:
+                    delay = base_delay * (2 ** i) + random.uniform(0, 0.5)
+                    logger.warning(f"⚠️  AkShare Fetch Retrying ({i+1}/{max_retries}) due to: {type(e).__name__}. Waiting {delay:.1f}s...")
+                    time.sleep(delay)
                 else:
+                    # Final attempt or non-retryable error
                     raise e
 
     def get_macro_context(self) -> Dict[str, Any]:
@@ -98,10 +85,9 @@ class MarketContextProvider:
         Fetch core macro indicators.
         Cache TTL: 24 hours (Macro data changes slowly)
         """
-        # (This is sync usually but being called async in integration? No it's sync. Provider is sync.)
         self._stats["macro_attempts"] += 1
         
-        # [DEBUG] Force clear cache if nasdaq is missing to ensure it gets updated in the first run
+        # Invalidate stale cache missing nasdaq field (one-time migration guard)
         if self._cache["macro"]["data"] and "nasdaq" not in self._cache["macro"]["data"]:
             self._cache["macro"]["data"] = None
 
@@ -184,217 +170,79 @@ class MarketContextProvider:
     def get_market_flow_context(self) -> Dict[str, Any]:
         """
         Fetch market-wide capital flows (Northbound, Sector).
-        Cache TTL: 1 hour (Intraday changes)
+        Optimized to use the most stable domestic sources (THS/HSGT Summary).
         """
         self._stats["market_flow_attempts"] += 1
         
         if self._is_cache_valid(self._cache["market_flow"], 3600):
             return self._cache["market_flow"]["data"]
 
-        logger.info("📡 Fetching Market Flow Data from AkShare...")
+        logger.info("📡 Fetching Market Flow Data (Stable Route)...")
+        
+        north_val = "N/A"
+        top_inflow = []
+        top_outflow = []
+
+        # 1. Northbound (Smart Money) - Use Summary API (More stable than Hist/Rank)
         try:
-            # 1. Northbound (Smart Money)
-            north_val = "N/A"
-            try:
-                df_north = self._safe_ak_fetch(ak.stock_hsgt_hist_em, symbol="北向资金")
-                if not df_north.empty:
-                    # columns: 日期, 当日成交净买额, ...
-                    latest = df_north.iloc[-1]
-                    val = latest['当日成交净买额']
-                else:
-                    # Fallback to HSGT summary
-                    logger.warning("Northbound hist empty, trying summary fallback...")
-                    df_north_sum = self._safe_ak_fetch(ak.stock_hsgt_fund_flow_summary_em)
-                    if not df_north_sum.empty:
-                        # Find "北向" row for latest day
-                        latest_row = df_north_sum[df_north_sum['资金方向'] == '北向'].head(2) # Sometimes latest is not the first row
-                        if not latest_row.empty:
-                            # Sum up "沪股通" and "深股通" for latest day if separate
-                            # Or just take the first matching if aggregated
-                            val = latest_row['成交净买额'].sum()
-                        else:
-                            raise ValueError("No Northbound data in summary")
+            df_north = self._safe_ak_fetch(ak.stock_hsgt_fund_flow_summary_em)
+            if not df_north.empty:
+                # Filter for '北向' rows
+                north_rows = df_north[df_north['资金方向'] == '北向']
+                if not north_rows.empty:
+                    # Sum '成交净买额' (Units: 100M / 亿)
+                    val = north_rows['成交净买额'].sum()
+                    if pd.notna(val) and val != 0:
+                        north_val = f"{float(val):+.2f}亿"
                     else:
-                        raise ValueError("Northbound summary empty")
-
-                if pd.notna(val):
-                    try:
-                        val_float = float(val)
-                        # Check for NaN again just in case
-                        if val_float != val_float: # Is NaN
-                            north_val = "N/A"
-                        elif abs(val_float) < 200: 
-                             # Unit might be 100M (亿) already in summary/EM
-                             north_val = f"{val_float:+.2f}亿"
-                        elif abs(val_float) > 10000: 
-                             # Unit usually RMB Yuan. 10亿 = 1,000,000,000
-                             val_b = val_float / 100000000
-                             north_val = f"{val_b:+.2f}亿"
-                        else:
-                             north_val = f"{val_float:+.2f}"
-                    except:
-                        north_val = str(val)
-            except Exception as e:
-                logger.warning(f"Northbound fetch failed: {e}")
-                
-            # 2. Sector Flows (Inflow & Outflow)
-            top_inflow = []
-            top_outflow = []
-            try:
-                df_sector = self._safe_ak_fetch(ak.stock_sector_fund_flow_rank, indicator="今日", sector_type="行业资金流")
-                if not df_sector.empty:
-                    # Sector flow rank returns sorted by net inflow (usually)
-                    
-                    def fmt_row(row):
-                        name = row.get('名称', '')
-                        flow = None
-                        for field in ['今日主力净流入-净额', '今日主力净流入', '今日主力净流入-净额量', '净流入']:
-                            val = row.get(field)
-                            if val is not None and str(val).lower() != 'nan':
-                                flow = val
-                                break
-                        if flow is not None and not isinstance(flow, str):
-                            try:
-                                v = float(flow)
-                                if abs(v) > 100000000: flow = f'{v/100000000:+.2f}亿'
-                                elif abs(v) > 10000: flow = f'{v/10000:+.1f}万'
-                                else: flow = f'{v:+.0f}'
-                            except: flow = str(flow)
-                        return f"{name}({flow})" if flow else name
-
-                    # Top 3 Inflow
-                    for _, row in df_sector.head(3).iterrows():
-                        top_inflow.append(fmt_row(row))
-                    
-                    # Top 2 Outflow (Last rows)
-                    for _, row in df_sector.tail(2).iterrows():
-                        top_outflow.append(fmt_row(row))
-                else:
-                    # Try raw fallback if AkShare returns empty but didn't throw
-                    raise ValueError("AkShare returned empty sector data")
-            except Exception as e:
-                logger.warning(f"Sector flow fetch failed (Attempt 1 - EM): {e}. Trying Attempt 2 (THS)...")
-                try:
-                    df_ths = self._safe_ak_fetch(ak.stock_fund_flow_industry, symbol="即时")
-                    if not df_ths.empty:
-                        df_ths['net_inflow'] = pd.to_numeric(df_ths['净额'], errors='coerce')
-                        df_sorted = df_ths.dropna(subset=['net_inflow']).sort_values('net_inflow', ascending=False)
-                        
-                        def fmt_ths(row):
-                            name = row.get('行业', '')
-                            flow = row.get('net_inflow', 0)
-                            return f"{name}({flow:+.2f}亿)" if name else ""
-
-                        for _, row in df_sorted.head(3).iterrows():
-                            s = fmt_ths(row)
-                            if s: top_inflow.append(s)
-                            
-                        for _, row in df_sorted.tail(2).iterrows():
-                            s = fmt_ths(row)
-                            if s: top_outflow.append(s)
-                        
-                        logger.info(f"✅ THS Flow Direct Fetch Succeeded: {len(top_inflow)} inflows found.")
-                    else:
-                        raise ValueError("THS returned empty")
-                except Exception as ths_e:
-                    logger.warning(f"Sector flow fetch failed (Attempt 2 - THS): {ths_e}. Trying Attempt 3 (Northbound Rank)...")
-                    try:
-                        # Attempt 3: Northbound Sector Flow (often available when main is blocked)
-                        df_nb = self._safe_ak_fetch(ak.stock_hsgt_board_rank_em, symbol="北向资金增持行业板块排行", indicator="今日")
-                        if not df_nb.empty:
-                            def fmt_nb(row):
-                                name = row.get('名称', '') or row.get('板块', '')
-                                flow = row.get('今日增持估计-市值') or row.get('成交净买额')
-                                if flow is not None:
-                                    try:
-                                        f = float(flow)
-                                        if abs(f) > 100000000: flow_s = f'{f/100000000:+.2f}亿'
-                                        elif abs(f) > 10000: flow_s = f'{f/10000:+.1f}万'
-                                        else: flow_s = f'{f:+.0f}'
-                                        return f"{name}({flow_s})"
-                                    except: pass
-                                return name
-                            
-                            for _, row in df_nb.head(3).iterrows():
-                                top_inflow.append(fmt_nb(row))
-                            for _, row in df_nb.tail(2).iterrows():
-                                top_outflow.append(fmt_nb(row))
-                            logger.info(f"✅ Northbound Sector Rank Succeeded: {len(top_inflow)} inflows found.")
-                        else:
-                            raise ValueError("Northbound Rank returned empty")
-                    except Exception as nb_e:
-                        logger.warning(f"Sector flow fetch failed (Attempt 3 - NB): {nb_e}. Trying raw direct fetch...")
-                        try:
-                            # Final High-Quality Fallback: Manual direct fetch bypassing everything
-                            import requests
-                            import json
-                            url = "http://push2.eastmoney.com/api/qt/clist/get?pn=1&pz=50&po=1&np=1&ut=b2884a393a59ad64002292a3e90d46a5&fltt=2&invt=2&fid0=f62&fs=m%3A90+t%3A2&stat=1&fields=f12%2Cf14%2Cf62&rt=52975239"
-                            
-                            # Try HTTPS as well
-                            try:
-                                # Force a clean session with no proxies
-                                session = requests.Session()
-                                session.trust_env = False 
-                                
-                                r = session.get(url, timeout=10, proxies={'http': None, 'https': None}, headers={
-                                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-                                    "Referer": "https://quote.eastmoney.com/"
-                                })
-                                
-                                if r.status_code != 200:
-                                    # Try HTTPS
-                                    r = session.get(url.replace("http://", "https://"), timeout=10, proxies={'http': None, 'https': None}, headers={
-                                        "User-Agent": "Mozilla/5.0",
-                                        "Referer": "https://quote.eastmoney.com/"
-                                    })
-
-                                if r.status_code == 200:
-                                    data = r.json()
-                                    diff = data.get('data', {}).get('diff', [])
-                                    if diff:
-                                        # Sort by f62 (Capital Flow)
-                                        sorted_diff = sorted(diff, key=lambda x: x.get('f62', 0) if x.get('f62') else 0, reverse=True)
-                                        
-                                        def fmt_item(item):
-                                            name = item.get('f14', '未知')
-                                            f = item.get('f62', 0)
-                                            if abs(f) > 100000000: flow = f'{f/100000000:+.2f}亿'
-                                            elif abs(f) > 10000: flow = f'{f/10000:+.1f}万'
-                                            else: flow = f'{f:+.0f}'
-                                            return f"{name}({flow})"
-
-                                        for item in sorted_diff[:3]:
-                                            top_inflow.append(fmt_item(item))
-                                        for item in sorted_diff[-2:]:
-                                            top_outflow.append(fmt_item(item))
-                                        logger.info(f"✅ Raw Direct Fetch Succeeded: {len(top_inflow)} inflows found.")
-                                    else:
-                                        # One last try: Broad Market Flow (Better than nothing)
-                                        logger.warning("Still no sector flow, falling back to broad market flow...")
-                                        df_m = self._safe_ak_fetch(ak.stock_market_fund_flow)
-                                        if not df_m.empty:
-                                            latest = df_m.iloc[-1]
-                                            m_flow = latest.get('主力净流入-净额', 0)
-                                            s_flow = f'{m_flow/100000000:+.1f}亿' if abs(m_flow) > 100000000 else str(m_flow)
-                                            top_inflow.append(f"全市场主力({s_flow})")
-                            except Exception as bypass_e:
-                                logger.error(f"❌ Raw bypass failed: {bypass_e}")
-                        except Exception as raw_e:
-                            logger.error(f"❌ All sector flow attempts failed: {raw_e}")
-
-            result = {
-                "northbound_net_inflow": north_val,
-                "top_inflow_sectors": ", ".join(top_inflow) if top_inflow else "暂无数据",
-                "top_outflow_sectors": ", ".join(top_outflow) if top_outflow else "暂无数据",
-                "summary": f"北向:{north_val} | 领涨:{', '.join(top_inflow[:2]) if top_inflow else 'N/A'} | 领跌:{', '.join(top_outflow[:1]) if top_outflow else 'N/A'}"
-            }
-            
-            self._cache["market_flow"] = {"data": result, "timestamp": datetime.now()}
-            self._stats["market_flow_success"] += 1
-            return result
+                        # If zero or NaN, try hist but expect limited success
+                        logger.warning("Northbound summary is zero/NaN, data might be stale.")
         except Exception as e:
-            logger.error(f"❌ Market Flow Context Failed: {e}")
-            return {"summary": "Market flow unavailable"}
+            logger.warning(f"Northbound fetch issue: {e}")
+
+        # 2. Sector Flows - Primary: THS (audited as most stable source)
+        try:
+            df_sector = self._safe_ak_fetch(ak.stock_fund_flow_industry, symbol="即时")
+            if not df_sector.empty:
+                df_sector['net_val'] = pd.to_numeric(df_sector['净额'], errors='coerce')
+                df_sorted = df_sector.dropna(subset=['net_val']).sort_values('net_val', ascending=False)
+                
+                def fmt_ths(row):
+                    name = row.get('行业', '')
+                    net = row.get('net_val', 0)
+                    return f"{name}({net:+.2f}亿)"
+
+                for _, row in df_sorted.head(3).iterrows():
+                    top_inflow.append(fmt_ths(row))
+                for _, row in df_sorted.tail(2).iterrows():
+                    top_outflow.append(fmt_ths(row))
+                
+                logger.info(f"✅ THS Industry Flow Succeeded: {len(top_inflow)} sectors found.")
+            else:
+                raise ValueError("THS record empty")
+        except Exception as e:
+            logger.error(f"❌ Primary Sector Flow (THS) failed: {e}")
+            # Final Fallback: Market-wide Main Flow (push2his - verified working)
+            try:
+                df_m = self._safe_ak_fetch(ak.stock_market_fund_flow)
+                if not df_m.empty:
+                    m_flow = df_m.iloc[-1].get('主力净流入-净额', 0)
+                    top_inflow.append(f"全市场主力({m_flow/100000000:+.1f}亿)")
+                    logger.info("✅ Broad market flow fallback succeeded.")
+            except Exception as fallback_e:
+                logger.error(f"❌ All flow sources exhausted: {fallback_e}")
+
+        result = {
+            "northbound_net_inflow": north_val,
+            "top_inflow_sectors": ", ".join(top_inflow) if top_inflow else "暂无数据",
+            "top_outflow_sectors": ", ".join(top_outflow) if top_outflow else "暂无数据",
+            "summary": f"北向:{north_val} | 领涨:{', '.join(top_inflow[:2]) if top_inflow else 'N/A'} | 领跌:{', '.join(top_outflow[:1]) if top_outflow else 'N/A'}"
+        }
+        
+        self._cache["market_flow"] = {"data": result, "timestamp": datetime.now()}
+        self._stats["market_flow_success"] += 1
+        return result
+
 
     def get_stock_flow_context(self, symbol: str) -> Dict[str, Any]:
         """
