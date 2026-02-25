@@ -80,10 +80,16 @@ class MarketContextProvider:
                     # Final attempt or non-retryable error
                     raise e
 
-    def get_macro_context(self) -> Dict[str, Any]:
+    def get_macro_context(self, skip_nasdaq: bool = False) -> Dict[str, Any]:
         """
         Fetch core macro indicators.
         Cache TTL: 24 hours (Macro data changes slowly)
+        
+        Args:
+            skip_nasdaq: If True, skips the Nasdaq API call entirely.
+                         Used when generating almanacs outside the valid
+                         window (US market hasn't closed yet), so the data
+                         would be stale/misleading.
         """
         self._stats["macro_attempts"] += 1
         
@@ -92,7 +98,13 @@ class MarketContextProvider:
             self._cache["macro"]["data"] = None
 
         if self._is_cache_valid(self._cache["macro"], 86400):
-            return self._cache["macro"]["data"]
+            cached = self._cache["macro"]["data"]
+            # If caller wants nasdaq skipped but cache has real nasdaq data,
+            # return a copy with nasdaq neutralized to avoid misleading usage
+            if skip_nasdaq and cached.get("nasdaq") != "N/A":
+                neutralized = {**cached, "nasdaq": "N/A", "nasdaq_skipped": True}
+                return neutralized
+            return cached
 
         logger.info("📡 Fetching Macro Data from AkShare...")
         try:
@@ -141,22 +153,28 @@ class MarketContextProvider:
 
             # 4. Global Context - Nasdaq (Daily)
             nasdaq_pct = "N/A"
-            try:
-                # Using sina US stock index API
-                df_nasdaq = self._safe_ak_fetch(ak.index_us_stock_sina, symbol='.IXIC')
-                if not df_nasdaq.empty and len(df_nasdaq) >= 2:
-                    last = float(df_nasdaq.iloc[-1]['close'])
-                    prev = float(df_nasdaq.iloc[-2]['close'])
-                    change = (last - prev) / prev * 100
-                    nasdaq_pct = f"{change:+.2f}%"
-            except Exception as e:
-                logger.warning(f"Global Nasdaq fetch failed: {e}")
+            nasdaq_skipped = False
+            if skip_nasdaq:
+                logger.info("⏭️  Skipping Nasdaq fetch (skip_nasdaq=True, data would be stale)")
+                nasdaq_skipped = True
+            else:
+                try:
+                    # Using sina US stock index API
+                    df_nasdaq = self._safe_ak_fetch(ak.index_us_stock_sina, symbol='.IXIC')
+                    if not df_nasdaq.empty and len(df_nasdaq) >= 2:
+                        last = float(df_nasdaq.iloc[-1]['close'])
+                        prev = float(df_nasdaq.iloc[-2]['close'])
+                        change = (last - prev) / prev * 100
+                        nasdaq_pct = f"{change:+.2f}%"
+                except Exception as e:
+                    logger.warning(f"Global Nasdaq fetch failed: {e}")
 
             result = {
                 "gdp": gdp_val,
                 "cpi": cpi_val,
                 "bond_10y": bond_val,
                 "nasdaq": nasdaq_pct,
+                "nasdaq_skipped": nasdaq_skipped,
                 "summary": f"GDP:{gdp_val} | Bond10Y:{bond_val} | Nasdaq:{nasdaq_pct}"
             }
             

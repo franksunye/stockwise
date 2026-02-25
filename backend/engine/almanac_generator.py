@@ -6,6 +6,20 @@ import os
 import argparse
 from datetime import datetime, timedelta
 
+# --- Time-awareness constants ---
+# Nasdaq data freshness window (Beijing Time):
+#   US markets close at 4:00 PM ET ≈ 5:00 AM Beijing (winter) / 4:00 AM (summer).
+#   A-share markets close at 15:00 Beijing.
+#
+#   Valid "overnight" window: 05:00 – 15:00 Beijing
+#     - After 05:00 AM: US just closed, Nasdaq data is the freshest "overnight" close.
+#     - Before 15:00 PM: The data is still relevant for today's A-share session.
+#     - After 15:00 PM: A-share closed; tonight's US session hasn't started yet.
+#       The Nasdaq data in AkShare is from LAST NIGHT, stale for T+1 prediction.
+#     - 00:00 – 05:00 AM: US may still be trading, data is incomplete/stale.
+NASDAQ_FRESH_START_HOUR = 5   # 05:00 Beijing = US market close
+NASDAQ_FRESH_END_HOUR = 15    # 15:00 Beijing = A-share market close
+
 current_dir = os.path.dirname(os.path.abspath(__file__))
 backend_dir = os.path.dirname(current_dir)
 if backend_dir not in sys.path:
@@ -15,10 +29,16 @@ try:
     from backend.database import get_connection
     from backend.logger import logger
     from backend.context.provider import MarketContextProvider
+    from backend.config import BEIJING_TZ
 except ImportError:
     from database import get_connection
     from logger import logger
     from backend.context.provider import MarketContextProvider
+    try:
+        from config import BEIJING_TZ
+    except ImportError:
+        from datetime import timezone
+        BEIJING_TZ = timezone(timedelta(hours=8))
 
 def get_next_trading_day(current_date_str, cursor):
     """Calculates the next business day, skipping weekends and holidays from DB."""
@@ -132,10 +152,22 @@ def generate_almanac(target_date=None, force_t_plus_1=True):
         # --- 2. Data Context Acquisition --- #
         provider = MarketContextProvider()
         
+        # Time-aware Nasdaq gating:
+        # Nasdaq data is only meaningful within the "overnight" freshness window
+        # (05:00–15:00 Beijing). Outside this window, the data is either stale
+        # (afternoon/evening: last night's close) or incomplete (late night: US still trading).
+        now_beijing = datetime.now(BEIJING_TZ)
+        is_nasdaq_fresh = NASDAQ_FRESH_START_HOUR <= now_beijing.hour < NASDAQ_FRESH_END_HOUR
+        
+        if not is_nasdaq_fresh:
+            logger.info(f"⏰ Nasdaq gating: Current time {now_beijing.strftime('%H:%M')} outside fresh window [{NASDAQ_FRESH_START_HOUR}:00–{NASDAQ_FRESH_END_HOUR}:00) → Nasdaq data is STALE, will be skipped")
+        else:
+            logger.info(f"✅ Nasdaq gating: Current time {now_beijing.strftime('%H:%M')} within fresh window [{NASDAQ_FRESH_START_HOUR}:00–{NASDAQ_FRESH_END_HOUR}:00) → Nasdaq data is FRESH")
+        
         # 1. Macro Context (Global & Domestic)
-        macro_data = provider.get_macro_context()
+        macro_data = provider.get_macro_context(skip_nasdaq=not is_nasdaq_fresh)
         nasdaq_change = macro_data.get("nasdaq", "N/A")
-        logger.info(f"📊 Global Context: Nasdaq Change = {nasdaq_change}")
+        logger.info(f"📊 Global Context: Nasdaq Change = {nasdaq_change} (fresh={is_nasdaq_fresh})")
         
         # 2. Sector Flows (Money Flow)
         flow_data = provider.get_market_flow_context()
@@ -272,9 +304,10 @@ def generate_almanac(target_date=None, force_t_plus_1=True):
         meteorology = selected["meteo"]
         template = selected["insight"]
 
-        # Global Enrichment (Nasdaq)
+        # Global Enrichment (Nasdaq) — Time-gated
+        # Only inject Nasdaq narrative when the data is genuinely "overnight" fresh.
         nasdaq_impact = None
-        if nasdaq_change != "N/A":
+        if nasdaq_change != "N/A" and is_nasdaq_fresh:
             try:
                 nasdaq_val = float(nasdaq_change.replace('%', ''))
                 if nasdaq_val > 1.0:
@@ -286,6 +319,9 @@ def generate_almanac(target_date=None, force_t_plus_1=True):
                 else:
                     nasdaq_impact = "neutral"
             except: pass
+        elif not is_nasdaq_fresh:
+            nasdaq_impact = "stale_skipped"
+            logger.info(f"⏭️  Nasdaq enrichment skipped: data not fresh at {now_beijing.strftime('%H:%M')}")
 
         # Temporal Context Enrichment
         temporal_impact = "none"
@@ -382,10 +418,12 @@ def generate_almanac(target_date=None, force_t_plus_1=True):
                 "selected_yi": selected_yi,
                 "selected_ji": selected_ji,
                 "nasdaq_impact": nasdaq_impact,
+                "nasdaq_freshness": "fresh" if is_nasdaq_fresh else "stale",
+                "generation_time_beijing": now_beijing.strftime("%Y-%m-%d %H:%M:%S"),
                 "temporal_impact": temporal_impact,
                 "extra_suffix": extra_suffix
             },
-            "version": "1.2-traceable-full"
+            "version": "1.3-nasdaq-time-gated"
         }
 
         # --- 4. Persist to DB --- #
