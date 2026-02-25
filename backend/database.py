@@ -443,6 +443,7 @@ def init_db():
                 market_entropy TEXT,
                 sector_currents TEXT,
                 ai_insight TEXT,
+                generation_trace TEXT,
                 created_at TIMESTAMP DEFAULT (datetime('now', '+8 hours'))
             )
         """)
@@ -634,6 +635,7 @@ def init_db():
 
         # Briefs Migrations
         add_column_if_missing('daily_briefs', 'notified_at', 'TIMESTAMP')
+        add_column_if_missing('market_almanacs', 'generation_trace', 'TEXT')
 
         # Prediction Table Migrations
         add_column_if_missing('ai_predictions_v2', 'validation_data', 'TEXT')

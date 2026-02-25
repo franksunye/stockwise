@@ -273,21 +273,30 @@ def generate_almanac(target_date=None, force_t_plus_1=True):
         template = selected["insight"]
 
         # Global Enrichment (Nasdaq)
+        nasdaq_impact = None
         if nasdaq_change != "N/A":
             try:
                 nasdaq_val = float(nasdaq_change.replace('%', ''))
                 if nasdaq_val > 1.0:
                     template += f" 受到隔夜美股（纳指{nasdaq_change}）走强映射，今天 A 股有望迎来积极的开盘情绪。"
+                    nasdaq_impact = "bullish"
                 elif nasdaq_val < -1.2:
                     template += f" 受隔夜纳指（{nasdaq_change}）压力传导，外围环境略显低迷，开盘需提防情绪砸盘。"
+                    nasdaq_impact = "bearish"
+                else:
+                    nasdaq_impact = "neutral"
             except: pass
 
         # Temporal Context Enrichment
+        temporal_impact = "none"
         if is_monday:
             template = "【周一开篇】" + template + " 本周趋势将由此定调。"
+            temporal_impact = "monday"
         elif is_friday:
             template = "【周五收官】" + template + " 周末政策面动向及消息博弈将是关键。"
+            temporal_impact = "friday"
         
+        extra_suffix = None
         if rng.random() < 0.4: # 40% chance for a "lucky charm" or extra advice
             extra_suffix = rng.choice([
                 " 心如止水，方能看透迷雾。",
@@ -339,6 +348,46 @@ def generate_almanac(target_date=None, force_t_plus_1=True):
             "inverse": inverse_currents
         }
 
+        # --- Prepare Trace Log ---
+        trace = {
+            "target_date": target_date,
+            "data_context_date": actual_price_date,
+            "seed_val": seed_val,
+            "metrics": {
+                "vol": {
+                    "current": current_vol,
+                    "average_recent": round(avg_vol, 2),
+                    "ratio": round(vol_ratio, 3),
+                    "label": vol_label
+                },
+                "breadth": {
+                    "winners": winners,
+                    "losers": losers,
+                    "total": total_stocks,
+                    "ratio": round(breadth_ratio, 3),
+                    "heat_score": heat_score,
+                    "label": breadth_label
+                },
+                "flows": {
+                    "raw_inflow": top_inflow,
+                    "raw_outflow": top_outflow,
+                    "parsed_main": main_currents,
+                    "parsed_inverse": inverse_currents
+                }
+            },
+            "macro": macro_data,
+            "logic": {
+                "rule_key": rule_key,
+                "mood_tag": mood_tag,
+                "selected_yi": selected_yi,
+                "selected_ji": selected_ji,
+                "nasdaq_impact": nasdaq_impact,
+                "temporal_impact": temporal_impact,
+                "extra_suffix": extra_suffix
+            },
+            "version": "1.2-traceable-full"
+        }
+
         # --- 4. Persist to DB --- #
         cursor.execute("SELECT 1 FROM market_almanacs WHERE target_date = ?", (target_date,))
         exists = cursor.fetchone()
@@ -348,27 +397,31 @@ def generate_almanac(target_date=None, force_t_plus_1=True):
                 UPDATE market_almanacs SET 
                     mood_tag = ?, action_strategy = ?, meteorology = ?, 
                     market_entropy = ?, sector_currents = ?, ai_insight = ?,
+                    generation_trace = ?,
                     created_at = datetime('now', '+8 hours')
                 WHERE target_date = ?
             """, (
                 mood_tag, action_strategy, meteorology,
                 json.dumps(entropy_payload, ensure_ascii=False),
                 json.dumps(sector_payload, ensure_ascii=False),
-                template, target_date
+                template,
+                json.dumps(trace, ensure_ascii=False),
+                target_date
             ))
-            logger.info(f"✅ Almanac Updated for {target_date} -> {mood_tag}")
+            logger.info(f"✅ Almanac Updated for {target_date} -> {mood_tag} (Trace saved)")
         else:
             cursor.execute("""
                 INSERT INTO market_almanacs 
-                (target_date, mood_tag, action_strategy, meteorology, market_entropy, sector_currents, ai_insight)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                (target_date, mood_tag, action_strategy, meteorology, market_entropy, sector_currents, ai_insight, generation_trace)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 target_date, mood_tag, action_strategy, meteorology,
                 json.dumps(entropy_payload, ensure_ascii=False),
                 json.dumps(sector_payload, ensure_ascii=False),
-                template
+                template,
+                json.dumps(trace, ensure_ascii=False)
             ))
-            logger.info(f"✅ Almanac Inserted for {target_date} -> {mood_tag}")
+            logger.info(f"✅ Almanac Inserted for {target_date} -> {mood_tag} (Trace saved)")
         
         conn.commit()
         return True
