@@ -172,6 +172,7 @@ Switching AI models or adding new models from different vendors (like DeepSeek, 
 ### 2. Standard Configuration Format
 When switching or adding a model, your Python script must update:
 *   `is_active`: Set to `1` for the active model, `0` for the old model.
+*   `roles`: Crucial for assigning tasks. Set to `["prediction", "brief_pro"]` for the primary PRO model, or `["prediction", "brief_free"]` for the FREE model. Must be a valid JSON array string.
 *   `provider`: Essential for the `ModelFactory` to know how to load it. Typical values are `adapter-openai` (for DeepSeek, Qwen via Dashscope, etc.) or `adapter-gemini-local`.
 *   `config_json`: The core settings. **Must be valid JSON**.
 
@@ -202,9 +203,10 @@ def switch():
         "base_url_env": "DEEPSEEK_BASE_URL",
         "max_tokens": 8192
     }
+    roles = ["prediction", "brief_pro"]
     cursor.execute(
-        "UPDATE prediction_models SET is_active = 1, config_json = ?, provider = 'adapter-openai' WHERE model_id = 'new-model'", 
-        (json.dumps(config),)
+        "UPDATE prediction_models SET is_active = 1, config_json = ?, provider = 'adapter-openai', roles = ? WHERE model_id = 'new-model'", 
+        (json.dumps(config), json.dumps(roles))
     )
     conn.commit()
     conn.close()
