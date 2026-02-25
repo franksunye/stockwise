@@ -10,7 +10,7 @@
 //   - Push:     Preserve existing notification handling
 // =============================================================================
 
-const CACHE_VERSION = 'ziso-v8';
+const CACHE_VERSION = 'ziso-v9';
 
 // Critical resources that MUST be available offline for the App Shell
 const PRECACHE_URLS = [
@@ -355,26 +355,42 @@ self.addEventListener('message', (event) => {
     self.skipWaiting();
   }
 });
-
 // =============================================================================
-// 5. PUSH & NOTIFICATION (保持原有逻辑 — 不改动)
+// 5. PUSH & NOTIFICATION — 推送通知 + 角标 (小红点)
+//
+// 角标生命周期:
+//   push 到达    → setAppBadge(1)    设置红点
+//   通知被点击   → clearAppBadge()   清除红点 (用户响应)
+//   通知被关闭   → clearAppBadge()   清除红点 (用户划掉)
+//   打开 App     → clearAppBadge()   清除红点 (dashboard/page.tsx)
 // =============================================================================
 self.addEventListener('push', function(event) {
-  if (event.data) {
-    const payload = event.data.json();
-    event.waitUntil(
+  if (!event.data) return;
+  let payload;
+  try {
+    payload = event.data.json();
+  } catch (e) {
+    console.warn('[SW] Invalid push payload, ignoring:', e);
+    return;
+  }
+  event.waitUntil(
+    Promise.all([
       self.registration.showNotification(payload.title || 'ZISO AI', {
         body: payload.body,
         icon: '/logo.png',
         badge: '/logo.png',
         data: { url: payload.url || '/dashboard' }
-      })
-    );
-  }
+      }),
+      navigator.setAppBadge
+        ? navigator.setAppBadge(1).catch(() => {})
+        : Promise.resolve()
+    ])
+  );
 });
 
 self.addEventListener('notificationclick', function(event) {
   event.notification.close();
+  if (navigator.clearAppBadge) navigator.clearAppBadge().catch(() => {});
   event.waitUntil(
     clients.matchAll({ type: 'window' }).then(windowClients => {
       for (var i = 0; i < windowClients.length; i++) {
@@ -384,4 +400,9 @@ self.addEventListener('notificationclick', function(event) {
       if (clients.openWindow) return clients.openWindow(event.notification.data.url);
     })
   );
+});
+
+// 用户从通知中心划掉通知时也清除角标
+self.addEventListener('notificationclose', function() {
+  if (navigator.clearAppBadge) navigator.clearAppBadge().catch(() => {});
 });
