@@ -197,24 +197,45 @@ class MarketContextProvider:
 
         logger.info("📡 Fetching Market Flow Data (Stable Route)...")
         
-        north_val = "N/A"
+        north_val = "暂停披露"
+        north_breadth = None
         top_inflow = []
         top_outflow = []
 
-        # 1. Northbound (Smart Money) - Use Summary API (More stable than Hist/Rank)
+        # 1. Northbound (Smart Money) - Breadth Signal
+        # Since 2024-08-19, HKEX no longer discloses real-time northbound net buy amounts.
+        # The '成交净买额' field permanently returns 0. However, the summary API still
+        # provides northbound win/loss stock counts, which serve as a useful breadth signal.
         try:
             df_north = self._safe_ak_fetch(ak.stock_hsgt_fund_flow_summary_em)
             if not df_north.empty:
-                # Filter for '北向' rows
                 north_rows = df_north[df_north['资金方向'] == '北向']
                 if not north_rows.empty:
-                    # Sum '成交净买额' (Units: 100M / 亿)
-                    val = north_rows['成交净买额'].sum()
-                    if pd.notna(val) and val != 0:
-                        north_val = f"{float(val):+.2f}亿"
+                    winners = int(north_rows['上涨数'].sum())
+                    losers = int(north_rows['下跌数'].sum())
+                    flat = int(north_rows['持平数'].sum())
+                    total = winners + losers + flat
+                    
+                    if total > 0:
+                        win_ratio = winners / total
+                        if win_ratio >= 0.65:
+                            sentiment = "偏多"
+                        elif win_ratio <= 0.35:
+                            sentiment = "偏空"
+                        else:
+                            sentiment = "均衡"
+                        
+                        north_val = f"涨{winners}/跌{losers} ({sentiment})"
+                        north_breadth = {
+                            "winners": winners,
+                            "losers": losers,
+                            "flat": flat,
+                            "win_ratio": round(win_ratio, 3),
+                            "sentiment": sentiment
+                        }
+                        logger.info(f"✅ Northbound breadth: {north_val}")
                     else:
-                        # If zero or NaN, try hist but expect limited success
-                        logger.warning("Northbound summary is zero/NaN, data might be stale.")
+                        logger.info("ℹ️  Northbound data has zero stocks (market may be closed)")
         except Exception as e:
             logger.warning(f"Northbound fetch issue: {e}")
 
@@ -252,6 +273,7 @@ class MarketContextProvider:
 
         result = {
             "northbound_net_inflow": north_val,
+            "northbound_breadth": north_breadth,
             "top_inflow_sectors": ", ".join(top_inflow) if top_inflow else "暂无数据",
             "top_outflow_sectors": ", ".join(top_outflow) if top_outflow else "暂无数据",
             "summary": f"北向:{north_val} | 领涨:{', '.join(top_inflow[:2]) if top_inflow else 'N/A'} | 领跌:{', '.join(top_outflow[:1]) if top_outflow else 'N/A'}"
