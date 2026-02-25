@@ -239,37 +239,79 @@ class MarketContextProvider:
         except Exception as e:
             logger.warning(f"Northbound fetch issue: {e}")
 
-        # 2. Sector Flows - Primary: THS (audited as most stable source)
+        # 2. Sector Flows - 3-Tier Fallback Strategy
+        # Primary:   Eastmoney stock_sector_fund_flow_rank (fast, reliable, 498 sectors, units: 元)
+        # Fallback1: THS stock_fund_flow_industry (90 sectors, units: 亿, scraping can fail)
+        # Fallback2: Broad market main force flow (coarse, last resort)
+        
+        sector_fetched = False
+        
+        # --- Tier 1: Eastmoney (Primary) ---
         try:
-            df_sector = self._safe_ak_fetch(ak.stock_fund_flow_industry, symbol="即时")
-            if not df_sector.empty:
-                df_sector['net_val'] = pd.to_numeric(df_sector['净额'], errors='coerce')
-                df_sorted = df_sector.dropna(subset=['net_val']).sort_values('net_val', ascending=False)
-                
-                def fmt_ths(row):
-                    name = row.get('行业', '')
-                    net = row.get('net_val', 0)
-                    return f"{name}({net:+.2f}亿)"
-
-                for _, row in df_sorted.head(3).iterrows():
-                    top_inflow.append(fmt_ths(row))
-                for _, row in df_sorted.tail(2).iterrows():
-                    top_outflow.append(fmt_ths(row))
-                
-                logger.info(f"✅ THS Industry Flow Succeeded: {len(top_inflow)} sectors found.")
+            df_em = self._safe_ak_fetch(
+                ak.stock_sector_fund_flow_rank, indicator="今日", sector_type="行业资金流"
+            )
+            if not df_em.empty:
+                net_col = '今日主力净流入-净额'
+                name_col = '名称'
+                if net_col in df_em.columns and name_col in df_em.columns:
+                    df_em['net_val'] = pd.to_numeric(df_em[net_col], errors='coerce')
+                    df_sorted = df_em.dropna(subset=['net_val']).sort_values('net_val', ascending=False)
+                    
+                    def fmt_em(row):
+                        name = row.get(name_col, '')
+                        net = row.get('net_val', 0) / 1e8  # 元 → 亿
+                        return f"{name}({net:+.2f}亿)"
+                    
+                    for _, row in df_sorted.head(3).iterrows():
+                        top_inflow.append(fmt_em(row))
+                    for _, row in df_sorted.tail(2).iterrows():
+                        top_outflow.append(fmt_em(row))
+                    
+                    sector_fetched = True
+                    logger.info(f"✅ Eastmoney Sector Flow Succeeded: {len(df_sorted)} sectors, top={top_inflow[0] if top_inflow else 'N/A'}")
+                else:
+                    logger.warning(f"EM sector flow columns mismatch: {list(df_em.columns)}")
             else:
-                raise ValueError("THS record empty")
+                raise ValueError("EM sector flow empty")
         except Exception as e:
-            logger.error(f"❌ Primary Sector Flow (THS) failed: {e}")
-            # Final Fallback: Market-wide Main Flow (push2his - verified working)
+            logger.warning(f"⚠️  Eastmoney Sector Flow failed, trying THS fallback: {e}")
+        
+        # --- Tier 2: THS Fallback ---
+        if not sector_fetched:
+            try:
+                df_sector = self._safe_ak_fetch(ak.stock_fund_flow_industry, symbol="即时")
+                if not df_sector.empty:
+                    df_sector['net_val'] = pd.to_numeric(df_sector['净额'], errors='coerce')
+                    df_sorted = df_sector.dropna(subset=['net_val']).sort_values('net_val', ascending=False)
+                    
+                    def fmt_ths(row):
+                        name = row.get('行业', '')
+                        net = row.get('net_val', 0)  # THS 净额 already in 亿
+                        return f"{name}({net:+.2f}亿)"
+
+                    for _, row in df_sorted.head(3).iterrows():
+                        top_inflow.append(fmt_ths(row))
+                    for _, row in df_sorted.tail(2).iterrows():
+                        top_outflow.append(fmt_ths(row))
+                    
+                    sector_fetched = True
+                    logger.info(f"✅ THS Industry Flow Fallback Succeeded: {len(df_sorted)} sectors")
+                else:
+                    raise ValueError("THS record empty")
+            except Exception as e:
+                logger.error(f"❌ THS Sector Flow also failed: {e}")
+        
+        # --- Tier 3: Broad Market (Last Resort) ---
+        if not sector_fetched:
             try:
                 df_m = self._safe_ak_fetch(ak.stock_market_fund_flow)
                 if not df_m.empty:
                     m_flow = df_m.iloc[-1].get('主力净流入-净额', 0)
-                    top_inflow.append(f"全市场主力({m_flow/100000000:+.1f}亿)")
-                    logger.info("✅ Broad market flow fallback succeeded.")
+                    top_inflow.append(f"全市场主力({m_flow/1e8:+.1f}亿)")
+                    logger.info("✅ Broad market flow (last resort) succeeded.")
             except Exception as fallback_e:
-                logger.error(f"❌ All flow sources exhausted: {fallback_e}")
+                logger.error(f"❌ All sector flow sources exhausted: {fallback_e}")
 
         result = {
             "northbound_net_inflow": north_val,
