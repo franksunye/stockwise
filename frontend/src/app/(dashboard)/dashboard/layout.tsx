@@ -168,13 +168,19 @@ export default function DashboardLayout({
         const newTier = (data.tier || 'free') as Tier;
         setTier(newTier);
         
-        // 只要是 Pro 用户（包括通过邀请获得的试用 Pro），都可进入
-        if (data.tier === 'pro') {
+        // ── 准入判断 (Gate Check) ──
+        // 准入控制 ≠ 会员等级。邀请墙的职责是"第一次进门"的门槛。
+        // 只要用户已经在后端注册过（非本次新建的 free 用户），就应放行。
+        // 这避免了 Pro 过期 → free → 再次被邀请墙挡住的问题。
+        const isNewFreeUser = data.isNewUser && data.tier === 'free';
+        
+        if (!isNewFreeUser) {
+          // 已注册用户（无论 pro 或 expired→free）：放行
           setIsAuthorized(true);
           setAuthCache(newTier, true);
-          // 成功授权后清除缓存的邀请信息
           localStorage.removeItem('STOCKWISE_REFERRED_BY');
         } else {
+          // 全新 free 用户（没有通过邀请链接获得 Pro）：需要邀请码
           setIsAuthorized(false);
           setAuthCache(newTier, false);
         }
