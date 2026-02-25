@@ -94,7 +94,7 @@ const AlmanacCard = memo(function AlmanacCard({
             <Sparkles className="w-3 h-3 text-indigo-400" />
             <span className="text-[10px] font-black text-slate-500 tracking-[0.2em] uppercase">{dateStr}</span>
           </div>
-          <h2 className="text-5xl font-black italic tracking-tighter text-white drop-shadow-lg">{data.mood_tag || '混沌未明'}</h2>
+          <h2 className="text-4xl font-black italic tracking-tighter text-white drop-shadow-lg">{data.mood_tag || '混沌未明'}</h2>
           <div className="flex flex-col items-center gap-1">
             <p className="text-lg font-bold tracking-[0.2em] text-indigo-100/90">{yi}</p>
             <div className="flex items-center gap-1.5 opacity-60">
