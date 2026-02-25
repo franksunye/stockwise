@@ -82,25 +82,22 @@ const AlmanacCard = memo(function AlmanacCard({
 
   return (
     <div className="w-full h-full shrink-0 flex flex-col items-center justify-center px-6 snap-center snap-always">
-      <div ref={posterRef} className="w-full max-w-md space-y-6 mx-auto relative">
+      <div ref={posterRef} className="w-full max-w-md space-y-5 mx-auto relative">
         {isCapturing && isCurrent && (
           <div className="pt-8 pb-4 text-center">
             <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">ZISO AI · 投资黄历</span>
           </div>
         )}
 
-        <section className="text-center space-y-2 py-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-2">
+        <section className="text-center space-y-1 py-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-1">
             <Sparkles className="w-3 h-3 text-indigo-400" />
             <span className="text-[10px] font-black text-slate-500 tracking-[0.2em] uppercase">{dateStr}</span>
           </div>
           <h2 className="text-4xl font-black italic tracking-tighter text-white drop-shadow-lg">{data.mood_tag || '混沌未明'}</h2>
-          <div className="flex flex-col items-center gap-1">
-            <p className="text-lg font-bold tracking-[0.2em] text-indigo-100/90">{yi}</p>
-            <div className="flex items-center gap-1.5 opacity-60">
-              <div className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">气象：{data.meteorology || '微雨'}</span>
-            </div>
+          <div className="flex items-center justify-center gap-1.5 opacity-60">
+            <div className="w-1 h-1 rounded-full bg-slate-500" />
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">气象：{data.meteorology || '微雨'}</span>
           </div>
         </section>
 
