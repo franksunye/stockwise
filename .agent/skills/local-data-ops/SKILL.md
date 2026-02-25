@@ -161,6 +161,58 @@ To test PRO-level analysis locally using your local Gemini proxy (`gemini_local`
         python backend/notifications.py --action push_daily
         ```
 
+## ⚙️ Model Management (Switching & Adding Vendors)
+
+Switching AI models or adding new models from different vendors (like DeepSeek, Aliyun, OpenAI compatible) is a routine operation. This is always done by updating the `prediction_models` table in the database.
+
+### 1. Safe Model Switching Strategy
+*   **Never manipulate JSON strings in PowerShell directly** when updating configurations. PowerShell's quote handling can strip quotes and corrupt the JSON (`{model: deepseek...}` instead of `{"model": "deepseek..."}`).
+*   **Always use a Python migration script** to securely `json.dumps()` the configuration and execute the SQL `UPDATE`.
+
+### 2. Standard Configuration Format
+When switching or adding a model, your Python script must update:
+*   `is_active`: Set to `1` for the active model, `0` for the old model.
+*   `provider`: Essential for the `ModelFactory` to know how to load it. Typical values are `adapter-openai` (for DeepSeek, Qwen via Dashscope, etc.) or `adapter-gemini-local`.
+*   `config_json`: The core settings. **Must be valid JSON**.
+
+#### Key `config_json` Parameters:
+*   `model`: The name the API expects (e.g., `deepseek-chat`, `deepseek-v3`).
+*   `api_key_env`: The environment variable name holding the API key (e.g., `DEEPSEEK_API_KEY`, `QWEN_API_KEY`). The engine reads this securely from `.env`.
+*   `base_url` or `base_url_env`:
+    *   If using an alternative endpoint (like Aliyun), set `"base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"`.
+    *   If using official but allowing overrides, set `"base_url_env": "DEEPSEEK_BASE_URL"`. The engine has fallback logic (e.g., falls back to `https://api.deepseek.com/v1` if `DEEPSEEK_BASE_URL` is empty).
+
+### 3. Example Migration Script Pattern
+Always define a quick script like `backend/migrations/switch_model.py`:
+```python
+import os, json, sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+os.environ["DB_SOURCE"] = "cloud" # ALWAYS specified!
+from database import get_connection
+
+def switch():
+    conn = get_connection()
+    cursor = conn.cursor()
+    # 1. Disable old
+    cursor.execute("UPDATE prediction_models SET is_active = 0 WHERE model_id = 'old-model'")
+    # 2. Config & Enable new
+    config = {
+        "model": "deepseek-chat",
+        "api_key_env": "DEEPSEEK_API_KEY",
+        "base_url_env": "DEEPSEEK_BASE_URL",
+        "max_tokens": 8192
+    }
+    cursor.execute(
+        "UPDATE prediction_models SET is_active = 1, config_json = ?, provider = 'adapter-openai' WHERE model_id = 'new-model'", 
+        (json.dumps(config),)
+    )
+    conn.commit()
+    conn.close()
+    
+if __name__ == "__main__":
+    switch()
+```
+
 ## 🔧 Troubleshooting & Configurations
 
 ### 1. Database Connection Errors (`Cannot connect to host ... turso.io`)
@@ -174,16 +226,8 @@ If using `gemini-3-flash` locally, ensure the `prediction_models` table is corre
     ```sql
     SELECT model_id, provider, config_json FROM prediction_models WHERE model_id = 'gemini-3-flash';
     ```
-*   **Correct Values**:
-    *   `provider`: `adapter-gemini-local`
-    *   `config_json`: `{"model":"gemini-3-flash","api_key_env":"LLM_API_KEY","base_url_env":"GEMINI_LOCAL_BASE_URL","max_tokens":8192}`
-*   **Fix SQL**:
-    ```sql
-    UPDATE prediction_models 
-    SET provider = 'adapter-gemini-local',
-        config_json = '{"model":"gemini-3-flash","api_key_env":"LLM_API_KEY","base_url_env":"GEMINI_LOCAL_BASE_URL","max_tokens":8192}' 
-    WHERE model_id = 'gemini-3-flash';
-    ```
+*   **Fix SQL** (via Python script recommended to avoid JSON corruption):
+    Ensure `config_json` is `{"model":"gemini-3-flash","api_key_env":"LLM_API_KEY","base_url_env":"GEMINI_LOCAL_BASE_URL","max_tokens":8192}`.
 
 ### 3. "AI Analysis Complete! Success: 0/1"
 *   **Cause**: Data for today already exists, and `--force` was not used.
@@ -191,11 +235,12 @@ If using `gemini-3-flash` locally, ensure the `prediction_models` table is corre
 
 ### 4. PowerShell Encoding/Parsing Errors
 *   **Cause**: PowerShell scripts with non-ASCII characters or incorrect encoding (e.g., UTF-8 with BOM) can fail on some Windows systems.
-*   **Fix**: Ensure the script is saved as UTF-8 (no BOM) and use English for prompts/logs within the script to maximize compatibility across environments. The current `run_prediction.ps1` has been updated to use English and a more robust regex for extracting symbols.
+*   **Fix**: Ensure the script is saved as UTF-8 (no BOM) and use English for prompts/logs within the script to maximize compatibility across environments.
 
 ## ⚠️ Critical Rules
 
 1.  **Never** execute a batch run without a cooling mechanism (`Sleep 5s`).
 2.  **Always** confirm the `DB_SOURCE` is correct. If running for production, it MUST be `cloud`.
 3.  **Always** check `frontend/scripts/turso-cli.mjs` output for errors before assuming the target list is empty.
+4.  **Never** write raw JSON directly in PowerShell SQL strings. Always use Python with `json.dumps()` for model configurations.
 

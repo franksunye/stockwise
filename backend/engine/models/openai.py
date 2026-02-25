@@ -18,9 +18,11 @@ class OpenAIAdapter(BasePredictionModel):
         # Support base_url from env variable or direct config
         base_url_env = config.get("base_url_env")
         if base_url_env:
-            self.base_url = os.getenv(base_url_env, "https://api.deepseek.com/v1")
+            env_val = os.getenv(base_url_env)
+            self.base_url = env_val if env_val else "https://api.deepseek.com/v1"
         else:
-            self.base_url = config.get("base_url", "https://api.deepseek.com/v1")
+            conf_val = config.get("base_url")
+            self.base_url = conf_val if conf_val else "https://api.deepseek.com/v1"
             
         self.model_name = config.get("model") or config.get("model_name", "deepseek-chat")
         self.max_tokens = config.get("max_tokens", 4096)
