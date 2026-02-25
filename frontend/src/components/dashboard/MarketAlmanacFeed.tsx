@@ -121,16 +121,16 @@ const AlmanacCard = memo(function AlmanacCard({
                 <h4 className="text-[9px] font-black text-slate-600 uppercase tracking-widest leading-none mt-0.5">板块洋流</h4>
               </div>
               <div className="space-y-1.5">
-                {sectors.main?.slice(0, 3).map((s: { name: string; flow: string }, si: number) => (
+                {sectors.main?.slice(0, 2).map((s: { name: string; flow: string }, si: number) => (
                   <div key={`main-${si}`} className="flex justify-between items-center bg-white/5 px-2 py-1.5 rounded gap-1">
-                    <span className="text-[10px] text-slate-400 font-bold truncate pr-1">{si === 0 ? '主向: ' : ''}{s.name}</span>
+                    <span className="text-[10px] text-slate-400 font-bold truncate pr-1">{s.name}</span>
                     <span className="text-[10px] text-emerald-400 font-black italic whitespace-nowrap shrink-0">{s.flow}</span>
                   </div>
                 ))}
                 {sectors.inverse?.slice(0, 2).map((s: { name: string; flow: string }, si: number) => (
-                  <div key={`inv-${si}`} className="flex justify-between items-center opacity-40 px-2 py-0.5 mt-1 gap-1">
-                    <span className="text-[9px] text-slate-500 truncate pr-1">逆向: {s.name}</span>
-                    <span className="text-[9px] text-rose-400 font-bold italic whitespace-nowrap shrink-0">{s.flow}</span>
+                  <div key={`inv-${si}`} className="flex justify-between items-center bg-white/5 px-2 py-1.5 rounded gap-1 opacity-70">
+                    <span className="text-[10px] text-slate-500 font-bold truncate pr-1">{s.name}</span>
+                    <span className="text-[10px] text-rose-400 font-bold italic whitespace-nowrap shrink-0">{s.flow}</span>
                   </div>
                 ))}
               </div>
@@ -150,11 +150,11 @@ const AlmanacCard = memo(function AlmanacCard({
                   </div>
                   <span className="text-[10px] font-black text-slate-100 leading-[1.4] text-left">{yi}</span>
                 </div>
-                <div className="flex items-start gap-2.5 opacity-50">
+                <div className="flex items-start gap-2.5 opacity-75">
                   <div className="w-4 h-4 rounded bg-rose-500/20 flex items-center justify-center border border-rose-500/30 shrink-0 mt-0.5">
                     <span className="text-[8px] font-black text-rose-400">忌</span>
                   </div>
-                  <span className="text-[10px] font-bold text-slate-400 leading-[1.4] text-left">{ji}</span>
+                  <span className="text-[10px] font-bold text-slate-300 leading-[1.4] text-left">{ji}</span>
                 </div>
               </div>
             </div>
@@ -277,13 +277,13 @@ export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlma
     text += `🔍 市场天机：${insight}\n\n`;
     
     if (sectors.main && sectors.main.length > 0) {
-      const mainStr = sectors.main.slice(0, 3).map(s => `${s.name}(${s.flow})`).join(', ');
-      text += `🌊 主流方向：${mainStr}\n`;
+      const mainStr = sectors.main.slice(0, 2).map(s => `${s.name}(${s.flow})`).join(', ');
+      text += `🌊 主力流入：${mainStr}\n`;
     }
     
     if (sectors.inverse && sectors.inverse.length > 0) {
       const invStr = sectors.inverse.slice(0, 2).map(s => `${s.name}(${s.flow})`).join(', ');
-      text += `❄️ 逆向压力：${invStr}\n`;
+      text += `❄️ 主力流出：${invStr}\n`;
     }
     
     text += `\n—— ZISO AI：替你做股市功课，带你看投资门道。\n`;
