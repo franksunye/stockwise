@@ -95,9 +95,9 @@ const AlmanacCard = memo(function AlmanacCard({
             <span className="text-[10px] font-black text-slate-500 tracking-[0.2em] uppercase">{dateStr}</span>
           </div>
           <h2 className="text-4xl font-black italic tracking-tighter text-white drop-shadow-lg">{data.mood_tag || '混沌未明'}</h2>
-          <div className="flex items-center justify-center gap-1.5 opacity-60">
-            <div className="w-1 h-1 rounded-full bg-slate-500" />
-            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">气象：{data.meteorology || '微雨'}</span>
+          <div className="flex items-center justify-center gap-2 opacity-80">
+            <div className="w-1.5 h-1.5 rounded-full bg-indigo-400/50" />
+            <span className="text-lg font-bold tracking-[0.1em] text-indigo-100/90">气象：{data.meteorology || '微雨'}</span>
           </div>
         </section>
 
