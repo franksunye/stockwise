@@ -137,6 +137,32 @@ class PredictionRunner:
         except:
             model_priorities = {m.model_id: m.priority for m in models}
         
+        # [Critical Guard] Detect if a higher-priority model failed this run.
+        # If so, do NOT promote lower-priority models to primary.
+        # Reason: PRO users pay for premium model (DeepSeek) analysis.
+        # Showing rule-engine or hunyuan-lite as primary would be a degraded experience.
+        attempted_model_ids = [m.model_id for m in models]
+        succeeded_model_ids = {p['model_id'] for p in valid_predictions}
+        failed_model_ids = set(attempted_model_ids) - succeeded_model_ids
+        
+        highest_attempted_priority = max(
+            (model_priorities.get(mid, 0) for mid in attempted_model_ids), default=0
+        )
+        highest_succeeded_priority = max(
+            (model_priorities.get(mid, 0) for mid in succeeded_model_ids), default=0
+        )
+        
+        # If a higher-priority model failed, block primary promotion for lower models
+        primary_promotion_blocked = highest_succeeded_priority < highest_attempted_priority
+        if primary_promotion_blocked:
+            failed_high = [mid for mid in failed_model_ids 
+                          if model_priorities.get(mid, 0) >= highest_succeeded_priority]
+            logger.warning(
+                f"🛡️ [{trace_id}] Primary promotion blocked: "
+                f"Higher-priority models failed: {failed_high}. "
+                f"Lower models will be saved but NOT set as primary."
+            )
+        
         for i, pred in enumerate(predictions):
             if not pred:
                 continue
@@ -146,18 +172,20 @@ class PredictionRunner:
             
             # Selector Logic: Set primary if this model has higher or equal priority than existing primary,
             # or if this model was already the primary (force re-run case)
+            # BUT: Block promotion if a higher-priority model failed this run.
             is_primary = 0
-            should_be_primary = (
-                model_priority > existing_priority or 
-                model_id == existing_primary_model_id  # Keep primary if same model (force re-run)
-            )
-            if should_be_primary:
-                # Reset old primary and set new one
-                cursor.execute("UPDATE ai_predictions_v2 SET is_primary = 0 WHERE symbol = ? AND date = ?", (symbol, date))
-                is_primary = 1
-                existing_priority = model_priority  # Update for next iteration
-                existing_primary_model_id = model_id
-                primary_pred = pred
+            if not primary_promotion_blocked:
+                should_be_primary = (
+                    model_priority > existing_priority or 
+                    model_id == existing_primary_model_id  # Keep primary if same model (force re-run)
+                )
+                if should_be_primary:
+                    # Reset old primary and set new one
+                    cursor.execute("UPDATE ai_predictions_v2 SET is_primary = 0 WHERE symbol = ? AND date = ?", (symbol, date))
+                    is_primary = 1
+                    existing_priority = model_priority  # Update for next iteration
+                    existing_primary_model_id = model_id
+                    primary_pred = pred
                 
             try:
                 # 4.5 Generate Visual Story (Silent Math Overlay)
@@ -220,6 +248,18 @@ class PredictionRunner:
             # 2. Execute prediction
             result = await model.predict(symbol, date, data)
             if result is None:
+                return None
+            
+            # 3. Guard: Reject error results from being treated as valid predictions
+            # This prevents API errors (e.g. "Fatal Error: HTTP 403...") from being
+            # saved to the database and displayed to end users.
+            if result.get('validation_status') == 'Error' or (
+                result.get('confidence', 1) == 0 and 
+                isinstance(result.get('reasoning', ''), str) and
+                not result['reasoning'].startswith('{')
+            ):
+                reason_preview = str(result.get('reasoning', ''))[:80]
+                logger.warning(f"⚠️ [{model.model_id}] Prediction rejected (error result): {reason_preview}...")
                 return None
                 
             result['model_id'] = model.model_id
