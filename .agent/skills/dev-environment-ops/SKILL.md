@@ -88,6 +88,17 @@ To query the **Production** database, use the `turso-cli.mjs` script. It automat
 *   **Diagnose Data Issues**:
     Use `--raw` (if supported by script modification) or `console.table` output to verify data existence.
 
+### 🔄 Syncing Cloud Data to Local (1:1 Replica)
+**Primary Tool**: `frontend/scripts/sync-remote-to-local.mjs`
+
+To reproduce production issues locally or test safely, you can pull a 1:1 replica of the Turso database (schema and data) into your local `data/stockwise.db`.
+
+```powershell
+# Run from the frontend/ directory
+node scripts/sync-remote-to-local.mjs
+```
+*(Note: This automatically makes a timestamped backup of your current local DB before overwriting).*
+
 ### 🏠 Local Development Database Operations
 **Primary Tool**: `sqlite3` (CLI) or Python Scripts
 
@@ -109,19 +120,22 @@ The local database is a file at `data/stockwise.db`. The `turso-cli.mjs` tool is
     python -c "import sqlite3; conn = sqlite3.connect('data/stockwise.db'); print(conn.execute('SELECT COUNT(*) FROM daily_prices').fetchone())"
     ```
 
-*   **Switching Contexts**:
-    When running `daily_morning_call.py` or `brief_generator.py`, **explicitly set the target**:
-    *   **Target Cloud (Full Pipeline)**:
-        ```powershell
-        $env:DB_SOURCE="cloud"; python -m backend.engine.brief_generator
-        ```
-    *   **Target Cloud (PRO Only - Fast)**:
-        ```powershell
-        $env:DB_SOURCE="cloud"; $env:BRIEF_SKIP_FREE="true"; python -m backend.engine.brief_generator
-        ```
-    *   **Target Local** (Default if env var missing, but be explicit):
+*   **Switching Contexts (Backend & Frontend)**:
+    The entire ecosystem (Python backend & Next.js frontend) uses the `DB_SOURCE` (or `DB_STRATEGY`) environment variable to hot-swap database connections seamlessly.
+
+    *   **Target Local (Default for dev)**:
+        Reads from `data/stockwise.db`. Ideal for safe debugging after a remote sync.
         ```powershell
         $env:DB_SOURCE="local"; python backend/scripts/daily_morning_call.py --dry-run
+        # Frontend
+        $env:DB_SOURCE="local"; npm run dev
+        ```
+    *   **Target Cloud (Testing Production)**:
+        Connects directly to Turso.
+        ```powershell
+        $env:DB_SOURCE="cloud"; python -m backend.engine.brief_generator
+        # Frontend
+        $env:DB_SOURCE="cloud"; npm run dev
         ```
 
 ### 2.3 Safe Data Purging SOP (Administrative)
@@ -143,9 +157,12 @@ When tasked with deleting sensitive production data (e.g., "Delete user X and al
 
 | Task                   | Command / Pattern                                                           |
 | :--------------------- | :-------------------------------------------------------------------------- |
+| **Sync DB 1:1 to Loc** | `cd frontend; node scripts/sync-remote-to-local.mjs`                        |
 | **Check Product Data** | `node frontend/scripts/turso-cli.mjs query "SELECT ..."`                    |
 | **Check Local Data**   | `sqlite3 data/stockwise.db "SELECT ..."`                                    |
 | **Purge User Data**    | Follow Section 2.3 sequence (Verify -> Purge Logs -> Unbind -> Delete Root) |
 | **Run Python (Prod)**  | `$env:DB_SOURCE="cloud"; python backend/script.py`                          |
 | **Run Python (Dev)**   | `$env:DB_SOURCE="local"; python backend/script.py`                          |
+| **Run Frontend (Prod)**| `$env:DB_SOURCE="cloud"; npm run dev`                                       |
+| **Run Frontend (Dev)** | `$env:DB_SOURCE="local"; npm run dev`                                       |
 | **Search Code**        | Use Agent Tool `grep_search` or `Select-String` (avoid `grep`)              |

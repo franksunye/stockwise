@@ -124,44 +124,37 @@ To test PRO-level analysis locally using your local Gemini proxy (`gemini_local`
     node frontend/scripts/turso-cli.mjs query "SELECT symbol, tier, signal FROM stock_briefs WHERE date = DATE('now', '+8 hours')"
     ```
 
-#### Execution Modes
+### Phase 5: [调试模式] 本地 LLM 逻辑验证
 
-1.  **Single User Debug (Test)**
-    *   Generates brief for ONE user (Phase 1 Analysis + Phase 2 Assembly).
-    *   Command:
-        ```powershell
-        $env:DB_SOURCE="cloud"; python backend/engine/brief_generator.py --user "user_id_here"
-        ```
+在开发新提示词 (Prompt)、调整交易逻辑或测试新模型时，使用**完全本地流程**可以获得极速反馈，且不消耗云端数据库配额。
 
-2.  **Full Production Run** (Normal)
-    *   Generates briefs for ALL active users (both Free and Pro).
-    *   Command:
-        ```powershell
-        $env:DB_SOURCE="cloud"; python -m backend.engine.brief_generator
-        ```
+#### 1. 准备本地环境与数据
+确保本地数据库 (`data/stockwise.db`) 包含最新的行情数据：
+```powershell
+# 指定同步某只股票的最新行情到本地库
+$env:DB_SOURCE="local"; python backend/main.py --symbol 00700
+```
 
-3.  **Optimized Local Generation** (Recommended)
-    *   Skips the Free tier analysis (Hunyuan) to save time/cost. Focuses on Pro tier (Gemini/DeepSeek) generation.
-    *   Command:
-        ```powershell
-        $env:DB_SOURCE="cloud"; $env:BRIEF_SKIP_FREE="true"; python -m backend.engine.brief_generator
-        ```
+#### 2. 执行本地 AI 预测
+使用本地 Gemini 代理或指定模型，并强制写入本地库：
+```powershell
+# --force 确保覆盖旧记录，--model 指定测试模型
+$env:DB_SOURCE="local"; python backend/main.py --analyze --symbol 00700 --model gemini-3-flash --force
+```
 
-4.  **Targeted Date Generation**
-    *   Generates briefs for a specific date.
-    *   Command:
-        ```powershell
-        $env:DB_SOURCE="cloud"; $env:BRIEF_SKIP_FREE="true"; python -m backend.engine.brief_generator --date 2026-01-26
-        ```
+#### 3. 瞬间验证 (CLI 查询)
+使用 `sqlite3` 命令行工具直接读取本地结果，无需经过 Web 界面或复杂的 API 调用：
+```powershell
+# 在项目根目录下执行
+sqlite3 data/stockwise.db "SELECT target_date, signal, confidence, ai_reasoning FROM ai_predictions_v2 WHERE symbol='00700' ORDER BY created_at DESC LIMIT 1;"
+```
 
-5.  **Push Notification Test**
-    *   Tests the notification delivery system only.
-    *   Command:
-        ```powershell
-        python backend/notifications.py --action push_daily
-        ```
+#### 4. 调试要点
+- **零网络延迟**：本地 SQLite 写入是秒级的，适合高频调整 Prompt。
+- **孤岛效应**：本地产生的结果**不会**出现在线上 App 中。调试满意后，请记得切回 `$env:DB_SOURCE="cloud"` 执行正式预测。
+- **表结构同步**：若线上增加了新列，需运行 `$env:DB_SOURCE="local"; python backend/main.py --sync-meta` 来同步本地 Schema。
 
-## ⚙️ Model Management (Switching & Adding Vendors)
+#### Execution Modes (Summary)
 
 Switching AI models or adding new models from different vendors (like DeepSeek, Aliyun, OpenAI compatible) is a routine operation. This is always done by updating the `prediction_models` table in the database.
 
