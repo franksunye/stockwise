@@ -64,7 +64,7 @@ class RuleAdapter(BasePredictionModel):
             sig = result.signal
             
             # Map back to API format
-            summary = f"{sig.action}: {sig.reason}"
+            summary = sig.reason
             reasoning_json = self._build_reasoning(sig.action, summary, sig.reason)
             
             # For pressure/support, use factors if available or fallback
