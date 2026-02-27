@@ -123,7 +123,7 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
   };
 
   return (
-    <div className="h-full w-full flex flex-col items-center justify-center px-4 snap-start pt-32 pb-32">
+    <div className="h-full w-full flex flex-col items-center justify-center px-6 snap-start snap-always pt-32 pb-32">
       <div className="w-full max-w-md space-y-5 mx-auto">
         {/* 1. AI 顶层核心结论 */}
         <section className="text-center space-y-1 py-2">

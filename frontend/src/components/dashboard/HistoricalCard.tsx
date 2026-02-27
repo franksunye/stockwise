@@ -53,7 +53,7 @@ export const HistoricalCard = memo(function HistoricalCard({ data, onClick }: { 
   const SignalIcon = isUp ? TrendingUp : isDown ? TrendingDown : Minus;
 
   return (
-    <div className="h-full w-full flex flex-col items-center justify-center px-6 snap-start">
+    <div className="h-full w-full flex flex-col items-center justify-center px-6 snap-start snap-always">
       <div 
         onClick={() => onClick?.(data)}
         className="w-full max-w-md glass-card p-8 border-white/5 relative overflow-hidden active:scale-[0.99] transition-transform cursor-pointer group hover:bg-white/[0.04]"

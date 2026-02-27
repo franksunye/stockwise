@@ -81,7 +81,7 @@ const AlmanacCard = memo(function AlmanacCard({
   );
 
   return (
-    <div className="w-full h-full shrink-0 flex flex-col items-center justify-center px-6 snap-center snap-always">
+    <div className="w-full h-full shrink-0 flex flex-col items-center justify-center px-6 snap-start snap-always">
       <div ref={posterRef} className="w-full max-w-md space-y-5 mx-auto relative">
         {isCapturing && isCurrent && (
           <div className="pt-8 pb-4 text-center">
@@ -379,7 +379,7 @@ export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlma
   }), [generateMarketingText, targetDate, generateImage, isCapturing, showToast]);
 
   return (
-    <div className="min-w-full h-full relative snap-center overflow-hidden">
+    <div className="min-w-full h-full shrink-0 relative snap-start snap-always overflow-hidden">
       {/* Toast Notification */}
       <AnimatePresence>
         {toastMessage && (

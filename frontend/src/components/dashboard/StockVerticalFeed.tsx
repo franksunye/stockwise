@@ -60,11 +60,11 @@ export const StockVerticalFeed = memo(function StockVerticalFeed({
   const handleScroll = (top: number) => onVerticalScroll(top, index);
 
   return (
-    <div className="min-w-full h-full relative snap-center overflow-hidden">
+    <div className="min-w-full h-full shrink-0 relative snap-start snap-always overflow-hidden">
       <VerticalIndicator container={container} onScroll={handleScroll} />
       <div 
         ref={setContainer}
-        className="w-full h-full absolute inset-0 overflow-y-scroll snap-y snap-mandatory scrollbar-hide"
+        className="w-full h-full absolute inset-0 overflow-y-scroll snap-y snap-mandatory scrollbar-hide flex flex-col items-center"
       >
         {/* Y轴 垂直内容 (TikTok Mode) */}
         <StockDashboardCard data={stock} onShowTactics={handleShowTactics} />
