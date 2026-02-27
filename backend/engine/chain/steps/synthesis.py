@@ -148,34 +148,38 @@ class SynthesisStep(BaseStep):
 - **综合评分**: {score_val:+d}
 ---
 
-## 强制执行字段 (系统已计算，请直接填入，不要修改)
+## 强制执行字段 (系统已计算，请直接填入并保持格式稳定，不要修改这些 Key 的值)
 ```json
 {{
   "signal": "{calculated_signal}",
   "confidence": {calculated_conf},
-  "key_levels": {{ "support": {boll_lower:.2f}, "resistance": {high_10d:.2f}, "stop_loss": {stop_ref:.2f} }},
-  "tactics": {{
-    "holding": [{{ "priority": "P1", "action": "{holding_action}", "trigger": "{holding_trigger}", "reason": "技术面触发" }}],
-    "empty": [{{ "priority": "P1", "action": "{empty_action}", "trigger": "价格企稳", "reason": "等待机会" }}],
-    "general": [{{ "priority": "P2", "action": "关注", "trigger": "成交量变化", "reason": "动能确认" }}]
+  "key_levels": {{ 
+    "immediate_support": [{boll_lower:.2f}], 
+    "immediate_resistance": [{high_10d:.2f}], 
+    "stop_loss_reference": {stop_ref:.2f} 
   }},
+  "tactics": {{
+    "holding_profit": [{{ "priority": "P1", "action": "{holding_action}", "trigger": "{holding_trigger}", "target_price": {high_10d:.2f}, "stop_advance_price": {close:.2f}, "reason": "技术面触发" }}],
+    "holding_loss": [{{ "priority": "P1", "action": "分批减仓", "trigger": "跌破{boll_lower:.2f}", "stop_loss_price": {stop_ref:.2f}, "reason": "触发止损防线" }}],
+    "empty": [{{ "priority": "P1", "action": "{empty_action}", "trigger": "价格企稳", "buy_zone_price": {boll_lower:.2f}, "reason": "寻找安全边际" }}]
+  }},
+  "counter_argument": "如果收盘价跌破 {stop_ref:.2f} 且成交量放大，则原有{calculated_signal}逻辑失效。",
   "news_analysis": ["无实时新闻"],
   "conflict_resolution": "{conflict_text}",
   "tomorrow_focus": "{focus_text}"
 }}
 ```
 
-## 需要你填写的字段
-**仅需填写以下 3 个字段**，其他字段请直接复制上方强制值，组合成一个完整的 JSON：
-1. `"summary"`: 用1句话总结当前技术面状态（评分{score_val:+d}）
-2. `"reasoning_trace"`: 必须输出包含以下 3 个对象的列表结构：
-   - {{ "step": "trend", "data": "从上方分析中详细提取 MA5/MA10/MA20 数值及均线状态", "conclusion": "趋势结论" }}
-   - {{ "step": "momentum", "data": "从上方提取记录的 MACD 柱状值/RSI 数值/KDJ 状态", "conclusion": "动能评估" }}
-   - {{ "step": "decision", "data": "综合以上技术信号的最终评级和裁决理由", "conclusion": "{decision_conclusion}" }}
-3. `"signal"`: {calculated_signal} (请直接填入)
+## 需要你补充填写的字段
+**仅需填写以下 3 个字段**，请将它们与上方强制执行的字段组合成一个**完整且合法的 JSON**：
+1. `"summary"`: 用简浅的一句话总结当前走势（必须基于评分{score_val:+d}）。
+2. `"reasoning_trace"`: 必须输出包含以下 3 个核心对象的列表：
+   - {{ "step": "trend", "data": "从上方提取 MA5/MA10/MA20 数值及均线状态", "conclusion": "趋势评估" }}
+   - {{ "step": "momentum", "data": "从上方提取 MACD 柱状值/RSI 数值/KDJ 状态", "conclusion": "动能评估" }}
+   - {{ "step": "decision", "data": "综合评分{score_val:+d}后的裁决理由", "conclusion": "{decision_conclusion}" }}
+3. `"signal"`: "{calculated_signal}" (保持原样)
 
-请直接输出完整 JSON，不要添加任何解释。
-特别注意：**所有文本值（例如 "未提供" 或 "N/A"）都必须包含在双引号中**。
+请直接输出完整 JSON。注意：**所有文本值必须用双引号括起来**。
 """
             return prompt
 
@@ -240,39 +244,40 @@ class SynthesisStep(BaseStep):
         if "key_levels" not in parsed:
             parsed["key_levels"] = {}
         
-        # 1. Backfill key_levels if missing or incomplete
+        # 1. Backfill key_levels if missing or incomplete (v3.3 Schema)
         model_name = d.get('model_name', '').lower()
-        # Non-lite models: Fill if missing support
-        # Lite models: Explicitly forced later, but initialize here to allow tactics backfill
-        if not parsed['key_levels'].get('support'):
-            high_10d = max([p.get('high', 0) for p in daily_prices[-10:]]) if daily_prices else 0
-            stop_ref = boll_lower * 0.97 if boll_lower > 0 else (latest.get('close', 0) or 0) * 0.95
-            parsed['key_levels'].update({
-                "support": round(boll_lower or ma20, 2),
-                "resistance": round(high_10d, 2),
-                "stop_loss": round(stop_ref, 2)
-            })
+        high_10d = max([p.get('high', 0) for p in daily_prices[-10:]]) if daily_prices else 0
+        stop_ref = boll_lower * 0.97 if boll_lower > 0 else (latest.get('close', 0) or 0) * 0.95
+        
+        if not parsed['key_levels'].get('immediate_support'):
+            parsed['key_levels']["immediate_support"] = [round(boll_lower or ma20, 2)]
+        if not parsed['key_levels'].get('immediate_resistance'):
+            parsed['key_levels']["immediate_resistance"] = [round(high_10d, 2)]
+        if not parsed['key_levels'].get('stop_loss_reference'):
+            parsed['key_levels']["stop_loss_reference"] = round(stop_ref, 2)
             
-        # 2. Backfill tactics if missing or empty
-        if not parsed.get('tactics') or not parsed['tactics'].get('holding'):
+        # 2. Backfill tactics if missing or empty (v3.3 Schema)
+        if not parsed.get('tactics') or (not parsed['tactics'].get('holding_profit') and not parsed['tactics'].get('holding')):
             signal = parsed.get('signal', 'Side')
-            base_holding = "持股观察" if signal == "Long" else "逢高减仓"
+            base_holding = "持股观察" if signal == "Long" else "持币观望"
             base_empty = "逢低介入" if signal == "Long" else "观望等待"
             
+            # Get support for trigger
+            supp = parsed['key_levels'].get('immediate_support', [0])[0]
+            
             parsed['tactics'] = {
-                "holding": [{
-                    "priority": "P1", 
-                    "action": base_holding, 
-                    "trigger": f"跌破{parsed['key_levels'].get('support', 0):.2f}", 
-                    "reason": "技术面触发风控"
+                "holding_profit": [{
+                    "priority": "P1", "action": base_holding, "trigger": f"不跌破{supp:.2f}",
+                    "target_price": round(high_10d, 2), "stop_advance_price": round(latest.get('close', 0), 2), "reason": "趋势持仓"
+                }],
+                "holding_loss": [{
+                    "priority": "P1", "action": "触发减仓", "trigger": f"跌破{supp:.2f}",
+                    "stop_loss_price": round(stop_ref, 2), "reason": "保护性止损"
                 }],
                 "empty": [{
-                    "priority": "P1", 
-                    "action": base_empty, 
-                    "trigger": f"回踩{parsed['key_levels'].get('support', 0):.2f}企稳", 
-                    "reason": "等待更有利位置"
-                }],
-                "general": []
+                    "priority": "P1", "action": base_empty, "trigger": f"回踩{supp:.2f}企稳",
+                    "buy_zone_price": round(boll_lower, 2), "reason": "等待右侧机会"
+                }]
             }
 
         # 3. Ensure other fields exist
@@ -291,19 +296,16 @@ class SynthesisStep(BaseStep):
         if not parsed.get('confidence') or not isinstance(parsed.get('confidence'), (int, float)):
             parsed['confidence'] = 0.5
 
-        # 5. LITE MODEL OVERRIDE: Force pre-calculated values (model can't follow instructions)
+        # 5. LITE MODEL OVERRIDE: Force pre-calculated values (v3.3 Schema)
         model_name = d.get('model_name', '').lower()
         if 'lite' in model_name:
-            # Re-calculate or use from outer scope
-            # Ensure key_levels to use pre-calculated values
-            high_10d = max([p.get('high', 0) for p in daily_prices[-10:]]) if daily_prices else 0
-            stop_ref = boll_lower * 0.97 if boll_lower > 0 else (latest.get('close', 0) or 0) * 0.95
-            
             parsed['key_levels'] = {
-                "support": round(boll_lower, 2),
-                "resistance": round(high_10d, 2),
-                "stop_loss": round(stop_ref, 2)
+                "immediate_support": [round(boll_lower, 2)],
+                "immediate_resistance": [round(high_10d, 2)],
+                "stop_loss_reference": round(stop_ref, 2)
             }
+            if "counter_argument" not in parsed:
+                parsed["counter_argument"] = f"若价格跌穿 {stop_ref:.2f} 关键位，当前多空判定失效，应立即止损。"
             
         # 6. Normalize reasoning_trace (Fix for Lite models returning dict or string instead of list)
         rt = parsed.get('reasoning_trace')
@@ -341,13 +343,28 @@ class SynthesisStep(BaseStep):
                 { "step": "decision", "data": "综合研判", "conclusion": parsed.get('summary', '观望')[:10] }
             ]
             
-        # Ensure it's always a list at the end
-        if not isinstance(parsed.get('reasoning_trace'), list):
-            parsed['reasoning_trace'] = [
-                { "step": "trend", "data": "根据日线均线分析", "conclusion": "趋势分析" },
-                { "step": "momentum", "data": "根据MACD及RSI指标", "conclusion": "动能评估" },
-                { "step": "decision", "data": "综合各周期信号", "conclusion": parsed.get('summary', '观望')[:10] }
+        # 7. Final Sanity Check for 6-step reasoning trace (v3.3 requirement)
+        rt = parsed.get('reasoning_trace', [])
+        if not isinstance(rt, list) or len(rt) < 3:
+            rt = [
+                { "step": "trend", "data": "均线及K线形态综合分析", "conclusion": "趋势确认" },
+                { "step": "momentum", "data": "MACD/RSI 动能强度监测", "conclusion": "动能评估" },
+                { "step": "levels", "data": f"支撑位 {boll_lower:.2f} 附近博弈", "conclusion": "空间格局" },
+                { "step": "context", "data": "大盘环境及板块共振分析", "conclusion": "环境对齐" },
+                { "step": "psychology", "data": "盘面多空情绪与诱多/诱空识别", "conclusion": "博弈心理" },
+                { "step": "decision", "data": "综合以上维度的最终风控裁决", "conclusion": parsed.get('signal', 'Side') }
             ]
+        elif len(rt) < 6:
+            # If model only provided 3, backfill the others to keep UI consistent
+            existing_steps = [s.get('step') for s in rt if isinstance(s, dict)]
+            if "levels" not in existing_steps:
+                rt.append({ "step": "levels", "data": "基于支撑阻力位的量价博弈", "conclusion": "空间格局" })
+            if "context" not in existing_steps:
+                rt.append({ "step": "context", "data": "综合外部环境与资金面流向分析", "conclusion": "环境共鸣" })
+            if "psychology" not in existing_steps:
+                rt.append({ "step": "psychology", "data": "多空心理博弈与关键节点情绪监测", "conclusion": "心理对冲" })
+            
+        parsed['reasoning_trace'] = rt
 
         context.artifacts["synthesis"] = parsed
 
