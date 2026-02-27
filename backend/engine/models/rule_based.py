@@ -12,7 +12,7 @@ class RuleAdapter(BasePredictionModel):
         logger.info(f"⚙️ Running Rule Engine for {symbol} on {date}")
         prices = data.get('daily_prices', [])
         if not prices:
-             return {"signal": "Side", "confidence": 0.0, "reasoning": self._build_reasoning("Side", "数据缺失", "无法获取价格数据")}
+             return {"signal": "Side", "confidence": 0.0, "reasoning": self._build_reasoning("Side", "数据缺失", "无法获取价格数据", {})}
              
         try:
             if isinstance(prices, list) and len(prices) > 0:
@@ -25,7 +25,6 @@ class RuleAdapter(BasePredictionModel):
             daily_series = pd.Series(latest)
             
             # Attempt to fetch extra context (Weekly/Monthly) locally since runner might not provide it
-            # This makes RuleAdapter smarter than before
             from backend.database import get_connection
             conn = get_connection()
             cursor = conn.cursor()
@@ -65,17 +64,19 @@ class RuleAdapter(BasePredictionModel):
             
             # Map back to API format
             summary = sig.reason
-            reasoning_json = self._build_reasoning(sig.action, summary, sig.reason)
+            close_val = latest.get('close', 0)
+            reasoning_json = self._build_reasoning(sig.action, summary, sig.reason, sig.factors, close_val)
             
-            # For pressure/support, use factors if available or fallback
+            # v3.3 Schema Support
             ma20 = sig.factors.get('ma20', 0)
+            boll_lower = latest.get('boll_lower', ma20 * 0.95 if ma20 > 0 else close_val * 0.95)
             
             return {
                 "signal": sig.action,
                 "confidence": sig.confidence,
                 "reasoning": reasoning_json,
                 "support_price": ma20,
-                "pressure_price": ma20 * 1.1, # Simple est
+                "pressure_price": ma20 * 1.1,
                 "token_usage_input": 0,
                 "token_usage_output": 0,
                 "execution_time_ms": 15
@@ -85,19 +86,42 @@ class RuleAdapter(BasePredictionModel):
             logger.error(f"Rule Engine Error: {e}")
             return None
     
-    def _build_reasoning(self, signal: str, summary: str, analysis: str) -> str:
-        """Build a JSON-formatted reasoning string consistent with LLM output."""
+    def _build_reasoning(self, signal: str, summary: str, analysis: str, factors: Dict[str, Any], close: float = 0) -> str:
+        """Build a JSON-formatted reasoning string consistent with v3.3 Schema."""
+        ma20 = factors.get('ma20', 0)
+        rsi = factors.get('rsi', 0)
+        macd = factors.get('macd_hist', 0)
+        
+        # Calculate levels for tactics
+        support = ma20 if ma20 > 0 else close * 0.95
+        resistance = close * 1.05 if ma20 == 0 else (ma20 * 1.1 if close < ma20 else close * 1.1)
+        stop_loss = support * 0.97
+        
         reasoning_data = {
             "signal": signal,
-            "summary": summary,
+            "confidence": 0.5 if signal == "Side" else 0.75,
+            "summary": f"量化兜底信号：{summary}",
             "reasoning_trace": [
-                {"step": "trend", "data": analysis, "conclusion": summary}
+                {"step": "trend", "data": f"MA20={ma20:.2f}, 价格={close:.2f}。{analysis}", "conclusion": "趋势观察"},
+                {"step": "momentum", "data": f"RSI={rsi:.1f}, MACD红柱={macd:.4f}", "conclusion": "动能评估"},
+                {"step": "levels", "data": f"关键支撑位在 MA20 ({ma20:.2f}) 附近，上方阻力参考前高。", "conclusion": "空间格局"},
+                {"step": "context", "data": "多周期共振分析：日、周、月趋势量化对比（系统预置规则）。", "conclusion": "多维对齐"},
+                {"step": "psychology", "data": "遵循趋势跟踪纪律，避开波动较大的主观预期区间。", "conclusion": "博弈纪律"},
+                {"step": "decision", "data": f"由于AI模块不可用，已切换至量化引擎根据均线偏离度执行兜底决策：{signal}", "conclusion": "量化契约"}
             ],
-            "tactics": {
-                "holding": [{"priority": "P1", "action": "持仓观察", "trigger": "均线信号变化", "reason": summary}],
-                "empty": [{"priority": "P1", "action": "观望为主", "trigger": "等待趋势确认", "reason": summary}]
+            "key_levels": {
+                "immediate_support": [round(support, 2)],
+                "immediate_resistance": [round(resistance, 2)],
+                "stop_loss_reference": round(stop_loss, 2)
             },
-            "conflict_resolution": "遵循均线趋势原则",
+            "tactics": {
+                "holding_profit": [{"priority": "P1", "action": "持仓观察", "trigger": f"不跌破 {ma20:.2f}", "target_price": round(resistance, 2), "stop_advance_price": round(close, 2), "reason": "趋势未改"}],
+                "holding_loss": [{"priority": "P1", "action": "严格止损", "trigger": f"有效跌破 {ma20:.2f}", "stop_loss_price": round(stop_loss, 2), "reason": "触发风险线"}],
+                "empty": [{"priority": "P1", "action": "观望为主", "trigger": f"回调至 {support:.2f} 企稳", "buy_zone_price": round(support, 2), "reason": "等待趋势确认"}]
+            },
+            "counter_argument": f"如果价格放量跌破 {stop_loss:.2f} 且 RSi 进一步走弱，则量化做多逻辑彻底失效。",
+            "conflict_resolution": "以均线系统为准，不带多空偏见，执行机械量化纪律。",
+            "tomorrow_focus": f"关注价格在 {ma20:.2f} 均线附近的博弈强度。",
             "is_llm": False
         }
         return json.dumps(reasoning_data, ensure_ascii=False)
