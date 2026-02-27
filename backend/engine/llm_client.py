@@ -70,7 +70,7 @@ class LLMClient:
             qps = LLM_CONFIG.get("hunyuan_qps", 2.0)
             self._rate_limiters["hunyuan"] = AsyncRateLimiter(qps)
 
-        self.timeout = timeout
+        # Line removed to favor the priority logic in line 60
         
         # Gemini Native Client 缓存 (用于云端 Gemini)
         self._gemini_client = None

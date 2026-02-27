@@ -73,10 +73,10 @@ export interface Tactic {
     priority: "P1" | "P2" | "P3";
     action: string;
     trigger: string;
-    target_price?: number | string;
-    stop_advance_price?: number | string;
-    stop_loss_price?: number | string;
-    buy_zone_price?: number | string;
+    target_price?: number | string | number[];
+    stop_advance_price?: number | string | number[];
+    stop_loss_price?: number | string | number[];
+    buy_zone_price?: number | string | number[];
     reason: string;
 }
 

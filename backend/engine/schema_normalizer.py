@@ -2,13 +2,56 @@ from typing import Dict, Any, List
 
 import re
 
+def _semantic_normalize_price(val: Any, is_range: bool = False) -> Any:
+    """
+    语义化价格处理：
+    1. 如果是区间 (is_range=True)，确保为 [min, max] 排序数组。
+    2. 如果是单值，保持原样。
+    3. 如果是多重水位，保持 LLM 给出的原始顺序。
+    """
+    if isinstance(val, list):
+        # 过滤非数字
+        nums = []
+        for x in val:
+            try: nums.append(float(x))
+            except: pass
+        
+        if not nums: return val
+        if is_range and len(nums) >= 2:
+            return sorted(nums)[:2] # 取最小的两个作为区间边界
+        return nums
+    return val
+
 def normalize_ai_response(data: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Standardize the data format returned by LLM to ensure consistent storage structure.
-    This acts as an Anti-Corruption Layer (ACL) between the LLM and the Database.
+    Standardize the data format returned by LLM...
     """
-    if not isinstance(data, dict):
-        return {}
+    if not isinstance(data, dict): return {}
+
+    # ... (前序信号/新闻处理保持不变) ...
+
+    # 处理 Tactics 中的价格语义
+    if "tactics" in data and isinstance(data["tactics"], dict):
+        for category in ["holding_profit", "holding_loss", "empty"]:
+            if category in data["tactics"]:
+                for item in data["tactics"][category]:
+                    if "buy_zone_price" in item:
+                        item["buy_zone_price"] = _semantic_normalize_price(item["buy_zone_price"], is_range=True)
+                    if "target_price" in item:
+                        item["target_price"] = _semantic_normalize_price(item["target_price"], is_range=False)
+
+    # 处理 Key Levels 中的价格语义
+    if "key_levels" in data and isinstance(data["key_levels"], dict):
+        kl = data["key_levels"]
+        for k in ["immediate_support", "immediate_resistance"]:
+            if k in kl:
+                kl[k] = _semantic_normalize_price(kl[k], is_range=False)
+        for k in ["strong_support", "strong_resistance"]:
+            if k in kl:
+                kl[k] = _semantic_normalize_price(kl[k], is_range=True) # 强支撑通常也是个区间
+
+    # 4. Normalize key_levels (Final structural normalization)
+    # ... (保持原有的 legacy support 映射) ...
 
     # 0. Normalize Signal (Must be "Long", "Short", or "Side")
     # Handle cases where Enum string representation might have leaked (e.g. "SignalEnum.SIDE")
@@ -103,20 +146,26 @@ def normalize_ai_response(data: Dict[str, Any]) -> Dict[str, Any]:
         
         # Legacy support: Auto-populate support/resistance/stop_loss from new fields if missing
         kl = data["key_levels"]
+        
+        def _get_float(val):
+            if isinstance(val, list):
+                val = val[0] if val else 0
+            try:
+                return float(val)
+            except (ValueError, TypeError):
+                return 0.0
+
         if kl.get("immediate_support") and not kl.get("support"):
-            kl["support"] = kl["immediate_support"][0] if kl["immediate_support"] else 0
+            kl["support"] = _get_float(kl["immediate_support"])
         if kl.get("strong_support") and not kl.get("support"):
-            try: kl["support"] = float(kl["strong_support"])
-            except: pass
+            kl["support"] = _get_float(kl["strong_support"])
             
         if kl.get("immediate_resistance") and not kl.get("resistance"):
-            kl["resistance"] = kl["immediate_resistance"][0] if kl["immediate_resistance"] else 0
+            kl["resistance"] = _get_float(kl["immediate_resistance"])
         if kl.get("strong_resistance") and not kl.get("resistance"):
-            try: kl["resistance"] = float(kl["strong_resistance"])
-            except: pass
+            kl["resistance"] = _get_float(kl["strong_resistance"])
             
         if kl.get("stop_loss_reference") and not kl.get("stop_loss"):
-            try: kl["stop_loss"] = float(kl["stop_loss_reference"])
-            except: pass
+            kl["stop_loss"] = _get_float(kl["stop_loss_reference"])
 
     return data

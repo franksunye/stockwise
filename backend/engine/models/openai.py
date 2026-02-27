@@ -28,6 +28,10 @@ class OpenAIAdapter(BasePredictionModel):
         self.max_tokens = config.get("max_tokens", 4096)
         self.temperature = config.get("temperature", 0.7)
         
+        # Use timeout from config or fallback to global/default (120s)
+        from backend.config import LLM_CONFIG
+        timeout = config.get("timeout") or LLM_CONFIG.get("timeout") or 120
+        
         # Initialize internal LLMClient
         # This reuses the robust networking, parsing, and tracking logic of the main client.
         self.client = LLMClient(
@@ -35,7 +39,7 @@ class OpenAIAdapter(BasePredictionModel):
             base_url=self.base_url,
             api_key=self.api_key,
             model=self.model_name,
-            timeout=60
+            timeout=timeout
         )
         
     async def predict(self, symbol: str, date: str, data: Dict[str, Any]) -> Dict[str, Any]:

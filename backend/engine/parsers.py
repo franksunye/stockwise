@@ -21,10 +21,10 @@ class SignalEnum(str, Enum):
 class KeyLevels(BaseModel):
     immediate_support: List[float] = Field(default_factory=list)
     immediate_resistance: List[float] = Field(default_factory=list)
-    strong_support: Optional[Union[float, str]] = 0.0
-    strong_resistance: Optional[Union[float, str]] = 0.0
-    breakout_confirmation_level: Optional[Union[float, str]] = 0.0
-    stop_loss_reference: Optional[Union[float, str]] = 0.0
+    strong_support: Optional[Union[float, str, List[Union[float, str]]]] = 0.0
+    strong_resistance: Optional[Union[float, str, List[Union[float, str]]]] = 0.0
+    breakout_confirmation_level: Optional[Union[float, str, List[Union[float, str]]]] = 0.0
+    stop_loss_reference: Optional[Union[float, str, List[Union[float, str]]]] = 0.0
 
     # Backward compatibility
     support: Optional[float] = 0.0
@@ -40,10 +40,10 @@ class TacticItem(BaseModel):
     priority: str = "P1"
     action: str
     trigger: str
-    target_price: Optional[Union[float, str]] = None
-    stop_advance_price: Optional[Union[float, str]] = None
-    stop_loss_price: Optional[Union[float, str]] = None
-    buy_zone_price: Optional[Union[float, str]] = None
+    target_price: Optional[Union[float, str, List[Union[float, str]]]] = None
+    stop_advance_price: Optional[Union[float, str, List[Union[float, str]]]] = None
+    stop_loss_price: Optional[Union[float, str, List[Union[float, str]]]] = None
+    buy_zone_price: Optional[Union[float, str, List[Union[float, str]]]] = None
     reason: str
 
 class Tactics(BaseModel):

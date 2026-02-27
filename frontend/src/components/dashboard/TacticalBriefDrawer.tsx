@@ -60,6 +60,26 @@ const getStepConfig = (step: string) => {
   return { icon: <Hash size={12} />, label: '分析步' };
 };
 
+// 语义化价格格式化
+const formatPrice = (val: number | string | number[] | undefined, isRange: boolean = false): string => {
+  if (val === undefined || val === null) return '--';
+  
+  if (Array.isArray(val)) {
+    if (val.length === 0) return '--';
+    
+    // 如果是区间，显示 A - B (后端已排序，这里做兜底)
+    if (isRange) {
+      const sorted = [...val].map(Number).sort((a, b) => a - b);
+      return sorted.length >= 2 ? `${sorted[0]} - ${sorted[1]}` : `${sorted[0]}`;
+    }
+    
+    // 如果是离散点位，显示 A / B
+    return val.join(' / ');
+  }
+  
+  return String(val);
+};
+
 export function TacticalBriefDrawer({ 
   isOpen, onClose, data, tier, model, symbol, targetDate, signal, confidence, stockName, userPos
 }: TacticalBriefDrawerProps) {
@@ -327,7 +347,7 @@ export function TacticalBriefDrawer({
                                      <p className="text-xs text-slate-400">触发: <span className="text-slate-200">{t.trigger}</span></p>
                                      {t.buy_zone_price && (
                                          <div className="py-1 px-2 bg-indigo-500/10 rounded-lg w-fit">
-                                             <p className="text-[10px] text-indigo-400 font-bold uppercase italic">理想买入区: {t.buy_zone_price}</p>
+                                             <p className="text-[10px] text-indigo-400 font-bold uppercase italic">理想买入区: {formatPrice(t.buy_zone_price, true)}</p>
                                          </div>
                                      )}
                                      <p className="text-xs text-slate-500 font-medium italic border-t border-white/10 pt-1.5 mt-1.5">理由: {t.reason}</p>
@@ -370,44 +390,42 @@ export function TacticalBriefDrawer({
                           <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
                             <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.5)]" /> 关键价位参考
                           </h3>
-                          <div className="grid grid-cols-2 gap-3">
                               <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5">
-                                  <p className="text-[9px] font-black text-slate-600 uppercase mb-2 tracking-tighter">支撑防御</p>
-                                  <div className="space-y-1">
-                                      <p className="text-sm font-black text-emerald-400">
-                                          {data.key_levels.strong_support || data.key_levels.support || '--'}
-                                      </p>
-                                      <p className="text-[10px] text-slate-500 font-bold">支撑位</p>
-                                  </div>
-                              </div>
-                              <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5">
-                                  <p className="text-[9px] font-black text-slate-600 uppercase mb-2 tracking-tighter">压力挑战</p>
-                                  <div className="space-y-1">
-                                      <p className="text-sm font-black text-rose-400">
-                                          {data.key_levels.strong_resistance || data.key_levels.resistance || '--'}
-                                      </p>
-                                      <p className="text-[10px] text-slate-500 font-bold">压力位</p>
-                                  </div>
-                              </div>
-                              <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5">
-                                  <p className="text-[9px] font-black text-slate-600 uppercase mb-2 tracking-tighter">突破信号</p>
-                                  <div className="space-y-1">
-                                      <p className="text-sm font-black text-indigo-400">
-                                          {data.key_levels.breakout_confirmation_level || '--'}
-                                      </p>
-                                      <p className="text-[10px] text-slate-500 font-bold">确认位</p>
-                                  </div>
-                              </div>
-                              <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5">
-                                  <p className="text-[9px] font-black text-slate-600 uppercase mb-2 tracking-tighter">极端止损</p>
-                                  <div className="space-y-1">
-                                      <p className="text-sm font-black text-slate-200">
-                                          {data.key_levels.stop_loss_reference || data.key_levels.stop_loss || '--'}
-                                      </p>
-                                      <p className="text-[10px] text-slate-500 font-bold">止损线</p>
-                                  </div>
-                              </div>
-                          </div>
+                                   <p className="text-[9px] font-black text-slate-600 uppercase mb-2 tracking-tighter">支撑水位</p>
+                                   <div className="space-y-1">
+                                       <p className="text-sm font-black text-emerald-400">
+                                           {formatPrice(data.key_levels.immediate_support || data.key_levels.support)}
+                                       </p>
+                                       <p className="text-[10px] text-slate-500 font-bold">支撑位</p>
+                                   </div>
+                               </div>
+                               <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5">
+                                   <p className="text-[9px] font-black text-slate-600 uppercase mb-2 tracking-tighter">压力挑战</p>
+                                   <div className="space-y-1">
+                                       <p className="text-sm font-black text-rose-400">
+                                           {formatPrice(data.key_levels.immediate_resistance || data.key_levels.resistance)}
+                                       </p>
+                                       <p className="text-[10px] text-slate-500 font-bold">挑战位</p>
+                                   </div>
+                               </div>
+                               <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5">
+                                   <p className="text-[9px] font-black text-slate-600 uppercase mb-2 tracking-tighter">强支撑区</p>
+                                   <div className="space-y-1">
+                                       <p className="text-sm font-black text-indigo-400">
+                                           {formatPrice(data.key_levels.strong_support, true)}
+                                       </p>
+                                       <p className="text-[10px] text-slate-500 font-bold">防线</p>
+                                   </div>
+                               </div>
+                               <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5">
+                                   <p className="text-[9px] font-black text-slate-600 uppercase mb-2 tracking-tighter">强压力区</p>
+                                   <div className="space-y-1">
+                                       <p className="text-sm font-black text-amber-500">
+                                           {formatPrice(data.key_levels.strong_resistance, true)}
+                                       </p>
+                                       <p className="text-[10px] text-slate-500 font-bold">重压区</p>
+                                   </div>
+                               </div>
                       </section>
                   )}
 
