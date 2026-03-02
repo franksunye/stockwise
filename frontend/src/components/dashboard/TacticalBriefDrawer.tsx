@@ -651,8 +651,13 @@ export function TacticalBriefDrawer({
                         onScroll={(e) => {
                            const target = e.currentTarget;
                            const scrollPos = target.scrollLeft;
-                           const cardWidth = target.offsetWidth - 32; // padding
-                           const index = Math.round(scrollPos / cardWidth);
+                           const containerWidth = target.clientWidth;
+                           // 每张卡片宽度 + 间隔 (gap-4 = 16px)
+                           const itemWidth = (containerWidth - 32) + 16; 
+                           
+                           // 使用中心点偏移算法，确保在滚动到一半时就触发索引切换
+                           const index = Math.round(scrollPos / itemWidth);
+                           
                            if (index !== activeIndex && index >= 0 && index < nodes.length) {
                                setActiveIndex(index);
                            }
@@ -678,8 +683,8 @@ export function TacticalBriefDrawer({
                                     onClick={() => {
                                         const container = carouselRef.current;
                                         if (container) {
-                                            const cardWidth = container.offsetWidth - 32;
-                                            container.scrollTo({ left: i * cardWidth, behavior: 'smooth' });
+                                            const itemWidth = (container.clientWidth - 32) + 16;
+                                            container.scrollTo({ left: i * itemWidth, behavior: 'smooth' });
                                         }
                                     }}
                                 >
@@ -711,12 +716,24 @@ export function TacticalBriefDrawer({
                                 </div>
                             );
                          })}
+                         {/* 物理占位，确保最后一张卡片可 Snap 居中 */}
+                         <div className="min-w-[24px] h-full shrink-0" />
                       </div>
 
                       {/* Pagination Dots */}
                       <div className="flex justify-center gap-1.5 mt-2">
                           {nodes.map((_, i) => (
-                              <div key={i} className={`h-1 rounded-full transition-all duration-300 ${activeIndex === i ? 'w-4 bg-indigo-500' : 'w-1 bg-white/10'}`} />
+                              <button 
+                                  key={i} 
+                                  onClick={() => {
+                                      const container = carouselRef.current;
+                                      if (container) {
+                                          const itemWidth = (container.clientWidth - 32) + 16;
+                                          container.scrollTo({ left: i * itemWidth, behavior: 'smooth' });
+                                      }
+                                  }}
+                                  className={`h-1 rounded-full transition-all duration-300 ${activeIndex === i ? 'w-6 bg-indigo-500' : 'w-1 bg-white/10'}`} 
+                              />
                           ))}
                       </div>
                    </section>
