@@ -62,6 +62,9 @@ export const StockVerticalFeed = memo(function StockVerticalFeed({
   return (
     <div className="min-w-full h-full shrink-0 relative snap-start snap-always overflow-hidden">
       <VerticalIndicator container={container} onScroll={handleScroll} />
+      {/* Layout Contract:
+          This is a snap-y viewport. Each child card must occupy one full viewport page
+          (100dvh + shrink-0 in child components), otherwise cards will collapse and stack. */}
       <div 
         ref={setContainer}
         className="w-full h-full absolute inset-0 overflow-y-scroll snap-y snap-mandatory scrollbar-hide flex flex-col items-center"

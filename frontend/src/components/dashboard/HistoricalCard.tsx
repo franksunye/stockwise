@@ -53,7 +53,9 @@ export const HistoricalCard = memo(function HistoricalCard({ data, onClick }: { 
   const SignalIcon = isUp ? TrendingUp : isDown ? TrendingDown : Minus;
 
   return (
-    <div className="h-full w-full flex flex-col items-center justify-center px-6 snap-start snap-always">
+    // Layout Contract: each historical card must be a full snap page.
+    // Do not switch back to h-full without an explicit parent height contract.
+    <div className="h-[100dvh] min-h-[100dvh] shrink-0 w-full flex flex-col items-center justify-center px-6 snap-start snap-always">
       <div 
         onClick={() => onClick?.(data)}
         className="w-full max-w-md glass-card p-8 border-white/5 relative overflow-hidden active:scale-[0.99] transition-transform cursor-pointer group hover:bg-white/[0.04]"
