@@ -280,28 +280,31 @@ export function TacticalBriefDrawer({
   const scenarioEmpty = normalizeScenarioTactics(data?.tactics?.empty || [], 'empty');
 
   const [viewState, setViewState] = useState<'holding_profit'|'holding_loss'|'empty'>('holding_profit');
-  const [activeIndex, setActiveIndex] = useState(() => {
-    const idx = getPriceNodes(data, currentPrice).findIndex(n => n.kind === 'current');
-    return idx >= 0 ? idx : 0;
-  });
+  const [activeIndex, setActiveIndex] = useState(0);
   const nodes = getPriceNodes(data, currentPrice);
   const scrollRef = useRef<HTMLDivElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll carousel to NOW (current price) on mount
+  // Reset to NOW (current price) card whenever drawer opens
   useEffect(() => {
-    const container = carouselRef.current;
-    if (container && activeIndex > 0) {
-      requestAnimationFrame(() => {
+    if (!isOpen) return;
+    const nowIdx = nodes.findIndex(n => n.kind === 'current');
+    const targetIdx = nowIdx >= 0 ? nowIdx : 0;
+    setActiveIndex(targetIdx);
+
+    // Scroll carousel to NOW after DOM renders
+    requestAnimationFrame(() => {
+      const container = carouselRef.current;
+      if (container && targetIdx > 0) {
         const firstChild = container.children[0] as HTMLElement;
         if (firstChild) {
           const step = firstChild.offsetWidth + 16;
-          container.scrollTo({ left: activeIndex * step, behavior: 'auto' });
+          container.scrollTo({ left: targetIdx * step, behavior: 'auto' });
         }
-      });
-    }
+      }
+    });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isOpen]);
 
   const priceRange = {
     max: Math.max(...nodes.map(n => n.price)) * 1.05,
