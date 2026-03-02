@@ -124,7 +124,58 @@ To test PRO-level analysis locally using your local Gemini proxy (`gemini_local`
     node frontend/scripts/turso-cli.mjs query "SELECT symbol, tier, signal FROM stock_briefs WHERE date = DATE('now', '+8 hours')"
     ```
 
-### Phase 5: [调试模式] 本地 LLM 逻辑验证
+### Phase 6: Incident Response (Repair & Backfill)
+
+When users report missing predictions or you notice a discrepancy, follow this "Repair SOP":
+
+#### 1. Identify Missing Stocks (The "Gap Analysis")
+Check which PRO stocks are missing for a specific date (e.g., '2026-02-27').
+```sql
+WITH pro_symbols AS (
+    SELECT DISTINCT w.symbol 
+    FROM user_watchlist w 
+    JOIN users u ON w.user_id = u.user_id 
+    WHERE u.subscription_tier = 'pro'
+),
+pred_symbols AS (
+    SELECT symbol FROM ai_predictions_v2 
+    WHERE date = 'YYYY-MM-DD' AND model_id = 'deepseek-v3'
+)
+SELECT symbol FROM pro_symbols 
+EXCEPT 
+SELECT symbol FROM pred_symbols;
+```
+
+#### 2. Investigating the Root Cause
+Query `llm_traces` to see if the failure was a network timeout or a parsing error.
+```sql
+SELECT symbol, status, error_message, created_at 
+FROM llm_traces 
+WHERE created_at >= 'YYYY-MM-DD' AND created_at < 'YYYY-MM-DD +1'
+AND status != 'success'
+ORDER BY created_at DESC;
+```
+*   **`error`**: Remote API issue (Timeout, Connection closed). 
+*   **`parse_failed`**: AI returned content but the JSON was malformed or truncated.
+
+#### 3. Execution (The Fill)
+Run the backfill for the missing symbol and date. **Always use `--force`**.
+```powershell
+$env:DB_SOURCE="cloud"; python backend/main.py --analyze --date YYYY-MM-DD --symbol <SYMBOL> --model deepseek-v3 --force
+```
+
+#### 4. Batching Repairs
+If multiple stocks failed, use a loop with a cooling period to avoid refiring the same API instability.
+```powershell
+# Example batch repair logic
+$stocks = @('000988', '300015', ...)
+foreach ($s in $stocks) {
+    python backend/main.py --analyze --date 2026-02-27 --symbol $s --model deepseek-v3 --force
+    Start-Sleep -Seconds 5
+}
+```
+
+### Phase 7: [调试模式] 本地 LLM 逻辑验证
 
 在开发新提示词 (Prompt)、调整交易逻辑或测试新模型时，使用**完全本地流程**可以获得极速反馈，且不消耗云端数据库配额。
 
@@ -212,19 +263,18 @@ if __name__ == "__main__":
 
 ### 1. Database Connection Errors (`Cannot connect to host ... turso.io`)
 *   **Cause**: Concurrency limits or connection pool exhaustion.
-*   **Fix**: Increase `Start-Sleep` duration in batch scripts (e.g., from 5s to 10s) or reduce batch size.
+*   **Fix**: Increase `Start-Sleep` duration in batch scripts (e.g., from 5s to 10s).
 
-### 2. Local LLM Configuration (Gemini)
-If using `gemini-3-flash` locally, ensure the `prediction_models` table is correctly configured to use `adapter-gemini-local`.
+### 2. LLM Transient Errors (DeepSeek/Cloud APIs)
+*   **Error**: `Read timed out` or `Response ended prematurely`.
+*   **Cause**: Extreme API load at the provider's end (common on Fridays or market peaks).
+*   **Fix**: Simple manual retry (Phase 6) usually succeeds as these are transient network issues.
 
-*   **Check Configuration**:
-    ```sql
-    SELECT model_id, provider, config_json FROM prediction_models WHERE model_id = 'gemini-3-flash';
-    ```
-*   **Fix SQL** (via Python script recommended to avoid JSON corruption):
-    Ensure `config_json` is `{"model":"gemini-3-flash","api_key_env":"LLM_API_KEY","base_url_env":"GEMINI_LOCAL_BASE_URL","max_tokens":8192}`.
+### 3. "JSON 解析失败" (parse_failed)
+*   **Cause**: AI truncated its response or included illegal characters that `json.loads` cannot handle.
+*   **Fix**: Check if the Prompt is too long or if the `LLM_TIMEOUT` is too short. Use `python tmp/test_parser.py` (if exists) with the raw output to debug the parser regex in `backend/engine/parsers.py`.
 
-### 3. "AI Analysis Complete! Success: 0/1"
+### 4. "AI Analysis Complete! Success: 0/1"
 *   **Cause**: Data for today already exists, and `--force` was not used.
 *   **Fix**: Add the `--force` flag to the command.
 

@@ -20,6 +20,95 @@ from backend.db_repo.queries import get_cleanup_sql, get_save_prices_sql, GET_ST
 from backend.logger import logger
 
 
+def _normalize_period_ohlcv(df: pd.DataFrame, period: str) -> pd.DataFrame:
+    """
+    Normalize raw provider data into strict weekly/monthly OHLCV bars.
+    This prevents accidental daily rows leaking into period tables.
+    """
+    if df.empty or period not in ("weekly", "monthly"):
+        return df
+
+    required_cols = {"date", "open", "high", "low", "close", "volume"}
+    if not required_cols.issubset(df.columns):
+        logger.warning(f"⚠️ {period} normalization skipped: missing columns {required_cols - set(df.columns)}")
+        return pd.DataFrame()
+
+    work = df.copy()
+    work["date"] = pd.to_datetime(work["date"], errors="coerce")
+    work = work.dropna(subset=["date"]).sort_values("date")
+    work = work.drop_duplicates(subset=["date"], keep="last")
+
+    # Force numeric for robust aggregation.
+    for col in ["open", "high", "low", "close", "volume"]:
+        work[col] = pd.to_numeric(work[col], errors="coerce")
+    work = work.dropna(subset=["open", "high", "low", "close", "volume"])
+    if work.empty:
+        return pd.DataFrame()
+
+    if period == "weekly":
+        work["_bucket"] = work["date"].dt.to_period("W-FRI")
+    else:
+        work["_bucket"] = work["date"].dt.to_period("M")
+
+    aggregated = (
+        work.groupby("_bucket", sort=True, as_index=False)
+        .agg(
+            date=("date", "max"),
+            open=("open", "first"),
+            high=("high", "max"),
+            low=("low", "min"),
+            close=("close", "last"),
+            volume=("volume", "sum"),
+        )
+        .sort_values("date")
+        .reset_index(drop=True)
+    )
+
+    aggregated["change_percent"] = aggregated["close"].pct_change().fillna(0) * 100
+    aggregated["date"] = aggregated["date"].dt.strftime("%Y-%m-%d")
+
+    return aggregated[["date", "open", "high", "low", "close", "volume", "change_percent"]]
+
+
+def _is_period_interval_sane(df: pd.DataFrame, period: str) -> bool:
+    """
+    Guard rail: weekly rows should not be clustered like daily bars;
+    monthly rows should not be clustered like weekly/daily bars.
+    """
+    if df.empty or len(df) < 3:
+        return True
+
+    dates = pd.to_datetime(df["date"], errors="coerce").dropna().sort_values()
+    if len(dates) < 3:
+        return True
+
+    diffs = dates.diff().dropna().dt.days
+    if diffs.empty:
+        return True
+
+    threshold = 4 if period == "weekly" else 20
+    bad_ratio = float((diffs < threshold).sum()) / float(len(diffs))
+    return bad_ratio <= 0.15
+
+
+def _calculate_indicators_safe(df: pd.DataFrame) -> pd.DataFrame:
+    try:
+        return calculate_indicators(df)
+    except Exception as e:
+        logger.warning(f"⚠️ Indicator calculation failed, fallback to zeroed indicators: {e}")
+        out = df.copy()
+        default_cols = [
+            "ma5", "ma10", "ma20", "ma60",
+            "macd", "macd_signal", "macd_hist",
+            "boll_upper", "boll_mid", "boll_lower",
+            "rsi", "kdj_k", "kdj_d", "kdj_j",
+        ]
+        for col in default_cols:
+            if col not in out.columns:
+                out[col] = 0
+        return out
+
+
 def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool = False):
     """增量处理特定周期的股票数据"""
     table_name = f"{period}_prices"
@@ -94,6 +183,20 @@ def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool =
         logger.warning(f"⚠️ {symbol}: 校验后无有效数据")
         return False
 
+    # 5.3 Period normalization (weekly/monthly only)
+    if period in ("weekly", "monthly"):
+        raw_rows = len(df)
+        df = _normalize_period_ohlcv(df, period)
+        if df.empty:
+            logger.warning(f"⚠️ {symbol}: {period} 归一化后无有效数据")
+            return False
+
+        if not _is_period_interval_sane(df, period):
+            logger.error(f"❌ {symbol}: {period} 周期间隔异常，拒绝写入以防止数据污染")
+            return False
+
+        logger.info(f"🧹 {symbol} {period} normalized: raw={raw_rows} -> bars={len(df)}")
+
     # [Optimization] Splice local history for indicator calculation
     # For any daily sync (standard or realtime) that has previous data,
     # we prepend historical rows from DB to ensure sliding windows (like MA60) work correctly.
@@ -143,7 +246,7 @@ def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool =
             logger.warning(f"⚠️ Context splicing failed for {symbol}: {e}")
 
     # 6. 计算指标
-    df = calculate_indicators(df)
+    df = _calculate_indicators_safe(df)
     
     # [Optimization] Filter back to only new rows for insertion
     if period == "daily" and '__is_new' in df.columns:
@@ -171,28 +274,15 @@ def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool =
 
     from database import execute_with_retry
 
-    # 6.1 对于周/月线：删除当前周期的旧记录（防止每日同步产生重复）
-    # akshare 每天返回的"当前周/月"日期会变化，需要清理再插入
+    # 6.1 对于周/月线：删除本次回灌窗口，确保历史污染可被覆盖清理
     if period in ("weekly", "monthly") and records:
-        latest_date = records[-1][1]  # 最新记录的日期
-        latest_dt = pd.to_datetime(latest_date)
-        
-        def _cleanup_current_period(conn, _table, _symbol, _latest_dt, _period):
+        start_date = records[0][1]  # 本次窗口最早日期
+
+        def _cleanup_period_window(conn, _table, _symbol, _start_date):
             cur = conn.cursor()
-            if _period == "weekly":
-                # 删除同一周的所有记录 (ISO 周)
-                week_start = _latest_dt - pd.Timedelta(days=_latest_dt.weekday())
-                cur.execute(get_cleanup_sql(_table), 
-                           (_symbol, week_start.strftime('%Y-%m-%d')))
-                logger.debug(f"🧹 清理 {_symbol} 本周旧记录 (从 {week_start.strftime('%Y-%m-%d')} 起)")
-            elif _period == "monthly":
-                # 删除同月的所有记录
-                month_start = _latest_dt.strftime('%Y-%m-01')
-                cur.execute(get_cleanup_sql(_table), 
-                           (_symbol, month_start))
-                logger.debug(f"🧹 清理 {_symbol} 本月旧记录 (从 {month_start} 起)")
-        
-        execute_with_retry(_cleanup_current_period, 3, table_name, symbol, latest_dt, period)
+            cur.execute(get_cleanup_sql(_table), (_symbol, _start_date))
+
+        execute_with_retry(_cleanup_period_window, 3, table_name, symbol, start_date)
 
     def _save_prices(conn, _table, _records):
         cur = conn.cursor()

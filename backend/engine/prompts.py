@@ -1,6 +1,7 @@
 import asyncio
 import json
 from typing import Dict, Any, List
+import pandas as pd
 from database import get_connection, get_stock_profile
 from backend.db_repo.queries import (
     GET_STOCK_NAME_QUERY, 
@@ -10,6 +11,94 @@ from backend.db_repo.queries import (
 )
 from backend.engine.context import SessionContext
 from backend.templating import render_template
+
+
+def _is_period_history_sane(rows: List[Dict[str, Any]], period: str) -> bool:
+    """
+    Detect daily-like leakage in weekly/monthly history.
+    """
+    if not rows or len(rows) < 3:
+        return True
+
+    date_series = pd.to_datetime(
+        pd.Series([r.get("date") for r in rows]),
+        errors="coerce",
+    ).dropna().sort_values()
+
+    if len(date_series) < 3:
+        return True
+
+    diffs = date_series.diff().dropna().dt.days
+    if diffs.empty:
+        return True
+
+    threshold = 4 if period == "weekly" else 20
+    bad_ratio = float((diffs < threshold).sum()) / float(len(diffs))
+    return bad_ratio <= 0.15
+
+
+def _aggregate_daily_to_period_bars(daily_rows: List[Dict[str, Any]], period: str) -> List[Dict[str, Any]]:
+    if not daily_rows:
+        return []
+
+    df = pd.DataFrame(daily_rows)
+    required_cols = {"date", "open", "high", "low", "close", "volume"}
+    if not required_cols.issubset(df.columns):
+        return []
+
+    df["date"] = pd.to_datetime(df["date"], errors="coerce")
+    for col in ["open", "high", "low", "close", "volume"]:
+        df[col] = pd.to_numeric(df[col], errors="coerce")
+
+    df = (
+        df.dropna(subset=["date", "open", "high", "low", "close", "volume"])
+        .sort_values("date")
+        .drop_duplicates(subset=["date"], keep="last")
+    )
+    if df.empty:
+        return []
+
+    if period == "weekly":
+        df["_bucket"] = df["date"].dt.to_period("W-FRI")
+    else:
+        df["_bucket"] = df["date"].dt.to_period("M")
+
+    bars = (
+        df.groupby("_bucket", sort=True, as_index=False)
+        .agg(
+            date=("date", "max"),
+            open=("open", "first"),
+            high=("high", "max"),
+            low=("low", "min"),
+            close=("close", "last"),
+            volume=("volume", "sum"),
+        )
+        .sort_values("date")
+        .reset_index(drop=True)
+    )
+    bars["change_percent"] = bars["close"].pct_change().fillna(0) * 100
+
+    # Rebuild period indicators so prompt fields (MA20/RSI/MACD) remain consistent.
+    try:
+        from backend.engine.indicators import calculate_indicators
+        bars = calculate_indicators(bars)
+    except Exception:
+        # Small samples can break third-party indicator internals; degrade gracefully.
+        for col in [
+            "ma5", "ma10", "ma20", "ma60",
+            "macd", "macd_signal", "macd_hist",
+            "boll_lower", "boll_mid", "boll_upper",
+            "rsi", "kdj_k", "kdj_d", "kdj_j",
+        ]:
+            if col not in bars.columns:
+                bars[col] = 0
+    bars["date"] = bars["date"].dt.strftime("%Y-%m-%d")
+
+    fields = ["date", "open", "high", "low", "close", "change_percent", "volume", "ma20", "rsi", "macd_hist"]
+    records = bars[fields].to_dict("records")
+    records.sort(key=lambda x: x["date"], reverse=True)
+    return records
+
 
 async def fetch_full_analysis_context(symbol: str, as_of_date: str = None, ctx: SessionContext = None) -> Dict[str, Any]:
     """
@@ -106,6 +195,32 @@ async def fetch_full_analysis_context(symbol: str, as_of_date: str = None, ctx: 
         ORDER BY date DESC LIMIT 12
     """, (symbol, analysis_date))
     monthly_history = [dict(zip(["date", "open", "high", "low", "close", "change_percent", "volume", "ma20", "rsi", "macd_hist"], m)) for m in cursor.fetchall()]
+
+    # 3.4 Safety fallback: If period tables look daily-like, derive W/M from daily bars.
+    weekly_ok = _is_period_history_sane(weekly_history, "weekly")
+    monthly_ok = _is_period_history_sane(monthly_history, "monthly")
+    need_weekly_fallback = (len(weekly_history) < 8) or (not weekly_ok)
+    need_monthly_fallback = (len(monthly_history) < 3) or (not monthly_ok)
+
+    if need_weekly_fallback or need_monthly_fallback:
+        cursor.execute("""
+            SELECT date, open, high, low, close, volume
+            FROM daily_prices
+            WHERE symbol = ? AND date <= ?
+            ORDER BY date DESC LIMIT 1200
+        """, (symbol, analysis_date))
+        raw_daily = [dict(zip(["date", "open", "high", "low", "close", "volume"], r)) for r in cursor.fetchall()]
+        raw_daily = raw_daily[::-1]  # oldest -> newest for aggregation
+
+        if need_weekly_fallback:
+            derived_weekly = _aggregate_daily_to_period_bars(raw_daily, "weekly")
+            if derived_weekly:
+                weekly_history = derived_weekly[:12]
+
+        if need_monthly_fallback:
+            derived_monthly = _aggregate_daily_to_period_bars(raw_daily, "monthly")
+            if derived_monthly:
+                monthly_history = derived_monthly[:12]
 
     # 4. Global Market Context (Via ContextService)
     from backend.engine.context_service import ContextService

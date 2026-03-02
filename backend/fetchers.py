@@ -65,25 +65,27 @@ class AkShareFetcher(BaseFetcher):
             except Exception as e:
                 logger.warning(f"⚠️ [AkShare] HK {symbol} EastMoney Hist failed: {e}")
             
-            # 2. Sina (Fallback)
-            logger.info(f"📡 [AkShare] HK {symbol} Falling back to Sina...")
-            try:
-                df = ak.stock_hk_daily(symbol=symbol, adjust="qfq")
-                if not df.empty:
-                    if "date" in df.columns:
-                        s_dt = datetime.strptime(start_date, "%Y%m%d").date()
-                        df["date"] = pd.to_datetime(df["date"]).dt.date
-                        df = df[df["date"] >= s_dt]
-                        
-                    df = df.rename(columns={
-                        "date": "日期", "open": "开盘", "high": "最高", "low": "最低", "close": "收盘", "volume": "成交量"
-                    })
-                    if "涨跌幅" not in df.columns:
-                        df["涨跌幅"] = df["收盘"].pct_change() * 100
-                    logger.info(f"✅ [AkShare] HK {symbol} fetched from Sina Fallback")
-                    return df
-            except Exception as e:
-                logger.error(f"❌ [AkShare] HK {symbol} Sina Fallback failed: {e}")
+            # Guard rail: Sina HK fallback endpoint is daily-only.
+            # Running it for weekly/monthly can leak daily rows into period tables.
+            if period == "daily":
+                logger.info(f"📡 [AkShare] HK {symbol} Falling back to Sina...")
+                try:
+                    df = ak.stock_hk_daily(symbol=symbol, adjust="qfq")
+                    if not df.empty:
+                        if "date" in df.columns:
+                            s_dt = datetime.strptime(start_date, "%Y%m%d").date()
+                            df["date"] = pd.to_datetime(df["date"]).dt.date
+                            df = df[df["date"] >= s_dt]
+
+                        df = df.rename(columns={
+                            "date": "日期", "open": "开盘", "high": "最高", "low": "最低", "close": "收盘", "volume": "成交量"
+                        })
+                        if "涨跌幅" not in df.columns:
+                            df["涨跌幅"] = df["收盘"].pct_change() * 100
+                        logger.info(f"✅ [AkShare] HK {symbol} fetched from Sina Fallback")
+                        return df
+                except Exception as e:
+                    logger.error(f"❌ [AkShare] HK {symbol} Sina Fallback failed: {e}")
             return pd.DataFrame()
 
         @retry_request(max_retries=3, delay=3.0)
@@ -148,20 +150,24 @@ class AkShareFetcher(BaseFetcher):
                         return df
                 except: pass
 
-            # 4. Index
-            try:
-                df = ak.stock_zh_index_daily(symbol=symbol)
-                if not df.empty:
-                    df['date'] = pd.to_datetime(df['date']).dt.strftime('%Y-%m-%d')
-                    s_dt = datetime.strptime(start_date, "%Y%m%d").strftime("%Y-%m-%d")
-                    df = df[df['date'] >= s_dt]
-                    df = df.rename(columns={
-                        "date": "日期", "open": "开盘", "high": "最高", "low": "最低", "close": "收盘", "volume": "成交量"
-                    })
-                    if "涨跌幅" not in df.columns:
-                        df["涨跌幅"] = df["收盘"].pct_change() * 100
-                    return df
-            except: pass
+            # Guard rail: index daily fallback is daily-only.
+            # Do not reuse it for weekly/monthly requests.
+            if period == "daily":
+                # 4. Index
+                try:
+                    df = ak.stock_zh_index_daily(symbol=symbol)
+                    if not df.empty:
+                        df['date'] = pd.to_datetime(df['date']).dt.strftime('%Y-%m-%d')
+                        s_dt = datetime.strptime(start_date, "%Y%m%d").strftime("%Y-%m-%d")
+                        df = df[df['date'] >= s_dt]
+                        df = df.rename(columns={
+                            "date": "日期", "open": "开盘", "high": "最高", "low": "最低", "close": "收盘", "volume": "成交量"
+                        })
+                        if "涨跌幅" not in df.columns:
+                            df["涨跌幅"] = df["收盘"].pct_change() * 100
+                        return df
+                except:
+                    pass
             
             return pd.DataFrame()
 
