@@ -1,8 +1,0 @@
-{
-  "buildCommand": "npm run build",
-  "installCommand": "npm install",
-  "framework": "nextjs",
-  "regions": ["hkg1"],
-  "cleanUrls": true,
-  "trailingSlash": false
-}
