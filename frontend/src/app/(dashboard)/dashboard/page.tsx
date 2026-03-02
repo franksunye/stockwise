@@ -163,6 +163,11 @@ function DashboardContent() {
     }
   }, [selectedTactics]);
 
+  const selectedTacticStock = useMemo(
+    () => stocks.find((s) => s.symbol === selectedTactics?.symbol),
+    [stocks, selectedTactics?.symbol]
+  );
+
   useEffect(() => {
     interface ExtendedNavigator { clearAppBadge?: () => Promise<void>; }
     const nav = navigator as ExtendedNavigator;
@@ -291,13 +296,14 @@ function DashboardContent() {
         onClose={closeTactics} 
         tier={tier}
         data={parsedTacticsData}
-        userPos={stocks.find(s => s.symbol === selectedTactics?.symbol)?.rule?.position || 'none'}
+        userPos={selectedTacticStock?.rule?.position || 'none'}
         model={selectedTactics?.prediction?.model}
         symbol={selectedTactics?.symbol || ''}
         targetDate={selectedTactics?.prediction?.target_date || ''}
         signal={selectedTactics?.prediction?.signal}
         confidence={selectedTactics?.prediction?.confidence}
-        stockName={stocks.find(s => s.symbol === selectedTactics?.symbol)?.name}
+        stockName={selectedTacticStock?.name}
+        currentPrice={selectedTacticStock?.price?.close}
       />
 
       <AnimatePresence>

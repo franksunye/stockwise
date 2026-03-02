@@ -18,7 +18,6 @@ import {
   AlertTriangle,
   Calendar
 } from 'lucide-react';
-import dynamic from 'next/dynamic';
 import { AIPrediction, TacticalData } from '@/lib/types';
 import { shouldEnableHighPerformance } from '@/lib/device-utils';
 import { AICouncil } from './AICouncil';
@@ -37,6 +36,7 @@ interface TacticalBriefDrawerProps {
   signal?: 'Long' | 'Short' | 'Side';
   confidence?: number;
   stockName?: string;
+  currentPrice?: number;
 }
 
 import { SilentPoster } from './SilentPoster';
@@ -80,8 +80,66 @@ const formatPrice = (val: number | string | number[] | undefined, isRange: boole
   return String(val);
 };
 
+const toNumberList = (val: number | string | number[] | undefined): number[] => {
+  if (val === undefined || val === null) return [];
+  const list = Array.isArray(val) ? val : [val];
+  const parsed = list
+    .map((x) => (typeof x === 'number' ? x : Number(x)))
+    .filter((x) => Number.isFinite(x));
+  return Array.from(new Map(parsed.map((x) => [x.toFixed(4), x])).values());
+};
+
+const normalizeDiscreteLevels = (
+  raw: number | string | number[] | undefined,
+  fallback: number | undefined,
+  mode: 'support' | 'resistance',
+): number[] => {
+  const levels = toNumberList(raw);
+  if (levels.length === 0 && typeof fallback === 'number' && Number.isFinite(fallback)) {
+    levels.push(fallback);
+  }
+  const sorted = [...levels].sort((a, b) => (mode === 'support' ? b - a : a - b));
+  return sorted.slice(0, 2);
+};
+
+const formatLevel = (val: number | undefined): string => {
+  if (val === undefined || !Number.isFinite(val)) return '--';
+  return Number.isInteger(val) ? `${val}` : val.toFixed(2).replace(/\.?0+$/, '');
+};
+
+const getLevelDistance = (current: number | undefined, level: number | undefined): number | undefined => {
+  if (
+    current === undefined ||
+    level === undefined ||
+    !Number.isFinite(current) ||
+    !Number.isFinite(level) ||
+    current === 0
+  ) {
+    return undefined;
+  }
+  return ((level - current) / current) * 100;
+};
+
+const formatDistancePercent = (distance: number | undefined): string => {
+  if (distance === undefined || !Number.isFinite(distance)) return '--';
+  const abs = Math.abs(distance);
+  const sign = distance > 0 ? '+' : '-';
+  return `${sign}${abs.toFixed(2)}%`;
+};
+
+const getKeyLevelStatus = (
+  current: number | undefined,
+  support1: number | undefined,
+  resistance1: number | undefined,
+): string => {
+  if (current === undefined || !Number.isFinite(current)) return '状态：当前价格不可用，先参考关键位区间。';
+  if (support1 !== undefined && current < support1) return '状态：已跌破一防，防守优先，等待企稳信号。';
+  if (resistance1 !== undefined && current > resistance1) return '状态：已突破一攻，转为观察突破延续。';
+  return '状态：位于一防与一攻之间，耐心等待方向选择。';
+};
+
 export function TacticalBriefDrawer({ 
-  isOpen, onClose, data, tier, model, symbol, targetDate, signal, confidence, stockName, userPos
+  isOpen, onClose, data, tier, model, symbol, targetDate, signal, confidence, stockName, currentPrice, userPos
 }: TacticalBriefDrawerProps) {
   const [isMounted, setIsMounted] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
@@ -97,6 +155,26 @@ export function TacticalBriefDrawer({
   
   const rawGeneral = data?.tactics?.general;
   const generalTactics = Array.isArray(rawGeneral) ? rawGeneral : (rawGeneral ? [rawGeneral] : []);
+
+  const supportLevels = normalizeDiscreteLevels(
+    data?.key_levels?.immediate_support,
+    data?.key_levels?.support,
+    'support',
+  );
+  const resistanceLevels = normalizeDiscreteLevels(
+    data?.key_levels?.immediate_resistance,
+    data?.key_levels?.resistance,
+    'resistance',
+  );
+  const l1 = supportLevels[0];
+  const l2 = supportLevels[1];
+  const r1 = resistanceLevels[0];
+  const r2 = resistanceLevels[1];
+  const dL1 = getLevelDistance(currentPrice, l1);
+  const dL2 = getLevelDistance(currentPrice, l2);
+  const dR1 = getLevelDistance(currentPrice, r1);
+  const dR2 = getLevelDistance(currentPrice, r2);
+  const keyLevelStatus = getKeyLevelStatus(currentPrice, l1, r1);
 
   const [viewState, setViewState] = useState<'holding_profit'|'holding_loss'|'empty'>('holding_profit');
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -390,42 +468,78 @@ export function TacticalBriefDrawer({
                           <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
                             <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.5)]" /> 关键价位参考
                           </h3>
-                              <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5">
-                                   <p className="text-[9px] font-black text-slate-600 uppercase mb-2 tracking-tighter">支撑水位</p>
-                                   <div className="space-y-1">
-                                       <p className="text-sm font-black text-emerald-400">
-                                           {formatPrice(data.key_levels.immediate_support || data.key_levels.support)}
-                                       </p>
-                                       <p className="text-[10px] text-slate-500 font-bold">支撑位</p>
+                          <div className="mb-3 px-3 py-2 rounded-xl border border-indigo-500/20 bg-indigo-500/5 flex items-center justify-between">
+                            <span className="text-[10px] font-black text-indigo-300 uppercase tracking-widest">当前价锚点</span>
+                            <span className="text-sm font-black text-white">{formatLevel(currentPrice)}</span>
+                          </div>
+                          <p className="text-[10px] text-slate-500 leading-relaxed mb-3">
+                            读法：左侧是防守位（一防/二防），右侧是进攻位（一攻/二攻）；百分比为相对当前价距离。
+                          </p>
+                          <p className="text-[11px] text-slate-300 mb-3 px-3 py-2 rounded-xl border border-white/5 bg-white/[0.02]">
+                            {keyLevelStatus}
+                          </p>
+                          <div className="grid grid-cols-2 gap-3">
+                               <div className="p-3 rounded-2xl bg-white/[0.02] border border-white/5">
+                                   <div className="flex items-center justify-between mb-1.5">
+                                      <span className="text-[10px] font-black px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">一防</span>
+                                      <span className="text-[10px] text-slate-500 font-bold">第一防守位</span>
                                    </div>
+                                   <p className="text-base font-black text-emerald-400">{formatLevel(l1)}</p>
+                                   <p className="text-[10px] text-emerald-300 mt-0.5">距现价 {formatDistancePercent(dL1)}</p>
+                                   <p className="text-[10px] text-slate-500 mt-1">守住可继续观察</p>
                                </div>
-                               <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5">
-                                   <p className="text-[9px] font-black text-slate-600 uppercase mb-2 tracking-tighter">压力挑战</p>
-                                   <div className="space-y-1">
-                                       <p className="text-sm font-black text-rose-400">
-                                           {formatPrice(data.key_levels.immediate_resistance || data.key_levels.resistance)}
-                                       </p>
-                                       <p className="text-[10px] text-slate-500 font-bold">挑战位</p>
+                               <div className="p-3 rounded-2xl bg-white/[0.02] border border-white/5">
+                                   <div className="flex items-center justify-between mb-1.5">
+                                      <span className="text-[10px] font-black px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">二防</span>
+                                      <span className="text-[10px] text-slate-500 font-bold">第二防守位</span>
                                    </div>
+                                   <p className="text-base font-black text-emerald-400">{formatLevel(l2)}</p>
+                                   <p className="text-[10px] text-emerald-300 mt-0.5">距现价 {formatDistancePercent(dL2)}</p>
+                                   <p className="text-[10px] text-slate-500 mt-1">跌破一防后观察这里</p>
                                </div>
-                               <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5">
-                                   <p className="text-[9px] font-black text-slate-600 uppercase mb-2 tracking-tighter">强支撑区</p>
-                                   <div className="space-y-1">
-                                       <p className="text-sm font-black text-indigo-400">
-                                           {formatPrice(data.key_levels.strong_support, true)}
-                                       </p>
-                                       <p className="text-[10px] text-slate-500 font-bold">防线</p>
+                               <div className="p-3 rounded-2xl bg-white/[0.02] border border-white/5">
+                                   <div className="flex items-center justify-between mb-1.5">
+                                      <span className="text-[10px] font-black px-1.5 py-0.5 rounded bg-rose-500/15 text-rose-300 border border-rose-500/30">一攻</span>
+                                      <span className="text-[10px] text-slate-500 font-bold">第一挑战位</span>
                                    </div>
+                                   <p className="text-base font-black text-rose-400">{formatLevel(r1)}</p>
+                                   <p className="text-[10px] text-rose-300 mt-0.5">距现价 {formatDistancePercent(dR1)}</p>
+                                   <p className="text-[10px] text-slate-500 mt-1">需要先突破再观察</p>
                                </div>
-                               <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5">
-                                   <p className="text-[9px] font-black text-slate-600 uppercase mb-2 tracking-tighter">强压力区</p>
-                                   <div className="space-y-1">
-                                       <p className="text-sm font-black text-amber-500">
-                                           {formatPrice(data.key_levels.strong_resistance, true)}
-                                       </p>
-                                       <p className="text-[10px] text-slate-500 font-bold">重压区</p>
+                               <div className="p-3 rounded-2xl bg-white/[0.02] border border-white/5">
+                                   <div className="flex items-center justify-between mb-1.5">
+                                      <span className="text-[10px] font-black px-1.5 py-0.5 rounded bg-rose-500/15 text-rose-300 border border-rose-500/30">二攻</span>
+                                      <span className="text-[10px] text-slate-500 font-bold">第二目标位</span>
                                    </div>
+                                   <p className="text-base font-black text-rose-400">{formatLevel(r2)}</p>
+                                   <p className="text-[10px] text-rose-300 mt-0.5">距现价 {formatDistancePercent(dR2)}</p>
+                                   <p className="text-[10px] text-slate-500 mt-1">接近该位时注意冲高回落</p>
                                </div>
+                          </div>
+                          <details className="mt-3 group rounded-xl border border-white/5 bg-white/[0.02]">
+                            <summary className="cursor-pointer list-none px-3 py-2.5 text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center justify-between">
+                              <span>进阶关键位</span>
+                              <span className="text-slate-600 group-open:rotate-180 transition-transform">v</span>
+                            </summary>
+                            <div className="px-3 pb-3 grid grid-cols-2 gap-2">
+                              <div className="p-2 rounded-lg border border-white/5 bg-black/10">
+                                <p className="text-[9px] font-black text-slate-600 mb-1">强支撑区</p>
+                                <p className="text-[11px] font-bold text-indigo-300">{formatPrice(data.key_levels.strong_support, true)}</p>
+                              </div>
+                              <div className="p-2 rounded-lg border border-white/5 bg-black/10">
+                                <p className="text-[9px] font-black text-slate-600 mb-1">强压力区</p>
+                                <p className="text-[11px] font-bold text-amber-300">{formatPrice(data.key_levels.strong_resistance, true)}</p>
+                              </div>
+                              <div className="p-2 rounded-lg border border-white/5 bg-black/10">
+                                <p className="text-[9px] font-black text-slate-600 mb-1">突破确认</p>
+                                <p className="text-[11px] font-bold text-indigo-300">{formatPrice(data.key_levels.breakout_confirmation_level)}</p>
+                              </div>
+                              <div className="p-2 rounded-lg border border-white/5 bg-black/10">
+                                <p className="text-[9px] font-black text-slate-600 mb-1">止损参考</p>
+                                <p className="text-[11px] font-bold text-slate-200">{formatPrice(data.key_levels.stop_loss_reference || data.key_levels.stop_loss)}</p>
+                              </div>
+                            </div>
+                          </details>
                       </section>
                   )}
 
