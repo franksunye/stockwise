@@ -127,7 +127,6 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
                   src={article.image} 
                   alt={article.title} 
                   fill
-                  priority
                   className="object-cover" 
                 />
             </div>
