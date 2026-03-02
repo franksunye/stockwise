@@ -601,23 +601,23 @@ export function TacticalBriefDrawer({
                                 <ChevronDown size={16} />
                               </div>
                             </summary>
-                            <div className="mt-2 px-3 pb-3 grid grid-cols-2 gap-2 rounded-2xl border border-white/5 bg-white/[0.02]">
-                              <div className="p-3 rounded-xl border border-white/5 bg-black/10">
-                                <p className="text-[10px] font-black text-slate-600 mb-1 uppercase tracking-wide">强支撑区</p>
-                                <p className="text-base font-black text-indigo-300 leading-tight">{formatPrice(data.key_levels.strong_support, true)}</p>
-                              </div>
-                              <div className="p-3 rounded-xl border border-white/5 bg-black/10">
-                                <p className="text-[10px] font-black text-slate-600 mb-1 uppercase tracking-wide">强压力区</p>
-                                <p className="text-base font-black text-amber-300 leading-tight">{formatPrice(data.key_levels.strong_resistance, true)}</p>
-                              </div>
-                              <div className="p-3 rounded-xl border border-white/5 bg-black/10">
-                                <p className="text-[10px] font-black text-slate-600 mb-1 uppercase tracking-wide">突破确认</p>
-                                <p className="text-base font-black text-indigo-300 leading-tight">{formatPrice(data.key_levels.breakout_confirmation_level)}</p>
-                              </div>
-                              <div className="p-3 rounded-xl border border-white/5 bg-black/10">
-                                <p className="text-[10px] font-black text-slate-600 mb-1 uppercase tracking-wide">止损参考</p>
-                                <p className="text-base font-black text-slate-200 leading-tight">{formatPrice(data.key_levels.stop_loss_reference || data.key_levels.stop_loss)}</p>
-                              </div>
+                            <div className="mt-2 p-4 grid grid-cols-2 gap-3 rounded-2xl border border-white/5 bg-white/[0.02]">
+                               <div className="p-3 rounded-xl border border-indigo-500/10 bg-indigo-500/[0.03]">
+                                 <p className="text-[10px] font-black text-indigo-400/60 mb-1 uppercase tracking-wide">强支撑区</p>
+                                 <p className="text-base font-black text-indigo-300 leading-tight">{formatPrice(data.key_levels.strong_support, true)}</p>
+                               </div>
+                               <div className="p-3 rounded-xl border border-amber-500/10 bg-amber-500/[0.03]">
+                                 <p className="text-[10px] font-black text-amber-400/60 mb-1 uppercase tracking-wide">强压力区</p>
+                                 <p className="text-base font-black text-amber-300 leading-tight">{formatPrice(data.key_levels.strong_resistance, true)}</p>
+                               </div>
+                               <div className="p-3 rounded-xl border border-indigo-500/10 bg-indigo-500/[0.03]">
+                                 <p className="text-[10px] font-black text-indigo-400/60 mb-1 uppercase tracking-wide">突破确认</p>
+                                 <p className="text-base font-black text-indigo-300 leading-tight">{formatPrice(data.key_levels.breakout_confirmation_level)}</p>
+                               </div>
+                               <div className="p-3 rounded-xl border border-white/10 bg-white/[0.03]">
+                                 <p className="text-[10px] font-black text-slate-500 mb-1 uppercase tracking-wide">止损参考</p>
+                                 <p className="text-base font-black text-slate-200 leading-tight">{formatPrice(data.key_levels.stop_loss_reference || data.key_levels.stop_loss)}</p>
+                               </div>
                             </div>
                           </details>
                       </section>
