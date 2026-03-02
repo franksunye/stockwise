@@ -280,10 +280,28 @@ export function TacticalBriefDrawer({
   const scenarioEmpty = normalizeScenarioTactics(data?.tactics?.empty || [], 'empty');
 
   const [viewState, setViewState] = useState<'holding_profit'|'holding_loss'|'empty'>('holding_profit');
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(() => {
+    const idx = getPriceNodes(data, currentPrice).findIndex(n => n.kind === 'current');
+    return idx >= 0 ? idx : 0;
+  });
   const nodes = getPriceNodes(data, currentPrice);
   const scrollRef = useRef<HTMLDivElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll carousel to NOW (current price) on mount
+  useEffect(() => {
+    const container = carouselRef.current;
+    if (container && activeIndex > 0) {
+      requestAnimationFrame(() => {
+        const firstChild = container.children[0] as HTMLElement;
+        if (firstChild) {
+          const step = firstChild.offsetWidth + 16;
+          container.scrollTo({ left: activeIndex * step, behavior: 'auto' });
+        }
+      });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const priceRange = {
     max: Math.max(...nodes.map(n => n.price)) * 1.05,
@@ -604,13 +622,14 @@ export function TacticalBriefDrawer({
                               return (
                                   <motion.div 
                                       key={node.id}
-                                      animate={{ 
-                                          opacity: (activeIndex === -1 || isActive) ? 1 : 0.4,
-                                          scale: isActive ? 1.05 : 1,
-                                          zIndex: isActive ? 10 : 0
-                                      }}
+                                       animate={{ 
+                                           opacity: (activeIndex === -1 || isActive) ? 1 : 0.4,
+                                           scale: isActive ? 1.02 : 1,
+                                           zIndex: isActive ? 10 : 0
+                                       }}
+                                       transition={{ duration: 0.25, ease: "easeOut" }}
                                       style={{ top: `${y}%` }}
-                                      className="absolute left-0 right-0 -translate-y-1/2 flex items-center transition-all duration-300 pointer-events-none"
+                                      className="absolute left-0 right-0 -translate-y-1/2 flex items-center pointer-events-none"
                                   >
                                       {isCurrent ? (
                                            <div className="w-full flex items-center justify-center">
