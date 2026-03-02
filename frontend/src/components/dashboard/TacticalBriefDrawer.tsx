@@ -604,19 +604,19 @@ export function TacticalBriefDrawer({
                             <div className="mt-2 px-3 pb-3 grid grid-cols-2 gap-2 rounded-2xl border border-white/5 bg-white/[0.02]">
                               <div className="p-3 rounded-xl border border-white/5 bg-black/10">
                                 <p className="text-[10px] font-black text-slate-600 mb-1 uppercase tracking-wide">强支撑区</p>
-                                <p className="text-xs font-bold text-indigo-300 leading-tight">{formatPrice(data.key_levels.strong_support, true)}</p>
+                                <p className="text-base font-black text-indigo-300 leading-tight">{formatPrice(data.key_levels.strong_support, true)}</p>
                               </div>
                               <div className="p-3 rounded-xl border border-white/5 bg-black/10">
                                 <p className="text-[10px] font-black text-slate-600 mb-1 uppercase tracking-wide">强压力区</p>
-                                <p className="text-xs font-bold text-amber-300 leading-tight">{formatPrice(data.key_levels.strong_resistance, true)}</p>
+                                <p className="text-base font-black text-amber-300 leading-tight">{formatPrice(data.key_levels.strong_resistance, true)}</p>
                               </div>
                               <div className="p-3 rounded-xl border border-white/5 bg-black/10">
                                 <p className="text-[10px] font-black text-slate-600 mb-1 uppercase tracking-wide">突破确认</p>
-                                <p className="text-xs font-bold text-indigo-300 leading-tight">{formatPrice(data.key_levels.breakout_confirmation_level)}</p>
+                                <p className="text-base font-black text-indigo-300 leading-tight">{formatPrice(data.key_levels.breakout_confirmation_level)}</p>
                               </div>
                               <div className="p-3 rounded-xl border border-white/5 bg-black/10">
                                 <p className="text-[10px] font-black text-slate-600 mb-1 uppercase tracking-wide">止损参考</p>
-                                <p className="text-xs font-bold text-slate-200 leading-tight">{formatPrice(data.key_levels.stop_loss_reference || data.key_levels.stop_loss)}</p>
+                                <p className="text-base font-black text-slate-200 leading-tight">{formatPrice(data.key_levels.stop_loss_reference || data.key_levels.stop_loss)}</p>
                               </div>
                             </div>
                           </details>
