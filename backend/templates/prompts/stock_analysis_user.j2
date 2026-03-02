@@ -101,6 +101,8 @@
 - `tactics` 中必须且仅包含三个子对象：`holding_profit`, `holding_loss`, `empty`。
 - 每个战术建议必须保持**结构完整性**，对于不适用的价位字段请显式输出为 `null`。
 - `key_levels` 中所有价位必须从提供数据中推导。
+- `immediate_support` / `immediate_resistance` 必须都是**长度为2**的数字数组，且语义固定为 `[L1, L2]` / `[R1, R2]`。
+- 关键位顺序与方向必须满足：`L1 <= 当日收盘价`，`L2 < L1`，`R1 >= 当日收盘价`，`R2 > R1`。
 - 价位建议需考虑风险收益比。
 
 {{ context_instruction }}
