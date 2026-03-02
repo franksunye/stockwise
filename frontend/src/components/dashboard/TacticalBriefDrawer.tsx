@@ -459,8 +459,8 @@ export function TacticalBriefDrawer({
                                                 <span className={`text-[10px] font-black px-1.5 py-0.5 rounded italic ${t.priority === 'P1' ? 'bg-indigo-500' : 'bg-slate-700'} text-white`}>{t.priority}</span>
                                                 <span className="text-sm font-bold text-white">{t.action}</span>
                                             </div>
-                                            <div className="flex items-center gap-1 opacity-80 text-[10px] font-bold text-[#2ECC71]">
-                                                <span>🟢</span> 盈利中
+                                            <div className="px-2 py-0.5 rounded-lg bg-[#2ECC71]/10 border border-[#2ECC71]/20 text-[10px] font-bold text-[#2ECC71]">
+                                                盈利中
                                             </div>
                                         </div>
 
@@ -489,8 +489,8 @@ export function TacticalBriefDrawer({
                                                 <span className={`text-[10px] font-black px-1.5 py-0.5 rounded italic ${t.priority === 'P1' ? 'bg-rose-500' : 'bg-slate-700'} text-white`}>{t.priority}</span>
                                                 <span className="text-sm font-bold text-white">{t.action}</span>
                                             </div>
-                                            <div className="flex items-center gap-1 opacity-80 text-[10px] font-bold text-[#FF4D4F]">
-                                                <span>🔴</span> 亏损中
+                                            <div className="px-2 py-0.5 rounded-lg bg-[#FF4D4F]/10 border border-[#FF4D4F]/20 text-[10px] font-bold text-[#FF4D4F]">
+                                                亏损中
                                             </div>
                                         </div>
 
@@ -518,8 +518,8 @@ export function TacticalBriefDrawer({
                                               <span className={`text-[10px] font-black px-1.5 py-0.5 rounded italic ${t.priority === 'P1' ? 'bg-indigo-500' : 'bg-slate-700'} text-white`}>{t.priority}</span>
                                               <span className="text-sm font-bold text-white">{t.action}</span>
                                           </div>
-                                          <div className="flex items-center gap-1 opacity-80 text-[10px] font-bold text-[#5DA9FF]">
-                                              <span>🔵</span> 观望中
+                                          <div className="px-2 py-0.5 rounded-lg bg-[#3A7AFE]/10 border border-[#3A7AFE]/20 text-[10px] font-bold text-[#5DA9FF]">
+                                              观望中
                                           </div>
                                       </div>
 
