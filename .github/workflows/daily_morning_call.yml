@@ -54,6 +54,7 @@ jobs:
           pip install -r backend/requirements.txt
 
       - name: Refresh Market Almanac with Overnight Data
+        timeout-minutes: 5
         env:
           PYTHONUNBUFFERED: "1"
           TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}

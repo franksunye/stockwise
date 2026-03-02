@@ -45,6 +45,7 @@ jobs:
           pip install -r backend/requirements.txt
 
       - name: Run Almanac Generator
+        timeout-minutes: 15
         env:
           PYTHONUNBUFFERED: "1"
           TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}

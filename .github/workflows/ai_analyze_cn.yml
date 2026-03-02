@@ -113,6 +113,7 @@ jobs:
           python -u backend/main.py --analyze --market CN $MODEL_FLAG $FORCE_FLAG $DATE_FLAG
 
       - name: Generate Market Almanac
+        timeout-minutes: 5
         env:
           PYTHONUNBUFFERED: "1"
           TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}

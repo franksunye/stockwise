@@ -20,38 +20,51 @@ from datetime import datetime, timedelta
 NASDAQ_FRESH_START_HOUR = 5   # 05:00 Beijing = US market close
 NASDAQ_FRESH_END_HOUR = 15    # 15:00 Beijing = A-share market close
 
-current_dir = os.path.dirname(os.path.abspath(__file__))
-backend_dir = os.path.dirname(current_dir)
-if backend_dir not in sys.path:
-    sys.path.insert(0, backend_dir)
+# --- Path Management ---
+current_file = os.path.abspath(__file__)
+engine_dir = os.path.dirname(current_file)
+backend_dir = os.path.dirname(engine_dir)
+root_dir = os.path.dirname(backend_dir)
 
+# Add both root and backend to sys.path for flexible importing
+for d in [root_dir, backend_dir]:
+    if d not in sys.path:
+        sys.path.insert(0, d)
+
+# Standardize Imports
 try:
     from backend.database import get_connection
     from backend.logger import logger
     from backend.context.provider import MarketContextProvider
-    from backend.config import BEIJING_TZ
+    from backend.config import BEIJING_TZ, ADMIN_MOBILES
+    from backend.utils import send_wecom_notification
 except ImportError:
+    # Fallback for environments where the 'backend' prefix might fail
     from database import get_connection
     from logger import logger
-    from backend.context.provider import MarketContextProvider
-    try:
-        from config import BEIJING_TZ
-    except ImportError:
-        from datetime import timezone
-        BEIJING_TZ = timezone(timedelta(hours=8))
+    from provider import MarketContextProvider
+    from config import BEIJING_TZ, ADMIN_MOBILES
+    from utils import send_wecom_notification
 
-def get_next_trading_day(current_date_str, cursor):
-    """Calculates the next business day, skipping weekends and holidays from DB."""
+def get_next_trading_day(current_date_str: str, cursor: sqlite3.Cursor) -> str:
+    """
+    Calculates the next business day for the A-share market.
+    Skips weekends (Sat/Sun) and explicit holidays stored in the DB.
+    
+    :param current_date_str: Starting date in YYYY-MM-DD format.
+    :param cursor: Active SQLite database cursor.
+    :return: The next trading date string (YYYY-MM-DD).
+    """
     current_date = datetime.strptime(current_date_str, "%Y-%m-%d")
     next_day = current_date + timedelta(days=1)
     
     while True:
-        # 1. Skip Weekends
+        # 1. Skip Weekends (Standard)
         if next_day.weekday() >= 5: # Sat=5, Sun=6
             next_day += timedelta(days=1)
             continue
             
-        # 2. Skip Holidays defined in DB
+        # 2. Skip Holidays (DB-defined)
         d_str = next_day.strftime("%Y-%m-%d")
         cursor.execute("SELECT 1 FROM market_holidays WHERE date = ?", (d_str,))
         if cursor.fetchone():
@@ -61,17 +74,25 @@ def get_next_trading_day(current_date_str, cursor):
         break
     return next_day.strftime("%Y-%m-%d")
 
-def generate_almanac(target_date=None, force_t_plus_1=True):
+def generate_almanac(target_date: str = None, force_t_plus_1: bool = True) -> bool:
     """
-    Rules-based Global Market Almanac Generator.
-    Zero-LLM dependency for maximum determinism and speed.
-    Now defaults to T+1 (Predictive Mode).
+    Core engine for the Rules-based Global Market Almanac.
+    
+    Features:
+    - Zero-LLM dependency for deterministic speed and accuracy.
+    - Time-aware filtering for Nasdaq (US market) data.
+    - Deterministic random generation using the target date as a seed.
+    - Automated Webhook alerting to Admin on failure.
+    
+    :param target_date: The date this almanac applies to. If None, predicts for T+1.
+    :param force_t_plus_1: If True and target_date is None, always targets the next trading day.
+    :return: True if successfully generated and persisted.
     """
     conn = get_connection()
     try:
         cursor = conn.cursor()
         
-        # 0. Detect actual price context date (Latest market close)
+        # 0. Sync Price Context (Determine the reference date of existing market data)
         cursor.execute("SELECT MAX(date) FROM daily_prices WHERE symbol IN ('sh000001', '00700')")
         price_row = cursor.fetchone()
         actual_price_date = price_row[0] if (price_row and price_row[0]) else (datetime.now() + timedelta(hours=8)).strftime("%Y-%m-%d")
@@ -465,7 +486,23 @@ def generate_almanac(target_date=None, force_t_plus_1=True):
         return True
 
     except Exception as e:
-        logger.error(f"❌ Almanac Generation Failed: {traceback.format_exc()}")
+        error_msg = traceback.format_exc()
+        logger.error(f"❌ Almanac Generation Failed: {error_msg}")
+        
+        # 🚨 Notify Admin via WeCom
+        repo_url = "https://github.com/franksunye/StockWise" # Standard repository link
+        maintenance_url = f"{repo_url}/actions/workflows/almanac_maintenance.yml"
+        
+        alert_content = (
+            f"### 🚨 StockWise 运行异常: 黄历生成失败\n\n"
+            f"**目标日期**: {target_date or 'N/A'}\n"
+            f"**报错原因**: `{str(e)}`\n"
+            f"**日志路径**: `almanac_generator.py`\n\n"
+            f"> [点击此处手动重试或补跑]({maintenance_url})\n\n"
+            f"请检查 GitHub Actions 后台或数据接口状态。"
+        )
+        send_wecom_notification(alert_content, mentioned_mobile_list=ADMIN_MOBILES)
+        
         return False
     finally:
         conn.close()
@@ -482,11 +519,16 @@ if __name__ == "__main__":
         end = datetime.strptime(args.end_date, "%Y-%m-%d")
         current = start
         logger.info(f"🚀 Starting Batch Almanac Generation: {args.start_date} to {args.end_date}")
+        all_success = True
         while current <= end:
             d_str = current.strftime("%Y-%m-%d")
             # Only generate for days that have trading data (sh000001)
-            generate_almanac(d_str)
+            if not generate_almanac(d_str):
+                all_success = False
             current += timedelta(days=1)
+        if not all_success:
+            sys.exit(1)
     else:
         logger.info(f"🚀 Starting Rule-based Almanac Generator for {args.date or 'latest data'}")
-        generate_almanac(args.date)
+        if not generate_almanac(args.date):
+            sys.exit(1)

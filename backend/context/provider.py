@@ -10,6 +10,7 @@ import pandas as pd
 from typing import Dict, Any
 from datetime import datetime
 import threading
+from concurrent.futures import ThreadPoolExecutor, TimeoutError
 from backend.logger import logger
 try:
     import backend.config # Ensure NO_PROXY and other environment fixes are applied
@@ -19,6 +20,7 @@ except ImportError:
 class MarketContextProvider:
     _instance = None
     _lock = threading.Lock()
+    _executor = ThreadPoolExecutor(max_workers=5) # Reusable thread pool for timeouts
     
     # In-memory simple cache
     _cache = {
@@ -50,20 +52,27 @@ class MarketContextProvider:
         age = (datetime.now() - cache_entry["timestamp"]).total_seconds()
         return age < ttl_seconds
 
-    def _safe_ak_fetch(self, func, *args, **kwargs):
+    def _safe_ak_fetch(self, func, *args, timeout=30, **kwargs):
         """
-        Executes an AkShare function with a robust retry mechanism.
-        Focuses on handling transient network failures with exponential backoff.
+        Executes an AkShare function with a robust retry mechanism and mandatory timeout.
+        Uses a shared ThreadPoolExecutor to avoid overhead.
         """
-        # Uses module-level time/random imports
-        
         max_retries = 2
         base_delay = 1.0
         
         for i in range(max_retries + 1):
             try:
-                # Direct call. Proxy handling is now managed globally if needed.
-                return func(*args, **kwargs)
+                attempt_str = f"(Attempt {i+1})" if i > 0 else ""
+                logger.info(f"📡  AkShare Fetch: {func.__name__} {attempt_str}")
+                
+                # Use shared executor for timeout enforcement
+                future = self._executor.submit(func, *args, **kwargs)
+                try:
+                    return future.result(timeout=timeout)
+                except TimeoutError:
+                    logger.error(f"❌ AkShare TIMEOUT ({timeout}s) for {func.__name__}")
+                    raise TimeoutError(f"AkShare function {func.__name__} timed out after {timeout}s")
+                    
             except Exception as e:
                 err_msg = str(e).lower()
                 # Determine if it's a retryable network error
@@ -74,10 +83,10 @@ class MarketContextProvider:
                 
                 if i < max_retries and is_retryable:
                     delay = base_delay * (2 ** i) + random.uniform(0, 0.5)
-                    logger.warning(f"⚠️  AkShare Fetch Retrying ({i+1}/{max_retries}) due to: {type(e).__name__}. Waiting {delay:.1f}s...")
+                    logger.warning(f"⚠️  Retryable Error in {func.__name__}: {type(e).__name__}. Retrying in {delay:.1f}s...")
                     time.sleep(delay)
                 else:
-                    # Final attempt or non-retryable error
+                    logger.error(f"❌ Final Failure for {func.__name__}: {e}")
                     raise e
 
     def get_macro_context(self, skip_nasdaq: bool = False) -> Dict[str, Any]:
