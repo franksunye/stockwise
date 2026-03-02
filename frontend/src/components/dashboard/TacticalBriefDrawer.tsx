@@ -603,49 +603,62 @@ export function TacticalBriefDrawer({
                               const isActive = activeIndex === i;
                               const y = getY(node.price);
                               const isCurrent = node.kind === 'current';
+                              const isLeft = i % 2 === 0; // 奇偶错位逻辑
                               
                               let color = 'text-slate-400';
-                              let bg = 'bg-white/5';
-                              let border = 'border-white/10';
+                              let badgeColor = 'bg-white/5 border-white/10';
                               
-                              if (node.kind === 'resistance') { color = 'text-rose-400'; bg = 'bg-rose-500/10'; border = 'border-rose-500/30'; }
-                              if (node.kind === 'target') { color = 'text-amber-400'; bg = 'bg-amber-500/10'; border = 'border-amber-400/30'; }
-                              if (node.kind === 'support') { color = 'text-emerald-400'; bg = 'bg-emerald-500/10'; border = 'border-emerald-500/30'; }
-                              if (node.kind === 'breakout') { color = 'text-indigo-400'; bg = 'bg-indigo-500/10'; border = 'border-indigo-500/30'; }
-                              if (node.kind === 'stoploss') { color = 'text-rose-600'; bg = 'bg-rose-900/20'; border = 'border-rose-900/50'; }
+                              if (node.kind === 'resistance') { color = 'text-rose-400'; badgeColor = 'bg-rose-500/10 border-rose-500/30'; }
+                              if (node.kind === 'target') { color = 'text-amber-400'; badgeColor = 'bg-amber-500/10 border-amber-400/30'; }
+                              if (node.kind === 'support') { color = 'text-emerald-400'; badgeColor = 'bg-emerald-500/10 border-emerald-500/30'; }
+                              if (node.kind === 'breakout') { color = 'text-indigo-400'; badgeColor = 'bg-indigo-500/10 border-indigo-500/30'; }
+                              if (node.kind === 'stoploss') { color = 'text-rose-600'; badgeColor = 'bg-rose-900/20 border-rose-900/50'; }
 
                               return (
                                   <motion.div 
                                       key={node.id}
                                       animate={{ 
-                                          opacity: (activeIndex === -1 || isActive) ? 1 : 0.3,
-                                          scale: isActive ? 1.02 : 1
+                                          opacity: (activeIndex === -1 || isActive) ? 1 : 0.4,
+                                          scale: isActive ? 1.05 : 1,
+                                          zIndex: isActive ? 10 : 0
                                       }}
                                       style={{ top: `${y}%` }}
-                                      className="absolute left-0 right-0 -translate-y-1/2 flex items-center group transition-all duration-300"
+                                      className="absolute left-0 right-0 -translate-y-1/2 flex items-center transition-all duration-300 pointer-events-none"
                                   >
-                                      {/* Horizontal Line */}
-                                      <div className={`flex-1 border-t ${isActive ? 'border-solid border-2' : 'border-dashed border-[1px]'} ${isActive ? (isCurrent ? 'border-indigo-500/50' : border.replace('border-', 'border-')) : 'border-white/5'} transition-all`} />
-                                      
                                       {isCurrent ? (
-                                           <div className="px-3 flex items-center gap-2">
-                                              <div className="relative">
-                                                <div className="w-2.5 h-2.5 rounded-full bg-indigo-500 shadow-[0_0_15px_rgba(99,102,241,1)]" />
-                                                <div className="absolute inset-0 rounded-full bg-indigo-500 animate-ping opacity-40" />
+                                           <div className="w-full flex items-center justify-center">
+                                              <div className="flex-1 border-t border-indigo-500/30 border-dashed" />
+                                              <div className="px-4 flex items-center gap-2">
+                                                <div className="relative">
+                                                    <div className="w-2 h-2 rounded-full bg-indigo-500 shadow-[0_0_15px_rgba(99,102,241,1)]" />
+                                                    <div className="absolute inset-0 rounded-full bg-indigo-500 animate-ping opacity-40" />
+                                                </div>
+                                                <span className="text-[11px] font-black text-white bg-indigo-500/20 px-2 py-0.5 rounded-full border border-indigo-500/40 uppercase tracking-tighter">
+                                                    NOW · {formatLevel(node.price)}
+                                                </span>
                                               </div>
-                                              <span className="text-sm font-black text-white bg-indigo-600/20 px-2 py-0.5 rounded-lg border border-indigo-500/30">
-                                                NOW · {formatLevel(node.price)}
-                                              </span>
+                                              <div className="flex-1 border-t border-indigo-500/30 border-dashed" />
                                            </div>
                                       ) : (
-                                          <div 
-                                              className={`ml-2 px-3 py-1.5 rounded-xl border ${isActive ? border + ' ' + bg : 'border-transparent bg-transparent'} transition-all flex flex-col items-end min-w-[100px]`}
-                                          >
-                                              <span className={`text-[10px] font-black uppercase tracking-wider ${isActive ? color : 'text-slate-500'}`}>{node.label}</span>
-                                              <span className={`text-sm font-black ${isActive ? 'text-white' : 'text-slate-400'}`}>{formatLevel(node.price)}</span>
+                                          <div className={`w-full flex items-center ${isLeft ? 'flex-row' : 'flex-row-reverse'}`}>
+                                              {/* 这里的线段根据左右位置弹性伸缩 */}
+                                              <div className={`w-4 border-t ${isActive ? 'border-solid border-2' : 'border-dashed border-[1px]'} ${isActive ? 'border-indigo-400' : 'border-white/5'}`} />
+                                              
+                                              {isActive ? (
+                                                  <div className={`px-3 py-1.5 rounded-xl border ${badgeColor} shadow-xl shadow-black/40 flex flex-col items-center min-w-[100px] pointer-events-auto`}>
+                                                      <span className={`text-[9px] font-black uppercase tracking-[0.1em] ${color}`}>{node.label}</span>
+                                                      <span className="text-sm font-black text-white">{formatLevel(node.price)}</span>
+                                                  </div>
+                                              ) : (
+                                                  <div className={`mx-2 flex items-center gap-2 ${isLeft ? 'flex-row' : 'flex-row-reverse'}`}>
+                                                      <span className="text-[10px] font-black text-slate-600 uppercase tracking-tight">{node.label}</span>
+                                                      <span className="text-[11px] font-black text-slate-400">{formatLevel(node.price)}</span>
+                                                  </div>
+                                              )}
+                                              
+                                              <div className={`flex-1 border-t ${isActive ? 'border-solid border-2 opacity-30' : 'border-dashed border-[1px] opacity-10'} ${isActive ? 'border-indigo-400' : 'border-white/5'}`} />
                                           </div>
                                       )}
-                                      <div className={`flex-1 border-t ${isActive ? 'border-solid border-2' : 'border-dashed border-[1px]'} ${isActive ? (isCurrent ? 'border-indigo-500/50' : border.replace('border-', 'border-')) : 'border-white/5'} transition-all`} />
                                   </motion.div>
                               )
                           })}
