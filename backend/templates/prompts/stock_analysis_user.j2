@@ -99,6 +99,8 @@
 3. **针对已持仓但亏损者 (Holding_Loss)**：必须基于关键支撑破位点给出**明确的止损价位**和**止损触发条件**。
 👉 **输出验证要点**：
 - `tactics` 中必须且仅包含三个子对象：`holding_profit`, `holding_loss`, `empty`。
+- `holding_profit` / `holding_loss` / `empty` 每个场景都必须输出**恰好2条策略**：第1条为 `P1` 主策略，第2条为 `P2/P3` 次策略（可为观察预案）。
+- 两条策略的 `action + trigger` 不得重复，必须具备可执行区分度。
 - 每个战术建议必须保持**结构完整性**，对于不适用的价位字段请显式输出为 `null`。
 - `key_levels` 中所有价位必须从提供数据中推导。
 - `immediate_support` / `immediate_resistance` 必须都是**长度为2**的数字数组，且语义固定为 `[L1, L2]` / `[R1, R2]`。

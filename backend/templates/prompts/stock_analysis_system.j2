@@ -33,6 +33,11 @@
    - `immediate_resistance[0]` = **R1最近压力**；`immediate_resistance[1]` = **R2次级压力**。
    - 必须满足：`L1 <= 当日收盘价`，`L2 < L1`，`R1 >= 当日收盘价`，`R2 > R1`。
    - 禁止输出“无顺序含义”的数组，数组顺序本身就是业务语义（L1/L2 与 R1/R2）。
+8. **场景策略数量契约 (Tactics Count Contract)**：
+   - `tactics.holding_profit`、`tactics.holding_loss`、`tactics.empty` 必须都输出**恰好2条**策略，不允许 0 条、1 条或超过 2 条。
+   - 第1条必须是 `P1` 主策略（主执行动作），第2条为 `P2/P3` 次策略（备选或观察预案）。
+   - 两条策略不得语义重复（不能只是同义改写），触发条件必须可区分。
+   - 若当下无明确交易动作，第2条应给“观察预案”，但仍必须包含 `action/trigger/reason`。
 
 ## 输出结构要求
 {

@@ -95,6 +95,8 @@ class RuleAdapter(BasePredictionModel):
         # Calculate levels for tactics
         support = ma20 if ma20 > 0 else close * 0.95
         resistance = close * 1.05 if ma20 == 0 else (ma20 * 1.1 if close < ma20 else close * 1.1)
+        support_2 = support * 0.985
+        resistance_2 = resistance * 1.015
         stop_loss = support * 0.97
         
         reasoning_data = {
@@ -110,14 +112,23 @@ class RuleAdapter(BasePredictionModel):
                 {"step": "decision", "data": f"由于AI模块不可用，已切换至量化引擎根据均线偏离度执行兜底决策：{signal}", "conclusion": "量化契约"}
             ],
             "key_levels": {
-                "immediate_support": [round(support, 2)],
-                "immediate_resistance": [round(resistance, 2)],
+                "immediate_support": [round(support, 2), round(support_2, 2)],
+                "immediate_resistance": [round(resistance, 2), round(resistance_2, 2)],
                 "stop_loss_reference": round(stop_loss, 2)
             },
             "tactics": {
-                "holding_profit": [{"priority": "P1", "action": "持仓观察", "trigger": f"不跌破 {ma20:.2f}", "target_price": round(resistance, 2), "stop_advance_price": round(close, 2), "reason": "趋势未改"}],
-                "holding_loss": [{"priority": "P1", "action": "严格止损", "trigger": f"有效跌破 {ma20:.2f}", "stop_loss_price": round(stop_loss, 2), "reason": "触发风险线"}],
-                "empty": [{"priority": "P1", "action": "观望为主", "trigger": f"回调至 {support:.2f} 企稳", "buy_zone_price": round(support, 2), "reason": "等待趋势确认"}]
+                "holding_profit": [
+                    {"priority": "P1", "action": "持仓观察", "trigger": f"不跌破 {ma20:.2f}", "target_price": round(resistance, 2), "stop_advance_price": round(close, 2), "reason": "趋势未改"},
+                    {"priority": "P2", "action": "分批止盈预案", "trigger": f"接近 {resistance:.2f} 且放量滞涨", "target_price": round(resistance_2, 2), "stop_advance_price": round(support, 2), "reason": "先锁定收益，避免冲高回落"}
+                ],
+                "holding_loss": [
+                    {"priority": "P1", "action": "严格止损", "trigger": f"有效跌破 {ma20:.2f}", "stop_loss_price": round(stop_loss, 2), "reason": "触发风险线"},
+                    {"priority": "P2", "action": "反弹减仓", "trigger": f"反弹至 {resistance:.2f} 附近但未突破", "stop_loss_price": round(stop_loss, 2), "reason": "弱势反抽优先降仓位风险"}
+                ],
+                "empty": [
+                    {"priority": "P1", "action": "观望为主", "trigger": f"回调至 {support:.2f} 企稳", "buy_zone_price": round(support, 2), "reason": "等待趋势确认"},
+                    {"priority": "P2", "action": "突破跟随预案", "trigger": f"放量突破 {resistance:.2f} 并站稳", "buy_zone_price": [round(resistance, 2), round(resistance_2, 2)], "reason": "只做确认后的顺势交易"}
+                ]
             },
             "counter_argument": f"如果价格放量跌破 {stop_loss:.2f} 且 RSi 进一步走弱，则量化做多逻辑彻底失效。",
             "conflict_resolution": "以均线系统为准，不带多空偏见，执行机械量化纪律。",

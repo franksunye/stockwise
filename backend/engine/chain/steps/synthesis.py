@@ -250,9 +250,11 @@ class SynthesisStep(BaseStep):
         stop_ref = boll_lower * 0.97 if boll_lower > 0 else (latest.get('close', 0) or 0) * 0.95
         
         if not parsed['key_levels'].get('immediate_support'):
-            parsed['key_levels']["immediate_support"] = [round(boll_lower or ma20, 2)]
+            s1 = round(boll_lower or ma20, 2)
+            parsed['key_levels']["immediate_support"] = [s1, round(s1 * 0.985, 2)]
         if not parsed['key_levels'].get('immediate_resistance'):
-            parsed['key_levels']["immediate_resistance"] = [round(high_10d, 2)]
+            r1 = round(high_10d, 2)
+            parsed['key_levels']["immediate_resistance"] = [r1, round(r1 * 1.015, 2)]
         if not parsed['key_levels'].get('stop_loss_reference'):
             parsed['key_levels']["stop_loss_reference"] = round(stop_ref, 2)
             
@@ -265,19 +267,38 @@ class SynthesisStep(BaseStep):
             # Get support for trigger
             supp = parsed['key_levels'].get('immediate_support', [0])[0]
             
+            resistance_ref = parsed['key_levels'].get('immediate_resistance', [round(high_10d, 2)])[0]
             parsed['tactics'] = {
-                "holding_profit": [{
-                    "priority": "P1", "action": base_holding, "trigger": f"不跌破{supp:.2f}",
-                    "target_price": round(high_10d, 2), "stop_advance_price": round(latest.get('close', 0), 2), "reason": "趋势持仓"
-                }],
-                "holding_loss": [{
-                    "priority": "P1", "action": "触发减仓", "trigger": f"跌破{supp:.2f}",
-                    "stop_loss_price": round(stop_ref, 2), "reason": "保护性止损"
-                }],
-                "empty": [{
-                    "priority": "P1", "action": base_empty, "trigger": f"回踩{supp:.2f}企稳",
-                    "buy_zone_price": round(boll_lower, 2), "reason": "等待右侧机会"
-                }]
+                "holding_profit": [
+                    {
+                        "priority": "P1", "action": base_holding, "trigger": f"不跌破{supp:.2f}",
+                        "target_price": round(high_10d, 2), "stop_advance_price": round(latest.get('close', 0), 2), "reason": "趋势持仓"
+                    },
+                    {
+                        "priority": "P2", "action": "分批止盈预案", "trigger": f"接近{resistance_ref:.2f}且动能转弱",
+                        "target_price": round(resistance_ref * 1.015, 2), "stop_advance_price": round(supp, 2), "reason": "锁定收益，防止回撤"
+                    }
+                ],
+                "holding_loss": [
+                    {
+                        "priority": "P1", "action": "触发减仓", "trigger": f"跌破{supp:.2f}",
+                        "stop_loss_price": round(stop_ref, 2), "reason": "保护性止损"
+                    },
+                    {
+                        "priority": "P2", "action": "反弹减仓", "trigger": f"反弹至{resistance_ref:.2f}但未突破",
+                        "stop_loss_price": round(stop_ref, 2), "reason": "弱势反抽先降风险"
+                    }
+                ],
+                "empty": [
+                    {
+                        "priority": "P1", "action": base_empty, "trigger": f"回踩{supp:.2f}企稳",
+                        "buy_zone_price": round(boll_lower, 2), "reason": "等待右侧机会"
+                    },
+                    {
+                        "priority": "P2", "action": "突破跟随预案", "trigger": f"放量突破{resistance_ref:.2f}并站稳",
+                        "buy_zone_price": [round(resistance_ref, 2), round(resistance_ref * 1.015, 2)], "reason": "确认后再入场，避免假突破"
+                    }
+                ]
             }
 
         # 3. Ensure other fields exist
@@ -299,9 +320,11 @@ class SynthesisStep(BaseStep):
         # 5. LITE MODEL OVERRIDE: Force pre-calculated values (v3.3 Schema)
         model_name = d.get('model_name', '').lower()
         if 'lite' in model_name:
+            s1 = round(boll_lower, 2)
+            r1 = round(high_10d, 2)
             parsed['key_levels'] = {
-                "immediate_support": [round(boll_lower, 2)],
-                "immediate_resistance": [round(high_10d, 2)],
+                "immediate_support": [s1, round(s1 * 0.985, 2)],
+                "immediate_resistance": [r1, round(r1 * 1.015, 2)],
                 "stop_loss_reference": round(stop_ref, 2)
             }
             if "counter_argument" not in parsed:
