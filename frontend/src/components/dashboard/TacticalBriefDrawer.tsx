@@ -444,91 +444,120 @@ export function TacticalBriefDrawer({
                                if (viewState !== 'empty') setViewState('empty');
                            }
                         }}
-                        className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide -mx-6 px-6 pb-4"
+                        className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide -mx-6 px-6 pb-2"
                     >
                        
-	                       {/* CARD 1: HOLDING PROFIT */}
-	                       <div className="min-w-full snap-center space-y-3">
-	                            {scenarioHoldingProfit.map((t, idx) => {
-                                const isPlaceholder = Boolean(t.__placeholder);
-                                return (
-	                                <div key={idx} className={`glass-card p-4 min-h-[152px] relative overflow-hidden bg-indigo-500/5 ${isPlaceholder ? 'border border-dashed border-indigo-500/20 opacity-75' : 'border-indigo-500/20'}`}>
-	                                   <span className="absolute top-2 right-2 text-[9px] font-black opacity-30 uppercase tracking-widest pointer-events-none text-indigo-300">已持仓 (有盈)</span>
-	                                   <div className="absolute right-0 top-6 p-2 opacity-5 pointer-events-none">
-	                                      <TrendingUp size={40} className="text-emerald-400" />
-                                   </div>
-                                   <div className="flex items-center gap-2 mb-2 relative z-10">
-                                      <span className={`text-[10px] font-black px-1.5 py-0.5 rounded italic ${t.priority === 'P1' ? 'bg-indigo-500' : 'bg-slate-700'} text-white`}>{t.priority}</span>
-                                      <span className="text-sm font-bold text-white">{t.action}</span>
-                                   </div>
-                                   <div className="space-y-1.5 relative z-10">
-                                       <p className="text-xs text-slate-400">触发: <span className="text-slate-200">{t.trigger}</span></p>
-                                       {(t.target_price || t.stop_advance_price) && (
-                                            <div className="flex flex-wrap gap-x-4 gap-y-1 py-1 px-2 bg-white/5 rounded-lg w-fit">
-                                                {t.target_price && <p className="text-[10px] text-emerald-400 font-bold uppercase">目标: {t.target_price}</p>}
-                                                {t.stop_advance_price && <p className="text-[10px] text-amber-400 font-bold uppercase">移动止盈: {t.stop_advance_price}</p>}
+ 	                       {/* CARD 1: HOLDING PROFIT (Green) */}
+ 	                       <div className="min-w-full snap-center space-y-4">
+ 	                            {scenarioHoldingProfit.map((t, idx) => (
+ 	                                <div key={idx} className="relative rounded-[16px] bg-[#121826] border border-white/[0.05] overflow-hidden flex min-h-[160px]">
+                                       {/* Layer 1: Left Status Bar */}
+                                       <div className="w-1 bg-[#2ECC71] shrink-0" />
+                                       
+                                       {/* Main Content Area */}
+                                       <div className="flex-1 p-5 flex flex-col justify-between">
+                                            {/* Layer 2: Header */}
+                                            <div className="flex items-center justify-between mb-3">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="bg-[#3A7AFE]/15 text-[#5DA9FF] text-[10px] font-black px-2 py-0.5 rounded-lg italic">{t.priority}</span>
+                                                    <h4 className="text-base font-semibold text-[#E6EDF8]">{t.action}</h4>
+                                                </div>
+                                                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#2ECC71]/10 text-[#2ECC71] text-[10px] font-bold">
+                                                    <span>🟢</span> 盈利中
+                                                </div>
                                             </div>
-                                       )}
-	                                       <p className="text-xs text-slate-500 font-medium italic border-t border-white/5 pt-1.5 mt-1.5">理由: {t.reason}</p>
-	                                   </div>
-	                                </div>
-	                            )})}
-	                       </div>
 
-	                       {/* CARD 2: HOLDING LOSS */}
-	                       <div className="min-w-full snap-center space-y-3">
-	                            {scenarioHoldingLoss.map((t, idx) => {
-                                const isPlaceholder = Boolean(t.__placeholder);
-                                return (
-	                                <div key={idx} className={`glass-card p-4 min-h-[152px] relative overflow-hidden bg-rose-500/5 ${isPlaceholder ? 'border border-dashed border-rose-500/20 opacity-75' : 'border-rose-500/20'}`}>
-	                                   <span className="absolute top-2 right-2 text-[9px] font-black opacity-30 uppercase tracking-widest pointer-events-none text-rose-300">已持仓 (亏损)</span>
-	                                   <div className="absolute right-0 top-6 p-2 opacity-5 pointer-events-none">
-	                                      <Target size={40} className="text-rose-400" />
-                                   </div>
-                                   <div className="flex items-center gap-2 mb-2 relative z-10">
-                                      <span className={`text-[10px] font-black px-1.5 py-0.5 rounded italic ${t.priority === 'P1' ? 'bg-rose-500' : 'bg-slate-700'} text-white`}>{t.priority}</span>
-                                      <span className="text-sm font-bold text-white">{t.action}</span>
-                                   </div>
-                                   <div className="space-y-1.5 relative z-10">
-                                       <p className="text-xs text-slate-400">触发: <span className="text-slate-200">{t.trigger}</span></p>
-                                       {t.stop_loss_price && (
-                                            <div className="py-1 px-2 bg-rose-500/10 rounded-lg w-fit">
-                                                <p className="text-[10px] text-rose-400 font-bold uppercase">止损价: {t.stop_loss_price}</p>
+                                            {/* Layer 3: Content */}
+                                            <div className="space-y-2">
+                                                <p className="text-sm text-[#A8B3CF] leading-relaxed">
+                                                    <span className="opacity-50">触发条件：</span>{t.trigger}
+                                                </p>
+                                                {(t.target_price || t.stop_advance_price) && (
+                                                    <div className="flex flex-wrap gap-4 py-1">
+                                                        {t.target_price && <p className="text-xs font-medium text-[#A8B3CF]">目标位: <span className="text-[#FFD166]">{t.target_price}</span></p>}
+                                                        {t.stop_advance_price && <p className="text-xs font-medium text-[#A8B3CF]">移动止盈: <span className="text-[#FFD166]">{t.stop_advance_price}</span></p>}
+                                                    </div>
+                                                )}
+                                                <p className="text-[13px] text-[#64748B] italic leading-relaxed pt-2 border-t border-white/[0.03]">
+                                                    {t.reason}
+                                                </p>
                                             </div>
-                                       )}
-	                                       <p className="text-xs text-slate-500 font-medium italic border-t border-rose-500/10 pt-1.5 mt-1.5">理由: {t.reason}</p>
-	                                   </div>
-	                                </div>
-	                            )})}
-	                       </div>
+                                       </div>
+ 	                                </div>
+ 	                            ))}
+ 	                       </div>
 
-	                       {/* CARD 3: EMPTY SCENARIO */}
-	                       <div className="min-w-full snap-center space-y-3">
-	                           {scenarioEmpty.map((t, idx) => {
-                             const isPlaceholder = Boolean(t.__placeholder);
-                             return (
-	                              <div key={idx} className={`glass-card p-4 min-h-[152px] bg-white/[0.02] relative ${isPlaceholder ? 'border border-dashed border-white/10 opacity-75' : 'border-white/5'}`}>
-	                                 <span className="absolute top-2 right-2 text-[9px] font-black text-slate-500/30 uppercase tracking-widest pointer-events-none">未建仓视角</span>
-	                                 <div className="flex items-center gap-2 mb-2">
-	                                    <span className={`text-[10px] font-black px-1.5 py-0.5 rounded italic ${t.priority === 'P1' ? 'bg-indigo-500 text-white' : 'bg-slate-700 text-slate-300'}`}>{t.priority}</span>
-                                    <span className="text-sm font-bold text-white">{t.action}</span>
-                                 </div>
-                                 <div className="space-y-1.5">
-                                     <p className="text-xs text-slate-400">触发: <span className="text-slate-200">{t.trigger}</span></p>
-                                     {t.buy_zone_price && (
-                                         <div className="py-1 px-2 bg-indigo-500/10 rounded-lg w-fit">
-                                             <p className="text-[10px] text-indigo-400 font-bold uppercase italic">理想买入区: {formatPrice(t.buy_zone_price, true)}</p>
-                                         </div>
-                                     )}
-	                                     <p className="text-xs text-slate-500 font-medium italic border-t border-white/10 pt-1.5 mt-1.5">理由: {t.reason}</p>
-	                                 </div>
-	                              </div>
-	                           )})}
-	                       </div>
+ 	                       {/* CARD 2: HOLDING LOSS (Red) */}
+ 	                       <div className="min-w-full snap-center space-y-4">
+ 	                            {scenarioHoldingLoss.map((t, idx) => (
+ 	                                <div key={idx} className="relative rounded-[16px] bg-[#121826] border border-white/[0.05] overflow-hidden flex min-h-[160px]">
+                                       <div className="w-1 bg-[#FF4D4F] shrink-0" />
+                                       <div className="flex-1 p-5 flex flex-col justify-between">
+                                            <div className="flex items-center justify-between mb-3">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="bg-[#3A7AFE]/15 text-[#5DA9FF] text-[10px] font-black px-2 py-0.5 rounded-lg italic">{t.priority}</span>
+                                                    <h4 className="text-base font-semibold text-[#E6EDF8]">{t.action}</h4>
+                                                </div>
+                                                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#FF4D4F]/10 text-[#FF4D4F] text-[10px] font-bold">
+                                                    <span>🔴</span> 亏损中
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <p className="text-sm text-[#A8B3CF] leading-relaxed">
+                                                    <span className="opacity-50">触发条件：</span>{t.trigger}
+                                                </p>
+                                                {t.stop_loss_price && (
+                                                    <div className="py-1">
+                                                        <p className="text-xs font-medium text-[#A8B3CF]">严格止损价: <span className="text-[#FFD166]">{t.stop_loss_price}</span></p>
+                                                    </div>
+                                                )}
+                                                <p className="text-[13px] text-[#64748B] italic leading-relaxed pt-2 border-t border-white/[0.03]">
+                                                    {t.reason}
+                                                </p>
+                                            </div>
+                                       </div>
+ 	                                </div>
+ 	                            ))}
+ 	                       </div>
+
+ 	                       {/* CARD 3: WATCH / NEUTRAL (Blue) */}
+ 	                       <div className="min-w-full snap-center space-y-4">
+ 	                           {scenarioEmpty.map((t, idx) => (
+ 	                              <div key={idx} className="relative rounded-[16px] bg-[#121826] border border-white/[0.05] overflow-hidden flex min-h-[160px]">
+                                     <div className="w-1 bg-[#3A7AFE] shrink-0" />
+                                     <div className="flex-1 p-5 flex flex-col justify-between">
+                                          <div className="flex items-center justify-between mb-3">
+                                              <div className="flex items-center gap-2">
+                                                  <span className="bg-[#3A7AFE]/15 text-[#5DA9FF] text-[10px] font-black px-2 py-0.5 rounded-lg italic">{t.priority}</span>
+                                                  <h4 className="text-base font-semibold text-[#E6EDF8]">{t.action}</h4>
+                                              </div>
+                                              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#3A7AFE]/10 text-[#5DA9FF] text-[10px] font-bold">
+                                                  <span>🔵</span> 观望中
+                                              </div>
+                                          </div>
+
+                                          <div className="space-y-2">
+                                              <p className="text-sm text-[#A8B3CF] leading-relaxed">
+                                                  <span className="opacity-50">触发条件：</span>{t.trigger}
+                                              </p>
+                                              {t.buy_zone_price && (
+                                                  <div className="py-1">
+                                                      <p className="text-xs font-medium text-[#A8B3CF]">理想买入区: <span className="text-[#FFD166]">{formatPrice(t.buy_zone_price, true)}</span></p>
+                                                  </div>
+                                              )}
+                                              <p className="text-[13px] text-[#64748B] italic leading-relaxed pt-2 border-t border-white/[0.03]">
+                                                  {t.reason}
+                                              </p>
+                                          </div>
+                                     </div>
+ 	                              </div>
+ 	                           ))}
+ 	                       </div>
                     </div>
                     
                     {/* Pagination Dots */}
-                    <div className="flex justify-center gap-2 mt-[-8px] mb-2">
+                    <div className="flex justify-center gap-2 mt-1 mb-2">
                         <div className={`h-1 rounded-full transition-all duration-300 ${viewState === 'holding_profit' ? 'w-6 bg-white' : 'w-1 bg-white/20'}`} />
                         <div className={`h-1 rounded-full transition-all duration-300 ${viewState === 'holding_loss' ? 'w-6 bg-white' : 'w-1 bg-white/20'}`} />
                         <div className={`h-1 rounded-full transition-all duration-300 ${viewState === 'empty' ? 'w-6 bg-white' : 'w-1 bg-white/20'}`} />
