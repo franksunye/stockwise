@@ -566,9 +566,11 @@ export function TacticalBriefDrawer({
 
                   {/* 核心战术结构：可视化阶梯图 + 策略卡片 */}
                    <section className="animate-in fade-in slide-in-from-bottom-4 duration-1000">
-                      <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                        <div className="w-1 h-1 rounded-full bg-indigo-500/50" /> 结构化价位决策
-                      </h3>
+                      <div className="mb-4">
+                        <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" /> 结构化价位决策
+                        </h3>
+                      </div>
                       
                       {/* Price Structure Graph */}
                       <div className="relative h-[280px] w-full mb-6 px-4 bg-white/[0.01] rounded-[24px] border border-white/[0.03] overflow-hidden">
