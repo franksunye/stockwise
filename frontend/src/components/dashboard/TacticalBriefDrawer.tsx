@@ -80,27 +80,6 @@ const formatPrice = (val: number | string | number[] | undefined, isRange: boole
   return String(val);
 };
 
-const toNumberList = (val: number | string | number[] | undefined): number[] => {
-  if (val === undefined || val === null) return [];
-  const list = Array.isArray(val) ? val : [val];
-  const parsed = list
-    .map((x) => (typeof x === 'number' ? x : Number(x)))
-    .filter((x) => Number.isFinite(x));
-  return Array.from(new Map(parsed.map((x) => [x.toFixed(4), x])).values());
-};
-
-const normalizeDiscreteLevels = (
-  raw: number | string | number[] | undefined,
-  fallback: number | undefined,
-  mode: 'support' | 'resistance',
-): number[] => {
-  const levels = toNumberList(raw);
-  if (levels.length === 0 && typeof fallback === 'number' && Number.isFinite(fallback)) {
-    levels.push(fallback);
-  }
-  const sorted = [...levels].sort((a, b) => (mode === 'support' ? b - a : a - b));
-  return sorted.slice(0, 2);
-};
 
 const formatLevel = (val: number | undefined): string => {
   if (val === undefined || !Number.isFinite(val)) return '--';
@@ -140,8 +119,13 @@ interface PriceLevelNode {
 const getPriceNodes = (data: TacticalData, currentPrice?: number): PriceLevelNode[] => {
   const nodes: PriceLevelNode[] = [];
   
-  const add = (raw: any, label: string, kind: PriceLevelNode['kind'], desc: string, action: string) => {
-    const prices = toNumberList(raw);
+  const add = (raw: number | string | number[] | undefined, label: string, kind: PriceLevelNode['kind'], desc: string, action: string) => {
+    const list = Array.isArray(raw) ? raw : [raw];
+    const parsed = list
+      .map((x) => (typeof x === 'number' ? x : Number(x)))
+      .filter((x) => Number.isFinite(x));
+    const prices = Array.from(new Map(parsed.map((x) => [x.toFixed(4), x])).values());
+    
     prices.forEach((p, idx) => {
       nodes.push({
         id: `${kind}-${idx}-${p}`,
