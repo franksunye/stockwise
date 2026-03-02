@@ -127,15 +127,51 @@ const formatDistancePercent = (distance: number | undefined): string => {
   return `${sign}${abs.toFixed(2)}%`;
 };
 
-const getKeyLevelStatus = (
-  current: number | undefined,
-  support1: number | undefined,
-  resistance1: number | undefined,
-): string => {
-  if (current === undefined || !Number.isFinite(current)) return '状态：当前价格不可用，先参考关键位区间。';
-  if (support1 !== undefined && current < support1) return '状态：已跌破一防，防守优先，等待企稳信号。';
-  if (resistance1 !== undefined && current > resistance1) return '状态：已突破一攻，转为观察突破延续。';
-  return '状态：位于一防与一攻之间，耐心等待方向选择。';
+
+interface PriceLevelNode {
+  id: string;
+  price: number;
+  label: string;
+  kind: 'resistance' | 'target' | 'current' | 'support' | 'stoploss' | 'breakout';
+  description: string;
+  action: string;
+}
+
+const getPriceNodes = (data: TacticalData, currentPrice?: number): PriceLevelNode[] => {
+  const nodes: PriceLevelNode[] = [];
+  
+  const add = (raw: any, label: string, kind: PriceLevelNode['kind'], desc: string, action: string) => {
+    const prices = toNumberList(raw);
+    prices.forEach((p, idx) => {
+      nodes.push({
+        id: `${kind}-${idx}-${p}`,
+        price: p,
+        label: prices.length > 1 ? `${label}${idx + 1}` : label,
+        kind,
+        description: desc,
+        action
+      });
+    });
+  };
+
+  // 按业务优先级和角色添加节点
+  if (data?.key_levels?.strong_resistance) 
+    add(data.key_levels.strong_resistance, '强压力区', 'resistance', '核心供给区，多空博弈终点', '减仓/离场');
+  if (data?.key_levels?.resistance || data?.key_levels?.immediate_resistance) 
+    add(data.key_levels.immediate_resistance || data.key_levels.resistance, '第一挑战位', 'target', '局部阶段目标，注意动能释放', '落袋/观察');
+  if (data?.key_levels?.breakout_confirmation_level)
+    add(data.key_levels.breakout_confirmation_level, '突破确认', 'breakout', '反转结构成立的关键锚点', '回踩确认/加码');
+  
+  if (currentPrice) nodes.push({ id: 'current', price: currentPrice, label: '当前价', kind: 'current', description: '目前市场成交活跃点', action: '观察' });
+
+  if (data?.key_levels?.support || data?.key_levels?.immediate_support) 
+    add(data.key_levels.immediate_support || data.key_levels.support, '第一防守位', 'support', '多头防线，不破即维持强势', '维持仓位');
+  if (data?.key_levels?.strong_support) 
+    add(data.key_levels.strong_support, '强支撑区', 'support', '底部核心支撑，中长期成本位', '右侧加仓点');
+  if (data?.key_levels?.stop_loss_reference || data?.key_levels?.stop_loss)
+    add(data.key_levels.stop_loss_reference || data.key_levels.stop_loss, '止损参考', 'stoploss', '结构崩溃底线', '绝对止损');
+
+  return nodes.sort((a, b) => b.price - a.price);
 };
 
 type ScenarioKind = 'holding_profit' | 'holding_loss' | 'empty';
@@ -250,32 +286,26 @@ export function TacticalBriefDrawer({
   const rawGeneral = data?.tactics?.general;
   const generalTactics = Array.isArray(rawGeneral) ? rawGeneral : (rawGeneral ? [rawGeneral] : []);
 
-  const supportLevels = normalizeDiscreteLevels(
-    data?.key_levels?.immediate_support,
-    data?.key_levels?.support,
-    'support',
-  );
-  const resistanceLevels = normalizeDiscreteLevels(
-    data?.key_levels?.immediate_resistance,
-    data?.key_levels?.resistance,
-    'resistance',
-  );
-  const l1 = supportLevels[0];
-  const l2 = supportLevels[1];
-  const r1 = resistanceLevels[0];
-  const r2 = resistanceLevels[1];
-  const dL1 = getLevelDistance(currentPrice, l1);
-  const dL2 = getLevelDistance(currentPrice, l2);
-  const dR1 = getLevelDistance(currentPrice, r1);
-  const dR2 = getLevelDistance(currentPrice, r2);
-  const keyLevelStatus = getKeyLevelStatus(currentPrice, l1, r1);
   const profitRaw = [...(data?.tactics?.holding_profit || []), ...(data?.tactics?.holding || [])];
   const scenarioHoldingProfit = normalizeScenarioTactics(profitRaw, 'holding_profit');
   const scenarioHoldingLoss = normalizeScenarioTactics(data?.tactics?.holding_loss || [], 'holding_loss');
   const scenarioEmpty = normalizeScenarioTactics(data?.tactics?.empty || [], 'empty');
 
   const [viewState, setViewState] = useState<'holding_profit'|'holding_loss'|'empty'>('holding_profit');
+  const [activeIndex, setActiveIndex] = useState(0);
+  const nodes = getPriceNodes(data, currentPrice);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const carouselRef = useRef<HTMLDivElement>(null);
+
+  const priceRange = {
+    max: Math.max(...nodes.map(n => n.price)) * 1.05,
+    min: Math.min(...nodes.map(n => n.price)) * 0.95
+  };
+
+  const getY = (price: number) => {
+    const range = priceRange.max - priceRange.min;
+    return range === 0 ? 50 : ((priceRange.max - price) / range) * 100;
+  };
   
   const posterPrediction: AIPrediction = {
     symbol,
@@ -540,88 +570,149 @@ export function TacticalBriefDrawer({
                     </section>
                   )}
 
-                  {/* 关键关键价位 (Key Levels) - 新增展示 */}
-                  {data.key_levels && (
-                      <section className="animate-in fade-in slide-in-from-bottom-2 duration-700">
-                          <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
-                            <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.5)]" /> 关键价位参考
-                          </h3>
-                          <div className="mb-3 p-4 rounded-2xl border border-indigo-500/20 bg-indigo-500/5 flex items-center justify-between">
-                            <span className="text-[10px] font-black text-indigo-300 uppercase tracking-widest">当前价锚点</span>
-                            <span className="text-sm font-black text-white">{formatLevel(currentPrice)}</span>
+                  {/* 核心战术结构：可视化阶梯图 + 策略卡片 */}
+                   <section className="animate-in fade-in slide-in-from-bottom-4 duration-1000">
+                      <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                        <div className="w-1 h-1 rounded-full bg-indigo-500/50" /> 结构化价位决策
+                      </h3>
+                      
+                      {/* Price Structure Graph */}
+                      <div className="relative h-[280px] w-full mb-6 px-4 bg-white/[0.01] rounded-[24px] border border-white/[0.03] overflow-hidden">
+                          {/* Y-axis Guides */}
+                          <div className="absolute inset-0 flex flex-col justify-between py-6 opacity-20 pointer-events-none">
+                              {[0, 1, 2, 3, 4].map(idx => (
+                                  <div key={idx} className="w-full border-t border-dashed border-white/20" />
+                              ))}
                           </div>
-                          <p className="text-[10px] text-slate-500 leading-relaxed mb-3">
-                            左侧是防守位（一防/二防），右侧是进攻位（一攻/二攻）；百分比为相对当前价距离。
-                          </p>
-                          <p className="text-xs text-slate-300 mb-3 p-4 rounded-2xl border border-white/5 bg-white/[0.02]">
-                            {keyLevelStatus}
-                          </p>
-                          <div className="grid grid-cols-2 gap-3">
-                               <div className="p-3 rounded-2xl bg-white/[0.02] border border-white/5">
-                                   <div className="flex items-center justify-between mb-1.5">
-                                      <span className="text-[10px] font-black px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">一防</span>
-                                      <span className="text-[10px] text-slate-500 font-bold">第一防守位</span>
-                                   </div>
-                                   <p className="text-base font-black text-emerald-400">{formatLevel(l1)}</p>
-                                   <p className="text-[10px] text-emerald-300 mt-0.5">距现价 {formatDistancePercent(dL1)}</p>
-                                   <p className="text-[10px] text-slate-500 mt-1">守住可继续观察</p>
-                               </div>
-                               <div className="p-3 rounded-2xl bg-white/[0.02] border border-white/5">
-                                   <div className="flex items-center justify-between mb-1.5">
-                                      <span className="text-[10px] font-black px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">二防</span>
-                                      <span className="text-[10px] text-slate-500 font-bold">第二防守位</span>
-                                   </div>
-                                   <p className="text-base font-black text-emerald-400">{formatLevel(l2)}</p>
-                                   <p className="text-[10px] text-emerald-300 mt-0.5">距现价 {formatDistancePercent(dL2)}</p>
-                                   <p className="text-[10px] text-slate-500 mt-1">跌破一防后观察这里</p>
-                               </div>
-                               <div className="p-3 rounded-2xl bg-white/[0.02] border border-white/5">
-                                   <div className="flex items-center justify-between mb-1.5">
-                                      <span className="text-[10px] font-black px-1.5 py-0.5 rounded bg-rose-500/15 text-rose-300 border border-rose-500/30">一攻</span>
-                                      <span className="text-[10px] text-slate-500 font-bold">第一挑战位</span>
-                                   </div>
-                                   <p className="text-base font-black text-rose-400">{formatLevel(r1)}</p>
-                                   <p className="text-[10px] text-rose-300 mt-0.5">距现价 {formatDistancePercent(dR1)}</p>
-                                   <p className="text-[10px] text-slate-500 mt-1">需要先突破再观察</p>
-                               </div>
-                               <div className="p-3 rounded-2xl bg-white/[0.02] border border-white/5">
-                                   <div className="flex items-center justify-between mb-1.5">
-                                      <span className="text-[10px] font-black px-1.5 py-0.5 rounded bg-rose-500/15 text-rose-300 border border-rose-500/30">二攻</span>
-                                      <span className="text-[10px] text-slate-500 font-bold">第二目标位</span>
-                                   </div>
-                                   <p className="text-base font-black text-rose-400">{formatLevel(r2)}</p>
-                                   <p className="text-[10px] text-rose-300 mt-0.5">距现价 {formatDistancePercent(dR2)}</p>
-                                   <p className="text-[10px] text-slate-500 mt-1">接近该位时注意冲高回落</p>
-                               </div>
-                          </div>
-                          <details className="mt-3 group">
-                            <summary className="cursor-pointer list-none w-full flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/5 active:scale-[0.98] transition-all">
-                              <span className="text-xs font-black text-slate-400 uppercase tracking-widest group-hover:text-slate-200 transition-colors">进阶关键位</span>
-                              <div className="text-slate-600 group-hover:text-slate-400 group-open:rotate-180 transition-all duration-200">
-                                <ChevronDown size={16} />
-                              </div>
-                            </summary>
-                            <div className="mt-2 p-4 grid grid-cols-2 gap-3 rounded-2xl border border-white/5 bg-white/[0.02]">
-                               <div className="p-3 rounded-xl border border-indigo-500/10 bg-indigo-500/[0.03]">
-                                 <p className="text-[10px] font-black text-indigo-400/60 mb-1 uppercase tracking-wide">强支撑区</p>
-                                 <p className="text-base font-black text-indigo-300 leading-tight">{formatPrice(data.key_levels.strong_support, true)}</p>
-                               </div>
-                               <div className="p-3 rounded-xl border border-amber-500/10 bg-amber-500/[0.03]">
-                                 <p className="text-[10px] font-black text-amber-400/60 mb-1 uppercase tracking-wide">强压力区</p>
-                                 <p className="text-base font-black text-amber-300 leading-tight">{formatPrice(data.key_levels.strong_resistance, true)}</p>
-                               </div>
-                               <div className="p-3 rounded-xl border border-indigo-500/10 bg-indigo-500/[0.03]">
-                                 <p className="text-[10px] font-black text-indigo-400/60 mb-1 uppercase tracking-wide">突破确认</p>
-                                 <p className="text-base font-black text-indigo-300 leading-tight">{formatPrice(data.key_levels.breakout_confirmation_level)}</p>
-                               </div>
-                               <div className="p-3 rounded-xl border border-white/10 bg-white/[0.03]">
-                                 <p className="text-[10px] font-black text-slate-500 mb-1 uppercase tracking-wide">止损参考</p>
-                                 <p className="text-base font-black text-slate-200 leading-tight">{formatPrice(data.key_levels.stop_loss_reference || data.key_levels.stop_loss)}</p>
-                               </div>
-                            </div>
-                          </details>
-                      </section>
-                  )}
+
+                          {/* Level Zones & Lines */}
+                          {nodes.map((node, i) => {
+                              const isActive = activeIndex === i;
+                              const y = getY(node.price);
+                              const isCurrent = node.kind === 'current';
+                              
+                              let color = 'text-slate-400';
+                              let bg = 'bg-white/5';
+                              let border = 'border-white/10';
+                              
+                              if (node.kind === 'resistance') { color = 'text-rose-400'; bg = 'bg-rose-500/10'; border = 'border-rose-500/30'; }
+                              if (node.kind === 'target') { color = 'text-amber-400'; bg = 'bg-amber-500/10'; border = 'border-amber-400/30'; }
+                              if (node.kind === 'support') { color = 'text-emerald-400'; bg = 'bg-emerald-500/10'; border = 'border-emerald-500/30'; }
+                              if (node.kind === 'breakout') { color = 'text-indigo-400'; bg = 'bg-indigo-500/10'; border = 'border-indigo-500/30'; }
+                              if (node.kind === 'stoploss') { color = 'text-rose-600'; bg = 'bg-rose-900/20'; border = 'border-rose-900/50'; }
+
+                              return (
+                                  <motion.div 
+                                      key={node.id}
+                                      animate={{ 
+                                          opacity: (activeIndex === -1 || isActive) ? 1 : 0.3,
+                                          scale: isActive ? 1.02 : 1
+                                      }}
+                                      style={{ top: `${y}%` }}
+                                      className="absolute left-0 right-0 -translate-y-1/2 flex items-center group transition-all duration-300"
+                                  >
+                                      {/* Horizontal Line */}
+                                      <div className={`flex-1 border-t ${isActive ? 'border-solid border-2' : 'border-dashed border-[1px]'} ${isActive ? (isCurrent ? 'border-indigo-500/50' : border.replace('border-', 'border-')) : 'border-white/5'} transition-all`} />
+                                      
+                                      {isCurrent ? (
+                                           <div className="px-3 flex items-center gap-2">
+                                              <div className="relative">
+                                                <div className="w-2.5 h-2.5 rounded-full bg-indigo-500 shadow-[0_0_15px_rgba(99,102,241,1)]" />
+                                                <div className="absolute inset-0 rounded-full bg-indigo-500 animate-ping opacity-40" />
+                                              </div>
+                                              <span className="text-sm font-black text-white bg-indigo-600/20 px-2 py-0.5 rounded-lg border border-indigo-500/30">
+                                                NOW · {formatLevel(node.price)}
+                                              </span>
+                                           </div>
+                                      ) : (
+                                          <div 
+                                              className={`ml-2 px-3 py-1.5 rounded-xl border ${isActive ? border + ' ' + bg : 'border-transparent bg-transparent'} transition-all flex flex-col items-end min-w-[100px]`}
+                                          >
+                                              <span className={`text-[10px] font-black uppercase tracking-wider ${isActive ? color : 'text-slate-500'}`}>{node.label}</span>
+                                              <span className={`text-sm font-black ${isActive ? 'text-white' : 'text-slate-400'}`}>{formatLevel(node.price)}</span>
+                                          </div>
+                                      )}
+                                      <div className={`flex-1 border-t ${isActive ? 'border-solid border-2' : 'border-dashed border-[1px]'} ${isActive ? (isCurrent ? 'border-indigo-500/50' : border.replace('border-', 'border-')) : 'border-white/5'} transition-all`} />
+                                  </motion.div>
+                              )
+                          })}
+                      </div>
+
+                      {/* Linked Strategy Carousel */}
+                      <div 
+                        ref={carouselRef}
+                        onScroll={(e) => {
+                           const target = e.currentTarget;
+                           const scrollPos = target.scrollLeft;
+                           const cardWidth = target.offsetWidth - 32; // padding
+                           const index = Math.round(scrollPos / cardWidth);
+                           if (index !== activeIndex && index >= 0 && index < nodes.length) {
+                               setActiveIndex(index);
+                           }
+                        }}
+                        className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide -mx-6 px-6 pb-2"
+                      >
+                         {nodes.map((node, i) => {
+                            const isActive = activeIndex === i;
+                            const isCurrent = node.kind === 'current';
+                            
+                            let accentColor = 'from-slate-500/20';
+                            let textColor = 'text-slate-300';
+                            if (node.kind === 'resistance') { accentColor = 'from-rose-500/20'; textColor = 'text-rose-300'; }
+                            if (node.kind === 'target') { accentColor = 'from-amber-500/20'; textColor = 'text-amber-300'; }
+                            if (node.kind === 'support') { accentColor = 'from-emerald-500/20'; textColor = 'text-emerald-300'; }
+                            if (node.kind === 'breakout') { accentColor = 'from-indigo-500/20'; textColor = 'text-indigo-300'; }
+                            if (node.kind === 'stoploss') { accentColor = 'from-rose-600/30'; textColor = 'text-rose-400'; }
+
+                            return (
+                                <div 
+                                    key={node.id} 
+                                    className="min-w-[calc(100%-32px)] snap-center p-0.5"
+                                    onClick={() => {
+                                        const container = carouselRef.current;
+                                        if (container) {
+                                            const cardWidth = container.offsetWidth - 32;
+                                            container.scrollTo({ left: i * cardWidth, behavior: 'smooth' });
+                                        }
+                                    }}
+                                >
+                                    <div className={`h-[140px] rounded-[24px] p-5 border transition-all duration-300 relative overflow-hidden flex flex-col justify-between ${isActive ? `bg-gradient-to-br ${accentColor} to-[#0a0a0f] border-white/10 shadow-2xl` : 'bg-white/[0.01] border-white/5 opacity-40'}`}>
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <span className={`text-[10px] font-black uppercase tracking-widest ${isActive ? textColor : 'text-slate-500'}`}>{node.label}</span>
+                                                <h4 className="text-xl font-black text-white mt-1">{formatLevel(node.price)}</h4>
+                                            </div>
+                                            {isActive && (
+                                                <div className={`px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-tighter bg-white/5 border border-white/10 ${textColor}`}>
+                                                    {isCurrent ? '当前实时锚点' : `距离: ${formatDistancePercent(getLevelDistance(currentPrice, node.price))}`}
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div>
+                                            <p className={`text-xs font-bold leading-relaxed ${isActive ? 'text-slate-200' : 'text-slate-500'}`}>{node.description}</p>
+                                            <p className={`text-[10px] italic mt-2 flex items-center gap-2 ${isActive ? 'text-indigo-400' : 'text-slate-600'}`}>
+                                                <span className="font-black uppercase tracking-widest bg-indigo-500/10 px-1.5 py-0.5 rounded">建议脚本</span> 
+                                                {node.action}
+                                            </p>
+                                        </div>
+                                        
+                                        {/* Background Decorative Price */}
+                                        <span className="absolute -bottom-4 -right-2 text-6xl font-black opacity-[0.02] pointer-events-none italic select-none">
+                                            {formatLevel(node.price)}
+                                        </span>
+                                    </div>
+                                </div>
+                            );
+                         })}
+                      </div>
+
+                      {/* Pagination Dots */}
+                      <div className="flex justify-center gap-1.5 mt-2">
+                          {nodes.map((_, i) => (
+                              <div key={i} className={`h-1 rounded-full transition-all duration-300 ${activeIndex === i ? 'w-4 bg-indigo-500' : 'w-1 bg-white/10'}`} />
+                          ))}
+                      </div>
+                   </section>
 
                   {/* 重点情报 (News Radar) */}
                   {((Array.isArray(data.news_analysis) && data.news_analysis.length > 0) || (typeof data.news_analysis === 'string' && data.news_analysis.trim() !== '')) && (
