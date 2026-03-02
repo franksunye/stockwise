@@ -155,7 +155,11 @@ const getPriceNodes = (data: TacticalData, currentPrice?: number): PriceLevelNod
   if (data?.key_levels?.stop_loss_reference || data?.key_levels?.stop_loss)
     add(data.key_levels.stop_loss_reference || data.key_levels.stop_loss, '止损参考', 'stoploss', '结构崩溃底线', '绝对止损');
 
-  return nodes.sort((a, b) => b.price - a.price);
+  const sorted = nodes.sort((a, b) => b.price - a.price);
+  // Dedup: remove nodes with identical prices to prevent phantom pagination dots
+  return sorted.filter((node, idx, self) => 
+    idx === 0 || Math.abs(node.price - self[idx-1].price) > 0.001
+  );
 };
 
 type ScenarioKind = 'holding_profit' | 'holding_loss' | 'empty';
@@ -653,9 +657,9 @@ export function TacticalBriefDrawer({
                         onScroll={(e) => {
                            const target = e.currentTarget;
                            const scrollPos = target.scrollLeft;
-                           const containerWidth = target.clientWidth;
-                           // 每张卡片宽度 + 间隔 (gap-4 = 16px)
-                           const itemWidth = (containerWidth - 32) + 16; 
+                            const firstChild = target.children[0] as HTMLElement;
+                            // physical step = card offsetWidth + gap(16px)
+                            const itemWidth = firstChild ? firstChild.offsetWidth + 16 : target.clientWidth - 16; 
                            
                            // 使用中心点偏移算法，确保在滚动到一半时就触发索引切换
                            const index = Math.round(scrollPos / itemWidth);
@@ -685,8 +689,8 @@ export function TacticalBriefDrawer({
                                     onClick={() => {
                                         const container = carouselRef.current;
                                         if (container) {
-                                            const itemWidth = (container.clientWidth - 32) + 16;
-                                            container.scrollTo({ left: i * itemWidth, behavior: 'smooth' });
+                                             const fc = container.children[0] as HTMLElement; const step = fc ? fc.offsetWidth + 16 : (container.clientWidth - 32) + 16;
+                                             container.scrollTo({ left: i * step, behavior: 'smooth' });
                                         }
                                     }}
                                 >
@@ -730,8 +734,8 @@ export function TacticalBriefDrawer({
                                   onClick={() => {
                                       const container = carouselRef.current;
                                       if (container) {
-                                          const itemWidth = (container.clientWidth - 32) + 16;
-                                          container.scrollTo({ left: i * itemWidth, behavior: 'smooth' });
+                                           const fc = container.children[0] as HTMLElement; const step = fc ? fc.offsetWidth + 16 : (container.clientWidth - 32) + 16;
+                                           container.scrollTo({ left: i * step, behavior: 'smooth' });
                                       }
                                   }}
                                   className={`h-1 rounded-full transition-all duration-300 ${activeIndex === i ? 'w-6 bg-white' : 'w-1 bg-white/20'}`} 
