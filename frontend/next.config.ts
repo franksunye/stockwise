@@ -45,13 +45,6 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-
-  // ── 内存与性能优化 ──
-  // 在 Vercel 免费版等低内存环境下，限制并行编译线程数以防止 OOM。
-  experimental: {
-    workerThreads: false,
-    cpus: 1
-  }
 };
 
 export default nextConfig;
