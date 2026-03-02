@@ -127,10 +127,11 @@ const getPriceNodes = (data: TacticalData, currentPrice?: number): PriceLevelNod
     const prices = Array.from(new Map(parsed.map((x) => [x.toFixed(4), x])).values());
     
     prices.forEach((p, idx) => {
+      const CN_ORD = ["第一", "第二", "第三"];
       nodes.push({
         id: `${kind}-${idx}-${p}`,
         price: p,
-        label: prices.length > 1 ? `${label}${idx + 1}` : label,
+        label: prices.length > 1 ? CN_ORD[idx] + label : label,
         kind,
         description: desc,
         action
@@ -142,14 +143,14 @@ const getPriceNodes = (data: TacticalData, currentPrice?: number): PriceLevelNod
   if (data?.key_levels?.strong_resistance) 
     add(data.key_levels.strong_resistance, '强压力区', 'resistance', '核心供给区，多空博弈终点', '减仓/离场');
   if (data?.key_levels?.resistance || data?.key_levels?.immediate_resistance) 
-    add(data.key_levels.immediate_resistance || data.key_levels.resistance, '第一挑战位', 'target', '局部阶段目标，注意动能释放', '落袋/观察');
+    add(data.key_levels.immediate_resistance || data.key_levels.resistance, '挑战位', 'target', '局部阶段目标，注意动能释放', '落袋/观察');
   if (data?.key_levels?.breakout_confirmation_level)
     add(data.key_levels.breakout_confirmation_level, '突破确认', 'breakout', '反转结构成立的关键锚点', '回踩确认/加码');
   
   if (currentPrice) nodes.push({ id: 'current', price: currentPrice, label: '当前价', kind: 'current', description: '目前市场成交活跃点', action: '观察' });
 
   if (data?.key_levels?.support || data?.key_levels?.immediate_support) 
-    add(data.key_levels.immediate_support || data.key_levels.support, '第一防守位', 'support', '多头防线，不破即维持强势', '维持仓位');
+    add(data.key_levels.immediate_support || data.key_levels.support, '防守位', 'support', '多头防线，不破即维持强势', '维持仓位');
   if (data?.key_levels?.strong_support) 
     add(data.key_levels.strong_support, '强支撑区', 'support', '底部核心支撑，中长期成本位', '右侧加仓点');
   if (data?.key_levels?.stop_loss_reference || data?.key_levels?.stop_loss)
@@ -288,23 +289,22 @@ export function TacticalBriefDrawer({
   // Reset to NOW (current price) card whenever drawer opens
   useEffect(() => {
     if (!isOpen) return;
-    const nowIdx = nodes.findIndex(n => n.kind === 'current');
+    const nowIdx = nodes.findIndex(n => n.kind === "current");
     const targetIdx = nowIdx >= 0 ? nowIdx : 0;
     setActiveIndex(targetIdx);
-
-    // Scroll carousel to NOW after DOM renders
     requestAnimationFrame(() => {
       const container = carouselRef.current;
       if (container && targetIdx > 0) {
         const firstChild = container.children[0] as HTMLElement;
         if (firstChild) {
           const step = firstChild.offsetWidth + 16;
-          container.scrollTo({ left: targetIdx * step, behavior: 'auto' });
+          container.scrollTo({ left: targetIdx * step, behavior: "auto" });
         }
       }
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
+
 
   const priceRange = {
     max: Math.max(...nodes.map(n => n.price)) * 1.05,
