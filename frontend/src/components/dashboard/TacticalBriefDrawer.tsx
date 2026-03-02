@@ -734,7 +734,7 @@ export function TacticalBriefDrawer({
                                           container.scrollTo({ left: i * itemWidth, behavior: 'smooth' });
                                       }
                                   }}
-                                  className={`h-1 rounded-full transition-all duration-300 ${activeIndex === i ? 'w-6 bg-indigo-500' : 'w-1 bg-white/10'}`} 
+                                  className={`h-1 rounded-full transition-all duration-300 ${activeIndex === i ? 'w-6 bg-white' : 'w-1 bg-white/20'}`} 
                               />
                           ))}
                       </div>
