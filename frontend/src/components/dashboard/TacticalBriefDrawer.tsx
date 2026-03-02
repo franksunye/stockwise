@@ -468,14 +468,14 @@ export function TacticalBriefDrawer({
                           <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
                             <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.5)]" /> 关键价位参考
                           </h3>
-                          <div className="mb-3 px-3 py-2 rounded-xl border border-indigo-500/20 bg-indigo-500/5 flex items-center justify-between">
+                          <div className="mb-3 p-4 rounded-2xl border border-indigo-500/20 bg-indigo-500/5 flex items-center justify-between">
                             <span className="text-[10px] font-black text-indigo-300 uppercase tracking-widest">当前价锚点</span>
                             <span className="text-sm font-black text-white">{formatLevel(currentPrice)}</span>
                           </div>
                           <p className="text-[10px] text-slate-500 leading-relaxed mb-3">
-                            读法：左侧是防守位（一防/二防），右侧是进攻位（一攻/二攻）；百分比为相对当前价距离。
+                            左侧是防守位（一防/二防），右侧是进攻位（一攻/二攻）；百分比为相对当前价距离。
                           </p>
-                          <p className="text-[11px] text-slate-300 mb-3 px-3 py-2 rounded-xl border border-white/5 bg-white/[0.02]">
+                          <p className="text-xs text-slate-300 mb-3 p-4 rounded-2xl border border-white/5 bg-white/[0.02]">
                             {keyLevelStatus}
                           </p>
                           <div className="grid grid-cols-2 gap-3">
@@ -516,27 +516,29 @@ export function TacticalBriefDrawer({
                                    <p className="text-[10px] text-slate-500 mt-1">接近该位时注意冲高回落</p>
                                </div>
                           </div>
-                          <details className="mt-3 group rounded-xl border border-white/5 bg-white/[0.02]">
-                            <summary className="cursor-pointer list-none px-3 py-2.5 text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center justify-between">
-                              <span>进阶关键位</span>
-                              <span className="text-slate-600 group-open:rotate-180 transition-transform">v</span>
+                          <details className="mt-3 group">
+                            <summary className="cursor-pointer list-none w-full flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/5 active:scale-[0.98] transition-all">
+                              <span className="text-xs font-black text-slate-400 uppercase tracking-widest group-hover:text-slate-200 transition-colors">进阶关键位</span>
+                              <div className="text-slate-600 group-hover:text-slate-400 group-open:rotate-180 transition-all duration-200">
+                                <ChevronDown size={16} />
+                              </div>
                             </summary>
-                            <div className="px-3 pb-3 grid grid-cols-2 gap-2">
-                              <div className="p-2 rounded-lg border border-white/5 bg-black/10">
-                                <p className="text-[9px] font-black text-slate-600 mb-1">强支撑区</p>
-                                <p className="text-[11px] font-bold text-indigo-300">{formatPrice(data.key_levels.strong_support, true)}</p>
+                            <div className="mt-2 px-3 pb-3 grid grid-cols-2 gap-2 rounded-2xl border border-white/5 bg-white/[0.02]">
+                              <div className="p-3 rounded-xl border border-white/5 bg-black/10">
+                                <p className="text-[10px] font-black text-slate-600 mb-1 uppercase tracking-wide">强支撑区</p>
+                                <p className="text-xs font-bold text-indigo-300 leading-tight">{formatPrice(data.key_levels.strong_support, true)}</p>
                               </div>
-                              <div className="p-2 rounded-lg border border-white/5 bg-black/10">
-                                <p className="text-[9px] font-black text-slate-600 mb-1">强压力区</p>
-                                <p className="text-[11px] font-bold text-amber-300">{formatPrice(data.key_levels.strong_resistance, true)}</p>
+                              <div className="p-3 rounded-xl border border-white/5 bg-black/10">
+                                <p className="text-[10px] font-black text-slate-600 mb-1 uppercase tracking-wide">强压力区</p>
+                                <p className="text-xs font-bold text-amber-300 leading-tight">{formatPrice(data.key_levels.strong_resistance, true)}</p>
                               </div>
-                              <div className="p-2 rounded-lg border border-white/5 bg-black/10">
-                                <p className="text-[9px] font-black text-slate-600 mb-1">突破确认</p>
-                                <p className="text-[11px] font-bold text-indigo-300">{formatPrice(data.key_levels.breakout_confirmation_level)}</p>
+                              <div className="p-3 rounded-xl border border-white/5 bg-black/10">
+                                <p className="text-[10px] font-black text-slate-600 mb-1 uppercase tracking-wide">突破确认</p>
+                                <p className="text-xs font-bold text-indigo-300 leading-tight">{formatPrice(data.key_levels.breakout_confirmation_level)}</p>
                               </div>
-                              <div className="p-2 rounded-lg border border-white/5 bg-black/10">
-                                <p className="text-[9px] font-black text-slate-600 mb-1">止损参考</p>
-                                <p className="text-[11px] font-bold text-slate-200">{formatPrice(data.key_levels.stop_loss_reference || data.key_levels.stop_loss)}</p>
+                              <div className="p-3 rounded-xl border border-white/5 bg-black/10">
+                                <p className="text-[10px] font-black text-slate-600 mb-1 uppercase tracking-wide">止损参考</p>
+                                <p className="text-xs font-bold text-slate-200 leading-tight">{formatPrice(data.key_levels.stop_loss_reference || data.key_levels.stop_loss)}</p>
                               </div>
                             </div>
                           </details>
