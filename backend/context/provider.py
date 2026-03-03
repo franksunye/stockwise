@@ -228,7 +228,7 @@ class MarketContextProvider:
     def _parse_signed_flow(flow_text: str) -> Optional[float]:
         if not flow_text:
             return None
-        match = re.search(r"([+-]?\d+(?:\.\d+)?)\s*äº¿", str(flow_text))
+        match = re.search(r"([+-]?\d+(?:\.\d+)?)\s*亿", str(flow_text))
         if not match:
             return None
         try:
@@ -249,7 +249,7 @@ class MarketContextProvider:
         def _fmt(row):
             name = row.get(name_col, "")
             net = float(row.get("net_val", 0.0)) / unit_divisor
-            return f"{name}({net:+.2f}äº¿)"
+            return f"{name}({net:+.2f}亿)"
 
         inflow_df = work[work["net_val"] > 0].sort_values("net_val", ascending=False)
         outflow_df = work[work["net_val"] < 0].sort_values("net_val", ascending=True)
@@ -260,7 +260,7 @@ class MarketContextProvider:
 
         outflow = [_fmt(row) for _, row in outflow_df.head(2).iterrows()]
         if not outflow:
-            outflow = ["æ— æ˜Žæ˜¾å‡€æµå‡º(>=0)"]
+            outflow = ["无明显净流出(>=0)"]
 
         return {
             "inflow": inflow,
@@ -668,7 +668,7 @@ class MarketContextProvider:
         }
         
         if not top_outflow:
-            top_outflow = ["æ— æ˜Žæ˜¾å‡€æµå‡º(>=0)"]
+            top_outflow = ["无明显净流出(>=0)"]
             consistency_flags.append("outflow_absent_non_negative_day")
 
         outflow_has_non_negative = False
@@ -686,11 +686,11 @@ class MarketContextProvider:
             else:
                 sector_source = "akshare:stock_market_fund_flow(last_resort_or_empty)"
 
-        result["top_inflow_sectors"] = ", ".join(top_inflow) if top_inflow else "æš‚æ— æ•°æ®"
-        result["top_outflow_sectors"] = ", ".join(top_outflow) if top_outflow else "æš‚æ— æ•°æ®"
+        result["top_inflow_sectors"] = ", ".join(top_inflow) if top_inflow else "暂无数据"
+        result["top_outflow_sectors"] = ", ".join(top_outflow) if top_outflow else "暂无数据"
         result["summary"] = (
-            f"åŒ—å‘:{north_val} | é¢†æ¶¨:{', '.join(top_inflow[:2]) if top_inflow else 'N/A'} "
-            f"| é¢†è·Œ:{', '.join(top_outflow[:1]) if top_outflow else 'N/A'}"
+            f"北向:{north_val} | 领涨:{', '.join(top_inflow[:2]) if top_inflow else 'N/A'} "
+            f"| 领跌:{', '.join(top_outflow[:1]) if top_outflow else 'N/A'}"
         )
 
         flow_fields = {

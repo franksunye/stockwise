@@ -9,15 +9,15 @@ from datetime import datetime, timedelta
 
 # --- Time-awareness constants ---
 # Nasdaq data freshness window (Beijing Time):
-#   US markets close at 4:00 PM ET â‰ˆ 5:00 AM Beijing (winter) / 4:00 AM (summer).
+#   US markets close at 4:00 PM ET ≈ 5:00 AM Beijing (winter) / 4:00 AM (summer).
 #   A-share markets close at 15:00 Beijing.
 #
-#   Valid "overnight" window: 05:00 â€“ 15:00 Beijing
+#   Valid "overnight" window: 05:00 – 15:00 Beijing
 #     - After 05:00 AM: US just closed, Nasdaq data is the freshest "overnight" close.
 #     - Before 15:00 PM: The data is still relevant for today's A-share session.
 #     - After 15:00 PM: A-share closed; tonight's US session hasn't started yet.
 #       The Nasdaq data in AkShare is from LAST NIGHT, stale for T+1 prediction.
-#     - 00:00 â€“ 05:00 AM: US may still be trading, data is incomplete/stale.
+#     - 00:00 – 05:00 AM: US may still be trading, data is incomplete/stale.
 NASDAQ_FRESH_START_HOUR = 5   # 05:00 Beijing = US market close
 NASDAQ_FRESH_END_HOUR = 15    # 15:00 Beijing = A-share market close
 
@@ -108,7 +108,7 @@ def generate_almanac(target_date: str = None, force_t_plus_1: bool = True) -> bo
             else:
                 target_date = actual_price_date
         
-        logger.info(f"ðŸš€ Generating Almanac for Target Date: {target_date} (Using data context from {actual_price_date})")
+        logger.info(f"🚀 Generating Almanac for Target Date: {target_date} (Using data context from {actual_price_date})")
         facts_bundle = get_or_generate_market_facts(actual_price_date)
         facts = facts_bundle.get("facts", {})
         facts_quality = facts_bundle.get("quality", {})
@@ -145,27 +145,28 @@ def generate_almanac(target_date: str = None, force_t_plus_1: bool = True) -> bo
         
         # Time-aware Nasdaq gating:
         # Nasdaq data is only meaningful within the "overnight" freshness window
-        # (05:00â€“15:00 Beijing). Outside this window, the data is either stale
+        # (05:00–15:00 Beijing). Outside this window, the data is either stale
         # (afternoon/evening: last night's close) or incomplete (late night: US still trading).
         now_beijing = datetime.now(BEIJING_TZ)
         is_nasdaq_fresh = NASDAQ_FRESH_START_HOUR <= now_beijing.hour < NASDAQ_FRESH_END_HOUR
         
         if not is_nasdaq_fresh:
-            logger.info(f"â° Nasdaq gating: Current time {now_beijing.strftime('%H:%M')} outside fresh window [{NASDAQ_FRESH_START_HOUR}:00â€“{NASDAQ_FRESH_END_HOUR}:00) â†’ Nasdaq data is STALE, will be skipped")
+            logger.info(f"⏰ Nasdaq gating: Current time {now_beijing.strftime('%H:%M')} outside fresh window [{NASDAQ_FRESH_START_HOUR}:00–{NASDAQ_FRESH_END_HOUR}:00) → Nasdaq data is STALE, will be skipped")
         else:
-            logger.info(f"âœ… Nasdaq gating: Current time {now_beijing.strftime('%H:%M')} within fresh window [{NASDAQ_FRESH_START_HOUR}:00â€“{NASDAQ_FRESH_END_HOUR}:00) â†’ Nasdaq data is FRESH")
+            logger.info(f"✅ Nasdaq gating: Current time {now_beijing.strftime('%H:%M')} within fresh window [{NASDAQ_FRESH_START_HOUR}:00–{NASDAQ_FRESH_END_HOUR}:00) → Nasdaq data is FRESH")
         
         # 1. Macro Context (Global & Domestic)
         macro_data = provider.get_macro_context(skip_nasdaq=not is_nasdaq_fresh)
         nasdaq_change = macro_data.get("nasdaq", "N/A")
-        logger.info(f"ðŸ“Š Global Context: Nasdaq Change = {nasdaq_change} (fresh={is_nasdaq_fresh})")
-        # 2. Sector Flows (Money Flow) from Fact Layer (authoritative for almanac)
+        logger.info(f"📊 Global Context: Nasdaq Change = {nasdaq_change} (fresh={is_nasdaq_fresh})")
+        
+        # 2. Sector Flows (Money Flow) from Fact Layer
         sector_flow = facts.get("sector_flow", {})
         top_inflow = sector_flow.get("top_inflow") or "暂无数据"
         top_outflow = sector_flow.get("top_outflow") or "暂无数据"
         logger.info(f"Market Flow: Inflow={top_inflow} | Outflow={top_outflow}")
         inflow_parts = [s.strip() for s in top_inflow.split(',') if s.strip()]
-
+        
         main_currents = []
         if inflow_parts and inflow_parts[0] != "暂无数据":
             for s in inflow_parts:
@@ -175,9 +176,9 @@ def generate_almanac(target_date: str = None, force_t_plus_1: bool = True) -> bo
                     main_currents.append({"name": name, "flow": flow})
                 else:
                     main_currents.append({"name": s, "flow": ""})
-
+                    
         outflow_parts = [s.strip() for s in top_outflow.split(',') if s.strip()]
-
+        
         inverse_currents = []
         if outflow_parts and outflow_parts[0] != "暂无数据":
             for s in outflow_parts:
@@ -188,9 +189,9 @@ def generate_almanac(target_date: str = None, force_t_plus_1: bool = True) -> bo
                 else:
                     inverse_currents.append({"name": s, "flow": ""})
         else:
+            # Default fallback for inverse if API doesn't provide it
             inverse_currents = [{"name": "高位接盘股", "flow": "退潮"}]
-            if breadth_type == "bull":
-                inverse_currents = [{"name": "避险防守", "flow": "抽血"}]
+            if breadth_type == "bull": inverse_currents = [{"name": "避险防守", "flow": "抽血"}]
 
         # --- 3. The Scorecard (Rules Engine - Dynamic & Humanistic) --- #
         # Use target_date as seed for deterministic daily variety
@@ -202,21 +203,21 @@ def generate_almanac(target_date: str = None, force_t_plus_1: bool = True) -> bo
         is_monday = (weekday == 0)
         is_friday = (weekday == 4)
         rule_key = f"{vol_type}_{breadth_type}"
-        top_sector_name = main_currents[0]["name"] if main_currents else "ä¸»æµèµ›é“"
+        top_sector_name = main_currents[0]["name"] if main_currents else "主流赛道"
 
         # Categorized Action Pool (Enriched with Lifestyle & Psychology)
         ACTIONS = {
             "bull": {
-                "yi": ["é¡ºåŠ¿è€Œä¸º", "æŒè‚¡å¾…æ¶¨", "åŠ ä»“ä¸»çº¿", "é€¢ä½Žå¸çº³", "å…³æ³¨é¾™å¤´", "åšå®šä¿¡å¿ƒ", "å¥–åŠ±åˆé¤", "å¤ç›˜é€»è¾‘", "æ·±å‘¼å¸", "æ‹¥æŠ±è¶‹åŠ¿"],
-                "ji": ["ç›²ç›®çœ‹ç©º", "é¢‘ç¹æ¢æ‰‹", "æé«˜æŠ›å”®", "é€†åŠ¿åšç©º", "è½»è¨€é¡¶è§", "æ»¡ä»“èµŒåš", "å¬ä¿¡å°é“", "è¿‡åº¦äº¢å¥‹", "æ·±å¤œç›¯ç›˜", "æ æ†æ“ä½œ"]
+                "yi": ["顺势而为", "持股待涨", "加仓主线", "逢低吸纳", "关注龙头", "坚定信心", "奖励午餐", "复盘逻辑", "深呼吸", "拥抱趋势"],
+                "ji": ["盲目看空", "频繁换手", "恐高抛售", "逆势做空", "轻言顶见", "满仓赌博", "听信小道", "过度亢奋", "深夜盯盘", "杠杆操作"]
             },
             "bear": {
-                "yi": ["æŒå¸è§‚æœ›", "é£ŽæŽ§ä¸ºçŽ‹", "ä¸¥æŽ§ä»“ä½", "é™å¾…æ—¶æœº", "ä½Žå¸ä¼å‡»", "ç ”ä¹ è´¢æŠ¥", "é˜…è¯»éžé‡‘èžä¹¦", "æ—©ç¡æ—©èµ·", "é™ªä¼´å®¶äºº", "æ–­ç½‘ç‹¬å¤„"],
-                "ji": ["ç›²ç›®æŠ„åº•", "é‡ä»“æ­»æ‰›", "ææ…Œæ€è·Œ", "å¾’æ‰‹æŽ¥åˆ€", "æ æ†æ“ä½œ", "é¢‘ç¹æ“ä½œ", "æƒ…ç»ªåŒ–ä¸‹å•", "æŠ±æ€¨å¸‚åœº", "å€Ÿé’±å…¥å¸‚", "æ€¥äºŽå›žæœ¬"]
+                "yi": ["持币观望", "风控为王", "严控仓位", "静待时机", "低吸伏击", "研习财报", "阅读非金融书", "早睡早起", "陪伴家人", "断网独处"],
+                "ji": ["盲目抄底", "重仓死扛", "恐慌杀跌", "徒手接刀", "杠杆操作", "频繁操作", "情绪化下单", "抱怨市场", "借钱入市", "急于回本"]
             },
             "neutral": {
-                "yi": ["é«˜ä½Žåˆ‡æ¢", "æŽ§åˆ¶ä»“ä½", "ç²¾ç ”ä¸ªè‚¡", "æ­¢ç›ˆå‡ä»“", "è€å¿ƒè›°ä¼", "å·¦ä¾§åŸ‹ä¼", "æ•´ç†ç¬”è®°", "ä¿æŒå®¢è§‚", "å°é‡è¯•é”™", "åˆ†æ‰¹è¿›åœº"],
-                "ji": ["è¿½æ¶¨æ€è·Œ", "æ»¡ä»“æ“ä½œ", "ç›²ç›®è·Ÿé£Ž", "é‡ä»“å•ä¸€", "é¢‘ç¹è¿›å‡º", "æ€¥äºŽæ±‚æˆ", "è´ªå¤§æ±‚å…¨", "èµŒå¾’å¿ƒæ€", "å¿½è§†é£Žé™©", "æ­»ç£•ä¸ªè‚¡"]
+                "yi": ["高低切换", "控制仓位", "精研个股", "止盈减仓", "耐心蛰伏", "左侧埋伏", "整理笔记", "保持客观", "小量试错", "分批进场"],
+                "ji": ["追涨杀跌", "满仓操作", "盲目跟风", "重仓单一", "频繁进出", "急于求成", "贪大求全", "赌徒心态", "忽视风险", "死磕个股"]
             }
         }
 
@@ -224,63 +225,63 @@ def generate_almanac(target_date: str = None, force_t_plus_1: bool = True) -> bo
         pool = ACTIONS.get(breadth_type, ACTIONS["neutral"])
         selected_yi = rng.sample(pool["yi"], 2)
         selected_ji = rng.sample(pool["ji"], 2)
-        action_strategy = f"å®œï¼š{' / '.join(selected_yi)} Â· å¿Œï¼š{' / '.join(selected_ji)}"
+        action_strategy = f"宜：{' / '.join(selected_yi)} · 忌：{' / '.join(selected_ji)}"
 
         # 9-Quadrant Rich Templates (Massive Expansion)
         VARIANTS = {
             "high_bull": [
-                {"tag": "åŠ¿å¦‚ç ´ç«¹", "meteo": "çƒˆç«", "insight": f"å¤§ç›˜çˆ†é‡é•¿é˜³ï¼Œåœºå¤–èµ„é‡‘å¦‚æ´ªæµèˆ¬æ¶Œå…¥ã€{top_sector_name}ã€‘ã€‚è¶‹åŠ¿ä¸€æ—¦å½¢æˆä¾¿éš¾ä»¥é˜»æŒ¡ï¼Œæ­¤åˆ»å”¯æœ‰æ‹¥æŠ±æ ¸å¿ƒï¼Œé™å¾…ç¹èŠ±ã€‚"},
-                {"tag": "é›·éœ†ä¸‡é’§", "meteo": "èµ¤é¾™", "insight": f"å¤šå¤´èƒ½é‡å…¨é¢çˆ†å‘ï¼Œé‡èƒ½åˆ›ä¸‹é˜¶æ®µæ–°é«˜ã€‚èµ„é‡‘åœ¨ã€{top_sector_name}ã€‘ç–¯ç‹‚æ‰«è´§ï¼Œèµšé’±æ•ˆåº”è¿›å…¥é«˜æ½®ï¼Œå»ºè®®ç´§æ‰£é¢†å¤´ç¾Šã€‚"},
-                {"tag": "é£žé¾™åœ¨å¤©", "meteo": "çº¢ç„°", "insight": f"æˆäº¤æ€¥å‰§æ”¾å¤§ï¼Œå¤§ç›˜å‘ˆçŽ°ä¿¯å†²å¼æ‹‰å‡ã€‚å¸‚åœºæƒ…ç»ªå·²è¢«å½»åº•ç‚¹ç‡ƒï¼Œã€{top_sector_name}ã€‘æ­£åœ¨ä¹¦å†™ç¥žè¯ï¼Œè¶‹åŠ¿çš„åŠ›é‡æ­£åœ¨æœ€å¤§åŒ–å®£æ³„ã€‚"},
-                {"tag": "é‡‘å…‰å å½±", "meteo": "è™¹å…‰", "insight": f"ä¸»æµæ¿å—å…¨çº¿é£˜çº¢ï¼Œå·¨é¢å¢žé‡èµ„é‡‘é”æ­»ã€{top_sector_name}ã€‘ã€‚è¿™ç§çº§åˆ«çš„æ”»å‡»ä¸ä»…æ˜¯åå¼¹ï¼Œæ›´æ˜¯é‡å¡‘ï¼Œå»ºè®®é¡ºåº”å¤©æ—¶ï¼Œä¹˜é£Žè€Œä¸Šã€‚"}
+                {"tag": "势如破竹", "meteo": "烈火", "insight": f"大盘爆量长阳，场外资金如洪流般涌入【{top_sector_name}】。趋势一旦形成便难以阻挡，此刻唯有拥抱核心，静待繁花。"},
+                {"tag": "雷霆万钧", "meteo": "赤龙", "insight": f"多头能量全面爆发，量能创下阶段新高。资金在【{top_sector_name}】疯狂扫货，赚钱效应进入高潮，建议紧扣领头羊。"},
+                {"tag": "飞龙在天", "meteo": "红焰", "insight": f"成交急剧放大，大盘呈现俯冲式拉升。市场情绪已被彻底点燃，【{top_sector_name}】正在书写神话，趋势的力量正在最大化宣泄。"},
+                {"tag": "金光叠影", "meteo": "虹光", "insight": f"主流板块全线飘红，巨额增量资金锁死【{top_sector_name}】。这种级别的攻击不仅是反弹，更是重塑，建议顺应天时，乘风而上。"}
             ],
             "flat_bull": [
-                {"tag": "å¹³æµç¼“è¿›", "meteo": "æ™¨æ›¦", "insight": f"ç¨³æ‰Žç¨³æ‰“çš„æ™®æ¶¨æ ¼å±€ã€‚è™½ç„¶æ²¡æœ‰æƒŠå¤©åŠ¨åœ°çš„çˆ†é‡ï¼Œä½†ã€{top_sector_name}ã€‘çš„ç¨³æ­¥ä¸Šç§»è¯´æ˜Žæ”¯æ’‘åšå®žã€‚æ­¤æ—¶è€å¿ƒæ¯”ä¿¡å¿ƒæ›´é‡è¦ã€‚"},
-                {"tag": "æ˜¥é£ŽåŒ–é›¨", "meteo": "æš–é˜³", "insight": f"å¸‚åœºå‘ˆçŽ°è‰¯æ€§è½®åŠ¨ï¼Œæ™®æ¶¨æ¸©å’Œä¸”å¥åº·ã€‚èµ„é‡‘æ­£æ‚„ç„¶å‘ã€{top_sector_name}ã€‘èšé›†ï¼ŒæŒè‚¡è€…åªéœ€é™çœ‹äº‘å·äº‘èˆ’ï¼Œä¸å¿…æ€¥äºŽæ±‚æˆã€‚"},
-                {"tag": "ç»†æ°´é•¿æµ", "meteo": "æŸ”å…‰", "insight": f"æŒ‡æ•°åœ¨ç¼“æ…¢æŽ¨å‡ä¸­ä¿®å¤ä¿¡å¿ƒã€‚ä¸»åŠ›åœ¨ã€{top_sector_name}ã€‘ä¸­æ…¢æ¡æ–¯ç†åœ°æž„å»ºé˜²çº¿ã€‚è¿™ç§æ¸©å’Œçš„æ™®æ¶¨å¾€å¾€æ‰æ˜¯æœ€æŒä¹…çš„èµšé’±è‰¯æœºã€‚"},
-                {"tag": "æ½œç§»é»˜åŒ–", "meteo": "ç†¹å¾®", "insight": f"æ— éœ€çˆ†é‡ï¼Œå–åŽ‹å·²åœ¨ç›˜æ•´ä¸­æ¶ˆç£¨æ®†å°½ã€‚å¸‚åœºæ­£å¤„äºŽä¸»å‡æµªå‰çš„é™è°§æ—¶åˆ»ï¼Œã€{top_sector_name}ã€‘çš„å°æ­¥å¿«è·‘æ˜¯æžä½³çš„ä½Žå¸ä¿¡å·ã€‚"}
+                {"tag": "平流缓进", "meteo": "晨曦", "insight": f"稳扎稳打的普涨格局。虽然没有惊天动地的爆量，但【{top_sector_name}】的稳步上移说明支撑坚实。此时耐心比信心更重要。"},
+                {"tag": "春风化雨", "meteo": "暖阳", "insight": f"市场呈现良性轮动，普涨温和且健康。资金正悄然向【{top_sector_name}】聚集，持股者只需静看云卷云舒，不必急于求成。"},
+                {"tag": "细水长流", "meteo": "柔光", "insight": f"指数在缓慢推升中修复信心。主力在【{top_sector_name}】中慢条斯理地构建防线。这种温和的普涨往往才是最持久的赚钱良机。"},
+                {"tag": "潜移默化", "meteo": "熹微", "insight": f"无需爆量，卖压已在盘整中消磨殆尽。市场正处于主升浪前的静谧时刻，【{top_sector_name}】的小步快跑是极佳的低吸信号。"}
             ],
             "low_bull": [
-                {"tag": "æš—é¦™æµ®åŠ¨", "meteo": "æš–é£Ž", "insight": f"æ— é‡åå¼¹å¾€å¾€ä¼´éšç€åˆ†æ­§ã€‚è™½æœ‰æ™®æ¶¨ä¹‹è¡¨ï¼Œä½†èƒ½é‡å°šæœªå®Œå…¨æ¿€æ´»ã€‚ä¸»æ”»æ‰‹åœ¨ã€{top_sector_name}ã€‘å±€éƒ¨è¯•æŽ¢ï¼Œé˜²èŒƒå†²é«˜å›žè½ã€‚"},
-                {"tag": "æž¯æœ¨é€¢æ˜¥", "meteo": "å¾®èŠ’", "insight": f"æƒ…ç»ªå…ˆäºŽèµ„é‡‘ä¿®å¤ï¼Œç¼©é‡æ™®æ¶¨æš—ç¤ºå–ç›˜æž¯ç«­ã€‚æ­¤æ—¶è™½æœªè§å¤§é¾™ï¼Œä½†ã€{top_sector_name}ã€‘çš„æ˜Ÿæ˜Ÿä¹‹ç«è¶³ä»¥ç‡ŽåŽŸï¼Œå®œè½»ä»“å‰çž»ã€‚"},
-                {"tag": "èœ»èœ“ç‚¹æ°´", "meteo": "æ¶Ÿæ¼ª", "insight": f"å­˜é‡èµ„é‡‘çš„åšå¼ˆè¡¨æ¼”ã€‚æŒ‡æ•°è™½çº¢ï¼Œä½†åº•æ°”ä¸è¶³ã€‚èµ„é‡‘åœ¨ã€{top_sector_name}ã€‘ä¸­å¿«è¿›å¿«å‡ºï¼Œåˆ‡èŽ«åœ¨ç¼©é‡æ—¶å½“çœŸï¼Œä¿æŒä¸‰åˆ†è­¦æƒ•ã€‚"},
-                {"tag": "é•œèŠ±æ°´æœˆ", "meteo": "å¹»å½©", "insight": f"çœ‹ä¼¼æ™®æ¶¨ï¼Œå®žåˆ™è‡ªæ•‘ã€‚ç¼©é‡åå¼¹å¤šä¸ºæƒ…ç»ªè„‰å†²ï¼Œã€{top_sector_name}ã€‘çš„æ´»è·ƒåº¦éš¾ä»¥æ”¯æ’‘é•¿ä¹…æ‹‰å‡ã€‚åœ¨è¿™ä¸ªé˜¶æ®µï¼ŒæŽ§åˆ¶è´ªå¿µæ¯”æŠ“ä½åˆ©æ¶¦æ›´é‡è¦ã€‚"}
+                {"tag": "暗香浮动", "meteo": "暖风", "insight": f"无量反弹往往伴随着分歧。虽有普涨之表，但能量尚未完全激活。主攻手在【{top_sector_name}】局部试探，防范冲高回落。"},
+                {"tag": "枯木逢春", "meteo": "微芒", "insight": f"情绪先于资金修复，缩量普涨暗示卖盘枯竭。此时虽未见大龙，但【{top_sector_name}】的星星之火足以燎原，宜轻仓前瞻。"},
+                {"tag": "蜻蜓点水", "meteo": "涟漪", "insight": f"存量资金的博弈表演。指数虽红，但底气不足。资金在【{top_sector_name}】中快进快出，切莫在缩量时当真，保持三分警惕。"},
+                {"tag": "镜花水月", "meteo": "幻彩", "insight": f"看似普涨，实则自救。缩量反弹多为情绪脉冲，【{top_sector_name}】的活跃度难以支撑长久拉升。在这个阶段，控制贪念比抓住利润更重要。"}
             ],
             "high_neutral": [
-                {"tag": "æƒŠæ¶›æ‹å²¸", "meteo": "å¥”æµ", "insight": f"å·¨é‡æ¢æ‰‹ä¼´éšç€å‰§çƒˆæ³¢åŠ¨ã€‚å¤šç©ºåŒæ–¹åœ¨ã€{top_sector_name}ã€‘ç­‰ä¸»æˆ˜åœºç™½åˆƒç›¸æŽ¥ã€‚åˆ†æ­§å³æœºä¼šï¼ŒåŽ»å¼±ç•™å¼ºæ˜¯å½“åŠ¡ä¹‹æ€¥ã€‚"},
-                {"tag": "ç†”ç‚‰äº¤é”‹", "meteo": "çƒˆé£Ž", "insight": f"çˆ†é‡éœ‡è¡è¯´æ˜Žç­¹ç æ­£åœ¨å¤§èŒƒå›´æ˜“æ‰‹ã€‚èµ„é‡‘ä»Žé«˜ä½è‚¡åŠ é€Ÿæ’¤ç¦»ï¼Œè½¬å‘å¯»æ‰¾ã€{top_sector_name}ã€‘æ–¹å‘çš„é¿é£Žæ¸¯ï¼Œæ³¢åŠ¨ä¸­è•´å«é‡ç”Ÿã€‚"},
-                {"tag": "é¾™è™Žå†³", "meteo": "ç‹‚æ¾œ", "insight": f"åœºé¢å®å¤§å´éš¾ä»¥å†³å‡ºèƒœè´Ÿã€‚æ¿å—é—´å‰§çƒˆæ¢æ‰‹ï¼Œã€{top_sector_name}ã€‘æˆä¸ºè§’åŠ›ä¸­å¿ƒã€‚è¿™ç§é«˜æ¢æ‰‹é€šå¸¸æ˜¯å˜ç›˜å‰å¥ï¼Œæ³¨æ„è§‚å¯Ÿå°¾ç›˜å¯¼å‘ã€‚"},
-                {"tag": "çƒ½ç«èµ¤å£", "meteo": "ç«é£Ž", "insight": f"ä¸‡äº¿æˆäº¤ä¸‹çš„æƒ¨çƒˆåšå¼ˆã€‚è™½ç„¶èµšé’±æ•ˆåº”åˆ†åŒ–ï¼Œä½†åªè¦èƒ½å®ˆä½ã€{top_sector_name}ã€‘æ ¸å¿ƒé˜µåœ°ï¼Œä¾¿èƒ½åœ¨ä¹±å±€ä¸­ç«‹äºŽä¸è´¥ä¹‹åœ°ã€‚"}
+                {"tag": "惊涛拍岸", "meteo": "奔流", "insight": f"巨量换手伴随着剧烈波动。多空双方在【{top_sector_name}】等主战场白刃相接。分歧即机会，去弱留强是当务之急。"},
+                {"tag": "熔炉交锋", "meteo": "烈风", "insight": f"爆量震荡说明筹码正在大范围易手。资金从高位股加速撤离，转向寻找【{top_sector_name}】方向的避风港，波动中蕴含重生。"},
+                {"tag": "龙虎决", "meteo": "狂澜", "insight": f"场面宏大却难以决出胜负。板块间剧烈换手，【{top_sector_name}】成为角力中心。这种高换手通常是变盘前奏，注意观察尾盘导向。"},
+                {"tag": "烽火赤壁", "meteo": "火风", "insight": f"万亿成交下的惨烈博弈。虽然赚钱效应分化，但只要能守住【{top_sector_name}】核心阵地，便能在乱局中立于不败之地。"}
             ],
             "flat_neutral": [
-                {"tag": "æš—æµæ¶ŒåŠ¨", "meteo": "æ™¨é›¾", "insight": f"æŒ‡æ•°æ³¢æ¾œä¸æƒŠï¼Œä½†æ°´åº•æš—æµæ¹æ€¥ã€‚å±žäºŽå…¸åž‹çš„è½®åŠ¨è¡Œæƒ…ï¼Œä¸»æˆ˜åœºè™½è§ã€{top_sector_name}ã€‘ï¼Œä½†åˆ‡å¿ŒåŽçŸ¥åŽè§‰è¿½é«˜ï¼Œåº”è€å¿ƒåŸ‹ä¼ã€‚"},
-                {"tag": "é›¾é‡Œçœ‹èŠ±", "meteo": "çƒŸäº‘", "insight": f"å¸‚åœºè¿›å…¥ç”µé£Žæ‰‡è½®åŠ¨æ¨¡å¼ã€‚æŒ‡æ•°çª„å¹…éœ‡è¡ï¼Œèµ„é‡‘åœ¨ã€{top_sector_name}ã€‘å†…éƒ¨å¿«é€Ÿåˆ‡æ¢ï¼Œè€ƒéªŒå¿ƒæ€çš„å®šåŠ›å’ŒæŠ•ç ”çš„æ·±åº¦ã€‚"},
-                {"tag": "ç½—ç”Ÿé—¨", "meteo": "è–„æš®", "insight": f"å¤šç©ºä¿¡æ¯äº¤ç»‡ï¼ŒæŒ‡æ•°é™·å…¥åƒµå±€ã€‚çœ‹ä¼¼å¹³ç¨³çš„èƒŒåŽï¼Œã€{top_sector_name}ã€‘æ­£ç»åŽ†æƒ¨çƒˆçš„åŽ»æ æ†ä¸Žå†å¹³è¡¡ã€‚æ­¤æ—¶ä¸åŠ¨å¦‚å±±ï¼Œæ–¹ä¸ºæ™ºè€…ã€‚"},
-                {"tag": "æ··æ²Œæœªæ˜Ž", "meteo": "å¾®é›¨", "insight": f"å…¸åž‹çš„å¹³è¡¡æœ¨åšå¼ˆã€‚æŒ‡æ•°åœ¨æžå°èŒƒå›´å†…èµ·ä¼ï¼Œèµ„é‡‘åœ¨ã€{top_sector_name}ã€‘ä¸­åå¤æ¨ªè·³å¯»æ‰¾æ–¹å‘ã€‚è¿™æ˜¯å¯¹äº¤æ˜“è€…è€å¿ƒæœ€æžç«¯çš„è€ƒéªŒã€‚"}
+                {"tag": "暗流涌动", "meteo": "晨雾", "insight": f"指数波澜不惊，但水底暗流湍急。属于典型的轮动行情，主战场虽见【{top_sector_name}】，但切忌后知后觉追高，应耐心埋伏。"},
+                {"tag": "雾里看花", "meteo": "烟云", "insight": f"市场进入电风扇轮动模式。指数窄幅震荡，资金在【{top_sector_name}】内部快速切换，考验心态的定力和投研的深度。"},
+                {"tag": "罗生门", "meteo": "薄暮", "insight": f"多空信息交织，指数陷入僵局。看似平稳的背后，【{top_sector_name}】正经历惨烈的去杠杆与再平衡。此时不动如山，方为智者。"},
+                {"tag": "混沌未明", "meteo": "微雨", "insight": f"典型的平衡木博弈。指数在极小范围内起伏，资金在【{top_sector_name}】中反复横跳寻找方向。这是对交易者耐心最极端的考验。"}
             ],
             "low_neutral": [
-                {"tag": "é™æ°´æ·±æµ", "meteo": "æ­¢æ°´", "insight": f"åœ°é‡éœ‡è¡ï¼Œå¸‚åœºçŠ¹å¦‚è¿›å…¥åžƒåœ¾æ—¶é—´ã€‚ä¸»åŠ›è¿›å…¥è›°ä¼çŠ¶æ€ï¼Œèµ„é‡‘æ™®éç¼ºä¹æ”»å‡»æ„æ„¿ã€‚ç©ºä»“æˆ–æžè½»ä»“é˜²å®ˆæ˜¯ä¸Šç­–ï¼Œé™å¾…çœŸé¾™ã€‚"},
-                {"tag": "å¤æ½­å¾®æ³¢", "meteo": "å¯’æ±Ÿ", "insight": f"é‡èƒ½é™è‡³å†°ç‚¹ï¼Œå¸‚åœºå‘ˆçŽ°å¤±è¡€çŠ¶æ€ã€‚ä¸Žå…¶åœ¨ã€{top_sector_name}ã€‘å¾®å°çš„æ³¢åŠ¨ä¸­æ²‰æµ®ï¼Œä¸å¦‚æŠ½èº«è€Œé€€ï¼Œç ”å­¦é€»è¾‘ï¼Œé™ä¿®å…¶å¿ƒã€‚"},
-                {"tag": "å¹³æ¹–ç§‹æœˆ", "meteo": "æ¸…éœœ", "insight": f"ä¸€åˆ‡éƒ½æ…¢äº†ä¸‹æ¥ã€‚é‡èƒ½ç¼©æ— å¯ç¼©ï¼Œå¤§ç›˜ä»¿ä½›å¤±åŽ»äº†å¿ƒè·³ã€‚æ­¤æ—¶ä¸å¿…åœ¨ã€{top_sector_name}ã€‘ä¸­è‹¦è‹¦å¯»è§…æœºä¼šï¼Œæœ€å¥½çš„æœºä¼šæ˜¯ä¼‘æ¯ã€‚"},
-                {"tag": "ç»å£°è°·", "meteo": "ç©ºèŒ«", "insight": f"å…¨åœºè‚ƒé™ã€‚äº¤æ˜“è€…åœ¨è§‚æœ›ï¼Œå¤§é³„åœ¨æ½œä¼ã€‚æ— é‡éœ‡è¡æ˜¯å¸‚åœºæœ€å¯‚å¯žçš„æ—¶åˆ»ï¼Œã€{top_sector_name}ã€‘çš„å†·æ¸…æ­£æ˜¯æœ€å¥½çš„é˜²å¾¡ç†ç”±ã€‚"}
+                {"tag": "静水深流", "meteo": "止水", "insight": f"地量震荡，市场犹如进入垃圾时间。主力进入蛰伏状态，资金普遍缺乏攻击意愿。空仓或极轻仓防守是上策，静待真龙。"},
+                {"tag": "古潭微波", "meteo": "寒江", "insight": f"量能降至冰点，市场呈现失血状态。与其在【{top_sector_name}】微小的波动中沉浮，不如抽身而退，研学逻辑，静修其心。"},
+                {"tag": "平湖秋月", "meteo": "清霜", "insight": f"一切都慢了下来。量能缩无可缩，大盘仿佛失去了心跳。此时不必在【{top_sector_name}】中苦苦寻觅机会，最好的机会是休息。"},
+                {"tag": "绝声谷", "meteo": "空茫", "insight": f"全场肃静。交易者在观望，大鳄在潜伏。无量震荡是市场最寂寞的时刻，【{top_sector_name}】的冷清正是最好的防御理由。"}
             ],
             "high_bear": [
-                {"tag": "æ³¥æ²™ä¿±ä¸‹", "meteo": "ç½¡é£Ž", "insight": f"æ”¾é‡å¤§è·Œæ˜¯æœ€å±é™©çš„ä¿¡å·ï¼Œç³»ç»Ÿæ€§é£Žé™©æ­£åœ¨ç–¯ç‹‚å®£æ³„ã€‚å³ä½¿ã€{top_sector_name}ã€‘æœ‰å±€éƒ¨æŠµæŠ—ï¼Œä¹Ÿéš¾æŒ¡å¤§åŠ¿é¢“é¡ï¼Œç©ºä»“æ˜¯å”¯ä¸€çš„ä¿®è¡Œã€‚"},
-                {"tag": "é‡‘çŸ³è£‚å˜", "meteo": "æ²‰é›·", "insight": f"ææ…Œç›˜å¦‚æ½®æ°´æ¶Œå‡ºï¼Œçˆ†é‡ä¸‹è·Œä¸è¨€åº•ã€‚å¤šå¤´åœ¨ã€{top_sector_name}ã€‘çš„é˜²çº¿å±‚å±‚å´©æºƒï¼Œé£ŽæŽ§æ˜¯æ­¤æ—¶å”¯ä¸€çš„æœ€é«˜ä¿¡æ¡ï¼Œä¸å¯æœ‰ä¾¥å¹¸ã€‚"},
-                {"tag": "ä¸‡é©¬å¥”è…¾", "meteo": "é»‘æ½®", "insight": f"å¤§åŠ¿å·²åŽ»ï¼Œå·¨é‡æŠ›å•æ— æƒ…æ‘§æ¯äº†æ‰€æœ‰æŠ€æœ¯ä½ã€‚èµ„é‡‘æ­£ä¸è®¡ä»£ä»·æ’¤ç¦»ï¼Œç”šè‡³æ³¢åŠã€{top_sector_name}ã€‘ã€‚è¿™ç§æ—¶åˆ»ï¼Œå¤šç•™ä¸€æ¯«ç§’éƒ½æ˜¯å±é™©ã€‚"},
-                {"tag": "å¤©å´©åœ°è£‚", "meteo": "é™¨çŸ³", "insight": f"æžç«¯ææ…Œã€‚åœºå†…æµåŠ¨æ€§è¿…é€Ÿæž¯ç«­ï¼ŒæŠ›åŽ‹å¦‚å¤§é›ªå´©èˆ¬å€¾æ³»è€Œä¸‹ã€‚æ­¤åˆ»ä»»ä½•è¯•å›¾æ‹¯æ•‘ã€{top_sector_name}ã€‘çš„è¡Œä¸ºéƒ½æ˜¯å¾’åŠ³ï¼Œå”¯æœ‰æŠ½èº«é¿é™©ã€‚"}
+                {"tag": "泥沙俱下", "meteo": "罡风", "insight": f"放量大跌是最危险的信号，系统性风险正在疯狂宣泄。即使【{top_sector_name}】有局部抵抗，也难挡大势颓靡，空仓是唯一的修行。"},
+                {"tag": "金石裂变", "meteo": "沉雷", "insight": f"恐慌盘如潮水涌出，爆量下跌不言底。多头在【{top_sector_name}】的防线层层崩溃，风控是此时唯一的最高信条，不可有侥幸。"},
+                {"tag": "万马奔腾", "meteo": "黑潮", "insight": f"大势已去，巨量抛单无情摧毁了所有技术位。资金正不计代价撤离，甚至波及【{top_sector_name}】。这种时刻，多留一毫秒都是危险。"},
+                {"tag": "天崩地裂", "meteo": "陨石", "insight": f"极端恐慌。场内流动性迅速枯竭，抛压如大雪崩般倾泻而下。此刻任何试图拯救【{top_sector_name}】的行为都是徒劳，唯有抽身避险。"}
             ],
             "flat_bear": [
-                {"tag": "è½å¶çŸ¥ç§‹", "meteo": "å¯’éœœ", "insight": f"é˜´è·Œç»µç»µï¼Œé’åˆ€è‚‰æœ€æ˜¯æ¶ˆç£¨æ„å¿—ã€‚è™½ç„¶æŠ›åŽ‹æœªè§é«˜æ½®ï¼Œä½†é‡å¿ƒæŒç»­ä¸‹ç§»ã€‚åœ¨å³ä¾§ä¿¡å·å‡ºçŽ°å‰ï¼Œä»»ä½•æŠ„åº•è¡Œä¸ºæœ¬è´¨éƒ½æ˜¯ä¸€åœºåŠ«éš¾ã€‚"},
-                {"tag": "å†·é›¨è§ç‘Ÿ", "meteo": "ç»†é›¨", "insight": f"å¸‚åœºé‡å¿ƒåœ¨æ— å£°ä¸­ä¸‹å ã€‚èµšé’±æ•ˆåº”é™è‡³å†°ç‚¹ï¼Œå³ä¾¿æ˜¯æ›¾å¼ºåŠ¿çš„ã€{top_sector_name}ã€‘ä¹Ÿæ˜¾éœ²ç–²æ€ã€‚å®œç¼©è¡£èŠ‚é£Ÿä»¥æ­¤åº¦è¿‡å¯’å†¬ã€‚"},
-                {"tag": "ç§‹é£Žæ‰«å¶", "meteo": "è‹¦é£Ž", "insight": f"é˜´äº‘å¯†å¸ƒã€‚æŠ›åŽ‹è™½ç„¶ä¸é‡ï¼Œä½†ä¹°ç›˜æ„æ„¿æ›´ä½Žã€‚æŒ‡æ•°åœ¨æ…¢æ€§å¤±è¡€ä¸­é˜´è·Œï¼Œã€{top_sector_name}ã€‘çš„æŠµæŠ—ä¹Ÿæ˜¾å¾—è½¯å¼±æ— åŠ›ã€‚"},
-                {"tag": "è¦†å·¢ä¹‹ä¸‹", "meteo": "é“…äº‘", "insight": f"å¤§ç›˜å‘ˆçŽ°å…¸åž‹çš„é˜´è·Œé€šé“ã€‚æ²¡æœ‰æ³¢æ¾œçš„ä¸‹è·Œæ‰æ˜¯æœ€éš¾åº”ä»˜çš„æ…¢æ€§æŠ˜ç£¨ã€‚å¦‚æžœä½ è¿˜åœ¨çº ç»“ã€{top_sector_name}ã€‘çš„è¡¥æ¶¨ï¼Œè¯·å…ˆçœ‹é€ç³»ç»Ÿé£Žé™©ã€‚"}
+                {"tag": "落叶知秋", "meteo": "寒霜", "insight": f"阴跌绵绵，钝刀肉最是消磨意志。虽然抛压未见高潮，但重心持续下移。在右侧信号出现前，任何抄底行为本质都是一场劫难。"},
+                {"tag": "冷雨萧瑟", "meteo": "细雨", "insight": f"市场重心在无声中下坠。赚钱效应降至冰点，即便是曾强势的【{top_sector_name}】也显露疲态。宜缩衣节食以此度过寒冬。"},
+                {"tag": "秋风扫叶", "meteo": "苦风", "insight": f"阴云密布。抛压虽然不重，但买盘意愿更低。指数在慢性失血中阴跌，【{top_sector_name}】的抵抗也显得软弱无力。"},
+                {"tag": "覆巢之下", "meteo": "铅云", "insight": f"大盘呈现典型的阴跌通道。没有波澜的下跌才是最难应付的慢性折磨。如果你还在纠结【{top_sector_name}】的补涨，请先看透系统风险。"}
             ],
             "low_bear": [
-                {"tag": "å€’æ˜¥å¯’", "meteo": "æ·±æ°´", "insight": f"ç¼©é‡æ™®è·Œæ„å‘³ç€ä¹°ç›˜å½»åº•æ¶ˆå¤±ã€‚å¸‚åœºå¤„äºŽæžåº¦è„†å¼±çš„çœŸç©ºæœŸï¼Œé™æ°´æ·±å¤„æ½œä¼ç€æœ€åŽä¸€æ¬¡ç»æœ›æ´—ç›˜ã€‚é»Žæ˜Žå‰çš„é»‘æš—æœ€ä¸ºéš¾ç†¬ã€‚"},
-                {"tag": "å†°å°åƒé‡Œ", "meteo": "çŽ„éœœ", "insight": f"æƒ…ç»ªè¿›å…¥æžå¯’çŠ¶æ€ï¼Œèƒ½é‡æž¯ç«­ã€‚æ­¤æ—¶ç›²ç›®å‰²è‚‰æˆ–ç›²ç›®æŠ„åº•çš†éžè‰¯ç­–ï¼Œå®ˆä½æ®‹å­˜çš„æœ¬é‡‘ï¼Œé™å¾…å†°é›ªæ¶ˆèžï¼Œå†¬åŽ»æ˜¥æ¥ã€‚"},
-                {"tag": "æž¯æ½­æ­»æ°´", "meteo": "å¹½æ¸Š", "insight": f"å¤§ç›˜å·²å¤±åŽ»åšå¼ˆä»·å€¼ã€‚ç¼©é‡æ™®è·Œè¯´æ˜Žå³ä¾¿æƒ³ç¦»åœºçš„èµ„é‡‘ä¹Ÿæ‰¾ä¸åˆ°å¯¹æ‰‹ç›˜ã€‚æ­¤æ—¶çš„ã€{top_sector_name}ã€‘å·²æ— ç”Ÿæ„å¯è¨€ï¼Œä¸“æ³¨åœºå¤–ç”Ÿæ´»ã€‚"},
-                {"tag": "è‰å™ªæž—é€¾é™", "meteo": "è’é‡Ž", "insight": f"æžåº¦ç¼©é‡åŽçš„æ™®è·Œã€‚è¿™å¾€å¾€æ˜¯æœ€åŽä¸€æ®µç»æœ›çš„å¿ƒç†é˜²çº¿è€ƒéªŒã€‚æ­¤æ—¶å¤šæƒ³æ— ç›Šï¼Œå…³ä¸Šç”µè„‘ï¼ŒåŽ»å‘¼å¸æ–°é²œç©ºæ°”ã€‚"}
+                {"tag": "倒春寒", "meteo": "深水", "insight": f"缩量普跌意味着买盘彻底消失。市场处于极度脆弱的真空期，静水深处潜伏着最后一次绝望洗盘。黎明前的黑暗最为难熬。"},
+                {"tag": "冰封千里", "meteo": "玄霜", "insight": f"情绪进入极寒状态，能量枯竭。此时盲目割肉或盲目抄底皆非良策，守住残存的本金，静待冰雪消融，冬去春来。"},
+                {"tag": "枯潭死水", "meteo": "幽渊", "insight": f"大盘已失去博弈价值。缩量普跌说明即便想离场的资金也找不到对手盘。此时的【{top_sector_name}】已无生意可言，专注场外生活。"},
+                {"tag": "蝉噪林逾静", "meteo": "荒野", "insight": f"极度缩量后的普跌。这往往是最后一段绝望的心理防线考验。此时多想无益，关上电脑，去呼吸新鲜空气。"}
             ]
         }
 
@@ -298,77 +299,77 @@ def generate_almanac(target_date: str = None, force_t_plus_1: bool = True) -> bo
             action_strategy = "宜：控制仓位 / 忌：情绪化追单"
             template = "数据完整性不足，已切换防守语义。请以仓位纪律和风险控制为先。"
 
-        # Global Enrichment (Nasdaq) â€” Time-gated
+        # Global Enrichment (Nasdaq) — Time-gated
         # Only inject Nasdaq narrative when the data is genuinely "overnight" fresh.
         nasdaq_impact = None
         if (not degraded) and nasdaq_change != "N/A" and is_nasdaq_fresh:
             try:
                 nasdaq_val = float(nasdaq_change.replace('%', ''))
                 if nasdaq_val > 1.0:
-                    template += f" å—åˆ°éš”å¤œç¾Žè‚¡ï¼ˆçº³æŒ‡{nasdaq_change}ï¼‰èµ°å¼ºæ˜ å°„ï¼Œä»Šå¤© A è‚¡æœ‰æœ›è¿Žæ¥ç§¯æžçš„å¼€ç›˜æƒ…ç»ªã€‚"
+                    template += f" 受到隔夜美股（纳指{nasdaq_change}）走强映射，今天 A 股有望迎来积极的开盘情绪。"
                     nasdaq_impact = "bullish"
                 elif nasdaq_val < -1.2:
-                    template += f" å—éš”å¤œçº³æŒ‡ï¼ˆ{nasdaq_change}ï¼‰åŽ‹åŠ›ä¼ å¯¼ï¼Œå¤–å›´çŽ¯å¢ƒç•¥æ˜¾ä½Žè¿·ï¼Œå¼€ç›˜éœ€æé˜²æƒ…ç»ªç ¸ç›˜ã€‚"
+                    template += f" 受隔夜纳指（{nasdaq_change}）压力传导，外围环境略显低迷，开盘需提防情绪砸盘。"
                     nasdaq_impact = "bearish"
                 else:
                     nasdaq_impact = "neutral"
             except: pass
         elif not is_nasdaq_fresh:
             nasdaq_impact = "stale_skipped"
-            logger.info(f"â­ï¸  Nasdaq enrichment skipped: data not fresh at {now_beijing.strftime('%H:%M')}")
+            logger.info(f"⏭️  Nasdaq enrichment skipped: data not fresh at {now_beijing.strftime('%H:%M')}")
 
         # Temporal Context Enrichment
         temporal_impact = "none"
         if (not degraded) and is_monday:
-            template = "ã€å‘¨ä¸€å¼€ç¯‡ã€‘" + template + " æœ¬å‘¨è¶‹åŠ¿å°†ç”±æ­¤å®šè°ƒã€‚"
+            template = "【周一开篇】" + template + " 本周趋势将由此定调。"
             temporal_impact = "monday"
         elif (not degraded) and is_friday:
-            template = "ã€å‘¨äº”æ”¶å®˜ã€‘" + template + " å‘¨æœ«æ”¿ç­–é¢åŠ¨å‘åŠæ¶ˆæ¯åšå¼ˆå°†æ˜¯å…³é”®ã€‚"
+            template = "【周五收官】" + template + " 周末政策面动向及消息博弈将是关键。"
             temporal_impact = "friday"
         
         extra_suffix = None
         if (not degraded) and rng.random() < 0.4: # 40% chance for a "lucky charm" or extra advice
             extra_suffix = rng.choice([
-                " å¿ƒå¦‚æ­¢æ°´ï¼Œæ–¹èƒ½çœ‹é€è¿·é›¾ã€‚",
-                " è®°ä½ï¼Œæœ¬é‡‘æ¯”åˆ©æ¶¦æ›´é‡è¦ã€‚",
-                " æ‰€æœ‰çš„æœºä¼šéƒ½æ˜¯ç­‰å‡ºæ¥çš„ã€‚",
-                " å¼±æ°´ä¸‰åƒï¼Œåªå–ä¸€ç“¢é¥®ã€‚",
-                " è¶‹åŠ¿æ˜¯ä½ çš„æœ‹å‹ï¼Œè€Œéžæ•Œäººã€‚",
-                " å–„æˆ˜è€…ä¹‹èƒœï¼Œæ— æ™ºåï¼Œæ— å‹‡åŠŸã€‚",
-                " èƒœå¯çŸ¥ï¼Œè€Œä¸å¯ä¸ºã€‚",
-                " ä¹°å…¥é æœºä¼šï¼Œå–å‡ºé å¿è€ã€‚",
-                " å¸‚åœºä¸ä¼šå…³é—¨ï¼Œæœºä¼šæ°¸è¿œéƒ½åœ¨ã€‚",
-                " å®å¯é”™è¿‡ï¼Œä¸è¦åšé”™ã€‚",
-                " æ­¢æŸæ˜¯äº¤æ˜“çš„ä¸€éƒ¨åˆ†ï¼Œåƒå‘¼å¸ä¸€æ ·è‡ªç„¶ã€‚",
-                " ä¸è¦è¯•å›¾æŽ¥ä½ä¸‹å çš„é£žåˆ€ã€‚",
-                " ç¬¬ä¸€å‡†åˆ™æ˜¯ä¿ä½æœ¬é‡‘ï¼Œç¬¬äºŒå‡†æ‰æ˜¯å‚è€ƒç¬¬ä¸€æ¡ã€‚",
-                " åˆ©æ¶¦æ˜¯å¸‚åœºç»™ä½ çš„å¥–é‡‘ï¼Œä¸æ˜¯ä½ åº”å¾—çš„è–ªæ°´ã€‚",
-                " é€†åŠ¿è€Œä¸ºå¾€å¾€æ˜¯æ¯ç­çš„å¼€å§‹ã€‚",
-                " åªæœ‰åœ¨æ½®æ°´é€€åŽ»æ—¶ï¼Œæ‰çŸ¥é“è°åœ¨è£¸æ³³ã€‚",
-                " é£Žé™©æ¥è‡ªä½ ä¸çŸ¥é“è‡ªå·±åœ¨åšä»€ä¹ˆã€‚",
-                " è€å¿ƒæ˜¯äº¤æ˜“è€…æœ€æ˜‚è´µçš„èµ„äº§ã€‚",
-                " åˆ«åœ¨åˆ«äººçš„è´ªå©ªä¸­è¿·å¤±ï¼Œåˆ«åœ¨åˆ«äººçš„ææƒ§ä¸­æˆ˜æ —ã€‚",
-                " æ¯ä¸€ç¬”äº¤æ˜“éƒ½è¯¥æœ‰å®ƒå¿…é¡»å­˜åœ¨çš„é€»è¾‘ã€‚",
-                " è¡Œæƒ…çš„æ¼”ç»Žï¼Œå¾€å¾€åœ¨ç»æœ›ä¸­è¯žç”Ÿï¼Œåœ¨åˆ†æ­§ä¸­æˆé•¿ã€‚",
-                " å¸‚åœºæ˜¯åäººæ€§çš„ï¼Œå­¦ä¼šä¸Žè‡ªå·±çš„æœ¬èƒ½å¯¹æŠ—ã€‚",
-                " äº¤æ˜“ä¸ä»…æ˜¯é‡‘é’±çš„åšå¼ˆï¼Œæ›´æ˜¯çµé­‚çš„ä¿®è¡Œã€‚",
-                " è¿›åœºå‰çš„æ€è€ƒï¼Œé‡äºŽè¿›åœºåŽçš„ç¥ˆç¥·ã€‚",
-                " æˆåŠŸçš„äº¤æ˜“è€…ï¼Œéƒ½æ˜¯æ¦‚çŽ‡çš„ä¿¡å¾’ã€‚",
-                " ä¿æŒæ•¬ç•ï¼Œå¸‚åœºæ°¸è¿œæ˜¯å¯¹çš„ã€‚",
-                " å¤ç›˜æ˜¯ä¸ºäº†åœ¨æœªæ¥ä¸å†çŠ¯åŒæ ·çš„é”™è¯¯ã€‚",
-                " æ‰€è°“ç›˜æ„Ÿï¼Œæ˜¯å»ºç«‹åœ¨æµ·é‡æ•°æ®ä¸Šçš„ç›´è§‰ã€‚",
-                " å¤åˆ©æ˜¯ä¸–ç•Œç¬¬å…«å¤§å¥‡è¿¹ï¼Œåˆ«è®©äºæŸæ‰“æ–­å®ƒã€‚",
-                " ä¸è¦çˆ±ä¸Šä½ çš„æŒä»“ï¼Œå®ƒåªæ˜¯ä¸€ä¸ªæ•°å­—ã€‚",
-                " å­¤ç‹¬æ˜¯äº¤æ˜“è€…çš„å¸¸æ€ï¼Œäº«å—è¿™ç§é™è°§ã€‚",
-                " å¥½çš„äº¤æ˜“å¾€å¾€æ˜¯æž¯ç‡¥ç”šè‡³ä¹å‘³çš„ã€‚",
-                " åœ¨å–§åš£ä¸­ä¿æŒå†·å³»ï¼Œåœ¨ä½Žè°·ä¸­ä¿æŒæ¸©å’Œã€‚"
+                " 心如止水，方能看透迷雾。",
+                " 记住，本金比利润更重要。",
+                " 所有的机会都是等出来的。",
+                " 弱水三千，只取一瓢饮。",
+                " 趋势是你的朋友，而非敌人。",
+                " 善战者之胜，无智名，无勇功。",
+                " 胜可知，而不可为。",
+                " 买入靠机会，卖出靠忍耐。",
+                " 市场不会关门，机会永远都在。",
+                " 宁可错过，不要做错。",
+                " 止损是交易的一部分，像呼吸一样自然。",
+                " 不要试图接住下坠的飞刀。",
+                " 第一准则是保住本金，第二准才是参考第一条。",
+                " 利润是市场给你的奖金，不是你应得的薪水。",
+                " 逆势而为往往是毁灭的开始。",
+                " 只有在潮水退去时，才知道谁在裸泳。",
+                " 风险来自你不知道自己在做什么。",
+                " 耐心是交易者最昂贵的资产。",
+                " 别在别人的贪婪中迷失，别在别人的恐惧中战栗。",
+                " 每一笔交易都该有它必须存在的逻辑。",
+                " 行情的演绎，往往在绝望中诞生，在分歧中成长。",
+                " 市场是反人性的，学会与自己的本能对抗。",
+                " 交易不仅是金钱的博弈，更是灵魂的修行。",
+                " 进场前的思考，重于进场后的祈祷。",
+                " 成功的交易者，都是概率的信徒。",
+                " 保持敬畏，市场永远是对的。",
+                " 复盘是为了在未来不再犯同样的错误。",
+                " 所谓盘感，是建立在海量数据上的直觉。",
+                " 复利是世界第八大奇迹，别让亏损打断它。",
+                " 不要爱上你的持仓，它只是一个数字。",
+                " 孤独是交易者的常态，享受这种静谧。",
+                " 好的交易往往是枯燥甚至乏味的。",
+                " 在喧嚣中保持冷峻，在低谷中保持温和。"
             ])
             template += extra_suffix
 
         # Compile final JSON payloads
         entropy_payload = {
             "score": heat_score,
-            "label": f"{heat_score}% Â· {breadth_label[:2]}",
+            "label": f"{heat_score}% · {breadth_label[:2]}",
             "breadth": breadth_label,
             "volume_status": f"{vol_label}"
         }
@@ -411,7 +412,7 @@ def generate_almanac(target_date: str = None, force_t_plus_1: bool = True) -> bo
                     "winners": winners,
                     "losers": losers,
                     "total": total_stocks,
-                    "ratio": round(breadth_ratio, 3),
+                    "ratio": round(float(breadth_ratio), 3),
                     "heat_score": heat_score,
                     "label": breadth_label
                 },
@@ -469,7 +470,7 @@ def generate_almanac(target_date: str = None, force_t_plus_1: bool = True) -> bo
                 json.dumps(trace, ensure_ascii=False),
                 target_date
             ))
-            logger.info(f"âœ… Almanac Updated for {target_date} -> {mood_tag} (Trace saved)")
+            logger.info(f"✅ Almanac Updated for {target_date} -> {mood_tag} (Trace saved)")
         else:
             cursor.execute("""
                 INSERT INTO market_almanacs 
@@ -482,26 +483,26 @@ def generate_almanac(target_date: str = None, force_t_plus_1: bool = True) -> bo
                 template,
                 json.dumps(trace, ensure_ascii=False)
             ))
-            logger.info(f"âœ… Almanac Inserted for {target_date} -> {mood_tag} (Trace saved)")
+            logger.info(f"✅ Almanac Inserted for {target_date} -> {mood_tag} (Trace saved)")
         
         conn.commit()
         return True
 
     except Exception as e:
         error_msg = traceback.format_exc()
-        logger.error(f"âŒ Almanac Generation Failed: {error_msg}")
+        logger.error(f"❌ Almanac Generation Failed: {error_msg}")
         
-        # ðŸš¨ Notify Admin via WeCom
+        # 🚨 Notify Admin via WeCom
         repo_url = "https://github.com/franksunye/StockWise" # Standard repository link
         maintenance_url = f"{repo_url}/actions/workflows/almanac_maintenance.yml"
         
         alert_content = (
-            f"### ðŸš¨ StockWise è¿è¡Œå¼‚å¸¸: é»„åŽ†ç”Ÿæˆå¤±è´¥\n\n"
-            f"**ç›®æ ‡æ—¥æœŸ**: {target_date or 'N/A'}\n"
-            f"**æŠ¥é”™åŽŸå› **: `{str(e)}`\n"
-            f"**æ—¥å¿—è·¯å¾„**: `almanac_generator.py`\n\n"
-            f"> [ç‚¹å‡»æ­¤å¤„æ‰‹åŠ¨é‡è¯•æˆ–è¡¥è·‘]({maintenance_url})\n\n"
-            f"è¯·æ£€æŸ¥ GitHub Actions åŽå°æˆ–æ•°æ®æŽ¥å£çŠ¶æ€ã€‚"
+            f"### 🚨 StockWise 运行异常: 黄历生成失败\n\n"
+            f"**目标日期**: {target_date or 'N/A'}\n"
+            f"**报错原因**: `{str(e)}`\n"
+            f"**日志路径**: `almanac_generator.py`\n\n"
+            f"> [点击此处手动重试或补跑]({maintenance_url})\n\n"
+            f"请检查 GitHub Actions 后台或数据接口状态。"
         )
         send_wecom_notification(alert_content, mentioned_mobile_list=ADMIN_MOBILES)
         
@@ -520,7 +521,7 @@ if __name__ == "__main__":
         start = datetime.strptime(args.start_date, "%Y-%m-%d")
         end = datetime.strptime(args.end_date, "%Y-%m-%d")
         current = start
-        logger.info(f"ðŸš€ Starting Batch Almanac Generation: {args.start_date} to {args.end_date}")
+        logger.info(f"🚀 Starting Batch Almanac Generation: {args.start_date} to {args.end_date}")
         all_success = True
         while current <= end:
             d_str = current.strftime("%Y-%m-%d")
@@ -531,8 +532,6 @@ if __name__ == "__main__":
         if not all_success:
             sys.exit(1)
     else:
-        logger.info(f"ðŸš€ Starting Rule-based Almanac Generator for {args.date or 'latest data'}")
+        logger.info(f"🚀 Starting Rule-based Almanac Generator for {args.date or 'latest data'}")
         if not generate_almanac(args.date):
             sys.exit(1)
-
-
