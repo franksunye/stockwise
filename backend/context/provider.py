@@ -127,6 +127,18 @@ class MarketContextProvider:
                 continue
         return None
 
+    def _extract_as_of_from_df(self, df: pd.DataFrame, candidate_columns: List[str], row_index: int = 0) -> Optional[Any]:
+        if df is None or df.empty:
+            return None
+        idx = row_index if row_index < len(df) else 0
+        row = df.iloc[idx]
+        for c in candidate_columns:
+            if c in df.columns:
+                val = row.get(c)
+                if pd.notna(val):
+                    return val
+        return None
+
     def _build_field_contract(
         self,
         *,
@@ -137,7 +149,13 @@ class MarketContextProvider:
         freshness_days: int,
         skipped: bool = False,
     ) -> Dict[str, Any]:
-        missing = value is None or str(value).strip() in ("", "N/A", "æš‚æ— æ•°æ®")
+        text_val = str(value).strip() if value is not None else ""
+        missing = (
+            value is None
+            or text_val == ""
+            or text_val.upper() == "N/A"
+            or ("\u6682\u65e0\u6570\u636e" in text_val)
+        )
         as_of_date = self._parse_date(as_of)
         status = "ok"
         freshness_score = 100
@@ -442,6 +460,7 @@ class MarketContextProvider:
 
             # 4. Global Context - Nasdaq (Daily)
             nasdaq_pct = "N/A"
+            nasdaq_as_of = None
             nasdaq_skipped = False
             if skip_nasdaq:
                 logger.info("⏭️  Skipping Nasdaq fetch (skip_nasdaq=True, data would be stale)")
@@ -455,6 +474,7 @@ class MarketContextProvider:
                         prev = float(df_nasdaq.iloc[-2]['close'])
                         change = (last - prev) / prev * 100
                         nasdaq_pct = f"{change:+.2f}%"
+                        nasdaq_as_of = self._extract_as_of_from_df(df_nasdaq, ["date"], row_index=len(df_nasdaq) - 1)
                 except Exception as e:
                     logger.warning(f"Global Nasdaq fetch failed: {e}")
 
@@ -469,17 +489,17 @@ class MarketContextProvider:
             fetched_at = datetime.now()
             fields = {
                 "gdp": self._build_field_contract(
-                    value=gdp_val, as_of=None, source="akshare:macro_china_gdp", fetched_at=fetched_at, freshness_days=120
+                    value=gdp_val, as_of=gdp_val, source="akshare:macro_china_gdp", fetched_at=fetched_at, freshness_days=120
                 ),
                 "cpi": self._build_field_contract(
-                    value=cpi_val, as_of=None, source="akshare:macro_china_cpi", fetched_at=fetched_at, freshness_days=45
+                    value=cpi_val, as_of=cpi_val, source="akshare:macro_china_cpi", fetched_at=fetched_at, freshness_days=45
                 ),
                 "bond_10y": self._build_field_contract(
-                    value=bond_val, as_of=None, source="akshare:bond_zh_us_rate", fetched_at=fetched_at, freshness_days=7
+                    value=bond_val, as_of=fetched_at.date().isoformat(), source="akshare:bond_zh_us_rate", fetched_at=fetched_at, freshness_days=7
                 ),
                 "nasdaq": self._build_field_contract(
                     value=nasdaq_pct,
-                    as_of=fetched_at.date().isoformat(),
+                    as_of=nasdaq_as_of or fetched_at.date().isoformat(),
                     source="akshare:index_us_stock_sina(.IXIC)",
                     fetched_at=fetched_at,
                     freshness_days=2,
@@ -523,6 +543,8 @@ class MarketContextProvider:
         north_source = "akshare:stock_hsgt_fund_flow_summary_em"
         sector_source = "unknown"
         consistency_flags: List[str] = []
+        north_as_of = fetched_at.date().isoformat()
+        sector_as_of = fetched_at.date().isoformat()
 
         # 1. Northbound (Smart Money) - Breadth Signal
         # Since 2024-08-19, HKEX no longer discloses real-time northbound net buy amounts.
@@ -674,21 +696,21 @@ class MarketContextProvider:
         flow_fields = {
             "northbound_net_inflow": self._build_field_contract(
                 value=north_val,
-                as_of=fetched_at.date().isoformat(),
+                as_of=north_as_of,
                 source=north_source,
                 fetched_at=fetched_at,
                 freshness_days=2,
             ),
             "top_inflow_sectors": self._build_field_contract(
                 value=result["top_inflow_sectors"],
-                as_of=fetched_at.date().isoformat(),
+                as_of=sector_as_of,
                 source=sector_source,
                 fetched_at=fetched_at,
                 freshness_days=1,
             ),
             "top_outflow_sectors": self._build_field_contract(
                 value=result["top_outflow_sectors"],
-                as_of=fetched_at.date().isoformat(),
+                as_of=sector_as_of,
                 source=sector_source,
                 fetched_at=fetched_at,
                 freshness_days=1,

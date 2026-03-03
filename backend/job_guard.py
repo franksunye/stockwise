@@ -1,6 +1,8 @@
 import time
 import json
 import traceback
+import os
+import uuid
 from datetime import datetime
 from typing import Dict, Any, Optional
 
@@ -47,11 +49,13 @@ class JobGuard:
         self.dimensions: Dict[str, Any] = {}
         self.log_id = None
         self.date_str = datetime.now(BEIJING_TZ).strftime("%Y-%m-%d")
+        self.pipeline_run_id = os.environ.get("PIPELINE_RUN_ID") or f"job-{self.date_str}-{uuid.uuid4().hex[:8]}"
 
     def __enter__(self):
         """任务开始"""
         self.start_time = time.time()
         now_str = datetime.now(BEIJING_TZ).strftime("%Y-%m-%d %H:%M:%S")
+        os.environ["PIPELINE_RUN_ID"] = self.pipeline_run_id
         
         logger.info(f"🛡️ [JobGuard] Task Started: {self.task_name} (Type: {self.task_type})")
         
@@ -100,6 +104,9 @@ class JobGuard:
         """增加分类维度 (e.g., market='HK')"""
         self.dimensions.update(kwargs)
 
+    def get_pipeline_run_id(self) -> str:
+        return self.pipeline_run_id
+
     def _log_db(self, status: str, message: str = None, metadata: dict = None):
         """向 task_logs 表写入数据 (对齐 TaskLogger 标准)"""
         try:
@@ -107,8 +114,17 @@ class JobGuard:
             cursor = conn.cursor()
             
             now_str = datetime.now(BEIJING_TZ).strftime("%Y-%m-%d %H:%M:%S")
-            meta_json = json.dumps(metadata, ensure_ascii=False) if metadata else None
-            dim_json = json.dumps(self.dimensions, ensure_ascii=False) if self.dimensions else None
+            dim_payload = dict(self.dimensions) if self.dimensions else {}
+            dim_payload.setdefault("pipeline_run_id", self.pipeline_run_id)
+            dim_json = json.dumps(dim_payload, ensure_ascii=False)
+            meta_payload = dict(metadata) if metadata else {}
+            meta_payload["trace_envelope"] = {
+                "pipeline_run_id": self.pipeline_run_id,
+                "component": "backend.job_guard",
+                "task_name": self.task_name,
+                "status": status,
+            }
+            meta_json = json.dumps(meta_payload, ensure_ascii=False)
             
             if status == "running":
                 cursor.execute("""

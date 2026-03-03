@@ -1,5 +1,7 @@
 # Market Almanac Backend Architecture (Technical Proposal)
 
+> Status: Technical reference doc for trusted-v1 backend implementation.
+
 ## 0. 核心愿景
 将枯燥的宏观行情数据通过 **Silent Math (静默数学)** 系统，转化为具备情绪价值和实战指导意义的“投资黄历”。后端作为“翻译官”，需实现从“数字”到“意境”的跨维度映射。
 
@@ -69,3 +71,56 @@
 ---
 **代号**: Project Muse (Market Core)
 **日期**: 2026-02-23
+
+---
+
+## 6. Trusted v1 Finalized Architecture (2026-03-03)
+### 6.1 Decision
+Under free-source constraints, we adopt a minimal two-layer architecture:
+1. Fact Layer
+- Responsible for ingest, cleaning, persistence, and quality gate.
+- Produces one authoritative daily snapshot.
+2. Semantic Layer
+- Reads only Fact Layer output.
+- Generates `mood_tag/action_strategy/meteorology/ai_insight` with deterministic rules.
+- LLM (optional) is only for wording polish, not fact judgment.
+
+Release policy:
+- One post-market finalization per day.
+- If quality gate fails, publish degraded almanac instead of normal tone.
+
+### 6.2 New Authoritative Table
+Add `market_facts_daily` as the only trusted input for almanac generation.
+
+Minimum columns:
+- `trade_date` (PK)
+- `total_turnover`, `turnover_ma5`, `turnover_ma20`, `turnover_ratio_5d`
+- `advancers`, `decliners`, `breadth_ratio`
+- `limit_up_count`, `limit_down_count`, `blowup_rate`
+- `idx_sse_chg_1d`, `idx_sse_slope_5d`, `idx_sse_slope_20d`
+- `idx_szse_chg_1d`, `idx_cyb_chg_1d`
+- `northbound_net`, `northbound_dir_3d`
+- `sector_inflow_top`, `sector_outflow_top`, `sector_dir_3d`
+- `quality_json`, `lineage_json`, `created_at`
+
+### 6.3 Trusted v1 Pipeline
+1. `facts_ingest_job` (new)
+- Runs post-market; writes `market_facts_daily`.
+- Covers the first 6 core metrics only.
+2. `facts_quality_gate` (new)
+- Enforces completeness/dimension/conflict thresholds.
+- Writes structured gate result to `quality_json`.
+3. `almanac_generate_job` (refactor existing)
+- Reads Fact Layer only.
+- If gate fails, outputs degraded almanac.
+4. `dashboard_read_path` (existing)
+- Continues reading `market_almanacs`.
+- Adds user-visible degraded hint.
+
+### 6.4 Minimal Execution Sequence
+1. Add `market_facts_daily` table and indexes.
+2. Implement `facts_ingest_job` for first 6 core metrics.
+3. Implement `facts_quality_gate`.
+4. Refactor almanac generator to read Fact Layer only.
+5. Add degraded state hint in frontend card.
+6. Run 7-day shadow validation before full rollout.

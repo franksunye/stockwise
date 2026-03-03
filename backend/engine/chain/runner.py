@@ -30,7 +30,18 @@ class ChainRunner:
         Persists trace to DB *after* completion (Delayed Write).
         """
         trace_id = input_data.get("trace_id") or str(uuid.uuid4())
+        pipeline_run_id = input_data.get("pipeline_run_id") or f"chain-{date}-{uuid.uuid4().hex[:8]}"
         context = ChainContext(symbol=symbol, date=date, input_data=input_data)
+        context.artifacts["trace_envelope"] = {
+            "trace_id": trace_id,
+            "parent_trace_id": input_data.get("parent_trace_id"),
+            "pipeline_run_id": pipeline_run_id,
+            "stage": "chain_execution",
+            "component": "backend.engine.chain.runner",
+            "symbol": symbol,
+            "date": date,
+            "status": "running",
+        }
         
         start_time = time.time()
         final_status = "success"
@@ -67,6 +78,10 @@ class ChainRunner:
             # --- Delayed Write Persistence ---
             # Regardless of success/failure, we write the full trace now.
             total_duration = int((time.time() - start_time) * 1000)
+            envelope = context.artifacts.get("trace_envelope", {})
+            envelope["status"] = final_status
+            envelope["duration_ms"] = total_duration
+            context.artifacts["trace_envelope"] = envelope
             await self._persist_trace(trace_id, context, final_status, total_duration, error_info)
 
         # Return the final synthesis artifact (Step 4 output)
