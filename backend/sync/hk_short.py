@@ -89,7 +89,9 @@ def _parse_hkex_daily_report(text: str, market: str) -> Tuple[Optional[str], pd.
     lines = [ln.rstrip() for ln in text.splitlines() if ln.strip()]
     data_rows: List[Tuple[str, str, float, float]] = []
 
-    row_re = re.compile(r"^\s*(\d{5})\s+(.+?)\s+([\d,]+(?:\.\d+)?)\s+([\d,]+)\s*$")
+    # HKEX short-selling report codes are variable-width (1-5 digits),
+    # and the two trailing numeric columns are (SH, $) i.e. volume then turnover.
+    row_re = re.compile(r"^\s*(\d{1,5})\s+(.+?)\s+([\d,]+(?:\.\d+)?)\s+([\d,]+(?:\.\d+)?)\s*$")
     for ln in lines:
         m = row_re.match(ln)
         if not m:
@@ -98,8 +100,8 @@ def _parse_hkex_daily_report(text: str, market: str) -> Tuple[Optional[str], pd.
         if not symbol:
             continue
         name = m.group(2).strip()
-        short_turnover = _to_float(m.group(3)) or 0.0
-        short_volume = _to_float(m.group(4)) or 0.0
+        short_volume = _to_float(m.group(3)) or 0.0
+        short_turnover = _to_float(m.group(4)) or 0.0
         data_rows.append((symbol, name, short_volume, short_turnover))
 
     if not data_rows:
