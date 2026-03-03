@@ -14,7 +14,7 @@ import { ReferralTracker } from '@/components/ReferralTracker';
 import { BadgeManager } from '@/components/BadgeManager';
 import { ServiceWorkerRegistrar } from '@/components/ServiceWorkerRegistrar';
 import { InstallGuide } from '@/components/InstallGuide';
-import { UserProfileProvider, type Tier } from '@/hooks/useUserProfile';
+import { UserProfileProvider, useUserProfile, type Tier } from '@/hooks/useUserProfile';
 import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton';
 import { motion, AnimatePresence } from 'framer-motion';
 import { isIOS, isStandalone } from '@/lib/device-utils';
@@ -53,6 +53,26 @@ function setAuthCache(tier: Tier, authorized: boolean): void {
   } catch {
     // localStorage may be full — non-critical
   }
+}
+
+function DashboardEntryGate({ children }: { children: React.ReactNode }) {
+  const { profile, loading } = useUserProfile();
+
+  // Block app UI until onboarding status is known to avoid dashboard flash for new users.
+  if (loading || !profile) {
+    return <DashboardSkeleton />;
+  }
+
+  if (!profile.hasOnboarded) {
+    return <OnboardingOverlay />;
+  }
+
+  return (
+    <>
+      <OnboardingOverlay />
+      {children}
+    </>
+  );
 }
 
 export default function DashboardLayout({
@@ -247,8 +267,9 @@ export default function DashboardLayout({
             <DashboardAuthProvider tier={tier}>
               <UserProfileProvider>
                 <StockProvider>
-                  <OnboardingOverlay />
-                  {children}
+                  <DashboardEntryGate>
+                    {children}
+                  </DashboardEntryGate>
                 </StockProvider>
               </UserProfileProvider>
             </DashboardAuthProvider>
