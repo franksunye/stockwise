@@ -22,14 +22,14 @@ export type MarketAlmanacHandle = {
  * Supports multiple delimiters used across different backend versions.
  */
 function parseActionStrategy(strategy: string) {
-  const raw = strategy || '宜：观望 · 忌：盲动';
-  let yi = '观望';
-  let ji = '盲动';
+  const raw = strategy || 'å®œï¼šè§‚æœ› Â· å¿Œï¼šç›²åŠ¨';
+  let yi = 'è§‚æœ›';
+  let ji = 'ç›²åŠ¨';
 
   const delimiters = [
-    { key: ' · 忌：', split: ' · 忌：' },
-    { key: ' / 忌：', split: ' / 忌：' },
-    { key: ' · ', split: ' · ' },
+    { key: ' Â· å¿Œï¼š', split: ' Â· å¿Œï¼š' },
+    { key: ' / å¿Œï¼š', split: ' / å¿Œï¼š' },
+    { key: ' Â· ', split: ' Â· ' },
     { key: ' / ', split: ' / ' }
   ];
 
@@ -37,13 +37,13 @@ function parseActionStrategy(strategy: string) {
   
   if (matched) {
     const parts = raw.split(matched.split);
-    yi = parts[0].replace(/^宜[：:]\s*/, '').trim();
-    ji = (parts[1] || '').replace(/^忌[：:]\s*/, '').trim();
+    yi = parts[0].replace(/^å®œ[ï¼š:]\s*/, '').trim();
+    ji = (parts[1] || '').replace(/^å¿Œ[ï¼š:]\s*/, '').trim();
   } else {
-    yi = raw.replace(/^宜[：:]\s*/, '').trim();
+    yi = raw.replace(/^å®œ[ï¼š:]\s*/, '').trim();
   }
 
-  return { yi: yi || '观望', ji: ji || '盲动' };
+  return { yi: yi || 'è§‚æœ›', ji: ji || 'ç›²åŠ¨' };
 }
 
 // --- 2. Sub-components ---
@@ -64,7 +64,7 @@ const AlmanacCard = memo(function AlmanacCard({
   const targetDate = data.target_date || new Date().toISOString().split('T')[0];
   const dateFormatted = targetDate.replace(/-/g, ' / ');
   const weekday = new Date(targetDate + 'T00:00:00').toLocaleDateString('zh-CN', { weekday: 'long' });
-  const dateStr = `${dateFormatted} · ${weekday}`;
+  const dateStr = `${dateFormatted} Â· ${weekday}`;
   
   const sectors = useMemo(() => 
     (typeof data.sector_currents === 'object' && data.sector_currents) 
@@ -76,7 +76,7 @@ const AlmanacCard = memo(function AlmanacCard({
   const entropy = useMemo(() => 
     (typeof data.market_entropy === 'object' && data.market_entropy)
       ? data.market_entropy
-      : { volume_status: '量能平稳' },
+      : { volume_status: 'é‡èƒ½å¹³ç¨³' },
     [data.market_entropy]
   );
 
@@ -85,7 +85,7 @@ const AlmanacCard = memo(function AlmanacCard({
       <div ref={posterRef} className="w-full max-w-md space-y-5 mx-auto relative">
         {isCapturing && isCurrent && (
           <div className="pt-8 pb-4 text-center">
-            <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">ZISO AI · 投资黄历</span>
+            <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">ZISO AI Â· æŠ•èµ„é»„åŽ†</span>
           </div>
         )}
 
@@ -94,10 +94,17 @@ const AlmanacCard = memo(function AlmanacCard({
             <Sparkles className="w-3 h-3 text-indigo-400" />
             <span className="text-[10px] font-black text-slate-500 tracking-[0.2em] uppercase">{dateStr}</span>
           </div>
-          <h2 className="text-4xl font-black italic tracking-tighter text-white drop-shadow-lg">{data.mood_tag || '混沌未明'}</h2>
+          {data.degraded && (
+            <div className="mb-1">
+              <span className="inline-flex items-center rounded-full border border-amber-400/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-300">
+                数据完整性不足，已降级
+              </span>
+            </div>
+          )}
+          <h2 className="text-4xl font-black italic tracking-tighter text-white drop-shadow-lg">{data.mood_tag || 'æ··æ²Œæœªæ˜Ž'}</h2>
           <div className="flex items-center justify-center gap-2 opacity-80">
             <div className="w-1.5 h-1.5 rounded-full bg-indigo-400/50" />
-            <span className="text-lg font-bold tracking-[0.1em] text-indigo-100/90">气象：{data.meteorology || '微雨'}</span>
+            <span className="text-lg font-bold tracking-[0.1em] text-indigo-100/90">æ°”è±¡ï¼š{data.meteorology || 'å¾®é›¨'}</span>
           </div>
         </section>
 
@@ -106,10 +113,10 @@ const AlmanacCard = memo(function AlmanacCard({
             <div className="w-5 h-5 rounded-md bg-indigo-600/20 flex items-center justify-center border border-indigo-500/30">
               <Shield className="w-2.5 h-2.5 text-indigo-400 fill-indigo-400/20" />
             </div>
-            <h3 className="text-[10px] font-black text-slate-600 uppercase tracking-widest">AI 市场天机</h3>
+            <h3 className="text-[10px] font-black text-slate-600 uppercase tracking-widest">AI å¸‚åœºå¤©æœº</h3>
           </div>
           <p className="text-sm leading-relaxed text-slate-300 font-medium italic pl-1 border-l-2 border-indigo-500/20">
-            {data.ai_insight || '分析正在生成中...'}
+            {data.ai_insight || 'åˆ†æžæ­£åœ¨ç”Ÿæˆä¸­...'}
           </p>
         </section>
 
@@ -118,7 +125,7 @@ const AlmanacCard = memo(function AlmanacCard({
             <div>
               <div className="flex items-center gap-1.5 mb-2">
                 <Waves className="w-3 h-3 text-indigo-400" />
-                <h4 className="text-[9px] font-black text-slate-600 uppercase tracking-widest leading-none mt-0.5">板块洋流</h4>
+                <h4 className="text-[9px] font-black text-slate-600 uppercase tracking-widest leading-none mt-0.5">æ¿å—æ´‹æµ</h4>
               </div>
               <div className="space-y-1.5">
                 {sectors.main?.slice(0, 2).map((s: { name: string; flow: string }, si: number) => (
@@ -141,18 +148,18 @@ const AlmanacCard = memo(function AlmanacCard({
             <div>
               <div className="flex items-center gap-1.5 mb-2">
                 <Target className="w-3 h-3 text-indigo-400" />
-                <h4 className="text-[9px] font-black text-slate-600 uppercase tracking-widest leading-none mt-0.5">行动指南</h4>
+                <h4 className="text-[9px] font-black text-slate-600 uppercase tracking-widest leading-none mt-0.5">è¡ŒåŠ¨æŒ‡å—</h4>
               </div>
               <div className="space-y-2.5">
                 <div className="flex items-start gap-2.5">
                   <div className="w-4 h-4 rounded bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30 shrink-0 mt-0.5">
-                    <span className="text-[8px] font-black text-indigo-400">宜</span>
+                    <span className="text-[8px] font-black text-indigo-400">å®œ</span>
                   </div>
                   <span className="text-[10px] font-black text-slate-100 leading-[1.4] text-left">{yi}</span>
                 </div>
                 <div className="flex items-start gap-2.5 opacity-75">
                   <div className="w-4 h-4 rounded bg-rose-500/20 flex items-center justify-center border border-rose-500/30 shrink-0 mt-0.5">
-                    <span className="text-[8px] font-black text-rose-400">忌</span>
+                    <span className="text-[8px] font-black text-rose-400">å¿Œ</span>
                   </div>
                   <span className="text-[10px] font-bold text-slate-300 leading-[1.4] text-left">{ji}</span>
                 </div>
@@ -161,7 +168,7 @@ const AlmanacCard = memo(function AlmanacCard({
             <div className="pt-2 border-t border-white/5 block">
               <div className="flex items-center gap-1">
                 <Zap className="w-2.5 h-2.5 text-indigo-400" />
-                <span className="text-[9px] text-slate-500 font-bold uppercase tracking-tighter">全场量能状态</span>
+                <span className="text-[9px] text-slate-500 font-bold uppercase tracking-tighter">å…¨åœºé‡èƒ½çŠ¶æ€</span>
               </div>
               <div className="text-[10px] font-black text-white italic mt-1 pl-1">
                 {entropy.volume_status}
@@ -174,14 +181,14 @@ const AlmanacCard = memo(function AlmanacCard({
           <div className="absolute inset-0 z-[500] bg-[#050508]/90 flex items-center justify-center capture-hidden border border-white/10 rounded-[32px]">
             <div className="flex flex-col items-center gap-3">
               <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
-              <p className="text-sm font-black text-white italic tracking-widest">正在幻化意境图...</p>
+              <p className="text-sm font-black text-white italic tracking-widest">æ­£åœ¨å¹»åŒ–æ„å¢ƒå›¾...</p>
             </div>
           </div>
         )}
 
         {idx === 0 && (
           <div className="flex flex-col items-center gap-1.5 pt-2 opacity-20 capture-hidden">
-            <span className="text-[10px] font-black tracking-[0.2em] text-slate-500 uppercase">上滑查看历史黄历</span>
+            <span className="text-[10px] font-black tracking-[0.2em] text-slate-500 uppercase">ä¸Šæ»‘æŸ¥çœ‹åŽ†å²é»„åŽ†</span>
             <ChevronDown size={14} className="animate-bounce" />
           </div>
         )}
@@ -257,11 +264,11 @@ export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlma
 
   // Safely extract properties for the current viewed almanac (used for share/copy logic)
   const targetDate = currentAlmanac?.target_date || new Date().toISOString().split('T')[0];
-  const moodTag = currentAlmanac?.mood_tag || '混沌未明';
-  const meteorology = currentAlmanac?.meteorology || '微雨';
-  const insight = currentAlmanac?.ai_insight || '股指进入混沌期，缺乏明确突破点。板块轮动加速，建议保持观望。';
+  const moodTag = currentAlmanac?.mood_tag || 'æ··æ²Œæœªæ˜Ž';
+  const meteorology = currentAlmanac?.meteorology || 'å¾®é›¨';
+  const insight = currentAlmanac?.ai_insight || 'è‚¡æŒ‡è¿›å…¥æ··æ²ŒæœŸï¼Œç¼ºä¹æ˜Žç¡®çªç ´ç‚¹ã€‚æ¿å—è½®åŠ¨åŠ é€Ÿï¼Œå»ºè®®ä¿æŒè§‚æœ›ã€‚';
   
-  const sectors = useMemo(() => typeof currentAlmanac?.sector_currents === 'object' && currentAlmanac?.sector_currents ? currentAlmanac?.sector_currents : { main: [{name: '待更新', flow: ''}], inverse: [{name: '待更新', flow: ''}] }, [currentAlmanac?.sector_currents]);
+  const sectors = useMemo(() => typeof currentAlmanac?.sector_currents === 'object' && currentAlmanac?.sector_currents ? currentAlmanac?.sector_currents : { main: [{name: 'å¾…æ›´æ–°', flow: ''}], inverse: [{name: 'å¾…æ›´æ–°', flow: ''}] }, [currentAlmanac?.sector_currents]);
 
   const { yi: yiTextMarketing, ji: jiTextMarketing } = useMemo(() => 
     parseActionStrategy(currentAlmanac?.action_strategy || ''), 
@@ -269,25 +276,25 @@ export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlma
   );
 
   const generateMarketingText = useCallback(() => {
-    let text = `ZISO AI 投资黄历 (${targetDate})\n\n`;
-    text += `📜 卦象：${moodTag}\n`;
-    text += `宜：${yiTextMarketing}\n`;
-    text += `忌：${jiTextMarketing}\n`;
-    text += `☁️ 气象：${meteorology}\n\n`;
-    text += `🔍 市场天机：${insight}\n\n`;
+    let text = `ZISO AI æŠ•èµ„é»„åŽ† (${targetDate})\n\n`;
+    text += `ðŸ“œ å¦è±¡ï¼š${moodTag}\n`;
+    text += `å®œï¼š${yiTextMarketing}\n`;
+    text += `å¿Œï¼š${jiTextMarketing}\n`;
+    text += `â˜ï¸ æ°”è±¡ï¼š${meteorology}\n\n`;
+    text += `ðŸ” å¸‚åœºå¤©æœºï¼š${insight}\n\n`;
     
     if (sectors.main && sectors.main.length > 0) {
       const mainStr = sectors.main.slice(0, 2).map(s => `${s.name}(${s.flow})`).join(', ');
-      text += `🌊 主力流入：${mainStr}\n`;
+      text += `ðŸŒŠ ä¸»åŠ›æµå…¥ï¼š${mainStr}\n`;
     }
     
     if (sectors.inverse && sectors.inverse.length > 0) {
       const invStr = sectors.inverse.slice(0, 2).map(s => `${s.name}(${s.flow})`).join(', ');
-      text += `❄️ 主力流出：${invStr}\n`;
+      text += `â„ï¸ ä¸»åŠ›æµå‡ºï¼š${invStr}\n`;
     }
     
-    text += `\n—— ZISO AI：替你做股市功课，带你看投资门道。\n`;
-    text += `#ZISOAI #知守AI #AI股票分析 #投资黄历 #大盘分析`;
+    text += `\nâ€”â€” ZISO AIï¼šæ›¿ä½ åšè‚¡å¸‚åŠŸè¯¾ï¼Œå¸¦ä½ çœ‹æŠ•èµ„é—¨é“ã€‚\n`;
+    text += `#ZISOAI #çŸ¥å®ˆAI #AIè‚¡ç¥¨åˆ†æž #æŠ•èµ„é»„åŽ† #å¤§ç›˜åˆ†æž`;
     return text;
   }, [targetDate, moodTag, yiTextMarketing, jiTextMarketing, meteorology, insight, sectors]);
 
@@ -329,9 +336,9 @@ export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlma
       const text = generateMarketingText();
       try {
         await navigator.clipboard.writeText(text);
-        showToast('黄历文案已复制！');
+        showToast('é»„åŽ†æ–‡æ¡ˆå·²å¤åˆ¶ï¼');
       } catch {
-        showToast('复制失败，请重试');
+        showToast('å¤åˆ¶å¤±è´¥ï¼Œè¯·é‡è¯•');
       }
     },
     share: async () => {
@@ -343,7 +350,7 @@ export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlma
       setIsCapturing(false);
       
       if (!dataUrl) {
-        showToast('图片生成失败');
+        showToast('å›¾ç‰‡ç”Ÿæˆå¤±è´¥');
         return;
       }
 
@@ -358,7 +365,7 @@ export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlma
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
           await navigator.share({
             files: [file],
-            title: '知守 AI · 投资黄历',
+            title: 'çŸ¥å®ˆ AI Â· æŠ•èµ„é»„åŽ†',
             text: generateMarketingText()
           });
           return;
@@ -374,7 +381,7 @@ export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlma
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      showToast('黄历海报已幻化完成！');
+      showToast('é»„åŽ†æµ·æŠ¥å·²å¹»åŒ–å®Œæˆï¼');
     }
   }), [generateMarketingText, targetDate, generateImage, isCapturing, showToast]);
 
@@ -429,3 +436,4 @@ export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlma
     </div>
   );
 }));
+

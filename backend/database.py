@@ -488,6 +488,18 @@ def init_db():
                 created_at TIMESTAMP DEFAULT (datetime('now', '+8 hours'))
             )
         """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS market_facts_daily (
+                fact_date TEXT PRIMARY KEY,
+                facts_json TEXT NOT NULL,
+                quality_json TEXT NOT NULL,
+                gate_pass INTEGER NOT NULL DEFAULT 0,
+                coverage_score REAL,
+                created_at TIMESTAMP DEFAULT (datetime('now', '+8 hours')),
+                updated_at TIMESTAMP DEFAULT (datetime('now', '+8 hours'))
+            )
+        """)
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_market_facts_gate_date ON market_facts_daily(gate_pass, fact_date DESC)")
 
         # 5c. Stock Briefs (Phase 1 cache - stock-level analysis, shared across users)
         cursor.execute("""

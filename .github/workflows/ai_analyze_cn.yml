@@ -122,6 +122,20 @@ jobs:
           echo "🚀 Generating Daily Market Almanac for A-Share..."
           python -u backend/engine/almanac_generator.py
 
+      - name: Market Facts Health Check (CN)
+        timeout-minutes: 5
+        env:
+          PYTHONUNBUFFERED: "1"
+          TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+          WECOM_ROBOT_KEY: ${{ secrets.WECOM_ROBOT_KEY }}
+        run: |
+          DATE_ARG=""
+          if [ -n "${{ inputs.date }}" ]; then
+            DATE_ARG="--date ${{ inputs.date }}"
+          fi
+          python -u backend/scripts/market_facts_healthcheck.py --market CN $DATE_ARG
+
       - name: Broadcast Market Almanac Preview
         env:
           PYTHONUNBUFFERED: "1"

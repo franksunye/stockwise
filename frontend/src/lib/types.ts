@@ -140,6 +140,7 @@ export interface MarketAlmanacData {
     mood_tag: string;
     action_strategy: string;
     meteorology: string;
+    degraded?: boolean;
     market_entropy: {
         score: number;
         label: string;

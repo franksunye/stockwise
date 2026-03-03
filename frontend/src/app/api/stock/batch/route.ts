@@ -227,6 +227,11 @@ export async function GET(request: Request) {
                     try {
                         if (typeof a.market_entropy === 'string') a.market_entropy = JSON.parse(a.market_entropy);
                         if (typeof a.sector_currents === 'string') a.sector_currents = JSON.parse(a.sector_currents);
+                        if (typeof a.generation_trace === 'string') a.generation_trace = JSON.parse(a.generation_trace);
+                        a.degraded = Boolean(
+                            a?.generation_trace?.logic?.degraded ||
+                            (a?.generation_trace?.data_quality?.facts_gate_pass === false)
+                        );
                     } catch { }
                 });
             }
