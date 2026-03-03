@@ -155,6 +155,22 @@ export interface MarketAlmanacData {
 }
 
 // Dashboard 页面聚合数据
+export interface ShortMetrics {
+    symbol: string;
+    trade_date?: string | null;
+    short_volume?: number | null;
+    short_turnover?: number | null;
+    short_volume_ratio?: number | null;
+    short_turnover_ratio?: number | null;
+    daily_quality_flag?: string | null;
+    report_week?: string | null;
+    short_interest_shares?: number | null;
+    short_interest_market_value?: number | null;
+    weekly_quality_flag?: string | null;
+    is_eligible?: number | boolean | null;
+    snapshot_date?: string | null;
+}
+
 export interface StockData {
     symbol: string;
     name: string;
@@ -162,6 +178,7 @@ export interface StockData {
     prediction: AIPrediction | null;
     previousPrediction: AIPrediction | null;
     history: AIPrediction[];
+    shortMetrics?: ShortMetrics | null;
     lastUpdated: string;
     rule: UserRule | null;
     loading: boolean;

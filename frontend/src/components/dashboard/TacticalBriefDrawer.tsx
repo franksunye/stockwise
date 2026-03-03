@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
+import {
   X as CloseIcon, 
   Info, 
   TrendingUp, 
@@ -18,7 +18,7 @@ import {
   AlertTriangle,
   Calendar
 } from 'lucide-react';
-import { AIPrediction, TacticalData, Tactic } from '@/lib/types';
+import { AIPrediction, TacticalData, Tactic, ShortMetrics } from '@/lib/types';
 import { shouldEnableHighPerformance } from '@/lib/device-utils';
 import { AICouncil } from './AICouncil';
 
@@ -37,6 +37,7 @@ interface TacticalBriefDrawerProps {
   confidence?: number;
   stockName?: string;
   currentPrice?: number;
+  shortMetrics?: ShortMetrics | null;
 }
 
 import { SilentPoster } from './SilentPoster';
@@ -258,7 +259,7 @@ const normalizeScenarioTactics = (items: Tactic[] | undefined, kind: ScenarioKin
 };
 
 export function TacticalBriefDrawer({ 
-  isOpen, onClose, data, tier, model, symbol, targetDate, signal, confidence, stockName, currentPrice, userPos
+  isOpen, onClose, data, tier, model, symbol, targetDate, signal, confidence, stockName, currentPrice, shortMetrics, userPos
 }: TacticalBriefDrawerProps) {
   const [isMounted, setIsMounted] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
@@ -283,8 +284,25 @@ export function TacticalBriefDrawer({
   const [viewState, setViewState] = useState<'holding_profit'|'holding_loss'|'empty'>('holding_profit');
   const [activeIndex, setActiveIndex] = useState(0);
   const nodes = getPriceNodes(data, currentPrice);
+  const isHK = symbol.length === 5;
   const scrollRef = useRef<HTMLDivElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
+
+  const shortRatio = (() => {
+    const v = shortMetrics?.short_turnover_ratio;
+    if (v === null || v === undefined) return null;
+    const n = Number(v);
+    return Number.isFinite(n) ? n : null;
+  })();
+
+  const shortPressure = (() => {
+    if (!isHK) return { label: '--', color: 'text-slate-500', interpretation: '仅港股显示' };
+    if (shortRatio === null) return { label: '待同步', color: 'text-slate-500', interpretation: '港交所日度数据收盘后更新' };
+    if (shortRatio > 0.25) return { label: '极高', color: 'text-rose-500', interpretation: '空头压力极高，优先风险控制' };
+    if (shortRatio > 0.15) return { label: '高', color: 'text-rose-400', interpretation: '空头压力偏高，注意反弹质量' };
+    if (shortRatio >= 0.05) return { label: '中', color: 'text-amber-400', interpretation: '空头压力中性，保持观察' };
+    return { label: '低', color: 'text-emerald-400', interpretation: '空头压力偏低，抛压有限' };
+  })();
 
   // Reset to NOW (current price) card whenever drawer opens
   useEffect(() => {
@@ -570,7 +588,7 @@ export function TacticalBriefDrawer({
                     </div>
                   </section>
 
-                   {generalTactics.length > 0 && (
+                  {generalTactics.length > 0 && (
                     <section>
                       <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
                         <div className="w-1.5 h-1.5 rounded-full bg-slate-500" /> 基础市场研判
@@ -585,6 +603,42 @@ export function TacticalBriefDrawer({
                             <p className="text-xs text-slate-500 leading-relaxed"><span className="text-slate-400">条件:</span> {t.trigger}</p>
                           </div>
                         ))}
+                      </div>
+                    </section>
+                  )}
+
+                  {isHK && (
+                    <section>
+                      <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" /> 空头压力
+                      </h3>
+                      <div className="p-4 rounded-2xl border border-white/5 bg-white/[0.01] space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] text-slate-500 font-bold uppercase tracking-wider">压力等级</span>
+                          <span className={`text-sm font-black ${shortPressure.color}`}>{shortPressure.label}</span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5">
+                            <p className="text-[10px] text-slate-600 font-bold uppercase tracking-wider mb-1">日度沽空比</p>
+                            <p className={`text-xs font-black ${shortPressure.color}`}>
+                              {shortRatio === null ? '--' : `${(shortRatio * 100).toFixed(1)}%`}
+                            </p>
+                            <p className="text-[10px] text-slate-600 mt-1">{shortMetrics?.trade_date || '日期待同步'}</p>
+                          </div>
+                          <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5">
+                            <p className="text-[10px] text-slate-600 font-bold uppercase tracking-wider mb-1">周度空仓</p>
+                            <p className="text-xs font-black text-slate-300">
+                              {shortMetrics?.short_interest_shares != null ? Number(shortMetrics.short_interest_shares).toLocaleString() : '--'}
+                            </p>
+                            <p className="text-[10px] text-slate-600 mt-1">{shortMetrics?.report_week || '周度待同步'}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between border-t border-white/5 pt-2.5">
+                          <p className="text-xs text-slate-500 italic">{shortPressure.interpretation}</p>
+                          <span className="text-[10px] text-slate-500 font-bold">
+                            可沽空: {shortMetrics?.is_eligible ? '是' : '未知'}
+                          </span>
+                        </div>
                       </div>
                     </section>
                   )}

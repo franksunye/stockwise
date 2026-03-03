@@ -146,7 +146,8 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
                     price: null,
                     prediction: null,
                     previousPrediction: null,
-                    history: []
+                    history: [],
+                    shortMetrics: null
                 };
 
                 return {
@@ -157,6 +158,7 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
                     previousPrediction: base.previousPrediction,
                     lastUpdated: base.lastUpdated || '--:--',
                     history: base.history || [],
+                    shortMetrics: base.shortMetrics || null,
                     rule: getRule(item.symbol),
                     loading: false,
                     justUpdated: silent

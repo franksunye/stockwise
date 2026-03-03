@@ -22,7 +22,6 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from database import init_db, get_stock_pool
 from fetchers import sync_stock_meta, sync_profiles
-from utils import send_wecom_notification
 from sync.prices import process_stock_period, run_full_sync
 from sync.realtime import sync_spot_prices
 from backend.analysis.runner import run_ai_analysis
@@ -39,6 +38,8 @@ if __name__ == "__main__":
     parser.add_argument('--sync-meta', action='store_true', help='仅同步股票元数据')
     parser.add_argument('--analyze', action='store_true', help='执行 AI 预测分析 (独立任务)')
     parser.add_argument('--verify', action='store_true', help='执行预测结果验证 (独立任务)')
+    parser.add_argument('--sync-hk-short', action='store_true', help='执行港股做空数据同步 (生产任务)')
+    parser.add_argument('--sync-hk-short-poc', action='store_true', help='执行港股做空数据 POC 同步')
     parser.add_argument('--symbol', type=str, help='指定股票代码')
     parser.add_argument('--market', type=str, choices=['CN', 'HK'], help='只同步/分析特定市场')
     parser.add_argument('--model', type=str, default='rule-engine', 
@@ -56,11 +57,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
     init_db()
     register_all_models()
-
-    from backend.engine.task_logger import get_task_logger
-    
-    # 确定触发者: 通过环境变量或 CLI 参数 (默认 scheduler)
-    trigger = os.environ.get("TASK_TRIGGER", "scheduler") 
     is_backfill_mode = args.date or args.start_date or args.end_date or args.days or args.auto_fill
 
     # 1. Prediction Verification
@@ -69,6 +65,28 @@ if __name__ == "__main__":
             from backend.engine.validator import verify_all_pending
             stats = verify_all_pending(force=args.force, target_date=args.date)
             if stats: job.set_stats(**stats)
+        sys.exit(0)
+    
+    # 1b. HK Short Selling Sync (Production)
+    elif args.sync_hk_short:
+        with JobGuard("HK Short Selling Sync", task_type="ingestion", rerun_workflow="data_sync_hk.yml") as job:
+            from backend.sync.hk_short import sync_hk_short_data
+            stats = sync_hk_short_data(limit_symbols=None)
+            if stats:
+                job.set_stats(**stats)
+            if not stats or not stats.get("ok", False):
+                raise RuntimeError(f"HK short sync failed: {stats}")
+        sys.exit(0)
+
+    # 1c. HK Short Selling POC Sync (Backward-compatible)
+    elif args.sync_hk_short_poc:
+        with JobGuard("HK Short Selling POC Sync", task_type="ingestion", triggered_by="user", channel_alert=False) as job:
+            from backend.sync.hk_short import sync_hk_short_poc
+            stats = sync_hk_short_poc(limit_symbols=50)
+            if stats:
+                job.set_stats(**stats)
+            if not stats or not stats.get("ok", False):
+                raise RuntimeError(f"HK short POC sync failed: {stats}")
         sys.exit(0)
     
     # 2. Realtime Sync

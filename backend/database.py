@@ -372,6 +372,47 @@ def init_db():
         """)
         cursor.execute("CREATE TABLE IF NOT EXISTS stock_pool (symbol TEXT PRIMARY KEY, name TEXT NOT NULL, added_at TIMESTAMP DEFAULT (datetime('now', '+8 hours')))")
         cursor.execute("CREATE TABLE IF NOT EXISTS global_stock_pool (symbol TEXT PRIMARY KEY, name TEXT NOT NULL, first_watched_at TIMESTAMP DEFAULT (datetime('now', '+8 hours')), watchers_count INTEGER DEFAULT 1, last_synced_at TIMESTAMP)")
+
+        # 2b. HK Short Selling Domain (POC -> Production ready tables)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS hk_short_selling_daily (
+                symbol TEXT NOT NULL,
+                trade_date TEXT NOT NULL,
+                market TEXT NOT NULL, -- MAIN / GEM
+                short_volume REAL,
+                short_turnover REAL,
+                total_volume REAL,
+                total_turnover REAL,
+                short_volume_ratio REAL,
+                short_turnover_ratio REAL,
+                source TEXT NOT NULL,
+                quality_flag TEXT,
+                ingested_at TIMESTAMP DEFAULT (datetime('now', '+8 hours')),
+                PRIMARY KEY (symbol, trade_date, source)
+            )
+        """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS hk_short_interest_weekly (
+                symbol TEXT NOT NULL,
+                report_week TEXT NOT NULL,
+                short_interest_shares REAL,
+                short_interest_market_value REAL,
+                source TEXT NOT NULL,
+                quality_flag TEXT,
+                ingested_at TIMESTAMP DEFAULT (datetime('now', '+8 hours')),
+                PRIMARY KEY (symbol, report_week, source)
+            )
+        """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS hk_short_eligible_list (
+                snapshot_date TEXT NOT NULL,
+                symbol TEXT NOT NULL,
+                is_eligible INTEGER NOT NULL DEFAULT 1,
+                source TEXT NOT NULL,
+                ingested_at TIMESTAMP DEFAULT (datetime('now', '+8 hours')),
+                PRIMARY KEY (snapshot_date, symbol, source)
+            )
+        """)
         
         # 3. User System
         cursor.execute("""
@@ -645,6 +686,9 @@ def init_db():
         add_column_if_missing('prediction_models', 'roles', 'TEXT')
 
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_task_logs_date_agent ON task_logs(date, agent_id)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_hk_short_daily_date ON hk_short_selling_daily(trade_date)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_hk_short_weekly_date ON hk_short_interest_weekly(report_week)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_hk_short_eligible_date ON hk_short_eligible_list(snapshot_date)")
         
         conn.commit()
         logger.info("✅ 数据库结构初始化完成 (Raw SQL - No ORM)")

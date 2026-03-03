@@ -304,6 +304,7 @@ function DashboardContent() {
         confidence={selectedTactics?.prediction?.confidence}
         stockName={selectedTacticStock?.name}
         currentPrice={selectedTacticStock?.price?.close}
+        shortMetrics={selectedTacticStock?.shortMetrics || null}
       />
 
       <AnimatePresence>

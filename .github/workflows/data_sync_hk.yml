@@ -39,4 +39,12 @@ jobs:
         run: |
           python -u backend/main.py --market HK ${{ inputs.force_full == true && '--full-periods' || '' }}
 
+      - name: Sync Hong Kong Short-Selling Data
+        env:
+          PYTHONUNBUFFERED: "1"
+          TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+          WECOM_ROBOT_KEY: ${{ secrets.WECOM_ROBOT_KEY }}
+        run: |
+          python -u backend/main.py --sync-hk-short
 
