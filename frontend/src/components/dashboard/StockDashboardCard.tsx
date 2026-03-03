@@ -276,14 +276,17 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
            {/* 右侧：验证结果 (Validation) */}
            <div className="glass-card p-4 flex flex-col justify-between relative">
               {(() => {
+                const isMarketOpenSoon = isTradingDay(undefined, marketType) && isPreMarket;
+
                 // 验证区逻辑 (Strict Date-Fact Alignment):
                 // 1. 锚点日期：以左侧显示的“事实日期”为准
-                const anchorDate = data.price?.date;
+                // 如果是盘前且将要开市，左侧强制显示为空的今日事实占位态，右侧验证也应同步锚定今日
+                const anchorDate = isMarketOpenSoon ? todayStr : data.price?.date;
                 
-                // 2. 在全量历史记录中寻找目标日期匹配的预测
-                // 确保只有当预测的 target_date 与事实日期完全一致时才展示验证结果
-                const validationPrediction = data.history?.find(
-                    p => p.target_date && normalizeTargetDate(p.target_date) === anchorDate
+                // 2. 在全集记录中寻找目标日期匹配的预测 (今日预测可能尚在 prediction 中，未进入 history 归档)
+                const allPredictions = [data.prediction, data.previousPrediction, ...(data.history || [])];
+                const validationPrediction = allPredictions.find(
+                    p => p && p.target_date && normalizeTargetDate(p.target_date) === anchorDate
                 );
 
                 // 3. 标签日期：如果有预测用预测日，否则用事实日进行展示
