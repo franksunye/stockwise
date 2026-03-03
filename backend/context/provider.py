@@ -5,13 +5,15 @@ Integration with AkShare for Macro and Capital Flow Data.
 import logging
 import time
 import random
+import re
 import akshare as ak
 import pandas as pd
-from typing import Dict, Any
-from datetime import datetime
+from typing import Dict, Any, Optional, List
+from datetime import datetime, date
 import threading
 from concurrent.futures import ThreadPoolExecutor, TimeoutError
 from backend.logger import logger
+from backend.database import get_connection
 try:
     import backend.config # Ensure NO_PROXY and other environment fixes are applied
 except ImportError:
@@ -89,6 +91,290 @@ class MarketContextProvider:
                     logger.error(f"❌ Final Failure for {func.__name__}: {e}")
                     raise e
 
+    @staticmethod
+    def _parse_date(value: Any) -> Optional[date]:
+        if value is None:
+            return None
+        text = str(value).strip()
+        if not text or text.upper() == "N/A":
+            return None
+
+        quarter_match = re.search(r"(\d{4}).*?([1-4])", text)
+        if quarter_match and ("Q" in text.upper() or "季" in text):
+            y = int(quarter_match.group(1))
+            q = int(quarter_match.group(2))
+            m = q * 3
+            d = 30 if m in (6, 9) else 31
+            if m == 2:
+                d = 28
+            return date(y, m, d)
+
+        month_match = re.match(r"^(\d{4})[-/年\.](\d{1,2})", text)
+        if month_match:
+            y = int(month_match.group(1))
+            m = int(month_match.group(2))
+            d = 28 if m == 2 else (30 if m in (4, 6, 9, 11) else 31)
+            return date(y, m, d)
+
+        full_match = re.match(r"^(\d{4})[-/年\.](\d{1,2})[-/月\.](\d{1,2})", text)
+        if full_match:
+            return date(int(full_match.group(1)), int(full_match.group(2)), int(full_match.group(3)))
+
+        for fmt in ("%Y-%m-%d", "%Y/%m/%d", "%Y.%m.%d", "%Y%m%d"):
+            try:
+                return datetime.strptime(text, fmt).date()
+            except ValueError:
+                continue
+        return None
+
+    def _extract_as_of_from_df(self, df: pd.DataFrame, candidate_columns: List[str], row_index: int = 0) -> Optional[Any]:
+        if df is None or df.empty:
+            return None
+        idx = row_index if row_index < len(df) else 0
+        row = df.iloc[idx]
+        for c in candidate_columns:
+            if c in df.columns:
+                val = row.get(c)
+                if pd.notna(val):
+                    return val
+        return None
+
+    def _build_field_contract(
+        self,
+        *,
+        value: Any,
+        as_of: Optional[Any],
+        source: str,
+        fetched_at: datetime,
+        freshness_days: int,
+        skipped: bool = False,
+    ) -> Dict[str, Any]:
+        text_val = str(value).strip() if value is not None else ""
+        missing = (
+            value is None
+            or text_val == ""
+            or text_val.upper() == "N/A"
+            or ("\u6682\u65e0\u6570\u636e" in text_val)
+        )
+        as_of_date = self._parse_date(as_of)
+        status = "ok"
+        freshness_score = 100
+
+        if skipped:
+            status = "skipped"
+        elif missing:
+            status = "missing"
+            freshness_score = 0
+        elif as_of_date is None:
+            status = "no_as_of"
+            freshness_score = 65
+        else:
+            age_days = max(0, (fetched_at.date() - as_of_date).days)
+            if age_days <= freshness_days:
+                status = "ok"
+                freshness_score = 100
+            elif age_days <= freshness_days * 2:
+                status = "stale"
+                freshness_score = 60
+            else:
+                status = "stale"
+                freshness_score = 20
+
+        return {
+            "value": value,
+            "as_of": str(as_of) if as_of is not None else None,
+            "source": source,
+            "fetched_at": fetched_at.isoformat(),
+            "freshness_days": freshness_days,
+            "status": status,
+            "freshness_score": freshness_score,
+        }
+
+    @staticmethod
+    def _score_quality(fields: Dict[str, Dict[str, Any]], required_fields: List[str], consistency_flags: Optional[List[str]] = None) -> Dict[str, Any]:
+        consistency_flags = consistency_flags or []
+        total = max(len(required_fields), 1)
+        present = 0
+        freshness_scores = []
+        flags: List[str] = list(consistency_flags)
+
+        for key in required_fields:
+            item = fields.get(key, {})
+            status = item.get("status", "missing")
+            if status != "missing":
+                present += 1
+            freshness_scores.append(float(item.get("freshness_score", 0)))
+            if status == "missing":
+                flags.append(f"missing_{key}")
+            elif status == "stale":
+                flags.append(f"stale_{key}")
+
+        completeness = round(100.0 * present / total, 1)
+        freshness = round(sum(freshness_scores) / max(len(freshness_scores), 1), 1)
+        consistency = max(0.0, 100.0 - 15.0 * len(consistency_flags))
+        score = round(0.45 * completeness + 0.35 * freshness + 0.20 * consistency, 1)
+        grade = "high" if score >= 85 else ("medium" if score >= 70 else "low")
+
+        return {
+            "score": score,
+            "grade": grade,
+            "completeness": completeness,
+            "freshness": freshness,
+            "consistency": round(consistency, 1),
+            "flags": sorted(set(flags)),
+        }
+
+    @staticmethod
+    def _parse_signed_flow(flow_text: str) -> Optional[float]:
+        if not flow_text:
+            return None
+        match = re.search(r"([+-]?\d+(?:\.\d+)?)\s*亿", str(flow_text))
+        if not match:
+            return None
+        try:
+            return float(match.group(1))
+        except (TypeError, ValueError):
+            return None
+
+    def _extract_sector_flows(self, df: pd.DataFrame, *, net_col: str, name_col: str, unit_divisor: float) -> Dict[str, Any]:
+        if df.empty or net_col not in df.columns or name_col not in df.columns:
+            return {"inflow": [], "outflow": [], "valid_rows": 0, "negative_count": 0}
+
+        work = df.copy()
+        work["net_val"] = pd.to_numeric(work[net_col], errors="coerce")
+        work = work.dropna(subset=["net_val"])
+        if work.empty:
+            return {"inflow": [], "outflow": [], "valid_rows": 0, "negative_count": 0}
+
+        def _fmt(row):
+            name = row.get(name_col, "")
+            net = float(row.get("net_val", 0.0)) / unit_divisor
+            return f"{name}({net:+.2f}亿)"
+
+        inflow_df = work[work["net_val"] > 0].sort_values("net_val", ascending=False)
+        outflow_df = work[work["net_val"] < 0].sort_values("net_val", ascending=True)
+
+        inflow = [_fmt(row) for _, row in inflow_df.head(3).iterrows()]
+        if not inflow:
+            inflow = [_fmt(row) for _, row in work.sort_values("net_val", ascending=False).head(3).iterrows()]
+
+        outflow = [_fmt(row) for _, row in outflow_df.head(2).iterrows()]
+        if not outflow:
+            outflow = ["无明显净流出(>=0)"]
+
+        return {
+            "inflow": inflow,
+            "outflow": outflow,
+            "valid_rows": int(len(work)),
+            "negative_count": int((work["net_val"] < 0).sum()),
+        }
+
+    def _get_hk_short_context(self, symbol: str) -> Dict[str, Any]:
+        """Fetch HK short-selling context from local sync tables."""
+        conn = get_connection()
+        try:
+            cur = conn.cursor()
+            cur.execute(
+                """
+                SELECT trade_date, short_volume, short_turnover, short_volume_ratio, short_turnover_ratio, quality_flag
+                FROM hk_short_selling_daily
+                WHERE symbol = ?
+                ORDER BY trade_date DESC
+                LIMIT 1
+                """,
+                (symbol,),
+            )
+            daily = cur.fetchone()
+
+            cur.execute(
+                """
+                SELECT report_week, short_interest_shares, short_interest_market_value, quality_flag
+                FROM hk_short_interest_weekly
+                WHERE symbol = ?
+                ORDER BY report_week DESC
+                LIMIT 1
+                """,
+                (symbol,),
+            )
+            weekly = cur.fetchone()
+
+            cur.execute(
+                """
+                SELECT is_eligible, snapshot_date
+                FROM hk_short_eligible_list
+                WHERE symbol = ?
+                ORDER BY snapshot_date DESC
+                LIMIT 1
+                """,
+                (symbol,),
+            )
+            eligible = cur.fetchone()
+
+            if not daily and not weekly and not eligible:
+                return {
+                    "summary": "港股做空数据暂无",
+                    "big_order_inflow": "N/A",
+                    "interpretation": "待同步",
+                    "short_selling_context": {"has_data": False, "eligible": None},
+                }
+
+            daily_date = daily[0] if daily else None
+            short_vol = float(daily[1]) if daily and daily[1] is not None else None
+            short_amt = float(daily[2]) if daily and daily[2] is not None else None
+            short_vol_ratio = float(daily[3]) if daily and daily[3] is not None else None
+            short_amt_ratio = float(daily[4]) if daily and daily[4] is not None else None
+            weekly_date = weekly[0] if weekly else None
+            weekly_shares = float(weekly[1]) if weekly and weekly[1] is not None else None
+            weekly_mv = float(weekly[2]) if weekly and weekly[2] is not None else None
+            is_eligible = bool(eligible[0]) if eligible else None
+
+            pressure_text = "做空压力数据不足"
+            if short_amt_ratio is not None:
+                if short_amt_ratio >= 0.2:
+                    pressure_text = "做空压力偏高"
+                elif short_amt_ratio >= 0.1:
+                    pressure_text = "做空压力中性"
+                else:
+                    pressure_text = "做空压力偏低"
+
+            ratio_text = f"{short_amt_ratio:.2%}" if short_amt_ratio is not None else "N/A"
+            summary = f"做空成交比({daily_date or '-'})={ratio_text} | 周度申报空仓({weekly_date or '-'})"
+
+            return {
+                "summary": summary,
+                "big_order_inflow": ratio_text,
+                "interpretation": pressure_text,
+                "short_selling_context": {
+                    "has_data": True,
+                    "eligible": is_eligible,
+                    "daily": {
+                        "trade_date": daily_date,
+                        "short_volume": short_vol,
+                        "short_turnover": short_amt,
+                        "short_volume_ratio": short_vol_ratio,
+                        "short_turnover_ratio": short_amt_ratio,
+                        "quality_flag": daily[5] if daily else None,
+                    },
+                    "weekly": {
+                        "report_week": weekly_date,
+                        "short_interest_shares": weekly_shares,
+                        "short_interest_market_value": weekly_mv,
+                        "quality_flag": weekly[3] if weekly else None,
+                    },
+                    "eligible_snapshot_date": eligible[1] if eligible else None,
+                },
+            }
+        except Exception as e:
+            logger.warning(f"HK short context fetch failed for {symbol}: {e}")
+            return {
+                "summary": "港股做空数据暂不可用",
+                "big_order_inflow": "N/A",
+                "interpretation": "数据源异常",
+                "short_selling_context": {"has_data": False, "error": str(e)},
+            }
+        finally:
+            conn.close()
+
     def get_macro_context(self, skip_nasdaq: bool = False) -> Dict[str, Any]:
         """
         Fetch core macro indicators.
@@ -112,6 +398,18 @@ class MarketContextProvider:
             # return a copy with nasdaq neutralized to avoid misleading usage
             if skip_nasdaq and cached.get("nasdaq") != "N/A":
                 neutralized = {**cached, "nasdaq": "N/A", "nasdaq_skipped": True}
+                fields = dict(neutralized.get("fields") or {})
+                if "nasdaq" in fields:
+                    fields["nasdaq"] = {
+                        **fields["nasdaq"],
+                        "value": "N/A",
+                        "status": "skipped",
+                    }
+                    neutralized["fields"] = fields
+                    neutralized["quality"] = self._score_quality(
+                        fields,
+                        ["gdp", "cpi", "bond_10y", "nasdaq"],
+                    )
                 return neutralized
             return cached
 
@@ -162,6 +460,7 @@ class MarketContextProvider:
 
             # 4. Global Context - Nasdaq (Daily)
             nasdaq_pct = "N/A"
+            nasdaq_as_of = None
             nasdaq_skipped = False
             if skip_nasdaq:
                 logger.info("⏭️  Skipping Nasdaq fetch (skip_nasdaq=True, data would be stale)")
@@ -175,6 +474,7 @@ class MarketContextProvider:
                         prev = float(df_nasdaq.iloc[-2]['close'])
                         change = (last - prev) / prev * 100
                         nasdaq_pct = f"{change:+.2f}%"
+                        nasdaq_as_of = self._extract_as_of_from_df(df_nasdaq, ["date"], row_index=len(df_nasdaq) - 1)
                 except Exception as e:
                     logger.warning(f"Global Nasdaq fetch failed: {e}")
 
@@ -185,6 +485,35 @@ class MarketContextProvider:
                 "nasdaq": nasdaq_pct,
                 "nasdaq_skipped": nasdaq_skipped,
                 "summary": f"GDP:{gdp_val} | Bond10Y:{bond_val} | Nasdaq:{nasdaq_pct}"
+            }
+            fetched_at = datetime.now()
+            fields = {
+                "gdp": self._build_field_contract(
+                    value=gdp_val, as_of=gdp_val, source="akshare:macro_china_gdp", fetched_at=fetched_at, freshness_days=120
+                ),
+                "cpi": self._build_field_contract(
+                    value=cpi_val, as_of=cpi_val, source="akshare:macro_china_cpi", fetched_at=fetched_at, freshness_days=45
+                ),
+                "bond_10y": self._build_field_contract(
+                    value=bond_val, as_of=fetched_at.date().isoformat(), source="akshare:bond_zh_us_rate", fetched_at=fetched_at, freshness_days=7
+                ),
+                "nasdaq": self._build_field_contract(
+                    value=nasdaq_pct,
+                    as_of=nasdaq_as_of or fetched_at.date().isoformat(),
+                    source="akshare:index_us_stock_sina(.IXIC)",
+                    fetched_at=fetched_at,
+                    freshness_days=2,
+                    skipped=nasdaq_skipped,
+                ),
+            }
+            result["contract_version"] = "macro.v1"
+            result["fields"] = fields
+            result["quality"] = self._score_quality(fields, ["gdp", "cpi", "bond_10y", "nasdaq"])
+            result["lineage"] = {
+                "gdp": "akshare:macro_china_gdp",
+                "cpi": "akshare:macro_china_cpi",
+                "bond_10y": "akshare:bond_zh_us_rate",
+                "nasdaq": "akshare:index_us_stock_sina(.IXIC)",
             }
             
             self._cache["macro"] = {"data": result, "timestamp": datetime.now()}
@@ -210,6 +539,12 @@ class MarketContextProvider:
         north_breadth = None
         top_inflow = []
         top_outflow = []
+        fetched_at = datetime.now()
+        north_source = "akshare:stock_hsgt_fund_flow_summary_em"
+        sector_source = "unknown"
+        consistency_flags: List[str] = []
+        north_as_of = fetched_at.date().isoformat()
+        sector_as_of = fetched_at.date().isoformat()
 
         # 1. Northbound (Smart Money) - Breadth Signal
         # Since 2024-08-19, HKEX no longer discloses real-time northbound net buy amounts.
@@ -275,7 +610,8 @@ class MarketContextProvider:
                     for _, row in df_sorted.head(3).iterrows():
                         top_inflow.append(fmt_em(row))
                     for _, row in df_sorted.tail(2).iterrows():
-                        top_outflow.append(fmt_em(row))
+                        if float(row.get('net_val', 0)) < 0:
+                            top_outflow.append(fmt_em(row))
                     
                     sector_fetched = True
                     logger.info(f"✅ Eastmoney Sector Flow Succeeded: {len(df_sorted)} sectors, top={top_inflow[0] if top_inflow else 'N/A'}")
@@ -302,7 +638,8 @@ class MarketContextProvider:
                     for _, row in df_sorted.head(3).iterrows():
                         top_inflow.append(fmt_ths(row))
                     for _, row in df_sorted.tail(2).iterrows():
-                        top_outflow.append(fmt_ths(row))
+                        if float(row.get('net_val', 0)) < 0:
+                            top_outflow.append(fmt_ths(row))
                     
                     sector_fetched = True
                     logger.info(f"✅ THS Industry Flow Fallback Succeeded: {len(df_sorted)} sectors")
@@ -330,6 +667,64 @@ class MarketContextProvider:
             "summary": f"北向:{north_val} | 领涨:{', '.join(top_inflow[:2]) if top_inflow else 'N/A'} | 领跌:{', '.join(top_outflow[:1]) if top_outflow else 'N/A'}"
         }
         
+        if not top_outflow:
+            top_outflow = ["无明显净流出(>=0)"]
+            consistency_flags.append("outflow_absent_non_negative_day")
+
+        outflow_has_non_negative = False
+        for item in top_outflow:
+            parsed = self._parse_signed_flow(item)
+            if parsed is not None and parsed >= 0:
+                outflow_has_non_negative = True
+                break
+        if outflow_has_non_negative:
+            consistency_flags.append("outflow_contains_non_negative_value")
+
+        if sector_source == "unknown":
+            if sector_fetched:
+                sector_source = "akshare:sector_flow(primary_or_fallback)"
+            else:
+                sector_source = "akshare:stock_market_fund_flow(last_resort_or_empty)"
+
+        result["top_inflow_sectors"] = ", ".join(top_inflow) if top_inflow else "暂无数据"
+        result["top_outflow_sectors"] = ", ".join(top_outflow) if top_outflow else "暂无数据"
+        result["summary"] = (
+            f"北向:{north_val} | 领涨:{', '.join(top_inflow[:2]) if top_inflow else 'N/A'} "
+            f"| 领跌:{', '.join(top_outflow[:1]) if top_outflow else 'N/A'}"
+        )
+
+        flow_fields = {
+            "northbound_net_inflow": self._build_field_contract(
+                value=north_val,
+                as_of=north_as_of,
+                source=north_source,
+                fetched_at=fetched_at,
+                freshness_days=2,
+            ),
+            "top_inflow_sectors": self._build_field_contract(
+                value=result["top_inflow_sectors"],
+                as_of=sector_as_of,
+                source=sector_source,
+                fetched_at=fetched_at,
+                freshness_days=1,
+            ),
+            "top_outflow_sectors": self._build_field_contract(
+                value=result["top_outflow_sectors"],
+                as_of=sector_as_of,
+                source=sector_source,
+                fetched_at=fetched_at,
+                freshness_days=1,
+            ),
+        }
+        result["contract_version"] = "market_flow.v1"
+        result["fields"] = flow_fields
+        result["quality"] = self._score_quality(
+            flow_fields,
+            ["northbound_net_inflow", "top_inflow_sectors", "top_outflow_sectors"],
+            consistency_flags=consistency_flags,
+        )
+        result["lineage"] = {"northbound": north_source, "sector_flow": sector_source}
+
         self._cache["market_flow"] = {"data": result, "timestamp": datetime.now()}
         self._stats["market_flow_success"] += 1
         return result
@@ -361,12 +756,8 @@ class MarketContextProvider:
             # stock_individual_fund_flow is for A-share
             
             if len(symbol) == 5:
-                # HK stock - this endpoint is A-share only; return stable fallback payload.
-                result = {
-                    "summary": "港股暂无资金流数据",
-                    "big_order_inflow": "N/A",
-                    "interpretation": "港股暂不支持主力资金流"
-                }
+                # HK stock: use local short-selling context synced by hk_short job.
+                result = self._get_hk_short_context(symbol)
                 self._cache["stock_flow"][symbol] = {"data": result, "timestamp": datetime.now()}
                 self._stats["stock_flow_success"] += 1
                 return result
@@ -425,4 +816,3 @@ class MarketContextProvider:
                 "big_order_inflow": "N/A",
                 "interpretation": "数据源异常"
             }
-

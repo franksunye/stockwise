@@ -4,6 +4,7 @@ import traceback
 import sys
 import os
 import argparse
+import uuid
 from datetime import datetime, timedelta
 
 # --- Time-awareness constants ---
@@ -36,6 +37,7 @@ try:
     from backend.database import get_connection
     from backend.logger import logger
     from backend.context.provider import MarketContextProvider
+    from backend.engine.market_facts_service import get_or_generate_market_facts
     from backend.config import BEIJING_TZ, ADMIN_MOBILES
     from backend.utils import send_wecom_notification
 except ImportError:
@@ -43,6 +45,7 @@ except ImportError:
     from database import get_connection
     from logger import logger
     from provider import MarketContextProvider
+    from market_facts_service import get_or_generate_market_facts
     from config import BEIJING_TZ, ADMIN_MOBILES
     from utils import send_wecom_notification
 
@@ -106,69 +109,36 @@ def generate_almanac(target_date: str = None, force_t_plus_1: bool = True) -> bo
                 target_date = actual_price_date
         
         logger.info(f"🚀 Generating Almanac for Target Date: {target_date} (Using data context from {actual_price_date})")
+        facts_bundle = get_or_generate_market_facts(actual_price_date)
+        facts = facts_bundle.get("facts", {})
+        facts_quality = facts_bundle.get("quality", {})
+        gate_pass = bool(facts_quality.get("gate_pass"))
+        if not gate_pass:
+            logger.warning(f"Market facts quality gate failed for {actual_price_date}: {facts_quality.get('flags', [])}")
 
-        # --- 2. Fetch Entropy (Volume & Breadth) --- #
-        # We use sh000001 as the volume proxy for market entropy
-        cursor.execute("""
-            SELECT date, volume FROM daily_prices 
-            WHERE symbol = 'sh000001' AND date <= ? 
-            ORDER BY date DESC LIMIT 6
-        """, (actual_price_date,))
-        rows = cursor.fetchall()
-        
-        if not rows:
-            logger.warning(f"No valid trading data for proxy sh000001 on or before {actual_price_date}.")
-            return False
-
-        # If the latest data date doesn't match target_date exactly (e.g. holiday or morning run), 
-        # we still proceed using the latest available prices as a sentiment proxy.
-        actual_price_date = rows[0][0]
         if actual_price_date != target_date:
-            logger.info(f"Market Data Gap: Generating almanac for {target_date} using latest prices from {actual_price_date}")
+            logger.info(f"Market Data Gap: Generating almanac for {target_date} using facts from {actual_price_date}")
 
-        current_vol = rows[0][1]
-        past_vols = [r[1] for r in rows[1:] if r[1] is not None]
-        avg_vol = sum(past_vols) / len(past_vols) if past_vols else current_vol
+        turnover = facts.get("turnover", {})
+        breadth = facts.get("breadth", {})
+        derived = facts.get("derived", {})
 
-        vol_ratio = current_vol / avg_vol if avg_vol > 0 else 1.0
-        
-        # Breadth (We search for the same date as the actual price data found)
-        cursor.execute("""
-            SELECT
-                SUM(CASE WHEN change_percent > 0 THEN 1 ELSE 0 END) as winners,
-                SUM(CASE WHEN change_percent < 0 THEN 1 ELSE 0 END) as losers,
-                COUNT(*) as total
-            FROM daily_prices 
-            WHERE date = ? AND length(symbol) != 5
-        """, (actual_price_date,))
-        b_row = cursor.fetchone()
-        winners = b_row[0] or 0
-        losers = b_row[1] or 0
-        total_stocks = b_row[2] or 1
+        vol_type = derived.get("vol_type", "flat")
+        breadth_type = derived.get("breadth_type", "neutral")
 
-        breadth_ratio = winners / (winners + losers) if (winners + losers) > 0 else 0.5
-        heat_score = int(breadth_ratio * 100)
+        vol_label_map = {"high": "显著放量", "low": "显著缩量", "flat": "量能平稳"}
+        breadth_label_map = {"bull": "普涨格局", "bear": "普跌格局", "neutral": "震荡分化"}
+        vol_label = vol_label_map.get(vol_type, "量能平稳")
+        breadth_label = breadth_label_map.get(breadth_type, "震荡分化")
 
-        # Quantitative Classification
-        if vol_ratio >= 1.25:
-            vol_label = "显著放量"
-            vol_type = "high"
-        elif vol_ratio <= 0.75:
-            vol_label = "显著缩量"
-            vol_type = "low"
-        else:
-            vol_label = "量能平稳"
-            vol_type = "flat"
-
-        if breadth_ratio >= 0.70:
-            breadth_label = "普涨格局"
-            breadth_type = "bull"
-        elif breadth_ratio <= 0.30:
-            breadth_label = "普跌格局"
-            breadth_type = "bear"
-        else:
-            breadth_label = "震荡分化"
-            breadth_type = "neutral"
+        winners = breadth.get("advancers") or 0
+        losers = breadth.get("decliners") or 0
+        total_stocks = winners + losers if (winners + losers) > 0 else 1
+        breadth_ratio = breadth.get("ratio")
+        if breadth_ratio is None:
+            breadth_ratio = winners / (winners + losers) if (winners + losers) > 0 else 0.5
+        heat_score = int(float(breadth_ratio) * 100)
+        vol_ratio = turnover.get("ratio_5d") if turnover.get("ratio_5d") is not None else 1.0
 
         # --- 2. Data Context Acquisition --- #
         provider = MarketContextProvider()
@@ -190,11 +160,11 @@ def generate_almanac(target_date: str = None, force_t_plus_1: bool = True) -> bo
         nasdaq_change = macro_data.get("nasdaq", "N/A")
         logger.info(f"📊 Global Context: Nasdaq Change = {nasdaq_change} (fresh={is_nasdaq_fresh})")
         
-        # 2. Sector Flows (Money Flow)
-        flow_data = provider.get_market_flow_context()
-        top_inflow = flow_data.get("top_inflow_sectors", "暂无数据")
-        top_outflow = flow_data.get("top_outflow_sectors", "暂无数据")
-        logger.info(f"📊 Market Flow: Inflow={top_inflow} | Outflow={top_outflow}")
+        # 2. Sector Flows (Money Flow) from Fact Layer
+        sector_flow = facts.get("sector_flow", {})
+        top_inflow = sector_flow.get("top_inflow") or "暂无数据"
+        top_outflow = sector_flow.get("top_outflow") or "暂无数据"
+        logger.info(f"Market Flow: Inflow={top_inflow} | Outflow={top_outflow}")
         inflow_parts = [s.strip() for s in top_inflow.split(',') if s.strip()]
         
         main_currents = []
@@ -207,8 +177,6 @@ def generate_almanac(target_date: str = None, force_t_plus_1: bool = True) -> bo
                 else:
                     main_currents.append({"name": s, "flow": ""})
                     
-        # Outflow (New)
-        top_outflow = flow_data.get("top_outflow_sectors", "暂无数据")
         outflow_parts = [s.strip() for s in top_outflow.split(',') if s.strip()]
         
         inverse_currents = []
@@ -324,11 +292,17 @@ def generate_almanac(target_date: str = None, force_t_plus_1: bool = True) -> bo
         mood_tag = selected["tag"]
         meteorology = selected["meteo"]
         template = selected["insight"]
+        degraded = not gate_pass
+        if degraded:
+            mood_tag = "混沌未明"
+            meteorology = "微雨"
+            action_strategy = "宜：控制仓位 / 忌：情绪化追单"
+            template = "数据完整性不足，已切换防守语义。请以仓位纪律和风险控制为先。"
 
         # Global Enrichment (Nasdaq) — Time-gated
         # Only inject Nasdaq narrative when the data is genuinely "overnight" fresh.
         nasdaq_impact = None
-        if nasdaq_change != "N/A" and is_nasdaq_fresh:
+        if (not degraded) and nasdaq_change != "N/A" and is_nasdaq_fresh:
             try:
                 nasdaq_val = float(nasdaq_change.replace('%', ''))
                 if nasdaq_val > 1.0:
@@ -346,15 +320,15 @@ def generate_almanac(target_date: str = None, force_t_plus_1: bool = True) -> bo
 
         # Temporal Context Enrichment
         temporal_impact = "none"
-        if is_monday:
+        if (not degraded) and is_monday:
             template = "【周一开篇】" + template + " 本周趋势将由此定调。"
             temporal_impact = "monday"
-        elif is_friday:
+        elif (not degraded) and is_friday:
             template = "【周五收官】" + template + " 周末政策面动向及消息博弈将是关键。"
             temporal_impact = "friday"
         
         extra_suffix = None
-        if rng.random() < 0.4: # 40% chance for a "lucky charm" or extra advice
+        if (not degraded) and rng.random() < 0.4: # 40% chance for a "lucky charm" or extra advice
             extra_suffix = rng.choice([
                 " 心如止水，方能看透迷雾。",
                 " 记住，本金比利润更重要。",
@@ -406,14 +380,31 @@ def generate_almanac(target_date: str = None, force_t_plus_1: bool = True) -> bo
         }
 
         # --- Prepare Trace Log ---
+        pipeline_run_id = f"almanac-{target_date}-{uuid.uuid4().hex[:8]}"
+        macro_quality = macro_data.get("quality") if isinstance(macro_data, dict) else None
+        flow_quality = {
+            "source": sector_flow.get("source"),
+            "status": sector_flow.get("status"),
+            "trend_3d": sector_flow.get("trend_3d"),
+        }
         trace = {
+            "trace_envelope": {
+                "trace_id": f"alm-{target_date}",
+                "parent_trace_id": None,
+                "pipeline_run_id": pipeline_run_id,
+                "stage": "almanac_generation",
+                "component": "backend.engine.almanac_generator",
+                "target_date": target_date,
+                "status": "success",
+                "generated_at_beijing": now_beijing.strftime("%Y-%m-%d %H:%M:%S"),
+            },
             "target_date": target_date,
             "data_context_date": actual_price_date,
             "seed_val": seed_val,
             "metrics": {
                 "vol": {
-                    "current": current_vol,
-                    "average_recent": round(avg_vol, 2),
+                    "current": turnover.get("total_amount_yi"),
+                    "average_recent": turnover.get("ma5"),
                     "ratio": round(vol_ratio, 3),
                     "label": vol_label
                 },
@@ -421,7 +412,7 @@ def generate_almanac(target_date: str = None, force_t_plus_1: bool = True) -> bo
                     "winners": winners,
                     "losers": losers,
                     "total": total_stocks,
-                    "ratio": round(breadth_ratio, 3),
+                    "ratio": round(float(breadth_ratio), 3),
                     "heat_score": heat_score,
                     "label": breadth_label
                 },
@@ -433,9 +424,21 @@ def generate_almanac(target_date: str = None, force_t_plus_1: bool = True) -> bo
                 }
             },
             "macro": macro_data,
+            "data_quality": {
+                "macro_quality": macro_quality,
+                "market_flow_quality": flow_quality,
+                "facts_quality": facts_quality,
+                "facts_gate_pass": gate_pass,
+            },
+            "lineage": {
+                "macro": macro_data.get("lineage", {}) if isinstance(macro_data, dict) else {},
+                "market_flow": {"sector_flow": sector_flow.get("source")},
+                "facts": {"fact_date": actual_price_date, "version": facts.get("version")},
+            },
             "logic": {
                 "rule_key": rule_key,
                 "mood_tag": mood_tag,
+                "degraded": degraded,
                 "selected_yi": selected_yi,
                 "selected_ji": selected_ji,
                 "nasdaq_impact": nasdaq_impact,
@@ -444,7 +447,7 @@ def generate_almanac(target_date: str = None, force_t_plus_1: bool = True) -> bo
                 "temporal_impact": temporal_impact,
                 "extra_suffix": extra_suffix
             },
-            "version": "1.3-nasdaq-time-gated"
+            "version": "1.4-fact-layer-gated"
         }
 
         # --- 4. Persist to DB --- #

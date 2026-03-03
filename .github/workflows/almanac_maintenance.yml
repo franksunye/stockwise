@@ -62,3 +62,19 @@ jobs:
             echo "🚀 Executing: python backend/engine/almanac_generator.py --start-date ${{ inputs.start_date }} --end-date ${{ inputs.end_date }}"
             python -u backend/engine/almanac_generator.py --start-date ${{ inputs.start_date }} --end-date ${{ inputs.end_date }}
           fi
+
+      - name: Market Facts Health Check (CN)
+        timeout-minutes: 5
+        env:
+          PYTHONUNBUFFERED: "1"
+          TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+          WECOM_ROBOT_KEY: ${{ secrets.WECOM_ROBOT_KEY }}
+        run: |
+          DATE_ARG=""
+          if [ "${{ inputs.mode }}" == "single-date" ] && [ -n "${{ inputs.date }}" ]; then
+            DATE_ARG="--date ${{ inputs.date }}"
+          elif [ "${{ inputs.mode }}" == "date-range" ] && [ -n "${{ inputs.end_date }}" ]; then
+            DATE_ARG="--date ${{ inputs.end_date }}"
+          fi
+          python -u backend/scripts/market_facts_healthcheck.py --market CN $DATE_ARG
