@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   X as CloseIcon, 
@@ -284,6 +284,7 @@ export function TacticalBriefDrawer({
   const [viewState, setViewState] = useState<'holding_profit'|'holding_loss'|'empty'>('holding_profit');
   const [activeIndex, setActiveIndex] = useState(0);
   const nodes = getPriceNodes(data, currentPrice);
+  const nodeSignature = useMemo(() => nodes.map((n) => n.id).join('|'), [nodes]);
   const isHK = symbol.length === 5;
   const scrollRef = useRef<HTMLDivElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
@@ -304,7 +305,7 @@ export function TacticalBriefDrawer({
     return { label: '低', color: 'text-emerald-400', interpretation: '空头压力偏低，抛压有限' };
   })();
 
-  // Reset to NOW (current price) card whenever drawer opens
+  // Reset carousel position whenever drawer opens or stock context changes.
   useEffect(() => {
     if (!isOpen) return;
     const nowIdx = nodes.findIndex(n => n.kind === "current");
@@ -312,16 +313,14 @@ export function TacticalBriefDrawer({
     setActiveIndex(targetIdx);
     requestAnimationFrame(() => {
       const container = carouselRef.current;
-      if (container && targetIdx > 0) {
+      if (container) {
         const firstChild = container.children[0] as HTMLElement;
-        if (firstChild) {
-          const step = firstChild.offsetWidth + 16;
-          container.scrollTo({ left: targetIdx * step, behavior: "auto" });
-        }
+        const step = firstChild ? firstChild.offsetWidth + 16 : container.clientWidth;
+        container.scrollTo({ left: targetIdx * step, behavior: "auto" });
       }
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen]);
+  }, [isOpen, symbol, nodeSignature]);
 
 
   const priceRange = {
