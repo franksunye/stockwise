@@ -30,6 +30,7 @@
 | :------- | :------------- | :------------------------------------------------------------ | :-------------------------------------------------- | :--------------------------------------------------- | :------- |
 | **分析** | **脉冲共振**   | 呼吸动画频率表示 AI 活跃度与模型共识。                        | `StockDashboardCard.tsx`: `animate-ping`            | Engine: `indicators.py` (共振算法)                   | ✅ 已实现 |
 | **分析** | **置信度系统** | 展示可解释的评分；**<75% 强制熔断为观望**。                   | `StockDashboardCard.tsx`: 百分比展示                | Engine: `ai_service.py` (Circuit Breaker 逻辑)       | ✅ 已实现 |
+| **分析** | **大盘黄历**   | 每日盘前/盘后全市场宏观气象与动作宜忌推演 (静默数学视角)。    | `MarketAlmanacFeed.tsx`: 零号位挂载展示             | Engine: `almanac_generator.py` (Trusted v1 架构)     | ✅ 已实现 |
 | **分析** | **战术简报**   | 点击卡片展开 JSON 结构化的战术分析 (买/卖点)。                | `TacticalBriefDrawer.tsx`: 解析 `ai_reasoning` JSON | Engine: `ai_service.py` 生成并存入 DB                | ✅ 已实现 |
 | **分析** | **历史矩阵**   | 30天胜率可视化矩阵，直观展示预测准确性。                      | `StockProfile.tsx`: Grid 布局 + 颜色编码            | Service: `/api/predictions` (Limit=30)               | ✅ 已实现 |
 | **分析** | **AI 智囊团**  | 展示多模型 (DeepSeek, Hunyuan, Quant) 对同一标的的共识/分歧。 | `AICouncil.tsx`: `mode=full` 及前端共识算法         | Service: `/api/predictions` 支持多模型返回           | ✅ 已实现 |
@@ -75,12 +76,13 @@
 
 ## 7. 通知与触达 (Notification)
 
-| 模块     | 子功能         | 功能描述                                                      | 前端实现细节 (文件/逻辑)                        | 后端支持 (Engine/Service)                                  | 状态     |
-| :------- | :------------- | :------------------------------------------------------------ | :---------------------------------------------- | :--------------------------------------------------------- | :------- |
-| **推送** | **Web Push**   | 浏览器级推送通知 (Service Worker)。                           | `UserCenterDrawer.tsx`: PWA Push Manager 集成   | Service: `/api/notifications/subscribe`                    | ✅ 已实现 |
-| **设置** | **精细化开关** | 独立控制：早报、信号反转、价格异动等 6 类通知。               | `UserCenterDrawer.tsx`: 详细的开关面板          | Engine: `notification_service.py` (_check_user_preference) | ✅ 已实现 |
-| **推送** | **智能反转**   | **Cross-Zero Logic**: 仅在趋势根本改变时(多转空/空转多)推送。 | N/A                                             | Engine: `notification_service.py` (check_signal_flip)      | ✅ 已实现 |
-| **测试** | **本地测试**   | "测试当前设备推送" 按钮，验证通路连通性。                     | `UserCenterDrawer.tsx`: `showNotification` 测试 | N/A                                                        | ✅ 已实现 |
+| 模块     | 子功能           | 功能描述                                                      | 前端实现细节 (文件/逻辑)                        | 后端支持 (Engine/Service)                                  | 状态     |
+| :------- | :--------------- | :------------------------------------------------------------ | :---------------------------------------------- | :--------------------------------------------------------- | :------- |
+| **推送** | **Web Push**     | 浏览器级推送通知 (Service Worker)。                           | `UserCenterDrawer.tsx`: PWA Push Manager 集成   | Service: `/api/notifications/subscribe`                    | ✅ 已实现 |
+| **设置** | **精细化开关**   | 独立控制 7 类通知：反转/早报/验证/更新/复盘/实时行情/黄历。   | `UserCenterDrawer.tsx`: 详细的开关面板          | Engine: `notification_service.py` (_check_user_preference) | ✅ 已实现 |
+| **推送** | **智能反转**     | **Cross-Zero Logic**: 仅在趋势根本改变时(多转空/空转多)推送。 | N/A                                             | Engine: `notification_service.py` (check_signal_flip)      | ✅ 已实现 |
+| **治理** | **统一模板引擎** | 通知文案统一由模板中心渲染，支持 tier 化与类型回退。          | N/A                                             | Engine: `notification_templates.py`                        | ✅ 已实现 |
+| **测试** | **本地测试**     | "测试当前设备推送" 按钮，验证通路连通性。                     | `UserCenterDrawer.tsx`: `showNotification` 测试 | N/A                                                        | ✅ 已实现 |
 
 ## 8. 客户端基础设施 (Client Infrastructure)
 
