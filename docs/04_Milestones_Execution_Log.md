@@ -32,6 +32,7 @@
 - [x] **[v4.2] “晨起之光”沉浸式交互**: 实现每日首次进入时，毛玻璃质感的“投资黄历”全屏预告与滑散效果。 (Team Completed ✅)
 - [x] **[v4.3] Silent Math 符号动效**: 重置个股卡片中心图标，支持根据 AI 置信度跳动的“呼吸符号” (`animate-ping`)。 (Team Completed ✅)
 - [x] **[v4.4] 艺术级战报分享引擎**: 实现高审美、低饱和度的社交海报 (`SilentPoster`) 自动化渲染，开启 Viral Growth 回路。 (Team Completed ✅)
+- [ ] **[v4.5] 气象动效叠加 (Visual Mood Layer)**: 引入微弱的 WebGL 或 CSS 粒子效果模拟“气象”叠加感。 (Backlog)
 
 ### C. 商业化与系统运营 (Ops & Growth)
 - [x] **[Growth] ZISO AI Beta Launch**: 完成了测试阶段的基础获客通路，建立 Beta 版体验群与推广文章。(Team Completed ✅)
