@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Multiavatar from '@/components/Multiavatar';
 import MarketingFooter from '@/components/MarketingFooter';
 import MarketingHeader from '@/components/MarketingHeader';
+import { agentTeam, founders } from '@/lib/agent-team';
 
 export default function LandingPage() {
   return (
@@ -205,10 +206,10 @@ export default function LandingPage() {
                 我们的团队
             </div>
             <h2 className="text-4xl md:text-5xl font-black italic tracking-tighter">
-              由 <span className="text-indigo-500">双创始人 + AI 执行团队</span> 驱动
+              由 <span className="text-indigo-500">双创始人 + 投研执行团队</span> 驱动
             </h2>
             <p className="text-slate-500 font-medium max-w-2xl mx-auto">
-              2 位创始人定义方法与边界，5 位 AI Agent 在每个交易日执行分析、风控与复盘。
+              2 位创始人定义方法与边界，3 位量化分析师 + 2 位执行保障角色在每个交易日闭环协作。
             </p>
             <Link
               href="/about"
@@ -220,84 +221,39 @@ export default function LandingPage() {
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">
-            <div className="glass-card p-8 border-white/10 bg-white/[0.02] space-y-4">
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400">AI 创始人 · AI FOUNDER</p>
-              <h3 className="text-2xl font-black italic">安德烈·谷（Andre Gu）</h3>
-              <p className="text-slate-400 text-sm font-medium leading-relaxed">
-                AI 创始人与系统架构发起者。持续负责代码实现、流程自动化与工程迭代。
-              </p>
-            </div>
-            <div className="glass-card p-8 border-white/10 bg-white/[0.02] space-y-4">
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400">联合创始人 · CO-FOUNDER</p>
-              <h3 className="text-2xl font-black italic">弗兰克·孙（Frank Sun）</h3>
-              <p className="text-slate-400 text-sm font-medium leading-relaxed">
-                联合创始人。负责产品策略、交易框架与风控边界，确保系统输出可解释、可执行、可复盘。
-              </p>
-            </div>
+            {founders.map((founder) => (
+              <div key={founder.name} className="glass-card p-8 border-white/10 bg-white/[0.02] space-y-4">
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400">{founder.label}</p>
+                <h3 className="text-2xl font-black italic">{founder.name}</h3>
+                <p className="text-slate-400 text-sm font-medium leading-relaxed">{founder.description}</p>
+              </div>
+            ))}
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-6">
-            {[
-              { 
-                name: "混元 Lite（Hunyuan Lite）", 
-                role: "初筛分析助理 · SCOUT ANALYST",
-                desc: "负责收盘后批量初筛，给出首轮结构化线索。",
-                color: "text-cyan-400", bg: "bg-cyan-500/10", border: "border-cyan-500/20", persona: "Hunyuan" 
-              },
-              { 
-                name: "DeepSeek（深寻）", 
-                role: "深度推演分析师 · REASONING ANALYST", 
-                desc: "负责多周期推演与交易条件拆解，形成次日剧本。", 
-                color: "text-purple-400", bg: "bg-purple-500/10", border: "border-purple-500/20", persona: "Quinn" 
-              },
-              { 
-                name: "诺拉 (Nora)", 
-                role: "情报上下文官 · CONTEXT OFFICER", 
-                desc: "负责新闻与宏观信号过滤，补全数据上下文。", 
-                color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20", persona: "Nora" 
-              },
-              { 
-                name: "塞拉 (Sylar)", 
-                role: "风控执行官 · RISK OFFICER", 
-                desc: "负责风险闸门与否决权，置信度不足时强制观望。", 
-                color: "text-slate-400", bg: "bg-slate-500/10", border: "border-slate-500/20", persona: "Sylar" 
-              },
-              {
-                name: "维尔（Verifier）",
-                role: "验证审计官 · VALIDATION AUDITOR",
-                desc: "负责收盘后验证回写与历史准确性追踪。",
-                color: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20", persona: "Verifier"
-              }
-            ].map((agent, i) => (
-              <div 
-                key={i}
-                className={`glass-card p-6 border ${agent.border} ${agent.bg} relative overflow-hidden group lg:min-h-[420px]`}
+            {agentTeam.map((agent) => (
+              <div
+                key={agent.name}
+                className={`glass-card p-6 border ${agent.borderColor} ${agent.bgColor} relative overflow-hidden group lg:min-h-[420px]`}
               >
                 <div className="flex flex-col items-center text-center space-y-4 relative z-10">
                   <div className="w-20 h-20 rounded-full bg-white/5 ring-1 ring-white/10 overflow-hidden relative mb-2 grayscale group-hover:grayscale-0 transition-all duration-500">
-                    <Multiavatar 
-                      name={agent.persona}
+                    <Multiavatar
+                      name={agent.avatarSeed}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                   </div>
                   <div>
-                    <h3 className={`font-black italic text-lg ${agent.color}`}>{agent.name}</h3>
+                    <h3 className={`font-black italic text-lg ${agent.textColor}`}>{agent.name}</h3>
                     <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mt-1">{agent.role}</p>
                   </div>
-                  <p className="text-slate-400 text-xs leading-relaxed font-bold">
-                    {agent.desc}
-                  </p>
+                  <p className="text-slate-400 text-xs leading-relaxed font-bold">{agent.description}</p>
                 </div>
-                {/* Background Accent */}
-                <div className={`absolute -right-4 -bottom-4 w-24 h-24 rounded-full blur-[40px] opacity-20 transition-opacity group-hover:opacity-40 
-                   ${i === 0 ? 'bg-cyan-500' : i === 1 ? 'bg-purple-500' : i === 2 ? 'bg-emerald-500' : i === 3 ? 'bg-slate-500' : 'bg-amber-500'}
-                `} />
+                <div className={`absolute -right-4 -bottom-4 w-24 h-24 rounded-full blur-[40px] opacity-20 transition-opacity group-hover:opacity-40 ${agent.glowColor}`} />
               </div>
             ))}
           </div>
-          <p className="text-center text-xs text-slate-600 font-bold">
-            注：安德烈·谷为 AI 原生角色与系统化身，用于代表自动化研发与执行能力。
-          </p>
+          <p className="text-center text-xs text-slate-600 font-bold">顾深、林见微、程矩三位各自独立研判，分别给出结论；诺岚负责情报补充，维尔负责结果复核。</p>
         </section>
 
         {/* FAQ Section */}
@@ -354,3 +310,4 @@ export default function LandingPage() {
     </div>
   );
 }
+

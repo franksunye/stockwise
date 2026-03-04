@@ -78,11 +78,11 @@ interface TeamCard {
 }
 
 const AGENTS: Record<string, AgentProfile> = {
-    market_observer: { name: '知守 · 马库斯', persona: 'Marcus', role: '市场观察员', color: 'blue' },
-    quant_mind: { name: '知守 · 奎因', persona: 'Quinn', role: '策略精算师', color: 'purple' },
-    news_desk: { name: '知守 · 诺拉', persona: 'Nora', role: '情报上下文官', color: 'green' },
-    system_guardian: { name: '知守 · 塞拉', persona: 'Sylar', role: '系统守护者', color: 'gray' },
-    validation_auditor: { name: '知守 · 维尔', persona: 'Verifier', role: '验证审计官', color: 'amber' },
+    market_observer: { name: '林见微（混元 Lite）', persona: 'lin-jianwei-hunyuan-lite', role: '初级量化分析师', color: 'blue' },
+    quant_mind: { name: '顾深（DeepSeek）', persona: 'gu-shen-deepseek', role: '资深量化分析师', color: 'purple' },
+    news_desk: { name: '诺岚（Nora）', persona: 'nora-context-desk', role: '情报上下文官', color: 'green' },
+    system_guardian: { name: '程矩（量化规则）', persona: 'cheng-ju-quant-rules', role: '规则量化分析师', color: 'gray' },
+    validation_auditor: { name: '维尔（Verifier）', persona: 'verifier-audit-desk', role: '验证审计官', color: 'amber' },
 };
 
 const DAILY_PLAN_TEMPLATE: PlanTask[] = [
@@ -146,8 +146,17 @@ const DAILY_PLAN_TEMPLATE: PlanTask[] = [
         agent_id: 'quant_mind',
         type: 'reasoning',
         phase: 'post_close',
-        dimensions: { model: '混合模型' },
+        dimensions: { model: 'DeepSeek' },
         expected_start: '17:00',
+    },
+    {
+        name: 'risk_gate',
+        display_name: '规则闸门与风险否决校验',
+        agent_id: 'system_guardian',
+        type: 'maintenance',
+        phase: 'post_close',
+        dimensions: { gate: 'rule-quant' },
+        expected_start: '17:10',
     },
     {
         name: 'brief_gen',

@@ -1,15 +1,30 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ShieldCheck, AlertTriangle, Zap, RotateCw } from 'lucide-react';
+import { ShieldCheck, AlertTriangle, RotateCw } from 'lucide-react';
 import { getCurrentUser } from '@/lib/user';
 import { AIPrediction } from '@/lib/types';
+import Multiavatar from '@/components/Multiavatar';
 
 import { formatModelName } from '@/lib/model-names';
 
 interface AICouncilProps {
   symbol: string;
   targetDate: string;
+}
+
+function mapCouncilMember(pred: AIPrediction) {
+  const raw = `${pred.display_name || ''} ${pred.model || ''}`.toLowerCase();
+  if (raw.includes('deepseek')) {
+    return { name: '顾深', role: '资深量化分析师', avatarSeed: 'gu-shen-deepseek' };
+  }
+  if (raw.includes('hunyuan') || raw.includes('混元')) {
+    return { name: '林序', role: '初级量化分析师', avatarSeed: 'lin-xu-hunyuan-lite' };
+  }
+  if (raw.includes('rule') || raw.includes('规则') || raw.includes('quant')) {
+    return { name: '程矩', role: '规则量化分析师', avatarSeed: 'cheng-ju-quant-rules' };
+  }
+  return { name: formatModelName(pred.display_name || pred.model), role: '量化分析成员', avatarSeed: 'ziso-council-fallback' };
 }
 
 export function AICouncil({ symbol, targetDate }: AICouncilProps) {
@@ -105,16 +120,18 @@ export function AICouncil({ symbol, targetDate }: AICouncilProps) {
       <div className="space-y-3">
         {predictions.map((pred, idx) => {
            const isPrimary = typeof pred.is_primary === 'number' ? pred.is_primary === 1 : pred.is_primary === true;
+           const member = mapCouncilMember(pred);
            return (
              <div key={idx} className={`p-4 rounded-xl border ${isPrimary ? 'bg-indigo-500/10 border-indigo-500/20' : 'bg-white/[0.02] border-white/5'}`}>
                 <div className="flex items-center justify-between mb-3">
                    <div className="flex items-center gap-2">
-                      <div className={`p-1.5 rounded-md ${isPrimary ? 'bg-indigo-500/20' : 'bg-slate-700/30'}`}>
-                         <Zap size={12} className={isPrimary ? 'text-indigo-400' : 'text-slate-400'} />
+                      <div className={`w-7 h-7 rounded-full border overflow-hidden ${isPrimary ? 'bg-indigo-500/10 border-indigo-500/30' : 'bg-white/5 border-white/10'}`}>
+                         <Multiavatar name={member.avatarSeed} className="w-full h-full" />
                       </div>
-                       <span className={`text-xs font-black uppercase tracking-wider ${isPrimary ? 'text-indigo-300' : 'text-slate-400'}`}>
-                          {formatModelName(pred.display_name || pred.model)}
-                       </span>
+                      <div className="leading-tight">
+                        <p className={`text-xs font-black tracking-wide ${isPrimary ? 'text-indigo-300' : 'text-slate-300'}`}>{member.name}</p>
+                        <p className="text-[10px] text-slate-500 font-bold">{member.role}</p>
+                      </div>
                     </div>
                    <div className={`px-2 py-1 rounded text-[10px] font-black uppercase tracking-wide
                       ${pred.signal === 'Long' ? 'bg-emerald-500/20 text-emerald-400' : 

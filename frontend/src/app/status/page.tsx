@@ -164,8 +164,8 @@ export default function StatusPage() {
       <div className="max-w-6xl mx-auto space-y-8">
         <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h1 className="text-2xl md:text-3xl font-black tracking-tight">知守委员会值班台</h1>
-            <p className="text-slate-500 text-sm mt-1">用团队视角展示今天谁在执行、谁在待命、哪里需要人工关注。</p>
+            <h1 className="text-2xl md:text-3xl font-black tracking-tight">值班团队看板</h1>
+            <p className="text-slate-500 text-sm mt-1">用团队视角展示执行节奏：谁在分析、谁在风控、谁在审计、哪里需要人工关注。</p>
           </div>
 
           <div className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-xl p-1.5">
@@ -258,7 +258,7 @@ export default function StatusPage() {
             </section>
 
             <section className="space-y-3">
-              <h2 className="text-lg font-black tracking-tight">今日作战板</h2>
+              <h2 className="text-lg font-black tracking-tight">今日执行看板</h2>
               <div className="grid lg:grid-cols-3 gap-3">
                 {data?.phases.map((phase) => (
                   <article key={phase.id} className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 space-y-3">
@@ -293,7 +293,7 @@ export default function StatusPage() {
             </section>
 
             <section className="space-y-3">
-              <h2 className="text-lg font-black tracking-tight">事件流 (聚合)</h2>
+              <h2 className="text-lg font-black tracking-tight">异常事件流（聚合）</h2>
               {data?.incidents.length ? (
                 <div className="space-y-2">
                   {data.incidents.map((incident) => {

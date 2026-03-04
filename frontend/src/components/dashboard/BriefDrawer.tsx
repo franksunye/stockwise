@@ -82,6 +82,22 @@ export function BriefDrawer({ isOpen, onClose, limitToSymbol, onUpgrade }: Brief
 
   const isSpecificStock = !!limitToSymbol && !showGlobal;
   const showContent = isSpecificStock ? extractedContent : brief?.content;
+  const briefAuthor =
+    tier === 'pro'
+      ? {
+          name: '顾深',
+          role: '资深量化分析师',
+          avatarSeed: 'gu-shen-deepseek',
+          roleClass: 'bg-purple-500/20 text-purple-300',
+          avatarClass: 'bg-purple-500/10 border-purple-500/20',
+        }
+      : {
+          name: '林序',
+          role: '初级量化分析师',
+          avatarSeed: 'lin-xu-hunyuan-lite',
+          roleClass: 'bg-cyan-500/20 text-cyan-300',
+          avatarClass: 'bg-cyan-500/10 border-cyan-500/20',
+        };
 
   return (
     <AnimatePresence>
@@ -196,15 +212,15 @@ export function BriefDrawer({ isOpen, onClose, limitToSymbol, onUpgrade }: Brief
                      )}
                   <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-purple-500/10 border border-purple-500/20 overflow-hidden shrink-0 grayscale hover:grayscale-0 transition-all duration-500">
-                        <Multiavatar name="Quinn" className="w-full h-full" />
+                      <div className={`w-10 h-10 rounded-full border overflow-hidden shrink-0 grayscale hover:grayscale-0 transition-all duration-500 ${briefAuthor.avatarClass}`}>
+                        <Multiavatar name={briefAuthor.avatarSeed} className="w-full h-full" />
                       </div>
                       <div className="space-y-0.5">
                         <div className="flex items-center gap-2">
-                           <span className="text-sm font-black text-white">深寻</span>
-                           <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-purple-500/20 text-purple-300 uppercase tracking-wider flex items-center gap-1">
+                           <span className="text-sm font-black text-white">{briefAuthor.name}</span>
+                           <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider flex items-center gap-1 ${briefAuthor.roleClass}`}>
                              <CheckCircle2 size={10} />
-                             深度推演分析师
+                             {briefAuthor.role}
                            </span>
                         </div>
                         <p className="text-[10px] text-slate-500 font-medium font-mono">
