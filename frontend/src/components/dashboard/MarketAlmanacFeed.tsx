@@ -94,13 +94,6 @@ const AlmanacCard = memo(function AlmanacCard({
             <Sparkles className="w-3 h-3 text-indigo-400" />
             <span className="text-[10px] font-black text-slate-500 tracking-[0.2em] uppercase">{dateStr}</span>
           </div>
-          {data.degraded && (
-            <div className="mb-1">
-              <span className="inline-flex items-center rounded-full border border-amber-400/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-300">
-                数据完整性不足，已降级
-              </span>
-            </div>
-          )}
           <h2 className="text-4xl font-black italic tracking-tighter text-white drop-shadow-lg">{data.mood_tag || '混沌未明'}</h2>
           <div className="flex items-center justify-center gap-2 opacity-80">
             <div className="w-1.5 h-1.5 rounded-full bg-indigo-400/50" />

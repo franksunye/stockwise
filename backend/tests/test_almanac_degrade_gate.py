@@ -97,7 +97,7 @@ class TestAlmanacDegradeGate(unittest.TestCase):
         if os.path.exists(cls.db_path):
             os.remove(cls.db_path)
 
-    def test_generate_almanac_degraded_when_gate_fails(self):
+    def test_generate_almanac_full_rules_when_gate_fails(self):
         ok = ag.generate_almanac(target_date="2026-03-03", force_t_plus_1=False)
         self.assertTrue(ok)
 
@@ -111,9 +111,13 @@ class TestAlmanacDegradeGate(unittest.TestCase):
             conn.close()
 
         self.assertIsNotNone(row)
-        self.assertEqual(row[0], "混沌未明")
-        self.assertEqual(row[1], "宜：控制仓位 / 忌：情绪化追单")
-        self.assertIn("数据完整性不足", row[2])
+        self.assertIsInstance(row[0], str)
+        self.assertTrue(len(row[0]) > 0)
+        self.assertIsInstance(row[1], str)
+        self.assertIn("宜", row[1])
+        self.assertIn("忌", row[1])
+        self.assertIsInstance(row[2], str)
+        self.assertNotIn("数据完整性不足", row[2])
         trace = json.loads(row[3])
         self.assertTrue(trace["logic"]["degraded"])
         self.assertFalse(trace["data_quality"]["facts_gate_pass"])

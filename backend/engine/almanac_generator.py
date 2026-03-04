@@ -115,6 +115,18 @@ def generate_almanac(target_date: str = None, force_t_plus_1: bool = True) -> bo
         gate_pass = bool(facts_quality.get("gate_pass"))
         if not gate_pass:
             logger.warning(f"Market facts quality gate failed for {actual_price_date}: {facts_quality.get('flags', [])}")
+            try:
+                quality_flags = facts_quality.get("flags", [])
+                alert_content = (
+                    "### ⚠️ StockWise Data Quality Alert: Almanac fallback rules in use\n\n"
+                    f"**Target Date**: {target_date or 'N/A'}\n"
+                    f"**Fact Date**: {actual_price_date}\n"
+                    f"**Flags**: `{', '.join(quality_flags) if quality_flags else 'unknown'}`\n\n"
+                    "Almanac generation continues with full rule-based content. Please monitor upstream data coverage."
+                )
+                send_wecom_notification(alert_content, mentioned_mobile_list=ADMIN_MOBILES)
+            except Exception:
+                logger.warning("Failed to send almanac data-quality alert to ADMIN", exc_info=True)
 
         if actual_price_date != target_date:
             logger.info(f"Market Data Gap: Generating almanac for {target_date} using facts from {actual_price_date}")
@@ -293,11 +305,6 @@ def generate_almanac(target_date: str = None, force_t_plus_1: bool = True) -> bo
         meteorology = selected["meteo"]
         template = selected["insight"]
         degraded = not gate_pass
-        if degraded:
-            mood_tag = "混沌未明"
-            meteorology = "微雨"
-            action_strategy = "宜：控制仓位 / 忌：情绪化追单"
-            template = "数据完整性不足，已切换防守语义。请以仓位纪律和风险控制为先。"
 
         # Global Enrichment (Nasdaq) — Time-gated
         # Only inject Nasdaq narrative when the data is genuinely "overnight" fresh.
