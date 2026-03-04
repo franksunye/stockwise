@@ -22,70 +22,70 @@ class NotificationTemplates:
         "daily_brief": {
             "free": {
                 "zh": {
-                    "title": "📊 今日简报已生成",
+                    "title": "📊 今日复盘已就绪",
                     "body": "{push_hook}"
                 }
             },
             "pro": {
                 "zh": {
                     "title": "⭐ Pro 深度复盘已就绪",
-                    "body": "{push_hook} | 首席主笔深度解读"
+                    "body": "{push_hook} | 含明日执行计划"
                 }
             }
         },
         "daily_brief_bullish": {
             "free": {
                 "zh": {
-                    "title": "🚀 机会预警：多只股票看涨",
+                    "title": "🚀 今日复盘：机会信号集中",
                     "body": "{push_hook}"
                 }
             },
             "pro": {
                 "zh": {
-                    "title": "🟢 强力买入信号确认",
-                    "body": "{push_hook} | Pro 级策略详情已解锁"
+                    "title": "🟢 Pro 机会窗口已确认",
+                    "body": "{push_hook} | 已附仓位与节奏建议"
                 }
             }
         },
         "daily_brief_bearish": {
             "free": {
                 "zh": {
-                    "title": "🛡️ 风险提示：持仓出现抛压",
+                    "title": "🛡️ 今日复盘：风险信号升温",
                     "body": "{push_hook}"
                 }
             },
             "pro": {
                 "zh": {
-                    "title": "🔴 关键避险信号触发",
-                    "body": "{push_hook} | 机构减仓迹象深度分析"
+                    "title": "🔴 Pro 避险信号已触发",
+                    "body": "{push_hook} | 已附减仓与防守方案"
                 }
             }
         },
         "daily_brief_neutral": {
             "free": {
                 "zh": {
-                    "title": "📊 今日简报：市场平稳",
+                    "title": "📊 今日复盘：市场偏中性",
                     "body": "{push_hook}"
                 }
             },
             "pro": {
                 "zh": {
-                    "title": "⚪ 震荡市策略更新",
-                    "body": "{push_hook} | 观望与低吸区间分析"
+                    "title": "⚪ Pro 震荡策略更新",
+                    "body": "{push_hook} | 已附观望与试仓边界"
                 }
             }
         },
         "signal_flip": {
             "free": {
                 "zh": {
-                    "title": "🚨 AI 信号转向: {symbol}",
-                    "body": "评级已从 [{old_signal}] 调整为 [{new_signal}]。信心指数: {confidence_pct}%。"
+                    "title": "🚨 信号反转：{symbol}",
+                    "body": "观点从 [{old_signal}] 变为 [{new_signal}]，置信度 {confidence_pct}%。点开看原因。"
                 }
             },
             "pro": {
                 "zh": {
-                    "title": "🎯 专属：{symbol} 信号发生重要逆转",
-                    "body": "深度评估显示评级已转向 [{new_signal}]。点击查看 Pro 级操作建议。"
+                    "title": "🎯 Pro 反转提醒：{symbol}",
+                    "body": "核心方向已切换到 [{new_signal}]。已生成仓位动作与风险阈值。"
                 }
             }
         },
@@ -100,50 +100,50 @@ class NotificationTemplates:
         "morning_call": {
             "free": {
                 "zh": {
-                    "title": "☕ 今日早报: AI 交易提醒",
-                    "body": "📊 关注股中 {stock_names} 等有看多信号。{sentiment_snippet}"
+                    "title": "☕ 开盘前早报",
+                    "body": "重点观察 {stock_names} 等标的。{sentiment_snippet}"
                 }
             },
             "pro": {
                 "zh": {
-                    "title": "☀️ Pro 专属：今日必读市场内参",
-                    "body": "💡 重点关注：{stock_names} 等出现高胜率信号。{sentiment_snippet}"
+                    "title": "☀️ Pro 开盘作战简报",
+                    "body": "高优先级标的：{stock_names}。{sentiment_snippet}"
                 }
             }
         },
         "morning_call_neutral": {
             "all": {
                 "zh": {
-                    "title": "☕ 今日早报: 市场观望",
-                    "body": "📉 今日市场整体观望为主。{sentiment_snippet}"
+                    "title": "☕ 开盘前早报：观望日",
+                    "body": "今日以纪律与等待为主。{sentiment_snippet}"
                 }
             }
         },
         "validation_glory": {
             "free": {
                  "zh": {
-                    "title": "🏅 验证成功：AI 再次击败市场",
-                    "body": "您关注的 {stock_names} 走势完美符合昨日预测（最高涨幅 {max_gain}%）。这就是 AI 的力量！"
+                    "title": "🏅 昨日判断已被验证",
+                    "body": "{stock_names} 与昨日判断一致，最大波动 {max_gain}%。继续按纪律执行。"
                 }
             },
             "pro": {
                  "zh": {
-                    "title": "🏆 精准复盘：Pro 策略价值验证",
-                    "body": "昨日 Pro 级预测点中 {stock_names} 关键变盘，最高捕获 {max_gain}% 波动。明日策略已生成，请速查看。"
+                    "title": "🏆 Pro 策略验证成功",
+                    "body": "{stock_names} 命中关键节奏，最大波动 {max_gain}%。下一步计划已更新。"
                 }
             }
         },
         "prediction_updated": {
             "free": {
                 "zh": {
-                    "title": "🤖 AI 预测已更新",
-                    "body": "您关注的 {market_name} AI 预测数据已全部更新，点击查看最新趋势。"
+                    "title": "🤖 预测数据已更新",
+                    "body": "{market_name} 监控池已完成刷新，可查看最新趋势。"
                 }
             },
             "pro": {
                 "zh": {
-                    "title": "⭐ Pro 专属：深度预测已就绪",
-                    "body": "今日 {market_name} AI 深度分析已生成，包含机构级情绪建模与策略解读。"
+                    "title": "⭐ Pro 深度预测已就绪",
+                    "body": "{market_name} 深度分析已生成，含情绪建模与策略解释。"
                 }
             }
         },
@@ -159,7 +159,7 @@ class NotificationTemplates:
             "all": {
                 "zh": {
                     "title": "📜 明日投资黄历已出炉",
-                    "body": "意境：{mood_tag} | 宜：{strategy}。抢先查看明日市场内能分析。"
+                    "body": "意境：{mood_tag} | 宜：{strategy}。抢先看明日市场势能推演。"
                 }
             }
         },
@@ -175,21 +175,21 @@ class NotificationTemplates:
         "brief_hook_bullish": {
             "all": {
                 "zh": {
-                    "body": "📈 {stocks}{etc}出现看涨信号，点击查看今日 AI 复盘。"
+                    "body": "📈 {stocks}{etc}出现上行动能，点击查看复盘与计划。"
                 }
             }
         },
         "brief_hook_bearish": {
             "all": {
                 "zh": {
-                    "body": "⚠️ {stocks}{etc}面临调整压力，点击查看风险提示。"
+                    "body": "⚠️ {stocks}{etc}下行压力加大，点击查看风控建议。"
                 }
             }
         },
         "brief_hook_neutral": {
             "all": {
                 "zh": {
-                    "body": "今日复盘：{count} 只股票走势平稳，点击查看详情。"
+                    "body": "今日复盘：{count} 只股票中性震荡，点击查看执行边界。"
                 }
             }
         },

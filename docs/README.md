@@ -1,64 +1,23 @@
-# StockWise Documentation
+# StockWise 文档索引
 
-> **为纪律而生的交易 HUD**
+本目录用于维护产品、商业、工程与运营的统一事实源（single source of truth）。
 
-欢迎来到 StockWise 项目文档库。这是一个旨在帮助个人投资者克服情绪波动、坚守交易纪律的 AI 原生应用。
+## 核心文档
 
----
+1. [00_Product_Business_Vision.md](./00_Product_Business_Vision.md)
+2. [01_Monetization_Strategy_CN.md](./01_Monetization_Strategy_CN.md)
+3. [02_Pricing_Strategy.md](./02_Pricing_Strategy.md)
+4. [03_Product_Features_Manifest.md](./03_Product_Features_Manifest.md)
+5. [10_Architecture.md](./10_Architecture.md)
+6. [11_Reliability_Protocol.md](./11_Reliability_Protocol.md)
+7. [30_Notification_Strategy_Design.md](./30_Notification_Strategy_Design.md)
 
-## 🗺️ 文档概览
+## 内容与增长
 
-1. **[产品规格 (PRD)](./Product_Spec.md)**：
-   - 包含产品愿景、Aha Moment、核心功能及 MVP 策略。
-2. **[技术设计 (Design)](./Technical_Design.md)**：
-   - 包含系统架构、数据库设计及数据采集管道。
-3. **[待办清单 (Backlog)](./Backlog.md)**：
-   - 详细的任务拆解与迭代计划。
+1. `docs/content/`：年度与月度内容矩阵、长文素材。
+2. `docs/wechat-drafts/`：Support Center 与社媒草稿源文件。
 
----
+## 归档与历史
 
-## 🚀 快速启动
-
-### 2分钟本地开发
-```bash
-# 前端启动
-cd frontend
-npm install
-npm run dev
-
-# 后端 ETL 测试 (需要环境变量)
-cd backend
-python sync_meta.py
-```
-
----
-
-## 📅 项目路线图 (Backlog)
-
-### ✅ 已完成
-- 核心 UI 框架 (Next.js + Tailwind)
-- 数据采集管道原型 (Akshare + Python)
-- 基础红绿灯信号算法
-
-### 🚧 正在进行 (Sprint 6/7)
-- **AI 预测验证系统**：集成 Gemini 预测与自动验证逻辑。
-- **盈亏比量化统计**：在 History 页面展示胜率曲线。
-- **50 只精选股票池**：优化数据覆盖范围。
-
-### 🔮 未来规划
-- 移动端 PWA 深度优化。
-- 多策略 AI 对比系统。
-- 微信/邮件信号预警推送。
-
----
-
-## 📁 目录结构
-```text
-stockwise/
-├── docs/                 # 项目文档 (PRD & Design)
-├── backend/              # Python ETL 数据管道 & AI 分析
-├── frontend/             # Next.js 14 应用
-│   ├── src/app/          # 路由与页面
-│   └── src/components/   # 精美 UI 组件
-└── .github/workflows/    # 自动化任务
-```
+1. `docs/archive/`：历史方案与旧里程碑，仅供追溯，不作为当前实现依据。
+2. 当前有效实现以代码与“核心文档”中的最新版为准。

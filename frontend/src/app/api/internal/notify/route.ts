@@ -29,7 +29,7 @@ export async function POST(request: Request) {
 
     try {
         const body = await request.json();
-        const { target_user_id, related_symbol, title, body: msgBody, url, tag } = body;
+        const { target_user_id, related_symbol, title, body: msgBody, url, tag, skip_log } = body;
 
         if (!title || !msgBody) {
             return NextResponse.json({ error: 'Missing title or body' }, { status: 400 });
@@ -191,7 +191,7 @@ export async function POST(request: Request) {
         });
 
         // 5. Log notifications to DB for history
-        if (successfulUserIds.size > 0) {
+        if (!skip_log && successfulUserIds.size > 0) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const logOps: { sql: string; args: any[] }[] = [];
             const timestamp = new Date().toISOString();

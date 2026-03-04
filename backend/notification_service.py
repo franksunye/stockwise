@@ -49,7 +49,9 @@ class NotificationManager:
             "processed": 0,
             "flips_detected": 0,
             "notifications_queued": 0,
-            "notifications_sent": 0
+            "notifications_sent": 0,
+            "skipped_by_preference": 0,
+            "errors": 0
         }
 
     def _get_conn(self):
@@ -105,7 +107,26 @@ class NotificationManager:
         "Bullish": 1,
         "Neutral": 0,
         "Bearish": -1,
-        "Strong Bearish": -2
+        "Strong Bearish": -2,
+        # Backward-compatible aliases used by legacy pipelines/tests
+        "Long": 1,
+        "Strong Long": 2,
+        "Short": -1,
+        "Strong Short": -2,
+        "Side": 0,
+        "Hold": 0,
+        "Buy": 1,
+        "Sell": -1
+    }
+
+    PREF_KEY_MAP = {
+        "daily_brief_bullish": "daily_brief",
+        "daily_brief_bearish": "daily_brief",
+        "daily_brief_neutral": "daily_brief",
+        "morning_call_neutral": "morning_call",
+        "signal_flip_batch": "signal_flip",
+        "almanac_preview": "market_almanac",
+        "almanac_ritual": "market_almanac"
     }
 
     def check_signal_flip(self, user_id: str, symbol: str, new_signal: str, new_confidence: float) -> Optional[dict]:
@@ -313,12 +334,33 @@ class NotificationManager:
                 "related_symbols": e.get("related_symbols", [])
             }
 
-        # 4. Handle Prediction Updated (Service Level)
+        # 4. Handle Daily Brief variants
+        daily_briefs = [
+            e for e in events
+            if e["type"] in ("daily_brief", "daily_brief_bullish", "daily_brief_bearish", "daily_brief_neutral")
+        ]
+        if daily_briefs:
+            e = daily_briefs[0]
+            push_hook = e.get("push_hook") or "点击查看今日 AI 复盘"
+            title, body = NotificationTemplates.render(
+                e["type"],
+                tier=user_tier,
+                push_hook=push_hook
+            )
+            return {
+                "title": title,
+                "body": body,
+                "url": e.get("url", "/dashboard?brief=true"),
+                "type": e["type"],
+                "related_symbols": e.get("related_symbols", [])
+            }
+
+        # 5. Handle Prediction Updated (Service Level)
         updates = [e for e in events if e["type"] == "prediction_updated"]
         if updates:
             # Aggregate: "HK Market updated" or "5 stocks updated"
             market_names = {e.get("market", "CN") for e in updates} # distinct markets
-            m_str = "/".join(list(market_names)) + " 市场"
+            m_str = "/".join(sorted(market_names)) + " 市场"
             
             title, body = NotificationTemplates.render(
                 "prediction_updated",
@@ -331,10 +373,10 @@ class NotificationManager:
                 "body": body,
                 "url": "/dashboard?utm_source=push&utm_medium=prediction_updated",
                 "type": "prediction_updated",
-                "related_symbols": [e["symbol"] for e in updates]
+                "related_symbols": list(dict.fromkeys([e["symbol"] for e in updates]))
             }
             
-        # 5. Handle Market Almanac (New!)
+        # 6. Handle Market Almanac
         almanacs = [e for e in events if e["type"] in ("almanac_preview", "almanac_ritual")]
         if almanacs:
             e = almanacs[0]
@@ -374,9 +416,7 @@ class NotificationManager:
                 return False
             
             # Type-specific check
-            pref_key = notif_type
-            if notif_type in ("almanac_preview", "almanac_ritual"):
-                pref_key = "market_almanac"
+            pref_key = self.PREF_KEY_MAP.get(notif_type, notif_type)
 
             type_settings = settings.get("types", {}).get(pref_key, {})
             return type_settings.get("enabled", True)
@@ -396,6 +436,7 @@ class NotificationManager:
         notif_type = payload.get("type", "unknown")
         if not self._check_user_preference(user_id, notif_type):
             logger.debug(f"⏭️ User {user_id} has disabled '{notif_type}' notifications, skipping")
+            self.stats["skipped_by_preference"] += 1
             return False
         
         # Add tracking ID to URL
@@ -407,7 +448,9 @@ class NotificationManager:
             
         if self.dry_run:
             logger.info(f"🧪 [DryRun] User {user_id} <- {payload['title']} | ID: {log_id}")
-            self._log_to_db(log_id, user_id, payload)
+            dry_payload = dict(payload)
+            dry_payload["url"] = tracked_url
+            self._log_to_db(log_id, user_id, dry_payload)
             return True
             
         try:
@@ -417,14 +460,18 @@ class NotificationManager:
                 body=payload["body"],
                 url=tracked_url,
                 target_user_id=user_id,
-                tag=payload["type"]
+                tag=payload["type"],
+                skip_log=True
             )
             
             # Log successful dispatch
-            self._log_to_db(log_id, user_id, payload)
+            logged_payload = dict(payload)
+            logged_payload["url"] = tracked_url
+            self._log_to_db(log_id, user_id, logged_payload)
             return True
         except Exception as e:
             logger.error(f"❌ Failed to send notification {log_id}: {e}")
+            self.stats["errors"] += 1
             return False
 
     def _log_to_db(self, log_id: str, user_id: str, payload: dict):
@@ -502,6 +549,9 @@ class NotificationManager:
                     try:
                         settings = json.loads(row[0])
                     except: pass
+
+                if settings.get("enabled", True) is False:
+                    continue
                 
                 # Check specific type or 'price_update' (Phase 1 key)
                 types = settings.get('types', {})
@@ -519,7 +569,8 @@ class NotificationManager:
                         title=title, 
                         body=body, 
                         url=f"/dashboard/stock/{symbol}",
-                        tag="price_update"
+                        tag="price_update",
+                        skip_log=True
                     )
                     
                     # Log for audit trail
@@ -534,7 +585,7 @@ class NotificationManager:
                     self.stats["notifications_sent"] += 1
                 except Exception as e:
                     logger.error(f"Failed to push to {uid}: {e}")
-                    self.stats["errors"] += 1
+                    self.stats["errors"] = self.stats.get("errors", 0) + 1
                     
         except Exception as e:
             logger.error(f"❌ Broadcast failed: {e}")

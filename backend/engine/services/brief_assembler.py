@@ -219,16 +219,18 @@ async def notify_user_brief_ready(user_id: str, date_str: str):
             "url": "/dashboard?brief=true",
             "related_symbols": []
         })
-        nm.flush()
-        
-        # 6. Mark as notified (UTC+8 workaround)
-        cursor.execute(
-            "UPDATE daily_briefs SET notified_at = datetime('now', '+8 hours') WHERE user_id = ? AND date = ?",
-            (user_id, date_str)
-        )
-        conn.commit()
-        
-        logger.info(f"✅ [Notify] User {user_id} notified for brief {date_str}")
+        delivered = nm.flush()
+
+        # 6. Mark as notified only when delivery succeeds
+        if delivered > 0:
+            cursor.execute(
+                "UPDATE daily_briefs SET notified_at = datetime('now', '+8 hours') WHERE user_id = ? AND date = ?",
+                (user_id, date_str)
+            )
+            conn.commit()
+            logger.info(f"✅ [Notify] User {user_id} notified for brief {date_str}")
+        else:
+            logger.warning(f"⚠️ [Notify] Brief notification not delivered for {user_id} ({date_str}), keeping notified_at NULL for retry")
         
     except Exception as e:
         logger.error(f"❌ [Notify] Failed to notify user {user_id}: {e}")

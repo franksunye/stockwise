@@ -18,7 +18,7 @@ try:
 except ImportError:
     from logger import logger
 
-def send_push_notification(title, body, url=None, related_symbol=None, broadcast=False, tag=None, target_user_id=None):
+def send_push_notification(title, body, url=None, related_symbol=None, broadcast=False, tag=None, target_user_id=None, skip_log=False):
     """
     调用 Internal API 发送 Web Push 通知
     """
@@ -40,7 +40,8 @@ def send_push_notification(title, body, url=None, related_symbol=None, broadcast
         "related_symbol": related_symbol,
         "broadcast": broadcast,
         "tag": tag,
-        "target_user_id": target_user_id
+        "target_user_id": target_user_id,
+        "skip_log": skip_log
     }
 
     try:

@@ -89,6 +89,19 @@ class TestNotificationService(unittest.TestCase):
         self.assertIn("AAPL, TSLA", payload["body"])
         self.assertEqual(set(payload["related_symbols"]), {"AAPL", "TSLA"})
 
+    def test_aggregation_daily_brief_variant(self):
+        """Daily brief variants should be aggregated and rendered."""
+        user_id = "user1"
+        events = [
+            {"type": "daily_brief_bullish", "push_hook": "📈 测试股票出现上行动能", "url": "/dashboard?brief=true"}
+        ]
+
+        payload = self.manager._aggregate_notifications(user_id, events, user_tier="pro")
+        self.assertIsNotNone(payload)
+        self.assertEqual(payload["type"], "daily_brief_bullish")
+        self.assertIn("机会", payload["title"])
+        self.assertIn("上行动能", payload["body"])
+
     def test_log_to_db_called(self):
         """Verify that analytics logging hits the database."""
         payload = {
@@ -118,6 +131,34 @@ class TestNotificationService(unittest.TestCase):
         self.assertEqual(cursor.execute.call_count, 2)
         args, _ = cursor.execute.call_args
         self.assertIn("INSERT OR REPLACE INTO signal_states", args[0])
+
+    def test_preference_mapping_daily_brief_variant(self):
+        """daily_brief variants should follow daily_brief preference key."""
+        settings = {
+            "enabled": True,
+            "types": {
+                "daily_brief": {"enabled": False}
+            }
+        }
+        cursor = self.mock_conn.cursor()
+        cursor.fetchone.return_value = (json.dumps(settings),)
+
+        allowed = self.manager._check_user_preference("user1", "daily_brief_bearish")
+        self.assertFalse(allowed)
+
+    def test_signal_alias_compatibility(self):
+        """Legacy signal names (Side/Long/Short) should still trigger flip logic."""
+        user_id = "user1"
+        symbol = "AAPL"
+        self.manager.signal_cache = {
+            user_id: {
+                symbol: {"signal": "Side", "confidence": 0.5}
+            }
+        }
+
+        event = self.manager.check_signal_flip(user_id, symbol, "Long", 0.88)
+        self.assertIsNotNone(event)
+        self.assertEqual(event["new_signal"], "Long")
 
     def test_flush_workflow(self):
         """Verify end-to-end flush logic."""
