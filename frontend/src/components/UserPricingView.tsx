@@ -267,7 +267,10 @@ export function UserPricingView({ currentTier, hasStripeCustomer, expiresAt }: P
         </div>
       </div>
 
-      <div className="pt-4 pb-8">
+      <div className="pt-4 pb-8 space-y-2">
+        <p className="text-[10px] text-center text-slate-500 font-medium leading-relaxed italic px-2">
+          *受限于底层机制，中国大陆及部分 Android 设备的实时推送不可用，建议您主动打卡查看。
+        </p>
         <p className="text-[10px] text-center text-slate-600 font-medium leading-relaxed italic px-2">
           股市有风险，投资需谨慎。本应用生成的所有内容由 AI 驱动，仅供参考。
           订阅即代表同意 服务条款 与 隐私协议。

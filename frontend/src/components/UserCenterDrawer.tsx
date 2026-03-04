@@ -61,6 +61,8 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
   const [showPricing, setShowPricing] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
   const [showLearn, setShowLearn] = useState(false);
+  const [isAndroid, setIsAndroid] = useState(false);
+
   // Fix: Separate visibility state from loading state
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [isLinkingEmail, setIsLinkingEmail] = useState(false);
@@ -81,6 +83,12 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
 
   useEffect(() => {
     setIsHighPerformance(shouldEnableHighPerformance());
+    const isAndroidDevice = /android/i.test(navigator.userAgent);
+    let isMainlandChina = false;
+    try {
+        isMainlandChina = Intl.DateTimeFormat().resolvedOptions().timeZone === 'Asia/Shanghai';
+    } catch(e) {}
+    setIsAndroid(isAndroidDevice && isMainlandChina);
     if (isOpen) {
       refreshProfile({ force: true });
       checkPushStatus();
@@ -445,6 +453,13 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                         </div>
                         {isSubscribed && (
                           <div className="bg-white/[0.02] border-t border-white/5 px-5 py-2">
+                            {isAndroid && (
+                              <div className="mt-2 mb-3 px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-left">
+                                <p className="text-[10px] text-amber-200/90 font-bold">
+                                  ⚠️ Android 推送不可用，请主动打开应用获取数据。
+                                </p>
+                              </div>
+                            )}
                             <button onClick={() => {
                                 setShowNotificationSettings(!showNotificationSettings);
                                 if (!showNotificationSettings) setShowReferralDetails(false);

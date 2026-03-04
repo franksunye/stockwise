@@ -324,6 +324,9 @@ function PricingContent() {
               </tbody>
             </table>
           </div>
+          <p className="text-center text-slate-500 text-xs mt-4 pb-8">
+            *实时推送提醒在 iOS (苹果) 设备及海外 Android 设备上提供最佳体验。<Link href="/support" className="underline hover:text-white transition-colors">了解中国大陆 Android 设备的推送局限性</Link>
+          </p>
         </motion.div>
 
         {/* 底部免责声明 */}

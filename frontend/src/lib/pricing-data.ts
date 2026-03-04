@@ -54,7 +54,7 @@ export const pricingPlans: PricingPlan[] = [
             '教练式 AI 研报 (拒绝术语堆砌)',
             '10 只自选股全权托管 (覆盖主力持仓)',
             '主力情绪与资金关键指标解锁',
-            '关键变盘点实时推送 (纪律提醒)',
+            '关键变盘点实时推送* (纪律提醒)',
             '⭐ 专属 Pro 身份勋章',
         ],
         priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_MONTHLY || 'price_1Su1zqS3fDFObThpZbYXr2GG',
@@ -94,7 +94,7 @@ export const featureComparison = [
     { label: '量化信号底座', free: '标准趋势判断', pro: '标准趋势判断', common: true },
     { label: '行情覆盖范围', free: 'A股 / 港股 全覆盖', pro: 'A股 / 港股 全覆盖', common: true },
     { label: '核心指标解锁', free: '仅收盘价', pro: '主力情绪、支撑压力位、量能状态', highlight: true },
-    { label: '通知与纪律', free: '无', pro: '关键变盘点 / 突发异动 实时推送', highlight: true },
+    { label: '通知与纪律', free: '无', pro: '关键变盘点 / 突发异动 实时推送*', highlight: true },
     { label: '数据时效性', free: '盘后同步', pro: '盘后同步', common: true },
     { label: '专属身份标识', free: '-', pro: '⭐ 专属 Pro 勋章' },
 ];
