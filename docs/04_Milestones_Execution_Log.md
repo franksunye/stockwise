@@ -40,6 +40,11 @@
 - [x] **[Product] 股票雷达 (Stock Radar) 规划**: 完成了商业化智能雷达产品线的定位、定价选型及开发路线图 (Pillar 5 进阶)。(Team Completed ✅)
 - [x] **[DevOps] 预测修复 SOP**: 在本地 ops 技能 `local-data-ops` 中沉淀 AI 预测漏斗修复的标准作业程序。(Team Completed ✅)
 
+### D. 港股做空专项迭代 (HK Short Selling Iteration)
+- [ ] **[HK-Short] Ops 强化**: 实现阈值告警、缺口补采、数据 SLA 看板。 (Backlog)
+- [ ] **[HK-Short] 数据质量强化**: 引入更多回归样本与异常标签。 (Backlog)
+- [ ] **[HK-Short] 策略强化**: 将做空压力因子纳入更多决策模板。 (Backlog)
+
 ---
 
 ## 🚀 3. 下季度专项深度规划 (2026 Q2 Focus)
