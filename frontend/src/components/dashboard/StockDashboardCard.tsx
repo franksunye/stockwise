@@ -19,7 +19,7 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
 
 
   const marketType = getMarketFromSymbol(data.symbol);
-  const isHK = marketType === 'HK';
+
   const scene = getMarketScene(marketType);
   const isPostMarket = scene === 'post_market';
   const isPreMarket = scene === 'pre_market';
@@ -123,20 +123,6 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
     }
   };
 
-  const toNumber = (v: unknown): number | null => {
-    if (v === null || v === undefined || v === '') return null;
-    const n = Number(v);
-    return Number.isFinite(n) ? n : null;
-  };
-
-  const shortRatio = toNumber(data.shortMetrics?.short_turnover_ratio);
-  const shortPressure = (() => {
-    if (shortRatio === null) return { label: '待同步', color: 'text-slate-500', detail: '沽空比 --' };
-    if (shortRatio > 0.25) return { label: '极高', color: 'text-rose-500', detail: `沽空比 ${(shortRatio * 100).toFixed(1)}%` };
-    if (shortRatio > 0.15) return { label: '高', color: 'text-rose-400', detail: `沽空比 ${(shortRatio * 100).toFixed(1)}%` };
-    if (shortRatio >= 0.05) return { label: '中', color: 'text-amber-400', detail: `沽空比 ${(shortRatio * 100).toFixed(1)}%` };
-    return { label: '低', color: 'text-emerald-400', detail: `沽空比 ${(shortRatio * 100).toFixed(1)}%` };
-  })();
 
   return (
     // Layout Contract: one vertical feed page = one viewport.
@@ -278,14 +264,7 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
                       </div>
                     )}
 
-                    {isHK && (
-                      <div className={`${isTradingDay(undefined, marketType) && !isPreMarket ? 'mt-1' : 'mt-2 pt-2 border-t border-white/5'} flex items-center justify-between`}>
-                        <span className="text-[10px] text-slate-600 font-bold uppercase">空压</span>
-                        <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-full bg-white/5 ${shortPressure.color}`}>
-                          {shortPressure.label} · {shortPressure.detail}
-                        </span>
-                      </div>
-                    )}
+
                     
                     {/* 周一盘前显示一条微弱的提示线 */}
                     {isMarketOpenSoon && (
