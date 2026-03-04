@@ -67,7 +67,8 @@ function useUserProfileStore(): UserProfileContextValue {
         profileRef.current = profile;
     }, [profile]);
 
-    // 1. 从缓存初始化
+    // 1. 从缓存初始化 — 关键：命中缓存时立即标记 loading=false
+    //    这使得 DashboardEntryGate 不会再显示第二层骨架屏
     useEffect(() => {
         const cached = localStorage.getItem(PROFILE_CACHE_KEY);
         if (cached) {
@@ -76,6 +77,7 @@ function useUserProfileStore(): UserProfileContextValue {
                 if (parsed && parsed.userId) {
                     setProfile(parsed);
                     profileRef.current = parsed;
+                    setLoading(false); // P0 核心修复：缓存命中 → 立即可渲染
                 }
             } catch (e) {
                 console.error('Failed to parse profile cache', e);
@@ -89,10 +91,15 @@ function useUserProfileStore(): UserProfileContextValue {
         const now = Date.now();
         const lastSync = parseInt(sessionStorage.getItem('last_profile_sync') || '0');
         if (!options?.force && now - lastSync < 30000 && profileRef.current) {
+            setLoading(false); // 确保防抖跳过时也标记已完成
             return profileRef.current;
         }
 
-        setLoading(true);
+        // P0 核心修复：只有在没有任何缓存数据时才显示 loading
+        // 有缓存时做“静默刷新”，用户看到的始终是已有内容
+        if (!profileRef.current) {
+            setLoading(true);
+        }
         try {
             await getCurrentUser();
             const watchlist = options?.watchlist || getWatchlist();

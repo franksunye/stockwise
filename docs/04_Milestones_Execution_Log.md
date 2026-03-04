@@ -39,6 +39,8 @@
 - [x] **[Ops] Android 推送策略护栏**: 针对国内安卓生态通知碎片化，上线基于降级体验的沟通策略 (Android Notification Strategy)。(Team Completed ✅)
 - [x] **[Product] 股票雷达 (Stock Radar) 规划**: 完成了商业化智能雷达产品线的定位、定价选型及开发路线图 (Pillar 5 进阶)。(Team Completed ✅)
 - [x] **[DevOps] 预测修复 SOP**: 在本地 ops 技能 `local-data-ops` 中沉淀 AI 预测漏斗修复的标准作业程序。(Team Completed ✅)
+- [x] **[Perf] Dashboard 首屏秒开优化 (P0+P1)**: 根因分析发现双层骨架屏门控 + 串行网络请求瀑布流导致 2-3s 延迟。P0: UserProfileProvider 缓存命中即渲染 (消除第二层骨架屏)；P1: Layout→Provider 缓存桥接 (消除重复 profile API) + 回访用户 getCurrentUser 后台执行 (并行化)。(Team Completed ✅)
+- [ ] **[Perf-P2] Dashboard SSR 预取 (未来方向)**: 将 Dashboard 从纯 `'use client'` 改为 Server Component + 服务端数据预取。需重构自建 HMAC Session 鉴权以适配 RSC 数据流，改动量大。当 P0/P1 优化效果验证后再评估 ROI。(Backlog - 2026 Q2+ 评估)
 
 ### D. 港股做空专项迭代 (HK Short Selling Iteration)
 - [ ] **[HK-Short] Ops 强化**: 实现阈值告警、缺口补采、数据 SLA 看板。 (Backlog)

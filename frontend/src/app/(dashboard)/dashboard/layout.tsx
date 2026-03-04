@@ -23,6 +23,11 @@ import { isIOS, isStandalone } from '@/lib/device-utils';
 // 已验证的 Pro 用户信息缓存在 localStorage 中，
 // 实现"打开即用"：不等待网络，先用缓存展示内容。
 const AUTH_CACHE_KEY = 'ZISO_AUTH_CACHE_V1';
+
+// P1: 用于桥接 Layout 的 profile 响应到 UserProfileProvider 的缓存
+// 避免 Provider 再次发起重复的 /api/user/profile 请求
+const USER_PROFILE_CACHE_KEY = 'stockwise_user_profile_v1';
+const PROFILE_SYNC_SESSION_KEY = 'last_profile_sync';
 interface AuthCache {
   tier: Tier;
   authorized: boolean;
@@ -53,6 +58,30 @@ function setAuthCache(tier: Tier, authorized: boolean): void {
   } catch {
     // localStorage may be full — non-critical
   }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function populateUserProfileCache(apiData: any): void {
+  try {
+    const profileForCache = {
+      userId: apiData.userId,
+      tier: apiData.tier || 'free',
+      expiresAt: apiData.expiresAt,
+      watchlistCount: apiData.watchlistCount,
+      email: apiData.email,
+      referralBalance: apiData.referralBalance,
+      totalEarned: apiData.totalEarned,
+      commissionRate: apiData.commissionRate,
+      hasOnboarded: apiData.hasOnboarded,
+      hasStripeCustomer: apiData.hasStripeCustomer,
+      isChannel: apiData.isChannel,
+      referralAlias: apiData.referralAlias,
+      referralCount: apiData.referralCount,
+      recentTransactions: apiData.recentTransactions,
+    };
+    localStorage.setItem(USER_PROFILE_CACHE_KEY, JSON.stringify(profileForCache));
+    sessionStorage.setItem(PROFILE_SYNC_SESSION_KEY, String(Date.now()));
+  } catch { /* non-critical */ }
 }
 
 function DashboardEntryGate({ children }: { children: React.ReactNode }) {
@@ -106,10 +135,18 @@ export default function DashboardLayout({
 
     const checkAuth = async () => {
       const { switches } = MEMBERSHIP_CONFIG;
+      const isReturningUser = !!cachedAuth?.authorized;
       
-      // 统一通过 getCurrentUser 获取/生成用户 ID
-      const currentUser = await getCurrentUser();
-      const uid = currentUser.userId;
+      // P1: 回访用户已有 session cookie，getCurrentUser 可以后台执行不阻塞
+      // 新用户必须等待 register 建立 session cookie 后才能调用 profile
+      let uid = '';
+      if (isReturningUser) {
+        uid = localStorage.getItem('STOCKWISE_USER_ID') || '';
+        getCurrentUser().catch(e => console.warn('Background user sync:', e));
+      } else {
+        const currentUser = await getCurrentUser();
+        uid = currentUser.userId;
+      }
 
       // 如果邀请墙关闭，直接放行（公测/正式期）
       if (!switches.requireInvite) {
@@ -124,6 +161,7 @@ export default function DashboardLayout({
           if (res.ok) {
             const data = await res.json();
             const newTier = (data.tier || 'free') as Tier;
+            populateUserProfileCache(data); // P1: 桥接到 UserProfileProvider 缓存
             setTier(newTier);
             setAuthCache(newTier, true);
           }
@@ -186,6 +224,12 @@ export default function DashboardLayout({
         clearTimeout(timeoutId);
         const data = await res.json();
         const newTier = (data.tier || 'free') as Tier;
+        
+        // P1: 桥接到 UserProfileProvider 缓存，消除重复 API 调用
+        // 防御性检查：仅在 API 成功时写入，避免错误响应污染缓存
+        if (res.ok && data.userId) {
+          populateUserProfileCache(data);
+        }
         setTier(newTier);
         
         // ── 准入判断 (Gate Check) ──
