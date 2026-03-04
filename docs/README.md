@@ -26,12 +26,11 @@
 ## 核心文档
 
 1. [00_Product_Business_Vision.md](./00_Product_Business_Vision.md)
-2. [01_Monetization_Strategy_CN.md](./01_Monetization_Strategy_CN.md)
-3. [02_Pricing_Strategy.md](./02_Pricing_Strategy.md)
-4. [03_Product_Features_Manifest.md](./03_Product_Features_Manifest.md)
-5. [10_Architecture.md](./10_Architecture.md)
-6. [11_Reliability_Protocol.md](./11_Reliability_Protocol.md)
-7. [30_Notification_Strategy_Design.md](./30_Notification_Strategy_Design.md)
+2. [01_Monetization_Pricing_Strategy.md](./01_Monetization_Pricing_Strategy.md)
+3. [03_Product_Features_Manifest.md](./03_Product_Features_Manifest.md)
+4. [10_Architecture.md](./10_Architecture.md)
+5. [11_Reliability_Protocol.md](./11_Reliability_Protocol.md)
+6. [30_Notification_Strategy_Design.md](./30_Notification_Strategy_Design.md)
 
 ## 内容与增长
 
