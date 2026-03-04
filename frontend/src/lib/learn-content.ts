@@ -3,7 +3,7 @@ import path from 'path';
 
 // Define the content directory (relative to project root, which is CWD for Node usually, but Next.js runs in frontend)
 // We need to resolve from the frontend directory up to docs
-const CONTENT_DIR = path.join(process.cwd(), '..', 'docs', 'content');
+const CONTENT_DIR = path.join(process.cwd(), '..', 'docs', '4_Growth_Ops', 'content');
 
 export interface ArticleMeta {
     slug: string;
