@@ -4,8 +4,8 @@
     "CN": {
       "vcp_ratio": 0.9,
       "breakout_volume_mult": 1.1,
-      "strong_close_threshold": 0.65,
-      "momentum_change_threshold": 4.0,
+      "strong_close_threshold": 0.7,
+      "momentum_change_threshold": 3.0,
       "risk_off_ma": 10
     },
     "HK": {
