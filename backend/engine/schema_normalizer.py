@@ -419,6 +419,11 @@ def normalize_ai_response(data: Dict[str, Any]) -> Dict[str, Any]:
                 item["target_price"] = _semantic_normalize_price(item["target_price"], is_range=False)
     _record_quality_metrics(raw_tactics_snapshot, data["tactics"])
 
+    # Remove legacy buckets from normalized output.
+    # Keep compatibility for input parsing/migration, but avoid leaking deprecated fields downstream.
+    data["tactics"].pop("holding", None)
+    data["tactics"].pop("general", None)
+
     # 4. Normalize key_levels (Must be Dict)
     if "key_levels" not in data or not isinstance(data["key_levels"], dict):
         data["key_levels"] = {
