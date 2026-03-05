@@ -40,3 +40,6 @@ out/
 npm-debug.log*
 data/stockwise.db-shm
 data/stockwise.db-wal
+
+# Local experiment artifacts
+tmp/
