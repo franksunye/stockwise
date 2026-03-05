@@ -1,5 +1,9 @@
 # DeepSeek 本地数据库诊断（2026-03-05）
 
+> 定位：本文件为“事故诊断与证据归档”（一次性事实记录）。
+> 后续长期策略与执行规范见：
+> [23_LLM_Output_Stability_Playbook.md](/c:/cygwin64/home/frank/StockWise/docs/2_Intelligence/23_LLM_Output_Stability_Playbook.md)
+
 ## 范围与口径
 - 数据源：`data/stockwise.db` 的 `llm_traces` 表。
 - 目标模型：`deepseek-v3`（并与 `deepseek-aliyun` 做对比）。
