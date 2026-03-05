@@ -462,8 +462,8 @@ export function TacticalBriefDrawer({
                           <p className={`text-xs font-bold truncate ${sourceKind === 'llm' ? 'text-indigo-200' : 'text-slate-200'}`}>
                             {analystProfile.name} · {analystProfile.role}
                           </p>
-                          <p className={`text-[10px] leading-tight mt-0.5 ${sourceKind === 'llm' ? 'text-indigo-300/70' : 'text-slate-500'}`}>
-                            {analystProfile.briefSummary} · 使用模型：{modelFact}
+                          <p className={`text-xs leading-tight mt-0.5 ${sourceKind === 'llm' ? 'text-indigo-300/80' : 'text-slate-400'}`}>
+                            使用模型：{modelFact}
                           </p>
                       </div>
                   </div>
