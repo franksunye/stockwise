@@ -1,8 +1,15 @@
 import json
 import re
-from typing import List, Dict, Any, Optional, Union
+import unicodedata
+from typing import List, Dict, Any, Optional, Union, Tuple
 from enum import Enum
+from dataclasses import dataclass
 from pydantic import BaseModel, Field, confloat, validator, ValidationError
+
+try:
+    import dirtyjson as _dirtyjson
+except Exception:
+    _dirtyjson = None
 
 class SignalEnum(str, Enum):
     LONG = "Long"
@@ -81,70 +88,162 @@ class StockAnalysisResult(BaseModel):
                 pass
         return v
 
+class ParseErrorCode(str, Enum):
+    NO_JSON_BLOCK = "NO_JSON_BLOCK"
+    INVALID_JSON = "INVALID_JSON"
+    TRUNCATED = "TRUNCATED"
+    SCHEMA_VALIDATION = "SCHEMA_VALIDATION"
+
+
+class ParseError(ValueError):
+    def __init__(self, code: ParseErrorCode, message: str, stage: str = "", details: str = ""):
+        super().__init__(message)
+        self.code = code
+        self.stage = stage
+        self.details = details
+
+
+@dataclass
+class ParseDiagnostics:
+    stage: str
+    used_dirtyjson: bool
+    normalized: bool
+    truncated_hint: bool
+
+
 def _extract_json_block(text: str) -> str:
     """
     Robustly extract the first valid JSON object from text.
     Handles Markdown code blocks and raw JSON.
     """
-    if not text: return ""
+    if not text:
+        return ""
     
-    # 1. Try to find markdown block
-    match = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', text, re.DOTALL)
+    # 1) Try fenced JSON first
+    match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.DOTALL | re.IGNORECASE)
     if match:
         return match.group(1)
 
-    # 2. Try to find outermost {}
-    # Simple stack-based finder for nested braces could be better, 
-    # but regex is often "good enough" for LLM output which usually puts JSON at the end or alone.
-    
-    # Greedy match from first { to last }
+    # 2) Stack-based extraction from the first "{", aware of quotes and escapes.
     start = text.find('{')
-    end = text.rfind('}')
-    
-    if start != -1 and end != -1 and end > start:
-        return text[start : end + 1]
-        
+    if start == -1:
+        return ""
+
+    depth = 0
+    in_string = False
+    escaped = False
+
+    for idx in range(start, len(text)):
+        ch = text[idx]
+
+        if in_string:
+            if escaped:
+                escaped = False
+            elif ch == '\\':
+                escaped = True
+            elif ch == '"':
+                in_string = False
+            continue
+
+        if ch == '"':
+            in_string = True
+            continue
+        if ch == '{':
+            depth += 1
+        elif ch == '}':
+            depth -= 1
+            if depth == 0:
+                return text[start:idx + 1]
+
+    # Unbalanced JSON (likely truncated): return from first "{" to end for downstream detection.
+    return text[start:]
+
+
+def _normalize_json_text(text: str) -> str:
+    # Curly quotes are not guaranteed to be normalized by NFKC; map them explicitly first.
+    text = text.replace("\u201c", '"').replace("\u201d", '"').replace("\u201f", '"').replace("\uff02", '"')
+    text = unicodedata.normalize("NFKC", text)
+    # Remove trailing commas before object/array close.
+    text = re.sub(r",\s*([}\]])", r"\1", text)
     return text
 
-def _fix_common_json_errors(text: str) -> str:
-    """
-    Attempt to fix common LLM JSON syntax errors.
-    """
-    # Fix trailing commas: , } -> } and , ] -> ]
-    text = re.sub(r',\s*}', '}', text)
-    text = re.sub(r',\s*\]', ']', text)
-    # Fix unquoted keys (simple alphanumeric keys)
-    # This is risky, only apply if absolutely necessary or use a proper loose parser library.
-    # For now, let's stick to simple trailing comma fixes.
-    return text
+
+def _is_probably_truncated(text: str) -> bool:
+    if not text:
+        return False
+    if text.count("{") > text.count("}"):
+        return True
+    if text.count("[") > text.count("]"):
+        return True
+    # Common partial endings in truncated JSON payloads
+    stripped = text.rstrip()
+    if stripped.endswith(":") or stripped.endswith(',"') or stripped.endswith(',"action"'):
+        return True
+    return False
+
+
+def _parse_dict_funnel(json_str: str) -> Tuple[Dict[str, Any], ParseDiagnostics]:
+    # L1: strict parser on raw extracted block.
+    try:
+        return json.loads(json_str), ParseDiagnostics(
+            stage="strict", used_dirtyjson=False, normalized=False, truncated_hint=False
+        )
+    except json.JSONDecodeError as strict_err:
+        normalized = _normalize_json_text(json_str)
+        truncated_hint = _is_probably_truncated(normalized)
+
+        # L2: strict parser after generic normalization.
+        try:
+            return json.loads(normalized), ParseDiagnostics(
+                stage="normalized_strict",
+                used_dirtyjson=False,
+                normalized=True,
+                truncated_hint=truncated_hint,
+            )
+        except json.JSONDecodeError as norm_err:
+            # L3: dirtyjson fallback (if available) for JS-like loose objects.
+            if _dirtyjson is not None:
+                try:
+                    return _dirtyjson.loads(normalized), ParseDiagnostics(
+                        stage="dirtyjson",
+                        used_dirtyjson=True,
+                        normalized=True,
+                        truncated_hint=truncated_hint,
+                    )
+                except Exception as dirty_err:
+                    code = ParseErrorCode.TRUNCATED if truncated_hint else ParseErrorCode.INVALID_JSON
+                    raise ParseError(
+                        code=code,
+                        stage="dirtyjson",
+                        message=f"Invalid JSON syntax: {dirty_err}",
+                        details=f"strict={strict_err}; normalized={norm_err}",
+                    )
+
+            code = ParseErrorCode.TRUNCATED if truncated_hint else ParseErrorCode.INVALID_JSON
+            raise ParseError(
+                code=code,
+                stage="normalized_strict",
+                message=f"Invalid JSON syntax: {norm_err}",
+                details=f"strict={strict_err}; dirtyjson=unavailable",
+            )
+
+
+def parse_ai_response_with_diagnostics(text: str) -> Tuple[StockAnalysisResult, ParseDiagnostics]:
+    json_str = _extract_json_block(text)
+    if not json_str:
+        raise ParseError(ParseErrorCode.NO_JSON_BLOCK, "No JSON object found in text", stage="extract")
+
+    data, diag = _parse_dict_funnel(json_str)
+    try:
+        return StockAnalysisResult(**data), diag
+    except ValidationError as e:
+        # Keep ValidationError behavior for existing callers.
+        raise e
 
 def parse_ai_response(text: str) -> StockAnalysisResult:
     """
     Parse (and clean) LLM output text into a structured StockAnalysisResult object.
     Raises ValidationError if parsing fails completely.
     """
-    # 1. Extract
-    json_str = _extract_json_block(text)
-    if not json_str:
-        raise ValueError("No JSON object found in text")
-
-    # 2. Parse JSON
-    try:
-        data = json.loads(json_str)
-    except json.JSONDecodeError:
-        # Retry with fix
-        json_str_fixed = _fix_common_json_errors(json_str)
-        try:
-            data = json.loads(json_str_fixed)
-        except json.JSONDecodeError as e:
-            # Last ditch: try `eval` safe subset? No, too dangerous.
-            # Maybe use a utility like `demjson` if available, but let's stick to stdlib.
-            raise ValueError(f"Invalid JSON syntax: {e}")
-
-    # 3. Validate with Pydantic
-    try:
-        return StockAnalysisResult(**data)
-    except ValidationError as e:
-        # Try to recover partial data or re-raise
-        # For strict engineering, we raise. The caller decides whether to retry or partial fallback.
-        raise e
+    result, _diag = parse_ai_response_with_diagnostics(text)
+    return result
