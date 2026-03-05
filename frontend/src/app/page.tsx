@@ -5,6 +5,8 @@ import Multiavatar from '@/components/Multiavatar';
 import MarketingFooter from '@/components/MarketingFooter';
 import MarketingHeader from '@/components/MarketingHeader';
 import { agentTeam, founders } from '@/lib/agent-team';
+import { BoundaryNotice, GeoSummary, SourceBlock } from '@/components/seo/GeoBlocks';
+import { brandCoreZhCN } from '@/content/brand-core.zh-CN';
 
 export default function LandingPage() {
   return (
@@ -283,6 +285,23 @@ export default function LandingPage() {
               <p className="text-slate-400 text-sm leading-relaxed">支持香港联交所、上交所、深交所的所有主流标的。新股或成交极其低迷的标的由于缺乏锚定点，系统会自动降级。</p>
             </div>
           </div>
+        </section>
+
+        <section className="w-full max-w-4xl">
+          <GeoSummary
+            summary={[
+              "知守 AI 聚焦盘后复盘与次日策略，降低情绪化交易干扰。",
+              "核心机制包括战术简报、胜率追踪、关键价位与风险提示。",
+              "分析结果可回看、可追溯，强调过程透明而非收益承诺。",
+            ]}
+          />
+          <SourceBlock
+            sources={[
+              ...brandCoreZhCN.defaultSources,
+              { name: "Product Positioning", accessedAt: "2026-03-05" },
+            ]}
+          />
+          <BoundaryNotice text={brandCoreZhCN.boundaryNotice.text} />
         </section>
 
         {/* CTA Banner */}

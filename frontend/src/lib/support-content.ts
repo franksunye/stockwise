@@ -465,3 +465,7 @@ iOS 用户注意：一定要在 Safari 里点“添加到主屏幕”，之后�
 export function getArticleBySlug(slug: string): SupportArticle | undefined {
     return SUPPORT_ARTICLES[slug];
 }
+
+export function getAllSupportArticles(): SupportArticle[] {
+    return Object.values(SUPPORT_ARTICLES);
+}

@@ -1,32 +1,41 @@
 import type { Metadata, Viewport } from "next";
+import { Analytics } from "@vercel/analytics/react";
+import { brandCoreZhCN } from "@/content/brand-core.zh-CN";
+import { buildCanonicalUrl } from "@/lib/seo";
 import "./globals.css";
+
+const homeTitle = "知守 AI (ZISO AI) | AI 做功课，你做决策";
+const homeDescription = brandCoreZhCN.positioning.text;
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
-  title: "知守 AI (ZISO AI) | 替你做股市功课，带你看投资门道",
-  description: "知守 AI (ZISO AI) 是你的私人股票投研助理。它替你完成复杂的复盘功课，带你看清行情背后的投资门道，让交易回归理性的从容。",
+  title: homeTitle,
+  description: homeDescription,
   manifest: "/manifest.json",
   icons: {
     icon: "/logo.png",
     apple: "/logo.png",
   },
+  alternates: {
+    canonical: buildCanonicalUrl(brandCoreZhCN.domain, "/"),
+  },
   openGraph: {
-    title: "知守 AI (ZISO AI) | 替你做股市功课，带你看投资门道",
-    description: "知守 AI (ZISO AI) 是你的私人股票投研助理。它替你完成复杂的复盘功课，带你看清行情背后的投资门道，让交易回归理性的从容。",
+    title: homeTitle,
+    description: homeDescription,
+    type: "website",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "ZISO AI - 替你做股市功课，带你看投资门道",
+        alt: "ZISO AI",
       },
     ],
-    type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "知守 AI (ZISO AI) | 替你做股市功课，带你看投资门道",
-    description: "知守 AI (ZISO AI) 是你的私人股票投研助理。它替你完成复杂的复盘功课，带你看清行情背后的投资门道。",
+    title: homeTitle,
+    description: homeDescription,
     images: ["/og-image.png"],
   },
   appleWebApp: {
@@ -47,8 +56,6 @@ export const viewport: Viewport = {
   userScalable: false,
 };
 
-import { Analytics } from "@vercel/analytics/react";
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -57,7 +64,6 @@ export default function RootLayout({
   return (
     <html lang="zh-CN">
       <head>
-        {/* 高级工程优化：预连接应用子域名和核心资源，极大减少移动端握手延迟 */}
         <link rel="preconnect" href="https://app.ziso.cc" />
         <link rel="dns-prefetch" href="https://app.ziso.cc" />
         <link rel="preconnect" href="https://va.vercel-scripts.com" />
@@ -86,3 +92,4 @@ export default function RootLayout({
     </html>
   );
 }
+

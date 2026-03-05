@@ -5,6 +5,9 @@ import { getArticleBySlug, getAllArticles } from '@/lib/learn-content';
 import ReactMarkdown from 'react-markdown';
 import { ChevronLeft, BookOpen, Brain, Zap, Shield, Sparkles, Target } from 'lucide-react';
 import MarketingFooter from '@/components/MarketingFooter';
+import { BoundaryNotice, FreshnessBlock, GeoSummary, SourceBlock } from '@/components/seo/GeoBlocks';
+import { brandCoreZhCN } from '@/content/brand-core.zh-CN';
+import { buildArticleJsonLd } from '@/lib/geo';
 
 interface CategoryStyle {
   label: string;
@@ -21,6 +24,34 @@ const CATEGORY_STYLE: Record<string, CategoryStyle> = {
   'The Money': { label: '资金篇', icon: Shield, color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
   'The Machine': { label: '工具篇', icon: Sparkles, color: 'text-indigo-400', bg: 'bg-indigo-500/10', border: 'border-indigo-500/20' },
   'The Case': { label: '案例篇', icon: Target, color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
+};
+
+const LEARN_TLDR: Record<string, string[]> = {
+  '101-64_eod_vs_intraday': [
+    '盘后复盘更适合执行纪律，盘中交易更容易受噪音影响。',
+    '知守 AI 的核心流程以 EOD 分析为主，盘中只做执行校验。',
+    '目标是降低情绪决策，而不是追求高频操作。',
+  ],
+  '101-65_confidence_calibration': [
+    '置信度用于表达模型把握度，不是收益概率保证。',
+    '高置信度不等于必涨，低置信度应优先防守。',
+    '建议把置信度与仓位管理联动使用。',
+  ],
+  '101-62_hallucination_control': [
+    'AI 幻觉在投资场景风险高，必须依赖可追溯数据锚点。',
+    '知守通过数据约束、规则约束和交叉验证降低幻觉。',
+    '用户应优先检查来源与验证口径，再看观点强弱。',
+  ],
+  '101-67_hybrid_system': [
+    '最稳的决策链路是 AI 负责分析，人类负责边界决策。',
+    '系统目标是提升一致性执行，而不是替代全部判断。',
+    '混合系统比纯主观或纯自动化更抗极端行情。',
+  ],
+  '101-81_case_reversal': [
+    '案例重点在“右侧确认”而非盲目抄底。',
+    '评估反转要同时看价位、量能与情绪变化。',
+    '先定义失效条件，再决定是否参与交易。',
+  ],
 };
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
@@ -51,6 +82,15 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
 
   const style = CATEGORY_STYLE[article.category] || { label: article.category, icon: BookOpen, color: 'text-slate-400', bg: 'bg-white/5', border: 'border-white/10' };
   const Icon = style.icon;
+  const pageUrl = `${brandCoreZhCN.domain}/learn/${article.slug}`;
+  const jsonLd = buildArticleJsonLd({
+    pageTitle: article.title,
+    pageDescription: article.subtitle,
+    pageUrl,
+    datePublished: article.date,
+    dateModified: article.date,
+    sources: brandCoreZhCN.defaultSources,
+  });
 
   // Custom Markdown Components for Premium Styling
   const MarkdownComponents: Record<string, React.ElementType> = {
@@ -144,6 +184,17 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
             </ReactMarkdown>
         </div>
 
+        <GeoSummary summary={LEARN_TLDR[article.slug] || []} />
+
+        <SourceBlock
+          sources={[
+            ...brandCoreZhCN.defaultSources,
+            { name: 'Learn Content Library', accessedAt: article.date },
+          ]}
+        />
+        <FreshnessBlock updatedAt={article.date} />
+        <BoundaryNotice text={brandCoreZhCN.boundaryNotice.text} />
+
         {/* Footer */}
         <div className="mt-20 pt-10 border-t border-white/10 flex justify-center">
             <Link 
@@ -157,6 +208,10 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
 
       </article>
 
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <MarketingFooter />
     </div>
   );

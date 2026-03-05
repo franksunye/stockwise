@@ -20,6 +20,11 @@ export interface Article extends ArticleMeta {
     content: string;
 }
 
+function isPublishableMeta(meta: Partial<ArticleMeta> & { publish?: string }): boolean {
+    if (meta.publish && meta.publish.toLowerCase() === 'false') return false;
+    return Boolean(meta.title && meta.date && meta.category);
+}
+
 // Simple Frontmatter Parser
 function parseFrontmatter(fileContent: string): { meta: Partial<ArticleMeta>, content: string } {
     const frontmatterRegex = /---\s*([\s\S]*?)\s*---/;
@@ -66,6 +71,10 @@ export async function getAllArticles(): Promise<ArticleMeta[]> {
             const fileContent = fs.readFileSync(filePath, 'utf-8');
             const { meta } = parseFrontmatter(fileContent);
 
+            if (!isPublishableMeta(meta as Partial<ArticleMeta> & { publish?: string })) {
+                return null;
+            }
+
             return {
                 slug: file.replace('.md', ''),
                 title: meta.title || 'Untitled',
@@ -77,6 +86,7 @@ export async function getAllArticles(): Promise<ArticleMeta[]> {
                 readingTime: Math.max(1, Math.ceil(fileContent.length / 400))
             } as ArticleMeta;
         })
+        .filter((article): article is ArticleMeta => article !== null)
         .sort((a, b) => (a.slug > b.slug ? 1 : -1));
 
     return articles;
@@ -91,6 +101,10 @@ export async function getArticleBySlug(slug: string): Promise<Article | null> {
 
     const fileContent = fs.readFileSync(filePath, 'utf-8');
     const { meta, content } = parseFrontmatter(fileContent);
+
+    if (!isPublishableMeta(meta as Partial<ArticleMeta> & { publish?: string })) {
+        return null;
+    }
 
     return {
         slug,

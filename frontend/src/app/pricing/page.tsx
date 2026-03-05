@@ -10,6 +10,8 @@ import { getCurrentUser } from '@/lib/user';
 import { pricingPlans, featureComparison } from '@/lib/pricing-data';
 import MarketingFooter from '@/components/MarketingFooter';
 import MarketingHeader from '@/components/MarketingHeader';
+import { BoundaryNotice, GeoSummary, SourceBlock } from '@/components/seo/GeoBlocks';
+import { brandCoreZhCN } from '@/content/brand-core.zh-CN';
 
 
 function PricingContent() {
@@ -403,6 +405,23 @@ function PricingContent() {
                     <p className="text-slate-500 text-sm font-medium">利用 DeepSeek V3 的批处理分布式架构，将年费控制在竞品的 1/5 以下。</p>
                 </div>
             </div>
+        </section>
+
+        <section className="mt-16 max-w-4xl mx-auto">
+          <GeoSummary
+            summary={[
+              "免费版用于基础体验，Pro 版提供更完整的分析链路与监控能力。",
+              "订阅方案支持月付与年付，价格与权益在页面公开透明。",
+              "页面内容仅用于功能说明，不构成投资建议或收益承诺。",
+            ]}
+          />
+          <SourceBlock
+            sources={[
+              ...brandCoreZhCN.defaultSources,
+              { name: "Pricing Policy", accessedAt: "2026-03-05" },
+            ]}
+          />
+          <BoundaryNotice text={brandCoreZhCN.boundaryNotice.text} />
         </section>
       </main>
 
