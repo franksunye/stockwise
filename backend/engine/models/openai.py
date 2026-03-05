@@ -160,11 +160,25 @@ class OpenAIAdapter(BasePredictionModel):
                 # Record Parse Failure Trace
                 tracker.set_status("parse_failed", "JSON 解析失败")
                 tracker.end_trace()
-                
-                if attempt < max_retries:
-                    logger.info(f"🔄 Retrying in {retry_delay * (2 ** attempt)}s...")
-                    await asyncio.sleep(retry_delay * (2 ** attempt))
-                continue
+
+                # Minimal hotfix: notify admin and stop retrying when response exists but parsing fails.
+                try:
+                    from backend.config import ADMIN_MOBILES
+                    from backend.utils import send_wecom_notification
+                    mention_targets = ADMIN_MOBILES if ADMIN_MOBILES else ["@all"]
+                    send_wecom_notification(
+                        f"⚠️ **LLM 解析失败告警**\n\n"
+                        f"> **股票**: {symbol}\n"
+                        f"> **模型**: {self.model_id}\n"
+                        f"> **尝试**: {attempt + 1}/{max_retries + 1}\n"
+                        f"> **原因**: LLM 已返回内容，但 JSON 解析失败。\n"
+                        f"> **处理**: 已按策略停止重试。",
+                        mentioned_mobile_list=mention_targets
+                    )
+                except Exception as notify_err:
+                    logger.warning(f"Failed to send parse failure notification: {notify_err}")
+
+                return self._error_result("JSON Parsing failed completely")
             
             # Success!
             tracker.set_status("success")
@@ -248,4 +262,3 @@ class OpenAIAdapter(BasePredictionModel):
         # - 500, 502, 503, 504 (Server Errors)
         # - ConnectionError, Timeout
         return True
-
