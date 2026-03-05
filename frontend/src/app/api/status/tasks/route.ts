@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@libsql/client';
+import { getTeamMemberById } from '@/lib/agent-team';
 
 type TaskStatus = 'pending' | 'running' | 'success' | 'failed' | 'skipped' | 'not_applicable';
 type PhaseId = 'pre_open' | 'intraday' | 'post_close';
@@ -78,11 +79,36 @@ interface TeamCard {
 }
 
 const AGENTS: Record<string, AgentProfile> = {
-    market_observer: { name: '林见微（混元 Lite）', persona: 'lin-jianwei-hunyuan-lite', role: '初级量化分析师', color: 'blue' },
-    quant_mind: { name: '顾深（DeepSeek）', persona: 'gu-shen-deepseek', role: '资深量化分析师', color: 'purple' },
-    news_desk: { name: '诺岚（Nora）', persona: 'nora-context-desk', role: '情报上下文官', color: 'green' },
-    system_guardian: { name: '程矩（量化规则）', persona: 'cheng-ju-quant-rules', role: '规则量化分析师', color: 'gray' },
-    validation_auditor: { name: '维尔（Verifier）', persona: 'verifier-audit-desk', role: '验证审计官', color: 'amber' },
+    market_observer: {
+        name: getTeamMemberById('lin_xu').displayName,
+        persona: getTeamMemberById('lin_xu').avatarSeed,
+        role: getTeamMemberById('lin_xu').role,
+        color: 'blue',
+    },
+    quant_mind: {
+        name: getTeamMemberById('gu_shen').displayName,
+        persona: getTeamMemberById('gu_shen').avatarSeed,
+        role: getTeamMemberById('gu_shen').role,
+        color: 'purple',
+    },
+    news_desk: {
+        name: getTeamMemberById('nora').displayName,
+        persona: getTeamMemberById('nora').avatarSeed,
+        role: getTeamMemberById('nora').role,
+        color: 'green',
+    },
+    system_guardian: {
+        name: getTeamMemberById('cheng_ju').displayName,
+        persona: getTeamMemberById('cheng_ju').avatarSeed,
+        role: getTeamMemberById('cheng_ju').role,
+        color: 'gray',
+    },
+    validation_auditor: {
+        name: getTeamMemberById('verifier').displayName,
+        persona: getTeamMemberById('verifier').avatarSeed,
+        role: getTeamMemberById('verifier').role,
+        color: 'amber',
+    },
 };
 
 const DAILY_PLAN_TEMPLATE: PlanTask[] = [

@@ -8,7 +8,7 @@ This directory serves as the unified single source of truth for the StockWise pr
 > The "Soul" of the project—answering "Why we are building this" and "How we will win."
 - [Product & Business Vision](./0_Strategy/00_Product_Business_Vision.md)
 - [Monetization & Pricing Strategy](./0_Strategy/01_Monetization_Pricing_Strategy.md)
-- [Agent Team Responsibility Matrix](./0_Strategy/02_Agent_Team_Responsibility_Matrix.md)
+- [Team Responsibility Matrix](./0_Strategy/02_Team_Responsibility_Matrix.md)
 - [Milestones & Execution Log](./0_Strategy/04_Milestones_Execution_Log.md)
 
 ### [1_Engineering/](./1_Engineering/) - Architecture & Engineering

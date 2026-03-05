@@ -97,7 +97,7 @@ export default function AboutPage() {
                 </div>
               ))}
             </div>
-            <p className="text-center text-xs text-slate-600 font-bold">顾深、林见微、程矩三位各自独立研判，分别给出结论；诺岚负责情报补充，维尔负责结果复核。</p>
+            <p className="text-center text-xs text-slate-600 font-bold">顾深、林序、程矩三位各自独立研判，分别给出结论；诺岚负责情报补充，维尔负责结果复核。</p>
           </div>
 
           {/* Our Values */}
