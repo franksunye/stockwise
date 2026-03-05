@@ -180,7 +180,7 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
                   <Zap className="w-2.5 h-2.5 text-indigo-400 fill-indigo-400/20" />
                 </div>
                 <h3 className="text-[10px] font-black text-slate-600 uppercase tracking-widest">
-                  AI 深度洞察 
+                  要点速递 
                   {displayPrediction?.model && (
                     <span className="ml-2 text-indigo-500/60 font-black italic">
                       · {formatModelName(displayPrediction.model)}
