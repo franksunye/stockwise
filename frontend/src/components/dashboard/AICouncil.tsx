@@ -7,6 +7,7 @@ import { AIPrediction } from '@/lib/types';
 import Multiavatar from '@/components/Multiavatar';
 
 import { formatModelName } from '@/lib/model-names';
+import { resolveAnalystFromModel } from '@/lib/agent-team';
 
 interface AICouncilProps {
   symbol: string;
@@ -15,17 +16,16 @@ interface AICouncilProps {
 }
 
 function mapCouncilMember(pred: AIPrediction) {
-  const raw = `${pred.display_name || ''} ${pred.model || ''}`.toLowerCase();
-  if (raw.includes('deepseek')) {
-    return { name: '顾深', role: '资深量化分析师', avatarSeed: 'gu-shen-deepseek' };
+  const modelLike = `${pred.display_name || ''} ${pred.model || ''}`;
+  const analyst = resolveAnalystFromModel(modelLike);
+  if (analyst.id === 'fallback') {
+    return {
+      name: formatModelName(pred.display_name || pred.model),
+      role: analyst.role,
+      avatarSeed: analyst.avatarSeed,
+    };
   }
-  if (raw.includes('hunyuan') || raw.includes('混元')) {
-    return { name: '林序', role: '初级量化分析师', avatarSeed: 'lin-xu-hunyuan-lite' };
-  }
-  if (raw.includes('rule') || raw.includes('规则') || raw.includes('quant')) {
-    return { name: '程矩', role: '规则量化分析师', avatarSeed: 'cheng-ju-quant-rules' };
-  }
-  return { name: formatModelName(pred.display_name || pred.model), role: '量化分析成员', avatarSeed: 'ziso-council-fallback' };
+  return { name: analyst.name, role: analyst.role, avatarSeed: analyst.avatarSeed };
 }
 
 export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
@@ -105,15 +105,15 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
       {/* Consensus Header */}
       <div className="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/10">
         <div>
-           <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">{symbol}</p>
+           <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">{symbol}</p>
            <h3 className="text-xl font-black tracking-tight text-white">{stockName || '未知股票'}</h3>
         </div>
         <div className="text-right">
+           <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">{predictions.length}席 投研决议</p>
            <h3 className={`text-xl font-black tracking-tight ${consensusColor} flex items-center justify-end gap-2`}>
               {consensusText}
               {(longCount === total || shortCount === total || sideCount === total) && <ShieldCheck size={18} />}
            </h3>
-           <p className="text-[9px] font-bold text-slate-600 uppercase tracking-wider">{predictions.length}席 投研决议</p>
         </div>
       </div>
 

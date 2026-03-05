@@ -21,6 +21,8 @@ import {
 import { AIPrediction, TacticalData, Tactic, ShortMetrics } from '@/lib/types';
 import { shouldEnableHighPerformance } from '@/lib/device-utils';
 import { AICouncil } from './AICouncil';
+import Multiavatar from '@/components/Multiavatar';
+import { resolveAnalystForBriefSource } from '@/lib/agent-team';
 
 import { formatModelName } from '@/lib/model-names';
 
@@ -106,6 +108,8 @@ const formatDistancePercent = (distance: number | undefined): string => {
   const sign = distance > 0 ? '+' : '-';
   return `${sign}${abs.toFixed(2)}%`;
 };
+
+type BriefSourceKind = 'llm' | 'rule';
 
 
 interface PriceLevelNode {
@@ -272,6 +276,11 @@ export function TacticalBriefDrawer({
   const [isExpanded, setIsExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState<'brief' | 'council'>('brief');
   const isFree = tier === 'free';
+  const sourceKind: BriefSourceKind = data.is_llm || (model && model !== 'rule-based') ? 'llm' : 'rule';
+  const analystProfile = resolveAnalystForBriefSource(sourceKind, model);
+  const modelFact = sourceKind === 'llm'
+    ? (model ? formatModelName(model) : 'LLM 深度推理版')
+    : '量化规则引擎';
   
   const rawGeneral = data?.tactics?.general;
   const generalTactics = Array.isArray(rawGeneral) ? rawGeneral : (rawGeneral ? [rawGeneral] : []);
@@ -438,29 +447,26 @@ export function TacticalBriefDrawer({
               {activeTab === 'brief' ? (
                 <div className="space-y-8 pb-8 animate-in fade-in slide-in-from-right-4 duration-300">
                   {/* 源类型标记 */}
-                  {data.is_llm || (model && model !== 'rule-based') ? (
-                      <div className="mb-6 px-4 py-3 rounded-xl bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 flex items-center gap-3">
-                          <div className="p-1.5 rounded-full bg-indigo-500/20">
-                              <Zap size={14} className="text-amber-400" />
-                          </div>
-                          <div className="flex-1">
-                              <p className="text-xs font-bold text-indigo-200">
-                                 {model ? formatModelName(model) : 'LLM 深度推理版'}
-                              </p>
-                              <p className="text-[10px] text-indigo-400/60 leading-tight mt-0.5">包含完整推理链与市场情绪感知</p>
-                          </div>
+                  <div className={`mb-6 px-4 py-3 rounded-xl border flex items-center gap-3 ${sourceKind === 'llm' ? 'bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border-indigo-500/20' : 'bg-slate-800/40 border-white/5'}`}>
+                      <div className="relative w-10 h-10 rounded-full border border-white/10 overflow-hidden shrink-0 bg-black/30">
+                        <Multiavatar name={analystProfile.avatarSeed} className="w-full h-full" />
+                        <div className={`absolute -right-0.5 -bottom-0.5 w-4 h-4 rounded-full border border-[#0a0a0f] flex items-center justify-center ${sourceKind === 'llm' ? 'bg-indigo-500/90' : 'bg-slate-600/90'}`}>
+                          {sourceKind === 'llm' ? (
+                            <Zap size={9} className="text-white" />
+                          ) : (
+                            <BarChart3 size={9} className="text-white" />
+                          )}
+                        </div>
                       </div>
-                  ) : (
-                      <div className="mb-6 px-4 py-3 rounded-xl bg-slate-800/40 border border-white/5 flex items-center gap-3">
-                          <div className="p-1.5 rounded-full bg-slate-700">
-                              <BarChart3 size={14} className="text-slate-400" />
-                          </div>
-                          <div className="flex-1">
-                              <p className="text-xs font-bold text-slate-300">量化规则版</p>
-                              <p className="text-[10px] text-slate-500 leading-tight mt-0.5">升级 Pro 解锁 LLM 深度推理与情报分析</p>
-                          </div>
+                      <div className="flex-1 min-w-0">
+                          <p className={`text-xs font-bold truncate ${sourceKind === 'llm' ? 'text-indigo-200' : 'text-slate-200'}`}>
+                            {analystProfile.name} · {analystProfile.role}
+                          </p>
+                          <p className={`text-[10px] leading-tight mt-0.5 ${sourceKind === 'llm' ? 'text-indigo-300/70' : 'text-slate-500'}`}>
+                            {analystProfile.briefSummary} · 使用模型：{modelFact}
+                          </p>
                       </div>
-                  )}
+                  </div>
 
                   <section>
                      {/* Header */}
