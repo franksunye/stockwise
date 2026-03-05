@@ -26,6 +26,10 @@ sys.path.insert(0, os.path.dirname(backend_path))
 from database import get_connection
 from logger import logger
 
+PARAMS_FILE_DEFAULT = os.path.join(
+    os.path.dirname(backend_path), "backend", "strategy_config", "tradeability_params_v1.json"
+)
+
 
 @dataclass
 class Bar:
@@ -87,6 +91,26 @@ def ensure_sidecar_table(conn) -> None:
         "CREATE INDEX IF NOT EXISTS idx_qts_state_date ON quant_tradeability_signals(setup_state, date DESC)"
     )
     conn.commit()
+
+
+def load_market_params(params_file: str, market: str) -> Dict[str, float]:
+    defaults = {
+        "vcp_ratio": 0.9,
+        "breakout_volume_mult": 1.1,
+        "strong_close_threshold": 0.65,
+        "momentum_change_threshold": 4.0,
+        "risk_off_ma": 10,
+    }
+    try:
+        with open(params_file, "r", encoding="utf-8") as f:
+            cfg = json.load(f)
+        market_cfg = (cfg.get("markets") or {}).get(market) or {}
+        for k in defaults:
+            if k in market_cfg:
+                defaults[k] = market_cfg[k]
+    except Exception as e:
+        logger.warning(f"⚠️ Failed to load params file ({params_file}), fallback to defaults: {e}")
+    return defaults
 
 
 def resolve_target_date(cursor, market: str, target_date: Optional[str]) -> Optional[str]:
@@ -237,14 +261,32 @@ def main() -> None:
     parser.add_argument("--market", choices=["CN", "HK"], default="CN")
     parser.add_argument("--date", default="", help="YYYY-MM-DD; default latest in market")
     parser.add_argument("--strategy-version", default="tradeability_v1")
+    parser.add_argument("--params-file", default=PARAMS_FILE_DEFAULT)
     parser.add_argument("--dry-run", action="store_true")
 
-    parser.add_argument("--vcp-ratio", type=float, default=0.9)
-    parser.add_argument("--breakout-volume-mult", type=float, default=1.1)
-    parser.add_argument("--strong-close-threshold", type=float, default=0.65)
-    parser.add_argument("--momentum-change-threshold", type=float, default=4.0)
-    parser.add_argument("--risk-off-ma", type=int, choices=[5, 10, 20], default=10)
+    parser.add_argument("--vcp-ratio", type=float, default=None)
+    parser.add_argument("--breakout-volume-mult", type=float, default=None)
+    parser.add_argument("--strong-close-threshold", type=float, default=None)
+    parser.add_argument("--momentum-change-threshold", type=float, default=None)
+    parser.add_argument("--risk-off-ma", type=int, choices=[5, 10, 20], default=None)
     args = parser.parse_args()
+
+    base_params = load_market_params(args.params_file, args.market)
+    vcp_ratio = args.vcp_ratio if args.vcp_ratio is not None else float(base_params["vcp_ratio"])
+    breakout_volume_mult = (
+        args.breakout_volume_mult if args.breakout_volume_mult is not None else float(base_params["breakout_volume_mult"])
+    )
+    strong_close_threshold = (
+        args.strong_close_threshold
+        if args.strong_close_threshold is not None
+        else float(base_params["strong_close_threshold"])
+    )
+    momentum_change_threshold = (
+        args.momentum_change_threshold
+        if args.momentum_change_threshold is not None
+        else float(base_params["momentum_change_threshold"])
+    )
+    risk_off_ma = args.risk_off_ma if args.risk_off_ma is not None else int(base_params["risk_off_ma"])
 
     conn = get_connection()
     try:
@@ -262,7 +304,9 @@ def main() -> None:
             return
 
         logger.info(
-            f"🚀 Tradeability sidecar running: market={args.market}, date={target_date}, symbols={len(symbols)}, dry_run={args.dry_run}"
+            f"🚀 Tradeability sidecar running: market={args.market}, date={target_date}, symbols={len(symbols)}, dry_run={args.dry_run}, params="
+            f"{{vcp={vcp_ratio}, vol_mult={breakout_volume_mult}, strong_close={strong_close_threshold}, "
+            f"momo={momentum_change_threshold}, risk_off_ma={risk_off_ma}}}"
         )
 
         rows = []
@@ -271,11 +315,11 @@ def main() -> None:
             history = fetch_history(cur, symbol, target_date, lookback=25)
             setup_state, score, trigger_hit, risk_off_hit, payload = eval_state(
                 history=history,
-                vcp_ratio=args.vcp_ratio,
-                breakout_volume_mult=args.breakout_volume_mult,
-                strong_close_threshold=args.strong_close_threshold,
-                momentum_change_threshold=args.momentum_change_threshold,
-                risk_off_ma=args.risk_off_ma,
+                vcp_ratio=vcp_ratio,
+                breakout_volume_mult=breakout_volume_mult,
+                strong_close_threshold=strong_close_threshold,
+                momentum_change_threshold=momentum_change_threshold,
+                risk_off_ma=risk_off_ma,
             )
             state_counts[setup_state] = state_counts.get(setup_state, 0) + 1
             rows.append(
