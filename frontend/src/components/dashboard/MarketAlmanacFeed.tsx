@@ -106,7 +106,7 @@ const AlmanacCard = memo(function AlmanacCard({
             <div className="w-5 h-5 rounded-md bg-indigo-600/20 flex items-center justify-center border border-indigo-500/30">
               <Shield className="w-2.5 h-2.5 text-indigo-400 fill-indigo-400/20" />
             </div>
-            <h3 className="text-[10px] font-black text-slate-600 uppercase tracking-widest">AI 市场天机</h3>
+            <h3 className="text-[10px] font-black text-slate-600 uppercase tracking-widest">市场天机</h3>
           </div>
           <p className="text-sm leading-relaxed text-slate-300 font-medium italic pl-1 border-l-2 border-indigo-500/20">
             {data.ai_insight || '分析正在生成中...'}
