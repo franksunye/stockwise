@@ -10,6 +10,7 @@ import { formatModelName } from '@/lib/model-names';
 
 interface AICouncilProps {
   symbol: string;
+  stockName?: string;
   targetDate: string;
 }
 
@@ -27,7 +28,7 @@ function mapCouncilMember(pred: AIPrediction) {
   return { name: formatModelName(pred.display_name || pred.model), role: '量化分析成员', avatarSeed: 'ziso-council-fallback' };
 }
 
-export function AICouncil({ symbol, targetDate }: AICouncilProps) {
+export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
   const [predictions, setPredictions] = useState<AIPrediction[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -53,7 +54,7 @@ export function AICouncil({ symbol, targetDate }: AICouncilProps) {
         setPredictions(relevantPreds);
       } catch (err: unknown) {
         console.error('Fetch council data error:', err);
-        setError('无法连接 AI 智囊团');
+        setError('无法连接投研决议');
       } finally {
         setLoading(false);
       }
@@ -68,7 +69,7 @@ export function AICouncil({ symbol, targetDate }: AICouncilProps) {
     return (
       <div className="flex flex-col items-center justify-center p-8 space-y-3">
         <RotateCw className="animate-spin text-indigo-500" size={24} />
-        <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">正在召集 AI 顾问...</p>
+        <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">正在调阅投研决议...</p>
       </div>
     );
   }
@@ -104,15 +105,15 @@ export function AICouncil({ symbol, targetDate }: AICouncilProps) {
       {/* Consensus Header */}
       <div className="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/10">
         <div>
-           <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">AI 智囊团结论</p>
-           <h3 className={`text-xl font-black tracking-tight ${consensusColor} flex items-center gap-2`}>
+           <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">{symbol}</p>
+           <h3 className="text-xl font-black tracking-tight text-white">{stockName || '未知股票'}</h3>
+        </div>
+        <div className="text-right">
+           <h3 className={`text-xl font-black tracking-tight ${consensusColor} flex items-center justify-end gap-2`}>
               {consensusText}
               {(longCount === total || shortCount === total || sideCount === total) && <ShieldCheck size={18} />}
            </h3>
-        </div>
-        <div className="text-right">
-           <p className="text-2xl font-black text-slate-200">{predictions.length}<span className="text-sm text-slate-500 font-bold ml-1">席</span></p>
-           <p className="text-[9px] font-bold text-slate-600 uppercase">参议模型</p>
+           <p className="text-[9px] font-bold text-slate-600 uppercase tracking-wider">{predictions.length}席 投研决议</p>
         </div>
       </div>
 
@@ -128,9 +129,9 @@ export function AICouncil({ symbol, targetDate }: AICouncilProps) {
                       <div className={`w-7 h-7 rounded-full border overflow-hidden ${isPrimary ? 'bg-indigo-500/10 border-indigo-500/30' : 'bg-white/5 border-white/10'}`}>
                          <Multiavatar name={member.avatarSeed} className="w-full h-full" />
                       </div>
-                      <div className="leading-tight">
+                      <div className="flex items-center gap-2">
                         <p className={`text-xs font-black tracking-wide ${isPrimary ? 'text-indigo-300' : 'text-slate-300'}`}>{member.name}</p>
-                        <p className="text-[10px] text-slate-500 font-bold">{member.role}</p>
+                        <p className="text-[10px] text-slate-500/80 font-bold">| {member.role}</p>
                       </div>
                     </div>
                    <div className={`px-2 py-1 rounded text-[10px] font-black uppercase tracking-wide

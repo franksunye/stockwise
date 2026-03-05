@@ -398,7 +398,7 @@ export function TacticalBriefDrawer({
                        onClick={() => setActiveTab('brief')}
                        className={`relative z-10 px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-colors duration-200 ${activeTab === 'brief' ? 'text-white' : 'text-slate-500 hover:text-slate-300'}`}
                      >
-                       战术简报
+                       策略内参
                        {activeTab === 'brief' && (
                          <motion.div 
                            className="absolute inset-0 bg-indigo-500 rounded-full -z-10 shadow-lg shadow-indigo-500/20"
@@ -412,7 +412,7 @@ export function TacticalBriefDrawer({
                        onClick={() => setActiveTab('council')}
                        className={`relative z-10 px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-colors duration-200 ${activeTab === 'council' ? 'text-white' : 'text-slate-500 hover:text-slate-300'}`}
                      >
-                       AI 智囊团
+                       投研决议
                        {activeTab === 'council' && (
                          <motion.div 
                            className="absolute inset-0 bg-indigo-500 rounded-full -z-10 shadow-lg shadow-indigo-500/20"
@@ -933,7 +933,7 @@ export function TacticalBriefDrawer({
                   </section>
                 </div>
               ) : (
-                <AICouncil symbol={symbol} targetDate={targetDate} />
+                <AICouncil symbol={symbol} stockName={stockName} targetDate={targetDate} />
               )}
             </div>
 
