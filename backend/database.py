@@ -631,6 +631,30 @@ def init_db():
                 PRIMARY KEY (user_id, symbol)
             )
         """)
+
+        # 9b. Quant Tradeability Sidecar Signals (non-intrusive experimental lane)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS quant_tradeability_signals (
+                symbol TEXT NOT NULL,
+                date TEXT NOT NULL,
+                market TEXT NOT NULL,
+                strategy_version TEXT NOT NULL,
+                setup_state TEXT NOT NULL,          -- NoSetup / Watch / TriggeredLong / RiskOff
+                opportunity_score REAL NOT NULL,    -- 0-100
+                trigger_rule_hit INTEGER DEFAULT 0, -- 0/1
+                risk_off_hit INTEGER DEFAULT 0,     -- 0/1
+                signal_payload TEXT,                -- JSON debug payload
+                created_at TIMESTAMP DEFAULT (datetime('now', '+8 hours')),
+                updated_at TIMESTAMP DEFAULT (datetime('now', '+8 hours')),
+                PRIMARY KEY (symbol, date, market, strategy_version)
+            )
+        """)
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS idx_qts_date_market ON quant_tradeability_signals(date DESC, market, strategy_version)"
+        )
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS idx_qts_state_date ON quant_tradeability_signals(setup_state, date DESC)"
+        )
         
         # 10. Add notification_settings column to users table (if exists)
         # This column stores user preferences for notification types as JSON

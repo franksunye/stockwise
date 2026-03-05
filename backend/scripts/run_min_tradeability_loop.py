@@ -48,6 +48,15 @@ class Trade:
     ret: float
 
 
+@dataclass
+class SimPosition:
+    symbol: str
+    entry_date: str
+    exit_date: str
+    entry_price: float
+    shares: float
+
+
 def safe_float(v: Optional[float]) -> float:
     try:
         return float(v) if v is not None else 0.0
@@ -168,6 +177,188 @@ def summarize_trades(trades: Sequence[Trade]) -> Dict[str, float]:
     }
 
 
+def simulate_capital_curve_legacy(
+    trades: Sequence[Trade],
+    initial_capital: float,
+    max_positions: int,
+    fee_bps_each_side: float,
+) -> Dict[str, float]:
+    """Legacy simplified capital curve: no daily MTM, realized PnL at exit only."""
+    if not trades:
+        return {
+            "initial_capital": initial_capital,
+            "final_capital": initial_capital,
+            "total_return": 0.0,
+            "cagr": 0.0,
+            "max_drawdown": 0.0,
+            "trade_count": 0,
+            "max_positions": max_positions,
+            "fee_bps_each_side": fee_bps_each_side,
+        }
+
+    fee = fee_bps_each_side / 10000.0
+    equity = initial_capital
+    peak = initial_capital
+    max_dd = 0.0
+
+    ordered = sorted(trades, key=lambda x: x.exit_date)
+    for t in ordered:
+        gross = 1.0 + t.ret
+        net = (1.0 - fee) * gross * (1.0 - fee)
+        equity *= net
+        if equity > peak:
+            peak = equity
+        dd = (peak - equity) / peak if peak > 0 else 0.0
+        if dd > max_dd:
+            max_dd = dd
+
+    d0 = datetime.strptime(min(t.entry_date for t in trades), "%Y-%m-%d")
+    d1 = datetime.strptime(max(t.exit_date for t in trades), "%Y-%m-%d")
+    days = max(1, (d1 - d0).days)
+    cagr = (equity / initial_capital) ** (365.0 / days) - 1.0 if initial_capital > 0 else 0.0
+    return {
+        "initial_capital": initial_capital,
+        "final_capital": equity,
+        "total_return": (equity / initial_capital) - 1.0 if initial_capital > 0 else 0.0,
+        "cagr": cagr,
+        "max_drawdown": max_dd,
+        "trade_count": len(trades),
+        "max_positions": max_positions,
+        "fee_bps_each_side": fee_bps_each_side,
+    }
+
+
+def simulate_capital_curve_mtm(
+    trades: Sequence[Trade],
+    bars_by_symbol: Dict[str, List[Bar]],
+    initial_capital: float,
+    max_positions: int,
+    fee_bps_each_side: float,
+) -> Dict[str, float]:
+    """Daily mark-to-market capital curve with entry/exit costs."""
+    if not trades:
+        return {
+            "initial_capital": initial_capital,
+            "final_capital": initial_capital,
+            "total_return": 0.0,
+            "cagr": 0.0,
+            "max_drawdown": 0.0,
+            "trade_count": 0,
+            "max_positions": max_positions,
+            "fee_bps_each_side": fee_bps_each_side,
+            "equity_points": 0,
+        }
+
+    fee = fee_bps_each_side / 10000.0
+    entries_by_date: Dict[str, List[Trade]] = {}
+    for t in trades:
+        entries_by_date.setdefault(t.entry_date, []).append(t)
+
+    date_to_closes: Dict[str, Dict[str, float]] = {}
+    for symbol, arr in bars_by_symbol.items():
+        for b in arr:
+            date_to_closes.setdefault(b.date, {})[symbol] = b.close
+    all_dates = sorted(date_to_closes.keys())
+    if not all_dates:
+        return {
+            "initial_capital": initial_capital,
+            "final_capital": initial_capital,
+            "total_return": 0.0,
+            "cagr": 0.0,
+            "max_drawdown": 0.0,
+            "trade_count": len(trades),
+            "max_positions": max_positions,
+            "fee_bps_each_side": fee_bps_each_side,
+            "equity_points": 0,
+        }
+
+    cash = initial_capital
+    active: List[SimPosition] = []
+    last_close: Dict[str, float] = {}
+    peak = initial_capital
+    max_dd = 0.0
+    equity_curve: List[Tuple[str, float]] = []
+    daily_holdings: List[Dict[str, object]] = []
+
+    for d in all_dates:
+        today_close = date_to_closes.get(d, {})
+        last_close.update(today_close)
+
+        todays_entries = entries_by_date.get(d, [])
+        for t in sorted(todays_entries, key=lambda x: x.symbol):
+            if len(active) >= max_positions or cash <= 0 or t.entry_price <= 0:
+                continue
+
+            cur_equity = cash
+            for p in active:
+                cur_equity += p.shares * last_close.get(p.symbol, p.entry_price)
+
+            alloc = min(cash, cur_equity / max_positions)
+            if alloc <= 0:
+                continue
+            shares = (alloc * (1.0 - fee)) / t.entry_price
+            if shares <= 0:
+                continue
+            cash -= alloc
+            active.append(
+                SimPosition(
+                    symbol=t.symbol,
+                    entry_date=t.entry_date,
+                    exit_date=t.exit_date,
+                    entry_price=t.entry_price,
+                    shares=shares,
+                )
+            )
+
+        still_active: List[SimPosition] = []
+        for p in active:
+            if p.exit_date == d:
+                exit_px = last_close.get(p.symbol, p.entry_price)
+                cash += p.shares * exit_px * (1.0 - fee)
+            else:
+                still_active.append(p)
+        active = still_active
+
+        held_symbols = sorted({p.symbol for p in active})
+        daily_holdings.append(
+            {
+                "date": d,
+                "holding_count": len(held_symbols),
+                "symbols": held_symbols,
+            }
+        )
+
+        equity = cash
+        for p in active:
+            equity += p.shares * last_close.get(p.symbol, p.entry_price)
+        equity_curve.append((d, equity))
+
+        if equity > peak:
+            peak = equity
+        dd = (peak - equity) / peak if peak > 0 else 0.0
+        if dd > max_dd:
+            max_dd = dd
+
+    final_capital = equity_curve[-1][1] if equity_curve else initial_capital
+    total_return = (final_capital / initial_capital) - 1.0 if initial_capital > 0 else 0.0
+    d0 = datetime.strptime(all_dates[0], "%Y-%m-%d")
+    d1 = datetime.strptime(all_dates[-1], "%Y-%m-%d")
+    days = max(1, (d1 - d0).days)
+    cagr = (final_capital / initial_capital) ** (365.0 / days) - 1.0 if initial_capital > 0 else 0.0
+    return {
+        "initial_capital": initial_capital,
+        "final_capital": final_capital,
+        "total_return": total_return,
+        "cagr": cagr,
+        "max_drawdown": max_dd,
+        "trade_count": len(trades),
+        "max_positions": max_positions,
+        "fee_bps_each_side": fee_bps_each_side,
+        "equity_points": len(equity_curve),
+        "daily_holdings": daily_holdings,
+    }
+
+
 def run_loop(
     bars_by_symbol: Dict[str, List[Bar]],
     max_hold_days: int,
@@ -177,6 +368,9 @@ def run_loop(
     breakout_volume_mult: float,
     strong_close_threshold: float,
     momentum_change_threshold: float,
+    initial_capital: float,
+    max_positions: int,
+    fee_bps_each_side: float,
 ) -> Dict[str, object]:
     watch_days = 0
     triggered_days = 0
@@ -270,6 +464,19 @@ def run_loop(
             i = exit_idx + 1
 
     trade_summary = summarize_trades(trades)
+    capital_summary = simulate_capital_curve_mtm(
+        trades,
+        bars_by_symbol=bars_by_symbol,
+        initial_capital=initial_capital,
+        max_positions=max_positions,
+        fee_bps_each_side=fee_bps_each_side,
+    )
+    capital_legacy = simulate_capital_curve_legacy(
+        trades,
+        initial_capital=initial_capital,
+        max_positions=max_positions,
+        fee_bps_each_side=fee_bps_each_side,
+    )
     coverage_watch = (watch_days / eligible_days) if eligible_days else 0.0
     coverage_trigger = (triggered_days / eligible_days) if eligible_days else 0.0
     watch_to_trigger = (triggered_days / watch_days) if watch_days else 0.0
@@ -297,7 +504,10 @@ def run_loop(
             "t3_samples": t3_total,
         },
         "trade_metrics": trade_summary,
+        "capital_metrics": capital_summary,
+        "capital_metrics_legacy": capital_legacy,
         "exit_reason_breakdown": exit_counts,
+        "all_trades": [t.__dict__ for t in trades],
         "sample_trades": [t.__dict__ for t in trades[:20]],
     }
 
@@ -306,6 +516,9 @@ def run_baseline_ma20(
     bars_by_symbol: Dict[str, List[Bar]],
     max_hold_days: int,
     stop_loss_pct: float,
+    initial_capital: float,
+    max_positions: int,
+    fee_bps_each_side: float,
 ) -> Dict[str, object]:
     """Simple baseline: enter when close > ma20 and previous close <= previous ma20."""
     trades: List[Trade] = []
@@ -364,6 +577,13 @@ def run_baseline_ma20(
 
     return {
         "trade_metrics": summarize_trades(trades),
+        "capital_metrics": simulate_capital_curve_mtm(
+            trades,
+            bars_by_symbol=bars_by_symbol,
+            initial_capital=initial_capital,
+            max_positions=max_positions,
+            fee_bps_each_side=fee_bps_each_side,
+        ),
         "trade_count": len(trades),
     }
 
@@ -407,6 +627,9 @@ def main() -> None:
     parser.add_argument("--breakout-volume-mult", type=float, default=1.5)
     parser.add_argument("--strong-close-threshold", type=float, default=0.7)
     parser.add_argument("--momentum-change-threshold", type=float, default=5.0)
+    parser.add_argument("--initial-capital", type=float, default=1_000_000.0)
+    parser.add_argument("--max-positions", type=int, default=10)
+    parser.add_argument("--fee-bps-each-side", type=float, default=5.0)
     parser.add_argument("--output-json", default="tmp/min_tradeability_loop_result.json")
     parser.add_argument("--with-baseline", action="store_true")
     parser.add_argument("--walk-forward-3", action="store_true")
@@ -431,12 +654,18 @@ def main() -> None:
         breakout_volume_mult=args.breakout_volume_mult,
         strong_close_threshold=args.strong_close_threshold,
         momentum_change_threshold=args.momentum_change_threshold,
+        initial_capital=args.initial_capital,
+        max_positions=args.max_positions,
+        fee_bps_each_side=args.fee_bps_each_side,
     )
     if args.with_baseline:
         result["baseline_ma20"] = run_baseline_ma20(
             bars_by_symbol=bars_by_symbol,
             max_hold_days=args.max_hold_days,
             stop_loss_pct=args.stop_loss_pct,
+            initial_capital=args.initial_capital,
+            max_positions=args.max_positions,
+            fee_bps_each_side=args.fee_bps_each_side,
         )
 
     if args.walk_forward_3:
@@ -456,6 +685,9 @@ def main() -> None:
                 args.breakout_volume_mult,
                 args.strong_close_threshold,
                 args.momentum_change_threshold,
+                args.initial_capital,
+                args.max_positions,
+                args.fee_bps_each_side,
             )
             row: Dict[str, object] = {
                 "window": idx,
@@ -466,7 +698,14 @@ def main() -> None:
                 "trade_metrics": main_res["trade_metrics"],
             }
             if args.with_baseline:
-                row["baseline_ma20"] = run_baseline_ma20(sub, args.max_hold_days, args.stop_loss_pct)
+                row["baseline_ma20"] = run_baseline_ma20(
+                    sub,
+                    args.max_hold_days,
+                    args.stop_loss_pct,
+                    args.initial_capital,
+                    args.max_positions,
+                    args.fee_bps_each_side,
+                )
             wf_rows.append(row)
         result["walk_forward_3"] = wf_rows
 
@@ -481,6 +720,9 @@ def main() -> None:
         "breakout_volume_mult": args.breakout_volume_mult,
         "strong_close_threshold": args.strong_close_threshold,
         "momentum_change_threshold": args.momentum_change_threshold,
+        "initial_capital": args.initial_capital,
+        "max_positions": args.max_positions,
+        "fee_bps_each_side": args.fee_bps_each_side,
         "with_baseline": args.with_baseline,
         "walk_forward_3": args.walk_forward_3,
         "run_at": datetime.now().isoformat(timespec="seconds"),
@@ -495,6 +737,9 @@ def main() -> None:
     print(json.dumps(result["state_metrics"], ensure_ascii=False, indent=2))
     print(json.dumps(result["forward_metrics"], ensure_ascii=False, indent=2))
     print(json.dumps(result["trade_metrics"], ensure_ascii=False, indent=2))
+    print(json.dumps(result["capital_metrics"], ensure_ascii=False, indent=2))
+    print("capital_metrics_legacy:")
+    print(json.dumps(result["capital_metrics_legacy"], ensure_ascii=False, indent=2))
     if args.with_baseline and "baseline_ma20" in result:
         print("baseline_ma20:")
         print(json.dumps(result["baseline_ma20"]["trade_metrics"], ensure_ascii=False, indent=2))
