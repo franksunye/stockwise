@@ -1,4 +1,5 @@
 ﻿import json
+import os
 from typing import Any
 
 import pandas as pd
@@ -39,22 +40,7 @@ def generate_ai_prediction(symbol: str, today_data: pd.Series, mode: str = 'ai',
             if ai_result and "signal" in ai_result:
                 ai_result["is_llm"] = True
 
-                # Circuit breaker for low confidence directional signals.
-                safe_threshold = 0.75
-                raw_signal = ai_result.get("signal", "Side")
-                raw_confidence = ai_result.get("confidence", 0.0)
-
-                if raw_signal in ["Long", "Short"] and raw_confidence < safe_threshold:
-                    logger.warning(
-                        f"   🛡️ 触发风控熔断: {symbol} 原始信号 {raw_signal} "
-                        f"(置信度 {raw_confidence:.2f} < {safe_threshold}) -> 强制观望"
-                    )
-                    ai_result["signal"] = "Side"
-                    ai_result["confidence"] = 0.5
-                    original_summary = ai_result.get("summary", "")
-                    ai_result["summary"] = (
-                        f"[系统风控] 原始信心不足({raw_confidence:.0%})，强制防御。{original_summary}"
-                    )
+                ai_result = _apply_directional_guardrail(ai_result, symbol)
 
                 model_name = ai_result.get("model") or LLM_CONFIG.get("model", "unknown-llm")
                 return _process_and_store_prediction(symbol, today_str, ai_result, model=model_name)
@@ -72,6 +58,53 @@ def generate_ai_prediction(symbol: str, today_data: pd.Series, mode: str = 'ai',
 def _model_exists(cursor, model_id: str) -> bool:
     cursor.execute("SELECT 1 FROM prediction_models WHERE model_id = ? LIMIT 1", (model_id,))
     return cursor.fetchone() is not None
+
+def _get_guardrail_config() -> tuple[float, str]:
+    """
+    Directional guardrail config.
+    - AI_DIRECTIONAL_CONFIDENCE_THRESHOLD: low-confidence threshold for Long/Short signals.
+    - AI_CIRCUIT_MODE:
+      - warn (default): log low-confidence directional signal, keep original signal.
+      - force_side: legacy mode, downgrade low-confidence Long/Short to Side.
+      - off: disable guardrail.
+    """
+    threshold_raw = os.getenv("AI_DIRECTIONAL_CONFIDENCE_THRESHOLD", "0.75")
+    mode = os.getenv("AI_CIRCUIT_MODE", "warn").strip().lower()
+    if mode not in {"warn", "force_side", "off"}:
+        mode = "warn"
+    try:
+        threshold = float(threshold_raw)
+    except Exception:
+        threshold = 0.75
+    return threshold, mode
+
+
+def _apply_directional_guardrail(ai_result: dict[str, Any], symbol: str) -> dict[str, Any]:
+    threshold, mode = _get_guardrail_config()
+    if mode == "off":
+        return ai_result
+
+    raw_signal = ai_result.get("signal", "Side")
+    raw_confidence = ai_result.get("confidence", 0.0)
+    try:
+        confidence = float(raw_confidence)
+    except Exception:
+        confidence = 0.0
+
+    if raw_signal in ["Long", "Short"] and confidence < threshold:
+        logger.warning(
+            f"   🛡️ 风控提示: {symbol} 原始信号 {raw_signal} "
+            f"(置信度 {confidence:.2f} < {threshold:.2f}) [mode={mode}]"
+        )
+        if mode == "force_side":
+            ai_result["signal"] = "Side"
+            ai_result["confidence"] = 0.5
+            original_summary = ai_result.get("summary", "")
+            ai_result["summary"] = (
+                f"[系统风控] 原始信心不足({confidence:.0%})，强制防御。{original_summary}"
+            )
+
+    return ai_result
 
 
 def _normalize_model_id(raw_model: str, is_llm: bool) -> str:
