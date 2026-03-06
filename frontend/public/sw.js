@@ -311,6 +311,19 @@ self.addEventListener('fetch', (event) => {
 
   // ─── RULE 3: Navigation — CacheFirst + Background Revalidate (秒开) ───
   if (request.mode === 'navigate') {
+    // App subdomain entry routes must honor server-side redirects/rewrite/auth
+    // and should not be served from stale cached HTML.
+    const isAppHost = url.hostname === 'app.ziso.cc' || url.hostname.startsWith('app.');
+    const isAppEntryPath =
+      url.pathname === '/' ||
+      url.pathname === '/dashboard' ||
+      url.pathname.startsWith('/dashboard/');
+
+    if (isAppHost && isAppEntryPath) {
+      event.respondWith(networkFirst(request, '/offline.html', 8000));
+      return;
+    }
+
     event.respondWith(navigationCacheFirst(request, '/offline.html'));
     return;
   }
