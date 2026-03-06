@@ -10,7 +10,7 @@ from backend.trading_calendar import get_market_from_symbol
 
 STRATEGY_CONFIG_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "strategy_config")
 SETUP_STATES = {"NoSetup", "Watch", "TriggeredLong", "RiskOff"}
-DEFAULT_STRATEGY_VERSION = "tradeability_v1"
+DEFAULT_STRATEGY_VERSION = "tradeability_v2"
 STRATEGY_DEFAULTS: Dict[str, Dict[str, Any]] = {
     "tradeability_v1": {
         "params_file": os.path.join(STRATEGY_CONFIG_DIR, "tradeability_params_v1.json"),

@@ -26,6 +26,7 @@ sys.path.insert(0, os.path.dirname(backend_path))
 from database import get_connection
 from logger import logger
 from utils import send_wecom_notification
+from engine.layer1_state import DEFAULT_STRATEGY_VERSION
 
 DEFAULT_CALIBRATION_DIR = os.path.join(os.path.dirname(backend_path), "tmp", "tradeability_calibration")
 
@@ -226,7 +227,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Generate weekly acceptance snapshot.")
     parser.add_argument("--week-end", default="", help="Week end date YYYY-MM-DD. Default latest.")
     parser.add_argument("--market", choices=["CN", "HK"], default="CN")
-    parser.add_argument("--strategy-version", default="tradeability_v1")
+    parser.add_argument("--strategy-version", default=DEFAULT_STRATEGY_VERSION)
     parser.add_argument("--calibration-dir", default=DEFAULT_CALIBRATION_DIR)
     parser.add_argument("--output-json", default="", help="Output JSON path.")
     parser.add_argument("--output-md", default="", help="Output Markdown path.")
