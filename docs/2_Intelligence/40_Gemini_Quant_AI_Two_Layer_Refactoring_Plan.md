@@ -3,7 +3,7 @@
 **文档状态**: Draft  
 **日期**: 2026-03-06  
 **作者**: Gemini  
-**关联文档**: `27_DeepSeek_V3_Rich_Context_Limits.md`, `27_Acceptance_Criteria_v1.md`, `39_Tradeability_Dual_Lane_Operations.md`
+**关联文档**: `27_DeepSeek_V3_Rich_Context_Limits.md`, `27_Acceptance_Criteria_v1.md`, `39_Tradeability_Dual_Lane_Operations.md`, [Spec 40 (UX)](../3_Product/Specs/40_Quant_AI_Dual_Layer_UX.md)
 
 ---
 

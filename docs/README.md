@@ -4,35 +4,33 @@ This directory serves as the unified single source of truth for the StockWise pr
 
 ## 📁 Core Directory Structure
 
-### [0_Strategy/](./0_Strategy/) - Strategy & Vision
-> The "Soul" of the project—answering "Why we are building this" and "How we will win."
+### [0_Strategy/](./0_Strategy/) - Why & Who
+> Project "Soul": Business vision, monetization, and team roles.
 - [Product & Business Vision](./0_Strategy/00_Product_Business_Vision.md)
 - [Monetization & Pricing Strategy](./0_Strategy/01_Monetization_Pricing_Strategy.md)
-- [Team Responsibility Matrix](./0_Strategy/02_Team_Responsibility_Matrix.md)
 - [Milestones & Execution Log](./0_Strategy/04_Milestones_Execution_Log.md)
 
-### [1_Engineering/](./1_Engineering/) - Architecture & Engineering
-> The "Backbone" of the project—answering "How it is built" and "How quality is ensured."
-- [System Architecture (As-Is & To-Be)](./1_Engineering/10_Architecture.md)
-- [Reliability Protocol](./1_Engineering/11_Reliability_Protocol.md)
-- [Release Quality Gates](./1_Engineering/12_Release_Quality_Gates.md)
-- [Globalization Analysis](./1_Engineering/GLOBALIZATION_ANALYSIS.md)
+### [1_Engineering/](./1_Engineering/) - How (System)
+> Project "Backbone": System architecture, reliability, and quality standards.
+- [Architecture (As-Is & To-Be)](./1_Engineering/10_Architecture.md)
+- [Reliability & Quality Gates](./1_Engineering/11_Reliability_Protocol.md)
 
-### [2_Intelligence/](./2_Intelligence/) - AI & Algorithms
-> The "Brain" of the project—encompassing prompt architecture and intelligence core.
-- [AI Prompt Design Logic](./2_Intelligence/20_AI_Prompt_Design.md)
-- [AI Confidence Algorithm Research](./2_Intelligence/21_AI_Confidence_Research.md)
+### [2_Intelligence/](./2_Intelligence/) - How (Brain)
+> Project "AI Logic": Prompt engineering, model strategies, and core algorithms.
+- [Quant-AI Refactoring (Plan 40)](./2_Intelligence/40_Gemini_Quant_AI_Two_Layer_Refactoring_Plan.md)
+- [Context Limits Research](./2_Intelligence/27_DeepSeek_V3_Rich_Context_Limits.md)
 
-### [3_Product/](./3_Product/) - Product & Features
-> The "Muscle" of the project—detailing specific feature definitions and specialized designs.
-- [Product Features Manifest](./3_Product/03_Product_Features_Manifest.md)
-- [Notification & Outreach Strategy](./3_Product/30_Notification_Strategy_Design.md)
-- **[Specs/](./3_Product/Specs/)** (Specialized Design Specifications)
-  - [Phase 3 Protection Spec](./3_Product/Specs/41_Phase3_Protection_Spec.md)
-  - [Stock Radar Discovery Engine](./3_Product/Specs/45_Stock_Radar_Discovery_Engine.md)
+### [3_Product/](./3_Product/) - What & UX
+> Project "Body": Feature manifest and specific product delivery specs.
+- [Features Manifest](./3_Product/03_Product_Features_Manifest.md)
+- **[Specs/](./3_Product/Specs/)** (Actionable blueprints for specific features)
+  - [Quant/AI Dual-Layer UX (40)](./3_Product/Specs/40_Quant_AI_Dual_Layer_UX.md)
+  - [SWR Architecture (46)](./3_Product/Specs/46_Frontend_SWR_Architecture_Upgrade.md)
+  - [Stock Radar (45)](./3_Product/Specs/45_Stock_Radar_Discovery_Engine.md)
+  - [Phase 3 Protection (41)](./3_Product/Specs/41_Phase3_Protection_Spec.md)
 
-### [4_Growth_Ops/](./4_Growth_Ops/) - Operations & Growth
-> The "Energy" of the project—covering content marketing, growth initiatives, and user support.
+### [4_Growth_Ops/](./4_Growth_Ops/) - Growth
+> Project "Energy": Marketing, content, and user operation workflows.
 - [Growth Roadmap (333 Plan)](./4_Growth_Ops/50_Growth_Roadmap_333_Plan.md)
 - [Missing Features & Optimization Plan](./4_Growth_Ops/51_Missing_Features_Plan.md)
 - [Annual Content Strategy 2026](./4_Growth_Ops/52_Annual_Content_Strategy_2026.md)
