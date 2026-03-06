@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import { ShieldCheck, AlertTriangle, RotateCw } from 'lucide-react';
@@ -8,6 +8,7 @@ import Multiavatar from '@/components/Multiavatar';
 
 import { formatModelName } from '@/lib/model-names';
 import { resolveAnalystFromModel } from '@/lib/agent-team';
+import { getPredictionActionMeta } from '@/lib/layer1-ui';
 
 interface AICouncilProps {
   symbol: string;
@@ -28,18 +29,47 @@ function mapCouncilMember(pred: AIPrediction) {
   return { name: analyst.name, role: analyst.role, avatarSeed: analyst.avatarSeed };
 }
 
-// 世界级前沿缓存层：带自动过期静默更新 (SWR) 和限制最大容量 (防内存泄漏)
+// ä¸–ç•Œçº§å‰æ²¿ç¼“å­˜å±‚ï¼šå¸¦è‡ªåŠ¨è¿‡æœŸé™é»˜æ›´æ–° (SWR) å’Œé™åˆ¶æœ€å¤§å®¹é‡ (é˜²å†…å­˜æ³„æ¼)
 interface CacheEntry {
   data: AIPrediction[];
   timestamp: number;
 }
 const councilCache = new Map<string, CacheEntry>();
-const CACHE_TTL = 1000 * 60 * 5; // 5分钟有效，超过五分钟采取静默加载 (Stale-While-Revalidate)
-const MAX_CACHE_SIZE = 50; // 最多缓存50只股票，防止 SPA 无限运行导致内存 OOM
+const CACHE_TTL = 1000 * 60 * 5; // 5åˆ†é’Ÿæœ‰æ•ˆï¼Œè¶…è¿‡äº”åˆ†é’Ÿé‡‡å–é™é»˜åŠ è½½ (Stale-While-Revalidate)
+const MAX_CACHE_SIZE = 50; // æœ€å¤šç¼“å­˜50åªè‚¡ç¥¨ï¼Œé˜²æ­¢ SPA æ— é™è¿è¡Œå¯¼è‡´å†…å­˜ OOM
+
+type CouncilActionKey = 'enter' | 'observe' | 'defense' | 'empty' | 'mixed';
+
+function getCouncilActionKey(pred: AIPrediction): CouncilActionKey {
+  switch (pred.layer1_status) {
+    case 'TriggeredLong':
+      return 'enter';
+    case 'Watch':
+      return 'observe';
+    case 'RiskOff':
+      return 'defense';
+    case 'NoSetup':
+      return 'empty';
+    default:
+      break;
+  }
+
+  switch (pred.signal) {
+    case 'Long':
+      return 'enter';
+    case 'Short':
+      return 'defense';
+    case 'Side':
+      return 'observe';
+    default:
+      return 'mixed';
+  }
+}
+
 
 function setCache(key: string, data: AIPrediction[]) {
   if (councilCache.size >= MAX_CACHE_SIZE) {
-    // 简易冷门淘汰：删除第一个插入的条目（可近似于 LRU/FIFO）
+    // ç®€æ˜“å†·é—¨æ·˜æ±°ï¼šåˆ é™¤ç¬¬ä¸€ä¸ªæ’å…¥çš„æ¡ç›®ï¼ˆå¯è¿‘ä¼¼äºŽ LRU/FIFOï¼‰
     const firstKey = councilCache.keys().next().value;
     if (firstKey) councilCache.delete(firstKey);
   }
@@ -49,30 +79,30 @@ function setCache(key: string, data: AIPrediction[]) {
 export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
   const cacheKey = `${symbol}_${targetDate}`;
 
-  // 1. 同步取缓存（无论是否过期，只要有数据就给到视图，达成 Zero UI Flash 的秒开体验）
+  // 1. åŒæ­¥å–ç¼“å­˜ï¼ˆæ— è®ºæ˜¯å¦è¿‡æœŸï¼Œåªè¦æœ‰æ•°æ®å°±ç»™åˆ°è§†å›¾ï¼Œè¾¾æˆ Zero UI Flash çš„ç§’å¼€ä½“éªŒï¼‰
   const [predictions, setPredictions] = useState<AIPrediction[]>(() => {
     return councilCache.get(cacheKey)?.data || [];
   });
   
-  // 2. Loading 设定：如果这是第一次请求（没有老缓存），则 loading
+  // 2. Loading è®¾å®šï¼šå¦‚æžœè¿™æ˜¯ç¬¬ä¸€æ¬¡è¯·æ±‚ï¼ˆæ²¡æœ‰è€ç¼“å­˜ï¼‰ï¼Œåˆ™ loading
   const [loading, setLoading] = useState<boolean>(() => !councilCache.has(cacheKey));
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    let isMounted = true; // 隔离异步竞态条件
+    let isMounted = true; // éš”ç¦»å¼‚æ­¥ç«žæ€æ¡ä»¶
 
     async function fetchCouncilData() {
       const cached = councilCache.get(cacheKey);
       const isFresh = cached && (Date.now() - cached.timestamp < CACHE_TTL);
 
       if (isFresh) {
-         // 数据依然极度新鲜，直接跳过所有网络请求
+         // æ•°æ®ä¾ç„¶æžåº¦æ–°é²œï¼Œç›´æŽ¥è·³è¿‡æ‰€æœ‰ç½‘ç»œè¯·æ±‚
          if (isMounted) setLoading(false);
          return; 
       }
 
-      // 【核心体验优化】即使数据陈旧，如果缓存里有旧数据，也不要设定 Loading=true。
-      // 它会在后台继续发起 fetch，用户可以在查阅旧数据的同时享受后台的自动更新。
+      // ã€æ ¸å¿ƒä½“éªŒä¼˜åŒ–ã€‘å³ä½¿æ•°æ®é™ˆæ—§ï¼Œå¦‚æžœç¼“å­˜é‡Œæœ‰æ—§æ•°æ®ï¼Œä¹Ÿä¸è¦è®¾å®š Loading=trueã€‚
+      // å®ƒä¼šåœ¨åŽå°ç»§ç»­å‘èµ· fetchï¼Œç”¨æˆ·å¯ä»¥åœ¨æŸ¥é˜…æ—§æ•°æ®çš„åŒæ—¶äº«å—åŽå°çš„è‡ªåŠ¨æ›´æ–°ã€‚
       if (!cached && isMounted) {
          setLoading(true);
       }
@@ -88,7 +118,7 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
         
         setCache(cacheKey, relevantPreds);
 
-        // 如果用户仍然停留在这个界面，则平滑替换最新的数据（如无变化则 React 内部有机制削减重绘）
+        // å¦‚æžœç”¨æˆ·ä»ç„¶åœç•™åœ¨è¿™ä¸ªç•Œé¢ï¼Œåˆ™å¹³æ»‘æ›¿æ¢æœ€æ–°çš„æ•°æ®ï¼ˆå¦‚æ— å˜åŒ–åˆ™ React å†…éƒ¨æœ‰æœºåˆ¶å‰Šå‡é‡ç»˜ï¼‰
         if (isMounted) {
             setPredictions(relevantPreds);
             setLoading(false);
@@ -96,7 +126,7 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
         }
       } catch (err: unknown) {
         console.error('Fetch council data error:', err);
-        if (isMounted && !cached) setError('无法连接投研决议'); 
+        if (isMounted && !cached) setError('æ— æ³•è¿žæŽ¥æŠ•ç ”å†³è®®'); 
         if (isMounted) setLoading(false);
       }
     }
@@ -106,7 +136,7 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
     }
 
     return () => {
-       // 清理机制，防止用户在请求途中秒切 Tab 引起的 React 内存泄漏警告与覆盖污染
+       // æ¸…ç†æœºåˆ¶ï¼Œé˜²æ­¢ç”¨æˆ·åœ¨è¯·æ±‚é€”ä¸­ç§’åˆ‡ Tab å¼•èµ·çš„ React å†…å­˜æ³„æ¼è­¦å‘Šä¸Žè¦†ç›–æ±¡æŸ“
        isMounted = false;
     };
   }, [symbol, targetDate, cacheKey]);
@@ -115,7 +145,7 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
     return (
       <div className="flex flex-col items-center justify-center p-8 space-y-3">
         <RotateCw className="animate-spin text-indigo-500" size={24} />
-        <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">正在调阅投研决议...</p>
+        <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">æ­£åœ¨è°ƒé˜…æŠ•ç ”å†³è®®...</p>
       </div>
     );
   }
@@ -124,27 +154,31 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
     return (
       <div className="flex flex-col items-center justify-center p-8 space-y-2 text-center">
         <AlertTriangle className="text-slate-600 mb-2" size={24} />
-        <p className="text-sm font-bold text-slate-400">暂无更多顾问意见</p>
-        <p className="text-xs text-slate-600">该标的目前仅由主模型覆盖</p>
+        <p className="text-sm font-bold text-slate-400">æš‚æ— æ›´å¤šé¡¾é—®æ„è§</p>
+        <p className="text-xs text-slate-600">è¯¥æ ‡çš„ç›®å‰ä»…ç”±ä¸»æ¨¡åž‹è¦†ç›–</p>
       </div>
     );
   }
 
   // Calculate Consensus
-  const signals = predictions.map(p => p.signal);
-  const longCount = signals.filter(s => s === 'Long').length;
-  const shortCount = signals.filter(s => s === 'Short').length;
-  const sideCount = signals.filter(s => s === 'Side').length;
+  const actionKeys = predictions.map(getCouncilActionKey);
+  const enterCount = actionKeys.filter((k) => k === 'enter').length;
+  const observeCount = actionKeys.filter((k) => k === 'observe').length;
+  const defenseCount = actionKeys.filter((k) => k === 'defense').length;
+  const emptyCount = actionKeys.filter((k) => k === 'empty').length;
   
   let consensusColor = 'text-slate-400';
-  let consensusText = '分歧';
+  let consensusText = 'åˆ†æ­§';
   
   const total = predictions.length;
-  if (longCount === total) { consensusColor = 'text-emerald-400'; consensusText = '做多共振'; }
-  else if (shortCount === total) { consensusColor = 'text-rose-400'; consensusText = '做空共振'; }
-  else if (sideCount === total) { consensusColor = 'text-amber-400'; consensusText = '观望共振'; }
-  else if (longCount > shortCount && longCount > sideCount) { consensusText = '倾向做多'; consensusColor = 'text-emerald-400/80'; }
-  else if (shortCount > longCount && shortCount > sideCount) { consensusText = '倾向做空'; consensusColor = 'text-rose-400/80'; }
+  if (enterCount === total) { consensusColor = 'text-emerald-400'; consensusText = '进场共振'; }
+  else if (observeCount === total) { consensusColor = 'text-amber-400'; consensusText = '观察共振'; }
+  else if (defenseCount === total) { consensusColor = 'text-rose-400'; consensusText = '防守共振'; }
+  else if (emptyCount === total) { consensusColor = 'text-slate-300'; consensusText = '空仓共振'; }
+  else if (enterCount > observeCount && enterCount > defenseCount && enterCount > emptyCount) { consensusText = '倾向进场'; consensusColor = 'text-emerald-400/80'; }
+  else if (observeCount > enterCount && observeCount > defenseCount && observeCount > emptyCount) { consensusText = '倾向观察'; consensusColor = 'text-amber-400/80'; }
+  else if (defenseCount > enterCount && defenseCount > observeCount && defenseCount > emptyCount) { consensusText = '倾向防守'; consensusColor = 'text-rose-400/80'; }
+  else if (emptyCount > enterCount && emptyCount > observeCount && emptyCount > defenseCount) { consensusText = '倾向空仓'; consensusColor = 'text-slate-300/80'; }
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -152,13 +186,13 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
       <div className="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/10">
         <div>
            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">{symbol}</p>
-           <h3 className="text-xl font-black tracking-tight text-white">{stockName || '未知股票'}</h3>
+           <h3 className="text-xl font-black tracking-tight text-white">{stockName || 'æœªçŸ¥è‚¡ç¥¨'}</h3>
         </div>
         <div className="text-right">
-           <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">{predictions.length}席 投研决议</p>
+           <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">{predictions.length}å¸­ æŠ•ç ”å†³è®®</p>
            <h3 className={`text-xl font-black tracking-tight ${consensusColor} flex items-center justify-end gap-2`}>
               {consensusText}
-              {(longCount === total || shortCount === total || sideCount === total) && <ShieldCheck size={18} />}
+              {(enterCount === total || observeCount === total || defenseCount === total || emptyCount === total) && <ShieldCheck size={18} />}
            </h3>
         </div>
       </div>
@@ -168,6 +202,22 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
         {predictions.map((pred, idx) => {
            const isPrimary = typeof pred.is_primary === 'number' ? pred.is_primary === 1 : pred.is_primary === true;
            const member = mapCouncilMember(pred);
+           const actionMeta = getPredictionActionMeta(pred);
+           const actionKey = getCouncilActionKey(pred);
+           const chipClass = actionKey === 'enter'
+             ? 'bg-emerald-500/20 text-emerald-400'
+             : actionKey === 'defense'
+               ? 'bg-rose-500/20 text-rose-400'
+               : actionKey === 'empty'
+                 ? 'bg-slate-500/20 text-slate-300'
+                 : 'bg-amber-500/20 text-amber-400';
+           const chipText = actionKey === 'enter'
+             ? '进场'
+             : actionKey === 'defense'
+               ? '防守'
+               : actionKey === 'empty'
+                 ? '空仓'
+                 : actionMeta.headline.replace('建议', '');
            return (
              <div key={idx} className={`p-4 rounded-xl border ${isPrimary ? 'bg-indigo-500/10 border-indigo-500/20' : 'bg-white/[0.02] border-white/5'}`}>
                 <div className="flex items-center justify-between mb-3">
@@ -180,15 +230,12 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
                         <p className="text-[10px] text-slate-500/80 font-bold">| {member.role}</p>
                       </div>
                     </div>
-                   <div className={`px-2 py-1 rounded text-[10px] font-black uppercase tracking-wide
-                      ${pred.signal === 'Long' ? 'bg-emerald-500/20 text-emerald-400' : 
-                        pred.signal === 'Short' ? 'bg-rose-500/20 text-rose-400' : 
-                        'bg-amber-500/20 text-amber-400'}`}>
-                       {pred.signal === 'Long' ? '做多' : pred.signal === 'Short' ? '做空' : '观望'}
+                   <div className={`px-2 py-1 rounded text-[10px] font-black uppercase tracking-wide ${chipClass}`}>
+                       {chipText}
                    </div>
                 </div>
                 
-                {/* 简要理由 */}
+                {/* ç®€è¦ç†ç”± */}
                 <p className="text-xs text-slate-300 leading-relaxed font-medium line-clamp-2">
                    {/* Try to parse if it's JSON or use raw */}
                    {(() => {
@@ -202,8 +249,8 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
                 </p>
 
                 <div className="mt-3 flex items-center gap-4 text-[10px] text-slate-500 font-bold">
-                   <span>把握: {(pred.confidence * 100).toFixed(0)}%</span>
-                   {pred.support_price && <span>支撑位: {pred.support_price}</span>}
+                   <span>æŠŠæ¡: {(pred.confidence * 100).toFixed(0)}%</span>
+                   {pred.support_price && <span>æ”¯æ’‘ä½: {pred.support_price}</span>}
                 </div>
              </div>
            );
