@@ -1,0 +1,87 @@
+name: Tradeability Experiment Weekly
+
+on:
+  schedule:
+    - cron: "30 2 * * 0"
+  workflow_dispatch:
+    inputs:
+      market:
+        description: "Target market"
+        type: choice
+        required: true
+        default: "CN"
+        options:
+        - CN
+        - HK
+      strategy_versions:
+        description: "Comma-separated strategy versions"
+        type: string
+        required: false
+        default: "tradeability_v1,tradeability_v2"
+      start_date:
+        description: "YYYY-MM-DD (optional)"
+        type: string
+        required: false
+        default: ""
+      end_date:
+        description: "YYYY-MM-DD (optional)"
+        type: string
+        required: false
+        default: ""
+
+jobs:
+  experiment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Run Tradeability Experiment
+        env:
+          PYTHONUNBUFFERED: "1"
+          DB_SOURCE: cloud
+          TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+        run: |
+          mkdir -p tmp/tradeability_experiments
+          MARKET="${{ inputs.market }}"
+          if [ -z "$MARKET" ]; then
+            MARKET="CN"
+          fi
+          STRATEGIES="${{ inputs.strategy_versions }}"
+          if [ -z "$STRATEGIES" ]; then
+            STRATEGIES="tradeability_v1,tradeability_v2"
+          fi
+          START_ARG=""
+          if [ -n "${{ inputs.start_date }}" ]; then
+            START_ARG="--start-date ${{ inputs.start_date }}"
+          fi
+          END_ARG=""
+          if [ -n "${{ inputs.end_date }}" ]; then
+            END_ARG="--end-date ${{ inputs.end_date }}"
+          fi
+          python -u backend/scripts/run_tradeability_experiment.py \
+            --market "$MARKET" \
+            --strategy-versions "$STRATEGIES" \
+            $START_ARG $END_ARG \
+            --output-json "tmp/tradeability_experiments/${MARKET,,}_strategy_experiment.json" \
+            --output-md "tmp/tradeability_experiments/${MARKET,,}_strategy_experiment.md"
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tradeability-experiment-weekly
+          path: tmp/tradeability_experiments/*
+          if-no-files-found: error
+          retention-days: 21

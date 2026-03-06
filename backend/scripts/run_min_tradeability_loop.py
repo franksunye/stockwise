@@ -374,6 +374,7 @@ def run_loop(
 ) -> Dict[str, object]:
     watch_days = 0
     triggered_days = 0
+    risk_off_days = 0
     eligible_days = 0
     t1_total = 0
     t1_win = 0
@@ -393,9 +394,17 @@ def run_loop(
             )
             watch = c1 and c2
             trigger = watch and c3 and c4
+            risk_ma_line = history[i].ma10
+            if risk_off_ma == 5:
+                risk_ma_line = history[i].ma5
+            elif risk_off_ma == 20:
+                risk_ma_line = history[i].ma20
+            risk_off = history[i].close > 0 and risk_ma_line > 0 and history[i].close < risk_ma_line
 
             if watch:
                 watch_days += 1
+            if risk_off:
+                risk_off_days += 1
             if not trigger:
                 i += 1
                 continue
@@ -479,6 +488,7 @@ def run_loop(
     )
     coverage_watch = (watch_days / eligible_days) if eligible_days else 0.0
     coverage_trigger = (triggered_days / eligible_days) if eligible_days else 0.0
+    coverage_risk_off = (risk_off_days / eligible_days) if eligible_days else 0.0
     watch_to_trigger = (triggered_days / watch_days) if watch_days else 0.0
 
     exit_counts: Dict[str, int] = {}
@@ -493,8 +503,10 @@ def run_loop(
         "state_metrics": {
             "watch_days": watch_days,
             "triggered_days": triggered_days,
+            "risk_off_days": risk_off_days,
             "watch_coverage": coverage_watch,
             "trigger_coverage": coverage_trigger,
+            "risk_off_coverage": coverage_risk_off,
             "watch_to_trigger_ratio": watch_to_trigger,
         },
         "forward_metrics": {

@@ -10,6 +10,19 @@ on:
         type: string
         required: false
         default: ""
+      market:
+        description: "Market"
+        type: choice
+        required: false
+        default: "CN"
+        options:
+        - CN
+        - HK
+      strategy_version:
+        description: "Strategy version"
+        type: string
+        required: false
+        default: "tradeability_v2"
       notify:
         description: "Send webhook summary"
         type: boolean
@@ -47,12 +60,22 @@ jobs:
           if [ -n "${{ inputs.week_end }}" ]; then
             END_ARG="--week-end ${{ inputs.week_end }}"
           fi
+          MARKET_ARG="--market CN"
+          if [ -n "${{ inputs.market }}" ]; then
+            MARKET_ARG="--market ${{ inputs.market }}"
+          fi
+          STRATEGY_ARG="--strategy-version tradeability_v2"
+          if [ -n "${{ inputs.strategy_version }}" ]; then
+            STRATEGY_ARG="--strategy-version ${{ inputs.strategy_version }}"
+          fi
           NOTIFY_ARG=""
           if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ inputs.notify }}" = "true" ]; then
             NOTIFY_ARG="--notify"
           fi
           python -u backend/scripts/metrics_acceptance_weekly.py \
             $END_ARG \
+            $MARKET_ARG \
+            $STRATEGY_ARG \
             --output-json tmp/acceptance_metrics/acceptance_weekly.json \
             --output-md tmp/acceptance_metrics/acceptance_weekly.md \
             $NOTIFY_ARG

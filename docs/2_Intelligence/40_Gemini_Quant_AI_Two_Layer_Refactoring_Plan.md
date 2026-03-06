@@ -105,11 +105,14 @@
 
 1. 扩展 Layer-1 策略版本（`tradeability_v2`）并保持同一裁决接口。
 2. 增加策略实验框架（v1/v2 并行评估），不改用户前台结构。
+   - 现已落地 `backend/scripts/run_tradeability_experiment.py`，用于输出版本并行对比 artifacts。
 3. 固化观测面板：方向一致率、状态分布、触发率、回撤控制。
+   - 现已在周验收脚本中收口为固定面板，并支持按 `strategy_version` 观察。
 4. 参数调优固化执行顺序（单参数小步迭代）：
    - 优先放宽进场触发相关阈值（`breakout_volume_mult` / `momentum_change_threshold`），观察 `TriggeredLong coverage`。
    - 同步监控 `RiskOff` 占比与最大回撤，避免以覆盖率换风险失控。
    - 每轮仅改 1 个参数，按周固化决策日志。
+   - 现已在 `backend/scripts/run_tradeability_weekly_calibration.py` 中按固定顺序执行。
 
 ---
 

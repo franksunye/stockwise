@@ -21,11 +21,11 @@ on:
         type: string
         required: false
         default: ''
-      strategy_version:
-        description: 'Sidecar strategy version'
+      strategy_versions:
+        description: 'Comma-separated sidecar strategy versions'
         type: string
         required: false
-        default: 'tradeability_v1'
+        default: 'tradeability_v1,tradeability_v2'
       dry_run:
         description: 'Dry run without DB writes'
         type: boolean
@@ -89,11 +89,11 @@ jobs:
           if [ "${{ inputs.dry_run }}" == "true" ]; then
             DRY_FLAG="--dry-run"
           fi
-          STRATEGY="${{ inputs.strategy_version }}"
-          if [ -z "$STRATEGY" ]; then
-            STRATEGY="tradeability_v1"
+          STRATEGIES="${{ inputs.strategy_versions }}"
+          if [ -z "$STRATEGIES" ]; then
+            STRATEGIES="tradeability_v1,tradeability_v2"
           fi
-          python -u backend/scripts/run_tradeability_sidecar.py --market CN --strategy-version "$STRATEGY" $DATE_ARG $DRY_FLAG
+          python -u backend/scripts/run_tradeability_sidecar.py --market CN --strategy-versions "$STRATEGIES" $DATE_ARG $DRY_FLAG
 
   run-hk:
     runs-on: ubuntu-latest
@@ -133,8 +133,8 @@ jobs:
           if [ "${{ inputs.dry_run }}" == "true" ]; then
             DRY_FLAG="--dry-run"
           fi
-          STRATEGY="${{ inputs.strategy_version }}"
-          if [ -z "$STRATEGY" ]; then
-            STRATEGY="tradeability_v1"
+          STRATEGIES="${{ inputs.strategy_versions }}"
+          if [ -z "$STRATEGIES" ]; then
+            STRATEGIES="tradeability_v1,tradeability_v2"
           fi
-          python -u backend/scripts/run_tradeability_sidecar.py --market HK --strategy-version "$STRATEGY" $DATE_ARG $DRY_FLAG
+          python -u backend/scripts/run_tradeability_sidecar.py --market HK --strategy-versions "$STRATEGIES" $DATE_ARG $DRY_FLAG

@@ -24,9 +24,13 @@
    - `backend/scripts/run_tradeability_sidecar.py`
 2. 周度参数校准：
    - `backend/scripts/run_tradeability_weekly_calibration.py`
-3. 参数配置：
+3. 策略并行实验：
+   - `backend/scripts/run_tradeability_experiment.py`
+   - `.github/workflows/tradeability_experiment_weekly.yml`
+4. 参数配置：
    - `backend/strategy_config/tradeability_params_v1.json`
-4. 预测主链路（含 Layer-1 快照注入与强制对齐）：
+   - `backend/strategy_config/tradeability_params_v2.json`
+5. 预测主链路（含 Layer-1 快照注入与强制对齐）：
    - `backend/engine/runner.py`
 
 ---
@@ -49,17 +53,33 @@ $env:DB_SOURCE="local"
 
 ```powershell
 $env:DB_SOURCE="local"
-python backend/scripts/run_tradeability_sidecar.py --market CN --dry-run
+python backend/scripts/run_tradeability_sidecar.py --market CN --strategy-versions tradeability_v1,tradeability_v2 --dry-run
 ```
 
 ### 4.2 weekly calibration
 
 ```powershell
 $env:DB_SOURCE="local"
-python backend/scripts/run_tradeability_weekly_calibration.py --market CN
+python backend/scripts/run_tradeability_weekly_calibration.py --market CN --strategy-versions tradeability_v1,tradeability_v2
 ```
 
-### 4.3 单票分析（功能验证）
+### 4.3 strategy experiment
+
+```powershell
+$env:DB_SOURCE="local"
+python backend/scripts/run_tradeability_experiment.py --market CN --strategy-versions tradeability_v1,tradeability_v2
+```
+
+### 4.4 cloud continuous observation
+
+1. `tradeability_sidecar_daily.yml`
+   - 默认并行写入 `tradeability_v1,tradeability_v2`
+2. `tradeability_experiment_weekly.yml`
+   - 每周产出 v1/v2 对比 artifact
+3. `acceptance_weekly.yml`
+   - 默认按 `tradeability_v2` 生成周验收快照
+
+### 4.5 单票分析（功能验证）
 
 ```powershell
 $env:DB_SOURCE="local"
@@ -103,16 +123,78 @@ GROUP BY model_id
 ORDER BY model_id;
 ```
 
+### 5.3 v1/v2 连续观测面板
+
+```sql
+SELECT
+  strategy_version,
+  COUNT(*) AS total_states,
+  ROUND(100.0 * SUM(CASE WHEN setup_state='TriggeredLong' THEN 1 ELSE 0 END) / COUNT(*), 2) AS triggered_pct,
+  ROUND(100.0 * SUM(CASE WHEN setup_state='Watch' THEN 1 ELSE 0 END) / COUNT(*), 2) AS watch_pct,
+  ROUND(100.0 * SUM(CASE WHEN setup_state='RiskOff' THEN 1 ELSE 0 END) / COUNT(*), 2) AS riskoff_pct,
+  ROUND(100.0 * SUM(CASE WHEN setup_state='NoSetup' THEN 1 ELSE 0 END) / COUNT(*), 2) AS nosetup_pct
+FROM quant_tradeability_signals
+WHERE market='CN'
+  AND date BETWEEN '2026-03-01' AND '2026-03-31'
+GROUP BY strategy_version
+ORDER BY strategy_version;
+```
+
+### 5.4 v1/v2 日度覆盖率轨迹
+
+```sql
+SELECT
+  date,
+  strategy_version,
+  ROUND(100.0 * SUM(CASE WHEN setup_state='TriggeredLong' THEN 1 ELSE 0 END) / COUNT(*), 2) AS triggered_pct,
+  ROUND(100.0 * SUM(CASE WHEN setup_state='RiskOff' THEN 1 ELSE 0 END) / COUNT(*), 2) AS riskoff_pct
+FROM quant_tradeability_signals
+WHERE market='CN'
+  AND strategy_version IN ('tradeability_v1','tradeability_v2')
+GROUP BY date, strategy_version
+ORDER BY date DESC, strategy_version;
+```
+
+### 5.5 线上是否具备切默认资格
+
+```sql
+SELECT
+  strategy_version,
+  MIN(date) AS start_date,
+  MAX(date) AS end_date,
+  COUNT(DISTINCT date) AS active_days,
+  ROUND(AVG(CASE WHEN setup_state='TriggeredLong' THEN 1.0 ELSE 0.0 END) * 100, 2) AS avg_triggered_pct,
+  ROUND(AVG(CASE WHEN setup_state='RiskOff' THEN 1.0 ELSE 0.0 END) * 100, 2) AS avg_riskoff_pct
+FROM quant_tradeability_signals
+WHERE market='CN'
+  AND strategy_version IN ('tradeability_v1','tradeability_v2')
+GROUP BY strategy_version
+ORDER BY strategy_version;
+```
+
 ---
 
 ## 6. 运维注意事项
 
 1. 研发期允许在本地反复 `--force` 覆盖同日记录，用于链路验证。
-2. 周度脚本默认不自动写回生产参数，只产出建议 artifacts。
+2. 周度脚本按 `breakout_volume_mult -> momentum_change_threshold -> strong_close_threshold -> vcp_ratio -> risk_off_ma` 的顺序做单参数小步迭代，并产出决策日志 artifacts。
 3. 如发现异常，可先关闭方向强制开关排查：
 ```powershell
 $env:LAYER1_SIGNAL_ENFORCE="0"
 ```
+4. 生产观察阶段不直接替换默认版本，先累计 `2~4` 周 `quant_tradeability_signals` 历史后再判断是否切默认。
+
+## 7. v2 Default Promotion Gate
+
+仅当 `tradeability_v2` 连续观察达到以下条件时，才允许考虑替换默认版本：
+
+1. 观察期不少于 `2~4` 周，且 `quant_tradeability_signals` 已形成连续日度历史。
+2. `TriggeredLong` 周均覆盖率稳定 `> 5%`，不能仅由单周尖峰拉高。
+3. `RiskOff` 占比不继续上行，且应稳定在最近实验观察水平附近或以下。
+4. `Max Drawdown` 不得劣于当前实验基线；若回撤重新恶化，则不允许切默认。
+5. `Watch -> TriggeredLong` 不应长期显著高于 `40%`，否则视为触发过松。
+6. Layer-1 方向一致率持续满足 `>= 99.5%`，目标维持 `100%`。
+7. 上述条件满足后，仍应先保留一段并行观察窗口，再执行默认切换。
 
 ---
 

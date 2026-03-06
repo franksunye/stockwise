@@ -14,11 +14,11 @@ on:
         - CN
         - HK
         - BOTH
-      strategy_version:
-        description: 'Strategy version for report labeling'
+      strategy_versions:
+        description: 'Comma-separated strategy versions for calibration'
         type: string
         required: false
-        default: 'tradeability_v1'
+        default: 'tradeability_v1,tradeability_v2'
       start_date:
         description: 'YYYY-MM-DD (optional)'
         type: string
@@ -29,11 +29,11 @@ on:
         type: string
         required: false
         default: ''
-      min_trades_per_window:
-        description: 'Minimum trades per window'
+      parameter_order:
+        description: 'Comma-separated single-parameter order'
         type: string
         required: false
-        default: '6'
+        default: 'breakout_volume_mult,momentum_change_threshold,strong_close_threshold,vcp_ratio,risk_off_ma'
 
 concurrency:
   group: tradeability-sidecar-weekly-calibration-${{ github.ref }}
@@ -76,22 +76,21 @@ jobs:
           if [ -n "${{ inputs.end_date }}" ]; then
             END_ARG="--end-date ${{ inputs.end_date }}"
           fi
-          STRATEGY="${{ inputs.strategy_version }}"
-          if [ -z "$STRATEGY" ]; then
-            STRATEGY="tradeability_v1"
+          STRATEGIES="${{ inputs.strategy_versions }}"
+          if [ -z "$STRATEGIES" ]; then
+            STRATEGIES="tradeability_v1,tradeability_v2"
           fi
-          MIN_TRADES="${{ inputs.min_trades_per_window }}"
-          if [ -z "$MIN_TRADES" ]; then
-            MIN_TRADES="6"
+          PARAM_ORDER="${{ inputs.parameter_order }}"
+          if [ -z "$PARAM_ORDER" ]; then
+            PARAM_ORDER="breakout_volume_mult,momentum_change_threshold,strong_close_threshold,vcp_ratio,risk_off_ma"
           fi
           python -u backend/scripts/run_tradeability_weekly_calibration.py \
             --market CN \
-            --strategy-version "$STRATEGY" \
-            --min-trades-per-window "$MIN_TRADES" \
+            --strategy-versions "$STRATEGIES" \
+            --parameter-order "$PARAM_ORDER" \
             $START_ARG $END_ARG \
             --output-json tmp/tradeability_calibration/cn_weekly_calibration.json \
-            --output-md tmp/tradeability_calibration/cn_weekly_calibration.md \
-            --emit-updated-params tmp/tradeability_calibration/cn_updated_params.json
+            --output-md tmp/tradeability_calibration/cn_weekly_calibration.md
 
       - name: Upload CN Calibration Artifact
         uses: actions/upload-artifact@v4
@@ -137,22 +136,21 @@ jobs:
           if [ -n "${{ inputs.end_date }}" ]; then
             END_ARG="--end-date ${{ inputs.end_date }}"
           fi
-          STRATEGY="${{ inputs.strategy_version }}"
-          if [ -z "$STRATEGY" ]; then
-            STRATEGY="tradeability_v1"
+          STRATEGIES="${{ inputs.strategy_versions }}"
+          if [ -z "$STRATEGIES" ]; then
+            STRATEGIES="tradeability_v1,tradeability_v2"
           fi
-          MIN_TRADES="${{ inputs.min_trades_per_window }}"
-          if [ -z "$MIN_TRADES" ]; then
-            MIN_TRADES="6"
+          PARAM_ORDER="${{ inputs.parameter_order }}"
+          if [ -z "$PARAM_ORDER" ]; then
+            PARAM_ORDER="breakout_volume_mult,momentum_change_threshold,strong_close_threshold,vcp_ratio,risk_off_ma"
           fi
           python -u backend/scripts/run_tradeability_weekly_calibration.py \
             --market HK \
-            --strategy-version "$STRATEGY" \
-            --min-trades-per-window "$MIN_TRADES" \
+            --strategy-versions "$STRATEGIES" \
+            --parameter-order "$PARAM_ORDER" \
             $START_ARG $END_ARG \
             --output-json tmp/tradeability_calibration/hk_weekly_calibration.json \
-            --output-md tmp/tradeability_calibration/hk_weekly_calibration.md \
-            --emit-updated-params tmp/tradeability_calibration/hk_updated_params.json
+            --output-md tmp/tradeability_calibration/hk_weekly_calibration.md
 
       - name: Upload HK Calibration Artifact
         uses: actions/upload-artifact@v4
