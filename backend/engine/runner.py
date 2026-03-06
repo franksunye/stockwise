@@ -3,6 +3,7 @@ import logging
 import uuid
 import json
 import traceback
+import os
 from typing import List, Dict, Any
 from datetime import datetime
 
@@ -270,6 +271,11 @@ class PredictionRunner:
             result = await model.predict(symbol, date, data)
             if result is None:
                 return None
+
+            # Layer-1 is the single source of directional truth.
+            # Model output may keep tactical narrative freedom, but signal is enforced.
+            layer1 = data.get("layer1") or {}
+            result = _enforce_layer1_direction(result, layer1)
             
             # 3. Guard: Reject error results from being treated as valid predictions
             # This prevents API errors (e.g. "Fatal Error: HTTP 403...") from being
@@ -296,3 +302,34 @@ class PredictionRunner:
         except Exception as e:
             logger.error(f"❌ Model {model.model_id} failed: {e}")
             return None
+
+
+def _layer1_to_signal(setup_state: str) -> str:
+    if setup_state == "TriggeredLong":
+        return "Long"
+    if setup_state in {"NoSetup", "Watch", "RiskOff"}:
+        return "Side"
+    return "Side"
+
+
+def _is_truthy_env(name: str, default: str = "1") -> bool:
+    raw = os.getenv(name, default).strip().lower()
+    return raw in {"1", "true", "yes", "on"}
+
+
+def _enforce_layer1_direction(result: Dict[str, Any], layer1: Dict[str, Any]) -> Dict[str, Any]:
+    setup_state = str(layer1.get("status") or "")
+    expected = _layer1_to_signal(setup_state)
+    signal = result.get("signal", "Side")
+
+    # Keep a kill-switch for emergency rollback in production.
+    if not _is_truthy_env("LAYER1_SIGNAL_ENFORCE", "1"):
+        return result
+
+    if signal != expected:
+        logger.warning(
+            f"🧱 Layer1 signal enforced: model={signal} -> layer1={expected} "
+            f"(status={setup_state})"
+        )
+        result["signal"] = expected
+    return result
