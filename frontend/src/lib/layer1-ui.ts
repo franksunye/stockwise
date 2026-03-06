@@ -17,9 +17,9 @@ export interface PredictionActionMeta {
 
 const LAYER1_META: Record<NonNullable<AIPrediction['layer1_status']>, PredictionActionMeta> = {
   TriggeredLong: {
-    headline: '可尝试建仓',
+    headline: '建议进场',
     badge: 'Layer-1 · 进场窗口',
-    posterDecision: '可尝试建仓',
+    posterDecision: '建议进场',
     color: COLORS.up,
     dotClass: 'bg-rose-500',
     iconTone: 'up',
@@ -27,9 +27,9 @@ const LAYER1_META: Record<NonNullable<AIPrediction['layer1_status']>, Prediction
     textClass: 'text-rose-500',
   },
   Watch: {
-    headline: '继续观察',
+    headline: '建议观察',
     badge: 'Layer-1 · 继续观察',
-    posterDecision: '继续观察',
+    posterDecision: '建议观察',
     color: COLORS.hold,
     dotClass: 'bg-amber-500',
     iconTone: 'flat',
@@ -37,9 +37,9 @@ const LAYER1_META: Record<NonNullable<AIPrediction['layer1_status']>, Prediction
     textClass: 'text-amber-500',
   },
   RiskOff: {
-    headline: '暂停新增仓位',
+    headline: '建议防守',
     badge: 'Layer-1 · 风险收缩',
-    posterDecision: '暂停新增仓位',
+    posterDecision: '建议防守',
     color: COLORS.down,
     dotClass: 'bg-emerald-500',
     iconTone: 'down',
@@ -47,9 +47,9 @@ const LAYER1_META: Record<NonNullable<AIPrediction['layer1_status']>, Prediction
     textClass: 'text-emerald-500',
   },
   NoSetup: {
-    headline: '不建议出手',
+    headline: '建议空仓',
     badge: 'Layer-1 · 暂无结构',
-    posterDecision: '不建议出手',
+    posterDecision: '建议空仓',
     color: COLORS.muted,
     dotClass: 'bg-slate-500',
     iconTone: 'flat',
