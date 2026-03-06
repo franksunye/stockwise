@@ -16,7 +16,7 @@ const SUPPORT_TLDR: Record<string, string[]> = {
   "ai-council-logic": [
     "知守 AI 采用多模型并行分析，降低单模型偏差。",
     "结论优先看一致性，再看单模型观点。",
-    "分歧较大时应降低仓位或先观望。",
+    "分歧较大时应降低仓位或先观察。",
   ],
   "tactical-brief-guide": [
     "战术简报要看结论、关键价位、风险反思三部分。",

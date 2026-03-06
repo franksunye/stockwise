@@ -185,7 +185,7 @@ export default async function LandingPage() {
               <span className="text-red-500">也要恪守 75% 闸门</span>
             </h2>
             <p className="text-slate-400 font-medium leading-relaxed">
-              知其博弈，也要守其方寸。如果 AI 对于次日的逻辑推演置信度低于 75%，系统将冷酷通过“熔断指令”强制阻断所有看多/看空行为，建议持币观望。不亏损，是您在市场中长期生存并最终获胜的第一条铁律。
+              知其博弈，也要守其方寸。如果 AI 对于次日的逻辑推演置信度低于 75%，系统将冷酷通过“熔断指令”强制阻断所有激进操作，建议保持观察。不亏损，是您在市场中长期生存并最终获胜的第一条铁律。
             </p>
             <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/5 space-y-4">
                <div className="flex justify-between items-center text-xs font-black uppercase tracking-widest">
@@ -195,7 +195,7 @@ export default async function LandingPage() {
                <div className="h-3 w-full bg-white/5 rounded-full overflow-hidden">
                   <div className="h-full w-[64%] bg-red-500/50" />
                </div>
-                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tighter">当前信号：空仓观望（防御模式开启）</p>
+                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tighter">当前信号：建议空仓（防御模式开启）</p>
             </div>
           </div>
         </section>

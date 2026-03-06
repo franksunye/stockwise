@@ -53,7 +53,7 @@ export function SettingsModal({ symbol, isOpen, onClose, onSave }: Props) {
     },
     { 
       id: 'none', 
-      label: '观望中', 
+      label: '观察中', 
       icon: User,
       description: 'AI 将提供通用决策参考',
       color: 'slate'

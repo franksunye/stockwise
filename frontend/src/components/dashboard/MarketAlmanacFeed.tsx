@@ -22,8 +22,8 @@ export type MarketAlmanacHandle = {
  * Supports multiple delimiters used across different backend versions.
  */
 function parseActionStrategy(strategy: string) {
-  const raw = strategy || '宜：观望 · 忌：盲动';
-  let yi = '观望';
+  const raw = strategy || '宜：观察 · 忌：盲动';
+  let yi = '观察';
   let ji = '盲动';
 
   const delimiters = [
@@ -43,7 +43,7 @@ function parseActionStrategy(strategy: string) {
     yi = raw.replace(/^宜[：:]\s*/, '').trim();
   }
 
-  return { yi: yi || '观望', ji: ji || '盲动' };
+  return { yi: yi || '观察', ji: ji || '盲动' };
 }
 
 // --- 2. Sub-components ---
@@ -259,7 +259,7 @@ export const MarketAlmanacFeed = memo(forwardRef<MarketAlmanacHandle, MarketAlma
   const targetDate = currentAlmanac?.target_date || new Date().toISOString().split('T')[0];
   const moodTag = currentAlmanac?.mood_tag || '混沌未明';
   const meteorology = currentAlmanac?.meteorology || '微雨';
-  const insight = currentAlmanac?.ai_insight || '股指进入混沌期，缺乏明确突破点。板块轮动加速，建议保持观望。';
+  const insight = currentAlmanac?.ai_insight || '股指进入混沌期，缺乏明确突破点。板块轮动加速，建议保持观察。';
   
   const sectors = useMemo(() => typeof currentAlmanac?.sector_currents === 'object' && currentAlmanac?.sector_currents ? currentAlmanac?.sector_currents : { main: [{name: '待更新', flow: ''}], inverse: [{name: '待更新', flow: ''}] }, [currentAlmanac?.sector_currents]);
 
