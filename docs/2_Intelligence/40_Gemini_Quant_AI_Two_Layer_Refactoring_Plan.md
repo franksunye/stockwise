@@ -29,7 +29,7 @@
 
 *   **Action 0.1：修复 `validator.py` 的虚假高胜率漏洞**
     *   **位置**: `backend/engine/validator.py`
-    *   **病灶**: 判定 `Side` (观望) 是否正确的逻辑缺失了绝对值保护，导致暴跌 (-10%) 甚至也被划入了 `< 3% 噪音阈值`，从而被打上 `Correct` 标签，严重污染了 LLM 的反思闭环库。
+    *   **病灶**: 判定 `Side` (观望) 是否正确的逻辑缺失了绝对值保护；在当前实现中 `NOISE_THRESHOLD=1.0`（1%）时，暴跌也可能被误标为 `Correct`，污染反思闭环库。
     *   **处方**: 将逻辑更正为 `abs(cumulative_change) <= NOISE_THRESHOLD`。以此重构真实胜率。
 *   **Action 0.2：解除过度防守的封印（熔断降级）**
     *   **位置**: `backend/engine/ai_service.py`
@@ -50,8 +50,9 @@
     4.  `RiskOff` (防守清仓：触发无理由机械止损)
 *   **Action 1.2：硬编码短线触发算子 (Trigger Algorithms)**
     用 Python 构建计算模块，直连 `daily_prices`：
-    *   **进攻触发**：如 VCP (波动率收敛) 后的放量（>1.5倍）突破 MA20。只要数字达标，立刻输出 `TriggeredLong`。
+    *   **进攻触发**：如 VCP (波动率收敛) 后的放量（示例：>1.5倍）突破 MA20。只要数字达标，立刻输出 `TriggeredLong`。
     *   **防守触发**：跌破前一交易日低点，或价格偏离（均线乖离率过大），立刻输出 `RiskOff`。
+    *   **参数口径约束**：本文中的阈值仅作“研究示例参数”。生产参数以 `backend/strategy_config/tradeability_params_v1.json` 与 `39_Tradeability_Dual_Lane_Operations.md` 为唯一准。
 
 ---
 
@@ -79,6 +80,7 @@
 
 *   **Action 3.1：拆分雷达预警与 AI 建言**
     *   **位置**: `frontend/src/components/dashboard/AICouncil.tsx` / `TacticalBriefDrawer.tsx` 等。
+    *   **前端保护约束（对齐 Spec 40）**: 改造仅限 UI/DOM 展示层；不得破坏现有 `SWR Map Cache` 与 `Zero UI Flash` 机制。
     *   **处方**:
         *   首屏最显眼的图标（如红绿信号灯/警笛）由 Layer-1 量化雷达直接接管，反应最冰冷的“当前可交易状态（如 `TriggeredLong`）”。
         *   下方展开的文字报告区，展示 Layer-2 也就是 DeepSeek V3 极富同理心和宏观大局观的战役复盘与防守建议。
