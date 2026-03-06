@@ -28,42 +28,88 @@ function mapCouncilMember(pred: AIPrediction) {
   return { name: analyst.name, role: analyst.role, avatarSeed: analyst.avatarSeed };
 }
 
+// 世界级前沿缓存层：带自动过期静默更新 (SWR) 和限制最大容量 (防内存泄漏)
+interface CacheEntry {
+  data: AIPrediction[];
+  timestamp: number;
+}
+const councilCache = new Map<string, CacheEntry>();
+const CACHE_TTL = 1000 * 60 * 5; // 5分钟有效，超过五分钟采取静默加载 (Stale-While-Revalidate)
+const MAX_CACHE_SIZE = 50; // 最多缓存50只股票，防止 SPA 无限运行导致内存 OOM
+
+function setCache(key: string, data: AIPrediction[]) {
+  if (councilCache.size >= MAX_CACHE_SIZE) {
+    // 简易冷门淘汰：删除第一个插入的条目（可近似于 LRU/FIFO）
+    const firstKey = councilCache.keys().next().value;
+    if (firstKey) councilCache.delete(firstKey);
+  }
+  councilCache.set(key, { data, timestamp: Date.now() });
+}
+
 export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
-  const [predictions, setPredictions] = useState<AIPrediction[]>([]);
-  const [loading, setLoading] = useState(true);
+  const cacheKey = `${symbol}_${targetDate}`;
+
+  // 1. 同步取缓存（无论是否过期，只要有数据就给到视图，达成 Zero UI Flash 的秒开体验）
+  const [predictions, setPredictions] = useState<AIPrediction[]>(() => {
+    return councilCache.get(cacheKey)?.data || [];
+  });
+  
+  // 2. Loading 设定：如果这是第一次请求（没有老缓存），则 loading
+  const [loading, setLoading] = useState<boolean>(() => !councilCache.has(cacheKey));
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let isMounted = true; // 隔离异步竞态条件
+
     async function fetchCouncilData() {
+      const cached = councilCache.get(cacheKey);
+      const isFresh = cached && (Date.now() - cached.timestamp < CACHE_TTL);
+
+      if (isFresh) {
+         // 数据依然极度新鲜，直接跳过所有网络请求
+         if (isMounted) setLoading(false);
+         return; 
+      }
+
+      // 【核心体验优化】即使数据陈旧，如果缓存里有旧数据，也不要设定 Loading=true。
+      // 它会在后台继续发起 fetch，用户可以在查阅旧数据的同时享受后台的自动更新。
+      if (!cached && isMounted) {
+         setLoading(true);
+      }
+
       try {
-        setLoading(true);
-        // Request detailed mode=full to get all models
         await getCurrentUser();
         const res = await fetch(`/api/predictions?symbol=${symbol}&limit=10&mode=full&targetDate=${targetDate}`);
         if (!res.ok) throw new Error('Failed to fetch council data');
         
         const data = await res.json();
         const allPreds = data.predictions as AIPrediction[];
-        
-        // Filter for the specific target date we are looking at
-        // If data is stale, this might return empty, so be careful.
-        // The dashboard usually shows the *latest* prediction.
-        // We really want "predictions for the same target_date as the main card"
         const relevantPreds = allPreds.filter(p => p.target_date === targetDate);
         
-        setPredictions(relevantPreds);
+        setCache(cacheKey, relevantPreds);
+
+        // 如果用户仍然停留在这个界面，则平滑替换最新的数据（如无变化则 React 内部有机制削减重绘）
+        if (isMounted) {
+            setPredictions(relevantPreds);
+            setLoading(false);
+            setError(null);
+        }
       } catch (err: unknown) {
         console.error('Fetch council data error:', err);
-        setError('无法连接投研决议');
-      } finally {
-        setLoading(false);
+        if (isMounted && !cached) setError('无法连接投研决议'); 
+        if (isMounted) setLoading(false);
       }
     }
 
     if (symbol && targetDate) {
       fetchCouncilData();
     }
-  }, [symbol, targetDate]);
+
+    return () => {
+       // 清理机制，防止用户在请求途中秒切 Tab 引起的 React 内存泄漏警告与覆盖污染
+       isMounted = false;
+    };
+  }, [symbol, targetDate, cacheKey]);
 
   if (loading) {
     return (
