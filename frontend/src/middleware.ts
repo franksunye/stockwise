@@ -1,21 +1,36 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-export function middleware(request: NextRequest) {
-    // 根本原因优化：更稳健的域名检测
-    const forwardedHost = request.headers.get('x-forwarded-host');
-    let hostname = forwardedHost ? forwardedHost.split(':')[0] : request.nextUrl.hostname;
+function normalizeHost(raw: string | null | undefined): string | null {
+    if (!raw) return null;
+    const first = raw.split(',')[0]?.trim().toLowerCase();
+    if (!first) return null;
+    return first.split(':')[0] || null;
+}
 
-    const hostHeader = request.headers.get('host');
-    if (!forwardedHost && hostHeader) {
-        hostname = hostHeader.split(':')[0];
-    }
+function collectHostCandidates(request: NextRequest): string[] {
+    const candidates = [
+        normalizeHost(request.headers.get('x-forwarded-host')),
+        normalizeHost(request.headers.get('host')),
+        normalizeHost(request.nextUrl.hostname),
+    ].filter((v): v is string => Boolean(v));
+
+    return Array.from(new Set(candidates));
+}
+
+export function middleware(request: NextRequest) {
+    // Host detection must be resilient to proxy header format changes.
+    const hostCandidates = collectHostCandidates(request);
 
     const url = request.nextUrl;
     const pathname = url.pathname;
 
-    const isAppDomain = hostname === 'app.ziso.cc' || hostname.startsWith('app.');
-    const isMainDomain = hostname === 'ziso.cc' || hostname === 'www.ziso.cc';
+    const isAppDomain = hostCandidates.some(
+        (host) => host === 'app.ziso.cc' || host.startsWith('app.')
+    );
+    const isMainDomain = hostCandidates.some(
+        (host) => host === 'ziso.cc' || host === 'www.ziso.cc'
+    );
 
     // 1. App 子域名策略 (app.ziso.cc)
     if (isAppDomain) {
