@@ -6,6 +6,36 @@ from backend.logger import logger
 
 
 class RuleAdapter(BasePredictionModel):
+    @staticmethod
+    def _layer1_action_profile(setup_state: str) -> Dict[str, str]:
+        profiles = {
+            "TriggeredLong": {
+                "summary_prefix": "当前进入可尝试建仓区间",
+                "holding_profit_action": "持仓观察",
+                "holding_loss_action": "跌破纪律位应退出",
+                "empty_action": "可尝试建仓",
+            },
+            "Watch": {
+                "summary_prefix": "当前仅适合继续观察",
+                "holding_profit_action": "持仓观察",
+                "holding_loss_action": "反弹减仓",
+                "empty_action": "继续观察",
+            },
+            "RiskOff": {
+                "summary_prefix": "当前进入风险收缩区",
+                "holding_profit_action": "已有仓位应收缩",
+                "holding_loss_action": "跌破纪律位应退出",
+                "empty_action": "暂停新增仓位",
+            },
+            "NoSetup": {
+                "summary_prefix": "当前不建议出手",
+                "holding_profit_action": "持仓观察",
+                "holding_loss_action": "触发减仓",
+                "empty_action": "不建议出手",
+            },
+        }
+        return profiles.get(setup_state, profiles["NoSetup"])
+
     async def predict(self, symbol: str, date: str, data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Rule Engine based on quant indicators.
@@ -154,9 +184,12 @@ class RuleAdapter(BasePredictionModel):
 
         summary_text = f"量化兜底信号：{summary}"
         decision_detail = f"量化规则决策：{signal}"
+        profile = self._layer1_action_profile(layer1_status or "NoSetup")
         if layer1_status and raw_signal and raw_signal != signal:
-            summary_text = f"[Layer-1:{layer1_status}] {summary_text}"
+            summary_text = f"[Layer-1:{layer1_status}] {profile['summary_prefix']}。{summary_text}"
             decision_detail += f"（Layer-1覆盖原始信号 {raw_signal}）"
+        elif layer1_status:
+            summary_text = f"[Layer-1:{layer1_status}] {profile['summary_prefix']}。{summary_text}"
 
         reasoning_data = {
             "signal": signal,
@@ -203,7 +236,7 @@ class RuleAdapter(BasePredictionModel):
                 "holding_profit": [
                     {
                         "priority": "P1",
-                        "action": "持仓观察",
+                        "action": profile["holding_profit_action"],
                         "trigger": f"不跌破 {ma20:.2f}",
                         "target_price": round(resistance, 2),
                         "stop_advance_price": round(close, 2),
@@ -221,7 +254,7 @@ class RuleAdapter(BasePredictionModel):
                 "holding_loss": [
                     {
                         "priority": "P1",
-                        "action": "严格止损",
+                        "action": profile["holding_loss_action"],
                         "trigger": f"有效跌破 {ma20:.2f}",
                         "stop_loss_price": round(stop_loss, 2),
                         "reason": "触发风险线",
@@ -237,7 +270,7 @@ class RuleAdapter(BasePredictionModel):
                 "empty": [
                     {
                         "priority": "P1",
-                        "action": "观望为主",
+                        "action": profile["empty_action"],
                         "trigger": f"回调至 {support:.2f} 企稳",
                         "buy_zone_price": round(support, 2),
                         "reason": "等待趋势确认",

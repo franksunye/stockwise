@@ -331,16 +331,14 @@ class SynthesisStep(BaseStep):
         if not parsed.get('confidence') or not isinstance(parsed.get('confidence'), (int, float)):
             parsed['confidence'] = 0.5
 
-        # Layer-1 is the source of truth for direction.
+        # Layer-1 is the source of truth for direction and action language.
         layer1 = d.get('layer1') or {}
         layer1_status = str(layer1.get('status') or "")
         if layer1_status:
             expected_signal = self._layer1_to_signal(layer1_status)
             if parsed.get('signal') != expected_signal:
                 parsed['signal'] = expected_signal
-                parsed['summary'] = (
-                    f"[Layer-1裁决:{layer1_status}] " + str(parsed.get('summary', ''))
-                )[:120]
+            parsed = self._apply_layer1_action_language(parsed, layer1_status)
 
         # 5. LITE MODEL OVERRIDE: Force pre-calculated values (v3.3 Schema)
         model_name = d.get('model_name', '').lower()
@@ -428,6 +426,88 @@ class SynthesisStep(BaseStep):
             return "Side"
         return "Side"
 
+    @staticmethod
+    def _layer1_action_profile(setup_state: str) -> Dict[str, str]:
+        profiles = {
+            "TriggeredLong": {
+                "summary_prefix": "当前进入可尝试建仓区间",
+                "holding_profit_action": "持仓观察",
+                "holding_profit_trigger": "不跌破一防位",
+                "holding_profit_reason": "量价结构仍支持多头尝试，先按纪律持有。",
+                "holding_loss_action": "跌破纪律位应退出",
+                "holding_loss_trigger": "有效跌破一防位",
+                "holding_loss_reason": "入场逻辑被破坏时先退出，避免小错拖大。",
+                "empty_action": "可尝试建仓",
+                "empty_trigger": "回踩企稳或放量确认",
+                "empty_reason": "只在右侧确认后试仓，不做主观抄底。",
+            },
+            "Watch": {
+                "summary_prefix": "当前仅适合继续观察",
+                "holding_profit_action": "持仓观察",
+                "holding_profit_trigger": "不破关键支撑先观察",
+                "holding_profit_reason": "结构未坏，但仍缺少更强确认信号。",
+                "holding_loss_action": "反弹减仓",
+                "holding_loss_trigger": "反抽无力或跌破一防位",
+                "holding_loss_reason": "确认不足时先降风险，不抢方向。",
+                "empty_action": "继续观察",
+                "empty_trigger": "等待放量突破或回踩企稳",
+                "empty_reason": "先看确认，再决定是否出手。",
+            },
+            "RiskOff": {
+                "summary_prefix": "当前进入风险收缩区",
+                "holding_profit_action": "已有仓位应收缩",
+                "holding_profit_trigger": "反弹无力或仍处风险线下方",
+                "holding_profit_reason": "优先收缩风险暴露，而不是继续加码。",
+                "holding_loss_action": "跌破纪律位应退出",
+                "holding_loss_trigger": "有效跌破风险线",
+                "holding_loss_reason": "当前核心任务是止损和控回撤。",
+                "empty_action": "暂停新增仓位",
+                "empty_trigger": "等待重新站回风险线之上",
+                "empty_reason": "风险状态未解除前，不建议新开仓。",
+            },
+            "NoSetup": {
+                "summary_prefix": "当前不建议出手",
+                "holding_profit_action": "持仓观察",
+                "holding_profit_trigger": "无新增催化前不主动加仓",
+                "holding_profit_reason": "没有清晰新机会，先守住已有纪律。",
+                "holding_loss_action": "触发减仓",
+                "holding_loss_trigger": "跌破一防位",
+                "holding_loss_reason": "既然没有新 setup，就更要保护已有仓位。",
+                "empty_action": "不建议出手",
+                "empty_trigger": "等待明确 setup 形成",
+                "empty_reason": "没有 setup 的时候，观望就是动作。",
+            },
+        }
+        return profiles.get(setup_state, profiles["NoSetup"])
+
+    def _apply_layer1_action_language(self, parsed: Dict[str, Any], setup_state: str) -> Dict[str, Any]:
+        profile = self._layer1_action_profile(setup_state)
+        summary = str(parsed.get("summary") or "").strip()
+        summary_prefix = f"[Layer-1裁决:{setup_state}] {profile['summary_prefix']}。"
+        parsed["summary"] = f"{summary_prefix}{summary}"[:160] if summary else summary_prefix[:160]
+
+        tactics = parsed.setdefault("tactics", {})
+        for bucket in ("holding_profit", "holding_loss", "empty"):
+            items = tactics.get(bucket)
+            if not isinstance(items, list) or not items:
+                tactics[bucket] = [{}]
+
+        holding_profit = tactics["holding_profit"][0]
+        holding_profit["action"] = profile["holding_profit_action"]
+        holding_profit["trigger"] = profile["holding_profit_trigger"]
+        holding_profit["reason"] = profile["holding_profit_reason"]
+
+        holding_loss = tactics["holding_loss"][0]
+        holding_loss["action"] = profile["holding_loss_action"]
+        holding_loss["trigger"] = profile["holding_loss_trigger"]
+        holding_loss["reason"] = profile["holding_loss_reason"]
+
+        empty = tactics["empty"][0]
+        empty["action"] = profile["empty_action"]
+        empty["trigger"] = profile["empty_trigger"]
+        empty["reason"] = profile["empty_reason"]
+        return parsed
+
     
     def _clean_and_parse_json(self, text: str) -> Dict[str, Any]:
         """
@@ -468,4 +548,3 @@ class SynthesisStep(BaseStep):
             except Exception as e2:
                 # Retry mechanism handles exceptions at step level
                 raise StepExecutionError(self.step_name, f"Failed to parse JSON: {e}. Repair failed: {e2}")
-

@@ -212,11 +212,16 @@ ORDER BY strategy_version;
 }
 ```
 6. 本地 `quant_tradeability_signals` 历史回灌在大样本下应使用分批提交；不要将接近 `500` 标的的 sidecar 重建一次性放进单事务提交。
-7. 如发现异常，可先关闭方向强制开关排查：
+7. 面向普通投资者的动作语言应基于 Layer-1 状态固定映射，不要在前台临时改口径：
+   - `TriggeredLong -> 可尝试建仓`
+   - `Watch -> 继续观察`
+   - `RiskOff -> 暂停新增仓位 / 已有仓位应收缩`
+   - `NoSetup -> 不建议出手`
+8. 如发现异常，可先关闭方向强制开关排查：
 ```powershell
 $env:LAYER1_SIGNAL_ENFORCE="0"
 ```
-8. 生产观察阶段不直接替换默认版本，先累计 `2~4` 周 `quant_tradeability_signals` 历史后再判断是否切默认。
+9. 生产观察阶段不直接替换默认版本，先累计 `2~4` 周 `quant_tradeability_signals` 历史后再判断是否切默认。
 
 ## 7. v2 Default Promotion Gate
 

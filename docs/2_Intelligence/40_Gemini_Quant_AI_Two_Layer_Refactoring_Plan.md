@@ -326,6 +326,25 @@ Plan 41 的前三步已在本地完成，且不依赖等待未来数周自然积
 
 #### 下一步建议
 
-1. 以当前 `tradeability_v2` 参数作为本地研究默认基线。
-2. 用该基线继续积累更长窗口观测，必要时再做“压 RiskOff”的保守微调。
-3. 在满足 `39_Tradeability_Dual_Lane_Operations.md` 中的 `v2 Default Promotion Gate` 前，不做默认切换。
+1. 以当前 `tradeability_v2` 参数作为本地研究默认基线，并冻结为下一阶段的比较基准。
+2. 下一轮调优目标不再优先追求更高 `TriggeredLong coverage`，而应转向“收益质量优化”：
+   - 降低无效触发和过高的 `Watch -> TriggeredLong`
+   - 控制 `RiskOff` 占比与最大回撤
+   - 优先微调 `vcp_ratio` 与 `strong_close_threshold`，而不是继续大幅放宽进场阈值
+3. 将当前 Layer-1 四状态整理成面向普通投资者可执行的动作语言：
+   - `TriggeredLong -> 可尝试建仓`
+   - `Watch -> 继续观察`
+   - `RiskOff -> 暂停新增仓位 / 已有仓位应收缩`
+   - `NoSetup -> 不建议出手`
+4. 在满足 `39_Tradeability_Dual_Lane_Operations.md` 中的 `v2 Default Promotion Gate` 前，不做默认切换。
+
+#### 下一阶段执行重点（Plan 41.5）
+
+下一阶段的重点，不是让 `v2` “更频繁出手”，而是让 `v2` “更会挑机会，并把防守信号翻译成人能执行的动作建议”。
+
+执行顺序：
+
+1. 先冻结当前 `v2` 为研究基线，不继续做大幅参数漂移。
+2. 再进行一轮收益质量导向的保守微调。
+3. 同步定义并固化普通投资者可理解的动作语言。
+4. 最后再进入线上 sidecar 影子观察，验证动作语言与历史回放是否一致。
