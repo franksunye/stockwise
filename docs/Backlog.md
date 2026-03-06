@@ -15,9 +15,15 @@
 - [ ] **生产验证补齐（运维）**：在 GitHub Actions 触发 `verify_predictions.yml` 并留存 run 链接与结果截图（当前受本地研发策略切换影响，待运维窗口执行）。
 
 ### 0.1 双层架构 #2 稳妥推进（P0，本周）
-- [ ] **Layer-1 状态机最小闭环**：落地 `NoSetup/Watch/TriggeredLong/RiskOff` 的计算与存储字段，不改前端展示。
-- [ ] **参数治理收口**：将阈值统一收敛到 `backend/strategy_config/tradeability_params_v1.json`，禁止散落硬编码。
-- [ ] **验收标准**：以最近 20 交易日样本核验，状态机输出可复现、参数变更可追踪。
+- [x] **Layer-1 状态机最小闭环**：已落地 `NoSetup/Watch/TriggeredLong/RiskOff` 的计算与存储字段，不改前端展示。
+- [x] **参数治理收口**：阈值已统一收敛到 `backend/strategy_config/tradeability_params_v1.json`，移除散落硬编码。
+- [x] **验收标准（阶段一）**：本地 SQLite 已完成可复现验证，状态机输出与参数文件可追踪。
+
+### 0.1.1 双层架构 #2 后续参数迭代（P0，进行中）
+- [ ] **覆盖率提升目标**：将 `TriggeredLong` 覆盖从当前约 `1.51%`（在线口径回放）提升到验收区间 `5%~20%`。
+- [ ] **单参数迭代规则**：每轮仅调整 1 个参数（优先 `breakout_volume_mult`、`momentum_change_threshold`），避免多变量混淆。
+- [ ] **风险护栏**：每轮必须同时复核 `RiskOff` 占比、最大回撤、方向一致率，不允许仅追求 Long 覆盖。
+- [ ] **周度汇报**：通过 `acceptance_weekly` 输出 gate 状态并同步 webhook 结论。
 
 ### 0.2 双层架构 #3 编排改造（P1）
 - [ ] **Runner 流程改造**：先算 Layer-1，再将状态注入 LLM 上下文，替代并行盲猜。

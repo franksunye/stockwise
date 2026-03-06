@@ -83,6 +83,22 @@
    - 输出完整性（summary/reasoning_trace/tactics）
    - 稳定性与耗时
 
+### 4.1 当前在线口径实测基线（SQLite 回放，2026-03-06）
+
+口径：以当前在线 LLM 模型（`deepseek-v3` + `gemini-3-flash` + `hunyuan-lite`）的历史 `ai_predictions_v2` 记录作为基线，对同一批 `symbol+date` 使用 `tradeability_v1` 重算 Layer-1 状态并映射 `Long/Side`。
+
+1. 样本量：`n=1327`（date range: `2025-01-09` ~ `2026-03-05`）
+2. 原始 LLM Long 占比：`0.60%`（`8/1327`）
+3. Layer-1 重算 Long 占比：`1.51%`（`20/1327`）
+4. Long 提升：`+0.90pp`（约 `2.50x`）
+5. 状态分布：
+   - `NoSetup`: `553` (`41.67%`)
+   - `Watch`: `27` (`2.03%`)
+   - `RiskOff`: `727` (`54.79%`)
+   - `TriggeredLong`: `20` (`1.51%`)
+
+结论：Layer-1 已经把“全 Side 黑盒”拆解为可解释的子状态，但当前参数下 `TriggeredLong` 覆盖仍偏低，后续迭代主目标是“在不显著恶化风险的前提下，提高 TriggeredLong 覆盖”。
+
 ---
 
 ## 5. 下一阶段（不改 UI 的前提下）
@@ -90,6 +106,10 @@
 1. 扩展 Layer-1 策略版本（`tradeability_v2`）并保持同一裁决接口。
 2. 增加策略实验框架（v1/v2 并行评估），不改用户前台结构。
 3. 固化观测面板：方向一致率、状态分布、触发率、回撤控制。
+4. 参数调优固化执行顺序（单参数小步迭代）：
+   - 优先放宽进场触发相关阈值（`breakout_volume_mult` / `momentum_change_threshold`），观察 `TriggeredLong coverage`。
+   - 同步监控 `RiskOff` 占比与最大回撤，避免以覆盖率换风险失控。
+   - 每轮仅改 1 个参数，按周固化决策日志。
 
 ---
 
