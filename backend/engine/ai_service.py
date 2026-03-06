@@ -25,6 +25,10 @@ def generate_ai_prediction(symbol: str, today_data: pd.Series, mode: str = 'ai',
     This function is kept for legacy compatibility. New production pipeline uses
     backend.engine.runner.PredictionRunner.
     """
+    logger.warning(
+        "⚠️ [DEPRECATED] ai_service.generate_ai_prediction is legacy-only. "
+        "Use PredictionRunner via backend.analysis.runner/backfill."
+    )
     today_str = today_data.get('date')
     if not today_str:
         return None
@@ -210,7 +214,14 @@ def _fetch_daily_history_for_layer1(cursor, symbol: str, date: str) -> list[dict
 
 
 def _process_and_store_prediction(symbol, date, ai_result, model="rule-based"):
-    """Store prediction to ai_predictions_v2 only (legacy table write frozen)."""
+    """
+    Legacy storage path retained for backward compatibility only.
+    New writes should go through PredictionRunner.
+    """
+    logger.warning(
+        "⚠️ [DEPRECATED] ai_service._process_and_store_prediction called; "
+        "prefer PredictionRunner path for new code."
+    )
     conn = get_connection()
     cursor = conn.cursor()
 
