@@ -5,8 +5,8 @@ name: Daily Brief & Push (Global)
 # 安全：通过 Trading Day Gate 闸门确保仅在交易日执行
 
 on:
-  schedule:
-    - cron: '30 9 * * 1-5'  # CST 17:30 (M-F)
+  # schedule:
+  #   - cron: '30 9 * * 1-5'  # CST 17:30 (M-F)
   workflow_dispatch:
     inputs:
       symbols:
