@@ -94,3 +94,34 @@
 2.  **基建筹备**: 拉取数据，先用伪代码验证量化触发逻辑的收益率是否真实存在 **(Phase 1)**。
 3.  **核心剥离**: 修改 AI 推理链，强灌溉量化状态，观测其生成的战术文本质量改变 **(Phase 2)**。
 4.  **门面翻新**: 最后升级 UI **(Phase 3)**。
+
+---
+
+## 执行进度同步（2026-03-06）
+
+### A. 已完成（#1 止血）
+
+- **Action 0.1 已完成**：`backend/engine/validator.py` 的 `Side` 判定更正为 `abs(cumulative_change) <= NOISE_THRESHOLD`。
+- **Action 0.2 已完成（第一阶段）**：`backend/engine/ai_service.py` 去除硬编码强制降级，改为可配置风控模式：
+  - `AI_CIRCUIT_MODE=warn`（默认，记录低置信度但不改信号）
+  - `AI_CIRCUIT_MODE=force_side`（兼容旧行为）
+  - `AI_CIRCUIT_MODE=off`（关闭该护栏）
+- **测试补强**：新增 `backend/tests/test_ai_service_guardrail_modes.py`，覆盖 `warn/force_side/off` 三种模式。
+- **代码合入状态**：提交 `ef89bd1` 已推送 `main`。
+
+### B. 验证证据（研发口径：本地 SQLite）
+
+- 单测通过：`python -m pytest backend/tests/test_ai_service_guardrail_modes.py backend/tests/test_ai_service_v2_storage.py -q`，结果 `4 passed`。
+- 本地强制校验：`$env:DB_SOURCE='local'; python backend/main.py --verify --force`，结果 `Validation Complete: 495 predictions updated`。
+- 近 10 天窗口复核：`signal='Side' AND validation_status='Correct' AND actual_change < -1.0` 结果为 `0`（本地库）。
+
+### C. 当前风险与口径
+
+- `verify_all_pending` 默认只覆盖近 10 天窗口；历史更早数据若需完全重算，应单独执行历史批处理方案。
+- 生产库全量回写在一次性长连接下曾出现连接重置，建议按 `target_date` 分批触发 GitHub Actions `verify_predictions.yml`。
+
+### D. 下一步（对齐战略/工程/Spec）
+
+1. 推进 **Phase 1**：先落地 Layer-1 状态机与参数治理，不直接改 UI 主路径。
+2. 推进 **Phase 2**：将 Runner 改为“先量化、后 AI”流水线，固定职责边界。
+3. 推进 **Phase 3**：按 Spec 40 做展示层改造，保持 SWR 零闪烁约束不回归。

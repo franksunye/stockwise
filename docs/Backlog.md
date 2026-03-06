@@ -4,6 +4,28 @@
 
 ---
 
+## 🔥 当前最高优先级 (Sprint 10: 双层架构止血与稳态推进)
+
+### 0. 双层架构 #1 止血修复（P0，已完成）
+- [x] **修复 Side 判定绝对值漏洞**：`backend/engine/validator.py` 已改为 `abs(cumulative_change) <= NOISE_THRESHOLD`，避免暴跌样本误标 `Correct`。
+- [x] **解除硬编码一刀切降级**：`backend/engine/ai_service.py` 已将风控熔断改为可配置模式（`warn` / `force_side` / `off`），默认 `warn` 保留方向信号。
+- [x] **补齐回归测试**：新增 `backend/tests/test_ai_service_guardrail_modes.py`，覆盖三种 guardrail 模式。
+- [x] **代码已合入主干**：提交 `ef89bd1` 已推送 `origin/main`。
+- [x] **本地验证闭环（SQLite）**：`$env:DB_SOURCE='local'; python backend/main.py --verify --force` 通过，`Validation Complete: 495 predictions updated`。
+- [ ] **生产验证补齐（运维）**：在 GitHub Actions 触发 `verify_predictions.yml` 并留存 run 链接与结果截图（当前受本地研发策略切换影响，待运维窗口执行）。
+
+### 0.1 双层架构 #2 稳妥推进（P0，本周）
+- [ ] **Layer-1 状态机最小闭环**：落地 `NoSetup/Watch/TriggeredLong/RiskOff` 的计算与存储字段，不改前端展示。
+- [ ] **参数治理收口**：将阈值统一收敛到 `backend/strategy_config/tradeability_params_v1.json`，禁止散落硬编码。
+- [ ] **验收标准**：以最近 20 交易日样本核验，状态机输出可复现、参数变更可追踪。
+
+### 0.2 双层架构 #3 编排改造（P1）
+- [ ] **Runner 流程改造**：先算 Layer-1，再将状态注入 LLM 上下文，替代并行盲猜。
+- [ ] **Prompt 职责降维**：方向由量化定，LLM 只负责战术解释与风险沟通。
+- [ ] **验收标准**：A/B 对照下，方向一致性与解释稳定性提升且不回归性能。
+
+---
+
 ## 🔥 当前最高优先级 (Sprint 9: 执行团队产品化与系统露出)
 
 ### 0. 执行团队拟人化露出收口（P0）
@@ -147,4 +169,4 @@
 
 ---
 
-**最后更新**: 2026-03-04
+**最后更新**: 2026-03-06
