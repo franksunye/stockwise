@@ -51,6 +51,12 @@ export interface AIPrediction {
         max_perf: number;
     } | string;
     max_perf_in_window?: number;
+    layer1_status?: 'NoSetup' | 'Watch' | 'TriggeredLong' | 'RiskOff';
+    layer1_score?: number;
+    layer1_trigger_hit?: number;
+    layer1_risk_off_hit?: number;
+    layer1_strategy_version?: string;
+    layer1_payload?: string;
     model?: string; // model_id (legacy or identifier)
     display_name?: string; // Display name from DB
     is_primary?: number | boolean; // Whether it is the primary prediction

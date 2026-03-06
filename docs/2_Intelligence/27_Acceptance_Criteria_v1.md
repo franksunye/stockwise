@@ -1,91 +1,71 @@
-# StockWise 验收标准 v1.0（达标定义）
+# StockWise 验收标准 v1.1（两层架构）
 
 **文档状态**: Active  
 **日期**: 2026-03-06  
-**作者**: Codex  
-**用途**: 定义“量化 + AI”策略上线是否达标，避免主观判断。
+**用途**: 定义“量化 + AI”上线达标条件，统一战略与工程口径。
 
 ---
 
 ## 1. 适用范围
 
-1. 策略形态：`NoSetup / Watch / TriggeredLong / RiskOff` 状态机  
-2. 周期：短期（1-10 日）优先，中期和长期按同一框架扩展  
-3. 评估口径：必须使用成本后结果（含手续费、滑点近似）
+1. Layer-1 状态机：`NoSetup / Watch / TriggeredLong / RiskOff`
+2. Layer-2 输出：`summary + reasoning_trace + tactics + key_levels`
+3. 评估口径：成本后结果（含手续费、滑点近似）
 
 ---
 
-## 2. Level 1：上线合格线（当前目标）
+## 2. Level-1（上线门槛）
 
-### 2.1 交易能力
+### 2.1 方向一致性（强约束）
 
-1. `TriggeredLong` 覆盖率：`5% ~ 20%`  
+1. 对所有带 `layer1_status` 的预测记录：
+   - `TriggeredLong -> signal=Long`
+   - `NoSetup/Watch/RiskOff -> signal=Side`
+2. 一致率门槛：`>= 99.5%`（目标 100%）
+
+### 2.2 交易能力
+
+1. `TriggeredLong` 覆盖率：`5% ~ 20%`
 2. `Watch -> TriggeredLong` 转化率：`15% ~ 40%`
 
-### 2.2 收益质量
+### 2.3 收益质量
 
-1. 成本后 `Expectancy > 0`  
-2. `Payoff = avg_win / avg_loss >= 1.3`  
+1. `Expectancy > 0`
+2. `Payoff >= 1.3`
 3. 短线 `T+3` 胜率 `>= 52%`
 
-### 2.3 风险控制
+### 2.4 风险控制
 
-1. 单笔最大亏损 `<= 1R`（R 为预设风险单位）  
-2. 策略 `MDD` 不高于旧版基线的 `80%`  
-3. 连续亏损触发降仓后，后续回撤斜率应下降
+1. 单笔最大亏损 `<= 1R`
+2. 策略 MDD 不高于旧基线的 `80%`
 
-### 2.4 稳定性（AI 特有）
+### 2.5 输出完整性（用户体验保护）
 
-1. 同输入多次推理，状态一致率 `>= 90%`  
-2. 未达一致率阈值时，自动降级到 `Watch`
-
-### 2.5 统计验证
-
-1. 至少 `3` 个 walk-forward 窗口  
-2. 每个窗口都需满足：`Expectancy > 0` 且 `MDD` 在阈内  
-3. 若任一窗口不满足，不判定达标
-
-### 2.6 校准运营一致性（Dual-Lane）
-
-1. 周度校准产物中，`best_robust_score` 连续 `2-3` 周稳定优于 `base_robust_score`
-2. 参数升级必须走“人工审核 + PR 合并”，禁止自动覆盖生产参数
-3. 若分数优势不稳定，则保持 `backend/strategy_config/tradeability_params_v1.json` 不变
+1. `reasoning_trace` 步数完整（目标 6 步）
+2. `tactics` 三场景完整：`holding_profit / holding_loss / empty`
+3. 缺失率需低于阈值（建议 `< 0.5%`）
 
 ---
 
-## 3. Level 2：行业优秀线（中长期目标）
+## 3. Level-2（中长期优秀线）
 
-在 Level 1 全满足基础上，追加：
-
-1. 风险调整收益显著提升（相对简单趋势基线）  
-2. 跨市场/跨板块/跨周期稳健  
-3. 容量与冲击成本可解释（可放大而不失真）  
-4. 显著性检验通过（防数据挖掘幻觉）
-
-说明：Level 2 不是立即上线门槛，而是 6-18 个月迭代目标。
+1. 跨市场/跨板块/跨周期稳定
+2. 风险调整收益显著优于简单趋势基线
+3. 显著性检验通过（防数据挖掘幻觉）
 
 ---
 
-## 4. 行业内评价口径
+## 4. 验收结论模板（周复用）
 
-1. Level 1：行业内属于“可上线、可复现、可风控”的务实标准  
-2. Level 2：行业内可归为“优秀/机构化标准”候选  
-3. 仅命中率高但成本后无正期望，不算达标
-
----
-
-## 5. 验收结论模板（每周复用）
-
-1. 本周是否满足 Level 1：`Yes/No`  
-2. 未达标项清单：逐项列出  
-3. 修复动作：下周实验计划与责任人  
+1. 是否满足 Level-1：`Yes/No`
+2. 未达标项：逐项列出
+3. 下周修复动作与责任人
 4. 是否允许扩大实盘权重：`Yes/No`
 
 ---
 
-## 6. 与现有文档关系
+## 5. 文档关系
 
-1. 运行口径见：`39_Tradeability_Dual_Lane_Operations.md`  
-2. 改造计划见：`40_Gemini_Quant_AI_Two_Layer_Refactoring_Plan.md`  
-3. 研究边界见：`27_DeepSeek_V3_Rich_Context_Limits.md`  
-4. 本文档只定义“什么叫达标”
+1. 运行手册：`39_Tradeability_Dual_Lane_Operations.md`
+2. 重构计划：`40_Gemini_Quant_AI_Two_Layer_Refactoring_Plan.md`
+3. 本文只定义“什么叫达标”，不承担运行步骤说明。

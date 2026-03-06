@@ -45,6 +45,7 @@ export async function GET(request: Request) {
                         WITH RankedPredictions AS (
                             SELECT p.symbol, p.date, p.target_date, p.signal, p.confidence,
                                     p.support_price, p.ai_reasoning, p.validation_status, p.actual_change,
+                                    p.layer1_status, p.layer1_score, p.layer1_trigger_hit, p.layer1_risk_off_hit, p.layer1_strategy_version, p.layer1_payload,
                                     p.max_perf_in_window,
                                     p.is_primary, p.model_id as model, m.display_name,
                                     ROW_NUMBER() OVER (PARTITION BY p.symbol, p.target_date ORDER BY m.priority DESC) as rn_daily
@@ -153,6 +154,7 @@ export async function GET(request: Request) {
                         WITH RankedPredictions AS (
                             SELECT p.symbol, p.date, p.target_date, p.signal, p.confidence,
                                     p.support_price, p.ai_reasoning, p.validation_status, p.actual_change,
+                                    p.layer1_status, p.layer1_score, p.layer1_trigger_hit, p.layer1_risk_off_hit, p.layer1_strategy_version, p.layer1_payload,
                                     p.max_perf_in_window,
                                     p.is_primary, p.model_id as model, m.display_name,
                                     ROW_NUMBER() OVER (PARTITION BY p.symbol, p.target_date ORDER BY m.priority DESC) as rn_daily

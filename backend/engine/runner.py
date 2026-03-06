@@ -3,6 +3,7 @@ import logging
 import uuid
 import json
 import traceback
+import os
 from typing import List, Dict, Any
 from datetime import datetime
 
@@ -12,6 +13,7 @@ from backend.trading_calendar import get_next_trading_day_str
 
 from backend.db_repo.queries import SAVE_PREDICTION_V2_QUERY, CHECK_PREDICTION_V2_EXISTS_QUERY
 from backend.engine.context import SessionContext
+from backend.engine.layer1_state import build_layer1_snapshot
 from backend.logger import logger
 from backend.engine.metaphor import metaphor_engine
 
@@ -77,12 +79,26 @@ class PredictionRunner:
         # 3. Parallel Execution (The Race)
         tasks = []
         from backend.engine.prompts import fetch_ai_history_for_model
+        layer1_snapshot = build_layer1_snapshot(symbol=symbol, daily_history=data.get("daily_prices") or [])
+        layer1_payload_json = json.dumps(layer1_snapshot.payload, ensure_ascii=False)
+        logger.info(
+            f"🧭 [{trace_id}] Layer1={layer1_snapshot.setup_state} "
+            f"(score={layer1_snapshot.opportunity_score}, strategy={layer1_snapshot.strategy_version})"
+        )
         
         for model in models:
             # Model-specific data context: each model reviews its own history
             model_specific_data = data.copy() if data else {}
             # Ensure trace_id is available to models if they need it
             model_specific_data['trace_id'] = trace_id
+            model_specific_data['layer1'] = {
+                "status": layer1_snapshot.setup_state,
+                "score": layer1_snapshot.opportunity_score,
+                "trigger_rule_hit": layer1_snapshot.trigger_rule_hit,
+                "risk_off_hit": layer1_snapshot.risk_off_hit,
+                "strategy_version": layer1_snapshot.strategy_version,
+                "payload": layer1_snapshot.payload,
+            }
             
             try:
                 # Use ctx for model history caching
@@ -209,7 +225,13 @@ class PredictionRunner:
                     pred.get('support_price'), pred.get('pressure_price'), pred.get('reasoning'),
                     pred.get('prompt_version', 'v1'), # Validated version from Adapter
                     pred.get('token_usage_input', 0), pred.get('token_usage_output', 0),
-                    pred.get('execution_time_ms', 0), is_primary, trace_id
+                    pred.get('execution_time_ms', 0), is_primary, trace_id,
+                    layer1_snapshot.setup_state,
+                    layer1_snapshot.opportunity_score,
+                    layer1_snapshot.trigger_rule_hit,
+                    layer1_snapshot.risk_off_hit,
+                    layer1_snapshot.strategy_version,
+                    layer1_payload_json,
                 ))
                 saved_count += 1
             except Exception as e:
@@ -249,6 +271,11 @@ class PredictionRunner:
             result = await model.predict(symbol, date, data)
             if result is None:
                 return None
+
+            # Layer-1 is the single source of directional truth.
+            # Model output may keep tactical narrative freedom, but signal is enforced.
+            layer1 = data.get("layer1") or {}
+            result = _enforce_layer1_direction(result, layer1)
             
             # 3. Guard: Reject error results from being treated as valid predictions
             # This prevents API errors (e.g. "Fatal Error: HTTP 403...") from being
@@ -276,3 +303,33 @@ class PredictionRunner:
             logger.error(f"❌ Model {model.model_id} failed: {e}")
             return None
 
+
+def _layer1_to_signal(setup_state: str) -> str:
+    if setup_state == "TriggeredLong":
+        return "Long"
+    if setup_state in {"NoSetup", "Watch", "RiskOff"}:
+        return "Side"
+    return "Side"
+
+
+def _is_truthy_env(name: str, default: str = "1") -> bool:
+    raw = os.getenv(name, default).strip().lower()
+    return raw in {"1", "true", "yes", "on"}
+
+
+def _enforce_layer1_direction(result: Dict[str, Any], layer1: Dict[str, Any]) -> Dict[str, Any]:
+    setup_state = str(layer1.get("status") or "")
+    expected = _layer1_to_signal(setup_state)
+    signal = result.get("signal", "Side")
+
+    # Keep a kill-switch for emergency rollback in production.
+    if not _is_truthy_env("LAYER1_SIGNAL_ENFORCE", "1"):
+        return result
+
+    if signal != expected:
+        logger.warning(
+            f"🧱 Layer1 signal enforced: model={signal} -> layer1={expected} "
+            f"(status={setup_state})"
+        )
+        result["signal"] = expected
+    return result

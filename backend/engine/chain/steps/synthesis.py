@@ -13,6 +13,17 @@ class SynthesisStep(BaseStep):
     async def build_prompt(self, context: ChainContext) -> str:
         d = context.input_data
         ai_history = d.get('ai_history', [])
+        layer1 = d.get('layer1') or {}
+        layer1_status = str(layer1.get('status') or "")
+        layer1_signal = self._layer1_to_signal(layer1_status)
+        layer1_instruction = ""
+        if layer1_status:
+            layer1_instruction = (
+                f"\n## Layer-1 系统裁决（硬约束）\n"
+                f"- 量化状态: {layer1_status}\n"
+                f"- 系统信号: {layer1_signal}\n"
+                f"- 说明: 方向已由 Layer-1 决定，你只负责解释与战术，不得改写方向。"
+            )
         
         # --- Dynamic Key Levels Calculation ---
         daily_prices = d.get('daily_prices', [])
@@ -83,7 +94,7 @@ class SynthesisStep(BaseStep):
             # 1. Extract Score from prior_analysis (Python-side Logic)
             import re
             score_match = re.search(r"综合评分:\s*([+\-]?\d+)", prior_analysis)
-            calculated_signal = "Side" # Default
+            calculated_signal = layer1_signal if layer1_status else "Side"
             calculated_conf = 0.5
             score_val = 0
             
@@ -92,10 +103,11 @@ class SynthesisStep(BaseStep):
                     score_val = int(score_match.group(1))
                     abs_score = abs(score_val)
                     
-                    # Signal Logic
-                    if score_val >= 4: calculated_signal = "Long"
-                    elif score_val <= -4: calculated_signal = "Short"
-                    else: calculated_signal = "Side"
+                    # Signal Logic: when Layer-1 exists, direction is fixed by system.
+                    if not layer1_status:
+                        if score_val >= 4: calculated_signal = "Long"
+                        elif score_val <= -4: calculated_signal = "Short"
+                        else: calculated_signal = "Side"
                     
                     # Confidence Logic (Deterministic)
                     if abs_score >= 4: calculated_conf = 0.85
@@ -137,6 +149,7 @@ class SynthesisStep(BaseStep):
 {prediction_review}
 
 {prior_analysis}
+{layer1_instruction}
 
 ---
 ## ⚠️ 数据锚定校验 (CRITICAL - 必须使用以下数值)
@@ -190,6 +203,7 @@ class SynthesisStep(BaseStep):
 整合所有信息（日线/周线/月线），生成最终操作建议。
 {prediction_review}
 {prior_analysis}
+{layer1_instruction}
 
 ## 核心逻辑 (Conservative Trader)
 1. **风险厌恶**：只要有"背离"或"多周期冲突"，默认"Side"（观望）。
@@ -317,6 +331,17 @@ class SynthesisStep(BaseStep):
         if not parsed.get('confidence') or not isinstance(parsed.get('confidence'), (int, float)):
             parsed['confidence'] = 0.5
 
+        # Layer-1 is the source of truth for direction.
+        layer1 = d.get('layer1') or {}
+        layer1_status = str(layer1.get('status') or "")
+        if layer1_status:
+            expected_signal = self._layer1_to_signal(layer1_status)
+            if parsed.get('signal') != expected_signal:
+                parsed['signal'] = expected_signal
+                parsed['summary'] = (
+                    f"[Layer-1裁决:{layer1_status}] " + str(parsed.get('summary', ''))
+                )[:120]
+
         # 5. LITE MODEL OVERRIDE: Force pre-calculated values (v3.3 Schema)
         model_name = d.get('model_name', '').lower()
         if 'lite' in model_name:
@@ -395,6 +420,14 @@ class SynthesisStep(BaseStep):
         if "signal" not in parsed:
             raise ValueError("JSON missing 'signal' field")
             
+    @staticmethod
+    def _layer1_to_signal(setup_state: str) -> str:
+        if setup_state == "TriggeredLong":
+            return "Long"
+        if setup_state in {"NoSetup", "Watch", "RiskOff"}:
+            return "Side"
+        return "Side"
+
     
     def _clean_and_parse_json(self, text: str) -> Dict[str, Any]:
         """
@@ -435,3 +468,4 @@ class SynthesisStep(BaseStep):
             except Exception as e2:
                 # Retry mechanism handles exceptions at step level
                 raise StepExecutionError(self.step_name, f"Failed to parse JSON: {e}. Repair failed: {e2}")
+

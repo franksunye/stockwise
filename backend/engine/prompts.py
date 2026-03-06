@@ -521,6 +521,14 @@ def prepare_stock_analysis_prompt(symbol: str, as_of_date: str = None, ctx: Dict
         context_instruction = f"👉 **回填模式**：请假装今天是 {data['date']}。仅基于提供的数据判断。"
     else:
         context_instruction = f"👉 **实时分析**：今天是 {data['date']}。请基于提供的数据判断。"
+    layer1 = ctx.get("layer1") or {}
+    layer1_status = str(layer1.get("status") or "")
+    if layer1_status:
+        forced_signal = "Long" if layer1_status == "TriggeredLong" else "Side"
+        context_instruction += (
+            f"\n👉 **Layer-1 硬约束**：当前量化状态={layer1_status}，系统裁决信号={forced_signal}。"
+            "你的职责是解释原因、给战术计划与风控，不得改写方向。"
+        )
 
     # Get Version
     from backend.templating import get_template_version
