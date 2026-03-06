@@ -1,6 +1,8 @@
 import { ShieldCheck, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { headers } from 'next/headers';
+import { redirect } from 'next/navigation';
 import Multiavatar from '@/components/Multiavatar';
 import MarketingFooter from '@/components/MarketingFooter';
 import MarketingHeader from '@/components/MarketingHeader';
@@ -8,7 +10,29 @@ import { agentTeam, founders } from '@/lib/agent-team';
 import { BoundaryNotice, GeoSummary, SourceBlock } from '@/components/seo/GeoBlocks';
 import { brandCoreZhCN } from '@/content/brand-core.zh-CN';
 
-export default function LandingPage() {
+function normalizeHost(raw: string | null | undefined): string | null {
+  if (!raw) return null;
+  const first = raw.split(',')[0]?.trim().toLowerCase();
+  if (!first) return null;
+  const withoutScheme = first.replace(/^https?:\/\//, '');
+  return withoutScheme.split(':')[0] || null;
+}
+
+export default async function LandingPage() {
+  const requestHeaders = await headers();
+  const hostCandidates = [
+    normalizeHost(requestHeaders.get('x-forwarded-host')),
+    normalizeHost(requestHeaders.get('host')),
+  ].filter((v): v is string => Boolean(v));
+
+  const isAppDomain = hostCandidates.some(
+    (host) => host === 'app.ziso.cc' || host.startsWith('app.')
+  );
+
+  if (isAppDomain) {
+    redirect('/dashboard');
+  }
+
   return (
     <div className="min-h-screen bg-[#050508] text-white overflow-x-hidden font-sans">
       {/* 动态背景 */}
