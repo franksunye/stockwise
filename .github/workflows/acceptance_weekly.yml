@@ -1,0 +1,66 @@
+name: Acceptance Weekly Snapshot
+
+on:
+  schedule:
+    - cron: "10 2 * * 0"
+  workflow_dispatch:
+    inputs:
+      week_end:
+        description: "YYYY-MM-DD (optional)"
+        type: string
+        required: false
+        default: ""
+      notify:
+        description: "Send webhook summary"
+        type: boolean
+        required: false
+        default: true
+
+jobs:
+  weekly-acceptance:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Run Weekly Acceptance Report
+        env:
+          PYTHONUNBUFFERED: "1"
+          DB_SOURCE: cloud
+          TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+          WECOM_ROBOT_KEY: ${{ secrets.WECOM_ROBOT_KEY }}
+        run: |
+          mkdir -p tmp/acceptance_metrics
+          END_ARG=""
+          if [ -n "${{ inputs.week_end }}" ]; then
+            END_ARG="--week-end ${{ inputs.week_end }}"
+          fi
+          NOTIFY_ARG=""
+          if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ inputs.notify }}" = "true" ]; then
+            NOTIFY_ARG="--notify"
+          fi
+          python -u backend/scripts/metrics_acceptance_weekly.py \
+            $END_ARG \
+            --output-json tmp/acceptance_metrics/acceptance_weekly.json \
+            --output-md tmp/acceptance_metrics/acceptance_weekly.md \
+            $NOTIFY_ARG
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: acceptance-weekly-snapshot
+          path: tmp/acceptance_metrics/acceptance_weekly.*
+          if-no-files-found: error
+          retention-days: 21
