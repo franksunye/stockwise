@@ -12,53 +12,44 @@
 ---
 
 ## 1. 核心目标 (The Goal)
-在 UI 层面上彻底终结系统内的“AI 议会投票制”，重构为 **“量化先决雷达 (Layer-1) + AI 释义参谋 (Layer-2)”** 的主从体系。消除用户面对众口难调的 AI 时的茫然，赋予量化结论最高视觉权重与压迫感。
+在不破坏现有高质量 UI 体验的前提下，通过**微妙的兵法级文案修订 (Semantic Text Changes)** 与 **团队服务模式的转换 (Team Service Narrative)**，将旧的“单个AI孤立喊单”体系，升级为“小组协作服务（顾深+程矩 / 林序+程矩）”的心智模型。用极简的文字进化，匹配底层双层量化引擎的威力。
 
 ---
 
 ## 2. UI 重构蓝图 (Refactoring Blueprint)
 
-### 2.1 顶部：Layer-1 量化雷达屏 (The Quant Radar)
-- **定位**：原地将当前的 Consensus Header 升级为“量化雷达大屏”。
-- **数据源绑定**：响应后台传入的全局字段（如 `layer1_status`），它不再是下方 AI 的“计票结果”，而是一张不可违背的“法院判决书”。
-- **视觉映射 (UI Mappings)**：
-    - `TriggeredLong` (战机确认)：卡片背景置换为强烈的 `bg-emerald-500/10 border-emerald-500/30`。在组件最右侧，引入带有 `animate-ping` 的脉冲指示灯，营造“猎物出现立刻开火”的临场感。
-    - `RiskOff` (纪律防守)：背景置换为 `bg-rose-500/10 border-rose-500/30`。文案采用极具红线意味的警告，例如 "红线跌破 · 立刻防守"，取代原来的 "共振" 说辞。
-    - `Watch` (重点盯防)：使用警醒的 `bg-amber-500/10`。
-    - `NoSetup` (查无战机)：回退回现有的 `bg-white/5` 默认玻璃态。
-- **透明度微交互**：允许用户点击这个强导向的雷达屏，向下展开一个不抢眼的解释层（`text-[10px] text-slate-500`），纯粹输出量化算子：`Engine: [Vol-Contraction / MA20 Breakout]`。
+### 2.1 语义演进：首页强宣发
+- **动作**：`StockDashboardCard.tsx` 中的司令部 `H2` 呈现纯文字级别的替换。
+- **映射**：
+    - `Long` -> **`战机触发`**
+    - `Short` -> **`纪律防守`**
+    - `Side` -> **`重点盯防`**
+    - `Null` -> **`查无战机`**
+- **原则**：只改字，不加戏。原有的 `COLORS.up/down/hold` 的绿/红/黄配色以及极简体验原样保留。
 
-### 2.2 下方：Layer-2 战术参谋团 (The Tactical Council)
-- **定位**：改造目前的“成员卡片列表”。
-- **核心手术：剥夺明文决策权**
-    - 隐藏原版每个模型卡片右上角的胶囊指示器（原：`bg-emerald-500/20 text-emerald-400` 的 `做多/做空` 标签）。
-    - 既然大方向已由量化雷达圈定，AI 就不配再发方向性质的指令，它们的职责转向 **“定性解释与风险推演”**。
-- **重心转移**：
-    - 因为没有了右上角的胶囊标签，UI 的负空间可以让给 `ai_reasoning`（推理文本段），我们可以适当放宽 `line-clamp-2` 限制，鼓励更深度的展示（比如 `line-clamp-3`）。
-    - 保留现有的 `isPrimary` 背景高亮逻辑（`bg-indigo-500/10`），维持不同职级员工的汇报主次顺序。
+### 2.2 工作组织演进：从单打独斗到“小组服务”
+- **定位**：`AICouncil.tsx` 与 `TacticalBriefDrawer.tsx` 不再是散装的 AI 名单，而是正式呈现为“执行团队的小组服务”。
+- **表现**：
+    - **体现协同**：在战术简报和投研决议中，文案及角色名需侧面体现这是“程矩(量化)提供触发红线，顾深/林序(AI)提供推演”的团队包裹服务。
+    - **无痛过渡**：依然沿用目前的卡片流和抽屉展开模式，只在数据组装上确保输出的是“小组打配合”的报告，而不是个人盲猜的报告。
 
 ---
 
-## 3. 首屏枢纽重构 (The Dashboard Core)
+## 4. 全局体验改造矩阵 (UX Modification Matrix)
 
-`StockDashboardCard.tsx` 是用户第一眼看到的战斗屏。必须移除其中旧版 AI 直接下达方向指令的视觉遗留。
+为了在开发阶段能够逐页面核对，并将视觉效果具象化，特制定此表：
 
-### 3.1 顶层定调：量化状态接管主视觉
-- **动作**：接管目前核心的 `<h2>` （现在的文案是：`建议做多 / 建议避险 / 建议观望`）。
-- **文案与颜色映射 (The H2 Replacement)**：
-    - 旧：`建议做多` -> 新：**`战机触发`** (TriggeredLong) 配合 `COLORS.up` (Emerald)。
-    - 旧：`建议避险` -> 新：**`纪律防守`** (RiskOff) 配合 `COLORS.down` (Rose)。
-    - 旧：`建议观望` -> 新：**`重点盯防`** (Watch) 配合 `COLORS.hold` (Amber)。
-    - `NoSetup` 则显示为“查无战机” (Slate)。
-- **视觉增强**：在 `TriggeredLong` 和 `RiskOff` 这种具有绝对偏向性的阶段，触发卡片整体容器的 `warning-pulse` 类，让整个界面具有压迫感。
-
-### 3.2 参谋卡片层 (The Center Card)
-- **动作**：保持点击展开 `TacticalBriefDrawer` 的能力不变。
-- **UI 强调**：既然顶层 H2 已经确定了“买/卖/停”，该区块的核心展示应该收敛到 `tacticalData.summary` 和 `support_price`，并用类似“AI 评估确认”之类的文案，体现 AI 作为“副手”的核验作用。
+| 组件文件 (Component)          | 改造区域 (Target Area) | 现状 (As-Is)                                     | 目标 (To-Be)                                                         | 视觉特效规范 (Visuals & Tailwind)            | 旧数据回退逻辑 (Fallback) |
+| :---------------------------- | :--------------------- | :----------------------------------------------- | :------------------------------------------------------------------- | :------------------------------------------- | :------------------------ |
+| **`StockDashboardCard.tsx`**  | 顶层核心结论 (`H2`)    | 显示 `建议做多` / `建议避险` 等字样              | 语义变更为量化风格文字：`战机触发` / `重点盯防` / `纪律防守`         | 保持现有颜色与排版视觉，不增加干扰。         | 无缝兼容旧数据。          |
+| **`StockDashboardCard.tsx`**  | 中部 AI 摘要卡片       | 文案显示 `要点速递`                              | 保持不变。                                                           | 保持原有的全部玻璃态逻辑，不作任何 UI 修改。 | 完全兼容旧版摘要展示。    |
+| **`AICouncil.tsx`**           | 顶部共识区 (`Header`)  | `x席 投研决议` 与 类似 `倾向做多` 的投票结果展示 | 保持原样，借用现有心智展示最终团队共识。                             | 保持目前极致的极简深色模式 UI。              | 对旧数据完全无痛。        |
+| **`AICouncil.tsx`**           | 下方成员卡片列表       | 独立工作的成员报告展示                           | 展示为“小组服务”协同推演（如顾深+程矩）。                            | 保持现有高亮逻辑（`isPrimary`）。            | 对旧数据完全无痛。        |
+| **`TacticalBriefDrawer.tsx`** | 战术抽屉 (Drawer)      | 一人的长篇独立分析                               | 文案结构与署名上体现为“小组服务结果”，例如程矩出点位、林序解释逻辑。 | 原有 markdown 渲染层保持不变。               | -                         |
 
 ---
 
-## 4. 前后端契约与容错 (Client-Server Contract)
+## 5. 前后端契约与容错 (Client-Server Contract)
 由于该挂载在 `Feed` 上的组件还会被用于查看半年甚至一年前的历史数据，必须考虑**向后兼容 (Backward Compatibility)**。
 
 *   **API 与 DB 调整**：确保 `/api/predictions?mode=full` 及数据库 `ai_predictions_v2` 在返回时，附加 `layer1_status`。而针对前端的 `AIPrediction` TypeScript Interface 也需增加对应字段。
@@ -69,8 +60,6 @@
 ---
 
 ## 5. 验收标准 (Done)
-- [ ] `StockDashboardCard.tsx` 与 `AICouncil.tsx` 可无缝兼容携带 Layer-1 的新账本数据与旧的纯 AI 数据。
-- [ ] 顶部雷达 / 首屏 H2 在 `TriggeredLong/RiskOff` 触发下，精准复用现有的 Tailwind 环保色板（Emerald/Rose），且带有 `animate-ping` 或 `warning-pulse` 呼吸动效。
-- [ ] 成员卡片右上角的“方向标签”在新模式下已被剥除，文案空间被放大，但原有的 `isPrimary` 主位视觉（Indigo）得到保留。
-- [ ] 改造过程 `isMounted` 与 `SWR Cache` 防丧尸泄露机制完好无损。
+- [ ] 确保前端架构（`StockDashboardCard`, `AICouncil`）在不修改 UI 的前提下，平滑兼容包含或不包含 `layer1_status` 的新老 API 数据。
+- [ ] 量化层的重构主要聚焦在 `backend/engine` 中，对最终输出给前端的 `predictions` 的包装，而非打碎重做前台。
 
