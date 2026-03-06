@@ -8,7 +8,6 @@ import { StockData, AIPrediction, MarketAlmanacData } from '@/lib/types';
 import { 
   StockVerticalFeed,
   BriefDrawer,
-  COLORS,
   MarketAlmanacFeed,
   type MarketAlmanacHandle
 } from '@/components/dashboard';
@@ -20,6 +19,7 @@ import { useStocks } from '@/context/StockContext';
 import { useTikTokScroll } from '@/hooks/useTikTokScroll';
 
 import { useUserProfile } from '@/hooks/useUserProfile';
+import { getPredictionActionMeta } from '@/lib/layer1-ui';
 
 const UserCenterDrawer = dynamic(() => import('@/components/UserCenterDrawer'), {
   ssr: false,
@@ -43,13 +43,11 @@ interface ExtendedStockData extends StockData {
 }
 
 // 1. 性能组件：独立背景辉光 (隔离 Modal 开关带来的重绘)
-const DashboardBackground = memo(({ isAlmanac, signal }: { isAlmanac: boolean, signal?: string }) => {
+const DashboardBackground = memo(({ isAlmanac, prediction }: { isAlmanac: boolean, prediction?: AIPrediction | null }) => {
   const color = useMemo(() => {
     if (isAlmanac) return '#4F46E5';
-    if (signal === 'Long') return COLORS.up;
-    if (signal === 'Short') return COLORS.down;
-    return COLORS.hold;
-  }, [isAlmanac, signal]);
+    return getPredictionActionMeta(prediction).color;
+  }, [isAlmanac, prediction]);
 
   return (
     <motion.div 
@@ -186,7 +184,7 @@ function DashboardContent() {
     <main className="fixed inset-0 bg-[#050508] text-white overflow-hidden select-none font-sans">
       <DashboardBackground 
         isAlmanac={isMarketAlmanac} 
-        signal={currentStock?.prediction?.signal} 
+        prediction={currentStock?.prediction} 
       />
 
       <header className="fixed top-0 left-0 right-0 z-[100] p-6 pointer-events-none">

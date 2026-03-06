@@ -567,7 +567,7 @@ export function TacticalBriefDrawer({
                                               <span className="text-sm font-bold text-white">{t.action}</span>
                                           </div>
                                           <div className="px-2 py-0.5 rounded-lg bg-[#3A7AFE]/10 border border-[#3A7AFE]/20 text-[10px] font-bold text-[#5DA9FF]">
-                                              观望中
+                                              等待入场
                                           </div>
                                       </div>
 

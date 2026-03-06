@@ -9,6 +9,7 @@ import { getMarketScene, getPredictionTitle, getClosePriceLabelFromData, getVali
 import { COLORS } from './constants';
 
 import { formatModelName } from '@/lib/model-names';
+import { getPredictionActionMeta } from '@/lib/layer1-ui';
 
 interface StockDashboardCardProps {
   data: StockData;
@@ -70,6 +71,11 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
     }
   }, [displayPrediction?.ai_reasoning]);
 
+  const actionMeta = useMemo(
+    () => getPredictionActionMeta(displayPrediction),
+    [displayPrediction]
+  );
+
   if (data.loading || !data.price) return (
     <div className="h-full w-full flex flex-col items-center justify-center space-y-4">
       <div className="w-20 h-20 rounded-[32px] bg-white/5 border border-white/10 flex items-center justify-center">
@@ -113,17 +119,6 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
   
   const mainTitle = getSmartTitle();
   
-  // 2. 信号文案简化展示 (Strict Mode)
-  const getSignalText = (signal?: string) => {
-    switch(signal) {
-      case 'Long': return '建议做多';
-      case 'Short': return '建议避险';
-      case 'Side': return '建议观望'; // 明确的 AI 观望建议
-      default: return '等待分析';     // 数据为空时的系统状态
-    }
-  };
-
-
   return (
     // Layout Contract: one vertical feed page = one viewport.
     // Keep 100dvh + shrink-0 to prevent flex shrink stacking in StockVerticalFeed.
@@ -152,16 +147,13 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
           </div>
 
           <h2 className="text-4xl font-black tracking-tighter" style={{ 
-            color: displayPrediction?.signal === 'Long' ? COLORS.up : 
-                   displayPrediction?.signal === 'Short' ? COLORS.down : 
-                   displayPrediction?.signal === 'Side' ? COLORS.hold : 
-                   '#94a3b8' // Slate-400 for 'Waiting/Null'
+            color: actionMeta.color
           }}>
-            {getSignalText(displayPrediction?.signal)}
+            {actionMeta.headline}
           </h2>
           <div className="flex items-center justify-center gap-3 text-[10px] font-bold text-slate-600">
             {displayPrediction ? (
-                <span className="flex items-center gap-1 uppercase tracking-widest"><Target className="w-3 h-3" /> 把握 {((displayPrediction?.confidence || 0) * 100).toFixed(0)}%</span>
+              <span className="flex items-center gap-1 uppercase tracking-widest"><Target className="w-3 h-3" /> 把握 {((displayPrediction?.confidence || 0) * 100).toFixed(0)}%</span>
             ) : (
                 <span className="flex items-center gap-1 uppercase tracking-widest italic">AI 引擎即将介入</span>
             )}

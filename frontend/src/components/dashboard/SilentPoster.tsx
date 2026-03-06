@@ -2,9 +2,10 @@
 
 import React, { useRef, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Share2, Download, Wind, Shield, AlertTriangle, Loader2, Copy, Check } from 'lucide-react';
+import { X, Share2, Download, Wind, Shield, AlertTriangle, Loader2, Copy } from 'lucide-react';
 import { AIPrediction, TacticalData, VisualStory } from '@/lib/types';
 import { COLORS } from './constants';
+import { getPredictionActionMeta } from '@/lib/layer1-ui';
 
 interface SilentPosterProps {
   isOpen: boolean;
@@ -62,6 +63,7 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
   }, [prediction.ai_reasoning]);
 
   const story = tacticalData?.visual_story;
+  const actionMeta = React.useMemo(() => getPredictionActionMeta(prediction), [prediction]);
 
   // Almanac Insights Extraction
   const keyLevels = tacticalData?.key_levels;
@@ -267,7 +269,7 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
   };
 
   const activeStory = story || defaultStory;
-  const signalColor = prediction?.signal === 'Long' ? COLORS.up : prediction?.signal === 'Short' ? COLORS.down : COLORS.hold;
+  const signalColor = actionMeta.color || COLORS.hold;
 
   return (
     <AnimatePresence>
@@ -452,7 +454,7 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
                   </div>
                   <div className="text-right">
                     <div className="text-xl font-black italic tracking-tighter opacity-80" style={{ color: signalColor }}>
-                      {prediction?.signal === 'Long' ? '看多' : prediction?.signal === 'Short' ? '看空' : '观望'}
+                      {actionMeta.posterDecision}
                     </div>
                     <div className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">
                        把握 {(prediction?.confidence * 100).toFixed(0)}%
