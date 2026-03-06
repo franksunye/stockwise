@@ -70,7 +70,28 @@ $env:DB_SOURCE="local"
 python backend/scripts/run_tradeability_experiment.py --market CN --strategy-versions tradeability_v1,tradeability_v2
 ```
 
-### 4.4 cloud continuous observation
+### 4.4 local data enhancement
+
+```powershell
+$env:DB_SOURCE="local"
+python backend/scripts/enhance_local_tradeability_data.py --market CN --target-symbols 300 --start-date 2024-01-01 --max-workers 4
+```
+
+### 4.5 historical sidecar backfill
+
+```powershell
+$env:DB_SOURCE="local"
+python backend/scripts/backfill_tradeability_history.py --market CN --strategy-versions tradeability_v1,tradeability_v2 --start-date 2024-01-01
+```
+
+### 4.6 window observability
+
+```powershell
+$env:DB_SOURCE="local"
+python backend/scripts/observe_tradeability_windows.py --market CN --strategy-versions tradeability_v1,tradeability_v2
+```
+
+### 4.7 cloud continuous observation
 
 1. `tradeability_sidecar_daily.yml`
    - 默认并行写入 `tradeability_v1,tradeability_v2`
@@ -79,7 +100,7 @@ python backend/scripts/run_tradeability_experiment.py --market CN --strategy-ver
 3. `acceptance_weekly.yml`
    - 默认按 `tradeability_v2` 生成周验收快照
 
-### 4.5 单票分析（功能验证）
+### 4.8 单票分析（功能验证）
 
 ```powershell
 $env:DB_SOURCE="local"
@@ -178,11 +199,23 @@ ORDER BY strategy_version;
 
 1. 研发期允许在本地反复 `--force` 覆盖同日记录，用于链路验证。
 2. 周度脚本按 `breakout_volume_mult -> momentum_change_threshold -> strong_close_threshold -> vcp_ratio -> risk_off_ma` 的顺序做单参数小步迭代，并产出决策日志 artifacts。
-3. 如发现异常，可先关闭方向强制开关排查：
+3. 本地历史研究推荐先执行“数据增强 -> 历史回灌 -> 窗口观测”，不要只看单次 experiment 汇总。
+4. 当前本地 CN 研究底座已扩展到 `301` 个标的；后续若继续扩样，应保持分层抽样口径，不要退回简单按代码顺序抓数。
+5. 当前本地 `tradeability_v2` 研究基线参数为：
+```json
+{
+  "vcp_ratio": 1.0,
+  "breakout_volume_mult": 0.9,
+  "strong_close_threshold": 0.55,
+  "momentum_change_threshold": 2.3,
+  "risk_off_ma": 5
+}
+```
+6. 如发现异常，可先关闭方向强制开关排查：
 ```powershell
 $env:LAYER1_SIGNAL_ENFORCE="0"
 ```
-4. 生产观察阶段不直接替换默认版本，先累计 `2~4` 周 `quant_tradeability_signals` 历史后再判断是否切默认。
+7. 生产观察阶段不直接替换默认版本，先累计 `2~4` 周 `quant_tradeability_signals` 历史后再判断是否切默认。
 
 ## 7. v2 Default Promotion Gate
 

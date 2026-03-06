@@ -2,11 +2,11 @@
   "strategy_version": "tradeability_v2",
   "markets": {
     "CN": {
-      "vcp_ratio": 0.95,
-      "breakout_volume_mult": 1.0,
-      "strong_close_threshold": 0.6,
-      "momentum_change_threshold": 2.8,
-      "risk_off_ma": 10
+      "vcp_ratio": 1.0,
+      "breakout_volume_mult": 0.9,
+      "strong_close_threshold": 0.55,
+      "momentum_change_threshold": 2.3,
+      "risk_off_ma": 5
     },
     "HK": {
       "vcp_ratio": 0.95,
