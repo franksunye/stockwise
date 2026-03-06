@@ -7,6 +7,7 @@ import { useUserProfile } from '@/hooks/useUserProfile';
 import { shouldEnableHighPerformance } from '@/lib/device-utils';
 import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
 import { getCurrentUser } from '@/lib/user';
+import { getPredictionActionMeta } from '@/lib/layer1-ui';
 
 // Fallback data for the reveal step
 const DEFAULT_REVEAL_DATA = { 
@@ -37,6 +38,9 @@ export function OnboardingOverlay() {
   const [revealData, setRevealData] = useState(DEFAULT_REVEAL_DATA);
   const [recommendedStocks, setRecommendedStocks] = useState<RecommendedStock[]>([]);
   const { profile, loading: profileLoading } = useUserProfile();
+  const revealActionMeta = getPredictionActionMeta({
+    signal: revealData.signal as 'Long' | 'Short' | 'Side',
+  });
 
   const fetchRecommendedStocks = useCallback(async () => {
     try {
@@ -336,7 +340,7 @@ export function OnboardingOverlay() {
                                      <div className={`text-3xl font-black tracking-tighter ${
                                          revealData.signal === 'Long' ? 'text-emerald-400' : revealData.signal === 'Short' ? 'text-rose-400' : 'text-amber-400'
                                      }`}>
-                                         {revealData.signal === 'Long' ? '建议做多' : revealData.signal === 'Short' ? '建议避险' : '建议观望'}
+                                         {revealActionMeta.headline}
                                      </div>
                                 </div>
 

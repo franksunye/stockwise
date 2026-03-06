@@ -1,4 +1,4 @@
-import type { AIPrediction } from '@/lib/types';
+﻿import type { AIPrediction } from '@/lib/types';
 
 import { COLORS } from '@/components/dashboard/constants';
 
@@ -60,9 +60,9 @@ const LAYER1_META: Record<NonNullable<AIPrediction['layer1_status']>, Prediction
 
 const SIGNAL_META: Record<string, PredictionActionMeta> = {
   Long: {
-    headline: '建议做多',
-    badge: 'AI · 做多',
-    posterDecision: '看多',
+    headline: '建议进场',
+    badge: 'AI · 进场',
+    posterDecision: '建议进场',
     color: COLORS.up,
     dotClass: 'bg-rose-500',
     iconTone: 'up',
@@ -70,9 +70,9 @@ const SIGNAL_META: Record<string, PredictionActionMeta> = {
     textClass: 'text-rose-500',
   },
   Short: {
-    headline: '建议避险',
-    badge: 'AI · 避险',
-    posterDecision: '避险',
+    headline: '建议防守',
+    badge: 'AI · 防守',
+    posterDecision: '建议防守',
     color: COLORS.down,
     dotClass: 'bg-emerald-500',
     iconTone: 'down',
@@ -80,9 +80,9 @@ const SIGNAL_META: Record<string, PredictionActionMeta> = {
     textClass: 'text-emerald-500',
   },
   Side: {
-    headline: '建议观望',
-    badge: 'AI · 观望',
-    posterDecision: '观望',
+    headline: '建议观察',
+    badge: 'AI · 观察',
+    posterDecision: '建议观察',
     color: COLORS.hold,
     dotClass: 'bg-amber-500',
     iconTone: 'flat',

@@ -98,7 +98,7 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
   }, []);
 
   const generateMarketingText = useCallback((activeStory: VisualStory) => {
-    const signalText = prediction.signal === 'Long' ? '看多' : prediction.signal === 'Short' ? '看空' : '观望';
+    const signalText = actionMeta.posterDecision;
     const confidence = (prediction.confidence * 100).toFixed(0);
     const weekday = new Date(prediction.target_date + 'T00:00:00').toLocaleDateString('zh-CN', { weekday: 'long' });
     
@@ -117,7 +117,7 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
     text += `#ZISOAI #知守AI #AI股票分析 #投资黄历 #股市复盘`;
     
     return text;
-  }, [stockName, prediction, intelligence, tacticStr]);
+  }, [stockName, prediction, intelligence, tacticStr, actionMeta.posterDecision]);
 
   const handleCopyText = async () => {
     const text = generateMarketingText(activeStory);
@@ -353,11 +353,11 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
 
                 {/* Visual State Icon */}
                 <div className="mb-2 relative">
-                   <div className={`absolute inset-0 ${prediction?.signal === 'Long' ? 'bg-emerald-500/20' : prediction?.signal === 'Short' ? 'bg-rose-500/20' : 'bg-slate-500/10'} blur-[40px] rounded-full animate-pulse capture-hidden`} />
+                   <div className={`absolute inset-0 ${actionMeta.iconTone === 'up' ? 'bg-emerald-500/20' : actionMeta.iconTone === 'down' ? 'bg-rose-500/20' : 'bg-slate-500/10'} blur-[40px] rounded-full animate-pulse capture-hidden`} />
                    <div className="relative w-16 h-16 flex items-center justify-center">
-                      {prediction?.signal === 'Long' ? (
+                      {actionMeta.iconTone === 'up' ? (
                         <Wind className="w-8 h-8 text-emerald-400/80 stroke-[1]" />
-                      ) : prediction?.signal === 'Short' ? (
+                      ) : actionMeta.iconTone === 'down' ? (
                         <AlertTriangle className="w-8 h-8 text-rose-400/80 stroke-[1]" />
                       ) : (
                         <Shield className="w-8 h-8 text-slate-400/80 stroke-[1]" />

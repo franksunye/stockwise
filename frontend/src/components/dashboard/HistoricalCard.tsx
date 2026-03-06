@@ -3,7 +3,7 @@
 import { memo } from 'react';
 import { ShieldCheck, XCircle, TrendingUp, TrendingDown, Minus, Target, Clock } from 'lucide-react';
 import { AIPrediction } from '@/lib/types';
-import { COLORS } from './constants';
+import { getPredictionActionMeta } from '@/lib/layer1-ui';
 import { formatModelName } from '@/lib/model-names';
 
 /**
@@ -13,6 +13,7 @@ import { formatModelName } from '@/lib/model-names';
 export const HistoricalCard = memo(function HistoricalCard({ data, onClick }: { data: AIPrediction; onClick?: (data: AIPrediction) => void }) {
   const isUp = data.signal === 'Long';
   const isDown = data.signal === 'Short';
+  const actionMeta = getPredictionActionMeta(data);
   
   // 尝试解析 JSON 理由
   let displayReason = data.ai_reasoning;
@@ -93,12 +94,12 @@ export const HistoricalCard = memo(function HistoricalCard({ data, onClick }: { 
               isDown ? 'bg-emerald-500/10 border-emerald-500/20' :
               'bg-amber-500/10 border-amber-500/20'
             }`}>
-              <SignalIcon size={18} style={{ color: isUp ? COLORS.up : isDown ? COLORS.down : COLORS.hold }} />
+              <SignalIcon size={18} className={actionMeta.textClass} />
             </div>
             <h3 className="text-2xl font-black italic tracking-tighter" style={{ 
-              color: isUp ? COLORS.up : isDown ? COLORS.down : COLORS.hold 
+              color: actionMeta.color
             }}>
-              {isUp ? '建议做多' : isDown ? '建议避险' : '建议观望'}
+              {actionMeta.headline}
             </h3>
             {/* Confidence Badge */}
             <div className="flex items-center gap-1 opacity-60 ml-1">
