@@ -10,10 +10,12 @@
 1. `39_Tradeability_Dual_Lane_Operations.md`  
    运行手册：双轨执行、命令、核验 SQL、回滚
 2. `40_Gemini_Quant_AI_Two_Layer_Refactoring_Plan.md`  
-   策略与工程边界：Layer-1 裁决，Layer-2 解释
-3. `27_Acceptance_Criteria_v1.md`  
+   已完成阶段文档：Layer-1 裁决，Layer-2 解释
+3. `41_Tradeability_Quality_and_Actionability_Plan.md`  
+   下一阶段主线：收益质量优化、风险立场产品化、线上影子运行
+4. `27_Acceptance_Criteria_v1.md`  
    验收门槛：一致性、收益质量、风险、输出完整性
-4. `27_DeepSeek_V3_Rich_Context_Limits.md`  
+5. `27_DeepSeek_V3_Rich_Context_Limits.md`  
    研究边界与证据登记
 
 ---
@@ -21,9 +23,10 @@
 ## 2. 冲突优先级（口径冲突时）
 
 1. 运行口径：`39`
-2. 架构与职责口径：`40`
-3. 验收口径：`27_Acceptance_Criteria_v1`
-4. 研究边界：`27_DeepSeek_V3_Rich_Context_Limits`
+2. 下一阶段执行口径：`41`
+3. 架构与职责口径：`40`
+4. 验收口径：`27_Acceptance_Criteria_v1`
+5. 研究边界：`27_DeepSeek_V3_Rich_Context_Limits`
 5. 归档文档：仅作历史记录，不作为现行执行依据
 
 ---

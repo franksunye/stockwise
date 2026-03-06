@@ -1,13 +1,15 @@
 # 量化 + AI 双层重构计划（对齐版）
 
-**文档状态**: Active  
+**文档状态**: Completed  
 **日期**: 2026-03-06  
 **当前分支口径**: `feat/layer1-state-machine-v1`  
-**关联文档**: `39_Tradeability_Dual_Lane_Operations.md`, `27_Acceptance_Criteria_v1.md`, [Spec 40 (UX)](../3_Product/Specs/40_Quant_AI_Dual_Layer_UX.md)
+**关联文档**: `39_Tradeability_Dual_Lane_Operations.md`, `27_Acceptance_Criteria_v1.md`, `41_Tradeability_Quality_and_Actionability_Plan.md`, [Spec 40 (UX)](../3_Product/Specs/40_Quant_AI_Dual_Layer_UX.md)
 
 ---
 
 ## 1. 目标定义（最终口径）
+
+> 结论：本计划对应的 Layer-1 / Layer-2 双层重构主线已完成，本文档保留为阶段完成记录与基线沉淀，不再承接新增执行项。
 
 1. Layer-1（量化层）拥有方向裁决权（Single Source of Truth）。
 2. Layer-2（LLM / Rule Engine）负责解释、战术、风控表达，不再拥有最终方向裁决权。
