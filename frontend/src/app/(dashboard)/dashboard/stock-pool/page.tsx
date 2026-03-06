@@ -10,6 +10,8 @@ import { getMarketScene } from '@/lib/date-utils';
 
 import { useStocks } from '@/context/StockContext';
 import { useDashboardAuth } from '@/context/DashboardAuthContext';
+import { getPredictionActionMeta } from '@/lib/layer1-ui';
+import type { AIPrediction } from '@/lib/types';
 
 interface StockSnapshot {
   symbol: string;
@@ -17,18 +19,9 @@ interface StockSnapshot {
   price: number;
   change: number;
   aiSignal: 'Long' | 'Short' | 'Side';
+  layer1Status?: AIPrediction['layer1_status'];
   updateTag?: string;
 }
-
-
-
-const getSignalMeta = (signal: string) => {
-  switch(signal) {
-    case 'Long': return { text: '建议做多', color: 'bg-rose-500', iconColor: 'text-rose-500', bgColor: 'bg-rose-500/10 border-rose-500/20' };
-    case 'Short': return { text: '建议避险', color: 'bg-emerald-500', iconColor: 'text-emerald-500', bgColor: 'bg-emerald-500/10 border-emerald-500/20' };
-    default: return { text: '建议观望', color: 'bg-amber-500', iconColor: 'text-amber-500', bgColor: 'bg-amber-500/10 border-amber-500/20' };
-  }
-};
 
 const StockItem = memo(({ 
   stock, 
@@ -43,7 +36,7 @@ const StockItem = memo(({
   onRemove: (e: React.MouseEvent, stock: StockSnapshot) => void,
   setNavigatingTo: (symbol: string) => void
 }) => {
-  const meta = getSignalMeta(stock.aiSignal);
+  const meta = getPredictionActionMeta({ signal: stock.aiSignal, layer1_status: stock.layer1Status });
   
   return (
     <motion.div
@@ -60,15 +53,15 @@ const StockItem = memo(({
       >
        <div className="flex items-center justify-between">
          <div className="flex items-center gap-4">
-           <div className={`w-14 h-14 rounded-[22px] flex items-center justify-center border-2 ${meta.bgColor}`}>
-              {stock.aiSignal === 'Long' ? <TrendingUp className={meta.iconColor} /> :
-               stock.aiSignal === 'Short' ? <TrendingDown className={meta.iconColor} /> : <Minus className={meta.iconColor} />}
+           <div className={`w-14 h-14 rounded-[22px] flex items-center justify-center border-2 ${meta.bgClass}`}>
+              {meta.iconTone === 'up' ? <TrendingUp className={meta.textClass} /> :
+               meta.iconTone === 'down' ? <TrendingDown className={meta.textClass} /> : <Minus className={meta.textClass} />}
            </div>
            <div>
              <h3 className="text-base font-black italic tracking-tighter text-white">{stock.name}</h3>
              <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest flex items-center gap-1.5 mt-0.5">
-               <span className={`w-1 h-1 rounded-full ${meta.color}`} />
-               {meta.text}
+               <span className={`w-1 h-1 rounded-full ${meta.dotClass}`} />
+               {meta.headline}
              </p>
            </div>
          </div>
@@ -135,6 +128,7 @@ export default function StockPoolPage() {
     price: s.price?.close || 0,
     change: s.price?.change_percent || 0,
     aiSignal: s.prediction?.signal || 'Side' as const,
+    layer1Status: s.prediction?.layer1_status,
     updateTag: s.lastUpdated
   })), [globalStocks]);
 
