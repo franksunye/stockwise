@@ -20,6 +20,20 @@ from logger import logger
 from backend.engine.layer1_state import DEFAULT_STRATEGY_VERSION, evaluate_layer1_state, list_supported_strategy_versions, load_market_params
 
 
+UPSERT_SQL = """
+INSERT INTO quant_tradeability_signals
+(symbol, date, market, strategy_version, setup_state, opportunity_score, trigger_rule_hit, risk_off_hit, signal_payload)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+ON CONFLICT(symbol, date, market, strategy_version) DO UPDATE SET
+    setup_state = excluded.setup_state,
+    opportunity_score = excluded.opportunity_score,
+    trigger_rule_hit = excluded.trigger_rule_hit,
+    risk_off_hit = excluded.risk_off_hit,
+    signal_payload = excluded.signal_payload,
+    updated_at = (datetime('now', '+8 hours'))
+"""
+
+
 def ensure_sidecar_table(conn) -> None:
     cur = conn.cursor()
     cur.execute(
@@ -105,64 +119,68 @@ def load_histories(market: str, start_date: str | None, end_date: str | None) ->
         conn.close()
 
 
+def _flush_rows(conn, rows: List[tuple]) -> int:
+    if not rows:
+        return 0
+    cur = conn.cursor()
+    cur.executemany(UPSERT_SQL, rows)
+    conn.commit()
+    return len(rows)
+
+
 def backfill_history(market: str, strategy_versions: Sequence[str], start_date: str | None, end_date: str | None) -> Dict[str, object]:
     histories = load_histories(market, start_date, end_date)
     if not histories:
         raise RuntimeError(f"No histories found for market={market}")
 
     version_params = {version: load_market_params(market=market, strategy_version=version)[1] for version in strategy_versions}
-    rows: List[tuple] = []
     state_counts: Dict[str, Dict[str, int]] = {version: {} for version in strategy_versions}
-    for symbol, history in histories.items():
-        for idx in range(len(history)):
-            if idx < 20:
-                continue
-            slice_history = history[: idx + 1]
-            latest_date = str(slice_history[-1]["date"])
-            for version in strategy_versions:
-                snapshot = evaluate_layer1_state(slice_history, params=version_params[version], strategy_version=version)
-                state_counts[version][snapshot.setup_state] = state_counts[version].get(snapshot.setup_state, 0) + 1
-                rows.append(
-                    (
-                        symbol,
-                        latest_date,
-                        market,
-                        version,
-                        snapshot.setup_state,
-                        float(snapshot.opportunity_score),
-                        int(snapshot.trigger_rule_hit),
-                        int(snapshot.risk_off_hit),
-                        json.dumps(snapshot.payload, ensure_ascii=False),
-                    )
-                )
-
     conn = get_connection()
     try:
         ensure_sidecar_table(conn)
-        cur = conn.cursor()
-        cur.executemany(
-            """
-            INSERT INTO quant_tradeability_signals
-            (symbol, date, market, strategy_version, setup_state, opportunity_score, trigger_rule_hit, risk_off_hit, signal_payload)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ON CONFLICT(symbol, date, market, strategy_version) DO UPDATE SET
-                setup_state = excluded.setup_state,
-                opportunity_score = excluded.opportunity_score,
-                trigger_rule_hit = excluded.trigger_rule_hit,
-                risk_off_hit = excluded.risk_off_hit,
-                signal_payload = excluded.signal_payload,
-                updated_at = (datetime('now', '+8 hours'))
-            """,
-            rows,
-        )
-        conn.commit()
+        batch_size = 25000
+        pending_rows: List[tuple] = []
+        rows_written = 0
+        processed_symbols = 0
+        for symbol, history in histories.items():
+            for idx in range(len(history)):
+                if idx < 20:
+                    continue
+                slice_history = history[: idx + 1]
+                latest_date = str(slice_history[-1]["date"])
+                for version in strategy_versions:
+                    snapshot = evaluate_layer1_state(slice_history, params=version_params[version], strategy_version=version)
+                    state_counts[version][snapshot.setup_state] = state_counts[version].get(snapshot.setup_state, 0) + 1
+                    pending_rows.append(
+                        (
+                            symbol,
+                            latest_date,
+                            market,
+                            version,
+                            snapshot.setup_state,
+                            float(snapshot.opportunity_score),
+                            int(snapshot.trigger_rule_hit),
+                            int(snapshot.risk_off_hit),
+                            json.dumps(snapshot.payload, ensure_ascii=False),
+                        )
+                    )
+                    if len(pending_rows) >= batch_size:
+                        rows_written += _flush_rows(conn, pending_rows)
+                        pending_rows = []
+            processed_symbols += 1
+            if processed_symbols % 50 == 0:
+                logger.info(
+                    f"Backfill progress. market={market}, processed_symbols={processed_symbols}, rows_written={rows_written}"
+                )
+        if pending_rows:
+            rows_written += _flush_rows(conn, pending_rows)
     finally:
         conn.close()
 
     return {
         "market": market,
         "strategy_versions": list(strategy_versions),
-        "rows_written": len(rows),
+        "rows_written": rows_written,
         "symbols": len(histories),
         "state_counts": state_counts,
     }

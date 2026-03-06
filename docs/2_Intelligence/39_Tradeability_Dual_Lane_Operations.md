@@ -200,7 +200,7 @@ ORDER BY strategy_version;
 1. 研发期允许在本地反复 `--force` 覆盖同日记录，用于链路验证。
 2. 周度脚本按 `breakout_volume_mult -> momentum_change_threshold -> strong_close_threshold -> vcp_ratio -> risk_off_ma` 的顺序做单参数小步迭代，并产出决策日志 artifacts。
 3. 本地历史研究推荐先执行“数据增强 -> 历史回灌 -> 窗口观测”，不要只看单次 experiment 汇总。
-4. 当前本地 CN 研究底座已扩展到 `301` 个标的；后续若继续扩样，应保持分层抽样口径，不要退回简单按代码顺序抓数。
+4. 当前本地 CN 研究底座已扩展到 `499` 个标的；后续若继续扩样，应保持分层抽样口径，不要退回简单按代码顺序抓数。
 5. 当前本地 `tradeability_v2` 研究基线参数为：
 ```json
 {
@@ -211,11 +211,12 @@ ORDER BY strategy_version;
   "risk_off_ma": 5
 }
 ```
-6. 如发现异常，可先关闭方向强制开关排查：
+6. 本地 `quant_tradeability_signals` 历史回灌在大样本下应使用分批提交；不要将接近 `500` 标的的 sidecar 重建一次性放进单事务提交。
+7. 如发现异常，可先关闭方向强制开关排查：
 ```powershell
 $env:LAYER1_SIGNAL_ENFORCE="0"
 ```
-7. 生产观察阶段不直接替换默认版本，先累计 `2~4` 周 `quant_tradeability_signals` 历史后再判断是否切默认。
+8. 生产观察阶段不直接替换默认版本，先累计 `2~4` 周 `quant_tradeability_signals` 历史后再判断是否切默认。
 
 ## 7. v2 Default Promotion Gate
 
