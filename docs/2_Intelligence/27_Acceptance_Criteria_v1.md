@@ -1,7 +1,7 @@
 # StockWise 验收标准 v1.0（达标定义）
 
-**文档状态**: Draft  
-**日期**: 2026-03-05  
+**文档状态**: Active  
+**日期**: 2026-03-06  
 **作者**: Codex  
 **用途**: 定义“量化 + AI”策略上线是否达标，避免主观判断。
 
@@ -45,6 +45,12 @@
 2. 每个窗口都需满足：`Expectancy > 0` 且 `MDD` 在阈内  
 3. 若任一窗口不满足，不判定达标
 
+### 2.6 校准运营一致性（Dual-Lane）
+
+1. 周度校准产物中，`best_robust_score` 连续 `2-3` 周稳定优于 `base_robust_score`
+2. 参数升级必须走“人工审核 + PR 合并”，禁止自动覆盖生产参数
+3. 若分数优势不稳定，则保持 `backend/strategy_config/tradeability_params_v1.json` 不变
+
 ---
 
 ## 3. Level 2：行业优秀线（中长期目标）
@@ -79,6 +85,7 @@
 
 ## 6. 与现有文档关系
 
-1. 执行细节见：`25_Side_Trap_and_Opportunity_Capture_Framework.md`  
-2. 研究依据见：`26_Independent_Research_AI_Quant_Tradeability_Framework.md`  
-3. 本文档只定义“什么叫达标”
+1. 运行口径见：`39_Tradeability_Dual_Lane_Operations.md`  
+2. 改造计划见：`40_Gemini_Quant_AI_Two_Layer_Refactoring_Plan.md`  
+3. 研究边界见：`27_DeepSeek_V3_Rich_Context_Limits.md`  
+4. 本文档只定义“什么叫达标”
