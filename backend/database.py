@@ -538,6 +538,12 @@ def init_db():
                 target_date TEXT NOT NULL,
                 signal TEXT,
                 confidence REAL,
+                layer1_status TEXT,
+                layer1_score REAL,
+                layer1_trigger_hit INTEGER DEFAULT 0,
+                layer1_risk_off_hit INTEGER DEFAULT 0,
+                layer1_strategy_version TEXT,
+                layer1_payload TEXT,
                 support_price REAL,
                 pressure_price REAL,
                 ai_reasoning TEXT,
@@ -717,6 +723,12 @@ def init_db():
         # Prediction Table Migrations
         add_column_if_missing('ai_predictions_v2', 'validation_data', 'TEXT')
         add_column_if_missing('ai_predictions_v2', 'max_perf_in_window', 'REAL')
+        add_column_if_missing('ai_predictions_v2', 'layer1_status', 'TEXT')
+        add_column_if_missing('ai_predictions_v2', 'layer1_score', 'REAL')
+        add_column_if_missing('ai_predictions_v2', 'layer1_trigger_hit', 'INTEGER DEFAULT 0')
+        add_column_if_missing('ai_predictions_v2', 'layer1_risk_off_hit', 'INTEGER DEFAULT 0')
+        add_column_if_missing('ai_predictions_v2', 'layer1_strategy_version', 'TEXT')
+        add_column_if_missing('ai_predictions_v2', 'layer1_payload', 'TEXT')
 
         # LLM Registry: Add roles column for unified model routing
         add_column_if_missing('prediction_models', 'roles', 'TEXT')

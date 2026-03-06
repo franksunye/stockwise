@@ -43,6 +43,7 @@ export async function GET(request: Request) {
         const sql = `
             SELECT p.symbol, p.date, p.target_date, p.signal, p.confidence, 
                     p.support_price, p.ai_reasoning, p.validation_status, p.actual_change,
+                    p.layer1_status, p.layer1_score, p.layer1_trigger_hit, p.layer1_risk_off_hit, p.layer1_strategy_version, p.layer1_payload,
                     p.is_primary, p.model_id as model, m.display_name,
                     d.close as close_price,
                     d.rsi, d.kdj_k, d.kdj_d, d.kdj_j, 

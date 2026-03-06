@@ -31,6 +31,9 @@ class _FakeCursor:
     def fetchone(self):
         return self._last_fetch
 
+    def fetchall(self):
+        return []
+
 
 class _FakeConn:
     def __init__(self):

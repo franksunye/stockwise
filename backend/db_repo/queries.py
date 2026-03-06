@@ -44,8 +44,10 @@ SAVE_PREDICTION_V2_QUERY = """
     (symbol, date, model_id, target_date, signal, confidence, 
      support_price, pressure_price, ai_reasoning, prompt_version,
      token_usage_input, token_usage_output, execution_time_ms,
-     is_primary, trace_id, created_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now', '+8 hours'), datetime('now', '+8 hours'))
+     is_primary, trace_id,
+     layer1_status, layer1_score, layer1_trigger_hit, layer1_risk_off_hit, layer1_strategy_version, layer1_payload,
+     created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now', '+8 hours'), datetime('now', '+8 hours'))
 """
 CHECK_PREDICTION_V2_EXISTS_QUERY = "SELECT 1 FROM ai_predictions_v2 WHERE symbol = ? AND date = ? AND model_id = ? LIMIT 1"
 FETCH_PREDICTION_HISTORY_QUERY = "SELECT date, signal, confidence, ai_reasoning, validation_status, actual_change, model_id FROM ai_predictions_v2 WHERE symbol = ? AND {filter_sql} AND validation_status != 'Pending' AND date < ? ORDER BY date DESC LIMIT ?"

@@ -9,6 +9,7 @@ from database import get_connection
 from logger import logger
 from trading_calendar import get_next_trading_day_str
 from .llm_client import get_llm_client
+from .layer1_state import build_layer1_snapshot
 from .prompts import prepare_stock_analysis_prompt
 
 try:
@@ -176,6 +177,38 @@ def _to_int(value: Any, default: int = 0) -> int:
         return default
 
 
+def _fetch_daily_history_for_layer1(cursor, symbol: str, date: str) -> list[dict[str, Any]]:
+    cursor.execute(
+        """
+        SELECT date, high, low, close, volume, ma5, ma10, ma20, macd_hist, change_percent
+        FROM daily_prices
+        WHERE symbol = ? AND date <= ?
+        ORDER BY date DESC
+        LIMIT 30
+        """,
+        (symbol, date),
+    )
+    rows = cursor.fetchall()
+    rows = list(reversed(rows))
+    history: list[dict[str, Any]] = []
+    for row in rows:
+        history.append(
+            {
+                "date": row[0],
+                "high": row[1],
+                "low": row[2],
+                "close": row[3],
+                "volume": row[4],
+                "ma5": row[5],
+                "ma10": row[6],
+                "ma20": row[7],
+                "macd_hist": row[8],
+                "change_percent": row[9],
+            }
+        )
+    return history
+
+
 def _process_and_store_prediction(symbol, date, ai_result, model="rule-based"):
     """Store prediction to ai_predictions_v2 only (legacy table write frozen)."""
     conn = get_connection()
@@ -192,6 +225,11 @@ def _process_and_store_prediction(symbol, date, ai_result, model="rule-based"):
 
     model_id = _resolve_model_id(cursor, model, is_llm=bool(ai_result.get("is_llm")))
     _ensure_model_exists(cursor, model_id)
+    layer1_snapshot = build_layer1_snapshot(
+        symbol=symbol,
+        daily_history=_fetch_daily_history_for_layer1(cursor, symbol=symbol, date=date),
+    )
+    layer1_payload_json = json.dumps(layer1_snapshot.payload, ensure_ascii=False)
 
     trace_id = str(ai_result.get("trace_id") or f"legacy-{symbol}-{date}-{model_id}")
 
@@ -215,6 +253,12 @@ def _process_and_store_prediction(symbol, date, ai_result, model="rule-based"):
             _to_int(ai_result.get("execution_time_ms"), 0),
             1,
             trace_id,
+            layer1_snapshot.setup_state,
+            layer1_snapshot.opportunity_score,
+            layer1_snapshot.trigger_rule_hit,
+            layer1_snapshot.risk_off_hit,
+            layer1_snapshot.strategy_version,
+            layer1_payload_json,
         ),
     )
 
