@@ -222,11 +222,12 @@ flowchart LR
 - `api/internal/*`：保留内部密钥校验并增加来源限制（IP/网关策略）。
 - 所有 SQL 语句参数化，禁止字符串拼接。
 
-### 4.3 AI 数据链路统一
+### 4.3 AI 推理与决策链路重构 (双层解耦架构)
 
-- `PredictionRunner` 作为唯一写入入口。
-- `ai_predictions_v2` 作为唯一事实源。
-- 回填、验证、报表统一到 v2 语义。
+- 将原有多模型平行竞争模式（`Multi-Model Race`）废弃，重构为**基于流水线的串行决策链 (Layer-1 Quant Trigger -> Layer-2 LLM Narrative)**。
+- **Layer-1** 引入纯量化算子层 `QuantEngine`，剥夺 LLM 的方向抉择权，由量化引擎接管核心行情触发与方向研判（如 Breakout / RiskOff）。
+- **Layer-2** LLM（如 DeepSeek V3）退居战术定性、文本描摹与新闻面二次解读，方向结论由 `PredictionRunner` 通过系统 Prompt 强行首批注入。
+- `PredictionRunner` 从“平行调度器”转型为“流水线组装器”，其输出写入 `ai_predictions_v2` 这一唯一事实源。
 
 ### 4.4 数据访问治理
 
@@ -281,8 +282,9 @@ flowchart LR
     TURSO --> BAK
 
     ORCH --> WORKER
-    WORKER --> AI
-    AI --> REPO
+    WORKER --> QUANT[Layer-1: QuantEngine]
+    QUANT --> LLM[Layer-2: LLM Narrative]
+    LLM --> REPO
 
     API --> OBS
     WORKER --> OBS

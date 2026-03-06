@@ -1,79 +1,59 @@
 # StockWise 里里程碑与执行进度日志 (Milestones Execution Log)
 
-> **当前版本**: v3.1 (P0 完成同步版)
-> **状态**: P0 三项架构基线已完成；进入 P1 治理与收口阶段，核心体验创新 (Project Muse) 持续推进。
+> **当前版本**: v3.4 (双层架构启航版)
+> **状态**: 历史遗留基线已完成；全面启动**“双层解耦”**重构战役，并将长线愿景锚定于**“B2C 行为修正 (木马策略)”**。
 
 ---
 
-## 🏁 1. 已完成里程碑 (Historical Achievements)
+## 🏁 1. 历史基准交付 (Historical Baseline, v1.0-v3.3)
 
-### Phase 1: 基础设施与闭环验证 (2025 - 2026.02)
-- [x] **v1.0: 核心量化引擎**: 确立了基于 `QuantEngine` 的每日同步与指标计算体系。
-- [x] **v2.0: 多模型推理阵列**: 引入了 Gemini、DeepSeek 等 LLM，实现了多模型共识 (AICouncil) 与路由。
-- [x] **v2.5: 丝滑 PWA 体验**: 实现了 iOS/Android 深度适配、秒开骨架屏、以及 "TikTok 式" 垂直滑动交互。
-- [x] **v2.8: 价值叙事系统**: `context_service` 成型，AI 能够进行带逻辑的归因分析。
-- [x] **v2.9: 商业化闭环**: 集成了分布式身份、邀请裂变及初版支付流。
-- [x] **v3.2: 安全防御基线**: 强制执行全量 SQL 参数化，修复 Admin 接口漏洞。 (Team Completed ✅)
-- [x] **v3.3: 数据链路收敛**: 彻底停用旧版 `ai_predictions` 写入，统一迁移至 `v2` 语义。 (Team Completed ✅)
-- [x] **v3.6: 发布质量门禁**: 建立 `verify:release`、API 鉴权契约测试与前端/PWA 基线冒烟。 (Team Completed ✅)
+> *(存档：已成功交付早期的 `QuantEngine` 行情同步、多模型推理阵列、极其丝滑的垂直滑动 PWA 终端、全量数据链路收敛、零信任安全鉴权，核心视觉 (Project Muse) 的前四期以及首页骨架屏秒开优化。基建地盘已全部夯实。)*
 
 ---
 
-## 🛠️ 2. 当前正在进行 (Current Sprints: v3.1 - 4.x)
+## 🛠️ 2. 当前战役 (The Dual-Layer Operation: v3.4 - v4.x)
 
-### A. 团队并行任务 (Infrastructure Hardening)
-- [x] **[v3.1] 零信任鉴权改造**: 已建立签名 Session 身份层并移除业务 API 对客户端 `userId` 信任。 (Team Completed ✅)
-- [ ] **[v3.1a] 迁移收口**: 生产关闭 `ALLOW_LEGACY_USERID_BOOTSTRAP` 并移除 legacy bootstrap 兼容分支。 (Team Planned)
-- [ ] **[v3.4] 量化规则插件化**: 重构 `backend/quant` 支持策略热插拔。 (Team Assigned)
-- [ ] **[v3.5] 可观测性看板**: 建立 API 延迟与 AI 置信度实时监测。 (Team Assigned)
+### A. 双层架构解耦战役 (核心主线)
+*与《双层解耦执行方案 (Plan 40)》紧密挂钩，从“模型瞎猜”到“流水线分工”：*
+- [ ] **[Phase 0] 评估基线止血 (Next Action)**: 修复 `validator.py` 胜率计算绝对值 BUG；解除 `ai_service.py` 保护性封印。 (🔥最高优先级)
+- [ ] **[Phase 1] Layer-1 雷达基建**: 接入 `pandas-ta`，建设 `Trigger/RiskOff` 四状态系统。
+- [ ] **[Phase 2] Layer-2 参谋降维**: 串行化 `runner.py`，强行注入量化 Prompt。
+- [ ] **[Phase 3] 界面降维打击**: 端侧分离“冰冷红绿灯”与“有温度的高维战报”。
 
-### B. 核心实验室专项 (Creative Innovation - Project Muse)
-- [x] **[v4.1] 元数据语义转换 (Meta-Semantics)**: 开发 `Metaphor Engine`，将数字指标映射为“宜/忌/能量”语言。 (Team Completed ✅)
-- [x] **[v4.2] “晨起之光”沉浸式交互**: 实现每日首次进入时，毛玻璃质感的“投资黄历”全屏预告与滑散效果。 (Team Completed ✅)
-- [x] **[v4.3] Silent Math 符号动效**: 重置个股卡片中心图标，支持根据 AI 置信度跳动的“呼吸符号” (`animate-ping`)。 (Team Completed ✅)
-- [x] **[v4.4] 艺术级战报分享引擎**: 实现高审美、低饱和度的社交海报 (`SilentPoster`) 自动化渲染，开启 Viral Growth 回路。 (Team Completed ✅)
-- [ ] **[v4.5] 气象动效叠加 (Visual Mood Layer)**: 引入微弱的 WebGL 或 CSS 粒子效果模拟“气象”叠加感。 (Backlog)
-
-### C. 商业化与系统运营 (Ops & Growth)
-- [x] **[Growth] ZISO AI Beta Launch**: 完成了测试阶段的基础获客通路，建立 Beta 版体验群与推广文章。(Team Completed ✅)
-- [x] **[Ops] Android 推送策略护栏**: 针对国内安卓生态通知碎片化，上线基于降级体验的沟通策略 (Android Notification Strategy)。(Team Completed ✅)
-- [x] **[Product] 股票雷达 (Stock Radar) 规划**: 完成了商业化智能雷达产品线的定位、定价选型及开发路线图 (Pillar 5 进阶)。(Team Completed ✅)
-- [x] **[DevOps] 预测修复 SOP**: 在本地 ops 技能 `local-data-ops` 中沉淀 AI 预测漏斗修复的标准作业程序。(Team Completed ✅)
-- [x] **[Perf] Dashboard 首屏秒开优化 (P0+P1)**: 根因分析发现双层骨架屏门控 + 串行网络请求瀑布流导致 2-3s 延迟。P0: UserProfileProvider 缓存命中即渲染 (消除第二层骨架屏)；P1: Layout→Provider 缓存桥接 (消除重复 profile API) + 回访用户 getCurrentUser 后台执行 (并行化)。(Team Completed ✅)
-- [ ] **[Perf-P2] Dashboard SSR 预取 (未来方向)**: 将 Dashboard 从纯 `'use client'` 改为 Server Component + 服务端数据预取。需重构自建 HMAC Session 鉴权以适配 RSC 数据流，改动量大。当 P0/P1 优化效果验证后再评估 ROI。(Backlog - 2026 Q2+ 评估)
-
-### D. 港股做空专项迭代 (HK Short Selling Iteration)
-- [ ] **[HK-Short] Ops 强化**: 实现阈值告警、缺口补采、数据 SLA 看板。 (Backlog)
-- [ ] **[HK-Short] 数据质量强化**: 引入更多回归样本与异常标签。 (Backlog)
-- [ ] **[HK-Short] 策略强化**: 将做空压力因子纳入更多决策模板。 (Backlog)
+### B. 并行实验室与优化任务 (Backlog)
+- [ ] **[v3.1a] 鉴权迁移收口**: 生产环境彻底关闭旧版兼容。
+- [ ] **[v3.5] 可观测性**: 建立 API 延迟与 AI 置信度实时大盘。
+- [ ] **[v4.5] 气象动效叠加**: 为个股状态卡引入微粒天气效果（如雨、雾）。
+- [ ] **[Perf-P2] SSR 预取**: PWA 服务端拉取数据优化（视 P1 优化后情况再定）。
+- [ ] **[HK-Short] 港股做空生态**: 数据 SLA 看板、缺口补采。
 
 ---
 
 ## 🚀 3. 下季度专项深度规划 (2026 Q2 Focus)
 
-**代号**: `Project Echo` (行为回声)
-**核心愿景**: 从“预测器”向“行为合伙人”跨越。
+**代号**: `Project Echo` (行为回声 - B2C 行为修正计划)
+**核心愿景**: 从“被动预测器”向“C 端行为合伙人 (交易界的 WHOOP / Noom)”跨越。全面执行**木马策略**：用“寻宝”迎合贪婪获客，用“纪律”修正行为留存。
 
 ### 专项 A：持仓审计魔镜 (Personalized Portfolio Coach)
-- **目标**: 实现基于买入成本的动态风控建议。
-- **关键交付**: `UserPortfolio` 加密存储层、持仓/计划偏差审计模块。
+- **目标**: 像顶级体能手表一样，实现基于买入成本的动态风控建议（例如弹出：“红细胞恢复度极差，今日禁止交易”）。
+- **关键交付**: `UserPortfolio` 加密存储层、持仓/计划偏差智能审计模块。
 
-### 专项 B：冲动防护与行为控制 (Impulse Guard)
-- **目标**: 介入盘中“非理性”窗口。
-- **关键交付**: 盘中 60s 冷静窗口、风险问答锁机制。
+### 专项 B：冲动防护与强制截断 (Impulse Guard)
+- **目标**: 介入盘中“非理性”窗口（贪婪追高/恐慌割肉），提供类似健身 App 的“底层行为阻断”。
+- **关键交付**: 盘中 60s 冷静期锁机制、由 Layer-1 量化直接触发的强势 `RiskOff` 熔断弹窗。
 
 ---
 
 ## 🗺️ 4. 2026 六大演进支柱 (The Six Pillars)
 
-| 专项维度                  | 核心目标                        | 商业角色       | 状态                 |
-| :------------------------ | :------------------------------ | :------------- | :------------------- |
-| **Pillar 1: 持仓建议**    | 基于真实买入价的个性化风控      | **留存护城河** | Q2 重点              |
-| **Pillar 2: 行为干预**    | 冲动交易阻断器（Impulse Guard） | **定位差异化** | Q2 重点              |
-| **Pillar 3: 游戏化钩子**  | 投资宜忌、Silent Math 视觉传导  | **获客引线**   | **v4.x 已交付 ✅**    |
-| **Pillar 4: 规则插件化**  | 量化模型热插拔                  | **技术资产**   | v3.4 团队推进        |
-| **Pillar 5: 发现新机会**  | 动态扫描“多头排列”与增强算法    | **核心竞争力** | **雷达产品规划阶段** |
-| **Pillar 6: 全球化/跨端** | 国际化、小程序/App              | **规模扩张**   | Q4 规划              |
+| 专项维度                  | 核心目标                        | 商业角色 (基于木马策略)   | 状态                 |
+| :------------------------ | :------------------------------ | :------------------------ | :------------------- |
+| **Pillar 1: 持仓建议**    | 基于真实买入价的个性化风控      | **深层交付 (纪律修正)**   | Q2 重点              |
+| **Pillar 2: 行为干预**    | 冲动交易阻断器（Impulse Guard） | **深层交付 (无价的安心)** | Q2 重点              |
+| **Pillar 3: 游戏化钩子**  | 低门槛交互、Silent Math 视觉    | **表层诱饵 (好玩易懂)**   | **v4.x 已交付 ✅**    |
+| **Pillar 4: 量化插件化**  | 模型热插拔与 Ensemble 选举集成  | **硬核工具底座**          | v3.4 进行中          |
+| **Pillar 5: 标的寻宝机**  | 盘后自动扫描极品 VCP 放量机会   | **表层诱饵 (迎合贪婪)**   | **雷达产品规划阶段** |
+| **Pillar 6: 全球化/跨端** | 国际化、小程序/App              | **规模商业化扩张**        | Q4 规划              |
 
 ---
 
