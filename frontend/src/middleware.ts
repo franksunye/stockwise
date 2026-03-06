@@ -24,6 +24,7 @@ export function middleware(request: NextRequest) {
 
     const url = request.nextUrl;
     const pathname = url.pathname;
+    const debugEnabled = url.searchParams.get('__mwdebug') === '1';
 
     const isAppDomain = hostCandidates.some(
         (host) => host === 'app.ziso.cc' || host.startsWith('app.')
@@ -32,16 +33,37 @@ export function middleware(request: NextRequest) {
         (host) => host === 'ziso.cc' || host === 'www.ziso.cc'
     );
 
+    const withDebugHeaders = (res: NextResponse, branch: string): NextResponse => {
+        if (!debugEnabled) return res;
+
+        res.headers.set('x-ziso-mw-branch', branch);
+        res.headers.set('x-ziso-mw-path', pathname);
+        res.headers.set('x-ziso-mw-host-candidates', hostCandidates.join('|') || 'none');
+        res.headers.set('x-ziso-mw-x-forwarded-host', request.headers.get('x-forwarded-host') || 'none');
+        res.headers.set('x-ziso-mw-host', request.headers.get('host') || 'none');
+        res.headers.set('x-ziso-mw-next-hostname', request.nextUrl.hostname || 'none');
+        res.headers.set('x-ziso-mw-is-app-domain', String(isAppDomain));
+        res.headers.set('x-ziso-mw-is-main-domain', String(isMainDomain));
+        res.headers.set('cache-control', 'no-store');
+        return res;
+    };
+
     // 1. App 子域名策略 (app.ziso.cc)
     if (isAppDomain) {
         if (pathname === '/') {
-            return NextResponse.rewrite(new URL('/dashboard', request.url));
+            return withDebugHeaders(
+                NextResponse.rewrite(new URL('/dashboard', request.url)),
+                'app-root-rewrite-dashboard'
+            );
         }
 
         if (pathname === '/dashboard') {
             const cleanUrl = url.clone();
             cleanUrl.pathname = '/';
-            return NextResponse.redirect(cleanUrl, 307);
+            return withDebugHeaders(
+                NextResponse.redirect(cleanUrl, 307),
+                'app-dashboard-redirect-root'
+            );
         }
     }
 
@@ -54,7 +76,10 @@ export function middleware(request: NextRequest) {
             if (code) {
                 const appUrl = new URL(`https://app.ziso.cc`, request.url);
                 appUrl.searchParams.set('invite', code);
-                return NextResponse.redirect(appUrl, 307);
+                return withDebugHeaders(
+                    NextResponse.redirect(appUrl, 307),
+                    'main-v-code-redirect-app'
+                );
             }
         }
 
@@ -63,11 +88,14 @@ export function middleware(request: NextRequest) {
             appUrl.pathname = pathname.replace('/dashboard', '');
             if (appUrl.pathname === '') appUrl.pathname = '/';
             appUrl.search = url.search;
-            return NextResponse.redirect(appUrl, 307);
+            return withDebugHeaders(
+                NextResponse.redirect(appUrl, 307),
+                'main-dashboard-redirect-app'
+            );
         }
     }
 
-    return NextResponse.next();
+    return withDebugHeaders(NextResponse.next(), 'pass-through');
 }
 
 export const config = {
