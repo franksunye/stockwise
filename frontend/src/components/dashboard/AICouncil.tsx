@@ -66,6 +66,21 @@ function getCouncilActionKey(pred: AIPrediction): CouncilActionKey {
   }
 }
 
+function getCouncilActionLabel(actionKey: CouncilActionKey): string {
+  switch (actionKey) {
+    case 'enter':
+      return '建议进场';
+    case 'observe':
+      return '建议观察';
+    case 'defense':
+      return '建议防守';
+    case 'empty':
+      return '建议空仓';
+    default:
+      return '判断分歧';
+  }
+}
+
 
 function setCache(key: string, data: AIPrediction[]) {
   if (councilCache.size >= MAX_CACHE_SIZE) {
@@ -168,17 +183,43 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
   const emptyCount = actionKeys.filter((k) => k === 'empty').length;
   
   let consensusColor = 'text-slate-400';
-  let consensusText = 'åˆ†æ­§';
+  let consensusText = '判断分歧';
+  let consensusSubtext = '不同投研视角暂未形成一致支持。';
   
   const total = predictions.length;
-  if (enterCount === total) { consensusColor = 'text-emerald-400'; consensusText = '进场共振'; }
-  else if (observeCount === total) { consensusColor = 'text-amber-400'; consensusText = '观察共振'; }
-  else if (defenseCount === total) { consensusColor = 'text-rose-400'; consensusText = '防守共振'; }
-  else if (emptyCount === total) { consensusColor = 'text-slate-300'; consensusText = '空仓共振'; }
-  else if (enterCount > observeCount && enterCount > defenseCount && enterCount > emptyCount) { consensusText = '倾向进场'; consensusColor = 'text-emerald-400/80'; }
-  else if (observeCount > enterCount && observeCount > defenseCount && observeCount > emptyCount) { consensusText = '倾向观察'; consensusColor = 'text-amber-400/80'; }
-  else if (defenseCount > enterCount && defenseCount > observeCount && defenseCount > emptyCount) { consensusText = '倾向防守'; consensusColor = 'text-rose-400/80'; }
-  else if (emptyCount > enterCount && emptyCount > observeCount && emptyCount > defenseCount) { consensusText = '倾向空仓'; consensusColor = 'text-slate-300/80'; }
+  if (enterCount === total) {
+    consensusColor = 'text-emerald-400';
+    consensusText = '一致支持建议进场';
+    consensusSubtext = '当前投研决议对主结论形成一致支持。';
+  } else if (observeCount === total) {
+    consensusColor = 'text-amber-400';
+    consensusText = '一致支持建议观察';
+    consensusSubtext = '当前投研决议对主结论形成一致支持。';
+  } else if (defenseCount === total) {
+    consensusColor = 'text-rose-400';
+    consensusText = '一致支持建议防守';
+    consensusSubtext = '当前投研决议对主结论形成一致支持。';
+  } else if (emptyCount === total) {
+    consensusColor = 'text-slate-300';
+    consensusText = '一致支持建议空仓';
+    consensusSubtext = '当前投研决议对主结论形成一致支持。';
+  } else if (enterCount > observeCount && enterCount > defenseCount && enterCount > emptyCount) {
+    consensusText = '更多支持建议进场';
+    consensusColor = 'text-emerald-400/80';
+    consensusSubtext = '当前投研决议更偏向支持主结论，但仍有分歧。';
+  } else if (observeCount > enterCount && observeCount > defenseCount && observeCount > emptyCount) {
+    consensusText = '更多支持建议观察';
+    consensusColor = 'text-amber-400/80';
+    consensusSubtext = '当前投研决议更偏向支持主结论，但仍有分歧。';
+  } else if (defenseCount > enterCount && defenseCount > observeCount && defenseCount > emptyCount) {
+    consensusText = '更多支持建议防守';
+    consensusColor = 'text-rose-400/80';
+    consensusSubtext = '当前投研决议更偏向支持主结论，但仍有分歧。';
+  } else if (emptyCount > enterCount && emptyCount > observeCount && emptyCount > defenseCount) {
+    consensusText = '更多支持建议空仓';
+    consensusColor = 'text-slate-300/80';
+    consensusSubtext = '当前投研决议更偏向支持主结论，但仍有分歧。';
+  }
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -194,6 +235,7 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
               {consensusText}
               {(enterCount === total || observeCount === total || defenseCount === total || emptyCount === total) && <ShieldCheck size={18} />}
            </h3>
+           <p className="mt-1 text-[11px] text-slate-500 leading-5">{consensusSubtext}</p>
         </div>
       </div>
 
@@ -211,13 +253,7 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
                : actionKey === 'empty'
                  ? 'bg-slate-500/20 text-slate-300'
                  : 'bg-amber-500/20 text-amber-400';
-           const chipText = actionKey === 'enter'
-             ? '进场'
-             : actionKey === 'defense'
-               ? '防守'
-               : actionKey === 'empty'
-                 ? '空仓'
-                 : actionMeta.headline.replace('建议', '');
+           const chipText = getCouncilActionLabel(actionKey);
            return (
              <div key={idx} className={`p-4 rounded-xl border ${isPrimary ? 'bg-indigo-500/10 border-indigo-500/20' : 'bg-white/[0.02] border-white/5'}`}>
                 <div className="flex items-center justify-between mb-3">
@@ -236,6 +272,9 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
                 </div>
                 
                 {/* ç®€è¦ç†ç”± */}
+                <p className="mb-2 text-[11px] font-medium text-slate-400 leading-5">
+                   {actionMeta.badge}
+                </p>
                 <p className="text-xs text-slate-300 leading-relaxed font-medium line-clamp-2">
                    {/* Try to parse if it's JSON or use raw */}
                    {(() => {
