@@ -121,6 +121,15 @@ interface PriceLevelNode {
   action: string;
 }
 
+const normalizeActionLabel = (action: string | undefined): string => {
+  if (!action) return '执行观察';
+  if (action.includes('观察')) return '执行观察';
+  if (action.includes('止损') || action.includes('减仓') || action.includes('防守')) return '执行防守';
+  if (action.includes('加仓') || action.includes('跟随') || action.includes('买')) return '执行进场';
+  if (action.includes('落袋') || action.includes('止盈') || action.includes('离场')) return '执行落袋';
+  return action;
+};
+
 const getPriceNodes = (data: TacticalData, currentPrice?: number): PriceLevelNode[] => {
   const nodes: PriceLevelNode[] = [];
   
@@ -146,20 +155,20 @@ const getPriceNodes = (data: TacticalData, currentPrice?: number): PriceLevelNod
 
   // 按业务优先级和角色添加节点
   if (data?.key_levels?.strong_resistance) 
-    add(data.key_levels.strong_resistance, '强压力区', 'resistance', '核心供给区，多空博弈终点', '减仓/离场');
+    add(data.key_levels.strong_resistance, '强压力区', 'resistance', '核心供给区，多空博弈终点', '执行落袋');
   if (data?.key_levels?.resistance || data?.key_levels?.immediate_resistance) 
-    add(data.key_levels.immediate_resistance || data.key_levels.resistance, '挑战位', 'target', '局部阶段目标，注意动能释放', '落袋/观察');
+    add(data.key_levels.immediate_resistance || data.key_levels.resistance, '挑战位', 'target', '局部阶段目标，注意动能释放', '执行落袋');
   if (data?.key_levels?.breakout_confirmation_level)
-    add(data.key_levels.breakout_confirmation_level, '突破确认', 'breakout', '反转结构成立的关键锚点', '回踩确认/加码');
+    add(data.key_levels.breakout_confirmation_level, '突破确认', 'breakout', '反转结构成立的关键锚点', '执行进场');
   
-  if (currentPrice) nodes.push({ id: 'current', price: currentPrice, label: '当前价', kind: 'current', description: '目前市场成交活跃点', action: '观察' });
+  if (currentPrice) nodes.push({ id: 'current', price: currentPrice, label: '当前价', kind: 'current', description: '目前市场成交活跃点', action: '执行观察' });
 
   if (data?.key_levels?.support || data?.key_levels?.immediate_support) 
-    add(data.key_levels.immediate_support || data.key_levels.support, '防守位', 'support', '多头防线，不破即维持强势', '维持仓位');
+    add(data.key_levels.immediate_support || data.key_levels.support, '防守位', 'support', '多头防线，不破即维持强势', '执行防守');
   if (data?.key_levels?.strong_support) 
-    add(data.key_levels.strong_support, '强支撑区', 'support', '底部核心支撑，中长期成本位', '右侧加仓点');
+    add(data.key_levels.strong_support, '强支撑区', 'support', '底部核心支撑，中长期成本位', '执行进场');
   if (data?.key_levels?.stop_loss_reference || data?.key_levels?.stop_loss)
-    add(data.key_levels.stop_loss_reference || data.key_levels.stop_loss, '止损参考', 'stoploss', '结构崩溃底线', '绝对止损');
+    add(data.key_levels.stop_loss_reference || data.key_levels.stop_loss, '止损参考', 'stoploss', '结构崩溃底线', '执行防守');
 
   const sorted = nodes.sort((a, b) => b.price - a.price);
   // Dedup: remove nodes with identical prices to prevent phantom pagination dots
@@ -178,7 +187,7 @@ const createPlaceholderTactic = (kind: ScenarioKind, idx: number): ScenarioTacti
     holding_profit: [
       {
         priority: 'P1',
-        action: '持仓观察',
+        action: '执行观察',
         trigger: '不跌破一防位',
         reason: '趋势未被破坏，先守纪律。',
         target_price: undefined,
@@ -187,7 +196,7 @@ const createPlaceholderTactic = (kind: ScenarioKind, idx: number): ScenarioTacti
       },
       {
         priority: 'P2',
-        action: '分批止盈预案',
+        action: '执行落袋',
         trigger: '接近一攻位且动能放缓',
         reason: '锁定波段利润，避免冲高回落。',
         target_price: undefined,
@@ -198,7 +207,7 @@ const createPlaceholderTactic = (kind: ScenarioKind, idx: number): ScenarioTacti
     holding_loss: [
       {
         priority: 'P1',
-        action: '严格止损',
+        action: '执行防守',
         trigger: '有效跌破一防位',
         reason: '优先控制回撤，避免亏损扩大。',
         stop_loss_price: undefined,
@@ -206,7 +215,7 @@ const createPlaceholderTactic = (kind: ScenarioKind, idx: number): ScenarioTacti
       },
       {
         priority: 'P2',
-        action: '反弹减仓',
+        action: '执行防守',
         trigger: '反抽压力位但未能突破',
         reason: '弱势反弹先降风险敞口。',
         stop_loss_price: undefined,
@@ -216,7 +225,7 @@ const createPlaceholderTactic = (kind: ScenarioKind, idx: number): ScenarioTacti
     empty: [
       {
         priority: 'P1',
-        action: '等待确认',
+        action: '执行观察',
         trigger: '回踩一防位企稳后再评估',
         reason: '先等右侧信号，再考虑入场。',
         buy_zone_price: undefined,
@@ -224,7 +233,7 @@ const createPlaceholderTactic = (kind: ScenarioKind, idx: number): ScenarioTacti
       },
       {
         priority: 'P2',
-        action: '突破跟随预案',
+        action: '执行进场',
         trigger: '放量突破一攻位并站稳',
         reason: '确认后再交易，避免假突破。',
         buy_zone_price: undefined,
@@ -505,7 +514,7 @@ export function TacticalBriefDrawer({
                                        <div className="flex items-center justify-between mb-2.5">
                                             <div className="flex items-center gap-2">
                                                 <span className={`text-[10px] font-black px-1.5 py-0.5 rounded italic ${t.priority === 'P1' ? 'bg-indigo-500' : 'bg-slate-700'} text-white`}>{t.priority}</span>
-                                                <span className="text-sm font-bold text-white">{t.action}</span>
+                                                <span className="text-sm font-bold text-white">{normalizeActionLabel(t.action)}</span>
                                             </div>
                                             <div className="px-2 py-0.5 rounded-lg bg-[#2ECC71]/10 border border-[#2ECC71]/20 text-[10px] font-bold text-[#2ECC71]">
                                                 盈利中
@@ -535,7 +544,7 @@ export function TacticalBriefDrawer({
                                        <div className="flex items-center justify-between mb-2.5">
                                             <div className="flex items-center gap-2">
                                                 <span className={`text-[10px] font-black px-1.5 py-0.5 rounded italic ${t.priority === 'P1' ? 'bg-rose-500' : 'bg-slate-700'} text-white`}>{t.priority}</span>
-                                                <span className="text-sm font-bold text-white">{t.action}</span>
+                                                <span className="text-sm font-bold text-white">{normalizeActionLabel(t.action)}</span>
                                             </div>
                                             <div className="px-2 py-0.5 rounded-lg bg-[#FF4D4F]/10 border border-[#FF4D4F]/20 text-[10px] font-bold text-[#FF4D4F]">
                                                 亏损中
@@ -564,7 +573,7 @@ export function TacticalBriefDrawer({
                                      <div className="flex items-center justify-between mb-2.5">
                                           <div className="flex items-center gap-2">
                                               <span className={`text-[10px] font-black px-1.5 py-0.5 rounded italic ${t.priority === 'P1' ? 'bg-indigo-500' : 'bg-slate-700'} text-white`}>{t.priority}</span>
-                                              <span className="text-sm font-bold text-white">{t.action}</span>
+                                              <span className="text-sm font-bold text-white">{normalizeActionLabel(t.action)}</span>
                                           </div>
                                           <div className="px-2 py-0.5 rounded-lg bg-[#3A7AFE]/10 border border-[#3A7AFE]/20 text-[10px] font-bold text-[#5DA9FF]">
                                               等待入场
@@ -603,7 +612,7 @@ export function TacticalBriefDrawer({
                           <div key={idx} className="p-4 rounded-2xl border border-white/5 bg-white/[0.01]">
                             <div className="flex items-center gap-2 mb-2">
                                <div className="w-1 h-1 rounded-full bg-slate-700" />
-                               <span className="text-xs font-bold text-slate-300">{t.action}</span>
+                               <span className="text-xs font-bold text-slate-300">{normalizeActionLabel(t.action)}</span>
                             </div>
                             <p className="text-xs text-slate-500 leading-relaxed"><span className="text-slate-400">条件:</span> {t.trigger}</p>
                           </div>
@@ -791,7 +800,7 @@ export function TacticalBriefDrawer({
                                             <p className={`text-xs font-bold leading-relaxed ${isActive ? 'text-slate-200' : 'text-slate-500'}`}>{node.description}</p>
                                             <p className={`text-[10px] italic mt-2 flex items-center gap-2 ${isActive ? 'text-indigo-400' : 'text-slate-600'}`}>
                                                 <span className="font-black uppercase tracking-widest bg-indigo-500/10 px-1.5 py-0.5 rounded">建议脚本</span> 
-                                                {node.action}
+                                                {normalizeActionLabel(node.action)}
                                             </p>
                                         </div>
                                         

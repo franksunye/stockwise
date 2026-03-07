@@ -14,6 +14,12 @@ export const HistoricalCard = memo(function HistoricalCard({ data, onClick }: { 
   const isUp = data.signal === 'Long';
   const isDown = data.signal === 'Short';
   const actionMeta = getPredictionActionMeta(data);
+  const validationSummary =
+    data.validation_status === 'Correct'
+      ? '这次历史判断后来被市场验证。'
+      : data.validation_status === 'Incorrect'
+        ? '这次历史判断后来出现偏差。'
+        : '这次历史判断仍在等待市场验证。';
   
   // 尝试解析 JSON 理由
   let displayReason = data.ai_reasoning;
@@ -109,6 +115,10 @@ export const HistoricalCard = memo(function HistoricalCard({ data, onClick }: { 
                  </span>
             </div>
           </div>
+
+          <p className="text-[12px] font-medium text-slate-400 leading-5 mb-3">
+            {actionMeta.badge}
+          </p>
           
           <p className="text-sm text-slate-300 leading-relaxed italic font-medium pl-1 border-l-2 border-white/10">
             &quot;{displayReason.length > 60 ? displayReason.slice(0, 60) + '...' : displayReason}&quot;
@@ -130,12 +140,7 @@ export const HistoricalCard = memo(function HistoricalCard({ data, onClick }: { 
             
             <div className="text-right">
               <span className="text-[10px] text-slate-500 font-bold uppercase block mb-1 tracking-widest leading-tight">
-                {(() => {
-                  if (data.validation_status !== 'Correct' && data.validation_status !== 'Incorrect') return '实际涨跌';
-                  if (isUp) return '当日收盘涨幅';
-                  if (isDown) return '当日收盘跌幅';
-                  return '收盘表现';
-                })()}
+                市场结果
               </span>
               <p className={`text-2xl font-black mono ${
                 (data.actual_change || 0) >= 0 ? 'text-rose-500' : 'text-emerald-500'
@@ -146,6 +151,9 @@ export const HistoricalCard = memo(function HistoricalCard({ data, onClick }: { 
               </p>
             </div>
           </div>
+          <p className="mt-4 text-xs text-slate-500 leading-relaxed">
+            {validationSummary}
+          </p>
         </div>
       </div>
     </div>
