@@ -113,6 +113,22 @@
    - 体验标准：
      - 个人中心二级页在布局、节奏、层级上是完整产品页，不是一级卡片搬家。
      - 模式、表现、决议、简报之间没有明显语义断裂。
+   - B1.5 验收记录表：
+
+| 模块 | 验收项 | 当前结果 | 备注 | Owner |
+|---|---|---|---|---|
+| Free 路径 | 个人中心首页仅保留投资模式一级入口 | Pending | 待实机走查 | Product + Frontend |
+| Free 路径 | 二级页默认看到平衡模式与通用表现 | Pending | 待实机走查 | Product + Frontend |
+| Free 路径 | 升级提示为权益表达，不是规则说明 | Pending | 待实机走查 | Product + Frontend |
+| Pro 路径 | 能看到当前模式、可切换模式、通用表现、监控池表现 | Pending | 待实机走查 | Product + Frontend |
+| Pro 路径 | 切换提示清楚说明“只影响后续新结论，不改历史记录” | Pending | 待实机走查 | Product + Frontend |
+| 性能 | 模式页首屏无明显等待感 | Pending | 待弱网与常规网络各走查一次 | Frontend |
+| Dashboard | 主结论只保留四语义 | Pending | 待截图级复核 | Product + Frontend |
+| Historical Card | 只解释主结论，不回到旧 signal 心智 | Pending | 待截图级复核 | Product + Frontend |
+| Tactical Brief | 主结论与执行动作分层清楚 | Pending | 待截图级复核 | Product + Frontend |
+| AI Council | 仅作为主结论支持层，不形成第二套判断系统 | Pending | 待截图级复核 | Product + Frontend |
+| 状态面 | loading / empty / error / upgrade gate 均为产品语言 | Pending | 待弱网与空数据场景复核 | Frontend |
+| 体验完成度 | 模式页是完整产品页，不是一级卡片搬移 | Pending | 待最终 sign-off | Product |
 2. **启动 A2**
    - 收口解释层，补齐 trace 与回放。
 3. **推进 SWR 统一**
