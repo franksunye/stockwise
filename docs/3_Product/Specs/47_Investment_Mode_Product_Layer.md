@@ -3,6 +3,10 @@
 > 定位：底层专业，表层极简（2C）。
 > 本 Spec 聚焦“模式定义、表现定义、系统边界、上线标准”，用于产品、前端、后端、量化统一实现。
 
+> 发布状态（2026-03-07）：
+> - 后端与 API 已发布到 `main`（commit: `a941edf`）
+> - 前端体验改造与增长实验仍按后续阶段推进
+
 ---
 
 ## 0. 设计基线（外部依据）
@@ -501,16 +505,16 @@
 ## 10. 验收标准（Done）
 
 - [ ] 模式定义在前后端与文案层一致（同名同义）。
-- [ ] 每个模式都有 `通用表现 + 监控池表现`。
-- [ ] 每套表现都有 `7D/30D/90D`。
-- [ ] 样本不足规则生效且前台有明确提示。
+- [x] 每个模式都有 `通用表现 + 监控池表现`。
+- [x] 每套表现都有 `7D/30D/90D`。
+- [x] 样本不足规则生效且前台有明确提示。
 - [ ] 前台核心场景只使用四语义主文案。
-- [ ] 新预测写入 `mode_id + layer1_strategy_version`。
-- [ ] 已建设 `mode_decision_log`，并可按 `mode_id/date/symbol` 查询决策依据。
-- [ ] 已建设 `mode_simulated_trade_ledger`，模式绩效可回溯至模拟交易台账。
-- [ ] 已建设 `mode_performance_snapshot`，前台首屏查询不依赖实时重算。
-- [ ] 模式绩效全链路可追溯（snapshot -> ledger -> decision -> prediction）。
-- [ ] 默认策略版本为 `tradeability_v2`。
+- [x] 新预测写入 `mode_id + layer1_strategy_version`。
+- [x] 已建设 `mode_decision_log`，并可按 `mode_id/date/symbol` 查询决策依据。
+- [x] 已建设 `mode_simulated_trade_ledger`，模式绩效可回溯至模拟交易台账。
+- [x] 已建设 `mode_performance_snapshot`，前台首屏查询不依赖实时重算。
+- [x] 模式绩效全链路可追溯（snapshot -> ledger -> decision -> prediction）。
+- [x] 默认策略版本为 `tradeability_v2`。
 - [ ] 用户切换模式后，Dashboard/投研决议/监控池/个人中心四处均可见当前模式。
 - [ ] Free 与 Pro 的模式能力边界按分层规则生效。
 - [ ] 前台已实现“极简/专业 × 移动端/PC”交付矩阵且不破坏现有导航。
@@ -614,7 +618,7 @@
 ---
 
 ## 15. 文档信息
-- 文档版本：`v1.6`
+- 文档版本：`v1.7`
 - 更新日期：`2026-03-07`
 - 维护：Product / Quant / Frontend / Backend
 
@@ -628,6 +632,15 @@
 - 后台产数管线：`prediction -> decision -> ledger -> snapshot`
 - API：`GET/POST /api/user/mode`、`GET /api/modes`、`GET /api/modes/performance`、`GET /api/modes/performance/summary`、`GET /api/modes/performance/ledger`、`GET /api/modes/decisions`
 - 审计字段：`job_id`、`rule_version`、`triggered_by` 已写入 mode 三层数据
+
+发布记录：
+- 已合并并发布到 `main`：`a941edf`
+- 合并路径：`feat/spec47-mode-backend-api` -> `main`（fast-forward）
+
+作业验证（本地等价 workflow 全量演练）：
+- 已覆盖 `.github/workflows` 后端相关 job（sync / analyze / verify / brief / almanac / maintenance / tradeability / gate）
+- 结果归档：`tmp/workflow_e2e/light_jobs_result.json`、`tmp/workflow_e2e/heavy_jobs_result.json`
+- 结论：后端 job 可运行，Spec47 新增链路未发现回归
 
 当前边界：
 - 模式切换不回写历史结论，仅影响后续产数与表现聚合。

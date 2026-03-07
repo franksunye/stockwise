@@ -3,6 +3,9 @@
 更新时间：2026-03-07  
 范围：本地开发环境（SQLite / Turso-compat SQL）
 
+发布状态：
+- 已发布到 `main`（commit: `a941edf`）
+
 ## 1. 目标
 
 保证 Investment Mode 在后端形成闭环：
@@ -48,3 +51,14 @@
   - `python -m unittest backend.tests.test_runner_layer1_enforcement backend.tests.test_backfill_v2_query`
 - 前端构建：
   - `cd frontend && npm run build`
+
+## 6. Workflow 全量演练（本地等价）
+
+- 已按 `.github/workflows` 后端相关 job 做本地等价执行（2026-03-07）：
+  - 数据同步：`meta_sync` / `data_sync_cn` / `data_sync_hk` / `data_sync_realtime` / `data_sync_single` / `sync_hk_short`
+  - 分析验证：`ai_analyze_cn` / `ai_analyze_hk` / `ai_backfill` / `verify_predictions`
+  - 运营与质量：`daily_brief_push` / `daily_validation_check` / `daily_morning_call(dry-run)` / `layer1_consistency` / `acceptance_weekly` / `trading_day_gate` / `user_maintenance(dry-run)` / `admin_codes`
+  - 策略实验：`tradeability_sidecar_daily(dry-run)` / `tradeability_experiment_weekly` / `tradeability_sidecar_weekly_calibration`
+- 结果归档：
+  - `tmp/workflow_e2e/light_jobs_result.json`
+  - `tmp/workflow_e2e/heavy_jobs_result.json`
