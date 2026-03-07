@@ -167,8 +167,8 @@ function SectionHeader({
     return (
         <div className="text-left">
             <div className="flex items-end justify-between gap-3">
-                <h3 className="text-lg font-black tracking-tight text-white">{title}</h3>
-                {detail ? <p className="text-[11px] font-medium text-slate-500">{detail}</p> : null}
+                <h3 className="text-base font-black italic tracking-tighter text-white uppercase">{title}</h3>
+                {detail ? <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{detail}</p> : null}
             </div>
         </div>
     );
@@ -320,8 +320,8 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
                         <div className="min-w-0 text-left">
                             <p className="text-[10px] font-black uppercase tracking-[0.22em] text-indigo-300/80">当前模式</p>
                             <div className="mt-3 flex items-center gap-2">
-                                <h3 className="text-3xl font-black tracking-tight text-white">{currentMode?.name || '平衡'}</h3>
-                                <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-bold text-slate-300">
+                                <h3 className="text-3xl font-black italic tracking-tighter text-white uppercase">{currentMode?.name || '平衡'}</h3>
+                                <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-bold text-slate-300 uppercase">
                                     {getRiskBandLabel(currentMode?.risk_band)}
                                 </span>
                             </div>
@@ -341,13 +341,13 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
                     </div>
 
                     <div className="relative mt-6 grid grid-cols-2 gap-3">
-                        <div className="rounded-2xl border border-white/6 bg-white/[0.03] px-4 py-3 text-left">
-                            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">当前生效</p>
-                            <p className="mt-2 text-lg font-black text-white">{formatUpdatedAt(modeResponse?.updated_at || null)}</p>
+                        <div className="rounded-xl border border-white/5 bg-white/[0.02] px-3 py-2.5 text-left">
+                            <p className="text-[9px] font-black uppercase tracking-[0.18em] text-slate-500">当前生效</p>
+                            <p className="mt-1 text-sm font-black italic text-white">{formatUpdatedAt(modeResponse?.updated_at || null)}</p>
                         </div>
-                        <div className="rounded-2xl border border-white/6 bg-white/[0.03] px-4 py-3 text-left">
-                            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">模式范围</p>
-                            <p className="mt-2 text-lg font-black text-white">{currentTier === 'pro' ? '多模式' : '平衡模式'}</p>
+                        <div className="rounded-xl border border-white/5 bg-white/[0.02] px-3 py-2.5 text-left">
+                            <p className="text-[9px] font-black uppercase tracking-[0.18em] text-slate-500">模式范围</p>
+                            <p className="mt-1 text-sm font-black italic text-white">{currentTier === 'pro' ? '多模式' : '平衡模式'}</p>
                         </div>
                     </div>
                 </div>
@@ -385,11 +385,11 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
                             >
                                 <div className="flex h-full flex-col justify-between gap-6">
                                     <div className="min-w-0">
-                                        <div className="flex items-center gap-2">
-                                            <span className={`text-[17px] font-black tracking-tight ${active ? 'text-white' : 'text-slate-100'}`}>
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <span className={`text-base font-black italic tracking-tighter uppercase ${active ? 'text-white' : 'text-slate-200'}`}>
                                                 {mode.name}
                                             </span>
-                                            <span className="rounded-full border border-white/8 bg-white/[0.04] px-2 py-0.5 text-[10px] font-bold text-slate-400">
+                                            <span className="rounded-[4px] border border-white/10 bg-white/[0.04] px-1.5 py-0.5 text-[9px] font-bold text-slate-400 tracking-widest uppercase">
                                                 {getRiskBandLabel(mode.risk_band)}
                                             </span>
                                         </div>
@@ -438,30 +438,30 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
                                     <div className="min-w-0 flex-1">
                                         <div className="flex items-center justify-between gap-3">
                                             <div>
-                                                <h4 className="text-base font-black text-white">{meta.title}</h4>
-                                                <p className="mt-1 text-[12px] leading-6 text-slate-400">{meta.subtitle}</p>
+                                                <h4 className="text-sm font-black italic tracking-tighter text-white uppercase">{meta.title}</h4>
+                                                <p className="mt-1 text-[11px] font-medium leading-relaxed text-slate-500">{meta.subtitle}</p>
                                             </div>
                                             <span className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">30D</span>
                                         </div>
 
                                         <div className="mt-4 grid grid-cols-3 gap-2">
-                                            <div className="rounded-2xl bg-black/20 px-3 py-3 text-center">
-                                                <div className="text-sm font-black text-white">
+                                            <div className="rounded-xl border border-white/5 bg-black/40 px-3 py-3 text-center">
+                                                <div className="text-sm font-black italic tracking-tighter text-white">
                                                     {formatPercent(summary?.metrics?.coverage ?? null)}
                                                 </div>
-                                                <div className="mt-1 text-[10px] text-slate-500">覆盖率</div>
+                                                <div className="mt-1 text-[9px] font-bold uppercase tracking-widest text-slate-500">覆盖率</div>
                                             </div>
-                                            <div className="rounded-2xl bg-black/20 px-3 py-3 text-center">
-                                                <div className="text-sm font-black text-white">
+                                            <div className="rounded-xl border border-white/5 bg-black/40 px-3 py-3 text-center">
+                                                <div className="text-sm font-black italic tracking-tighter text-emerald-400">
                                                     {formatPercent(summary?.metrics?.hit_rate ?? null)}
                                                 </div>
-                                                <div className="mt-1 text-[10px] text-slate-500">命中率</div>
+                                                <div className="mt-1 text-[9px] font-bold uppercase tracking-widest text-slate-500">命中率</div>
                                             </div>
-                                            <div className="rounded-2xl bg-black/20 px-3 py-3 text-center">
-                                                <div className={`text-sm font-black ${insufficient ? 'text-slate-500' : 'text-white'}`}>
+                                            <div className="rounded-xl border border-white/5 bg-black/40 px-3 py-3 text-center">
+                                                <div className={`text-sm font-black italic tracking-tighter ${insufficient ? 'text-slate-600' : 'text-rose-500'}`}>
                                                     {formatPercent(summary?.metrics?.max_drawdown ?? null, { signed: true })}
                                                 </div>
-                                                <div className="mt-1 text-[10px] text-slate-500">最大回撤</div>
+                                                <div className="mt-1 text-[9px] font-bold uppercase tracking-widest text-slate-500">最大回撤</div>
                                             </div>
                                         </div>
 
@@ -483,24 +483,26 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
             ) : null}
 
             {currentTier === 'free' ? (
-                <div className="rounded-[26px] border border-indigo-500/15 bg-indigo-500/6 p-5 text-left">
-                    <div className="flex items-center gap-2">
+                <div className="rounded-[24px] border border-amber-500/20 bg-amber-500/[0.03] p-5 text-left">
+                    <div className="flex items-center gap-2 mb-2.5">
                         <Crown className="w-4 h-4 text-amber-400" />
-                        <p className="text-base font-black text-white">解锁更多投资模式与监控池表现</p>
+                        <p className="text-sm font-black italic tracking-tighter text-amber-100 uppercase">解锁更多投资模式与监控池表现</p>
                     </div>
-                    <p className="mt-3 text-sm leading-7 text-slate-300">
+                    <p className="text-[11px] leading-relaxed text-slate-400 font-medium">
                         当前可查看平衡模式的通用表现。升级 Pro 后，可按自己的投资风格切换更多模式，并查看监控池表现。
                     </p>
                     <button
                         type="button"
                         onClick={onUpgrade}
-                        className="mt-4 inline-flex items-center rounded-2xl bg-indigo-600 px-4 py-2.5 text-sm font-bold text-white transition-all hover:bg-indigo-500"
+                        className="mt-4 inline-flex items-center rounded-xl bg-amber-500/10 border border-amber-500/20 px-4 py-2 text-xs font-black italic uppercase tracking-wider text-amber-300 transition-all hover:bg-amber-500/20"
                     >
                         升级 Pro
                     </button>
                 </div>
             ) : (
-                <p className="text-[12px] leading-6 text-slate-500">模式切换只影响后续新结论，历史记录保持不变。</p>
+                <p className="text-[10px] font-bold uppercase tracking-wide leading-6 text-slate-500/80 text-center border border-white/5 bg-white/[0.02] rounded-xl py-3 px-4">
+                    模式切换只影响后续新结论，历史记录保持不变。
+                </p>
             )}
         </div>
     );
