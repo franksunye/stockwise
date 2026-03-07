@@ -18,7 +18,7 @@ export interface PredictionActionMeta {
 const LAYER1_META: Record<NonNullable<AIPrediction['layer1_status']>, PredictionActionMeta> = {
   TriggeredLong: {
     headline: '建议进场',
-    badge: 'Layer-1 · 进场窗口',
+    badge: '适合开始寻找机会',
     posterDecision: '建议进场',
     color: COLORS.up,
     dotClass: 'bg-rose-500',
@@ -28,7 +28,7 @@ const LAYER1_META: Record<NonNullable<AIPrediction['layer1_status']>, Prediction
   },
   Watch: {
     headline: '建议观察',
-    badge: 'Layer-1 · 继续观察',
+    badge: '先观察，不急着出手',
     posterDecision: '建议观察',
     color: COLORS.hold,
     dotClass: 'bg-amber-500',
@@ -38,7 +38,7 @@ const LAYER1_META: Record<NonNullable<AIPrediction['layer1_status']>, Prediction
   },
   RiskOff: {
     headline: '建议防守',
-    badge: 'Layer-1 · 风险收缩',
+    badge: '优先控制风险',
     posterDecision: '建议防守',
     color: COLORS.down,
     dotClass: 'bg-emerald-500',
@@ -48,7 +48,7 @@ const LAYER1_META: Record<NonNullable<AIPrediction['layer1_status']>, Prediction
   },
   NoSetup: {
     headline: '建议空仓',
-    badge: 'Layer-1 · 暂无结构',
+    badge: '当前不建议出手',
     posterDecision: '建议空仓',
     color: COLORS.muted,
     dotClass: 'bg-slate-500',
@@ -61,7 +61,7 @@ const LAYER1_META: Record<NonNullable<AIPrediction['layer1_status']>, Prediction
 const SIGNAL_META: Record<string, PredictionActionMeta> = {
   Long: {
     headline: '建议进场',
-    badge: 'AI · 进场',
+    badge: '适合开始寻找机会',
     posterDecision: '建议进场',
     color: COLORS.up,
     dotClass: 'bg-rose-500',
@@ -71,7 +71,7 @@ const SIGNAL_META: Record<string, PredictionActionMeta> = {
   },
   Short: {
     headline: '建议防守',
-    badge: 'AI · 防守',
+    badge: '优先控制风险',
     posterDecision: '建议防守',
     color: COLORS.down,
     dotClass: 'bg-emerald-500',
@@ -81,7 +81,7 @@ const SIGNAL_META: Record<string, PredictionActionMeta> = {
   },
   Side: {
     headline: '建议观察',
-    badge: 'AI · 观察',
+    badge: '先观察，不急着出手',
     posterDecision: '建议观察',
     color: COLORS.hold,
     dotClass: 'bg-amber-500',
@@ -93,7 +93,7 @@ const SIGNAL_META: Record<string, PredictionActionMeta> = {
 
 const FALLBACK_META: PredictionActionMeta = {
   headline: '等待分析',
-  badge: 'AI · 等待分析',
+  badge: '正在生成可执行结论',
   posterDecision: '等待分析',
   color: '#94a3b8',
   dotClass: 'bg-slate-500',

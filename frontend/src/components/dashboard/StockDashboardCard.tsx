@@ -151,6 +151,9 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
           }}>
             {actionMeta.headline}
           </h2>
+          <p className="text-[12px] font-medium text-slate-400 leading-5">
+            {actionMeta.badge}
+          </p>
           <div className="flex items-center justify-center gap-3 text-[10px] font-bold text-slate-600">
             {displayPrediction ? (
               <span className="flex items-center gap-1 uppercase tracking-widest"><Target className="w-3 h-3" /> 把握 {((displayPrediction?.confidence || 0) * 100).toFixed(0)}%</span>
