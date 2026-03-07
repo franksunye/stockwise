@@ -358,7 +358,7 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
                     title="选择模式"
                     detail={currentTier === 'free' ? 'Free 默认使用平衡模式' : '切换只影响后续新结论'}
                 />
-                <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
                     {allowedModes.map((mode) => {
                         const active = mode.mode_id === modeResponse?.mode_id;
                         const locked = mode.is_locked;
@@ -375,7 +375,7 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
                                     void handleSwitchMode(mode.mode_id);
                                 }}
                                 disabled={!!savingModeId}
-                                className={`w-full rounded-[24px] border px-4 py-4 text-left transition-all ${
+                                className={`min-h-[148px] rounded-[24px] border px-4 py-4 text-left transition-all ${
                                     active
                                         ? 'border-indigo-500/40 bg-indigo-500/10 shadow-[0_0_0_1px_rgba(99,102,241,0.08)]'
                                         : locked
@@ -383,19 +383,19 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
                                           : 'border-white/6 bg-white/[0.03] hover:border-white/12 hover:bg-white/[0.045]'
                                 } disabled:opacity-60`}
                             >
-                                <div className="flex items-start justify-between gap-4">
+                                <div className="flex h-full flex-col justify-between gap-6">
                                     <div className="min-w-0">
                                         <div className="flex items-center gap-2">
-                                            <span className={`text-xl font-black tracking-tight ${active ? 'text-white' : 'text-slate-100'}`}>
+                                            <span className={`text-[17px] font-black tracking-tight ${active ? 'text-white' : 'text-slate-100'}`}>
                                                 {mode.name}
                                             </span>
                                             <span className="rounded-full border border-white/8 bg-white/[0.04] px-2 py-0.5 text-[10px] font-bold text-slate-400">
                                                 {getRiskBandLabel(mode.risk_band)}
                                             </span>
                                         </div>
-                                        <p className="mt-2 text-sm leading-6 text-slate-400">{mode.tagline}</p>
+                                        <p className="mt-3 text-[13px] leading-6 text-slate-400 line-clamp-3">{mode.tagline}</p>
                                     </div>
-                                    <div className="shrink-0 flex items-center gap-2">
+                                    <div className="shrink-0 flex items-center justify-end gap-2">
                                         {savingModeId === mode.mode_id ? (
                                             <Loader2 className="w-4 h-4 animate-spin text-slate-400" />
                                         ) : locked ? (
