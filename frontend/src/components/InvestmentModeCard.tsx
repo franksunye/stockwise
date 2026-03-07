@@ -41,6 +41,16 @@ interface Props {
     onUpgrade: () => void;
 }
 
+interface CachedCardData {
+    savedAt: number;
+    tier: UserTier;
+    modeResponse: ModeApiResponse;
+    summaries: Partial<Record<PerformanceScope, PerformanceApiResponse>>;
+}
+
+const CARD_CACHE_KEY = 'stockwise:investment-mode-card';
+const CARD_CACHE_TTL_MS = 10 * 60 * 1000;
+
 async function fetchCardData(currentTier: UserTier): Promise<{
     modeResponse: ModeApiResponse;
     summaries: Partial<Record<PerformanceScope, PerformanceApiResponse>>;
@@ -79,6 +89,54 @@ async function fetchCardData(currentTier: UserTier): Promise<{
         modeResponse: nextModeResponse,
         summaries: Object.fromEntries(summaries) as Partial<Record<PerformanceScope, PerformanceApiResponse>>,
     };
+}
+
+function readCachedCardData(currentTier: UserTier): CachedCardData | null {
+    if (typeof window === 'undefined') return null;
+
+    try {
+        const raw = window.localStorage.getItem(CARD_CACHE_KEY);
+        if (!raw) return null;
+
+        const parsed = JSON.parse(raw) as Partial<CachedCardData>;
+        if (
+            !parsed ||
+            parsed.tier !== currentTier ||
+            typeof parsed.savedAt !== 'number' ||
+            !parsed.modeResponse ||
+            !parsed.summaries
+        ) {
+            return null;
+        }
+
+        if (Date.now() - parsed.savedAt > CARD_CACHE_TTL_MS) {
+            return null;
+        }
+
+        return parsed as CachedCardData;
+    } catch {
+        return null;
+    }
+}
+
+function writeCachedCardData(
+    currentTier: UserTier,
+    modeResponse: ModeApiResponse,
+    summaries: Partial<Record<PerformanceScope, PerformanceApiResponse>>
+): void {
+    if (typeof window === 'undefined') return;
+
+    try {
+        const payload: CachedCardData = {
+            savedAt: Date.now(),
+            tier: currentTier,
+            modeResponse,
+            summaries,
+        };
+        window.localStorage.setItem(CARD_CACHE_KEY, JSON.stringify(payload));
+    } catch {
+        // Cache is optional and should never block rendering.
+    }
 }
 
 const SCOPE_META: Record<PerformanceScope, { title: string; subtitle: string; icon: typeof Sparkles }> = {
@@ -123,9 +181,23 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
 
     useEffect(() => {
         let cancelled = false;
+        const cached = readCachedCardData(currentTier);
+
+        if (cached) {
+            setModeResponse(cached.modeResponse);
+            setSummaryByScope(cached.summaries);
+            setError(null);
+            setLoading(false);
+        } else {
+            setModeResponse(null);
+            setSummaryByScope({});
+            setLoading(true);
+        }
 
         async function loadData(): Promise<void> {
-            setLoading(true);
+            if (!cached) {
+                setLoading(true);
+            }
 
             try {
                 setError(null);
@@ -135,10 +207,13 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
 
                 setModeResponse(nextModeResponse);
                 setSummaryByScope(summaries);
+                writeCachedCardData(currentTier, nextModeResponse, summaries);
             } catch (err) {
                 if (cancelled) return;
                 const message = err instanceof Error ? err.message : '暂时无法加载投资模式';
-                setError(message);
+                if (!cached) {
+                    setError(message);
+                }
             } finally {
                 if (cancelled) return;
                 setLoading(false);
@@ -160,8 +235,11 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
             setModeResponse(nextModeResponse);
             setSummaryByScope(summaries);
             setError(null);
+            writeCachedCardData(currentTier, nextModeResponse, summaries);
         } catch (err) {
-            setError(err instanceof Error ? err.message : '暂时无法加载投资模式');
+            if (!modeResponse) {
+                setError(err instanceof Error ? err.message : '暂时无法加载投资模式');
+            }
         } finally {
             setRefreshing(false);
         }
