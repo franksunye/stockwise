@@ -158,18 +158,15 @@ function formatUpdatedAt(value: string | null): string {
 }
 
 function SectionHeader({
-    eyebrow,
     title,
     detail,
 }: {
-    eyebrow: string;
     title: string;
     detail?: string;
 }) {
     return (
         <div className="text-left">
-            <p className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-500">{eyebrow}</p>
-            <div className="mt-2 flex items-end justify-between gap-3">
+            <div className="flex items-end justify-between gap-3">
                 <h3 className="text-lg font-black tracking-tight text-white">{title}</h3>
                 {detail ? <p className="text-[11px] font-medium text-slate-500">{detail}</p> : null}
             </div>
@@ -358,7 +355,6 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
 
             <section className="space-y-4">
                 <SectionHeader
-                    eyebrow="Mode"
                     title="选择模式"
                     detail={currentTier === 'free' ? 'Free 默认使用平衡模式' : '切换只影响后续新结论'}
                 />
@@ -425,7 +421,7 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
             </section>
 
             <section className="space-y-4">
-                <SectionHeader eyebrow="30D" title="模式表现" />
+                <SectionHeader title="模式表现" />
                 <div className="space-y-4">
                     {scopes.map((scope) => {
                         const summary = summaryByScope[scope];
