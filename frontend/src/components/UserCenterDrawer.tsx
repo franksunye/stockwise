@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, User, Crown, Zap, ShieldCheck, Loader2, ArrowRight, Share2, 
   Check, RefreshCw, Key, Bell, ChevronDown, ArrowLeftRight, Sun, 
-  Trophy, FileText, ChevronRight, Mail, HelpCircle, BookOpen, Info, Shield
+  Trophy, FileText, ChevronRight, Mail, HelpCircle, BookOpen, Info
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getCurrentUser, restoreUserIdentity } from '@/lib/user';
@@ -446,14 +446,11 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                         </div>
                       </button>
                       <button onClick={() => setShowInvestmentMode(true)} className="w-full py-4 px-5 rounded-[24px] border border-white/5 bg-white/[0.02] hover:border-indigo-500/20 transition-all flex items-center justify-between group">
-                        <div className="flex items-center gap-3">
-                          <Shield className="w-5 h-5 text-indigo-400" />
-                          <div className="text-left">
-                            <span className="block text-sm font-bold text-white">投资模式</span>
-                            <span className="block text-[10px] text-slate-500 font-medium">
-                              {tier === 'pro' ? '选择适合你的风格，并查看模式表现' : '查看默认模式表现，解锁更多投资风格'}
-                            </span>
-                          </div>
+                        <div className="text-left">
+                          <span className="block text-sm font-bold text-white">投资模式</span>
+                          <span className="block text-[10px] text-slate-500 font-medium">
+                            {tier === 'pro' ? '选择适合你的风格，并查看模式表现' : '查看默认模式表现，解锁更多投资风格'}
+                          </span>
                         </div>
                         <ChevronRight size={14} className="text-slate-600 group-hover:text-white transition-colors" />
                       </button>
