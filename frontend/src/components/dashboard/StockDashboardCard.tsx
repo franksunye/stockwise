@@ -264,7 +264,7 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
                     {/* 周一盘前显示一条微弱的提示线 */}
                     {isMarketOpenSoon && (
                       <div className="mt-2 pt-2 border-t border-dashed border-white/5">
-                        <span className="text-[10px] text-slate-700 font-bold italic">等待 09:30 事实流入</span>
+                        <span className="text-[10px] text-slate-700 font-bold italic">等待开盘后更新市场事实</span>
                       </div>
                     )}
                   </>
@@ -300,31 +300,31 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
                     
                     <div className="flex-1 flex flex-col items-center justify-center pt-4">
                       {!validationPrediction ? (
-                        <p className="text-xs font-bold text-slate-600 italic">暂无历史验证</p>
+                        <p className="text-xs font-bold text-slate-600 italic">历史验证还在累积中</p>
                       ) : (
                         <>
                            {status === 'Correct' ? (
                              <div className="flex flex-col items-center gap-2">
                                <ShieldCheck size={28} className="text-emerald-500" />
-                               <span className="text-xs font-black text-emerald-500 tracking-wide">预测准确</span>
+                               <span className="text-xs font-black text-emerald-500 tracking-wide">历史判断被验证</span>
                              </div>
                            ) : status === 'Verifying' ? (
                              <div className="flex flex-col items-center gap-2">
                                <Clock size={24} className="text-indigo-400 animate-pulse" />
                                <div className="flex flex-col items-center">
                                  <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">验证中</span>
-                                 <span className="text-[9px] font-bold text-slate-500 italic">正在追踪收盘表现...</span>
+                                 <span className="text-[9px] font-bold text-slate-500 italic">正在等待市场走完这段判断...</span>
                                </div>
                              </div>
                            ) : status === 'Incorrect' ? (
                              <div className="flex flex-col items-center gap-2">
                                <div className="text-rose-500 text-2xl font-black leading-none">❌</div>
-                               <span className="text-xs font-black text-rose-500 tracking-wide">产生偏差</span>
+                               <span className="text-xs font-black text-rose-500 tracking-wide">历史判断出现偏差</span>
                              </div>
                            ) : (
                              <div className="flex flex-col items-center gap-2">
                                <Clock size={24} className="text-slate-700" />
-                               <span className="text-[10px] font-bold text-slate-500 italic">待收盘验证</span>
+                               <span className="text-[10px] font-bold text-slate-500 italic">等待收盘后验证</span>
                              </div>
                            )}
                         </>

@@ -305,8 +305,9 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
 
     if (loading) {
         return (
-            <div className="min-h-[320px] flex items-center justify-center text-slate-500">
+            <div className="min-h-[320px] flex flex-col items-center justify-center gap-3 text-slate-500">
                 <Loader2 className="w-6 h-6 animate-spin" />
+                <p className="text-[11px] font-medium text-slate-500">正在同步你的模式与表现...</p>
             </div>
         );
     }
@@ -314,8 +315,8 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
     if (error && !modeResponse) {
         return (
             <div className="rounded-[28px] border border-rose-500/20 bg-rose-500/5 px-5 py-5 text-left">
-                <p className="text-sm font-bold text-rose-200">暂时无法加载投资模式</p>
-                <p className="mt-2 text-[12px] leading-6 text-rose-200/75">{error || '请稍后再试'}</p>
+                <p className="text-sm font-bold text-rose-200">暂时无法显示投资模式</p>
+                <p className="mt-2 text-[12px] leading-6 text-rose-200/75">{error || '请稍后重新进入此页。'}</p>
             </div>
         );
     }
@@ -380,7 +381,7 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
             <section className="space-y-4">
                 <SectionHeader
                     title="选择模式"
-                    detail={currentTier === 'free' ? 'Free 默认使用平衡模式' : '切换只影响后续新结论'}
+                    detail={currentTier === 'free' ? '免费版默认使用平衡模式' : '切换只影响后续新结论'}
                 />
                 <div className="grid grid-cols-2 gap-3">
                     {allowedModes.map((mode) => {
@@ -513,14 +514,14 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
                         <p className="text-sm font-black italic tracking-tighter text-amber-100 uppercase">解锁更多投资模式与监控池表现</p>
                     </div>
                     <p className="text-[11px] leading-relaxed text-slate-400 font-medium">
-                        当前可查看平衡模式的通用表现。升级 Pro 后，可按自己的投资风格切换更多模式，并查看监控池表现。
+                        当前默认使用平衡模式，并可查看对应的通用表现。升级 Pro 后，可按自己的投资风格切换更多模式，并查看监控池表现。
                     </p>
                     <button
                         type="button"
                         onClick={onUpgrade}
                         className="mt-4 inline-flex items-center rounded-xl bg-amber-500/10 border border-amber-500/20 px-4 py-2 text-xs font-black italic uppercase tracking-wider text-amber-300 transition-all hover:bg-amber-500/20"
                     >
-                        升级 Pro
+                        查看 Pro 权益
                     </button>
                 </div>
             ) : (

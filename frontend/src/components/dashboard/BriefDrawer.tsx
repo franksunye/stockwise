@@ -143,22 +143,22 @@ export function BriefDrawer({ isOpen, onClose, limitToSymbol, onUpgrade }: Brief
               {loading ? (
                 <div className="h-full flex flex-col items-center justify-center space-y-4 py-20 text-slate-500">
                   <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
-                  <p className="text-[10px] font-black uppercase tracking-[0.2em]">正在同步深度复盘...</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em]">正在整理最新简报...</p>
                 </div>
               ) : error || !brief ? (
                 <div className="h-full flex flex-col items-center justify-center space-y-6 text-center py-20">
                   <div className="w-16 h-16 rounded-full bg-primary/5 flex items-center justify-center"><Sparkles size={24} className="text-slate-600" /></div>
                   <div>
                     <h3 className="text-white font-bold text-sm mb-1 uppercase tracking-tight">今日简报尚未就绪</h3>
-                    <p className="text-[11px] text-slate-500 leading-relaxed font-medium">请保持监控列表活跃，AI 将在收盘后生成深度分析。</p>
+                    <p className="text-[11px] text-slate-500 leading-relaxed font-medium">收盘后会优先生成新的市场复盘，你也可以稍后再回来查看。</p>
                   </div>
                 </div>
               ) : (isSpecificStock && !showContent) ? (
                   <div className="h-full flex flex-col items-center justify-center space-y-6 text-center py-20">
                     <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center opacity-50"><FileText size={24} className="text-slate-600" /></div>
                     <div className="space-y-4">
-                      <p className="text-[11px] text-slate-500 leading-relaxed font-medium">今日日报中未发现对于股票 {limitToSymbol} 的重大异动分析。</p>
-                      <button onClick={() => setShowGlobal(true)} className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-indigo-500/20">查看完整日报</button>
+                      <p className="text-[11px] text-slate-500 leading-relaxed font-medium">今天的简报里还没有单独展开 {limitToSymbol}，你可以先查看完整市场简报。</p>
+                      <button onClick={() => setShowGlobal(true)} className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-indigo-500/20">查看完整简报</button>
                     </div>
                   </div>
               ) : (
@@ -199,10 +199,10 @@ export function BriefDrawer({ isOpen, onClose, limitToSymbol, onUpgrade }: Brief
                         <div className="w-full p-4 rounded-[24px] bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20 relative overflow-hidden group">
                           <div className="relative z-10 flex items-center justify-between">
                             <div className="flex-1">
-                              <h4 className="text-[11px] font-black text-amber-200 flex items-center gap-2 mb-1 uppercase italic tracking-tight">⭐ 解锁 PRO 深度复盘</h4>
-                              <p className="text-[9px] text-amber-400/70 leading-relaxed font-bold">专属首席主笔深度解读，叙事驱动的行业与个股专业分析</p>
+                              <h4 className="text-[11px] font-black text-amber-200 flex items-center gap-2 mb-1 uppercase italic tracking-tight">⭐ 解锁 Pro 深度简报</h4>
+                              <p className="text-[9px] text-amber-400/70 leading-relaxed font-bold">查看更完整的复盘结构、重点情报和个股展开。</p>
                             </div>
-                            <button onClick={() => { if (onUpgrade) { onClose(); onUpgrade(); } else { window.location.href = '/pricing'; } }} className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-[10px] font-black tracking-widest uppercase transition-all active:scale-95 whitespace-nowrap ml-4">升级</button>
+                            <button onClick={() => { if (onUpgrade) { onClose(); onUpgrade(); } else { window.location.href = '/pricing'; } }} className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-[10px] font-black tracking-widest uppercase transition-all active:scale-95 whitespace-nowrap ml-4">查看权益</button>
                           </div>
                         </div>
                      )}
