@@ -8,9 +8,20 @@ from typing import Any, Dict, Sequence
 from backend.logger import logger
 from backend.trading_calendar import get_market_from_symbol
 
+try:
+    import pandas as pd
+except Exception:
+    pd = None
+
+try:
+    import pandas_ta as ta
+except Exception:
+    ta = None
+
 STRATEGY_CONFIG_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "strategy_config")
 SETUP_STATES = {"NoSetup", "Watch", "TriggeredLong", "RiskOff"}
 DEFAULT_STRATEGY_VERSION = "tradeability_v2"
+INDICATOR_ENGINE_MODE = os.getenv("LAYER1_INDICATOR_ENGINE", "auto").strip().lower()
 STRATEGY_DEFAULTS: Dict[str, Dict[str, Any]] = {
     "tradeability_v1": {
         "params_file": os.path.join(STRATEGY_CONFIG_DIR, "tradeability_params_v1.json"),
@@ -69,6 +80,64 @@ def _calc_amp(bar: Dict[str, Any]) -> float:
     if close <= 0:
         return 0.0
     return (high - low) / close
+
+
+def _to_optional_float(v: Any) -> float | None:
+    try:
+        if v is None:
+            return None
+        f = float(v)
+        return f if f > 0 else None
+    except Exception:
+        return None
+
+
+def _has_precomputed_ma(bar: Dict[str, Any]) -> bool:
+    return (
+        _to_optional_float(bar.get("ma5")) is not None
+        and _to_optional_float(bar.get("ma10")) is not None
+        and _to_optional_float(bar.get("ma20")) is not None
+    )
+
+
+def _compute_fallback_ma(history: Sequence[Dict[str, Any]]) -> tuple[float | None, float | None, float | None, str]:
+    closes = [_safe_float(x.get("close")) for x in history if _safe_float(x.get("close")) > 0]
+    if len(closes) < 20:
+        return None, None, None, "insufficient_close_history"
+
+    if INDICATOR_ENGINE_MODE in {"auto", "pandas_ta"} and pd is not None and ta is not None:
+        try:
+            series = pd.Series(closes, dtype="float64")
+            ma5_s = ta.sma(series, length=5)
+            ma10_s = ta.sma(series, length=10)
+            ma20_s = ta.sma(series, length=20)
+            ma5 = float(ma5_s.iloc[-1]) if ma5_s is not None and not pd.isna(ma5_s.iloc[-1]) else None
+            ma10 = float(ma10_s.iloc[-1]) if ma10_s is not None and not pd.isna(ma10_s.iloc[-1]) else None
+            ma20 = float(ma20_s.iloc[-1]) if ma20_s is not None and not pd.isna(ma20_s.iloc[-1]) else None
+            if ma5 and ma10 and ma20:
+                return ma5, ma10, ma20, "pandas_ta"
+        except Exception as e:
+            logger.warning(f"Layer1 pandas-ta fallback failed, switching to rolling mean: {e}")
+
+    ma5 = _mean(closes[-5:])
+    ma10 = _mean(closes[-10:])
+    ma20 = _mean(closes[-20:])
+    return ma5, ma10, ma20, "native_rolling"
+
+
+def _enrich_bar_with_indicators(history: Sequence[Dict[str, Any]], bar: Dict[str, Any]) -> tuple[Dict[str, Any], str]:
+    if _has_precomputed_ma(bar):
+        return dict(bar), "precomputed"
+
+    enriched = dict(bar)
+    ma5, ma10, ma20, engine = _compute_fallback_ma(history)
+    if ma5 is not None:
+        enriched["ma5"] = ma5
+    if ma10 is not None:
+        enriched["ma10"] = ma10
+    if ma20 is not None:
+        enriched["ma20"] = ma20
+    return enriched, engine
 
 
 def list_supported_strategy_versions() -> Sequence[str]:
@@ -308,7 +377,7 @@ def evaluate_layer1_state(
 
     history = list(daily_history)
     i = len(history) - 1
-    bar = history[i]
+    bar, indicator_engine = _enrich_bar_with_indicators(history, history[i])
     prev = history[i - 1]
 
     amp5 = _mean([_calc_amp(x) for x in history[i - 4 : i + 1]])
@@ -330,6 +399,7 @@ def evaluate_layer1_state(
 
     payload = {
         "latest_date": bar.get("date"),
+        "indicator_engine": indicator_engine,
         "amp5": round(amp5, 6),
         "amp20": round(amp20, 6),
         "prev_vol5": round(prev_vol5, 2),

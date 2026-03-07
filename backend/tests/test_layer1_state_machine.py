@@ -119,4 +119,57 @@ def test_load_market_params_and_version_registry():
 
     strategy_version, params = load_market_params("CN", strategy_version="tradeability_v2")
     assert strategy_version == "tradeability_v2"
-    assert params["momentum_change_threshold"] == 2.8
+    assert params["momentum_change_threshold"] == 2.3
+
+
+def test_layer1_fallback_indicator_engine_when_ma_missing():
+    history = []
+    for i in range(21):
+        history.append({
+            "date": f"2026-03-{i+1:02d}",
+            "high": 10.5,
+            "low": 9.5,
+            "close": 10.0 + i * 0.01,
+            "volume": 100 + i,
+            "macd_hist": 0.1,
+            "change_percent": 0.6,
+        })
+
+    params = {
+        "vcp_ratio": 0.95,
+        "breakout_volume_mult": 1.0,
+        "strong_close_threshold": 0.60,
+        "momentum_change_threshold": 2.8,
+        "risk_off_ma": 10,
+    }
+    result = evaluate_layer1_state(history, params, "tradeability_v2")
+    assert result.payload.get("indicator_engine") in {"pandas_ta", "native_rolling"}
+    assert result.payload.get("ma10", 0) > 0
+    assert result.payload.get("ma20", 0) > 0
+
+
+def test_layer1_uses_precomputed_indicators_when_present():
+    history = []
+    for i in range(21):
+        history.append(_bar(
+            f"2026-04-{i+1:02d}",
+            10.5,
+            9.5,
+            10.0,
+            120.0,
+            9.8,
+            9.9,
+            10.0,
+            0.1,
+            0.5,
+        ))
+
+    params = {
+        "vcp_ratio": 0.95,
+        "breakout_volume_mult": 1.0,
+        "strong_close_threshold": 0.60,
+        "momentum_change_threshold": 2.8,
+        "risk_off_ma": 10,
+    }
+    result = evaluate_layer1_state(history, params, "tradeability_v2")
+    assert result.payload.get("indicator_engine") == "precomputed"

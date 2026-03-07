@@ -13,7 +13,8 @@ import {
   Clock,
   LayoutGrid,
   Terminal,
-  MessageSquare
+  MessageSquare,
+  Activity
 } from 'lucide-react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -221,7 +222,7 @@ export default function AdminDashboard() {
              </Link>
 
              <Link href="/admin/llm-traces" className="group block">
-               <div className="glass-card p-8 flex items-center justify-between hover:bg-white/[0.04] transition-all border-amber-500/20">
+                <div className="glass-card p-8 flex items-center justify-between hover:bg-white/[0.04] transition-all border-amber-500/20">
                  <div className="flex items-center gap-6">
                    <div className="w-14 h-14 rounded-2xl bg-amber-500/10 flex items-center justify-center group-hover:bg-amber-500/20 transition-all">
                      <MessageSquare className="w-7 h-7 text-amber-500" />
@@ -232,6 +233,21 @@ export default function AdminDashboard() {
                    </div>
                  </div>
                  <ArrowRight className="text-slate-700 group-hover:text-amber-500 group-hover:translate-x-1 transition-all" />
+                </div>
+             </Link>
+
+             <Link href="/admin/observability" className="group block">
+               <div className="glass-card p-8 flex items-center justify-between hover:bg-white/[0.04] transition-all border-cyan-500/20">
+                 <div className="flex items-center gap-6">
+                   <div className="w-14 h-14 rounded-2xl bg-cyan-500/10 flex items-center justify-center group-hover:bg-cyan-500/20 transition-all">
+                     <Activity className="w-7 h-7 text-cyan-400" />
+                   </div>
+                   <div>
+                     <h2 className="text-xl font-black italic tracking-tighter mb-1">可观测看板</h2>
+                     <p className="text-xs text-slate-500 font-medium">查看 API 延迟、AI 置信度和 Mode Pipeline 成功率</p>
+                   </div>
+                 </div>
+                 <ArrowRight className="text-slate-700 group-hover:text-cyan-400 group-hover:translate-x-1 transition-all" />
                </div>
              </Link>
 

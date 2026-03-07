@@ -62,3 +62,11 @@
 - 结果归档：
   - `tmp/workflow_e2e/light_jobs_result.json`
   - `tmp/workflow_e2e/heavy_jobs_result.json`
+
+## 7. 关联治理与可观测
+
+- Layer-1 指标与参数治理：
+  - `docs/1_Engineering/15_Layer1_Indicator_and_Param_Governance.md`
+- Admin 可观测看板（PC）：
+  - 页面：`/admin/observability`
+  - API：`/api/admin/observability`
