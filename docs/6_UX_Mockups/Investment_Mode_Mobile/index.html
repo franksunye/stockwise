@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Investment Mode UX Mockup (Mobile)</title>
+  <style>
+    :root {
+      --bg: #06080c;
+      --panel: #101723;
+      --panel-soft: #151e2d;
+      --line: #243149;
+      --text: #eef2ff;
+      --muted: #99a7c2;
+      --accent: #42d392;
+      --warn: #f0b35a;
+      --danger: #ff6f70;
+      --chip: #1a2436;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(900px 420px at 50% -120px, #1a2a43 0%, var(--bg) 65%);
+      color: var(--text);
+      font-family: "PingFang SC", "Noto Sans SC", "Segoe UI", sans-serif;
+      min-height: 100vh;
+    }
+    .phone {
+      width: 390px;
+      margin: 16px auto 32px;
+      border: 1px solid #2a3b58;
+      border-radius: 26px;
+      overflow: hidden;
+      background: linear-gradient(180deg, #0a101b 0%, #070b13 100%);
+      box-shadow: 0 18px 50px rgba(0,0,0,.45);
+    }
+    .topbar {
+      padding: 14px 16px 10px;
+      border-bottom: 1px solid #1a2437;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .topbar h1 { margin: 0; font-size: 16px; }
+    .topbar small { color: var(--muted); font-size: 11px; }
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      padding: 10px 12px;
+      border-bottom: 1px solid #1a2437;
+    }
+    .tab {
+      border: 1px solid #2b3b55;
+      background: #111a2a;
+      color: #b8c4dc;
+      font-size: 11px;
+      border-radius: 999px;
+      padding: 7px 6px;
+      text-align: center;
+      cursor: pointer;
+      user-select: none;
+    }
+    .tab.active {
+      background: #1f304b;
+      color: #fff;
+      border-color: #46699b;
+    }
+    .view { display: none; padding: 14px 12px 18px; }
+    .view.active { display: block; }
+    .card {
+      background: linear-gradient(180deg, var(--panel) 0%, var(--panel-soft) 100%);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+    .row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .title { font-size: 13px; font-weight: 700; }
+    .sub { font-size: 11px; color: var(--muted); }
+    .chip {
+      background: var(--chip);
+      border: 1px solid #2f3f5f;
+      color: #c8d3ea;
+      border-radius: 999px;
+      font-size: 11px;
+      padding: 4px 8px;
+      display: inline-block;
+    }
+    .kpi {
+      margin-top: 9px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .kpi div {
+      background: #0d1522;
+      border: 1px solid #27334a;
+      border-radius: 12px;
+      padding: 8px;
+      text-align: center;
+    }
+    .kpi b { display: block; font-size: 16px; margin-bottom: 2px; }
+    .kpi span { font-size: 10px; color: var(--muted); }
+    .mode-item {
+      border: 1px solid #2f3e5a;
+      border-radius: 12px;
+      padding: 10px;
+      background: #0f1726;
+      margin-bottom: 8px;
+    }
+    .mode-item.active { border-color: #4d74a8; background: #142137; }
+    .list { margin: 0; padding: 0; list-style: none; }
+    .list li {
+      border: 1px solid #273750;
+      background: #0d1421;
+      border-radius: 12px;
+      padding: 9px 10px;
+      margin-bottom: 7px;
+    }
+    .tag { font-size: 10px; border-radius: 999px; padding: 2px 7px; border: 1px solid; }
+    .t-buy { color: var(--accent); border-color: #2a7f60; }
+    .t-watch { color: var(--warn); border-color: #8a6731; }
+    .btn {
+      width: 100%;
+      border: 1px solid #39608f;
+      background: #1f3655;
+      color: #fff;
+      border-radius: 11px;
+      padding: 10px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .hint {
+      margin-top: 10px;
+      color: #9fb3d5;
+      font-size: 11px;
+      line-height: 1.45;
+      border-left: 2px solid #3d5f91;
+      padding-left: 8px;
+    }
+    .meta {
+      margin-top: 8px;
+      font-size: 10px;
+      color: #8ea3c8;
+      line-height: 1.45;
+    }
+    .chart-card {
+      margin-top: 10px;
+      background: #0c1320;
+      border: 1px solid #2a3851;
+      border-radius: 12px;
+      padding: 8px;
+    }
+    .chart-title {
+      font-size: 11px;
+      color: #b8c8e6;
+      margin-bottom: 6px;
+    }
+    .legend {
+      margin-top: 5px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      font-size: 10px;
+      color: #9fb2d5;
+    }
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      display: inline-block;
+      margin-right: 4px;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+  <div class="phone">
+    <div class="topbar">
+      <div>
+        <h1>投资模式 · 核心 UX</h1>
+        <small>独立 Mockup（移动端）</small>
+      </div>
+      <span class="chip">v0</span>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" data-view="dashboard">首屏</div>
+      <div class="tab" data-view="modes">模式</div>
+      <div class="tab" data-view="perf">绩效</div>
+      <div class="tab" data-view="details">明细</div>
+    </div>
+
+    <section class="view active" id="dashboard">
+      <div class="card">
+        <div class="row">
+          <div>
+            <div class="title">今日核心结论</div>
+            <div class="sub">当前建议：建议观察</div>
+          </div>
+          <span class="chip">首屏无模式</span>
+        </div>
+        <div class="kpi">
+          <div><b>观察</b><span>当前状态</span></div>
+          <div><b>2</b><span>重点风险</span></div>
+          <div><b>4</b><span>关注标的</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="row">
+          <div class="title">模式入口策略</div>
+          <span class="chip">仅个人中心</span>
+        </div>
+        <p class="sub">首屏不展示任何模式内容。用户从个人中心进入“投资模式”查看与切换。</p>
+        <button class="btn" data-go="modes">模拟：进入投资模式</button>
+      </div>
+    </section>
+
+    <section class="view" id="modes">
+      <div class="mode-item active">
+        <div class="row">
+          <div class="title">平衡（默认）</div>
+          <span class="chip">medium</span>
+        </div>
+        <div class="sub">覆盖与质量平衡，适合大多数用户。</div>
+      </div>
+      <div class="mode-item">
+        <div class="row">
+          <div class="title">稳健</div>
+          <span class="chip">low</span>
+        </div>
+        <div class="sub">回撤优先，信号更克制。</div>
+      </div>
+      <div class="mode-item">
+        <div class="row">
+          <div class="title">进取</div>
+          <span class="chip">high</span>
+        </div>
+        <div class="sub">覆盖优先，波动更高（Pro）。</div>
+      </div>
+      <button class="btn" data-go="perf">切换后看绩效</button>
+      <div class="hint">切换只影响新预测，不回写历史结论。</div>
+    </section>
+
+    <section class="view" id="perf">
+      <div class="card">
+        <div class="row">
+          <div class="title">通用表现 · 30D</div>
+          <span class="chip">样本 126</span>
+        </div>
+        <div class="kpi">
+          <div><b>66%</b><span>可操作机会</span></div>
+          <div><b>57%</b><span>判断准确度</span></div>
+          <div><b>-5.8%</b><span>历史最大回撤</span></div>
+        </div>
+        <div class="kpi">
+          <div><b>+8.4%</b><span>累计收益（模拟）</span></div>
+          <div><b>1.42</b><span>盈亏比</span></div>
+          <div><b>26</b><span>已结算笔数</span></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">模式表现趋势（近30天）</div>
+          <svg viewBox="0 0 340 130" width="100%" height="130" aria-label="模式表现趋势图">
+            <line x1="0" y1="95" x2="340" y2="95" stroke="#2d3b55" stroke-width="1"/>
+            <path d="M0,95 L28,98 L56,92 L84,100 L112,88 L140,82 L168,86 L196,73 L224,69 L252,62 L280,55 L308,48 L340,42"
+                  fill="none" stroke="#44d79b" stroke-width="2.5"/>
+            <path d="M0,95 L28,101 L56,108 L84,112 L112,105 L140,100 L168,98 L196,93 L224,96 L252,89 L280,84 L308,80 L340,76 L340,130 L0,130 Z"
+                  fill="rgba(255,111,112,0.20)"/>
+            <g fill="#7fa1d6">
+              <rect x="10" y="106" width="8" height="24" rx="2"/>
+              <rect x="38" y="112" width="8" height="18" rx="2"/>
+              <rect x="66" y="100" width="8" height="30" rx="2"/>
+              <rect x="94" y="116" width="8" height="14" rx="2"/>
+              <rect x="122" y="96" width="8" height="34" rx="2"/>
+              <rect x="150" y="104" width="8" height="26" rx="2"/>
+              <rect x="178" y="108" width="8" height="22" rx="2"/>
+              <rect x="206" y="94" width="8" height="36" rx="2"/>
+              <rect x="234" y="98" width="8" height="32" rx="2"/>
+              <rect x="262" y="92" width="8" height="38" rx="2"/>
+              <rect x="290" y="101" width="8" height="29" rx="2"/>
+              <rect x="318" y="96" width="8" height="34" rx="2"/>
+            </g>
+          </svg>
+          <div class="legend">
+            <span><i class="dot" style="background:#44d79b"></i>累计收益（模拟）</span>
+            <span><i class="dot" style="background:rgba(255,111,112,.7)"></i>回撤区间</span>
+            <span><i class="dot" style="background:#7fa1d6"></i>可操作机会频率</span>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">决策质量趋势（7日滚动）</div>
+          <svg viewBox="0 0 340 130" width="100%" height="130" aria-label="决策质量趋势图">
+            <line x1="0" y1="100" x2="340" y2="100" stroke="#2d3b55" stroke-width="1"/>
+            <g fill="#5f7aa8">
+              <rect x="12" y="112" width="10" height="18" rx="2"/>
+              <rect x="40" y="108" width="10" height="22" rx="2"/>
+              <rect x="68" y="105" width="10" height="25" rx="2"/>
+              <rect x="96" y="114" width="10" height="16" rx="2"/>
+              <rect x="124" y="102" width="10" height="28" rx="2"/>
+              <rect x="152" y="109" width="10" height="21" rx="2"/>
+              <rect x="180" y="111" width="10" height="19" rx="2"/>
+              <rect x="208" y="104" width="10" height="26" rx="2"/>
+              <rect x="236" y="100" width="10" height="30" rx="2"/>
+              <rect x="264" y="106" width="10" height="24" rx="2"/>
+              <rect x="292" y="103" width="10" height="27" rx="2"/>
+              <rect x="320" y="99" width="10" height="31" rx="2"/>
+            </g>
+            <path d="M0,72 L28,75 L56,70 L84,74 L112,68 L140,66 L168,69 L196,63 L224,60 L252,62 L280,58 L308,56 L340,54"
+                  fill="none" stroke="#8fb2ff" stroke-width="2.5"/>
+          </svg>
+          <div class="legend">
+            <span><i class="dot" style="background:#8fb2ff"></i>7日滚动判断准确度</span>
+            <span><i class="dot" style="background:#5f7aa8"></i>每日已结算笔数</span>
+          </div>
+          <div class="meta">专业展开：用于看“质量是否稳定”，不替代收益与回撤主图。</div>
+        </div>
+        <div class="meta">口径：模拟交易台账（非真实成交） · 统计区间：近30天</div>
+      </div>
+      <div class="card">
+        <div class="row">
+          <div class="title">监控池表现 · 30D</div>
+          <span class="chip">Pro</span>
+        </div>
+        <div class="kpi">
+          <div><b>49%</b><span>可操作机会</span></div>
+          <div><b>61%</b><span>判断准确度</span></div>
+          <div><b>-4.2%</b><span>历史最大回撤</span></div>
+        </div>
+        <div class="kpi">
+          <div><b>+6.1%</b><span>累计收益（模拟）</span></div>
+          <div><b>1.35</b><span>盈亏比</span></div>
+          <div><b>14</b><span>已结算笔数</span></div>
+        </div>
+        <div class="meta">仅 Pro 可查看完整明细与筛选</div>
+      </div>
+      <button class="btn" data-go="details">查看依据与台账</button>
+      <div class="hint">历史表现不代表未来收益；模式仅提供决策参考。</div>
+    </section>
+
+    <section class="view" id="details">
+      <div class="card">
+        <div class="row">
+          <div class="title">决策依据（最近 3 条）</div>
+          <span class="chip">可回溯</span>
+        </div>
+        <ul class="list">
+          <li>
+            <div class="row"><b>600519</b><span class="tag t-buy">建议进场</span></div>
+            <div class="sub">触发：量化状态 TriggeredLong；成交量放大。</div>
+          </li>
+          <li>
+            <div class="row"><b>000858</b><span class="tag t-watch">建议观察</span></div>
+            <div class="sub">触发：动能走平，未到突破确认位。</div>
+          </li>
+          <li>
+            <div class="row"><b>300750</b><span class="tag t-watch">建议防守</span></div>
+            <div class="sub">触发：risk-off 命中，回撤放大。</div>
+          </li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="row">
+          <div class="title">模拟交易台账（非真实成交）</div>
+          <span class="chip">30D</span>
+        </div>
+        <ul class="list">
+          <li><div class="row"><b>600519</b><b style="color:var(--accent)">+3.6%</b></div><div class="sub">进场 02-11 · 平仓 02-26 · 持有 15 天</div></li>
+          <li><div class="row"><b>000858</b><b style="color:var(--danger)">-1.2%</b></div><div class="sub">进场 02-14 · 平仓 02-20 · 持有 6 天</div></li>
+        </ul>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const tabs = document.querySelectorAll('.tab');
+    const views = document.querySelectorAll('.view');
+    function show(id) {
+      tabs.forEach(t => t.classList.toggle('active', t.dataset.view === id));
+      views.forEach(v => v.classList.toggle('active', v.id === id));
+    }
+    tabs.forEach(t => t.addEventListener('click', () => show(t.dataset.view)));
+    document.querySelectorAll('[data-go]').forEach(btn => {
+      btn.addEventListener('click', () => show(btn.dataset.go));
+    });
+  </script>
+</body>
+</html>
