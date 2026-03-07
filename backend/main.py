@@ -6,7 +6,6 @@ StockWise ETL Pipeline - CLI 入口
 import sys
 import os
 import argparse
-import time
 import io
 
 # 修复 Windows 控制台编码问题
@@ -38,22 +37,28 @@ if __name__ == "__main__":
     parser.add_argument('--sync-meta', action='store_true', help='仅同步股票元数据')
     parser.add_argument('--analyze', action='store_true', help='执行 AI 预测分析 (独立任务)')
     parser.add_argument('--verify', action='store_true', help='执行预测结果验证 (独立任务)')
+    parser.add_argument('--mode-pipeline', action='store_true', help='执行 Investment Mode 后台数据管线')
     parser.add_argument('--sync-hk-short', action='store_true', help='执行港股做空数据同步 (生产任务)')
     parser.add_argument('--sync-hk-short-poc', action='store_true', help='执行港股做空数据 POC 同步')
     parser.add_argument('--symbol', type=str, help='指定股票代码')
     parser.add_argument('--market', type=str, choices=['CN', 'HK'], help='只同步/分析特定市场')
-    parser.add_argument('--model', type=str, default='rule-engine', 
-                        choices=['all', 'deepseek-v3', 'deepseek-v3.2-exp', 'gemini-3-flash', 'hunyuan-lite', 'rule-engine'],
-                        help='指定 AI 模型')
-    
+    parser.add_argument(
+        '--model',
+        type=str,
+        default='rule-engine',
+        choices=['all', 'deepseek-v3', 'deepseek-v3.2-exp', 'gemini-3-flash', 'hunyuan-lite', 'rule-engine'],
+        help='指定 AI 模型'
+    )
+
     parser.add_argument('--date', type=str, help='指定分析日期 (YYYY-MM-DD)')
     parser.add_argument('--start-date', type=str, help='日期范围起始 (YYYY-MM-DD)')
     parser.add_argument('--end-date', type=str, help='日期范围结束 (YYYY-MM-DD)')
     parser.add_argument('--days', type=int, help='回填最近N天')
-    parser.add_argument('--auto-fill', action='store_true', help='智能检测并补充缺失分析')
+    parser.add_argument('--auto-fill', action='store_true', help='智能检测并补全缺失分析')
     parser.add_argument('--force', action='store_true', help='强制重新分析')
     parser.add_argument('--full-periods', action='store_true', help='强制同步周线和月线')
-    
+    parser.add_argument('--skip-mode-pipeline', action='store_true', help='跳过 analyze 后的 mode 数据管线')
+
     args = parser.parse_args()
     init_db()
     register_all_models()
@@ -64,9 +69,24 @@ if __name__ == "__main__":
         with JobGuard("Prediction Verification", task_type="maintenance", rerun_workflow="verify_predictions.yml") as job:
             from backend.engine.validator import verify_all_pending
             stats = verify_all_pending(force=args.force, target_date=args.date)
-            if stats: job.set_stats(**stats)
+            if stats:
+                job.set_stats(**stats)
         sys.exit(0)
-    
+
+    # 1a. Investment Mode Pipeline
+    elif args.mode_pipeline:
+        with JobGuard("Investment Mode Pipeline", task_type="maintenance", triggered_by="scheduler") as job:
+            from backend.analysis.mode_pipeline import run_mode_pipeline
+            stats = run_mode_pipeline(
+                as_of_date=args.date,
+                job_id=job.get_pipeline_run_id(),
+                rule_version="mode_sim_v1",
+                triggered_by=f"{job.agent_id}:mode-pipeline",
+            )
+            if stats:
+                job.set_stats(**stats)
+        sys.exit(0)
+
     # 1b. HK Short Selling Sync (Production)
     elif args.sync_hk_short:
         with JobGuard("HK Short Selling Sync", task_type="ingestion", rerun_workflow="data_sync_hk.yml") as job:
@@ -88,7 +108,7 @@ if __name__ == "__main__":
             if not stats or not stats.get("ok", False):
                 raise RuntimeError(f"HK short POC sync failed: {stats}")
         sys.exit(0)
-    
+
     # 2. Realtime Sync
     elif args.realtime:
         market_code = args.market if args.market else "ALL"
@@ -101,16 +121,18 @@ if __name__ == "__main__":
                 target_stocks = [s for s in all_stocks if (args.market == 'HK' and len(s) == 5) or (args.market == 'CN' and len(s) != 5)]
             else:
                 target_stocks = all_stocks
-            
+
             stats = sync_spot_prices(target_stocks)
-            if stats: job.set_stats(**stats)
+            if stats:
+                job.set_stats(**stats)
         sys.exit(0)
-            
+
     # 3. Meta Sync
     elif args.sync_meta:
         with JobGuard("Metadata Sync", task_type="ingestion", rerun_workflow="sync_meta.yml") as job:
             meta_stats = sync_stock_meta()
-            if meta_stats: job.set_stats(**meta_stats)
+            if meta_stats:
+                job.set_stats(**meta_stats)
             sync_profiles(limit=20)
             job.set_stats(profile_sync_limit=20)
         sys.exit(0)
@@ -119,21 +141,40 @@ if __name__ == "__main__":
     elif args.analyze and is_backfill_mode:
         with JobGuard("AI Analysis (Backfill)", task_type="prediction", triggered_by="user") as job:
             stats = run_ai_analysis_backfill(
-                symbol=args.symbol, market_filter=args.market, date=args.date,
-                start_date=args.start_date, end_date=args.end_date,
-                days=args.days, auto_fill=args.auto_fill,
-                model_filter=args.model, force=args.force
+                symbol=args.symbol,
+                market_filter=args.market,
+                date=args.date,
+                start_date=args.start_date,
+                end_date=args.end_date,
+                days=args.days,
+                auto_fill=args.auto_fill,
+                model_filter=args.model,
+                force=args.force
             )
-            if stats: job.set_stats(**stats)
+            if stats:
+                job.set_stats(**stats)
         sys.exit(0)
-            
+
     # 5. Daily AI Analysis
     elif args.analyze:
         market_dim = args.market if args.market else "ALL"
         with JobGuard(f"AI Analysis ({market_dim})", task_type="prediction", rerun_workflow="daily_analysis.yml") as job:
             job.set_dimensions(market=market_dim, model=args.model)
             stats = run_ai_analysis(symbol=args.symbol, market_filter=args.market, force=args.force, model_filter=args.model)
-            if stats: job.set_stats(**stats)
+            if stats:
+                job.set_stats(**stats)
+            if not args.skip_mode_pipeline:
+                from backend.analysis.mode_pipeline import run_mode_pipeline
+                mode_stats = run_mode_pipeline(
+                    as_of_date=args.date,
+                    job_id=job.get_pipeline_run_id(),
+                    rule_version="mode_sim_v1",
+                    triggered_by=f"{job.agent_id}:analyze",
+                )
+                if mode_stats:
+                    job.set_stats(mode_decisions=mode_stats.get("decision_rows", 0),
+                                  mode_ledger=mode_stats.get("ledger_rows", 0),
+                                  mode_snapshots=mode_stats.get("snapshot_rows", 0))
         sys.exit(0)
 
     # 6. Manual Symbol Sync
@@ -144,14 +185,16 @@ if __name__ == "__main__":
             process_stock_period(args.symbol, period="monthly")
             logger.info(f"⚡ [On-Demand] Fetching realtime snapshot for {args.symbol}...")
             stats = sync_spot_prices([args.symbol])
-            if stats: job.set_stats(**stats)
+            if stats:
+                job.set_stats(**stats)
         sys.exit(0)
-        
+
     # 7. Default Full Market Sync
     else:
         market_dim = args.market if args.market else "ALL"
         with JobGuard(f"Full Market Sync ({market_dim})", task_type="ingestion", rerun_workflow="daily_sync.yml") as job:
             job.set_dimensions(market=market_dim)
             stats = run_full_sync(market_filter=args.market, force_full=args.full_periods)
-            if stats: job.set_stats(**stats)
+            if stats:
+                job.set_stats(**stats)
         sys.exit(0)

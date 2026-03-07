@@ -17,6 +17,8 @@ from backend.engine.layer1_state import build_layer1_snapshot
 from backend.logger import logger
 from backend.engine.metaphor import metaphor_engine
 
+DEFAULT_MODE_ID = os.getenv("DEFAULT_INVESTMENT_MODE_ID", "balanced_v1")
+
 class PredictionRunner:
     def __init__(self, model_filter: str = None, force: bool = False):
         """
@@ -232,6 +234,7 @@ class PredictionRunner:
                     layer1_snapshot.risk_off_hit,
                     layer1_snapshot.strategy_version,
                     layer1_payload_json,
+                    DEFAULT_MODE_ID,
                 ))
                 saved_count += 1
             except Exception as e:

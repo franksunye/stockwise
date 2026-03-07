@@ -544,6 +544,7 @@ def init_db():
                 layer1_risk_off_hit INTEGER DEFAULT 0,
                 layer1_strategy_version TEXT,
                 layer1_payload TEXT,
+                mode_id TEXT,
                 support_price REAL,
                 pressure_price REAL,
                 ai_reasoning TEXT,
@@ -561,6 +562,85 @@ def init_db():
                 PRIMARY KEY (symbol, date, model_id),
                 FOREIGN KEY (model_id) REFERENCES prediction_models(model_id)
             )
+        """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS user_investment_mode (
+                user_id TEXT PRIMARY KEY,
+                mode_id TEXT NOT NULL,
+                updated_at TIMESTAMP NOT NULL,
+                updated_by TEXT DEFAULT 'user'
+            )
+        """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS mode_decision_log (
+                id TEXT PRIMARY KEY,
+                mode_id TEXT NOT NULL,
+                symbol TEXT NOT NULL,
+                decision_date TEXT NOT NULL,
+                strategy_version TEXT NOT NULL,
+                decision_semantic TEXT NOT NULL,
+                layer1_status TEXT,
+                trigger_flags TEXT,
+                reasoning_snapshot TEXT,
+                confidence REAL,
+                job_id TEXT,
+                rule_version TEXT,
+                triggered_by TEXT,
+                created_at TIMESTAMP NOT NULL
+            )
+        """)
+        cursor.execute("""
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_mode_decision_unique
+            ON mode_decision_log(mode_id, symbol, decision_date, strategy_version)
+        """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS mode_simulated_trade_ledger (
+                id TEXT PRIMARY KEY,
+                mode_id TEXT NOT NULL,
+                symbol TEXT NOT NULL,
+                entry_date TEXT NOT NULL,
+                exit_date TEXT,
+                entry_price REAL NOT NULL,
+                exit_price REAL,
+                holding_days INTEGER,
+                trade_status TEXT NOT NULL,
+                decision_source_id TEXT NOT NULL,
+                pnl_pct REAL,
+                max_drawdown_pct REAL,
+                rule_version TEXT NOT NULL,
+                job_id TEXT,
+                triggered_by TEXT,
+                created_at TIMESTAMP NOT NULL,
+                updated_at TIMESTAMP NOT NULL
+            )
+        """)
+        cursor.execute("""
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_mode_ledger_unique
+            ON mode_simulated_trade_ledger(mode_id, symbol, entry_date, rule_version)
+        """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS mode_performance_snapshot (
+                mode_id TEXT NOT NULL,
+                scope TEXT NOT NULL,
+                horizon TEXT NOT NULL,
+                segment_key TEXT DEFAULT 'all',
+                coverage REAL,
+                hit_rate REAL,
+                max_drawdown REAL,
+                sample_size INTEGER,
+                payoff_ratio REAL,
+                stability_score REAL,
+                job_id TEXT,
+                rule_version TEXT,
+                triggered_by TEXT,
+                as_of_date TEXT NOT NULL,
+                computed_at TIMESTAMP NOT NULL,
+                PRIMARY KEY (mode_id, scope, horizon, as_of_date, segment_key)
+            )
+        """)
+        cursor.execute("""
+            CREATE INDEX IF NOT EXISTS idx_mode_perf_query
+            ON mode_performance_snapshot(mode_id, scope, horizon, segment_key, as_of_date DESC)
         """)
 
         # 7. Chain Execution Traces (For Multi-turn debugging & observability)
@@ -729,6 +809,15 @@ def init_db():
         add_column_if_missing('ai_predictions_v2', 'layer1_risk_off_hit', 'INTEGER DEFAULT 0')
         add_column_if_missing('ai_predictions_v2', 'layer1_strategy_version', 'TEXT')
         add_column_if_missing('ai_predictions_v2', 'layer1_payload', 'TEXT')
+        add_column_if_missing('ai_predictions_v2', 'mode_id', 'TEXT')
+        add_column_if_missing('mode_decision_log', 'job_id', 'TEXT')
+        add_column_if_missing('mode_decision_log', 'rule_version', 'TEXT')
+        add_column_if_missing('mode_decision_log', 'triggered_by', 'TEXT')
+        add_column_if_missing('mode_simulated_trade_ledger', 'job_id', 'TEXT')
+        add_column_if_missing('mode_simulated_trade_ledger', 'triggered_by', 'TEXT')
+        add_column_if_missing('mode_performance_snapshot', 'job_id', 'TEXT')
+        add_column_if_missing('mode_performance_snapshot', 'rule_version', 'TEXT')
+        add_column_if_missing('mode_performance_snapshot', 'triggered_by', 'TEXT')
 
         # LLM Registry: Add roles column for unified model routing
         add_column_if_missing('prediction_models', 'roles', 'TEXT')

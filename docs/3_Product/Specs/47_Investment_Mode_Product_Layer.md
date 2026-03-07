@@ -617,3 +617,21 @@
 - 文档版本：`v1.6`
 - 更新日期：`2026-03-07`
 - 维护：Product / Quant / Frontend / Backend
+
+---
+
+## 16. Backend 落地状态（2026-03-07）
+
+本轮已完成（本地环境）：
+- 后端数据结构：`user_investment_mode`、`mode_decision_log`、`mode_simulated_trade_ledger`、`mode_performance_snapshot`
+- 预测落库扩展：`ai_predictions_v2.mode_id`（兼容补列）
+- 后台产数管线：`prediction -> decision -> ledger -> snapshot`
+- API：`GET/POST /api/user/mode`、`GET /api/modes`、`GET /api/modes/performance`、`GET /api/modes/performance/summary`、`GET /api/modes/performance/ledger`、`GET /api/modes/decisions`
+- 审计字段：`job_id`、`rule_version`、`triggered_by` 已写入 mode 三层数据
+
+当前边界：
+- 模式切换不回写历史结论，仅影响后续产数与表现聚合。
+- `drilldown` 接口未纳入本轮，其余扩展接口已落地。
+
+工程运行与排障参考：
+- `docs/1_Engineering/14_Investment_Mode_Backend_Runbook.md`
