@@ -9,16 +9,22 @@ Builds:
 import json
 import uuid
 from datetime import datetime, timedelta, timezone
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 from backend.database import get_connection
+from backend.engine.layer1_state import build_layer1_snapshot
+from backend.investment_mode import DEFAULT_MODE_ID, get_mode_definition
 from backend.logger import logger
 
-DEFAULT_MODE_ID = "balanced_v1"
 SUPPORTED_MODES = ["steady_v1", "balanced_v1", "aggressive_v1", "observe_only_v1"]
 HORIZONS = {"7d": 7, "30d": 30, "90d": 90}
 DEFAULT_STRATEGY_VERSION = "tradeability_v2"
 DEFAULT_RULE_VERSION = "mode_sim_v1"
+
+ENTRY_SEMANTIC = "建议进场"
+WATCH_SEMANTIC = "建议观察"
+DEFENSE_SEMANTIC = "建议防守"
+CASH_SEMANTIC = "建议空仓"
 
 
 def _today_str() -> str:
@@ -30,42 +36,92 @@ def _cutoff_date(as_of_date: str, days: int) -> str:
     return (date_obj - timedelta(days=days - 1)).strftime("%Y-%m-%d")
 
 
+def _safe_float(value: Any) -> float:
+    try:
+        if value is None:
+            return 0.0
+        return float(value)
+    except Exception:
+        return 0.0
+
+
 def _semantic_from_layer1(layer1_status: Optional[str], signal: Optional[str]) -> str:
     if layer1_status == "TriggeredLong":
-        return "建议进场"
+        return ENTRY_SEMANTIC
     if layer1_status == "Watch":
-        return "建议观察"
+        return WATCH_SEMANTIC
     if layer1_status == "RiskOff":
-        return "建议防守"
+        return DEFENSE_SEMANTIC
     if layer1_status == "NoSetup":
-        return "建议空仓"
-
-    # Fallback by legacy signal.
+        return CASH_SEMANTIC
     if signal == "Long":
-        return "建议进场"
-    if signal == "Side":
-        return "建议观察"
-    return "建议观察"
+        return ENTRY_SEMANTIC
+    return WATCH_SEMANTIC
 
 
-def _semantic_by_mode(mode_id: str, layer1_status: Optional[str], signal: Optional[str]) -> str:
-    # "仅观察"模式不输出进场结论，保持 2C 克制边界
-    if mode_id == "observe_only_v1":
-        return "建议观察"
-    return _semantic_from_layer1(layer1_status, signal)
+def _clip_reasoning(raw_reasoning: Any, mode_id: str, decision_semantic: str, mode_note: str) -> str:
+    base = str(raw_reasoning or "").strip()
+    prefix = f"[{mode_id}|{decision_semantic}] {mode_note}"
+    if not base:
+        return prefix[:240]
+    max_base_len = max(0, 240 - len(prefix) - 3)
+    if max_base_len <= 0:
+        return prefix[:240]
+    return f"{prefix} | {base[:max_base_len]}"
+
+
+def _semantic_by_mode(mode_id: str, layer1_status: str, signal: Optional[str], observe_only: bool) -> Tuple[str, str]:
+    if observe_only:
+        return WATCH_SEMANTIC, "observe_only_blocks_entry"
+    semantic = _semantic_from_layer1(layer1_status, signal)
+    return semantic, f"bundle_state:{layer1_status}"
+
+
+def _fetch_daily_history(conn, symbol: str, decision_date: str) -> Sequence[Dict[str, Any]]:
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        SELECT date, open, high, low, close, change_percent, volume,
+               ma5, ma10, ma20, macd_hist
+        FROM daily_prices
+        WHERE symbol = ? AND date <= ?
+        ORDER BY date DESC LIMIT 30
+        """,
+        (symbol, decision_date),
+    )
+    rows = cursor.fetchall()
+    columns = [
+        "date",
+        "open",
+        "high",
+        "low",
+        "close",
+        "change_percent",
+        "volume",
+        "ma5",
+        "ma10",
+        "ma20",
+        "macd_hist",
+    ]
+    history = [dict(zip(columns, row)) for row in rows]
+    history.reverse()
+    return history
 
 
 def ensure_mode_pipeline_schema(conn) -> None:
     cursor = conn.cursor()
-    cursor.execute("""
+    cursor.execute(
+        """
         CREATE TABLE IF NOT EXISTS user_investment_mode (
             user_id TEXT PRIMARY KEY,
             mode_id TEXT NOT NULL,
             updated_at TIMESTAMP NOT NULL,
             updated_by TEXT DEFAULT 'user'
         )
-    """)
-    cursor.execute("""
+        """
+    )
+    cursor.execute(
+        """
         CREATE TABLE IF NOT EXISTS mode_decision_log (
             id TEXT PRIMARY KEY,
             mode_id TEXT NOT NULL,
@@ -82,12 +138,16 @@ def ensure_mode_pipeline_schema(conn) -> None:
             triggered_by TEXT,
             created_at TIMESTAMP NOT NULL
         )
-    """)
-    cursor.execute("""
+        """
+    )
+    cursor.execute(
+        """
         CREATE UNIQUE INDEX IF NOT EXISTS idx_mode_decision_unique
         ON mode_decision_log(mode_id, symbol, decision_date, strategy_version)
-    """)
-    cursor.execute("""
+        """
+    )
+    cursor.execute(
+        """
         CREATE TABLE IF NOT EXISTS mode_simulated_trade_ledger (
             id TEXT PRIMARY KEY,
             mode_id TEXT NOT NULL,
@@ -107,12 +167,16 @@ def ensure_mode_pipeline_schema(conn) -> None:
             created_at TIMESTAMP NOT NULL,
             updated_at TIMESTAMP NOT NULL
         )
-    """)
-    cursor.execute("""
+        """
+    )
+    cursor.execute(
+        """
         CREATE UNIQUE INDEX IF NOT EXISTS idx_mode_ledger_unique
         ON mode_simulated_trade_ledger(mode_id, symbol, entry_date, rule_version)
-    """)
-    cursor.execute("""
+        """
+    )
+    cursor.execute(
+        """
         CREATE TABLE IF NOT EXISTS mode_performance_snapshot (
             mode_id TEXT NOT NULL,
             scope TEXT NOT NULL,
@@ -131,7 +195,8 @@ def ensure_mode_pipeline_schema(conn) -> None:
             computed_at TIMESTAMP NOT NULL,
             PRIMARY KEY (mode_id, scope, horizon, as_of_date, segment_key)
         )
-    """)
+        """
+    )
     try:
         cursor.execute("ALTER TABLE ai_predictions_v2 ADD COLUMN mode_id TEXT")
     except Exception as e:
@@ -165,34 +230,57 @@ def _upsert_mode_decisions(
     triggered_by: str,
 ) -> int:
     cursor = conn.cursor()
+    mode_definition = get_mode_definition(mode_id)
     cursor.execute(
         """
-        SELECT symbol, date, target_date, signal, confidence,
-               layer1_status, layer1_trigger_hit, layer1_risk_off_hit, ai_reasoning
+        SELECT symbol, date, target_date, signal, confidence, ai_reasoning
         FROM ai_predictions_v2
         WHERE date = ? AND is_primary = 1
         """,
         (decision_date,),
     )
     rows = cursor.fetchall()
+    history_cache: Dict[Tuple[str, str], Sequence[Dict[str, Any]]] = {}
     now = datetime.now(timezone.utc).isoformat()
     count = 0
-    for row in rows:
-        symbol = row[0]
-        signal = row[3]
-        confidence = row[4]
-        layer1_status = row[5]
-        trigger_hit = int(row[6] or 0)
-        risk_off_hit = int(row[7] or 0)
-        reasoning_raw = row[8] or ""
-        reasoning_snapshot = str(reasoning_raw)[:240]
-        decision_semantic = _semantic_by_mode(mode_id, layer1_status, signal)
+    for symbol, _date, _target_date, signal, confidence, reasoning_raw in rows:
+        cache_key = (symbol, decision_date)
+        if cache_key not in history_cache:
+            history_cache[cache_key] = _fetch_daily_history(conn, symbol, decision_date)
+        history = history_cache[cache_key]
+        snapshot = build_layer1_snapshot(
+            symbol=symbol,
+            daily_history=history,
+            strategy_version=str(mode_definition.get("strategy_version") or DEFAULT_STRATEGY_VERSION),
+            params_bundle=str(mode_definition.get("params_bundle") or "balanced"),
+        )
+        layer1_status = snapshot.setup_state
+        decision_semantic, mode_note = _semantic_by_mode(
+            mode_id,
+            layer1_status,
+            signal,
+            bool(mode_definition.get("observe_only")),
+        )
         trigger_flags = json.dumps(
-            {"layer1_trigger_hit": trigger_hit, "layer1_risk_off_hit": risk_off_hit},
+            {
+                "mode_rule": mode_note,
+                "params_bundle": snapshot.payload.get("params_bundle"),
+                "opportunity_score": snapshot.opportunity_score,
+                "trigger_rule_hit": snapshot.trigger_rule_hit,
+                "risk_off_hit": snapshot.risk_off_hit,
+                "latest_date": snapshot.payload.get("latest_date"),
+                "effective_params": snapshot.payload.get("params"),
+                "cond_breakout": snapshot.payload.get("cond_breakout"),
+                "cond_breakout_soft": snapshot.payload.get("cond_breakout_soft"),
+                "cond_strong_close": snapshot.payload.get("cond_strong_close"),
+                "cond_momentum": snapshot.payload.get("cond_momentum"),
+                "cond_momentum_recovery": snapshot.payload.get("cond_momentum_recovery"),
+                "cond_base_trend": snapshot.payload.get("cond_base_trend"),
+            },
             ensure_ascii=False,
         )
-        decision_id = f"{mode_id}:{symbol}:{decision_date}:{DEFAULT_STRATEGY_VERSION}"
-
+        reasoning_snapshot = _clip_reasoning(reasoning_raw, mode_id, decision_semantic, mode_note)
+        decision_id = f"{mode_id}:{symbol}:{decision_date}:{snapshot.strategy_version}"
         cursor.execute(
             """
             INSERT INTO mode_decision_log
@@ -214,7 +302,7 @@ def _upsert_mode_decisions(
                 mode_id,
                 symbol,
                 decision_date,
-                DEFAULT_STRATEGY_VERSION,
+                snapshot.strategy_version,
                 decision_semantic,
                 layer1_status,
                 trigger_flags,
@@ -230,6 +318,21 @@ def _upsert_mode_decisions(
     return count
 
 
+def _delete_non_entry_ledgers(cursor, mode_id: str, decision_date: str) -> None:
+    cursor.execute(
+        """
+        DELETE FROM mode_simulated_trade_ledger
+        WHERE mode_id = ? AND entry_date = ?
+          AND decision_source_id IN (
+              SELECT id
+              FROM mode_decision_log
+              WHERE mode_id = ? AND decision_date = ? AND decision_semantic <> ?
+          )
+        """,
+        (mode_id, decision_date, mode_id, decision_date, ENTRY_SEMANTIC),
+    )
+
+
 def _upsert_mode_ledger(
     conn,
     mode_id: str,
@@ -239,33 +342,27 @@ def _upsert_mode_ledger(
     triggered_by: str,
 ) -> int:
     cursor = conn.cursor()
+    _delete_non_entry_ledgers(cursor, mode_id, decision_date)
     cursor.execute(
         """
-        SELECT d.id, d.symbol, d.decision_date, p.target_date, p.confidence
+        SELECT d.id, d.symbol, d.decision_date, p.target_date
         FROM mode_decision_log d
         JOIN ai_predictions_v2 p
           ON p.symbol = d.symbol AND p.date = d.decision_date
-         AND COALESCE(p.mode_id, ?) = d.mode_id
-        WHERE d.mode_id = ? AND d.decision_date = ? AND p.is_primary = 1
+        WHERE d.mode_id = ? AND d.decision_date = ? AND d.decision_semantic = ? AND p.is_primary = 1
         """,
-        (DEFAULT_MODE_ID, mode_id, decision_date),
+        (mode_id, decision_date, ENTRY_SEMANTIC),
     )
     rows = cursor.fetchall()
     now = datetime.now(timezone.utc).isoformat()
     count = 0
-    for decision_id, symbol, entry_date, target_date, _confidence in rows:
-        cursor.execute(
-            "SELECT close FROM daily_prices WHERE symbol = ? AND date = ? LIMIT 1",
-            (symbol, entry_date),
-        )
+    for decision_id, symbol, entry_date, target_date in rows:
+        cursor.execute("SELECT close FROM daily_prices WHERE symbol = ? AND date = ? LIMIT 1", (symbol, entry_date))
         entry_row = cursor.fetchone()
         if not entry_row:
             continue
         entry_price = float(entry_row[0])
-        cursor.execute(
-            "SELECT close FROM daily_prices WHERE symbol = ? AND date = ? LIMIT 1",
-            (symbol, target_date),
-        )
+        cursor.execute("SELECT close FROM daily_prices WHERE symbol = ? AND date = ? LIMIT 1", (symbol, target_date))
         exit_row = cursor.fetchone()
 
         if exit_row:
@@ -327,8 +424,7 @@ def _upsert_mode_ledger(
 
 
 def _calc_metrics(rows: List) -> Dict[str, Optional[float]]:
-    sample_size = len(rows)
-    if sample_size == 0:
+    if not rows:
         return {
             "sample_size": 0,
             "hit_rate": None,
@@ -336,7 +432,6 @@ def _calc_metrics(rows: List) -> Dict[str, Optional[float]]:
             "payoff_ratio": None,
             "stability_score": None,
         }
-
     pnls = [float(r[0]) for r in rows if r[0] is not None]
     if not pnls:
         return {
@@ -346,7 +441,6 @@ def _calc_metrics(rows: List) -> Dict[str, Optional[float]]:
             "payoff_ratio": None,
             "stability_score": None,
         }
-
     wins = [x for x in pnls if x > 0]
     losses = [x for x in pnls if x <= 0]
     hit_rate = len(wins) / len(pnls) if pnls else None
@@ -419,8 +513,6 @@ def _refresh_snapshots(
     created = 0
     for horizon, days in HORIZONS.items():
         cutoff = _cutoff_date(as_of_date, days)
-
-        # Universal scope
         cursor.execute(
             """
             SELECT pnl_pct
@@ -431,7 +523,6 @@ def _refresh_snapshots(
         )
         rows = cursor.fetchall()
         metrics = _calc_metrics(rows)
-
         cursor.execute(
             """
             SELECT COUNT(*)
@@ -441,23 +532,19 @@ def _refresh_snapshots(
             (mode_id, cutoff, as_of_date),
         )
         decision_total = int(cursor.fetchone()[0] or 0)
-        coverage = (metrics["sample_size"] / decision_total) if decision_total > 0 else None
-        _upsert_snapshot_row(
-            cursor,
-            mode_id,
-            "universal",
-            horizon,
-            "all",
-            coverage,
-            metrics,
-            as_of_date,
-            job_id,
-            rule_version,
-            triggered_by,
+        cursor.execute(
+            """
+            SELECT COUNT(*)
+            FROM mode_simulated_trade_ledger
+            WHERE mode_id = ? AND entry_date BETWEEN ? AND ?
+            """,
+            (mode_id, cutoff, as_of_date),
         )
+        trade_total = int(cursor.fetchone()[0] or 0)
+        coverage = (trade_total / decision_total) if decision_total > 0 else None
+        _upsert_snapshot_row(cursor, mode_id, "universal", horizon, "all", coverage, metrics, as_of_date, job_id, rule_version, triggered_by)
         created += 1
 
-        # Pool scope: by user watchlist
         cursor.execute(
             """
             SELECT DISTINCT w.user_id
@@ -492,20 +579,18 @@ def _refresh_snapshots(
                 (mode_id, cutoff, as_of_date, user_id),
             )
             user_decisions = int(cursor.fetchone()[0] or 0)
-            user_coverage = (user_metrics["sample_size"] / user_decisions) if user_decisions > 0 else None
-            _upsert_snapshot_row(
-                cursor,
-                mode_id,
-                "pool",
-                horizon,
-                f"user:{user_id}",
-                user_coverage,
-                user_metrics,
-                as_of_date,
-                job_id,
-                rule_version,
-                triggered_by,
+            cursor.execute(
+                """
+                SELECT COUNT(*)
+                FROM mode_simulated_trade_ledger l
+                JOIN user_watchlist w ON w.symbol = l.symbol
+                WHERE l.mode_id = ? AND l.entry_date BETWEEN ? AND ? AND w.user_id = ?
+                """,
+                (mode_id, cutoff, as_of_date, user_id),
             )
+            user_trade_total = int(cursor.fetchone()[0] or 0)
+            user_coverage = (user_trade_total / user_decisions) if user_decisions > 0 else None
+            _upsert_snapshot_row(cursor, mode_id, "pool", horizon, f"user:{user_id}", user_coverage, user_metrics, as_of_date, job_id, rule_version, triggered_by)
             created += 1
     return created
 
@@ -548,7 +633,7 @@ def run_mode_pipeline(
             "rule_version": rule_version,
             "triggered_by": triggered_by,
         }
-        logger.info(f"✅ Mode pipeline finished: {stats}")
+        logger.info(f"Mode pipeline finished: {stats}")
         return stats
     except Exception:
         conn.rollback()

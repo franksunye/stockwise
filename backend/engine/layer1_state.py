@@ -46,6 +46,25 @@ STRATEGY_DEFAULTS: Dict[str, Dict[str, Any]] = {
 }
 PARAMS_FILE_DEFAULT = STRATEGY_DEFAULTS[DEFAULT_STRATEGY_VERSION]["params_file"]
 COMMON_PARAM_KEYS = ("vcp_ratio", "breakout_volume_mult", "strong_close_threshold", "momentum_change_threshold", "risk_off_ma")
+PARAMS_BUNDLE_DEFAULT = "balanced"
+PARAMS_BUNDLE_OVERRIDES: Dict[str, Dict[str, float]] = {
+    "balanced": {},
+    "steady": {
+        "vcp_ratio": 0.92,
+        "breakout_volume_mult": 1.05,
+        "strong_close_threshold": 0.65,
+        "momentum_change_threshold": 3.0,
+        "risk_off_ma": 10.0,
+    },
+    "aggressive": {
+        "vcp_ratio": 1.05,
+        "breakout_volume_mult": 0.80,
+        "strong_close_threshold": 0.50,
+        "momentum_change_threshold": 1.4,
+        "risk_off_ma": 5.0,
+    },
+    "observe_only": {},
+}
 
 
 @dataclass
@@ -144,6 +163,10 @@ def list_supported_strategy_versions() -> Sequence[str]:
     return tuple(STRATEGY_DEFAULTS.keys())
 
 
+def list_supported_params_bundles() -> Sequence[str]:
+    return tuple(PARAMS_BUNDLE_OVERRIDES.keys())
+
+
 def resolve_params_file(strategy_version: str = DEFAULT_STRATEGY_VERSION, params_file: str | None = None) -> str:
     if params_file:
         return params_file
@@ -165,10 +188,17 @@ def _normalize_params(raw_params: Dict[str, Any], strategy_version: str = DEFAUL
     return out
 
 
+def _resolve_params_bundle(params_bundle: str | None) -> str:
+    candidate = (params_bundle or PARAMS_BUNDLE_DEFAULT).strip().lower()
+    return candidate if candidate in PARAMS_BUNDLE_OVERRIDES else PARAMS_BUNDLE_DEFAULT
+
+
 def load_market_params(
     market: str,
     params_file: str | None = None,
     strategy_version: str = DEFAULT_STRATEGY_VERSION,
+    params_bundle: str | None = None,
+    params_override: Dict[str, Any] | None = None,
 ) -> tuple[str, Dict[str, float]]:
     resolved_version = strategy_version if strategy_version in STRATEGY_DEFAULTS else DEFAULT_STRATEGY_VERSION
     resolved_file = resolve_params_file(strategy_version=resolved_version, params_file=params_file)
@@ -180,6 +210,12 @@ def load_market_params(
         params = _normalize_params(((cfg.get("markets") or {}).get(market) or {}), strategy_version=resolved_version)
     except Exception as e:
         logger.warning(f"Layer1 params load failed, fallback defaults. market={market}, error={e}")
+    bundle_key = _resolve_params_bundle(params_bundle)
+    bundle_overrides = PARAMS_BUNDLE_OVERRIDES.get(bundle_key) or {}
+    if bundle_overrides:
+        params = _normalize_params({**params, **bundle_overrides}, strategy_version=resolved_version)
+    if params_override:
+        params = _normalize_params({**params, **params_override}, strategy_version=resolved_version)
     return resolved_version, params
 
 
@@ -420,14 +456,20 @@ def build_layer1_snapshot(
     daily_history: Sequence[Dict[str, Any]],
     params_file: str | None = None,
     strategy_version: str = DEFAULT_STRATEGY_VERSION,
+    params_bundle: str | None = None,
+    params_override: Dict[str, Any] | None = None,
 ) -> Layer1Snapshot:
     market = get_market_from_symbol(symbol)
     loaded_strategy_version, params = load_market_params(
         market=market,
         params_file=params_file,
         strategy_version=strategy_version,
+        params_bundle=params_bundle,
+        params_override=params_override,
     )
-    return evaluate_layer1_state(daily_history=daily_history, params=params, strategy_version=loaded_strategy_version)
+    snapshot = evaluate_layer1_state(daily_history=daily_history, params=params, strategy_version=loaded_strategy_version)
+    snapshot.payload["params_bundle"] = _resolve_params_bundle(params_bundle)
+    return snapshot
 
 
 def map_layer1_to_legacy_signal(setup_state: str) -> str:

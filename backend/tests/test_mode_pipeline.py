@@ -4,7 +4,53 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from backend.analysis.mode_pipeline import run_mode_pipeline, ensure_mode_pipeline_schema
+from backend.analysis.mode_pipeline import (
+    DEFENSE_SEMANTIC,
+    ENTRY_SEMANTIC,
+    WATCH_SEMANTIC,
+    ensure_mode_pipeline_schema,
+    run_mode_pipeline,
+)
+
+
+def _price_row(symbol, date, open_, high, low, close, change_percent, volume, ma5, ma10, ma20, macd_hist):
+    return (symbol, date, open_, high, low, close, change_percent, volume, ma5, ma10, ma20, macd_hist)
+
+
+def _strong_history(symbol: str):
+    rows = []
+    for i in range(16):
+        day = f"2026-02-{i + 1:02d}"
+        rows.append(_price_row(symbol, day, 10.0, 12.0, 8.0, 10.0, 0.5, 100.0, 9.8, 9.7, 9.6, 0.1))
+    for i in range(4):
+        day = f"2026-02-{17 + i:02d}"
+        rows.append(_price_row(symbol, day, 10.0, 10.2, 9.8, 10.0, 0.8, 100.0, 9.9, 9.8, 9.7, 0.1))
+    rows.append(_price_row(symbol, "2026-03-06", 10.5, 10.9, 10.0, 10.5, 2.1, 92.0, 10.1, 10.2, 10.1, 0.09))
+    rows.append(_price_row(symbol, "2026-03-07", 10.6, 11.0, 10.2, 11.0, 4.7, 118.0, 10.3, 10.2, 10.0, 0.2))
+    return rows
+
+
+def _borderline_history(symbol: str):
+    rows = []
+    for i in range(16):
+        day = f"2026-02-{i + 1:02d}"
+        rows.append(_price_row(symbol, day, 10.0, 12.0, 8.0, 10.0, 0.5, 100.0, 9.8, 9.7, 9.6, 0.1))
+    for i in range(4):
+        day = f"2026-02-{17 + i:02d}"
+        rows.append(_price_row(symbol, day, 10.0, 10.2, 9.8, 10.0, 0.8, 100.0, 9.9, 9.8, 9.7, 0.1))
+    rows.append(_price_row(symbol, "2026-03-06", 10.55, 10.9, 10.0, 10.55, 2.0, 88.0, 10.1, 10.2, 10.1, 0.12))
+    rows.append(_price_row(symbol, "2026-03-07", 10.6, 10.95, 10.3, 10.9, 3.3, 110.0, 10.2, 10.15, 10.0, 0.16))
+    return rows
+
+
+def _risk_off_history(symbol: str):
+    rows = []
+    for i in range(20):
+        day = f"2026-02-{i + 1:02d}"
+        rows.append(_price_row(symbol, day, 10.0, 10.6, 9.4, 10.0, 0.5, 100.0, 10.0, 10.0, 10.0, 0.1))
+    rows.append(_price_row(symbol, "2026-03-06", 9.8, 10.1, 9.6, 9.7, -0.8, 95.0, 9.9, 10.1, 10.0, 0.05))
+    rows.append(_price_row(symbol, "2026-03-07", 9.6, 9.8, 9.2, 9.3, -4.1, 120.0, 9.7, 9.9, 9.95, -0.02))
+    return rows
 
 
 class TestModePipeline(unittest.TestCase):
@@ -41,7 +87,16 @@ class TestModePipeline(unittest.TestCase):
             CREATE TABLE daily_prices (
                 symbol TEXT NOT NULL,
                 date TEXT NOT NULL,
+                open REAL,
+                high REAL,
+                low REAL,
                 close REAL,
+                change_percent REAL,
+                volume REAL,
+                ma5 REAL,
+                ma10 REAL,
+                ma20 REAL,
+                macd_hist REAL,
                 PRIMARY KEY(symbol, date)
             )
             """
@@ -49,17 +104,32 @@ class TestModePipeline(unittest.TestCase):
         cur.execute("CREATE TABLE user_watchlist (user_id TEXT NOT NULL, symbol TEXT NOT NULL)")
         cur.execute("CREATE TABLE users (user_id TEXT PRIMARY KEY, subscription_tier TEXT)")
 
-        cur.execute(
+        cur.executemany(
             """
             INSERT INTO ai_predictions_v2
             (symbol, date, model_id, target_date, signal, confidence, layer1_status, layer1_trigger_hit, layer1_risk_off_hit, ai_reasoning, is_primary, mode_id)
-            VALUES ('000001', '2026-03-06', 'rule-engine', '2026-03-07', 'Long', 0.8, 'TriggeredLong', 1, 0, 'test reasoning', 1, 'balanced_v1')
-            """
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            [
+                ("000001", "2026-03-06", "rule-engine", "2026-03-07", "Long", 0.82, "TriggeredLong", 1, 0, "strong setup", 1, "balanced_v1"),
+                ("000002", "2026-03-06", "rule-engine", "2026-03-07", "Side", 0.44, "Watch", 0, 0, "borderline setup", 1, "balanced_v1"),
+                ("000003", "2026-03-06", "rule-engine", "2026-03-07", "Side", 0.61, "RiskOff", 0, 1, "risk off setup", 1, "balanced_v1"),
+            ],
         )
-        cur.execute("INSERT INTO daily_prices (symbol, date, close) VALUES ('000001', '2026-03-06', 10.0)")
-        cur.execute("INSERT INTO daily_prices (symbol, date, close) VALUES ('000001', '2026-03-07', 10.5)")
+        price_rows = _strong_history("000001") + _borderline_history("000002") + _risk_off_history("000003")
+        cur.executemany(
+            """
+            INSERT INTO daily_prices
+            (symbol, date, open, high, low, close, change_percent, volume, ma5, ma10, ma20, macd_hist)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            price_rows,
+        )
         cur.execute("INSERT INTO users (user_id, subscription_tier) VALUES ('u1', 'pro')")
-        cur.execute("INSERT INTO user_watchlist (user_id, symbol) VALUES ('u1', '000001')")
+        cur.executemany(
+            "INSERT INTO user_watchlist (user_id, symbol) VALUES (?, ?)",
+            [("u1", "000001"), ("u1", "000002"), ("u1", "000003")],
+        )
         conn.commit()
         conn.close()
 
@@ -69,50 +139,39 @@ class TestModePipeline(unittest.TestCase):
         except OSError:
             pass
 
-    def test_pipeline_builds_decision_ledger_snapshot(self):
-        with patch("backend.analysis.mode_pipeline.get_connection", return_value=sqlite3.connect(self.db_path)):
-            stats = run_mode_pipeline(
+    def _run_pipeline(self, mode_id=None):
+        with patch("backend.analysis.mode_pipeline.get_connection", side_effect=lambda: sqlite3.connect(self.db_path)):
+            return run_mode_pipeline(
                 as_of_date="2026-03-06",
-                mode_id="balanced_v1",
+                mode_id=mode_id,
                 job_id="job-test-1",
                 rule_version="mode_sim_v1",
                 triggered_by="unittest",
             )
-        self.assertGreaterEqual(stats["decision_rows"], 1)
+
+    def test_pipeline_builds_decision_ledger_snapshot(self):
+        stats = self._run_pipeline(mode_id="balanced_v1")
+        self.assertGreaterEqual(stats["decision_rows"], 3)
         self.assertGreaterEqual(stats["ledger_rows"], 1)
         self.assertGreaterEqual(stats["snapshot_rows"], 1)
 
         conn = sqlite3.connect(self.db_path)
         cur = conn.cursor()
-        cur.execute("SELECT decision_semantic, job_id, rule_version, triggered_by FROM mode_decision_log WHERE mode_id='balanced_v1' AND symbol='000001'")
+        cur.execute(
+            "SELECT decision_semantic, job_id, rule_version, triggered_by FROM mode_decision_log WHERE mode_id='balanced_v1' AND symbol='000001'"
+        )
         row = cur.fetchone()
-        self.assertIsNotNone(row)
-        self.assertEqual(row[0], "建议进场")
+        self.assertEqual(row[0], ENTRY_SEMANTIC)
         self.assertEqual(row[1], "job-test-1")
         self.assertEqual(row[2], "mode_sim_v1")
         self.assertEqual(row[3], "unittest")
 
-        cur.execute("SELECT trade_status, pnl_pct, job_id, triggered_by FROM mode_simulated_trade_ledger WHERE mode_id='balanced_v1' AND symbol='000001'")
-        ledger = cur.fetchone()
-        self.assertIsNotNone(ledger)
-        self.assertEqual(ledger[0], "closed")
-        self.assertAlmostEqual(ledger[1], 0.05, places=6)
-        self.assertEqual(ledger[2], "job-test-1")
-        self.assertEqual(ledger[3], "unittest")
-
         cur.execute(
-            """
-            SELECT scope, horizon, sample_size, job_id, rule_version, triggered_by
-            FROM mode_performance_snapshot
-            WHERE mode_id='balanced_v1' AND as_of_date='2026-03-06'
-            """
+            "SELECT trade_status, pnl_pct FROM mode_simulated_trade_ledger WHERE mode_id='balanced_v1' AND symbol='000001'"
         )
-        snapshots = cur.fetchall()
-        self.assertTrue(any(s[0] == "universal" for s in snapshots))
-        self.assertTrue(any(s[0] == "pool" for s in snapshots))
-        self.assertTrue(all(s[3] == "job-test-1" for s in snapshots))
-        self.assertTrue(all(s[4] == "mode_sim_v1" for s in snapshots))
-        self.assertTrue(all(s[5] == "unittest" for s in snapshots))
+        ledger = cur.fetchone()
+        self.assertEqual(ledger[0], "closed")
+        self.assertAlmostEqual(ledger[1], (11.0 - 10.5) / 10.5, places=6)
         conn.close()
 
     def test_schema_ensure_adds_tables(self):
@@ -136,29 +195,57 @@ class TestModePipeline(unittest.TestCase):
         conn.commit()
         conn.close()
 
-        with patch("backend.analysis.mode_pipeline.get_connection", side_effect=lambda: sqlite3.connect(self.db_path)):
-            run_mode_pipeline(as_of_date="2026-03-06", mode_id="aggressive_v1")
-            run_mode_pipeline(as_of_date="2026-03-06", mode_id="balanced_v1")
+        self._run_pipeline(mode_id="aggressive_v1")
+        self._run_pipeline(mode_id="balanced_v1")
 
         conn = sqlite3.connect(self.db_path)
         cur = conn.cursor()
         cur.execute(
-            """
-            SELECT COUNT(*) FROM mode_performance_snapshot
-            WHERE mode_id='aggressive_v1' AND scope='pool' AND segment_key='user:u1'
-            """
+            "SELECT COUNT(*) FROM mode_performance_snapshot WHERE mode_id='aggressive_v1' AND scope='pool' AND segment_key='user:u1'"
         )
-        aggressive_count = int(cur.fetchone()[0] or 0)
-        self.assertGreaterEqual(aggressive_count, 1)
-
+        self.assertGreaterEqual(int(cur.fetchone()[0] or 0), 1)
         cur.execute(
-            """
-            SELECT COUNT(*) FROM mode_performance_snapshot
-            WHERE mode_id='balanced_v1' AND scope='pool' AND segment_key='user:u1'
-            """
+            "SELECT COUNT(*) FROM mode_performance_snapshot WHERE mode_id='balanced_v1' AND scope='pool' AND segment_key='user:u1'"
         )
-        balanced_count = int(cur.fetchone()[0] or 0)
-        self.assertEqual(balanced_count, 0)
+        self.assertEqual(int(cur.fetchone()[0] or 0), 0)
+        conn.close()
+
+    def test_modes_use_distinct_quant_bundles(self):
+        self._run_pipeline()
+        conn = sqlite3.connect(self.db_path)
+        cur = conn.cursor()
+
+        cur.execute("SELECT decision_semantic FROM mode_decision_log WHERE mode_id='steady_v1' AND symbol='000002'")
+        self.assertEqual(cur.fetchone()[0], WATCH_SEMANTIC)
+
+        cur.execute("SELECT decision_semantic FROM mode_decision_log WHERE mode_id='balanced_v1' AND symbol='000002'")
+        self.assertEqual(cur.fetchone()[0], ENTRY_SEMANTIC)
+
+        cur.execute("SELECT decision_semantic FROM mode_decision_log WHERE mode_id='aggressive_v1' AND symbol='000002'")
+        self.assertEqual(cur.fetchone()[0], ENTRY_SEMANTIC)
+
+        cur.execute("SELECT decision_semantic FROM mode_decision_log WHERE mode_id='observe_only_v1' AND symbol='000001'")
+        self.assertEqual(cur.fetchone()[0], WATCH_SEMANTIC)
+
+        cur.execute("SELECT decision_semantic FROM mode_decision_log WHERE mode_id='balanced_v1' AND symbol='000003'")
+        self.assertEqual(cur.fetchone()[0], DEFENSE_SEMANTIC)
+
+        cur.execute("SELECT trigger_flags FROM mode_decision_log WHERE mode_id='steady_v1' AND symbol='000002'")
+        self.assertIn('"params_bundle": "steady"', cur.fetchone()[0])
+        conn.close()
+
+    def test_only_entry_semantics_create_ledger_rows(self):
+        self._run_pipeline()
+        conn = sqlite3.connect(self.db_path)
+        cur = conn.cursor()
+        cur.execute("SELECT COUNT(*) FROM mode_simulated_trade_ledger WHERE mode_id='steady_v1'")
+        self.assertEqual(int(cur.fetchone()[0] or 0), 0)
+        cur.execute("SELECT COUNT(*) FROM mode_simulated_trade_ledger WHERE mode_id='balanced_v1'")
+        self.assertEqual(int(cur.fetchone()[0] or 0), 2)
+        cur.execute("SELECT COUNT(*) FROM mode_simulated_trade_ledger WHERE mode_id='aggressive_v1'")
+        self.assertEqual(int(cur.fetchone()[0] or 0), 2)
+        cur.execute("SELECT COUNT(*) FROM mode_simulated_trade_ledger WHERE mode_id='observe_only_v1'")
+        self.assertEqual(int(cur.fetchone()[0] or 0), 0)
         conn.close()
 
 

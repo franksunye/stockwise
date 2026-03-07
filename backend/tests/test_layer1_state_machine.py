@@ -1,5 +1,6 @@
 from backend.engine.layer1_state import (
     evaluate_layer1_state,
+    list_supported_params_bundles,
     list_supported_strategy_versions,
     load_market_params,
     map_layer1_to_legacy_signal,
@@ -116,10 +117,18 @@ def test_layer1_v2_is_supported_and_relaxes_trigger_path():
 def test_load_market_params_and_version_registry():
     assert "tradeability_v1" in list_supported_strategy_versions()
     assert "tradeability_v2" in list_supported_strategy_versions()
+    assert "steady" in list_supported_params_bundles()
+    assert "balanced" in list_supported_params_bundles()
+    assert "aggressive" in list_supported_params_bundles()
 
     strategy_version, params = load_market_params("CN", strategy_version="tradeability_v2")
     assert strategy_version == "tradeability_v2"
     assert params["momentum_change_threshold"] == 2.3
+
+    _, steady_params = load_market_params("CN", strategy_version="tradeability_v2", params_bundle="steady")
+    _, aggressive_params = load_market_params("CN", strategy_version="tradeability_v2", params_bundle="aggressive")
+    assert steady_params["breakout_volume_mult"] > params["breakout_volume_mult"]
+    assert aggressive_params["momentum_change_threshold"] < params["momentum_change_threshold"]
 
 
 def test_layer1_fallback_indicator_engine_when_ma_missing():
