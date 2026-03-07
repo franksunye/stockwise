@@ -48,7 +48,7 @@ async function fetchCardData(currentTier: UserTier): Promise<{
     const modeRes = await fetch('/api/user/mode', { cache: 'no-store' });
     const modeJson = (await modeRes.json().catch(() => ({}))) as Partial<ModeApiResponse> & { error?: string };
     if (!modeRes.ok) {
-        throw new Error(modeJson.error || '投资模式读取失败');
+        throw new Error(modeJson.error || '暂时无法加载投资模式');
     }
 
     const nextModeResponse: ModeApiResponse = {
@@ -69,7 +69,7 @@ async function fetchCardData(currentTier: UserTier): Promise<{
             );
             const json = (await res.json().catch(() => ({}))) as PerformanceApiResponse & { error?: string };
             if (!res.ok) {
-                throw new Error(json.error || `${scope} 表现读取失败`);
+                throw new Error(json.error || '暂时无法加载表现数据');
             }
             return [scope, json] as const;
         })
@@ -84,12 +84,12 @@ async function fetchCardData(currentTier: UserTier): Promise<{
 const SCOPE_META: Record<PerformanceScope, { title: string; subtitle: string; icon: typeof Sparkles }> = {
     universal: {
         title: '通用表现',
-        subtitle: '回答这个投资模式本身是否稳定',
+        subtitle: '看这个模式整体是否稳健',
         icon: Sparkles,
     },
     pool: {
         title: '监控池表现',
-        subtitle: '回答这个投资模式对我的监控池是否有效',
+        subtitle: '看这个模式对你的监控池是否更合适',
         icon: Radar,
     },
 };
@@ -106,9 +106,9 @@ function formatPercent(value: number | null, options?: { signed?: boolean }): st
 }
 
 function formatUpdatedAt(value: string | null): string {
-    if (!value) return '尚未切换';
+    if (!value) return '默认模式';
     const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return '尚未切换';
+    if (Number.isNaN(date.getTime())) return '默认模式';
     return date.toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' });
 }
 
@@ -137,7 +137,7 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
                 setSummaryByScope(summaries);
             } catch (err) {
                 if (cancelled) return;
-                const message = err instanceof Error ? err.message : '投资模式读取失败';
+                const message = err instanceof Error ? err.message : '暂时无法加载投资模式';
                 setError(message);
             } finally {
                 if (cancelled) return;
@@ -161,7 +161,7 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
             setSummaryByScope(summaries);
             setError(null);
         } catch (err) {
-            setError(err instanceof Error ? err.message : '投资模式读取失败');
+            setError(err instanceof Error ? err.message : '暂时无法加载投资模式');
         } finally {
             setRefreshing(false);
         }
@@ -182,12 +182,12 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
             });
             const json = (await res.json().catch(() => ({}))) as { error?: string; note?: string };
             if (!res.ok) {
-                throw new Error(json.error || '模式切换失败');
+                throw new Error(json.error || '切换失败，请稍后再试');
             }
-            setNotice(json.note || '切换仅影响后续新结论');
+            setNotice(json.note || '已切换，后续新结论将按当前模式展示');
             await handleRefresh();
         } catch (err) {
-            setError(err instanceof Error ? err.message : '模式切换失败');
+            setError(err instanceof Error ? err.message : '切换失败，请稍后再试');
         } finally {
             setSavingModeId(null);
         }
@@ -206,7 +206,7 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
                             <h4 className="text-sm font-bold text-white uppercase">投资模式</h4>
                         </div>
                         <p className="mt-1 text-[11px] text-slate-500">
-                            入口只放个人中心，Dashboard 保持当前体验。
+                            选择更适合你的投资风格，并查看对应表现。
                         </p>
                     </div>
                     <button
@@ -227,8 +227,8 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
                     </div>
                 ) : error ? (
                     <div className="rounded-2xl border border-rose-500/20 bg-rose-500/5 px-4 py-3 text-left">
-                        <p className="text-xs font-bold text-rose-300">投资模式暂时不可用</p>
-                        <p className="mt-1 text-[11px] text-rose-200/70">{error}</p>
+                        <p className="text-xs font-bold text-rose-300">暂时无法加载投资模式</p>
+                        <p className="mt-1 text-[11px] text-rose-200/70">{error || '请稍后再试'}</p>
                     </div>
                 ) : (
                     <>
@@ -256,16 +256,16 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
                                 )}
                             </div>
                             <div className="mt-3 flex items-center justify-between gap-3 text-[11px]">
-                                <span className="text-slate-500">最近切换</span>
+                                <span className="text-slate-500">当前生效</span>
                                 <span className="font-bold text-slate-300">{formatUpdatedAt(modeResponse?.updated_at || null)}</span>
                             </div>
                         </div>
 
                         <div className="space-y-2">
                             <div className="flex items-center justify-between">
-                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">模式选择</span>
+                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">选择模式</span>
                                 {currentTier === 'free' && (
-                                    <span className="text-[10px] font-bold text-slate-600">Free 固定为默认投资模式</span>
+                                    <span className="text-[10px] font-bold text-slate-600">Free 当前默认使用平衡模式</span>
                                 )}
                             </div>
                             <div className="grid grid-cols-2 gap-2">
@@ -332,9 +332,6 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
                                                     </div>
                                                     <p className="mt-1 text-[11px] text-slate-500">{meta.subtitle}</p>
                                                 </div>
-                                                <span className="text-[10px] font-bold text-slate-500">
-                                                    样本 {summary?.metrics?.sample_size ?? '--'}
-                                                </span>
                                             </div>
 
                                             <div className="mt-3 grid grid-cols-3 gap-2">
@@ -372,22 +369,22 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
                             <div className="rounded-[20px] border border-indigo-500/15 bg-indigo-500/5 p-4 text-left">
                                 <div className="flex items-center gap-2">
                                     <Crown className="w-4 h-4 text-amber-400" />
-                                    <p className="text-sm font-bold text-white">解锁更多投资模式与双轨表现</p>
+                                    <p className="text-sm font-bold text-white">解锁更多投资模式与监控池表现</p>
                                 </div>
                                 <p className="mt-2 text-[11px] leading-5 text-slate-400">
-                                    Free 当前只展示平衡投资模式的通用表现。升级 Pro 后可切换多个投资模式，并查看监控池表现。
+                                    当前可查看平衡模式的通用表现。升级 Pro 后，可按自己的投资风格切换更多模式，并查看监控池表现。
                                 </p>
                                 <button
                                     type="button"
                                     onClick={onUpgrade}
                                     className="mt-3 inline-flex items-center rounded-xl bg-indigo-600 px-4 py-2 text-xs font-bold text-white transition-all hover:bg-indigo-500"
                                 >
-                                    查看 Pro 权益
+                                    升级 Pro
                                 </button>
                             </div>
                         ) : (
                             <p className="text-[11px] leading-5 text-slate-500">
-                                投资模式切换只影响后续新结论，不回写历史结论。
+                                模式切换只影响后续新结论，历史记录保持不变。
                             </p>
                         )}
                     </>

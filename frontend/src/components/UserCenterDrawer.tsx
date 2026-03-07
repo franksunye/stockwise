@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, User, Crown, Zap, ShieldCheck, Loader2, ArrowRight, Share2, 
   Check, RefreshCw, Key, Bell, ChevronDown, ArrowLeftRight, Sun, 
-  Trophy, FileText, ChevronRight, Mail, HelpCircle, BookOpen, Info 
+  Trophy, FileText, ChevronRight, Mail, HelpCircle, BookOpen, Info, Shield
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getCurrentUser, restoreUserIdentity } from '@/lib/user';
@@ -59,6 +59,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
   
   const [isHighPerformance, setIsHighPerformance] = useState(false);
   const [showIdentityCenter, setShowIdentityCenter] = useState(false);
+  const [showInvestmentMode, setShowInvestmentMode] = useState(false);
   const [showPricing, setShowPricing] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
   const [showLearn, setShowLearn] = useState(false);
@@ -96,6 +97,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
     } else {
       setShowPricing(false);
       setShowIdentityCenter(false);
+      setShowInvestmentMode(false);
       setShowSupport(false);
       setShowLearn(false);
       setShowNotificationSettings(false);
@@ -287,7 +289,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
 
           <motion.div 
             initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
-            drag={!showPricing && !showSupport && !showLearn ? "y" : false}
+            drag={!showPricing && !showIdentityCenter && !showInvestmentMode && !showSupport && !showLearn ? "y" : false}
             dragConstraints={{ top: 0, bottom: 0 }}
             dragElastic={{ top: 0.1, bottom: 0.6 }}
             onDragEnd={(_, info) => { if (info.offset.y > 150) onClose(); }}
@@ -303,15 +305,15 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
             {/* Navigation Header */}
             <header className="shrink-0 z-20 px-5 py-4 flex items-center justify-between border-b border-white/5 bg-[#0a0a0f]/80 backdrop-blur-xl">
               <div className="w-10">
-                {(showIdentityCenter || showPricing || showSupport || showLearn) && (
-                  <button onClick={() => { setShowPricing(false); setShowIdentityCenter(false); setShowSupport(false); setShowLearn(false); }} className="p-2 rounded-full hover:bg-white/5 active:scale-90 transition-all text-slate-400">
+                {(showIdentityCenter || showInvestmentMode || showPricing || showSupport || showLearn) && (
+                  <button onClick={() => { setShowPricing(false); setShowIdentityCenter(false); setShowInvestmentMode(false); setShowSupport(false); setShowLearn(false); }} className="p-2 rounded-full hover:bg-white/5 active:scale-90 transition-all text-slate-400">
                     <ArrowLeftRight className="w-5 h-5 rotate-180" />
                   </button>
                 )}
               </div>
               <div className="flex-1 text-center">
                 <h2 className="text-xl font-black italic tracking-tighter text-white uppercase mt-1">
-                  {showPricing ? '订阅方案' : showIdentityCenter ? '账号设置' : showSupport ? '帮助与支持' : showLearn ? '101 手册' : '个人中心'}
+                  {showPricing ? '订阅方案' : showIdentityCenter ? '账号设置' : showInvestmentMode ? '投资模式' : showSupport ? '帮助与支持' : showLearn ? '101 手册' : '个人中心'}
                 </h2>
               </div>
               <div className="w-10 flex justify-end">
@@ -389,6 +391,10 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                       {restoreMsg && <p className={`text-[10px] mt-2 text-left ${restoreMsg.type === 'success' ? 'text-emerald-400' : 'text-rose-400'}`}>{restoreMsg.text}</p>}
                     </div>
                   </motion.div>
+                ) : showInvestmentMode ? (
+                  <motion.div key="investment-mode" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.25 }}>
+                    <InvestmentModeCard currentTier={tier} onUpgrade={() => setShowPricing(true)} />
+                  </motion.div>
                 ) : showSupport ? (
                   <motion.div key="support" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.25 }}>
                     <SupportCenterView />
@@ -439,9 +445,19 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                             <ChevronRight size={14} className="text-slate-600 group-hover:text-white transition-colors" />
                         </div>
                       </button>
+                      <button onClick={() => setShowInvestmentMode(true)} className="w-full py-4 px-5 rounded-[24px] border border-white/5 bg-white/[0.02] hover:border-indigo-500/20 transition-all flex items-center justify-between group">
+                        <div className="flex items-center gap-3">
+                          <Shield className="w-5 h-5 text-indigo-400" />
+                          <div className="text-left">
+                            <span className="block text-sm font-bold text-white">投资模式</span>
+                            <span className="block text-[10px] text-slate-500 font-medium">
+                              {tier === 'pro' ? '选择适合你的风格，并查看模式表现' : '查看默认模式表现，解锁更多投资风格'}
+                            </span>
+                          </div>
+                        </div>
+                        <ChevronRight size={14} className="text-slate-600 group-hover:text-white transition-colors" />
+                      </button>
                     </div>
-
-                    <InvestmentModeCard currentTier={tier} onUpgrade={() => setShowPricing(true)} />
 
                     {/* Push Switch */}
                     {pushSupported && (
