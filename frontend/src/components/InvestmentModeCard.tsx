@@ -51,11 +51,11 @@ interface CachedCardData {
 const CARD_CACHE_KEY = 'stockwise:investment-mode-card';
 const CARD_CACHE_TTL_MS = 10 * 60 * 1000;
 
-async function fetchCardData(currentTier: UserTier): Promise<{
+async function fetchCardData(): Promise<{
     modeResponse: ModeApiResponse;
     summaries: Partial<Record<PerformanceScope, PerformanceApiResponse>>;
 }> {
-    const modeRes = await fetch('/api/user/mode', { cache: 'no-store' });
+    const modeRes = await fetch('/api/user/mode/summary', { cache: 'no-store' });
     const modeJson = (await modeRes.json().catch(() => ({}))) as Partial<ModeApiResponse> & { error?: string };
     if (!modeRes.ok) {
         throw new Error(modeJson.error || '暂时无法加载投资模式');
@@ -70,24 +70,12 @@ async function fetchCardData(currentTier: UserTier): Promise<{
             : [],
     };
 
-    const scopes: PerformanceScope[] = currentTier === 'pro' ? ['universal', 'pool'] : ['universal'];
-    const summaries = await Promise.all(
-        scopes.map(async (scope) => {
-            const res = await fetch(
-                `/api/modes/performance?scope=${scope}&horizon=30d&mode_id=${encodeURIComponent(nextModeResponse.mode_id)}`,
-                { cache: 'no-store' }
-            );
-            const json = (await res.json().catch(() => ({}))) as PerformanceApiResponse & { error?: string };
-            if (!res.ok) {
-                throw new Error(json.error || '暂时无法加载表现数据');
-            }
-            return [scope, json] as const;
-        })
-    );
-
     return {
         modeResponse: nextModeResponse,
-        summaries: Object.fromEntries(summaries) as Partial<Record<PerformanceScope, PerformanceApiResponse>>,
+        summaries:
+            modeJson && typeof modeJson === 'object' && 'summaries' in modeJson
+                ? ((modeJson as { summaries?: Partial<Record<PerformanceScope, PerformanceApiResponse>> }).summaries ?? {})
+                : {},
     };
 }
 
@@ -201,7 +189,7 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
 
             try {
                 setError(null);
-                const { modeResponse: nextModeResponse, summaries } = await fetchCardData(currentTier);
+                const { modeResponse: nextModeResponse, summaries } = await fetchCardData();
 
                 if (cancelled) return;
 
@@ -231,7 +219,7 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
         setNotice(null);
         setRefreshing(true);
         try {
-            const { modeResponse: nextModeResponse, summaries } = await fetchCardData(currentTier);
+            const { modeResponse: nextModeResponse, summaries } = await fetchCardData();
             setModeResponse(nextModeResponse);
             setSummaryByScope(summaries);
             setError(null);
