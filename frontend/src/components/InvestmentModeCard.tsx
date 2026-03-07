@@ -229,8 +229,10 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
         };
     }, [currentTier]);
 
-    async function handleRefresh(): Promise<void> {
-        setNotice(null);
+    async function handleRefresh(options?: { keepNotice?: boolean }): Promise<void> {
+        if (!options?.keepNotice) {
+            setNotice(null);
+        }
         setRefreshing(true);
         try {
             const { modeResponse: nextModeResponse, summaries } = await fetchCardData();
@@ -250,6 +252,22 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
     async function handleSwitchMode(modeId: string): Promise<void> {
         if (!modeResponse || savingModeId || modeId === modeResponse.mode_id) return;
 
+        // 1. 保存当前状态用于回滚
+        const previousModeResponse = modeResponse;
+        const targetMode = modeResponse.allowed_modes.find((m) => m.mode_id === modeId);
+
+        // 2. 乐观更新当地 UI：立即切换高亮状态
+        if (targetMode) {
+            setModeResponse({
+                ...modeResponse,
+                mode_id: modeId,
+                mode: {
+                    ...(modeResponse.mode || {}),
+                    ...targetMode,
+                } as unknown as InvestmentModeDefinition,
+            });
+        }
+
         setSavingModeId(modeId);
         setNotice(null);
         setError(null);
@@ -264,9 +282,15 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
             if (!res.ok) {
                 throw new Error(json.error || '切换失败，请稍后再试');
             }
+            // 3. 成功后设置提示语
             setNotice(json.note || '已切换，后续新结论将按当前模式展示');
-            await handleRefresh();
+            
+            // 4. 不阻塞当前函数执行，在后台静默刷新统计数据 (覆盖率/命中率等)
+            // 保持 keepNotice 为 true 以免提示语被 handleRefresh 清除
+            void handleRefresh({ keepNotice: true });
         } catch (err) {
+            // 5. 发生错误则回滚 UI
+            setModeResponse(previousModeResponse);
             setError(err instanceof Error ? err.message : '切换失败，请稍后再试');
         } finally {
             setSavingModeId(null);
