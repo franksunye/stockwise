@@ -190,6 +190,12 @@ export function parseHorizon(value: string | null): Horizon | null {
     return null;
 }
 
+export function getRiskBandLabel(riskBand: RiskBand | null | undefined): string {
+    if (riskBand === 'low') return '低波动';
+    if (riskBand === 'high') return '高波动';
+    return '均衡';
+}
+
 export function getModeDefinition(modeId: string): InvestmentModeDefinition | null {
     return MODES_BY_ID.get(modeId) || null;
 }

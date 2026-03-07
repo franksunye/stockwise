@@ -12,6 +12,7 @@ import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
 import { isPushSupported, subscribeUserToPush } from '@/lib/notifications';
 import { shouldEnableHighPerformance } from '@/lib/device-utils';
 import { IdentityPassport } from '@/components/IdentityPassport';
+import { InvestmentModeCard } from '@/components/InvestmentModeCard';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { UserPricingView } from './UserPricingView';
 import { SupportCenterView } from './SupportCenterView';
@@ -439,6 +440,8 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                         </div>
                       </button>
                     </div>
+
+                    <InvestmentModeCard currentTier={tier} onUpgrade={() => setShowPricing(true)} />
 
                     {/* Push Switch */}
                     {pushSupported && (

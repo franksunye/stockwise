@@ -286,6 +286,40 @@ describe('Frontend Smoke Gate', () => {
     });
 });
 
+describe('Investment Mode Gate', () => {
+    it('enforces free-tier default mode and summary boundary', async () => {
+        const client = new SessionClient(BASE_URL);
+
+        const registerRes = await client.request('/api/user/register', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ registrationType: 'anonymous' }),
+        });
+        assert.equal(registerRes.status, 200);
+
+        const modeRes = await client.request('/api/user/mode');
+        assert.equal(modeRes.status, 200);
+        const modeBody = await json(modeRes);
+        assert.equal(modeBody.mode_id, 'balanced_v1');
+        assert.equal(modeBody.tier, 'free');
+        assert.ok(Array.isArray(modeBody.allowed_modes));
+        assert.equal(modeBody.allowed_modes.filter((item) => item.is_locked).length >= 1, true);
+
+        const summaryRes = await client.request('/api/modes/performance?scope=universal&horizon=30d');
+        assert.equal(summaryRes.status, 200);
+
+        const forbiddenSummaryRes = await client.request('/api/modes/performance?scope=pool&horizon=30d');
+        assert.equal(forbiddenSummaryRes.status, 403);
+
+        const forbiddenSwitchRes = await client.request('/api/user/mode', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ mode_id: 'steady_v1' }),
+        });
+        assert.equal(forbiddenSwitchRes.status, 403);
+    });
+});
+
 describe('PWA Baseline Gate', () => {
     it('serves manifest and service worker assets', async () => {
         const manifestRes = await withTimeout(
