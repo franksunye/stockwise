@@ -67,6 +67,9 @@
 
 - Layer-1 指标与参数治理：
   - `docs/1_Engineering/15_Layer1_Indicator_and_Param_Governance.md`
+  - 参数变更模板：`docs/1_Engineering/templates/Layer1_Param_Change_Template.md`
 - Admin 可观测看板（PC）：
   - 页面：`/admin/observability`
   - API：`/api/admin/observability`
+- 可观测阈值与异常定义：
+  - `docs/1_Engineering/16_Observability_Thresholds_and_Incidents.md`

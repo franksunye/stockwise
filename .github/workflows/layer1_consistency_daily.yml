@@ -15,6 +15,11 @@ on:
         type: boolean
         required: false
         default: true
+      strategy_version:
+        description: "Layer1 strategy version"
+        type: string
+        required: false
+        default: "tradeability_v2"
 
 jobs:
   daily-consistency:
@@ -47,14 +52,20 @@ jobs:
           if [ -n "${{ inputs.date }}" ]; then
             DATE_ARG="--date ${{ inputs.date }}"
           fi
+          STRATEGY_ARG="--strategy-version tradeability_v2"
+          if [ -n "${{ inputs.strategy_version }}" ]; then
+            STRATEGY_ARG="--strategy-version ${{ inputs.strategy_version }}"
+          fi
           NOTIFY_ARG=""
           if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ inputs.notify }}" = "true" ]; then
             NOTIFY_ARG="--notify"
           fi
           python -u backend/scripts/metrics_layer1_consistency.py \
             $DATE_ARG \
+            $STRATEGY_ARG \
             --output-json tmp/layer1_metrics/layer1_consistency_daily.json \
             --output-md tmp/layer1_metrics/layer1_consistency_daily.md \
+            --persist \
             $NOTIFY_ARG
 
       - name: Upload Artifact

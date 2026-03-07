@@ -7,6 +7,22 @@ import Database from 'better-sqlite3';
 export const dynamic = 'force-dynamic';
 
 type NumRecord = Record<string, string | number | null>;
+type AlertState = 'ok' | 'warn' | 'critical';
+
+const OBS_THRESHOLDS = {
+    api_latency_p95_ms: { warn: 5000, critical: 8000 },
+    api_latency_min_samples_24h: 20,
+    confidence_low_ratio_7d: { warn: 0.35, critical: 0.5 },
+    confidence_min_samples_7d: 50,
+    mode_pipeline_success_rate_14d: { warn: 0.95, critical: 0.9 },
+    mode_pipeline_min_runs_14d: 3,
+} as const;
+
+const ANOMALY_DEFINITIONS = {
+    api_latency_p95_ms: 'P95 latency exceeds threshold, indicating API degradation risk.',
+    confidence_low_ratio_7d: 'Large share of low-confidence outputs (<0.6), indicating model confidence drift.',
+    mode_pipeline_success_rate_14d: 'Mode pipeline success rate dropped, indicating production data pipeline instability.',
+} as const;
 
 function num(v: unknown, fallback = 0): number {
     if (v === null || v === undefined) return fallback;
@@ -28,6 +44,18 @@ async function queryRows(client: Client, sql: string, args: Array<string | numbe
 
 function queryRowsLocal(db: Database.Database, sql: string, args: Array<string | number> = []): NumRecord[] {
     return db.prepare(sql).all(...args) as NumRecord[];
+}
+
+function stateHighBad(value: number, warn: number, critical: number): AlertState {
+    if (value >= critical) return 'critical';
+    if (value >= warn) return 'warn';
+    return 'ok';
+}
+
+function stateLowBad(value: number, warn: number, critical: number): AlertState {
+    if (value <= critical) return 'critical';
+    if (value <= warn) return 'warn';
+    return 'ok';
 }
 
 export async function GET(request: Request) {
@@ -146,9 +174,62 @@ export async function GET(request: Request) {
             };
         });
 
+        const latencyState = stateHighBad(
+            latencyP95,
+            OBS_THRESHOLDS.api_latency_p95_ms.warn,
+            OBS_THRESHOLDS.api_latency_p95_ms.critical,
+        );
+        const confidenceState = stateHighBad(
+            confidenceLowRatio,
+            OBS_THRESHOLDS.confidence_low_ratio_7d.warn,
+            OBS_THRESHOLDS.confidence_low_ratio_7d.critical,
+        );
+        const modeState = stateLowBad(
+            successRate,
+            OBS_THRESHOLDS.mode_pipeline_success_rate_14d.warn,
+            OBS_THRESHOLDS.mode_pipeline_success_rate_14d.critical,
+        );
+        const latencyStateFinal: AlertState = latencies.length < OBS_THRESHOLDS.api_latency_min_samples_24h ? 'warn' : latencyState;
+        const confidenceStateFinal: AlertState = confidenceValues.length < OBS_THRESHOLDS.confidence_min_samples_7d ? 'warn' : confidenceState;
+        const modeStateFinal: AlertState = totalRuns < OBS_THRESHOLDS.mode_pipeline_min_runs_14d ? 'warn' : modeState;
+        const overallState: AlertState = [latencyStateFinal, confidenceStateFinal, modeStateFinal].includes('critical')
+            ? 'critical'
+            : ([latencyStateFinal, confidenceStateFinal, modeStateFinal].includes('warn') ? 'warn' : 'ok');
+
+        const alerts = [
+            {
+                metric: 'api_latency_p95_ms',
+                state: latencyStateFinal,
+                value: Number(latencyP95.toFixed(2)),
+                threshold: OBS_THRESHOLDS.api_latency_p95_ms,
+                definition: ANOMALY_DEFINITIONS.api_latency_p95_ms,
+                sample_guard: { min_samples: OBS_THRESHOLDS.api_latency_min_samples_24h, samples: latencies.length },
+            },
+            {
+                metric: 'confidence_low_ratio_7d',
+                state: confidenceStateFinal,
+                value: Number(confidenceLowRatio.toFixed(4)),
+                threshold: OBS_THRESHOLDS.confidence_low_ratio_7d,
+                definition: ANOMALY_DEFINITIONS.confidence_low_ratio_7d,
+                sample_guard: { min_samples: OBS_THRESHOLDS.confidence_min_samples_7d, samples: confidenceValues.length },
+            },
+            {
+                metric: 'mode_pipeline_success_rate_14d',
+                state: modeStateFinal,
+                value: Number(successRate.toFixed(4)),
+                threshold: OBS_THRESHOLDS.mode_pipeline_success_rate_14d,
+                definition: ANOMALY_DEFINITIONS.mode_pipeline_success_rate_14d,
+                sample_guard: { min_samples: OBS_THRESHOLDS.mode_pipeline_min_runs_14d, samples: totalRuns },
+            },
+        ];
+
         return NextResponse.json({
             generated_at: new Date().toISOString(),
             db_strategy: strategy,
+            overall_state: overallState,
+            thresholds: OBS_THRESHOLDS,
+            anomaly_definitions: ANOMALY_DEFINITIONS,
+            alerts,
             api_latency: {
                 avg_ms_24h: Number(latencyAvg.toFixed(2)),
                 p50_ms_24h: Number(latencyP50.toFixed(2)),

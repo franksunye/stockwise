@@ -135,4 +135,5 @@
 - **Patch (0.0.X)**：缺陷修复与兼容性修正。
 - **文档纪律**：
   - 每周更新一次里程碑状态（含日期与证据）。
+  - 每周复盘必须附带 observability gate（来自 `acceptance_weekly` 与 `/admin/observability`）。
   - 状态字段仅使用：`未开始 / 进行中 / 已完成 / 风险中`。

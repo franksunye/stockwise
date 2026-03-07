@@ -30,6 +30,15 @@ interface TrendMode {
 interface ObservabilityPayload {
   generated_at: string;
   db_strategy: string;
+  overall_state: 'ok' | 'warn' | 'critical';
+  alerts: Array<{
+    metric: string;
+    state: 'ok' | 'warn' | 'critical';
+    value: number;
+    threshold: { warn: number; critical: number };
+    definition: string;
+    sample_guard?: { min_samples: number; samples: number };
+  }>;
   api_latency: {
     avg_ms_24h: number;
     p50_ms_24h: number;
@@ -56,6 +65,12 @@ interface ObservabilityPayload {
 
 function pct(v: number): string {
   return `${(v * 100).toFixed(1)}%`;
+}
+
+function stateBadge(state?: 'ok' | 'warn' | 'critical') {
+  if (state === 'critical') return 'text-rose-300 border-rose-500/30 bg-rose-500/10';
+  if (state === 'warn') return 'text-amber-300 border-amber-500/30 bg-amber-500/10';
+  return 'text-emerald-300 border-emerald-500/30 bg-emerald-500/10';
 }
 
 export default function ObservabilityPage() {
@@ -105,8 +120,13 @@ export default function ObservabilityPage() {
               <p className="text-xs text-slate-500">API 延迟 / AI 置信度 / Mode Pipeline 成功率</p>
             </div>
           </div>
-          <div className="text-xs text-slate-500">
-            {data?.generated_at ? `Updated: ${new Date(data.generated_at).toLocaleString('zh-CN', { hour12: false })}` : '--'}
+          <div className="flex items-center gap-3">
+            <span className={`text-xs px-2 py-1 rounded border ${stateBadge(data?.overall_state)}`}>
+              {data?.overall_state ? `State: ${data.overall_state.toUpperCase()}` : 'State: --'}
+            </span>
+            <div className="text-xs text-slate-500">
+              {data?.generated_at ? `Updated: ${new Date(data.generated_at).toLocaleString('zh-CN', { hour12: false })}` : '--'}
+            </div>
           </div>
         </header>
 
@@ -182,10 +202,28 @@ export default function ObservabilityPage() {
                 </div>
               </article>
             </section>
+
+            <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+              <h2 className="text-sm font-black mb-3">阈值告警与异常定义</h2>
+              <div className="space-y-2 text-xs">
+                {(data?.alerts || []).map((a) => (
+                  <div key={a.metric} className="rounded-lg border border-white/10 bg-black/20 px-3 py-2">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="font-mono text-slate-300">{a.metric}</span>
+                      <span className={`px-2 py-0.5 rounded border ${stateBadge(a.state)}`}>{a.state.toUpperCase()}</span>
+                    </div>
+                    <p className="text-slate-400 mt-1">{a.definition}</p>
+                    <p className="text-slate-500 mt-1">value={a.value} | warn={a.threshold.warn} | critical={a.threshold.critical}</p>
+                    {a.sample_guard && (
+                      <p className="text-slate-500">samples={a.sample_guard.samples} / min={a.sample_guard.min_samples}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </section>
           </>
         )}
       </div>
     </div>
   );
 }
-
