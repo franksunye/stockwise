@@ -7,6 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "db:sync-local": "node scripts/sync-remote-to-local.mjs",
+    "db:audit-local": "node scripts/local-db-audit.mjs",
     "test:quality": "node --test tests/quality-gates.test.mjs",
     "verify:release": "npm run build && npm run test:quality"
   },
