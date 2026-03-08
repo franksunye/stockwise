@@ -75,9 +75,34 @@
 核心表（见 `backend/database.py`）：
 - 行情：`daily_prices`、`weekly_prices`、`monthly_prices`
 - 预测：`ai_predictions_v2`、`prediction_models`
+- 生产决策：`user_investment_mode`、`mode_decision_log`、`mode_simulated_trade_ledger`、`mode_performance_snapshot`
+- 研究量化：`quant_tradeability_signals`
 - 追踪：`chain_execution_traces`、`llm_traces`
 - 调度：`task_logs`
 - 用户域：`users`、`user_watchlist`、`notification_logs` 等
+
+### 2.4.1 双 Lane 口径
+
+当前仓库在量化与产品层面采用两条并行但职责不同的数据 lane：
+
+1. `Production Decision Lane`
+   - 面向用户正式展示。
+   - 输入来自 `daily_prices + ai_predictions_v2`。
+   - 产出 `mode_decision_log`、`mode_simulated_trade_ledger`、`mode_performance_snapshot`。
+   - 对应产品对象为 `Investment Mode`。
+
+2. `Research Quant Lane`
+   - 面向量化研究、参数校准、版本并行观测。
+   - 输入主要来自 `daily_prices`。
+   - 产出 `quant_tradeability_signals`。
+   - 对应工程对象为 `tradeability sidecar`、weekly calibration、策略实验。
+
+3. 架构约束
+   - 两条 lane 都基于真实市场数据，因此都不是“假数据”。
+   - 但两条 lane 的结果表不得混用：
+     - 生产 lane 负责正式产品口径。
+     - 研究 lane 负责实验与治理口径。
+   - 推荐共享底层 Layer-1 计算内核，不推荐合并最终结果表。
 
 ### 2.5 可观测性现状
 
@@ -229,6 +254,18 @@ flowchart LR
 - **Layer-2** LLM（如 DeepSeek V3）退居战术定性、文本描摹与新闻面二次解读，方向结论由 `PredictionRunner` 通过系统 Prompt 强行首批注入。
 - `PredictionRunner` 从“平行调度器”转型为“流水线组装器”，其输出写入 `ai_predictions_v2` 这一唯一事实源。
 
+### 4.3.1 Lane 分工
+
+在双层解耦架构之上，系统进一步分为：
+
+1. `Production Decision Lane`
+   - `sync -> analyze -> mode_pipeline -> /api/modes/*`
+   - 用户看到的 Investment Mode 结果均来自该 lane。
+
+2. `Research Quant Lane`
+   - `sync -> sample sync -> sidecar -> weekly calibration`
+   - 该 lane 用于策略版本比较、样本积累和参数治理，不直接作为前台正式展示数据源。
+
 ### 4.4 数据访问治理
 
 - 仅允许 `db_repo` 与 `migrations` 持有原生 SQL。
@@ -369,4 +406,3 @@ ADR 至少包含：背景、备选方案、决策、影响面、回滚方案。
 - 每次发布前，架构 owner 进行“文档-代码一致性”检查。
 - 每季度进行一次架构健康评审（风险、SLO、成本、性能、可维护性）。
 - 文档中的“事实描述”必须能在代码中定位到对应文件。
-

@@ -16,6 +16,41 @@
 1. 方向由 Layer-1 裁决。
 2. Layer-2 不得覆盖方向，只负责解释和战术。
 
+### 1.1 生产链路 vs 研究链路
+
+为避免后续讨论混淆，`Investment Mode` 与 `tradeability sidecar` 必须明确区分为两条不同职责的数据链路：
+
+1. 生产链路（Production Decision Lane）：
+   - 面向用户正式展示。
+   - 真实输入来自线上 `daily_prices` 与 `ai_predictions_v2`。
+   - 结果表为：
+     - `mode_decision_log`
+     - `mode_simulated_trade_ledger`
+     - `mode_performance_snapshot`
+   - 其中 `ledger` 是**基于真实行情和真实预测生成的模拟台账**，不是券商真实成交记录。
+
+2. 研究链路（Research Quant Lane）：
+   - 面向量化研究、参数校准、版本并行观测。
+   - 真实输入同样来自线上/本地 `daily_prices`。
+   - 结果表为：
+     - `quant_tradeability_signals`
+   - 默认允许并行存在 `tradeability_v1 / tradeability_v2 / future_v3` 等多个版本，不直接作为前台正式口径。
+
+3. 边界原则：
+   - 两条链路都建立在真实市场数据上，因此都不是“假数据”。
+   - 但只有生产链路属于正式产品口径；研究链路属于策略实验与治理口径。
+   - 允许复用同一套 Layer-1 计算内核；不建议将最终结果表强行合并为一套。
+
+### 1.2 为什么不直接合并成一套结果表
+
+1. 生产链路追求口径稳定，研究链路追求版本并行与快速试错。
+2. 生产链路要回答“用户当时看到什么”；研究链路要回答“某版本在样本上表现如何”。
+3. 若直接共用最终结果表，会导致实验参数变更污染前台展示、审计和周报口径。
+4. 当前推荐架构是：
+   - 底层输入共用：`daily_prices`、`ai_predictions_v2`
+   - Layer-1 内核共用：状态机、参数加载、特征计算
+   - 最终结果分流：`Investment Mode` 生产表 / `sidecar` 研究表
+
 ---
 
 ## 2. 当前运行组件
@@ -32,6 +67,10 @@
    - `backend/strategy_config/tradeability_params_v2.json`
 5. 预测主链路（含 Layer-1 快照注入与强制对齐）：
    - `backend/engine/runner.py`
+6. 盘后样本扩充（研究链路，不影响盘中实时同步）：
+   - `backend/scripts/run_tradeability_sample_sync.py`
+   - `.github/workflows/tradeability_sample_sync_daily.yml`
+   - `.github/workflows/tradeability_postclose_pipeline.yml`
 
 ---
 
@@ -93,11 +132,13 @@ python backend/scripts/observe_tradeability_windows.py --market CN --strategy-ve
 
 ### 4.7 cloud continuous observation
 
-1. `tradeability_sidecar_daily.yml`
-   - 默认并行写入 `tradeability_v1,tradeability_v2`
-2. `tradeability_experiment_weekly.yml`
+1. `tradeability_postclose_pipeline.yml`
+   - 盘后编排顺序：`daily pipeline -> sample sync -> sidecar daily`
+2. `tradeability_sidecar_daily.yml`
+   - 在盘后样本补量之后执行，默认并行写入 `tradeability_v1,tradeability_v2`
+3. `tradeability_experiment_weekly.yml`
    - 每周产出 v1/v2 对比 artifact
-3. `acceptance_weekly.yml`
+4. `acceptance_weekly.yml`
    - 默认按 `tradeability_v2` 生成周验收快照
 
 ### 4.8 单票分析（功能验证）

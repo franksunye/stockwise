@@ -61,6 +61,20 @@ Hub = 持续更新的“常规内容”节奏（不是一次性爆款）。
 | 验证状态 | validation_status | 历史预测是否已被市场结果验证 | 验证中 / 预测准确 / 产生偏差 |
 | 策略版本 | layer1_strategy_version | Layer-1 使用的策略版本标识 | 策略版本（默认 v2） |
 
+## 3.1) 核心系统 Lane（跨团队统一叫法）
+
+> 这一节定义的是“系统级数据链路名词”，用于产品、研发、运营讨论时避免把产品口径和研究口径混为一谈。
+
+| 中文名 | 英文名 | 定义 | 备注 |
+|---|---|---|---|
+| 生产决策链路 | Production Decision Lane | 面向用户正式展示的决策数据链路 | 对应 Investment Mode |
+| 研究量化链路 | Research Quant Lane | 面向量化研究、参数校准、版本观测的数据链路 | 对应 sidecar / calibration |
+
+补充说明：
+- 两条 lane 都建立在真实市场数据之上。
+- `Production Decision Lane` 不是“真实成交”，其中模式台账仍是模拟台账。
+- `Research Quant Lane` 不是“假数据”，但它不是前台正式展示口径。
+
 ---
 
 ## 4) 语义映射规范（四语义）
@@ -96,6 +110,8 @@ Hub = 持续更新的“常规内容”节奏（不是一次性爆款）。
 ## 5) 命名边界（禁止混用）
 
 - `策略`（内部工程对象）不等于 `投资模式`（用户产品对象）。
+- `Production Decision Lane` 不等于 `Research Quant Lane`。
+- `Investment Mode`（产品结果）不等于 `sidecar`（研究结果）。
 - `signal`（兼容层）不等于 `action semantics`（用户执行语言）。
 - `看多/看空/观望`、`做多/做空` 属于旧表述，不再作为新 UI 主文案。
 - `层状态`可以技术展示，但用户主结论应优先显示动作语义。

@@ -96,6 +96,24 @@
 
 此部分追踪不直接暴露给前端，但支撑整个系统运行的核心后端模块(基于 `backend/engine` 审计)。
 
+### 9.1 核心数据 Lane
+
+为避免功能文档误把正式产品数据与研究数据混在一起，本清单采用以下口径：
+
+1. `Production Decision Lane`
+   - 面向用户正式展示。
+   - 典型链路：`daily_prices -> ai_predictions_v2 -> mode_pipeline -> /api/modes/*`
+   - 对应产品能力：Investment Mode、模式表现、模式决策明细。
+
+2. `Research Quant Lane`
+   - 面向量化研究与参数治理。
+   - 典型链路：`daily_prices -> sample sync -> sidecar -> calibration`
+   - 对应工程能力：`quant_tradeability_signals`、策略版本并行观测、weekly calibration。
+
+3. 边界约束
+   - 两条 lane 都建立在真实行情数据之上。
+   - 但 `Research Quant Lane` 不是当前前台正式展示的数据源。
+
 | 模块       | 子功能              | 描述与技术细节                                                               | 代码位置 (Backend/Engine)                     | 状态     |
 | :--------- | :------------------ | :--------------------------------------------------------------------------- | :-------------------------------------------- | :------- |
 | **ETL**    | **AbstractFetcher** | 统一数据获取接口，支持 AkShare (主) 和 Yahoo (备) 自动降级切换。             | `fetchers.py`, `backend/engine/fetchers/`     | ✅ 已实现 |
