@@ -1,10 +1,6 @@
 name: Tradeability Sidecar Daily
 
 on:
-  schedule:
-    # After CN/HK daily pipelines complete
-    - cron: '50 8 * * 1-5'  # CN sidecar
-    - cron: '20 9 * * 1-5'  # HK sidecar
   workflow_dispatch:
     inputs:
       market:
@@ -31,34 +27,38 @@ on:
         type: boolean
         required: false
         default: false
+  workflow_call:
+    inputs:
+      market:
+        description: 'Target market'
+        type: string
+        required: true
+      date:
+        description: 'YYYY-MM-DD (optional, default latest trading date by market)'
+        type: string
+        required: false
+        default: ''
+      strategy_versions:
+        description: 'Comma-separated sidecar strategy versions'
+        type: string
+        required: false
+        default: 'tradeability_v1,tradeability_v2'
+      dry_run:
+        description: 'Dry run without DB writes'
+        type: boolean
+        required: false
+        default: false
 
 concurrency:
   group: tradeability-sidecar-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  gate_cn:
-    if: github.event_name == 'schedule'
-    uses: ./.github/workflows/trading_day_gate.yml
-    with:
-      market: 'CN'
-    secrets: inherit
-
-  gate_hk:
-    if: github.event_name == 'schedule'
-    uses: ./.github/workflows/trading_day_gate.yml
-    with:
-      market: 'HK'
-    secrets: inherit
-
   run-cn:
     runs-on: ubuntu-latest
-    needs: [gate_cn]
     if: |
-      always() && (
-        github.event_name == 'workflow_dispatch' && (inputs.market == 'CN' || inputs.market == 'BOTH') ||
-        github.event_name == 'schedule' && needs.gate_cn.outputs.should_run == 'true' && github.event.schedule == '50 8 * * 1-5'
-      )
+      github.event_name == 'workflow_call' && inputs.market == 'CN' ||
+      github.event_name == 'workflow_dispatch' && (inputs.market == 'CN' || inputs.market == 'BOTH')
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -97,12 +97,9 @@ jobs:
 
   run-hk:
     runs-on: ubuntu-latest
-    needs: [gate_hk]
     if: |
-      always() && (
-        github.event_name == 'workflow_dispatch' && (inputs.market == 'HK' || inputs.market == 'BOTH') ||
-        github.event_name == 'schedule' && needs.gate_hk.outputs.should_run == 'true' && github.event.schedule == '20 9 * * 1-5'
-      )
+      github.event_name == 'workflow_call' && inputs.market == 'HK' ||
+      github.event_name == 'workflow_dispatch' && (inputs.market == 'HK' || inputs.market == 'BOTH')
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4

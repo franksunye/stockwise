@@ -1,0 +1,195 @@
+name: Tradeability Sample Sync Daily
+
+on:
+  workflow_dispatch:
+    inputs:
+      market:
+        description: 'Target market'
+        type: choice
+        required: true
+        default: 'BOTH'
+        options:
+        - CN
+        - HK
+        - BOTH
+      cn_target_symbols:
+        description: 'CN nightly sample symbols'
+        type: number
+        required: false
+        default: 150
+      hk_target_symbols:
+        description: 'HK nightly sample symbols'
+        type: number
+        required: false
+        default: 80
+      history_start_date:
+        description: 'History floor (YYYY-MM-DD)'
+        type: string
+        required: false
+        default: '2024-01-01'
+      incremental_buffer_days:
+        description: 'Replay buffer days for partially synced symbols'
+        type: number
+        required: false
+        default: 14
+      max_workers:
+        description: 'Worker count'
+        type: number
+        required: false
+        default: 2
+      sync_meta:
+        description: 'Refresh stock_meta before sync'
+        type: boolean
+        required: false
+        default: false
+  workflow_call:
+    inputs:
+      market:
+        description: 'Target market'
+        type: string
+        required: true
+      cn_target_symbols:
+        description: 'CN nightly sample symbols'
+        type: number
+        required: false
+        default: 150
+      hk_target_symbols:
+        description: 'HK nightly sample symbols'
+        type: number
+        required: false
+        default: 80
+      history_start_date:
+        description: 'History floor (YYYY-MM-DD)'
+        type: string
+        required: false
+        default: '2024-01-01'
+      incremental_buffer_days:
+        description: 'Replay buffer days for partially synced symbols'
+        type: number
+        required: false
+        default: 14
+      max_workers:
+        description: 'Worker count'
+        type: number
+        required: false
+        default: 2
+      sync_meta:
+        description: 'Refresh stock_meta before sync'
+        type: boolean
+        required: false
+        default: false
+
+concurrency:
+  group: tradeability-sample-sync-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  run-cn:
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'workflow_call' && inputs.market == 'CN' ||
+      github.event_name == 'workflow_dispatch' && (inputs.market == 'CN' || inputs.market == 'BOTH')
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Run CN Sample Sync
+        env:
+          PYTHONUNBUFFERED: "1"
+          DB_SOURCE: cloud
+          TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+        run: |
+          TARGET_SYMBOLS="${{ inputs.cn_target_symbols }}"
+          if [ -z "$TARGET_SYMBOLS" ]; then
+            TARGET_SYMBOLS="150"
+          fi
+          MAX_WORKERS="${{ inputs.max_workers }}"
+          if [ -z "$MAX_WORKERS" ]; then
+            MAX_WORKERS="2"
+          fi
+          HISTORY_START_DATE="${{ inputs.history_start_date }}"
+          if [ -z "$HISTORY_START_DATE" ]; then
+            HISTORY_START_DATE="2024-01-01"
+          fi
+          BUFFER_DAYS="${{ inputs.incremental_buffer_days }}"
+          if [ -z "$BUFFER_DAYS" ]; then
+            BUFFER_DAYS="14"
+          fi
+          META_FLAG=""
+          if [ "${{ inputs.sync_meta }}" == "true" ]; then
+            META_FLAG="--sync-meta"
+          fi
+          python -u backend/scripts/run_tradeability_sample_sync.py \
+            --market CN \
+            --target-symbols "$TARGET_SYMBOLS" \
+            --history-start-date "$HISTORY_START_DATE" \
+            --incremental-buffer-days "$BUFFER_DAYS" \
+            --max-workers "$MAX_WORKERS" \
+            $META_FLAG
+
+  run-hk:
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'workflow_call' && inputs.market == 'HK' ||
+      github.event_name == 'workflow_dispatch' && (inputs.market == 'HK' || inputs.market == 'BOTH')
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Run HK Sample Sync
+        env:
+          PYTHONUNBUFFERED: "1"
+          DB_SOURCE: cloud
+          TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+        run: |
+          TARGET_SYMBOLS="${{ inputs.hk_target_symbols }}"
+          if [ -z "$TARGET_SYMBOLS" ]; then
+            TARGET_SYMBOLS="80"
+          fi
+          MAX_WORKERS="${{ inputs.max_workers }}"
+          if [ -z "$MAX_WORKERS" ]; then
+            MAX_WORKERS="2"
+          fi
+          HISTORY_START_DATE="${{ inputs.history_start_date }}"
+          if [ -z "$HISTORY_START_DATE" ]; then
+            HISTORY_START_DATE="2024-01-01"
+          fi
+          BUFFER_DAYS="${{ inputs.incremental_buffer_days }}"
+          if [ -z "$BUFFER_DAYS" ]; then
+            BUFFER_DAYS="14"
+          fi
+          META_FLAG=""
+          if [ "${{ inputs.sync_meta }}" == "true" ]; then
+            META_FLAG="--sync-meta"
+          fi
+          python -u backend/scripts/run_tradeability_sample_sync.py \
+            --market HK \
+            --target-symbols "$TARGET_SYMBOLS" \
+            --history-start-date "$HISTORY_START_DATE" \
+            --incremental-buffer-days "$BUFFER_DAYS" \
+            --max-workers "$MAX_WORKERS" \
+            $META_FLAG

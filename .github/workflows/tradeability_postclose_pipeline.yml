@@ -1,0 +1,130 @@
+name: Tradeability Post-Close Pipeline
+
+on:
+  schedule:
+    - cron: '5 10 * * 1-5'   # CN post-close orchestration
+    - cron: '35 10 * * 1-5'  # HK post-close orchestration
+  workflow_dispatch:
+    inputs:
+      market:
+        description: 'Target market'
+        type: choice
+        required: true
+        default: 'BOTH'
+        options:
+        - CN
+        - HK
+        - BOTH
+      cn_target_symbols:
+        description: 'CN nightly sample symbols'
+        type: number
+        required: false
+        default: 150
+      hk_target_symbols:
+        description: 'HK nightly sample symbols'
+        type: number
+        required: false
+        default: 80
+      history_start_date:
+        description: 'History floor (YYYY-MM-DD)'
+        type: string
+        required: false
+        default: '2024-01-01'
+      incremental_buffer_days:
+        description: 'Replay buffer days for partially synced symbols'
+        type: number
+        required: false
+        default: 14
+      max_workers:
+        description: 'Worker count'
+        type: number
+        required: false
+        default: 2
+      strategy_versions:
+        description: 'Comma-separated sidecar strategy versions'
+        type: string
+        required: false
+        default: 'tradeability_v1,tradeability_v2'
+      dry_run:
+        description: 'Dry run sidecar without DB writes'
+        type: boolean
+        required: false
+        default: false
+      sync_meta:
+        description: 'Refresh stock_meta before sample sync'
+        type: boolean
+        required: false
+        default: false
+
+concurrency:
+  group: tradeability-postclose-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  gate_cn:
+    if: github.event_name == 'schedule'
+    uses: ./.github/workflows/trading_day_gate.yml
+    with:
+      market: 'CN'
+    secrets: inherit
+
+  gate_hk:
+    if: github.event_name == 'schedule'
+    uses: ./.github/workflows/trading_day_gate.yml
+    with:
+      market: 'HK'
+    secrets: inherit
+
+  sample-sync-cn:
+    needs: [gate_cn]
+    if: |
+      always() && (
+        github.event_name == 'workflow_dispatch' && (inputs.market == 'CN' || inputs.market == 'BOTH') ||
+        github.event_name == 'schedule' && needs.gate_cn.outputs.should_run == 'true' && github.event.schedule == '5 10 * * 1-5'
+      )
+    uses: ./.github/workflows/tradeability_sample_sync_daily.yml
+    with:
+      market: 'CN'
+      cn_target_symbols: ${{ inputs.cn_target_symbols || 150 }}
+      history_start_date: ${{ inputs.history_start_date || '2024-01-01' }}
+      incremental_buffer_days: ${{ inputs.incremental_buffer_days || 14 }}
+      max_workers: ${{ inputs.max_workers || 2 }}
+      sync_meta: ${{ inputs.sync_meta || false }}
+    secrets: inherit
+
+  sidecar-cn:
+    needs: [sample-sync-cn]
+    if: success()
+    uses: ./.github/workflows/tradeability_sidecar_daily.yml
+    with:
+      market: 'CN'
+      strategy_versions: ${{ inputs.strategy_versions || 'tradeability_v1,tradeability_v2' }}
+      dry_run: ${{ inputs.dry_run || false }}
+    secrets: inherit
+
+  sample-sync-hk:
+    needs: [gate_hk]
+    if: |
+      always() && (
+        github.event_name == 'workflow_dispatch' && (inputs.market == 'HK' || inputs.market == 'BOTH') ||
+        github.event_name == 'schedule' && needs.gate_hk.outputs.should_run == 'true' && github.event.schedule == '35 10 * * 1-5'
+      )
+    uses: ./.github/workflows/tradeability_sample_sync_daily.yml
+    with:
+      market: 'HK'
+      hk_target_symbols: ${{ inputs.hk_target_symbols || 80 }}
+      history_start_date: ${{ inputs.history_start_date || '2024-01-01' }}
+      incremental_buffer_days: ${{ inputs.incremental_buffer_days || 14 }}
+      max_workers: ${{ inputs.max_workers || 2 }}
+      sync_meta: ${{ inputs.sync_meta || false }}
+    secrets: inherit
+
+  sidecar-hk:
+    needs: [sample-sync-hk]
+    if: success()
+    uses: ./.github/workflows/tradeability_sidecar_daily.yml
+    with:
+      market: 'HK'
+      strategy_versions: ${{ inputs.strategy_versions || 'tradeability_v1,tradeability_v2' }}
+      dry_run: ${{ inputs.dry_run || false }}
+    secrets: inherit
