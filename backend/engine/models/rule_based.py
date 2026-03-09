@@ -182,14 +182,14 @@ class RuleAdapter(BasePredictionModel):
         resistance_2 = resistance * 1.015
         stop_loss = support * 0.97
 
-        summary_text = f"量化兜底信号：{summary}"
-        decision_detail = f"量化规则决策：{signal}"
+        summary_text = summary
+        decision_detail = signal
         profile = self._layer1_action_profile(layer1_status or "NoSetup")
         if layer1_status and raw_signal and raw_signal != signal:
-            summary_text = f"[Layer-1:{layer1_status}] {profile['summary_prefix']}。{summary_text}"
+            summary_text = f"{profile['summary_prefix']}。{summary_text}"
             decision_detail += f"（Layer-1覆盖原始信号 {raw_signal}）"
         elif layer1_status:
-            summary_text = f"[Layer-1:{layer1_status}] {profile['summary_prefix']}。{summary_text}"
+            summary_text = f"{profile['summary_prefix']}。{summary_text}"
 
         reasoning_data = {
             "signal": signal,
