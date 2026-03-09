@@ -7,13 +7,16 @@ This directory serves as the unified single source of truth for the 知守 AI (Z
 ### [0_Strategy/](./0_Strategy/) - Why & Who
 > Project "Soul": Business vision, monetization, and team roles.
 - [Product & Business Vision](./0_Strategy/00_Product_Business_Vision.md)
-- [Monetization & Pricing Strategy](./0_Strategy/01_Monetization_Pricing_Strategy.md)
+- [Product Positioning & Boundaries](./0_Strategy/01_Product_Positioning_and_Boundaries.md)
+- [Monetization & Pricing Strategy](./0_Strategy/02_Monetization_Pricing_Strategy.md)
+- [Team Responsibility Matrix](./0_Strategy/03_Team_Responsibility_Matrix.md)
 - [Milestones & Execution Log](./0_Strategy/04_Milestones_Execution_Log.md)
 
 ### [1_Engineering/](./1_Engineering/) - How (System)
 > Project "Backbone": System architecture, reliability, and quality standards.
 - [Architecture (As-Is & To-Be)](./1_Engineering/10_Architecture.md)
 - [Reliability & Quality Gates](./1_Engineering/11_Reliability_Protocol.md)
+- [Quant-Engine Architecture](./1_Engineering/13_Quant_Engine_Architecture.md)
 - [Investment Mode Backend Runbook](./1_Engineering/14_Investment_Mode_Backend_Runbook.md)
 
 ### Current Source of Truth: Investment Mode / Tradeability
@@ -51,9 +54,21 @@ This directory serves as the unified single source of truth for the 知守 AI (Z
 - [Growth Roadmap (333 Plan)](./4_Growth_Ops/50_Growth_Roadmap_333_Plan.md)
 - [Missing Features & Optimization Plan](./4_Growth_Ops/51_Missing_Features_Plan.md)
 - [Annual Content Strategy 2026](./4_Growth_Ops/52_Annual_Content_Strategy_2026.md)
+- [Chinese SEO/GEO Foundation Plan](./4_Growth_Ops/53_Chinese_SEO_GEO_Foundation_Plan.md)
+- [SEO/GEO Execution Log 2026Q1](./4_Growth_Ops/54_SEO_GEO_Execution_Log_2026Q1.md)
 - [User Invitation Campaign Plan](./4_Growth_Ops/55_User_Invitation_Campaign_Plan.md)
+- [Learn Center: ZISO 101 Syllabus](./4_Growth_Ops/content/ZISO_101_SYLLABUS.md)
 - **[content/](./4_Growth_Ops/content/)** (Original Learn Center Case Studies)
 - **[wechat-drafts/](./4_Growth_Ops/wechat-drafts/)** (Drafts for Support Center Articles)
+
+### [5_Support_Ops/](./5_Support_Ops/) - Support
+> Project "Shield": Support Center content, troubleshooting, and user outcome alignment.
+- **[content/](./5_Support_Ops/content/)** (Official Support Center Articles)
+  - [投研决议逻辑 (Investment Decision)](./5_Support_Ops/content/ai-council-logic.md)
+  - [策略内参指南 (Tactical Brief)](./5_Support_Ops/content/tactical-brief-guide.md)
+  - [四态语义释义 (Four States)](./5_Support_Ops/content/four-states-semantics.md)
+  - [双轨制架构说明 (Dual-Lane)](./5_Support_Ops/content/dual-lane-architecture.md)
+  - [投资模式配置 (Investment Mode)](./5_Support_Ops/content/investment-mode-config.md)
 
 ---
 
