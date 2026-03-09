@@ -226,7 +226,14 @@ def _collect_observability(cur, end_date: str, strategy_version: str) -> Dict[st
           SUM(CASE WHEN status = 'success' THEN 1 ELSE 0 END) AS success_runs
         FROM task_logs
         WHERE date BETWEEN ? AND ?
-          AND (task_name LIKE '%Mode Pipeline%' OR task_name LIKE '%mode pipeline%')
+          AND (
+            task_name LIKE '%Mode Pipeline%'
+            OR task_name LIKE '%mode pipeline%'
+            OR display_name LIKE '%Mode Pipeline%'
+            OR display_name LIKE '%mode pipeline%'
+            OR task_name = 'Investment Mode Pipeline'
+            OR display_name = 'Investment Mode Pipeline'
+          )
         """,
         (start_14d, end_date),
     )

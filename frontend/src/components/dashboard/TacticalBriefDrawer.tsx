@@ -16,7 +16,9 @@ import {
   Layers,
   Hash,
   AlertTriangle,
-  Calendar
+  Calendar,
+  TrendingDown,
+  Shield
 } from 'lucide-react';
 import { AIPrediction, TacticalData, Tactic, ShortMetrics } from '@/lib/types';
 import { shouldEnableHighPerformance } from '@/lib/device-utils';
@@ -791,16 +793,29 @@ export function TacticalBriefDrawer({
                                                 <h4 className="text-xl font-black text-white mt-1">{formatLevel(node.price)}</h4>
                                             </div>
                                             {isActive && (
-                                                <div className={`px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-tighter bg-white/5 border border-white/10 ${textColor}`}>
-                                                    {isCurrent ? '当前实时锚点' : `距离: ${formatDistancePercent(getLevelDistance(currentPrice, node.price))}`}
+                                                <div className={`px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-tighter bg-white/5 border border-white/10 ${textColor} flex items-center`}>
+                                                    {isCurrent ? (
+                                                        '当前实时锚点'
+                                                    ) : (
+                                                        <span className="flex items-center gap-1">
+                                                            {node.price > (currentPrice || 0) ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
+                                                            {node.price > (currentPrice || 0) ? '上方空间' : '向下缓冲'} {formatDistancePercent(getLevelDistance(currentPrice, node.price))}
+                                                        </span>
+                                                    )}
                                                 </div>
                                             )}
                                         </div>
                                         <div>
                                             <p className={`text-xs font-bold leading-relaxed ${isActive ? 'text-slate-200' : 'text-slate-500'}`}>{node.description}</p>
-                                            <p className={`text-[10px] italic mt-2 flex items-center gap-2 ${isActive ? 'text-indigo-400' : 'text-slate-600'}`}>
-                                                <span className="font-black uppercase tracking-widest bg-indigo-500/10 px-1.5 py-0.5 rounded">建议脚本</span> 
-                                                {normalizeActionLabel(node.action)}
+                                            <p className={`text-[10px] mt-2 flex items-center gap-1.5 ${isActive ? textColor : 'text-slate-600'}`}>
+                                                <span className="font-black uppercase tracking-widest bg-white/10 px-1.5 py-0.5 rounded text-slate-300">防呆脚本</span> 
+                                                <span className="flex items-center gap-1 font-bold">
+                                                    {normalizeActionLabel(node.action) === '执行防守' && <Shield size={12} />}
+                                                    {normalizeActionLabel(node.action) === '执行落袋' && <Target size={12} />}
+                                                    {normalizeActionLabel(node.action) === '执行进场' && <TrendingUp size={12} />}
+                                                    {normalizeActionLabel(node.action) === '执行观察' && <Crosshair size={12} />}
+                                                    {normalizeActionLabel(node.action)}
+                                                </span>
                                             </p>
                                         </div>
                                         

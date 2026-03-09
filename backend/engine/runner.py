@@ -18,6 +18,54 @@ from backend.logger import logger
 from backend.engine.metaphor import metaphor_engine
 
 DEFAULT_MODE_ID = os.getenv("DEFAULT_INVESTMENT_MODE_ID", "balanced_v1")
+PRIMARY_CONFIDENCE_THRESHOLD = float(os.getenv("PRIMARY_CONFIDENCE_THRESHOLD", "0.6"))
+
+
+def _to_float(value: Any, default: float = 0.0) -> float:
+    try:
+        if value is None:
+            return default
+        return float(value)
+    except Exception:
+        return default
+
+
+def select_primary_prediction(
+    predictions: List[Dict[str, Any]],
+    model_priorities: Dict[str, int],
+    *,
+    existing_primary_model_id: str | None,
+    existing_priority: int,
+    primary_promotion_blocked: bool,
+    confidence_threshold: float = PRIMARY_CONFIDENCE_THRESHOLD,
+) -> str | None:
+    eligible: List[Dict[str, Any]] = []
+    fallback: List[Dict[str, Any]] = []
+
+    for pred in predictions:
+        if not pred:
+            continue
+        model_id = str(pred["model_id"])
+        priority = int(model_priorities.get(model_id, 0))
+        confidence = _to_float(pred.get("confidence"))
+        item = {
+            "model_id": model_id,
+            "priority": priority,
+            "confidence": confidence,
+        }
+        fallback.append(item)
+        if confidence >= confidence_threshold:
+            eligible.append(item)
+
+    chosen_pool = eligible or fallback
+    if not chosen_pool or primary_promotion_blocked:
+        return None
+
+    chosen_pool.sort(key=lambda x: (x["priority"], x["confidence"]), reverse=True)
+    top = chosen_pool[0]
+    if top["priority"] > existing_priority or top["model_id"] == existing_primary_model_id or existing_primary_model_id is None:
+        return str(top["model_id"])
+    return None
 
 class PredictionRunner:
     def __init__(self, model_filter: str = None, force: bool = False):
@@ -181,29 +229,27 @@ class PredictionRunner:
                 f"Lower models will be saved but NOT set as primary."
             )
         
+        selected_primary_model_id = select_primary_prediction(
+            valid_predictions,
+            model_priorities,
+            existing_primary_model_id=existing_primary_model_id,
+            existing_priority=existing_priority,
+            primary_promotion_blocked=primary_promotion_blocked,
+        )
+        if selected_primary_model_id:
+            primary_pred = next((p for p in valid_predictions if p["model_id"] == selected_primary_model_id), None)
+
         for i, pred in enumerate(predictions):
             if not pred:
                 continue
                 
             model_id = pred['model_id']
-            model_priority = model_priorities.get(model_id, 0)
-            
-            # Selector Logic: Set primary if this model has higher or equal priority than existing primary,
-            # or if this model was already the primary (force re-run case)
-            # BUT: Block promotion if a higher-priority model failed this run.
             is_primary = 0
-            if not primary_promotion_blocked:
-                should_be_primary = (
-                    model_priority > existing_priority or 
-                    model_id == existing_primary_model_id  # Keep primary if same model (force re-run)
-                )
-                if should_be_primary:
-                    # Reset old primary and set new one
-                    cursor.execute("UPDATE ai_predictions_v2 SET is_primary = 0 WHERE symbol = ? AND date = ?", (symbol, date))
-                    is_primary = 1
-                    existing_priority = model_priority  # Update for next iteration
-                    existing_primary_model_id = model_id
-                    primary_pred = pred
+            if selected_primary_model_id and model_id == selected_primary_model_id:
+                cursor.execute("UPDATE ai_predictions_v2 SET is_primary = 0 WHERE symbol = ? AND date = ?", (symbol, date))
+                is_primary = 1
+                existing_priority = model_priorities.get(model_id, existing_priority)
+                existing_primary_model_id = model_id
                 
             try:
                 # 4.5 Generate Visual Story (Silent Math Overlay)

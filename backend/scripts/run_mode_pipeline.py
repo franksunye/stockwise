@@ -5,6 +5,7 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from backend.analysis.mode_pipeline import run_mode_pipeline
+from backend.job_guard import JobGuard
 
 
 def main():
@@ -15,13 +16,23 @@ def main():
     parser.add_argument("--triggered-by", type=str, default="manual", help="Triggered by label")
     args = parser.parse_args()
 
-    stats = run_mode_pipeline(
-        as_of_date=args.date,
-        mode_id=args.mode_id,
-        rule_version=args.rule_version,
-        triggered_by=args.triggered_by,
-    )
-    print(stats)
+    job = JobGuard("Investment Mode Pipeline", task_type="maintenance", triggered_by=args.triggered_by)
+    if args.date:
+        job.date_str = args.date
+    with job:
+        if args.date:
+            job.set_dimensions(as_of_date=args.date)
+        if args.mode_id:
+            job.set_dimensions(mode_id=args.mode_id)
+        stats = run_mode_pipeline(
+            as_of_date=args.date,
+            mode_id=args.mode_id,
+            rule_version=args.rule_version,
+            triggered_by=args.triggered_by,
+            job_id=job.get_pipeline_run_id(),
+        )
+        job.set_stats(success=True, **stats)
+        print(stats)
 
 
 if __name__ == "__main__":
