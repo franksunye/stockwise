@@ -337,6 +337,7 @@ def collect(end_date: str, strategy_version: str, market: str, calibration_dir: 
               ) AS aligned
             FROM ai_predictions_v2
             WHERE date BETWEEN ? AND ?
+              AND is_primary = 1
               AND layer1_status IS NOT NULL
               AND layer1_status <> ''
               AND COALESCE(NULLIF(layer1_strategy_version, ''), 'tradeability_v2') = ?

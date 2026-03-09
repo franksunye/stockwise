@@ -36,6 +36,12 @@ def _parse_versions(raw: str) -> List[str]:
     return versions
 
 
+def _resolve_single_run_params_file(strategy_versions: Sequence[str], params_file: str) -> str:
+    if len(strategy_versions) != 1:
+        raise ValueError("--params-file only supports a single strategy version run")
+    return params_file
+
+
 def _evaluate_version(
     market: str,
     strategy_version: str,
@@ -45,8 +51,9 @@ def _evaluate_version(
     initial_capital: float,
     max_positions: int,
     fee_bps_each_side: float,
+    params_file: Optional[str] = None,
 ) -> Dict[str, object]:
-    _, params = load_market_params(market=market, strategy_version=strategy_version)
+    _, params = load_market_params(market=market, strategy_version=strategy_version, params_file=params_file)
     result = run_loop(
         bars_by_symbol=bars_by_symbol,
         max_hold_days=max_hold_days,
@@ -111,6 +118,7 @@ def main() -> None:
     parser.add_argument("--initial-capital", type=float, default=1_000_000.0)
     parser.add_argument("--max-positions", type=int, default=10)
     parser.add_argument("--fee-bps-each-side", type=float, default=5.0)
+    parser.add_argument("--params-file", default="")
     parser.add_argument("--output-json", default="")
     parser.add_argument("--output-md", default="")
     args = parser.parse_args()
@@ -119,6 +127,8 @@ def main() -> None:
     if not bars_by_symbol:
         raise RuntimeError(f"No bars found for market={args.market}")
     all_dates = [bar.date for bars in bars_by_symbol.values() for bar in bars]
+    strategy_versions = _parse_versions(args.strategy_versions)
+    params_file = _resolve_single_run_params_file(strategy_versions, args.params_file) if args.params_file else ""
     payload = {
         "market": args.market,
         "run_at": datetime.now().isoformat(timespec="seconds"),
@@ -136,8 +146,9 @@ def main() -> None:
                 initial_capital=args.initial_capital,
                 max_positions=args.max_positions,
                 fee_bps_each_side=args.fee_bps_each_side,
+                params_file=params_file or None,
             )
-            for version in _parse_versions(args.strategy_versions)
+            for version in strategy_versions
         ],
     }
 

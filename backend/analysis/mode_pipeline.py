@@ -228,6 +228,7 @@ def _upsert_mode_decisions(
     job_id: str,
     rule_version: str,
     triggered_by: str,
+    params_file: str | None = None,
 ) -> int:
     cursor = conn.cursor()
     mode_definition = get_mode_definition(mode_id)
@@ -253,6 +254,7 @@ def _upsert_mode_decisions(
             daily_history=history,
             strategy_version=str(mode_definition.get("strategy_version") or DEFAULT_STRATEGY_VERSION),
             params_bundle=str(mode_definition.get("params_bundle") or "balanced"),
+            params_file=params_file,
         )
         layer1_status = snapshot.setup_state
         decision_semantic, mode_note = _semantic_by_mode(
@@ -601,6 +603,7 @@ def run_mode_pipeline(
     job_id: Optional[str] = None,
     rule_version: str = DEFAULT_RULE_VERSION,
     triggered_by: str = "scheduler",
+    params_file: Optional[str] = None,
 ) -> Dict[str, int]:
     conn = get_connection()
     cursor = conn.cursor()
@@ -618,7 +621,15 @@ def run_mode_pipeline(
         ledger_rows = 0
         snapshots = 0
         for current_mode in modes:
-            decisions += _upsert_mode_decisions(conn, current_mode, target_date, final_job_id, rule_version, triggered_by)
+            decisions += _upsert_mode_decisions(
+                conn,
+                current_mode,
+                target_date,
+                final_job_id,
+                rule_version,
+                triggered_by,
+                params_file=params_file,
+            )
             ledger_rows += _upsert_mode_ledger(conn, current_mode, target_date, final_job_id, rule_version, triggered_by)
             snapshots += _refresh_snapshots(conn, current_mode, target_date, final_job_id, rule_version, triggered_by)
 

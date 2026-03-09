@@ -74,6 +74,12 @@ def _parse_versions(raw: str) -> List[str]:
     return versions
 
 
+def _resolve_single_run_params_file(strategy_versions: Sequence[str], params_file: str) -> str:
+    if len(strategy_versions) != 1:
+        raise ValueError("--params-file only supports a single strategy version run")
+    return params_file
+
+
 def load_histories(market: str, start_date: str | None, end_date: str | None) -> Dict[str, List[Dict[str, object]]]:
     conn = get_connection()
     try:
@@ -128,12 +134,25 @@ def _flush_rows(conn, rows: List[tuple]) -> int:
     return len(rows)
 
 
-def backfill_history(market: str, strategy_versions: Sequence[str], start_date: str | None, end_date: str | None) -> Dict[str, object]:
-    histories = load_histories(market, start_date, end_date)
+def backfill_history(
+    market: str,
+    strategy_versions: Sequence[str],
+    start_date: str | None,
+    end_date: str | None,
+    params_file: str | None = None,
+) -> Dict[str, object]:
+    histories = load_histories(market, None, end_date)
     if not histories:
         raise RuntimeError(f"No histories found for market={market}")
 
-    version_params = {version: load_market_params(market=market, strategy_version=version)[1] for version in strategy_versions}
+    version_params = {
+        version: load_market_params(
+            market=market,
+            strategy_version=version,
+            params_file=params_file if len(strategy_versions) == 1 else None,
+        )[1]
+        for version in strategy_versions
+    }
     state_counts: Dict[str, Dict[str, int]] = {version: {} for version in strategy_versions}
     conn = get_connection()
     try:
@@ -148,6 +167,8 @@ def backfill_history(market: str, strategy_versions: Sequence[str], start_date: 
                     continue
                 slice_history = history[: idx + 1]
                 latest_date = str(slice_history[-1]["date"])
+                if start_date and latest_date < start_date:
+                    continue
                 for version in strategy_versions:
                     snapshot = evaluate_layer1_state(slice_history, params=version_params[version], strategy_version=version)
                     state_counts[version][snapshot.setup_state] = state_counts[version].get(snapshot.setup_state, 0) + 1
@@ -192,13 +213,17 @@ def main() -> None:
     parser.add_argument("--strategy-versions", default="tradeability_v1,tradeability_v2")
     parser.add_argument("--start-date", default="")
     parser.add_argument("--end-date", default="")
+    parser.add_argument("--params-file", default="")
     args = parser.parse_args()
 
+    strategy_versions = _parse_versions(args.strategy_versions)
+    params_file = _resolve_single_run_params_file(strategy_versions, args.params_file) if args.params_file else ""
     payload = backfill_history(
         market=args.market,
-        strategy_versions=_parse_versions(args.strategy_versions),
+        strategy_versions=strategy_versions,
         start_date=args.start_date or None,
         end_date=args.end_date or None,
+        params_file=params_file or None,
     )
     payload["run_at"] = datetime.now().isoformat(timespec="seconds")
     print(json.dumps(payload, ensure_ascii=False, indent=2))

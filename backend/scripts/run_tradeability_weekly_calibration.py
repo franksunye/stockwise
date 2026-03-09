@@ -233,6 +233,12 @@ def _parse_strategy_versions(raw: str) -> List[str]:
     return versions
 
 
+def _resolve_single_run_params_file(strategy_versions: Sequence[str], params_file: str) -> str:
+    if len(strategy_versions) != 1:
+        raise ValueError("--params-file only supports a single strategy version run")
+    return params_file
+
+
 def _render_markdown(payload: Dict[str, object]) -> str:
     lines: List[str] = []
     lines.append(f"# Weekly Calibration Report ({payload['market']})")
@@ -284,6 +290,7 @@ def main() -> None:
     parser.add_argument("--initial-capital", type=float, default=1_000_000.0)
     parser.add_argument("--max-positions", type=int, default=10)
     parser.add_argument("--fee-bps-each-side", type=float, default=5.0)
+    parser.add_argument("--params-file", default="")
     parser.add_argument("--output-json", default="")
     parser.add_argument("--output-md", default="")
     args = parser.parse_args()
@@ -304,9 +311,15 @@ def main() -> None:
         if parameter not in DEFAULT_STEP_MAP:
             raise ValueError(f"Unsupported parameter in order: {parameter}")
 
+    strategy_versions = _parse_strategy_versions(args.strategy_versions)
+    params_file = _resolve_single_run_params_file(strategy_versions, args.params_file) if args.params_file else ""
     versions_payload: List[Dict[str, object]] = []
-    for strategy_version in _parse_strategy_versions(args.strategy_versions):
-        _, base_params = load_market_params(args.market, strategy_version=strategy_version)
+    for strategy_version in strategy_versions:
+        _, base_params = load_market_params(
+            args.market,
+            strategy_version=strategy_version,
+            params_file=params_file or None,
+        )
         current_params = {k: float(v) for k, v in base_params.items()}
         decision_log: List[Dict[str, object]] = []
 

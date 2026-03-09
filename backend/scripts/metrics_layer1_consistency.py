@@ -112,6 +112,7 @@ def collect_metrics(target_date: str, strategy_version: str = DEFAULT_STRATEGY_V
               SUM(CASE WHEN layer1_status IN ('NoSetup','Watch','RiskOff') THEN 1 ELSE 0 END) AS l1_side_states
             FROM ai_predictions_v2
             WHERE date = ?
+              AND is_primary = 1
               AND layer1_status IS NOT NULL
               AND layer1_status <> ''
               AND COALESCE(NULLIF(layer1_strategy_version, ''), 'tradeability_v2') = ?
@@ -130,6 +131,7 @@ def collect_metrics(target_date: str, strategy_version: str = DEFAULT_STRATEGY_V
                 COUNT(*) AS cnt
               FROM ai_predictions_v2
               WHERE date = ?
+                AND is_primary = 1
                 AND layer1_status IN ('NoSetup','Watch','TriggeredLong','RiskOff')
                 AND COALESCE(NULLIF(layer1_strategy_version, ''), 'tradeability_v2') = ?
               GROUP BY {market_case}, layer1_status

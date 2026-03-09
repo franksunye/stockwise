@@ -136,6 +136,7 @@ def backfill_primary_layer1_fields(
     end_date: str | None,
     market: str | None,
     fill_only_missing: bool,
+    params_file: str | None = None,
 ) -> Dict[str, object]:
     rows = _fetch_target_rows(
         start_date=start_date,
@@ -164,7 +165,11 @@ def backfill_primary_layer1_fields(
         market_code = str(row["market"])
         params = params_by_market.get(market_code)
         if params is None:
-            _, params = load_market_params(market=market_code, strategy_version=strategy_version)
+            _, params = load_market_params(
+                market=market_code,
+                strategy_version=strategy_version,
+                params_file=params_file,
+            )
             params_by_market[market_code] = params
         symbol = str(row["symbol"])
         date_str = str(row["date"])
@@ -216,6 +221,7 @@ def main() -> None:
     parser.add_argument("--end-date", default="")
     parser.add_argument("--market", choices=["CN", "HK"], default="")
     parser.add_argument("--fill-only-missing", action="store_true", help="Only update rows with missing/mismatched Layer-1 fields.")
+    parser.add_argument("--params-file", default="", help="Optional local params file override.")
     args = parser.parse_args()
 
     payload = backfill_primary_layer1_fields(
@@ -224,6 +230,7 @@ def main() -> None:
         end_date=args.end_date or None,
         market=args.market or None,
         fill_only_missing=args.fill_only_missing,
+        params_file=args.params_file or None,
     )
     payload["run_at"] = datetime.now().isoformat(timespec="seconds")
     logger.info(f"Primary Layer1 backfill done: {payload}")
