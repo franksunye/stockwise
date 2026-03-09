@@ -26,6 +26,7 @@ This directory serves as the unified single source of truth for the 知守 AI (Z
 > Project "AI Logic": Prompt engineering, model strategies, and core algorithms.
 - [Dual-Lane Operations](./2_Intelligence/39_Tradeability_Dual_Lane_Operations.md)
 - [Context Limits Research](./2_Intelligence/27_DeepSeek_V3_Rich_Context_Limits.md)
+- [Acceptance Criteria v1](./2_Intelligence/27_Acceptance_Criteria_v1.md)
 
 ### Historical Records: Investment Mode / Tradeability
 - [Promotion Execution Plan](./1_Engineering/archive/17_Tradeability_Promotion_Execution_Plan.md)
@@ -37,10 +38,12 @@ This directory serves as the unified single source of truth for the 知守 AI (Z
 ### [3_Product/](./3_Product/) - What & UX
 > Project "Body": Feature manifest and specific product delivery specs.
 - [Features Manifest](./3_Product/03_Product_Features_Manifest.md)
-- **[Specs/](./3_Product/Specs/)** (Actionable blueprints for specific features)
+- **[Specs/](./3_Product/Specs/)**
   - [Quant/AI Dual-Layer UX (40)](./3_Product/Specs/40_Quant_AI_Dual_Layer_UX.md)
-  - [SWR Architecture (46)](./3_Product/Specs/46_Frontend_SWR_Architecture_Upgrade.md)
   - [Stock Radar (45)](./3_Product/Specs/45_Stock_Radar_Discovery_Engine.md)
+  - [SWR Architecture (46)](./3_Product/Specs/46_Frontend_SWR_Architecture_Upgrade.md)
+  - [Investment Mode Product Layer (47)](./3_Product/Specs/47_Investment_Mode_Product_Layer.md)
+  - [Admin Tradeability Control Tower (48)](./3_Product/Specs/48_Admin_Tradeability_Control_Tower.md)
   - [Phase 3 Protection (41)](./3_Product/Specs/41_Phase3_Protection_Spec.md)
 
 ### [4_Growth_Ops/](./4_Growth_Ops/) - Growth
@@ -48,6 +51,7 @@ This directory serves as the unified single source of truth for the 知守 AI (Z
 - [Growth Roadmap (333 Plan)](./4_Growth_Ops/50_Growth_Roadmap_333_Plan.md)
 - [Missing Features & Optimization Plan](./4_Growth_Ops/51_Missing_Features_Plan.md)
 - [Annual Content Strategy 2026](./4_Growth_Ops/52_Annual_Content_Strategy_2026.md)
+- [User Invitation Campaign Plan](./4_Growth_Ops/55_User_Invitation_Campaign_Plan.md)
 - **[content/](./4_Growth_Ops/content/)** (Original Learn Center Case Studies)
 - **[wechat-drafts/](./4_Growth_Ops/wechat-drafts/)** (Drafts for Support Center Articles)
 
@@ -55,7 +59,7 @@ This directory serves as the unified single source of truth for the 知守 AI (Z
 
 ## 🛠️ Maintenance Guidelines
 1. **Backlog Driven**: For daily tasks and brainstorming, refer to [Backlog.md](./Backlog.md).
-2. **Archiving Principle**: Move outdated or deprecated plans to [archive/](./archive/).
+2. **Archiving Principle**: Move outdated or deprecated plans to `archive/` subdirectories.
 3. **Consistency Checks**: When code implementation conflicts with documentation, the code takes precedence. Always update documentation promptly to reflect actual implementations.
 
 ---
