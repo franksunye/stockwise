@@ -144,18 +144,46 @@ function gateClasses(status: GateStatus) {
     return 'border-amber-500/30 bg-amber-500/10 text-amber-200';
 }
 
+function gateLabel(status: GateStatus): string {
+    if (status === 'PASS') return '通过';
+    if (status === 'FAIL') return '未通过';
+    return '观察中';
+}
+
 function healthClasses(state: HealthState) {
     if (state === 'critical') return 'border-rose-500/30 bg-rose-500/10 text-rose-200';
     if (state === 'warn') return 'border-amber-500/30 bg-amber-500/10 text-amber-200';
     return 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200';
 }
 
+function healthLabel(state: HealthState): string {
+    if (state === 'critical') return '严重';
+    if (state === 'warn') return '告警';
+    return '正常';
+}
+
 function humanEventLabel(eventType: string): string {
-    if (eventType === 'promotion_execute') return 'Promotion Execute';
-    if (eventType === 'promotion_approve') return 'Promotion Approve';
-    if (eventType === 'promotion_rollback') return 'Rollback';
-    if (eventType === 'verdict') return 'Verdict';
+    if (eventType === 'promotion_execute') return '执行升级';
+    if (eventType === 'promotion_approve') return '升级审批';
+    if (eventType === 'promotion_rollback') return '执行回退';
+    if (eventType === 'verdict') return '门禁结论';
     return eventType;
+}
+
+function actionLabel(action: string | null | undefined): string {
+    if (!action) return '暂无建议';
+    if (action === 'promote_candidate') return '建议升级候选版本';
+    if (action === 'hold_and_observe') return '继续观察';
+    return action;
+}
+
+function outcomeLabel(status: string | null | undefined): string {
+    if (!status) return '--';
+    if (status === 'approved') return '已审批';
+    if (status === 'applied') return '已执行';
+    if (status === 'fail') return '失败';
+    if (status === 'pass') return '通过';
+    return status;
 }
 
 function modeLabel(modeId: string): string {
@@ -210,42 +238,42 @@ export default function TradeabilityControlTowerPage() {
             {
                 label: '当前生产版本',
                 value: data.summary.configured_strategy_version,
-                sub: dominant ? `Observed primary: ${dominant.strategy_version} (${dominant.sample_count})` : 'No recent primary sample',
+                sub: dominant ? `近 7 天主版本：${dominant.strategy_version}（${dominant.sample_count} 条）` : '近 7 天没有主版本样本',
                 icon: CircuitBoard,
                 tone: 'border-indigo-500/30 bg-indigo-500/10 text-indigo-200',
             },
             {
                 label: '当前研究候选',
                 value: marketData.verdict.candidate_version,
-                sub: `Baseline: ${marketData.verdict.baseline_version}`,
+                sub: `对照版本：${marketData.verdict.baseline_version}`,
                 icon: FlaskConical,
                 tone: 'border-cyan-500/30 bg-cyan-500/10 text-cyan-200',
             },
             {
-                label: 'Promotion Gate',
-                value: marketData.verdict.gate_status,
-                sub: marketData.verdict.recommended_action || 'No recommendation',
+                label: '升级门禁',
+                value: gateLabel(marketData.verdict.gate_status),
+                sub: actionLabel(marketData.verdict.recommended_action),
                 icon: BadgeCheck,
                 tone: gateClasses(marketData.verdict.gate_status),
             },
             {
-                label: 'Pass Streak',
-                value: `${marketData.verdict.pass_streak_weeks}w`,
-                sub: `Week end: ${marketData.verdict.latest_week_end || '--'}`,
+                label: '连续通过周数',
+                value: `${marketData.verdict.pass_streak_weeks} 周`,
+                sub: `统计周结束：${marketData.verdict.latest_week_end || '--'}`,
                 icon: TimerReset,
                 tone: 'border-white/15 bg-white/[0.04] text-white',
             },
             {
-                label: 'Production Health',
-                value: data.summary.production_health.toUpperCase(),
-                sub: `Mode pipeline ${(data.summary.mode_pipeline_success_rate_14d * 100).toFixed(1)}%`,
+                label: '生产健康度',
+                value: healthLabel(data.summary.production_health),
+                sub: `模式流水线成功率 ${(data.summary.mode_pipeline_success_rate_14d * 100).toFixed(1)}%`,
                 icon: ShieldAlert,
                 tone: healthClasses(data.summary.production_health),
             },
             {
-                label: 'Last Action',
-                value: timeline ? humanEventLabel(timeline.event_type) : 'None',
-                sub: timeline ? `${timeline.actor || 'system'} @ ${formatDateTime(timeline.created_at)}` : 'No audit event',
+                label: '最近动作',
+                value: timeline ? humanEventLabel(timeline.event_type) : '暂无',
+                sub: timeline ? `${timeline.actor || 'system'} · ${formatDateTime(timeline.created_at)}` : '暂无审计记录',
                 icon: Bot,
                 tone: 'border-amber-500/30 bg-amber-500/10 text-amber-100',
             },
@@ -261,24 +289,24 @@ export default function TradeabilityControlTowerPage() {
                             <Link href="/admin" className="p-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition">
                                 <ArrowLeft className="w-4 h-4 text-slate-300" />
                             </Link>
-                            <span className="text-[10px] uppercase tracking-[0.3em] text-slate-500 font-black">Admin Control Tower</span>
+                            <span className="text-[10px] uppercase tracking-[0.3em] text-slate-500 font-black">管理员控制台</span>
                         </div>
                         <div>
                             <h1 className="text-3xl md:text-4xl font-black tracking-tight">
-                                TRADEABILITY <span className="text-cyan-400">CONTROL TOWER</span>
+                                Tradeability <span className="text-cyan-400">控制塔</span>
                             </h1>
                             <p className="text-sm text-slate-500 mt-2">
-                                一屏区分 Research Lane 和 Production Lane，只回答升级决策真正需要的问题。
+                                一屏区分研究流水线和生产流水线，只展示升级决策真正需要的信息。
                             </p>
                         </div>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-3">
                         <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2 text-xs text-slate-400">
-                            DB: <span className="text-white font-mono">{data?.db_strategy || '--'}</span>
+                            数据源：<span className="text-white font-mono">{data?.db_strategy || '--'}</span>
                         </div>
                         <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2 text-xs text-slate-400">
-                            Updated: <span className="text-white font-mono">{formatDateTime(data?.generated_at)}</span>
+                            更新时间：<span className="text-white font-mono">{formatDateTime(data?.generated_at)}</span>
                         </div>
                     </div>
                 </header>
@@ -306,7 +334,7 @@ export default function TradeabilityControlTowerPage() {
                     </div>
                 ) : !data || !marketData ? (
                     <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-8 text-sm text-slate-400">
-                        暂无 control tower 数据。
+                        暂无控制塔数据。
                     </div>
                 ) : (
                     <>
@@ -327,7 +355,7 @@ export default function TradeabilityControlTowerPage() {
                             <article className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
                                 <div className="flex items-center gap-2 text-cyan-300 text-xs uppercase tracking-[0.24em] font-black">
                                     <FlaskConical className="w-4 h-4" />
-                                    Research Lane
+                                    研究流水线
                                 </div>
                                 <div className="mt-4 grid gap-4 md:grid-cols-2">
                                     {[marketData.research.candidate_metric, marketData.research.baseline_metric].map((metric, index) => (
@@ -336,19 +364,19 @@ export default function TradeabilityControlTowerPage() {
                                                 <div>
                                                     <div className="text-sm font-black">{metric?.strategy_version || '--'}</div>
                                                     <div className="text-xs text-slate-500 mt-1">
-                                                        {index === 0 ? 'Candidate' : 'Baseline'} | Latest {metric?.latest_date || '--'}
+                                                        {index === 0 ? '候选版本' : '对照版本'} | 最新日期 {metric?.latest_date || '--'}
                                                     </div>
                                                 </div>
                                                 <ArrowRightLeft className="w-4 h-4 text-slate-600" />
                                             </div>
                                             <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
-                                                <MetricBlock label="Triggered" value={pct(metric?.triggered_coverage_pct)} />
-                                                <MetricBlock label="Watch" value={pct(metric?.watch_coverage_pct)} />
-                                                <MetricBlock label="RiskOff" value={pct(metric?.riskoff_coverage_pct)} />
-                                                <MetricBlock label="Avg Score" value={num(metric?.avg_opportunity_score)} />
+                                                <MetricBlock label="触发占比" value={pct(metric?.triggered_coverage_pct)} />
+                                                <MetricBlock label="观察占比" value={pct(metric?.watch_coverage_pct)} />
+                                                <MetricBlock label="防守占比" value={pct(metric?.riskoff_coverage_pct)} />
+                                                <MetricBlock label="平均分" value={num(metric?.avg_opportunity_score)} />
                                             </div>
                                             <div className="mt-3 text-xs text-slate-500">
-                                                Samples {metric?.sample_count ?? 0} | Triggered {metric?.triggered_count ?? 0}
+                                                样本 {metric?.sample_count ?? 0} 条 | 触发 {metric?.triggered_count ?? 0} 条
                                             </div>
                                         </div>
                                     ))}
@@ -357,11 +385,11 @@ export default function TradeabilityControlTowerPage() {
                                 <div className="mt-5 rounded-2xl border border-white/10 bg-black/20 p-4">
                                     <div className="flex items-center justify-between gap-3">
                                         <div>
-                                            <div className="text-sm font-black">Gate Verdict</div>
-                                            <div className="text-xs text-slate-500 mt-1">Current market decision for {activeMarket}</div>
+                                            <div className="text-sm font-black">当前门禁结论</div>
+                                            <div className="text-xs text-slate-500 mt-1">{activeMarket} 市场当前升级判断</div>
                                         </div>
                                         <span className={`px-3 py-1 rounded-full border text-xs font-black ${gateClasses(marketData.verdict.gate_status)}`}>
-                                            {marketData.verdict.gate_status}
+                                            {gateLabel(marketData.verdict.gate_status)}
                                         </span>
                                     </div>
                                     <div className="mt-4 space-y-2">
@@ -383,13 +411,13 @@ export default function TradeabilityControlTowerPage() {
                             <article className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
                                 <div className="flex items-center gap-2 text-indigo-300 text-xs uppercase tracking-[0.24em] font-black">
                                     <CircuitBoard className="w-4 h-4" />
-                                    Production Lane
+                                    生产流水线
                                 </div>
                                 <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4">
                                     <div className="text-sm font-black">{data.production.default_mode_name}</div>
                                     <div className="text-xs text-slate-500 mt-1">{data.production.default_mode_tagline}</div>
                                     <div className="mt-3 text-xs text-slate-400">
-                                        Configured strategy <span className="font-mono text-white">{data.summary.configured_strategy_version}</span>
+                                        当前配置策略 <span className="font-mono text-white">{data.summary.configured_strategy_version}</span>
                                     </div>
                                 </div>
 
@@ -398,13 +426,13 @@ export default function TradeabilityControlTowerPage() {
                                         <div key={item.horizon} className="rounded-2xl border border-white/10 bg-black/20 p-4">
                                             <div className="flex items-center justify-between">
                                                 <div className="text-sm font-black">{item.horizon.toUpperCase()}</div>
-                                                <div className="text-xs text-slate-500">As of {item.as_of_date || '--'}</div>
+                                                <div className="text-xs text-slate-500">统计到 {item.as_of_date || '--'}</div>
                                             </div>
                                             <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
-                                                <MetricBlock label="Hit Rate" value={pct(item.hit_rate)} />
-                                                <MetricBlock label="Coverage" value={pct(item.coverage)} />
-                                                <MetricBlock label="Drawdown" value={pct(item.max_drawdown)} />
-                                                <MetricBlock label="Samples" value={String(item.sample_size)} />
+                                                <MetricBlock label="命中率" value={pct(item.hit_rate)} />
+                                                <MetricBlock label="覆盖率" value={pct(item.coverage)} />
+                                                <MetricBlock label="最大回撤" value={pct(item.max_drawdown)} />
+                                                <MetricBlock label="样本数" value={String(item.sample_size)} />
                                             </div>
                                         </div>
                                     ))}
@@ -416,22 +444,22 @@ export default function TradeabilityControlTowerPage() {
                             <article className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
                                 <div className="flex items-center gap-2 text-emerald-300 text-xs uppercase tracking-[0.24em] font-black">
                                     <Activity className="w-4 h-4" />
-                                    System Overview
+                                    系统概况
                                 </div>
                                 <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                                    <MetricPanel label="API Latency P95" value={`${data.summary.api_latency_p95_ms_24h.toFixed(0)} ms`} hint="24h" />
-                                    <MetricPanel label="Confidence Low Ratio" value={pct(data.summary.confidence_low_ratio_7d)} hint="7d" />
-                                    <MetricPanel label="Mode Pipeline Success" value={pct(data.summary.mode_pipeline_success_rate_14d)} hint="14d" />
-                                    <MetricPanel label="Latest Prices" value={data.summary.latest_prices_date || '--'} hint="daily_prices" />
-                                    <MetricPanel label="Latest Predictions" value={data.summary.latest_prediction_date || '--'} hint="ai_predictions_v2" />
-                                    <MetricPanel label="Latest Mode Snapshot" value={data.summary.latest_mode_snapshot_date || '--'} hint="mode_performance_snapshot" />
+                                    <MetricPanel label="API 延迟 P95" value={`${data.summary.api_latency_p95_ms_24h.toFixed(0)} ms`} hint="近 24 小时" />
+                                    <MetricPanel label="低置信度占比" value={pct(data.summary.confidence_low_ratio_7d)} hint="近 7 天" />
+                                    <MetricPanel label="模式流水线成功率" value={pct(data.summary.mode_pipeline_success_rate_14d)} hint="近 14 天" />
+                                    <MetricPanel label="最新行情日期" value={data.summary.latest_prices_date || '--'} hint="daily_prices" />
+                                    <MetricPanel label="最新预测日期" value={data.summary.latest_prediction_date || '--'} hint="ai_predictions_v2" />
+                                    <MetricPanel label="最新模式快照" value={data.summary.latest_mode_snapshot_date || '--'} hint="mode_performance_snapshot" />
                                 </div>
                             </article>
 
                             <article className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
                                 <div className="flex items-center gap-2 text-amber-300 text-xs uppercase tracking-[0.24em] font-black">
                                     <BadgeCheck className="w-4 h-4" />
-                                    Promotion Center
+                                    升级中心
                                 </div>
                                 <div className="mt-4 space-y-3">
                                     {marketData.promotion.timeline.slice(0, 8).map((item, index) => (
@@ -441,12 +469,12 @@ export default function TradeabilityControlTowerPage() {
                                                 <div className="text-xs text-slate-500">{formatDateTime(item.created_at)}</div>
                                             </div>
                                             <div className="mt-2 text-xs text-slate-400">
-                                                {item.actor || 'system'} | {item.outcome_status}
+                                                {item.actor || 'system'} | {outcomeLabel(item.outcome_status)}
                                             </div>
                                             <div className="mt-2 text-xs text-slate-500">
                                                 {item.rollback_to_version
-                                                    ? `Rollback to ${item.rollback_to_version}`
-                                                    : `${item.candidate_version || '--'} vs ${item.baseline_version || '--'}`}
+                                                    ? `回退到 ${item.rollback_to_version}`
+                                                    : `${item.candidate_version || '--'} 对比 ${item.baseline_version || '--'}`}
                                             </div>
                                             {item.reason ? <div className="mt-2 text-xs text-amber-100">{item.reason}</div> : null}
                                         </div>
@@ -458,19 +486,19 @@ export default function TradeabilityControlTowerPage() {
                         <section className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
                             <div className="flex items-center gap-2 text-indigo-300 text-xs uppercase tracking-[0.24em] font-black">
                                 <Bot className="w-4 h-4" />
-                                Mode Snapshot Table
+                                模式表现表
                             </div>
                             <div className="mt-4 overflow-x-auto">
                                 <table className="w-full text-sm">
                                     <thead className="text-slate-500 text-xs uppercase tracking-widest">
                                         <tr className="border-b border-white/10">
-                                            <th className="text-left py-3 pr-3">Mode</th>
-                                            <th className="text-left py-3 pr-3">Hit Rate</th>
-                                            <th className="text-left py-3 pr-3">Coverage</th>
-                                            <th className="text-left py-3 pr-3">Drawdown</th>
-                                            <th className="text-left py-3 pr-3">Payoff</th>
-                                            <th className="text-left py-3 pr-3">Stability</th>
-                                            <th className="text-left py-3">Samples</th>
+                                            <th className="text-left py-3 pr-3">模式</th>
+                                            <th className="text-left py-3 pr-3">命中率</th>
+                                            <th className="text-left py-3 pr-3">覆盖率</th>
+                                            <th className="text-left py-3 pr-3">最大回撤</th>
+                                            <th className="text-left py-3 pr-3">盈亏比</th>
+                                            <th className="text-left py-3 pr-3">稳定度</th>
+                                            <th className="text-left py-3">样本数</th>
                                         </tr>
                                     </thead>
                                     <tbody>
