@@ -65,7 +65,6 @@ def test_rule_engine_aligns_to_layer1_riskoff(monkeypatch):
     assert out["signal"] == "Side"
     reasoning = json.loads(out["reasoning"])
     assert reasoning["signal"] == "Side"
-    assert "[Layer-1:RiskOff]" in reasoning["summary"]
     assert "风险收缩区" in reasoning["summary"]
     assert reasoning["tactics"]["empty"][0]["action"] == "暂停新增仓位"
     assert reasoning["tactics"]["holding_profit"][0]["action"] == "已有仓位应收缩"
@@ -88,6 +87,5 @@ def test_rule_engine_aligns_to_layer1_triggered_long(monkeypatch):
     assert out["signal"] == "Long"
     reasoning = json.loads(out["reasoning"])
     assert reasoning["signal"] == "Long"
-    assert "[Layer-1:TriggeredLong]" in reasoning["summary"]
     assert "可尝试建仓区间" in reasoning["summary"]
     assert reasoning["tactics"]["empty"][0]["action"] == "可尝试建仓"

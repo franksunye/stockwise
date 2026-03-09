@@ -15,23 +15,36 @@ def stable_bucket(symbol: str) -> int:
 def board_quota(board_sizes: Dict[str, int], total_limit: int) -> Dict[str, int]:
     total = sum(board_sizes.values()) or 1
     positive_boards = [board for board, size in board_sizes.items() if size > 0]
-    min_quota = 1 if total_limit <= max(1, len(positive_boards)) else min(5, total_limit)
+    if total_limit <= 0 or not positive_boards:
+        return {}
+
+    # Keep at most one guaranteed slot per active board; higher floors can deadlock
+    # rebalancing when the requested limit is small.
+    min_quota = 1 if total_limit >= len(positive_boards) else 0
     quotas = {board: max(min_quota, round(total_limit * size / total)) for board, size in board_sizes.items() if size > 0}
     assigned = sum(quotas.values())
     ordered = sorted(board_sizes, key=lambda board: board_sizes[board], reverse=True)
     while assigned > total_limit and ordered:
+        changed = False
         for board in ordered:
             if assigned <= total_limit:
                 break
             if quotas.get(board, 0) > min_quota:
                 quotas[board] -= 1
                 assigned -= 1
+                changed = True
+        if not changed:
+            break
     while assigned < total_limit and ordered:
+        changed = False
         for board in ordered:
             if assigned >= total_limit:
                 break
             quotas[board] = quotas.get(board, 0) + 1
             assigned += 1
+            changed = True
+        if not changed:
+            break
     return quotas
 
 

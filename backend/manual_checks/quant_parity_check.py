@@ -4,6 +4,7 @@ import sys
 
 import pandas as pd
 
+
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
@@ -38,7 +39,7 @@ def _series_from_table(cursor, table: str, symbol: str):
     return pd.Series(dict(zip(cols, row)))
 
 
-def verify_parity():
+def verify_parity() -> bool:
     conn = get_connection()
     cursor = conn.cursor()
     pool = get_stock_pool()

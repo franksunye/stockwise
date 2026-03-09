@@ -1,9 +1,6 @@
 import pandas as pd
 import pandas_ta_classic as ta
 
-# 解决 Pandas 2.2+ 的 FutureWarnings
-pd.set_option('future.no_silent_downcasting', True)
-
 def calculate_indicators(df: pd.DataFrame) -> pd.DataFrame:
     """计算技术指标"""
     if df.empty:
@@ -57,6 +54,7 @@ def calculate_indicators(df: pd.DataFrame) -> pd.DataFrame:
         df["kdj_d"] = 0
         df["kdj_j"] = 0
     
-    # 填充缺失值并类型转换
-    df = df.fillna(0).infer_objects(copy=False)
+    # Avoid deprecated infer_objects(copy=...) path under pandas 3.x.
+    df = df.fillna(0)
+    df = df.infer_objects()
     return df

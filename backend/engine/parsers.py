@@ -4,7 +4,7 @@ import unicodedata
 from typing import List, Dict, Any, Optional, Union, Tuple
 from enum import Enum
 from dataclasses import dataclass
-from pydantic import BaseModel, Field, confloat, validator, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
 
 try:
     import dirtyjson as _dirtyjson
@@ -74,17 +74,16 @@ class StockAnalysisResult(BaseModel):
     tomorrow_focus: Optional[str] = ""
     counter_argument: Optional[str] = Field(default="", description="思辨复盘：反向逻辑或潜在风险点")
     
-    # Allow extra fields for forward compatibility
-    class Config:
-        extra = "ignore"
+    model_config = ConfigDict(extra="ignore")
 
-    @validator('confidence', pre=True)
+    @field_validator("confidence", mode="before")
+    @classmethod
     def parse_confidence(cls, v):
         """Handle 85% -> 0.85"""
         if isinstance(v, str) and v.endswith('%'):
             try:
                 return float(v.strip('%')) / 100.0
-            except:
+            except Exception:
                 pass
         return v
 

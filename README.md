@@ -43,5 +43,7 @@ Available backend suites:
 
 Default behavior runs the stable backend regression set and excludes `network` tests unless explicitly requested.
 
+Manual diagnostics that are not part of the default regression suite live under `backend/manual_checks/`.
+
 ---
 *Built for the everyday investor.*

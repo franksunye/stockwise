@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 from typing import Optional
 from datetime import date as date_type
 
@@ -37,8 +37,7 @@ class KLineBar(BaseModel):
     
     ai_summary: Optional[str] = None
 
-    class Config:
-        populate_by_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
     @field_validator("date")
     @classmethod
