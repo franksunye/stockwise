@@ -1,0 +1,42 @@
+{
+  "market": "CN",
+  "purpose": "online_shadow_universe_experiment",
+  "window_reference": {
+    "start": "2026-02-28",
+    "end": "2026-03-06"
+  },
+  "selection_rule": "top non-global-pool symbols by recent tradeability_v2 TriggeredLong days",
+  "strategy_version": "tradeability_v2",
+  "symbols": [
+    { "symbol": "600207", "name": "安彩高科", "triggered_days": 3 },
+    { "symbol": "002758", "name": "浙农股份", "triggered_days": 2 },
+    { "symbol": "601778", "name": "晶科科技", "triggered_days": 2 },
+    { "symbol": "000301", "name": "东方盛虹", "triggered_days": 1 },
+    { "symbol": "000833", "name": "粤桂股份", "triggered_days": 1 },
+    { "symbol": "000998", "name": "隆平高科", "triggered_days": 1 },
+    { "symbol": "002226", "name": "江南化工", "triggered_days": 1 },
+    { "symbol": "002302", "name": "西部建设", "triggered_days": 1 },
+    { "symbol": "002378", "name": "章源钨业", "triggered_days": 1 },
+    { "symbol": "002648", "name": "卫星化学", "triggered_days": 1 },
+    { "symbol": "002831", "name": "裕同科技", "triggered_days": 1 },
+    { "symbol": "002876", "name": "三利谱", "triggered_days": 1 },
+    { "symbol": "300455", "name": "航天智装", "triggered_days": 1 },
+    { "symbol": "300592", "name": "华凯易佰", "triggered_days": 1 },
+    { "symbol": "300711", "name": "广哈通信", "triggered_days": 1 },
+    { "symbol": "300922", "name": "天秦装备", "triggered_days": 1 },
+    { "symbol": "301141", "name": "中科磁业", "triggered_days": 1 },
+    { "symbol": "301302", "name": "华如科技", "triggered_days": 1 },
+    { "symbol": "301326", "name": "捷邦科技", "triggered_days": 1 },
+    { "symbol": "301586", "name": "佳力奇", "triggered_days": 1 },
+    { "symbol": "301613", "name": "新铝时代", "triggered_days": 1 },
+    { "symbol": "600468", "name": "百利电气", "triggered_days": 1 },
+    { "symbol": "600526", "name": "菲达环保", "triggered_days": 1 },
+    { "symbol": "600888", "name": "新疆众和", "triggered_days": 1 },
+    { "symbol": "600916", "name": "中国黄金", "triggered_days": 1 },
+    { "symbol": "600988", "name": "赤峰黄金", "triggered_days": 1 },
+    { "symbol": "600989", "name": "宝丰能源", "triggered_days": 1 },
+    { "symbol": "601121", "name": "宝地矿业", "triggered_days": 1 },
+    { "symbol": "601212", "name": "白银有色", "triggered_days": 1 },
+    { "symbol": "601609", "name": "金田股份", "triggered_days": 1 }
+  ]
+}
