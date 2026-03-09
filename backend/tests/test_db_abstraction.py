@@ -1,11 +1,15 @@
 import sys
 import os
 import unittest
+import pytest
 
 # Add backend to path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from database import get_connection, LibSQLCursorAdapter
+from database import get_connection
+
+
+pytestmark = pytest.mark.integration
 
 def get_table_columns(cursor, table_name):
     """

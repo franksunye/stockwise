@@ -20,6 +20,7 @@ export function useTikTokScroll(stocks: StockData[], options?: UseTikTokScrollOp
     const searchParams = useSearchParams();
     const targetSymbol = searchParams.get('symbol');
     const hasAutoScrolled = useRef(false);
+    const stockCount = stocks.length;
 
     // 边缘过滑检测
     const touchStartX = useRef<number>(0);
@@ -117,7 +118,7 @@ export function useTikTokScroll(stocks: StockData[], options?: UseTikTokScrollOp
     // 处理从股票池跳转过来的定位逻辑
     useEffect(() => {
         const container = scrollRef.current;
-        if (targetSymbol && stocks.length > 0 && container && !hasAutoScrolled.current) {
+        if (targetSymbol && stockCount > 0 && container && !hasAutoScrolled.current) {
             const index = stocks.findIndex(s => s.symbol === targetSymbol || s.symbol.endsWith(targetSymbol));
             if (index !== -1) {
                 hasAutoScrolled.current = true;
@@ -146,7 +147,7 @@ export function useTikTokScroll(stocks: StockData[], options?: UseTikTokScrollOp
                 return () => clearTimeout(timer);
             }
         }
-    }, [targetSymbol, stocks.filter(s => s.symbol).length, stocks]);
+    }, [stockCount, targetSymbol, stocks]);
 
     return {
         currentIndex,
@@ -160,4 +161,3 @@ export function useTikTokScroll(stocks: StockData[], options?: UseTikTokScrollOp
         scrollToToday
     };
 }
-

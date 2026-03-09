@@ -455,7 +455,7 @@ class NotificationManager:
             
         try:
             # Call existing notifications.py utility
-            send_push_notification(
+            delivered = send_push_notification(
                 title=payload["title"],
                 body=payload["body"],
                 url=tracked_url,
@@ -463,6 +463,10 @@ class NotificationManager:
                 tag=payload["type"],
                 skip_log=True
             )
+            if not delivered:
+                logger.warning(f"⚠️ Notification {log_id} 未成功送达，跳过落库")
+                self.stats["errors"] += 1
+                return False
             
             # Log successful dispatch
             logged_payload = dict(payload)
@@ -564,7 +568,7 @@ class NotificationManager:
                 # Send Push
                 try:
                     log_id = f"price_{uuid.uuid4().hex[:12]}"
-                    send_push_notification(
+                    delivered = send_push_notification(
                         target_user_id=uid, 
                         title=title, 
                         body=body, 
@@ -572,6 +576,9 @@ class NotificationManager:
                         tag="price_update",
                         skip_log=True
                     )
+                    if not delivered:
+                        self.stats["errors"] = self.stats.get("errors", 0) + 1
+                        continue
                     
                     # Log for audit trail
                     self._log_to_db(log_id, uid, {

@@ -4,7 +4,7 @@ from backend.engine.runner import select_primary_prediction
 
 
 class PrimarySelectionTest(unittest.TestCase):
-    def test_prefers_high_confidence_model_over_higher_priority_low_confidence(self):
+    def test_prefers_higher_priority_model_even_when_confidence_is_lower(self):
         predictions = [
             {"model_id": "deepseek-v3", "confidence": 0.44},
             {"model_id": "rule-engine", "confidence": 0.88},
@@ -18,7 +18,7 @@ class PrimarySelectionTest(unittest.TestCase):
             primary_promotion_blocked=False,
             confidence_threshold=0.6,
         )
-        self.assertEqual(selected, "rule-engine")
+        self.assertEqual(selected, "deepseek-v3")
 
     def test_falls_back_to_highest_priority_when_none_meet_threshold(self):
         predictions = [

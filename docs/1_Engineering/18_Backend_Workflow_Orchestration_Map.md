@@ -10,6 +10,7 @@
    - 当前统一术语应为：生产线、实验线、运营链路、验证链路
 2. 单个 workflow 承担多种职责，出现互相阻塞
 3. 时间表只写 cron，不写依赖、阻塞级别和失败策略
+4. 通知责任未并入编排设计，导致有的任务会通知用户、有的任务只应通知 ADMIN、有的任务失败后仍可能静默
 
 本文档作为后续 workflow 拆分与调度治理的统一依据。
 
@@ -396,7 +397,7 @@
 
 ## 5. 任务分类字段
 
-后续所有 workflow 应至少能回答这 7 个字段：
+后续所有 workflow 应至少能回答这 10 个字段：
 
 1. `Stage`
 2. `Type`
@@ -405,6 +406,9 @@
 5. `Blocking Level`
 6. `Primary Output`
 7. `SLA`
+8. `Notification Audience`
+9. `Notification Channel`
+10. `Notify on Fail`
 
 推荐口径如下。
 
@@ -455,6 +459,37 @@
 2. 当前已明确由 Cloudflare Worker 驱动的生产任务有：
    - `data_sync_realtime.yml`
    - `daily_morning_call.yml`
+
+### 5.5 Notification Audience
+
+1. `User`
+   - 面向终端用户的正式价值交付，例如 push / broadcast
+2. `ADMIN`
+   - 面向运维/管理侧的内部告警、巡检摘要、研究结论同步
+3. `User + ADMIN`
+   - 既有用户触达，也要求内部可观测与失败告警
+4. `None`
+   - 当前不应主动发通知，但必须在文档中明确这是“有意为之”而不是遗漏
+
+### 5.6 Notification Channel
+
+1. `Push`
+   - Web Push / 内部通知 API，直接触达用户
+2. `WeCom`
+   - 企业微信机器人，触达 ADMIN
+3. `Artifact / Task Log`
+   - 仅产出 artifact、任务日志、落库记录，不算主动通知
+4. `Mixed`
+   - 同时存在 `Push` 与 `WeCom`
+
+### 5.7 Notify on Fail
+
+1. `required`
+   - 失败必须触发 ADMIN 告警，不能静默
+2. `best_effort`
+   - 失败应告警，但允许由父 workflow 或外围守卫承接
+3. `none`
+   - 当前不发失败通知；仅适用于明确的手工/实验任务
 
 ## 6. 当前真实编排地图
 
@@ -520,6 +555,63 @@ Production 内部分为两组：
 | `admin_codes.yml` | Maintenance | maintenance | Manual / API Dispatch | 无 | manual_only | 邀请码管理 |
 | `ai_backfill.yml` | Manual / Backfill | maintenance | Manual / API Dispatch | 手工触发 | manual_only | 历史分析补跑 |
 | `almanac_maintenance.yml` | Manual / Backfill | maintenance | Manual / API Dispatch | 手工触发 | manual_only | 历史黄历补跑 |
+
+### 6.5 当前任务通知矩阵（逐项核对版）
+
+下表基于当前 `.github/workflows/` 与实际脚本实现核对，目标不是描述“理想状态”，而是记录 2026-03-09 这一天仓库里的真实通知行为。
+
+| Job / Workflow | Audience | Channel | 当前状态 | 检查结论 / 缺口 |
+| --- | --- | --- | --- | --- |
+| `meta_sync.yml` | `ADMIN` | `WeCom` | 已实现 | `backend/main.py --sync-meta` 走 `JobGuard`，成功/失败都会发内部通知 |
+| `data_sync_cn.yml` | `ADMIN` | `WeCom` | 已实现 | 盘后正式同步，失败不应静默 |
+| `data_sync_hk.yml` | `ADMIN` | `WeCom` | 已实现 | 含 HK short sync，内部告警链已接入 |
+| `data_sync_realtime.yml` | `User + ADMIN` | `Mixed` | 已实现 | 盘中价格波动会走 `price_update` push；作业本身走 `JobGuard` 发 ADMIN 告警 |
+| `data_sync_single.yml` | `ADMIN` | `WeCom` | 已实现 | 手工补数不直接通知用户，只向运维侧暴露执行结果 |
+| `verify_predictions.yml` | `User + ADMIN` | `Push + WeCom` | 部分实现 | 用户侧验证结果/战报已实现，但 workflow 未注入 `WECOM_ROBOT_KEY`，`JobGuard` 失败告警当前不稳，应补齐 ADMIN 通知 |
+| `ai_analyze_cn.yml` | `User + ADMIN` | `Mixed` | 已实现 | 用户会收到 `prediction_updated` / `signal_flip`，作业本身会发 ADMIN 通知 |
+| `ai_analyze_hk.yml` | `User + ADMIN` | `Mixed` | 已实现 | 与 CN 同口径 |
+| `mode_pipeline` | `ADMIN` | `WeCom` | 已实现 | 目前通过 `--analyze` 内部耦合承接；无独立用户通知职责 |
+| `daily_almanac_cn.yml` | `User + ADMIN` | `Mixed` | 已实现 | 预览广播触达用户；生成降级与 `market_facts_healthcheck` 触达 ADMIN |
+| `daily_morning_call.yml` | `User + ADMIN` | `Mixed` | 已实现 | morning call push + ritual broadcast 面向用户；脚本成功/失败会发 WeCom |
+| `daily_brief_push.yml` | `User + ADMIN` | `Mixed` | 待收口 | `brief_generator` 已逐用户即时推送，但 workflow 末尾仍调用 `backend/notifications.py --action push_daily`；当前存在重复触达/职责重叠风险 |
+| `broadcast_almanac.py` | `User` | `Push` | 已实现 | 作为分发器使用时职责清晰，不应再承担重算或内部告警职责 |
+| `tradeability_postclose_pipeline.yml` | `ADMIN` | `WeCom` | 缺失 | 研究总编排当前无统一成功/失败通知，夜间任务失败可能只留在 Actions 里 |
+| `tradeability_sample_sync_daily.yml` | `ADMIN` | `WeCom` | 缺失 | 当前只产数据，不发内部告警；建议至少失败通知 |
+| `tradeability_sidecar_daily.yml` | `ADMIN` | `WeCom` | 缺失 | sidecar 写研究表但无告警出口，排障成本偏高 |
+| `tradeability_sidecar_weekly_calibration.yml` | `ADMIN` | `WeCom` | 缺失 | 周校准仅产 artifact，无主动同步 |
+| `tradeability_experiment_weekly.yml` | `ADMIN` | `WeCom` | 缺失 | 周实验仅上传 artifact，无失败告警 |
+| `tradeability_promotion_gate.yml` | `ADMIN` | `WeCom` | 已实现 | 已有 `notify` 开关，适合作为研究链周度结论出口 |
+| `trading_day_gate.yml` | `None` | `Artifact / Task Log` | 合理 | 闸门本身不单独通知；由父 workflow 记录是否跳过即可 |
+| `daily_validation_check.yml` | `User + ADMIN` | `Mixed` | 已实现 | 用户战报 + ADMIN 成功/失败通知都已接入 |
+| `acceptance_weekly.yml` | `ADMIN` | `WeCom` | 已实现 | 已有 `notify` 参数，周验收应持续保留内部摘要 |
+| `layer1_consistency_daily.yml` | `ADMIN` | `WeCom` | 已实现 | 已有 `notify` 参数，适合作为日级治理告警 |
+| `market_facts_healthcheck.py` | `ADMIN` | `WeCom` | 已实现 | 已作为内容链质量闸门接入内部告警 |
+| `user_maintenance.yml` | `ADMIN` | `WeCom` | 已实现 | 清理结果与失败都会发内部通知 |
+| `admin_codes.yml` | `ADMIN` | `Artifact / Task Log` | 部分实现 | 目前主要依赖 Actions 输出，无主动通知；因属手工任务可接受，但建议补最小结果摘要 |
+| `ai_backfill.yml` | `ADMIN` | `WeCom` | 已实现 | 手工补跑应通知内部，不通知用户 |
+| `almanac_maintenance.yml` | `ADMIN` | `WeCom` | 部分实现 | 目前只有健康检查阶段有 WeCom，主生成步骤缺统一作业守卫，建议补齐失败告警 |
+
+### 6.6 通知编排结论
+
+逐项核对后，当前系统的通知职责可以收敛为四条规则：
+
+1. `Production Core` 里凡是直接改动用户可见数据的任务，都至少要有 `ADMIN` 失败告警；如果还会触发用户体验变化，则再叠加 `User` 通知
+2. `Production Content` 天然属于 `User + ADMIN` 双通知任务，因为它既是内容交付，也需要内部确认是否送达
+3. `Research` 与 `Ops Governance` 默认不通知用户，但不代表可以静默；应至少把周报、promotion、失败告警发给 `ADMIN`
+4. `Manual / Backfill` 不默认通知用户，但必须把是否执行成功明确告诉触发者或 `ADMIN`
+
+### 6.7 当前优先补齐项
+
+基于现状，通知治理优先级建议如下：
+
+1. `P0`：补齐 `verify_predictions.yml` 的 `WECOM_ROBOT_KEY`，让验证链失败时一定能通知 `ADMIN`
+2. `P0`：收口 `daily_brief_push.yml` 的通知职责，二选一保留
+   - 保留“生成后即时推送”
+   - 或保留“批量广播”
+   - 但不能两条链同时作为正式口径
+3. `P1`：给 `tradeability_postclose_pipeline.yml` 及其子 workflow 增加统一的 `ADMIN` 成功/失败摘要
+4. `P1`：给 `almanac_maintenance.yml` 主生成步骤补 `JobGuard` 或等价告警，避免历史补跑失败静默
+5. `P2`：给 `admin_codes.yml` 增加最小内部结果摘要，至少能在手工执行后同步生成数量或失败原因
 
 ## 7. 当前边界状态
 
@@ -664,8 +756,13 @@ Production 内部分为两组：
 
 ## 10. 后续治理建议
 
-1. 所有 workflow 文档都补上 `Stage / Type / Trigger Source / Depends On / Blocking`
+1. 所有 workflow 文档都补上 `Stage / Type / Trigger Source / Depends On / Blocking / Notification`
 2. 生产链与研究链分别维护独立总表
 3. `README.md` 从“文件列表说明”升级为“链路拓扑说明”
 4. 对超时敏感的内容链任务，统一标注 `best_effort`
 5. 研究链默认不得阻塞生产链
+6. 所有面向生产的 workflow 都必须明确回答：
+   - 是否通知 `User`
+   - 是否通知 `ADMIN`
+   - 失败时谁来兜底通知
+7. 不允许同一业务事件长期并存两条正式通知链，避免重复推送与口径分叉

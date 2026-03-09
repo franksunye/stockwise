@@ -92,7 +92,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
     let isMainlandChina = false;
     try {
         isMainlandChina = Intl.DateTimeFormat().resolvedOptions().timeZone === 'Asia/Shanghai';
-    } catch(e) {}
+    } catch {}
     setIsAndroid(isAndroidDevice && isMainlandChina);
     if (isOpen) {
       refreshProfile({ force: true });
@@ -106,7 +106,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
               if (parsed?.modeResponse?.mode) {
                   setCurrentMode(parsed.modeResponse.mode);
               }
-          } catch(e) {}
+          } catch {}
       }
       fetch('/api/user/mode/summary', { cache: 'no-store' })
           .then(res => res.json())

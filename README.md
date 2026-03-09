@@ -16,5 +16,32 @@ StockWise is designed to empower everyday investors by leveraging advanced AI ag
 
 Please refer to the detailed documentation located in the [`/docs`](./docs) directory for setup instructions, architecture overwiews, and contribution guidelines.
 
+## 🧪 Test Environment
+
+Backend test environment can be bootstrapped locally with the repo venv:
+
+```bash
+python3 -m venv .venv
+./.venv/bin/python -m pip install -r backend/requirements-dev.txt
+./.venv/bin/python -m pytest backend/tests
+```
+
+Or use the helper script:
+
+```bash
+./scripts/run_backend_tests.sh
+```
+
+Available backend suites:
+
+```bash
+./scripts/run_backend_tests.sh --suite unit
+./scripts/run_backend_tests.sh --suite integration
+./scripts/run_backend_tests.sh --suite network
+./scripts/run_backend_tests.sh --suite all
+```
+
+Default behavior runs the stable backend regression set and excludes `network` tests unless explicitly requested.
+
 ---
 *Built for the everyday investor.*

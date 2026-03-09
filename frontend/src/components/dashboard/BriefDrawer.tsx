@@ -219,12 +219,12 @@ export function BriefDrawer({ isOpen, onClose, limitToSymbol, onUpgrade }: Brief
                              {briefAuthorIdentity.role}
                            </span>
                         </div>
-                        <p className="text-[10px] text-slate-500 font-medium font-mono">
+                         <p className="text-[10px] text-slate-500 font-medium font-mono">
                            发布于 {(() => {
                               const match = brief.content.match(/(ZISO|StockWise) AI 生成于\s*(\d{1,2}:\d{2})/);
                               return match ? match[2] : (brief.created_at ? new Date(brief.created_at).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit', hour12: false}) : '--:--');
                            })()}
-                        </p>
+                         </p>
                       </div>
                     </div>
                     {tier === 'pro' && (

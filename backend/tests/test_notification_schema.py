@@ -5,11 +5,14 @@ Part of Phase 1: Database Schema Extension.
 import sys
 import os
 import unittest
+import pytest
 
 # Add backend to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from database import get_connection, init_db
+
+pytestmark = pytest.mark.integration
 
 
 class TestNotificationSchema(unittest.TestCase):

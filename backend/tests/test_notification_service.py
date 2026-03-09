@@ -178,6 +178,23 @@ class TestNotificationService(unittest.TestCase):
             # Wait, in this test setup dry_run=True, so it shouldn't call mock_push
             mock_push.assert_not_called()
 
+    def test_send_notification_should_fail_when_push_not_delivered(self):
+        """Push API returning False must not be treated as a successful delivery."""
+        manager = NotificationManager(conn=self.mock_conn, dry_run=False)
+        with patch.object(manager, '_check_user_preference', return_value=True), \
+             patch('notification_service.send_push_notification', return_value=False), \
+             patch.object(manager, '_log_to_db') as mock_log:
+            ok = manager._send_notification("user1", {
+                "title": "测试",
+                "body": "内容",
+                "url": "/dashboard",
+                "type": "daily_brief",
+                "related_symbols": []
+            })
+
+        self.assertFalse(ok)
+        mock_log.assert_not_called()
+
 
 if __name__ == "__main__":
     unittest.main()

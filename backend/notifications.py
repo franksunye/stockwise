@@ -31,7 +31,7 @@ def send_push_notification(title, body, url=None, related_symbol=None, broadcast
     
     if not secret:
         logger.debug("⚠️ Skipping push notification: INTERNAL_API_SECRET not set")
-        return
+        return False
 
     payload = {
         "title": title,
@@ -56,10 +56,13 @@ def send_push_notification(title, body, url=None, related_symbol=None, broadcast
         )
         if response.status_code == 200:
             logger.info(f"✅ 推送发送成功: {title} (Target: {target_user_id or 'Broadcast'})")
+            return True
         else:
             logger.warning(f"⚠️ 推送发送失败 [{response.status_code}]: {response.text}")
+            return False
     except Exception as e:
         logger.error(f"❌ 推送请求异常: {e}")
+        return False
 
 def send_personalized_daily_report(date_str):
     """
@@ -118,14 +121,15 @@ def send_personalized_daily_report(date_str):
                 )
                 
                 # Send push notification
-                send_push_notification(
+                delivered = send_push_notification(
                     title=title,
                     body=push_hook or "点击查看今日 AI 复盘",
                     url="/dashboard?brief=true",
                     target_user_id=user_id,
                     tag="daily_brief"
                 )
-                success_count += 1
+                if delivered:
+                    success_count += 1
                 time.sleep(0.1) # Rate limit protection
                 
             except Exception as e:

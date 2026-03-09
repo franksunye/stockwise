@@ -140,7 +140,7 @@ async function navigationCacheFirst(request, fallbackUrl) {
       }
     }
     return networkResponse;
-  } catch (err) {
+  } catch {
     // 3. Both failed → offline fallback
     if (fallbackUrl) {
       const fallback = await cache.match(fallbackUrl);
@@ -202,7 +202,7 @@ async function rscCacheFirst(request) {
       }
     }
     return networkResponse;
-  } catch (err) {
+  } catch {
     // Return a 504 to force Next.js to hard-navigate, which will hit the App Shell
     return new Response('Offline or Timeout', { status: 504, statusText: 'Gateway Timeout' });
   }
@@ -221,7 +221,7 @@ async function networkFirst(request, fallbackUrl, timeoutMs = 4000) {
       cache.put(request, networkResponse.clone());
     }
     return networkResponse;
-  } catch (err) {
+  } catch {
     const cachedResponse = await cache.match(request);
     if (cachedResponse) {
       return cachedResponse;
@@ -274,7 +274,7 @@ async function cacheFirst(request) {
       cache.put(request, networkResponse.clone());
     }
     return networkResponse;
-  } catch (err) {
+  } catch {
     // 3. Both cache and network failed → return a proper error response
     // CRITICAL FIX: Previously returned `undefined` here, crashing the browser
     return new Response('Network error', {

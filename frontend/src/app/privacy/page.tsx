@@ -5,6 +5,8 @@ import { Shield, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import MarketingFooter from '@/components/MarketingFooter';
+import { GeoSummary, SourceBlock, BoundaryNotice } from '@/components/seo/GeoBlocks';
+import { brandCoreZhCN } from '@/content/brand-core.zh-CN';
 
 export default function PrivacyPolicy() {
   return (
@@ -80,6 +82,30 @@ export default function PrivacyPolicy() {
               </p>
             </section>
           </div>
+
+          {/* GEO/Transparency Section - Subtle & Functional for Search Engines */}
+          <section className="pt-10 opacity-30 hover:opacity-100 transition-opacity">
+            <div className="flex flex-col md:flex-row gap-6 mb-6">
+              <div className="flex-1 text-left">
+                <GeoSummary
+                  summary={[
+                    "知守 AI 严格遵守用户隐私保护原则，仅收集必要的服务数据。",
+                    "支付环节全部托管至 Stripe 生态，系统不触碰任何敏感支付元信息。",
+                    "数据加密存储，除用户主动触发的功能外，不会进行任何隐私性抓取。",
+                  ]}
+                />
+              </div>
+              <div className="flex-1 text-left">
+                <SourceBlock
+                  sources={[
+                    ...brandCoreZhCN.defaultSources,
+                    { name: "Privacy Compliance", url: "https://ziso.cc/privacy", accessedAt: "2026-03-09" },
+                  ]}
+                />
+              </div>
+            </div>
+            <BoundaryNotice text={brandCoreZhCN.boundaryNotice.text} />
+          </section>
         </motion.div>
       </main>
 

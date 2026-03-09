@@ -201,7 +201,7 @@ export default async function LandingPage() {
         </section>
 
         {/* How It Works - Re-styled as a summary flow */}
-        <section className="pt-60 w-full">
+        <section className="pt-32 w-full">
            <div className="text-center mb-20">
               <h2 className="text-4xl md:text-5xl font-black italic tracking-tighter uppercase">
                  <span className="text-indigo-500 tracking-normal">3 步</span> 开启独立交易系统
@@ -226,7 +226,7 @@ export default async function LandingPage() {
         </section>
 
         {/* Team */}
-        <section className="pt-60 w-full space-y-16">
+        <section className="pt-32 w-full space-y-16">
           <div className="text-center space-y-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">
                 我们的团队
@@ -283,7 +283,7 @@ export default async function LandingPage() {
         </section>
 
         {/* FAQ Section */}
-        <section id="faq" className="py-60 w-full max-w-4xl space-y-12">
+        <section id="faq" className="pt-32 pb-10 w-full max-w-4xl space-y-12">
           <div className="text-center space-y-4">
             <h2 className="text-3xl md:text-4xl font-black italic tracking-tighter uppercase">
               常见问题 <span className="text-indigo-500 uppercase">FAQ</span>
@@ -312,7 +312,7 @@ export default async function LandingPage() {
         </section>
 
         {/* CTA Banner */}
-        <section className="py-40 w-full max-w-4xl text-center space-y-10 border-b border-white/5">
+        <section className="py-20 w-full max-w-4xl text-center space-y-10 border-b border-white/5">
           <h2 className="text-3xl md:text-5xl font-black italic tracking-tighter uppercase leading-tight">
             准备好让 <span className="text-indigo-500 uppercase">ZISO AI</span> <br className="hidden md:block" />
             替你打理股市功课了吗？

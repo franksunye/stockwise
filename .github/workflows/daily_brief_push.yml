@@ -25,6 +25,10 @@ on:
         description: '强制重新生成 (同时跳过交易日检查)'
         type: boolean
         default: false
+      send_legacy_batch_push:
+        description: '是否额外执行旧版批量广播（默认关闭，仅用于人工补发）'
+        type: boolean
+        default: false
 
 jobs:
   # Step 0: Trading Day Gate (仅 schedule 触发时检查)
@@ -98,7 +102,7 @@ jobs:
           
           python -m backend.engine.brief_generator $SYMBOLS_ARG $USER_ARG $DATE_ARG $FORCE_ARG
       - name: Broadcast Notifications
-        if: github.event_name == 'schedule' || (github.event.inputs.symbols == '' && github.event.inputs.user == '')
+        if: github.event.inputs.send_legacy_batch_push == 'true'
         env:
           # Database
           TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}

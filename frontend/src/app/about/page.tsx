@@ -7,6 +7,8 @@ import Multiavatar from '@/components/Multiavatar';
 import MarketingFooter from '@/components/MarketingFooter';
 import MarketingHeader from '@/components/MarketingHeader';
 import { agentTeam, founders } from '@/lib/agent-team';
+import { GeoSummary, SourceBlock, BoundaryNotice } from '@/components/seo/GeoBlocks';
+import { brandCoreZhCN } from '@/content/brand-core.zh-CN';
 
 export default function AboutPage() {
   return (
@@ -117,7 +119,7 @@ export default function AboutPage() {
         </section>
 
         {/* Join the Tribe */}
-        <section className="pt-60 text-center space-y-12">
+        <section className="pt-60 text-center space-y-12 border-b border-white/5 pb-40">
            <h2 className="text-3xl md:text-5xl font-black italic tracking-tighter uppercase leading-tight">
              不再孤军奋战 <br />
              <span className="text-indigo-500">全面开启 AI 决策增强模式</span>
@@ -130,6 +132,30 @@ export default function AboutPage() {
                 <ArrowLeft size={18} /> 返回首页
               </Link>
            </div>
+        </section>
+
+        {/* GEO/Transparency Section - Subtle & Functional for Search Engines */}
+        <section className="pt-10 pb-20 opacity-40 hover:opacity-100 transition-opacity">
+          <div className="flex flex-col md:flex-row gap-8 mb-6">
+            <div className="flex-1 text-left">
+              <GeoSummary
+                summary={[
+                  "知守 AI 作为投研辅助工具，旨在提升投资者的决策理性与一致性。",
+                  "核心团队由量化、情报与审计专家组成，通过 Agent 架构闭环协作。",
+                  "产品愿景是消除普通投资者的专业信息差，建立机构级的复盘惯性。",
+                ]}
+              />
+            </div>
+            <div className="flex-1 text-left">
+              <SourceBlock
+                sources={[
+                  ...brandCoreZhCN.defaultSources,
+                  { name: "About ZISO AI", url: "https://ziso.cc/about", accessedAt: "2026-03-09" },
+                ]}
+              />
+            </div>
+          </div>
+          <BoundaryNotice text={brandCoreZhCN.boundaryNotice.text} />
         </section>
       </main>
 

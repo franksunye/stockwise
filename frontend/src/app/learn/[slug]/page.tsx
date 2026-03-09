@@ -184,16 +184,24 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
             </ReactMarkdown>
         </div>
 
-        <GeoSummary summary={LEARN_TLDR[article.slug] || []} />
-
-        <SourceBlock
-          sources={[
-            ...brandCoreZhCN.defaultSources,
-            { name: 'Learn Content Library', accessedAt: article.date },
-          ]}
-        />
-        <FreshnessBlock updatedAt={article.date} />
-        <BoundaryNotice text={brandCoreZhCN.boundaryNotice.text} />
+        {/* GEO/Transparency Section - Subtle & Functional for Search Engines */}
+        <section className="mt-20 pt-10 border-t border-white/5 opacity-40 hover:opacity-100 transition-opacity">
+          <div className="flex flex-col md:flex-row gap-6 mb-6">
+            <div className="flex-1 text-left">
+              <GeoSummary summary={LEARN_TLDR[article.slug] || []} />
+            </div>
+            <div className="flex-1 text-left">
+              <SourceBlock
+                sources={[
+                  ...brandCoreZhCN.defaultSources,
+                  { name: 'Learn Content Library', accessedAt: article.date },
+                ]}
+              />
+            </div>
+          </div>
+          <BoundaryNotice text={brandCoreZhCN.boundaryNotice.text} />
+          <FreshnessBlock updatedAt={article.date} />
+        </section>
 
         {/* Footer */}
         <div className="mt-20 pt-10 border-t border-white/10 flex justify-center">

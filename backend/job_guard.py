@@ -9,7 +9,19 @@ from typing import Dict, Any, Optional
 from backend.logger import logger
 from backend.database import get_connection
 from backend.utils import send_wecom_notification
-from backend.config import BEIJING_TZ, ADMIN_MOBILES
+from backend.config import BEIJING_TZ
+try:
+    from backend.admin_notifications import (
+        build_failure_message,
+        build_success_message,
+        get_admin_mobiles,
+    )
+except ImportError:
+    from admin_notifications import (
+        build_failure_message,
+        build_success_message,
+        get_admin_mobiles,
+    )
 
 class JobGuard:
     """
@@ -22,8 +34,6 @@ class JobGuard:
     4. 运维操作联动 (Rerun Links)。
     """
     
-    REPO_ACTIONS_URL = "https://github.com/franksunye/stockwise/actions/workflows"
-
     def __init__(self, 
                  task_name: str, 
                  agent_id: str = "system_scheduler",
@@ -150,35 +160,33 @@ class JobGuard:
 
     def _send_success_notification(self, duration: float):
         """成功通知"""
-        lines = [f"### ✅ StockWise: {self.task_name}"]
-        lines.append(f"> **Status**: Success")
-        lines.append(f"- **Duration**: {duration:.1f}s")
-        
-        if self.stats:
-            lines.append("---")
-            for k, v in self.stats.items():
-                if k == "success": continue
-                clean_key = k.replace("_", " ").title()
-                lines.append(f"- **{clean_key}**: {v}")
-                
-        send_wecom_notification("\n".join(lines))
+        metadata = {k: v for k, v in self.stats.items() if k != "success"}
+        send_wecom_notification(
+            build_success_message(
+                task_name=self.task_name,
+                duration=duration,
+                metadata=metadata,
+            )
+        )
 
     def _send_fail_notification(self, error_msg: str, duration: float):
         """失败提醒 (带精准 @ 和 运维链接)"""
-        lines = [f"### ❌ StockWise: {self.task_name} FAILED"]
-        lines.append(f"> **Status**: Failed")
-        lines.append(f"- **Duration**: {duration:.1f}s")
-        lines.append(f"- **Error**: `{error_msg}`")
-        
-        if self.rerun_workflow:
-            url = f"{self.REPO_ACTIONS_URL}/{self.rerun_workflow}"
-            lines.append(f"\n🔗 [点击重跑 GitHub Actions]({url})")
-        
+        metadata = {k: v for k, v in self.stats.items() if k != "success"}
         mentioned_list = []
         if self.channel_alert:
-            if ADMIN_MOBILES:
-                mentioned_list.extend(ADMIN_MOBILES)
+            admin_mobiles = get_admin_mobiles()
+            if admin_mobiles:
+                mentioned_list.extend(admin_mobiles)
             else:
                 mentioned_list.append("@all")
-                
-        send_wecom_notification("\n".join(lines), mentioned_mobile_list=mentioned_list if mentioned_list else None)
+
+        send_wecom_notification(
+            build_failure_message(
+                task_name=self.task_name,
+                error_message=error_msg,
+                duration=duration,
+                metadata=metadata,
+                rerun_workflow=self.rerun_workflow,
+            ),
+            mentioned_mobile_list=mentioned_list if mentioned_list else None,
+        )

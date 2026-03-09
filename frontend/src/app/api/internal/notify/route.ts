@@ -4,6 +4,15 @@ import { Client } from '@libsql/client';
 import Database from 'better-sqlite3';
 import webpush from 'web-push';
 
+const PREF_KEY_MAP: Record<string, string> = {
+    daily_brief_bullish: 'daily_brief',
+    daily_brief_bearish: 'daily_brief',
+    daily_brief_neutral: 'daily_brief',
+    morning_call_neutral: 'morning_call',
+    signal_flip_batch: 'signal_flip',
+    almanac_preview: 'market_almanac',
+    almanac_ritual: 'market_almanac'
+};
 
 // Configure web-push
 if (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
@@ -98,6 +107,7 @@ export async function POST(request: Request) {
         if (notifTypeKey.startsWith('price_update_')) {
             notifTypeKey = 'price_update';
         }
+        notifTypeKey = PREF_KEY_MAP[notifTypeKey] || notifTypeKey;
 
         // 只有在有订阅者时才查询偏好
         if (subscriptions.length > 0) {
@@ -181,6 +191,8 @@ export async function POST(request: Request) {
 
         const results = (await Promise.all(promises)) as NotificationResult[];
         const successCount = results.filter((r) => r.status === 'fulfilled').length;
+        const skippedCount = results.filter((r) => r.status === 'skipped').length;
+        const failedCount = results.filter((r) => r.status === 'rejected').length;
 
         // Collect successful user IDs for logging (deduplicated)
         const successfulUserIds = new Set<string>();
@@ -285,7 +297,10 @@ export async function POST(request: Request) {
         return NextResponse.json({
             success: true,
             count: successCount,
-            total: subscriptions.length
+            total: subscriptions.length,
+            skipped: skippedCount,
+            failed: failedCount,
+            notificationType: notifTypeKey
         });
 
     } catch (error) {

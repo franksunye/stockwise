@@ -119,7 +119,7 @@ if __name__ == "__main__":
     # 2. Realtime Sync
     elif args.realtime:
         market_code = args.market if args.market else "ALL"
-        with JobGuard(f"Realtime Sync ({market_code})", task_type="ingestion", rerun_workflow="realtime_sync.yml") as job:
+        with JobGuard(f"Realtime Sync ({market_code})", task_type="ingestion", rerun_workflow="data_sync_realtime.yml") as job:
             job.set_dimensions(market=market_code)
             all_stocks = get_stock_pool()
             if args.symbol:
@@ -136,7 +136,7 @@ if __name__ == "__main__":
 
     # 3. Meta Sync
     elif args.sync_meta:
-        with JobGuard("Metadata Sync", task_type="ingestion", rerun_workflow="sync_meta.yml") as job:
+        with JobGuard("Metadata Sync", task_type="ingestion", rerun_workflow="meta_sync.yml") as job:
             meta_stats = sync_stock_meta()
             if meta_stats:
                 job.set_stats(**meta_stats)
@@ -165,7 +165,10 @@ if __name__ == "__main__":
     # 5. Daily AI Analysis
     elif args.analyze:
         market_dim = args.market if args.market else "ALL"
-        with JobGuard(f"AI Analysis ({market_dim})", task_type="prediction", rerun_workflow="daily_analysis.yml") as job:
+        rerun_workflow = "ai_analyze_cn.yml"
+        if args.market == "HK":
+            rerun_workflow = "ai_analyze_hk.yml"
+        with JobGuard(f"AI Analysis ({market_dim})", task_type="prediction", rerun_workflow=rerun_workflow) as job:
             job.set_dimensions(market=market_dim, model=args.model)
             stats = run_ai_analysis(symbol=args.symbol, market_filter=args.market, force=args.force, model_filter=args.model)
             if stats:
@@ -239,7 +242,10 @@ if __name__ == "__main__":
     # 7. Default Full Market Sync
     else:
         market_dim = args.market if args.market else "ALL"
-        with JobGuard(f"Full Market Sync ({market_dim})", task_type="ingestion", rerun_workflow="daily_sync.yml") as job:
+        rerun_workflow = "data_sync_cn.yml"
+        if args.market == "HK":
+            rerun_workflow = "data_sync_hk.yml"
+        with JobGuard(f"Full Market Sync ({market_dim})", task_type="ingestion", rerun_workflow=rerun_workflow) as job:
             job.set_dimensions(market=market_dim)
             stats = run_full_sync(market_filter=args.market, force_full=args.full_periods)
             if stats:

@@ -5,6 +5,8 @@ import { FileText, ChevronLeft, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import MarketingFooter from '@/components/MarketingFooter';
+import { GeoSummary, SourceBlock, BoundaryNotice } from '@/components/seo/GeoBlocks';
+import { brandCoreZhCN } from '@/content/brand-core.zh-CN';
 
 export default function TermsOfService() {
   return (
@@ -89,6 +91,30 @@ export default function TermsOfService() {
               </p>
             </section>
           </div>
+
+          {/* GEO/Transparency Section - Subtle & Functional for Search Engines */}
+          <section className="pt-10 opacity-30 hover:opacity-100 transition-opacity">
+            <div className="flex flex-col md:flex-row gap-6 mb-6">
+              <div className="flex-1 text-left">
+                <GeoSummary
+                  summary={[
+                    "ZISO AI 所有预测内容均为 AI 概率推演，不构成投资建议。",
+                    "用户需对自身的交易行为负全部法律责任。",
+                    "系统数据来源公开及合规渠道，强调分析过程的透明度。",
+                  ]}
+                />
+              </div>
+              <div className="flex-1 text-left">
+                <SourceBlock
+                  sources={[
+                    ...brandCoreZhCN.defaultSources,
+                    { name: "Legal & Terms", url: "https://ziso.cc/terms", accessedAt: "2026-03-09" },
+                  ]}
+                />
+              </div>
+            </div>
+            <BoundaryNotice text={brandCoreZhCN.boundaryNotice.text} />
+          </section>
         </motion.div>
       </main>
 

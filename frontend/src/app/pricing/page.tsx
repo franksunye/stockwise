@@ -407,20 +407,49 @@ function PricingContent() {
             </div>
         </section>
 
-        <section className="mt-16 max-w-4xl mx-auto">
-          <GeoSummary
-            summary={[
-              "免费版用于基础体验，Pro 版提供更完整的分析链路与自选能力。",
-              "订阅方案支持月付与年付，价格与权益在页面公开透明。",
-              "页面内容仅用于功能说明，不构成投资建议或收益承诺。",
-            ]}
-          />
-          <SourceBlock
-            sources={[
-              ...brandCoreZhCN.defaultSources,
-              { name: "Pricing Policy", accessedAt: "2026-03-05" },
-            ]}
-          />
+        {/* CTA Banner */}
+        <section className="py-20 w-full max-w-4xl text-center space-y-10 border-b border-white/5 mx-auto">
+          <h2 className="text-3xl md:text-5xl font-black italic tracking-tighter uppercase leading-tight">
+            准备好让 <span className="text-indigo-500 uppercase">ZISO AI</span> <br className="hidden md:block" />
+            替你打理股市功课了吗？
+          </h2>
+          <div className="flex flex-col md:flex-row items-center justify-center gap-6">
+            <Link 
+              href="https://app.ziso.cc"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-12 py-6 rounded-3xl bg-indigo-500 text-white font-black italic text-xl shadow-[0_20px_40px_rgba(99,102,241,0.3)] hover:scale-105 active:scale-95 transition-all flex items-center gap-3"
+            >
+              立刻开启专家协作 <ChevronRight size={24} />
+            </Link>
+          </div>
+        </section>
+
+        {/* 
+          GEO/Transparency Section - Subtle & Functional for Search Engines
+          We keep this on the landing page for 'Search Generative Experience' optimization 
+          but hide it from prominent visual hierarchy.
+        */}
+        <section className="w-full max-w-4xl pt-10 pb-20 opacity-[0.25] hover:opacity-100 transition-opacity mx-auto">
+          <div className="flex flex-col md:flex-row gap-8 mb-6">
+            <div className="flex-1 text-left">
+              <GeoSummary
+                summary={[
+                  "免费版用于基础体验，Pro 版提供更完整的分析链路与自选能力。",
+                  "订阅方案支持月付与年付，价格与权益在页面公开透明。",
+                  "页面内容仅用于功能说明，不构成投资建议或收益承诺。",
+                ]}
+              />
+            </div>
+            <div className="flex-1 text-left">
+              <SourceBlock
+                sources={[
+                  ...brandCoreZhCN.defaultSources,
+                  { name: "Pricing Policy", accessedAt: "2026-03-05" },
+                ]}
+              />
+            </div>
+          </div>
           <BoundaryNotice text={brandCoreZhCN.boundaryNotice.text} />
         </section>
       </main>

@@ -3,6 +3,7 @@ import sqlite3
 import tempfile
 import unittest
 from unittest.mock import patch
+import pytest
 
 from backend.analysis.mode_pipeline import (
     DEFENSE_SEMANTIC,
@@ -11,6 +12,9 @@ from backend.analysis.mode_pipeline import (
     ensure_mode_pipeline_schema,
     run_mode_pipeline,
 )
+
+
+pytestmark = pytest.mark.integration
 
 
 def _price_row(symbol, date, open_, high, low, close, change_percent, volume, ma5, ma10, ma20, macd_hist):

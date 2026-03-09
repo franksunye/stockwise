@@ -7,6 +7,18 @@ except ImportError:
 from backend.database import get_connection
 from backend.logger import logger
 from backend.engine.task_registry import AGENTS
+try:
+    from backend.admin_notifications import (
+        build_failure_message,
+        build_success_message,
+        get_admin_mobiles,
+    )
+except ImportError:
+    from admin_notifications import (
+        build_failure_message,
+        build_success_message,
+        get_admin_mobiles,
+    )
 
 class TaskLogger:
     def __init__(self, 
@@ -42,43 +54,36 @@ class TaskLogger:
             start=True
         )
 
-
-    # Repo base URL for manual trigger construction
-    REPO_ACTIONS_URL = "https://github.com/franksunye/stockwise/actions/workflows"
-
     def success(self, message: str = None, metadata: dict = None, notify: bool = False):
         """Log task success."""
         self._log(status="success", message=message, metadata=metadata, end=True)
         if notify:
             from backend.utils import send_wecom_notification
-            content = f"### ✅ StockWise: {self.task_name}\n"
-            content += f"> **Status**: Success\n"
+            notify_meta = dict(metadata or {})
             if message:
-                content += f"- **Message**: {message}\n"
-            if metadata:
-                for k, v in metadata.items():
-                    content += f"- **{str(k).title()}**: {v}\n"
-            send_wecom_notification(content)
+                notify_meta["message"] = message
+            send_wecom_notification(build_success_message(self.task_name, metadata=notify_meta))
 
     def fail(self, message: str = None, metadata: dict = None, notify: bool = True, channel_alert: bool = True, rerun_workflow: str = None):
         """Log task failure."""
         self._log(status="failed", message=message, metadata=metadata, end=True)
         if notify:
             from backend.utils import send_wecom_notification
-            content = f"### ❌ StockWise: {self.task_name} FAILED\n"
-            content += f"> **Status**: Failed\n"
-            content += f"- **Error**: `{message or 'Unknown Error'}`"
-            
+            notify_meta = dict(metadata or {})
             mentions = None
             if channel_alert:
-                from backend.config import ADMIN_MOBILES
-                mentions = ADMIN_MOBILES if ADMIN_MOBILES else ["@all"]
-                
-                if rerun_workflow:
-                    url = f"{self.REPO_ACTIONS_URL}/{rerun_workflow}"
-                    content += f"\n\n🔗 [运维重跑]({url})"
-            
-            send_wecom_notification(content, mentioned_mobile_list=mentions)
+                admin_mobiles = get_admin_mobiles()
+                mentions = admin_mobiles if admin_mobiles else ["@all"]
+
+            send_wecom_notification(
+                build_failure_message(
+                    task_name=self.task_name,
+                    error_message=message,
+                    metadata=notify_meta,
+                    rerun_workflow=rerun_workflow,
+                ),
+                mentioned_mobile_list=mentions,
+            )
 
     def _log(self, status: str, display_name: str = None, task_type: str = None, dimensions: dict = None, 
              message: str = None, metadata: dict = None, start: bool = False, end: bool = False):

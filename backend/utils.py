@@ -5,9 +5,13 @@ import requests
 from functools import wraps
 from datetime import datetime
 from pypinyin import pinyin, Style
-from config import BEIJING_TZ, WECOM_ROBOT_KEY
+from config import BEIJING_TZ
 from database import get_connection
 from logger import logger
+try:
+    from backend.admin_notifications import get_wecom_robot_key
+except ImportError:
+    from admin_notifications import get_wecom_robot_key
 
 def retry_request(max_retries=5, delay=2.0, backoff=2.0):
     """
@@ -74,14 +78,15 @@ def send_wecom_notification(content: str, mentioned_mobile_list: list = None):
     :param content: 消息内容 (Markdown)
     :param mentioned_mobile_list: 需要 @ 的手机号列表 (["138...", "@all"])
     """
-    if not WECOM_ROBOT_KEY:
-        logger.warning("⚠️ WECOM_ROBOT_KEY not found in environment. Notification skipped.")
-        return
+    wecom_robot_key = get_wecom_robot_key()
+    if not wecom_robot_key:
+        logger.warning("⚠️ WECOM_ROBOT_KEY 未配置，跳过企业微信通知。")
+        return False
     
-    if WECOM_ROBOT_KEY.startswith("http"):
-        url = WECOM_ROBOT_KEY
+    if wecom_robot_key.startswith("http"):
+        url = wecom_robot_key
     else:
-        url = f"https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key={WECOM_ROBOT_KEY}"
+        url = f"https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key={wecom_robot_key}"
     
     payload = {
         "msgtype": "markdown",
@@ -116,9 +121,10 @@ def send_wecom_notification(content: str, mentioned_mobile_list: list = None):
     try:
         # 1. 发送 Markdown
         response = requests.post(url, json=payload, timeout=10)
+        response.raise_for_status()
         
         # 2. 如果需要 @人，额外发一条 Text 消息 (因为 Markdown 无法通过 API 参数 @手机号)
-        if mentioned_mobile_list and response.status_code == 200:
+        if mentioned_mobile_list:
              text_payload = {
                 "msgtype": "text",
                 "text": {
@@ -126,14 +132,14 @@ def send_wecom_notification(content: str, mentioned_mobile_list: list = None):
                     "mentioned_mobile_list": mentioned_mobile_list
                 }
              }
-             requests.post(url, json=text_payload, timeout=5)
+             text_response = requests.post(url, json=text_payload, timeout=5)
+             text_response.raise_for_status()
 
-        if response.status_code == 200:
-            print("   📲 企微报告已推送")
-        else:
-            print(f"   ⚠️ 企微推送失败: {response.text}")
+        logger.info("📲 企业微信通知发送成功")
+        return True
     except Exception as e:
-        print(f"   ⚠️ 企微网络异常: {e}")
+        logger.error(f"⚠️ 企业微信通知发送失败: {e}")
+        raise
 
 def format_date(dt_str: str, format_in="%Y%m%d", format_out="%Y-%m-%d") -> str:
     """日期格式转换"""
@@ -155,6 +161,4 @@ def format_volume(volume):
         return str(int(val))
     except:
         return str(volume)
-
-
 

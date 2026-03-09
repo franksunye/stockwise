@@ -124,7 +124,7 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
     try {
       await navigator.clipboard.writeText(text);
       showToast('文案已复制，去朋友圈/小红书分享吧！');
-    } catch (err) {
+    } catch {
       showToast('复制失败，请手动长按文字');
     }
   };
