@@ -6,7 +6,6 @@ import { Check, Zap, ShieldCheck, Target, Clock } from 'lucide-react';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { shouldEnableHighPerformance } from '@/lib/device-utils';
 import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
-import { getCurrentUser } from '@/lib/user';
 import { getPredictionActionMeta } from '@/lib/layer1-ui';
 
 // Fallback data for the reveal step
@@ -37,7 +36,7 @@ export function OnboardingOverlay() {
   const [analyzingStage, setAnalyzingStage] = useState(0); // 0: None, 1: Connecting, 2: Flows, 3: AI
   const [revealData, setRevealData] = useState(DEFAULT_REVEAL_DATA);
   const [recommendedStocks, setRecommendedStocks] = useState<RecommendedStock[]>([]);
-  const { profile, loading: profileLoading } = useUserProfile();
+  const { profile, loading: profileLoading, refreshProfile } = useUserProfile();
   const revealActionMeta = getPredictionActionMeta({
     signal: revealData.signal as 'Long' | 'Short' | 'Side',
   });
@@ -78,30 +77,18 @@ export function OnboardingOverlay() {
   }, [fetchRecommendedStocks]);
 
   const handleComplete = async () => {
-    await getCurrentUser();
     try {
-         await fetch('/api/user/onboarding/complete', {
+        await fetch('/api/user/onboarding/complete', {
             method: 'POST',
             body: JSON.stringify({ selectedStock })
         });
         localStorage.setItem('STOCKWISE_HAS_ONBOARDED', 'true');
         
-        // Optimistically update the user profile cache to prevent flash of Step 1 on reload
-        try {
-            const cachedProfileRaw = localStorage.getItem('stockwise_user_profile_v1');
-            if (cachedProfileRaw) {
-                const cachedProfile = JSON.parse(cachedProfileRaw);
-                cachedProfile.hasOnboarded = true;
-                localStorage.setItem('stockwise_user_profile_v1', JSON.stringify(cachedProfile));
-            }
-        } catch { /* ignore cache parse error */ }
-
-        setIsVisible(false);
-        // Reload to refresh state (simple way to ensure UI updates to Pro)
-        window.location.reload();
+        // Use global state to naturally unmount the overlay without reloading the page
+        await refreshProfile({ force: true });
+        
     } catch (e) {
         console.error("Completion failed", e);
-        setIsVisible(false); // Close anyway
     }
   };
 
