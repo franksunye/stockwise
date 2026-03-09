@@ -193,12 +193,15 @@ export default function InvitationManagement() {
                     </div>
                     <div>
                       <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-2">有效期 (Days)</label>
-                      <input 
-                        type="number" 
+                      <select 
                         value={newCodeDuration}
                         onChange={(e) => setNewCodeDuration(parseInt(e.target.value))}
                         className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-indigo-500 transition-colors"
-                      />
+                      >
+                        {[10, 15, 30, 60, 90].map(d => (
+                          <option key={d} value={d}>{d} 天</option>
+                        ))}
+                      </select>
                     </div>
                   </div>
 
