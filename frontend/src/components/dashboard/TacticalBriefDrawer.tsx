@@ -661,7 +661,7 @@ export function TacticalBriefDrawer({
                    <section className="animate-in fade-in slide-in-from-bottom-4 duration-1000">
                       <div className="mb-4">
                         <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
-                          <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" /> 结构化关键价位
+                          <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" /> 核心操盘点位
                         </h3>
                       </div>
                       
