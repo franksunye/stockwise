@@ -36,6 +36,26 @@ type ResearchPoolSummary = {
     latest_signal_coverage_count: number;
     board_groups: Array<{ key: string; label: string; count: number }>;
     price_bands: Array<{ key: string; label: string; count: number }>;
+    board_group_metrics: Array<{
+        key: string;
+        label: string;
+        count: number;
+        sample_count: number;
+        triggered_coverage_pct: number;
+        watch_coverage_pct: number;
+        riskoff_coverage_pct: number;
+        avg_opportunity_score: number;
+    }>;
+    price_band_metrics: Array<{
+        key: string;
+        label: string;
+        count: number;
+        sample_count: number;
+        triggered_coverage_pct: number;
+        watch_coverage_pct: number;
+        riskoff_coverage_pct: number;
+        avg_opportunity_score: number;
+    }>;
 };
 
 function num(value: unknown, fallback = 0): number {
@@ -137,6 +157,108 @@ function summarizeManifestDistribution(manifestPath: string): Pick<ResearchPoolS
     };
 }
 
+type SegmentMetric = {
+    key: string;
+    label: string;
+    count: number;
+    sample_count: number;
+    triggered_coverage_pct: number;
+    watch_coverage_pct: number;
+    riskoff_coverage_pct: number;
+    avg_opportunity_score: number;
+};
+
+function loadSegmentManifestMap(dirPath: string): Record<string, { label: string; count: number; symbols: string[] }> {
+    const absDir = resolveRepoPath(dirPath);
+    if (!fs.existsSync(absDir)) return {};
+    const files = fs.readdirSync(absDir).filter((name) => name.endsWith('.json'));
+    const output: Record<string, { label: string; count: number; symbols: string[] }> = {};
+    for (const file of files) {
+        const raw = fs.readFileSync(path.join(absDir, file), 'utf-8');
+        const payload = JSON.parse(raw) as Record<string, unknown>;
+        const dimension = typeof payload.dimension === 'string' ? payload.dimension : '';
+        const segment = typeof payload.segment === 'string' ? payload.segment : '';
+        const symbols = Array.isArray(payload.symbols)
+            ? payload.symbols
+                .map((item) => {
+                    if (!item || typeof item !== 'object') return null;
+                    const symbol = (item as Record<string, unknown>).symbol;
+                    return typeof symbol === 'string' ? symbol : null;
+                })
+                .filter((item): item is string => Boolean(item))
+            : [];
+        const label = dimension === 'board_group' ? labelBoardGroup(segment) : labelPriceBand(segment);
+        output[file.replace(/\.json$/, '')] = { label, count: symbols.length, symbols };
+    }
+    return output;
+}
+
+async function querySegmentMetricCloud(client: Client, market: string, latestDate: string | null, strategyVersion: string, symbols: string[]): Promise<Omit<SegmentMetric, 'key' | 'label' | 'count'>> {
+    if (!latestDate || !symbols.length) {
+        return { sample_count: 0, triggered_coverage_pct: 0, watch_coverage_pct: 0, riskoff_coverage_pct: 0, avg_opportunity_score: 0 };
+    }
+    const placeholders = symbols.map(() => '?').join(',');
+    const row = await queryOne(
+        client,
+        `SELECT
+            COUNT(*) AS sample_count,
+            SUM(CASE WHEN setup_state = 'TriggeredLong' THEN 1 ELSE 0 END) AS triggered_count,
+            SUM(CASE WHEN setup_state = 'Watch' THEN 1 ELSE 0 END) AS watch_count,
+            SUM(CASE WHEN setup_state = 'RiskOff' THEN 1 ELSE 0 END) AS riskoff_count,
+            AVG(opportunity_score) AS avg_opportunity_score
+         FROM quant_tradeability_signals
+         WHERE market = ?
+           AND date = ?
+           AND strategy_version = ?
+           AND symbol IN (${placeholders})`,
+        [market, latestDate, strategyVersion, ...symbols],
+    );
+    const sample = num(row?.sample_count);
+    const triggered = num(row?.triggered_count);
+    const watch = num(row?.watch_count);
+    const riskoff = num(row?.riskoff_count);
+    return {
+        sample_count: sample,
+        triggered_coverage_pct: sample ? triggered / sample : 0,
+        watch_coverage_pct: sample ? watch / sample : 0,
+        riskoff_coverage_pct: sample ? riskoff / sample : 0,
+        avg_opportunity_score: num(row?.avg_opportunity_score, 0),
+    };
+}
+
+function querySegmentMetricLocal(db: Database.Database, market: string, latestDate: string | null, strategyVersion: string, symbols: string[]): Omit<SegmentMetric, 'key' | 'label' | 'count'> {
+    if (!latestDate || !symbols.length) {
+        return { sample_count: 0, triggered_coverage_pct: 0, watch_coverage_pct: 0, riskoff_coverage_pct: 0, avg_opportunity_score: 0 };
+    }
+    const placeholders = symbols.map(() => '?').join(',');
+    const row = queryOneLocal(
+        db,
+        `SELECT
+            COUNT(*) AS sample_count,
+            SUM(CASE WHEN setup_state = 'TriggeredLong' THEN 1 ELSE 0 END) AS triggered_count,
+            SUM(CASE WHEN setup_state = 'Watch' THEN 1 ELSE 0 END) AS watch_count,
+            SUM(CASE WHEN setup_state = 'RiskOff' THEN 1 ELSE 0 END) AS riskoff_count,
+            AVG(opportunity_score) AS avg_opportunity_score
+         FROM quant_tradeability_signals
+         WHERE market = ?
+           AND date = ?
+           AND strategy_version = ?
+           AND symbol IN (${placeholders})`,
+        [market, latestDate, strategyVersion, ...symbols],
+    );
+    const sample = num(row?.sample_count);
+    const triggered = num(row?.triggered_count);
+    const watch = num(row?.watch_count);
+    const riskoff = num(row?.riskoff_count);
+    return {
+        sample_count: sample,
+        triggered_coverage_pct: sample ? triggered / sample : 0,
+        watch_coverage_pct: sample ? watch / sample : 0,
+        riskoff_coverage_pct: sample ? riskoff / sample : 0,
+        avg_opportunity_score: num(row?.avg_opportunity_score, 0),
+    };
+}
+
 async function queryCountForSymbols(client: Client, table: 'daily_prices' | 'quant_tradeability_signals', market: string, dateColumn: string, latestDate: string | null, symbols: string[]): Promise<number> {
     if (!latestDate || !symbols.length) return 0;
     const placeholders = symbols.map(() => '?').join(',');
@@ -225,8 +347,10 @@ export async function GET(request: Request) {
     const defaultMode = getModeDefinition(DEFAULT_MODE_ID);
     const configuredStrategyVersion = defaultMode?.strategy_mapping.strategy_version || 'tradeability_v2';
     const cnResearchManifestPath = 'backend/strategy_config/research_pool/cn_core_500.json';
+    const cnResearchSegmentDir = 'backend/strategy_config/research_pool/cn_core_500_segments';
     const cnResearchPool = loadManifestSymbols(cnResearchManifestPath);
     const cnResearchDistribution = summarizeManifestDistribution(cnResearchManifestPath);
+    const cnResearchSegments = loadSegmentManifestMap(cnResearchSegmentDir);
 
     const latencySeriesSql = `
         SELECT latency_ms
@@ -343,6 +467,8 @@ export async function GET(request: Request) {
             latest_signal_coverage_count: 0,
             board_groups: cnResearchDistribution.board_groups,
             price_bands: cnResearchDistribution.price_bands,
+            board_group_metrics: [],
+            price_band_metrics: [],
         };
 
         if (strategy === 'cloud') {
@@ -395,6 +521,26 @@ export async function GET(request: Request) {
                 ...cnResearchPoolSummary,
                 latest_price_coverage_count: await queryCountForSymbols(db, 'daily_prices', 'CN', 'date', latestPricesRow?.value ? String(latestPricesRow.value) : null, cnResearchPool.symbols),
                 latest_signal_coverage_count: await queryCountForSymbols(db, 'quant_tradeability_signals', 'CN', 'date', cnLatestDate || null, cnResearchPool.symbols),
+                board_group_metrics: (await Promise.all(
+                    Object.entries(cnResearchSegments)
+                        .filter(([key]) => key.startsWith('board_group_'))
+                        .map(async ([key, segment]) => ({
+                            key,
+                            label: segment.label,
+                            count: segment.count,
+                            ...(await querySegmentMetricCloud(db, 'CN', cnLatestDate || null, configuredStrategyVersion, segment.symbols)),
+                        })),
+                )).sort((a, b) => b.triggered_coverage_pct - a.triggered_coverage_pct || b.sample_count - a.sample_count),
+                price_band_metrics: (await Promise.all(
+                    Object.entries(cnResearchSegments)
+                        .filter(([key]) => key.startsWith('price_band_'))
+                        .map(async ([key, segment]) => ({
+                            key,
+                            label: segment.label,
+                            count: segment.count,
+                            ...(await querySegmentMetricCloud(db, 'CN', cnLatestDate || null, configuredStrategyVersion, segment.symbols)),
+                        })),
+                )).sort((a, b) => b.triggered_coverage_pct - a.triggered_coverage_pct || b.sample_count - a.sample_count),
             };
 
             return buildResponse({
@@ -445,6 +591,24 @@ export async function GET(request: Request) {
             ...cnResearchPoolSummary,
             latest_price_coverage_count: queryCountForSymbolsLocal(db, 'daily_prices', 'CN', 'date', latestPricesRow?.value ? String(latestPricesRow.value) : null, cnResearchPool.symbols),
             latest_signal_coverage_count: queryCountForSymbolsLocal(db, 'quant_tradeability_signals', 'CN', 'date', cnLatestDate || null, cnResearchPool.symbols),
+            board_group_metrics: Object.entries(cnResearchSegments)
+                .filter(([key]) => key.startsWith('board_group_'))
+                .map(([key, segment]) => ({
+                    key,
+                    label: segment.label,
+                    count: segment.count,
+                    ...querySegmentMetricLocal(db, 'CN', cnLatestDate || null, configuredStrategyVersion, segment.symbols),
+                }))
+                .sort((a, b) => b.triggered_coverage_pct - a.triggered_coverage_pct || b.sample_count - a.sample_count),
+            price_band_metrics: Object.entries(cnResearchSegments)
+                .filter(([key]) => key.startsWith('price_band_'))
+                .map(([key, segment]) => ({
+                    key,
+                    label: segment.label,
+                    count: segment.count,
+                    ...querySegmentMetricLocal(db, 'CN', cnLatestDate || null, configuredStrategyVersion, segment.symbols),
+                }))
+                .sort((a, b) => b.triggered_coverage_pct - a.triggered_coverage_pct || b.sample_count - a.sample_count),
         };
 
         db.close();

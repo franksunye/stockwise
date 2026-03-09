@@ -45,6 +45,26 @@ interface TradeabilityPayload {
             latest_signal_coverage_count: number;
             board_groups: Array<{ key: string; label: string; count: number }>;
             price_bands: Array<{ key: string; label: string; count: number }>;
+            board_group_metrics: Array<{
+                key: string;
+                label: string;
+                count: number;
+                sample_count: number;
+                triggered_coverage_pct: number;
+                watch_coverage_pct: number;
+                riskoff_coverage_pct: number;
+                avg_opportunity_score: number;
+            }>;
+            price_band_metrics: Array<{
+                key: string;
+                label: string;
+                count: number;
+                sample_count: number;
+                triggered_coverage_pct: number;
+                watch_coverage_pct: number;
+                riskoff_coverage_pct: number;
+                avg_opportunity_score: number;
+            }>;
         };
     };
     production: {
@@ -597,6 +617,78 @@ export default function TradeabilityControlTowerPage() {
                                     ))}
                                 </div>
                             </div>
+                        </section>
+
+                        <section className="grid gap-6 xl:grid-cols-2">
+                            <article className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
+                                <SectionHeader
+                                    icon={FlaskConical}
+                                    title="板块实验结果"
+                                    description="这是研究池内各板块分组在最新实验日的量化结果，先看哪组更容易出现可出手机会。"
+                                    tone="text-cyan-300"
+                                />
+                                <div className="mt-4 overflow-x-auto">
+                                    <table className="w-full text-sm">
+                                        <thead className="text-slate-500 text-xs uppercase tracking-widest">
+                                            <tr className="border-b border-white/10">
+                                                <th className="text-left py-3 pr-3">分组</th>
+                                                <th className="text-left py-3 pr-3">池子数</th>
+                                                <th className="text-left py-3 pr-3">当天样本</th>
+                                                <th className="text-left py-3 pr-3">触发率</th>
+                                                <th className="text-left py-3 pr-3">观察率</th>
+                                                <th className="text-left py-3">风险规避率</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {data.summary.research_pool.board_group_metrics.map((row) => (
+                                                <tr key={row.key} className="border-b border-white/5">
+                                                    <td className="py-3 pr-3 font-black">{row.label}</td>
+                                                    <td className="py-3 pr-3 font-mono">{row.count}</td>
+                                                    <td className="py-3 pr-3 font-mono">{row.sample_count}</td>
+                                                    <td className="py-3 pr-3 font-mono">{pct(row.triggered_coverage_pct)}</td>
+                                                    <td className="py-3 pr-3 font-mono">{pct(row.watch_coverage_pct)}</td>
+                                                    <td className="py-3 font-mono">{pct(row.riskoff_coverage_pct)}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </article>
+
+                            <article className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
+                                <SectionHeader
+                                    icon={FlaskConical}
+                                    title="价格带实验结果"
+                                    description="这是研究池内各价格带分组在最新实验日的量化结果，用来判断规则更适合哪类价格区间。"
+                                    tone="text-cyan-300"
+                                />
+                                <div className="mt-4 overflow-x-auto">
+                                    <table className="w-full text-sm">
+                                        <thead className="text-slate-500 text-xs uppercase tracking-widest">
+                                            <tr className="border-b border-white/10">
+                                                <th className="text-left py-3 pr-3">分组</th>
+                                                <th className="text-left py-3 pr-3">池子数</th>
+                                                <th className="text-left py-3 pr-3">当天样本</th>
+                                                <th className="text-left py-3 pr-3">触发率</th>
+                                                <th className="text-left py-3 pr-3">观察率</th>
+                                                <th className="text-left py-3">风险规避率</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {data.summary.research_pool.price_band_metrics.map((row) => (
+                                                <tr key={row.key} className="border-b border-white/5">
+                                                    <td className="py-3 pr-3 font-black">{row.label}</td>
+                                                    <td className="py-3 pr-3 font-mono">{row.count}</td>
+                                                    <td className="py-3 pr-3 font-mono">{row.sample_count}</td>
+                                                    <td className="py-3 pr-3 font-mono">{pct(row.triggered_coverage_pct)}</td>
+                                                    <td className="py-3 pr-3 font-mono">{pct(row.watch_coverage_pct)}</td>
+                                                    <td className="py-3 font-mono">{pct(row.riskoff_coverage_pct)}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </article>
                         </section>
 
                         <section className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
