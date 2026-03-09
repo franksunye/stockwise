@@ -15,7 +15,8 @@ import {
   Terminal,
   MessageSquare,
   Activity,
-  FlaskConical
+  FlaskConical,
+  Ticket
 } from 'lucide-react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -264,6 +265,21 @@ export default function AdminDashboard() {
                    </div>
                  </div>
                  <ArrowRight className="text-slate-700 group-hover:text-cyan-300 group-hover:translate-x-1 transition-all" />
+               </div>
+             </Link>
+
+             <Link href="/admin/invitations" className="group block">
+               <div className="glass-card p-8 flex items-center justify-between hover:bg-white/[0.04] transition-all border-indigo-500/20">
+                 <div className="flex items-center gap-6">
+                   <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 flex items-center justify-center group-hover:bg-indigo-500/20 transition-all">
+                     <Ticket className="w-7 h-7 text-indigo-500" />
+                   </div>
+                   <div>
+                     <h2 className="text-xl font-black italic tracking-tighter mb-1">邀请码管理</h2>
+                     <p className="text-xs text-slate-500 font-medium">生成、管理并快速拷贝系统邀请码，无需手工操作数据库</p>
+                   </div>
+                 </div>
+                 <ArrowRight className="text-slate-700 group-hover:text-indigo-500 group-hover:translate-x-1 transition-all" />
                </div>
              </Link>
 
