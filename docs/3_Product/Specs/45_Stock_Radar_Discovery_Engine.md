@@ -79,7 +79,7 @@
 *   **核心逻辑**：自然语言直接驱动选股。
 *   **技术挑战**：
     *   **Text-to-Radar**：利用 LLM 将用户口语转义为结构化雷达参数。
-    *   **AI 智囊团验证 (Agentic Verification)**：选出的标的将由多模型（DeepSeek & Gemini）进行交叉验证，产出“核心推荐逻辑”。
+    *   **投研决议验证 (Agentic Verification)**：选出的标的将由多模型（DeepSeek & Gemini）进行交叉验证，产出“核心推荐逻辑”。
 *   **可行性**：**60%**。需要研究多 Agent 协作流（Orchestration），目前系统已具备初步的 `llm_registry` 基础。
 
 ---

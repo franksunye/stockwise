@@ -1,7 +1,7 @@
 ---
 title: "一键找回：权益瞬间同步"
 category: "账号与安全"
-lastUpdated: "2026-02-15"
+lastUpdated: "2026-03-09"
 ---
 
 换了手机？别急。

@@ -1,7 +1,7 @@
 ---
 title: "Free 与 Pro：差距在哪？"
 category: "权益与增长"
-lastUpdated: "2026-02-15"
+lastUpdated: "2026-03-09"
 ---
 
 - **普通用户 (Free)**：支持 3 个自选席位，查看基础结论，这叫“入门体验”。

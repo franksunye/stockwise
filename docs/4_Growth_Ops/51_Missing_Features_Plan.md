@@ -20,8 +20,8 @@ This document is the ultimate knowledge blueprint for StockWise. It maps every t
 ---
 
 ## 🧠 2. AI Intelligence & Analysis (AI 智慧与分析)
-9.  **AI 智囊团 (AI Council)**: 多模型共识算法 (Wisdom of Crowds)。
-10. **战术简报解读 (Tactical Brief)**: 结构化 JSON 建议的实战用法。
+9.  **投研决议 (AI Council)**: 多模型共识算法 (Wisdom of Crowds)。
+10. **策略内参解读 (Tactical Brief)**: 结构化 JSON 建议的实战用法。
 11. **关键价位图解 (Key Levels)**: 支撑、压力、突破位的判定逻辑。
 12. **胜率历史矩阵 (Win-Rate Matrix)**: 30天预测表现的可视化复盘。
 13. **智能上下文提取 (Context Extraction)**: 从全局日报中正则提取个股见解。

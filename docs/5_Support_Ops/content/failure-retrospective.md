@@ -1,7 +1,7 @@
 ---
 title: "认错审计：出错不可怕"
 category: "AI 智慧与分析"
-lastUpdated: "2026-02-15"
+lastUpdated: "2026-03-09"
 ---
 
 没谁能 100% 稳赢。

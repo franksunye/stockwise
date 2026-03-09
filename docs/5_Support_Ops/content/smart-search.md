@@ -1,7 +1,7 @@
 ---
 title: "聪明搜索：这才是量化速度"
 category: "交互与导航"
-lastUpdated: "2026-02-15"
+lastUpdated: "2026-03-09"
 ---
 
 搜股票，越快越好。

@@ -1,7 +1,7 @@
 ---
 title: "兑换码：手动给权益充值"
 category: "权益与增长"
-lastUpdated: "2026-02-15"
+lastUpdated: "2026-03-09"
 ---
 
 拿到 \`PRO-XXXX\` 的码了？
