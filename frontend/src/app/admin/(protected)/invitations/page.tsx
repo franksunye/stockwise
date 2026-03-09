@@ -168,41 +168,33 @@ export default function InvitationManagement() {
                 
                 <div className="space-y-6">
                   <div>
-                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-2">类型 (Type)</label>
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-2">生成方案 (Package)</label>
                     <select 
-                      value={newCodeType}
-                      onChange={(e) => setNewCodeType(e.target.value)}
+                      value={`${newCodeType}:${newCodeDuration}`}
+                      onChange={(e) => {
+                        const [type, duration] = e.target.value.split(':');
+                        setNewCodeType(type);
+                        setNewCodeDuration(parseInt(duration));
+                      }}
                       className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-indigo-500 transition-colors"
                     >
-                      <option value="pro_monthly">Pro Monthly (默认)</option>
-                      <option value="pro_quarterly">Pro Quarterly</option>
-                      <option value="pro_yearly">Pro Yearly</option>
-                      <option value="beta">Beta Access</option>
+                      <option value="pro_trial:10">Pro 体验 (10天)</option>
+                      <option value="pro_trial:15">Pro 体验 (15天)</option>
+                      <option value="pro_monthly:30">Pro 月卡 (30天)</option>
+                      <option value="pro_bimonthly:60">Pro 双月卡 (60天)</option>
+                      <option value="pro_quarterly:90">Pro 季卡 (90天)</option>
+                      <option value="beta:30">Beta 全功能 (30天)</option>
                     </select>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-2">生成数量 (Count)</label>
-                      <input 
-                        type="number" 
-                        value={newCodeCount}
-                        onChange={(e) => setNewCodeCount(parseInt(e.target.value))}
-                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-indigo-500 transition-colors"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-2">有效期 (Days)</label>
-                      <select 
-                        value={newCodeDuration}
-                        onChange={(e) => setNewCodeDuration(parseInt(e.target.value))}
-                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-indigo-500 transition-colors"
-                      >
-                        {[10, 15, 30, 60, 90].map(d => (
-                          <option key={d} value={d}>{d} 天</option>
-                        ))}
-                      </select>
-                    </div>
+                  <div>
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-2">生成数量 (Count)</label>
+                    <input 
+                      type="number" 
+                      value={newCodeCount}
+                      onChange={(e) => setNewCodeCount(parseInt(e.target.value))}
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-indigo-500 transition-colors"
+                    />
                   </div>
 
                   <div className="flex gap-4 pt-4">
