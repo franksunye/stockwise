@@ -576,10 +576,10 @@ Production 内部分为两组：
 | `daily_brief_push.yml` | `User + ADMIN` | `Mixed` | 已收口 | 正式口径已切到 `brief_generator` 逐用户即时推送；旧版批量广播仅在 `send_legacy_batch_push=true` 时作为人工补发使用 |
 | `broadcast_almanac.py` | `User` | `Push` | 已实现 | 作为分发器使用时职责清晰，不应再承担重算或内部告警职责 |
 | `tradeability_postclose_pipeline.yml` | `ADMIN` | `WeCom` | 已实现 | 顶层 `notify-summary` job 会汇总 CN/HK 样本同步与 sidecar 结果，成功/失败都向 ADMIN 发中文摘要，失败带重试入口 |
-| `tradeability_sample_sync_daily.yml` | `ADMIN` | `WeCom` | 缺失 | 当前只产数据，不发内部告警；建议至少失败通知 |
-| `tradeability_sidecar_daily.yml` | `ADMIN` | `WeCom` | 缺失 | sidecar 写研究表但无告警出口，排障成本偏高 |
-| `tradeability_sidecar_weekly_calibration.yml` | `ADMIN` | `WeCom` | 缺失 | 周校准仅产 artifact，无主动同步 |
-| `tradeability_experiment_weekly.yml` | `ADMIN` | `WeCom` | 缺失 | 周实验仅上传 artifact，无失败告警 |
+| `tradeability_sample_sync_daily.yml` | `ADMIN` | `WeCom` | 已实现 | 顶层 `notify-summary` job 会汇总 CN/HK 样本同步结果，成功/失败都向 ADMIN 发中文摘要 |
+| `tradeability_sidecar_daily.yml` | `ADMIN` | `WeCom` | 已实现 | 顶层 `notify-summary` job 会汇总 CN/HK sidecar 结果，失败时带重试入口 |
+| `tradeability_sidecar_weekly_calibration.yml` | `ADMIN` | `WeCom` | 已实现 | 周校准完成后会向 ADMIN 同步 CN/HK 分支状态，不再只依赖 artifact |
+| `tradeability_experiment_weekly.yml` | `ADMIN` | `WeCom` | 已实现 | 周实验 job 结束后统一向 ADMIN 发送成功/失败摘要 |
 | `tradeability_promotion_gate.yml` | `ADMIN` | `WeCom` | 已实现 | 已有 `notify` 开关，适合作为研究链周度结论出口 |
 | `trading_day_gate.yml` | `None` | `Artifact / Task Log` | 合理 | 闸门本身不单独通知；由父 workflow 记录是否跳过即可 |
 | `daily_validation_check.yml` | `User + ADMIN` | `Mixed` | 已实现 | 用户战报 + ADMIN 成功/失败通知都已接入 |
@@ -587,9 +587,9 @@ Production 内部分为两组：
 | `layer1_consistency_daily.yml` | `ADMIN` | `WeCom` | 已实现 | 已有 `notify` 参数，适合作为日级治理告警 |
 | `market_facts_healthcheck.py` | `ADMIN` | `WeCom` | 已实现 | 已作为内容链质量闸门接入内部告警 |
 | `user_maintenance.yml` | `ADMIN` | `WeCom` | 已实现 | 清理结果与失败都会发内部通知 |
-| `admin_codes.yml` | `ADMIN` | `Artifact / Task Log` | 部分实现 | 目前主要依赖 Actions 输出，无主动通知；因属手工任务可接受，但建议补最小结果摘要 |
+| `admin_codes.yml` | `ADMIN` | `WeCom` | 已实现 | 手工邀请码管理结束后会向 ADMIN 发送最小结果摘要，失败时带重试入口 |
 | `ai_backfill.yml` | `ADMIN` | `WeCom` | 已实现 | 手工补跑应通知内部，不通知用户 |
-| `almanac_maintenance.yml` | `ADMIN` | `WeCom` | 部分实现 | 目前只有健康检查阶段有 WeCom，主生成步骤缺统一作业守卫，建议补齐失败告警 |
+| `almanac_maintenance.yml` | `ADMIN` | `WeCom` | 已实现 | 主生成链结束后统一向 ADMIN 发送中文摘要；健康检查与主任务失败都不会再静默 |
 
 ### 6.6 通知编排结论
 
@@ -604,10 +604,8 @@ Production 内部分为两组：
 
 基于现状，通知治理优先级建议如下：
 
-1. `P1`：给 `tradeability_sample_sync_daily.yml` / `tradeability_sidecar_daily.yml` 增加更细粒度的作业级摘要，减少只看父 workflow 时的信息损耗
-2. `P1`：给 `almanac_maintenance.yml` 主生成步骤补 `JobGuard` 或等价告警，避免历史补跑失败静默
-3. `P1`：把“ADMIN 中文成功/失败通知、失败带重试入口、用户仅订阅才通知”固化为回归测试，避免后续被回退
-4. `P2`：给 `admin_codes.yml` 增加最小内部结果摘要，至少能在手工执行后同步生成数量或失败原因
+1. `P2`：如果后续需要更高可观测性，可把 `tradeability_*` 的单个脚本运行指标（如处理 symbol 数、artifact 名称）继续下沉到作业级摘要
+2. `P2`：继续把同样的 workflow 级中文摘要模式推广到其他手工治理链，保持运维口径一致
 
 ## 7. 当前边界状态
 

@@ -85,3 +85,31 @@ jobs:
           path: tmp/tradeability_experiments/*
           if-no-files-found: error
           retention-days: 21
+
+      - name: Notify ADMIN Summary
+        if: always()
+        env:
+          WECOM_ROBOT_KEY: ${{ secrets.WECOM_ROBOT_KEY }}
+          ADMIN_MOBILES: ${{ secrets.ADMIN_MOBILES }}
+          MARKET_INPUT: ${{ inputs.market || 'CN' }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          TRIGGER_SOURCE: ${{ github.event_name }}
+        run: |
+          STATUS="${{ job.status }}"
+          MESSAGE="Tradeability 周实验已完成"
+          if [ "$STATUS" = "failure" ] || [ "$STATUS" = "cancelled" ]; then
+            STATUS="failed"
+            MESSAGE="Tradeability 周实验失败或被取消，请排查"
+          else
+            STATUS="success"
+          fi
+
+          python -u backend/scripts/send_admin_workflow_notification.py \
+            --task-name "Tradeability 周实验" \
+            --status "$STATUS" \
+            --message "$MESSAGE" \
+            --rerun-workflow "tradeability_experiment_weekly.yml" \
+            --meta workflow=tradeability_experiment_weekly.yml \
+            --meta trigger_source="$TRIGGER_SOURCE" \
+            --meta market="$MARKET_INPUT" \
+            --meta run_url="$RUN_URL"

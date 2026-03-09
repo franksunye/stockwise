@@ -213,3 +213,54 @@ jobs:
             --max-workers "$MAX_WORKERS" \
             $MANIFEST_FLAG \
             $META_FLAG
+
+  notify-summary:
+    needs: [run-cn, run-hk]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Notify ADMIN Summary
+        env:
+          WECOM_ROBOT_KEY: ${{ secrets.WECOM_ROBOT_KEY }}
+          ADMIN_MOBILES: ${{ secrets.ADMIN_MOBILES }}
+          MARKET_INPUT: ${{ inputs.market || 'AUTO' }}
+          RUN_CN_RESULT: ${{ needs.run-cn.result || 'skipped' }}
+          RUN_HK_RESULT: ${{ needs.run-hk.result || 'skipped' }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          TRIGGER_SOURCE: ${{ github.event_name }}
+        run: |
+          STATUS="success"
+          MESSAGE="Tradeability 样本同步已完成"
+          for result in "$RUN_CN_RESULT" "$RUN_HK_RESULT"; do
+            if [ "$result" = "failure" ] || [ "$result" = "cancelled" ]; then
+              STATUS="failed"
+              MESSAGE="Tradeability 样本同步存在失败或取消的分支，请排查"
+              break
+            fi
+          done
+
+          python -u backend/scripts/send_admin_workflow_notification.py \
+            --task-name "Tradeability 样本同步" \
+            --status "$STATUS" \
+            --message "$MESSAGE" \
+            --rerun-workflow "tradeability_sample_sync_daily.yml" \
+            --meta workflow=tradeability_sample_sync_daily.yml \
+            --meta trigger_source="$TRIGGER_SOURCE" \
+            --meta market="$MARKET_INPUT" \
+            --meta sample_sync_cn="$RUN_CN_RESULT" \
+            --meta sample_sync_hk="$RUN_HK_RESULT" \
+            --meta run_url="$RUN_URL"

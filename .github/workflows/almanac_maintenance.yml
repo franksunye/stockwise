@@ -70,6 +70,7 @@ jobs:
           TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
           TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
           WECOM_ROBOT_KEY: ${{ secrets.WECOM_ROBOT_KEY }}
+          ADMIN_MOBILES: ${{ secrets.ADMIN_MOBILES }}
         run: |
           DATE_ARG=""
           if [ "${{ inputs.mode }}" == "single-date" ] && [ -n "${{ inputs.date }}" ]; then
@@ -78,3 +79,37 @@ jobs:
             DATE_ARG="--date ${{ inputs.end_date }}"
           fi
           python -u backend/scripts/market_facts_healthcheck.py --market CN $DATE_ARG
+
+      - name: Notify ADMIN Summary
+        if: always()
+        env:
+          WECOM_ROBOT_KEY: ${{ secrets.WECOM_ROBOT_KEY }}
+          ADMIN_MOBILES: ${{ secrets.ADMIN_MOBILES }}
+          MODE_INPUT: ${{ inputs.mode }}
+          DATE_INPUT: ${{ inputs.date }}
+          START_DATE_INPUT: ${{ inputs.start_date }}
+          END_DATE_INPUT: ${{ inputs.end_date }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          TRIGGER_SOURCE: ${{ github.event_name }}
+        run: |
+          STATUS="${{ job.status }}"
+          MESSAGE="黄历历史补跑已完成"
+          if [ "$STATUS" = "failure" ] || [ "$STATUS" = "cancelled" ]; then
+            STATUS="failed"
+            MESSAGE="黄历历史补跑失败或被取消，请排查"
+          else
+            STATUS="success"
+          fi
+
+          python -u backend/scripts/send_admin_workflow_notification.py \
+            --task-name "黄历历史补跑" \
+            --status "$STATUS" \
+            --message "$MESSAGE" \
+            --rerun-workflow "almanac_maintenance.yml" \
+            --meta workflow=almanac_maintenance.yml \
+            --meta trigger_source="$TRIGGER_SOURCE" \
+            --meta mode="$MODE_INPUT" \
+            --meta date="$DATE_INPUT" \
+            --meta start_date="$START_DATE_INPUT" \
+            --meta end_date="$END_DATE_INPUT" \
+            --meta run_url="$RUN_URL"

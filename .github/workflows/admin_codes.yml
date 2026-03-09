@@ -49,3 +49,35 @@ jobs:
           else
             python scripts/manage_codes.py list --all
           fi
+
+      - name: Notify ADMIN Summary
+        if: always()
+        env:
+          WECOM_ROBOT_KEY: ${{ secrets.WECOM_ROBOT_KEY }}
+          ADMIN_MOBILES: ${{ secrets.ADMIN_MOBILES }}
+          ACTION_INPUT: ${{ inputs.action }}
+          COUNT_INPUT: ${{ inputs.count }}
+          DAYS_INPUT: ${{ inputs.days }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          TRIGGER_SOURCE: ${{ github.event_name }}
+        run: |
+          STATUS="${{ job.status }}"
+          MESSAGE="邀请码管理任务已完成"
+          if [ "$STATUS" = "failure" ] || [ "$STATUS" = "cancelled" ]; then
+            STATUS="failed"
+            MESSAGE="邀请码管理任务失败或被取消，请排查"
+          else
+            STATUS="success"
+          fi
+
+          python -u backend/scripts/send_admin_workflow_notification.py \
+            --task-name "邀请码管理" \
+            --status "$STATUS" \
+            --message "$MESSAGE" \
+            --rerun-workflow "admin_codes.yml" \
+            --meta workflow=admin_codes.yml \
+            --meta trigger_source="$TRIGGER_SOURCE" \
+            --meta action="$ACTION_INPUT" \
+            --meta count="$COUNT_INPUT" \
+            --meta days="$DAYS_INPUT" \
+            --meta run_url="$RUN_URL"

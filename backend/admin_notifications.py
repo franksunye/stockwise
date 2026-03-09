@@ -27,6 +27,9 @@ WORKFLOW_LABELS = {
 
 METADATA_LABELS = {
     "candidate_version": "候选版本",
+    "action": "操作",
+    "calibration_cn": "CN 周校准",
+    "calibration_hk": "HK 周校准",
     "count": "数量",
     "date": "日期",
     "dry_run": "演练模式",
@@ -39,6 +42,7 @@ METADATA_LABELS = {
     "gate_hk": "HK 交易日闸门",
     "market": "市场",
     "message": "说明",
+    "mode": "模式",
     "pipeline_run_id": "流水线运行 ID",
     "run_url": "运行链接",
     "records": "记录数",
