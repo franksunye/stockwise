@@ -545,12 +545,12 @@ export default function TradeabilityControlTowerPage() {
                                     <thead className="text-slate-500 text-xs uppercase tracking-widest">
                                         <tr className="border-b border-white/10">
                                             <th className="text-left py-3 pr-3">模式</th>
-                                            <th className="text-left py-3 pr-3">命中率</th>
-                                            <th className="text-left py-3 pr-3">覆盖率</th>
-                                            <th className="text-left py-3 pr-3">最大回撤</th>
-                                            <th className="text-left py-3 pr-3">盈亏比</th>
-                                            <th className="text-left py-3 pr-3">稳定度</th>
-                                            <th className="text-left py-3">样本数</th>
+                                            <th className="text-left py-3 pr-3"><HeaderTip label="命中率" tip="命中率表示历史样本里判断方向大体正确的比例。越高通常越好，但也要结合样本数一起看。" /></th>
+                                            <th className="text-left py-3 pr-3"><HeaderTip label="覆盖率" tip="覆盖率表示系统愿意给出明确结论的比例。越高说明出手更频繁，但不代表质量一定更高。" /></th>
+                                            <th className="text-left py-3 pr-3"><HeaderTip label="最大回撤" tip="最大回撤表示这段时间里最差的一次下滑幅度。绝对值越大，说明承受的风险越高。" /></th>
+                                            <th className="text-left py-3 pr-3"><HeaderTip label="盈亏比" tip="盈亏比表示平均盈利和平均亏损的相对关系。大于 1 通常更理想，说明赚的时候比亏的时候更多。" /></th>
+                                            <th className="text-left py-3 pr-3"><HeaderTip label="稳定度" tip="稳定度表示结果是否平稳、是否容易大起大落。越高通常说明策略更稳，不容易忽好忽坏。" /></th>
+                                            <th className="text-left py-3"><HeaderTip label="样本数" tip="样本数表示这组统计是基于多少条历史记录算出来的。样本太少时，指标参考价值会下降。" /></th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -626,5 +626,20 @@ function TipCard({ title, text }: { title: string; text: string }) {
             <div className="text-sm font-black text-white">{title}</div>
             <p className="mt-2 text-xs leading-6 text-slate-400">{text}</p>
         </div>
+    );
+}
+
+function HeaderTip({ label, tip }: { label: string; tip: string }) {
+    return (
+        <span className="inline-flex items-center gap-1">
+            <span>{label}</span>
+            <span
+                className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-white/15 bg-white/[0.05] text-[10px] normal-case text-slate-400 cursor-help"
+                title={tip}
+                aria-label={`${label}说明：${tip}`}
+            >
+                ?
+            </span>
+        </span>
     );
 }
