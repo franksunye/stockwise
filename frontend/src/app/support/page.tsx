@@ -28,7 +28,8 @@ const SUPPORT_SECTIONS = [
       { q: '深度链接引导 (Deep Linking)', slug: 'deep-linking-usage' },
       { q: 'TikTok 式沉浸滚动 (Snap-Y)', slug: 'snap-y-dynamics' },
       { q: '搜索联想与秒速响应', slug: 'smart-search' },
-      { q: 'iOS 专项性能优化 (Safari)', slug: 'ios-tuning' }
+      { q: 'iOS 专项性能优化 (Safari)', slug: 'ios-tuning' },
+      { q: '沉浸式投资模式配置 (Investment Mode)', slug: 'investment-mode-config' }
     ]
   },
   {
@@ -62,7 +63,8 @@ const SUPPORT_SECTIONS = [
       { q: 'RSI 颜色隐喻 (RSI Metaphor)', slug: 'rsi-color-metaphor' },
       { q: '脉冲与共振 (Pulse Logic)', slug: 'ai-pulse-resonance' },
       { q: '置信度百分比解读', slug: 'confidence-explained' },
-      { q: '触感反馈的心理暗示', slug: 'haptic-sync' }
+      { q: '触感反馈的心理暗示', slug: 'haptic-sync' },
+      { q: '四态交易决策语义 (4-States)', slug: 'four-states-semantics' }
     ]
   },
   {
@@ -76,7 +78,8 @@ const SUPPORT_SECTIONS = [
     items: [
       { q: 'T+3 多日验证机制', slug: 'multi-day-verification' },
       { q: '验证的三种状态说明', slug: 'verification-states' },
-      { q: '失败的价值 (Value of Failure)', slug: 'value-of-failure' }
+      { q: '失败的价值 (Value of Failure)', slug: 'value-of-failure' },
+      { q: '双轨生产与验证池 (Dual-Lane)', slug: 'dual-lane-architecture' }
     ]
   },
   {
@@ -107,7 +110,8 @@ const SUPPORT_SECTIONS = [
       { q: '推荐激励 (Referral Rewards)', slug: 'referral-rewards' },
       { q: '渠道分润看板 (Partners)', slug: 'channel-revenue-guide' },
       { q: '权益兑换码 (Redeem Codes)', slug: 'redeem-code-usage' },
-      { q: '免费版与 Pro 版对比', slug: 'tiers-explained' }
+      { q: '免费版与 Pro 版对比', slug: 'tiers-explained' },
+      { q: '邀请码分发与获取 (Invitation Ops)', slug: 'invitation-ops-guide' }
     ]
   },
   {

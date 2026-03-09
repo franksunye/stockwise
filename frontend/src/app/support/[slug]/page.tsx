@@ -68,6 +68,24 @@ const SUPPORT_TLDR: Record<string, string[]> = {
     "升级判断应看监控数量、分析深度与验证需求。",
     "套餐差异以页面公开条款与当前版本为准。",
   ],
+  "four-states-semantics": [
+    "方向裁决全交给了稳定的量化规则，不再受AI情绪波动干扰。",
+    "简化为四大硬性状态：进场、防守、观察、空仓。",
+    "用极度明确的灯号，帮你摆脱信息过载导致的瘫痪。"
+  ],
+  "dual-lane-architecture": [
+    "系统后台分为研究轨与生产轨，保证了呈现给你的极其稳定。",
+    "AI会在验证池中进行激烈的容错测试与试错。",
+    "只有测试中回撤小且极具胜率的法则，才会被发布到你的面前。"
+  ],
+  "investment-mode-config": [
+    "个人中心的偏好设置升级为沉浸式的伸缩风琴设计。",
+    "直连API，乐观更新逻辑避免等待时间，所见即所得。"
+  ],
+  "invitation-ops-guide": [
+    "所有权限制由严密的后台邀请码控制（10-90天空窗期管理）。",
+    "目的是阻断盲目投机，过滤给真正懂纪律的玩家分发算力。"
+  ]
 };
 
 const SUPPORT_TO_LEARN_LINKS: Record<string, Array<{ slug: string; title: string }>> = {

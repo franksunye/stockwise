@@ -8,7 +8,8 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
-import { getArticleBySlug } from '@/lib/support-content';
+
+import type { SupportArticle } from '@/lib/support-content';
 
 // Mirror the same section structure as the web support page
 // Data source: support-content.ts (shared with /support web pages)
@@ -106,8 +107,22 @@ const SECTIONS = [
 export function SupportCenterView() {
   const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [article, setArticle] = useState<SupportArticle | null>(null);
+  const [articleLoading, setArticleLoading] = useState(false);
 
-  const article = selectedSlug ? getArticleBySlug(selectedSlug) : null;
+  const handleSelectSlug = async (slug: string) => {
+    setSelectedSlug(slug);
+    setArticleLoading(true);
+    try {
+      const res = await fetch(`/api/support/${slug}`);
+      if (!res.ok) throw new Error('Not found');
+      const data = await res.json();
+      setArticle(data);
+    } catch {
+      setArticle(null);
+    }
+    setArticleLoading(false);
+  };
 
   const filteredSections = useMemo(() => {
     if (!searchQuery) return SECTIONS;
@@ -129,7 +144,7 @@ export function SupportCenterView() {
         className="space-y-5"
       >
         <button
-          onClick={() => setSelectedSlug(null)}
+          onClick={() => { setSelectedSlug(null); setArticle(null); }}
           className="flex items-center gap-1.5 text-slate-500 hover:text-white active:scale-95 transition-all py-1 -ml-1"
         >
           <ChevronLeft size={16} />
@@ -139,21 +154,26 @@ export function SupportCenterView() {
         <div className="space-y-2.5">
           <div className="flex items-center gap-2">
             <span className="px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[9px] font-black uppercase tracking-widest">
-              {article.category}
+              {article.category || '加载中...'}
             </span>
             <div className="flex items-center gap-1 text-slate-600 text-[9px] font-bold">
               <Calendar size={10} />
-              {article.lastUpdated}
+              {article.lastUpdated || ''}
             </div>
           </div>
           <h3 className="text-lg font-black tracking-tight italic leading-snug text-white">
-            {article.title}
+            {article.title || '加载中...'}
           </h3>
         </div>
 
-        <article className="prose prose-invert prose-sm max-w-none">
-          <ReactMarkdown
-            components={{
+        {articleLoading ? (
+            <div className="flex items-center justify-center py-10 opacity-50">
+                <div className="w-5 h-5 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
+            </div>
+        ) : (
+            <article className="prose prose-invert prose-sm max-w-none">
+              <ReactMarkdown
+                components={{
               h3: ({ children }) => <h4 className="text-sm font-bold text-slate-200 mt-5 mb-2">{children}</h4>,
               p: ({ children }) => <p className="text-[13px] text-slate-400 leading-relaxed mb-3 font-medium">{children}</p>,
               ul: ({ children }) => <ul className="space-y-2 mb-3 list-none pl-0">{children}</ul>,
@@ -182,9 +202,10 @@ export function SupportCenterView() {
               td: ({ children }) => <td className="px-3 py-2 text-slate-400 border-t border-white/5 text-[11px]">{children}</td>,
             }}
           >
-            {article.content}
-          </ReactMarkdown>
-        </article>
+              {article.content || ''}
+            </ReactMarkdown>
+          </article>
+        )}
       </motion.div>
     );
   }
@@ -226,7 +247,7 @@ export function SupportCenterView() {
               {section.items.map((item) => (
                 <button
                   key={item.slug}
-                  onClick={() => setSelectedSlug(item.slug)}
+                  onClick={() => handleSelectSlug(item.slug)}
                   className="w-full px-4 py-3 flex items-center justify-between hover:bg-white/[0.03] active:bg-white/[0.05] transition-colors text-left"
                 >
                   <span className="text-[13px] font-medium text-slate-300">{item.q}</span>

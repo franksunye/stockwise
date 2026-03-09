@@ -9,6 +9,10 @@
 > - `docs/2_Intelligence/41_Tradeability_Quality_and_Actionability_Plan.md`
 > - `docs/1_Engineering/16_Observability_Thresholds_and_Incidents.md`
 
+> 术语约定：
+> - 中文统一使用“生产线 / 实验线”。
+> - 英文统一对应 `Production Decision Lane / Research Quant Lane`。
+
 ---
 
 ## 0. 背景与问题
@@ -35,7 +39,7 @@
 
 这份控制台必须解决 4 个问题：
 
-1. 研究线当前跑到哪里了
+1. 实验线当前跑到哪里了
 2. 生产线当前用的是什么版本，表现如何
 3. 当前 candidate 能不能 promotion，卡在哪
 4. 最近谁做了 approve / promote / rollback
@@ -130,9 +134,9 @@
 - 红色：未达标
 - 所有指标显示当前值、阈值、最近趋势
 
-### 4.3 Research Lane
+### 4.3 Research Lane（实验线）
 
-用于回答：“研究线最近谁更好？”
+用于回答：“实验线最近谁更好？”
 
 展示内容：
 
@@ -185,6 +189,9 @@
 
 - 研究指标与产品指标必须明确分区
 - 不允许把 `quant_tradeability_signals` 误当作用户侧正式表现
+- 当前后台以“各模式分别看绩效”为主，不把模式总和作为核心管理指标
+- 展示目标是判断每个投资模式分别为用户提供了什么价值
+- `仅观察` 需以特殊模式标记展示，不参与与 `稳健 / 平衡 / 进取` 的同类最优比较
 
 ### 4.5 Promotion Center
 
@@ -270,7 +277,7 @@
 
 ### 6.2 `GET /api/admin/tradeability/research`
 
-返回研究线数据：
+返回实验线数据：
 
 - `market`
 - `candidate_version`

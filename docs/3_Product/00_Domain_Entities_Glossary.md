@@ -64,16 +64,18 @@ Hub = 持续更新的“常规内容”节奏（不是一次性爆款）。
 ## 3.1) 核心系统 Lane（跨团队统一叫法）
 
 > 这一节定义的是“系统级数据链路名词”，用于产品、研发、运营讨论时避免把产品口径和研究口径混为一谈。
+> 中文主叫法统一使用“生产线 / 实验线”；英文保留 `Production Decision Lane / Research Quant Lane`。
 
 | 中文名 | 英文名 | 定义 | 备注 |
 |---|---|---|---|
-| 生产决策链路 | Production Decision Lane | 面向用户正式展示的决策数据链路 | 对应 Investment Mode |
-| 研究量化链路 | Research Quant Lane | 面向量化研究、参数校准、版本观测的数据链路 | 对应 sidecar / calibration |
+| 生产线 | Production Decision Lane | 面向用户正式展示的决策数据链路 | 对应 Investment Mode |
+| 实验线 | Research Quant Lane | 面向量化研究、参数校准、版本观测的数据链路 | 对应 sidecar / calibration |
 
 补充说明：
 - 两条 lane 都建立在真实市场数据之上。
 - `Production Decision Lane` 不是“真实成交”，其中模式台账仍是模拟台账。
 - `Research Quant Lane` 不是“假数据”，但它不是前台正式展示口径。
+- 样本池中文主叫法统一使用“生产池 / 研究池”。
 
 ---
 
@@ -111,6 +113,7 @@ Hub = 持续更新的“常规内容”节奏（不是一次性爆款）。
 
 - `策略`（内部工程对象）不等于 `投资模式`（用户产品对象）。
 - `Production Decision Lane` 不等于 `Research Quant Lane`。
+- `生产线` 不等于 `实验线`。
 - `Investment Mode`（产品结果）不等于 `sidecar`（研究结果）。
 - `signal`（兼容层）不等于 `action semantics`（用户执行语言）。
 - `看多/看空/观望`、`做多/做空` 属于旧表述，不再作为新 UI 主文案。
