@@ -294,14 +294,14 @@ export default function TradeabilityControlTowerPage() {
                             <Link href="/admin" className="p-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition">
                                 <ArrowLeft className="w-4 h-4 text-slate-300" />
                             </Link>
-                            <span className="text-[10px] uppercase tracking-[0.3em] text-slate-500 font-black">管理员控制台</span>
+                            <span className="text-[10px] uppercase tracking-[0.3em] text-slate-500 font-black">管理员后台</span>
                         </div>
                         <div>
                             <h1 className="text-3xl md:text-4xl font-black tracking-tight">
-                                Tradeability <span className="text-cyan-400">控制塔</span>
+                                策略 <span className="text-cyan-400">控制台</span>
                             </h1>
                             <p className="text-sm text-slate-500 mt-2">
-                                一屏区分研究流水线和生产流水线，只展示升级决策真正需要的信息。
+                                一屏区分研究流水线和生产流水线，帮助判断现在能不能升级、为什么不能升级。
                             </p>
                         </div>
                     </div>

@@ -259,8 +259,8 @@ export default function AdminDashboard() {
                      <FlaskConical className="w-7 h-7 text-cyan-300" />
                    </div>
                    <div>
-                     <h2 className="text-xl font-black italic tracking-tighter mb-1">Tradeability 控制塔</h2>
-                     <p className="text-xs text-slate-500 font-medium">统一查看双流水线、promotion gate 和最近审计时间线</p>
+                     <h2 className="text-xl font-black italic tracking-tighter mb-1">策略控制台</h2>
+                     <p className="text-xs text-slate-500 font-medium">统一查看研究、生产、升级门禁和最近审计时间线</p>
                    </div>
                  </div>
                  <ArrowRight className="text-slate-700 group-hover:text-cyan-300 group-hover:translate-x-1 transition-all" />
