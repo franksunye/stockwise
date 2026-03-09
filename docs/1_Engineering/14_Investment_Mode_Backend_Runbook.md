@@ -104,6 +104,57 @@ Investment Mode 当前依赖的生产编排顺序应理解为：
 2. A 股黄历、market facts health check、preview broadcast 已从 `ai_analyze_cn.yml` 拆出，独立归入 `daily_almanac_cn.yml`。
 3. `daily_morning_call.yml` 与 `data_sync_realtime.yml` 由 Cloudflare Worker 负责严格时间触发，不应再额外叠加 GitHub cron。
 
+## 3.2 线上实验的运行纪律
+
+线上量化实验与本地量化实验必须使用不同纪律：
+
+1. 本地：
+   - 允许互动式试错。
+   - 允许快速改参数、改候选清单、重跑局部窗口。
+   - 目标是找方向，不是形成最终线上结论。
+2. 线上：
+   - 必须全自动。
+   - 必须通过 workflow 执行。
+   - 不允许依赖人工盯跑、临时 SSH、手工改数据。
+   - 目标是验证真实系统中的连续稳定性。
+
+## 3.3 线上受控实验的部署要求
+
+线上受控实验必须满足以下要求：
+
+1. 固定输入：
+   - manifest、参数文件、时间窗口必须在仓库内可追踪。
+2. 固定数据源：
+   - 使用 cloud 数据源，不允许混入本地 SQLite。
+3. 固定输出：
+   - 每次运行必须生成 artifact，至少包含 backfill 结果与 summary。
+4. 固定边界：
+   - 实验结果属于研究链路，不直接写成前台正式口径。
+5. 固定升级纪律：
+   - 线上实验成功不等于 production 默认切换。
+   - 若要推进 production，必须继续经过 `verdict -> approval -> execute -> rollback`。
+
+## 3.4 当前 shadow universe 入口
+
+当前已落地的线上受控实验入口：
+
+1. workflow：
+   - `.github/workflows/tradeability_shadow_universe_experiment.yml`
+2. 固定实验清单：
+   - `backend/strategy_config/shadow_universe/cn_top30_shadow.json`
+3. 轻量执行脚本：
+   - `backend/scripts/run_shadow_universe_light_backfill.py`
+4. 汇总脚本：
+   - `backend/scripts/summarize_shadow_universe_results.py`
+
+用途：
+
+1. 验证 shadow universe 是否能在云端真实数据上持续提升：
+   - `TriggeredLong coverage`
+   - `Watch -> Triggered`
+   - 以及后续一致性、可观测、产品表现
+2. 保持与 Production Decision Lane 隔离，不直接改线上默认产品口径
+
 ## 4. 稳定性边界
 
 - 不回写历史结论：模式切换仅影响后续产数与表现聚合。

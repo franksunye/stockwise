@@ -140,8 +140,73 @@ python backend/scripts/observe_tradeability_windows.py --market CN --strategy-ve
    - 每周产出 v1/v2 对比 artifact
 4. `acceptance_weekly.yml`
    - 默认按 `tradeability_v2` 生成周验收快照
+5. `tradeability_shadow_universe_experiment.yml`
+   - 用于受控验证固定 shadow universe 是否能改善研究门禁与产品完成度
 
-### 4.8 单票分析（功能验证）
+### 4.8 本地实验 vs 线上实验
+
+必须明确区分两种工作方式：
+
+1. 本地实验：
+   - 允许互动式试错。
+   - 允许快速改参数、改候选清单、重跑局部窗口。
+   - 目标是判断“这个想法值不值得进线上验证”。
+   - 本地结论不能直接当作 production promotion 依据。
+
+2. 线上实验：
+   - 必须全自动运行。
+   - 必须通过 workflow 触发，不允许依赖人工 SSH 或临时手敲命令。
+   - 必须固定输入、固定脚本、固定输出、固定审计。
+   - 目标是验证“这件事在真实云端数据与真实编排里能否连续成立”。
+
+### 4.9 线上实验的约束
+
+线上受控实验必须满足以下约束：
+
+1. 实验对象必须固定：
+   - 使用仓库内 manifest / 固定配置。
+   - 不允许在线上临时手改 universe。
+2. 数据源必须固定：
+   - 必须使用 cloud 数据源。
+   - 明确 `DB_SOURCE=cloud`，并通过 `TURSO_DB_URL`、`TURSO_AUTH_TOKEN` 运行。
+3. 入口必须固定：
+   - 只能由 GitHub Actions workflow 触发。
+   - 不允许把线上服务器当本地实验室使用。
+4. 产物必须固定：
+   - 每次运行都要落 artifact。
+   - 至少包含 manifest、窗口、summary、关键 gate 指标。
+5. 研究结果不得直接污染前台：
+   - 线上实验结果属于 Research Quant Lane。
+   - 不能直接替换 Production Decision Lane 的正式口径。
+6. promotion 必须另走审批链：
+   - `verdict -> approval -> execute -> rollback`
+   - 线上实验成功不等于允许直接切生产。
+
+### 4.10 当前 shadow universe 线上实验口径
+
+当前新增的线上受控实验入口为：
+
+1. workflow：
+   - `.github/workflows/tradeability_shadow_universe_experiment.yml`
+2. 固定实验清单：
+   - `backend/strategy_config/shadow_universe/cn_top30_shadow.json`
+3. 轻量执行脚本：
+   - `backend/scripts/run_shadow_universe_light_backfill.py`
+4. 汇总脚本：
+   - `backend/scripts/summarize_shadow_universe_results.py`
+
+当前约束：
+
+1. 该实验属于 shadow experiment，不是生产默认切换。
+2. 该实验用于验证：
+   - `TriggeredLong coverage`
+   - `Watch -> Triggered`
+   - `consistency`
+   - `observability`
+   - 后续 `mode_performance_snapshot`
+3. 连续观察未达标前，不允许进入 promotion。
+
+### 4.11 单票分析（功能验证）
 
 ```powershell
 $env:DB_SOURCE="local"
