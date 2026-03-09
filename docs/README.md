@@ -14,19 +14,25 @@ This directory serves as the unified single source of truth for the 知守 AI (Z
 > Project "Backbone": System architecture, reliability, and quality standards.
 - [Architecture (As-Is & To-Be)](./1_Engineering/10_Architecture.md)
 - [Reliability & Quality Gates](./1_Engineering/11_Reliability_Protocol.md)
-- [Investment Mode Execution Alignment Plan](./1_Engineering/19_Investment_Mode_Execution_Alignment_Plan.md)
+- [Investment Mode Backend Runbook](./1_Engineering/14_Investment_Mode_Backend_Runbook.md)
 
 ### Current Source of Truth: Investment Mode / Tradeability
 - [Dual-Lane Operations](./2_Intelligence/39_Tradeability_Dual_Lane_Operations.md)
 - [Investment Mode Backend Runbook](./1_Engineering/14_Investment_Mode_Backend_Runbook.md)
 - [Investment Mode Product Layer](./3_Product/Specs/47_Investment_Mode_Product_Layer.md)
 - [Admin Tradeability Control Tower](./3_Product/Specs/48_Admin_Tradeability_Control_Tower.md)
-- [Execution Alignment Record](./1_Engineering/19_Investment_Mode_Execution_Alignment_Plan.md)
 
 ### [2_Intelligence/](./2_Intelligence/) - How (Brain)
 > Project "AI Logic": Prompt engineering, model strategies, and core algorithms.
-- [Quant-AI Refactoring (Plan 40)](./2_Intelligence/40_Gemini_Quant_AI_Two_Layer_Refactoring_Plan.md)
+- [Dual-Lane Operations](./2_Intelligence/39_Tradeability_Dual_Lane_Operations.md)
 - [Context Limits Research](./2_Intelligence/27_DeepSeek_V3_Rich_Context_Limits.md)
+
+### Historical Records: Investment Mode / Tradeability
+- [Promotion Execution Plan](./1_Engineering/archive/17_Tradeability_Promotion_Execution_Plan.md)
+- [Execution Alignment Record](./1_Engineering/archive/19_Investment_Mode_Execution_Alignment_Plan.md)
+- [Quant-AI Refactoring (Plan 40)](./2_Intelligence/archive/40_Gemini_Quant_AI_Two_Layer_Refactoring_Plan.md)
+- [Tradeability Quality and Actionability (Plan 41)](./2_Intelligence/archive/41_Tradeability_Quality_and_Actionability_Plan.md)
+- [Local Tradeability Experiment Preparation](./2_Intelligence/research/42_Local_Tradeability_Experiment_Preparation.md)
 
 ### [3_Product/](./3_Product/) - What & UX
 > Project "Body": Feature manifest and specific product delivery specs.

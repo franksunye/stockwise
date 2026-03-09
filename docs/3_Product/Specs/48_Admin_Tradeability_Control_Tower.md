@@ -4,9 +4,9 @@
 > 本 Spec 聚焦“Research Lane / Production Lane / Promotion Center”的统一展示与操作边界，用于产品、前端、后端统一实现。
 
 > 关联文档：
-> - `docs/1_Engineering/17_Tradeability_Promotion_Execution_Plan.md`
+> - `docs/1_Engineering/archive/17_Tradeability_Promotion_Execution_Plan.md`
 > - `docs/2_Intelligence/39_Tradeability_Dual_Lane_Operations.md`
-> - `docs/2_Intelligence/41_Tradeability_Quality_and_Actionability_Plan.md`
+> - `docs/2_Intelligence/archive/41_Tradeability_Quality_and_Actionability_Plan.md`
 > - `docs/1_Engineering/16_Observability_Thresholds_and_Incidents.md`
 
 > 术语约定：

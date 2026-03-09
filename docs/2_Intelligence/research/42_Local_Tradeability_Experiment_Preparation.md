@@ -6,7 +6,7 @@
 当前主依据：
 - `docs/2_Intelligence/39_Tradeability_Dual_Lane_Operations.md`
 - `docs/1_Engineering/14_Investment_Mode_Backend_Runbook.md`
-- `docs/1_Engineering/17_Tradeability_Promotion_Execution_Plan.md`
+- `docs/1_Engineering/archive/17_Tradeability_Promotion_Execution_Plan.md`
 
 说明：
 

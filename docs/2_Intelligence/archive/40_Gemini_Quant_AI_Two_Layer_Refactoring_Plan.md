@@ -3,7 +3,7 @@
 **文档状态**: Completed  
 **日期**: 2026-03-06  
 **当前分支口径**: `feat/layer1-state-machine-v1`  
-**关联文档**: `39_Tradeability_Dual_Lane_Operations.md`, `27_Acceptance_Criteria_v1.md`, `41_Tradeability_Quality_and_Actionability_Plan.md`, [Spec 40 (UX)](../3_Product/Specs/40_Quant_AI_Dual_Layer_UX.md)
+**关联文档**: `../39_Tradeability_Dual_Lane_Operations.md`, `../27_Acceptance_Criteria_v1.md`, `41_Tradeability_Quality_and_Actionability_Plan.md`, [Spec 40 (UX)](../../3_Product/Specs/40_Quant_AI_Dual_Layer_UX.md)
 
 ---
 

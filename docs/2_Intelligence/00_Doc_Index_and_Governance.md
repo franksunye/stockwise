@@ -5,17 +5,13 @@
 
 ---
 
-## 1. 主文档（长期维护）
+## 1. 现行主文档（长期维护）
 
 1. `39_Tradeability_Dual_Lane_Operations.md`  
    运行手册：双轨执行、命令、核验 SQL、回滚
-2. `40_Gemini_Quant_AI_Two_Layer_Refactoring_Plan.md`  
-   已完成阶段文档：Layer-1 裁决，Layer-2 解释
-3. `41_Tradeability_Quality_and_Actionability_Plan.md`  
-   阶段性研究计划记录：收益质量优化、风险立场产品化、线上影子运行
-4. `27_Acceptance_Criteria_v1.md`  
+2. `27_Acceptance_Criteria_v1.md`  
    验收门槛：一致性、收益质量、风险、输出完整性
-5. `27_DeepSeek_V3_Rich_Context_Limits.md`  
+3. `27_DeepSeek_V3_Rich_Context_Limits.md`  
    研究边界与证据登记
 
 当前这条线的现行主依据补充为：
@@ -24,17 +20,25 @@
 2. `docs/3_Product/Specs/47_Investment_Mode_Product_Layer.md`
 3. `docs/3_Product/Specs/48_Admin_Tradeability_Control_Tower.md`
 
+## 1.1 已归档或研究中
+
+1. `archive/40_Gemini_Quant_AI_Two_Layer_Refactoring_Plan.md`
+   已完成阶段文档：Layer-1 裁决，Layer-2 解释
+2. `archive/41_Tradeability_Quality_and_Actionability_Plan.md`
+   阶段性研究计划记录：收益质量优化、风险立场产品化、线上影子运行
+3. `research/42_Local_Tradeability_Experiment_Preparation.md`
+   本地定向实验工作单，仅供研究轮次参考
+
 ---
 
 ## 2. 冲突优先级（口径冲突时）
 
 1. 运行口径：`39`
 2. 后端运行口径：`docs/1_Engineering/14_Investment_Mode_Backend_Runbook.md`
-3. 架构与职责口径：`40`
-4. 验收口径：`27_Acceptance_Criteria_v1`
-5. 产品与后台口径：`47 / 48`
-6. 研究边界：`27_DeepSeek_V3_Rich_Context_Limits`
-7. 标记为 `Historical Reference` 或位于 `archive/` 的文档：仅作历史记录，不作为现行执行依据
+3. 验收口径：`27_Acceptance_Criteria_v1`
+4. 产品与后台口径：`47 / 48`
+5. 研究边界：`27_DeepSeek_V3_Rich_Context_Limits`
+6. 标记为 `Historical Reference`、位于 `archive/` 或位于 `research/` 的文档：仅作历史记录，不作为现行执行依据
 
 ---
 

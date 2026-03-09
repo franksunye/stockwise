@@ -3,7 +3,7 @@
 **文档状态**: Historical Reference  
 **日期**: 2026-03-06  
 **承接文档**: `40_Gemini_Quant_AI_Two_Layer_Refactoring_Plan.md`  
-**关联文档**: `39_Tradeability_Dual_Lane_Operations.md`, `27_Acceptance_Criteria_v1.md`
+**关联文档**: `../39_Tradeability_Dual_Lane_Operations.md`, `../27_Acceptance_Criteria_v1.md`
 **说明**: 本文保留为阶段性研究计划记录；若与当前术语或执行口径冲突，以 `39 / 14 / 47 / 48` 为准。
 
 ---

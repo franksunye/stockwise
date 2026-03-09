@@ -15,7 +15,7 @@
 ## 当前有效主口径
 
 1. `docs/2_Intelligence/39_Tradeability_Dual_Lane_Operations.md`
-2. `docs/2_Intelligence/40_Gemini_Quant_AI_Two_Layer_Refactoring_Plan.md`
+2. `docs/2_Intelligence/archive/40_Gemini_Quant_AI_Two_Layer_Refactoring_Plan.md`
 3. `docs/2_Intelligence/27_Acceptance_Criteria_v1.md`
 4. `docs/2_Intelligence/27_DeepSeek_V3_Rich_Context_Limits.md`
 5. `docs/2_Intelligence/00_Doc_Index_and_Governance.md`

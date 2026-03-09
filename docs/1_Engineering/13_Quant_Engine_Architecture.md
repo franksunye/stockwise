@@ -3,7 +3,7 @@
 **文档状态**: Draft  
 **日期**: 2026-03-06  
 **作者**: Gemini & Frank Sun  
-**关联文档**: `10_Architecture.md`, `40_Gemini_Quant_AI_Two_Layer_Refactoring_Plan.md`
+**关联文档**: `10_Architecture.md`, `../2_Intelligence/archive/40_Gemini_Quant_AI_Two_Layer_Refactoring_Plan.md`
 
 ---
 
