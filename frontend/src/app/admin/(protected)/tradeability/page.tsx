@@ -35,6 +35,15 @@ interface TradeabilityPayload {
         confidence_low_ratio_7d: number;
         mode_pipeline_success_rate_14d: number;
         default_mode_id: string;
+        research_pool: {
+            manifest_path: string;
+            pool_name: string;
+            target_size: number;
+            actual_size: number;
+            latest_reference_date: string | null;
+            latest_price_coverage_count: number;
+            latest_signal_coverage_count: number;
+        };
     };
     production: {
         default_mode_id: string;
@@ -276,10 +285,17 @@ export default function TradeabilityControlTowerPage() {
                 tone: healthClasses(data.summary.production_health),
             },
             {
+                label: '研究池覆盖',
+                value: `${data.summary.research_pool.latest_signal_coverage_count}/${data.summary.research_pool.actual_size}`,
+                sub: `最新信号覆盖 ${data.summary.research_pool.latest_price_coverage_count}/${data.summary.research_pool.actual_size} 条行情`,
+                icon: Bot,
+                tone: 'border-sky-500/30 bg-sky-500/10 text-sky-100',
+            },
+            {
                 label: '最近审计动作',
                 value: timeline ? humanEventLabel(timeline.event_type) : '暂无',
                 sub: timeline ? `${timeline.actor || 'system'} · ${formatDateTime(timeline.created_at)}` : '暂无审计记录',
-                icon: Bot,
+                icon: BadgeCheck,
                 tone: 'border-amber-500/30 bg-amber-500/10 text-amber-100',
             },
         ];
@@ -364,19 +380,19 @@ export default function TradeabilityControlTowerPage() {
                             <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                                 <TipCard
                                     title="研究流水线"
-                                    text="看研究结论本身。这里比较候选版本和对照版本，回答“新版本是否具备升级价值”。"
+                                    text="研究流水线跑在研究池上。研究池独立于产品池，用来科学验证规则，不直接受用户关注池限制。"
                                 />
                                 <TipCard
                                     title="生产流水线"
-                                    text="看线上正式口径。这里展示当前线上配置和正式表现，回答“当前线上版本运行得怎么样”。"
+                                    text="生产流水线跑在产品池上。产品池就是用户真实形成的池子，只负责承接已经验证过的结论。"
                                 />
                                 <TipCard
                                     title="升级门禁"
                                     text="这是系统给出的升级结论。通过=允许进入升级流程；未通过=继续观察或修正；观察中=样本或观察窗口还不够。"
                                 />
                                 <TipCard
-                                    title="连续达标周数"
-                                    text="不是看单周偶然结果，而是看最近几周是否持续达标。连续达标越多，升级越稳妥。"
+                                    title="研究池覆盖"
+                                    text="看研究池当天有多少股票已经有最新行情、又有最新量化信号。这个数偏低，说明线上实验还没真正跑满。"
                                 />
                             </div>
                         </section>
@@ -498,6 +514,9 @@ export default function TradeabilityControlTowerPage() {
                                     <MetricPanel label="API 延迟 P95" value={`${data.summary.api_latency_p95_ms_24h.toFixed(0)} ms`} hint="近 24 小时" />
                                     <MetricPanel label="低置信度占比" value={pct(data.summary.confidence_low_ratio_7d)} hint="近 7 天" />
                                     <MetricPanel label="模式流水线成功率" value={pct(data.summary.mode_pipeline_success_rate_14d)} hint="近 14 天" />
+                                    <MetricPanel label="研究池大小" value={`${data.summary.research_pool.actual_size}`} hint={data.summary.research_pool.pool_name} />
+                                    <MetricPanel label="研究池行情覆盖" value={`${data.summary.research_pool.latest_price_coverage_count}/${data.summary.research_pool.actual_size}`} hint={data.summary.research_pool.latest_reference_date || '最新参考日'} />
+                                    <MetricPanel label="研究池信号覆盖" value={`${data.summary.research_pool.latest_signal_coverage_count}/${data.summary.research_pool.actual_size}`} hint={activeMarket === 'CN' ? '最新 sidecar' : '当前仅接入 CN'} />
                                     <MetricPanel label="最新行情日期" value={data.summary.latest_prices_date || '--'} hint="daily_prices" />
                                     <MetricPanel label="最新预测日期" value={data.summary.latest_prediction_date || '--'} hint="ai_predictions_v2" />
                                     <MetricPanel label="最新模式快照" value={data.summary.latest_mode_snapshot_date || '--'} hint="mode_performance_snapshot" />

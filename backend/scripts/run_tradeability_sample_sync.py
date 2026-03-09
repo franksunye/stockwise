@@ -12,8 +12,10 @@ from __future__ import annotations
 import argparse
 import os
 import sys
+import json
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
+from pathlib import Path
 from typing import Dict, List
 
 import pandas as pd
@@ -28,6 +30,41 @@ from logger import logger
 from sync.prices import _calculate_indicators_safe
 from backend.db_repo.queries import get_save_prices_sql
 from backend.quant.sample_sync_utils import CandidateRow, resolve_sync_start_date, select_cn_candidates, stable_bucket
+
+
+def load_symbols_from_manifest(manifest_path: str) -> List[str]:
+    payload = json.loads(Path(manifest_path).read_text(encoding="utf-8"))
+    symbols = [str(item.get("symbol")) for item in payload.get("symbols") or [] if item.get("symbol")]
+    if not symbols:
+        raise ValueError(f"No symbols found in manifest: {manifest_path}")
+    return symbols
+
+
+def load_manifest_candidates(market: str, manifest_path: str) -> List[CandidateRow]:
+    symbols = load_symbols_from_manifest(manifest_path)
+    conn = get_connection()
+    try:
+        cur = conn.cursor()
+        placeholders = ",".join(["?"] * len(symbols))
+        rows = cur.execute(
+            f"""
+            SELECT sm.symbol, sm.name, COALESCE(COUNT(dp.date), 0) AS row_count, MAX(dp.date) AS last_date
+            FROM stock_meta sm
+            LEFT JOIN daily_prices dp ON dp.symbol = sm.symbol
+            WHERE sm.market = ?
+              AND sm.symbol IN ({placeholders})
+            GROUP BY sm.symbol, sm.name
+            ORDER BY sm.symbol
+            """,
+            [market, *symbols],
+        ).fetchall()
+        by_symbol = {
+            str(row[0]): (str(row[0]), str(row[1]), int(row[2] or 0), str(row[3]) if row[3] else None, 0)
+            for row in rows
+        }
+        return [by_symbol[symbol] for symbol in symbols if symbol in by_symbol]
+    finally:
+        conn.close()
 
 
 def _candidate_query(market: str, limit: int, latest_market_date: str, include_global_pool: bool, include_fresh: bool) -> str:
@@ -255,6 +292,7 @@ def run_sample_sync(
     sync_meta: bool,
     include_global_pool: bool,
     include_fresh: bool,
+    research_pool_manifest: str,
 ) -> Dict[str, object]:
     before = _market_summary(market)
     if sync_meta:
@@ -264,20 +302,24 @@ def run_sample_sync(
     if not latest_market_date:
         raise RuntimeError(f"No latest market date found for market={market}. Seed daily_prices first.")
 
-    candidates = load_candidate_symbols(
-        market=market,
-        limit=target_symbols,
-        latest_market_date=latest_market_date,
-        include_global_pool=include_global_pool,
-        include_fresh=include_fresh,
-    )
+    if research_pool_manifest:
+        candidates = load_manifest_candidates(market=market, manifest_path=research_pool_manifest)
+    else:
+        candidates = load_candidate_symbols(
+            market=market,
+            limit=target_symbols,
+            latest_market_date=latest_market_date,
+            include_global_pool=include_global_pool,
+            include_fresh=include_fresh,
+        )
     logger.info(
-        "Sample sync starting. market=%s, latest_date=%s, candidates=%s, include_global_pool=%s, include_fresh=%s",
+        "Sample sync starting. market=%s, latest_date=%s, candidates=%s, include_global_pool=%s, include_fresh=%s, manifest=%s",
         market,
         latest_market_date,
         len(candidates),
         include_global_pool,
         include_fresh,
+        research_pool_manifest or "",
     )
 
     results: List[Dict[str, object]] = []
@@ -298,6 +340,7 @@ def run_sample_sync(
         "latest_market_date": latest_market_date,
         "incremental_buffer_days": incremental_buffer_days,
         "target_symbols": target_symbols,
+        "research_pool_manifest": research_pool_manifest or None,
         "selected_candidates": [
             {
                 "symbol": symbol,
@@ -327,6 +370,7 @@ def main() -> None:
     parser.add_argument("--sync-meta", action="store_true")
     parser.add_argument("--include-global-pool", action="store_true")
     parser.add_argument("--include-fresh", action="store_true")
+    parser.add_argument("--research-pool-manifest", default="", help="Optional repo-relative or absolute manifest path")
     args = parser.parse_args()
 
     payload = run_sample_sync(
@@ -338,6 +382,7 @@ def main() -> None:
         sync_meta=args.sync_meta,
         include_global_pool=args.include_global_pool,
         include_fresh=args.include_fresh,
+        research_pool_manifest=args.research_pool_manifest,
     )
     print(pd.Series(payload).to_json(force_ascii=False, indent=2))
 

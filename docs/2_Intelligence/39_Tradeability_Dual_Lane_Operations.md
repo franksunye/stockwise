@@ -32,6 +32,7 @@
 2. 研究链路（Research Quant Lane）：
    - 面向量化研究、参数校准、版本并行观测。
    - 真实输入同样来自线上/本地 `daily_prices`。
+   - 研究链路运行在“研究池”上；研究池服务于规则验证，不受当前产品关注池直接限制。
    - 结果表为：
      - `quant_tradeability_signals`
    - 默认允许并行存在 `tradeability_v1 / tradeability_v2 / future_v3` 等多个版本，不直接作为前台正式口径。
@@ -39,9 +40,30 @@
 3. 边界原则：
    - 两条链路都建立在真实市场数据上，因此都不是“假数据”。
    - 但只有生产链路属于正式产品口径；研究链路属于策略实验与治理口径。
+   - 产品链路运行在“产品池”上；产品池由真实用户形成，不作为研究实验的样本设计约束。
    - 允许复用同一套 Layer-1 计算内核；不建议将最终结果表强行合并为一套。
 
-### 1.2 为什么不直接合并成一套结果表
+### 1.2 研究池 vs 产品池
+
+为避免把“规则问题”和“样本设计问题”混在一起，当前统一采用两层池子定义：
+
+1. 研究池：
+   - 只服务量化实验。
+   - 目标是科学验证规则是否有效。
+   - 可以独立设计、分组对照、定期调整。
+   - 不受当前用户关注池直接限制。
+
+2. 产品池：
+   - 只服务正式产品承接。
+   - 由真实用户形成，不作为实验样本设计对象。
+   - 用户前台、正式模式、正式运营口径都以产品池为准。
+
+3. 运行原则：
+   - 研究池负责找结论。
+   - 产品池负责承接结论。
+   - 不允许反过来让产品池决定研究实验应看哪些股票。
+
+### 1.3 为什么不直接合并成一套结果表
 
 1. 生产链路追求口径稳定，研究链路追求版本并行与快速试错。
 2. 生产链路要回答“用户当时看到什么”；研究链路要回答“某版本在样本上表现如何”。
@@ -136,12 +158,22 @@ python backend/scripts/observe_tradeability_windows.py --market CN --strategy-ve
    - 盘后编排顺序：`daily pipeline -> sample sync -> sidecar daily`
 2. `tradeability_sidecar_daily.yml`
    - 在盘后样本补量之后执行，默认并行写入 `tradeability_v1,tradeability_v2`
+   - 这是“研究池上的日常规则实验”
+   - 这是量化规则实验，不依赖线上 AI 重新出结论；当前 `Watch / TriggeredLong / RiskOff` 由 `tradeability` 规则决定。
 3. `tradeability_experiment_weekly.yml`
    - 每周产出 v1/v2 对比 artifact
 4. `acceptance_weekly.yml`
    - 默认按 `tradeability_v2` 生成周验收快照
 5. `tradeability_shadow_universe_experiment.yml`
-   - 用于受控验证固定 shadow universe 是否能改善研究门禁与产品完成度
+   - 用于受控验证固定研究池扩样是否能改善研究门禁与产品完成度
+   - 这同样属于量化规则实验；shadow universe 的意义是扩研究池，而不是额外调用线上 AI。
+
+补充口径：
+
+1. 当前线上 `sidecar` 与 `shadow universe` 的核心输出都由量化规则产生。
+2. AI 在这条链路里目前主要承担解释层职责，不负责决定实验结论。
+3. 因此，`现有样本池` 与 `扩展 shadow 样本池` 的差异，本质是量化样本设计差异，不是 AI 模型差异。
+4. 长期目标不是保留“旧池子 + shadow 池子”两套概念，而是逐步把研究实验统一到明确维护的研究池上。
 
 ### 4.8 本地实验 vs 线上实验
 
@@ -158,6 +190,7 @@ python backend/scripts/observe_tradeability_windows.py --market CN --strategy-ve
    - 必须通过 workflow 触发，不允许依赖人工 SSH 或临时手敲命令。
    - 必须固定输入、固定脚本、固定输出、固定审计。
    - 目标是验证“这件事在真实云端数据与真实编排里能否连续成立”。
+   - 对 `sidecar` / `shadow universe` 而言，验证对象是量化规则和样本池设计，不是 AI 解释文本。
 
 ### 4.9 线上实验的约束
 
@@ -165,7 +198,7 @@ python backend/scripts/observe_tradeability_windows.py --market CN --strategy-ve
 
 1. 实验对象必须固定：
    - 使用仓库内 manifest / 固定配置。
-   - 不允许在线上临时手改 universe。
+   - 不允许在线上临时手改研究池。
 2. 数据源必须固定：
    - 必须使用 cloud 数据源。
    - 明确 `DB_SOURCE=cloud`，并通过 `TURSO_DB_URL`、`TURSO_AUTH_TOKEN` 运行。
@@ -198,15 +231,34 @@ python backend/scripts/observe_tradeability_windows.py --market CN --strategy-ve
 当前约束：
 
 1. 该实验属于 shadow experiment，不是生产默认切换。
+   - 它本质上是“研究池扩样实验”的第一版线上入口。
 2. 该实验用于验证：
    - `TriggeredLong coverage`
    - `Watch -> Triggered`
    - `consistency`
    - `observability`
    - 后续 `mode_performance_snapshot`
+   - 核心是在云端真实编排下验证“扩样本池是否让量化结果更完整”，不是验证 AI 是否更会解释。
 3. 连续观察未达标前，不允许进入 promotion。
 
-### 4.11 单票分析（功能验证）
+### 4.11 两个线上实验如何区分
+
+当前线上最容易混淆的两个实验，其实只差在“研究池是否扩样”：
+
+1. `tradeability_sidecar_daily`
+   - 在当前研究池上跑日常规则实验。
+   - 回答的是：“按我们现在定义的研究池，规则表现怎么样？”
+
+2. `tradeability_shadow_universe_experiment`
+   - 在扩大的研究池上跑同样的规则实验。
+   - 回答的是：“如果把研究池设计得更科学、更宽一些，规则结果会不会更完整？”
+
+一句话：
+
+- `sidecar daily` = 当前研究池实验
+- `shadow universe` = 研究池扩样实验
+
+### 4.12 单票分析（功能验证）
 
 ```powershell
 $env:DB_SOURCE="local"

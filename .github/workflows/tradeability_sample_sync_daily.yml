@@ -42,6 +42,11 @@ on:
         type: boolean
         required: false
         default: false
+      research_pool_manifest:
+        description: 'Repo-relative research-pool manifest path'
+        type: string
+        required: false
+        default: ''
   workflow_call:
     inputs:
       market:
@@ -78,6 +83,11 @@ on:
         type: boolean
         required: false
         default: false
+      research_pool_manifest:
+        description: 'Repo-relative research-pool manifest path'
+        type: string
+        required: false
+        default: ''
 
 concurrency:
   group: tradeability-sample-sync-${{ github.ref }}
@@ -131,12 +141,17 @@ jobs:
           if [ "${{ inputs.sync_meta }}" == "true" ]; then
             META_FLAG="--sync-meta"
           fi
+          MANIFEST_FLAG=""
+          if [ -n "${{ inputs.research_pool_manifest }}" ]; then
+            MANIFEST_FLAG="--research-pool-manifest ${{ inputs.research_pool_manifest }}"
+          fi
           python -u backend/scripts/run_tradeability_sample_sync.py \
             --market CN \
             --target-symbols "$TARGET_SYMBOLS" \
             --history-start-date "$HISTORY_START_DATE" \
             --incremental-buffer-days "$BUFFER_DAYS" \
             --max-workers "$MAX_WORKERS" \
+            $MANIFEST_FLAG \
             $META_FLAG
 
   run-hk:
@@ -186,10 +201,15 @@ jobs:
           if [ "${{ inputs.sync_meta }}" == "true" ]; then
             META_FLAG="--sync-meta"
           fi
+          MANIFEST_FLAG=""
+          if [ -n "${{ inputs.research_pool_manifest }}" ]; then
+            MANIFEST_FLAG="--research-pool-manifest ${{ inputs.research_pool_manifest }}"
+          fi
           python -u backend/scripts/run_tradeability_sample_sync.py \
             --market HK \
             --target-symbols "$TARGET_SYMBOLS" \
             --history-start-date "$HISTORY_START_DATE" \
             --incremental-buffer-days "$BUFFER_DAYS" \
             --max-workers "$MAX_WORKERS" \
+            $MANIFEST_FLAG \
             $META_FLAG

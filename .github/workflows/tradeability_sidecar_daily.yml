@@ -27,6 +27,11 @@ on:
         type: boolean
         required: false
         default: false
+      research_pool_manifest:
+        description: 'Repo-relative research-pool manifest path'
+        type: string
+        required: false
+        default: ''
   workflow_call:
     inputs:
       market:
@@ -48,6 +53,11 @@ on:
         type: boolean
         required: false
         default: false
+      research_pool_manifest:
+        description: 'Repo-relative research-pool manifest path'
+        type: string
+        required: false
+        default: ''
 
 concurrency:
   group: tradeability-sidecar-${{ github.ref }}
@@ -93,7 +103,11 @@ jobs:
           if [ -z "$STRATEGIES" ]; then
             STRATEGIES="tradeability_v1,tradeability_v2"
           fi
-          python -u backend/scripts/run_tradeability_sidecar.py --market CN --strategy-versions "$STRATEGIES" $DATE_ARG $DRY_FLAG
+          MANIFEST_FLAG=""
+          if [ -n "${{ inputs.research_pool_manifest }}" ]; then
+            MANIFEST_FLAG="--research-pool-manifest ${{ inputs.research_pool_manifest }}"
+          fi
+          python -u backend/scripts/run_tradeability_sidecar.py --market CN --strategy-versions "$STRATEGIES" $DATE_ARG $DRY_FLAG $MANIFEST_FLAG
 
   run-hk:
     runs-on: ubuntu-latest
@@ -134,4 +148,8 @@ jobs:
           if [ -z "$STRATEGIES" ]; then
             STRATEGIES="tradeability_v1,tradeability_v2"
           fi
-          python -u backend/scripts/run_tradeability_sidecar.py --market HK --strategy-versions "$STRATEGIES" $DATE_ARG $DRY_FLAG
+          MANIFEST_FLAG=""
+          if [ -n "${{ inputs.research_pool_manifest }}" ]; then
+            MANIFEST_FLAG="--research-pool-manifest ${{ inputs.research_pool_manifest }}"
+          fi
+          python -u backend/scripts/run_tradeability_sidecar.py --market HK --strategy-versions "$STRATEGIES" $DATE_ARG $DRY_FLAG $MANIFEST_FLAG

@@ -38,7 +38,25 @@ Investment Mode 与 `tradeability sidecar` 都使用真实市场数据，但职�
    - Investment Mode 的 `mode_simulated_trade_ledger` 是模拟交易台账，不是用户真实成交。
    - sidecar 也不是“假数据”，它同样基于真实行情，只是研究用途而非正式展示用途。
 
-## 1.2 当前数据血缘
+## 1.2 两层池子定义
+
+当前统一采用两层池子，避免把实验设计与产品现实混在一起：
+
+1. 研究池：
+   - 服务量化实验。
+   - 用于校准、对照、验收、扩样验证。
+   - 可以独立设计，不受当前用户关注池直接限制。
+
+2. 产品池：
+   - 服务正式产品。
+   - 由真实用户形成，不作为研究实验的样本设计边界。
+
+3. 原则：
+   - 研究池负责找结论。
+   - 产品池负责承接结论。
+   - 不允许让产品池反过来决定研究实验应该覆盖哪些股票。
+
+## 1.3 当前数据血缘
 
 线上 Investment Mode 的数据血缘为：
 
@@ -117,13 +135,14 @@ Investment Mode 当前依赖的生产编排顺序应理解为：
    - 必须通过 workflow 执行。
    - 不允许依赖人工盯跑、临时 SSH、手工改数据。
    - 目标是验证真实系统中的连续稳定性。
+   - 对 `tradeability sidecar` 和 `shadow universe` 而言，当前验证对象是量化规则与样本池设计，不是 AI 预测文本本身。
 
 ## 3.3 线上受控实验的部署要求
 
 线上受控实验必须满足以下要求：
 
 1. 固定输入：
-   - manifest、参数文件、时间窗口必须在仓库内可追踪。
+   - 研究池 manifest、参数文件、时间窗口必须在仓库内可追踪。
 2. 固定数据源：
    - 使用 cloud 数据源，不允许混入本地 SQLite。
 3. 固定输出：
@@ -154,6 +173,15 @@ Investment Mode 当前依赖的生产编排顺序应理解为：
    - `Watch -> Triggered`
    - 以及后续一致性、可观测、产品表现
 2. 保持与 Production Decision Lane 隔离，不直接改线上默认产品口径
+
+补充口径：
+
+1. `tradeability_sidecar_daily` 与 `tradeability_shadow_universe_experiment` 都属于量化规则实验。
+2. 当前实验结论由 `tradeability` 规则输出决定。
+3. AI 仍可作为产品解释层存在，但不是当前线上实验的决策引擎。
+4. 两者区别只在于：
+   - `tradeability_sidecar_daily` 跑当前研究池
+   - `tradeability_shadow_universe_experiment` 跑扩样后的研究池
 
 ## 4. 稳定性边界
 

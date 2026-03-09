@@ -14,6 +14,7 @@ import json
 import os
 import sys
 from typing import Dict, List, Optional, Sequence
+from pathlib import Path
 
 backend_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, backend_path)
@@ -27,6 +28,14 @@ from backend.engine.layer1_state import (
     list_supported_strategy_versions,
     load_market_params,
 )
+
+
+def load_symbols_from_manifest(manifest_path: str) -> List[str]:
+    payload = json.loads(Path(manifest_path).read_text(encoding="utf-8"))
+    symbols = [str(item.get("symbol")) for item in payload.get("symbols") or [] if item.get("symbol")]
+    if not symbols:
+        raise ValueError(f"No symbols found in manifest: {manifest_path}")
+    return symbols
 
 
 def ensure_sidecar_table(conn) -> None:
@@ -73,16 +82,24 @@ def resolve_target_date(cursor, market: str, target_date: Optional[str]) -> Opti
     return row[0] if row and row[0] else None
 
 
-def fetch_symbols_for_date(cursor, market: str, date_str: str) -> List[str]:
+def fetch_symbols_for_date(cursor, market: str, date_str: str, manifest_path: str = "") -> List[str]:
+    manifest_symbols = load_symbols_from_manifest(manifest_path) if manifest_path else []
+    args: list[object] = [date_str, market]
+    manifest_filter = ""
+    if manifest_symbols:
+        placeholders = ",".join(["?"] * len(manifest_symbols))
+        manifest_filter = f" AND dp.symbol IN ({placeholders})"
+        args.extend(manifest_symbols)
     rows = cursor.execute(
-        """
+        f"""
         SELECT dp.symbol
         FROM daily_prices dp
         JOIN stock_meta sm ON sm.symbol = dp.symbol
         WHERE dp.date = ? AND sm.market = ?
+        {manifest_filter}
         ORDER BY dp.symbol
         """,
-        (date_str, market),
+        tuple(args),
     ).fetchall()
     return [str(r[0]) for r in rows]
 
@@ -170,6 +187,7 @@ def main() -> None:
     parser.add_argument("--strategy-version", default=DEFAULT_STRATEGY_VERSION)
     parser.add_argument("--strategy-versions", default="", help="Comma-separated experiment versions, e.g. tradeability_v1,tradeability_v2")
     parser.add_argument("--params-file", default="", help="Optional override for single-version runs")
+    parser.add_argument("--research-pool-manifest", default="", help="Optional manifest used to restrict the experiment universe")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--vcp-ratio", type=float, default=None)
     parser.add_argument("--breakout-volume-mult", type=float, default=None)
@@ -194,7 +212,7 @@ def main() -> None:
             logger.warning(f"No target date found for market={args.market}")
             return
 
-        symbols = fetch_symbols_for_date(cur, args.market, target_date)
+        symbols = fetch_symbols_for_date(cur, args.market, target_date, args.research_pool_manifest)
         if not symbols:
             logger.warning(f"No symbols found for market={args.market} date={target_date}")
             return
@@ -248,6 +266,7 @@ def main() -> None:
             "market": args.market,
             "date": target_date,
             "dry_run": args.dry_run,
+            "research_pool_manifest": args.research_pool_manifest or None,
             "strategies": run_summary,
         }
         logger.info(f"Sidecar done. market={args.market}, date={target_date}, summary={run_summary}, dry_run={args.dry_run}")

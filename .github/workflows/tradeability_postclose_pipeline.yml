@@ -55,6 +55,11 @@ on:
         type: boolean
         required: false
         default: false
+      cn_research_pool_manifest:
+        description: 'Repo-relative CN research-pool manifest path'
+        type: string
+        required: false
+        default: 'backend/strategy_config/research_pool/cn_core_500.json'
 
 concurrency:
   group: tradeability-postclose-${{ github.ref }}
@@ -90,6 +95,7 @@ jobs:
       incremental_buffer_days: ${{ inputs.incremental_buffer_days || 14 }}
       max_workers: ${{ inputs.max_workers || 2 }}
       sync_meta: ${{ inputs.sync_meta || false }}
+      research_pool_manifest: ${{ inputs.cn_research_pool_manifest || 'backend/strategy_config/research_pool/cn_core_500.json' }}
     secrets: inherit
 
   sidecar-cn:
@@ -100,6 +106,7 @@ jobs:
       market: 'CN'
       strategy_versions: ${{ inputs.strategy_versions || 'tradeability_v1,tradeability_v2' }}
       dry_run: ${{ inputs.dry_run || false }}
+      research_pool_manifest: ${{ inputs.cn_research_pool_manifest || 'backend/strategy_config/research_pool/cn_core_500.json' }}
     secrets: inherit
 
   sample-sync-hk:

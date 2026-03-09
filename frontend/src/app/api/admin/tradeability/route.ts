@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { Client } from '@libsql/client';
 import Database from 'better-sqlite3';
+import fs from 'node:fs';
+import path from 'node:path';
 import { requireAdminAuth } from '@/lib/admin-auth';
 import { getDbClient } from '@/lib/db';
 import { DEFAULT_MODE_ID, getModeDefinition } from '@/lib/investment-mode';
@@ -22,6 +24,16 @@ type ResearchMetric = {
     riskoff_coverage_pct: number;
     avg_opportunity_score: number;
     latest_date: string | null;
+};
+
+type ResearchPoolSummary = {
+    manifest_path: string;
+    pool_name: string;
+    target_size: number;
+    actual_size: number;
+    latest_reference_date: string | null;
+    latest_price_coverage_count: number;
+    latest_signal_coverage_count: number;
 };
 
 function num(value: unknown, fallback = 0): number {
@@ -53,6 +65,65 @@ function queryOneLocal(db: Database.Database, sql: string, args: Array<string | 
 async function queryOne(client: Client, sql: string, args: Array<string | number> = []): Promise<DbRow | null> {
     const rows = await queryRows(client, sql, args);
     return rows[0] ?? null;
+}
+
+function resolveRepoPath(relativePath: string): string {
+    const cwd = process.cwd();
+    const repoRoot = cwd.endsWith('/frontend') ? path.resolve(cwd, '..') : cwd;
+    return path.resolve(repoRoot, relativePath);
+}
+
+function loadManifestSymbols(manifestPath: string): { pool_name: string; target_size: number; actual_size: number; latest_reference_date: string | null; symbols: string[] } {
+    const raw = fs.readFileSync(resolveRepoPath(manifestPath), 'utf-8');
+    const payload = JSON.parse(raw) as Record<string, unknown>;
+    const symbols = Array.isArray(payload.symbols)
+        ? payload.symbols
+            .map((item) => {
+                if (!item || typeof item !== 'object') return null;
+                const symbol = (item as Record<string, unknown>).symbol;
+                return typeof symbol === 'string' ? symbol : null;
+            })
+            .filter((item): item is string => Boolean(item))
+        : [];
+    return {
+        pool_name: typeof payload.pool_name === 'string' ? payload.pool_name : 'research_pool',
+        target_size: typeof payload.target_size === 'number' ? payload.target_size : symbols.length,
+        actual_size: typeof payload.actual_size === 'number' ? payload.actual_size : symbols.length,
+        latest_reference_date: typeof payload.latest_reference_date === 'string' ? payload.latest_reference_date : null,
+        symbols,
+    };
+}
+
+async function queryCountForSymbols(client: Client, table: 'daily_prices' | 'quant_tradeability_signals', market: string, dateColumn: string, latestDate: string | null, symbols: string[]): Promise<number> {
+    if (!latestDate || !symbols.length) return 0;
+    const placeholders = symbols.map(() => '?').join(',');
+    const rows = await queryRows(
+        client,
+        `SELECT COUNT(DISTINCT dp.symbol) AS value
+         FROM ${table} dp
+         JOIN stock_meta sm ON sm.symbol = dp.symbol
+         WHERE sm.market = ?
+           AND dp.${dateColumn} = ?
+           AND dp.symbol IN (${placeholders})`,
+        [market, latestDate, ...symbols],
+    );
+    return num(rows[0]?.value);
+}
+
+function queryCountForSymbolsLocal(db: Database.Database, table: 'daily_prices' | 'quant_tradeability_signals', market: string, dateColumn: string, latestDate: string | null, symbols: string[]): number {
+    if (!latestDate || !symbols.length) return 0;
+    const placeholders = symbols.map(() => '?').join(',');
+    const row = queryOneLocal(
+        db,
+        `SELECT COUNT(DISTINCT dp.symbol) AS value
+         FROM ${table} dp
+         JOIN stock_meta sm ON sm.symbol = dp.symbol
+         WHERE sm.market = ?
+           AND dp.${dateColumn} = ?
+           AND dp.symbol IN (${placeholders})`,
+        [market, latestDate, ...symbols],
+    );
+    return num(row?.value);
 }
 
 function parseSummaryJson(raw: unknown): Record<string, unknown> {
@@ -110,6 +181,8 @@ export async function GET(request: Request) {
     const client = getDbClient();
     const defaultMode = getModeDefinition(DEFAULT_MODE_ID);
     const configuredStrategyVersion = defaultMode?.strategy_mapping.strategy_version || 'tradeability_v2';
+    const cnResearchManifestPath = 'backend/strategy_config/research_pool/cn_core_500.json';
+    const cnResearchPool = loadManifestSymbols(cnResearchManifestPath);
 
     const latencySeriesSql = `
         SELECT latency_ms
@@ -216,6 +289,15 @@ export async function GET(request: Request) {
         let hkLatestDateRow: DbRow | null = null;
         let primaryVersionRows: DbRow[] = [];
         let latestSnapshotRows: DbRow[] = [];
+        let cnResearchPoolSummary: ResearchPoolSummary = {
+            manifest_path: cnResearchManifestPath,
+            pool_name: cnResearchPool.pool_name,
+            target_size: cnResearchPool.target_size,
+            actual_size: cnResearchPool.actual_size,
+            latest_reference_date: cnResearchPool.latest_reference_date,
+            latest_price_coverage_count: 0,
+            latest_signal_coverage_count: 0,
+        };
 
         if (strategy === 'cloud') {
             const db = client as Client;
@@ -263,6 +345,11 @@ export async function GET(request: Request) {
                 cnLatestDate ? queryRows(db, researchMetricsSql, ['CN', shiftDate(cnLatestDate, -6)]) : Promise.resolve([]),
                 hkLatestDate ? queryRows(db, researchMetricsSql, ['HK', shiftDate(hkLatestDate, -6)]) : Promise.resolve([]),
             ]);
+            cnResearchPoolSummary = {
+                ...cnResearchPoolSummary,
+                latest_price_coverage_count: await queryCountForSymbols(db, 'daily_prices', 'CN', 'date', latestPricesRow?.value ? String(latestPricesRow.value) : null, cnResearchPool.symbols),
+                latest_signal_coverage_count: await queryCountForSymbols(db, 'quant_tradeability_signals', 'CN', 'date', cnLatestDate || null, cnResearchPool.symbols),
+            };
 
             return buildResponse({
                 strategy,
@@ -277,6 +364,7 @@ export async function GET(request: Request) {
                 latestModeSnapshots: latestModeSnapshotsRow?.value ? String(latestModeSnapshotsRow.value) : null,
                 latestSnapshotRows,
                 primaryVersionRows,
+                researchPool: cnResearchPoolSummary,
                 markets: {
                     CN: { verdictRow: cnVerdictRow, auditRows: cnAuditRows, researchRows: cnResearchRows },
                     HK: { verdictRow: hkVerdictRow, auditRows: hkAuditRows, researchRows: hkResearchRows },
@@ -307,6 +395,11 @@ export async function GET(request: Request) {
         const hkLatestDate = String(hkLatestDateRow?.latest_date || '');
         const cnResearchRows = cnLatestDate ? queryRowsLocal(db, researchMetricsSql, ['CN', shiftDate(cnLatestDate, -6)]) : [];
         const hkResearchRows = hkLatestDate ? queryRowsLocal(db, researchMetricsSql, ['HK', shiftDate(hkLatestDate, -6)]) : [];
+        cnResearchPoolSummary = {
+            ...cnResearchPoolSummary,
+            latest_price_coverage_count: queryCountForSymbolsLocal(db, 'daily_prices', 'CN', 'date', latestPricesRow?.value ? String(latestPricesRow.value) : null, cnResearchPool.symbols),
+            latest_signal_coverage_count: queryCountForSymbolsLocal(db, 'quant_tradeability_signals', 'CN', 'date', cnLatestDate || null, cnResearchPool.symbols),
+        };
 
         db.close();
 
@@ -323,6 +416,7 @@ export async function GET(request: Request) {
             latestModeSnapshots: latestModeSnapshotsRow?.value ? String(latestModeSnapshotsRow.value) : null,
             latestSnapshotRows,
             primaryVersionRows,
+            researchPool: cnResearchPoolSummary,
             markets: {
                 CN: { verdictRow: cnVerdictRow, auditRows: cnAuditRows, researchRows: cnResearchRows },
                 HK: { verdictRow: hkVerdictRow, auditRows: hkAuditRows, researchRows: hkResearchRows },
@@ -354,6 +448,7 @@ function buildResponse(input: {
     latestModeSnapshots: string | null;
     latestSnapshotRows: DbRow[];
     primaryVersionRows: DbRow[];
+    researchPool: ResearchPoolSummary;
     markets: Record<string, { verdictRow: DbRow | null; auditRows: DbRow[]; researchRows: DbRow[] }>;
 }) {
     const latencies = input.latencyRows.map((row) => num(row.latency_ms)).filter((value) => value > 0);
@@ -475,6 +570,7 @@ function buildResponse(input: {
             confidence_low_ratio_7d: Number(confidenceLowRatio.toFixed(4)),
             mode_pipeline_success_rate_14d: Number(modeSuccessRate.toFixed(4)),
             default_mode_id: DEFAULT_MODE_ID,
+            research_pool: input.researchPool,
         },
         production: {
             default_mode_id: DEFAULT_MODE_ID,
