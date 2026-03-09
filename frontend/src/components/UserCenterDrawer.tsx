@@ -11,6 +11,7 @@ import { getCurrentUser, restoreUserIdentity } from '@/lib/user';
 import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
 import { isPushSupported, subscribeUserToPush } from '@/lib/notifications';
 import { shouldEnableHighPerformance } from '@/lib/device-utils';
+import { getRiskBandLabel } from '@/lib/investment-mode';
 import { IdentityPassport } from '@/components/IdentityPassport';
 import { InvestmentModeCard } from '@/components/InvestmentModeCard';
 import { useUserProfile } from '@/hooks/useUserProfile';
@@ -65,6 +66,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
   const [showSupport, setShowSupport] = useState(false);
   const [showLearn, setShowLearn] = useState(false);
   const [isAndroid, setIsAndroid] = useState(false);
+  const [currentMode, setCurrentMode] = useState<{name: string, risk_band: string, tagline: string, default_horizon: string} | null>(null);
 
   // Fix: Separate visibility state from loading state
   const [showEmailForm, setShowEmailForm] = useState(false);
@@ -95,6 +97,24 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
     if (isOpen) {
       refreshProfile({ force: true });
       checkPushStatus();
+      
+      // Load and fetch real investment mode data
+      const cachedMode = localStorage.getItem('stockwise:investment-mode-card');
+      if (cachedMode) {
+          try {
+              const parsed = JSON.parse(cachedMode);
+              if (parsed?.modeResponse?.mode) {
+                  setCurrentMode(parsed.modeResponse.mode);
+              }
+          } catch(e) {}
+      }
+      fetch('/api/user/mode/summary', { cache: 'no-store' })
+          .then(res => res.json())
+          .then(data => {
+              if (data.mode) setCurrentMode(data.mode);
+          })
+          .catch(console.error);
+          
     } else {
       setShowPricing(false);
       setShowIdentityCenter(false);
@@ -463,7 +483,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                       投资模式
                                   </h4>
                                   <span className="px-2 py-0.5 rounded-lg bg-indigo-500/10 text-[10px] font-bold text-indigo-400 border border-indigo-500/20">
-                                      稳健波段
+                                      {currentMode ? currentMode.name : '加载中...'}
                                   </span>
                               </div>
                               <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform duration-300 ${showInvestmentModeDetails ? 'rotate-180' : ''}`} />
@@ -475,18 +495,18 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                       <div className="bg-white/[0.02] border-t border-white/5 px-5 py-4">
                                           <div className="grid grid-cols-2 gap-2 mb-3">
                                             <div className="bg-white/5 rounded-2xl p-3 border border-white/5 text-left">
-                                              <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-1">推荐持仓区间</div>
-                                              <div className="text-base font-black text-white">3-7 <span className="text-[10px] font-bold text-slate-500">交易日</span></div>
+                                              <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-1">建议评估周期</div>
+                                              <div className="text-base font-black text-white">{currentMode?.default_horizon ? currentMode.default_horizon.replace('d', '') : '--'} <span className="text-[10px] font-bold text-slate-500">自然日</span></div>
                                             </div>
                                             <div className="bg-white/5 rounded-2xl p-3 border border-white/5 text-left">
                                               <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-1">系统风险评级</div>
-                                              <div className="text-base font-black text-amber-400">中低风险</div>
+                                              <div className="text-base font-black text-amber-400">{getRiskBandLabel((currentMode?.risk_band as 'low' | 'medium' | 'high') || 'medium')}</div>
                                             </div>
                                           </div>
                                           
                                           <div className="mb-4">
                                               <p className="text-[10px] text-slate-500 leading-relaxed text-left">
-                                                当前模式侧重于右侧交易信号，寻找带有盈亏比优势的波段区间。若目标跌破核心防守位，将强制转化为防守动作以规避风险敞口。
+                                                {currentMode?.tagline || '模式数据加载中...'}
                                               </p>
                                           </div>
 
