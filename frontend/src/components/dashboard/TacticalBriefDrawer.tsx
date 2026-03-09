@@ -481,7 +481,7 @@ export function TacticalBriefDrawer({
                      {/* Header */}
                      <div className="mb-4">
                         <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
-                           <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" /> 场景建议
+                           <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" /> 交易预案
                         </h3>
                      </div>
 
