@@ -1,0 +1,167 @@
+name: Tradeability Promote Execute
+
+on:
+  workflow_dispatch:
+    inputs:
+      market:
+        description: "Target market"
+        type: choice
+        required: true
+        default: "CN"
+        options:
+        - CN
+        - HK
+      candidate_version:
+        description: "Candidate strategy version"
+        type: string
+        required: true
+        default: "tradeability_v2"
+      baseline_version:
+        description: "Baseline strategy version"
+        type: string
+        required: true
+        default: "tradeability_v1"
+      week_end:
+        description: "YYYY-MM-DD (optional)"
+        type: string
+        required: false
+        default: ""
+      lookback_weeks:
+        description: "Rolling lookback weeks"
+        type: number
+        required: false
+        default: 4
+      min_pass_weeks:
+        description: "Minimum consecutive pass weeks"
+        type: number
+        required: false
+        default: 2
+      approver:
+        description: "Approver identity"
+        type: string
+        required: true
+      approval_reason:
+        description: "Approval rationale"
+        type: string
+        required: true
+      force_approve:
+        description: "Allow approval when verdict is FAIL"
+        type: boolean
+        required: false
+        default: false
+      execute_promotion:
+        description: "Apply source change after approval"
+        type: boolean
+        required: false
+        default: false
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Generate Promotion Inputs
+        env:
+          PYTHONUNBUFFERED: "1"
+          DB_SOURCE: cloud
+          TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+        run: |
+          mkdir -p tmp/tradeability_calibration tmp/tradeability_experiments tmp/tradeability_promotion
+          MARKET_LOWER=$(echo "${{ inputs.market }}" | tr '[:upper:]' '[:lower:]')
+          WEEK_END_ARG=""
+          if [ -n "${{ inputs.week_end }}" ]; then
+            WEEK_END_ARG="--end-date ${{ inputs.week_end }}"
+          fi
+          python -u backend/scripts/run_tradeability_weekly_calibration.py \
+            --market "${{ inputs.market }}" \
+            --strategy-versions "${{ inputs.candidate_version }},${{ inputs.baseline_version }}" \
+            --output-json "tmp/tradeability_calibration/${MARKET_LOWER}_weekly_calibration.json" \
+            --output-md "tmp/tradeability_calibration/${MARKET_LOWER}_weekly_calibration.md"
+          python -u backend/scripts/run_tradeability_experiment.py \
+            --market "${{ inputs.market }}" \
+            --strategy-versions "${{ inputs.candidate_version }},${{ inputs.baseline_version }}" \
+            $WEEK_END_ARG \
+            --output-json "tmp/tradeability_experiments/${MARKET_LOWER}_strategy_experiment.json" \
+            --output-md "tmp/tradeability_experiments/${MARKET_LOWER}_strategy_experiment.md"
+
+      - name: Generate Verdict
+        env:
+          PYTHONUNBUFFERED: "1"
+          DB_SOURCE: cloud
+          TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+        run: |
+          WEEK_END_ARG=""
+          if [ -n "${{ inputs.week_end }}" ]; then
+            WEEK_END_ARG="--week-end ${{ inputs.week_end }}"
+          fi
+          python -u backend/scripts/metrics_tradeability_promotion.py \
+            --market "${{ inputs.market }}" \
+            --candidate-version "${{ inputs.candidate_version }}" \
+            --baseline-version "${{ inputs.baseline_version }}" \
+            --lookback-weeks "${{ inputs.lookback_weeks }}" \
+            --min-pass-weeks "${{ inputs.min_pass_weeks }}" \
+            $WEEK_END_ARG \
+            --calibration-dir tmp/tradeability_calibration \
+            --experiment-dir tmp/tradeability_experiments \
+            --output-json tmp/tradeability_promotion/promotion_verdict.json \
+            --output-md tmp/tradeability_promotion/promotion_verdict.md
+
+      - name: Create Approval Artifact
+        env:
+          PYTHONUNBUFFERED: "1"
+          DB_SOURCE: cloud
+          TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+        run: |
+          FORCE_ARG=""
+          if [ "${{ inputs.force_approve }}" = "true" ]; then
+            FORCE_ARG="--force"
+          fi
+          python -u backend/scripts/approve_tradeability_promotion.py \
+            --verdict-json tmp/tradeability_promotion/promotion_verdict.json \
+            --approver "${{ inputs.approver }}" \
+            --reason "${{ inputs.approval_reason }}" \
+            --approval-json tmp/tradeability_promotion/promotion_approval.json \
+            $FORCE_ARG
+
+      - name: Promote Dry Run Or Execute
+        env:
+          PYTHONUNBUFFERED: "1"
+          DB_SOURCE: cloud
+          TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+        run: |
+          EXECUTE_ARG=""
+          if [ "${{ inputs.execute_promotion }}" = "true" ]; then
+            EXECUTE_ARG="--execute"
+          fi
+          python -u backend/scripts/promote_tradeability_bundle.py \
+            --verdict-json tmp/tradeability_promotion/promotion_verdict.json \
+            --approval-json tmp/tradeability_promotion/promotion_approval.json \
+            --market "${{ inputs.market }}" \
+            --baseline-version "${{ inputs.baseline_version }}" \
+            --actor "github-actions:${{ github.actor }}" \
+            $EXECUTE_ARG
+
+      - name: Upload Promotion Bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: tradeability-promotion-bundle
+          path: tmp/tradeability_promotion/*
+          if-no-files-found: error
+          retention-days: 21
