@@ -631,14 +631,17 @@ function TipCard({ title, text }: { title: string; text: string }) {
 
 function HeaderTip({ label, tip }: { label: string; tip: string }) {
     return (
-        <span className="inline-flex items-center gap-1">
+        <span className="group relative inline-flex items-center gap-1">
             <span>{label}</span>
-            <span
-                className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-white/15 bg-white/[0.05] text-[10px] normal-case text-slate-400 cursor-help"
-                title={tip}
-                aria-label={`${label}说明：${tip}`}
+            <button
+                type="button"
+                className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-white/15 bg-white/[0.05] text-[10px] normal-case text-slate-400 cursor-help transition hover:border-cyan-400/40 hover:text-cyan-200"
+                aria-label={`${label}说明`}
             >
                 ?
+            </button>
+            <span className="pointer-events-none absolute left-0 top-full z-20 mt-2 hidden w-56 rounded-xl border border-cyan-400/20 bg-[#0b0d13] px-3 py-2 text-left text-[11px] normal-case leading-5 text-slate-300 shadow-2xl shadow-black/40 group-hover:block group-focus-within:block">
+                {tip}
             </span>
         </span>
     );
