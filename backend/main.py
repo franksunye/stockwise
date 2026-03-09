@@ -41,6 +41,13 @@ if __name__ == "__main__":
     parser.add_argument('--sync-hk-short', action='store_true', help='执行港股做空数据同步 (生产任务)')
     parser.add_argument('--sync-hk-short-poc', action='store_true', help='执行港股做空数据 POC 同步')
     parser.add_argument('--symbol', type=str, help='指定股票代码')
+    parser.add_argument(
+        '--sync-mode',
+        type=str,
+        default='core',
+        choices=['core', 'periods', 'full'],
+        help='单票按需同步模式: core=daily+realtime, periods=weekly+monthly, full=daily+weekly+monthly+realtime'
+    )
     parser.add_argument('--market', type=str, choices=['CN', 'HK'], help='只同步/分析特定市场')
     parser.add_argument(
         '--model',
@@ -180,13 +187,53 @@ if __name__ == "__main__":
     # 6. Manual Symbol Sync
     elif args.symbol:
         with JobGuard(f"Manual Sync ({args.symbol})", task_type="ingestion", triggered_by="user", channel_alert=False) as job:
-            process_stock_period(args.symbol, period="daily")
-            process_stock_period(args.symbol, period="weekly")
-            process_stock_period(args.symbol, period="monthly")
-            logger.info(f"⚡ [On-Demand] Fetching realtime snapshot for {args.symbol}...")
-            stats = sync_spot_prices([args.symbol])
-            if stats:
-                job.set_stats(**stats)
+            sync_mode = args.sync_mode or "core"
+            job.set_dimensions(symbol=args.symbol, sync_mode=sync_mode)
+
+            daily_ok = True
+            weekly_ok = True
+            monthly_ok = True
+            realtime_ok = True
+
+            if sync_mode in ("core", "full"):
+                daily_ok = process_stock_period(args.symbol, period="daily")
+
+            if sync_mode in ("periods", "full"):
+                weekly_ok = process_stock_period(args.symbol, period="weekly")
+                monthly_ok = process_stock_period(args.symbol, period="monthly")
+
+            job.set_stats(
+                sync_mode=sync_mode,
+                daily_ok=bool(daily_ok),
+                weekly_ok=bool(weekly_ok),
+                monthly_ok=bool(monthly_ok),
+            )
+
+            if sync_mode in ("core", "full") and not daily_ok:
+                raise RuntimeError(f"Manual sync failed: daily period could not be updated for {args.symbol}")
+
+            degraded_periods = [
+                period for period, ok in [("weekly", weekly_ok), ("monthly", monthly_ok)] if not ok
+            ]
+            if sync_mode in ("periods", "full") and degraded_periods:
+                logger.warning(
+                    f"⚠️ [On-Demand] {args.symbol} completed with degraded periods: {', '.join(degraded_periods)}"
+                )
+
+            if sync_mode in ("core", "full"):
+                logger.info(f"⚡ [On-Demand] Fetching realtime snapshot for {args.symbol}...")
+                stats = sync_spot_prices([args.symbol])
+                realtime_ok = bool(stats)
+                if stats:
+                    job.set_stats(**stats)
+                else:
+                    job.set_stats(realtime_ok=False)
+
+            if sync_mode == "periods" and not (weekly_ok or monthly_ok):
+                raise RuntimeError(f"Manual sync failed: no period data could be updated for {args.symbol}")
+
+            if sync_mode in ("core", "full") and not realtime_ok:
+                logger.warning(f"⚠️ [On-Demand] {args.symbol} daily sync succeeded but realtime snapshot was unavailable.")
         sys.exit(0)
 
     # 7. Default Full Market Sync

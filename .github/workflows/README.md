@@ -11,7 +11,7 @@
 | `daily_sync_hk.yml`      | 定时 (UTC 8:30)  | 港股数据+AI分析 | 🔴 数据同步和AI分析耦合  |
 | `realtime-sync.yml`      | 手动/Worker      | 盘中实时同步    | ✅ 职责单一              |
 | `metadata_sync.yml`      | 定时 (UTC 22:00) | 元数据同步      | ✅ 职责单一              |
-| `on-demand-sync.yml`     | 手动             | 单股票同步      | ✅ 职责单一              |
+| `on-demand-sync.yml`     | 手动             | 单股票按需补数  | ✅ 面向前端体验补齐       |
 | `admin_manage_codes.yml` | 手动             | 邀请码管理      | ✅ 职责单一              |
 
 ### 主要问题
@@ -110,7 +110,7 @@
 
 | Workflow               | 使用场景             |
 | ---------------------- | -------------------- |
-| `data_sync_single.yml` | 新增股票、单股补数据 |
+| `data_sync_single.yml` | 新增股票后快速补齐前端最小可展示数据；周期补数为可选扩展 |
 | `ai_backfill.yml`      | 补跑历史 AI 分析     |
 | `ai_analyze_cn/hk.yml` | 重新运行当日分析     |
 | `admin_codes.yml`      | 邀请码管理           |

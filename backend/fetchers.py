@@ -315,11 +315,24 @@ class SmartFetcher(BaseFetcher):
                 df = fetcher.fetch_history(symbol, period, start_date)
                 if not df.empty:
                     return df
-                logger.warning(f"⚠️ {fetcher.__class__.__name__} 返回空數據，嘗試下一個源...")
+                logger.warning(f"⚠️ {fetcher.__class__.__name__} 返回空數據: {symbol} {period}，嘗試下一個源...")
             except Exception as e:
-                logger.error(f"❌ {fetcher.__class__.__name__} 執行異常: {e}")
+                logger.error(f"❌ {fetcher.__class__.__name__} 執行異常: {symbol} {period} - {e}")
+
+        # Period endpoints from public data sources are less stable than daily.
+        # If weekly/monthly failed, fall back to daily history and let prices.py normalize.
+        if period in ("weekly", "monthly"):
+            logger.warning(f"⚠️ {symbol} {period} 直连源失败，回退为 daily 历史派生。")
+            for fetcher in self.fetchers:
+                try:
+                    df = fetcher.fetch_history(symbol, "daily", start_date)
+                    if not df.empty:
+                        logger.info(f"✅ {symbol} {period} 回退成功：使用 daily 历史派生。")
+                        return df
+                except Exception as e:
+                    logger.warning(f"⚠️ {fetcher.__class__.__name__} daily fallback failed: {symbol} - {e}")
         
-        logger.error(f"❌ 所有數據源均失效: {symbol}")
+        logger.error(f"❌ 所有數據源均失效: {symbol} ({period})")
         return pd.DataFrame()
 
 
@@ -584,4 +597,3 @@ def sync_profiles(limit=20):
         logger.error(f"❌ 同步公司概况失败: {e}")
     finally:
         conn.close()
-
