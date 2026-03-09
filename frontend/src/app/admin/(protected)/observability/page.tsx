@@ -73,6 +73,20 @@ function stateBadge(state?: 'ok' | 'warn' | 'critical') {
   return 'text-emerald-300 border-emerald-500/30 bg-emerald-500/10';
 }
 
+function stateLabel(state?: 'ok' | 'warn' | 'critical') {
+  if (state === 'critical') return '严重';
+  if (state === 'warn') return '告警';
+  if (state === 'ok') return '正常';
+  return '--';
+}
+
+function alertLabel(metric: string) {
+  if (metric === 'api_latency_p95_ms') return 'API 延迟 P95';
+  if (metric === 'confidence_low_ratio_7d') return '低置信度占比';
+  if (metric === 'mode_pipeline_success_rate_14d') return '模式流水线成功率';
+  return metric;
+}
+
 export default function ObservabilityPage() {
   const [data, setData] = useState<ObservabilityPayload | null>(null);
   const [loading, setLoading] = useState(true);
@@ -116,16 +130,16 @@ export default function ObservabilityPage() {
               <ArrowLeft className="w-4 h-4 text-slate-300" />
             </Link>
             <div>
-              <h1 className="text-2xl font-black tracking-tight">OBSERVABILITY</h1>
-              <p className="text-xs text-slate-500">API 延迟 / AI 置信度 / Mode Pipeline 成功率</p>
+              <h1 className="text-2xl font-black tracking-tight">可观测性看板</h1>
+              <p className="text-xs text-slate-500">查看 API 延迟、AI 置信度和模式流水线运行状态</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <span className={`text-xs px-2 py-1 rounded border ${stateBadge(data?.overall_state)}`}>
-              {data?.overall_state ? `State: ${data.overall_state.toUpperCase()}` : 'State: --'}
+              {data?.overall_state ? `状态：${stateLabel(data.overall_state)}` : '状态：--'}
             </span>
             <div className="text-xs text-slate-500">
-              {data?.generated_at ? `Updated: ${new Date(data.generated_at).toLocaleString('zh-CN', { hour12: false })}` : '--'}
+              {data?.generated_at ? `更新时间：${new Date(data.generated_at).toLocaleString('zh-CN', { hour12: false })}` : '--'}
             </div>
           </div>
         </header>
@@ -140,27 +154,27 @@ export default function ObservabilityPage() {
               <div className="rounded-2xl border border-indigo-500/30 bg-indigo-500/10 p-5">
                 <div className="flex items-center gap-2 text-indigo-300 text-xs uppercase tracking-widest font-black">
                   <Gauge className="w-4 h-4" />
-                  API Latency (24h)
+                  API 延迟（24 小时）
                 </div>
                 <p className="mt-3 text-3xl font-black">{headline?.latency || '--'}</p>
-                <p className="text-xs text-slate-400 mt-2">P50: {data?.api_latency.p50_ms_24h ?? 0}ms | P95: {data?.api_latency.p95_ms_24h ?? 0}ms</p>
+                <p className="text-xs text-slate-400 mt-2">P50：{data?.api_latency.p50_ms_24h ?? 0}ms | P95：{data?.api_latency.p95_ms_24h ?? 0}ms</p>
               </div>
               <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-5">
                 <div className="flex items-center gap-2 text-emerald-300 text-xs uppercase tracking-widest font-black">
                   <Waves className="w-4 h-4" />
-                  AI Confidence (7d)
+                  AI 置信度（7 天）
                 </div>
                 <p className="mt-3 text-3xl font-black">{headline?.confidence || '--'}</p>
-                <p className="text-xs text-slate-400 mt-2">High: {data ? pct(data.ai_confidence.high_ratio_7d) : '--'} | Low: {data ? pct(data.ai_confidence.low_ratio_7d) : '--'}</p>
+                <p className="text-xs text-slate-400 mt-2">高：{data ? pct(data.ai_confidence.high_ratio_7d) : '--'} | 低：{data ? pct(data.ai_confidence.low_ratio_7d) : '--'}</p>
               </div>
               <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-5">
                 <div className="flex items-center gap-2 text-amber-300 text-xs uppercase tracking-widest font-black">
                   <ShieldAlert className="w-4 h-4" />
-                  Mode Pipeline (14d)
+                  模式流水线（14 天）
                 </div>
                 <p className="mt-3 text-3xl font-black">{headline?.modeSuccess || '--'}</p>
                 <p className="text-xs text-slate-400 mt-2">
-                  Total: {data?.mode_pipeline.total_runs_14d ?? 0} | Failed: {data?.mode_pipeline.failed_runs_14d ?? 0}
+                  总运行：{data?.mode_pipeline.total_runs_14d ?? 0} | 失败：{data?.mode_pipeline.failed_runs_14d ?? 0}
                 </p>
               </div>
             </section>
@@ -184,14 +198,14 @@ export default function ObservabilityPage() {
                   {(data?.ai_confidence.trend_7d || []).map((row) => (
                     <div key={row.date} className="flex justify-between bg-black/20 border border-white/5 rounded-lg px-3 py-2">
                       <span className="text-slate-400">{row.date}</span>
-                      <span className="font-mono text-white">{pct(row.avg_confidence)} (H {pct(row.high_ratio)} / L {pct(row.low_ratio)})</span>
+                      <span className="font-mono text-white">{pct(row.avg_confidence)}（高 {pct(row.high_ratio)} / 低 {pct(row.low_ratio)}）</span>
                     </div>
                   ))}
                 </div>
               </article>
 
               <article className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                <h2 className="text-sm font-black mb-3 flex items-center gap-2"><Activity className="w-4 h-4 text-amber-400" /> Mode Pipeline 趋势（14天）</h2>
+                <h2 className="text-sm font-black mb-3 flex items-center gap-2"><Activity className="w-4 h-4 text-amber-400" /> 模式流水线趋势（14天）</h2>
                 <div className="space-y-2 text-xs">
                   {(data?.mode_pipeline.trend_14d || []).map((row) => (
                     <div key={row.date} className="flex justify-between bg-black/20 border border-white/5 rounded-lg px-3 py-2">
@@ -209,13 +223,13 @@ export default function ObservabilityPage() {
                 {(data?.alerts || []).map((a) => (
                   <div key={a.metric} className="rounded-lg border border-white/10 bg-black/20 px-3 py-2">
                     <div className="flex items-center justify-between gap-3">
-                      <span className="font-mono text-slate-300">{a.metric}</span>
-                      <span className={`px-2 py-0.5 rounded border ${stateBadge(a.state)}`}>{a.state.toUpperCase()}</span>
+                      <span className="font-mono text-slate-300">{alertLabel(a.metric)}</span>
+                      <span className={`px-2 py-0.5 rounded border ${stateBadge(a.state)}`}>{stateLabel(a.state)}</span>
                     </div>
                     <p className="text-slate-400 mt-1">{a.definition}</p>
-                    <p className="text-slate-500 mt-1">value={a.value} | warn={a.threshold.warn} | critical={a.threshold.critical}</p>
+                    <p className="text-slate-500 mt-1">当前值={a.value} | 告警阈值={a.threshold.warn} | 严重阈值={a.threshold.critical}</p>
                     {a.sample_guard && (
-                      <p className="text-slate-500">samples={a.sample_guard.samples} / min={a.sample_guard.min_samples}</p>
+                      <p className="text-slate-500">样本数={a.sample_guard.samples} / 最小样本={a.sample_guard.min_samples}</p>
                     )}
                   </div>
                 ))}
