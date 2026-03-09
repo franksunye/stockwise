@@ -567,13 +567,13 @@ Production 内部分为两组：
 | `data_sync_hk.yml` | `ADMIN` | `WeCom` | 已实现 | 含 HK short sync，内部告警链已接入 |
 | `data_sync_realtime.yml` | `User + ADMIN` | `Mixed` | 已实现 | 盘中价格波动会走 `price_update` push；作业本身走 `JobGuard` 发 ADMIN 告警 |
 | `data_sync_single.yml` | `ADMIN` | `WeCom` | 已实现 | 手工补数不直接通知用户，只向运维侧暴露执行结果 |
-| `verify_predictions.yml` | `User + ADMIN` | `Push + WeCom` | 部分实现 | 用户侧验证结果/战报已实现，但 workflow 未注入 `WECOM_ROBOT_KEY`，`JobGuard` 失败告警当前不稳，应补齐 ADMIN 通知 |
+| `verify_predictions.yml` | `User + ADMIN` | `Push + WeCom` | 已实现 | 用户侧验证结果/战报与 ADMIN 成功/失败告警都已接入，workflow 已注入 `WECOM_ROBOT_KEY` 与 `ADMIN_MOBILES` |
 | `ai_analyze_cn.yml` | `User + ADMIN` | `Mixed` | 已实现 | 用户会收到 `prediction_updated` / `signal_flip`，作业本身会发 ADMIN 通知 |
 | `ai_analyze_hk.yml` | `User + ADMIN` | `Mixed` | 已实现 | 与 CN 同口径 |
 | `mode_pipeline` | `ADMIN` | `WeCom` | 已实现 | 目前通过 `--analyze` 内部耦合承接；无独立用户通知职责 |
 | `daily_almanac_cn.yml` | `User + ADMIN` | `Mixed` | 已实现 | 预览广播触达用户；生成降级与 `market_facts_healthcheck` 触达 ADMIN |
 | `daily_morning_call.yml` | `User + ADMIN` | `Mixed` | 已实现 | morning call push + ritual broadcast 面向用户；脚本成功/失败会发 WeCom |
-| `daily_brief_push.yml` | `User + ADMIN` | `Mixed` | 待收口 | `brief_generator` 已逐用户即时推送，但 workflow 末尾仍调用 `backend/notifications.py --action push_daily`；当前存在重复触达/职责重叠风险 |
+| `daily_brief_push.yml` | `User + ADMIN` | `Mixed` | 已收口 | 正式口径已切到 `brief_generator` 逐用户即时推送；旧版批量广播仅在 `send_legacy_batch_push=true` 时作为人工补发使用 |
 | `broadcast_almanac.py` | `User` | `Push` | 已实现 | 作为分发器使用时职责清晰，不应再承担重算或内部告警职责 |
 | `tradeability_postclose_pipeline.yml` | `ADMIN` | `WeCom` | 缺失 | 研究总编排当前无统一成功/失败通知，夜间任务失败可能只留在 Actions 里 |
 | `tradeability_sample_sync_daily.yml` | `ADMIN` | `WeCom` | 缺失 | 当前只产数据，不发内部告警；建议至少失败通知 |
@@ -604,14 +604,10 @@ Production 内部分为两组：
 
 基于现状，通知治理优先级建议如下：
 
-1. `P0`：补齐 `verify_predictions.yml` 的 `WECOM_ROBOT_KEY`，让验证链失败时一定能通知 `ADMIN`
-2. `P0`：收口 `daily_brief_push.yml` 的通知职责，二选一保留
-   - 保留“生成后即时推送”
-   - 或保留“批量广播”
-   - 但不能两条链同时作为正式口径
-3. `P1`：给 `tradeability_postclose_pipeline.yml` 及其子 workflow 增加统一的 `ADMIN` 成功/失败摘要
-4. `P1`：给 `almanac_maintenance.yml` 主生成步骤补 `JobGuard` 或等价告警，避免历史补跑失败静默
-5. `P2`：给 `admin_codes.yml` 增加最小内部结果摘要，至少能在手工执行后同步生成数量或失败原因
+1. `P1`：给 `tradeability_postclose_pipeline.yml` 及其子 workflow 增加统一的 `ADMIN` 成功/失败摘要
+2. `P1`：给 `almanac_maintenance.yml` 主生成步骤补 `JobGuard` 或等价告警，避免历史补跑失败静默
+3. `P1`：把“ADMIN 中文成功/失败通知、失败带重试入口、用户仅订阅才通知”固化为回归测试，避免后续被回退
+4. `P2`：给 `admin_codes.yml` 增加最小内部结果摘要，至少能在手工执行后同步生成数量或失败原因
 
 ## 7. 当前边界状态
 

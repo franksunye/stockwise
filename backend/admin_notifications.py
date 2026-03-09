@@ -25,6 +25,29 @@ WORKFLOW_LABELS = {
     "verify_predictions.yml": "预测验证",
 }
 
+METADATA_LABELS = {
+    "candidate_version": "候选版本",
+    "count": "数量",
+    "date": "日期",
+    "delivered_users": "已送达用户",
+    "duration": "耗时",
+    "error": "错误",
+    "failed_count": "失败数量",
+    "force": "强制模式",
+    "market": "市场",
+    "message": "说明",
+    "pipeline_run_id": "流水线运行 ID",
+    "records": "记录数",
+    "skipped_count": "跳过数量",
+    "success_count": "成功数量",
+    "symbol": "股票代码",
+    "symbols": "股票列表",
+    "target_date": "目标日期",
+    "triggered_by": "触发来源",
+    "user_id": "用户 ID",
+    "warning_count": "告警数量",
+}
+
 
 def build_workflow_url(workflow_file: Optional[str]) -> Optional[str]:
     if not workflow_file:
@@ -46,7 +69,7 @@ def format_metadata_lines(metadata: Optional[Dict[str, Any]]) -> list[str]:
     for key, value in metadata.items():
         if value is None:
             continue
-        label = str(key).replace("_", " ").title()
+        label = METADATA_LABELS.get(key, str(key).replace("_", " ").title())
         lines.append(f"- **{label}**: {value}")
     return lines
 

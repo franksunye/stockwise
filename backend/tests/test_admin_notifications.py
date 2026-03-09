@@ -17,7 +17,8 @@ class TestAdminNotifications(unittest.TestCase):
         self.assertIn("**任务**: A股盘后同步", message)
         self.assertIn("上游接口超时", message)
         self.assertIn("重试入口", message)
-        self.assertIn("data_sync_cn.yml", message)
+        self.assertIn("A股盘后同步", message)
+        self.assertIn("actions/workflows/data_sync_cn.yml", message)
 
     def test_build_success_message_uses_chinese_labels(self):
         message = build_success_message(
@@ -29,7 +30,7 @@ class TestAdminNotifications(unittest.TestCase):
         self.assertIn("后台任务成功", message)
         self.assertIn("**任务**: 早盘计划提醒", message)
         self.assertIn("**耗时**: 5.0s", message)
-        self.assertIn("Delivered Users", message)
+        self.assertIn("已送达用户", message)
 
 
 if __name__ == "__main__":

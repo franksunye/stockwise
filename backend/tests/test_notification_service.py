@@ -195,6 +195,44 @@ class TestNotificationService(unittest.TestCase):
         self.assertFalse(ok)
         mock_log.assert_not_called()
 
+    def test_send_notification_should_skip_when_user_disabled_type(self):
+        """Disabled user preferences must skip delivery and logging."""
+        manager = NotificationManager(conn=self.mock_conn, dry_run=False)
+        with patch.object(manager, '_check_user_preference', return_value=False), \
+             patch('notification_service.send_push_notification') as mock_push, \
+             patch.object(manager, '_log_to_db') as mock_log:
+            ok = manager._send_notification("user1", {
+                "title": "测试",
+                "body": "内容",
+                "url": "/dashboard",
+                "type": "daily_brief",
+                "related_symbols": []
+            })
+
+        self.assertFalse(ok)
+        self.assertEqual(manager.stats["skipped_by_preference"], 1)
+        mock_push.assert_not_called()
+        mock_log.assert_not_called()
+
+    def test_send_notification_should_append_tracking_id_before_logging(self):
+        """Successful sends should append nid to URL before logging."""
+        manager = NotificationManager(conn=self.mock_conn, dry_run=False)
+        with patch.object(manager, '_check_user_preference', return_value=True), \
+             patch('notification_service.send_push_notification', return_value=True), \
+             patch.object(manager, '_log_to_db') as mock_log:
+            ok = manager._send_notification("user1", {
+                "title": "测试",
+                "body": "内容",
+                "url": "/dashboard?brief=true",
+                "type": "daily_brief",
+                "related_symbols": []
+            })
+
+        self.assertTrue(ok)
+        logged_payload = mock_log.call_args.args[2]
+        self.assertIn("nid=", logged_payload["url"])
+        self.assertIn("brief=true", logged_payload["url"])
+
 
 if __name__ == "__main__":
     unittest.main()
