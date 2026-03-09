@@ -579,8 +579,8 @@ Production 内部分为两组：
 
 | 北京时间 | 类别 | 任务 | 说明 |
 | --- | --- | --- | --- |
-| 18:05 | Research | `tradeability_postclose_pipeline.yml` (CN) | 正式盘后链结束后再跑研究链 |
-| 18:35 | Research | `tradeability_postclose_pipeline.yml` (HK) | 港股研究链 |
+| 19:05 | Research | `tradeability_postclose_pipeline.yml` (CN) | 进入夜间治理段后再跑研究链，避免与盘后正式产数重叠 |
+| 19:35 | Research | `tradeability_postclose_pipeline.yml` (HK) | 港股研究链，保持在 19:00 后运行 |
 
 ### 8.3 按需操作
 

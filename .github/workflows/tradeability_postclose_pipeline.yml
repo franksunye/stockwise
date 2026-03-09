@@ -2,8 +2,8 @@ name: Tradeability Post-Close Pipeline
 
 on:
   schedule:
-    - cron: '5 10 * * 1-5'   # CN post-close orchestration
-    - cron: '35 10 * * 1-5'  # HK post-close orchestration
+    - cron: '5 11 * * 1-5'   # CN research orchestration after 19:00 BJT
+    - cron: '35 11 * * 1-5'  # HK research orchestration after 19:00 BJT
   workflow_dispatch:
     inputs:
       market:
@@ -85,7 +85,7 @@ jobs:
     if: |
       always() && (
         github.event_name == 'workflow_dispatch' && (inputs.market == 'CN' || inputs.market == 'BOTH') ||
-        github.event_name == 'schedule' && needs.gate_cn.outputs.should_run == 'true' && github.event.schedule == '5 10 * * 1-5'
+        github.event_name == 'schedule' && needs.gate_cn.outputs.should_run == 'true' && github.event.schedule == '5 11 * * 1-5'
       )
     uses: ./.github/workflows/tradeability_sample_sync_daily.yml
     with:
@@ -114,7 +114,7 @@ jobs:
     if: |
       always() && (
         github.event_name == 'workflow_dispatch' && (inputs.market == 'HK' || inputs.market == 'BOTH') ||
-        github.event_name == 'schedule' && needs.gate_hk.outputs.should_run == 'true' && github.event.schedule == '35 10 * * 1-5'
+        github.event_name == 'schedule' && needs.gate_hk.outputs.should_run == 'true' && github.event.schedule == '35 11 * * 1-5'
       )
     uses: ./.github/workflows/tradeability_sample_sync_daily.yml
     with:
