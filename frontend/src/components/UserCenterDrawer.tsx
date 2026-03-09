@@ -56,6 +56,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
   const [testingPush, setTestingPush] = useState(false);
   const [showNotificationSettings, setShowNotificationSettings] = useState(false);
   const [showReferralDetails, setShowReferralDetails] = useState(false);
+  const [showInvestmentModeDetails, setShowInvestmentModeDetails] = useState(false);
   
   const [isHighPerformance, setIsHighPerformance] = useState(false);
   const [showIdentityCenter, setShowIdentityCenter] = useState(false);
@@ -102,6 +103,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
       setShowLearn(false);
       setShowNotificationSettings(false);
       setShowReferralDetails(false);
+      setShowInvestmentModeDetails(false);
       setShowEmailForm(false);
       setIsLinkingEmail(false);
       setTempEmail('');
@@ -445,15 +447,60 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                             <ChevronRight size={14} className="text-slate-600 group-hover:text-white transition-colors" />
                         </div>
                       </button>
-                      <button onClick={() => setShowInvestmentMode(true)} className="w-full py-4 px-5 rounded-[24px] border border-white/5 bg-white/[0.02] hover:border-indigo-500/20 transition-all flex items-center justify-between group">
-                        <div className="text-left">
-                          <span className="block text-sm font-bold text-white">投资模式</span>
-                          <span className="block text-[10px] text-slate-500 font-medium">
-                            {tier === 'pro' ? '选择适合你的风格，并查看模式表现' : '查看默认模式表现，解锁更多投资风格'}
-                          </span>
-                        </div>
-                        <ChevronRight size={14} className="text-slate-600 group-hover:text-white transition-colors" />
-                      </button>
+                      <div className="glass-card !p-0 rounded-[24px] overflow-hidden border-white/5 bg-white/[0.02]">
+                          <div className="px-5 py-4 pb-2">
+                              <div className="flex items-center justify-between mb-3 text-left">
+                                  <h4 className="text-sm font-black italic text-white flex items-center gap-2">
+                                      投资模式
+                                      <span className="px-1.5 py-0.5 rounded bg-indigo-500/20 text-[8px] font-black uppercase tracking-widest text-indigo-300 border border-indigo-500/20 not-italic">
+                                          稳健波段
+                                      </span>
+                                  </h4>
+                              </div>
+                              <button 
+                                  onClick={() => setShowInvestmentMode(true)} 
+                                  className="w-full py-2.5 mb-2 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-xs font-bold text-white group"
+                              >
+                                  进入模式配置中心 <ArrowRight size={14} className="text-slate-500 group-hover:text-white transition-colors" />
+                              </button>
+                          </div>
+                          <div className="bg-white/[0.02] border-t border-white/5 px-5 py-2">
+                              <button 
+                                  onClick={() => {
+                                      setShowInvestmentModeDetails(!showInvestmentModeDetails);
+                                      if (!showInvestmentModeDetails) {
+                                          setShowNotificationSettings(false);
+                                          setShowReferralDetails(false);
+                                      }
+                                  }} 
+                                  className="w-full flex items-center justify-between text-[10px] text-slate-500 hover:text-indigo-400 transition-colors uppercase font-bold tracking-widest"
+                              >
+                                  当前模式速览
+                                  <ChevronDown className={`w-3 h-3 transition-transform ${showInvestmentModeDetails ? 'rotate-180' : ''}`} />
+                              </button>
+                              <AnimatePresence>
+                                  {showInvestmentModeDetails && (
+                                      <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
+                                          <div className="grid grid-cols-2 gap-2 mt-2 mb-2">
+                                            <div className="bg-white/5 rounded-2xl p-3 border border-white/5 text-left">
+                                              <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-1">推荐持仓区间</div>
+                                              <div className="text-lg font-black text-white">3-7 <span className="text-xs font-bold text-slate-500">交易日</span></div>
+                                            </div>
+                                            <div className="bg-white/5 rounded-2xl p-3 border border-white/5 text-left">
+                                              <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-1">系统评级</div>
+                                              <div className="text-lg font-black text-amber-400">稳健型</div>
+                                            </div>
+                                          </div>
+                                          <div className="px-1 mb-3">
+                                              <p className="text-[10px] text-slate-500 leading-relaxed text-left">
+                                                该模式侧重于右侧信号，寻找带有盈亏比优势的波段区间。若目标跌破核心防守位，将强制转化为 <span className="text-rose-400 font-bold">防守动作</span> 以规避风险敞口。
+                                              </p>
+                                          </div>
+                                      </motion.div>
+                                  )}
+                              </AnimatePresence>
+                          </div>
+                      </div>
                     </div>
 
                     {/* Push Switch */}
