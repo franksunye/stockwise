@@ -61,9 +61,10 @@ const getStepConfig = (step: string) => {
   if (s.includes('news') || s.includes('fundamental')) return { icon: <Newspaper size={12} />, label: '情报' };
   if (s.includes('position') || s.includes('level') || s.includes('price')) return { icon: <Crosshair size={12} />, label: '价格行为' };
   if (s.includes('context')) return { icon: <Layers size={12} />, label: '上下文' };
+  if (s.includes('fund') || s.includes('capital') || s.includes('flow') || s.includes('money')) return { icon: <Hash size={12} />, label: '资金博弈' };
 
-  // 兜底
-  return { icon: <Hash size={12} />, label: '分析步' };
+  // 兜底使用更专业的词汇
+  return { icon: <Hash size={12} />, label: '综合研判' };
 };
 
 // 语义化价格格式化
