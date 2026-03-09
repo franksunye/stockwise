@@ -261,7 +261,7 @@ export function OnboardingOverlay() {
                                     })}
                                 </div>
                                 
-                                <p className="text-[10px] text-slate-600 italic">* 正式使用后，您可以添加任意港股或A股到监控池</p>
+                                <p className="text-[10px] text-slate-600 italic">* 正式使用后，您可以添加任意港股或A股到自选池</p>
                             </>
                         ) : (
                             <div className="py-12 space-y-8">
@@ -404,7 +404,7 @@ export function OnboardingOverlay() {
                         <div className="space-y-4">
                             <h2 className="text-3xl font-black italic text-white">一切就绪!</h2>
                             <p className="text-slate-400">
-                                <span className="text-white font-bold">{selectedStockName || selectedStock || '自选股'}</span> 已添加到您的监控列表。
+                                <span className="text-white font-bold">{selectedStockName || selectedStock || '测试资产'}</span> 已添加到您的自选池。
                             </p>
                             
                             {/* Upsell Card */}
@@ -412,7 +412,7 @@ export function OnboardingOverlay() {
                                 <div className="relative z-10">
                                      <h3 className="text-indigo-300 font-bold uppercase tracking-widest text-xs mb-2">特别礼物</h3>
                                       <p className="text-white font-bold text-lg mb-1">已激活 {trialDays} 天 Pro 体验权</p>
-                                     <p className="text-slate-400 text-xs">可监控 10 只股票，解锁 AI 核心逻辑与止损建议。</p>
+                                     <p className="text-slate-400 text-xs">支持添加 10 只自选并在全站解锁 AI 核心逻辑。</p>
                                 </div>
                                 <Clock className="absolute -bottom-4 -right-4 w-24 h-24 text-indigo-500/10" />
                             </div>

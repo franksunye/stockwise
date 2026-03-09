@@ -58,8 +58,8 @@ const SCOPE_META: Record<PerformanceScope, { title: string; subtitle: string; ic
         icon: Sparkles,
     },
     pool: {
-        title: '监控池表现',
-        subtitle: '看这个模式对你的监控池是否更合适',
+        title: '自选表现',
+        subtitle: '看这个模式对你的自选股是否更合适',
         icon: Radar,
     },
 };
@@ -511,10 +511,10 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
                 <div className="rounded-[24px] border border-amber-500/20 bg-amber-500/[0.03] p-5 text-left">
                     <div className="flex items-center gap-2 mb-2.5">
                         <Crown className="w-4 h-4 text-amber-400" />
-                        <p className="text-sm font-black italic tracking-tighter text-amber-100 uppercase">解锁更多投资模式与监控池表现</p>
+                        <p className="text-sm font-black italic tracking-tighter text-amber-100 uppercase">解锁更多模式与自选整体表现</p>
                     </div>
                     <p className="text-[11px] leading-relaxed text-slate-400 font-medium">
-                        当前默认使用平衡模式，并可查看对应的通用表现。升级 Pro 后，可按自己的投资风格切换更多模式，并查看监控池表现。
+                        当前默认使用平衡模式，并可查看对应的通用表现。升级 Pro 后，可按自己的投资风格切换更多模式，并查看自选表现。
                     </p>
                     <button
                         type="button"

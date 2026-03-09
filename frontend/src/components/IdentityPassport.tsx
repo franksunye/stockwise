@@ -27,7 +27,7 @@ export function IdentityPassport({ userId, onLinkEmail, emailLinked }: Props) {
             
             {/* User ID Row */}
             <div>
-                <label className="text-[10px] font-bold text-slate-500 mb-1.5 block">用户 ID (点击复制)</label>
+                <label className="text-[10px] font-bold text-slate-500 mb-1.5 block">用户 ID</label>
                 <button 
                     onClick={handleCopy}
                     className="w-full flex items-center justify-between gap-3 bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 hover:border-white/10 transition-all rounded-xl px-4 py-3 group text-left"
@@ -61,9 +61,9 @@ export function IdentityPassport({ userId, onLinkEmail, emailLinked }: Props) {
                     >
                         <div className="flex items-center gap-2.5">
                             <Mail size={14} className="text-indigo-400" />
-                            <span className="text-xs font-medium text-indigo-200">未绑定安全邮箱</span>
+                            <span className="text-xs font-medium text-indigo-200">尚未绑定邮箱</span>
                         </div>
-                        <span className="text-[10px] font-bold text-indigo-400">去绑定 &rarr;</span>
+                        <span className="text-[10px] font-bold text-indigo-400">立即绑定 &rarr;</span>
                     </button>
                 )}
             </div>

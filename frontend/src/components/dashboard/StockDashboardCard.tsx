@@ -205,7 +205,7 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
                   } else {
                     // Fallback for No Data
                     const pendingText = !displayPrediction 
-                        ? "该股票刚刚加入核心监控池。AI 量化引擎正在排队处理历史数据，预计将在下一个市场窗口（盘前或收盘后）生成深度策略。"
+                        ? "该股票刚刚加入自选池。AI 量化引擎正在排队处理历史数据，预计将在下一个市场窗口（盘前或收盘后）生成深度策略。"
                         : (displayPrediction?.ai_reasoning || '正在评估行情...');
                     
                     return <p className="text-sm leading-relaxed text-slate-400 font-medium italic pl-1 border-l-2 border-slate-500/20">&quot;{pendingText}&quot;</p>;

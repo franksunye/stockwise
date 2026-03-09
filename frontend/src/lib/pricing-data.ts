@@ -68,7 +68,7 @@ export const pricingPlans: PricingPlan[] = [
         enName: 'Alpha',
         price: '1,999',
         period: '每年',
-        description: '顶级阿尔法收益工具，实时深度监控',
+        description: '顶级阿尔法收益工具，实时深度追踪',
         features: [
             '实时盘中突发事件 AI 分析',
             '1对1 AI 专属策略看板',
@@ -90,7 +90,7 @@ export const pricingPlans: PricingPlan[] = [
 export const featureComparison = [
     { label: 'AI 分析深度', free: '规则引擎 + 基础 AI', pro: 'DeepSeek V3 (顶级思维链模型)', highlight: true },
     { label: '复盘叙事逻辑', free: '基础数据罗列', pro: '像真人教练一样深度推演与归因', highlight: true },
-    { label: '监控托管数量', free: '3 只 (尝鲜体验)', pro: '10 只 (覆盖主力持仓)', highlight: true },
+    { label: '自选资产上限', free: '3 只', pro: '10 只', highlight: true },
     { label: '量化信号底座', free: '标准趋势判断', pro: '标准趋势判断', common: true },
     { label: '行情覆盖范围', free: 'A股 / 港股 全覆盖', pro: 'A股 / 港股 全覆盖', common: true },
     { label: '宏观大盘黄历', free: '每日宜忌与气象推演', pro: '每日宜忌与气象推演', common: true },

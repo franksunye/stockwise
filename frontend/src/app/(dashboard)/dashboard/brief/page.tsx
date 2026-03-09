@@ -107,7 +107,7 @@ export default function BriefPage() {
           <div>
             <h3 className="text-white font-bold text-lg mb-2">{error || '今日暂无简报'}</h3>
             <p className="text-sm text-slate-500 leading-relaxed">
-              请确保您的监控列表不为空。<br />
+              请确保您的自选列表不为空。<br />
               AI 可能会在收盘后生成。
             </p>
           </div>

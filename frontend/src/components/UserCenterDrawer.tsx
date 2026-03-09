@@ -367,7 +367,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                             <button onClick={() => setShowEmailForm(false)} className="text-slate-600 hover:text-slate-400"><X size={12} /></button>
                         </div>
                         <p className="text-[10px] text-slate-500 leading-relaxed text-left">
-                            绑定邮箱后，即使更换设备、重装应用或清空缓存，只要通过验证该邮箱，即可找回所有付费权益。
+                            绑定邮箱以防丢失账号，找回所有付费权益。
                         </p>
                         <div className="flex gap-2">
                           <input 
@@ -393,7 +393,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                       <div className="flex items-center justify-between mb-3 text-left">
                           <div className="flex items-center gap-2">
                               <RefreshCw size={14} className="text-slate-500" />
-                              <span className="text-xs font-bold text-slate-400">找回旧账号</span>
+                              <span className="text-xs font-bold text-slate-400">换机/找回账号</span>
                           </div>
                       </div>
                       <div className="flex gap-2">
@@ -449,10 +449,10 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                     {/* Quota Section */}
                     <div className="glass-card !p-0 rounded-[24px] overflow-hidden border-white/5 bg-white/[0.02]">
                       <div className="px-5 py-4 flex items-center justify-between">
-                        <span className="text-sm font-bold text-slate-400 uppercase tracking-wide">监控配额使用情况</span>
+                        <span className="text-sm font-bold text-slate-400 uppercase tracking-wide">自选额度</span>
                         <div className="flex items-center gap-2">
                           <span className={`text-base font-black ${watchlistCount >= (tier === 'pro' ? 10 : 3) ? 'text-amber-400' : 'text-white'}`}>{watchlistCount}</span>
-                          <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">/ {tier === 'pro' ? '10' : '3'} 名额</span>
+                          <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">/ {tier === 'pro' ? '10' : '3'}</span>
                         </div>
                       </div>
                     </div>
@@ -495,11 +495,11 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                       <div className="bg-white/[0.02] border-t border-white/5 px-5 py-4">
                                           <div className="grid grid-cols-2 gap-2 mb-3">
                                             <div className="bg-white/5 rounded-2xl p-3 border border-white/5 text-left">
-                                              <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-1">建议评估周期</div>
+                                              <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-1">评估周期</div>
                                               <div className="text-base font-black text-white">{currentMode?.default_horizon ? currentMode.default_horizon.replace('d', '') : '--'} <span className="text-[10px] font-bold text-slate-500">自然日</span></div>
                                             </div>
                                             <div className="bg-white/5 rounded-2xl p-3 border border-white/5 text-left">
-                                              <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-1">系统风险评级</div>
+                                              <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-1">风险评级</div>
                                               <div className="text-base font-black text-amber-400">{getRiskBandLabel((currentMode?.risk_band as 'low' | 'medium' | 'high') || 'medium')}</div>
                                             </div>
                                           </div>
@@ -515,7 +515,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                               className="w-full py-3 rounded-xl bg-indigo-500/10 border border-indigo-500/20 hover:bg-indigo-500/20 active:scale-[0.98] transition-all flex items-center justify-between px-4 group"
                                           >
                                               <div className="flex flex-col items-start gap-0.5">
-                                                  <span className="text-xs font-bold text-indigo-300">切换模式与偏好设置</span>
+                                                  <span className="text-xs font-bold text-indigo-300">切换投资模式</span>
                                                   <span className="text-[9px] text-indigo-400/70 font-medium">解锁高频交易等更多策略系统</span>
                                               </div>
                                               <ChevronRight size={14} className="text-indigo-400 group-hover:text-white transition-colors" />
@@ -551,7 +551,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                 setShowNotificationSettings(!showNotificationSettings);
                                 if (!showNotificationSettings) setShowReferralDetails(false);
                             }} className="w-full flex items-center justify-between text-[10px] text-slate-500 hover:text-indigo-400 transition-colors uppercase font-bold tracking-widest">
-                                高级通知偏好
+                                高级偏好设置
                                 <ChevronDown className={`w-3 h-3 transition-transform ${showNotificationSettings ? 'rotate-180' : ''}`} />
                             </button>
                             <AnimatePresence>
@@ -591,7 +591,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                     })}
                                     <div className="pt-1.5 mt-1.5 border-t border-white/5 flex justify-center">
                                         <button onClick={handleTestPush} disabled={testingPush} className="flex items-center gap-2 py-1.5 px-4 rounded-xl hover:bg-white/5 transition-colors text-[10px] text-slate-500 hover:text-indigo-400 font-bold uppercase tracking-wider disabled:opacity-50">
-                                            <Bell size={12} /> {testingPush ? '发送中...' : '测试当前设备推送'}
+                                            <Bell size={12} /> {testingPush ? '发送中...' : '测试推送'}
                                         </button>
                                     </div>
                                   </div>
@@ -655,7 +655,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                 setShowReferralDetails(!showReferralDetails);
                                 if (!showReferralDetails) setShowNotificationSettings(false);
                             }} className="w-full flex items-center justify-between text-[10px] text-slate-500 hover:text-indigo-400 transition-colors uppercase font-bold tracking-widest">
-                                {isChannel ? '分润详情' : '查看奖励规则'}
+                                {isChannel ? '收益详情' : '奖励规则'}
                                 <ChevronDown className={`w-3 h-3 transition-transform ${showReferralDetails ? 'rotate-180' : ''}`} />
                             </button>
                             <AnimatePresence>
@@ -736,7 +736,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                     {/* Support & Links */}
                     <div className="space-y-3">
                       <button onClick={() => setShowSupport(true)} className="w-full py-4 px-5 rounded-[24px] bg-white/5 border border-white/5 flex items-center justify-between group">
-                          <div className="flex items-center gap-3"><HelpCircle className="text-emerald-400" size={18} /><span className="text-sm font-bold text-white uppercase tracking-tight">常见问题与支持</span></div>
+                          <div className="flex items-center gap-3"><HelpCircle className="text-emerald-400" size={18} /><span className="text-sm font-bold text-white uppercase tracking-tight">帮助与支持</span></div>
                           <ChevronRight size={14} className="text-slate-600 group-hover:text-white transition-colors" />
                       </button>
                       

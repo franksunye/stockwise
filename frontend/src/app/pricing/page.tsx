@@ -139,7 +139,7 @@ function PricingContent() {
               </div>
               <h2 className="text-3xl font-black italic mb-4">欢迎加入 PRO 会员!</h2>
               <p className="text-slate-400 font-medium mb-8 leading-relaxed">
-                您的权限已自动激活。现在您可以享受深度复盘、更多监控额度以及实时战报推送。
+                您的权限已自动激活。现在您可以享受深度复盘、更多自选额度以及实时推送。
               </p>
               <Link 
                 href="/"
@@ -410,7 +410,7 @@ function PricingContent() {
         <section className="mt-16 max-w-4xl mx-auto">
           <GeoSummary
             summary={[
-              "免费版用于基础体验，Pro 版提供更完整的分析链路与监控能力。",
+              "免费版用于基础体验，Pro 版提供更完整的分析链路与自选能力。",
               "订阅方案支持月付与年付，价格与权益在页面公开透明。",
               "页面内容仅用于功能说明，不构成投资建议或收益承诺。",
             ]}

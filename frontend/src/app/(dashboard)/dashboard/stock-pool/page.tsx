@@ -211,7 +211,7 @@ export default function StockPoolPage() {
     
     const limit = tier === 'pro' ? 10 : 3;
     if (watchlist.length >= limit) {
-      setLimitMsg(tier === 'pro' ? '已达到 Pro 版 10 只监控上限' : '已达到免费版 3 只上限，升级 Pro 可扩展至 10 只');
+      setLimitMsg(tier === 'pro' ? '已达到 10 只自选上限' : '升级 Pro 可添加更多自选 (上限 3 只)');
       setTimeout(() => setLimitMsg(null), 3000);
       return;
     }
@@ -268,7 +268,7 @@ export default function StockPoolPage() {
         
         <div className="flex-1 text-center">
           <h1 className="text-xl font-black italic tracking-tighter text-white uppercase">
-            监控池 <span className="text-indigo-500 underline decoration-2 underline-offset-4" data-en="POOL">POOL</span>
+            自选池 <span className="text-indigo-500 underline decoration-2 underline-offset-4" data-en="POOL">POOL</span>
           </h1>
         </div>
 
@@ -364,7 +364,7 @@ export default function StockPoolPage() {
         </AnimatePresence>
 
         <div className="space-y-4">
-          <h2 className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] px-2 mb-4">监控标的 ({stocks.length})</h2>
+          <h2 className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] px-2 mb-4">自选资产 ({stocks.length})</h2>
           {loading && !stocks.length ? (
             [1, 2, 3].map(i => <div key={i} className="glass-card h-24 animate-pulse" />)
           ) : stocks.length === 0 ? (
@@ -409,7 +409,7 @@ export default function StockPoolPage() {
                 </div>
                 <h3 className="text-xl font-black italic tracking-tighter mb-2 text-white">确认移除？</h3>
                 <p className="text-sm text-slate-400 mb-8 leading-relaxed">
-                  确定要从监控池中移除 <span className="text-white font-bold">{stockToDelete.name} ({stockToDelete.symbol})</span> 吗？此操作不可撤销。
+                  确定要从自选池中移除 <span className="text-white font-bold">{stockToDelete.name} ({stockToDelete.symbol})</span> 吗？
                 </p>
                 <div className="flex gap-3 w-full">
                   <button 
