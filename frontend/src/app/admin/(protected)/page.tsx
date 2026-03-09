@@ -14,7 +14,8 @@ import {
   LayoutGrid,
   Terminal,
   MessageSquare,
-  Activity
+  Activity,
+  FlaskConical
 } from 'lucide-react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -248,6 +249,21 @@ export default function AdminDashboard() {
                    </div>
                  </div>
                  <ArrowRight className="text-slate-700 group-hover:text-cyan-400 group-hover:translate-x-1 transition-all" />
+               </div>
+             </Link>
+
+             <Link href="/admin/tradeability" className="group block">
+               <div className="glass-card p-8 flex items-center justify-between hover:bg-white/[0.04] transition-all border-cyan-400/20">
+                 <div className="flex items-center gap-6">
+                   <div className="w-14 h-14 rounded-2xl bg-cyan-400/10 flex items-center justify-center group-hover:bg-cyan-400/20 transition-all">
+                     <FlaskConical className="w-7 h-7 text-cyan-300" />
+                   </div>
+                   <div>
+                     <h2 className="text-xl font-black italic tracking-tighter mb-1">Tradeability 控制塔</h2>
+                     <p className="text-xs text-slate-500 font-medium">统一查看双流水线、promotion gate 和最近审计时间线</p>
+                   </div>
+                 </div>
+                 <ArrowRight className="text-slate-700 group-hover:text-cyan-300 group-hover:translate-x-1 transition-all" />
                </div>
              </Link>
 
