@@ -13,4 +13,4 @@ category: "快速开始"
 3. **绑定身份**：进入个人中心绑定邮箱，确保护航付费权益不丢失。
 
 ---
-*本文档归档于 StockWise Support Center (快速开始)*
+*本文档归档于 知守 AI (ZISO AI) Support Center (快速开始)*

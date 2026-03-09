@@ -1,4 +1,4 @@
-# StockWise 信号验证机制研究与设计文档
+# 知守 AI (ZISO AI) 信号验证机制研究与设计文档
 
 **文档状态**: 草案 (Draft)  
 **创建日期**: 2026-01-03  
@@ -6,7 +6,7 @@
 
 ## 1. 背景与问题
 
-StockWise 目前采用 LLM (Large Language Module) 作为核心分析引擎，为个人投资者提供 `Long` (做多)、`Short` (避险/做空)、`Side` (观望) 三种操作建议。
+知守 AI (ZISO AI) 目前采用 LLM (Large Language Module) 作为核心分析引擎，为个人投资者提供 `Long` (做多)、`Short` (避险/做空)、`Side` (观望) 三种操作建议。
 
 ### 当前的验证逻辑 (Legacy Logic)
 系统通过 `validate_previous_prediction` 函数对 "T-1日" 的预测进行 "T日" 验证。目前的标准是**绝对二元验证 (Absolute Binary Validation)**：
@@ -45,7 +45,7 @@ StockWise 目前采用 LLM (Large Language Module) 作为核心分析引擎，�
 
 ---
 
-## 3. 针对 StockWise 的改良方案
+## 3. 针对 知守 AI (ZISO AI) 的改良方案
 
 结合 LLM 的特性和个人投资者的需求，我们提出从“绝对正确”转向“模糊正确 (Fuzzy Correctness)”的演进路线。
 

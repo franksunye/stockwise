@@ -12,4 +12,4 @@ category: "量化逻辑与纪律"
 强制让你养成逆向思维。要是看大红就想冲，那你就离被套不远了。
 
 ---
-*本文档归档于 StockWise Support Center (量化逻辑与纪律)*
+*本文档归档于 知守 AI (ZISO AI) Support Center (量化逻辑与纪律)*

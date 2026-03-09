@@ -11,4 +11,4 @@ category: "交易实战"
 判定标准基于“收盘收益率”。只有实际走势与预测逻辑完全契合，才会标记为 **Correct**。
 
 ---
-*本文档归档于 StockWise Support Center (交易实战)*
+*本文档归档于 知守 AI (ZISO AI) Support Center (交易实战)*

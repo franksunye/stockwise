@@ -1,4 +1,4 @@
-# StockWise 中文 SEO/GEO 主执行文档（精简版）
+# 知守 AI (ZISO AI) 中文 SEO/GEO 主执行文档（精简版）
 
 > 状态：Executing  
 > 版本：v1.0（精简）  

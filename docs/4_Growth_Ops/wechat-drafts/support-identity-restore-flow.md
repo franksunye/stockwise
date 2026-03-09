@@ -10,4 +10,4 @@ category: "账号与安全"
 在设置里输一下你的恢复邮箱，刷的一下，你的监控股、你的 Pro 时间就全都回来了。就像什么都没发生过一样。
 
 ---
-*本文档归档于 StockWise Support Center (账号与安全)*
+*本文档归档于 知守 AI (ZISO AI) Support Center (账号与安全)*

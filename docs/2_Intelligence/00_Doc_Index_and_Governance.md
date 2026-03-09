@@ -1,7 +1,7 @@
 # 2_Intelligence 文档索引与治理（对齐版）
 
 **文档状态**: Active  
-**日期**: 2026-03-06
+**日期**: 2026-03-09
 
 ---
 
@@ -12,22 +12,29 @@
 2. `40_Gemini_Quant_AI_Two_Layer_Refactoring_Plan.md`  
    已完成阶段文档：Layer-1 裁决，Layer-2 解释
 3. `41_Tradeability_Quality_and_Actionability_Plan.md`  
-   下一阶段主线：收益质量优化、风险立场产品化、线上影子运行
+   阶段性研究计划记录：收益质量优化、风险立场产品化、线上影子运行
 4. `27_Acceptance_Criteria_v1.md`  
    验收门槛：一致性、收益质量、风险、输出完整性
 5. `27_DeepSeek_V3_Rich_Context_Limits.md`  
    研究边界与证据登记
+
+当前这条线的现行主依据补充为：
+
+1. `docs/1_Engineering/14_Investment_Mode_Backend_Runbook.md`
+2. `docs/3_Product/Specs/47_Investment_Mode_Product_Layer.md`
+3. `docs/3_Product/Specs/48_Admin_Tradeability_Control_Tower.md`
 
 ---
 
 ## 2. 冲突优先级（口径冲突时）
 
 1. 运行口径：`39`
-2. 下一阶段执行口径：`41`
+2. 后端运行口径：`docs/1_Engineering/14_Investment_Mode_Backend_Runbook.md`
 3. 架构与职责口径：`40`
 4. 验收口径：`27_Acceptance_Criteria_v1`
-5. 研究边界：`27_DeepSeek_V3_Rich_Context_Limits`
-5. 归档文档：仅作历史记录，不作为现行执行依据
+5. 产品与后台口径：`47 / 48`
+6. 研究边界：`27_DeepSeek_V3_Rich_Context_Limits`
+7. 标记为 `Historical Reference` 或位于 `archive/` 的文档：仅作历史记录，不作为现行执行依据
 
 ---
 
@@ -37,6 +44,7 @@
 2. 实验先写 `archive/` 或 `research/`，复验后再回写主文档。
 3. 关键结论必须可追溯（SQL、测试、代码或流程证据）。
 4. 关键变更需同步更新文档头部日期与状态。
+5. 文档状态最少分为：`Active`、`Completed`、`Historical Reference`。
 
 ---
 

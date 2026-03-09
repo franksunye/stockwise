@@ -36,7 +36,7 @@ image_prompt: "**Concept**: Leverage and disproportion. **Style**: Clean 3D. **S
 
 ## 🛡️ ZISO 如何优化你的 R/R？
 
-我们强烈反对在“压力位下方”买入。StockWise 的核心评估逻辑之一就是 **“赔率扫描”**。
+我们强烈反对在“压力位下方”买入。知守 AI (ZISO AI) 的核心评估逻辑之一就是 **“赔率扫描”**。
 
 **Actionable Tactic：三倍原则**
 在按下“买入”键前，在 ZISO 图表上画三道线：

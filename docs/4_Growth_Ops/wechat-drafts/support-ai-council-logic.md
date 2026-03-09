@@ -10,4 +10,4 @@ category: "AI 智慧与分析"
 我们让 DeepSeek 和 混元Lite 负责投资分析，再加上咱们自己的量化库做保。只有他们几位都点头说“这票靠谱”时，信号才叫“共振”。一个人的错觉叫幻觉，三个人的共识才叫真相。
 
 ---
-*本文档归档于 StockWise Support Center (AI 智慧与分析)*
+*本文档归档于 知守 AI (ZISO AI) Support Center (AI 智慧与分析)*

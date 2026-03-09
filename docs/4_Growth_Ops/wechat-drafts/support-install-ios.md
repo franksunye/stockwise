@@ -14,4 +14,4 @@ category: "快速开始"
 > **注意**：必须在 Safari 中操作，其他浏览器内核（如微信内）不支持 PWA 安装。
 
 ---
-*本文档归档于 StockWise Support Center (快速开始)*
+*本文档归档于 知守 AI (ZISO AI) Support Center (快速开始)*

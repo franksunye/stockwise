@@ -10,4 +10,4 @@ category: "数据与服务保障"
 大家都不看的票，更新频率会自动降低。省下的算力，全用来伺候你最关心的标的了。
 
 ---
-*本文档归档于 StockWise Support Center (数据与服务保障)*
+*本文档归档于 知守 AI (ZISO AI) Support Center (数据与服务保障)*

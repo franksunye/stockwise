@@ -10,4 +10,4 @@ category: "数据与服务保障"
 行情软件要是断了线就是在谋财害命。我们准备了多套Fetcher，就是为了保证你在关键时刻永远能连得上。
 
 ---
-*本文档归档于 StockWise Support Center (数据与服务保障)*
+*本文档归档于 知守 AI (ZISO AI) Support Center (数据与服务保障)*

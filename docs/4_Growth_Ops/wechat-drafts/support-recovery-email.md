@@ -11,4 +11,4 @@ category: "账号与安全"
 由于 PWA 不依赖传统的应用商店账号，一旦你重装系统或清理浏览器，本地数据可能丢失。只要绑定了邮箱，你就可以通过验证码瞬间找回所有的 Pro 权益。
 
 ---
-*本文档归档于 StockWise Support Center (账号与安全)*
+*本文档归档于 知守 AI (ZISO AI) Support Center (账号与安全)*

@@ -19,7 +19,7 @@ const SUPPORT_TLDR: Record<string, string[]> = {
     "分歧较大时应降低仓位或先观察。",
   ],
   "tactical-brief-guide": [
-    "战术简报要看结论、关键价位、风险反思三部分。",
+    "策略内参要看结论、关键价位、风险反思三部分。",
     "重点不是观点强弱，而是失效条件是否明确。",
     "把简报当执行脚本，不当情绪安慰。",
   ],
@@ -29,7 +29,7 @@ const SUPPORT_TLDR: Record<string, string[]> = {
     "连错期应降低信号权重，优先防守。",
   ],
   "multi-day-verification": [
-    "知守采用多日验证口径，不用单日涨跌判断成败。",
+    "知守 AI 采用多日验证口径，不用单日涨跌判断成败。",
     "核心目的是减少短噪音对策略评估的干扰。",
     "验证结果用于迭代模型，不用于事后包装。",
   ],
@@ -247,13 +247,13 @@ export default async function SupportDetailPage({ params }: { params: Params }) 
         <SourceBlock
           sources={[
             {
-              name: "StockWise Support Center",
+              name: "知守 AI (ZISO AI) 帮助中心",
               url: "https://ziso.cc/support",
               accessedAt: article.lastUpdated,
               claimScope: "功能机制定义",
             },
             {
-              name: "StockWise Learn Center",
+              name: "知守 AI (ZISO AI) 投研中心",
               url: "https://ziso.cc/learn",
               accessedAt: article.lastUpdated,
               claimScope: "方法论与术语口径",

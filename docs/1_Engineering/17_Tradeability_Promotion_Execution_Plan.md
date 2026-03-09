@@ -1,7 +1,12 @@
 # 17 Tradeability Promotion Execution Plan
 
 更新时间：2026-03-09  
-状态：Active
+状态：Completed  
+定位：Promotion 工程收口记录（保留作执行历史）  
+当前主依据：
+- `docs/2_Intelligence/39_Tradeability_Dual_Lane_Operations.md`
+- `docs/1_Engineering/14_Investment_Mode_Backend_Runbook.md`
+- `docs/3_Product/Specs/48_Admin_Tradeability_Control_Tower.md`
 
 ## 1. 结论
 
@@ -33,7 +38,7 @@
 4. `rollback_tradeability_bundle.py` 负责回滚
 5. `promotion_audit_log` 负责审计留痕
 
-因此，当前最值得投入的工程主线应定义为：
+因此，本轮最值得投入的工程主线被定义为：
 
 **Tradeability Promotion Lane**
 
@@ -85,7 +90,7 @@
 
 当前真实问题不是“有没有动作语言”，而是“研究结论如何推进到正式产品口径”。
 
-## 3. 真实缺口
+## 3. 本轮收口前的真实缺口
 
 ### 3.1 缺口 A：只有 weekly snapshot，没有 promotion verdict
 
@@ -145,7 +150,24 @@
 
 如果 promotion 不接入这些指标，系统仍然可能停留在“研究效果不错，但用户层结果未被验证”的状态。
 
-## 4. 下一个大项的工程定义
+## 4. 本轮完成结果
+
+本轮已完成以下收口：
+
+1. `metrics_tradeability_promotion.py` 已升级为三核心模式治理：
+   - `steady_v1`
+   - `balanced_v1`
+   - `aggressive_v1`
+2. `observe_only_v1` 已明确排除在核心 promotion 门禁之外。
+3. approval artifact、promotion flow、Admin API、Admin 页面已承接新的治理字段。
+4. promotion 相关后端单测已补齐并跑通。
+
+因此，本文件后续不再作为主执行入口，而保留为：
+
+- 为什么要建设 Promotion Lane 的背景记录
+- 本轮工程闭环的历史说明
+
+## 5. 下一个大项的工程定义
 
 ### 大项名称
 
@@ -164,7 +186,7 @@
 
 `research artifacts -> rolling evaluation -> promotion verdict -> product config update`
 
-## 5. 执行拆解
+## 6. 执行拆解
 
 ### P0.1 产出统一 Promotion Verdict
 
@@ -253,7 +275,7 @@
 当前已完成第一版：
 
 1. `metrics_tradeability_promotion.py` 已接入 `mode_performance_snapshot`
-2. 当前第一版仍默认使用 `balanced_v1 / universal / 30d`
+2. 当前 verdict 已升级为三核心模式治理，并保留 `balanced_v1 / universal / 30d` 作为默认模式重点视图
 3. 已纳入 gate：
    - `sample_size`
    - `hit_rate`
@@ -265,7 +287,7 @@
    - `blocking_reasons`
    - promotion verdict artifact
 
-下一步执行口径已确定为：
+本轮最终执行口径为：
 
 1. `稳健 / 平衡 / 进取` 三个核心模式进入 promotion 治理视角
 2. `平衡` 保持默认模式重点展示

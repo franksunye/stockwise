@@ -10,4 +10,4 @@ category: "账号与安全"
 我们不需要你的手机号，也不需要你的身份证。这就是你的全匿名通行证，管好它，别让人偷看。
 
 ---
-*本文档归档于 StockWise Support Center (账号与安全)*
+*本文档归档于 知守 AI (ZISO AI) Support Center (账号与安全)*

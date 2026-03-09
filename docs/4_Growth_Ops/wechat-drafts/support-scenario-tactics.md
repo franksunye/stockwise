@@ -13,4 +13,4 @@ AI 会根据你的心理场景定制建议：
 - **空手观望**：寻找高确定性的“入场奇点”。
 
 ---
-*本文档归档于 StockWise Support Center (交易实战)*
+*本文档归档于 知守 AI (ZISO AI) Support Center (交易实战)*

@@ -1,6 +1,6 @@
 # Missing Features Documentation Plan (遗漏功能文档规划)
 
-This document is the ultimate knowledge blueprint for StockWise. It maps every technical feature from `PRODUCT_FEATURES_MANIFEST.md` to user-centric support content, ensuring 100% documentation coverage.
+This document is the ultimate knowledge blueprint for 知守 AI (ZISO AI). It maps every technical feature from `PRODUCT_FEATURES_MANIFEST.md` to user-centric support content, ensuring 100% documentation coverage.
 
 **Total Items**: 40 Core Support Articles
 **Status**: Rigorous Alignment Complete (V2.0)

@@ -11,4 +11,4 @@ category: "底层智能"
 人类大脑天生倾向于寻找支持自己看法的证据（确认偏差）。ZISO AI 会强制输出逻辑严密的“反面观点”，迫使你从另一个角度审视仓位风险。
 
 ---
-*本文档归档于 StockWise Support Center (底层智能)*
+*本文档归档于 知守 AI (ZISO AI) Support Center (底层智能)*

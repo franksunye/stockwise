@@ -11,4 +11,4 @@ category: "AI 智慧与分析"
 这就是市场的“心理防区”。AI 帮你钉死了这几条线，破了线，逻辑就全变了。
 
 ---
-*本文档归档于 StockWise Support Center (AI 智慧与分析)*
+*本文档归档于 知守 AI (ZISO AI) Support Center (AI 智慧与分析)*

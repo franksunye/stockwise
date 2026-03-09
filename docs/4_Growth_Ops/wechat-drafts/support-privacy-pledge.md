@@ -10,4 +10,4 @@ category: "账号与安全"
 我们只记录你的股票偏好，而且全是加密的。不收集通讯录，不看地理位置。在这里，你可以安安静静地打磨你的交易系统。
 
 ---
-*本文档归档于 StockWise Support Center (账号与安全)*
+*本文档归档于 知守 AI (ZISO AI) Support Center (账号与安全)*

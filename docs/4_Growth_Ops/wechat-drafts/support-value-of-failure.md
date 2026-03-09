@@ -10,4 +10,4 @@ category: "验证与诚信"
 我们从不删错贴。**诚信是量化投资的命根子。** 每一个错误都是 AI 下次进化的养料，也是让你看清 AI “边界”在哪里的最好教具。
 
 ---
-*本文档归档于 StockWise Support Center (验证与诚信)*
+*本文档归档于 知守 AI (ZISO AI) Support Center (验证与诚信)*

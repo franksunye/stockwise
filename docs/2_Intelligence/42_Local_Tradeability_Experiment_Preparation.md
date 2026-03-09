@@ -1,7 +1,18 @@
 # 42 本地 Tradeability 实验准备
 
 更新时间：2026-03-09  
-状态：Active
+状态：Historical Reference  
+定位：本地定向实验工作单（保留作阶段性研究记录）  
+当前主依据：
+- `docs/2_Intelligence/39_Tradeability_Dual_Lane_Operations.md`
+- `docs/1_Engineering/14_Investment_Mode_Backend_Runbook.md`
+- `docs/1_Engineering/17_Tradeability_Promotion_Execution_Plan.md`
+
+说明：
+
+1. 本文记录的是某一阶段的本地实验准备与候选筛选方式。
+2. 若与当前双轨主口径、promotion 治理或运行顺序冲突，以主文档为准。
+3. 后续若再次开展本地定向实验，优先新建 `research/` 下的轮次记录，而不是把本文继续当作长期主执行文档。
 
 ## 1. 目标
 

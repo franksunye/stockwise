@@ -13,4 +13,4 @@ category: "底层智能"
 - **动作导向**：简报的结论始终落在“具体价位”与“具体动作”上，拒绝模棱两可。
 
 ---
-*本文档归档于 StockWise Support Center (底层智能)*
+*本文档归档于 知守 AI (ZISO AI) Support Center (底层智能)*

@@ -12,4 +12,4 @@ category: "交互与导航"
 - **往右滑**：你的身份。管好你的会员权益和设置。
 
 ---
-*本文档归档于 StockWise Support Center (交互与导航)*
+*本文档归档于 知守 AI (ZISO AI) Support Center (交互与导航)*

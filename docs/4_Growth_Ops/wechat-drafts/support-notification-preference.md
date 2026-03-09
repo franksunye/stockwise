@@ -18,4 +18,4 @@ category: "通知与触达"
 我们要的是高价值提醒，不是高频打扰。
 
 ---
-*本文档归档于 StockWise Support Center (通知与触达)*
+*本文档归档于 知守 AI (ZISO AI) Support Center (通知与触达)*

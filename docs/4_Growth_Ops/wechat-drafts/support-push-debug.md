@@ -10,4 +10,4 @@ category: "通知与触达"
 点一下那个“测试推送”按钮。要是手机没响，那准是你的系统防火墙或者省电模式把咱给拦了。去设置里给点权限。
 
 ---
-*本文档归档于 StockWise Support Center (通知与触达)*
+*本文档归档于 知守 AI (ZISO AI) Support Center (通知与触达)*

@@ -10,4 +10,4 @@ category: "AI 智慧与分析"
 如果 AI 昨天看错了，系统会自动复盘。是市场出了黑天鹅？还是模型没算对？**敢于公开承认并分析错误**，才是咱们能越跑越准的原因。
 
 ---
-*本文档归档于 StockWise Support Center (AI 智慧与分析)*
+*本文档归档于 知守 AI (ZISO AI) Support Center (AI 智慧与分析)*

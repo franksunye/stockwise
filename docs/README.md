@@ -1,6 +1,6 @@
-# StockWise Knowledge Base (Single Source of Truth)
+# 知守 AI (ZISO AI) 知识库 (Single Source of Truth)
 
-This directory serves as the unified single source of truth for the StockWise project, covering product strategy, architecture design, AI logic, and operations/growth.
+This directory serves as the unified single source of truth for the 知守 AI (ZISO AI) 产品项目, covering product strategy, architecture design, AI logic, and operations/growth.
 
 ## 📁 Core Directory Structure
 
@@ -15,6 +15,13 @@ This directory serves as the unified single source of truth for the StockWise pr
 - [Architecture (As-Is & To-Be)](./1_Engineering/10_Architecture.md)
 - [Reliability & Quality Gates](./1_Engineering/11_Reliability_Protocol.md)
 - [Investment Mode Execution Alignment Plan](./1_Engineering/19_Investment_Mode_Execution_Alignment_Plan.md)
+
+### Current Source of Truth: Investment Mode / Tradeability
+- [Dual-Lane Operations](./2_Intelligence/39_Tradeability_Dual_Lane_Operations.md)
+- [Investment Mode Backend Runbook](./1_Engineering/14_Investment_Mode_Backend_Runbook.md)
+- [Investment Mode Product Layer](./3_Product/Specs/47_Investment_Mode_Product_Layer.md)
+- [Admin Tradeability Control Tower](./3_Product/Specs/48_Admin_Tradeability_Control_Tower.md)
+- [Execution Alignment Record](./1_Engineering/19_Investment_Mode_Execution_Alignment_Plan.md)
 
 ### [2_Intelligence/](./2_Intelligence/) - How (Brain)
 > Project "AI Logic": Prompt engineering, model strategies, and core algorithms.

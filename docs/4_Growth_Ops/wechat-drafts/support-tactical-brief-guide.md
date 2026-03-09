@@ -10,4 +10,4 @@ category: "AI 智慧与分析"
 去读那个“风险反思”。AI 会告诉你：“虽然我看多，但要是某某价位跌破了，我就认错。”这才是真干货。无脑吹牛的内容，外面到处都是，我们要的是应对方案。
 
 ---
-*本文档归档于 StockWise Support Center (AI 智慧与分析)*
+*本文档归档于 知守 AI (ZISO AI) Support Center (AI 智慧与分析)*

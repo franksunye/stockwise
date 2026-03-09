@@ -10,4 +10,4 @@ category: "数据与服务保障"
 网络慢点没关系，系统会在后台慢慢跟服务器对账。我们不希望网络的小转圈打断了你的思路。
 
 ---
-*本文档归档于 StockWise Support Center (数据与服务保障)*
+*本文档归档于 知守 AI (ZISO AI) Support Center (数据与服务保障)*

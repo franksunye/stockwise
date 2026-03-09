@@ -10,4 +10,4 @@ category: "权益与增长"
 只要他入场，你们俩都能领到一个“Loot Box”，里面装着 Pro 会员天数。独乐乐不如众乐乐。
 
 ---
-*本文档归档于 StockWise Support Center (权益与增长)*
+*本文档归档于 知守 AI (ZISO AI) Support Center (权益与增长)*

@@ -11,4 +11,4 @@ category: "验证与诚信"
 - **偏了**：市场不给面子，逻辑失效，咱撤退重来。
 
 ---
-*本文档归档于 StockWise Support Center (验证与诚信)*
+*本文档归档于 知守 AI (ZISO AI) Support Center (验证与诚信)*

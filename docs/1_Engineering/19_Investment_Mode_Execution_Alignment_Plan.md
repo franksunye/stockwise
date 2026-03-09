@@ -1,14 +1,19 @@
 # 19 Investment Mode Execution Alignment Plan
 
 更新时间：2026-03-09  
-状态：Active  
-定位：执行对齐文档（先统一文字口径，再推动实现收敛）
+状态：Completed  
+定位：执行对齐与落地记录（保留作阶段性历史）  
+当前主依据：
+- `docs/2_Intelligence/39_Tradeability_Dual_Lane_Operations.md`
+- `docs/1_Engineering/14_Investment_Mode_Backend_Runbook.md`
+- `docs/3_Product/Specs/47_Investment_Mode_Product_Layer.md`
+- `docs/3_Product/Specs/48_Admin_Tradeability_Control_Tower.md`
 
 ## 1. 目标
 
 这份文档用于解决当前 Investment Mode / tradeability 双线体系中的一个现实问题：
 
-**团队共识已经开始收敛，但文档口径、后台展示口径和代码现状还没有完全一致。**
+**团队共识已经完成收敛，本文件保留本轮如何从口径对齐推进到工程落地的记录。**
 
 因此，当前最重要的工作不是继续扩写概念，而是明确：
 
@@ -66,7 +71,7 @@
 
 ---
 
-## 3. 当前事实（As-Is）
+## 3. 当前事实（As-Is，收口后）
 
 以下内容是当前仓库实现层已经成立的事实，文档必须承认它，不应提前把目标态写成既成事实。
 
@@ -81,51 +86,50 @@
    - `mode_performance_snapshot`
 3. 实验侧结果表已落地：
    - `quant_tradeability_signals`
-4. Promotion 机制已落地第一版：
+4. Promotion 机制已落地并升级为核心模式治理：
    - verdict
    - approval
    - promote
    - rollback
    - `promotion_audit_log`
+   - 三核心模式治理
+   - 默认模式重点展示
+   - `observe_only_v1` 特殊排除
 5. Admin Tradeability 控制塔已存在：
    - 研究池/实验结果可看
    - 生产模式快照可看
    - promotion timeline 可看
 
-### 3.2 还不是事实、只是目标的内容
+### 3.2 本轮前曾不是事实、现已收口的内容
 
 1. “生产线和实验线的数据底座不同”：
-   - 当前文档共识已改成这个说法
-   - 但代码现状仍主要表现为“结果表分离”，不是“物理底座完全分离”
+   - 已确认为不采用该表述
+   - 当前正式口径为“共享底层数据 + 结果表与统计口径严格分离”
 2. “promotion 已按三个核心模式并列治理”：
-   - 当前并非如此
-   - 现有 promotion 仍明显偏向默认模式 `balanced_v1`
+   - 本轮已落地
+   - 当前默认模式仍重点展示，但 verdict 不再只围绕 `balanced_v1`
 3. “全仓库文档和页面术语已经统一”：
-   - 当前也并非如此
-   - 仍有旧文档/旧页面使用“产品池 / 研究线 / 生产流水线”等旧口径
+   - 本轮核心文档与 Admin 页面已统一
+   - 外围历史文档若保留旧词，应显式标记为历史参考
 
 ---
 
-## 4. 目标态（To-Be）
+## 4. 本轮落地结果（Delivered）
 
-### 4.1 架构目标态
+### 4.1 架构收口结果
 
-目标态应明确为：
+1. 生产线和实验线在结果口径上已明确分离。
+2. 当前采用“共享底层数据 + 结果表与统计口径严格分离”。
+3. 若未来升级为逻辑分层或物理分离，需单独立项。
 
-1. 生产线和实验线在结果口径上完全分离
-2. 生产线和实验线在数据底座上要么：
-   - 物理分离
-   - 要么逻辑分层并有明确边界
-3. 不允许继续使用模糊表述，把“结果表分离”误说成“底座已经分离”
-
-### 4.2 管理目标态
+### 4.2 管理收口结果
 
 1. Admin 对生产线以“模式分别看绩效”为主
 2. 不把模式总和作为核心管理指标
 3. `仅观察` 单独标记，不与三类核心模式混作同类排名
-4. promotion 逐步从“默认模式中心”升级为“核心模式治理中心”
+4. promotion 已从“默认模式中心”升级为“核心模式治理中心”
 
-### 4.3 文档目标态
+### 4.3 文档收口结果
 
 1. 核心文档中文统一使用：
    - `生产线 / 实验线`
@@ -238,9 +242,9 @@
 
 ---
 
-## 7. 分阶段执行方案
+## 7. 分阶段执行结果
 
-### Phase 0：文档收口（当前立即执行）
+### Phase 0：文档收口（Completed）
 
 目标：
 
@@ -255,7 +259,7 @@
 2. 运行文档一致
 3. 产品/后台 spec 一致
 
-### Phase 1：事实核对（文档补真相）
+### Phase 1：事实核对（Completed）
 
 目标：
 
@@ -277,7 +281,7 @@
    - 只看 `balanced_v1`
    - 还是已经具备多模式扩展能力
 
-### Phase 2：后台口径对齐
+### Phase 2：后台口径对齐（Completed）
 
 目标：
 
@@ -290,7 +294,7 @@
    - `研究流水线`
    - `生产流水线`
 
-### Phase 3：机制升级决策
+### Phase 3：机制升级决策（Completed）
 
 目标：
 
@@ -304,15 +308,15 @@
    - runbook
    - promotion 计划
 
-注意：
+结果：
 
-Phase 3 才是机制升级阶段，不应在 Phase 0 和 Phase 1 里偷渡为既成事实。
+Phase 3 已完成，当前主口径已回写到主文档与工程实现。
 
 ---
 
-## 8. 工程任务清单
+## 8. 工程任务清单（完成情况）
 
-### P0：数据结构与 verdict 收敛
+### P0：数据结构与 verdict 收敛（Completed）
 
 1. 把 `metrics_tradeability_promotion.py` 从单 `balanced_v1` 产品效果门禁升级为三核心模式治理口径。
 2. 增加 mode-level verdict summary 结构，至少覆盖：
@@ -321,7 +325,7 @@ Phase 3 才是机制升级阶段，不应在 Phase 0 和 Phase 1 里偷渡为既
    - `aggressive_v1`
 3. 将 `observe_only_v1` 明确排除在核心模式比较之外，但保留独立展示标记。
 
-### P1：Admin API 收敛
+### P1：Admin API 收敛（Completed）
 
 1. 扩展 `/api/admin/tradeability`：
    - 返回默认模式重点视图
@@ -332,7 +336,7 @@ Phase 3 才是机制升级阶段，不应在 Phase 0 和 Phase 1 里偷渡为既
    - 实验线结果
    - promotion 核心 verdict
 
-### P2：Admin 页面收敛
+### P2：Admin 页面收敛（Completed）
 
 1. 生产区改成“双层结构”：
    - 默认模式重点卡
@@ -343,7 +347,7 @@ Phase 3 才是机制升级阶段，不应在 Phase 0 和 Phase 1 里偷渡为既
    - 非收益承诺
    - 指标必须结合样本数和风险指标一起看
 
-### P3：测试与回归
+### P3：测试与回归（Completed）
 
 1. 更新 promotion 相关单测，覆盖三核心模式治理。
 2. 更新 Admin API 聚合层测试。
@@ -351,7 +355,7 @@ Phase 3 才是机制升级阶段，不应在 Phase 0 和 Phase 1 里偷渡为既
 
 ---
 
-## 9. 文档改造范围（执行清单）
+## 9. 文档改造范围（执行结果）
 
 ### 7.1 已优先收口的文档
 
@@ -360,7 +364,7 @@ Phase 3 才是机制升级阶段，不应在 Phase 0 和 Phase 1 里偷渡为既
 3. `docs/3_Product/Specs/48_Admin_Tradeability_Control_Tower.md`
 4. `docs/3_Product/00_Domain_Entities_Glossary.md`
 
-### 7.2 下一批需要同步的文档
+### 7.2 已同步的外围文档
 
 1. `docs/1_Engineering/14_Investment_Mode_Backend_Runbook.md`
 2. `docs/1_Engineering/10_Architecture.md`
@@ -369,7 +373,7 @@ Phase 3 才是机制升级阶段，不应在 Phase 0 和 Phase 1 里偷渡为既
 5. `docs/2_Intelligence/41_Tradeability_Quality_and_Actionability_Plan.md`
 6. 其他引用旧叫法的 support / growth 文档
 
-### 7.3 页面文案需要同步的位置
+### 7.3 已同步的页面位置
 
 1. `frontend/src/app/admin/(protected)/tradeability/page.tsx`
 2. 其他 Admin 或说明页中出现：
@@ -380,7 +384,7 @@ Phase 3 才是机制升级阶段，不应在 Phase 0 和 Phase 1 里偷渡为既
 
 ---
 
-## 10. 执行判断标准
+## 10. 收口判断标准
 
 这份方案是否执行到位，用下面 4 条判断：
 
@@ -397,4 +401,4 @@ Phase 3 才是机制升级阶段，不应在 Phase 0 和 Phase 1 里偷渡为既
 
 当前 Investment Mode 的正确推进方式不是继续扩写概念，而是：
 
-**先把“事实、目标、阶段、责任边界”写清楚，再推进后台和机制收敛。**
+**这条线已经完成“口径统一 -> 工程实现 -> 后台承接 -> 测试回归”的阶段性收口。**

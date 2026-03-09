@@ -15,4 +15,4 @@ Android 是 PWA 的原生主场，支持最为流畅。
 若系统拦截，请在手机“设置”中允许 Chrome 浏览器的“创建桌面快捷方式”权限。
 
 ---
-*本文档归档于 StockWise Support Center (快速开始)*
+*本文档归档于 知守 AI (ZISO AI) Support Center (快速开始)*

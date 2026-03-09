@@ -10,4 +10,4 @@ category: "交互与导航"
 它会把华丽的弹簧动画关掉，换成省电的匀速滑动。虽然视觉上没那么炫了，但能保证你在关键时刻不卡顿，不掉链子。
 
 ---
-*本文档归档于 StockWise Support Center (交互与导航)*
+*本文档归档于 知守 AI (ZISO AI) Support Center (交互与导航)*

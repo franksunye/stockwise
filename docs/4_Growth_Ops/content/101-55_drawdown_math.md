@@ -37,7 +37,7 @@ image_prompt: "**Concept**: The cost of recovery. **Style**: 3D Isometric. **Sub
 
 ---
 
-## ⚖️ 实战：StockWise 的防御底线
+## ⚖️ 实战：知守 AI (ZISO AI) 的防御底线
 
 ZISO 的所有 AI 算法，首要任务都是 **“防止大额回撤”**。
 

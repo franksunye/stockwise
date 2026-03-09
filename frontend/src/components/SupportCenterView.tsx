@@ -32,8 +32,8 @@ const SECTIONS = [
     id: 'ai-logic', title: 'AI 智慧与分析', icon: Brain,
     color: 'text-indigo-400', bg: 'bg-indigo-500/10', border: 'border-indigo-500/20',
     items: [
-      { q: 'AI 智囊团：群体决策机制', slug: 'ai-council-logic' },
-      { q: '战术简报解读 (Tactical Brief)', slug: 'tactical-brief-guide' },
+      { q: '投研决议：多维度共识', slug: 'ai-council-logic' },
+      { q: '策略内参解读 (Tactical Brief)', slug: 'tactical-brief-guide' },
       { q: '关键价位图解 (Key Levels)', slug: 'key-levels-mapping' },
       { q: '胜率历史矩阵 (Win-Rate)', slug: 'history-matrix-viz' },
       { q: '智能上下文提取机制', slug: 'context-extraction' },

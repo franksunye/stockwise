@@ -10,4 +10,4 @@ category: "AI 智慧与分析"
 如果最近全是红的，说明这只票正处在 AI 最擅长的行情里。如果灰的多，可能是这段时间市场太乱，AI 也没摸准。跟着状态好的 AI 走，别跟它较真。
 
 ---
-*本文档归档于 StockWise Support Center (AI 智慧与分析)*
+*本文档归档于 知守 AI (ZISO AI) Support Center (AI 智慧与分析)*

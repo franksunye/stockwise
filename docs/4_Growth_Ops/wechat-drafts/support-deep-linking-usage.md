@@ -10,4 +10,4 @@ category: "交互与导航"
 直接在网址后面加个 \`?s=股票代码\`。或者分享给哥们，他点开就能看到你正在研究的那份简报，不用再对半屏截图猜半天。
 
 ---
-*本文档归档于 StockWise Support Center (交互与导航)*
+*本文档归档于 知守 AI (ZISO AI) Support Center (交互与导航)*

@@ -14,4 +14,4 @@ PWA 是一种结合了网页轻量与 App 沉浸感的卓越技术。它让 ZISO
 - **即时更新**：每次打开都是最新版本，算法实时同步。
 
 ---
-*本文档归档于 StockWise Support Center (快速开始)*
+*本文档归档于 知守 AI (ZISO AI) Support Center (快速开始)*

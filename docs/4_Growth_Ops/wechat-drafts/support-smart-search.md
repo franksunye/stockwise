@@ -10,4 +10,4 @@ category: "交互与导航"
 不管是代码、拼音头（比如 GZMT）、还是中文名字，你怎么顺手怎么搜。我们专门做了防抖优化，手滑输入错一个字母，它也能尽量猜出你要找谁。
 
 ---
-*本文档归档于 StockWise Support Center (交互与导航)*
+*本文档归档于 知守 AI (ZISO AI) Support Center (交互与导航)*

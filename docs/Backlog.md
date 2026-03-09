@@ -1,4 +1,4 @@
-﻿# StockWise 项目待办清单 (Backlog)
+﻿# 知守 AI (ZISO AI) 项目待办清单 (Backlog)
 
 > **小步快跑** —— 将大愿景拆解为可落地的任务。
 

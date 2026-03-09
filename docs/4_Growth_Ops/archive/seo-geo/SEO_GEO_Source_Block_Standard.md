@@ -1,4 +1,4 @@
-# StockWise SEO/GEO 来源块标准（v1）
+# 知守 AI (ZISO AI) SEO/GEO 来源块标准（v1）
 
 > Date: 2026-03-05
 > Scope: 全站公开内容页（learn/support/landing 解释块）
@@ -33,13 +33,13 @@ type SourceRef = {
 ```ts
 [
   {
-    name: "StockWise Learn Center",
+    name: "知守 AI (ZISO AI) Learn Center",
     url: "https://ziso.cc/learn",
     accessedAt: "2026-03-05",
     claimScope: "方法论定义"
   },
   {
-    name: "StockWise Support Center",
+    name: "知守 AI (ZISO AI) Support Center",
     url: "https://ziso.cc/support",
     accessedAt: "2026-03-05",
     claimScope: "功能机制与验证口径"

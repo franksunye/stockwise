@@ -10,4 +10,4 @@ category: "权益与增长"
 去个人中心手动填上。通常这是公测、参加活动或者合伙人送你的特别礼包。手慢无！
 
 ---
-*本文档归档于 StockWise Support Center (权益与增长)*
+*本文档归档于 知守 AI (ZISO AI) Support Center (权益与增长)*

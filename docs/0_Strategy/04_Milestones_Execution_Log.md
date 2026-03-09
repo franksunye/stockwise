@@ -1,4 +1,4 @@
-# StockWise 里程碑与执行进度日志 (Milestones Execution Log)
+# 知守 AI (ZISO AI) 里程碑与执行进度日志 (Milestones Execution Log)
 
 > **文档版本**: v3.7（聚焦当前里程碑版）  
 > **更新日期**: 2026-03-07  

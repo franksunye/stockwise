@@ -11,4 +11,4 @@ category: "通知与触达"
 同方向的小幅变化（比如看多变更强看多）默认不推，核心目标是让每条通知都值得你点开。
 
 ---
-*本文档归档于 StockWise Support Center (通知与触达)*
+*本文档归档于 知守 AI (ZISO AI) Support Center (通知与触达)*

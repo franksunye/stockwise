@@ -13,4 +13,4 @@ category: "底层智能"
 3. **理性隔离**：秒级波动极易诱发散户的恐惧与贪婪。
 
 ---
-*本文档归档于 StockWise Support Center (底层智能)*
+*本文档归档于 知守 AI (ZISO AI) Support Center (底层智能)*

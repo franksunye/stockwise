@@ -11,4 +11,4 @@ category: "交易实战"
 - **止损 (Stop Loss)**：这是不可妥协的铁律纪律线。
 
 ---
-*本文档归档于 StockWise Support Center (交易实战)*
+*本文档归档于 知守 AI (ZISO AI) Support Center (交易实战)*

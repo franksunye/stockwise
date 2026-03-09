@@ -10,4 +10,4 @@ category: "AI 智慧与分析"
 AI 的正则引擎会帮你把那堆废话滤掉，直接把日报里最关键的那句拎到卡片上。不用通读全篇，也能知道你关心的票出啥事了。
 
 ---
-*本文档归档于 StockWise Support Center (AI 智慧与分析)*
+*本文档归档于 知守 AI (ZISO AI) Support Center (AI 智慧与分析)*

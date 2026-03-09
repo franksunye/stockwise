@@ -10,4 +10,4 @@ category: "账号与安全"
 **绑定个邮箱吧！** 这是你找回 Pro 会员权益的唯一办法。别等丢了再哭，现在就去绑定。
 
 ---
-*本文档归档于 StockWise Support Center (账号与安全)*
+*本文档归档于 知守 AI (ZISO AI) Support Center (账号与安全)*

@@ -12,4 +12,4 @@ category: "量化逻辑与纪律"
 这就是交易节奏感。
 
 ---
-*本文档归档于 StockWise Support Center (量化逻辑与纪律)*
+*本文档归档于 知守 AI (ZISO AI) Support Center (量化逻辑与纪律)*

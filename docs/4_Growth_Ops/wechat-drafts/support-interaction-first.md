@@ -11,4 +11,4 @@ category: "交互与导航"
 点下去没反应最糟心。在 ZISO，按钮响应是 0 延迟的，动画先跑，数据慢个零点几秒填进来没关系，但**你的手感和节奏绝对不能断**。
 
 ---
-*本文档归档于 StockWise Support Center (交互与导航)*
+*本文档归档于 知守 AI (ZISO AI) Support Center (交互与导航)*

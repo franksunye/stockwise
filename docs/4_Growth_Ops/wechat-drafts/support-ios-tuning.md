@@ -10,4 +10,4 @@ category: "交互与导航"
 这不是偷懒，是为了让你的 ProMotion 屏幕满帧跑。**手感要像黄油一样顺滑**，你下单的时候才会有信心。
 
 ---
-*本文档归档于 StockWise Support Center (交互与导航)*
+*本文档归档于 知守 AI (ZISO AI) Support Center (交互与导航)*

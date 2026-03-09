@@ -13,4 +13,4 @@ ZISO AI 支持手机、Pad、电脑多端访问。
 3. **自动同步**：你的监控池与 Pro 权益将自动同步。
 
 ---
-*本文档归档于 StockWise Support Center (账号与安全)*
+*本文档归档于 知守 AI (ZISO AI) Support Center (账号与安全)*

@@ -1,4 +1,4 @@
-# StockWise 量化引擎架构规划 (QuantEngine Architecture)
+# 知守 AI (ZISO AI) 量化引擎架构规划 (QuantEngine Architecture)
 
 **文档状态**: Draft  
 **日期**: 2026-03-06  
@@ -9,7 +9,7 @@
 
 ## 1. 定位与目标
 
-在 StockWise 最新的“双层解耦架构”中，**量化引擎（QuantEngine）被正式剥离并确立为 Layer-1 先决触发层**。
+在 知守 AI (ZISO AI) 最新的“双层解耦架构”中，**量化引擎（QuantEngine）被正式剥离并确立为 Layer-1 先决触发层**。
 它不再是大模型（Layer-2）的辅助参考项，而是拥有绝对“开火权（买入触发）”与“一票否决权（防守清仓）”的系统大脑。
 
 本架构规划旨在为 `QuantEngine` 制定长期的演进蓝图，确保其具备**高扩展性（插件化）、抗冲突性（多策略调度）和可审计性**，以从容应对未来数百个策略因子同时运行的复杂场景。
@@ -133,5 +133,5 @@ QuantEngine 的“选单式策略”架构拥有对核心商业模式（Free vs.
     *   *backtesting.py*：轻量级且自带精美交互图表，非常适合作为新策略（如 VCP、破位止损）的快速验证和回测可视化脚手架。
 
 ### 6.3 核心调度的边界 (Buy vs. Build)
-*   **我们应该自己写什么 (Build)**：调度逻辑（`EnsembleOrchestrator`）、状态机的收敛、LLM 提示词工厂、以及结合大 A 股特殊制度的打分权重。这是 StockWise 的核心护城河。
+*   **我们应该自己写什么 (Build)**：调度逻辑（`EnsembleOrchestrator`）、状态机的收敛、LLM 提示词工厂、以及结合大 A 股特殊制度的打分权重。这是 知守 AI (ZISO AI) 的核心护城河。
 *   **我们绝不该写什么 (Buy/Integrate)**：K 线对齐代码、滑点与交易费率模拟计算、底层 MACD/RSI 源码公式。这些脏活累活，全权交由成熟的顶级开源库接管。

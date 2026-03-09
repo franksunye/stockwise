@@ -3,7 +3,7 @@
 ## 1. 背景与目标 (Background & Goals)
 
 **现状 (Status Quo)**
-目前 StockWise 的前端架构中，网络请求状态管理和本地缓存存在较强的“碎片化”特征：
+目前 知守 AI (ZISO AI) 的前端架构中，网络请求状态管理和本地缓存存在较强的“碎片化”特征：
 - 首页大盘流（`useDashboardData`）：基于 `localStorage` 手写了大量逻辑，包括定时器轮询、焦点回归刷新、手动防抖（Debounce）及过期管理。
 - 用户自选池（`useWatchlist`）：实现了乐观更新（Optimistic Updates）与本地远端同步，带有五秒的突变防守期（Anti-Zombie）。
 - 局部组件（如 `AICouncil`）：通过 `Map` 构建了带限制容量（防 OOM）的纯内存缓存。

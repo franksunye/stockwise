@@ -80,8 +80,8 @@ export const brandCoreZhCN: BrandCore = {
     text: "所有内容仅供研究与信息参考，不构成投资建议或收益承诺。",
   },
   defaultSources: [
-    { name: "StockWise Learn Center", url: "https://ziso.cc/learn" },
-    { name: "StockWise Support Center", url: "https://ziso.cc/support" },
+    { name: "知守 AI (ZISO AI) 投研中心", url: "https://ziso.cc/learn" },
+    { name: "知守 AI (ZISO AI) 帮助中心", url: "https://ziso.cc/support" },
   ],
 };
 
