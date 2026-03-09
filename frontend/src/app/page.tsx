@@ -311,27 +311,10 @@ export default async function LandingPage() {
           </div>
         </section>
 
-        <section className="w-full max-w-4xl">
-          <GeoSummary
-            summary={[
-              "知守 AI 聚焦盘后复盘与次日策略，降低情绪化交易干扰。",
-              "核心机制包括战术简报、胜率追踪、关键价位与风险提示。",
-              "分析结果可回看、可追溯，强调过程透明而非收益承诺。",
-            ]}
-          />
-          <SourceBlock
-            sources={[
-              ...brandCoreZhCN.defaultSources,
-              { name: "Product Positioning", accessedAt: "2026-03-05" },
-            ]}
-          />
-          <BoundaryNotice text={brandCoreZhCN.boundaryNotice.text} />
-        </section>
-
         {/* CTA Banner */}
-        <section className="py-40 w-full max-w-4xl text-center space-y-10">
+        <section className="py-40 w-full max-w-4xl text-center space-y-10 border-b border-white/5">
           <h2 className="text-3xl md:text-5xl font-black italic tracking-tighter uppercase leading-tight">
-            准好让 <span className="text-indigo-500 uppercase">ZISO AI</span> <br className="hidden md:block" />
+            准备好让 <span className="text-indigo-500 uppercase">ZISO AI</span> <br className="hidden md:block" />
             替你打理股市功课了吗？
           </h2>
           <div className="flex flex-col md:flex-row items-center justify-center gap-6">
@@ -343,9 +326,37 @@ export default async function LandingPage() {
             >
               立即进入应用 <ChevronRight size={24} />
             </Link>
-            {/* Free Trial Badge Removed */}
           </div>
         </section>
+
+        {/* 
+          GEO/Transparency Section - Subtle & Functional for Search Engines
+          We keep this on the landing page for 'Search Generative Experience' optimization 
+          but hide it from prominent visual hierarchy to maintain a premium feel.
+        */}
+        <section className="w-full max-w-4xl pt-10 pb-20 opacity-[0.25] hover:opacity-100 transition-opacity">
+          <div className="flex flex-col md:flex-row gap-6 mb-6">
+            <div className="flex-1">
+              <GeoSummary
+                summary={[
+                  "知守 AI 聚焦盘后复盘与次日策略，降低情绪化交易干扰。",
+                  "核心机制包括战术简报、胜率追踪、关键价位与风险提示。",
+                  "分析结果可回看、可追溯，强调过程透明而非收益承诺。",
+                ]}
+              />
+            </div>
+            <div className="flex-1">
+              <SourceBlock
+                sources={[
+                  ...brandCoreZhCN.defaultSources,
+                  { name: "Product Positioning", url: "https://ziso.cc", accessedAt: "2026-03-05" },
+                ]}
+              />
+            </div>
+          </div>
+          <BoundaryNotice text={brandCoreZhCN.boundaryNotice.text} />
+        </section>
+
       </main>
 
 
