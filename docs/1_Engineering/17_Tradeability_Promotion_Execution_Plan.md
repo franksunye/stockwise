@@ -248,11 +248,12 @@
 
 1. Promotion 不只看研究侧 `quant_tradeability_signals`
 2. 还看用户正式展示链路的结果是否稳定
+3. 核心治理对象从“单默认模式”升级为“三核心模式”，默认模式继续重点展示
 
 当前已完成第一版：
 
 1. `metrics_tradeability_promotion.py` 已接入 `mode_performance_snapshot`
-2. 当前默认使用 `balanced_v1 / universal / 30d`
+2. 当前第一版仍默认使用 `balanced_v1 / universal / 30d`
 3. 已纳入 gate：
    - `sample_size`
    - `hit_rate`
@@ -263,6 +264,13 @@
    - `promotion_gate_pass`
    - `blocking_reasons`
    - promotion verdict artifact
+
+下一步执行口径已确定为：
+
+1. `稳健 / 平衡 / 进取` 三个核心模式进入 promotion 治理视角
+2. `平衡` 保持默认模式重点展示
+3. `仅观察` 不参与核心模式同类比较与 promotion 核心门禁
+4. 真正 promote / rollback 仍以 mode bundle / params bundle 为执行单位
 
 ### P1.2 收口前台动作语言
 

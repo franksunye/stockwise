@@ -751,6 +751,44 @@ function buildResponse(input: {
                 blocking_reasons: blockingReasons,
                 latest_week_end: verdictSummary.latest_week_end ? String(verdictSummary.latest_week_end) : null,
                 verdict_created_at: payload.verdictRow?.created_at ? String(payload.verdictRow.created_at) : null,
+                default_mode_id: verdictSummary.default_mode_id ? String(verdictSummary.default_mode_id) : DEFAULT_MODE_ID,
+                core_mode_gate_pass: Boolean(verdictSummary.core_mode_gate_pass),
+                core_mode_governance: Object.entries((verdictSummary.core_mode_effects || {}) as Record<string, unknown>).map(
+                    ([modeId, raw]) => {
+                        const row = raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {};
+                        const effect = row.effect && typeof row.effect === 'object'
+                            ? (row.effect as Record<string, unknown>)
+                            : null;
+                        const gates = row.gates && typeof row.gates === 'object'
+                            ? (row.gates as Record<string, unknown>)
+                            : {};
+                        const modeBlockingReasons = Array.isArray(row.blocking_reasons)
+                            ? row.blocking_reasons.map((item) => String(item))
+                            : [];
+                        return {
+                            mode_id: modeId,
+                            is_core_mode: Boolean(row.is_core_mode),
+                            is_default_mode: Boolean(row.is_default_mode),
+                            excluded_from_promotion: Boolean(row.excluded_from_promotion),
+                            exclusion_reason: row.reason ? String(row.reason) : null,
+                            gate_pass: Boolean(row.gate_pass),
+                            blocking_reasons: modeBlockingReasons,
+                            as_of_date: effect?.as_of_date ? String(effect.as_of_date) : null,
+                            hit_rate: effect?.hit_rate == null ? null : num(effect.hit_rate, Number.NaN),
+                            max_drawdown: effect?.max_drawdown == null ? null : num(effect.max_drawdown, Number.NaN),
+                            sample_size: effect?.sample_size == null ? 0 : num(effect.sample_size),
+                            payoff_ratio: effect?.payoff_ratio == null ? null : num(effect.payoff_ratio, Number.NaN),
+                            stability_score: effect?.stability_score == null ? null : num(effect.stability_score, Number.NaN),
+                            gates: Object.fromEntries(
+                                Object.entries(gates).map(([key, value]) => [key, value === null ? null : Boolean(value)])
+                            ),
+                        };
+                    }
+                ).sort((a, b) => {
+                    if (a.excluded_from_promotion !== b.excluded_from_promotion) return a.excluded_from_promotion ? 1 : -1;
+                    if (a.is_default_mode !== b.is_default_mode) return a.is_default_mode ? -1 : 1;
+                    return a.mode_id.localeCompare(b.mode_id);
+                }),
             },
             research: {
                 metrics_7d: researchMetrics,

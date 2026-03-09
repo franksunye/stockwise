@@ -644,7 +644,7 @@ export function TacticalBriefDrawer({
                             <p className="text-[10px] text-slate-600 mt-1">{shortMetrics?.trade_date || '日期待同步'}</p>
                           </div>
                           <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5">
-                            <p className="text-[10px] text-slate-600 font-bold uppercase tracking-wider mb-1">周度空仓</p>
+                            <p className="text-[10px] text-slate-600 font-bold uppercase tracking-wider mb-1">做空仓位</p>
                             <p className="text-xs font-black text-slate-300">
                               {shortMetrics?.short_interest_shares != null ? Number(shortMetrics.short_interest_shares).toLocaleString() : '--'}
                             </p>

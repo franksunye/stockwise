@@ -42,7 +42,7 @@ image_prompt: "A 3D visualization of a stock chart where the Moving Average line
 
 ### 🐆 战术线 (MA20 - The Month)
 *   **意义**：短期强弱分水岭。
-*   **用法**：做短线波段，**线上持股，线下空仓**。如果你是做短线的，跌破 MA20 就是闭眼离场的信号，没有任何理由。
+*   **用法**：做短线波段，**线上持股，线下观望**。如果你是做短线的，跌破 MA20 就是闭眼离场的信号，没有任何理由。
 
 ### 🐘 生命线 (MA60 - The Quarter)
 *   **意义**：中期趋势。机构的季度考核线。

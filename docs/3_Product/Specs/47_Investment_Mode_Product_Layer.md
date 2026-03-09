@@ -231,7 +231,7 @@
 为支撑“模式绩效可解释、可验证、可复盘”，后台必须建设两层记录能力：
 
 1. `mode_decision_log`（决策日志）
-- 定义：记录每个模式在每个交易日的决策结论与触发依据（如：进场/观察/防守/空仓）。
+- 定义：记录每个模式在每个交易日的决策结论与触发依据（如：进场/观察/防守/暂无信号）。
 - 目标：保证“为什么这样判断”可审计、可追溯。
 - 最小字段建议：`mode_id`, `date`, `symbol`, `decision_semantic`, `strategy_version`, `trigger_flags`, `reasoning_snapshot`, `created_at`。
 
@@ -264,7 +264,7 @@
   - `symbol` TEXT NOT NULL
   - `decision_date` TEXT NOT NULL
   - `strategy_version` TEXT NOT NULL
-  - `decision_semantic` TEXT NOT NULL（仅允许：进场/观察/防守/空仓）
+  - `decision_semantic` TEXT NOT NULL（仅允许：进场/观察/防守/暂无信号）
   - `layer1_status` TEXT
   - `trigger_flags` TEXT（JSON）
   - `reasoning_snapshot` TEXT（摘要快照，避免前台重算）

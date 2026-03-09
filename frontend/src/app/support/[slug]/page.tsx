@@ -70,7 +70,7 @@ const SUPPORT_TLDR: Record<string, string[]> = {
   ],
   "four-states-semantics": [
     "方向裁决全交给了稳定的量化规则，不再受AI情绪波动干扰。",
-    "简化为四大硬性状态：进场、防守、观察、空仓。",
+    "简化为四大硬性状态：进场、防守、观察、暂无信号。",
     "用极度明确的灯号，帮你摆脱信息过载导致的瘫痪。"
   ],
   "dual-lane-architecture": [

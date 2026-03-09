@@ -54,4 +54,4 @@ image_prompt: "**Concept**: A conceptual 3D illustration of Intellectual Ego in 
 - 复盘口径：复盘重点放在“计划偏离点”，而非结果合理化。
 
 ---
-*下一篇：[101-10] “空仓”的艺术：为什么坐着不动价值百万。*
+*下一篇：[101-10] “空手观望”的艺术：为什么坐着不动价值百万。*

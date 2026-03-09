@@ -1,9 +1,11 @@
 import unittest
+from unittest.mock import patch
 
 from backend.scripts.metrics_tradeability_promotion import (
     _comparative_gates,
     _weekly_pass,
     _build_blocking_reasons,
+    _build_core_mode_effect_summary,
     _mode_effect_gates,
 )
 
@@ -106,6 +108,82 @@ class TradeabilityPromotionTest(unittest.TestCase):
         )
         self.assertTrue(all(v is not False for v in gates.values()))
         self.assertEqual(reasons, [])
+
+    def test_blocking_reasons_include_failed_core_modes(self):
+        reasons = _build_blocking_reasons(
+            weekly_reports=[
+                {
+                    "candidate": _report(),
+                    "baseline": _report(trig=7.0),
+                    "comparative_gates": {
+                        "coverage_not_worse": True,
+                        "riskoff_not_worse": True,
+                        "consistency_not_worse": True,
+                        "watch_to_trigger_not_looser": True,
+                        "drawdown_not_worse": True,
+                    },
+                    "weekly_pass": True,
+                }
+            ],
+            min_pass_weeks=1,
+            core_mode_effects={
+                "steady_v1": {"is_core_mode": True, "gate_pass": False},
+                "balanced_v1": {"is_core_mode": True, "gate_pass": True},
+                "aggressive_v1": {"is_core_mode": True, "gate_pass": True},
+                "observe_only_v1": {"is_core_mode": False, "excluded_from_promotion": True},
+            },
+            core_mode_reasons=["steady_v1: product effect sample_size 12 is below 20"],
+        )
+        self.assertTrue(any("core mode product effect failed on: steady_v1" in x for x in reasons))
+        self.assertTrue(any("steady_v1:" in x for x in reasons))
+
+    def test_core_mode_effect_summary_excludes_observe_only(self):
+        effect_map = {
+            "steady_v1": {
+                "mode_id": "steady_v1",
+                "horizon": "30d",
+                "hit_rate": 0.53,
+                "max_drawdown": -0.09,
+                "sample_size": 30,
+                "payoff_ratio": 1.02,
+                "stability_score": 0.40,
+                "as_of_date": "2026-03-08",
+            },
+            "balanced_v1": {
+                "mode_id": "balanced_v1",
+                "horizon": "30d",
+                "hit_rate": 0.53,
+                "max_drawdown": -0.09,
+                "sample_size": 30,
+                "payoff_ratio": 1.02,
+                "stability_score": 0.40,
+                "as_of_date": "2026-03-08",
+            },
+            "aggressive_v1": {
+                "mode_id": "aggressive_v1",
+                "horizon": "30d",
+                "hit_rate": 0.53,
+                "max_drawdown": -0.09,
+                "sample_size": 30,
+                "payoff_ratio": 1.02,
+                "stability_score": 0.40,
+                "as_of_date": "2026-03-08",
+            },
+        }
+
+        def fake_load_mode_effect(_market, _end_date, *, mode_id, horizon="30d"):
+            self.assertEqual(horizon, "30d")
+            return effect_map.get(mode_id)
+
+        with patch("backend.scripts.metrics_tradeability_promotion._load_mode_effect", side_effect=fake_load_mode_effect):
+            summary, overall_pass, reasons = _build_core_mode_effect_summary("CN", "2026-03-09")
+
+        self.assertTrue(overall_pass)
+        self.assertEqual(reasons, [])
+        self.assertTrue(summary["balanced_v1"]["is_default_mode"])
+        self.assertFalse(summary["steady_v1"]["is_default_mode"])
+        self.assertEqual(summary["observe_only_v1"]["excluded_from_promotion"], True)
+        self.assertEqual(summary["observe_only_v1"]["reason"], "observe_only_mode_excluded_from_core_governance")
 
 
 if __name__ == "__main__":

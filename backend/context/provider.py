@@ -395,7 +395,7 @@ class MarketContextProvider:
                     pressure_text = "做空压力偏低"
 
             ratio_text = f"{short_amt_ratio:.2%}" if short_amt_ratio is not None else "N/A"
-            summary = f"做空成交比({daily_date or '-'})={ratio_text} | 周度申报空仓({weekly_date or '-'})"
+            summary = f"做空成交比({daily_date or '-'})={ratio_text} | 周度申报做空仓位({weekly_date or '-'})"
 
             return {
                 "summary": summary,

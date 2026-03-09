@@ -104,6 +104,24 @@ interface TradeabilityPayload {
             blocking_reasons: string[];
             latest_week_end: string | null;
             verdict_created_at: string | null;
+            default_mode_id: string;
+            core_mode_gate_pass: boolean;
+            core_mode_governance: Array<{
+                mode_id: string;
+                is_core_mode: boolean;
+                is_default_mode: boolean;
+                excluded_from_promotion: boolean;
+                exclusion_reason: string | null;
+                gate_pass: boolean;
+                blocking_reasons: string[];
+                as_of_date: string | null;
+                hit_rate: number | null;
+                max_drawdown: number | null;
+                sample_size: number;
+                payoff_ratio: number | null;
+                stability_score: number | null;
+                gates: Record<string, boolean | null>;
+            }>;
         };
         research: {
             metrics_7d: Array<{
@@ -216,6 +234,12 @@ function outcomeLabel(status: string | null | undefined): string {
     if (status === 'fail') return '失败';
     if (status === 'pass') return '通过';
     return status;
+}
+
+function modeGateTone(pass: boolean, excluded: boolean) {
+    if (excluded) return 'border-amber-500/20 bg-amber-500/5 text-amber-100';
+    if (pass) return 'border-emerald-500/20 bg-emerald-500/5 text-emerald-100';
+    return 'border-rose-500/20 bg-rose-500/5 text-rose-100';
 }
 
 function modeLabel(modeId: string): string {
@@ -480,6 +504,49 @@ export default function TradeabilityControlTowerPage() {
                                     </div>
                                     <div className="mt-4 rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2 text-xs text-slate-400">
                                         阻塞原因是当前不能升级的直接原因。这里最值得优先看，通常比单个指标数字更重要。
+                                    </div>
+                                </div>
+
+                                <div className="mt-5 rounded-2xl border border-white/10 bg-black/20 p-4">
+                                    <div className="flex items-center justify-between gap-3">
+                                        <div>
+                                            <div className="text-sm font-black">核心模式治理</div>
+                                            <div className="text-xs text-slate-500 mt-1">
+                                                三个核心模式进入同类治理，默认模式继续重点展示；`仅观察` 不进入核心门禁。
+                                            </div>
+                                        </div>
+                                        <span className={`px-3 py-1 rounded-full border text-xs font-black ${marketData.verdict.core_mode_gate_pass ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200' : 'border-rose-500/30 bg-rose-500/10 text-rose-200'}`}>
+                                            {marketData.verdict.core_mode_gate_pass ? '核心模式达标' : '核心模式未达标'}
+                                        </span>
+                                    </div>
+                                    <div className="mt-4 grid gap-3 md:grid-cols-2">
+                                        {marketData.verdict.core_mode_governance.map((item) => (
+                                            <div key={item.mode_id} className={`rounded-xl border px-3 py-3 ${modeGateTone(item.gate_pass, item.excluded_from_promotion)}`}>
+                                                <div className="flex items-start justify-between gap-3">
+                                                    <div>
+                                                        <div className="font-black">
+                                                            {modeLabel(item.mode_id)}
+                                                            {item.is_default_mode ? ' · 默认模式' : ''}
+                                                        </div>
+                                                        <div className="text-[11px] opacity-80 mt-1">{item.mode_id}</div>
+                                                    </div>
+                                                    <div className="text-xs font-black">
+                                                        {item.excluded_from_promotion ? '排除' : (item.gate_pass ? 'PASS' : 'FAIL')}
+                                                    </div>
+                                                </div>
+                                                <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                                                    <MetricBlock label="胜率" value={pct(item.hit_rate)} />
+                                                    <MetricBlock label="回撤" value={pct(item.max_drawdown)} />
+                                                    <MetricBlock label="盈亏比" value={num(item.payoff_ratio)} />
+                                                    <MetricBlock label="样本数" value={String(item.sample_size)} />
+                                                </div>
+                                                <div className="mt-3 text-[11px] opacity-80">
+                                                    {item.excluded_from_promotion
+                                                        ? (item.exclusion_reason || '不参与核心门禁')
+                                                        : (item.blocking_reasons[0] || `统计到 ${item.as_of_date || '--'}`)}
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
                                 </div>
                             </article>

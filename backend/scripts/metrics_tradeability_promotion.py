@@ -33,6 +33,8 @@ DEFAULT_EXPERIMENT_DIR = os.path.join(os.path.dirname(backend_path), "tmp", "tra
 PRODUCT_EFFECT_DEFAULT_MODE = "balanced_v1"
 PRODUCT_EFFECT_DEFAULT_HORIZON = "30d"
 PRODUCT_EFFECT_MAX_STALENESS_DAYS = 7
+CORE_PRODUCT_EFFECT_MODES = ("steady_v1", "balanced_v1", "aggressive_v1")
+OBSERVE_ONLY_MODE = "observe_only_v1"
 PRODUCT_EFFECT_THRESHOLDS = {
     "sample_size_min": 20,
     "hit_rate_min": 0.50,
@@ -188,6 +190,55 @@ def _mode_effect_gates(mode_effect: Optional[Dict[str, Any]], end_date: str) -> 
     return gates, reasons
 
 
+def _load_core_mode_effects(
+    market: str,
+    end_date: str,
+    *,
+    horizon: str = PRODUCT_EFFECT_DEFAULT_HORIZON,
+) -> Dict[str, Optional[Dict[str, Any]]]:
+    return {
+        mode_id: _load_mode_effect(market, end_date, mode_id=mode_id, horizon=horizon)
+        for mode_id in CORE_PRODUCT_EFFECT_MODES
+    }
+
+
+def _build_core_mode_effect_summary(
+    market: str,
+    end_date: str,
+    *,
+    horizon: str = PRODUCT_EFFECT_DEFAULT_HORIZON,
+) -> Tuple[Dict[str, Dict[str, Any]], bool, List[str]]:
+    summary: Dict[str, Dict[str, Any]] = {}
+    overall_pass = True
+    blocking_reasons: List[str] = []
+
+    for mode_id, mode_effect in _load_core_mode_effects(market, end_date, horizon=horizon).items():
+        gates, reasons = _mode_effect_gates(mode_effect, end_date)
+        mode_pass = all(value is not False for value in gates.values())
+        summary[mode_id] = {
+            "mode_id": mode_id,
+            "is_core_mode": True,
+            "is_default_mode": mode_id == PRODUCT_EFFECT_DEFAULT_MODE,
+            "effect": mode_effect,
+            "gates": gates,
+            "gate_pass": mode_pass,
+            "blocking_reasons": reasons,
+        }
+        if not mode_pass:
+            overall_pass = False
+            blocking_reasons.extend(f"{mode_id}: {reason}" for reason in reasons)
+
+    summary[OBSERVE_ONLY_MODE] = {
+        "mode_id": OBSERVE_ONLY_MODE,
+        "is_core_mode": False,
+        "is_default_mode": False,
+        "excluded_from_promotion": True,
+        "reason": "observe_only_mode_excluded_from_core_governance",
+    }
+
+    return summary, overall_pass, blocking_reasons
+
+
 def _write_promotion_audit(
     *,
     event_type: str,
@@ -275,8 +326,8 @@ def _weekly_pass(candidate: Dict[str, Any], comparative: Dict[str, Optional[bool
 def _build_blocking_reasons(
     weekly_reports: List[Dict[str, Any]],
     min_pass_weeks: int,
-    mode_effect_gates: Optional[Dict[str, Optional[bool]]] = None,
-    mode_effect_reasons: Optional[List[str]] = None,
+    core_mode_effects: Optional[Dict[str, Dict[str, Any]]] = None,
+    core_mode_reasons: Optional[List[str]] = None,
 ) -> List[str]:
     reasons: List[str] = []
     if not weekly_reports:
@@ -312,12 +363,16 @@ def _build_blocking_reasons(
     if float(baseline["metrics"]["triggered_coverage_pct"]) <= 0.0:
         reasons.append("baseline coverage data missing in latest window")
 
-    if mode_effect_gates:
-        failed_mode_gates = [name for name, value in mode_effect_gates.items() if value is False]
-        if failed_mode_gates:
-            reasons.append(f"product effect gates failed: {', '.join(failed_mode_gates)}")
-    if mode_effect_reasons:
-        reasons.extend(mode_effect_reasons)
+    if core_mode_effects:
+        failed_modes = [
+            mode_id
+            for mode_id, payload in core_mode_effects.items()
+            if payload.get("is_core_mode") and payload.get("gate_pass") is False
+        ]
+        if failed_modes:
+            reasons.append(f"core mode product effect failed on: {', '.join(failed_modes)}")
+    if core_mode_reasons:
+        reasons.extend(core_mode_reasons)
 
     return reasons
 
@@ -369,18 +424,19 @@ def build_verdict(
             break
 
     experiment_payload = _load_latest_experiment(market, experiment_dir)
-    mode_effect = _load_mode_effect(market, week_end)
-    mode_effect_gates, mode_effect_reasons = _mode_effect_gates(mode_effect, week_end)
+    core_mode_effects, core_mode_gate_pass, core_mode_reasons = _build_core_mode_effect_summary(market, week_end)
+    default_mode_effect = core_mode_effects.get(PRODUCT_EFFECT_DEFAULT_MODE, {}).get("effect")
+    default_mode_gates = core_mode_effects.get(PRODUCT_EFFECT_DEFAULT_MODE, {}).get("gates", {})
     promotion_gate_pass = (
         pass_streak_weeks >= min_pass_weeks
         and all(r["weekly_pass"] for r in weekly_reports[:min_pass_weeks])
-        and all(value is not False for value in mode_effect_gates.values())
+        and core_mode_gate_pass
     )
     blocking_reasons = _build_blocking_reasons(
         weekly_reports,
         min_pass_weeks,
-        mode_effect_gates=mode_effect_gates,
-        mode_effect_reasons=mode_effect_reasons,
+        core_mode_effects=core_mode_effects,
+        core_mode_reasons=core_mode_reasons,
     )
 
     verdict = {
@@ -402,8 +458,11 @@ def build_verdict(
             "candidate": _find_experiment_result(experiment_payload, candidate_version),
             "baseline": _find_experiment_result(experiment_payload, baseline_version),
         },
-        "latest_mode_effect": mode_effect,
-        "latest_mode_effect_gates": mode_effect_gates,
+        "default_mode_id": PRODUCT_EFFECT_DEFAULT_MODE,
+        "latest_mode_effect": default_mode_effect,
+        "latest_mode_effect_gates": default_mode_gates,
+        "core_mode_effects": core_mode_effects,
+        "core_mode_gate_pass": core_mode_gate_pass,
         "product_effect_thresholds": PRODUCT_EFFECT_THRESHOLDS,
         "weekly_reports": weekly_reports,
     }
@@ -464,7 +523,7 @@ def to_markdown(verdict: Dict[str, Any]) -> str:
 
     mode_effect = verdict.get("latest_mode_effect")
     if mode_effect:
-        lines.append("## Latest Product Effect Snapshot")
+        lines.append("## Default Mode Product Effect Snapshot")
         lines.append("")
         lines.append(
             f"- Mode `{mode_effect['mode_id']}` {mode_effect['horizon']} as of `{mode_effect['as_of_date']}`: "
@@ -475,10 +534,36 @@ def to_markdown(verdict: Dict[str, Any]) -> str:
         lines.append("")
         gates = verdict.get("latest_mode_effect_gates") or {}
         if gates:
-            lines.append("## Product Effect Gates")
+            lines.append("## Default Mode Product Effect Gates")
             lines.append("")
             for key, value in gates.items():
                 lines.append(f"- `{key}`: **{value}**")
+            lines.append("")
+
+    core_mode_effects = verdict.get("core_mode_effects") or {}
+    if core_mode_effects:
+        lines.append("## Core Mode Governance")
+        lines.append("")
+        lines.append("| mode_id | role | gate_pass | as_of_date | hit_rate | max_drawdown | sample_size |")
+        lines.append("|---|---|---|---|---:|---:|---:|")
+        for mode_id in CORE_PRODUCT_EFFECT_MODES:
+            payload = core_mode_effects.get(mode_id) or {}
+            effect = payload.get("effect") or {}
+            role = "default" if payload.get("is_default_mode") else "core"
+            lines.append(
+                f"| {mode_id} | {role} | {'PASS' if payload.get('gate_pass') else 'FAIL'} | "
+                f"{effect.get('as_of_date', '--')} | "
+                f"{float(effect.get('hit_rate') or 0.0):.2f} | "
+                f"{float(effect.get('max_drawdown') or 0.0):.2f} | "
+                f"{int(effect.get('sample_size') or 0)} |"
+            )
+        lines.append("")
+        observe = core_mode_effects.get(OBSERVE_ONLY_MODE) or {}
+        if observe:
+            lines.append(
+                f"- `{OBSERVE_ONLY_MODE}` excluded from core governance: "
+                f"{observe.get('reason', 'observe_only_mode_excluded')}"
+            )
 
     return "\n".join(lines)
 
@@ -538,6 +623,9 @@ def main() -> int:
             "min_pass_weeks": verdict["window"]["min_pass_weeks"],
             "latest_mode_effect": verdict.get("latest_mode_effect"),
             "latest_mode_effect_gates": verdict.get("latest_mode_effect_gates"),
+            "core_mode_effects": verdict.get("core_mode_effects"),
+            "core_mode_gate_pass": verdict.get("core_mode_gate_pass"),
+            "default_mode_id": verdict.get("default_mode_id"),
             "execution_mode": "verdict_only",
             "actor": "system:metrics_tradeability_promotion",
             "source_verdict_path": args.output_json,

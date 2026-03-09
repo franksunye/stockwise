@@ -30,7 +30,7 @@ image_prompt: "**Concept**: A conceptual 3D illustration of a physical leap over
 ### 3. 中继缺口 (Runaway Gap)
 在趋势运行中点出现。
 *   *能量*：趋势加速。
-*   *操作*：如果你在车上，请坐稳。如果是空仓，不要追。
+*   *操作*：如果你在车上，请坐稳。如果在场外，不要追。
 
 ### 4. 竭尽缺口 (Exhaustion Gap)
 出现在趋势的末端。

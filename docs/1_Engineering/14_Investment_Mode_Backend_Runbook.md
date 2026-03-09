@@ -18,6 +18,12 @@
 
 Investment Mode 与 `tradeability sidecar` 都使用真实市场数据，但职责不同，不得混称：
 
+术语约定：
+
+- 中文统一使用“生产线 / 实验线”。
+- 中文统一使用“生产池 / 研究池”。
+- 英文保留 `Production Decision Lane / Research Quant Lane`。
+
 1. Investment Mode：
    - 属于正式产品数据链路。
    - 输入来自线上 `daily_prices` 与 `ai_predictions_v2`。
@@ -47,14 +53,14 @@ Investment Mode 与 `tradeability sidecar` 都使用真实市场数据，但职�
    - 用于校准、对照、验收、扩样验证。
    - 可以独立设计，不受当前用户关注池直接限制。
 
-2. 产品池：
+2. 生产池：
    - 服务正式产品。
    - 由真实用户形成，不作为研究实验的样本设计边界。
 
 3. 原则：
    - 研究池负责找结论。
-   - 产品池负责承接结论。
-   - 不允许让产品池反过来决定研究实验应该覆盖哪些股票。
+   - 生产池负责承接结论。
+   - 不允许让生产池反过来决定研究实验应该覆盖哪些股票。
 
 ## 1.3 当前数据血缘
 
@@ -69,7 +75,7 @@ Investment Mode 与 `tradeability sidecar` 都使用真实市场数据，但职�
    - `mode_performance_snapshot`
 5. 前台 `/api/modes`、`/api/modes/performance`、`/api/modes/decisions` 读取 mode 三层结果表
 
-研究链路的血缘为：
+实验线的血缘为：
 
 1. 数据同步任务写入 `daily_prices`
 2. 盘后样本补量可继续扩充 `daily_prices` 覆盖面
@@ -105,16 +111,16 @@ Investment Mode 当前依赖的生产编排顺序应理解为：
 1. `daily_pipeline_cn.yml` / `daily_pipeline_hk.yml`
    - 先完成行情同步与预测分析
 2. `tradeability_postclose_pipeline.yml`
-   - 先执行盘后样本补量（研究链路）
+   - 先执行盘后样本补量（实验线）
    - 再执行 `tradeability_sidecar_daily.yml`
 3. `run_mode_pipeline()`
-   - 默认随 `--analyze` 自动执行，属于生产链路
+   - 默认随 `--analyze` 自动执行，属于生产线
 4. `tradeability_sidecar_weekly_calibration.yml`
-   - 周末独立执行，属于研究链路周度治理
+   - 周末独立执行，属于实验线周度治理
 
 注意：
 - `sidecar` 不应被误认为是 Investment Mode 的前台直接数据源。
-- 盘后样本补量和 sidecar 的顺序影响研究链路样本质量，但不改变 Investment Mode 的正式表结构定义。
+- 盘后样本补量和 sidecar 的顺序影响实验线样本质量，但不改变 Investment Mode 的正式表结构定义。
 
 补充边界：
 
@@ -148,7 +154,7 @@ Investment Mode 当前依赖的生产编排顺序应理解为：
 3. 固定输出：
    - 每次运行必须生成 artifact，至少包含 backfill 结果与 summary。
 4. 固定边界：
-   - 实验结果属于研究链路，不直接写成前台正式口径。
+   - 实验结果属于实验线，不直接写成前台正式口径。
 5. 固定升级纪律：
    - 线上实验成功不等于 production 默认切换。
    - 若要推进 production，必须继续经过 `verdict -> approval -> execute -> rollback`。
