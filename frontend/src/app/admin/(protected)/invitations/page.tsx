@@ -40,7 +40,7 @@ export default function InvitationManagement() {
   
   // Create New Code States
   const [isCreating, setIsCreating] = useState(false);
-  const [newCodeType, setNewCodeType] = useState('beta');
+  const [newCodeType, setNewCodeType] = useState('pro_monthly');
   const [newCodeCount, setNewCodeCount] = useState(5);
   const [newCodeDuration, setNewCodeDuration] = useState(30);
 
@@ -174,10 +174,10 @@ export default function InvitationManagement() {
                       onChange={(e) => setNewCodeType(e.target.value)}
                       className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-indigo-500 transition-colors"
                     >
-                      <option value="beta">Beta Access (默认)</option>
-                      <option value="pro_trial">Pro 会员试用</option>
-                      <option value="gift">礼品赠送</option>
-                      <option value="event">活动专用</option>
+                      <option value="pro_monthly">Pro Monthly (默认)</option>
+                      <option value="pro_quarterly">Pro Quarterly</option>
+                      <option value="pro_yearly">Pro Yearly</option>
+                      <option value="beta">Beta Access</option>
                     </select>
                   </div>
 

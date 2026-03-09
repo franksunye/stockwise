@@ -36,15 +36,19 @@ export async function POST(request: Request) {
     if (unauthorized) return unauthorized;
 
     try {
-        const { count = 1, type = 'beta', duration_days = 30 } = await request.json();
+        const { count = 1, type = 'pro_monthly', duration_days = 30 } = await request.json();
         const client = getDbClient();
         const strategy = process.env.DB_STRATEGY || 'local';
 
         const newCodes = [];
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // No I, 1, O, 0
+        
         for (let i = 0; i < count; i++) {
-            // Generate a simple but unique code: SW-[8 random chars]
-            const randomStr = Math.random().toString(36).substring(2, 10).toUpperCase();
-            const code = `SW-${randomStr}`;
+            let randomStr = '';
+            for (let j = 0; j < 6; j++) {
+                randomStr += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            const code = `PRO-${randomStr}`;
             newCodes.push(code);
         }
 
