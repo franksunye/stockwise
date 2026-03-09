@@ -18,7 +18,8 @@ import {
   AlertTriangle,
   Calendar,
   TrendingDown,
-  Shield
+  Shield,
+  ChevronUp
 } from 'lucide-react';
 import { AIPrediction, TacticalData, Tactic, ShortMetrics } from '@/lib/types';
 import { shouldEnableHighPerformance } from '@/lib/device-utils';
@@ -730,7 +731,10 @@ export function TacticalBriefDrawer({
                                                   </div>
                                               ) : (
                                                   <div className={`mx-2 flex items-center gap-2 ${isLeft ? 'flex-row' : 'flex-row-reverse'}`}>
-                                                      <span className="text-[10px] font-black text-slate-600 uppercase tracking-tight">{node.label}</span>
+                                                      <span className="text-[10px] font-black text-slate-600 uppercase tracking-tight flex items-center gap-0.5">
+                                                          {node.price > (currentPrice || 0) ? <ChevronUp size={10} className="text-slate-700" /> : <ChevronDown size={10} className="text-slate-700" />}
+                                                          {node.label}
+                                                      </span>
                                                       <span className="text-[11px] font-black text-slate-400">{formatLevel(node.price)}</span>
                                                   </div>
                                               )}
