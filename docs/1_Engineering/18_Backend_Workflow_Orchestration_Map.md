@@ -575,7 +575,7 @@ Production 内部分为两组：
 | `daily_morning_call.yml` | `User + ADMIN` | `Mixed` | 已实现 | morning call push + ritual broadcast 面向用户；脚本成功/失败会发 WeCom |
 | `daily_brief_push.yml` | `User + ADMIN` | `Mixed` | 已收口 | 正式口径已切到 `brief_generator` 逐用户即时推送；旧版批量广播仅在 `send_legacy_batch_push=true` 时作为人工补发使用 |
 | `broadcast_almanac.py` | `User` | `Push` | 已实现 | 作为分发器使用时职责清晰，不应再承担重算或内部告警职责 |
-| `tradeability_postclose_pipeline.yml` | `ADMIN` | `WeCom` | 缺失 | 研究总编排当前无统一成功/失败通知，夜间任务失败可能只留在 Actions 里 |
+| `tradeability_postclose_pipeline.yml` | `ADMIN` | `WeCom` | 已实现 | 顶层 `notify-summary` job 会汇总 CN/HK 样本同步与 sidecar 结果，成功/失败都向 ADMIN 发中文摘要，失败带重试入口 |
 | `tradeability_sample_sync_daily.yml` | `ADMIN` | `WeCom` | 缺失 | 当前只产数据，不发内部告警；建议至少失败通知 |
 | `tradeability_sidecar_daily.yml` | `ADMIN` | `WeCom` | 缺失 | sidecar 写研究表但无告警出口，排障成本偏高 |
 | `tradeability_sidecar_weekly_calibration.yml` | `ADMIN` | `WeCom` | 缺失 | 周校准仅产 artifact，无主动同步 |
@@ -604,7 +604,7 @@ Production 内部分为两组：
 
 基于现状，通知治理优先级建议如下：
 
-1. `P1`：给 `tradeability_postclose_pipeline.yml` 及其子 workflow 增加统一的 `ADMIN` 成功/失败摘要
+1. `P1`：给 `tradeability_sample_sync_daily.yml` / `tradeability_sidecar_daily.yml` 增加更细粒度的作业级摘要，减少只看父 workflow 时的信息损耗
 2. `P1`：给 `almanac_maintenance.yml` 主生成步骤补 `JobGuard` 或等价告警，避免历史补跑失败静默
 3. `P1`：把“ADMIN 中文成功/失败通知、失败带重试入口、用户仅订阅才通知”固化为回归测试，避免后续被回退
 4. `P2`：给 `admin_codes.yml` 增加最小内部结果摘要，至少能在手工执行后同步生成数量或失败原因
