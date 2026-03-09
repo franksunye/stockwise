@@ -10,6 +10,7 @@ import {
     Bot,
     CircuitBoard,
     FlaskConical,
+    Info,
     ShieldAlert,
     TimerReset,
 } from 'lucide-react';
@@ -199,6 +200,10 @@ function formatDateTime(value: string | null | undefined): string {
     return new Date(value).toLocaleString('zh-CN', { hour12: false });
 }
 
+function explainMarket(market: 'CN' | 'HK'): string {
+    return market === 'CN' ? 'A 股市场' : '港股市场';
+}
+
 export default function TradeabilityControlTowerPage() {
     const [data, setData] = useState<TradeabilityPayload | null>(null);
     const [loading, setLoading] = useState(true);
@@ -351,12 +356,39 @@ export default function TradeabilityControlTowerPage() {
                             ))}
                         </section>
 
+                        <section className="rounded-3xl border border-cyan-500/15 bg-cyan-500/[0.04] p-6">
+                            <div className="flex items-center gap-2 text-cyan-200 text-xs uppercase tracking-[0.24em] font-black">
+                                <Info className="w-4 h-4" />
+                                阅读说明
+                            </div>
+                            <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                                <TipCard
+                                    title="研究流水线"
+                                    text="看策略研究本身。这里比较候选版本和对照版本，回答“新版本是否更值得升级”。"
+                                />
+                                <TipCard
+                                    title="生产流水线"
+                                    text="看线上正式口径。这里展示当前产品配置和模式表现，回答“用户现在实际看到的结果怎么样”。"
+                                />
+                                <TipCard
+                                    title="升级门禁"
+                                    text="这是系统给出的升级结论。通过=允许进入升级流程；未通过=继续观察或修正；观察中=数据还不够。"
+                                />
+                                <TipCard
+                                    title="连续通过周数"
+                                    text="不是看单周偶然结果，而是看最近几周是否持续达标。连续通过越多，升级越稳妥。"
+                                />
+                            </div>
+                        </section>
+
                         <section className="grid gap-6 xl:grid-cols-[1.2fr_1fr]">
                             <article className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
-                                <div className="flex items-center gap-2 text-cyan-300 text-xs uppercase tracking-[0.24em] font-black">
-                                    <FlaskConical className="w-4 h-4" />
-                                    研究流水线
-                                </div>
+                                <SectionHeader
+                                    icon={FlaskConical}
+                                    title="研究流水线"
+                                    description={`查看 ${explainMarket(activeMarket)} 最近窗口里，候选版本和对照版本谁更强。`}
+                                    tone="text-cyan-300"
+                                />
                                 <div className="mt-4 grid gap-4 md:grid-cols-2">
                                     {[marketData.research.candidate_metric, marketData.research.baseline_metric].map((metric, index) => (
                                         <div key={metric?.strategy_version || index} className="rounded-2xl border border-white/10 bg-black/20 p-4">
@@ -377,6 +409,9 @@ export default function TradeabilityControlTowerPage() {
                                             </div>
                                             <div className="mt-3 text-xs text-slate-500">
                                                 样本 {metric?.sample_count ?? 0} 条 | 触发 {metric?.triggered_count ?? 0} 条
+                                            </div>
+                                            <div className="mt-3 rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2 text-xs text-slate-400">
+                                                触发占比 = 最近样本里进入“可出手”状态的比例。防守占比越高，说明系统更倾向先避险。
                                             </div>
                                         </div>
                                     ))}
@@ -405,19 +440,27 @@ export default function TradeabilityControlTowerPage() {
                                             </div>
                                         )}
                                     </div>
+                                    <div className="mt-4 rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2 text-xs text-slate-400">
+                                        阻塞原因是当前不能升级的直接原因。这里最值得优先看，通常比单个指标数字更重要。
+                                    </div>
                                 </div>
                             </article>
 
                             <article className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
-                                <div className="flex items-center gap-2 text-indigo-300 text-xs uppercase tracking-[0.24em] font-black">
-                                    <CircuitBoard className="w-4 h-4" />
-                                    生产流水线
-                                </div>
+                                <SectionHeader
+                                    icon={CircuitBoard}
+                                    title="生产流水线"
+                                    description="查看线上当前正式配置，以及用户实际对应的模式表现。"
+                                    tone="text-indigo-300"
+                                />
                                 <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4">
                                     <div className="text-sm font-black">{data.production.default_mode_name}</div>
                                     <div className="text-xs text-slate-500 mt-1">{data.production.default_mode_tagline}</div>
                                     <div className="mt-3 text-xs text-slate-400">
                                         当前配置策略 <span className="font-mono text-white">{data.summary.configured_strategy_version}</span>
+                                    </div>
+                                    <div className="mt-3 rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2 text-xs text-slate-400">
+                                        这里不是研究数据，而是产品正式口径。它回答的是“当前线上策略对用户表现如何”。
                                     </div>
                                 </div>
 
@@ -434,6 +477,9 @@ export default function TradeabilityControlTowerPage() {
                                                 <MetricBlock label="最大回撤" value={pct(item.max_drawdown)} />
                                                 <MetricBlock label="样本数" value={String(item.sample_size)} />
                                             </div>
+                                            <div className="mt-3 rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2 text-xs text-slate-400">
+                                                命中率看方向是否大体正确；覆盖率看系统给出结论的频率；最大回撤看最差情况下会承受多大损失。
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
@@ -442,10 +488,12 @@ export default function TradeabilityControlTowerPage() {
 
                         <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
                             <article className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
-                                <div className="flex items-center gap-2 text-emerald-300 text-xs uppercase tracking-[0.24em] font-black">
-                                    <Activity className="w-4 h-4" />
-                                    系统概况
-                                </div>
+                                <SectionHeader
+                                    icon={Activity}
+                                    title="系统概况"
+                                    description="只看运行健康度，帮助判断当前不通过到底是策略问题，还是系统运行问题。"
+                                    tone="text-emerald-300"
+                                />
                                 <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                                     <MetricPanel label="API 延迟 P95" value={`${data.summary.api_latency_p95_ms_24h.toFixed(0)} ms`} hint="近 24 小时" />
                                     <MetricPanel label="低置信度占比" value={pct(data.summary.confidence_low_ratio_7d)} hint="近 7 天" />
@@ -457,10 +505,12 @@ export default function TradeabilityControlTowerPage() {
                             </article>
 
                             <article className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
-                                <div className="flex items-center gap-2 text-amber-300 text-xs uppercase tracking-[0.24em] font-black">
-                                    <BadgeCheck className="w-4 h-4" />
-                                    升级中心
-                                </div>
+                                <SectionHeader
+                                    icon={BadgeCheck}
+                                    title="升级中心"
+                                    description="按时间顺序记录门禁、审批、升级和回退。这里主要用来复盘，不是日常先看区。"
+                                    tone="text-amber-300"
+                                />
                                 <div className="mt-4 space-y-3">
                                     {marketData.promotion.timeline.slice(0, 8).map((item, index) => (
                                         <div key={`${item.event_type}-${item.created_at || index}`} className="rounded-2xl border border-white/10 bg-black/20 p-4">
@@ -484,10 +534,12 @@ export default function TradeabilityControlTowerPage() {
                         </section>
 
                         <section className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
-                            <div className="flex items-center gap-2 text-indigo-300 text-xs uppercase tracking-[0.24em] font-black">
-                                <Bot className="w-4 h-4" />
-                                模式表现表
-                            </div>
+                            <SectionHeader
+                                icon={Bot}
+                                title="模式表现表"
+                                description="用于横向比较几个模式最近 30 天的正式表现，帮助理解默认模式是否合理。"
+                                tone="text-indigo-300"
+                            />
                             <div className="mt-4 overflow-x-auto">
                                 <table className="w-full text-sm">
                                     <thead className="text-slate-500 text-xs uppercase tracking-widest">
@@ -542,6 +594,37 @@ function MetricBlock({ label, value }: { label: string; value: string }) {
         <div className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
             <div className="text-[10px] uppercase tracking-[0.24em] text-slate-500 font-black">{label}</div>
             <div className="mt-1 font-mono text-white">{value}</div>
+        </div>
+    );
+}
+
+function SectionHeader({
+    icon: Icon,
+    title,
+    description,
+    tone,
+}: {
+    icon: typeof Activity;
+    title: string;
+    description: string;
+    tone: string;
+}) {
+    return (
+        <div>
+            <div className={`flex items-center gap-2 text-xs uppercase tracking-[0.24em] font-black ${tone}`}>
+                <Icon className="w-4 h-4" />
+                {title}
+            </div>
+            <p className="mt-2 text-sm text-slate-500">{description}</p>
+        </div>
+    );
+}
+
+function TipCard({ title, text }: { title: string; text: string }) {
+    return (
+        <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+            <div className="text-sm font-black text-white">{title}</div>
+            <p className="mt-2 text-xs leading-6 text-slate-400">{text}</p>
         </div>
     );
 }
