@@ -16,11 +16,11 @@ export async function GET(request: Request) {
 
         if (strategy === 'cloud') {
             const turso = client as Client;
-            const result = await turso.execute('SELECT * FROM invitation_codes ORDER BY created_at DESC');
+            const result = await turso.execute('SELECT * FROM invitation_codes ORDER BY COALESCE(used_at, created_at) DESC');
             invitations = result.rows;
         } else {
             const db = client as Database.Database;
-            invitations = db.prepare('SELECT * FROM invitation_codes ORDER BY created_at DESC').all();
+            invitations = db.prepare('SELECT * FROM invitation_codes ORDER BY COALESCE(used_at, created_at) DESC').all();
             db.close();
         }
 

@@ -274,7 +274,7 @@ export default function InvitationManagement() {
                   <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">类型 / 权益</th>
                   <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">状态</th>
                   <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">使用者</th>
-                  <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">创建时间</th>
+                  <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">时间 / 状态</th>
                   <th className="px-6 py-4 text-right"></th>
                 </tr>
               </thead>
@@ -325,8 +325,21 @@ export default function InvitationManagement() {
                         <span className="text-slate-600">-</span>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-slate-500 mono text-[11px]">
-                      {new Date(inv.created_at).toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' })}
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col gap-0.5">
+                        <div className="flex items-center gap-1.5">
+                          <Calendar className="w-3 h-3 text-slate-500" />
+                          <span className="text-slate-200 font-medium">
+                            {inv.is_used && inv.used_at 
+                              ? new Date(inv.used_at).toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+                              : new Date(inv.created_at).toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' })
+                            }
+                          </span>
+                        </div>
+                        <span className="text-[10px] text-slate-500 uppercase font-black tracking-widest">
+                          {inv.is_used ? '使用于' : '创建于'}
+                        </span>
+                      </div>
                     </td>
                     <td className="px-6 py-4 text-right">
                       {!inv.is_used && (
