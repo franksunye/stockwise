@@ -241,14 +241,14 @@ export default function TradeabilityControlTowerPage() {
         const timeline = marketData.promotion.timeline[0];
         return [
             {
-                label: '当前生产版本',
+                label: '当前线上版本',
                 value: data.summary.configured_strategy_version,
                 sub: dominant ? `近 7 天主版本：${dominant.strategy_version}（${dominant.sample_count} 条）` : '近 7 天没有主版本样本',
                 icon: CircuitBoard,
                 tone: 'border-indigo-500/30 bg-indigo-500/10 text-indigo-200',
             },
             {
-                label: '当前研究候选',
+                label: '当前候选版本',
                 value: marketData.verdict.candidate_version,
                 sub: `对照版本：${marketData.verdict.baseline_version}`,
                 icon: FlaskConical,
@@ -262,21 +262,21 @@ export default function TradeabilityControlTowerPage() {
                 tone: gateClasses(marketData.verdict.gate_status),
             },
             {
-                label: '连续通过周数',
+                label: '连续达标周数',
                 value: `${marketData.verdict.pass_streak_weeks} 周`,
                 sub: `统计周结束：${marketData.verdict.latest_week_end || '--'}`,
                 icon: TimerReset,
                 tone: 'border-white/15 bg-white/[0.04] text-white',
             },
             {
-                label: '生产健康度',
+                label: '线上运行健康度',
                 value: healthLabel(data.summary.production_health),
                 sub: `模式流水线成功率 ${(data.summary.mode_pipeline_success_rate_14d * 100).toFixed(1)}%`,
                 icon: ShieldAlert,
                 tone: healthClasses(data.summary.production_health),
             },
             {
-                label: '最近动作',
+                label: '最近审计动作',
                 value: timeline ? humanEventLabel(timeline.event_type) : '暂无',
                 sub: timeline ? `${timeline.actor || 'system'} · ${formatDateTime(timeline.created_at)}` : '暂无审计记录',
                 icon: Bot,
@@ -364,19 +364,19 @@ export default function TradeabilityControlTowerPage() {
                             <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                                 <TipCard
                                     title="研究流水线"
-                                    text="看策略研究本身。这里比较候选版本和对照版本，回答“新版本是否更值得升级”。"
+                                    text="看研究结论本身。这里比较候选版本和对照版本，回答“新版本是否具备升级价值”。"
                                 />
                                 <TipCard
                                     title="生产流水线"
-                                    text="看线上正式口径。这里展示当前产品配置和模式表现，回答“用户现在实际看到的结果怎么样”。"
+                                    text="看线上正式口径。这里展示当前线上配置和正式表现，回答“当前线上版本运行得怎么样”。"
                                 />
                                 <TipCard
                                     title="升级门禁"
-                                    text="这是系统给出的升级结论。通过=允许进入升级流程；未通过=继续观察或修正；观察中=数据还不够。"
+                                    text="这是系统给出的升级结论。通过=允许进入升级流程；未通过=继续观察或修正；观察中=样本或观察窗口还不够。"
                                 />
                                 <TipCard
-                                    title="连续通过周数"
-                                    text="不是看单周偶然结果，而是看最近几周是否持续达标。连续通过越多，升级越稳妥。"
+                                    title="连续达标周数"
+                                    text="不是看单周偶然结果，而是看最近几周是否持续达标。连续达标越多，升级越稳妥。"
                                 />
                             </div>
                         </section>
@@ -386,7 +386,7 @@ export default function TradeabilityControlTowerPage() {
                                 <SectionHeader
                                     icon={FlaskConical}
                                     title="研究流水线"
-                                    description={`查看 ${explainMarket(activeMarket)} 最近窗口里，候选版本和对照版本谁更强。`}
+                                    description={`查看 ${explainMarket(activeMarket)} 最近窗口里，候选版本相对对照版本的表现差异。`}
                                     tone="text-cyan-300"
                                 />
                                 <div className="mt-4 grid gap-4 md:grid-cols-2">
@@ -402,16 +402,16 @@ export default function TradeabilityControlTowerPage() {
                                                 <ArrowRightLeft className="w-4 h-4 text-slate-600" />
                                             </div>
                                             <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
-                                                <MetricBlock label="触发占比" value={pct(metric?.triggered_coverage_pct)} />
-                                                <MetricBlock label="观察占比" value={pct(metric?.watch_coverage_pct)} />
-                                                <MetricBlock label="防守占比" value={pct(metric?.riskoff_coverage_pct)} />
-                                                <MetricBlock label="平均分" value={num(metric?.avg_opportunity_score)} />
+                                                <MetricBlock label="触发率" value={pct(metric?.triggered_coverage_pct)} />
+                                                <MetricBlock label="观察率" value={pct(metric?.watch_coverage_pct)} />
+                                                <MetricBlock label="风险规避率" value={pct(metric?.riskoff_coverage_pct)} />
+                                                <MetricBlock label="机会评分" value={num(metric?.avg_opportunity_score)} />
                                             </div>
                                             <div className="mt-3 text-xs text-slate-500">
                                                 样本 {metric?.sample_count ?? 0} 条 | 触发 {metric?.triggered_count ?? 0} 条
                                             </div>
                                             <div className="mt-3 rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2 text-xs text-slate-400">
-                                                触发占比 = 最近样本里进入“可出手”状态的比例。防守占比越高，说明系统更倾向先避险。
+                                                触发率表示最近样本里进入“可出手”状态的比例。风险规避率越高，说明系统越偏向先避险。
                                             </div>
                                         </div>
                                     ))}
@@ -421,7 +421,7 @@ export default function TradeabilityControlTowerPage() {
                                     <div className="flex items-center justify-between gap-3">
                                         <div>
                                             <div className="text-sm font-black">当前门禁结论</div>
-                                            <div className="text-xs text-slate-500 mt-1">{activeMarket} 市场当前升级判断</div>
+                                            <div className="text-xs text-slate-500 mt-1">{activeMarket} 市场当前是否允许升级</div>
                                         </div>
                                         <span className={`px-3 py-1 rounded-full border text-xs font-black ${gateClasses(marketData.verdict.gate_status)}`}>
                                             {gateLabel(marketData.verdict.gate_status)}
@@ -450,7 +450,7 @@ export default function TradeabilityControlTowerPage() {
                                 <SectionHeader
                                     icon={CircuitBoard}
                                     title="生产流水线"
-                                    description="查看线上当前正式配置，以及用户实际对应的模式表现。"
+                                    description="查看线上当前正式配置，以及对应的正式表现。"
                                     tone="text-indigo-300"
                                 />
                                 <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4">
@@ -460,7 +460,7 @@ export default function TradeabilityControlTowerPage() {
                                         当前配置策略 <span className="font-mono text-white">{data.summary.configured_strategy_version}</span>
                                     </div>
                                     <div className="mt-3 rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2 text-xs text-slate-400">
-                                        这里不是研究数据，而是产品正式口径。它回答的是“当前线上策略对用户表现如何”。
+                                        这里不是研究样本，而是正式口径。它回答的是“当前线上版本实际表现如何”。
                                     </div>
                                 </div>
 
@@ -472,13 +472,13 @@ export default function TradeabilityControlTowerPage() {
                                                 <div className="text-xs text-slate-500">统计到 {item.as_of_date || '--'}</div>
                                             </div>
                                             <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
-                                                <MetricBlock label="命中率" value={pct(item.hit_rate)} />
-                                                <MetricBlock label="覆盖率" value={pct(item.coverage)} />
+                                                <MetricBlock label="胜率" value={pct(item.hit_rate)} />
+                                                <MetricBlock label="出手率" value={pct(item.coverage)} />
                                                 <MetricBlock label="最大回撤" value={pct(item.max_drawdown)} />
                                                 <MetricBlock label="样本数" value={String(item.sample_size)} />
                                             </div>
                                             <div className="mt-3 rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2 text-xs text-slate-400">
-                                                命中率看方向是否大体正确；覆盖率看系统给出结论的频率；最大回撤看最差情况下会承受多大损失。
+                                                胜率看历史上做对的比例；出手率看系统愿意给出明确出手结论的频率；最大回撤看最差情况下会承受多大损失。
                                             </div>
                                         </div>
                                     ))}
@@ -491,7 +491,7 @@ export default function TradeabilityControlTowerPage() {
                                 <SectionHeader
                                     icon={Activity}
                                     title="系统概况"
-                                    description="只看运行健康度，帮助判断当前不通过到底是策略问题，还是系统运行问题。"
+                                    description="只看运行健康度，用来判断当前问题来自策略本身，还是来自运行链路。"
                                     tone="text-emerald-300"
                                 />
                                 <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -508,7 +508,7 @@ export default function TradeabilityControlTowerPage() {
                                 <SectionHeader
                                     icon={BadgeCheck}
                                     title="升级中心"
-                                    description="按时间顺序记录门禁、审批、升级和回退。这里主要用来复盘，不是日常先看区。"
+                                    description="按时间顺序记录门禁、审批、升级和回退。这里主要用于复盘和追踪。"
                                     tone="text-amber-300"
                                 />
                                 <div className="mt-4 space-y-3">
@@ -537,7 +537,7 @@ export default function TradeabilityControlTowerPage() {
                             <SectionHeader
                                 icon={Bot}
                                 title="模式表现表"
-                                description="用于横向比较几个模式最近 30 天的正式表现，帮助理解默认模式是否合理。"
+                                description="用于横向比较几个模式最近 30 天的正式表现，帮助判断当前默认模式是否合理。"
                                 tone="text-indigo-300"
                             />
                             <div className="mt-4 overflow-x-auto">
@@ -545,11 +545,11 @@ export default function TradeabilityControlTowerPage() {
                                     <thead className="text-slate-500 text-xs uppercase tracking-widest">
                                         <tr className="border-b border-white/10">
                                             <th className="text-left py-3 pr-3">模式</th>
-                                            <th className="text-left py-3 pr-3"><HeaderTip label="命中率" tip="命中率表示历史样本里判断方向大体正确的比例。越高通常越好，但也要结合样本数一起看。" /></th>
-                                            <th className="text-left py-3 pr-3"><HeaderTip label="覆盖率" tip="覆盖率表示系统愿意给出明确结论的比例。越高说明出手更频繁，但不代表质量一定更高。" /></th>
+                                            <th className="text-left py-3 pr-3"><HeaderTip label="胜率" tip="胜率表示历史样本里判断方向大体正确的比例。越高通常越好，但也要结合样本数一起看。" /></th>
+                                            <th className="text-left py-3 pr-3"><HeaderTip label="出手率" tip="出手率表示系统愿意给出明确出手结论的比例。越高说明出手更频繁，但不代表质量一定更高。" /></th>
                                             <th className="text-left py-3 pr-3"><HeaderTip label="最大回撤" tip="最大回撤表示这段时间里最差的一次下滑幅度。绝对值越大，说明承受的风险越高。" /></th>
                                             <th className="text-left py-3 pr-3"><HeaderTip label="盈亏比" tip="盈亏比表示平均盈利和平均亏损的相对关系。大于 1 通常更理想，说明赚的时候比亏的时候更多。" /></th>
-                                            <th className="text-left py-3 pr-3"><HeaderTip label="稳定度" tip="稳定度表示结果是否平稳、是否容易大起大落。越高通常说明策略更稳，不容易忽好忽坏。" /></th>
+                                            <th className="text-left py-3 pr-3"><HeaderTip label="稳定性" tip="稳定性表示结果是否平稳、是否容易大起大落。越高通常说明策略更稳，不容易忽好忽坏。" /></th>
                                             <th className="text-left py-3"><HeaderTip label="样本数" tip="样本数表示这组统计是基于多少条历史记录算出来的。样本太少时，指标参考价值会下降。" /></th>
                                         </tr>
                                     </thead>
