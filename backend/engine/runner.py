@@ -39,30 +39,32 @@ def select_primary_prediction(
     primary_promotion_blocked: bool,
     confidence_threshold: float = PRIMARY_CONFIDENCE_THRESHOLD,
 ) -> str | None:
-    eligible: List[Dict[str, Any]] = []
-    fallback: List[Dict[str, Any]] = []
+    if not predictions or primary_promotion_blocked:
+        return None
 
+    # Strictly priority-driven selection as per previous logic.
+    # Higher priority model always wins even if its confidence is lower than a low-priority model.
+    # We sort by (priority, confidence) to break ties in priority with confidence.
+    items = []
     for pred in predictions:
         if not pred:
             continue
         model_id = str(pred["model_id"])
         priority = int(model_priorities.get(model_id, 0))
         confidence = _to_float(pred.get("confidence"))
-        item = {
+        items.append({
             "model_id": model_id,
             "priority": priority,
             "confidence": confidence,
-        }
-        fallback.append(item)
-        if confidence >= confidence_threshold:
-            eligible.append(item)
+        })
 
-    chosen_pool = eligible or fallback
-    if not chosen_pool or primary_promotion_blocked:
+    if not items:
         return None
 
-    chosen_pool.sort(key=lambda x: (x["priority"], x["confidence"]), reverse=True)
-    top = chosen_pool[0]
+    items.sort(key=lambda x: (x["priority"], x["confidence"]), reverse=True)
+    top = items[0]
+
+    # Only promote if better than existing, or if matches existing, or if no primary yet.
     if top["priority"] > existing_priority or top["model_id"] == existing_primary_model_id or existing_primary_model_id is None:
         return str(top["model_id"])
     return None
