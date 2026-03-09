@@ -234,17 +234,17 @@ export default function DashboardLayout({
         
         // ── 准入判断 (Gate Check) ──
         // 准入控制 ≠ 会员等级。邀请墙的职责是"第一次进门"的门槛。
-        // 只要用户已经在后端注册过（非本次新建的 free 用户），就应放行。
-        // 这避免了 Pro 过期 → free → 再次被邀请墙挡住的问题。
-        const isNewFreeUser = data.isNewUser && data.tier === 'free';
+        // 未完成 Onboarding 的 Free 用户视为未授权（即从未成功通过门槛）
+        // 如果是 Pro（通过邀请/兑换）或已完成 Onboarding（老用户），直接放行
+        const isUnauthorizedFreeUser = data.tier === 'free' && !data.hasOnboarded;
         
-        if (!isNewFreeUser) {
-          // 已注册用户（无论 pro 或 expired→free）：放行
+        if (!isUnauthorizedFreeUser) {
+          // 已注册且授权用户（无论是 pro 或者老 free）：放行
           setIsAuthorized(true);
           setAuthCache(newTier, true);
           localStorage.removeItem('STOCKWISE_REFERRED_BY');
         } else {
-          // 全新 free 用户（没有通过邀请链接获得 Pro）：需要邀请码
+          // 全新 free 用户，或从未成功完成 onboarding 的 free 用户：需要邀请码
           setIsAuthorized(false);
           setAuthCache(newTier, false);
         }

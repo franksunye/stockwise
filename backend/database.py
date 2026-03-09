@@ -741,6 +741,26 @@ def init_db():
         cursor.execute(
             "CREATE INDEX IF NOT EXISTS idx_qts_state_date ON quant_tradeability_signals(setup_state, date DESC)"
         )
+
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS promotion_audit_log (
+                audit_id TEXT PRIMARY KEY,
+                event_type TEXT NOT NULL,
+                market TEXT,
+                candidate_version TEXT,
+                baseline_version TEXT,
+                outcome_status TEXT NOT NULL,
+                source_verdict_path TEXT,
+                execution_mode TEXT,
+                actor TEXT,
+                summary_json TEXT NOT NULL,
+                created_at TIMESTAMP NOT NULL
+            )
+        """)
+        cursor.execute("""
+            CREATE INDEX IF NOT EXISTS idx_promotion_audit_lookup
+            ON promotion_audit_log(event_type, market, created_at DESC)
+        """)
         
         # 10. Add notification_settings column to users table (if exists)
         # This column stores user preferences for notification types as JSON

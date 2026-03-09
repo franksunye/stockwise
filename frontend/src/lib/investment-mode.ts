@@ -303,6 +303,25 @@ export async function ensureInvestmentModeSchema(db: DbClient): Promise<void> {
         CREATE INDEX IF NOT EXISTS idx_mode_perf_query
         ON mode_performance_snapshot(mode_id, scope, horizon, segment_key, as_of_date DESC)
     `);
+    await execute(db, `
+        CREATE TABLE IF NOT EXISTS promotion_audit_log (
+            audit_id TEXT PRIMARY KEY,
+            event_type TEXT NOT NULL,
+            market TEXT,
+            candidate_version TEXT,
+            baseline_version TEXT,
+            outcome_status TEXT NOT NULL,
+            source_verdict_path TEXT,
+            execution_mode TEXT,
+            actor TEXT,
+            summary_json TEXT NOT NULL,
+            created_at TIMESTAMP NOT NULL
+        )
+    `);
+    await execute(db, `
+        CREATE INDEX IF NOT EXISTS idx_promotion_audit_lookup
+        ON promotion_audit_log(event_type, market, created_at DESC)
+    `);
 
     try {
         await execute(db, 'ALTER TABLE ai_predictions_v2 ADD COLUMN mode_id TEXT');
