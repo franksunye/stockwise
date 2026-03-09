@@ -474,7 +474,7 @@ Production 内部分为两组：
 | `data_sync_cn.yml` | Post-Close | ingestion | Workflow Call / Manual | `trading_day_gate(CN)` | hard_blocking | A 股正式同步 |
 | `data_sync_hk.yml` | Post-Close | ingestion | Workflow Call / Manual | `trading_day_gate(HK)` | hard_blocking | 港股正式同步 |
 | `data_sync_realtime.yml` | Intraday | ingestion | Cloudflare Worker / Manual | Worker / API 节拍 | soft_blocking | 前端实时行情能力，属于生产链 |
-| `data_sync_single.yml` | Manual / Backfill | ingestion | Manual / API Dispatch | 手工触发 | manual_only | 单票补数、运营修复、前台问题排查 |
+| `data_sync_single.yml` | Manual / Backfill | ingestion | Manual / API Dispatch | 手工触发 | manual_only | 默认只做前端最小可展示补数；周期补数为可选扩展 |
 | `verify_predictions.yml` | Post-Close | production_validation | Workflow Call / Manual | `data_sync_*` | soft_blocking | 用户可见验证结果，属于生产口径 |
 | `ai_analyze_cn.yml` | Post-Close | analysis | Workflow Call / Manual | `data_sync_cn` | soft_blocking | 纯分析 workflow；内部仍会触发 `mode_pipeline` |
 | `ai_analyze_hk.yml` | Post-Close | analysis | Workflow Call / Manual | `data_sync_hk` | soft_blocking | 纯分析 workflow；与 CN 保持相同边界 |
@@ -586,9 +586,42 @@ Production 内部分为两组：
 
 | 触发方式 | 类别 | 任务 | 说明 |
 | --- | --- | --- | --- |
-| 手工 / API / 运维 | Production Core | `data_sync_single.yml` | 单票补数、排障、手工修复 |
+| 手工 / API / 运维 | Production Core | `data_sync_single.yml` | 新增股票后快速补齐前端可展示数据；必要时补周期数据 |
 | 手工 / API / 运维 | Maintenance | `ai_backfill.yml` | 历史分析补跑 |
 | 手工 / API / 运维 | Maintenance | `almanac_maintenance.yml` | 黄历历史补跑 |
+
+### 8.3.1 `data_sync_single.yml` 方案口径
+
+`data_sync_single.yml` 的定位应明确为：
+
+1. 面向前端体验的单票即时补数，不是完整盘后生产链的缩小版
+2. 触发场景主要是用户新增一只系统尚未覆盖的股票后，页面需要尽快有可展示数据
+3. 成功标准应优先围绕“前端可用”而不是“所有周期都齐全”
+
+推荐口径：
+
+1. 默认模式只补 `core`
+   - 目标：尽快补齐前端最小可展示数据
+   - 范围：`daily` + 可选 `realtime`
+2. `weekly` / `monthly` 不应阻塞默认链路
+   - 作为可选扩展补数
+   - 或由盘后正式链继续补齐
+3. 盘后正式链负责持续接管
+   - 前提是该股票已进入 `global_stock_pool` 且 `watchers_count > 0`
+   - 后续由正式同步、分析、预测链继续补齐
+4. `data_sync_single.yml` 与盘后正式链分工不同
+   - 前者解决“刚新增后立刻可看”
+   - 后者解决“日终完整产数与持续覆盖”
+5. 周/月数据策略应以稳定性优先
+   - 推荐以 `daily` 为主源
+   - `weekly` / `monthly` 优先由本地聚合生成
+   - 远端原生周/月接口仅作为可选优化，不作为默认成功依赖
+
+当前生产口径补充：
+
+1. `daily_prices` 是周期链的 canonical source
+2. `weekly_prices` / `monthly_prices` 以 `daily_prices` 聚合为主路径
+3. 原生周/月接口可保留为对账或观察工具，但不再作为生产主依赖
 
 ### 8.4 每周 Research / Ops Governance
 

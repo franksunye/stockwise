@@ -109,6 +109,36 @@ def _calculate_indicators_safe(df: pd.DataFrame) -> pd.DataFrame:
         return out
 
 
+def _resolve_fetch_plan(period: str, last_date_str: str = None) -> tuple[str, str]:
+    """
+    Use daily as the canonical source for weekly/monthly generation.
+    This keeps period bars stable even when public weekly/monthly endpoints flap.
+    """
+    now = datetime.now()
+
+    if period == "daily":
+        if last_date_str:
+            last_dt = datetime.strptime(last_date_str, "%Y-%m-%d")
+            fetch_start = (last_dt - timedelta(days=7)).strftime("%Y%m%d")
+        else:
+            fetch_start = (now - timedelta(days=120)).strftime("%Y%m%d")
+        return "daily", fetch_start
+
+    if period == "weekly":
+        overlap_days = 365 if last_date_str else 365 * 3
+    else:
+        # Monthly indicators need a longer warm-up window, but do not require 10y of daily bars.
+        overlap_days = 365 * 3 if last_date_str else 365 * 6
+
+    if last_date_str:
+        last_dt = datetime.strptime(last_date_str, "%Y-%m-%d")
+        fetch_start = (last_dt - timedelta(days=overlap_days)).strftime("%Y%m%d")
+    else:
+        fetch_start = (now - timedelta(days=overlap_days)).strftime("%Y%m%d")
+
+    return "daily", fetch_start
+
+
 def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool = False):
     """增量处理特定周期的股票数据"""
     table_name = f"{period}_prices"
@@ -119,30 +149,12 @@ def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool =
     
     last_date_str = get_last_date(symbol, table_name)
     
-    # 动态确定回溯天数，确保指标计算有足够上下文
-    if period == "daily":
-        # 如果已有数据，fetch 窗口减小到 7 天（覆盖最近可能的数据缺失），背景历史由 DB 补齐
-        # 这样可以大幅减少 AkShare 的数据拉取压力和耗时
-        if last_date_str:
-            last_dt = datetime.strptime(last_date_str, "%Y-%m-%d")
-            fetch_start_str = (last_dt - timedelta(days=7)).strftime("%Y%m%d")
-        else:
-            # 新股票初次同步，必须拉取足够长的历史来计算指标 (如 MA60)
-            buffer_days = 120
-            fetch_start_str = (datetime.now() - timedelta(days=buffer_days)).strftime("%Y%m%d")
-    elif period == "weekly":
-        buffer_days = 365 * 2
-    else:
-        buffer_days = 365 * 10
+    source_period, fetch_start_str = _resolve_fetch_plan(period, last_date_str)
+    if period in ("weekly", "monthly"):
+        logger.info(f"🧭 {symbol} {period}: using {source_period} history as canonical source.")
 
-    if period != "daily":
-        if last_date_str:
-            last_dt = datetime.strptime(last_date_str, "%Y-%m-%d")
-            fetch_start_str = (last_dt - timedelta(days=buffer_days)).strftime("%Y%m%d")
-        else:
-            fetch_start_str = (datetime.now() - timedelta(days=buffer_days)).strftime("%Y%m%d")
     # 1. 抓取 (Pass is_realtime flag to use optimized Sina Spot path)
-    df = fetch_stock_data(symbol, period=period, start_date=fetch_start_str, is_realtime=is_realtime)
+    df = fetch_stock_data(symbol, period=source_period, start_date=fetch_start_str, is_realtime=is_realtime)
     # [Fix] Explicitly return False if fetch failed or no data, so caller knows it wasn't updated
     if df.empty: return False
     
