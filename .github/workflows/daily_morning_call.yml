@@ -16,6 +16,10 @@ on:
         required: false
         default: false
 
+concurrency:
+  group: daily-morning-call-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   # Step 0: Trading Day Gate (仅 schedule 触发时检查)
   gate:
@@ -54,7 +58,7 @@ jobs:
           pip install -r backend/requirements.txt
 
       - name: Refresh Market Almanac with Overnight Data
-        timeout-minutes: 5
+        timeout-minutes: 10
         env:
           PYTHONUNBUFFERED: "1"
           TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
@@ -64,6 +68,7 @@ jobs:
           python -u backend/engine/almanac_generator.py
 
       - name: Run Morning Call
+        timeout-minutes: 10
         env:
           TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
           TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
@@ -80,6 +85,7 @@ jobs:
           python backend/scripts/daily_morning_call.py $ARGS
 
       - name: Broadcast Market Almanac Ritual
+        timeout-minutes: 5
         env:
           PYTHONUNBUFFERED: "1"
           TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}

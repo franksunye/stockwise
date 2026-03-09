@@ -1,7 +1,7 @@
 name: StockWise Realtime Sync
 
 on:
-  # 调度由 Cloudflare Worker 负责 (精确每10分钟)
+  # 调度由 Cloudflare Worker 负责 (每15分钟运行一次，Worker 内部判断交易时段)
   # 参见: cloudflare-worker/README.md
   workflow_dispatch: # 由 Cloudflare Worker 或手动触发
 

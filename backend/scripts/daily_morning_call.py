@@ -44,7 +44,7 @@ def generate_morning_calls(dry_run=False, target_date=None, force=False):
             # Assuming Morning Call is primarily for A-share/HK open.
             if is_market_closed(check_date, "CN") and is_market_closed(check_date, "HK"):
                 logger.info(f"📅 [TradingDayGuard] {today_str} 为全市场休市日，跳过早报推送。")
-                return
+                return 0
         except ImportError:
             # Fallback if trading_calendar not found (e.g. strict path issues)
             logger.warning("⚠️ [TradingDayGuard] Could not import trading_calendar, skipping check.")
@@ -122,10 +122,12 @@ def generate_morning_calls(dry_run=False, target_date=None, force=False):
         total_delivered = nm.flush()
         logger.info(f"✅ Morning Call Task Finished. Queued: {sent_count}, Delivered: {total_delivered}")
         t_logger.success(f"Delivered briefing to {total_delivered} users.", notify=True)
+        return 0
         
     except Exception as e:
         logger.error(f"❌ Morning Call Failed: {e}")
         t_logger.fail(f"Execution Error: {str(e)}", notify=True, rerun_workflow="daily_morning_call.yml")
+        return 1
     finally:
         conn.close()
 
@@ -138,4 +140,4 @@ if __name__ == "__main__":
     parser.add_argument("--force", action="store_true", help="Force execution on holidays")
     args = parser.parse_args()
     
-    generate_morning_calls(dry_run=args.dry_run, target_date=args.date, force=args.force)
+    raise SystemExit(generate_morning_calls(dry_run=args.dry_run, target_date=args.date, force=args.force))

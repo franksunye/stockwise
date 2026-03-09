@@ -98,6 +98,12 @@ Investment Mode 当前依赖的生产编排顺序应理解为：
 - `sidecar` 不应被误认为是 Investment Mode 的前台直接数据源。
 - 盘后样本补量和 sidecar 的顺序影响研究链路样本质量，但不改变 Investment Mode 的正式表结构定义。
 
+补充边界：
+
+1. `ai_analyze_cn.yml` 与 `ai_analyze_hk.yml` 现在都应视为纯分析 workflow。
+2. A 股黄历、market facts health check、preview broadcast 已从 `ai_analyze_cn.yml` 拆出，独立归入 `daily_almanac_cn.yml`。
+3. `daily_morning_call.yml` 与 `data_sync_realtime.yml` 由 Cloudflare Worker 负责严格时间触发，不应再额外叠加 GitHub cron。
+
 ## 4. 稳定性边界
 
 - 不回写历史结论：模式切换仅影响后续产数与表现聚合。

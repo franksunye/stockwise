@@ -103,8 +103,8 @@
 
 | 时间 (北京) | 频率     | Workflow                 | 说明         |
 | ----------- | -------- | ------------------------ | ------------ |
-| 09:30-15:00 | 每10分钟 | `data_sync_realtime.yml` | A股盘中同步  |
-| 09:30-16:00 | 每10分钟 | `data_sync_realtime.yml` | 港股盘中同步 |
+| 08:30       | 精确触发 | `daily_morning_call.yml` | 盘前 morning call |
+| 09:15-16:30 | 每15分钟 | `data_sync_realtime.yml` | 盘中实时同步，由 Worker 在交易窗口内调度 |
 
 ### 手动触发
 

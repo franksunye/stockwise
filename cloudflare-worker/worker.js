@@ -1,8 +1,10 @@
 /**
- * StockWise Realtime Sync Scheduler
+ * StockWise Precision Scheduler
  * 
- * 这个 Cloudflare Worker 作为精准调度器，每 15 分钟触发一次 GitHub Actions workflow。
- * 解决了 GitHub Actions schedule 不精准的问题。
+ * 这个 Cloudflare Worker 作为精准调度器，每 15 分钟运行一次。
+ * 它会根据北京时间决定触发哪个 GitHub Actions workflow：
+ * 1. 08:30 触发 daily_morning_call.yml
+ * 2. 交易时段触发 data_sync_realtime.yml
  */
 
 export default {

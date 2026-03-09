@@ -9,6 +9,10 @@ on:
     - cron: '0 8 * * 1-5'
   workflow_dispatch: # 支持手动触发
 
+concurrency:
+  group: daily-pipeline-cn-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   # Step 0: Trading Day Gate (仅 schedule 触发时检查)
   gate:
@@ -41,4 +45,12 @@ jobs:
     needs: sync
     if: success()
     uses: ./.github/workflows/ai_analyze_cn.yml
+    secrets: inherit
+
+  # Step 4: 大盘黄历 (与分析并行，避免互相阻塞)
+  almanac:
+    needs: sync
+    if: success()
+    continue-on-error: true
+    uses: ./.github/workflows/daily_almanac_cn.yml
     secrets: inherit

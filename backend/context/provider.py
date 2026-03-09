@@ -6,12 +6,14 @@ import logging
 import time
 import random
 import re
+import weakref
 import akshare as ak
 import pandas as pd
 from typing import Dict, Any, Optional, List
 from datetime import datetime, date
 import threading
 from concurrent.futures import ThreadPoolExecutor, TimeoutError
+from concurrent.futures.thread import _worker, _threads_queues
 from backend.logger import logger
 from backend.database import get_connection
 try:
@@ -19,10 +21,40 @@ try:
 except ImportError:
     pass
 
+
+class _DaemonThreadPoolExecutor(ThreadPoolExecutor):
+    """ThreadPoolExecutor whose workers do not block process exit."""
+
+    def _adjust_thread_count(self):
+        if self._idle_semaphore.acquire(timeout=0):
+            return
+
+        def weakref_cb(_, q=self._work_queue):
+            q.put(None)
+
+        num_threads = len(self._threads)
+        if num_threads < self._max_workers:
+            thread_name = '%s_%d' % (self._thread_name_prefix or self, num_threads)
+            t = threading.Thread(
+                name=thread_name,
+                target=_worker,
+                args=(
+                    weakref.ref(self, weakref_cb),
+                    self._work_queue,
+                    self._initializer,
+                    self._initargs,
+                ),
+            )
+            t.daemon = True
+            t.start()
+            self._threads.add(t)
+            _threads_queues[t] = self._work_queue
+
 class MarketContextProvider:
     _instance = None
     _lock = threading.Lock()
-    _executor = ThreadPoolExecutor(max_workers=5) # Reusable thread pool for timeouts
+    _executor_lock = threading.Lock()
+    _executor = None
     
     # In-memory simple cache
     _cache = {
@@ -42,7 +74,30 @@ class MarketContextProvider:
         with cls._lock:
             if cls._instance is None:
                 cls._instance = super(MarketContextProvider, cls).__new__(cls)
+            if cls._executor is None:
+                cls._executor = cls._make_executor()
         return cls._instance
+
+    @classmethod
+    def _make_executor(cls) -> _DaemonThreadPoolExecutor:
+        return _DaemonThreadPoolExecutor(max_workers=5, thread_name_prefix="akshare")
+
+    @classmethod
+    def _get_executor(cls) -> _DaemonThreadPoolExecutor:
+        with cls._executor_lock:
+            if cls._executor is None:
+                cls._executor = cls._make_executor()
+            return cls._executor
+
+    @classmethod
+    def _reset_executor(cls):
+        with cls._executor_lock:
+            old_executor = cls._executor
+            cls._executor = cls._make_executor()
+
+        if old_executor is not None:
+            old_executor.shutdown(wait=False, cancel_futures=True)
+            logger.warning("♻️  Recreated AkShare executor after timeout to isolate stuck workers.")
         
     def get_diagnostics(self) -> Dict[str, Any]:
         """Return health statistics of data fetching."""
@@ -67,12 +122,14 @@ class MarketContextProvider:
                 attempt_str = f"(Attempt {i+1})" if i > 0 else ""
                 logger.info(f"📡  AkShare Fetch: {func.__name__} {attempt_str}")
                 
-                # Use shared executor for timeout enforcement
-                future = self._executor.submit(func, *args, **kwargs)
+                # Use a daemonized executor so stale AkShare workers cannot pin process exit.
+                future = self._get_executor().submit(func, *args, **kwargs)
                 try:
                     return future.result(timeout=timeout)
                 except TimeoutError:
                     logger.error(f"❌ AkShare TIMEOUT ({timeout}s) for {func.__name__}")
+                    future.cancel()
+                    self._reset_executor()
                     raise TimeoutError(f"AkShare function {func.__name__} timed out after {timeout}s")
                     
             except Exception as e:

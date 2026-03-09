@@ -42,7 +42,7 @@ def broadcast_almanac(dry_run=False, target_date=None, phase="ritual"):
         
         if not row:
             logger.warning(f"⚠️ No almanac found for {today_str}. Skipping broadcast.")
-            return
+            return 0
 
         mood_tag, strategy, insight = row
         # Clean insight for push body
@@ -55,7 +55,7 @@ def broadcast_almanac(dry_run=False, target_date=None, phase="ritual"):
         
         if not user_ids:
             logger.info("🔕 No target users found for broadcast.")
-            return
+            return 0
 
         nm = NotificationManager(dry_run=dry_run)
         
@@ -73,9 +73,11 @@ def broadcast_almanac(dry_run=False, target_date=None, phase="ritual"):
         # 4. Flush
         total_delivered = nm.flush()
         logger.info(f"✅ Almanac Broadcast ({phase}) Finished. Delivered: {total_delivered}")
+        return 0
         
     except Exception as e:
         logger.error(f"❌ Almanac Broadcast Failed: {e}")
+        return 1
     finally:
         conn.close()
 
@@ -87,4 +89,6 @@ if __name__ == "__main__":
     parser.add_argument("--phase", type=str, choices=["preview", "ritual"], default="ritual")
     args = parser.parse_args()
     
-    broadcast_almanac(dry_run=args.dry_run, target_date=args.date, phase=args.phase)
+    raise SystemExit(
+        broadcast_almanac(dry_run=args.dry_run, target_date=args.date, phase=args.phase)
+    )

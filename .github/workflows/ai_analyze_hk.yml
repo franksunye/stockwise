@@ -45,6 +45,10 @@ on:
         required: false
         default: 'all'
 
+concurrency:
+  group: ai-analyze-hk-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   analyze-hk:
     runs-on: ubuntu-latest
