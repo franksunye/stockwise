@@ -34,6 +34,8 @@ type ResearchPoolSummary = {
     latest_reference_date: string | null;
     latest_price_coverage_count: number;
     latest_signal_coverage_count: number;
+    board_groups: Array<{ key: string; label: string; count: number }>;
+    price_bands: Array<{ key: string; label: string; count: number }>;
 };
 
 function num(value: unknown, fallback = 0): number {
@@ -91,6 +93,47 @@ function loadManifestSymbols(manifestPath: string): { pool_name: string; target_
         actual_size: typeof payload.actual_size === 'number' ? payload.actual_size : symbols.length,
         latest_reference_date: typeof payload.latest_reference_date === 'string' ? payload.latest_reference_date : null,
         symbols,
+    };
+}
+
+function labelBoardGroup(key: string): string {
+    if (key === 'sh_main') return '沪市主板';
+    if (key === 'sz_main') return '深市主板';
+    if (key === 'sz_growth') return '深市成长';
+    if (key === 'chinext') return '创业板';
+    if (key === 'star') return '科创板';
+    return key;
+}
+
+function labelPriceBand(key: string): string {
+    if (key === 'lt10') return '10 元以下';
+    if (key === '10to30') return '10-30 元';
+    if (key === '30to80') return '30-80 元';
+    if (key === 'ge80') return '80 元以上';
+    return key;
+}
+
+function summarizeManifestDistribution(manifestPath: string): Pick<ResearchPoolSummary, 'board_groups' | 'price_bands'> {
+    const raw = fs.readFileSync(resolveRepoPath(manifestPath), 'utf-8');
+    const payload = JSON.parse(raw) as Record<string, unknown>;
+    const symbols = Array.isArray(payload.symbols) ? payload.symbols : [];
+    const boardCounts = new Map<string, number>();
+    const bandCounts = new Map<string, number>();
+    for (const item of symbols) {
+        if (!item || typeof item !== 'object') continue;
+        const row = item as Record<string, unknown>;
+        const board = typeof row.board_group === 'string' ? row.board_group : 'unknown';
+        const band = typeof row.price_band === 'string' ? row.price_band : 'unknown';
+        boardCounts.set(board, (boardCounts.get(board) || 0) + 1);
+        bandCounts.set(band, (bandCounts.get(band) || 0) + 1);
+    }
+    return {
+        board_groups: [...boardCounts.entries()]
+            .map(([key, count]) => ({ key, label: labelBoardGroup(key), count }))
+            .sort((a, b) => b.count - a.count || a.key.localeCompare(b.key)),
+        price_bands: [...bandCounts.entries()]
+            .map(([key, count]) => ({ key, label: labelPriceBand(key), count }))
+            .sort((a, b) => b.count - a.count || a.key.localeCompare(b.key)),
     };
 }
 
@@ -183,6 +226,7 @@ export async function GET(request: Request) {
     const configuredStrategyVersion = defaultMode?.strategy_mapping.strategy_version || 'tradeability_v2';
     const cnResearchManifestPath = 'backend/strategy_config/research_pool/cn_core_500.json';
     const cnResearchPool = loadManifestSymbols(cnResearchManifestPath);
+    const cnResearchDistribution = summarizeManifestDistribution(cnResearchManifestPath);
 
     const latencySeriesSql = `
         SELECT latency_ms
@@ -297,6 +341,8 @@ export async function GET(request: Request) {
             latest_reference_date: cnResearchPool.latest_reference_date,
             latest_price_coverage_count: 0,
             latest_signal_coverage_count: 0,
+            board_groups: cnResearchDistribution.board_groups,
+            price_bands: cnResearchDistribution.price_bands,
         };
 
         if (strategy === 'cloud') {

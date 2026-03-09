@@ -43,6 +43,8 @@ interface TradeabilityPayload {
             latest_reference_date: string | null;
             latest_price_coverage_count: number;
             latest_signal_coverage_count: number;
+            board_groups: Array<{ key: string; label: string; count: number }>;
+            price_bands: Array<{ key: string; label: string; count: number }>;
         };
     };
     production: {
@@ -550,6 +552,51 @@ export default function TradeabilityControlTowerPage() {
                                     ))}
                                 </div>
                             </article>
+                        </section>
+
+                        <section className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
+                            <SectionHeader
+                                icon={Bot}
+                                title="研究池分布"
+                                description="这是当前 500 只研究池的基础分布。后续做板块、价格带实验时，直接基于这些分组切池。"
+                                tone="text-sky-300"
+                            />
+                            <div className="mt-4 grid gap-6 xl:grid-cols-2">
+                                <div className="space-y-3">
+                                    <div className="text-xs uppercase tracking-[0.24em] text-slate-500 font-black">板块分布</div>
+                                    {data.summary.research_pool.board_groups.map((item) => (
+                                        <div key={item.key} className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                                            <div className="flex items-center justify-between gap-3">
+                                                <div className="text-sm font-black">{item.label}</div>
+                                                <div className="text-sm font-mono text-white">{item.count}</div>
+                                            </div>
+                                            <div className="mt-2 h-2 rounded-full bg-white/5 overflow-hidden">
+                                                <div
+                                                    className="h-full rounded-full bg-sky-400/80"
+                                                    style={{ width: `${(item.count / Math.max(data.summary.research_pool.actual_size, 1)) * 100}%` }}
+                                                />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="space-y-3">
+                                    <div className="text-xs uppercase tracking-[0.24em] text-slate-500 font-black">价格带分布</div>
+                                    {data.summary.research_pool.price_bands.map((item) => (
+                                        <div key={item.key} className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                                            <div className="flex items-center justify-between gap-3">
+                                                <div className="text-sm font-black">{item.label}</div>
+                                                <div className="text-sm font-mono text-white">{item.count}</div>
+                                            </div>
+                                            <div className="mt-2 h-2 rounded-full bg-white/5 overflow-hidden">
+                                                <div
+                                                    className="h-full rounded-full bg-cyan-400/80"
+                                                    style={{ width: `${(item.count / Math.max(data.summary.research_pool.actual_size, 1)) * 100}%` }}
+                                                />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
                         </section>
 
                         <section className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
