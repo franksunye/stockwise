@@ -195,7 +195,7 @@ export default async function LandingPage() {
                <div className="h-3 w-full bg-white/5 rounded-full overflow-hidden">
                   <div className="h-full w-[64%] bg-red-500/50" />
                </div>
-                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tighter">当前信号：建议空仓（防御模式开启）</p>
+                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tighter">当前信号：暂无信号（防御模式开启）</p>
             </div>
           </div>
         </section>

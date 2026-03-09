@@ -24,7 +24,7 @@ DEFAULT_RULE_VERSION = "mode_sim_v1"
 ENTRY_SEMANTIC = "建议进场"
 WATCH_SEMANTIC = "建议观察"
 DEFENSE_SEMANTIC = "建议防守"
-CASH_SEMANTIC = "建议空仓"
+CASH_SEMANTIC = "暂无信号"
 
 
 def _today_str() -> str:

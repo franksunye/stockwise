@@ -75,7 +75,7 @@ function getCouncilActionLabel(actionKey: CouncilActionKey): string {
     case 'defense':
       return '建议防守';
     case 'empty':
-      return '建议空仓';
+      return '暂无信号';
     default:
       return '判断分歧';
   }
@@ -201,7 +201,7 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
     consensusSubtext = '当前投研决议对主结论形成一致支持。';
   } else if (emptyCount === total) {
     consensusColor = 'text-slate-300';
-    consensusText = '一致支持建议空仓';
+    consensusText = '一致支持暂无信号';
     consensusSubtext = '当前投研决议对主结论形成一致支持。';
   } else if (enterCount > observeCount && enterCount > defenseCount && enterCount > emptyCount) {
     consensusText = '更多支持建议进场';
@@ -216,7 +216,7 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
     consensusColor = 'text-rose-400/80';
     consensusSubtext = '当前投研决议更偏向支持主结论，但仍有分歧。';
   } else if (emptyCount > enterCount && emptyCount > observeCount && emptyCount > defenseCount) {
-    consensusText = '更多支持建议空仓';
+    consensusText = '更多支持暂无信号';
     consensusColor = 'text-slate-300/80';
     consensusSubtext = '当前投研决议更偏向支持主结论，但仍有分歧。';
   }

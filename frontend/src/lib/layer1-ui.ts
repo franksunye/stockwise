@@ -47,9 +47,9 @@ const LAYER1_META: Record<NonNullable<AIPrediction['layer1_status']>, Prediction
     textClass: 'text-emerald-500',
   },
   NoSetup: {
-    headline: '建议空仓',
+    headline: '暂无信号',
     badge: '当前不建议出手',
-    posterDecision: '建议空仓',
+    posterDecision: '暂无信号',
     color: COLORS.muted,
     dotClass: 'bg-slate-500',
     iconTone: 'flat',

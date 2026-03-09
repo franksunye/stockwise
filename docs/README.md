@@ -14,6 +14,7 @@ This directory serves as the unified single source of truth for the StockWise pr
 > Project "Backbone": System architecture, reliability, and quality standards.
 - [Architecture (As-Is & To-Be)](./1_Engineering/10_Architecture.md)
 - [Reliability & Quality Gates](./1_Engineering/11_Reliability_Protocol.md)
+- [Investment Mode Execution Alignment Plan](./1_Engineering/19_Investment_Mode_Execution_Alignment_Plan.md)
 
 ### [2_Intelligence/](./2_Intelligence/) - How (Brain)
 > Project "AI Logic": Prompt engineering, model strategies, and core algorithms.

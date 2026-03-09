@@ -339,7 +339,7 @@ export default function TradeabilityControlTowerPage() {
                                 策略 <span className="text-cyan-400">控制台</span>
                             </h1>
                             <p className="text-sm text-slate-500 mt-2">
-                                一屏区分研究流水线和生产流水线，帮助判断现在能不能升级、为什么不能升级。
+                                一屏区分实验线和生产线，帮助判断现在能不能升级、为什么不能升级。
                             </p>
                         </div>
                     </div>
@@ -401,12 +401,12 @@ export default function TradeabilityControlTowerPage() {
                             </div>
                             <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                                 <TipCard
-                                    title="研究流水线"
-                                    text="研究流水线跑在研究池上。研究池独立于产品池，用来科学验证规则，不直接受用户关注池限制。"
+                                    title="实验线"
+                                    text="实验线跑在研究池上。研究池独立于生产池，用来科学验证规则，不直接受用户关注池限制。"
                                 />
                                 <TipCard
-                                    title="生产流水线"
-                                    text="生产流水线跑在产品池上。产品池就是用户真实形成的池子，只负责承接已经验证过的结论。"
+                                    title="生产线"
+                                    text="生产线跑在生产池上。生产池就是用户真实形成的池子，只负责承接已经验证过的结论。"
                                 />
                                 <TipCard
                                     title="升级门禁"
@@ -423,7 +423,7 @@ export default function TradeabilityControlTowerPage() {
                             <article className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
                                 <SectionHeader
                                     icon={FlaskConical}
-                                    title="研究流水线"
+                                    title="实验线"
                                     description={`查看 ${explainMarket(activeMarket)} 最近窗口里，候选版本相对对照版本的表现差异。`}
                                     tone="text-cyan-300"
                                 />
@@ -487,8 +487,8 @@ export default function TradeabilityControlTowerPage() {
                             <article className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
                                 <SectionHeader
                                     icon={CircuitBoard}
-                                    title="生产流水线"
-                                    description="查看线上当前正式配置，以及对应的正式表现。"
+                                    title="生产线"
+                                    description="查看线上当前正式配置，以及对应的正式表现。这里看的是模式价值评估，不是收益承诺。"
                                     tone="text-indigo-300"
                                 />
                                 <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4">
@@ -498,7 +498,7 @@ export default function TradeabilityControlTowerPage() {
                                         当前配置策略 <span className="font-mono text-white">{data.summary.configured_strategy_version}</span>
                                     </div>
                                     <div className="mt-3 rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2 text-xs text-slate-400">
-                                        这里不是研究样本，而是正式口径。它回答的是“当前线上版本实际表现如何”。
+                                        这里不是研究样本，而是正式口径。它回答的是“当前线上版本和模式组合实际表现如何”。
                                     </div>
                                 </div>
 
@@ -516,7 +516,7 @@ export default function TradeabilityControlTowerPage() {
                                                 <MetricBlock label="样本数" value={String(item.sample_size)} />
                                             </div>
                                             <div className="mt-3 rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2 text-xs text-slate-400">
-                                                胜率看历史上做对的比例；出手率看系统愿意给出明确出手结论的频率；最大回撤看最差情况下会承受多大损失。
+                                                胜率、出手率和回撤都必须结合样本数一起看；这些指标用于评估模式价值，不代表未来收益承诺。
                                             </div>
                                         </div>
                                     ))}
@@ -575,12 +575,12 @@ export default function TradeabilityControlTowerPage() {
                         </section>
 
                         <section className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
-                            <SectionHeader
-                                icon={Bot}
-                                title="研究池分布"
-                                description="这是当前 500 只研究池的基础分布。后续做板块、价格带实验时，直接基于这些分组切池。"
-                                tone="text-sky-300"
-                            />
+                                <SectionHeader
+                                    icon={Bot}
+                                    title="研究池分布"
+                                    description="这是当前研究池的基础分布。后续做板块、价格带实验时，直接基于这些分组切池。"
+                                    tone="text-sky-300"
+                                />
                             <div className="mt-4 grid gap-6 xl:grid-cols-2">
                                 <div className="space-y-3">
                                     <div className="text-xs uppercase tracking-[0.24em] text-slate-500 font-black">板块分布</div>
@@ -692,12 +692,12 @@ export default function TradeabilityControlTowerPage() {
                         </section>
 
                         <section className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
-                            <SectionHeader
-                                icon={Bot}
-                                title="模式表现表"
-                                description="用于横向比较几个模式最近 30 天的正式表现，帮助判断当前默认模式是否合理。"
-                                tone="text-indigo-300"
-                            />
+                                <SectionHeader
+                                    icon={Bot}
+                                    title="模式表现表"
+                                    description="用于横向比较各模式最近 30 天的正式表现，帮助判断每个模式分别为用户提供了什么价值。"
+                                    tone="text-indigo-300"
+                                />
                             <div className="mt-4 overflow-x-auto">
                                 <table className="w-full text-sm">
                                     <thead className="text-slate-500 text-xs uppercase tracking-widest">
@@ -717,6 +717,9 @@ export default function TradeabilityControlTowerPage() {
                                                 <td className="py-3 pr-3">
                                                     <div className="font-black">{modeLabel(row.mode_id)}</div>
                                                     <div className="text-xs text-slate-500">{row.mode_id}</div>
+                                                    {row.mode_id === 'observe_only_v1' ? (
+                                                        <div className="text-[10px] text-amber-300 mt-1">特殊模式，不参与核心模式同类比较</div>
+                                                    ) : null}
                                                 </td>
                                                 <td className="py-3 pr-3 font-mono">{pct(row.hit_rate)}</td>
                                                 <td className="py-3 pr-3 font-mono">{pct(row.coverage)}</td>
