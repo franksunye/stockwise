@@ -31,9 +31,9 @@
 | **分析** | **脉冲共振**   | 呼吸动画频率表示 AI 活跃度与模型共识。                        | `StockDashboardCard.tsx`: `animate-ping`            | Engine: `indicators.py` (共振算法)                   | ✅ 已实现 |
 | **分析** | **置信度系统** | 展示可解释的评分；**<75% 强制熔断为观望**。                   | `StockDashboardCard.tsx`: 百分比展示                | Engine: `ai_service.py` (Circuit Breaker 逻辑)       | ✅ 已实现 |
 | **分析** | **大盘黄历**   | 每日盘前/盘后全市场宏观气象与动作宜忌推演 (静默数学视角)。    | `MarketAlmanacFeed.tsx`: 零号位挂载展示             | Engine: `almanac_generator.py` (Trusted v1 架构)     | ✅ 已实现 |
-| **分析** | **战术简报**   | 点击卡片展开 JSON 结构化的战术分析 (买/卖点)。                | `TacticalBriefDrawer.tsx`: 解析 `ai_reasoning` JSON | Engine: `ai_service.py` 生成并存入 DB                | ✅ 已实现 |
+| **分析** | **策略内参**   | 点击卡片展开 JSON 结构化的战术分析 (买/卖点)。                | `TacticalBriefDrawer.tsx`: 解析 `ai_reasoning` JSON | Engine: `ai_service.py` 生成并存入 DB                | ✅ 已实现 |
 | **分析** | **历史矩阵**   | 30天胜率可视化矩阵，直观展示预测准确性。                      | `StockProfile.tsx`: Grid 布局 + 颜色编码            | Service: `/api/predictions` (Limit=30)               | ✅ 已实现 |
-| **分析** | **AI 智囊团**  | 展示多模型 (DeepSeek, Hunyuan, Quant) 对同一标的的共识/分歧。 | `AICouncil.tsx`: `mode=full` 及前端共识算法         | Service: `/api/predictions` 支持多模型返回           | ✅ 已实现 |
+| **分析** | **投研决议**  | 展示多模型 (DeepSeek, Hunyuan, Quant) 对同一标的的共识/分歧。 | `AICouncil.tsx`: `mode=full` 及前端共识算法         | Service: `/api/predictions` 支持多模型返回           | ✅ 已实现 |
 | **分析** | **关键价位**   | 独立展示支撑位、压力位、突破位及止损参考。                    | `TacticalBriefDrawer.tsx`: Key Levels 卡片渲染      | Engine: `ai_service.py` 生成 Key Levels              | ✅ 已实现 |
 | **分析** | **上下文提取** | 从全局日报中正则提取特定个股的段落 (Regex Extraction)。       | `BriefDrawer.tsx`: `useMemo` + Regex 匹配           | Engine: `brief_generator.py` (Markdown Generation)   | ✅ 已实现 |
 | **分析** | **失败回溯**   | 对历史预测进行"准确/错误/验证中"打标 (T+1/2/3)。              | `StockDashboardCard.tsx` & `HistoricalCard.tsx`     | Engine: `validator.py` (verify_all_pending 多日验证) | ✅ 已实现 |

@@ -13,6 +13,7 @@ import argparse
 import json
 import os
 import re
+import sqlite3
 import sys
 import uuid
 from datetime import datetime, timezone
@@ -23,7 +24,16 @@ BACKEND_DIR = os.path.join(ROOT_DIR, "backend")
 sys.path.insert(0, BACKEND_DIR)
 sys.path.insert(0, ROOT_DIR)
 
-from database import get_connection
+
+
+def _get_connection():
+    try:
+        from database import get_connection as get_db_connection  # type: ignore
+        return get_db_connection()
+    except ModuleNotFoundError as exc:
+        if exc.name != "libsql":
+            raise
+        return sqlite3.connect(os.environ.get("DB_PATH") or ":memory:")
 
 DEFAULT_TARGET_FILES = [
     os.path.join(ROOT_DIR, "backend", "investment_mode.py"),
@@ -149,7 +159,7 @@ def _write_audit(
     actor: str,
     summary: Dict[str, object],
 ) -> None:
-    conn = get_connection()
+    conn = _get_connection()
     try:
         cur = conn.cursor()
         cur.execute(

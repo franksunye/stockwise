@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import sqlite3
 import sys
 import uuid
 from datetime import datetime, timedelta, timezone
@@ -21,15 +22,9 @@ backend_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, backend_path)
 sys.path.insert(0, os.path.dirname(backend_path))
 
-from database import get_connection
 from logger import logger
-from utils import send_wecom_notification
-from scripts.metrics_acceptance_weekly import (  # type: ignore
-    DEFAULT_CALIBRATION_DIR,
-    collect as collect_acceptance,
-)
-
 DEFAULT_EXPERIMENT_DIR = os.path.join(os.path.dirname(backend_path), "tmp", "tradeability_experiments")
+DEFAULT_CALIBRATION_DIR = os.path.join(os.path.dirname(backend_path), "tmp", "tradeability_calibration")
 PRODUCT_EFFECT_DEFAULT_MODE = "balanced_v1"
 PRODUCT_EFFECT_DEFAULT_HORIZON = "30d"
 PRODUCT_EFFECT_MAX_STALENESS_DAYS = 7
@@ -44,10 +39,35 @@ PRODUCT_EFFECT_THRESHOLDS = {
 }
 
 
+def _get_connection():
+    try:
+        from database import get_connection as get_db_connection  # type: ignore
+        return get_db_connection()
+    except ModuleNotFoundError as exc:
+        if exc.name != "libsql":
+            raise
+        return sqlite3.connect(os.environ.get("DB_PATH") or ":memory:")
+
+
+def _send_wecom_notification(content: str) -> None:
+    from utils import send_wecom_notification  # type: ignore
+    send_wecom_notification(content)
+
+
+def _collect_acceptance(*, end_date: str, strategy_version: str, market: str, calibration_dir: str) -> Dict[str, Any]:
+    from scripts.metrics_acceptance_weekly import collect as collect_acceptance  # type: ignore
+    return collect_acceptance(
+        end_date=end_date,
+        strategy_version=strategy_version,
+        market=market,
+        calibration_dir=calibration_dir,
+    )
+
+
 def _resolve_week_end(week_end: Optional[str]) -> str:
     if week_end:
         return week_end
-    conn = get_connection()
+    conn = _get_connection()
     try:
         cur = conn.cursor()
         row = cur.execute("SELECT MAX(date) FROM ai_predictions_v2").fetchone()
@@ -83,7 +103,7 @@ def _load_mode_effect(
     mode_id: str = PRODUCT_EFFECT_DEFAULT_MODE,
     horizon: str = PRODUCT_EFFECT_DEFAULT_HORIZON,
 ) -> Optional[Dict[str, Any]]:
-    conn = get_connection()
+    conn = _get_connection()
     try:
         cur = conn.cursor()
         row = cur.execute(
@@ -248,7 +268,7 @@ def _write_promotion_audit(
     outcome_status: str,
     summary: Dict[str, Any],
 ) -> None:
-    conn = get_connection()
+    conn = _get_connection()
     try:
         cur = conn.cursor()
         created_at = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
@@ -393,13 +413,13 @@ def build_verdict(
 
     for index in range(lookback_weeks):
         current_end = (end_dt - timedelta(days=7 * index)).strftime("%Y-%m-%d")
-        candidate = collect_acceptance(
+        candidate = _collect_acceptance(
             end_date=current_end,
             strategy_version=candidate_version,
             market=market,
             calibration_dir=calibration_dir,
         )
-        baseline = collect_acceptance(
+        baseline = _collect_acceptance(
             end_date=current_end,
             strategy_version=baseline_version,
             market=market,
@@ -643,7 +663,7 @@ def main() -> int:
         )
         if verdict["blocking_reasons"]:
             content += "\n- Blocking: " + "；".join(verdict["blocking_reasons"][:3])
-        send_wecom_notification(content)
+        _send_wecom_notification(content)
 
     return 0
 

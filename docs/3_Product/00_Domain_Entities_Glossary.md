@@ -38,7 +38,7 @@ Hub = 持续更新的“常规内容”节奏（不是一次性爆款）。
 | 仪表盘 | Dashboard | Dashboard | 用户进入后查看全局与个股决策的主工作台。 |
 | 个股卡片 | Stock Card | Card | 仪表盘中承载单只股票核心状态的卡片。 |
 | 投研决议 | Investment Decision | Decision | 多分析引擎对同一标的的综合结论。 |
-| 战术简报 | Tactical Brief | Brief | 围绕单只股票的可执行细化建议面板。 |
+| 策略内参 | Tactical Brief | Brief | 围绕单只股票的可执行细化建议面板。 |
 | 投资黄历 | Market Almanac | Almanac | 市场层面的日度宜忌与风险气象视图。 |
 | 投资模式 | Investment Mode | Mode | 将后台策略能力封装成用户可理解的产品模式。 |
 | 预测记录 | Prediction | Prediction | 某日某标的的一次分析结果记录。 |

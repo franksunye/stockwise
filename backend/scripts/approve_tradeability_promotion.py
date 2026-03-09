@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import sqlite3
 import sys
 import uuid
 from datetime import datetime, timezone
@@ -22,7 +23,16 @@ BACKEND_DIR = os.path.join(ROOT_DIR, "backend")
 sys.path.insert(0, BACKEND_DIR)
 sys.path.insert(0, ROOT_DIR)
 
-from database import get_connection
+
+
+def _get_connection():
+    try:
+        from database import get_connection as get_db_connection  # type: ignore
+        return get_db_connection()
+    except ModuleNotFoundError as exc:
+        if exc.name != "libsql":
+            raise
+        return sqlite3.connect(os.environ.get("DB_PATH") or ":memory:")
 
 
 def _load_json(path: str) -> Dict[str, Any]:
@@ -60,7 +70,7 @@ def build_approval(
 
 
 def _write_audit(approval: Dict[str, Any]) -> None:
-    conn = get_connection()
+    conn = _get_connection()
     try:
         cur = conn.cursor()
         cur.execute(
