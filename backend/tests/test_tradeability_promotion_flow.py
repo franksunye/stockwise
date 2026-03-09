@@ -33,6 +33,14 @@ class TradeabilityPromotionFlowTest(unittest.TestCase):
                         "candidate_version": "tradeability_v2",
                         "baseline_version": "tradeability_v1",
                         "promotion_gate_pass": True,
+                        "default_mode_id": "balanced_v1",
+                        "core_mode_gate_pass": True,
+                        "core_mode_effects": {
+                            "steady_v1": {"is_core_mode": True, "gate_pass": True},
+                            "balanced_v1": {"is_core_mode": True, "is_default_mode": True, "gate_pass": True},
+                            "aggressive_v1": {"is_core_mode": True, "gate_pass": True},
+                            "observe_only_v1": {"is_core_mode": False, "excluded_from_promotion": True},
+                        },
                         "recommended_action": "promote_candidate",
                     },
                     ensure_ascii=False,
@@ -61,6 +69,8 @@ class TradeabilityPromotionFlowTest(unittest.TestCase):
             approval = json.loads(approval_json.read_text(encoding="utf-8"))
             self.assertTrue(approval["approved"])
             self.assertEqual(approval["candidate_version"], "tradeability_v2")
+            self.assertTrue(approval["core_mode_gate_pass"])
+            self.assertIn("balanced_v1", approval["core_mode_effects"])
 
             subprocess.run(
                 [
