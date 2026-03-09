@@ -12,7 +12,167 @@
 
 本文档作为后续 workflow 拆分与调度治理的统一依据。
 
-## 2. 四类任务语义
+## 2. 24 小时运行纲
+
+在进入具体 workflow 之前，先定义一天 24 小时内后台的宏观时间规划。
+
+这部分不是精确 cron 表，而是“这个时间段系统应该以什么目标为主”的总纲。
+
+### 2.0 总控摘要表
+
+| 时间段 | 主目标 | 主类别 | 允许的任务类别 |
+| --- | --- | --- | --- |
+| `06:00-09:00` | 盘前准备 | 内容刷新与晨间触达 | `Production Content` / 轻量 `Ops Governance` / 必要 `Maintenance` |
+| `09:00-16:30` | 盘中服务 | 前端实时能力优先 | `Production Core` / 严格受控 `Production Content` / 最小化 `Ops Governance` |
+| `16:00-19:00` | 盘后产数 | 正式生产批处理 | `Production Core` / `Production Content` / `production_validation` / 轻量 `Ops Governance` |
+| `19:00-06:00` | 夜间治理 | 研究、治理、补跑 | `Research` / `Ops Governance` / `Maintenance` |
+
+### 2.1 总原则
+
+1. 同一时间段应尽量只服务一个主目标，避免生产、研究、运营、维护互相抢关键路径
+2. 高时效任务优先由外部精确定时触发，避免依赖 GitHub cron 漂移
+3. 面向用户的正式产数优先，研究、治理、维护应让路给生产关键路径
+4. 长任务与内容任务分离，避免单 job 里串行堆叠
+5. 时间规划先定义“做什么”，workflow 只是实现方式
+
+### 2.2 一天四个主时段
+
+#### A. 盘前准备段：06:00-09:00
+
+目标：
+
+1. 完成盘前需要给用户消费的内容刷新
+2. 准备晨间通知和 ritual
+3. 不做大规模重计算
+
+允许的任务类型：
+
+1. `Production Content`
+2. 轻量 `Ops Governance`
+3. 必要的 `Maintenance`
+
+典型任务：
+
+1. `daily_morning_call.yml`
+2. 盘前黄历刷新
+3. 轻量健康检查
+
+不建议：
+
+1. 大批量 AI 分析
+2. 大规模 backfill
+3. 研究链重计算
+
+#### B. 盘中服务段：09:00-16:30
+
+目标：
+
+1. 稳定服务前端实时能力
+2. 优先保证数据新鲜度和触达时效
+3. 控制后台负载，避免影响实时同步
+
+允许的任务类型：
+
+1. `Production Core`
+2. 严格受控的 `Production Content`
+3. 最小化 `Ops Governance`
+
+典型任务：
+
+1. `data_sync_realtime.yml`
+2. 单票补数与线上排障
+
+不建议：
+
+1. 与实时同步争抢资源的重型批处理
+2. 大批量研究实验
+3. 会放大外部 API 压力的内容重算
+
+#### C. 盘后产数段：16:00-19:00
+
+目标：
+
+1. 先完成正式生产链产数
+2. 再并行完成内容链与验证链
+3. 这是一天中最重要的正式批处理窗口
+
+允许的任务类型：
+
+1. `Production Core`
+2. `Production Content`
+3. `production_validation`
+4. 轻量 `Ops Governance`
+
+典型任务：
+
+1. `data_sync_cn.yml` / `data_sync_hk.yml`
+2. `verify_predictions.yml`
+3. `ai_analyze_cn.yml` / `ai_analyze_hk.yml`
+4. `daily_almanac_cn.yml`
+5. `daily_brief_push.yml`
+
+规则：
+
+1. 先同步，再验证/分析/内容分叉
+2. 面向用户的正式产数优先于研究链
+3. 内容任务不应阻塞分析主链
+
+#### D. 夜间治理段：19:00-06:00
+
+目标：
+
+1. 消化研究、治理、补跑、低频维护
+2. 不影响盘前和盘中关键时段
+3. 为第二天提供治理结论和修复空间
+
+允许的任务类型：
+
+1. `Research`
+2. `Ops Governance`
+3. `Maintenance`
+
+典型任务：
+
+1. `tradeability_postclose_pipeline.yml`
+2. weekly calibration / experiment / promotion
+3. `acceptance_weekly.yml`
+4. `almanac_maintenance.yml`
+5. `ai_backfill.yml`
+
+不建议：
+
+1. 把夜间研究任务挂到生产关键路径上
+2. 让补跑任务与次日盘前内容链抢资源
+
+### 2.3 时间优先级
+
+如果不同类型任务发生冲突，统一按这个优先级让路：
+
+1. `Production Core`
+2. `Production Content`
+3. `production_validation`
+4. `Ops Governance`
+5. `Research`
+6. `Maintenance`
+
+解释：
+
+1. 先保证前端可用和正式产数
+2. 再保证用户消费内容
+3. 再做验证、治理、研究和补跑
+
+### 2.4 这份总纲的用途
+
+后面每一个 workflow 在设计时，都应先回答：
+
+1. 它属于一天中的哪个主时段
+2. 它是否抢占了不该抢占的关键窗口
+3. 它是否应该让位于更高优先级任务
+4. 它失败后是否应该阻塞该时段的主目标
+
+只有先回答这些问题，才进入具体的 cron、依赖和 timeout 设计。
+
+## 3. 四类任务语义
 
 当前后台任务不再建议简单区分为“生产 / 非生产”。
 
@@ -25,7 +185,7 @@
 
 定义如下。
 
-### 2.1 Production
+### 3.1 Production
 
 定义：
 
@@ -46,7 +206,7 @@
 5. Investment Mode 产数
 6. 黄历 / brief / morning call 生产与分发
 
-### 2.2 Research
+### 3.2 Research
 
 定义：
 
@@ -61,7 +221,7 @@
 4. strategy experiment
 5. promotion verdict
 
-### 2.3 Ops Governance
+### 3.3 Ops Governance
 
 定义：
 
@@ -76,7 +236,7 @@
 4. layer1 consistency
 5. market facts health check
 
-### 2.4 Maintenance
+### 3.4 Maintenance
 
 定义：
 
@@ -90,7 +250,7 @@
 4. backfill
 5. 历史 almanac maintenance
 
-## 3. 四条主链路
+## 4. 四条主链路
 虽然一级语义改为四类，但在运行编排上，仍然可以抽象为四条主链路：
 
 1. 生产决策链
@@ -233,7 +393,7 @@
 1. 这条链通常应为非阻塞或弱阻塞
 2. 除非发现严重生产风险，否则不应拖住核心产数
 
-## 4. 任务分类字段
+## 5. 任务分类字段
 
 后续所有 workflow 应至少能回答这 7 个字段：
 
@@ -247,7 +407,7 @@
 
 推荐口径如下。
 
-### 4.1 Stage
+### 5.1 Stage
 
 1. `Post-Close`
 2. `Pre-Market`
@@ -256,7 +416,7 @@
 5. `Weekly Governance`
 6. `Manual / Backfill`
 
-### 4.2 Type
+### 5.2 Type
 
 1. `ingestion`
 2. `analysis`
@@ -266,7 +426,7 @@
 6. `research`
 7. `promotion_governance`
 
-### 4.3 Blocking Level
+### 5.3 Blocking Level
 
 1. `hard_blocking`
    失败则下游主流程不应继续
@@ -277,7 +437,7 @@
 4. `manual_only`
    仅手工触发
 
-### 4.4 Trigger Source
+### 5.4 Trigger Source
 
 1. `GitHub Schedule`
    由 GitHub cron 直接触发
@@ -295,9 +455,9 @@
    - `data_sync_realtime.yml`
    - `daily_morning_call.yml`
 
-## 5. 当前真实编排地图
+## 6. 当前真实编排地图
 
-### 5.1 Production
+### 6.1 Production
 
 Production 内部分为两组：
 
@@ -306,7 +466,7 @@ Production 内部分为两组：
 2. `Production Content`
    - 黄历、brief、morning call、broadcast
 
-#### 5.1.1 Production Core
+#### 6.1.1 Production Core
 
 | Job / Workflow | Stage | Type | Trigger Source | Depends On | Blocking | 备注 |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -320,7 +480,7 @@ Production 内部分为两组：
 | `ai_analyze_hk.yml` | Post-Close | analysis | Workflow Call / Manual | `data_sync_hk` | soft_blocking | 纯分析 workflow；与 CN 保持相同边界 |
 | `mode_pipeline` | Post-Close | analysis | Internal Program Call | `ai_analyze_*` 内部触发 | soft_blocking | 正式 Investment Mode 产数 |
 
-#### 5.1.2 Production Content
+#### 6.1.2 Production Content
 
 | Job / Workflow | Stage | Type | Trigger Source | Depends On | Blocking | 备注 |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -329,7 +489,7 @@ Production 内部分为两组：
 | `daily_brief_push.yml` | Post-Close | distribution | GitHub Schedule / Manual | brief source 数据 | best_effort | 简报推送 |
 | `broadcast_almanac.py` | Post-Close / Pre-Market | distribution | Workflow / Program Entry | 已生成黄历 | best_effort | 只负责广播，不应重算 |
 
-### 5.2 Research
+### 6.2 Research
 
 | Job / Workflow | Stage | Type | Trigger Source | Depends On | Blocking | 备注 |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -340,7 +500,7 @@ Production 内部分为两组：
 | `tradeability_experiment_weekly.yml` | Weekly Governance | research | GitHub Schedule / Manual | 历史样本/sidecar | best_effort | 周度实验 artifact |
 | `tradeability_promotion_gate.yml` | Weekly Governance | promotion_governance | GitHub Schedule / Manual | calibration + experiment | best_effort | 研究结果是否可晋级生产参数 |
 
-### 5.3 Ops Governance
+### 6.3 Ops Governance
 
 | Job / Workflow | Stage | Type | Trigger Source | Depends On | Blocking | 备注 |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -350,7 +510,7 @@ Production 内部分为两组：
 | `layer1_consistency_daily.yml` | Maintenance | ops_validation | GitHub Schedule / Manual | sidecar / ai_predictions | best_effort | Layer-1 一致性 |
 | `market_facts_healthcheck.py` | Post-Close / Manual | ops_validation | Workflow / Program Entry | 黄历事实层 | best_effort | 不应拖住分析主链 |
 
-### 5.4 Maintenance
+### 6.4 Maintenance
 
 | Job / Workflow | Stage | Type | Trigger Source | Depends On | Blocking | 备注 |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -360,9 +520,9 @@ Production 内部分为两组：
 | `ai_backfill.yml` | Manual / Backfill | maintenance | Manual / API Dispatch | 手工触发 | manual_only | 历史分析补跑 |
 | `almanac_maintenance.yml` | Manual / Backfill | maintenance | Manual / API Dispatch | 手工触发 | manual_only | 历史黄历补跑 |
 
-## 6. 当前边界状态
+## 7. 当前边界状态
 
-### 6.1 `ai_analyze_cn.yml` 越界问题已修复
+### 7.1 `ai_analyze_cn.yml` 越界问题已修复
 
 当前状态：
 
@@ -382,7 +542,7 @@ Production 内部分为两组：
 2. 黄历失败不会再污染分析任务成功率
 3. workflow 名称与实际职责重新一致
 
-### 6.2 `--analyze` 内部再带 `mode_pipeline`
+### 7.2 `--analyze` 内部再带 `mode_pipeline`
 
 当前 `backend/main.py --analyze` 默认自动触发 `mode_pipeline`。
 
@@ -391,16 +551,16 @@ Production 内部分为两组：
 1. 这件事不是错误
 2. 但需要在文档中明确：它属于生产链内部耦合，不等同于把运营链也带进去
 
-### 6.3 研究链和生产链目前是并行存在的
+### 7.3 研究链和生产链目前是并行存在的
 
 这是合理的，不应合并：
 
 1. 生产链回答“今天正式给用户什么”
 2. 研究链回答“哪个版本更好、是否值得升级”
 
-## 7. 推荐的时间编排口径
+## 8. 推荐的时间编排口径
 
-### 7.1 每日 Production
+### 8.1 每日 Production
 
 | 北京时间 | 类别 | 任务 | 说明 |
 | --- | --- | --- | --- |
@@ -415,14 +575,14 @@ Production 内部分为两组：
 | 17:30 | Ops Governance / Production Content | `daily_validation_check.yml` / `daily_brief_push.yml` | 巡检与摘要 |
 | 08:30 | Production Content | `daily_morning_call.yml` | 由 Cloudflare Worker 精确触发，盘前基于隔夜信息刷新并广播 |
 
-### 7.2 每日 Research
+### 8.2 每日 Research
 
 | 北京时间 | 类别 | 任务 | 说明 |
 | --- | --- | --- | --- |
 | 18:05 | Research | `tradeability_postclose_pipeline.yml` (CN) | 正式盘后链结束后再跑研究链 |
 | 18:35 | Research | `tradeability_postclose_pipeline.yml` (HK) | 港股研究链 |
 
-### 7.3 按需操作
+### 8.3 按需操作
 
 | 触发方式 | 类别 | 任务 | 说明 |
 | --- | --- | --- | --- |
@@ -430,7 +590,7 @@ Production 内部分为两组：
 | 手工 / API / 运维 | Maintenance | `ai_backfill.yml` | 历史分析补跑 |
 | 手工 / API / 运维 | Maintenance | `almanac_maintenance.yml` | 黄历历史补跑 |
 
-### 7.4 每周 Research / Ops Governance
+### 8.4 每周 Research / Ops Governance
 
 | 北京时间 | 类别 | 任务 | 说明 |
 | --- | --- | --- | --- |
@@ -439,7 +599,7 @@ Production 内部分为两组：
 | 周日 10:50 | Research | `tradeability_promotion_gate.yml` | 周 promotion verdict |
 | 周日 10:10 | Ops Governance | `acceptance_weekly.yml` | 周验收快照 |
 
-## 8. 第一优先级拆分建议
+## 9. 第一优先级拆分建议
 
 第一阶段边界清理已经完成：
 
@@ -458,7 +618,7 @@ Production 内部分为两组：
 2. 黄历失败不会污染分析任务成功率
 3. workflow 名称和职责重新一致
 
-### 8.1 当前执行约束
+### 9.1 当前执行约束
 
 为兼容 GitHub Actions Free 与 Turso 现状，当前执行约束是：
 
@@ -468,7 +628,7 @@ Production 内部分为两组：
 4. 对盘后主产线保留有限并行，不主动放大到高并发 fan-out
 5. 对可能卡死的 AkShare 调用使用可重置 timeout 隔离
 
-## 9. 后续治理建议
+## 10. 后续治理建议
 
 1. 所有 workflow 文档都补上 `Stage / Type / Trigger Source / Depends On / Blocking`
 2. 生产链与研究链分别维护独立总表
