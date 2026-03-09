@@ -98,7 +98,6 @@ function DashboardEntryGate({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      <OnboardingOverlay />
       {children}
     </>
   );

@@ -85,6 +85,17 @@ export function OnboardingOverlay() {
             body: JSON.stringify({ selectedStock })
         });
         localStorage.setItem('STOCKWISE_HAS_ONBOARDED', 'true');
+        
+        // Optimistically update the user profile cache to prevent flash of Step 1 on reload
+        try {
+            const cachedProfileRaw = localStorage.getItem('stockwise_user_profile_v1');
+            if (cachedProfileRaw) {
+                const cachedProfile = JSON.parse(cachedProfileRaw);
+                cachedProfile.hasOnboarded = true;
+                localStorage.setItem('stockwise_user_profile_v1', JSON.stringify(cachedProfile));
+            }
+        } catch { /* ignore cache parse error */ }
+
         setIsVisible(false);
         // Reload to refresh state (simple way to ensure UI updates to Pro)
         window.location.reload();
