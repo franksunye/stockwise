@@ -183,34 +183,43 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
   const defenseCount = actionKeys.filter((k) => k === 'defense').length;
   const emptyCount = actionKeys.filter((k) => k === 'empty').length;
   
+  let consensusLevel = '更多支持';
+  let actionLabel = '暂无信号';
   let consensusColor = 'text-slate-400';
-  let consensusText = '判断分歧';
+  
   const total = predictions.length;
-  if (enterCount === total) {
-    consensusColor = 'text-emerald-400';
-    consensusText = '一致支持建议进场';
-  } else if (observeCount === total) {
-    consensusColor = 'text-amber-400';
-    consensusText = '一致支持建议观察';
-  } else if (defenseCount === total) {
-    consensusColor = 'text-rose-400';
-    consensusText = '一致支持建议防守';
-  } else if (emptyCount === total) {
-    consensusColor = 'text-slate-300';
-    consensusText = '一致支持暂无信号';
-  } else if (enterCount > observeCount && enterCount > defenseCount && enterCount > emptyCount) {
-    consensusText = '更多支持建议进场';
-    consensusColor = 'text-emerald-400/80';
-  } else if (observeCount > enterCount && observeCount > defenseCount && observeCount > emptyCount) {
-    consensusText = '更多支持建议观察';
-    consensusColor = 'text-amber-400/80';
-  } else if (defenseCount > enterCount && defenseCount > observeCount && defenseCount > emptyCount) {
-    consensusText = '更多支持建议防守';
-    consensusColor = 'text-rose-400/80';
-  } else if (emptyCount > enterCount && emptyCount > observeCount && emptyCount > defenseCount) {
-    consensusText = '更多支持暂无信号';
-    consensusColor = 'text-slate-300/80';
+  const isUnanimous = enterCount === total || observeCount === total || defenseCount === total || emptyCount === total;
+  
+  if (isUnanimous) {
+    consensusLevel = '一致支持';
+    if (enterCount === total) actionLabel = '建议进场';
+    else if (observeCount === total) actionLabel = '建议观察';
+    else if (defenseCount === total) actionLabel = '建议防守';
+    else actionLabel = '暂无信号';
+  } else {
+    // Determine majority
+    const counts = [
+      { key: 'enter', count: enterCount, label: '建议进场' },
+      { key: 'observe', count: observeCount, label: '建议观察' },
+      { key: 'defense', count: defenseCount, label: '建议防守' },
+      { key: 'empty', count: emptyCount, label: '暂无信号' }
+    ];
+    counts.sort((a, b) => b.count - a.count);
+    
+    if (counts[0].count > counts[1].count) {
+      consensusLevel = '更多支持';
+      actionLabel = counts[0].label;
+    } else {
+      consensusLevel = '判断分歧';
+      actionLabel = '意见不一';
+    }
   }
+
+  // Set color based on action
+  if (actionLabel.includes('进场')) consensusColor = 'text-emerald-400';
+  else if (actionLabel.includes('观察')) consensusColor = 'text-amber-400';
+  else if (actionLabel.includes('防守')) consensusColor = 'text-rose-400';
+  else if (actionLabel.includes('暂无')) consensusColor = 'text-slate-300';
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -221,10 +230,12 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
            <h3 className="text-xl font-black tracking-tight text-white">{stockName || '未知股票'}</h3>
         </div>
         <div className="text-right">
-           <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">{predictions.length}席 投研决议</p>
+           <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">
+              {predictions.length}席 {consensusLevel}
+           </p>
            <h3 className={`text-xl font-black tracking-tight ${consensusColor} flex items-center justify-end gap-2`}>
-              {consensusText}
-              {(enterCount === total || observeCount === total || defenseCount === total || emptyCount === total) && <ShieldCheck size={18} />}
+              {actionLabel}
+              {isUnanimous && <ShieldCheck size={18} />}
            </h3>
         </div>
       </div>
