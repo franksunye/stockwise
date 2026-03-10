@@ -126,11 +126,11 @@ interface PriceLevelNode {
 }
 
 const normalizeActionLabel = (action: string | undefined): string => {
-  if (!action) return '执行观察';
-  if (action.includes('观察')) return '执行观察';
-  if (action.includes('止损') || action.includes('减仓') || action.includes('防守')) return '执行防守';
-  if (action.includes('加仓') || action.includes('跟随') || action.includes('买')) return '执行进场';
-  if (action.includes('落袋') || action.includes('止盈') || action.includes('离场')) return '执行落袋';
+  if (!action) return '建议观察';
+  if (action.includes('观察')) return '建议观察';
+  if (action.includes('止损') || action.includes('减仓') || action.includes('防守')) return '建议防守';
+  if (action.includes('加仓') || action.includes('跟随') || action.includes('买')) return '建议进场';
+  if (action.includes('落袋') || action.includes('止盈') || action.includes('离场')) return '建议落袋';
   return action;
 };
 
@@ -812,15 +812,23 @@ export function TacticalBriefDrawer({
                                         </div>
                                         <div>
                                             <p className={`text-xs font-bold leading-relaxed ${isActive ? 'text-slate-200' : 'text-slate-500'}`}>{node.description}</p>
-                                            <p className={`text-[10px] mt-2 flex items-center gap-1.5 ${isActive ? textColor : 'text-slate-600'}`}>
-                                                <span className="font-black uppercase tracking-widest bg-white/10 px-1.5 py-0.5 rounded text-slate-300">防呆脚本</span> 
-                                                <span className="flex items-center gap-1 font-bold">
-                                                    {normalizeActionLabel(node.action) === '执行防守' && <Shield size={12} />}
-                                                    {normalizeActionLabel(node.action) === '执行落袋' && <Target size={12} />}
-                                                    {normalizeActionLabel(node.action) === '执行进场' && <TrendingUp size={12} />}
-                                                    {normalizeActionLabel(node.action) === '执行观察' && <Crosshair size={12} />}
-                                                    {normalizeActionLabel(node.action)}
-                                                </span>
+                                            <p className={`text-[10px] mt-2 flex items-center gap-1.5 font-bold ${isActive ? textColor : 'text-slate-600'}`}>
+                                                {isCurrent ? (
+                                                    <>
+                                                        {signal === 'Long' && <Zap size={12} className="text-rose-400" />}
+                                                        {signal === 'Side' && <Crosshair size={12} className="text-amber-400" />}
+                                                        {signal === 'Short' && <Shield size={12} className="text-emerald-400" />}
+                                                        {signal === 'Long' ? '建议进场' : signal === 'Short' ? '建议防守' : '建议观察'}
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        {normalizeActionLabel(node.action) === '建议防守' && <Shield size={12} />}
+                                                        {normalizeActionLabel(node.action) === '建议落袋' && <Target size={12} />}
+                                                        {normalizeActionLabel(node.action) === '建议进场' && <TrendingUp size={12} />}
+                                                        {normalizeActionLabel(node.action) === '建议观察' && <Crosshair size={12} />}
+                                                        {normalizeActionLabel(node.action)}
+                                                    </>
+                                                )}
                                             </p>
                                         </div>
                                         
