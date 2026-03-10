@@ -64,6 +64,16 @@ Investment Mode 与 `tradeability sidecar` 都使用真实市场数据，但职�
    - 生产池负责承接结论。
    - 不允许让生产池反过来决定研究实验应该覆盖哪些股票。
 
+补充口径：
+
+1. 当前模式升级的最小发布单元应理解为“模式发布物”，而不是裸参数。
+2. 模式发布物至少包含：
+   - 参数包
+   - 研究窗口与研究样本
+   - 研究绩效摘要 / 候选比较结论
+3. 线下研究负责形成模式发布物。
+4. 生产环境负责承接已发布的模式发布物，并在生产数据、生产池和用户池上生成正式效果。
+
 ## 1.3 当前数据血缘
 
 线上 Investment Mode 的数据血缘为：
@@ -83,6 +93,12 @@ Investment Mode 与 `tradeability sidecar` 都使用真实市场数据，但职�
 2. 盘后样本补量可继续扩充 `daily_prices` 覆盖面
 3. `run_tradeability_sidecar.py` 基于 `daily_prices` 计算 `quant_tradeability_signals`
 4. `run_tradeability_weekly_calibration.py` 基于研究样本和 sidecar 输出做周度参数校准
+
+补充边界：
+
+1. 实验线可以持续并行运行，用于形成下一轮模式发布物。
+2. 实验线 artifact 不直接写成前台正式表现。
+3. 若当前模式参数已发布到生产，实验线仍可继续跑，不影响生产线按既定口径产数。
 
 ## 2. 已落地代码位置
 
