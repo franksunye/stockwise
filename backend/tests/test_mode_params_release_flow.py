@@ -25,6 +25,21 @@ def test_mode_params_release_flow():
                         "method": "local_backtest",
                         "artifact": "tmp/mode_backtest/best_release.json",
                     },
+                    "window": {
+                        "start_date": "2024-01-01",
+                        "end_date": "2026-03-06",
+                    },
+                    "research_performance": {
+                        "market": "CN",
+                        "window": {"start_date": "2024-01-01", "end_date": "2026-03-06"},
+                        "universe": {"symbol_count": 500, "manifest": "tmp/mode_backtest/candidate_manifest_cn.json"},
+                        "modes": {
+                            "steady_v1": {
+                                "selected_candidate_name": "steady_best",
+                                "metrics": {"sample_size": 80, "max_drawdown_pct": 12.3},
+                            }
+                        },
+                    },
                     "bundles": {
                         "steady": {"default": {"breakout_volume_mult": 1.08, "risk_off_ma": 10}},
                         "balanced": {"default": {"momentum_change_threshold": 2.0}},
@@ -57,6 +72,9 @@ def test_mode_params_release_flow():
 
         payload = json.loads(target_json.read_text(encoding="utf-8"))
         assert payload["strategy_version"] == "tradeability_v2"
+        assert payload["window"]["end_date"] == "2026-03-06"
+        assert payload["research_performance"]["universe"]["symbol_count"] == 500
+        assert payload["research_performance"]["modes"]["steady_v1"]["selected_candidate_name"] == "steady_best"
         assert payload["bundles"]["steady"]["default"]["breakout_volume_mult"] == 1.08
         assert payload["bundles"]["balanced"]["default"]["momentum_change_threshold"] == 2.0
         assert payload["bundles"]["aggressive"]["default"]["risk_off_ma"] == 5.0

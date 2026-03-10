@@ -95,6 +95,10 @@ def _build_config(release: Dict[str, Any]) -> Dict[str, Any]:
         "strategy_version": strategy_version,
         "generated_at": str(release.get("generated_at") or ""),
         "source": dict(release.get("source") or {}),
+        "window": dict(release.get("window") or {}),
+        "research_performance": dict(release.get("research_performance") or {}),
+        "selection_summary": dict(release.get("selection_summary") or {}),
+        "production_effect": dict(release.get("production_effect") or {}),
         "bundles": normalized_bundles,
     }
 

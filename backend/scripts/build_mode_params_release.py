@@ -258,6 +258,7 @@ def build_release_payload(
     selected_modes: Dict[str, Any] = {}
     bundles_payload: Dict[str, Any] = {}
     production_effects: Dict[str, Any] = {}
+    research_performance_modes: Dict[str, Any] = {}
 
     for mode_payload in manifest["modes"]:
         mode_id = str(mode_payload["mode_id"])
@@ -287,6 +288,21 @@ def build_release_payload(
             "selected_candidate": selected,
             "ranked_candidates": ranked,
         }
+        research_performance_modes[mode_id] = {
+            "mode_id": mode_id,
+            "mode_name": _mode_label(mode_id),
+            "bundle_name": bundle_name,
+            "selected_candidate_name": str(selected["name"]),
+            "metrics": dict(selected["metrics"]),
+            "ranked_candidates": [
+                {
+                    "name": str(candidate["name"]),
+                    "score": float(candidate["score"]),
+                    "metrics": dict(candidate["metrics"]),
+                }
+                for candidate in ranked
+            ],
+        }
         bundles_payload[bundle_name] = _merge_bundle_release(
             current_config,
             bundle_name=bundle_name,
@@ -313,6 +329,15 @@ def build_release_payload(
             "artifact": os.path.relpath(output_json_path, ROOT_DIR),
         },
         "window": window,
+        "research_performance": {
+            "market": market,
+            "window": window,
+            "universe": {
+                "symbol_count": len(bars_by_symbol),
+                "manifest": os.path.relpath(manifest_path, ROOT_DIR),
+            },
+            "modes": research_performance_modes,
+        },
         "selection_summary": selected_modes,
         "production_effect": production_effects if include_production_effect else {},
         "bundles": bundles_payload,
@@ -327,6 +352,7 @@ def _to_markdown(payload: Dict[str, Any]) -> str:
     lines.append(f"- Strategy: `{payload['strategy_version']}`")
     lines.append(f"- Window: `{payload['window']['start_date']}` ~ `{payload['window']['end_date']}`")
     lines.append(f"- Generated at: `{payload['generated_at']}`")
+    lines.append(f"- Research universe size: `{payload['research_performance']['universe']['symbol_count']}`")
     lines.append("")
     lines.append("| mode | selected | score | trig | t3_win | payoff | max_dd | trades |")
     lines.append("|---|---|---:|---:|---:|---:|---:|---:|")

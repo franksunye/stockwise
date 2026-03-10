@@ -226,6 +226,9 @@ def test_build_release_payload_selects_best_and_merges_market_override():
     assert payload["selection_summary"]["steady_v1"]["selected_candidate"]["name"] == "steady_best"
     assert payload["selection_summary"]["balanced_v1"]["selected_candidate"]["name"] == "balanced_best"
     assert payload["selection_summary"]["aggressive_v1"]["selected_candidate"]["name"] == "aggressive_best"
+    assert payload["research_performance"]["market"] == "CN"
+    assert payload["research_performance"]["universe"]["symbol_count"] == 1
+    assert payload["research_performance"]["modes"]["steady_v1"]["selected_candidate_name"] == "steady_best"
     assert payload["bundles"]["steady"]["markets"]["CN"]["breakout_volume_mult"] == 1.08
     assert payload["bundles"]["steady"]["markets"]["HK"]["risk_off_ma"] == 10
     assert payload["bundles"]["observe_only"]["markets"]["HK"] == {}
