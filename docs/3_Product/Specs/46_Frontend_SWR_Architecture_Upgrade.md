@@ -34,6 +34,12 @@
 
 因此，当前文档需要从“继续推进 Dashboard”修正为“保留 AICouncil 成果，重新定义下一步范围”。
 
+补充验证结果：
+
+- `stock-pool -> dashboard` 的进入体验，在入口 bootstrap 修正后已基本无感。
+- 冷启动 / 重新打开应用时，仍可能有极短的快速闪烁，但已不再暴露 Dashboard 骨架屏。
+- 这说明当前主矛盾已从“数据层退化”收敛为“入口 bootstrap / hydration 切换细节”。
+
 ## 2. 当前现状梳理
 
 ### 2.1 已经被验证有效的行为
@@ -172,6 +178,34 @@
 
 - 持久化应该按领域做，而不是按库做。
 
+### 5.3 Dashboard Bootstrap 需要独立收口
+
+这次线上验证进一步说明，Dashboard 首页体验并不只由数据请求层决定，还强依赖入口 bootstrap 链路：
+
+- auth cache
+- profile cache
+- onboarding marker
+- 导航意图（如 `stock-pool -> dashboard?symbol=...`）
+- hydration 前后的骨架显示策略
+
+短期内，这些条件可以以战术方式修正，目标是先确保用户无感进入。
+
+但从长期架构看，不应让这些入口条件持续散落在：
+
+- `RootLayout` 的 bootstrap script
+- `dashboard/layout.tsx` 的 gate 逻辑
+- `stock-pool` 页的导航意图写入
+- `dashboard/page` 的清理逻辑
+
+因此，后续应收敛出统一的 `dashboard bootstrap state` 工具层，职责至少包括：
+
+1. 统一读取 auth/profile/onboarding/navigation intent。
+2. 统一判断“是否允许乐观进入 Dashboard”。
+3. 统一管理 bootstrap 生命周期与过期策略。
+4. 将显示层、数据层、导航层的入口判断从页面组件中剥离。
+
+这一步不属于当前 SWR 迁移的直接实施项，但它是 Dashboard 首页长期稳定性的必要前置条件。
+
 ## 6. 分模块落地方案
 
 ### 6.1 Phase 1: AICouncil 先行
@@ -281,6 +315,11 @@
 - 允许轻微等待，但不允许结构性退化。
 - 更接近 `AICouncil` 已验证成功的局部数据模式。
 
+补充判断：
+
+- 当前 Dashboard 首页体验的主要残留问题，已经不是 SWR 本身，而是 bootstrap 状态收口还不统一。
+- 因此，在重新触碰 Dashboard 主链路之前，应优先评估是否先抽出统一的 `dashboard bootstrap state`。
+
 ## 7. 不建议做的事
 
 以下做法不建议采用：
@@ -359,6 +398,7 @@
 - 对本项目最稳的路线是：
   - 保留本地快照秒开。
   - 引入 SWR 统一运行时请求层。
+  - 将 Dashboard 首页的 bootstrap 判断视为独立架构问题，而不是附属在 SWR 迁移里的顺手修补。
   - 分阶段迁移。
   - 先局部组件，再外围数据面，最后才回到首页主链路。
   - 一旦首帧体感退化，优先回滚，不硬推。
