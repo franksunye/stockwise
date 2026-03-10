@@ -379,13 +379,13 @@ export function TacticalBriefDrawer({
     <AnimatePresence>
 
       {isOpen && (
-        <div className={`fixed inset-0 z-[200] flex items-end justify-center bg-black/60 pointer-events-auto overflow-hidden ${!isHighPerformance ? 'backdrop-blur-sm' : ''}`}>
+        <div className="fixed inset-0 z-[200] flex items-end justify-center bg-black/60 pointer-events-auto overflow-hidden">
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="absolute inset-0"
+            className="absolute inset-0 will-change-opacity"
           />
           <motion.div 
             initial={{ y: '100%' }}
@@ -398,7 +398,7 @@ export function TacticalBriefDrawer({
               ? { type: 'tween', ease: 'easeOut', duration: 0.25 }
               : { type: 'spring', damping: 25, stiffness: 200 }
             }
-            className="w-full max-w-md bg-[#0a0a0f] border-t border-white/10 rounded-t-[32px] shadow-[0_-20px_50px_rgba(0,0,0,0.5)] overflow-hidden pointer-events-auto z-10 h-[85vh] flex flex-col"
+            className="w-full max-w-md bg-[#0a0a0f] border-t border-white/10 rounded-t-[32px] shadow-[0_-20px_50px_rgba(0,0,0,0.5)] overflow-hidden pointer-events-auto z-10 h-[85vh] flex flex-col transform-gpu will-change-transform"
           >
             {/* 顶部视觉拉手 */}
             <div className="w-full flex justify-center pt-3 pb-1 shrink-0 bg-[#0a0a0f]">

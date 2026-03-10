@@ -29,6 +29,21 @@ interface Props {
 export function UserCenterDrawer({ isOpen, onClose }: Props) {
   const { profile, tier, userId, refreshProfile, loading } = useUserProfile();
 
+  const resetDrawerState = () => {
+    setShowPricing(false);
+    setShowIdentityCenter(false);
+    setShowInvestmentMode(false);
+    setShowSupport(false);
+    setShowLearn(false);
+    setShowNotificationSettings(false);
+    setShowReferralDetails(false);
+    setShowInvestmentModeDetails(false);
+    setShowEmailForm(false);
+    setIsLinkingEmail(false);
+    setTempEmail('');
+    setEmailMsg(null);
+  };
+
   // Local sync/display states (derived from profile)
   const expiresAt = profile?.expiresAt || null;
   const watchlistCount = profile?.watchlistCount || 0;
@@ -114,20 +129,6 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
               if (data.mode) setCurrentMode(data.mode);
           })
           .catch(console.error);
-          
-    } else {
-      setShowPricing(false);
-      setShowIdentityCenter(false);
-      setShowInvestmentMode(false);
-      setShowSupport(false);
-      setShowLearn(false);
-      setShowNotificationSettings(false);
-      setShowReferralDetails(false);
-      setShowInvestmentModeDetails(false);
-      setShowEmailForm(false);
-      setIsLinkingEmail(false);
-      setTempEmail('');
-      setEmailMsg(null);
     }
   }, [isOpen, refreshProfile]);
 
@@ -301,12 +302,12 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
     }
   };
   return (
-    <AnimatePresence>
+    <AnimatePresence onExitComplete={resetDrawerState}>
       {isOpen && (
         <div className="fixed inset-0 z-[200] flex flex-col items-center justify-end bg-black/80 pointer-events-auto overflow-hidden">
           <motion.div 
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            onClick={onClose} className="absolute inset-0"
+            onClick={onClose} className="absolute inset-0 will-change-opacity"
           />
 
           <motion.div 
@@ -319,7 +320,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
               ? { type: 'tween', ease: 'easeOut', duration: 0.25 }
               : { type: 'spring', damping: 25, stiffness: 200 }
             }
-            className="w-full max-w-md h-[85vh] flex flex-col bg-[#0a0a0f] border-t border-white/10 rounded-t-[32px] shadow-[0_-20px_50px_rgba(0,0,0,0.5)] overflow-hidden pointer-events-auto z-10"
+            className="w-full max-w-md h-[85vh] flex flex-col bg-[#0a0a0f] border-t border-white/10 rounded-t-[32px] shadow-[0_-20px_50px_rgba(0,0,0,0.5)] overflow-hidden pointer-events-auto z-10 transform-gpu will-change-transform"
           >
             {/* Visual Handle */}
             <div className="w-full flex justify-center pt-3 pb-1 shrink-0"><div className="w-12 h-1 rounded-full bg-white/20" /></div>
