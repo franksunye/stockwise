@@ -8,6 +8,12 @@ import {
     getUserMode,
     type UserTier,
 } from '@/lib/investment-mode';
+import {
+    EFFECTIVE_DECISION_SEMANTIC_SQL,
+    EFFECTIVE_LAYER1_STATUS_SQL,
+    EFFECTIVE_SIGNAL_SQL,
+    EFFECTIVE_VALIDATION_STATUS_SQL,
+} from '@/lib/prediction-display';
 
 export const dynamic = 'force-dynamic';
 
@@ -60,24 +66,13 @@ export async function GET(request: Request) {
                     p.symbol,
                     p.date,
                     p.target_date,
-                    CASE
-                        WHEN dlog.decision_semantic = '建议进场' OR dlog.decision_semantic = '进场' THEN 'Long'
-                        WHEN dlog.decision_semantic = '建议防守' OR dlog.decision_semantic = '防守' THEN 'Short'
-                        WHEN dlog.decision_semantic IN ('建议观察', '观察', '暂无信号', '建议空仓', '空仓') THEN 'Side'
-                        ELSE p.signal
-                    END AS signal,
+                    ${EFFECTIVE_SIGNAL_SQL} AS signal,
                     p.confidence,
                     p.support_price,
                     p.ai_reasoning,
-                    p.validation_status,
+                    ${EFFECTIVE_VALIDATION_STATUS_SQL} AS validation_status,
                     p.actual_change,
-                    CASE
-                        WHEN dlog.decision_semantic = '建议进场' OR dlog.decision_semantic = '进场' THEN 'TriggeredLong'
-                        WHEN dlog.decision_semantic = '建议防守' OR dlog.decision_semantic = '防守' THEN 'RiskOff'
-                        WHEN dlog.decision_semantic IN ('暂无信号', '建议空仓', '空仓') THEN 'NoSetup'
-                        WHEN dlog.decision_semantic = '建议观察' OR dlog.decision_semantic = '观察' THEN 'Watch'
-                        ELSE p.layer1_status
-                    END AS layer1_status,
+                    ${EFFECTIVE_LAYER1_STATUS_SQL} AS layer1_status,
                     p.layer1_score,
                     p.layer1_trigger_hit,
                     p.layer1_risk_off_hit,
@@ -86,13 +81,7 @@ export async function GET(request: Request) {
                     p.is_primary,
                     p.model_id AS model,
                     m.display_name,
-                    CASE
-                        WHEN dlog.decision_semantic IN ('建议空仓', '空仓') THEN '暂无信号'
-                        WHEN dlog.decision_semantic = '防守' THEN '建议防守'
-                        WHEN dlog.decision_semantic = '观察' THEN '建议观察'
-                        WHEN dlog.decision_semantic = '进场' THEN '建议进场'
-                        ELSE dlog.decision_semantic
-                    END AS decision_semantic,
+                    ${EFFECTIVE_DECISION_SEMANTIC_SQL} AS decision_semantic,
                     ? AS mode_id,
                     d.close AS close_price,
                     d.rsi,
