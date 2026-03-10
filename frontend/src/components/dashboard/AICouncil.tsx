@@ -1,5 +1,6 @@
 'use client';
 
+import { preload } from 'swr';
 import useSWR from 'swr';
 import { ShieldCheck, AlertTriangle, RotateCw } from 'lucide-react';
 import { getCurrentUser } from '@/lib/user';
@@ -115,8 +116,11 @@ async function fetchCouncilData([
   symbol,
   targetDate,
 ]: readonly [string, string, string]): Promise<CouncilCachePayload> {
-  await getCurrentUser();
-  const res = await fetch(`/api/predictions?symbol=${symbol}&limit=10&mode=full&targetDate=${targetDate}`);
+  let res = await fetch(`/api/predictions?symbol=${symbol}&limit=10&mode=full&targetDate=${targetDate}`);
+  if (res.status === 401) {
+    await getCurrentUser();
+    res = await fetch(`/api/predictions?symbol=${symbol}&limit=10&mode=full&targetDate=${targetDate}`);
+  }
   if (!res.ok) throw new Error('Failed to fetch council data');
 
   const data = await res.json();
@@ -126,6 +130,11 @@ async function fetchCouncilData([
     data: relevantPreds,
     fetchedAt: Date.now(),
   };
+}
+
+export function preloadAICouncil(symbol: string, targetDate: string): void {
+  if (!symbol || !targetDate) return;
+  preload(['ai-council', symbol, targetDate] as const, fetchCouncilData);
 }
 
 export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {

@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 import { AIPrediction, TacticalData, Tactic, ShortMetrics } from '@/lib/types';
 import { shouldEnableHighPerformance } from '@/lib/device-utils';
-import { AICouncil } from './AICouncil';
+import { AICouncil, preloadAICouncil } from './AICouncil';
 import Multiavatar from '@/components/Multiavatar';
 import { resolveAnalystForBriefSource } from '@/lib/agent-team';
 
@@ -343,6 +343,11 @@ export function TacticalBriefDrawer({
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, symbol, nodeSignature]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    preloadAICouncil(symbol, targetDate);
+  }, [isOpen, symbol, targetDate]);
 
 
   const priceRange = {
