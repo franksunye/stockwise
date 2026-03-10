@@ -483,7 +483,7 @@ class SynthesisStep(BaseStep):
     def _apply_layer1_action_language(self, parsed: Dict[str, Any], setup_state: str) -> Dict[str, Any]:
         profile = self._layer1_action_profile(setup_state)
         summary = str(parsed.get("summary") or "").strip()
-        summary_prefix = f"[Layer-1裁决:{setup_state}] {profile['summary_prefix']}。"
+        summary_prefix = f"{profile['summary_prefix']}。"
         parsed["summary"] = f"{summary_prefix}{summary}"[:160] if summary else summary_prefix[:160]
 
         tactics = parsed.setdefault("tactics", {})

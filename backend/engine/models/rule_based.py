@@ -187,7 +187,7 @@ class RuleAdapter(BasePredictionModel):
         profile = self._layer1_action_profile(layer1_status or "NoSetup")
         if layer1_status and raw_signal and raw_signal != signal:
             summary_text = f"{profile['summary_prefix']}。{summary_text}"
-            decision_detail += f"（Layer-1覆盖原始信号 {raw_signal}）"
+            decision_detail += "（已根据系统规则校准方向）"
         elif layer1_status:
             summary_text = f"{profile['summary_prefix']}。{summary_text}"
 

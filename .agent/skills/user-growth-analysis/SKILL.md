@@ -111,7 +111,20 @@ GROUP BY DATE(created_at)
 ORDER BY date ASC
 ```
 
-### Step 6: 全站累计快照
+### Step 6: 活跃用户分析 (DAU)
+
+```sql
+-- 今日活跃用户分布
+SELECT 
+  COUNT(DISTINCT user_id) as dau,
+  SUM(CASE WHEN subscription_tier='pro' THEN 1 ELSE 0 END) as active_pro,
+  SUM(CASE WHEN created_at LIKE '<YYYY-MM-DD>%' THEN 1 ELSE 0 END) as active_new_users,
+  SUM(CASE WHEN created_at < '<YYYY-MM-DD>' THEN 1 ELSE 0 END) as active_returning_users
+FROM users 
+WHERE last_active_at LIKE '<YYYY-MM-DD>%'
+```
+
+### Step 7: 全站累计快照
 
 ```sql
 SELECT 
@@ -130,15 +143,17 @@ FROM users
 ```
 ## 📊 <YYYY-MM-DD> 用户增长日报
 
-### 一、今日新增概览
+### 一、今日增长与活跃概览
 | 指标 | 数值 |
 | 今日新增用户 | X 人 |
 | 其中 Pro 付费 | X 人 (XX%) |
-| 其中 Free 免费 | X 人 |
+| 今日活跃用户 (DAU) | X 人 |
+| --- 其中老用户回访 | X 人 |
+| --- 其中 Pro 活跃 | X 人 |
 | 来自推荐链接 | X 人 |
 
-### 二、新用户明细（北京时间）
-表格：用户ID / 层级 / 来源 / 注册时间 / 自选股
+### 二、活跃用户明细（北京时间）
+表格：用户ID / 层级 / 注册时间 / 最后活跃 / 关键动作 (如新增自选股)
 
 ### 三、Pro 用户订阅详情
 表格：用户ID / 注册时间 / 到期时间 / Pro时长 / 订阅类型
