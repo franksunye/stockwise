@@ -3,8 +3,19 @@ import { getDbClient } from '@/lib/db';
 import { getUserTier } from '@/lib/user-server';
 import { getModelSqlFilter } from '@/lib/membership-config';
 import { requireUserSession } from '@/lib/user-session';
+import {
+    ensureInvestmentModeSchema,
+    getUserMode,
+    type UserTier,
+} from '@/lib/investment-mode';
 
 export const dynamic = 'force-dynamic';
+
+function closeDb(db: unknown): void {
+    if (db && typeof db === 'object' && 'close' in db && typeof (db as { close?: () => void }).close === 'function') {
+        (db as { close: () => void }).close();
+    }
+}
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
@@ -38,19 +49,48 @@ export async function GET(request: Request) {
         let almanacs: any[] = [];
 
         try {
+            await ensureInvestmentModeSchema(client);
+            const currentMode = await getUserMode(client, userId, userTier as UserTier);
+
             if ('execute' in client) {
                 if (symbols.length > 0) {
                     const placeholders = symbols.map(() => '?').join(',');
-                    const sql = `
+                    const historySql = `
                         WITH RankedPredictions AS (
-                            SELECT p.symbol, p.date, p.target_date, p.signal, p.confidence,
+                            SELECT p.symbol, p.date, p.target_date,
+                                    CASE
+                                        WHEN dlog.decision_semantic = '建议进场' OR dlog.decision_semantic = '进场' THEN 'Long'
+                                        WHEN dlog.decision_semantic = '建议防守' OR dlog.decision_semantic = '防守' THEN 'Short'
+                                        WHEN dlog.decision_semantic IN ('建议观察', '观察', '暂无信号', '建议空仓', '空仓') THEN 'Side'
+                                        ELSE p.signal
+                                    END AS signal,
+                                    p.confidence,
                                     p.support_price, p.ai_reasoning, p.validation_status, p.actual_change,
-                                    p.layer1_status, p.layer1_score, p.layer1_trigger_hit, p.layer1_risk_off_hit, p.layer1_strategy_version, p.layer1_payload,
+                                    CASE
+                                        WHEN dlog.decision_semantic = '建议进场' OR dlog.decision_semantic = '进场' THEN 'TriggeredLong'
+                                        WHEN dlog.decision_semantic = '建议防守' OR dlog.decision_semantic = '防守' THEN 'RiskOff'
+                                        WHEN dlog.decision_semantic IN ('暂无信号', '建议空仓', '空仓') THEN 'NoSetup'
+                                        WHEN dlog.decision_semantic = '建议观察' OR dlog.decision_semantic = '观察' THEN 'Watch'
+                                        ELSE p.layer1_status
+                                    END AS layer1_status,
+                                    p.layer1_score, p.layer1_trigger_hit, p.layer1_risk_off_hit, p.layer1_strategy_version, p.layer1_payload,
                                     p.max_perf_in_window,
                                     p.is_primary, p.model_id as model, m.display_name,
+                                    CASE
+                                        WHEN dlog.decision_semantic IN ('建议空仓', '空仓') THEN '暂无信号'
+                                        WHEN dlog.decision_semantic = '防守' THEN '建议防守'
+                                        WHEN dlog.decision_semantic = '观察' THEN '建议观察'
+                                        WHEN dlog.decision_semantic = '进场' THEN '建议进场'
+                                        ELSE dlog.decision_semantic
+                                    END AS decision_semantic,
+                                    ? AS mode_id,
                                     ROW_NUMBER() OVER (PARTITION BY p.symbol, p.target_date ORDER BY m.priority DESC) as rn_daily
                             FROM ai_predictions_v2 p
                             LEFT JOIN prediction_models m ON p.model_id = m.model_id
+                            LEFT JOIN mode_decision_log dlog
+                                ON dlog.mode_id = ?
+                               AND dlog.symbol = p.symbol
+                               AND dlog.decision_date = p.date
                             WHERE p.symbol IN (${placeholders}) AND (${tierFilter})
                         ),
                         DailyBest AS (
@@ -122,8 +162,8 @@ export async function GET(request: Request) {
                             args: symbols
                         }),
                         client.execute({
-                            sql,
-                            args: symbols
+                            sql: historySql,
+                            args: [currentMode.mode_id, currentMode.mode_id, ...symbols]
                         }),
                         client.execute({
                             sql: shortSql,
@@ -150,16 +190,42 @@ export async function GET(request: Request) {
                             ) latest ON dp.symbol = latest.symbol AND dp.date = latest.max_date
                         `).all(...symbols) as Record<string, unknown>[];
 
-                    const sql = `
+                    const historySql = `
                         WITH RankedPredictions AS (
-                            SELECT p.symbol, p.date, p.target_date, p.signal, p.confidence,
+                            SELECT p.symbol, p.date, p.target_date,
+                                    CASE
+                                        WHEN dlog.decision_semantic = '建议进场' OR dlog.decision_semantic = '进场' THEN 'Long'
+                                        WHEN dlog.decision_semantic = '建议防守' OR dlog.decision_semantic = '防守' THEN 'Short'
+                                        WHEN dlog.decision_semantic IN ('建议观察', '观察', '暂无信号', '建议空仓', '空仓') THEN 'Side'
+                                        ELSE p.signal
+                                    END AS signal,
+                                    p.confidence,
                                     p.support_price, p.ai_reasoning, p.validation_status, p.actual_change,
-                                    p.layer1_status, p.layer1_score, p.layer1_trigger_hit, p.layer1_risk_off_hit, p.layer1_strategy_version, p.layer1_payload,
+                                    CASE
+                                        WHEN dlog.decision_semantic = '建议进场' OR dlog.decision_semantic = '进场' THEN 'TriggeredLong'
+                                        WHEN dlog.decision_semantic = '建议防守' OR dlog.decision_semantic = '防守' THEN 'RiskOff'
+                                        WHEN dlog.decision_semantic IN ('暂无信号', '建议空仓', '空仓') THEN 'NoSetup'
+                                        WHEN dlog.decision_semantic = '建议观察' OR dlog.decision_semantic = '观察' THEN 'Watch'
+                                        ELSE p.layer1_status
+                                    END AS layer1_status,
+                                    p.layer1_score, p.layer1_trigger_hit, p.layer1_risk_off_hit, p.layer1_strategy_version, p.layer1_payload,
                                     p.max_perf_in_window,
                                     p.is_primary, p.model_id as model, m.display_name,
+                                    CASE
+                                        WHEN dlog.decision_semantic IN ('建议空仓', '空仓') THEN '暂无信号'
+                                        WHEN dlog.decision_semantic = '防守' THEN '建议防守'
+                                        WHEN dlog.decision_semantic = '观察' THEN '建议观察'
+                                        WHEN dlog.decision_semantic = '进场' THEN '建议进场'
+                                        ELSE dlog.decision_semantic
+                                    END AS decision_semantic,
+                                    ? AS mode_id,
                                     ROW_NUMBER() OVER (PARTITION BY p.symbol, p.target_date ORDER BY m.priority DESC) as rn_daily
                             FROM ai_predictions_v2 p
                             LEFT JOIN prediction_models m ON p.model_id = m.model_id
+                            LEFT JOIN mode_decision_log dlog
+                                ON dlog.mode_id = ?
+                               AND dlog.symbol = p.symbol
+                               AND dlog.decision_date = p.date
                             WHERE p.symbol IN (${placeholders}) AND (${tierFilter})
                         ),
                         DailyBest AS (
@@ -219,7 +285,7 @@ export async function GET(request: Request) {
                         LEFT JOIN weekly_latest w ON t.symbol = w.symbol
                         LEFT JOIN eligible_latest e ON t.symbol = e.symbol
                     `;
-                    allHistory = client.prepare(sql).all(...symbols) as Record<string, unknown>[];
+                    allHistory = client.prepare(historySql).all(currentMode.mode_id, currentMode.mode_id, ...symbols) as Record<string, unknown>[];
                     shortMetricsRows = client.prepare(shortSql).all(...symbols) as Record<string, unknown>[];
                 }
                 almanacs = client.prepare('SELECT * FROM market_almanacs ORDER BY target_date DESC LIMIT 5').all();
@@ -239,9 +305,7 @@ export async function GET(request: Request) {
             }
 
         } finally {
-            if (client && typeof (client as { close?: () => void }).close === 'function') {
-                (client as { close: () => void }).close();
-            }
+            closeDb(client);
         }
 
         const priceMap = new Map(latestPrices.map(p => [p.symbol as string, p]));
