@@ -271,10 +271,6 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
                    </div>
                 </div>
                 
-                {/* 简要理由 */}
-                <p className="mb-2 text-[11px] font-medium text-slate-400 leading-5">
-                   {actionMeta.badge}
-                </p>
                 <p className="text-xs text-slate-300 leading-relaxed font-medium line-clamp-2">
                    {/* Try to parse if it's JSON or use raw */}
                    {(() => {

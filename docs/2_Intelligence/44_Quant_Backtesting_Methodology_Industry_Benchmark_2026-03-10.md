@@ -23,7 +23,7 @@
 
 StockWise 当前底层，确实属于量化回测驱动的规则优化体系。
 
-但它**不是**机构级“寻找最强 alpha”的研究栈，也**不能**被表述为“已经接近行业最优量化方法”。
+但它**不是**机构级“寻找最强 alpha（超额收益）”的研究栈，也**不能**被表述为“已经接近行业最优量化方法”。
 
 更准确的定位是：
 
@@ -31,7 +31,7 @@ StockWise 当前底层，确实属于量化回测驱动的规则优化体系。
 2. 它在方法论上，和行业的常见流程有相似之处：
    - 历史回测
    - 参数校准
-   - walk-forward / 多窗口观察
+   - walk-forward（滚动前推验证） / 多窗口观察
    - 生产观察与灰度切换
 3. 但它在研究深度上，当前更接近：
    - 零售量化平台中偏严谨的一类
@@ -40,14 +40,14 @@ StockWise 当前底层，确实属于量化回测驱动的规则优化体系。
    - 成本与成交建模
    - 容量与冲击分析
    - 多重检验 / 过拟合控制
-   - universe / survivorship / point-in-time 数据治理
-   - benchmark 与风险归因
+   - universe（研究股票池） / survivorship（幸存者偏差） / point-in-time（时点可得）数据治理
+   - benchmark（基准）与风险归因
 
 ### 2.2 更重要的结论
 
 如果 StockWise 的产品目标仍然是“把复杂策略转成普通投资者可执行的模式与动作建议”，那么当前方向**可以成立**，但论证标准不能是：
 
-- “我们是否找到了市场里最好的 alpha”
+- “我们是否找到了市场里最好的 alpha（超额收益）”
 
 而应该是：
 
@@ -67,13 +67,13 @@ StockWise 当前底层，确实属于量化回测驱动的规则优化体系。
 2. 不把单次回测净值最好看当成主要证据
 3. 将交易成本、冲击、滑点、容量、借券约束等纳入现实性建模
 4. 对多重检验、数据挖掘偏差、过拟合做显式控制
-5. 尽量使用 point-in-time 数据、可复现 universe、统一 benchmark 与风险归因
-6. 在生产上继续做 paper trading / shadow trading / live monitoring
+5. 尽量使用 point-in-time（时点可得）数据、可复现 universe（研究股票池）、统一 benchmark（基准）与风险归因
+6. 在生产上继续做 paper trading（模拟交易） / shadow trading（影子交易） / live monitoring（实时监控）
 
 ### 外部依据
 
-1. Bailey / López de Prado 等关于 backtest overfitting 的研究，核心论点是：在重复搜索与选择策略的过程中，历史最优结果极易是伪发现，必须显式处理多重检验与过拟合问题。  
-2. Bailey 关于 Deflated Sharpe Ratio 的工作，本质上也是在提醒：单个 Sharpe 或单次回测结果不足以证明策略可靠。  
+1. Bailey / López de Prado 等关于 backtest overfitting（回测过拟合）的研究，核心论点是：在重复搜索与选择策略的过程中，历史最优结果极易是伪发现，必须显式处理多重检验与过拟合问题。  
+2. Bailey 关于 Deflated Sharpe Ratio（折减夏普比率）的工作，本质上也是在提醒：单个 Sharpe（夏普比率）或单次回测结果不足以证明策略可靠。  
 3. AQR 等系统化投资机构长期强调：交易成本不是后处理装饰项，而是策略研究本体的一部分。  
 4. MSCI / BlackRock 这类系统化投资材料的共同点，是把因子、容量、换手、风险暴露、数据治理放在同一张研究图谱里，而不是只看收益曲线。
 
@@ -92,20 +92,20 @@ StockWise 当前底层，确实属于量化回测驱动的规则优化体系。
 零售量化软件并不都“很弱”，但通常会做三类取舍：
 
 1. 强调易用性，弱化机构级数据与执行细节
-2. 提供参数优化、回测、walk-forward、paper trading 等能力
-3. 在默认体验中，很少把容量、冲击、点时点数据、组合级风控建模做到机构级完整度
+2. 提供参数优化、回测、walk-forward（滚动前推验证）、paper trading（模拟交易）等能力
+3. 在默认体验中，很少把容量、冲击、point-in-time（时点可得）数据、组合级风控建模做到机构级完整度
 
 ### 代表性产品的常见特点
 
 1. QuantConnect
-   - 提供 walk-forward optimization、slippage / fee / fill 等 reality modeling 模块
+   - 提供 walk-forward optimization（滚动前推优化）、slippage（滑点） / fee（费用） / fill（成交撮合）等 reality modeling（现实成交建模）模块
    - 说明零售/开发者平台也在向严谨研究靠拢
    - 但仍要求使用者自己定义合理目标函数与约束
 2. Freqtrade
-   - 提供 hyperopt、lookahead-analysis 等功能
+   - 提供 hyperopt（超参数搜索）、lookahead-analysis（未来函数检测）等功能
    - 说明零售社区已经把“避免未来函数污染”单独工具化
 3. Backtrader
-   - 支持 commission、slippage、sizers、observers 等现实化组件
+   - 支持 commission（手续费）、slippage（滑点）、sizers（仓位分配器）、observers（观察器）等现实化组件
    - 但严谨程度很大程度取决于用户自己怎么配置
 4. Composer
    - 前端产品表达更接近消费者
@@ -117,8 +117,8 @@ StockWise 当前底层，确实属于量化回测驱动的规则优化体系。
 
 1. 参数优化
 2. 基础成本建模
-3. walk-forward 或 paper trading
-4. anti-lookahead 工具或明确提醒
+3. walk-forward（滚动前推验证）或 paper trading（模拟交易）
+4. anti-lookahead（防未来函数）工具或明确提醒
 
 因此，只要我们自称“量化回测方法”，就不能只做到参数搜索和历史收益统计；至少要逐步补齐这些中位线能力。
 
@@ -132,20 +132,21 @@ StockWise 当前底层，确实属于量化回测驱动的规则优化体系。
 
 截至 2026-03-10，本地 SQLite 底座为：
 
-1. `daily_prices`: 288,647 行
-2. 覆盖标的：579
-3. 时间范围：2022-12-27 至 2026-03-09
+1. `daily_prices`: 320,167 行
+2. 覆盖标的：655
+3. 时间范围：2022-12-27 至 2026-03-10
 4. 其中：
-   - CN：464 个标的，235,482 行
-   - HK：112 个标的，52,886 行
-5. `quant_tradeability_signals`: 544,758 行
+   - CN：467 个标的，235,761 行
+   - HK：188 个标的，84,406 行
+5. `quant_tradeability_signals`: 605,120 行
    - 覆盖 `tradeability_v1 / tradeability_v2`
-   - 时间范围：2024-01-30 至 2026-03-06
+   - 时间范围：2024-01-02 至 2026-03-06
+   - 其中 CN：463 个标的，451,200 行；HK：187 个标的，153,920 行
 
 结论：
 
 1. 对 CN 来说，本地研究底座已经足够支撑中等强度的规则回测与参数筛选
-2. 对 HK 来说，能做研究，但厚度明显弱于 CN
+2. 对 HK 来说，底座已经明显补厚，能够支撑模式分层和成本版本地 best，但横截面厚度仍弱于 CN
 3. 对“模式绩效快照”来说，生产样本仍偏薄，不适合作为本次定参主依据
 
 ## 4.2 规则引擎与回测主循环
@@ -158,7 +159,7 @@ StockWise 当前底层，确实属于量化回测驱动的规则优化体系。
 
 1. 只使用日线数据
 2. 核心条件是少量显式规则：
-   - 收缩/盘整（VCP-like）
+   - 收缩/盘整（VCP-like，类似波动收缩形态）
    - 放量突破
    - 强收盘
    - 动量
@@ -171,14 +172,16 @@ StockWise 当前底层，确实属于量化回测驱动的规则优化体系。
 4. 资金曲线支持：
    - 手续费 `fee_bps_each_side`
    - 最大持仓数 `max_positions`
-   - 简化的日度 MTM
+   - 简化的日度 MTM（盯市估值）
+   - 显式 `spread_bps / slippage_bps`
+   - `fixed / liquidity_bucketed` 两种执行成本口径
 
 ### 代码证据
 
 1. 信号条件定义：`backend/scripts/run_min_tradeability_loop.py`
 2. 次日开盘进场：`entry_price = next day open else close`
 3. 退出条件：止损 / 风险 MA / 持有期超时
-4. 资金曲线：支持 fee 与持仓上限，但没有显式 bid-ask / market impact 模型
+4. 资金曲线：已支持 fee（费用）与显式 spread/slippage（价差/滑点）建模，并新增按市场与近 20 日成交额分桶的 `liquidity_bucketed` 成本口径，但仍没有显式 market impact（市场冲击） / partial fill（部分成交） / 容量约束模型
 
 ## 4.3 参数校准方式
 
@@ -221,16 +224,22 @@ StockWise 当前底层，确实属于量化回测驱动的规则优化体系。
 
 1. 给 `steady / balanced / aggressive` 分别提供候选参数
 2. 用同一回测引擎逐一跑候选
-3. 用 mode-specific objective weights 排序
-4. 生成 release artifact
+3. 用 mode-specific objective weights（模式专属目标权重）排序
+4. 生成 release artifact（发布产物）
 5. 再由发布脚本写入生产参数配置
+
+当前这条链路相比文档初稿又前进了一步：
+
+1. release artifact 已不只是参数，还会携带 `research_performance`、`selection_summary`、`production_effect`
+2. 正式配置文件已按市场沉淀 `market_release_artifacts`
+3. 也就是说，当前生产配置里已经能够同时保存 CN / HK 两套模式发布物，而不是只有裸参数
 
 这说明我们已经从“单策略参数搜索”过渡到了“模式层参数治理”。
 
 但必须客观指出：
 
 1. 这里的目标函数仍然是人工设计的启发式加权
-2. 它不是机构常见的组合层最优化，也不是多目标 Pareto 前沿分析
+2. 它不是机构常见的组合层最优化，也不是多目标 Pareto（帕累托）前沿分析
 3. 它更像“产品化参数治理器”
 
 ## 4.5 生产效果链
@@ -249,12 +258,14 @@ StockWise 当前底层，确实属于量化回测驱动的规则优化体系。
 
 1. 它让参数研究和用户结果之间存在可追踪映射
 2. 它把“本地研究结论”接到了“生产模式表现”
+3. 同时，模式发布物本身现在也能带上“研究绩效摘要”，作为模式对象的一部分进入线上配置
 
 但这里也有明显限制：
 
-1. `mode_performance_snapshot` 的 `max_drawdown` 目前来自已闭合交易的最差单笔 `pnl_pct`，不是标准组合净值路径回撤
+1. `mode_performance_snapshot` 的 `max_drawdown` 目前来自已闭合交易的最差单笔 `pnl_pct`（盈亏百分比），不是标准组合净值路径回撤
 2. `stability_score = hit_rate - abs(max_drawdown)` 也是启发式指标，不是行业标准
 3. 因此，生产效果链可以做治理参考，但不能被表述成机构级绩效分析系统
+4. 虽然现在已经有 `backfill_mode_performance.py` 用于批量重建生产绩效，但它本质上仍是生产口径刷新工具，不等于机构级实时绩效归因系统
 
 ---
 
@@ -269,8 +280,8 @@ StockWise 当前底层，确实属于量化回测驱动的规则优化体系。
 我们已经开始区分：
 
 1. 本地研究
-2. artifact 产出
-3. promotion / rollback / audit
+2. artifact（产物）产出
+3. promotion（发布） / rollback（回滚） / audit（审计）
 4. 生产效果追踪
 
 这比很多零售量化脚本“回测好看就改线上”更成熟。
@@ -294,6 +305,7 @@ StockWise 当前底层，确实属于量化回测驱动的规则优化体系。
 1. 不只看单窗口
 2. 不只看单次最好结果
 3. 不只看研究线，还看 mode pipeline 的正式表
+4. 参数上线后，已经支持用脚本批量 backfill（回刷）生产模式绩效，而不是只能等待线上自然累积
 
 ### D. 研究目标和产品目标是一致的
 
@@ -305,7 +317,7 @@ StockWise 当前底层，确实属于量化回测驱动的规则优化体系。
 2. 出手
 3. 防守
 
-这类动作语义构建的，而不是先做抽象 alpha 打分，再强行包装给用户。
+这类动作语义构建的，而不是先做抽象 alpha（超额收益）打分，再强行包装给用户。
 
 ---
 
@@ -313,23 +325,30 @@ StockWise 当前底层，确实属于量化回测驱动的规则优化体系。
 
 ### A. 还没有显式滑点与冲击建模
 
-当前成本模型只包含手续费，没有显式：
+这条判断需要按当前状态修订。
 
-1. bid-ask spread
-2. 盘口冲击
-3. 成交概率 / 部分成交
-4. 容量约束
+当前成本模型已经不再只包含手续费，而是已经加入了两层显式现实成交建模：
+
+1. 固定 `spread_bps / slippage_bps`
+2. 按市场与流动性分桶的 `liquidity_bucketed` 成本口径
+
+但仍然没有显式：
+
+1. 盘口冲击
+2. fill probability（成交概率） / partial fill（部分成交）
+3. 容量约束
+4. 基于真实成交反馈校准的成本曲线
 
 这意味着：
 
-1. 当前回测结果更像“研究收益”，不是“真实可成交收益”
-2. 对流动性差、波动大的标的，会系统性偏乐观
+1. 当前回测结果已经比初稿时更接近“研究可成交收益”，但仍不是“真实可成交收益”
+2. 对流动性差、波动大的标的，乐观偏差已经被部分压缩，但尚未彻底消除
 
-### B. 还没有正式的 lookahead-bias / data leakage 检查工具链
+### B. 还没有正式的 lookahead-bias（前视偏差） / data leakage（数据泄漏）检查工具链
 
 虽然当前日线逻辑看起来没有明显未来函数设计，但没有专门工具去验证“研究代码是否被未来数据污染”。
 
-行业里这件事已经有明确工具化实践，例如 Freqtrade 的 lookahead-analysis。
+行业里这件事已经有明确工具化实践，例如 Freqtrade 的 lookahead-analysis（未来函数检测）。
 
 ### C. 多重检验控制不足
 
@@ -343,17 +362,17 @@ StockWise 当前底层，确实属于量化回测驱动的规则优化体系。
 
 从 Bailey / López de Prado 的框架看，这是一个真实风险，而不是学术洁癖。
 
-### D. universe 与 point-in-time 治理还不够完整
+### D. universe（研究股票池）与 point-in-time（时点可得）治理还不够完整
 
 当前研究样本在不断扩样，但还没有把以下问题完全制度化：
 
-1. research universe 是否完全版本化
-2. 每轮回测是否严格使用 point-in-time 可得 universe
-3. 是否存在 survivorship bias
+1. research universe（研究股票池）是否完全版本化
+2. 每轮回测是否严格使用 point-in-time（时点可得）可得 universe（研究股票池）
+3. 是否存在 survivorship bias（幸存者偏差）
 
 这在研究结果看起来很好时，会成为解释软肋。
 
-### E. benchmark 与风险归因不足
+### E. benchmark（基准）与风险归因不足
 
 当前我们更多比较的是：
 
@@ -364,7 +383,7 @@ StockWise 当前底层，确实属于量化回测驱动的规则优化体系。
 但还没系统回答：
 
 1. 相比基准指数到底提升了什么
-2. 收益来自 beta、行业暴露，还是规则本身
+2. 收益来自 beta（市场暴露）、行业暴露，还是规则本身
 3. 回撤改善来自少交易，还是规则质量更高
 
 ### F. 生产绩效指标仍偏启发式
@@ -389,7 +408,7 @@ StockWise 当前底层，确实属于量化回测驱动的规则优化体系。
 ### 关键差异
 
 1. 机构量化的目标函数通常是：
-   - alpha
+   - alpha（超额收益）
    - 信息比率
    - 容量后净收益
    - 风险预算内最优配置
@@ -401,7 +420,7 @@ StockWise 当前底层，确实属于量化回测驱动的规则优化体系。
 
 所以差异不只是包装，而是**研究目标本身不同**。
 
-这也是为什么我们不该把自己表述为“正在用同样的方法和机构量化争夺最优 alpha”。
+这也是为什么我们不该把自己表述为“正在用同样的方法和机构量化争夺最优 alpha（超额收益）”。
 
 ---
 
@@ -424,7 +443,7 @@ StockWise 当前底层，确实属于量化回测驱动的规则优化体系。
 
 ### A. 产品目标一致性
 
-底层研究是否真的服务了“普通投资者操作建议”这一目标，而不是偷偷滑向“抽象 alpha 崇拜”。
+底层研究是否真的服务了“普通投资者操作建议”这一目标，而不是偷偷滑向“抽象 alpha（超额收益）崇拜”。
 
 检验问题：
 
@@ -444,7 +463,7 @@ StockWise 当前底层，确实属于量化回测驱动的规则优化体系。
 
 检验问题：
 
-1. 加入更现实的滑点、spread、容量后，结果是否仍可接受？
+1. 加入更现实的滑点、spread（价差）、容量后，结果是否仍可接受？
 2. 研究收益是否大幅依赖“理想成交假设”？
 
 ### D. 过拟合控制
@@ -459,7 +478,7 @@ StockWise 当前底层，确实属于量化回测驱动的规则优化体系。
 
 检验问题：
 
-1. 本地 best 是否能改善线上 mode snapshot / ledger 的结果？
+1. 本地 best（最优方案）是否能改善线上 mode snapshot（模式快照） / ledger（交易台账）的结果？
 2. 是否只是研究线好看，但生产线不传导？
 
 只有这五类问题同时站得住，才能说“这套方法对我们是对的”。
@@ -482,7 +501,7 @@ StockWise 当前底层，确实属于量化回测驱动的规则优化体系。
 
 那么这条路是成立的。
 
-## 7.2 当前方法是否已经足够强，可以宣称“找到了最好 alpha”？
+## 7.2 当前方法是否已经足够强，可以宣称“找到了最好 alpha（超额收益）”？
 
 不能。
 
@@ -496,7 +515,7 @@ StockWise 当前底层，确实属于量化回测驱动的规则优化体系。
 
 但不适合说：
 
-1. 已经找到市场上最优 alpha
+1. 已经找到市场上最优 alpha（超额收益）
 2. 已达到机构级量化底层能力
 3. 当前回测结果可直接外推为真实收益能力
 
@@ -507,7 +526,7 @@ StockWise 当前底层，确实属于量化回测驱动的规则优化体系。
 StockWise 当前底层，是一套**面向 C 端决策产品的、可解释的规则回测与参数治理体系**。
 
 它的严谨性已经高于“纯拍脑袋策略包装”，
-但仍低于“机构级 alpha 研究平台”。
+但仍低于“机构级 alpha（超额收益）研究平台”。
 
 ---
 
@@ -515,23 +534,23 @@ StockWise 当前底层，是一套**面向 C 端决策产品的、可解释的�
 
 ## P0：必须补
 
-1. 为 `run_min_tradeability_loop.py` 增加显式滑点 / spread 开关
-2. 增加 anti-lookahead 检查脚本
-3. 记录每轮候选搜索次数，形成最基本的 search audit
-4. 把 research universe manifest 版本化并固化到回测 artifact
+1. 增加 anti-lookahead（防未来函数）检查脚本
+2. 记录每轮候选搜索次数，形成最基本的 search audit（搜索审计）
+3. 把 research universe manifest（研究股票池清单）版本化并固化到回测 artifact（回测产物）
+4. 将当前 `liquidity_bucketed` 成本口径继续向“生产可校准”的成本模型推进，而不是长期停留在启发式分桶
 
 ## P1：很重要
 
-1. 为模式回测加入 benchmark 对照
-2. 将 mode snapshot 的 drawdown 升级为真正的组合路径回撤
-3. 区分 in-sample / validation / release window
-4. 把 HK 底座继续加厚
+1. 为模式回测加入 benchmark（基准）对照
+2. 将 mode snapshot（模式快照）的 drawdown（回撤）升级为真正的组合路径回撤
+3. 区分 in-sample（样本内） / validation（验证期） / release window（发布窗口）
+4. 把 HK 底座继续加厚，并在更厚底座上复核当前 HK best 的稳定性
 
 ## P2：进一步提高可信度
 
-1. 引入更正式的 walk-forward / rolling retrain 纪律
-2. 评估 Deflated Sharpe / PBO 一类的过拟合校正方法是否值得落地轻量版
-3. 补充行业/风格暴露分析，减少“其实只是 beta 更强”的误判
+1. 引入更正式的 walk-forward（滚动前推验证） / rolling retrain（滚动重训练）纪律
+2. 评估 Deflated Sharpe（折减夏普比率） / PBO（回测过拟合概率）一类的过拟合校正方法是否值得落地轻量版
+3. 补充行业/风格暴露分析，减少“其实只是 beta（市场暴露）更强”的误判
 
 ---
 
@@ -542,56 +561,86 @@ StockWise 当前底层，是一套**面向 C 端决策产品的、可解释的�
 1. 我们底层确实是量化回测驱动的
 2. 我们正在围绕少量核心条件优化参数组合
 3. 我们的方法在方向上接近行业中常见的“研究 -> 验证 -> 上线治理”框架
-4. 但我们当前的真实定位，是产品导向的规则研究系统，不是机构级 alpha 工厂
+4. 但我们当前的真实定位，是产品导向的规则研究系统，不是机构级 alpha（超额收益）工厂
 
 ### 不应使用的说法
 
-1. “我们已经通过量化找到最优 alpha”
+1. “我们已经通过量化找到最优 alpha（超额收益）”
 2. “我们和行业头部底层本质一样，只是包装不同”
 3. “当前回测结果已经足以证明真实收益最优”
 
 ### 最稳妥的对外/对内统一口径
 
-StockWise 的底层不是在做机构式大规模 alpha 挖掘，
+StockWise 的底层不是在做机构式大规模 alpha（超额收益）挖掘，
 而是在用可解释的量化规则和历史回测，持续校准适合普通投资者的操作模式。
 
-这条路线当前是成立的，但其正确性应以“模式建议的稳定性、可解释性、现实可成交性与生产传导效果”来证明，而不是以“是否找到了行业最强 alpha”来证明。
+这条路线当前是成立的，但其正确性应以“模式建议的稳定性、可解释性、现实可成交性与生产传导效果”来证明，而不是以“是否找到了行业最强 alpha（超额收益）”来证明。
 
 ---
 
-## 10. 参考资料
+## 10. 名词解释
+
+1. `alpha`：通常指相对基准的超额收益，不等同于“总收益更高”。
+2. `benchmark`：用来对照策略表现的基准，例如指数或参考组合。
+3. `beta`：策略或组合对整体市场波动的暴露程度。
+4. `walk-forward`：按时间向前滚动做训练、验证和观察，避免只在单一历史区间里优化。
+5. `rolling retrain`：随着时间推进，按固定节奏重新训练或重新校准参数。
+6. `in-sample / validation / release window`：分别指样本内、验证期、正式发布评估窗口。
+7. `point-in-time data`：只使用当时真实可获得的数据，避免把事后才知道的信息带回历史。
+8. `survivorship bias`：只看存活到今天的标的，忽略已经退市或被淘汰样本带来的偏差。
+9. `paper trading`：不真金白银下单，只按真实市场节奏模拟交易。
+10. `shadow trading`：生产环境里并行记录一套策略结果，但不真正影响用户或资金。
+11. `live monitoring`：策略上线后持续监控产数、风险、绩效和异常。
+12. `slippage`：理想成交价和真实成交价之间的偏差。
+13. `spread` 或 `bid-ask spread`：买一价和卖一价之间的差距，是天然交易摩擦。
+14. `market impact`：下单行为本身对市场价格产生的冲击。
+15. `fill / partial fill`：订单是否成交，以及是否只成交了一部分。
+16. `backtest overfitting`：通过反复试参数或试策略，把历史偶然性误当成真实规律。
+17. `Deflated Sharpe Ratio`：在多次尝试、多策略比较背景下，对夏普比率做折减校正的方法。
+18. `PBO`：Probability of Backtest Overfitting，回测过拟合概率。
+19. `lookahead-bias / data leakage`：回测中错误使用了未来信息或不该提前知道的数据。
+20. `anti-lookahead`：专门用于检查和防止未来函数污染的约束或工具。
+21. `hyperopt`：超参数搜索，用系统化方式寻找更合适的参数组合。
+22. `Pareto front`：多目标优化里，一组互不完全支配的折中解集合。
+23. `artifact / release artifact`：研究或发布流程产出的结构化结果文件，例如参数包、候选排序、研究绩效摘要。
+24. `search audit`：对一次参数搜索试了多少候选、怎么筛选、最终怎么选中的审计记录。
+25. `mode snapshot / ledger`：前者指模式绩效快照，后者指模式交易台账。
+
+---
+
+## 11. 参考资料
 
 ### 学术 / 研究
 
-1. Bailey, Borwein, López de Prado, Zhu. *The Probability of Backtest Overfitting*  
+1. Bailey, Borwein, López de Prado, Zhu. *The Probability of Backtest Overfitting*（回测过拟合的概率）  
    https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2326253
-2. Bailey, López de Prado. *The Deflated Sharpe Ratio*  
+2. Bailey, López de Prado. *The Deflated Sharpe Ratio*（折减夏普比率）  
    https://www.davidhbailey.com/dhbpapers/deflated-sharpe.pdf
-3. Carr, López de Prado. *Determining Optimal Trading Rules without Backtesting*  
+3. Carr, López de Prado. *Determining Optimal Trading Rules without Backtesting*（不依赖回测确定最优交易规则）  
    https://arxiv.org/abs/1408.1159
 
 ### 机构 / 行业资料
 
-4. AQR, transaction cost related research hub  
+4. AQR, transaction cost related research hub（交易成本研究专题）  
    https://www.aqr.com/insights/research/white-papers/transactions-costs-practical-application
-5. BlackRock systematic investing overview  
+5. BlackRock systematic investing overview（系统化投资概览）  
    https://www.blackrock.com/us/individual/investment-ideas/systematic-investing
-6. MSCI factor investing resource center  
+6. MSCI factor investing resource center（因子投资资源中心）  
    https://www.msci.com/data-and-analytics/factor-investing
 
 ### 零售量化 / 开发者平台
 
-7. QuantConnect walk-forward optimization docs  
+7. QuantConnect walk-forward optimization docs（滚动前推优化文档）  
    https://www.quantconnect.com/docs/v2/writing-algorithms/optimization/walk-forward-optimization
-8. QuantConnect slippage / reality modeling docs  
+8. QuantConnect slippage / reality modeling docs（滑点 / 现实成交建模文档）  
    https://www.quantconnect.com/docs/v2/writing-algorithms/reality-modeling/slippage/supported-models
-9. Freqtrade hyperopt docs  
+9. Freqtrade hyperopt docs（超参数搜索文档）  
    https://www.freqtrade.io/en/stable/hyperopt/
-10. Freqtrade lookahead-analysis docs  
+10. Freqtrade lookahead-analysis docs（未来函数检测文档）  
     https://www.freqtrade.io/en/stable/lookahead-analysis/
-11. Backtrader slippage docs  
+11. Backtrader slippage docs（滑点文档）  
     https://www.backtrader.com/docu/slippage/slippage/
-12. Composer backtest basics  
+12. Composer backtest basics（回测基础说明）  
     https://help.composer.trade/article/67-backtest-basics
 
 ### 本仓库对应实现
