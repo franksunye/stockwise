@@ -25,6 +25,11 @@
 - [ ] **风险护栏**：每轮必须同时复核 `RiskOff` 占比、最大回撤、方向一致率，不允许仅追求 Long 覆盖。
 - [ ] **周度汇报**：通过 `acceptance_weekly` 输出 gate 状态并同步 webhook 结论。
 
+### 0.1.2 Investment Mode 绩效口径收口（P0，待排期）
+- [ ] **前端/API 双绩效展示**：Investment Mode 前端与 API 需要拆分 `research_performance` 与 `production_performance`，默认优先展示模式发布物自带的研究绩效。
+- [ ] **口径文案统一**：用户侧明确区分“研究表现”和“你的自选池表现/正式表现”，避免将研究样本结果误读为个人实际效果。
+- [ ] **验收标准**：模式页可同时读取并展示两类绩效；研究绩效来自 `mode_params_bundles_v1.json.market_release_artifacts.*`，生产绩效继续来自 `mode_performance_snapshot`。
+
 ### 0.2 双层架构 #3 编排改造（P1）
 - [ ] **Runner 流程改造**：先算 Layer-1，再将状态注入 LLM 上下文，替代并行盲猜。
 - [ ] **Prompt 职责降维**：方向由量化定，LLM 只负责战术解释与风险沟通。
@@ -175,4 +180,4 @@
 
 ---
 
-**最后更新**: 2026-03-06
+**最后更新**: 2026-03-10
