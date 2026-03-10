@@ -6,6 +6,7 @@
 > 发布状态（2026-03-07）：
 > - 后端与 API 已发布到 `main`（commit: `a941edf`）
 > - 前端体验改造与增长实验仍按后续阶段推进
+> - Investment Mode / Tradeability 专项已完成，本文继续作为现行产品规格
 
 ---
 

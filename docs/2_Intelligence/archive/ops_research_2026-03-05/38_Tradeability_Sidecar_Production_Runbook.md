@@ -1,9 +1,10 @@
 # Tradeability Sidecar 上线运行手册
 
-**文档状态**: Active  
+**文档状态**: Archived  
 **日期**: 2026-03-06  
 **分支**: `main`  
 **目标**: 在不影响现有主预测链路的前提下，上线旁路策略信号。
+**说明**: 本文已被 `docs/2_Intelligence/39_Tradeability_Dual_Lane_Operations.md` 吸收，不再作为现行运行依据。
 
 ---
 

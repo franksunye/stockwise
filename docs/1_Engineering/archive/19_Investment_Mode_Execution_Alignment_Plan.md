@@ -369,7 +369,7 @@ Phase 3 已完成，当前主口径已回写到主文档与工程实现。
 1. `docs/1_Engineering/14_Investment_Mode_Backend_Runbook.md`
 2. `docs/1_Engineering/10_Architecture.md`
 3. `docs/3_Product/03_Product_Features_Manifest.md`
-4. `docs/3_Product/42_Product_Updates_4_States_Semantic_Upgrade.md`
+4. `docs/3_Product/legacy_specs/42_Product_Updates_4_States_Semantic_Upgrade.md`
 5. `docs/2_Intelligence/archive/41_Tradeability_Quality_and_Actionability_Plan.md`
 6. 其他引用旧叫法的 support / growth 文档
 

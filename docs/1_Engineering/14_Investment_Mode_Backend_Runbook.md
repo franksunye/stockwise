@@ -2,6 +2,8 @@
 
 更新时间：2026-03-07  
 范围：本地开发环境（SQLite / Turso-compat SQL）
+文档角色：Investment Mode 后端现行运行手册
+专项状态：Investment Mode / Tradeability 已完成，本文继续作为现行工程依据
 
 发布状态：
 - 已发布到 `main`（commit: `a941edf`）

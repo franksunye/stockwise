@@ -25,6 +25,11 @@ This directory serves as the unified single source of truth for the 知守 AI (Z
 - [Investment Mode Product Layer](./3_Product/Specs/47_Investment_Mode_Product_Layer.md)
 - [Admin Tradeability Control Tower](./3_Product/Specs/48_Admin_Tradeability_Control_Tower.md)
 
+### Completed Initiatives
+- `Investment Mode / Tradeability`
+  - Current source of truth has been reduced to the 4 documents above.
+  - Execution records, plans, and local experiment notes have been moved to `archive/` or `research/`.
+
 ### [2_Intelligence/](./2_Intelligence/) - How (Brain)
 > Project "AI Logic": Prompt engineering, model strategies, and core algorithms.
 - [Dual-Lane Operations](./2_Intelligence/39_Tradeability_Dual_Lane_Operations.md)

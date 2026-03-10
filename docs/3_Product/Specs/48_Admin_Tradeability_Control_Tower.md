@@ -8,6 +8,9 @@
 > - `docs/2_Intelligence/39_Tradeability_Dual_Lane_Operations.md`
 > - `docs/2_Intelligence/archive/41_Tradeability_Quality_and_Actionability_Plan.md`
 > - `docs/1_Engineering/16_Observability_Thresholds_and_Incidents.md`
+>
+> 专项状态：
+> - Investment Mode / Tradeability 专项已完成，本文继续作为现行后台规格
 
 > 术语约定：
 > - 中文统一使用“生产线 / 实验线”。
