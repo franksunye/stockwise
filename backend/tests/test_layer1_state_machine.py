@@ -1,4 +1,9 @@
+import json
+import os
+import tempfile
+
 from backend.engine.layer1_state import (
+    _load_bundle_config_cached,
     evaluate_layer1_state,
     list_supported_params_bundles,
     list_supported_strategy_versions,
@@ -129,6 +134,39 @@ def test_load_market_params_and_version_registry():
     _, aggressive_params = load_market_params("CN", strategy_version="tradeability_v2", params_bundle="aggressive")
     assert steady_params["breakout_volume_mult"] > params["breakout_volume_mult"]
     assert aggressive_params["momentum_change_threshold"] < params["momentum_change_threshold"]
+
+
+def test_load_market_params_prefers_bundle_release_file():
+    release = {
+        "config_version": "mode_params_bundles_v1",
+        "strategy_version": "tradeability_v2",
+        "bundles": {
+            "balanced": {"default": {}},
+            "steady": {"default": {"breakout_volume_mult": 1.08}},
+            "aggressive": {"default": {"momentum_change_threshold": 1.1}},
+            "observe_only": {"default": {}},
+        },
+    }
+    with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False, encoding="utf-8") as tmp:
+        json.dump(release, tmp, ensure_ascii=False)
+        tmp.write("\n")
+        tmp_path = tmp.name
+
+    original = os.environ.get("MODE_PARAMS_BUNDLES_FILE")
+    os.environ["MODE_PARAMS_BUNDLES_FILE"] = tmp_path
+    _load_bundle_config_cached.cache_clear()
+    try:
+        _, steady_params = load_market_params("CN", strategy_version="tradeability_v2", params_bundle="steady")
+        _, aggressive_params = load_market_params("CN", strategy_version="tradeability_v2", params_bundle="aggressive")
+        assert steady_params["breakout_volume_mult"] == 1.08
+        assert aggressive_params["momentum_change_threshold"] == 1.1
+    finally:
+        if original is None:
+            os.environ.pop("MODE_PARAMS_BUNDLES_FILE", None)
+        else:
+            os.environ["MODE_PARAMS_BUNDLES_FILE"] = original
+        _load_bundle_config_cached.cache_clear()
+        os.remove(tmp_path)
 
 
 def test_layer1_fallback_indicator_engine_when_ma_missing():

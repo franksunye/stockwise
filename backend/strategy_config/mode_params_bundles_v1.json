@@ -1,0 +1,65 @@
+{
+  "config_version": "mode_params_bundles_v1",
+  "strategy_version": "tradeability_v2",
+  "generated_at": "2026-03-10T09:11:49.364239Z",
+  "source": {
+    "market": "CN",
+    "method": "local_backtest",
+    "manifest": "stockwise/tmp/mode_backtest/candidate_manifest_cn_costed_v1.json",
+    "artifact": "stockwise/tmp/mode_backtest/best_release_cn_costed_recommended.json",
+    "selection_policy": "semantic_override_for_steady_drawdown_with_execution_costs"
+  },
+  "bundles": {
+    "steady": {
+      "default": {
+        "vcp_ratio": 0.92,
+        "breakout_volume_mult": 1.05,
+        "strong_close_threshold": 0.65,
+        "momentum_change_threshold": 3.0,
+        "risk_off_ma": 10.0
+      },
+      "markets": {
+        "CN": {
+          "vcp_ratio": 0.93,
+          "breakout_volume_mult": 1.02,
+          "strong_close_threshold": 0.64,
+          "momentum_change_threshold": 2.9,
+          "risk_off_ma": 10.0
+        }
+      }
+    },
+    "balanced": {
+      "default": {},
+      "markets": {
+        "CN": {
+          "vcp_ratio": 1.03,
+          "breakout_volume_mult": 0.84,
+          "strong_close_threshold": 0.52,
+          "momentum_change_threshold": 1.7,
+          "risk_off_ma": 5.0
+        }
+      }
+    },
+    "aggressive": {
+      "default": {
+        "vcp_ratio": 1.05,
+        "breakout_volume_mult": 0.8,
+        "strong_close_threshold": 0.5,
+        "momentum_change_threshold": 1.4,
+        "risk_off_ma": 5.0
+      },
+      "markets": {
+        "CN": {
+          "vcp_ratio": 1.08,
+          "breakout_volume_mult": 0.72,
+          "strong_close_threshold": 0.46,
+          "momentum_change_threshold": 0.9,
+          "risk_off_ma": 5.0
+        }
+      }
+    },
+    "observe_only": {
+      "default": {}
+    }
+  }
+}

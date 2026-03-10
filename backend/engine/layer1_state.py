@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 from dataclasses import dataclass
+from functools import lru_cache
 from typing import Any, Dict, Sequence
 
 from backend.logger import logger
@@ -164,7 +165,8 @@ def list_supported_strategy_versions() -> Sequence[str]:
 
 
 def list_supported_params_bundles() -> Sequence[str]:
-    return tuple(PARAMS_BUNDLE_OVERRIDES.keys())
+    configured = _load_bundle_config().get("bundles") or {}
+    return tuple(dict.fromkeys([*PARAMS_BUNDLE_OVERRIDES.keys(), *configured.keys()]))
 
 
 def resolve_params_file(strategy_version: str = DEFAULT_STRATEGY_VERSION, params_file: str | None = None) -> str:
@@ -190,7 +192,46 @@ def _normalize_params(raw_params: Dict[str, Any], strategy_version: str = DEFAUL
 
 def _resolve_params_bundle(params_bundle: str | None) -> str:
     candidate = (params_bundle or PARAMS_BUNDLE_DEFAULT).strip().lower()
-    return candidate if candidate in PARAMS_BUNDLE_OVERRIDES else PARAMS_BUNDLE_DEFAULT
+    return candidate if candidate in list_supported_params_bundles() else PARAMS_BUNDLE_DEFAULT
+
+
+def _bundle_file_mtime() -> float | None:
+    try:
+        return os.path.getmtime(_resolve_mode_params_bundles_file())
+    except OSError:
+        return None
+
+
+@lru_cache(maxsize=4)
+def _load_bundle_config_cached(path: str, mtime: float | None) -> Dict[str, Any]:
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            payload = json.load(f)
+    except Exception as e:
+        logger.warning(f"Mode params bundle config load failed, fallback hardcoded bundles. path={path}, error={e}")
+        return {"bundles": {}}
+    bundles = payload.get("bundles")
+    if not isinstance(bundles, dict):
+        return {"bundles": {}}
+    return {"bundles": bundles}
+
+
+def _load_bundle_config() -> Dict[str, Any]:
+    path = _resolve_mode_params_bundles_file()
+    return _load_bundle_config_cached(path, _bundle_file_mtime())
+
+
+def _resolve_mode_params_bundles_file() -> str:
+    return os.getenv("MODE_PARAMS_BUNDLES_FILE", os.path.join(STRATEGY_CONFIG_DIR, "mode_params_bundles_v1.json"))
+
+
+def _resolve_bundle_overrides(bundle_key: str, market: str) -> Dict[str, Any]:
+    fallback = dict(PARAMS_BUNDLE_OVERRIDES.get(bundle_key) or {})
+    configured = ((_load_bundle_config().get("bundles") or {}).get(bundle_key) or {})
+    default_overrides = dict(configured.get("default") or {})
+    market_overrides = dict(((configured.get("markets") or {}).get(market.upper())) or {})
+    merged = {**fallback, **default_overrides, **market_overrides}
+    return merged
 
 
 def load_market_params(
@@ -211,7 +252,7 @@ def load_market_params(
     except Exception as e:
         logger.warning(f"Layer1 params load failed, fallback defaults. market={market}, error={e}")
     bundle_key = _resolve_params_bundle(params_bundle)
-    bundle_overrides = PARAMS_BUNDLE_OVERRIDES.get(bundle_key) or {}
+    bundle_overrides = _resolve_bundle_overrides(bundle_key, market)
     if bundle_overrides:
         params = _normalize_params({**params, **bundle_overrides}, strategy_version=resolved_version)
     if params_override:

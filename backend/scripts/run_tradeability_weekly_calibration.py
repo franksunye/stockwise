@@ -127,6 +127,8 @@ def _window_metrics(
     initial_capital: float,
     max_positions: int,
     fee_bps_each_side: float,
+    spread_bps: float,
+    slippage_bps: float,
 ) -> Dict[str, object]:
     rows: List[Dict[str, object]] = []
     consistency_proxy = 100.0
@@ -144,6 +146,8 @@ def _window_metrics(
             initial_capital=initial_capital,
             max_positions=max_positions,
             fee_bps_each_side=fee_bps_each_side,
+            spread_bps=spread_bps,
+            slippage_bps=slippage_bps,
         )
         trade_metrics = res["trade_metrics"]
         state_metrics = res["state_metrics"]
@@ -290,6 +294,8 @@ def main() -> None:
     parser.add_argument("--initial-capital", type=float, default=1_000_000.0)
     parser.add_argument("--max-positions", type=int, default=10)
     parser.add_argument("--fee-bps-each-side", type=float, default=5.0)
+    parser.add_argument("--spread-bps", type=float, default=0.0)
+    parser.add_argument("--slippage-bps", type=float, default=0.0)
     parser.add_argument("--params-file", default="")
     parser.add_argument("--output-json", default="")
     parser.add_argument("--output-md", default="")
@@ -333,6 +339,8 @@ def main() -> None:
                 initial_capital=args.initial_capital,
                 max_positions=args.max_positions,
                 fee_bps_each_side=args.fee_bps_each_side,
+                spread_bps=args.spread_bps,
+                slippage_bps=args.slippage_bps,
             )
             baseline_metrics = baseline_eval["aggregate"]
             results: List[Dict[str, object]] = []
@@ -348,6 +356,8 @@ def main() -> None:
                     initial_capital=args.initial_capital,
                     max_positions=args.max_positions,
                     fee_bps_each_side=args.fee_bps_each_side,
+                    spread_bps=args.spread_bps,
+                    slippage_bps=args.slippage_bps,
                 )
                 metrics = candidate_eval["aggregate"]
                 guardrails = _guardrail_status(metrics, baseline_metrics)
@@ -395,6 +405,8 @@ def main() -> None:
             initial_capital=args.initial_capital,
             max_positions=args.max_positions,
             fee_bps_each_side=args.fee_bps_each_side,
+            spread_bps=args.spread_bps,
+            slippage_bps=args.slippage_bps,
         )
         final_metrics = final_eval["aggregate"]
         versions_payload.append(

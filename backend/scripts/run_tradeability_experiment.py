@@ -51,6 +51,8 @@ def _evaluate_version(
     initial_capital: float,
     max_positions: int,
     fee_bps_each_side: float,
+    spread_bps: float,
+    slippage_bps: float,
     params_file: Optional[str] = None,
 ) -> Dict[str, object]:
     _, params = load_market_params(market=market, strategy_version=strategy_version, params_file=params_file)
@@ -66,6 +68,8 @@ def _evaluate_version(
         initial_capital=initial_capital,
         max_positions=max_positions,
         fee_bps_each_side=fee_bps_each_side,
+        spread_bps=spread_bps,
+        slippage_bps=slippage_bps,
     )
     state_metrics = result["state_metrics"]
     trade_metrics = result["trade_metrics"]
@@ -118,6 +122,8 @@ def main() -> None:
     parser.add_argument("--initial-capital", type=float, default=1_000_000.0)
     parser.add_argument("--max-positions", type=int, default=10)
     parser.add_argument("--fee-bps-each-side", type=float, default=5.0)
+    parser.add_argument("--spread-bps", type=float, default=0.0)
+    parser.add_argument("--slippage-bps", type=float, default=0.0)
     parser.add_argument("--params-file", default="")
     parser.add_argument("--output-json", default="")
     parser.add_argument("--output-md", default="")
@@ -146,6 +152,8 @@ def main() -> None:
                 initial_capital=args.initial_capital,
                 max_positions=args.max_positions,
                 fee_bps_each_side=args.fee_bps_each_side,
+                spread_bps=args.spread_bps,
+                slippage_bps=args.slippage_bps,
                 params_file=params_file or None,
             )
             for version in strategy_versions

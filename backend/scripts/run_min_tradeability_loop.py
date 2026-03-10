@@ -64,6 +64,18 @@ def safe_float(v: Optional[float]) -> float:
         return 0.0
 
 
+def apply_execution_costs(price: float, *, side: str, spread_bps: float, slippage_bps: float) -> float:
+    if price <= 0:
+        return price
+    total_bps = max(0.0, float(spread_bps)) + max(0.0, float(slippage_bps))
+    adjustment = total_bps / 10000.0
+    if side == "buy":
+        return price * (1.0 + adjustment)
+    if side == "sell":
+        return price * (1.0 - adjustment)
+    raise ValueError(f"Unsupported side: {side}")
+
+
 def load_bars(conn: sqlite3.Connection, start_date: Optional[str], end_date: Optional[str]) -> Dict[str, List[Bar]]:
     where_parts = []
     params: List[str] = []
@@ -182,6 +194,8 @@ def simulate_capital_curve_legacy(
     initial_capital: float,
     max_positions: int,
     fee_bps_each_side: float,
+    spread_bps: float,
+    slippage_bps: float,
 ) -> Dict[str, float]:
     """Legacy simplified capital curve: no daily MTM, realized PnL at exit only."""
     if not trades:
@@ -194,6 +208,8 @@ def simulate_capital_curve_legacy(
             "trade_count": 0,
             "max_positions": max_positions,
             "fee_bps_each_side": fee_bps_each_side,
+            "spread_bps": spread_bps,
+            "slippage_bps": slippage_bps,
         }
 
     fee = fee_bps_each_side / 10000.0
@@ -225,6 +241,8 @@ def simulate_capital_curve_legacy(
         "trade_count": len(trades),
         "max_positions": max_positions,
         "fee_bps_each_side": fee_bps_each_side,
+        "spread_bps": spread_bps,
+        "slippage_bps": slippage_bps,
     }
 
 
@@ -234,6 +252,8 @@ def simulate_capital_curve_mtm(
     initial_capital: float,
     max_positions: int,
     fee_bps_each_side: float,
+    spread_bps: float,
+    slippage_bps: float,
 ) -> Dict[str, float]:
     """Daily mark-to-market capital curve with entry/exit costs."""
     if not trades:
@@ -246,6 +266,8 @@ def simulate_capital_curve_mtm(
             "trade_count": 0,
             "max_positions": max_positions,
             "fee_bps_each_side": fee_bps_each_side,
+            "spread_bps": spread_bps,
+            "slippage_bps": slippage_bps,
             "equity_points": 0,
         }
 
@@ -269,6 +291,8 @@ def simulate_capital_curve_mtm(
             "trade_count": len(trades),
             "max_positions": max_positions,
             "fee_bps_each_side": fee_bps_each_side,
+            "spread_bps": spread_bps,
+            "slippage_bps": slippage_bps,
             "equity_points": 0,
         }
 
@@ -354,6 +378,8 @@ def simulate_capital_curve_mtm(
         "trade_count": len(trades),
         "max_positions": max_positions,
         "fee_bps_each_side": fee_bps_each_side,
+        "spread_bps": spread_bps,
+        "slippage_bps": slippage_bps,
         "equity_points": len(equity_curve),
         "daily_holdings": daily_holdings,
     }
@@ -371,6 +397,8 @@ def run_loop(
     initial_capital: float,
     max_positions: int,
     fee_bps_each_side: float,
+    spread_bps: float = 0.0,
+    slippage_bps: float = 0.0,
 ) -> Dict[str, object]:
     watch_days = 0
     triggered_days = 0
@@ -424,7 +452,13 @@ def run_loop(
 
             entry_idx = i + 1
             entry_bar = history[entry_idx]
-            entry_price = entry_bar.open if entry_bar.open > 0 else entry_bar.close
+            raw_entry_price = entry_bar.open if entry_bar.open > 0 else entry_bar.close
+            entry_price = apply_execution_costs(
+                raw_entry_price,
+                side="buy",
+                spread_bps=spread_bps,
+                slippage_bps=slippage_bps,
+            )
             if entry_price <= 0:
                 i += 1
                 continue
@@ -454,7 +488,13 @@ def run_loop(
                 k += 1
 
             exit_bar = history[exit_idx]
-            exit_price = exit_bar.close if exit_bar.close > 0 else entry_price
+            raw_exit_price = exit_bar.close if exit_bar.close > 0 else raw_entry_price
+            exit_price = apply_execution_costs(
+                raw_exit_price,
+                side="sell",
+                spread_bps=spread_bps,
+                slippage_bps=slippage_bps,
+            )
             ret = (exit_price / entry_price) - 1.0
             trades.append(
                 Trade(
@@ -479,12 +519,16 @@ def run_loop(
         initial_capital=initial_capital,
         max_positions=max_positions,
         fee_bps_each_side=fee_bps_each_side,
+        spread_bps=spread_bps,
+        slippage_bps=slippage_bps,
     )
     capital_legacy = simulate_capital_curve_legacy(
         trades,
         initial_capital=initial_capital,
         max_positions=max_positions,
         fee_bps_each_side=fee_bps_each_side,
+        spread_bps=spread_bps,
+        slippage_bps=slippage_bps,
     )
     coverage_watch = (watch_days / eligible_days) if eligible_days else 0.0
     coverage_trigger = (triggered_days / eligible_days) if eligible_days else 0.0
@@ -508,6 +552,8 @@ def run_loop(
             "trigger_coverage": coverage_trigger,
             "risk_off_coverage": coverage_risk_off,
             "watch_to_trigger_ratio": watch_to_trigger,
+            "spread_bps": spread_bps,
+            "slippage_bps": slippage_bps,
         },
         "forward_metrics": {
             "t1_win_rate": (t1_win / t1_total) if t1_total else 0.0,
@@ -531,6 +577,8 @@ def run_baseline_ma20(
     initial_capital: float,
     max_positions: int,
     fee_bps_each_side: float,
+    spread_bps: float,
+    slippage_bps: float,
 ) -> Dict[str, object]:
     """Simple baseline: enter when close > ma20 and previous close <= previous ma20."""
     trades: List[Trade] = []
@@ -549,7 +597,13 @@ def run_baseline_ma20(
 
             entry_idx = i + 1
             entry_bar = history[entry_idx]
-            entry_price = entry_bar.open if entry_bar.open > 0 else entry_bar.close
+            raw_entry_price = entry_bar.open if entry_bar.open > 0 else entry_bar.close
+            entry_price = apply_execution_costs(
+                raw_entry_price,
+                side="buy",
+                spread_bps=spread_bps,
+                slippage_bps=slippage_bps,
+            )
             if entry_price <= 0:
                 i += 1
                 continue
@@ -571,7 +625,13 @@ def run_baseline_ma20(
                 k += 1
 
             exit_bar = history[exit_idx]
-            exit_price = exit_bar.close if exit_bar.close > 0 else entry_price
+            raw_exit_price = exit_bar.close if exit_bar.close > 0 else raw_entry_price
+            exit_price = apply_execution_costs(
+                raw_exit_price,
+                side="sell",
+                spread_bps=spread_bps,
+                slippage_bps=slippage_bps,
+            )
             trades.append(
                 Trade(
                     symbol=symbol,
@@ -595,6 +655,8 @@ def run_baseline_ma20(
             initial_capital=initial_capital,
             max_positions=max_positions,
             fee_bps_each_side=fee_bps_each_side,
+            spread_bps=spread_bps,
+            slippage_bps=slippage_bps,
         ),
         "trade_count": len(trades),
     }
@@ -642,6 +704,8 @@ def main() -> None:
     parser.add_argument("--initial-capital", type=float, default=1_000_000.0)
     parser.add_argument("--max-positions", type=int, default=10)
     parser.add_argument("--fee-bps-each-side", type=float, default=5.0)
+    parser.add_argument("--spread-bps", type=float, default=0.0)
+    parser.add_argument("--slippage-bps", type=float, default=0.0)
     parser.add_argument("--output-json", default="tmp/min_tradeability_loop_result.json")
     parser.add_argument("--with-baseline", action="store_true")
     parser.add_argument("--walk-forward-3", action="store_true")
@@ -669,6 +733,8 @@ def main() -> None:
         initial_capital=args.initial_capital,
         max_positions=args.max_positions,
         fee_bps_each_side=args.fee_bps_each_side,
+        spread_bps=args.spread_bps,
+        slippage_bps=args.slippage_bps,
     )
     if args.with_baseline:
         result["baseline_ma20"] = run_baseline_ma20(
@@ -678,6 +744,8 @@ def main() -> None:
             initial_capital=args.initial_capital,
             max_positions=args.max_positions,
             fee_bps_each_side=args.fee_bps_each_side,
+            spread_bps=args.spread_bps,
+            slippage_bps=args.slippage_bps,
         )
 
     if args.walk_forward_3:
@@ -700,6 +768,8 @@ def main() -> None:
                 args.initial_capital,
                 args.max_positions,
                 args.fee_bps_each_side,
+                args.spread_bps,
+                args.slippage_bps,
             )
             row: Dict[str, object] = {
                 "window": idx,
@@ -717,6 +787,8 @@ def main() -> None:
                     args.initial_capital,
                     args.max_positions,
                     args.fee_bps_each_side,
+                    args.spread_bps,
+                    args.slippage_bps,
                 )
             wf_rows.append(row)
         result["walk_forward_3"] = wf_rows
@@ -735,6 +807,8 @@ def main() -> None:
         "initial_capital": args.initial_capital,
         "max_positions": args.max_positions,
         "fee_bps_each_side": args.fee_bps_each_side,
+        "spread_bps": args.spread_bps,
+        "slippage_bps": args.slippage_bps,
         "with_baseline": args.with_baseline,
         "walk_forward_3": args.walk_forward_3,
         "run_at": datetime.now().isoformat(timespec="seconds"),

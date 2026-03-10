@@ -58,6 +58,8 @@ def _evaluate_scenario(scenario: Dict[str, Any]) -> Dict[str, Any]:
         initial_capital=float(scenario.get("initial_capital", 1_000_000.0)),
         max_positions=int(scenario.get("max_positions", 10)),
         fee_bps_each_side=float(scenario.get("fee_bps_each_side", 5.0)),
+        spread_bps=float(scenario.get("spread_bps", 0.0)),
+        slippage_bps=float(scenario.get("slippage_bps", 0.0)),
     )
 
     trade = result["trade_metrics"]
