@@ -78,9 +78,31 @@ export default function RootLayout({
                   var isIOS = /iPhone|iPad|iPod/i.test(ua);
                   var isAndroid = /Android/i.test(ua);
                   var isMobile = isIOS || isAndroid;
+                  var authCacheRaw = localStorage.getItem('ZISO_AUTH_CACHE_V1');
+                  var profileCacheRaw = localStorage.getItem('stockwise_user_profile_v1');
+                  var hasOnboardedFlag = localStorage.getItem('STOCKWISE_HAS_ONBOARDED') === 'true';
+                  var authCache = null;
+                  var profileCache = null;
+
+                  try { authCache = authCacheRaw ? JSON.parse(authCacheRaw) : null; } catch (e) {}
+                  try { profileCache = profileCacheRaw ? JSON.parse(profileCacheRaw) : null; } catch (e) {}
+
+                  var canBypassDashboardSkeleton =
+                    (
+                      hasOnboardedFlag ||
+                      !!(profileCache && profileCache.userId && profileCache.hasOnboarded !== false)
+                    ) &&
+                    (
+                      !!(authCache && authCache.authorized === true) ||
+                      !!(profileCache && profileCache.userId)
+                    );
+
                   if (isIOS) document.body.classList.add('is-ios');
                   if (isAndroid) document.body.classList.add('is-android');
                   if (isMobile) document.body.classList.add('is-mobile');
+                  if (canBypassDashboardSkeleton) {
+                    document.documentElement.classList.add('dashboard-boot-ready');
+                  }
                 } catch(e) {}
               })();
             `,
@@ -92,4 +114,3 @@ export default function RootLayout({
     </html>
   );
 }
-

@@ -24,6 +24,11 @@ body {
   min-height: 100vh;
 }
 
+html.dashboard-boot-ready [data-dashboard-skeleton="true"] {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
 .glass-card {
   background: var(--card-bg);
   backdrop-filter: blur(16px);

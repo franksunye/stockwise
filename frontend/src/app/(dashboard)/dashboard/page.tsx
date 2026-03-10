@@ -21,6 +21,8 @@ import { useTikTokScroll } from '@/hooks/useTikTokScroll';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { getPredictionActionMeta } from '@/lib/layer1-ui';
 
+const DASHBOARD_NAV_INTENT_KEY = 'stockwise_dashboard_nav_intent';
+
 const UserCenterDrawer = dynamic(() => import('@/components/UserCenterDrawer'), {
   ssr: false,
   loading: () => null
@@ -179,6 +181,14 @@ function DashboardContent() {
       setBriefOpen(true);
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    try {
+      sessionStorage.removeItem(DASHBOARD_NAV_INTENT_KEY);
+    } catch {
+      // non-critical
+    }
+  }, []);
 
   return (
     <main className="fixed inset-0 bg-[#050508] text-white overflow-hidden select-none font-sans">

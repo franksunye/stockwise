@@ -23,6 +23,8 @@ import { isIOS, isStandalone } from '@/lib/device-utils';
 // 已验证的 Pro 用户信息缓存在 localStorage 中，
 // 实现"打开即用"：不等待网络，先用缓存展示内容。
 const AUTH_CACHE_KEY = 'ZISO_AUTH_CACHE_V1';
+const DASHBOARD_NAV_INTENT_KEY = 'stockwise_dashboard_nav_intent';
+const DASHBOARD_NAV_INTENT_MAX_AGE = 15 * 1000;
 
 // P1: 用于桥接 Layout 的 profile 响应到 UserProfileProvider 的缓存
 // 避免 Provider 再次发起重复的 /api/user/profile 请求
@@ -60,6 +62,47 @@ function setAuthCache(tier: Tier, authorized: boolean): void {
   }
 }
 
+function getRecentDashboardNavIntent(): { symbol?: string; timestamp: number } | null {
+  try {
+    const raw = sessionStorage.getItem(DASHBOARD_NAV_INTENT_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { symbol?: string; timestamp?: number };
+    if (!parsed?.timestamp) return null;
+    if (Date.now() - parsed.timestamp > DASHBOARD_NAV_INTENT_MAX_AGE) return null;
+    return { symbol: parsed.symbol, timestamp: parsed.timestamp };
+  } catch {
+    return null;
+  }
+}
+
+function getOptimisticDashboardBootstrap(): { authorized: boolean; tier: Tier } | null {
+  try {
+    const cachedAuth = getAuthCache();
+    if (cachedAuth) {
+      return {
+        authorized: cachedAuth.authorized,
+        tier: cachedAuth.tier,
+      };
+    }
+
+    const profileRaw = localStorage.getItem(USER_PROFILE_CACHE_KEY);
+    const profile = profileRaw ? JSON.parse(profileRaw) : null;
+    const hasOnboardedFlag = localStorage.getItem('STOCKWISE_HAS_ONBOARDED') === 'true';
+    const hasRecentDashboardIntent = Boolean(getRecentDashboardNavIntent());
+
+    if (profile?.userId && (profile.hasOnboarded !== false || hasOnboardedFlag || hasRecentDashboardIntent)) {
+      return {
+        authorized: true,
+        tier: (profile.tier || 'free') as Tier,
+      };
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function populateUserProfileCache(apiData: any): void {
   try {
@@ -86,10 +129,34 @@ function populateUserProfileCache(apiData: any): void {
 
 function DashboardEntryGate({ children }: { children: React.ReactNode }) {
   const { profile, loading } = useUserProfile();
+  const [canOptimisticallyEnter, setCanOptimisticallyEnter] = useState(false);
+
+  useLayoutEffect(() => {
+    try {
+      const hasOnboardedFlag = localStorage.getItem('STOCKWISE_HAS_ONBOARDED') === 'true';
+      const cachedProfile = localStorage.getItem(USER_PROFILE_CACHE_KEY);
+      const parsedProfile = cachedProfile ? JSON.parse(cachedProfile) : null;
+      const hasRecentDashboardIntent = Boolean(getRecentDashboardNavIntent());
+      setCanOptimisticallyEnter(
+        hasOnboardedFlag ||
+        Boolean(parsedProfile?.userId && (parsedProfile?.hasOnboarded !== false || hasRecentDashboardIntent))
+      );
+    } catch {
+      setCanOptimisticallyEnter(localStorage.getItem('STOCKWISE_HAS_ONBOARDED') === 'true');
+    }
+  }, []);
 
   // Block app UI until onboarding status is known to avoid dashboard flash for new users.
   if (loading || !profile) {
-    return <DashboardSkeleton />;
+    if (canOptimisticallyEnter) {
+      return <>{children}</>;
+    }
+
+    return (
+      <div data-dashboard-skeleton="true">
+        <DashboardSkeleton />
+      </div>
+    );
   }
 
   if (!profile.hasOnboarded) {
@@ -126,10 +193,10 @@ export default function DashboardLayout({
 
   useLayoutEffect(() => {
     // 1. 客户端挂载后立即尝试从缓存恢复，实现"秒开"
-    const cachedAuth = getAuthCache();
-    if (cachedAuth) {
-      setIsAuthorized(cachedAuth.authorized);
-      setTier(cachedAuth.tier);
+    const optimisticBootstrap = getOptimisticDashboardBootstrap();
+    if (optimisticBootstrap) {
+      setIsAuthorized(optimisticBootstrap.authorized);
+      setTier(optimisticBootstrap.tier);
     }
   }, []);
 
@@ -280,6 +347,7 @@ export default function DashboardLayout({
             initial={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
+            data-dashboard-skeleton="true"
           >
             <DashboardSkeleton />
           </motion.div>

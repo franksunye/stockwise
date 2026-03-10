@@ -23,6 +23,8 @@ interface StockSnapshot {
   updateTag?: string;
 }
 
+const DASHBOARD_NAV_INTENT_KEY = 'stockwise_dashboard_nav_intent';
+
 const StockItem = memo(({ 
   stock, 
   navigatingTo, 
@@ -48,7 +50,17 @@ const StockItem = memo(({
     >
       <Link 
         href={`/dashboard?symbol=${stock.symbol}`}
-        onClick={() => setNavigatingTo(stock.symbol)}
+        onClick={() => {
+          try {
+            sessionStorage.setItem(DASHBOARD_NAV_INTENT_KEY, JSON.stringify({
+              symbol: stock.symbol,
+              timestamp: Date.now()
+            }));
+          } catch {
+            // non-critical
+          }
+          setNavigatingTo(stock.symbol);
+        }}
         className={`glass-card p-5 group transition-all relative block active:scale-95 touch-optimized ${navigatingTo === stock.symbol ? 'bg-white/10 border-indigo-500/30 ring-1 ring-indigo-500/20' : 'hover:bg-white/[0.04]'}`}
       >
        <div className="flex items-center justify-between">
