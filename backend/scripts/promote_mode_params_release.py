@@ -78,7 +78,20 @@ def _normalize_bundle_payload(name: str, payload: Dict[str, Any]) -> Dict[str, A
     }
 
 
-def _build_config(release: Dict[str, Any]) -> Dict[str, Any]:
+def _build_market_release_entry(release: Dict[str, Any]) -> Dict[str, Any]:
+    return {
+        "generated_at": str(release.get("generated_at") or ""),
+        "strategy_version": str(release.get("strategy_version") or "tradeability_v2"),
+        "source": dict(release.get("source") or {}),
+        "window": dict(release.get("window") or {}),
+        "research_performance": dict(release.get("research_performance") or {}),
+        "selection_summary": dict(release.get("selection_summary") or {}),
+        "production_effect": dict(release.get("production_effect") or {}),
+    }
+
+
+def _build_config(release: Dict[str, Any], existing_config: Dict[str, Any] | None = None) -> Dict[str, Any]:
+    existing_config = dict(existing_config or {})
     strategy_version = str(release.get("strategy_version") or "tradeability_v2").strip() or "tradeability_v2"
     bundles = dict(release.get("bundles") or {})
     missing = [name for name in REQUIRED_BUNDLES if name not in bundles]
@@ -90,15 +103,17 @@ def _build_config(release: Dict[str, Any]) -> Dict[str, Any]:
         payload = dict(bundles.get(bundle_name) or {})
         normalized_bundles[bundle_name] = _normalize_bundle_payload(bundle_name, payload)
 
+    market = str((release.get("source") or {}).get("market") or (release.get("research_performance") or {}).get("market") or "").strip().upper()
+    market_release_artifacts = dict(existing_config.get("market_release_artifacts") or {})
+    if market:
+        market_release_artifacts[market] = _build_market_release_entry(release)
+
     return {
         "config_version": str(release.get("config_version") or "mode_params_bundles_v1"),
         "strategy_version": strategy_version,
         "generated_at": str(release.get("generated_at") or ""),
         "source": dict(release.get("source") or {}),
-        "window": dict(release.get("window") or {}),
-        "research_performance": dict(release.get("research_performance") or {}),
-        "selection_summary": dict(release.get("selection_summary") or {}),
-        "production_effect": dict(release.get("production_effect") or {}),
+        **({"market_release_artifacts": market_release_artifacts} if market_release_artifacts else {}),
         "bundles": normalized_bundles,
     }
 
@@ -182,7 +197,8 @@ def main() -> int:
 
     release_path = os.path.abspath(args.release_json)
     target_file = os.path.abspath(args.target_file)
-    release = _build_config(_load_json(release_path))
+    existing_config = _load_json(target_file) if os.path.exists(target_file) else {}
+    release = _build_config(_load_json(release_path), existing_config=existing_config)
 
     print(f"Target file: {os.path.relpath(target_file, ROOT_DIR)}")
     print(f"Strategy version: {release['strategy_version']}")

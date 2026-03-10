@@ -53,6 +53,36 @@ def test_mode_params_release_flow():
             + "\n",
             encoding="utf-8",
         )
+        target_json.write_text(
+            json.dumps(
+                {
+                    "config_version": "mode_params_bundles_v1",
+                    "strategy_version": "tradeability_v2",
+                    "generated_at": "2026-03-09T00:00:00Z",
+                    "source": {"market": "HK", "method": "local_backtest"},
+                    "market_release_artifacts": {
+                        "HK": {
+                            "window": {"start_date": "2024-01-01", "end_date": "2026-03-06"},
+                            "research_performance": {
+                                "market": "HK",
+                                "universe": {"symbol_count": 180},
+                                "modes": {"steady_v1": {"selected_candidate_name": "steady_hk_base"}},
+                            },
+                        }
+                    },
+                    "bundles": {
+                        "steady": {"default": {"risk_off_ma": 10}},
+                        "balanced": {"default": {}},
+                        "aggressive": {"default": {"risk_off_ma": 5}},
+                        "observe_only": {"default": {}},
+                    },
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
 
         subprocess.run(
             [
@@ -72,9 +102,13 @@ def test_mode_params_release_flow():
 
         payload = json.loads(target_json.read_text(encoding="utf-8"))
         assert payload["strategy_version"] == "tradeability_v2"
-        assert payload["window"]["end_date"] == "2026-03-06"
-        assert payload["research_performance"]["universe"]["symbol_count"] == 500
-        assert payload["research_performance"]["modes"]["steady_v1"]["selected_candidate_name"] == "steady_best"
+        assert payload["market_release_artifacts"]["HK"]["research_performance"]["universe"]["symbol_count"] == 180
+        assert payload["market_release_artifacts"]["CN"]["window"]["end_date"] == "2026-03-06"
+        assert payload["market_release_artifacts"]["CN"]["research_performance"]["universe"]["symbol_count"] == 500
+        assert (
+            payload["market_release_artifacts"]["CN"]["research_performance"]["modes"]["steady_v1"]["selected_candidate_name"]
+            == "steady_best"
+        )
         assert payload["bundles"]["steady"]["default"]["breakout_volume_mult"] == 1.08
         assert payload["bundles"]["balanced"]["default"]["momentum_change_threshold"] == 2.0
         assert payload["bundles"]["aggressive"]["default"]["risk_off_ma"] == 5.0
