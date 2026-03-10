@@ -53,6 +53,7 @@ def _evaluate_version(
     fee_bps_each_side: float,
     spread_bps: float,
     slippage_bps: float,
+    execution_cost_profile: str,
     params_file: Optional[str] = None,
 ) -> Dict[str, object]:
     _, params = load_market_params(market=market, strategy_version=strategy_version, params_file=params_file)
@@ -70,6 +71,8 @@ def _evaluate_version(
         fee_bps_each_side=fee_bps_each_side,
         spread_bps=spread_bps,
         slippage_bps=slippage_bps,
+        market=market,
+        execution_cost_profile=execution_cost_profile,
     )
     state_metrics = result["state_metrics"]
     trade_metrics = result["trade_metrics"]
@@ -124,6 +127,7 @@ def main() -> None:
     parser.add_argument("--fee-bps-each-side", type=float, default=5.0)
     parser.add_argument("--spread-bps", type=float, default=0.0)
     parser.add_argument("--slippage-bps", type=float, default=0.0)
+    parser.add_argument("--execution-cost-profile", choices=["fixed", "liquidity_bucketed"], default="fixed")
     parser.add_argument("--params-file", default="")
     parser.add_argument("--output-json", default="")
     parser.add_argument("--output-md", default="")
@@ -154,6 +158,7 @@ def main() -> None:
                 fee_bps_each_side=args.fee_bps_each_side,
                 spread_bps=args.spread_bps,
                 slippage_bps=args.slippage_bps,
+                execution_cost_profile=args.execution_cost_profile,
                 params_file=params_file or None,
             )
             for version in strategy_versions

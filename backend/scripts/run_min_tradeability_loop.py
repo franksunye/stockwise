@@ -18,6 +18,22 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Dict, List, Optional, Sequence, Tuple
 
+FIXED_EXECUTION_COST_PROFILE = "fixed"
+LIQUIDITY_BUCKETED_EXECUTION_COST_PROFILE = "liquidity_bucketed"
+DEFAULT_EXECUTION_COST_PROFILE = FIXED_EXECUTION_COST_PROFILE
+LIQUIDITY_COST_BUCKETS: Dict[str, Sequence[Dict[str, float | str]]] = {
+    "CN": (
+        {"bucket": "large", "min_avg_turnover": 500_000_000.0, "spread_bps": 4.0, "slippage_bps": 6.0},
+        {"bucket": "mid", "min_avg_turnover": 100_000_000.0, "spread_bps": 6.0, "slippage_bps": 10.0},
+        {"bucket": "small", "min_avg_turnover": 0.0, "spread_bps": 10.0, "slippage_bps": 18.0},
+    ),
+    "HK": (
+        {"bucket": "large", "min_avg_turnover": 300_000_000.0, "spread_bps": 8.0, "slippage_bps": 12.0},
+        {"bucket": "mid", "min_avg_turnover": 80_000_000.0, "spread_bps": 10.0, "slippage_bps": 18.0},
+        {"bucket": "small", "min_avg_turnover": 0.0, "spread_bps": 16.0, "slippage_bps": 30.0},
+    ),
+}
+
 
 @dataclass
 class Bar:
@@ -74,6 +90,46 @@ def apply_execution_costs(price: float, *, side: str, spread_bps: float, slippag
     if side == "sell":
         return price * (1.0 - adjustment)
     raise ValueError(f"Unsupported side: {side}")
+
+
+def infer_market(symbol: str, market: str | None = None) -> str:
+    if market:
+        return market.strip().upper()
+    return "HK" if len(symbol) == 5 else "CN"
+
+
+def average_turnover(history: Sequence[Bar], end_idx: int, lookback: int = 20) -> float:
+    if not history:
+        return 0.0
+    start_idx = max(0, end_idx - lookback + 1)
+    samples = [max(0.0, bar.close) * max(0.0, bar.volume) for bar in history[start_idx : end_idx + 1] if bar.close > 0 and bar.volume > 0]
+    return mean(samples)
+
+
+def resolve_execution_costs(
+    *,
+    symbol: str,
+    history: Sequence[Bar],
+    signal_idx: int,
+    market: str | None,
+    spread_bps: float,
+    slippage_bps: float,
+    execution_cost_profile: str,
+) -> Tuple[float, float, str]:
+    profile = (execution_cost_profile or DEFAULT_EXECUTION_COST_PROFILE).strip().lower()
+    if profile != LIQUIDITY_BUCKETED_EXECUTION_COST_PROFILE:
+        return max(0.0, float(spread_bps)), max(0.0, float(slippage_bps)), FIXED_EXECUTION_COST_PROFILE
+
+    resolved_market = infer_market(symbol, market)
+    avg_turnover = average_turnover(history, signal_idx)
+    for bucket in LIQUIDITY_COST_BUCKETS.get(resolved_market, ()):
+        if avg_turnover >= float(bucket["min_avg_turnover"]):
+            return (
+                float(bucket["spread_bps"]),
+                float(bucket["slippage_bps"]),
+                str(bucket["bucket"]),
+            )
+    return max(0.0, float(spread_bps)), max(0.0, float(slippage_bps)), "fallback"
 
 
 def load_bars(conn: sqlite3.Connection, start_date: Optional[str], end_date: Optional[str]) -> Dict[str, List[Bar]]:
@@ -399,6 +455,8 @@ def run_loop(
     fee_bps_each_side: float,
     spread_bps: float = 0.0,
     slippage_bps: float = 0.0,
+    market: str | None = None,
+    execution_cost_profile: str = DEFAULT_EXECUTION_COST_PROFILE,
 ) -> Dict[str, object]:
     watch_days = 0
     triggered_days = 0
@@ -409,6 +467,10 @@ def run_loop(
     t3_total = 0
     t3_win = 0
     trades: List[Trade] = []
+    applied_spread_total = 0.0
+    applied_slippage_total = 0.0
+    applied_cost_trade_count = 0
+    bucket_counts: Dict[str, int] = {}
 
     for symbol, history in bars_by_symbol.items():
         if len(history) < 26:
@@ -453,11 +515,20 @@ def run_loop(
             entry_idx = i + 1
             entry_bar = history[entry_idx]
             raw_entry_price = entry_bar.open if entry_bar.open > 0 else entry_bar.close
+            effective_spread_bps, effective_slippage_bps, bucket_name = resolve_execution_costs(
+                symbol=symbol,
+                history=history,
+                signal_idx=i,
+                market=market,
+                spread_bps=spread_bps,
+                slippage_bps=slippage_bps,
+                execution_cost_profile=execution_cost_profile,
+            )
             entry_price = apply_execution_costs(
                 raw_entry_price,
                 side="buy",
-                spread_bps=spread_bps,
-                slippage_bps=slippage_bps,
+                spread_bps=effective_spread_bps,
+                slippage_bps=effective_slippage_bps,
             )
             if entry_price <= 0:
                 i += 1
@@ -492,9 +563,13 @@ def run_loop(
             exit_price = apply_execution_costs(
                 raw_exit_price,
                 side="sell",
-                spread_bps=spread_bps,
-                slippage_bps=slippage_bps,
+                spread_bps=effective_spread_bps,
+                slippage_bps=effective_slippage_bps,
             )
+            applied_spread_total += effective_spread_bps
+            applied_slippage_total += effective_slippage_bps
+            applied_cost_trade_count += 1
+            bucket_counts[bucket_name] = bucket_counts.get(bucket_name, 0) + 1
             ret = (exit_price / entry_price) - 1.0
             trades.append(
                 Trade(
@@ -554,6 +629,10 @@ def run_loop(
             "watch_to_trigger_ratio": watch_to_trigger,
             "spread_bps": spread_bps,
             "slippage_bps": slippage_bps,
+            "execution_cost_profile": execution_cost_profile,
+            "avg_applied_spread_bps": (applied_spread_total / applied_cost_trade_count) if applied_cost_trade_count else 0.0,
+            "avg_applied_slippage_bps": (applied_slippage_total / applied_cost_trade_count) if applied_cost_trade_count else 0.0,
+            "execution_cost_bucket_counts": bucket_counts,
         },
         "forward_metrics": {
             "t1_win_rate": (t1_win / t1_total) if t1_total else 0.0,
@@ -579,6 +658,8 @@ def run_baseline_ma20(
     fee_bps_each_side: float,
     spread_bps: float,
     slippage_bps: float,
+    market: str | None = None,
+    execution_cost_profile: str = DEFAULT_EXECUTION_COST_PROFILE,
 ) -> Dict[str, object]:
     """Simple baseline: enter when close > ma20 and previous close <= previous ma20."""
     trades: List[Trade] = []
@@ -598,11 +679,20 @@ def run_baseline_ma20(
             entry_idx = i + 1
             entry_bar = history[entry_idx]
             raw_entry_price = entry_bar.open if entry_bar.open > 0 else entry_bar.close
+            effective_spread_bps, effective_slippage_bps, _ = resolve_execution_costs(
+                symbol=symbol,
+                history=history,
+                signal_idx=i,
+                market=market,
+                spread_bps=spread_bps,
+                slippage_bps=slippage_bps,
+                execution_cost_profile=execution_cost_profile,
+            )
             entry_price = apply_execution_costs(
                 raw_entry_price,
                 side="buy",
-                spread_bps=spread_bps,
-                slippage_bps=slippage_bps,
+                spread_bps=effective_spread_bps,
+                slippage_bps=effective_slippage_bps,
             )
             if entry_price <= 0:
                 i += 1
@@ -629,8 +719,8 @@ def run_baseline_ma20(
             exit_price = apply_execution_costs(
                 raw_exit_price,
                 side="sell",
-                spread_bps=spread_bps,
-                slippage_bps=slippage_bps,
+                spread_bps=effective_spread_bps,
+                slippage_bps=effective_slippage_bps,
             )
             trades.append(
                 Trade(
@@ -704,8 +794,14 @@ def main() -> None:
     parser.add_argument("--initial-capital", type=float, default=1_000_000.0)
     parser.add_argument("--max-positions", type=int, default=10)
     parser.add_argument("--fee-bps-each-side", type=float, default=5.0)
+    parser.add_argument("--market", choices=["CN", "HK"], default="")
     parser.add_argument("--spread-bps", type=float, default=0.0)
     parser.add_argument("--slippage-bps", type=float, default=0.0)
+    parser.add_argument(
+        "--execution-cost-profile",
+        choices=[FIXED_EXECUTION_COST_PROFILE, LIQUIDITY_BUCKETED_EXECUTION_COST_PROFILE],
+        default=DEFAULT_EXECUTION_COST_PROFILE,
+    )
     parser.add_argument("--output-json", default="tmp/min_tradeability_loop_result.json")
     parser.add_argument("--with-baseline", action="store_true")
     parser.add_argument("--walk-forward-3", action="store_true")
@@ -735,6 +831,8 @@ def main() -> None:
         fee_bps_each_side=args.fee_bps_each_side,
         spread_bps=args.spread_bps,
         slippage_bps=args.slippage_bps,
+        market=args.market or None,
+        execution_cost_profile=args.execution_cost_profile,
     )
     if args.with_baseline:
         result["baseline_ma20"] = run_baseline_ma20(
@@ -746,6 +844,8 @@ def main() -> None:
             fee_bps_each_side=args.fee_bps_each_side,
             spread_bps=args.spread_bps,
             slippage_bps=args.slippage_bps,
+            market=args.market or None,
+            execution_cost_profile=args.execution_cost_profile,
         )
 
     if args.walk_forward_3:
@@ -770,6 +870,8 @@ def main() -> None:
                 args.fee_bps_each_side,
                 args.spread_bps,
                 args.slippage_bps,
+                args.market or None,
+                args.execution_cost_profile,
             )
             row: Dict[str, object] = {
                 "window": idx,
@@ -789,6 +891,8 @@ def main() -> None:
                     args.fee_bps_each_side,
                     args.spread_bps,
                     args.slippage_bps,
+                    args.market or None,
+                    args.execution_cost_profile,
                 )
             wf_rows.append(row)
         result["walk_forward_3"] = wf_rows
@@ -807,8 +911,10 @@ def main() -> None:
         "initial_capital": args.initial_capital,
         "max_positions": args.max_positions,
         "fee_bps_each_side": args.fee_bps_each_side,
+        "market": args.market or None,
         "spread_bps": args.spread_bps,
         "slippage_bps": args.slippage_bps,
+        "execution_cost_profile": args.execution_cost_profile,
         "with_baseline": args.with_baseline,
         "walk_forward_3": args.walk_forward_3,
         "run_at": datetime.now().isoformat(timespec="seconds"),

@@ -60,6 +60,8 @@ def _evaluate_scenario(scenario: Dict[str, Any]) -> Dict[str, Any]:
         fee_bps_each_side=float(scenario.get("fee_bps_each_side", 5.0)),
         spread_bps=float(scenario.get("spread_bps", 0.0)),
         slippage_bps=float(scenario.get("slippage_bps", 0.0)),
+        market=str(scenario["market"]),
+        execution_cost_profile=str(scenario.get("execution_cost_profile", "fixed")),
     )
 
     trade = result["trade_metrics"]

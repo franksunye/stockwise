@@ -191,7 +191,7 @@ def test_build_release_payload_selects_best_and_merges_market_override():
         },
     }
 
-    def fake_run_loop(*, bars_by_symbol, max_hold_days, stop_loss_pct, vcp_ratio, risk_off_ma, breakout_volume_mult, strong_close_threshold, momentum_change_threshold, initial_capital, max_positions, fee_bps_each_side, spread_bps, slippage_bps):
+    def fake_run_loop(*, bars_by_symbol, max_hold_days, stop_loss_pct, vcp_ratio, risk_off_ma, breakout_volume_mult, strong_close_threshold, momentum_change_threshold, initial_capital, max_positions, fee_bps_each_side, spread_bps, slippage_bps, market, execution_cost_profile):
         for mode in manifest["modes"]:
             for candidate in mode["candidates"]:
                 params = candidate["params"]
@@ -204,6 +204,8 @@ def test_build_release_payload_selects_best_and_merges_market_override():
                 ):
                     assert spread_bps == 0.0
                     assert slippage_bps == 0.0
+                    assert market == "CN"
+                    assert execution_cost_profile == "fixed"
                     return fake_results[candidate["name"]]
         raise AssertionError("Unexpected candidate params")
 

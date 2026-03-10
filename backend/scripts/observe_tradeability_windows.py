@@ -119,6 +119,8 @@ def _observe_window(
         fee_bps_each_side=5.0,
         spread_bps=0.0,
         slippage_bps=0.0,
+        market=market,
+        execution_cost_profile="fixed",
     )
     state_metrics = result["state_metrics"]
     trade_metrics = result["trade_metrics"]

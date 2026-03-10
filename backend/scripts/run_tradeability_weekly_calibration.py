@@ -129,6 +129,7 @@ def _window_metrics(
     fee_bps_each_side: float,
     spread_bps: float,
     slippage_bps: float,
+    execution_cost_profile: str,
 ) -> Dict[str, object]:
     rows: List[Dict[str, object]] = []
     consistency_proxy = 100.0
@@ -148,6 +149,8 @@ def _window_metrics(
             fee_bps_each_side=fee_bps_each_side,
             spread_bps=spread_bps,
             slippage_bps=slippage_bps,
+            market=None,
+            execution_cost_profile=execution_cost_profile,
         )
         trade_metrics = res["trade_metrics"]
         state_metrics = res["state_metrics"]
@@ -296,6 +299,7 @@ def main() -> None:
     parser.add_argument("--fee-bps-each-side", type=float, default=5.0)
     parser.add_argument("--spread-bps", type=float, default=0.0)
     parser.add_argument("--slippage-bps", type=float, default=0.0)
+    parser.add_argument("--execution-cost-profile", choices=["fixed", "liquidity_bucketed"], default="fixed")
     parser.add_argument("--params-file", default="")
     parser.add_argument("--output-json", default="")
     parser.add_argument("--output-md", default="")
@@ -341,6 +345,7 @@ def main() -> None:
                 fee_bps_each_side=args.fee_bps_each_side,
                 spread_bps=args.spread_bps,
                 slippage_bps=args.slippage_bps,
+                execution_cost_profile=args.execution_cost_profile,
             )
             baseline_metrics = baseline_eval["aggregate"]
             results: List[Dict[str, object]] = []
@@ -358,6 +363,7 @@ def main() -> None:
                     fee_bps_each_side=args.fee_bps_each_side,
                     spread_bps=args.spread_bps,
                     slippage_bps=args.slippage_bps,
+                    execution_cost_profile=args.execution_cost_profile,
                 )
                 metrics = candidate_eval["aggregate"]
                 guardrails = _guardrail_status(metrics, baseline_metrics)
@@ -407,6 +413,7 @@ def main() -> None:
             fee_bps_each_side=args.fee_bps_each_side,
             spread_bps=args.spread_bps,
             slippage_bps=args.slippage_bps,
+            execution_cost_profile=args.execution_cost_profile,
         )
         final_metrics = final_eval["aggregate"]
         versions_payload.append(

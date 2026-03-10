@@ -161,6 +161,7 @@ def _score_candidate(metrics: Dict[str, Any], objective: str, weights_override: 
 def _evaluate_candidate(
     *,
     bars_by_symbol: Dict[str, List[Any]],
+    market: str,
     common: Dict[str, Any],
     candidate: Dict[str, Any],
     objective: str,
@@ -181,6 +182,8 @@ def _evaluate_candidate(
         fee_bps_each_side=float(candidate.get("fee_bps_each_side", common.get("fee_bps_each_side", 5.0))),
         spread_bps=float(candidate.get("spread_bps", common.get("spread_bps", 0.0))),
         slippage_bps=float(candidate.get("slippage_bps", common.get("slippage_bps", 0.0))),
+        market=market,
+        execution_cost_profile=str(candidate.get("execution_cost_profile", common.get("execution_cost_profile", "fixed"))),
     )
     metrics = _normalize_metrics(result)
     score = _score_candidate(metrics, objective=objective, weights_override=weights_override)
@@ -266,6 +269,7 @@ def build_release_payload(
         candidates = [
             _evaluate_candidate(
                 bars_by_symbol=bars_by_symbol,
+                market=market,
                 common=common,
                 candidate=dict(candidate),
                 objective=objective,

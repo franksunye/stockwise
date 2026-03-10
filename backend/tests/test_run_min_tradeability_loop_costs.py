@@ -1,4 +1,4 @@
-from backend.scripts.run_min_tradeability_loop import Bar, run_loop
+from backend.scripts.run_min_tradeability_loop import Bar, resolve_execution_costs, run_loop
 
 
 def _bar(date: str, close: float, open_: float | None = None, ma5: float = 9.9, ma10: float = 9.8, ma20: float = 9.7, volume: float = 100.0, change_percent: float = 1.0, macd_hist: float = 0.1, high: float | None = None, low: float | None = None) -> Bar:
@@ -53,3 +53,43 @@ def test_run_loop_execution_costs_reduce_returns():
     assert with_cost["trade_metrics"]["expectancy"] < base["trade_metrics"]["expectancy"]
     assert with_cost["all_trades"][0]["entry_price"] > base["all_trades"][0]["entry_price"]
     assert with_cost["all_trades"][0]["exit_price"] < base["all_trades"][0]["exit_price"]
+
+
+def test_liquidity_bucketed_costs_scale_down_for_large_cn():
+    history = []
+    for i in range(25):
+        history.append(_bar(f"2026-02-{i+1:02d}", close=10.0, volume=60_000_000.0, high=10.4, low=9.6))
+
+    spread_bps, slippage_bps, bucket = resolve_execution_costs(
+        symbol="600519",
+        history=history,
+        signal_idx=24,
+        market="CN",
+        spread_bps=0.0,
+        slippage_bps=0.0,
+        execution_cost_profile="liquidity_bucketed",
+    )
+
+    assert bucket == "large"
+    assert spread_bps == 4.0
+    assert slippage_bps == 6.0
+
+
+def test_liquidity_bucketed_costs_scale_up_for_small_hk():
+    history = []
+    for i in range(25):
+        history.append(_bar(f"2026-03-{i+1:02d}", close=2.0, volume=800_000.0, high=2.1, low=1.9))
+
+    spread_bps, slippage_bps, bucket = resolve_execution_costs(
+        symbol="00295",
+        history=history,
+        signal_idx=24,
+        market="HK",
+        spread_bps=0.0,
+        slippage_bps=0.0,
+        execution_cost_profile="liquidity_bucketed",
+    )
+
+    assert bucket == "small"
+    assert spread_bps == 16.0
+    assert slippage_bps == 30.0

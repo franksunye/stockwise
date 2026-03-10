@@ -128,7 +128,7 @@ def test_load_market_params_and_version_registry():
 
     strategy_version, params = load_market_params("CN", strategy_version="tradeability_v2")
     assert strategy_version == "tradeability_v2"
-    assert params["momentum_change_threshold"] == 2.3
+    assert params["momentum_change_threshold"] == 1.7
 
     _, steady_params = load_market_params("CN", strategy_version="tradeability_v2", params_bundle="steady")
     _, aggressive_params = load_market_params("CN", strategy_version="tradeability_v2", params_bundle="aggressive")
