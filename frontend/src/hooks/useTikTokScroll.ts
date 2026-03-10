@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { StockData } from '@/lib/types';
 
@@ -116,7 +116,7 @@ export function useTikTokScroll(stocks: StockData[], options?: UseTikTokScrollOp
     };
 
     // 处理从股票池跳转过来的定位逻辑
-    useEffect(() => {
+    useLayoutEffect(() => {
         const container = scrollRef.current;
         if (targetSymbol && stockCount > 0 && container && !hasAutoScrolled.current) {
             const index = stocks.findIndex(s => s.symbol === targetSymbol || s.symbol.endsWith(targetSymbol));

@@ -6,6 +6,7 @@ import {
     useCallback,
     useContext,
     useEffect,
+    useLayoutEffect,
     useRef,
     useState,
 } from 'react';
@@ -69,7 +70,7 @@ function useUserProfileStore(): UserProfileContextValue {
 
     // 1. 从缓存初始化 — 关键：命中缓存时立即标记 loading=false
     //    这使得 DashboardEntryGate 不会再显示第二层骨架屏
-    useEffect(() => {
+    useLayoutEffect(() => {
         const cached = localStorage.getItem(PROFILE_CACHE_KEY);
         if (cached) {
             try {

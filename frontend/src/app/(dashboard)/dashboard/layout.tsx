@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useLayoutEffect } from 'react';
 import { InviteWall } from '@/components/InviteWall';
 import { OnboardingOverlay } from '@/components/onboarding/OnboardingOverlay';
 import { getWatchlist } from '@/lib/storage';
@@ -124,13 +124,17 @@ export default function DashboardLayout({
     </>
   );
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     // 1. 客户端挂载后立即尝试从缓存恢复，实现"秒开"
     const cachedAuth = getAuthCache();
     if (cachedAuth) {
       setIsAuthorized(cachedAuth.authorized);
       setTier(cachedAuth.tier);
     }
+  }, []);
+
+  useEffect(() => {
+    const cachedAuth = getAuthCache();
 
     const checkAuth = async () => {
       const { switches } = MEMBERSHIP_CONFIG;
