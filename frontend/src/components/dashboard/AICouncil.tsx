@@ -235,7 +235,6 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
               {consensusText}
               {(enterCount === total || observeCount === total || defenseCount === total || emptyCount === total) && <ShieldCheck size={18} />}
            </h3>
-           <p className="mt-1 text-[11px] text-slate-500 leading-5">{consensusSubtext}</p>
         </div>
       </div>
 
