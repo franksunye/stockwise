@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Crown, Loader2, Lock, Radar, RefreshCw, Sparkles } from 'lucide-react';
+import { ChevronDown, ChevronUp, Crown, Loader2, Lock, Radar, RefreshCw, Sparkles } from 'lucide-react';
 import {
     getRiskBandLabel,
     type InvestmentModeDefinition,
@@ -182,6 +182,10 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
     const [notice, setNotice] = useState<string | null>(null);
     const [modeResponse, setModeResponse] = useState<ModeApiResponse | null>(null);
     const [summaryByScope, setSummaryByScope] = useState<Partial<Record<PerformanceScope, PerformanceApiResponse>>>({});
+    const [showAdvancedByScope, setShowAdvancedByScope] = useState<Record<PerformanceScope, boolean>>({
+        universal: false,
+        pool: false,
+    });
 
     useEffect(() => {
         let cancelled = false;
@@ -462,9 +466,21 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
                                     </div>
                                     <div className="min-w-0 flex-1">
                                         <div className="flex items-center justify-between gap-3">
-                                            <div>
-                                                <h4 className="text-sm font-black italic tracking-tighter text-white uppercase">{meta.title}</h4>
-                                                <p className="mt-1 text-[11px] font-medium leading-relaxed text-slate-500">{meta.subtitle}</p>
+                                            <div className="flex items-center gap-3">
+                                                <div>
+                                                    <h4 className="text-sm font-black italic tracking-tighter text-white uppercase">{meta.title}</h4>
+                                                    <p className="mt-1 text-[11px] font-medium leading-relaxed text-slate-500">{meta.subtitle}</p>
+                                                </div>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setShowAdvancedByScope(prev => ({ ...prev, [scope]: !prev[scope] }));
+                                                    }}
+                                                    className="inline-flex items-center gap-1 rounded-full border border-white/5 bg-white/5 px-2 py-0.5 text-[9px] font-bold text-slate-400 hover:bg-white/10 hover:text-slate-300 transition-colors"
+                                                >
+                                                    {showAdvancedByScope[scope] ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                                                    详情
+                                                </button>
                                             </div>
                                             <span className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">30D</span>
                                         </div>
@@ -474,13 +490,13 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
                                                 <div className="text-sm font-black italic tracking-tighter text-white">
                                                     {formatPercent(summary?.metrics?.coverage ?? null)}
                                                 </div>
-                                                <div className="mt-1 text-[9px] font-bold uppercase tracking-widest text-slate-500">覆盖率</div>
+                                                <div className="mt-1 text-[9px] font-bold uppercase tracking-widest text-slate-500">出手率</div>
                                             </div>
                                             <div className="rounded-xl border border-white/5 bg-black/40 px-3 py-3 text-center">
                                                 <div className="text-sm font-black italic tracking-tighter text-emerald-400">
                                                     {formatPercent(summary?.metrics?.hit_rate ?? null)}
                                                 </div>
-                                                <div className="mt-1 text-[9px] font-bold uppercase tracking-widest text-slate-500">命中率</div>
+                                                <div className="mt-1 text-[9px] font-bold uppercase tracking-widest text-slate-500">胜率</div>
                                             </div>
                                             <div className="rounded-xl border border-white/5 bg-black/40 px-3 py-3 text-center">
                                                 <div className={`text-sm font-black italic tracking-tighter ${insufficient ? 'text-slate-600' : 'text-rose-500'}`}>
@@ -489,6 +505,29 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
                                                 <div className="mt-1 text-[9px] font-bold uppercase tracking-widest text-slate-500">最大回撤</div>
                                             </div>
                                         </div>
+
+                                        {showAdvancedByScope[scope] && (
+                                            <div className="mt-2 grid grid-cols-3 gap-2 animate-in fade-in slide-in-from-top-1 duration-200">
+                                                <div className="rounded-xl border border-white/5 bg-black/20 px-3 py-2 text-center">
+                                                    <div className="text-[11px] font-bold text-slate-300">
+                                                        {summary?.metrics?.sample_size ?? '--'}
+                                                    </div>
+                                                    <div className="mt-0.5 text-[8px] font-bold uppercase tracking-widest text-slate-600">实测样本</div>
+                                                </div>
+                                                <div className="rounded-xl border border-white/5 bg-black/20 px-3 py-2 text-center">
+                                                    <div className="text-[11px] font-bold text-slate-300">
+                                                        {summary?.metrics?.payoff_ratio != null ? summary.metrics.payoff_ratio.toFixed(2) : '--'}
+                                                    </div>
+                                                    <div className="mt-0.5 text-[8px] font-bold uppercase tracking-widest text-slate-600">风报比</div>
+                                                </div>
+                                                <div className="rounded-xl border border-white/5 bg-black/20 px-3 py-2 text-center">
+                                                    <div className="text-[11px] font-bold text-slate-300">
+                                                        {summary?.metrics?.stability_score != null ? summary.metrics.stability_score.toFixed(1) : '--'}
+                                                    </div>
+                                                    <div className="mt-0.5 text-[8px] font-bold uppercase tracking-widest text-slate-600">稳定分</div>
+                                                </div>
+                                            </div>
+                                        )}
 
                                         {summary?.message ? (
                                             <p className="mt-3 text-[11px] leading-5 text-amber-300/85">{summary.message}</p>
