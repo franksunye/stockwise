@@ -6,11 +6,12 @@ on:
   workflow_dispatch:
     inputs:
       market:
-        description: '市场 (留空则全部)'
+        description: '市场'
         required: false
         type: choice
+        default: ALL
         options:
-          - ''
+          - ALL
           - CN
           - HK
       symbol:
@@ -93,7 +94,7 @@ jobs:
           fi
           
           # 市场过滤
-          if [ -n "${{ inputs.market }}" ]; then
+          if [ "${{ inputs.market }}" != "ALL" ]; then
             CMD="$CMD --market ${{ inputs.market }}"
           fi
           

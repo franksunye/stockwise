@@ -35,4 +35,5 @@
 - 如果 workflow 时间、依赖或触发源发生变化，优先更新：
   - `docs/1_Engineering/18_Backend_Workflow_Orchestration_Map.md`
   - `docs/1_Engineering/14_Investment_Mode_Backend_Runbook.md`
+- 所有 `.github/workflows/**` 变更都会经过 `workflow_quality_gates.yml` 的静态校验后再进入主干。
 - 不再在本 README 中维护第二套独立时间表。
