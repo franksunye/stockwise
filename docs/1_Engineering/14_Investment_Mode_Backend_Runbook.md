@@ -126,7 +126,7 @@ Investment Mode 与 `tradeability sidecar` 都使用真实市场数据，但职�
 
 Investment Mode 当前依赖的生产编排顺序应理解为：
 
-1. `daily_pipeline_cn.yml` / `daily_pipeline_hk.yml`
+1. `daily_pipeline_cn_main.yml` / `daily_pipeline_hk.yml`
    - 先完成行情同步与预测分析
 2. `tradeability_postclose_pipeline.yml`
    - 先执行盘后样本补量（实验线）

@@ -1,5 +1,7 @@
 name: Daily Pipeline - A-Share (CN)
 
+# NOTE: Recreated under a new workflow path to force GitHub to register
+# a fresh workflow ID after the old CN workflow stopped honoring schedule.
 # 编排层：组合数据同步 + AI 分析，形成完整的每日流水线
 # 安全：通过 Trading Day Gate 闸门确保仅在 CN 市场交易日执行
 

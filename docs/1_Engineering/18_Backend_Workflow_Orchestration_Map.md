@@ -291,7 +291,7 @@
 2. `data_sync_hk.yml`
 3. `data_sync_realtime.yml`
 4. `data_sync_single.yml`
-5. `daily_pipeline_cn.yml`
+5. `daily_pipeline_cn_main.yml`
 6. `daily_pipeline_hk.yml`
 7. `ai_analyze_cn.yml`
 8. `ai_analyze_hk.yml`
@@ -620,7 +620,7 @@ Production 内部分为两组：
    - 黄历生成
    - market facts health check
    - preview broadcast
-3. `daily_pipeline_cn.yml` 已改为：
+3. `daily_pipeline_cn_main.yml` 已改为：
    - `sync -> verify`
    - `sync -> analyze`
    - `sync -> almanac`
@@ -727,7 +727,7 @@ Production 内部分为两组：
 
 1. `ai_analyze_cn.yml` 已恢复为纯分析 workflow
 2. 已新增独立的 `daily_almanac_cn.yml`
-3. `daily_pipeline_cn.yml` 已改为：
+3. `daily_pipeline_cn_main.yml` 已改为：
    - `sync -> verify`
    - `sync -> analyze`
    - `sync -> almanac`
