@@ -518,16 +518,33 @@ def prepare_stock_analysis_prompt(symbol: str, as_of_date: str = None, ctx: Dict
 
     # 4. Context Instruction
     if as_of_date:
-        context_instruction = f"👉 **回填模式**：请假装今天是 {data['date']}。仅基于提供的数据判断。"
+        context_instruction = (
+            f"👉 **历史复盘模式**：本次分析基准日为 {data['date']}。"
+            "请仅基于该日及之前已提供的数据判断，不要引入之后的信息。"
+        )
     else:
         context_instruction = f"👉 **实时分析**：今天是 {data['date']}。请基于提供的数据判断。"
     layer1 = ctx.get("layer1") or {}
     layer1_status = str(layer1.get("status") or "")
     if layer1_status:
-        forced_signal = "Long" if layer1_status == "TriggeredLong" else "Side"
+        if layer1_status == "TriggeredLong":
+            layer1_guidance = (
+                "当前量化约束允许做多方向判断。"
+                "若价格行为与结构位不支持，可降低置信度，但不要反向给出做空/避险结论。"
+            )
+        elif layer1_status in {"RiskOff", "Wait", "NoTrade", "Blocked"}:
+            layer1_guidance = (
+                "当前量化约束偏防守，不代表走势完全中性。"
+                "你的职责是解释风险来源并给出等待/防守型战术，不要输出激进进攻判断。"
+            )
+        else:
+            layer1_guidance = (
+                "请将该状态视为优先级更高的风险约束信号。"
+                "你的职责是解释其含义，并在战术与风控上保持一致，不要擅自弱化。"
+            )
         context_instruction += (
-            f"\n👉 **Layer-1 硬约束**：当前量化状态={layer1_status}，系统裁决信号={forced_signal}。"
-            "你的职责是解释原因、给战术计划与风控，不得改写方向。"
+            f"\n👉 **Layer-1 硬约束**：当前量化状态={layer1_status}。"
+            f"{layer1_guidance}"
         )
 
     # Get Version

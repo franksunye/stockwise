@@ -1,0 +1,158 @@
+{
+  "version": "2026-03-12",
+  "description": "Unified eval manifest for prompt experiments under docs/7_Debug_Traces.",
+  "cases": [
+    {
+      "id": "baseline_old",
+      "group": "four_way_benchmark",
+      "system_prompt": "prompts/Baseline_Old_System.md",
+      "user_prompt": "prompts/Baseline_Old_User.md",
+      "prompt_source": "production_prompt_text",
+      "execution_note": "Replayed with local Gemini in experiments; not the live DeepSeek production runtime.",
+      "signal_mode": "legacy",
+      "expected_layer1_status": "RiskOff",
+      "assertions": [
+        {"name": "parse_success", "value": true},
+        {"name": "normalized_signal_in", "values": ["Side"]},
+        {"name": "normalized_tactics_compliant", "value": true},
+        {"name": "normalized_key_levels_compliant", "value": true}
+      ]
+    },
+    {
+      "id": "b1_minimal_features",
+      "group": "four_way_benchmark",
+      "system_prompt": "prompts/Shared_Optimized_System.md",
+      "user_prompt": "prompts/B1_Minimal_User.md",
+      "prompt_source": "experiment",
+      "signal_mode": "legacy",
+      "expected_layer1_status": "RiskOff",
+      "assertions": [
+        {"name": "parse_success", "value": true},
+        {"name": "normalized_signal_in", "values": ["Side"]},
+        {"name": "normalized_tactics_compliant", "value": true},
+        {"name": "normalized_key_levels_compliant", "value": true},
+        {"name": "layer1_alignment", "value": true}
+      ]
+    },
+    {
+      "id": "b2_rich_tables",
+      "group": "four_way_benchmark",
+      "system_prompt": "prompts/Shared_Optimized_System.md",
+      "user_prompt": "prompts/B2_Rich_User.md",
+      "prompt_source": "experiment",
+      "signal_mode": "legacy",
+      "expected_layer1_status": "RiskOff",
+      "assertions": [
+        {"name": "parse_success", "value": true},
+        {"name": "normalized_signal_in", "values": ["Side"]},
+        {"name": "normalized_tactics_compliant", "value": true},
+        {"name": "normalized_key_levels_compliant", "value": true},
+        {"name": "layer1_alignment", "value": true}
+      ]
+    },
+    {
+      "id": "b3_logic_distilled",
+      "group": "four_way_benchmark",
+      "system_prompt": "prompts/B3_Adversarial_System.md",
+      "user_prompt": "prompts/B3_Distilled_User.md",
+      "prompt_source": "experiment",
+      "signal_mode": "legacy",
+      "expected_layer1_status": "RiskOff",
+      "assertions": [
+        {"name": "parse_success", "value": true},
+        {"name": "normalized_signal_in", "values": ["Side"]},
+        {"name": "normalized_tactics_compliant", "value": true},
+        {"name": "normalized_key_levels_compliant", "value": true}
+      ]
+    },
+    {
+      "id": "b2_with_l1",
+      "group": "layer1_constraint",
+      "system_prompt": "prompts/Shared_Optimized_System.md",
+      "user_prompt": "prompts/B2_Rich_User.md",
+      "prompt_source": "experiment",
+      "signal_mode": "legacy",
+      "expected_layer1_status": "RiskOff",
+      "assertions": [
+        {"name": "parse_success", "value": true},
+        {"name": "normalized_signal_in", "values": ["Side"]},
+        {"name": "raw_confidence_lte", "value": 0.5},
+        {"name": "layer1_alignment", "value": true}
+      ]
+    },
+    {
+      "id": "b2_without_l1",
+      "group": "layer1_constraint",
+      "system_prompt": "prompts/Shared_Optimized_System.md",
+      "user_prompt": "prompts/B2_No_L1_User.md",
+      "prompt_source": "experiment",
+      "signal_mode": "any",
+      "assertions": [
+        {"name": "parse_success", "value": true},
+        {"name": "raw_confidence_gte", "value": 0.5},
+        {"name": "normalized_tactics_compliant", "value": true},
+        {"name": "normalized_key_levels_compliant", "value": true}
+      ]
+    },
+    {
+      "id": "b2_legacy_3_states",
+      "group": "four_state_semantics",
+      "system_prompt": "prompts/Shared_Optimized_System.md",
+      "user_prompt": "prompts/B2_Rich_User.md",
+      "prompt_source": "experiment",
+      "signal_mode": "legacy",
+      "expected_layer1_status": "RiskOff",
+      "assertions": [
+        {"name": "parse_success", "value": true},
+        {"name": "normalized_signal_in", "values": ["Side"]},
+        {"name": "normalized_tactics_compliant", "value": true}
+      ]
+    },
+    {
+      "id": "b4_new_4_states",
+      "group": "four_state_semantics",
+      "system_prompt": "prompts/B4_FourState_System.md",
+      "user_prompt": "prompts/B2_Rich_User.md",
+      "prompt_source": "experiment",
+      "signal_mode": "four_state",
+      "expected_layer1_status": "RiskOff",
+      "assertions": [
+        {"name": "parse_success", "value": true},
+        {"name": "raw_signal_in", "values": ["RiskOff", "Watch", "TriggeredLong", "NoSetup"]},
+        {"name": "normalized_signal_in", "values": ["Side"]},
+        {"name": "raw_enum_compliant", "value": true}
+      ]
+    },
+    {
+      "id": "b2_optimized_3_states",
+      "group": "fair_3_vs_4_states",
+      "system_prompt": "prompts/Shared_Optimized_System.md",
+      "user_prompt": "prompts/B2_Rich_User.md",
+      "prompt_source": "experiment",
+      "signal_mode": "legacy",
+      "expected_layer1_status": "RiskOff",
+      "assertions": [
+        {"name": "parse_success", "value": true},
+        {"name": "normalized_signal_in", "values": ["Side"]},
+        {"name": "normalized_tactics_compliant", "value": true},
+        {"name": "normalized_key_levels_compliant", "value": true}
+      ]
+    },
+    {
+      "id": "b4_strict_4_states",
+      "group": "fair_3_vs_4_states",
+      "system_prompt": "prompts/B4_STRICT_SYSTEM.md",
+      "user_prompt": "prompts/B2_Rich_User.md",
+      "prompt_source": "experiment",
+      "signal_mode": "four_state",
+      "expected_layer1_status": "RiskOff",
+      "assertions": [
+        {"name": "parse_success", "value": true},
+        {"name": "raw_signal_in", "values": ["RiskOff", "Watch", "TriggeredLong", "NoSetup"]},
+        {"name": "raw_enum_compliant", "value": true},
+        {"name": "normalized_tactics_compliant", "value": true},
+        {"name": "normalized_key_levels_compliant", "value": true}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "total_cases": 4,
+  "parse_success_rate": 0.5,
+  "raw_enum_compliance_rate": 0.5,
+  "normalized_enum_compliance_rate": 0.75,
+  "normalized_tactics_compliance_rate": 0.75,
+  "normalized_key_levels_compliance_rate": 0.75,
+  "assertion_pass_rate": 0.5,
+  "avg_latency_s": 17.218,
+  "avg_total_tokens": 5282.3,
+  "by_group": {
+    "four_way_benchmark": {
+      "cases": 4,
+      "assertion_pass": 2,
+      "avg_latency_s": 17.218,
+      "avg_total_tokens": 5282.3
+    }
+  }
+}

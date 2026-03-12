@@ -1,0 +1,50 @@
+{
+  "0_OLD_BASELINE": {
+    "content": "{\n  \"signal\": \"Side\",\n  \"confidence\": 0.75,\n  \"summary\": \"股价放量跌破MA20关键支撑，资金流出显著，技术指标死叉共振，建议保持观望以规避调整风险。\",\n  \"reasoning_trace\": [\n    {\n      \"step\": \"trend\",\n      \"data\": \"均线虽多头排列，但收盘价跌破MA20（381.14），短期上升趋势破坏。\",\n      \"conclusion\": \"短期趋势转入调整\"\n    },\n    {\n      \"step\": \"momentum\",\n      \"data\": \"MACD死叉且KDJ向下发散，RSI回落至中性区，显示下行压力依然较大。\",\n      \"conclusion\": \"动能转向空头\"\n    },\n    {\n      \"step\": \"levels\",\n      \"data\": \"跌破MA20后下方空间打开，支撑见375.67，上方压力降至381.14。\",\n      \"conclusion\": \"空间向下倾斜\"\n    },\n    {\n      \"step\": \"context\",\n      \"data\": \"整体市场背景偏空，主力资金大幅净流出21.63亿，机构筹码出现松动。\",\n      \"conclusion\": \"资金面承压显著\"\n    },\n    {\n      \"step\": \"psychology\",\n      \"data\": \"连跌两日击穿心理位，多头进入博弈盲区，市场恐慌情绪有待进一步消化。\",\n      \"conclusion\": \"避险情绪升温\"\n    },\n    {\n      \"step\": \"decision\",\n      \"data\": \"技术位破位与资金面流出共振，当前位置博弈赔率不足，维持侧岸观望建议。\",\n      \"conclusion\": \"维持观望评级\"\n    }\n  ],\n  \"counter_argument\": \"若明日缩量回抽并快速站稳381.14，则属于假破位诱空，短线风险将暂时解除。\",\n  \"news_analysis\": [],\n  \"tactics\": {\n    \"holding_profit\": [\n      {\n        \"priority\": \"P1\",\n        \"action\": \"减仓避险\",\n        \"trigger\": \"盘中反弹至381.14附近遇阻\",\n        \"target_price\": 405.18,\n        \"stop_advance_price\": 375.0,\n        \"reason\": \"破位反抽是离场良机\"\n      },\n      {\n        \"priority\": \"P2\",\n        \"action\": \"止盈保护\",\n        \"trigger\": \"跌破今日最低点375.67\",\n        \"target_price\": 405.18,\n        \"stop_advance_price\": 375.67,\n        \"reason\": \"防止盈利回吐转为亏损\"\n      }\n    ],\n    \"holding_loss\": [\n      {\n        \"priority\": \"P1\",\n        \"action\": \"严格止损\",\n        \"trigger\": \"收盘跌破369.32\",\n        \"stop_loss_price\": 369.32,\n        \"reason\": \"跌破该位将打开下行空间\"\n      },\n      {\n        \"priority\": \"P2\",\n        \"action\": \"观察防守\",\n        \"trigger\": \"连续三个交易日无法收复MA20\",\n        \"stop_loss_price\": 375.0,\n        \"reason\": \"时间止损防止阴跌\"\n      }\n    ],\n    \"empty\": [\n      {\n        \"priority\": \"P1\",\n        \"action\": \"左侧等待\",\n        \"trigger\": \"缩量回调至366.11密集成交区企稳\",\n        \"buy_",
+    "meta": {
+      "input_tokens": 7175,
+      "output_tokens": 891,
+      "total_tokens": 11267,
+      "latency_ms": 22873,
+      "error": null
+    },
+    "tokens": 11267,
+    "latency": 22.874639987945557
+  },
+  "B1_MINIMAL_FEATURES": {
+    "content": "{\n  \"internal_reasoning\": \"新易盛（300502）在2026-03-12的走势极度恶劣，呈现典型的‘假突破后深跌’。从VCP模式视角看，该股未能实现波动率收缩，反而出现了向下波动的剧烈扩张，单日振幅接近7.3%。价格放量跌破MA5、MA10及关键的MA20（381.14），说明短期多头结构已完全破坏。主力资金高达21.63亿的净流出与MACD死叉共振，确认了机构的阶段性出货行为。尽管中期处于18%的机会位，但Layer-1的RiskOff环境与日线级别的放量破位形成合力，预示着下方仍有寻找筹码锚点（366.11）乃至20日低点（346.74）的惯性。目前价格处于布林带中轨下方，且没有任何企稳迹象，任何盲目的抄底行为都面临极高的非对称风险。当前的矛盾在于：虽然长期基本面可能受光模块需求支撑，但短期技术面已进入空头控制区，必须尊重市场给出的撤退信号。\",\n  \"signal\": \"Side\",\n  \"confidence\": 0.35,\n  \"summary\": \"放量跌破MA20关键支撑，主力资金大幅流出，技术形态全面走坏，执行RiskOff防御策略。\",\n  \"tactics\": {\n    \"holding_profit\": [\n      {\n        \"priority\": \"P1\",\n        \"action\": \"落袋为安\",\n        \"trigger\": \"股价若反抽至MA20（381.14）附近受阻。\",\n        \"exit_zone_price\": [380.50, 382.00],\n        \"reason\": \"破位后的反抽通常是最后的离场机会。\"\n      },\n      {\n        \"priority\": \"P2\",\n        \"action\": \"锁定剩余利润\",\n        \"trigger\": \"跌破今日最低价375.67。\",\n        \"exit_zone_price\": [374.00, 375.50],\n        \"reason\": \"防止盈利回吐转为亏损，保护本金安全。\"\n      }\n    ],\n    \"holding_loss\": [\n      {\n        \"priority\": \"P1\",\n        \"action\": \"果断止损\",\n        \"trigger\": \"股价有效跌破筹码锚点366.11。\",\n        \"exit_zone_price\": [365.00, 366.00],\n        \"reason\": \"下方空间打开，避免陷入深套。\"\n      },\n      {\n        \"priority\": \"P2\",\n        \"action\": \"减仓防御\",\n        \"trigger\": \"次日未能收复380.00心理关口。\",\n        \"exit_zone_price\": [378.00, 380.00],\n        \"reason\": \"确认走势转弱，主动降低风险敞口。\"\n      }\n    ],\n    \"empty\": [\n      {\n        \"priority\": \"P1\",\n        \"action\": \"静待沉淀\",\n        \"trigger\": \"股价回归346.74-355.00区域并出现连续缩量窄幅整理。\",\n        \"buy_zone_price\": [347.00, 352.00],\n        \"reason\": \"寻找20日低点附近的技术性支撑与波动率收缩信号。\"\n      },\n      {\n        \"priority\": \"P2\",\n        \"action\": \"右侧确认\",\n        \"trigger\": \"价格重新放量站稳MA10（384.9）且Layer-1转为RiskOn。\",\n        \"buy_zone_price\": [385.00, 388.00],\n        \"reason\": \"趋势修复后再行介入，胜率更高。\"\n      }\n    ]\n  },\n  \"key_levels\": {\n    \"immediate_support\": [366.11, 346.74],\n    \"immediate_resistance\": [381.14, 391.07],\n    \"stop_loss_reference\": 340.64\n  }\n}",
+    "meta": {
+      "input_tokens": 1903,
+      "output_tokens": 1011,
+      "total_tokens": 4189,
+      "latency_ms": 14895,
+      "error": null
+    },
+    "tokens": 4189,
+    "latency": 14.895724058151245
+  },
+  "B2_RICH_TABLES": {
+    "content": "{\n  \"internal_reasoning\": \"新易盛 (300502) 目前的量化特征呈现出显著的‘破位下行’态势。从 VCP 模式观察，该股在 3 月 5 日放量冲高至 422.6 后，并未能形成高位紧凑整理，反而出现了波动率异常放大的特征。2026-03-12 的收盘价 378.77 已经正式跌破了 20 日均线 (381.14) 这一核心生命线，且伴随着主力资金 21.63 亿的巨额净流出，显示机构投资者正在进行非对称的仓位出逃。尽管中期海拔处于 18% 的低位，预示着长线空间，但短期动能指标 MACD 死叉与 KDJ 持续下行，构成了典型的空头共振。Layer-1 指令为 RiskOff，意味着当前市场环境对多头极度不友好。从筹码分布看，366.11 是重要的筹码锚点，若此位失守，下方的支撑将下移至 20 日低点 346.74 附近。目前价格与 MA5 的乖离率尚未达到超跌反弹的极端值，因此不建议进行任何左侧抄底。风险收益比在当前位置并不平衡，多头需等待成交量萎缩至 20 万手以下的‘枯竭点’，并伴随价格波动率收缩，才能重新评估入场机会。\",\n  \"signal\": \"Side\",\n  \"confidence\": 0.35,\n  \"summary\": \"放量跌破MA20支撑位，主力资金大幅流出，短期趋势走弱，建议观望等待缩量企稳。\",\n  \"tactics\": {\n    \"holding_profit\": [\n      {\n        \"priority\": \"P1\",\n        \"action\": \"防守撤退\",\n        \"trigger\": \"股价跌破今日低点 375.67。\",\n        \"buy_zone_price\": [],\n        \"reason\": \"跌破日内低点确认短期下行通道开启，需锁定剩余利润。\"\n      },\n      {\n        \"priority\": \"P2\",\n        \"action\": \"反抽离场\",\n        \"trigger\": \"股价反抽至 381.20 (MA20) 附近受阻。\",\n        \"buy_zone_price\": [],\n        \"reason\": \"均线破位后的回抽通常是最后的分批离场机会。\"\n      }\n    ],\n    \"holding_loss\": [\n      {\n        \"priority\": \"P1\",\n        \"action\": \"硬止损\",\n        \"trigger\": \"收盘价跌破 366.11 筹码锚点。\",\n        \"buy_zone_price\": [],\n        \"reason\": \"跌破筹码密集区意味着下方空间打开，必须防止亏损失控。\"\n      },\n      {\n        \"priority\": \"P2\",\n        \"action\": \"减仓止损\",\n        \"trigger\": \"反弹至 385.00 阻力位无量。\",\n        \"buy_zone_price\": [],\n        \"reason\": \"利用反弹降低持仓成本，改善整体账户的风险暴露。\"\n      }\n    ],\n    \"empty\": [\n      {\n        \"priority\": \"P1\",\n        \"action\": \"静默观察\",\n        \"trigger\": \"日成交量高于 25 万手且未见企稳信号。\",\n        \"buy_zone_price\": [],\n        \"reason\": \"波动率未收缩前，入场胜率极低，需等待 VCP 结构的重新构建。\"\n      },\n      {\n        \"priority\": \"P2\",\n        \"action\": \"极轻仓试探\",\n        \"trigger\": \"缩量回踩 360-366 区间并出现 15 分钟底背离。\",\n        \"buy_zone_price\": [\n          360.50,\n          366.00\n        ],\n        \"reason\": \"基于筹码锚点的博弈性反弹，仅限极小仓位。\"\n      }\n    ]\n  },\n  \"key_levels\": {\n    \"immediate_support\": [\n      375.67,\n      366.11\n    ],\n    \"immediate_resistance\": [\n      381.14,\n      405.18\n    ],\n    \"stop_loss_reference\": 340.64\n  }\n}",
+    "meta": {
+      "input_tokens": 3073,
+      "output_tokens": 1061,
+      "total_tokens": 6106,
+      "latency_ms": 17695,
+      "error": null
+    },
+    "tokens": 6106,
+    "latency": 17.69543695449829
+  },
+  "B3_LOGIC_DISTILLED": {
+    "content": "{\n  \"internal_reasoning\": \"当前新易盛（300502）处于极度脆弱的博弈窗口，技术面与资金面的共振下跌构成了严峻的挑战。蓝色方（Bear Case）逻辑占据主导地位：日线级别以-3.68%的长阴线放量贯穿MA20（381.14），收盘价几乎处于全天最低点，这反映了市场抛压的极度坚决。近3日主力资金流出逾25亿，这种规模的“分歧性派发”在光模块板块极少见，预示着机构对于短期基本面或宏观流动性存在重大的避险需求。周线双顶结构对420元上方形成强力封锁，短期内难以修复。红色方（Bull Case）逻辑则寄希望于长周期的估值回归：月线虽然经历2月深度回调，但3月目前处于海拔18%的中期低位，RSI（47.1）尚未进入超卖区，暗示杀跌动能虽强但已接近筹码密集区（366.11）。如果366.11元作为多头最后阵地能够放量止跌，则存在技术性反抽MA20的博弈机会。最终决策：基于赔率与期望值分析，目前向下回测支撑的概率远大于向上突破，且AI模型前期的连续失误警示我们当前处于“非理性派发期”。在RiskOff环境下，保护资本金是第一优先级。裁决结果为：场外持币观望，严禁在破位初期盲目抄底，等待366.11元附近的企稳信号。\",\n  \"summary\": \"放量跌破MA20支撑，主力资金巨额流出，短期趋势走弱，建议观望并关注366元支撑。\",\n  \"key_levels\": {\n    \"immediate_support\": [\n      366.11,\n      346.74\n    ],\n    \"immediate_resistance\": [\n      381.14,\n      405.18\n    ]\n  },\n  \"tactics\": {\n    \"holding_profit\": \"建议在381.14元（原支撑转阻力）附近减仓锁定利润，防范趋势进一步恶化。\",\n    \"holding_loss\": \"若收盘价有效跌破366.11元筹码密集区，应坚决执行止损以规避加速下行风险。\",\n    \"empty\": \"当前处于RiskOff阶段，空头动能强劲，建议在366元附近观察缩量止跌信号后再行决策。\"\n  },\n  \"stop_loss_reference\": 353.35\n}",
+    "meta": {
+      "input_tokens": 1291,
+      "output_tokens": 629,
+      "total_tokens": 4227,
+      "latency_ms": 16919,
+      "error": null
+    },
+    "tokens": 4227,
+    "latency": 16.92034363746643
+  }
+}

@@ -7,10 +7,10 @@
 #   .\run_prod_analysis.ps1 -Market CN    # 仅分析 A 股
 #   .\run_prod_analysis.ps1 -Market HK    # 仅分析港股
 #
-# ============ 回填模式 ============
-#   .\run_prod_analysis.ps1 -Date 2025-12-30              # 补指定日期
-#   .\run_prod_analysis.ps1 -StartDate 2025-12-23 -EndDate 2025-12-30  # 补日期范围
-#   .\run_prod_analysis.ps1 -Days 7                       # 补最近7天
+# ============ 历史复盘 / 补算模式 ============
+#   .\run_prod_analysis.ps1 -Date 2025-12-30              # 复盘/补指定日期
+#   .\run_prod_analysis.ps1 -StartDate 2025-12-23 -EndDate 2025-12-30  # 复盘/补日期范围
+#   .\run_prod_analysis.ps1 -Days 7                       # 复盘/补最近7天
 #   .\run_prod_analysis.ps1 -AutoFill                     # 智能补充缺失分析
 #   .\run_prod_analysis.ps1 -Symbol 600519 -Days 7        # 指定股票补最近7天
 
@@ -18,7 +18,7 @@ param(
     [string]$Symbol,
     [ValidateSet("CN", "HK")]
     [string]$Market,
-    [string]$Date,           # 单日回填
+    [string]$Date,           # 单日复盘/补算
     [string]$StartDate,      # 范围起始
     [string]$EndDate,        # 范围结束
     [int]$Days,              # 最近N天
@@ -45,7 +45,7 @@ $env:PYTHONIOENCODING = "utf-8"
 # Build command arguments
 $pythonArgs = @("backend\main.py", "--analyze")
 
-# 判断是否为回填模式
+# 判断是否为历史复盘/补算模式
 $isBackfillMode = $Date -or $StartDate -or $EndDate -or $Days -or $AutoFill
 
 if ($Symbol) {
@@ -58,9 +58,9 @@ if ($Market) {
     $pythonArgs += $Market
 }
 
-# 回填模式参数
+# 历史复盘/补算参数
 if ($Date) {
-    Write-Host ">>> [回填模式] 补充日期: $Date" -ForegroundColor Magenta
+    Write-Host ">>> [历史复盘/补算] 目标日期: $Date" -ForegroundColor Magenta
     $pythonArgs += "--date"
     $pythonArgs += $Date
 }
@@ -76,11 +76,11 @@ if ($EndDate) {
 }
 
 if ($StartDate -and $EndDate) {
-    Write-Host ">>> [回填模式] 日期范围: $StartDate ~ $EndDate" -ForegroundColor Magenta
+    Write-Host ">>> [历史复盘/补算] 日期范围: $StartDate ~ $EndDate" -ForegroundColor Magenta
 }
 
 if ($Days) {
-    Write-Host ">>> [回填模式] 最近 $Days 天" -ForegroundColor Magenta
+    Write-Host ">>> [历史复盘/补算] 最近 $Days 天" -ForegroundColor Magenta
     $pythonArgs += "--days"
     $pythonArgs += $Days
 }

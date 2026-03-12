@@ -1,0 +1,101 @@
+{
+  "signal": "Side",
+  "confidence": 0.45,
+  "summary": "股价放量跌破MA20，主力大幅流出，短期趋势转弱，缺乏高赔率入场点，建议观望。",
+  "reasoning_trace": [
+    {
+      "step": "trend",
+      "data": "收盘价378.77已跌破MA20(381.14)，短期均线虽多头排列但价格失守关键支撑，趋势转弱。",
+      "conclusion": "短期趋势由多转空。"
+    },
+    {
+      "step": "momentum",
+      "data": "MACD死叉，KDJ死叉向下，RSI(47.1)中性偏弱，主力单日净流出21.63亿，动能衰竭。",
+      "conclusion": "动能指标全面转空。"
+    },
+    {
+      "step": "levels",
+      "data": "收盘价下方支撑为密集成交锚点366.11及前低346.74；上方压力为MA20(381.14)及MA60(405.18)。",
+      "conclusion": "处于支撑与压力之间的真空地带。"
+    },
+    {
+      "step": "context",
+      "data": "市场整体偏空，北向资金净流出，主力资金大幅流出，板块轮动至传统行业。",
+      "conclusion": "外部环境对科技股不利。"
+    },
+    {
+      "step": "psychology",
+      "data": "放量下跌显示恐慌抛售，跌破MA20可能引发技术性止损盘，短期情绪偏空。",
+      "conclusion": "市场情绪偏向恐慌。"
+    },
+    {
+      "step": "decision",
+      "data": "价格行为转弱，动能衰竭，且缺乏明确的非对称性支撑位，盈亏比不佳。",
+      "conclusion": "无高期望值机会，维持观望。"
+    }
+  ],
+  "counter_argument": "股价处于中期机会位（18%），若能在366.11附近企稳，可能形成中期底部，存在左侧博弈机会。",
+  "news_analysis": [],
+  "tactics": {
+    "holding_profit": [
+      {
+        "priority": "P1",
+        "action": "减仓或离场",
+        "trigger": "股价反弹至MA20(381.14)附近承压，或明日开盘后继续走弱。",
+        "target_price": null,
+        "stop_advance_price": 366.11,
+        "reason": "趋势转弱，保护利润优先。"
+      },
+      {
+        "priority": "P2",
+        "action": "观察反弹力度",
+        "trigger": "股价放量站回MA20(381.14)之上。",
+        "target_price": null,
+        "stop_advance_price": null,
+        "reason": "若强势收复，则趋势可能修复。"
+      }
+    ],
+    "holding_loss": [
+      {
+        "priority": "P1",
+        "action": "严格止损",
+        "trigger": "股价跌破关键支撑位366.11。",
+        "stop_loss_price": 366.11,
+        "reason": "跌破筹码密集区，下行空间打开。"
+      },
+      {
+        "priority": "P2",
+        "action": "反弹减亏",
+        "trigger": "股价反弹至MA20(381.14)附近。",
+        "stop_loss_price": null,
+        "reason": "利用反弹降低仓位，减少亏损。"
+      }
+    ],
+    "empty": [
+      {
+        "priority": "P1",
+        "action": "保持观望",
+        "trigger": "无明确信号，等待企稳。",
+        "buy_zone_price": null,
+        "reason": "趋势不明，缺乏高赔率买点。"
+      },
+      {
+        "priority": "P2",
+        "action": "观察企稳信号",
+        "trigger": "股价在366.11附近缩量企稳，或放量站回MA20(381.14)。",
+        "buy_zone_price": [366.11, 375.67],
+        "reason": "等待关键支撑位确认或趋势修复。"
+      }
+    ]
+  },
+  "key_levels": {
+    "immediate_support": [366.11, 346.74],
+    "immediate_resistance": [381.14, 405.18],
+    "strong_support": 346.74,
+    "strong_resistance": 405.18,
+    "breakout_confirmation_level": 381.14,
+    "stop_loss_reference": 350.0
+  },
+  "conflict_resolution": "中期位置低提供支撑，但短期价格行为与动能转空，矛盾。以短期价格行为为准，等待更清晰信号。",
+  "tomorrow_focus": "关注股价在366.11支撑位的表现及能否收复MA20(381.14)。"
+}

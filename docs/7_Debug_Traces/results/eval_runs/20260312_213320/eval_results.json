@@ -1,0 +1,395 @@
+{
+  "run_id": "20260312_213320",
+  "manifest": {
+    "path": "/Users/yesun/Code/stockwise/docs/7_Debug_Traces/eval_manifest.json",
+    "case_count": 1
+  },
+  "provider": {
+    "provider": "gemini_local",
+    "model": "gemini-3-flash",
+    "base_url": "http://127.0.0.1:8045",
+    "temperature": 0.1,
+    "max_tokens": 12000,
+    "cooldown_s": 0.0,
+    "retries": 1,
+    "retry_delay_s": 8.0
+  },
+  "summary": {
+    "total_cases": 1,
+    "parse_success_rate": 1.0,
+    "raw_enum_compliance_rate": 1.0,
+    "normalized_enum_compliance_rate": 1.0,
+    "normalized_tactics_compliance_rate": 1.0,
+    "normalized_key_levels_compliance_rate": 1.0,
+    "assertion_pass_rate": 1.0,
+    "avg_latency_s": 30.173,
+    "avg_total_tokens": 12377.0,
+    "by_group": {
+      "four_way_benchmark": {
+        "cases": 1,
+        "assertion_pass": 1,
+        "avg_latency_s": 30.173,
+        "avg_total_tokens": 12377.0
+      }
+    }
+  },
+  "results": [
+    {
+      "case_id": "baseline_old",
+      "group": "four_way_benchmark",
+      "signal_mode": "legacy",
+      "meta": {
+        "input_tokens": 7175,
+        "output_tokens": 1181,
+        "total_tokens": 12377,
+        "latency_ms": 30172,
+        "error": null
+      },
+      "latency_s": 30.173,
+      "raw": {
+        "signal": "Side",
+        "confidence": 0.85,
+        "enum_compliant": true,
+        "tactics_contract": {
+          "present": true,
+          "all_buckets_present": true,
+          "all_lists": true,
+          "all_len_2": true,
+          "compliant": true
+        },
+        "key_levels_contract": {
+          "present": true,
+          "support_len_2": true,
+          "resistance_len_2": true,
+          "semantic_order_ok": true,
+          "compliant": true
+        },
+        "content": "{\n  \"signal\": \"Side\",\n  \"confidence\": 0.85,\n  \"summary\": \"股价放量跌破MA20关键支撑，短期动能转弱，主力资金大幅流出，建议场外观望等待企稳。\",\n  \"reasoning_trace\": [\n    {\n      \"step\": \"trend\",\n      \"data\": \"价格跌破MA20(381.14)，短期均线空头排列，中期受制于MA60压力。\",\n      \"conclusion\": \"短期趋势转弱\"\n    },\n    {\n      \"step\": \"momentum\",\n      \"data\": \"MACD与KDJ双重死叉向下，RSI跌破中轴，空头动能占据主导。\",\n      \"conclusion\": \"动能向下发散\"\n    },\n    {\n      \"step\": \"levels\",\n      \"data\": \"跌破MA20后，下方支撑见366.11密集成交区及346.74波段低点。\",\n      \"conclusion\": \"支撑下移\"\n    },\n    {\n      \"step\": \"context\",\n      \"data\": \"市场整体偏弱，主力资金单日净流出超21亿，机构抛压沉重。\",\n      \"conclusion\": \"资金面显著承压\"\n    },\n    {\n      \"step\": \"psychology\",\n      \"data\": \"连续阴线破坏多头信心，放量下跌显示恐慌盘涌出，短期难有合力。\",\n      \"conclusion\": \"情绪陷入低迷\"\n    },\n    {\n      \"step\": \"decision\",\n      \"data\": \"趋势破位且无止跌迹象，盈亏比不佳，执行Side策略规避风险。\",\n      \"conclusion\": \"维持观望评级\"\n    }\n  ],\n  \"counter_argument\": \"若股价能在366附近缩量企稳并快速收复MA20，则存在假破位反抽可能。\",\n  \"news_analysis\": [],\n  \"tactics\": {\n    \"holding_profit\": [\n      {\n        \"priority\": \"P1\",\n        \"action\": \"减仓锁定利润\",\n        \"trigger\": \"股价反抽381.14不破\",\n        \"target_price\": 405.18,\n        \"stop_advance_price\": 375.0,\n        \"reason\": \"趋势破位需优先保护利润\"\n      },\n      {\n        \"priority\": \"P2\",\n        \"action\": \"观察反弹力度\",\n        \"trigger\": \"站稳381.14后看391.07\",\n        \"target_price\": 422.6,\n        \"stop_advance_price\": 381.14,\n        \"reason\": \"确认反弹强度再行决策\"\n      }\n    ],\n    \"holding_loss\": [\n      {\n        \"priority\": \"P1\",\n        \"action\": \"破位止损\",\n        \"trigger\": \"收盘价跌破366.11\",\n        \"stop_loss_price\": 366.11,\n        \"reason\": \"防止亏损进一步扩大\"\n      },\n      {\n        \"priority\": \"P2\",\n        \"action\": \"反抽减仓\",\n        \"trigger\": \"股价反弹至381.14附近\",\n        \"stop_loss_price\": 353.0,\n        \"reason\": \"利用反抽降低持仓成本\"\n      }\n    ],\n    \"empty\": [\n      {\n        \"priority\": \"P1\",\n        \"action\": \"左侧等待\",\n        \"trigger\": \"缩量回调至366.11附近企稳\",\n        \"buy_zone_price\": \"360.0-366.11\",\n        \"reason\": \"密集成交区具备博弈价值\"\n      },\n      {\n        \"priority\": \"P2\",\n        \"action\": \"右侧确认\",\n        \"trigger\": \"放量收复391.07确认止跌\",\n        \"buy_zone_price\": \"391.07-395.0\",\n        \"reason\": \"趋势扭转后再行入场\"\n      }\n    ]\n  },\n  \"key_levels\": {\n    \"immediate_support\": [366.11, 346.74],\n    \"immediate_resistance\": [381.14, 391.07],\n    \"strong_support\": 346.74,\n    \"strong_resistance\": 405.18,\n    \"breakout_confirmation_level\": 391.07,\n    \"stop_loss_reference\": 340.63\n  },\n  \"conflict_resolution\": \"均线多头与指标死叉矛盾，以价格破位MA20为准，判定短期走势已坏。\",\n  \"tomorrow_focus\": \"关注366.11支撑强度及主力资金流向是否放缓。\"\n}"
+      },
+      "parser": {
+        "parse_success": true,
+        "parse_error": null,
+        "diagnostics": {
+          "stage": "strict",
+          "used_dirtyjson": false,
+          "normalized": false,
+          "truncated_hint": false
+        },
+        "parsed_model": {
+          "signal": "Side",
+          "confidence": 0.85,
+          "summary": "股价放量跌破MA20关键支撑，短期动能转弱，主力资金大幅流出，建议场外观望等待企稳。",
+          "reasoning_trace": [
+            {
+              "step": "trend",
+              "data": "价格跌破MA20(381.14)，短期均线空头排列，中期受制于MA60压力。",
+              "conclusion": "短期趋势转弱"
+            },
+            {
+              "step": "momentum",
+              "data": "MACD与KDJ双重死叉向下，RSI跌破中轴，空头动能占据主导。",
+              "conclusion": "动能向下发散"
+            },
+            {
+              "step": "levels",
+              "data": "跌破MA20后，下方支撑见366.11密集成交区及346.74波段低点。",
+              "conclusion": "支撑下移"
+            },
+            {
+              "step": "context",
+              "data": "市场整体偏弱，主力资金单日净流出超21亿，机构抛压沉重。",
+              "conclusion": "资金面显著承压"
+            },
+            {
+              "step": "psychology",
+              "data": "连续阴线破坏多头信心，放量下跌显示恐慌盘涌出，短期难有合力。",
+              "conclusion": "情绪陷入低迷"
+            },
+            {
+              "step": "decision",
+              "data": "趋势破位且无止跌迹象，盈亏比不佳，执行Side策略规避风险。",
+              "conclusion": "维持观望评级"
+            }
+          ],
+          "news_analysis": [],
+          "tactics": {
+            "holding_profit": [
+              {
+                "priority": "P1",
+                "action": "减仓锁定利润",
+                "trigger": "股价反抽381.14不破",
+                "target_price": 405.18,
+                "stop_advance_price": 375.0,
+                "stop_loss_price": null,
+                "buy_zone_price": null,
+                "reason": "趋势破位需优先保护利润"
+              },
+              {
+                "priority": "P2",
+                "action": "观察反弹力度",
+                "trigger": "站稳381.14后看391.07",
+                "target_price": 422.6,
+                "stop_advance_price": 381.14,
+                "stop_loss_price": null,
+                "buy_zone_price": null,
+                "reason": "确认反弹强度再行决策"
+              }
+            ],
+            "holding_loss": [
+              {
+                "priority": "P1",
+                "action": "破位止损",
+                "trigger": "收盘价跌破366.11",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": 366.11,
+                "buy_zone_price": null,
+                "reason": "防止亏损进一步扩大"
+              },
+              {
+                "priority": "P2",
+                "action": "反抽减仓",
+                "trigger": "股价反弹至381.14附近",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": 353.0,
+                "buy_zone_price": null,
+                "reason": "利用反抽降低持仓成本"
+              }
+            ],
+            "empty": [
+              {
+                "priority": "P1",
+                "action": "左侧等待",
+                "trigger": "缩量回调至366.11附近企稳",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": "360.0-366.11",
+                "reason": "密集成交区具备博弈价值"
+              },
+              {
+                "priority": "P2",
+                "action": "右侧确认",
+                "trigger": "放量收复391.07确认止跌",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": "391.07-395.0",
+                "reason": "趋势扭转后再行入场"
+              }
+            ],
+            "holding": [],
+            "general": []
+          },
+          "key_levels": {
+            "immediate_support": [
+              366.11,
+              346.74
+            ],
+            "immediate_resistance": [
+              381.14,
+              391.07
+            ],
+            "strong_support": 346.74,
+            "strong_resistance": 405.18,
+            "breakout_confirmation_level": 391.07,
+            "stop_loss_reference": 340.63,
+            "support": 0.0,
+            "resistance": 0.0,
+            "stop_loss": 0.0
+          },
+          "conflict_resolution": "均线多头与指标死叉矛盾，以价格破位MA20为准，判定短期走势已坏。",
+          "tomorrow_focus": "关注366.11支撑强度及主力资金流向是否放缓。",
+          "counter_argument": "若股价能在366附近缩量企稳并快速收复MA20，则存在假破位反抽可能。",
+          "close_anchor": 378.77
+        }
+      },
+      "normalized": {
+        "signal": "Side",
+        "confidence": 0.85,
+        "enum_compliant": true,
+        "tactics_contract": {
+          "present": true,
+          "all_buckets_present": true,
+          "all_lists": true,
+          "all_len_2": true,
+          "compliant": true
+        },
+        "key_levels_contract": {
+          "present": true,
+          "support_len_2": true,
+          "resistance_len_2": true,
+          "semantic_order_ok": true,
+          "compliant": true
+        },
+        "layer1_expected_signal": "Side",
+        "layer1_alignment_ok": true,
+        "key_levels_meta": {
+          "immediate_support_source": "model",
+          "immediate_resistance_source": "model"
+        },
+        "output": {
+          "signal": "Side",
+          "confidence": 0.85,
+          "summary": "股价放量跌破MA20关键支撑，短期动能转弱，主力资金大幅流出，建议场外观望等待企稳。",
+          "reasoning_trace": [
+            {
+              "step": "trend",
+              "data": "价格跌破MA20(381.14)，短期均线空头排列，中期受制于MA60压力。",
+              "conclusion": "短期趋势转弱"
+            },
+            {
+              "step": "momentum",
+              "data": "MACD与KDJ双重死叉向下，RSI跌破中轴，空头动能占据主导。",
+              "conclusion": "动能向下发散"
+            },
+            {
+              "step": "levels",
+              "data": "跌破MA20后，下方支撑见366.11密集成交区及346.74波段低点。",
+              "conclusion": "支撑下移"
+            },
+            {
+              "step": "context",
+              "data": "市场整体偏弱，主力资金单日净流出超21亿，机构抛压沉重。",
+              "conclusion": "资金面显著承压"
+            },
+            {
+              "step": "psychology",
+              "data": "连续阴线破坏多头信心，放量下跌显示恐慌盘涌出，短期难有合力。",
+              "conclusion": "情绪陷入低迷"
+            },
+            {
+              "step": "decision",
+              "data": "趋势破位且无止跌迹象，盈亏比不佳，执行Side策略规避风险。",
+              "conclusion": "维持观望评级"
+            }
+          ],
+          "counter_argument": "若股价能在366附近缩量企稳并快速收复MA20，则存在假破位反抽可能。",
+          "news_analysis": [],
+          "tactics": {
+            "holding_profit": [
+              {
+                "priority": "P1",
+                "action": "减仓锁定利润",
+                "trigger": "股价反抽381.14不破",
+                "reason": "趋势破位需优先保护利润",
+                "target_price": 405.18,
+                "stop_advance_price": 375.0,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              },
+              {
+                "priority": "P2",
+                "action": "观察反弹力度",
+                "trigger": "站稳381.14后看391.07",
+                "reason": "确认反弹强度再行决策",
+                "target_price": 422.6,
+                "stop_advance_price": 381.14,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              }
+            ],
+            "holding_loss": [
+              {
+                "priority": "P1",
+                "action": "破位止损",
+                "trigger": "收盘价跌破366.11",
+                "reason": "防止亏损进一步扩大",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": 366.11,
+                "buy_zone_price": null
+              },
+              {
+                "priority": "P2",
+                "action": "反抽减仓",
+                "trigger": "股价反弹至381.14附近",
+                "reason": "利用反抽降低持仓成本",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": 353.0,
+                "buy_zone_price": null
+              }
+            ],
+            "empty": [
+              {
+                "priority": "P1",
+                "action": "左侧等待",
+                "trigger": "缩量回调至366.11附近企稳",
+                "reason": "密集成交区具备博弈价值",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": "360.0-366.11"
+              },
+              {
+                "priority": "P2",
+                "action": "右侧确认",
+                "trigger": "放量收复391.07确认止跌",
+                "reason": "趋势扭转后再行入场",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": "391.07-395.0"
+              }
+            ]
+          },
+          "key_levels": {
+            "immediate_support": [
+              366.11,
+              346.74
+            ],
+            "immediate_resistance": [
+              381.14,
+              391.07
+            ],
+            "strong_support": 346.74,
+            "strong_resistance": 405.18,
+            "breakout_confirmation_level": 391.07,
+            "stop_loss_reference": 340.63,
+            "support": 366.11,
+            "resistance": 381.14,
+            "stop_loss": 340.63
+          },
+          "conflict_resolution": "均线多头与指标死叉矛盾，以价格破位MA20为准，判定短期走势已坏。",
+          "tomorrow_focus": "关注366.11支撑强度及主力资金流向是否放缓。",
+          "key_levels_meta": {
+            "immediate_support_source": "model",
+            "immediate_resistance_source": "model"
+          },
+          "close_anchor": 378.77
+        }
+      },
+      "assertions": [
+        {
+          "name": "parse_success",
+          "passed": true,
+          "actual": true,
+          "expected": true
+        },
+        {
+          "name": "normalized_signal_in",
+          "passed": true,
+          "actual": "Side",
+          "expected": [
+            "Side"
+          ]
+        },
+        {
+          "name": "normalized_tactics_compliant",
+          "passed": true,
+          "actual": true,
+          "expected": true
+        },
+        {
+          "name": "normalized_key_levels_compliant",
+          "passed": true,
+          "actual": true,
+          "expected": true
+        }
+      ],
+      "all_assertions_passed": true
+    }
+  ]
+}

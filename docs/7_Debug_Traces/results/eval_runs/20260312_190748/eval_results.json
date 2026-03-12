@@ -1,0 +1,2200 @@
+{
+  "run_id": "20260312_190748",
+  "manifest": {
+    "path": "/Users/yesun/Code/stockwise/docs/7_Debug_Traces/eval_manifest.json",
+    "case_count": 10
+  },
+  "provider": {
+    "provider": "gemini_local",
+    "model": "gemini-3-flash",
+    "base_url": "http://127.0.0.1:8045"
+  },
+  "summary": {
+    "total_cases": 10,
+    "parse_success_rate": 0.5,
+    "raw_enum_compliance_rate": 0.5,
+    "normalized_enum_compliance_rate": 0.5,
+    "normalized_tactics_compliance_rate": 0.7,
+    "normalized_key_levels_compliance_rate": 0.7,
+    "assertion_pass_rate": 0.4,
+    "avg_latency_s": 20.268,
+    "avg_total_tokens": 6428.6,
+    "by_group": {
+      "four_way_benchmark": {
+        "cases": 4,
+        "assertion_pass": 1,
+        "avg_latency_s": 22.12,
+        "avg_total_tokens": 7094.0
+      },
+      "layer1_constraint": {
+        "cases": 2,
+        "assertion_pass": 0,
+        "avg_latency_s": 17.6,
+        "avg_total_tokens": 6416.0
+      },
+      "four_state_semantics": {
+        "cases": 2,
+        "assertion_pass": 1,
+        "avg_latency_s": 19.151,
+        "avg_total_tokens": 5674.0
+      },
+      "fair_3_vs_4_states": {
+        "cases": 2,
+        "assertion_pass": 2,
+        "avg_latency_s": 20.352,
+        "avg_total_tokens": 5858.5
+      }
+    }
+  },
+  "results": [
+    {
+      "case_id": "baseline_old",
+      "group": "four_way_benchmark",
+      "signal_mode": "legacy",
+      "meta": {
+        "input_tokens": 7175,
+        "output_tokens": 162,
+        "total_tokens": 11267,
+        "latency_ms": 23989,
+        "error": null
+      },
+      "latency_s": 23.991,
+      "raw": {
+        "signal": null,
+        "confidence": null,
+        "enum_compliant": false,
+        "tactics_contract": {
+          "present": false,
+          "all_buckets_present": false,
+          "all_lists": false,
+          "all_len_2": false,
+          "compliant": false
+        },
+        "key_levels_contract": {
+          "present": false,
+          "support_len_2": false,
+          "resistance_len_2": false,
+          "semantic_order_ok": false,
+          "compliant": false
+        },
+        "content": "{\n  \"signal\": \"Side\",\n  \"confidence\": 0.85,\n  \"summary\": \"股价跌破MA20支撑，资金流出显著且技术指标死叉，短期下行压力大，建议观望等待支撑确认。\",\n  \"reasoning_trace\": [\n    {\n      \"step\": \"trend\",\n      \"data\": \"收盘价378.77跌破MA20(381.14)，短期多头形态遭到破坏，进入震荡调整期。\",\n      \"conclusion\": \"趋势转入弱势震荡\"\n    },\n    {\n      \"step\": \"momentum\",\n      \"data\": \"MACD与KDJ双死叉向下，"
+      },
+      "parser": {
+        "parse_success": false,
+        "parse_error": "Invalid JSON syntax: Unterminated string starting at: line 13 column 15 (char 302)",
+        "diagnostics": null,
+        "parsed_model": null
+      },
+      "normalized": {
+        "signal": null,
+        "confidence": null,
+        "enum_compliant": false,
+        "tactics_contract": {
+          "present": false,
+          "all_buckets_present": false,
+          "all_lists": false,
+          "all_len_2": false,
+          "compliant": false
+        },
+        "key_levels_contract": {
+          "present": false,
+          "support_len_2": false,
+          "resistance_len_2": false,
+          "semantic_order_ok": false,
+          "compliant": false
+        },
+        "layer1_expected_signal": "Side",
+        "layer1_alignment_ok": false,
+        "key_levels_meta": null,
+        "output": {
+          "close_anchor": 378.77
+        }
+      },
+      "assertions": [
+        {
+          "name": "parse_success",
+          "passed": false,
+          "actual": false,
+          "expected": true
+        },
+        {
+          "name": "normalized_signal_in",
+          "passed": false,
+          "actual": null,
+          "expected": [
+            "Side"
+          ]
+        },
+        {
+          "name": "normalized_tactics_compliant",
+          "passed": false,
+          "actual": false,
+          "expected": true
+        },
+        {
+          "name": "normalized_key_levels_compliant",
+          "passed": false,
+          "actual": false,
+          "expected": true
+        }
+      ],
+      "all_assertions_passed": false
+    },
+    {
+      "case_id": "b1_minimal_features",
+      "group": "four_way_benchmark",
+      "signal_mode": "legacy",
+      "meta": {
+        "input_tokens": 1903,
+        "output_tokens": 385,
+        "total_tokens": 5995,
+        "latency_ms": 23522,
+        "error": null
+      },
+      "latency_s": 23.523,
+      "raw": {
+        "signal": null,
+        "confidence": null,
+        "enum_compliant": false,
+        "tactics_contract": {
+          "present": false,
+          "all_buckets_present": false,
+          "all_lists": false,
+          "all_len_2": false,
+          "compliant": false
+        },
+        "key_levels_contract": {
+          "present": false,
+          "support_len_2": false,
+          "resistance_len_2": false,
+          "semantic_order_ok": false,
+          "compliant": false
+        },
+        "content": "{\n  \"internal_reasoning\": \"新易盛 (300502) 在 2026-03-12 的表现极度恶劣，开盘即在 400.01 点的关键心理关口承压，随后放量杀跌，收盘 378.77 形成近乎光脚的实体阴线。核心矛盾在于：尽管前期试图构建 VCP 整理，但今日的实体长阴直接掼穿了 MA5、MA10 及最重要的趋势生命线 MA20 (381.14)，且成交量较前日放大，呈现典型的‘放量破位’特征。主力资金单日净流出 21.63 亿，反映了机构在高位的剧烈出货意图，多头防线在 400 点附近被彻底击碎。当前 ATR 波动率高达 25.42，而股价已偏离均线支撑，Layer-1 的 RiskOff 裁决极具前瞻性。由于 MACD 死叉且 KDJ 持续下行，短期动能已完全转空。VCP 模式在此处演变成了高位的多头陷阱，而非突破前的收缩。在没有缩量止跌信号出现前，任何基于‘跌深反弹’的博弈都缺乏非对称收益比，下方的筹码锚点 366.11 是短期唯一的心理支撑，若此位失守，将面临向 20 日低点 346.74 回归的风险。\",\n  \"signal\": \"Side\",\n  \"confidence\": 0.25,\n  \"summary\": \"放量掼穿MA20生命线，主力"
+      },
+      "parser": {
+        "parse_success": false,
+        "parse_error": "Invalid JSON syntax: Unterminated string starting at: line 5 column 14 (char 529)",
+        "diagnostics": null,
+        "parsed_model": null
+      },
+      "normalized": {
+        "signal": null,
+        "confidence": null,
+        "enum_compliant": false,
+        "tactics_contract": {
+          "present": false,
+          "all_buckets_present": false,
+          "all_lists": false,
+          "all_len_2": false,
+          "compliant": false
+        },
+        "key_levels_contract": {
+          "present": false,
+          "support_len_2": false,
+          "resistance_len_2": false,
+          "semantic_order_ok": false,
+          "compliant": false
+        },
+        "layer1_expected_signal": "Side",
+        "layer1_alignment_ok": false,
+        "key_levels_meta": null,
+        "output": {
+          "close_anchor": 378.77
+        }
+      },
+      "assertions": [
+        {
+          "name": "parse_success",
+          "passed": false,
+          "actual": false,
+          "expected": true
+        },
+        {
+          "name": "normalized_signal_in",
+          "passed": false,
+          "actual": null,
+          "expected": [
+            "Side"
+          ]
+        },
+        {
+          "name": "normalized_tactics_compliant",
+          "passed": false,
+          "actual": false,
+          "expected": true
+        },
+        {
+          "name": "normalized_key_levels_compliant",
+          "passed": false,
+          "actual": false,
+          "expected": true
+        },
+        {
+          "name": "layer1_alignment",
+          "passed": false,
+          "actual": false,
+          "expected": true
+        }
+      ],
+      "all_assertions_passed": false
+    },
+    {
+      "case_id": "b2_rich_tables",
+      "group": "four_way_benchmark",
+      "signal_mode": "legacy",
+      "meta": {
+        "input_tokens": 3073,
+        "output_tokens": 822,
+        "total_tokens": 6811,
+        "latency_ms": 22523,
+        "error": null
+      },
+      "latency_s": 22.524,
+      "raw": {
+        "signal": "Wait",
+        "confidence": 0.85,
+        "enum_compliant": false,
+        "tactics_contract": {
+          "present": true,
+          "all_buckets_present": true,
+          "all_lists": true,
+          "all_len_2": true,
+          "compliant": true
+        },
+        "key_levels_contract": {
+          "present": true,
+          "support_len_2": true,
+          "resistance_len_2": true,
+          "semantic_order_ok": true,
+          "compliant": true
+        },
+        "content": "{\n  \"internal_reasoning\": \"新易盛在2026-03-12的走势表现出明显的弱势。价格以跳空低开后震荡下行，最终放量跌破了MA20（381.14）这一关键生命线。从VCP模式来看，目前并未看到波动收缩，反而是在高位放量下跌，显示出供应压力极大。主力资金净流出21.63亿，这是一个极其负面的信号，暗示大资金正在撤离。尽管周线图上RSI仍处于中位，但日线级别的MACD死叉和KDJ下行确认了短期调整的开启。Layer-1的RiskOff环境要求我们必须尊重趋势的向下修正。目前价格下方唯一的心理支撑是366.11的筹码锚点。如果该位置失守，股价可能会回测346.74的区间下沿。在没有看到缩量止跌和价格重回均线系统上方之前，任何抄底行为都是对抗趋势的博弈，不符合米勒维尼的高期望值原则。此外，由于沪深300ETF表现偏弱且北向资金流出，整体量化环境不支持激进操作。当前ATR高达25.42，意味着波动极不稳定，不满足VCP进入末端收缩的入场条件。交易者应保持冷静，等待市场给出更清晰的止跌信号。\",\n  \"signal\": \"Wait\",\n  \"confidence\": 0.85,\n  \"summary\": \"放量跌破MA20支撑，主力资金大幅流出，当前处于RiskOff状态，建议空仓观望。\",\n  \"tactics\": {\n    \"holding_profit\": [\n      {\"priority\": \"P1\", \"action\": \"破位止盈\", \"trigger\": \"股价跌破 375.00 触发 50% 减仓。\", \"reason\": \"防范短期破位后的惯性下杀。\"},\n      {\"priority\": \"P2\", \"action\": \"清仓防御\", \"trigger\": \"日线收盘无法收复 381.14（MA20）。\", \"reason\": \"确认中期趋势转弱，保护利润。\"}\n    ],\n    \"holding_loss\": [\n      {\"priority\": \"P1\", \"action\": \"止损离场\", \"trigger\": \"价格跌破 366.11 筹码锚点。\", \"reason\": \"防止亏损扩大至不可控范围。\"},\n      {\"priority\": \"P2\", \"action\": \"逢高减压\", \"trigger\": \"股价反弹至 385.00（MA10）附近受阻。\", \"reason\": \"降低仓位权重，缓解心理压力。\"}\n    ],\n    \"empty\": [\n      {\"priority\": \"P1\", \"action\": \"耐心等待\", \"trigger\": \"等待 ATR-14 降至 15 以下且出现缩量整理。\", \"reason\": \"寻找符合 VCP 模式的波动收缩买点。\"},\n      {\"priority\": \"P2\", \"action\": \"右侧确认\", \"trigger\": \"放量收复 405.18（MA60）且 Layer-1 转为 RiskOn。\", \"reason\": \"确认趋势反转后再行介入。\"}\n    ]\n  },\n  \"key_levels\": {\n    \"immediate_support\": [366.11, 346.74],\n    \"immediate_resistance\": [381.14, 405.18],\n    \"stop_loss_reference\": 340.64\n  }\n}"
+      },
+      "parser": {
+        "parse_success": true,
+        "parse_error": null,
+        "diagnostics": {
+          "stage": "strict",
+          "used_dirtyjson": false,
+          "normalized": false,
+          "truncated_hint": false
+        },
+        "parsed_model": {
+          "signal": "Side",
+          "confidence": 0.85,
+          "summary": "放量跌破MA20支撑，主力资金大幅流出，当前处于RiskOff状态，建议空仓观望。",
+          "reasoning_trace": [],
+          "news_analysis": [],
+          "tactics": {
+            "holding_profit": [
+              {
+                "priority": "P1",
+                "action": "破位止盈",
+                "trigger": "股价跌破 375.00 触发 50% 减仓。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null,
+                "reason": "防范短期破位后的惯性下杀。"
+              },
+              {
+                "priority": "P2",
+                "action": "清仓防御",
+                "trigger": "日线收盘无法收复 381.14（MA20）。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null,
+                "reason": "确认中期趋势转弱，保护利润。"
+              }
+            ],
+            "holding_loss": [
+              {
+                "priority": "P1",
+                "action": "止损离场",
+                "trigger": "价格跌破 366.11 筹码锚点。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null,
+                "reason": "防止亏损扩大至不可控范围。"
+              },
+              {
+                "priority": "P2",
+                "action": "逢高减压",
+                "trigger": "股价反弹至 385.00（MA10）附近受阻。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null,
+                "reason": "降低仓位权重，缓解心理压力。"
+              }
+            ],
+            "empty": [
+              {
+                "priority": "P1",
+                "action": "耐心等待",
+                "trigger": "等待 ATR-14 降至 15 以下且出现缩量整理。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null,
+                "reason": "寻找符合 VCP 模式的波动收缩买点。"
+              },
+              {
+                "priority": "P2",
+                "action": "右侧确认",
+                "trigger": "放量收复 405.18（MA60）且 Layer-1 转为 RiskOn。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null,
+                "reason": "确认趋势反转后再行介入。"
+              }
+            ],
+            "holding": [],
+            "general": []
+          },
+          "key_levels": {
+            "immediate_support": [
+              366.11,
+              346.74
+            ],
+            "immediate_resistance": [
+              381.14,
+              405.18
+            ],
+            "strong_support": 0.0,
+            "strong_resistance": 0.0,
+            "breakout_confirmation_level": 0.0,
+            "stop_loss_reference": 340.64,
+            "support": 0.0,
+            "resistance": 0.0,
+            "stop_loss": 0.0
+          },
+          "conflict_resolution": "",
+          "tomorrow_focus": "",
+          "counter_argument": "",
+          "close_anchor": 378.77
+        }
+      },
+      "normalized": {
+        "signal": "Side",
+        "confidence": 0.85,
+        "enum_compliant": true,
+        "tactics_contract": {
+          "present": true,
+          "all_buckets_present": true,
+          "all_lists": true,
+          "all_len_2": true,
+          "compliant": true
+        },
+        "key_levels_contract": {
+          "present": true,
+          "support_len_2": true,
+          "resistance_len_2": true,
+          "semantic_order_ok": true,
+          "compliant": true
+        },
+        "layer1_expected_signal": "Side",
+        "layer1_alignment_ok": true,
+        "key_levels_meta": {
+          "immediate_support_source": "model",
+          "immediate_resistance_source": "model"
+        },
+        "output": {
+          "internal_reasoning": "新易盛在2026-03-12的走势表现出明显的弱势。价格以跳空低开后震荡下行，最终放量跌破了MA20（381.14）这一关键生命线。从VCP模式来看，目前并未看到波动收缩，反而是在高位放量下跌，显示出供应压力极大。主力资金净流出21.63亿，这是一个极其负面的信号，暗示大资金正在撤离。尽管周线图上RSI仍处于中位，但日线级别的MACD死叉和KDJ下行确认了短期调整的开启。Layer-1的RiskOff环境要求我们必须尊重趋势的向下修正。目前价格下方唯一的心理支撑是366.11的筹码锚点。如果该位置失守，股价可能会回测346.74的区间下沿。在没有看到缩量止跌和价格重回均线系统上方之前，任何抄底行为都是对抗趋势的博弈，不符合米勒维尼的高期望值原则。此外，由于沪深300ETF表现偏弱且北向资金流出，整体量化环境不支持激进操作。当前ATR高达25.42，意味着波动极不稳定，不满足VCP进入末端收缩的入场条件。交易者应保持冷静，等待市场给出更清晰的止跌信号。",
+          "signal": "Side",
+          "confidence": 0.85,
+          "summary": "放量跌破MA20支撑，主力资金大幅流出，当前处于RiskOff状态，建议空仓观望。",
+          "tactics": {
+            "holding_profit": [
+              {
+                "priority": "P1",
+                "action": "破位止盈",
+                "trigger": "股价跌破 375.00 触发 50% 减仓。",
+                "reason": "防范短期破位后的惯性下杀。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              },
+              {
+                "priority": "P2",
+                "action": "清仓防御",
+                "trigger": "日线收盘无法收复 381.14（MA20）。",
+                "reason": "确认中期趋势转弱，保护利润。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              }
+            ],
+            "holding_loss": [
+              {
+                "priority": "P1",
+                "action": "止损离场",
+                "trigger": "价格跌破 366.11 筹码锚点。",
+                "reason": "防止亏损扩大至不可控范围。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              },
+              {
+                "priority": "P2",
+                "action": "逢高减压",
+                "trigger": "股价反弹至 385.00（MA10）附近受阻。",
+                "reason": "降低仓位权重，缓解心理压力。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              }
+            ],
+            "empty": [
+              {
+                "priority": "P1",
+                "action": "耐心等待",
+                "trigger": "等待 ATR-14 降至 15 以下且出现缩量整理。",
+                "reason": "寻找符合 VCP 模式的波动收缩买点。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              },
+              {
+                "priority": "P2",
+                "action": "右侧确认",
+                "trigger": "放量收复 405.18（MA60）且 Layer-1 转为 RiskOn。",
+                "reason": "确认趋势反转后再行介入。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              }
+            ]
+          },
+          "key_levels": {
+            "immediate_support": [
+              366.11,
+              346.74
+            ],
+            "immediate_resistance": [
+              381.14,
+              405.18
+            ],
+            "stop_loss_reference": 340.64,
+            "strong_support": 0,
+            "strong_resistance": 0,
+            "breakout_confirmation_level": 0,
+            "support": 366.11,
+            "resistance": 381.14,
+            "stop_loss": 340.64
+          },
+          "news_analysis": [],
+          "reasoning_trace": [],
+          "counter_argument": "",
+          "key_levels_meta": {
+            "immediate_support_source": "model",
+            "immediate_resistance_source": "model"
+          },
+          "close_anchor": 378.77
+        }
+      },
+      "assertions": [
+        {
+          "name": "parse_success",
+          "passed": true,
+          "actual": true,
+          "expected": true
+        },
+        {
+          "name": "normalized_signal_in",
+          "passed": true,
+          "actual": "Side",
+          "expected": [
+            "Side"
+          ]
+        },
+        {
+          "name": "normalized_tactics_compliant",
+          "passed": true,
+          "actual": true,
+          "expected": true
+        },
+        {
+          "name": "normalized_key_levels_compliant",
+          "passed": true,
+          "actual": true,
+          "expected": true
+        },
+        {
+          "name": "layer1_alignment",
+          "passed": true,
+          "actual": true,
+          "expected": true
+        }
+      ],
+      "all_assertions_passed": true
+    },
+    {
+      "case_id": "b3_logic_distilled",
+      "group": "four_way_benchmark",
+      "signal_mode": "legacy",
+      "meta": {
+        "input_tokens": 1291,
+        "output_tokens": 662,
+        "total_tokens": 4303,
+        "latency_ms": 18441,
+        "error": null
+      },
+      "latency_s": 18.442,
+      "raw": {
+        "signal": null,
+        "confidence": null,
+        "enum_compliant": false,
+        "tactics_contract": {
+          "present": true,
+          "all_buckets_present": true,
+          "all_lists": true,
+          "all_len_2": true,
+          "compliant": true
+        },
+        "key_levels_contract": {
+          "present": true,
+          "support_len_2": true,
+          "resistance_len_2": true,
+          "semantic_order_ok": true,
+          "compliant": true
+        },
+        "content": "{\n  \"internal_reasoning\": \"当前新易盛（300502）呈现典型的“破位派发”特征，市场情绪已转入极度谨慎状态。蓝色方（Bear Case）认为技术面极度恶化，3月12日的放量长阴线不仅有效跌破了MA20（381.14）这一中期生命线，且收盘价贴近全天最低点，预示着次日仍有惯性下杀风险。资金面上，连续三日逾25亿的巨额抛售在光模块板块极为罕见，这标志着机构投资者已从“分歧”转向“一致出逃”。北向资金的流出与大盘走弱形成共振，加剧了估值下修的压力。AI模型此前的抄底失败是重要的负面反馈，证明市场已进入非理性杀跌阶段，任何过早的左侧介入都可能面临“接飞刀”的风险。红色方（Bull Case）则指出多头唯一的避风港在于366.11元附近的筹码密集区，此处聚集了大量前期获利盘与护盘资金，具备较强的结构性支撑。RSI目前位于47.1，虽未超卖，但已接近回归中值，暗示下杀斜率可能在触及筹码区后放缓。月线级别的长期上升通道尚未被完全破坏，当下的调整可视为对历史高位双顶压力的必要消化。最终决策：基于博弈赔率，当前下行空间尚未完全封闭，而反弹阻力重重。裁决信号为“观望（Side）”。在主力资金流向扭转前，不建议进行买入。应密切关注366.11元的支撑有效性，若该位置失守，股价将滑向346.74元的20日低点。\",\n  \"summary\": \"放量跌破MA20且主力巨额套现，趋势由强转弱，短期需回踩366.11元筹码支撑位。\",\n  \"key_levels\": {\n    \"immediate_support\": [\n      366.11,\n      346.74\n    ],\n    \"immediate_resistance\": [\n      381.14,\n      405.18\n    ]\n  },\n  \"tactics\": {\n    \"holding_profit\": \"建议大幅减仓或清仓，锁定前期利润，防范利润在破位加速期快速回吐。\",\n    \"holding_loss\": \"反抽MA20（381.14）不能站稳则坚决止损，拒绝任何形式的左侧摊平操作。\",\n    \"empty\": \"严格保持空仓观望，等待股价在366.11元附近企稳并出现资金回流信号后再行考虑。\"\n  },\n  \"stop_loss_reference\": 353.35\n}"
+      },
+      "parser": {
+        "parse_success": false,
+        "parse_error": "5 validation errors for StockAnalysisResult\nsignal\n  Field required [type=missing, input_value={'internal_reasoning': '...loss_reference': 353.35}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nconfidence\n  Field required [type=missing, input_value={'internal_reasoning': '...loss_reference': 353.35}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\ntactics.holding_profit\n  Input should be a valid list [type=list_type, input_value='建议大幅减仓或清...速期快速回吐。', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.12/v/list_type\ntactics.holding_loss\n  Input should be a valid list [type=list_type, input_value='反抽MA20（381.14）...左侧摊平操作。', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.12/v/list_type\ntactics.empty\n  Input should be a valid list [type=list_type, input_value='严格保持空仓观望...号后再行考虑。', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.12/v/list_type",
+        "diagnostics": null,
+        "parsed_model": null
+      },
+      "normalized": {
+        "signal": "Side",
+        "confidence": null,
+        "enum_compliant": true,
+        "tactics_contract": {
+          "present": true,
+          "all_buckets_present": true,
+          "all_lists": true,
+          "all_len_2": true,
+          "compliant": true
+        },
+        "key_levels_contract": {
+          "present": true,
+          "support_len_2": true,
+          "resistance_len_2": true,
+          "semantic_order_ok": true,
+          "compliant": true
+        },
+        "layer1_expected_signal": "Side",
+        "layer1_alignment_ok": true,
+        "key_levels_meta": {
+          "immediate_support_source": "model",
+          "immediate_resistance_source": "model"
+        },
+        "output": {
+          "internal_reasoning": "当前新易盛（300502）呈现典型的“破位派发”特征，市场情绪已转入极度谨慎状态。蓝色方（Bear Case）认为技术面极度恶化，3月12日的放量长阴线不仅有效跌破了MA20（381.14）这一中期生命线，且收盘价贴近全天最低点，预示着次日仍有惯性下杀风险。资金面上，连续三日逾25亿的巨额抛售在光模块板块极为罕见，这标志着机构投资者已从“分歧”转向“一致出逃”。北向资金的流出与大盘走弱形成共振，加剧了估值下修的压力。AI模型此前的抄底失败是重要的负面反馈，证明市场已进入非理性杀跌阶段，任何过早的左侧介入都可能面临“接飞刀”的风险。红色方（Bull Case）则指出多头唯一的避风港在于366.11元附近的筹码密集区，此处聚集了大量前期获利盘与护盘资金，具备较强的结构性支撑。RSI目前位于47.1，虽未超卖，但已接近回归中值，暗示下杀斜率可能在触及筹码区后放缓。月线级别的长期上升通道尚未被完全破坏，当下的调整可视为对历史高位双顶压力的必要消化。最终决策：基于博弈赔率，当前下行空间尚未完全封闭，而反弹阻力重重。裁决信号为“观望（Side）”。在主力资金流向扭转前，不建议进行买入。应密切关注366.11元的支撑有效性，若该位置失守，股价将滑向346.74元的20日低点。",
+          "summary": "放量跌破MA20且主力巨额套现，趋势由强转弱，短期需回踩366.11元筹码支撑位。",
+          "key_levels": {
+            "immediate_support": [
+              366.11,
+              346.74
+            ],
+            "immediate_resistance": [
+              381.14,
+              405.18
+            ],
+            "strong_support": 0,
+            "strong_resistance": 0,
+            "breakout_confirmation_level": 0,
+            "stop_loss_reference": 0,
+            "support": 366.11,
+            "resistance": 381.14
+          },
+          "tactics": {
+            "holding_profit": [
+              {
+                "priority": "P1",
+                "action": "持仓观察",
+                "trigger": "不跌破一防位",
+                "reason": "趋势未被破坏，先守纪律。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              },
+              {
+                "priority": "P2",
+                "action": "分批止盈预案",
+                "trigger": "接近一攻位且动能放缓",
+                "reason": "锁定波段利润，避免冲高回落。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              }
+            ],
+            "holding_loss": [
+              {
+                "priority": "P1",
+                "action": "严格止损",
+                "trigger": "有效跌破一防位",
+                "reason": "先控制回撤，避免亏损扩大。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              },
+              {
+                "priority": "P2",
+                "action": "反弹减仓",
+                "trigger": "反抽至压力位但未能突破",
+                "reason": "弱势反弹优先降风险。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              }
+            ],
+            "empty": [
+              {
+                "priority": "P1",
+                "action": "等待确认",
+                "trigger": "回踩一防位企稳后再评估",
+                "reason": "先等右侧信号，再考虑入场。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              },
+              {
+                "priority": "P2",
+                "action": "突破跟随预案",
+                "trigger": "放量突破一攻位并站稳",
+                "reason": "只做确定性，不做猜顶猜底。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              }
+            ]
+          },
+          "stop_loss_reference": 353.35,
+          "signal": "Side",
+          "news_analysis": [],
+          "reasoning_trace": [],
+          "counter_argument": "",
+          "key_levels_meta": {
+            "immediate_support_source": "model",
+            "immediate_resistance_source": "model"
+          },
+          "close_anchor": 378.77
+        }
+      },
+      "assertions": [
+        {
+          "name": "parse_success",
+          "passed": false,
+          "actual": false,
+          "expected": true
+        },
+        {
+          "name": "normalized_signal_in",
+          "passed": true,
+          "actual": "Side",
+          "expected": [
+            "Side"
+          ]
+        },
+        {
+          "name": "normalized_tactics_compliant",
+          "passed": true,
+          "actual": true,
+          "expected": true
+        },
+        {
+          "name": "normalized_key_levels_compliant",
+          "passed": true,
+          "actual": true,
+          "expected": true
+        }
+      ],
+      "all_assertions_passed": false
+    },
+    {
+      "case_id": "b2_with_l1",
+      "group": "layer1_constraint",
+      "signal_mode": "legacy",
+      "meta": {
+        "input_tokens": 3073,
+        "output_tokens": 929,
+        "total_tokens": 6416,
+        "latency_ms": 21697,
+        "error": null
+      },
+      "latency_s": 21.698,
+      "raw": {
+        "signal": "Side",
+        "confidence": 0.85,
+        "enum_compliant": true,
+        "tactics_contract": {
+          "present": true,
+          "all_buckets_present": true,
+          "all_lists": true,
+          "all_len_2": true,
+          "compliant": true
+        },
+        "key_levels_contract": {
+          "present": true,
+          "support_len_2": true,
+          "resistance_len_2": true,
+          "semantic_order_ok": true,
+          "compliant": true
+        },
+        "content": "{\n  \"internal_reasoning\": \"从量价关系深度剖析，2026-03-12 的走势呈现出典型的‘冲高溃败’特征。早盘尝试冲击 MA60 (405.18) 阻力位未果，随后放量下杀跌破 MA20 (381.14) 关键生命线，收盘价 378.77 处于当日极低位置，显示空头完全主导。从 VCP 模式观察，该股目前波动率处于‘宽幅震荡阶段’而非‘收缩阶段’，3/5 至今的波幅剧烈且重心下移，不符合米勒维尼的入场准则。主力资金净流出 21.63 亿说明机构分歧巨大，大资金撤离态势明显。此外，MACD 死叉与 RSI 下行共振，配合 Layer-1 的 RiskOff 裁决，确认了当前处于非对称风险区。股价与 20 日高点的距离暗示上方存在大量套牢筹码，短期内即便有反弹，也大概率是弱势修复，缺乏持续上攻的动能支撑。在波动率未收缩、均线系统未理顺前，任何左侧抄底行为均属高风险博弈。\",\n  \"signal\": \"Side\",\n  \"confidence\": 0.85,\n  \"summary\": \"放量跌破MA20生命线，主力资金大幅出逃，波动率扩张且动能背离，建议持币观望。\",\n  \"key_levels\": {\n    \"immediate_support\": [366.11, 346.74],\n    \"immediate_resistance\": [381.14, 405.18]\n  },\n  \"tactics\": {\n    \"holding_profit\": [\n      {\n        \"priority\": \"P1\",\n        \"action\": \"减仓止盈\",\n        \"trigger\": \"若未来 24 小时内无法收复并站稳 381.14 (MA20)。\",\n        \"reason\": \"防范中期趋势由多转空，保护存量利润。\"\n      },\n      {\n        \"priority\": \"P2\",\n        \"action\": \"清仓锁定\",\n        \"trigger\": \"收盘价跌破 366.11 筹码锚点。\",\n        \"reason\": \"跌破该位意味着多头最后防线失守，趋势彻底反转。\"\n      }\n    ],\n    \"holding_loss\": [\n      {\n        \"priority\": \"P1\",\n        \"action\": \"坚决止损\",\n        \"trigger\": \"股价触及 369.37 (3/4 最低点) 或跌破 366.11。\",\n        \"reason\": \"避免损失扩大，遵循米勒维尼的硬止损原则。\"\n      },\n      {\n        \"priority\": \"P2\",\n        \"action\": \"逢高减仓\",\n        \"trigger\": \"股价反抽至 385.00 附近但成交量无法有效放大。\",\n        \"reason\": \"利用弱势反弹降低仓位敞口，改善风险暴露。\"\n      }\n    ],\n    \"empty\": [\n      {\n        \"priority\": \"P1\",\n        \"action\": \"耐心等待\",\n        \"trigger\": \"等待股价在 360.00-366.00 区间缩量横盘至少 3-5 天。\",\n        \"reason\": \"观察波动率是否重新收缩 (VCP)，寻找低风险买点。\"\n      },\n      {\n        \"priority\": \"P2\",\n        \"action\": \"右侧确认\",\n        \"trigger\": \"股价重新放量突破 405.18 (MA60) 且回踩不破。\",\n        \"reason\": \"确认中期压力位转化为支撑位后再行介入。\"\n      }\n    ]\n  },\n  \"stop_loss_reference\": 334.25\n}"
+      },
+      "parser": {
+        "parse_success": true,
+        "parse_error": null,
+        "diagnostics": {
+          "stage": "strict",
+          "used_dirtyjson": false,
+          "normalized": false,
+          "truncated_hint": false
+        },
+        "parsed_model": {
+          "signal": "Side",
+          "confidence": 0.85,
+          "summary": "放量跌破MA20生命线，主力资金大幅出逃，波动率扩张且动能背离，建议持币观望。",
+          "reasoning_trace": [],
+          "news_analysis": [],
+          "tactics": {
+            "holding_profit": [
+              {
+                "priority": "P1",
+                "action": "减仓止盈",
+                "trigger": "若未来 24 小时内无法收复并站稳 381.14 (MA20)。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null,
+                "reason": "防范中期趋势由多转空，保护存量利润。"
+              },
+              {
+                "priority": "P2",
+                "action": "清仓锁定",
+                "trigger": "收盘价跌破 366.11 筹码锚点。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null,
+                "reason": "跌破该位意味着多头最后防线失守，趋势彻底反转。"
+              }
+            ],
+            "holding_loss": [
+              {
+                "priority": "P1",
+                "action": "坚决止损",
+                "trigger": "股价触及 369.37 (3/4 最低点) 或跌破 366.11。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null,
+                "reason": "避免损失扩大，遵循米勒维尼的硬止损原则。"
+              },
+              {
+                "priority": "P2",
+                "action": "逢高减仓",
+                "trigger": "股价反抽至 385.00 附近但成交量无法有效放大。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null,
+                "reason": "利用弱势反弹降低仓位敞口，改善风险暴露。"
+              }
+            ],
+            "empty": [
+              {
+                "priority": "P1",
+                "action": "耐心等待",
+                "trigger": "等待股价在 360.00-366.00 区间缩量横盘至少 3-5 天。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null,
+                "reason": "观察波动率是否重新收缩 (VCP)，寻找低风险买点。"
+              },
+              {
+                "priority": "P2",
+                "action": "右侧确认",
+                "trigger": "股价重新放量突破 405.18 (MA60) 且回踩不破。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null,
+                "reason": "确认中期压力位转化为支撑位后再行介入。"
+              }
+            ],
+            "holding": [],
+            "general": []
+          },
+          "key_levels": {
+            "immediate_support": [
+              366.11,
+              346.74
+            ],
+            "immediate_resistance": [
+              381.14,
+              405.18
+            ],
+            "strong_support": 0.0,
+            "strong_resistance": 0.0,
+            "breakout_confirmation_level": 0.0,
+            "stop_loss_reference": 0.0,
+            "support": 0.0,
+            "resistance": 0.0,
+            "stop_loss": 0.0
+          },
+          "conflict_resolution": "",
+          "tomorrow_focus": "",
+          "counter_argument": "",
+          "close_anchor": 378.77
+        }
+      },
+      "normalized": {
+        "signal": "Side",
+        "confidence": 0.85,
+        "enum_compliant": true,
+        "tactics_contract": {
+          "present": true,
+          "all_buckets_present": true,
+          "all_lists": true,
+          "all_len_2": true,
+          "compliant": true
+        },
+        "key_levels_contract": {
+          "present": true,
+          "support_len_2": true,
+          "resistance_len_2": true,
+          "semantic_order_ok": true,
+          "compliant": true
+        },
+        "layer1_expected_signal": "Side",
+        "layer1_alignment_ok": true,
+        "key_levels_meta": {
+          "immediate_support_source": "model",
+          "immediate_resistance_source": "model"
+        },
+        "output": {
+          "internal_reasoning": "从量价关系深度剖析，2026-03-12 的走势呈现出典型的‘冲高溃败’特征。早盘尝试冲击 MA60 (405.18) 阻力位未果，随后放量下杀跌破 MA20 (381.14) 关键生命线，收盘价 378.77 处于当日极低位置，显示空头完全主导。从 VCP 模式观察，该股目前波动率处于‘宽幅震荡阶段’而非‘收缩阶段’，3/5 至今的波幅剧烈且重心下移，不符合米勒维尼的入场准则。主力资金净流出 21.63 亿说明机构分歧巨大，大资金撤离态势明显。此外，MACD 死叉与 RSI 下行共振，配合 Layer-1 的 RiskOff 裁决，确认了当前处于非对称风险区。股价与 20 日高点的距离暗示上方存在大量套牢筹码，短期内即便有反弹，也大概率是弱势修复，缺乏持续上攻的动能支撑。在波动率未收缩、均线系统未理顺前，任何左侧抄底行为均属高风险博弈。",
+          "signal": "Side",
+          "confidence": 0.85,
+          "summary": "放量跌破MA20生命线，主力资金大幅出逃，波动率扩张且动能背离，建议持币观望。",
+          "key_levels": {
+            "immediate_support": [
+              366.11,
+              346.74
+            ],
+            "immediate_resistance": [
+              381.14,
+              405.18
+            ],
+            "strong_support": 0,
+            "strong_resistance": 0,
+            "breakout_confirmation_level": 0,
+            "stop_loss_reference": 0,
+            "support": 366.11,
+            "resistance": 381.14
+          },
+          "tactics": {
+            "holding_profit": [
+              {
+                "priority": "P1",
+                "action": "减仓止盈",
+                "trigger": "若未来 24 小时内无法收复并站稳 381.14 (MA20)。",
+                "reason": "防范中期趋势由多转空，保护存量利润。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              },
+              {
+                "priority": "P2",
+                "action": "清仓锁定",
+                "trigger": "收盘价跌破 366.11 筹码锚点。",
+                "reason": "跌破该位意味着多头最后防线失守，趋势彻底反转。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              }
+            ],
+            "holding_loss": [
+              {
+                "priority": "P1",
+                "action": "坚决止损",
+                "trigger": "股价触及 369.37 (3/4 最低点) 或跌破 366.11。",
+                "reason": "避免损失扩大，遵循米勒维尼的硬止损原则。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              },
+              {
+                "priority": "P2",
+                "action": "逢高减仓",
+                "trigger": "股价反抽至 385.00 附近但成交量无法有效放大。",
+                "reason": "利用弱势反弹降低仓位敞口，改善风险暴露。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              }
+            ],
+            "empty": [
+              {
+                "priority": "P1",
+                "action": "耐心等待",
+                "trigger": "等待股价在 360.00-366.00 区间缩量横盘至少 3-5 天。",
+                "reason": "观察波动率是否重新收缩 (VCP)，寻找低风险买点。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              },
+              {
+                "priority": "P2",
+                "action": "右侧确认",
+                "trigger": "股价重新放量突破 405.18 (MA60) 且回踩不破。",
+                "reason": "确认中期压力位转化为支撑位后再行介入。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              }
+            ]
+          },
+          "stop_loss_reference": 334.25,
+          "news_analysis": [],
+          "reasoning_trace": [],
+          "counter_argument": "",
+          "key_levels_meta": {
+            "immediate_support_source": "model",
+            "immediate_resistance_source": "model"
+          },
+          "close_anchor": 378.77
+        }
+      },
+      "assertions": [
+        {
+          "name": "parse_success",
+          "passed": true,
+          "actual": true,
+          "expected": true
+        },
+        {
+          "name": "normalized_signal_in",
+          "passed": true,
+          "actual": "Side",
+          "expected": [
+            "Side"
+          ]
+        },
+        {
+          "name": "raw_confidence_lte",
+          "passed": false,
+          "actual": 0.85,
+          "expected": 0.5
+        },
+        {
+          "name": "layer1_alignment",
+          "passed": true,
+          "actual": true,
+          "expected": true
+        }
+      ],
+      "all_assertions_passed": false
+    },
+    {
+      "case_id": "b2_without_l1",
+      "group": "layer1_constraint",
+      "signal_mode": "any",
+      "meta": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0,
+        "latency_ms": 0,
+        "error": "429 Too Many Requests. {'message': 'All accounts exhausted. Last error: HTTP 503: {\\n  \"error\": {\\n    \"code\": 503,\\n    \"message\": \"No capacity available for model gemini-3-flash on the server\",\\n    \"status\": \"UNAVAILABLE\",\\n    \"details\": [\\n      {\\n        \"@type\": \"type.googleapis.com/google.rpc.ErrorInfo\",\\n        \"reason\": \"MODEL_CAPACITY_EXHAUSTED\",\\n        \"domain\": \"cloudcode-pa.googleapis.com\",\\n        \"metadata\": {\\n          \"model\": \"gemini-3-flash\"\\n        }\\n      },\\n      {\\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\\n        \"retryDelay\": \"18s\"\\n      }\\n    ]\\n  }\\n}\\n', 'status': 'Too Many Requests'}"
+      },
+      "latency_s": 13.502,
+      "raw": {
+        "signal": null,
+        "confidence": null,
+        "enum_compliant": false,
+        "tactics_contract": {
+          "present": false,
+          "all_buckets_present": false,
+          "all_lists": false,
+          "all_len_2": false,
+          "compliant": false
+        },
+        "key_levels_contract": {
+          "present": false,
+          "support_len_2": false,
+          "resistance_len_2": false,
+          "semantic_order_ok": false,
+          "compliant": false
+        },
+        "content": null
+      },
+      "parser": {
+        "parse_success": false,
+        "parse_error": "No JSON object found in text",
+        "diagnostics": null,
+        "parsed_model": null
+      },
+      "normalized": {
+        "signal": null,
+        "confidence": null,
+        "enum_compliant": false,
+        "tactics_contract": {
+          "present": false,
+          "all_buckets_present": false,
+          "all_lists": false,
+          "all_len_2": false,
+          "compliant": false
+        },
+        "key_levels_contract": {
+          "present": false,
+          "support_len_2": false,
+          "resistance_len_2": false,
+          "semantic_order_ok": false,
+          "compliant": false
+        },
+        "layer1_expected_signal": null,
+        "layer1_alignment_ok": null,
+        "key_levels_meta": null,
+        "output": {
+          "close_anchor": 378.77
+        }
+      },
+      "assertions": [
+        {
+          "name": "parse_success",
+          "passed": false,
+          "actual": false,
+          "expected": true
+        },
+        {
+          "name": "raw_confidence_gte",
+          "passed": false,
+          "actual": null,
+          "expected": 0.5
+        },
+        {
+          "name": "normalized_tactics_compliant",
+          "passed": false,
+          "actual": false,
+          "expected": true
+        },
+        {
+          "name": "normalized_key_levels_compliant",
+          "passed": false,
+          "actual": false,
+          "expected": true
+        }
+      ],
+      "all_assertions_passed": false
+    },
+    {
+      "case_id": "b2_legacy_3_states",
+      "group": "four_state_semantics",
+      "signal_mode": "legacy",
+      "meta": {
+        "input_tokens": 3073,
+        "output_tokens": 904,
+        "total_tokens": 6330,
+        "latency_ms": 20575,
+        "error": null
+      },
+      "latency_s": 20.576,
+      "raw": {
+        "signal": "Side",
+        "confidence": 0.35,
+        "enum_compliant": true,
+        "tactics_contract": {
+          "present": true,
+          "all_buckets_present": true,
+          "all_lists": true,
+          "all_len_2": true,
+          "compliant": true
+        },
+        "key_levels_contract": {
+          "present": true,
+          "support_len_2": true,
+          "resistance_len_2": true,
+          "semantic_order_ok": true,
+          "compliant": true
+        },
+        "content": "{\n  \"internal_reasoning\": \"新易盛当前呈现典型的‘冲高折返’后的筹码松动特征。从 VCP 视角看，3月5日的放量长上影线（422.60）构成了沉重的供应压力区，随后的价格行为并未出现预期的波动率收缩（Contraction），反而以放量阴线连续跌破 MA5、MA10 及 MA20，显示多头防线全面失守。最核心的矛盾在于：尽管 AI 行业景气度尚存，但主力资金在 2026-03-12 录得 21.63 亿的巨额净流出，这与股价跌破关键均线形成了共振，属于典型的机构派发信号。Layer-1 环境判定为 RiskOff，且北向资金偏空，意味着系统性风险正在压制个股表现。目前 RSI 与 KDJ 指标均处于下行通道且未触及超卖区，暗示调整尚未结束。从盈亏比角度看，当前位置入场缺乏安全边际，下方 366.11 附近的筹码锚点是多头最后的心理关口。操作上应秉持米勒维尼的‘先观察后行动’原则，严禁在中期趋势转弱时盲目抄底，需等待波动率重新收敛后的二级口袋买点。\",\n  \"signal\": \"Side\",\n  \"confidence\": 0.35,\n  \"summary\": \"主力巨额流出且失守关键均线，VCP形态破坏，处于风险释放期，建议空仓观望。\",\n  \"tactics\": {\n    \"holding_profit\": [\n      {\n        \"priority\": \"P1\",\n        \"action\": \"保护性止盈\",\n        \"trigger\": \"股价跌破 378.00 支撑\",\n        \"reason\": \"防止利润因趋势转弱而出现大幅回撤。\"\n      },\n      {\n        \"priority\": \"P2\",\n        \"action\": \"清仓离场\",\n        \"trigger\": \"反抽 381.14 (MA20) 无法站稳\",\n        \"reason\": \"均线转换为强阻力，确认短期下降趋势确立。\"\n      }\n    ],\n    \"holding_loss\": [\n      {\n        \"priority\": \"P1\",\n        \"action\": \"立即止损\",\n        \"trigger\": \"破今日低点 375.67\",\n        \"reason\": \"价格跌破关键支撑区间，下行空间向 366 锚点打开。\"\n      },\n      {\n        \"priority\": \"P2\",\n        \"action\": \"减仓应对\",\n        \"trigger\": \"反弹至 385.00 附近\",\n        \"reason\": \"利用弱势反弹降低风险敞口，修正错误头寸。\"\n      }\n    ],\n    \"empty\": [\n      {\n        \"priority\": \"P1\",\n        \"action\": \"耐心观望\",\n        \"trigger\": \"价格在 366.11-375.00 区间震荡\",\n        \"reason\": \"等待主力抛压衰竭及缩量筑底信号出现。\"\n      },\n      {\n        \"priority\": \"P2\",\n        \"action\": \"左侧试探\",\n        \"trigger\": \"缩量回踩 366.11 出现长下影线\",\n        \"reason\": \"博弈筹码锚点支撑，仅限极小仓位进行非对称博弈。\"\n      }\n    ]\n  },\n  \"key_levels\": {\n    \"immediate_support\": [\n      375.67,\n      366.11\n    ],\n    \"immediate_resistance\": [\n      381.14,\n      391.07\n    ],\n    \"stop_loss_reference\": 340.64\n  }\n}"
+      },
+      "parser": {
+        "parse_success": true,
+        "parse_error": null,
+        "diagnostics": {
+          "stage": "strict",
+          "used_dirtyjson": false,
+          "normalized": false,
+          "truncated_hint": false
+        },
+        "parsed_model": {
+          "signal": "Side",
+          "confidence": 0.35,
+          "summary": "主力巨额流出且失守关键均线，VCP形态破坏，处于风险释放期，建议空仓观望。",
+          "reasoning_trace": [],
+          "news_analysis": [],
+          "tactics": {
+            "holding_profit": [
+              {
+                "priority": "P1",
+                "action": "保护性止盈",
+                "trigger": "股价跌破 378.00 支撑",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null,
+                "reason": "防止利润因趋势转弱而出现大幅回撤。"
+              },
+              {
+                "priority": "P2",
+                "action": "清仓离场",
+                "trigger": "反抽 381.14 (MA20) 无法站稳",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null,
+                "reason": "均线转换为强阻力，确认短期下降趋势确立。"
+              }
+            ],
+            "holding_loss": [
+              {
+                "priority": "P1",
+                "action": "立即止损",
+                "trigger": "破今日低点 375.67",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null,
+                "reason": "价格跌破关键支撑区间，下行空间向 366 锚点打开。"
+              },
+              {
+                "priority": "P2",
+                "action": "减仓应对",
+                "trigger": "反弹至 385.00 附近",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null,
+                "reason": "利用弱势反弹降低风险敞口，修正错误头寸。"
+              }
+            ],
+            "empty": [
+              {
+                "priority": "P1",
+                "action": "耐心观望",
+                "trigger": "价格在 366.11-375.00 区间震荡",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null,
+                "reason": "等待主力抛压衰竭及缩量筑底信号出现。"
+              },
+              {
+                "priority": "P2",
+                "action": "左侧试探",
+                "trigger": "缩量回踩 366.11 出现长下影线",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null,
+                "reason": "博弈筹码锚点支撑，仅限极小仓位进行非对称博弈。"
+              }
+            ],
+            "holding": [],
+            "general": []
+          },
+          "key_levels": {
+            "immediate_support": [
+              375.67,
+              366.11
+            ],
+            "immediate_resistance": [
+              381.14,
+              391.07
+            ],
+            "strong_support": 0.0,
+            "strong_resistance": 0.0,
+            "breakout_confirmation_level": 0.0,
+            "stop_loss_reference": 340.64,
+            "support": 0.0,
+            "resistance": 0.0,
+            "stop_loss": 0.0
+          },
+          "conflict_resolution": "",
+          "tomorrow_focus": "",
+          "counter_argument": "",
+          "close_anchor": 378.77
+        }
+      },
+      "normalized": {
+        "signal": "Side",
+        "confidence": 0.35,
+        "enum_compliant": true,
+        "tactics_contract": {
+          "present": true,
+          "all_buckets_present": true,
+          "all_lists": true,
+          "all_len_2": true,
+          "compliant": true
+        },
+        "key_levels_contract": {
+          "present": true,
+          "support_len_2": true,
+          "resistance_len_2": true,
+          "semantic_order_ok": true,
+          "compliant": true
+        },
+        "layer1_expected_signal": "Side",
+        "layer1_alignment_ok": true,
+        "key_levels_meta": {
+          "immediate_support_source": "model",
+          "immediate_resistance_source": "model"
+        },
+        "output": {
+          "internal_reasoning": "新易盛当前呈现典型的‘冲高折返’后的筹码松动特征。从 VCP 视角看，3月5日的放量长上影线（422.60）构成了沉重的供应压力区，随后的价格行为并未出现预期的波动率收缩（Contraction），反而以放量阴线连续跌破 MA5、MA10 及 MA20，显示多头防线全面失守。最核心的矛盾在于：尽管 AI 行业景气度尚存，但主力资金在 2026-03-12 录得 21.63 亿的巨额净流出，这与股价跌破关键均线形成了共振，属于典型的机构派发信号。Layer-1 环境判定为 RiskOff，且北向资金偏空，意味着系统性风险正在压制个股表现。目前 RSI 与 KDJ 指标均处于下行通道且未触及超卖区，暗示调整尚未结束。从盈亏比角度看，当前位置入场缺乏安全边际，下方 366.11 附近的筹码锚点是多头最后的心理关口。操作上应秉持米勒维尼的‘先观察后行动’原则，严禁在中期趋势转弱时盲目抄底，需等待波动率重新收敛后的二级口袋买点。",
+          "signal": "Side",
+          "confidence": 0.35,
+          "summary": "主力巨额流出且失守关键均线，VCP形态破坏，处于风险释放期，建议空仓观望。",
+          "tactics": {
+            "holding_profit": [
+              {
+                "priority": "P1",
+                "action": "保护性止盈",
+                "trigger": "股价跌破 378.00 支撑",
+                "reason": "防止利润因趋势转弱而出现大幅回撤。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              },
+              {
+                "priority": "P2",
+                "action": "清仓离场",
+                "trigger": "反抽 381.14 (MA20) 无法站稳",
+                "reason": "均线转换为强阻力，确认短期下降趋势确立。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              }
+            ],
+            "holding_loss": [
+              {
+                "priority": "P1",
+                "action": "立即止损",
+                "trigger": "破今日低点 375.67",
+                "reason": "价格跌破关键支撑区间，下行空间向 366 锚点打开。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              },
+              {
+                "priority": "P2",
+                "action": "减仓应对",
+                "trigger": "反弹至 385.00 附近",
+                "reason": "利用弱势反弹降低风险敞口，修正错误头寸。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              }
+            ],
+            "empty": [
+              {
+                "priority": "P1",
+                "action": "耐心观望",
+                "trigger": "价格在 366.11-375.00 区间震荡",
+                "reason": "等待主力抛压衰竭及缩量筑底信号出现。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              },
+              {
+                "priority": "P2",
+                "action": "左侧试探",
+                "trigger": "缩量回踩 366.11 出现长下影线",
+                "reason": "博弈筹码锚点支撑，仅限极小仓位进行非对称博弈。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              }
+            ]
+          },
+          "key_levels": {
+            "immediate_support": [
+              375.67,
+              366.11
+            ],
+            "immediate_resistance": [
+              381.14,
+              391.07
+            ],
+            "stop_loss_reference": 340.64,
+            "strong_support": 0,
+            "strong_resistance": 0,
+            "breakout_confirmation_level": 0,
+            "support": 375.67,
+            "resistance": 381.14,
+            "stop_loss": 340.64
+          },
+          "news_analysis": [],
+          "reasoning_trace": [],
+          "counter_argument": "",
+          "key_levels_meta": {
+            "immediate_support_source": "model",
+            "immediate_resistance_source": "model"
+          },
+          "close_anchor": 378.77
+        }
+      },
+      "assertions": [
+        {
+          "name": "parse_success",
+          "passed": true,
+          "actual": true,
+          "expected": true
+        },
+        {
+          "name": "normalized_signal_in",
+          "passed": true,
+          "actual": "Side",
+          "expected": [
+            "Side"
+          ]
+        },
+        {
+          "name": "normalized_tactics_compliant",
+          "passed": true,
+          "actual": true,
+          "expected": true
+        }
+      ],
+      "all_assertions_passed": true
+    },
+    {
+      "case_id": "b4_new_4_states",
+      "group": "four_state_semantics",
+      "signal_mode": "four_state",
+      "meta": {
+        "input_tokens": 2733,
+        "output_tokens": 604,
+        "total_tokens": 5018,
+        "latency_ms": 17725,
+        "error": null
+      },
+      "latency_s": 17.725,
+      "raw": {
+        "signal": "RiskOff",
+        "confidence": 0.85,
+        "enum_compliant": true,
+        "tactics_contract": {
+          "present": true,
+          "all_buckets_present": true,
+          "all_lists": true,
+          "all_len_2": true,
+          "compliant": true
+        },
+        "key_levels_contract": {
+          "present": true,
+          "support_len_2": true,
+          "resistance_len_2": true,
+          "semantic_order_ok": true,
+          "compliant": true
+        },
+        "content": "{\n  \"internal_reasoning\": \"2026-03-12的盘面表现呈现出明确的转弱信号，属于典型的趋势破坏形态。从价格行为来看，新易盛今日开盘尝试上攻400.01元整数关口未果，随后震荡下行，收盘价378.77元已实体跌破MA20（381.14）这一关键的牛熊分界线。这种‘高开低走’的放量阴线，结合前两日（3月10日及11日）的冲高回落，构成了明显的头部诱多陷阱。从资金博弈维度分析，主力资金净流出高达21.63亿，显示机构投资者在当前位置离场意愿极强，属于典型的资金撤退期。技术指标上，MACD死叉与RSI下行共振，且股价已跌至所有主流均线（MA5, 10, 20, 60）下方，上方筹码密集区已转化为沉重压力。对比Layer-1的RiskOff判定，当前市场环境不支持任何激进操作。虽然中期海拔处于18%的机会位，但短期动能完全丧失，在未见缩量企稳或底背离信号前，盲目抄底将面临极大的回撤风险。逻辑论证上，这不属于Watch，因为支撑位已被有效击穿；也不属于NoSetup，因为波动率放大且处于趋势转折点。因此，最终裁定为RiskOff，必须执行防守策略，优先回收仓位以应对潜在的持续阴跌。\",\n  \"signal\": \"RiskOff\",\n  \"confidence\": 0.85,\n  \"summary\": \"放量跌破MA20支撑，主力资金大幅流出，趋势转弱，建议全面收缩战线。 \",\n  \"tactics\": {\n    \"holding_profit\": \"P1：建议市价减仓 70% 锁定利润；P2：若跌破 366 元锚点则全部清仓。\",\n    \"holding_loss\": \"P1：无条件执行纪律性止损，严防阴跌扩大化；P2：不补仓，不摊薄成本。\",\n    \"empty\": \"P1：场外保持绝对空仓；P2：等待股价回到 MA60 上方或出现缩量双底后再评估。\"\n  },\n  \"key_levels\": {\n    \"immediate_support\": [366.11, 346.74],\n    \"immediate_resistance\": [381.14, 400.01]\n  }\n}"
+      },
+      "parser": {
+        "parse_success": false,
+        "parse_error": "3 validation errors for StockAnalysisResult\ntactics.holding_profit\n  Input should be a valid list [type=list_type, input_value='P1：建议市价减仓 ...点则全部清仓。', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.12/v/list_type\ntactics.holding_loss\n  Input should be a valid list [type=list_type, input_value='P1：无条件执行纪...，不摊薄成本。', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.12/v/list_type\ntactics.empty\n  Input should be a valid list [type=list_type, input_value='P1：场外保持绝对...双底后再评估。', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.12/v/list_type",
+        "diagnostics": null,
+        "parsed_model": null
+      },
+      "normalized": {
+        "signal": "Side",
+        "confidence": 0.85,
+        "enum_compliant": false,
+        "tactics_contract": {
+          "present": true,
+          "all_buckets_present": true,
+          "all_lists": true,
+          "all_len_2": true,
+          "compliant": true
+        },
+        "key_levels_contract": {
+          "present": true,
+          "support_len_2": true,
+          "resistance_len_2": true,
+          "semantic_order_ok": true,
+          "compliant": true
+        },
+        "layer1_expected_signal": "RiskOff",
+        "layer1_alignment_ok": false,
+        "key_levels_meta": {
+          "immediate_support_source": "model",
+          "immediate_resistance_source": "model"
+        },
+        "output": {
+          "internal_reasoning": "2026-03-12的盘面表现呈现出明确的转弱信号，属于典型的趋势破坏形态。从价格行为来看，新易盛今日开盘尝试上攻400.01元整数关口未果，随后震荡下行，收盘价378.77元已实体跌破MA20（381.14）这一关键的牛熊分界线。这种‘高开低走’的放量阴线，结合前两日（3月10日及11日）的冲高回落，构成了明显的头部诱多陷阱。从资金博弈维度分析，主力资金净流出高达21.63亿，显示机构投资者在当前位置离场意愿极强，属于典型的资金撤退期。技术指标上，MACD死叉与RSI下行共振，且股价已跌至所有主流均线（MA5, 10, 20, 60）下方，上方筹码密集区已转化为沉重压力。对比Layer-1的RiskOff判定，当前市场环境不支持任何激进操作。虽然中期海拔处于18%的机会位，但短期动能完全丧失，在未见缩量企稳或底背离信号前，盲目抄底将面临极大的回撤风险。逻辑论证上，这不属于Watch，因为支撑位已被有效击穿；也不属于NoSetup，因为波动率放大且处于趋势转折点。因此，最终裁定为RiskOff，必须执行防守策略，优先回收仓位以应对潜在的持续阴跌。",
+          "signal": "Side",
+          "confidence": 0.85,
+          "summary": "放量跌破MA20支撑，主力资金大幅流出，趋势转弱，建议全面收缩战线。 ",
+          "tactics": {
+            "holding_profit": [
+              {
+                "priority": "P1",
+                "action": "持仓观察",
+                "trigger": "不跌破一防位",
+                "reason": "趋势未被破坏，先守纪律。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              },
+              {
+                "priority": "P2",
+                "action": "分批止盈预案",
+                "trigger": "接近一攻位且动能放缓",
+                "reason": "锁定波段利润，避免冲高回落。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              }
+            ],
+            "holding_loss": [
+              {
+                "priority": "P1",
+                "action": "严格止损",
+                "trigger": "有效跌破一防位",
+                "reason": "先控制回撤，避免亏损扩大。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              },
+              {
+                "priority": "P2",
+                "action": "反弹减仓",
+                "trigger": "反抽至压力位但未能突破",
+                "reason": "弱势反弹优先降风险。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              }
+            ],
+            "empty": [
+              {
+                "priority": "P1",
+                "action": "等待确认",
+                "trigger": "回踩一防位企稳后再评估",
+                "reason": "先等右侧信号，再考虑入场。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              },
+              {
+                "priority": "P2",
+                "action": "突破跟随预案",
+                "trigger": "放量突破一攻位并站稳",
+                "reason": "只做确定性，不做猜顶猜底。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              }
+            ]
+          },
+          "key_levels": {
+            "immediate_support": [
+              366.11,
+              346.74
+            ],
+            "immediate_resistance": [
+              381.14,
+              400.01
+            ],
+            "strong_support": 0,
+            "strong_resistance": 0,
+            "breakout_confirmation_level": 0,
+            "stop_loss_reference": 0,
+            "support": 366.11,
+            "resistance": 381.14
+          },
+          "news_analysis": [],
+          "reasoning_trace": [],
+          "counter_argument": "",
+          "key_levels_meta": {
+            "immediate_support_source": "model",
+            "immediate_resistance_source": "model"
+          },
+          "close_anchor": 378.77
+        }
+      },
+      "assertions": [
+        {
+          "name": "parse_success",
+          "passed": false,
+          "actual": false,
+          "expected": true
+        },
+        {
+          "name": "raw_signal_in",
+          "passed": true,
+          "actual": "RiskOff",
+          "expected": [
+            "RiskOff",
+            "Watch",
+            "TriggeredLong",
+            "NoSetup"
+          ]
+        },
+        {
+          "name": "normalized_signal_in",
+          "passed": true,
+          "actual": "Side",
+          "expected": [
+            "Side"
+          ]
+        },
+        {
+          "name": "raw_enum_compliant",
+          "passed": true,
+          "actual": true,
+          "expected": true
+        }
+      ],
+      "all_assertions_passed": false
+    },
+    {
+      "case_id": "b2_optimized_3_states",
+      "group": "fair_3_vs_4_states",
+      "signal_mode": "legacy",
+      "meta": {
+        "input_tokens": 3073,
+        "output_tokens": 915,
+        "total_tokens": 5979,
+        "latency_ms": 18152,
+        "error": null
+      },
+      "latency_s": 18.152,
+      "raw": {
+        "signal": "Side",
+        "confidence": 0.35,
+        "enum_compliant": true,
+        "tactics_contract": {
+          "present": true,
+          "all_buckets_present": true,
+          "all_lists": true,
+          "all_len_2": true,
+          "compliant": true
+        },
+        "key_levels_contract": {
+          "present": true,
+          "support_len_2": true,
+          "resistance_len_2": true,
+          "semantic_order_ok": true,
+          "compliant": true
+        },
+        "content": "{\n  \"internal_reasoning\": \"新易盛 (300502) 目前展现出极度危险的“假突破后放量下杀”特征。从 3 月 5 日触及 422.6 的高点后，波动率并未如 VCP 模式预期的那样收缩，反而出现了剧烈的宽幅震荡。3 月 12 日的大阴线直接放量贯穿了 MA5、MA10 及 MA20 三条关键均线，这在米勒维尼体系中属于典型的“网球变鸡蛋”行为，即价格未能表现出应有的弹性。主力资金流出 21.63 亿体现了机构在 400 元整数关口上方的强烈套现意愿。尽管中期处于机会位，但短期动能（MACD 死叉、KDJ 下行）已完全走坏。当前价格处于布林带中轨下方，且 Layer-1 环境为 RiskOff，意味着任何无量反弹都应视为减仓、离场机会。目前最核心的矛盾在于：散户在 400 元附近的筹码堆积与主力资金快速撤离之间的对立。在波动率未回归至 ATR 平稳区域且价格未重新站稳 MA20 之前，不具备任何高期望值的入场条件，结构已出现明显破位。\",\n  \"signal\": \"Side\",\n  \"confidence\": 0.35,\n  \"summary\": \"放量跌破多条短期均线，主力大幅流出，VCP形态破坏，进入风险规避期。\",\n  \"tactics\": {\n    \"holding_profit\": [\n      {\n        \"priority\": \"P1\",\n        \"action\": \"减仓止盈\",\n        \"trigger\": \"若明日无法快速收复 381.14 (MA20) 关键位。\",\n        \"reason\": \"防范趋势由上升转为宽幅震荡或下行。\"\n      },\n      {\n        \"priority\": \"P2\",\n        \"action\": \"清仓离场\",\n        \"trigger\": \"价格跌破 366.11 筹码锚点。\",\n        \"reason\": \"保护核心利润，防止利润回撤至成本区。\"\n      }\n    ],\n    \"holding_loss\": [\n      {\n        \"priority\": \"P1\",\n        \"action\": \"反弹减仓\",\n        \"trigger\": \"股价回抽 385.00 至 391.00 阻力区间。\",\n        \"reason\": \"降低风险敞口，利用反弹降低亏损比例。\"\n      },\n      {\n        \"priority\": \"P2\",\n        \"action\": \"硬性止损\",\n        \"trigger\": \"股价收盘跌破 359.86 (2月收盘价)。\",\n        \"reason\": \"防止陷入深套，当前资金流向极度不利。\"\n      }\n    ],\n    \"empty\": [\n      {\n        \"priority\": \"P1\",\n        \"action\": \"持续观望\",\n        \"trigger\": \"波动率 (ATR) 未收缩至 15 以下且无缩量横盘。\",\n        \"reason\": \"当前处于高波动下跌段，不符合 VCP 入场准则。\"\n      },\n      {\n        \"priority\": \"P2\",\n        \"action\": \"左侧试探\",\n        \"trigger\": \"股价回落至 346.74 附近出现放量止跌信号。\",\n        \"reason\": \"在 20 日低点附近寻求极小仓位的非对称博弈机会。\"\n      }\n    ]\n  },\n  \"key_levels\": {\n    \"immediate_support\": [\n      369.37,\n      359.86\n    ],\n    \"immediate_resistance\": [\n      381.14,\n      391.07\n    ],\n    \"stop_loss_reference\": 340.64\n  }\n}"
+      },
+      "parser": {
+        "parse_success": true,
+        "parse_error": null,
+        "diagnostics": {
+          "stage": "strict",
+          "used_dirtyjson": false,
+          "normalized": false,
+          "truncated_hint": false
+        },
+        "parsed_model": {
+          "signal": "Side",
+          "confidence": 0.35,
+          "summary": "放量跌破多条短期均线，主力大幅流出，VCP形态破坏，进入风险规避期。",
+          "reasoning_trace": [],
+          "news_analysis": [],
+          "tactics": {
+            "holding_profit": [
+              {
+                "priority": "P1",
+                "action": "减仓止盈",
+                "trigger": "若明日无法快速收复 381.14 (MA20) 关键位。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null,
+                "reason": "防范趋势由上升转为宽幅震荡或下行。"
+              },
+              {
+                "priority": "P2",
+                "action": "清仓离场",
+                "trigger": "价格跌破 366.11 筹码锚点。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null,
+                "reason": "保护核心利润，防止利润回撤至成本区。"
+              }
+            ],
+            "holding_loss": [
+              {
+                "priority": "P1",
+                "action": "反弹减仓",
+                "trigger": "股价回抽 385.00 至 391.00 阻力区间。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null,
+                "reason": "降低风险敞口，利用反弹降低亏损比例。"
+              },
+              {
+                "priority": "P2",
+                "action": "硬性止损",
+                "trigger": "股价收盘跌破 359.86 (2月收盘价)。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null,
+                "reason": "防止陷入深套，当前资金流向极度不利。"
+              }
+            ],
+            "empty": [
+              {
+                "priority": "P1",
+                "action": "持续观望",
+                "trigger": "波动率 (ATR) 未收缩至 15 以下且无缩量横盘。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null,
+                "reason": "当前处于高波动下跌段，不符合 VCP 入场准则。"
+              },
+              {
+                "priority": "P2",
+                "action": "左侧试探",
+                "trigger": "股价回落至 346.74 附近出现放量止跌信号。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null,
+                "reason": "在 20 日低点附近寻求极小仓位的非对称博弈机会。"
+              }
+            ],
+            "holding": [],
+            "general": []
+          },
+          "key_levels": {
+            "immediate_support": [
+              369.37,
+              359.86
+            ],
+            "immediate_resistance": [
+              381.14,
+              391.07
+            ],
+            "strong_support": 0.0,
+            "strong_resistance": 0.0,
+            "breakout_confirmation_level": 0.0,
+            "stop_loss_reference": 340.64,
+            "support": 0.0,
+            "resistance": 0.0,
+            "stop_loss": 0.0
+          },
+          "conflict_resolution": "",
+          "tomorrow_focus": "",
+          "counter_argument": "",
+          "close_anchor": 378.77
+        }
+      },
+      "normalized": {
+        "signal": "Side",
+        "confidence": 0.35,
+        "enum_compliant": true,
+        "tactics_contract": {
+          "present": true,
+          "all_buckets_present": true,
+          "all_lists": true,
+          "all_len_2": true,
+          "compliant": true
+        },
+        "key_levels_contract": {
+          "present": true,
+          "support_len_2": true,
+          "resistance_len_2": true,
+          "semantic_order_ok": true,
+          "compliant": true
+        },
+        "layer1_expected_signal": "Side",
+        "layer1_alignment_ok": true,
+        "key_levels_meta": {
+          "immediate_support_source": "model",
+          "immediate_resistance_source": "model"
+        },
+        "output": {
+          "internal_reasoning": "新易盛 (300502) 目前展现出极度危险的“假突破后放量下杀”特征。从 3 月 5 日触及 422.6 的高点后，波动率并未如 VCP 模式预期的那样收缩，反而出现了剧烈的宽幅震荡。3 月 12 日的大阴线直接放量贯穿了 MA5、MA10 及 MA20 三条关键均线，这在米勒维尼体系中属于典型的“网球变鸡蛋”行为，即价格未能表现出应有的弹性。主力资金流出 21.63 亿体现了机构在 400 元整数关口上方的强烈套现意愿。尽管中期处于机会位，但短期动能（MACD 死叉、KDJ 下行）已完全走坏。当前价格处于布林带中轨下方，且 Layer-1 环境为 RiskOff，意味着任何无量反弹都应视为减仓、离场机会。目前最核心的矛盾在于：散户在 400 元附近的筹码堆积与主力资金快速撤离之间的对立。在波动率未回归至 ATR 平稳区域且价格未重新站稳 MA20 之前，不具备任何高期望值的入场条件，结构已出现明显破位。",
+          "signal": "Side",
+          "confidence": 0.35,
+          "summary": "放量跌破多条短期均线，主力大幅流出，VCP形态破坏，进入风险规避期。",
+          "tactics": {
+            "holding_profit": [
+              {
+                "priority": "P1",
+                "action": "减仓止盈",
+                "trigger": "若明日无法快速收复 381.14 (MA20) 关键位。",
+                "reason": "防范趋势由上升转为宽幅震荡或下行。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              },
+              {
+                "priority": "P2",
+                "action": "清仓离场",
+                "trigger": "价格跌破 366.11 筹码锚点。",
+                "reason": "保护核心利润，防止利润回撤至成本区。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              }
+            ],
+            "holding_loss": [
+              {
+                "priority": "P1",
+                "action": "反弹减仓",
+                "trigger": "股价回抽 385.00 至 391.00 阻力区间。",
+                "reason": "降低风险敞口，利用反弹降低亏损比例。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              },
+              {
+                "priority": "P2",
+                "action": "硬性止损",
+                "trigger": "股价收盘跌破 359.86 (2月收盘价)。",
+                "reason": "防止陷入深套，当前资金流向极度不利。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              }
+            ],
+            "empty": [
+              {
+                "priority": "P1",
+                "action": "持续观望",
+                "trigger": "波动率 (ATR) 未收缩至 15 以下且无缩量横盘。",
+                "reason": "当前处于高波动下跌段，不符合 VCP 入场准则。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              },
+              {
+                "priority": "P2",
+                "action": "左侧试探",
+                "trigger": "股价回落至 346.74 附近出现放量止跌信号。",
+                "reason": "在 20 日低点附近寻求极小仓位的非对称博弈机会。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              }
+            ]
+          },
+          "key_levels": {
+            "immediate_support": [
+              369.37,
+              359.86
+            ],
+            "immediate_resistance": [
+              381.14,
+              391.07
+            ],
+            "stop_loss_reference": 340.64,
+            "strong_support": 0,
+            "strong_resistance": 0,
+            "breakout_confirmation_level": 0,
+            "support": 369.37,
+            "resistance": 381.14,
+            "stop_loss": 340.64
+          },
+          "news_analysis": [],
+          "reasoning_trace": [],
+          "counter_argument": "",
+          "key_levels_meta": {
+            "immediate_support_source": "model",
+            "immediate_resistance_source": "model"
+          },
+          "close_anchor": 378.77
+        }
+      },
+      "assertions": [
+        {
+          "name": "parse_success",
+          "passed": true,
+          "actual": true,
+          "expected": true
+        },
+        {
+          "name": "normalized_signal_in",
+          "passed": true,
+          "actual": "Side",
+          "expected": [
+            "Side"
+          ]
+        },
+        {
+          "name": "normalized_tactics_compliant",
+          "passed": true,
+          "actual": true,
+          "expected": true
+        },
+        {
+          "name": "normalized_key_levels_compliant",
+          "passed": true,
+          "actual": true,
+          "expected": true
+        }
+      ],
+      "all_assertions_passed": true
+    },
+    {
+      "case_id": "b4_strict_4_states",
+      "group": "fair_3_vs_4_states",
+      "signal_mode": "four_state",
+      "meta": {
+        "input_tokens": 2763,
+        "output_tokens": 947,
+        "total_tokens": 5738,
+        "latency_ms": 22549,
+        "error": null
+      },
+      "latency_s": 22.551,
+      "raw": {
+        "signal": "RiskOff",
+        "confidence": 0.88,
+        "enum_compliant": true,
+        "tactics_contract": {
+          "present": true,
+          "all_buckets_present": true,
+          "all_lists": true,
+          "all_len_2": true,
+          "compliant": true
+        },
+        "key_levels_contract": {
+          "present": true,
+          "support_len_2": true,
+          "resistance_len_2": true,
+          "semantic_order_ok": true,
+          "compliant": true
+        },
+        "content": "{\n  \"internal_reasoning\": \"新易盛 (300502) 在 2026-03-12 的走势呈现出典型的转弱信号。从量价关系分析，当日股价收于 378.77 元，跌幅 3.68%，且成交量较前一日有所放大，显示出抛售压力的增强。最关键的技术破坏在于股价放量击穿了 20 日均线 (381.14) 这一核心支撑位，这在米勒维尼的趋势模板中属于短期趋势走坏的标志。从 VCP 模式观察，该股在 3 月 5 日创下 422.6 元的高点后，未能形成紧凑的“柄部”区域，反而出现了波动率放大 (Volatility Expansion) 的特征，且高点不断下移，这表明供需平衡已向供应方倾斜。主力资金净流出高达 21.63 亿，进一步验证了机构在光模块板块的高位出货行为。MACD 出现死叉且 RSI 掉头向下进入 50 以下的弱势区，暗示中期调整可能才刚刚开始。考虑到沪深 300 整体环境的压制以及北向资金的流出态势，该标的目前不具备非对称风险收益比的入场条件。基于盈亏比风控原则，在股价重新站稳 MA20 并缩量企稳前，必须采取防守策略。\",\n  \"signal\": \"RiskOff\",\n  \"confidence\": 0.88,\n  \"summary\": \"放量跌破MA20关键支撑，主力大幅流出，技术结构转入空头，执行风险规避策略。\",\n  \"tactics\": {\n    \"holding_profit\": [\n      {\n        \"priority\": \"P1\",\n        \"action\": \"减仓止盈\",\n        \"trigger\": \"股价反抽 381-385 区域受阻\",\n        \"reason\": \"利用回抽 MA20 的机会锁定利润，防止利润被深度回撤吞噬。\"\n      },\n      {\n        \"priority\": \"P2\",\n        \"action\": \"清仓离场\",\n        \"trigger\": \"日线级别收盘跌破 375 元\",\n        \"reason\": \"确认均线空头排列，趋势彻底破坏，必须保护本金安全。\"\n      }\n    ],\n    \"holding_loss\": [\n      {\n        \"priority\": \"P1\",\n        \"action\": \"强制止损\",\n        \"trigger\": \"跌破 370 元整数关口\",\n        \"reason\": \"避免股价滑向 366.11 的筹码密集区下方导致亏损失控。\"\n      },\n      {\n        \"priority\": \"P2\",\n        \"action\": \"逢高减仓\",\n        \"trigger\": \"盘中任何脉冲式反弹至 388 元上方\",\n        \"reason\": \"利用短期超卖引发的反抽降低仓位，降低整体风险敞口。\"\n      }\n    ],\n    \"empty\": [\n      {\n        \"priority\": \"P1\",\n        \"action\": \"空仓观望\",\n        \"trigger\": \"价格处于 MA20 压力线下方\",\n        \"reason\": \"不参与趋势不明或处于下降通道的垃圾时间，等待波动率收缩。\"\n      },\n      {\n        \"priority\": \"P2\",\n        \"action\": \"等待企稳信号\",\n        \"trigger\": \"缩量回调至 346-350 支撑区并出现底分型\",\n        \"reason\": \"寻找左侧支撑位与波动率收缩的交汇点，等待新的 VCP 结构形成。\"\n      }\n    ]\n  },\n  \"key_levels\": {\n    \"immediate_support\": [\n      366.11,\n      346.74\n    ],\n    \"immediate_resistance\": [\n      391.07,\n      405.18\n    ],\n    \"stop_loss_reference\": 353.35\n  }\n}"
+      },
+      "parser": {
+        "parse_success": true,
+        "parse_error": null,
+        "diagnostics": {
+          "stage": "strict",
+          "used_dirtyjson": false,
+          "normalized": false,
+          "truncated_hint": false
+        },
+        "parsed_model": {
+          "signal": "Side",
+          "confidence": 0.88,
+          "summary": "放量跌破MA20关键支撑，主力大幅流出，技术结构转入空头，执行风险规避策略。",
+          "reasoning_trace": [],
+          "news_analysis": [],
+          "tactics": {
+            "holding_profit": [
+              {
+                "priority": "P1",
+                "action": "减仓止盈",
+                "trigger": "股价反抽 381-385 区域受阻",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null,
+                "reason": "利用回抽 MA20 的机会锁定利润，防止利润被深度回撤吞噬。"
+              },
+              {
+                "priority": "P2",
+                "action": "清仓离场",
+                "trigger": "日线级别收盘跌破 375 元",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null,
+                "reason": "确认均线空头排列，趋势彻底破坏，必须保护本金安全。"
+              }
+            ],
+            "holding_loss": [
+              {
+                "priority": "P1",
+                "action": "强制止损",
+                "trigger": "跌破 370 元整数关口",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null,
+                "reason": "避免股价滑向 366.11 的筹码密集区下方导致亏损失控。"
+              },
+              {
+                "priority": "P2",
+                "action": "逢高减仓",
+                "trigger": "盘中任何脉冲式反弹至 388 元上方",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null,
+                "reason": "利用短期超卖引发的反抽降低仓位，降低整体风险敞口。"
+              }
+            ],
+            "empty": [
+              {
+                "priority": "P1",
+                "action": "空仓观望",
+                "trigger": "价格处于 MA20 压力线下方",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null,
+                "reason": "不参与趋势不明或处于下降通道的垃圾时间，等待波动率收缩。"
+              },
+              {
+                "priority": "P2",
+                "action": "等待企稳信号",
+                "trigger": "缩量回调至 346-350 支撑区并出现底分型",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null,
+                "reason": "寻找左侧支撑位与波动率收缩的交汇点，等待新的 VCP 结构形成。"
+              }
+            ],
+            "holding": [],
+            "general": []
+          },
+          "key_levels": {
+            "immediate_support": [
+              366.11,
+              346.74
+            ],
+            "immediate_resistance": [
+              391.07,
+              405.18
+            ],
+            "strong_support": 0.0,
+            "strong_resistance": 0.0,
+            "breakout_confirmation_level": 0.0,
+            "stop_loss_reference": 353.35,
+            "support": 0.0,
+            "resistance": 0.0,
+            "stop_loss": 0.0
+          },
+          "conflict_resolution": "",
+          "tomorrow_focus": "",
+          "counter_argument": "",
+          "close_anchor": 378.77
+        }
+      },
+      "normalized": {
+        "signal": "Side",
+        "confidence": 0.88,
+        "enum_compliant": false,
+        "tactics_contract": {
+          "present": true,
+          "all_buckets_present": true,
+          "all_lists": true,
+          "all_len_2": true,
+          "compliant": true
+        },
+        "key_levels_contract": {
+          "present": true,
+          "support_len_2": true,
+          "resistance_len_2": true,
+          "semantic_order_ok": true,
+          "compliant": true
+        },
+        "layer1_expected_signal": "RiskOff",
+        "layer1_alignment_ok": false,
+        "key_levels_meta": {
+          "immediate_support_source": "model",
+          "immediate_resistance_source": "model"
+        },
+        "output": {
+          "internal_reasoning": "新易盛 (300502) 在 2026-03-12 的走势呈现出典型的转弱信号。从量价关系分析，当日股价收于 378.77 元，跌幅 3.68%，且成交量较前一日有所放大，显示出抛售压力的增强。最关键的技术破坏在于股价放量击穿了 20 日均线 (381.14) 这一核心支撑位，这在米勒维尼的趋势模板中属于短期趋势走坏的标志。从 VCP 模式观察，该股在 3 月 5 日创下 422.6 元的高点后，未能形成紧凑的“柄部”区域，反而出现了波动率放大 (Volatility Expansion) 的特征，且高点不断下移，这表明供需平衡已向供应方倾斜。主力资金净流出高达 21.63 亿，进一步验证了机构在光模块板块的高位出货行为。MACD 出现死叉且 RSI 掉头向下进入 50 以下的弱势区，暗示中期调整可能才刚刚开始。考虑到沪深 300 整体环境的压制以及北向资金的流出态势，该标的目前不具备非对称风险收益比的入场条件。基于盈亏比风控原则，在股价重新站稳 MA20 并缩量企稳前，必须采取防守策略。",
+          "signal": "Side",
+          "confidence": 0.88,
+          "summary": "放量跌破MA20关键支撑，主力大幅流出，技术结构转入空头，执行风险规避策略。",
+          "tactics": {
+            "holding_profit": [
+              {
+                "priority": "P1",
+                "action": "减仓止盈",
+                "trigger": "股价反抽 381-385 区域受阻",
+                "reason": "利用回抽 MA20 的机会锁定利润，防止利润被深度回撤吞噬。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              },
+              {
+                "priority": "P2",
+                "action": "清仓离场",
+                "trigger": "日线级别收盘跌破 375 元",
+                "reason": "确认均线空头排列，趋势彻底破坏，必须保护本金安全。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              }
+            ],
+            "holding_loss": [
+              {
+                "priority": "P1",
+                "action": "强制止损",
+                "trigger": "跌破 370 元整数关口",
+                "reason": "避免股价滑向 366.11 的筹码密集区下方导致亏损失控。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              },
+              {
+                "priority": "P2",
+                "action": "逢高减仓",
+                "trigger": "盘中任何脉冲式反弹至 388 元上方",
+                "reason": "利用短期超卖引发的反抽降低仓位，降低整体风险敞口。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              }
+            ],
+            "empty": [
+              {
+                "priority": "P1",
+                "action": "空仓观望",
+                "trigger": "价格处于 MA20 压力线下方",
+                "reason": "不参与趋势不明或处于下降通道的垃圾时间，等待波动率收缩。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              },
+              {
+                "priority": "P2",
+                "action": "等待企稳信号",
+                "trigger": "缩量回调至 346-350 支撑区并出现底分型",
+                "reason": "寻找左侧支撑位与波动率收缩的交汇点，等待新的 VCP 结构形成。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              }
+            ]
+          },
+          "key_levels": {
+            "immediate_support": [
+              366.11,
+              346.74
+            ],
+            "immediate_resistance": [
+              391.07,
+              405.18
+            ],
+            "stop_loss_reference": 353.35,
+            "strong_support": 0,
+            "strong_resistance": 0,
+            "breakout_confirmation_level": 0,
+            "support": 366.11,
+            "resistance": 391.07,
+            "stop_loss": 353.35
+          },
+          "news_analysis": [],
+          "reasoning_trace": [],
+          "counter_argument": "",
+          "key_levels_meta": {
+            "immediate_support_source": "model",
+            "immediate_resistance_source": "model"
+          },
+          "close_anchor": 378.77
+        }
+      },
+      "assertions": [
+        {
+          "name": "parse_success",
+          "passed": true,
+          "actual": true,
+          "expected": true
+        },
+        {
+          "name": "raw_signal_in",
+          "passed": true,
+          "actual": "RiskOff",
+          "expected": [
+            "RiskOff",
+            "Watch",
+            "TriggeredLong",
+            "NoSetup"
+          ]
+        },
+        {
+          "name": "raw_enum_compliant",
+          "passed": true,
+          "actual": true,
+          "expected": true
+        },
+        {
+          "name": "normalized_tactics_compliant",
+          "passed": true,
+          "actual": true,
+          "expected": true
+        },
+        {
+          "name": "normalized_key_levels_compliant",
+          "passed": true,
+          "actual": true,
+          "expected": true
+        }
+      ],
+      "all_assertions_passed": true
+    }
+  ]
+}

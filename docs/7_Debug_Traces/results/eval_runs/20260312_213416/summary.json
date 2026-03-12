@@ -1,0 +1,19 @@
+{
+  "total_cases": 1,
+  "parse_success_rate": 0.0,
+  "raw_enum_compliance_rate": 1.0,
+  "normalized_enum_compliance_rate": 0.0,
+  "normalized_tactics_compliance_rate": 1.0,
+  "normalized_key_levels_compliance_rate": 1.0,
+  "assertion_pass_rate": 0.0,
+  "avg_latency_s": 20.531,
+  "avg_total_tokens": 5840.0,
+  "by_group": {
+    "four_state_semantics": {
+      "cases": 1,
+      "assertion_pass": 0,
+      "avg_latency_s": 20.531,
+      "avg_total_tokens": 5840.0
+    }
+  }
+}

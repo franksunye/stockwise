@@ -1,0 +1,37 @@
+{
+  "total_cases": 10,
+  "parse_success_rate": 0.7,
+  "raw_enum_compliance_rate": 0.7,
+  "normalized_enum_compliance_rate": 0.7,
+  "normalized_tactics_compliance_rate": 0.9,
+  "normalized_key_levels_compliance_rate": 0.9,
+  "assertion_pass_rate": 0.7,
+  "avg_latency_s": 28.135,
+  "avg_total_tokens": 7501.1,
+  "by_group": {
+    "four_way_benchmark": {
+      "cases": 4,
+      "assertion_pass": 2,
+      "avg_latency_s": 30.073,
+      "avg_total_tokens": 8183.8
+    },
+    "layer1_constraint": {
+      "cases": 2,
+      "assertion_pass": 2,
+      "avg_latency_s": 29.634,
+      "avg_total_tokens": 7657.0
+    },
+    "four_state_semantics": {
+      "cases": 2,
+      "assertion_pass": 1,
+      "avg_latency_s": 20.923,
+      "avg_total_tokens": 5854.0
+    },
+    "fair_3_vs_4_states": {
+      "cases": 2,
+      "assertion_pass": 2,
+      "avg_latency_s": 29.972,
+      "avg_total_tokens": 7627.0
+    }
+  }
+}

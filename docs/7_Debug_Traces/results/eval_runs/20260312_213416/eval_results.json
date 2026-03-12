@@ -1,0 +1,234 @@
+{
+  "run_id": "20260312_213416",
+  "manifest": {
+    "path": "/Users/yesun/Code/stockwise/docs/7_Debug_Traces/eval_manifest.json",
+    "case_count": 1
+  },
+  "provider": {
+    "provider": "gemini_local",
+    "model": "gemini-3-flash",
+    "base_url": "http://127.0.0.1:8045",
+    "temperature": 0.1,
+    "max_tokens": 12000,
+    "cooldown_s": 0.0,
+    "retries": 1,
+    "retry_delay_s": 8.0
+  },
+  "summary": {
+    "total_cases": 1,
+    "parse_success_rate": 0.0,
+    "raw_enum_compliance_rate": 1.0,
+    "normalized_enum_compliance_rate": 0.0,
+    "normalized_tactics_compliance_rate": 1.0,
+    "normalized_key_levels_compliance_rate": 1.0,
+    "assertion_pass_rate": 0.0,
+    "avg_latency_s": 20.531,
+    "avg_total_tokens": 5840.0,
+    "by_group": {
+      "four_state_semantics": {
+        "cases": 1,
+        "assertion_pass": 0,
+        "avg_latency_s": 20.531,
+        "avg_total_tokens": 5840.0
+      }
+    }
+  },
+  "results": [
+    {
+      "case_id": "b4_new_4_states",
+      "group": "four_state_semantics",
+      "signal_mode": "four_state",
+      "meta": {
+        "input_tokens": 2733,
+        "output_tokens": 684,
+        "total_tokens": 5840,
+        "latency_ms": 20530,
+        "error": null
+      },
+      "latency_s": 20.531,
+      "raw": {
+        "signal": "RiskOff",
+        "confidence": 0.92,
+        "enum_compliant": true,
+        "tactics_contract": {
+          "present": true,
+          "all_buckets_present": true,
+          "all_lists": true,
+          "all_len_2": true,
+          "compliant": true
+        },
+        "key_levels_contract": {
+          "present": true,
+          "support_len_2": true,
+          "resistance_len_2": true,
+          "semantic_order_ok": true,
+          "compliant": true
+        },
+        "content": "{\n  \"internal_reasoning\": \"从 2026-03-12 的盘面表现看，新易盛（300502）呈现出极其危险的破位特征。首先，股价今日收盘 378.77 元，不仅跌破了 5 日和 10 日均线，更重要的是放量击穿了关键的 20 日生命线（MA20: 381.14），这在量化交易系统中属于典型的趋势破坏信号。今日早盘虽有冲高尝试，但最高价 404.85 元在触及 60 日均线（MA60: 405.18）压力位后迅速回落，留下了较长的上影线，显示多头反攻乏力且上方抛压沉重。从资金面来看，主力资金单日净流出高达 21.63 亿，这种规模的资金出逃通常意味着机构投资者正在进行系统性的减仓，而非简单的洗盘。技术指标方面，MACD 已形成死叉，RSI 掉头向下进入弱势区（47.1），KDJ 亦呈现空头排列，所有动能指标均指向下行。结合 Layer-1 判定的 RiskOff 环境以及沪深 300 整体的调整压力，当前标的已进入非对称风险区，即下跌空间远大于潜在反弹空间。虽然 366.11 元处有前期筹码堆积，但在目前这种恐慌性抛售态势下，支撑力度存疑。综上所述，当前必须执行 RiskOff 策略，优先保护本金安全，避免在趋势反转初期盲目抗单或抄底。该决策逻辑完全对齐系统 RiskOff 语义，即盘面出现趋势破坏与资金出逃，必须回收仓位。\",\n  \"signal\": \"RiskOff\",\n  \"confidence\": 0.92,\n  \"summary\": \"股价放量跌破 MA20 关键支撑，主力资金大幅流出，趋势转弱，建议果断减仓防守。\",\n  \"tactics\": {\n    \"holding_profit\": \"P1: 现价全额止盈，锁定前期利润；P2: 若明日反抽 381 元无法站稳，清空所有剩余仓位。\",\n    \"holding_loss\": \"P1: 跌破今日低点 375.67 元必须无条件止损离场；P2: 严禁任何形式的补仓摊薄成本。\",\n    \"empty\": \"P1: 场外绝对观望，不接飞刀；P2: 等待股价回踩 346-360 元区间并出现缩量企稳信号再行评估。\"\n  },\n  \"key_levels\": {\n    \"immediate_support\": [375.67, 366.11],\n    \"immediate_resistance\": [381.14, 391.07]\n  }\n}"
+      },
+      "parser": {
+        "parse_success": false,
+        "parse_error": "3 validation errors for StockAnalysisResult\ntactics.holding_profit\n  Input should be a valid list [type=list_type, input_value='P1: 现价全额止盈...所有剩余仓位。', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.12/v/list_type\ntactics.holding_loss\n  Input should be a valid list [type=list_type, input_value='P1: 跌破今日低点 3...补仓摊薄成本。', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.12/v/list_type\ntactics.empty\n  Input should be a valid list [type=list_type, input_value='P1: 场外绝对观望...信号再行评估。', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.12/v/list_type",
+        "diagnostics": null,
+        "parsed_model": null
+      },
+      "normalized": {
+        "signal": "Side",
+        "confidence": 0.92,
+        "enum_compliant": false,
+        "tactics_contract": {
+          "present": true,
+          "all_buckets_present": true,
+          "all_lists": true,
+          "all_len_2": true,
+          "compliant": true
+        },
+        "key_levels_contract": {
+          "present": true,
+          "support_len_2": true,
+          "resistance_len_2": true,
+          "semantic_order_ok": true,
+          "compliant": true
+        },
+        "layer1_expected_signal": "RiskOff",
+        "layer1_alignment_ok": false,
+        "key_levels_meta": {
+          "immediate_support_source": "model",
+          "immediate_resistance_source": "model"
+        },
+        "output": {
+          "internal_reasoning": "从 2026-03-12 的盘面表现看，新易盛（300502）呈现出极其危险的破位特征。首先，股价今日收盘 378.77 元，不仅跌破了 5 日和 10 日均线，更重要的是放量击穿了关键的 20 日生命线（MA20: 381.14），这在量化交易系统中属于典型的趋势破坏信号。今日早盘虽有冲高尝试，但最高价 404.85 元在触及 60 日均线（MA60: 405.18）压力位后迅速回落，留下了较长的上影线，显示多头反攻乏力且上方抛压沉重。从资金面来看，主力资金单日净流出高达 21.63 亿，这种规模的资金出逃通常意味着机构投资者正在进行系统性的减仓，而非简单的洗盘。技术指标方面，MACD 已形成死叉，RSI 掉头向下进入弱势区（47.1），KDJ 亦呈现空头排列，所有动能指标均指向下行。结合 Layer-1 判定的 RiskOff 环境以及沪深 300 整体的调整压力，当前标的已进入非对称风险区，即下跌空间远大于潜在反弹空间。虽然 366.11 元处有前期筹码堆积，但在目前这种恐慌性抛售态势下，支撑力度存疑。综上所述，当前必须执行 RiskOff 策略，优先保护本金安全，避免在趋势反转初期盲目抗单或抄底。该决策逻辑完全对齐系统 RiskOff 语义，即盘面出现趋势破坏与资金出逃，必须回收仓位。",
+          "signal": "Side",
+          "confidence": 0.92,
+          "summary": "股价放量跌破 MA20 关键支撑，主力资金大幅流出，趋势转弱，建议果断减仓防守。",
+          "tactics": {
+            "holding_profit": [
+              {
+                "priority": "P1",
+                "action": "持仓观察",
+                "trigger": "不跌破一防位",
+                "reason": "趋势未被破坏，先守纪律。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              },
+              {
+                "priority": "P2",
+                "action": "分批止盈预案",
+                "trigger": "接近一攻位且动能放缓",
+                "reason": "锁定波段利润，避免冲高回落。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              }
+            ],
+            "holding_loss": [
+              {
+                "priority": "P1",
+                "action": "严格止损",
+                "trigger": "有效跌破一防位",
+                "reason": "先控制回撤，避免亏损扩大。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              },
+              {
+                "priority": "P2",
+                "action": "反弹减仓",
+                "trigger": "反抽至压力位但未能突破",
+                "reason": "弱势反弹优先降风险。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              }
+            ],
+            "empty": [
+              {
+                "priority": "P1",
+                "action": "等待确认",
+                "trigger": "回踩一防位企稳后再评估",
+                "reason": "先等右侧信号，再考虑入场。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              },
+              {
+                "priority": "P2",
+                "action": "突破跟随预案",
+                "trigger": "放量突破一攻位并站稳",
+                "reason": "只做确定性，不做猜顶猜底。",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              }
+            ]
+          },
+          "key_levels": {
+            "immediate_support": [
+              375.67,
+              366.11
+            ],
+            "immediate_resistance": [
+              381.14,
+              391.07
+            ],
+            "strong_support": 0,
+            "strong_resistance": 0,
+            "breakout_confirmation_level": 0,
+            "stop_loss_reference": 0,
+            "support": 375.67,
+            "resistance": 381.14
+          },
+          "news_analysis": [],
+          "reasoning_trace": [],
+          "counter_argument": "",
+          "key_levels_meta": {
+            "immediate_support_source": "model",
+            "immediate_resistance_source": "model"
+          },
+          "close_anchor": 378.77
+        }
+      },
+      "assertions": [
+        {
+          "name": "parse_success",
+          "passed": false,
+          "actual": false,
+          "expected": true
+        },
+        {
+          "name": "raw_signal_in",
+          "passed": true,
+          "actual": "RiskOff",
+          "expected": [
+            "RiskOff",
+            "Watch",
+            "TriggeredLong",
+            "NoSetup"
+          ]
+        },
+        {
+          "name": "normalized_signal_in",
+          "passed": true,
+          "actual": "Side",
+          "expected": [
+            "Side"
+          ]
+        },
+        {
+          "name": "raw_enum_compliant",
+          "passed": true,
+          "actual": true,
+          "expected": true
+        }
+      ],
+      "all_assertions_passed": false
+    }
+  ]
+}

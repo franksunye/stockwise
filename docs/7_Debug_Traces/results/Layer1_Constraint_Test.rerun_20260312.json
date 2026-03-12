@@ -1,0 +1,26 @@
+{
+  "B2_WITH_L1": {
+    "content": "{\n  \"internal_reasoning\": \"新易盛 (300502) 目前呈现典型的派发特征。从价格行为分析，3月12日的长阴线直接穿透了MA5、MA10并收于MA20（381.14）之下，且收盘价极度接近全天最低点，显示空头力量占据绝对统治地位。尽管中期海拔高度处于18%的机会位，但短期主力资金高达21.63亿的净流出与Layer-1定义的RiskOff环境形成了强烈的看空共振。深层矛盾在于：虽然股价处于布林带中轨平衡区，但VCP所要求的波动收缩并未出现，反而因近期的大开大合导致ATR-14维持在25.42的高位，这表明筹码极度松动。周线级别RSI维持在50附近，尚未进入超卖区，暗示下行空间未完全释放。在成交量未能萎缩至地量且价格未站稳381.14之前，任何盲目的左侧抄底都将面临极高的非对称风险。当前的博弈空间受限于上方MA60（405.18）的强压，短期内应保持极度审慎。\",\n  \"signal\": \"Side\",\n  \"confidence\": 0.85,\n  \"summary\": \"破位阴线失守MA20，资金大幅流出，波动率未见收缩，进入空头主导的风险防范期。\",\n  \"tactics\": {\n    \"holding_profit\": [\n      {\n        \"priority\": \"P1\",\n        \"action\": \"大幅减仓\",\n        \"trigger\": \"若反抽381.14（MA20）受阻且量能萎缩。\",\n        \"reason\": \"利用反弹确认阻力，锁定已有利润，防止利润被波动吞噬。\"\n      },\n      {\n        \"priority\": \"P2\",\n        \"action\": \"清仓离场\",\n        \"trigger\": \"股价跌破375.00并持续15分钟不收回。\",\n        \"reason\": \"确认短期上升趋势彻底瓦解，进入完全现金防御状态。\"\n      }\n    ],\n    \"holding_loss\": [\n      {\n        \"priority\": \"P1\",\n        \"action\": \"机械止损\",\n        \"trigger\": \"收盘价跌破366.11（筹码锚点）。\",\n        \"reason\": \"跌破核心筹码密集区意味着下方空间打开，必须执行纪律。\"\n      },\n      {\n        \"priority\": \"P2\",\n        \"action\": \"禁止补仓\",\n        \"trigger\": \"价格在360-380区间震荡期间。\",\n        \"reason\": \"在Layer-1为RiskOff且主力撤退时补仓会指数级增加风险暴露。\"\n      }\n    ],\n    \"empty\": [\n      {\n        \"priority\": \"P1\",\n        \"action\": \"等待VCP收缩\",\n        \"trigger\": \"价格在360.00上方出现连续3-5日的窄幅缩量整理。\",\n        \"reason\": \"寻找波动率收缩（Volatility Contraction）的进场奇点。\"\n      },\n      {\n        \"priority\": \"P2\",\n        \"action\": \"右侧突破介入\",\n        \"trigger\": \"放量收复405.18（MA60）且回踩站稳。\",\n        \"reason\": \"确认中期趋势反转，配合Layer-1转为RiskOn时进场。\"\n      }\n    ]\n  },\n  \"key_levels\": {\n    \"immediate_support\": [\n      369.37,\n      366.11\n    ],\n    \"immediate_resistance\": [\n      381.14,\n      405.18\n    ],\n    \"stop_loss_reference\": 340.64\n  }\n}",
+    "meta": {
+      "input_tokens": 3073,
+      "output_tokens": 910,
+      "total_tokens": 6875,
+      "latency_ms": 22018,
+      "error": null
+    },
+    "tokens": 6875,
+    "latency": 22.019532918930054
+  },
+  "B2_WITHOUT_L1": {
+    "content": null,
+    "meta": {
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "latency_ms": 0,
+      "error": "429 Too Many Requests. {'message': 'All accounts exhausted. Last error: HTTP 503: {\\n  \"error\": {\\n    \"code\": 503,\\n    \"message\": \"No capacity available for model gemini-3-flash on the server\",\\n    \"status\": \"UNAVAILABLE\",\\n    \"details\": [\\n      {\\n        \"@type\": \"type.googleapis.com/google.rpc.ErrorInfo\",\\n        \"reason\": \"MODEL_CAPACITY_EXHAUSTED\",\\n        \"domain\": \"cloudcode-pa.googleapis.com\",\\n        \"metadata\": {\\n          \"model\": \"gemini-3-flash\"\\n        }\\n      },\\n      {\\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\\n        \"retryDelay\": \"17s\"\\n      }\\n    ]\\n  }\\n}\\n', 'status': 'Too Many Requests'}"
+    },
+    "tokens": 0,
+    "latency": 13.43282413482666
+  }
+}

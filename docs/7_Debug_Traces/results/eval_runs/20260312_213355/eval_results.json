@@ -1,0 +1,131 @@
+{
+  "run_id": "20260312_213355",
+  "manifest": {
+    "path": "/Users/yesun/Code/stockwise/docs/7_Debug_Traces/eval_manifest.json",
+    "case_count": 1
+  },
+  "provider": {
+    "provider": "gemini_local",
+    "model": "gemini-3-flash",
+    "base_url": "http://127.0.0.1:8045",
+    "temperature": 0.1,
+    "max_tokens": 12000,
+    "cooldown_s": 0.0,
+    "retries": 1,
+    "retry_delay_s": 8.0
+  },
+  "summary": {
+    "total_cases": 1,
+    "parse_success_rate": 0.0,
+    "raw_enum_compliance_rate": 0.0,
+    "normalized_enum_compliance_rate": 0.0,
+    "normalized_tactics_compliance_rate": 0.0,
+    "normalized_key_levels_compliance_rate": 0.0,
+    "assertion_pass_rate": 0.0,
+    "avg_latency_s": 16.811,
+    "avg_total_tokens": 3851.0,
+    "by_group": {
+      "four_way_benchmark": {
+        "cases": 1,
+        "assertion_pass": 0,
+        "avg_latency_s": 16.811,
+        "avg_total_tokens": 3851.0
+      }
+    }
+  },
+  "results": [
+    {
+      "case_id": "b3_logic_distilled",
+      "group": "four_way_benchmark",
+      "signal_mode": "legacy",
+      "meta": {
+        "input_tokens": 1291,
+        "output_tokens": 594,
+        "total_tokens": 3851,
+        "latency_ms": 16808,
+        "error": null
+      },
+      "latency_s": 16.811,
+      "raw": {
+        "signal": null,
+        "confidence": null,
+        "enum_compliant": false,
+        "tactics_contract": {
+          "present": false,
+          "all_buckets_present": false,
+          "all_lists": false,
+          "all_len_2": false,
+          "compliant": false
+        },
+        "key_levels_contract": {
+          "present": false,
+          "support_len_2": false,
+          "resistance_len_2": false,
+          "semantic_order_ok": false,
+          "compliant": false
+        },
+        "content": "{\n  \"internal_reasoning\": \"当前新易盛（300502）呈现典型的“高位派发后破位”特征。蓝色方（空头）逻辑：日线放量长阴跌破MA20关键支撑，收盘价贴近最低点，显示空头情绪宣泄尚未结束。主力资金近3日超25亿的净流出属于极端抛售行为，暗示机构对短期估值或行业预期存在剧烈分歧。周线双顶结构压制明显，技术面已进入修正周期，MA5/10/20均线空头排列初现，下行惯性极强。红色方（多头）逻辑：月线级别多头趋势未完全破坏，目前价格处于中期相对低位（18%分位），下方366.11存在密集的筹码堆积，具备较强的结构性支撑。RSI尚未进入超卖区，意味着仍有惯性下探空间，但急跌往往伴随超跌反弹的博弈机会，长周期支撑位可能诱发技术性回抽。最终决策：基于RiskOff环境，当前胜率向空头倾斜。博弈重心应放在366.11支撑位的有效性验证上。在未出现缩量企稳或长下影线信号前，任何反抽均视为减仓机会。期望值计算显示，当前位置入场盈亏比不佳，建议执行Side（观望）策略，等待空头动能衰竭。\",\n  \"summary\": \"MA20失守伴随主力巨量派发，短期空头动能占优，需关注366.11筹码区支撑强度。\",\n  \"key_levels\": {\n    \"immediate_support\": [\n      366.11,\n      346.74\n    ],\n    \"immediate_resistance\": [\n      381.14,\n      405.18\n    ]\n  },\n  \"tactics\": {\n    \"holding_profit\": \"大幅减仓，防守位上移至381.14，若反抽无法放量收复该位置则清仓离场。\",\n    \"holding_loss\": \"跌破MA20已触发技术止损，建议逢反抽减筹，不宜死扛，止损参考366.11破位。\",\n    \"empty\": \"严格观望，等待价格回落至366.11附近观察缩量企稳信号，或等待RSI进入超卖区。\",\n  },\n  \"stop_loss_reference\": 353.35\n}"
+      },
+      "parser": {
+        "parse_success": false,
+        "parse_error": "Invalid JSON syntax: Expecting ',' delimiter: line 2 column 45 (char 46)",
+        "diagnostics": null,
+        "parsed_model": null
+      },
+      "normalized": {
+        "signal": null,
+        "confidence": null,
+        "enum_compliant": false,
+        "tactics_contract": {
+          "present": false,
+          "all_buckets_present": false,
+          "all_lists": false,
+          "all_len_2": false,
+          "compliant": false
+        },
+        "key_levels_contract": {
+          "present": false,
+          "support_len_2": false,
+          "resistance_len_2": false,
+          "semantic_order_ok": false,
+          "compliant": false
+        },
+        "layer1_expected_signal": "Side",
+        "layer1_alignment_ok": false,
+        "key_levels_meta": null,
+        "output": {
+          "close_anchor": 378.77
+        }
+      },
+      "assertions": [
+        {
+          "name": "parse_success",
+          "passed": false,
+          "actual": false,
+          "expected": true
+        },
+        {
+          "name": "normalized_signal_in",
+          "passed": false,
+          "actual": null,
+          "expected": [
+            "Side"
+          ]
+        },
+        {
+          "name": "normalized_tactics_compliant",
+          "passed": false,
+          "actual": false,
+          "expected": true
+        },
+        {
+          "name": "normalized_key_levels_compliant",
+          "passed": false,
+          "actual": false,
+          "expected": true
+        }
+      ],
+      "all_assertions_passed": false
+    }
+  ]
+}

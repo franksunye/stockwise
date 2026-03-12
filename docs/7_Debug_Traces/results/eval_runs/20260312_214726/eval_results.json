@@ -1,0 +1,229 @@
+{
+  "run_id": "20260312_214726",
+  "manifest": {
+    "path": "/Users/yesun/Code/stockwise/docs/7_Debug_Traces/eval_manifest.json",
+    "case_count": 1
+  },
+  "provider": {
+    "provider": "gemini_local",
+    "model": "gemini-3-flash",
+    "base_url": "http://127.0.0.1:8045",
+    "temperature": 0.1,
+    "max_tokens": 12000,
+    "cooldown_s": 0.0,
+    "retries": 1,
+    "retry_delay_s": 8.0
+  },
+  "summary": {
+    "total_cases": 1,
+    "parse_success_rate": 0.0,
+    "raw_enum_compliance_rate": 1.0,
+    "normalized_enum_compliance_rate": 1.0,
+    "normalized_tactics_compliance_rate": 1.0,
+    "normalized_key_levels_compliance_rate": 1.0,
+    "assertion_pass_rate": 0.0,
+    "avg_latency_s": 20.961,
+    "avg_total_tokens": 4920.0,
+    "by_group": {
+      "four_way_benchmark": {
+        "cases": 1,
+        "assertion_pass": 0,
+        "avg_latency_s": 20.961,
+        "avg_total_tokens": 4920.0
+      }
+    }
+  },
+  "results": [
+    {
+      "case_id": "b3_logic_distilled",
+      "group": "four_way_benchmark",
+      "signal_mode": "legacy",
+      "meta": {
+        "input_tokens": 1784,
+        "output_tokens": 925,
+        "total_tokens": 4920,
+        "latency_ms": 20959,
+        "error": null
+      },
+      "latency_s": 20.961,
+      "raw": {
+        "signal": "Side",
+        "confidence": null,
+        "enum_compliant": true,
+        "tactics_contract": {
+          "present": true,
+          "all_buckets_present": true,
+          "all_lists": true,
+          "all_len_2": true,
+          "compliant": true
+        },
+        "key_levels_contract": {
+          "present": true,
+          "support_len_2": true,
+          "resistance_len_2": true,
+          "semantic_order_ok": true,
+          "compliant": true
+        },
+        "content": "{\n  \"internal_reasoning\": \"当前新易盛（300502）呈现出典型的“高位放量破位”特征。蓝色方（Bear Case）：技术面极度恶化，3月12日的长阴线不仅放量跌破了MA20（381.14）这一生命线，且收盘价几乎处于全天最低点，显示空头动能尚未完全释放。资金面上，近3日主力资金流出逾25亿，这种规模的派发通常意味着机构对短期基本面或估值逻辑产生了根本性分歧。周线级别的双顶结构压制明显，若366.11的筹码密集区失守，下方将直指346.74甚至更低，形成中期趋势的反转。红色方（Bull Case）：尽管短期超卖压力巨大，但月线级别仍维持多头底色，目前的调整可视为对前期过快涨幅的修正。366.11作为多头最后的密集防御区，具备较强的心理与技术支撑。RSI目前处于47.1，尚未进入极端超卖区，但也意味着下行空间在收窄。若能在366.11附近企稳并伴随缩量，则存在超跌反弹的博弈机会。最终决策：基于博弈赔率，当前处于“破位初期的惯性下杀”阶段，胜率向空头倾斜。在主力资金流出未见放缓、MA20未收复前，盲目抄底的期望值为负。裁决为Side（观望），重点观察366.11支撑强度。\",\n  \"signal\": \"Side\",\n  \"summary\": \"放量跌破MA20关键位，主力资金大幅流出，短期趋势走弱，需等待366.11支撑确认。\",\n  \"tactics\": {\n    \"holding_profit\": [\n      {\n        \"priority\": \"P1\",\n        \"action\": \"减仓\",\n        \"trigger\": \"反抽381.14受阻\",\n        \"reason\": \"MA20已由支撑转为强压力位，需锁定利润规避二次下探\"\n      },\n      {\n        \"priority\": \"P2\",\n        \"action\": \"清仓\",\n        \"trigger\": \"有效跌破366.11\",\n        \"reason\": \"筹码密集区瓦解，意味着中期上涨趋势彻底终结\"\n      }\n    ],\n    \"holding_loss\": [\n      {\n        \"priority\": \"P1\",\n        \"action\": \"止损\",\n        \"trigger\": \"收盘价低于366.11\",\n        \"reason\": \"规避破位后的加速下行风险，保护剩余本金\"\n      },\n      {\n        \"priority\": \"P2\",\n        \"action\": \"锁仓等待\",\n        \"trigger\": \"RSI跌至30以下\",\n        \"reason\": \"进入极端超卖区，等待技术性抽吸后的减仓机会\"\n      }\n    ],\n    \"empty\": [\n      {\n        \"priority\": \"P1\",\n        \"action\": \"观望\",\n        \"trigger\": \"价格在366.11-378.77区间震荡\",\n        \"reason\": \"趋势不明且动能向下，等待底部信号明确\"\n      },\n      {\n        \"priority\": \"P2\",\n        \"action\": \"试探性买入\",\n        \"trigger\": \"放量收复381.14\",\n        \"reason\": \"确认本次破位为假跌破，趋势重回多头排列\"\n      }\n    ]\n  },\n  \"key_levels\": {\n    \"immediate_support\": [\n      366.11,\n      346.74\n    ],\n    \"immediate_resistance\": [\n      381.14,\n      405.18\n    ]\n  },\n  \"stop_loss_reference\": 353.35\n}"
+      },
+      "parser": {
+        "parse_success": false,
+        "parse_error": "1 validation error for StockAnalysisResult\nconfidence\n  Field required [type=missing, input_value={'internal_reasoning': '...loss_reference': 353.35}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing",
+        "diagnostics": null,
+        "parsed_model": null
+      },
+      "normalized": {
+        "signal": "Side",
+        "confidence": null,
+        "enum_compliant": true,
+        "tactics_contract": {
+          "present": true,
+          "all_buckets_present": true,
+          "all_lists": true,
+          "all_len_2": true,
+          "compliant": true
+        },
+        "key_levels_contract": {
+          "present": true,
+          "support_len_2": true,
+          "resistance_len_2": true,
+          "semantic_order_ok": true,
+          "compliant": true
+        },
+        "layer1_expected_signal": "Side",
+        "layer1_alignment_ok": true,
+        "key_levels_meta": {
+          "immediate_support_source": "model",
+          "immediate_resistance_source": "model"
+        },
+        "output": {
+          "internal_reasoning": "当前新易盛（300502）呈现出典型的“高位放量破位”特征。蓝色方（Bear Case）：技术面极度恶化，3月12日的长阴线不仅放量跌破了MA20（381.14）这一生命线，且收盘价几乎处于全天最低点，显示空头动能尚未完全释放。资金面上，近3日主力资金流出逾25亿，这种规模的派发通常意味着机构对短期基本面或估值逻辑产生了根本性分歧。周线级别的双顶结构压制明显，若366.11的筹码密集区失守，下方将直指346.74甚至更低，形成中期趋势的反转。红色方（Bull Case）：尽管短期超卖压力巨大，但月线级别仍维持多头底色，目前的调整可视为对前期过快涨幅的修正。366.11作为多头最后的密集防御区，具备较强的心理与技术支撑。RSI目前处于47.1，尚未进入极端超卖区，但也意味着下行空间在收窄。若能在366.11附近企稳并伴随缩量，则存在超跌反弹的博弈机会。最终决策：基于博弈赔率，当前处于“破位初期的惯性下杀”阶段，胜率向空头倾斜。在主力资金流出未见放缓、MA20未收复前，盲目抄底的期望值为负。裁决为Side（观望），重点观察366.11支撑强度。",
+          "signal": "Side",
+          "summary": "放量跌破MA20关键位，主力资金大幅流出，短期趋势走弱，需等待366.11支撑确认。",
+          "tactics": {
+            "holding_profit": [
+              {
+                "priority": "P1",
+                "action": "减仓",
+                "trigger": "反抽381.14受阻",
+                "reason": "MA20已由支撑转为强压力位，需锁定利润规避二次下探",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              },
+              {
+                "priority": "P2",
+                "action": "清仓",
+                "trigger": "有效跌破366.11",
+                "reason": "筹码密集区瓦解，意味着中期上涨趋势彻底终结",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              }
+            ],
+            "holding_loss": [
+              {
+                "priority": "P1",
+                "action": "止损",
+                "trigger": "收盘价低于366.11",
+                "reason": "规避破位后的加速下行风险，保护剩余本金",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              },
+              {
+                "priority": "P2",
+                "action": "锁仓等待",
+                "trigger": "RSI跌至30以下",
+                "reason": "进入极端超卖区，等待技术性抽吸后的减仓机会",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              }
+            ],
+            "empty": [
+              {
+                "priority": "P1",
+                "action": "观望",
+                "trigger": "价格在366.11-378.77区间震荡",
+                "reason": "趋势不明且动能向下，等待底部信号明确",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              },
+              {
+                "priority": "P2",
+                "action": "试探性买入",
+                "trigger": "放量收复381.14",
+                "reason": "确认本次破位为假跌破，趋势重回多头排列",
+                "target_price": null,
+                "stop_advance_price": null,
+                "stop_loss_price": null,
+                "buy_zone_price": null
+              }
+            ]
+          },
+          "key_levels": {
+            "immediate_support": [
+              366.11,
+              346.74
+            ],
+            "immediate_resistance": [
+              381.14,
+              405.18
+            ],
+            "strong_support": 0,
+            "strong_resistance": 0,
+            "breakout_confirmation_level": 0,
+            "stop_loss_reference": 0,
+            "support": 366.11,
+            "resistance": 381.14
+          },
+          "stop_loss_reference": 353.35,
+          "news_analysis": [],
+          "reasoning_trace": [],
+          "counter_argument": "",
+          "key_levels_meta": {
+            "immediate_support_source": "model",
+            "immediate_resistance_source": "model"
+          },
+          "close_anchor": 378.77
+        }
+      },
+      "assertions": [
+        {
+          "name": "parse_success",
+          "passed": false,
+          "actual": false,
+          "expected": true
+        },
+        {
+          "name": "normalized_signal_in",
+          "passed": true,
+          "actual": "Side",
+          "expected": [
+            "Side"
+          ]
+        },
+        {
+          "name": "normalized_tactics_compliant",
+          "passed": true,
+          "actual": true,
+          "expected": true
+        },
+        {
+          "name": "normalized_key_levels_compliant",
+          "passed": true,
+          "actual": true,
+          "expected": true
+        }
+      ],
+      "all_assertions_passed": false
+    }
+  ]
+}
