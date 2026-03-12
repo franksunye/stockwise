@@ -38,10 +38,13 @@ export interface AIPrediction {
     symbol: string;
     date: string;
     target_date: string;
-    signal: 'Long' | 'Short' | 'Side';
+    signal: 'Long' | 'Short' | 'Side'; // compatibility field; may include mode overlay
+    canonical_signal?: string; // base stored final signal before mode overlay
+    llm_signal?: string; // AI-side conclusion extracted from ai_reasoning
     confidence: number;
     support_price: number;
-    ai_reasoning: string;
+    ai_reasoning: string; // existing reasoning payload stored in ai_predictions_v2
+    llm_reasoning?: string; // alias for AI-side reasoning view; currently equals ai_reasoning
     validation_status: 'Pending' | 'Correct' | 'Incorrect' | 'Neutral' | 'Verifying';
     actual_change: number | null;
     validation_data?: {
@@ -51,7 +54,8 @@ export interface AIPrediction {
         max_perf: number;
     } | string;
     max_perf_in_window?: number;
-    layer1_status?: 'NoSetup' | 'Watch' | 'TriggeredLong' | 'RiskOff';
+    layer1_status?: 'NoSetup' | 'Watch' | 'TriggeredLong' | 'RiskOff'; // compatibility field; may include mode overlay
+    layer1_signal?: 'NoSetup' | 'Watch' | 'TriggeredLong' | 'RiskOff'; // base stored Layer-1 conclusion
     layer1_score?: number;
     layer1_trigger_hit?: number;
     layer1_risk_off_hit?: number;

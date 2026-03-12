@@ -23,6 +23,11 @@ function closeDb(db: unknown): void {
     }
 }
 
+// History route exposes both compatibility fields and explicit dual-track fields.
+// Consumers that need richer decision context should prefer:
+// - canonical_signal / layer1_signal for base rule-disciplined view
+// - llm_signal / llm_reasoning for AI-side view
+
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     let symbol = searchParams.get('symbol');
@@ -52,9 +57,11 @@ export async function GET(request: Request) {
             const currentMode = await getUserMode(client, userId, userTier as UserTier);
 
             const sql = `
-                SELECT p.symbol, p.date, p.target_date, ${EFFECTIVE_SIGNAL_SQL} AS signal, p.confidence,
-                       p.support_price, p.ai_reasoning, ${EFFECTIVE_VALIDATION_STATUS_SQL} AS validation_status, p.actual_change,
-                       ${EFFECTIVE_LAYER1_STATUS_SQL} AS layer1_status,
+                SELECT p.symbol, p.date, p.target_date, ${EFFECTIVE_SIGNAL_SQL} AS signal, p.signal AS canonical_signal, p.confidence,
+                       p.support_price, p.ai_reasoning, p.ai_reasoning AS llm_reasoning,
+                       COALESCE(json_extract(p.ai_reasoning, '$.signal'), p.signal) AS llm_signal,
+                       ${EFFECTIVE_VALIDATION_STATUS_SQL} AS validation_status, p.actual_change,
+                       ${EFFECTIVE_LAYER1_STATUS_SQL} AS layer1_status, p.layer1_status AS layer1_signal,
                        p.max_perf_in_window, p.validation_data,
                        p.is_primary, p.model_id as model, m.display_name,
                        ${EFFECTIVE_DECISION_SEMANTIC_SQL} AS decision_semantic,

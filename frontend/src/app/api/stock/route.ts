@@ -2,6 +2,10 @@ import { NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 import { getDbClient } from '@/lib/db';
 
+// Stock detail keeps the original prediction shape and adds explicit dual-track aliases:
+// - canonical_signal / layer1_signal for the stored base result
+// - llm_signal / llm_reasoning for the AI-side interpretation from ai_reasoning
+
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const symbol = searchParams.get('symbol');
@@ -46,7 +50,10 @@ export async function GET(request: Request) {
                 });
                 const rsPred = await client.execute({
                     sql: `
-                        SELECT p.*, d.close as close_price, m.display_name as model
+                        SELECT p.*, p.signal AS canonical_signal, p.layer1_status AS layer1_signal,
+                               p.ai_reasoning AS llm_reasoning,
+                               COALESCE(json_extract(p.ai_reasoning, '$.signal'), p.signal) AS llm_signal,
+                               d.close as close_price, m.display_name as model
                         FROM ai_predictions_v2 p
                         LEFT JOIN daily_prices d ON p.symbol = d.symbol AND p.date = d.date
                         LEFT JOIN prediction_models m ON p.model_id = m.model_id
@@ -62,7 +69,10 @@ export async function GET(request: Request) {
             } else {
                 row = client.prepare('SELECT * FROM daily_prices WHERE symbol = ? ORDER BY date DESC LIMIT 1').get(symbol);
                 const predictions = client.prepare(`
-                    SELECT p.*, d.close as close_price, m.display_name as model
+                    SELECT p.*, p.signal AS canonical_signal, p.layer1_status AS layer1_signal,
+                           p.ai_reasoning AS llm_reasoning,
+                           COALESCE(json_extract(p.ai_reasoning, '$.signal'), p.signal) AS llm_signal,
+                           d.close as close_price, m.display_name as model
                     FROM ai_predictions_v2 p
                     LEFT JOIN daily_prices d ON p.symbol = d.symbol AND p.date = d.date
                     LEFT JOIN prediction_models m ON p.model_id = m.model_id

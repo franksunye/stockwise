@@ -23,6 +23,12 @@ function closeDb(db: unknown): void {
     }
 }
 
+// Field semantics:
+// - signal / layer1_status: compatibility fields that may already include current mode overlay
+// - canonical_signal / layer1_signal: base stored decision view from ai_predictions_v2
+// - llm_signal / llm_reasoning: AI-side interpretation extracted from ai_reasoning
+// This route intentionally adds explicit views without changing existing callers.
+
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const symbol = searchParams.get('symbol');
@@ -67,12 +73,16 @@ export async function GET(request: Request) {
                     p.date,
                     p.target_date,
                     ${EFFECTIVE_SIGNAL_SQL} AS signal,
+                    p.signal AS canonical_signal,
                     p.confidence,
                     p.support_price,
                     p.ai_reasoning,
+                    p.ai_reasoning AS llm_reasoning,
+                    COALESCE(json_extract(p.ai_reasoning, '$.signal'), p.signal) AS llm_signal,
                     ${EFFECTIVE_VALIDATION_STATUS_SQL} AS validation_status,
                     p.actual_change,
                     ${EFFECTIVE_LAYER1_STATUS_SQL} AS layer1_status,
+                    p.layer1_status AS layer1_signal,
                     p.layer1_score,
                     p.layer1_trigger_hit,
                     p.layer1_risk_off_hit,

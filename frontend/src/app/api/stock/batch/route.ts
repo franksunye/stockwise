@@ -23,6 +23,12 @@ function closeDb(db: unknown): void {
     }
 }
 
+// Batch payload carries three decision lenses in one row:
+// - overlay lens: signal / layer1_status / decision_semantic
+// - base lens: canonical_signal / layer1_signal
+// - AI lens: llm_signal / llm_reasoning
+// Existing UI can keep using overlay fields; deeper views can adopt the explicit fields.
+
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const symbolsParam = searchParams.get('symbols');
@@ -65,9 +71,13 @@ export async function GET(request: Request) {
                         WITH RankedPredictions AS (
                             SELECT p.symbol, p.date, p.target_date,
                                     ${EFFECTIVE_SIGNAL_SQL} AS signal,
+                                    p.signal AS canonical_signal,
                                     p.confidence,
-                                    p.support_price, p.ai_reasoning, ${EFFECTIVE_VALIDATION_STATUS_SQL} AS validation_status, p.actual_change,
+                                    p.support_price, p.ai_reasoning, p.ai_reasoning AS llm_reasoning,
+                                    COALESCE(json_extract(p.ai_reasoning, '$.signal'), p.signal) AS llm_signal,
+                                    ${EFFECTIVE_VALIDATION_STATUS_SQL} AS validation_status, p.actual_change,
                                     ${EFFECTIVE_LAYER1_STATUS_SQL} AS layer1_status,
+                                    p.layer1_status AS layer1_signal,
                                     p.layer1_score, p.layer1_trigger_hit, p.layer1_risk_off_hit, p.layer1_strategy_version, p.layer1_payload,
                                     p.max_perf_in_window,
                                     p.is_primary, p.model_id as model, m.display_name,
@@ -183,9 +193,13 @@ export async function GET(request: Request) {
                         WITH RankedPredictions AS (
                             SELECT p.symbol, p.date, p.target_date,
                                     ${EFFECTIVE_SIGNAL_SQL} AS signal,
+                                    p.signal AS canonical_signal,
                                     p.confidence,
-                                    p.support_price, p.ai_reasoning, ${EFFECTIVE_VALIDATION_STATUS_SQL} AS validation_status, p.actual_change,
+                                    p.support_price, p.ai_reasoning, p.ai_reasoning AS llm_reasoning,
+                                    COALESCE(json_extract(p.ai_reasoning, '$.signal'), p.signal) AS llm_signal,
+                                    ${EFFECTIVE_VALIDATION_STATUS_SQL} AS validation_status, p.actual_change,
                                     ${EFFECTIVE_LAYER1_STATUS_SQL} AS layer1_status,
+                                    p.layer1_status AS layer1_signal,
                                     p.layer1_score, p.layer1_trigger_hit, p.layer1_risk_off_hit, p.layer1_strategy_version, p.layer1_payload,
                                     p.max_perf_in_window,
                                     p.is_primary, p.model_id as model, m.display_name,
