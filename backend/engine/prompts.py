@@ -1,5 +1,6 @@
 import asyncio
 import json
+import os
 from typing import Dict, Any, List
 import pandas as pd
 from database import get_connection, get_stock_profile
@@ -11,6 +12,24 @@ from backend.db_repo.queries import (
 )
 from backend.engine.context import SessionContext
 from backend.templating import render_template
+
+
+def _resolve_stock_analysis_prompt_variant() -> str:
+    variant = str(os.getenv("STOCK_ANALYSIS_PROMPT_VARIANT", "b2")).strip().lower()
+    return variant if variant in {"legacy", "b2"} else "b2"
+
+
+def _resolve_stock_analysis_template_names() -> tuple[str, str]:
+    variant = _resolve_stock_analysis_prompt_variant()
+    if variant == "b2":
+        return (
+            "prompts/stock_analysis_system_b2.j2",
+            "prompts/stock_analysis_user_b2.j2",
+        )
+    return (
+        "prompts/stock_analysis_system.j2",
+        "prompts/stock_analysis_user.j2",
+    )
 
 
 def _is_period_history_sane(rows: List[Dict[str, Any]], period: str) -> bool:
@@ -333,8 +352,10 @@ def prepare_stock_analysis_prompt(symbol: str, as_of_date: str = None, ctx: Dict
         return None, ctx["error"]
 
     # System Prompt (Jinja2 Template)
+    system_template_name, user_template_name = _resolve_stock_analysis_template_names()
+
     try:
-        system_prompt = render_template('prompts/stock_analysis_system.j2')
+        system_prompt = render_template(system_template_name)
     except Exception as e:
         print(f"System Template rendering failed: {e}")
         return None, f"System Template Error: {e}"
@@ -549,11 +570,11 @@ def prepare_stock_analysis_prompt(symbol: str, as_of_date: str = None, ctx: Dict
 
     # Get Version
     from backend.templating import get_template_version
-    final_version = get_template_version('prompts/stock_analysis_system.j2', default="v1.0")
+    final_version = get_template_version(system_template_name, default="v1.0")
 
     # Render User Prompt
     try:
-        user_prompt = render_template('prompts/stock_analysis_user.j2',
+        user_prompt = render_template(user_template_name,
             stock_name=ctx.get("name", "未知股票"),
             symbol=symbol,
             date=data['date'],

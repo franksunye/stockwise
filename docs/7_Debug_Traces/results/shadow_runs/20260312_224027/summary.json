@@ -1,0 +1,21 @@
+{
+  "symbol": "300502",
+  "date": "2026-03-12",
+  "layer1_status": "RiskOff",
+  "legacy": {
+    "prompt_version": "v3.6",
+    "latency_s": 39.266,
+    "total_tokens": 14166,
+    "raw_signal": "Side",
+    "normalized_signal": "Side",
+    "summary": "股价放量跌破MA20关键支撑，动能指标死叉共振，短期进入调整期，建议观望等待企稳。"
+  },
+  "b2_prod_safe": {
+    "prompt_version": "b2.v1",
+    "latency_s": 28.164,
+    "total_tokens": 9615,
+    "raw_signal": "Side",
+    "normalized_signal": "Side",
+    "summary": "股价放量跌破MA20关键支撑，技术指标全面转弱，触发RiskOff约束，建议持币观望。"
+  }
+}

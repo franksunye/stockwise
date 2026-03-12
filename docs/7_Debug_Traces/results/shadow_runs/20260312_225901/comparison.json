@@ -1,0 +1,144 @@
+{
+  "summary": {
+    "symbol": "601869",
+    "date": "2026-03-12",
+    "layer1_status": "Watch",
+    "legacy": {
+      "prompt_version": "v3.6",
+      "latency_s": 37.049,
+      "total_tokens": 12647,
+      "raw_signal": "Side",
+      "normalized_signal": "Side",
+      "summary": "冲高回落留下长上影线，266元压力显著，短期进入震荡消化期，建议观望等待回踩支撑。"
+    },
+    "b2_prod_safe": {
+      "prompt_version": "b2.v1",
+      "latency_s": 17.958,
+      "total_tokens": 0,
+      "raw_signal": null,
+      "normalized_signal": null,
+      "summary": null
+    }
+  },
+  "legacy": {
+    "meta": {
+      "input_tokens": 6238,
+      "output_tokens": 1184,
+      "total_tokens": 12647,
+      "latency_ms": 37048,
+      "error": null
+    },
+    "parser": {
+      "parse_success": true,
+      "parse_error": null,
+      "diagnostics": {
+        "stage": "strict",
+        "used_dirtyjson": false,
+        "normalized": false,
+        "truncated_hint": false
+      }
+    },
+    "raw_signal": "Side",
+    "raw_confidence": 0.65,
+    "normalized_signal": "Side",
+    "summary": "冲高回落留下长上影线，266元压力显著，短期进入震荡消化期，建议观望等待回踩支撑。",
+    "normalized_tactics_keys": [
+      "holding_profit",
+      "holding_loss",
+      "empty"
+    ],
+    "normalized_key_levels": {
+      "immediate_support": [
+        236.2,
+        220.65
+      ],
+      "immediate_resistance": [
+        250.01,
+        266.66
+      ],
+      "strong_support": 157.0,
+      "strong_resistance": 266.66,
+      "breakout_confirmation_level": 266.66,
+      "stop_loss_reference": 213.8,
+      "support": 236.2,
+      "resistance": 250.01,
+      "stop_loss": 213.8
+    },
+    "raw_content_head": "{\n  \"signal\": \"Side\",\n  \"confidence\": 0.65,\n  \"summary\": \"冲高回落留下长上影线，266元压力显著，短期进入震荡消化期，建议观望等待回踩支撑。\",\n  \"reasoning_trace\": [\n    {\n      \"step\": \"trend\",\n      \"data\": \"站上MA20(220.65)且MA60持续向上，中期趋势维持多头排列。\",\n      \"conclusion\": \"中期趋势向好\"\n    },\n    {\n      \"step\": \"momentum\",\n      \"data\": \"MACD金叉但红柱缩短，KDJ超买区走平，短期上攻动能出现衰竭迹象。\",\n      \"conclusion\": \"动能有所减弱\"\n    },\n    {\n      \"step\": \"levels\",\n      \"data\": \"今日受阻于266.66前高放量回落，下方236.2密集成交区具备初步支撑。\",\n      \"conclusion\": \"上压下撑明显\"\n    },\n    {\n      \"step\": \"context\",\n      \"data\": \"市场处于Watch状态，北向资金数据缺失，个股资金流向不明，环境偏中性。\",\n      \"conclusion\": \"外部环境不明\"\n    },\n    {\n      \"step\": \"psychology\",\n      \"data\": \"高位放量冲高回落显示获利盘了结意愿强烈，多头追高情绪受挫。\",\n      \"conclusion\": \"情绪趋于谨慎\"\n    },\n    {\n      \"step\": \"decision\",\n      \"data\": \"价格处于高位震荡区，盈亏比不具优势，需等待筹码换手及支撑确认。\",\n      \"conclusion\": \"维持观望评级\"\n    }\n  ],\n  \"counter_argument\": \"若明日放量突破266.66并站稳，则上影线被吞没，短期将开启新一轮主升浪。\",\n  \"news_analysis\": [],\n  \"tactics\": {\n    \"holding_profit\": [\n      {\n        \"priority\": \"P1\",\n        \"action\": \"减仓避险\",\n        \"trigger\": \"跌破236.2元\",\n        \"target_price\": 266.66,\n        \"stop_advance_price\": 236.2,\n        \"reason\": \"锁定利润防止利润大幅回撤\"\n      },\n      {\n        \"priority\": \"P2\",\n        \"action\": \"持股待涨\",\n        \"trigger\": \"站稳245元且不破236.2\",\n        \"target_price\": 280.0,\n        \"stop_advance_price\": 236.2,\n        \"reason\": \"观察能否消化上影线压力\"\n      }\n    ],\n    \"holding_loss\": [\n      {\n        \"priority\": \"P1\",\n        \"action\": \"止损离场\",\n        \"trigger\": \"跌破220.65(MA20)\",",
+    "variant": "legacy",
+    "prompt_version": "v3.6",
+    "latency_s": 37.049,
+    "prompt_preview": {
+      "system_head": [
+        "",
+        "你是 StockWise 的 AI 决策助手，专门为个人投资者提供股票操作建议。",
+        "",
+        "## 数据声明",
+        "**以下所有数据均为来自香港联交所、上海证券交易所、深圳证券交易所的真实市场数据，绝非模拟或虚拟数据。请基于这些真实数据进行专业分析。**",
+        ""
+      ],
+      "user_head": [
+        "# 股票数据输入",
+        "",
+        "## 1. 基础信息",
+        "- **601869** (601869)",
+        "- 日期: 2026-03-12",
+        "- **整体市场背景**: 本地 shadow validation (北向净流入: N/A)",
+        "- **股价位置(Altitude)**: 短期(20d) - | 中期(60d) - | 长期(250d) -",
+        "",
+        "## 1.1 宏观与资金 (Macro & Flow)",
+        "- **宏观数据**: GDP N/A | CPI N/A | 10年期国债 N/A",
+        "- **市场资金**: 领涨板块 [暂无]",
+        "- **个股资金**: 主力大单净流入 **N/A** (👉 暂无解释)"
+      ]
+    }
+  },
+  "b2_prod_safe": {
+    "meta": {
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "latency_ms": 0,
+      "error": "429 Too Many Requests. {'message': 'All accounts exhausted. Last error: HTTP 503: {\\n  \"error\": {\\n    \"code\": 503,\\n    \"message\": \"No capacity available for model gemini-3-flash on the server\",\\n    \"status\": \"UNAVAILABLE\",\\n    \"details\": [\\n      {\\n        \"@type\": \"type.googleapis.com/google.rpc.ErrorInfo\",\\n        \"reason\": \"MODEL_CAPACITY_EXHAUSTED\",\\n        \"domain\": \"cloudcode-pa.googleapis.com\",\\n        \"metadata\": {\\n          \"model\": \"gemini-3-flash\"\\n        }\\n      },\\n      {\\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\\n        \"retryDelay\": \"8s\"\\n      }\\n    ]\\n  }\\n}\\n', 'status': 'Too Many Requests'}"
+    },
+    "parser": {
+      "parse_success": false,
+      "parse_error": "No JSON object found in text",
+      "diagnostics": null
+    },
+    "raw_signal": null,
+    "raw_confidence": null,
+    "normalized_signal": null,
+    "summary": null,
+    "normalized_tactics_keys": [],
+    "normalized_key_levels": null,
+    "raw_content_head": "",
+    "variant": "b2",
+    "prompt_version": "b2.v1",
+    "latency_s": 17.958,
+    "prompt_preview": {
+      "system_head": [
+        "",
+        "你是 StockWise 的核心量化决策引擎，负责把真实市场数据转成可执行的交易纪律。",
+        "",
+        "## 核心原则",
+        "1. 价格行为与关键位优先，宏观与情绪只作背景参考。",
+        "2. 你不预测涨跌，你给出带触发条件的执行计划。"
+      ],
+      "user_head": [
+        "<stockwise_input>",
+        "",
+        "<meta_context>",
+        "股票: 601869 (601869)",
+        "分析基准日: 2026-03-12",
+        "市场背景: 本地 shadow validation",
+        "股价海拔: 短期(20d) - | 中期(60d) - | 长期(250d) -",
+        "</meta_context>",
+        "",
+        "<profile_data>",
+        "行业: 未知",
+        "主营业务: 暂无"
+      ]
+    }
+  }
+}

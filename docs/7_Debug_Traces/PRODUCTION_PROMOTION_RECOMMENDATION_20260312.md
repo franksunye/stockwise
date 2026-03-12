@@ -11,6 +11,11 @@
 
 这是当前专项的正式实验结论。
 
+> 边界说明：
+> 这里指的是 **实验室版本 `B2_LAB`**。
+> 当前生产代码中正在并行引入的是其裁剪后的 **`B2_PROD_SAFE`** 变体，两者不能直接混写。
+> 详见 [`B2_VARIANT_CLARIFICATION_20260312.md`](/Users/yesun/Code/stockwise/docs/7_Debug_Traces/B2_VARIANT_CLARIFICATION_20260312.md)。
+
 ## 2. 为什么是 `B2`
 
 ### 2.1 它是当前“质量优先”路线里最均衡的版本

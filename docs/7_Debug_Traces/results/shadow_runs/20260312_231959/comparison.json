@@ -1,0 +1,169 @@
+{
+  "summary": {
+    "symbol": "00700",
+    "date": "2026-03-12",
+    "layer1_status": "NoSetup",
+    "legacy": {
+      "prompt_version": "v3.6",
+      "latency_s": 40.042,
+      "total_tokens": 13030,
+      "raw_signal": "Side",
+      "normalized_signal": "Side",
+      "summary": "股价大涨后缩量回调，受阻于MA60压力位，建议在541.5至557区间内观望，等待方向选择。"
+    },
+    "b2_prod_safe": {
+      "prompt_version": "b2.v1",
+      "latency_s": 25.365,
+      "total_tokens": 9113,
+      "raw_signal": "Side",
+      "normalized_signal": "Side",
+      "summary": "股价于MA60承压回落，Layer-1提示无交易信号，建议观望等待关键位突破或回踩确认。"
+    }
+  },
+  "legacy": {
+    "meta": {
+      "input_tokens": 6957,
+      "output_tokens": 1338,
+      "total_tokens": 13030,
+      "latency_ms": 40041,
+      "error": null
+    },
+    "parser": {
+      "parse_success": true,
+      "parse_error": null,
+      "diagnostics": {
+        "stage": "strict",
+        "used_dirtyjson": false,
+        "normalized": false,
+        "truncated_hint": false
+      }
+    },
+    "raw_signal": "Side",
+    "raw_confidence": 0.75,
+    "normalized_signal": "Side",
+    "summary": "股价大涨后缩量回调，受阻于MA60压力位，建议在541.5至557区间内观望，等待方向选择。",
+    "normalized_tactics_keys": [
+      "holding_profit",
+      "holding_loss",
+      "empty"
+    ],
+    "normalized_key_levels": {
+      "immediate_support": [
+        541.5,
+        527.6
+      ],
+      "immediate_resistance": [
+        557.0,
+        578.8
+      ],
+      "strong_support": 516.0,
+      "strong_resistance": 578.0,
+      "breakout_confirmation_level": 557.5,
+      "stop_loss_reference": 517.5,
+      "support": 541.5,
+      "resistance": 557.0,
+      "stop_loss": 517.5
+    },
+    "raw_content_head": "{\n  \"signal\": \"Side\",\n  \"confidence\": 0.75,\n  \"summary\": \"股价大涨后缩量回调，受阻于MA60压力位，建议在541.5至557区间内观望，等待方向选择。\",\n  \"reasoning_trace\": [\n    {\n      \"step\": \"trend\",\n      \"data\": \"站上MA20但受阻于MA60(578.78)，均线系统纠缠显示中期趋势不明朗。\",\n      \"conclusion\": \"中期震荡短期偏强\"\n    },\n    {\n      \"step\": \"momentum\",\n      \"data\": \"KDJ金叉向上但MACD仍处于死叉收敛态势，动能指标背离需时间修复。\",\n      \"conclusion\": \"动能修复中\"\n    },\n    {\n      \"step\": \"levels\",\n      \"data\": \"541.5为今日低点支撑，上方557及MA60构成明显抛压，空间受限。\",\n      \"conclusion\": \"空间受限于关键位\"\n    },\n    {\n      \"step\": \"context\",\n      \"data\": \"市场资金流向不详，个股处于大涨后的消化期，外部环境影响中性。\",\n      \"conclusion\": \"环境中性\"\n    },\n    {\n      \"step\": \"psychology\",\n      \"data\": \"连续两日缩量回调显示抛压减弱，但多头在550上方追高意愿不足。\",\n      \"conclusion\": \"观望情绪浓厚\"\n    },\n    {\n      \"step\": \"decision\",\n      \"data\": \"满足NoSetup硬约束，且当前盈亏比不具压倒性优势，不宜盲目入场。\",\n      \"conclusion\": \"维持观望评级\"\n    }\n  ],\n  \"counter_argument\": \"若放量突破557并站稳，可能开启针对MA60的二次冲击，空头需警惕。\",\n  \"news_analysis\": [],\n  \"tactics\": {\n    \"holding_profit\": [\n      {\n        \"priority\": \"P1\",\n        \"action\": \"部分减仓\",\n        \"trigger\": \"跌破541.5支撑位\",\n        \"target_price\": 578.0,\n        \"stop_advance_price\": 541.5,\n        \"stop_loss_price\": null,\n        \"buy_zone_price\": null,\n        \"reason\": \"跌破今日低点预示调整加深\"\n      },\n      {\n        \"priority\": \"P2\",\n        \"action\": \"持股观察\",\n        \"trigger\": \"缩量守住541.5且放量反弹\",\n        \"target_price\": 578.0,\n        \"stop_advance_price\": 535.0,\n        \"stop_loss_price\": null,\n        \"buy_zone_price\": null,\n        \"reason\": \"缩量回调后仍有上攻动能",
+    "variant": "legacy",
+    "prompt_version": "v3.6",
+    "latency_s": 40.042,
+    "prompt_preview": {
+      "system_head": [
+        "",
+        "你是 StockWise 的 AI 决策助手，专门为个人投资者提供股票操作建议。",
+        "",
+        "## 数据声明",
+        "**以下所有数据均为来自香港联交所、上海证券交易所、深圳证券交易所的真实市场数据，绝非模拟或虚拟数据。请基于这些真实数据进行专业分析。**",
+        ""
+      ],
+      "user_head": [
+        "# 股票数据输入",
+        "",
+        "## 1. 基础信息",
+        "- **00700** (00700)",
+        "- 日期: 2026-03-12",
+        "- **整体市场背景**: 本地 shadow validation (北向净流入: N/A)",
+        "- **股价位置(Altitude)**: 短期(20d) - | 中期(60d) - | 长期(250d) -",
+        "",
+        "## 1.1 宏观与资金 (Macro & Flow)",
+        "- **宏观数据**: GDP N/A | CPI N/A | 10年期国债 N/A",
+        "- **市场资金**: 领涨板块 [暂无]",
+        "- **个股资金**: 主力大单净流入 **N/A** (👉 暂无解释)"
+      ]
+    }
+  },
+  "b2_prod_safe": {
+    "meta": {
+      "input_tokens": 4336,
+      "output_tokens": 1285,
+      "total_tokens": 9113,
+      "latency_ms": 25364,
+      "error": null
+    },
+    "parser": {
+      "parse_success": true,
+      "parse_error": null,
+      "diagnostics": {
+        "stage": "strict",
+        "used_dirtyjson": false,
+        "normalized": false,
+        "truncated_hint": false
+      }
+    },
+    "raw_signal": "Side",
+    "raw_confidence": 0.65,
+    "normalized_signal": "Side",
+    "summary": "股价于MA60承压回落，Layer-1提示无交易信号，建议观望等待关键位突破或回踩确认。",
+    "normalized_tactics_keys": [
+      "holding_profit",
+      "holding_loss",
+      "empty"
+    ],
+    "normalized_key_levels": {
+      "immediate_support": [
+        541.5,
+        527.6
+      ],
+      "immediate_resistance": [
+        553.5,
+        557.0
+      ],
+      "strong_support": 498.8,
+      "strong_resistance": 578.8,
+      "breakout_confirmation_level": 557.0,
+      "stop_loss_reference": 527.6,
+      "support": 541.5,
+      "resistance": 553.5,
+      "stop_loss": 527.6
+    },
+    "raw_content_head": "{\n  \"signal\": \"Side\",\n  \"confidence\": 0.65,\n  \"summary\": \"股价于MA60承压回落，Layer-1提示无交易信号，建议观望等待关键位突破或回踩确认。\",\n  \"reasoning_trace\": [\n    {\n      \"step\": \"trend\",\n      \"data\": \"长期牛市，中期MA60下行承压，短期低位反弹后进入震荡。\",\n      \"conclusion\": \"中期承压短期震荡\"\n    },\n    {\n      \"step\": \"momentum\",\n      \"data\": \"KDJ金叉向上但MACD死叉收敛，动能指标出现背离，多头力量减弱。\",\n      \"conclusion\": \"动能分歧\"\n    },\n    {\n      \"step\": \"levels\",\n      \"data\": \"553.5筹码密集区及MA60(578.8)构成强压，527.6(MA20)为关键支撑。\",\n      \"conclusion\": \"空间受限\"\n    },\n    {\n      \"step\": \"context\",\n      \"data\": \"3月10日大涨后连续两日缩量调整，市场在消化获利盘。\",\n      \"conclusion\": \"消化整理\"\n    },\n    {\n      \"step\": \"psychology\",\n      \"data\": \"市场对550上方抛压存疑，Layer-1硬约束NoSetup暗示胜率不足。\",\n      \"conclusion\": \"谨慎情绪主导\"\n    },\n    {\n      \"step\": \"decision\",\n      \"data\": \"严格执行Layer-1约束，不盲目左侧交易，等待右侧信号明确。\",\n      \"conclusion\": \"保持观望\"\n    }\n  ],\n  \"counter_argument\": \"若市场放量突破MA60(578.8)，则当前NoSetup可能错失底部反转初期的加速段。\",\n  \"news_analysis\": [],\n  \"tactics\": {\n    \"holding_profit\": [\n      {\n        \"priority\": \"P1\",\n        \"action\": \"减仓\",\n        \"trigger\": \"跌破541.5\",\n        \"target_price\": null,\n        \"stop_advance_price\": 541.5,\n        \"stop_loss_price\": null,\n        \"buy_zone_price\": null,\n        \"reason\": \"确认短期反弹遇阻\"\n      },\n      {\n        \"priority\": \"P2\",\n        \"action\": \"止盈\",\n        \"trigger\": \"触及553.5无法放量突破\",\n        \"target_price\": 553.5,\n        \"stop_advance_price\": null,\n        \"stop_loss_price\": null,\n        \"buy_zone_price\": null,\n        \"reason\": \"筹码密集区压力\"\n      }\n    ],\n    ",
+    "variant": "b2",
+    "prompt_version": "b2.v1",
+    "latency_s": 25.365,
+    "prompt_preview": {
+      "system_head": [
+        "",
+        "你是 StockWise 的核心量化决策引擎，负责把真实市场数据转成可执行的交易纪律。",
+        "",
+        "## 核心原则",
+        "1. 价格行为与关键位优先，宏观与情绪只作背景参考。",
+        "2. 你不预测涨跌，你给出带触发条件的执行计划。"
+      ],
+      "user_head": [
+        "<stockwise_input>",
+        "",
+        "<meta_context>",
+        "股票: 00700 (00700)",
+        "分析基准日: 2026-03-12",
+        "市场背景: 本地 shadow validation",
+        "股价海拔: 短期(20d) - | 中期(60d) - | 长期(250d) -",
+        "</meta_context>",
+        "",
+        "<profile_data>",
+        "行业: 未知",
+        "主营业务: 暂无"
+      ]
+    }
+  }
+}

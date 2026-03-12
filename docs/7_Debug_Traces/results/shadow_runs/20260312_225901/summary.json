@@ -1,0 +1,21 @@
+{
+  "symbol": "601869",
+  "date": "2026-03-12",
+  "layer1_status": "Watch",
+  "legacy": {
+    "prompt_version": "v3.6",
+    "latency_s": 37.049,
+    "total_tokens": 12647,
+    "raw_signal": "Side",
+    "normalized_signal": "Side",
+    "summary": "冲高回落留下长上影线，266元压力显著，短期进入震荡消化期，建议观望等待回踩支撑。"
+  },
+  "b2_prod_safe": {
+    "prompt_version": "b2.v1",
+    "latency_s": 17.958,
+    "total_tokens": 0,
+    "raw_signal": null,
+    "normalized_signal": null,
+    "summary": null
+  }
+}

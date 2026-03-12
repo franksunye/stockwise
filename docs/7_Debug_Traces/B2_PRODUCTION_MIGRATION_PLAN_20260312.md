@@ -184,6 +184,21 @@
 
 3. 不删除旧模板
 
+当前状态（2026-03-12）：
+
+- 已实现
+- 新增正式模板：
+  - [`stock_analysis_system_b2.j2`](/Users/yesun/Code/stockwise/backend/templates/prompts/stock_analysis_system_b2.j2)
+  - [`stock_analysis_user_b2.j2`](/Users/yesun/Code/stockwise/backend/templates/prompts/stock_analysis_user_b2.j2)
+- 已在 [`prompts.py`](/Users/yesun/Code/stockwise/backend/engine/prompts.py) 中加入默认关闭的模板切换
+- 当前开关：
+  - `STOCK_ANALYSIS_PROMPT_VARIANT=legacy`（默认）
+  - `STOCK_ANALYSIS_PROMPT_VARIANT=b2`
+- 注意：
+  - 当前生产代码引入的是 **`B2_PROD_SAFE`**
+  - 不是实验目录中 `B2_RICH_TABLES` 的逐字复刻
+  - 详见 [`B2_VARIANT_CLARIFICATION_20260312.md`](/Users/yesun/Code/stockwise/docs/7_Debug_Traces/B2_VARIANT_CLARIFICATION_20260312.md)
+
 为什么不直接覆盖旧模板：
 
 - 覆盖式改动难以比对
@@ -201,6 +216,12 @@
 回退方式：
 
 - 切回旧模板选择开关
+
+已完成的最小验证：
+
+- 模板切换单测通过：
+  - [`test_prompt_variant_switch.py`](/Users/yesun/Code/stockwise/backend/tests/test_prompt_variant_switch.py)
+- 本地 `300502 / 2026-03-12 / gemini_local` 在 `STOCK_ANALYSIS_PROMPT_VARIANT=b2` 下已成功跑通并完成严格解析
 
 风险等级：
 
@@ -237,6 +258,15 @@
 说明：
 
 - 如果当前主链暂时不方便做双写，也可以先在离线脚本层做“生产上下文重放”
+- 当前已完成的本地证据：
+  - [`SHADOW_VALIDATION_RESULT_20260312.md`](/Users/yesun/Code/stockwise/docs/7_Debug_Traces/SHADOW_VALIDATION_RESULT_20260312.md)
+  - [`PHASE3_5_LOCAL_WRITE_VALIDATION_RESULT_20260312.md`](/Users/yesun/Code/stockwise/docs/7_Debug_Traces/PHASE3_5_LOCAL_WRITE_VALIDATION_RESULT_20260312.md)
+  - [`MODEL_OUTPUT_COMPARISON_20260312.md`](/Users/yesun/Code/stockwise/docs/7_Debug_Traces/MODEL_OUTPUT_COMPARISON_20260312.md)
+  - [`PROD_DEEPSEEK_VS_LOCAL_B2_DEEPSEEK_20260312.md`](/Users/yesun/Code/stockwise/docs/7_Debug_Traces/PROD_DEEPSEEK_VS_LOCAL_B2_DEEPSEEK_20260312.md)
+- 当前这些证据共同支持：
+  - `B2_PROD_SAFE` 已在本地主链路上完成影子验证与真实写库验证
+  - 在 `deepseek-v3` 上未出现主方向漂移
+  - 本地 `b2.v1` 的变化更接近“保守风格强化”，不是策略立场改变
 
 ## Phase 4：小流量切换
 
@@ -308,6 +338,47 @@
 
 - 丧失精确回退能力
 - 不利于分阶段验证
+
+## 5.4 后续候选能力（不属于当前主线）
+
+### `internal_reasoning` 影子实验
+
+说明：
+
+- `internal_reasoning` 出现在实验版优化 prompt 思路中
+- 当前正式生产 schema、解析器和前后端契约都**没有**这个字段
+- 因此它不属于本次 B2 迁移范围
+
+为什么未来可能值得做：
+
+- 有机会提升复杂场景下的推理完整度
+- 便于内部审计与质检
+- 可以帮助区分“模型真实推理深度”与“最终摘要质量”
+
+为什么现在不应纳入主线：
+
+- 会增加 token 与 latency
+- 会增加自由文本长度，提升结构不稳定风险
+- 当前没有业务消费方，贸然加入只会扩大改动面
+
+建议进入方式：
+
+1. 仅作为影子字段实验
+   - 只进入 trace / 调试记录
+   - 不进入当前正式 `StockAnalysisResult`
+
+2. 单独评估 4 个指标
+   - 质量是否提升
+   - parse 是否更稳或更差
+   - token 是否明显增加
+   - latency 是否明显上升
+
+3. 只有在 B2 默认切换稳定后，再决定是否正式化
+
+当前结论：
+
+- `internal_reasoning` 是**后续候选能力**
+- **不是当前 B2 迁移计划的一部分**
 
 ## 6. 建议的最小实施顺序
 

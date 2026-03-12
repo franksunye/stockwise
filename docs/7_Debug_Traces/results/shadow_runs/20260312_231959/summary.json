@@ -1,0 +1,21 @@
+{
+  "symbol": "00700",
+  "date": "2026-03-12",
+  "layer1_status": "NoSetup",
+  "legacy": {
+    "prompt_version": "v3.6",
+    "latency_s": 40.042,
+    "total_tokens": 13030,
+    "raw_signal": "Side",
+    "normalized_signal": "Side",
+    "summary": "股价大涨后缩量回调，受阻于MA60压力位，建议在541.5至557区间内观望，等待方向选择。"
+  },
+  "b2_prod_safe": {
+    "prompt_version": "b2.v1",
+    "latency_s": 25.365,
+    "total_tokens": 9113,
+    "raw_signal": "Side",
+    "normalized_signal": "Side",
+    "summary": "股价于MA60承压回落，Layer-1提示无交易信号，建议观望等待关键位突破或回踩确认。"
+  }
+}

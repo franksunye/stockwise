@@ -1,0 +1,21 @@
+{
+  "symbol": "00700",
+  "date": "2026-03-12",
+  "layer1_status": "NoSetup",
+  "legacy": {
+    "prompt_version": "v3.6",
+    "latency_s": 15.685,
+    "total_tokens": 0,
+    "raw_signal": null,
+    "normalized_signal": null,
+    "summary": null
+  },
+  "b2_prod_safe": {
+    "prompt_version": "b2.v1",
+    "latency_s": 31.29,
+    "total_tokens": 9942,
+    "raw_signal": "Side",
+    "normalized_signal": "Side",
+    "summary": "股价受阻于MA60，Layer-1提示无交易信号，建议观望等待趋势明朗。"
+  }
+}

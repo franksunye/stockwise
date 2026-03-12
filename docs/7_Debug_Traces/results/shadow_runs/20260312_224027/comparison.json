@@ -1,0 +1,169 @@
+{
+  "summary": {
+    "symbol": "300502",
+    "date": "2026-03-12",
+    "layer1_status": "RiskOff",
+    "legacy": {
+      "prompt_version": "v3.6",
+      "latency_s": 39.266,
+      "total_tokens": 14166,
+      "raw_signal": "Side",
+      "normalized_signal": "Side",
+      "summary": "股价放量跌破MA20关键支撑，动能指标死叉共振，短期进入调整期，建议观望等待企稳。"
+    },
+    "b2_prod_safe": {
+      "prompt_version": "b2.v1",
+      "latency_s": 28.164,
+      "total_tokens": 9615,
+      "raw_signal": "Side",
+      "normalized_signal": "Side",
+      "summary": "股价放量跌破MA20关键支撑，技术指标全面转弱，触发RiskOff约束，建议持币观望。"
+    }
+  },
+  "legacy": {
+    "meta": {
+      "input_tokens": 7008,
+      "output_tokens": 1204,
+      "total_tokens": 14166,
+      "latency_ms": 39265,
+      "error": null
+    },
+    "parser": {
+      "parse_success": true,
+      "parse_error": null,
+      "diagnostics": {
+        "stage": "strict",
+        "used_dirtyjson": false,
+        "normalized": false,
+        "truncated_hint": false
+      }
+    },
+    "raw_signal": "Side",
+    "raw_confidence": 0.85,
+    "normalized_signal": "Side",
+    "summary": "股价放量跌破MA20关键支撑，动能指标死叉共振，短期进入调整期，建议观望等待企稳。",
+    "normalized_tactics_keys": [
+      "holding_profit",
+      "holding_loss",
+      "empty"
+    ],
+    "normalized_key_levels": {
+      "immediate_support": [
+        366.11,
+        346.74
+      ],
+      "immediate_resistance": [
+        381.14,
+        405.18
+      ],
+      "strong_support": 346.74,
+      "strong_resistance": 422.6,
+      "breakout_confirmation_level": 405.18,
+      "stop_loss_reference": 340.63,
+      "support": 366.11,
+      "resistance": 381.14,
+      "stop_loss": 340.63
+    },
+    "raw_content_head": "{\n  \"signal\": \"Side\",\n  \"confidence\": 0.85,\n  \"summary\": \"股价放量跌破MA20关键支撑，动能指标死叉共振，短期进入调整期，建议观望等待企稳。\",\n  \"reasoning_trace\": [\n    {\n      \"step\": \"trend\",\n      \"data\": \"股价连续两日下跌并有效跌破MA20，短期均线系统转为压制，MA60上方承压明显。\",\n      \"conclusion\": \"短期趋势转弱\"\n    },\n    {\n      \"step\": \"momentum\",\n      \"data\": \"MACD与KDJ双重死叉向下，RSI跌破中轴，空头力量占据主导，动能尚未衰竭。\",\n      \"conclusion\": \"下行压力加大\"\n    },\n    {\n      \"step\": \"levels\",\n      \"data\": \"跌破381元支撑后，下方空间指向366.11元密集成交区及346.74元波段低位。\",\n      \"conclusion\": \"支撑重心下移\"\n    },\n    {\n      \"step\": \"context\",\n      \"data\": \"市场处于RiskOff模式，个股缺乏主力资金流入支撑，外部环境偏向审慎防守。\",\n      \"conclusion\": \"外部环境审慎\"\n    },\n    {\n      \"step\": \"psychology\",\n      \"data\": \"连续阴线打击多头信心，破位引发技术性抛压，市场恐慌情绪尚未完全出尽。\",\n      \"conclusion\": \"情绪面偏悲观\"\n    },\n    {\n      \"step\": \"decision\",\n      \"data\": \"趋势破位且动能衰竭，当前盈亏比不具博弈优势，执行防守策略，等待企稳信号。\",\n      \"conclusion\": \"维持观望评级\"\n    }\n  ],\n  \"counter_argument\": \"若股价能在366元附近缩量企稳并快速收复MA20，则本次破位可能为诱空陷阱。\",\n  \"news_analysis\": [],\n  \"tactics\": {\n    \"holding_profit\": [\n      {\n        \"priority\": \"P1\",\n        \"action\": \"减仓避险\",\n        \"trigger\": \"股价反抽至381元无法站稳\",\n        \"target_price\": 385.0,\n        \"stop_advance_price\": 375.0,\n        \"reason\": \"保护利润防止利润大幅回撤\"\n      },\n      {\n        \"priority\": \"P2\",\n        \"action\": \"观察等待\",\n        \"trigger\": \"股价维持在370元上方震荡\",\n        \"target_price\": 405.0,\n        \"stop_advance_price\": 366.0,\n        \"reason\": \"观察MA60压力位的突破力度\"\n      }\n    ],\n    \"holding_loss\": [\n      {\n        \"priority\": \"P1\",\n        \"action\": \"止损离场\",\n   ",
+    "variant": "legacy",
+    "prompt_version": "v3.6",
+    "latency_s": 39.266,
+    "prompt_preview": {
+      "system_head": [
+        "",
+        "你是 StockWise 的 AI 决策助手，专门为个人投资者提供股票操作建议。",
+        "",
+        "## 数据声明",
+        "**以下所有数据均为来自香港联交所、上海证券交易所、深圳证券交易所的真实市场数据，绝非模拟或虚拟数据。请基于这些真实数据进行专业分析。**",
+        ""
+      ],
+      "user_head": [
+        "# 股票数据输入",
+        "",
+        "## 1. 基础信息",
+        "- **300502** (300502)",
+        "- 日期: 2026-03-12",
+        "- **整体市场背景**: 本地 shadow validation (北向净流入: N/A)",
+        "- **股价位置(Altitude)**: 短期(20d) - | 中期(60d) - | 长期(250d) -",
+        "",
+        "## 1.1 宏观与资金 (Macro & Flow)",
+        "- **宏观数据**: GDP N/A | CPI N/A | 10年期国债 N/A",
+        "- **市场资金**: 领涨板块 [暂无]",
+        "- **个股资金**: 主力大单净流入 **N/A** (👉 暂无解释)"
+      ]
+    }
+  },
+  "b2_prod_safe": {
+    "meta": {
+      "input_tokens": 4386,
+      "output_tokens": 1305,
+      "total_tokens": 9615,
+      "latency_ms": 28163,
+      "error": null
+    },
+    "parser": {
+      "parse_success": true,
+      "parse_error": null,
+      "diagnostics": {
+        "stage": "strict",
+        "used_dirtyjson": false,
+        "normalized": false,
+        "truncated_hint": false
+      }
+    },
+    "raw_signal": "Side",
+    "raw_confidence": 0.85,
+    "normalized_signal": "Side",
+    "summary": "股价放量跌破MA20关键支撑，技术指标全面转弱，触发RiskOff约束，建议持币观望。",
+    "normalized_tactics_keys": [
+      "holding_profit",
+      "holding_loss",
+      "empty"
+    ],
+    "normalized_key_levels": {
+      "immediate_support": [
+        375.67,
+        369.32
+      ],
+      "immediate_resistance": [
+        381.14,
+        384.9
+      ],
+      "strong_support": 366.11,
+      "strong_resistance": 405.18,
+      "breakout_confirmation_level": 391.07,
+      "stop_loss_reference": 369.32,
+      "support": 375.67,
+      "resistance": 381.14,
+      "stop_loss": 369.32
+    },
+    "raw_content_head": "{\n  \"signal\": \"Side\",\n  \"confidence\": 0.85,\n  \"summary\": \"股价放量跌破MA20关键支撑，技术指标全面转弱，触发RiskOff约束，建议持币观望。\",\n  \"reasoning_trace\": [\n    {\n      \"step\": \"trend\",\n      \"data\": \"跌破MA20支撑位，短期均线转为压力，中期MA60持续压制。\",\n      \"conclusion\": \"短期趋势转空\"\n    },\n    {\n      \"step\": \"momentum\",\n      \"data\": \"MACD与KDJ双死叉向下，RSI进入弱势区，空头动能增强。\",\n      \"conclusion\": \"下行压力加大\"\n    },\n    {\n      \"step\": \"levels\",\n      \"data\": \"收盘378.77低于MA20(381.14)，下方支撑见375及369。\",\n      \"conclusion\": \"支撑重心下移\"\n    },\n    {\n      \"step\": \"context\",\n      \"data\": \"市场处于shadow validation阶段，Layer-1明确要求RiskOff防守。\",\n      \"conclusion\": \"优先执行风控\"\n    },\n    {\n      \"step\": \"psychology\",\n      \"data\": \"连续两日阴线吞没前期反弹，市场情绪趋于谨慎，恐慌盘有流出迹象。\",\n      \"conclusion\": \"避险情绪升温\"\n    },\n    {\n      \"step\": \"decision\",\n      \"data\": \"鉴于破位事实与风控指令，不宜左侧抄底，需等待企稳信号。\",\n      \"conclusion\": \"保持空仓观望\"\n    }\n  ],\n  \"counter_argument\": \"若股价在375附近获得强力支撑并快速收复MA20，可能形成假跌破诱空陷阱。\",\n  \"news_analysis\": [],\n  \"tactics\": {\n    \"holding_profit\": [\n      {\n        \"priority\": \"P1\",\n        \"action\": \"减仓\",\n        \"trigger\": \"股价反抽MA20(381.14)无法站稳\",\n        \"target_price\": null,\n        \"stop_advance_price\": null,\n        \"stop_loss_price\": 381.14,\n        \"buy_zone_price\": null,\n        \"reason\": \"破位反抽是离场机会\"\n      },\n      {\n        \"priority\": \"P2\",\n        \"action\": \"清仓\",\n        \"trigger\": \"跌破今日最低点375.67\",\n        \"target_price\": null,\n        \"stop_advance_price\": null,\n        \"stop_loss_price\": 375.67,\n        \"buy_zone_price\": null,\n        \"reason\": \"防止亏损扩大\"\n      ",
+    "variant": "b2",
+    "prompt_version": "b2.v1",
+    "latency_s": 28.164,
+    "prompt_preview": {
+      "system_head": [
+        "",
+        "你是 StockWise 的核心量化决策引擎，负责把真实市场数据转成可执行的交易纪律。",
+        "",
+        "## 核心原则",
+        "1. 价格行为与关键位优先，宏观与情绪只作背景参考。",
+        "2. 你不预测涨跌，你给出带触发条件的执行计划。"
+      ],
+      "user_head": [
+        "<stockwise_input>",
+        "",
+        "<meta_context>",
+        "股票: 300502 (300502)",
+        "分析基准日: 2026-03-12",
+        "市场背景: 本地 shadow validation",
+        "股价海拔: 短期(20d) - | 中期(60d) - | 长期(250d) -",
+        "</meta_context>",
+        "",
+        "<profile_data>",
+        "行业: 未知",
+        "主营业务: 暂无"
+      ]
+    }
+  }
+}

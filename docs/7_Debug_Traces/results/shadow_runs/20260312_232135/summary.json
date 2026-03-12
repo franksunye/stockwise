@@ -1,0 +1,21 @@
+{
+  "symbol": "601869",
+  "date": "2026-03-12",
+  "layer1_status": "Watch",
+  "legacy": {
+    "prompt_version": "v3.6",
+    "latency_s": 29.496,
+    "total_tokens": 11482,
+    "raw_signal": "Side",
+    "normalized_signal": "Side",
+    "summary": "冲高回落显现上方抛压，短期进入震荡整固期，建议等待回踩支撑确认。"
+  },
+  "b2_prod_safe": {
+    "prompt_version": "b2.v1",
+    "latency_s": 39.624,
+    "total_tokens": 11458,
+    "raw_signal": "Side",
+    "normalized_signal": "Side",
+    "summary": "股价冲高回落收长上影，受制于266阻力，Layer-1处于Watch状态，建议观望等待回调确认。"
+  }
+}

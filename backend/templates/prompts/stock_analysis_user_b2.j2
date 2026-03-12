@@ -1,0 +1,83 @@
+<stockwise_input>
+
+<meta_context>
+股票: {{ stock_name }} ({{ symbol }})
+分析基准日: {{ date }}
+市场背景: {{ market_context }}
+股价海拔: {{ altitude_str }}
+</meta_context>
+
+<profile_data>
+行业: {{ profile.industry | default('未知') }}
+主营业务: {{ profile.main_business | default('暂无') }}
+公司简介: {{ (profile.description | default('暂无'))[:100] }}
+</profile_data>
+
+<macro_and_flow>
+宏观: GDP {{ macro_context.gdp | default('N/A') }} | CPI {{ macro_context.cpi | default('N/A') }} | 10Y {{ macro_context.bond_10y | default('N/A') }}
+市场资金: 北向 {{ market_flow_context.northbound_net_inflow | default('N/A') }} | 领涨板块 {{ market_flow_context.top_inflow_sectors | default('暂无') }}
+个股资金: 主力大单 {{ stock_flow_context.big_order_inflow | default('N/A') }} | 解读 {{ stock_flow_context.interpretation | default('暂无') }}
+</macro_and_flow>
+
+<price_action_daily>
+| 日期 | 开盘 | 最高 | 最低 | 收盘 | 涨跌幅 | 成交量 |
+|------|------|------|------|------|--------|--------|
+{% for h in daily_history -%}
+| {{ h.date }} | {{ h.open }} | {{ h.high }} | {{ h.low }} | {{ h.close }} | {{ "%+.2f"|format(h.change_percent or 0) }}% | {{ h.volume | int }} |
+{% endfor %}
+</price_action_daily>
+
+<technical_indicators>
+均线: {{ tech.ma_alignment }}
+价格位置: {{ tech.price_pos_desc }}
+中期确认: {{ tech.mid_term_desc }}
+MACD: {{ tech.macd_desc }}
+RSI: {{ "%.1f"|format(tech.rsi) }} ({{ tech.rsi_desc }})
+KDJ: K{{ "%.1f"|format(tech.k) }}/D{{ "%.1f"|format(tech.d) }} -> {{ tech.kdj_desc }}
+布林位置: {{ tech.boll_desc }}
+共振评分: {{ "%+d"|format(tech.total_score) }} ({{ tech.score_meaning }})
+ATR-14: {{ structural_hints.atr_14 }}
+20日高低: {{ structural_hints.low_20d }} ~ {{ structural_hints.high_20d }}
+筹码锚点: {{ structural_hints.heavy_volume_anchor }}
+均线参考: MA20({{ structural_hints.ma20 }}) / MA60({{ structural_hints.ma60 }})
+</technical_indicators>
+
+<price_action_weekly>
+| 周末日期 | 收盘 | 涨跌幅 | MA20 | RSI |
+|----------|------|--------|------|-----|
+{% for w in weekly_history -%}
+| {{ w.date }} | {{ w.close }} | {{ "%+.2f"|format(w.change_percent or 0) }}% | {{ "%.2f"|format(w.ma20) }} | {{ "%.1f"|format(w.rsi) }} |
+{% endfor %}
+季度区间: {{ weekly_stats.low }} ~ {{ weekly_stats.high }}
+</price_action_weekly>
+
+<price_action_monthly>
+| 月末日期 | 收盘 | 涨跌幅 |
+|----------|------|--------|
+{% for m in monthly_history -%}
+| {{ m.date }} | {{ m.close }} | {{ "%+.2f"|format(m.change_percent or 0) }}% |
+{% endfor %}
+年度区间: {{ monthly_stats.low }} ~ {{ monthly_stats.high }}
+长期趋势: {{ long_term_trend }}
+</price_action_monthly>
+
+{% if ai_history %}
+<ai_prediction_history>
+| 预测日期 | 信号 | 置信度 | 核心判断 | 结果 | 实际涨跌 |
+|----------|------|--------|----------|------|----------|
+{% for pred in ai_history -%}
+| {{ pred.date }} | {{ {"Long": "做多", "Side": "观望", "Short": "避险"}.get(pred.signal, pred.signal) }} | {{ "%.0f"|format(pred.confidence * 100) }}% | {{ pred.summary }} | {{ "✅" if pred.validation_status == "Correct" else ("❌" if pred.validation_status == "Incorrect" else "➖") }} | {{ "%+.2f"|format(pred.actual_change) }}% |
+{% endfor %}
+历史准确率: {{ ai_accuracy.total }} 次 / {{ "%.1f"|format(ai_accuracy.rate) }}%
+</ai_prediction_history>
+{% endif %}
+
+<execution_constraints>
+{{ context_instruction }}
+</execution_constraints>
+
+<decision_anchor>
+请务必以 {{ date }} 的收盘价、关键支撑/压力位和风险收益比作为最敏感依据。
+</decision_anchor>
+
+</stockwise_input>
