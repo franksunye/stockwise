@@ -1,0 +1,45 @@
+{
+  "summary": {
+    "symbol": "300502",
+    "date": "2026-03-12",
+    "variant": "default",
+    "models": [
+      {
+        "model": "gemini-3-flash",
+        "returncode": 0,
+        "prompt_version": "b2.v1",
+        "signal": "Side",
+        "confidence": 0.88,
+        "execution_time_ms": 45191,
+        "token_usage_input": 4557,
+        "token_usage_output": 1376
+      }
+    ]
+  },
+  "details": [
+    {
+      "model": "gemini-3-flash",
+      "run": {
+        "model": "gemini-3-flash",
+        "returncode": 0,
+        "elapsed_s": 115.866,
+        "stdout_tail": "3:52:29 [INFO] ✅ Broad market flow (last resort) succeeded. (provider.py:715)\u001b[0m\n\u001b[34;20m2026-03-12 23:52:29 [INFO] 📡 Fetching Flow Data for 300502... (provider.py:807)\u001b[0m\n\u001b[34;20m2026-03-12 23:52:37 [INFO] 📊 Rich context fetched for 300502 on 2026-03-12 (runner.py:125)\u001b[0m\n\u001b[34;20m2026-03-12 23:52:37 [INFO] 🧭 [tr-f3bcdeb7fd05] Layer1=RiskOff (score=30.0, strategy=tradeability_v2) (runner.py:136)\u001b[0m\n\u001b[34;20m2026-03-12 23:52:37 [INFO] 📜 gemini-3-flash history loaded: 5 records, 63.2% acc (runner.py:162)\u001b[0m\n\u001b[31;20m2026-03-12 23:52:54 [ERROR] Gemini Local Call Error: 429 Too Many Requests. {'message': 'All accounts exhausted. Last error: HTTP 503: {\\n  \"error\": {\\n    \"code\": 503,\\n    \"message\": \"No capacity available for model gemini-3-flash on the server\",\\n    \"status\": \"UNAVAILABLE\",\\n    \"details\": [\\n      {\\n        \"@type\": \"type.googleapis.com/google.rpc.ErrorInfo\",\\n        \"reason\": \"MODEL_CAPACITY_EXHAUSTED\",\\n        \"domain\": \"cloudcode-pa.googleapis.com\",\\n        \"metadata\": {\\n          \"model\": \"gemini-3-flash\"\\n        }\\n      },\\n      {\\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\\n        \"retryDelay\": \"15s\"\\n      }\\n    ]\\n  }\\n}\\n', 'status': 'Too Many Requests'} (gemini_local.py:228)\u001b[0m\n\u001b[31;20m2026-03-12 23:52:54 [ERROR] Gemini Local execution failed (attempt 1/4): 429 Too Many Requests. {'message': 'All accounts exhausted. Last error: HTTP 503: {\\n  \"error\": {\\n    \"code\": 503,\\n    \"message\": \"No capacity available for model gemini-3-flash on the server\",\\n    \"status\": \"UNAVAILABLE\",\\n    \"details\": [\\n      {\\n        \"@type\": \"type.googleapis.com/google.rpc.ErrorInfo\",\\n        \"reason\": \"MODEL_CAPACITY_EXHAUSTED\",\\n        \"domain\": \"cloudcode-pa.googleapis.com\",\\n        \"metadata\": {\\n          \"model\": \"gemini-3-flash\"\\n        }\\n      },\\n      {\\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\\n        \"retryDelay\": \"15s\"\\n      }\\n    ]\\n  }\\n}\\n', 'status': 'Too Many Requests'} (gemini_local.py:96)\u001b[0m\n\u001b[34;20m2026-03-12 23:53:22 [INFO]    🤖 GEMINI_LOCAL 响应成功 (26.5s, 8924 tokens) (gemini_local.py:224)\u001b[0m\n\u001b[34;20m2026-03-12 23:53:22 [INFO] 📥 gemini-3-flash Response: 3070 chars (gemini_local.py:123)\u001b[0m\n\u001b[34;20m2026-03-12 23:53:22 [INFO] 📊 Trace: ✅ 26475ms | 8924 tokens | attempt: 2 (gemini_local.py:146)\u001b[0m\n\u001b[34;20m2026-03-12 23:53:22 [INFO] 🏁 Analysis round finished. Cache Stats: 0 hits, 1 misses (0.0%) (runner.py:169)\u001b[0m\n\u001b[34;20m2026-03-12 23:53:22 [INFO] ✅ Analysis completed for 300502. Saved 1 results. Primary: None (runner.py:296)\u001b[0m\n\u001b[33;20m2026-03-12 23:53:23 [WARNING] ⚠️ 推送发送失败 [503]:  (notifications.py:61)\u001b[0m\n\u001b[33;20m2026-03-12 23:53:24 [WARNING] ⚠️ 推送发送失败 [503]:  (notifications.py:61)\u001b[0m\n\u001b[33;20m2026-03-12 23:53:25 [WARNING] ⚠️ 推送发送失败 [503]:  (notifications.py:61)\u001b[0m\n\u001b[34;20m2026-03-12 23:53:25 [INFO] ✅ [JobGuard] Task Success: AI Analysis (Backfill). Duration: 114.4s (job_guard.py:103)\u001b[0m\n\u001b[34;20m2026-03-12 23:53:26 [INFO] 📲 企业微信通知发送成功 (utils.py:138)\u001b[0m\n",
+        "stderr_tail": "\n  0%|          | 0/19 [00:00<?, ?it/s]\n                                      \n\n  0%|          | 0/19 [00:00<?, ?it/s]\n  5%|▌         | 1/19 [00:01<00:24,  1.36s/it]\n 11%|█         | 2/19 [00:03<00:35,  2.10s/it]\n                                              \n\n  0%|          | 0/19 [00:00<?, ?it/s]\n                                      \n"
+      },
+      "saved_row": {
+        "symbol": "300502",
+        "date": "2026-03-12",
+        "model_id": "gemini-3-flash",
+        "prompt_version": "b2.v1",
+        "signal": "Side",
+        "confidence": 0.88,
+        "token_usage_input": 4557,
+        "token_usage_output": 1376,
+        "execution_time_ms": 45191,
+        "is_primary": 0,
+        "summary": "股价放量跌破MA20支撑，主力资金大幅流出，触发RiskOff约束，短期趋势走弱。",
+        "tomorrow_focus": "关注375.67支撑有效性及MA20能否收复。"
+      }
+    }
+  ]
+}

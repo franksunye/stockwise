@@ -1,0 +1,17 @@
+{
+  "symbol": "300502",
+  "date": "2026-03-12",
+  "variant": "default",
+  "models": [
+    {
+      "model": "gemini-3-flash",
+      "returncode": 0,
+      "prompt_version": "b2.v1",
+      "signal": "Side",
+      "confidence": 0.88,
+      "execution_time_ms": 45191,
+      "token_usage_input": 4557,
+      "token_usage_output": 1376
+    }
+  ]
+}
