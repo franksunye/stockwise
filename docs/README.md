@@ -11,6 +11,9 @@ This directory serves as the unified single source of truth for the 知守 AI (Z
 - [Monetization & Pricing Strategy](./0_Strategy/02_Monetization_Pricing_Strategy.md)
 - [Team Responsibility Matrix](./0_Strategy/03_Team_Responsibility_Matrix.md)
 - [Milestones & Execution Log](./0_Strategy/04_Milestones_Execution_Log.md)
+- [Quant Industry Map & Dao-Fa-Shu-Qi](./0_Strategy/05_Quant_Industry_Map_and_StockWise_DoFaShu.md)
+- [Methods & Masters Research Framework](./0_Strategy/06_Quant_Methods_Masters_Research_Framework.md)
+- [Method Registry Design](./0_Strategy/07_StockWise_Method_Registry_Design.md)
 
 ### [1_Engineering/](./1_Engineering/) - How (System)
 > Project "Backbone": System architecture, reliability, and quality standards.
