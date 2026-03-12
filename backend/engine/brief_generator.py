@@ -42,6 +42,7 @@ try:
     from backend.logger import logger
     from backend.engine.models.brief_strategies import StrategyFactory
     from backend.engine.context_service import ContextService
+    from backend.engine.signal_semantics import signal_to_cn_label
     from backend.engine.task_logger import get_task_logger
 
     from backend.engine.services.news_service import fetch_news_for_stock
@@ -51,6 +52,7 @@ except ImportError:
     from logger import logger
     from engine.models.brief_strategies import StrategyFactory
     from engine.context_service import ContextService
+    from engine.signal_semantics import signal_to_cn_label
     from task_logger import get_task_logger
 
     from engine.services.news_service import fetch_news_for_stock
@@ -171,11 +173,12 @@ async def analyze_stock_context(
     # 2. Prepare User Prompt (Data remains the same, but strategy decides the personality)
     # Build data description (with citation sources)
     signal = technical_data.get('signal', 'Side')
+    signal_label = signal_to_cn_label(signal)
     confidence = technical_data.get('confidence', 0)
     conf_pct = int(confidence * 100) if confidence <= 1 else int(confidence)
     
     hard_data_lines = [
-        f"- AI 信号: {signal} (置信度 {conf_pct}%) [来源: StockWise AI]",
+        f"- AI 信号: {signal_label} (置信度 {conf_pct}%) [来源: StockWise AI]",
     ]
     
     if technical_data.get('close'):
@@ -226,7 +229,7 @@ async def analyze_stock_context(
         curr_low = technical_data.get('low')
         
         for i, p in enumerate(history):
-            sig_cn = {"Long": "做多", "Side": "观望", "Short": "避险"}.get(p['signal'], p['signal'])
+            sig_cn = signal_to_cn_label(p['signal'])
             status_icon = "✅" if p['status'] == "Correct" else ("❌" if p['status'] == "Incorrect" else "➖")
             change_text = f"{p['change']:+.2f}%" if p['change'] is not None else "待验证"
             
@@ -260,7 +263,7 @@ async def analyze_stock_context(
         user_prompt = render_template('prompts/briefs/user.j2',
             symbol=symbol,
             stock_name=stock_name,
-            signal=signal,
+            signal=signal_label,
             confidence=conf_pct,
             close=technical_data.get('close'),
             change_str=f"+{(technical_data.get('change_percent') or 0.0):.2f}%" if (technical_data.get('change_percent') or 0.0) >= 0 else f"{(technical_data.get('change_percent') or 0.0):.2f}%",

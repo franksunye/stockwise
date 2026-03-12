@@ -3,6 +3,7 @@ from typing import Any, Dict
 
 from .base import BasePredictionModel
 from backend.logger import logger
+from backend.engine.signal_semantics import canonical_signal_from_layer1
 
 
 class RuleAdapter(BasePredictionModel):
@@ -45,10 +46,10 @@ class RuleAdapter(BasePredictionModel):
         prices = data.get("daily_prices", [])
         if not prices:
             return {
-                "signal": "Side",
+                "signal": "NoSetup",
                 "confidence": 0.0,
                 "reasoning": self._build_reasoning(
-                    signal="Side",
+                    signal="NoSetup",
                     summary="数据缺失",
                     analysis="无法获取价格数据",
                     factors={},
@@ -144,11 +145,7 @@ class RuleAdapter(BasePredictionModel):
 
     @staticmethod
     def _layer1_to_signal(setup_state: str) -> str:
-        if setup_state == "TriggeredLong":
-            return "Long"
-        if setup_state in {"NoSetup", "Watch", "RiskOff"}:
-            return "Side"
-        return "Side"
+        return canonical_signal_from_layer1(setup_state, "NoSetup")
 
     def _align_signal_with_layer1(self, raw_signal: str, layer1_status: str) -> str:
         if not layer1_status:

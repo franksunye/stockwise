@@ -5,6 +5,7 @@ import copy
 
 import re
 from backend.logger import logger
+from backend.engine.signal_semantics import normalize_signal_value
 
 
 _PRIORITY_RANK = {"P1": 1, "P2": 2, "P3": 3}
@@ -336,15 +337,9 @@ def normalize_ai_response(data: Dict[str, Any]) -> Dict[str, Any]:
     # 4. Normalize key_levels (Final structural normalization)
     # ... (保持原有的 legacy support 映射) ...
 
-    # 0. Normalize Signal (Must be "Long", "Short", or "Side")
-    # Handle cases where Enum string representation might have leaked (e.g. "SignalEnum.SIDE")
+    # 0. Normalize Signal (Preserve canonical four-state semantics when available)
     if "signal" in data:
-        sig = str(data["signal"])
-        if "LONG" in sig.upper(): data["signal"] = "Long"
-        elif "SHORT" in sig.upper(): data["signal"] = "Short"
-        elif "SIDE" in sig.upper(): data["signal"] = "Side"
-        elif sig not in ["Long", "Short", "Side"]:
-            data["signal"] = "Side" # Default fallback
+        data["signal"] = normalize_signal_value(data["signal"], "Side")
     else:
         data["signal"] = "Side"
 

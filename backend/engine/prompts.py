@@ -3,6 +3,7 @@ import json
 import os
 from typing import Dict, Any, List
 import pandas as pd
+from backend.engine.signal_semantics import signal_to_cn_label
 from database import get_connection, get_stock_profile
 from backend.db_repo.queries import (
     GET_STOCK_NAME_QUERY, 
@@ -550,13 +551,28 @@ def prepare_stock_analysis_prompt(symbol: str, as_of_date: str = None, ctx: Dict
     if layer1_status:
         if layer1_status == "TriggeredLong":
             layer1_guidance = (
-                "当前量化约束允许做多方向判断。"
-                "若价格行为与结构位不支持，可降低置信度，但不要反向给出做空/避险结论。"
+                "当前量化约束允许进入进攻候选状态。"
+                "若价格行为与关键位不支持，可降低置信度，但不要回退成笼统观望语气。"
             )
-        elif layer1_status in {"RiskOff", "Wait", "NoTrade", "Blocked"}:
+        elif layer1_status == "RiskOff":
             layer1_guidance = (
-                "当前量化约束偏防守，不代表走势完全中性。"
-                "你的职责是解释风险来源并给出等待/防守型战术，不要输出激进进攻判断。"
+                "当前量化约束明确偏防守，不代表走势中性。"
+                "你的职责是解释风险来源并给出防守/收缩型战术，不要输出进攻判断。"
+            )
+        elif layer1_status == "Watch":
+            layer1_guidance = (
+                "当前量化约束为观察态。"
+                "你的职责是说明还缺哪一步确认，不要把观察态包装成可执行进攻信号。"
+            )
+        elif layer1_status == "NoSetup":
+            layer1_guidance = (
+                "当前量化约束为无明确机会。"
+                "你的职责是指出为什么暂时不值得出手，不要硬凑交易理由。"
+            )
+        elif layer1_status in {"Wait", "NoTrade", "Blocked"}:
+            layer1_guidance = (
+                "当前量化约束偏防守/等待。"
+                "你的职责是保持风险一致性，不要输出激进进攻判断。"
             )
         else:
             layer1_guidance = (
@@ -598,7 +614,8 @@ def prepare_stock_analysis_prompt(symbol: str, as_of_date: str = None, ctx: Dict
             ai_accuracy=ctx.get("accuracy", {"total":0, "rate":0}),
             tech=tech_data,
             structural_hints=structural_hints,
-            context_instruction=context_instruction
+            context_instruction=context_instruction,
+            signal_to_cn_label=signal_to_cn_label,
         )
     except Exception as e:
         print(f"User Template rendering failed: {e}")

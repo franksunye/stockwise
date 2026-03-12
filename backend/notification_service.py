@@ -23,6 +23,7 @@ from backend.db_repo.queries import (
 from backend.logger import logger
 from notifications import send_push_notification
 from notification_templates import NotificationTemplates
+from backend.engine.signal_semantics import signal_weight
 
 
 class NotificationManager:
@@ -108,15 +109,6 @@ class NotificationManager:
         "Neutral": 0,
         "Bearish": -1,
         "Strong Bearish": -2,
-        # Backward-compatible aliases used by legacy pipelines/tests
-        "Long": 1,
-        "Strong Long": 2,
-        "Short": -1,
-        "Strong Short": -2,
-        "Side": 0,
-        "Hold": 0,
-        "Buy": 1,
-        "Sell": -1
     }
 
     PREF_KEY_MAP = {
@@ -154,8 +146,8 @@ class NotificationManager:
         
         # --- Cross-Zero Logic Implementation ---
         
-        old_weight = self.SIGNAL_WEIGHTS.get(old_signal, 0)
-        new_weight = self.SIGNAL_WEIGHTS.get(new_signal, 0)
+        old_weight = self.SIGNAL_WEIGHTS.get(old_signal, signal_weight(old_signal))
+        new_weight = self.SIGNAL_WEIGHTS.get(new_signal, signal_weight(new_signal))
         
         # Criteria 1: Zero-Crossing (Fundamental Direction Change)
         # Examples: -1 -> 1 (Flip), 1 -> -1 (Flip), 0 -> 1 (Flip), 1 -> 0 (Exit Signal - Optional)

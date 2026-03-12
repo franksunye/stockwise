@@ -15,6 +15,11 @@ from backend.db_repo.queries import SAVE_PREDICTION_V2_QUERY, CHECK_PREDICTION_V
 from backend.engine.context import SessionContext
 from backend.engine.layer1_state import build_layer1_snapshot
 from backend.logger import logger
+from backend.engine.signal_semantics import (
+    canonical_signal_from_layer1,
+    is_legacy_signal_inertia,
+    normalize_signal_value,
+)
 from backend.engine.metaphor import metaphor_engine
 
 DEFAULT_MODE_ID = os.getenv("DEFAULT_INVESTMENT_MODE_ID", "balanced_v1")
@@ -356,11 +361,7 @@ class PredictionRunner:
 
 
 def _layer1_to_signal(setup_state: str) -> str:
-    if setup_state == "TriggeredLong":
-        return "Long"
-    if setup_state in {"NoSetup", "Watch", "RiskOff"}:
-        return "Side"
-    return "Side"
+    return canonical_signal_from_layer1(setup_state, "NoSetup")
 
 
 def _is_truthy_env(name: str, default: str = "1") -> bool:
@@ -371,16 +372,30 @@ def _is_truthy_env(name: str, default: str = "1") -> bool:
 def _enforce_layer1_direction(result: Dict[str, Any], layer1: Dict[str, Any]) -> Dict[str, Any]:
     setup_state = str(layer1.get("status") or "")
     expected = _layer1_to_signal(setup_state)
-    signal = result.get("signal", "Side")
+    signal = normalize_signal_value(result.get("signal", "Side"), "Side")
 
     # Keep a kill-switch for emergency rollback in production.
     if not _is_truthy_env("LAYER1_SIGNAL_ENFORCE", "1"):
         return result
 
-    if signal != expected:
-        logger.warning(
-            f"🧱 Layer1 signal enforced: model={signal} -> layer1={expected} "
-            f"(status={setup_state})"
-        )
+    if expected and signal != expected:
+        if is_legacy_signal_inertia(signal, expected):
+            logger.warning(
+                f"🧱 Layer1 signal enforced due to legacy enum inertia: "
+                f"model={signal} -> layer1={expected} (status={setup_state})"
+            )
+        else:
+            logger.warning(
+                f"🧱 Layer1 signal enforced: model={signal} -> layer1={expected} "
+                f"(status={setup_state})"
+            )
         result["signal"] = expected
+        reasoning_raw = result.get("reasoning")
+        if isinstance(reasoning_raw, str) and reasoning_raw.startswith("{"):
+            try:
+                reasoning_dict = json.loads(reasoning_raw)
+                reasoning_dict["signal"] = expected
+                result["reasoning"] = json.dumps(reasoning_dict, ensure_ascii=False)
+            except Exception:
+                logger.warning("Failed to synchronize enforced signal into reasoning JSON")
     return result

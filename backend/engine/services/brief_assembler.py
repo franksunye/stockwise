@@ -6,6 +6,7 @@ try:
 except ImportError:
     from config import BEIJING_TZ
 from typing import Optional, List, Dict, Any
+from backend.engine.signal_semantics import signal_weight
 
 try:
     from backend.database import get_connection
@@ -90,9 +91,9 @@ async def assemble_user_brief(user_id: str, date_str: str) -> Optional[str]:
         
         for symbol, name, _, signal in stock_reports:
              s_name = name or symbol
-             if signal and ('Long' in signal or 'Bullish' in signal):
+             if signal_weight(signal) > 0:
                  bullish_stocks.append(s_name)
-             elif signal and ('Short' in signal or 'Bearish' in signal):
+             elif signal_weight(signal) < 0:
                  bearish_stocks.append(s_name)
         
         try:

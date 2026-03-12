@@ -5,7 +5,7 @@ from backend.engine.schema_normalizer import normalize_ai_response
 
 class TestSchemaNormalizerTacticsContract(unittest.TestCase):
     def test_missing_tactics_are_backfilled_to_two_per_scenario(self):
-        data = {"signal": "Side", "confidence": 0.5}
+        data = {"signal": "Watch", "confidence": 0.5}
         out = normalize_ai_response(data)
 
         self.assertIn("tactics", out)
@@ -23,7 +23,7 @@ class TestSchemaNormalizerTacticsContract(unittest.TestCase):
 
     def test_duplicate_and_priority_are_normalized(self):
         data = {
-            "signal": "Long",
+            "signal": "TriggeredLong",
             "confidence": 0.8,
             "tactics": {
                 "holding_profit": [
@@ -47,7 +47,7 @@ class TestSchemaNormalizerTacticsContract(unittest.TestCase):
 
     def test_buy_zone_range_and_target_price_semantics(self):
         data = {
-            "signal": "Side",
+            "signal": "Watch",
             "confidence": 0.6,
             "tactics": {
                 "holding_profit": [
@@ -104,7 +104,7 @@ class TestSchemaNormalizerTacticsContract(unittest.TestCase):
 
     def test_key_levels_derive_second_level_and_meta(self):
         data = {
-            "signal": "Side",
+            "signal": "RiskOff",
             "confidence": 0.6,
             "key_levels": {
                 "immediate_support": [100],
@@ -126,7 +126,7 @@ class TestSchemaNormalizerTacticsContract(unittest.TestCase):
 
     def test_key_levels_fallback_when_no_candidates(self):
         data = {
-            "signal": "Side",
+            "signal": "NoSetup",
             "confidence": 0.4,
             "key_levels": {
                 "immediate_support": [100],
@@ -142,6 +142,11 @@ class TestSchemaNormalizerTacticsContract(unittest.TestCase):
         self.assertAlmostEqual(kl["immediate_resistance"][1], round(120 * 1.015, 4))
         self.assertEqual(out["key_levels_meta"]["immediate_support_source"], "fallback")
         self.assertEqual(out["key_levels_meta"]["immediate_resistance_source"], "fallback")
+
+    def test_canonical_signal_is_preserved(self):
+        data = {"signal": "RiskOff", "confidence": 0.7}
+        out = normalize_ai_response(data)
+        self.assertEqual(out["signal"], "RiskOff")
 
 
 if __name__ == "__main__":

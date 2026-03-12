@@ -5,6 +5,7 @@ from typing import List, Dict, Any, Optional, Union, Tuple
 from enum import Enum
 from dataclasses import dataclass
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
+from backend.engine.signal_semantics import normalize_signal_value
 
 try:
     import dirtyjson as _dirtyjson
@@ -12,6 +13,10 @@ except Exception:
     _dirtyjson = None
 
 class SignalEnum(str, Enum):
+    TRIGGERED_LONG = "TriggeredLong"
+    WATCH = "Watch"
+    NO_SETUP = "NoSetup"
+    RISK_OFF = "RiskOff"
     LONG = "Long"
     SHORT = "Short"
     SIDE = "Side"
@@ -19,10 +24,10 @@ class SignalEnum(str, Enum):
     @classmethod
     def _missing_(cls, value):
         """Case-insensitive fallback"""
-        if isinstance(value, str):
-            for member in cls:
-                if member.value.lower() == value.lower():
-                    return member
+        normalized = normalize_signal_value(value, "Side")
+        for member in cls:
+            if member.value == normalized:
+                return member
         return cls.SIDE # Default safe fallback
 
 class KeyLevels(BaseModel):

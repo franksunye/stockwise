@@ -18,7 +18,7 @@ from backend.engine.parsers import (
 def _base_json(summary="简要"):
     return (
         "{"
-        f"\"signal\":\"Side\","
+        f"\"signal\":\"Watch\","
         f"\"confidence\":0.5,"
         f"\"summary\":\"{summary}\","
         "\"reasoning_trace\":[],"
@@ -33,7 +33,7 @@ class TestParsersFunnel(unittest.TestCase):
     def test_strict_json_should_parse(self):
         content = _base_json("strict")
         result, diag = parse_ai_response_with_diagnostics(content)
-        self.assertEqual(result.signal.value, "Side")
+        self.assertEqual(result.signal.value, "Watch")
         self.assertEqual(diag.stage, "strict")
         self.assertFalse(diag.used_dirtyjson)
 
@@ -41,7 +41,7 @@ class TestParsersFunnel(unittest.TestCase):
         content = (
             "```json\n"
             "{\n"
-            "  “signal”: “Side”，\n"
+            "  “signal”: “RiskOff”，\n"
             "  “confidence”: \"85%\"，\n"
             "  “summary”: “简明”，\n"
             "  \"reasoning_trace\": [],\n"
@@ -52,7 +52,7 @@ class TestParsersFunnel(unittest.TestCase):
             "```"
         )
         result, diag = parse_ai_response_with_diagnostics(content)
-        self.assertEqual(result.signal.value, "Side")
+        self.assertEqual(result.signal.value, "RiskOff")
         self.assertAlmostEqual(result.confidence, 0.85)
         self.assertEqual(diag.stage, "normalized_strict")
         self.assertTrue(diag.normalized)

@@ -1,4 +1,4 @@
-<stockwise_input>
+<analysis_input>
 
 <meta_context>
 股票: {{ stock_name }} ({{ symbol }})
@@ -66,7 +66,7 @@ ATR-14: {{ structural_hints.atr_14 }}
 | 预测日期 | 信号 | 置信度 | 核心判断 | 结果 | 实际涨跌 |
 |----------|------|--------|----------|------|----------|
 {% for pred in ai_history -%}
-| {{ pred.date }} | {{ {"Long": "做多", "Side": "观望", "Short": "避险"}.get(pred.signal, pred.signal) }} | {{ "%.0f"|format(pred.confidence * 100) }}% | {{ pred.summary }} | {{ "✅" if pred.validation_status == "Correct" else ("❌" if pred.validation_status == "Incorrect" else "➖") }} | {{ "%+.2f"|format(pred.actual_change) }}% |
+| {{ pred.date }} | {{ signal_to_cn_label(pred.signal) }} | {{ "%.0f"|format(pred.confidence * 100) }}% | {{ pred.summary }} | {{ "✅" if pred.validation_status == "Correct" else ("❌" if pred.validation_status == "Incorrect" else "➖") }} | {{ "%+.2f"|format(pred.actual_change) }}% |
 {% endfor %}
 历史准确率: {{ ai_accuracy.total }} 次 / {{ "%.1f"|format(ai_accuracy.rate) }}%
 </ai_prediction_history>
@@ -76,8 +76,17 @@ ATR-14: {{ structural_hints.atr_14 }}
 {{ context_instruction }}
 </execution_constraints>
 
+<signal_language_contract>
+`signal` 字段只能使用以下四个值：
+- TriggeredLong = 进攻触发条件已成立，可开始执行候选进场计划
+- Watch = 有观察价值，但还缺确认，继续等待触发
+- NoSetup = 当前没有值得执行或继续跟踪的 setup
+- RiskOff = 当前应防守
+请先确定 `signal`，再生成其余字段。
+</signal_language_contract>
+
 <decision_anchor>
 请务必以 {{ date }} 的收盘价、关键支撑/压力位和风险收益比作为最敏感依据。
 </decision_anchor>
 
-</stockwise_input>
+</analysis_input>
