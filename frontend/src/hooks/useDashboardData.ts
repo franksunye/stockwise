@@ -31,6 +31,9 @@ function formatRefreshError(error: unknown, sessionRecoveryAttempted: boolean): 
         if (error.message.includes('Batch API failed: 403')) {
             return '403 无权限';
         }
+        if (error.message.includes('Batch API failed: 500')) {
+            return error.message.replace('Batch API failed: 500', '500');
+        }
         if (error.message.includes('Batch API failed: 5')) {
             return '服务端错误';
         }
@@ -182,7 +185,23 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
             clearTimeout(timeoutId);
 
             if (!batchRes.ok) {
-                throw new Error(`Batch API failed: ${batchRes.status}`);
+                let errorDetail = '';
+                try {
+                    const errorBody = await batchRes.json();
+                    const code = typeof errorBody?.debugCode === 'string' ? errorBody.debugCode : null;
+                    const requestId = typeof errorBody?.requestId === 'string' ? errorBody.requestId : null;
+                    const message = typeof errorBody?.debugMessage === 'string' ? errorBody.debugMessage : null;
+                    const parts = [code, message, requestId].filter(Boolean);
+                    if (parts.length > 0) {
+                        errorDetail = ` (${parts.join(' | ')})`;
+                    }
+                } catch {
+                    const headerRequestId = batchRes.headers.get('X-Stockwise-Request-Id');
+                    if (headerRequestId) {
+                        errorDetail = ` (${headerRequestId})`;
+                    }
+                }
+                throw new Error(`Batch API failed: ${batchRes.status}${errorDetail}`);
             }
 
             const batchData = await batchRes.json();

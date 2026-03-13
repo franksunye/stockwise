@@ -31,6 +31,8 @@ function closeDb(db: unknown): void {
 // Existing UI can keep using overlay fields; deeper views can adopt the explicit fields.
 
 export async function GET(request: Request) {
+    const requestId = `batch_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+    let debugStage = 'init';
     const { searchParams } = new URL(request.url);
     const symbolsParam = searchParams.get('symbols');
     const parsedHistoryLimit = Number.parseInt(searchParams.get('historyLimit') || '7', 10);
@@ -48,12 +50,15 @@ export async function GET(request: Request) {
     const startTime = Date.now();
 
     try {
+        debugStage = 'require_user_session';
         const auth = requireUserSession(request);
         if ('response' in auth) return auth.response;
         const userId = auth.userId;
+        debugStage = 'get_user_tier';
         const userTier = await getUserTier(userId);
         const tierFilter = getModelSqlFilter(userTier);
 
+        debugStage = 'get_db_client';
         const client = getDbClient();
         let latestPrices: Record<string, unknown>[] = [];
         let allHistory: Record<string, unknown>[] = [];
@@ -64,7 +69,9 @@ export async function GET(request: Request) {
 
         try {
             try {
+                debugStage = 'ensure_mode_schema';
                 await ensureInvestmentModeSchema(client);
+                debugStage = 'get_user_mode';
                 const currentMode = await getUserMode(client, userId, userTier as UserTier);
                 currentModeId = currentMode.mode_id;
             } catch (error) {
@@ -195,6 +202,7 @@ export async function GET(request: Request) {
                         LEFT JOIN eligible_latest e ON t.symbol = e.symbol
                     `;
                     try {
+                        debugStage = 'cloud_rich_query';
                         const [pricesRs, historyRs, shortRs] = await Promise.all([
                             client.execute({
                                 sql: `SELECT dp.* FROM daily_prices dp
@@ -220,6 +228,7 @@ export async function GET(request: Request) {
                         if (shortRs.rows && shortRs.rows.length > 0) shortMetricsRows = shortRs.rows as Record<string, unknown>[];
                     } catch (error) {
                         console.error('[Batch] Rich cloud query failed, retrying with fallback payload:', error);
+                        debugStage = 'cloud_fallback_query';
                         const [pricesRs, historyRs] = await Promise.all([
                             client.execute({
                                 sql: `SELECT dp.* FROM daily_prices dp
@@ -243,6 +252,7 @@ export async function GET(request: Request) {
                 }
 
                 try {
+                    debugStage = 'cloud_almanac_query';
                     const rsAlmanac = await client.execute({ sql: 'SELECT * FROM market_almanacs ORDER BY target_date DESC LIMIT 5', args: [] });
                     if (rsAlmanac.rows && rsAlmanac.rows.length > 0) almanacs = rsAlmanac.rows;
                 } catch (error) {
@@ -251,6 +261,7 @@ export async function GET(request: Request) {
             } else {
                 if (symbols.length > 0) {
                     const placeholders = symbols.map(() => '?').join(',');
+                    debugStage = 'local_prices_query';
                     latestPrices = client.prepare(`
                             SELECT dp.* FROM daily_prices dp
                             INNER JOIN (
@@ -382,15 +393,18 @@ export async function GET(request: Request) {
                         LEFT JOIN eligible_latest e ON t.symbol = e.symbol
                     `;
                     try {
+                        debugStage = 'local_rich_query';
                         allHistory = client.prepare(historySql).all(currentModeId, currentModeId, ...symbols) as Record<string, unknown>[];
                         shortMetricsRows = client.prepare(shortSql).all(...symbols) as Record<string, unknown>[];
                     } catch (error) {
                         console.error('[Batch] Rich local query failed, retrying with fallback payload:', error);
+                        debugStage = 'local_fallback_query';
                         allHistory = client.prepare(fallbackHistorySql).all(currentModeId, ...symbols) as Record<string, unknown>[];
                         shortMetricsRows = [];
                     }
                 }
                 try {
+                    debugStage = 'local_almanac_query';
                     almanacs = client.prepare('SELECT * FROM market_almanacs ORDER BY target_date DESC LIMIT 5').all();
                 } catch (error) {
                     console.error('[Batch] Local almanac query failed, continuing without almanac:', error);
@@ -447,18 +461,31 @@ export async function GET(request: Request) {
             };
         });
 
+        debugStage = 'build_response';
         const response = NextResponse.json({
             stocks,
             almanacs,
             almanac: almanacs[0] || null, // Keep for fallback
             tier: userTier,
-            queryTime: Date.now() - startTime
+            queryTime: Date.now() - startTime,
+            requestId
         });
         response.headers.set('Cache-Control', 'private, no-store, max-age=0, must-revalidate');
         response.headers.set('Vary', 'Cookie');
+        response.headers.set('X-Stockwise-Request-Id', requestId);
         return response;
     } catch (error) {
-        console.error('Batch Stock API Error:', error);
-        return NextResponse.json({ error: 'Database error' }, { status: 500 });
+        const debugMessage = error instanceof Error ? error.message : String(error);
+        console.error(`[Batch][${requestId}][${debugStage}]`, error);
+        const response = NextResponse.json({
+            error: 'Database error',
+            debugCode: `batch_${debugStage}`,
+            debugMessage,
+            requestId
+        }, { status: 500 });
+        response.headers.set('Cache-Control', 'private, no-store, max-age=0, must-revalidate');
+        response.headers.set('Vary', 'Cookie');
+        response.headers.set('X-Stockwise-Request-Id', requestId);
+        return response;
     }
 }
