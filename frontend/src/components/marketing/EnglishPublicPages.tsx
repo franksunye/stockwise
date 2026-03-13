@@ -20,7 +20,6 @@ import MarketingFooter from '@/components/MarketingFooter';
 import MarketingHeader from '@/components/MarketingHeader';
 import Multiavatar from '@/components/Multiavatar';
 import { BoundaryNotice, GeoSummary, SourceBlock } from '@/components/seo/GeoBlocks';
-import { brandCoreZhCN } from '@/content/brand-core.zh-CN';
 
 const EN_FOUNDERS = [
   {
@@ -111,6 +110,14 @@ const EN_AGENT_TEAM = [
     aboutGradient: 'from-amber-500/20',
   },
 ] as const;
+
+const EN_DEFAULT_SOURCES = [
+  { name: 'ZISO AI Research Center', url: 'https://ziso.cc/learn' },
+  { name: 'ZISO AI Help Center', url: 'https://ziso.cc/support' },
+] as const;
+
+const EN_BOUNDARY_NOTICE =
+  'All content is provided for research and informational purposes only. Nothing on this site constitutes investment advice or a promise of returns.';
 
 function PageShell({
   currentPage,
@@ -444,6 +451,7 @@ export function EnglishHomePage() {
           <div className="flex flex-col md:flex-row gap-6 mb-6">
             <div className="flex-1 text-left">
               <GeoSummary
+                locale="en"
                 summary={[
                   'ZISO AI is focused on post-close research and next-session preparation for China and Hong Kong equities.',
                   'The workflow centers on tactical briefs, key levels, council-style review, and explicit risk boundaries.',
@@ -453,14 +461,15 @@ export function EnglishHomePage() {
             </div>
             <div className="flex-1 text-left">
               <SourceBlock
+                locale="en"
                 sources={[
-                  ...brandCoreZhCN.defaultSources,
+                  ...EN_DEFAULT_SOURCES,
                   { name: 'Product Positioning', url: 'https://ziso.cc', accessedAt: '2026-03-13' },
                 ]}
               />
             </div>
           </div>
-          <BoundaryNotice text={brandCoreZhCN.boundaryNotice.text} />
+          <BoundaryNotice locale="en" text={EN_BOUNDARY_NOTICE} />
         </section>
       </main>
     </PageShell>
@@ -760,6 +769,7 @@ export function EnglishPricingPage() {
           <div className="flex flex-col md:flex-row gap-8 mb-6">
             <div className="flex-1 text-left">
               <GeoSummary
+                locale="en"
                 summary={[
                   'The pricing structure is designed around research depth, watchlist coverage, and execution discipline.',
                   'Free is intended for exploration, while Pro unlocks the fuller reasoning and monitoring workflow.',
@@ -769,14 +779,15 @@ export function EnglishPricingPage() {
             </div>
             <div className="flex-1 text-left">
               <SourceBlock
+                locale="en"
                 sources={[
-                  ...brandCoreZhCN.defaultSources,
+                  ...EN_DEFAULT_SOURCES,
                   { name: 'Pricing Policy', url: 'https://ziso.cc/pricing', accessedAt: '2026-03-13' },
                 ]}
               />
             </div>
           </div>
-          <BoundaryNotice text={brandCoreZhCN.boundaryNotice.text} />
+          <BoundaryNotice locale="en" text={EN_BOUNDARY_NOTICE} />
         </section>
       </main>
     </PageShell>
@@ -878,6 +889,7 @@ export function EnglishPrivacyPage() {
         <div className="flex flex-col md:flex-row gap-6 mb-6">
           <div className="flex-1 text-left">
             <GeoSummary
+              locale="en"
               summary={[
                 'ZISO AI collects only the operational data required to run accounts, watchlists, billing, and notification settings.',
                 'Stripe handles raw payment processing, while ZISO AI avoids storing sensitive card information.',
@@ -887,14 +899,15 @@ export function EnglishPrivacyPage() {
           </div>
           <div className="flex-1 text-left">
             <SourceBlock
+              locale="en"
               sources={[
-                ...brandCoreZhCN.defaultSources,
+                ...EN_DEFAULT_SOURCES,
                 { name: 'Privacy Compliance', url: 'https://ziso.cc/privacy', accessedAt: '2026-03-13' },
               ]}
             />
           </div>
         </div>
-        <BoundaryNotice text={brandCoreZhCN.boundaryNotice.text} />
+        <BoundaryNotice locale="en" text={EN_BOUNDARY_NOTICE} />
       </section>
     </LegalShell>
   );
@@ -962,6 +975,7 @@ export function EnglishTermsPage() {
         <div className="flex flex-col md:flex-row gap-6 mb-6">
           <div className="flex-1 text-left">
             <GeoSummary
+              locale="en"
               summary={[
                 'ZISO AI provides AI-assisted market analysis for informational and research-support purposes only.',
                 'Users remain fully responsible for trading decisions and the legal consequences of market actions.',
@@ -971,14 +985,15 @@ export function EnglishTermsPage() {
           </div>
           <div className="flex-1 text-left">
             <SourceBlock
+              locale="en"
               sources={[
-                ...brandCoreZhCN.defaultSources,
+                ...EN_DEFAULT_SOURCES,
                 { name: 'Legal & Terms', url: 'https://ziso.cc/terms', accessedAt: '2026-03-13' },
               ]}
             />
           </div>
         </div>
-        <BoundaryNotice text={brandCoreZhCN.boundaryNotice.text} />
+        <BoundaryNotice locale="en" text={EN_BOUNDARY_NOTICE} />
       </section>
     </LegalShell>
   );
@@ -1035,6 +1050,7 @@ export function EnglishRefundPage() {
         <div className="flex flex-col md:flex-row gap-6 mb-6">
           <div className="flex-1 text-left">
             <GeoSummary
+              locale="en"
               summary={[
                 'ZISO AI offers a 48-hour refund window for first-time Pro subscribers only.',
                 'Approved refunds are processed back through Stripe to the original payment method.',
@@ -1044,14 +1060,15 @@ export function EnglishRefundPage() {
           </div>
           <div className="flex-1 text-left">
             <SourceBlock
+              locale="en"
               sources={[
-                ...brandCoreZhCN.defaultSources,
+                ...EN_DEFAULT_SOURCES,
                 { name: 'Refund Policy', url: 'https://ziso.cc/refund', accessedAt: '2026-03-13' },
               ]}
             />
           </div>
         </div>
-        <BoundaryNotice text={brandCoreZhCN.boundaryNotice.text} />
+        <BoundaryNotice locale="en" text={EN_BOUNDARY_NOTICE} />
       </section>
     </LegalShell>
   );

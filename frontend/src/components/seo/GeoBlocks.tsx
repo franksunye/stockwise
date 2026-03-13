@@ -2,26 +2,32 @@ import type { SourceRef } from "@/lib/geo";
 
 interface GeoSummaryProps {
   summary: string[];
+  locale?: "zh" | "en";
 }
 
 interface SourceBlockProps {
   sources: SourceRef[];
+  locale?: "zh" | "en";
 }
 
 interface BoundaryNoticeProps {
   text: string;
+  locale?: "zh" | "en";
 }
 
 interface FreshnessBlockProps {
   updatedAt?: string;
+  locale?: "zh" | "en";
 }
 
-export function GeoSummary({ summary }: GeoSummaryProps) {
+export function GeoSummary({ summary, locale = "zh" }: GeoSummaryProps) {
   if (!summary.length) return null;
 
   return (
     <section className="rounded-2xl border border-white/5 bg-white/[0.01] p-5 mb-4 group/geo transition-colors hover:bg-white/[0.03] hover:border-white/10">
-      <p className="text-[10px] uppercase tracking-[0.2em] text-slate-600 mb-3 font-black">TL;DR</p>
+      <p className="text-[10px] uppercase tracking-[0.2em] text-slate-600 mb-3 font-black">
+        {locale === "en" ? "Summary" : "TL;DR"}
+      </p>
       <ul className="list-disc list-inside space-y-2 text-sm text-slate-500 group-hover/geo:text-slate-300 transition-colors leading-relaxed">
         {summary.map((item) => (
           <li key={item}>{item}</li>
@@ -31,12 +37,14 @@ export function GeoSummary({ summary }: GeoSummaryProps) {
   );
 }
 
-export function SourceBlock({ sources }: SourceBlockProps) {
+export function SourceBlock({ sources, locale = "zh" }: SourceBlockProps) {
   if (!sources.length) return null;
 
   return (
     <section className="rounded-2xl border border-white/5 bg-white/[0.01] p-5 mb-4 group/geo transition-colors hover:bg-white/[0.03] hover:border-white/10">
-      <p className="text-[10px] uppercase tracking-[0.2em] text-slate-600 mb-3 font-black">来源记录</p>
+      <p className="text-[10px] uppercase tracking-[0.2em] text-slate-600 mb-3 font-black">
+        {locale === "en" ? "Sources" : "来源记录"}
+      </p>
       <ul className="space-y-2 text-sm text-slate-500 group-hover/geo:text-slate-300 transition-colors">
         {sources.map((source) => (
           <li key={`${source.name}-${source.url || "local"}`} className="flex flex-wrap items-center gap-x-2">
@@ -52,8 +60,16 @@ export function SourceBlock({ sources }: SourceBlockProps) {
             ) : (
               <span className="font-bold">{source.name}</span>
             )}
-            {source.accessedAt ? <span className="opacity-50 text-[10px]">（访问: {source.accessedAt}）</span> : ""}
-            {source.claimScope ? <span className="opacity-50 text-[10px]">（领域: {source.claimScope}）</span> : ""}
+            {source.accessedAt ? (
+              <span className="opacity-50 text-[10px]">
+                {locale === "en" ? `(Accessed: ${source.accessedAt})` : `（访问: ${source.accessedAt}）`}
+              </span>
+            ) : ""}
+            {source.claimScope ? (
+              <span className="opacity-50 text-[10px]">
+                {locale === "en" ? `(Scope: ${source.claimScope})` : `（领域: ${source.claimScope}）`}
+              </span>
+            ) : ""}
           </li>
         ))}
       </ul>
@@ -61,19 +77,23 @@ export function SourceBlock({ sources }: SourceBlockProps) {
   );
 }
 
-export function BoundaryNotice({ text }: BoundaryNoticeProps) {
+export function BoundaryNotice({ text, locale = "zh" }: BoundaryNoticeProps) {
   return (
     <section className="rounded-2xl border border-amber-500/5 bg-amber-500/[0.01] p-5 group/geo transition-colors hover:bg-amber-500/[0.03] hover:border-amber-500/10">
-      <p className="text-[10px] uppercase tracking-[0.2em] text-amber-900/40 mb-2 font-black group-hover/geo:text-amber-700/60 transition-colors">边界声明</p>
+      <p className="text-[10px] uppercase tracking-[0.2em] text-amber-900/40 mb-2 font-black group-hover/geo:text-amber-700/60 transition-colors">
+        {locale === "en" ? "Boundary Notice" : "边界声明"}
+      </p>
       <p className="text-sm text-amber-900/30 group-hover/geo:text-amber-200/50 transition-colors leading-relaxed">{text}</p>
     </section>
   );
 }
 
-export function FreshnessBlock({ updatedAt }: FreshnessBlockProps) {
+export function FreshnessBlock({ updatedAt, locale = "zh" }: FreshnessBlockProps) {
   if (!updatedAt) return null;
 
   return (
-    <p className="text-xs text-slate-500 mt-6">更新时间：{updatedAt}</p>
+    <p className="text-xs text-slate-500 mt-6">
+      {locale === "en" ? `Updated: ${updatedAt}` : `更新时间：${updatedAt}`}
+    </p>
   );
 }
