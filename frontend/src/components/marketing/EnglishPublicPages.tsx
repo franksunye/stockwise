@@ -1,8 +1,27 @@
+'use client';
+
+import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft, ChevronRight, Check, FileText, RefreshCcw, Shield, Sparkles, Target, Users } from 'lucide-react';
+import {
+  ArrowLeft,
+  Check,
+  ChevronRight,
+  FileText,
+  PartyPopper,
+  RefreshCcw,
+  Shield,
+  ShieldCheck,
+  Sparkles,
+  Target,
+  Users,
+  Zap,
+} from 'lucide-react';
 import MarketingFooter from '@/components/MarketingFooter';
 import MarketingHeader from '@/components/MarketingHeader';
-import { pricingPlans } from '@/lib/pricing-data';
+import Multiavatar from '@/components/Multiavatar';
+import { BoundaryNotice, GeoSummary, SourceBlock } from '@/components/seo/GeoBlocks';
+import { brandCoreZhCN } from '@/content/brand-core.zh-CN';
+import { agentTeam, founders } from '@/lib/agent-team';
 
 function PageShell({
   currentPage,
@@ -20,71 +39,186 @@ function PageShell({
       <MarketingHeader currentPage={currentPage} locale="en" />
       {children}
       <MarketingFooter locale="en" />
+      <style jsx global>{`
+        .glass-card {
+          background: rgba(255, 255, 255, 0.02);
+          backdrop-filter: blur(20px);
+          border: 1px solid rgba(255, 255, 255, 0.05);
+          border-radius: 40px;
+        }
+      `}</style>
     </div>
   );
 }
 
+const EN_PRICING_PLANS = [
+  {
+    name: 'Free',
+    eyebrow: 'Starter access',
+    price: '0',
+    period: 'Forever',
+    description: 'For investors exploring AI-assisted market review for the first time.',
+    features: [
+      'Rule-based trend signal layer',
+      'Daily market recap',
+      'Market almanac and macro mood card',
+      '3 AI stock checks per day',
+      'Community access',
+    ],
+    cta: 'Start Free',
+    href: 'https://app.ziso.cc',
+    highlight: false,
+    accent: 'text-slate-300',
+  },
+  {
+    name: 'Pro',
+    eyebrow: 'Core product',
+    price: '29.9',
+    period: 'Per month / ¥299 yearly',
+    description: 'For investors who want deeper nightly research and stronger execution discipline.',
+    features: [
+      'DeepSeek reasoning layer',
+      'Coach-style tactical briefs',
+      '10 fully monitored watchlist names',
+      'Key levels and sentiment unlocks',
+      'Realtime discipline alerts on major setup changes',
+      'Pro identity badge',
+    ],
+    cta: 'Open App',
+    href: 'https://app.ziso.cc',
+    highlight: true,
+    accent: 'text-indigo-300',
+  },
+  {
+    name: 'Alpha',
+    eyebrow: 'High-touch workflow',
+    price: '1,999',
+    period: 'Per year',
+    description: 'For advanced users who need deeper monitoring and priority support.',
+    features: [
+      'Intraday event analysis',
+      'Dedicated strategy dashboard',
+      'Automated deep-dive reports',
+      'API-level raw data access',
+      'Priority support',
+    ],
+    cta: 'Contact Support',
+    href: 'mailto:support@ziso.cc',
+    highlight: false,
+    accent: 'text-emerald-300',
+  },
+] as const;
+
+const EN_FEATURE_COMPARISON = [
+  { label: 'AI reasoning depth', free: 'Rule engine + basic AI', pro: 'Deep reasoning layer', highlight: true },
+  { label: 'Briefing style', free: 'Basic recap', pro: 'Coach-style narrative and attribution', highlight: true },
+  { label: 'Watchlist capacity', free: '3 names', pro: '10 names', highlight: true },
+  { label: 'Market coverage', free: 'China + Hong Kong equities', pro: 'China + Hong Kong equities', highlight: false },
+  { label: 'Realtime discipline alerts', free: 'No', pro: 'Yes, for major setup changes', highlight: true },
+  { label: 'Data rhythm', free: 'Post-close', pro: 'Post-close + selective realtime alerts', highlight: false },
+] as const;
+
 export function EnglishHomePage() {
   return (
     <PageShell currentPage="home">
-      <main className="relative z-10 mx-auto flex max-w-6xl flex-col gap-24 px-8 pb-32 pt-10">
-        <section className="grid gap-12 md:grid-cols-[1.2fr_0.8fr] md:items-center">
-          <div className="space-y-8">
-            <div className="inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-300">
-              <Sparkles size={12} />
-              AI Market Research
+      <main className="relative z-10 max-w-7xl mx-auto px-8 pt-12 pb-40 flex flex-col items-center text-center">
+        <div className="space-y-6 max-w-3xl mb-16">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-black uppercase tracking-widest mb-4">
+            <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
+            ZISO AI | Post-close market research for serious retail investors
+          </div>
+          <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-tight">
+            AI does the research.
+            <br />
+            <span className="bg-gradient-to-r from-indigo-400 to-cyan-300 bg-clip-text text-transparent">
+              You keep the decision.
+            </span>
+          </h1>
+          <p className="text-lg md:text-xl text-slate-400 font-medium max-w-2xl mx-auto leading-relaxed">
+            ZISO AI turns post-close market data into a disciplined briefing with key levels, action states, context,
+            and risk boundaries, so retail investors can prepare before the next session instead of reacting inside it.
+          </p>
+          <div className="pt-10 flex flex-col md:flex-row items-center justify-center gap-4">
+            <Link
+              href="https://app.ziso.cc"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-10 py-5 rounded-3xl bg-indigo-500 text-white font-black text-lg shadow-[0_20px_40px_rgba(99,102,241,0.3)] hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
+            >
+              Open the App <ChevronRight size={20} />
+            </Link>
+            <Link href="/en/pricing" className="px-10 py-5 rounded-3xl bg-white/5 border border-white/10 text-white font-black text-lg hover:bg-white/10 transition-all">
+              View Pricing
+            </Link>
+          </div>
+        </div>
+
+        <div className="w-full max-w-5xl relative mt-20">
+          <div className="relative h-[500px] md:h-[700px] w-full flex items-center justify-center">
+            <div className="absolute left-[5%] md:left-[15%] w-[45%] md:w-[25%] aspect-[9/19] bg-[#0A0A10] rounded-[30px] border border-white/10 shadow-2xl z-10 -rotate-12 origin-bottom-right hidden sm:flex items-center justify-center p-2 transition-transform hover:-translate-x-2">
+              <div className="w-full h-full bg-[#050508] rounded-[22px] border border-white/5 overflow-hidden relative">
+                <Image src="/images/landing/analysis-depth.png" alt="AI analysis detail" fill sizes="(min-width: 768px) 25vw, 45vw" className="object-cover" />
+              </div>
             </div>
-            <h1 className="text-5xl font-black tracking-tight md:text-7xl">
-              AI does the research.
-              <br />
-              <span className="bg-gradient-to-r from-indigo-400 to-cyan-300 bg-clip-text text-transparent">
-                You keep the decision.
-              </span>
-            </h1>
-            <p className="max-w-2xl text-lg leading-8 text-slate-300">
-              ZISO AI is a post-close research workflow for serious retail investors. It turns market noise into a
-              disciplined briefing with key levels, context, risk boundaries, and execution language.
-            </p>
-            <div className="flex flex-col gap-4 sm:flex-row">
-              <Link
-                href="https://app.ziso.cc"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 rounded-3xl bg-indigo-500 px-8 py-4 text-lg font-black text-white shadow-[0_20px_40px_rgba(99,102,241,0.3)] transition-all hover:scale-[1.02]"
-              >
-                Open the App
-                <ChevronRight size={20} />
-              </Link>
-              <Link
-                href="/en/pricing"
-                className="inline-flex items-center justify-center rounded-3xl border border-white/10 bg-white/5 px-8 py-4 text-lg font-black text-white transition-all hover:bg-white/10"
-              >
-                View Pricing
-              </Link>
+
+            <div className="absolute right-[5%] md:right-[15%] w-[45%] md:w-[25%] aspect-[9/19] bg-[#0A0A10] rounded-[30px] border border-white/10 shadow-2xl z-10 rotate-12 origin-bottom-left hidden sm:flex items-center justify-center p-2 transition-transform hover:translate-x-2">
+              <div className="w-full h-full bg-[#050508] rounded-[22px] border border-white/5 overflow-hidden relative">
+                <Image src="/images/landing/alert-popup.png" alt="Realtime discipline alert" fill sizes="(min-width: 768px) 25vw, 45vw" className="object-cover" />
+              </div>
+            </div>
+
+            <div className="relative w-[70%] sm:w-[50%] md:w-[32%] aspect-[9/19] bg-[#1A1A25] rounded-[40px] border border-white/20 shadow-[0_0_100px_rgba(99,102,241,0.2)] z-30 flex items-center justify-center p-2 md:p-3 transition-transform hover:scale-[1.02]">
+              <div className="w-full h-full bg-[#050508] rounded-[30px] border border-white/10 overflow-hidden relative">
+                <Image src="/images/landing/main-dashboard.png" alt="Main dashboard preview" fill priority sizes="(min-width: 1024px) 32vw, (min-width: 640px) 50vw, 70vw" className="object-cover" />
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 w-20 h-5 bg-black rounded-full border border-white/5 z-20" />
+              </div>
             </div>
           </div>
 
-          <div className="rounded-[40px] border border-white/10 bg-white/[0.03] p-8 shadow-[0_30px_80px_rgba(0,0,0,0.45)]">
-            <div className="space-y-6">
-              <div>
-                <p className="text-[11px] font-black uppercase tracking-[0.2em] text-indigo-300">What you actually get</p>
-                <h2 className="mt-3 text-3xl font-black tracking-tight text-white">A trading briefing, not a hype feed</h2>
-              </div>
-              <ul className="space-y-4 text-sm leading-7 text-slate-300">
-                <li className="flex gap-3"><Check size={16} className="mt-1 text-emerald-400" /> Post-close tactical brief with support, resistance, and invalidation levels</li>
-                <li className="flex gap-3"><Check size={16} className="mt-1 text-emerald-400" /> AI council view for cross-model agreement and disagreement</li>
-                <li className="flex gap-3"><Check size={16} className="mt-1 text-emerald-400" /> Risk-first execution language: enter, observe, defend, or no setup</li>
-              </ul>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] h-[60%] bg-indigo-600/10 blur-[120px] -z-10 rounded-full" />
+        </div>
+
+        <section id="features" className="pt-48 w-full grid md:grid-cols-2 gap-20 items-center text-left">
+          <div className="space-y-8">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[10px] font-black uppercase tracking-[0.2em]">
+              Prepare before the session
             </div>
+            <h2 className="text-4xl md:text-5xl font-black tracking-tighter leading-tight">
+              Review calmly after the close.
+              <br />
+              <span className="text-indigo-400">Trade with more structure the next day.</span>
+            </h2>
+            <p className="text-slate-400 font-medium leading-relaxed">
+              The product is designed around one belief: most retail investors lose consistency because they make
+              decisions inside noise. ZISO AI moves the heavy research into the post-close window, so execution can stay
+              simpler, cleaner, and more rule-driven.
+            </p>
+            <ul className="space-y-4">
+              {[
+                'Tactical brief with support, resistance, and invalidation levels',
+                'AI council view for agreement and disagreement across analytical seats',
+                'Execution states framed as enter, observe, defend, or no setup',
+              ].map((item) => (
+                <li key={item} className="flex items-center gap-3 text-sm font-bold text-slate-300">
+                  <div className="w-5 h-5 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400">
+                    <ChevronRight size={14} />
+                  </div>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="glass-card aspect-square bg-[#0A0A10] rounded-[40px] overflow-hidden border border-white/5 relative">
+            <Image src="/images/landing/prediction-card-detail.png" alt="Detailed tactical brief" fill className="object-cover opacity-80 hover:opacity-100 transition-opacity duration-700" />
           </div>
         </section>
 
-        <section id="features" className="grid gap-8 md:grid-cols-3">
+        <section className="pt-32 w-full grid md:grid-cols-3 gap-8 text-left">
           {[
             {
               icon: Target,
               title: 'Daily tactical brief',
-              desc: 'A concise after-hours plan with key levels, tactical scenarios, and invalidation boundaries.',
+              desc: 'A post-close plan with key levels, tactical scenarios, and invalidation boundaries.',
             },
             {
               icon: Users,
@@ -92,37 +226,152 @@ export function EnglishHomePage() {
               desc: 'Multiple analytical seats surface agreement, disagreement, and the dominant action bias.',
             },
             {
-              icon: Shield,
+              icon: ShieldCheck,
               title: 'Risk-first discipline',
               desc: 'If confidence is weak, the system defaults to observe or no setup instead of forcing action.',
             },
           ].map((item) => (
-            <div key={item.title} className="rounded-[32px] border border-white/5 bg-white/[0.02] p-8">
-              <item.icon className="text-indigo-400" size={28} />
-              <h3 className="mt-6 text-2xl font-black tracking-tight">{item.title}</h3>
-              <p className="mt-4 text-sm leading-7 text-slate-400">{item.desc}</p>
+            <div key={item.title} className="glass-card p-10 space-y-6 border-white/5">
+              <item.icon className="text-indigo-400 w-8 h-8" />
+              <h3 className="text-xl font-black">{item.title}</h3>
+              <p className="text-slate-500 text-sm leading-relaxed">{item.desc}</p>
             </div>
           ))}
         </section>
 
-        <section id="faq" className="rounded-[40px] border border-white/5 bg-white/[0.02] p-8 md:p-12">
-          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-slate-500">FAQ</p>
-          <div className="mt-8 grid gap-8 md:grid-cols-2">
-            <div>
-              <h3 className="text-xl font-black">Is this an automated trading product?</h3>
-              <p className="mt-3 text-sm leading-7 text-slate-400">
-                No. ZISO AI is a research and decision-support workflow. It helps you prepare and execute with more
-                structure, but the trade remains your responsibility.
-              </p>
+        <section className="pt-32 w-full space-y-16">
+          <div className="text-center space-y-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">
+              The operating team
             </div>
-            <div>
-              <h3 className="text-xl font-black">Which markets does it cover today?</h3>
-              <p className="mt-3 text-sm leading-7 text-slate-400">
-                Today the product is optimized for China and Hong Kong equities. The English website focuses on helping
-                search engines and AI systems understand the product, positioning, and public-facing policies.
-              </p>
+            <h2 className="text-4xl md:text-5xl font-black tracking-tighter leading-tight">
+              Guided by founders,
+              <br />
+              <span className="text-indigo-400">delivered like a research desk.</span>
+            </h2>
+            <p className="text-slate-500 font-medium max-w-3xl mx-auto">
+              Two founders define the boundary and research direction. The visible analyst seats explain the setup,
+              the quant layer maintains structural judgment, and the workflow automation keeps the nightly routine
+              consistent.
+            </p>
+            <Link
+              href="/en/about"
+              className="inline-flex items-center gap-2 text-sm font-bold text-indigo-300 hover:text-indigo-200 transition-colors"
+            >
+              Meet the team and operating model <ChevronRight size={16} />
+            </Link>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            {founders.map((founder) => (
+              <div key={founder.name} className="glass-card p-8 border-white/10 bg-white/[0.02] space-y-4">
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400">{founder.label}</p>
+                <h3 className="text-2xl font-black">{founder.name}</h3>
+                <p className="text-slate-400 text-sm font-medium leading-relaxed">{founder.description}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
+            {agentTeam.map((agent) => (
+              <div
+                key={agent.name}
+                className={`glass-card p-6 border ${agent.borderColor} ${agent.bgColor} relative overflow-hidden group lg:min-h-[360px]`}
+              >
+                <div className="flex flex-col items-center text-center space-y-4 relative z-10">
+                  <div className="w-20 h-20 rounded-full bg-white/5 ring-1 ring-white/10 overflow-hidden relative mb-2 grayscale group-hover:grayscale-0 transition-all duration-500">
+                    <Multiavatar
+                      name={agent.avatarSeed}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
+                  </div>
+                  <div>
+                    <h3 className={`font-black text-lg ${agent.textColor}`}>{agent.name}</h3>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mt-1">{agent.role}</p>
+                  </div>
+                  <p className="text-slate-400 text-xs leading-relaxed font-bold">{agent.description}</p>
+                </div>
+                <div className={`absolute -right-4 -bottom-4 w-24 h-24 rounded-full blur-[40px] opacity-20 transition-opacity group-hover:opacity-40 ${agent.glowColor}`} />
+              </div>
+            ))}
+          </div>
+          <p className="text-center text-xs text-slate-600 font-bold">
+            On the surface, users interact with a research team. Underneath, analysis models, quant models, and
+            automation are doing the heavy lifting.
+          </p>
+        </section>
+
+        <section id="faq" className="pt-24 w-full max-w-4xl text-left">
+          <div className="text-center mb-12">
+            <p className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-500">FAQ</p>
+            <h2 className="mt-4 text-3xl md:text-5xl font-black tracking-tighter">What the product is, and what it is not.</h2>
+          </div>
+          <div className="grid md:grid-cols-2 gap-6">
+            {[
+              {
+                q: 'Is this an automated trading product?',
+                a: 'No. ZISO AI is a research and decision-support workflow. It helps you prepare and execute with more structure, but the trade remains your responsibility.',
+              },
+              {
+                q: 'Which markets does it cover today?',
+                a: 'Today the product is optimized for China and Hong Kong equities. The English website exists so search engines and AI systems can understand the product and public positioning.',
+              },
+              {
+                q: 'Why focus on post-close research?',
+                a: 'Because most retail mistakes happen inside intraday noise. A calmer review cycle produces better preparation and more consistent execution.',
+              },
+              {
+                q: 'Does the product promise returns?',
+                a: 'No. The system is built to improve research discipline, not to guarantee outcomes or remove market risk.',
+              },
+            ].map((item) => (
+              <div key={item.q} className="rounded-[32px] border border-white/5 bg-white/[0.02] p-8">
+                <h3 className="text-xl font-black">{item.q}</h3>
+                <p className="mt-4 text-sm leading-7 text-slate-400">{item.a}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="py-20 w-full max-w-4xl text-center space-y-10 border-b border-white/5">
+          <h2 className="text-3xl md:text-5xl font-black tracking-tighter leading-tight">
+            Ready to let <span className="text-indigo-400">ZISO AI</span>
+            <br className="hidden md:block" />
+            do the market homework with you?
+          </h2>
+          <div className="flex flex-col md:flex-row items-center justify-center gap-6">
+            <Link
+              href="https://app.ziso.cc"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-12 py-6 rounded-3xl bg-indigo-500 text-white font-black text-xl shadow-[0_20px_40px_rgba(99,102,241,0.3)] hover:scale-105 active:scale-95 transition-all flex items-center gap-3"
+            >
+              Open the App <ChevronRight size={24} />
+            </Link>
+          </div>
+        </section>
+
+        <section className="w-full max-w-4xl pt-10 pb-20 opacity-[0.25] hover:opacity-100 transition-opacity">
+          <div className="flex flex-col md:flex-row gap-6 mb-6">
+            <div className="flex-1 text-left">
+              <GeoSummary
+                summary={[
+                  'ZISO AI is focused on post-close research and next-session preparation for China and Hong Kong equities.',
+                  'The workflow centers on tactical briefs, key levels, council-style review, and explicit risk boundaries.',
+                  'The product is presented as research support, not as a promise of profits or automated trading.',
+                ]}
+              />
+            </div>
+            <div className="flex-1 text-left">
+              <SourceBlock
+                sources={[
+                  ...brandCoreZhCN.defaultSources,
+                  { name: 'Product Positioning', url: 'https://ziso.cc', accessedAt: '2026-03-13' },
+                ]}
+              />
             </div>
           </div>
+          <BoundaryNotice text={brandCoreZhCN.boundaryNotice.text} />
         </section>
       </main>
     </PageShell>
@@ -132,73 +381,106 @@ export function EnglishHomePage() {
 export function EnglishAboutPage() {
   return (
     <PageShell currentPage="about">
-      <main className="relative z-10 mx-auto max-w-5xl px-8 pb-32 pt-16">
-        <div className="space-y-8">
-          <div className="inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-300">
-            <Sparkles size={12} />
-            About ZISO AI
+      <main className="relative z-10 max-w-5xl mx-auto px-8 pt-20 pb-32">
+        <div className="space-y-8 text-center sm:text-left">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[10px] font-black uppercase tracking-widest">
+            <Sparkles size={12} /> About ZISO AI
           </div>
-          <h1 className="text-4xl font-black tracking-tight md:text-6xl">
+          <h1 className="text-4xl md:text-6xl font-black tracking-tighter leading-tight">
             Institutional research discipline,
             <br />
-            <span className="text-indigo-400">adapted for serious retail investors.</span>
+            <span className="bg-gradient-to-r from-indigo-400 to-cyan-300 bg-clip-text text-transparent">
+              adapted for serious retail investors.
+            </span>
           </h1>
-          <p className="max-w-3xl text-lg leading-8 text-slate-300">
+          <p className="text-lg text-slate-400 font-medium leading-relaxed max-w-3xl">
             ZISO AI was built around one principle: ordinary investors should have access to structured post-close
-            research, not just intraday noise, reactive sentiment, and improvised decision-making.
+            research, not just noise, sentiment, and improvised decision-making.
           </p>
         </div>
 
-        <section className="mt-20 grid gap-8 md:grid-cols-3">
-          {[
-            {
-              title: 'Mission',
-              desc: 'Replace impulsive trading habits with a repeatable research routine that improves consistency.',
-            },
-            {
-              title: 'Method',
-              desc: 'Blend analysis models, quant rules, and execution discipline into a single user-facing workflow.',
-            },
-            {
-              title: 'Boundary',
-              desc: 'We do not sell certainty. We build structured judgment, risk boundaries, and better preparation.',
-            },
-          ].map((item) => (
-            <div key={item.title} className="rounded-[32px] border border-white/5 bg-white/[0.02] p-8">
-              <h2 className="text-2xl font-black tracking-tight">{item.title}</h2>
-              <p className="mt-4 text-sm leading-7 text-slate-400">{item.desc}</p>
+        <section className="pt-24 grid md:grid-cols-2 gap-16 items-center">
+          <div className="space-y-6">
+            <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center">
+              <Target className="text-indigo-400" />
             </div>
-          ))}
-        </section>
-
-        <section className="mt-20 rounded-[40px] border border-white/5 bg-white/[0.02] p-8 md:p-12">
-          <h2 className="text-3xl font-black tracking-tight">How the product is structured</h2>
-          <div className="mt-8 grid gap-6 md:grid-cols-3">
-            <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-indigo-300">Research lead</p>
-              <p className="mt-3 text-sm leading-7 text-slate-400">
-                The product direction is governed as a research workflow first, not as an engagement-first media app.
-              </p>
-            </div>
-            <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-indigo-300">Analytical layer</p>
-              <p className="mt-3 text-sm leading-7 text-slate-400">
-                AI-generated interpretation provides readable reasoning, but quant logic remains the structural base.
-              </p>
-            </div>
-            <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-indigo-300">Execution boundary</p>
-              <p className="mt-3 text-sm leading-7 text-slate-400">
-                Final actions are framed as disciplined states: enter, observe, defend, or no setup.
+            <h2 className="text-3xl font-black tracking-tighter">Our mission</h2>
+            <p className="text-slate-400 leading-relaxed font-bold">
+              The mission is straightforward: give ordinary investors access to a more institutional research rhythm.
+            </p>
+            <p className="text-slate-500 text-sm leading-relaxed">
+              Instead of leaving investors to stitch together fragments of news, indicators, and instinct, ZISO AI
+              turns market review into a repeatable nightly workflow. The goal is not certainty. The goal is cleaner
+              preparation, clearer boundaries, and stronger discipline.
+            </p>
+          </div>
+          <div className="glass-card p-1 relative group">
+            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-cyan-500/20 rounded-[38px] blur-xl opacity-50 group-hover:opacity-100 transition-opacity" />
+            <div className="bg-[#0a0a0f] rounded-[38px] p-8 relative z-10 space-y-4">
+              <div className="text-indigo-300 font-black text-xl leading-tight">“Research first. Decision second.”</div>
+              <p className="text-slate-500 text-sm text-justify leading-relaxed">
+                That principle is embedded across the product: the system is optimized for post-close review, tactical
+                preparation, risk framing, and execution clarity. It is not built as a hype feed, and it is not built to
+                manufacture certainty.
               </p>
             </div>
           </div>
         </section>
 
-        <section className="mt-20 text-center">
+        <section className="pt-24 space-y-12">
+          <div className="text-center space-y-4">
+            <h2 className="text-3xl font-black tracking-tighter">Team and operating structure</h2>
+            <p className="text-slate-500 max-w-2xl mx-auto text-sm">
+              On the surface, the product is delivered like a research service. Underneath, it is supported by analysis
+              models, quant rules, and automation.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            {founders.map((founder) => (
+              <div key={founder.name} className="glass-card p-8 space-y-4 border-white/10 bg-white/[0.02]">
+                <div className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400">{founder.label}</div>
+                <h3 className="text-2xl font-black">{founder.name}</h3>
+                <p className="text-slate-400 text-sm leading-relaxed font-medium">{founder.description}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {agentTeam.map((member) => (
+              <div key={member.name} className={`p-6 rounded-[32px] bg-gradient-to-b ${member.aboutGradient} to-transparent border border-white/5 flex flex-col items-center text-center space-y-4`}>
+                <div className="w-16 h-16 rounded-full bg-black/40 border border-white/10 overflow-hidden">
+                  <Multiavatar name={member.avatarSeed} className="w-full h-full" />
+                </div>
+                <div>
+                  <div className={`font-black ${member.textColor}`}>{member.name}</div>
+                  <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">{member.role}</div>
+                </div>
+                <p className="text-[11px] text-slate-400 leading-relaxed font-medium">{member.description}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-4 text-left">
+            <div className="glass-card p-6 space-y-3 border-white/5">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400">Research direction</p>
+              <p className="text-sm text-slate-400 leading-relaxed">The product is governed as a research workflow first, with clear boundary-setting around what is signal, what is noise, and what should remain uncertain.</p>
+            </div>
+            <div className="glass-card p-6 space-y-3 border-white/5">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400">Analysis layer</p>
+              <p className="text-sm text-slate-400 leading-relaxed">Readable AI interpretation sits above the quant base, so investors can understand the structure before they decide how to act.</p>
+            </div>
+            <div className="glass-card p-6 space-y-3 border-white/5">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400">Execution discipline</p>
+              <p className="text-sm text-slate-400 leading-relaxed">The system expresses decisions in explicit states such as enter, observe, defend, or no setup, to reduce ambiguity at execution time.</p>
+            </div>
+          </div>
+        </section>
+
+        <section className="pt-20 text-center">
           <Link
             href="https://app.ziso.cc"
-            className="inline-flex items-center gap-2 rounded-3xl bg-indigo-500 px-8 py-4 text-lg font-black text-white transition-all hover:scale-[1.02]"
+            className="inline-flex items-center gap-2 rounded-3xl bg-indigo-500 px-10 py-5 text-lg font-black text-white transition-all hover:scale-[1.02]"
           >
             Open App
             <ChevronRight size={20} />
@@ -210,131 +492,202 @@ export function EnglishAboutPage() {
 }
 
 export function EnglishPricingPage() {
-  const englishPlans = [
-    {
-      enName: 'Free',
-      price: '0',
-      period: 'forever',
-      description: 'For investors exploring AI-assisted market review for the first time.',
-      features: [
-        'Rule-based market signal layer',
-        'Daily market recap',
-        'Market almanac and macro mood card',
-        '3 AI stock checks per day',
-        'Community access',
-      ],
-    },
-    {
-      enName: 'Pro',
-      price: '29.9',
-      period: 'per month / ¥299 yearly',
-      description: 'For investors who want deeper nightly research and a more disciplined execution layer.',
-      features: [
-        'DeepSeek reasoning layer',
-        'Coach-style tactical briefs',
-        '10 fully monitored watchlist names',
-        'Key level and sentiment unlocks',
-        'Realtime discipline alerts on major setup changes',
-        'Pro identity badge',
-      ],
-    },
-    {
-      enName: 'Alpha',
-      price: '1,999',
-      period: 'per year',
-      description: 'For advanced workflows that need higher-touch support and deeper monitoring.',
-      features: [
-        'Intraday event analysis',
-        'Dedicated strategy dashboard',
-        'Automated deep-dive reports',
-        'API-level raw data access',
-        'Priority support',
-      ],
-    },
-  ] as const;
-
-  const englishComparison = [
-    { label: 'AI reasoning depth', free: 'Rule engine + basic AI', pro: 'Deep reasoning layer', highlight: true },
-    { label: 'Briefing style', free: 'Basic recap', pro: 'Coach-style narrative and attribution', highlight: true },
-    { label: 'Watchlist capacity', free: '3 names', pro: '10 names', highlight: true },
-    { label: 'Market coverage', free: 'China + Hong Kong equities', pro: 'China + Hong Kong equities', highlight: false },
-    { label: 'Realtime discipline alerts', free: 'No', pro: 'Yes, for major setup changes', highlight: true },
-    { label: 'Data rhythm', free: 'Post-close', pro: 'Post-close + selective realtime alerts', highlight: false },
-  ] as const;
-
   return (
     <PageShell currentPage="pricing">
-      <main className="relative z-10 mx-auto max-w-6xl px-8 pb-32 pt-12">
-        <div className="text-center">
-          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-indigo-300">Pricing</p>
-          <h1 className="mt-4 text-4xl font-black tracking-tight md:text-6xl">Hire a research workflow, not just another app.</h1>
-          <p className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-slate-300">
+      <main className="relative z-10 max-w-7xl mx-auto px-8 pt-12 pb-40">
+        <div className="text-center space-y-4 mb-20">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[10px] font-black uppercase tracking-[0.2em] mb-4">
+            Research-first subscription
+          </div>
+          <h1 className="text-4xl md:text-6xl font-black tracking-tighter leading-tight">
+            Hire a research workflow,
+            <br />
+            <span className="bg-gradient-to-r from-indigo-400 to-cyan-300 bg-clip-text text-transparent">not just another app.</span>
+          </h1>
+          <p className="text-lg text-slate-400 font-medium max-w-3xl mx-auto leading-relaxed mt-6">
             The subscription pays for research depth, coverage, and execution discipline. It is designed for investors
             who want a stable nightly routine instead of reactive decision-making.
           </p>
         </div>
 
-        <div className="mt-16 grid gap-8 lg:grid-cols-3">
-          {pricingPlans.map((plan, index) => (
+        <div className="grid lg:grid-cols-3 gap-8 mb-20">
+          {EN_PRICING_PLANS.map((plan) => (
             <div
-              key={plan.enName}
-              className={`rounded-[36px] border p-8 ${
-                plan.highlight ? 'border-indigo-500/30 bg-indigo-500/10' : 'border-white/5 bg-white/[0.02]'
+              key={plan.name}
+              className={`glass-card p-8 flex flex-col relative overflow-hidden ${
+                plan.highlight ? 'border-indigo-500/40 ring-1 ring-indigo-500/20' : 'border-white/5'
               }`}
             >
-              <plan.icon className={plan.highlight ? 'text-indigo-300' : 'text-slate-300'} size={28} />
-              <h2 className="mt-6 text-3xl font-black tracking-tight">{plan.enName}</h2>
-              <p className="mt-2 text-sm text-slate-400">{englishPlans[index].description}</p>
-              <div className="mt-8 flex items-end gap-2">
-                <span className="text-sm font-bold">¥</span>
-                <span className="text-5xl font-black">{englishPlans[index].price}</span>
+              {plan.highlight && (
+                <div className="absolute top-5 right-[-35px] rotate-45 bg-indigo-600 text-white text-[10px] font-black px-10 py-1 uppercase tracking-tighter">
+                  Core plan
+                </div>
+              )}
+
+              <div className="mb-8">
+                <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${plan.accent}`}>{plan.eyebrow}</p>
+                <h3 className="text-3xl font-black mt-4">{plan.name}</h3>
               </div>
-              <p className="mt-2 text-sm text-slate-500">{englishPlans[index].period}</p>
-              <ul className="mt-8 space-y-3 text-sm leading-7 text-slate-300">
-                {englishPlans[index].features.map((feature) => (
-                  <li key={feature} className="flex gap-3">
-                    <Check size={16} className="mt-1 text-emerald-400" />
-                    <span>{feature}</span>
-                  </li>
+
+              <div className="mb-8">
+                <div className="flex items-baseline gap-1">
+                  <span className="text-sm font-bold">¥</span>
+                  <span className="text-5xl font-black tracking-tighter">{plan.price}</span>
+                </div>
+                <p className="text-slate-500 text-sm mt-2">{plan.period}</p>
+                <p className="text-slate-400 text-sm mt-4 leading-relaxed italic">{plan.description}</p>
+              </div>
+
+              <div className="space-y-4 mb-10 flex-1">
+                {plan.features.map((feature) => (
+                  <div key={feature} className="flex items-start gap-3 text-sm">
+                    <div className="mt-1 w-4 h-4 rounded-full bg-white/5 flex items-center justify-center flex-shrink-0">
+                      <Check size={10} className={plan.highlight ? 'text-indigo-400' : 'text-slate-500'} />
+                    </div>
+                    <span className="text-slate-300 font-medium">{feature}</span>
+                  </div>
                 ))}
-              </ul>
+              </div>
+
               <Link
-                href={plan.href || 'https://app.ziso.cc'}
-                target={plan.href?.startsWith('mailto:') ? undefined : '_blank'}
-                rel={plan.href?.startsWith('mailto:') ? undefined : 'noopener noreferrer'}
-                className={`mt-8 inline-flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-black ${
-                  plan.highlight ? 'bg-indigo-500 text-white' : 'border border-white/10 bg-white/5 text-white'
+                href={plan.href}
+                target={plan.href.startsWith('mailto:') ? undefined : '_blank'}
+                rel={plan.href.startsWith('mailto:') ? undefined : 'noopener noreferrer'}
+                className={`w-full py-4 rounded-2xl flex items-center justify-center gap-2 font-black transition-all active:scale-95 ${
+                  plan.highlight
+                    ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-500'
+                    : 'bg-white/5 border border-white/10 hover:bg-white/10 text-white'
                 }`}
               >
-                {plan.cta || 'Open App'}
-                <ChevronRight size={16} />
+                {plan.cta}
+                <ChevronRight size={18} />
               </Link>
             </div>
           ))}
         </div>
 
-        <section className="mt-20 rounded-[40px] border border-white/5 bg-white/[0.02] p-8 md:p-12">
-          <h2 className="text-3xl font-black tracking-tight">Feature depth</h2>
-          <div className="mt-8 overflow-x-auto">
-            <table className="w-full min-w-[680px] border-collapse text-left text-sm">
+        <section className="mb-24 hidden md:block">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-black tracking-tighter">Feature depth comparison</h2>
+            <p className="text-slate-500 text-sm mt-2">A clearer view of what changes when you move from exploration to disciplined daily use.</p>
+          </div>
+
+          <div className="glass-card overflow-hidden border-white/5 bg-white/[0.01]">
+            <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-white/5">
-                  <th className="py-4 text-slate-500">Capability</th>
-                  <th className="py-4 text-slate-300">Free</th>
-                  <th className="py-4 text-indigo-300">Pro</th>
+                <tr className="border-b border-white/5 bg-white/[0.02]">
+                  <th className="py-6 px-8 text-sm font-black uppercase tracking-widest text-slate-500">Capability</th>
+                  <th className="py-6 px-8 text-sm font-black text-slate-300">Free</th>
+                  <th className="py-6 px-8 text-sm font-black text-indigo-300">Pro</th>
                 </tr>
               </thead>
-              <tbody>
-                {englishComparison.map((row) => (
-                  <tr key={row.label} className="border-b border-white/[0.03]">
-                    <td className="py-4 text-slate-400">{row.label}</td>
-                    <td className="py-4 text-slate-500">{row.free}</td>
-                    <td className={`py-4 ${row.highlight ? 'font-black text-indigo-100' : 'text-slate-300'}`}>{row.pro}</td>
+              <tbody className="text-sm font-medium">
+                {EN_FEATURE_COMPARISON.map((row) => (
+                  <tr key={row.label} className="border-b border-white/[0.03] hover:bg-white/[0.01] transition-colors">
+                    <td className="py-5 px-8 text-slate-400 font-bold">{row.label}</td>
+                    <td className="py-5 px-8 text-slate-500">{row.free}</td>
+                    <td className={`py-5 px-8 ${row.highlight ? 'text-indigo-100 font-black' : 'text-slate-300'}`}>{row.pro}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+        </section>
+
+        <section className="mb-24">
+          <div className="glass-card p-1 border-white/10 bg-gradient-to-r from-indigo-500/20 via-cyan-500/10 to-transparent">
+            <div className="bg-[#0a0a0e] rounded-[38px] p-8 md:p-12 flex flex-col md:flex-row items-center gap-10">
+              <div className="flex-1 text-left">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-bold uppercase tracking-wider mb-4">
+                  <Zap size={12} className="fill-current" />
+                  <span>Manual support channel</span>
+                </div>
+                <h2 className="text-3xl font-black tracking-tighter mb-4 text-white">
+                  Payment problem?
+                  <br className="md:hidden" />
+                  <span className="text-slate-500">Talk to support directly.</span>
+                </h2>
+                <p className="text-slate-400 font-medium leading-relaxed max-w-lg mb-6">
+                  If Stripe is unavailable, your card is unsupported, or you need manual onboarding, contact support
+                  directly and we will help you activate access.
+                </p>
+                <div className="flex items-center gap-4 text-sm font-bold text-slate-500">
+                  <span className="flex items-center gap-2"><Check size={14} className="text-emerald-500" /> Fast response</span>
+                  <span className="flex items-center gap-2"><Check size={14} className="text-emerald-500" /> Manual onboarding</span>
+                  <span className="flex items-center gap-2"><Check size={14} className="text-emerald-500" /> Business support</span>
+                </div>
+              </div>
+
+              <div className="relative group">
+                <div className="absolute inset-0 bg-indigo-500 blur-[60px] opacity-20 group-hover:opacity-40 transition-opacity rounded-full" />
+                <div className="relative z-10 p-4 bg-white rounded-3xl shadow-2xl shadow-indigo-500/20 transform group-hover:scale-105 transition-transform duration-300">
+                  <Image src="/support-qr.png" alt="Support QR code" width={180} height={180} className="rounded-xl" />
+                  <div className="mt-3 text-center">
+                    <p className="text-[#050508] font-black text-xs tracking-widest uppercase">SCAN TO CHAT</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="text-center">
+          <h2 className="text-3xl font-black tracking-tighter mb-12">Why ZISO AI?</h2>
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="p-6">
+              <h4 className="text-white font-bold mb-3">Market-native research lens</h4>
+              <p className="text-slate-500 text-sm font-medium">Built around China and Hong Kong market structure instead of generic “global finance” abstraction.</p>
+            </div>
+            <div className="p-6">
+              <h4 className="text-white font-bold mb-3">Readable execution language</h4>
+              <p className="text-slate-500 text-sm font-medium">The product is designed to explain what matters, what invalidates, and what to do next without drowning users in jargon.</p>
+            </div>
+            <div className="p-6">
+              <h4 className="text-white font-bold mb-3">Research-first discipline</h4>
+              <p className="text-slate-500 text-sm font-medium">The workflow is structured to improve consistency, not to stimulate more impulsive trading.</p>
+            </div>
+          </div>
+        </section>
+
+        <section className="py-20 w-full max-w-4xl text-center space-y-10 border-b border-white/5 mx-auto">
+          <h2 className="text-3xl md:text-5xl font-black tracking-tighter leading-tight">
+            Ready to bring more structure
+            <br className="hidden md:block" />
+            into your nightly research routine?
+          </h2>
+          <div className="flex flex-col md:flex-row items-center justify-center gap-6">
+            <Link
+              href="https://app.ziso.cc"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-12 py-6 rounded-3xl bg-indigo-500 text-white font-black text-xl shadow-[0_20px_40px_rgba(99,102,241,0.3)] hover:scale-105 active:scale-95 transition-all flex items-center gap-3"
+            >
+              Open the App <ChevronRight size={24} />
+            </Link>
+          </div>
+        </section>
+
+        <section className="w-full max-w-4xl pt-10 pb-20 opacity-[0.25] hover:opacity-100 transition-opacity mx-auto">
+          <div className="flex flex-col md:flex-row gap-8 mb-6">
+            <div className="flex-1 text-left">
+              <GeoSummary
+                summary={[
+                  'The pricing structure is designed around research depth, watchlist coverage, and execution discipline.',
+                  'Free is intended for exploration, while Pro unlocks the fuller reasoning and monitoring workflow.',
+                  'Pricing content is explanatory only and does not create any guarantee of returns.',
+                ]}
+              />
+            </div>
+            <div className="flex-1 text-left">
+              <SourceBlock
+                sources={[
+                  ...brandCoreZhCN.defaultSources,
+                  { name: 'Pricing Policy', url: 'https://ziso.cc/pricing', accessedAt: '2026-03-13' },
+                ]}
+              />
+            </div>
+          </div>
+          <BoundaryNotice text={brandCoreZhCN.boundaryNotice.text} />
         </section>
       </main>
     </PageShell>
@@ -356,22 +709,22 @@ function LegalShell({
 }) {
   return (
     <PageShell currentPage="home">
-      <main className="relative z-10 mx-auto max-w-3xl px-8 pb-28 pt-16">
+      <main className="relative z-10 max-w-3xl mx-auto px-8 py-20">
         <div className="space-y-4">
-          <div className="inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-indigo-300">
-            <Icon size={12} />
-            {eyebrow}
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-black uppercase tracking-widest">
+            <Icon size={12} /> {eyebrow}
           </div>
-          <h1 className="text-4xl font-black tracking-tight md:text-5xl">{title}</h1>
-          <p className="text-sm text-slate-500">Last updated: {updatedAt}</p>
+          <h1 className="text-4xl md:text-5xl font-black tracking-tighter">{title}</h1>
+          <p className="text-slate-400 text-sm">Last updated: {updatedAt}</p>
         </div>
 
-        <div className="mt-10 rounded-[36px] border border-white/5 bg-white/[0.02] p-8 md:p-12">{children}</div>
+        <div className="glass-card p-8 md:p-12 space-y-8 border-white/5 bg-white/[0.01] mt-10">
+          {children}
+        </div>
 
         <div className="mt-10">
-          <Link href="/en" className="inline-flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-white">
-            <ArrowLeft size={16} />
-            Back to English home
+          <Link href="/en" className="inline-flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-white transition-colors">
+            <ArrowLeft size={16} /> Back to English home
           </Link>
         </div>
       </main>
@@ -382,24 +735,78 @@ function LegalShell({
 export function EnglishPrivacyPage() {
   return (
     <LegalShell icon={Shield} eyebrow="Privacy Policy" title="Privacy Policy" updatedAt="January 27, 2026">
-      <div className="space-y-8 text-sm leading-7 text-slate-300">
-        <section>
-          <h2 className="text-xl font-black text-white">1. What we collect</h2>
-          <p className="mt-3">We only collect the information required to provide the service: account identity, watchlist preferences, notification settings, and billing state handled through Stripe.</p>
-        </section>
-        <section>
-          <h2 className="text-xl font-black text-white">2. How we use it</h2>
-          <p className="mt-3">The data is used to maintain your account, personalize research delivery, support subscription flows, and improve system reliability.</p>
-        </section>
-        <section>
-          <h2 className="text-xl font-black text-white">3. Payment boundary</h2>
-          <p className="mt-3">ZISO AI does not store raw card details. Payment processing is handled through Stripe.</p>
-        </section>
-        <section>
-          <h2 className="text-xl font-black text-white">4. Contact</h2>
-          <p className="mt-3">For privacy-related questions, contact <span className="font-black text-indigo-300">support@ziso.cc</span>.</p>
-        </section>
-      </div>
+      <section className="space-y-4">
+        <h2 className="text-xl font-bold text-white">1. Information we collect</h2>
+        <p className="text-slate-400 leading-relaxed text-sm">
+          We only collect the information required to operate the service:
+        </p>
+        <ul className="list-disc list-inside ml-2 space-y-2 text-sm text-slate-400 leading-relaxed">
+          <li>Account identity, including the email you use to register and sign in.</li>
+          <li>Preference data such as your watchlist, notification choices, and product settings.</li>
+          <li>Billing state needed to determine subscription access and support entitlement.</li>
+        </ul>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-xl font-bold text-white">2. How we use it</h2>
+        <p className="text-slate-400 leading-relaxed text-sm">
+          The data is used to maintain your account, personalize research delivery, support subscription flows, and
+          improve reliability across the product.
+        </p>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-xl font-bold text-white">3. Payment boundary</h2>
+        <p className="text-slate-400 leading-relaxed text-sm">
+          Payment processing is handled through Stripe. ZISO AI does not store raw card details.
+        </p>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-xl font-bold text-white">4. Security</h2>
+        <p className="text-slate-400 leading-relaxed text-sm">
+          We apply industry-standard controls to protect user data, but no internet transmission can be guaranteed to be
+          completely risk-free.
+        </p>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-xl font-bold text-white">5. Cookies and session state</h2>
+        <p className="text-slate-400 leading-relaxed text-sm">
+          We use necessary cookies and session storage only to maintain sign-in state, basic product continuity, and
+          operational website performance.
+        </p>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-xl font-bold text-white">6. Contact</h2>
+        <p className="text-slate-400 leading-relaxed text-sm">
+          For privacy-related questions, contact <span className="text-indigo-300 font-bold">support@ziso.cc</span>.
+        </p>
+      </section>
+
+      <section className="pt-6 opacity-30 hover:opacity-100 transition-opacity">
+        <div className="flex flex-col md:flex-row gap-6 mb-6">
+          <div className="flex-1 text-left">
+            <GeoSummary
+              summary={[
+                'ZISO AI collects only the operational data required to run accounts, watchlists, billing, and notification settings.',
+                'Stripe handles raw payment processing, while ZISO AI avoids storing sensitive card information.',
+                'The privacy boundary is centered on service delivery rather than behavioral data resale.',
+              ]}
+            />
+          </div>
+          <div className="flex-1 text-left">
+            <SourceBlock
+              sources={[
+                ...brandCoreZhCN.defaultSources,
+                { name: 'Privacy Compliance', url: 'https://ziso.cc/privacy', accessedAt: '2026-03-13' },
+              ]}
+            />
+          </div>
+        </div>
+        <BoundaryNotice text={brandCoreZhCN.boundaryNotice.text} />
+      </section>
     </LegalShell>
   );
 }
@@ -407,24 +814,83 @@ export function EnglishPrivacyPage() {
 export function EnglishTermsPage() {
   return (
     <LegalShell icon={FileText} eyebrow="Terms of Service" title="Terms of Service" updatedAt="January 27, 2026">
-      <div className="space-y-8 text-sm leading-7 text-slate-300">
-        <section>
-          <h2 className="text-xl font-black text-white">1. Service scope</h2>
-          <p className="mt-3">ZISO AI provides AI-assisted market analysis, briefings, and research workflows. It does not provide individualized investment advice.</p>
-        </section>
-        <section>
-          <h2 className="text-xl font-black text-white">2. User responsibility</h2>
-          <p className="mt-3">You remain fully responsible for your own trading decisions, account activity, and any market actions taken based on the service.</p>
-        </section>
-        <section>
-          <h2 className="text-xl font-black text-white">3. Subscription</h2>
-          <p className="mt-3">Paid plans renew automatically unless canceled before the billing cycle ends, subject to the applicable billing provider terms.</p>
-        </section>
-        <section>
-          <h2 className="text-xl font-black text-white">4. Liability boundary</h2>
-          <p className="mt-3">To the maximum extent permitted by law, ZISO AI is not liable for profits or losses resulting from trades made using the service content.</p>
-        </section>
+      <div className="glass-card p-6 border-amber-500/20 bg-amber-500/[0.02] flex gap-4 items-start">
+        <ShieldCheck className="text-amber-400 shrink-0 mt-1" size={20} />
+        <div className="text-sm text-amber-100/80 leading-relaxed font-medium">
+          ZISO AI provides AI-assisted analysis and research content for informational purposes only. Nothing on the site
+          constitutes investment advice, legal advice, or a guarantee of outcome.
+        </div>
       </div>
+
+      <section className="space-y-4">
+        <h2 className="text-xl font-bold text-white">1. Service scope</h2>
+        <p className="text-slate-400 leading-relaxed text-sm">
+          ZISO AI provides AI-assisted market analysis, briefings, and research workflows. It does not provide
+          individualized investment advice.
+        </p>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-xl font-bold text-white">2. User responsibility</h2>
+        <p className="text-slate-400 leading-relaxed text-sm">
+          You remain fully responsible for your own trading decisions, account activity, and any market actions taken
+          based on the service.
+        </p>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-xl font-bold text-white">3. Subscription</h2>
+        <p className="text-slate-400 leading-relaxed text-sm">
+          Paid plans renew automatically unless canceled before the billing cycle ends, subject to the applicable billing
+          provider terms.
+        </p>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-xl font-bold text-white">4. Prohibited use</h2>
+        <p className="text-slate-400 leading-relaxed text-sm">
+          You may not scrape the service, misuse the data for illegal securities activity, or attempt to reverse engineer
+          protected parts of the system.
+        </p>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-xl font-bold text-white">5. Liability boundary</h2>
+        <p className="text-slate-400 leading-relaxed text-sm">
+          To the maximum extent permitted by law, ZISO AI is not liable for profits or losses resulting from trades made
+          using the service content.
+        </p>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-xl font-bold text-white">6. Contact</h2>
+        <p className="text-slate-400 leading-relaxed text-sm">
+          For legal and terms-related questions, contact <span className="text-indigo-300 font-bold">support@ziso.cc</span>.
+        </p>
+      </section>
+
+      <section className="pt-6 opacity-30 hover:opacity-100 transition-opacity">
+        <div className="flex flex-col md:flex-row gap-6 mb-6">
+          <div className="flex-1 text-left">
+            <GeoSummary
+              summary={[
+                'ZISO AI provides AI-assisted market analysis for informational and research-support purposes only.',
+                'Users remain fully responsible for trading decisions and the legal consequences of market actions.',
+                'The service emphasizes transparent analysis boundaries rather than individualized investment advice.',
+              ]}
+            />
+          </div>
+          <div className="flex-1 text-left">
+            <SourceBlock
+              sources={[
+                ...brandCoreZhCN.defaultSources,
+                { name: 'Legal & Terms', url: 'https://ziso.cc/terms', accessedAt: '2026-03-13' },
+              ]}
+            />
+          </div>
+        </div>
+        <BoundaryNotice text={brandCoreZhCN.boundaryNotice.text} />
+      </section>
     </LegalShell>
   );
 }
@@ -432,20 +898,72 @@ export function EnglishTermsPage() {
 export function EnglishRefundPage() {
   return (
     <LegalShell icon={RefreshCcw} eyebrow="Refund Policy" title="Refund Policy" updatedAt="January 27, 2026">
-      <div className="space-y-8 text-sm leading-7 text-slate-300">
-        <section>
-          <h2 className="text-xl font-black text-white">1. Cooling-off window</h2>
-          <p className="mt-3">First-time Pro subscribers may request a full refund within 48 hours of the initial purchase if the service is not a fit.</p>
-        </section>
-        <section>
-          <h2 className="text-xl font-black text-white">2. How to request</h2>
-          <p className="mt-3">Email <span className="font-black text-indigo-300">support@ziso.cc</span> with the subject line <span className="font-black text-white">[Refund Request]</span> plus your account email.</p>
-        </section>
-        <section>
-          <h2 className="text-xl font-black text-white">3. Processing time</h2>
-          <p className="mt-3">Approved refunds are returned through Stripe to the original payment method. Banking timelines vary by provider.</p>
-        </section>
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="glass-card p-6 border-indigo-500/20 bg-indigo-500/[0.05] space-y-3">
+          <PartyPopper className="text-indigo-300" size={24} />
+          <h3 className="font-bold text-white">48-hour cooling-off window</h3>
+          <p className="text-slate-400 text-xs leading-relaxed">First-time Pro subscribers may request a full refund within 48 hours of the initial purchase if the service is not a fit.</p>
+        </div>
+        <div className="glass-card p-6 border-white/5 bg-white/[0.02] space-y-3">
+          <RefreshCcw className="text-slate-400" size={24} />
+          <h3 className="font-bold text-white">Cancel anytime</h3>
+          <p className="text-slate-400 text-xs leading-relaxed">You may cancel renewal at any time. Access remains active until the end of the current billing period.</p>
+        </div>
       </div>
+
+      <section className="space-y-4">
+        <h2 className="text-xl font-bold text-white">1. Eligibility</h2>
+        <p className="text-slate-400 leading-relaxed text-sm">
+          The full refund guarantee applies only to first-time subscribers and only when the request is submitted within
+          48 hours of purchase.
+        </p>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-xl font-bold text-white">2. How to request</h2>
+        <p className="text-slate-400 leading-relaxed text-sm">
+          Email <span className="text-indigo-300 font-bold">support@ziso.cc</span> with the subject line
+          <span className="text-white font-bold"> [Refund Request]</span> plus your account email.
+        </p>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-xl font-bold text-white">3. Processing time</h2>
+        <p className="text-slate-400 leading-relaxed text-sm">
+          Approved refunds are returned through Stripe to the original payment method. Final arrival time depends on the
+          banking provider.
+        </p>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-xl font-bold text-white">4. Exceptions</h2>
+        <p className="text-slate-400 leading-relaxed text-sm">
+          Accounts suspended for abuse or misuse of the service are not eligible for refunds.
+        </p>
+      </section>
+
+      <section className="pt-6 opacity-30 hover:opacity-100 transition-opacity">
+        <div className="flex flex-col md:flex-row gap-6 mb-6">
+          <div className="flex-1 text-left">
+            <GeoSummary
+              summary={[
+                'ZISO AI offers a 48-hour refund window for first-time Pro subscribers only.',
+                'Approved refunds are processed back through Stripe to the original payment method.',
+                'Refund policy does not apply to accounts suspended for abuse or misuse of the service.',
+              ]}
+            />
+          </div>
+          <div className="flex-1 text-left">
+            <SourceBlock
+              sources={[
+                ...brandCoreZhCN.defaultSources,
+                { name: 'Refund Policy', url: 'https://ziso.cc/refund', accessedAt: '2026-03-13' },
+              ]}
+            />
+          </div>
+        </div>
+        <BoundaryNotice text={brandCoreZhCN.boundaryNotice.text} />
+      </section>
     </LegalShell>
   );
 }
