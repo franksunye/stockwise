@@ -12,6 +12,7 @@ const TRADING_REFRESH_INTERVAL = 5 * 60 * 1000;   // 5分钟
 const DEFAULT_REFRESH_INTERVAL = 10 * 60 * 1000;  // 10分钟
 const CACHE_KEY = 'stockwise_dashboard_cache_v1';
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24小时过期
+const RESUME_REFRESH_THRESHOLD = 30 * 1000; // iOS PWA 回前台后 30s 以上即尝试刷新
 
 function getRefreshInterval(): number {
     const scene = getMarketScene();
@@ -118,7 +119,11 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
             const url = `/api/stock/batch?symbols=${symbols}&historyLimit=15${!silent ? `&t=${Date.now()}` : ''}`;
 
             const batchRes = await fetch(url, {
-                signal: controller.signal
+                signal: controller.signal,
+                cache: 'no-store',
+                headers: {
+                    'Cache-Control': 'no-cache'
+                }
             });
             clearTimeout(timeoutId);
 
@@ -217,32 +222,30 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
 
     // 页面可见性检测：当用户切回页面时刷新数据
     useEffect(() => {
-        const handleVisibilityChange = () => {
-            if (document.visibilityState === 'visible') {
-                // 页面变为可见时，检查是否需要刷新
-                const timeSinceLastFetch = Date.now() - lastFetchTimeRef.current;
-                // 如果距离上次刷新超过2分钟，静默刷新
-                if (timeSinceLastFetch > 2 * 60 * 1000) {
-                    loadAllData(true);
-                }
-            }
-        };
-
-        document.addEventListener('visibilitychange', handleVisibilityChange);
-        return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-    }, [loadAllData]);
-
-    // 窗口获得焦点时刷新（处理从其他应用切回的情况）
-    useEffect(() => {
-        const handleFocus = () => {
+        const refreshOnResume = () => {
             const timeSinceLastFetch = Date.now() - lastFetchTimeRef.current;
-            if (timeSinceLastFetch > 2 * 60 * 1000) {
+            if (timeSinceLastFetch > RESUME_REFRESH_THRESHOLD) {
                 loadAllData(true);
             }
         };
 
-        window.addEventListener('focus', handleFocus);
-        return () => window.removeEventListener('focus', handleFocus);
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible') {
+                refreshOnResume();
+            }
+        };
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        window.addEventListener('focus', refreshOnResume);
+        window.addEventListener('pageshow', refreshOnResume);
+        window.addEventListener('online', refreshOnResume);
+
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+            window.removeEventListener('focus', refreshOnResume);
+            window.removeEventListener('pageshow', refreshOnResume);
+            window.removeEventListener('online', refreshOnResume);
+        };
     }, [loadAllData]);
 
     // 定时刷新

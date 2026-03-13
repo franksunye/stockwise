@@ -336,7 +336,7 @@ export async function GET(request: Request) {
             tier: userTier,
             queryTime: Date.now() - startTime
         });
-        response.headers.set('Cache-Control', 'private, max-age=60, stale-while-revalidate=30');
+        response.headers.set('Cache-Control', 'private, no-store, max-age=0, must-revalidate');
         response.headers.set('Vary', 'Cookie');
         return response;
     } catch (error) {
