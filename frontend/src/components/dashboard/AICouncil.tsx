@@ -438,9 +438,6 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
 
       {/* Model List */}
       <div className="space-y-3">
-        <p className="px-1 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-600">
-          协同观点基于量化模型底座生成，独立判断保留分析师原始观点
-        </p>
         {councilCards.map((card) => {
            const actionMeta = getCouncilActionMeta(card.actionKey);
            const chipClass = getActionChipClass(card.actionKey);
@@ -484,6 +481,9 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
              </div>
            );
         })}
+        <p className="px-1 pt-1 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-600">
+          协同观点基于量化模型底座生成，独立判断保留分析师原始观点
+        </p>
       </div>
     </div>
   );
