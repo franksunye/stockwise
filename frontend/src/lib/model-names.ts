@@ -5,7 +5,7 @@ export function formatModelName(modelName: string | undefined | null): string {
 
     // DeepSeek
     if (lower.includes('deepseek')) {
-        return 'DeepSeek V3'; // Assuming V3 is the current standard, or just 'DeepSeek'
+        return 'DeepSeek';
     }
 
     // Gemini

@@ -294,6 +294,7 @@ export function TacticalBriefDrawer({
   const modelFact = sourceKind === 'llm'
     ? (model ? formatModelName(model) : 'LLM 深度推理版')
     : '量化规则引擎';
+  const sourceFact = `${modelFact} 生成`;
   
   const rawGeneral = data?.tactics?.general;
   const generalTactics = Array.isArray(rawGeneral) ? rawGeneral : (rawGeneral ? [rawGeneral] : []);
@@ -481,7 +482,7 @@ export function TacticalBriefDrawer({
                             {analystProfile.name} · {analystProfile.role}
                           </p>
                           <p className={`text-xs leading-tight mt-0.5 ${sourceKind === 'llm' ? 'text-indigo-300/80' : 'text-slate-400'}`}>
-                            使用模型：{modelFact}
+                            {sourceFact}
                           </p>
                       </div>
                   </div>
