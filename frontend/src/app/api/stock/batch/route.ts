@@ -17,7 +17,7 @@ import {
 } from '@/lib/prediction-display';
 
 export const dynamic = 'force-dynamic';
-const DASHBOARD_PREDICTION_LOOKBACK_DAYS = 45;
+const DASHBOARD_PREDICTION_LOOKBACK_DAYS = 10;
 
 const SAFE_LLM_SIGNAL_SQL = `
     COALESCE(
