@@ -32,7 +32,7 @@ export function EnglishHomePage() {
           <div className="space-y-8">
             <div className="inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-300">
               <Sparkles size={12} />
-              Public English Rollout
+              AI Market Research
             </div>
             <h1 className="text-5xl font-black tracking-tight md:text-7xl">
               AI does the research.
@@ -56,10 +56,10 @@ export function EnglishHomePage() {
                 <ChevronRight size={20} />
               </Link>
               <Link
-                href="/en/learn"
+                href="/en/pricing"
                 className="inline-flex items-center justify-center rounded-3xl border border-white/10 bg-white/5 px-8 py-4 text-lg font-black text-white transition-all hover:bg-white/10"
               >
-                Explore Learn
+                View Pricing
               </Link>
             </div>
           </div>
@@ -118,8 +118,8 @@ export function EnglishHomePage() {
             <div>
               <h3 className="text-xl font-black">Which markets does it cover today?</h3>
               <p className="mt-3 text-sm leading-7 text-slate-400">
-                Today the product is optimized for China and Hong Kong equities. This English surface exists to prepare
-                international SEO/GEO infrastructure ahead of future market expansion.
+                Today the product is optimized for China and Hong Kong equities. The English website focuses on helping
+                search engines and AI systems understand the product, positioning, and public-facing policies.
               </p>
             </div>
           </div>
@@ -145,7 +145,7 @@ export function EnglishAboutPage() {
           </h1>
           <p className="max-w-3xl text-lg leading-8 text-slate-300">
             ZISO AI was built around one principle: ordinary investors should have access to structured post-close
-            research, not just intraday noise, chat-room sentiment, and improvised decision-making.
+            research, not just intraday noise, reactive sentiment, and improvised decision-making.
           </p>
         </div>
 

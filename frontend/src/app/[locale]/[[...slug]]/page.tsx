@@ -29,7 +29,7 @@ function getStaticPreviewConfig(slugParts: string[]): PreviewConfig | null {
 
   const staticConfig: Record<string, PreviewConfig> = {
     '': {
-      title: 'ZISO AI English Preview',
+      title: 'ZISO AI | AI Does the Research. You Keep the Decision.',
       description: 'Structured market research, tactical briefings, and execution discipline for serious retail investors.',
       canonicalPath: '/',
       alternateLocales: ['zh', 'en'],
