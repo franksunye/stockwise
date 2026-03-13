@@ -75,6 +75,7 @@ This directory serves as the unified single source of truth for the 知守 AI (Z
   - [投研决议逻辑 (Investment Decision)](./5_Support_Ops/content/ai-council-logic.md)
   - [策略内参指南 (Tactical Brief)](./5_Support_Ops/content/tactical-brief-guide.md)
   - [四态语义释义 (Four States)](./5_Support_Ops/content/four-states-semantics.md)
+  - [四态语义验证规则 (Validation Rules)](./5_Support_Ops/content/four-state-validation-rules.md)
   - [双轨制架构说明 (Dual-Lane)](./5_Support_Ops/content/dual-lane-architecture.md)
   - [投资模式配置 (Investment Mode)](./5_Support_Ops/content/investment-mode-config.md)
 
