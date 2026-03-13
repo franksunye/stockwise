@@ -710,16 +710,17 @@ export function EnglishPricingPage() {
       <main className="relative z-10 max-w-7xl mx-auto px-8 pt-12 pb-40">
         <div className="text-center space-y-4 mb-20">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[10px] font-black uppercase tracking-[0.2em] mb-4">
-            Research-first subscription
+            Know the visible. Guard the hidden.
           </div>
           <h1 className="text-4xl md:text-6xl font-black tracking-tighter leading-tight">
-            Hire a research workflow,
+            Appoint your own
             <br />
-            <span className="bg-gradient-to-r from-indigo-400 to-cyan-300 bg-clip-text text-transparent">not just another app.</span>
+            <span className="bg-gradient-to-r from-indigo-400 to-cyan-300 bg-clip-text text-transparent">ZISO research council.</span>
           </h1>
           <p className="text-lg text-slate-400 font-medium max-w-3xl mx-auto leading-relaxed mt-6">
-            The subscription pays for research depth, coverage, and execution discipline. It is designed for investors
-            who want a stable nightly routine instead of reactive decision-making.
+            A subscription here is not just buying features. It is closer to hiring a round-the-clock research council.
+            The product is designed to reduce emotional interference, strengthen your nightly review habit, and make
+            decision-making calmer, cleaner, and more consistent.
           </p>
         </div>
 
@@ -848,16 +849,16 @@ export function EnglishPricingPage() {
           <h2 className="text-3xl font-black tracking-tighter mb-12">Why ZISO AI?</h2>
           <div className="grid md:grid-cols-3 gap-8">
             <div className="p-6">
-              <h4 className="text-white font-bold mb-3">Market-native research lens</h4>
-              <p className="text-slate-500 text-sm font-medium">Built around China and Hong Kong market structure instead of generic “global finance” abstraction.</p>
+              <h4 className="text-white font-bold mb-3">Knows equities better than generic AI</h4>
+              <p className="text-slate-500 text-sm font-medium">The workflow is tuned for China and Hong Kong equity logic instead of broad, generic finance prompts.</p>
             </div>
             <div className="p-6">
-              <h4 className="text-white font-bold mb-3">Readable execution language</h4>
-              <p className="text-slate-500 text-sm font-medium">The product is designed to explain what matters, what invalidates, and what to do next without drowning users in jargon.</p>
+              <h4 className="text-white font-bold mb-3">Explains narrative, not just numbers</h4>
+              <p className="text-slate-500 text-sm font-medium">The product does not dump cold indicators. It translates price behavior into reasoning that ordinary investors can actually follow.</p>
             </div>
             <div className="p-6">
-              <h4 className="text-white font-bold mb-3">Research-first discipline</h4>
-              <p className="text-slate-500 text-sm font-medium">The workflow is structured to improve consistency, not to stimulate more impulsive trading.</p>
+              <h4 className="text-white font-bold mb-3">Aggressive value for depth delivered</h4>
+              <p className="text-slate-500 text-sm font-medium">The pricing is intentionally kept far below traditional research terminals so disciplined retail investors can actually use it daily.</p>
             </div>
           </div>
         </section>
@@ -953,48 +954,40 @@ export function EnglishPrivacyPage() {
       <section className="space-y-4">
         <h2 className="text-xl font-bold text-white">1. Information we collect</h2>
         <p className="text-slate-400 leading-relaxed text-sm">
-          We only collect the information required to operate the service:
+          We only collect the information required to provide the service:
         </p>
         <ul className="list-disc list-inside ml-2 space-y-2 text-sm text-slate-400 leading-relaxed">
-          <li>Account identity, including the email you use to register and sign in.</li>
-          <li>Preference data such as your watchlist, notification choices, and product settings.</li>
-          <li>Billing state needed to determine subscription access and support entitlement.</li>
+          <li>Account information, including the email address used to register and sign in.</li>
+          <li>Preference settings such as your watchlist and notification choices.</li>
+          <li>Payment state needed for subscription access. Stripe handles the payment transaction itself, and ZISO AI does not store raw card numbers or card security codes.</li>
         </ul>
       </section>
 
       <section className="space-y-4">
         <h2 className="text-xl font-bold text-white">2. How we use it</h2>
         <p className="text-slate-400 leading-relaxed text-sm">
-          The data is used to maintain your account, personalize research delivery, support subscription flows, and
-          improve reliability across the product.
+          The information is used to maintain your account, deliver personalized research briefs, provide customer
+          support, and improve product reliability. We do not sell or rent your personal data to third parties.
         </p>
       </section>
 
       <section className="space-y-4">
-        <h2 className="text-xl font-bold text-white">3. Payment boundary</h2>
+        <h2 className="text-xl font-bold text-white">3. Data security</h2>
         <p className="text-slate-400 leading-relaxed text-sm">
-          Payment processing is handled through Stripe. ZISO AI does not store raw card details.
+          We apply industry-standard encryption and security controls to protect user data. No internet transmission can
+          be guaranteed to be completely risk-free, so users should also safeguard their own login credentials.
         </p>
       </section>
 
       <section className="space-y-4">
-        <h2 className="text-xl font-bold text-white">4. Security</h2>
+        <h2 className="text-xl font-bold text-white">4. Cookies and session state</h2>
         <p className="text-slate-400 leading-relaxed text-sm">
-          We apply industry-standard controls to protect user data, but no internet transmission can be guaranteed to be
-          completely risk-free.
+          We use necessary cookies and session storage to maintain sign-in state and basic website performance.
         </p>
       </section>
 
       <section className="space-y-4">
-        <h2 className="text-xl font-bold text-white">5. Cookies and session state</h2>
-        <p className="text-slate-400 leading-relaxed text-sm">
-          We use necessary cookies and session storage only to maintain sign-in state, basic product continuity, and
-          operational website performance.
-        </p>
-      </section>
-
-      <section className="space-y-4">
-        <h2 className="text-xl font-bold text-white">6. Contact</h2>
+        <h2 className="text-xl font-bold text-white">5. Contact</h2>
         <p className="text-slate-400 leading-relaxed text-sm">
           For privacy-related questions, contact <span className="text-indigo-300 font-bold">support@ziso.cc</span>.
         </p>
@@ -1034,40 +1027,41 @@ export function EnglishTermsPage() {
       <div className="glass-card p-6 border-amber-500/20 bg-amber-500/[0.02] flex gap-4 items-start">
         <ShieldCheck className="text-amber-400 shrink-0 mt-1" size={20} />
         <div className="text-sm text-amber-100/80 leading-relaxed font-medium">
-          ZISO AI provides AI-assisted analysis and research content for informational purposes only. Nothing on the site
-          constitutes investment advice, legal advice, or a guarantee of outcome.
+          Important notice: all forecasts, analysis, and reports provided by ZISO AI are generated with AI assistance
+          for informational and technical reference only. Nothing on this site constitutes investment advice, financial
+          advice, or legal advice. Market risk remains your own responsibility.
         </div>
       </div>
 
       <section className="space-y-4">
         <h2 className="text-xl font-bold text-white">1. Service scope</h2>
         <p className="text-slate-400 leading-relaxed text-sm">
-          ZISO AI provides AI-assisted market analysis, briefings, and research workflows. It does not provide
-          individualized investment advice.
+          ZISO AI provides AI-assisted market analysis, briefing summaries, and alert workflows. Users acknowledge the
+          limitations of AI-generated content and the uncertainty inherent in market forecasts.
         </p>
       </section>
 
       <section className="space-y-4">
         <h2 className="text-xl font-bold text-white">2. User responsibility</h2>
         <p className="text-slate-400 leading-relaxed text-sm">
-          You remain fully responsible for your own trading decisions, account activity, and any market actions taken
-          based on the service.
+          You are responsible for activity conducted through your account. If you discover unauthorized use, you should
+          notify us promptly.
         </p>
       </section>
 
       <section className="space-y-4">
         <h2 className="text-xl font-bold text-white">3. Subscription</h2>
         <p className="text-slate-400 leading-relaxed text-sm">
-          Paid plans renew automatically unless canceled before the billing cycle ends, subject to the applicable billing
-          provider terms.
+          Pro access is subscription-based. Unless canceled before the billing cycle ends, the subscription renews
+          automatically in accordance with the applicable payment provider terms.
         </p>
       </section>
 
       <section className="space-y-4">
         <h2 className="text-xl font-bold text-white">4. Prohibited use</h2>
         <p className="text-slate-400 leading-relaxed text-sm">
-          You may not scrape the service, misuse the data for illegal securities activity, or attempt to reverse engineer
-          protected parts of the system.
+          You may not scrape the service, misuse platform information for unlawful securities activity, or engage in
+          insider trading or other prohibited conduct using the site.
         </p>
       </section>
 
@@ -1141,8 +1135,9 @@ export function EnglishRefundPage() {
       <section className="space-y-4">
         <h2 className="text-xl font-bold text-white">2. How to request</h2>
         <p className="text-slate-400 leading-relaxed text-sm">
-          Email <span className="text-indigo-300 font-bold">support@ziso.cc</span> with the subject line
-          <span className="text-white font-bold"> [Refund Request]</span> plus your account email.
+          To request a refund, email <span className="text-indigo-300 font-bold">support@ziso.cc</span> with the subject line
+          <span className="text-white font-bold"> [Refund Request]</span> and include your account email. Requests are
+          typically processed within 1 to 3 business days.
         </p>
       </section>
 
@@ -1150,7 +1145,7 @@ export function EnglishRefundPage() {
         <h2 className="text-xl font-bold text-white">3. Processing time</h2>
         <p className="text-slate-400 leading-relaxed text-sm">
           Approved refunds are returned through Stripe to the original payment method. Final arrival time depends on the
-          banking provider.
+          banking provider and usually takes several business days.
         </p>
       </section>
 
