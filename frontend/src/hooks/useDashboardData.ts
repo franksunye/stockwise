@@ -167,7 +167,7 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
             // Step 2: 拿着 watchlist 去 CDN 拉取公共数据 (公有API)
             const symbols = effectiveWatchlist.map(w => w.symbol).join(',');
             // 如果是非静默刷新（手动点击或初始化），增加一个 cache-buster 扰动缓存
-            const url = `/api/stock/batch?symbols=${symbols}&historyLimit=15${!silent ? `&t=${Date.now()}` : ''}`;
+            const url = `/api/stock/batch?symbols=${symbols}&historyLimit=5${!silent ? `&t=${Date.now()}` : ''}`;
 
             const fetchOptions: RequestInit = {
                 signal: controller.signal,
