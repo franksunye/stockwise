@@ -496,7 +496,7 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
                                                 <div className="text-sm font-black italic tracking-tighter text-emerald-400">
                                                     {formatPercent(summary?.metrics?.hit_rate ?? null)}
                                                 </div>
-                                                <div className="mt-1 text-[9px] font-bold uppercase tracking-widest text-slate-500">胜率</div>
+                                                <div className="mt-1 text-[9px] font-bold uppercase tracking-widest text-slate-500">通过率</div>
                                             </div>
                                             <div className="rounded-xl border border-white/5 bg-black/40 px-3 py-3 text-center">
                                                 <div className={`text-sm font-black italic tracking-tighter ${insufficient ? 'text-slate-600' : 'text-rose-500'}`}>

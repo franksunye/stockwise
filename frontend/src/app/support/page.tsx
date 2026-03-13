@@ -44,7 +44,7 @@ const SUPPORT_SECTIONS = [
       { q: 'AI 智囊团：群体决策机制', slug: 'ai-council-logic' },
       { q: '战术简报解读 (Tactical Brief)', slug: 'tactical-brief-guide' },
       { q: '关键价位图解 (Key Levels)', slug: 'key-levels-mapping' },
-      { q: '胜率历史矩阵 (Win-Rate)', slug: 'history-matrix-viz' },
+      { q: '回看历史矩阵 (Review Matrix)', slug: 'history-matrix-viz' },
       { q: '智能上下文提取机制', slug: 'context-extraction' },
       { q: '失败回溯审计 (Failure Audit)', slug: 'failure-retrospective' }
     ]

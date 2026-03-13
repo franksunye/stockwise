@@ -94,7 +94,7 @@ DAILY_TASK_PLAN_TEMPLATE = [
     },
     {
         "name": "validation",
-        "display_name": "预测准确性验证与战报",
+        "display_name": "历史回看验证与战报",
         "agent_id": "validation_auditor",
         "type": "maintenance",
         "expected_start": "16:45",

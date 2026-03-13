@@ -153,7 +153,7 @@ export default async function LandingPage() {
               {[
                 "多周期趋势共振捕捉 (MA/RSI/MACD)",
                 "量价异动深度溯源",
-                "基于历史胜率的置信度评分"
+                "基于历史表现的置信度评分"
               ].map((item, i) => (
                 <li key={i} className="flex items-center gap-3 text-sm font-bold text-slate-300">
                   <div className="w-5 h-5 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-500">
@@ -310,11 +310,11 @@ export default async function LandingPage() {
             </div>
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent text-left">
               <p className="text-white font-bold mb-3 uppercase tracking-tighter">AI 的判断准吗？</p>
-              <p className="text-slate-400 text-sm leading-relaxed">AI 复盘的结果支持全量核销。我们不仅替你做功课，更对每一笔“功课”的质量负责。历史预测的胜率在个股档案中公开透明。</p>
+              <p className="text-slate-400 text-sm leading-relaxed">AI 复盘的结果支持全量核销。我们不仅替你做功课，更对每一笔“功课”的质量负责。历史判断的回看结果会在个股档案中公开透明。</p>
             </div>
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent text-left">
               <p className="text-white font-bold mb-3 uppercase tracking-tighter">为什么要设定 75% 门槛？</p>
-              <p className="text-slate-400 text-sm leading-relaxed">胜率不足 70% 的博弈在数学上是长期负期望的。知其白而守其黑，守住本金是我们对普通用户最大的价值。</p>
+              <p className="text-slate-400 text-sm leading-relaxed">如果历史回看长期站不住，任何激进判断都不值得贸然执行。知其白而守其黑，守住本金是我们对普通用户最大的价值。</p>
             </div>
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent text-left">
               <p className="text-white font-bold mb-3 uppercase tracking-tighter">支持所有股票吗？</p>
@@ -352,7 +352,7 @@ export default async function LandingPage() {
               <GeoSummary
                 summary={[
                   "知守 AI 聚焦盘后复盘与次日策略，降低情绪化交易干扰。",
-                  "核心机制包括战术简报、胜率追踪、关键价位与风险提示。",
+                  "核心机制包括战术简报、回看追踪、关键价位与风险提示。",
                   "分析结果可回看、可追溯，强调过程透明而非收益承诺。",
                 ]}
               />

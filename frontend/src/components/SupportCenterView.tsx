@@ -35,7 +35,7 @@ const SECTIONS = [
       { q: '投研决议：多维度共识', slug: 'ai-council-logic' },
       { q: '策略内参解读 (Tactical Brief)', slug: 'tactical-brief-guide' },
       { q: '关键价位图解 (Key Levels)', slug: 'key-levels-mapping' },
-      { q: '胜率历史矩阵 (Win-Rate)', slug: 'history-matrix-viz' },
+      { q: '回看历史矩阵 (Review Matrix)', slug: 'history-matrix-viz' },
       { q: '智能上下文提取机制', slug: 'context-extraction' },
       { q: '失败回溯审计 (Failure Audit)', slug: 'failure-retrospective' }
     ]

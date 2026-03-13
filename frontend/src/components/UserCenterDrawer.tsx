@@ -562,7 +562,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                     {[
                                       { key: 'signal_flip', icon: ArrowLeftRight, label: '趋势反转', badge: '重要' },
                                       { key: 'morning_call', icon: Sun, label: '每日早报', badge: '08:30' },
-                                      { key: 'validation_glory', icon: Trophy, label: '验证战报', badge: '胜率' },
+                                      { key: 'validation_glory', icon: Trophy, label: '回看战报', badge: '通过率' },
                                       { key: 'prediction_updated', icon: Zap, label: '预测更新', badge: '分析完成' },
                                       { key: 'daily_brief', icon: FileText, label: tier === 'pro' ? 'Pro 深度复盘' : '简报生成', badge: tier === 'pro' ? '★ 专属' : '17:30', isPro: tier === 'pro' },
                                       { key: 'price_update', icon: Info, label: '实时行情', badge: '盘中推送' },

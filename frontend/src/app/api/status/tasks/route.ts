@@ -159,7 +159,7 @@ const DAILY_PLAN_TEMPLATE: PlanTask[] = [
     },
     {
         name: 'validation',
-        display_name: '预测准确性验证与战报',
+        display_name: '历史回看验证与战报',
         agent_id: 'validation_auditor',
         type: 'maintenance',
         phase: 'post_close',

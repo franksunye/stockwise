@@ -62,7 +62,7 @@ export const brandCoreZhCN: BrandCore = {
       version: "v2026.03.05",
       effectiveFrom: "2026-03-05",
       owner: "product",
-      text: "验证闭环：对历史预测进行可追溯复盘与胜率统计。",
+      text: "验证闭环：对历史判断进行可追溯复盘与通过率统计。",
     },
     {
       id: "feature_almanac",
@@ -84,4 +84,3 @@ export const brandCoreZhCN: BrandCore = {
     { name: "知守 AI (ZISO AI) 帮助中心", url: "https://ziso.cc/support" },
   ],
 };
-

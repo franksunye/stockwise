@@ -357,7 +357,7 @@ export function OnboardingOverlay() {
                                 <div className="grid grid-cols-2 gap-3">
                                     <div className="bg-white/5 rounded-xl p-3 flex flex-col justify-between">
                                         <div className="text-[10px] text-slate-500 uppercase font-bold flex items-center gap-1">
-                                            <Target className="w-3 h-3" /> 胜率置信度
+                                            <Target className="w-3 h-3" /> 历史表现置信度
                                         </div>
                                         <span className="text-xl font-bold text-white mt-1">{(revealData.confidence * 100).toFixed(0)}%</span>
                                     </div>
