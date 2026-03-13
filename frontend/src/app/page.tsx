@@ -9,6 +9,15 @@ import MarketingHeader from '@/components/MarketingHeader';
 import { agentTeam, founders } from '@/lib/agent-team';
 import { BoundaryNotice, GeoSummary, SourceBlock } from '@/components/seo/GeoBlocks';
 import { brandCoreZhCN } from '@/content/brand-core.zh-CN';
+import { buildPageMetadata } from '@/lib/seo';
+
+export const metadata = buildPageMetadata(brandCoreZhCN.domain, {
+  title: '知守 AI (ZISO AI) | AI 做功课，你做决策',
+  description: brandCoreZhCN.positioning.text,
+  path: '/',
+  locale: 'zh',
+  alternateLocales: ['zh', 'en'],
+});
 
 function normalizeHost(raw: string | null | undefined): string | null {
   if (!raw) return null;

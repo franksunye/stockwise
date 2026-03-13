@@ -17,7 +17,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/pricing`, lastModified: updated, changeFrequency: "weekly", priority: 0.8 },
     { url: `${base}/learn`, lastModified: updated, changeFrequency: "daily", priority: 0.9 },
     { url: `${base}/support`, lastModified: updated, changeFrequency: "weekly", priority: 0.8 },
-    { url: `${base}/status`, lastModified: updated, changeFrequency: "hourly", priority: 0.6 },
     { url: `${base}/privacy`, lastModified: updated, changeFrequency: "yearly", priority: 0.3 },
     { url: `${base}/terms`, lastModified: updated, changeFrequency: "yearly", priority: 0.3 },
     { url: `${base}/refund`, lastModified: updated, changeFrequency: "yearly", priority: 0.3 },
@@ -39,4 +38,3 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [...staticRoutes, ...learnRoutes, ...supportRoutes];
 }
-

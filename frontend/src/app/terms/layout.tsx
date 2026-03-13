@@ -6,6 +6,8 @@ export const metadata: Metadata = buildPageMetadata(brandCoreZhCN.domain, {
   title: "服务条款 | 知守 AI (ZISO AI)",
   description: "知守 AI 服务条款与使用规则。",
   path: "/terms",
+  locale: "zh",
+  alternateLocales: ["zh", "en"],
   keywords: ["服务条款", "知守AI", "使用协议"],
 });
 
@@ -16,4 +18,3 @@ export default function TermsLayout({
 }) {
   return children;
 }
-

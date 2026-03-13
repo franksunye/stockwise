@@ -1,7 +1,13 @@
 import fs from 'fs';
 import path from 'path';
+import { DEFAULT_PUBLIC_LOCALE, type PublicLocale } from '@/lib/public-i18n';
 
 const CONTENT_DIR = path.join(process.cwd(), '..', 'docs', '5_Support_Ops', 'content');
+
+interface ContentRequestOptions {
+    locale?: PublicLocale;
+    fallbackToDefault?: boolean;
+}
 
 export interface SupportArticle {
     slug: string;
@@ -10,6 +16,11 @@ export interface SupportArticle {
     lastUpdated: string;
     content: string;
     relatedSlugs?: string[];
+    locale?: PublicLocale;
+    sourceLocale?: PublicLocale;
+    translationStatus?: 'source' | 'translated' | 'fallback';
+    availableLocales?: PublicLocale[];
+    isFallback?: boolean;
 }
 
 function parseFrontmatter(fileContent: string): { meta: Partial<SupportArticle>, content: string } {
@@ -45,16 +56,47 @@ function parseFrontmatter(fileContent: string): { meta: Partial<SupportArticle>,
     };
 }
 
-export function getAllSupportArticles(): SupportArticle[] {
-    if (!fs.existsSync(CONTENT_DIR)) {
+function getContentDirectory(locale: PublicLocale): string | null {
+    const localizedDir = path.join(CONTENT_DIR, locale);
+    if (fs.existsSync(localizedDir)) {
+        return localizedDir;
+    }
+    if (locale === DEFAULT_PUBLIC_LOCALE && fs.existsSync(CONTENT_DIR)) {
+        return CONTENT_DIR;
+    }
+    return null;
+}
+
+function resolveDirectory(options?: ContentRequestOptions): { dir: string | null; sourceLocale: PublicLocale; isFallback: boolean } {
+    const locale = options?.locale || DEFAULT_PUBLIC_LOCALE;
+    const localizedDir = getContentDirectory(locale);
+    if (localizedDir) {
+        return { dir: localizedDir, sourceLocale: locale, isFallback: false };
+    }
+
+    if (options?.fallbackToDefault) {
+        return {
+            dir: getContentDirectory(DEFAULT_PUBLIC_LOCALE),
+            sourceLocale: DEFAULT_PUBLIC_LOCALE,
+            isFallback: locale !== DEFAULT_PUBLIC_LOCALE,
+        };
+    }
+
+    return { dir: null, sourceLocale: locale, isFallback: false };
+}
+
+export function getAllSupportArticles(options?: ContentRequestOptions): SupportArticle[] {
+    const locale = options?.locale || DEFAULT_PUBLIC_LOCALE;
+    const { dir, sourceLocale, isFallback } = resolveDirectory(options);
+    if (!dir || !fs.existsSync(dir)) {
         return [];
     }
 
-    const files = fs.readdirSync(CONTENT_DIR);
+    const files = fs.readdirSync(dir);
     const articles = files
         .filter(file => file.endsWith('.md'))
         .map(file => {
-            const filePath = path.join(CONTENT_DIR, file);
+            const filePath = path.join(dir, file);
             const fileContent = fs.readFileSync(filePath, 'utf-8');
             const { meta, content } = parseFrontmatter(fileContent);
 
@@ -64,6 +106,11 @@ export function getAllSupportArticles(): SupportArticle[] {
                 category: meta.category || 'Uncategorized',
                 lastUpdated: meta.lastUpdated || '',
                 content,
+                locale,
+                sourceLocale,
+                translationStatus: isFallback ? 'fallback' : sourceLocale === DEFAULT_PUBLIC_LOCALE ? 'source' : 'translated',
+                availableLocales: [sourceLocale],
+                isFallback,
             } as SupportArticle;
         })
         .sort((a, b) => (a.slug > b.slug ? 1 : -1));
@@ -71,8 +118,14 @@ export function getAllSupportArticles(): SupportArticle[] {
     return articles;
 }
 
-export function getArticleBySlug(slug: string): SupportArticle | undefined {
-    const filePath = path.join(CONTENT_DIR, `${slug}.md`);
+export function getArticleBySlug(slug: string, options?: ContentRequestOptions): SupportArticle | undefined {
+    const locale = options?.locale || DEFAULT_PUBLIC_LOCALE;
+    const { dir, sourceLocale, isFallback } = resolveDirectory(options);
+    if (!dir) {
+        return undefined;
+    }
+
+    const filePath = path.join(dir, `${slug}.md`);
 
     if (!fs.existsSync(filePath)) {
         return undefined;
@@ -87,5 +140,10 @@ export function getArticleBySlug(slug: string): SupportArticle | undefined {
         category: meta.category || 'Uncategorized',
         lastUpdated: meta.lastUpdated || '',
         content,
+        locale,
+        sourceLocale,
+        translationStatus: isFallback ? 'fallback' : sourceLocale === DEFAULT_PUBLIC_LOCALE ? 'source' : 'translated',
+        availableLocales: [sourceLocale],
+        isFallback,
     } as SupportArticle;
 }

@@ -123,6 +123,8 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
       title: "支持文档未找到 | 知守 AI",
       description: "该支持文档不存在或已下线。",
       path: `/support/${slug}`,
+      locale: 'zh',
+      alternateLocales: ['zh'],
     });
   }
 
@@ -130,6 +132,8 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     title: `${article.title} | 支持中心 | 知守 AI`,
     description: `${article.category} - ${article.title}`,
     path: `/support/${article.slug}`,
+    locale: 'zh',
+    alternateLocales: ['zh'],
     keywords: ["知守AI支持", article.category, article.title],
     type: "article",
   });

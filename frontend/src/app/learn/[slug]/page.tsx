@@ -8,6 +8,7 @@ import MarketingFooter from '@/components/MarketingFooter';
 import { BoundaryNotice, FreshnessBlock, GeoSummary, SourceBlock } from '@/components/seo/GeoBlocks';
 import { brandCoreZhCN } from '@/content/brand-core.zh-CN';
 import { buildArticleJsonLd } from '@/lib/geo';
+import { buildPageMetadata } from '@/lib/seo';
 
 interface CategoryStyle {
   label: string;
@@ -57,12 +58,24 @@ const LEARN_TLDR: Record<string, string[]> = {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const article = await getArticleBySlug(slug);
-  if (!article) return { title: 'Article Not Found' };
+  if (!article) {
+    return buildPageMetadata(brandCoreZhCN.domain, {
+      title: 'Article Not Found | ZISO AI 101',
+      description: 'The requested Learn article does not exist.',
+      path: `/learn/${slug}`,
+      locale: 'zh',
+      alternateLocales: ['zh'],
+    });
+  }
   
-  return {
+  return buildPageMetadata(brandCoreZhCN.domain, {
     title: `${article.title.split(': ')[1] || article.title} | ZISO AI 101 | 知守日课`,
     description: article.subtitle,
-  };
+    path: `/learn/${article.slug}`,
+    locale: 'zh',
+    alternateLocales: ['zh'],
+    type: 'article',
+  });
 }
 
 export async function generateStaticParams() {

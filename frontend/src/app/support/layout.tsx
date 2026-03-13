@@ -6,6 +6,8 @@ export const metadata: Metadata = buildPageMetadata(brandCoreZhCN.domain, {
   title: "支持中心 | 知守 AI (ZISO AI)",
   description: "查看知守 AI 功能说明、通知设置、验证逻辑与常见问题。",
   path: "/support",
+  locale: "zh",
+  alternateLocales: ["zh", "en"],
   keywords: ["知守AI支持中心", "AI复盘说明", "通知设置"],
 });
 
@@ -16,4 +18,3 @@ export default function SupportLayout({
 }) {
   return children;
 }
-

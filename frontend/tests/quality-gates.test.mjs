@@ -183,6 +183,20 @@ async function json(response) {
     }
 }
 
+async function requestWithForwardedHost(pathname, forwardedHost, init = {}) {
+    const headers = new Headers(init.headers || {});
+    headers.set('x-forwarded-host', forwardedHost);
+    return withTimeout(
+        fetch(`${BASE_URL}${pathname}`, {
+            ...init,
+            headers,
+            redirect: 'manual',
+        }),
+        ROUTE_TIMEOUT_MS,
+        `Request timeout: ${pathname} [host=${forwardedHost}]`
+    );
+}
+
 before(async () => {
     if (SHOULD_START_SERVER) {
         await startServer();
@@ -283,6 +297,51 @@ describe('Frontend Smoke Gate', () => {
             const contentType = response.headers.get('content-type') || '';
             assert.ok(contentType.includes('text/html'), `Expected HTML for ${page}`);
         }
+    });
+});
+
+describe('Public i18n/SEO Gate', () => {
+    it('keeps app subdomain protected from locale-prefixed public routes', async () => {
+        const appRootRes = await requestWithForwardedHost('/?__mwdebug=1', 'app.ziso.cc');
+        assert.equal(appRootRes.headers.get('x-ziso-mw-branch'), 'app-root-rewrite-dashboard');
+
+        const appLocaleRes = await requestWithForwardedHost('/en?__mwdebug=1', 'app.ziso.cc');
+        assert.equal(appLocaleRes.status, 307);
+        assert.equal(appLocaleRes.headers.get('x-ziso-mw-branch'), 'app-strip-locale-prefix');
+        assert.ok(appLocaleRes.headers.get('location')?.endsWith('/?__mwdebug=1'));
+    });
+
+    it('serves english public preview pages only on the main domain', async () => {
+        const enRes = await requestWithForwardedHost('/en?__mwdebug=1', 'ziso.cc');
+        assert.equal(enRes.status, 200);
+        assert.equal(enRes.headers.get('x-ziso-mw-branch'), 'main-public-locale');
+        const html = await enRes.text();
+        assert.ok(html.includes('English Preview'));
+        assert.ok(html.includes('noindex,follow') || html.includes('noindex, follow'));
+        assert.ok(html.includes('hrefLang="zh-CN"'));
+        assert.ok(html.includes('hrefLang="x-default"'));
+    });
+
+    it('keeps english fallback article pages noindex and canonicalized to chinese originals', async () => {
+        const res = await requestWithForwardedHost('/en/learn/101-64_eod_vs_intraday', 'ziso.cc');
+        assert.equal(res.status, 200);
+        const html = await res.text();
+        assert.ok(html.includes('English content for this article is not published yet'));
+        assert.ok(html.includes('content="noindex,follow"') || html.includes('content="noindex, follow"'));
+        assert.ok(html.includes('href="https://ziso.cc/learn/101-64_eod_vs_intraday"'));
+    });
+
+    it('keeps locale previews out of the official sitemap', async () => {
+        const sitemapRes = await withTimeout(
+            fetch(`${BASE_URL}/sitemap.xml`),
+            ROUTE_TIMEOUT_MS,
+            'Request timeout: /sitemap.xml'
+        );
+        assert.equal(sitemapRes.status, 200);
+        const body = await sitemapRes.text();
+        assert.ok(body.includes('https://ziso.cc/learn'));
+        assert.ok(!body.includes('/en'));
+        assert.ok(!body.includes('https://ziso.cc/status'));
     });
 });
 

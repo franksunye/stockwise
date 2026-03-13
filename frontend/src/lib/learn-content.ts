@@ -1,9 +1,15 @@
 import fs from 'fs';
 import path from 'path';
+import { DEFAULT_PUBLIC_LOCALE, type PublicLocale } from '@/lib/public-i18n';
 
 // Define the content directory (relative to project root, which is CWD for Node usually, but Next.js runs in frontend)
 // We need to resolve from the frontend directory up to docs
 const CONTENT_DIR = path.join(process.cwd(), '..', 'docs', '4_Growth_Ops', 'content');
+
+interface ContentRequestOptions {
+    locale?: PublicLocale;
+    fallbackToDefault?: boolean;
+}
 
 export interface ArticleMeta {
     slug: string;
@@ -14,6 +20,11 @@ export interface ArticleMeta {
     image?: string;
     image_prompt?: string;
     readingTime: number;
+    locale?: PublicLocale;
+    sourceLocale?: PublicLocale;
+    translationStatus?: 'source' | 'translated' | 'fallback';
+    availableLocales?: PublicLocale[];
+    isFallback?: boolean;
 }
 
 export interface Article extends ArticleMeta {
@@ -58,16 +69,47 @@ function parseFrontmatter(fileContent: string): { meta: Partial<ArticleMeta>, co
     };
 }
 
-export async function getAllArticles(): Promise<ArticleMeta[]> {
-    if (!fs.existsSync(CONTENT_DIR)) {
+function getContentDirectory(locale: PublicLocale): string | null {
+    const localizedDir = path.join(CONTENT_DIR, locale);
+    if (fs.existsSync(localizedDir)) {
+        return localizedDir;
+    }
+    if (locale === DEFAULT_PUBLIC_LOCALE && fs.existsSync(CONTENT_DIR)) {
+        return CONTENT_DIR;
+    }
+    return null;
+}
+
+function resolveDirectory(options?: ContentRequestOptions): { dir: string | null; sourceLocale: PublicLocale; isFallback: boolean } {
+    const locale = options?.locale || DEFAULT_PUBLIC_LOCALE;
+    const localizedDir = getContentDirectory(locale);
+    if (localizedDir) {
+        return { dir: localizedDir, sourceLocale: locale, isFallback: false };
+    }
+
+    if (options?.fallbackToDefault) {
+        return {
+            dir: getContentDirectory(DEFAULT_PUBLIC_LOCALE),
+            sourceLocale: DEFAULT_PUBLIC_LOCALE,
+            isFallback: locale !== DEFAULT_PUBLIC_LOCALE,
+        };
+    }
+
+    return { dir: null, sourceLocale: locale, isFallback: false };
+}
+
+export async function getAllArticles(options?: ContentRequestOptions): Promise<ArticleMeta[]> {
+    const locale = options?.locale || DEFAULT_PUBLIC_LOCALE;
+    const { dir, sourceLocale, isFallback } = resolveDirectory(options);
+    if (!dir || !fs.existsSync(dir)) {
         return [];
     }
 
-    const files = fs.readdirSync(CONTENT_DIR);
+    const files = fs.readdirSync(dir);
     const articles = files
         .filter(file => file.endsWith('.md') && file !== 'STOCKWISE_101_SYLLABUS.md')
         .map(file => {
-            const filePath = path.join(CONTENT_DIR, file);
+            const filePath = path.join(dir, file);
             const fileContent = fs.readFileSync(filePath, 'utf-8');
             const { meta } = parseFrontmatter(fileContent);
 
@@ -83,7 +125,12 @@ export async function getAllArticles(): Promise<ArticleMeta[]> {
                 category: meta.category || 'Uncategorized',
                 image: meta.image,
                 image_prompt: meta.image_prompt,
-                readingTime: Math.max(1, Math.ceil(fileContent.length / 400))
+                readingTime: Math.max(1, Math.ceil(fileContent.length / 400)),
+                locale,
+                sourceLocale,
+                translationStatus: isFallback ? 'fallback' : sourceLocale === DEFAULT_PUBLIC_LOCALE ? 'source' : 'translated',
+                availableLocales: [sourceLocale],
+                isFallback,
             } as ArticleMeta;
         })
         .filter((article): article is ArticleMeta => article !== null)
@@ -92,8 +139,14 @@ export async function getAllArticles(): Promise<ArticleMeta[]> {
     return articles;
 }
 
-export async function getArticleBySlug(slug: string): Promise<Article | null> {
-    const filePath = path.join(CONTENT_DIR, `${slug}.md`);
+export async function getArticleBySlug(slug: string, options?: ContentRequestOptions): Promise<Article | null> {
+    const locale = options?.locale || DEFAULT_PUBLIC_LOCALE;
+    const { dir, sourceLocale, isFallback } = resolveDirectory(options);
+    if (!dir) {
+        return null;
+    }
+
+    const filePath = path.join(dir, `${slug}.md`);
 
     if (!fs.existsSync(filePath)) {
         return null;
@@ -115,7 +168,12 @@ export async function getArticleBySlug(slug: string): Promise<Article | null> {
         image: meta.image,
         image_prompt: meta.image_prompt,
         content,
-        readingTime: Math.max(1, Math.ceil(fileContent.length / 400))
+        readingTime: Math.max(1, Math.ceil(fileContent.length / 400)),
+        locale,
+        sourceLocale,
+        translationStatus: isFallback ? 'fallback' : sourceLocale === DEFAULT_PUBLIC_LOCALE ? 'source' : 'translated',
+        availableLocales: [sourceLocale],
+        isFallback,
     };
 }
 

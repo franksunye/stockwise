@@ -1,5 +1,12 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import {
+    DEFAULT_PUBLIC_LOCALE,
+    getPublicLocaleFromPathname,
+    hasPublicLocalePrefix,
+    isExcludedAppPath,
+    stripPublicLocalePrefix,
+} from '@/lib/public-i18n';
 
 function normalizeHost(raw: string | null | undefined): string | null {
     if (!raw) return null;
@@ -33,6 +40,11 @@ export function middleware(request: NextRequest) {
         (host) => host === 'ziso.cc' || host === 'www.ziso.cc'
     );
 
+    const locale = getPublicLocaleFromPathname(pathname);
+    const isLocalePrefixed = hasPublicLocalePrefix(pathname);
+    const strippedPathname = stripPublicLocalePrefix(pathname);
+    const isExcludedAfterLocaleStrip = isExcludedAppPath(strippedPathname);
+
     const withDebugHeaders = (res: NextResponse, branch: string): NextResponse => {
         if (!debugEnabled) return res;
 
@@ -48,8 +60,31 @@ export function middleware(request: NextRequest) {
         return res;
     };
 
+    const withLocaleRequestHeader = (branch: string): NextResponse => {
+        const headers = new Headers(request.headers);
+        headers.set('x-ziso-locale', locale);
+        headers.set('x-ziso-locale-prefix', isLocalePrefixed ? '1' : '0');
+        return withDebugHeaders(
+            NextResponse.next({
+                request: {
+                    headers,
+                },
+            }),
+            branch
+        );
+    };
+
     // 1. App 子域名策略 (app.ziso.cc)
     if (isAppDomain) {
+        if (isLocalePrefixed) {
+            const cleanUrl = url.clone();
+            cleanUrl.pathname = strippedPathname === '/dashboard' ? '/' : strippedPathname;
+            return withDebugHeaders(
+                NextResponse.redirect(cleanUrl, 307),
+                'app-strip-locale-prefix'
+            );
+        }
+
         if (pathname === '/') {
             return withDebugHeaders(
                 NextResponse.rewrite(new URL('/dashboard', request.url)),
@@ -69,6 +104,15 @@ export function middleware(request: NextRequest) {
 
     // 2. 官网主域名策略 (ziso.cc)
     if (isMainDomain) {
+        if (isLocalePrefixed && isExcludedAfterLocaleStrip) {
+            const cleanUrl = url.clone();
+            cleanUrl.pathname = strippedPathname;
+            return withDebugHeaders(
+                NextResponse.redirect(cleanUrl, 307),
+                'main-strip-locale-excluded-path'
+            );
+        }
+
         // [优化] 处理 /v/[code] 极速跳转
         // 直接 307 重定向到 App 域名并带上参数，DashboardLayout 会接手别名解析
         if (pathname.startsWith('/v/')) {
@@ -93,6 +137,12 @@ export function middleware(request: NextRequest) {
                 'main-dashboard-redirect-app'
             );
         }
+
+        return withLocaleRequestHeader(isLocalePrefixed ? 'main-public-locale' : 'main-public-default-locale');
+    }
+
+    if (locale !== DEFAULT_PUBLIC_LOCALE) {
+        return withLocaleRequestHeader('pass-through-locale');
     }
 
     return withDebugHeaders(NextResponse.next(), 'pass-through');

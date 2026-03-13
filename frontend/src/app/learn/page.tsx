@@ -3,11 +3,16 @@ import Image from 'next/image';
 import { getAllArticles } from '@/lib/learn-content';
 import { ChevronLeft, ChevronRight, BookOpen, Brain, Zap, Shield, Sparkles, Target } from 'lucide-react';
 import MarketingFooter from '@/components/MarketingFooter';
+import { brandCoreZhCN } from '@/content/brand-core.zh-CN';
+import { buildPageMetadata } from '@/lib/seo';
 
-export const metadata = {
+export const metadata = buildPageMetadata(brandCoreZhCN.domain, {
   title: 'ZISO AI 101 | 知守日课',
   description: '你的理性避难所。教你如何用 AI 和概率论在市场中活下来。',
-};
+  path: '/learn',
+  locale: 'zh',
+  alternateLocales: ['zh', 'en'],
+});
 
 interface CategoryStyle {
   label: string;

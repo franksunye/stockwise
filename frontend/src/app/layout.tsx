@@ -1,28 +1,18 @@
 import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/react";
+import { headers } from "next/headers";
 import { brandCoreZhCN } from "@/content/brand-core.zh-CN";
-import { buildCanonicalUrl } from "@/lib/seo";
+import { getHtmlLang, isSupportedPublicLocale } from "@/lib/public-i18n";
 import "./globals.css";
 
-const homeTitle = "知守 AI (ZISO AI) | AI 做功课，你做决策";
-const homeDescription = brandCoreZhCN.positioning.text;
-
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
-  title: homeTitle,
-  description: homeDescription,
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || brandCoreZhCN.domain),
   manifest: "/manifest.json",
   icons: {
     icon: "/logo.png",
     apple: "/logo.png",
   },
-  alternates: {
-    canonical: buildCanonicalUrl(brandCoreZhCN.domain, "/"),
-  },
   openGraph: {
-    title: homeTitle,
-    description: homeDescription,
-    type: "website",
     images: [
       {
         url: "/og-image.png",
@@ -33,9 +23,6 @@ export const metadata: Metadata = {
     ],
   },
   twitter: {
-    card: "summary_large_image",
-    title: homeTitle,
-    description: homeDescription,
     images: ["/og-image.png"],
   },
   appleWebApp: {
@@ -56,13 +43,17 @@ export const viewport: Viewport = {
   userScalable: false,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const requestHeaders = await headers();
+  const localeHeader = requestHeaders.get("x-ziso-locale");
+  const locale = isSupportedPublicLocale(localeHeader) ? localeHeader : "zh";
+
   return (
-    <html lang="zh-CN">
+    <html lang={getHtmlLang(locale)}>
       <head>
         <link rel="preconnect" href="https://app.ziso.cc" />
         <link rel="dns-prefetch" href="https://app.ziso.cc" />
