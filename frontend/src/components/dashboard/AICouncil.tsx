@@ -207,7 +207,7 @@ function buildCouncilCards(predictions: AIPrediction[]): CouncilCardData[] {
     cards.push({
       key: 'shen-ce-gu-shen-collab',
       title: `${shenCe.name} × ${guShen.name}`,
-      role: '协同观点',
+      role: '复核意见',
       summary: buildCollabSummary(deepseekPred, guShen.name),
       actionKey: collabAction,
       confidence: deepseekPred.confidence,
@@ -250,7 +250,7 @@ function buildCouncilCards(predictions: AIPrediction[]): CouncilCardData[] {
     cards.push({
       key: 'shen-ce-cheng-ju-rule',
       title: `${shenCe.name} × ${chengJu.name}`,
-      role: '协同观点',
+      role: '复核意见',
       summary: buildRuleSummary(rulePred),
       actionKey: ruleAction,
       confidence: rulePred.confidence,
@@ -503,7 +503,7 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
            );
         })}
         <p className="px-1 pt-1 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-600">
-          协同观点基于量化模型底座生成，独立判断保留分析师原始观点
+          复核意见基于量化模型底座生成，独立判断保留分析师原始观点
         </p>
       </div>
     </div>
