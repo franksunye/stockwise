@@ -16,6 +16,21 @@ export default function MarketingHeader({ currentPage, locale = 'zh' }: Marketin
   const basePrefix = locale === 'zh' ? '' : '/en';
   const localizedHome = locale === 'zh' ? '/' : '/en';
   const localizedHomeAnchorPrefix = currentPage === 'home' ? '' : localizedHome;
+  const currentLocalePathByPage: Record<MarketingHeaderPage, string> = {
+    home: locale === 'zh' ? '/' : '/en',
+    about: locale === 'zh' ? '/about' : '/en/about',
+    pricing: locale === 'zh' ? '/pricing' : '/en/pricing',
+  };
+  const zhPathByPage: Record<MarketingHeaderPage, string> = {
+    home: '/',
+    about: '/about',
+    pricing: '/pricing',
+  };
+  const enPathByPage: Record<MarketingHeaderPage, string> = {
+    home: '/en',
+    about: '/en/about',
+    pricing: '/en/pricing',
+  };
   const labels = locale === 'zh'
     ? {
         features: '功能',
@@ -23,6 +38,8 @@ export default function MarketingHeader({ currentPage, locale = 'zh' }: Marketin
         pricing: '价格',
         faq: 'FAQ',
         openApp: '进入应用',
+        localeZh: '中',
+        localeEn: 'EN',
       }
     : {
         features: 'Features',
@@ -30,6 +47,8 @@ export default function MarketingHeader({ currentPage, locale = 'zh' }: Marketin
         pricing: 'Pricing',
         faq: 'FAQ',
         openApp: 'Open App',
+        localeZh: '中',
+        localeEn: 'EN',
       };
 
   const links: MarketingMenuLink[] = locale === 'zh'
@@ -47,6 +66,11 @@ export default function MarketingHeader({ currentPage, locale = 'zh' }: Marketin
         { href: `${basePrefix}/pricing`, label: 'Pricing', prefetch: false, isActive: currentPage === 'pricing' },
         { href: `${localizedHomeAnchorPrefix}#faq`, label: 'FAQ' },
       ];
+
+  const localeSwitches = [
+    { href: locale === 'zh' ? currentLocalePathByPage[currentPage] : zhPathByPage[currentPage], label: labels.localeZh, isActive: locale === 'zh' },
+    { href: locale === 'en' ? currentLocalePathByPage[currentPage] : enPathByPage[currentPage], label: labels.localeEn, isActive: locale === 'en' },
+  ];
 
   return (
     <nav className="relative z-50 flex items-center justify-between px-8 py-8 max-w-7xl mx-auto">
@@ -68,6 +92,19 @@ export default function MarketingHeader({ currentPage, locale = 'zh' }: Marketin
             {item.label}
           </Link>
         ))}
+        <div className="flex items-center rounded-full border border-white/10 bg-white/5 p-1">
+          {localeSwitches.map((item) => (
+            <Link
+              key={item.label}
+              href={item.href}
+              className={`rounded-full px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.24em] transition-colors ${
+                item.isActive ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              {item.label}
+            </Link>
+          ))}
+        </div>
         <Link
           href="https://app.ziso.cc"
           target="_blank"
@@ -78,7 +115,11 @@ export default function MarketingHeader({ currentPage, locale = 'zh' }: Marketin
         </Link>
       </div>
 
-      <LandingMobileMenu links={links} cta={{ href: 'https://app.ziso.cc', label: labels.openApp }} />
+      <LandingMobileMenu
+        links={links}
+        cta={{ href: 'https://app.ziso.cc', label: labels.openApp }}
+        localeSwitches={localeSwitches}
+      />
     </nav>
   );
 }

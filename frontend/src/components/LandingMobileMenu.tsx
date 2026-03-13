@@ -16,6 +16,12 @@ interface MobileMenuCta {
   href: string;
 }
 
+interface LocaleSwitchLink {
+  href: string;
+  label: string;
+  isActive?: boolean;
+}
+
 const defaultLinks: MarketingMenuLink[] = [
   { href: '#features', label: '功能' },
   { href: '/learn', label: '101 手册', prefetch: false },
@@ -28,11 +34,13 @@ const defaultLinks: MarketingMenuLink[] = [
 interface LandingMobileMenuProps {
   links?: MarketingMenuLink[];
   cta?: MobileMenuCta;
+  localeSwitches?: LocaleSwitchLink[];
 }
 
 export default function LandingMobileMenu({
   links = defaultLinks,
   cta = { href: 'https://app.ziso.cc', label: '进入应用' },
+  localeSwitches = [],
 }: LandingMobileMenuProps) {
   const [open, setOpen] = useState(false);
 
@@ -64,6 +72,24 @@ export default function LandingMobileMenu({
             {item.label}
           </Link>
         ))}
+        {localeSwitches.length > 0 ? (
+          <div className="mt-2 flex items-center gap-3">
+            {localeSwitches.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setOpen(false)}
+                className={`rounded-full border px-4 py-2 text-sm font-black uppercase tracking-[0.2em] transition-colors ${
+                  item.isActive
+                    ? 'border-white/20 bg-white/10 text-white'
+                    : 'border-white/10 bg-white/5 text-slate-400 hover:text-white'
+                }`}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        ) : null}
         <Link
           href={cta.href}
           target="_blank"
