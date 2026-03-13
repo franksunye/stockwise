@@ -1,0 +1,45 @@
+{
+  "summary": {
+    "symbol": "300502",
+    "date": "2026-03-12",
+    "variant": "default",
+    "models": [
+      {
+        "model": "gemini-3-flash",
+        "returncode": 0,
+        "prompt_version": "b2.v6",
+        "signal": "RiskOff",
+        "confidence": 0.85,
+        "execution_time_ms": 22108,
+        "token_usage_input": 5183,
+        "token_usage_output": 1329
+      }
+    ]
+  },
+  "details": [
+    {
+      "model": "gemini-3-flash",
+      "run": {
+        "model": "gemini-3-flash",
+        "returncode": 0,
+        "elapsed_s": 78.636,
+        "stdout_tail": "ank: SSLError. Retrying in 1.3s... (provider.py:145)\u001b[0m\n\u001b[34;20m2026-03-13 11:29:21 [INFO] 📡  AkShare Fetch: stock_sector_fund_flow_rank (Attempt 2) (provider.py:123)\u001b[0m\n\u001b[33;20m2026-03-13 11:29:23 [WARNING] ⚠️  Retryable Error in stock_sector_fund_flow_rank: ConnectionError. Retrying in 2.4s... (provider.py:145)\u001b[0m\n\u001b[34;20m2026-03-13 11:29:26 [INFO] 📡  AkShare Fetch: stock_sector_fund_flow_rank (Attempt 3) (provider.py:123)\u001b[0m\n\u001b[31;20m2026-03-13 11:29:27 [ERROR] ❌ Final Failure for stock_sector_fund_flow_rank: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response')) (provider.py:148)\u001b[0m\n\u001b[33;20m2026-03-13 11:29:27 [WARNING] ⚠️  Eastmoney Sector Flow failed, trying THS fallback: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response')) (provider.py:680)\u001b[0m\n\u001b[34;20m2026-03-13 11:29:27 [INFO] 📡  AkShare Fetch: stock_fund_flow_industry  (provider.py:123)\u001b[0m\n\u001b[31;20m2026-03-13 11:29:30 [ERROR] ❌ Final Failure for stock_fund_flow_industry: 'NoneType' object has no attribute 'text' (provider.py:148)\u001b[0m\n\u001b[31;20m2026-03-13 11:29:30 [ERROR] ❌ THS Sector Flow also failed: 'NoneType' object has no attribute 'text' (provider.py:706)\u001b[0m\n\u001b[34;20m2026-03-13 11:29:30 [INFO] 📡  AkShare Fetch: stock_market_fund_flow  (provider.py:123)\u001b[0m\n\u001b[34;20m2026-03-13 11:29:33 [INFO] ✅ Broad market flow (last resort) succeeded. (provider.py:715)\u001b[0m\n\u001b[34;20m2026-03-13 11:29:33 [INFO] 📡 Fetching Flow Data for 300502... (provider.py:807)\u001b[0m\n\u001b[34;20m2026-03-13 11:29:35 [INFO] 📊 Rich context fetched for 300502 on 2026-03-12 (runner.py:130)\u001b[0m\n\u001b[34;20m2026-03-13 11:29:35 [INFO] 🧭 [tr-596a48a38c81] Layer1=RiskOff (score=30.0, strategy=tradeability_v2) (runner.py:141)\u001b[0m\n\u001b[34;20m2026-03-13 11:29:35 [INFO] 📜 gemini-3-flash history loaded: 5 records, 63.2% acc (runner.py:167)\u001b[0m\n\u001b[34;20m2026-03-13 11:29:57 [INFO]    🤖 GEMINI_LOCAL 响应成功 (22.1s, 8889 tokens) (gemini_local.py:224)\u001b[0m\n\u001b[34;20m2026-03-13 11:29:57 [INFO] 📥 gemini-3-flash Response: 3034 chars (gemini_local.py:123)\u001b[0m\n\u001b[34;20m2026-03-13 11:29:57 [INFO] 📊 Trace: ✅ 22107ms | 8889 tokens | attempt: 1 (gemini_local.py:146)\u001b[0m\n\u001b[33;20m2026-03-13 11:29:57 [WARNING] 🧱 Layer1 signal enforced due to legacy enum inertia: model=Side -> layer1=RiskOff (status=RiskOff) (runner.py:383)\u001b[0m\n\u001b[34;20m2026-03-13 11:29:57 [INFO] 🏁 Analysis round finished. Cache Stats: 0 hits, 1 misses (0.0%) (runner.py:174)\u001b[0m\n\u001b[34;20m2026-03-13 11:29:57 [INFO] ✅ Analysis completed for 300502. Saved 1 results. Primary: None (runner.py:301)\u001b[0m\n\u001b[33;20m2026-03-13 11:29:57 [WARNING] ⚠️ 推送发送失败 [503]:  (notifications.py:61)\u001b[0m\n\u001b[33;20m2026-03-13 11:29:58 [WARNING] ⚠️ 推送发送失败 [503]:  (notifications.py:61)\u001b[0m\n\u001b[33;20m2026-03-13 11:29:59 [WARNING] ⚠️ 推送发送失败 [503]:  (notifications.py:61)\u001b[0m\n\u001b[34;20m2026-03-13 11:29:59 [INFO] ✅ [JobGuard] Task Success: AI Analysis (Backfill). Duration: 77.3s (job_guard.py:103)\u001b[0m\n\u001b[34;20m2026-03-13 11:29:59 [INFO] 📲 企业微信通知发送成功 (utils.py:138)\u001b[0m\n",
+        "stderr_tail": "\n  0%|          | 0/19 [00:00<?, ?it/s]\n  5%|▌         | 1/19 [00:01<00:29,  1.63s/it]\n                                              \n\n  0%|          | 0/19 [00:00<?, ?it/s]\n  5%|▌         | 1/19 [00:02<00:37,  2.08s/it]\n 11%|█         | 2/19 [00:03<00:32,  1.93s/it]\n                                              \n\n  0%|          | 0/19 [00:00<?, ?it/s]\n  5%|▌         | 1/19 [00:01<00:24,  1.35s/it]\n 11%|█         | 2/19 [00:04<00:40,  2.40s/it]\n                                              \n"
+      },
+      "saved_row": {
+        "symbol": "300502",
+        "date": "2026-03-12",
+        "model_id": "gemini-3-flash",
+        "prompt_version": "b2.v6",
+        "signal": "RiskOff",
+        "confidence": 0.85,
+        "token_usage_input": 5183,
+        "token_usage_output": 1329,
+        "execution_time_ms": 22108,
+        "is_primary": 0,
+        "summary": "放量跌破MA20关键支撑，技术指标全面恶化且主力资金大幅流出，转入防御阶段。",
+        "tomorrow_focus": "375.67支撑强度及对MA20反抽的压力确认。"
+      }
+    }
+  ]
+}

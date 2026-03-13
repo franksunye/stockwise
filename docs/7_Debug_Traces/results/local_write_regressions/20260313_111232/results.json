@@ -1,0 +1,45 @@
+{
+  "summary": {
+    "symbol": "300502",
+    "date": "2026-03-12",
+    "variant": "default",
+    "models": [
+      {
+        "model": "gemini-3-flash",
+        "returncode": 0,
+        "prompt_version": "b2.v6",
+        "signal": "RiskOff",
+        "confidence": 0.85,
+        "execution_time_ms": 32701,
+        "token_usage_input": 5224,
+        "token_usage_output": 1381
+      }
+    ]
+  },
+  "details": [
+    {
+      "model": "gemini-3-flash",
+      "run": {
+        "model": "gemini-3-flash",
+        "returncode": 0,
+        "elapsed_s": 129.519,
+        "stdout_tail": "&fields=f12%2Cf14%2Cf2%2Cf3%2Cf62%2Cf184%2Cf66%2Cf69%2Cf72%2Cf75%2Cf78%2Cf81%2Cf84%2Cf87%2Cf204%2Cf205%2Cf124&rt=52975239&_=1773371639374 (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)'))) (provider.py:680)\u001b[0m\n\u001b[34;20m2026-03-13 11:14:01 [INFO] 📡  AkShare Fetch: stock_fund_flow_industry  (provider.py:123)\u001b[0m\n\u001b[31;20m2026-03-13 11:14:02 [ERROR] ❌ Final Failure for stock_fund_flow_industry: 'NoneType' object has no attribute 'text' (provider.py:148)\u001b[0m\n\u001b[31;20m2026-03-13 11:14:02 [ERROR] ❌ THS Sector Flow also failed: 'NoneType' object has no attribute 'text' (provider.py:706)\u001b[0m\n\u001b[34;20m2026-03-13 11:14:02 [INFO] 📡  AkShare Fetch: stock_market_fund_flow  (provider.py:123)\u001b[0m\n\u001b[34;20m2026-03-13 11:14:04 [INFO] ✅ Broad market flow (last resort) succeeded. (provider.py:715)\u001b[0m\n\u001b[34;20m2026-03-13 11:14:04 [INFO] 📡 Fetching Flow Data for 300502... (provider.py:807)\u001b[0m\n\u001b[33;20m2026-03-13 11:14:05 [WARNING] Stock flow fetch failed for 300502: HTTPSConnectionPool(host='push2his.eastmoney.com', port=443): Max retries exceeded with url: /api/qt/stock/fflow/daykline/get?lmt=0&klt=101&secid=0.300502&fields1=f1%2Cf2%2Cf3%2Cf7&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61%2Cf62%2Cf63%2Cf64%2Cf65&ut=b2884a393a59ad64002292a3e90d46a5&_=1773371644790 (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)'))) (provider.py:870)\u001b[0m\n\u001b[34;20m2026-03-13 11:14:05 [INFO] 📊 Rich context fetched for 300502 on 2026-03-12 (runner.py:130)\u001b[0m\n\u001b[34;20m2026-03-13 11:14:05 [INFO] 🧭 [tr-39a5651b901c] Layer1=RiskOff (score=30.0, strategy=tradeability_v2) (runner.py:141)\u001b[0m\n\u001b[34;20m2026-03-13 11:14:05 [INFO] 📜 gemini-3-flash history loaded: 5 records, 63.2% acc (runner.py:167)\u001b[0m\n\u001b[34;20m2026-03-13 11:14:38 [INFO]    🤖 GEMINI_LOCAL 响应成功 (32.7s, 11039 tokens) (gemini_local.py:224)\u001b[0m\n\u001b[34;20m2026-03-13 11:14:38 [INFO] 📥 gemini-3-flash Response: 3125 chars (gemini_local.py:123)\u001b[0m\n\u001b[34;20m2026-03-13 11:14:38 [INFO] 📊 Trace: ✅ 32698ms | 11039 tokens | attempt: 1 (gemini_local.py:146)\u001b[0m\n\u001b[33;20m2026-03-13 11:14:38 [WARNING] 🧱 Layer1 signal enforced due to legacy enum inertia: model=Side -> layer1=RiskOff (status=RiskOff) (runner.py:383)\u001b[0m\n\u001b[34;20m2026-03-13 11:14:38 [INFO] 🏁 Analysis round finished. Cache Stats: 0 hits, 1 misses (0.0%) (runner.py:174)\u001b[0m\n\u001b[34;20m2026-03-13 11:14:38 [INFO] ✅ Analysis completed for 300502. Saved 1 results. Primary: None (runner.py:301)\u001b[0m\n\u001b[33;20m2026-03-13 11:14:39 [WARNING] ⚠️ 推送发送失败 [503]:  (notifications.py:61)\u001b[0m\n\u001b[33;20m2026-03-13 11:14:39 [WARNING] ⚠️ 推送发送失败 [503]:  (notifications.py:61)\u001b[0m\n\u001b[33;20m2026-03-13 11:14:40 [WARNING] ⚠️ 推送发送失败 [503]:  (notifications.py:61)\u001b[0m\n\u001b[34;20m2026-03-13 11:14:40 [INFO] ✅ [JobGuard] Task Success: AI Analysis (Backfill). Duration: 128.1s (job_guard.py:103)\u001b[0m\n\u001b[34;20m2026-03-13 11:14:41 [INFO] 📲 企业微信通知发送成功 (utils.py:138)\u001b[0m\n",
+        "stderr_tail": "\n  0%|          | 0/19 [00:00<?, ?it/s]\n  5%|▌         | 1/19 [00:02<00:39,  2.18s/it]\n 11%|█         | 2/19 [00:03<00:30,  1.77s/it]\n 16%|█▌        | 3/19 [00:05<00:26,  1.67s/it]\n 21%|██        | 4/19 [00:06<00:23,  1.58s/it]\n                                              \n\n  0%|          | 0/19 [00:00<?, ?it/s]\n  5%|▌         | 1/19 [00:02<00:52,  2.89s/it]\n 11%|█         | 2/19 [00:06<00:53,  3.16s/it]\n 16%|█▌        | 3/19 [00:08<00:46,  2.91s/it]\n 21%|██        | 4/19 [00:10<00:34,  2.28s/it]\n 26%|██▋       | 5/19 [00:15<00:49,  3.56s/it]\n 32%|███▏      | 6/19 [00:17<00:36,  2.79s/it]\n 37%|███▋      | 7/19 [00:18<00:27,  2.30s/it]\n                                              \n\n  0%|          | 0/19 [00:00<?, ?it/s]\n  5%|▌         | 1/19 [00:01<00:30,  1.71s/it]\n 11%|█         | 2/19 [00:17<02:53, 10.20s/it]\n 16%|█▌        | 3/19 [00:23<02:06,  7.92s/it]\n 21%|██        | 4/19 [00:24<01:22,  5.51s/it]\n 26%|██▋       | 5/19 [00:26<00:56,  4.05s/it]\n 32%|███▏      | 6/19 [00:28<00:45,  3.49s/it]\n                                              \n"
+      },
+      "saved_row": {
+        "symbol": "300502",
+        "date": "2026-03-12",
+        "model_id": "gemini-3-flash",
+        "prompt_version": "b2.v6",
+        "signal": "RiskOff",
+        "confidence": 0.85,
+        "token_usage_input": 5224,
+        "token_usage_output": 1381,
+        "execution_time_ms": 32701,
+        "is_primary": 0,
+        "summary": "股价放量跌破MA20支撑，指标系统性转弱，与量化RiskOff共振，建议离场避险。",
+        "tomorrow_focus": "375.67低点支撑强度及MA20反抽压力。"
+      }
+    }
+  ]
+}

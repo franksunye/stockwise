@@ -1,0 +1,45 @@
+{
+  "summary": {
+    "symbol": "300502",
+    "date": "2026-03-12",
+    "variant": "default",
+    "models": [
+      {
+        "model": "gemini-3-flash",
+        "returncode": 0,
+        "prompt_version": "b2.v6",
+        "signal": "RiskOff",
+        "confidence": 0.85,
+        "execution_time_ms": 27821,
+        "token_usage_input": 5222,
+        "token_usage_output": 1408
+      }
+    ]
+  },
+  "details": [
+    {
+      "model": "gemini-3-flash",
+      "run": {
+        "model": "gemini-3-flash",
+        "returncode": 0,
+        "elapsed_s": 132.584,
+        "stdout_tail": "after 30s (provider.py:680)\u001b[0m\n\u001b[34;20m2026-03-13 10:56:56 [INFO] 📡  AkShare Fetch: stock_fund_flow_industry  (provider.py:123)\u001b[0m\n\u001b[31;20m2026-03-13 10:56:59 [ERROR] ❌ Final Failure for stock_fund_flow_industry: 'NoneType' object has no attribute 'text' (provider.py:148)\u001b[0m\n\u001b[31;20m2026-03-13 10:56:59 [ERROR] ❌ THS Sector Flow also failed: 'NoneType' object has no attribute 'text' (provider.py:706)\u001b[0m\n\u001b[34;20m2026-03-13 10:56:59 [INFO] 📡  AkShare Fetch: stock_market_fund_flow  (provider.py:123)\u001b[0m\n\u001b[34;20m2026-03-13 10:57:02 [INFO] ✅ Broad market flow (last resort) succeeded. (provider.py:715)\u001b[0m\n\u001b[34;20m2026-03-13 10:57:02 [INFO] 📡 Fetching Flow Data for 300502... (provider.py:807)\u001b[0m\n\u001b[34;20m2026-03-13 10:57:03 [INFO] 📊 Rich context fetched for 300502 on 2026-03-12 (runner.py:130)\u001b[0m\n\u001b[34;20m2026-03-13 10:57:03 [INFO] 🧭 [tr-1a39ddade65f] Layer1=RiskOff (score=30.0, strategy=tradeability_v2) (runner.py:141)\u001b[0m\n\u001b[34;20m2026-03-13 10:57:03 [INFO] 📜 gemini-3-flash history loaded: 5 records, 63.2% acc (runner.py:167)\u001b[0m\n\u001b[31;20m2026-03-13 10:57:06 [ERROR] Gemini Local Call Error: 429 Too Many Requests. {'message': 'All accounts exhausted. Last error: HTTP request failed at https://cloudcode-pa.googleapis.com/v1internal: error sending request for url (https://cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse): client error (Connect)', 'status': 'Too Many Requests'} (gemini_local.py:228)\u001b[0m\n\u001b[31;20m2026-03-13 10:57:06 [ERROR] Gemini Local execution failed (attempt 1/4): 429 Too Many Requests. {'message': 'All accounts exhausted. Last error: HTTP request failed at https://cloudcode-pa.googleapis.com/v1internal: error sending request for url (https://cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse): client error (Connect)', 'status': 'Too Many Requests'} (gemini_local.py:96)\u001b[0m\n\u001b[34;20m2026-03-13 10:57:31 [INFO]    🤖 GEMINI_LOCAL 响应成功 (22.9s, 8681 tokens) (gemini_local.py:224)\u001b[0m\n\u001b[34;20m2026-03-13 10:57:31 [INFO] 📥 gemini-3-flash Response: 3142 chars (gemini_local.py:123)\u001b[0m\n\u001b[34;20m2026-03-13 10:57:31 [INFO] 📊 Trace: ✅ 23007ms | 8681 tokens | attempt: 2 (gemini_local.py:146)\u001b[0m\n\u001b[33;20m2026-03-13 10:57:31 [WARNING] 🧱 Layer1 signal enforced due to legacy enum inertia: model=Side -> layer1=RiskOff (status=RiskOff) (runner.py:383)\u001b[0m\n\u001b[34;20m2026-03-13 10:57:31 [INFO] 🏁 Analysis round finished. Cache Stats: 0 hits, 1 misses (0.0%) (runner.py:174)\u001b[0m\n\u001b[34;20m2026-03-13 10:57:31 [INFO] ✅ Analysis completed for 300502. Saved 1 results. Primary: None (runner.py:301)\u001b[0m\n\u001b[33;20m2026-03-13 10:57:32 [WARNING] ⚠️ 推送发送失败 [503]:  (notifications.py:61)\u001b[0m\n\u001b[33;20m2026-03-13 10:57:33 [WARNING] ⚠️ 推送发送失败 [503]:  (notifications.py:61)\u001b[0m\n\u001b[33;20m2026-03-13 10:57:34 [WARNING] ⚠️ 推送发送失败 [503]:  (notifications.py:61)\u001b[0m\n\u001b[34;20m2026-03-13 10:57:34 [INFO] ✅ [JobGuard] Task Success: AI Analysis (Backfill). Duration: 131.2s (job_guard.py:103)\u001b[0m\n\u001b[34;20m2026-03-13 10:57:34 [INFO] 📲 企业微信通知发送成功 (utils.py:138)\u001b[0m\n",
+        "stderr_tail": "\n  0%|          | 0/5 [00:00<?, ?it/s]\n 20%|██        | 1/5 [00:03<00:12,  3.06s/it]\n                                             \n\n  0%|          | 0/5 [00:00<?, ?it/s]\n 20%|██        | 1/5 [00:17<01:08, 17.06s/it]\n                                             \n"
+      },
+      "saved_row": {
+        "symbol": "300502",
+        "date": "2026-03-12",
+        "model_id": "gemini-3-flash",
+        "prompt_version": "b2.v6",
+        "signal": "RiskOff",
+        "confidence": 0.85,
+        "token_usage_input": 5222,
+        "token_usage_output": 1408,
+        "execution_time_ms": 27821,
+        "is_primary": 0,
+        "summary": "股价放量跌破MA20支撑，主力资金大幅流出，技术形态走坏，需防范进一步下行风险。",
+        "tomorrow_focus": "关注375昨日低点支撑强度及主力资金流出是否衰竭。"
+      }
+    }
+  ]
+}
