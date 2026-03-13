@@ -185,11 +185,22 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
               <div className="space-y-4">
                 {(() => {
                   if (tacticalData) {
+                    const userPos = data.rule?.position === 'holding' ? 'holding' : 'empty';
+                    const rawTactics = tacticalData.tactics?.[userPos];
+                    const tacticsArr = Array.isArray(rawTactics) ? rawTactics : (rawTactics ? [rawTactics] : []);
+                    const p1 = tacticsArr[0];
                     return (
                       <>
                         <p className="text-sm leading-relaxed text-slate-300 font-medium italic pl-1 border-l-2 border-indigo-500/20">
                           &quot;{tacticalData.summary || displayPrediction?.ai_reasoning}&quot;
                         </p>
+                        {p1 && <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 w-full overflow-hidden">
+                          <span className="text-[10px] font-black bg-indigo-500 text-white px-1 py-0.5 rounded italic shrink-0">{p1.priority}</span>
+                          <div className="flex items-center gap-1 min-w-0">
+                            <span className="text-[10px] font-bold text-indigo-400 shrink-0">{p1.action}:</span>
+                            <span className="text-xs text-slate-400 font-medium truncate">{p1.trigger}</span>
+                          </div>
+                        </div>}
                       </>
                     );
                   } else {

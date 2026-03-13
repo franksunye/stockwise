@@ -117,10 +117,6 @@ export const HistoricalCard = memo(function HistoricalCard({ data, onClick }: { 
             </div>
           </div>
 
-          <p className="text-[12px] font-medium text-slate-400 leading-5 mb-3">
-            {actionMeta.badge}
-          </p>
-          
           <p className="text-sm text-slate-300 leading-relaxed italic font-medium pl-1 border-l-2 border-white/10">
             &quot;{displayReason.length > 60 ? displayReason.slice(0, 60) + '...' : displayReason}&quot;
           </p>
