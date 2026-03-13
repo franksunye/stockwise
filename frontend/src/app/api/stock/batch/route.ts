@@ -18,6 +18,16 @@ import {
 
 export const dynamic = 'force-dynamic';
 
+const SAFE_LLM_SIGNAL_SQL = `
+    COALESCE(
+        CASE
+            WHEN json_valid(p.ai_reasoning) THEN json_extract(p.ai_reasoning, '$.signal')
+            ELSE NULL
+        END,
+        p.signal
+    )
+`;
+
 function closeDb(db: unknown): void {
     if (db && typeof db === 'object' && 'close' in db && typeof (db as { close?: () => void }).close === 'function') {
         (db as { close: () => void }).close();
@@ -88,7 +98,7 @@ export async function GET(request: Request) {
                                     p.signal AS canonical_signal,
                                     p.confidence,
                                     p.support_price, p.ai_reasoning, p.ai_reasoning AS llm_reasoning,
-                                    COALESCE(json_extract(p.ai_reasoning, '$.signal'), p.signal) AS llm_signal,
+                                    ${SAFE_LLM_SIGNAL_SQL} AS llm_signal,
                                     ${EFFECTIVE_VALIDATION_STATUS_SQL} AS validation_status, p.actual_change,
                                     p.validation_data,
                                     ${EFFECTIVE_LAYER1_STATUS_SQL} AS layer1_status,
@@ -129,7 +139,7 @@ export async function GET(request: Request) {
                                     p.signal AS canonical_signal,
                                     p.confidence,
                                     p.support_price, p.ai_reasoning, p.ai_reasoning AS llm_reasoning,
-                                    COALESCE(json_extract(p.ai_reasoning, '$.signal'), p.signal) AS llm_signal,
+                                    ${SAFE_LLM_SIGNAL_SQL} AS llm_signal,
                                     p.validation_status AS validation_status, p.actual_change,
                                     p.validation_data,
                                     p.layer1_status AS layer1_status,
@@ -279,7 +289,7 @@ export async function GET(request: Request) {
                                     p.signal AS canonical_signal,
                                     p.confidence,
                                     p.support_price, p.ai_reasoning, p.ai_reasoning AS llm_reasoning,
-                                    COALESCE(json_extract(p.ai_reasoning, '$.signal'), p.signal) AS llm_signal,
+                                    ${SAFE_LLM_SIGNAL_SQL} AS llm_signal,
                                     ${EFFECTIVE_VALIDATION_STATUS_SQL} AS validation_status, p.actual_change,
                                     p.validation_data,
                                     ${EFFECTIVE_LAYER1_STATUS_SQL} AS layer1_status,
@@ -320,7 +330,7 @@ export async function GET(request: Request) {
                                     p.signal AS canonical_signal,
                                     p.confidence,
                                     p.support_price, p.ai_reasoning, p.ai_reasoning AS llm_reasoning,
-                                    COALESCE(json_extract(p.ai_reasoning, '$.signal'), p.signal) AS llm_signal,
+                                    ${SAFE_LLM_SIGNAL_SQL} AS llm_signal,
                                     p.validation_status AS validation_status, p.actual_change,
                                     p.validation_data,
                                     p.layer1_status AS layer1_status,

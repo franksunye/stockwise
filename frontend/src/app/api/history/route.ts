@@ -17,6 +17,16 @@ import {
 
 export const revalidate = 300; // 5 minutes cache
 
+const SAFE_LLM_SIGNAL_SQL = `
+    COALESCE(
+        CASE
+            WHEN json_valid(p.ai_reasoning) THEN json_extract(p.ai_reasoning, '$.signal')
+            ELSE NULL
+        END,
+        p.signal
+    )
+`;
+
 function closeDb(db: unknown): void {
     if (db && typeof db === 'object' && 'close' in db && typeof (db as { close?: () => void }).close === 'function') {
         (db as { close: () => void }).close();
@@ -59,7 +69,7 @@ export async function GET(request: Request) {
             const sql = `
                 SELECT p.symbol, p.date, p.target_date, ${EFFECTIVE_SIGNAL_SQL} AS signal, p.signal AS canonical_signal, p.confidence,
                        p.support_price, p.ai_reasoning, p.ai_reasoning AS llm_reasoning,
-                       COALESCE(json_extract(p.ai_reasoning, '$.signal'), p.signal) AS llm_signal,
+                       ${SAFE_LLM_SIGNAL_SQL} AS llm_signal,
                        ${EFFECTIVE_VALIDATION_STATUS_SQL} AS validation_status, p.actual_change,
                        ${EFFECTIVE_LAYER1_STATUS_SQL} AS layer1_status, p.layer1_status AS layer1_signal,
                        p.max_perf_in_window, p.validation_data,

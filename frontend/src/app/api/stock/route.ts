@@ -2,6 +2,16 @@ import { NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 import { getDbClient } from '@/lib/db';
 
+const SAFE_LLM_SIGNAL_SQL = `
+    COALESCE(
+        CASE
+            WHEN json_valid(p.ai_reasoning) THEN json_extract(p.ai_reasoning, '$.signal')
+            ELSE NULL
+        END,
+        p.signal
+    )
+`;
+
 // Stock detail keeps the original prediction shape and adds explicit dual-track aliases:
 // - canonical_signal / layer1_signal for the stored base result
 // - llm_signal / llm_reasoning for the AI-side interpretation from ai_reasoning
@@ -52,7 +62,7 @@ export async function GET(request: Request) {
                     sql: `
                         SELECT p.*, p.signal AS canonical_signal, p.layer1_status AS layer1_signal,
                                p.ai_reasoning AS llm_reasoning,
-                               COALESCE(json_extract(p.ai_reasoning, '$.signal'), p.signal) AS llm_signal,
+                               ${SAFE_LLM_SIGNAL_SQL} AS llm_signal,
                                d.close as close_price, m.display_name as model
                         FROM ai_predictions_v2 p
                         LEFT JOIN daily_prices d ON p.symbol = d.symbol AND p.date = d.date
@@ -71,7 +81,7 @@ export async function GET(request: Request) {
                 const predictions = client.prepare(`
                     SELECT p.*, p.signal AS canonical_signal, p.layer1_status AS layer1_signal,
                            p.ai_reasoning AS llm_reasoning,
-                           COALESCE(json_extract(p.ai_reasoning, '$.signal'), p.signal) AS llm_signal,
+                           ${SAFE_LLM_SIGNAL_SQL} AS llm_signal,
                            d.close as close_price, m.display_name as model
                     FROM ai_predictions_v2 p
                     LEFT JOIN daily_prices d ON p.symbol = d.symbol AND p.date = d.date
