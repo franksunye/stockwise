@@ -17,6 +17,7 @@ import {
 } from '@/lib/prediction-display';
 
 export const dynamic = 'force-dynamic';
+const DASHBOARD_PREDICTION_LOOKBACK_DAYS = 45;
 
 const SAFE_LLM_SIGNAL_SQL = `
     COALESCE(
@@ -58,6 +59,9 @@ export async function GET(request: Request) {
     if (symbols.length > 50) return NextResponse.json({ error: 'Too many symbols' }, { status: 400 });
 
     const startTime = Date.now();
+    const dashboardPredictionThreshold = new Date(Date.now() - DASHBOARD_PREDICTION_LOOKBACK_DAYS * 86400000)
+        .toISOString()
+        .split('T')[0];
 
     try {
         debugStage = 'require_user_session';
@@ -115,7 +119,9 @@ export async function GET(request: Request) {
                                 ON dlog.mode_id = ?
                                AND dlog.symbol = p.symbol
                                AND dlog.decision_date = p.date
-                            WHERE p.symbol IN (${placeholders}) AND (${tierFilter})
+                            WHERE p.symbol IN (${placeholders})
+                              AND COALESCE(p.target_date, p.date) >= '${dashboardPredictionThreshold}'
+                              AND (${tierFilter})
                         ),
                         DailyBest AS (
                             SELECT * FROM RankedPredictions WHERE rn_daily = 1
@@ -152,7 +158,9 @@ export async function GET(request: Request) {
                                     ROW_NUMBER() OVER (PARTITION BY p.symbol, p.target_date ORDER BY m.priority DESC) as rn_daily
                             FROM ai_predictions_v2 p
                             LEFT JOIN prediction_models m ON p.model_id = m.model_id
-                            WHERE p.symbol IN (${placeholders}) AND (${tierFilter})
+                            WHERE p.symbol IN (${placeholders})
+                              AND COALESCE(p.target_date, p.date) >= '${dashboardPredictionThreshold}'
+                              AND (${tierFilter})
                         ),
                         DailyBest AS (
                             SELECT * FROM RankedPredictions WHERE rn_daily = 1
@@ -306,7 +314,9 @@ export async function GET(request: Request) {
                                 ON dlog.mode_id = ?
                                AND dlog.symbol = p.symbol
                                AND dlog.decision_date = p.date
-                            WHERE p.symbol IN (${placeholders}) AND (${tierFilter})
+                            WHERE p.symbol IN (${placeholders})
+                              AND COALESCE(p.target_date, p.date) >= '${dashboardPredictionThreshold}'
+                              AND (${tierFilter})
                         ),
                         DailyBest AS (
                             SELECT * FROM RankedPredictions WHERE rn_daily = 1
@@ -343,7 +353,9 @@ export async function GET(request: Request) {
                                     ROW_NUMBER() OVER (PARTITION BY p.symbol, p.target_date ORDER BY m.priority DESC) as rn_daily
                             FROM ai_predictions_v2 p
                             LEFT JOIN prediction_models m ON p.model_id = m.model_id
-                            WHERE p.symbol IN (${placeholders}) AND (${tierFilter})
+                            WHERE p.symbol IN (${placeholders})
+                              AND COALESCE(p.target_date, p.date) >= '${dashboardPredictionThreshold}'
+                              AND (${tierFilter})
                         ),
                         DailyBest AS (
                             SELECT * FROM RankedPredictions WHERE rn_daily = 1
