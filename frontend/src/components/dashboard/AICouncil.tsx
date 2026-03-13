@@ -192,7 +192,7 @@ function buildCouncilCards(predictions: AIPrediction[]): CouncilCardData[] {
     cards.push({
       key: 'shen-ce-gu-shen-collab',
       title: `${shenCe.name} × ${guShen.name}`,
-      role: '量化模型协同观点',
+      role: '协同观点',
       summary: buildCollabSummary(deepseekPred, guShen.name),
       actionKey: collabAction,
       confidence: deepseekPred.confidence,
@@ -204,7 +204,7 @@ function buildCouncilCards(predictions: AIPrediction[]): CouncilCardData[] {
     cards.push({
       key: 'gu-shen-independent',
       title: guShen.name,
-      role: '独立观点',
+      role: '独立判断',
       summary: getCouncilSummary(deepseekPred.llm_reasoning || deepseekPred.ai_reasoning),
       actionKey: getCouncilActionKeyFromSignal(deepseekPred.llm_signal || deepseekPred.signal),
       confidence: deepseekPred.confidence,
@@ -218,7 +218,7 @@ function buildCouncilCards(predictions: AIPrediction[]): CouncilCardData[] {
     cards.push({
       key: 'lin-xu-independent',
       title: linXu.name,
-      role: '独立观点',
+      role: '独立判断',
       summary: getCouncilSummary(linxuPred.llm_reasoning || linxuPred.ai_reasoning),
       actionKey: getCouncilActionKeyFromSignal(linxuPred.llm_signal || linxuPred.signal),
       confidence: linxuPred.confidence,
@@ -235,7 +235,7 @@ function buildCouncilCards(predictions: AIPrediction[]): CouncilCardData[] {
     cards.push({
       key: 'shen-ce-cheng-ju-rule',
       title: `${shenCe.name} × ${chengJu.name}`,
-      role: '规则侧协同观点',
+      role: '协同观点',
       summary: buildRuleSummary(rulePred),
       actionKey: ruleAction,
       confidence: rulePred.confidence,
@@ -425,6 +425,9 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
 
       {/* Model List */}
       <div className="space-y-3">
+        <p className="px-1 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-600">
+          协同观点基于量化模型底座生成，独立判断保留分析师原始观点
+        </p>
         {councilCards.map((card) => {
            const chipClass = getActionChipClass(card.actionKey);
            const chipText = getCouncilActionLabel(card.actionKey);
