@@ -62,7 +62,7 @@ export function StockProfile({ stock, onClose }: StockProfileProps) {
   // 使用完整的历史数据计算胜率，如果还在加载则使用传入的数据
   const historyToUse = fullHistory.length > 0 ? fullHistory : stock.history;
   const winCount = historyToUse?.filter(h => h.validation_status === 'Correct').length || 0;
-  const totalCount = historyToUse?.filter(h => h.validation_status !== 'Pending').length || 0;
+  const totalCount = historyToUse?.filter(h => h.validation_status === 'Correct' || h.validation_status === 'Incorrect').length || 0;
   const winRate = totalCount > 0 ? Math.round((winCount / totalCount) * 100) : 0;
 
   return (
@@ -103,11 +103,11 @@ export function StockProfile({ stock, onClose }: StockProfileProps) {
 
         <div className="grid grid-cols-2 gap-4 mb-8">
           <div className="glass-card p-4 text-center">
-            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest block mb-2">历史胜率</span>
+            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest block mb-2">回看通过率</span>
             <p className="text-3xl font-black mono text-emerald-500">{winRate}%</p>
           </div>
           <div className="glass-card p-4 text-center">
-            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest block mb-2">累计验证</span>
+            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest block mb-2">完成回看</span>
             <p className="text-3xl font-black mono text-white">{totalCount}</p>
           </div>
         </div>

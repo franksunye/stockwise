@@ -51,7 +51,18 @@ export interface AIPrediction {
         window: number;
         days_evaluated: number;
         trajectory: Array<{ date: string, change: number, cum_change: number }>;
-        max_perf: number;
+        t1_change?: number;
+        cum_change?: number;
+        max_cum_change?: number;
+        min_cum_change?: number;
+        max_perf?: number;
+        signal_family?: 'canonical' | 'legacy';
+        normalized_signal?: string;
+        effective_signal?: string;
+        market?: string;
+        semantic_verdict?: 'Validated' | 'WeakValidated' | 'Invalidated' | 'PendingWindow';
+        outcome_verdict?: 'Strong' | 'Neutral' | 'Weak' | 'Adverse' | 'PendingWindow';
+        reason_code?: string;
     } | string;
     max_perf_in_window?: number;
     layer1_status?: 'NoSetup' | 'Watch' | 'TriggeredLong' | 'RiskOff'; // compatibility field; may include mode overlay

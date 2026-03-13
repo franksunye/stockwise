@@ -30,35 +30,38 @@ export const EFFECTIVE_DECISION_SEMANTIC_SQL = `
 `;
 
 export const EFFECTIVE_VALIDATION_STATUS_SQL = `
-    CASE
-        WHEN p.actual_change IS NULL THEN p.validation_status
-        WHEN p.validation_status IN ('Pending', 'Verifying') THEN p.validation_status
-        WHEN ${EFFECTIVE_SIGNAL_SQL} = 'Long'
-            THEN CASE WHEN p.actual_change > 0 THEN 'Correct' ELSE 'Incorrect' END
-        WHEN ${EFFECTIVE_SIGNAL_SQL} = 'Short'
-            THEN CASE WHEN p.actual_change < 0 THEN 'Correct' ELSE 'Incorrect' END
-        WHEN ${EFFECTIVE_SIGNAL_SQL} = 'Side'
-            THEN CASE WHEN ABS(p.actual_change) <= ${NOISE_THRESHOLD_PERCENT} THEN 'Correct' ELSE 'Incorrect' END
-        ELSE p.validation_status
-    END
+    p.validation_status
 `;
 
-export function deriveValidationStatus(
-    signal: string | null | undefined,
-    actualChange: number | null | undefined,
-    currentStatus: string | null | undefined
-): string | null | undefined {
-    if (actualChange == null) return currentStatus;
-    if (currentStatus === 'Pending' || currentStatus === 'Verifying') return currentStatus;
+export interface ParsedValidationData {
+    window?: number;
+    days_evaluated?: number;
+    trajectory?: Array<{ date: string; change: number; cum_change: number }>;
+    t1_change?: number;
+    cum_change?: number;
+    max_cum_change?: number;
+    min_cum_change?: number;
+    semantic_verdict?: string;
+    outcome_verdict?: string;
+    reason_code?: string;
+}
 
-    if (signal === 'Long') {
-        return actualChange > 0 ? 'Correct' : 'Incorrect';
+export function parseValidationData(raw: unknown): ParsedValidationData | null {
+    if (!raw) return null;
+    if (typeof raw === 'string') {
+        try {
+            return JSON.parse(raw) as ParsedValidationData;
+        } catch {
+            return null;
+        }
     }
-    if (signal === 'Short') {
-        return actualChange < 0 ? 'Correct' : 'Incorrect';
+    if (typeof raw === 'object') {
+        return raw as ParsedValidationData;
     }
-    if (signal === 'Side') {
-        return Math.abs(actualChange) <= NOISE_THRESHOLD_PERCENT ? 'Correct' : 'Incorrect';
-    }
-    return currentStatus;
+    return null;
+}
+
+export function getValidationWindowLabel(windowDays: number | null | undefined): string {
+    if (!windowDays || windowDays <= 1) return '收盘验证';
+    return `${windowDays}日回看`;
 }

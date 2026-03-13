@@ -5,6 +5,7 @@ import { ShieldCheck, XCircle, TrendingUp, TrendingDown, Minus, Target, Clock } 
 import { AIPrediction } from '@/lib/types';
 import { getPredictionActionMeta } from '@/lib/layer1-ui';
 import { formatModelName } from '@/lib/model-names';
+import { getValidationWindowLabel, parseValidationData } from '@/lib/prediction-display';
 
 /**
  * 历史预测卡片
@@ -14,12 +15,18 @@ export const HistoricalCard = memo(function HistoricalCard({ data, onClick }: { 
   const isUp = data.signal === 'Long';
   const isDown = data.signal === 'Short';
   const actionMeta = getPredictionActionMeta(data);
+  const validationData = parseValidationData(data.validation_data);
+  const windowLabel = getValidationWindowLabel(validationData?.window);
+  const displayResult = validationData?.window && validationData.window > 1
+    ? validationData.cum_change ?? data.actual_change
+    : data.actual_change;
+  const resultLabel = validationData?.window && validationData.window > 1 ? `${validationData.window}日累计` : '首日变动';
   const validationSummary =
     data.validation_status === 'Correct'
-      ? '这次历史判断后来被市场验证。'
+      ? `${windowLabel}后，这次判断整体站得住。`
       : data.validation_status === 'Incorrect'
-        ? '这次历史判断后来出现偏差。'
-        : '这次历史判断仍在等待市场验证。';
+        ? `${windowLabel}后，这次判断与市场结果出现偏离。`
+        : `正在等待${windowLabel}走完。`;
   
   // 尝试解析 JSON 理由
   let displayReason = data.ai_reasoning;
@@ -43,13 +50,13 @@ export const HistoricalCard = memo(function HistoricalCard({ data, onClick }: { 
   const getValidationStyle = () => {
     switch (data.validation_status) {
       case 'Correct':
-        return { icon: ShieldCheck, color: 'text-emerald-500', bg: 'bg-emerald-500/10 border-emerald-500/20', label: '预测准确' };
+        return { icon: ShieldCheck, color: 'text-emerald-500', bg: 'bg-emerald-500/10 border-emerald-500/20', label: `${windowLabel}通过` };
       case 'Incorrect':
-        return { icon: XCircle, color: 'text-rose-500', bg: 'bg-rose-500/10 border-rose-500/20', label: '产生偏差' };
+        return { icon: XCircle, color: 'text-rose-500', bg: 'bg-rose-500/10 border-rose-500/20', label: `${windowLabel}偏离` };
       case 'Verifying':
-        return { icon: Clock, color: 'text-indigo-400', bg: 'bg-indigo-500/10 border-indigo-500/20', label: '验证中' };
+        return { icon: Clock, color: 'text-indigo-400', bg: 'bg-indigo-500/10 border-indigo-500/20', label: `${windowLabel}中` };
       default:
-        return { icon: Minus, color: 'text-slate-500', bg: 'bg-slate-500/10 border-slate-500/20', label: '待验证' };
+        return { icon: Minus, color: 'text-slate-500', bg: 'bg-slate-500/10 border-slate-500/20', label: '待回看' };
     }
   };
 
@@ -140,13 +147,13 @@ export const HistoricalCard = memo(function HistoricalCard({ data, onClick }: { 
             
             <div className="text-right">
               <span className="text-[10px] text-slate-500 font-bold uppercase block mb-1 tracking-widest leading-tight">
-                市场结果
+                {resultLabel}
               </span>
               <p className={`text-2xl font-black mono ${
-                (data.actual_change || 0) >= 0 ? 'text-rose-500' : 'text-emerald-500'
+                (displayResult || 0) >= 0 ? 'text-rose-500' : 'text-emerald-500'
               }`}>
-                {data.actual_change !== null && data.actual_change !== undefined
-                  ? `${data.actual_change >= 0 ? '+' : ''}${data.actual_change.toFixed(2)}%`
+                {displayResult !== null && displayResult !== undefined
+                  ? `${displayResult >= 0 ? '+' : ''}${displayResult.toFixed(2)}%`
                   : '--'}
               </p>
             </div>

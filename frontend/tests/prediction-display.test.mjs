@@ -6,23 +6,23 @@ import { describe, it } from 'node:test';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const moduleUrl = pathToFileURL(path.resolve(__dirname, '../src/lib/prediction-display.ts')).href;
 const {
-    deriveValidationStatus,
-    NOISE_THRESHOLD_PERCENT,
+    EFFECTIVE_VALIDATION_STATUS_SQL,
+    getValidationWindowLabel,
+    parseValidationData,
 } = await import(moduleUrl);
 
-describe('prediction display validation derivation', () => {
-    it('keeps pending-like statuses unchanged', () => {
-        assert.equal(deriveValidationStatus('Short', -6.56, 'Pending'), 'Pending');
-        assert.equal(deriveValidationStatus('Short', -6.56, 'Verifying'), 'Verifying');
+describe('prediction display validation helpers', () => {
+    it('uses stored backend validation status directly', () => {
+        assert.equal(EFFECTIVE_VALIDATION_STATUS_SQL.trim(), 'p.validation_status');
     });
 
-    it('treats risk-off style short calls as correct on down moves', () => {
-        assert.equal(deriveValidationStatus('Short', -6.56, 'Incorrect'), 'Correct');
-        assert.equal(deriveValidationStatus('Short', 6.54, 'Correct'), 'Incorrect');
+    it('parses validation payload safely', () => {
+        assert.deepEqual(parseValidationData('{"window":3,"cum_change":1.6}'), { window: 3, cum_change: 1.6 });
+        assert.equal(parseValidationData('not-json'), null);
     });
 
-    it('applies the same noise threshold to side signals', () => {
-        assert.equal(deriveValidationStatus('Side', NOISE_THRESHOLD_PERCENT, 'Incorrect'), 'Correct');
-        assert.equal(deriveValidationStatus('Side', -(NOISE_THRESHOLD_PERCENT + 0.01), 'Correct'), 'Incorrect');
+    it('formats window labels conservatively', () => {
+        assert.equal(getValidationWindowLabel(3), '3日回看');
+        assert.equal(getValidationWindowLabel(1), '收盘验证');
     });
 });

@@ -81,6 +81,7 @@ export async function GET(request: Request) {
                     COALESCE(json_extract(p.ai_reasoning, '$.signal'), p.signal) AS llm_signal,
                     ${EFFECTIVE_VALIDATION_STATUS_SQL} AS validation_status,
                     p.actual_change,
+                    p.validation_data,
                     ${EFFECTIVE_LAYER1_STATUS_SQL} AS layer1_status,
                     p.layer1_status AS layer1_signal,
                     p.layer1_score,

@@ -10,6 +10,7 @@ import { COLORS } from './constants';
 
 import { formatModelName } from '@/lib/model-names';
 import { getPredictionActionMeta } from '@/lib/layer1-ui';
+import { getValidationWindowLabel, parseValidationData } from '@/lib/prediction-display';
 
 interface StockDashboardCardProps {
   data: StockData;
@@ -288,6 +289,8 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
                 // 3. 标签日期：如果有预测用预测日，否则用事实日进行展示
                 const labelDate = validationPrediction ? normalizeTargetDate(validationPrediction.target_date) : anchorDate;
                 const status = validationPrediction?.validation_status;
+                const validationMeta = parseValidationData(validationPrediction?.validation_data);
+                const windowLabel = getValidationWindowLabel(validationMeta?.window);
 
                 return (
                   <>
@@ -303,25 +306,25 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
                            {status === 'Correct' ? (
                              <div className="flex flex-col items-center gap-2">
                                <ShieldCheck size={28} className="text-emerald-500" />
-                               <span className="text-xs font-black text-emerald-500 tracking-wide">历史判断被验证</span>
+                               <span className="text-xs font-black text-emerald-500 tracking-wide">{windowLabel}通过</span>
                              </div>
                            ) : status === 'Verifying' ? (
                              <div className="flex flex-col items-center gap-2">
                                <Clock size={24} className="text-indigo-400 animate-pulse" />
                                <div className="flex flex-col items-center">
-                                 <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">验证中</span>
-                                 <span className="text-[9px] font-bold text-slate-500 italic">正在等待市场走完这段判断...</span>
+                                 <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">{windowLabel}</span>
+                                 <span className="text-[9px] font-bold text-slate-500 italic">等待市场把这段走势走完</span>
                                </div>
                              </div>
                            ) : status === 'Incorrect' ? (
                              <div className="flex flex-col items-center gap-2">
                                <div className="text-rose-500 text-2xl font-black leading-none">❌</div>
-                               <span className="text-xs font-black text-rose-500 tracking-wide">历史判断出现偏差</span>
+                               <span className="text-xs font-black text-rose-500 tracking-wide">{windowLabel}偏离</span>
                              </div>
                            ) : (
                              <div className="flex flex-col items-center gap-2">
                                <Clock size={24} className="text-slate-700" />
-                               <span className="text-[10px] font-bold text-slate-500 italic">等待收盘后验证</span>
+                               <span className="text-[10px] font-bold text-slate-500 italic">等待回看窗口</span>
                              </div>
                            )}
                         </>
