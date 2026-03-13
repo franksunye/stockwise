@@ -8,7 +8,7 @@ import { AIPrediction } from '@/lib/types';
 import Multiavatar from '@/components/Multiavatar';
 
 import { formatModelName } from '@/lib/model-names';
-import { resolveAnalystFromModel } from '@/lib/agent-team';
+import { getTeamMemberById, resolveAnalystFromModel } from '@/lib/agent-team';
 
 interface AICouncilProps {
   symbol: string;
@@ -19,6 +19,22 @@ interface AICouncilProps {
 interface CouncilCachePayload {
   data: AIPrediction[];
   fetchedAt: number;
+}
+
+type CouncilActionKey = 'enter' | 'observe' | 'defense' | 'empty' | 'mixed';
+type CouncilCardMode = 'collab' | 'independent' | 'rule';
+
+interface CouncilCardData {
+  key: string;
+  title: string;
+  role: string;
+  summary: string;
+  actionKey: CouncilActionKey;
+  confidence?: number;
+  supportPrice?: number;
+  isPrimary?: boolean;
+  mode: CouncilCardMode;
+  avatarSeeds: string[];
 }
 
 function mapCouncilMember(pred: AIPrediction) {
@@ -37,8 +53,6 @@ function mapCouncilMember(pred: AIPrediction) {
 const CACHE_TTL = 1000 * 60 * 5;
 const MAX_CACHE_SIZE = 50;
 const councilSnapshotCache = new Map<string, CouncilCachePayload>();
-
-type CouncilActionKey = 'enter' | 'observe' | 'defense' | 'empty' | 'mixed';
 
 function getCouncilActionKey(pred: AIPrediction): CouncilActionKey {
   switch (pred.layer1_status) {
@@ -66,6 +80,24 @@ function getCouncilActionKey(pred: AIPrediction): CouncilActionKey {
   }
 }
 
+function getCouncilActionKeyFromSignal(signalLike: string | undefined | null): CouncilActionKey {
+  switch (signalLike) {
+    case 'TriggeredLong':
+    case 'Long':
+      return 'enter';
+    case 'Watch':
+    case 'Side':
+      return 'observe';
+    case 'RiskOff':
+    case 'Short':
+      return 'defense';
+    case 'NoSetup':
+      return 'empty';
+    default:
+      return 'mixed';
+  }
+}
+
 function getCouncilActionLabel(actionKey: CouncilActionKey): string {
   switch (actionKey) {
     case 'enter':
@@ -81,13 +113,154 @@ function getCouncilActionLabel(actionKey: CouncilActionKey): string {
   }
 }
 
-function getCouncilSummary(reasoning: string): string {
+function parseReasoning(reasoning: string | undefined): Record<string, unknown> | null {
+  if (!reasoning) return null;
   try {
-    const parsed = JSON.parse(reasoning);
-    return parsed.summary || parsed.analysis || reasoning;
+    return JSON.parse(reasoning) as Record<string, unknown>;
   } catch {
-    return reasoning;
+    return null;
   }
+}
+
+function getCouncilSummary(reasoning: string): string {
+  const parsed = parseReasoning(reasoning);
+  if (!parsed) return reasoning;
+  return String(parsed.summary || parsed.analysis || reasoning);
+}
+
+function getConflictSummary(reasoning: string | undefined): string | null {
+  const parsed = parseReasoning(reasoning);
+  if (!parsed) return null;
+  const conflict = parsed.conflict_resolution;
+  return typeof conflict === 'string' && conflict.trim() ? conflict.trim() : null;
+}
+
+function getFirstSentence(text: string | null | undefined): string | null {
+  if (!text) return null;
+  const normalized = text.trim();
+  if (!normalized) return null;
+  const match = normalized.match(/^.+?[。！？!?]/);
+  return match ? match[0] : normalized;
+}
+
+function buildCollabSummary(pred: AIPrediction, analystName: string): string {
+  const actionLabel = getCouncilActionLabel(
+    getCouncilActionKeyFromSignal(pred.layer1_signal || pred.layer1_status || pred.canonical_signal || pred.signal)
+  );
+  const conflict = getFirstSentence(getConflictSummary(pred.llm_reasoning || pred.ai_reasoning));
+  if (conflict) return conflict;
+
+  const summary = getFirstSentence(getCouncilSummary(pred.llm_reasoning || pred.ai_reasoning));
+  if (summary) {
+    return `基于量化模型当前${actionLabel}结论，${analystName}复核后给出协同汇报：${summary}`;
+  }
+  return `基于量化模型当前${actionLabel}结论，${analystName}复核后维持协同判断。`;
+}
+
+function buildRuleSummary(pred: AIPrediction): string {
+  const summary = getFirstSentence(getCouncilSummary(pred.llm_reasoning || pred.ai_reasoning));
+  if (summary) return summary;
+  const actionLabel = getCouncilActionLabel(
+    getCouncilActionKeyFromSignal(pred.layer1_signal || pred.layer1_status || pred.canonical_signal || pred.signal)
+  );
+  return `规则侧当前给出${actionLabel}判断，继续以量化模型结论作为纪律锚点。`;
+}
+
+function getActionChipClass(actionKey: CouncilActionKey): string {
+  if (actionKey === 'enter') return 'bg-emerald-500/20 text-emerald-400';
+  if (actionKey === 'defense') return 'bg-rose-500/20 text-rose-400';
+  if (actionKey === 'empty') return 'bg-slate-500/20 text-slate-300';
+  return 'bg-amber-500/20 text-amber-400';
+}
+
+function buildCouncilCards(predictions: AIPrediction[]): CouncilCardData[] {
+  const shenCe = getTeamMemberById('shen_ce');
+  const guShen = getTeamMemberById('gu_shen');
+  const linXu = getTeamMemberById('lin_xu');
+  const chengJu = getTeamMemberById('cheng_ju');
+
+  const deepseekPred = predictions.find((pred) => resolveAnalystFromModel(`${pred.display_name || ''} ${pred.model || ''}`).id === 'gu_shen');
+  const linxuPred = predictions.find((pred) => resolveAnalystFromModel(`${pred.display_name || ''} ${pred.model || ''}`).id === 'lin_xu');
+  const rulePred = predictions.find((pred) => resolveAnalystFromModel(`${pred.display_name || ''} ${pred.model || ''}`).id === 'cheng_ju');
+
+  const cards: CouncilCardData[] = [];
+
+  if (deepseekPred) {
+    const collabAction = getCouncilActionKeyFromSignal(
+      deepseekPred.layer1_signal || deepseekPred.layer1_status || deepseekPred.canonical_signal || deepseekPred.signal
+    );
+    cards.push({
+      key: 'shen-ce-gu-shen-collab',
+      title: `${shenCe.name} × ${guShen.name}`,
+      role: '量化模型协同观点',
+      summary: buildCollabSummary(deepseekPred, guShen.name),
+      actionKey: collabAction,
+      confidence: deepseekPred.confidence,
+      supportPrice: deepseekPred.support_price,
+      isPrimary: true,
+      mode: 'collab',
+      avatarSeeds: [shenCe.avatarSeed, guShen.avatarSeed],
+    });
+    cards.push({
+      key: 'gu-shen-independent',
+      title: guShen.name,
+      role: '独立观点',
+      summary: getCouncilSummary(deepseekPred.llm_reasoning || deepseekPred.ai_reasoning),
+      actionKey: getCouncilActionKeyFromSignal(deepseekPred.llm_signal || deepseekPred.signal),
+      confidence: deepseekPred.confidence,
+      supportPrice: deepseekPred.support_price,
+      mode: 'independent',
+      avatarSeeds: [guShen.avatarSeed],
+    });
+  }
+
+  if (linxuPred) {
+    cards.push({
+      key: 'lin-xu-independent',
+      title: linXu.name,
+      role: '独立观点',
+      summary: getCouncilSummary(linxuPred.llm_reasoning || linxuPred.ai_reasoning),
+      actionKey: getCouncilActionKeyFromSignal(linxuPred.llm_signal || linxuPred.signal),
+      confidence: linxuPred.confidence,
+      supportPrice: linxuPred.support_price,
+      mode: 'independent',
+      avatarSeeds: [linXu.avatarSeed],
+    });
+  }
+
+  if (rulePred) {
+    const ruleAction = getCouncilActionKeyFromSignal(
+      rulePred.layer1_signal || rulePred.layer1_status || rulePred.canonical_signal || rulePred.signal
+    );
+    cards.push({
+      key: 'shen-ce-cheng-ju-rule',
+      title: `${shenCe.name} × ${chengJu.name}`,
+      role: '规则侧协同观点',
+      summary: buildRuleSummary(rulePred),
+      actionKey: ruleAction,
+      confidence: rulePred.confidence,
+      supportPrice: rulePred.support_price,
+      mode: 'rule',
+      avatarSeeds: [shenCe.avatarSeed, chengJu.avatarSeed],
+    });
+  }
+
+  if (cards.length > 0) return cards;
+
+  return predictions.map((pred, idx) => {
+    const member = mapCouncilMember(pred);
+    return {
+      key: `fallback-${idx}`,
+      title: member.name,
+      role: member.role,
+      summary: getCouncilSummary(pred.ai_reasoning),
+      actionKey: getCouncilActionKey(pred),
+      confidence: pred.confidence,
+      supportPrice: pred.support_price,
+      mode: 'independent',
+      avatarSeeds: [member.avatarSeed],
+    };
+  });
 }
 
 function getCouncilSnapshot(key: string): CouncilCachePayload | undefined {
@@ -165,6 +338,7 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
 
   const predictions = payload?.data || [];
   const loading = isLoading && predictions.length === 0;
+  const councilCards = buildCouncilCards(predictions);
 
   if (loading) {
     return (
@@ -251,28 +425,30 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
 
       {/* Model List */}
       <div className="space-y-3">
-        {predictions.map((pred, idx) => {
-           const isPrimary = typeof pred.is_primary === 'number' ? pred.is_primary === 1 : pred.is_primary === true;
-           const member = mapCouncilMember(pred);
-           const actionKey = getCouncilActionKey(pred);
-           const chipClass = actionKey === 'enter'
-             ? 'bg-emerald-500/20 text-emerald-400'
-             : actionKey === 'defense'
-               ? 'bg-rose-500/20 text-rose-400'
-               : actionKey === 'empty'
-                 ? 'bg-slate-500/20 text-slate-300'
-                 : 'bg-amber-500/20 text-amber-400';
-           const chipText = getCouncilActionLabel(actionKey);
+        {councilCards.map((card) => {
+           const chipClass = getActionChipClass(card.actionKey);
+           const chipText = getCouncilActionLabel(card.actionKey);
            return (
-             <div key={idx} className={`p-4 rounded-xl border ${isPrimary ? 'bg-indigo-500/10 border-indigo-500/20' : 'bg-white/[0.02] border-white/5'}`}>
+             <div key={card.key} className={`p-4 rounded-xl border ${card.isPrimary ? 'bg-indigo-500/10 border-indigo-500/20' : 'bg-white/[0.02] border-white/5'}`}>
                 <div className="flex items-center justify-between mb-3">
                    <div className="flex items-center gap-2">
-                      <div className={`w-7 h-7 rounded-full border overflow-hidden ${isPrimary ? 'bg-indigo-500/10 border-indigo-500/30' : 'bg-white/5 border-white/10'}`}>
-                         <Multiavatar name={member.avatarSeed} className="w-full h-full" />
-                      </div>
+                      {card.avatarSeeds.length === 1 ? (
+                        <div className={`w-7 h-7 rounded-full border overflow-hidden ${card.isPrimary ? 'bg-indigo-500/10 border-indigo-500/30' : 'bg-white/5 border-white/10'}`}>
+                           <Multiavatar name={card.avatarSeeds[0]} className="w-full h-full" />
+                        </div>
+                      ) : (
+                        <div className="relative w-11 h-7">
+                          <div className={`absolute left-0 top-0 w-7 h-7 rounded-full border overflow-hidden bg-white/5 border-white/10 z-10`}>
+                            <Multiavatar name={card.avatarSeeds[0]} className="w-full h-full" />
+                          </div>
+                          <div className={`absolute left-4 top-0 w-7 h-7 rounded-full border overflow-hidden ${card.isPrimary ? 'bg-indigo-500/10 border-indigo-500/30' : 'bg-white/5 border-white/10'} z-20`}>
+                            <Multiavatar name={card.avatarSeeds[1]} className="w-full h-full" />
+                          </div>
+                        </div>
+                      )}
                       <div className="flex items-center gap-2">
-                        <p className={`text-xs font-black tracking-wide ${isPrimary ? 'text-indigo-300' : 'text-slate-300'}`}>{member.name}</p>
-                        <p className="text-[10px] text-slate-500/80 font-bold">| {member.role}</p>
+                        <p className={`text-xs font-black tracking-wide ${card.isPrimary ? 'text-indigo-300' : 'text-slate-300'}`}>{card.title}</p>
+                        <p className="text-[10px] text-slate-500/80 font-bold">| {card.role}</p>
                       </div>
                     </div>
                    <div className={`px-2 py-1 rounded text-[10px] font-black uppercase tracking-wide ${chipClass}`}>
@@ -281,12 +457,12 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
                 </div>
                 
                 <p className="text-xs text-slate-300 leading-relaxed font-medium line-clamp-2">
-                   {getCouncilSummary(pred.ai_reasoning)}
+                   {card.summary}
                 </p>
 
                 <div className="mt-3 flex items-center gap-4 text-[10px] text-slate-500 font-bold">
-                   <span>把握: {(pred.confidence * 100).toFixed(0)}%</span>
-                   {pred.support_price && <span>支撑位: {pred.support_price}</span>}
+                   {typeof card.confidence === 'number' && <span>把握: {(card.confidence * 100).toFixed(0)}%</span>}
+                   {card.supportPrice && <span>支撑位: {card.supportPrice}</span>}
                 </div>
              </div>
            );
