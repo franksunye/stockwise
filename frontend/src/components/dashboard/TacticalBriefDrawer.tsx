@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useMemo } from 'react';
+import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   X as CloseIcon, 
@@ -307,7 +307,6 @@ export function TacticalBriefDrawer({
   const [viewState, setViewState] = useState<'holding_profit'|'holding_loss'|'empty'>('holding_profit');
   const [activeIndex, setActiveIndex] = useState(0);
   const nodes = getPriceNodes(data, currentPrice);
-  const nodeSignature = useMemo(() => nodes.map((n) => n.id).join('|'), [nodes]);
   const isHK = symbol.length === 5;
   const scrollRef = useRef<HTMLDivElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
@@ -328,22 +327,29 @@ export function TacticalBriefDrawer({
     return { label: '低', color: 'text-emerald-400', interpretation: '空头压力偏低，抛压有限' };
   })();
 
-  // Reset carousel position whenever drawer opens or stock context changes.
-  useEffect(() => {
-    if (!isOpen) return;
-    const nowIdx = nodes.findIndex(n => n.kind === "current");
-    const targetIdx = nowIdx >= 0 ? nowIdx : 0;
-    setActiveIndex(targetIdx);
+  const defaultActiveIndex = useMemo(() => {
+    const nowIdx = nodes.findIndex((node) => node.kind === 'current');
+    return nowIdx >= 0 ? nowIdx : 0;
+  }, [nodes]);
+
+  const syncCarouselToIndex = useCallback((index: number) => {
     requestAnimationFrame(() => {
       const container = carouselRef.current;
-      if (container) {
-        const firstChild = container.children[0] as HTMLElement;
-        const step = firstChild ? firstChild.offsetWidth + 16 : container.clientWidth;
-        container.scrollTo({ left: targetIdx * step, behavior: "auto" });
-      }
+      if (!container) return;
+
+      const firstChild = container.children[0] as HTMLElement | undefined;
+      const step = firstChild ? firstChild.offsetWidth + 16 : container.clientWidth;
+      container.scrollTo({ left: index * step, behavior: 'auto' });
     });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, symbol, nodeSignature]);
+  }, []);
+
+  // Reset carousel position whenever drawer opens, stock context changes,
+  // or the user switches back to the tactical brief tab.
+  useEffect(() => {
+    if (!isOpen || activeTab !== 'brief') return;
+    setActiveIndex(defaultActiveIndex);
+    syncCarouselToIndex(defaultActiveIndex);
+  }, [activeTab, defaultActiveIndex, isOpen, syncCarouselToIndex]);
 
   useEffect(() => {
     if (!isOpen) return;
