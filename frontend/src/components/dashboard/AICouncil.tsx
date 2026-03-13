@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { preload } from 'swr';
 import useSWR from 'swr';
 import { ShieldCheck, AlertTriangle, RotateCw } from 'lucide-react';
@@ -53,6 +54,7 @@ function mapCouncilMember(pred: AIPrediction) {
 
 const CACHE_TTL = 1000 * 60 * 5;
 const MAX_CACHE_SIZE = 50;
+const LOADING_INDICATOR_DELAY_MS = 150;
 const councilSnapshotCache = new Map<string, CouncilCachePayload>();
 
 function getCouncilActionKey(pred: AIPrediction): CouncilActionKey {
@@ -351,7 +353,27 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
 
   const predictions = payload?.data || [];
   const loading = isLoading && predictions.length === 0;
+  const [showLoadingIndicator, setShowLoadingIndicator] = useState(false);
   const councilCards = buildCouncilCards(predictions);
+
+  useEffect(() => {
+    if (!loading) {
+      setShowLoadingIndicator(false);
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      setShowLoadingIndicator(true);
+    }, LOADING_INDICATOR_DELAY_MS);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [loading]);
+
+  if (loading && !showLoadingIndicator) {
+    return <div className="min-h-[88px]" aria-hidden="true" />;
+  }
 
   if (loading) {
     return (

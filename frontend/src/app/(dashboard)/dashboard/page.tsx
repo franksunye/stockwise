@@ -38,6 +38,20 @@ const TacticalBriefDrawer = dynamic(() => import('@/components/dashboard/Tactica
   loading: () => null
 });
 
+let aiCouncilPreloadModulePromise: Promise<typeof import('@/components/dashboard/AICouncil')> | null = null;
+
+function preloadCouncil(symbol?: string, targetDate?: string) {
+  if (!symbol || !targetDate) return;
+  aiCouncilPreloadModulePromise ??= import('@/components/dashboard/AICouncil');
+  void aiCouncilPreloadModulePromise
+    .then(({ preloadAICouncil }) => {
+      preloadAICouncil(symbol, targetDate);
+    })
+    .catch(() => {
+      // Non-critical: this only affects first-open smoothness.
+    });
+}
+
 // 扩展类型以包含黄历特有字段，消除 lint 错误
 interface ExtendedStockData extends StockData {
   isAlmanac?: boolean;
@@ -146,6 +160,7 @@ function DashboardContent() {
   const closeProfile = useCallback(() => setProfileStock(null), []);
   
   const handleShowTactics = useCallback((symbol: string, prediction: AIPrediction) => {
+    preloadCouncil(symbol, prediction.target_date);
     setSelectedTactics({ symbol, prediction });
   }, []);
 
@@ -181,6 +196,11 @@ function DashboardContent() {
       setBriefOpen(true);
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    if (!currentStock || currentStock.isAlmanac) return;
+    preloadCouncil(currentStock.symbol, currentStock.prediction?.target_date);
+  }, [currentStock]);
 
   useEffect(() => {
     try {
