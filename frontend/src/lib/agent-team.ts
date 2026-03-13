@@ -172,8 +172,8 @@ const TEAM_MEMBER_DIRECTORY: Record<TeamMemberId, TeamMemberProfile> = {
     role: '验证审计官',
     roleEn: 'VALIDATION AUDITOR',
     avatarSeed: 'verifier-audit-desk',
-    briefSummary: '收盘后回写校验，持续追踪命中率与误差漂移。',
-    aboutDescription: '收盘后回写校验，持续追踪命中率与误差漂移。',
+    briefSummary: '收盘后回写校验，持续追踪历史表现与误差漂移。',
+    aboutDescription: '收盘后回写校验，持续追踪历史表现与误差漂移。',
     unit: 'ops',
     style: {
       textColor: 'text-amber-400',

@@ -40,7 +40,7 @@ AGENTS = {
         "role": "收盘验证与审计回写",
         "color": "amber",
         "avatar": "/avatars/verifier.png",
-        "description": "专职追踪预测兑现并回写验证结果与准确率审计。",
+        "description": "专职追踪历史判断兑现情况，并回写验证结果与表现审计。",
     },
 }
 

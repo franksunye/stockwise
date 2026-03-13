@@ -59,7 +59,7 @@ export function StockProfile({ stock, onClose }: StockProfileProps) {
 
 
 
-  // 使用完整的历史数据计算胜率，如果还在加载则使用传入的数据
+  // 使用完整的历史数据计算回看通过率，如果还在加载则使用传入的数据
   const historyToUse = fullHistory.length > 0 ? fullHistory : stock.history;
   const winCount = historyToUse?.filter(h => h.validation_status === 'Correct').length || 0;
   const totalCount = historyToUse?.filter(h => h.validation_status === 'Correct' || h.validation_status === 'Incorrect').length || 0;

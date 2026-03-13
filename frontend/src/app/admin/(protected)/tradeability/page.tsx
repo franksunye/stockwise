@@ -535,7 +535,7 @@ export default function TradeabilityControlTowerPage() {
                                                     </div>
                                                 </div>
                                                 <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
-                                                    <MetricBlock label="胜率" value={pct(item.hit_rate)} />
+                                                    <MetricBlock label="历史通过率" value={pct(item.hit_rate)} />
                                                     <MetricBlock label="回撤" value={pct(item.max_drawdown)} />
                                                     <MetricBlock label="盈亏比" value={num(item.payoff_ratio)} />
                                                     <MetricBlock label="样本数" value={String(item.sample_size)} />
@@ -577,13 +577,13 @@ export default function TradeabilityControlTowerPage() {
                                                 <div className="text-xs text-slate-500">统计到 {item.as_of_date || '--'}</div>
                                             </div>
                                             <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
-                                                <MetricBlock label="胜率" value={pct(item.hit_rate)} />
+                                                <MetricBlock label="历史通过率" value={pct(item.hit_rate)} />
                                                 <MetricBlock label="出手率" value={pct(item.coverage)} />
                                                 <MetricBlock label="最大回撤" value={pct(item.max_drawdown)} />
                                                 <MetricBlock label="样本数" value={String(item.sample_size)} />
                                             </div>
                                             <div className="mt-3 rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2 text-xs text-slate-400">
-                                                胜率、出手率和回撤都必须结合样本数一起看；这些指标用于评估模式价值，不代表未来收益承诺。
+                                                历史通过率、出手率和回撤都必须结合样本数一起看；这些指标用于评估模式价值，不代表未来收益承诺。
                                             </div>
                                         </div>
                                     ))}
@@ -770,7 +770,7 @@ export default function TradeabilityControlTowerPage() {
                                     <thead className="text-slate-500 text-xs uppercase tracking-widest">
                                         <tr className="border-b border-white/10">
                                             <th className="text-left py-3 pr-3">模式</th>
-                                            <th className="text-left py-3 pr-3"><HeaderTip label="胜率" tip="胜率表示历史样本里判断方向大体正确的比例。越高通常越好，但也要结合样本数一起看。" /></th>
+                                            <th className="text-left py-3 pr-3"><HeaderTip label="历史通过率" tip="历史通过率表示样本在既定回看口径下整体站得住的比例。越高通常越好，但也要结合样本数一起看。" /></th>
                                             <th className="text-left py-3 pr-3"><HeaderTip label="出手率" tip="出手率表示系统愿意给出明确出手结论的比例。越高说明出手更频繁，但不代表质量一定更高。" /></th>
                                             <th className="text-left py-3 pr-3"><HeaderTip label="最大回撤" tip="最大回撤表示这段时间里最差的一次下滑幅度。绝对值越大，说明承受的风险越高。" /></th>
                                             <th className="text-left py-3 pr-3"><HeaderTip label="盈亏比" tip="盈亏比表示平均盈利和平均亏损的相对关系。大于 1 通常更理想，说明赚的时候比亏的时候更多。" /></th>
