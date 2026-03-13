@@ -26,6 +26,10 @@ export interface User {
   registrationType: RegistrationType;
 }
 
+interface GetCurrentUserOptions {
+  forceSessionSync?: boolean;
+}
+
 /**
  * 生成短格式 User ID (user_xxx)
  * 统一的 ID 生成入口，确保全局一致性
@@ -111,7 +115,7 @@ function syncUserIdToStorage(userId: string, userType: RegistrationType): void {
  * 2. Cookie（iOS PWA 主屏幕应用恢复）
  * 3. 创建新用户（首次访问）
  */
-export async function getCurrentUser(): Promise<User> {
+export async function getCurrentUser(options: GetCurrentUserOptions = {}): Promise<User> {
   if (typeof window === 'undefined') {
     // SSR 环境，返回临时用户
     return {
@@ -164,7 +168,7 @@ export async function getCurrentUser(): Promise<User> {
 
   // 确保服务端会话存在（同时兼容老 userId 迁移）
   const lastSyncAt = Number(sessionStorage.getItem(USER_SESSION_SYNC_KEY) || '0');
-  const shouldSyncSession = Date.now() - lastSyncAt > USER_SESSION_SYNC_INTERVAL_MS;
+  const shouldSyncSession = options.forceSessionSync || (Date.now() - lastSyncAt > USER_SESSION_SYNC_INTERVAL_MS);
   if (shouldSyncSession) {
     try {
       const controller = new AbortController();

@@ -129,7 +129,7 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
 
             let batchRes = await fetch(url, fetchOptions);
             if (batchRes.status === 401) {
-                await getCurrentUser();
+                await getCurrentUser({ forceSessionSync: true });
                 batchRes = await fetch(url, fetchOptions);
             }
             clearTimeout(timeoutId);
