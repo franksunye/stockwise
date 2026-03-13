@@ -4,6 +4,7 @@ import { getUserTier } from '@/lib/user-server';
 import { getModelSqlFilter } from '@/lib/membership-config';
 import { requireUserSession } from '@/lib/user-session';
 import {
+    DEFAULT_MODE_ID,
     ensureInvestmentModeSchema,
     getUserMode,
     type UserTier,
@@ -59,10 +60,16 @@ export async function GET(request: Request) {
         let shortMetricsRows: Record<string, unknown>[] = [];
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let almanacs: any[] = [];
+        let currentModeId = DEFAULT_MODE_ID;
 
         try {
-            await ensureInvestmentModeSchema(client);
-            const currentMode = await getUserMode(client, userId, userTier as UserTier);
+            try {
+                await ensureInvestmentModeSchema(client);
+                const currentMode = await getUserMode(client, userId, userTier as UserTier);
+                currentModeId = currentMode.mode_id;
+            } catch (error) {
+                console.error('[Batch] Mode context unavailable, using default mode fallback:', error);
+            }
 
             if ('execute' in client) {
                 if (symbols.length > 0) {
@@ -98,6 +105,43 @@ export async function GET(request: Request) {
                         ),
                         HistoryRanked AS (
                             SELECT d.*, 
+                                   ROW_NUMBER() OVER (PARTITION BY symbol ORDER BY target_date DESC) as rn_history
+                            FROM DailyBest d
+                        )
+                        SELECT h.*, dp.close as close_price,
+                               dp.rsi, dp.kdj_k, dp.kdj_d, dp.kdj_j, dp.macd, dp.macd_signal, dp.macd_hist, dp.boll_upper, dp.boll_mid, dp.boll_lower
+                        FROM HistoryRanked h
+                        LEFT JOIN daily_prices dp ON h.symbol = dp.symbol AND h.target_date = dp.date
+                        WHERE h.rn_history <= ${historyLimit}
+                        ORDER BY h.target_date DESC
+                    `;
+                    const fallbackHistorySql = `
+                        WITH RankedPredictions AS (
+                            SELECT p.symbol, p.date, p.target_date,
+                                    p.signal AS signal,
+                                    p.signal AS canonical_signal,
+                                    p.confidence,
+                                    p.support_price, p.ai_reasoning, p.ai_reasoning AS llm_reasoning,
+                                    COALESCE(json_extract(p.ai_reasoning, '$.signal'), p.signal) AS llm_signal,
+                                    p.validation_status AS validation_status, p.actual_change,
+                                    p.validation_data,
+                                    p.layer1_status AS layer1_status,
+                                    p.layer1_status AS layer1_signal,
+                                    p.layer1_score, p.layer1_trigger_hit, p.layer1_risk_off_hit, p.layer1_strategy_version, p.layer1_payload,
+                                    p.max_perf_in_window,
+                                    p.is_primary, p.model_id as model, m.display_name,
+                                    p.signal AS decision_semantic,
+                                    ? AS mode_id,
+                                    ROW_NUMBER() OVER (PARTITION BY p.symbol, p.target_date ORDER BY m.priority DESC) as rn_daily
+                            FROM ai_predictions_v2 p
+                            LEFT JOIN prediction_models m ON p.model_id = m.model_id
+                            WHERE p.symbol IN (${placeholders}) AND (${tierFilter})
+                        ),
+                        DailyBest AS (
+                            SELECT * FROM RankedPredictions WHERE rn_daily = 1
+                        ),
+                        HistoryRanked AS (
+                            SELECT d.*,
                                    ROW_NUMBER() OVER (PARTITION BY symbol ORDER BY target_date DESC) as rn_history
                             FROM DailyBest d
                         )
@@ -150,33 +194,60 @@ export async function GET(request: Request) {
                         LEFT JOIN weekly_latest w ON t.symbol = w.symbol
                         LEFT JOIN eligible_latest e ON t.symbol = e.symbol
                     `;
-                    const [pricesRs, historyRs, shortRs] = await Promise.all([
-                        client.execute({
-                            sql: `SELECT dp.* FROM daily_prices dp
-                                        INNER JOIN (
-                                            SELECT symbol, MAX(date) as max_date
-                                            FROM daily_prices
-                                            WHERE symbol IN (${placeholders})
-                                            GROUP BY symbol
-                                        ) latest ON dp.symbol = latest.symbol AND dp.date = latest.max_date`,
-                            args: symbols
-                        }),
-                        client.execute({
-                            sql: historySql,
-                            args: [currentMode.mode_id, currentMode.mode_id, ...symbols]
-                        }),
-                        client.execute({
-                            sql: shortSql,
-                            args: symbols
-                        })
-                    ]);
-                    if (pricesRs.rows && pricesRs.rows.length > 0) latestPrices = pricesRs.rows as Record<string, unknown>[];
-                    if (historyRs.rows && historyRs.rows.length > 0) allHistory = historyRs.rows as Record<string, unknown>[];
-                    if (shortRs.rows && shortRs.rows.length > 0) shortMetricsRows = shortRs.rows as Record<string, unknown>[];
+                    try {
+                        const [pricesRs, historyRs, shortRs] = await Promise.all([
+                            client.execute({
+                                sql: `SELECT dp.* FROM daily_prices dp
+                                            INNER JOIN (
+                                                SELECT symbol, MAX(date) as max_date
+                                                FROM daily_prices
+                                                WHERE symbol IN (${placeholders})
+                                                GROUP BY symbol
+                                            ) latest ON dp.symbol = latest.symbol AND dp.date = latest.max_date`,
+                                args: symbols
+                            }),
+                            client.execute({
+                                sql: historySql,
+                                args: [currentModeId, currentModeId, ...symbols]
+                            }),
+                            client.execute({
+                                sql: shortSql,
+                                args: symbols
+                            })
+                        ]);
+                        if (pricesRs.rows && pricesRs.rows.length > 0) latestPrices = pricesRs.rows as Record<string, unknown>[];
+                        if (historyRs.rows && historyRs.rows.length > 0) allHistory = historyRs.rows as Record<string, unknown>[];
+                        if (shortRs.rows && shortRs.rows.length > 0) shortMetricsRows = shortRs.rows as Record<string, unknown>[];
+                    } catch (error) {
+                        console.error('[Batch] Rich cloud query failed, retrying with fallback payload:', error);
+                        const [pricesRs, historyRs] = await Promise.all([
+                            client.execute({
+                                sql: `SELECT dp.* FROM daily_prices dp
+                                            INNER JOIN (
+                                                SELECT symbol, MAX(date) as max_date
+                                                FROM daily_prices
+                                                WHERE symbol IN (${placeholders})
+                                                GROUP BY symbol
+                                            ) latest ON dp.symbol = latest.symbol AND dp.date = latest.max_date`,
+                                args: symbols
+                            }),
+                            client.execute({
+                                sql: fallbackHistorySql,
+                                args: [currentModeId, ...symbols]
+                            })
+                        ]);
+                        latestPrices = pricesRs.rows as Record<string, unknown>[];
+                        allHistory = historyRs.rows as Record<string, unknown>[];
+                        shortMetricsRows = [];
+                    }
                 }
 
-                const rsAlmanac = await client.execute({ sql: 'SELECT * FROM market_almanacs ORDER BY target_date DESC LIMIT 5', args: [] });
-                if (rsAlmanac.rows && rsAlmanac.rows.length > 0) almanacs = rsAlmanac.rows;
+                try {
+                    const rsAlmanac = await client.execute({ sql: 'SELECT * FROM market_almanacs ORDER BY target_date DESC LIMIT 5', args: [] });
+                    if (rsAlmanac.rows && rsAlmanac.rows.length > 0) almanacs = rsAlmanac.rows;
+                } catch (error) {
+                    console.error('[Batch] Almanac query failed, continuing without almanac:', error);
+                }
             } else {
                 if (symbols.length > 0) {
                     const placeholders = symbols.map(() => '?').join(',');
@@ -231,6 +302,43 @@ export async function GET(request: Request) {
                         WHERE h.rn_history <= ${historyLimit}
                         ORDER BY h.target_date DESC
                     `;
+                    const fallbackHistorySql = `
+                        WITH RankedPredictions AS (
+                            SELECT p.symbol, p.date, p.target_date,
+                                    p.signal AS signal,
+                                    p.signal AS canonical_signal,
+                                    p.confidence,
+                                    p.support_price, p.ai_reasoning, p.ai_reasoning AS llm_reasoning,
+                                    COALESCE(json_extract(p.ai_reasoning, '$.signal'), p.signal) AS llm_signal,
+                                    p.validation_status AS validation_status, p.actual_change,
+                                    p.validation_data,
+                                    p.layer1_status AS layer1_status,
+                                    p.layer1_status AS layer1_signal,
+                                    p.layer1_score, p.layer1_trigger_hit, p.layer1_risk_off_hit, p.layer1_strategy_version, p.layer1_payload,
+                                    p.max_perf_in_window,
+                                    p.is_primary, p.model_id as model, m.display_name,
+                                    p.signal AS decision_semantic,
+                                    ? AS mode_id,
+                                    ROW_NUMBER() OVER (PARTITION BY p.symbol, p.target_date ORDER BY m.priority DESC) as rn_daily
+                            FROM ai_predictions_v2 p
+                            LEFT JOIN prediction_models m ON p.model_id = m.model_id
+                            WHERE p.symbol IN (${placeholders}) AND (${tierFilter})
+                        ),
+                        DailyBest AS (
+                            SELECT * FROM RankedPredictions WHERE rn_daily = 1
+                        ),
+                        HistoryRanked AS (
+                            SELECT d.*,
+                                   ROW_NUMBER() OVER (PARTITION BY symbol ORDER BY target_date DESC) as rn_history
+                            FROM DailyBest d
+                        )
+                        SELECT h.*, dp.close as close_price,
+                               dp.rsi, dp.kdj_k, dp.kdj_d, dp.kdj_j, dp.macd, dp.macd_signal, dp.macd_hist, dp.boll_upper, dp.boll_mid, dp.boll_lower
+                        FROM HistoryRanked h
+                        LEFT JOIN daily_prices dp ON h.symbol = dp.symbol AND h.target_date = dp.date
+                        WHERE h.rn_history <= ${historyLimit}
+                        ORDER BY h.target_date DESC
+                    `;
                     const targetValues = symbols.map(() => '(?)').join(',');
                     const shortSql = `
                         WITH target(symbol) AS (VALUES ${targetValues}),
@@ -273,10 +381,20 @@ export async function GET(request: Request) {
                         LEFT JOIN weekly_latest w ON t.symbol = w.symbol
                         LEFT JOIN eligible_latest e ON t.symbol = e.symbol
                     `;
-                    allHistory = client.prepare(historySql).all(currentMode.mode_id, currentMode.mode_id, ...symbols) as Record<string, unknown>[];
-                    shortMetricsRows = client.prepare(shortSql).all(...symbols) as Record<string, unknown>[];
+                    try {
+                        allHistory = client.prepare(historySql).all(currentModeId, currentModeId, ...symbols) as Record<string, unknown>[];
+                        shortMetricsRows = client.prepare(shortSql).all(...symbols) as Record<string, unknown>[];
+                    } catch (error) {
+                        console.error('[Batch] Rich local query failed, retrying with fallback payload:', error);
+                        allHistory = client.prepare(fallbackHistorySql).all(currentModeId, ...symbols) as Record<string, unknown>[];
+                        shortMetricsRows = [];
+                    }
                 }
-                almanacs = client.prepare('SELECT * FROM market_almanacs ORDER BY target_date DESC LIMIT 5').all();
+                try {
+                    almanacs = client.prepare('SELECT * FROM market_almanacs ORDER BY target_date DESC LIMIT 5').all();
+                } catch (error) {
+                    console.error('[Batch] Local almanac query failed, continuing without almanac:', error);
+                }
             }
             if (almanacs.length > 0) {
                 almanacs.forEach(a => {
