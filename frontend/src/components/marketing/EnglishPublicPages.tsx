@@ -21,7 +21,96 @@ import MarketingHeader from '@/components/MarketingHeader';
 import Multiavatar from '@/components/Multiavatar';
 import { BoundaryNotice, GeoSummary, SourceBlock } from '@/components/seo/GeoBlocks';
 import { brandCoreZhCN } from '@/content/brand-core.zh-CN';
-import { agentTeam, founders } from '@/lib/agent-team';
+
+const EN_FOUNDERS = [
+  {
+    label: 'Founder / Research Lead',
+    name: 'Andre Gu',
+    description:
+      'Leads research direction, systems architecture, and product delivery, translating the quant-plus-AI methodology into a stable user-facing workflow.',
+  },
+  {
+    label: 'Co-Founder',
+    name: 'Frank Sun',
+    description:
+      'Owns product strategy, trading framework design, and risk boundaries, ensuring every output remains explainable, actionable, and reviewable.',
+  },
+] as const;
+
+const EN_AGENT_TEAM = [
+  {
+    name: 'Gu Shen (DeepSeek)',
+    role: 'Senior Analyst',
+    description:
+      'Produces the primary conclusion, deeper scenario analysis, and core risk judgment, then turns that work into a clearer tactical narrative.',
+    avatarSeed: 'gu-shen-deepseek',
+    textColor: 'text-indigo-400',
+    bgColor: 'bg-indigo-500/10',
+    borderColor: 'border-indigo-500/20',
+    glowColor: 'bg-indigo-500',
+    aboutGradient: 'from-indigo-500/20',
+  },
+  {
+    name: 'Lin Xu (Hunyuan Lite)',
+    role: 'Junior Analyst',
+    description:
+      'Adds supporting analysis and alternate angles, helping translate complex market behavior into judgments that are easier to understand and act on.',
+    avatarSeed: 'lin-xu-hunyuan-lite',
+    textColor: 'text-cyan-400',
+    bgColor: 'bg-cyan-500/10',
+    borderColor: 'border-cyan-500/20',
+    glowColor: 'bg-cyan-500',
+    aboutGradient: 'from-cyan-500/20',
+  },
+  {
+    name: 'Cheng Ju (Rule Engine)',
+    role: 'Junior Rule Analyst',
+    description:
+      'Explains the rule-based view, discipline state, and structural constraints, representing the quant rule perspective without claiming discretionary judgment.',
+    avatarSeed: 'cheng-ju-quant-rules',
+    textColor: 'text-rose-400',
+    bgColor: 'bg-rose-500/10',
+    borderColor: 'border-rose-500/20',
+    glowColor: 'bg-rose-500',
+    aboutGradient: 'from-rose-500/20',
+  },
+  {
+    name: 'Shen Ce (Quant Engineer)',
+    role: 'Quant Engineer',
+    description:
+      'Builds the quant model foundation, turning data handling, indicators, rules, and parameters into a stable production-grade system.',
+    avatarSeed: 'shen-ce-quant-engineer',
+    textColor: 'text-violet-400',
+    bgColor: 'bg-violet-500/10',
+    borderColor: 'border-violet-500/20',
+    glowColor: 'bg-violet-500',
+    aboutGradient: 'from-violet-500/20',
+  },
+  {
+    name: 'Nora',
+    role: 'Context Officer',
+    description:
+      'Filters news and macro noise, then restores the real context around each signal so tactical decisions are not made in a vacuum.',
+    avatarSeed: 'nora-context-desk',
+    textColor: 'text-emerald-400',
+    bgColor: 'bg-emerald-500/10',
+    borderColor: 'border-emerald-500/20',
+    glowColor: 'bg-emerald-500',
+    aboutGradient: 'from-emerald-500/20',
+  },
+  {
+    name: 'Verifier',
+    role: 'Validation Auditor',
+    description:
+      'Reviews outcomes after the close, tracks hit rate and model drift, and helps keep the research workflow accountable over time.',
+    avatarSeed: 'verifier-audit-desk',
+    textColor: 'text-amber-400',
+    bgColor: 'bg-amber-500/10',
+    borderColor: 'border-amber-500/20',
+    glowColor: 'bg-amber-500',
+    aboutGradient: 'from-amber-500/20',
+  },
+] as const;
 
 function PageShell({
   currentPage,
@@ -263,7 +352,7 @@ export function EnglishHomePage() {
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">
-            {founders.map((founder) => (
+            {EN_FOUNDERS.map((founder) => (
               <div key={founder.name} className="glass-card p-8 border-white/10 bg-white/[0.02] space-y-4">
                 <p className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400">{founder.label}</p>
                 <h3 className="text-2xl font-black">{founder.name}</h3>
@@ -273,7 +362,7 @@ export function EnglishHomePage() {
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
-            {agentTeam.map((agent) => (
+            {EN_AGENT_TEAM.map((agent) => (
               <div
                 key={agent.name}
                 className={`glass-card p-6 border ${agent.borderColor} ${agent.bgColor} relative overflow-hidden group lg:min-h-[360px]`}
@@ -437,7 +526,7 @@ export function EnglishAboutPage() {
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">
-            {founders.map((founder) => (
+            {EN_FOUNDERS.map((founder) => (
               <div key={founder.name} className="glass-card p-8 space-y-4 border-white/10 bg-white/[0.02]">
                 <div className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400">{founder.label}</div>
                 <h3 className="text-2xl font-black">{founder.name}</h3>
@@ -447,7 +536,7 @@ export function EnglishAboutPage() {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {agentTeam.map((member) => (
+            {EN_AGENT_TEAM.map((member) => (
               <div key={member.name} className={`p-6 rounded-[32px] bg-gradient-to-b ${member.aboutGradient} to-transparent border border-white/5 flex flex-col items-center text-center space-y-4`}>
                 <div className="w-16 h-16 rounded-full bg-black/40 border border-white/10 overflow-hidden">
                   <Multiavatar name={member.avatarSeed} className="w-full h-full" />
