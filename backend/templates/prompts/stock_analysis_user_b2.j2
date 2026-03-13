@@ -72,6 +72,23 @@ ATR-14: {{ structural_hints.atr_14 }}
 </ai_prediction_history>
 {% endif %}
 
+{% if quant_model_status %}
+<quant_model_context>
+量化模型角色: 规则侧结构判断，不等于你的最终输出；它用于提供状态对照与风险背景。
+四状态定义:
+- TriggeredLong = 量化模型认为进攻触发条件已成立
+- Watch = 量化模型认为值得继续观察，但仍缺关键确认
+- NoSetup = 量化模型认为当前无明确 setup
+- RiskOff = 量化模型认为当前应以防守/收缩为主
+当前量化模型结论: {{ quant_model_status }}
+量化模型说明: {{ quant_model_guidance }}
+任务要求:
+- 你需要给出分析模型自己的 `signal`
+- 你可以与量化模型一致，也可以分歧
+- 若分歧，请在 `conflict_resolution` 中说明最关键的分歧证据
+</quant_model_context>
+{% endif %}
+
 <execution_constraints>
 {{ context_instruction }}
 </execution_constraints>

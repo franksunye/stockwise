@@ -390,12 +390,4 @@ def _enforce_layer1_direction(result: Dict[str, Any], layer1: Dict[str, Any]) ->
                 f"(status={setup_state})"
             )
         result["signal"] = expected
-        reasoning_raw = result.get("reasoning")
-        if isinstance(reasoning_raw, str) and reasoning_raw.startswith("{"):
-            try:
-                reasoning_dict = json.loads(reasoning_raw)
-                reasoning_dict["signal"] = expected
-                result["reasoning"] = json.dumps(reasoning_dict, ensure_ascii=False)
-            except Exception:
-                logger.warning("Failed to synchronize enforced signal into reasoning JSON")
     return result

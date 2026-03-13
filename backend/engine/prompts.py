@@ -33,6 +33,15 @@ def _resolve_stock_analysis_template_names() -> tuple[str, str]:
     )
 
 
+def _is_truthy_env(name: str, default: str = "1") -> bool:
+    raw = os.getenv(name, default).strip().lower()
+    return raw in {"1", "true", "yes", "on"}
+
+
+def _should_inject_layer1_prompt_context() -> bool:
+    return _is_truthy_env("LAYER1_PROMPT_INJECTION", "0")
+
+
 def _is_period_history_sane(rows: List[Dict[str, Any]], period: str) -> bool:
     """
     Detect daily-like leakage in weekly/monthly history.
@@ -548,40 +557,41 @@ def prepare_stock_analysis_prompt(symbol: str, as_of_date: str = None, ctx: Dict
         context_instruction = f"👉 **实时分析**：今天是 {data['date']}。请基于提供的数据判断。"
     layer1 = ctx.get("layer1") or {}
     layer1_status = str(layer1.get("status") or "")
-    if layer1_status:
+    quant_model_guidance = ""
+    if layer1_status and _should_inject_layer1_prompt_context():
         if layer1_status == "TriggeredLong":
-            layer1_guidance = (
-                "当前量化约束允许进入进攻候选状态。"
-                "若价格行为与关键位不支持，可降低置信度，但不要回退成笼统观望语气。"
+            quant_model_guidance = (
+                "量化模型判断当前已进入进攻候选状态。"
+                "请将其视为规则侧观点，并结合价格行为与关键位独立判断。"
             )
         elif layer1_status == "RiskOff":
-            layer1_guidance = (
-                "当前量化约束明确偏防守，不代表走势中性。"
-                "你的职责是解释风险来源并给出防守/收缩型战术，不要输出进攻判断。"
+            quant_model_guidance = (
+                "量化模型判断当前偏防守，这不等于走势中性。"
+                "请将其视为规则侧观点，并独立分析风险来源与是否存在分歧。"
             )
         elif layer1_status == "Watch":
-            layer1_guidance = (
-                "当前量化约束为观察态。"
-                "你的职责是说明还缺哪一步确认，不要把观察态包装成可执行进攻信号。"
+            quant_model_guidance = (
+                "量化模型判断当前为观察态。"
+                "请将其视为规则侧观点，并独立分析还缺哪一步确认。"
             )
         elif layer1_status == "NoSetup":
-            layer1_guidance = (
-                "当前量化约束为无明确机会。"
-                "你的职责是指出为什么暂时不值得出手，不要硬凑交易理由。"
+            quant_model_guidance = (
+                "量化模型判断当前无明确机会。"
+                "请将其视为规则侧观点，并独立分析是否确实缺少可执行 setup。"
             )
         elif layer1_status in {"Wait", "NoTrade", "Blocked"}:
-            layer1_guidance = (
-                "当前量化约束偏防守/等待。"
-                "你的职责是保持风险一致性，不要输出激进进攻判断。"
+            quant_model_guidance = (
+                "量化模型判断当前偏等待/防守。"
+                "请将其视为规则侧观点，并独立分析其与价格行为是否一致。"
             )
         else:
-            layer1_guidance = (
-                "请将该状态视为优先级更高的风险约束信号。"
-                "你的职责是解释其含义，并在战术与风控上保持一致，不要擅自弱化。"
+            quant_model_guidance = (
+                "请将该状态视为规则侧结论输入。"
+                "你的职责是解释其含义，并独立给出分析模型的判断。"
             )
         context_instruction += (
-            f"\n👉 **Layer-1 硬约束**：当前量化状态={layer1_status}。"
-            f"{layer1_guidance}"
+            f"\n👉 **量化模型结论**：当前量化状态={layer1_status}。"
+            f"{quant_model_guidance}"
         )
 
     # Get Version
@@ -615,6 +625,8 @@ def prepare_stock_analysis_prompt(symbol: str, as_of_date: str = None, ctx: Dict
             tech=tech_data,
             structural_hints=structural_hints,
             context_instruction=context_instruction,
+            quant_model_status=layer1_status if _should_inject_layer1_prompt_context() else "",
+            quant_model_guidance=quant_model_guidance,
             signal_to_cn_label=signal_to_cn_label,
         )
     except Exception as e:
