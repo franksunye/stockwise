@@ -8,10 +8,7 @@ import {
   EnglishRefundPage,
   EnglishTermsPage,
 } from '@/components/marketing/EnglishPublicPages';
-import LocalePreviewPage from '@/components/marketing/LocalePreviewPage';
 import { brandCoreZhCN } from '@/content/brand-core.zh-CN';
-import { getArticleBySlug as getLearnArticleBySlug } from '@/lib/learn-content';
-import { getArticleBySlug as getSupportArticleBySlug } from '@/lib/support-content';
 import { isSupportedPublicLocale } from '@/lib/public-i18n';
 import { buildPageMetadata } from '@/lib/seo';
 
@@ -79,20 +76,6 @@ function getStaticPreviewConfig(slugParts: string[]): PreviewConfig | null {
       index: true,
       render: () => <EnglishRefundPage />,
     },
-    learn: {
-      title: 'Learn | ZISO AI',
-      description: 'English infrastructure preview for the Learn library.',
-      canonicalPath: '/learn',
-      alternateLocales: ['zh', 'en'],
-      index: false,
-    },
-    support: {
-      title: 'Support | ZISO AI',
-      description: 'English infrastructure preview for the Support hub.',
-      canonicalPath: '/support',
-      alternateLocales: ['zh', 'en'],
-      index: false,
-    },
   };
 
   return staticConfig[path] || null;
@@ -101,32 +84,6 @@ function getStaticPreviewConfig(slugParts: string[]): PreviewConfig | null {
 async function resolvePreviewConfig(slugParts: string[]): Promise<PreviewConfig | null> {
   const staticConfig = getStaticPreviewConfig(slugParts);
   if (staticConfig) return staticConfig;
-
-  if (slugParts.length === 2 && slugParts[0] === 'learn') {
-    const article = await getLearnArticleBySlug(slugParts[1], { locale: 'en', fallbackToDefault: true });
-    if (!article) return null;
-    return {
-      title: `${article.title} | English Preview | ZISO AI Learn`,
-      description: 'English content for this Learn article is not published yet. This route exists as a controlled fallback preview.',
-      canonicalPath: `/learn/${slugParts[1]}`,
-      isFallback: true,
-      alternateLocales: ['zh'],
-      index: false,
-    };
-  }
-
-  if (slugParts.length === 2 && slugParts[0] === 'support') {
-    const article = getSupportArticleBySlug(slugParts[1], { locale: 'en', fallbackToDefault: true });
-    if (!article) return null;
-    return {
-      title: `${article.title} | English Preview | ZISO AI Support`,
-      description: 'English content for this Support article is not published yet. This route exists as a controlled fallback preview.',
-      canonicalPath: `/support/${slugParts[1]}`,
-      isFallback: true,
-      alternateLocales: ['zh'],
-      index: false,
-    };
-  }
 
   return null;
 }
@@ -179,14 +136,5 @@ export default async function LocalePreviewRoute({ params }: { params: Params })
   if (config.render) {
     return config.render();
   }
-
-  return (
-    <LocalePreviewPage
-      eyebrow="English Preview"
-      title={config.title}
-      description={config.description}
-      canonicalPath={config.canonicalPath}
-      isFallback={config.isFallback}
-    />
-  );
+  notFound();
 }

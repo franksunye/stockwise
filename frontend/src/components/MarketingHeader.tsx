@@ -19,31 +19,34 @@ export default function MarketingHeader({ currentPage, locale = 'zh' }: Marketin
   const labels = locale === 'zh'
     ? {
         features: '功能',
-        learn: '101 手册',
         about: '关于',
         pricing: '价格',
-        support: '支持',
         faq: 'FAQ',
         openApp: '进入应用',
       }
     : {
         features: 'Features',
-        learn: 'Learn',
         about: 'About',
         pricing: 'Pricing',
-        support: 'Support',
         faq: 'FAQ',
         openApp: 'Open App',
       };
 
-  const links: MarketingMenuLink[] = [
-    { href: `${localizedHomeAnchorPrefix}#features`, label: labels.features },
-    { href: `${basePrefix}/learn`, label: labels.learn, prefetch: false },
-    { href: `${basePrefix}/about`, label: labels.about, prefetch: false, isActive: currentPage === 'about' },
-    { href: `${basePrefix}/pricing`, label: labels.pricing, prefetch: false, isActive: currentPage === 'pricing' },
-    { href: `${basePrefix}/support`, label: labels.support, prefetch: false },
-    { href: `${localizedHomeAnchorPrefix}#faq`, label: labels.faq },
-  ];
+  const links: MarketingMenuLink[] = locale === 'zh'
+    ? [
+        { href: `${localizedHomeAnchorPrefix}#features`, label: '功能' },
+        { href: `${basePrefix}/learn`, label: '101 手册', prefetch: false },
+        { href: `${basePrefix}/about`, label: '关于', prefetch: false, isActive: currentPage === 'about' },
+        { href: `${basePrefix}/pricing`, label: '价格', prefetch: false, isActive: currentPage === 'pricing' },
+        { href: `${basePrefix}/support`, label: '支持', prefetch: false },
+        { href: `${localizedHomeAnchorPrefix}#faq`, label: 'FAQ' },
+      ]
+    : [
+        { href: `${localizedHomeAnchorPrefix}#features`, label: 'Features' },
+        { href: `${basePrefix}/about`, label: 'About', prefetch: false, isActive: currentPage === 'about' },
+        { href: `${basePrefix}/pricing`, label: 'Pricing', prefetch: false, isActive: currentPage === 'pricing' },
+        { href: `${localizedHomeAnchorPrefix}#faq`, label: 'FAQ' },
+      ];
 
   return (
     <nav className="relative z-50 flex items-center justify-between px-8 py-8 max-w-7xl mx-auto">

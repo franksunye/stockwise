@@ -16,8 +16,6 @@ export default function MarketingFooter({ locale = 'zh' }: { locale?: MarketingF
         { href: `${prefix}/refund`, label: '退款政策' },
       ]
     : [
-        { href: `${prefix}/learn`, label: 'Learn' },
-        { href: `${prefix}/support`, label: 'Support' },
         { href: `${prefix}/pricing`, label: 'Pricing' },
         { href: `${prefix}/about`, label: 'About' },
         { href: `${prefix}/privacy`, label: 'Privacy' },

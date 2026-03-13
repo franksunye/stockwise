@@ -323,13 +323,12 @@ describe('Public i18n/SEO Gate', () => {
         assert.ok(html.includes('href="https://ziso.cc/en"'));
     });
 
-    it('keeps english fallback article pages noindex and canonicalized to chinese originals', async () => {
+    it('keeps english content routes out of scope', async () => {
         const res = await requestWithForwardedHost('/en/learn/101-64_eod_vs_intraday', 'ziso.cc');
-        assert.equal(res.status, 200);
-        const html = await res.text();
-        assert.ok(html.includes('English content for this article is not published yet'));
-        assert.ok(html.includes('content="noindex,follow"') || html.includes('content="noindex, follow"'));
-        assert.ok(html.includes('href="https://ziso.cc/learn/101-64_eod_vs_intraday"'));
+        assert.equal(res.status, 404);
+
+        const supportRes = await requestWithForwardedHost('/en/support/tactical-brief-guide', 'ziso.cc');
+        assert.equal(supportRes.status, 404);
     });
 
     it('publishes only formal english static pages in the official sitemap', async () => {
