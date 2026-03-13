@@ -52,6 +52,7 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
                 if (age < CACHE_TTL && Array.isArray(data) && data.length > 0) {
                     console.log(`🚀 Loaded ${data.length} stocks from local cache (${Math.round(age / 60000)}m ago)`);
                     setStocks(data);
+                    setLastRefreshTime(new Date(timestamp));
 
                     // 兼容性尝试性加载：即便缓存是 v1 版本的（没有 almanac），也不影响 stocks 的展示
                     if (parsed.almanac) setAlmanac(parsed.almanac);
@@ -66,9 +67,9 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
         }
     }, []);
 
-    const loadAllData = useCallback(async (silent = false, ignoreDebounce = false) => {
+    const loadAllData = useCallback(async (silent = false, ignoreDebounce = false): Promise<boolean> => {
         // 如果 watchlist 还在加载中，跳过
-        if (loadingWatchlist && watchlist.length === 0) return;
+        if (loadingWatchlist && watchlist.length === 0) return false;
 
         // 如果没有股票，清空 (但不能 return，因为仍然需要去拉取公共的 Market Almanac)
         if (watchlist.length === 0) {
@@ -96,9 +97,9 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
                     } as StockData; // Placeholder
                 });
                 setStocks(remapped);
-                return;
+                return false;
             }
-            return;
+            return false;
         }
 
         lastFetchTimeRef.current = now;
@@ -190,6 +191,7 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
                     setStocks(prev => prev.map(s => ({ ...s, justUpdated: false })));
                 }, 2000);
             }
+            return true;
         } catch (e) {
             console.error('Dashboard fetch error:', e);
             // [Fix] Even on error, we should ensure UI reflects the watchlist
@@ -206,6 +208,7 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
                 setStocks(fallback);
             }
             setLoadingPool(false);
+            return false;
         } finally {
             setIsRefreshing(false);
         }
@@ -258,7 +261,7 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
     }, [loadAllData]);
 
     // 手动刷新函数
-    const manualRefresh = useCallback(() => {
+    const manualRefresh = useCallback((): Promise<boolean> => {
         lastFetchTimeRef.current = 0; // 重置防抖
         return loadAllData(false);
     }, [loadAllData]);

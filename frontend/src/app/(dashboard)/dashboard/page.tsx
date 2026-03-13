@@ -218,10 +218,10 @@ function DashboardContent() {
   }, [refreshNotice]);
 
   const handleManualRefresh = useCallback(async () => {
-    try {
-      await refresh();
+    const refreshed = await refresh();
+    if (refreshed) {
       setRefreshNotice('已更新');
-    } catch {
+    } else {
       setRefreshNotice('刷新失败');
     }
   }, [refresh]);

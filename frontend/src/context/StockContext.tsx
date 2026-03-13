@@ -12,7 +12,7 @@ interface StockContextType {
     loadingList: boolean;
     isRefreshing: boolean;
     lastRefreshTime: Date | null;
-    refresh: () => Promise<void>;
+    refresh: () => Promise<boolean>;
     loadMoreHistory: (symbol: string, offset: number) => Promise<void>;
     addStock: (symbol: string, name: string) => Promise<boolean>;
     removeStock: (symbol: string) => Promise<boolean>;
