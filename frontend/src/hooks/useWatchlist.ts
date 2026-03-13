@@ -53,7 +53,11 @@ export function useWatchlist() {
             try {
                 // Fetch source of truth from server
                 // [Fix] Add timestamp to bust iOS aggressive cache
-                const res = await fetch(`/api/stock-pool?t=${Date.now()}`);
+                let res = await fetch(`/api/stock-pool?t=${Date.now()}`);
+                if (res.status === 401) {
+                    await getCurrentUser({ forceSessionSync: true });
+                    res = await fetch(`/api/stock-pool?t=${Date.now()}`);
+                }
                 if (res.ok) {
                     const data = await res.json();
 
@@ -81,11 +85,11 @@ export function useWatchlist() {
                         }
                         return current;
                     });
-                    setLoading(false);
                 }
             } catch (e) {
                 console.error('Watchlist sync error', e);
             } finally {
+                setLoading(false);
                 isSyncing.current = false;
             }
         };
