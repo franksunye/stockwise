@@ -9,6 +9,7 @@ import Multiavatar from '@/components/Multiavatar';
 
 import { formatModelName } from '@/lib/model-names';
 import { getTeamMemberById, resolveAnalystFromModel } from '@/lib/agent-team';
+import { getPredictionActionMeta } from '@/lib/layer1-ui';
 
 interface AICouncilProps {
   symbol: string;
@@ -167,10 +168,22 @@ function buildRuleSummary(pred: AIPrediction): string {
 }
 
 function getActionChipClass(actionKey: CouncilActionKey): string {
-  if (actionKey === 'enter') return 'bg-emerald-500/20 text-emerald-400';
-  if (actionKey === 'defense') return 'bg-rose-500/20 text-rose-400';
-  if (actionKey === 'empty') return 'bg-slate-500/20 text-slate-300';
-  return 'bg-amber-500/20 text-amber-400';
+  return getCouncilActionMeta(actionKey).bgClass.replace('border-rose-500/20', '').replace('border-emerald-500/20', '').replace('border-amber-500/20', '').replace('border-slate-500/20', '').trim();
+}
+
+function getCouncilActionMeta(actionKey: CouncilActionKey) {
+  switch (actionKey) {
+    case 'enter':
+      return getPredictionActionMeta({ signal: 'Long', layer1_status: 'TriggeredLong' });
+    case 'observe':
+      return getPredictionActionMeta({ signal: 'Side', layer1_status: 'Watch' });
+    case 'defense':
+      return getPredictionActionMeta({ signal: 'Short', layer1_status: 'RiskOff' });
+    case 'empty':
+      return getPredictionActionMeta({ signal: 'Side', layer1_status: 'NoSetup' });
+    default:
+      return getPredictionActionMeta(null);
+  }
 }
 
 function buildCouncilCards(predictions: AIPrediction[]): CouncilCardData[] {
@@ -399,10 +412,10 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
   }
 
   // Set color based on action
-  if (actionLabel.includes('进场')) consensusColor = 'text-emerald-400';
-  else if (actionLabel.includes('观察')) consensusColor = 'text-amber-400';
-  else if (actionLabel.includes('防守')) consensusColor = 'text-rose-400';
-  else if (actionLabel.includes('暂无')) consensusColor = 'text-slate-300';
+  if (actionLabel.includes('进场')) consensusColor = getCouncilActionMeta('enter').textClass;
+  else if (actionLabel.includes('观察')) consensusColor = getCouncilActionMeta('observe').textClass;
+  else if (actionLabel.includes('防守')) consensusColor = getCouncilActionMeta('defense').textClass;
+  else if (actionLabel.includes('暂无')) consensusColor = getCouncilActionMeta('empty').textClass;
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -429,6 +442,7 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
           协同观点基于量化模型底座生成，独立判断保留分析师原始观点
         </p>
         {councilCards.map((card) => {
+           const actionMeta = getCouncilActionMeta(card.actionKey);
            const chipClass = getActionChipClass(card.actionKey);
            const chipText = getCouncilActionLabel(card.actionKey);
            return (
