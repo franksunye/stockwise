@@ -1,5 +1,13 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import {
+  EnglishAboutPage,
+  EnglishHomePage,
+  EnglishPricingPage,
+  EnglishPrivacyPage,
+  EnglishRefundPage,
+  EnglishTermsPage,
+} from '@/components/marketing/EnglishPublicPages';
 import LocalePreviewPage from '@/components/marketing/LocalePreviewPage';
 import { brandCoreZhCN } from '@/content/brand-core.zh-CN';
 import { getArticleBySlug as getLearnArticleBySlug } from '@/lib/learn-content';
@@ -15,6 +23,8 @@ interface PreviewConfig {
   canonicalPath: string;
   isFallback?: boolean;
   alternateLocales?: Array<'zh' | 'en'>;
+  index?: boolean;
+  render?: () => React.ReactNode;
 }
 
 function getStaticPreviewConfig(slugParts: string[]): PreviewConfig | null {
@@ -23,51 +33,65 @@ function getStaticPreviewConfig(slugParts: string[]): PreviewConfig | null {
   const staticConfig: Record<string, PreviewConfig> = {
     '': {
       title: 'ZISO AI English Preview',
-      description: 'Public English infrastructure is active for SEO and GEO validation. Full English rollout is intentionally deferred.',
+      description: 'Structured market research, tactical briefings, and execution discipline for serious retail investors.',
       canonicalPath: '/',
       alternateLocales: ['zh', 'en'],
+      index: true,
+      render: () => <EnglishHomePage />,
     },
     about: {
       title: 'About ZISO AI',
-      description: 'English public metadata and route validation for the ZISO AI marketing site.',
+      description: 'Why ZISO AI exists, how it frames research, and how the workflow is structured.',
       canonicalPath: '/about',
       alternateLocales: ['zh', 'en'],
+      index: true,
+      render: () => <EnglishAboutPage />,
     },
     pricing: {
       title: 'Pricing | ZISO AI',
-      description: 'English preview of pricing route infrastructure for the public website.',
+      description: 'Subscription plans for investors who want stronger nightly research and execution discipline.',
       canonicalPath: '/pricing',
       alternateLocales: ['zh', 'en'],
+      index: true,
+      render: () => <EnglishPricingPage />,
     },
     privacy: {
       title: 'Privacy Policy | ZISO AI',
-      description: 'English verification page for privacy route infrastructure.',
+      description: 'Privacy and data handling policy for the ZISO AI public website.',
       canonicalPath: '/privacy',
       alternateLocales: ['zh', 'en'],
+      index: true,
+      render: () => <EnglishPrivacyPage />,
     },
     terms: {
       title: 'Terms of Service | ZISO AI',
-      description: 'English verification page for terms route infrastructure.',
+      description: 'Terms governing the use of ZISO AI analysis, briefings, and subscription services.',
       canonicalPath: '/terms',
       alternateLocales: ['zh', 'en'],
+      index: true,
+      render: () => <EnglishTermsPage />,
     },
     refund: {
       title: 'Refund Policy | ZISO AI',
-      description: 'English verification page for refund route infrastructure.',
+      description: 'Refund policy for first-time Pro subscribers and billing support flows.',
       canonicalPath: '/refund',
       alternateLocales: ['zh', 'en'],
+      index: true,
+      render: () => <EnglishRefundPage />,
     },
     learn: {
       title: 'Learn | ZISO AI',
       description: 'English infrastructure preview for the Learn library.',
       canonicalPath: '/learn',
       alternateLocales: ['zh', 'en'],
+      index: false,
     },
     support: {
       title: 'Support | ZISO AI',
       description: 'English infrastructure preview for the Support hub.',
       canonicalPath: '/support',
       alternateLocales: ['zh', 'en'],
+      index: false,
     },
   };
 
@@ -87,6 +111,7 @@ async function resolvePreviewConfig(slugParts: string[]): Promise<PreviewConfig 
       canonicalPath: `/learn/${slugParts[1]}`,
       isFallback: true,
       alternateLocales: ['zh'],
+      index: false,
     };
   }
 
@@ -99,6 +124,7 @@ async function resolvePreviewConfig(slugParts: string[]): Promise<PreviewConfig 
       canonicalPath: `/support/${slugParts[1]}`,
       isFallback: true,
       alternateLocales: ['zh'],
+      index: false,
     };
   }
 
@@ -131,7 +157,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     description: config.description,
     path: slugParts.length === 0 ? '/' : `/${slugParts.join('/')}`,
     locale: 'en',
-    index: false,
+    index: config.index ?? false,
     alternateLocales: config.alternateLocales,
     canonicalPath: config.canonicalPath,
     canonicalLocale: config.isFallback ? 'zh' : 'en',
@@ -148,6 +174,10 @@ export default async function LocalePreviewRoute({ params }: { params: Params })
   const config = await resolvePreviewConfig(slugParts);
   if (!config) {
     notFound();
+  }
+
+  if (config.render) {
+    return config.render();
   }
 
   return (

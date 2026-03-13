@@ -13,13 +13,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: `${base}/`, lastModified: updated, changeFrequency: "daily", priority: 1.0 },
+    { url: `${base}/en`, lastModified: updated, changeFrequency: "daily", priority: 0.7 },
     { url: `${base}/about`, lastModified: updated, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${base}/en/about`, lastModified: updated, changeFrequency: "monthly", priority: 0.5 },
     { url: `${base}/pricing`, lastModified: updated, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${base}/en/pricing`, lastModified: updated, changeFrequency: "weekly", priority: 0.6 },
     { url: `${base}/learn`, lastModified: updated, changeFrequency: "daily", priority: 0.9 },
     { url: `${base}/support`, lastModified: updated, changeFrequency: "weekly", priority: 0.8 },
     { url: `${base}/privacy`, lastModified: updated, changeFrequency: "yearly", priority: 0.3 },
+    { url: `${base}/en/privacy`, lastModified: updated, changeFrequency: "yearly", priority: 0.2 },
     { url: `${base}/terms`, lastModified: updated, changeFrequency: "yearly", priority: 0.3 },
+    { url: `${base}/en/terms`, lastModified: updated, changeFrequency: "yearly", priority: 0.2 },
     { url: `${base}/refund`, lastModified: updated, changeFrequency: "yearly", priority: 0.3 },
+    { url: `${base}/en/refund`, lastModified: updated, changeFrequency: "yearly", priority: 0.2 },
   ];
 
   const learnRoutes = (await getAllArticles()).map((article) => ({

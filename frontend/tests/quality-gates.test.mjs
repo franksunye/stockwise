@@ -311,15 +311,16 @@ describe('Public i18n/SEO Gate', () => {
         assert.ok(appLocaleRes.headers.get('location')?.endsWith('/?__mwdebug=1'));
     });
 
-    it('serves english public preview pages only on the main domain', async () => {
+    it('serves english public pages only on the main domain', async () => {
         const enRes = await requestWithForwardedHost('/en?__mwdebug=1', 'ziso.cc');
         assert.equal(enRes.status, 200);
         assert.equal(enRes.headers.get('x-ziso-mw-branch'), 'main-public-locale');
         const html = await enRes.text();
-        assert.ok(html.includes('English Preview'));
-        assert.ok(html.includes('noindex,follow') || html.includes('noindex, follow'));
+        assert.ok(html.includes('AI does the research.'));
+        assert.ok(!html.includes('noindex,follow'));
         assert.ok(html.includes('hrefLang="zh-CN"'));
         assert.ok(html.includes('hrefLang="x-default"'));
+        assert.ok(html.includes('href="https://ziso.cc/en"'));
     });
 
     it('keeps english fallback article pages noindex and canonicalized to chinese originals', async () => {
@@ -331,7 +332,7 @@ describe('Public i18n/SEO Gate', () => {
         assert.ok(html.includes('href="https://ziso.cc/learn/101-64_eod_vs_intraday"'));
     });
 
-    it('keeps locale previews out of the official sitemap', async () => {
+    it('publishes only formal english static pages in the official sitemap', async () => {
         const sitemapRes = await withTimeout(
             fetch(`${BASE_URL}/sitemap.xml`),
             ROUTE_TIMEOUT_MS,
@@ -339,8 +340,11 @@ describe('Public i18n/SEO Gate', () => {
         );
         assert.equal(sitemapRes.status, 200);
         const body = await sitemapRes.text();
+        assert.ok(body.includes('https://ziso.cc/en'));
+        assert.ok(body.includes('https://ziso.cc/en/about'));
         assert.ok(body.includes('https://ziso.cc/learn'));
-        assert.ok(!body.includes('/en'));
+        assert.ok(!body.includes('https://ziso.cc/en/learn'));
+        assert.ok(!body.includes('https://ziso.cc/en/support'));
         assert.ok(!body.includes('https://ziso.cc/status'));
     });
 });

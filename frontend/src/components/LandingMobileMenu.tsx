@@ -11,6 +11,11 @@ export interface MarketingMenuLink {
   isActive?: boolean;
 }
 
+interface MobileMenuCta {
+  label: string;
+  href: string;
+}
+
 const defaultLinks: MarketingMenuLink[] = [
   { href: '#features', label: '功能' },
   { href: '/learn', label: '101 手册', prefetch: false },
@@ -22,9 +27,13 @@ const defaultLinks: MarketingMenuLink[] = [
 
 interface LandingMobileMenuProps {
   links?: MarketingMenuLink[];
+  cta?: MobileMenuCta;
 }
 
-export default function LandingMobileMenu({ links = defaultLinks }: LandingMobileMenuProps) {
+export default function LandingMobileMenu({
+  links = defaultLinks,
+  cta = { href: 'https://app.ziso.cc', label: '进入应用' },
+}: LandingMobileMenuProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -56,13 +65,13 @@ export default function LandingMobileMenu({ links = defaultLinks }: LandingMobil
           </Link>
         ))}
         <Link
-          href="https://app.ziso.cc"
+          href={cta.href}
           target="_blank"
           rel="noopener noreferrer"
           onClick={() => setOpen(false)}
           className="mt-4 px-10 py-4 rounded-3xl bg-indigo-500 text-white font-black italic text-lg shadow-[0_20px_40px_rgba(99,102,241,0.3)] flex items-center gap-2"
         >
-          进入应用 <ChevronRight size={20} />
+          {cta.label} <ChevronRight size={20} />
         </Link>
       </div>
     </>

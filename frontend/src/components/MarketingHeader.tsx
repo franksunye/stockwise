@@ -5,26 +5,49 @@ import Image from 'next/image';
 import LandingMobileMenu, { type MarketingMenuLink } from '@/components/LandingMobileMenu';
 
 type MarketingHeaderPage = 'home' | 'about' | 'pricing';
+type MarketingHeaderLocale = 'zh' | 'en';
 
 interface MarketingHeaderProps {
   currentPage: MarketingHeaderPage;
+  locale?: MarketingHeaderLocale;
 }
 
-export default function MarketingHeader({ currentPage }: MarketingHeaderProps) {
-  const homeAnchorPrefix = currentPage === 'home' ? '' : '/';
+export default function MarketingHeader({ currentPage, locale = 'zh' }: MarketingHeaderProps) {
+  const basePrefix = locale === 'zh' ? '' : '/en';
+  const localizedHome = locale === 'zh' ? '/' : '/en';
+  const localizedHomeAnchorPrefix = currentPage === 'home' ? '' : localizedHome;
+  const labels = locale === 'zh'
+    ? {
+        features: '功能',
+        learn: '101 手册',
+        about: '关于',
+        pricing: '价格',
+        support: '支持',
+        faq: 'FAQ',
+        openApp: '进入应用',
+      }
+    : {
+        features: 'Features',
+        learn: 'Learn',
+        about: 'About',
+        pricing: 'Pricing',
+        support: 'Support',
+        faq: 'FAQ',
+        openApp: 'Open App',
+      };
 
   const links: MarketingMenuLink[] = [
-    { href: `${homeAnchorPrefix}#features`, label: '功能' },
-    { href: '/learn', label: '101 手册', prefetch: false },
-    { href: '/about', label: '关于', prefetch: false, isActive: currentPage === 'about' },
-    { href: '/pricing', label: '价格', prefetch: false, isActive: currentPage === 'pricing' },
-    { href: '/support', label: '支持', prefetch: false },
-    { href: `${homeAnchorPrefix}#faq`, label: 'FAQ' },
+    { href: `${localizedHomeAnchorPrefix}#features`, label: labels.features },
+    { href: `${basePrefix}/learn`, label: labels.learn, prefetch: false },
+    { href: `${basePrefix}/about`, label: labels.about, prefetch: false, isActive: currentPage === 'about' },
+    { href: `${basePrefix}/pricing`, label: labels.pricing, prefetch: false, isActive: currentPage === 'pricing' },
+    { href: `${basePrefix}/support`, label: labels.support, prefetch: false },
+    { href: `${localizedHomeAnchorPrefix}#faq`, label: labels.faq },
   ];
 
   return (
     <nav className="relative z-50 flex items-center justify-between px-8 py-8 max-w-7xl mx-auto">
-      <Link href="/" className="flex items-center gap-2">
+      <Link href={localizedHome} className="flex items-center gap-2">
         <Image src="/logo.png" alt="ZISO AI Logo" width={40} height={40} className="rounded-xl" />
         <span className="text-xl font-black italic tracking-tighter">
           ZISO <span className="text-indigo-500">AI</span>
@@ -48,11 +71,11 @@ export default function MarketingHeader({ currentPage }: MarketingHeaderProps) {
           rel="noopener noreferrer"
           className="px-5 py-2.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-white"
         >
-          进入应用
+          {labels.openApp}
         </Link>
       </div>
 
-      <LandingMobileMenu links={links} />
+      <LandingMobileMenu links={links} cta={{ href: 'https://app.ziso.cc', label: labels.openApp }} />
     </nav>
   );
 }
