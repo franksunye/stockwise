@@ -119,19 +119,26 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
             // 如果是非静默刷新（手动点击或初始化），增加一个 cache-buster 扰动缓存
             const url = `/api/stock/batch?symbols=${symbols}&historyLimit=15${!silent ? `&t=${Date.now()}` : ''}`;
 
-            const batchRes = await fetch(url, {
+            const fetchOptions: RequestInit = {
                 signal: controller.signal,
                 cache: 'no-store',
                 headers: {
                     'Cache-Control': 'no-cache'
                 }
-            });
+            };
+
+            let batchRes = await fetch(url, fetchOptions);
+            if (batchRes.status === 401) {
+                await getCurrentUser();
+                batchRes = await fetch(url, fetchOptions);
+            }
             clearTimeout(timeoutId);
 
-            const batchData = await batchRes.json();
+            if (!batchRes.ok) {
+                throw new Error(`Batch API failed: ${batchRes.status}`);
+            }
 
-            // Note: Since dashboard route is called by useWatchlist, we also need to get almanac from somewhere
-            // Actually, we modified dashboard route! Let's fetch almanac from there if we can, or modify stock/batch
+            const batchData = await batchRes.json();
 
             if (batchData.error) { throw new Error(batchData.error); }
             if (batchData.almanacs) {
