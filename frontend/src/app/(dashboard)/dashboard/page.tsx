@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense, useRef, useCallback, useMemo, memo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LayoutGrid as Grid, ChevronDown, User, FileText, Share2, Copy } from 'lucide-react';
+import { LayoutGrid as Grid, ChevronDown, User, FileText, Share2, Copy, RefreshCw } from 'lucide-react';
 import { StockData, AIPrediction, MarketAlmanacData } from '@/lib/types';
 import { 
   StockVerticalFeed,
@@ -86,7 +86,8 @@ function DashboardContent() {
   const [briefOpen, setBriefOpen] = useState(false);
   const almanacRef = useRef<MarketAlmanacHandle>(null);
 
-  const { stocks, almanac, almanacs, loadMoreHistory } = useStocks();
+  const { stocks, almanac, almanacs, isRefreshing, lastRefreshTime, refresh, loadMoreHistory } = useStocks();
+  const [refreshNotice, setRefreshNotice] = useState<string | null>(null);
 
   // Create an extended array where the first items are the Market Almanacs
   const displayStocks = useMemo(() => {
@@ -210,6 +211,26 @@ function DashboardContent() {
     }
   }, []);
 
+  useEffect(() => {
+    if (!refreshNotice) return;
+    const timer = window.setTimeout(() => setRefreshNotice(null), 1800);
+    return () => window.clearTimeout(timer);
+  }, [refreshNotice]);
+
+  const handleManualRefresh = useCallback(async () => {
+    try {
+      await refresh();
+      setRefreshNotice('已更新');
+    } catch {
+      setRefreshNotice('刷新失败');
+    }
+  }, [refresh]);
+
+  const refreshLabel = useMemo(() => {
+    if (!lastRefreshTime) return '未刷新';
+    return `${lastRefreshTime.getHours().toString().padStart(2, '0')}:${lastRefreshTime.getMinutes().toString().padStart(2, '0')} 更新`;
+  }, [lastRefreshTime]);
+
   return (
     <main className="fixed inset-0 bg-[#050508] text-white overflow-hidden select-none font-sans">
       <DashboardBackground 
@@ -254,16 +275,33 @@ function DashboardContent() {
             </div>
           </div>
 
-          <button onClick={() => isMarketAlmanac ? almanacRef.current?.copy() : openBrief()}
-            className="w-10 h-10 rounded-[16px] bg-white/5 border border-white/10 flex items-center justify-center active:scale-90 transition-all hover:bg-white/10 group overflow-hidden relative"
-          >
-            <div className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${isMarketAlmanac ? 'opacity-100 scale-100' : 'opacity-0 scale-50 pointer-events-none'}`}>
-              <Copy className="w-5 h-5 text-slate-400 group-hover:text-indigo-400 transition-colors" />
+          <div className="flex items-start gap-2 pointer-events-auto">
+            <div className="flex flex-col items-end gap-1">
+              <button
+                onClick={handleManualRefresh}
+                disabled={isRefreshing}
+                className="w-10 h-10 rounded-[16px] bg-white/5 border border-white/10 flex items-center justify-center active:scale-90 transition-all hover:bg-white/10 disabled:opacity-60 disabled:cursor-default"
+                aria-label="刷新数据"
+                title="刷新数据"
+              >
+                <RefreshCw className={`w-5 h-5 text-slate-400 transition-colors ${isRefreshing ? 'animate-spin text-indigo-400' : 'hover:text-indigo-400'}`} />
+              </button>
+              <div className="min-h-[14px] text-[10px] font-black italic tracking-wide text-slate-500 text-right">
+                {refreshNotice || refreshLabel}
+              </div>
             </div>
-            <div className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${!isMarketAlmanac ? 'opacity-100 scale-100' : 'opacity-0 scale-50 pointer-events-none'}`}>
-              <FileText className="w-5 h-5 text-slate-400 group-hover:text-indigo-400 transition-colors" />
-            </div>
-          </button>
+
+            <button onClick={() => isMarketAlmanac ? almanacRef.current?.copy() : openBrief()}
+              className="w-10 h-10 rounded-[16px] bg-white/5 border border-white/10 flex items-center justify-center active:scale-90 transition-all hover:bg-white/10 group overflow-hidden relative"
+            >
+              <div className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${isMarketAlmanac ? 'opacity-100 scale-100' : 'opacity-0 scale-50 pointer-events-none'}`}>
+                <Copy className="w-5 h-5 text-slate-400 group-hover:text-indigo-400 transition-colors" />
+              </div>
+              <div className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${!isMarketAlmanac ? 'opacity-100 scale-100' : 'opacity-0 scale-50 pointer-events-none'}`}>
+                <FileText className="w-5 h-5 text-slate-400 group-hover:text-indigo-400 transition-colors" />
+              </div>
+            </button>
+          </div>
         </div>
       </header>
 
