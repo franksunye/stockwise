@@ -23,6 +23,7 @@ export type TeamMemberId =
   | 'gu_shen'
   | 'lin_xu'
   | 'cheng_ju'
+  | 'shen_ce'
   | 'nora'
   | 'verifier'
   | 'fallback';
@@ -54,13 +55,13 @@ const TEAM_MEMBER_DIRECTORY: Record<TeamMemberId, TeamMemberProfile> = {
     id: 'andre_gu',
     name: '安德烈·谷',
     displayName: '安德烈·谷（Andre Gu）',
-    role: 'AI 创始人',
-    roleEn: 'AI FOUNDER',
+    role: 'AI 创始人 / 研究负责人（兼任）',
+    roleEn: 'AI FOUNDER / RESEARCH LEAD',
     avatarSeed: 'andre-gu-ai-founder',
-    briefSummary: '负责系统架构、自动化工程与交付节奏，把策略方法稳定落到产品。',
-    aboutDescription: '负责系统架构、自动化工程与交付节奏，把策略方法稳定落到产品。',
+    briefSummary: '负责研究方向、系统架构与工程交付，把量化 + AI 方法稳定落到产品。',
+    aboutDescription: '兼任研究负责人，负责量化 + AI 的方法框架、术语边界、系统架构与工程交付，把研究能力稳定落到产品。',
     unit: 'founder',
-    founderLabel: 'AI 创始人 · AI FOUNDER',
+    founderLabel: 'AI 创始人 / 研究负责人（兼任） · AI FOUNDER / RESEARCH LEAD',
   },
   frank_sun: {
     id: 'frank_sun',
@@ -78,11 +79,11 @@ const TEAM_MEMBER_DIRECTORY: Record<TeamMemberId, TeamMemberProfile> = {
     id: 'lin_xu',
     name: '林序',
     displayName: '林序（混元 Lite）',
-    role: '初级量化分析师',
-    roleEn: 'JUNIOR QUANT ANALYST',
+    role: '初级分析师',
+    roleEn: 'JUNIOR ANALYST',
     avatarSeed: 'lin-xu-hunyuan-lite',
-    briefSummary: '独立完成策略推演，输出个人结论与补充视角。',
-    aboutDescription: '独立完成策略推演，输出个人结论与补充视角。',
+    briefSummary: '负责辅助分析与补充视角，把复杂行情翻译成更容易理解的判断。',
+    aboutDescription: '基于分析模型输出辅助判断、补充视角与基础技术解释，并与规则分析师、量化工程师协作解读量化模型结论。',
     unit: 'quant',
     style: {
       textColor: 'text-cyan-400',
@@ -96,11 +97,11 @@ const TEAM_MEMBER_DIRECTORY: Record<TeamMemberId, TeamMemberProfile> = {
     id: 'gu_shen',
     name: '顾深',
     displayName: '顾深（DeepSeek）',
-    role: '资深量化分析师',
-    roleEn: 'SENIOR QUANT ANALYST',
+    role: '资深分析师',
+    roleEn: 'SENIOR ANALYST',
     avatarSeed: 'gu-shen-deepseek',
-    briefSummary: '独立完成深度策略推演，输出个人结论与风险判断。',
-    aboutDescription: '独立完成深度策略推演，输出个人结论与风险判断。',
+    briefSummary: '负责主结论、深度分析与风险判断，给出更完整的策略解释。',
+    aboutDescription: '基于分析模型输出主结论、深度推演与关键矛盾解释，并与规则分析师、量化工程师协作解读量化模型结论。',
     unit: 'quant',
     style: {
       textColor: 'text-indigo-400',
@@ -114,11 +115,11 @@ const TEAM_MEMBER_DIRECTORY: Record<TeamMemberId, TeamMemberProfile> = {
     id: 'cheng_ju',
     name: '程矩',
     displayName: '程矩（量化规则）',
-    role: '规则量化分析师',
-    roleEn: 'RULE QUANT ANALYST',
+    role: '初级规则分析师',
+    roleEn: 'JUNIOR RULE ANALYST',
     avatarSeed: 'cheng-ju-quant-rules',
-    briefSummary: '独立完成规则推演，输出规则侧结论与约束条件。',
-    aboutDescription: '独立完成规则推演，输出规则侧结论与约束条件。',
+    briefSummary: '负责规则侧判断与纪律表达，说明量化模型当前如何看待风险与结构。',
+    aboutDescription: '基于规则模型输出规则侧判断、状态语言与纪律性说明，代表规则侧分析视角，但不承担量化工程实现职责。',
     unit: 'quant',
     style: {
       textColor: 'text-rose-400',
@@ -126,6 +127,24 @@ const TEAM_MEMBER_DIRECTORY: Record<TeamMemberId, TeamMemberProfile> = {
       borderColor: 'border-rose-500/20',
       glowColor: 'bg-rose-500',
       aboutGradient: 'from-rose-500/20',
+    },
+  },
+  shen_ce: {
+    id: 'shen_ce',
+    name: '沈策',
+    displayName: '沈策（Quant Engineer）',
+    role: '量化工程师',
+    roleEn: 'QUANT ENGINEER',
+    avatarSeed: 'shen-ce-quant-engineer',
+    briefSummary: '负责量化模型底座，把数据、规则与参数真正落成稳定可运行的系统。',
+    aboutDescription: '负责数据处理、指标计算、规则实现、参数管理与量化模型落地，为顾深、林序、程矩提供稳定的量化工程底座。',
+    unit: 'quant',
+    style: {
+      textColor: 'text-violet-400',
+      bgColor: 'bg-violet-500/10',
+      borderColor: 'border-violet-500/20',
+      glowColor: 'bg-violet-500',
+      aboutGradient: 'from-violet-500/20',
     },
   },
   nora: {
@@ -177,7 +196,7 @@ const TEAM_MEMBER_DIRECTORY: Record<TeamMemberId, TeamMemberProfile> = {
 };
 
 const FOUNDER_ORDER: TeamMemberId[] = ['andre_gu', 'frank_sun'];
-const AGENT_CARD_ORDER: TeamMemberId[] = ['lin_xu', 'gu_shen', 'cheng_ju', 'nora', 'verifier'];
+const AGENT_CARD_ORDER: TeamMemberId[] = ['gu_shen', 'lin_xu', 'cheng_ju', 'shen_ce', 'nora', 'verifier'];
 
 export const founders: FounderProfile[] = FOUNDER_ORDER.map((id) => {
   const member = TEAM_MEMBER_DIRECTORY[id];

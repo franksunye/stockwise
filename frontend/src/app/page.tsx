@@ -232,10 +232,13 @@ export default async function LandingPage() {
                 我们的团队
             </div>
             <h2 className="text-4xl md:text-5xl font-black italic tracking-tighter">
-              由 <span className="text-indigo-500">双创始人 + 投研执行团队</span> 驱动
+              由 <span className="text-indigo-500">双创始人 + 投研团队</span> 驱动
             </h2>
             <p className="text-slate-500 font-medium max-w-2xl mx-auto">
-              2 位创始人定义方法与边界，3 位量化分析师 + 2 位执行保障角色在每个交易日闭环协作。
+              2 位创始人定义边界与研究方向，3 位分析师负责判断与解读，1 位量化工程师负责模型底座，情报与审计角色保障每个交易日闭环协作。
+            </p>
+            <p className="text-slate-600 font-bold max-w-2xl mx-auto text-xs uppercase tracking-[0.2em]">
+              Analysis Models + Quant Models + Automated Workflow
             </p>
             <Link
               href="/about"
@@ -256,7 +259,7 @@ export default async function LandingPage() {
             ))}
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
             {agentTeam.map((agent) => (
               <div
                 key={agent.name}
@@ -279,7 +282,7 @@ export default async function LandingPage() {
               </div>
             ))}
           </div>
-          <p className="text-center text-xs text-slate-600 font-bold">顾深、林序、程矩三位各自独立研判，分别给出结论；诺岚负责情报补充，维尔负责结果复核。</p>
+          <p className="text-center text-xs text-slate-600 font-bold">顾深、林序、程矩分别从分析侧与规则侧给出判断；沈策提供量化模型底座；诺岚补充情报，维尔负责结果复核。你看到的是投研团队服务，背后运行的是分析模型、量化模型与自动化流程。</p>
         </section>
 
         {/* FAQ Section */}
@@ -364,4 +367,3 @@ export default async function LandingPage() {
     </div>
   );
 }
-

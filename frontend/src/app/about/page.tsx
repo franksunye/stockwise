@@ -40,6 +40,9 @@ export default function AboutPage() {
           <p className="text-lg text-slate-400 font-medium leading-relaxed max-w-2xl">
             ZISO AI 是你口袋里的复盘专家，也是你的实战导师。它替你打理繁琐的股市功课，带你一眼看清投资背后的深度门道。
           </p>
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-600 max-w-2xl">
+            Front-stage service by a research team, back-stage powered by analysis models, quant models, and automated workflow.
+          </p>
         </motion.div>
 
         {/* The Problem & Vision */}
@@ -71,7 +74,10 @@ export default function AboutPage() {
             <div className="text-center space-y-4">
               <h2 className="text-3xl font-black italic tracking-tighter uppercase">团队与执行体系</h2>
               <p className="text-slate-500 max-w-2xl mx-auto text-sm">
-                我们按小组协作推进：量化、情报、审计分工明确，每个交易日闭环协作。
+                我们把研究方向、分析表达、量化工程、情报补充与结果审计拆成清晰分工，再以投研团队服务的形式交付给用户。
+              </p>
+              <p className="text-slate-600 max-w-2xl mx-auto text-xs font-bold uppercase tracking-[0.2em]">
+                Team-facing on the surface. Model-driven underneath.
               </p>
             </div>
 
@@ -85,7 +91,7 @@ export default function AboutPage() {
               ))}
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {agentTeam.map((member) => (
                 <div key={member.name} className={`p-6 rounded-[32px] bg-gradient-to-b ${member.aboutGradient} to-transparent border border-white/5 flex flex-col items-center text-center space-y-4`}>
                   <div className="w-16 h-16 rounded-full bg-black/40 border border-white/10 overflow-hidden grayscale">
@@ -99,7 +105,21 @@ export default function AboutPage() {
                 </div>
               ))}
             </div>
-            <p className="text-center text-xs text-slate-600 font-bold">顾深、林序、程矩三位各自独立研判，分别给出结论；诺岚负责情报补充，维尔负责结果复核。</p>
+            <div className="grid md:grid-cols-3 gap-4 text-left">
+              <div className="glass-card p-6 space-y-3 border-white/5">
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400">研究与边界</p>
+                <p className="text-sm text-slate-400 leading-relaxed">安德烈与弗兰克负责研究方向、产品边界与方法治理，确保系统不是黑箱荐股，而是一套可解释的投研服务。</p>
+              </div>
+              <div className="glass-card p-6 space-y-3 border-white/5">
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400">分析与解读</p>
+                <p className="text-sm text-slate-400 leading-relaxed">顾深、林序、程矩分别从深度分析、辅助分析与规则判断三条视角给出解释与结论，形成面向用户的投研表达。</p>
+              </div>
+              <div className="glass-card p-6 space-y-3 border-white/5">
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400">工程与保障</p>
+                <p className="text-sm text-slate-400 leading-relaxed">沈策负责量化模型底座，诺岚负责情报补充，维尔负责验证复核，共同保障每个交易日的系统稳定与结果可信。</p>
+              </div>
+            </div>
+            <p className="text-center text-xs text-slate-600 font-bold">用户看到的是一支投研团队在为你服务；分析模型负责解释，量化模型负责结构判断，自动化流程负责把这些能力稳定地串起来。</p>
           </div>
 
           {/* Our Values */}
@@ -141,7 +161,7 @@ export default function AboutPage() {
               <GeoSummary
                 summary={[
                   "知守 AI 作为投研辅助工具，旨在提升投资者的决策理性与一致性。",
-                  "核心团队由量化、情报与审计专家组成，通过 Agent 架构闭环协作。",
+                  "核心团队由研究负责人、分析师、量化工程、情报与审计协同组成，以投研团队服务的方式对外交付。",
                   "产品愿景是消除普通投资者的专业信息差，建立机构级的复盘惯性。",
                 ]}
               />
@@ -172,4 +192,3 @@ export default function AboutPage() {
     </div>
   );
 }
-
