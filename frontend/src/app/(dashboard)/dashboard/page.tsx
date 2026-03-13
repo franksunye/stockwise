@@ -86,7 +86,7 @@ function DashboardContent() {
   const [briefOpen, setBriefOpen] = useState(false);
   const almanacRef = useRef<MarketAlmanacHandle>(null);
 
-  const { stocks, almanac, almanacs, isRefreshing, lastRefreshTime, refresh, loadMoreHistory } = useStocks();
+  const { stocks, almanac, almanacs, isRefreshing, lastRefreshTime, lastRefreshError, refresh, loadMoreHistory } = useStocks();
   const [refreshNotice, setRefreshNotice] = useState<string | null>(null);
 
   // Create an extended array where the first items are the Market Almanacs
@@ -286,8 +286,15 @@ function DashboardContent() {
               >
                 <RefreshCw className={`w-5 h-5 text-slate-400 transition-colors ${isRefreshing ? 'animate-spin text-indigo-400' : 'hover:text-indigo-400'}`} />
               </button>
-              <div className="min-h-[14px] text-[10px] font-black italic tracking-wide text-slate-500 text-right">
-                {refreshNotice || refreshLabel}
+              <div className="min-h-[24px] flex flex-col items-end justify-start text-right">
+                <div className={`text-[10px] font-black italic tracking-wide ${refreshNotice ? 'text-indigo-400' : lastRefreshError ? 'text-rose-400' : 'text-slate-500'}`}>
+                  {refreshNotice || lastRefreshError || refreshLabel}
+                </div>
+                {lastRefreshError && !refreshNotice && (
+                  <div className="text-[10px] font-black italic tracking-wide text-slate-500">
+                    {refreshLabel}
+                  </div>
+                )}
               </div>
             </div>
 

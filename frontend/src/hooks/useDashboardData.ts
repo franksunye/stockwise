@@ -19,6 +19,32 @@ function getRefreshInterval(): number {
     return scene === 'trading' ? TRADING_REFRESH_INTERVAL : DEFAULT_REFRESH_INTERVAL;
 }
 
+function formatRefreshError(error: unknown, sessionRecoveryAttempted: boolean): string {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+        return '请求超时';
+    }
+
+    if (error instanceof Error) {
+        if (error.message.includes('Batch API failed: 401')) {
+            return sessionRecoveryAttempted ? '401 会话恢复失败' : '401 未授权';
+        }
+        if (error.message.includes('Batch API failed: 403')) {
+            return '403 无权限';
+        }
+        if (error.message.includes('Batch API failed: 5')) {
+            return '服务端错误';
+        }
+        if (error.message.includes('Failed to fetch') || error.message.includes('Load failed')) {
+            return '网络失败';
+        }
+        if (error.message.trim()) {
+            return error.message;
+        }
+    }
+
+    return '未知错误';
+}
+
 export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: boolean) {
     // Watchlist passed from props to avoid redundant hook calls in unified context
 
@@ -28,6 +54,7 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
     const [loadingPool, setLoadingPool] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [lastRefreshTime, setLastRefreshTime] = useState<Date | null>(null);
+    const [lastRefreshError, setLastRefreshError] = useState<string | null>(null);
 
     const lastFetchTimeRef = useRef<number>(0);
     const stocksRef = useRef<StockData[]>(stocks);
@@ -82,13 +109,17 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
         const effectiveWatchlist = getEffectiveWatchlist();
 
         // 如果 watchlist 还在加载中，跳过
-        if (loadingWatchlist && effectiveWatchlist.length === 0) return false;
+        if (loadingWatchlist && effectiveWatchlist.length === 0) {
+            setLastRefreshError('等待自选池恢复');
+            return false;
+        }
 
         // 如果没有股票，清空 (但不能 return，因为仍然需要去拉取公共的 Market Almanac)
         if (effectiveWatchlist.length === 0) {
             if (!loadingWatchlist) {
                 setStocks([]);
             }
+            setLastRefreshError('无可刷新标的');
         }
 
         const now = Date.now();
@@ -117,7 +148,10 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
 
         lastFetchTimeRef.current = now;
 
-        if (!silent) setIsRefreshing(true);
+        if (!silent) {
+            setIsRefreshing(true);
+            setLastRefreshError(null);
+        }
 
         try {
             const startTime = performance.now();
@@ -194,6 +228,7 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
             setStocks(validResults);
             setLoadingPool(false);
             setLastRefreshTime(new Date());
+            setLastRefreshError(null);
 
             // 💾 写入本地缓存 (后台静默)
             try {
@@ -214,6 +249,9 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
             return true;
         } catch (e) {
             console.error('Dashboard fetch error:', e);
+            const sessionRecoveryAttempted =
+                e instanceof Error && e.message.includes('401');
+            setLastRefreshError(formatRefreshError(e, sessionRecoveryAttempted));
             // [Fix] Even on error, we should ensure UI reflects the watchlist
             // If network fails, at least show the items in watchlist with error state
             if (effectiveWatchlist.length > 0) {
@@ -337,6 +375,7 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
         loadingPool,
         isRefreshing,
         lastRefreshTime,
+        lastRefreshError,
         refresh: manualRefresh,
         loadMoreHistory
     };

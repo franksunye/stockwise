@@ -12,6 +12,7 @@ interface StockContextType {
     loadingList: boolean;
     isRefreshing: boolean;
     lastRefreshTime: Date | null;
+    lastRefreshError: string | null;
     refresh: () => Promise<boolean>;
     loadMoreHistory: (symbol: string, offset: number) => Promise<void>;
     addStock: (symbol: string, name: string) => Promise<boolean>;
@@ -31,6 +32,7 @@ export function StockProvider({ children }: { children: ReactNode }) {
         loadingPool,
         isRefreshing,
         lastRefreshTime,
+        lastRefreshError,
         refresh,
         loadMoreHistory
     } = useDashboardData(watchlist, loadingList);
@@ -40,6 +42,7 @@ export function StockProvider({ children }: { children: ReactNode }) {
         loadingPool,
         isRefreshing,
         lastRefreshTime,
+        lastRefreshError,
         refresh,
         loadMoreHistory,
         watchlist,
@@ -48,7 +51,7 @@ export function StockProvider({ children }: { children: ReactNode }) {
         removeStock,
         almanac,
         almanacs
-    }), [stocks, loadingPool, isRefreshing, lastRefreshTime, refresh, loadMoreHistory, watchlist, loadingList, addStock, removeStock, almanac, almanacs]);
+    }), [stocks, loadingPool, isRefreshing, lastRefreshTime, lastRefreshError, refresh, loadMoreHistory, watchlist, loadingList, addStock, removeStock, almanac, almanacs]);
 
     return (
         <StockContext.Provider value={value}>
