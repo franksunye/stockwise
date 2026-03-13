@@ -21,12 +21,6 @@ export const HistoricalCard = memo(function HistoricalCard({ data, onClick }: { 
     ? validationData.cum_change ?? data.actual_change
     : data.actual_change;
   const resultLabel = validationData?.window && validationData.window > 1 ? `${validationData.window}日累计` : '首日变动';
-  const validationSummary =
-    data.validation_status === 'Correct'
-      ? `${windowLabel}后，这次判断整体站得住。`
-      : data.validation_status === 'Incorrect'
-        ? `${windowLabel}后，这次判断与市场结果出现偏离。`
-        : `正在等待${windowLabel}走完。`;
   
   // 尝试解析 JSON 理由
   let displayReason = data.ai_reasoning;
@@ -158,9 +152,6 @@ export const HistoricalCard = memo(function HistoricalCard({ data, onClick }: { 
               </p>
             </div>
           </div>
-          <p className="mt-4 text-xs text-slate-500 leading-relaxed">
-            {validationSummary}
-          </p>
         </div>
       </div>
     </div>
