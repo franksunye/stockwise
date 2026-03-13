@@ -401,7 +401,7 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
   const defenseCount = actionKeys.filter((k) => k === 'defense').length;
   const emptyCount = actionKeys.filter((k) => k === 'empty').length;
   
-  let consensusLevel = '更多支持';
+  let consensusLevel = '更多共识';
   let actionLabel = '暂无信号';
   let consensusColor = 'text-slate-400';
   
@@ -409,7 +409,7 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
   const isUnanimous = enterCount === total || observeCount === total || defenseCount === total || emptyCount === total;
   
   if (isUnanimous) {
-    consensusLevel = '一致支持';
+    consensusLevel = '结论一致';
     if (enterCount === total) actionLabel = '建议进场';
     else if (observeCount === total) actionLabel = '建议观察';
     else if (defenseCount === total) actionLabel = '建议防守';
@@ -425,7 +425,7 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
     counts.sort((a, b) => b.count - a.count);
     
     if (counts[0].count > counts[1].count) {
-      consensusLevel = '更多支持';
+      consensusLevel = '更多共识';
       actionLabel = counts[0].label;
     } else {
       consensusLevel = '判断分歧';
@@ -461,7 +461,6 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
       {/* Model List */}
       <div className="space-y-3">
         {councilCards.map((card) => {
-           const actionMeta = getCouncilActionMeta(card.actionKey);
            const chipClass = getActionChipClass(card.actionKey);
            const chipText = getCouncilActionLabel(card.actionKey);
            return (
