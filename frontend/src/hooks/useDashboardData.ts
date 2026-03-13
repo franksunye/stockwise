@@ -69,17 +69,6 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
 
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-    const getEffectiveWatchlist = useCallback((): WatchlistItem[] => {
-        if (watchlist.length > 0) return watchlist;
-        if (stocksRef.current.length === 0) return [];
-
-        return stocksRef.current.map((stock, index) => ({
-            symbol: stock.symbol,
-            name: stock.name,
-            addedAt: index
-        }));
-    }, [watchlist]);
-
     // 1. 初始化：尝试从本地缓存读取，实现【秒开】
     useEffect(() => {
         try {
@@ -109,16 +98,14 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
     }, []);
 
     const loadAllData = useCallback(async (silent = false, ignoreDebounce = false): Promise<boolean> => {
-        const effectiveWatchlist = getEffectiveWatchlist();
-
         // 如果 watchlist 还在加载中，跳过
-        if (loadingWatchlist && effectiveWatchlist.length === 0) {
+        if (loadingWatchlist && watchlist.length === 0) {
             setLastRefreshError('等待自选池恢复');
             return false;
         }
 
         // 如果没有股票，清空 (但不能 return，因为仍然需要去拉取公共的 Market Almanac)
-        if (effectiveWatchlist.length === 0) {
+        if (watchlist.length === 0) {
             if (!loadingWatchlist) {
                 setStocks([]);
             }
@@ -132,9 +119,9 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
             // we MUST re-map the stocks if the watchlist itself has changed (e.g. user added/removed item).
             // Current `stocks` might be stale compared to `watchlist`.
             // Check if we need a quick local sync without network
-            if (effectiveWatchlist.length !== stocksRef.current.length) {
+            if (watchlist.length !== stocksRef.current.length) {
                 // Fallback: Local re-map using existing data + new placeholder
-                const remapped = effectiveWatchlist.map(item => {
+                const remapped = watchlist.map(item => {
                     const existing = stocksRef.current.find(s => s.symbol === item.symbol);
                     if (existing) return existing;
                     return {
@@ -165,7 +152,7 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
             getCurrentUser().catch(err => console.error('Background user sync error:', err));
 
             // Step 2: 拿着 watchlist 去 CDN 拉取公共数据 (公有API)
-            const symbols = effectiveWatchlist.map(w => w.symbol).join(',');
+            const symbols = watchlist.map(w => w.symbol).join(',');
             // 如果是非静默刷新（手动点击或初始化），增加一个 cache-buster 扰动缓存
             const url = `/api/stock/batch?symbols=${symbols}&historyLimit=5${!silent ? `&t=${Date.now()}` : ''}`;
 
@@ -215,10 +202,10 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
             }
 
             const fetchTime = Math.round(performance.now() - startTime);
-            console.log(`📊 Dashboard loaded: ${effectiveWatchlist.length} stocks in ${fetchTime}ms`);
+            console.log(`📊 Dashboard loaded: ${watchlist.length} stocks in ${fetchTime}ms`);
 
             // Merge Watchlist with Batch Data
-            const validResults = effectiveWatchlist.map(item => {
+            const validResults = watchlist.map(item => {
                 const stockData = (batchData.stocks || []).find((s: { symbol: string }) => s.symbol === item.symbol);
                 const base = stockData || {
                     symbol: item.symbol,
@@ -273,8 +260,8 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
             setLastRefreshError(formatRefreshError(e, sessionRecoveryAttempted));
             // [Fix] Even on error, we should ensure UI reflects the watchlist
             // If network fails, at least show the items in watchlist with error state
-            if (effectiveWatchlist.length > 0) {
-                const fallback = effectiveWatchlist.map(item => {
+            if (watchlist.length > 0) {
+                const fallback = watchlist.map(item => {
                     const existing = stocksRef.current.find(s => s.symbol === item.symbol);
                     return existing || {
                         symbol: item.symbol, name: item.name, price: null, loading: false,
@@ -289,7 +276,7 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
         } finally {
             setIsRefreshing(false);
         }
-    }, [getEffectiveWatchlist, loadingWatchlist]); // Important: depends on watchlist
+    }, [watchlist, loadingWatchlist]); // Important: depends on watchlist
 
     // Watchlist 变更时，强制触发一次刷新 (Ignore Debounce)
     useEffect(() => {
