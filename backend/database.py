@@ -11,6 +11,7 @@ import sys
 import requests
 import json
 import time
+import math
 from typing import Optional, List, Dict, Any, Callable
 from pathlib import Path
 
@@ -112,18 +113,25 @@ class TursoHttpCursor:
         self._rows = []
         self._idx = 0
 
+    @staticmethod
+    def _encode_arg(value):
+        if value is None:
+            return {"type": "null", "value": None}
+        if isinstance(value, bool):
+            return {"type": "integer", "value": "1" if value else "0"}
+        if isinstance(value, int):
+            return {"type": "integer", "value": str(value)}
+        if isinstance(value, float):
+            if not math.isfinite(value):
+                return {"type": "null", "value": None}
+            return {"type": "float", "value": value}
+        return {"type": "text", "value": str(value)}
+
     def execute(self, sql, params=None):
         args = []
         if params:
             for p in params:
-                if p is None:
-                    args.append({"type": "null", "value": None})
-                elif isinstance(p, int):
-                    args.append({"type": "integer", "value": str(p)})
-                elif isinstance(p, float):
-                    args.append({"type": "float", "value": float(p)})
-                else:
-                    args.append({"type": "text", "value": str(p)})
+                args.append(self._encode_arg(p))
         
         stmt = { "sql": sql }
         if args:
@@ -146,14 +154,7 @@ class TursoHttpCursor:
         for params in seq_of_parameters:
             args = []
             for p in params:
-                if p is None:
-                    args.append({"type": "null", "value": None})
-                elif isinstance(p, int):
-                    args.append({"type": "integer", "value": str(p)})
-                elif isinstance(p, float):
-                    args.append({"type": "float", "value": float(p)})
-                else:
-                    args.append({"type": "text", "value": str(p)})
+                args.append(self._encode_arg(p))
             reqs.append({
                 "type": "execute", 
                 "stmt": { "sql": sql, "args": args }
