@@ -277,23 +277,23 @@ export function EnglishHomePage() {
         <section id="features" className="pt-48 w-full grid md:grid-cols-2 gap-20 items-center text-left">
           <div className="space-y-8">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[10px] font-black uppercase tracking-[0.2em]">
-              Prepare before the session
+              Build tomorrow&apos;s plan
             </div>
             <h2 className="text-4xl md:text-5xl font-black tracking-tighter leading-tight">
-              Review calmly after the close.
+              Review when the market is calm.
               <br />
-              <span className="text-indigo-400">Trade with more structure the next day.</span>
+              <span className="text-indigo-400">Write tomorrow&apos;s script before tomorrow arrives.</span>
             </h2>
             <p className="text-slate-400 font-medium leading-relaxed">
-              The product is designed around one belief: most retail investors lose consistency because they make
-              decisions inside noise. ZISO AI moves the heavy research into the post-close window, so execution can stay
-              simpler, cleaner, and more rule-driven.
+              Professional traders are not defined by fast intraday instinct alone. Their real edge comes from the work
+              they do after the close. ZISO AI connects market data and news each evening, then turns that into a
+              structured decision script. It does not manufacture random predictions. It defines executable boundaries.
             </p>
             <ul className="space-y-4">
               {[
-                'Tactical brief with support, resistance, and invalidation levels',
-                'AI council view for agreement and disagreement across analytical seats',
-                'Execution states framed as enter, observe, defend, or no setup',
+                'Multi-timeframe trend resonance across MA, RSI, and MACD',
+                'Price-volume anomaly tracing with contextual explanation',
+                'Confidence scoring grounded in historical hit-rate logic',
               ].map((item) => (
                 <li key={item} className="flex items-center gap-3 text-sm font-bold text-slate-300">
                   <div className="w-5 h-5 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400">
@@ -306,6 +306,77 @@ export function EnglishHomePage() {
           </div>
           <div className="glass-card aspect-square bg-[#0A0A10] rounded-[40px] overflow-hidden border border-white/5 relative">
             <Image src="/images/landing/prediction-card-detail.png" alt="Detailed tactical brief" fill className="object-cover opacity-80 hover:opacity-100 transition-opacity duration-700" />
+          </div>
+        </section>
+
+        <section className="pt-32 w-full grid md:grid-cols-2 gap-20 items-center text-left">
+          <div className="order-2 md:order-1 glass-card aspect-square bg-[#0A0A10] rounded-[40px] overflow-hidden border border-white/5 relative">
+            <Image src="/images/landing/circuit-breaker-logic.png" alt="Risk circuit breaker logic" fill sizes="(min-width: 768px) 45vw, 100vw" className="object-cover opacity-80 hover:opacity-100 transition-opacity duration-700" />
+            <ShieldCheck size={120} className="absolute bottom-4 right-4 opacity-[0.1] text-red-500 pointer-events-none" />
+          </div>
+          <div className="order-1 md:order-2 space-y-8">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] font-black uppercase tracking-[0.2em]">
+              Risk control system
+            </div>
+            <h2 className="text-4xl md:text-5xl font-black tracking-tighter leading-tight">
+              Even in the wildest tape,
+              <br />
+              <span className="text-red-400">the 75% gate still holds.</span>
+            </h2>
+            <p className="text-slate-400 font-medium leading-relaxed">
+              Understanding the game is not enough. You also need to defend your boundaries. If the system&apos;s confidence
+              in the next session falls below 75%, ZISO AI triggers a hard circuit breaker and blocks aggressive action.
+              Observe first. Survive first. Not losing discipline is the first rule of staying in the market long enough
+              to win anything meaningful.
+            </p>
+            <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/5 space-y-4">
+              <div className="flex justify-between items-center text-xs font-black uppercase tracking-widest">
+                <span className="text-slate-500">AI confidence score</span>
+                <span className="text-red-400">Circuit breaker triggered</span>
+              </div>
+              <div className="h-3 w-full bg-white/5 rounded-full overflow-hidden">
+                <div className="h-full w-[64%] bg-red-500/50" />
+              </div>
+              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tighter">
+                Current state: no setup, defense mode active
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section className="pt-32 w-full">
+          <div className="text-center mb-20">
+            <h2 className="text-4xl md:text-5xl font-black tracking-tighter leading-tight">
+              <span className="text-indigo-400">3 steps</span> to a more independent trading system
+            </h2>
+          </div>
+          <div className="grid md:grid-cols-3 gap-12 text-left">
+            {[
+              {
+                num: '01',
+                title: 'Lock your watchlist',
+                desc: 'Add the names you care about. The system immediately starts syncing and modeling roughly 250 trading days of history.',
+              },
+              {
+                num: '02',
+                title: 'Receive the nightly brief',
+                desc: 'Within about 30 minutes after the close, the research assistant delivers a briefing with support, resistance, tactical framing, and decision logic.',
+              },
+              {
+                num: '03',
+                title: 'Execute with intraday discipline',
+                desc: 'Stop being kidnapped by random intraday motion. When the market touches the script set the night before, the council helps bring your discipline back online.',
+              },
+            ].map((step) => (
+              <div key={step.num} className="space-y-6 relative group">
+                <div className="text-7xl font-black text-white/[0.03] group-hover:text-indigo-500/10 transition-colors absolute -top-10 -left-4">
+                  {step.num}
+                </div>
+                <h3 className="font-extrabold text-2xl relative z-10">{step.title}</h3>
+                <p className="text-slate-500 text-sm leading-relaxed font-medium relative z-10">{step.desc}</p>
+                <div className="w-12 h-1 bg-white/5 rounded-full group-hover:w-20 group-hover:bg-indigo-500/30 transition-all duration-500" />
+              </div>
+            ))}
           </div>
         </section>
 
@@ -492,8 +563,11 @@ export function EnglishAboutPage() {
             </span>
           </h1>
           <p className="text-lg text-slate-400 font-medium leading-relaxed max-w-3xl">
-            ZISO AI was built around one principle: ordinary investors should have access to structured post-close
-            research, not just noise, sentiment, and improvised decision-making.
+            ZISO AI is a pocket research partner and a practical execution coach. It takes over the exhausting market
+            homework, then helps investors see the deeper logic behind each decision.
+          </p>
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-600 max-w-3xl">
+            Front-stage service by a research team, back-stage powered by analysis models, quant models, and automated workflow.
           </p>
         </div>
 
@@ -504,22 +578,25 @@ export function EnglishAboutPage() {
             </div>
             <h2 className="text-3xl font-black tracking-tighter">Our mission</h2>
             <p className="text-slate-400 leading-relaxed font-bold">
-              The mission is straightforward: give ordinary investors access to a more institutional research rhythm.
+              ZISO AI was built around a direct goal: <span className="text-white">help ordinary investors operate with institutional-grade research discipline.</span>
             </p>
             <p className="text-slate-500 text-sm leading-relaxed">
-              Instead of leaving investors to stitch together fragments of news, indicators, and instinct, ZISO AI
-              turns market review into a repeatable nightly workflow. The goal is not certainty. The goal is cleaner
-              preparation, clearer boundaries, and stronger discipline.
+              Retail investors are usually trapped by fragmented information, time-poor review habits, and reactive
+              decision-making. ZISO AI uses multiple cooperating agents to process daily market inputs, structure the
+              review cycle, and help users leave behind gut-feel trading in favor of calmer, more defensible decisions.
             </p>
           </div>
           <div className="glass-card p-1 relative group">
             <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-cyan-500/20 rounded-[38px] blur-xl opacity-50 group-hover:opacity-100 transition-opacity" />
             <div className="bg-[#0a0a0f] rounded-[38px] p-8 relative z-10 space-y-4">
-              <div className="text-indigo-300 font-black text-xl leading-tight">“Research first. Decision second.”</div>
+              <div className="text-indigo-300 font-black text-xl leading-tight">
+                &ldquo;Know the visible. Guard the hidden.&rdquo;
+              </div>
               <p className="text-slate-500 text-sm text-justify leading-relaxed">
-                That principle is embedded across the product: the system is optimized for post-close review, tactical
-                preparation, risk framing, and execution clarity. It is not built as a hype feed, and it is not built to
-                manufacture certainty.
+                That is the spirit behind the name ZISO. The first part is the deep research work that helps investors
+                see the structure of the market more clearly. The second part is the enduring discipline that protects
+                capital when certainty is weak. Understand the game, but hold your boundaries. That is how rational
+                execution becomes possible.
               </p>
             </div>
           </div>
@@ -529,8 +606,8 @@ export function EnglishAboutPage() {
           <div className="text-center space-y-4">
             <h2 className="text-3xl font-black tracking-tighter">Team and operating structure</h2>
             <p className="text-slate-500 max-w-2xl mx-auto text-sm">
-              On the surface, the product is delivered like a research service. Underneath, it is supported by analysis
-              models, quant rules, and automation.
+              We separate research direction, analysis expression, quant engineering, context intelligence, and result
+              auditing into clear roles, then deliver the experience to users as if a research desk were working with them directly.
             </p>
           </div>
 
@@ -575,14 +652,52 @@ export function EnglishAboutPage() {
           </div>
         </section>
 
-        <section className="pt-20 text-center">
-          <Link
-            href="https://app.ziso.cc"
-            className="inline-flex items-center gap-2 rounded-3xl bg-indigo-500 px-10 py-5 text-lg font-black text-white transition-all hover:scale-[1.02]"
-          >
-            Open App
-            <ChevronRight size={20} />
-          </Link>
+        <section className="pt-20 grid md:grid-cols-3 gap-8">
+          {[
+            {
+              icon: ShieldCheck,
+              title: 'Deep review assistant',
+              desc: 'The system scans broad market inputs and turns noisy chart behavior into a structured nightly research workflow.',
+            },
+            {
+              icon: Users,
+              title: 'Execution decision partner',
+              desc: 'The product does not just list signals. It interprets the setup, explains the logic, and helps users act with more clarity.',
+            },
+            {
+              icon: Sparkles,
+              title: 'Rational risk guardrail',
+              desc: 'In moments of excitement or confusion, the system keeps a colder line. It does not promise miracles. It protects discipline.',
+            },
+          ].map((value) => (
+            <div key={value.title} className="glass-card p-10 space-y-6 border-white/5">
+              <value.icon className="text-indigo-400 w-8 h-8" />
+              <h3 className="text-xl font-black">{value.title}</h3>
+              <p className="text-slate-500 text-sm leading-relaxed">{value.desc}</p>
+            </div>
+          ))}
+        </section>
+
+        <section className="pt-32 text-center space-y-12 border-b border-white/5 pb-32">
+          <h2 className="text-3xl md:text-5xl font-black tracking-tighter leading-tight">
+            Stop trading alone.
+            <br />
+            <span className="text-indigo-400">Turn on AI-enhanced decision support.</span>
+          </h2>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link
+              href="https://app.ziso.cc"
+              className="px-10 py-5 rounded-3xl bg-indigo-500 text-white font-black shadow-lg hover:scale-105 transition-all"
+            >
+              Open the App
+            </Link>
+            <Link
+              href="/en"
+              className="px-10 py-5 rounded-3xl bg-white/5 border border-white/10 text-slate-400 font-black hover:text-white transition-all flex items-center gap-2"
+            >
+              <ArrowLeft size={18} /> Back to Home
+            </Link>
+          </div>
         </section>
       </main>
     </PageShell>
