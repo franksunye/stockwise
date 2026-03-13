@@ -26,7 +26,7 @@ const EN_FOUNDERS = [
     label: 'Founder / Research Lead',
     name: 'Andre Gu',
     description:
-      'Leads research direction, systems architecture, and product delivery, translating the quant-plus-AI methodology into a stable user-facing workflow.',
+      'Leads research direction, systems architecture, and product delivery, turning the quant-plus-AI methodology into a stable, user-facing workflow.',
   },
   {
     label: 'Co-Founder',
@@ -41,7 +41,7 @@ const EN_AGENT_TEAM = [
     name: 'Gu Shen (DeepSeek)',
     role: 'Senior Analyst',
     description:
-      'Produces the primary conclusion, deeper scenario analysis, and core risk judgment, then turns that work into a clearer tactical narrative.',
+      'Produces the lead conclusion, deeper scenario analysis, and core risk judgment, then turns that work into a clear tactical narrative.',
     avatarSeed: 'gu-shen-deepseek',
     textColor: 'text-indigo-400',
     bgColor: 'bg-indigo-500/10',
@@ -65,7 +65,7 @@ const EN_AGENT_TEAM = [
     name: 'Cheng Ju (Rule Engine)',
     role: 'Junior Rule Analyst',
     description:
-      'Explains the rule-based view, discipline state, and structural constraints, representing the quant rule perspective without claiming discretionary judgment.',
+      'Explains the rule-based view, discipline state, and structural constraints, representing the quant rule perspective without pretending to be discretionary judgment.',
     avatarSeed: 'cheng-ju-quant-rules',
     textColor: 'text-rose-400',
     bgColor: 'bg-rose-500/10',
@@ -232,7 +232,7 @@ export function EnglishHomePage() {
           </h1>
           <p className="text-lg md:text-xl text-slate-400 font-medium max-w-2xl mx-auto leading-relaxed">
             ZISO AI turns post-close market data into a disciplined briefing with key levels, action states, context,
-            and risk boundaries, so retail investors can prepare before the next session instead of reacting inside it.
+            and risk boundaries, so retail investors can prepare for the next session instead of reacting inside it.
           </p>
           <div className="pt-10 flex flex-col md:flex-row items-center justify-center gap-4">
             <Link
@@ -365,7 +365,7 @@ export function EnglishHomePage() {
               {
                 num: '03',
                 title: 'Execute with intraday discipline',
-                desc: 'Stop being kidnapped by random intraday motion. When the market touches the script set the night before, the council helps bring your discipline back online.',
+                desc: 'Stop letting random intraday movement dictate the trade. When price reaches the script set the night before, the council helps restore execution discipline.',
               },
             ].map((step) => (
               <div key={step.num} className="space-y-6 relative group">
@@ -481,7 +481,7 @@ export function EnglishHomePage() {
               },
               {
                 q: 'Which markets does it cover today?',
-                a: 'Today the product is optimized for China and Hong Kong equities. The English website exists so search engines and AI systems can understand the product and public positioning.',
+                a: 'Today the product is optimized for China and Hong Kong equities. The English website exists so search engines and AI systems can understand the product, positioning, and public-facing policies.',
               },
               {
                 q: 'Why focus on post-close research?',
@@ -564,7 +564,7 @@ export function EnglishAboutPage() {
           </h1>
           <p className="text-lg text-slate-400 font-medium leading-relaxed max-w-3xl">
             ZISO AI is a pocket research partner and a practical execution coach. It takes over the exhausting market
-            homework, then helps investors see the deeper logic behind each decision.
+            homework and helps investors see the deeper logic behind each decision.
           </p>
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-600 max-w-3xl">
             Front-stage service by a research team, back-stage powered by analysis models, quant models, and automated workflow.
@@ -590,13 +590,12 @@ export function EnglishAboutPage() {
             <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-cyan-500/20 rounded-[38px] blur-xl opacity-50 group-hover:opacity-100 transition-opacity" />
             <div className="bg-[#0a0a0f] rounded-[38px] p-8 relative z-10 space-y-4">
               <div className="text-indigo-300 font-black text-xl leading-tight">
-                &ldquo;Know the visible. Guard the hidden.&rdquo;
+                &ldquo;See what is visible. Guard what must remain disciplined.&rdquo;
               </div>
               <p className="text-slate-500 text-sm text-justify leading-relaxed">
                 That is the spirit behind the name ZISO. The first part is the deep research work that helps investors
-                see the structure of the market more clearly. The second part is the enduring discipline that protects
-                capital when certainty is weak. Understand the game, but hold your boundaries. That is how rational
-                execution becomes possible.
+                see market structure more clearly. The second part is the enduring discipline that protects capital when
+                certainty is weak. Understand the game, but hold the line. That is what makes rational execution possible.
               </p>
             </div>
           </div>
@@ -607,7 +606,7 @@ export function EnglishAboutPage() {
             <h2 className="text-3xl font-black tracking-tighter">Team and operating structure</h2>
             <p className="text-slate-500 max-w-2xl mx-auto text-sm">
               We separate research direction, analysis expression, quant engineering, context intelligence, and result
-              auditing into clear roles, then deliver the experience to users as if a research desk were working with them directly.
+              auditing into clear roles, then deliver the experience as if a research desk were working alongside the user.
             </p>
           </div>
 
@@ -710,7 +709,7 @@ export function EnglishPricingPage() {
       <main className="relative z-10 max-w-7xl mx-auto px-8 pt-12 pb-40">
         <div className="text-center space-y-4 mb-20">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[10px] font-black uppercase tracking-[0.2em] mb-4">
-            Know the visible. Guard the hidden.
+            Structured pricing for disciplined investors
           </div>
           <h1 className="text-4xl md:text-6xl font-black tracking-tighter leading-tight">
             Appoint your own
@@ -858,7 +857,7 @@ export function EnglishPricingPage() {
             </div>
             <div className="p-6">
               <h4 className="text-white font-bold mb-3">Aggressive value for depth delivered</h4>
-              <p className="text-slate-500 text-sm font-medium">The pricing is intentionally kept far below traditional research terminals so disciplined retail investors can actually use it daily.</p>
+              <p className="text-slate-500 text-sm font-medium">The pricing is intentionally kept far below traditional research terminals so serious retail investors can realistically use it every day.</p>
             </div>
           </div>
         </section>
@@ -967,7 +966,7 @@ export function EnglishPrivacyPage() {
         <h2 className="text-xl font-bold text-white">2. How we use it</h2>
         <p className="text-slate-400 leading-relaxed text-sm">
           The information is used to maintain your account, deliver personalized research briefs, provide customer
-          support, and improve product reliability. We do not sell or rent your personal data to third parties.
+          support, and improve product reliability. We do not sell or rent personal data to third parties.
         </p>
       </section>
 
@@ -975,7 +974,7 @@ export function EnglishPrivacyPage() {
         <h2 className="text-xl font-bold text-white">3. Data security</h2>
         <p className="text-slate-400 leading-relaxed text-sm">
           We apply industry-standard encryption and security controls to protect user data. No internet transmission can
-          be guaranteed to be completely risk-free, so users should also safeguard their own login credentials.
+          be guaranteed to be completely risk-free, so users should also protect their own login credentials.
         </p>
       </section>
 
@@ -1028,7 +1027,7 @@ export function EnglishTermsPage() {
         <ShieldCheck className="text-amber-400 shrink-0 mt-1" size={20} />
         <div className="text-sm text-amber-100/80 leading-relaxed font-medium">
           Important notice: all forecasts, analysis, and reports provided by ZISO AI are generated with AI assistance
-          for informational and technical reference only. Nothing on this site constitutes investment advice, financial
+          for informational reference only. Nothing on this site constitutes investment advice, financial
           advice, or legal advice. Market risk remains your own responsibility.
         </div>
       </div>
@@ -1137,7 +1136,7 @@ export function EnglishRefundPage() {
         <p className="text-slate-400 leading-relaxed text-sm">
           To request a refund, email <span className="text-indigo-300 font-bold">support@ziso.cc</span> with the subject line
           <span className="text-white font-bold"> [Refund Request]</span> and include your account email. Requests are
-          typically processed within 1 to 3 business days.
+          typically reviewed within 1 to 3 business days.
         </p>
       </section>
 
@@ -1145,7 +1144,7 @@ export function EnglishRefundPage() {
         <h2 className="text-xl font-bold text-white">3. Processing time</h2>
         <p className="text-slate-400 leading-relaxed text-sm">
           Approved refunds are returned through Stripe to the original payment method. Final arrival time depends on the
-          banking provider and usually takes several business days.
+          banking provider and usually takes several business days to settle.
         </p>
       </section>
 
