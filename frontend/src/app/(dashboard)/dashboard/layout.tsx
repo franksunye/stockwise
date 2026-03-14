@@ -12,7 +12,6 @@ import { resolveReferralCode } from '@/lib/referral-resolver';
 import { SystemSync } from '@/components/SystemSync';
 import { ReferralTracker } from '@/components/ReferralTracker';
 import { BadgeManager } from '@/components/BadgeManager';
-import { ServiceWorkerRegistrar } from '@/components/ServiceWorkerRegistrar';
 import { InstallGuide } from '@/components/InstallGuide';
 import { UserProfileProvider, useUserProfile, type Tier } from '@/hooks/useUserProfile';
 import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton';
@@ -186,7 +185,6 @@ export default function DashboardLayout({
       <SystemSync />
       <ReferralTracker />
       <BadgeManager />
-      <ServiceWorkerRegistrar />
       <InstallGuide />
     </>
   );

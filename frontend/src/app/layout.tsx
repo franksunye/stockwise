@@ -3,6 +3,7 @@ import { Analytics } from "@vercel/analytics/react";
 import { headers } from "next/headers";
 import { brandCoreZhCN } from "@/content/brand-core.zh-CN";
 import { getHtmlLang, isSupportedPublicLocale } from "@/lib/public-i18n";
+import { ServiceWorkerRegistrar } from "@/components/ServiceWorkerRegistrar";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -100,6 +101,7 @@ export default async function RootLayout({
           }}
         />
         {children}
+        <ServiceWorkerRegistrar />
         <Analytics />
       </body>
     </html>
