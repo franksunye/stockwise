@@ -151,11 +151,6 @@ export const HistoricalCard = memo(function HistoricalCard({ data, onClick }: { 
 
           {/* 轨迹追踪表格 (固定3行) */}
           <div className="pt-4 border-t border-white/5">
-            <div className="flex items-center justify-between mb-3">
-               <span className="text-xs font-black text-indigo-400/50 tracking-[0.2em] uppercase">72H 趋势追踪</span>
-               <div className="h-px flex-1 bg-white/5 ml-3" />
-            </div>
-            
             <div className="space-y-2">
               {[0, 1, 2].map((dayOffset) => {
                 const dayData = validationData?.trajectory?.[dayOffset];
