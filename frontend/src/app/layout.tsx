@@ -8,7 +8,6 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || brandCoreZhCN.domain),
-  manifest: "/manifest.json",
   icons: {
     icon: "/logo.png",
     apple: "/logo.png",
@@ -56,6 +55,7 @@ export default async function RootLayout({
   return (
     <html lang={getHtmlLang(locale)}>
       <head>
+        <link rel="manifest" href="/manifest.json" />
         <link rel="preconnect" href="https://app.ziso.cc" />
         <link rel="dns-prefetch" href="https://app.ziso.cc" />
         <link rel="preconnect" href="https://va.vercel-scripts.com" />
