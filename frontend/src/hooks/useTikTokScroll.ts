@@ -4,6 +4,17 @@ import { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react
 import { useSearchParams } from 'next/navigation';
 import { StockData } from '@/lib/types';
 
+export interface VerticalLayerState {
+    type: 'today' | 'history';
+    date: string | null;
+}
+
+export interface VerticalPositionRequest {
+    nonce: number;
+    type: 'today' | 'history';
+    date: string | null;
+}
+
 interface UseTikTokScrollOptions {
     onOverscrollRight?: () => void;  // 在最后一个股票继续左滑时触发
     onOverscrollLeft?: () => void;   // 在第一个股票继续右滑时触发
@@ -11,10 +22,14 @@ interface UseTikTokScrollOptions {
 
 export function useTikTokScroll(stocks: StockData[], options?: UseTikTokScrollOptions) {
     const [currentIndex, setCurrentIndex] = useState(0);
-    const [yPositions, setYPositions] = useState<{ [index: number]: number }>({});
+    const [yPositions, setYPositions] = useState<Record<string, number>>({});
+    const [layerStates, setLayerStates] = useState<Record<string, VerticalLayerState>>({});
+    const [positionRequests, setPositionRequests] = useState<Record<string, VerticalPositionRequest>>({});
     const [backToTopCounter, setBackToTopCounter] = useState(0);
     const [isSnapped, setIsSnapped] = useState(true);
     const isReturningToTop = useRef(false);
+    const previousIndexRef = useRef(0);
+    const positionNonceRef = useRef(0);
 
     const scrollRef = useRef<HTMLDivElement>(null);
     const searchParams = useSearchParams();
@@ -27,26 +42,46 @@ export function useTikTokScroll(stocks: StockData[], options?: UseTikTokScrollOp
     const isAtRightEdge = useRef<boolean>(false);
     const isAtLeftEdge = useRef<boolean>(true);  // 默认在左边缘
 
+    const getNearestIndex = useCallback((container: HTMLDivElement, scrollLeft: number) => {
+        const children = Array.from(container.children) as HTMLElement[];
+        if (children.length === 0) return 0;
+
+        let nearestIndex = 0;
+        let nearestDistance = Number.POSITIVE_INFINITY;
+
+        children.forEach((child, index) => {
+            const distance = Math.abs(child.offsetLeft - scrollLeft);
+            if (distance < nearestDistance) {
+                nearestDistance = distance;
+                nearestIndex = index;
+            }
+        });
+
+        return nearestIndex;
+    }, []);
+
     // 处理横向滚动 (切股)
     const handleScroll = useCallback(() => {
-        if (!scrollRef.current) return;
-        const scrollLeft = scrollRef.current.scrollLeft;
-        const width = scrollRef.current.clientWidth;
-        const scrollWidth = scrollRef.current.scrollWidth;
+        const container = scrollRef.current;
+        if (!container) return;
+        const scrollLeft = container.scrollLeft;
+        const width = container.clientWidth;
+        const scrollWidth = container.scrollWidth;
 
         if (width <= 0) return;
 
-        // 1. 索引切换逻辑：增加阈值，避免在 50% 位置反复横跳，并严格限制边界防止 iOS 橡皮筋效应导致越界 (-1 或超过长度)
-        const fractionalIndex = scrollLeft / width;
-        const newIndex = Math.max(0, Math.min(Math.round(fractionalIndex), stocks.length - 1));
+        // 1. 索引切换逻辑：不要依赖 scrollLeft / width 的理想模型。
+        // Android 上在连续多页 snap 后可能出现累计偏差，改为按真实子元素 offsetLeft 找最近页。
+        const newIndex = Math.max(0, Math.min(getNearestIndex(container, scrollLeft), stocks.length - 1));
 
         if (newIndex !== currentIndex) {
             setCurrentIndex(newIndex);
         }
 
-        // 2. 稳定态（吸附）检测：只要偏离中心超过 2px，就认为是在滑动中
-        const offset = Math.abs((scrollLeft % width + width + width / 2) % width - width / 2);
-        const stable = offset < 2;
+        // 2. 稳定态（吸附）检测：对准最近子页的真实 offsetLeft，而不是假设每页宽度完全相等。
+        const children = container.children;
+        const targetLeft = children[newIndex] instanceof HTMLElement ? (children[newIndex] as HTMLElement).offsetLeft : newIndex * width;
+        const stable = Math.abs(scrollLeft - targetLeft) < 2;
         if (stable !== isSnapped) {
             setIsSnapped(stable);
         }
@@ -55,7 +90,7 @@ export function useTikTokScroll(stocks: StockData[], options?: UseTikTokScrollOp
         const maxScrollLeft = scrollWidth - width;
         isAtRightEdge.current = scrollLeft >= maxScrollLeft - 5;
         isAtLeftEdge.current = scrollLeft <= 5;
-    }, [currentIndex, isSnapped, stocks.length]);
+    }, [currentIndex, getNearestIndex, isSnapped, stocks.length]);
 
     // 处理触摸开始
     const handleTouchStart = useCallback((e: TouchEvent) => {
@@ -95,7 +130,7 @@ export function useTikTokScroll(stocks: StockData[], options?: UseTikTokScrollOp
     }, [handleTouchStart, handleTouchEnd]);
 
     // 处理纵向滚动 (复盘)
-    const handleVerticalScroll = useCallback((top: number, index: number) => {
+    const handleVerticalScroll = useCallback((top: number, symbol: string) => {
         // 如果正在回弹过程中，且高度还没归零，则忽略更新以防止按钮闪烁
         if (isReturningToTop.current) {
             if (top <= 0) isReturningToTop.current = false;
@@ -103,8 +138,18 @@ export function useTikTokScroll(stocks: StockData[], options?: UseTikTokScrollOp
         }
 
         setYPositions(prev => {
-            if (prev[index] === top) return prev;
-            return { ...prev, [index]: top };
+            if (prev[symbol] === top) return prev;
+            return { ...prev, [symbol]: top };
+        });
+    }, []);
+
+    const handleVerticalLayerChange = useCallback((symbol: string, layer: VerticalLayerState) => {
+        setLayerStates(prev => {
+            const current = prev[symbol];
+            if (current?.type === layer.type && current?.date === layer.date) {
+                return prev;
+            }
+            return { ...prev, [symbol]: layer };
         });
     }, []);
 
@@ -112,8 +157,36 @@ export function useTikTokScroll(stocks: StockData[], options?: UseTikTokScrollOp
     const scrollToToday = () => {
         isReturningToTop.current = true; // 开启回弹锁
         setBackToTopCounter(prev => prev + 1);
-        setYPositions(prev => ({ ...prev, [currentIndex]: 0 }));
+        const currentSymbol = stocks[currentIndex]?.symbol;
+        if (!currentSymbol) return;
+        setYPositions(prev => ({ ...prev, [currentSymbol]: 0 }));
+        setLayerStates(prev => ({ ...prev, [currentSymbol]: { type: 'today', date: null } }));
     };
+
+    useEffect(() => {
+        const previousIndex = previousIndexRef.current;
+        if (previousIndex === currentIndex) return;
+
+        const previousStock = stocks[previousIndex] as StockData & { isAlmanac?: boolean };
+        const currentStock = stocks[currentIndex] as StockData & { isAlmanac?: boolean };
+
+        previousIndexRef.current = currentIndex;
+
+        if (currentStock?.isAlmanac) return;
+        if (!currentStock?.symbol) return;
+
+        const sourceLayer = previousStock?.isAlmanac
+            ? { type: 'today', date: null }
+            : (layerStates[previousStock?.symbol || ''] || { type: 'today', date: null });
+
+        const nextRequest: VerticalPositionRequest = {
+            nonce: ++positionNonceRef.current,
+            type: sourceLayer.type,
+            date: sourceLayer.date
+        };
+
+        setPositionRequests(prev => ({ ...prev, [currentStock.symbol]: nextRequest }));
+    }, [currentIndex, layerStates, stocks]);
 
     // 处理从股票池跳转过来的定位逻辑
     useLayoutEffect(() => {
@@ -155,9 +228,11 @@ export function useTikTokScroll(stocks: StockData[], options?: UseTikTokScrollOp
         scrollRef,
         handleScroll,
         // 关键：只有在吸附状态且滚动超过阈值时，才认为 yScrollPosition 有效
-        yScrollPosition: isSnapped ? (yPositions[currentIndex] || 0) : 0,
+        yScrollPosition: isSnapped ? (yPositions[stocks[currentIndex]?.symbol || ''] || 0) : 0,
         handleVerticalScroll,
+        handleVerticalLayerChange,
         backToTopCounter,
-        scrollToToday
+        scrollToToday,
+        positionRequest: positionRequests[stocks[currentIndex]?.symbol || ''] || null
     };
 }

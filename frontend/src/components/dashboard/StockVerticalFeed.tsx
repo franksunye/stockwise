@@ -1,28 +1,67 @@
-import { useState, useEffect, useRef, memo } from 'react';
+import { useState, useEffect, useRef, memo, useCallback } from 'react';
 import { StockData, AIPrediction } from '@/lib/types';
 import { StockDashboardCard } from './StockDashboardCard';
 import { HistoricalCard } from './HistoricalCard';
 import { VerticalIndicator } from './VerticalIndicator';
+import { VerticalLayerState, VerticalPositionRequest } from '@/hooks/useTikTokScroll';
 
 interface StockVerticalFeedProps {
   stock: StockData;
-  index: number;
   onShowTactics: (symbol: string, prediction: AIPrediction) => void;
-  onVerticalScroll: (top: number, index: number) => void;
+  onVerticalScroll: (top: number, symbol: string) => void;
+  onVerticalLayerChange?: (symbol: string, layer: VerticalLayerState) => void;
   onLoadMore?: (symbol: string, offset: number) => void;
   scrollRequest?: number;
+  positionRequest?: VerticalPositionRequest | null;
 }
 
 export const StockVerticalFeed = memo(function StockVerticalFeed({ 
   stock, 
-  index,
   onShowTactics, 
   onVerticalScroll, 
+  onVerticalLayerChange,
   onLoadMore,
-  scrollRequest 
+  scrollRequest,
+  positionRequest
 }: StockVerticalFeedProps) {
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const loaderRef = useRef<HTMLDivElement>(null);
+
+  const getCardElements = useCallback(() => {
+    if (!container) return [];
+    return Array.from(container.children).slice(0, stock.history.length) as HTMLElement[];
+  }, [container, stock.history.length]);
+
+  const resolveClosestHistoryIndex = useCallback((targetDate: string) => {
+    const historyCards = stock.history.slice(1);
+    if (historyCards.length === 0) return 0;
+
+    const exactIndex = historyCards.findIndex(item => item.target_date === targetDate);
+    if (exactIndex !== -1) return exactIndex + 1;
+
+    const targetTime = new Date(`${targetDate}T00:00:00`).getTime();
+    let earlierMatchIndex: number | null = null;
+    let earlierMatchTime = Number.NEGATIVE_INFINITY;
+    let nearestIndex = 1;
+    let nearestDistance = Number.POSITIVE_INFINITY;
+
+    historyCards.forEach((item, itemIndex) => {
+      const candidateTime = new Date(`${item.target_date}T00:00:00`).getTime();
+      const distance = Math.abs(candidateTime - targetTime);
+
+      if (candidateTime <= targetTime && candidateTime > earlierMatchTime) {
+        earlierMatchTime = candidateTime;
+        earlierMatchIndex = itemIndex + 1;
+      }
+
+      if (distance < nearestDistance) {
+        nearestDistance = distance;
+        nearestIndex = itemIndex + 1;
+      }
+    });
+
+    return earlierMatchIndex ?? nearestIndex;
+  }, [stock.history]);
   
   // 监听回顶请求
   const prevScrollRequestRef = useRef(scrollRequest || 0);
@@ -32,6 +71,36 @@ export const StockVerticalFeed = memo(function StockVerticalFeed({
       prevScrollRequestRef.current = scrollRequest;
     }
   }, [container, scrollRequest]);
+
+  const prevPositionRequestRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (!container || !positionRequest) return;
+    if (prevPositionRequestRef.current === positionRequest.nonce) return;
+
+    prevPositionRequestRef.current = positionRequest.nonce;
+
+    if (positionRequest.type === 'today' || !positionRequest.date) {
+      container.scrollTo({ top: 0, behavior: 'smooth' });
+      onVerticalLayerChange?.(stock.symbol, { type: 'today', date: null });
+      return;
+    }
+
+    const targetIndex = resolveClosestHistoryIndex(positionRequest.date);
+    const cards = getCardElements();
+    const targetCard = cards[targetIndex];
+
+    if (!targetCard) {
+      container.scrollTo({ top: 0, behavior: 'smooth' });
+      onVerticalLayerChange?.(stock.symbol, { type: 'today', date: null });
+      return;
+    }
+
+    container.scrollTo({ top: targetCard.offsetTop, behavior: 'smooth' });
+    onVerticalLayerChange?.(stock.symbol, {
+      type: targetIndex === 0 ? 'today' : 'history',
+      date: targetIndex === 0 ? null : stock.history[targetIndex]?.target_date || null
+    });
+  }, [container, getCardElements, onVerticalLayerChange, positionRequest, resolveClosestHistoryIndex, stock.history, stock.symbol]);
 
   // 懒加载触发
   useEffect(() => {
@@ -57,7 +126,28 @@ export const StockVerticalFeed = memo(function StockVerticalFeed({
 
   // Stable wrappers for children
   const handleShowTactics = (prediction: AIPrediction) => onShowTactics(stock.symbol, prediction);
-  const handleScroll = (top: number) => onVerticalScroll(top, index);
+  const handleScroll = (top: number) => {
+    onVerticalScroll(top, stock.symbol);
+
+    const cards = getCardElements();
+    if (cards.length === 0) return;
+
+    let nearestIndex = 0;
+    let nearestDistance = Number.POSITIVE_INFINITY;
+
+    cards.forEach((card, cardIndex) => {
+      const distance = Math.abs(card.offsetTop - top);
+      if (distance < nearestDistance) {
+        nearestDistance = distance;
+        nearestIndex = cardIndex;
+      }
+    });
+
+    onVerticalLayerChange?.(stock.symbol, {
+      type: nearestIndex === 0 ? 'today' : 'history',
+      date: nearestIndex === 0 ? null : stock.history[nearestIndex]?.target_date || null
+    });
+  };
 
   return (
     <div className="min-w-full h-full shrink-0 relative snap-start snap-always overflow-hidden">

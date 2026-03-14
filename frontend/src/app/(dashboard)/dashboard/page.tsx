@@ -130,8 +130,10 @@ function DashboardContent() {
     handleScroll,
     yScrollPosition,
     handleVerticalScroll,
+    handleVerticalLayerChange,
     backToTopCounter,
-    scrollToToday
+    scrollToToday,
+    positionRequest
   } = useTikTokScroll(displayStocks, scrollOptions);
 
   const [selectedTactics, setSelectedTactics] = useState<{ symbol: string; prediction: AIPrediction } | null>(null);
@@ -164,9 +166,13 @@ function DashboardContent() {
     setSelectedTactics({ symbol, prediction });
   }, []);
 
-  const handleVerticalScrollStable = useCallback((top: number, index: number) => {
-    handleVerticalScroll(top, index);
+  const handleVerticalScrollStable = useCallback((top: number, symbol: string) => {
+    handleVerticalScroll(top, symbol);
   }, [handleVerticalScroll]);
+
+  const handleVerticalLayerChangeStable = useCallback((symbol: string, layer: { type: 'today' | 'history'; date: string | null }) => {
+    handleVerticalLayerChange(symbol, layer);
+  }, [handleVerticalLayerChange]);
 
   // 预解析战术数据，避免渲染时 JSON.parse
   const parsedTacticsData = useMemo(() => {
@@ -283,10 +289,12 @@ function DashboardContent() {
           }
           return (
             <StockVerticalFeed 
-              key={stock.symbol} index={idx} stock={stock} 
+              key={stock.symbol} stock={stock} 
               onShowTactics={handleShowTactics} 
               onVerticalScroll={handleVerticalScrollStable}
+              onVerticalLayerChange={handleVerticalLayerChangeStable}
               scrollRequest={backToTopCounter}
+              positionRequest={idx === currentIndex ? positionRequest : null}
               onLoadMore={loadMoreHistory}
             />
           );
