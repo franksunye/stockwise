@@ -127,7 +127,7 @@ export const HistoricalCard = memo(function HistoricalCard({ data, onClick }: { 
         <div className="pt-6 border-t border-white/5">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <span className="text-[10px] text-slate-500 font-bold uppercase block mb-1 tracking-widest leading-tight">
+              <span className="text-xs text-slate-500 font-bold uppercase block mb-1 tracking-widest leading-tight">
                 {formatDate(data.target_date)} 收盘价
               </span>
               <p className="text-2xl font-black mono text-slate-100">
@@ -136,7 +136,7 @@ export const HistoricalCard = memo(function HistoricalCard({ data, onClick }: { 
             </div>
             
             <div className="text-right">
-              <span className="text-[10px] text-slate-500 font-bold uppercase block mb-1 tracking-widest leading-tight">
+              <span className="text-xs text-slate-500 font-bold uppercase block mb-1 tracking-widest leading-tight">
                 当日涨跌
               </span>
               <p className={`text-2xl font-black italic tracking-tighter ${
@@ -152,29 +152,29 @@ export const HistoricalCard = memo(function HistoricalCard({ data, onClick }: { 
           {/* 轨迹追踪表格 (固定3行) */}
           <div className="pt-4 border-t border-white/5">
             <div className="flex items-center justify-between mb-3">
-               <span className="text-[9px] font-black text-indigo-400/50 tracking-[0.2em] uppercase">72H Trend Log</span>
+               <span className="text-xs font-black text-indigo-400/50 tracking-[0.2em] uppercase">72H 趋势追踪</span>
                <div className="h-px flex-1 bg-white/5 ml-3" />
             </div>
             
             <div className="space-y-2">
               {[0, 1, 2].map((dayOffset) => {
                 const dayData = validationData?.trajectory?.[dayOffset];
-                const dayLabel = `Day ${dayOffset + 1}`;
+                const dayLabel = `第 ${dayOffset + 1} 日`;
                 
                 return (
                   <div key={dayOffset} className="flex items-center justify-between group/row">
                     <div className="flex items-center gap-3">
-                      <span className="text-[10px] font-bold text-slate-600 mono w-8">{dayLabel}</span>
-                      <span className="text-[10px] font-medium text-slate-400 mono">
+                      <span className="text-xs font-bold text-slate-600 mono w-12">{dayLabel}</span>
+                      <span className="text-xs font-medium text-slate-400 mono">
                         {dayData ? formatDate(dayData.date) : '--/--'}
                       </span>
                     </div>
                     
                     <div className="flex items-center gap-6">
-                      <span className="text-[10px] font-bold text-slate-300 mono w-12 text-right">
+                      <span className="text-xs font-bold text-slate-300 mono w-12 text-right">
                         {dayData?.close ? dayData.close.toFixed(2) : '--'}
                       </span>
-                      <span className={`text-[10px] font-black mono w-14 text-right ${
+                      <span className={`text-xs font-black mono w-14 text-right ${
                         dayData ? (dayData.cum_change >= 0 ? 'text-rose-500/80' : 'text-emerald-500/80') : 'text-slate-700'
                       }`}>
                         {dayData ? `${dayData.cum_change >= 0 ? '+' : ''}${dayData.cum_change.toFixed(2)}%` : '--'}
