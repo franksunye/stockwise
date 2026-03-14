@@ -206,6 +206,12 @@
 
 这一步不属于当前 SWR 迁移的直接实施项，但它是 Dashboard 首页长期稳定性的必要前置条件。
 
+文档关系说明：
+
+1. 本文负责给出架构判断与边界约束。
+2. 若需要处理 2026-03 新用户 invite -> onboarding -> dashboard 首次进入卡在黄历的问题，执行层请参考 [`25_Onboarding_First_Load_Recovery_Plan_20260314.md`](/Users/yesun/Code/stockwise/docs/1_Engineering/25_Onboarding_First_Load_Recovery_Plan_20260314.md)。
+3. 该执行文档是对本节判断的战术落地，不代表恢复 Dashboard 主链路的 SWR 迁移。
+
 ## 6. 分模块落地方案
 
 ### 6.1 Phase 1: AICouncil 先行

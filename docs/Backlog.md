@@ -12,7 +12,7 @@
 - [x] **补齐回归测试**：新增 `backend/tests/test_ai_service_guardrail_modes.py`，覆盖三种 guardrail 模式。
 - [x] **代码已合入主干**：提交 `ef89bd1` 已推送 `origin/main`。
 - [x] **本地验证闭环（SQLite）**：`$env:DB_SOURCE='local'; python backend/main.py --verify --force` 通过，`Validation Complete: 495 predictions updated`。
-- [ ] **生产验证补齐（运维）**：在 GitHub Actions 触发 `verify_predictions.yml` 并留存 run 链接与结果截图（当前受本地研发策略切换影响，待运维窗口执行）。
+- [x] **生产验证补齐（运维）**：已在 GitHub Actions 手动触发 `verify_predictions.yml`，线上数据已确认写回 `T+3` 回看结果与 `validation_data` 新结构。
 
 ### 0.1 双层架构 #2 稳妥推进（P0，本周）
 - [x] **Layer-1 状态机最小闭环**：已落地 `NoSetup/Watch/TriggeredLong/RiskOff` 的计算与存储字段，不改前端展示。

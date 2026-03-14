@@ -19,6 +19,9 @@ const DEFAULT_REVEAL_DATA = {
   support: 95.00 
 };
 
+const WATCHLIST_STORAGE_KEY = 'STOCKWISE_WATCHLIST_V2';
+const WATCHLIST_SYNC_EVENT = 'stockwise-watchlist-sync';
+
 interface RecommendedStock {
   symbol: string;
   name: string;
@@ -78,11 +81,36 @@ export function OnboardingOverlay() {
 
   const handleComplete = async () => {
     try {
-        await fetch('/api/user/onboarding/complete', {
+        const response = await fetch('/api/user/onboarding/complete', {
             method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ selectedStock })
         });
+        if (!response.ok) {
+          throw new Error(`Onboarding completion failed: ${response.status}`);
+        }
         localStorage.setItem('STOCKWISE_HAS_ONBOARDED', 'true');
+        if (selectedStock) {
+          try {
+            const stored = localStorage.getItem(WATCHLIST_STORAGE_KEY);
+            const parsed = stored ? JSON.parse(stored) : [];
+            const currentList = Array.isArray(parsed) ? parsed : [];
+            const alreadyExists = currentList.some((item) => item?.symbol === selectedStock);
+            if (!alreadyExists) {
+              localStorage.setItem(WATCHLIST_STORAGE_KEY, JSON.stringify([
+                ...currentList,
+                {
+                  symbol: selectedStock,
+                  name: selectedStockName || selectedStock,
+                  addedAt: Date.now()
+                }
+              ]));
+            }
+            window.dispatchEvent(new Event(WATCHLIST_SYNC_EVENT));
+          } catch (storageError) {
+            console.error('Failed to seed onboarding watchlist cache', storageError);
+          }
+        }
         
         // Use global state to naturally unmount the overlay without reloading the page
         await refreshProfile({ force: true });

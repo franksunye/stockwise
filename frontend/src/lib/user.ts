@@ -28,6 +28,62 @@ export interface User {
 
 interface GetCurrentUserOptions {
   forceSessionSync?: boolean;
+  waitForSessionSync?: boolean;
+}
+
+let pendingUserSessionSync: Promise<void> | null = null;
+
+async function syncCurrentUserSession(
+  userId: string,
+  userType: RegistrationType,
+  forceSessionSync: boolean
+): Promise<void> {
+  const lastSyncAt = Number(sessionStorage.getItem(USER_SESSION_SYNC_KEY) || '0');
+  const shouldSyncSession =
+    forceSessionSync || (Date.now() - lastSyncAt > USER_SESSION_SYNC_INTERVAL_MS);
+
+  if (!shouldSyncSession) {
+    setCookie(USER_ID_COOKIE, userId);
+    return;
+  }
+
+  if (!pendingUserSessionSync) {
+    pendingUserSessionSync = (async () => {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 20000);
+        const response = await fetch('/api/user/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId,
+            registrationType: userType || 'anonymous',
+          }),
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          console.error('❌ 用户会话同步失败:', response.status);
+          setCookie(USER_ID_COOKIE, userId);
+          return;
+        }
+
+        const data = await response.json();
+        const syncedUserId = data?.userId && data.userId !== userId ? data.userId : userId;
+        syncUserIdToStorage(syncedUserId, userType || 'anonymous');
+        sessionStorage.setItem(USER_SESSION_SYNC_KEY, String(Date.now()));
+        console.log('✅ 用户会话已同步:', syncedUserId);
+      } catch (error) {
+        console.error('❌ 用户会话同步失败或超时:', error);
+        setCookie(USER_ID_COOKIE, userId);
+      } finally {
+        pendingUserSessionSync = null;
+      }
+    })();
+  }
+
+  await pendingUserSessionSync;
 }
 
 /**
@@ -166,52 +222,18 @@ export async function getCurrentUser(options: GetCurrentUserOptions = {}): Promi
     syncUserIdToInstallUrl(userId);
   }
 
-  // 确保服务端会话存在（同时兼容老 userId 迁移）
-  const lastSyncAt = Number(sessionStorage.getItem(USER_SESSION_SYNC_KEY) || '0');
-  const shouldSyncSession = options.forceSessionSync || (Date.now() - lastSyncAt > USER_SESSION_SYNC_INTERVAL_MS);
-  if (shouldSyncSession) {
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 20000);
-      const response = await fetch('/api/user/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId,
-          registrationType: userType || 'anonymous',
-        }),
-        signal: controller.signal
-      });
-      clearTimeout(timeoutId);
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data?.userId && data.userId !== userId) {
-          userId = data.userId;
-          userType = 'anonymous';
-        }
-
-        if (userId) {
-          syncUserIdToStorage(userId, userType || 'anonymous');
-        }
-        sessionStorage.setItem(USER_SESSION_SYNC_KEY, String(Date.now()));
-        console.log('✅ 用户会话已同步:', userId);
-      } else {
-        console.error('❌ 用户会话同步失败:', response.status);
-        if (userId) setCookie(USER_ID_COOKIE, userId);
-      }
-    } catch (error) {
-      console.error('❌ 用户会话同步失败或超时:', error);
-      if (userId) setCookie(USER_ID_COOKIE, userId);
-    }
-  } else if (userId) {
-    setCookie(USER_ID_COOKIE, userId);
-  }
-
   if (!userId) {
     userId = generateShortId();
     userType = 'anonymous';
     syncUserIdToStorage(userId, userType);
+  }
+
+  const shouldWaitForSessionSync =
+    options.forceSessionSync || options.waitForSessionSync !== false;
+  if (shouldWaitForSessionSync) {
+    await syncCurrentUserSession(userId, userType || 'anonymous', options.forceSessionSync === true);
+  } else {
+    void syncCurrentUserSession(userId, userType || 'anonymous', options.forceSessionSync === true);
   }
 
   return {

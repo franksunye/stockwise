@@ -205,14 +205,14 @@ export default function DashboardLayout({
       const { switches } = MEMBERSHIP_CONFIG;
       const isReturningUser = !!cachedAuth?.authorized;
       
-      // P1: 回访用户已有 session cookie，getCurrentUser 可以后台执行不阻塞
-      // 新用户必须等待 register 建立 session cookie 后才能调用 profile
+      // 回访用户已有 session cookie，后台同步即可。
+      // 新用户先恢复本地 identity，再在 profile 401 时强制补齐 session。
       let uid = '';
       if (isReturningUser) {
         uid = localStorage.getItem('STOCKWISE_USER_ID') || '';
         getCurrentUser().catch(e => console.warn('Background user sync:', e));
       } else {
-        const currentUser = await getCurrentUser();
+        const currentUser = await getCurrentUser({ waitForSessionSync: false });
         uid = currentUser.userId;
       }
 
@@ -221,11 +221,19 @@ export default function DashboardLayout({
         setIsAuthorized(true);
         setAuthCache('free', true);
         try {
-          const res = await fetch('/api/user/profile', {
+          let res = await fetch('/api/user/profile', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ watchlist: getWatchlist() }),
           });
+          if (res.status === 401) {
+            await getCurrentUser({ forceSessionSync: true });
+            res = await fetch('/api/user/profile', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ watchlist: getWatchlist() }),
+            });
+          }
           if (res.ok) {
             const data = await res.json();
             const newTier = (data.tier || 'free') as Tier;
@@ -283,12 +291,21 @@ export default function DashboardLayout({
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 20000);
 
-        const res = await fetch('/api/user/profile', {
+        let res = await fetch('/api/user/profile', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ watchlist: getWatchlist(), referredBy }),
           signal: controller.signal
         });
+        if (res.status === 401) {
+          await getCurrentUser({ forceSessionSync: true });
+          res = await fetch('/api/user/profile', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ watchlist: getWatchlist(), referredBy }),
+            signal: controller.signal
+          });
+        }
         clearTimeout(timeoutId);
         const data = await res.json();
         const newTier = (data.tier || 'free') as Tier;

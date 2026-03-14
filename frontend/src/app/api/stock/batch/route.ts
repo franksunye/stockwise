@@ -45,15 +45,11 @@ export async function GET(request: Request) {
     const requestId = `batch_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
     let debugStage = 'init';
     const { searchParams } = new URL(request.url);
-    const symbolsParam = searchParams.get('symbols');
+    const symbolsParam = searchParams.get('symbols') || '';
     const parsedHistoryLimit = Number.parseInt(searchParams.get('historyLimit') || '7', 10);
     const historyLimit = Number.isFinite(parsedHistoryLimit)
         ? Math.min(30, Math.max(1, parsedHistoryLimit))
         : 7;
-
-    if (!symbolsParam) {
-        return NextResponse.json({ error: 'Missing symbols' }, { status: 400 });
-    }
 
     const symbols = symbolsParam ? symbolsParam.split(',').map(s => s.trim()).filter(s => s.length > 0) : [];
     if (symbols.length > 50) return NextResponse.json({ error: 'Too many symbols' }, { status: 400 });

@@ -280,7 +280,7 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
 
     // Watchlist 变更时，强制触发一次刷新 (Ignore Debounce)
     useEffect(() => {
-        if (!loadingWatchlist && watchlist.length > 0) {
+        if (watchlist.length > 0) {
             loadAllData(false, true); // silent=false, ignoreDebounce=true
         } else if (watchlist.length === 0 && !loadingWatchlist) {
             setStocks([]);

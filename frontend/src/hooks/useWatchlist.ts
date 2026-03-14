@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { getCurrentUser } from '@/lib/user';
 
 const WATCHLIST_STORAGE_KEY = 'STOCKWISE_WATCHLIST_V2'; // Version 2 for clean slate
+const WATCHLIST_SYNC_EVENT = 'stockwise-watchlist-sync';
 
 export interface WatchlistItem {
     symbol: string;
@@ -12,25 +13,44 @@ export interface WatchlistItem {
 export function useWatchlist() {
     const [watchlist, setWatchlist] = useState<WatchlistItem[]>([]);
     const [loading, setLoading] = useState(true);
+    const [localBootstrapDone, setLocalBootstrapDone] = useState(false);
     const lastMutationTime = useRef<number>(0);
     const isSyncing = useRef(false);
 
-    // 1. Init: Load from local storage immediately
-    useEffect(() => {
+    const restoreLocalWatchlist = useCallback(() => {
         try {
             const stored = localStorage.getItem(WATCHLIST_STORAGE_KEY);
-            if (stored) {
-                const parsed = JSON.parse(stored);
-                if (Array.isArray(parsed)) {
-                    setWatchlist(parsed);
-                    setLoading(false);
-                }
+            if (!stored) {
+                setWatchlist([]);
+                return;
             }
-        } catch (e) { console.error('Local watchlist load error', e); }
+
+            const parsed = JSON.parse(stored);
+            if (Array.isArray(parsed)) {
+                setWatchlist(parsed);
+            }
+        } catch (e) {
+            console.error('Local watchlist load error', e);
+        }
     }, []);
+
+    // 1. Init: Load from local storage immediately
+    useEffect(() => {
+        restoreLocalWatchlist();
+        setLoading(false);
+        setLocalBootstrapDone(true);
+    }, [restoreLocalWatchlist]);
+
+    useEffect(() => {
+        const handleWatchlistSync = () => restoreLocalWatchlist();
+        window.addEventListener(WATCHLIST_SYNC_EVENT, handleWatchlistSync);
+        return () => window.removeEventListener(WATCHLIST_SYNC_EVENT, handleWatchlistSync);
+    }, [restoreLocalWatchlist]);
 
     // 2. Sync with server (Silent & Lazy)
     useEffect(() => {
+        if (!localBootstrapDone) return;
+
         const sync = async () => {
             if (isSyncing.current) return;
 
@@ -44,11 +64,9 @@ export function useWatchlist() {
 
             isSyncing.current = true;
 
-            const user = await getCurrentUser();
-            if (!user) {
-                isSyncing.current = false;
-                return;
-            }
+            void getCurrentUser({ waitForSessionSync: false }).catch(e => {
+                console.error('Background user bootstrap error', e);
+            });
 
             try {
                 // Fetch source of truth from server
@@ -89,14 +107,13 @@ export function useWatchlist() {
             } catch (e) {
                 console.error('Watchlist sync error', e);
             } finally {
-                setLoading(false);
                 isSyncing.current = false;
             }
         };
 
         const timer = setTimeout(sync, 500);
         return () => clearTimeout(timer);
-    }, []);
+    }, [localBootstrapDone]);
 
     const addStock = useCallback(async (symbol: string, name: string) => {
         const user = await getCurrentUser();

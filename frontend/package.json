@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "check:onboarding": "node scripts/manual-onboarding-check.mjs",
     "db:sync-local": "node scripts/sync-remote-to-local.mjs",
     "db:sync-local:incremental": "node scripts/sync-remote-to-local.mjs --incremental",
     "db:audit-local": "node scripts/local-db-audit.mjs",
