@@ -282,7 +282,7 @@ function DashboardContent() {
               <MarketAlmanacFeed 
                 ref={almanacRef} key={stock.symbol} index={idx}
                 data={stock.almanacData}
-                onVerticalScroll={handleVerticalScrollStable} 
+                onVerticalScroll={(top) => handleVerticalScrollStable(top, stock.symbol)} 
                 scrollRequest={backToTopCounter}
               />
             );

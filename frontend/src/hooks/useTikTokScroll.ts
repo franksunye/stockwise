@@ -175,7 +175,7 @@ export function useTikTokScroll(stocks: StockData[], options?: UseTikTokScrollOp
         if (currentStock?.isAlmanac) return;
         if (!currentStock?.symbol) return;
 
-        const sourceLayer = previousStock?.isAlmanac
+        const sourceLayer: VerticalLayerState = previousStock?.isAlmanac
             ? { type: 'today', date: null }
             : (layerStates[previousStock?.symbol || ''] || { type: 'today', date: null });
 
