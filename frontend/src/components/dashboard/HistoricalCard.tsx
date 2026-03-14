@@ -17,6 +17,22 @@ export const HistoricalCard = memo(function HistoricalCard({ data, onClick }: { 
   const actionMeta = getPredictionActionMeta(data);
   const validationData = parseValidationData(data.validation_data);
   const windowLabel = getValidationWindowLabel(validationData?.window);
+
+  // 解析基准日数据 (从 layer1_payload 或回退到 data)
+  let basePrice = data.close_price; // 默认回退
+  let baseChange = 0;
+  try {
+    if (data.layer1_payload) {
+      const payload = typeof data.layer1_payload === 'string' 
+        ? JSON.parse(data.layer1_payload) 
+        : data.layer1_payload;
+      basePrice = payload.close || basePrice;
+      baseChange = payload.change_percent || 0;
+    }
+  } catch (e) {
+    console.error('Failed to parse layer1_payload', e);
+  }
+
   const displayResult = validationData?.window && validationData.window > 1
     ? validationData.cum_change ?? data.actual_change
     : data.actual_change;
@@ -149,9 +165,34 @@ export const HistoricalCard = memo(function HistoricalCard({ data, onClick }: { 
             </div>
           </div>
 
-          {/* 轨迹追踪表格 (固定3行) */}
           <div className="pt-4 border-t border-white/5">
             <div className="space-y-2">
+              {/* 基准日 (T+0 参考) - 极致美化版 */}
+              <div className="flex items-center justify-between group/row relative">
+                {/* 连接线：从基准日指向第1日 */}
+                <div className="absolute left-[3px] top-[14px] bottom-[-2px] w-[1px] bg-gradient-to-b from-white/10 to-white/5" />
+                
+                <div className="flex items-center gap-3 relative">
+                  {/* 锚点小圆点 */}
+                  <div className="w-1.5 h-1.5 rounded-full bg-indigo-500/40 border border-indigo-400/20" />
+                  <span className="text-[10px] font-black text-indigo-400/40 uppercase tracking-[0.2em] w-12 mr-[-8px]">基准日</span>
+                  <span className="text-[10px] font-bold text-slate-500 mono">
+                    {formatDate(data.date)}
+                  </span>
+                </div>
+                
+                <div className="flex items-center gap-6">
+                  <span className="text-xs font-bold text-slate-500 mono w-12 text-right">
+                    {basePrice ? basePrice.toFixed(2) : '--'}
+                  </span>
+                  <span className={`text-[10px] font-black mono w-14 text-right ${
+                    baseChange >= 0 ? 'text-rose-500/30' : 'text-emerald-500/30'
+                  }`}>
+                    {baseChange !== undefined ? `${baseChange >= 0 ? '+' : ''}${baseChange.toFixed(2)}%` : '--'}
+                  </span>
+                </div>
+              </div>
+
               {[0, 1, 2].map((dayOffset) => {
                 const dayData = validationData?.trajectory?.[dayOffset];
                 const dayLabel = `第 ${dayOffset + 1} 日`;
