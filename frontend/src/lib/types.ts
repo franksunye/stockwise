@@ -50,7 +50,7 @@ export interface AIPrediction {
     validation_data?: {
         window: number;
         days_evaluated: number;
-        trajectory: Array<{ date: string, change: number, cum_change: number }>;
+        trajectory: Array<{ date: string, change: number, cum_change: number, close?: number }>;
         t1_change?: number;
         cum_change?: number;
         max_cum_change?: number;
