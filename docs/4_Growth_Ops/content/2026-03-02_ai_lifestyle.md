@@ -4,8 +4,20 @@ subtitle: "从信息过载到深度洞察：普通人如何用 AI 重建生活�
 date: "2026-03-02"
 category: "The Machine"
 funnel_stage: "TOFU"
-rhythm: "Hub"
-image: "/images/learn/ai_lifestyle_premium.png"
+rhythm: "Hero"
+image: "/images/learn/ai_lifestyle.png"
+publish:
+  wechat:
+    status: published
+    url: "https://mp.weixin.qq.com/s/eR-4uQ1tCHZt0i4x3lBwHw"
+    date: "2026-03-12"
+  xhs:
+    status: draft
+    url: ""
+  twitter:
+    status: none
+  toutiao:
+    status: none
 ---
 
 # AI 除了写 PPT 还能做什么？论“冷酷实习生”对焦虑的终极拯救

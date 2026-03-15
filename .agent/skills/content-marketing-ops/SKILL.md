@@ -178,7 +178,7 @@ StockWise 视觉语言结合了 **瑞士国际主义风格 (Swiss Style)** 的�
 我们不生产“一次性”内容。遵循 **“一鱼多吃 (Content Repurposing)”** 策略，榨干核心资产的价值。
 
 ### Step 1: 核心资产生产 (Create the Anchor)
-首发于 `docs/content/` 目录下创建高质量 `Markdown` 文件 (通常为 Hub / Hero 级别)。
+首发于 `docs/4_Growth_Ops/content/` 目录下创建高质量 `Markdown` 文件 (通常为 Hub / Hero 级别)。
 例如：`101-{XX}_{slug}.md`。
 
 **Frontmatter 规范**:
@@ -192,6 +192,17 @@ funnel_stage: "TOFU" | "MOFU" | "BOFU"
 rhythm: "Hero" | "Hub" | "Hygiene"
 image: "/images/learn/{slug}.png"
 image_prompt: "这里保留当时生成图片的 prompt，作为资产备份"
+publish:
+  wechat:
+    status: draft # 状态：draft | scheduled | published | none | old
+    url: ""
+  xhs:
+    status: draft
+    url: ""
+  twitter:
+    status: none
+  toutiao:
+    status: draft
 ---
 ```
 
@@ -205,3 +216,9 @@ image_prompt: "这里保留当时生成图片的 prompt，作为资产备份"
 1.  下载生成图片并重命名为 `{slug}.png`。
 2.  放入 `frontend/public/images/learn/`（或其他分发需要的图床媒体库）。
 3.  提交 Git 归档为永久资产。
+
+### Step 4: 多平台发布追踪与面板生成 (Docs-as-Code)
+当内容在各大平台首发/分发完成后：
+1. 回到对应的 Markdown 文件，将其 Frontmatter 中的 `publish` 节点对应的平台状态修改为 `published`，并粘贴发文链接 `url`。
+2. 直接向我（AI）呼叫：**“运行 /cmo-sync”**。
+3. AI 助理将自动扫描全部 Markdown 资产，并使用最新数据刷新 `docs/4_Growth_Ops/content/README.md` CMO 看板。

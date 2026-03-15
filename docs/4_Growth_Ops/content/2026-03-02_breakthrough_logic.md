@@ -4,8 +4,20 @@ subtitle: "在噪音洪流中，重建你的个人决策实验室。"
 date: "2026-03-02"
 category: "The Mind"
 funnel_stage: "TOFU"
-rhythm: "Hub"
-image: "/images/learn/decision_logic_premium.png"
+rhythm: "Hero"
+image: "/images/learn/breakthrough_logic.png"
+publish:
+  wechat:
+    status: published
+    url: "https://mp.weixin.qq.com/s/7Lg6jQ8u_V1wY2a3zPqX0A"
+    date: "2026-03-05"
+  xhs:
+    status: draft
+    url: ""
+  twitter:
+    status: none
+  toutiao:
+    status: none
 ---
 
 # 别被直觉骗了：如何在噪音时代重建你的“决策实验室”？
