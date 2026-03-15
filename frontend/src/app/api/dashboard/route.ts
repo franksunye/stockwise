@@ -47,30 +47,6 @@ export async function GET(request: Request) {
             }
 
 
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            let almanacs: Record<string, any>[] = [];
-            if ('execute' in client) {
-                const rsAlmanac = await client.execute({ sql: 'SELECT * FROM market_almanacs ORDER BY target_date DESC LIMIT 5', args: [] });
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                if (rsAlmanac.rows && rsAlmanac.rows.length > 0) almanacs = rsAlmanac.rows as Record<string, any>[];
-            } else {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                almanacs = client.prepare('SELECT * FROM market_almanacs ORDER BY target_date DESC LIMIT 5').all() as Record<string, any>[];
-            }
-            if (almanacs.length > 0) {
-                almanacs.forEach(a => {
-                    try {
-                        if (typeof a.market_entropy === 'string') a.market_entropy = JSON.parse(a.market_entropy);
-                        if (typeof a.sector_currents === 'string') a.sector_currents = JSON.parse(a.sector_currents);
-                        if (typeof a.generation_trace === 'string') a.generation_trace = JSON.parse(a.generation_trace);
-                        a.degraded = Boolean(
-                            a?.generation_trace?.logic?.degraded ||
-                            (a?.generation_trace?.data_quality?.facts_gate_pass === false)
-                        );
-                    } catch { }
-                });
-            }
-
             const queryTime = Date.now() - startTime;
 
 
@@ -78,8 +54,6 @@ export async function GET(request: Request) {
             // 前端需要拿到这个列表后，再去请求 /api/stock/batch
             return NextResponse.json({
                 watchlist,
-                almanacs,
-                almanac: almanacs[0] || null, // Fallback
                 timestamp: new Date().toISOString(),
                 queryTime
             });

@@ -1,8 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/react";
-import { headers } from "next/headers";
 import { brandCoreZhCN } from "@/content/brand-core.zh-CN";
-import { getHtmlLang, isSupportedPublicLocale } from "@/lib/public-i18n";
 import { ServiceWorkerRegistrar } from "@/components/ServiceWorkerRegistrar";
 import "./globals.css";
 
@@ -43,22 +41,31 @@ export const viewport: Viewport = {
   userScalable: false,
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const requestHeaders = await headers();
-  const localeHeader = requestHeaders.get("x-ziso-locale");
-  const locale = isSupportedPublicLocale(localeHeader) ? localeHeader : "zh";
-
   return (
-    <html lang={getHtmlLang(locale)}>
+    <html lang="zh-CN">
       <head>
         <link rel="manifest" href="/manifest.json" />
         <link rel="preconnect" href="https://app.ziso.cc" />
         <link rel="dns-prefetch" href="https://app.ziso.cc" />
         <link rel="preconnect" href="https://va.vercel-scripts.com" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var pathname = window.location.pathname || '/';
+                  var isEnglishPublicPath = pathname === '/en' || pathname === '/en/' || pathname.indexOf('/en/') === 0;
+                  document.documentElement.lang = isEnglishPublicPath ? 'en' : 'zh-CN';
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
       </head>
       <body className="antialiased">
         <script

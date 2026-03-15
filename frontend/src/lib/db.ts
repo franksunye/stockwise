@@ -86,3 +86,44 @@ export async function executeWithRetry<T>(
     console.error(`❌ Failed after ${maxRetries} attempts. Last error:`, lastError);
     throw lastError;
 }
+
+/**
+ * 获取市场黄历数据 (共享)
+ */
+export async function getMarketAlmanacs(limit: number = 5) {
+    const client = getDbClient();
+    try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let rows: any[] = [];
+        if ('execute' in client) {
+            const rs = await client.execute({
+                sql: 'SELECT * FROM market_almanacs ORDER BY target_date DESC LIMIT ?',
+                args: [limit]
+            });
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            rows = rs.rows as any[];
+        } else {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            rows = client.prepare('SELECT * FROM market_almanacs ORDER BY target_date DESC LIMIT ?').all(limit) as any[];
+        }
+
+        return rows.map(a => {
+            try {
+                if (typeof a.market_entropy === 'string') a.market_entropy = JSON.parse(a.market_entropy);
+                if (typeof a.sector_currents === 'string') a.sector_currents = JSON.parse(a.sector_currents);
+                if (typeof a.generation_trace === 'string') a.generation_trace = JSON.parse(a.generation_trace);
+                a.degraded = Boolean(
+                    a?.generation_trace?.logic?.degraded ||
+                    (a?.generation_trace?.data_quality?.facts_gate_pass === false)
+                );
+            } catch (e) {
+                console.warn('[DB] Failed to parse almanac JSON:', e);
+            }
+            return a;
+        });
+    } finally {
+        if (client && typeof client.close === 'function') {
+            client.close();
+        }
+    }
+}

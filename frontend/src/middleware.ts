@@ -3,6 +3,7 @@ import type { NextRequest } from 'next/server';
 import {
     DEFAULT_PUBLIC_LOCALE,
     getPublicLocaleFromPathname,
+    getLocaleHrefLang,
     hasPublicLocalePrefix,
     isExcludedAppPath,
     stripPublicLocalePrefix,
@@ -64,14 +65,13 @@ export function middleware(request: NextRequest) {
         const headers = new Headers(request.headers);
         headers.set('x-ziso-locale', locale);
         headers.set('x-ziso-locale-prefix', isLocalePrefixed ? '1' : '0');
-        return withDebugHeaders(
-            NextResponse.next({
-                request: {
-                    headers,
-                },
-            }),
-            branch
-        );
+        const response = NextResponse.next({
+            request: {
+                headers,
+            },
+        });
+        response.headers.set('content-language', getLocaleHrefLang(locale));
+        return withDebugHeaders(response, branch);
     };
 
     // 1. App 子域名策略 (app.ziso.cc)
@@ -142,7 +142,9 @@ export function middleware(request: NextRequest) {
     }
 
     if (locale !== DEFAULT_PUBLIC_LOCALE) {
-        return withLocaleRequestHeader('pass-through-locale');
+        const response = NextResponse.next();
+        response.headers.set('content-language', getLocaleHrefLang(locale));
+        return withDebugHeaders(response, 'pass-through-locale');
     }
 
     return withDebugHeaders(NextResponse.next(), 'pass-through');

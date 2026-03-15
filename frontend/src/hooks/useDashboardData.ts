@@ -8,11 +8,11 @@ import { getMarketScene } from '@/lib/date-utils';
 import { WatchlistItem } from './useWatchlist';
 
 // 动态刷新间隔：交易时段5分钟，非交易时段10分钟
-const TRADING_REFRESH_INTERVAL = 5 * 60 * 1000;   // 5分钟
-const DEFAULT_REFRESH_INTERVAL = 10 * 60 * 1000;  // 10分钟
+const TRADING_REFRESH_INTERVAL = 10 * 60 * 1000;  // 10分钟
+const DEFAULT_REFRESH_INTERVAL = 20 * 60 * 1000;  // 20分钟
 const CACHE_KEY = 'stockwise_dashboard_cache_v1';
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24小时过期
-const RESUME_REFRESH_THRESHOLD = 30 * 1000; // iOS PWA 回前台后 30s 以上即尝试刷新
+const RESUME_REFRESH_THRESHOLD = 5 * 60 * 1000; // iOS PWA 回前台后 5min 以上即尝试刷新
 
 function getRefreshInterval(): number {
     const scene = getMarketScene();
@@ -61,11 +61,21 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
 
     const lastFetchTimeRef = useRef<number>(0);
     const stocksRef = useRef<StockData[]>(stocks);
+    const almanacRef = useRef<MarketAlmanacData | null>(almanac);
+    const almanacsRef = useRef<MarketAlmanacData[]>(almanacs);
 
     // Sync ref with state
     useEffect(() => {
         stocksRef.current = stocks;
     }, [stocks]);
+
+    useEffect(() => {
+        almanacRef.current = almanac;
+    }, [almanac]);
+
+    useEffect(() => {
+        almanacsRef.current = almanacs;
+    }, [almanacs]);
 
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -148,10 +158,32 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort('请求超时 (12s)'), 12000); // 12s timeout
 
-            // Step 1: Ensure User Identity in background (Don't await to avoid blocking critical data fetch)
+            // Step 1: Fetch Shared Almanac context (Stage 1)
+            const fetchAlmanac = async () => {
+                const almanacController = new AbortController();
+                const almanacTimeoutId = setTimeout(() => almanacController.abort(), 3000);
+                try {
+                    const res = await fetch('/api/shared/almanac', {
+                        signal: almanacController.signal,
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.almanacs) setAlmanacs(data.almanacs);
+                        if (data.almanac) setAlmanac(data.almanac);
+                        return data;
+                    }
+                } catch (e) {
+                    console.warn('[Dashboard] Shared Almanac fetch failed, continuing...', e);
+                } finally {
+                    clearTimeout(almanacTimeoutId);
+                }
+                return null;
+            };
+
+            // Step 2: Ensure User Identity in background
             getCurrentUser().catch(err => console.error('Background user sync error:', err));
 
-            // Step 2: 拿着 watchlist 去 CDN 拉取公共数据 (公有API)
+            // Step 3: Fetch Batch Stock Data (Stage 2)
             const symbols = watchlist.map(w => w.symbol).join(',');
             // 如果是非静默刷新（手动点击或初始化），增加一个 cache-buster 扰动缓存
             const url = `/api/stock/batch?symbols=${symbols}&historyLimit=5${!silent ? `&t=${Date.now()}` : ''}`;
@@ -163,6 +195,9 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
                     'Cache-Control': 'no-cache'
                 }
             };
+
+            // Execute Stage 1 in background so Almanac failure/latency never blocks stocks.
+            void fetchAlmanac();
 
             let batchRes = await fetch(url, fetchOptions);
             if (batchRes.status === 401) {
@@ -192,14 +227,7 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
             }
 
             const batchData = await batchRes.json();
-
             if (batchData.error) { throw new Error(batchData.error); }
-            if (batchData.almanacs) {
-                setAlmanacs(batchData.almanacs);
-            }
-            if (batchData.almanac) {
-                setAlmanac(batchData.almanac);
-            }
 
             const fetchTime = Math.round(performance.now() - startTime);
             console.log(`📊 Dashboard loaded: ${watchlist.length} stocks in ${fetchTime}ms`);
@@ -240,8 +268,8 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
             try {
                 localStorage.setItem(CACHE_KEY, JSON.stringify({
                     data: validResults,
-                    almanac: batchData.almanac,
-                    almanacs: batchData.almanacs,
+                    almanac: almanacRef.current,
+                    almanacs: almanacsRef.current,
                     timestamp: Date.now()
                 }));
             } catch (e) { console.error('Cache save error', e); }
