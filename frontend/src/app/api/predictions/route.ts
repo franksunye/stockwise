@@ -98,23 +98,16 @@ export async function GET(request: Request) {
                     p.layer1_trigger_hit,
                     p.layer1_risk_off_hit,
                     p.layer1_strategy_version,
-                    p.layer1_payload,
+                    json_object(
+                        'close', json_extract(p.layer1_payload, '$.close'),
+                        'change_percent', json_extract(p.layer1_payload, '$.change_percent')
+                    ) AS layer1_payload,
                     p.is_primary,
                     p.model_id AS model,
                     m.display_name,
                     ${EFFECTIVE_DECISION_SEMANTIC_SQL} AS decision_semantic,
                     ? AS mode_id,
-                    d.close AS close_price,
-                    d.rsi,
-                    d.kdj_k,
-                    d.kdj_d,
-                    d.kdj_j,
-                    d.macd,
-                    d.macd_signal,
-                    d.macd_hist,
-                    d.boll_upper,
-                    d.boll_mid,
-                    d.boll_lower
+                    d.close AS close_price
                 FROM ai_predictions_v2 p
                 LEFT JOIN prediction_models m ON p.model_id = m.model_id
                 LEFT JOIN mode_decision_log dlog

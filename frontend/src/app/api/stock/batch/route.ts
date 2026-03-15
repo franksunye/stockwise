@@ -84,13 +84,17 @@ export async function GET(request: Request) {
                         ${EFFECTIVE_SIGNAL_SQL} AS signal,
                         p.signal AS canonical_signal,
                         p.confidence,
-                        p.support_price, p.ai_reasoning, p.ai_reasoning AS llm_reasoning,
-                        ${SAFE_LLM_SIGNAL_SQL} AS llm_signal,
+                        p.support_price,
+                        p.ai_reasoning,
                         ${EFFECTIVE_VALIDATION_STATUS_SQL} AS validation_status, p.actual_change,
                         p.validation_data,
                         ${EFFECTIVE_LAYER1_STATUS_SQL} AS layer1_status,
                         p.layer1_status AS layer1_signal,
-                        p.layer1_score, p.layer1_trigger_hit, p.layer1_risk_off_hit, p.layer1_strategy_version, p.layer1_payload,
+                        p.layer1_score, p.layer1_trigger_hit, p.layer1_risk_off_hit, p.layer1_strategy_version,
+                        json_object(
+                            'close', json_extract(p.layer1_payload, '$.close'),
+                            'change_percent', json_extract(p.layer1_payload, '$.change_percent')
+                        ) AS layer1_payload,
                         p.max_perf_in_window,
                         p.is_primary, p.model_id as model, m.display_name,
                         ${EFFECTIVE_DECISION_SEMANTIC_SQL} AS decision_semantic,
@@ -114,8 +118,11 @@ export async function GET(request: Request) {
                        ROW_NUMBER() OVER (PARTITION BY symbol ORDER BY target_date DESC) as rn_history
                 FROM DailyBest d
             )
-            SELECT h.*, dp.close as close_price,
-                   dp.rsi, dp.kdj_k, dp.kdj_d, dp.kdj_j, dp.macd, dp.macd_signal, dp.macd_hist, dp.boll_upper, dp.boll_mid, dp.boll_lower
+            SELECT h.*,
+                   h.ai_reasoning AS llm_reasoning,
+                   h.validation_data,
+                   ${SAFE_LLM_SIGNAL_SQL} AS llm_signal,
+                   dp.close as close_price
             FROM HistoryRanked h
             LEFT JOIN daily_prices dp ON h.symbol = dp.symbol AND h.target_date = dp.date
             WHERE h.rn_history <= ${historyLimit}
@@ -127,13 +134,17 @@ export async function GET(request: Request) {
                         p.signal AS signal,
                         p.signal AS canonical_signal,
                         p.confidence,
-                        p.support_price, p.ai_reasoning, p.ai_reasoning AS llm_reasoning,
-                        ${SAFE_LLM_SIGNAL_SQL} AS llm_signal,
+                        p.support_price,
+                        p.ai_reasoning,
                         p.validation_status AS validation_status, p.actual_change,
                         p.validation_data,
                         p.layer1_status AS layer1_status,
                         p.layer1_status AS layer1_signal,
-                        p.layer1_score, p.layer1_trigger_hit, p.layer1_risk_off_hit, p.layer1_strategy_version, p.layer1_payload,
+                        p.layer1_score, p.layer1_trigger_hit, p.layer1_risk_off_hit, p.layer1_strategy_version,
+                        json_object(
+                            'close', json_extract(p.layer1_payload, '$.close'),
+                            'change_percent', json_extract(p.layer1_payload, '$.change_percent')
+                        ) AS layer1_payload,
                         p.max_perf_in_window,
                         p.is_primary, p.model_id as model, m.display_name,
                         p.signal AS decision_semantic,
@@ -153,8 +164,11 @@ export async function GET(request: Request) {
                        ROW_NUMBER() OVER (PARTITION BY symbol ORDER BY target_date DESC) as rn_history
                 FROM DailyBest d
             )
-            SELECT h.*, dp.close as close_price,
-                   dp.rsi, dp.kdj_k, dp.kdj_d, dp.kdj_j, dp.macd, dp.macd_signal, dp.macd_hist, dp.boll_upper, dp.boll_mid, dp.boll_lower
+            SELECT h.*,
+                   h.ai_reasoning AS llm_reasoning,
+                   h.validation_data,
+                   h.signal AS llm_signal,
+                   dp.close as close_price
             FROM HistoryRanked h
             LEFT JOIN daily_prices dp ON h.symbol = dp.symbol AND h.target_date = dp.date
             WHERE h.rn_history <= ${historyLimit}
@@ -231,9 +245,9 @@ export async function GET(request: Request) {
         const validDateThreshold = new Date(Date.now() - PREDICTION_VALIDITY_DAYS * 86400000).toISOString().split('T')[0];
 
         const stocks = symbols.map(sym => {
-            const history = historyBySymbol.get(sym) || [];
+            const rawHistory = historyBySymbol.get(sym) || [];
             const price = priceMap.get(sym) as Record<string, unknown> | undefined;
-            const validPreds = (history as { date: string }[]).filter(p => p.date >= validDateThreshold);
+            const validPreds = (rawHistory as { date: string }[]).filter(p => p.date >= validDateThreshold);
 
             return {
                 symbol: sym,

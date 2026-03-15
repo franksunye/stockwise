@@ -41,12 +41,12 @@ export async function GET(request: Request) {
                 let rows;
                 if ('execute' in client) {
                     const rs = await client.execute({
-                        sql: 'SELECT * FROM daily_prices WHERE symbol = ? ORDER BY date DESC LIMIT ?',
+                        sql: 'SELECT date, open, high, low, close, volume, change_percent FROM daily_prices WHERE symbol = ? ORDER BY date DESC LIMIT ?',
                         args: [symbol, limit]
                     });
                     rows = rs.rows;
                 } else {
-                    rows = client.prepare('SELECT * FROM daily_prices WHERE symbol = ? ORDER BY date DESC LIMIT ?').all(symbol, limit);
+                    rows = client.prepare('SELECT date, open, high, low, close, volume, change_percent FROM daily_prices WHERE symbol = ? ORDER BY date DESC LIMIT ?').all(symbol, limit);
                 }
                 return NextResponse.json({ prices: rows });
             }
@@ -55,14 +55,20 @@ export async function GET(request: Request) {
             let row, latestPrediction, prevPrediction;
             if ('execute' in client) {
                 const rsPrice = await client.execute({
-                    sql: 'SELECT * FROM daily_prices WHERE symbol = ? ORDER BY date DESC LIMIT 1',
+                    sql: 'SELECT date, open, high, low, close, volume, change_percent, rsi FROM daily_prices WHERE symbol = ? ORDER BY date DESC LIMIT 1',
                     args: [symbol]
                 });
                 const rsPred = await client.execute({
                     sql: `
-                        SELECT p.*, p.signal AS canonical_signal, p.layer1_status AS layer1_signal,
+                        SELECT p.symbol, p.date, p.target_date, p.signal, p.signal AS canonical_signal, p.layer1_status, p.layer1_status AS layer1_signal,
+                               p.confidence, p.support_price,
+                               p.ai_reasoning,
                                p.ai_reasoning AS llm_reasoning,
                                ${SAFE_LLM_SIGNAL_SQL} AS llm_signal,
+                               json_object(
+                                   'close', json_extract(p.layer1_payload, '$.close'),
+                                   'change_percent', json_extract(p.layer1_payload, '$.change_percent')
+                               ) AS layer1_payload,
                                d.close as close_price, m.display_name as model
                         FROM ai_predictions_v2 p
                         LEFT JOIN daily_prices d ON p.symbol = d.symbol AND p.date = d.date
@@ -77,11 +83,17 @@ export async function GET(request: Request) {
                 latestPrediction = rsPred.rows[0];
                 prevPrediction = rsPred.rows[1];
             } else {
-                row = client.prepare('SELECT * FROM daily_prices WHERE symbol = ? ORDER BY date DESC LIMIT 1').get(symbol);
+                row = client.prepare('SELECT date, open, high, low, close, volume, change_percent, rsi FROM daily_prices WHERE symbol = ? ORDER BY date DESC LIMIT 1').get(symbol);
                 const predictions = client.prepare(`
-                    SELECT p.*, p.signal AS canonical_signal, p.layer1_status AS layer1_signal,
+                    SELECT p.symbol, p.date, p.target_date, p.signal, p.signal AS canonical_signal, p.layer1_status, p.layer1_status AS layer1_signal,
+                           p.confidence, p.support_price,
+                           p.ai_reasoning,
                            p.ai_reasoning AS llm_reasoning,
                            ${SAFE_LLM_SIGNAL_SQL} AS llm_signal,
+                           json_object(
+                               'close', json_extract(p.layer1_payload, '$.close'),
+                               'change_percent', json_extract(p.layer1_payload, '$.change_percent')
+                           ) AS layer1_payload,
                            d.close as close_price, m.display_name as model
                     FROM ai_predictions_v2 p
                     LEFT JOIN daily_prices d ON p.symbol = d.symbol AND p.date = d.date

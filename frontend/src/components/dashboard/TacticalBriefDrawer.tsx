@@ -280,6 +280,7 @@ export function TacticalBriefDrawer({
 }: TacticalBriefDrawerProps) {
   const [isMounted, setIsMounted] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
+  const isFetchingDetail = false;
 
   useEffect(() => {
     setIsMounted(true);
@@ -384,7 +385,6 @@ export function TacticalBriefDrawer({
   return (
     <>
     <AnimatePresence>
-
       {isOpen && (
         <div className="fixed inset-0 z-[200] flex items-end justify-center bg-black/60 pointer-events-auto overflow-hidden">
           <motion.div 
@@ -412,9 +412,9 @@ export function TacticalBriefDrawer({
                <div className="w-12 h-1 rounded-full bg-white/20" />
             </div>
 
-            {/* 固定 Header，不再随内容滚动，彻底消除缝隙穿透 */}
+            {/* 固定 Header */}
             <header className="relative flex items-center justify-center py-2 px-6 bg-[#0a0a0f] border-b border-white/5 shadow-lg shadow-black/20 shrink-0 z-20">
-                 {/* Left: Almanac (Historical/Humanistic Context) */}
+                 {/* Left: Almanac */}
                  <button 
                    onClick={(e) => {
                      e.stopPropagation();
@@ -438,6 +438,7 @@ export function TacticalBriefDrawer({
                            className="absolute inset-0 bg-indigo-500 rounded-full -z-10 shadow-lg shadow-indigo-500/20"
                            initial={{ opacity: 0, scale: 0.9 }}
                            animate={{ opacity: 1, scale: 1 }}
+                           layoutId="activeTab"
                            transition={{ type: "spring", bounce: 0.2, duration: 0.3 }}
                          />
                        )}
@@ -452,6 +453,7 @@ export function TacticalBriefDrawer({
                            className="absolute inset-0 bg-indigo-500 rounded-full -z-10 shadow-lg shadow-indigo-500/20"
                            initial={{ opacity: 0, scale: 0.9 }}
                            animate={{ opacity: 1, scale: 1 }}
+                           layoutId="activeTab"
                            transition={{ type: "spring", bounce: 0.2, duration: 0.3 }}
                          />
                        )}
@@ -467,13 +469,12 @@ export function TacticalBriefDrawer({
                  </button>
             </header>
 
-            <div className="p-6 pt-4 flex-1 overflow-y-auto scrollbar-hide">
-
+            <div className={`p-6 pt-4 flex-1 overflow-y-auto scrollbar-hide relative`}>
               {activeTab === 'brief' ? (
                 <div className="space-y-8 pb-8 animate-in fade-in slide-in-from-right-4 duration-300">
                   {/* 源类型标记 */}
                   <div className={`mb-6 px-4 py-3 rounded-xl border flex items-center gap-3 ${sourceKind === 'llm' ? 'bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border-indigo-500/20' : 'bg-slate-800/40 border-white/5'}`}>
-                      <div className="relative w-10 h-10 rounded-full border border-white/10 overflow-hidden shrink-0 bg-black/30">
+                      <div className="relative w-10 h-10 shrink-0">
                         <Multiavatar name={analystProfile.avatarSeed} className="w-full h-full" />
                         <div className={`absolute -right-0.5 -bottom-0.5 w-4 h-4 rounded-full border border-[#0a0a0f] flex items-center justify-center ${sourceKind === 'llm' ? 'bg-indigo-500/90' : 'bg-slate-600/90'}`}>
                           {sourceKind === 'llm' ? (
