@@ -47,6 +47,8 @@ jobs:
           TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
           TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
           WECOM_ROBOT_KEY: ${{ secrets.WECOM_ROBOT_KEY }}
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+          INTERNAL_API_SECRET: ${{ secrets.INTERNAL_API_SECRET }}
         run: |
           DATE_ARG=""
           if [ -n "${{ inputs.date }}" ]; then
@@ -78,6 +80,8 @@ jobs:
           TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
           TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
           WECOM_ROBOT_KEY: ${{ secrets.WECOM_ROBOT_KEY }}
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+          INTERNAL_API_SECRET: ${{ secrets.INTERNAL_API_SECRET }}
         run: |
           DATE_ARG=""
           if [ -n "${{ inputs.date }}" ]; then
