@@ -109,10 +109,10 @@ class MarketContextProvider:
         age = (datetime.now() - cache_entry["timestamp"]).total_seconds()
         return age < ttl_seconds
 
-    def _safe_ak_fetch(self, func, *args, timeout=30, **kwargs):
+    def _safe_ak_fetch(self, func, *args, timeout: int = 60, **kwargs) -> Optional[Any]:
         """
-        Executes an AkShare function with a robust retry mechanism and mandatory timeout.
-        Uses a shared ThreadPoolExecutor to avoid overhead.
+        Safely call an AkShare function with retries and a timeout.
+        Uses a thread pool to enforce the timeout globally.
         """
         max_retries = 2
         base_delay = 1.0
