@@ -64,8 +64,20 @@ self.addEventListener('activate', (event) => {
 // 2.5 HELPER — Fetch with Timeout
 // =============================================================================
 function fetchWithTimeout(request, timeoutMs = 4000) {
-  if (!navigator.onLine) {
-    return Promise.reject(new Error('Browser is offline'));
+  // In ServiceWorkerGlobalScope, `navigator` may be unavailable or unreliable.
+  // Prefer a defensive check and let fetch() be the source of truth.
+  try {
+    const onlineHint =
+      typeof self !== 'undefined' &&
+      self.navigator &&
+      typeof self.navigator.onLine === 'boolean'
+        ? self.navigator.onLine
+        : undefined;
+    if (onlineHint === false) {
+      return Promise.reject(new Error('Browser is offline'));
+    }
+  } catch {
+    // Ignore and proceed to fetch — we'll still timeout/fallback safely.
   }
   return new Promise((resolve, reject) => {
     const timeoutId = setTimeout(() => {
@@ -140,7 +152,7 @@ async function navigationCacheFirst(request, fallbackUrl) {
       }
     }
     return networkResponse;
-  } catch {
+  } catch (err) {
     // 3. Both failed → offline fallback
     if (fallbackUrl) {
       const fallback = await cache.match(fallbackUrl);
@@ -221,7 +233,7 @@ async function networkFirst(request, fallbackUrl, timeoutMs = 4000) {
       cache.put(request, networkResponse.clone());
     }
     return networkResponse;
-  } catch {
+  } catch (err) {
     const cachedResponse = await cache.match(request);
     if (cachedResponse) {
       return cachedResponse;
