@@ -53,6 +53,8 @@ function mapCouncilMember(pred: AIPrediction) {
 }
 
 const CACHE_TTL = 1000 * 60 * 5;
+const SNAPSHOT_TTL = 1000 * 60 * 30;
+const SNAPSHOT_VERSION = 'v1';
 const MAX_CACHE_SIZE = 50;
 const LOADING_INDICATOR_DELAY_MS = 150;
 const councilSnapshotCache = new Map<string, CouncilCachePayload>();
@@ -299,6 +301,40 @@ function setCouncilSnapshot(key: string, payload: CouncilCachePayload): void {
   }
 }
 
+function buildSessionSnapshotKey(symbol: string, targetDate: string): string {
+  return `ziso:ai-council:${SNAPSHOT_VERSION}:${symbol}:${targetDate}`;
+}
+
+function readSessionSnapshot(symbol: string, targetDate: string): CouncilCachePayload | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const storage = window.sessionStorage;
+    const raw = storage.getItem(buildSessionSnapshotKey(symbol, targetDate));
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<CouncilCachePayload>;
+    if (!parsed || !Array.isArray(parsed.data) || typeof parsed.fetchedAt !== 'number') {
+      return null;
+    }
+    if (Date.now() - parsed.fetchedAt > SNAPSHOT_TTL) {
+      return null;
+    }
+    return parsed as CouncilCachePayload;
+  } catch {
+    return null;
+  }
+}
+
+function writeSessionSnapshot(symbol: string, targetDate: string, payload: CouncilCachePayload): void {
+  if (typeof window === 'undefined') return;
+  try {
+    const storage = window.sessionStorage;
+    const key = buildSessionSnapshotKey(symbol, targetDate);
+    storage.setItem(key, JSON.stringify(payload));
+  } catch {
+    // best-effort only
+  }
+}
+
 async function fetchCouncilData([
   ,
   symbol,
@@ -327,13 +363,21 @@ export function preloadAICouncil(symbol: string, targetDate: string): void {
 
 export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
   const snapshotKey = `${symbol}_${targetDate}`;
-  const fallbackPayload = getCouncilSnapshot(snapshotKey);
+  const memoryPayload = getCouncilSnapshot(snapshotKey);
+  const sessionPayload = !memoryPayload && symbol && targetDate
+    ? readSessionSnapshot(symbol, targetDate)
+    : null;
+  const fallbackPayload = memoryPayload || sessionPayload || undefined;
+  const hasSessionSnapshot = !!sessionPayload;
+
   const swrKey = symbol && targetDate
     ? (['ai-council', symbol, targetDate] as const)
     : null;
-  const isFresh = fallbackPayload
-    ? Date.now() - fallbackPayload.fetchedAt < CACHE_TTL
+  const isFreshMemory = memoryPayload
+    ? Date.now() - memoryPayload.fetchedAt < CACHE_TTL
     : false;
+  const shouldRevalidateOnMount = !hasSessionSnapshot && !isFreshMemory;
+  const shouldRevalidateIfStale = shouldRevalidateOnMount;
 
   const {
     data: payload,
@@ -343,11 +387,14 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
     fallbackData: fallbackPayload,
     keepPreviousData: true,
     revalidateOnFocus: false,
-    revalidateIfStale: !isFresh,
-    revalidateOnMount: !isFresh,
+    revalidateIfStale: shouldRevalidateIfStale,
+    revalidateOnMount: shouldRevalidateOnMount,
     dedupingInterval: 10 * 1000,
     onSuccess: (nextPayload) => {
       setCouncilSnapshot(snapshotKey, nextPayload);
+      if (symbol && targetDate) {
+        writeSessionSnapshot(symbol, targetDate, nextPayload);
+      }
     },
   });
 
