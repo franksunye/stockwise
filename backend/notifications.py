@@ -30,7 +30,7 @@ def send_push_notification(title, body, url=None, related_symbol=None, broadcast
     secret = os.getenv("INTERNAL_API_SECRET")
     
     if not secret:
-        logger.debug("⚠️ Skipping push notification: INTERNAL_API_SECRET not set")
+        logger.warning("⚠️ Skipping push notification: INTERNAL_API_SECRET not set")
         return False
 
     payload = {

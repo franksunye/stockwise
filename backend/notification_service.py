@@ -456,7 +456,7 @@ class NotificationManager:
                 skip_log=True
             )
             if not delivered:
-                logger.warning(f"⚠️ Notification {log_id} 未成功送达，跳过落库")
+                logger.warning(f"⚠️ Notification {log_id} ({notif_type}) 未成功送达，跳过落库")
                 self.stats["errors"] += 1
                 return False
             
@@ -466,7 +466,7 @@ class NotificationManager:
             self._log_to_db(log_id, user_id, logged_payload)
             return True
         except Exception as e:
-            logger.error(f"❌ Failed to send notification {log_id}: {e}")
+            logger.error(f"❌ Failed to send notification {log_id} (type: {notif_type}): {e}")
             self.stats["errors"] += 1
             return False
 
