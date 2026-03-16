@@ -62,13 +62,42 @@ export default function RootLayout({
                   var isIOS = /iPhone|iPad|iPod/i.test(ua);
                   if (!isIOS) return;
 
-                  // Prevent iOS PWA white flash: apply dark bg + logo ASAP.
-                  document.documentElement.classList.add('ios-boot');
+                  // iOS PWA cold-start: add a non-blocking splash overlay (dark + logo)
+                  // to avoid the white flash/repaint during cold boot.
+                  function mountSplash() {
+                    try {
+                      if (document.getElementById('ios-pwa-splash')) return;
+                      var splash = document.createElement('div');
+                      splash.id = 'ios-pwa-splash';
+                      var img = document.createElement('img');
+                      img.src = '/logo.png';
+                      img.alt = 'ZISO AI';
+                      splash.appendChild(img);
+                      document.body.appendChild(splash);
+                    } catch (e) {}
+                  }
 
-                  // Remove boot splash after full load. (App content is opaque anyway.)
-                  window.addEventListener('load', function() {
-                    document.documentElement.classList.remove('ios-boot');
-                  }, { once: true });
+                  function hideSplash() {
+                    try {
+                      var splash = document.getElementById('ios-pwa-splash');
+                      if (!splash) return;
+                      splash.classList.add('is-hiding');
+                      setTimeout(function() {
+                        try { splash.remove(); } catch (e) {}
+                      }, 260);
+                    } catch (e) {}
+                  }
+
+                  // Mount as soon as body exists.
+                  if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', mountSplash, { once: true });
+                  } else {
+                    mountSplash();
+                  }
+
+                  // Hide on full load. Also add a short fallback hide to reduce perceived delay.
+                  window.addEventListener('load', hideSplash, { once: true });
+                  setTimeout(hideSplash, 1200);
                 } catch (e) {}
               })();
             `,

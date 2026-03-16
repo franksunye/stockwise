@@ -24,16 +24,30 @@ body {
   min-height: 100vh;
 }
 
-/* iOS PWA cold-start: show a logo splash instead of white flash.
-   The class is injected very early in <head> and removed on window 'load'. */
-html.ios-boot body {
-  background-image:
-    url("/logo.png"),
-    radial-gradient(circle at 50% -20%, #1e1b4b 0%, transparent 50%),
-    radial-gradient(circle at 0% 100%, #111827 0%, transparent 40%);
-  background-repeat: no-repeat, no-repeat, no-repeat;
-  background-position: 50% 38%, 50% -20%, 0% 100%;
-  background-size: 88px 88px, auto, auto;
+/* iOS PWA cold-start: prevent white flash with a minimal splash overlay.
+   We avoid background-image toggles (which can cause a visible repaint flash). */
+#ios-pwa-splash {
+  position: fixed;
+  inset: 0;
+  background: #050508;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2147483647;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 220ms ease-out;
+}
+
+#ios-pwa-splash img {
+  width: 88px;
+  height: 88px;
+  border-radius: 18px;
+  opacity: 0.9;
+}
+
+#ios-pwa-splash.is-hiding {
+  opacity: 0;
 }
 
 html.dashboard-boot-ready [data-dashboard-skeleton="true"] {
