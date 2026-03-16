@@ -229,3 +229,84 @@
 - **后续迁移范围**：
   - 其他需要盘中价格刷新的前端页面（如二级详情页）应逐步改用 `/api/stock/prices`，避免新增依赖 `/api/stock/batch` 做高频轮询。
 
+---
+
+## 9. Per-Symbol Tier/Mode 报告的 ISR 方案（Future Option）
+
+本节只作为未来可选方案记录当前共识，**不要求立即实现**。
+
+### 9.1 Page Key 抽象：有限的视图矩阵
+
+从「单只股票视图」的角度，我们可以将页面空间抽象为一个有限矩阵：
+
+- 维度 1：用户层级（Tier）
+  - Free
+  - PRO
+- 维度 2：投资模式（Mode）
+  - Free：固定 1 种「默认模式」/ 无模式
+  - PRO：若干种模式（例如 3 种）
+- 维度 3：页面类型（Page Kind）
+  - 基础档案 / 总览页（symbol 维度）
+  - 每个模式下的模式视角页（symbol + mode 维度）
+
+综合起来，对于某一只股票 `symbol`：
+
+- Free 用户：通常只有 1 个视图（默认模式）；
+- PRO 用户：可能有「基础总览 + N 个模式视角」，例如 4 个页面。
+
+因此可以定义统一的 Page Key：
+
+```text
+PageKey = (symbol, tier, mode?)
+```
+
+在给定交易日内，对于相同的 `(symbol, tier, mode)`：
+
+- 投研结论 / 黄历摘要 / 模式视角在逻辑上应保持一致；
+- 差异主要体现在：
+  - 用户是否有权限访问该 PageKey；
+  - 用户当前是否已解锁该模式。
+
+这类 PageKey 更接近「公共事实视图」，适合用作 ISR / Origin Cache 的自然边界。
+
+### 9.2 ISR 策略：Per-PageKey 报告，而非 Batch
+
+基于上述 PageKey 抽象，推荐的未来 ISR 策略是：
+
+- **对每个 PageKey 使用 ISR**：
+  - 例如：
+    - `/pro/stocks/[symbol]/overview` → `(symbol, PRO, default)`；
+    - `/pro/stocks/[symbol]/modes/[modeId]` → `(symbol, PRO, modeId)`；
+    - `/free/stocks/[symbol]` → `(symbol, FREE, default)`。
+  - 为每个 `(symbol, tier, mode)` 组合预生成一份「报告页面」或「报告数据」：
+    - 使用 `revalidate`（如 1 天 / 1 交易日）；
+    - 内部可继续使用 `unstable_cache` / DB 视图来拼装事实层。
+
+- **Batch/Dashboard 不做 ISR，只做聚合**：
+  - `/api/stock/batch` 保持为：
+    - 「按用户 watchlist + 当前 mode 聚合多个 PageKey 的摘要」；
+    - 只负责组合、排序、过滤，不做全包级别的 ISR。
+  - Batch 内部应优先消费：
+    - 已经通过 ISR / `unstable_cache` 预备好的 per-symbol / per-mode 事实；
+    - 避免在 Batch 层面引入新的「跨用户共享缓存」语义。
+
+### 9.3 边界与注意事项
+
+- **共享 vs. 权限**
+  - PageKey 视图可以在 Origin 上跨用户共享缓存（同 tier / mode），
+    但访问控制仍由：
+    - 路由保护（仅 PRO 可访问 PRO PageKey）；
+    - 页面加载时的用户态校验（当前用户是否解锁该模式）来保证。
+
+- **Batch 仍保持用户态聚合职责**
+  - 即便 PageKey 报告被 ISR 化，Dashboard：
+    - 仍然是 per-user 的 watchlist 聚合；
+    - 仍然需要根据当前 mode/tier 做 overlay；
+    - 不应被误用为整个系统的 ISR 粒度。
+
+- **实现时机**
+  - 只有当「股票详情页 / 模式视角页」进入实质性开发阶段时，才需要将本节转化为具体 API & 路由设计；
+  - 在那之前，本节仅作为团队在「是否给 Batch 上 ISR」问题上的工程共识参考：
+    - **优先给 per-symbol × tier × mode 的报告页做 ISR**；
+    - **不要给当前形态的 `/api/stock/batch` 整包做 ISR**。
+

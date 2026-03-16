@@ -12,8 +12,9 @@ import { WatchlistItem } from './useWatchlist';
 const TRADING_REFRESH_INTERVAL = 60 * 60 * 1000;  // 60分钟
 const DEFAULT_REFRESH_INTERVAL = 120 * 60 * 1000; // 120分钟
 
-// 价格层刷新间隔：盘中 10 分钟
-const PRICE_REFRESH_INTERVAL = 10 * 60 * 1000;
+// 价格层刷新间隔：盘中 3 分钟，非交易时段 10 分钟
+const TRADING_PRICE_REFRESH_INTERVAL = 3 * 60 * 1000;
+const DEFAULT_PRICE_REFRESH_INTERVAL = 10 * 60 * 1000;
 const CACHE_KEY = 'stockwise_dashboard_cache_v1';
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24小时过期
 const RESUME_REFRESH_THRESHOLD = 1 * 60 * 1000; // iOS PWA 回前台后 1min 以上即尝试刷新
@@ -396,12 +397,16 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
         }
     }, [watchlist, loadingWatchlist, loadAllData]);
 
-    // 页面可见性检测：当用户切回页面时刷新数据
+    // 页面可见性检测：当用户切回页面时刷新数据（决策层 + 价格层）
     useEffect(() => {
         const refreshOnResume = () => {
             const timeSinceLastFetch = Date.now() - lastFetchTimeRef.current;
             if (timeSinceLastFetch > RESUME_REFRESH_THRESHOLD) {
                 loadAllData(true);
+            }
+            const symbols = watchlist.map(w => w.symbol);
+            if (symbols.length > 0) {
+                void refreshPrices(symbols);
             }
         };
 
@@ -422,7 +427,7 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
             window.removeEventListener('pageshow', refreshOnResume);
             window.removeEventListener('online', refreshOnResume);
         };
-    }, [loadAllData]);
+    }, [loadAllData, watchlist, refreshPrices]);
 
     // 决策层定时刷新（低频）
     useEffect(() => {
@@ -449,9 +454,13 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
         if (priceIntervalRef.current) {
             clearInterval(priceIntervalRef.current);
         }
+        const scene = getMarketScene();
+        const interval = scene === 'trading'
+            ? TRADING_PRICE_REFRESH_INTERVAL
+            : DEFAULT_PRICE_REFRESH_INTERVAL;
         priceIntervalRef.current = setInterval(() => {
             refreshPrices(symbols);
-        }, PRICE_REFRESH_INTERVAL);
+        }, interval);
 
         return () => {
             if (priceIntervalRef.current) {
