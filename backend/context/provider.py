@@ -610,14 +610,23 @@ class MarketContextProvider:
         north_as_of = fetched_at.date().isoformat()
         sector_as_of = fetched_at.date().isoformat()
 
-        # 1. Parallel Fetch for Northbound and Primary/Fallback Sector Flow
+        # Yellow Pages MVP note:
+        # "Sector ranking" style endpoints are frequently unstable (rate-limit/SSL/proxy).
+        # We therefore anchor on a broad-market flow as the primary signal, and only
+        # attempt sector detail when explicitly enabled or when broad-market is missing.
+
+        # 1. Parallel Fetch for Northbound and optional Sector Detail
         executor = self._get_executor()
+        enable_sector_detail = str(os.environ.get("YELLOWPAGES_SECTOR_DETAIL", "0")).strip() in {"1", "true", "True", "YES", "yes"}
         futures = {
             "north": executor.submit(self._safe_ak_fetch, ak.stock_hsgt_fund_flow_summary_em),
+            # Broad-market is our primary and most stable route
+            "broad": executor.submit(self._safe_ak_fetch, ak.stock_market_fund_flow),
+            # Sector details are best-effort (often unstable). Keep them behind a flag.
             "em": executor.submit(
                 self._safe_ak_fetch, ak.stock_sector_fund_flow_rank, indicator="今日", sector_type="行业资金流"
-            ),
-            "ths": executor.submit(self._safe_ak_fetch, ak.stock_fund_flow_industry, symbol="即时")
+            ) if enable_sector_detail else None,
+            "ths": executor.submit(self._safe_ak_fetch, ak.stock_fund_flow_industry, symbol="即时") if enable_sector_detail else None,
         }
 
         # 1.1 Process Northbound
@@ -645,79 +654,106 @@ class MarketContextProvider:
         except Exception as e:
             logger.warning(f"Northbound fetch issue: {e}")
 
-        # 2. Sector Flows - Tiered Processing
+        # 2. Sector Flows - Stable-first processing
         sector_fetched = False
-        
-        # --- Tier 1: Eastmoney (Primary) ---
-        try:
-            df_em = futures["em"].result()
-            if df_em is not None and not df_em.empty:
-                net_col = '今日主力净流入-净额'
-                name_col = '名称'
-                if net_col in df_em.columns and name_col in df_em.columns:
-                    df_em['net_val'] = pd.to_numeric(df_em[net_col], errors='coerce')
-                    df_sorted = df_em.dropna(subset=['net_val']).sort_values('net_val', ascending=False)
-                    
-                    def fmt_em(row):
-                        name = row.get(name_col, '')
-                        net = row.get('net_val', 0) / 1e8  # 元 → 亿
-                        return f"{name}({net:+.2f}亿)"
-                    
-                    for _, row in df_sorted.head(3).iterrows():
-                        top_inflow.append(fmt_em(row))
-                    for _, row in df_sorted.tail(2).iterrows():
-                        if float(row.get('net_val', 0)) < 0:
-                            top_outflow.append(fmt_em(row))
-                    
-                    sector_fetched = True
-                    sector_source = "akshare:stock_sector_fund_flow_rank"
-                    logger.info(f"✅ Eastmoney Sector Flow Succeeded: {len(df_sorted)} sectors")
-                else:
-                    logger.warning(f"EM sector flow columns mismatch: {list(df_em.columns)}")
-            else:
-                logger.warning("EM sector flow empty")
-        except Exception as e:
-            logger.warning(f"⚠️  Eastmoney Sector Flow failed: {e}")
-        
-        # --- Tier 2: THS Fallback ---
-        if not sector_fetched:
-            try:
-                df_sector = futures["ths"].result()
-                if df_sector is not None and not df_sector.empty:
-                    df_sector['net_val'] = pd.to_numeric(df_sector['净额'], errors='coerce')
-                    df_sorted = df_sector.dropna(subset=['net_val']).sort_values('net_val', ascending=False)
-                    
-                    def fmt_ths(row):
-                        name = row.get('行业', '')
-                        net = row.get('net_val', 0)  # THS 净额 already in 亿
-                        return f"{name}({net:+.2f}亿)"
+        sector_detail_used = False
 
-                    for _, row in df_sorted.head(3).iterrows():
-                        top_inflow.append(fmt_ths(row))
-                    for _, row in df_sorted.tail(2).iterrows():
-                        if float(row.get('net_val', 0)) < 0:
-                            top_outflow.append(fmt_ths(row))
-                    
-                    sector_fetched = True
-                    sector_source = "akshare:stock_fund_flow_industry"
-                    logger.info(f"✅ THS Industry Flow Fallback Succeeded: {len(df_sorted)} sectors")
-                else:
-                    logger.warning("THS record empty")
-            except Exception as e:
-                logger.error(f"❌ THS Sector Flow also failed: {e}")
+        # --- Primary: Broad Market (Stable Anchor) ---
+        try:
+            df_m = futures["broad"].result()
+            if df_m is not None and not df_m.empty:
+                m_flow = df_m.iloc[-1].get('主力净流入-净额', 0)
+                top_inflow.append(f"全市场主力({m_flow/1e8:+.1f}亿)")
+                sector_fetched = True
+                sector_source = "akshare:stock_market_fund_flow"
+                logger.info("✅ Broad market flow succeeded (primary).")
+        except Exception as e:
+            logger.warning(f"⚠️  Broad market flow failed: {e}")
         
-        # --- Tier 3: Broad Market (Last Resort) ---
-        if not sector_fetched:
+        # --- Enhancement: Sector Details (Best-effort) ---
+        # Only attempt if explicitly enabled AND (broad is missing OR we want extra detail).
+        if enable_sector_detail:
+            # --- Tier 1: Eastmoney Sector Rank ---
             try:
-                df_m = self._safe_ak_fetch(ak.stock_market_fund_flow)
-                if df_m is not None and not df_m.empty:
-                    m_flow = df_m.iloc[-1].get('主力净流入-净额', 0)
-                    top_inflow.append(f"全市场主力({m_flow/1e8:+.1f}亿)")
-                    sector_fetched = True
-                    sector_source = "akshare:stock_market_fund_flow"
-                    logger.info("✅ Broad market flow (last resort) succeeded.")
-            except Exception as fallback_e:
-                logger.error(f"❌ All sector flow sources exhausted: {fallback_e}")
+                if futures.get("em") is not None:
+                    df_em = futures["em"].result()
+                else:
+                    df_em = None
+                if df_em is not None and not df_em.empty:
+                    net_col = '今日主力净流入-净额'
+                    name_col = '名称'
+                    if net_col in df_em.columns and name_col in df_em.columns:
+                        df_em['net_val'] = pd.to_numeric(df_em[net_col], errors='coerce')
+                        df_sorted = df_em.dropna(subset=['net_val']).sort_values('net_val', ascending=False)
+                        
+                        def fmt_em(row):
+                            name = row.get(name_col, '')
+                            net = row.get('net_val', 0) / 1e8  # 元 → 亿
+                            return f"{name}({net:+.2f}亿)"
+                        
+                        # Keep broad-market as anchor, add sector details after it
+                        extra_in = []
+                        extra_out = []
+                        for _, row in df_sorted.head(3).iterrows():
+                            extra_in.append(fmt_em(row))
+                        for _, row in df_sorted.tail(2).iterrows():
+                            if float(row.get('net_val', 0)) < 0:
+                                extra_out.append(fmt_em(row))
+                        if extra_in:
+                            top_inflow.extend(extra_in)
+                        if extra_out:
+                            top_outflow.extend(extra_out)
+                        sector_detail_used = True
+                        # If broad already succeeded, keep source anchored but record detail
+                        if sector_source == "unknown":
+                            sector_source = "akshare:stock_sector_fund_flow_rank"
+                        logger.info(f"✅ Eastmoney Sector Detail Succeeded: {len(df_sorted)} sectors")
+                    else:
+                        logger.warning(f"EM sector flow columns mismatch: {list(df_em.columns)}")
+                else:
+                    logger.warning("EM sector flow empty")
+            except Exception as e:
+                logger.warning(f"⚠️  Eastmoney Sector Flow failed: {e}")
+        
+            # --- Tier 2: THS Sector Detail Fallback ---
+            if not sector_detail_used:
+                try:
+                    if futures.get("ths") is not None:
+                        df_sector = futures["ths"].result()
+                    else:
+                        df_sector = None
+                    if df_sector is not None and not df_sector.empty:
+                        df_sector['net_val'] = pd.to_numeric(df_sector['净额'], errors='coerce')
+                        df_sorted = df_sector.dropna(subset=['net_val']).sort_values('net_val', ascending=False)
+                        
+                        def fmt_ths(row):
+                            name = row.get('行业', '')
+                            net = row.get('net_val', 0)  # THS 净额 already in 亿
+                            return f"{name}({net:+.2f}亿)"
+
+                        extra_in = []
+                        extra_out = []
+                        for _, row in df_sorted.head(3).iterrows():
+                            extra_in.append(fmt_ths(row))
+                        for _, row in df_sorted.tail(2).iterrows():
+                            if float(row.get('net_val', 0)) < 0:
+                                extra_out.append(fmt_ths(row))
+                        if extra_in:
+                            top_inflow.extend(extra_in)
+                        if extra_out:
+                            top_outflow.extend(extra_out)
+                        sector_detail_used = True
+                        if sector_source == "unknown":
+                            sector_source = "akshare:stock_fund_flow_industry"
+                        logger.info(f"✅ THS Industry Detail Fallback Succeeded: {len(df_sorted)} sectors")
+                    else:
+                        logger.warning("THS record empty")
+                except Exception as e:
+                    logger.error(f"❌ THS Sector Flow also failed: {e}")
+        
+        # If even broad-market failed, we consider the sector flow missing.
+        if not sector_fetched:
+            logger.warning("⚠️  Sector flow missing: broad-market route failed.")
 
         if not top_outflow:
             top_outflow = ["无明显净流出(>=0)"]
@@ -777,6 +813,8 @@ class MarketContextProvider:
             consistency_flags=consistency_flags,
         )
         result["lineage"] = {"northbound": north_source, "sector_flow": sector_source}
+        result["sector_detail_used"] = sector_detail_used
+        result["sector_detail_enabled"] = enable_sector_detail
 
         self._cache["market_flow"] = {"data": result, "timestamp": datetime.now()}
         self._stats["market_flow_success"] += 1

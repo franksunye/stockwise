@@ -82,6 +82,7 @@ def audit_providers() -> List[EndpointResult]:
     """
     endpoints: List[Tuple[str, Callable[..., Any], Dict[str, Any]]] = [
         ("breadth_legu", ak.stock_market_activity_legu, {}),
+        ("market_fund_flow", ak.stock_market_fund_flow, {}),
         ("index_spot_em", ak.stock_zh_index_spot_em, {}),
         ("index_daily_SH", ak.stock_zh_index_daily_em, {"symbol": "sh000001"}),
         ("index_daily_SZ", ak.stock_zh_index_daily_em, {"symbol": "sz399001"}),

@@ -78,6 +78,22 @@ To reconcile **technical stability** with the **Yellow Pages product vision**, w
   - Limit-up / limit-down statistics and broken-board rate.
   - Additional sentiment enrichments that depend on more fragile upstream APIs.
 
+### 6.1 Special Stability Strategy: Capital Flow (Stable Anchor + Optional Detail)
+
+Capital flow APIs are a frequent source of instability (SSL EOF, connection aborts, and rate-limit behaviour on sector-ranking endpoints).
+To ship a stable Yellow Pages MVP, we apply a **Stable-Anchor** strategy:
+
+- **Primary (Stable Anchor)**: Always attempt **broad market flow** first:
+  - `ak.stock_market_fund_flow()` → `全市场主力(+/-X亿)`
+- **Optional (Best-effort Sector Detail)**: Sector ranking enrichment is **disabled by default** and only enabled via an environment switch:
+  - Tier 1: `ak.stock_sector_fund_flow_rank(indicator="今日", sector_type="行业资金流")`
+  - Tier 2: `ak.stock_fund_flow_industry(symbol="即时")`
+
+**Env Switch**:
+
+- `YELLOWPAGES_SECTOR_DETAIL=0` (default): Only broad-market anchor is used; sector detail calls are skipped entirely.
+- `YELLOWPAGES_SECTOR_DETAIL=1`: Enable best-effort sector details (may degrade without blocking Yellow Pages).
+
 UI / content guidelines for Yellow Pages:
 
 - If **Guaranteed Signals** are available and pass the fact-layer gate, the Almanac renders as "complete" even if best-effort modules are missing.
