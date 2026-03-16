@@ -117,16 +117,40 @@ def generate_almanac(target_date: str = None, force_t_plus_1: bool = True) -> bo
         facts = facts_bundle.get("facts", {})
         facts_quality = facts_bundle.get("quality", {})
         gate_pass = bool(facts_quality.get("gate_pass"))
+        
+        # QUALITY HARD LOCK: If critical data (turnover/breadth) is missing, we MUST abort.
+        # This prevents generating hollow '罗生门' reports when upstream APIs are failing.
+        critical_flags = {"missing_turnover", "missing_breadth"}
+        current_flags = set(facts_quality.get("flags", []))
+        if not gate_pass and (current_flags & critical_flags):
+            err_msg = f"CRITICAL DATA FAILURE for {actual_price_date}: {current_flags & critical_flags}. Aborting generation to prevent hollow results."
+            logger.error(f"❌ {err_msg}")
+            
+            # Send high-priority alert before failing
+            try:
+                fail_alert = (
+                    "### 🚨 StockWise CRITICAL FAILURE\n\n"
+                    "**Almanac Generation Aborted**\n"
+                    f"**Date**: {actual_price_date}\n"
+                    f"**Reason**: Critical metrics missing ({', '.join(current_flags & critical_flags)})\n\n"
+                    "Network isolation and fallbacks were exhausted. Please check data provider health."
+                )
+                send_wecom_notification(fail_alert, mentioned_mobile_list=ADMIN_MOBILES)
+            except Exception:
+                pass
+                
+            raise RuntimeError(err_msg)
+
         if not gate_pass:
             logger.warning(f"Market facts quality gate failed for {actual_price_date}: {facts_quality.get('flags', [])}")
             try:
                 quality_flags = facts_quality.get("flags", [])
                 alert_content = (
-                    "### ⚠️ StockWise Data Quality Alert: Almanac fallback rules in use\n\n"
+                    "### ⚠️ StockWise Data Quality Warning\n\n"
                     f"**Target Date**: {target_date or 'N/A'}\n"
                     f"**Fact Date**: {actual_price_date}\n"
                     f"**Flags**: `{', '.join(quality_flags) if quality_flags else 'unknown'}`\n\n"
-                    "Almanac generation continues with full rule-based content. Please monitor upstream data coverage."
+                    "Non-critical data is missing. Almanac generation continues with reduced precision."
                 )
                 send_wecom_notification(alert_content, mentioned_mobile_list=ADMIN_MOBILES)
             except Exception:

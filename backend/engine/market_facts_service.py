@@ -1,4 +1,5 @@
 import json
+import os
 import re
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
@@ -9,6 +10,67 @@ import pandas as pd
 from backend.context.provider import MarketContextProvider
 from backend.database import get_connection
 from backend.logger import logger
+
+
+def _isolated_ak_fetch(func, **kwargs) -> Any:
+    """Helper to fetch from AkShare with high-reliability isolation fallback."""
+    import time
+    try:
+        # Standard fetch
+        res = func(**kwargs)
+        if res is not None:
+            return res
+    except Exception:
+        pass
+    
+    # Isolated fallback (No Proxy) with Jitter
+    time.sleep(1.0) # Jitter to allow connection cooling
+    original_no_proxy = os.environ.get('NO_PROXY')
+    os.environ['NO_PROXY'] = '*'
+    try:
+        return func(**kwargs)
+    except Exception as e:
+        logger.warning(f"Isolated fetch failed for {func.__name__}: {e}")
+        return None
+    finally:
+        if original_no_proxy is None:
+            os.environ.pop('NO_PROXY', None)
+        else:
+            os.environ['NO_PROXY'] = original_no_proxy
+
+
+def _fetch_breadth_stable() -> Tuple[Optional[int], Optional[int], Dict[str, Any]]:
+    """Fetch market breadth using stable LeGu aggregate API."""
+    try:
+        df = _isolated_ak_fetch(ak.stock_market_activity_legu)
+        if df is not None and not df.empty:
+            adv = _safe_float(df[df["item"] == "上涨"]["value"].iloc[0])
+            dec = _safe_float(df[df["item"] == "下跌"]["value"].iloc[0])
+            if adv is not None and dec is not None:
+                return int(adv), int(dec), {"status": "ok", "source": "akshare:stock_market_activity_legu"}
+    except Exception as e:
+        logger.warning(f"Stable breadth logic failed: {e}")
+    return None, None, {"status": "missing", "source": "akshare:stock_market_activity_legu"}
+
+
+def _fetch_total_turnover_stable() -> Tuple[Optional[float], Dict[str, Any]]:
+    """Fetch total market turnover by summing SH and SZ indices."""
+    try:
+        df = _isolated_ak_fetch(ak.stock_zh_index_spot_em)
+        if df is not None and not df.empty:
+            sh = df[df["代码"] == "000001"]
+            sz = df[df["代码"] == "399001"]
+            if not sh.empty and not sz.empty:
+                sh_amt = _safe_float(sh["成交额"].iloc[0])
+                sz_amt = _safe_float(sz["成交额"].iloc[0])
+                if sh_amt is not None and sz_amt is not None:
+                    total_yi = (sh_amt + sz_amt) / 1e8
+                    return total_yi, {"status": "ok", "source": "akshare:stock_zh_index_spot_em"}
+    except Exception as e:
+        logger.warning(f"Stable turnover logic failed: {e}")
+    return None, {"status": "missing", "source": "akshare:stock_zh_index_spot_em"}
+
+
 
 
 def _today_str() -> str:
@@ -107,123 +169,55 @@ def _load_recent_facts(cur, fact_date: str, limit: int = 25) -> List[Dict[str, A
     return out
 
 
-def _fetch_a_spot() -> Tuple[Optional[pd.DataFrame], Dict[str, Any]]:
-    """Fetch all A-share spot prices with fallback redundancy."""
-    # 1. Primary: Eastmoney (Better detail, higher reliability usually)
-    try:
-        df = ak.stock_zh_a_spot_em()
-        if df is not None and not df.empty:
-            return df, {"status": "ok", "source": "akshare:stock_zh_a_spot_em", "sample_size": int(len(df))}
-    except Exception as e:
-        logger.warning(f"⚠️ Primary spot fetch (EM) failed: {e}. Trying Sina fallback...")
-
-    # 2. Fallback: Sina (Reliable secondary source)
-    try:
-        df_sina = ak.stock_zh_a_spot()
-        if df_sina is not None and not df_sina.empty:
-            # Normalize schema to match EM's expected columns
-            rename_map = {
-                "code": "代码",
-                "name": "名称",
-                "trade": "最新价",
-                "changepercent": "涨跌幅",
-                "amount": "成交额",
-                "turnoverratio": "换手率"
-            }
-            df_norm = df_sina.rename(columns=rename_map)
-            # Spot check: ensure '成交额' is present for turnover calculation
-            if "成交额" in df_norm.columns:
-                logger.info(f"✅ Sina Fallback succeeded (Count: {len(df_norm)})")
-                return df_norm, {"status": "ok", "source": "akshare:stock_zh_a_spot", "sample_size": int(len(df_norm))}
-    except Exception as e:
-        logger.error(f"❌ Fallback spot fetch (Sina) also failed: {e}")
-
-    return None, {"status": "missing", "error": "All spot sources (EM/Sina) failed"}
-
-
-def _extract_turnover_from_spot(df: Optional[pd.DataFrame]) -> Tuple[Optional[float], Dict[str, Any]]:
-    try:
-        if df is None or df.empty:
-            return None, {"status": "missing", "source": "akshare:stock_zh_a_spot_em"}
-        amount_col = "成交额"
-        if amount_col not in df.columns:
-            return None, {"status": "missing", "source": "akshare:stock_zh_a_spot_em"}
-        amounts = pd.to_numeric(df[amount_col], errors="coerce")
-        total_amount_yi = float(amounts.fillna(0).sum()) / 1e8
-        return total_amount_yi, {
-            "status": "ok",
-            "source": "akshare:stock_zh_a_spot_em",
-            "sample_size": int(len(df)),
-        }
-    except Exception as e:
-        logger.warning(f"market facts turnover fetch failed: {e}")
-        return None, {"status": "missing", "source": "akshare:stock_zh_a_spot_em", "error": str(e)}
-
-
-def _extract_breadth_from_spot(df: Optional[pd.DataFrame]) -> Tuple[Optional[int], Optional[int], Dict[str, Any]]:
-    try:
-        if df is None or df.empty or "涨跌幅" not in df.columns:
-            return None, None, {"status": "missing", "source": "akshare:stock_zh_a_spot_em"}
-        pct = pd.to_numeric(df["涨跌幅"], errors="coerce")
-        adv = int((pct > 0).sum())
-        dec = int((pct < 0).sum())
-        return adv, dec, {
-            "status": "ok",
-            "source": "akshare:stock_zh_a_spot_em",
-            "sample_size": int(len(df)),
-        }
-    except Exception as e:
-        logger.warning(f"market facts breadth fetch failed: {e}")
-        return None, None, {"status": "missing", "source": "akshare:stock_zh_a_spot_em", "error": str(e)}
-
-
 def _extract_limit_stats(fact_date: str) -> Tuple[Dict[str, Any], Dict[str, Any]]:
     dt = fact_date.replace("-", "")
     result = {"limit_up": None, "limit_down": None, "broken_rate": None}
-    status = {"status": "missing", "source": "akshare:zt_pool"}
+    status_meta = {"status": "missing", "source": "akshare:zt_pool"}
     try:
-        up_df = ak.stock_zt_pool_em(date=dt)
-        down_df = ak.stock_zt_pool_dtgc_em(date=dt)
-        broken_df = ak.stock_zt_pool_zbgc_em(date=dt)
+        up_df = _isolated_ak_fetch(ak.stock_zt_pool_em, date=dt)
+        down_df = _isolated_ak_fetch(ak.stock_zt_pool_dtgc_em, date=dt)
+        broken_df = _isolated_ak_fetch(ak.stock_zt_pool_zbgc_em, date=dt)
+        
         limit_up = int(len(up_df)) if up_df is not None else 0
         limit_down = int(len(down_df)) if down_df is not None else 0
         broken_count = int(len(broken_df)) if broken_df is not None else 0
+        
         result["limit_up"] = limit_up
         result["limit_down"] = limit_down
         denom = max(limit_up + broken_count, 1)
         result["broken_rate"] = round(broken_count / denom, 4)
-        status = {"status": "ok", "source": "akshare:zt_pool"}
+        status_meta["status"] = "ok"
     except Exception as e:
-        logger.warning(f"market facts limit stats fetch failed: {e}")
-        status = {"status": "missing", "source": "akshare:zt_pool", "error": str(e)}
-    return result, status
+        logger.warning(f"Limit stats logic failed: {e}")
+        status_meta["error"] = str(e)
+    return result, status_meta
 
 
 def _extract_index_trend(symbol: str) -> Dict[str, Any]:
-    out = {"symbol": symbol, "pct_1d": None, "pct_5d": None, "pct_20d": None, "direction": "flat"}
+    out = {"symbol": symbol, "pct_1d": None, "pct_5d": None, "pct_20d": None, "direction": "flat", "status": "missing"}
     try:
-        df = ak.stock_zh_index_daily_em(symbol=symbol)
+        df = _isolated_ak_fetch(ak.stock_zh_index_daily_em, symbol=symbol)
         if df is None or df.empty or "close" not in df.columns:
-            out["status"] = "missing"
             return out
         closes = pd.to_numeric(df["close"], errors="coerce").dropna().tolist()
         if len(closes) < 2:
-            out["status"] = "missing"
             return out
-        last = closes[-1]
-        prev1 = closes[-2] if len(closes) >= 2 else None
-        prev5 = closes[-6] if len(closes) >= 6 else None
-        prev20 = closes[-21] if len(closes) >= 21 else None
-        out["pct_1d"] = round((last - prev1) / prev1 * 100, 3) if prev1 else None
-        out["pct_5d"] = round((last - prev5) / prev5 * 100, 3) if prev5 else None
-        out["pct_20d"] = round((last - prev20) / prev20 * 100, 3) if prev20 else None
-        out["direction"] = _to_direction(out["pct_1d"])
-        out["status"] = "ok"
-        return out
+        c_now = closes[-1]
+        c_prev = closes[-2]
+        c_5 = closes[-5] if len(closes) >= 5 else closes[0]
+        c_20 = closes[-20] if len(closes) >= 20 else closes[0]
+        
+        out.update({
+            "pct_1d": round((c_now / c_prev - 1) * 100, 2) if c_prev else 0,
+            "pct_5d": round((c_now / c_5 - 1) * 100, 2) if c_5 else 0,
+            "pct_20d": round((c_now / c_20 - 1) * 100, 2) if c_20 else 0,
+            "direction": _to_direction(c_now - c_prev),
+            "status": "ok"
+        })
     except Exception as e:
-        out["status"] = "missing"
+        logger.warning(f"Index trend logic failed for {symbol}: {e}")
         out["error"] = str(e)
-        return out
+    return out
 
 
 def _trend_3d(values: List[Optional[float]]) -> str:
@@ -310,21 +304,21 @@ def generate_market_facts(fact_date: Optional[str] = None) -> Dict[str, Any]:
         # Parallel Fetching
         from concurrent.futures import ThreadPoolExecutor
         with ThreadPoolExecutor(max_workers=6) as executor:
-            future_spot = executor.submit(_fetch_a_spot)
+            future_turnover = executor.submit(_fetch_total_turnover_stable)
+            future_breadth = executor.submit(_fetch_breadth_stable)
             future_limit = executor.submit(_extract_limit_stats, fact_date)
             future_sh = executor.submit(_extract_index_trend, "sh000001")
             future_sz = executor.submit(_extract_index_trend, "sz399001")
             future_cyb = executor.submit(_extract_index_trend, "sz399006")
             future_flow = executor.submit(provider.get_market_flow_context)
 
-            spot_df, _spot_meta = future_spot.result()
+            turnover_now, turnover_meta = future_turnover.result()
+            adv, dec, breadth_meta = future_breadth.result()
             limit_stats, limit_meta = future_limit.result()
             idx_sh = future_sh.result()
             idx_sz = future_sz.result()
             idx_cyb = future_cyb.result()
             flow_data = future_flow.result()
-
-        turnover_now, turnover_meta = _extract_turnover_from_spot(spot_df)
         turnover_series = [v for v in prev_turnovers if v is not None]
         if turnover_now is not None:
             turnover_series = turnover_series + [turnover_now]
@@ -341,7 +335,6 @@ def generate_market_facts(fact_date: Optional[str] = None) -> Dict[str, Any]:
         else:
             vol_type = "flat"
 
-        adv, dec, breadth_meta = _extract_breadth_from_spot(spot_df)
         breadth_ratio = None
         if adv is not None and dec is not None and (adv + dec) > 0:
             breadth_ratio = adv / (adv + dec)
@@ -408,18 +401,18 @@ def generate_market_facts(fact_date: Optional[str] = None) -> Dict[str, Any]:
             "turnover": {
                 "status": "ok" if turnover_now is not None else "missing",
                 "source": turnover_meta.get("source"),
-                "total_amount_yi": round(turnover_now, 2) if turnover_now is not None else None,
-                "ma5": round(ma5, 2) if ma5 is not None else None,
-                "ma20": round(ma20, 2) if ma20 is not None else None,
-                "ratio_5d": round(ratio5, 3) if ratio5 is not None else None,
-                "ratio_20d": round(ratio20, 3) if ratio20 is not None else None,
+                "total_amount_yi": round(float(turnover_now), 2) if turnover_now is not None else None,
+                "ma5": round(float(ma5), 2) if ma5 is not None else None,
+                "ma20": round(float(ma20), 2) if ma20 is not None else None,
+                "ratio_5d": round(float(ratio5), 3) if ratio5 is not None else None,
+                "ratio_20d": round(float(ratio20), 3) if ratio20 is not None else None,
             },
             "breadth": {
                 "status": "ok" if breadth_ratio is not None else "missing",
                 "source": breadth_meta.get("source"),
                 "advancers": adv,
                 "decliners": dec,
-                "ratio": round(breadth_ratio, 3) if breadth_ratio is not None else None,
+                "ratio": round(float(breadth_ratio), 3) if breadth_ratio is not None else None,
                 "trend_3d": breadth_trend,
             },
             "limit_stats": {
@@ -554,10 +547,20 @@ def get_or_generate_market_facts(fact_date: str) -> Dict[str, Any]:
         logger.warning(f"generate_market_facts failed for {fact_date}, trying historical fallback: {e}")
         fallback = get_latest_market_facts_on_or_before(fact_date)
         if fallback and fallback.get("facts"):
-            quality = dict(fallback.get("quality") or {})
-            flags = list(quality.get("flags") or [])
-            flags.append("stale_fallback_used")
-            quality["flags"] = sorted(set(flags))
+            quality = fallback.get("quality")
+            if not isinstance(quality, dict):
+                quality = {}
+            else:
+                quality = dict(quality)
+            
+            flags_list = quality.get("flags")
+            if not isinstance(flags_list, list):
+                flags_list = []
+            else:
+                flags_list = list(flags_list)
+                
+            flags_list.append("stale_fallback_used")
+            quality["flags"] = sorted(set(flags_list))
             quality["gate_pass"] = False
             quality["fallback_fact_date"] = fallback.get("fact_date")
             fallback["quality"] = quality
