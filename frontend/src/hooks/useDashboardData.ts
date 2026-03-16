@@ -12,7 +12,7 @@ const TRADING_REFRESH_INTERVAL = 10 * 60 * 1000;  // 10分钟
 const DEFAULT_REFRESH_INTERVAL = 20 * 60 * 1000;  // 20分钟
 const CACHE_KEY = 'stockwise_dashboard_cache_v1';
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24小时过期
-const RESUME_REFRESH_THRESHOLD = 5 * 60 * 1000; // iOS PWA 回前台后 5min 以上即尝试刷新
+const RESUME_REFRESH_THRESHOLD = 1 * 60 * 1000; // iOS PWA 回前台后 1min 以上即尝试刷新
 
 function getRefreshInterval(): number {
     const scene = getMarketScene();
