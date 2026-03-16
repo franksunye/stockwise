@@ -521,7 +521,9 @@ def get_latest_market_facts_on_or_before(fact_date: str) -> Optional[Dict[str, A
 
 def get_or_generate_market_facts(fact_date: str) -> Dict[str, Any]:
     existing = get_market_facts(fact_date)
-    if existing and existing.get("facts") and existing.get("quality"):
+    # Only use existing if it has data AND passed the quality gate.
+    # This allows re-triggering jobs to attempt fresh fetching if earlier attempts failed.
+    if existing and existing.get("facts") and existing.get("quality") and existing.get("gate_pass"):
         return existing
     try:
         return generate_market_facts(fact_date)
