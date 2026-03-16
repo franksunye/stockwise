@@ -36,6 +36,30 @@ function closeDb(db: unknown): void {
     }
 }
 
+function formatPriceUpdateTag(priceDate: unknown, todayDate: string): string {
+    if (!priceDate) return '--';
+
+    const normalizedPriceDate = String(priceDate);
+    const shortDate = normalizedPriceDate.substring(5);
+
+    // The stock pool surface shows end-of-day data rather than live ticks.
+    // Be explicit when we're still showing the previous completed trading day.
+    if (normalizedPriceDate < todayDate) {
+        return `${shortDate} 收盘`;
+    }
+
+    return `${shortDate} 已更新`;
+}
+
+function applyNoStoreHeaders(response: NextResponse): NextResponse {
+    response.headers.set('Cache-Control', 'no-cache, no-store, max-age=0, must-revalidate');
+    response.headers.set('Pragma', 'no-cache');
+    response.headers.set('Expires', '0');
+    response.headers.set('X-Accel-Buffering', 'no');
+    response.headers.set('Vary', 'Cookie');
+    return response;
+}
+
 // Batch payload carries three decision lenses in one row:
 // - overlay lens: signal / layer1_status / decision_semantic
 // - base lens: canonical_signal / layer1_signal
@@ -64,7 +88,10 @@ export async function GET(request: Request) {
     try {
         debugStage = 'require_user_session';
         const auth = requireUserSession(request);
-        if ('response' in auth) return auth.response;
+        if ('response' in auth) {
+            auth.response.headers.set('X-Stockwise-Request-Id', requestId);
+            return applyNoStoreHeaders(auth.response);
+        }
         const userId = auth.userId;
         debugStage = 'get_user_tier';
         const userTier = await getUserTier(userId);
@@ -237,7 +264,6 @@ export async function GET(request: Request) {
         }
 
         const hkTime = new Date(new Date().getTime() + (new Date().getTimezoneOffset() * 60000) + (3600000 * 8));
-        const lastUpdateTime = `${hkTime.getHours().toString().padStart(2, '0')}:${(Math.floor(hkTime.getMinutes() / 10) * 10).toString().padStart(2, '0')}`;
         const hkDateStr = hkTime.toISOString().split('T')[0];
 
         // Calculate the threshold string exactly once to avoid redundant allocations inside the loop
@@ -254,9 +280,9 @@ export async function GET(request: Request) {
                 price: price || null,
                 prediction: validPreds[0] || null,
                 previousPrediction: validPreds[1] || null,
-                history,
+                history: rawHistory,
                 shortMetrics: shortMetricsMap.get(sym) || null,
-                lastUpdated: (price?.date && String(price.date) < hkDateStr) ? `${String(price.date).substring(5)} ${lastUpdateTime}` : lastUpdateTime
+                lastUpdated: formatPriceUpdateTag(price?.date, hkDateStr)
             };
         });
 
@@ -268,10 +294,8 @@ export async function GET(request: Request) {
             queryTime: Date.now() - startTime,
             requestId
         });
-        response.headers.set('Cache-Control', 'private, no-store, max-age=0, must-revalidate');
-        response.headers.set('Vary', 'Cookie');
         response.headers.set('X-Stockwise-Request-Id', requestId);
-        return response;
+        return applyNoStoreHeaders(response);
     } catch (error) {
         const debugMessage = error instanceof Error ? error.message : String(error);
         console.error(`[Batch][${requestId}][${debugStage}]`, error);
@@ -281,9 +305,7 @@ export async function GET(request: Request) {
             debugMessage,
             requestId
         }, { status: 500 });
-        response.headers.set('Cache-Control', 'private, no-store, max-age=0, must-revalidate');
-        response.headers.set('Vary', 'Cookie');
         response.headers.set('X-Stockwise-Request-Id', requestId);
-        return response;
+        return applyNoStoreHeaders(response);
     }
 }

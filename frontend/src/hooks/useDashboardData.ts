@@ -48,6 +48,16 @@ function formatRefreshError(error: unknown, sessionRecoveryAttempted: boolean): 
     return '未知错误';
 }
 
+function buildBatchUrl(symbols: string): string {
+    const params = new URLSearchParams({
+        symbols,
+        historyLimit: '5',
+        _t: String(Date.now())
+    });
+
+    return `/api/stock/batch?${params.toString()}`;
+}
+
 export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: boolean) {
     // Watchlist passed from props to avoid redundant hook calls in unified context
 
@@ -185,8 +195,7 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
 
             // Step 3: Fetch Batch Stock Data (Stage 2)
             const symbols = watchlist.map(w => w.symbol).join(',');
-            // 如果是非静默刷新（手动点击或初始化），增加一个 cache-buster 扰动缓存
-            const url = `/api/stock/batch?symbols=${symbols}&historyLimit=5${!silent ? `&t=${Date.now()}` : ''}`;
+            const url = buildBatchUrl(symbols);
 
             const fetchOptions: RequestInit = {
                 signal: controller.signal,
@@ -202,7 +211,7 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
             let batchRes = await fetch(url, fetchOptions);
             if (batchRes.status === 401) {
                 await getCurrentUser({ forceSessionSync: true });
-                batchRes = await fetch(url, fetchOptions);
+                batchRes = await fetch(buildBatchUrl(symbols), fetchOptions);
             }
             clearTimeout(timeoutId);
 
