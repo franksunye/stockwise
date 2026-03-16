@@ -108,14 +108,37 @@ def _load_recent_facts(cur, fact_date: str, limit: int = 25) -> List[Dict[str, A
 
 
 def _fetch_a_spot() -> Tuple[Optional[pd.DataFrame], Dict[str, Any]]:
+    """Fetch all A-share spot prices with fallback redundancy."""
+    # 1. Primary: Eastmoney (Better detail, higher reliability usually)
     try:
         df = ak.stock_zh_a_spot_em()
-        if df is None or df.empty:
-            return None, {"status": "missing", "source": "akshare:stock_zh_a_spot_em"}
-        return df, {"status": "ok", "source": "akshare:stock_zh_a_spot_em", "sample_size": int(len(df))}
+        if df is not None and not df.empty:
+            return df, {"status": "ok", "source": "akshare:stock_zh_a_spot_em", "sample_size": int(len(df))}
     except Exception as e:
-        logger.warning(f"market facts spot fetch failed: {e}")
-        return None, {"status": "missing", "source": "akshare:stock_zh_a_spot_em", "error": str(e)}
+        logger.warning(f"⚠️ Primary spot fetch (EM) failed: {e}. Trying Sina fallback...")
+
+    # 2. Fallback: Sina (Reliable secondary source)
+    try:
+        df_sina = ak.stock_zh_a_spot()
+        if df_sina is not None and not df_sina.empty:
+            # Normalize schema to match EM's expected columns
+            rename_map = {
+                "code": "代码",
+                "name": "名称",
+                "trade": "最新价",
+                "changepercent": "涨跌幅",
+                "amount": "成交额",
+                "turnoverratio": "换手率"
+            }
+            df_norm = df_sina.rename(columns=rename_map)
+            # Spot check: ensure '成交额' is present for turnover calculation
+            if "成交额" in df_norm.columns:
+                logger.info(f"✅ Sina Fallback succeeded (Count: {len(df_norm)})")
+                return df_norm, {"status": "ok", "source": "akshare:stock_zh_a_spot", "sample_size": int(len(df_norm))}
+    except Exception as e:
+        logger.error(f"❌ Fallback spot fetch (Sina) also failed: {e}")
+
+    return None, {"status": "missing", "error": "All spot sources (EM/Sina) failed"}
 
 
 def _extract_turnover_from_spot(df: Optional[pd.DataFrame]) -> Tuple[Optional[float], Dict[str, Any]]:
