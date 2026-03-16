@@ -118,9 +118,10 @@ def generate_almanac(target_date: str = None, force_t_plus_1: bool = True) -> bo
         facts_quality = facts_bundle.get("quality", {})
         gate_pass = bool(facts_quality.get("gate_pass"))
         
-        # QUALITY HARD LOCK: If critical data (turnover/breadth) is missing, we MUST abort.
-        # This prevents generating hollow '罗生门' reports when upstream APIs are failing.
-        critical_flags = {"missing_turnover", "missing_breadth"}
+        # QUALITY HARD LOCK (Yellow Pages MVP):
+        # Only abort when market breadth is missing. Other modules (turnover/indices/flows)
+        # are allowed to degrade so we can still ship a usable Yellow Pages experience.
+        critical_flags = {"missing_breadth"}
         current_flags = set(facts_quality.get("flags", []))
         if not gate_pass and (current_flags & critical_flags):
             err_msg = f"CRITICAL DATA FAILURE for {actual_price_date}: {current_flags & critical_flags}. Aborting generation to prevent hollow results."

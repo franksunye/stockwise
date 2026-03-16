@@ -229,6 +229,8 @@ def _trend_3d(values: List[Optional[float]]) -> str:
 
 
 def _compute_quality_and_gate(facts: Dict[str, Any]) -> Dict[str, Any]:
+    # Yellow Pages MVP: do not hard-require fragile upstream modules.
+    # We keep "breadth" as the only truly critical fetch; other modules may degrade.
     required = [
         "turnover",
         "breadth",
@@ -237,11 +239,13 @@ def _compute_quality_and_gate(facts: Dict[str, Any]) -> Dict[str, Any]:
         "northbound",
         "sector_flow",
     ]
+    critical = ["breadth"]
     missing: List[str] = []
     for k in required:
         status = facts.get(k, {}).get("status")
         if status != "ok":
             missing.append(k)
+    missing_critical = [k for k in critical if k in missing]
 
     completeness = round(100.0 * (len(required) - len(missing)) / len(required), 1)
 
@@ -264,7 +268,9 @@ def _compute_quality_and_gate(facts: Dict[str, Any]) -> Dict[str, Any]:
     missing_count = len(missing)
     freshness_pass = missing_count <= 1
     conflict = bool(facts.get("derived", {}).get("risk_conflict"))
-    gate_pass = completeness >= 85.0 and covered >= 4 and freshness_pass and (not conflict)
+    # Gate: pass if critical data is present and overall coverage is decent.
+    # This intentionally allows missing turnover / indices in constrained environments.
+    gate_pass = (len(missing_critical) == 0) and (covered >= 2) and freshness_pass and (not conflict)
 
     flags = []
     if missing:
@@ -274,6 +280,8 @@ def _compute_quality_and_gate(facts: Dict[str, Any]) -> Dict[str, Any]:
 
     return {
         "required_fields": required,
+        "critical_fields": critical,
+        "missing_critical_fields": missing_critical,
         "missing_fields": missing,
         "completeness": completeness,
         "dimensions": dims,

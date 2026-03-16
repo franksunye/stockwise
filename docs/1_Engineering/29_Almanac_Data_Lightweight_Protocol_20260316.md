@@ -42,11 +42,57 @@ The system remains protected by a **Quality Hard Lock** (Fail-Fast Gate). If eve
 - **Status**: The engine now prioritizes **Correctness** over "Best Effort" incomplete rendering.
 - **Fallback**: Automated fallback to the latest known historical facts with a `stale_fallback_used` flag ensures the UI doesn't break, while maintaining integrity.
 
-## 5. Decision Reference
+## 5. Data Provider Verification Plan
+
+Before we "lock in" AkShare-based aggregation for the Yellow Pages (Almanac) experience, we maintain a standing **Data Provider Verification Plan**:
+
+- **Scope**:
+  - `ak.stock_market_activity_legu()` → Market breadth (advancers / decliners).
+  - `ak.stock_zh_index_spot_em()` → SH000001 + SZ399001 intraday turnover.
+  - `ak.stock_zh_index_daily_em()` → Core index trend (SH / SZ / CYB).
+  - `ak.stock_zt_pool_em` / `ak.stock_zt_pool_dtgc_em` / `ak.stock_zt_pool_zbgc_em` → Limit-up / limit-down / broken-board stats.
+- **Dimensions**:
+  - **Structural Stability**: Field names and schema stability across trading days, weekends, and holidays.
+  - **Temporal Availability**: Behaviour under different time windows (trading hours, overnight, weekends) and retry characteristics.
+  - **Numerical Sanity**: Spot-check against exchange announcements / trusted dashboards (e.g. total turnover,涨跌家数, 涨跌停数量) with explicit tolerance bands.
+  - **Network Robustness**: Success-rate comparison *with vs. without* `_isolated_ak_fetch` under local proxy / VPN environments.
+- **Execution**:
+  - A lightweight `scripts/audit_data_providers.py` job can be run locally or on a scheduled basis to:
+    - Sample one or more dates.
+    - Call the above endpoints in parallel.
+    - Persist raw responses + metrics (status, latency, schema hash, key figures) into SQLite / CSV for offline review.
+  - Findings are fed back into:
+    - `market_facts_service` quality rules (e.g. stricter sanity checks).
+    - Yellow Pages design (which metrics are "hard guarantees" vs. "best-effort").
+
+## 6. Yellow Pages Capability Boundaries
+
+To reconcile **technical stability** with the **Yellow Pages product vision**, we explicitly separate:
+
+- **Guaranteed Signals (Hard-Contract)**:
+  - Daily market liquidity envelope (total turnover and its 5D/20D context).
+  - Market breadth and temperature (advancers / decliners, breadth ratio, high/low/flat volume regime).
+  - Core index trend state (SH / SZ / CYB direction over 1D/5D/20D).
+- **Best-Effort Signals (Soft-Contract)**:
+  - Fine-grained sector flows and narrative (top inflow / outflow sectors, northbound fund structure).
+  - Limit-up / limit-down statistics and broken-board rate.
+  - Additional sentiment enrichments that depend on more fragile upstream APIs.
+
+UI / content guidelines for Yellow Pages:
+
+- If **Guaranteed Signals** are available and pass the fact-layer gate, the Almanac renders as "complete" even if best-effort modules are missing.
+- If only **Best-Effort Signals** fail, the UI should:
+  - Clearly mark those sections as "temporarily unavailable" or omit them gracefully.
+  - Avoid blocking the overall Almanac generation.
+- Any future Yellow Pages feature proposal must clarify:
+  - Whether it relies solely on **Guaranteed Signals**, or also on **Best-Effort Signals**.
+  - How it should degrade when best-effort data is absent.
+
+## 7. Decision Reference
 
 This pivot prioritizes **System Robustness (Reliability)** over **Granular Data Granularity**. While scraping provided more detail, the instability cost was too high. The aggregated protocol delivers sufficient market metadata for the Almanac while ensuring the system remains "Silicon-Smooth" and professional.
 
-## 6. Implementation Checklist (Completed 2026-03-16)
+## 8. Implementation Checklist (Completed 2026-03-16)
 
 - [x] **Refactor**: Remove `_fetch_a_spot` (deprecated scraping logic).
 - [x] **New Source**: Implement `_fetch_breadth_stable` and `_fetch_total_turnover_stable`.

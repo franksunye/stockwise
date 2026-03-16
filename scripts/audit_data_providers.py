@@ -1,65 +1,151 @@
+import os
+import time
+from dataclasses import dataclass, asdict
+from typing import Any, Callable, Dict, List, Optional, Tuple
+
 import akshare as ak
 import pandas as pd
-import time
-import os
-import requests
 
-def audit_providers():
-    providers = [
-        ("Eastmoney (EM)", ak.stock_zh_a_spot_em),
-        ("Sina (Sina)", ak.stock_zh_a_spot)
+
+@dataclass
+class EndpointResult:
+    name: str
+    func: str
+    mode: str  # "normal" | "isolated"
+    ok: bool
+    empty: bool
+    error: Optional[str]
+    latency_sec: float
+    row_count: Optional[int]
+    columns: List[str]
+
+
+def _timed_call(func: Callable[..., Any], **kwargs) -> Tuple[Any, float, Optional[str]]:
+    start = time.time()
+    try:
+        res = func(**kwargs)
+        return res, time.time() - start, None
+    except Exception as e:  # noqa: BLE001
+        return None, time.time() - start, f"{type(e).__name__}: {str(e)[:200]}"
+
+
+def _isolated_env_call(func: Callable[..., Any], **kwargs) -> Tuple[Any, float, Optional[str]]:
+    proxy_keys = [
+        # lowercase (common in unix tooling)
+        "http_proxy",
+        "https_proxy",
+        "all_proxy",
+        "no_proxy",
+        # uppercase (requests/urllib3 will also read these)
+        "HTTP_PROXY",
+        "HTTPS_PROXY",
+        "ALL_PROXY",
+        "NO_PROXY",
+        # socks variants (some setups use these)
+        "socks_proxy",
+        "socks5_proxy",
+        "SOCKS_PROXY",
+        "SOCKS5_PROXY",
     ]
-    
-    print("🔬 Systematic Data Provider Audit")
-    print("-" * 40)
-    
-    # Check current network environment
-    proxies = {k: v for k, v in os.environ.items() if 'proxy' in k.lower()}
+    orig = {k: os.environ.get(k) for k in proxy_keys}
+    try:
+        for k in proxy_keys:
+            os.environ.pop(k, None)
+        # Force direct connections for all hosts
+        os.environ["NO_PROXY"] = "*"
+        os.environ["no_proxy"] = "*"
+        return _timed_call(func, **kwargs)
+    finally:
+        for k, v in orig.items():
+            if v is None:
+                os.environ.pop(k, None)
+            else:
+                os.environ[k] = v
+
+
+def _summarize_df(df: Any) -> Tuple[bool, bool, Optional[int], List[str]]:
+    if df is None:
+        return False, True, None, []
+    if isinstance(df, pd.DataFrame):
+        empty = df.empty
+        return True, empty, int(len(df)), list(map(str, df.columns))
+    # Unknown type – treat as non-empty object
+    return True, False, None, []
+
+
+def audit_providers() -> List[EndpointResult]:
+    """
+    Local PoC to audit key AkShare endpoints used by the Almanac/Yellow Pages.
+
+    It does NOT write to DB; just prints a concise table and returns structured results
+    so we can later wire it into more formal logging if needed.
+    """
+    endpoints: List[Tuple[str, Callable[..., Any], Dict[str, Any]]] = [
+        ("breadth_legu", ak.stock_market_activity_legu, {}),
+        ("index_spot_em", ak.stock_zh_index_spot_em, {}),
+        ("index_daily_SH", ak.stock_zh_index_daily_em, {"symbol": "sh000001"}),
+        ("index_daily_SZ", ak.stock_zh_index_daily_em, {"symbol": "sz399001"}),
+        ("index_daily_CYB", ak.stock_zh_index_daily_em, {"symbol": "sz399006"}),
+        ("zt_pool_up", ak.stock_zt_pool_em, {"date": time.strftime("%Y%m%d")}),
+        ("zt_pool_down", ak.stock_zt_pool_dtgc_em, {"date": time.strftime("%Y%m%d")}),
+        ("zt_pool_broken", ak.stock_zt_pool_zbgc_em, {"date": time.strftime("%Y%m%d")}),
+    ]
+
+    print("🔬 AkShare Data Provider PoC (Yellow Pages Core)")
+    print("-" * 72)
+    proxies = {k: v for k, v in os.environ.items() if "proxy" in k.lower()}
     if proxies:
-        print(f"⚠️ Proxy detected: {proxies}")
-    
-    for name, func in providers:
-        print(f"\n🔍 Auditing {name}...")
-        
-        # Test 1: With current environment
-        print("   -> Testing with current environment (Direct)...")
-        start_time = time.time()
-        try:
-            df = func()
-            if df is not None and not df.empty:
-                print(f"   ✅ Success: Found {len(df)} records in {time.time()-start_time:.2f}s")
-            else:
-                print(f"   ❌ Failed: Empty result")
-        except Exception as e:
-            print(f"   ❌ Error: {type(e).__name__} - {str(e)[:100]}")
-            
-        # Test 2: Environmental Isolation (Clear proxies)
-        print("   -> Testing with environment isolation (No Proxy)...")
-        start_isolated = time.time()
-        try:
-            # Save original
-            orig_http = os.environ.get('http_proxy')
-            orig_https = os.environ.get('https_proxy')
-            orig_all = os.environ.get('all_proxy')
-            
-            # Clear
-            if 'http_proxy' in os.environ: del os.environ['http_proxy']
-            if 'https_proxy' in os.environ: del os.environ['https_proxy']
-            if 'all_proxy' in os.environ: del os.environ['all_proxy']
-            
-            df_isolated = func()
-            
-            # Restore
-            if orig_http: os.environ['http_proxy'] = orig_http
-            if orig_https: os.environ['https_proxy'] = orig_https
-            if orig_all: os.environ['all_proxy'] = orig_all
-            
-            if df_isolated is not None and not df_isolated.empty:
-                print(f"   ✅ Success: Found {len(df_isolated)} records in {time.time()-start_isolated:.2f}s")
-            else:
-                print(f"   ❌ Failed: Empty result")
-        except Exception as e_iso:
-            print(f"   ❌ Error: {type(e_iso).__name__} - {str(e_iso)[:100]}")
+        print(f"🌐 Current proxy env: {proxies}")
+    else:
+        print("🌐 No proxy detected in environment.")
+
+    all_results: List[EndpointResult] = []
+
+    for name, func, kwargs in endpoints:
+        print(f"\n=== {name} ===")
+
+        # normal mode
+        res, latency, err = _timed_call(func, **kwargs)
+        ok, empty, rows, cols = _summarize_df(res)
+        r_normal = EndpointResult(
+            name=name,
+            func=func.__name__,
+            mode="normal",
+            ok=ok and err is None and not empty,
+            empty=empty,
+            error=err,
+            latency_sec=round(latency, 2),
+            row_count=rows,
+            columns=cols,
+        )
+        all_results.append(r_normal)
+        status = "✅" if r_normal.ok else "❌"
+        print(f"{status} normal  | {r_normal.latency_sec:5.2f}s | rows={rows} | empty={empty} | err={err or '-'}")
+
+        # isolated mode
+        res_i, latency_i, err_i = _isolated_env_call(func, **kwargs)
+        ok_i, empty_i, rows_i, cols_i = _summarize_df(res_i)
+        r_iso = EndpointResult(
+            name=name,
+            func=func.__name__,
+            mode="isolated",
+            ok=ok_i and err_i is None and not empty_i,
+            empty=empty_i,
+            error=err_i,
+            latency_sec=round(latency_i, 2),
+            row_count=rows_i,
+            columns=cols_i,
+        )
+        all_results.append(r_iso)
+        status_i = "✅" if r_iso.ok else "❌"
+        print(f"{status_i} isolated | {r_iso.latency_sec:5.2f}s | rows={rows_i} | empty={empty_i} | err={err_i or '-'}")
+
+    print("\nSummary (JSON-like):")
+    for r in all_results:
+        print(asdict(r))
+
+    return all_results
+
 
 if __name__ == "__main__":
     audit_providers()
