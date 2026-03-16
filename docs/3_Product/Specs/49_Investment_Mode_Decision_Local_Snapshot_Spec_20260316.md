@@ -13,11 +13,13 @@
 - `46_Frontend_SWR_Architecture_Upgrade.md`
 - `23_PWA_Dashboard_Refresh_Strategy_Regression_20260313.md`
 - `25_Onboarding_First_Load_Recovery_Plan_20260314.md`
+- `30_Stock_Data_Layers_And_API_Boundaries_20260316.md`
 
 本说明与它们的关系：
 
 - 延续「持久化快照层 + SWR 运行时层」的分层原则；
 - 不推动 Dashboard 主链路再次大改，只在 **投研决议这一块局部数据面** 增加快照。
+- 与价格刷新职责拆分（`/api/stock/batch` vs `/api/stock/prices`）解耦：本方案只关注 `/api/predictions` 提供的投研决议数据，价格层刷新由独立的轻量 API 负责，详见 `30_Stock_Data_Layers_And_API_Boundaries_20260316.md`。
 
 ---
 

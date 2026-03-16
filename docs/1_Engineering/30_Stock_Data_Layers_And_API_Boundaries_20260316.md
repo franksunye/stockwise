@@ -211,3 +211,21 @@
 
 这为后续实施方案 A（拆出独立价格 API、收紧 batch 角色）提供了统一的设计基线。我们应在新功能与重构中逐步对齐到本约束。 
 
+---
+
+## 8. Implementation Status (2026-03-16)
+
+截至 2026-03-16，本文件描述的拆分方案已部分落地：
+
+- **价格视图 API 已实现**：
+  - `GET /api/stock/prices?symbols=...`
+    - 返回：`symbol / date / close / change_percent / lastUpdated` 等轻量字段；
+    - 用途：供 Dashboard / 自选池等前端以 10 分钟级频率刷新价格快照。
+
+- **Dashboard 已完成首轮前端迁移**：
+  - 决策层（预测 / 战术 / 决议）：继续通过 `GET /api/stock/batch` 拉取，刷新频率降低为按需（首屏、回前台、显式刷新、低频定时）。
+  - 价格层：通过 `GET /api/stock/prices` 按 watchlist 的 symbol 列表每 10 分钟刷新一次，仅更新 `price.close / price.change_percent / lastUpdated`。
+
+- **后续迁移范围**：
+  - 其他需要盘中价格刷新的前端页面（如二级详情页）应逐步改用 `/api/stock/prices`，避免新增依赖 `/api/stock/batch` 做高频轮询。
+
