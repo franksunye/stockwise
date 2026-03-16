@@ -7,9 +7,13 @@ import { getRule } from '@/lib/storage';
 import { getMarketScene } from '@/lib/date-utils';
 import { WatchlistItem } from './useWatchlist';
 
-// 动态刷新间隔：交易时段5分钟，非交易时段10分钟
-const TRADING_REFRESH_INTERVAL = 10 * 60 * 1000;  // 10分钟
-const DEFAULT_REFRESH_INTERVAL = 20 * 60 * 1000;  // 20分钟
+// 动态刷新间隔（决策层）：交易时段 60 分钟，非交易时段 120 分钟
+// 决策 / 战术数据按日级更新即可，无需高频轮询。
+const TRADING_REFRESH_INTERVAL = 60 * 60 * 1000;  // 60分钟
+const DEFAULT_REFRESH_INTERVAL = 120 * 60 * 1000; // 120分钟
+
+// 价格层刷新间隔：盘中 10 分钟
+const PRICE_REFRESH_INTERVAL = 10 * 60 * 1000;
 const CACHE_KEY = 'stockwise_dashboard_cache_v1';
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24小时过期
 const RESUME_REFRESH_THRESHOLD = 1 * 60 * 1000; // iOS PWA 回前台后 1min 以上即尝试刷新
@@ -88,6 +92,7 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
     }, [almanacs]);
 
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const priceIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     // 1. 初始化：尝试从本地缓存读取，实现【秒开】
     useEffect(() => {
@@ -315,6 +320,73 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
         }
     }, [watchlist, loadingWatchlist]); // Important: depends on watchlist
 
+    interface PriceSnapshot {
+        symbol: string;
+        date: string | null;
+        close: number | null;
+        change_percent: number | null;
+        lastUpdated: string;
+    }
+
+    const refreshPrices = useCallback(async (symbols: string[]): Promise<void> => {
+        if (symbols.length === 0) return;
+        try {
+            const params = new URLSearchParams({ symbols: symbols.join(',') });
+            const res = await fetch(`/api/stock/prices?${params.toString()}`, {
+                cache: 'no-store',
+                headers: { 'Cache-Control': 'no-cache' }
+            });
+            if (!res.ok) return;
+            const data = await res.json() as { prices?: PriceSnapshot[] };
+            if (!data.prices || !Array.isArray(data.prices)) return;
+
+            const map = new Map<string, PriceSnapshot>();
+            for (const p of data.prices) {
+                if (p && typeof p.symbol === 'string') {
+                    map.set(p.symbol, p);
+                }
+            }
+
+            if (map.size === 0) return;
+
+            setStocks(prev => prev.map(s => {
+                const p = map.get(s.symbol);
+                if (!p) return s;
+
+                const existingPrice = s.price;
+
+                // 仅在已有价格快照的基础上更新 close / change_percent，避免构造不完整的 DailyPrice。
+                if (!existingPrice) {
+                    return {
+                        ...s,
+                        lastUpdated: p.lastUpdated || s.lastUpdated
+                    };
+                }
+
+                const close = typeof p.close === 'number'
+                    ? p.close
+                    : existingPrice.close;
+                const changePercent = typeof p.change_percent === 'number'
+                    ? p.change_percent
+                    : (existingPrice as unknown as { change_percent?: number }).change_percent ?? existingPrice.change_percent;
+
+                const nextPrice = {
+                    ...existingPrice,
+                    close,
+                    change_percent: changePercent
+                };
+
+                return {
+                    ...s,
+                    price: nextPrice,
+                    lastUpdated: p.lastUpdated || s.lastUpdated
+                };
+            }));
+        } catch (e) {
+            console.warn('[Dashboard] Price refresh failed:', e);
+        }
+    }, []);
+
     // Watchlist 变更时，强制触发一次刷新 (Ignore Debounce)
     useEffect(() => {
         if (watchlist.length > 0) {
@@ -352,7 +424,7 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
         };
     }, [loadAllData]);
 
-    // 定时刷新
+    // 决策层定时刷新（低频）
     useEffect(() => {
         loadAllData();
         intervalRef.current = setInterval(() => loadAllData(true), getRefreshInterval());
@@ -360,6 +432,34 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
             if (intervalRef.current) clearInterval(intervalRef.current);
         };
     }, [loadAllData]);
+
+    // 价格层定时刷新（高频）
+    useEffect(() => {
+        const symbols = watchlist.map(w => w.symbol);
+        if (symbols.length === 0) {
+            if (priceIntervalRef.current) {
+                clearInterval(priceIntervalRef.current);
+                priceIntervalRef.current = null;
+            }
+            return;
+        }
+
+        // 先做一次价格刷新，随后进入周期刷新
+        refreshPrices(symbols);
+        if (priceIntervalRef.current) {
+            clearInterval(priceIntervalRef.current);
+        }
+        priceIntervalRef.current = setInterval(() => {
+            refreshPrices(symbols);
+        }, PRICE_REFRESH_INTERVAL);
+
+        return () => {
+            if (priceIntervalRef.current) {
+                clearInterval(priceIntervalRef.current);
+                priceIntervalRef.current = null;
+            }
+        };
+    }, [watchlist, refreshPrices]);
 
     // 手动刷新函数
     const manualRefresh = useCallback((): Promise<boolean> => {
