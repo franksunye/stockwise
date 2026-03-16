@@ -6,6 +6,7 @@ import os
 import argparse
 import uuid
 from datetime import datetime, timedelta
+import time
 
 # --- Time-awareness constants ---
 # Nasdaq data freshness window (Beijing Time):
@@ -109,7 +110,10 @@ def generate_almanac(target_date: str = None, force_t_plus_1: bool = True) -> bo
                 target_date = actual_price_date
         
         logger.info(f"🚀 Generating Almanac for Target Date: {target_date} (Using data context from {actual_price_date})")
+        t_start = time.time()
         facts_bundle = get_or_generate_market_facts(actual_price_date)
+        t_facts = time.time()
+        logger.info(f"⏱️ Stage 1: Market Facts fetched in {t_facts - t_start:.2f}s")
         facts = facts_bundle.get("facts", {})
         facts_quality = facts_bundle.get("quality", {})
         gate_pass = bool(facts_quality.get("gate_pass"))
@@ -168,9 +172,11 @@ def generate_almanac(target_date: str = None, force_t_plus_1: bool = True) -> bo
             logger.info(f"✅ Nasdaq gating: Current time {now_beijing.strftime('%H:%M')} within fresh window [{NASDAQ_FRESH_START_HOUR}:00–{NASDAQ_FRESH_END_HOUR}:00) → Nasdaq data is FRESH")
         
         # 1. Macro Context (Global & Domestic)
+        t_macro_start = time.time()
         macro_data = provider.get_macro_context(skip_nasdaq=not is_nasdaq_fresh)
+        t_macro_end = time.time()
         nasdaq_change = macro_data.get("nasdaq", "N/A")
-        logger.info(f"📊 Global Context: Nasdaq Change = {nasdaq_change} (fresh={is_nasdaq_fresh})")
+        logger.info(f"📊 Global Context: Nasdaq Change = {nasdaq_change} (fresh={is_nasdaq_fresh}) [fetched in {t_macro_end - t_macro_start:.2f}s]")
         
         # 2. Sector Flows (Money Flow) from Fact Layer
         sector_flow = facts.get("sector_flow", {})
@@ -491,6 +497,9 @@ def generate_almanac(target_date: str = None, force_t_plus_1: bool = True) -> bo
                 json.dumps(trace, ensure_ascii=False)
             ))
             logger.info(f"✅ Almanac Inserted for {target_date} -> {mood_tag} (Trace saved)")
+        
+        t_end = time.time()
+        logger.info(f"✨ Almanac generation completed for {target_date} in total {t_end - t_start:.2f}s")
         
         conn.commit()
         return True

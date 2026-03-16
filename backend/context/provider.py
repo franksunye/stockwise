@@ -472,36 +472,44 @@ class MarketContextProvider:
 
         logger.info("📡 Fetching Macro Data from AkShare...")
         try:
-            # 1. GDP (Quarterly)
+            tasks = {
+                "gdp": (ak.macro_china_gdp, {}),
+                "cpi": (ak.macro_china_cpi, {}),
+                "bond": (ak.bond_zh_us_rate, {}),
+            }
+            if not skip_nasdaq:
+                tasks["nasdaq"] = (ak.index_us_stock_sina, {"symbol": ".IXIC"})
+
+            futures = {}
+            executor = self._get_executor()
+            for key, (func, kwargs) in tasks.items():
+                futures[key] = executor.submit(self._safe_ak_fetch, func, **kwargs)
+
+            # 1. GDP
             gdp_val = "N/A"
             try:
-                # macro_china_gdp returns current quarter
-                df_gdp = self._safe_ak_fetch(ak.macro_china_gdp)
-                if not df_gdp.empty:
-                    # columns: 季度, 国内生产总值-绝对值, 国内生产总值-同比增长...
+                df_gdp = futures["gdp"].result()
+                if df_gdp is not None and not df_gdp.empty:
                     latest = df_gdp.iloc[0]
                     gdp_val = f"{latest['国内生产总值-同比增长']}% (Q{latest.get('季度', '')})"
             except Exception as e:
                 logger.warning(f"Macro GDP fetch failed: {e}")
 
-            # 2. CPI (Monthly)
+            # 2. CPI
             cpi_val = "N/A"
             try:
-                df_cpi = self._safe_ak_fetch(ak.macro_china_cpi)
-                if not df_cpi.empty:
-                    # columns: 月份, 全国-同比增长...
+                df_cpi = futures["cpi"].result()
+                if df_cpi is not None and not df_cpi.empty:
                     latest = df_cpi.iloc[0]
                     cpi_val = f"{latest['全国-同比增长']}% ({latest['月份']})"
             except Exception as e:
                 logger.warning(f"Macro CPI fetch failed: {e}")
 
-            # 3. 10Y Bond Yield (Daily)
+            # 3. 10Y Bond Yield
             bond_val = "N/A"
             try:
-                # Using bond_zh_us_rate for CN 10Y
-                df_bond = self._safe_ak_fetch(ak.bond_zh_us_rate)
-                if not df_bond.empty:
-                    # columns: 日期, 中国国债收益率2年, 中国国债收益率5年, 中国国债收益率10年...
+                df_bond = futures["bond"].result()
+                if df_bond is not None and not df_bond.empty:
                     v_key = '中国国债收益率10年'
                     if v_key in df_bond.columns:
                         latest = df_bond.iloc[0]
@@ -515,7 +523,7 @@ class MarketContextProvider:
             except Exception as e:
                 logger.warning(f"Macro Bond fetch failed: {e}")
 
-            # 4. Global Context - Nasdaq (Daily)
+            # 4. Global Context - Nasdaq
             nasdaq_pct = "N/A"
             nasdaq_as_of = None
             nasdaq_skipped = False
@@ -524,9 +532,8 @@ class MarketContextProvider:
                 nasdaq_skipped = True
             else:
                 try:
-                    # Using sina US stock index API
-                    df_nasdaq = self._safe_ak_fetch(ak.index_us_stock_sina, symbol='.IXIC')
-                    if not df_nasdaq.empty and len(df_nasdaq) >= 2:
+                    df_nasdaq = futures["nasdaq"].result()
+                    if df_nasdaq is not None and not df_nasdaq.empty and len(df_nasdaq) >= 2:
                         last = float(df_nasdaq.iloc[-1]['close'])
                         prev = float(df_nasdaq.iloc[-2]['close'])
                         change = (last - prev) / prev * 100
@@ -603,13 +610,20 @@ class MarketContextProvider:
         north_as_of = fetched_at.date().isoformat()
         sector_as_of = fetched_at.date().isoformat()
 
-        # 1. Northbound (Smart Money) - Breadth Signal
-        # Since 2024-08-19, HKEX no longer discloses real-time northbound net buy amounts.
-        # The '成交净买额' field permanently returns 0. However, the summary API still
-        # provides northbound win/loss stock counts, which serve as a useful breadth signal.
+        # 1. Parallel Fetch for Northbound and Primary/Fallback Sector Flow
+        executor = self._get_executor()
+        futures = {
+            "north": executor.submit(self._safe_ak_fetch, ak.stock_hsgt_fund_flow_summary_em),
+            "em": executor.submit(
+                self._safe_ak_fetch, ak.stock_sector_fund_flow_rank, indicator="今日", sector_type="行业资金流"
+            ),
+            "ths": executor.submit(self._safe_ak_fetch, ak.stock_fund_flow_industry, symbol="即时")
+        }
+
+        # 1.1 Process Northbound
         try:
-            df_north = self._safe_ak_fetch(ak.stock_hsgt_fund_flow_summary_em)
-            if not df_north.empty:
+            df_north = futures["north"].result()
+            if df_north is not None and not df_north.empty:
                 north_rows = df_north[df_north['资金方向'] == '北向']
                 if not north_rows.empty:
                     winners = int(north_rows['上涨数'].sum())
@@ -619,20 +633,11 @@ class MarketContextProvider:
                     
                     if total > 0:
                         win_ratio = winners / total
-                        if win_ratio >= 0.65:
-                            sentiment = "偏多"
-                        elif win_ratio <= 0.35:
-                            sentiment = "偏空"
-                        else:
-                            sentiment = "均衡"
-                        
+                        sentiment = "偏多" if win_ratio >= 0.65 else ("偏空" if win_ratio <= 0.35 else "均衡")
                         north_val = f"涨{winners}/跌{losers} ({sentiment})"
                         north_breadth = {
-                            "winners": winners,
-                            "losers": losers,
-                            "flat": flat,
-                            "win_ratio": round(win_ratio, 3),
-                            "sentiment": sentiment
+                            "winners": winners, "losers": losers, "flat": flat,
+                            "win_ratio": round(win_ratio, 3), "sentiment": sentiment
                         }
                         logger.info(f"✅ Northbound breadth: {north_val}")
                     else:
@@ -640,19 +645,13 @@ class MarketContextProvider:
         except Exception as e:
             logger.warning(f"Northbound fetch issue: {e}")
 
-        # 2. Sector Flows - 3-Tier Fallback Strategy
-        # Primary:   Eastmoney stock_sector_fund_flow_rank (fast, reliable, 498 sectors, units: 元)
-        # Fallback1: THS stock_fund_flow_industry (90 sectors, units: 亿, scraping can fail)
-        # Fallback2: Broad market main force flow (coarse, last resort)
-        
+        # 2. Sector Flows - Tiered Processing
         sector_fetched = False
         
         # --- Tier 1: Eastmoney (Primary) ---
         try:
-            df_em = self._safe_ak_fetch(
-                ak.stock_sector_fund_flow_rank, indicator="今日", sector_type="行业资金流"
-            )
-            if not df_em.empty:
+            df_em = futures["em"].result()
+            if df_em is not None and not df_em.empty:
                 net_col = '今日主力净流入-净额'
                 name_col = '名称'
                 if net_col in df_em.columns and name_col in df_em.columns:
@@ -671,19 +670,20 @@ class MarketContextProvider:
                             top_outflow.append(fmt_em(row))
                     
                     sector_fetched = True
-                    logger.info(f"✅ Eastmoney Sector Flow Succeeded: {len(df_sorted)} sectors, top={top_inflow[0] if top_inflow else 'N/A'}")
+                    sector_source = "akshare:stock_sector_fund_flow_rank"
+                    logger.info(f"✅ Eastmoney Sector Flow Succeeded: {len(df_sorted)} sectors")
                 else:
                     logger.warning(f"EM sector flow columns mismatch: {list(df_em.columns)}")
             else:
-                raise ValueError("EM sector flow empty")
+                logger.warning("EM sector flow empty")
         except Exception as e:
-            logger.warning(f"⚠️  Eastmoney Sector Flow failed, trying THS fallback: {e}")
+            logger.warning(f"⚠️  Eastmoney Sector Flow failed: {e}")
         
         # --- Tier 2: THS Fallback ---
         if not sector_fetched:
             try:
-                df_sector = self._safe_ak_fetch(ak.stock_fund_flow_industry, symbol="即时")
-                if not df_sector.empty:
+                df_sector = futures["ths"].result()
+                if df_sector is not None and not df_sector.empty:
                     df_sector['net_val'] = pd.to_numeric(df_sector['净额'], errors='coerce')
                     df_sorted = df_sector.dropna(subset=['net_val']).sort_values('net_val', ascending=False)
                     
@@ -699,9 +699,10 @@ class MarketContextProvider:
                             top_outflow.append(fmt_ths(row))
                     
                     sector_fetched = True
+                    sector_source = "akshare:stock_fund_flow_industry"
                     logger.info(f"✅ THS Industry Flow Fallback Succeeded: {len(df_sorted)} sectors")
                 else:
-                    raise ValueError("THS record empty")
+                    logger.warning("THS record empty")
             except Exception as e:
                 logger.error(f"❌ THS Sector Flow also failed: {e}")
         
@@ -709,21 +710,15 @@ class MarketContextProvider:
         if not sector_fetched:
             try:
                 df_m = self._safe_ak_fetch(ak.stock_market_fund_flow)
-                if not df_m.empty:
+                if df_m is not None and not df_m.empty:
                     m_flow = df_m.iloc[-1].get('主力净流入-净额', 0)
                     top_inflow.append(f"全市场主力({m_flow/1e8:+.1f}亿)")
+                    sector_fetched = True
+                    sector_source = "akshare:stock_market_fund_flow"
                     logger.info("✅ Broad market flow (last resort) succeeded.")
             except Exception as fallback_e:
                 logger.error(f"❌ All sector flow sources exhausted: {fallback_e}")
 
-        result = {
-            "northbound_net_inflow": north_val,
-            "northbound_breadth": north_breadth,
-            "top_inflow_sectors": ", ".join(top_inflow) if top_inflow else "暂无数据",
-            "top_outflow_sectors": ", ".join(top_outflow) if top_outflow else "暂无数据",
-            "summary": f"北向:{north_val} | 领涨:{', '.join(top_inflow[:2]) if top_inflow else 'N/A'} | 领跌:{', '.join(top_outflow[:1]) if top_outflow else 'N/A'}"
-        }
-        
         if not top_outflow:
             top_outflow = ["无明显净流出(>=0)"]
             consistency_flags.append("outflow_absent_non_negative_day")
@@ -743,12 +738,13 @@ class MarketContextProvider:
             else:
                 sector_source = "akshare:stock_market_fund_flow(last_resort_or_empty)"
 
-        result["top_inflow_sectors"] = ", ".join(top_inflow) if top_inflow else "暂无数据"
-        result["top_outflow_sectors"] = ", ".join(top_outflow) if top_outflow else "暂无数据"
-        result["summary"] = (
-            f"北向:{north_val} | 领涨:{', '.join(top_inflow[:2]) if top_inflow else 'N/A'} "
-            f"| 领跌:{', '.join(top_outflow[:1]) if top_outflow else 'N/A'}"
-        )
+        result = {
+            "northbound_net_inflow": north_val,
+            "northbound_breadth": north_breadth,
+            "top_inflow_sectors": ", ".join(top_inflow) if top_inflow else "暂无数据",
+            "top_outflow_sectors": ", ".join(top_outflow) if top_outflow else "暂无数据",
+            "summary": f"北向:{north_val} | 领涨:{', '.join(top_inflow[:2]) if top_inflow else 'N/A'} | 领跌:{', '.join(top_outflow[:1]) if top_outflow else 'N/A'}"
+        }
 
         flow_fields = {
             "northbound_net_inflow": self._build_field_contract(

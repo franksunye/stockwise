@@ -284,7 +284,23 @@ def generate_market_facts(fact_date: Optional[str] = None) -> Dict[str, Any]:
             if item.get("fact_date") < fact_date
         ]
 
-        spot_df, _spot_meta = _fetch_a_spot()
+        # Parallel Fetching
+        from concurrent.futures import ThreadPoolExecutor
+        with ThreadPoolExecutor(max_workers=6) as executor:
+            future_spot = executor.submit(_fetch_a_spot)
+            future_limit = executor.submit(_extract_limit_stats, fact_date)
+            future_sh = executor.submit(_extract_index_trend, "sh000001")
+            future_sz = executor.submit(_extract_index_trend, "sz399001")
+            future_cyb = executor.submit(_extract_index_trend, "sz399006")
+            future_flow = executor.submit(provider.get_market_flow_context)
+
+            spot_df, _spot_meta = future_spot.result()
+            limit_stats, limit_meta = future_limit.result()
+            idx_sh = future_sh.result()
+            idx_sz = future_sz.result()
+            idx_cyb = future_cyb.result()
+            flow_data = future_flow.result()
+
         turnover_now, turnover_meta = _extract_turnover_from_spot(spot_df)
         turnover_series = [v for v in prev_turnovers if v is not None]
         if turnover_now is not None:
@@ -321,19 +337,12 @@ def generate_market_facts(fact_date: Optional[str] = None) -> Dict[str, Any]:
         else:
             breadth_type = "neutral"
 
-        limit_stats, limit_meta = _extract_limit_stats(fact_date)
-
-        idx_sh = _extract_index_trend("sh000001")
-        idx_sz = _extract_index_trend("sz399001")
-        idx_cyb = _extract_index_trend("sz399006")
         idx_ok = all(i.get("status") == "ok" for i in [idx_sh, idx_sz, idx_cyb])
         core_indices = {
             "status": "ok" if idx_ok else "missing",
             "source": "akshare:stock_zh_index_daily_em",
             "items": {"sh000001": idx_sh, "sz399001": idx_sz, "sz399006": idx_cyb},
         }
-
-        flow_data = provider.get_market_flow_context()
         north = flow_data.get("northbound_breadth")
         north_score = None
         north_sentiment = "unknown"
