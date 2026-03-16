@@ -58,6 +58,27 @@ export default function RootLayout({
             __html: `
               (function() {
                 try {
+                  var ua = window.navigator.userAgent || '';
+                  var isIOS = /iPhone|iPad|iPod/i.test(ua);
+                  if (!isIOS) return;
+
+                  // Prevent iOS PWA white flash: apply dark bg + logo ASAP.
+                  document.documentElement.classList.add('ios-boot');
+
+                  // Remove boot splash after full load. (App content is opaque anyway.)
+                  window.addEventListener('load', function() {
+                    document.documentElement.classList.remove('ios-boot');
+                  }, { once: true });
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
                   var pathname = window.location.pathname || '/';
                   var isEnglishPublicPath = pathname === '/en' || pathname === '/en/' || pathname.indexOf('/en/') === 0;
                   document.documentElement.lang = isEnglishPublicPath ? 'en' : 'zh-CN';
