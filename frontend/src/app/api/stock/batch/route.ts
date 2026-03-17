@@ -56,7 +56,7 @@ const PRICE_TECHNICAL_KEYS = [
     'ma5', 'ma10', 'ma20', 'ma60',
     'macd', 'macd_signal', 'macd_hist',
     'boll_upper', 'boll_mid', 'boll_lower',
-    'rsi', 'kdj_k', 'kdj_d', 'kdj_j', 'ai_summary',
+    'kdj_k', 'kdj_d', 'kdj_j', 'ai_summary',
 ];
 
 function stripPredictionRow(row: Record<string, unknown>): Record<string, unknown> {
