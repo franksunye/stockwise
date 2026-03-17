@@ -80,21 +80,24 @@
 当前状态：
 
 - 价格底层已经被隔离到：
-  - `lib/stock-cache.ts` 中的 `getCachedLatestPrices`；
+  - `lib/stock-cache.ts` 中的两个出口：
+    - `getLatestPrices`：直接查询 DB，无缓存，供 `/api/stock/prices` 使用；
+    - `getCachedLatestPrices`：`unstable_cache` 包装（2 分钟 TTL），供 `/api/stock/batch` 使用。
   - `daily_prices` 表；
   - 批量接口中通过：
     - `latestPrices = getCachedLatestPrices(...)`  
     - `LEFT JOIN daily_prices dp ...`  
     来为每只股票补上价格。
 
-规划中的 API 角色（尚未拆出独立接口，但应按此方向收敛）：
+已实现的 API 角色：
 
-- 未来的 `GET /api/stock/prices?symbols=...`（示例命名）
-  - 作用：只返回价格与必要涨跌字段，例如：
-    - `close / change_percent / lastUpdatedTag` 等；
+- `GET /api/stock/prices?symbols=...`
+  - 作用：只返回价格与必要涨跌字段：
+    - `symbol / date / close / change_percent / lastUpdated`；
   - 特点：
     - 负载极轻；
-    - 可安全用于 10–15 分钟刷新；
+    - **直接查询 DB（无 `unstable_cache`）**，保证价格实时性；
+    - 可安全用于 3–10 分钟级刷新；
     - 不携带 `ai_reasoning`、战术数据、投研决议等重字段。
 
 **职责总结**：
@@ -213,21 +216,32 @@
 
 ---
 
-## 8. Implementation Status (2026-03-16)
+## 8. Implementation Status
 
-截至 2026-03-16，本文件描述的拆分方案已部分落地：
+### 8.1 Initial Implementation (2026-03-16)
 
 - **价格视图 API 已实现**：
   - `GET /api/stock/prices?symbols=...`
     - 返回：`symbol / date / close / change_percent / lastUpdated` 等轻量字段；
-    - 用途：供 Dashboard / 自选池等前端以 10 分钟级频率刷新价格快照。
+    - 用途：供 Dashboard / 自选池等前端以 3–10 分钟级频率刷新价格快照。
 
 - **Dashboard 已完成首轮前端迁移**：
   - 决策层（预测 / 战术 / 决议）：继续通过 `GET /api/stock/batch` 拉取，刷新频率降低为按需（首屏、回前台、显式刷新、低频定时）。
-  - 价格层：通过 `GET /api/stock/prices` 按 watchlist 的 symbol 列表每 10 分钟刷新一次，仅更新 `price.close / price.change_percent / lastUpdated`。
+  - 价格层：通过 `GET /api/stock/prices` 按 watchlist 的 symbol 列表盘中每 3 分钟 / 非盘中每 10 分钟刷新，仅更新 `price.close / price.change_percent / lastUpdated`。
 
-- **后续迁移范围**：
-  - 其他需要盘中价格刷新的前端页面（如二级详情页）应逐步改用 `/api/stock/prices`，避免新增依赖 `/api/stock/batch` 做高频轮询。
+### 8.2 Server Cache Tiering (2026-03-17)
+
+问题发现：`/api/stock/prices` 原先复用 `getCachedLatestPrices`（`unstable_cache`, 15 min TTL）。由于 `unstable_cache` 采用 stale-while-revalidate 语义，实际有效延迟可达 ~30 分钟。即使客户端发送 `cache: 'no-store'` 并使用 URL cache-buster，服务端仍然返回缓存的 DB 查询结果。
+
+修复：
+- `lib/stock-cache.ts` 新增 `getLatestPrices`（无缓存直查 DB）；
+- `getCachedLatestPrices` TTL 从 900s 降至 120s（15 min → 2 min）；
+- `/api/stock/prices` 改用 `getLatestPrices`，每次请求直接查 DB，保证价格实时性；
+- `/api/stock/batch` 继续使用 `getCachedLatestPrices`（2 min TTL），平衡决策载荷与新鲜度。
+
+### 8.3 后续迁移范围
+
+- 其他需要盘中价格刷新的前端页面（如二级详情页）应逐步改用 `/api/stock/prices`，避免新增依赖 `/api/stock/batch` 做高频轮询。
 
 ---
 

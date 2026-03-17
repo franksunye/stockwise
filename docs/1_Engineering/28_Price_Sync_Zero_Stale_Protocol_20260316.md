@@ -44,24 +44,37 @@ If the current time is Monday morning and the data received is from Friday, the 
 
 ## 4. Cache Preservation Strategy (Preventing Server Overload)
 
-The Zero-Stale Protocol does **NOT** destroy the entire caching architecture. It performs a **"Precision Bypass"** of the CDN/Edge layer, while keeping the internal protection layers intact:
+The Zero-Stale Protocol does **NOT** destroy the entire caching architecture. It performs a **"Precision Bypass"** of the CDN/Edge layer, while differentiating server-side cache treatment by endpoint role:
 
 | Layer | Status | Reason |
 | :--- | :--- | :--- |
 | **Service Worker (PWA Shell)** | ✅ Preserved | Handles static JS/CSS; no impact on server load. |
 | **Local Snapshot (localStorage)** | ✅ Preserved | Ensures "Instant-Open" (秒开); background fetch happens afterwards. |
-| **Server-side `unstable_cache`** | ✅ Preserved | **CRITICAL**: The `getCachedLatestPrices` (15m) in `lib/stock-cache.ts` still protects the Database from redundant hits. |
+| **Server-side `unstable_cache` (batch)** | ✅ Preserved (2 min) | `getCachedLatestPrices` in `lib/stock-cache.ts` protects the DB on the heavy `/api/stock/batch` path. TTL reduced from 15 min → **2 min** on 2026-03-17 to balance freshness and load. |
+| **Server-side DB query (prices)** | 🔄 Direct query | `/api/stock/prices` now calls `getLatestPrices` (uncached) directly. This endpoint is the dedicated price-refresh channel and must always return the freshest DB state. Changed on 2026-03-17. |
 | **Edge/CDN (Vercel Cache)** | ❌ Bypassed | This layer is the source of the "frozen timestamp" and "dirty data." |
 
 ### Why this is safe:
-Even if 1,000 users refresh at the same second, the **Origin Server** will hit its internal `unstable_cache`. If the data is < 15 mins old, it returns immediately without querying the Database (Turso). The Edge Cache was redundant for DB protection but catastrophic for UX freshness.
+- For `/api/stock/batch`: Even if many users refresh simultaneously, the Origin Server hits `unstable_cache` (2 min TTL). The effective max staleness is ~4 min (TTL + stale-while-revalidate), far better than the previous ~30 min window.
+- For `/api/stock/prices`: Each request queries the DB directly. This query is lightweight (single `MAX(date)` per symbol) and the endpoint is only called every 3 min (trading) / 10 min (non-trading) per client, making the DB load manageable.
+- The Edge Cache bypass remains permanent for both endpoints.
 
 ## 5. Implementation Checklist
 
-- [ ] **Frontend**: Modify `useDashboardData.ts` to include `_t` in all batch fetch URLs.
-- [ ] **Backend**: Update `/api/stock/batch/route.ts` with explicit Bypass headers.
-- [ ] **Verification**: Monitor `X-Stockwise-Request-Id` in DevTools; verify it changes on every refresh cycle.
+- [x] **Frontend**: Modify `useDashboardData.ts` to include `_t` in all batch fetch URLs.
+- [x] **Backend**: Update `/api/stock/batch/route.ts` with explicit Bypass headers.
+- [x] **Verification**: Monitor `X-Stockwise-Request-Id` in DevTools; verify it changes on every refresh cycle.
+- [x] **Server Cache Tiering (2026-03-17)**: Split `stock-cache.ts` into uncached `getLatestPrices` (for price-refresh endpoint) and reduced-TTL `getCachedLatestPrices` (2 min, for batch endpoint). `/api/stock/prices` now queries DB directly; `/api/stock/batch` uses 2-min server cache.
 
-## 5. Decision Reference
+## 6. Decision Reference
 
 This protocol prioritizes **Freshness Accuracy** over **Server Load**. In trading systems, stale price data is a high-severity UX failure. CDN offloading for the primary dashboard batch API is permanently disabled.
+
+### 2026-03-17 Revision: Server-Side Cache Tiering
+
+The original protocol (2026-03-16) preserved the 15-minute `unstable_cache` on the server side, reasoning that it protected the DB while the Edge bypass solved the UX freshness issue. In practice, `unstable_cache` with stale-while-revalidate semantics introduced an **effective 30-minute staleness window** that the Edge bypass could not resolve — the Origin itself was returning cached data.
+
+Resolution:
+- `/api/stock/prices` (price-refresh channel): now bypasses `unstable_cache` entirely, querying the DB directly via `getLatestPrices`.
+- `/api/stock/batch` (full decision payload): `getCachedLatestPrices` TTL reduced from 900s → 120s (15 min → 2 min).
+- `getCachedShortMetrics` (HK short selling data): unchanged at 3600s (1 hour), as this data updates less frequently.

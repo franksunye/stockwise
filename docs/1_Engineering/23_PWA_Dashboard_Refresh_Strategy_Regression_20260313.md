@@ -245,3 +245,13 @@ The intended strategy was:
 `show cached Dashboard immediately, then reliably refresh when the app comes back`
 
 The regression appeared because the implementation accumulated too many independent cache layers without one explicit freshness owner.
+
+## 12. Follow-Up: Server-Side Cache Tiering (2026-03-17)
+
+A related staleness issue resurfaced on 2026-03-17: even with the Edge/CDN bypass from Section 7, stock prices remained stale because the **server-side `unstable_cache`** in `lib/stock-cache.ts` still held DB query results for up to 15 minutes (with stale-while-revalidate pushing effective staleness to ~30 min).
+
+This was resolved by splitting `stock-cache.ts` into two paths:
+- `getLatestPrices` (uncached, direct DB query) — used by `/api/stock/prices` for real-time price refresh.
+- `getCachedLatestPrices` (2 min TTL, down from 15 min) — used by `/api/stock/batch` for the heavier decision payload.
+
+See [`28_Price_Sync_Zero_Stale_Protocol_20260316.md`](./28_Price_Sync_Zero_Stale_Protocol_20260316.md) Section 6 for the full decision record.

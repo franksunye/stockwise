@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getCachedLatestPrices } from '@/lib/stock-cache';
+import { getLatestPrices } from '@/lib/stock-cache';
 import { requireUserSession } from '@/lib/user-session';
 
 export const dynamic = 'force-dynamic';
@@ -49,7 +49,7 @@ export async function GET(request: Request) {
 
   try {
     const normalizedSymbols = Array.from(new Set(symbols)).sort();
-    const latestPrices = await getCachedLatestPrices(normalizedSymbols);
+    const latestPrices = await getLatestPrices(normalizedSymbols);
 
     const hkTime = new Date(
       new Date().getTime() + new Date().getTimezoneOffset() * 60000 + 3600000 * 8,

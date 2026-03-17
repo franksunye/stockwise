@@ -2,47 +2,45 @@
 import { unstable_cache } from 'next/cache';
 import { getDbClient } from '@/lib/db';
 
+const LATEST_PRICES_SQL = `SELECT dp.* FROM daily_prices dp
+INNER JOIN (
+    SELECT symbol, MAX(date) as max_date
+    FROM daily_prices
+    WHERE symbol IN (%PLACEHOLDERS%)
+    GROUP BY symbol
+) latest ON dp.symbol = latest.symbol AND dp.date = latest.max_date`;
+
+async function queryLatestPrices(symbols: string[]): Promise<Record<string, unknown>[]> {
+    if (symbols.length === 0) return [];
+    const client = getDbClient();
+    try {
+        const placeholders = symbols.map(() => '?').join(',');
+        const sql = LATEST_PRICES_SQL.replace('%PLACEHOLDERS%', placeholders);
+        let rows: Record<string, unknown>[] = [];
+        if ('execute' in client) {
+            const rs = await client.execute({ sql, args: symbols });
+            rows = rs.rows as Record<string, unknown>[];
+        } else {
+            rows = client.prepare(sql).all(...symbols) as any[];
+        }
+        return rows;
+    } finally {
+        if (client && typeof (client as any).close === 'function') (client as any).close();
+    }
+}
+
 /**
- * 缓存获取最新价格 (15分钟)
+ * 直接查询最新价格（无缓存）— 供价格刷新端点使用，保证实时性。
+ */
+export const getLatestPrices = queryLatestPrices;
+
+/**
+ * 缓存获取最新价格 (2分钟) — 供 batch 端点使用，平衡新鲜度与 DB 负载。
  */
 export const getCachedLatestPrices = unstable_cache(
-    async (symbols: string[]) => {
-        if (symbols.length === 0) return [];
-        const client = getDbClient();
-        try {
-            const placeholders = symbols.map(() => '?').join(',');
-            let rows: Record<string, unknown>[] = [];
-            if ('execute' in client) {
-                const rs = await client.execute({
-                    sql: `SELECT dp.* FROM daily_prices dp
-                          INNER JOIN (
-                              SELECT symbol, MAX(date) as max_date
-                              FROM daily_prices
-                              WHERE symbol IN (${placeholders})
-                              GROUP BY symbol
-                          ) latest ON dp.symbol = latest.symbol AND dp.date = latest.max_date`,
-                    args: symbols
-                });
-                rows = rs.rows as Record<string, unknown>[];
-            } else {
-                const result = client.prepare(`
-                    SELECT dp.* FROM daily_prices dp
-                    INNER JOIN (
-                        SELECT symbol, MAX(date) as max_date
-                        FROM daily_prices
-                        WHERE symbol IN (${placeholders})
-                        GROUP BY symbol
-                    ) latest ON dp.symbol = latest.symbol AND dp.date = latest.max_date
-                `).all(...symbols) as any[];
-                rows = result as Record<string, unknown>[];
-            }
-            return rows;
-        } finally {
-            if (client && typeof (client as any).close === 'function') (client as any).close();
-        }
-    },
+    queryLatestPrices,
     ['latest-prices'],
-    { revalidate: 900, tags: ['daily-prices'] }
+    { revalidate: 120, tags: ['daily-prices'] }
 );
 
 /**
