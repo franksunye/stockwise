@@ -15,6 +15,8 @@ import { getCurrentUser } from '@/lib/user';
 import { getWatchlist } from '@/lib/storage';
 
 const PROFILE_CACHE_KEY = 'stockwise_user_profile_v1';
+const PROFILE_SYNC_SESSION_KEY = 'last_profile_sync';
+const PROFILE_SYNC_IN_FLIGHT_KEY = 'profile_sync_in_flight_v1';
 
 export type Tier = 'free' | 'pro';
 
@@ -88,9 +90,22 @@ function useUserProfileStore(): UserProfileContextValue {
 
     // 2. 获取/刷新 Profile
     const refreshProfile = useCallback(async (options?: RefreshProfileOptions) => {
+        // 如果 Layout 正在进行首轮 profile 同步，Provider 让位，避免重复请求
+        if (!options?.force) {
+            try {
+                const inFlight = sessionStorage.getItem(PROFILE_SYNC_IN_FLIGHT_KEY);
+                if (inFlight === '1') {
+                    setLoading(false);
+                    return profileRef.current ?? null;
+                }
+            } catch {
+                // 非关键路径，忽略存储异常
+            }
+        }
+
         // 增加频率限制：30秒内不重复请求，除非 force 为 true
         const now = Date.now();
-        const lastSync = parseInt(sessionStorage.getItem('last_profile_sync') || '0');
+        const lastSync = parseInt(sessionStorage.getItem(PROFILE_SYNC_SESSION_KEY) || '0');
         if (!options?.force && now - lastSync < 30000 && profileRef.current) {
             setLoading(false); // 确保防抖跳过时也标记已完成
             return profileRef.current;
@@ -144,7 +159,7 @@ function useUserProfileStore(): UserProfileContextValue {
             setProfile(newProfile);
             profileRef.current = newProfile;
             localStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify(newProfile));
-            sessionStorage.setItem('last_profile_sync', now.toString());
+            sessionStorage.setItem(PROFILE_SYNC_SESSION_KEY, now.toString());
             return newProfile;
         } catch (e) {
             console.error('Refresh profile failed', e);

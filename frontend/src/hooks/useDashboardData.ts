@@ -94,6 +94,7 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
 
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const priceIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const lastPriceRefreshTimeRef = useRef<number>(0);
 
     // 1. 初始化：尝试从本地缓存读取，实现【秒开】
     useEffect(() => {
@@ -331,6 +332,12 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
 
     const refreshPrices = useCallback(async (symbols: string[]): Promise<void> => {
         if (symbols.length === 0) return;
+        const now = Date.now();
+        // 价格层轻量节流：5 秒内的重复刷新跳过，避免首屏/可见性事件叠加导致重复请求
+        if (now - lastPriceRefreshTimeRef.current < 5000) {
+            return;
+        }
+        lastPriceRefreshTimeRef.current = now;
         try {
             const params = new URLSearchParams({ symbols: symbols.join(',') });
             const res = await fetch(`/api/stock/prices?${params.toString()}`, {

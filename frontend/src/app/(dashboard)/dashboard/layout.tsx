@@ -29,6 +29,7 @@ const DASHBOARD_NAV_INTENT_MAX_AGE = 15 * 1000;
 // 避免 Provider 再次发起重复的 /api/user/profile 请求
 const USER_PROFILE_CACHE_KEY = 'stockwise_user_profile_v1';
 const PROFILE_SYNC_SESSION_KEY = 'last_profile_sync';
+const PROFILE_SYNC_IN_FLIGHT_KEY = 'profile_sync_in_flight_v1';
 interface AuthCache {
   tier: Tier;
   authorized: boolean;
@@ -228,6 +229,11 @@ export default function DashboardLayout({
         setIsAuthorized(true);
         setAuthCache('free', true);
         try {
+          try {
+            sessionStorage.setItem(PROFILE_SYNC_IN_FLIGHT_KEY, '1');
+          } catch {
+            // 非关键路径，忽略存储异常
+          }
           let res = await fetch('/api/user/profile', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -250,6 +256,12 @@ export default function DashboardLayout({
           }
         } catch (e) {
           console.warn('Tier warmup failed (invite disabled mode):', e);
+        } finally {
+          try {
+            sessionStorage.removeItem(PROFILE_SYNC_IN_FLIGHT_KEY);
+          } catch {
+            // ignore
+          }
         }
         return;
       }
@@ -297,6 +309,12 @@ export default function DashboardLayout({
       try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 20000);
+
+        try {
+          sessionStorage.setItem(PROFILE_SYNC_IN_FLIGHT_KEY, '1');
+        } catch {
+          // 非关键路径，忽略存储异常
+        }
 
         let res = await fetch('/api/user/profile', {
           method: 'POST',
@@ -350,6 +368,12 @@ export default function DashboardLayout({
           // isAuthorized 和 tier 已经由初始化设置好了，无需额外操作
         } else {
           setIsAuthorized(false);
+        }
+      } finally {
+        try {
+          sessionStorage.removeItem(PROFILE_SYNC_IN_FLIGHT_KEY);
+        } catch {
+          // ignore
         }
       }
     };
