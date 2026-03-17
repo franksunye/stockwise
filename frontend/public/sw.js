@@ -10,7 +10,7 @@
 //   - Push:     Preserve existing notification handling
 // =============================================================================
 
-const CACHE_VERSION = 'ziso-v10';
+const CACHE_VERSION = 'ziso-v11';
 
 // Critical resources that MUST be available offline for the App Shell
 const PRECACHE_URLS = [
@@ -345,13 +345,16 @@ self.addEventListener('fetch', (event) => {
   // ─── RULE 2: Only intercept GET requests ───
   if (request.method !== 'GET') return;
 
-  // ─── RULE 2.5: Next.js App Router RSC/Data Requests (拦截软路由数据) ───
-  // Using SWR (Stale-While-Revalidate) ensures instant soft-navigations.
-  // This achieves "秒开本地内容，然后后台更新" for Next.js transitions.
+  // ─── RULE 2.5: Next.js App Router RSC/Data Requests — NetworkOnly ───
+  // RSC/Flight requests are NEVER cached — industry best practice.
+  // Stale RSC payloads cause version-mismatch errors across deployments
+  // (ChunkLoadError, error boundary). Since all page navigation uses
+  // hard nav (<a> / window.location.href), RSC caching provides no
+  // benefit. Let the browser fetch from the network natively; Next.js
+  // handles failures with its own internal fallback logic.
   const isRSC = request.headers.has('RSC') || url.searchParams.has('_rsc');
   if (isRSC) {
-    event.respondWith(rscCacheFirst(request));
-    return;
+    return; // NetworkOnly — let browser handle natively
   }
 
   // ─── RULE 3: Navigation — CacheFirst + Background Revalidate (秒开) ───

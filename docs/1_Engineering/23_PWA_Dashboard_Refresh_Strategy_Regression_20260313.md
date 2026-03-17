@@ -323,11 +323,15 @@ ESLint `@next/next/no-html-link-for-pages` is suppressed per-line with comments 
 - **Critical**: non-chunk recovery does NOT send `CLEAR_CACHES` — the navigation HTML cache is the recovery lifeline, especially when completely offline.
 - 10-second cooldown prevents infinite loops; error UI shown only if auto-recovery itself fails.
 
-### 13.7 SW `rscCacheFirst` Status
+### 13.7 SW `rscCacheFirst` — Removed from Critical Path (2026-03-17)
 
-The SW's `rscCacheFirst` handler was reverted to returning 504 on cache-miss + network-fail. An attempt to `throw` instead (to produce a genuine `TypeError` and trigger Next.js MPA fallback) caused **worse** behavior on iOS Safari — the error became reproducible every time instead of intermittent.
+**Previous state:** The SW's `rscCacheFirst` handler was reverted to returning 504 on cache-miss + network-fail. Despite all dashboard pages using hard navigation, the error persisted because Next.js App Router internally makes RSC requests during hydration, prefetching, and router initialization — and the SW intercepted these, returning stale cached payloads from previous deployments.
 
-The 504 path remains as-is. With all dashboard pages using hard navigation, `rscCacheFirst` is no longer on the critical path for user-facing page transitions.
+**Root cause confirmed:** Industry consensus (Next.js PR #67229, Serwist docs, StackOverflow) establishes that **RSC/Flight responses must be NetworkOnly and never cached by the service worker**. Stale RSC payloads cause `buildId` mismatches between cached Flight data and current JS chunks, triggering `ChunkLoadError` and error boundary activation.
+
+**Fix applied:** RULE 2.5 in `sw.js` now returns early for RSC requests (`request.headers.has('RSC') || url.searchParams.has('_rsc')`) without calling `event.respondWith()`, making them NetworkOnly (browser handles natively). `CACHE_VERSION` bumped from `ziso-v10` to `ziso-v11` to purge all stale caches including poisoned `__RSC` entries.
+
+The `rscCacheFirst` function remains as dead code for reference but is no longer invoked.
 
 ### 13.8 Principle for Future Work
 
