@@ -323,20 +323,33 @@ ESLint `@next/next/no-html-link-for-pages` is suppressed per-line with comments 
 - **Critical**: non-chunk recovery does NOT send `CLEAR_CACHES` — the navigation HTML cache is the recovery lifeline, especially when completely offline.
 - 10-second cooldown prevents infinite loops; error UI shown only if auto-recovery itself fails.
 
-### 13.7 SW `rscCacheFirst` — Removed from Critical Path (2026-03-17)
+### 13.7 Actual Root Cause — `data.price.rsi` Null Access (2026-03-17)
 
-**Previous state:** The SW's `rscCacheFirst` handler was reverted to returning 504 on cache-miss + network-fail. Despite all dashboard pages using hard navigation, the error persisted because Next.js App Router internally makes RSC requests during hydration, prefetching, and router initialization — and the SW intercepted these, returning stale cached payloads from previous deployments.
+**Misdiagnosis:** Sections 13.2–13.6 attributed the error to RSC soft-navigation failures and prescribed hard navigation (`<a>` / `window.location.href`) as the fix. Multiple iterations of SW changes (throw vs 504, RSC NetworkOnly) and navigation rewrites were attempted.
 
-**Root cause confirmed:** Industry consensus (Next.js PR #67229, Serwist docs, StackOverflow) establishes that **RSC/Flight responses must be NetworkOnly and never cached by the service worker**. Stale RSC payloads cause `buildId` mismatches between cached Flight data and current JS chunks, triggering `ChunkLoadError` and error boundary activation.
+**Actual root cause:** Adding a diagnostic overlay to the error boundary page immediately revealed the real error:
 
-**Fix applied:** RULE 2.5 in `sw.js` now returns early for RSC requests (`request.headers.has('RSC') || url.searchParams.has('_rsc')`) without calling `event.respondWith()`, making them NetworkOnly (browser handles natively). `CACHE_VERSION` bumped from `ziso-v10` to `ziso-v11` to purge all stale caches including poisoned `__RSC` entries.
+```
+TypeError: undefined is not an object (evaluating 't.price.rsi.toFixed')
+```
 
-The `rscCacheFirst` function remains as dead code for reference but is no longer invoked.
+`StockDashboardCard.tsx` rendered `data.price.rsi.toFixed(0)` without null-checking `rsi`. Stocks whose API response lacked RSI data crashed React rendering → error boundary → "页面加载异常".
 
-### 13.8 Principle for Future Work
+**Fix:** Added `data.price.rsi != null` guard to the RSI rendering condition. One line.
 
-> **In a PWA with SW-cached HTML shells, page-level navigation must stay on the SW navigation cache path.** Next.js RSC soft navigation creates a parallel fetch path that bypasses the SW HTML cache entirely. On unreliable networks (offline, weak, slow backend), this parallel path fails — and the failure mode (error boundary) is visible and disruptive.
->
-> Soft navigation (`<Link>`) is appropriate for non-PWA web apps with reliable network, or for transitions within the same page (drawers, modals, tabs). For PWA page transitions where offline resilience is required, hard navigation is the correct choice.
+**Collateral changes reverted:** All `<Link>` → `<a>` hard navigation changes were reverted. Soft navigation (`<Link>` / `router.push()`) is restored across all dashboard pages for smooth, instant page transitions.
 
-Commits: `5758f70`, `89f46ae`, `ea68864`, `eaa4b88`.
+**Changes retained (still correct best practice):**
+- SW RSC NetworkOnly (RULE 2.5) — `rscCacheFirst` no longer invoked; RSC requests pass through to network. This is industry best practice regardless of this specific bug.
+- `CACHE_VERSION` at `ziso-v11` — one-time stale cache cleanup already applied.
+- Error boundary auto-recovery + diagnostic overlay — valuable safety net for future issues.
+
+### 13.8 Lesson Learned
+
+> **When an error boundary fires, instrument it immediately with diagnostic output (error name, message, stack) before theorizing about the cause.** The entire RSC/SW investigation was a misdiagnosis because we assumed the error was navigation-related without ever reading the actual error object. A single diagnostic line on the error page would have resolved this in minutes instead of hours.
+
+### 13.9 Principle for Future Work
+
+> **Always null-check optional fields from API responses before calling methods on them**, even when TypeScript types declare them as required. Runtime data may diverge from type definitions. Use `value != null` guards before `.toFixed()`, `.toString()`, or any method call on potentially-undefined data.
+
+Commits: `5758f70`, `89f46ae`, `ea68864`, `eaa4b88`, `76d30fc`, `27ef15d`, `38c07f8`.

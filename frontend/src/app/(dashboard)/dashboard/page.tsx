@@ -3,6 +3,8 @@
 import { useState, useEffect, Suspense, useRef, useCallback, useMemo, memo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { LayoutGrid as Grid, ChevronDown, User, FileText, Share2, Copy } from 'lucide-react';
 import { StockData, AIPrediction, MarketAlmanacData } from '@/lib/types';
 import { 
@@ -116,10 +118,16 @@ function DashboardContent() {
     return [almanacCard, ...stocks] as ExtendedStockData[];
   }, [stocks, almanacs, almanac]);
 
+  const router = useRouter();
+
+  useEffect(() => {
+    router.prefetch('/dashboard/stock-pool');
+  }, [router]);
+
   const scrollOptions = useMemo(() => ({
     onOverscrollRight: () => setUserCenterOpen(true),
-    onOverscrollLeft: () => { window.location.href = '/dashboard/stock-pool'; }
-  }), []);
+    onOverscrollLeft: () => router.push('/dashboard/stock-pool')
+  }), [router]);
 
   const {
     currentIndex,
@@ -317,10 +325,9 @@ function DashboardContent() {
           ))}
         </div>
         <div className="w-full flex justify-between items-center pointer-events-auto">
-          {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
-          <a href="/dashboard/stock-pool" className="p-3 rounded-2xl bg-white/5 border border-white/10 active:scale-95 transition-all pointer-events-auto inline-flex items-center justify-center cursor-pointer">
+          <Link href="/dashboard/stock-pool" className="p-3 rounded-2xl bg-white/5 border border-white/10 active:scale-95 transition-all pointer-events-auto inline-flex items-center justify-center cursor-pointer">
             <Grid className="w-5 h-5 text-indigo-400" />
-          </a>
+          </Link>
           <button onClick={openUserCenter} className="w-11 h-11 rounded-full bg-white/5 border border-white/10 flex items-center justify-center transition-all active:scale-90 hover:bg-white/10 shrink-0 cursor-pointer">
             <User className="w-5 h-5 text-slate-400" />
           </button>

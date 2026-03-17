@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback, useMemo, memo, useRef } from 'react';
 import { Plus, Trash2, ArrowLeft, TrendingUp, TrendingDown, Minus, LayoutGrid } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getMarketScene } from '@/lib/date-utils';
 
@@ -45,11 +47,9 @@ const StockItem = memo(({
       transition={{ duration: 0.15 }}
       className="transform-gpu"
     >
-      {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
-      <a 
+      <Link 
         href="/dashboard"
-        onClick={(e) => {
-          e.preventDefault();
+        onClick={() => {
           try {
             sessionStorage.setItem(DASHBOARD_NAV_INTENT_KEY, JSON.stringify({
               symbol: stock.symbol,
@@ -59,10 +59,6 @@ const StockItem = memo(({
             // non-critical
           }
           setNavigatingTo(stock.symbol);
-          // Hard navigation bypasses RSC soft-nav entirely.
-          // SW's navigationCacheFirst serves cached HTML shell instantly,
-          // immune to RSC failures on weak/offline networks.
-          window.location.href = '/dashboard';
         }}
         className={`glass-card p-5 group transition-all relative block active:scale-95 touch-optimized ${navigatingTo === stock.symbol ? 'bg-white/10 border-indigo-500/30 ring-1 ring-indigo-500/20' : 'hover:bg-white/[0.04]'}`}
       >
@@ -115,7 +111,7 @@ const StockItem = memo(({
             </div>
           )}
        </div>
-      </a>
+      </Link>
     </motion.div>
   );
 });
@@ -160,8 +156,11 @@ export default function StockPoolPage() {
   const isPreMarket = scene === 'pre_market';
 
   const { tier } = useDashboardAuth();
+  const router = useRouter();
 
-
+  useEffect(() => {
+    router.prefetch('/dashboard');
+  }, [router]);
 
   useEffect(() => {
     const timer = setTimeout(async () => {
@@ -251,10 +250,9 @@ export default function StockPoolPage() {
       {/* Solid/Stable Header Structure (Centered Title) */}
       <header className="shrink-0 z-20 px-6 py-4 flex items-center justify-between bg-[#050508] border-b border-white/5">
         <div className="w-12">
-          {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
-          <a href="/dashboard" className="p-2 rounded-full hover:bg-white/5 active:scale-90 transition-all text-slate-400 flex items-center justify-center">
+          <Link href="/dashboard" className="p-2 rounded-full hover:bg-white/5 active:scale-90 transition-all text-slate-400 flex items-center justify-center">
             <ArrowLeft className="w-5 h-5" />
-          </a>
+          </Link>
         </div>
         
         <div className="flex-1 text-center">
