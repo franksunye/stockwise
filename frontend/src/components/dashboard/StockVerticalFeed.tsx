@@ -108,7 +108,7 @@ export const StockVerticalFeed = memo(function StockVerticalFeed({
     
     const observer = new IntersectionObserver((entries) => {
       const target = entries[0];
-      if (target.isIntersecting && !stock.loadingMore && stock.hasMoreHistory !== false) {
+      if (target.isIntersecting && !stock.loadingMore && stock.hasMoreHistory === true) {
         onLoadMore(stock.symbol, stock.history.length);
       }
     }, {

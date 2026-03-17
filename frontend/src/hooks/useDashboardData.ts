@@ -84,6 +84,7 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
     const almanacRef = useRef<MarketAlmanacData | null>(almanac);
     const almanacsRef = useRef<MarketAlmanacData[]>(almanacs);
     const prevHistoryLimitRef = useRef<number>(historyLimit);
+    const prevWatchlistRef = useRef<WatchlistItem[]>(watchlist);
 
     // Sync ref with state
     useEffect(() => {
@@ -410,7 +411,16 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
     }, []);
 
     // Watchlist 变更时，强制触发一次刷新 (Ignore Debounce)
+    // Skip when only loadAllData reference changed (e.g. historyLimit transition);
+    // Effect 6 below handles that case.
     useEffect(() => {
+        const prev = prevWatchlistRef.current;
+        const changed = prev.length !== watchlist.length ||
+            prev.some((item, i) => item.symbol !== watchlist[i]?.symbol);
+        prevWatchlistRef.current = watchlist;
+
+        if (!changed) return;
+
         if (watchlist.length > 0) {
             loadAllData(false, true); // silent=false, ignoreDebounce=true
         } else if (watchlist.length === 0 && !loadingWatchlist) {
