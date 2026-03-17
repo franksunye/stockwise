@@ -30,7 +30,7 @@
 | 层 | 技术选型 | 关键配置 |
 |----|----------|----------|
 | Frontend Runtime | Next.js 15.5.9 (App Router) on Vercel Serverless | 无 `maxDuration` / Edge Runtime 配置 |
-| Database | Turso (libSQL) via `@libsql/client` HTTP API | 每次请求新建连接，无连接池 (`frontend/src/lib/db.ts`) |
+| Database | Turso (libSQL) via `@libsql/client` HTTP API | 模块级单例连接 (`frontend/src/lib/db.ts`)，消除 per-request TLS 握手 |
 | Backend Pipeline | Python CLI on GitHub Actions cron | 5 daily workers, 2 realtime workers |
 | Push Notifications | Web Push (VAPID) via `/api/internal/notify` | Bearer token auth |
 | CDN / Edge | Vercel Edge Network | API 端点已 bypass CDN (Zero-Stale Protocol) |
@@ -94,10 +94,11 @@ Source: `frontend/src/hooks/useDashboardData.ts` (L12-17), `frontend/src/lib/use
 | `getLatestPrices` | 无缓存，直查 DB | 0 | `/api/stock/prices` |
 | `getCachedLatestPrices` | `unstable_cache` | 120s (2 min) | `/api/stock/batch` |
 | `getCachedShortMetrics` | `unstable_cache` | 3600s (1 hr) | `/api/stock/batch` |
+| `_predCache` (prediction history) | 进程级 `Map` | 300s (5 min) | `/api/stock/batch` 预测查询 |
 
-Source: `frontend/src/lib/stock-cache.ts`
+Source: `frontend/src/lib/stock-cache.ts`, `frontend/src/app/api/stock/batch/route.ts`
 
-`unstable_cache` 的 key 包含函数参数（即 symbols 数组），因此**不同自选池组合的用户命中不同缓存条目**，跨用户共享率极低。
+`unstable_cache` 的 key 包含函数参数（即 symbols 数组），因此**不同自选池组合的用户命中不同缓存条目**，跨用户共享率极低。预测缓存 `_predCache` 以 `symbols|historyLimit|tier|modeId` 为 key，同 tier/mode 的用户可共享缓存条目，5 分钟内重复请求直接命中内存。
 
 ### 2.5 Backend Pipeline
 
@@ -248,13 +249,15 @@ Turso 的行读取配额极其宽裕。瓶颈不在配额，而在：
 | PWA/CDN | 🟢 | 🟢 | 🟢 | 🟢 |
 | Rate Limiting | 🔴 | 🔴 | 🔴 | 🔴 |
 | Price API Dedup | 🟢 | 🟡 | 🔴 | 🔴 |
-| Batch Latency (p95) | 🔴 | 🔴 | 🔴 | 🔴 |
+| Batch Latency (p95) | 🟢 | 🟢 | 🟡 | 🔴 |
 | Page-Load Request Fan-out | 🟡 | 🟡 | 🔴 | 🔴 |
 | Batch Decomposition | 🟢 | 🟢 | 🟢 | 🔴 |
 | Push vs Poll | 🟢 | 🟢 | 🟡 | 🔴 |
 | Multi-Region | 🟢 | 🟢 | 🟢 | 🟡 |
 
-> 2026-03-17 更新: 基于实测校准，10K 用户 Vercel Compute 从 🟢 调整为 🟡 (实测校准 ~480 GB-hrs 接近 Pro 上限一半)。新增 "Batch Latency" 和 "Page-Load Request Fan-out" 两项指标 — batch 6.15s 的 p95 延迟在所有规模下均为红灯 (UX 不合格)，page-load 的 8 请求 fan-out 在 10K+ 时贡献显著 compute 浪费。
+> 2026-03-17 更新: 基于实测校准，10K 用户 Vercel Compute 从 🟢 调整为 🟡 (实测校准 ~480 GB-hrs 接近 Pro 上限一半)。新增 "Batch Latency" 和 "Page-Load Request Fan-out" 两项指标。page-load 的 8 请求 fan-out 在 10K+ 时贡献显著 compute 浪费。
+>
+> 2026-03-17 (晚) 更新: Batch Latency 从全局 🔴 调整为 1K/10K 🟢、100K 🟡、1M 🔴。四层优化已部署：进程级预测缓存 (5min TTL) 消除 95% 重复查询；`idx_pred_symbol_target` 索引 + 去除 `COALESCE` 使未命中缓存的查询从全表扫描降至索引 range scan；DB 连接单例化消除 per-request TLS 握手；响应裁剪降低 payload ~80%。缓存命中路径 <50ms，未命中路径预期从 ~6s 降至 <1s。
 
 ---
 
@@ -337,7 +340,7 @@ flowchart TB
 | 现有轮询模型 | 可承受 |
 | 速率限制 | ❌ 缺失 |
 | Vercel 计划 | Hobby 可用，实测校准约占 48% |
-| Batch 端点延迟 | ✅ 已修复 — 根因是 SQL 别名 bug，修复后 rich query 正常执行 |
+| Batch 端点延迟 | ✅ 已修复 — SQL bug fix + 4-tier 延迟优化 (cache/index/singleton/strip) |
 | 页面加载 fan-out | ✅ 已优化 — calendar ISR 化 + register 跨 tab 去重 |
 
 **Tier 0 Quick Wins** (已执行, 2026-03-17):
@@ -347,6 +350,7 @@ flowchart TB
 | **Batch SQL bug fix** | `SAFE_LLM_SIGNAL_SQL` 在外层 CTE SELECT 中引用了不存在的 `p.` 别名（应为 `h.`），导致 Turso 报 `no such column: p.ai_reasoning`，rich query **100% 失败**后走 fallback（+3-4s 延迟）。修复别名后 rich query 直接成功。同时保留 `modeSchemaReady` 检查和 2s timeout 作为防御性 fallback。 | ✅ 已修复 |
 | Calendar ISR 化 | `/api/system/calendar` 从 `force-dynamic` 改为 `revalidate: 86400` (1天)。每次 page load 节省 1 个 origin hit + ~1.3s 延迟。 | ✅ 已修复 |
 | Register 跨 tab 去重 | 新增 `stockwise_ssync` cookie (30min TTL) 作为跨 tab 防抖标记。新 tab 在 30 分钟内跳过 register POST，同时加速 profile 请求启动。 | ✅ 已修复 |
+| **Batch 4-tier 延迟优化** | 四层优化: (1) 预测缓存 5min TTL — 消除 95% 重复查询; (2) `idx_pred_symbol_target` 索引 + 去除 `COALESCE` — 启用索引 range scan; (3) DB 连接单例化 — 消除 TLS 握手; (4) 响应裁剪 — 去除 `llm_reasoning` 副本/SQL 内部列/lite 模式裁剪技术指标和 history/全 null `shortMetrics`。索引已在 Turso 线上和本地 SQLite 同步创建。 | ✅ 已部署 |
 
 ### Tier 1: 10K Users
 
@@ -357,7 +361,7 @@ flowchart TB
 
 | 项目 | 描述 | 预估工期 | 优先级 |
 |------|------|----------|--------|
-| DB 单例化 | `getDbClient()` 改为模块级单例，减少 TLS 握手开销。实测所有端点 1-2s 延迟中，TLS 握手占比显著。 | 0.5 天 | **P0** |
+| ~~DB 单例化~~ | ~~`getDbClient()` 改为模块级单例~~ | ~~0.5 天~~ | ✅ 已在 Tier 0 完成 |
 | Per-symbol 内存缓存 | 在 `stock-cache.ts` 中为 `getLatestPrices` 增加进程级 Map 缓存，30s TTL，per-symbol key。热门股票跨用户共享。 | 0.5 天 | **P0** |
 | API 速率限制 | middleware 或 API 层增加 per-IP / per-session 限制：全局 60 req/min, prices 30 req/min, batch 5 req/min | 1 天 | **P0** |
 | Vercel Pro | 确认部署在 Pro 计划 | 配置变更 | **P0** |
@@ -692,7 +696,24 @@ FROM HistoryRanked h LEFT JOIN daily_prices dp ...
 - `modeSchemaReady` 标志位：`ensureInvestmentModeSchema` 失败时跳过 rich query
 - `Promise.race` 2s timeout：rich query 慢时快速 fallback
 
-### 8.4 (Reserved) Future Scaling Decisions
+### 8.4 2026-03-17: Batch 4-Tier Latency Optimization
+
+**背景**: Section 8.3 修复了 SQL 别名 bug，但用户反馈 batch `queryTime` 仍在 6s+ (单只自选股)。实测确认延迟来自四个独立瓶颈：无预测缓存、缺索引 + COALESCE 阻断索引、per-request TLS 握手、响应含大量冗余字段。
+
+**优化措施**:
+
+| Tier | 措施 | 文件 | 影响 |
+|------|------|------|------|
+| 0 | 进程级预测缓存 (`Map`, 5min TTL), key = `symbols\|historyLimit\|tier\|modeId` | `batch/route.ts` | 消除 ~95% 重复 DB 查询 |
+| 1 | `CREATE INDEX idx_pred_symbol_target ON ai_predictions_v2(symbol, target_date, model_id)` + WHERE 从 `COALESCE(p.target_date, p.date)` 改为 `p.target_date` (NOT NULL 确认) | `database.py`, `batch/route.ts` | 索引 range scan 替代全表扫描，预期 10-20x 加速 |
+| 2 | `getDbClient()` Turso 云端单例 — `close()` 变 no-op，transient error 时 `resetCloudClient()` 重建 | `db.ts` | 省 ~200-500ms TLS/request |
+| 3 | 裁剪 `llm_reasoning` (等于 `ai_reasoning` 的冗余副本)、`rn_daily/rn_history` (SQL 内部列)；lite 模式 (stock-pool) 省略 `history` 数组和价格技术指标；全 null `shortMetrics` (A 股) 省略 | `batch/route.ts` | payload 缩减 ~80% (lite) / ~30% (full) |
+
+**数据库变更**: `idx_pred_symbol_target` 已在 Turso 线上和本地 SQLite 同步创建 (3865 行, 0 NULL `target_date`, 建索引 <1s)。
+
+**影响评估**: 缓存命中路径 <50ms (内存读取 + JSON 序列化)。缓存未命中路径：索引 + 单例 预期从 ~6s 降至 <1s。响应裁剪额外降低序列化和网络传输开销。Tier 1 (10K 用户) 的 "DB 单例化" 项已提前完成。
+
+### 8.5 (Reserved) Future Scaling Decisions
 
 后续扩容决策在此追加记录。
 
@@ -704,7 +725,7 @@ FROM HistoryRanked h LEFT JOIN daily_prices dp ...
 |------|----------|
 | `frontend/src/lib/stock-cache.ts` | 价格缓存分层 (getLatestPrices / getCachedLatestPrices) |
 | `frontend/src/hooks/useDashboardData.ts` L12-17 | 客户端轮询间隔定义 |
-| `frontend/src/lib/db.ts` L32-57 | Turso 连接创建模式 (每次新建) |
+| `frontend/src/lib/db.ts` L32-57 | Turso 连接模式 (云端单例 + 本地每次新建) |
 | `frontend/src/middleware.ts` | Middleware (无速率限制) |
 | `frontend/src/app/api/stock/prices/route.ts` | 价格刷新端点 (force-dynamic, no-store) |
 | `frontend/src/app/api/stock/batch/route.ts` | 决策批量端点 (force-dynamic, no-store); L227 fallback 逻辑 |

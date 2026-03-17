@@ -216,7 +216,10 @@ export function listModeCatalogForTier(tier: UserTier): ModeCatalogItem[] {
     });
 }
 
+let _schemaEnsured = false;
+
 export async function ensureInvestmentModeSchema(db: DbClient): Promise<void> {
+    if (_schemaEnsured) return;
     await execute(db, `
         CREATE TABLE IF NOT EXISTS user_investment_mode (
             user_id TEXT PRIMARY KEY,
@@ -355,9 +358,17 @@ export async function ensureInvestmentModeSchema(db: DbClient): Promise<void> {
             }
         }
     }
+    _schemaEnsured = true;
 }
 
+const _modeCache = new Map<string, { record: UserModeRecord; ts: number }>();
+const MODE_CACHE_TTL = 300_000; // 5 min
+
 export async function getUserMode(db: DbClient, userId: string, tier: UserTier): Promise<UserModeRecord> {
+    const cacheKey = `${userId}|${tier}`;
+    const cached = _modeCache.get(cacheKey);
+    if (cached && Date.now() - cached.ts < MODE_CACHE_TTL) return cached.record;
+
     const row = await queryOne<{ mode_id?: string; updated_at?: string }>(
         db,
         'SELECT mode_id, updated_at FROM user_investment_mode WHERE user_id = ? LIMIT 1',
@@ -365,19 +376,22 @@ export async function getUserMode(db: DbClient, userId: string, tier: UserTier):
     );
 
     const modeId = row?.mode_id || DEFAULT_MODE_ID;
+    let record: UserModeRecord;
     if (!isModeAllowedForTier(modeId, tier)) {
-        return {
+        record = {
             mode_id: DEFAULT_MODE_ID,
             updated_at: row?.updated_at || null,
             source: 'default_fallback',
         };
+    } else {
+        record = {
+            mode_id: modeId,
+            updated_at: row?.updated_at || null,
+            source: row?.mode_id ? 'user_selection' : 'default_fallback',
+        };
     }
-
-    return {
-        mode_id: modeId,
-        updated_at: row?.updated_at || null,
-        source: row?.mode_id ? 'user_selection' : 'default_fallback',
-    };
+    _modeCache.set(cacheKey, { record, ts: Date.now() });
+    return record;
 }
 
 export async function setUserMode(

@@ -1,13 +1,13 @@
 import { getDbClient } from './db';
 
-/**
- * 获取用户的订阅等级
- * 
- * @param userId 用户唯一标识
- * @returns 'free' | 'pro'
- */
+const _tierCache = new Map<string, { tier: 'free' | 'pro'; ts: number }>();
+const TIER_CACHE_TTL = 300_000; // 5 min
+
 export async function getUserTier(userId: string | null): Promise<'free' | 'pro'> {
     if (!userId) return 'free';
+
+    const cached = _tierCache.get(userId);
+    if (cached && Date.now() - cached.ts < TIER_CACHE_TTL) return cached.tier;
 
     const client = getDbClient();
     try {
@@ -19,13 +19,19 @@ export async function getUserTier(userId: string | null): Promise<'free' | 'pro'
                 args: [userId]
             });
             if (rs.rows.length > 0) {
-                return (rs.rows[0].subscription_tier as 'free' | 'pro') || 'free';
+                const tier = (rs.rows[0].subscription_tier as 'free' | 'pro') || 'free';
+                _tierCache.set(userId, { tier, ts: Date.now() });
+                return tier;
             }
         } else {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const localDb = client as any;
             const row = localDb.prepare("SELECT subscription_tier FROM users WHERE user_id = ? LIMIT 1").get(userId) as { subscription_tier: string } | undefined;
-            if (row) return (row.subscription_tier as 'free' | 'pro') || 'free';
+            if (row) {
+                const tier = (row.subscription_tier as 'free' | 'pro') || 'free';
+                _tierCache.set(userId, { tier, ts: Date.now() });
+                return tier;
+            }
         }
     } catch (e) {
         console.error('Failed to fetch user tier:', e);
