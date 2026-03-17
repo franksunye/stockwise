@@ -214,14 +214,14 @@ async function rscCacheFirst(request) {
       }
     }
     return networkResponse;
-  } catch (err) {
-    // Propagate as network error instead of returning a synthetic 504.
-    // A rejected respondWith() produces a genuine TypeError in the page's fetch(),
-    // which triggers Next.js Router's built-in MPA fallback — the browser then
-    // does a hard navigation that hits navigationCacheFirst → cached HTML shell.
-    // The dashboard error boundary provides an additional safety net if MPA
-    // fallback doesn't fire (older Next.js versions or edge cases).
-    throw err;
+  } catch {
+    // RSC cache empty + network failed.
+    // Return 504 so the dashboard error boundary can auto-recover via
+    // hard navigation, which hits navigationCacheFirst → cached HTML shell.
+    // NOTE: Do NOT throw here — rejected respondWith() has unpredictable
+    // behavior on iOS Safari PWA and does NOT reliably trigger Next.js
+    // MPA fallback. A synthetic 504 is safer and consistently handled.
+    return new Response('Offline or Timeout', { status: 504, statusText: 'Gateway Timeout' });
   }
 }
 

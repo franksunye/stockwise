@@ -18,11 +18,11 @@
 
 建议和以下文档配套阅读：
 
-1. `docs/0_Strategy/01_Product_Positioning_and_Boundaries.md`
+1. `../0_Strategy/01_Product_Positioning_and_Boundaries.md`
    - 解决商业定位与能力边界
-2. `docs/2_Intelligence/44_Quant_Backtesting_Methodology_Industry_Benchmark_2026-03-10.md`
+2. `./44_Quant_Backtesting_Methodology_Industry_Benchmark_2026-03-10.md`
    - 解决当前方法的客观审计与行业对照
-3. `docs/2_Intelligence/39_Tradeability_Dual_Lane_Operations.md`
+3. `./39_Tradeability_Dual_Lane_Operations.md`
    - 解决生产线 / 实验线的工程纪律
 
 一句话说：

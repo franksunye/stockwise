@@ -2,8 +2,6 @@
 
 import { useState, useEffect, useCallback, useMemo, memo, useRef } from 'react';
 import { Plus, Trash2, ArrowLeft, TrendingUp, TrendingDown, Minus, LayoutGrid } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getMarketScene } from '@/lib/date-utils';
 
@@ -47,9 +45,10 @@ const StockItem = memo(({
       transition={{ duration: 0.15 }}
       className="transform-gpu"
     >
-      <Link 
+      <a 
         href="/dashboard"
-        onClick={() => {
+        onClick={(e) => {
+          e.preventDefault();
           try {
             sessionStorage.setItem(DASHBOARD_NAV_INTENT_KEY, JSON.stringify({
               symbol: stock.symbol,
@@ -59,6 +58,10 @@ const StockItem = memo(({
             // non-critical
           }
           setNavigatingTo(stock.symbol);
+          // Hard navigation bypasses RSC soft-nav entirely.
+          // SW's navigationCacheFirst serves cached HTML shell instantly,
+          // immune to RSC failures on weak/offline networks.
+          window.location.href = '/dashboard';
         }}
         className={`glass-card p-5 group transition-all relative block active:scale-95 touch-optimized ${navigatingTo === stock.symbol ? 'bg-white/10 border-indigo-500/30 ring-1 ring-indigo-500/20' : 'hover:bg-white/[0.04]'}`}
       >
@@ -111,15 +114,13 @@ const StockItem = memo(({
             </div>
           )}
        </div>
-      </Link>
+      </a>
     </motion.div>
   );
 });
 StockItem.displayName = 'StockItem';
 
 export default function StockPoolPage() {
-  const router = useRouter();
-  
   const { 
     stocks: globalStocks, 
     loadingPool, 
@@ -159,12 +160,6 @@ export default function StockPoolPage() {
 
   const { tier } = useDashboardAuth();
 
-
-
-  useEffect(() => {
-      // 预加载详情页，提升离线/弱网时的响应速度
-      router.prefetch('/dashboard');
-  }, [router]);
 
 
   useEffect(() => {
@@ -255,9 +250,9 @@ export default function StockPoolPage() {
       {/* Solid/Stable Header Structure (Centered Title) */}
       <header className="shrink-0 z-20 px-6 py-4 flex items-center justify-between bg-[#050508] border-b border-white/5">
         <div className="w-12">
-          <Link href="/dashboard" className="p-2 rounded-full hover:bg-white/5 active:scale-90 transition-all text-slate-400 flex items-center justify-center">
+          <a href="/dashboard" className="p-2 rounded-full hover:bg-white/5 active:scale-90 transition-all text-slate-400 flex items-center justify-center">
             <ArrowLeft className="w-5 h-5" />
-          </Link>
+          </a>
         </div>
         
         <div className="flex-1 text-center">

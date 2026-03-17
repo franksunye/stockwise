@@ -9,9 +9,17 @@
 
 1. `39_Tradeability_Dual_Lane_Operations.md`  
    运行手册：双轨执行、命令、核验 SQL、回滚
-2. `27_Acceptance_Criteria_v1.md`  
+2. `05_Quant_Industry_Map_and_StockWise_DoFaShu.md`  
+   量化行业地图与道法术器：战略定位与路线图
+3. `06_Quant_Methods_Masters_Research_Framework.md`  
+   量化方法与大师研究框架
+4. `07_StockWise_Method_Registry_Design.md`  
+   量化方法库设计规范
+5. `44_Quant_Backtesting_Methodology_Industry_Benchmark_2026-03-10.md`  
+   量化回测方法审计与行业对照
+6. `27_Acceptance_Criteria_v1.md`  
    验收门槛：一致性、收益质量、风险、输出完整性
-3. `27_DeepSeek_V3_Rich_Context_Limits.md`  
+7. `27_DeepSeek_V3_Rich_Context_Limits.md`  
    研究边界与证据登记
 
 当前这条线的现行主依据补充为：

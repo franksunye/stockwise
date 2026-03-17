@@ -11,9 +11,6 @@ This directory serves as the unified single source of truth for the 知守 AI (Z
 - [Monetization & Pricing Strategy](./0_Strategy/02_Monetization_Pricing_Strategy.md)
 - [Team Responsibility Matrix](./0_Strategy/03_Team_Responsibility_Matrix.md)
 - [Milestones & Execution Log](./0_Strategy/04_Milestones_Execution_Log.md)
-- [Quant Industry Map & Dao-Fa-Shu-Qi](./0_Strategy/05_Quant_Industry_Map_and_StockWise_DoFaShu.md)
-- [Methods & Masters Research Framework](./0_Strategy/06_Quant_Methods_Masters_Research_Framework.md)
-- [Method Registry Design](./0_Strategy/07_StockWise_Method_Registry_Design.md)
 
 ### [1_Engineering/](./1_Engineering/) - How (System)
 > Project "Backbone": System architecture, reliability, and quality standards.
@@ -35,9 +32,14 @@ This directory serves as the unified single source of truth for the 知守 AI (Z
 
 ### [2_Intelligence/](./2_Intelligence/) - How (Brain)
 > Project "AI Logic": Prompt engineering, model strategies, and core algorithms.
+- **[Quant Strategy & Methodology]**
+  - [Quant Industry Map & Dao-Fa-Shu-Qi](./2_Intelligence/05_Quant_Industry_Map_and_StockWise_DoFaShu.md)
+  - [Methods & Masters Research Framework](./2_Intelligence/06_Quant_Methods_Masters_Research_Framework.md)
+  - [Method Registry Design](./2_Intelligence/07_StockWise_Method_Registry_Design.md)
 - [Dual-Lane Operations](./2_Intelligence/39_Tradeability_Dual_Lane_Operations.md)
 - [Context Limits Research](./2_Intelligence/27_DeepSeek_V3_Rich_Context_Limits.md)
 - [Acceptance Criteria v1](./2_Intelligence/27_Acceptance_Criteria_v1.md)
+- [Quant Backtesting Methodology](./2_Intelligence/44_Quant_Backtesting_Methodology_Industry_Benchmark_2026-03-10.md)
 
 ### Historical Records: Investment Mode / Tradeability
 - [Promotion Execution Plan](./1_Engineering/archive/17_Tradeability_Promotion_Execution_Plan.md)
