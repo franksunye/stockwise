@@ -246,7 +246,7 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
                     </div>
 
                     {/* RSI 仅在事实已发生时显示 */}
-                    {isTradingDay(undefined, marketType) && !isPreMarket && (
+                    {isTradingDay(undefined, marketType) && !isPreMarket && data.price.rsi != null && (
                       <div className="mt-2 pt-2 border-t border-white/5 flex items-center justify-between">
                         <span className="text-[10px] text-slate-600 font-bold uppercase">RSI</span>
                         <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-full bg-white/5 ${
