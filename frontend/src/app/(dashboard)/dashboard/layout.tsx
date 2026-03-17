@@ -360,12 +360,15 @@ export default function DashboardLayout({
   // Dismiss the server-rendered splash once dashboard content is ready.
   // The splash stays visible while React hydrates & resolves auth from cache,
   // then fades out to reveal the actual content underneath.
+  // NOTE: We only visually hide here (opacity + pointerEvents). The splash
+  // DOM node stays in the tree so React's reconciliation doesn't break.
+  // It's invisible and inert, so no UX impact.
   useEffect(() => {
     if (isAuthorized !== null) {
       const splash = document.getElementById('app-splash');
       if (splash) {
         splash.style.opacity = '0';
-        setTimeout(() => { try { splash.remove(); } catch {} }, 260);
+        splash.style.pointerEvents = 'none';
       }
     }
   }, [isAuthorized]);

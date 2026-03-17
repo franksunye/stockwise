@@ -141,12 +141,18 @@ export default function RootLayout({
                     var shouldShowSplash = isMobile && (isDashboardRoute || (isAppHost && path === '/') || (isLocalDev && isDashboardRoute));
 
                     if (!shouldShowSplash) {
-                      splash.style.display = 'none';
+                      splash.style.opacity = '0';
+                      splash.style.pointerEvents = 'none';
                     } else {
-                      // Safety timeout: auto-hide if React fails to dismiss it
+                      // Safety timeout: visually hide if React fails to dismiss it.
+                      // CRITICAL: Do NOT call s.remove() here — the splash is a
+                      // server-rendered React node. Removing it before hydration
+                      // causes a fatal React hydration mismatch on slow cold starts
+                      // (especially iOS PWA after SW cache version bumps).
+                      // React will handle the actual DOM removal after hydration.
                       setTimeout(function() {
                         var s = document.getElementById('app-splash');
-                        if (s) { s.style.opacity = '0'; setTimeout(function() { try { s.remove(); } catch(e){} }, 260); }
+                        if (s) { s.style.opacity = '0'; s.style.pointerEvents = 'none'; }
                       }, 4000);
                     }
                   }
