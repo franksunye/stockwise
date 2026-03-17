@@ -411,8 +411,10 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
             if (timeSinceLastFetch > RESUME_REFRESH_THRESHOLD) {
                 loadAllData(true);
             }
+            // 价格刷新仅在距上次价格刷新超过 30s 时触发，避免与 batch 初始加载或定时器叠加
+            const timeSinceLastPrice = Date.now() - lastPriceRefreshTimeRef.current;
             const symbols = watchlist.map(w => w.symbol);
-            if (symbols.length > 0) {
+            if (symbols.length > 0 && timeSinceLastPrice > 30000) {
                 void refreshPrices(symbols);
             }
         };
@@ -446,6 +448,8 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
     }, [loadAllData]);
 
     // 价格层定时刷新（高频）
+    // 首次价格数据由 batch 端点返回，无需在 mount 时额外调用 refreshPrices。
+    // 仅启动周期定时器，首次独立价格刷新在第一个 interval 后触发。
     useEffect(() => {
         const symbols = watchlist.map(w => w.symbol);
         if (symbols.length === 0) {
@@ -456,8 +460,6 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
             return;
         }
 
-        // 先做一次价格刷新，随后进入周期刷新
-        refreshPrices(symbols);
         if (priceIntervalRef.current) {
             clearInterval(priceIntervalRef.current);
         }
