@@ -214,9 +214,14 @@ async function rscCacheFirst(request) {
       }
     }
     return networkResponse;
-  } catch {
-    // Return a 504 to force Next.js to hard-navigate, which will hit the App Shell
-    return new Response('Offline or Timeout', { status: 504, statusText: 'Gateway Timeout' });
+  } catch (err) {
+    // Propagate as network error instead of returning a synthetic 504.
+    // A rejected respondWith() produces a genuine TypeError in the page's fetch(),
+    // which triggers Next.js Router's built-in MPA fallback — the browser then
+    // does a hard navigation that hits navigationCacheFirst → cached HTML shell.
+    // The dashboard error boundary provides an additional safety net if MPA
+    // fallback doesn't fire (older Next.js versions or edge cases).
+    throw err;
   }
 }
 

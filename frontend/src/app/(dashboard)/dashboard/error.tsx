@@ -15,6 +15,10 @@ function isChunkLoadError(error: Error): boolean {
   );
 }
 
+const CHUNK_RELOAD_KEY = 'ziso_chunk_reload_ts';
+const NAV_RECOVERY_KEY = 'ziso_nav_recovery_ts';
+const RECOVERY_COOLDOWN_MS = 10_000;
+
 export default function DashboardError({
   error,
   reset,
@@ -22,23 +26,37 @@ export default function DashboardError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const [showErrorUI, setShowErrorUI] = useState(false);
   const [retrying, setRetrying] = useState(false);
 
   useEffect(() => {
     console.error('[Dashboard Error Boundary]', error);
 
-    // ChunkLoadError = deployment version mismatch or stale SW cache.
-    // Tell SW to purge stale navigation/RSC caches, then hard reload.
     if (isChunkLoadError(error)) {
-      const key = 'ziso_chunk_reload_ts';
-      const lastReload = Number(sessionStorage.getItem(key) || '0');
-      if (Date.now() - lastReload > 10_000) {
-        sessionStorage.setItem(key, String(Date.now()));
+      const lastReload = Number(sessionStorage.getItem(CHUNK_RELOAD_KEY) || '0');
+      if (Date.now() - lastReload > RECOVERY_COOLDOWN_MS) {
+        sessionStorage.setItem(CHUNK_RELOAD_KEY, String(Date.now()));
         navigator.serviceWorker?.controller?.postMessage('CLEAR_CACHES');
         window.location.reload();
         return;
       }
+      setShowErrorUI(true);
+      return;
     }
+
+    // Non-chunk errors (RSC navigation timeout, network failure, etc.):
+    // Auto-recover via hard navigation → SW's navigationCacheFirst serves
+    // the cached HTML shell instantly, avoiding the error page entirely.
+    // CRITICAL: Do NOT send CLEAR_CACHES here — the navigation HTML cache
+    // is our recovery lifeline, especially when completely offline.
+    const lastRecovery = Number(sessionStorage.getItem(NAV_RECOVERY_KEY) || '0');
+    if (Date.now() - lastRecovery > RECOVERY_COOLDOWN_MS) {
+      sessionStorage.setItem(NAV_RECOVERY_KEY, String(Date.now()));
+      window.location.replace(window.location.pathname + window.location.search);
+      return;
+    }
+
+    setShowErrorUI(true);
   }, [error]);
 
   const handleRetry = () => {
@@ -51,6 +69,8 @@ export default function DashboardError({
       setTimeout(() => setRetrying(false), 1000);
     }
   };
+
+  if (!showErrorUI) return null;
 
   return (
     <div className="fixed inset-0 bg-[#050508] flex items-center justify-center px-8">
