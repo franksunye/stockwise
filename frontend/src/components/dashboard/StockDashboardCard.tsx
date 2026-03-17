@@ -336,12 +336,10 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
            </div>
         </section>
 
-        {data.history.length > 1 && (
-          <div className="flex flex-col items-center gap-1.5 pt-2 opacity-20">
-            <span className="text-[10px] font-black tracking-[0.2em] text-slate-500 uppercase">上划追溯历史轨迹</span>
-            <ChevronDown size={14} className="animate-bounce" />
-          </div>
-        )}
+        <div className={`flex flex-col items-center gap-1.5 pt-2 opacity-20 transition-opacity duration-300 ${data.history.length > 1 ? 'visible' : 'invisible'}`}>
+          <span className="text-[10px] font-black tracking-[0.2em] text-slate-500 uppercase">上划追溯历史轨迹</span>
+          <ChevronDown size={14} className="animate-bounce" />
+        </div>
       </div>
     </div>
   );
