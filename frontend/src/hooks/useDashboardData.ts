@@ -4,24 +4,27 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { getCurrentUser } from '@/lib/user';
 import { StockData, MarketAlmanacData } from '@/lib/types';
 import { getRule } from '@/lib/storage';
-import { getMarketScene } from '@/lib/date-utils';
+import { getMarketScene, isTradingDay, getHKTime, formatDateStr } from '@/lib/date-utils';
 import { WatchlistItem } from './useWatchlist';
-
-// 动态刷新间隔（决策层）：交易时段 60 分钟，非交易时段 120 分钟
-// 决策 / 战术数据按日级更新即可，无需高频轮询。
-const TRADING_REFRESH_INTERVAL = 60 * 60 * 1000;  // 60分钟
-const DEFAULT_REFRESH_INTERVAL = 120 * 60 * 1000; // 120分钟
 
 // 价格层刷新间隔：盘中 3 分钟，非交易时段 10 分钟
 const TRADING_PRICE_REFRESH_INTERVAL = 3 * 60 * 1000;
 const DEFAULT_PRICE_REFRESH_INTERVAL = 10 * 60 * 1000;
 const CACHE_KEY = 'stockwise_dashboard_cache_v1';
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24小时过期
-const RESUME_REFRESH_THRESHOLD = 1 * 60 * 1000; // iOS PWA 回前台后 1min 以上即尝试刷新
 
-function getRefreshInterval(): number {
-    const scene = getMarketScene();
-    return scene === 'trading' ? TRADING_REFRESH_INTERVAL : DEFAULT_REFRESH_INTERVAL;
+// 预测层轮询间隔：仅在收盘后等待当日预测时使用
+const PREDICTION_POLL_INTERVAL = 5 * 60 * 1000; // 5 min
+
+function arePredictionsFreshForToday(stocks: StockData[]): boolean {
+    const todayStr = formatDateStr(getHKTime());
+    return stocks.some(s => s.prediction?.date === todayStr);
+}
+
+function shouldPollBatch(stocks: StockData[]): boolean {
+    if (getMarketScene() !== 'post_market') return false;
+    if (!isTradingDay()) return false;
+    return !arePredictionsFreshForToday(stocks);
 }
 
 function formatRefreshError(error: unknown, sessionRecoveryAttempted: boolean): string {
@@ -415,19 +418,15 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
         prevHistoryLimitRef.current = historyLimit;
     }, [historyLimit, watchlist.length, loadAllData]);
 
-    // 页面可见性检测：当用户切回页面时刷新数据
-    // priceOnlyRefresh 模式下只刷价格，跳过重量级 batch 请求
+    // 页面可见性检测：切回页面时刷新
+    // Batch 仅在收盘后等待当日预测时触发；其余场景只刷价格
     useEffect(() => {
         const refreshOnResume = () => {
-            if (!priceOnlyRefresh) {
-                const timeSinceLastFetch = Date.now() - lastFetchTimeRef.current;
-                if (timeSinceLastFetch > RESUME_REFRESH_THRESHOLD) {
-                    loadAllData(true);
-                }
+            if (!priceOnlyRefresh && shouldPollBatch(stocksRef.current)) {
+                loadAllData(true);
             }
-            const timeSinceLastPrice = Date.now() - lastPriceRefreshTimeRef.current;
             const symbols = watchlist.map(w => w.symbol);
-            if (symbols.length > 0 && timeSinceLastPrice > 30000) {
+            if (symbols.length > 0) {
                 void refreshPrices(symbols);
             }
         };
@@ -451,12 +450,15 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
         };
     }, [loadAllData, watchlist, refreshPrices, priceOnlyRefresh]);
 
-    // 决策层定时刷新（低频）
-    // priceOnlyRefresh 模式下跳过：预测数据日级更新，由缓存 + 首次加载覆盖
+    // 预测层智能轮询：仅在收盘后等待当日预测时每 5 分钟检查一次
+    // 盘中/周末/预测已到达 → 定时器空转不发请求
     useEffect(() => {
         if (priceOnlyRefresh) return;
-        loadAllData();
-        intervalRef.current = setInterval(() => loadAllData(true), getRefreshInterval());
+        intervalRef.current = setInterval(() => {
+            if (shouldPollBatch(stocksRef.current)) {
+                loadAllData(true);
+            }
+        }, PREDICTION_POLL_INTERVAL);
         return () => {
             if (intervalRef.current) clearInterval(intervalRef.current);
         };
