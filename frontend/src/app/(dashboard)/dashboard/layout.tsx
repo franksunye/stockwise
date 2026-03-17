@@ -394,10 +394,12 @@ export default function DashboardLayout({
         splash.style.opacity = '0';
         splash.style.pointerEvents = 'none';
       }
-      // Mark the session as active so the inline boot script can suppress
+      // Write a localStorage timestamp so the inline boot script can suppress
       // the splash on subsequent in-app navigations (e.g. sub-page → dashboard).
-      // sessionStorage is cleared on cold start, so this is safe.
-      try { sessionStorage.setItem('stockwise_session_active', '1'); } catch { /* non-critical */ }
+      // Uses localStorage (not sessionStorage) because iOS standalone WKWebView
+      // can silently clear sessionStorage during background/resume cycles.
+      // The boot script uses a 2-minute TTL to still show splash on true cold starts.
+      try { localStorage.setItem('stockwise_splash_ts', String(Date.now())); } catch { /* non-critical */ }
     }
   }, [isAuthorized]);
 

@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
-import { useSearchParams } from 'next/navigation';
 import { StockData } from '@/lib/types';
+
+const DASHBOARD_NAV_INTENT_KEY = 'stockwise_dashboard_nav_intent';
+const NAV_INTENT_MAX_AGE = 15_000;
 
 export interface VerticalLayerState {
     type: 'today' | 'history';
@@ -32,8 +34,7 @@ export function useTikTokScroll(stocks: StockData[], options?: UseTikTokScrollOp
     const positionNonceRef = useRef(0);
 
     const scrollRef = useRef<HTMLDivElement>(null);
-    const searchParams = useSearchParams();
-    const targetSymbol = searchParams.get('symbol');
+    const navIntentSymbol = useRef<string | null | undefined>(undefined);
     const hasAutoScrolled = useRef(false);
     const stockCount = stocks.length;
 
@@ -189,25 +190,38 @@ export function useTikTokScroll(stocks: StockData[], options?: UseTikTokScrollOp
     }, [currentIndex, layerStates, stocks]);
 
     // 处理从股票池跳转过来的定位逻辑
+    // 使用 ref 而非 useState 读取 sessionStorage，避免 SSR/hydration 状态不一致：
+    // Server 端无 window → null，Client 端 hydration 可能读到 symbol → mismatch。
+    // ref 不参与 React 渲染树比对，彻底消除跨平台 hydration 风险。
     useLayoutEffect(() => {
+        if (navIntentSymbol.current === undefined) {
+            navIntentSymbol.current = null;
+            try {
+                const raw = sessionStorage.getItem(DASHBOARD_NAV_INTENT_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed?.symbol && Date.now() - (parsed.timestamp || 0) < NAV_INTENT_MAX_AGE) {
+                        navIntentSymbol.current = parsed.symbol;
+                    }
+                }
+            } catch { /* non-critical */ }
+        }
+
+        const target = navIntentSymbol.current;
         const container = scrollRef.current;
-        if (targetSymbol && stockCount > 0 && container && !hasAutoScrolled.current) {
-            const index = stocks.findIndex(s => s.symbol === targetSymbol || s.symbol.endsWith(targetSymbol));
+        if (target && stockCount > 0 && container && !hasAutoScrolled.current) {
+            const index = stocks.findIndex(s => s.symbol === target || s.symbol.endsWith(target));
             if (index !== -1) {
                 hasAutoScrolled.current = true;
 
-                // 1. 同步更新索引，确保背景色等 UI 状态立即对齐
                 setCurrentIndex(index);
 
-                // 2. 立即执行物理滚动，消除 setTimeout 导致的视觉延迟
-                // 在极少数情况下 clientWidth 可能由于渲染未完成为 0，添加兜底逻辑
                 const width = container.clientWidth || window.innerWidth;
                 container.scrollTo({
                     left: index * width,
                     behavior: 'instant'
                 });
 
-                // 3. 稳健性兜底：针对某些浏览器内核可能的渲染延迟，在下一帧再次校准
                 const timer = setTimeout(() => {
                     if (container.scrollLeft !== index * container.clientWidth) {
                         container.scrollTo({
@@ -220,7 +234,7 @@ export function useTikTokScroll(stocks: StockData[], options?: UseTikTokScrollOp
                 return () => clearTimeout(timer);
             }
         }
-    }, [stockCount, targetSymbol, stocks]);
+    }, [stockCount, stocks]);
 
     return {
         currentIndex,

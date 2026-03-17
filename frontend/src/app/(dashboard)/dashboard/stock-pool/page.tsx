@@ -48,7 +48,7 @@ const StockItem = memo(({
       className="transform-gpu"
     >
       <Link 
-        href={`/dashboard?symbol=${stock.symbol}`}
+        href="/dashboard"
         onClick={() => {
           try {
             sessionStorage.setItem(DASHBOARD_NAV_INTENT_KEY, JSON.stringify({

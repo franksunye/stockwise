@@ -140,10 +140,14 @@ export default function RootLayout({
                     var isLocalDev = host === 'localhost' || host === '127.0.0.1';
 
                     // Suppress splash for in-app navigations (any sub-page → dashboard).
-                    // stockwise_session_active is written once the dashboard layout mounts
-                    // and auth resolves. sessionStorage is cleared on cold start, so this
-                    // flag reliably distinguishes internal navigation from a true cold start.
-                    var isInSession = sessionStorage.getItem('stockwise_session_active') === '1';
+                    // Uses localStorage with a 2-minute TTL instead of sessionStorage
+                    // because iOS standalone WKWebView can silently clear sessionStorage
+                    // during background/resume cycles, causing the splash to reappear.
+                    var isInSession = false;
+                    try {
+                      var splashTs = parseInt(localStorage.getItem('stockwise_splash_ts') || '0', 10);
+                      isInSession = (Date.now() - splashTs < 120000);
+                    } catch(ex) {}
 
                     var shouldShowSplash = !isInSession && isMobile && (isDashboardRoute || (isAppHost && path === '/') || (isLocalDev && isDashboardRoute));
 
