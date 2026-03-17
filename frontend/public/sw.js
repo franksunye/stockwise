@@ -10,7 +10,7 @@
 //   - Push:     Preserve existing notification handling
 // =============================================================================
 
-const CACHE_VERSION = 'ziso-v9';
+const CACHE_VERSION = 'ziso-v10';
 
 // Critical resources that MUST be available offline for the App Shell
 const PRECACHE_URLS = [
@@ -277,8 +277,9 @@ async function cacheFirst(request) {
     
     // VERSION MISMATCH PROTECTION:
     // If a request for a JS chunk returns 404, it means the build has updated.
-    // We should NOT cache this error, and potentially let the client handle it.
+    // Purge stale navigation/RSC caches that reference old chunk URLs.
     if (networkResponse.status === 404 && request.url.includes('/_next/static/')) {
+        purgeStaleNavigationCache();
         return networkResponse;
     }
 
@@ -295,6 +296,33 @@ async function cacheFirst(request) {
       headers: { 'Content-Type': 'text/plain' },
     });
   }
+}
+
+/**
+ * Purge stale navigation and RSC cache entries after detecting a version mismatch
+ * (e.g., a /_next/static/ chunk returning 404 means a new deployment invalidated old chunks).
+ * Navigation HTML and RSC payloads reference specific chunk hashes; once those hashes change,
+ * the cached HTML/RSC becomes poisonous — it will try to load non-existent chunks and crash.
+ */
+function purgeStaleNavigationCache() {
+  getCache().then((cache) => {
+    cache.keys().then((keys) => {
+      let purged = 0;
+      for (const req of keys) {
+        const url = req.url || '';
+        const isNavOrRSC =
+          url.endsWith('__RSC') ||
+          (!url.includes('/_next/') && !url.includes('/api/') && !url.includes('.'));
+        if (isNavOrRSC) {
+          cache.delete(req);
+          purged++;
+        }
+      }
+      if (purged > 0) {
+        console.log('[SW] Purged', purged, 'stale navigation/RSC entries after version mismatch');
+      }
+    });
+  }).catch(() => {});
 }
 
 self.addEventListener('fetch', (event) => {
@@ -382,6 +410,9 @@ self.addEventListener('fetch', (event) => {
 self.addEventListener('message', (event) => {
   if (event.data === 'SKIP_WAITING') {
     self.skipWaiting();
+  }
+  if (event.data === 'CLEAR_CACHES') {
+    purgeStaleNavigationCache();
   }
 });
 // =============================================================================
