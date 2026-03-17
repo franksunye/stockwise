@@ -138,7 +138,14 @@ export default function RootLayout({
                     var isAppHost = host === 'app.ziso.cc' || host.indexOf('app.') === 0;
                     var isDashboardRoute = path === '/dashboard' || path.indexOf('/dashboard/') === 0;
                     var isLocalDev = host === 'localhost' || host === '127.0.0.1';
-                    var shouldShowSplash = isMobile && (isDashboardRoute || (isAppHost && path === '/') || (isLocalDev && isDashboardRoute));
+
+                    // Suppress splash for in-app navigations (any sub-page → dashboard).
+                    // stockwise_session_active is written once the dashboard layout mounts
+                    // and auth resolves. sessionStorage is cleared on cold start, so this
+                    // flag reliably distinguishes internal navigation from a true cold start.
+                    var isInSession = sessionStorage.getItem('stockwise_session_active') === '1';
+
+                    var shouldShowSplash = !isInSession && isMobile && (isDashboardRoute || (isAppHost && path === '/') || (isLocalDev && isDashboardRoute));
 
                     if (!shouldShowSplash) {
                       splash.style.opacity = '0';

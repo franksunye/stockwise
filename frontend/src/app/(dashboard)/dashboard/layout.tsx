@@ -370,6 +370,10 @@ export default function DashboardLayout({
         splash.style.opacity = '0';
         splash.style.pointerEvents = 'none';
       }
+      // Mark the session as active so the inline boot script can suppress
+      // the splash on subsequent in-app navigations (e.g. sub-page → dashboard).
+      // sessionStorage is cleared on cold start, so this is safe.
+      try { sessionStorage.setItem('stockwise_session_active', '1'); } catch { /* non-critical */ }
     }
   }, [isAuthorized]);
 
