@@ -12,9 +12,7 @@ import {
   type MarketAlmanacHandle
 } from '@/components/dashboard';
 import { formatStockSymbol } from '@/lib/date-utils';
-import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { useRouter } from 'next/navigation';
 import { useStocks } from '@/context/StockContext';
 import { useTikTokScroll } from '@/hooks/useTikTokScroll';
 
@@ -80,7 +78,6 @@ const DashboardBackground = memo(({ isAlmanac, prediction }: { isAlmanac: boolea
 DashboardBackground.displayName = 'DashboardBackground';
 
 function DashboardContent() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const [userCenterOpen, setUserCenterOpen] = useState(false);
   const [briefOpen, setBriefOpen] = useState(false);
@@ -121,8 +118,8 @@ function DashboardContent() {
 
   const scrollOptions = useMemo(() => ({
     onOverscrollRight: () => setUserCenterOpen(true),
-    onOverscrollLeft: () => router.push('/dashboard/stock-pool')
-  }), [router]);
+    onOverscrollLeft: () => { window.location.href = '/dashboard/stock-pool'; }
+  }), []);
 
   const {
     currentIndex,
@@ -320,9 +317,9 @@ function DashboardContent() {
           ))}
         </div>
         <div className="w-full flex justify-between items-center pointer-events-auto">
-          <Link href="/dashboard/stock-pool" prefetch className="p-3 rounded-2xl bg-white/5 border border-white/10 active:scale-95 transition-all pointer-events-auto inline-flex items-center justify-center cursor-pointer">
+          <a href="/dashboard/stock-pool" className="p-3 rounded-2xl bg-white/5 border border-white/10 active:scale-95 transition-all pointer-events-auto inline-flex items-center justify-center cursor-pointer">
             <Grid className="w-5 h-5 text-indigo-400" />
-          </Link>
+          </a>
           <button onClick={openUserCenter} className="w-11 h-11 rounded-full bg-white/5 border border-white/10 flex items-center justify-center transition-all active:scale-90 hover:bg-white/10 shrink-0 cursor-pointer">
             <User className="w-5 h-5 text-slate-400" />
           </button>

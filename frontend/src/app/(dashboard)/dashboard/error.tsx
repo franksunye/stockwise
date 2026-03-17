@@ -52,7 +52,7 @@ export default function DashboardError({
     const lastRecovery = Number(sessionStorage.getItem(NAV_RECOVERY_KEY) || '0');
     if (Date.now() - lastRecovery > RECOVERY_COOLDOWN_MS) {
       sessionStorage.setItem(NAV_RECOVERY_KEY, String(Date.now()));
-      window.location.replace(window.location.pathname + window.location.search);
+      window.location.href = window.location.pathname + window.location.search;
       return;
     }
 
