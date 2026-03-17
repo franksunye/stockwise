@@ -29,7 +29,8 @@ const StockContext = createContext<StockContextType | undefined>(undefined);
 
 export function StockProvider({ children }: { children: ReactNode }) {
     const pathname = usePathname();
-    const historyLimit = pathname === '/dashboard/stock-pool' ? LITE_HISTORY_LIMIT : FULL_HISTORY_LIMIT;
+    const isStockPool = pathname === '/dashboard/stock-pool';
+    const historyLimit = isStockPool ? LITE_HISTORY_LIMIT : FULL_HISTORY_LIMIT;
 
     const { watchlist, loading: loadingList, addStock, removeStock } = useWatchlist();
     const {
@@ -42,7 +43,7 @@ export function StockProvider({ children }: { children: ReactNode }) {
         lastRefreshError,
         refresh,
         loadMoreHistory
-    } = useDashboardData(watchlist, loadingList, historyLimit);
+    } = useDashboardData(watchlist, loadingList, historyLimit, isStockPool);
 
     const value = useMemo(() => ({
         stocks,

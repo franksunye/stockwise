@@ -65,7 +65,7 @@ function buildBatchUrl(symbols: string, historyLimit: number): string {
 
 const DEFAULT_HISTORY_LIMIT = 5;
 
-export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: boolean, historyLimit: number = DEFAULT_HISTORY_LIMIT) {
+export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: boolean, historyLimit: number = DEFAULT_HISTORY_LIMIT, priceOnlyRefresh = false) {
 
     const [stocks, setStocks] = useState<StockData[]>([]);
     const [almanac, setAlmanac] = useState<MarketAlmanacData | null>(null);
@@ -415,14 +415,16 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
         prevHistoryLimitRef.current = historyLimit;
     }, [historyLimit, watchlist.length, loadAllData]);
 
-    // 页面可见性检测：当用户切回页面时刷新数据（决策层 + 价格层）
+    // 页面可见性检测：当用户切回页面时刷新数据
+    // priceOnlyRefresh 模式下只刷价格，跳过重量级 batch 请求
     useEffect(() => {
         const refreshOnResume = () => {
-            const timeSinceLastFetch = Date.now() - lastFetchTimeRef.current;
-            if (timeSinceLastFetch > RESUME_REFRESH_THRESHOLD) {
-                loadAllData(true);
+            if (!priceOnlyRefresh) {
+                const timeSinceLastFetch = Date.now() - lastFetchTimeRef.current;
+                if (timeSinceLastFetch > RESUME_REFRESH_THRESHOLD) {
+                    loadAllData(true);
+                }
             }
-            // 价格刷新仅在距上次价格刷新超过 30s 时触发，避免与 batch 初始加载或定时器叠加
             const timeSinceLastPrice = Date.now() - lastPriceRefreshTimeRef.current;
             const symbols = watchlist.map(w => w.symbol);
             if (symbols.length > 0 && timeSinceLastPrice > 30000) {
@@ -447,16 +449,18 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
             window.removeEventListener('pageshow', refreshOnResume);
             window.removeEventListener('online', refreshOnResume);
         };
-    }, [loadAllData, watchlist, refreshPrices]);
+    }, [loadAllData, watchlist, refreshPrices, priceOnlyRefresh]);
 
     // 决策层定时刷新（低频）
+    // priceOnlyRefresh 模式下跳过：预测数据日级更新，由缓存 + 首次加载覆盖
     useEffect(() => {
+        if (priceOnlyRefresh) return;
         loadAllData();
         intervalRef.current = setInterval(() => loadAllData(true), getRefreshInterval());
         return () => {
             if (intervalRef.current) clearInterval(intervalRef.current);
         };
-    }, [loadAllData]);
+    }, [loadAllData, priceOnlyRefresh]);
 
     // 价格层定时刷新（高频）
     // 首次价格数据由 batch 端点返回，无需在 mount 时额外调用 refreshPrices。
