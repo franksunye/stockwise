@@ -7,6 +7,7 @@ import time
 import random
 import re
 import weakref
+import os
 import akshare as ak
 import pandas as pd
 from typing import Dict, Any, Optional, List
