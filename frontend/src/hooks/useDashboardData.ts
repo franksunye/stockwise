@@ -79,6 +79,7 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
     const [lastRefreshError, setLastRefreshError] = useState<string | null>(null);
 
     const lastFetchTimeRef = useRef<number>(0);
+    const fetchGenRef = useRef<number>(0);
     const stocksRef = useRef<StockData[]>(stocks);
     const almanacRef = useRef<MarketAlmanacData | null>(almanac);
     const almanacsRef = useRef<MarketAlmanacData[]>(almanacs);
@@ -169,6 +170,7 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
         }
 
         lastFetchTimeRef.current = now;
+        const gen = ++fetchGenRef.current;
 
         if (!silent) {
             setIsRefreshing(true);
@@ -279,6 +281,12 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
                     justUpdated: silent
                 } as StockData;
             });
+
+            // Discard stale response: a newer loadAllData was triggered while
+            // this one was in flight (e.g. lite→full historyLimit transition).
+            if (gen !== fetchGenRef.current) {
+                return false;
+            }
 
             setStocks(validResults);
             setLoadingPool(false);
