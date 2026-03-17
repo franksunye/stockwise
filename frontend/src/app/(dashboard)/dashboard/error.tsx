@@ -97,6 +97,26 @@ export default function DashboardError({
             ref: {error.digest}
           </p>
         )}
+
+        {/* Diagnostic info — visible to help identify root cause */}
+        <div className="mt-8 text-left bg-slate-900/80 border border-slate-700/50 rounded-xl p-4 max-h-[40vh] overflow-y-auto">
+          <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-2 font-bold">诊断信息</p>
+          <div className="space-y-1.5 text-[11px] font-mono text-slate-400 break-all leading-relaxed">
+            <p><span className="text-amber-400">name:</span> {error.name}</p>
+            <p><span className="text-amber-400">message:</span> {error.message}</p>
+            {error.digest && <p><span className="text-amber-400">digest:</span> {error.digest}</p>}
+            <p><span className="text-amber-400">url:</span> {typeof window !== 'undefined' ? window.location.href : 'SSR'}</p>
+            <p><span className="text-amber-400">sw:</span> {typeof navigator !== 'undefined' && navigator.serviceWorker?.controller ? 'active' : 'none'}</p>
+            <p><span className="text-amber-400">online:</span> {typeof navigator !== 'undefined' ? String(navigator.onLine) : '?'}</p>
+            <p><span className="text-amber-400">time:</span> {new Date().toISOString()}</p>
+            {error.stack && (
+              <details className="mt-2">
+                <summary className="text-amber-400 cursor-pointer">stack trace</summary>
+                <pre className="mt-1 text-[9px] text-slate-500 whitespace-pre-wrap">{error.stack}</pre>
+              </details>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
