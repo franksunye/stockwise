@@ -1,9 +1,13 @@
 'use client';
 
 import React, { createContext, useContext, ReactNode, useMemo } from 'react';
+import { usePathname } from 'next/navigation';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { useWatchlist, WatchlistItem } from '@/hooks/useWatchlist';
 import { StockData, MarketAlmanacData } from '@/lib/types';
+
+const LITE_HISTORY_LIMIT = 1;
+const FULL_HISTORY_LIMIT = 5;
 
 interface StockContextType {
     stocks: StockData[];
@@ -24,6 +28,9 @@ interface StockContextType {
 const StockContext = createContext<StockContextType | undefined>(undefined);
 
 export function StockProvider({ children }: { children: ReactNode }) {
+    const pathname = usePathname();
+    const historyLimit = pathname === '/dashboard/stock-pool' ? LITE_HISTORY_LIMIT : FULL_HISTORY_LIMIT;
+
     const { watchlist, loading: loadingList, addStock, removeStock } = useWatchlist();
     const {
         stocks,
@@ -35,7 +42,7 @@ export function StockProvider({ children }: { children: ReactNode }) {
         lastRefreshError,
         refresh,
         loadMoreHistory
-    } = useDashboardData(watchlist, loadingList);
+    } = useDashboardData(watchlist, loadingList, historyLimit);
 
     const value = useMemo(() => ({
         stocks,

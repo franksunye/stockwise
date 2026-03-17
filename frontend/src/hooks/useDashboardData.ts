@@ -53,18 +53,19 @@ function formatRefreshError(error: unknown, sessionRecoveryAttempted: boolean): 
     return '未知错误';
 }
 
-function buildBatchUrl(symbols: string): string {
+function buildBatchUrl(symbols: string, historyLimit: number): string {
     const params = new URLSearchParams({
         symbols,
-        historyLimit: '5',
+        historyLimit: String(historyLimit),
         _t: String(Date.now())
     });
 
     return `/api/stock/batch?${params.toString()}`;
 }
 
-export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: boolean) {
-    // Watchlist passed from props to avoid redundant hook calls in unified context
+const DEFAULT_HISTORY_LIMIT = 5;
+
+export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: boolean, historyLimit: number = DEFAULT_HISTORY_LIMIT) {
 
     const [stocks, setStocks] = useState<StockData[]>([]);
     const [almanac, setAlmanac] = useState<MarketAlmanacData | null>(null);
@@ -78,6 +79,7 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
     const stocksRef = useRef<StockData[]>(stocks);
     const almanacRef = useRef<MarketAlmanacData | null>(almanac);
     const almanacsRef = useRef<MarketAlmanacData[]>(almanacs);
+    const prevHistoryLimitRef = useRef<number>(historyLimit);
 
     // Sync ref with state
     useEffect(() => {
@@ -202,7 +204,7 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
 
             // Step 3: Fetch Batch Stock Data (Stage 2)
             const symbols = watchlist.map(w => w.symbol).join(',');
-            const url = buildBatchUrl(symbols);
+            const url = buildBatchUrl(symbols, historyLimit);
 
             const fetchOptions: RequestInit = {
                 signal: controller.signal,
@@ -218,7 +220,7 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
             let batchRes = await fetch(url, fetchOptions);
             if (batchRes.status === 401) {
                 await getCurrentUser({ forceSessionSync: true });
-                batchRes = await fetch(buildBatchUrl(symbols), fetchOptions);
+                batchRes = await fetch(buildBatchUrl(symbols, historyLimit), fetchOptions);
             }
             clearTimeout(timeoutId);
 
@@ -320,7 +322,7 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
         } finally {
             setIsRefreshing(false);
         }
-    }, [watchlist, loadingWatchlist]); // Important: depends on watchlist
+    }, [watchlist, loadingWatchlist, historyLimit]);
 
     interface PriceSnapshot {
         symbol: string;
@@ -403,6 +405,15 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
             setStocks([]);
         }
     }, [watchlist, loadingWatchlist, loadAllData]);
+
+    // historyLimit 升级时（如从 stock-pool 导航回 dashboard），立即补拉历史数据
+    useEffect(() => {
+        if (historyLimit > prevHistoryLimitRef.current && watchlist.length > 0) {
+            lastFetchTimeRef.current = 0;
+            loadAllData(true);
+        }
+        prevHistoryLimitRef.current = historyLimit;
+    }, [historyLimit, watchlist.length, loadAllData]);
 
     // 页面可见性检测：当用户切回页面时刷新数据（决策层 + 价格层）
     useEffect(() => {
