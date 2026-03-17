@@ -53,8 +53,8 @@ function mapCouncilMember(pred: AIPrediction) {
 }
 
 const CACHE_TTL = 1000 * 60 * 5;
-const SNAPSHOT_TTL = 1000 * 60 * 30;
-const SNAPSHOT_VERSION = 'v1';
+const SNAPSHOT_TTL = 1000 * 60 * 60 * 24; // 24h — predictions are daily-immutable; target_date in key handles invalidation
+const SNAPSHOT_VERSION = 'v2';
 const MAX_CACHE_SIZE = 50;
 const LOADING_INDICATOR_DELAY_MS = 150;
 const councilSnapshotCache = new Map<string, CouncilCachePayload>();
@@ -305,11 +305,33 @@ function buildSessionSnapshotKey(symbol: string, targetDate: string): string {
   return `ziso:ai-council:${SNAPSHOT_VERSION}:${symbol}:${targetDate}`;
 }
 
+const SNAPSHOT_KEY_PREFIX = `ziso:ai-council:${SNAPSHOT_VERSION}:`;
+
+function pruneStaleSnapshots(): void {
+  if (typeof window === 'undefined') return;
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    const storage = window.localStorage;
+    const keysToRemove: string[] = [];
+    for (let i = 0; i < storage.length; i++) {
+      const key = storage.key(i);
+      if (!key || !key.startsWith('ziso:ai-council:')) continue;
+      const datePart = key.split(':').pop();
+      if (datePart && datePart < today) keysToRemove.push(key);
+    }
+    for (const key of keysToRemove) storage.removeItem(key);
+  } catch {
+    // best-effort
+  }
+}
+
+let _pruned = false;
+
 function readSessionSnapshot(symbol: string, targetDate: string): CouncilCachePayload | null {
   if (typeof window === 'undefined') return null;
+  if (!_pruned) { _pruned = true; pruneStaleSnapshots(); }
   try {
-    const storage = window.sessionStorage;
-    const raw = storage.getItem(buildSessionSnapshotKey(symbol, targetDate));
+    const raw = window.localStorage.getItem(buildSessionSnapshotKey(symbol, targetDate));
     if (!raw) return null;
     const parsed = JSON.parse(raw) as Partial<CouncilCachePayload>;
     if (!parsed || !Array.isArray(parsed.data) || typeof parsed.fetchedAt !== 'number') {
@@ -327,11 +349,9 @@ function readSessionSnapshot(symbol: string, targetDate: string): CouncilCachePa
 function writeSessionSnapshot(symbol: string, targetDate: string, payload: CouncilCachePayload): void {
   if (typeof window === 'undefined') return;
   try {
-    const storage = window.sessionStorage;
-    const key = buildSessionSnapshotKey(symbol, targetDate);
-    storage.setItem(key, JSON.stringify(payload));
+    window.localStorage.setItem(buildSessionSnapshotKey(symbol, targetDate), JSON.stringify(payload));
   } catch {
-    // best-effort only
+    // best-effort — quota exceeded or private mode
   }
 }
 

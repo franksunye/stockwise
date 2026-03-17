@@ -208,10 +208,9 @@ function DashboardContent() {
     }
   }, [searchParams]);
 
-  useEffect(() => {
-    if (!currentStock || currentStock.isAlmanac) return;
-    preloadCouncil(currentStock.symbol, currentStock.prediction?.target_date);
-  }, [currentStock]);
+  // Council data is daily-immutable and cached in localStorage keyed by target_date.
+  // On-demand fetch when user opens TacticalBriefDrawer is sufficient;
+  // swipe-based preloading removed to avoid wasteful /api/predictions requests.
 
   useEffect(() => {
     try {
