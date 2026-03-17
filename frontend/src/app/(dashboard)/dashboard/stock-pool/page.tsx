@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback, useMemo, memo, useRef } from 'react';
 import { Plus, Trash2, ArrowLeft, TrendingUp, TrendingDown, Minus, LayoutGrid } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { getCurrentUser, type User } from '@/lib/user';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getMarketScene } from '@/lib/date-utils';
 
@@ -120,10 +119,7 @@ StockItem.displayName = 'StockItem';
 
 export default function StockPoolPage() {
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
   
-  // New Hook Usage
-  // Global Data Context
   const { 
     stocks: globalStocks, 
     loadingPool, 
@@ -158,23 +154,10 @@ export default function StockPoolPage() {
 
   const [limitMsg, setLimitMsg] = useState<string | null>(null);
 
-  const [isIOS, setIsIOS] = useState(false);
-
   const scene = getMarketScene();
   const isPreMarket = scene === 'pre_market';
 
   const { tier } = useDashboardAuth();
-
-  useEffect(() => {
-    const init = async () => {
-        const u = await getCurrentUser();
-        setUser(u);
-    };
-    init();
-    // iOS Detection
-    const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-    setIsIOS(iOS);
-  }, []);
 
 
 
@@ -219,7 +202,7 @@ export default function StockPoolPage() {
 
   const handleAdd = async (symbolOverride?: string, nameOverride?: string) => {
     const targetSymbol = symbolOverride || newSymbol.trim();
-    if (!targetSymbol || !user) return;
+    if (!targetSymbol) return;
     
     const limit = tier === 'pro' ? 10 : 3;
     if (watchlist.length >= limit) {
@@ -248,7 +231,7 @@ export default function StockPoolPage() {
   }, []);
 
   const confirmDelete = async () => {
-    if (!stockToDelete || !user) return;
+    if (!stockToDelete) return;
     setIsDeleting(true);
     
     const ok = await removeStock(stockToDelete.symbol);
@@ -267,8 +250,7 @@ export default function StockPoolPage() {
     <div 
       className="fixed top-0 left-0 right-0 bottom-0 h-[100dvh] w-full bg-[#050508] text-white overflow-hidden flex flex-col font-sans overscroll-none"
     >
-      {/* Background glow - conditionally render for non-iOS */}
-      {!isIOS && <div className="fixed inset-0 opacity-[0.03] pointer-events-none bg-indigo-500 blur-[120px] scale-150" />}
+      <div className="fixed inset-0 opacity-[0.03] pointer-events-none bg-indigo-500 blur-[120px] scale-150" />
 
       {/* Solid/Stable Header Structure (Centered Title) */}
       <header className="shrink-0 z-20 px-6 py-4 flex items-center justify-between bg-[#050508] border-b border-white/5">
@@ -446,11 +428,6 @@ export default function StockPoolPage() {
       </AnimatePresence>
 
       <style jsx global>{`
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-        .glass-card { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 32px; }
-        
-        /* iOS Long Press Fix */
         .touch-optimized {
           -webkit-touch-callout: none !important;
           -webkit-user-select: none !important;

@@ -50,7 +50,7 @@ self.addEventListener('activate', (event) => {
         );
       })
       .then(() => {
-        console.log('[SW] Activated v5, claiming clients');
+        console.log('[SW] Activated, claiming clients');
         return self.clients.claim();
       })
   );
