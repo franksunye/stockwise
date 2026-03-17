@@ -43,7 +43,36 @@
 - 其余全部 `force-dynamic` 或无显式缓存指令。
 - **零速率限制**：Middleware (`frontend/src/middleware.ts`) 仅做域名路由和 locale 处理。
 
-### 2.3 Client Polling Model
+### 2.3 Client Request Model
+
+#### 2.3.1 Initial Page Load (Cold Start)
+
+实测数据 (2026-03-17, PC Chrome, 单次刷新 `app.ziso.cc/dashboard/stock-pool`):
+
+| # | 方法 | 端点 | 状态 | 实测耗时 | 触发源 |
+|---|------|------|------|----------|--------|
+| 1 | GET | `/` | 304 | — | 导航 |
+| 2 | GET | `/dashboard` | 307 | — | 重定向 |
+| 3 | GET | `/api/stock-pool` | 200 | 1.05s | `useWatchlist` mount |
+| 4 | GET | `/api/shared/almanac` | 200 | 217ms | ISR 缓存 |
+| 5 | GET | `/api/stock/batch` | 200 | **6.15s** | `useDashboardData` mount |
+| 6 | GET | `/api/stock/prices` | 200 | **2.14s** | `useDashboardData` mount |
+| 7 | GET | `/api/system/calendar` | 200 | 1.31s | `SystemSync` mount |
+| 8 | GET | `/dashboard/stock-pool` | 304 | — | 页面 SSR |
+| 9 | POST | `/api/user/register` | 200 | — | `getCurrentUser()` → `syncCurrentUserSession()` |
+| 10 | POST | `/api/user/profile` | 200 | 1.27s | `useUserProfile` mount |
+
+**关键观察**: 单次页面刷新产生 **8 个 API origin hits** (排除 SSR/redirect)。总瀑布时间 **6.33s** (bottleneck: batch 端点)。
+
+- `register` 实际是 "ensure session / upsert user" 语义，每 5 分钟同步一次 (`USER_SESSION_SYNC_INTERVAL_MS`)，由 `getCurrentUser()` 触发
+- `profile` 在 Provider mount 时自动调用，有 30 秒防抖但首次加载必触发
+- `calendar` 由全局 `SystemSync` 组件 mount 时触发，`force-dynamic` 无任何缓存
+
+**Chrome 总览**: 38 requests, 6.7 kB transferred, 1.8 MB resources, DOMContentLoaded: 95ms, Finish: 6.33s。静态资源全部 SW/memory cache 命中 (0ms)。
+
+Source: Production Vercel logs + Chrome DevTools Network, 2026-03-17 17:44:31 HKT
+
+#### 2.3.2 Steady-State Polling
 
 | 端点 | 盘中频率 | 非盘中频率 | 触发方式 |
 |------|----------|------------|----------|
@@ -51,9 +80,12 @@
 | `/api/stock/batch` | 每 60 min | 每 120 min | 定时 + 回前台 |
 | `/api/shared/almanac` | 1 次/会话 | 1 次/会话 | ISR 缓存 |
 | `/api/stock-pool` | 1 次/会话 | 1 次/会话 | mount 时同步 |
+| `/api/user/register` | ≤1 次/5min | ≤1 次/5min | `getCurrentUser()` 会话同步 (5min 防抖) |
+| `/api/user/profile` | 1 次/会话 | 1 次/会话 | Provider mount (30s 防抖) |
+| `/api/system/calendar` | 1 次/hr | 1 次/hr | `SystemSync` setInterval |
 | visibility 触发 | ~5 次/小时 | ~2 次/小时 | `visibilitychange` / `focus` / `pageshow` / `online` |
 
-Source: `frontend/src/hooks/useDashboardData.ts` (L12-17)
+Source: `frontend/src/hooks/useDashboardData.ts` (L12-17), `frontend/src/lib/user.ts` (L19), `frontend/src/hooks/useUserProfile.ts` (L109), `frontend/src/components/SystemSync.tsx` (L32)
 
 ### 2.4 Server-Side Caching
 
@@ -103,31 +135,58 @@ Source: `frontend/src/lib/stock-cache.ts`
 
 ### 3.2 Per-User Request Pattern (Trading Hours)
 
-| 端点 | 频率 | req/hour |
-|------|------|----------|
-| `/api/stock/prices` | 每 3 min | 20 |
-| `/api/stock/batch` | 每 60 min | 1 |
-| `/api/shared/almanac` | ISR 缓存 | ~0 (CDN) |
-| `/api/stock-pool` | 1 次/会话 | ~0.5 |
-| visibility 触发 | ~5 次/小时 | 5 |
-| **合计** | | **~27 req/hr** |
+| 端点 | 频率 | req/hour | 备注 |
+|------|------|----------|------|
+| `/api/stock/prices` | 每 3 min | 20 | 最频繁端点 |
+| `/api/stock/batch` | 每 60 min | 1 | 最重端点 (p95 ~6s) |
+| `/api/shared/almanac` | ISR 缓存 | ~0 (CDN) | |
+| `/api/stock-pool` | 1 次/会话 | ~0.5 | |
+| `/api/user/register` | ≤1 次/5min | ~3 | 会话同步 (upsert, 5min 防抖) |
+| `/api/user/profile` | 1 次/会话 | ~0.5 | Provider mount (30s 防抖) |
+| `/api/system/calendar` | 1 次/hr | 1 | force-dynamic, ISR 候选 |
+| visibility 触发 | ~5 次/小时 | 5 | |
+| **稳态合计** | | **~31 req/hr** | |
+| **+页面刷新 burst** | 2 次/会话 × ~8 req | **+~4 req/hr** | 见 Section 2.3.1 |
+| **综合估算** | | **~35 req/hr** | |
+
+> 注: 之前版本估算为 ~27 req/hr，漏算了 register、profile、calendar 端点。含页面刷新 burst 的综合估算为 ~35 req/hr (+30%)。
 
 ### 3.3 Scale Comparison
 
 | 指标 | 1K 用户 | 10K 用户 | 100K 用户 | 1M 用户 |
 |------|---------|----------|-----------|---------|
 | 盘中并发 | 200 | 2,000 | 20,000 | **200,000** |
-| 价格 QPS (稳态) | ~1.1 | ~11 | ~111 | **~1,111** |
-| 全端点 QPS (稳态) | ~1.5 | ~15 | ~150 | **~1,500** |
-| 开盘峰值 QPS (1-2 min) | ~12 | ~120 | ~1,200 | **~12,000** |
-| 月度 API 调用 | ~660K | ~6.6M | ~66M | **~660M** |
-| Vercel compute (无优化) | ~9 GB-hrs | ~94 GB-hrs | ~940 GB-hrs | **~9,400 GB-hrs** |
-| Turso price queries/s | ~1.1 | ~11 | ~111 | **~1,111** |
-| 月度带宽 | ~3 GB | ~35 GB | ~330 GB | **~3.3 TB** |
+| 价格 QPS (稳态) | ~1.4 | ~14 | ~140 | **~1,400** |
+| 全端点 QPS (稳态) | ~1.9 | ~19 | ~194 | **~1,944** |
+| 开盘峰值 QPS (1-2 min) | ~16 | ~160 | ~1,600 | **~16,000** |
+| 月度 API 调用 | ~860K | ~8.6M | ~86M | **~860M** |
+| Vercel compute (乐观, 200ms avg) | ~12 GB-hrs | ~122 GB-hrs | ~1,220 GB-hrs | **~12,200 GB-hrs** |
+| Vercel compute (实测校准, 见下) | ~48 GB-hrs | ~480 GB-hrs | ~4,800 GB-hrs | **~48,000 GB-hrs** |
+| Turso price queries/s | ~1.4 | ~14 | ~140 | **~1,400** |
+| 月度带宽 | ~4 GB | ~45 GB | ~430 GB | **~4.3 TB** |
 
-**Compute 计算方式**: 月度调用 × 200ms 平均执行 × 256MB 内存 = GB-hrs
+**Compute 计算方式**: 月度调用 × 平均执行时间 × 256MB 内存 = GB-hrs
 
-> 注: 1M 数据假设无任何架构优化。实际进入 Tier 2 后价格层 O(1) 化，Tier 3 需进一步拆解 batch 层，实际 compute 远低于此上限。见 Section 6.4。
+#### 实测校准 (2026-03-17)
+
+文档初始版本使用 200ms 均匀平均执行时间。生产实测 (Chrome DevTools, 1 只自选股) 显示端点延迟差异巨大:
+
+| 端点 | 实测端到端延迟 | 估算函数 CPU 时间 | 备注 |
+|------|---------------|------------------|------|
+| `/api/stock/batch` | **6.15s** | ~800ms-2s | 含外部 fallback 重试 + 复杂 SQL; CPU 占比约 15-30% |
+| `/api/stock/prices` | **2.14s** | ~200-400ms | TLS 握手 + Turso HTTP 往返; IO 等待为主 |
+| `/api/system/calendar` | **1.31s** | ~100-200ms | 简单查询, 延迟主要来自新建 DB 连接 |
+| `/api/user/profile` | **1.27s** | ~200-400ms | 多次 DB 查询 (user + watchlist + referral) |
+| `/api/stock-pool` | **1.05s** | ~100-200ms | 简单查询 |
+| `/api/shared/almanac` | **217ms** | ~50-100ms | ISR 缓存命中 |
+
+Vercel 计费基于函数 CPU 执行时间 (非端到端延迟)，IO 等待 (Turso HTTP roundtrip、外部服务) 期间 CPU 空闲不计费。但即使以保守的 CPU 占比估算，**加权平均函数执行时间约为 400-800ms**，是 200ms 假设的 **2-4 倍**。
+
+上方表格中 "实测校准" 行使用 800ms 加权平均执行时间，代表当前未优化状态下的合理上界。
+
+> **重要**: 1M 数据假设无任何架构优化。实际进入 Tier 2 后价格层 O(1) 化，Tier 3 需进一步拆解 batch 层，实际 compute 远低于此上限。见 Section 6.4。
+>
+> batch 端点的 6.15s 响应时间中，`[Batch] Cloud rich history failed, falling back...` 表明存在外部依赖 (mode_decision_log JOIN) 失败后的 fallback 重试，这一路径本身贡献了 ~3-4s 延迟。修复 schema 问题或设置更短的 fallback timeout 可显著降低 batch 延迟。
 
 ---
 
@@ -141,11 +200,11 @@ Source: `frontend/src/lib/stock-cache.ts`
 | Bandwidth | 100 GB | 1 TB | Custom |
 | Function Timeout | 10s | 60s | 900s |
 
-| 用户规模 | 需要计划 | 状态 |
-|----------|----------|------|
-| 1K | Hobby 勉强可用 | 🟡 |
-| 10K | **Pro 必须** (~94 GB-hrs, Pro 充裕) | 🟢 |
-| 100K | **Pro 紧绷** (~940 GB-hrs, 接近 1,000 上限) | 🔴 |
+| 用户规模 | 需要计划 (乐观 200ms) | 需要计划 (实测校准) | 状态 |
+|----------|----------------------|---------------------|------|
+| 1K | ~12 GB-hrs, Hobby 可用 | ~48 GB-hrs, **Hobby 占半** | 🟡 |
+| 10K | ~122 GB-hrs, Pro 充裕 | ~480 GB-hrs, **Pro 占半** | 🟡 |
+| 100K | ~1,220 GB-hrs, Pro 超限 | ~4,800 GB-hrs, **Enterprise 必须** | 🔴 |
 
 ### 4.2 Turso Database
 
@@ -183,15 +242,19 @@ Turso 的行读取配额极其宽裕。瓶颈不在配额，而在：
 
 | 层 | 1K | 10K | 100K | 1M |
 |----|:--:|:---:|:----:|:--:|
-| Vercel Compute | 🟡 | 🟢 | 🔴 | 🔴 |
+| Vercel Compute | 🟡 | 🟡 | 🔴 | 🔴 |
 | Turso | 🟢 | 🟢 | 🟡 | 🔴 |
 | Backend Pipeline | 🟢 | 🟢 | 🟢 | 🟡 |
 | PWA/CDN | 🟢 | 🟢 | 🟢 | 🟢 |
 | Rate Limiting | 🔴 | 🔴 | 🔴 | 🔴 |
 | Price API Dedup | 🟢 | 🟡 | 🔴 | 🔴 |
+| Batch Latency (p95) | 🔴 | 🔴 | 🔴 | 🔴 |
+| Page-Load Request Fan-out | 🟡 | 🟡 | 🔴 | 🔴 |
 | Batch Decomposition | 🟢 | 🟢 | 🟢 | 🔴 |
 | Push vs Poll | 🟢 | 🟢 | 🟡 | 🔴 |
 | Multi-Region | 🟢 | 🟢 | 🟢 | 🟡 |
+
+> 2026-03-17 更新: 基于实测校准，10K 用户 Vercel Compute 从 🟢 调整为 🟡 (实测校准 ~480 GB-hrs 接近 Pro 上限一半)。新增 "Batch Latency" 和 "Page-Load Request Fan-out" 两项指标 — batch 6.15s 的 p95 延迟在所有规模下均为红灯 (UX 不合格)，page-load 的 8 请求 fan-out 在 10K+ 时贡献显著 compute 浪费。
 
 ---
 
@@ -267,30 +330,42 @@ flowchart TB
 ### Tier 0: Current (~1K users)
 
 **触发条件**: 当前状态
-**状态**: 可运行，存在安全隐患
+**状态**: 可运行，存在性能与安全隐患
 
 | 项目 | 状态 |
 |------|------|
 | 现有轮询模型 | 可承受 |
 | 速率限制 | ❌ 缺失 |
-| Vercel 计划 | Hobby 可用但无余量 |
+| Vercel 计划 | Hobby 可用，实测校准约占 48% |
+| Batch 端点延迟 | ✅ 已修复 — 根因是 SQL 别名 bug，修复后 rich query 正常执行 |
+| 页面加载 fan-out | ✅ 已优化 — calendar ISR 化 + register 跨 tab 去重 |
+
+**Tier 0 Quick Wins** (已执行, 2026-03-17):
+
+| 项目 | 描述 | 状态 |
+|------|------|------|
+| **Batch SQL bug fix** | `SAFE_LLM_SIGNAL_SQL` 在外层 CTE SELECT 中引用了不存在的 `p.` 别名（应为 `h.`），导致 Turso 报 `no such column: p.ai_reasoning`，rich query **100% 失败**后走 fallback（+3-4s 延迟）。修复别名后 rich query 直接成功。同时保留 `modeSchemaReady` 检查和 2s timeout 作为防御性 fallback。 | ✅ 已修复 |
+| Calendar ISR 化 | `/api/system/calendar` 从 `force-dynamic` 改为 `revalidate: 86400` (1天)。每次 page load 节省 1 个 origin hit + ~1.3s 延迟。 | ✅ 已修复 |
+| Register 跨 tab 去重 | 新增 `stockwise_ssync` cookie (30min TTL) 作为跨 tab 防抖标记。新 tab 在 30 分钟内跳过 register POST，同时加速 profile 请求启动。 | ✅ 已修复 |
 
 ### Tier 1: 10K Users
 
 **触发条件**: MAU 接近 5,000 或盘中并发超过 500
+**实测校准风险**: 10K 用户实测校准 compute ~480 GB-hrs/月，已接近 Pro 上限一半。若 batch 端点延迟未优化，实际可能更高。
 
 **必须完成的改造**:
 
-| 项目 | 描述 | 预估工期 |
-|------|------|----------|
-| Per-symbol 内存缓存 | 在 `stock-cache.ts` 中为 `getLatestPrices` 增加进程级 Map 缓存，30s TTL，per-symbol key。热门股票跨用户共享。 | 0.5 天 |
-| API 速率限制 | middleware 或 API 层增加 per-IP / per-session 限制：全局 60 req/min, prices 30 req/min, batch 5 req/min | 1 天 |
-| Vercel Pro | 确认部署在 Pro 计划 | 配置变更 |
-| 请求抖动 | 客户端定时器加入 0-30s 随机延迟，缓解开盘惊群 | 0.5 天 |
-| DB 单例化 | `getDbClient()` 改为模块级单例，减少 TLS 握手开销 | 0.5 天 |
-| 低频端点 ISR | `/api/system/calendar` (1d), `/api/learn/*` (1h) | 0.5 天 |
+| 项目 | 描述 | 预估工期 | 优先级 |
+|------|------|----------|--------|
+| DB 单例化 | `getDbClient()` 改为模块级单例，减少 TLS 握手开销。实测所有端点 1-2s 延迟中，TLS 握手占比显著。 | 0.5 天 | **P0** |
+| Per-symbol 内存缓存 | 在 `stock-cache.ts` 中为 `getLatestPrices` 增加进程级 Map 缓存，30s TTL，per-symbol key。热门股票跨用户共享。 | 0.5 天 | **P0** |
+| API 速率限制 | middleware 或 API 层增加 per-IP / per-session 限制：全局 60 req/min, prices 30 req/min, batch 5 req/min | 1 天 | **P0** |
+| Vercel Pro | 确认部署在 Pro 计划 | 配置变更 | **P0** |
+| 请求抖动 | 客户端定时器加入 0-30s 随机延迟，缓解开盘惊群。实测开盘峰值可达稳态 8-10 倍。 | 0.5 天 | P1 |
+| Profile 请求合并 | `register` 和 `profile` 目前是独立的两次 POST，可合并为单一 `/api/user/bootstrap` 端点 — 一次 roundtrip 完成 session sync + profile 返回。节省 1 个函数调用 + 1 次 DB 连接/page load。 | 1 天 | P1 |
+| 低频端点 ISR | `/api/learn/*` (1h)。Calendar ISR 化应在 Tier 0 Quick Wins 阶段完成。 | 0.5 天 | P2 |
 
-**预估总工期**: 2-3 天
+**预估总工期**: 3-4 天
 **基础设施月成本增量**: Vercel Pro $20/mo
 
 ### Tier 2: 100K Users
@@ -491,6 +566,8 @@ Vercel compute 降至 ~1,350 GB-hrs，仍超 Pro 上限但已在 Enterprise 合�
 | **Total** | **~$5/mo** | **~$25/mo** | **~$35-230/mo** | **~$230-2,640/mo** |
 
 > 1M 成本区间较大，取决于平台选择 (Vercel Enterprise vs Cloudflare Workers 混合) 和是否引入实时推送服务。
+>
+> **实测校准注**: 上述成本假设各 Tier 阶段的优化已完成。以 10K 用户为例，Vercel Pro 含 1,000 GB-hrs，实测校准 compute ~480 GB-hrs (占 48%)，仍在 Pro 范围内。但若 100K 用户未做价格广播优化，实测校准 compute ~4,800 GB-hrs，远超 Pro 上限，Enterprise 必须。成本模型的有效性高度依赖各 Tier 优化的按时执行。
 
 ### 7.2 Unit Economics
 
@@ -564,7 +641,58 @@ Vercel compute 降至 ~1,350 GB-hrs，仍超 Pro 上限但已在 Enterprise 合�
 
 详见: [28_Price_Sync_Zero_Stale_Protocol_20260316.md](./28_Price_Sync_Zero_Stale_Protocol_20260316.md) Section 6
 
-### 8.2 (Reserved) Future Scaling Decisions
+### 8.2 2026-03-17: Production Traffic Measurement & Model Calibration
+
+**背景**: 在 PC Chrome 浏览器对 `app.ziso.cc/dashboard/stock-pool` 执行单次页面刷新，同时观察 Vercel 后端日志和 Chrome DevTools Network 面板，以校准容量规划模型中的理论假设。
+
+**关键发现**:
+
+1. **Per-page-load fan-out**: 单次刷新产生 10 个后端请求 (8 个 API origin hits)，此前流量模型仅考虑稳态轮询，未计入冷启动 burst。
+2. **漏算端点**: `/api/user/register`、`/api/user/profile`、`/api/system/calendar` 未纳入 Section 3.2 的 per-user 请求模型。校准后稳态从 ~27 req/hr 调整为 ~35 req/hr (+30%)。
+3. **Batch 延迟**: `/api/stock/batch` 端到端 6.15s (仅 1 只自选股)，bottleneck 源于 `historySql` JOIN `mode_decision_log` 失败后 fallback 到 `fallbackHistorySql`，Turso 错误传播延迟 ~3-4s。此延迟同时是 UX 和 compute 成本问题。
+4. **200ms 执行时间假设偏乐观**: 实测加权平均端到端延迟 ~1.5-2s，估算 CPU 占用时间 400-800ms，是原假设的 2-4 倍。Vercel compute 估算相应调高。
+5. **Calendar force-dynamic**: `/api/system/calendar` 每次 page load 触发，返回几乎不变的假日数据，实测延迟 1.31s。是最明显的 ISR 低挂果实。
+6. **静态资源层健康**: JS/CSS 全部从 Service Worker / memory cache 返回 (0ms)，DOMContentLoaded 95ms。瓶颈完全在 API 层。
+
+**决策**:
+- 修订 Section 2.3 为两部分: Initial Page Load (实测) + Steady-State Polling
+- 修订 Section 3.2 补充遗漏端点，综合估算 ~35 req/hr
+- 修订 Section 3.3 增加 "实测校准" compute 估算行 (800ms 加权平均)
+- 修订 Section 4.5 Traffic Light: 新增 "Batch Latency" 和 "Page-Load Fan-out" 指标
+- 新增 Tier 0 Quick Wins: batch fallback timeout、calendar ISR、register 去重
+- 修订 Tier 1: 增加 "Profile 请求合并" 项，DB 单例化和 per-symbol 缓存提升为 P0
+
+**影响评估**: 模型校准后，10K 用户的 Vercel compute 估算从 ~94 GB-hrs 调整为 ~480 GB-hrs (实测校准)，从"Pro 充裕"变为"Pro 占半"。这使得 Tier 1 优化的紧迫性显著提前 — 特别是 DB 单例化和 per-symbol 缓存应尽早实施以降低函数执行时间。
+
+### 8.3 2026-03-17: Batch Rich Query SQL Alias Bug Fix
+
+**背景**: Section 8.2 的实测数据显示 `/api/stock/batch` 端点耗时 6.15s，日志中 `[Batch] Cloud rich history failed, falling back...` 在每次请求中触发。初始假设为 `mode_decision_log` 表不存在或 schema 不匹配。
+
+**根因分析**: 通过 `turso-cli.mjs` 验证：
+- `mode_decision_log` 表存在且有 5912 行数据
+- Schema 完全匹配 `ensureInvestmentModeSchema` 的定义
+- 直接在 Turso 上执行 `historySql` 得到明确错误: **`no such column: p.ai_reasoning (at offset 2435)`**
+
+**根因**: `SAFE_LLM_SIGNAL_SQL` 常量使用 `p.ai_reasoning` 和 `p.signal`，但该 SQL 片段被嵌入到外层 CTE SELECT 中，此作用域只有 `h` (HistoryRanked) 和 `dp` (daily_prices) 两个表别名。`p` (ai_predictions_v2) 别名仅在第一层 CTE 内部有效。
+
+```sql
+-- 外层 SELECT 中的错误引用:
+SELECT h.*, ..., COALESCE(CASE WHEN json_valid(p.ai_reasoning) ...) AS llm_signal
+FROM HistoryRanked h LEFT JOIN daily_prices dp ...
+-- p 在此作用域不存在!
+```
+
+此 bug 意味着 rich query **从未成功执行过** — 每次请求都先等 Turso 返回错误（~3-4s），再执行 fallback query（~2s），总计 ~6s。
+
+**修复**: `p.ai_reasoning` → `h.ai_reasoning`, `p.signal` → `h.signal`。修复后 rich query 在 Turso 上直接成功，预期 batch 端点延迟从 ~6s 降至 ~2-3s。
+
+**影响**: 同一常量在 `history/route.ts`、`stock/route.ts`、`predictions/route.ts` 中也存在，但这些文件在 `FROM ai_predictions_v2 p` 的直接作用域中使用 `p.`，别名有效，不受影响。Bug 仅影响 `batch/route.ts` 的 CTE 结构。
+
+**附带优化**: 在修复 SQL bug 的同时，为 batch 端点增加了防御性措施：
+- `modeSchemaReady` 标志位：`ensureInvestmentModeSchema` 失败时跳过 rich query
+- `Promise.race` 2s timeout：rich query 慢时快速 fallback
+
+### 8.4 (Reserved) Future Scaling Decisions
 
 后续扩容决策在此追加记录。
 
@@ -579,7 +707,13 @@ Vercel compute 降至 ~1,350 GB-hrs，仍超 Pro 上限但已在 Enterprise 合�
 | `frontend/src/lib/db.ts` L32-57 | Turso 连接创建模式 (每次新建) |
 | `frontend/src/middleware.ts` | Middleware (无速率限制) |
 | `frontend/src/app/api/stock/prices/route.ts` | 价格刷新端点 (force-dynamic, no-store) |
-| `frontend/src/app/api/stock/batch/route.ts` | 决策批量端点 (force-dynamic, no-store) |
+| `frontend/src/app/api/stock/batch/route.ts` | 决策批量端点 (force-dynamic, no-store); L227 fallback 逻辑 |
+| `frontend/src/app/api/user/register/route.ts` | 用户会话同步 (INSERT OR IGNORE upsert) |
+| `frontend/src/app/api/user/profile/route.ts` | 用户 profile 加载 (多 DB 查询: user + watchlist + referral) |
+| `frontend/src/app/api/system/calendar/route.ts` | 市场假日端点 (force-dynamic, ISR 候选) |
+| `frontend/src/lib/user.ts` L19, L36-87 | `USER_SESSION_SYNC_INTERVAL_MS` (5min), `syncCurrentUserSession` |
+| `frontend/src/hooks/useUserProfile.ts` L109 | Profile 30s 防抖逻辑 |
+| `frontend/src/components/SystemSync.tsx` | Calendar 全局同步组件 (mount + 1hr interval) |
 | `frontend/public/sw.js` L306-310 | Service Worker API bypass |
 | `backend/db_repo/queries.py` | `GET_STOCK_POOL_QUERY` (全局股票池) |
 | `backend/main.py` | 后端管道任务编排 |

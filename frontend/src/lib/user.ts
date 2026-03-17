@@ -17,6 +17,8 @@ const USER_ID_COOKIE = 'stockwise_uid';
 const USER_ID_URL_PARAM = 'uid';
 const USER_SESSION_SYNC_KEY = 'STOCKWISE_USER_SESSION_SYNCED_AT';
 const USER_SESSION_SYNC_INTERVAL_MS = 5 * 60 * 1000;
+const SESSION_SYNC_COOKIE = 'stockwise_ssync';
+const SESSION_SYNC_COOKIE_TTL_MIN = 30;
 
 export type RegistrationType = 'anonymous' | 'explicit';
 
@@ -38,9 +40,12 @@ async function syncCurrentUserSession(
   userType: RegistrationType,
   forceSessionSync: boolean
 ): Promise<void> {
+  // Cross-tab dedup: short-lived cookie survives new tabs, preventing redundant register POSTs.
+  // sessionStorage alone resets per-tab, causing every new tab to fire a register call.
+  const crossTabSynced = getCookie(SESSION_SYNC_COOKIE) === '1';
   const lastSyncAt = Number(sessionStorage.getItem(USER_SESSION_SYNC_KEY) || '0');
   const shouldSyncSession =
-    forceSessionSync || (Date.now() - lastSyncAt > USER_SESSION_SYNC_INTERVAL_MS);
+    forceSessionSync || (!crossTabSynced && (Date.now() - lastSyncAt > USER_SESSION_SYNC_INTERVAL_MS));
 
   if (!shouldSyncSession) {
     setCookie(USER_ID_COOKIE, userId);
@@ -73,6 +78,7 @@ async function syncCurrentUserSession(
         const syncedUserId = data?.userId && data.userId !== userId ? data.userId : userId;
         syncUserIdToStorage(syncedUserId, userType || 'anonymous');
         sessionStorage.setItem(USER_SESSION_SYNC_KEY, String(Date.now()));
+        setCookie(SESSION_SYNC_COOKIE, '1', SESSION_SYNC_COOKIE_TTL_MIN / (24 * 60));
         console.log('✅ 用户会话已同步:', syncedUserId);
       } catch (error) {
         console.error('❌ 用户会话同步失败或超时:', error);

@@ -23,10 +23,10 @@ const DASHBOARD_PREDICTION_LOOKBACK_DAYS = 10;
 const SAFE_LLM_SIGNAL_SQL = `
     COALESCE(
         CASE
-            WHEN json_valid(p.ai_reasoning) THEN json_extract(p.ai_reasoning, '$.signal')
+            WHEN json_valid(h.ai_reasoning) THEN json_extract(h.ai_reasoning, '$.signal')
             ELSE NULL
         END,
-        p.signal
+        h.signal
     )
 `;
 
@@ -206,8 +206,10 @@ export async function GET(request: Request) {
                 shortMetricsRows = cachedShortMetrics;
 
                 // Stage 2: Fetch Dynamic/User-specific data
+                let modeSchemaReady = false;
                 try {
                     await ensureInvestmentModeSchema(client);
+                    modeSchemaReady = true;
                     const currentMode = await getUserMode(client, userId, userTier as UserTier);
                     currentModeId = currentMode.mode_id;
                 } catch (error) {
@@ -216,15 +218,36 @@ export async function GET(request: Request) {
 
                 try {
                     debugStage = 'fetch_predictions';
-                    if ('execute' in client) {
-                        try {
-                            const historyRs = await client.execute({
-                                sql: historySql,
-                                args: [currentModeId, currentModeId, ...symbols]
-                            });
-                            if (historyRs.rows && historyRs.rows.length > 0) allHistory = historyRs.rows as Record<string, unknown>[];
-                        } catch {
-                            console.warn('[Batch] Cloud rich history failed, falling back...');
+                    const isCloud = 'execute' in client;
+
+                    if (isCloud) {
+                        let richQuerySucceeded = false;
+
+                        if (modeSchemaReady) {
+                            const RICH_QUERY_TIMEOUT_MS = 2000;
+                            try {
+                                const historyRs = await Promise.race([
+                                    client.execute({
+                                        sql: historySql,
+                                        args: [currentModeId, currentModeId, ...symbols]
+                                    }),
+                                    new Promise<never>((_, reject) =>
+                                        setTimeout(() => reject(new Error('Rich query timeout')), RICH_QUERY_TIMEOUT_MS)
+                                    )
+                                ]);
+                                if (historyRs.rows && historyRs.rows.length > 0) {
+                                    allHistory = historyRs.rows as Record<string, unknown>[];
+                                }
+                                richQuerySucceeded = true;
+                            } catch (e) {
+                                const reason = e instanceof Error ? e.message : 'unknown';
+                                console.warn(`[Batch] Cloud rich history failed (${reason}), falling back...`);
+                            }
+                        } else {
+                            console.warn('[Batch] Mode schema not ready, skipping rich query');
+                        }
+
+                        if (!richQuerySucceeded) {
                             const historyRs = await client.execute({
                                 sql: fallbackHistorySql,
                                 args: [currentModeId, ...symbols]
