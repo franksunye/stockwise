@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 import { AIPrediction, TacticalData, Tactic, ShortMetrics } from '@/lib/types';
 import { shouldEnableHighPerformance } from '@/lib/device-utils';
-import { AICouncil, preloadAICouncil } from './AICouncil';
+import { AICouncil } from './AICouncil';
 import Multiavatar from '@/components/Multiavatar';
 import { resolveAnalystForBriefSource } from '@/lib/agent-team';
 
@@ -352,10 +352,8 @@ export function TacticalBriefDrawer({
     syncCarouselToIndex(defaultActiveIndex);
   }, [activeTab, defaultActiveIndex, isOpen, syncCarouselToIndex]);
 
-  useEffect(() => {
-    if (!isOpen) return;
-    preloadAICouncil(symbol, targetDate);
-  }, [isOpen, symbol, targetDate]);
+  // Council preload removed — AICouncil's useSWR is the single fetch entry point.
+  // localStorage cache keyed by target_date handles cross-session reuse.
 
 
   const priceRange = {

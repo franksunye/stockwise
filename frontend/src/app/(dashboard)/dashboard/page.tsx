@@ -38,19 +38,8 @@ const TacticalBriefDrawer = dynamic(() => import('@/components/dashboard/Tactica
   loading: () => null
 });
 
-let aiCouncilPreloadModulePromise: Promise<typeof import('@/components/dashboard/AICouncil')> | null = null;
-
-function preloadCouncil(symbol?: string, targetDate?: string) {
-  if (!symbol || !targetDate) return;
-  aiCouncilPreloadModulePromise ??= import('@/components/dashboard/AICouncil');
-  void aiCouncilPreloadModulePromise
-    .then(({ preloadAICouncil }) => {
-      preloadAICouncil(symbol, targetDate);
-    })
-    .catch(() => {
-      // Non-critical: this only affects first-open smoothness.
-    });
-}
+// Council preloading removed — AICouncil's useSWR is the single fetch entry point.
+// localStorage cache keyed by target_date ensures subsequent opens are instant.
 
 // 扩展类型以包含黄历特有字段，消除 lint 错误
 interface ExtendedStockData extends StockData {
@@ -167,7 +156,6 @@ function DashboardContent() {
   const closeProfile = useCallback(() => setProfileStock(null), []);
   
   const handleShowTactics = useCallback((symbol: string, prediction: AIPrediction) => {
-    preloadCouncil(symbol, prediction.target_date);
     setSelectedTactics({ symbol, prediction });
   }, []);
 
