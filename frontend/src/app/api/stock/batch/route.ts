@@ -20,6 +20,14 @@ import { getCachedLatestPrices, getCachedShortMetrics } from '@/lib/stock-cache'
 export const dynamic = 'force-dynamic';
 const DASHBOARD_PREDICTION_LOOKBACK_DAYS = 10;
 
+// Tier 0: In-memory prediction cache (survives across warm Vercel invocations)
+const _predCache = new Map<string, { rows: Record<string, unknown>[]; ts: number }>();
+const PRED_CACHE_TTL = 300_000; // 5 min
+
+function getPredCacheKey(symbols: string[], historyLimit: number, tier: string, modeId: string): string {
+    return `${symbols.join(',')}|${historyLimit}|${tier}|${modeId}`;
+}
+
 const SAFE_LLM_SIGNAL_SQL = `
     COALESCE(
         CASE
@@ -42,6 +50,32 @@ function formatPriceUpdateTag(hkTime: Date): string {
     const hours = String(hkTime.getHours()).padStart(2, '0');
     const minutes = String(hkTime.getMinutes()).padStart(2, '0');
     return `${month}-${day} ${hours}:${minutes}`;
+}
+
+const PRICE_TECHNICAL_KEYS = [
+    'ma5', 'ma10', 'ma20', 'ma60',
+    'macd', 'macd_signal', 'macd_hist',
+    'boll_upper', 'boll_mid', 'boll_lower',
+    'rsi', 'kdj_k', 'kdj_d', 'kdj_j', 'ai_summary',
+];
+
+function stripPredictionRow(row: Record<string, unknown>): Record<string, unknown> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { llm_reasoning, rn_daily, rn_history, ...rest } = row;
+    return rest;
+}
+
+function stripPriceRow(price: Record<string, unknown>): Record<string, unknown> {
+    const out = { ...price };
+    for (const key of PRICE_TECHNICAL_KEYS) delete out[key];
+    return out;
+}
+
+function isAllNullMetrics(metrics: Record<string, unknown> | null): boolean {
+    if (!metrics) return true;
+    return Object.entries(metrics).every(
+        ([k, v]) => k === 'symbol' || v === null || v === undefined
+    );
 }
 
 function applyNoStoreHeaders(response: NextResponse): NextResponse {
@@ -127,7 +161,7 @@ export async function GET(request: Request) {
                    AND dlog.symbol = p.symbol
                    AND dlog.decision_date = p.date
                 WHERE p.symbol IN (${placeholders})
-                  AND COALESCE(p.target_date, p.date) >= '${dashboardPredictionThreshold}'
+                  AND p.target_date >= '${dashboardPredictionThreshold}'
                   AND (${tierFilter})
             ),
             DailyBest AS (
@@ -173,7 +207,7 @@ export async function GET(request: Request) {
                 FROM ai_predictions_v2 p
                 LEFT JOIN prediction_models m ON p.model_id = m.model_id
                 WHERE p.symbol IN (${placeholders})
-                  AND COALESCE(p.target_date, p.date) >= '${dashboardPredictionThreshold}'
+                  AND p.target_date >= '${dashboardPredictionThreshold}'
                   AND (${tierFilter})
             ),
             DailyBest AS (
@@ -218,48 +252,59 @@ export async function GET(request: Request) {
 
                 try {
                     debugStage = 'fetch_predictions';
-                    const isCloud = 'execute' in client;
 
-                    if (isCloud) {
-                        let richQuerySucceeded = false;
+                    const cacheKey = getPredCacheKey(normalizedCacheSymbols, historyLimit, userTier, currentModeId);
+                    const cached = _predCache.get(cacheKey);
+                    if (cached && Date.now() - cached.ts < PRED_CACHE_TTL) {
+                        allHistory = cached.rows;
+                    } else {
+                        const isCloud = 'execute' in client;
 
-                        if (modeSchemaReady) {
-                            const RICH_QUERY_TIMEOUT_MS = 2000;
-                            try {
-                                const historyRs = await Promise.race([
-                                    client.execute({
-                                        sql: historySql,
-                                        args: [currentModeId, currentModeId, ...symbols]
-                                    }),
-                                    new Promise<never>((_, reject) =>
-                                        setTimeout(() => reject(new Error('Rich query timeout')), RICH_QUERY_TIMEOUT_MS)
-                                    )
-                                ]);
-                                if (historyRs.rows && historyRs.rows.length > 0) {
-                                    allHistory = historyRs.rows as Record<string, unknown>[];
+                        if (isCloud) {
+                            let richQuerySucceeded = false;
+
+                            if (modeSchemaReady) {
+                                const RICH_QUERY_TIMEOUT_MS = 2000;
+                                try {
+                                    const historyRs = await Promise.race([
+                                        client.execute({
+                                            sql: historySql,
+                                            args: [currentModeId, currentModeId, ...symbols]
+                                        }),
+                                        new Promise<never>((_, reject) =>
+                                            setTimeout(() => reject(new Error('Rich query timeout')), RICH_QUERY_TIMEOUT_MS)
+                                        )
+                                    ]);
+                                    if (historyRs.rows && historyRs.rows.length > 0) {
+                                        allHistory = historyRs.rows as Record<string, unknown>[];
+                                    }
+                                    richQuerySucceeded = true;
+                                } catch (e) {
+                                    const reason = e instanceof Error ? e.message : 'unknown';
+                                    console.warn(`[Batch] Cloud rich history failed (${reason}), falling back...`);
                                 }
-                                richQuerySucceeded = true;
-                            } catch (e) {
-                                const reason = e instanceof Error ? e.message : 'unknown';
-                                console.warn(`[Batch] Cloud rich history failed (${reason}), falling back...`);
+                            } else {
+                                console.warn('[Batch] Mode schema not ready, skipping rich query');
+                            }
+
+                            if (!richQuerySucceeded) {
+                                const historyRs = await client.execute({
+                                    sql: fallbackHistorySql,
+                                    args: [currentModeId, ...symbols]
+                                });
+                                allHistory = historyRs.rows as Record<string, unknown>[];
                             }
                         } else {
-                            console.warn('[Batch] Mode schema not ready, skipping rich query');
+                            try {
+                                allHistory = client.prepare(historySql).all(currentModeId, currentModeId, ...symbols) as Record<string, unknown>[];
+                            } catch {
+                                console.warn('[Batch] Local rich history failed, falling back...');
+                                allHistory = client.prepare(fallbackHistorySql).all(currentModeId, ...symbols) as Record<string, unknown>[];
+                            }
                         }
 
-                        if (!richQuerySucceeded) {
-                            const historyRs = await client.execute({
-                                sql: fallbackHistorySql,
-                                args: [currentModeId, ...symbols]
-                            });
-                            allHistory = historyRs.rows as Record<string, unknown>[];
-                        }
-                    } else {
-                        try {
-                            allHistory = client.prepare(historySql).all(currentModeId, currentModeId, ...symbols) as Record<string, unknown>[];
-                        } catch {
-                            console.warn('[Batch] Local rich history failed, falling back...');
-                            allHistory = client.prepare(fallbackHistorySql).all(currentModeId, ...symbols) as Record<string, unknown>[];
+                        if (allHistory.length > 0) {
+                            _predCache.set(cacheKey, { rows: allHistory, ts: Date.now() });
                         }
                     }
                 } catch (error) {
@@ -285,20 +330,33 @@ export async function GET(request: Request) {
         const PREDICTION_VALIDITY_DAYS = 20;
         const validDateThreshold = new Date(Date.now() - PREDICTION_VALIDITY_DAYS * 86400000).toISOString().split('T')[0];
 
+        const isLite = historyLimit <= 1;
         const stocks = symbols.map(sym => {
             const rawHistory = historyBySymbol.get(sym) || [];
             const price = priceMap.get(sym) as Record<string, unknown> | undefined;
             const validPreds = (rawHistory as { date: string }[]).filter(p => p.date >= validDateThreshold);
 
-            return {
+            const prediction = validPreds[0] ? stripPredictionRow(validPreds[0] as Record<string, unknown>) : null;
+            const strippedHistory = rawHistory.map(h => stripPredictionRow(h));
+            const shortMetrics = shortMetricsMap.get(sym) || null;
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const entry: Record<string, any> = {
                 symbol: sym,
-                price: price || null,
-                prediction: validPreds[0] || null,
-                previousPrediction: validPreds[1] || null,
-                history: rawHistory,
-                shortMetrics: shortMetricsMap.get(sym) || null,
+                price: price && isLite ? stripPriceRow(price) : (price || null),
+                prediction,
+                previousPrediction: validPreds[1] ? stripPredictionRow(validPreds[1] as Record<string, unknown>) : null,
                 lastUpdated: formatPriceUpdateTag(hkTime)
             };
+
+            if (!isLite) {
+                entry.history = strippedHistory;
+            }
+            if (!isAllNullMetrics(shortMetrics)) {
+                entry.shortMetrics = shortMetrics;
+            }
+
+            return entry;
         });
 
         debugStage = 'build_response';

@@ -847,6 +847,7 @@ def init_db():
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_hk_short_daily_date ON hk_short_selling_daily(trade_date)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_hk_short_weekly_date ON hk_short_interest_weekly(report_week)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_hk_short_eligible_date ON hk_short_eligible_list(snapshot_date)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_pred_symbol_target ON ai_predictions_v2(symbol, target_date, model_id)")
         
         conn.commit()
         logger.info("✅ 数据库结构初始化完成 (Raw SQL - No ORM)")
