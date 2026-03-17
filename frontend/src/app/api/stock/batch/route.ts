@@ -351,6 +351,7 @@ export async function GET(request: Request) {
 
             if (!isLite) {
                 entry.history = strippedHistory;
+                entry.hasMoreHistory = strippedHistory.length >= historyLimit;
             }
             if (!isAllNullMetrics(shortMetrics)) {
                 entry.shortMetrics = shortMetrics;

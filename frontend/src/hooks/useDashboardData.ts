@@ -275,6 +275,7 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
                     previousPrediction: base.previousPrediction,
                     lastUpdated: base.lastUpdated || '--:--',
                     history: base.history || [],
+                    hasMoreHistory: base.hasMoreHistory ?? undefined,
                     shortMetrics: base.shortMetrics || null,
                     rule: getRule(item.symbol),
                     loading: false,
