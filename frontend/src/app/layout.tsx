@@ -53,56 +53,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://app.ziso.cc" />
         <link rel="dns-prefetch" href="https://app.ziso.cc" />
         <link rel="preconnect" href="https://va.vercel-scripts.com" />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                try {
-                  var ua = window.navigator.userAgent || '';
-                  var isIOS = /iPhone|iPad|iPod/i.test(ua);
-                  if (!isIOS) return;
-
-                  // iOS PWA cold-start: add a non-blocking splash overlay (dark + logo)
-                  // to avoid the white flash/repaint during cold boot.
-                  function mountSplash() {
-                    try {
-                      if (document.getElementById('ios-pwa-splash')) return;
-                      var splash = document.createElement('div');
-                      splash.id = 'ios-pwa-splash';
-                      var img = document.createElement('img');
-                      img.src = '/logo.png';
-                      img.alt = 'ZISO AI';
-                      splash.appendChild(img);
-                      document.body.appendChild(splash);
-                    } catch (e) {}
-                  }
-
-                  function hideSplash() {
-                    try {
-                      var splash = document.getElementById('ios-pwa-splash');
-                      if (!splash) return;
-                      splash.classList.add('is-hiding');
-                      setTimeout(function() {
-                        try { splash.remove(); } catch (e) {}
-                      }, 260);
-                    } catch (e) {}
-                  }
-
-                  // Mount as soon as body exists.
-                  if (document.readyState === 'loading') {
-                    document.addEventListener('DOMContentLoaded', mountSplash, { once: true });
-                  } else {
-                    mountSplash();
-                  }
-
-                  // Hide on full load. Also add a short fallback hide to reduce perceived delay.
-                  window.addEventListener('load', hideSplash, { once: true });
-                  setTimeout(hideSplash, 1200);
-                } catch (e) {}
-              })();
-            `,
-          }}
-        />
+        {/* Splash moved to server-rendered #app-splash in <body> for reliability */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -118,6 +69,30 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased">
+        {/* Server-rendered splash: in the HTML from the first byte, no script timing dependency.
+            Visible by default; the inline script below removes it for desktop / non-dashboard. */}
+        <div
+          id="app-splash"
+          style={{
+            position: 'fixed',
+            inset: '0',
+            background: '#050508',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 2147483647,
+            opacity: 1,
+            transition: 'opacity 220ms ease-out',
+          }}
+        >
+          <img
+            src="/logo.png"
+            alt="ZISO AI"
+            width={88}
+            height={88}
+            style={{ borderRadius: '18px', opacity: 0.9 }}
+          />
+        </div>
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -151,6 +126,29 @@ export default function RootLayout({
                   if (isMobile) document.body.classList.add('is-mobile');
                   if (canBypassDashboardSkeleton) {
                     document.documentElement.classList.add('dashboard-boot-ready');
+                  }
+
+                  // Splash visibility: only keep for mobile users on app subdomain dashboard.
+                  // All other routes (landing page, pricing, terms, etc.) and desktop
+                  // get it removed before first paint (this script runs synchronously).
+                  var splash = document.getElementById('app-splash');
+                  if (splash) {
+                    var host = window.location.hostname;
+                    var path = window.location.pathname;
+                    var isAppHost = host === 'app.ziso.cc' || host.indexOf('app.') === 0;
+                    var isDashboardRoute = path === '/dashboard' || path.indexOf('/dashboard/') === 0;
+                    var isLocalDev = host === 'localhost' || host === '127.0.0.1';
+                    var shouldShowSplash = isMobile && (isDashboardRoute || (isAppHost && path === '/') || (isLocalDev && isDashboardRoute));
+
+                    if (!shouldShowSplash) {
+                      splash.style.display = 'none';
+                    } else {
+                      // Safety timeout: auto-hide if React fails to dismiss it
+                      setTimeout(function() {
+                        var s = document.getElementById('app-splash');
+                        if (s) { s.style.opacity = '0'; setTimeout(function() { try { s.remove(); } catch(e){} }, 260); }
+                      }, 4000);
+                    }
                   }
                 } catch(e) {}
               })();

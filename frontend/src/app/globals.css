@@ -24,31 +24,10 @@ body {
   min-height: 100vh;
 }
 
-/* iOS PWA cold-start: prevent white flash with a minimal splash overlay.
-   We avoid background-image toggles (which can cause a visible repaint flash). */
-#ios-pwa-splash {
-  position: fixed;
-  inset: 0;
-  background: #050508;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2147483647;
-  pointer-events: none;
-  opacity: 1;
-  transition: opacity 220ms ease-out;
-}
-
-#ios-pwa-splash img {
-  width: 88px;
-  height: 88px;
-  border-radius: 18px;
-  opacity: 0.9;
-}
-
-#ios-pwa-splash.is-hiding {
-  opacity: 0;
-}
+/* App splash: server-rendered in root layout <body>, styled via inline styles.
+   The splash is dismissed by React (dashboard layout) or by the safety timeout
+   in the body inline script. No CSS classes needed for show/hide — opacity is
+   toggled directly via JS for maximum reliability across all platforms. */
 
 html.dashboard-boot-ready [data-dashboard-skeleton="true"] {
   opacity: 0 !important;

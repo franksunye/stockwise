@@ -323,8 +323,12 @@ self.addEventListener('fetch', (event) => {
 
   // ─── RULE 3: Navigation — CacheFirst + Background Revalidate (秒开) ───
   if (request.mode === 'navigate') {
-    // App subdomain entry routes must honor server-side redirects/rewrite/auth
-    // and should not be served from stale cached HTML.
+    // App subdomain entry: CacheFirst + Background Revalidate (秒开)
+    // Rationale: The cached HTML is the React shell; all auth & data are
+    // fetched client-side via API (no-store). Stale HTML is safe because
+    // middleware only does transparent URL rewrites, not server-side auth.
+    // Background revalidation keeps the shell fresh for the next visit.
+    // This eliminates the multi-second network wait on weak connections.
     const isAppHost = url.hostname === 'app.ziso.cc' || url.hostname.startsWith('app.');
     const isAppEntryPath =
       url.pathname === '/' ||
@@ -332,7 +336,7 @@ self.addEventListener('fetch', (event) => {
       url.pathname.startsWith('/dashboard/');
 
     if (isAppHost && isAppEntryPath) {
-      event.respondWith(networkFirst(request, '/offline.html', 8000));
+      event.respondWith(navigationCacheFirst(request, '/offline.html'));
       return;
     }
 

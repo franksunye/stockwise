@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useLayoutEffect } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { InviteWall } from '@/components/InviteWall';
 import { OnboardingOverlay } from '@/components/onboarding/OnboardingOverlay';
 import { getWatchlist } from '@/lib/storage';
@@ -176,9 +176,13 @@ export default function DashboardLayout({
 }) {
   // ── 乐观初始化 ──
   // 避免 React Hydration Mismatch (Error #418)：服务端和客户端初次渲染必须一致
-  // 我们以 null 初始化展示 Skeleton，立刻在 useEffect 中读取缓存"秒开"
+  // 我们以 null 初始化展示 Skeleton，立刻在 useLayoutEffect 中读取缓存"秒开"
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
   const [tier, setTier] = useState<Tier>('free');
+
+  // 返回用户检测：如果 inline boot script 已设置 dashboard-boot-ready，
+  // 表示有完整缓存，可以跳过 skeleton→content 的过渡动画。
+  const canSkipTransition = useRef(false);
 
   const appBootstrap = (
     <>
@@ -190,7 +194,10 @@ export default function DashboardLayout({
   );
 
   useLayoutEffect(() => {
-    // 1. 客户端挂载后立即尝试从缓存恢复，实现"秒开"
+    // 检测返回用户标记（在 setIsAuthorized 之前设置，确保渲染时可用）
+    canSkipTransition.current = document.documentElement.classList.contains('dashboard-boot-ready');
+
+    // 客户端挂载后立即尝试从缓存恢复，实现"秒开"
     const optimisticBootstrap = getOptimisticDashboardBootstrap();
     if (optimisticBootstrap) {
       setIsAuthorized(optimisticBootstrap.authorized);
@@ -350,6 +357,19 @@ export default function DashboardLayout({
     checkAuth();
   }, []);
 
+  // Dismiss the server-rendered splash once dashboard content is ready.
+  // The splash stays visible while React hydrates & resolves auth from cache,
+  // then fades out to reveal the actual content underneath.
+  useEffect(() => {
+    if (isAuthorized !== null) {
+      const splash = document.getElementById('app-splash');
+      if (splash) {
+        splash.style.opacity = '0';
+        setTimeout(() => { try { splash.remove(); } catch {} }, 260);
+      }
+    }
+  }, [isAuthorized]);
+
   return (
     <div className="bg-[#050508] min-h-screen overflow-hidden">
       {appBootstrap}
@@ -378,20 +398,21 @@ export default function DashboardLayout({
             transition={{ duration: 0.3 }}
           >
             <InviteWall onSuccess={(newTier) => {
-              // 关键修复：当邀请码成功时，立即更新 tier 并授权进入
               if (newTier) setTier(newTier as Tier);
               setIsAuthorized(true);
             }} />
           </motion.div>
         )}
 
-        {/* 3. 已授权状态 (显示正式内容) */}
+        {/* 3. 已授权状态 (显示正式内容)
+             返回用户 (canSkipTransition): 跳过 fade-in 动画，内容直接可见。
+             Splash 在上层遮罩并渐隐，提供流畅品牌过渡。 */}
         {isAuthorized === true && (
           <motion.div 
             key="dashboard-content"
-            initial={{ opacity: 0 }}
+            initial={canSkipTransition.current ? { opacity: 1 } : { opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.4 }}
+            transition={{ duration: canSkipTransition.current ? 0 : 0.4 }}
           >
             <DashboardAuthProvider tier={tier}>
               <UserProfileProvider>
