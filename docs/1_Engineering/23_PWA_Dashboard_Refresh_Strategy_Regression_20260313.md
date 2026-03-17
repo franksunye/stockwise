@@ -222,6 +222,7 @@ Any future refresh or caching work on Dashboard should preserve these rules:
 3. iPhone PWA standalone resume behavior must be treated as a separate runtime, not as a normal browser tab.
 4. "秒开" is allowed only if silent refresh remains dependable.
 5. If multiple cache layers exist, one owner must define freshness semantics explicitly.
+6. **All page-level navigation within the Dashboard PWA must use hard navigation (`<a>` / `window.location.href`), not Next.js `<Link>` / `router.push()`.** See Section 13 for the full rationale.
 
 ## 10. Recommended Next Cleanup
 
@@ -255,3 +256,83 @@ This was resolved by splitting `stock-cache.ts` into two paths:
 - `getCachedLatestPrices` (2 min TTL, down from 15 min) — used by `/api/stock/batch` for the heavier decision payload.
 
 See [`28_Price_Sync_Zero_Stale_Protocol_20260316.md`](./28_Price_Sync_Zero_Stale_Protocol_20260316.md) Section 6 for the full decision record.
+
+## 13. Follow-Up: Hard Navigation Mandate for Dashboard PWA (2026-03-17)
+
+### 13.1 Incident
+
+On iPhone PWA, navigating from stock-pool to dashboard (by tapping a stock) intermittently — and after an attempted SW fix, consistently — showed "页面加载异常" error page instead of the dashboard.
+
+Clicking "重新加载" always recovered successfully, confirming the cached data and HTML were healthy.
+
+### 13.2 Root Cause
+
+Next.js `<Link>` / `router.push()` triggers **RSC soft navigation**: a separate fetch for the React Server Component payload. This RSC fetch goes through the SW's `rscCacheFirst()` strategy:
+
+1. If RSC cache has a hit → returns instantly (works).
+2. If RSC cache is empty → tries network with 8s timeout.
+3. If network fails → returns synthetic 504 → Next.js throws → **error boundary fires**.
+
+The error boundary showed "页面加载异常", bypassing the entire SW cache architecture that was built for 秒开 — the `navigationCacheFirst` HTML shell cache, `localStorage` auth/data cache, and client-side hydration were all completely unused.
+
+**The irony**: a perfectly valid cached HTML shell for `/dashboard` existed in the SW navigation cache the entire time. A hard navigation would have loaded it instantly.
+
+### 13.3 Why RSC Soft Navigation Is Fragile in PWA Context
+
+| Factor | Impact |
+|--------|--------|
+| RSC fetch is a sub-resource request, not a navigation | SW `navigationCacheFirst` never runs |
+| RSC cache only populates on successful soft-nav | First-time or cache-miss paths always hit network |
+| `navigator.onLine` is unreliable on iOS Safari standalone | `fetchWithTimeout` may reject immediately even with working network |
+| `event.respondWith()` reject (throw) has unpredictable behavior on iOS Safari | Attempted fix of throwing instead of 504 made the issue reproducible every time |
+| `router.prefetch()` also uses RSC path | Prefetch failure leaves cache empty for subsequent navigation |
+
+### 13.4 Architectural Decision
+
+**All page-level navigation within the Dashboard PWA uses hard navigation (`<a>` / `window.location.href`) instead of Next.js `<Link>` / `router.push()`.**
+
+Hard navigation path:
+
+```
+User tap → browser navigation request → SW intercepts →
+navigationCacheFirst → cached HTML shell → instant load →
+React hydrate → localStorage auth/data restore → content ready
+```
+
+This path is **100% on the SW cache chain**. Offline, weak network, slow Vercel/Turso — all served from cache.
+
+### 13.5 Pages Fixed
+
+| File | Navigation | Change |
+|------|-----------|--------|
+| `stock-pool/page.tsx` | Stock item → dashboard | `<Link>` → `<a>` + `window.location.href` |
+| `stock-pool/page.tsx` | Back arrow → dashboard | `<Link>` → `<a>` |
+| `dashboard/page.tsx` | Footer icon → stock-pool | `<Link>` → `<a>` |
+| `dashboard/page.tsx` | Overscroll left → stock-pool | `router.push()` → `window.location.href` |
+| `brief/page.tsx` | Back arrow → dashboard (×2) | `<Link>` → `<a>` |
+| `brief/page.tsx` | "返回首页" button | `<Link>` → `<a>` |
+
+ESLint `@next/next/no-html-link-for-pages` is suppressed per-line with comments explaining the PWA intent.
+
+### 13.6 Error Boundary Safety Net
+
+`dashboard/error.tsx` was also hardened:
+
+- **Non-chunk errors** (RSC timeout, network failure): auto-recover via `window.location.href` to trigger SW cache. Renders `null` during recovery so the error page never flashes.
+- **Chunk errors** (version mismatch): existing `CLEAR_CACHES` + reload behavior preserved.
+- **Critical**: non-chunk recovery does NOT send `CLEAR_CACHES` — the navigation HTML cache is the recovery lifeline, especially when completely offline.
+- 10-second cooldown prevents infinite loops; error UI shown only if auto-recovery itself fails.
+
+### 13.7 SW `rscCacheFirst` Status
+
+The SW's `rscCacheFirst` handler was reverted to returning 504 on cache-miss + network-fail. An attempt to `throw` instead (to produce a genuine `TypeError` and trigger Next.js MPA fallback) caused **worse** behavior on iOS Safari — the error became reproducible every time instead of intermittent.
+
+The 504 path remains as-is. With all dashboard pages using hard navigation, `rscCacheFirst` is no longer on the critical path for user-facing page transitions.
+
+### 13.8 Principle for Future Work
+
+> **In a PWA with SW-cached HTML shells, page-level navigation must stay on the SW navigation cache path.** Next.js RSC soft navigation creates a parallel fetch path that bypasses the SW HTML cache entirely. On unreliable networks (offline, weak, slow backend), this parallel path fails — and the failure mode (error boundary) is visible and disruptive.
+>
+> Soft navigation (`<Link>`) is appropriate for non-PWA web apps with reliable network, or for transitions within the same page (drawers, modals, tabs). For PWA page transitions where offline resilience is required, hard navigation is the correct choice.
+
+Commits: `5758f70`, `89f46ae`, `ea68864`, `eaa4b88`.

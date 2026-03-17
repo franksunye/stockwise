@@ -1,4 +1,4 @@
-# 2_Intelligence 文档索引与治理（对齐版）
+# 20_Intelligence 文档索引与治理（对齐版）
 
 **文档状态**: Active  
 **日期**: 2026-03-09
@@ -7,19 +7,19 @@
 
 ## 1. 现行主文档（长期维护）
 
-1. `39_Tradeability_Dual_Lane_Operations.md`  
+1. `27C_Dual_Lane_Operations_Manual.md`  
    运行手册：双轨执行、命令、核验 SQL、回滚
-2. `05_Quant_Industry_Map_and_StockWise_DoFaShu.md`  
+2. `21Q_Quant_Industry_Map.md`  
    量化行业地图与道法术器：战略定位与路线图
-3. `06_Quant_Methods_Masters_Research_Framework.md`  
+3. `22Q_Quant_Research_Framework.md`  
    量化方法与大师研究框架
-4. `07_StockWise_Method_Registry_Design.md`  
+4. `23Q_Method_Registry_Design.md`  
    量化方法库设计规范
-5. `44_Quant_Backtesting_Methodology_Industry_Benchmark_2026-03-10.md`  
+5. `28Q_Quant_Backtesting_Methodology.md`  
    量化回测方法审计与行业对照
-6. `27_Acceptance_Criteria_v1.md`  
+6. `26C_Quant_AI_Acceptance_Criteria.md`  
    验收门槛：一致性、收益质量、风险、输出完整性
-7. `27_DeepSeek_V3_Rich_Context_Limits.md`  
+7. `25A_AI_Context_Limits_DeepSeek.md`  
    研究边界与证据登记
 
 当前这条线的现行主依据补充为：
@@ -41,11 +41,11 @@
 
 ## 2. 冲突优先级（口径冲突时）
 
-1. 运行口径：`39`
+1. 运行口径：`27C`
 2. 后端运行口径：`docs/1_Engineering/14_Investment_Mode_Backend_Runbook.md`
-3. 验收口径：`27_Acceptance_Criteria_v1`
+3. 验收口径：`26C_Quant_AI_Acceptance_Criteria`
 4. 产品与后台口径：`47 / 48`
-5. 研究边界：`27_DeepSeek_V3_Rich_Context_Limits`
+5. 研究边界：`25A_AI_Context_Limits_DeepSeek`
 6. 标记为 `Historical Reference`、位于 `archive/` 或位于 `research/` 的文档：仅作历史记录，不作为现行执行依据
 
 ---

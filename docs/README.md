@@ -20,7 +20,7 @@ This directory serves as the unified single source of truth for the 知守 AI (Z
 - [Investment Mode Backend Runbook](./1_Engineering/14_Investment_Mode_Backend_Runbook.md)
 
 ### Current Source of Truth: Investment Mode / Tradeability
-- [Dual-Lane Operations](./2_Intelligence/39_Tradeability_Dual_Lane_Operations.md)
+- [Dual-Lane Operations](./2_Intelligence/27C_Dual_Lane_Operations_Manual.md)
 - [Investment Mode Backend Runbook](./1_Engineering/14_Investment_Mode_Backend_Runbook.md)
 - [Investment Mode Product Layer](./3_Product/Specs/47_Investment_Mode_Product_Layer.md)
 - [Admin Tradeability Control Tower](./3_Product/Specs/48_Admin_Tradeability_Control_Tower.md)
@@ -33,13 +33,13 @@ This directory serves as the unified single source of truth for the 知守 AI (Z
 ### [2_Intelligence/](./2_Intelligence/) - How (Brain)
 > Project "AI Logic": Prompt engineering, model strategies, and core algorithms.
 - **[Quant Strategy & Methodology]**
-  - [Quant Industry Map & Dao-Fa-Shu-Qi](./2_Intelligence/05_Quant_Industry_Map_and_StockWise_DoFaShu.md)
-  - [Methods & Masters Research Framework](./2_Intelligence/06_Quant_Methods_Masters_Research_Framework.md)
-  - [Method Registry Design](./2_Intelligence/07_StockWise_Method_Registry_Design.md)
-- [Dual-Lane Operations](./2_Intelligence/39_Tradeability_Dual_Lane_Operations.md)
-- [Context Limits Research](./2_Intelligence/27_DeepSeek_V3_Rich_Context_Limits.md)
-- [Acceptance Criteria v1](./2_Intelligence/27_Acceptance_Criteria_v1.md)
-- [Quant Backtesting Methodology](./2_Intelligence/44_Quant_Backtesting_Methodology_Industry_Benchmark_2026-03-10.md)
+  - [Quant Industry Map & Road Map](./2_Intelligence/21Q_Quant_Industry_Map.md)
+  - [Methods & Masters Research Framework](./2_Intelligence/22Q_Quant_Research_Framework.md)
+  - [Method Registry Design](./2_Intelligence/23Q_Method_Registry_Design.md)
+- [Dual-Lane Operations Manual](./2_Intelligence/27C_Dual_Lane_Operations_Manual.md)
+- [AI Context Limits (DeepSeek)](./2_Intelligence/25A_AI_Context_Limits_DeepSeek.md)
+- [Quant + AI Acceptance Criteria](./2_Intelligence/26C_Quant_AI_Acceptance_Criteria.md)
+- [Quant Backtesting Methodology](./2_Intelligence/28Q_Quant_Backtesting_Methodology.md)
 
 ### Historical Records: Investment Mode / Tradeability
 - [Promotion Execution Plan](./1_Engineering/archive/17_Tradeability_Promotion_Execution_Plan.md)
