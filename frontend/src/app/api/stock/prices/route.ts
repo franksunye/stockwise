@@ -12,19 +12,12 @@ function applyNoStoreHeaders(response: NextResponse): NextResponse {
   return response;
 }
 
-function formatPriceUpdateTag(priceDate: unknown, todayDate: string): string {
-  if (!priceDate) return '--';
-
-  const normalizedPriceDate = String(priceDate);
-  const shortDate = normalizedPriceDate.substring(5);
-
-  // Dashboard 价量层展示的是日线级快照，而非逐笔行情。
-  // 若仍为上一交易日数据，需在文案中显式标示“收盘”。
-  if (normalizedPriceDate < todayDate) {
-    return `${shortDate} 收盘`;
-  }
-
-  return `${shortDate} 已更新`;
+function formatPriceUpdateTag(hkTime: Date): string {
+  const month = String(hkTime.getMonth() + 1).padStart(2, '0');
+  const day = String(hkTime.getDate()).padStart(2, '0');
+  const hours = String(hkTime.getHours()).padStart(2, '0');
+  const minutes = String(hkTime.getMinutes()).padStart(2, '0');
+  return `${month}-${day} ${hours}:${minutes}`;
 }
 
 export async function GET(request: Request) {
@@ -54,7 +47,7 @@ export async function GET(request: Request) {
     const hkTime = new Date(
       new Date().getTime() + new Date().getTimezoneOffset() * 60000 + 3600000 * 8,
     );
-    const hkDateStr = hkTime.toISOString().split('T')[0];
+    const updateTag = formatPriceUpdateTag(hkTime);
 
     const prices = latestPrices.map((row) => {
       const r = row as Record<string, unknown>;
@@ -64,7 +57,7 @@ export async function GET(request: Request) {
         close: typeof r.close === 'number' ? r.close : null,
         change_percent:
           typeof r.change_percent === 'number' ? r.change_percent : null,
-        lastUpdated: formatPriceUpdateTag(r.date, hkDateStr),
+        lastUpdated: updateTag,
       };
     });
 
