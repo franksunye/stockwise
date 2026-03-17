@@ -36,19 +36,12 @@ function closeDb(db: unknown): void {
     }
 }
 
-function formatPriceUpdateTag(priceDate: unknown, todayDate: string): string {
-    if (!priceDate) return '--';
-
-    const normalizedPriceDate = String(priceDate);
-    const shortDate = normalizedPriceDate.substring(5);
-
-    // The stock pool surface shows end-of-day data rather than live ticks.
-    // Be explicit when we're still showing the previous completed trading day.
-    if (normalizedPriceDate < todayDate) {
-        return `${shortDate} 收盘`;
-    }
-
-    return `${shortDate} 已更新`;
+function formatPriceUpdateTag(hkTime: Date): string {
+    const month = String(hkTime.getMonth() + 1).padStart(2, '0');
+    const day = String(hkTime.getDate()).padStart(2, '0');
+    const hours = String(hkTime.getHours()).padStart(2, '0');
+    const minutes = String(hkTime.getMinutes()).padStart(2, '0');
+    return `${month}-${day} ${hours}:${minutes}`;
 }
 
 function applyNoStoreHeaders(response: NextResponse): NextResponse {
@@ -264,7 +257,6 @@ export async function GET(request: Request) {
         }
 
         const hkTime = new Date(new Date().getTime() + (new Date().getTimezoneOffset() * 60000) + (3600000 * 8));
-        const hkDateStr = hkTime.toISOString().split('T')[0];
 
         // Calculate the threshold string exactly once to avoid redundant allocations inside the loop
         const PREDICTION_VALIDITY_DAYS = 20;
@@ -282,7 +274,7 @@ export async function GET(request: Request) {
                 previousPrediction: validPreds[1] || null,
                 history: rawHistory,
                 shortMetrics: shortMetricsMap.get(sym) || null,
-                lastUpdated: formatPriceUpdateTag(price?.date, hkDateStr)
+                lastUpdated: formatPriceUpdateTag(hkTime)
             };
         });
 
