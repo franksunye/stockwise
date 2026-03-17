@@ -66,6 +66,6 @@
 
 ## 5. 文档关系
 
-1. 运行手册：`39_Tradeability_Dual_Lane_Operations.md`
+1. 运行手册：`27C_Dual_Lane_Operations_Manual.md`
 2. 重构计划：`archive/40_Gemini_Quant_AI_Two_Layer_Refactoring_Plan.md`
 3. 本文只定义“什么叫达标”，不承担运行步骤说明。

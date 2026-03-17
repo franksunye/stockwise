@@ -20,9 +20,9 @@
 
 1. `../0_Strategy/01_Product_Positioning_and_Boundaries.md`
    - 解决商业定位与能力边界
-2. `./44_Quant_Backtesting_Methodology_Industry_Benchmark_2026-03-10.md`
-   - 解决当前方法的客观审计与行业对照
-3. `./39_Tradeability_Dual_Lane_Operations.md`
+2. `./28Q_Quant_Backtesting_Methodology.md`
+   - 解决当前方法的客观审计 with 行业对照
+3. `./27C_Dual_Lane_Operations_Manual.md`
    - 解决生产线 / 实验线的工程纪律
 
 一句话说：

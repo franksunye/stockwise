@@ -22,7 +22,7 @@
 说明：
 
 1. 如果你要看“行业大地图 / 我们是谁 / 我们该去哪里”，主文档应看：
-   - `./05_Quant_Industry_Map_and_StockWise_DoFaShu.md`
+   - `./21Q_Quant_Industry_Map.md`
 2. 本文件不再承担完整战略世界观说明，只承担：
    - 当前方法审计
    - 行业方法学对照
@@ -76,7 +76,7 @@ StockWise 当前底层，确实属于量化回测驱动的规则优化体系。
 
 但这一定义的完整行业地图、道法术器分析与未来路线，已迁移到：
 
-- `./05_Quant_Industry_Map_and_StockWise_DoFaShu.md`
+- `./21Q_Quant_Industry_Map.md`
 
 本文件后续只保留和“当前方法是否严谨”直接相关的判断。
 
