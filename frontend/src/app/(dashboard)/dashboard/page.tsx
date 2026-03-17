@@ -317,6 +317,7 @@ function DashboardContent() {
           ))}
         </div>
         <div className="w-full flex justify-between items-center pointer-events-auto">
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
           <a href="/dashboard/stock-pool" className="p-3 rounded-2xl bg-white/5 border border-white/10 active:scale-95 transition-all pointer-events-auto inline-flex items-center justify-center cursor-pointer">
             <Grid className="w-5 h-5 text-indigo-400" />
           </a>

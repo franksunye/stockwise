@@ -79,6 +79,7 @@ export default function BriefPage() {
       <div className="fixed inset-0 bg-[#050508] flex flex-col">
         {/* Header */}
         <header className="flex items-center justify-between p-8 pt-12 shrink-0">
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
           <a href="/dashboard" className="p-2.5 rounded-full bg-white/5 border border-white/10">
             <ArrowLeft className="w-5 h-5 text-slate-400" />
           </a>
@@ -110,6 +111,7 @@ export default function BriefPage() {
               AI 可能会在收盘后生成。
             </p>
           </div>
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
           <a 
             href="/dashboard"
             className="mt-4 px-8 py-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-all active:scale-95"
@@ -126,6 +128,7 @@ export default function BriefPage() {
     <div className="fixed inset-0 bg-[#050508] flex flex-col overflow-hidden">
       {/* Solid Header - No transparency */}
       <header className="flex items-center justify-between p-8 pt-12 pb-6 shrink-0 bg-[#050508] z-20">
+        {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
         <a href="/dashboard" className="p-2.5 rounded-full bg-white/5 border border-white/10 active:scale-90 transition-all">
           <ArrowLeft className="w-5 h-5 text-slate-400" />
         </a>

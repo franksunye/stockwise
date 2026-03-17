@@ -45,6 +45,7 @@ const StockItem = memo(({
       transition={{ duration: 0.15 }}
       className="transform-gpu"
     >
+      {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
       <a 
         href="/dashboard"
         onClick={(e) => {
@@ -250,6 +251,7 @@ export default function StockPoolPage() {
       {/* Solid/Stable Header Structure (Centered Title) */}
       <header className="shrink-0 z-20 px-6 py-4 flex items-center justify-between bg-[#050508] border-b border-white/5">
         <div className="w-12">
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
           <a href="/dashboard" className="p-2 rounded-full hover:bg-white/5 active:scale-90 transition-all text-slate-400 flex items-center justify-center">
             <ArrowLeft className="w-5 h-5" />
           </a>
