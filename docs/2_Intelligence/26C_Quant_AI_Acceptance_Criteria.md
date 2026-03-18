@@ -45,6 +45,9 @@
 2. `tactics` 三场景完整：`holding_profit / holding_loss / empty`
 3. 缺失率需低于阈值（建议 `< 0.5%`）
 
+> [!TIP]
+> **逻辑依据**：上述指标的判定（如 T+3 胜率、MDD）的底层验证逻辑请参考：[30Q 量化信号验证与执行公理](./30Q_Quant_Signal_and_Execution_Axioms.md)。
+
 ---
 
 ## 3. Level-2（中长期优秀线）
