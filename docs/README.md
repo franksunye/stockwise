@@ -18,17 +18,14 @@ This directory serves as the unified single source of truth for the 知守 AI (Z
 - [Reliability & Quality Gates](./1_Engineering/11_Reliability_Protocol.md)
 - [Quant-Engine Architecture](./1_Engineering/13_Quant_Engine_Architecture.md)
 - [Investment Mode Backend Runbook](./1_Engineering/14_Investment_Mode_Backend_Runbook.md)
+- [Stock News Fetching Implementation](./1_Engineering/33_Stock_News_Fetching_Implementation.md)
+- [Dashboard Page Refactoring Design](./1_Engineering/34_Dashboard_Page_Refactoring_Design.md)
 
 ### Current Source of Truth: Investment Mode / Tradeability
 - [Dual-Lane Operations](./2_Intelligence/27C_Dual_Lane_Operations_Manual.md)
 - [Investment Mode Backend Runbook](./1_Engineering/14_Investment_Mode_Backend_Runbook.md)
 - [Investment Mode Product Layer](./3_Product/Specs/47_Investment_Mode_Product_Layer.md)
 - [Admin Tradeability Control Tower](./3_Product/Specs/48_Admin_Tradeability_Control_Tower.md)
-
-### Completed Initiatives
-- `Investment Mode / Tradeability`
-  - Current source of truth has been reduced to the 4 documents above.
-  - Execution records, plans, and local experiment notes have been moved to `archive/` or `research/`.
 
 ### [2_Intelligence/](./2_Intelligence/) - How (Brain)
 > Project "AI Logic": Prompt engineering, model strategies, and core algorithms.
@@ -41,17 +38,13 @@ This directory serves as the unified single source of truth for the 知守 AI (Z
 - [Quant + AI Acceptance Criteria](./2_Intelligence/26C_Quant_AI_Acceptance_Criteria.md)
 - [Quant Backtesting Methodology](./2_Intelligence/28Q_Quant_Backtesting_Methodology.md)
 - [Signal Validation Axioms](./2_Intelligence/30Q_Quant_Signal_and_Execution_Axioms.md)
-
-### Historical Records: Investment Mode / Tradeability
-- [Promotion Execution Plan](./1_Engineering/archive/17_Tradeability_Promotion_Execution_Plan.md)
-- [Execution Alignment Record](./1_Engineering/archive/19_Investment_Mode_Execution_Alignment_Plan.md)
-- [Quant-AI Refactoring (Plan 40)](./2_Intelligence/archive/40_Gemini_Quant_AI_Two_Layer_Refactoring_Plan.md)
-- [Tradeability Quality and Actionability (Plan 41)](./2_Intelligence/archive/41_Tradeability_Quality_and_Actionability_Plan.md)
-- [Local Tradeability Experiment Preparation](./2_Intelligence/research/42_Local_Tradeability_Experiment_Preparation.md)
+- [Validation Logic Research (Legacy)](./2_Intelligence/31Q_Validation_Logic_Research_Legacy.md)
 
 ### [3_Product/](./3_Product/) - What & UX
 > Project "Body": Feature manifest and specific product delivery specs.
 - [Features Manifest](./3_Product/03_Product_Features_Manifest.md)
+- [Membership Design Plan](./3_Product/31_Membership_Design_Plan.md)
+- [Nightly Plan Feature Spec](./3_Product/32_Nightly_Plan_Feature_Spec.md)
 - **[Specs/](./3_Product/Specs/)**
   - [Quant/AI Dual-Layer UX (40)](./3_Product/Specs/40_Quant_AI_Dual_Layer_UX.md)
   - [Stock Radar (45)](./3_Product/Specs/45_Stock_Radar_Discovery_Engine.md)
@@ -82,6 +75,10 @@ This directory serves as the unified single source of truth for the 知守 AI (Z
   - [双轨制架构说明 (Dual-Lane)](./5_Support_Ops/content/dual-lane-architecture.md)
   - [投资模式配置 (Investment Mode)](./5_Support_Ops/content/investment-mode-config.md)
 
+### [6_UX_Mockups/](./6_UX_Mockups/) - Body (UI)
+> Project "Visuals": Screen mockups, navigation flows, and UI component designs.
+- [User Center Notification Upgrade](./6_UX_Mockups/01_User_Center_Notification_Upgrade.md)
+
 ---
 
 ## 🛠️ Maintenance Guidelines
@@ -90,4 +87,4 @@ This directory serves as the unified single source of truth for the 知守 AI (Z
 3. **Consistency Checks**: When code implementation conflicts with documentation, the code takes precedence. Always update documentation promptly to reflect actual implementations.
 
 ---
-**Last Updated**: March 9, 2026
+**Last Updated**: March 18, 2026
