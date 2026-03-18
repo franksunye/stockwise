@@ -68,13 +68,13 @@ jobs:
           TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
         run: |
           mkdir -p tmp/tradeability_calibration
-          START_ARG=""
+          START_ARGS=()
           if [ -n "${{ inputs.start_date }}" ]; then
-            START_ARG="--start-date ${{ inputs.start_date }}"
+            START_ARGS+=(--start-date "${{ inputs.start_date }}")
           fi
-          END_ARG=""
+          END_ARGS=()
           if [ -n "${{ inputs.end_date }}" ]; then
-            END_ARG="--end-date ${{ inputs.end_date }}"
+            END_ARGS+=(--end-date "${{ inputs.end_date }}")
           fi
           STRATEGIES="${{ inputs.strategy_versions }}"
           if [ -z "$STRATEGIES" ]; then
@@ -88,7 +88,7 @@ jobs:
             --market CN \
             --strategy-versions "$STRATEGIES" \
             --parameter-order "$PARAM_ORDER" \
-            $START_ARG $END_ARG \
+            "${START_ARGS[@]}" "${END_ARGS[@]}" \
             --output-json tmp/tradeability_calibration/cn_weekly_calibration.json \
             --output-md tmp/tradeability_calibration/cn_weekly_calibration.md
 
@@ -128,13 +128,13 @@ jobs:
           TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
         run: |
           mkdir -p tmp/tradeability_calibration
-          START_ARG=""
+          START_ARGS=()
           if [ -n "${{ inputs.start_date }}" ]; then
-            START_ARG="--start-date ${{ inputs.start_date }}"
+            START_ARGS+=(--start-date "${{ inputs.start_date }}")
           fi
-          END_ARG=""
+          END_ARGS=()
           if [ -n "${{ inputs.end_date }}" ]; then
-            END_ARG="--end-date ${{ inputs.end_date }}"
+            END_ARGS+=(--end-date "${{ inputs.end_date }}")
           fi
           STRATEGIES="${{ inputs.strategy_versions }}"
           if [ -z "$STRATEGIES" ]; then
@@ -148,7 +148,7 @@ jobs:
             --market HK \
             --strategy-versions "$STRATEGIES" \
             --parameter-order "$PARAM_ORDER" \
-            $START_ARG $END_ARG \
+            "${START_ARGS[@]}" "${END_ARGS[@]}" \
             --output-json tmp/tradeability_calibration/hk_weekly_calibration.json \
             --output-md tmp/tradeability_calibration/hk_weekly_calibration.md
 

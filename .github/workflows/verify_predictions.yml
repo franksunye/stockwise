@@ -53,6 +53,14 @@ jobs:
           WECOM_ROBOT_KEY: ${{ secrets.WECOM_ROBOT_KEY }}
           ADMIN_MOBILES: ${{ secrets.ADMIN_MOBILES }}
         run: |
-          FORCE_ARG="${{ (inputs.force == true || github.event.inputs.force == 'true') && '--force' || '' }}"
-          DATE_ARG="${{ (inputs.date != '' && format('--date {0}', inputs.date)) || (github.event.inputs.date != '' && format('--date {0}', github.event.inputs.date)) || '' }}"
-          python -u backend/main.py --verify $FORCE_ARG $DATE_ARG
+          FORCE_ARGS=()
+          if [ "${{ inputs.force }}" = "true" ] || [ "${{ github.event.inputs.force }}" = "true" ]; then
+            FORCE_ARGS+=(--force)
+          fi
+          DATE_ARGS=()
+          if [ -n "${{ inputs.date }}" ]; then
+            DATE_ARGS+=(--date "${{ inputs.date }}")
+          elif [ -n "${{ github.event.inputs.date }}" ]; then
+            DATE_ARGS+=(--date "${{ github.event.inputs.date }}")
+          fi
+          python -u backend/main.py --verify "${FORCE_ARGS[@]}" "${DATE_ARGS[@]}"

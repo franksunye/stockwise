@@ -97,24 +97,25 @@ jobs:
           INTERNAL_API_SECRET: ${{ secrets.INTERNAL_API_SECRET }}
           NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
         run: |
-          FORCE_FLAG=""
+          FORCE_ARGS=()
           if [ "${{ inputs.force }}" == "true" ]; then
-            FORCE_FLAG="--force"
+            FORCE_ARGS+=(--force)
             echo "⚠️ Force mode enabled via input."
           else
             echo "ℹ️ Force mode disabled."
           fi
 
-          DATE_FLAG=""
+          DATE_ARGS=()
           if [ -n "${{ inputs.date }}" ]; then
-            DATE_FLAG="--date ${{ inputs.date }}"
+            DATE_ARGS+=(--date "${{ inputs.date }}")
             echo "📅 Target date set to: ${{ inputs.date }}"
           fi
           
-          MODEL_FLAG="--model ${{ inputs.model }}"
           if [ -z "${{ inputs.model }}" ]; then
-             MODEL_FLAG="--model all"
+            MODEL_ARGS=(--model all)
+          else
+            MODEL_ARGS=(--model "${{ inputs.model }}")
           fi
 
-          echo "🚀 Executing: python -u backend/main.py --analyze --market HK $MODEL_FLAG $FORCE_FLAG $DATE_FLAG"
-          python -u backend/main.py --analyze --market HK $MODEL_FLAG $FORCE_FLAG $DATE_FLAG
+          echo "🚀 Executing: python -u backend/main.py --analyze --market HK ${MODEL_ARGS[*]} ${FORCE_ARGS[*]} ${DATE_ARGS[*]}"
+          python -u backend/main.py --analyze --market HK "${MODEL_ARGS[@]}" "${FORCE_ARGS[@]}" "${DATE_ARGS[@]}"

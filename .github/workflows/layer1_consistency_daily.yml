@@ -48,25 +48,25 @@ jobs:
           WECOM_ROBOT_KEY: ${{ secrets.WECOM_ROBOT_KEY }}
         run: |
           mkdir -p tmp/layer1_metrics
-          DATE_ARG=""
+          DATE_ARGS=()
           if [ -n "${{ inputs.date }}" ]; then
-            DATE_ARG="--date ${{ inputs.date }}"
+            DATE_ARGS+=(--date "${{ inputs.date }}")
           fi
-          STRATEGY_ARG="--strategy-version tradeability_v2"
+          STRATEGY_ARGS=(--strategy-version tradeability_v2)
           if [ -n "${{ inputs.strategy_version }}" ]; then
-            STRATEGY_ARG="--strategy-version ${{ inputs.strategy_version }}"
+            STRATEGY_ARGS=(--strategy-version "${{ inputs.strategy_version }}")
           fi
-          NOTIFY_ARG=""
+          NOTIFY_ARGS=()
           if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ inputs.notify }}" = "true" ]; then
-            NOTIFY_ARG="--notify"
+            NOTIFY_ARGS+=(--notify)
           fi
           python -u backend/scripts/metrics_layer1_consistency.py \
-            $DATE_ARG \
-            $STRATEGY_ARG \
+            "${DATE_ARGS[@]}" \
+            "${STRATEGY_ARGS[@]}" \
             --output-json tmp/layer1_metrics/layer1_consistency_daily.json \
             --output-md tmp/layer1_metrics/layer1_consistency_daily.md \
             --persist \
-            $NOTIFY_ARG
+            "${NOTIFY_ARGS[@]}"
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4

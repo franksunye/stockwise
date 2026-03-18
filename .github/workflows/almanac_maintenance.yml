@@ -52,12 +52,12 @@ jobs:
           TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
         run: |
           if [ "${{ inputs.mode }}" == "single-date" ]; then
-            DATE_ARG=""
+            DATE_ARGS=()
             if [ -n "${{ inputs.date }}" ]; then
-              DATE_ARG="--date ${{ inputs.date }}"
+              DATE_ARGS+=(--date "${{ inputs.date }}")
             fi
-            echo "🚀 Executing: python backend/engine/almanac_generator.py $DATE_ARG"
-            python -u backend/engine/almanac_generator.py $DATE_ARG
+            echo "🚀 Executing: python backend/engine/almanac_generator.py ${DATE_ARGS[*]}"
+            python -u backend/engine/almanac_generator.py "${DATE_ARGS[@]}"
           else
             echo "🚀 Executing: python backend/engine/almanac_generator.py --start-date ${{ inputs.start_date }} --end-date ${{ inputs.end_date }}"
             python -u backend/engine/almanac_generator.py --start-date ${{ inputs.start_date }} --end-date ${{ inputs.end_date }}
@@ -72,13 +72,13 @@ jobs:
           WECOM_ROBOT_KEY: ${{ secrets.WECOM_ROBOT_KEY }}
           ADMIN_MOBILES: ${{ secrets.ADMIN_MOBILES }}
         run: |
-          DATE_ARG=""
+          DATE_ARGS=()
           if [ "${{ inputs.mode }}" == "single-date" ] && [ -n "${{ inputs.date }}" ]; then
-            DATE_ARG="--date ${{ inputs.date }}"
+            DATE_ARGS+=(--date "${{ inputs.date }}")
           elif [ "${{ inputs.mode }}" == "date-range" ] && [ -n "${{ inputs.end_date }}" ]; then
-            DATE_ARG="--date ${{ inputs.end_date }}"
+            DATE_ARGS+=(--date "${{ inputs.end_date }}")
           fi
-          python -u backend/scripts/market_facts_healthcheck.py --market CN $DATE_ARG
+          python -u backend/scripts/market_facts_healthcheck.py --market CN "${DATE_ARGS[@]}"
 
       - name: Notify ADMIN Summary
         if: always()

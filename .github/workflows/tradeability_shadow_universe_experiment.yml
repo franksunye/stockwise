@@ -57,15 +57,15 @@ jobs:
           TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
         run: |
           mkdir -p tmp/shadow_universe
-          FORCE_FLAG=""
+          FORCE_ARGS=()
           if [ "${{ inputs.force }}" == "true" ]; then
-            FORCE_FLAG="--force"
+            FORCE_ARGS+=(--force)
           fi
           python -u backend/scripts/run_shadow_universe_light_backfill.py \
             --manifest "${{ inputs.manifest_path }}" \
             --start-date "${{ inputs.start_date }}" \
             --end-date "${{ inputs.end_date }}" \
-            $FORCE_FLAG | tee tmp/shadow_universe/backfill.json
+            "${FORCE_ARGS[@]}" | tee tmp/shadow_universe/backfill.json
 
       - name: Summarize Shadow Experiment
         env:

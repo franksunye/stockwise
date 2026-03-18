@@ -82,9 +82,9 @@ jobs:
         run: |
           mkdir -p tmp/tradeability_calibration tmp/tradeability_experiments tmp/tradeability_promotion
           MARKET_LOWER=$(echo "${{ inputs.market }}" | tr '[:upper:]' '[:lower:]')
-          WEEK_END_ARG=""
+          WEEK_END_ARGS=()
           if [ -n "${{ inputs.week_end }}" ]; then
-            WEEK_END_ARG="--end-date ${{ inputs.week_end }}"
+            WEEK_END_ARGS+=(--end-date "${{ inputs.week_end }}")
           fi
           python -u backend/scripts/run_tradeability_weekly_calibration.py \
             --market "${{ inputs.market }}" \
@@ -94,7 +94,7 @@ jobs:
           python -u backend/scripts/run_tradeability_experiment.py \
             --market "${{ inputs.market }}" \
             --strategy-versions "${{ inputs.candidate_version }},${{ inputs.baseline_version }}" \
-            $WEEK_END_ARG \
+            "${WEEK_END_ARGS[@]}" \
             --output-json "tmp/tradeability_experiments/${MARKET_LOWER}_strategy_experiment.json" \
             --output-md "tmp/tradeability_experiments/${MARKET_LOWER}_strategy_experiment.md"
 
@@ -105,9 +105,9 @@ jobs:
           TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
           TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
         run: |
-          WEEK_END_ARG=""
+          WEEK_END_ARGS=()
           if [ -n "${{ inputs.week_end }}" ]; then
-            WEEK_END_ARG="--week-end ${{ inputs.week_end }}"
+            WEEK_END_ARGS+=(--week-end "${{ inputs.week_end }}")
           fi
           python -u backend/scripts/metrics_tradeability_promotion.py \
             --market "${{ inputs.market }}" \
@@ -115,7 +115,7 @@ jobs:
             --baseline-version "${{ inputs.baseline_version }}" \
             --lookback-weeks "${{ inputs.lookback_weeks }}" \
             --min-pass-weeks "${{ inputs.min_pass_weeks }}" \
-            $WEEK_END_ARG \
+            "${WEEK_END_ARGS[@]}" \
             --calibration-dir tmp/tradeability_calibration \
             --experiment-dir tmp/tradeability_experiments \
             --output-json tmp/tradeability_promotion/promotion_verdict.json \
@@ -128,16 +128,16 @@ jobs:
           TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
           TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
         run: |
-          FORCE_ARG=""
+          FORCE_ARGS=()
           if [ "${{ inputs.force_approve }}" = "true" ]; then
-            FORCE_ARG="--force"
+            FORCE_ARGS+=(--force)
           fi
           python -u backend/scripts/approve_tradeability_promotion.py \
             --verdict-json tmp/tradeability_promotion/promotion_verdict.json \
             --approver "${{ inputs.approver }}" \
             --reason "${{ inputs.approval_reason }}" \
             --approval-json tmp/tradeability_promotion/promotion_approval.json \
-            $FORCE_ARG
+            "${FORCE_ARGS[@]}"
 
       - name: Promote Dry Run Or Execute
         env:
@@ -146,9 +146,9 @@ jobs:
           TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
           TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
         run: |
-          EXECUTE_ARG=""
+          EXECUTE_ARGS=()
           if [ "${{ inputs.execute_promotion }}" = "true" ]; then
-            EXECUTE_ARG="--execute"
+            EXECUTE_ARGS+=(--execute)
           fi
           python -u backend/scripts/promote_tradeability_bundle.py \
             --verdict-json tmp/tradeability_promotion/promotion_verdict.json \
@@ -156,7 +156,7 @@ jobs:
             --market "${{ inputs.market }}" \
             --baseline-version "${{ inputs.baseline_version }}" \
             --actor "github-actions:${{ github.actor }}" \
-            $EXECUTE_ARG
+            "${EXECUTE_ARGS[@]}"
 
       - name: Upload Promotion Bundle
         uses: actions/upload-artifact@v4

@@ -137,13 +137,13 @@ jobs:
           if [ -z "$BUFFER_DAYS" ]; then
             BUFFER_DAYS="14"
           fi
-          META_FLAG=""
+          META_ARGS=()
           if [ "${{ inputs.sync_meta }}" == "true" ]; then
-            META_FLAG="--sync-meta"
+            META_ARGS+=(--sync-meta)
           fi
-          MANIFEST_FLAG=""
+          MANIFEST_ARGS=()
           if [ -n "${{ inputs.research_pool_manifest }}" ]; then
-            MANIFEST_FLAG="--research-pool-manifest ${{ inputs.research_pool_manifest }}"
+            MANIFEST_ARGS+=(--research-pool-manifest "${{ inputs.research_pool_manifest }}")
           fi
           python -u backend/scripts/run_tradeability_sample_sync.py \
             --market CN \
@@ -151,8 +151,8 @@ jobs:
             --history-start-date "$HISTORY_START_DATE" \
             --incremental-buffer-days "$BUFFER_DAYS" \
             --max-workers "$MAX_WORKERS" \
-            $MANIFEST_FLAG \
-            $META_FLAG
+            "${MANIFEST_ARGS[@]}" \
+            "${META_ARGS[@]}"
 
   run-hk:
     runs-on: ubuntu-latest
@@ -197,13 +197,13 @@ jobs:
           if [ -z "$BUFFER_DAYS" ]; then
             BUFFER_DAYS="14"
           fi
-          META_FLAG=""
+          META_ARGS=()
           if [ "${{ inputs.sync_meta }}" == "true" ]; then
-            META_FLAG="--sync-meta"
+            META_ARGS+=(--sync-meta)
           fi
-          MANIFEST_FLAG=""
+          MANIFEST_ARGS=()
           if [ -n "${{ inputs.research_pool_manifest }}" ]; then
-            MANIFEST_FLAG="--research-pool-manifest ${{ inputs.research_pool_manifest }}"
+            MANIFEST_ARGS+=(--research-pool-manifest "${{ inputs.research_pool_manifest }}")
           fi
           python -u backend/scripts/run_tradeability_sample_sync.py \
             --market HK \
@@ -211,8 +211,8 @@ jobs:
             --history-start-date "$HISTORY_START_DATE" \
             --incremental-buffer-days "$BUFFER_DAYS" \
             --max-workers "$MAX_WORKERS" \
-            $MANIFEST_FLAG \
-            $META_FLAG
+            "${MANIFEST_ARGS[@]}" \
+            "${META_ARGS[@]}"
 
   notify-summary:
     needs: [run-cn, run-hk]

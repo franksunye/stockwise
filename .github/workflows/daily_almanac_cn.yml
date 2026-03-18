@@ -50,12 +50,12 @@ jobs:
           NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
           INTERNAL_API_SECRET: ${{ secrets.INTERNAL_API_SECRET }}
         run: |
-          DATE_ARG=""
+          DATE_ARGS=()
           if [ -n "${{ inputs.date }}" ]; then
-            DATE_ARG="--date ${{ inputs.date }}"
+            DATE_ARGS+=(--date "${{ inputs.date }}")
           fi
           echo "🚀 Generating Daily Market Almanac for A-Share..."
-          python -u backend/engine/almanac_generator.py $DATE_ARG
+          python -u backend/engine/almanac_generator.py "${DATE_ARGS[@]}"
 
       - name: Market Facts Health Check (CN)
         continue-on-error: true
@@ -66,11 +66,11 @@ jobs:
           TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
           WECOM_ROBOT_KEY: ${{ secrets.WECOM_ROBOT_KEY }}
         run: |
-          DATE_ARG=""
+          DATE_ARGS=()
           if [ -n "${{ inputs.date }}" ]; then
-            DATE_ARG="--date ${{ inputs.date }}"
+            DATE_ARGS+=(--date "${{ inputs.date }}")
           fi
-          python -u backend/scripts/market_facts_healthcheck.py --market CN $DATE_ARG
+          python -u backend/scripts/market_facts_healthcheck.py --market CN "${DATE_ARGS[@]}"
 
       - name: Broadcast Market Almanac Preview
         continue-on-error: true
@@ -83,9 +83,9 @@ jobs:
           NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
           INTERNAL_API_SECRET: ${{ secrets.INTERNAL_API_SECRET }}
         run: |
-          DATE_ARG=""
+          DATE_ARGS=()
           if [ -n "${{ inputs.date }}" ]; then
-            DATE_ARG="--date ${{ inputs.date }}"
+            DATE_ARGS+=(--date "${{ inputs.date }}")
           fi
           echo "📜 Sending T+1 Almanac Preview to users..."
-          python -u backend/scripts/broadcast_almanac.py --phase preview $DATE_ARG
+          python -u backend/scripts/broadcast_almanac.py --phase preview "${DATE_ARGS[@]}"

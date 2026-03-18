@@ -96,12 +96,13 @@ jobs:
           ADMIN_MOBILES: ${{ secrets.ADMIN_MOBILES }}
         run: |
           # 1. 生成每日简报并汇总
-          SYMBOLS_ARG="${{ github.event.inputs.symbols != '' && format('--symbols {0}', github.event.inputs.symbols) || '' }}"
-          USER_ARG="${{ github.event.inputs.user != '' && format('--user {0}', github.event.inputs.user) || '' }}"
-          DATE_ARG="${{ github.event.inputs.date != '' && format('--date {0}', github.event.inputs.date) || '' }}"
-          FORCE_ARG="${{ github.event.inputs.force == 'true' && '--force' || '' }}"
-          
-          python -m backend.engine.brief_generator $SYMBOLS_ARG $USER_ARG $DATE_ARG $FORCE_ARG
+          ARGS=()
+          if [ -n "${{ github.event.inputs.symbols }}" ]; then ARGS+=(--symbols "${{ github.event.inputs.symbols }}"); fi
+          if [ -n "${{ github.event.inputs.user }}" ]; then ARGS+=(--user "${{ github.event.inputs.user }}"); fi
+          if [ -n "${{ github.event.inputs.date }}" ]; then ARGS+=(--date "${{ github.event.inputs.date }}"); fi
+          if [ "${{ github.event.inputs.force }}" = "true" ]; then ARGS+=(--force); fi
+
+          python -m backend.engine.brief_generator "${ARGS[@]}"
       - name: Broadcast Notifications
         if: github.event.inputs.send_legacy_batch_push == 'true'
         env:
@@ -114,5 +115,6 @@ jobs:
           INTERNAL_API_SECRET: ${{ secrets.INTERNAL_API_SECRET }}
         run: |
           # Send pushes based on generated briefs
-          DATE_ARG="${{ github.event.inputs.date != '' && format('--date {0}', github.event.inputs.date) || '' }}"
-          python backend/notifications.py --action push_daily $DATE_ARG
+          DATE_ARGS=()
+          if [ -n "${{ github.event.inputs.date }}" ]; then DATE_ARGS+=(--date "${{ github.event.inputs.date }}"); fi
+          python backend/notifications.py --action push_daily "${DATE_ARGS[@]}"

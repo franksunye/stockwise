@@ -63,18 +63,18 @@ jobs:
           if [ -z "$STRATEGIES" ]; then
             STRATEGIES="tradeability_v1,tradeability_v2"
           fi
-          START_ARG=""
+          START_ARGS=()
           if [ -n "${{ inputs.start_date }}" ]; then
-            START_ARG="--start-date ${{ inputs.start_date }}"
+            START_ARGS+=(--start-date "${{ inputs.start_date }}")
           fi
-          END_ARG=""
+          END_ARGS=()
           if [ -n "${{ inputs.end_date }}" ]; then
-            END_ARG="--end-date ${{ inputs.end_date }}"
+            END_ARGS+=(--end-date "${{ inputs.end_date }}")
           fi
           python -u backend/scripts/run_tradeability_experiment.py \
             --market "$MARKET" \
             --strategy-versions "$STRATEGIES" \
-            $START_ARG $END_ARG \
+            "${START_ARGS[@]}" "${END_ARGS[@]}" \
             --output-json "tmp/tradeability_experiments/${MARKET,,}_strategy_experiment.json" \
             --output-md "tmp/tradeability_experiments/${MARKET,,}_strategy_experiment.md"
 

@@ -91,23 +91,23 @@ jobs:
           TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
           TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
         run: |
-          DATE_ARG=""
+          DATE_ARGS=()
           if [ -n "${{ inputs.date }}" ]; then
-            DATE_ARG="--date ${{ inputs.date }}"
+            DATE_ARGS+=(--date "${{ inputs.date }}")
           fi
-          DRY_FLAG=""
+          DRY_ARGS=()
           if [ "${{ inputs.dry_run }}" == "true" ]; then
-            DRY_FLAG="--dry-run"
+            DRY_ARGS+=(--dry-run)
           fi
           STRATEGIES="${{ inputs.strategy_versions }}"
           if [ -z "$STRATEGIES" ]; then
             STRATEGIES="tradeability_v1,tradeability_v2"
           fi
-          MANIFEST_FLAG=""
+          MANIFEST_ARGS=()
           if [ -n "${{ inputs.research_pool_manifest }}" ]; then
-            MANIFEST_FLAG="--research-pool-manifest ${{ inputs.research_pool_manifest }}"
+            MANIFEST_ARGS+=(--research-pool-manifest "${{ inputs.research_pool_manifest }}")
           fi
-          python -u backend/scripts/run_tradeability_sidecar.py --market CN --strategy-versions "$STRATEGIES" $DATE_ARG $DRY_FLAG $MANIFEST_FLAG
+          python -u backend/scripts/run_tradeability_sidecar.py --market CN --strategy-versions "$STRATEGIES" "${DATE_ARGS[@]}" "${DRY_ARGS[@]}" "${MANIFEST_ARGS[@]}"
 
   run-hk:
     runs-on: ubuntu-latest
@@ -136,23 +136,23 @@ jobs:
           TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
           TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
         run: |
-          DATE_ARG=""
+          DATE_ARGS=()
           if [ -n "${{ inputs.date }}" ]; then
-            DATE_ARG="--date ${{ inputs.date }}"
+            DATE_ARGS+=(--date "${{ inputs.date }}")
           fi
-          DRY_FLAG=""
+          DRY_ARGS=()
           if [ "${{ inputs.dry_run }}" == "true" ]; then
-            DRY_FLAG="--dry-run"
+            DRY_ARGS+=(--dry-run)
           fi
           STRATEGIES="${{ inputs.strategy_versions }}"
           if [ -z "$STRATEGIES" ]; then
             STRATEGIES="tradeability_v1,tradeability_v2"
           fi
-          MANIFEST_FLAG=""
+          MANIFEST_ARGS=()
           if [ -n "${{ inputs.research_pool_manifest }}" ]; then
-            MANIFEST_FLAG="--research-pool-manifest ${{ inputs.research_pool_manifest }}"
+            MANIFEST_ARGS+=(--research-pool-manifest "${{ inputs.research_pool_manifest }}")
           fi
-          python -u backend/scripts/run_tradeability_sidecar.py --market HK --strategy-versions "$STRATEGIES" $DATE_ARG $DRY_FLAG $MANIFEST_FLAG
+          python -u backend/scripts/run_tradeability_sidecar.py --market HK --strategy-versions "$STRATEGIES" "${DATE_ARGS[@]}" "${DRY_ARGS[@]}" "${MANIFEST_ARGS[@]}"
 
   notify-summary:
     needs: [run-cn, run-hk]

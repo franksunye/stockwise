@@ -85,14 +85,14 @@ jobs:
           TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
           TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
         run: |
-          END_ARG=""
+          END_ARGS=()
           if [ -n "${{ inputs.week_end }}" ]; then
-            END_ARG="--end-date ${{ inputs.week_end }}"
+            END_ARGS+=(--end-date "${{ inputs.week_end }}")
           fi
           python -u backend/scripts/run_tradeability_experiment.py \
             --market CN \
             --strategy-versions "${{ inputs.candidate_version || 'tradeability_v2' }},${{ inputs.baseline_version || 'tradeability_v1' }}" \
-            $END_ARG \
+            "${END_ARGS[@]}" \
             --output-json tmp/tradeability_experiments/cn_strategy_experiment.json \
             --output-md tmp/tradeability_experiments/cn_strategy_experiment.md
 
@@ -104,13 +104,13 @@ jobs:
           TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
           WECOM_ROBOT_KEY: ${{ secrets.WECOM_ROBOT_KEY }}
         run: |
-          WEEK_END_ARG=""
+          WEEK_END_ARGS=()
           if [ -n "${{ inputs.week_end }}" ]; then
-            WEEK_END_ARG="--week-end ${{ inputs.week_end }}"
+            WEEK_END_ARGS+=(--week-end "${{ inputs.week_end }}")
           fi
-          NOTIFY_ARG=""
+          NOTIFY_ARGS=()
           if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ inputs.notify }}" = "true" ]; then
-            NOTIFY_ARG="--notify"
+            NOTIFY_ARGS+=(--notify)
           fi
           python -u backend/scripts/metrics_tradeability_promotion.py \
             --market CN \
@@ -118,12 +118,12 @@ jobs:
             --baseline-version "${{ inputs.baseline_version || 'tradeability_v1' }}" \
             --lookback-weeks "${{ inputs.lookback_weeks || 4 }}" \
             --min-pass-weeks "${{ inputs.min_pass_weeks || 2 }}" \
-            $WEEK_END_ARG \
+            "${WEEK_END_ARGS[@]}" \
             --calibration-dir tmp/tradeability_calibration \
             --experiment-dir tmp/tradeability_experiments \
             --output-json tmp/tradeability_promotion/cn_promotion_verdict.json \
             --output-md tmp/tradeability_promotion/cn_promotion_verdict.md \
-            $NOTIFY_ARG
+            "${NOTIFY_ARGS[@]}"
 
       - name: Upload CN Promotion Artifact
         uses: actions/upload-artifact@v4
@@ -172,14 +172,14 @@ jobs:
           TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
           TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
         run: |
-          END_ARG=""
+          END_ARGS=()
           if [ -n "${{ inputs.week_end }}" ]; then
-            END_ARG="--end-date ${{ inputs.week_end }}"
+            END_ARGS+=(--end-date "${{ inputs.week_end }}")
           fi
           python -u backend/scripts/run_tradeability_experiment.py \
             --market HK \
             --strategy-versions "${{ inputs.candidate_version || 'tradeability_v2' }},${{ inputs.baseline_version || 'tradeability_v1' }}" \
-            $END_ARG \
+            "${END_ARGS[@]}" \
             --output-json tmp/tradeability_experiments/hk_strategy_experiment.json \
             --output-md tmp/tradeability_experiments/hk_strategy_experiment.md
 
@@ -191,13 +191,13 @@ jobs:
           TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
           WECOM_ROBOT_KEY: ${{ secrets.WECOM_ROBOT_KEY }}
         run: |
-          WEEK_END_ARG=""
+          WEEK_END_ARGS=()
           if [ -n "${{ inputs.week_end }}" ]; then
-            WEEK_END_ARG="--week-end ${{ inputs.week_end }}"
+            WEEK_END_ARGS+=(--week-end "${{ inputs.week_end }}")
           fi
-          NOTIFY_ARG=""
+          NOTIFY_ARGS=()
           if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ inputs.notify }}" = "true" ]; then
-            NOTIFY_ARG="--notify"
+            NOTIFY_ARGS+=(--notify)
           fi
           python -u backend/scripts/metrics_tradeability_promotion.py \
             --market HK \
@@ -205,12 +205,12 @@ jobs:
             --baseline-version "${{ inputs.baseline_version || 'tradeability_v1' }}" \
             --lookback-weeks "${{ inputs.lookback_weeks || 4 }}" \
             --min-pass-weeks "${{ inputs.min_pass_weeks || 2 }}" \
-            $WEEK_END_ARG \
+            "${WEEK_END_ARGS[@]}" \
             --calibration-dir tmp/tradeability_calibration \
             --experiment-dir tmp/tradeability_experiments \
             --output-json tmp/tradeability_promotion/hk_promotion_verdict.json \
             --output-md tmp/tradeability_promotion/hk_promotion_verdict.md \
-            $NOTIFY_ARG
+            "${NOTIFY_ARGS[@]}"
 
       - name: Upload HK Promotion Artifact
         uses: actions/upload-artifact@v4
