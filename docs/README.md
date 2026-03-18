@@ -40,6 +40,7 @@ This directory serves as the unified single source of truth for the 知守 AI (Z
 - [AI Context Limits (DeepSeek)](./2_Intelligence/25A_AI_Context_Limits_DeepSeek.md)
 - [Quant + AI Acceptance Criteria](./2_Intelligence/26C_Quant_AI_Acceptance_Criteria.md)
 - [Quant Backtesting Methodology](./2_Intelligence/28Q_Quant_Backtesting_Methodology.md)
+- [Signal Validation Axioms](./2_Intelligence/30Q_Quant_Signal_and_Execution_Axioms.md)
 
 ### Historical Records: Investment Mode / Tradeability
 - [Promotion Execution Plan](./1_Engineering/archive/17_Tradeability_Promotion_Execution_Plan.md)
