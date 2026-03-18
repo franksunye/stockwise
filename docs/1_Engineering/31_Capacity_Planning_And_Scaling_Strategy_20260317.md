@@ -738,3 +738,14 @@ FROM HistoryRanked h LEFT JOIN daily_prices dp ...
 | `frontend/public/sw.js` L306-310 | Service Worker API bypass |
 | `backend/db_repo/queries.py` | `GET_STOCK_POOL_QUERY` (全局股票池) |
 | `backend/main.py` | 后端管道任务编排 |
+
+### 8.6 2026-03-18: Frontend Network Zero-Redundancy Optimization
+
+**背景**: 虽然 2026-03-17 的优化中缓解了单页面重载的部分扇出 (Fan-out)，但应用在系统级重新分配进程的“冷启动”和路由导航 (自选池↔首页) 的“热切换”中，仍会无可避免地高频触发 `profile`, `batch`, `almanac`, 和 `stock-pool` 拉取。
+
+**决策**: 引入“零冗余协议”(Zero-Redundancy Protocol)。一旦本地具有功能完备的 Cache 态缓存，且处于 TTL 许可生命周期内，前端完全截断基于挂载 (Mount) 事件发端的全量拉取。数据的推陈出新彻底让位于特定事件 (用户手动增补) 和既定后台心跳 (Heartbeat polling)。
+具体手段包含：为 `profile` 施加冷启动 30 分钟 TTL；为自选池静默同步设定 12 小时 TTL；在路由引起历史记录需求拔高 (`historyLimit` 提升) 及 `watchlist` 挂载复苏时，追加实际库存盘点 (Inventory Check)，拒绝向服务器下达已持有数据的补充请求。
+
+**影响评估**: 极大降低单用户每天应用生命周期的接口请求基数。彻底屏蔽掉纯展示类操作引发的不必要函数调用，将架构平稳过渡到按需获取的最佳实践状态。
+
+详见: [32_Frontend_Network_Optimization_Zero_Redundancy_20260318.md](./32_Frontend_Network_Optimization_Zero_Redundancy_20260318.md)
