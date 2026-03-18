@@ -81,11 +81,26 @@ class ChainRunner:
             envelope = context.artifacts.get("trace_envelope", {})
             envelope["status"] = final_status
             envelope["duration_ms"] = total_duration
+            envelope["usage"] = {
+                "input_tokens": int(getattr(context, "total_input_tokens", 0) or 0),
+                "output_tokens": int(getattr(context, "total_output_tokens", 0) or 0),
+                "total_tokens": int(getattr(context, "total_tokens", 0) or 0),
+            }
             context.artifacts["trace_envelope"] = envelope
             await self._persist_trace(trace_id, context, final_status, total_duration, error_info)
 
-        # Return the final synthesis artifact (Step 4 output)
-        return context.artifacts.get("synthesis")
+        # Return the final synthesis artifact (Step 4 output) with minimal meta injected
+        synthesis = context.artifacts.get("synthesis")
+        if isinstance(synthesis, dict):
+            synthesis.setdefault("_meta", {})
+            synthesis["_meta"].update({
+                "trace_id": trace_id,
+                "duration_ms": total_duration,
+                "input_tokens": int(getattr(context, "total_input_tokens", 0) or 0),
+                "output_tokens": int(getattr(context, "total_output_tokens", 0) or 0),
+                "total_tokens": int(getattr(context, "total_tokens", 0) or 0),
+            })
+        return synthesis
 
     async def _persist_trace(self, trace_id, context, status, duration, error_info):
         """Writes the execution trace to Turso in a single transaction."""

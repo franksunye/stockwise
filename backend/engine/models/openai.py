@@ -12,17 +12,56 @@ from ..llm_tracker import get_tracker
 class OpenAIAdapter(BasePredictionModel):
     def __init__(self, model_id: str, config: Dict[str, Any]):
         super().__init__(model_id, config)
-        self.api_key_env = config.get("api_key_env", "DEEPSEEK_API_KEY")
-        self.api_key = os.getenv(self.api_key_env)
+
+        def _norm_provider_id(pid: str) -> str:
+            pid = (pid or "").strip()
+            pid = pid.replace("-", "_").replace(".", "_")
+            return pid.upper()
+
+        def _env_provider_key(pid: str, field: str) -> str:
+            return f"LLM_PROVIDER__{_norm_provider_id(pid)}__{field}"
+
+        provider_id = config.get("provider_id") or config.get("provider")
+        provider_env_api_key = _env_provider_key(provider_id, "API_KEY") if provider_id else None
+        provider_env_base_url = _env_provider_key(provider_id, "BASE_URL") if provider_id else None
+
+        # Legacy fallbacks (migration period)
+        legacy_api_key_fallbacks = {
+            "ALIYUN_DASHSCOPE": ["ALIYUN_API_KEY", "QWEN_API_KEY", "LLM_API_KEY"],
+            "DEEPSEEK_OFFICIAL": ["DEEPSEEK_API_KEY", "LLM_API_KEY"],
+            "TENCENT_HUNYUAN": ["HUNYUAN_API_KEY", "LLM_API_KEY"],
+            "OPENAI": ["OPENAI_API_KEY", "LLM_API_KEY"],
+        }
+        legacy_base_url_fallbacks = {
+            "ALIYUN_DASHSCOPE": ["ALIYUN_BASE_URL", "QWEN_VS_URL", "LLM_BASE_URL"],
+            "DEEPSEEK_OFFICIAL": ["DEEPSEEK_BASE_URL", "LLM_BASE_URL"],
+        }
+
+        # Resolve API key (explicit api_key_env takes priority, then provider_id mapping)
+        self.api_key_env = config.get("api_key_env") or provider_env_api_key or "DEEPSEEK_API_KEY"
+        self.api_key = os.getenv(self.api_key_env) or ""
+        if (not self.api_key) and provider_id:
+            for k in legacy_api_key_fallbacks.get(_norm_provider_id(provider_id), []):
+                v = os.getenv(k) or ""
+                if v:
+                    self.api_key = v
+                    break
         
         # Support base_url from env variable or direct config
-        base_url_env = config.get("base_url_env")
+        base_url_env = config.get("base_url_env") or provider_env_base_url
         if base_url_env:
             env_val = os.getenv(base_url_env)
             self.base_url = env_val if env_val else "https://api.deepseek.com/v1"
         else:
             conf_val = config.get("base_url")
             self.base_url = conf_val if conf_val else "https://api.deepseek.com/v1"
+
+        if (not self.base_url or self.base_url == "https://api.deepseek.com/v1") and provider_id:
+            for k in legacy_base_url_fallbacks.get(_norm_provider_id(provider_id), []):
+                v = os.getenv(k) or ""
+                if v:
+                    self.base_url = v
+                    break
             
         self.model_name = config.get("model") or config.get("model_name", "deepseek-chat")
         self.max_tokens = config.get("max_tokens", 4096)

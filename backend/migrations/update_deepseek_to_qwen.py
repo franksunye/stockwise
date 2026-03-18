@@ -20,8 +20,11 @@ def update_model_config():
     try:
         # New configuration for Aliyun DeepSeek
         aliyun_config = {
-            "model": "deepseek-v3", # Aliyun uses same model name usually, or explicit params
-            "api_key_env": "ALIYUN_API_KEY", 
+            "model": "deepseek-v3.1", # Aliyun DashScope current DeepSeek model id
+            # New canonical provider identifier for env resolution:
+            # LLM_PROVIDER__ALIYUN_DASHSCOPE__API_KEY / LLM_PROVIDER__ALIYUN_DASHSCOPE__BASE_URL
+            "provider_id": "aliyun_dashscope",
+            # Keep explicit fallback for base_url for safety if env missing
             "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
         }
         

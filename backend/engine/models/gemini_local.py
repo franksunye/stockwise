@@ -17,17 +17,41 @@ from backend.engine.llm_tracker import get_tracker, estimate_tokens
 class GeminiLocalAdapter(BasePredictionModel):
     def __init__(self, model_id: str, config: Dict[str, Any]):
         super().__init__(model_id, config)
-        
+
+        def _norm_provider_id(pid: str) -> str:
+            pid = (pid or "").strip()
+            pid = pid.replace("-", "_").replace(".", "_")
+            return pid.upper()
+
+        def _env_provider_key(pid: str, field: str) -> str:
+            return f"LLM_PROVIDER__{_norm_provider_id(pid)}__{field}"
+
+        provider_id = config.get("provider_id") or config.get("provider")
+        provider_env_api_key = _env_provider_key(provider_id, "API_KEY") if provider_id else None
+        provider_env_base_url = _env_provider_key(provider_id, "BASE_URL") if provider_id else None
+
         # 配置项
-        self.api_key_env = config.get("api_key_env", "LLM_API_KEY")
-        self.api_key = os.getenv(self.api_key_env)
+        # Priority: explicit env ref in config > provider_id mapping > legacy defaults
+        self.api_key_env = config.get("api_key_env") or provider_env_api_key or "LLM_API_KEY"
+        self.api_key = os.getenv(self.api_key_env) or ""
+        if (not self.api_key) and provider_id:
+            # Legacy fallbacks during migration
+            for k in ["LLM_API_KEY", "GEMINI_API_KEY"]:
+                v = os.getenv(k) or ""
+                if v:
+                    self.api_key = v
+                    break
         
         # 本地代理地址 (不带 /v1)
-        base_url_env = config.get("base_url_env")
+        base_url_env = config.get("base_url_env") or provider_env_base_url or "LLM_PROVIDER__GEMINI_LOCAL__BASE_URL"
         if base_url_env:
             self.base_url = os.getenv(base_url_env, "http://127.0.0.1:8045")
         else:
             self.base_url = config.get("base_url", "http://127.0.0.1:8045")
+
+        # Legacy fallback for older setups
+        if not self.base_url or self.base_url == "http://127.0.0.1:8045":
+            self.base_url = os.getenv("GEMINI_LOCAL_BASE_URL", self.base_url)
         
         self.model_name = config.get("model") or config.get("model_name", "gemini-3-flash")
         self.max_tokens = config.get("max_tokens", 4096)

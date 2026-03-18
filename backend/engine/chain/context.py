@@ -34,6 +34,8 @@ class ChainContext:
     })
     
     total_tokens: int = 0
+    total_input_tokens: int = 0
+    total_output_tokens: int = 0
     step_durations: List[Dict[str, int]] = field(default_factory=list)
 
     def add_message(self, role: str, content: str):

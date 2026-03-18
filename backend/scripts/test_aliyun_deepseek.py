@@ -5,10 +5,14 @@ import os
 
 # User provided API Key from the previous step
 # Using DashScope endpoint for DeepSeek model
-API_KEY = os.getenv("ALIYUN_API_KEY", "sk-cc191c6af76e4ab1a7367befb7b2b6af")
+API_KEY = os.getenv("LLM_PROVIDER__ALIYUN_DASHSCOPE__API_KEY") or os.getenv("ALIYUN_API_KEY") or ""
 
 # Aliyun DashScope OpenAI-compatible endpoint
-BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions"
+BASE_URL = (
+    os.getenv("LLM_PROVIDER__ALIYUN_DASHSCOPE__BASE_URL")
+    or os.getenv("ALIYUN_BASE_URL")
+    or "https://dashscope.aliyuncs.com/compatible-mode/v1"
+)
 
 # Model Name from User's Screenshot / Search Results
 # Screenshot showed "deepseek-v3.2", search confirms availability.
@@ -16,6 +20,10 @@ MODEL_NAME = "deepseek-v3" # Let's try v3.2 first as requested, else fall back t
 
 def test_aliyun_deepseek():
     print(f"🔧 Testing Aliyun DashScope with model: {MODEL_NAME}")
+    if not API_KEY:
+        raise RuntimeError(
+            "Missing API key. Set LLM_PROVIDER__ALIYUN_DASHSCOPE__API_KEY (preferred) or ALIYUN_API_KEY."
+        )
     print(f"🔑 API Key: {API_KEY[:6]}...")
     
     headers = {
@@ -35,11 +43,11 @@ def test_aliyun_deepseek():
         "temperature": 0.7
     }
 
-    print(f"🚀 Sending request to {BASE_URL}...")
+    print(f"🚀 Sending request to {BASE_URL}/chat/completions ...")
     
     start_time = time.time()
     try:
-        response = requests.post(BASE_URL, headers=headers, json=payload)
+        response = requests.post(f"{BASE_URL}/chat/completions", headers=headers, json=payload)
         
         if response.status_code != 200:
              print(f"⚠️ Initial attempt with {MODEL_NAME} failed: {response.status_code}")
@@ -49,7 +57,7 @@ def test_aliyun_deepseek():
              if MODEL_NAME == "deepseek-v3.2":
                  print("🔄 Retrying with 'deepseek-v3'...")
                  payload["model"] = "deepseek-v3"
-                 response = requests.post(BASE_URL, headers=headers, json=payload)
+                 response = requests.post(f"{BASE_URL}/chat/completions", headers=headers, json=payload)
 
         response.raise_for_status()
         

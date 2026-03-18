@@ -32,8 +32,31 @@ class HunyuanChainModel(BasePredictionModel):
         self.steps = StepFactory.create_steps(self.strategy_config["steps"])
         
         # 3. Setup Client (using database config)
-        api_key = os.getenv(self.config.get("api_key_env", ""), "")
-        base_url = self.config.get("base_url")
+        def _norm_provider_id(pid: str) -> str:
+            pid = (pid or "").strip()
+            pid = pid.replace("-", "_").replace(".", "_")
+            return pid.upper()
+
+        def _env_provider_key(pid: str, field: str) -> str:
+            return f"LLM_PROVIDER__{_norm_provider_id(pid)}__{field}"
+
+        provider_id = self.config.get("provider_id") or self.config.get("provider")
+
+        api_key_env = self.config.get("api_key_env") or (
+            _env_provider_key(provider_id, "API_KEY") if provider_id else None
+        )
+        api_key = os.getenv(api_key_env, "") if api_key_env else ""
+        if not api_key:
+            # Migration-safe fallback: allow legacy key name
+            api_key = os.getenv("HUNYUAN_API_KEY", "")
+
+        base_url_env = self.config.get("base_url_env") or (
+            _env_provider_key(provider_id, "BASE_URL") if provider_id else None
+        )
+        base_url = os.getenv(base_url_env, "") if base_url_env else ""
+        if not base_url:
+            base_url = self.config.get("base_url") or "https://api.hunyuan.cloud.tencent.com/v1"
+
         model_name = self.config.get("model", "hunyuan-lite")
         
         self.client = LLMClient(
@@ -68,8 +91,50 @@ class HunyuanChainModel(BasePredictionModel):
             # Format for database and frontend compatibility
             # 1. Map top-level prices for PredictionRunner
             key_levels = result.get("key_levels", {})
-            result["support_price"] = key_levels.get("support")
-            result["pressure_price"] = key_levels.get("resistance")
+            # Hunyuan chain returns tiered arrays (immediate_support/resistance).
+            # We map them into the single-value columns used by ai_predictions_v2.
+            support = key_levels.get("support")
+            resistance = key_levels.get("resistance")
+            if support is None:
+                imm = key_levels.get("immediate_support")
+                if isinstance(imm, list) and imm:
+                    support = imm[0]
+            if resistance is None:
+                imm = key_levels.get("immediate_resistance")
+                if isinstance(imm, list) and imm:
+                    resistance = imm[0]
+
+            result["support_price"] = support
+            result["pressure_price"] = resistance
+
+            # 1.1 Normalize key_levels to match deepseek/gemini schema
+            # (keep original immediate_* arrays for richer UI, but add support/resistance/stop_loss)
+            if isinstance(key_levels, dict):
+                if key_levels.get("support") is None and support is not None:
+                    key_levels["support"] = support
+                if key_levels.get("resistance") is None and resistance is not None:
+                    key_levels["resistance"] = resistance
+                # unify stop_loss naming
+                if key_levels.get("stop_loss") is None and key_levels.get("stop_loss_reference") is not None:
+                    key_levels["stop_loss"] = key_levels.get("stop_loss_reference")
+                result["key_levels"] = key_levels
+
+            # 2. Ensure common top-level fields exist (schema parity)
+            result.setdefault("signal", "Side")
+            try:
+                result["confidence"] = float(result.get("confidence", 0.5))
+            except Exception:
+                result["confidence"] = 0.5
+
+            # 3. Inject runtime meta for DB columns (token/latency)
+            meta = result.get("_meta") if isinstance(result, dict) else None
+            if isinstance(meta, dict):
+                result["execution_time_ms"] = int(meta.get("duration_ms", 0) or 0)
+                result["token_usage_input"] = int(meta.get("input_tokens", 0) or 0)
+                result["token_usage_output"] = int(meta.get("output_tokens", 0) or 0)
+
+            # 4. Prompt version marker for chain models (distinct from b2 templates)
+            result.setdefault("prompt_version", "chain.hunyuan-lite.v1")
             
             # 2. Add 'reasoning' for PredictionRunner (mapped to ai_reasoning column)
             # We store the FULL structured result as JSON string, 

@@ -56,6 +56,8 @@ class BaseStep(ABC):
 
                 # 5. Update Metrics
                 context.total_tokens += meta.get("total_tokens", 0)
+                context.total_input_tokens += meta.get("input_tokens", 0)
+                context.total_output_tokens += meta.get("output_tokens", 0)
                 context.add_message("user", final_prompt) # Log full prompt
                 context.add_message("assistant", response)
                 

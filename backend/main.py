@@ -53,7 +53,7 @@ if __name__ == "__main__":
         '--model',
         type=str,
         default='rule-engine',
-        choices=['all', 'deepseek-v3', 'deepseek-v3.2-exp', 'gemini-3-flash', 'hunyuan-lite', 'rule-engine'],
+        choices=['all', 'deepseek-aliyun', 'deepseek-v3', 'deepseek-v3.2-exp', 'gemini-3-flash', 'hunyuan-lite', 'rule-engine'],
         help='指定 AI 模型'
     )
 

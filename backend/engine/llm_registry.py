@@ -118,19 +118,69 @@ class LLMRegistry:
     def _resolve_config(cls, model: Dict) -> Dict[str, str]:
         """Resolve a model's config_json, replacing env-var references with actual values."""
         config = json.loads(model.get('config_json') or '{}')
+
+        def _norm_provider_id(pid: str) -> str:
+            # ENV keys should be stable and case-insensitive in config_json.
+            # We normalize to UPPER with underscores to fit common env style.
+            pid = (pid or "").strip()
+            pid = pid.replace("-", "_").replace(".", "_")
+            return pid.upper()
+
+        def _env_provider_key(pid: str, field: str) -> str:
+            # Canonical naming: LLM_PROVIDER__<PROVIDER_ID>__API_KEY / BASE_URL
+            return f"LLM_PROVIDER__{_norm_provider_id(pid)}__{field}"
+
+        # Legacy env var fallbacks for backward compatibility during migration.
+        # Keep this list small and explicit to avoid accidental misrouting.
+        _LEGACY_API_KEY_FALLBACKS = {
+            # Historical: Aliyun DashScope was sometimes referred as Qwen.
+            "ALIYUN_DASHSCOPE": ["ALIYUN_API_KEY", "QWEN_API_KEY", "LLM_API_KEY"],
+            # Official DeepSeek endpoint
+            "DEEPSEEK_OFFICIAL": ["DEEPSEEK_API_KEY", "LLM_API_KEY"],
+            # Tencent Hunyuan
+            "TENCENT_HUNYUAN": ["HUNYUAN_API_KEY", "LLM_API_KEY"],
+            # Generic
+            "OPENAI": ["OPENAI_API_KEY", "LLM_API_KEY"],
+        }
+        _LEGACY_BASE_URL_FALLBACKS = {
+            "ALIYUN_DASHSCOPE": ["ALIYUN_BASE_URL", "QWEN_VS_URL", "LLM_BASE_URL"],
+            "DEEPSEEK_OFFICIAL": ["DEEPSEEK_BASE_URL", "LLM_BASE_URL"],
+        }
+
+        provider_id = config.get("provider_id") or config.get("provider")  # provider_id preferred
+        provider_env_api_key = _env_provider_key(provider_id, "API_KEY") if provider_id else None
+        provider_env_base_url = _env_provider_key(provider_id, "BASE_URL") if provider_id else None
         
         # Resolve base_url: env var takes priority, then static config fallback
         base_url = None
-        base_url_env = config.get('base_url_env')
+        base_url_env = config.get('base_url_env') or provider_env_base_url
         if base_url_env:
             base_url = os.getenv(base_url_env)  # None if not set, '' if set but empty
+        if (not base_url) and provider_id:
+            for k in _LEGACY_BASE_URL_FALLBACKS.get(_norm_provider_id(provider_id), []):
+                v = os.getenv(k)
+                if v:
+                    base_url = v
+                    break
         if not base_url:
             base_url = config.get('base_url', '')
-        
+
+        # Resolve api_key: env var takes priority, then legacy/provider fallbacks
+        api_key = ""
+        api_key_env = config.get("api_key_env") or provider_env_api_key
+        if api_key_env:
+            api_key = os.getenv(api_key_env, "") or ""
+        if (not api_key) and provider_id:
+            for k in _LEGACY_API_KEY_FALLBACKS.get(_norm_provider_id(provider_id), []):
+                v = os.getenv(k, "")
+                if v:
+                    api_key = v
+                    break
+
         return {
             'model': config.get('model', ''),
             'base_url': base_url,
-            'api_key': os.getenv(config.get('api_key_env', ''), ''),
+            'api_key': api_key,
         }
 
     # ─── Public API ────────────────────────────────────────────────

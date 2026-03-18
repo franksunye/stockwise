@@ -80,15 +80,18 @@ jobs:
           LLM_MODEL: ${{ secrets.LLM_MODEL }}
           LLM_ENABLED: ${{ secrets.LLM_ENABLED }}
           LLM_PROVIDER: aliyun
-          ALIYUN_API_KEY: ${{ secrets.ALIYUN_API_KEY }}
-          ALIYUN_MODEL: deepseek-v3
-          ALIYUN_BASE_URL: https://dashscope.aliyuncs.com/compatible-mode/v1
-          # QWEN_API_KEY for deepseek-aliyun model (configured in database)
-          QWEN_API_KEY: ${{ secrets.QWEN_API_KEY }}
+          # Canonical provider-scoped keys (preferred)
+          LLM_PROVIDER__ALIYUN_DASHSCOPE__API_KEY: ${{ secrets.LLM_PROVIDER__ALIYUN_DASHSCOPE__API_KEY }}
+          LLM_PROVIDER__ALIYUN_DASHSCOPE__BASE_URL: ${{ secrets.LLM_PROVIDER__ALIYUN_DASHSCOPE__BASE_URL }}
+          # Canonical Tencent Hunyuan key
+          LLM_PROVIDER__TENCENT_HUNYUAN__API_KEY: ${{ secrets.LLM_PROVIDER__TENCENT_HUNYUAN__API_KEY }}
+          # Canonical Gemini Local key + proxy base URL
+          LLM_PROVIDER__GEMINI_LOCAL__API_KEY: ${{ secrets.LLM_PROVIDER__GEMINI_LOCAL__API_KEY }}
+          LLM_PROVIDER__GEMINI_LOCAL__BASE_URL: ${{ secrets.LLM_PROVIDER__GEMINI_LOCAL__BASE_URL }}
+          # Canonical DeepSeek Official (kept for rollback model entries, even if inactive)
+          LLM_PROVIDER__DEEPSEEK_OFFICIAL__API_KEY: ${{ secrets.LLM_PROVIDER__DEEPSEEK_OFFICIAL__API_KEY }}
+          LLM_PROVIDER__DEEPSEEK_OFFICIAL__BASE_URL: ${{ secrets.LLM_PROVIDER__DEEPSEEK_OFFICIAL__BASE_URL }}
           
-          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
-          DEEPSEEK_BASE_URL: ${{ secrets.DEEPSEEK_BASE_URL }}
-          HUNYUAN_API_KEY: ${{ secrets.HUNYUAN_API_KEY }}
           # 通知
           WECOM_ROBOT_KEY: ${{ secrets.WECOM_ROBOT_KEY }}
           INTERNAL_API_SECRET: ${{ secrets.INTERNAL_API_SECRET }}
