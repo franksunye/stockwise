@@ -422,7 +422,35 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
         if (!changed) return;
 
         if (watchlist.length > 0) {
-            loadAllData(false, true); // silent=false, ignoreDebounce=true
+            // Inventory Check: only force a batch fetch when local cache cannot satisfy watchlist.
+            // This avoids cold-start fan-out when watchlist is restored from local storage (0 -> N)
+            // but dashboard stocks were already restored from snapshot cache.
+            const watchSymbols = new Set(watchlist.map(w => w.symbol));
+            const stockSymbols = new Set((stocksRef.current || []).map(s => s.symbol));
+            let hasMissingSymbol = false;
+            for (const sym of watchSymbols) {
+                if (!stockSymbols.has(sym)) {
+                    hasMissingSymbol = true;
+                    break;
+                }
+            }
+
+            if (hasMissingSymbol) {
+                loadAllData(false, true); // silent=false, ignoreDebounce=true
+                return;
+            }
+
+            // No missing symbols: trust local cache, but re-map ordering and fill placeholders if needed.
+            const remapped = watchlist.map(item => {
+                const existing = (stocksRef.current || []).find(s => s.symbol === item.symbol);
+                if (existing) return existing;
+                return {
+                    symbol: item.symbol, name: item.name, price: null,
+                    change: 0, lastUpdated: '...', history: [], loading: true,
+                    prediction: null, previousPrediction: null, rule: null
+                } as StockData;
+            });
+            setStocks(remapped);
         } else if (watchlist.length === 0 && !loadingWatchlist) {
             setStocks([]);
         }
@@ -431,8 +459,12 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
     // historyLimit 升级时（如从 stock-pool 导航回 dashboard），立即补拉历史数据
     useEffect(() => {
         if (historyLimit > prevHistoryLimitRef.current && watchlist.length > 0) {
-            lastFetchTimeRef.current = 0;
-            loadAllData(true);
+            // Inventory Check: only fetch when existing cache cannot satisfy the new historyLimit.
+            // Note: silent=true already bypasses the 30s debounce in loadAllData.
+            const allSatisfied = (stocksRef.current || []).every(s => (s.history?.length || 0) >= historyLimit);
+            if (!allSatisfied) {
+                loadAllData(true);
+            }
         }
         prevHistoryLimitRef.current = historyLimit;
     }, [historyLimit, watchlist.length, loadAllData]);
