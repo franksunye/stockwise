@@ -1,11 +1,31 @@
 # 📊 CMO 内容发布全局看板 (Docs-as-Code)
 
-> 自动生成时间：2026/3/19 10:42:32
+> 自动生成时间：2026/3/19 10:45:09
 > 💡 **提示**: 本看板由 `scripts/cmo_sync.mjs` 自动从各 Markdown 文件的头信息 (Frontmatter) 提取并重新渲染。
 
 | 文章标题 | 分类 (Category) | 漏斗层级 | 日期 | 公众号 | 小红书 | Twitter | 头条号 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | [March_Content_Matrix_Execution_2026](March_Content_Matrix_Execution_2026.md) | Uncategorized | Unknown | N/A | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [101-13: 为什么“预测明天涨停”是最大的智商税？](101-13_prediction_tax.md) | The Mind | TOFU | 2026-04-10 | 📝 草稿 | 📝 草稿 | 📝 草稿 | 📝 草稿 |
+| [101-14: 慢即是快：盘后计算 (EOD) 才是终极武器](101-14_eod_edge.md) | The Mind | MOFU | 2026-04-10 | 📝 草稿 | 📝 草稿 | 📝 草稿 | 📝 草稿 |
+| [101-15: 别装全能：你是找信号的分析师，还是交易员？](101-15_analyst_vs_trader.md) | The Mind | MOFU | 2026-04-10 | 📝 草稿 | 📝 草稿 | 📝 草稿 | 📝 草稿 |
+| [101-16: 组合的假象：买了 5 只白酒股，你以为分散了风险？](101-16_fake_diversification.md) | The Mind | TOFU | 2026-04-10 | 📝 草稿 | 📝 草稿 | 📝 草稿 | 📝 草稿 |
+| [101-17: 为什么 ZISO 是一面重塔盾，而不是魔法跑车？](101-17_tower_shield.md) | The Mind | BOFU | 2026-04-10 | 📝 草稿 | 📝 草稿 | 📝 草稿 | 📝 草稿 |
+| [101-33: 为什么你的指标总是变成反指？](101-33_indicator_failure.md) | The Method | MOFU | 2026-04-10 | 📝 草稿 | 📝 草稿 | 📝 草稿 | 📝 草稿 |
+| [101-34: 把“止损”推迟到明天的代价](101-34_mae_cost.md) | The Method | MOFU | 2026-04-10 | 📝 草稿 | 📝 草稿 | 📝 草稿 | 📝 草稿 |
+| [101-35: 回测与未来的鸿沟](101-35_overfitting_trap.md) | The Method | TOFU | 2026-04-10 | 📝 草稿 | 📝 草稿 | 📝 草稿 | 📝 草稿 |
+| [101-36: 滑点与印花税：杀死回测富翁的毒药](101-36_slippage_poison.md) | The Method | MOFU | 2026-04-10 | 📝 草稿 | 📝 草稿 | 📝 草稿 | 📝 草稿 |
+| [101-60: 胜率的谎言：错 60% 还能赚钱](101-60_win_rate_lie.md) | The Money | TOFU | 2026-04-10 | 📝 草稿 | 📝 草稿 | 📝 草稿 | 📝 草稿 |
+| [101-61: 砍仓的艺术：亏 50% 需要 100% 回本](101-61_drawdown_math_revisited.md) | The Money | MOFU | 2026-04-10 | 📝 草稿 | 📝 草稿 | 📝 草稿 | 📝 草稿 |
+| [101-62: 头寸管理的铁律：1% 生存法则](101-62_one_percent_survival.md) | The Money | MOFU | 2026-04-10 | 📝 草稿 | 📝 草稿 | 📝 草稿 | 📝 草稿 |
+| [101-63: “再看看”：散户字典里最昂贵的三个字](101-63_wait_and_see_cost.md) | The Money | TOFU | 2026-04-10 | 📝 草稿 | 📝 草稿 | 📝 草稿 | 📝 草稿 |
+| [101-64: 如果没有信号，空仓就是最高级策略](101-64_empty_position.md) | The Money | MOFU | 2026-04-10 | 📝 草稿 | 📝 草稿 | 📝 草稿 | 📝 草稿 |
+| [101-65: 盈利的恐惧：为什么赚钱时你总是拿不住？](101-65_profit_fear.md) | The Money | MOFU | 2026-04-10 | 📝 草稿 | 📝 草稿 | 📝 草稿 | 📝 草稿 |
+| [101-69: 为什么 ZISO 每天只在 08:30 和 21:00 找你？](101-69_ziso_rhythm.md) | The Machine | BOFU | 2026-04-10 | 📝 草稿 | 📝 草稿 | 📝 草稿 | 📝 草稿 |
+| [101-70: 给机器立规矩：不设防护网的 AI 在加速死亡](101-70_ai_guardrails.md) | The Machine | BOFU | 2026-04-10 | 📝 草稿 | 📝 草稿 | 📝 草稿 | 📝 草稿 |
+| [101-71: 弱水三千只取一瓢：冻结你的自选池](101-71_frozen_universe.md) | The Machine | MOFU | 2026-04-10 | 📝 草稿 | 📝 草稿 | 📝 草稿 | 📝 草稿 |
+| [101-72: 置信度解码：AI 的“看好”到底几分真](101-72_confidence_decode.md) | The Machine | BOFU | 2026-04-10 | 📝 草稿 | 📝 草稿 | 📝 草稿 | 📝 草稿 |
+| [101-73: 接受不完美：与市场的不确定性做朋友](101-73_embrace_uncertainty.md) | The Machine | MOFU | 2026-04-10 | 📝 草稿 | 📝 草稿 | 📝 草稿 | 📝 草稿 |
 | [101-59: 赚钱了也不代表你对了](101-59_mfe_truth.md) | The Money | MOFU | 2026-04-05 | 📝 草稿 | 📝 草稿 | 📝 草稿 | 📝 草稿 |
 | [101-32: 删掉你的持仓成本线](101-32_stateless_execution.md) | The Method | MOFU | 2026-04-03 | 📝 草稿 | 📝 草稿 | 📝 草稿 | 📝 草稿 |
 | [101-68: 通用大模型炒股，就像请郭德纲做心脏手术](101-68_general_llm_illusion.md) | The Machine | TOFU | 2026-03-22 | 📝 草稿 | 📝 草稿 | 📝 草稿 | 📝 草稿 |
