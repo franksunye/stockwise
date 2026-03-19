@@ -2,6 +2,8 @@
 title: "邀请码系统：只接待懂纪律的人"
 category: "权益与增长"
 lastUpdated: "2026-03-09"
+source_docs:
+  - docs/0_Strategy/07_Growth_and_GTM_Roadmap.md
 ---
 
 目前支持多种方式获得或扩展你的 Pro 会员权益：

@@ -1,9 +1,3 @@
-# ZISO 101: 知守日课 (The Survival Manual)
-> **Subtitle**: 知其白，守其黑。AI 时代的散户生存日课。
-> **Philosophy**: Rationality, Discipline, and Data-Driven Decision Making.
-
-This is the master syllabus for the ZISO content strategy. It is designed to be a comprehensive guide that educates users, builds trust, and establishes ZISO as a thought leader in AI-assisted investing.
-
 ---
 
 ## Module 1: The Mind (Psychology & Discipline)
@@ -31,6 +25,8 @@ This is the master syllabus for the ZISO content strategy. It is designed to be 
 - **101-10**: **The Power of "Sitting on Your Hands"**
   - *Concept*: Cash is a position. The value of doing nothing.
 
+source_docs:
+  - docs/0_Strategy/07_Growth_and_GTM_Roadmap.md
 ---
 
 ## Module 2: The Method (Technical & Rules)

@@ -2,6 +2,8 @@
 title: "拒绝“未来函数”：咱们不玩虚的"
 category: "量化逻辑与纪律"
 lastUpdated: "2026-03-09"
+source_docs:
+  - docs/2_Intelligence/28Q_Quant_Backtesting_Methodology.md
 ---
 
 炒股最怕看“马后炮”指标。

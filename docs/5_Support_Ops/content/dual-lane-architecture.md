@@ -2,6 +2,8 @@
 title: "双轨制：前台生产线，后台实验线"
 category: "验证与诚信"
 lastUpdated: "2026-03-09"
+source_docs:
+  - docs/2_Intelligence/27C_Dual_Lane_Operations_Manual.md
 ---
 
 为了保证你看到的每一个建议都是“稳”的，我们在系统底层实施了严密的 **Dual-Lane (生产/实验)** 架构：

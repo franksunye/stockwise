@@ -2,6 +2,8 @@
 title: "投资模式：切换你的策略风格"
 category: "交互与导航"
 lastUpdated: "2026-03-09"
+source_docs:
+  - docs/3_Product/Specs/47_Investment_Mode_Product_Layer.md
 ---
 
 为了满足不同风格的用户，我们将复杂的后台策略库封装成了可理解、可选择、可执行的 **投资模式 (Investment Mode)**：

@@ -2,6 +2,8 @@
 title: "绑定邮箱：唯一的“救命稻草”"
 category: "账号与安全"
 lastUpdated: "2026-03-09"
+source_docs:
+  - docs/1_Engineering/11_Reliability_Protocol.md
 ---
 
 因为咱不存你的手机号，一旦你换手机或者清理了浏览器缓存，你的权益就丢了。

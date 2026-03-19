@@ -2,6 +2,8 @@
 title: "通知开关：不喜欢就关了"
 category: "通知与触达"
 lastUpdated: "2026-03-04"
+source_docs:
+  - docs/3_Product/30_Notification_Strategy_Design.md
 ---
 
 你可以按类型独立开关，一共 7 类：

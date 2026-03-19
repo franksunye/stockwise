@@ -2,6 +2,8 @@
 title: "颜色反转：戒掉“追涨杀跌”"
 category: "量化逻辑与纪律"
 lastUpdated: "2026-03-09"
+source_docs:
+  - docs/3_Product/03_Product_Features_Manifest.md
 ---
 
 **注意！咱们这儿颜色是反着来的：**

@@ -2,6 +2,8 @@
 title: "一键找回：权益瞬间同步"
 category: "账号与安全"
 lastUpdated: "2026-03-09"
+source_docs:
+  - docs/3_Product/31_Membership_Design_Plan.md
 ---
 
 换了手机？别急。

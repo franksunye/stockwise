@@ -2,6 +2,8 @@
 title: "推荐激励：有福同享"
 category: "权益与增长"
 lastUpdated: "2026-03-09"
+source_docs:
+  - docs/0_Strategy/02_Monetization_Pricing_Strategy.md
 ---
 
 觉得咱这儿准？拉哥们一把。

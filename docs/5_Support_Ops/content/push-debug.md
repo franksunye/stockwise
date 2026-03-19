@@ -2,6 +2,8 @@
 title: "测测通没通：别被系统拦了"
 category: "通知与触达"
 lastUpdated: "2026-03-09"
+source_docs:
+  - docs/3_Product/30_Notification_Strategy_Design.md
 ---
 
 设了半天收不到通知？

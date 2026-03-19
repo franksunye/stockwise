@@ -2,6 +2,8 @@
 title: "脉冲频率：信号强度一眼看"
 category: "量化逻辑与纪律"
 lastUpdated: "2026-03-09"
+source_docs:
+  - docs/1_Engineering/13_Quant_Engine_Architecture.md
 ---
 
 卡片上那个一闪一闪的频率。

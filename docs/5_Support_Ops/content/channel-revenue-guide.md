@@ -2,6 +2,8 @@
 title: "渠道分润：共同赚钱"
 category: "权益与增长"
 lastUpdated: "2026-03-09"
+source_docs:
+  - docs/0_Strategy/02_Monetization_Pricing_Strategy.md
 ---
 
 专门给合伙人准备的。

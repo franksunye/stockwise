@@ -2,6 +2,8 @@
 title: "认错审计：出错不可怕"
 category: "AI 智慧与分析"
 lastUpdated: "2026-03-09"
+source_docs:
+  - docs/1_Engineering/24_AICouncil_Review_Opinion_Current_State_20260313.md
 ---
 
 没谁能 100% 稳赢。

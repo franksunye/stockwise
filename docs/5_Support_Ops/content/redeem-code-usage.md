@@ -2,6 +2,8 @@
 title: "兑换码：手动给权益充值"
 category: "权益与增长"
 lastUpdated: "2026-03-09"
+source_docs:
+  - docs/0_Strategy/02_Monetization_Pricing_Strategy.md
 ---
 
 拿到 \`PRO-XXXX\` 的码了？

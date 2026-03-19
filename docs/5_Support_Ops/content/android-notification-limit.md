@@ -2,6 +2,8 @@
 title: "Android 通知限制说明"
 category: "通知与触达"
 lastUpdated: "2026-03-04"
+source_docs:
+  - docs/3_Product/30_Notification_Strategy_Design.md
 ---
 
 我们希望对您保持最大限度的透明：由于安卓生态的特殊性，ZISO AI 实时推送功能在**中国大陆地区的 Android 设备**上可能会遇到接收延迟或无法接收的情况。

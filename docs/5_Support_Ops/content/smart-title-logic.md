@@ -2,6 +2,8 @@
 title: "智能标题：随盘面“变脸”"
 category: "量化逻辑与纪律"
 lastUpdated: "2026-03-09"
+source_docs:
+  - docs/3_Product/Specs/45_Stock_Radar_Discovery_Engine.md
 ---
 
 标题这玩意儿也有讲究：

@@ -2,6 +2,8 @@
 title: "左右滑：你的三个战场"
 category: "交互与导航"
 lastUpdated: "2026-03-09"
+source_docs:
+  - docs/3_Product/Specs/46_Frontend_SWR_Architecture_Upgrade.md
 ---
 
 别在一堆菜单里乱找了，三个方向解决战斗：

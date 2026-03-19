@@ -18,6 +18,8 @@ publish:
     status: none
   toutiao:
     status: none
+source_docs:
+  - docs/2_Intelligence/22Q_Quant_Research_Framework.md
 ---
 
 # 别被直觉骗了：如何在噪音时代重建你的“决策实验室”？

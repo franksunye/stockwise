@@ -2,6 +2,8 @@
 title: "iOS 特供：极致跟手感"
 category: "交互与导航"
 lastUpdated: "2026-03-09"
+source_docs:
+  - docs/3_Product/30_Notification_Strategy_Design.md
 ---
 
 在 iPhone 上，我们主动把一些华而不实的“毛玻璃”背景关了。

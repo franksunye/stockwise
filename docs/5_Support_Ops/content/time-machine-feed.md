@@ -2,6 +2,8 @@
 title: "时光机模式：拒绝“马后炮”"
 category: "交互与导航"
 lastUpdated: "2026-03-09"
+source_docs:
+  - docs/1_Engineering/11_Reliability_Protocol.md
 ---
 
 为什么要往回刷？不是为了翻旧帐，是为了让你“穿越”。

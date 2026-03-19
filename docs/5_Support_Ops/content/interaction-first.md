@@ -2,6 +2,8 @@
 title: "交互优先：手感不能断"
 category: "交互与导航"
 lastUpdated: "2026-03-09"
+source_docs:
+  - docs/3_Product/Specs/46_Frontend_SWR_Architecture_Upgrade.md
 ---
 
 我们坚信：交易软件应该像游戏一样快。

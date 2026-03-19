@@ -2,6 +2,8 @@
 title: "乐观更新：不用等圈圈转"
 category: "数据与服务保障"
 lastUpdated: "2026-03-09"
+source_docs:
+  - docs/3_Product/Specs/46_Frontend_SWR_Architecture_Upgrade.md
 ---
 
 当你点“添加股票”的时候，UI 会瞬间反应过来。

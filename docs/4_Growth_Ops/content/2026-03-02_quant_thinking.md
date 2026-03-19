@@ -6,6 +6,8 @@ category: "The Method"
 funnel_stage: "MOFU"
 rhythm: "Hub"
 image: "/images/learn/quant_logic_premium.png"
+source_docs:
+  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
 ---
 
 # 量化思维：为什么优秀的决策者，看起来都像个“冷血机器人”？

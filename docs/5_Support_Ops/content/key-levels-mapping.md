@@ -2,6 +2,8 @@
 title: "关键价位：市场的防线"
 category: "AI 智慧与分析"
 lastUpdated: "2026-03-09"
+source_docs:
+  - docs/3_Product/Specs/45_Stock_Radar_Discovery_Engine.md
 ---
 
 在“核心操盘点位”图中，每一个标签都有明确的量化意义：

@@ -18,6 +18,8 @@ publish:
     status: none
   toutiao:
     status: none
+source_docs:
+  - docs/0_Strategy/01_Product_Positioning_and_Boundaries.md
 ---
 
 # AI 除了写 PPT 还能做什么？论“冷酷实习生”对焦虑的终极拯救

@@ -2,6 +2,8 @@
 title: "单点对焦：别让散乱害了你"
 category: "交互与导航"
 lastUpdated: "2026-03-09"
+source_docs:
+  - docs/3_Product/Specs/46_Frontend_SWR_Architecture_Upgrade.md
 ---
 
 为什么要一页只放一只票？

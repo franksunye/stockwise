@@ -1,52 +1,13 @@
 # Content Traceability Matrix 溯源总控表
 
 > 这是一份由 `/content-audit` 命令自动生成的核心物料与外部发布内容追踪表。
-> **生成时间**: 2026-03-19T02:58:07.383Z
+> **生成时间**: 2026-03-19T03:13:24.427Z
 
 ## 🚨 预警区：逻辑过期风险 (Outdated)
 
 底层战略/工程文档已经更新，对应的外部内容需要复核以防止文案逻辑冲突。
 
-- 🔴 [`docs/4_Growth_Ops/content/101-01_impossible_triangle.md`](../../docs/4_Growth_Ops/content/101-01_impossible_triangle.md) -> 需复核底层更新 `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md`
-- 🔴 [`docs/4_Growth_Ops/content/101-02_fomo.md`](../../docs/4_Growth_Ops/content/101-02_fomo.md) -> 需复核底层更新 `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md`
-- 🔴 [`docs/4_Growth_Ops/content/101-03_loss_aversion.md`](../../docs/4_Growth_Ops/content/101-03_loss_aversion.md) -> 需复核底层更新 `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md`
-- 🔴 [`docs/4_Growth_Ops/content/101-04_confirmation_bias.md`](../../docs/4_Growth_Ops/content/101-04_confirmation_bias.md) -> 需复核底层更新 `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md`
-- 🔴 [`docs/4_Growth_Ops/content/101-05_gamblers_fallacy.md`](../../docs/4_Growth_Ops/content/101-05_gamblers_fallacy.md) -> 需复核底层更新 `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md`
-- 🔴 [`docs/4_Growth_Ops/content/101-06_endowment_effect.md`](../../docs/4_Growth_Ops/content/101-06_endowment_effect.md) -> 需复核底层更新 `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md`
-- 🔴 [`docs/4_Growth_Ops/content/101-07_revenge_trading.md`](../../docs/4_Growth_Ops/content/101-07_revenge_trading.md) -> 需复核底层更新 `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md`
-- 🔴 [`docs/4_Growth_Ops/content/101-08_3m_framework.md`](../../docs/4_Growth_Ops/content/101-08_3m_framework.md) -> 需复核底层更新 `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md`
-- 🔴 [`docs/4_Growth_Ops/content/101-09_why_smart_people_fail.md`](../../docs/4_Growth_Ops/content/101-09_why_smart_people_fail.md) -> 需复核底层更新 `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md`
-- 🔴 [`docs/4_Growth_Ops/content/101-10_sitting_on_hands.md`](../../docs/4_Growth_Ops/content/101-10_sitting_on_hands.md) -> 需复核底层更新 `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md`
-- 🔴 [`docs/4_Growth_Ops/content/101-11_hindsight_bias.md`](../../docs/4_Growth_Ops/content/101-11_hindsight_bias.md) -> 需复核底层更新 `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md`
-- 🔴 [`docs/4_Growth_Ops/content/101-21_rsi_decoded.md`](../../docs/4_Growth_Ops/content/101-21_rsi_decoded.md) -> 需复核底层更新 `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md`
-- 🔴 [`docs/4_Growth_Ops/content/101-22_moving_averages.md`](../../docs/4_Growth_Ops/content/101-22_moving_averages.md) -> 需复核底层更新 `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md`
-- 🔴 [`docs/4_Growth_Ops/content/101-23_macd.md`](../../docs/4_Growth_Ops/content/101-23_macd.md) -> 需复核底层更新 `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md`
-- 🔴 [`docs/4_Growth_Ops/content/101-24_volume.md`](../../docs/4_Growth_Ops/content/101-24_volume.md) -> 需复核底层更新 `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md`
-- 🔴 [`docs/4_Growth_Ops/content/101-25_support_resistance.md`](../../docs/4_Growth_Ops/content/101-25_support_resistance.md) -> 需复核底层更新 `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md`
-- 🔴 [`docs/4_Growth_Ops/content/101-26_candlestick_patterns.md`](../../docs/4_Growth_Ops/content/101-26_candlestick_patterns.md) -> 需复核底层更新 `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md`
-- 🔴 [`docs/4_Growth_Ops/content/101-27_bollinger_bands.md`](../../docs/4_Growth_Ops/content/101-27_bollinger_bands.md) -> 需复核底层更新 `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md`
-- 🔴 [`docs/4_Growth_Ops/content/101-28_left_right_trading.md`](../../docs/4_Growth_Ops/content/101-28_left_right_trading.md) -> 需复核底层更新 `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md`
-- 🔴 [`docs/4_Growth_Ops/content/101-29_gap_theory.md`](../../docs/4_Growth_Ops/content/101-29_gap_theory.md) -> 需复核底层更新 `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md`
-- 🔴 [`docs/4_Growth_Ops/content/101-30_divergence.md`](../../docs/4_Growth_Ops/content/101-30_divergence.md) -> 需复核底层更新 `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md`
-- 🔴 [`docs/4_Growth_Ops/content/101-31_sector_rotation.md`](../../docs/4_Growth_Ops/content/101-31_sector_rotation.md) -> 需复核底层更新 `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md`
-- 🔴 [`docs/4_Growth_Ops/content/101-51_kelly_criterion.md`](../../docs/4_Growth_Ops/content/101-51_kelly_criterion.md) -> 需复核底层更新 `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md`
-- 🔴 [`docs/4_Growth_Ops/content/101-52_stop_loss_art.md`](../../docs/4_Growth_Ops/content/101-52_stop_loss_art.md) -> 需复核底层更新 `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md`
-- 🔴 [`docs/4_Growth_Ops/content/101-53_risk_reward_ratio.md`](../../docs/4_Growth_Ops/content/101-53_risk_reward_ratio.md) -> 需复核底层更新 `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md`
-- 🔴 [`docs/4_Growth_Ops/content/101-54_position_sizing.md`](../../docs/4_Growth_Ops/content/101-54_position_sizing.md) -> 需复核底层更新 `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md`
-- 🔴 [`docs/4_Growth_Ops/content/101-55_drawdown_math.md`](../../docs/4_Growth_Ops/content/101-55_drawdown_math.md) -> 需复核底层更新 `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md`
-- 🔴 [`docs/4_Growth_Ops/content/101-56_correlation_risk.md`](../../docs/4_Growth_Ops/content/101-56_correlation_risk.md) -> 需复核底层更新 `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md`
-- 🔴 [`docs/4_Growth_Ops/content/101-57_one_percent_rule.md`](../../docs/4_Growth_Ops/content/101-57_one_percent_rule.md) -> 需复核底层更新 `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md`
-- 🔴 [`docs/4_Growth_Ops/content/101-58_profit_taking.md`](../../docs/4_Growth_Ops/content/101-58_profit_taking.md) -> 需复核底层更新 `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md`
-- 🔴 [`docs/4_Growth_Ops/content/101-61_llm_vs_quant.md`](../../docs/4_Growth_Ops/content/101-61_llm_vs_quant.md) -> 需复核底层更新 `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md`
-- 🔴 [`docs/4_Growth_Ops/content/101-62_hallucination_control.md`](../../docs/4_Growth_Ops/content/101-62_hallucination_control.md) -> 需复核底层更新 `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md`
-- 🔴 [`docs/4_Growth_Ops/content/101-63_context_engineering.md`](../../docs/4_Growth_Ops/content/101-63_context_engineering.md) -> 需复核底层更新 `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md`
-- 🔴 [`docs/4_Growth_Ops/content/101-64_eod_vs_intraday.md`](../../docs/4_Growth_Ops/content/101-64_eod_vs_intraday.md) -> 需复核底层更新 `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md`
-- 🔴 [`docs/4_Growth_Ops/content/101-65_confidence_calibration.md`](../../docs/4_Growth_Ops/content/101-65_confidence_calibration.md) -> 需复核底层更新 `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md`
-- 🔴 [`docs/4_Growth_Ops/content/101-66_prompt_engineering.md`](../../docs/4_Growth_Ops/content/101-66_prompt_engineering.md) -> 需复核底层更新 `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md`
-- 🔴 [`docs/4_Growth_Ops/content/101-67_hybrid_system.md`](../../docs/4_Growth_Ops/content/101-67_hybrid_system.md) -> 需复核底层更新 `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md`
-- 🔴 [`docs/4_Growth_Ops/content/101-81_case_reversal.md`](../../docs/4_Growth_Ops/content/101-81_case_reversal.md) -> 需复核底层更新 `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md`
-- 🔴 [`docs/4_Growth_Ops/content/101-82_false_breakout.md`](../../docs/4_Growth_Ops/content/101-82_false_breakout.md) -> 需复核底层更新 `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md`
-- 🔴 [`docs/4_Growth_Ops/content/101-83_falling_knife.md`](../../docs/4_Growth_Ops/content/101-83_falling_knife.md) -> 需复核底层更新 `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md`
+- *当前无过期内容 / All Synced*
 
 ## ⚠️ 预警区：孤儿内容 (Orphaned)
 

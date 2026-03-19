@@ -2,6 +2,8 @@
 title: "数据拼接：最新指标不求人"
 category: "数据与服务保障"
 lastUpdated: "2026-03-09"
+source_docs:
+  - docs/1_Engineering/32_Frontend_Network_Optimization_Zero_Redundancy_20260318.md
 ---
 
 咱们显示的 MA（均线）和指标是“热乎”的。

@@ -2,6 +2,8 @@
 title: "隐私承诺：这是你的避风港"
 category: "账号与安全"
 lastUpdated: "2026-03-09"
+source_docs:
+  - docs/1_Engineering/11_Reliability_Protocol.md
 ---
 
 我们对你赚多少钱不感兴趣。
