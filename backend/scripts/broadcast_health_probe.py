@@ -7,14 +7,27 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 import time
 from datetime import datetime
 from typing import Any, Dict, List, Tuple
 
 import requests
 
-from backend.database import get_connection
-from backend.logger import logger
+CURRENT_FILE = os.path.abspath(__file__)
+SCRIPTS_DIR = os.path.dirname(CURRENT_FILE)
+BACKEND_DIR = os.path.dirname(SCRIPTS_DIR)
+ROOT_DIR = os.path.dirname(BACKEND_DIR)
+for candidate in (ROOT_DIR, BACKEND_DIR):
+    if candidate not in sys.path:
+        sys.path.insert(0, candidate)
+
+try:
+    from backend.database import get_connection
+    from backend.logger import logger
+except ImportError:
+    from database import get_connection  # type: ignore
+    from logger import logger  # type: ignore
 
 
 CREATE_HEALTH_TABLE_SQL = """
