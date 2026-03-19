@@ -1,11 +1,15 @@
 # 📊 CMO 内容发布全局看板 (Docs-as-Code)
 
-> 自动生成时间：2026/3/15 16:41:40
+> 自动生成时间：2026/3/19 10:42:32
 > 💡 **提示**: 本看板由 `scripts/cmo_sync.mjs` 自动从各 Markdown 文件的头信息 (Frontmatter) 提取并重新渲染。
 
 | 文章标题 | 分类 (Category) | 漏斗层级 | 日期 | 公众号 | 小红书 | Twitter | 头条号 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | [March_Content_Matrix_Execution_2026](March_Content_Matrix_Execution_2026.md) | Uncategorized | Unknown | N/A | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [101-59: 赚钱了也不代表你对了](101-59_mfe_truth.md) | The Money | MOFU | 2026-04-05 | 📝 草稿 | 📝 草稿 | 📝 草稿 | 📝 草稿 |
+| [101-32: 删掉你的持仓成本线](101-32_stateless_execution.md) | The Method | MOFU | 2026-04-03 | 📝 草稿 | 📝 草稿 | 📝 草稿 | 📝 草稿 |
+| [101-68: 通用大模型炒股，就像请郭德纲做心脏手术](101-68_general_llm_illusion.md) | The Machine | TOFU | 2026-03-22 | 📝 草稿 | 📝 草稿 | 📝 草稿 | 📝 草稿 |
+| [101-12: 别和镰刀拼微秒](101-12_l4_hft_illusion.md) | The Mind | TOFU | 2026-03-20 | 📝 草稿 | 📝 草稿 | 📝 草稿 | 📝 草稿 |
 | [AI 除了写 PPT 还能做什么？论‘冷酷实习生’对焦虑的终极拯救](2026-03-02_ai_lifestyle.md) | The Machine | TOFU | 2026-03-02 | [✅ 已发布](https://mp.weixin.qq.com/s/eR-4uQ1tCHZt0i4x3lBwHw) | 📝 草稿 | ➖ 不发布 | ➖ 不发布 |
 | [AI 时代的决策真相：为什么‘直觉’是你最危险的敌人？](2026-03-02_breakthrough_logic.md) | The Mind | TOFU | 2026-03-02 | [✅ 已发布](https://mp.weixin.qq.com/s/7Lg6jQ8u_V1wY2a3zPqX0A) | 📝 草稿 | ➖ 不发布 | ➖ 不发布 |
 | [量化思维入门：像工程师一样处理生活中的‘概率游戏’](2026-03-02_quant_thinking.md) | The Method | MOFU | 2026-03-02 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
