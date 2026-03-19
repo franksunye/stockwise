@@ -3,6 +3,15 @@
 **Date**: 2026-03-18  
 **Status**: POC 已完成：完成 Turso 接入、正确性对比、并完成 Cloudflare vs Vercel 压测 + 迁移决策表
 
+> **文档定位（避免与主路线图重复）**
+> - 本文档是 **POC 证据文档**（实验设计、压测、成本测算、决策记录）。
+> - 规模化实施顺序与范围以 [31_Capacity_Planning_And_Scaling_Strategy_20260317.md](./31_Capacity_Planning_And_Scaling_Strategy_20260317.md) 为准。
+> - 当前执行原则：**先完成价格广播（broadcast），后评估 Cloudflare Workers 承载**；不将“平台迁移”作为先于“规模治理”的动作。
+
+> 2026-03-19 生产推进状态：
+> - 价格广播第一步已在 Vercel 主链路上线（`/api/stock/prices/all` + 30s 缓存 + 客户端本地过滤）。
+> - 当前线上仍由 Vercel 承载广播端点；Cloudflare Workers 迁移保持“后置评估”状态（未切生产流量）。
+
 ## 1. Purpose & Scope
 
 - **为什么要做这次 POC**
@@ -49,33 +58,31 @@
 - **复杂度目标**
   - POC 期间，本地开发 / 部署 / 观测的**心智负担**可控，不显著复杂化日常工程流程。
 
-### 3.2 成功标准表（占位）
+### 3.2 成功标准与结项判定
 
-| 维度 | 指标 | 成功标准 | 备注 |
-|------|------|----------|------|
-| 性能 | p95 延迟 | CF Workers 相对 Vercel 的延迟差在 ±10% 内，或在高并发场景明显优于 Vercel | 以 3 个 QPS 档位测量：低 / 中 / 高 |
-| 成本 | 月度估算 | 在 100K / 1M 模型下，CF 费用显著低于 Vercel GB-hrs 估算 | 依赖 Section 6 流量模型 |
-| 复杂度 | DX 评分 | 主 owner 对「日常开发/排障是否可接受」给出主观评分（通过/不通过） | 需在附录定义评估问题清单 |
-| 风险 | 运行稳定性 | 在压测 + 小规模灰度期间，无系统性错误/崩溃 | 错误率/超时率指标 |
+| 维度 | 指标 | 成功标准 | POC 结论 |
+|------|------|----------|-----------|
+| 性能 | p95 延迟 | Cloudflare Workers 相对 Vercel 的延迟差在 ±10% 内，或在高并发场景明显优于 Vercel | 达成（见 6.1.1，压测场景下 Cloudflare 平均与 p95 更优） |
+| 成本 | 月度估算 | 在 100K / 1M 模型下，Cloudflare Workers 费用显著低于 Vercel GB-hrs 估算 | 达成（见 6.2.1，价格层在价格广播假设下边际成本近似 $0） |
+| 复杂度 | DX 评分 | 主 owner 对「日常开发/排障是否可接受」给出主观评分（通过/不通过） | 通过（见 10.2，总体可接受，但需保留双平台排障意识） |
+| 风险 | 运行稳定性 | 在压测 + 小规模灰度期间，无系统性错误/崩溃 | 达成（压测 200/200 成功，无系统性错误） |
 
-> 后续在实测后更新具体数字（例如 Δp95、估算月度成本、DX 主观结论），并在 Section 9 的 Decision Log 中记录最终结论。
+> 结项说明：POC 指标已形成 Go / No-go 证据；生产实施顺序与范围继续以 [31](./31_Capacity_Planning_And_Scaling_Strategy_20260317.md) 为准。
 
 ## 4. Experiment Design
 
 ### 4.1 POC 类型与范围
 
 - **仅针对 API 层**：不调整 Next.js SSR、静态文件分发、PWA 配置。
-- **仅使用 Turso 作为数据源**：Worker 通过 HTTP 访问 Turso，不引入新的 DB/KV 作为前置依赖（可在附录列出未来可能使用的 CF KV/DO）。
+- **仅使用 Turso 作为数据源**：Worker 通过 HTTP 访问 Turso，不引入新的 DB/KV 作为前置依赖（可在附录列出未来可能使用的 Cloudflare KV/DO）。
 - **只选一个代表性端点**：以价格层为样本，不直接迁移复杂的 `/api/stock/batch` 决策端点。
 
-### 4.2 POC 端点选择（占位）
+### 4.2 POC 端点选择（已确认）
 
-- **候选 1**：`GET /api/stock/prices/all`
+- **目标端点**：`GET /api/stock/prices/all`
   - 输入：无或可选 query（例如 `?market=hk`）。
   - 输出：全局股票池价格数组。
-- **候选 2**：轻量配置/元数据端点（若认为价格端点过重，可先从简单端点骨架开始）
-
-> TODO: 最终确认本次 POC 的目标端点，并在下方给出明确的请求/响应 schema。
+  - 对比约束：使用 `symbols` query 参数与 Vercel `/api/stock/prices` 对齐 symbol 集合，便于正确性与性能对比。
 
 #### 4.2.1 请求/响应 Schema（示例骨架）
 
@@ -125,7 +132,7 @@ export type PriceBroadcastResponse = {
   - 再从 `daily_prices` 中为集合里的每只股票取最新一条记录（与 `getLatestPrices` 的语义保持一致）。
   - 将 `close` 映射为 `lastPrice`，将 `change_percent` 映射为 `changePct`，并近似计算绝对涨跌额 `change ≈ close * change_percent / 100`。
 
-### 4.3 架构对比图（占位）
+### 4.3 架构对比图
 
 #### 4.3.1 当前：Vercel Serverless
 
@@ -154,7 +161,7 @@ flowchart LR
     - 发送到 Cloudflare Worker 端点。
   - 收集响应时间/响应体差异，用于性能与正确性对比。
 - **在线灰度（可选，后置）**
-  - 在前端或中间层加入内部开关（例如 `X-Stockwise-Backend: cf-workers` header 或 query 参数），仅对内部账号/实验组路由到 CF Worker。
+  - 在前端或中间层加入内部开关（例如 `X-Stockwise-Backend: cf-workers` header 或 query 参数），仅对内部账号/实验组路由到 Cloudflare Worker。
 
 ## 5. Implementation Plan
 
@@ -182,7 +189,7 @@ flowchart LR
 - **环境划分**
   - `dev`：本地 `wrangler dev`。
   - `preview`：GitHub 分支自动部署（可选）。
-  - `prod-poc`：单独的 CF 环境，仅供 POC 调用。
+  - `prod-poc`：单独的 Cloudflare 环境，仅供 POC 调用。
 - **配置项**
   - Turso `URL` / `AUTH_TOKEN` 通过 Workers `vars` / `secrets` 注入。
   - 若需要跨环境区分，可在 `wrangler.toml` 中为不同环境维护不同变量集合。
@@ -265,11 +272,11 @@ Cloudflare Workers 费用细节来源：[`workers.cloudflare.com/pricing`](https
 
 > 目标：控制 CPU/计费风险的同时，把“增长时成本仍可控”的架构思路落地。
 
-| 接口特征（判断标准） | 首选工程动作 | 为什么（贴合成本模型） | 下一步迁移到 CF 的时机 |
+| 接口特征（判断标准） | 首选工程动作 | 为什么（贴合成本模型） | 下一步迁移到 Cloudflare Workers 的时机 |
 |---|---|---|---|
 | 同一份公共数据，对不同用户仅是过滤/展示差异（典型：价格层） | 先做 broadcast（如 `/api/stock/prices/all`），再上边缘缓存；客户端按自选池过滤 | 把计算从 O(users) 压到 O(1)，减少重复计算/重复函数调用，直接缓解 Vercel Hobby 的 Active CPU 预算压力 | 当 broadcast + 缓存语义稳定后，把该端点迁到 Cloudflare Workers（本 POC 验证已覆盖） |
-| 同一端点里混有“公共可缓存部分”和“用户私有决策 overlay”（典型：batch/决策聚合） | 先拆分 public card（可缓存/可 ISR）与 private overlay（仍 dynamic、轻量） | 在不引入新计费形态的情况下先把“重计算”缓存化/去重，避免迁移后仍按用户线性增长消耗 CPU | 拆分后，public 部分可分别迁到 CF/边缘缓存；private overlay 视延迟与调试成本决定是否迁移 |
-| 每用户差异巨大、且需要强交互或强个性化推理的重计算 | 先降频、合并请求、减少 payload、提高缓存命中；尽量把重计算从线上函数中移走/异步化 | 仅“换平台”不能改变计算规模随用户增长线性扩张的问题；先做规模治理再谈迁移更省成本 | 若证明该类重计算是瓶颈，再对 CF 进行 POC（但前提仍建议先拆/降频） |
+| 同一端点里混有“公共可缓存部分”和“用户私有决策 overlay”（典型：batch/决策聚合） | 先拆分 public card（可缓存/可 ISR）与 private overlay（仍 dynamic、轻量） | 在不引入新计费形态的情况下先把“重计算”缓存化/去重，避免迁移后仍按用户线性增长消耗 CPU | 拆分后，public 部分可分别迁到 Cloudflare Workers/边缘缓存；private overlay 视延迟与调试成本决定是否迁移 |
+| 每用户差异巨大、且需要强交互或强个性化推理的重计算 | 先降频、合并请求、减少 payload、提高缓存命中；尽量把重计算从线上函数中移走/异步化 | 仅“换平台”不能改变计算规模随用户增长线性扩张的问题；先做规模治理再谈迁移更省成本 | 若证明该类重计算是瓶颈，再对 Cloudflare Workers 进行 POC（但前提仍建议先拆/降频） |
 
 ## 7. Risk Assessment & Mitigation
 
@@ -292,20 +299,20 @@ Cloudflare Workers 费用细节来源：[`workers.cloudflare.com/pricing`](https
 
 ## 8. Timeline & Ownership
 
-### 8.1 粗粒度时间线（草案）
+### 8.1 实际执行时间线（POC）
 
-| 阶段 | 内容 | 预估工期 | 备注 |
+| 阶段 | 内容 | 实际状态 | 备注 |
 |------|------|----------|------|
-| 设计 | 完成本 POC 文档、确定端点与指标 | 0.5–1 天 | 当前阶段 |
-| Skeleton | 搭建 Workers 项目骨架，打通 Turso 请求 | 1–2 天 | 含本地联调 |
-| 压测 | 编写压测脚本并在 dev/preview 环境跑测试 | 1–2 天 | 收集性能/错误数据 |
-| 评估 | 汇总性能/成本/复杂度结论，更新本文件 | 0.5–1 天 | 形成 go/no-go |
+| 设计 | 完成本 POC 文档、确定端点与指标 | 已完成 | 见 Section 9 |
+| Skeleton | 搭建 Workers 项目骨架，打通 Turso 请求 | 已完成 | 含本地联调 |
+| 压测 | 编写压测脚本并在 dev/preview 环境跑测试 | 已完成 | 已产出性能与正确性对比 |
+| 评估 | 汇总性能/成本/复杂度结论，更新本文件 | 已完成 | 已形成 Go / No-go |
 
-### 8.2 角色与责任（占位）
+### 8.2 角色与责任（POC 结项记录）
 
-- **Owner**: _TODO: 填写姓名_  
-- **Infra/DevOps 支持**: _TODO_  
-- **数据分析支持（如需要）**: _TODO_
+- **Owner**: Engineering（见 Section 9 决策记录）
+- **Infra/DevOps 支持**: 同 Engineering 协作完成（wrangler 环境与变量注入）
+- **数据分析支持**: 由工程侧基于压测脚本与流量模型完成
 
 ## 9. Decision Log
 
@@ -322,9 +329,17 @@ Cloudflare Workers 费用细节来源：[`workers.cloudflare.com/pricing`](https
   - 对 `close` 与 `change_percent` 的相对误差在容忍阈值内：两只标的均 `OK`
 - **2026-03-18** — 对比脚本支持 session cookie：从 `backend/.env`、`frontend/.env` 加载 `USER_SESSION_SECRET`，通过 `COMPARE_USER_ID` 或 Turso 查询获取 `user_id`，生成 `stockwise_user_session` cookie 后请求 Vercel `/api/stock/prices`。需在 frontend/.env 中配置 `USER_SESSION_SECRET` 方可完成 Vercel vs Worker 数据一致性对比。
 - **2026-03-18** — 成本结论：在采用 price broadcast + edge caching（对应 [31] 的 origin hits 降低假设）后，价格端点 origin 调用量可降到 ~86K/月量级；Cloudflare Workers 具备 100k requests/day 免费额度与 10ms CPU/request 免费包含，因此请求与 CPU 边际成本可近似为 **$0**（“从可用到空成本”），同时显著缓解 Vercel Hobby 价格层导致的 GB-hrs 超配风险。
-- **2026-03-18** — POC 结项（Go/No-go）：
-  - **Go**：价格层优先做 broadcast（`/api/stock/prices/all`）并将该端点部署在 Cloudflare Workers，作为控制 Vercel Hobby Active CPU 风险的主路径。
-  - **No-go（当前阶段）**：不推荐直接“迁移高 CPU 的 monolith API”作为首选方案；先依据 `6.4 Migration Decision Table` 完成 public/private 拆分与缓存化，再决定迁移范围。
+- **2026-03-18** — POC 结项（Go / No-go）：
+  - **Go**：价格层优先做 broadcast（`/api/stock/prices/all`）并先在现有生产链路稳定运行，作为控制 Vercel Hobby Active CPU 风险的主路径；待 broadcast 语义与指标稳定后，再评估该公共端点的 Cloudflare 承载切换。
+  - **No-go（POC 结项范围内）**：不推荐直接“迁移高 CPU 的 monolith API”作为首选方案；先依据 `6.4 Migration Decision Table` 完成 public/private 拆分与缓存化，再决定迁移范围。
+- **2026-03-19** — Broadcast Phase-1 在 Vercel 生产链路上线：
+  - 新增 `GET /api/stock/prices/all`（支持 `market=all|hk|cn`）。
+  - 广播缓存策略：`Cache-Control: public, s-maxage=30, stale-while-revalidate=30`；服务端查询层 `revalidate: 30`。
+  - 前端价格刷新主路径切换到广播端点，盘中刷新 1 分钟，非交易时段 10 分钟。
+  - 生产容错：广播连续失败触发熔断，自动回退 legacy `/api/stock/prices`，冷却后自动恢复探测。
+- **2026-03-19** — `global_stock_pool` 一致性修复与线上清理完成：
+  - 修复 `stock-pool` add/delete 的计数幂等问题，并在 `watchers_count <= 0` 时移除 symbol。
+  - 线上对账清理结果：清理后 `watchers_count<=0=0`，计数不一致 `0`（对齐 `user_watchlist` 实际人数）。
 
 ## 10. Appendix
 
@@ -334,15 +349,10 @@ Cloudflare Workers 费用细节来源：[`workers.cloudflare.com/pricing`](https
 - [28_Price_Sync_Zero_Stale_Protocol_20260316.md](./28_Price_Sync_Zero_Stale_Protocol_20260316.md)
 - [32_Frontend_Network_Optimization_Zero_Redundancy_20260318.md](./32_Frontend_Network_Optimization_Zero_Redundancy_20260318.md)
 
-### 10.2 DX 评估问题清单（占位）
+### 10.2 DX 评估结论（POC 阶段）
 
-- 本地开发：
-  - 是否需要额外脚本/命令来同时启动 Next.js 与 Workers？
-  - 日常开发者是否需要理解 Worker 运行时细节？
-- 日志与监控：
-  - 错误定位路径是否清晰（从用户反馈到具体 Worker 日志）？
-  - 是否需要新接入监控/告警系统？
-- 部署与回滚：
-  - 部署失败/Worker 配置错误时是否影响现有 Vercel 路径？
-  - 回滚是否可以通过关闭开关 + 一次配置变更完成？
+- 本地开发：可接受。需要并行使用 Next.js 与 Worker 的调试命令，但流程可控。
+- 日志与排障：可接受。需要在 Vercel 与 Cloudflare 两侧同时观察日志（如 `wrangler tail`）。
+- 部署与回滚：可接受。POC 为旁路调用，不影响既有 Vercel 主路径；回滚策略为关闭灰度开关。
+- 运营约束：若进入生产灰度，需补齐统一监控与告警口径，避免双平台观测割裂。
 
