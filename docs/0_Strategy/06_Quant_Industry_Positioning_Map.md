@@ -1,4 +1,4 @@
-# StockWise 量化行业地图与道法术器
+# 06 量化行业定位与地图 (Quant Industry Positioning Map)
 
 **文档状态**: Current Strategy  
 **日期**: 2026-03-12  

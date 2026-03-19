@@ -12,6 +12,9 @@ This directory serves as the unified single source of truth for the 知守 AI (Z
 - [Team Responsibility Matrix](./0_Strategy/03_Team_Responsibility_Matrix.md)
 - [Milestones & Execution Log](./0_Strategy/04_Milestones_Execution_Log.md)
 - [Quant Signal and Execution Axioms](./0_Strategy/05_Quant_Signal_and_Execution_Axioms.md)
+- [Quant Industry Positioning Map](./0_Strategy/06_Quant_Industry_Positioning_Map.md)
+- [GTM & Growth Roadmap](./0_Strategy/07_Growth_and_GTM_Roadmap.md)
+- [Globalization Strategy & Evolution](./0_Strategy/08_Globalization_Strategy_and_Evolution.md)
 
 ### [1_Engineering/](./1_Engineering/) - How (System)
 > Project "Backbone": System architecture, reliability, and quality standards.
@@ -31,7 +34,6 @@ This directory serves as the unified single source of truth for the 知守 AI (Z
 ### [2_Intelligence/](./2_Intelligence/) - How (Brain)
 > Project "AI Logic": Prompt engineering, model strategies, and core algorithms.
 - **[Quant Strategy & Methodology]**
-  - [Quant Industry Map & Road Map](./2_Intelligence/21Q_Quant_Industry_Map.md)
   - [Methods & Masters Research Framework](./2_Intelligence/22Q_Quant_Research_Framework.md)
   - [Method Registry Design](./2_Intelligence/23Q_Method_Registry_Design.md)
 - [Dual-Lane Operations Manual](./2_Intelligence/27C_Dual_Lane_Operations_Manual.md)
@@ -55,7 +57,6 @@ This directory serves as the unified single source of truth for the 知守 AI (Z
 
 ### [4_Growth_Ops/](./4_Growth_Ops/) - Growth
 > Project "Energy": Marketing, content, and user operation workflows.
-- [Growth Roadmap (333 Plan)](./4_Growth_Ops/50_Growth_Roadmap_333_Plan.md)
 - [Missing Features & Optimization Plan](./4_Growth_Ops/51_Missing_Features_Plan.md)
 - [Annual Content Strategy 2026](./4_Growth_Ops/52_Annual_Content_Strategy_2026.md)
 - [Chinese SEO/GEO Foundation Plan](./4_Growth_Ops/53_Chinese_SEO_GEO_Foundation_Plan.md)

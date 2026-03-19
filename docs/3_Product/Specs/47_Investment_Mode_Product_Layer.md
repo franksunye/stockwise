@@ -585,7 +585,7 @@
 投资模式相关的增长假设、KPI、A/B 实验、上线门槛与回滚，
 统一维护在增长文档：
 
-- `docs/4_Growth_Ops/50_Growth_Roadmap_333_Plan.md`（章节：投资模式增长专项）
+- `docs/0_Strategy/07_Growth_and_GTM_Roadmap.md`（章节：投资模式增长专项）
 
 本 Spec 只保留产品定义与能力边界，避免产品与增长口径重复维护。
 
@@ -607,12 +607,12 @@
 ### 9.1 增长实验（引用）
 
 模式增长实验在增长文档统一管理：
-- `docs/4_Growth_Ops/50_Growth_Roadmap_333_Plan.md`（章节：投资模式增长专项）
+- `docs/0_Strategy/07_Growth_and_GTM_Roadmap.md`（章节：投资模式增长专项）
 
 ### 9.2 上线门槛与回滚（引用）
 
 具体门槛与回滚条件以增长文档为准：
-- `docs/4_Growth_Ops/50_Growth_Roadmap_333_Plan.md`（章节：投资模式增长专项）
+- `docs/0_Strategy/07_Growth_and_GTM_Roadmap.md`（章节：投资模式增长专项）
 
 ---
 

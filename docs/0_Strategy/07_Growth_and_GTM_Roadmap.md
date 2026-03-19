@@ -1,4 +1,4 @@
-# 知守 AI (ZISO AI) "3-3-3" 增长与变现路线图
+# 07 增长与变现路线图 (GTM & Growth Roadmap)
 
 ## 1. 核心愿景 (Core Vision)
 知守 AI (ZISO AI) 不仅仅是一个 AI 荐股工具，它致力于成为个人投资者的 **"AI 行为合伙人" (AI Behavioral Partner)**。通过解决散户“追涨杀跌”、“缺乏计划”的本性弱点，将 AI 洞察转化为切实可落地的交易纪律。

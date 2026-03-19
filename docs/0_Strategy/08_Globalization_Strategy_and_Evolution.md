@@ -1,4 +1,4 @@
-# 知守 AI (ZISO AI) (ZISO AI) 全球化与多语言架构演进分析
+# 08 全球化战略与架构演进 (Globalization Strategy & Evolution)
 
 ## 1. 现状评估 (Current State Assessment)
 

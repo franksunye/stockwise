@@ -9,7 +9,7 @@
 
 1. `27C_Dual_Lane_Operations_Manual.md`  
    运行手册：双轨执行、命令、核验 SQL、回滚
-2. `21Q_Quant_Industry_Map.md`  
+2. `../0_Strategy/06_Quant_Industry_Positioning_Map.md`  
    量化行业地图与道法术器：战略定位与路线图
 3. `22Q_Quant_Research_Framework.md`  
    量化方法与大师研究框架
