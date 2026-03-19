@@ -10,6 +10,41 @@ INNER JOIN (
     GROUP BY symbol
 ) latest ON dp.symbol = latest.symbol AND dp.date = latest.max_date`;
 
+const LATEST_BROADCAST_PRICES_SQL = `WITH pool AS (
+    SELECT gp.symbol
+    FROM global_stock_pool gp
+    JOIN stock_meta sm ON gp.symbol = sm.symbol
+),
+latest AS (
+    SELECT symbol, MAX(date) AS max_date
+    FROM daily_prices
+    WHERE symbol IN (SELECT symbol FROM pool)
+    GROUP BY symbol
+)
+SELECT dp.symbol, dp.date, dp.close, dp.change_percent
+FROM daily_prices dp
+JOIN latest l ON dp.symbol = l.symbol AND dp.date = l.max_date
+ORDER BY dp.symbol
+LIMIT ?`;
+
+const LATEST_BROADCAST_PRICES_BY_MARKET_SQL = `WITH pool AS (
+    SELECT gp.symbol
+    FROM global_stock_pool gp
+    JOIN stock_meta sm ON gp.symbol = sm.symbol
+    WHERE LOWER(sm.market) = LOWER(?)
+),
+latest AS (
+    SELECT symbol, MAX(date) AS max_date
+    FROM daily_prices
+    WHERE symbol IN (SELECT symbol FROM pool)
+    GROUP BY symbol
+)
+SELECT dp.symbol, dp.date, dp.close, dp.change_percent
+FROM daily_prices dp
+JOIN latest l ON dp.symbol = l.symbol AND dp.date = l.max_date
+ORDER BY dp.symbol
+LIMIT ?`;
+
 async function queryLatestPrices(symbols: string[]): Promise<Record<string, unknown>[]> {
     if (symbols.length === 0) return [];
     const client = getDbClient();
@@ -41,6 +76,46 @@ export const getCachedLatestPrices = unstable_cache(
     queryLatestPrices,
     ['latest-prices'],
     { revalidate: 120, tags: ['daily-prices'] }
+);
+
+async function queryLatestBroadcastPrices(
+    market: string = 'all',
+    limit: number = 200,
+): Promise<Record<string, unknown>[]> {
+    const safeLimit = Number.isFinite(limit) ? Math.min(Math.max(Math.trunc(limit), 1), 1000) : 200;
+    const client = getDbClient();
+    try {
+        let rows: Record<string, unknown>[] = [];
+        const normalizedMarket = market.toLowerCase();
+        const sql = normalizedMarket === 'hk' || normalizedMarket === 'cn'
+            ? LATEST_BROADCAST_PRICES_BY_MARKET_SQL
+            : LATEST_BROADCAST_PRICES_SQL;
+        const args: (string | number)[] = sql === LATEST_BROADCAST_PRICES_BY_MARKET_SQL
+            ? [normalizedMarket, safeLimit]
+            : [safeLimit];
+        if ('execute' in client) {
+            const rs = await client.execute({
+                sql,
+                args,
+            });
+            rows = rs.rows as Record<string, unknown>[];
+        } else {
+            rows = client.prepare(sql).all(...args) as any[];
+        }
+        return rows;
+    } finally {
+        if (client && typeof (client as any).close === 'function') (client as any).close();
+    }
+}
+
+/**
+ * 广播价格快照（30 秒）— 供 /api/stock/prices/all 使用。
+ * 将价格查询从 per-user symbols 请求收敛为公共全量查询。
+ */
+export const getCachedBroadcastPrices = unstable_cache(
+    queryLatestBroadcastPrices,
+    ['broadcast-prices'],
+    { revalidate: 30, tags: ['daily-prices', 'broadcast-prices'] },
 );
 
 /**

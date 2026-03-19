@@ -7,9 +7,11 @@ import { getRule } from '@/lib/storage';
 import { getMarketScene, isTradingDay, getHKTime, formatDateStr } from '@/lib/date-utils';
 import { WatchlistItem } from './useWatchlist';
 
-// 价格层刷新间隔：盘中 3 分钟，非交易时段 10 分钟
-const TRADING_PRICE_REFRESH_INTERVAL = 3 * 60 * 1000;
+// 价格层刷新间隔：盘中 1 分钟，非交易时段 10 分钟
+const TRADING_PRICE_REFRESH_INTERVAL = 1 * 60 * 1000;
 const DEFAULT_PRICE_REFRESH_INTERVAL = 10 * 60 * 1000;
+const BROADCAST_FAILURE_THRESHOLD = 3;
+const BROADCAST_CIRCUIT_BREAKER_MS = 5 * 60 * 1000;
 const CACHE_KEY = 'stockwise_dashboard_cache_v1';
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24小时过期
 
@@ -102,6 +104,8 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const priceIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const lastPriceRefreshTimeRef = useRef<number>(0);
+    const broadcastFailureStreakRef = useRef<number>(0);
+    const broadcastCircuitOpenUntilRef = useRef<number>(0);
 
     // 1. 初始化：尝试从本地缓存读取，实现【秒开】
     useEffect(() => {
@@ -345,6 +349,13 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
         lastUpdated: string;
     }
 
+    interface BroadcastPriceSnapshot {
+        symbol: string;
+        lastPrice: number | null;
+        changePct: number | null;
+        updatedAt: string | null;
+    }
+
     const refreshPrices = useCallback(async (symbols: string[]): Promise<void> => {
         if (symbols.length === 0) return;
         const now = Date.now();
@@ -354,23 +365,74 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
         }
         lastPriceRefreshTimeRef.current = now;
         try {
-            const params = new URLSearchParams({ symbols: symbols.join(',') });
-            const res = await fetch(`/api/stock/prices?${params.toString()}`, {
-                cache: 'no-store',
-                headers: { 'Cache-Control': 'no-cache' }
-            });
-            if (!res.ok) return;
-            const data = await res.json() as { prices?: PriceSnapshot[] };
-            if (!data.prices || !Array.isArray(data.prices)) return;
+            const shouldUseLegacyOnly = now < broadcastCircuitOpenUntilRef.current;
 
-            const map = new Map<string, PriceSnapshot>();
-            for (const p of data.prices) {
-                if (p && typeof p.symbol === 'string') {
-                    map.set(p.symbol, p);
+            const fetchBroadcast = async (): Promise<Map<string, PriceSnapshot> | null> => {
+                // 广播端点默认走 all 市场，前端按 watchlist 本地过滤，兼容双市场自选池。
+                const res = await fetch('/api/stock/prices/all?market=all', {
+                    cache: 'no-store',
+                    headers: { 'Cache-Control': 'no-cache' }
+                });
+                if (!res.ok) return null;
+                const data = await res.json() as { items?: BroadcastPriceSnapshot[] };
+                if (!data.items || !Array.isArray(data.items)) return null;
+
+                const map = new Map<string, PriceSnapshot>();
+                for (const p of data.items) {
+                    if (p && typeof p.symbol === 'string') {
+                        map.set(p.symbol, {
+                            symbol: p.symbol,
+                            date: p.updatedAt,
+                            close: p.lastPrice,
+                            change_percent: p.changePct,
+                            lastUpdated: p.updatedAt || '--:--'
+                        });
+                    }
                 }
+                return map;
+            };
+
+            const fetchLegacy = async (): Promise<Map<string, PriceSnapshot> | null> => {
+                const params = new URLSearchParams({ symbols: symbols.join(',') });
+                const res = await fetch(`/api/stock/prices?${params.toString()}`, {
+                    cache: 'no-store',
+                    headers: { 'Cache-Control': 'no-cache' }
+                });
+                if (!res.ok) return null;
+                const data = await res.json() as { prices?: PriceSnapshot[] };
+                if (!data.prices || !Array.isArray(data.prices)) return null;
+                const map = new Map<string, PriceSnapshot>();
+                for (const p of data.prices) {
+                    if (p && typeof p.symbol === 'string') {
+                        map.set(p.symbol, p);
+                    }
+                }
+                return map;
+            };
+
+            let map: Map<string, PriceSnapshot> | null = null;
+
+            if (!shouldUseLegacyOnly) {
+                map = await fetchBroadcast();
+                if (map && map.size > 0) {
+                    // 广播恢复成功，清空失败计数与熔断状态。
+                    broadcastFailureStreakRef.current = 0;
+                    broadcastCircuitOpenUntilRef.current = 0;
+                } else {
+                    broadcastFailureStreakRef.current += 1;
+                    if (broadcastFailureStreakRef.current >= BROADCAST_FAILURE_THRESHOLD) {
+                        broadcastCircuitOpenUntilRef.current = Date.now() + BROADCAST_CIRCUIT_BREAKER_MS;
+                        console.warn(
+                            `[Dashboard] Broadcast circuit open for ${BROADCAST_CIRCUIT_BREAKER_MS / 1000}s after ${broadcastFailureStreakRef.current} failures`,
+                        );
+                    }
+                    map = await fetchLegacy();
+                }
+            } else {
+                map = await fetchLegacy();
             }
 
-            if (map.size === 0) return;
+            if (!map || map.size === 0) return;
 
             setStocks(prev => prev.map(s => {
                 const p = map.get(s.symbol);
