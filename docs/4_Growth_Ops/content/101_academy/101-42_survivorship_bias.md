@@ -1,0 +1,64 @@
+---
+title: "幸存者偏差：你看到的“股神”，只是赌场里刚好连赢十把的人"
+source_docs:
+  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+category: "Growth 101"
+funnel_stage: "TOFU"
+campaign: "wechat_4_week_sprint_2026q2"
+rhythm: "Hub"
+traceability:
+  status: "healthy"
+  last_reviewed_at: "2026-03-19"
+workflow:
+  stage: "reviewing"
+  owner: "cmo"
+  reviewer: "founder"
+  priority: "high"
+  target_publish_date: "2026-04-02"
+  last_action_at: "2026-03-19"
+blocked_reason: ""
+maintenance:
+  change_status: "created"
+  update_reason: "backlog_activation"
+website:
+  enabled: true
+  surface: "learn"
+image: "/images/learn/101-42_survivorship_bias.png"
+image_prompt: "A minimalist Swiss-style design of a single bright dot floating above a sea of buried, semi-transparent outlines. Dark Mode (#050508). Accent: Emerald (#10b981). NO text."
+distribution:
+  wechat:
+    enabled: true
+    status: "draft"
+---
+
+# 幸存者偏差：你看到的“股神”，只是赌场里刚好连赢十把的人
+
+> *"在有着一亿参与者的猴子掷硬币大赛中，必定有一只猴子能连续抛出 20 次正面，然后被媒体封为『神猴』。"*
+
+如果你在社交媒体或股票社区里冲浪，你很容易陷入极度的焦虑：
+似乎所有人都在昨天满仓擒获了地天板，似乎所有人都在币圈实现了财务自由。晒出的收益截图动辄 300%、500%。
+
+你开始疯狂地购买他们的课程，模仿他们的“左侧打板战法”，结果一上手就被市场一击必杀。
+
+欢迎来到**幸存者偏差 (Survivorship Bias)** 的剧场。
+
+---
+
+## 🪦 沉默的弹坑
+
+你只看到了那万分之一刚好踩中彩票的幸运儿，**却没看到在他们脚下，踩着九万九千九百九十九具因为同样的高危操作而爆仓的尸体。** 死人是不会发朋友圈的，爆仓的人早已默默删掉了 App。
+
+那些所谓的“妖股战法”、“首阴反包”，在极个别样本上展示出了惊人的暴利，但在大数定律的回测下，其长期期望值 (Expected Value) 其实是负数。
+
+---
+
+## 📉 ZISO 的冷酷除魅
+
+这就解释了为什么 ZISO 的策略永远显得那么“平庸”和“冰冷”。
+我们不追求在一天内抓到 20% 的所谓大牛股。我们追求的是，在一万次交易样本的回溯中，系统能够保持一个稳定向上的数学期望。
+
+*   放弃对爆发性“神话”的崇拜。
+*   屏蔽社区里的暴富噪音。
+*   坚持执行那些被证明有效的低赔率、高盈亏比机械法则。
+
+真正的复利不是烟花，它是流水滴石穿。在丛林里，那些活得最久的老乌龟，才是最终吃掉所有猎物尸体的人。

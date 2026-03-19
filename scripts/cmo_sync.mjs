@@ -25,7 +25,7 @@ const RECENTLY_UPDATED_FILE = path.join(VIEWS_DIR, 'recently-updated.md');
 const CHANGE_IMPACT_FILE = path.join(VIEWS_DIR, 'change-impact.md');
 const EXTERNAL_MAINTENANCE_FILE = path.join(VIEWS_DIR, 'external-maintenance.md');
 
-const SKIP_DIRS = new Set(['archive', 'marketing', 'Mar_2026_Blitz', '_views']);
+const SKIP_DIRS = new Set(['archive', 'marketing', '_views']);
 const EXCLUDED_FILES = new Set([
   'CONTENT_ASSET_TEMPLATE.md',
   'ZISO_101_SYLLABUS.md',
