@@ -27,8 +27,6 @@ maintenance:
 website:
   enabled: true
   surface: "learn"
- image: "/images/learn/101-109_maturity_epilogue.png"
-image_prompt: "A minimalist Swiss-style design of a single illuminated doorway standing alone in a dark, gridded space. Dark Mode (#050508). Accent: Cyan (#06b6d4). NO text."
 distribution:
   wechat:
     enabled: true

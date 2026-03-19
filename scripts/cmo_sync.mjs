@@ -442,10 +442,11 @@ function renderPipelineBoard(items, generatedAt) {
     }
 
     output += markdownTable(
-      ['标题', '来源', '优先级', 'Owner', 'Reviewer', '目标日期', '公众号', '阻塞原因'],
+      ['标题', '来源', '漏斗', '优先级', 'Owner', 'Reviewer', '目标日期', '公众号', '阻塞原因'],
       stageItems.map((item) => [
         itemLink(item, 'pipeline'),
         item.contentSource === 'growth' ? 'Growth' : 'Support',
+        item.funnelStage,
         PRIORITY_LABELS[item.priority] || item.priority,
         item.owner || '-',
         item.reviewer || '-',
@@ -560,11 +561,12 @@ function renderNextReleaseBoard(items, generatedAt) {
     output += '- 当前无已编入战役的公众号内容\n\n';
   } else {
     output += markdownTable(
-      ['目标日期', '标题', '来源', '主流程', 'Owner', 'Reviewer', '公众号状态'],
+      ['目标日期', '标题', '来源', '漏斗', '主流程', 'Owner', 'Reviewer', '公众号状态'],
       campaignItems.map((item) => [
         formatDateWithWeekday(item.targetPublishDate) || 'N/A',
         itemLink(item, 'next'),
         item.contentSource === 'growth' ? 'Growth' : 'Support',
+        item.funnelStage,
         STAGE_LABELS[item.workflowStage] || item.workflowStage,
         item.owner || '-',
         item.reviewer || '-',
@@ -579,10 +581,11 @@ function renderNextReleaseBoard(items, generatedAt) {
     output += '- 当前无符合条件的内容\n\n';
   } else {
     output += markdownTable(
-      ['标题', '来源', '主流程', '目标日期', 'Owner', 'Reviewer', '公众号状态'],
+      ['标题', '来源', '漏斗', '主流程', '目标日期', 'Owner', 'Reviewer', '公众号状态'],
       readyForWechat.map((item) => [
         itemLink(item, 'next'),
         item.contentSource === 'growth' ? 'Growth' : 'Support',
+        item.funnelStage,
         STAGE_LABELS[item.workflowStage] || item.workflowStage,
         formatDateWithWeekday(item.targetPublishDate) || 'N/A',
         item.owner || '-',
@@ -598,10 +601,11 @@ function renderNextReleaseBoard(items, generatedAt) {
     output += '- 当前无符合条件的内容\n\n';
   } else {
     output += markdownTable(
-      ['标题', '来源', '主流程', '目标日期', '公众号状态'],
+      ['标题', '来源', '漏斗', '主流程', '目标日期', '公众号状态'],
       scheduledForWechat.map((item) => [
         itemLink(item, 'next'),
         item.contentSource === 'growth' ? 'Growth' : 'Support',
+        item.funnelStage,
         STAGE_LABELS[item.workflowStage] || item.workflowStage,
         formatDateWithWeekday(item.targetPublishDate) || 'N/A',
         formatChannelStatus(item.distribution.wechat)
@@ -621,10 +625,11 @@ function renderRecentlyUpdatedBoard(items, generatedAt) {
   output += '> 说明：按最近 Git 变更时间排序，帮助团队快速识别近期被修改或维护的内容资产。\n\n';
 
   output += markdownTable(
-    ['标题', '来源', '最后动作', '维护状态', '修订原因', '主流程', '溯源'],
+    ['标题', '来源', '漏斗', '最后动作', '维护状态', '修订原因', '主流程', '溯源'],
     recentItems.map((item) => [
       itemLink(item, 'recent'),
       item.contentSource === 'growth' ? 'Growth' : 'Support',
+      item.funnelStage,
       item.lastActionAt || 'N/A',
       item.maintenanceStatus,
       item.maintenanceReason || '-',

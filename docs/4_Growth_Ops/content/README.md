@@ -1,6 +1,6 @@
 # 内容运营主索引 (Content Operations Registry)
 
-> 自动生成时间：2026/3/19 17:56:00
+> 自动生成时间：2026/3/19 18:18:25
 > 说明：本索引由 `scripts/cmo_sync.mjs` 统一扫描 `4_Growth_Ops/content` 与 `5_Support_Ops/content` 生成。
 > 日期规则：已发布内容优先显示公众号真实发布日期；未发布内容显示目标发布日期。
 > 视图：[_Pipeline_](_views/pipeline.md) · [_Next Release_](_views/next-release.md) · [_Recently Updated_](_views/recently-updated.md) · [_Change Impact_](_views/change-impact.md) · [_External Maintenance_](_views/external-maintenance.md)
