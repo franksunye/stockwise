@@ -11,6 +11,7 @@ import sys
 import time
 from datetime import datetime
 from typing import Any, Dict, List, Tuple
+from urllib.parse import urlparse
 
 import requests
 
@@ -45,11 +46,38 @@ CREATE TABLE IF NOT EXISTS ops_broadcast_health (
 """
 
 
-def _site_base_url() -> str:
-    raw = os.getenv("NEXT_PUBLIC_SITE_URL", "https://ziso.cc").strip()
-    if not raw.startswith("http://") and not raw.startswith("https://"):
-        raw = f"https://{raw}"
-    return raw.rstrip("/")
+def _normalize_base_url(raw: str) -> str:
+    value = raw.strip()
+    if not value:
+        return ""
+    if not value.startswith("http://") and not value.startswith("https://"):
+        value = f"https://{value}"
+    return value.rstrip("/")
+
+
+def _candidate_base_urls() -> List[str]:
+    candidates: List[str] = []
+    explicit_probe = _normalize_base_url(os.getenv("BROADCAST_PROBE_BASE_URL", ""))
+    site_url = _normalize_base_url(os.getenv("NEXT_PUBLIC_SITE_URL", "https://ziso.cc"))
+
+    for item in (explicit_probe, site_url):
+        if item and item not in candidates:
+            candidates.append(item)
+
+    if site_url:
+        parsed = urlparse(site_url)
+        host = parsed.netloc.lower()
+        scheme = parsed.scheme or "https"
+        if host in ("ziso.cc", "www.ziso.cc"):
+            app_variant = f"{scheme}://app.ziso.cc"
+            if app_variant not in candidates:
+                candidates.append(app_variant)
+        elif host.startswith("app."):
+            bare_variant = f"{scheme}://{host.removeprefix('app.')}"
+            if bare_variant not in candidates:
+                candidates.append(bare_variant)
+
+    return candidates
 
 
 def _probe_one(base_url: str, market: str, timeout_sec: int) -> Tuple[int, int, int, int, str]:
@@ -81,7 +109,11 @@ def _probe_one(base_url: str, market: str, timeout_sec: int) -> Tuple[int, int, 
 
 
 def main() -> int:
-    base_url = _site_base_url()
+    base_urls = _candidate_base_urls()
+    if not base_urls:
+        logger.error("[BroadcastProbe] no candidate base url found")
+        return 1
+
     timeout_sec = int(os.getenv("BROADCAST_PROBE_TIMEOUT_SEC", "12"))
     markets: List[str] = ["all", "hk", "cn"]
     checked_at = datetime.utcnow().isoformat(timespec="seconds") + "Z"
@@ -91,6 +123,15 @@ def main() -> int:
 
     try:
         cursor.execute(CREATE_HEALTH_TABLE_SQL)
+        base_url = base_urls[0]
+        # Choose first endpoint that is not a hard 404 for market=all.
+        for candidate in base_urls:
+            status, _, _, _, _ = _probe_one(candidate, "all", timeout_sec)
+            if status != 404:
+                base_url = candidate
+                break
+        logger.info("[BroadcastProbe] selected_base_url=%s candidates=%s", base_url, base_urls)
+
         results = []
         for market in markets:
             status, latency_ms, item_count, ok, error = _probe_one(base_url, market, timeout_sec)
