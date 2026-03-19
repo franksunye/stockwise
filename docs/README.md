@@ -11,6 +11,7 @@ This directory serves as the unified single source of truth for the 知守 AI (Z
 - [Monetization & Pricing Strategy](./0_Strategy/02_Monetization_Pricing_Strategy.md)
 - [Team Responsibility Matrix](./0_Strategy/03_Team_Responsibility_Matrix.md)
 - [Milestones & Execution Log](./0_Strategy/04_Milestones_Execution_Log.md)
+- [Quant Signal and Execution Axioms](./0_Strategy/05_Quant_Signal_and_Execution_Axioms.md)
 
 ### [1_Engineering/](./1_Engineering/) - How (System)
 > Project "Backbone": System architecture, reliability, and quality standards.
@@ -37,7 +38,6 @@ This directory serves as the unified single source of truth for the 知守 AI (Z
 - [AI Context Limits (DeepSeek)](./2_Intelligence/25A_AI_Context_Limits_DeepSeek.md)
 - [Quant + AI Acceptance Criteria](./2_Intelligence/26C_Quant_AI_Acceptance_Criteria.md)
 - [Quant Backtesting Methodology](./2_Intelligence/28Q_Quant_Backtesting_Methodology.md)
-- [Signal Validation Axioms](./2_Intelligence/30Q_Quant_Signal_and_Execution_Axioms.md)
 - [Validation Logic Research (Legacy)](./2_Intelligence/31Q_Validation_Logic_Research_Legacy.md)
 
 ### [3_Product/](./3_Product/) - What & UX

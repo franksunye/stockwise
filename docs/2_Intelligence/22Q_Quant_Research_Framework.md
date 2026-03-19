@@ -319,7 +319,7 @@ StockWise 当前已经明确：
 为了让未来扩展不失控，任何外部方法在进入 StockWise 时，都应先落位到以下四类对象之一：
 
 > [!NOTE]
-> **判定基石**：所有方法的验证与执行分离逻辑应遵循 [30Q 量化信号验证与执行公理](./30Q_Quant_Signal_and_Execution_Axioms.md)。
+> **判定基石**：所有方法的验证与执行分离逻辑应遵循 [05 量化信号验证与执行公理](../0_Strategy/05_Quant_Signal_and_Execution_Axioms.md)。
 
 ### 4.4.1 量化方法框架
 

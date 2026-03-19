@@ -81,7 +81,7 @@ StockWise 当前底层，确实属于量化回测驱动的规则优化体系。
 本文件后续只保留和“当前方法是否严谨”直接相关的判断。
 
 > [!IMPORTANT]
-> **判定准则补充**：关于“信号判定正确”的底层量化公理（如 MFE 与 Stateful Execution 的分离），已固化在：[30Q 量化信号验证与执行公理](./30Q_Quant_Signal_and_Execution_Axioms.md)。
+> **判定准则补充**：关于“信号判定正确”的底层量化公理（如 MFE 与 Stateful Execution 的分离），已固化在：[05 量化信号验证与执行公理](../0_Strategy/05_Quant_Signal_and_Execution_Axioms.md)。
 
 ---
 

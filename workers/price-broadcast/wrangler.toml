@@ -1,0 +1,16 @@
+name = "stockwise-price-broadcast-poc"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+
+# 本地 dev 时从 .dev.vars 读取 TURSO_DB_URL / TURSO_AUTH_TOKEN（与 backend .env 一致）
+# 部署时用 wrangler secret put TURSO_DB_URL / TURSO_AUTH_TOKEN
+
+[env.dev]
+route = ""
+
+[env.preview]
+route = ""
+
+[env.prod]
+route = ""
+

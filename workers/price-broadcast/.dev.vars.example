@@ -1,0 +1,4 @@
+# 本地 wrangler dev 时使用，复制为 .dev.vars 并填入真实值
+# 可从 backend/.env 或 frontend/.env 复制 TURSO_DB_URL、TURSO_AUTH_TOKEN
+TURSO_DB_URL=
+TURSO_AUTH_TOKEN=
