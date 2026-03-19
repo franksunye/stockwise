@@ -5,6 +5,9 @@ date: "2026-02-04"
 category: "The Machine"
 image: "/images/learn/confidence_calibration.png"
 image_prompt: "**Concept**: Precision within probability. **Style**: Swiss Design. **Subject**: A 3D bell curve shape made of light lines. **Action**: A central narrow vertical band is highlighted in Emerald. **Colors**: Indigo/Emerald. **Constraints**: NO text."
+source_docs:
+  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
 ---
 
 # 置信度：AI 的底牌

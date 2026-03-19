@@ -5,6 +5,9 @@ date: "2026-02-04"
 category: "The Method"
 image: "/images/learn/bollinger_bands.png"
 image_prompt: "**Concept**: A conceptual 3D illustration of an elastic membrane expanding and contracting. **Style**: Swiss Design, Geometric, Minimalist, Clean, Dark Mode (#050508). **Subject**: Two semi-transparent, glowing Indigo arcs flanking a central white core. The arcs are bending slightly outward. **Action**: A sphere in the center is pushing against one of the arcs, creating a tension effect. **Materials**: Elastic glass appearance, soft glow. **Colors**: Indigo (#6366f1) for the bands, White for the core. **Constraints**: NO text. NO blur. Center composition."
+source_docs:
+  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
 ---
 
 # 布林带：波动的牢笼

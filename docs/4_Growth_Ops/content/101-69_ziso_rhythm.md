@@ -18,6 +18,9 @@ publish:
     status: draft
   toutiao:
     status: draft
+source_docs:
+  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
 ---
 
 # 101-69: 为什么 ZISO 每天只在 08:30 和 21:00 找你？

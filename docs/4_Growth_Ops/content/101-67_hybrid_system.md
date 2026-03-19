@@ -5,6 +5,9 @@ date: "2026-02-04"
 category: "The Machine"
 image: "/images/learn/hybrid_system.png"
 image_prompt: "**Concept**: Complex synthesis. **Style**: Clean 3D. **Subject**: A large sphere composed of different smaller geometric shapes (cones, cubes, toruses). **Action**: It rotates as a single unit. **Colors**: Multiple Indigo shades. **Constraints**: NO text."
+source_docs:
+  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
 ---
 
 # 混合决策：不迷信，不懈怠

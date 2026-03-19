@@ -5,6 +5,9 @@ date: "2026-02-04"
 category: "The Method"
 image: "/images/learn/sector_rotation.png"
 image_prompt: "**Concept**: Sequential activation in a cycle. **Style**: Minimalist. **Subject**: A circular arrangement of 8 small cubes. **Action**: One cube is glowing Emerald (#10b981), others are dim Indigo. **Colors**: Emerald vs Indigo contrast. **Constraints**: NO text."
+source_docs:
+  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
 ---
 
 # 行业轮动：钱在流向哪里？

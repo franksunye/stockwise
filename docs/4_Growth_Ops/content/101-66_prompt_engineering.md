@@ -5,6 +5,9 @@ date: "2026-02-04"
 category: "The Machine"
 image: "/images/learn/prompt_engineering.png"
 image_prompt: "**Concept**: Directional focus. **Style**: High Contrast. **Subject**: A dark wall with a tiny geometric aperture. **Action**: A intense Indigo beam shooting through the hole, expanding into a pattern. **Colors**: Indigo. **Constraints**: NO text."
+source_docs:
+  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
 ---
 
 # 炼金术：数据的灵魂刻画

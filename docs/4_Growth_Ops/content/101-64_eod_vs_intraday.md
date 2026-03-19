@@ -5,6 +5,9 @@ date: "2026-02-04"
 category: "The Machine"
 image: "/images/learn/eod_vs_intraday.png"
 image_prompt: "**Concept**: Scale of time decomposition. **Style**: Minimalist. **Subject**: A long Indigo prism. **Action**: A portion of it is sliced into micro-thin glowing Emerald layers. **Colors**: Indigo/Emerald. **Constraints**: NO text."
+source_docs:
+  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
 ---
 
 # 节奏：噪音与信号的博弈

@@ -5,6 +5,9 @@ date: "2026-02-04"
 category: "The Method"
 image: "/images/learn/gap_theory.png"
 image_prompt: "**Concept**: A conceptual 3D illustration of a physical leap over a void. **Style**: Swiss Design, Geometric, Minimalist, Clean, Dark Mode (#050508). **Subject**: Two floating platforms with a noticeable gap between them. A trail of Indigo energy particles is jumping from one to the other. **Action**: The trail of energy is bright and concentrated in the middle of the 'void'. **Materials**: Matte finish for platforms, ethereal glow for the energy trail. **Colors**: Indigo (#6366f1) for the leap, White for the particles. **Constraints**: NO text. NO blur. Center composition."
+source_docs:
+  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
 ---
 
 # 缺口：共识的坍塌与爆发

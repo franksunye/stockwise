@@ -5,6 +5,9 @@ date: "2026-02-04"
 category: "The Money"
 image: "/images/learn/profit_taking.png"
 image_prompt: "**Concept**: Cashing out. **Style**: 3D Illustration. **Subject**: A clear glass cube. **Action**: Particles flowing from a funnel above into the cube, filling it halfway. **Colors**: Emerald Green (#10b981). **Constraints**: NO text."
+source_docs:
+  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
 ---
 
 # 止盈：让利润落袋的勇气

@@ -5,6 +5,9 @@ date: "2026-02-04"
 category: "The Method"
 image: "/images/learn/support_resistance.png"
 image_prompt: "A war map. A fortress wall labeled '$100.00' is being bombarded by green arrows from below. The wall is cracked but holding. Behind it, defenders (bears) are reinforcing the breach."
+source_docs:
+  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
 ---
 
 # 支撑与压力：为什么整数关口是心理战壕？

@@ -18,6 +18,9 @@ publish:
     status: draft
   toutiao:
     status: draft
+source_docs:
+  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
 ---
 
 # 101-33: 为什么你的指标总是变成反指？

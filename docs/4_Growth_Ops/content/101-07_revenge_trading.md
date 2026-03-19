@@ -5,6 +5,9 @@ date: "2026-02-04"
 category: "The Mind"
 image: "/images/learn/revenge_trading.png"
 image_prompt: "**Concept**: A conceptual 3D illustration of Revenge Trading. **Style**: Swiss Design, Geometric, Minimalist, Clean, Dark Mode (#050508). **Subject**: A fractured red polygon colliding with a serene Indigo grid. The fragments of the red shape are sharp and chaotic. **Action**: The impact is causing a ripple effect across the orderly grid. **Materials**: Matte finish, soft global illumination, high contrast. **Colors**: Rose Red (#f43f5e) for the chaotic fragments, Indigo (#6366f1) for the background grid. **Constraints**: NO text. NO blur. Center composition."
+source_docs:
+  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
 ---
 
 # 报复性交易：赌场里最受欢迎的赌徒

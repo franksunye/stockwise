@@ -5,6 +5,9 @@ date: "2026-02-04"
 category: "The Money"
 image: "/images/learn/drawdown_math.png"
 image_prompt: "**Concept**: The cost of recovery. **Style**: 3D Isometric. **Subject**: A smooth white ramp. **Action**: A rectangular portion of the ramp has collapsed downward into shadows. **Colors**: Sharp contrast, dark void. **Constraints**: NO text."
+source_docs:
+  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
 ---
 
 # 回撤数学：为什么你输不起？

@@ -5,6 +5,9 @@ date: "2026-02-04"
 category: "The Method"
 image: "/images/learn/left_right_trading.png"
 image_prompt: "**Concept**: A conceptual 3D illustration of a turning point. **Style**: Swiss Design, Geometric, Minimalist, Clean, Dark Mode (#050508). **Subject**: A descending Indigo staircase that suddenly shifts into an ascending Emerald ramp. **Action**: A single white sphere is resting exactly at the V-shaped junction. **Materials**: Solid stone-like steps, glowing glass ramp. **Colors**: Indigo (#6366f1) for the descent, Emerald (#10b981) for the ascent. **Constraints**: NO text. NO blur. Center composition."
+source_docs:
+  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
 ---
 
 # 左侧与右侧：交易的两种流派

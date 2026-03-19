@@ -5,6 +5,9 @@ date: "2026-02-04"
 category: "The Method"
 image: "/images/learn/divergence.png"
 image_prompt: "**Concept**: A conceptual 3D illustration of two paths moving in different directions. **Style**: Swiss Design, Geometric, Minimalist, Clean, Dark Mode (#050508). **Subject**: Two parallel glowing lines. The top one is slanted upwards (price), while the bottom one is slanted downwards (RSI/Momentum). **Action**: The lines are creating a noticeable 'V' shape divergence. **Materials**: Glowing glass tubes, soft indirect lighting. **Colors**: Indigo (#6366f1) for the top line, Rose Red (#f43f5e) for the bottom diagnostic line. **Constraints**: NO text. NO blur. Center composition."
+source_docs:
+  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
 ---
 
 # 背离：识破趋势的最后伪装

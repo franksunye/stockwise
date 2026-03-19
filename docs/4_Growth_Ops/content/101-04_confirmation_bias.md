@@ -5,6 +5,9 @@ date: "2026-02-04"
 category: "The Mind"
 image: "/images/learn/confirmation_bias.png"
 image_prompt: "A person wearing VR goggles labeled 'Bullish View'. They are looking at a chart that is clearly crashing, but through the goggles, the red candles are filtered out and only green candles are visible. The background is a chaotic newsroom."
+source_docs:
+  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
 ---
 
 # 确认偏误 (Confirmation Bias)：你只看得到你想看的新闻

@@ -5,6 +5,9 @@ date: "2026-02-04"
 category: "The Method"
 image: "/images/learn/moving_averages.png"
 image_prompt: "A 3D visualization of a stock chart where the Moving Average lines are actually rivers. The price candles are boats floating on the river. MA20 is a fast stream, MA250 is a deep, slow ocean current."
+source_docs:
+  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
 ---
 
 # 均线系统 (MA)：均线不是线，是成本

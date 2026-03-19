@@ -5,6 +5,9 @@ date: "2026-02-04"
 category: "The Mind"
 image: "/images/learn/gamblers_fallacy.png"
 image_prompt: "A roulette wheel where every number is red. A gambler is aggressively betting on black, sweating profusely. The background is a stock chart forming a waterfall decline."
+source_docs:
+  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
 ---
 
 # 赌徒谬误：连跌 5 天了，明天一定会涨吗？

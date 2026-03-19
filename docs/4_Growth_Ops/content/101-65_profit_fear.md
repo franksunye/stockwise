@@ -18,6 +18,9 @@ publish:
     status: draft
   toutiao:
     status: draft
+source_docs:
+  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
 ---
 
 # 101-65: 盈利的恐惧：为什么赚钱时你总是拿不住？

@@ -5,6 +5,9 @@ date: "2026-02-04"
 category: "The Case"
 image: "/images/learn/false_breakout.png"
 image_prompt: "**Concept**: Deception and return. **Style**: 3D Shatter. **Subject**: A Indigo sphere breaking through a ceiling. **Action**: The ceiling fragments turn Rose Red (#f43f5e) and spiral around the sphere to drag it down. **Colors**: Indigo/Rose. **Constraints**: NO text."
+source_docs:
+  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
 ---
 
 # 案例：追涨的滑铁卢

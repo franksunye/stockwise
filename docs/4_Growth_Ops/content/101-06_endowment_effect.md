@@ -5,6 +5,9 @@ date: "2026-02-04"
 category: "The Mind"
 image: "/images/learn/endowment_effect.png"
 image_prompt: "**Concept**: A conceptual 3D illustration of the Endowment Effect. **Style**: Swiss Design, Geometric, Minimalist, Clean, Dark Mode (#050508). **Subject**: A single glowing Indigo sphere held inside a complex, transparent geometric cage. Another identical sphere lies outside the cage, ignored. **Action**: The hand-like geometry is tightly clutching the caged sphere. **Materials**: Matte finish, soft global illumination, high contrast. **Colors**: Indigo (#6366f1) for the 'owned' sphere, Slate/Grey for the exterior one. **Constraints**: NO text. NO blur. Center composition."
+source_docs:
+  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
 ---
 
 # 禀赋效应：为什么你买入的那一刻，它就“变贵”了？

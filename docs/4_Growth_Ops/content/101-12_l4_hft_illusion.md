@@ -18,6 +18,9 @@ publish:
     status: draft
   toutiao:
     status: draft
+source_docs:
+  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
 ---
 
 # 别和镰刀拼微秒：为什么高频打板是散户的坟墓

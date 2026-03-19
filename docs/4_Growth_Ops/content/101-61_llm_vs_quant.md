@@ -5,6 +5,9 @@ date: "2026-02-04"
 category: "The Machine"
 image: "/images/learn/llm_vs_quant.png"
 image_prompt: "**Concept**: Integration of fluid logic and rigid math. **Style**: Cyberpunk Swiss. **Subject**: A glowing Indigo liquid blob merging into a rigid white wireframe grid. **Action**: The two forms intertwine. **Colors**: Indigo, White, Black. **Constraints**: NO text."
+source_docs:
+  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
 ---
 
 # 投研新纪元：语义与数字的合流

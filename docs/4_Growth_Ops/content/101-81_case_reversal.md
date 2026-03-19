@@ -5,6 +5,9 @@ date: "2026-02-04"
 category: "The Case"
 image: "/images/learn/case_reversal.png"
 image_prompt: "**Concept**: Abrupt change in momentum. **Style**: High Contrast. **Subject**: A trail of white particles falling. **Action**: At the bottom, they suddenly transform into a bright Indigo beam shooting upwards. **Colors**: Indigo. **Constraints**: NO text."
+source_docs:
+  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
 ---
 
 # 案例：死里逃生的底部逻辑

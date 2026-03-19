@@ -5,6 +5,9 @@ date: "2026-02-04"
 category: "The Method"
 image: "/images/learn/rsi_decoded.png"
 image_prompt: "A minimalist line chart showing price making a higher peak, while a glowing neon line below (RSI) makes a lower peak. A red warning triangle floats between them. Dark background, cyber-financial aesthetic."
+source_docs:
+  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
 ---
 
 # RSI 指标新解：别再傻傻地看"超买"了
