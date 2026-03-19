@@ -1,3 +1,13 @@
+---
+title: "体验升级支持文档：重构交易决策大脑与极简“四态”心智"
+doc_id: "legacy-four-states-semantic-upgrade"
+doc_domain: "product"
+doc_status: "deprecated"
+owner: "founder"
+last_reviewed_at: "2026-03-19"
+summary: "用于历史升级说明与对外沟通的旧版四态语义文档，如与现行术语冲突，应以后续 active specs 与词表为准。"
+---
+
 # 体验升级支持文档：重构交易决策大脑与极简“四态”心智
 
 **文档性质**: 用户沟通 / 客服支持 / 内容营销基座  

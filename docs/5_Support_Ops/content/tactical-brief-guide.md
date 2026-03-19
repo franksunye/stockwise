@@ -1,13 +1,40 @@
 ---
 title: "策略内参：怎么看干货？"
+content_id: "support-tactical-brief-guide"
+content_source: "support"
+content_type: "guide"
+canonical_role: "canonical"
 lastUpdated: "2026-03-09"
 source_docs:
   - docs/1_Engineering/13_Quant_Engine_Architecture.md
 category: "Features"
 funnel_stage: "BOFU"
-publish:
+traceability:
+  status: "healthy"
+  last_reviewed_at: "2026-03-19"
+workflow:
+  stage: "published"
+  owner: "cmo"
+  reviewer: "founder"
+  priority: "medium"
+  target_publish_date: "2026-03-19"
+  last_action_at: "2026-03-19"
+  blocked_reason: ""
+maintenance:
+  change_status: "updated"
+  update_reason: "product_change"
+  external_action: "refresh_existing"
+  external_note: "公众号旧文仍可沿用，但应按当前策略内参结构与术语刷新表述。"
+website:
+  enabled: true
+  surface: "support"
+distribution:
   wechat:
+    enabled: true
     status: "published"
+    url: "https://mp.weixin.qq.com/s/8bpp3YEbcFnLgbuwwFHIXw"
+    published_at: "2026-03-05"
+    baseline: "frontline_q1_2026"
 date: "2026-03-19"
 ---
 

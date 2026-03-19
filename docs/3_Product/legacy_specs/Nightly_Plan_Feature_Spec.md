@@ -1,3 +1,13 @@
+---
+title: "Nightly Plan & Morning Push - Full Feature Spec"
+doc_id: "legacy-nightly-plan-feature-spec"
+doc_domain: "product"
+doc_status: "deprecated"
+owner: "founder"
+last_reviewed_at: "2026-03-19"
+summary: "夜间计划功能的旧版规格，已由现行 Nightly Plan 规划文档替代，保留作历史参考。"
+---
+
 # Nightly Plan & Morning Push - Full Feature Spec
 
 ## Goal

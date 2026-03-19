@@ -1,3 +1,13 @@
+---
+title: "知守 AI (ZISO AI) 变现与定价策略 (Monetization & Pricing Strategy)"
+doc_id: "strategy-monetization-pricing-strategy"
+doc_domain: "strategy"
+doc_status: "active"
+owner: "founder"
+last_reviewed_at: "2026-03-19"
+summary: "定义产品定价、变现逻辑与竞争差异，是会员、权益与商业化内容的战略事实源。"
+---
+
 # 知守 AI (ZISO AI) 变现与定价策略 (Monetization & Pricing Strategy)
 
 ## 1. 执行摘要与核心哲学 (Executive Summary & Philosophy)

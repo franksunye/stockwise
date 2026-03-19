@@ -1,3 +1,13 @@
+---
+title: "AICouncil：复核意见 / 独立判断 当前实现说明（2026-03-13）"
+doc_id: "engineering-ai-council-review-opinion-current-state-20260313"
+doc_domain: "engineering"
+doc_status: "active"
+owner: "founder"
+last_reviewed_at: "2026-03-19"
+summary: "定义 AICouncil 中复核意见与独立判断的当前实现语义，是相关 Support 内容的工程事实源。"
+---
+
 # AICouncil：复核意见 / 独立判断 当前实现说明（2026-03-13）
 
 ## 1. Why This Note Exists
@@ -167,4 +177,3 @@
    - `review_mode`
 3. 不要把“技术面共振评分”与 “Layer-1 四状态”混为同一个输入层。
 4. 文档与前端命名必须始终反映真实实现，而不是理想中的架构。
-

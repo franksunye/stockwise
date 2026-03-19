@@ -1,3 +1,13 @@
+---
+title: "独立研究：富上下文 + 顶级模型（DeepSeek V3）在量化预测中的真实物理边界"
+doc_id: "intelligence-ai-context-limits-deepseek"
+doc_domain: "intelligence"
+doc_status: "draft"
+owner: "founder"
+last_reviewed_at: "2026-03-19"
+summary: "研究 DeepSeek 在富上下文下的能力边界，是上下文工程与模型能力相关内容的研究参考源。"
+---
+
 # 独立研究：富上下文 + 顶级模型（DeepSeek V3）在量化预测中的真实物理边界
 
 **文档状态**: Draft  

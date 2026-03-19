@@ -1,3 +1,13 @@
+---
+title: "32. Frontend Network Optimization: Zero-Redundancy Protocol"
+doc_id: "engineering-frontend-network-optimization-zero-redundancy-20260318"
+doc_domain: "engineering"
+doc_status: "active"
+owner: "founder"
+last_reviewed_at: "2026-03-19"
+summary: "定义前端零冗余请求协议，是秒开、弱网与网络优化相关内容的工程事实源。"
+---
+
 # 32. Frontend Network Optimization: Zero-Redundancy Protocol
 
 **Date**: 2026-03-18

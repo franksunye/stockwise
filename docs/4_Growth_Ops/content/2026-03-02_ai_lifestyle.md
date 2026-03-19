@@ -9,8 +9,9 @@ image: "/images/learn/ai_lifestyle.png"
 publish:
   wechat:
     status: published
-    url: "https://mp.weixin.qq.com/s/eR-4uQ1tCHZt0i4x3lBwHw"
-    date: "2026-03-12"
+    url: "https://mp.weixin.qq.com/s/bJtXPV4r4ANCjp7wOOxV_w"
+    published_at: "2026-03-02"
+    baseline: "frontline_q1_2026"
   xhs:
     status: draft
     url: ""

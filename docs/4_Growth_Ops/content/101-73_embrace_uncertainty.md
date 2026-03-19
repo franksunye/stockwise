@@ -1,22 +1,47 @@
 ---
 title: "101-73: 接受不完美：与市场的不确定性做朋友"
 subtitle: "连西蒙斯都会亏损"
+content_id: "growth-101-073"
+content_source: "growth"
+content_type: "article"
+canonical_role: "canonical"
 date: "2026-04-10"
 category: "The Machine"
 funnel_stage: "MOFU"
 rhythm: "Hub"
+traceability:
+  status: "healthy"
+  last_reviewed_at: "2026-03-19"
+workflow:
+  stage: "drafting"
+  owner: "cmo"
+  reviewer: "founder"
+  priority: "high"
+  target_publish_date: "2026-04-10"
+  last_action_at: "2026-03-19"
+  blocked_reason: ""
+maintenance:
+  change_status: "updated"
+  update_reason: "copy_edit"
+website:
+  enabled: true
+  surface: "learn"
 image: "/images/learn/101-73_embrace_uncertainty.png"
 image_prompt: "A conceptual 3D illustration of 连西蒙斯都会亏损. Swiss Design, Geometric, Minimalist. Dark Mode background (#050508). Accent colors: Indigo (#6366f1) and Rose Red (#f43f5e). NO text."
-publish:
+distribution:
   wechat:
+    enabled: true
     status: draft
     url: ""
   xhs:
+    enabled: true
     status: draft
     url: ""
   twitter:
+    enabled: true
     status: draft
   toutiao:
+    enabled: true
     status: draft
 source_docs:
   - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md

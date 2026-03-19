@@ -1,3 +1,13 @@
+---
+title: "Almanac Data Lightweight Protocol (Stability Pivot 2026-03-16)"
+doc_id: "engineering-almanac-data-lightweight-protocol-20260316"
+doc_domain: "engineering"
+doc_status: "active"
+owner: "founder"
+last_reviewed_at: "2026-03-19"
+summary: "定义黄历数据从重抓取转向轻协议聚合的稳定性方案，是相关工程与内容叙事的事实源。"
+---
+
 # Almanac Data Lightweight Protocol (Stability Pivot 2026-03-16)
 
 ## 1. Background

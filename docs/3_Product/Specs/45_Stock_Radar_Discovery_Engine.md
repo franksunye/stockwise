@@ -1,3 +1,13 @@
+---
+title: "Stock Radar (智能策略雷达) 产品特性说明书"
+doc_id: "spec-stock-radar-discovery-engine"
+doc_domain: "product"
+doc_status: "active"
+owner: "founder"
+last_reviewed_at: "2026-03-19"
+summary: "定义智能策略雷达的产品目标、商业分层与技术路线，是发现引擎相关内容资产的现行事实源。"
+---
+
 # Stock Radar (智能策略雷达) 产品特性说明书
 
 ## 1. 特性概览 (Feature Overview)

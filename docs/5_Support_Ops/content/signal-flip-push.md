@@ -8,6 +8,9 @@ funnel_stage: "BOFU"
 publish:
   wechat:
     status: "published"
+    published_at: "2026-02-25"
+    url: "https://mp.weixin.qq.com/s/WxeVVxbmUHADEXKgw68vpw"
+    baseline: "frontline_q1_2026"
 date: "2026-03-19"
 ---
 

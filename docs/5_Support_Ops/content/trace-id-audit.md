@@ -1,13 +1,36 @@
 ---
 title: "错误溯源：什么是 Trace ID (Trace ID Audit)"
+content_id: "support-trace-id-audit"
+content_source: "support"
+content_type: "guide"
+canonical_role: "canonical"
 source_docs:
   - docs/1_Engineering/16_Observability_Thresholds_and_Incidents.md
 category: "Support Ops"
 funnel_stage: "BOFU"
+campaign: "wechat_4_week_sprint_2026q2"
 date: "2026-03-19"
-publish:
+traceability:
+  status: "healthy"
+  last_reviewed_at: "2026-03-19"
+workflow:
+  stage: "drafting"
+  owner: "cmo"
+  reviewer: "founder"
+  priority: "high"
+  target_publish_date: "2026-04-16"
+  last_action_at: "2026-03-19"
+  blocked_reason: ""
+maintenance:
+  change_status: "updated"
+  update_reason: "product_change"
+website:
+  enabled: true
+  surface: "support"
+distribution:
   wechat:
-    status: "none"
+    enabled: true
+    status: "draft"
 ---
 
 # 错误溯源：什么是 Trace ID (Trace ID Audit)

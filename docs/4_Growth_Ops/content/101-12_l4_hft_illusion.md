@@ -1,22 +1,48 @@
 ---
 title: "101-12: 别和镰刀拼微秒"
 subtitle: "为什么高频打板是散户的坟墓"
+content_id: "growth-101-012"
+content_source: "growth"
+content_type: "article"
+canonical_role: "canonical"
 date: "2026-03-20"
 category: "The Mind"
 funnel_stage: "TOFU"
+campaign: "wechat_4_week_sprint_2026q2"
 rhythm: "Hub"
+traceability:
+  status: "healthy"
+  last_reviewed_at: "2026-03-19"
+workflow:
+  stage: "reviewing"
+  owner: "cmo"
+  reviewer: "founder"
+  priority: "high"
+  target_publish_date: "2026-03-23"
+  last_action_at: "2026-03-19"
+  blocked_reason: ""
+maintenance:
+  change_status: "updated"
+  update_reason: "copy_edit"
+website:
+  enabled: true
+  surface: "learn"
 image: "/images/learn/101-12_l4_hft_illusion.png"
 image_prompt: "A conceptual 3D illustration of a fragile hourglass crushed by a massive server rack. Swiss Design, Geometric, Minimalist, High-End Corporate Tech. Dark Mode background (#050508). Action: An uneven ticking clock. Colors: Strictly Indigo (#6366f1) and Rose Red (#f43f5e) accent lights. NO text. NO UI elements."
-publish:
+distribution:
   wechat:
+    enabled: true
     status: draft
     url: ""
   xhs:
+    enabled: true
     status: draft
     url: ""
   twitter:
+    enabled: true
     status: draft
   toutiao:
+    enabled: true
     status: draft
 source_docs:
   - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md

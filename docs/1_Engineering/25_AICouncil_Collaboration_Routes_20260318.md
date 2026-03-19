@@ -1,3 +1,13 @@
+---
+title: "AICouncil：协作线路与独立性审计（2026-03-18）"
+doc_id: "engineering-ai-council-collaboration-routes-20260318"
+doc_domain: "engineering"
+doc_status: "active"
+owner: "founder"
+last_reviewed_at: "2026-03-19"
+summary: "审计 AICouncil 各分析师的协作线路与独立性，是投研决议相关内容的工程事实源。"
+---
+
 # AICouncil：协作线路与独立性审计（2026-03-18）
 
 > 本文档是 `24_AICouncil_Review_Opinion_Current_State_20260313.md` 的补充与延伸。

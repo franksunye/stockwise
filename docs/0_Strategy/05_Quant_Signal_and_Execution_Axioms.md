@@ -1,3 +1,13 @@
+---
+title: "05 量化信号验证与执行公理 (Quant Signal & Execution Axioms)"
+doc_id: "strategy-quant-signal-and-execution-axioms"
+doc_domain: "strategy"
+doc_status: "active"
+owner: "founder"
+last_reviewed_at: "2026-03-19"
+summary: "定义信号验证、MFE、公理边界与投资模式职责，是大量 101 内容的核心上游事实源。"
+---
+
 # 05 量化信号验证与执行公理 (Quant Signal & Execution Axioms)
 
 **日期**: 2026-03-18  

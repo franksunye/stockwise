@@ -1,3 +1,13 @@
+---
+title: "功能规格说明书：投资模式（Investment Mode）(Spec 47)"
+doc_id: "spec-investment-mode-product-layer"
+doc_domain: "product"
+doc_status: "active"
+owner: "founder"
+last_reviewed_at: "2026-03-19"
+summary: "Investment Mode 的现行产品规格，定义模式对象、边界、术语与上线标准，是相关内容资产的重要事实源。"
+---
+
 # 功能规格说明书：投资模式（Investment Mode）(Spec 47)
 
 > 定位：底层专业，表层极简（2C）。

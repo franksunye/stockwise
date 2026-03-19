@@ -6,7 +6,7 @@ category: "Growth 101"
 funnel_stage: "TOFU"
 publish:
   wechat:
-    status: "published"
+    status: "none"
 date: "2026-03-19"
 ---
 

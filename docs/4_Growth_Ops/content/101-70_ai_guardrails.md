@@ -1,22 +1,48 @@
 ---
 title: "101-70: 给机器立规矩：不设防护网的 AI 在加速死亡"
 subtitle: "没有自动刹车的雷达毫无意义"
+content_id: "growth-101-070"
+content_source: "growth"
+content_type: "article"
+canonical_role: "canonical"
 date: "2026-04-10"
 category: "The Machine"
 funnel_stage: "BOFU"
+campaign: "wechat_4_week_sprint_2026q2"
 rhythm: "Hub"
+traceability:
+  status: "healthy"
+  last_reviewed_at: "2026-03-19"
+workflow:
+  stage: "drafting"
+  owner: "cmo"
+  reviewer: "founder"
+  priority: "high"
+  target_publish_date: "2026-04-15"
+  last_action_at: "2026-03-19"
+  blocked_reason: ""
+maintenance:
+  change_status: "updated"
+  update_reason: "copy_edit"
+website:
+  enabled: true
+  surface: "learn"
 image: "/images/learn/101-70_ai_guardrails.png"
 image_prompt: "A conceptual 3D illustration of 没有自动刹车的雷达毫无意义. Swiss Design, Geometric, Minimalist. Dark Mode background (#050508). Accent colors: Indigo (#6366f1) and Rose Red (#f43f5e). NO text."
-publish:
+distribution:
   wechat:
+    enabled: true
     status: draft
     url: ""
   xhs:
+    enabled: true
     status: draft
     url: ""
   twitter:
+    enabled: true
     status: draft
   toutiao:
+    enabled: true
     status: draft
 source_docs:
   - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md

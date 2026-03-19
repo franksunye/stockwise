@@ -1,3 +1,13 @@
+---
+title: "知守 AI (ZISO AI) AI Reliability Protocol (可信度保障协议)"
+doc_id: "engineering-ai-reliability-protocol"
+doc_domain: "engineering"
+doc_status: "active"
+owner: "founder"
+last_reviewed_at: "2026-03-19"
+summary: "定义 AI 可信度保障与三层防护架构，是幻觉、可靠性与风控类内容的工程事实源。"
+---
+
 # 知守 AI (ZISO AI) AI Reliability Protocol (可信度保障协议)
 
 ## 核心问题
@@ -86,4 +96,3 @@
     *   *任务*: 接收 Gemini 搜到的 "新闻摘要" + 数据库里的 "硬指标"，进行最终的 **"利好/利空演绎推理"**。
 
 **结论**: 我们不依赖单一模型的幻觉。我们用 **Google 的搜索技术** 找新闻，用 **DeepSeek 的推理技术** 做判断，用 **本地数据库** 做事实锚定。
-

@@ -1,3 +1,13 @@
+---
+title: "Tradeability 双轨运行手册（执行对齐版）"
+doc_id: "intelligence-dual-lane-operations-manual"
+doc_domain: "intelligence"
+doc_status: "active"
+owner: "founder"
+last_reviewed_at: "2026-03-19"
+summary: "定义生产线与实验线的双轨运行原则，是 dual-lane 相关内容的研究与运行事实源。"
+---
+
 # Tradeability 双轨运行手册（执行对齐版）
 
 **文档状态**: Active  

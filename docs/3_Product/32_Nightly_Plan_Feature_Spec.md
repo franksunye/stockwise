@@ -1,3 +1,13 @@
+---
+title: "Nightly Plan & Morning Push - Full Feature Spec"
+doc_id: "product-nightly-plan-feature-spec"
+doc_domain: "product"
+doc_status: "draft"
+owner: "founder"
+last_reviewed_at: "2026-03-19"
+summary: "描述晚间复盘与晨间推送的完整功能设想，作为相关内容策划的参考源，当前仍偏规划态。"
+---
+
 # Nightly Plan & Morning Push - Full Feature Spec
 
 ## Goal

@@ -1,22 +1,48 @@
 ---
 title: "101-32: 删掉你的持仓成本线"
 subtitle: "市场根本不在乎你亏了多少"
+content_id: "growth-101-032"
+content_source: "growth"
+content_type: "article"
+canonical_role: "canonical"
 date: "2026-04-03"
 category: "The Method"
 funnel_stage: "MOFU"
+campaign: "wechat_4_week_sprint_2026q2"
 rhythm: "Hub"
+traceability:
+  status: "healthy"
+  last_reviewed_at: "2026-03-19"
+workflow:
+  stage: "reviewing"
+  owner: "cmo"
+  reviewer: "founder"
+  priority: "high"
+  target_publish_date: "2026-03-27"
+  last_action_at: "2026-03-19"
+  blocked_reason: ""
+maintenance:
+  change_status: "updated"
+  update_reason: "copy_edit"
+website:
+  enabled: true
+  surface: "learn"
 image: "/images/learn/101-32_stateless_execution.png"
 image_prompt: "A conceptual 3D illustration of a floating monolith severing a fragile red thread. Swiss Design, Geometric, Minimalist. Dark Mode background (#050508). Action: Clean, emotionless detachment. Accent colors: Indigo (#6366f1) for the monolith, Rose Red (#f43f5e) for the severed thread. NO text."
-publish:
+distribution:
   wechat:
+    enabled: true
     status: draft
     url: ""
   xhs:
+    enabled: true
     status: draft
     url: ""
   twitter:
+    enabled: true
     status: draft
   toutiao:
+    enabled: true
     status: draft
 source_docs:
   - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md

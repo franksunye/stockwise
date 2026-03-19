@@ -1,3 +1,13 @@
+---
+title: "44 量化回测方法审计与行业对照"
+doc_id: "intelligence-quant-backtesting-methodology"
+doc_domain: "intelligence"
+doc_status: "active"
+owner: "founder"
+last_reviewed_at: "2026-03-19"
+summary: "审计当前量化回测方法与行业对照，是方法论与可信度相关内容的研究事实源。"
+---
+
 # 44 量化回测方法审计与行业对照
 
 日期：2026-03-10  

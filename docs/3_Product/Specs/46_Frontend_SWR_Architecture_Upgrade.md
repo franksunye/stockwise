@@ -1,3 +1,13 @@
+---
+title: "Frontend Architecture Upgrade: SWR & Unified Caching"
+doc_id: "spec-frontend-swr-architecture-upgrade"
+doc_domain: "product"
+doc_status: "active"
+owner: "founder"
+last_reviewed_at: "2026-03-19"
+summary: "定义前端 SWR 与统一缓存架构的现行边界，是秒开、快照与零闪烁相关内容的产品事实源。"
+---
+
 # Frontend Architecture Upgrade: SWR & Unified Caching
 
 ## 1. 背景

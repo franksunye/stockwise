@@ -1,13 +1,36 @@
 ---
 title: "模型层级划分：Pro 版与基础版 AI 引擎切流说明"
+content_id: "support-model-tiers-diff"
+content_source: "support"
+content_type: "guide"
+canonical_role: "canonical"
 source_docs:
   - docs/3_Product/31_Membership_Design_Plan.md
 category: "Support Ops"
 funnel_stage: "BOFU"
+campaign: "wechat_4_week_sprint_2026q2"
 date: "2026-03-19"
-publish:
+traceability:
+  status: "healthy"
+  last_reviewed_at: "2026-03-19"
+workflow:
+  stage: "reviewing"
+  owner: "cmo"
+  reviewer: "founder"
+  priority: "high"
+  target_publish_date: "2026-03-31"
+  last_action_at: "2026-03-19"
+  blocked_reason: ""
+maintenance:
+  change_status: "updated"
+  update_reason: "product_change"
+website:
+  enabled: true
+  surface: "support"
+distribution:
   wechat:
-    status: "none"
+    enabled: true
+    status: "draft"
 ---
 
 # 模型层级划分：Pro 版与基础版 AI 引擎切流说明

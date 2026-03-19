@@ -1,7 +1,7 @@
 # Content Traceability Matrix 溯源总控表
 
 > 这是一份由 `/content-audit` 命令自动生成的核心物料与外部发布内容追踪表。
-> **生成时间**: 2026-03-19T03:38:29.934Z
+> **生成时间**: 2026-03-19T08:15:38.385Z
 
 ## 🚨 预警区：逻辑过期风险 (Outdated)
 
@@ -15,6 +15,18 @@
 
 - *无孤儿内容 / No Orphans*
 
+## 🧭 预警区：引用了已废弃源文档 (Deprecated Sources)
+
+如果某篇内容仍然依赖已标记为 `deprecated` 或 `archived` 的上游文档，说明它的事实基础可能已不是现行版本。
+
+- *当前无内容引用已废弃源文档*
+
+## 🧱 预警区：引用了未补规范元数据的源文档 (Source Metadata Missing)
+
+如果某篇内容引用的上游文档还没有补齐 `doc_id / doc_domain / doc_status`，系统虽可追踪路径，但还不能稳定判断它是否属于现行事实源。
+
+- *当前被引用的源文档都已具备最小元数据*
+
 ## 💡 IP 闲置榜 (Under-utilized Internal Docs)
 
 以下高价值的内部战略或工程架构，尚未被转化为任意一篇对外 Growth 营销或客服物料。
@@ -23,12 +35,23 @@
 - 🔵 [`docs/0_Strategy/03_Team_Responsibility_Matrix.md`](../../docs/0_Strategy/03_Team_Responsibility_Matrix.md)
 - 🔵 [`docs/0_Strategy/04_Milestones_Execution_Log.md`](../../docs/0_Strategy/04_Milestones_Execution_Log.md)
 - 🔵 [`docs/0_Strategy/08_Globalization_Strategy_and_Evolution.md`](../../docs/0_Strategy/08_Globalization_Strategy_and_Evolution.md)
+- 🔵 [`docs/0_Strategy/history/MILESTONE_2025.md`](../../docs/0_Strategy/history/MILESTONE_2025.md)
 - 🔵 [`docs/2_Intelligence/20_Doc_Index_and_Governance.md`](../../docs/2_Intelligence/20_Doc_Index_and_Governance.md)
 - 🔵 [`docs/2_Intelligence/23Q_Method_Registry_Design.md`](../../docs/2_Intelligence/23Q_Method_Registry_Design.md)
 - 🔵 [`docs/2_Intelligence/24Q_Method_Mapping_Examples.md`](../../docs/2_Intelligence/24Q_Method_Mapping_Examples.md)
 - 🔵 [`docs/2_Intelligence/26C_Quant_AI_Acceptance_Criteria.md`](../../docs/2_Intelligence/26C_Quant_AI_Acceptance_Criteria.md)
 - 🔵 [`docs/2_Intelligence/29Q_Mode_Params_Promotion.md`](../../docs/2_Intelligence/29Q_Mode_Params_Promotion.md)
 - 🔵 [`docs/2_Intelligence/31Q_Validation_Logic_Research_Legacy.md`](../../docs/2_Intelligence/31Q_Validation_Logic_Research_Legacy.md)
+- 🔵 [`docs/2_Intelligence/legacy_specs/Multi_Model_Prediction_Design.md`](../../docs/2_Intelligence/legacy_specs/Multi_Model_Prediction_Design.md)
+- 🔵 [`docs/2_Intelligence/registry/archetypes/trend_breakout.md`](../../docs/2_Intelligence/registry/archetypes/trend_breakout.md)
+- 🔵 [`docs/2_Intelligence/registry/components/macd_crossover.md`](../../docs/2_Intelligence/registry/components/macd_crossover.md)
+- 🔵 [`docs/2_Intelligence/registry/masters/alexander_elder.md`](../../docs/2_Intelligence/registry/masters/alexander_elder.md)
+- 🔵 [`docs/2_Intelligence/registry/masters/warren_buffett.md`](../../docs/2_Intelligence/registry/masters/warren_buffett.md)
+- 🔵 [`docs/2_Intelligence/registry/methodologies/turtle_trading.md`](../../docs/2_Intelligence/registry/methodologies/turtle_trading.md)
+- 🔵 [`docs/2_Intelligence/registry/risk_rules/atr_stop.md`](../../docs/2_Intelligence/registry/risk_rules/atr_stop.md)
+- 🔵 [`docs/2_Intelligence/research/42_Local_Tradeability_Experiment_Preparation.md`](../../docs/2_Intelligence/research/42_Local_Tradeability_Experiment_Preparation.md)
+- 🔵 [`docs/2_Intelligence/research/Daily_Tracking_Concept_Initial.md`](../../docs/2_Intelligence/research/Daily_Tracking_Concept_Initial.md)
+- 🔵 [`docs/2_Intelligence/research/Validation_Logic_Research.md`](../../docs/2_Intelligence/research/Validation_Logic_Research.md)
 - 🔵 [`docs/1_Engineering/10_Architecture.md`](../../docs/1_Engineering/10_Architecture.md)
 - 🔵 [`docs/1_Engineering/12_Release_Quality_Gates.md`](../../docs/1_Engineering/12_Release_Quality_Gates.md)
 - 🔵 [`docs/1_Engineering/14_Investment_Mode_Backend_Runbook.md`](../../docs/1_Engineering/14_Investment_Mode_Backend_Runbook.md)
@@ -46,10 +69,62 @@
 - 🔵 [`docs/1_Engineering/33_Cloudflare_Workers_Migration_POC_20260318.md`](../../docs/1_Engineering/33_Cloudflare_Workers_Migration_POC_20260318.md)
 - 🔵 [`docs/1_Engineering/33_Stock_News_Fetching_Implementation.md`](../../docs/1_Engineering/33_Stock_News_Fetching_Implementation.md)
 - 🔵 [`docs/1_Engineering/34_Dashboard_Page_Refactoring_Design.md`](../../docs/1_Engineering/34_Dashboard_Page_Refactoring_Design.md)
+- 🔵 [`docs/1_Engineering/35_Broadcast_LayerA_Operations_Runbook_20260319.md`](../../docs/1_Engineering/35_Broadcast_LayerA_Operations_Runbook_20260319.md)
 - 🔵 [`docs/1_Engineering/GLOBALIZATION_IMPLEMENTATION_DESIGN.md`](../../docs/1_Engineering/GLOBALIZATION_IMPLEMENTATION_DESIGN.md)
+- 🔵 [`docs/1_Engineering/LLM_Debug_Traces/0_Handover_Report.md`](../../docs/1_Engineering/LLM_Debug_Traces/0_Handover_Report.md)
+- 🔵 [`docs/1_Engineering/LLM_Debug_Traces/B2_LAB_VS_B2_PROD_SAFE_20260312.md`](../../docs/1_Engineering/LLM_Debug_Traces/B2_LAB_VS_B2_PROD_SAFE_20260312.md)
+- 🔵 [`docs/1_Engineering/LLM_Debug_Traces/B2_PRODUCTION_MIGRATION_PLAN_20260312.md`](../../docs/1_Engineering/LLM_Debug_Traces/B2_PRODUCTION_MIGRATION_PLAN_20260312.md)
+- 🔵 [`docs/1_Engineering/LLM_Debug_Traces/B2_VARIANT_CLARIFICATION_20260312.md`](../../docs/1_Engineering/LLM_Debug_Traces/B2_VARIANT_CLARIFICATION_20260312.md)
+- 🔵 [`docs/1_Engineering/LLM_Debug_Traces/CURRENT_BASELINE_STATUS_20260312.md`](../../docs/1_Engineering/LLM_Debug_Traces/CURRENT_BASELINE_STATUS_20260312.md)
+- 🔵 [`docs/1_Engineering/LLM_Debug_Traces/CURRENT_LOCAL_GEMINI_BASELINE_20260312.md`](../../docs/1_Engineering/LLM_Debug_Traces/CURRENT_LOCAL_GEMINI_BASELINE_20260312.md)
+- 🔵 [`docs/1_Engineering/LLM_Debug_Traces/EVAL_RUNNER_README.md`](../../docs/1_Engineering/LLM_Debug_Traces/EVAL_RUNNER_README.md)
+- 🔵 [`docs/1_Engineering/LLM_Debug_Traces/EXPERIMENT_MAP_20260312.md`](../../docs/1_Engineering/LLM_Debug_Traces/EXPERIMENT_MAP_20260312.md)
+- 🔵 [`docs/1_Engineering/LLM_Debug_Traces/FOUR_STATE_PROMOTION_PLAN_20260313.md`](../../docs/1_Engineering/LLM_Debug_Traces/FOUR_STATE_PROMOTION_PLAN_20260313.md)
+- 🔵 [`docs/1_Engineering/LLM_Debug_Traces/FOUR_STATE_PROMOTION_RESULT_20260313.md`](../../docs/1_Engineering/LLM_Debug_Traces/FOUR_STATE_PROMOTION_RESULT_20260313.md)
+- 🔵 [`docs/1_Engineering/LLM_Debug_Traces/FOUR_STATE_SEMANTICS_VALIDATION_20260313.md`](../../docs/1_Engineering/LLM_Debug_Traces/FOUR_STATE_SEMANTICS_VALIDATION_20260313.md)
+- 🔵 [`docs/1_Engineering/LLM_Debug_Traces/FOUR_STATE_TASK_LOG_20260313.md`](../../docs/1_Engineering/LLM_Debug_Traces/FOUR_STATE_TASK_LOG_20260313.md)
+- 🔵 [`docs/1_Engineering/LLM_Debug_Traces/INDEPENDENT_REVIEW_20260312.md`](../../docs/1_Engineering/LLM_Debug_Traces/INDEPENDENT_REVIEW_20260312.md)
+- 🔵 [`docs/1_Engineering/LLM_Debug_Traces/LAYER1_PROMPT_INJECTION_COMPARISON_20260313.md`](../../docs/1_Engineering/LLM_Debug_Traces/LAYER1_PROMPT_INJECTION_COMPARISON_20260313.md)
+- 🔵 [`docs/1_Engineering/LLM_Debug_Traces/LOCAL_GEMINI_LEGACY_VS_B2_BASELINE_20260312.md`](../../docs/1_Engineering/LLM_Debug_Traces/LOCAL_GEMINI_LEGACY_VS_B2_BASELINE_20260312.md)
+- 🔵 [`docs/1_Engineering/LLM_Debug_Traces/LOCAL_WRITE_REGRESSION_README_20260312.md`](../../docs/1_Engineering/LLM_Debug_Traces/LOCAL_WRITE_REGRESSION_README_20260312.md)
+- 🔵 [`docs/1_Engineering/LLM_Debug_Traces/MODEL_OUTPUT_COMPARISON_20260312.md`](../../docs/1_Engineering/LLM_Debug_Traces/MODEL_OUTPUT_COMPARISON_20260312.md)
+- 🔵 [`docs/1_Engineering/LLM_Debug_Traces/PHASE3_5_LOCAL_WRITE_VALIDATION_PLAN_20260312.md`](../../docs/1_Engineering/LLM_Debug_Traces/PHASE3_5_LOCAL_WRITE_VALIDATION_PLAN_20260312.md)
+- 🔵 [`docs/1_Engineering/LLM_Debug_Traces/PHASE3_5_LOCAL_WRITE_VALIDATION_RESULT_20260312.md`](../../docs/1_Engineering/LLM_Debug_Traces/PHASE3_5_LOCAL_WRITE_VALIDATION_RESULT_20260312.md)
+- 🔵 [`docs/1_Engineering/LLM_Debug_Traces/PHASE4_SMALL_ROLLOUT_PLAN_20260312.md`](../../docs/1_Engineering/LLM_Debug_Traces/PHASE4_SMALL_ROLLOUT_PLAN_20260312.md)
+- 🔵 [`docs/1_Engineering/LLM_Debug_Traces/PRODUCTION_DEFAULT_SWITCH_DECISION_20260312.md`](../../docs/1_Engineering/LLM_Debug_Traces/PRODUCTION_DEFAULT_SWITCH_DECISION_20260312.md)
+- 🔵 [`docs/1_Engineering/LLM_Debug_Traces/PRODUCTION_GROUND_TRUTH_CHECK_20260312.md`](../../docs/1_Engineering/LLM_Debug_Traces/PRODUCTION_GROUND_TRUTH_CHECK_20260312.md)
+- 🔵 [`docs/1_Engineering/LLM_Debug_Traces/PRODUCTION_PROMOTION_RECOMMENDATION_20260312.md`](../../docs/1_Engineering/LLM_Debug_Traces/PRODUCTION_PROMOTION_RECOMMENDATION_20260312.md)
+- 🔵 [`docs/1_Engineering/LLM_Debug_Traces/PROD_DEEPSEEK_VS_LOCAL_B2_DEEPSEEK_20260312.md`](../../docs/1_Engineering/LLM_Debug_Traces/PROD_DEEPSEEK_VS_LOCAL_B2_DEEPSEEK_20260312.md)
+- 🔵 [`docs/1_Engineering/LLM_Debug_Traces/PROMPT_AUDIT_20260312.md`](../../docs/1_Engineering/LLM_Debug_Traces/PROMPT_AUDIT_20260312.md)
+- 🔵 [`docs/1_Engineering/LLM_Debug_Traces/RERUN_AUDIT_20260312.md`](../../docs/1_Engineering/LLM_Debug_Traces/RERUN_AUDIT_20260312.md)
+- 🔵 [`docs/1_Engineering/LLM_Debug_Traces/SHADOW_CASE_SET_20260312.md`](../../docs/1_Engineering/LLM_Debug_Traces/SHADOW_CASE_SET_20260312.md)
+- 🔵 [`docs/1_Engineering/LLM_Debug_Traces/SHADOW_VALIDATION_PLAN_20260312.md`](../../docs/1_Engineering/LLM_Debug_Traces/SHADOW_VALIDATION_PLAN_20260312.md)
+- 🔵 [`docs/1_Engineering/LLM_Debug_Traces/SHADOW_VALIDATION_RESULT_20260312.md`](../../docs/1_Engineering/LLM_Debug_Traces/SHADOW_VALIDATION_RESULT_20260312.md)
+- 🔵 [`docs/1_Engineering/LLM_Debug_Traces/STRUCTURED_OUTPUT_POLICY_20260313.md`](../../docs/1_Engineering/LLM_Debug_Traces/STRUCTURED_OUTPUT_POLICY_20260313.md)
+- 🔵 [`docs/1_Engineering/LLM_Debug_Traces/TEST_MATRIX_20260312.md`](../../docs/1_Engineering/LLM_Debug_Traces/TEST_MATRIX_20260312.md)
+- 🔵 [`docs/1_Engineering/LLM_Debug_Traces/prompts/B1_Minimal_User.md`](../../docs/1_Engineering/LLM_Debug_Traces/prompts/B1_Minimal_User.md)
+- 🔵 [`docs/1_Engineering/LLM_Debug_Traces/prompts/B2_No_L1_User.md`](../../docs/1_Engineering/LLM_Debug_Traces/prompts/B2_No_L1_User.md)
+- 🔵 [`docs/1_Engineering/LLM_Debug_Traces/prompts/B2_Rich_User.md`](../../docs/1_Engineering/LLM_Debug_Traces/prompts/B2_Rich_User.md)
+- 🔵 [`docs/1_Engineering/LLM_Debug_Traces/prompts/B3_Adversarial_System.md`](../../docs/1_Engineering/LLM_Debug_Traces/prompts/B3_Adversarial_System.md)
+- 🔵 [`docs/1_Engineering/LLM_Debug_Traces/prompts/B3_Distilled_User.md`](../../docs/1_Engineering/LLM_Debug_Traces/prompts/B3_Distilled_User.md)
+- 🔵 [`docs/1_Engineering/LLM_Debug_Traces/prompts/B4_FourState_System.md`](../../docs/1_Engineering/LLM_Debug_Traces/prompts/B4_FourState_System.md)
+- 🔵 [`docs/1_Engineering/LLM_Debug_Traces/prompts/B4_STRICT_SYSTEM.md`](../../docs/1_Engineering/LLM_Debug_Traces/prompts/B4_STRICT_SYSTEM.md)
+- 🔵 [`docs/1_Engineering/LLM_Debug_Traces/prompts/Baseline_Old_System.md`](../../docs/1_Engineering/LLM_Debug_Traces/prompts/Baseline_Old_System.md)
+- 🔵 [`docs/1_Engineering/LLM_Debug_Traces/prompts/Baseline_Old_User.md`](../../docs/1_Engineering/LLM_Debug_Traces/prompts/Baseline_Old_User.md)
+- 🔵 [`docs/1_Engineering/LLM_Debug_Traces/prompts/Shared_Optimized_System.md`](../../docs/1_Engineering/LLM_Debug_Traces/prompts/Shared_Optimized_System.md)
+- 🔵 [`docs/1_Engineering/legacy_designs/Stock_News_Fetching.md`](../../docs/1_Engineering/legacy_designs/Stock_News_Fetching.md)
+- 🔵 [`docs/1_Engineering/legacy_designs/Technical_Design.md`](../../docs/1_Engineering/legacy_designs/Technical_Design.md)
+- 🔵 [`docs/1_Engineering/legacy_designs/refactoring-dashboard-page.md`](../../docs/1_Engineering/legacy_designs/refactoring-dashboard-page.md)
+- 🔵 [`docs/1_Engineering/templates/Layer1_Param_Change_Template.md`](../../docs/1_Engineering/templates/Layer1_Param_Change_Template.md)
 - 🔵 [`docs/3_Product/00_Domain_Entities_Glossary.md`](../../docs/3_Product/00_Domain_Entities_Glossary.md)
 - 🔵 [`docs/3_Product/32_Nightly_Plan_Feature_Spec.md`](../../docs/3_Product/32_Nightly_Plan_Feature_Spec.md)
 - 🔵 [`docs/3_Product/Specs/00_SPEC_TEMPLATE.md`](../../docs/3_Product/Specs/00_SPEC_TEMPLATE.md)
+- 🔵 [`docs/3_Product/UX_Design/UX_Concept_TikTok_Weather.md`](../../docs/3_Product/UX_Design/UX_Concept_TikTok_Weather.md)
+- 🔵 [`docs/3_Product/legacy_specs/42_Product_Updates_4_States_Semantic_Upgrade.md`](../../docs/3_Product/legacy_specs/42_Product_Updates_4_States_Semantic_Upgrade.md)
+- 🔵 [`docs/3_Product/legacy_specs/Membership_Design_Plan.md`](../../docs/3_Product/legacy_specs/Membership_Design_Plan.md)
+- 🔵 [`docs/3_Product/legacy_specs/Nightly_Plan_Feature_Spec.md`](../../docs/3_Product/legacy_specs/Nightly_Plan_Feature_Spec.md)
+- 🔵 [`docs/3_Product/legacy_specs/Product_Spec.md`](../../docs/3_Product/legacy_specs/Product_Spec.md)
+- 🔵 [`docs/3_Product/legacy_specs/UserCenterDrawer_Notification_Upgrade.md`](../../docs/3_Product/legacy_specs/UserCenterDrawer_Notification_Upgrade.md)
 
 ## ✅ 健康溯源映射表 (Healthy Reference Map)
 
@@ -220,7 +295,6 @@
 ### [`docs/0_Strategy/07_Growth_and_GTM_Roadmap.md`](../../docs/0_Strategy/07_Growth_and_GTM_Roadmap.md)
 - -> `docs/4_Growth_Ops/content/April_Content_Matrix_Engineering_2026.md`
 - -> `docs/4_Growth_Ops/content/March_Content_Matrix_Execution_2026.md`
-- -> `docs/4_Growth_Ops/content/ZISO_101_SYLLABUS.md`
 - -> `docs/5_Support_Ops/content/invitation-ops-guide.md`
 - -> `docs/5_Support_Ops/content/invite-wall-rationale.md`
 

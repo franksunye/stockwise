@@ -1,3 +1,13 @@
+---
+title: "StockWise 会员体系与商业化方案设计"
+doc_id: "legacy-membership-design-plan"
+doc_domain: "product"
+doc_status: "deprecated"
+owner: "founder"
+last_reviewed_at: "2026-03-19"
+summary: "历史会员体系设计稿，保留旧定价与权益分层背景；现行会员口径应优先引用 active 文档。"
+---
+
 # StockWise 会员体系与商业化方案设计
 
 > **核心思路**：通过“规则引擎 (免费)”与“LLM 深度分析 (付费)”的差异化，平衡服务成本与用户价值。

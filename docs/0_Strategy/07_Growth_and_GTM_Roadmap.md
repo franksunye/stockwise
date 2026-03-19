@@ -1,3 +1,13 @@
+---
+title: "07 增长与变现路线图 (GTM & Growth Roadmap)"
+doc_id: "strategy-growth-and-gtm-roadmap"
+doc_domain: "strategy"
+doc_status: "active"
+owner: "founder"
+last_reviewed_at: "2026-03-19"
+summary: "定义增长、变现与阶段性 GTM 路线，是 campaign 与邀请增长内容的战略事实源。"
+---
+
 # 07 增长与变现路线图 (GTM & Growth Roadmap)
 
 ## 1. 核心愿景 (Core Vision)

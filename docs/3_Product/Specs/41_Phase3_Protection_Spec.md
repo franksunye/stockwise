@@ -1,3 +1,13 @@
+---
+title: "第3阶段功能规格书：护城河 (保护与日志)"
+doc_id: "spec-phase3-protection"
+doc_domain: "product"
+doc_status: "draft"
+owner: "founder"
+last_reviewed_at: "2026-03-19"
+summary: "定义第3阶段保护型能力与行为教练设想，是相关内容策划的产品参考源，当前仍属规划态。"
+---
+
 # 第3阶段功能规格书：护城河 (保护与日志)
 
 ## 目标

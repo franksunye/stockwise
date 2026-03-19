@@ -1,3 +1,13 @@
+---
+title: "06 量化行业定位与地图 (Quant Industry Positioning Map)"
+doc_id: "strategy-quant-industry-positioning-map"
+doc_domain: "strategy"
+doc_status: "active"
+owner: "founder"
+last_reviewed_at: "2026-03-19"
+summary: "定义 StockWise 在量化行业中的定位与边界，是多篇 Growth 101 叙事的战略事实源。"
+---
+
 # 06 量化行业定位与地图 (Quant Industry Positioning Map)
 
 **文档状态**: Current Strategy  

@@ -1,3 +1,13 @@
+---
+title: "产品功能清单 (Product Features Manifest)"
+doc_id: "product-features-manifest"
+doc_domain: "product"
+doc_status: "active"
+owner: "founder"
+last_reviewed_at: "2026-03-19"
+summary: "面向产品、研发与增长团队的功能事实总表，用于确认现行产品能力、命名口径与交付状态。"
+---
+
 # 产品功能清单 (Product Features Manifest)
 
 **Last Updated: 2026-03-17**

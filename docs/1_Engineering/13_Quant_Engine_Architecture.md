@@ -1,3 +1,13 @@
+---
+title: "知守 AI (ZISO AI) 量化引擎架构规划 (QuantEngine Architecture)"
+doc_id: "engineering-quant-engine-architecture"
+doc_domain: "engineering"
+doc_status: "active"
+owner: "founder"
+last_reviewed_at: "2026-03-19"
+summary: "定义量化引擎的架构目标与插件化设计，是规则引擎、解释层与战术内容的重要工程事实源。"
+---
+
 # 知守 AI (ZISO AI) 量化引擎架构规划 (QuantEngine Architecture)
 
 **文档状态**: Draft  

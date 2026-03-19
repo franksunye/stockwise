@@ -1,3 +1,13 @@
+---
+title: "19 Dual-Track Decision Architecture Proposal"
+doc_id: "engineering-dual-track-decision-architecture-proposal"
+doc_domain: "engineering"
+doc_status: "draft"
+owner: "founder"
+last_reviewed_at: "2026-03-19"
+summary: "定义双轨决策架构提案，是 dual-track 与解释层相关内容的工程参考源，当前仍属 proposal。"
+---
+
 # 19 Dual-Track Decision Architecture Proposal
 
 更新时间：2026-03-13  

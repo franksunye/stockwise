@@ -4,9 +4,21 @@ source_docs:
   - docs/2_Intelligence/22Q_Quant_Research_Framework.md
 category: "Engine"
 funnel_stage: "BOFU"
+maintenance:
+  change_status: "review_needed"
+  update_reason: "product_change"
+  external_action: "publish_replacement"
+  external_status: "in_progress"
+  external_note: "旧文建立在历史 AICouncil/共识语义上，建议按现行决议口径发布新版解释文。"
+content_lifecycle:
+  status: "active"
+  superseded_by: "wechat: 投研决议共识机制（现行版，待发布）"
 publish:
   wechat:
     status: "published"
+    published_at: "2026-02-19"
+    url: "https://mp.weixin.qq.com/s/KDT2hCFUH1S4nidyYPOJ1A"
+    baseline: "frontline_q1_2026"
 date: "2026-03-19"
 ---
 

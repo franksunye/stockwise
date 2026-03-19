@@ -1,7 +1,37 @@
+---
+title: "31. Capacity Planning & Scaling Strategy"
+doc_id: "engineering-capacity-planning-and-scaling-strategy-20260317"
+doc_domain: "engineering"
+doc_status: "active"
+owner: "founder"
+last_reviewed_at: "2026-03-19"
+summary: "定义容量规划与扩容路线，是广播、流量与容量相关内容的工程事实源。"
+---
+
 # 31. Capacity Planning & Scaling Strategy
 
 **Date**: 2026-03-17
 **Status**: Active baseline — revisit when approaching next tier threshold
+
+> 2026-03-19 实施更新（Production）：
+> - 价格广播第一步已上线：`/api/stock/prices/all`（`market=all|hk|cn`）+ 30s 广播缓存 + 客户端本地过滤。
+> - 前端盘中价格刷新已从 3 分钟调整为 1 分钟；非交易时段保持 10 分钟。
+> - 已增加广播失败自动降级：连续失败后回退到 legacy `/api/stock/prices?symbols=...`，冷却后自动探测恢复。
+> - `global_stock_pool` 管理 bug 已修复（增删幂等、`1->0` 删除），并完成线上脏数据对账清理（计数一致）。
+
+## Document Ownership & Scope Boundary
+
+为避免工程文档重复扩散，本文件是容量与扩容路线的单一主文档（single source of truth）：
+
+- **本文件（31）负责**：`做什么`、`什么时候做`、`到哪个规模触发`（Tier roadmap + breakpoints）。
+- **[33_Cloudflare_Workers_Migration_POC_20260318.md](./33_Cloudflare_Workers_Migration_POC_20260318.md) 负责**：Cloudflare POC 的实验方法、结果数据与结论证据（不是实施主计划）。
+- **[32_Frontend_Network_Optimization_Zero_Redundancy_20260318.md](./32_Frontend_Network_Optimization_Zero_Redundancy_20260318.md) 负责**：前端请求冗余治理的实现细则（是本路线图的专项子方案）。
+
+执行顺序约束（以本文件为准）：
+
+1. 先完成价格层 broadcast（`/api/stock/prices/all` + 缓存 + 客户端过滤）并稳定运行；
+2. 再评估是否将该公共端点迁移到 Cloudflare Workers；
+3. `batch` 按 public/private 拆分后，再决定公共部分的迁移范围。
 
 ## 1. Purpose
 
@@ -76,7 +106,8 @@ Source: Production Vercel logs + Chrome DevTools Network, 2026-03-17 17:44:31 HK
 
 | 端点 | 盘中频率 | 非盘中频率 | 触发方式 |
 |------|----------|------------|----------|
-| `/api/stock/prices` | 每 3 min | 每 10 min | `setInterval` 定时轮询 |
+| `/api/stock/prices/all` | 每 1 min | 每 10 min | 主路径：广播快照（客户端本地过滤） |
+| `/api/stock/prices` | 降级兜底 | 降级兜底 | 广播熔断时自动回退 |
 | `/api/stock/batch` | 每 60 min | 每 120 min | 定时 + 回前台 |
 | `/api/shared/almanac` | 1 次/会话 | 1 次/会话 | ISR 缓存 |
 | `/api/stock-pool` | 1 次/会话 | 1 次/会话 | mount 时同步 |
@@ -297,13 +328,14 @@ flowchart TB
     end
 ```
 
-核心思路：新增 `/api/stock/prices/all` 端点：
+核心思路：新增 `/api/stock/prices/all` 端点（已上线）：
 
 - 查询 `global_stock_pool` 全部 symbol 的最新价格
 - 响应体：~100 只 × ~60 bytes ≈ **6 KB**（极轻量）
 - 设置 `Cache-Control: public, s-maxage=30, stale-while-revalidate=30`
 - Vercel Edge 全球缓存，origin 每 30 秒只被穿透 1 次
 - 客户端收到全量价格后，本地按自选池过滤
+- 服务端查询通过 `getCachedBroadcastPrices`（`revalidate: 30`）进一步减少重复 DB 查询
 
 ### 5.3 Efficiency Comparison
 
@@ -329,6 +361,26 @@ flowchart TB
 ---
 
 ## 6. Scaling Roadmap
+
+### 6.0 Broadcast Phase-2 Execution Principle (2026-03-19)
+
+在 `prices/all` 第一阶段上线后，后续推进遵循以下顺序，避免“扩接口快于治理能力”：
+
+1. **先稳底座，再扩广播**
+   - 先确保广播链路可观测、可回退、可对账；
+   - 再继续改造下一个接口（优先 `batch` 的 public 部分）。
+
+2. **治理动作必须先落地**
+   - `global_stock_pool` 每日对账（`watchers_count` 与 `user_watchlist` 一致性）；
+   - 广播失败熔断状态可观测（失败率、回退触发率、空结果率）。
+
+3. **接口扩展遵循“公共先行”**
+   - 仅对“跨用户共享”的公共数据做广播化；
+   - 用户私有 overlay 保持 dynamic，避免把个性化逻辑误广播。
+
+4. **每次扩展都要有收益闭环**
+   - 用一周窗口对比函数调用量、CPU、DB 查询量；
+   - 只有收益可验证，才进入下一接口改造。
 
 ### Tier 0: Current (~1K users)
 
@@ -716,6 +768,29 @@ FROM HistoryRanked h LEFT JOIN daily_prices dp ...
 ### 8.5 (Reserved) Future Scaling Decisions
 
 后续扩容决策在此追加记录。
+
+### 8.7 2026-03-19: Global Stock Pool Consistency Fix + Data Cleanup
+
+**背景**: `global_stock_pool.watchers_count` 与 `user_watchlist` 实际人数出现偏差，存在重复 add/delete 导致计数漂移与 `watchers_count <= 0` 脏数据。
+
+**修复**:
+- `POST /api/stock-pool`: 仅在“本用户本次真实新增”时 `watchers_count +1`。
+- `DELETE /api/stock-pool`: 仅在“本用户确实持有该 symbol”时 `watchers_count -1`，并在 `watchers_count <= 0` 时删除该 symbol。
+- 线上执行一次性对账：按 `user_watchlist` 重算计数并清理零关注行。
+
+**结果（线上）**:
+- 清理前：`pool_rows=77`，`watchers_count<=0` 行 `41`，计数不一致 `11`。
+- 清理后：`pool_rows=33`，`watchers_count<=0=0`，计数不一致 `0`。
+
+### 8.8 2026-03-19: Broadcast Phase-1 Production Rollout
+
+**上线内容**:
+- 新增 `GET /api/stock/prices/all`，支持 `market=all|hk|cn`。
+- 前端价格刷新主路径切换到广播端点；盘中刷新频率 1 分钟，非交易时段 10 分钟。
+- 增加生产级容错：广播连续失败触发熔断，自动回退到 legacy `/api/stock/prices`，冷却后自动恢复探测。
+
+**结论**:
+- 价格层主路径已从 per-user 查询切换为公共广播快照复用，满足 Tier 2 第一阶段落地目标。
 
 ---
 

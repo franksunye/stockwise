@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { execSync } from 'child_process';
 import url from 'url';
+import yaml from 'yaml';
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const ROOT_DIR = path.resolve(__dirname, '..');
@@ -13,7 +14,11 @@ const INTELLIGENCE_DIR = path.join(ROOT_DIR, 'docs/2_Intelligence');
 const ENGINEERING_DIR = path.join(ROOT_DIR, 'docs/1_Engineering');
 const PRODUCT_DIR = path.join(ROOT_DIR, 'docs/3_Product');
 
-const OUTPUT_FILE = path.join(ROOT_DIR, 'docs/4_Growth_Ops/54_Content_Traceability_Matrix.md');
+const OUTPUT_FILE = path.join(ROOT_DIR, 'docs/4_Growth_Ops/44_Content_Traceability_Matrix.md');
+const EXCLUDED_EXTERNAL_FILES = new Set([
+  'CONTENT_ASSET_TEMPLATE.md',
+  'ZISO_101_SYLLABUS.md'
+]);
 
 // Helper to get git modified time
 function getGitModTime(filepath) {
@@ -29,36 +34,41 @@ function getGitModTime(filepath) {
 }
 
 function parseFrontmatter(content) {
-  const match = content.match(/^---\n([\s\S]*?)\n---/);
+  const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   if (!match) return {};
-  const meta = {};
-  const lines = match[1].split('\n');
-  let currentKey = '';
-  for (const line of lines) {
-    if (line.startsWith('  - ')) {
-      if (currentKey && Array.isArray(meta[currentKey])) {
-        meta[currentKey].push(line.replace('  - ', '').trim());
-      }
-    } else if (line.includes(':')) {
-      const parts = line.split(':');
-      currentKey = parts[0].trim();
-      const val = parts.slice(1).join(':').trim();
-      if (val) {
-        meta[currentKey] = val;
-      } else {
-        // likely an array coming next
-        meta[currentKey] = [];
-      }
-    }
+  try {
+    return yaml.parse(match[1]) || {};
+  } catch (_error) {
+    return {};
   }
-  return meta;
 }
 
 function findMdFiles(dir) {
   if (!fs.existsSync(dir)) return [];
   return fs.readdirSync(dir)
-    .filter(file => file.endsWith('.md') && file !== 'README.md')
+    .filter(file => file.endsWith('.md') && file !== 'README.md' && !EXCLUDED_EXTERNAL_FILES.has(file))
     .map(file => path.join(dir, file));
+}
+
+function findMdFilesRecursive(dir, files = []) {
+  if (!fs.existsSync(dir)) return files;
+
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (entry.name.startsWith('.')) continue;
+    const fullPath = path.join(dir, entry.name);
+
+    if (entry.isDirectory()) {
+      if (entry.name === 'archive') continue;
+      findMdFilesRecursive(fullPath, files);
+      continue;
+    }
+
+    if (entry.name.endsWith('.md') && entry.name !== 'README.md') {
+      files.push(fullPath);
+    }
+  }
+
+  return files;
 }
 
 async function runAudit() {
@@ -72,28 +82,17 @@ async function runAudit() {
   const coreDirs = [STRATEGY_DIR, INTELLIGENCE_DIR, ENGINEERING_DIR, PRODUCT_DIR];
   const coreFiles = new Set();
   
-  // Collect all core documents recursively (simplified 1 level here)
   coreDirs.forEach(dir => {
-    if (fs.existsSync(dir)) {
-      fs.readdirSync(dir).forEach(file => {
-        if (file.endsWith('.md') && !file.includes('README')) {
-           // Basic mapping. Realistically we might search deeply.
-           coreFiles.add(path.relative(ROOT_DIR, path.join(dir, file)));
-        }
-      });
-      // also check Specs
-      const specsDir = path.join(dir, 'Specs');
-      if (fs.existsSync(specsDir)) {
-          fs.readdirSync(specsDir).forEach(file => {
-            if (file.endsWith('.md')) coreFiles.add(path.relative(ROOT_DIR, path.join(specsDir, file)));
-          });
-      }
-    }
+    findMdFilesRecursive(dir).forEach(file => {
+      coreFiles.add(path.relative(ROOT_DIR, file));
+    });
   });
 
   const matrix = {
     orphaned: [],
     outdated: [],
+    deprecatedSources: [],
+    sourceMetadataMissing: [],
     healthy: []
   };
 
@@ -129,6 +128,22 @@ async function runAudit() {
       }
 
       const sourceTime = getGitModTime(sourceAbs);
+      const sourceMeta = parseFrontmatter(fs.readFileSync(sourceAbs, 'utf8'));
+      const sourceStatus = sourceMeta.doc_status || sourceMeta.status || 'active';
+      const missingFields = ['doc_id', 'doc_domain', 'doc_status'].filter((field) => !sourceMeta[field]);
+
+      if (missingFields.length > 0) {
+        matrix.sourceMetadataMissing.push({
+          file: relPath,
+          source,
+          missingFields
+        });
+      }
+
+      if (['deprecated', 'archived'].includes(sourceStatus)) {
+        matrix.deprecatedSources.push({ file: relPath, source, status: sourceStatus });
+      }
+
       if (sourceTime > articleTime) {
          isOutdated = true;
          staleReason = source;
@@ -169,6 +184,41 @@ async function runAudit() {
   matrix.orphaned.forEach(item => {
     ms += `- 🟠 [\`${item}\`](../../${item})\n`;
   });
+
+  ms += `\n## 🧭 预警区：引用了已废弃源文档 (Deprecated Sources)\n\n`;
+  ms += `如果某篇内容仍然依赖已标记为 \`deprecated\` 或 \`archived\` 的上游文档，说明它的事实基础可能已不是现行版本。\n\n`;
+  if (matrix.deprecatedSources.length === 0) ms += `- *当前无内容引用已废弃源文档*\n`;
+  matrix.deprecatedSources.forEach(item => {
+    ms += `- 🟣 [\`${item.file}\`](../../${item.file}) -> 引用了 \`${item.status}\` 源文档 \`${item.source}\`\n`;
+  });
+
+  ms += `\n## 🧱 预警区：引用了未补规范元数据的源文档 (Source Metadata Missing)\n\n`;
+  ms += `如果某篇内容引用的上游文档还没有补齐 \`doc_id / doc_domain / doc_status\`，系统虽可追踪路径，但还不能稳定判断它是否属于现行事实源。\n\n`;
+  if (matrix.sourceMetadataMissing.length === 0) {
+    ms += `- *当前被引用的源文档都已具备最小元数据*\n`;
+  } else {
+    const groupedMissing = new Map();
+
+    matrix.sourceMetadataMissing.forEach(item => {
+      const existing = groupedMissing.get(item.source) || {
+        missingFields: item.missingFields,
+        files: []
+      };
+      existing.files.push(item.file);
+      groupedMissing.set(item.source, existing);
+    });
+
+    [...groupedMissing.entries()]
+      .sort((a, b) => b[1].files.length - a[1].files.length || a[0].localeCompare(b[0], 'zh-CN'))
+      .forEach(([source, info]) => {
+        const examples = info.files.slice(0, 3).map((file) => `\`${file}\``).join('、');
+        ms += `- 🟡 \`${source}\` 缺少 ${info.missingFields.map((field) => `\`${field}\``).join(', ')}；当前影响 ${info.files.length} 篇内容`;
+        if (examples) {
+          ms += `（例如：${examples}）`;
+        }
+        ms += `\n`;
+      });
+  }
 
   ms += `\n## 💡 IP 闲置榜 (Under-utilized Internal Docs)\n\n`;
   ms += `以下高价值的内部战略或工程架构，尚未被转化为任意一篇对外 Growth 营销或客服物料。\n\n`;

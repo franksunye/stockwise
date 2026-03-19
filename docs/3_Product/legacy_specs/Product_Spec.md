@@ -1,3 +1,13 @@
+---
+title: "StockWise 产品规格说明书 (PRD)"
+doc_id: "legacy-product-spec"
+doc_domain: "product"
+doc_status: "deprecated"
+owner: "founder"
+last_reviewed_at: "2026-03-19"
+summary: "早期整体 PRD，保留历史定位与产品心智演化背景；如与现行产品口径冲突，应以后续 active specs 为准。"
+---
+
 # StockWise 产品规格说明书 (PRD)
 
 > **交易者的抬头显示器 (HUD)** —— 不做预测涨跌的水晶球，做执行纪律的理性锚点。

@@ -1,3 +1,13 @@
+---
+title: "Investment Mode Decision Local Snapshot Spec 20260316"
+doc_id: "spec-investment-mode-decision-local-snapshot-20260316"
+doc_domain: "product"
+doc_status: "active"
+owner: "founder"
+last_reviewed_at: "2026-03-19"
+summary: "定义投研决议本地快照层的现行设计，用于解释决议页面的缓存体验、边界与实现约束。"
+---
+
 ## 1. Purpose
 
 本说明文档聚焦一个非常具体的问题：
@@ -329,4 +339,3 @@ useSWR(
 3. 该快照层与 Dashboard 已有的「本地快照 + SWR 运行时层」理念保持一致，且仅作用于 `AICouncil`，风险可控、易于回滚。
 
 执行顺序严格遵循「先文档、后代码，小步、可验证、可回滚」的标准。
-

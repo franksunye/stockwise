@@ -1,3 +1,13 @@
+---
+title: "功能规格说明书：Admin Tradeability Control Tower (Spec 48)"
+doc_id: "spec-admin-tradeability-control-tower"
+doc_domain: "product"
+doc_status: "active"
+owner: "founder"
+last_reviewed_at: "2026-03-19"
+summary: "定义 Tradeability 后台控制塔的产品边界与统一操作视图，是相关 Admin/Support 内容的产品事实源。"
+---
+
 # 功能规格说明书：Admin Tradeability Control Tower (Spec 48)
 
 > 定位：面向内部运营、量化、工程的 PC 端控制台。

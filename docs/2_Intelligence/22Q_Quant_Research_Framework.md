@@ -1,3 +1,13 @@
+---
+title: "StockWise 交易方法与大师智慧的研究吸收框架"
+doc_id: "intelligence-quant-research-framework"
+doc_domain: "intelligence"
+doc_status: "active"
+owner: "founder"
+last_reviewed_at: "2026-03-19"
+summary: "定义交易方法、研究框架与可产品化边界，是多篇方法论与认知类内容的研究事实源。"
+---
+
 # StockWise 交易方法与大师智慧的研究吸收框架
 
 **文档状态**: Current Strategy  

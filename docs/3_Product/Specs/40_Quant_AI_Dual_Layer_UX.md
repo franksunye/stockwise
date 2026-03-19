@@ -1,9 +1,25 @@
+---
+title: "功能规格说明书：量化/AI 双层界面表现 (Spec 40)"
+doc_id: "spec-quant-ai-dual-layer-ux"
+doc_domain: "product"
+doc_status: "active"
+owner: "founder"
+last_reviewed_at: "2026-03-19"
+summary: "定义量化层与 AI 分析层在前台的协同呈现方式，并约束投研决议等解释层的命名与交互表达。"
+---
+
 # 功能规格说明书：量化/AI 双层界面表现 (Spec 40)
 
 > **设计准则**: 严格继承项目现有的 `Silent Math` 视觉语言，复用已有的 Tailwind tokens 和暗黑玻璃态美学，不平地起高楼。对历史数据必须提供完美向下兼容，确保“时光机”模式不崩溃。
 
 ## 0. 现状审查与设计约束 (Status Quo & Constraints)
 当前 (`AICouncil.tsx`) 采用的是“议会投票制” UI：顶部的 Consensus Header 汇集了下方多个 AI 成员的信号以计算共振（如：`倾向做多`，`做空共振`）。
+
+命名说明：
+
+- 组件名 `AICouncil.tsx` 保留工程兼容价值。
+- 对外产品与内容口径统一使用 `投研决议 / Investment Decision`，不再新增“智囊团”式旧称。
+
 **现有资产复用要求**：
 1.  **颜色资产**：继续使用体系内的 `emerald-500/20` (多)、`rose-500/20` (空)、`amber-500/20` (侧)，以及基础的玻璃态 `bg-white/5 border-white/10`。
 2.  **字体资产**：层级标签复用 `text-[10px] uppercase tracking-widest`，长文稿复用 `text-xs text-slate-300 leading-relaxed font-medium`。

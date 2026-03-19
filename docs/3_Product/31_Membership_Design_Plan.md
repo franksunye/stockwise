@@ -1,3 +1,13 @@
+---
+title: "StockWise 会员体系与商业化方案设计"
+doc_id: "product-membership-design-plan"
+doc_domain: "product"
+doc_status: "active"
+owner: "founder"
+last_reviewed_at: "2026-03-19"
+summary: "定义当前会员体系、权益边界与商业化分层，是账号、会员与权益类 Support 内容的事实源。"
+---
+
 # StockWise 会员体系与商业化方案设计
 
 > **核心思路**：通过“规则引擎 (免费)”与“LLM 深度分析 (付费)”的差异化，平衡服务成本与用户价值。

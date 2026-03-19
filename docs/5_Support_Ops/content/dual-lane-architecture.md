@@ -1,14 +1,37 @@
 ---
 title: "双轨制：前台生产线，后台实验线"
+content_id: "support-dual-lane-architecture"
+content_source: "support"
+content_type: "guide"
+canonical_role: "canonical"
 category: "验证与诚信"
 lastUpdated: "2026-03-09"
 source_docs:
   - docs/2_Intelligence/27C_Dual_Lane_Operations_Manual.md
 funnel_stage: "BOFU"
+campaign: "wechat_4_week_sprint_2026q2"
 date: "2026-03-19"
-publish:
+traceability:
+  status: "healthy"
+  last_reviewed_at: "2026-03-19"
+workflow:
+  stage: "reviewing"
+  owner: "cmo"
+  reviewer: "founder"
+  priority: "high"
+  target_publish_date: "2026-04-02"
+  last_action_at: "2026-03-19"
+  blocked_reason: ""
+maintenance:
+  change_status: "updated"
+  update_reason: "product_change"
+website:
+  enabled: true
+  surface: "support"
+distribution:
   wechat:
-    status: "none"
+    enabled: true
+    status: "draft"
 ---
 
 为了保证你看到的每一个建议都是“稳”的，我们在系统底层实施了严密的 **Dual-Lane (生产/实验)** 架构：

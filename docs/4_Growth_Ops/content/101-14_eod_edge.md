@@ -1,22 +1,48 @@
 ---
 title: "101-14: 慢即是快：盘后计算 (EOD) 才是终极武器"
 subtitle: "盘中盯盘会让你智商减半"
+content_id: "growth-101-014"
+content_source: "growth"
+content_type: "article"
+canonical_role: "canonical"
 date: "2026-04-10"
 category: "The Mind"
 funnel_stage: "MOFU"
+campaign: "wechat_4_week_sprint_2026q2"
 rhythm: "Hub"
+traceability:
+  status: "healthy"
+  last_reviewed_at: "2026-03-19"
+workflow:
+  stage: "reviewing"
+  owner: "cmo"
+  reviewer: "founder"
+  priority: "high"
+  target_publish_date: "2026-04-03"
+  last_action_at: "2026-03-19"
+  blocked_reason: ""
+maintenance:
+  change_status: "updated"
+  update_reason: "copy_edit"
+website:
+  enabled: true
+  surface: "learn"
 image: "/images/learn/101-14_eod_edge.png"
 image_prompt: "A conceptual 3D illustration of 盘中盯盘会让你智商减半. Swiss Design, Geometric, Minimalist. Dark Mode background (#050508). Accent colors: Indigo (#6366f1) and Rose Red (#f43f5e). NO text."
-publish:
+distribution:
   wechat:
+    enabled: true
     status: draft
     url: ""
   xhs:
+    enabled: true
     status: draft
     url: ""
   twitter:
+    enabled: true
     status: draft
   toutiao:
+    enabled: true
     status: draft
 source_docs:
   - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md

@@ -1,3 +1,13 @@
+---
+title: "知守 AI (ZISO AI) 领域名词表（用户视角）"
+doc_id: "domain-entities-glossary"
+doc_domain: "product"
+doc_status: "active"
+owner: "founder"
+last_reviewed_at: "2026-03-19"
+summary: "统一产品、研发、内容运营对外使用的核心实体命名，避免同物多名与旧术语残留。"
+---
+
 # 知守 AI (ZISO AI) 领域名词表（用户视角）
 
 定位：MOFU；节奏：Hub。
@@ -44,6 +54,11 @@ Hub = 持续更新的“常规内容”节奏（不是一次性爆款）。
 | 预测记录 | Prediction | Prediction | 某日某标的的一次分析结果记录。 |
 | 通知事件 | Notification | Notify | 向用户触发的提醒与反转信号事件。 |
 | 用户画像 | User Profile | Profile | 与权限、偏好、状态相关的用户信息对象。 |
+
+命名迁移说明：
+
+- 历史旧名 `AI Council / 智囊团` 统一收敛为 `投研决议 / Investment Decision`。
+- 对外内容、前台文案、帮助中心与增长素材应优先使用 `投研决议`，避免新旧口径混用。
 
 ---
 

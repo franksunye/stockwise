@@ -9,8 +9,8 @@ image: "/images/learn/breakthrough_logic.png"
 publish:
   wechat:
     status: published
-    url: "https://mp.weixin.qq.com/s/7Lg6jQ8u_V1wY2a3zPqX0A"
-    date: "2026-03-05"
+    url: "https://mp.weixin.qq.com/s/aXQoun4YcB-Sn1ZDsIz3rg"
+    published_at: "2026-03-05"
   xhs:
     status: draft
     url: ""

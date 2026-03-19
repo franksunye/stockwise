@@ -1,4 +1,8 @@
 {
+  "scripts": {
+    "content:sync": "node scripts/cmo_sync.mjs",
+    "content:audit": "node scripts/content_audit.mjs"
+  },
   "devDependencies": {
     "yaml": "^2.8.2"
   }

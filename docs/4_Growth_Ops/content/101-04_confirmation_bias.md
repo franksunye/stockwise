@@ -12,6 +12,9 @@ funnel_stage: "TOFU"
 publish:
   wechat:
     status: "published"
+    published_at: "2026-02-27"
+    url: "https://mp.weixin.qq.com/s/W2rE5BNMIs3wf3YvT-V0lw"
+    baseline: "frontline_q1_2026"
 
 ---
 

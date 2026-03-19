@@ -1,3 +1,13 @@
+---
+title: "Price Sync Zero-Stale Protocol (Incident 2026-03-16)"
+doc_id: "engineering-price-sync-zero-stale-protocol-20260316"
+doc_domain: "engineering"
+doc_status: "active"
+owner: "founder"
+last_reviewed_at: "2026-03-19"
+summary: "定义价格同步零陈旧协议，是零 stale、价格刷新与相关 Support 内容的工程事实源。"
+---
+
 # Price Sync Zero-Stale Protocol (Incident 2026-03-16)
 
 ## 1. Background

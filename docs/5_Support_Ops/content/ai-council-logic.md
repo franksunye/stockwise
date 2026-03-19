@@ -1,13 +1,44 @@
 ---
 title: "投研决议：多维度的共识"
+content_id: "support-ai-council-logic"
+content_source: "support"
+content_type: "guide"
+canonical_role: "canonical"
 lastUpdated: "2026-03-18"
 source_docs:
   - docs/1_Engineering/25_AICouncil_Collaboration_Routes_20260318.md
 category: "Engine"
 funnel_stage: "BOFU"
-publish:
+traceability:
+  status: "healthy"
+  last_reviewed_at: "2026-03-19"
+workflow:
+  stage: "published"
+  owner: "cmo"
+  reviewer: "founder"
+  priority: "high"
+  target_publish_date: "2026-03-19"
+  last_action_at: "2026-03-19"
+  blocked_reason: ""
+maintenance:
+  change_status: "review_needed"
+  update_reason: "product_change"
+  external_action: "publish_replacement"
+  external_status: "in_progress"
+  external_note: "公众号旧文仍沿用“智囊团”历史语义，建议以“投研决议”现行口径重发替代说明。"
+content_lifecycle:
+  status: "active"
+  superseded_by: "wechat: 投研决议（现行版，待发布）"
+website:
+  enabled: true
+  surface: "support"
+distribution:
   wechat:
+    enabled: true
     status: "published"
+    url: "https://mp.weixin.qq.com/s/NuvCM1CRxNs1GfKvIiotow"
+    published_at: "2026-02-18"
+    baseline: "frontline_q1_2026"
 date: "2026-03-19"
 ---
 

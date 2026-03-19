@@ -1,13 +1,36 @@
 ---
 title: "极端容错解析：大崩盘时的降级渲染预案 (Smart Parser)"
+content_id: "support-smart-parser-ui"
+content_source: "support"
+content_type: "guide"
+canonical_role: "canonical"
 source_docs:
   - docs/1_Engineering/29_Almanac_Data_Lightweight_Protocol_20260316.md
 category: "Support Ops"
 funnel_stage: "BOFU"
+campaign: "wechat_4_week_sprint_2026q2"
 date: "2026-03-19"
-publish:
+traceability:
+  status: "healthy"
+  last_reviewed_at: "2026-03-19"
+workflow:
+  stage: "drafting"
+  owner: "cmo"
+  reviewer: "founder"
+  priority: "high"
+  target_publish_date: "2026-04-07"
+  last_action_at: "2026-03-19"
+  blocked_reason: ""
+maintenance:
+  change_status: "updated"
+  update_reason: "product_change"
+website:
+  enabled: true
+  surface: "support"
+distribution:
   wechat:
-    status: "none"
+    enabled: true
+    status: "draft"
 ---
 
 # 极端容错解析：大崩盘时的降级渲染预案 (Smart Parser)

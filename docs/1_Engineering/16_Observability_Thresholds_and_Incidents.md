@@ -1,3 +1,13 @@
+---
+title: "16 Observability 阈值与异常定义（R2）"
+doc_id: "engineering-observability-thresholds-and-incidents-r2"
+doc_domain: "engineering"
+doc_status: "active"
+owner: "founder"
+last_reviewed_at: "2026-03-19"
+summary: "定义 observability 指标阈值与异常规则，是风险、黑天鹅、波动类内容的工程事实源。"
+---
+
 # 16 Observability 阈值与异常定义（R2）
 
 更新时间：2026-03-07  

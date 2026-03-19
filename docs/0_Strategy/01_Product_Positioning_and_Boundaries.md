@@ -1,3 +1,13 @@
+---
+title: "知守 AI (ZISO AI) 产品定位与能力边界 (Positioning & Boundaries)"
+doc_id: "strategy-product-positioning-and-boundaries"
+doc_domain: "strategy"
+doc_status: "active"
+owner: "founder"
+last_reviewed_at: "2026-03-19"
+summary: "定义产品定位、能力边界与不可进入的赛道，是高层品牌叙事与内容边界的核心事实源。"
+---
+
 # 知守 AI (ZISO AI) 产品定位与能力边界 (Positioning & Boundaries)
 
 **文档状态**: Draft  

@@ -1,3 +1,13 @@
+---
+title: "个人中心通知设置升级方案"
+doc_id: "legacy-user-center-notification-upgrade"
+doc_domain: "product"
+doc_status: "deprecated"
+owner: "founder"
+last_reviewed_at: "2026-03-19"
+summary: "个人中心通知设置的历史升级方案，保留作实现背景参考；现行通知口径应以后续 active specs 为准。"
+---
+
 # 个人中心通知设置升级方案
 
 ## 📍 入口位置
