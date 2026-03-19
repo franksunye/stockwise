@@ -33,21 +33,21 @@
 
 ## 🧠 2. AI 智慧与分析 (AI Intelligence & Analysis)
 - [x] **投研决议 (AI Council)**: 多模型共识算法的判别逻辑。
-- [ ] **共识结论定义 (Consensus Levels)**: **(待起草)** “结论一致” vs “更多共识” vs “判断分歧”的算法定义。
-- [ ] **分析师实名/匿名角色**: **(待起草)** 申策、谷深、林旭、程巨等 AI 分析师的人设与擅长领域。
-- [/] **策略内参解读 (Tactical Brief)**: **(需补全)** 深入技术层面的 Profit/Loss/Empty 场景预案。
-- [ ] **关键价位阶梯 (Price Ladder)**: **(待起草)** 支撑、压力、挑战、防守位的平衡图解。
+- [x] **共识结论定义 (Consensus Levels)**: **(已就绪)** “结论一致” vs “更多共识” vs “判断分歧”的算法定义。
+- [x] **分析师实名/匿名角色**: **(已就绪)** 申策、谷深、林旭、程巨等 AI 分析师的人设与擅长领域。
+- [x] **策略内参解读 (Tactical Brief)**: **(已就绪)** 深入技术层面的 Profit/Loss/Empty 场景预案。
+- [x] **关键价位阶梯 (Price Ladder)**: **(已就绪)** 支撑、压力、挑战、防守位的平衡图解。
 - [x] **胜率历史矩阵 (Win-Rate Matrix)**: 30天预测表现概率回溯。
-- [ ] **大盘宏观黄历 (Yellow Pages)**: **(待起草)** 每日盘前气象与静默数学视角。
-- [ ] **空头压力分析 (HK Only)**: **(待起草)** 沽空比与做空仓位等级解读。
+- [x] **大盘宏观黄历 (Yellow Pages)**: **(已就绪)** 每日盘前气象与静默数学视角。
+- [x] **空头压力分析 (HK Only)**: **(已就绪)** 沽空比与做空仓位等级解读。
 - [x] **失败回溯审计 (Failure Retrospective)**: 针对偏差的公开审计机制。
-- [ ] **模型层级划分 (Model Tiers)**: **(待起草)** 为什么 Pro 能看到 DeepSeek-V3 而免费用户仅限规则引擎。
+- [x] **模型层级划分 (Model Tiers)**: **(已就绪)** 为什么 Pro 能看到 DeepSeek-V3 而免费用户仅限规则引擎。
 
 ---
 
 ## 🧪 3. 量化逻辑与纪律 (Quant Logic & Discipline)
-- [/] **严格模式：防未来函数 (Anti-Future)**: **(需同步 V2)** 锁死时间窗口的强制性。
-- [/] **智能标题语境 (Smart Title)**: **(需更新)** 导航栏随行情动态变化的引导逻辑。
+- [x] **严格模式：防未来函数 (Anti-Future)**: **(已就绪)** 锁死时间窗口的强制性。
+- [x] **智能标题语境 (Smart Title)**: **(已就绪)** 导航栏随行情动态变化的引导逻辑。
 - [x] **RSI 颜色隐喻 (RSI Metaphor)**: “红跌绿涨”感官系统说明。
 - [x] **脉冲与共振 (Pulse & Resonance)**: 呼吸频率作为一致性的量化度量。
 - [x] **置信度百分比 (Confidence Factor)**: 市场秩序的度量衡。
@@ -66,19 +66,19 @@
 - [x] **身份护照系统 (Identity Passport)**: 100% 匿名化。
 - [x] **邮箱绑定机制 (Email Binding)**: 多端唯一入口。
 - [x] **身份找回流程 (Account Recovery)**: 紧急恢复路径。
-- [ ] **邀请墙机制 (Invite Wall)**: **(待起草)** 内测期为什么需要激活码或邀请才能进入。
+- [x] **邀请墙机制 (Invite Wall)**: **(已就绪)** 内测期为什么需要激活码或邀请才能进入。
 - [x] **隐私承诺 (Privacy Pledge)**: 不收集敏感信息底线。
 - [x] **角标清除逻辑 (Badge Hygiene)**: 应用红点自动清理。
 
 ---
 
 ## 🎁 6. 权益与增长 (Benefits & Growth)
-- [ ] **投资模式自选 (Investment Mode)**: **(待起草)** 平衡/稳健/激进策略切换。
-- [ ] **新用户体验期 (Onboarding Trial)**: **(待起草)** 完成 OB 后获赠 3 天 Pro 权益规则。
-- [ ] **邀请双向激励 (Referral Mechanism)**: **(待起草)** 邀请 1 人双方各获 5 天 Pro（基于 `MEMBERSHIP_CONFIG`）。
-- [ ] **自选股配额 (Stock Quota)**: **(待起草)** 免费版 3 只 vs Pro 版 10 只的门槛说明。
-- [ ] **模型访问权等级**: **(待起草)** `hunyuan-lite` 与 `rule-engine` 的分级开放详情。
-- [/] **渠道分润看板 (Partner Dashboard)**: **(需更新)** 佣金计算、 alias 与提现。
+- [x] **投资模式自选 (Investment Mode)**: **(已就绪)** 平衡/稳健/激进策略切换。
+- [x] **新用户体验期 (Onboarding Trial)**: **(已就绪)** 完成 OB 后获赠 3 天 Pro 权益规则。
+- [x] **邀请双向激励 (Referral Mechanism)**: **(已就绪)** 邀请 1 人双方各获 5 天 Pro（基于 `MEMBERSHIP_CONFIG`）。
+- [x] **自选股配额 (Stock Quota)**: **(已就绪)** 免费版 3 只 vs Pro 版 10 只的门槛说明。
+- [x] **模型访问权等级**: **(已就绪)** `hunyuan-lite` 与 `rule-engine` 的分级开放详情。
+- [x] **渠道分润看板 (Partner Dashboard)**: **(已就绪)** 佣金计算、 alias 与提现。
 - [x] **权益兑换码 (Redeem Codes)**: 发放与激活说明。
 
 ---
@@ -92,14 +92,14 @@
 ---
 
 ## ⚙️ 8. 数据与系统保障 (Data & Infra)
-- [ ] **零过期协议 (Zero-Stale Protocol)**: **(待起草)** 实时行情锁与决策价值。
+- [x] **零过期协议 (Zero-Stale Protocol)**: **(已就绪)** 实时行情锁与决策价值。
 - [x] **乐观更新机制 (Optimistic Updates)**: “秒应”交互技术。
 - [x] **实时盘中拼接 (Intraday Data Splicing)**: EOD 与实时 Sina 接口拼接。
 - [x] **按需同步算法 (On-Demand Sync)**: 优先级调度逻辑。
-- [ ] **预发隔离环境 (Env Isolation)**: **(待起草)** 代码隔离对数据安全的作用。
-- [ ] **治理控制塔 (Tradeability Tower)**: **(待起草)** AI 模型上线门禁标准。
-- [ ] **溯源审计 ID (Trace ID)**: **(待起草)** 用户如何通过 ID 反馈异常预测。
-- [ ] **极端容错解析 (Smart Parser)**: **(待起草)** 为什么即使 LLM 抽风，UI 依然能稳定显示数据。
+- [x] **预发隔离环境 (Env Isolation)**: **(已就绪)** 代码隔离对数据安全的作用。
+- [x] **治理控制塔 (Tradeability Tower)**: **(已就绪)** AI 模型上线门禁标准。
+- [x] **溯源审计 ID (Trace ID)**: **(已就绪)** 用户如何通过 ID 反馈异常预测。
+- [x] **极端容错解析 (Smart Parser)**: **(已就绪)** 为什么即使 LLM 抽风，UI 依然能稳定显示数据。
 
 ---
 
