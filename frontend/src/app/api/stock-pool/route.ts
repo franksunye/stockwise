@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic';
 import { getDbClient } from '../../../lib/db';
 import { triggerOnDemandSync } from '@/lib/github-actions';
 import { getMarketFromSymbol, getExpectedLatestDataDate } from '@/lib/date-utils';
-import { Client } from '@libsql/client';
+import type { Client } from '@libsql/client';
 import type { Database } from 'better-sqlite3';
 import { requireUserSession } from '@/lib/user-session';
 
@@ -80,6 +80,12 @@ export async function POST(request: Request) {
         // 标记是否为新股票（用于决定是否触发即时同步）
 
         if ('execute' in client) {
+            const existingWatch = await client.execute({
+                sql: 'SELECT 1 FROM user_watchlist WHERE user_id = ? AND symbol = ? LIMIT 1',
+                args: [userId, symbol],
+            });
+            const alreadyWatched = existingWatch.rows.length > 0;
+
             // Turso
             // 1. 添加到用户关注列表
             await client.execute({
@@ -87,47 +93,52 @@ export async function POST(request: Request) {
                 args: [userId, symbol, now],
             });
 
-            // 2. 更新全局股票池
-            const existing = await client.execute({
-                sql: 'SELECT watchers_count FROM global_stock_pool WHERE symbol = ?',
-                args: [symbol],
-            });
-
-            if (existing.rows.length > 0) {
-                // 股票已存在，增加计数（无需触发即时同步，常规同步会覆盖）
-                await client.execute({
-                    sql: 'UPDATE global_stock_pool SET watchers_count = watchers_count + 1 WHERE symbol = ?',
+            // 2. 仅在“本用户本次新增”时更新全局股票池，避免重复添加虚增 watchers_count
+            if (!alreadyWatched) {
+                const existing = await client.execute({
+                    sql: 'SELECT watchers_count FROM global_stock_pool WHERE symbol = ?',
                     args: [symbol],
                 });
-            } else {
-                // 新股票，插入记录
-                await client.execute({
-                    sql: 'INSERT INTO global_stock_pool (symbol, name, watchers_count, first_watched_at) VALUES (?, ?, 1, ?)',
-                    args: [symbol, displayName, now],
-                });
+
+                if (existing.rows.length > 0) {
+                    await client.execute({
+                        sql: 'UPDATE global_stock_pool SET watchers_count = watchers_count + 1 WHERE symbol = ?',
+                        args: [symbol],
+                    });
+                } else {
+                    await client.execute({
+                        sql: 'INSERT INTO global_stock_pool (symbol, name, watchers_count, first_watched_at) VALUES (?, ?, 1, ?)',
+                        args: [symbol, displayName, now],
+                    });
+                }
             }
         } else {
+            const existingWatch = client
+                .prepare('SELECT 1 FROM user_watchlist WHERE user_id = ? AND symbol = ? LIMIT 1')
+                .get(userId, symbol) as { 1: number } | undefined;
+            const alreadyWatched = Boolean(existingWatch);
+
             // SQLite
             // 1. 添加到用户关注列表
             client
                 .prepare('INSERT OR IGNORE INTO user_watchlist (user_id, symbol, added_at) VALUES (?, ?, ?)')
                 .run(userId, symbol, now);
 
-            // 2. 更新全局股票池
-            const existing = client
-                .prepare('SELECT watchers_count FROM global_stock_pool WHERE symbol = ?')
-                .get(symbol);
+            // 2. 仅在“本用户本次新增”时更新全局股票池
+            if (!alreadyWatched) {
+                const existing = client
+                    .prepare('SELECT watchers_count FROM global_stock_pool WHERE symbol = ?')
+                    .get(symbol);
 
-            if (existing) {
-                // 股票已存在，增加计数（无需触发即时同步）
-                client
-                    .prepare('UPDATE global_stock_pool SET watchers_count = watchers_count + 1 WHERE symbol = ?')
-                    .run(symbol);
-            } else {
-                // 新股票，插入记录
-                client
-                    .prepare('INSERT INTO global_stock_pool (symbol, name, watchers_count, first_watched_at) VALUES (?, ?, 1, ?)')
-                    .run(symbol, displayName, now);
+                if (existing) {
+                    client
+                        .prepare('UPDATE global_stock_pool SET watchers_count = watchers_count + 1 WHERE symbol = ?')
+                        .run(symbol);
+                } else {
+                    client
+                        .prepare('INSERT INTO global_stock_pool (symbol, name, watchers_count, first_watched_at) VALUES (?, ?, 1, ?)')
+                        .run(symbol, displayName, now);
+                }
             }
         }
 
@@ -196,6 +207,12 @@ export async function DELETE(request: Request) {
         const client = getDbClient();
 
         if ('execute' in client) {
+            const existingWatch = await client.execute({
+                sql: 'SELECT 1 FROM user_watchlist WHERE user_id = ? AND symbol = ? LIMIT 1',
+                args: [userId, symbol],
+            });
+            const hadWatch = existingWatch.rows.length > 0;
+
             // Turso
             // 1. 从用户关注列表删除
             await client.execute({
@@ -203,25 +220,39 @@ export async function DELETE(request: Request) {
                 args: [userId, symbol],
             });
 
-            // 2. 更新全局股票池计数
+            // 2. 仅在确实存在该关注时递减计数，且不允许负数
+            if (hadWatch) {
+                await client.execute({
+                    sql: 'UPDATE global_stock_pool SET watchers_count = CASE WHEN watchers_count > 0 THEN watchers_count - 1 ELSE 0 END WHERE symbol = ?',
+                    args: [symbol],
+                });
+            }
+
+            // 3. 若无人关注，立即从全局关注池移除，保持“用户关注池总和”语义
             await client.execute({
-                sql: 'UPDATE global_stock_pool SET watchers_count = watchers_count - 1 WHERE symbol = ?',
+                sql: 'DELETE FROM global_stock_pool WHERE symbol = ? AND watchers_count <= 0',
                 args: [symbol],
             });
-
-            // 3. 可选：如果无人关注，删除记录 (暂时保留以保存历史数据)
-            // await client.execute({
-            //     sql: 'DELETE FROM global_stock_pool WHERE symbol = ? AND watchers_count <= 0',
-            //     args: [symbol],
-            // });
         } else {
+            const existingWatch = client
+                .prepare('SELECT 1 FROM user_watchlist WHERE user_id = ? AND symbol = ? LIMIT 1')
+                .get(userId, symbol) as { 1: number } | undefined;
+            const hadWatch = Boolean(existingWatch);
+
             // SQLite
             client
                 .prepare('DELETE FROM user_watchlist WHERE user_id = ? AND symbol = ?')
                 .run(userId, symbol);
 
+            if (hadWatch) {
+                client
+                    .prepare('UPDATE global_stock_pool SET watchers_count = CASE WHEN watchers_count > 0 THEN watchers_count - 1 ELSE 0 END WHERE symbol = ?')
+                    .run(symbol);
+            }
+
+            // 若无人关注，立即移除
             client
-                .prepare('UPDATE global_stock_pool SET watchers_count = watchers_count - 1 WHERE symbol = ?')
+                .prepare('DELETE FROM global_stock_pool WHERE symbol = ? AND watchers_count <= 0')
                 .run(symbol);
 
             client.close();
