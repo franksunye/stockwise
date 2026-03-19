@@ -199,7 +199,7 @@ const EN_PRICING_PLANS = [
       'Priority support',
     ],
     cta: 'Contact Support',
-    href: 'mailto:support@ziso.cc',
+    href: 'mailto:hi@ziso.cc',
     highlight: false,
     accent: 'text-emerald-300',
   },
