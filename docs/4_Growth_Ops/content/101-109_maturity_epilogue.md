@@ -66,7 +66,7 @@ L4 级的物理霸权，L3 级的算力堡垒，L0/L1 级的认知陷阱…… �
 
 ---
 
-#### 附录：专业名词对照 (Glossary)
+#### 认知对齐：行话指南
 <small>
 - **避风港**：Sanctuary / Safety Zone
 - **局部规则**：Local Dynamics

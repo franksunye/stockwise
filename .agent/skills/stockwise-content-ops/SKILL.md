@@ -34,7 +34,7 @@ This skill integrates the **ZISO World-Class Playbook** (Philosophical Depth) wi
     - **Metaphor First (隐喻先行)**: Use intuitive metaphors (e.g., "Dealer", "Fishing Rod Bend", "Scales") *before* defining technical terms (MFE, MAE, R-multiples).
     - **Pure Chinese Flow (纯净中文流)**: Remove bilingual terms (e.g., `(Management)`) from the main body. Keep the prose naturally Chinese to avoid reading "stutters."
     - **Authority Descriptors (权威短注)**: Use brief inline descriptions for institutions and authors (e.g., "华尔街顶级巨头 Citadel", "头寸管理大师 Van Tharp") to build instant trust.
-    - **Visual Glossary (底部对照表)**: Use a standardized `<small>` footer glossary for all English technical terms and institution/author details.
+    - **认知对齐 (行话指南)**：不再使用传统的“附录”标题，而是使用如“认知对齐：行话指南”这类更具极客感且符合用户心智的标题。Use a standardized `<small>` footer glossary for all English technical terms and institution/author details.
     - **Direct Impact**: First sentence must draw blood.
     - **Native Lingo**: Use "讲真", "割肉", "接盘侠", "关灯吃面".
     - **Short & Sharp**: Use periods to force a cold, rhythmic pace.

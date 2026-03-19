@@ -72,7 +72,7 @@ L1 级选手的最大的问题在于没有 **样本外回测** 的概念。
 
 ---
 
-#### 附录：专业名词对照 (Glossary)
+#### 认知对齐：行话指南
 <small>
 - **工具驱动**：Indicator Assisted
 - **过度拟合**：Overfitting

@@ -77,7 +77,7 @@ source_docs:
 
 ---
 
-#### 附录：专业名词对照 (Glossary)
+#### 认知对齐：行话指南
 <small>
 - **交易管理**：Trade Management
 - **注码管理/头寸规模**：Position Sizing

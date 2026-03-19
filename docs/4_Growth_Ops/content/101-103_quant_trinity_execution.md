@@ -74,7 +74,7 @@ ZISO 明确告诉你：**散户不要去壕沟里对拼手速。**
 
 ---
 
-#### 附录：专业名词对照 (Glossary)
+#### 认知对齐：行话指南
 <small>
 - **交易执行**：Trade Execution
 - **执行模型**：Execution Model

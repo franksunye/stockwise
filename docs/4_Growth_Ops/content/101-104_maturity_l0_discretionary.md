@@ -70,7 +70,7 @@ L0 级的终点往往是由于**锚定效应**（死守成本价）导致的大�
 
 ---
 
-#### 附录：专业名词对照 (Glossary)
+#### 认知对齐：行话指南
 <small>
 - **直觉驱动**：Discretionary Trading
 - **快思考/慢思考**：System 1 / System 2 Thinking

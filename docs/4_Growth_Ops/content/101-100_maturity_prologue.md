@@ -63,7 +63,7 @@ source_docs:
 
 ---
 
-#### 附录：专业名词对照 (Glossary)
+#### 认知对齐：行话指南
 <small>
 - **成熟度模型**：Maturity Model / Pyramid
 - **生态位**：Niche

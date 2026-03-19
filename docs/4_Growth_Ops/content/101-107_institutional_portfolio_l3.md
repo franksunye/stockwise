@@ -69,7 +69,7 @@ L3 级意味着你已经从一个“猎人”变成了一个“主权财富经�
 
 ---
 
-#### 附录：专业名词对照 (Glossary)
+#### 认知对齐：行话指南
 <small>
 - **因子投资**：Factor Investing (Value, Size, Momentum, Quality, Low Volatility)
 - **风险平价**：Risk Parity (Bridgewater's All Weather style)

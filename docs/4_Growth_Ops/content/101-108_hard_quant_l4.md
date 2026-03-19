@@ -73,7 +73,7 @@ L4 是人类目前在二级市场创造出的最精密、最冰冷的效率机�
 
 ---
 
-#### 附录：专业名词对照 (Glossary)
+#### 认知对齐：行话指南
 <small>
 - **极硬量化**：Hard Quant
 - **高频交易**：HFT (High Frequency Trading)

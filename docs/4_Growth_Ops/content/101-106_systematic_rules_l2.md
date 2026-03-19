@@ -71,7 +71,7 @@ L2 级是一个分水岭：跨过去，你就是用统计学武装的职业猎�
 
 ---
 
-#### 附录：专业名词对照 (Glossary)
+#### 认知对齐：行话指南
 <small>
 - **规则化量化**：Systematic Rules
 - **波动收缩模式**：VCP (Volatility Contraction Pattern)

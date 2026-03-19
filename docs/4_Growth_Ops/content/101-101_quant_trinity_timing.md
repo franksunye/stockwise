@@ -78,7 +78,7 @@ source_docs:
 
 ---
 
-#### 附录：专业名词对照 (Glossary)
+#### 认知对齐：行话指南
 <small>
 - **择时**：Timing / Signal Generation
 - **洞见**：Alpha Insight
