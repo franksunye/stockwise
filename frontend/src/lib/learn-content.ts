@@ -201,8 +201,3 @@ export function getCategories(articles: ArticleMeta[]): string[] {
     const categories = new Set(articles.map(a => a.category));
     return Array.from(categories);
 }
-
-export function getCategories(articles: ArticleMeta[]): string[] {
-    const categories = new Set(articles.map(a => a.category));
-    return Array.from(categories);
-}
