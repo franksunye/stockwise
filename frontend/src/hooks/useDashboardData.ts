@@ -106,6 +106,8 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
     const lastPriceRefreshTimeRef = useRef<number>(0);
     const broadcastFailureStreakRef = useRef<number>(0);
     const broadcastCircuitOpenUntilRef = useRef<number>(0);
+    const lastFallbackEventAtRef = useRef<number>(0);
+    const lastRecoveryEventAtRef = useRef<number>(0);
 
     // 1. 初始化：尝试从本地缓存读取，实现【秒开】
     useEffect(() => {
@@ -366,6 +368,30 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
         lastPriceRefreshTimeRef.current = now;
         try {
             const shouldUseLegacyOnly = now < broadcastCircuitOpenUntilRef.current;
+            const reportBroadcastEvent = async (
+                eventType: 'broadcast_circuit_open' | 'legacy_fallback_used' | 'broadcast_recovered',
+                reason: string,
+                failureStreak: number,
+            ): Promise<void> => {
+                try {
+                    await fetch('/api/ops/broadcast/events', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            eventType,
+                            market: 'all',
+                            reason,
+                            failureStreak,
+                            circuitOpenUntil: broadcastCircuitOpenUntilRef.current > 0
+                                ? new Date(broadcastCircuitOpenUntilRef.current).toISOString()
+                                : null,
+                            clientTime: new Date().toISOString(),
+                        }),
+                    });
+                } catch (err) {
+                    console.warn('[Dashboard] Failed to report broadcast event:', err);
+                }
+            };
 
             const fetchBroadcast = async (): Promise<Map<string, PriceSnapshot> | null> => {
                 // 广播端点默认走 all 市场，前端按 watchlist 本地过滤，兼容双市场自选池。
@@ -416,6 +442,13 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
                 map = await fetchBroadcast();
                 if (map && map.size > 0) {
                     // 广播恢复成功，清空失败计数与熔断状态。
+                    if (
+                        broadcastFailureStreakRef.current > 0 &&
+                        now - lastRecoveryEventAtRef.current > 60_000
+                    ) {
+                        lastRecoveryEventAtRef.current = now;
+                        void reportBroadcastEvent('broadcast_recovered', 'broadcast_fetch_ok', broadcastFailureStreakRef.current);
+                    }
                     broadcastFailureStreakRef.current = 0;
                     broadcastCircuitOpenUntilRef.current = 0;
                 } else {
@@ -425,11 +458,23 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
                         console.warn(
                             `[Dashboard] Broadcast circuit open for ${BROADCAST_CIRCUIT_BREAKER_MS / 1000}s after ${broadcastFailureStreakRef.current} failures`,
                         );
+                        if (now - lastFallbackEventAtRef.current > 60_000) {
+                            lastFallbackEventAtRef.current = now;
+                            void reportBroadcastEvent('broadcast_circuit_open', 'broadcast_empty_or_failed', broadcastFailureStreakRef.current);
+                        }
                     }
                     map = await fetchLegacy();
+                    if (broadcastFailureStreakRef.current > 0 && now - lastFallbackEventAtRef.current > 60_000) {
+                        lastFallbackEventAtRef.current = now;
+                        void reportBroadcastEvent('legacy_fallback_used', 'broadcast_fetch_failed', broadcastFailureStreakRef.current);
+                    }
                 }
             } else {
                 map = await fetchLegacy();
+                if (now - lastFallbackEventAtRef.current > 60_000) {
+                    lastFallbackEventAtRef.current = now;
+                    void reportBroadcastEvent('legacy_fallback_used', 'broadcast_circuit_open', broadcastFailureStreakRef.current);
+                }
             }
 
             if (!map || map.size === 0) return;

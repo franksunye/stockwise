@@ -1,0 +1,57 @@
+name: Broadcast Ops Guard
+
+on:
+  schedule:
+    # every 15 minutes
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Broadcast health probe
+        env:
+          TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+          DB_SOURCE: cloud
+        run: |
+          python backend/scripts/broadcast_health_probe.py
+
+      - name: Pool reconcile
+        env:
+          TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+          DB_SOURCE: cloud
+        run: |
+          python backend/scripts/reconcile_global_stock_pool.py
+
+      - name: Notify ADMIN on failure
+        if: failure()
+        env:
+          WECOM_ROBOT_KEY: ${{ secrets.WECOM_ROBOT_KEY }}
+          ADMIN_MOBILES: ${{ secrets.ADMIN_MOBILES }}
+        run: |
+          python backend/scripts/send_admin_workflow_notification.py \
+            --task-name "Broadcast Ops Guard" \
+            --status failed \
+            --message "Broadcast probe or pool reconcile failed. Please inspect workflow run logs." \
+            --rerun-workflow "broadcast_ops_guard.yml" \
+            --meta "workflow=broadcast_ops_guard.yml" \
+            --meta "repo=${{ github.repository }}" \
+            --meta "run_id=${{ github.run_id }}"

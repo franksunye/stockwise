@@ -22,8 +22,12 @@ This directory serves as the unified single source of truth for the 知守 AI (Z
 - [Reliability & Quality Gates](./1_Engineering/11_Reliability_Protocol.md)
 - [Quant-Engine Architecture](./1_Engineering/13_Quant_Engine_Architecture.md)
 - [Investment Mode Backend Runbook](./1_Engineering/14_Investment_Mode_Backend_Runbook.md)
+- [Capacity Planning & Scaling Strategy](./1_Engineering/31_Capacity_Planning_And_Scaling_Strategy_20260317.md) *(主路线图：做什么/何时做)*
+- [Frontend Network Zero-Redundancy](./1_Engineering/32_Frontend_Network_Optimization_Zero_Redundancy_20260318.md) *(前端专项实现细则)*
+- [Cloudflare Workers Migration POC](./1_Engineering/33_Cloudflare_Workers_Migration_POC_20260318.md) *(POC 证据与测量数据，不是实施主计划)*
 - [Stock News Fetching Implementation](./1_Engineering/33_Stock_News_Fetching_Implementation.md)
 - [Dashboard Page Refactoring Design](./1_Engineering/34_Dashboard_Page_Refactoring_Design.md)
+- [Broadcast Layer A Operations Runbook](./1_Engineering/35_Broadcast_LayerA_Operations_Runbook_20260319.md) *(上线运行与应急收口标准)*
 
 ### Current Source of Truth: Investment Mode / Tradeability
 - [Dual-Lane Operations](./2_Intelligence/27C_Dual_Lane_Operations_Manual.md)
@@ -57,11 +61,14 @@ This directory serves as the unified single source of truth for the 知守 AI (Z
 
 ### [4_Growth_Ops/](./4_Growth_Ops/) - Growth
 > Project "Energy": Marketing, content, and user operation workflows.
-- [Missing Features & Optimization Plan](./4_Growth_Ops/51_Missing_Features_Plan.md)
-- [Annual Content Strategy 2026](./4_Growth_Ops/52_Annual_Content_Strategy_2026.md)
-- [Chinese SEO/GEO Foundation Plan](./4_Growth_Ops/53_Chinese_SEO_GEO_Foundation_Plan.md)
-- [SEO/GEO Execution Log 2026Q1](./4_Growth_Ops/54_SEO_GEO_Execution_Log_2026Q1.md)
-- [User Invitation Campaign Plan](./4_Growth_Ops/55_User_Invitation_Campaign_Plan.md)
+- [Annual Content Strategy 2026](./4_Growth_Ops/40_Annual_Content_Strategy_2026.md)
+- [Growth Content Alignment Checklist](./4_Growth_Ops/41_Growth_Content_Alignment_Checklist.md)
+- [Chinese SEO/GEO Foundation Plan](./4_Growth_Ops/43_Chinese_SEO_GEO_Foundation_Plan.md)
+- [Content Traceability Matrix](./4_Growth_Ops/44_Content_Traceability_Matrix.md)
+- [Traceability Debt Cleanup Plan](./4_Growth_Ops/45_Traceability_Debt_Cleanup_Plan.md)
+- [User Invitation Campaign Plan](./4_Growth_Ops/45_User_Invitation_Campaign_Plan.md)
+- [Content Operations Master Guide](./4_Growth_Ops/46_Content_Operations_System_Blueprint.md)
+- [Content Operations Registry](./4_Growth_Ops/content/README.md)
 - [Learn Center: ZISO 101 Syllabus](./4_Growth_Ops/content/ZISO_101_SYLLABUS.md)
 - **[content/](./4_Growth_Ops/content/)** (Original Learn Center Case Studies)
 - **[wechat-drafts/](./4_Growth_Ops/wechat-drafts/)** (Drafts for Support Center Articles)
@@ -88,4 +95,4 @@ This directory serves as the unified single source of truth for the 知守 AI (Z
 3. **Consistency Checks**: When code implementation conflicts with documentation, the code takes precedence. Always update documentation promptly to reflect actual implementations.
 
 ---
-**Last Updated**: March 18, 2026
+**Last Updated**: March 19, 2026

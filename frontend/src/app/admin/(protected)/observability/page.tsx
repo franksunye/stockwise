@@ -63,6 +63,36 @@ interface ObservabilityPayload {
   };
 }
 
+interface BroadcastObservabilityPayload {
+  generated_at: string;
+  broadcast: {
+    total_checks_24h: number;
+    ok_checks_24h: number;
+    ok_rate_24h: number;
+    avg_latency_ms_24h: number;
+    max_latency_ms_24h: number;
+    empty_result_checks_24h: number;
+  };
+  pool_reconcile: {
+    latest_runs: Array<{
+      run_id: string;
+      started_at: string | null;
+      status: string;
+      mismatch_before: number;
+      mismatch_after: number;
+      updated_rows: number;
+      deleted_rows: number;
+    }>;
+  };
+  fallback_events: {
+    total_events_24h: number;
+    legacy_fallback_24h: number;
+    circuit_open_24h: number;
+    recovered_24h: number;
+    last_event_at: string | null;
+  };
+}
+
 function pct(v: number): string {
   return `${(v * 100).toFixed(1)}%`;
 }
@@ -89,15 +119,22 @@ function alertLabel(metric: string) {
 
 export default function ObservabilityPage() {
   const [data, setData] = useState<ObservabilityPayload | null>(null);
+  const [broadcastData, setBroadcastData] = useState<BroadcastObservabilityPayload | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let active = true;
     const run = async () => {
       try {
-        const res = await fetch('/api/admin/observability', { cache: 'no-store' });
-        const json = await res.json();
-        if (active) setData(json);
+        const [coreRes, broadcastRes] = await Promise.all([
+          fetch('/api/admin/observability', { cache: 'no-store' }),
+          fetch('/api/admin/observability/broadcast', { cache: 'no-store' }),
+        ]);
+        const [coreJson, broadcastJson] = await Promise.all([coreRes.json(), broadcastRes.json()]);
+        if (active) {
+          setData(coreJson);
+          setBroadcastData(broadcastJson);
+        }
       } catch (e) {
         console.error('Failed to fetch observability', e);
       } finally {
@@ -175,6 +212,43 @@ export default function ObservabilityPage() {
                 <p className="mt-3 text-3xl font-black">{headline?.modeSuccess || '--'}</p>
                 <p className="text-xs text-slate-400 mt-2">
                   总运行：{data?.mode_pipeline.total_runs_14d ?? 0} | 失败：{data?.mode_pipeline.failed_runs_14d ?? 0}
+                </p>
+              </div>
+            </section>
+
+            <section className="grid md:grid-cols-3 gap-4">
+              <div className="rounded-2xl border border-cyan-500/30 bg-cyan-500/10 p-5">
+                <div className="flex items-center gap-2 text-cyan-300 text-xs uppercase tracking-widest font-black">
+                  <Gauge className="w-4 h-4" />
+                  Broadcast 健康（24 小时）
+                </div>
+                <p className="mt-3 text-3xl font-black">{pct(broadcastData?.broadcast.ok_rate_24h || 0)}</p>
+                <p className="text-xs text-slate-400 mt-2">
+                  探测成功 {broadcastData?.broadcast.ok_checks_24h ?? 0} / {broadcastData?.broadcast.total_checks_24h ?? 0}
+                </p>
+              </div>
+              <div className="rounded-2xl border border-fuchsia-500/30 bg-fuchsia-500/10 p-5">
+                <div className="flex items-center gap-2 text-fuchsia-300 text-xs uppercase tracking-widest font-black">
+                  <ShieldAlert className="w-4 h-4" />
+                  Fallback 事件（24 小时）
+                </div>
+                <p className="mt-3 text-3xl font-black">{broadcastData?.fallback_events.total_events_24h ?? 0}</p>
+                <p className="text-xs text-slate-400 mt-2">
+                  熔断 {broadcastData?.fallback_events.circuit_open_24h ?? 0} | 回退 {broadcastData?.fallback_events.legacy_fallback_24h ?? 0}
+                </p>
+              </div>
+              <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-5">
+                <div className="flex items-center gap-2 text-emerald-300 text-xs uppercase tracking-widest font-black">
+                  <Activity className="w-4 h-4" />
+                  Pool 对账最近一次
+                </div>
+                <p className="mt-3 text-3xl font-black">
+                  {broadcastData?.pool_reconcile.latest_runs?.[0]?.status || '--'}
+                </p>
+                <p className="text-xs text-slate-400 mt-2">
+                  mismatch {broadcastData?.pool_reconcile.latest_runs?.[0]?.mismatch_before ?? 0}
+                  {' -> '}
+                  {broadcastData?.pool_reconcile.latest_runs?.[0]?.mismatch_after ?? 0}
                 </p>
               </div>
             </section>

@@ -794,6 +794,55 @@ def init_db():
                 updated_at TIMESTAMP DEFAULT (datetime('now', '+8 hours'))
             )
         """)
+
+        # 11b. Broadcast Ops Guard Tables
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS ops_broadcast_health (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                endpoint TEXT NOT NULL,
+                market TEXT NOT NULL,
+                status_code INTEGER NOT NULL,
+                latency_ms INTEGER NOT NULL,
+                item_count INTEGER DEFAULT 0,
+                ok INTEGER NOT NULL DEFAULT 0,
+                error_message TEXT,
+                checked_at TEXT NOT NULL
+            )
+        """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS ops_pool_reconcile_runs (
+                run_id TEXT PRIMARY KEY,
+                started_at TEXT NOT NULL,
+                finished_at TEXT,
+                status TEXT NOT NULL,
+                mismatch_before INTEGER DEFAULT 0,
+                mismatch_after INTEGER DEFAULT 0,
+                non_positive_before INTEGER DEFAULT 0,
+                non_positive_after INTEGER DEFAULT 0,
+                updated_rows INTEGER DEFAULT 0,
+                deleted_rows INTEGER DEFAULT 0,
+                details_json TEXT,
+                error_message TEXT
+            )
+        """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS ops_broadcast_fallback_events (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                event_type TEXT NOT NULL,
+                market TEXT NOT NULL DEFAULT 'all',
+                reason TEXT,
+                failure_streak INTEGER DEFAULT 0,
+                circuit_open_until TEXT,
+                client_time TEXT,
+                user_agent TEXT,
+                created_at TEXT NOT NULL
+            )
+        """)
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_ops_broadcast_checked_at ON ops_broadcast_health(checked_at DESC)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_ops_broadcast_market_checked ON ops_broadcast_health(market, checked_at DESC)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_ops_reconcile_started_at ON ops_pool_reconcile_runs(started_at DESC)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_ops_broadcast_fallback_created ON ops_broadcast_fallback_events(created_at DESC)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_ops_broadcast_fallback_type_created ON ops_broadcast_fallback_events(event_type, created_at DESC)")
         
         # 12. Robust Schema Migrations (Fixing production drift)
         def add_column_if_missing(table, column, definition):
