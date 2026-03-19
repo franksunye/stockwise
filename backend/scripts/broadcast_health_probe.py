@@ -77,6 +77,11 @@ def _candidate_base_urls() -> List[str]:
             if bare_variant not in candidates:
                 candidates.append(bare_variant)
 
+    # Final safety fallback for production probing.
+    default_app = "https://app.ziso.cc"
+    if default_app not in candidates:
+        candidates.append(default_app)
+
     return candidates
 
 
