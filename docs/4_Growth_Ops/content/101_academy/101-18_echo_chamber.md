@@ -54,9 +54,9 @@ ZISO 的量化引擎极其鄙视“新闻解读”。
 ---
 
 #### 认知对齐：行话指南
-<small>
+
 - **回音壁效应**：Echo Chamber
 - **主力资金**：Smart Money
 - **资金足迹**：Money Trail
 - **信息茧房**：Information Cocoon
-</small>
+

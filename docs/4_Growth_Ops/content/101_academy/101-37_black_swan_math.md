@@ -60,8 +60,8 @@ ZISO 的核心架构从不建立在“岁月静好”上。我们的风控引擎
 ---
 
 #### 认知对齐：行话指南
-<small>
+
 - **厚尾效应**：Fat Tails
 - **相关性**：Correlation
 - **风控引擎**：Risk Engine / Phase 3 Protection
-</small>
+

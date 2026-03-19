@@ -73,10 +73,10 @@ source_docs:
 ---
 
 #### 认知对齐：行话指南
-<small>
+
 - **最大有利运动**：MFE - Maximum Favorable Excursion
 - **开仓点**：Entry Point
 - **解套**：Escaping a losing trade at parity
 - **爆发力**：Momentum / Explosion
-</small>
+
  

@@ -64,12 +64,12 @@ source_docs:
 ---
 
 #### 认知对齐：行话指南
-<small>
+
 - **成熟度模型**：Maturity Model / Pyramid
 - **生态位**：Niche
 - **思维范式**：Paradigm Shift
 - **上帝视角**：Bird's Eye View / Macro Perspective
-</small>
+
 
 ---
 *开始航行：101-104《L0级——凭直觉交易，是在浓雾中盲目狂奔》*

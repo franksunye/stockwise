@@ -76,10 +76,10 @@ source_docs:
 ---
 
 #### 认知对齐：行话指南
-<small>
+
 - **无状态**：Stateless
 - **持仓均价**：Break-even Price / Cost Basis
 - **解套**：Unlocking a losing position
 - **信号中心**：The Signal Center
-</small>
+
  

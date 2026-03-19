@@ -69,14 +69,14 @@ L3 级意味着你已经从一个“猎人”变成了一个“主权财富经�
 ---
 
 #### 认知对齐：行话指南
-<small>
+
 - **因子投资**：Factor Investing (Value, Size, Momentum, Quality, Low Volatility)
 - **风险平价**：Risk Parity (Bridgewater's All Weather style)
 - **风险归因**：Risk Attribution (Alpha vs. Beta)
 - **不相关性**：Non-correlation / Diversification
 - **AQR (Cliff Asness)**：全球顶级量化对冲基金，系统化策略的学术捍卫者。
 - **Eugene Fama**：现代金融之父，有效市场假说与五因子模型奠基人。
-</small>
+
 
 ---
 *下一篇：101-108《L4级——极硬量化，是物理层面的毫秒之战》*

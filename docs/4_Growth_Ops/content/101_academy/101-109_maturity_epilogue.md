@@ -67,12 +67,12 @@ L4 级的物理霸权，L3 级的算力堡垒，L0/L1 级的认知陷阱…… �
 ---
 
 #### 认知对齐：行话指南
-<small>
+
 - **避风港**：Sanctuary / Safety Zone
 - **局部规则**：Local Dynamics
 - **逻辑闭环**：Execution Consistency
 - **理性共鸣**：Rational Resonance
-</small>
+
 
 ---
 *祝你在算法的丛林中，找到属于自己的逻辑之光。*

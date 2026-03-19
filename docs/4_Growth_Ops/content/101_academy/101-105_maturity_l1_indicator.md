@@ -72,13 +72,13 @@ L1 级选手的最大的问题在于没有 **样本外回测** 的概念。
 ---
 
 #### 认知对齐：行话指南
-<small>
+
 - **工具驱动**：Indicator Assisted
 - **过度拟合**：Overfitting
 - **样本外回测**：Out-of-sample Backtest
 - **滞后性**：Lagging Indicators
 - **双重测试**：Walk-forward Analysis
-</small>
+
 
 ---
 *下一篇：101-106《L2级——系统化规则，是从“武功秘籍”到“精密仪器”》*

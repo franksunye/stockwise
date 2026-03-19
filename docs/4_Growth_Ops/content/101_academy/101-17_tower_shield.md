@@ -83,11 +83,11 @@ ZISO 的底层逻辑，压根不需要用“神准”去赢钱。
 ---
 
 #### 认知对齐：行话指南
-<small>
+
 - **重装塔盾**：Heavy Tower Shield (ZISO logic)
 - **防滚架**：Roll Cage (Risk Control metaphor)
 - **极寒警告**：Hyper-Cold Warning
 - **知其白，守其黑**：Chinese philosophy on balance and risk
-</small>
+
 
  

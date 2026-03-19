@@ -87,9 +87,9 @@ ZISO 的算力引擎，从来不是为了给你一个 100% 灵验的魔法水晶
 ---
 
 #### 认知对齐：行话指南
-<small>
+
 - **胜率偏差**：Edge
 - **概率执行**：Probabilistic Execution
 - **数学期望**：Expected Value
 - **K线噪音**：Market Noise
-</small>
+

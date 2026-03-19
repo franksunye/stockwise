@@ -75,7 +75,7 @@ ZISO 明确告诉你：**散户不要去壕沟里对拼手速。**
 ---
 
 #### 认知对齐：行话指南
-<small>
+
 - **交易执行**：Trade Execution
 - **执行模型**：Execution Model
 - **延迟套利**：Latency Arbitrage
@@ -85,7 +85,7 @@ ZISO 明确告诉你：**散户不要去壕沟里对拼手速。**
 - **物理共置**：Co-location (Server speed)
 - **硬件加速**：FPGA / GPU Acceleration
 - **Citadel / Virtu**：全球顶级的量化交易与高频做市商，拥有极强的算法和硬件优势。
-</small>
+
 
 ---
 *全系列完结。*

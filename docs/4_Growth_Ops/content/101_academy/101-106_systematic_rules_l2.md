@@ -72,14 +72,14 @@ L2 级是一个分水岭：跨过去，你就是用统计学武装的职业猎�
 ---
 
 #### 认知对齐：行话指南
-<small>
+
 - **规则化量化**：Systematic Rules
 - **波动收缩模式**：VCP (Volatility Contraction Pattern)
 - **趋势模版**：Trend Template
 - **动量审计**：Momentum Audit
 - **逻辑闭环**：Logical Consistency / Integrity
 - **Mark Minervini**：美国投资冠军，VCP 模式创始人，其实战体系是 L2 级的教科书。
-</small>
+
 
 ---
 *下一篇：101-107《L3级——系统化组合投资，是舰队司令部的排兵布阵》*

@@ -66,9 +66,9 @@ distribution:
 ---
 
 #### 认知对齐：行话指南
-<small>
+
 - **幸存者偏差**：Survivorship Bias
 - **期望值**：Expected Value
 - **大数定律**：Law of Large Numbers
 - **盈亏比**：Risk/Reward Ratio
-</small>
+

@@ -63,8 +63,8 @@ distribution:
 ---
 
 #### 认知对齐：行话指南
-<small>
+
 - **机会成本**：Opportunity Cost
 - **止损税**：Stop Loss Tax (ZISO term)
 - **主升浪**：The Main Uptrend
-</small>
+

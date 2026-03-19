@@ -79,14 +79,14 @@ source_docs:
 ---
 
 #### 认知对齐：行话指南
-<small>
+
 - **择时**：Timing / Signal Generation
 - **洞见**：Alpha Insight
 - **John Sweeney**：顶级量化专家，MFE/MAE 理论奠基人。
 - **无状态**：Stateless / Finite State Machines
 - **最大有利变动**：MFE (Maximum Favorable Excursion)
 - **最大不利变动**：MAE (Maximum Adverse Excursion)
-</small>
+
 
 ---
 *下一篇：101-102《交易管理——为什么“状态”是财富的分水岭》*

@@ -70,10 +70,10 @@ ZISO 的冷酷在于，我们彻底放弃日内分钟级的高频厮杀，强制
 ---
 
 #### 认知对齐：行话指南
-<small>
+
 - **微秒**：Millionths of a second
 - **流动性**：Liquidity
 - **盘后极端计算**：EOD - End of Day
 - **高频战场**：HFT - High Frequency Trading
-</small>
+
  

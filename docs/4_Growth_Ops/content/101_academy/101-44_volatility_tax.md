@@ -65,9 +65,9 @@ distribution:
 ---
 
 #### 认知对齐：行话指南
-<small>
+
 - **波动率税**：Volatility Tax
 - **布朗运动**：Random Walk
 - **滑点**：Slippage
 - **非单边趋势**：Trendless
-</small>
+

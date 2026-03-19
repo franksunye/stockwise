@@ -86,10 +86,10 @@ ZISO 给出的全行业唯一冷血解药是：**把速度降到最慢。慢，�
 ---
 
 #### 认知对齐：行话指南
-<small>
+
 - **盘后计算**：EOD - End of Day
 - **神经毒素**：Neurotoxin (Trading stress metaphor)
 - **骗炮**：Bull/Bear Trap (Market manipulation)
 - **网格挂单**：Grid Orders / Limit Orders
-</small>
+
  

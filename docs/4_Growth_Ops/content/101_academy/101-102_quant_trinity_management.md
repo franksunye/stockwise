@@ -78,7 +78,7 @@ source_docs:
 ---
 
 #### 认知对齐：行话指南
-<small>
+
 - **交易管理**：Trade Management
 - **注码管理/头寸规模**：Position Sizing
 - **有状态**：Stateful / Context-aware
@@ -87,7 +87,7 @@ source_docs:
 - **R 倍数**：R-multiples (Risk unit)
 - **Van Tharp**：著名投资心理学家，强调头寸规模决定绩效。
 - **Alexander Elder**：资深交易员，《以交易为生》作者，深谙交易心理。
-</small>
+
 
 ---
 *下一篇：101-103《交易执行——别在壕沟里与加特林机枪肉搏》*

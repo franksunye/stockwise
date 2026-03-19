@@ -71,14 +71,14 @@ L0 级的终点往往是由于**锚定效应**（死守成本价）导致的大�
 ---
 
 #### 认知对齐：行话指南
-<small>
+
 - **直觉驱动**：Discretionary Trading
 - **快思考/慢思考**：System 1 / System 2 Thinking
 - **损失厌恶**：Loss Aversion
 - **心理账户**：Mental Accounting
 - **锚定效应**：Anchoring Bias
 - **Daniel Kahneman**：诺贝尔经济学奖得主，行为金融学巅峰人物。
-</small>
+
 
 ---
 *下一篇：101-105《L1级——看指标提示，是盯着后视镜开车》*

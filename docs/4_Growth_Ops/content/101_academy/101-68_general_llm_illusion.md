@@ -72,10 +72,10 @@ source_docs:
 ---
 
 #### 认知对齐：行话指南
-<small>
+
 - **幻觉**：Hallucination
 - **滑点**：Slippage
 - **最大逆风**：MAE - Maximum Adverse Excursion
 - **量化风控引擎**：Quant Engine
-</small>
+
  
