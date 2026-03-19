@@ -6,6 +6,23 @@ import { DEFAULT_PUBLIC_LOCALE, type PublicLocale } from '@/lib/public-i18n';
 // We need to resolve from the frontend directory up to docs
 const CONTENT_DIR = path.join(process.cwd(), '..', 'docs', '4_Growth_Ops', 'content');
 
+// Recursive file walker
+function walkMarkdownFiles(dirPath: string, allFiles: string[] = []): string[] {
+    if (!fs.existsSync(dirPath)) return allFiles;
+    const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+
+    for (const entry of entries) {
+        if (entry.name.startsWith('.') || entry.name === '_views' || entry.name === 'archive' || entry.name === 'marketing') continue;
+        const fullPath = path.join(dirPath, entry.name);
+        if (entry.isDirectory()) {
+            walkMarkdownFiles(fullPath, allFiles);
+        } else if (entry.name.endsWith('.md') && entry.name !== 'README.md' && entry.name !== 'STOCKWISE_101_SYLLABUS.md') {
+            allFiles.push(fullPath);
+        }
+    }
+    return allFiles;
+}
+
 interface ContentRequestOptions {
     locale?: PublicLocale;
     fallbackToDefault?: boolean;
@@ -105,11 +122,9 @@ export async function getAllArticles(options?: ContentRequestOptions): Promise<A
         return [];
     }
 
-    const files = fs.readdirSync(dir);
+    const files = walkMarkdownFiles(dir);
     const articles = files
-        .filter(file => file.endsWith('.md') && file !== 'STOCKWISE_101_SYLLABUS.md')
-        .map(file => {
-            const filePath = path.join(dir, file);
+        .map(filePath => {
             const fileContent = fs.readFileSync(filePath, 'utf-8');
             const { meta } = parseFrontmatter(fileContent);
 
@@ -118,7 +133,7 @@ export async function getAllArticles(options?: ContentRequestOptions): Promise<A
             }
 
             return {
-                slug: file.replace('.md', ''),
+                slug: path.basename(filePath, '.md'),
                 title: meta.title || 'Untitled',
                 subtitle: meta.subtitle || '',
                 date: meta.date || '',
@@ -141,14 +156,17 @@ export async function getAllArticles(options?: ContentRequestOptions): Promise<A
 
 export async function getArticleBySlug(slug: string, options?: ContentRequestOptions): Promise<Article | null> {
     const locale = options?.locale || DEFAULT_PUBLIC_LOCALE;
-    const { dir, sourceLocale, isFallback } = resolveDirectory(options);
+    const { dir } = resolveDirectory(options);
     if (!dir) {
         return null;
     }
 
-    const filePath = path.join(dir, `${slug}.md`);
+    // Since we now have subdirectories, we must find the file by traversing.
+    // For performance, we could search only for `slug.md` but Next.js router gives us the slug.
+    const allFiles = walkMarkdownFiles(dir);
+    const filePath = allFiles.find(f => path.basename(f, '.md') === slug);
 
-    if (!fs.existsSync(filePath)) {
+    if (!filePath || !fs.existsSync(filePath)) {
         return null;
     }
 
@@ -158,6 +176,8 @@ export async function getArticleBySlug(slug: string, options?: ContentRequestOpt
     if (!isPublishableMeta(meta as Partial<ArticleMeta> & { publish?: string })) {
         return null;
     }
+
+    const { sourceLocale, isFallback } = resolveDirectory(options);
 
     return {
         slug,
@@ -175,6 +195,11 @@ export async function getArticleBySlug(slug: string, options?: ContentRequestOpt
         availableLocales: [sourceLocale],
         isFallback,
     };
+}
+
+export function getCategories(articles: ArticleMeta[]): string[] {
+    const categories = new Set(articles.map(a => a.category));
+    return Array.from(categories);
 }
 
 export function getCategories(articles: ArticleMeta[]): string[] {

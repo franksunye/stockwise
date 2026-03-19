@@ -4,6 +4,23 @@ import { DEFAULT_PUBLIC_LOCALE, type PublicLocale } from '@/lib/public-i18n';
 
 const CONTENT_DIR = path.join(process.cwd(), '..', 'docs', '5_Support_Ops', 'content');
 
+// Recursive file walker
+function walkMarkdownFiles(dirPath: string, allFiles: string[] = []): string[] {
+    if (!fs.existsSync(dirPath)) return allFiles;
+    const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+
+    for (const entry of entries) {
+        if (entry.name.startsWith('.') || entry.name === 'archive') continue;
+        const fullPath = path.join(dirPath, entry.name);
+        if (entry.isDirectory()) {
+            walkMarkdownFiles(fullPath, allFiles);
+        } else if (entry.name.endsWith('.md') && entry.name !== 'README.md') {
+            allFiles.push(fullPath);
+        }
+    }
+    return allFiles;
+}
+
 interface ContentRequestOptions {
     locale?: PublicLocale;
     fallbackToDefault?: boolean;
@@ -92,16 +109,14 @@ export function getAllSupportArticles(options?: ContentRequestOptions): SupportA
         return [];
     }
 
-    const files = fs.readdirSync(dir);
+    const files = walkMarkdownFiles(dir);
     const articles = files
-        .filter(file => file.endsWith('.md'))
-        .map(file => {
-            const filePath = path.join(dir, file);
+        .map(filePath => {
             const fileContent = fs.readFileSync(filePath, 'utf-8');
             const { meta, content } = parseFrontmatter(fileContent);
 
             return {
-                slug: file.replace('.md', ''),
+                slug: path.basename(filePath, '.md'),
                 title: meta.title || 'Untitled',
                 category: meta.category || 'Uncategorized',
                 lastUpdated: meta.lastUpdated || '',
@@ -120,19 +135,22 @@ export function getAllSupportArticles(options?: ContentRequestOptions): SupportA
 
 export function getArticleBySlug(slug: string, options?: ContentRequestOptions): SupportArticle | undefined {
     const locale = options?.locale || DEFAULT_PUBLIC_LOCALE;
-    const { dir, sourceLocale, isFallback } = resolveDirectory(options);
+    const { dir } = resolveDirectory(options);
     if (!dir) {
         return undefined;
     }
 
-    const filePath = path.join(dir, `${slug}.md`);
+    const allFiles = walkMarkdownFiles(dir);
+    const filePath = allFiles.find(f => path.basename(f, '.md') === slug);
 
-    if (!fs.existsSync(filePath)) {
+    if (!filePath || !fs.existsSync(filePath)) {
         return undefined;
     }
 
     const fileContent = fs.readFileSync(filePath, 'utf-8');
     const { meta, content } = parseFrontmatter(fileContent);
+
+    const { sourceLocale, isFallback } = resolveDirectory(options);
 
     return {
         slug,
