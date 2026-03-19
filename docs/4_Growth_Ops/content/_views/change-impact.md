@@ -1,62 +1,57 @@
 # 产品变更影响视图 (Change Impact Board)
 
-> 自动生成时间：2026/3/19 18:51:27
+> 自动生成时间：2026/3/19 19:04:20
 > 说明：该视图用于回答“产品/工程文档变化后，哪些内容应该复核或补充”。
 
 ## 受底层文档变更影响，需优先复核的内容
 
 | 内容资产 | 来源 | 主流程 | 受影响源文档 |
 | --- | --- | --- | --- |
-| [101-01: 散户的不可能三角](../101_academy/101-01_impossible_triangle.md) | Growth | 🚀 已发布 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-02: 错失恐惧症 (FOMO)](../101_academy/101-02_fomo.md) | Growth | 🚀 已发布 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-03: 厌恶损失 (Loss Aversion)](../101_academy/101-03_loss_aversion.md) | Growth | 🚀 已发布 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-04: 确认偏误 (Confirmation Bias)](../101_academy/101-04_confirmation_bias.md) | Growth | 🚀 已发布 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-05: 赌徒谬误 (Gambler's Fallacy)](../101_academy/101-05_gamblers_fallacy.md) | Growth | 🚀 已发布 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-06: 禀赋效应 (Endowment Effect)](../101_academy/101-06_endowment_effect.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-07: 报复性交易 (Revenge Trading)](../101_academy/101-07_revenge_trading.md) | Growth | 🚀 已发布 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-08: 3M 框架 (Mind, Method, Money)](../101_academy/101-08_3m_framework.md) | Growth | 🚀 已发布 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-09: 为什么聪明人会失败？](../101_academy/101-09_why_smart_people_fail.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [超越交易：用量化思维审视人生风险的终局](../101_academy/101-100_beyond_trading.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/01_Product_Positioning_and_Boundaries.md` |
-| [101-10: 离场休息的艺术](../101_academy/101-10_sitting_on_hands.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-11: 事后聪明偏误 (Hindsight Bias)](../101_academy/101-11_hindsight_bias.md) | Growth | 🚀 已发布 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-12: 别和机器拼手速：你眼里的“极速”，在量化面前只是慢镜头](../101_academy/101-12_l4_hft_illusion.md) | Growth | 👀 待审核 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-13: 为什么“预测明天涨停”是最大的智商税？](../101_academy/101-13_prediction_tax.md) | Growth | 👀 待审核 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-15: 别装全能：你是找信号的分析师，还是交易员？](../101_academy/101-15_analyst_vs_trader.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-16: 组合的假象：买了 5 只白酒股，你以为分散了风险？](../101_academy/101-16_fake_diversification.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-17: 为什么 ZISO 是一座安全屋，而不是一辆赛车？](../101_academy/101-17_tower_shield.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [内幕消息错觉：送上门的“内幕”，全是为你准备的绞肉机](../101_academy/101-19_insider_illusion.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [信息节食：屏蔽大 V 的 30 天，我的账户为何起死回生](../101_academy/101-20_information_diet.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-21: RSI 指标新解](../101_academy/101-21_rsi_decoded.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-22: 均线系统 (Moving Averages)](../101_academy/101-22_moving_averages.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-23: MACD (动能之王)](../101_academy/101-23_macd.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-24: 成交量分析 (Volume)](../101_academy/101-24_volume.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-25: 支撑与压力 (Support & Resistance)](../101_academy/101-25_support_resistance.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-26: K 线形态的 AI 视角](../101_academy/101-26_candlestick_patterns.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-27: 布林带 (Bollinger Bands)](../101_academy/101-27_bollinger_bands.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-28: 左侧与右侧交易](../101_academy/101-28_left_right_trading.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-29: 跳空缺口理论](../101_academy/101-29_gap_theory.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-30: 背离 (Divergence)](../101_academy/101-30_divergence.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-31: 行业轮动逻辑](../101_academy/101-31_sector_rotation.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-33: 为什么你的指标总是变成反指？](../101_academy/101-33_indicator_failure.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-34: 把“止损”推迟到明天的代价](../101_academy/101-34_mae_cost.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-35: 回测与未来的鸿沟](../101_academy/101-35_overfitting_trap.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-36: 滑点与印花税：杀死回测富翁的毒药](../101_academy/101-36_slippage_poison.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [向下摊平：在错误的泥潭里越陷越深的死亡操作](../101_academy/101-41_avg_down_trap.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [均值回归：万物皆周期，涨上天的终将跌回均线](../101_academy/101-43_mean_reversion.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [时间价值陷阱：横盘不仅折磨心智，更是对资金使用率的谋杀](../101_academy/101-45_time_decay.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [羊群效应：当连你家楼下的保安都在谈论股票时，快跑](../101_academy/101-46_herd_mentality.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [随机游走假说：承认市场短期的不可预测性，是走向成熟的第一步](../101_academy/101-47_random_walk.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [多动症的毁灭：为什么管不住手的人，都在给券商打工？](../101_academy/101-49_overtrading_doom.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [非对称博弈：寻找下跌空间有限、上涨空间无限的“肥尾”机会](../101_academy/101-50_asymmetric_bet.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-51: 凯利公式 (The Kelly Criterion)](../101_academy/101-51_kelly_criterion.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-52: 止损的艺术](../101_academy/101-52_stop_loss_art.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-53: 盈亏比 (Risk/Reward Ratio)](../101_academy/101-53_risk_reward_ratio.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-54: 仓位管理与分批建仓](../101_academy/101-54_position_sizing.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-55: 回撤的数学真相](../101_academy/101-55_drawdown_math.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-56: 投资组合的相关性风险](../101_academy/101-56_correlation_risk.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-57: 1% 准则](../101_academy/101-57_one_percent_rule.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-58: 止盈的艺术](../101_academy/101-58_profit_taking.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-60: 胜率的谎言：错 60% 还能赚钱](../101_academy/101-60_win_rate_lie.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
+| [脉冲频率：信号强度一眼看](../../../5_Support_Ops/content/ai-pulse-resonance.md) | Support | 🚀 已发布 | `docs/1_Engineering/13_Quant_Engine_Architecture.md` |
+| [AI 分析师人设框架的边界 (Analyst Personas)](../../../5_Support_Ops/content/analyst-personas.md) | Support | 🚀 已发布 | `docs/2_Intelligence/22Q_Quant_Research_Framework.md` |
+| [Android 通知限制说明](../../../5_Support_Ops/content/android-notification-limit.md) | Support | 🚀 已发布 | `docs/3_Product/30_Notification_Strategy_Design.md` |
+| [拒绝“未来函数”：咱们不玩虚的](../../../5_Support_Ops/content/anti-future-function.md) | Support | 🚀 已发布 | `docs/2_Intelligence/28Q_Quant_Backtesting_Methodology.md` |
+| [渠道分润：共同赚钱](../../../5_Support_Ops/content/channel-revenue-guide.md) | Support | 🚀 已发布 | `docs/0_Strategy/02_Monetization_Pricing_Strategy.md` |
+| [大盘黄历图卡解读 (Daily Yellow Pages)](../../../5_Support_Ops/content/daily-yellow-pages.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/45_Stock_Radar_Discovery_Engine.md` |
+| [深度链接：一键直达“战场”](../../../5_Support_Ops/content/deep-linking-usage.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/46_Frontend_SWR_Architecture_Upgrade.md` |
+| [绑定邮箱：唯一的“救命稻草”](../../../5_Support_Ops/content/email-sync-logic.md) | Support | 🚀 已发布 | `docs/1_Engineering/11_Reliability_Protocol.md` |
+| [最高级别用户环境物理隔离 (Env Isolation)](../../../5_Support_Ops/content/env-isolation.md) | Support | 🚀 已发布 | `docs/1_Engineering/16_Observability_Thresholds_and_Incidents.md` |
+| [认错审计：出错不可怕](../../../5_Support_Ops/content/failure-retrospective.md) | Support | 🚀 已发布 | `docs/1_Engineering/24_AICouncil_Review_Opinion_Current_State_20260313.md` |
+| [四态语义验证规则（修订版）](../../../5_Support_Ops/content/four-state-validation-rules.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/40_Quant_AI_Dual_Layer_UX.md` |
+| [动作语义：进场、观察、防守、暂无信号](../../../5_Support_Ops/content/four-states-semantics.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/40_Quant_AI_Dual_Layer_UX.md` |
+| [触反馈：心跳与信号同步](../../../5_Support_Ops/content/haptic-sync.md) | Support | 🚀 已发布 | `docs/3_Product/30_Notification_Strategy_Design.md` |
+| [胜率矩阵：摸清 AI 的脾气](../../../5_Support_Ops/content/history-matrix-viz.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/49_Investment_Mode_Decision_Local_Snapshot_Spec_20260316.md` |
+| [沽空数据透视指南 (HK Only)](../../../5_Support_Ops/content/hk-short-pressure.md) | Support | 🚀 已发布 | `docs/2_Intelligence/22Q_Quant_Research_Framework.md` |
+| [身份护照：UserID 就是你的命](../../../5_Support_Ops/content/identity-passport.md) | Support | 🚀 已发布 | `docs/3_Product/31_Membership_Design_Plan.md` |
+| [一键找回：权益瞬间同步](../../../5_Support_Ops/content/identity-restore-flow.md) | Support | 🚀 已发布 | `docs/3_Product/31_Membership_Design_Plan.md` |
+| [交互优先：手感不能断](../../../5_Support_Ops/content/interaction-first.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/46_Frontend_SWR_Architecture_Upgrade.md` |
+| [邀请码系统：只接待懂纪律的人](../../../5_Support_Ops/content/invitation-ops-guide.md) | Support | 🚀 已发布 | `docs/0_Strategy/07_Growth_and_GTM_Roadmap.md` |
+| [为什么设邀请墙？(Invite Wall Rationale)](../../../5_Support_Ops/content/invite-wall-rationale.md) | Support | 🚀 已发布 | `docs/0_Strategy/07_Growth_and_GTM_Roadmap.md` |
+| [iOS 特供：极致跟手感](../../../5_Support_Ops/content/ios-tuning.md) | Support | 🚀 已发布 | `docs/3_Product/30_Notification_Strategy_Design.md` |
+| [关键价位：市场的防线](../../../5_Support_Ops/content/key-levels-mapping.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/45_Stock_Radar_Discovery_Engine.md` |
+| [T+3 验证：趋势需要时间](../../../5_Support_Ops/content/multi-day-verification.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/49_Investment_Mode_Decision_Local_Snapshot_Spec_20260316.md` |
+| [左右滑：你的三个战场](../../../5_Support_Ops/content/nav-map-logic.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/46_Frontend_SWR_Architecture_Upgrade.md` |
+| [通知开关：不喜欢就关了](../../../5_Support_Ops/content/notification-preference.md) | Support | 🚀 已发布 | `docs/3_Product/30_Notification_Strategy_Design.md` |
+| [体验期权限发放规则 (Onboarding Trial Rules)](../../../5_Support_Ops/content/onboarding-trial-rules.md) | Support | 🚀 已发布 | `docs/3_Product/31_Membership_Design_Plan.md` |
+| [乐观更新：不用等圈圈转](../../../5_Support_Ops/content/optimistic-ui-logic.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/46_Frontend_SWR_Architecture_Upgrade.md` |
+| [五级价位阵地解释系统 (Price Ladder)](../../../5_Support_Ops/content/price-ladder.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/45_Stock_Radar_Discovery_Engine.md` |
+| [隐私承诺：这是你的避风港](../../../5_Support_Ops/content/privacy-pledge.md) | Support | 🚀 已发布 | `docs/1_Engineering/11_Reliability_Protocol.md` |
+| [测测通没通：别被系统拦了](../../../5_Support_Ops/content/push-debug.md) | Support | 🚀 已发布 | `docs/3_Product/30_Notification_Strategy_Design.md` |
+| [数据拼接：最新指标不求人](../../../5_Support_Ops/content/realtime-data-splicing.md) | Support | 🚀 已发布 | `docs/1_Engineering/32_Frontend_Network_Optimization_Zero_Redundancy_20260318.md` |
+| [兑换码：手动给权益充值](../../../5_Support_Ops/content/redeem-code-usage.md) | Support | 🚀 已发布 | `docs/0_Strategy/02_Monetization_Pricing_Strategy.md` |
+| [双向邀请与 Pro 连贯性奖励 (Referral Mechanism)](../../../5_Support_Ops/content/referral-mechanism.md) | Support | 🚀 已发布 | `docs/3_Product/31_Membership_Design_Plan.md` |
+| [推荐激励：有福同享](../../../5_Support_Ops/content/referral-rewards.md) | Support | 🚀 已发布 | `docs/0_Strategy/02_Monetization_Pricing_Strategy.md` |
+| [颜色反转：戒掉“追涨杀跌”](../../../5_Support_Ops/content/rsi-color-metaphor.md) | Support | 🚀 已发布 | `docs/3_Product/03_Product_Features_Manifest.md` |
+| [聪明搜索：这才是量化速度](../../../5_Support_Ops/content/smart-search.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/45_Stock_Radar_Discovery_Engine.md` |
+| [智能标题：随盘面“变脸”](../../../5_Support_Ops/content/smart-title-logic.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/45_Stock_Radar_Discovery_Engine.md` |
+| [单点对焦：别让散乱害了你](../../../5_Support_Ops/content/snap-y-dynamics.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/46_Frontend_SWR_Architecture_Upgrade.md` |
+| [自选股容量与资源算力计算 (Stock Quota Limits)](../../../5_Support_Ops/content/stock-quota-limits.md) | Support | 🚀 已发布 | `docs/3_Product/31_Membership_Design_Plan.md` |
+| [Free 与 Pro：差距在哪？](../../../5_Support_Ops/content/tiers-explained.md) | Support | 🚀 已发布 | `docs/3_Product/31_Membership_Design_Plan.md` |
+| [时光机模式：拒绝“马后炮”](../../../5_Support_Ops/content/time-machine-feed.md) | Support | 🚀 已发布 | `docs/1_Engineering/11_Reliability_Protocol.md` |
+| [治理控制塔：模型上线前的绝对隔离门禁 (Tradeability Tower)](../../../5_Support_Ops/content/tradeability-tower.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/48_Admin_Tradeability_Control_Tower.md` |
+| [认错的价值：咱们不删帖](../../../5_Support_Ops/content/value-of-failure.md) | Support | 🚀 已发布 | `docs/1_Engineering/24_AICouncil_Review_Opinion_Current_State_20260313.md` |
+| [验证的三种状态](../../../5_Support_Ops/content/verification-states.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/40_Quant_AI_Dual_Layer_UX.md` |
+| [推送指南：不错过每一秒](../../../5_Support_Ops/content/web-push-setup.md) | Support | 🚀 已发布 | `docs/3_Product/30_Notification_Strategy_Design.md` |
 
 ## 尚未被转化成内容资产的内部文档机会
 

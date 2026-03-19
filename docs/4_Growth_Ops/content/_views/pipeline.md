@@ -1,6 +1,6 @@
 # 内容生产流程看板 (Pipeline Board)
 
-> 自动生成时间：2026/3/19 18:51:27
+> 自动生成时间：2026/3/19 19:04:20
 > 说明：本看板优先服务活跃工作流，只展开需要推进的阶段；已发布内容只保留最近概览，避免看板膨胀。
 
 ## 🧠 待策划
@@ -169,7 +169,7 @@
 | [101-01: 散户的不可能三角](../101_academy/101-01_impossible_triangle.md) | Growth | 2026-02-17 周二 | ✅ 上线中 | [✅ 已发布](https://mp.weixin.qq.com/s/IQorGEjEe7l5Aws3RGUhbA) |
 | [角标清除：别被红点牵着走](../../../5_Support_Ops/content/badge-hygiene.md) | Support | 2026-02-17 周二 | ✅ 上线中 | [✅ 已发布](https://mp.weixin.qq.com/s/JdHK9Gi-QqlwGf45rT-GMQ) |
 | [系统与直觉：在暴雪中，你该相信导航还是自己的眼睛？](../101_academy/101-86_system_vs_intuition.md) | Growth | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 |
-| [脉冲频率：信号强度一眼看](../../../5_Support_Ops/content/ai-pulse-resonance.md) | Support | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 |
+| [彻底告别盯盘焦虑！把复盘交给AI后，我每天多出了两小时（附自动化指南）](../blitz_hub/Hub_01_Farewell_Screen_Staring.md) | Growth | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 |
 
 ## 📦 已归档
 

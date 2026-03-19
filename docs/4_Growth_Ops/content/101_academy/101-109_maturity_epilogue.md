@@ -70,7 +70,7 @@ L4 级的物理霸权，L3 级的算力堡垒，L0/L1 级的认知陷阱…… �
 <small>
 - **避风港**：Sanctuary / Safety Zone
 - **局部规则**：Local Dynamics
-- **逻辑闭还**：Execution Consistency
+- **逻辑闭环**：Execution Consistency
 - **理性共鸣**：Rational Resonance
 </small>
 

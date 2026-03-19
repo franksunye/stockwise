@@ -1,6 +1,6 @@
 # 内容运营主索引 (Content Operations Registry)
 
-> 自动生成时间：2026/3/19 18:51:27
+> 自动生成时间：2026/3/19 19:04:20
 > 说明：本索引由 `scripts/cmo_sync.mjs` 统一扫描 `4_Growth_Ops/content` 与 `5_Support_Ops/content` 生成。
 > 日期规则：已发布内容优先显示公众号真实发布日期；未发布内容显示目标发布日期。
 > 视图：[_Pipeline_](_views/pipeline.md) · [_Next Release_](_views/next-release.md) · [_Recently Updated_](_views/recently-updated.md) · [_Change Impact_](_views/change-impact.md) · [_External Maintenance_](_views/external-maintenance.md)
@@ -50,18 +50,18 @@
 | [101-04: 确认偏误 (Confirmation Bias)](101_academy/101-04_confirmation_bias.md) | Growth | article | TOFU | 🚀 已发布 | 2026-02-27 周五 | ✅ 上线中 | [✅ 已发布](https://mp.weixin.qq.com/s/W2rE5BNMIs3wf3YvT-V0lw) | 2026-03-19 |
 | [上下文提取：只看我想要的](../../5_Support_Ops/content/context-extraction.md) | Support | article | BOFU | 🚀 已发布 | 2026-03-02 周一 | ✅ 上线中 | [✅ 已发布](https://mp.weixin.qq.com/s/Kiq-ZmQQ6-x6w-6Z9igNGg) | 2026-03-19 |
 | [AI 除了写 PPT 还能做什么？论‘冷酷实习生’对焦虑的终极拯救](101_academy/2026-03-02_ai_lifestyle.md) | Growth | article | TOFU | 🚀 已发布 | 2026-03-02 周一 | ✅ 上线中 | [✅ 已发布](https://mp.weixin.qq.com/s/bJtXPV4r4ANCjp7wOOxV_w) | 2026-03-19 |
-| [彻底告别盯盘焦虑！把复盘交给AI后，我每天多出了两小时（附自动化指南）](blitz_hub/Hub_01_Farewell_Screen_Staring.md) | Growth | article | TOFU | 🚀 已发布 | 2026-03-03 周二 | ✅ 上线中 | ➖ 不发布 | 2026-03-09 |
+| [彻底告别盯盘焦虑！把复盘交给AI后，我每天多出了两小时（附自动化指南）](blitz_hub/Hub_01_Farewell_Screen_Staring.md) | Growth | article | TOFU | 🚀 已发布 | 2026-03-03 周二 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
 | [量化思维入门：像工程师一样处理生活中的‘概率游戏’](101_academy/2026-03-02_quant_thinking.md) | Growth | article | MOFU | 🚀 已发布 | 2026-03-03 周二 | ✅ 上线中 | [✅ 已发布](https://mp.weixin.qq.com/s/bP3BhbzLwTWkYKZgzfhXDA) | 2026-03-19 |
 | [置信度：这不是胜算，是把握](../../5_Support_Ops/content/confidence-explained.md) | Support | guide | BOFU | 🚀 已发布 | 2026-03-04 周三 | ✅ 上线中 | [✅ 已发布](https://mp.weixin.qq.com/s/q2jilWow3swLU91GJyy7wQ) | 2026-03-19 |
 | [策略内参：怎么看干货？](../../5_Support_Ops/content/tactical-brief-guide.md) | Support | guide | BOFU | 🚀 已发布 | 2026-03-05 周四 | ✅ 上线中 | [✅ 已发布](https://mp.weixin.qq.com/s/8bpp3YEbcFnLgbuwwFHIXw) | 2026-03-19 |
 | [AI 时代的决策真相：为什么‘直觉’是你最危险的敌人？](101_academy/2026-03-02_breakthrough_logic.md) | Growth | article | TOFU | 🚀 已发布 | 2026-03-05 周四 | ✅ 上线中 | [✅ 已发布](https://mp.weixin.qq.com/s/aXQoun4YcB-Sn1ZDsIz3rg) | 2026-03-19 |
 | [101-08: 3M 框架 (Mind, Method, Money)](101_academy/101-08_3m_framework.md) | Growth | article | MOFU | 🚀 已发布 | 2026-03-06 周五 | ✅ 上线中 | [✅ 已发布](https://mp.weixin.qq.com/s/9hq7nzRj3l2PokOq5DIMwQ) | 2026-03-19 |
-| [我测试了全网最火的“DeepSeek炒股提示词”，终于看清了AI投资的致命伤……](blitz_hub/Hub_02_ChatGPT_Test_Fail.md) | Growth | article | TOFU | 🚀 已发布 | 2026-03-06 周五 | ✅ 上线中 | ➖ 不发布 | 2026-03-09 |
-| [每天刷 50 条 AI 利好推送，为什么反而越亏越多？](blitz_hub/Hub_03_Information_Overload.md) | Growth | article | TOFU | 🚀 已发布 | 2026-03-10 周二 | ✅ 上线中 | ➖ 不发布 | 2026-03-09 |
+| [我测试了全网最火的“DeepSeek炒股提示词”，终于看清了AI投资的致命伤……](blitz_hub/Hub_02_ChatGPT_Test_Fail.md) | Growth | article | TOFU | 🚀 已发布 | 2026-03-06 周五 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
+| [每天刷 50 条 AI 利好推送，为什么反而越亏越多？](blitz_hub/Hub_03_Information_Overload.md) | Growth | article | TOFU | 🚀 已发布 | 2026-03-10 周二 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
 | [101-07: 报复性交易 (Revenge Trading)](101_academy/101-07_revenge_trading.md) | Growth | article | TOFU | 🚀 已发布 | 2026-03-13 周五 | ✅ 上线中 | [✅ 已发布](https://mp.weixin.qq.com/s/txW2UEVUw--BcSTd4jwhDA) | 2026-03-19 |
-| [让你上头的“均线金叉”，到底是怎么被量化机器拿来精确割韭菜的？](blitz_hub/Hub_04_Moving_Average_Trap.md) | Growth | article | TOFU | 🚀 已发布 | 2026-03-13 周五 | ✅ 上线中 | ➖ 不发布 | 2026-03-09 |
+| [让你上头的“均线金叉”，到底是怎么被量化机器拿来精确割韭菜的？](blitz_hub/Hub_04_Moving_Average_Trap.md) | Growth | article | TOFU | 🚀 已发布 | 2026-03-13 周五 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
 | [101-05: 赌徒谬误 (Gambler's Fallacy)](101_academy/101-05_gamblers_fallacy.md) | Growth | article | TOFU | 🚀 已发布 | 2026-03-17 周二 | ✅ 上线中 | [✅ 已发布](https://mp.weixin.qq.com/s/oAuy-zm2qN1vsglYEC1jIQ) | 2026-03-19 |
-| [手把手教你：每天收盘只需 5 分钟，用 AI 打造专属的“量化极寒预警”](blitz_hub/Hub_05_Five_Minutes_Daily.md) | Growth | article | MOFU | 🚀 已发布 | 2026-03-17 周二 | ✅ 上线中 | ➖ 不发布 | 2026-03-09 |
+| [手把手教你：每天收盘只需 5 分钟，用 AI 打造专属的“量化极寒预警”](blitz_hub/Hub_05_Five_Minutes_Daily.md) | Growth | article | MOFU | 🚀 已发布 | 2026-03-17 周二 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
 | [“秒应”极速感：为了让你不焦虑，我们在重写物理法则](101_academy/101-79_optimistic_ui.md) | Growth | article | TOFU | ✍️ 生产中 | 2026-03-19 周四 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
 | [10 毫秒的生与死：ZISO 的边缘节点加速如何跑赢闪电崩盘](101_academy/101-74_edge_computing.md) | Growth | article | TOFU | ✍️ 生产中 | 2026-03-19 周四 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
 | [把耐心当作武器：猎手总是趴在雪地里最久的那一个](101_academy/101-96_patience_as_a_weapon.md) | Growth | article | TOFU | ✍️ 生产中 | 2026-03-19 周四 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
@@ -143,7 +143,7 @@
 | [Free 与 Pro：差距在哪？](../../5_Support_Ops/content/tiers-explained.md) | Support | article | BOFU | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
 | [iOS 特供：极致跟手感](../../5_Support_Ops/content/ios-tuning.md) | Support | article | BOFU | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
 | [T+3 验证：趋势需要时间](../../5_Support_Ops/content/multi-day-verification.md) | Support | article | BOFU | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
-| [复盘一场真实的大跌：当所有人都在疯狂时，AI 是如何冷着脸劝我离场休息的？](blitz_hub/Hub_06_Cold_Feedback_Case.md) | Growth | article | MOFU | 🚀 已发布 | 2026-03-20 周五 | ✅ 上线中 | ➖ 不发布 | 2026-03-09 |
+| [复盘一场真实的大跌：当所有人都在疯狂时，AI 是如何冷着脸劝我离场休息的？](blitz_hub/Hub_06_Cold_Feedback_Case.md) | Growth | article | MOFU | 🚀 已发布 | 2026-03-20 周五 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
 | [101-12: 别和机器拼手速：你眼里的“极速”，在量化面前只是慢镜头](101_academy/101-12_l4_hft_illusion.md) | Growth | article | TOFU | 👀 待审核 | 2026-03-23 周一 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
 | [波动率税：在剧烈震荡中，本金是如何被悄悄抽干的？](101_academy/101-44_volatility_tax.md) | Growth | article | TOFU | 👀 待审核 | 2026-03-24 周二 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
 | [投资模式：切换你的策略风格](../../5_Support_Ops/content/investment-mode-config.md) | Support | guide | BOFU | 👀 待审核 | 2026-03-24 周二 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
