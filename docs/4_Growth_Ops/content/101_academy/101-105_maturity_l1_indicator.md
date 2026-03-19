@@ -1,87 +1,91 @@
 ---
-title: "101-105: 你以为自己在看信号，很多时候其实只是在盯着后视镜开车"
-subtitle: "金叉、死叉这些词人人都懂，但好懂不等于真有用"
-content_id: "growth-101-105"
-content_source: "growth"
-content_type: "article"
-canonical_role: "canonical"
-date: "2026-03-20"
-category: "The Machine"
-funnel_stage: "MOFU"
-campaign_role: "bridge"
-timeliness_role: "timely"
-timely_anchor: "指标党/MACD金叉/插件化炒股"
-viral_priority: "normal"
+title: '101-105: 你以为自己在看信号，很多时候其实只是在盯着后视镜开车'
+subtitle: 金叉、死叉这些词人人都懂，但好懂不等于真有用
+content_id: growth-101-105
+content_source: growth
+content_type: article
+canonical_role: canonical
+date: '2026-03-20'
+category: The Machine
+funnel_stage: MOFU
+campaign_role: bridge
+timeliness_role: timely
+timely_anchor: 指标党/MACD金叉/插件化炒股
+viral_priority: normal
 headline_alternatives:
-  - "MACD 金叉、死叉看着像答案，很多时候只是滞后的安慰剂"
-  - "插件越装越多，很多人不是更专业了，只是更像在看后视镜"
+- MACD 金叉、死叉看着像答案，很多时候只是滞后的安慰剂
+- 插件越装越多，很多人不是更专业了，只是更像在看后视镜
 cover_lines:
-  - "好懂，不等于真有用。"
-  - "很多人以为自己在看信号，实际上只是盯着后视镜开车。"
-share_copy: "如果你对 MACD、金叉、死叉、背离这些词特别熟，这篇会很有感觉。它不是否定指标，而是讲清楚指标为什么常常只回答了一半。"
-campaign: "wechat_4_week_sprint_2026q2"
-rhythm: "Hub"
+- 好懂，不等于真有用。
+- 很多人以为自己在看信号，实际上只是盯着后视镜开车。
+share_copy: 如果你对 MACD、金叉、死叉、背离这些词特别熟，这篇会很有感觉。它不是否定指标，而是讲清楚指标为什么常常只回答了一半。
+campaign: wechat_4_week_sprint_2026q2
+rhythm: Hub
 traceability:
-  status: "healthy"
-  last_reviewed_at: "2026-03-19"
+  status: healthy
+  last_reviewed_at: '2026-03-19'
 workflow:
-  stage: "reviewing"
-  review_priority: "ready_later"
-  owner: "cmo"
-  reviewer: "founder"
-  priority: "high"
-  target_publish_date: "2026-04-08"
-  last_action_at: "2026-03-19"
-blocked_reason: ""
+  stage: reviewing
+  review_priority: ready_later
+  owner: cmo
+  reviewer: founder
+  priority: high
+  target_publish_date: '2026-04-08'
+  last_action_at: '2026-03-19'
+blocked_reason: ''
 maintenance:
-  change_status: "created"
-  update_reason: "new_series"
+  change_status: created
+  update_reason: new_series
 website:
   enabled: true
-  surface: "learn"
+  surface: learn
 image: "/images/learn/101-105_maturity_l1_indicator_cover.png"
 images:
   cover: "/images/learn/101-105_maturity_l1_indicator_cover.png"
   body:
-    - "/images/learn/101-105_maturity_l1_indicator_body_1.png"
-    - "/images/learn/101-105_maturity_l1_indicator_body_2.png"
+  - "/images/learn/101-105_maturity_l1_indicator_body_1.png"
+  - "/images/learn/101-105_maturity_l1_indicator_body_2.png"
   cards:
-    - "/images/learn/101-105_maturity_l1_indicator_card_1.png"
+  - "/images/learn/101-105_maturity_l1_indicator_card_1.png"
 image_specs:
-  cover: "1200x675"
-  body: "1080x720"
-  card: "1080x1440"
+  cover: 1200x675
+  body: 1080x720
+  card: 1080x1440
 image_prompts:
-  cover: "A metaphorical finance image of a driver focusing only on the rear-view mirror while the road ahead blurs into danger. Used to represent lagging indicators. Premium dark editorial tone, realistic but symbolic, no text."
+  cover: A metaphorical finance image of a driver focusing only on the rear-view mirror while the road ahead blurs into danger. Used to represent lagging indicators. Premium dark editorial tone, realistic but symbolic, no text.
 derivative_guidance:
   body:
-    - "Use the provided cover image as the visual reference. Keep the same rear-view-mirror metaphor, the same danger-ahead mood, and the same premium dark editorial tone. Create a supporting scene that feels more chart-like without leaving the same world."
-    - "Use the provided cover image as the visual reference. Preserve the same lagging-indicator metaphor and the same emotional risk. Extend the same world into a more human supporting scene of false precision and unseen danger ahead."
+  - Use the provided cover image as the visual reference. Keep the same rear-view-mirror metaphor, the same danger-ahead mood, and the same premium dark editorial tone. Create a supporting scene that feels more chart-like without leaving the same world.
+  - Use the provided cover image as the visual reference. Preserve the same lagging-indicator metaphor and the same emotional risk. Extend the same world into a more human supporting scene of false precision and unseen danger ahead.
   cards:
-    - "Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame. Preserve the lagging-indicator metaphor and the sense of danger ahead."
+  - Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame. Preserve the lagging-indicator metaphor and the sense of danger ahead.
 visual_strategy:
-  concept_core: "指标很像答案，但常常只是后视镜"
-  image_type: "Concept"
+  concept_core: 指标很像答案，但常常只是后视镜
+  image_type: Concept
   image_count: 3
-  primary_image_model: "gemini"
-  generation_mode: "cover_first"
+  primary_image_model: gemini
+  generation_mode: cover_first
   derivation_rule:
-    body: "same_world"
-    cards: "derived_from_cover"
+    body: same_world
+    cards: derived_from_cover
   image_breakdown:
     cover: 1
     body: 2
     social_cards: 0
   reader_hook: "‘后视镜开车’要直接成为视觉本体。"
-visual_style_prefix: "Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel."
+  body_asset_policy: derive_only
+  cover_reusable_in_body: false
+  body_usage_plan:
+    body_1: derive_from_cover
+    body_2: derive_from_cover
+visual_style_prefix: Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel.
 distribution:
   wechat:
     enabled: true
-    status: "draft"
+    status: draft
 source_docs:
-  - docs/0_Strategy/01_Product_Positioning_and_Boundaries.md
+- docs/0_Strategy/01_Product_Positioning_and_Boundaries.md
 ---
-
 # 你以为自己在看信号，很多时候其实只是在盯着后视镜开车
 
 > “L1 最大的错觉，不是完全不懂市场，而是以为多看几个指标，就已经接近系统化了。”
@@ -138,16 +142,3 @@ L1 最典型的问题，不是工具少，而是研究治理几乎没有成型�
 
 下一步，不是再装更多插件，而是开始认真问一句: 这些信号，到底有没有被验证过。
 
----
-
-#### 认知对齐：行话指南
-
-- **工具驱动**：Indicator Assisted
-- **过度拟合**：Overfitting
-- **样本外回测**：Out-of-sample Backtest
-- **滞后性**：Lagging Indicators
-- **双重测试**：Walk-forward Analysis
-
-
----
-*下一篇：101-106《L2级——系统化规则，是从“武功秘籍”到“精密仪器”》*

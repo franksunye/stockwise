@@ -17,13 +17,15 @@
 一篇文章不是 4 张独立图片，而是：
 
 1. 一张 `cover` 母版
-2. 两张 `body` 同世界延展
+2. 一张优先复用 `cover` 的 `body`
+3. 一张按需派生的 `body`
 3. 一张或多张 `card` 传播派生图
 
 要点：
 
 - `cover` 先做，负责定世界
-- `body` 不重开世界，只做近景、局部、动作或同主题延展
+- `body` 第一优先级不是“新做”，而是“能不能直接复用 `cover`”
+- 只有复用不够时，`body` 才做近景、局部、动作或同主题延展
 - `cards` 不重新发明画面，优先从 `cover` 竖版派生
 
 ## 二、执行顺序
@@ -31,11 +33,27 @@
 1. 读取文章 frontmatter
 2. 只生成 `cover`
 3. 人工选定 1 张最合适的 `cover`
-4. 把这张 `cover` 当作参考图生成 `body_1`、`body_2`
-5. 再从同一张 `cover` 派生 `card_1`
-6. 如果 `cover` 不对，回到第 2 步，不要先做 `body/cards`
+4. 判断 `body_1` 是否直接复用 `cover` 或 `cover` 裁切版
+5. 只有在需要新的阅读节奏时，才把这张 `cover` 当参考图生成 `body_2`
+6. 再从同一张 `cover` 派生 `card_1`
+7. 如果 `cover` 不对，回到第 2 步，不要先做 `body/cards`
 
-## 三、frontmatter 语义
+## 三、默认决策顺序
+
+每篇文章都按这个顺序判断：
+
+1. `cover` 能不能直接作为头图和正文第一张图
+2. 如果可以，`body_1 = reuse_cover`
+3. 如果正文中段还需要换气，再补 `body_2 = derive_from_cover`
+4. 如果文章本身很短，甚至可以没有额外 `body`
+
+推荐默认策略：
+
+- `cover`: 必做
+- `body_1`: 优先复用 `cover`
+- `body_2`: 按需派生
+- `cards`: 从 `cover` 派生
+## 四、frontmatter 语义
 
 - `image`
   兼容字段，默认等于 `images.cover`
@@ -47,8 +65,9 @@
   参考图派生指令
 - `derivative_guidance.cards`
   参考图派生指令
-
-## 四、给模型的两类输入
+- `visual_strategy.body_asset_policy`
+  控制正文图优先复用还是优先派生
+## 五、给模型的两类输入
 
 ### 1. `cover` 输入
 
@@ -112,8 +131,9 @@ Do not introduce:
 - readable text
 - unrelated background elements
 ```
+如果 `body_1` 直接复用 `cover`，这一步可以跳过。
 
-## 五、程序化拼接建议
+## 六、程序化拼接建议
 
 如果后面写脚本，推荐拆成两个任务类型：
 
@@ -128,17 +148,17 @@ Do not introduce:
 这样程序里不需要理解“文章要讲什么”，只要理解：
 
 - 先 cover
-- 后 derivative
-
-## 六、团队执行时的判断标准
+- 再判断 reuse 还是 derivative
+## 七、团队执行时的判断标准
 
 每次出图前都检查 3 个问题：
 
 1. `cover` 有没有把这篇文章的唯一母题讲清楚？
 2. `body/cards` 是不是明显来自同一个视觉世界？
 3. 如果把 4 张图排在一起，看起来是不是一篇文章，而不是四个外包稿？
+4. 正文第一张图是不是其实可以直接复用 `cover`，而不是为了凑数新做一张？
 
-## 七、默认推荐
+## 八、默认推荐
 
 - 主母版优先用更擅长“语义准确”的模型
 - 如果某模型更会讲故事但不够精致，先用它定 `cover`

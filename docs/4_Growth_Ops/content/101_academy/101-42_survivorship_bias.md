@@ -1,82 +1,86 @@
 ---
-title: "幸存者偏差：你刷到的那些“股神”，很多只是运气暂时还没用完"
-subtitle: "你看到的是赢家截图，看不到的是同一套方法下大多数沉默离场的人"
+title: 幸存者偏差：你刷到的那些“股神”，很多只是运气暂时还没用完
+subtitle: 你看到的是赢家截图，看不到的是同一套方法下大多数沉默离场的人
 source_docs:
-  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
-category: "Growth 101"
-funnel_stage: "TOFU"
-campaign_role: "hook"
-timeliness_role: "timely_candidate"
-timely_anchor: "社交媒体股神/收益截图/短视频造神"
-viral_priority: "watchlist"
+- docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+category: Growth 101
+funnel_stage: TOFU
+campaign_role: hook
+timeliness_role: timely_candidate
+timely_anchor: 社交媒体股神/收益截图/短视频造神
+viral_priority: watchlist
 headline_alternatives:
-  - "满屏股神和收益截图，很多只是运气好的人刚好还没翻车"
-  - "你刷到的那些“老师”，很多不是强，只是暂时还没输出来"
+- 满屏股神和收益截图，很多只是运气好的人刚好还没翻车
+- 你刷到的那些“老师”，很多不是强，只是暂时还没输出来
 cover_lines:
-  - "你看到的是股神截图，看不到的是同一套玩法下沉默离场的大多数人。"
-  - "很多被吹上天的方法，只是运气暂时还没用完。"
-share_copy: "现在社交媒体上最不缺的就是“老师”和收益图，这篇讲的就是为什么你看到的常常不是规律，而只是被放大的幸存者。"
-campaign: "wechat_4_week_sprint_2026q2"
-rhythm: "Hub"
+- 你看到的是股神截图，看不到的是同一套玩法下沉默离场的大多数人。
+- 很多被吹上天的方法，只是运气暂时还没用完。
+share_copy: 现在社交媒体上最不缺的就是“老师”和收益图，这篇讲的就是为什么你看到的常常不是规律，而只是被放大的幸存者。
+campaign: wechat_4_week_sprint_2026q2
+rhythm: Hub
 traceability:
-  status: "healthy"
-  last_reviewed_at: "2026-03-19"
+  status: healthy
+  last_reviewed_at: '2026-03-19'
 workflow:
-  stage: "reviewing"
-  review_priority: "ready_later"
-  owner: "cmo"
-  reviewer: "founder"
-  priority: "high"
-  target_publish_date: "2026-04-02"
-  last_action_at: "2026-03-19"
-blocked_reason: ""
+  stage: reviewing
+  review_priority: ready_later
+  owner: cmo
+  reviewer: founder
+  priority: high
+  target_publish_date: '2026-04-02'
+  last_action_at: '2026-03-19'
+blocked_reason: ''
 maintenance:
-  change_status: "created"
-  update_reason: "backlog_activation"
+  change_status: created
+  update_reason: backlog_activation
 website:
   enabled: true
-  surface: "learn"
+  surface: learn
 image: "/images/learn/101-42_survivorship_bias_cover.png"
 images:
   cover: "/images/learn/101-42_survivorship_bias_cover.png"
   body:
-    - "/images/learn/101-42_survivorship_bias_body_1.png"
-    - "/images/learn/101-42_survivorship_bias_body_2.png"
+  - "/images/learn/101-42_survivorship_bias_body_1.png"
+  - "/images/learn/101-42_survivorship_bias_body_2.png"
   cards:
-    - "/images/learn/101-42_survivorship_bias_card_1.png"
+  - "/images/learn/101-42_survivorship_bias_card_1.png"
 image_specs:
-  cover: "1200x675"
-  body: "1080x720"
-  card: "1080x1440"
+  cover: 1200x675
+  body: 1080x720
+  card: 1080x1440
 image_prompts:
-  cover: "An editorial image of a social feed where one bright winning profit screenshot is highlighted while countless dim failed samples disappear into the background. Feels like selective visibility and illusion. Realistic interface-inspired composition without readable text."
+  cover: An editorial image of a social feed where one bright winning profit screenshot is highlighted while countless dim failed samples disappear into the background. Feels like selective visibility and illusion. Realistic interface-inspired composition without readable text.
 derivative_guidance:
   body:
-    - "Use the provided cover image as the visual reference. Keep the same selective-visibility world, the same highlighted winner, and the same illusion-driven emotional tone. Create a supporting scene that feels more crowd-driven and social."
-    - "Use the provided cover image as the visual reference. Preserve the same feed-based illusion and the same realistic interface-inspired world. Extend it into a supporting scene where envy-inducing profit visuals hide losses beneath the surface."
+  - Use the provided cover image as the visual reference. Keep the same selective-visibility world, the same highlighted winner, and the same illusion-driven emotional tone. Create a supporting scene that feels more crowd-driven and social.
+  - Use the provided cover image as the visual reference. Preserve the same feed-based illusion and the same realistic interface-inspired world. Extend it into a supporting scene where envy-inducing profit visuals hide losses beneath the surface.
   cards:
-    - "Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame. Preserve one bright winner against a field of invisible losers."
+  - Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame. Preserve one bright winner against a field of invisible losers.
 visual_strategy:
-  concept_core: "你看到的是股神，没看到的是沉默离场的人"
-  image_type: "Editorial"
+  concept_core: 你看到的是股神，没看到的是沉默离场的人
+  image_type: Editorial
   image_count: 4
-  primary_image_model: "gemini"
-  generation_mode: "cover_first"
+  primary_image_model: gemini
+  generation_mode: cover_first
   derivation_rule:
-    body: "same_world"
-    cards: "derived_from_cover"
+    body: same_world
+    cards: derived_from_cover
   image_breakdown:
     cover: 1
     body: 2
     social_cards: 1
-  reader_hook: "先让人感受到‘满屏股神’的假繁荣。"
-visual_style_prefix: "Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel."
+  reader_hook: 先让人感受到‘满屏股神’的假繁荣。
+  body_asset_policy: reuse_then_derive
+  cover_reusable_in_body: true
+  body_usage_plan:
+    body_1: reuse_cover
+    body_2: derive_from_cover
+visual_style_prefix: Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel.
 distribution:
   wechat:
     enabled: true
-    status: "draft"
+    status: draft
 ---
-
 # 幸存者偏差：你刷到的那些“股神”，很多只是运气暂时还没用完
 
 > *"社交媒体最擅长做的一件事，就是把少数吃到肉的人，包装成谁学谁会的答案。 "*
@@ -129,11 +133,3 @@ ZISO 的判断标准从来不是“有没有一次特别惊艳的收益截图”
 
 你看到的是故事，未必是分布。你看到的是幸存者，未必是规律。
 
----
-
-#### 认知对齐：行话指南
-
-- **幸存者偏差**：Survivorship Bias
-- **期望值**：Expected Value
-- **大数定律**：Law of Large Numbers
-- **盈亏比**：Risk/Reward Ratio

@@ -1,88 +1,93 @@
 ---
-title: "101-12: 你以为自己在抢板，很多时候其实只是去给机器送肉"
-subtitle: "散户最不该打的一仗，就是拿手速去碰量化的枪口"
-content_id: "growth-101-012"
-content_source: "growth"
-content_type: "article"
-canonical_role: "canonical"
-date: "2026-03-20"
-category: "The Mind"
-funnel_stage: "TOFU"
-campaign_role: "hook"
-timeliness_role: "timely_candidate"
-timely_anchor: "量化交易/超短打板/自动化交易"
-viral_priority: "watchlist"
+title: '101-12: 你以为自己在抢板，很多时候其实只是去给机器送肉'
+subtitle: 散户最不该打的一仗，就是拿手速去碰量化的枪口
+content_id: growth-101-012
+content_source: growth
+content_type: article
+canonical_role: canonical
+date: '2026-03-20'
+category: The Mind
+funnel_stage: TOFU
+campaign_role: hook
+timeliness_role: timely_candidate
+timely_anchor: 量化交易/超短打板/自动化交易
+viral_priority: watchlist
 headline_alternatives:
-  - "量化越来越快，普通人还在抢板，这场仗从一开始就没法打"
-  - "超短打板看着热血，很多时候只是去给更快的机器当流动性"
+- 量化越来越快，普通人还在抢板，这场仗从一开始就没法打
+- 超短打板看着热血，很多时候只是去给更快的机器当流动性
 cover_lines:
-  - "你以为自己在抢板，很多时候其实只是赶着去当接盘侠。"
-  - "量化面前，你眼里的极速，常常只是慢动作。"
-share_copy: "如果你还在幻想靠手速、分时和抢板赢市场，这篇很值得看。不是你不够努力，而是你可能从一开始就站错了战场。"
-campaign: "wechat_4_week_sprint_2026q2"
-rhythm: "Hub"
+- 你以为自己在抢板，很多时候其实只是赶着去当接盘侠。
+- 量化面前，你眼里的极速，常常只是慢动作。
+share_copy: 如果你还在幻想靠手速、分时和抢板赢市场，这篇很值得看。不是你不够努力，而是你可能从一开始就站错了战场。
+campaign: wechat_4_week_sprint_2026q2
+rhythm: Hub
 traceability:
-  status: "healthy"
-  last_reviewed_at: "2026-03-19"
+  status: healthy
+  last_reviewed_at: '2026-03-19'
 workflow:
-  stage: "reviewing"
-  review_priority: "review_next"
-  owner: "cmo"
-  reviewer: "founder"
-  priority: "high"
-  target_publish_date: "2026-03-24"
-  last_action_at: "2026-03-19"
-  blocked_reason: ""
+  stage: reviewing
+  review_priority: review_next
+  owner: cmo
+  reviewer: founder
+  priority: high
+  target_publish_date: '2026-03-24'
+  last_action_at: '2026-03-19'
+  blocked_reason: ''
 maintenance:
-  change_status: "updated"
-  update_reason: "copy_edit"
+  change_status: updated
+  update_reason: copy_edit
 website:
   enabled: true
-  surface: "learn"
+  surface: learn
 image: "/images/learn/101-12_l4_hft_illusion_cover.png"
 images:
   cover: "/images/learn/101-12_l4_hft_illusion_cover.png"
   body:
-    - "/images/learn/101-12_l4_hft_illusion_body_1.png"
-    - "/images/learn/101-12_l4_hft_illusion_body_2.png"
+  - "/images/learn/101-12_l4_hft_illusion_body_1.png"
+  - "/images/learn/101-12_l4_hft_illusion_body_2.png"
   cards:
-    - "/images/learn/101-12_l4_hft_illusion_card_1.png"
+  - "/images/learn/101-12_l4_hft_illusion_card_1.png"
 image_specs:
-  cover: "1200x675"
-  body: "1080x720"
-  card: "1080x1440"
+  cover: 1200x675
+  body: 1080x720
+  card: 1080x1440
 image_prompts:
-  cover: "A conceptual finance image showing a human finger about to tap a mobile buy button, contrasted against towering ultra-fast server racks and fiber lines rushing past. The human side looks fragile and late. Premium editorial lighting, dark Chinese finance tone, strong speed contrast, realistic, no text, no UI overlays."
+  cover: A conceptual finance image showing a human finger about to tap a mobile buy button, contrasted against towering ultra-fast server racks and fiber lines rushing past. The human side looks fragile and late. Premium editorial lighting, dark Chinese finance tone, strong speed contrast, realistic, no text, no UI overlays.
 derivative_guidance:
   body:
-    - "Use the provided cover image as the visual reference. Keep the same speed-pressure world, the same dark trading environment, and the same asymmetry between human and machine. Create a closer supporting scene that emphasizes how late and fragile the human side is."
-    - "Use the provided cover image as the visual reference. Preserve the same cold machine advantage and threatening mood. Extend the same world into a more symbolic supporting scene about being used as liquidity, without introducing a new visual system."
+  - Use the provided cover image as the visual reference. Keep the same speed-pressure world, the same dark trading environment, and the same asymmetry between human and machine. Create a closer supporting scene that emphasizes how late and fragile the human side is.
+  - Use the provided cover image as the visual reference. Preserve the same cold machine advantage and threatening mood. Extend the same world into a more symbolic supporting scene about being used as liquidity, without introducing a new visual system.
   cards:
-    - "Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame. Preserve the late human hand versus faster machine advantage and keep the image simple and threatening, not flashy."
+  - Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame. Preserve the late human hand versus faster machine advantage and keep the image simple and threatening, not flashy.
 visual_strategy:
-  concept_core: "散户拿手速去碰量化的枪口"
-  image_type: "Concept"
+  concept_core: 散户拿手速去碰量化的枪口
+  image_type: Concept
   image_count: 4
-  primary_image_model: "gemini"
-  generation_mode: "cover_first"
+  primary_image_model: gemini
+  generation_mode: cover_first
   derivation_rule:
-    body: "same_world"
-    cards: "derived_from_cover"
+    body: same_world
+    cards: derived_from_cover
   image_breakdown:
     cover: 1
     body: 2
     social_cards: 1
   reader_hook: "“抢板”这件事要被画成一种送上门的错觉。"
-visual_style_prefix: "Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel."
+  body_asset_policy: reuse_then_derive
+  cover_reusable_in_body: true
+  body_usage_plan:
+    body_1: reuse_cover
+    body_2: derive_from_cover
+visual_style_prefix: Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel.
 distribution:
   wechat:
     enabled: true
     status: draft
-    url: ""
+    url: ''
   xhs:
     enabled: true
     status: draft
-    url: ""
+    url: ''
   twitter:
     enabled: true
     status: draft
@@ -90,10 +95,9 @@ distribution:
     enabled: true
     status: draft
 source_docs:
-  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
-  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
+- docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+- docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
 ---
-
 # 你以为自己在抢板，其实只是给机器当肉
 
 > “你以为自己抢到了先手，很多时候只是刚好赶上去当接盘侠。”
@@ -138,15 +142,3 @@ ZISO 的冷酷之处，恰恰在于它主动退出了这场“拼手速”的幻
 
 你看到的“极速”，在量化面前，很多时候只是慢镜头。真正能让你活下来的，从来不是更快的一次点击，而是更晚一点动手，更早一点认清边界，以及彻底放弃那种“我也许能靠手速赢机构”的幻觉。
 
----
-
-#### 认知对齐：行话指南
-
-<small>
-微秒：一百万分之一秒。到了高频交易世界，连这种时间差都可能被当成优势。<br>
-流动性：市场里愿意接你买卖单的“对手盘”。很多散户以为自己在抢跑，其实只是去给别人提供成交机会。<br>
-盘后：收盘后的冷静窗口。比起盘中追逐噪音，这才是普通投资者更适合做判断的时间带。<br>
-高频交易：围绕极低延迟、极快执行和基础设施优势展开的工业化交易体系，不是普通投资者该硬闯的战场。
-</small>
-
- 

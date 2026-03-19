@@ -1,87 +1,91 @@
 ---
-title: "101-100: 你以为自己在炒股，其实连自己站在哪一层都没弄明白"
-subtitle: "别拿散户的家伙事，去打机构的仗"
-content_id: "growth-101-100"
-content_source: "growth"
-content_type: "article"
-canonical_role: "canonical"
-date: "2026-03-20"
-category: "The Machine"
-funnel_stage: "MOFU"
-campaign_role: "bridge"
-timeliness_role: "timely"
-timely_anchor: "AI时代/智能体/普通投资者与机构分层"
-viral_priority: "watchlist"
+title: '101-100: 你以为自己在炒股，其实连自己站在哪一层都没弄明白'
+subtitle: 别拿散户的家伙事，去打机构的仗
+content_id: growth-101-100
+content_source: growth
+content_type: article
+canonical_role: canonical
+date: '2026-03-20'
+category: The Machine
+funnel_stage: MOFU
+campaign_role: bridge
+timeliness_role: timely
+timely_anchor: AI时代/智能体/普通投资者与机构分层
+viral_priority: watchlist
 headline_alternatives:
-  - "AI 时代最残酷的一件事：很多人连自己站在哪一层都没搞清楚"
-  - "从散户到机构，中间隔着不止技术，更隔着一整张层级地图"
+- AI 时代最残酷的一件事：很多人连自己站在哪一层都没搞清楚
+- 从散户到机构，中间隔着不止技术，更隔着一整张层级地图
 cover_lines:
-  - "别拿散户的家伙事，去打机构的仗。"
-  - "看不清自己站在哪一层，越努力，越容易跑偏。"
-share_copy: "这篇适合当整个系列的总入口。很多人不是不努力，而是连自己在和谁打仗、该打什么仗都没弄明白。"
-campaign: "wechat_4_week_sprint_2026q2"
-rhythm: "Hero"
+- 别拿散户的家伙事，去打机构的仗。
+- 看不清自己站在哪一层，越努力，越容易跑偏。
+share_copy: 这篇适合当整个系列的总入口。很多人不是不努力，而是连自己在和谁打仗、该打什么仗都没弄明白。
+campaign: wechat_4_week_sprint_2026q2
+rhythm: Hero
 traceability:
-  status: "healthy"
-  last_reviewed_at: "2026-03-19"
+  status: healthy
+  last_reviewed_at: '2026-03-19'
 workflow:
-  stage: "reviewing"
-  review_priority: "review_first"
-  owner: "cmo"
-  reviewer: "founder"
-  priority: "high"
-  target_publish_date: "2026-03-25"
-  last_action_at: "2026-03-19"
-blocked_reason: ""
+  stage: reviewing
+  review_priority: review_first
+  owner: cmo
+  reviewer: founder
+  priority: high
+  target_publish_date: '2026-03-25'
+  last_action_at: '2026-03-19'
+blocked_reason: ''
 maintenance:
-  change_status: "created"
-  update_reason: "series_framing"
+  change_status: created
+  update_reason: series_framing
 website:
   enabled: true
-  surface: "learn"
+  surface: learn
 image: "/images/learn/101-100_maturity_prologue_cover.png"
 images:
   cover: "/images/learn/101-100_maturity_prologue_cover.png"
   body:
-    - "/images/learn/101-100_maturity_prologue_body_1.png"
-    - "/images/learn/101-100_maturity_prologue_body_2.png"
+  - "/images/learn/101-100_maturity_prologue_body_1.png"
+  - "/images/learn/101-100_maturity_prologue_body_2.png"
   cards:
-    - "/images/learn/101-100_maturity_prologue_card_1.png"
+  - "/images/learn/101-100_maturity_prologue_card_1.png"
 image_specs:
-  cover: "1200x675"
-  body: "1080x720"
-  card: "1080x1440"
+  cover: 1200x675
+  body: 1080x720
+  card: 1080x1440
 image_prompts:
-  cover: "A conceptual hierarchy map of investing levels. In the foreground, a lone retail investor with simple tools; in the distance, an industrial institutional fleet of machines, terminals, and infrastructure. The scene feels like different layers of the same battlefield. Dark premium editorial style, symbolic, no text."
+  cover: A conceptual hierarchy map of investing levels. In the foreground, a lone retail investor with simple tools; in the distance, an industrial institutional fleet of machines, terminals, and infrastructure. The scene feels like different layers of the same battlefield. Dark premium editorial style, symbolic, no text.
 derivative_guidance:
   body:
-    - "Use the provided cover image as the visual reference. Keep the same layered battlefield metaphor, the same distance between retail and institutions, and the same dark premium tone. Create a supporting scene that emphasizes unequal strategic positions within the same hierarchy world."
-    - "Use the provided cover image as the visual reference. Preserve the same investing-level map and same retail-versus-institution contrast. Extend the same world into a closer supporting scene of one retail investor looking up at the layered system."
+  - Use the provided cover image as the visual reference. Keep the same layered battlefield metaphor, the same distance between retail and institutions, and the same dark premium tone. Create a supporting scene that emphasizes unequal strategic positions within the same hierarchy world.
+  - Use the provided cover image as the visual reference. Preserve the same investing-level map and same retail-versus-institution contrast. Extend the same world into a closer supporting scene of one retail investor looking up at the layered system.
   cards:
-    - "Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame. Preserve the sense of unequal levels and the retail-versus-institution contrast."
+  - Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame. Preserve the sense of unequal levels and the retail-versus-institution contrast.
 visual_strategy:
-  concept_core: "散户和机构根本不在同一个层级"
-  image_type: "Concept"
+  concept_core: 散户和机构根本不在同一个层级
+  image_type: Concept
   image_count: 4
-  primary_image_model: "gemini"
-  generation_mode: "cover_first"
+  primary_image_model: gemini
+  generation_mode: cover_first
   derivation_rule:
-    body: "same_world"
-    cards: "derived_from_cover"
+    body: same_world
+    cards: derived_from_cover
   image_breakdown:
     cover: 1
     body: 2
     social_cards: 1
-  reader_hook: "先让读者一眼看出：原来大家根本不在同一个层级。"
-visual_style_prefix: "Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel."
+  reader_hook: 先让读者一眼看出：原来大家根本不在同一个层级。
+  body_asset_policy: reuse_then_derive
+  cover_reusable_in_body: true
+  body_usage_plan:
+    body_1: reuse_cover
+    body_2: derive_from_cover
+visual_style_prefix: Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel.
 distribution:
   wechat:
     enabled: true
-    status: "draft"
+    status: draft
 source_docs:
-  - docs/0_Strategy/01_Product_Positioning_and_Boundaries.md
+- docs/0_Strategy/01_Product_Positioning_and_Boundaries.md
 ---
-
 # 你以为自己在炒股，其实连自己站在哪一层都不知道
 
 > “很多人不是输在不努力，而是输在拎着菜刀，就以为自己已经上了战场。”
@@ -186,17 +190,3 @@ L2 的核心，不是你有没有一个漂亮的公式，而是你开始用规�
 
 因为从“赌博”走向“投资”，从“被收割”走向“职业化生存”，第一步从来不是更努力，而是先拿到地图。
 
----
-
-#### 认知对齐：行话指南
-
-<small>
-成熟度模型：用层级划分能力边界与方法复杂度的地图，不是为了炫技，而是为了避免跑错战场。<br>
-生态位：你在市场里的真实位置。不同生态位，决定了你该打哪种仗、该放弃哪种幻想。<br>
-思维范式：你理解市场的底层方式。范式不变，工具换再多，结果也常常不变。<br>
-上帝视角：不是“什么都懂”，而是先看清全图，再决定自己该往哪一层走。
-</small>
-
-
----
-*开始航行：101-104《L0级——凭直觉交易，是在浓雾中盲目狂奔》*

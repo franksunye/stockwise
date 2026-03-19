@@ -63,6 +63,7 @@ derivative_guidance:
 visual_strategy:
   concept_core: ""
   generation_mode: "cover_first" # cover_first | independent
+  body_asset_policy: "reuse_then_derive" # reuse_then_derive | derive_only | independent_body
   derivation_rule:
     body: "same_world" # same_world | derived_from_cover | independent
     cards: "derived_from_cover" # derived_from_cover | same_world | independent
@@ -135,14 +136,25 @@ distribution:
 默认生成方式：
 
 1. 先生成 `cover`，作为整篇文章的视觉母版
-2. 再把选定的 `cover` 作为参考图，派生 `body`
-3. `cards` 优先从 `cover` 派生，而不是完全重新生成
+2. 先判断 `body` 是否可以直接复用 `cover`
+3. 如果需要变化，再把选定的 `cover` 作为参考图，派生 `body`
+4. `cards` 优先从 `cover` 派生，而不是完全重新生成
 
 推荐默认值：
 
 - `generation_mode: "cover_first"`
+- `body_asset_policy: "reuse_then_derive"`
 - `derivation_rule.body: "same_world"`
 - `derivation_rule.cards: "derived_from_cover"`
+
+`body_asset_policy` 建议这样理解：
+
+- `reuse_then_derive`
+  先复用 `cover` 或其裁切版作为 `body_1`，只有在阅读节奏需要变化时再派生 `body_2`
+- `derive_only`
+  `body` 不直接复用 `cover`，但都从 `cover` 参考图派生
+- `independent_body`
+  少用。只在正文确实需要另一种同主题场景时才使用
 
 字段语义：
 
@@ -152,6 +164,13 @@ distribution:
   不是新的独立 prompt，而是“参考我给的 cover 图片，保持一致，只做局部延展”的派生指令
 - `derivative_guidance.cards`
   不是新的独立 prompt，而是“参考我给的 cover 图片，改成竖版传播卡”的派生指令
+
+执行优先级：
+
+1. 先问：`cover` 能不能直接兼任 `body_1`
+2. 如果能，正文第一张图直接复用 `cover` 或 `cover` 裁切版
+3. 只有当文章中段需要新的阅读节奏时，再做 `body_2` 派生图
+4. `cards` 默认始终从 `cover` 派生
 
 推荐写法：
 

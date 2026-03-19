@@ -23,7 +23,8 @@
 ## 二、每篇建议图片数
 
 - `1` 张封面主图
-- `2` 张正文节奏图
+- `1` 张优先复用 `cover` 的正文图
+- `1` 张按需派生的正文节奏图
 - `1` 张再分发卡图
 
 默认每篇 `4` 张。
@@ -79,8 +80,9 @@ Premium editorial finance style, realistic not cartoonish, dark high-contrast at
 
 1. 先生成 `cover`
 2. 选定一张最合适的 `cover`
-3. 再把这张 `cover` 当参考图去做 `body`
-4. 最后从同一张 `cover` 派生 `card`
+3. 先判断正文第一张图能不能直接复用 `cover`
+4. 如果需要新的阅读节奏，再把这张 `cover` 当参考图去做 `body`
+5. 最后从同一张 `cover` 派生 `card`
 
 推荐语气：
 
@@ -89,6 +91,12 @@ Use the provided cover image as the visual reference.
 Keep the same subject, palette, material language, emotional tone, and visual world.
 Change only...
 ```
+
+默认策略：
+
+- `body_1`: 优先复用 `cover`
+- `body_2`: 按需派生
+- `card`: 从 `cover` 派生
 ## 六、逐篇定义
 
 ### 1. 101-68 General LLM Illusion

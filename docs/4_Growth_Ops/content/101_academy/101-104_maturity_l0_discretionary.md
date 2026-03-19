@@ -1,87 +1,91 @@
 ---
-title: "101-104: 只要你的交易还经常从“我觉得”开始，你就还没走出 L0"
-subtitle: "很多人不是不会分析，而是每次心一热，就开始给冲动找理由"
-content_id: "growth-101-104"
-content_source: "growth"
-content_type: "article"
-canonical_role: "canonical"
-date: "2026-03-20"
-category: "The Machine"
-funnel_stage: "MOFU"
-campaign_role: "bridge"
-timeliness_role: "timely"
-timely_anchor: "散户直觉交易/群聊跟单/AI时代低阶投资行为"
-viral_priority: "normal"
+title: '101-104: 只要你的交易还经常从“我觉得”开始，你就还没走出 L0'
+subtitle: 很多人不是不会分析，而是每次心一热，就开始给冲动找理由
+content_id: growth-101-104
+content_source: growth
+content_type: article
+canonical_role: canonical
+date: '2026-03-20'
+category: The Machine
+funnel_stage: MOFU
+campaign_role: bridge
+timeliness_role: timely
+timely_anchor: 散户直觉交易/群聊跟单/AI时代低阶投资行为
+viral_priority: normal
 headline_alternatives:
-  - "群里一热闹你就想下单？只要还靠“我觉得”，你就没离开 L0"
-  - "AI 时代最落后的交易方式，还是那句：我觉得这次差不多了"
+- 群里一热闹你就想下单？只要还靠“我觉得”，你就没离开 L0
+- AI 时代最落后的交易方式，还是那句：我觉得这次差不多了
 cover_lines:
-  - "只要交易还经常从‘我觉得’开始，你就还没离开最低层。"
-  - "心一热就想下单，很多人输的不是行情，是自己那句‘差不多了’。"
-share_copy: "这篇特别适合用来打掉最底层的交易幻觉。只要还在靠“我觉得”“应该差不多”，其实就还没真正开始升级。"
-campaign: "wechat_4_week_sprint_2026q2"
-rhythm: "Hub"
+- 只要交易还经常从‘我觉得’开始，你就还没离开最低层。
+- 心一热就想下单，很多人输的不是行情，是自己那句‘差不多了’。
+share_copy: 这篇特别适合用来打掉最底层的交易幻觉。只要还在靠“我觉得”“应该差不多”，其实就还没真正开始升级。
+campaign: wechat_4_week_sprint_2026q2
+rhythm: Hub
 traceability:
-  status: "healthy"
-  last_reviewed_at: "2026-03-19"
+  status: healthy
+  last_reviewed_at: '2026-03-19'
 workflow:
-  stage: "reviewing"
-  review_priority: "ready_later"
-  owner: "cmo"
-  reviewer: "founder"
-  priority: "high"
-  target_publish_date: "2026-04-01"
-  last_action_at: "2026-03-19"
-blocked_reason: ""
+  stage: reviewing
+  review_priority: ready_later
+  owner: cmo
+  reviewer: founder
+  priority: high
+  target_publish_date: '2026-04-01'
+  last_action_at: '2026-03-19'
+blocked_reason: ''
 maintenance:
-  change_status: "created"
-  update_reason: "new_series"
+  change_status: created
+  update_reason: new_series
 website:
   enabled: true
-  surface: "learn"
+  surface: learn
 image: "/images/learn/101-104_maturity_l0_discretionary_cover.png"
 images:
   cover: "/images/learn/101-104_maturity_l0_discretionary_cover.png"
   body:
-    - "/images/learn/101-104_maturity_l0_discretionary_body_1.png"
-    - "/images/learn/101-104_maturity_l0_discretionary_body_2.png"
+  - "/images/learn/101-104_maturity_l0_discretionary_body_1.png"
+  - "/images/learn/101-104_maturity_l0_discretionary_body_2.png"
   cards:
-    - "/images/learn/101-104_maturity_l0_discretionary_card_1.png"
+  - "/images/learn/101-104_maturity_l0_discretionary_card_1.png"
 image_specs:
-  cover: "1200x675"
-  body: "1080x720"
-  card: "1080x1440"
+  cover: 1200x675
+  body: 1080x720
+  card: 1080x1440
 image_prompts:
-  cover: "A conceptual image of an investor's hand hovering over a buy button while a red-hot emotional cloud swirls above it. The idea is impulse-driven trading. Clean composition, premium dark finance style, emotional pressure, no text."
+  cover: A conceptual image of an investor's hand hovering over a buy button while a red-hot emotional cloud swirls above it. The idea is impulse-driven trading. Clean composition, premium dark finance style, emotional pressure, no text.
 derivative_guidance:
   body:
-    - "Use the provided cover image as the visual reference. Keep the same emotional heat, the same impulse-trading atmosphere, and the same red-hot intuition world. Create a supporting scene where rumor or group-chat pressure pushes the same hand toward action."
-    - "Use the provided cover image as the visual reference. Preserve the same hovering-hand metaphor and same emotional flare. Extend the same world into a more symbolic supporting scene about intuition burning over a fragile account."
+  - Use the provided cover image as the visual reference. Keep the same emotional heat, the same impulse-trading atmosphere, and the same red-hot intuition world. Create a supporting scene where rumor or group-chat pressure pushes the same hand toward action.
+  - Use the provided cover image as the visual reference. Preserve the same hovering-hand metaphor and same emotional flare. Extend the same world into a more symbolic supporting scene about intuition burning over a fragile account.
   cards:
-    - "Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame. Preserve the hovering hand and emotional flare as the core metaphor."
+  - Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame. Preserve the hovering hand and emotional flare as the core metaphor.
 visual_strategy:
-  concept_core: "心一热，交易就开始脱离规则"
-  image_type: "Concept"
+  concept_core: 心一热，交易就开始脱离规则
+  image_type: Concept
   image_count: 3
-  primary_image_model: "gemini"
-  generation_mode: "cover_first"
+  primary_image_model: gemini
+  generation_mode: cover_first
   derivation_rule:
-    body: "same_world"
-    cards: "derived_from_cover"
+    body: same_world
+    cards: derived_from_cover
   image_breakdown:
     cover: 1
     body: 2
     social_cards: 0
   reader_hook: "“心一热就下单”必须在图上成立。"
-visual_style_prefix: "Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel."
+  body_asset_policy: derive_only
+  cover_reusable_in_body: false
+  body_usage_plan:
+    body_1: derive_from_cover
+    body_2: derive_from_cover
+visual_style_prefix: Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel.
 distribution:
   wechat:
     enabled: true
-    status: "draft"
+    status: draft
 source_docs:
-  - docs/0_Strategy/01_Product_Positioning_and_Boundaries.md
+- docs/0_Strategy/01_Product_Positioning_and_Boundaries.md
 ---
-
 # 只要你的交易还经常从“我觉得”开始，你就还在 L0
 
 > “股市里最怕的，不是看错一次，而是次次都觉得这回八九不离十。”
@@ -130,17 +134,3 @@ ZISO 的角色，从来不是替用户把冲动讲得更漂亮，而是把那些
 
 只要你的交易还经常从“我觉得”开始，市场就永远有办法让你为这种感觉买单。
 
----
-
-#### 认知对齐：行话指南
-
-- **直觉驱动**：Discretionary Trading
-- **快思考/慢思考**：System 1 / System 2 Thinking
-- **损失厌恶**：Loss Aversion
-- **心理账户**：Mental Accounting
-- **锚定效应**：Anchoring Bias
-- **Daniel Kahneman**：诺贝尔经济学奖得主，行为金融学巅峰人物。
-
-
----
-*下一篇：101-105《L1级——看指标提示，是盯着后视镜开车》*

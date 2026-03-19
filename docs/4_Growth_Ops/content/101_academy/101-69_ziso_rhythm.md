@@ -1,88 +1,93 @@
 ---
-title: "101-69: 为什么 ZISO 白天几乎不吭声，反而更可能帮你少亏钱？"
-subtitle: "08:30 和 21:00 不是摆样子，而是专治盘中手痒的两道护栏"
-content_id: "growth-101-069"
-content_source: "growth"
-content_type: "article"
-canonical_role: "canonical"
-date: "2026-04-10"
-category: "The Machine"
-funnel_stage: "BOFU"
-campaign_role: "conversion"
-timeliness_role: "timely"
-timely_anchor: "信息过载/智能提醒过载/盘中焦虑"
-viral_priority: "watchlist"
+title: '101-69: 为什么 ZISO 白天几乎不吭声，反而更可能帮你少亏钱？'
+subtitle: '08:30 和 21:00 不是摆样子，而是专治盘中手痒的两道护栏'
+content_id: growth-101-069
+content_source: growth
+content_type: article
+canonical_role: canonical
+date: '2026-04-10'
+category: The Machine
+funnel_stage: BOFU
+campaign_role: conversion
+timeliness_role: timely
+timely_anchor: 信息过载/智能提醒过载/盘中焦虑
+viral_priority: watchlist
 headline_alternatives:
-  - "别家白天叮咚个不停，ZISO 为什么反而选择少说话"
-  - "提醒越多越安全吗？很多股民真正缺的，是白天少被打扰"
+- 别家白天叮咚个不停，ZISO 为什么反而选择少说话
+- 提醒越多越安全吗？很多股民真正缺的，是白天少被打扰
 cover_lines:
-  - "真值钱的系统，很多时候不是一直喊你，而是知道什么时候该闭嘴。"
-  - "很多亏损，不是没提醒，而是提醒太多把人带乱了。"
-share_copy: "如果你一直以为盘中提醒越多越专业，这篇会把这个直觉反过来。对白天容易手痒、容易被带节奏的人尤其有用。"
-campaign: "wechat_4_week_sprint_2026q2"
-rhythm: "Hub"
+- 真值钱的系统，很多时候不是一直喊你，而是知道什么时候该闭嘴。
+- 很多亏损，不是没提醒，而是提醒太多把人带乱了。
+share_copy: 如果你一直以为盘中提醒越多越专业，这篇会把这个直觉反过来。对白天容易手痒、容易被带节奏的人尤其有用。
+campaign: wechat_4_week_sprint_2026q2
+rhythm: Hub
 traceability:
-  status: "healthy"
-  last_reviewed_at: "2026-03-19"
+  status: healthy
+  last_reviewed_at: '2026-03-19'
 workflow:
-  stage: "drafting"
-  review_priority: "review_first"
-  owner: "cmo"
-  reviewer: "founder"
-  priority: "high"
-  target_publish_date: "2026-03-27"
-  last_action_at: "2026-03-19"
-  blocked_reason: ""
+  stage: drafting
+  review_priority: review_first
+  owner: cmo
+  reviewer: founder
+  priority: high
+  target_publish_date: '2026-03-27'
+  last_action_at: '2026-03-19'
+  blocked_reason: ''
 maintenance:
-  change_status: "updated"
-  update_reason: "copy_edit"
+  change_status: updated
+  update_reason: copy_edit
 website:
   enabled: true
-  surface: "learn"
+  surface: learn
 image: "/images/learn/101-69_ziso_rhythm_cover.png"
 images:
   cover: "/images/learn/101-69_ziso_rhythm_cover.png"
   body:
-    - "/images/learn/101-69_ziso_rhythm_body_1.png"
-    - "/images/learn/101-69_ziso_rhythm_body_2.png"
+  - "/images/learn/101-69_ziso_rhythm_body_1.png"
+  - "/images/learn/101-69_ziso_rhythm_body_2.png"
   cards:
-    - "/images/learn/101-69_ziso_rhythm_card_1.png"
+  - "/images/learn/101-69_ziso_rhythm_card_1.png"
 image_specs:
-  cover: "1200x675"
-  body: "1080x720"
-  card: "1080x1440"
+  cover: 1200x675
+  body: 1080x720
+  card: 1080x1440
 image_prompts:
-  cover: "A calm conceptual image about disciplined timing. Chaotic exploding phone notifications fading into the background, while two stable glowing light points anchor the scene like rational checkpoints. Premium dark palette, finance lifestyle mood, minimal but emotionally clear, no text."
+  cover: A calm conceptual image about disciplined timing. Chaotic exploding phone notifications fading into the background, while two stable glowing light points anchor the scene like rational checkpoints. Premium dark palette, finance lifestyle mood, minimal but emotionally clear, no text.
 derivative_guidance:
   body:
-    - "Use the provided cover image as the visual reference. Keep the same timing-discipline world, the same dark palette, and the same contrast between noise and checkpoints. Create a supporting scene that zooms into daytime notification overload."
-    - "Use the provided cover image as the visual reference. Preserve the same rhythm metaphor and emotional calm. Extend the same world into a clean morning-or-evening ritual scene with notes, tea, and structure."
+  - Use the provided cover image as the visual reference. Keep the same timing-discipline world, the same dark palette, and the same contrast between noise and checkpoints. Create a supporting scene that zooms into daytime notification overload.
+  - Use the provided cover image as the visual reference. Preserve the same rhythm metaphor and emotional calm. Extend the same world into a clean morning-or-evening ritual scene with notes, tea, and structure.
   cards:
-    - "Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame. Preserve the checkpoint metaphor and the contrast between noise and rhythm."
+  - Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame. Preserve the checkpoint metaphor and the contrast between noise and rhythm.
 visual_strategy:
-  concept_core: "盘中噪音很多，但真正有价值的是固定节律"
-  image_type: "Concept"
+  concept_core: 盘中噪音很多，但真正有价值的是固定节律
+  image_type: Concept
   image_count: 4
-  primary_image_model: "gemini"
-  generation_mode: "cover_first"
+  primary_image_model: gemini
+  generation_mode: cover_first
   derivation_rule:
-    body: "same_world"
-    cards: "derived_from_cover"
+    body: same_world
+    cards: derived_from_cover
   image_breakdown:
     cover: 1
     body: 2
     social_cards: 1
-  reader_hook: "让读者先看到‘白天被打扰 vs 定点理性’的差别。"
-visual_style_prefix: "Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel."
+  reader_hook: 让读者先看到‘白天被打扰 vs 定点理性’的差别。
+  body_asset_policy: reuse_then_derive
+  cover_reusable_in_body: true
+  body_usage_plan:
+    body_1: reuse_cover
+    body_2: derive_from_cover
+visual_style_prefix: Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel.
 distribution:
   wechat:
     enabled: true
     status: draft
-    url: ""
+    url: ''
   xhs:
     enabled: true
     status: draft
-    url: ""
+    url: ''
   twitter:
     enabled: true
     status: draft
@@ -90,10 +95,9 @@ distribution:
     enabled: true
     status: draft
 source_docs:
-  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
-  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
+- docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+- docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
 ---
-
 # 101-69: 为什么 ZISO 白天几乎不打扰你，反而更可能帮你少亏钱？
 
 > “真值钱的系统，很多时候不是白天叮咚个没完，而是在你手痒的时候先让你闭手。”

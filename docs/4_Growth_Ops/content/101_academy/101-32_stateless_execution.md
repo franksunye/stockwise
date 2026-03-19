@@ -1,88 +1,93 @@
 ---
-title: "101-32: 市场根本不在乎你亏了多少，只有你自己还在死守成本线"
-subtitle: "很多错误动作，不是趋势看错了，而是你满脑子都在想解套"
-content_id: "growth-101-032"
-content_source: "growth"
-content_type: "article"
-canonical_role: "canonical"
-date: "2026-04-03"
-category: "The Method"
-funnel_stage: "MOFU"
-campaign_role: "bridge"
-timeliness_role: "evergreen"
-timely_anchor: "解套心态/成本线执念/回本心理"
-viral_priority: "normal"
+title: '101-32: 市场根本不在乎你亏了多少，只有你自己还在死守成本线'
+subtitle: 很多错误动作，不是趋势看错了，而是你满脑子都在想解套
+content_id: growth-101-032
+content_source: growth
+content_type: article
+canonical_role: canonical
+date: '2026-04-03'
+category: The Method
+funnel_stage: MOFU
+campaign_role: bridge
+timeliness_role: evergreen
+timely_anchor: 解套心态/成本线执念/回本心理
+viral_priority: normal
 headline_alternatives:
-  - "很多人不是输给行情，而是输给了那句“等回本我就走”"
-  - "成本线为什么最会骗人？因为它总让你误以为市场欠你一个解套"
+- 很多人不是输给行情，而是输给了那句“等回本我就走”
+- 成本线为什么最会骗人？因为它总让你误以为市场欠你一个解套
 cover_lines:
-  - "很多人不是输给行情，而是输给了那句‘等回本我就走’。"
-  - "市场根本不认识你的成本线，只有你自己天天惦记着它。"
-share_copy: "如果你总会被‘解套’这两个字带着走，这篇会特别扎心。它讲的不是技术，而是那条最会骗人的成本线。"
-campaign: "wechat_4_week_sprint_2026q2"
-rhythm: "Hub"
+- 很多人不是输给行情，而是输给了那句‘等回本我就走’。
+- 市场根本不认识你的成本线，只有你自己天天惦记着它。
+share_copy: 如果你总会被‘解套’这两个字带着走，这篇会特别扎心。它讲的不是技术，而是那条最会骗人的成本线。
+campaign: wechat_4_week_sprint_2026q2
+rhythm: Hub
 traceability:
-  status: "healthy"
-  last_reviewed_at: "2026-03-19"
+  status: healthy
+  last_reviewed_at: '2026-03-19'
 workflow:
-  stage: "reviewing"
-  review_priority: "ready_later"
-  owner: "cmo"
-  reviewer: "founder"
-  priority: "high"
-  target_publish_date: "2026-04-14"
-  last_action_at: "2026-03-19"
-  blocked_reason: ""
+  stage: reviewing
+  review_priority: ready_later
+  owner: cmo
+  reviewer: founder
+  priority: high
+  target_publish_date: '2026-04-14'
+  last_action_at: '2026-03-19'
+  blocked_reason: ''
 maintenance:
-  change_status: "updated"
-  update_reason: "copy_edit"
+  change_status: updated
+  update_reason: copy_edit
 website:
   enabled: true
-  surface: "learn"
+  surface: learn
 image: "/images/learn/101-32_stateless_execution_cover.png"
 images:
   cover: "/images/learn/101-32_stateless_execution_cover.png"
   body:
-    - "/images/learn/101-32_stateless_execution_body_1.png"
-    - "/images/learn/101-32_stateless_execution_body_2.png"
+  - "/images/learn/101-32_stateless_execution_body_1.png"
+  - "/images/learn/101-32_stateless_execution_body_2.png"
   cards:
-    - "/images/learn/101-32_stateless_execution_card_1.png"
+  - "/images/learn/101-32_stateless_execution_card_1.png"
 image_specs:
-  cover: "1200x675"
-  body: "1080x720"
-  card: "1080x1440"
+  cover: 1200x675
+  body: 1080x720
+  card: 1080x1440
 image_prompts:
-  cover: "A conceptual finance image of a glowing cost-basis line turning into a chain wrapped around a retail investor. The line itself becomes the trap. Premium dark symbolic style, no text."
+  cover: A conceptual finance image of a glowing cost-basis line turning into a chain wrapped around a retail investor. The line itself becomes the trap. Premium dark symbolic style, no text.
 derivative_guidance:
   body:
-    - "Use the provided cover image as the visual reference. Keep the same cost-line trap, the same dark prison-like emotional world, and the same premium finance symbolism. Create a supporting scene that feels more human and shows attachment to the break-even line."
-    - "Use the provided cover image as the visual reference. Preserve the same chain-like cost-line metaphor and the same emotional confinement. Extend the same world into a more symbolic prison-bar supporting scene."
+  - Use the provided cover image as the visual reference. Keep the same cost-line trap, the same dark prison-like emotional world, and the same premium finance symbolism. Create a supporting scene that feels more human and shows attachment to the break-even line.
+  - Use the provided cover image as the visual reference. Preserve the same chain-like cost-line metaphor and the same emotional confinement. Extend the same world into a more symbolic prison-bar supporting scene.
   cards:
-    - "Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame. Preserve the cost-line-as-chain metaphor and keep the composition clean."
+  - Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame. Preserve the cost-line-as-chain metaphor and keep the composition clean.
 visual_strategy:
-  concept_core: "成本线不是答案，而是最会骗你的那条线"
-  image_type: "Concept"
+  concept_core: 成本线不是答案，而是最会骗你的那条线
+  image_type: Concept
   image_count: 3
-  primary_image_model: "gemini"
-  generation_mode: "cover_first"
+  primary_image_model: gemini
+  generation_mode: cover_first
   derivation_rule:
-    body: "same_world"
-    cards: "derived_from_cover"
+    body: same_world
+    cards: derived_from_cover
   image_breakdown:
     cover: 1
     body: 2
     social_cards: 0
-  reader_hook: "成本线要被画成‘最会骗人的那根绳子’。"
-visual_style_prefix: "Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel."
+  reader_hook: 成本线要被画成‘最会骗人的那根绳子’。
+  body_asset_policy: derive_only
+  cover_reusable_in_body: false
+  body_usage_plan:
+    body_1: derive_from_cover
+    body_2: derive_from_cover
+visual_style_prefix: Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel.
 distribution:
   wechat:
     enabled: true
     status: draft
-    url: ""
+    url: ''
   xhs:
     enabled: true
     status: draft
-    url: ""
+    url: ''
   twitter:
     enabled: true
     status: draft
@@ -90,10 +95,9 @@ distribution:
     enabled: true
     status: draft
 source_docs:
-  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
-  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
+- docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+- docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
 ---
-
 # 市场根本不在乎你亏了多少，只有你自己还在死守那条成本线
 
 > “账户里最会骗你的那条线，很多时候不是 K 线，而是那条你天天惦记着的成本线。”
@@ -144,13 +148,3 @@ source_docs:
 
 因为很多账户真正亏掉的，不是那一笔买贵了的成本，而是后面为了守着那条成本线，不断做错的动作。
 
----
-
-#### 认知对齐：行话指南
-
-- **无状态**：Stateless
-- **持仓均价**：Break-even Price / Cost Basis
-- **解套**：Unlocking a losing position
-- **信号中心**：The Signal Center
-
- 

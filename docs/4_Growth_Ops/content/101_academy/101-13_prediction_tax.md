@@ -1,88 +1,93 @@
 ---
-title: "101-13: 为什么“这票明天会不会涨”这句话，本身就是最大的智商税？"
-subtitle: "散户老想要个准话，机构只认概率和纪律"
-content_id: "growth-101-013"
-content_source: "growth"
-content_type: "article"
-canonical_role: "canonical"
-date: "2026-04-10"
-category: "The Mind"
-funnel_stage: "TOFU"
-campaign_role: "hook"
-timeliness_role: "evergreen"
-timely_anchor: "AI预测涨跌/明天会不会涨/龙头算命"
-viral_priority: "top5"
+title: '101-13: 为什么“这票明天会不会涨”这句话，本身就是最大的智商税？'
+subtitle: 散户老想要个准话，机构只认概率和纪律
+content_id: growth-101-013
+content_source: growth
+content_type: article
+canonical_role: canonical
+date: '2026-04-10'
+category: The Mind
+funnel_stage: TOFU
+campaign_role: hook
+timeliness_role: evergreen
+timely_anchor: AI预测涨跌/明天会不会涨/龙头算命
+viral_priority: top5
 launch_order: 2
 headline_alternatives:
-  - "“这票明天会不会涨？”这句问得越勤，往往亏得越快"
-  - "AI 也好，老师也好，最贵的不是服务费，是你老想听准话"
+- "“这票明天会不会涨？”这句问得越勤，往往亏得越快"
+- AI 也好，老师也好，最贵的不是服务费，是你老想听准话
 cover_lines:
-  - "市场里最贵的东西，不是会员费，而是你老想听一句准话。"
-  - "你越想知道明天，动作往往越容易变形。"
-share_copy: "问老师、问朋友、问 AI、问明天会不会涨，这几乎是每个股民都干过的事。这篇就是专门拆这个最贵的执念。"
-campaign: "wechat_4_week_sprint_2026q2"
-rhythm: "Hub"
+- 市场里最贵的东西，不是会员费，而是你老想听一句准话。
+- 你越想知道明天，动作往往越容易变形。
+share_copy: 问老师、问朋友、问 AI、问明天会不会涨，这几乎是每个股民都干过的事。这篇就是专门拆这个最贵的执念。
+campaign: wechat_4_week_sprint_2026q2
+rhythm: Hub
 traceability:
-  status: "healthy"
-  last_reviewed_at: "2026-03-19"
+  status: healthy
+  last_reviewed_at: '2026-03-19'
 workflow:
-  stage: "reviewing"
-  review_priority: "review_first"
-  owner: "cmo"
-  reviewer: "founder"
-  priority: "high"
-  target_publish_date: "2026-04-06"
-  last_action_at: "2026-03-19"
-  blocked_reason: ""
+  stage: reviewing
+  review_priority: review_first
+  owner: cmo
+  reviewer: founder
+  priority: high
+  target_publish_date: '2026-04-06'
+  last_action_at: '2026-03-19'
+  blocked_reason: ''
 maintenance:
-  change_status: "updated"
-  update_reason: "copy_edit"
+  change_status: updated
+  update_reason: copy_edit
 website:
   enabled: true
-  surface: "learn"
+  surface: learn
 image: "/images/learn/101-13_prediction_tax_cover.png"
 images:
   cover: "/images/learn/101-13_prediction_tax_cover.png"
   body:
-    - "/images/learn/101-13_prediction_tax_body_1.png"
-    - "/images/learn/101-13_prediction_tax_body_2.png"
+  - "/images/learn/101-13_prediction_tax_body_1.png"
+  - "/images/learn/101-13_prediction_tax_body_2.png"
   cards:
-    - "/images/learn/101-13_prediction_tax_card_1.png"
+  - "/images/learn/101-13_prediction_tax_card_1.png"
 image_specs:
-  cover: "1200x675"
-  body: "1080x720"
-  card: "1080x1440"
+  cover: 1200x675
+  body: 1080x720
+  card: 1080x1440
 image_prompts:
-  cover: "A hybrid editorial-concept image of anxious investors surrounding a glowing question mark over a stock chart, like modern fortune-telling. The mood is desperate for certainty. Realistic Chinese retail investing atmosphere, premium dark palette, no text."
+  cover: A hybrid editorial-concept image of anxious investors surrounding a glowing question mark over a stock chart, like modern fortune-telling. The mood is desperate for certainty. Realistic Chinese retail investing atmosphere, premium dark palette, no text.
 derivative_guidance:
   body:
-    - "Use the provided cover image as the visual reference. Keep the glowing question mark, the anxious crowd energy, and the same dark Chinese retail finance atmosphere. Create a supporting scene that shows people asking the same stock question to multiple devices without changing the visual world."
-    - "Use the provided cover image as the visual reference. Preserve the same uncertainty metaphor. Extend the same world into a supporting contrast between certainty-seeking and disciplined probability, while keeping the same palette and emotional pressure."
+  - Use the provided cover image as the visual reference. Keep the glowing question mark, the anxious crowd energy, and the same dark Chinese retail finance atmosphere. Create a supporting scene that shows people asking the same stock question to multiple devices without changing the visual world.
+  - Use the provided cover image as the visual reference. Preserve the same uncertainty metaphor. Extend the same world into a supporting contrast between certainty-seeking and disciplined probability, while keeping the same palette and emotional pressure.
   cards:
-    - "Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame. Preserve the question mark as the core symbol and leave clean space for future headline overlay."
+  - Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame. Preserve the question mark as the core symbol and leave clean space for future headline overlay.
 visual_strategy:
-  concept_core: "散户把交易当算命，系统把交易当概率"
-  image_type: "Hybrid"
+  concept_core: 散户把交易当算命，系统把交易当概率
+  image_type: Hybrid
   image_count: 4
-  generation_mode: "cover_first"
+  generation_mode: cover_first
   derivation_rule:
-    body: "same_world"
-    cards: "derived_from_cover"
+    body: same_world
+    cards: derived_from_cover
   image_breakdown:
     cover: 1
     body: 2
     social_cards: 1
-  reader_hook: "普通人最熟悉的那句“明天会不会涨”，一眼就能代入。"
-visual_style_prefix: "Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel."
+  reader_hook: 普通人最熟悉的那句“明天会不会涨”，一眼就能代入。
+  body_asset_policy: reuse_then_derive
+  cover_reusable_in_body: true
+  body_usage_plan:
+    body_1: reuse_cover
+    body_2: derive_from_cover
+visual_style_prefix: Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel.
 distribution:
   wechat:
     enabled: true
     status: draft
-    url: ""
+    url: ''
   xhs:
     enabled: true
     status: draft
-    url: ""
+    url: ''
   twitter:
     enabled: true
     status: draft
@@ -90,10 +95,9 @@ distribution:
     enabled: true
     status: draft
 source_docs:
-  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
-  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
+- docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+- docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
 ---
-
 # 101-13: 为什么“问明天会不会涨”这件事，本身就是最大的智商税？
 
 > “市场里最贵的东西，不是会员费，而是你老想听一句准话。”
@@ -134,11 +138,3 @@ ZISO 的边界一直很清楚。我们做的不是“替你预测宇宙”，而
 
 承认自己对明天没有绝对把握，不是弱。那反而是你开始接近专业的第一步。
 
----
-
-#### 认知对齐：行话指南
-
-- **胜率偏差**：Edge
-- **概率执行**：Probabilistic Execution
-- **数学期望**：Expected Value
-- **K线噪音**：Market Noise

@@ -1,82 +1,86 @@
 ---
-title: "波动率税：最磨人的行情，不是暴跌，而是天天给你点甜头再扇你一巴掌"
-subtitle: "账户最常见的死法，不是一下摔死，而是来回打脸、慢慢失血"
+title: 波动率税：最磨人的行情，不是暴跌，而是天天给你点甜头再扇你一巴掌
+subtitle: 账户最常见的死法，不是一下摔死，而是来回打脸、慢慢失血
 source_docs:
-  - docs/1_Engineering/16_Observability_Thresholds_and_Incidents.md
-category: "Growth 101"
-funnel_stage: "TOFU"
-campaign_role: "hook"
-timeliness_role: "evergreen"
-timely_anchor: "震荡市/热点轮动/电力资源板块反复拉扯"
-viral_priority: "top5"
+- docs/1_Engineering/16_Observability_Thresholds_and_Incidents.md
+category: Growth 101
+funnel_stage: TOFU
+campaign_role: hook
+timeliness_role: evergreen
+timely_anchor: 震荡市/热点轮动/电力资源板块反复拉扯
+viral_priority: top5
 launch_order: 5
 headline_alternatives:
-  - "热点一天一换、板块来回抽，你的钱很多时候不是亏在大跌里"
-  - "最折磨人的行情，不是暴跌，而是今天给口肉明天就一巴掌"
+- 热点一天一换、板块来回抽，你的钱很多时候不是亏在大跌里
+- 最折磨人的行情，不是暴跌，而是今天给口肉明天就一巴掌
 cover_lines:
-  - "最狠的行情，不是一刀砍死你，是今天给颗糖，明天再扇你一巴掌。"
-  - "很多账户不是暴跌亏没的，而是震荡里一点点磨空的。"
-share_copy: "如果你最近总觉得自己没踩大雷，但账户就是在一点点缩水，这篇会让你明白什么叫“波动率税”。"
-campaign: "wechat_4_week_sprint_2026q2"
-rhythm: "Hub"
+- 最狠的行情，不是一刀砍死你，是今天给颗糖，明天再扇你一巴掌。
+- 很多账户不是暴跌亏没的，而是震荡里一点点磨空的。
+share_copy: 如果你最近总觉得自己没踩大雷，但账户就是在一点点缩水，这篇会让你明白什么叫“波动率税”。
+campaign: wechat_4_week_sprint_2026q2
+rhythm: Hub
 traceability:
-  status: "healthy"
-  last_reviewed_at: "2026-03-19"
+  status: healthy
+  last_reviewed_at: '2026-03-19'
 workflow:
-  stage: "reviewing"
-  review_priority: "review_next"
-  owner: "cmo"
-  reviewer: "founder"
-  priority: "high"
-  target_publish_date: "2026-03-31"
-  last_action_at: "2026-03-19"
-blocked_reason: ""
+  stage: reviewing
+  review_priority: review_next
+  owner: cmo
+  reviewer: founder
+  priority: high
+  target_publish_date: '2026-03-31'
+  last_action_at: '2026-03-19'
+blocked_reason: ''
 maintenance:
-  change_status: "created"
-  update_reason: "backlog_activation"
+  change_status: created
+  update_reason: backlog_activation
 website:
   enabled: true
-  surface: "learn"
+  surface: learn
 image: "/images/learn/101-44_volatility_tax_cover.png"
 images:
   cover: "/images/learn/101-44_volatility_tax_cover.png"
   body:
-    - "/images/learn/101-44_volatility_tax_body_1.png"
-    - "/images/learn/101-44_volatility_tax_body_2.png"
+  - "/images/learn/101-44_volatility_tax_body_1.png"
+  - "/images/learn/101-44_volatility_tax_body_2.png"
   cards:
-    - "/images/learn/101-44_volatility_tax_card_1.png"
+  - "/images/learn/101-44_volatility_tax_card_1.png"
 image_specs:
-  cover: "1200x675"
-  body: "1080x720"
-  card: "1080x1440"
+  cover: 1200x675
+  body: 1080x720
+  card: 1080x1440
 image_prompts:
-  cover: "An editorial symbolic finance image showing a small investor account being pulled back and forth by violent market swings, like repeated slaps from both directions. The feeling is exhausting rather than catastrophic. Realistic motion, high tension, Chinese stock market mood, no text."
+  cover: An editorial symbolic finance image showing a small investor account being pulled back and forth by violent market swings, like repeated slaps from both directions. The feeling is exhausting rather than catastrophic. Realistic motion, high tension, Chinese stock market mood, no text.
 derivative_guidance:
   body:
-    - "Use the provided cover image as the visual reference. Keep the same exhausting whiplash world, the same Chinese stock market mood, and the same realistic tension. Create a supporting scene that focuses on the human side of chasing rotating moves."
-    - "Use the provided cover image as the visual reference. Preserve the same back-and-forth slap structure and emotional whiplash. Extend the same world into a more symbolic scene of hope briefly appearing and then disappearing."
+  - Use the provided cover image as the visual reference. Keep the same exhausting whiplash world, the same Chinese stock market mood, and the same realistic tension. Create a supporting scene that focuses on the human side of chasing rotating moves.
+  - Use the provided cover image as the visual reference. Preserve the same back-and-forth slap structure and emotional whiplash. Extend the same world into a more symbolic scene of hope briefly appearing and then disappearing.
   cards:
-    - "Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame. Preserve the back-and-forth slap structure and the feeling of repeated emotional loss."
+  - Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame. Preserve the back-and-forth slap structure and the feeling of repeated emotional loss.
 visual_strategy:
-  concept_core: "震荡行情不是一刀砍死你，而是来回打脸慢慢失血"
-  image_type: "Editorial"
+  concept_core: 震荡行情不是一刀砍死你，而是来回打脸慢慢失血
+  image_type: Editorial
   image_count: 4
-  generation_mode: "cover_first"
+  generation_mode: cover_first
   derivation_rule:
-    body: "same_world"
-    cards: "derived_from_cover"
+    body: same_world
+    cards: derived_from_cover
   image_breakdown:
     cover: 1
     body: 2
     social_cards: 1
-  reader_hook: "不是暴跌，而是天天来回打脸，这个视觉感要比概念更强。"
-visual_style_prefix: "Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel."
+  reader_hook: 不是暴跌，而是天天来回打脸，这个视觉感要比概念更强。
+  body_asset_policy: reuse_then_derive
+  cover_reusable_in_body: true
+  body_usage_plan:
+    body_1: reuse_cover
+    body_2: derive_from_cover
+visual_style_prefix: Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel.
 distribution:
   wechat:
     enabled: true
-    status: "draft"
+    status: draft
 ---
-
 # 波动率税：最磨人的行情，不是暴跌，而是每天都给你一点希望
 
 > *"最狠的行情，往往不是一刀砍死你，而是今天给颗糖，明天再顺手扇你一巴掌。"* 
@@ -111,11 +115,3 @@ ZISO 的逻辑不是否认波动，而是拒绝在没有把握的波动里消耗
 
 把刀一直握在手里，不叫专业。知道什么时候该收刀，才是。
 
----
-
-#### 认知对齐：行话指南
-
-- **波动率税**：Volatility Tax
-- **布朗运动**：Random Walk
-- **滑点**：Slippage
-- **非单边趋势**：Trendless

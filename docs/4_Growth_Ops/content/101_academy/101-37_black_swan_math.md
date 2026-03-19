@@ -1,83 +1,87 @@
 ---
-title: "黑天鹅数学：你以为十年一遇，市场却隔三差五就教你做人"
-subtitle: "真正危险的不是灾难会不会来，而是你总觉得这回应该轮不到自己"
+title: 黑天鹅数学：你以为十年一遇，市场却隔三差五就教你做人
+subtitle: 真正危险的不是灾难会不会来，而是你总觉得这回应该轮不到自己
 source_docs:
-  - docs/1_Engineering/16_Observability_Thresholds_and_Incidents.md
-category: "Growth 101"
-funnel_stage: "TOFU"
-campaign_role: "hook"
-timeliness_role: "timely_candidate"
-timely_anchor: "地缘冲突/油价波动/全球市场黑天鹅"
-viral_priority: "watchlist"
+- docs/1_Engineering/16_Observability_Thresholds_and_Incidents.md
+category: Growth 101
+funnel_stage: TOFU
+campaign_role: hook
+timeliness_role: timely_candidate
+timely_anchor: 地缘冲突/油价波动/全球市场黑天鹅
+viral_priority: watchlist
 headline_alternatives:
-  - "中东一紧张、油价一冲高，很多人才发现黑天鹅从来不只活在新闻里"
-  - "你以为只是国际新闻，真到市场里，黑天鹅往往先来教账户做人"
+- 中东一紧张、油价一冲高，很多人才发现黑天鹅从来不只活在新闻里
+- 你以为只是国际新闻，真到市场里，黑天鹅往往先来教账户做人
 cover_lines:
-  - "你以为十年一遇，市场却总能隔三差五教你做人。"
-  - "真正危险的，不是黑天鹅会不会来，而是你总觉得这次轮不到自己。"
-share_copy: "最近地缘、油价、全球市场波动都在提醒一件事：黑天鹅从来不是书本概念。这篇很适合接最近的国际局势。"
-campaign: "wechat_4_week_sprint_2026q2"
-rhythm: "Hub"
+- 你以为十年一遇，市场却总能隔三差五教你做人。
+- 真正危险的，不是黑天鹅会不会来，而是你总觉得这次轮不到自己。
+share_copy: 最近地缘、油价、全球市场波动都在提醒一件事：黑天鹅从来不是书本概念。这篇很适合接最近的国际局势。
+campaign: wechat_4_week_sprint_2026q2
+rhythm: Hub
 traceability:
-  status: "healthy"
-  last_reviewed_at: "2026-03-19"
+  status: healthy
+  last_reviewed_at: '2026-03-19'
 workflow:
-  stage: "reviewing"
-  review_priority: "ready_later"
-  owner: "cmo"
-  reviewer: "founder"
-  priority: "high"
-  target_publish_date: "2026-04-13"
-  last_action_at: "2026-03-19"
-blocked_reason: ""
+  stage: reviewing
+  review_priority: ready_later
+  owner: cmo
+  reviewer: founder
+  priority: high
+  target_publish_date: '2026-04-13'
+  last_action_at: '2026-03-19'
+blocked_reason: ''
 maintenance:
-  change_status: "created"
-  update_reason: "backlog_activation"
+  change_status: created
+  update_reason: backlog_activation
 website:
   enabled: true
-  surface: "learn"
+  surface: learn
 image: "/images/learn/101-37_black_swan_math_cover.png"
 images:
   cover: "/images/learn/101-37_black_swan_math_cover.png"
   body:
-    - "/images/learn/101-37_black_swan_math_body_1.png"
-    - "/images/learn/101-37_black_swan_math_body_2.png"
+  - "/images/learn/101-37_black_swan_math_body_1.png"
+  - "/images/learn/101-37_black_swan_math_body_2.png"
   cards:
-    - "/images/learn/101-37_black_swan_math_card_1.png"
-    - "/images/learn/101-37_black_swan_math_card_2.png"
+  - "/images/learn/101-37_black_swan_math_card_1.png"
+  - "/images/learn/101-37_black_swan_math_card_2.png"
 image_specs:
-  cover: "1200x675"
-  body: "1080x720"
-  card: "1080x1440"
+  cover: 1200x675
+  body: 1080x720
+  card: 1080x1440
 image_prompts:
-  cover: "A serious editorial macro-finance image blending geopolitical tension, rising oil price signals, and a sharp market selloff. It should feel credible and sober, not sensational. Real-world atmosphere, dramatic but controlled, no text, no propaganda look."
+  cover: A serious editorial macro-finance image blending geopolitical tension, rising oil price signals, and a sharp market selloff. It should feel credible and sober, not sensational. Real-world atmosphere, dramatic but controlled, no text, no propaganda look.
 derivative_guidance:
   body:
-    - "Use the provided cover image as the visual reference. Keep the same macro-risk world, the same sober editorial realism, and the same geopolitical-energy-market tension. Create a supporting scene that stays credible and real."
-    - "Use the provided cover image as the visual reference. Preserve the same danger tone and macro-finance world. Extend it into a more symbolic black-swan supporting scene without becoming sensational."
+  - Use the provided cover image as the visual reference. Keep the same macro-risk world, the same sober editorial realism, and the same geopolitical-energy-market tension. Create a supporting scene that stays credible and real.
+  - Use the provided cover image as the visual reference. Preserve the same danger tone and macro-finance world. Extend it into a more symbolic black-swan supporting scene without becoming sensational.
   cards:
-    - "Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame. Preserve the geopolitical-energy-market link and keep it sober, not sensational."
+  - Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame. Preserve the geopolitical-energy-market link and keep it sober, not sensational.
 visual_strategy:
-  concept_core: "黑天鹅不是新闻噪音，而是真会砸到账户上的现实"
-  image_type: "Editorial"
+  concept_core: 黑天鹅不是新闻噪音，而是真会砸到账户上的现实
+  image_type: Editorial
   image_count: 5
-  primary_image_model: "gemini"
-  generation_mode: "cover_first"
+  primary_image_model: gemini
+  generation_mode: cover_first
   derivation_rule:
-    body: "same_world"
-    cards: "derived_from_cover"
+    body: same_world
+    cards: derived_from_cover
   image_breakdown:
     cover: 1
     body: 2
     social_cards: 2
-  reader_hook: "地缘和油价要有现实新闻感，不能画成廉价灾难片。"
-visual_style_prefix: "Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel."
+  reader_hook: 地缘和油价要有现实新闻感，不能画成廉价灾难片。
+  body_asset_policy: derive_only
+  cover_reusable_in_body: false
+  body_usage_plan:
+    body_1: derive_from_cover
+    body_2: derive_from_cover
+visual_style_prefix: Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel.
 distribution:
   wechat:
     enabled: true
-    status: "draft"
+    status: draft
 ---
-
 # 黑天鹅数学：你以为十年一遇，市场却总能让你三年碰一次
 
 > *"极端风险最毒的地方，不是它来得突然，而是它每次来之前，你都觉得自己没那么背。 "*
@@ -116,10 +120,3 @@ ZISO 的底层逻辑，做的也不是“假设世界永远平稳”。它更像
 
 你不用每天都预测灾难，但你必须让自己的系统，默认灾难迟早会来。
 
----
-
-#### 认知对齐：行话指南
-
-- **厚尾效应**：Fat Tails
-- **相关性**：Correlation
-- **风控引擎**：Risk Engine / Phase 3 Protection

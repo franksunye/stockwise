@@ -1,82 +1,86 @@
 ---
-title: "回音壁效应：你以为自己在做研究，很多时候其实是在给持仓找安慰"
-subtitle: "越刷新闻越踏实，很多时候不是懂得更多，而是更舍不得认错"
+title: 回音壁效应：你以为自己在做研究，很多时候其实是在给持仓找安慰
+subtitle: 越刷新闻越踏实，很多时候不是懂得更多，而是更舍不得认错
 source_docs:
-  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
-category: "Growth 101"
-funnel_stage: "TOFU"
-campaign_role: "hook"
-timeliness_role: "evergreen"
-timely_anchor: "短视频荐股/社交媒体股评/AI信息洪流"
-viral_priority: "top5"
+- docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+category: Growth 101
+funnel_stage: TOFU
+campaign_role: hook
+timeliness_role: evergreen
+timely_anchor: 短视频荐股/社交媒体股评/AI信息洪流
+viral_priority: top5
 launch_order: 4
 headline_alternatives:
-  - "短视频、股评、AI 一起喂你信息，很多人不是看懂了，而是被喂上头了"
-  - "你以为自己在刷信息，很多时候只是在反复听自己想听的话"
+- 短视频、股评、AI 一起喂你信息，很多人不是看懂了，而是被喂上头了
+- 你以为自己在刷信息，很多时候只是在反复听自己想听的话
 cover_lines:
-  - "很多人最用功的时候，恰恰是已经套住、最想给自己找安慰的时候。"
-  - "你以为自己在做研究，很多时候只是在给持仓找台阶。"
-share_copy: "买完股票后拼命刷新闻、刷股吧、刷短视频的人，应该都会被这篇扎一下。它讲的不是信息，而是信息怎么把人一步步带偏。"
-campaign: "wechat_4_week_sprint_2026q2"
-rhythm: "Hub"
+- 很多人最用功的时候，恰恰是已经套住、最想给自己找安慰的时候。
+- 你以为自己在做研究，很多时候只是在给持仓找台阶。
+share_copy: 买完股票后拼命刷新闻、刷股吧、刷短视频的人，应该都会被这篇扎一下。它讲的不是信息，而是信息怎么把人一步步带偏。
+campaign: wechat_4_week_sprint_2026q2
+rhythm: Hub
 traceability:
-  status: "healthy"
-  last_reviewed_at: "2026-03-19"
+  status: healthy
+  last_reviewed_at: '2026-03-19'
 workflow:
-  stage: "reviewing"
-  review_priority: "review_next"
-  owner: "cmo"
-  reviewer: "founder"
-  priority: "high"
-  target_publish_date: "2026-03-30"
-  last_action_at: "2026-03-19"
-blocked_reason: ""
+  stage: reviewing
+  review_priority: review_next
+  owner: cmo
+  reviewer: founder
+  priority: high
+  target_publish_date: '2026-03-30'
+  last_action_at: '2026-03-19'
+blocked_reason: ''
 maintenance:
-  change_status: "created"
-  update_reason: "backlog_activation"
+  change_status: created
+  update_reason: backlog_activation
 website:
   enabled: true
-  surface: "learn"
+  surface: learn
 image: "/images/learn/101-18_echo_chamber_cover.png"
 images:
   cover: "/images/learn/101-18_echo_chamber_cover.png"
   body:
-    - "/images/learn/101-18_echo_chamber_body_1.png"
-    - "/images/learn/101-18_echo_chamber_body_2.png"
+  - "/images/learn/101-18_echo_chamber_body_1.png"
+  - "/images/learn/101-18_echo_chamber_body_2.png"
   cards:
-    - "/images/learn/101-18_echo_chamber_card_1.png"
+  - "/images/learn/101-18_echo_chamber_card_1.png"
 image_specs:
-  cover: "1200x675"
-  body: "1080x720"
-  card: "1080x1440"
+  cover: 1200x675
+  body: 1080x720
+  card: 1080x1440
 image_prompts:
-  cover: "A hybrid editorial image of a retail investor late at night scrolling on a phone, surrounded by repeating finance headlines about the same stock, forming an echo wall. The mood is anxious, self-reinforcing, and claustrophobic. Realistic, dark room lighting, Chinese finance context, no text."
+  cover: A hybrid editorial image of a retail investor late at night scrolling on a phone, surrounded by repeating finance headlines about the same stock, forming an echo wall. The mood is anxious, self-reinforcing, and claustrophobic. Realistic, dark room lighting, Chinese finance context, no text.
 derivative_guidance:
   body:
-    - "Use the provided cover image as the visual reference. Keep the same phone glow, the same claustrophobic repetition, and the same late-night emotional tone. Create a supporting scene where repeated bullish narratives overwhelm the same investor."
-    - "Use the provided cover image as the visual reference. Preserve the same dark room, same anxious phone-centered composition, and same emotional need for reassurance. Extend the same world into a more intimate losing-position scene."
+  - Use the provided cover image as the visual reference. Keep the same phone glow, the same claustrophobic repetition, and the same late-night emotional tone. Create a supporting scene where repeated bullish narratives overwhelm the same investor.
+  - Use the provided cover image as the visual reference. Preserve the same dark room, same anxious phone-centered composition, and same emotional need for reassurance. Extend the same world into a more intimate losing-position scene.
   cards:
-    - "Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame. Preserve the repeated-headline echo wall and anxious phone-centered composition."
+  - Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame. Preserve the repeated-headline echo wall and anxious phone-centered composition.
 visual_strategy:
-  concept_core: "买完股票后，信息开始反过来安慰你"
-  image_type: "Hybrid"
+  concept_core: 买完股票后，信息开始反过来安慰你
+  image_type: Hybrid
   image_count: 4
-  generation_mode: "cover_first"
+  generation_mode: cover_first
   derivation_rule:
-    body: "same_world"
-    cards: "derived_from_cover"
+    body: same_world
+    cards: derived_from_cover
   image_breakdown:
     cover: 1
     body: 2
     social_cards: 1
   reader_hook: "“买完就到处找利好”这个动作，要让读者从图上先认出自己。"
-visual_style_prefix: "Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel."
+  body_asset_policy: reuse_then_derive
+  cover_reusable_in_body: true
+  body_usage_plan:
+    body_1: reuse_cover
+    body_2: derive_from_cover
+visual_style_prefix: Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel.
 distribution:
   wechat:
     enabled: true
-    status: "draft"
+    status: draft
 ---
-
 # 回音壁效应：你以为自己在做研究，其实只是在给持仓找安慰
 
 > *"很多人最用功的时候，恰恰是已经套住、最想给自己找台阶下的时候。"* 
@@ -180,13 +184,3 @@ distribution:
 
 因为只有当你不再被回音壁反复催眠，你才有机会听见真正重要的东西。
 
----
-
-#### 认知对齐：行话指南
-
-<small>
-回音壁效应：你不断接触到和自己原有判断一致的信息，久而久之误以为“这就是真相”。<br>
-主力资金：更早行动、体量更大、对市场结构影响更强的一类资金。<br>
-资金足迹：价格、成交量、换手、结构变化里留下的真实行动痕迹，比口号更接近交易现实。<br>
-信息茧房：你以为自己在看世界，实际上一直只在看算法愿意推给你的那一层。
-</small>

@@ -1,88 +1,93 @@
 ---
-title: "101-59: 赚钱了，不代表你这笔买得漂亮，有时候只是运气救了你"
-subtitle: "很多盈利只是结果好看，不代表这笔出手真有章法"
-content_id: "growth-101-059"
-content_source: "growth"
-content_type: "article"
-canonical_role: "canonical"
-date: "2026-04-05"
-category: "The Money"
-funnel_stage: "MOFU"
-campaign_role: "bridge"
-timeliness_role: "evergreen"
-timely_anchor: "晒收益文化/运气盈利/买点质量"
-viral_priority: "normal"
+title: '101-59: 赚钱了，不代表你这笔买得漂亮，有时候只是运气救了你'
+subtitle: 很多盈利只是结果好看，不代表这笔出手真有章法
+content_id: growth-101-059
+content_source: growth
+content_type: article
+canonical_role: canonical
+date: '2026-04-05'
+category: The Money
+funnel_stage: MOFU
+campaign_role: bridge
+timeliness_role: evergreen
+timely_anchor: 晒收益文化/运气盈利/买点质量
+viral_priority: normal
 headline_alternatives:
-  - "赚了钱也别急着吹自己，很多盈利只是行情顺手把你救了"
-  - "为什么有些人明明赚钱了，方法却还是错的"
+- 赚了钱也别急着吹自己，很多盈利只是行情顺手把你救了
+- 为什么有些人明明赚钱了，方法却还是错的
 cover_lines:
-  - "最会害人的，不一定是亏钱，很多时候反而是那些靠运气赚到的钱。"
-  - "赚钱了，不代表这笔买得漂亮。"
-share_copy: "这篇很适合打掉“赚钱=方法对”的幻觉。尤其在晒收益文化很重的时候，它会显得特别有价值。"
-campaign: "wechat_4_week_sprint_2026q2"
-rhythm: "Hub"
+- 最会害人的，不一定是亏钱，很多时候反而是那些靠运气赚到的钱。
+- 赚钱了，不代表这笔买得漂亮。
+share_copy: 这篇很适合打掉“赚钱=方法对”的幻觉。尤其在晒收益文化很重的时候，它会显得特别有价值。
+campaign: wechat_4_week_sprint_2026q2
+rhythm: Hub
 traceability:
-  status: "healthy"
-  last_reviewed_at: "2026-03-19"
+  status: healthy
+  last_reviewed_at: '2026-03-19'
 workflow:
-  stage: "reviewing"
-  review_priority: "review_first"
-  owner: "cmo"
-  reviewer: "founder"
-  priority: "high"
-  target_publish_date: "2026-04-16"
-  last_action_at: "2026-03-19"
-  blocked_reason: ""
+  stage: reviewing
+  review_priority: review_first
+  owner: cmo
+  reviewer: founder
+  priority: high
+  target_publish_date: '2026-04-16'
+  last_action_at: '2026-03-19'
+  blocked_reason: ''
 maintenance:
-  change_status: "updated"
-  update_reason: "copy_edit"
+  change_status: updated
+  update_reason: copy_edit
 website:
   enabled: true
-  surface: "learn"
+  surface: learn
 image: "/images/learn/101-59_mfe_truth_cover.png"
 images:
   cover: "/images/learn/101-59_mfe_truth_cover.png"
   body:
-    - "/images/learn/101-59_mfe_truth_body_1.png"
-    - "/images/learn/101-59_mfe_truth_body_2.png"
+  - "/images/learn/101-59_mfe_truth_body_1.png"
+  - "/images/learn/101-59_mfe_truth_body_2.png"
   cards:
-    - "/images/learn/101-59_mfe_truth_card_1.png"
+  - "/images/learn/101-59_mfe_truth_card_1.png"
 image_specs:
-  cover: "1200x675"
-  body: "1080x720"
-  card: "1080x1440"
+  cover: 1200x675
+  body: 1080x720
+  card: 1080x1440
 image_prompts:
-  cover: "A conceptual image of an arrow missing the intended target but accidentally landing beside gold coins, representing lucky profit instead of skill. Clean, premium, dark editorial finance style, no text."
+  cover: A conceptual image of an arrow missing the intended target but accidentally landing beside gold coins, representing lucky profit instead of skill. Clean, premium, dark editorial finance style, no text.
 derivative_guidance:
   body:
-    - "Use the provided cover image as the visual reference. Keep the same luck-versus-skill world, the same clean premium tone, and the same missed-target metaphor. Create a supporting scene that shows a profitable result sitting on top of a poor entry."
-    - "Use the provided cover image as the visual reference. Preserve the same accidental-win metaphor and the same dark editorial finance world. Extend it into a supporting scene that makes the gap between good result and bad process more explicit."
+  - Use the provided cover image as the visual reference. Keep the same luck-versus-skill world, the same clean premium tone, and the same missed-target metaphor. Create a supporting scene that shows a profitable result sitting on top of a poor entry.
+  - Use the provided cover image as the visual reference. Preserve the same accidental-win metaphor and the same dark editorial finance world. Extend it into a supporting scene that makes the gap between good result and bad process more explicit.
   cards:
-    - "Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame. Preserve the missed target and lucky-gain metaphor."
+  - Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame. Preserve the missed target and lucky-gain metaphor.
 visual_strategy:
-  concept_core: "赚钱不等于买得漂亮，很多时候只是运气救场"
-  image_type: "Concept"
+  concept_core: 赚钱不等于买得漂亮，很多时候只是运气救场
+  image_type: Concept
   image_count: 3
-  primary_image_model: "gemini"
-  generation_mode: "cover_first"
+  primary_image_model: gemini
+  generation_mode: cover_first
   derivation_rule:
-    body: "same_world"
-    cards: "derived_from_cover"
+    body: same_world
+    cards: derived_from_cover
   image_breakdown:
     cover: 1
     body: 2
     social_cards: 0
   reader_hook: "‘赚了不代表买得漂亮’必须被画成运气救场。"
-visual_style_prefix: "Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel."
+  body_asset_policy: derive_only
+  cover_reusable_in_body: false
+  body_usage_plan:
+    body_1: derive_from_cover
+    body_2: derive_from_cover
+visual_style_prefix: Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel.
 distribution:
   wechat:
     enabled: true
     status: draft
-    url: ""
+    url: ''
   xhs:
     enabled: true
     status: draft
-    url: ""
+    url: ''
   twitter:
     enabled: true
     status: draft
@@ -90,10 +95,9 @@ distribution:
     enabled: true
     status: draft
 source_docs:
-  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
-  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
+- docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+- docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
 ---
-
 # 101-59: 赚钱了，不代表你这笔买得漂亮
 
 > “股市里最会害人的，不一定是亏钱，很多时候反而是瞎猫碰上死耗子那几次。”
@@ -147,13 +151,3 @@ MFE，最大有利运动，说白了就是看一笔交易在进入之后，市�
 
 所以“赚钱了也不代表你买对了”这句话，并不是故意唱反调。它只是提醒你，真正值得被复制的，不是某一次结果，而是那个能稳定产出高质量入场点的方法。
 
----
-
-#### 认知对齐：行话指南
-
-- **最大有利运动**：MFE - Maximum Favorable Excursion
-- **开仓点**：Entry Point
-- **解套**：Escaping a losing trade at parity
-- **爆发力**：Momentum / Explosion
-
- 

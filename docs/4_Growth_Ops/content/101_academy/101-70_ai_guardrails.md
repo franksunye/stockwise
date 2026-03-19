@@ -1,88 +1,93 @@
 ---
-title: "101-70: AI 最危险的时候，不是它不聪明，而是你想冲时它也跟着你喊冲"
-subtitle: "投资场景里，没有护栏的 AI 不是帮手，更像顺着你上头的捧哏"
-content_id: "growth-101-070"
-content_source: "growth"
-content_type: "article"
-canonical_role: "canonical"
-date: "2026-04-10"
-category: "The Machine"
-funnel_stage: "BOFU"
-campaign_role: "conversion"
-timeliness_role: "timely"
-timely_anchor: "AI Agent/智能体落地/AI投资助手"
-viral_priority: "watchlist"
+title: '101-70: AI 最危险的时候，不是它不聪明，而是你想冲时它也跟着你喊冲'
+subtitle: 投资场景里，没有护栏的 AI 不是帮手，更像顺着你上头的捧哏
+content_id: growth-101-070
+content_source: growth
+content_type: article
+canonical_role: canonical
+date: '2026-04-10'
+category: The Machine
+funnel_stage: BOFU
+campaign_role: conversion
+timeliness_role: timely
+timely_anchor: AI Agent/智能体落地/AI投资助手
+viral_priority: watchlist
 headline_alternatives:
-  - "AI 最危险的时候，不是答不上来，而是你想冲时它也跟着你喊冲"
-  - "智能体时代最该先问的一句：这个 AI，到底有没有刹车"
+- AI 最危险的时候，不是答不上来，而是你想冲时它也跟着你喊冲
+- 智能体时代最该先问的一句：这个 AI，到底有没有刹车
 cover_lines:
-  - "你一上头，它也跟着上头，这种 AI 看着贴心，真到拿真钱时最要命。"
-  - "AI 最危险的时候，不是不会答，而是太会顺着你答。"
-share_copy: "AI Agent、智能体都很热，但投资里最关键的问题其实很土：它到底有没有刹车。没有这层护栏，再聪明都不够。"
-campaign: "wechat_4_week_sprint_2026q2"
-rhythm: "Hub"
+- 你一上头，它也跟着上头，这种 AI 看着贴心，真到拿真钱时最要命。
+- AI 最危险的时候，不是不会答，而是太会顺着你答。
+share_copy: AI Agent、智能体都很热，但投资里最关键的问题其实很土：它到底有没有刹车。没有这层护栏，再聪明都不够。
+campaign: wechat_4_week_sprint_2026q2
+rhythm: Hub
 traceability:
-  status: "healthy"
-  last_reviewed_at: "2026-03-19"
+  status: healthy
+  last_reviewed_at: '2026-03-19'
 workflow:
-  stage: "drafting"
-  review_priority: "review_next"
-  owner: "cmo"
-  reviewer: "founder"
-  priority: "high"
-  target_publish_date: "2026-04-10"
-  last_action_at: "2026-03-19"
-  blocked_reason: ""
+  stage: drafting
+  review_priority: review_next
+  owner: cmo
+  reviewer: founder
+  priority: high
+  target_publish_date: '2026-04-10'
+  last_action_at: '2026-03-19'
+  blocked_reason: ''
 maintenance:
-  change_status: "updated"
-  update_reason: "copy_edit"
+  change_status: updated
+  update_reason: copy_edit
 website:
   enabled: true
-  surface: "learn"
+  surface: learn
 image: "/images/learn/101-70_ai_guardrails_cover.png"
 images:
   cover: "/images/learn/101-70_ai_guardrails_cover.png"
   body:
-    - "/images/learn/101-70_ai_guardrails_body_1.png"
-    - "/images/learn/101-70_ai_guardrails_body_2.png"
+  - "/images/learn/101-70_ai_guardrails_body_1.png"
+  - "/images/learn/101-70_ai_guardrails_body_2.png"
   cards:
-    - "/images/learn/101-70_ai_guardrails_card_1.png"
+  - "/images/learn/101-70_ai_guardrails_card_1.png"
 image_specs:
-  cover: "1200x675"
-  body: "1080x720"
-  card: "1080x1440"
+  cover: 1200x675
+  body: 1080x720
+  card: 1080x1440
 image_prompts:
-  cover: "A conceptual image of an intelligent AI machine accelerating forward while its brake system is visibly broken or disconnected. The visual message is smart but uncontrollable. Premium dark tech-finance style, realistic materials, no text."
+  cover: A conceptual image of an intelligent AI machine accelerating forward while its brake system is visibly broken or disconnected. The visual message is smart but uncontrollable. Premium dark tech-finance style, realistic materials, no text.
 derivative_guidance:
   body:
-    - "Use the provided cover image as the visual reference. Keep the same no-brake AI world, the same dark tech-finance tone, and the same uncontrollable-intelligence message. Create a supporting scene that shows confidence on the surface but missing risk boundaries underneath."
-    - "Use the provided cover image as the visual reference. Preserve the same missing-brake metaphor and the same materials. Extend the same world into a supporting close-up of intelligence without restraint."
+  - Use the provided cover image as the visual reference. Keep the same no-brake AI world, the same dark tech-finance tone, and the same uncontrollable-intelligence message. Create a supporting scene that shows confidence on the surface but missing risk boundaries underneath.
+  - Use the provided cover image as the visual reference. Preserve the same missing-brake metaphor and the same materials. Extend the same world into a supporting close-up of intelligence without restraint.
   cards:
-    - "Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame. Preserve the missing-brake metaphor and make restraint, not coolness, the center."
+  - Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame. Preserve the missing-brake metaphor and make restraint, not coolness, the center.
 visual_strategy:
-  concept_core: "智能不是最重要的，能不能刹住车才是"
-  image_type: "Concept"
+  concept_core: 智能不是最重要的，能不能刹住车才是
+  image_type: Concept
   image_count: 4
-  primary_image_model: "gemini"
-  generation_mode: "cover_first"
+  primary_image_model: gemini
+  generation_mode: cover_first
   derivation_rule:
-    body: "same_world"
-    cards: "derived_from_cover"
+    body: same_world
+    cards: derived_from_cover
   image_breakdown:
     cover: 1
     body: 2
     social_cards: 1
-  reader_hook: "最重要的不是‘聪明’，而是‘有没有刹车’。"
-visual_style_prefix: "Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel."
+  reader_hook: 最重要的不是‘聪明’，而是‘有没有刹车’。
+  body_asset_policy: reuse_then_derive
+  cover_reusable_in_body: true
+  body_usage_plan:
+    body_1: reuse_cover
+    body_2: derive_from_cover
+visual_style_prefix: Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel.
 distribution:
   wechat:
     enabled: true
     status: draft
-    url: ""
+    url: ''
   xhs:
     enabled: true
     status: draft
-    url: ""
+    url: ''
   twitter:
     enabled: true
     status: draft
@@ -90,10 +95,9 @@ distribution:
     enabled: true
     status: draft
 source_docs:
-  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
-  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
+- docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+- docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
 ---
-
 # 101-70: AI 最危险的时刻，不是它不聪明，而是它开始顺着你说话
 
 > “你一上头，它也跟着上头，这种 AI 看着贴心，真到拿真钱时最要命。”

@@ -1,82 +1,86 @@
 ---
-title: "机会成本：一只烂股最狠的地方，不是套你一笔钱，而是拖住你整轮行情"
-subtitle: "你以为自己是在等回本，很多时候其实是在眼睁睁错过后面的肉"
+title: 机会成本：一只烂股最狠的地方，不是套你一笔钱，而是拖住你整轮行情
+subtitle: 你以为自己是在等回本，很多时候其实是在眼睁睁错过后面的肉
 source_docs:
-  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
-category: "Growth 101"
-funnel_stage: "TOFU"
-campaign_role: "hook"
-timeliness_role: "evergreen"
-timely_anchor: "牛市轮动/主线切换/踏空焦虑"
-viral_priority: "watchlist"
+- docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+category: Growth 101
+funnel_stage: TOFU
+campaign_role: hook
+timeliness_role: evergreen
+timely_anchor: 牛市轮动/主线切换/踏空焦虑
+viral_priority: watchlist
 headline_alternatives:
-  - "主线一轮轮切换，最难受的不是踏空，而是钱还被烂股锁着"
-  - "很多人不是没赶上行情，而是先把钱困死在了一只烂股里"
+- 主线一轮轮切换，最难受的不是踏空，而是钱还被烂股锁着
+- 很多人不是没赶上行情，而是先把钱困死在了一只烂股里
 cover_lines:
-  - "最狠的不是亏钱，是眼睁睁看着别处涨，而你的钱还被锁着。"
-  - "你以为在等回本，很多时候是在错过后面的肉。"
-share_copy: "这篇特别适合那些总想“等回本再走”的人。很多人不是没机会，而是钱先被一只烂股困死了。"
-campaign: "wechat_4_week_sprint_2026q2"
-rhythm: "Hub"
+- 最狠的不是亏钱，是眼睁睁看着别处涨，而你的钱还被锁着。
+- 你以为在等回本，很多时候是在错过后面的肉。
+share_copy: 这篇特别适合那些总想“等回本再走”的人。很多人不是没机会，而是钱先被一只烂股困死了。
+campaign: wechat_4_week_sprint_2026q2
+rhythm: Hub
 traceability:
-  status: "healthy"
-  last_reviewed_at: "2026-03-19"
+  status: healthy
+  last_reviewed_at: '2026-03-19'
 workflow:
-  stage: "reviewing"
-  review_priority: "review_next"
-  owner: "cmo"
-  reviewer: "founder"
-  priority: "high"
-  target_publish_date: "2026-03-26"
-  last_action_at: "2026-03-19"
-blocked_reason: ""
+  stage: reviewing
+  review_priority: review_next
+  owner: cmo
+  reviewer: founder
+  priority: high
+  target_publish_date: '2026-03-26'
+  last_action_at: '2026-03-19'
+blocked_reason: ''
 maintenance:
-  change_status: "created"
-  update_reason: "backlog_activation"
+  change_status: created
+  update_reason: backlog_activation
 website:
   enabled: true
-  surface: "learn"
+  surface: learn
 image: "/images/learn/101-40_opportunity_cost_cover.png"
 images:
   cover: "/images/learn/101-40_opportunity_cost_cover.png"
   body:
-    - "/images/learn/101-40_opportunity_cost_body_1.png"
-    - "/images/learn/101-40_opportunity_cost_body_2.png"
+  - "/images/learn/101-40_opportunity_cost_body_1.png"
+  - "/images/learn/101-40_opportunity_cost_body_2.png"
   cards:
-    - "/images/learn/101-40_opportunity_cost_card_1.png"
+  - "/images/learn/101-40_opportunity_cost_card_1.png"
 image_specs:
-  cover: "1200x675"
-  body: "1080x720"
-  card: "1080x1440"
+  cover: 1200x675
+  body: 1080x720
+  card: 1080x1440
 image_prompts:
-  cover: "An editorial-style symbolic image: a retail investor trapped behind a transparent cage shaped like a falling stock chart, while in the background a bright upward market train moves away. Emotional but clean composition, realistic, Chinese investing mood, no text."
+  cover: 'An editorial-style symbolic image: a retail investor trapped behind a transparent cage shaped like a falling stock chart, while in the background a bright upward market train moves away. Emotional but clean composition, realistic, Chinese investing mood, no text.'
 derivative_guidance:
   body:
-    - "Use the provided cover image as the visual reference. Keep the same trapped-capital world, the same emotional Chinese investing mood, and the same clean editorial composition. Create a supporting scene that stays human and shows missed opportunities moving away."
-    - "Use the provided cover image as the visual reference. Preserve the same trapped-capital metaphor and overall visual world. Extend it into a more symbolic supporting scene focused on locked capital and distant opportunity."
+  - Use the provided cover image as the visual reference. Keep the same trapped-capital world, the same emotional Chinese investing mood, and the same clean editorial composition. Create a supporting scene that stays human and shows missed opportunities moving away.
+  - Use the provided cover image as the visual reference. Preserve the same trapped-capital metaphor and overall visual world. Extend it into a more symbolic supporting scene focused on locked capital and distant opportunity.
   cards:
-    - "Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame. Preserve the feeling of being locked in while opportunity leaves."
+  - Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame. Preserve the feeling of being locked in while opportunity leaves.
 visual_strategy:
-  concept_core: "烂股锁住了钱，也锁住了后面的机会"
-  image_type: "Editorial"
+  concept_core: 烂股锁住了钱，也锁住了后面的机会
+  image_type: Editorial
   image_count: 4
-  primary_image_model: "gemini"
-  generation_mode: "cover_first"
+  primary_image_model: gemini
+  generation_mode: cover_first
   derivation_rule:
-    body: "same_world"
-    cards: "derived_from_cover"
+    body: same_world
+    cards: derived_from_cover
   image_breakdown:
     cover: 1
     body: 2
     social_cards: 1
-  reader_hook: "要让人看见“钱被困住”的痛感，而不是只理解一个术语。"
-visual_style_prefix: "Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel."
+  reader_hook: 要让人看见“钱被困住”的痛感，而不是只理解一个术语。
+  body_asset_policy: reuse_then_derive
+  cover_reusable_in_body: true
+  body_usage_plan:
+    body_1: reuse_cover
+    body_2: derive_from_cover
+visual_style_prefix: Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel.
 distribution:
   wechat:
     enabled: true
-    status: "draft"
+    status: draft
 ---
-
 # 机会成本：一只烂股最狠的地方，不是让你亏钱，而是拖住你整轮牛市
 
 > *"很多人以为自己只是被套住了一只票，其实真正被套住的，是后面本来该轮到你的那口肉。 "*
@@ -115,10 +119,3 @@ ZISO 在底层强调风险否决和动作纪律，本质上也是同一逻辑。
 
 永远和一只已经走坏的股票谈恋爱，代价从来不只是亏钱，而是把自己后面的机会也一起拖慢了。
 
----
-
-#### 认知对齐：行话指南
-
-- **机会成本**：Opportunity Cost
-- **止损税**：Stop Loss Tax (ZISO term)
-- **主升浪**：The Main Uptrend

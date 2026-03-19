@@ -1,88 +1,93 @@
 ---
-title: "101-14: 越盯盘，越容易亏大钱：很多大跌，都是盯出来的"
-subtitle: "分时图最擅长做的一件事，就是把你越看越手痒，越看越乱"
-content_id: "growth-101-014"
-content_source: "growth"
-content_type: "article"
-canonical_role: "canonical"
-date: "2026-04-10"
-category: "The Mind"
-funnel_stage: "MOFU"
-campaign_role: "bridge"
-timeliness_role: "evergreen"
-timely_anchor: "盯盘焦虑/分时图成瘾/盘后决策"
-viral_priority: "top5"
+title: '101-14: 越盯盘，越容易亏大钱：很多大跌，都是盯出来的'
+subtitle: 分时图最擅长做的一件事，就是把你越看越手痒，越看越乱
+content_id: growth-101-014
+content_source: growth
+content_type: article
+canonical_role: canonical
+date: '2026-04-10'
+category: The Mind
+funnel_stage: MOFU
+campaign_role: bridge
+timeliness_role: evergreen
+timely_anchor: 盯盘焦虑/分时图成瘾/盘后决策
+viral_priority: top5
 launch_order: 3
 headline_alternatives:
-  - "很多大跌不是看不见，而是你盯盘盯到最后还是忍不住乱动"
-  - "分时图为什么越看越亏？因为它最会挑你手痒的时候下手"
+- 很多大跌不是看不见，而是你盯盘盯到最后还是忍不住乱动
+- 分时图为什么越看越亏？因为它最会挑你手痒的时候下手
 cover_lines:
-  - "很多大跌，不是跌出来的，是盯出来的。"
-  - "分时图最会干的一件事，就是把你越看越手痒。"
-share_copy: "对白天一开盘就放不下手机的人，这篇会很有杀伤力。它讲的不是偷懒，而是为什么很多亏损恰恰是“太勤奋”盯出来的。"
-campaign: "wechat_4_week_sprint_2026q2"
-rhythm: "Hub"
+- 很多大跌，不是跌出来的，是盯出来的。
+- 分时图最会干的一件事，就是把你越看越手痒。
+share_copy: 对白天一开盘就放不下手机的人，这篇会很有杀伤力。它讲的不是偷懒，而是为什么很多亏损恰恰是“太勤奋”盯出来的。
+campaign: wechat_4_week_sprint_2026q2
+rhythm: Hub
 traceability:
-  status: "healthy"
-  last_reviewed_at: "2026-03-19"
+  status: healthy
+  last_reviewed_at: '2026-03-19'
 workflow:
-  stage: "reviewing"
-  review_priority: "review_first"
-  owner: "cmo"
-  reviewer: "founder"
-  priority: "high"
-  target_publish_date: "2026-04-09"
-  last_action_at: "2026-03-19"
-  blocked_reason: ""
+  stage: reviewing
+  review_priority: review_first
+  owner: cmo
+  reviewer: founder
+  priority: high
+  target_publish_date: '2026-04-09'
+  last_action_at: '2026-03-19'
+  blocked_reason: ''
 maintenance:
-  change_status: "updated"
-  update_reason: "copy_edit"
+  change_status: updated
+  update_reason: copy_edit
 website:
   enabled: true
-  surface: "learn"
+  surface: learn
 image: "/images/learn/101-14_eod_edge_cover.png"
 images:
   cover: "/images/learn/101-14_eod_edge_cover.png"
   body:
-    - "/images/learn/101-14_eod_edge_body_1.png"
-    - "/images/learn/101-14_eod_edge_body_2.png"
+  - "/images/learn/101-14_eod_edge_body_1.png"
+  - "/images/learn/101-14_eod_edge_body_2.png"
   cards:
-    - "/images/learn/101-14_eod_edge_card_1.png"
+  - "/images/learn/101-14_eod_edge_card_1.png"
 image_specs:
-  cover: "1200x675"
-  body: "1080x720"
-  card: "1080x1440"
+  cover: 1200x675
+  body: 1080x720
+  card: 1080x1440
 image_prompts:
-  cover: "An editorial contrast image: on one side an investor glued to a flashing intraday chart, on the other side a calm post-market desk with notes and structure. The emotional difference is the key. Realistic, dark finance environment, no text."
+  cover: 'An editorial contrast image: on one side an investor glued to a flashing intraday chart, on the other side a calm post-market desk with notes and structure. The emotional difference is the key. Realistic, dark finance environment, no text.'
 derivative_guidance:
   body:
-    - "Use the provided cover image as the visual reference. Keep the same split-world contrast, the same dark finance mood, and the same intraday-versus-post-market structure. Create a closer supporting scene that zooms into intraday addiction and repeated refreshing."
-    - "Use the provided cover image as the visual reference. Keep the same split-world contrast and the same emotional release after the close. Extend the calm half of the same world into a quieter evening planning scene."
+  - Use the provided cover image as the visual reference. Keep the same split-world contrast, the same dark finance mood, and the same intraday-versus-post-market structure. Create a closer supporting scene that zooms into intraday addiction and repeated refreshing.
+  - Use the provided cover image as the visual reference. Keep the same split-world contrast and the same emotional release after the close. Extend the calm half of the same world into a quieter evening planning scene.
   cards:
-    - "Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame. Preserve the left-right emotional contrast and keep it simple and readable for sharing."
+  - Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame. Preserve the left-right emotional contrast and keep it simple and readable for sharing.
 visual_strategy:
-  concept_core: "盘中上头，盘后冷静"
-  image_type: "Editorial"
+  concept_core: 盘中上头，盘后冷静
+  image_type: Editorial
   image_count: 4
-  generation_mode: "cover_first"
+  generation_mode: cover_first
   derivation_rule:
-    body: "same_world"
-    cards: "derived_from_cover"
+    body: same_world
+    cards: derived_from_cover
   image_breakdown:
     cover: 1
     body: 2
     social_cards: 1
-  reader_hook: "盯盘成瘾和盘后冷静的对比，普通投资者一眼就懂。"
-visual_style_prefix: "Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel."
+  reader_hook: 盯盘成瘾和盘后冷静的对比，普通投资者一眼就懂。
+  body_asset_policy: reuse_then_derive
+  cover_reusable_in_body: true
+  body_usage_plan:
+    body_1: reuse_cover
+    body_2: derive_from_cover
+visual_style_prefix: Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel.
 distribution:
   wechat:
     enabled: true
     status: draft
-    url: ""
+    url: ''
   xhs:
     enabled: true
     status: draft
-    url: ""
+    url: ''
   twitter:
     enabled: true
     status: draft
@@ -90,10 +95,9 @@ distribution:
     enabled: true
     status: draft
 source_docs:
-  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
-  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
+- docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+- docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
 ---
-
 # 101-14: 越盯盘，越容易亏大钱：为什么“不看盘”反而避开了大跌？
 
 > “分时图最可怕的地方，不是它跳得厉害，而是它总让你觉得自己非得立刻做点什么。”
@@ -143,13 +147,3 @@ source_docs:
 
 所以别被分时图绑架。对普通投资者来说，少盯一会儿盘，很多时候不是少努力，而是少给噪音一次把你带跑的机会。
 
----
-
-#### 认知对齐：行话指南
-
-- **盘后计算**：EOD - End of Day
-- **神经毒素**：Neurotoxin (Trading stress metaphor)
-- **骗炮**：Bull/Bear Trap (Market manipulation)
-- **网格挂单**：Grid Orders / Limit Orders
-
- 

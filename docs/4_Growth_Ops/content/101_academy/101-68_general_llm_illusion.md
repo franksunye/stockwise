@@ -1,90 +1,95 @@
 ---
-title: "101-68: 让你的“龙虾”替你炒股？听着挺唬人，亏起来也是真快"
-subtitle: "从 ChatGPT 到 Agent，越会说人话，越容易让人忘了它根本不负责"
-content_id: "growth-101-068"
-content_source: "growth"
-content_type: "article"
-canonical_role: "canonical"
-date: "2026-03-22"
-category: "The Machine"
-funnel_stage: "TOFU"
-campaign_role: "hook"
-timeliness_role: "timely"
-timely_anchor: "OpenClaw/AI Agent/大模型炒股"
-viral_priority: "top5"
+title: '101-68: 让你的“龙虾”替你炒股？听着挺唬人，亏起来也是真快'
+subtitle: 从 ChatGPT 到 Agent，越会说人话，越容易让人忘了它根本不负责
+content_id: growth-101-068
+content_source: growth
+content_type: article
+canonical_role: canonical
+date: '2026-03-22'
+category: The Machine
+funnel_stage: TOFU
+campaign_role: hook
+timeliness_role: timely
+timely_anchor: OpenClaw/AI Agent/大模型炒股
+viral_priority: top5
 launch_order: 1
 headline_alternatives:
-  - "OpenClaw 火了，但让“龙虾”替你炒股这件事，可能从第一步就错了"
-  - "从 ChatGPT 到龙虾 Agent，为什么越像人，越容易让散户放下戒心"
+- OpenClaw 火了，但让“龙虾”替你炒股这件事，可能从第一步就错了
+- 从 ChatGPT 到龙虾 Agent，为什么越像人，越容易让散户放下戒心
 cover_lines:
-  - "它越像个懂行的人，你越容易忘了亏钱的是你。"
-  - "会说人话，不等于能替你扛回撤。"
-share_copy: "最近很多人都在聊 OpenClaw、Agent、AI 炒股，这篇不是泼冷水，而是把最容易忽略的一件事说透了：会说、会搜、会调工具，不等于能替你碰本金。"
-campaign: "wechat_4_week_sprint_2026q2"
-rhythm: "Hub"
+- 它越像个懂行的人，你越容易忘了亏钱的是你。
+- 会说人话，不等于能替你扛回撤。
+share_copy: 最近很多人都在聊 OpenClaw、Agent、AI 炒股，这篇不是泼冷水，而是把最容易忽略的一件事说透了：会说、会搜、会调工具，不等于能替你碰本金。
+campaign: wechat_4_week_sprint_2026q2
+rhythm: Hub
 traceability:
-  status: "healthy"
-  last_reviewed_at: "2026-03-19"
+  status: healthy
+  last_reviewed_at: '2026-03-19'
 workflow:
-  stage: "reviewing"
-  review_priority: "review_first"
-  owner: "cmo"
-  reviewer: "founder"
-  priority: "high"
-  target_publish_date: "2026-03-23"
-  last_action_at: "2026-03-19"
-  blocked_reason: ""
+  stage: reviewing
+  review_priority: review_first
+  owner: cmo
+  reviewer: founder
+  priority: high
+  target_publish_date: '2026-03-23'
+  last_action_at: '2026-03-19'
+  blocked_reason: ''
 maintenance:
-  change_status: "updated"
-  update_reason: "copy_edit"
+  change_status: updated
+  update_reason: copy_edit
 website:
   enabled: true
-  surface: "learn"
+  surface: learn
 image: "/images/learn/101-68_general_llm_illusion_cover.png"
 images:
   cover: "/images/learn/101-68_general_llm_illusion_cover.png"
   body:
-    - "/images/learn/101-68_general_llm_illusion_body_1.png"
-    - "/images/learn/101-68_general_llm_illusion_body_2.png"
+  - "/images/learn/101-68_general_llm_illusion_body_1.png"
+  - "/images/learn/101-68_general_llm_illusion_body_2.png"
   cards:
-    - "/images/learn/101-68_general_llm_illusion_card_1.png"
-    - "/images/learn/101-68_general_llm_illusion_card_2.png"
+  - "/images/learn/101-68_general_llm_illusion_card_1.png"
+  - "/images/learn/101-68_general_llm_illusion_card_2.png"
 image_specs:
-  cover: "1200x675"
-  body: "1080x720"
-  card: "1080x1440"
+  cover: 1200x675
+  body: 1080x720
+  card: 1080x1440
 image_prompts:
-  cover: "Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no brand logos, no readable dashboard text, no luxury car advertisement look, no cheap sci-fi look. Wide horizontal composition for a WeChat article cover. A red mechanical lobster claw gripping a plain black steering wheel in front of a blurred volatile market backdrop. The key message is not AI is driving, but AI is driving without brakes. Brake failure must be visually obvious through a broken brake cable, missing brake symbol, or empty brake warning area. Emphasize danger, loss of control, and hidden risk over cool technology aesthetics."
+  cover: Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no brand logos, no readable dashboard text, no luxury car advertisement look, no cheap sci-fi look. Wide horizontal composition for a WeChat article cover. A red mechanical lobster claw gripping a plain black steering wheel in front of a blurred volatile market backdrop. The key message is not AI is driving, but AI is driving without brakes. Brake failure must be visually obvious through a broken brake cable, missing brake symbol, or empty brake warning area. Emphasize danger, loss of control, and hidden risk over cool technology aesthetics.
 derivative_guidance:
   body:
-    - "Use the provided cover image as the visual reference. Keep the same lobster claw, the same danger mood, the same dark metal palette, and the same brake-failure metaphor. Create a closer supporting scene that shifts toward a worried Chinese retail investor facing AI analysis, without changing the visual world."
-    - "Use the provided cover image as the visual reference. Preserve the same hidden-risk message and the same premium dark finance tone. Extend the same world into a more symbolic supporting scene about polished AI appearance versus broken risk barriers."
+  - Use the provided cover image as the visual reference. Keep the same lobster claw, the same danger mood, the same dark metal palette, and the same brake-failure metaphor. Create a closer supporting scene that shifts toward a worried Chinese retail investor facing AI analysis, without changing the visual world.
+  - Use the provided cover image as the visual reference. Preserve the same hidden-risk message and the same premium dark finance tone. Extend the same world into a more symbolic supporting scene about polished AI appearance versus broken risk barriers.
   cards:
-    - "Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame. Preserve the lobster claw, steering wheel, and missing-brake metaphor. Prioritize strong silhouette and leave space for future headline overlay."
-    - "Use the provided cover image as the visual reference. Create a second vertical social card derived from the same mother frame. Keep the same danger world and make the no-brake message visually obvious rather than cool."
+  - Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame. Preserve the lobster claw, steering wheel, and missing-brake metaphor. Prioritize strong silhouette and leave space for future headline overlay.
+  - Use the provided cover image as the visual reference. Create a second vertical social card derived from the same mother frame. Keep the same danger world and make the no-brake message visually obvious rather than cool.
 visual_strategy:
-  concept_core: "会干活的 AI 没有刹车"
-  image_type: "Hybrid"
+  concept_core: 会干活的 AI 没有刹车
+  image_type: Hybrid
   image_count: 5
-  generation_mode: "cover_first"
+  generation_mode: cover_first
   derivation_rule:
-    body: "same_world"
-    cards: "derived_from_cover"
+    body: same_world
+    cards: derived_from_cover
   image_breakdown:
     cover: 1
     body: 2
     social_cards: 2
-  reader_hook: "AI Agent 看起来很会干活，但最重要的刹车和风控是空的。"
-visual_style_prefix: "Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel."
+  reader_hook: AI Agent 看起来很会干活，但最重要的刹车和风控是空的。
+  body_asset_policy: reuse_then_derive
+  cover_reusable_in_body: true
+  body_usage_plan:
+    body_1: reuse_cover
+    body_2: derive_from_cover
+visual_style_prefix: Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel.
 distribution:
   wechat:
     enabled: true
     status: draft
-    url: ""
+    url: ''
   xhs:
     enabled: true
     status: draft
-    url: ""
+    url: ''
   twitter:
     enabled: true
     status: draft
@@ -92,10 +97,9 @@ distribution:
     enabled: true
     status: draft
 source_docs:
-  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
-  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
+- docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+- docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
 ---
-
 # 让你的“龙虾”替你炒股？听起来很酷，亏起来也很快
 
 > “它越像个懂行的人，你越容易忘了，亏钱的不是它，是你。”
@@ -149,15 +153,3 @@ ZISO 从来不把大语言模型，更不会把 Agent，当成操盘手。它更
 
 写诗的 AI，可以陪你聊天；会排比的 AI，可以帮你润色；会调工具的“龙虾”，可以替你跑腿。但碰到真金白银，你更需要的还是一面盾，而不是一张嘴，也不是一只更勤快的爪子。嘴再会说，也挡不住回撤。
 
----
-
-#### 认知对齐：行话指南
-
-<small>
-幻觉：大模型把“像真的话”拼出来，不代表它掌握了真实事实。<br>
-滑点：你以为能成交的价格，和你最终真正成交的价格之间的落差。<br>
-最大逆风：进场后，价格先朝不利方向走过的最大幅度。<br>
-量化风控引擎：先算信号、风险和退出边界，再决定能不能行动的底层规则系统。
-</small>
-
- 

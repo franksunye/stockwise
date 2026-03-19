@@ -1,87 +1,91 @@
 ---
-title: "101-106: 真正的 L2，不是会背几条规则，而是知道规则一失灵就该认错"
-subtitle: "从迷信秘籍，到把规则当成一台要经常校准的机器"
-content_id: "growth-101-106"
-content_source: "growth"
-content_type: "article"
-canonical_role: "canonical"
-date: "2026-03-20"
-category: "The Machine"
-funnel_stage: "MOFU"
-campaign_role: "bridge"
-timeliness_role: "timely"
-timely_anchor: "AI时代规则系统/量化治理/智能化投资框架"
-viral_priority: "normal"
+title: '101-106: 真正的 L2，不是会背几条规则，而是知道规则一失灵就该认错'
+subtitle: 从迷信秘籍，到把规则当成一台要经常校准的机器
+content_id: growth-101-106
+content_source: growth
+content_type: article
+canonical_role: canonical
+date: '2026-03-20'
+category: The Machine
+funnel_stage: MOFU
+campaign_role: bridge
+timeliness_role: timely
+timely_anchor: AI时代规则系统/量化治理/智能化投资框架
+viral_priority: normal
 headline_alternatives:
-  - "AI 时代真正值钱的，不是更聪明的点子，而是能认错的规则系统"
-  - "很多人学了很多规则还停在原地，因为他从来没想过规则也会失灵"
+- AI 时代真正值钱的，不是更聪明的点子，而是能认错的规则系统
+- 很多人学了很多规则还停在原地，因为他从来没想过规则也会失灵
 cover_lines:
-  - "真正值钱的不是规则多，而是规则失灵时你知道该认错。"
-  - "没有什么圣杯能包打天下，能活下来的系统都要反复校准。"
-share_copy: "这篇很适合做成熟度系列的真正落点。它不是讲规则有多神，而是讲规则为什么必须被治理、被验证、被允许失效。"
-campaign: "wechat_4_week_sprint_2026q2"
-rhythm: "Hub"
+- 真正值钱的不是规则多，而是规则失灵时你知道该认错。
+- 没有什么圣杯能包打天下，能活下来的系统都要反复校准。
+share_copy: 这篇很适合做成熟度系列的真正落点。它不是讲规则有多神，而是讲规则为什么必须被治理、被验证、被允许失效。
+campaign: wechat_4_week_sprint_2026q2
+rhythm: Hub
 traceability:
-  status: "healthy"
-  last_reviewed_at: "2026-03-19"
+  status: healthy
+  last_reviewed_at: '2026-03-19'
 workflow:
-  stage: "reviewing"
-  review_priority: "review_first"
-  owner: "cmo"
-  reviewer: "founder"
-  priority: "high"
-  target_publish_date: "2026-04-15"
-  last_action_at: "2026-03-19"
-blocked_reason: ""
+  stage: reviewing
+  review_priority: review_first
+  owner: cmo
+  reviewer: founder
+  priority: high
+  target_publish_date: '2026-04-15'
+  last_action_at: '2026-03-19'
+blocked_reason: ''
 maintenance:
-  change_status: "created"
-  update_reason: "new_series"
+  change_status: created
+  update_reason: new_series
 website:
   enabled: true
-  surface: "learn"
+  surface: learn
 image: "/images/learn/101-106_systematic_rules_l2_cover.png"
 images:
   cover: "/images/learn/101-106_systematic_rules_l2_cover.png"
   body:
-    - "/images/learn/101-106_systematic_rules_l2_body_1.png"
-    - "/images/learn/101-106_systematic_rules_l2_body_2.png"
+  - "/images/learn/101-106_systematic_rules_l2_body_1.png"
+  - "/images/learn/101-106_systematic_rules_l2_body_2.png"
   cards:
-    - "/images/learn/101-106_systematic_rules_l2_card_1.png"
+  - "/images/learn/101-106_systematic_rules_l2_card_1.png"
 image_specs:
-  cover: "1200x675"
-  body: "1080x720"
-  card: "1080x1440"
+  cover: 1200x675
+  body: 1080x720
+  card: 1080x1440
 image_prompts:
-  cover: "A conceptual image of a precise financial machine being recalibrated by hand, emphasizing maintenance and correction rather than perfection. It should feel engineered, disciplined, and realistic. Dark premium tone, no text."
+  cover: A conceptual image of a precise financial machine being recalibrated by hand, emphasizing maintenance and correction rather than perfection. It should feel engineered, disciplined, and realistic. Dark premium tone, no text.
 derivative_guidance:
   body:
-    - "Use the provided cover image as the visual reference. Keep the same calibration world, the same engineered discipline, and the same dark premium tone. Create a supporting close-up that emphasizes adjustment, governance, and correction rather than magic."
-    - "Use the provided cover image as the visual reference. Preserve the same recalibration metaphor and the same realistic machine world. Extend it into a supporting scene where slight error is being corrected instead of worshipped."
+  - Use the provided cover image as the visual reference. Keep the same calibration world, the same engineered discipline, and the same dark premium tone. Create a supporting close-up that emphasizes adjustment, governance, and correction rather than magic.
+  - Use the provided cover image as the visual reference. Preserve the same recalibration metaphor and the same realistic machine world. Extend it into a supporting scene where slight error is being corrected instead of worshipped.
   cards:
-    - "Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame. Preserve the recalibration metaphor and remove any impression of a perfect holy grail."
+  - Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame. Preserve the recalibration metaphor and remove any impression of a perfect holy grail.
 visual_strategy:
-  concept_core: "真正的规则系统不是神，而是会被校准的机器"
-  image_type: "Concept"
+  concept_core: 真正的规则系统不是神，而是会被校准的机器
+  image_type: Concept
   image_count: 3
-  primary_image_model: "gemini"
-  generation_mode: "cover_first"
+  primary_image_model: gemini
+  generation_mode: cover_first
   derivation_rule:
-    body: "same_world"
-    cards: "derived_from_cover"
+    body: same_world
+    cards: derived_from_cover
   image_breakdown:
     cover: 1
     body: 2
     social_cards: 0
-  reader_hook: "要让‘规则也会失灵，所以要校准’这件事一眼看懂。"
-visual_style_prefix: "Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel."
+  reader_hook: 要让‘规则也会失灵，所以要校准’这件事一眼看懂。
+  body_asset_policy: derive_only
+  cover_reusable_in_body: false
+  body_usage_plan:
+    body_1: derive_from_cover
+    body_2: derive_from_cover
+visual_style_prefix: Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel.
 distribution:
   wechat:
     enabled: true
-    status: "draft"
+    status: draft
 source_docs:
-  - docs/0_Strategy/01_Product_Positioning_and_Boundaries.md
+- docs/0_Strategy/01_Product_Positioning_and_Boundaries.md
 ---
-
 # 真正的 L2，不是会背几条规则，而是知道规则一失灵就该认错
 
 > “真正把人从 L1 拉到 L2 的，不是招式变多了，而是知道这世上没有包打天下的圣杯。”
@@ -140,17 +144,3 @@ ZISO 当前的重点，不是去假装自己已经是 L3 组合平台，更不�
 
 当你开始问“这套规则为什么成立、什么时候失效、我该如何验证它”，而不是只问“它最近准不准”，你就已经真正走进 L2 了。
 
----
-
-#### 认知对齐：行话指南
-
-- **规则化量化**：Systematic Rules
-- **波动收缩模式**：VCP (Volatility Contraction Pattern)
-- **趋势模版**：Trend Template
-- **动量审计**：Momentum Audit
-- **逻辑闭环**：Logical Consistency / Integrity
-- **Mark Minervini**：美国投资冠军，VCP 模式创始人，其实战体系是 L2 级的教科书。
-
-
----
-*下一篇：101-107《L3级——系统化组合投资，是舰队司令部的排兵布阵》*

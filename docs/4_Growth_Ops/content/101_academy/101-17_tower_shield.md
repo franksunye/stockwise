@@ -1,88 +1,93 @@
 ---
-title: "101-17: 为什么 ZISO 更像一座安全屋，而不是一辆带你往前冲的赛车？"
-subtitle: "市场里最稀缺的，不是更刺激，而是你上头时还有东西能拦你一把"
-content_id: "growth-101-017"
-content_source: "growth"
-content_type: "article"
-canonical_role: "canonical"
-date: "2026-04-10"
-category: "The Mind"
-funnel_stage: "BOFU"
-campaign_role: "conversion"
-timeliness_role: "evergreen"
-timely_anchor: "高波动市场/普通投资者生存/反上头系统"
-viral_priority: "watchlist"
+title: '101-17: 为什么 ZISO 更像一座安全屋，而不是一辆带你往前冲的赛车？'
+subtitle: 市场里最稀缺的，不是更刺激，而是你上头时还有东西能拦你一把
+content_id: growth-101-017
+content_source: growth
+content_type: article
+canonical_role: canonical
+date: '2026-04-10'
+category: The Mind
+funnel_stage: BOFU
+campaign_role: conversion
+timeliness_role: evergreen
+timely_anchor: 高波动市场/普通投资者生存/反上头系统
+viral_priority: watchlist
 headline_alternatives:
-  - "市场越刺激，普通人越需要的往往不是赛车，而是一面盾"
-  - "真正值钱的投资系统，不是带你冲，而是你上头时能拦你"
+- 市场越刺激，普通人越需要的往往不是赛车，而是一面盾
+- 真正值钱的投资系统，不是带你冲，而是你上头时能拦你
 cover_lines:
-  - "赛车让你兴奋，安全屋让你活得久。"
-  - "很多人缺的不是更猛的机会，而是上头时还有东西能拦他一把。"
-share_copy: "这篇很适合做品牌立场文。它讲清楚了 ZISO 到底卖什么：不是刺激，不是神准，而是普通人在市场里最缺的那点安全感。"
-campaign: "wechat_4_week_sprint_2026q2"
-rhythm: "Hub"
+- 赛车让你兴奋，安全屋让你活得久。
+- 很多人缺的不是更猛的机会，而是上头时还有东西能拦他一把。
+share_copy: 这篇很适合做品牌立场文。它讲清楚了 ZISO 到底卖什么：不是刺激，不是神准，而是普通人在市场里最缺的那点安全感。
+campaign: wechat_4_week_sprint_2026q2
+rhythm: Hub
 traceability:
-  status: "healthy"
-  last_reviewed_at: "2026-03-19"
+  status: healthy
+  last_reviewed_at: '2026-03-19'
 workflow:
-  stage: "drafting"
-  review_priority: "review_first"
-  owner: "cmo"
-  reviewer: "founder"
-  priority: "high"
-  target_publish_date: "2026-04-03"
-  last_action_at: "2026-03-19"
-  blocked_reason: ""
+  stage: drafting
+  review_priority: review_first
+  owner: cmo
+  reviewer: founder
+  priority: high
+  target_publish_date: '2026-04-03'
+  last_action_at: '2026-03-19'
+  blocked_reason: ''
 maintenance:
-  change_status: "updated"
-  update_reason: "copy_edit"
+  change_status: updated
+  update_reason: copy_edit
 website:
   enabled: true
-  surface: "learn"
+  surface: learn
 image: "/images/learn/101-17_tower_shield_cover.png"
 images:
   cover: "/images/learn/101-17_tower_shield_cover.png"
   body:
-    - "/images/learn/101-17_tower_shield_body_1.png"
-    - "/images/learn/101-17_tower_shield_body_2.png"
+  - "/images/learn/101-17_tower_shield_body_1.png"
+  - "/images/learn/101-17_tower_shield_body_2.png"
   cards:
-    - "/images/learn/101-17_tower_shield_card_1.png"
+  - "/images/learn/101-17_tower_shield_card_1.png"
 image_specs:
-  cover: "1200x675"
-  body: "1080x720"
-  card: "1080x1440"
+  cover: 1200x675
+  body: 1080x720
+  card: 1080x1440
 image_prompts:
-  cover: "A symbolic split-scene: on one side a high-speed racing machine, on the other side a heavy safe house or shielded structure. A retail investor stands between them, forced to choose. Premium dark editorial style, highly symbolic, no text."
+  cover: 'A symbolic split-scene: on one side a high-speed racing machine, on the other side a heavy safe house or shielded structure. A retail investor stands between them, forced to choose. Premium dark editorial style, highly symbolic, no text.'
 derivative_guidance:
   body:
-    - "Use the provided cover image as the visual reference. Keep the same split choice, the same premium dark editorial tone, and the same speed-versus-safety tension. Create a supporting scene that stays closer to the dangerous chase side."
-    - "Use the provided cover image as the visual reference. Preserve the same choice structure and emotional contrast. Extend the same world into a quieter fortified-safety scene that represents survival over thrill."
+  - Use the provided cover image as the visual reference. Keep the same split choice, the same premium dark editorial tone, and the same speed-versus-safety tension. Create a supporting scene that stays closer to the dangerous chase side.
+  - Use the provided cover image as the visual reference. Preserve the same choice structure and emotional contrast. Extend the same world into a quieter fortified-safety scene that represents survival over thrill.
   cards:
-    - "Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame. Preserve the tension between speed and survival."
+  - Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame. Preserve the tension between speed and survival.
 visual_strategy:
-  concept_core: "普通投资者最缺的不是更快，而是上头时有人能拦"
-  image_type: "Concept"
+  concept_core: 普通投资者最缺的不是更快，而是上头时有人能拦
+  image_type: Concept
   image_count: 4
-  primary_image_model: "gemini"
-  generation_mode: "cover_first"
+  primary_image_model: gemini
+  generation_mode: cover_first
   derivation_rule:
-    body: "same_world"
-    cards: "derived_from_cover"
+    body: same_world
+    cards: derived_from_cover
   image_breakdown:
     cover: 1
     body: 2
     social_cards: 1
-  reader_hook: "安全屋要比赛车更有画面冲击力，才能反直觉。"
-visual_style_prefix: "Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel."
+  reader_hook: 安全屋要比赛车更有画面冲击力，才能反直觉。
+  body_asset_policy: reuse_then_derive
+  cover_reusable_in_body: true
+  body_usage_plan:
+    body_1: reuse_cover
+    body_2: derive_from_cover
+visual_style_prefix: Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel.
 distribution:
   wechat:
     enabled: true
     status: draft
-    url: ""
+    url: ''
   xhs:
     enabled: true
     status: draft
-    url: ""
+    url: ''
   twitter:
     enabled: true
     status: draft
@@ -90,10 +95,9 @@ distribution:
     enabled: true
     status: draft
 source_docs:
-  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
-  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
+- docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+- docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
 ---
-
 # 101-17: 为什么 ZISO 更像一座安全屋，而不是一辆带你冲锋的赛车？
 
 > “真正决定你能不能活着留在市场里的，往往不是跑得更快，而是你快上头时还有东西能把你拽回来。”
@@ -138,14 +142,3 @@ source_docs:
 
 所以 ZISO 不是一辆赛车。赛车让你兴奋，安全屋让你活得久。
 
----
-
-#### 认知对齐：行话指南
-
-- **重装塔盾**：Heavy Tower Shield (ZISO logic)
-- **防滚架**：Roll Cage (Risk Control metaphor)
-- **极寒警告**：Hyper-Cold Warning
-- **知其白，守其黑**：Chinese philosophy on balance and risk
-
-
- 

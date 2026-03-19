@@ -1,88 +1,93 @@
 ---
-title: "101-71: 自选股越加越多，很多时候不是机会变多，而是心先乱了"
-subtitle: "冻结自选池，不是胆小，而是别再今天追这个、明天看那个"
-content_id: "growth-101-071"
-content_source: "growth"
-content_type: "article"
-canonical_role: "canonical"
-date: "2026-04-10"
-category: "The Machine"
-funnel_stage: "MOFU"
-campaign_role: "bridge"
-timeliness_role: "evergreen"
-timely_anchor: "全市场焦虑/热点轮动/自选股膨胀"
-viral_priority: "normal"
+title: '101-71: 自选股越加越多，很多时候不是机会变多，而是心先乱了'
+subtitle: 冻结自选池，不是胆小，而是别再今天追这个、明天看那个
+content_id: growth-101-071
+content_source: growth
+content_type: article
+canonical_role: canonical
+date: '2026-04-10'
+category: The Machine
+funnel_stage: MOFU
+campaign_role: bridge
+timeliness_role: evergreen
+timely_anchor: 全市场焦虑/热点轮动/自选股膨胀
+viral_priority: normal
 headline_alternatives:
-  - "自选股越加越多，不一定机会越多，更多时候只是人先慌了"
-  - "热点天天换，为什么很多人最后是一只都没真正看懂"
+- 自选股越加越多，不一定机会越多，更多时候只是人先慌了
+- 热点天天换，为什么很多人最后是一只都没真正看懂
 cover_lines:
-  - "自选股越加越多，很多时候不是机会变多，而是心先乱了。"
-  - "不是你看的票太少，而是你看的票太多，最后一只也没看明白。"
-share_copy: "如果你每天都在加自选、切热点、总觉得外面还有更好的票，这篇会很有共鸣。它讲的是普通人最容易忽略的注意力成本。"
-campaign: "wechat_4_week_sprint_2026q2"
-rhythm: "Hub"
+- 自选股越加越多，很多时候不是机会变多，而是心先乱了。
+- 不是你看的票太少，而是你看的票太多，最后一只也没看明白。
+share_copy: 如果你每天都在加自选、切热点、总觉得外面还有更好的票，这篇会很有共鸣。它讲的是普通人最容易忽略的注意力成本。
+campaign: wechat_4_week_sprint_2026q2
+rhythm: Hub
 traceability:
-  status: "healthy"
-  last_reviewed_at: "2026-03-19"
+  status: healthy
+  last_reviewed_at: '2026-03-19'
 workflow:
-  stage: "drafting"
-  review_priority: "ready_later"
-  owner: "cmo"
-  reviewer: "founder"
-  priority: "high"
-  target_publish_date: "2026-04-17"
-  last_action_at: "2026-03-19"
-  blocked_reason: ""
+  stage: drafting
+  review_priority: ready_later
+  owner: cmo
+  reviewer: founder
+  priority: high
+  target_publish_date: '2026-04-17'
+  last_action_at: '2026-03-19'
+  blocked_reason: ''
 maintenance:
-  change_status: "updated"
-  update_reason: "copy_edit"
+  change_status: updated
+  update_reason: copy_edit
 website:
   enabled: true
-  surface: "learn"
+  surface: learn
 image: "/images/learn/101-71_frozen_universe_cover.png"
 images:
   cover: "/images/learn/101-71_frozen_universe_cover.png"
   body:
-    - "/images/learn/101-71_frozen_universe_body_1.png"
-    - "/images/learn/101-71_frozen_universe_body_2.png"
+  - "/images/learn/101-71_frozen_universe_body_1.png"
+  - "/images/learn/101-71_frozen_universe_body_2.png"
   cards:
-    - "/images/learn/101-71_frozen_universe_card_1.png"
+  - "/images/learn/101-71_frozen_universe_card_1.png"
 image_specs:
-  cover: "1200x675"
-  body: "1080x720"
-  card: "1080x1440"
+  cover: 1200x675
+  body: 1080x720
+  card: 1080x1440
 image_prompts:
-  cover: "A conceptual image of countless floating stock symbols dissolving into noise, while a small focused cluster remains sharply framed and calm. The message is selective attention and disciplined scope. Dark premium finance tone, no text."
+  cover: A conceptual image of countless floating stock symbols dissolving into noise, while a small focused cluster remains sharply framed and calm. The message is selective attention and disciplined scope. Dark premium finance tone, no text.
 derivative_guidance:
   body:
-    - "Use the provided cover image as the visual reference. Keep the same focus-versus-chaos world, the same dark premium finance tone, and the same selective-attention message. Create a supporting scene that stays human and shows overwhelm from an expanding watchlist."
-    - "Use the provided cover image as the visual reference. Preserve the same framed-focus metaphor and the same market-noise world. Extend it into a calmer supporting scene that emphasizes selected scope over chaos."
+  - Use the provided cover image as the visual reference. Keep the same focus-versus-chaos world, the same dark premium finance tone, and the same selective-attention message. Create a supporting scene that stays human and shows overwhelm from an expanding watchlist.
+  - Use the provided cover image as the visual reference. Preserve the same framed-focus metaphor and the same market-noise world. Extend it into a calmer supporting scene that emphasizes selected scope over chaos.
   cards:
-    - "Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame. Preserve the contrast between noisy universe and selected focus."
+  - Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame. Preserve the contrast between noisy universe and selected focus.
 visual_strategy:
-  concept_core: "看得越多不一定机会越多，很多时候只是心更乱"
-  image_type: "Concept"
+  concept_core: 看得越多不一定机会越多，很多时候只是心更乱
+  image_type: Concept
   image_count: 3
-  primary_image_model: "gemini"
-  generation_mode: "cover_first"
+  primary_image_model: gemini
+  generation_mode: cover_first
   derivation_rule:
-    body: "same_world"
-    cards: "derived_from_cover"
+    body: same_world
+    cards: derived_from_cover
   image_breakdown:
     cover: 1
     body: 2
     social_cards: 0
-  reader_hook: "图上先让人感觉到‘票太多，心更乱’。"
-visual_style_prefix: "Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel."
+  reader_hook: 图上先让人感觉到‘票太多，心更乱’。
+  body_asset_policy: derive_only
+  cover_reusable_in_body: false
+  body_usage_plan:
+    body_1: derive_from_cover
+    body_2: derive_from_cover
+visual_style_prefix: Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel.
 distribution:
   wechat:
     enabled: true
     status: draft
-    url: ""
+    url: ''
   xhs:
     enabled: true
     status: draft
-    url: ""
+    url: ''
   twitter:
     enabled: true
     status: draft
@@ -90,10 +95,9 @@ distribution:
     enabled: true
     status: draft
 source_docs:
-  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
-  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
+- docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+- docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
 ---
-
 # 101-71: 自选股越加越多，很多时候不是机会变多，而是人先乱了
 
 > “很多人以为自己缺的是更多票，其实更常见的问题是：看得太多，最后一只也没看明白。”

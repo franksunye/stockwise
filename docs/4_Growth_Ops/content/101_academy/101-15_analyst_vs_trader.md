@@ -1,88 +1,93 @@
 ---
-title: "101-15: 你昨晚写好的计划，为什么一开盘就不算数了？"
-subtitle: "因为你老想一个人把看盘、判断、下手全包了"
-content_id: "growth-101-015"
-content_source: "growth"
-content_type: "article"
-canonical_role: "canonical"
-date: "2026-04-10"
-category: "The Mind"
-funnel_stage: "MOFU"
-campaign_role: "bridge"
-timeliness_role: "evergreen"
-timely_anchor: "盘前计划与盘中变卦/执行纪律/情绪交易"
-viral_priority: "normal"
+title: '101-15: 你昨晚写好的计划，为什么一开盘就不算数了？'
+subtitle: 因为你老想一个人把看盘、判断、下手全包了
+content_id: growth-101-015
+content_source: growth
+content_type: article
+canonical_role: canonical
+date: '2026-04-10'
+category: The Mind
+funnel_stage: MOFU
+campaign_role: bridge
+timeliness_role: evergreen
+timely_anchor: 盘前计划与盘中变卦/执行纪律/情绪交易
+viral_priority: normal
 headline_alternatives:
-  - "为什么你每天晚上都能想明白，一开盘就又乱了"
-  - "计划写得越认真，盘中越容易变卦？很多人输在自己打自己脸"
+- 为什么你每天晚上都能想明白，一开盘就又乱了
+- 计划写得越认真，盘中越容易变卦？很多人输在自己打自己脸
 cover_lines:
-  - "很多人不是没计划，而是一到盘中，计划就成了摆设。"
-  - "昨晚那个冷静的你，往往扛不住今天盘中的自己。"
-share_copy: "这篇特别适合那些每天复盘都很认真，但一开盘还是容易乱的人。它讲的不是技巧，而是为什么你总在自己打自己脸。"
-campaign: "wechat_4_week_sprint_2026q2"
-rhythm: "Hub"
+- 很多人不是没计划，而是一到盘中，计划就成了摆设。
+- 昨晚那个冷静的你，往往扛不住今天盘中的自己。
+share_copy: 这篇特别适合那些每天复盘都很认真，但一开盘还是容易乱的人。它讲的不是技巧，而是为什么你总在自己打自己脸。
+campaign: wechat_4_week_sprint_2026q2
+rhythm: Hub
 traceability:
-  status: "healthy"
-  last_reviewed_at: "2026-03-19"
+  status: healthy
+  last_reviewed_at: '2026-03-19'
 workflow:
-  stage: "drafting"
-  review_priority: "review_next"
-  owner: "cmo"
-  reviewer: "founder"
-  priority: "high"
-  target_publish_date: "2026-04-07"
-  last_action_at: "2026-03-19"
-  blocked_reason: ""
+  stage: drafting
+  review_priority: review_next
+  owner: cmo
+  reviewer: founder
+  priority: high
+  target_publish_date: '2026-04-07'
+  last_action_at: '2026-03-19'
+  blocked_reason: ''
 maintenance:
-  change_status: "updated"
-  update_reason: "copy_edit"
+  change_status: updated
+  update_reason: copy_edit
 website:
   enabled: true
-  surface: "learn"
+  surface: learn
 image: "/images/learn/101-15_analyst_vs_trader_cover.png"
 images:
   cover: "/images/learn/101-15_analyst_vs_trader_cover.png"
   body:
-    - "/images/learn/101-15_analyst_vs_trader_body_1.png"
-    - "/images/learn/101-15_analyst_vs_trader_body_2.png"
+  - "/images/learn/101-15_analyst_vs_trader_body_1.png"
+  - "/images/learn/101-15_analyst_vs_trader_body_2.png"
   cards:
-    - "/images/learn/101-15_analyst_vs_trader_card_1.png"
+  - "/images/learn/101-15_analyst_vs_trader_card_1.png"
 image_specs:
-  cover: "1200x675"
-  body: "1080x720"
-  card: "1080x1440"
+  cover: 1200x675
+  body: 1080x720
+  card: 1080x1440
 image_prompts:
-  cover: "A conceptual split-identity image: the same investor divided into two halves, one calmly planning at night, the other frantically trading during market hours. Strong contrast between order and panic. Dark premium finance style, no text."
+  cover: 'A conceptual split-identity image: the same investor divided into two halves, one calmly planning at night, the other frantically trading during market hours. Strong contrast between order and panic. Dark premium finance style, no text.'
 derivative_guidance:
   body:
-    - "Use the provided cover image as the visual reference. Keep the same split-self world, the same dark premium tone, and the same role conflict. Create a supporting scene that emphasizes the neat night plan versus messy intraday panic."
-    - "Use the provided cover image as the visual reference. Preserve the same divided identity metaphor and emotional contrast. Extend the same world into a closer human portrait of calm rationality versus market panic."
+  - Use the provided cover image as the visual reference. Keep the same split-self world, the same dark premium tone, and the same role conflict. Create a supporting scene that emphasizes the neat night plan versus messy intraday panic.
+  - Use the provided cover image as the visual reference. Preserve the same divided identity metaphor and emotional contrast. Extend the same world into a closer human portrait of calm rationality versus market panic.
   cards:
-    - "Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame. Preserve the dual-role conflict rather than inventing a new scene."
+  - Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame. Preserve the dual-role conflict rather than inventing a new scene.
 visual_strategy:
-  concept_core: "昨晚会做计划的你，和开盘后乱动的你，不是一个人"
-  image_type: "Concept"
+  concept_core: 昨晚会做计划的你，和开盘后乱动的你，不是一个人
+  image_type: Concept
   image_count: 3
-  primary_image_model: "gemini"
-  generation_mode: "cover_first"
+  primary_image_model: gemini
+  generation_mode: cover_first
   derivation_rule:
-    body: "same_world"
-    cards: "derived_from_cover"
+    body: same_world
+    cards: derived_from_cover
   image_breakdown:
     cover: 1
     body: 2
     social_cards: 0
-  reader_hook: "图上先让人明白：昨晚和今天开盘后的你，根本不是一个人。"
-visual_style_prefix: "Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel."
+  reader_hook: 图上先让人明白：昨晚和今天开盘后的你，根本不是一个人。
+  body_asset_policy: derive_only
+  cover_reusable_in_body: false
+  body_usage_plan:
+    body_1: derive_from_cover
+    body_2: derive_from_cover
+visual_style_prefix: Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel.
 distribution:
   wechat:
     enabled: true
     status: draft
-    url: ""
+    url: ''
   xhs:
     enabled: true
     status: draft
-    url: ""
+    url: ''
   twitter:
     enabled: true
     status: draft
@@ -90,10 +95,9 @@ distribution:
     enabled: true
     status: draft
 source_docs:
-  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
-  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
+- docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+- docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
 ---
-
 # 101-15: 你昨晚的计划，为什么总在第二天开盘后作废？
 
 > “很多人不是没计划，而是一到盘中，计划就成了摆设。”
