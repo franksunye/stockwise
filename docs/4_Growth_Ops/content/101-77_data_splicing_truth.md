@@ -1,6 +1,13 @@
 ---
+title: "你看到的 K 线是滞后的：实时动态拼接底层是如何工作的？"
 source_docs:
   - docs/1_Engineering/29_Almanac_Data_Lightweight_Protocol_20260316.md
+category: "Growth 101"
+funnel_stage: "TOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "draft"
 ---
 
 # 你看到的 K 线是滞后的：实时动态拼接底层是如何工作的？

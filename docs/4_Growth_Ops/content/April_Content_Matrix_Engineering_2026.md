@@ -1,4 +1,5 @@
 ---
+title: "4 月战役大纲：ZISO 硬核降维打击矩阵 (The 'Cold Steel' Blitz)"
 source_docs:
   - docs/0_Strategy/07_Growth_and_GTM_Roadmap.md
   - docs/1_Engineering/28_Price_Sync_Zero_Stale_Protocol_20260316.md
@@ -6,6 +7,12 @@ source_docs:
   - docs/2_Intelligence/25A_AI_Context_Limits_DeepSeek.md
   - docs/3_Product/Specs/41_Phase3_Protection_Spec.md
   - docs/3_Product/Specs/48_Admin_Tradeability_Control_Tower.md
+category: "Growth 101"
+funnel_stage: "TOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "draft"
 ---
 
 # 4 月战役大纲：ZISO 硬核降维打击矩阵 (The "Cold Steel" Blitz)

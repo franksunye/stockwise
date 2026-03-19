@@ -1,6 +1,13 @@
 ---
+title: "错误溯源：什么是 Trace ID (Trace ID Audit)"
 source_docs:
   - docs/1_Engineering/16_Observability_Thresholds_and_Incidents.md
+category: "Support Ops"
+funnel_stage: "BOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "none"
 ---
 
 # 错误溯源：什么是 Trace ID (Trace ID Audit)

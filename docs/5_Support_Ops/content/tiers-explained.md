@@ -4,6 +4,11 @@ category: "权益与增长"
 lastUpdated: "2026-03-09"
 source_docs:
   - docs/3_Product/31_Membership_Design_Plan.md
+funnel_stage: "BOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "none"
 ---
 
 - **普通用户 (Free)**：支持 3 个自选席位，查看基础结论，这叫“入门体验”。

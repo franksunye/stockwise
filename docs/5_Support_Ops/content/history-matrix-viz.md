@@ -4,6 +4,11 @@ category: "AI 智慧与分析"
 lastUpdated: "2026-03-09"
 source_docs:
   - docs/3_Product/Specs/49_Investment_Mode_Decision_Local_Snapshot_Spec_20260316.md
+funnel_stage: "BOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "none"
 ---
 
 那一排小方块就是 AI 的“模拟考成绩单”。

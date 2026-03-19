@@ -1,6 +1,13 @@
 ---
+title: "体验期权限发放规则 (Onboarding Trial Rules)"
 source_docs:
   - docs/3_Product/31_Membership_Design_Plan.md
+category: "Support Ops"
+funnel_stage: "BOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "none"
 ---
 
 # 体验期权限发放规则 (Onboarding Trial Rules)

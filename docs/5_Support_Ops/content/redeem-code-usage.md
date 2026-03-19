@@ -4,6 +4,11 @@ category: "权益与增长"
 lastUpdated: "2026-03-09"
 source_docs:
   - docs/0_Strategy/02_Monetization_Pricing_Strategy.md
+funnel_stage: "BOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "none"
 ---
 
 拿到 \`PRO-XXXX\` 的码了？

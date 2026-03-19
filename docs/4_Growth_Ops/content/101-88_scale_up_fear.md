@@ -1,6 +1,13 @@
 ---
+title: "资金放大的恐惧：仓位加倍后动作变形的应对指南"
 source_docs:
   - docs/2_Intelligence/22Q_Quant_Research_Framework.md
+category: "Growth 101"
+funnel_stage: "TOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "draft"
 ---
 
 # 资金放大的恐惧：仓位加倍后动作变形的应对指南

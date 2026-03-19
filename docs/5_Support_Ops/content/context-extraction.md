@@ -8,7 +8,7 @@ funnel_stage: "BOFU"
 publish:
   wechat:
     status: "published"
-
+date: "2026-03-19"
 ---
 
 每天市场消息上万字，跟你那只股票相关的可能就两句。

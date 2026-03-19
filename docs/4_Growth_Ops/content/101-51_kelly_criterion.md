@@ -8,6 +8,10 @@ image_prompt: "**Concept**: Mathematical balance and sizing. **Style**: Swiss De
 source_docs:
   - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
   - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
+funnel_stage: "TOFU"
+publish:
+  wechat:
+    status: "draft"
 ---
 
 # 凯利公式：告别“拍脑袋”仓位法

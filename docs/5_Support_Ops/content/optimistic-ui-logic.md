@@ -4,6 +4,11 @@ category: "数据与服务保障"
 lastUpdated: "2026-03-09"
 source_docs:
   - docs/3_Product/Specs/46_Frontend_SWR_Architecture_Upgrade.md
+funnel_stage: "BOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "none"
 ---
 
 当你点“添加股票”的时候，UI 会瞬间反应过来。

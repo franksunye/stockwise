@@ -1,6 +1,13 @@
 ---
+title: "模型层级划分：Pro 版与基础版 AI 引擎切流说明"
 source_docs:
   - docs/3_Product/31_Membership_Design_Plan.md
+category: "Support Ops"
+funnel_stage: "BOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "none"
 ---
 
 # 模型层级划分：Pro 版与基础版 AI 引擎切流说明

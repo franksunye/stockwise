@@ -8,6 +8,10 @@ image_prompt: "**Concept**: Scale of time decomposition. **Style**: Minimalist. 
 source_docs:
   - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
   - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
+funnel_stage: "TOFU"
+publish:
+  wechat:
+    status: "draft"
 ---
 
 # 节奏：噪音与信号的博弈

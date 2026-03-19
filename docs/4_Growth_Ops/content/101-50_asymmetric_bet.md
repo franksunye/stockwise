@@ -1,6 +1,13 @@
 ---
+title: "非对称博弈：寻找下跌空间有限、上涨空间无限的“肥尾”机会"
 source_docs:
   - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+category: "Growth 101"
+funnel_stage: "TOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "draft"
 ---
 
 # 非对称博弈：寻找下跌空间有限、上涨空间无限的“肥尾”机会

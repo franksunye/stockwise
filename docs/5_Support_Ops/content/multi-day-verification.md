@@ -4,6 +4,11 @@ category: "验证与诚信"
 lastUpdated: "2026-03-09"
 source_docs:
   - docs/3_Product/Specs/49_Investment_Mode_Decision_Local_Snapshot_Spec_20260316.md
+funnel_stage: "BOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "none"
 ---
 
 咱不玩那种“一秒钟涨跌”的游戏，那叫赌博。

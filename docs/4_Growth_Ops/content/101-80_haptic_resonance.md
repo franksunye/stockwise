@@ -1,6 +1,13 @@
 ---
+title: "触觉共振：手机的震动，如何将量化纪律直接刻入你的潜意识"
 source_docs:
   - docs/3_Product/30_Notification_Strategy_Design.md
+category: "Growth 101"
+funnel_stage: "TOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "draft"
 ---
 
 # 触觉共振：手机的震动，如何将量化纪律直接刻入你的潜意识

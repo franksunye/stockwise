@@ -8,7 +8,7 @@ funnel_stage: "BOFU"
 publish:
   wechat:
     status: "published"
-
+date: "2026-03-19"
 ---
 
 我们不会一天轰炸你几十条。

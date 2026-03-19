@@ -8,7 +8,7 @@ funnel_stage: "BOFU"
 publish:
   wechat:
     status: "published"
-
+date: "2026-03-19"
 ---
 
 置信度 80% 并不代表 80% 会涨。

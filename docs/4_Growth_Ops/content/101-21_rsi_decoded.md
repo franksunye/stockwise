@@ -8,6 +8,10 @@ image_prompt: "A minimalist line chart showing price making a higher peak, while
 source_docs:
   - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
   - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
+funnel_stage: "TOFU"
+publish:
+  wechat:
+    status: "draft"
 ---
 
 # RSI 指标新解：别再傻傻地看"超买"了

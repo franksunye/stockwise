@@ -8,6 +8,10 @@ image_prompt: "**Concept**: Isolation of small risk. **Style**: Swiss Grid. **Su
 source_docs:
   - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
   - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
+funnel_stage: "TOFU"
+publish:
+  wechat:
+    status: "draft"
 ---
 
 # 1% 准则：控制亏损的“核反应堆”

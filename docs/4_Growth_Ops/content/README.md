@@ -1,53 +1,10 @@
 # 📊 CMO 内容发布全局看板 (Docs-as-Code)
 
-> 自动生成时间：2026/3/19 12:44:43
+> 自动生成时间：2026/3/19 12:48:51
 > 💡 **提示**: 本看板由 `scripts/cmo_sync.mjs` 自动从各 Markdown 文件的头信息 (Frontmatter) 提取并重新渲染。
 
 | 文章标题 | 分类 (Category) | 漏斗层级 | 日期 | 公众号 | 小红书 | Twitter | 头条号 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [101-100_beyond_trading](101-100_beyond_trading.md) | Uncategorized | Unknown | N/A | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-18_echo_chamber](101-18_echo_chamber.md) | Uncategorized | Unknown | N/A | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-19_insider_illusion](101-19_insider_illusion.md) | Uncategorized | Unknown | N/A | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-20_information_diet](101-20_information_diet.md) | Uncategorized | Unknown | N/A | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-37_black_swan_math](101-37_black_swan_math.md) | Uncategorized | Unknown | N/A | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-38_liquidity_dry_up](101-38_liquidity_dry_up.md) | Uncategorized | Unknown | N/A | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-39_margin_call_spiral](101-39_margin_call_spiral.md) | Uncategorized | Unknown | N/A | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-40_opportunity_cost](101-40_opportunity_cost.md) | Uncategorized | Unknown | N/A | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-41_avg_down_trap](101-41_avg_down_trap.md) | Uncategorized | Unknown | N/A | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-42_survivorship_bias](101-42_survivorship_bias.md) | Uncategorized | Unknown | N/A | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-43_mean_reversion](101-43_mean_reversion.md) | Uncategorized | Unknown | N/A | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-44_volatility_tax](101-44_volatility_tax.md) | Uncategorized | Unknown | N/A | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-45_time_decay](101-45_time_decay.md) | Uncategorized | Unknown | N/A | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-46_herd_mentality](101-46_herd_mentality.md) | Uncategorized | Unknown | N/A | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-47_random_walk](101-47_random_walk.md) | Uncategorized | Unknown | N/A | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-48_tail_risk](101-48_tail_risk.md) | Uncategorized | Unknown | N/A | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-49_overtrading_doom](101-49_overtrading_doom.md) | Uncategorized | Unknown | N/A | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-50_asymmetric_bet](101-50_asymmetric_bet.md) | Uncategorized | Unknown | N/A | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-74_edge_computing](101-74_edge_computing.md) | Uncategorized | Unknown | N/A | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-75_notification_diet](101-75_notification_diet.md) | Uncategorized | Unknown | N/A | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-76_smart_parser_survive](101-76_smart_parser_survive.md) | Uncategorized | Unknown | N/A | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-77_data_splicing_truth](101-77_data_splicing_truth.md) | Uncategorized | Unknown | N/A | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-78_anti_stale_lock](101-78_anti_stale_lock.md) | Uncategorized | Unknown | N/A | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-79_optimistic_ui](101-79_optimistic_ui.md) | Uncategorized | Unknown | N/A | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-80_haptic_resonance](101-80_haptic_resonance.md) | Uncategorized | Unknown | N/A | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-84_the_zen_of_losing](101-84_the_zen_of_losing.md) | Uncategorized | Unknown | N/A | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-85_probability_mindset](101-85_probability_mindset.md) | Uncategorized | Unknown | N/A | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-86_system_vs_intuition](101-86_system_vs_intuition.md) | Growth 101 | TOFU | N/A | ✅ 已发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-87_the_boredom_of_winning](101-87_the_boredom_of_winning.md) | Uncategorized | Unknown | N/A | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-88_scale_up_fear](101-88_scale_up_fear.md) | Uncategorized | Unknown | N/A | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-89_the_final_boss](101-89_the_final_boss.md) | Uncategorized | Unknown | N/A | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-90_capital_preservation](101-90_capital_preservation.md) | Uncategorized | Unknown | N/A | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-91_the_illusory_control](101-91_the_illusory_control.md) | Uncategorized | Unknown | N/A | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-92_embrace_drawdowns](101-92_embrace_drawdowns.md) | Uncategorized | Unknown | N/A | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-93_the_invisible_hand](101-93_the_invisible_hand.md) | Uncategorized | Unknown | N/A | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-94_the_cost_of_opinions](101-94_the_cost_of_opinions.md) | Uncategorized | Unknown | N/A | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-95_the_lonely_path](101-95_the_lonely_path.md) | Uncategorized | Unknown | N/A | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-96_patience_as_a_weapon](101-96_patience_as_a_weapon.md) | Uncategorized | Unknown | N/A | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-97_the_tyranny_of_now](101-97_the_tyranny_of_now.md) | Uncategorized | Unknown | N/A | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-98_the_quant_awakening](101-98_the_quant_awakening.md) | Uncategorized | Unknown | N/A | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-99_the_ziso_manifesto](101-99_the_ziso_manifesto.md) | Uncategorized | Unknown | N/A | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [April_Content_Matrix_Engineering_2026](April_Content_Matrix_Engineering_2026.md) | Uncategorized | Unknown | N/A | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [March_Content_Matrix_Execution_2026](March_Content_Matrix_Execution_2026.md) | Uncategorized | Unknown | N/A | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
 | [101-13: 为什么“预测明天涨停”是最大的智商税？](101-13_prediction_tax.md) | The Mind | TOFU | 2026-04-10 | 📝 草稿 | 📝 草稿 | 📝 草稿 | 📝 草稿 |
 | [101-14: 慢即是快：盘后计算 (EOD) 才是终极武器](101-14_eod_edge.md) | The Mind | MOFU | 2026-04-10 | 📝 草稿 | 📝 草稿 | 📝 草稿 | 📝 草稿 |
 | [101-15: 别装全能：你是找信号的分析师，还是交易员？](101-15_analyst_vs_trader.md) | The Mind | MOFU | 2026-04-10 | 📝 草稿 | 📝 草稿 | 📝 草稿 | 📝 草稿 |
@@ -72,6 +29,49 @@
 | [101-32: 删掉你的持仓成本线](101-32_stateless_execution.md) | The Method | MOFU | 2026-04-03 | 📝 草稿 | 📝 草稿 | 📝 草稿 | 📝 草稿 |
 | [101-68: 通用大模型炒股，就像请郭德纲做心脏手术](101-68_general_llm_illusion.md) | The Machine | TOFU | 2026-03-22 | 📝 草稿 | 📝 草稿 | 📝 草稿 | 📝 草稿 |
 | [101-12: 别和镰刀拼微秒](101-12_l4_hft_illusion.md) | The Mind | TOFU | 2026-03-20 | 📝 草稿 | 📝 草稿 | 📝 草稿 | 📝 草稿 |
+| [超越交易：用量化思维审视人生风险的终局](101-100_beyond_trading.md) | Growth 101 | TOFU | 2026-03-19 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [回音壁效应：为什么越努力看新闻，亏得越惨？](101-18_echo_chamber.md) | Growth 101 | TOFU | 2026-03-19 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [内幕消息错觉：送上门的“内幕”，全是为你准备的绞肉机](101-19_insider_illusion.md) | Growth 101 | TOFU | 2026-03-19 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [信息节食：屏蔽大 V 的 30 天，我的账户为何起死回生](101-20_information_diet.md) | Growth 101 | TOFU | 2026-03-19 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [黑天鹅数学：十年一遇的暴跌，为什么每三年就来一次？](101-37_black_swan_math.md) | Growth 101 | TOFU | 2026-03-19 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [流动性枯竭：当你想跑，却没有买家时的极寒地狱](101-38_liquidity_dry_up.md) | Growth 101 | TOFU | 2026-03-19 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [连环爆仓：带血的筹码是如何在下跌中踩踏的？](101-39_margin_call_spiral.md) | Growth 101 | TOFU | 2026-03-19 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [机会成本：死扛烂股的最大代价，是错过了整个牛市](101-40_opportunity_cost.md) | Growth 101 | TOFU | 2026-03-19 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [向下摊平：在错误的泥潭里越陷越深的死亡操作](101-41_avg_down_trap.md) | Growth 101 | TOFU | 2026-03-19 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [幸存者偏差：你看到的“股神”，只是赌场里刚好连赢十把的人](101-42_survivorship_bias.md) | Growth 101 | TOFU | 2026-03-19 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [均值回归：万物皆周期，涨上天的终将跌回均线](101-43_mean_reversion.md) | Growth 101 | TOFU | 2026-03-19 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [波动率税：在剧烈震荡中，本金是如何被悄悄抽干的？](101-44_volatility_tax.md) | Growth 101 | TOFU | 2026-03-19 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [时间价值陷阱：横盘不仅折磨心智，更是对资金使用率的谋杀](101-45_time_decay.md) | Growth 101 | TOFU | 2026-03-19 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [羊群效应：当连你家楼下的保安都在谈论股票时，快跑](101-46_herd_mentality.md) | Growth 101 | TOFU | 2026-03-19 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [随机游走假说：承认市场短期的不可预测性，是走向成熟的第一步](101-47_random_walk.md) | Growth 101 | TOFU | 2026-03-19 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [尾部风险：如何防范那些由于“不可能”而让你倾家荡产的小概率事件](101-48_tail_risk.md) | Growth 101 | TOFU | 2026-03-19 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [多动症的毁灭：为什么管不住手的人，都在给券商打工？](101-49_overtrading_doom.md) | Growth 101 | TOFU | 2026-03-19 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [非对称博弈：寻找下跌空间有限、上涨空间无限的“肥尾”机会](101-50_asymmetric_bet.md) | Growth 101 | TOFU | 2026-03-19 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [10 毫秒的生与死：ZISO 的边缘节点加速如何跑赢闪电崩盘](101-74_edge_computing.md) | Growth 101 | TOFU | 2026-03-19 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [我们为什么阉割了你的盘中提示金牌？因为无知等于平安](101-75_notification_diet.md) | Growth 101 | TOFU | 2026-03-19 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [在 DeepSeek 抽风的夜晚，ZISO 的 UI 为什么坚如磐石？](101-76_smart_parser_survive.md) | Growth 101 | TOFU | 2026-03-19 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [你看到的 K 线是滞后的：实时动态拼接底层是如何工作的？](101-77_data_splicing_truth.md) | Growth 101 | TOFU | 2026-03-19 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [零过期协议：哪怕慢了一秒钟的数据，也是毒药](101-78_anti_stale_lock.md) | Growth 101 | TOFU | 2026-03-19 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [“秒应”极速感：为了让你不焦虑，我们在重写物理法则](101-79_optimistic_ui.md) | Growth 101 | TOFU | 2026-03-19 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [触觉共振：手机的震动，如何将量化纪律直接刻入你的潜意识](101-80_haptic_resonance.md) | Growth 101 | TOFU | 2026-03-19 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [亏损的禅意：接纳止损，如同接纳呼吸](101-84_the_zen_of_losing.md) | Growth 101 | TOFU | 2026-03-19 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [概率心智：放弃确定性，拥抱分布区间](101-85_probability_mindset.md) | Growth 101 | TOFU | 2026-03-19 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [系统与直觉：在暴雪中，你该相信导航还是自己的眼睛？](101-86_system_vs_intuition.md) | Growth 101 | TOFU | 2026-03-19 | ✅ 已发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [盈利是极其无聊的：当交易不再刺激，你就入门了](101-87_the_boredom_of_winning.md) | Growth 101 | TOFU | 2026-03-19 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [资金放大的恐惧：仓位加倍后动作变形的应对指南](101-88_scale_up_fear.md) | Growth 101 | TOFU | 2026-03-19 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [终极Boss：市场从来不是对手，你才是你最大的敌人](101-89_the_final_boss.md) | Growth 101 | TOFU | 2026-03-19 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [本金至上：哪怕错过一百次机会，也不要犯一次致命错误](101-90_capital_preservation.md) | Growth 101 | TOFU | 2026-03-19 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [控制错觉：你无法左右行情，你能左右的只有你的键盘](101-91_the_illusory_control.md) | Growth 101 | TOFU | 2026-03-19 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [拥抱回撤：每一次回撤，都是系统过滤弱者的试炼](101-92_embrace_drawdowns.md) | Growth 101 | TOFU | 2026-03-19 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [看不见的手：流动性才是市场的终极庄家](101-93_the_invisible_hand.md) | Growth 101 | TOFU | 2026-03-19 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [观点的代价：在市场上争论对错是最昂贵的爱好](101-94_the_cost_of_opinions.md) | Growth 101 | TOFU | 2026-03-19 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [孤独的路：离开噪音群，走向量化的荒野](101-95_the_lonely_path.md) | Growth 101 | TOFU | 2026-03-19 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [把耐心当作武器：猎手总是趴在雪地里最久的那一个](101-96_patience_as_a_weapon.md) | Growth 101 | TOFU | 2026-03-19 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [当下的暴政：逃离分时图的绑架，站到月线上看风景](101-97_the_tyranny_of_now.md) | Growth 101 | TOFU | 2026-03-19 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [量化觉醒：给大脑植入纪律芯片的 21 天](101-98_the_quant_awakening.md) | Growth 101 | TOFU | 2026-03-19 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [知守宣言：在疯狂的世界里，建立你自己的冰冷要塞](101-99_the_ziso_manifesto.md) | Growth 101 | TOFU | 2026-03-19 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [4 月战役大纲：ZISO 硬核降维打击矩阵 (The 'Cold Steel' Blitz)](April_Content_Matrix_Engineering_2026.md) | Growth 101 | TOFU | 2026-03-19 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [March_Content_Matrix_Execution_2026](March_Content_Matrix_Execution_2026.md) | Growth 101 | TOFU | 2026-03-19 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
 | [AI 除了写 PPT 还能做什么？论‘冷酷实习生’对焦虑的终极拯救](2026-03-02_ai_lifestyle.md) | The Machine | TOFU | 2026-03-02 | [✅ 已发布](https://mp.weixin.qq.com/s/eR-4uQ1tCHZt0i4x3lBwHw) | 📝 草稿 | ➖ 不发布 | ➖ 不发布 |
 | [AI 时代的决策真相：为什么‘直觉’是你最危险的敌人？](2026-03-02_breakthrough_logic.md) | The Mind | TOFU | 2026-03-02 | [✅ 已发布](https://mp.weixin.qq.com/s/7Lg6jQ8u_V1wY2a3zPqX0A) | 📝 草稿 | ➖ 不发布 | ➖ 不发布 |
 | [量化思维入门：像工程师一样处理生活中的‘概率游戏’](2026-03-02_quant_thinking.md) | Methodology | MOFU | 2026-03-02 | ✅ 已发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
@@ -80,38 +80,38 @@
 | [101-03: 厌恶损失 (Loss Aversion)](101-03_loss_aversion.md) | Growth 101 | TOFU | 2026-02-04 | ✅ 已发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
 | [101-04: 确认偏误 (Confirmation Bias)](101-04_confirmation_bias.md) | Growth 101 | TOFU | 2026-02-04 | ✅ 已发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
 | [101-05: 赌徒谬误 (Gambler's Fallacy)](101-05_gamblers_fallacy.md) | Growth 101 | TOFU | 2026-02-04 | ✅ 已发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-06: 禀赋效应 (Endowment Effect)](101-06_endowment_effect.md) | The Mind | Unknown | 2026-02-04 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [101-06: 禀赋效应 (Endowment Effect)](101-06_endowment_effect.md) | The Mind | TOFU | 2026-02-04 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
 | [101-07: 报复性交易 (Revenge Trading)](101-07_revenge_trading.md) | Growth 101 | TOFU | 2026-02-04 | ✅ 已发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
 | [101-08: 3M 框架 (Mind, Method, Money)](101-08_3m_framework.md) | Growth 101 | MOFU | 2026-02-04 | ✅ 已发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-09: 为什么聪明人会失败？](101-09_why_smart_people_fail.md) | The Mind | Unknown | 2026-02-04 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-10: 离场休息的艺术](101-10_sitting_on_hands.md) | The Mind | Unknown | 2026-02-04 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [101-09: 为什么聪明人会失败？](101-09_why_smart_people_fail.md) | The Mind | TOFU | 2026-02-04 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [101-10: 离场休息的艺术](101-10_sitting_on_hands.md) | The Mind | TOFU | 2026-02-04 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
 | [101-11: 事后聪明偏误 (Hindsight Bias)](101-11_hindsight_bias.md) | Growth 101 | TOFU | 2026-02-04 | ✅ 已发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-21: RSI 指标新解](101-21_rsi_decoded.md) | The Method | Unknown | 2026-02-04 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-22: 均线系统 (Moving Averages)](101-22_moving_averages.md) | The Method | Unknown | 2026-02-04 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-23: MACD (动能之王)](101-23_macd.md) | The Method | Unknown | 2026-02-04 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-24: 成交量分析 (Volume)](101-24_volume.md) | The Method | Unknown | 2026-02-04 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-25: 支撑与压力 (Support & Resistance)](101-25_support_resistance.md) | The Method | Unknown | 2026-02-04 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-26: K 线形态的 AI 视角](101-26_candlestick_patterns.md) | The Method | Unknown | 2026-02-04 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-27: 布林带 (Bollinger Bands)](101-27_bollinger_bands.md) | The Method | Unknown | 2026-02-04 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-28: 左侧与右侧交易](101-28_left_right_trading.md) | The Method | Unknown | 2026-02-04 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-29: 跳空缺口理论](101-29_gap_theory.md) | The Method | Unknown | 2026-02-04 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-30: 背离 (Divergence)](101-30_divergence.md) | The Method | Unknown | 2026-02-04 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-31: 行业轮动逻辑](101-31_sector_rotation.md) | The Method | Unknown | 2026-02-04 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-51: 凯利公式 (The Kelly Criterion)](101-51_kelly_criterion.md) | The Money | Unknown | 2026-02-04 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-52: 止损的艺术](101-52_stop_loss_art.md) | The Money | Unknown | 2026-02-04 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-53: 盈亏比 (Risk/Reward Ratio)](101-53_risk_reward_ratio.md) | The Money | Unknown | 2026-02-04 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-54: 仓位管理与分批建仓](101-54_position_sizing.md) | The Money | Unknown | 2026-02-04 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-55: 回撤的数学真相](101-55_drawdown_math.md) | The Money | Unknown | 2026-02-04 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-56: 投资组合的相关性风险](101-56_correlation_risk.md) | The Money | Unknown | 2026-02-04 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-57: 1% 准则](101-57_one_percent_rule.md) | The Money | Unknown | 2026-02-04 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-58: 止盈的艺术](101-58_profit_taking.md) | The Money | Unknown | 2026-02-04 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-61: LLM vs 量化模型](101-61_llm_vs_quant.md) | The Machine | Unknown | 2026-02-04 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-62: AI 幻觉的封印术](101-62_hallucination_control.md) | The Machine | Unknown | 2026-02-04 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-63: 上下文工程](101-63_context_engineering.md) | The Machine | Unknown | 2026-02-04 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-64: 盘后分析 vs 盘中博弈](101-64_eod_vs_intraday.md) | The Machine | Unknown | 2026-02-04 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-65: 置信度解码](101-65_confidence_calibration.md) | The Machine | Unknown | 2026-02-04 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-66: 投研 Prompt 工程](101-66_prompt_engineering.md) | The Machine | Unknown | 2026-02-04 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-67: AI + 人的混合系统](101-67_hybrid_system.md) | The Machine | Unknown | 2026-02-04 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-81: 实战案例：结构化反转](101-81_case_reversal.md) | The Case | Unknown | 2026-02-04 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-82: 实战案例：识别虚假突破](101-82_false_breakout.md) | The Case | Unknown | 2026-02-04 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
-| [101-83: 实战案例：避开下坠飞刀](101-83_falling_knife.md) | The Case | Unknown | 2026-02-04 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [101-21: RSI 指标新解](101-21_rsi_decoded.md) | The Method | TOFU | 2026-02-04 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [101-22: 均线系统 (Moving Averages)](101-22_moving_averages.md) | The Method | TOFU | 2026-02-04 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [101-23: MACD (动能之王)](101-23_macd.md) | The Method | TOFU | 2026-02-04 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [101-24: 成交量分析 (Volume)](101-24_volume.md) | The Method | TOFU | 2026-02-04 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [101-25: 支撑与压力 (Support & Resistance)](101-25_support_resistance.md) | The Method | TOFU | 2026-02-04 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [101-26: K 线形态的 AI 视角](101-26_candlestick_patterns.md) | The Method | TOFU | 2026-02-04 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [101-27: 布林带 (Bollinger Bands)](101-27_bollinger_bands.md) | The Method | TOFU | 2026-02-04 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [101-28: 左侧与右侧交易](101-28_left_right_trading.md) | The Method | TOFU | 2026-02-04 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [101-29: 跳空缺口理论](101-29_gap_theory.md) | The Method | TOFU | 2026-02-04 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [101-30: 背离 (Divergence)](101-30_divergence.md) | The Method | TOFU | 2026-02-04 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [101-31: 行业轮动逻辑](101-31_sector_rotation.md) | The Method | TOFU | 2026-02-04 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [101-51: 凯利公式 (The Kelly Criterion)](101-51_kelly_criterion.md) | The Money | TOFU | 2026-02-04 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [101-52: 止损的艺术](101-52_stop_loss_art.md) | The Money | TOFU | 2026-02-04 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [101-53: 盈亏比 (Risk/Reward Ratio)](101-53_risk_reward_ratio.md) | The Money | TOFU | 2026-02-04 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [101-54: 仓位管理与分批建仓](101-54_position_sizing.md) | The Money | TOFU | 2026-02-04 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [101-55: 回撤的数学真相](101-55_drawdown_math.md) | The Money | TOFU | 2026-02-04 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [101-56: 投资组合的相关性风险](101-56_correlation_risk.md) | The Money | TOFU | 2026-02-04 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [101-57: 1% 准则](101-57_one_percent_rule.md) | The Money | TOFU | 2026-02-04 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [101-58: 止盈的艺术](101-58_profit_taking.md) | The Money | TOFU | 2026-02-04 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [101-61: LLM vs 量化模型](101-61_llm_vs_quant.md) | The Machine | TOFU | 2026-02-04 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [101-62: AI 幻觉的封印术](101-62_hallucination_control.md) | The Machine | TOFU | 2026-02-04 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [101-63: 上下文工程](101-63_context_engineering.md) | The Machine | TOFU | 2026-02-04 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [101-64: 盘后分析 vs 盘中博弈](101-64_eod_vs_intraday.md) | The Machine | TOFU | 2026-02-04 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [101-65: 置信度解码](101-65_confidence_calibration.md) | The Machine | TOFU | 2026-02-04 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [101-66: 投研 Prompt 工程](101-66_prompt_engineering.md) | The Machine | TOFU | 2026-02-04 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [101-67: AI + 人的混合系统](101-67_hybrid_system.md) | The Machine | TOFU | 2026-02-04 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [101-81: 实战案例：结构化反转](101-81_case_reversal.md) | The Case | TOFU | 2026-02-04 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [101-82: 实战案例：识别虚假突破](101-82_false_breakout.md) | The Case | TOFU | 2026-02-04 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [101-83: 实战案例：避开下坠飞刀](101-83_falling_knife.md) | The Case | TOFU | 2026-02-04 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |

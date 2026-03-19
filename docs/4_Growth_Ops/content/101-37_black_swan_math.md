@@ -1,6 +1,13 @@
 ---
+title: "黑天鹅数学：十年一遇的暴跌，为什么每三年就来一次？"
 source_docs:
   - docs/1_Engineering/16_Observability_Thresholds_and_Incidents.md
+category: "Growth 101"
+funnel_stage: "TOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "draft"
 ---
 
 # 黑天鹅数学：十年一遇的暴跌，为什么每三年就来一次？

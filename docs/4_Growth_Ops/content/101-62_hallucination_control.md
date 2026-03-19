@@ -8,6 +8,10 @@ image_prompt: "**Concept**: Filtering for clarity. **Style**: Geometric. **Subje
 source_docs:
   - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
   - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
+funnel_stage: "TOFU"
+publish:
+  wechat:
+    status: "draft"
 ---
 
 # 幻觉：AI 投资最大的敌人

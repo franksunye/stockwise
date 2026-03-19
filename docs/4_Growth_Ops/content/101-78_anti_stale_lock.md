@@ -1,6 +1,13 @@
 ---
+title: "零过期协议：哪怕慢了一秒钟的数据，也是毒药"
 source_docs:
   - docs/1_Engineering/29_Almanac_Data_Lightweight_Protocol_20260316.md
+category: "Growth 101"
+funnel_stage: "TOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "draft"
 ---
 
 # 零过期协议：哪怕慢了一秒钟的数据，也是毒药

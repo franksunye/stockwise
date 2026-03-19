@@ -1,6 +1,13 @@
 ---
+title: "控制错觉：你无法左右行情，你能左右的只有你的键盘"
 source_docs:
   - docs/0_Strategy/01_Product_Positioning_and_Boundaries.md
+category: "Growth 101"
+funnel_stage: "TOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "draft"
 ---
 
 # 控制错觉：你无法左右行情，你能左右的只有你的键盘

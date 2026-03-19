@@ -1,6 +1,13 @@
 ---
+title: "终极Boss：市场从来不是对手，你才是你最大的敌人"
 source_docs:
   - docs/0_Strategy/01_Product_Positioning_and_Boundaries.md
+category: "Growth 101"
+funnel_stage: "TOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "draft"
 ---
 
 # 终极Boss：市场从来不是对手，你才是你最大的敌人

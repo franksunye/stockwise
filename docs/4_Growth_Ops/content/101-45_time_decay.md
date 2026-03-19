@@ -1,6 +1,13 @@
 ---
+title: "时间价值陷阱：横盘不仅折磨心智，更是对资金使用率的谋杀"
 source_docs:
   - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+category: "Growth 101"
+funnel_stage: "TOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "draft"
 ---
 
 # 时间价值陷阱：横盘不仅折磨心智，更是对资金使用率的谋杀

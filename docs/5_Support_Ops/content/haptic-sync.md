@@ -4,6 +4,11 @@ category: "量化逻辑与纪律"
 lastUpdated: "2026-03-09"
 source_docs:
   - docs/3_Product/30_Notification_Strategy_Design.md
+funnel_stage: "BOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "none"
 ---
 
 当你一键刷回“今天”的时候，手机会有个微弱的小震动。

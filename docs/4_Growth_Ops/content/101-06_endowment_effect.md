@@ -8,6 +8,10 @@ image_prompt: "**Concept**: A conceptual 3D illustration of the Endowment Effect
 source_docs:
   - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
   - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
+funnel_stage: "TOFU"
+publish:
+  wechat:
+    status: "draft"
 ---
 
 # 禀赋效应：为什么你买入的那一刻，它就“变贵”了？

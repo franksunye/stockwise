@@ -1,6 +1,13 @@
 ---
+title: "10 毫秒的生与死：ZISO 的边缘节点加速如何跑赢闪电崩盘"
 source_docs:
   - docs/1_Engineering/29_Almanac_Data_Lightweight_Protocol_20260316.md
+category: "Growth 101"
+funnel_stage: "TOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "draft"
 ---
 
 # 10 毫秒的生与死：ZISO 的边缘节点加速如何跑赢闪电崩盘

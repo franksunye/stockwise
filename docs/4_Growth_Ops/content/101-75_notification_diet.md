@@ -1,6 +1,13 @@
 ---
+title: "我们为什么阉割了你的盘中提示金牌？因为无知等于平安"
 source_docs:
   - docs/3_Product/30_Notification_Strategy_Design.md
+category: "Growth 101"
+funnel_stage: "TOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "draft"
 ---
 
 # 我们为什么阉割了你的盘中提示金牌？因为无知等于平安

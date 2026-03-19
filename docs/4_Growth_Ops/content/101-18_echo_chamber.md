@@ -1,6 +1,13 @@
 ---
+title: "回音壁效应：为什么越努力看新闻，亏得越惨？"
 source_docs:
   - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+category: "Growth 101"
+funnel_stage: "TOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "draft"
 ---
 
 # 回音壁效应：为什么越努力看新闻，亏得越惨？

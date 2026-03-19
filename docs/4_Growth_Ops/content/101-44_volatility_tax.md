@@ -1,6 +1,13 @@
 ---
+title: "波动率税：在剧烈震荡中，本金是如何被悄悄抽干的？"
 source_docs:
   - docs/1_Engineering/16_Observability_Thresholds_and_Incidents.md
+category: "Growth 101"
+funnel_stage: "TOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "draft"
 ---
 
 # 波动率税：在剧烈震荡中，本金是如何被悄悄抽干的？

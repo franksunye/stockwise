@@ -1,6 +1,13 @@
 ---
+title: "观点的代价：在市场上争论对错是最昂贵的爱好"
 source_docs:
   - docs/0_Strategy/01_Product_Positioning_and_Boundaries.md
+category: "Growth 101"
+funnel_stage: "TOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "draft"
 ---
 
 # 观点的代价：在市场上争论对错是最昂贵的爱好

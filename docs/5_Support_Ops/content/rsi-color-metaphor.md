@@ -4,6 +4,11 @@ category: "量化逻辑与纪律"
 lastUpdated: "2026-03-09"
 source_docs:
   - docs/3_Product/03_Product_Features_Manifest.md
+funnel_stage: "BOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "none"
 ---
 
 **注意！咱们这儿颜色是反着来的：**

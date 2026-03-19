@@ -8,6 +8,10 @@ image_prompt: "**Concept**: Abrupt change in momentum. **Style**: High Contrast.
 source_docs:
   - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
   - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
+funnel_stage: "TOFU"
+publish:
+  wechat:
+    status: "draft"
 ---
 
 # 案例：死里逃生的底部逻辑

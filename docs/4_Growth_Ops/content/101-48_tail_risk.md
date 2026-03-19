@@ -1,6 +1,13 @@
 ---
+title: "尾部风险：如何防范那些由于“不可能”而让你倾家荡产的小概率事件"
 source_docs:
   - docs/1_Engineering/11_Reliability_Protocol.md
+category: "Growth 101"
+funnel_stage: "TOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "draft"
 ---
 
 # 尾部风险：如何防范那些由于“不可能”而让你倾家荡产的小概率事件

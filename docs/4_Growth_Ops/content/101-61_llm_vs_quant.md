@@ -8,6 +8,10 @@ image_prompt: "**Concept**: Integration of fluid logic and rigid math. **Style**
 source_docs:
   - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
   - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
+funnel_stage: "TOFU"
+publish:
+  wechat:
+    status: "draft"
 ---
 
 # 投研新纪元：语义与数字的合流

@@ -1,6 +1,13 @@
 ---
+title: "知守宣言：在疯狂的世界里，建立你自己的冰冷要塞"
 source_docs:
   - docs/0_Strategy/01_Product_Positioning_and_Boundaries.md
+category: "Growth 101"
+funnel_stage: "TOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "draft"
 ---
 
 # 知守宣言：在疯狂的世界里，建立你自己的冰冷要塞

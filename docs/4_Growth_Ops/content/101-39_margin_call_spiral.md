@@ -1,6 +1,13 @@
 ---
+title: "连环爆仓：带血的筹码是如何在下跌中踩踏的？"
 source_docs:
   - docs/1_Engineering/16_Observability_Thresholds_and_Incidents.md
+category: "Growth 101"
+funnel_stage: "TOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "draft"
 ---
 
 # 连环爆仓：带血的筹码是如何在下跌中踩踏的？

@@ -1,6 +1,13 @@
 ---
+title: "均值回归：万物皆周期，涨上天的终将跌回均线"
 source_docs:
   - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+category: "Growth 101"
+funnel_stage: "TOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "draft"
 ---
 
 # 均值回归：万物皆周期，涨上天的终将跌回均线

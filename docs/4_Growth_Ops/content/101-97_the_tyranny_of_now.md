@@ -1,6 +1,13 @@
 ---
+title: "当下的暴政：逃离分时图的绑架，站到月线上看风景"
 source_docs:
   - docs/2_Intelligence/22Q_Quant_Research_Framework.md
+category: "Growth 101"
+funnel_stage: "TOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "draft"
 ---
 
 # 当下的暴政：逃离分时图的绑架，站到月线上看风景

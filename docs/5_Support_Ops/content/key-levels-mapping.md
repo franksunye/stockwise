@@ -4,6 +4,11 @@ category: "AI 智慧与分析"
 lastUpdated: "2026-03-09"
 source_docs:
   - docs/3_Product/Specs/45_Stock_Radar_Discovery_Engine.md
+funnel_stage: "BOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "none"
 ---
 
 在“核心操盘点位”图中，每一个标签都有明确的量化意义：

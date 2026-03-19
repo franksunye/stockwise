@@ -1,6 +1,13 @@
 ---
+title: "双向邀请与 Pro 连贯性奖励 (Referral Mechanism)"
 source_docs:
   - docs/3_Product/31_Membership_Design_Plan.md
+category: "Support Ops"
+funnel_stage: "BOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "none"
 ---
 
 # 双向邀请与 Pro 连贯性奖励 (Referral Mechanism)

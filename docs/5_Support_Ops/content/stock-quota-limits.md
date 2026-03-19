@@ -1,6 +1,13 @@
 ---
+title: "自选股容量与资源算力计算 (Stock Quota Limits)"
 source_docs:
   - docs/3_Product/31_Membership_Design_Plan.md
+category: "Support Ops"
+funnel_stage: "BOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "none"
 ---
 
 # 自选股容量与资源算力计算 (Stock Quota Limits)

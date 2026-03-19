@@ -1,6 +1,13 @@
 ---
+title: "五级价位阵地解释系统 (Price Ladder)"
 source_docs:
   - docs/3_Product/Specs/45_Stock_Radar_Discovery_Engine.md
+category: "Support Ops"
+funnel_stage: "BOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "none"
 ---
 
 # 五级价位阵地解释系统 (Price Ladder)

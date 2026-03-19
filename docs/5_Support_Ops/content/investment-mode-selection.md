@@ -1,6 +1,13 @@
 ---
+title: "三种投资偏好如何变更量化敏感度 (Investment Mode Selection)"
 source_docs:
   - docs/3_Product/Specs/47_Investment_Mode_Product_Layer.md
+category: "Support Ops"
+funnel_stage: "BOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "none"
 ---
 
 # 三种投资偏好如何变更量化敏感度 (Investment Mode Selection)

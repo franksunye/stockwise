@@ -1,6 +1,13 @@
 ---
+title: "把耐心当作武器：猎手总是趴在雪地里最久的那一个"
 source_docs:
   - docs/2_Intelligence/22Q_Quant_Research_Framework.md
+category: "Growth 101"
+funnel_stage: "TOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "draft"
 ---
 
 # 把耐心当作武器：猎手总是趴在雪地里最久的那一个

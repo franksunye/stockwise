@@ -1,6 +1,13 @@
 ---
+title: "拥抱回撤：每一次回撤，都是系统过滤弱者的试炼"
 source_docs:
   - docs/0_Strategy/01_Product_Positioning_and_Boundaries.md
+category: "Growth 101"
+funnel_stage: "TOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "draft"
 ---
 
 # 拥抱回撤：每一次回撤，都是系统过滤弱者的试炼

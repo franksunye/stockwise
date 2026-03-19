@@ -1,6 +1,13 @@
 ---
+title: "孤独的路：离开噪音群，走向量化的荒野"
 source_docs:
   - docs/0_Strategy/01_Product_Positioning_and_Boundaries.md
+category: "Growth 101"
+funnel_stage: "TOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "draft"
 ---
 
 # 孤独的路：离开噪音群，走向量化的荒野

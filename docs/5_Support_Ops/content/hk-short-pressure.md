@@ -1,6 +1,13 @@
 ---
+title: "沽空数据透视指南 (HK Only)"
 source_docs:
   - docs/2_Intelligence/22Q_Quant_Research_Framework.md
+category: "Support Ops"
+funnel_stage: "BOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "none"
 ---
 
 # 沽空数据透视指南 (HK Only)

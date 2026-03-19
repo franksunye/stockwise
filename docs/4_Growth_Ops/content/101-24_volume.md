@@ -8,6 +8,10 @@ image_prompt: "A dark chart. The price candles are misty and translucent (ghostl
 source_docs:
   - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
   - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
+funnel_stage: "TOFU"
+publish:
+  wechat:
+    status: "draft"
 ---
 
 # 成交量 (Volume)：价格会撒谎，但成交量不会

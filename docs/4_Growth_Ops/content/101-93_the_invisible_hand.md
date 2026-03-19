@@ -1,6 +1,13 @@
 ---
+title: "看不见的手：流动性才是市场的终极庄家"
 source_docs:
   - docs/2_Intelligence/22Q_Quant_Research_Framework.md
+category: "Growth 101"
+funnel_stage: "TOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "draft"
 ---
 
 # 看不见的手：流动性才是市场的终极庄家

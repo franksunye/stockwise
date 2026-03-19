@@ -4,6 +4,11 @@ category: "验证与诚信"
 lastUpdated: "2026-03-09"
 source_docs:
   - docs/2_Intelligence/27C_Dual_Lane_Operations_Manual.md
+funnel_stage: "BOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "none"
 ---
 
 为了保证你看到的每一个建议都是“稳”的，我们在系统底层实施了严密的 **Dual-Lane (生产/实验)** 架构：

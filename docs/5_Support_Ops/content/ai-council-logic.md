@@ -8,7 +8,7 @@ funnel_stage: "BOFU"
 publish:
   wechat:
     status: "published"
-
+date: "2026-03-19"
 ---
 
 在个股详情页的"投研决议" (AI Council) 面板中，你可以看到来自多位不同背景分析师的意见，分为两种类型：

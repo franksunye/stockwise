@@ -1,6 +1,13 @@
 ---
+title: "盈利是极其无聊的：当交易不再刺激，你就入门了"
 source_docs:
   - docs/2_Intelligence/22Q_Quant_Research_Framework.md
+category: "Growth 101"
+funnel_stage: "TOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "draft"
 ---
 
 # 盈利是极其无聊的：当交易不再刺激，你就入门了

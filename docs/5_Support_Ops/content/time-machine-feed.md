@@ -4,6 +4,11 @@ category: "交互与导航"
 lastUpdated: "2026-03-09"
 source_docs:
   - docs/1_Engineering/11_Reliability_Protocol.md
+funnel_stage: "BOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "none"
 ---
 
 为什么要往回刷？不是为了翻旧帐，是为了让你“穿越”。

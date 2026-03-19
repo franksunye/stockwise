@@ -1,6 +1,13 @@
 ---
+title: "March_Content_Matrix_Execution_2026"
 source_docs:
   - docs/0_Strategy/07_Growth_and_GTM_Roadmap.md
+category: "Growth 101"
+funnel_stage: "TOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "draft"
 ---
 
 ## 3 月高频内容矩阵清单 (The 8-Post Blitz)

@@ -1,4 +1,5 @@
 ---
+title: "共识分级定义 (Consensus Levels)"
 source_docs:
   - docs/2_Intelligence/22Q_Quant_Research_Framework.md
 category: "Engine"
@@ -6,7 +7,7 @@ funnel_stage: "BOFU"
 publish:
   wechat:
     status: "published"
-
+date: "2026-03-19"
 ---
 
 # 共识分级定义 (Consensus Levels)

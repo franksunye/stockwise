@@ -1,6 +1,13 @@
 ---
+title: "机会成本：死扛烂股的最大代价，是错过了整个牛市"
 source_docs:
   - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+category: "Growth 101"
+funnel_stage: "TOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "draft"
 ---
 
 # 机会成本：死扛烂股的最大代价，是错过了整个牛市

@@ -1,6 +1,13 @@
 ---
+title: "流动性枯竭：当你想跑，却没有买家时的极寒地狱"
 source_docs:
   - docs/1_Engineering/16_Observability_Thresholds_and_Incidents.md
+category: "Growth 101"
+funnel_stage: "TOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "draft"
 ---
 
 # 流动性枯竭：当你想跑，却没有买家时的极寒地狱

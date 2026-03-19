@@ -8,7 +8,7 @@ funnel_stage: "BOFU"
 publish:
   wechat:
     status: "published"
-
+date: "2026-03-19"
 ---
 
 当你打开 App，手机系统那个红点角标会自动消失。

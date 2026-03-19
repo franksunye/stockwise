@@ -4,6 +4,11 @@ category: "通知与触达"
 lastUpdated: "2026-03-04"
 source_docs:
   - docs/3_Product/30_Notification_Strategy_Design.md
+funnel_stage: "BOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "none"
 ---
 
 你可以按类型独立开关，一共 7 类：

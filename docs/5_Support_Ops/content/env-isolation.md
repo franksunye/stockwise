@@ -1,6 +1,13 @@
 ---
+title: "最高级别用户环境物理隔离 (Env Isolation)"
 source_docs:
   - docs/1_Engineering/16_Observability_Thresholds_and_Incidents.md
+category: "Support Ops"
+funnel_stage: "BOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "none"
 ---
 
 # 最高级别用户环境物理隔离 (Env Isolation)

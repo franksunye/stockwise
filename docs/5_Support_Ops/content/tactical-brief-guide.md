@@ -8,7 +8,7 @@ funnel_stage: "BOFU"
 publish:
   wechat:
     status: "published"
-
+date: "2026-03-19"
 ---
 
 点开个股详情页的“策略内参” (Tactical Brief)，你会看到一份自动生成的操盘手册：

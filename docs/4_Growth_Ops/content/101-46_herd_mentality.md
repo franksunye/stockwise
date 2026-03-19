@@ -1,6 +1,13 @@
 ---
+title: "羊群效应：当连你家楼下的保安都在谈论股票时，快跑"
 source_docs:
   - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+category: "Growth 101"
+funnel_stage: "TOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "draft"
 ---
 
 # 羊群效应：当连你家楼下的保安都在谈论股票时，快跑

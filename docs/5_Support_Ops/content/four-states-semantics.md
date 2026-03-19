@@ -4,6 +4,11 @@ category: "量化逻辑与纪律"
 lastUpdated: "2026-03-09"
 source_docs:
   - docs/3_Product/Specs/40_Quant_AI_Dual_Layer_UX.md
+funnel_stage: "BOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "none"
 ---
 
 我们将复杂的量化状态机 (Layer-1) 输出，转化为了四个极简的交易动作指令：

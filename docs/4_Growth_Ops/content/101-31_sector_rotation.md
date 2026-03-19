@@ -8,6 +8,10 @@ image_prompt: "**Concept**: Sequential activation in a cycle. **Style**: Minimal
 source_docs:
   - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
   - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
+funnel_stage: "TOFU"
+publish:
+  wechat:
+    status: "draft"
 ---
 
 # 行业轮动：钱在流向哪里？

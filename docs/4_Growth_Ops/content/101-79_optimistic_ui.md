@@ -1,6 +1,13 @@
 ---
+title: "“秒应”极速感：为了让你不焦虑，我们在重写物理法则"
 source_docs:
   - docs/3_Product/30_Notification_Strategy_Design.md
+category: "Growth 101"
+funnel_stage: "TOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "draft"
 ---
 
 # “秒应”极速感：为了让你不焦虑，我们在重写物理法则

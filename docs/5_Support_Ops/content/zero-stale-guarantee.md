@@ -1,6 +1,13 @@
 ---
+title: "零过期数据屏障技术白皮书 (Zero-Stale Protocol)"
 source_docs:
   - docs/1_Engineering/28_Price_Sync_Zero_Stale_Protocol_20260316.md
+category: "Support Ops"
+funnel_stage: "BOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "none"
 ---
 
 # 零过期数据屏障技术白皮书 (Zero-Stale Protocol)

@@ -1,6 +1,13 @@
 ---
+title: "极端容错解析：大崩盘时的降级渲染预案 (Smart Parser)"
 source_docs:
   - docs/1_Engineering/29_Almanac_Data_Lightweight_Protocol_20260316.md
+category: "Support Ops"
+funnel_stage: "BOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "none"
 ---
 
 # 极端容错解析：大崩盘时的降级渲染预案 (Smart Parser)

@@ -1,6 +1,13 @@
 ---
+title: "治理控制塔：模型上线前的绝对隔离门禁 (Tradeability Tower)"
 source_docs:
   - docs/3_Product/Specs/48_Admin_Tradeability_Control_Tower.md
+category: "Support Ops"
+funnel_stage: "BOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "none"
 ---
 
 # 治理控制塔：模型上线前的绝对隔离门禁 (Tradeability Tower)

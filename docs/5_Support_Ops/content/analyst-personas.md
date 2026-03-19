@@ -1,6 +1,13 @@
 ---
+title: "AI 分析师人设框架的边界 (Analyst Personas)"
 source_docs:
   - docs/2_Intelligence/22Q_Quant_Research_Framework.md
+category: "Support Ops"
+funnel_stage: "BOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "none"
 ---
 
 # AI 分析师人设框架的边界 (Analyst Personas)

@@ -1,6 +1,13 @@
 ---
+title: "幸存者偏差：你看到的“股神”，只是赌场里刚好连赢十把的人"
 source_docs:
   - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+category: "Growth 101"
+funnel_stage: "TOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "draft"
 ---
 
 # 幸存者偏差：你看到的“股神”，只是赌场里刚好连赢十把的人

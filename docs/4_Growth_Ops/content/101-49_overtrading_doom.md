@@ -1,6 +1,13 @@
 ---
+title: "多动症的毁灭：为什么管不住手的人，都在给券商打工？"
 source_docs:
   - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+category: "Growth 101"
+funnel_stage: "TOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "draft"
 ---
 
 # 多动症的毁灭：为什么管不住手的人，都在给券商打工？

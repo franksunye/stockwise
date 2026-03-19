@@ -4,6 +4,11 @@ category: "量化逻辑与纪律"
 lastUpdated: "2026-03-09"
 source_docs:
   - docs/2_Intelligence/28Q_Quant_Backtesting_Methodology.md
+funnel_stage: "BOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "none"
 ---
 
 炒股最怕看“马后炮”指标。

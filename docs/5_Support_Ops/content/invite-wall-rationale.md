@@ -1,6 +1,13 @@
 ---
+title: "为什么设邀请墙？(Invite Wall Rationale)"
 source_docs:
   - docs/0_Strategy/07_Growth_and_GTM_Roadmap.md
+category: "Support Ops"
+funnel_stage: "BOFU"
+date: "2026-03-19"
+publish:
+  wechat:
+    status: "none"
 ---
 
 # 为什么设邀请墙？(Invite Wall Rationale)
