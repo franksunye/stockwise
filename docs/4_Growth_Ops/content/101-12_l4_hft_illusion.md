@@ -1,5 +1,5 @@
 ---
-title: "101-12: 别和镰刀拼微秒"
+title: "101-12: 别和机器拼手速：你眼里的“极速”，在量化面前只是慢镜头"
 subtitle: "为什么高频打板是散户的坟墓"
 content_id: "growth-101-012"
 content_source: "growth"
@@ -49,7 +49,7 @@ source_docs:
   - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
 ---
 
-# 别和镰刀拼微秒：为什么高频打板是散户的坟墓
+# 别和机器拼手速：你眼里的“极速”，在量化面前只是慢镜头
 
 > “如果你不能比机器更快，那就必须比机器更守纪律。”
 

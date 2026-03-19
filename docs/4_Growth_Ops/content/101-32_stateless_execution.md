@@ -1,5 +1,5 @@
 ---
-title: "101-32: 删掉你的持仓成本线"
+title: "101-32: 忘了你的买入价：市场根本不在乎你亏了多少"
 subtitle: "市场根本不在乎你亏了多少"
 content_id: "growth-101-032"
 content_source: "growth"
@@ -49,7 +49,7 @@ source_docs:
   - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
 ---
 
-# 删掉你的“持仓成本线”：无记忆的信号 (Stateless)
+# 忘了你的买入价：市场根本不在乎你亏了多少
 
 > “你买入的价格，是这个世界上最无关紧要的数据。”
 

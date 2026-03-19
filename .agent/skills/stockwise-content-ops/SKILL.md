@@ -28,14 +28,16 @@ This skill integrates the **ZISO World-Class Playbook** (Philosophical Depth) wi
 
 ## 2. Creative Standards: Anti-AI & Silent Math
 
-### 2.1 Writing Style (Anti-AI & Mentor Voice)
-**Core Rule: If it sounds like AI, the value is zero.**
-- **🚫 Anti-Patterns**: No "In conclusion," no templated openings, no "since... then..." logic loops, no neutral disclaimers.
+### 2.1 Writing Style (Scientifically Rigorous Pop-Science)
+**Core Rule: Professionalism is the goal; accessibility is the bridge.**
 - **✅ Best Practices**:
+    - **Metaphor First (隐喻先行)**: Use intuitive metaphors (e.g., "Dealer", "Fishing Rod Bend", "Scales") *before* defining technical terms (MFE, MAE, R-multiples).
+    - **Pure Chinese Flow (纯净中文流)**: Remove bilingual terms (e.g., `(Management)`) from the main body. Keep the prose naturally Chinese to avoid reading "stutters."
+    - **Authority Descriptors (权威短注)**: Use brief inline descriptions for institutions and authors (e.g., "华尔街顶级巨头 Citadel", "头寸管理大师 Van Tharp") to build instant trust.
+    - **Visual Glossary (底部对照表)**: Use a standardized `<small>` footer glossary for all English technical terms and institution/author details.
     - **Direct Impact**: First sentence must draw blood.
     - **Native Lingo**: Use "讲真", "割肉", "接盘侠", "关灯吃面".
     - **Short & Sharp**: Use periods to force a cold, rhythmic pace.
-    - **Physical Metaphors**: Use weight, friction, and extreme scenarios (e.g., "brakes failing on a cliff").
 
 ### 2.2 Visuals: "Silent Math" (沉默的数学)
 - **Palette**: Deep Void (`#050508`), Indigo-500 (`#6366f1`), Rose-500 (`#f43f5e`), Emerald-500 (`#10b981`).

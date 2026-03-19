@@ -1,5 +1,5 @@
 ---
-title: "101-68: 通用大模型炒股，就像请郭德纲做心脏手术"
+title: "101-68: 别让只会写排比句的 AI，碰你的本金"
 subtitle: "为什么和 ChatGPT 聊股票是危险的"
 content_id: "growth-101-068"
 content_source: "growth"
@@ -49,7 +49,7 @@ source_docs:
   - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
 ---
 
-# 通用大模型炒股，就像请郭德纲做心脏手术
+# 别让只会写排比句的 AI，碰你的本金
 
 > “嘴皮子再溜，也护不住你的钱包。”
 

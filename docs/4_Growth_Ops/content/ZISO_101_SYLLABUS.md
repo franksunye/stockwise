@@ -55,7 +55,18 @@ source_docs:
 
 ---
 
-## Module 3: The Money (Risk Management)
+### Module 2: The Machine - 量化交易成熟度金字塔
+*(从感性博弈到物理竞争的垂直进化)*
+
+- **101-100: 开篇——量化进化的“上帝视角”**：总览金字塔全景
+- **101-104: L0级——直觉驱动**：解构情绪包与认知偏差
+- **101-105: L1级——工具驱动**：识破后视镜里的指标陷阱
+- **101-106: L2级——系统规则**：知守 AI 的逻辑治理坐标
+- **101-107: L3级——精英组合**：资产组合的不相关性奇迹
+- **101-108: L4级——极硬量化**：光速与基建的物理决战
+- **101-109: 结篇——寻找你的量化绿洲**：散户的突围路径
+
+### Module 3: Strategy & Risk (即将推出)
 *Survival is the only KPI.*
 
 - **101-51**: **The Kelly Criterion for Retail**
@@ -102,3 +113,15 @@ source_docs:
   - *Concept*: How volume flagged a trap.
 - **101-83**: **Case Study: Avoiding the "Knife Catch"**
   - *Concept*: When AI said "Wait" while everyone was buying the dip.
+
+---
+
+## Module 6: Advanced Quant Architecture (Deep Dives)
+*Mastering the Trinity of Winning.*
+
+- **101-101**: **Timing: Thinking Like a Dealer**
+  - *Concept*: The Alpha Layer. Stateless signal generation.
+- **101-102**: **Trade Management: The Power of State**
+  - *Concept*: Portfolio and Risk Model. Stateful context mapping.
+- **101-103**: **Execution: Escaping the Trenches**
+  - *Concept*: Tactics and Micro-level execution. Avoiding HFT traps.

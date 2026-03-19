@@ -1,5 +1,5 @@
 ---
-title: "101-14: 慢即是快：盘后计算 (EOD) 才是终极武器"
+title: "101-14: 别被分时图绑架：为什么“不盯盘”反而避开了大跌？"
 subtitle: "盘中盯盘会让你智商减半"
 content_id: "growth-101-014"
 content_source: "growth"
@@ -49,7 +49,7 @@ source_docs:
   - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
 ---
 
-# 101-14: 慢即是快：盘后计算 (EOD) 才是终极武器
+# 101-14: 别被分时图绑架：为什么“不盯盘”反而避开了大跌？
 
 > “盘中红绿闪烁的数字，是一瓶毒性发作极快的神经毒素。盯着它，你的智商会每分钟下降 1%。”
 

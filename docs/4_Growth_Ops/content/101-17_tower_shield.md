@@ -1,5 +1,5 @@
 ---
-title: "101-17: 为什么 ZISO 是一面重塔盾，而不是魔法跑车？"
+title: "101-17: 为什么 ZISO 是一座安全屋，而不是一辆赛车？"
 subtitle: "市场防守大于进攻"
 content_id: "growth-101-017"
 content_source: "growth"
@@ -49,7 +49,7 @@ source_docs:
   - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
 ---
 
-# 101-17: 为什么 ZISO 是一面重塔盾，而不是魔法跑车？
+# 101-17: 为什么 ZISO 是一座安全屋，而不是一辆赛车？
 
 > “给你一辆极速狂飙的法拉利，如果没有刹车，你只会死得更快。”
 

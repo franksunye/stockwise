@@ -1,6 +1,6 @@
 # 内容生产流程看板 (Pipeline Board)
 
-> 自动生成时间：2026/3/19 16:26:48
+> 自动生成时间：2026/3/19 17:56:00
 > 说明：本看板优先服务活跃工作流，只展开需要推进的阶段；已发布内容只保留最近概览，避免看板膨胀。
 
 ## 🧠 待策划
@@ -87,7 +87,7 @@
 | [极端容错解析：大崩盘时的降级渲染预案 (Smart Parser)](../../../5_Support_Ops/content/smart-parser-ui.md) | Support | 高 | cmo | founder | 2026-04-07 周二 | 📝 草稿 | - |
 | [101-16: 组合的假象：买了 5 只白酒股，你以为分散了风险？](../101-16_fake_diversification.md) | Growth | 高 | cmo | founder | 2026-04-08 周三 | 📝 草稿 | - |
 | [性能降级：省电也是战斗力](../../../5_Support_Ops/content/perf-adaptation.md) | Support | 高 | cmo | founder | 2026-04-09 周四 | 📝 草稿 | - |
-| [101-17: 为什么 ZISO 是一面重塔盾，而不是魔法跑车？](../101-17_tower_shield.md) | Growth | 高 | cmo | founder | 2026-04-10 周五 | 📝 草稿 | - |
+| [101-17: 为什么 ZISO 是一座安全屋，而不是一辆赛车？](../101-17_tower_shield.md) | Growth | 高 | cmo | founder | 2026-04-10 周五 | 📝 草稿 | - |
 | [101-33: 为什么你的指标总是变成反指？](../101-33_indicator_failure.md) | Growth | 中 | - | - | 2026-04-10 周五 | 📝 草稿 | - |
 | [101-34: 把“止损”推迟到明天的代价](../101-34_mae_cost.md) | Growth | 中 | - | - | 2026-04-10 周五 | 📝 草稿 | - |
 | [101-35: 回测与未来的鸿沟](../101-35_overfitting_trap.md) | Growth | 中 | - | - | 2026-04-10 周五 | 📝 草稿 | - |
@@ -110,16 +110,26 @@
 
 | 标题 | 来源 | 优先级 | Owner | Reviewer | 目标日期 | 公众号 | 阻塞原因 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [101-12: 别和镰刀拼微秒](../101-12_l4_hft_illusion.md) | Growth | 高 | cmo | founder | 2026-03-23 周一 | 📝 草稿 | - |
+| [101-12: 别和机器拼手速：你眼里的“极速”，在量化面前只是慢镜头](../101-12_l4_hft_illusion.md) | Growth | 高 | cmo | founder | 2026-03-23 周一 | 📝 草稿 | - |
 | [投资模式：切换你的策略风格](../../../5_Support_Ops/content/investment-mode-config.md) | Support | 高 | cmo | founder | 2026-03-24 周二 | 📝 草稿 | - |
-| [101-68: 通用大模型炒股，就像请郭德纲做心脏手术](../101-68_general_llm_illusion.md) | Growth | 高 | cmo | founder | 2026-03-25 周三 | 📝 草稿 | - |
+| [101-68: 别让只会写排比句的 AI，碰你的本金](../101-68_general_llm_illusion.md) | Growth | 高 | cmo | founder | 2026-03-25 周三 | 📝 草稿 | - |
 | [按需更新：好钢用在刀刃上](../../../5_Support_Ops/content/on-demand-sync.md) | Support | 高 | cmo | founder | 2026-03-26 周四 | 📝 草稿 | - |
-| [101-32: 删掉你的持仓成本线](../101-32_stateless_execution.md) | Growth | 高 | cmo | founder | 2026-03-27 周五 | 📝 草稿 | - |
+| [101-100: 开篇——量化进化的“上帝视角”](../101-100_maturity_prologue.md) | Growth | 高 | cmo | founder | 2026-03-27 周五 | 📝 草稿 | - |
+| [101-101: 择时——像发牌员一样思考，而不是赌客](../101-101_quant_trinity_timing.md) | Growth | 高 | cmo | founder | 2026-03-27 周五 | 📝 草稿 | - |
+| [101-102: 交易管理——为什么“状态”是财富的分水岭](../101-102_quant_trinity_management.md) | Growth | 高 | cmo | founder | 2026-03-27 周五 | 📝 草稿 | - |
+| [101-103: 交易执行——别在壕沟里与加特林机枪肉搏](../101-103_quant_trinity_execution.md) | Growth | 高 | cmo | founder | 2026-03-27 周五 | 📝 草稿 | - |
+| [101-104: L0级——凭直觉交易，是在浓雾中盲目狂奔](../101-104_maturity_l0_discretionary.md) | Growth | 高 | cmo | founder | 2026-03-27 周五 | 📝 草稿 | - |
+| [101-105: L1级——看指标提示，是盯着后视镜开车](../101-105_maturity_l1_indicator.md) | Growth | 高 | cmo | founder | 2026-03-27 周五 | 📝 草稿 | - |
+| [101-106: L2级——系统化规则，是从“武功秘籍”到“精密仪器”](../101-106_systematic_rules_l2.md) | Growth | 高 | cmo | founder | 2026-03-27 周五 | 📝 草稿 | - |
+| [101-107: L3级——系统化组合投资，是舰队司令部的排兵布阵](../101-107_institutional_portfolio_l3.md) | Growth | 高 | cmo | founder | 2026-03-27 周五 | 📝 草稿 | - |
+| [101-108: L4级——极硬量化，是物理层面的毫秒之战](../101-108_hard_quant_l4.md) | Growth | 高 | cmo | founder | 2026-03-27 周五 | 📝 草稿 | - |
+| [101-109: 结篇——寻找你的量化绿洲](../101-109_maturity_epilogue.md) | Growth | 高 | cmo | founder | 2026-03-27 周五 | 📝 草稿 | - |
+| [101-32: 忘了你的买入价：市场根本不在乎你亏了多少](../101-32_stateless_execution.md) | Growth | 高 | cmo | founder | 2026-03-27 周五 | 📝 草稿 | - |
 | [101-59: 赚钱了也不代表你对了](../101-59_mfe_truth.md) | Growth | 高 | cmo | founder | 2026-03-30 周一 | 📝 草稿 | - |
 | [模型层级划分：Pro 版与基础版 AI 引擎切流说明](../../../5_Support_Ops/content/model-tiers-diff.md) | Support | 高 | cmo | founder | 2026-03-31 周二 | 📝 草稿 | - |
 | [101-13: 为什么“预测明天涨停”是最大的智商税？](../101-13_prediction_tax.md) | Growth | 高 | cmo | founder | 2026-04-01 周三 | 📝 草稿 | - |
 | [双轨制：前台生产线，后台实验线](../../../5_Support_Ops/content/dual-lane-architecture.md) | Support | 高 | cmo | founder | 2026-04-02 周四 | 📝 草稿 | - |
-| [101-14: 慢即是快：盘后计算 (EOD) 才是终极武器](../101-14_eod_edge.md) | Growth | 高 | cmo | founder | 2026-04-03 周五 | 📝 草稿 | - |
+| [101-14: 别被分时图绑架：为什么“不盯盘”反而避开了大跌？](../101-14_eod_edge.md) | Growth | 高 | cmo | founder | 2026-04-03 周五 | 📝 草稿 | - |
 
 ## ✅ 已通过
 
@@ -131,7 +141,7 @@
 
 ## 🚀 已发布
 
-- 已发布资产总数：65
+- 已发布资产总数：64
 - 系统识别公众号已发布：18 篇
 - 已确认公众号前线基线：17 篇
 - 看板优先展示公众号已发布内容，其次补充仅网站上线的内容；完整清单请看主索引。
