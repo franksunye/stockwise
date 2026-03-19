@@ -190,6 +190,8 @@ date: "YYYY-MM-DD"
 category: "The Mind" | "The Method" | "The Money" | "The Machine"
 funnel_stage: "TOFU" | "MOFU" | "BOFU"
 rhythm: "Hero" | "Hub" | "Hygiene"
+source_docs:
+  - "docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md" # 必须且强制绑定底层战略依据
 image: "/images/learn/{slug}.png"
 image_prompt: "这里保留当时生成图片的 prompt，作为资产备份"
 publish:
@@ -222,3 +224,13 @@ publish:
 1. 回到对应的 Markdown 文件，将其 Frontmatter 中的 `publish` 节点对应的平台状态修改为 `published`，并粘贴发文链接 `url`。
 2. 直接向我（AI）呼叫：**“运行 /cmo-sync”**。
 3. AI 助理将自动扫描全部 Markdown 资产，并使用最新数据刷新 `docs/4_Growth_Ops/content/README.md` CMO 看板。
+
+---
+
+## 10. 双向内容溯源与防腐化 (Content Traceability & Governance)
+
+外发内容绝不可以成为没有底层逻辑支撑的“孤儿营销”。StockWise 强制要求实施 **Docs-as-Code 级别的双向溯源矩阵**：
+
+1. **锚点强制绑定 (Source Docs)**：所有外发的 101 文章和 Support 客服文档，其 YAML Frontmatter 中必须包含 `source_docs` 字段，指向 `0_Strategy` 或 `1_Engineering` 中的底层逻辑/战略文件。
+2. **自动化防腐化审计 (/content-audit)**：当底层逻辑被更新时，通过运行 `/content-audit` 快捷指令（直接向 AI 呼叫），系统将执行审计脚本。
+3. **上帝视角矩阵**：审计完毕后，系统将自动生成/刷新 `docs/4_Growth_Ops/54_Content_Traceability_Matrix.md`。该矩阵将揭露所有“一旦底层战略更新，外部文案必须同步重写 (Outdated)”的情况，以及“毫无外部内容输出的闲置内部优质资产 (Under-utilized IP)”。
