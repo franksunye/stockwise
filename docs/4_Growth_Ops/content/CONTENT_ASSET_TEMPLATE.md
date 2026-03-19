@@ -19,6 +19,7 @@ content_type: "article" # article | faq | guide | campaign | glossary | update
 canonical_role: "canonical" # canonical | derivative
 category: ""
 funnel_stage: "TOFU" # TOFU | MOFU | BOFU
+campaign_role: "" # hook | bridge | conversion
 campaign: ""
 source_docs:
   - docs/...
@@ -45,6 +46,27 @@ content_lifecycle:
 website:
   enabled: true
   surface: "learn" # learn | support | campaign | hidden
+image: ""
+images:
+  cover: ""
+  body: []
+  cards: []
+image_specs:
+  cover: "1200x675" # 16:9, wechat/headline cover
+  body: "1080x720" # 3:2, inline reading rhythm
+  card: "1080x1440" # 3:4, xiaohongshu/social card
+image_prompts:
+  cover: ""
+derivative_guidance:
+  body: []
+  cards: []
+visual_strategy:
+  concept_core: ""
+  generation_mode: "cover_first" # cover_first | independent
+  derivation_rule:
+    body: "same_world" # same_world | derived_from_cover | independent
+    cards: "derived_from_cover" # derived_from_cover | same_world | independent
+visual_style_prefix: "Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel."
 distribution:
   wechat:
     enabled: true
@@ -74,6 +96,75 @@ distribution:
 - `workflow.target_publish_date`
 - `website.enabled`
 - `distribution.wechat.status`
+
+推荐补齐：
+
+- `campaign_role`
+
+## 图片命名规范
+
+建议所有内容图片都按“文章 slug + 图片角色”命名，避免后期混乱。
+
+示例：
+
+- `101-68_general_llm_illusion_cover.png`
+- `101-68_general_llm_illusion_body_1.png`
+- `101-68_general_llm_illusion_body_2.png`
+- `101-68_general_llm_illusion_card_1.png`
+- `101-68_general_llm_illusion_card_2.png`
+
+固定角色：
+
+- `cover`
+- `body_1`
+- `body_2`
+- `card_1`
+- `card_2`
+
+默认建议：
+
+- 每篇至少有 `cover`
+- 正文长文默认配 `body_1`、`body_2`
+- 有跨平台分发需求时补 `card_1`
+- 强传播文章可再补 `card_2`
+
+## 生成一致性规范
+
+不要把一篇文章的 `cover / body / cards` 当成 3 套独立图片。
+
+默认生成方式：
+
+1. 先生成 `cover`，作为整篇文章的视觉母版
+2. 再把选定的 `cover` 作为参考图，派生 `body`
+3. `cards` 优先从 `cover` 派生，而不是完全重新生成
+
+推荐默认值：
+
+- `generation_mode: "cover_first"`
+- `derivation_rule.body: "same_world"`
+- `derivation_rule.cards: "derived_from_cover"`
+
+字段语义：
+
+- `image_prompts.cover`
+  只用于生成母版封面，是文生图主提示词
+- `derivative_guidance.body`
+  不是新的独立 prompt，而是“参考我给的 cover 图片，保持一致，只做局部延展”的派生指令
+- `derivative_guidance.cards`
+  不是新的独立 prompt，而是“参考我给的 cover 图片，改成竖版传播卡”的派生指令
+
+推荐写法：
+
+```yaml
+image_prompts:
+  cover: "..."
+derivative_guidance:
+  body:
+    - "Use the provided cover image as the visual reference. Keep the same subject, palette, and emotional world. Create a closer supporting scene..."
+    - "Use the provided cover image as the visual reference. Preserve the same metaphor and materials. Extend the same world..."
+  cards:
+    - "Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame..."
+```
 
 ## 团队使用方式
 

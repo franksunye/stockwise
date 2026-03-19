@@ -47,6 +47,16 @@ const PRIORITY_LABELS = {
   medium: '中',
   low: '低'
 };
+const CAMPAIGN_ROLE_LABELS = {
+  hook: '破圈钩子',
+  bridge: '信任桥梁',
+  conversion: '转化承接'
+};
+const REVIEW_PRIORITY_LABELS = {
+  review_first: '建议先审',
+  review_next: '次优先审',
+  ready_later: '基本可发'
+};
 const CHANNEL_LABELS = {
   website: '网站',
   wechat: '公众号',
@@ -291,10 +301,12 @@ function normalizeContentItem(filePath, sourceRootName) {
     canonicalRole: meta.canonical_role || 'canonical',
     category: meta.category || 'Uncategorized',
     funnelStage: meta.funnel_stage || 'Unknown',
+    campaignRole: meta.campaign_role || '',
     campaign: meta.campaign || '',
     sourceDocs: Array.isArray(meta.source_docs) ? meta.source_docs : [],
     traceabilityStatus: meta.traceability?.status || (Array.isArray(meta.source_docs) && meta.source_docs.length > 0 ? 'healthy' : 'missing'),
     workflowStage: normalizeStage(meta, distribution),
+    reviewPriority: meta.workflow?.review_priority || '',
     owner: meta.workflow?.owner || '',
     reviewer: meta.workflow?.reviewer || '',
     priority: meta.workflow?.priority || 'medium',
@@ -317,6 +329,14 @@ function normalizeContentItem(filePath, sourceRootName) {
     websiteSurface: meta.website?.surface || (sourceRootName === 'support' ? 'support' : 'learn'),
     distribution
   };
+}
+
+function formatCampaignRole(role) {
+  return CAMPAIGN_ROLE_LABELS[role] || '-';
+}
+
+function formatReviewPriority(priority) {
+  return REVIEW_PRIORITY_LABELS[priority] || '-';
 }
 
 function getDisplayDate(item) {
@@ -400,6 +420,7 @@ function renderMasterRegistry(items, generatedAt) {
     item.contentSource === 'growth' ? 'Growth' : 'Support',
     item.contentType,
     item.funnelStage,
+    formatCampaignRole(item.campaignRole),
     STAGE_LABELS[item.workflowStage] || item.workflowStage,
     getDisplayDate(item),
     formatChannelStatus(item.distribution.website),
@@ -418,7 +439,7 @@ function renderMasterRegistry(items, generatedAt) {
   output += `[_Change Impact_](${getRelativePath(CHANGE_IMPACT_FILE, MASTER_FILE)}) · `;
   output += `[_External Maintenance_](${getRelativePath(EXTERNAL_MAINTENANCE_FILE, MASTER_FILE)})\n\n`;
   output += markdownTable(
-    ['标题', '来源', '类型', '漏斗', '主流程', '关键日期', '网站', '公众号', '最近动作'],
+    ['标题', '来源', '类型', '漏斗', '战役角色', '主流程', '关键日期', '网站', '公众号', '最近动作'],
     rows
   );
   output += '\n';
@@ -442,11 +463,13 @@ function renderPipelineBoard(items, generatedAt) {
     }
 
     output += markdownTable(
-      ['标题', '来源', '漏斗', '优先级', 'Owner', 'Reviewer', '目标日期', '公众号', '阻塞原因'],
+      ['标题', '来源', '漏斗', '战役角色', '审核优先级', '优先级', 'Owner', 'Reviewer', '目标日期', '公众号', '阻塞原因'],
       stageItems.map((item) => [
         itemLink(item, 'pipeline'),
         item.contentSource === 'growth' ? 'Growth' : 'Support',
         item.funnelStage,
+        formatCampaignRole(item.campaignRole),
+        formatReviewPriority(item.reviewPriority),
         PRIORITY_LABELS[item.priority] || item.priority,
         item.owner || '-',
         item.reviewer || '-',
@@ -496,7 +519,7 @@ function renderPipelineBoard(items, generatedAt) {
   return output;
 }
 
-function getNextWeekRange() {
+function getNextFourWeekRange() {
   const now = new Date();
   const day = now.getDay();
   const daysUntilNextMonday = day === 0 ? 1 : 8 - day;
@@ -506,7 +529,7 @@ function getNextWeekRange() {
   start.setHours(0, 0, 0, 0);
 
   const end = new Date(start);
-  end.setDate(start.getDate() + 6);
+  end.setDate(start.getDate() + (4 * 7) - 1);
   end.setHours(23, 59, 59, 999);
 
   return { start, end };
@@ -518,12 +541,13 @@ function isWithinRange(date, start, end) {
 }
 
 function renderNextReleaseBoard(items, generatedAt) {
-  const { start, end } = getNextWeekRange();
+  const { start, end } = getNextFourWeekRange();
   const campaignItems = sortByTargetDateThenTitle(
     items.filter(
       (item) =>
         item.campaign === 'wechat_4_week_sprint_2026q2' &&
-        item.distribution.wechat?.enabled
+        item.distribution.wechat?.enabled &&
+        isWithinRange(item.targetPublishDateParsed, start, end)
     )
   );
 
@@ -551,22 +575,24 @@ function renderNextReleaseBoard(items, generatedAt) {
     })
   );
 
-  let output = '# 下周发布队列 (Next Release Queue)\n\n';
+  let output = '# 未来 4 周发布队列 (Next 4-Week Release Queue)\n\n';
   output += `> 自动生成时间：${generatedAt}\n`;
-  output += `> 下周窗口：${formatDateWithWeekday(start)} 至 ${formatDateWithWeekday(end)}\n`;
-  output += '> 说明：本视图分成两层。第一层展示未来 4 周公众号战役排期；第二层展示下周已经达到执行条件的操作清单。\n\n';
+  output += `> 规划窗口：${formatDateWithWeekday(start)} 至 ${formatDateWithWeekday(end)}\n`;
+  output += '> 说明：本视图分成两层。第一层展示未来 4 周公众号战役排期；第二层展示窗口内已经达到执行条件的操作清单。\n\n';
 
   output += '## 未来 4 周公众号战役排期\n\n';
   if (campaignItems.length === 0) {
     output += '- 当前无已编入战役的公众号内容\n\n';
   } else {
     output += markdownTable(
-      ['目标日期', '标题', '来源', '漏斗', '主流程', 'Owner', 'Reviewer', '公众号状态'],
+      ['目标日期', '标题', '来源', '漏斗', '战役角色', '审核优先级', '主流程', 'Owner', 'Reviewer', '公众号状态'],
       campaignItems.map((item) => [
         formatDateWithWeekday(item.targetPublishDate) || 'N/A',
         itemLink(item, 'next'),
         item.contentSource === 'growth' ? 'Growth' : 'Support',
         item.funnelStage,
+        formatCampaignRole(item.campaignRole),
+        formatReviewPriority(item.reviewPriority),
         STAGE_LABELS[item.workflowStage] || item.workflowStage,
         item.owner || '-',
         item.reviewer || '-',
@@ -581,11 +607,13 @@ function renderNextReleaseBoard(items, generatedAt) {
     output += '- 当前无符合条件的内容\n\n';
   } else {
     output += markdownTable(
-      ['标题', '来源', '漏斗', '主流程', '目标日期', 'Owner', 'Reviewer', '公众号状态'],
+      ['标题', '来源', '漏斗', '战役角色', '审核优先级', '主流程', '目标日期', 'Owner', 'Reviewer', '公众号状态'],
       readyForWechat.map((item) => [
         itemLink(item, 'next'),
         item.contentSource === 'growth' ? 'Growth' : 'Support',
         item.funnelStage,
+        formatCampaignRole(item.campaignRole),
+        formatReviewPriority(item.reviewPriority),
         STAGE_LABELS[item.workflowStage] || item.workflowStage,
         formatDateWithWeekday(item.targetPublishDate) || 'N/A',
         item.owner || '-',
@@ -601,11 +629,13 @@ function renderNextReleaseBoard(items, generatedAt) {
     output += '- 当前无符合条件的内容\n\n';
   } else {
     output += markdownTable(
-      ['标题', '来源', '漏斗', '主流程', '目标日期', '公众号状态'],
+      ['标题', '来源', '漏斗', '战役角色', '审核优先级', '主流程', '目标日期', '公众号状态'],
       scheduledForWechat.map((item) => [
         itemLink(item, 'next'),
         item.contentSource === 'growth' ? 'Growth' : 'Support',
         item.funnelStage,
+        formatCampaignRole(item.campaignRole),
+        formatReviewPriority(item.reviewPriority),
         STAGE_LABELS[item.workflowStage] || item.workflowStage,
         formatDateWithWeekday(item.targetPublishDate) || 'N/A',
         formatChannelStatus(item.distribution.wechat)

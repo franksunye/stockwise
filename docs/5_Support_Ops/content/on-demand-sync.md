@@ -9,6 +9,7 @@ lastUpdated: "2026-03-09"
 source_docs:
   - docs/1_Engineering/32_Frontend_Network_Optimization_Zero_Redundancy_20260318.md
 funnel_stage: "BOFU"
+campaign_role: "conversion"
 campaign: "wechat_4_week_sprint_2026q2"
 date: "2026-03-19"
 traceability:
@@ -19,7 +20,7 @@ workflow:
   owner: "cmo"
   reviewer: "founder"
   priority: "high"
-  target_publish_date: "2026-03-26"
+  target_publish_date: "2026-04-22"
   last_action_at: "2026-03-19"
   blocked_reason: ""
 maintenance:

@@ -32,12 +32,29 @@ This skill integrates the **ZISO World-Class Playbook** (Philosophical Depth) wi
 **Core Rule: Professionalism is the goal; accessibility is the bridge.**
 - **✅ Best Practices**:
     - **Metaphor First (隐喻先行)**: Use intuitive metaphors (e.g., "Dealer", "Fishing Rod Bend", "Scales") *before* defining technical terms (MFE, MAE, R-multiples).
+    - **WeChat Article Density (公众号正文密度)**: Write like a strong Chinese long-form public account article, not like slogan cards, poetry, or a teleprompter script. Keep paragraph continuity; reserve short standalone lines only for decisive turns or sharp conclusions.
     - **Pure Chinese Flow (纯净中文流)**: Remove bilingual terms (e.g., `(Management)`) from the main body. Keep the prose naturally Chinese to avoid reading "stutters."
     - **Authority Descriptors (权威短注)**: Use brief inline descriptions for institutions and authors (e.g., "华尔街顶级巨头 Citadel", "头寸管理大师 Van Tharp") to build instant trust.
     - **认知对齐 (行话指南)**：不再使用传统的“附录”标题，而是使用如“认知对齐：行话指南”这类更具极客感且符合用户心智的标题。Use a standardized `<small>` footer glossary for all English technical terms and institution/author details.
     - **Direct Impact**: First sentence must draw blood.
     - **Native Lingo**: Use "讲真", "割肉", "接盘侠", "关灯吃面".
     - **Short & Sharp**: Use periods to force a cold, rhythmic pace.
+    - **Not Closed-Door Writing (避免闭门造车)**: Before revising a live-facing article, check current Chinese internet discourse and hot expressions around the topic. Use contemporary user-facing language and examples when they sharpen relevance, but always anchor conclusions back to StockWise strategy docs.
+    - **Role-Aware Editing (按战役角色改稿)**: `hook` articles should prioritize immediacy, user pain, and spreadability; `bridge` articles should clarify maps, frameworks, and level differences; `conversion` articles should land on product mechanics, boundaries, and actionability.
+    - **Keep the Blade, Remove the Gimmick (保留锋利，去掉花活)**: Strong openings are encouraged, but body paragraphs should read like an article, not fragmented copywriting. If a draft starts reading like verse, compress it back into normal article paragraphs.
+    - **10w+ Standard (10w+ 生产标准)**:
+        - Do not optimize only for correctness; optimize for click, retention, recognition, and forwarding.
+        - Title must work for strangers in WeChat discovery, not just existing users.
+        - The first 150 Chinese characters must quickly hit a real user action, embarrassment, fear, or familiar bad habit.
+        - Every article should contain 2-3 “传播单元”: screenshot-worthy lines, quotable turns, or identity-level conclusions people want to forward.
+        - Prefer real scenes first, theory second. Start from behaviors like asking AI for tomorrow's涨跌, staring at分时图, waiting to解套, or刷新闻安慰持仓.
+        - Prepare multiple title/opening candidates when reach matters; assume iteration beats first-draft instinct.
+    - **WeChat Discovery Awareness (适配看一看传播)**:
+        - Strong copy must still work when the reader does not know ZISO.
+        - Ask: would this title earn a click from a stranger, and would the first screen earn another 10 seconds?
+    - **Support Boundary (Support 文体边界)**:
+        - `Support` content is not written like `101`.
+        - `Support` pieces should read like concise help docs, system explainers, or product notes: short, direct, concrete, low-flourish.
 
 ### 2.2 Visuals: "Silent Math" (沉默的数学)
 - **Palette**: Deep Void (`#050508`), Indigo-500 (`#6366f1`), Rose-500 (`#f43f5e`), Emerald-500 (`#10b981`).
@@ -49,9 +66,16 @@ This skill integrates the **ZISO World-Class Playbook** (Philosophical Depth) wi
 
 ### 3.1 Content Production Workflow
 1. Map request to Funnel & Rhythm.
-2. Draft copy using high-stance, anti-generic voice.
-3. Define visual direction using the Silent Math engine.
-4. **Docs-as-Code Integration**: Use Markdown frontmatter as the source of truth for all status and metadata.
+2. Read source docs and identify the hard strategic boundary or product truth the article must not violate.
+3. Check current Chinese web discourse for the topic before revising public-facing copy; absorb hot user language, product names, and misconceptions if relevant.
+4. Draft or revise copy using high-stance, anti-generic voice and WeChat-article paragraph density.
+5. If the article is intended to compete for broad reach, explicitly rework:
+   - 3 title options
+   - first-screen opening
+   - 2-3传播单元
+   - a clearer reason to share/save/follow
+6. Define visual direction using the Silent Math engine.
+7. **Docs-as-Code Integration**: Use Markdown frontmatter as the source of truth for all status and metadata.
 
 ### 3.2 Metadata (Frontmatter) Rules
 - **workflow.\***: Main pipeline tracking.

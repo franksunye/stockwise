@@ -1,9 +1,21 @@
 ---
-title: "幸存者偏差：你看到的“股神”，只是赌场里刚好连赢十把的人"
+title: "幸存者偏差：你刷到的那些“股神”，很多只是运气暂时还没用完"
+subtitle: "你看到的是赢家截图，看不到的是同一套方法下大多数沉默离场的人"
 source_docs:
   - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
 category: "Growth 101"
 funnel_stage: "TOFU"
+campaign_role: "hook"
+timeliness_role: "timely_candidate"
+timely_anchor: "社交媒体股神/收益截图/短视频造神"
+viral_priority: "watchlist"
+headline_alternatives:
+  - "满屏股神和收益截图，很多只是运气好的人刚好还没翻车"
+  - "你刷到的那些“老师”，很多不是强，只是暂时还没输出来"
+cover_lines:
+  - "你看到的是股神截图，看不到的是同一套玩法下沉默离场的大多数人。"
+  - "很多被吹上天的方法，只是运气暂时还没用完。"
+share_copy: "现在社交媒体上最不缺的就是“老师”和收益图，这篇讲的就是为什么你看到的常常不是规律，而只是被放大的幸存者。"
 campaign: "wechat_4_week_sprint_2026q2"
 rhythm: "Hub"
 traceability:
@@ -11,6 +23,7 @@ traceability:
   last_reviewed_at: "2026-03-19"
 workflow:
   stage: "reviewing"
+  review_priority: "ready_later"
   owner: "cmo"
   reviewer: "founder"
   priority: "high"
@@ -23,45 +36,98 @@ maintenance:
 website:
   enabled: true
   surface: "learn"
-image: "/images/learn/101-42_survivorship_bias.png"
-image_prompt: "A minimalist Swiss-style design of a single bright dot floating above a sea of buried, semi-transparent outlines. Dark Mode (#050508). Accent: Emerald (#10b981). NO text."
+image: "/images/learn/101-42_survivorship_bias_cover.png"
+images:
+  cover: "/images/learn/101-42_survivorship_bias_cover.png"
+  body:
+    - "/images/learn/101-42_survivorship_bias_body_1.png"
+    - "/images/learn/101-42_survivorship_bias_body_2.png"
+  cards:
+    - "/images/learn/101-42_survivorship_bias_card_1.png"
+image_specs:
+  cover: "1200x675"
+  body: "1080x720"
+  card: "1080x1440"
+image_prompts:
+  cover: "An editorial image of a social feed where one bright winning profit screenshot is highlighted while countless dim failed samples disappear into the background. Feels like selective visibility and illusion. Realistic interface-inspired composition without readable text."
+derivative_guidance:
+  body:
+    - "Use the provided cover image as the visual reference. Keep the same selective-visibility world, the same highlighted winner, and the same illusion-driven emotional tone. Create a supporting scene that feels more crowd-driven and social."
+    - "Use the provided cover image as the visual reference. Preserve the same feed-based illusion and the same realistic interface-inspired world. Extend it into a supporting scene where envy-inducing profit visuals hide losses beneath the surface."
+  cards:
+    - "Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame. Preserve one bright winner against a field of invisible losers."
+visual_strategy:
+  concept_core: "你看到的是股神，没看到的是沉默离场的人"
+  image_type: "Editorial"
+  image_count: 4
+  primary_image_model: "gemini"
+  generation_mode: "cover_first"
+  derivation_rule:
+    body: "same_world"
+    cards: "derived_from_cover"
+  image_breakdown:
+    cover: 1
+    body: 2
+    social_cards: 1
+  reader_hook: "先让人感受到‘满屏股神’的假繁荣。"
+visual_style_prefix: "Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel."
 distribution:
   wechat:
     enabled: true
     status: "draft"
 ---
 
-# 幸存者偏差：你看到的“股神”，只是赌场里刚好连赢十把的人
+# 幸存者偏差：你刷到的那些“股神”，很多只是运气暂时还没用完
 
-> *"在有着一亿参与者的猴子掷硬币大赛中，必定有一只猴子能连续抛出 20 次正面，然后被媒体封为『神猴』。"*
+> *"社交媒体最擅长做的一件事，就是把少数吃到肉的人，包装成谁学谁会的答案。 "*
 
-如果你在社交媒体或股票社区里冲浪，你很容易陷入极度的焦虑：
-似乎所有人都在昨天满仓擒获了地天板，似乎所有人都在币圈实现了财务自由。晒出的收益截图动辄 300%、500%。
+很多人一刷股票社区，就会产生一种很强的错觉：好像别人总能提前埋伏到龙头，总能抓到涨停，总能在最热的时候站在正确一边。
 
-你开始疯狂地购买他们的课程，模仿他们的“左侧打板战法”，结果一上手就被市场一击必杀。
+晒出来的，总是高收益截图、漂亮战绩、极限翻倍故事。久而久之，你很容易开始怀疑：是不是只有我总在错过，只有我一上手就挨打？
 
-欢迎来到**幸存者偏差**的剧场。
+这就是幸存者偏差最典型的陷阱。
 
----
+## 你看到的，往往只是留下来的人
 
-## 🪦 沉默的弹坑
+幸存者偏差并不复杂。它真正可怕的地方在于：**你看到的样本，本来就不是全样本。**
 
-你只看到了那万分之一刚好踩中彩票的幸运儿，**却没看到在他们脚下，踩着九万九千九百九十九具因为同样的高危操作而爆仓的尸体。** 死人是不会发朋友圈的，爆仓的人早已默默删掉了 App。
+一个高波动、高风险的玩法，只要参与的人够多，理论上总会有人在一段时间里连续押对、连续爆赚、连续看起来像天才。问题在于，这些人更容易被看见、更愿意发声、也更容易被包装成“方法有效”的证明。
 
-那些所谓的“妖股战法”、“首阴反包”，在极个别样本上展示出了惊人的暴利，但在大数定律的回测下，其长期期望值其实是负数。
+而那些在同样方法里亏掉、爆仓、沉默退出的人，不会在同样的位置上被你看到。
 
----
+于是很多人最后学到的，不是一个被完整验证过的方法，而是少数幸存案例留下来的幻觉。
 
-## 📉 ZISO 的冷酷除魅
+## 为什么“看起来有人赚到了”根本不够
 
-这就解释了为什么 ZISO 的策略永远显得那么“平庸”和“冰冷”。
-我们不追求在一天内抓到 20% 的所谓大牛股。我们追求的是，在一万次交易样本的回溯中，系统能够保持一个稳定向上的数学期望。
+这是散户最容易踩的坑之一。
 
-*   放弃对爆发性“神话”的崇拜。
-*   屏蔽社区里的暴富噪音。
-*   坚持执行那些被证明有效的低赔率、高盈亏比机械法则。
+一套方法只要曾经让少数人赚到大钱，就很容易显得特别有吸引力。可在交易里，“曾经有人靠它赚到”远远不等于“它长期值得复制”。因为真正该问的问题不是：有没有赢家，而是：
 
-真正的复利不是烟花，它是流水滴石穿。在丛林里，那些活得最久的老乌龟，才是最终吃掉所有猎物尸体的人。
+- 这套方法在更大样本里表现如何？
+- 它的失败率、回撤、爆掉的比例有多高？
+- 赚钱的人，到底是方法稳定，还是运气刚好站在他那边？
+
+如果这些问题没有被回答，光看几个赢家案例，得到的往往不是规律，而是幻觉。
+
+## 幸存者偏差为什么会把人带向更危险的地方
+
+因为它不只是让你看错别人，还会让你看错自己。
+
+你一旦开始用少数赢家的故事来定义“什么才算厉害”，就很容易高估高风险打法的价值，低估稳定方法的意义。那些慢一点、稳一点、不那么抓眼球的方法，会显得不够传奇；而那些高波动、高刺激、极少数人爆赚的玩法，却会不断被包装成“真正的高手都在这样做”。
+
+可市场里最贵的，从来不是短期神话，而是长期可复制。
+
+## ZISO 为什么看起来不够“传奇”
+
+因为我们不打算用少数极端样本来证明自己。
+
+ZISO 的判断标准从来不是“有没有一次特别惊艳的收益截图”，而是这套逻辑放进更长时间、更大样本、更复杂环境之后，能不能依然站得住。我们更关心的是长期期望、纪律约束、错误控制和稳定性，而不是一两次足够拿来传播的爆发故事。
+
+这也是为什么，真正成熟的系统常常看起来没有那么戏剧化。它不靠少数传奇样本建立信任，而是靠大量不那么刺激、但更可复制的结果慢慢积累可信度。
+
+所以幸存者偏差这篇文章真正想提醒你的，不是“外面没有高手”，而是：**不要把被看见的赢家，误当成完整的真相。**
+
+你看到的是故事，未必是分布。你看到的是幸存者，未必是规律。
 
 ---
 
@@ -71,4 +137,3 @@ distribution:
 - **期望值**：Expected Value
 - **大数定律**：Law of Large Numbers
 - **盈亏比**：Risk/Reward Ratio
-
