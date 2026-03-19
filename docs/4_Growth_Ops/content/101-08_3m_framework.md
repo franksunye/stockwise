@@ -2,12 +2,17 @@
 title: "101-08: 3M 框架 (Mind, Method, Money)"
 subtitle: "交易成功的金字塔：你缺了哪一块？"
 date: "2026-02-04"
-category: "The Mind"
 image: "/images/learn/3m_framework.png"
 image_prompt: "**Concept**: A conceptual 3D illustration of the 3M Framework. **Style**: Swiss Design, Geometric, Minimalist, Clean, Dark Mode (#050508). **Subject**: An equilateral triangle floating in void. Each side of the triangle is composed of distinct semi-transparent materials. **Action**: The triangle is spinning slowly, emitting a subtle Indigo glow. **Materials**: Glass, Matte plastic, and Polished metal. **Colors**: Indigo (#6366f1) as the core energy. **Constraints**: NO text. NO blur. Center composition."
 source_docs:
   - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
   - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
+category: "Growth 101"
+funnel_stage: "MOFU"
+publish:
+  wechat:
+    status: "published"
+
 ---
 
 # 3M 框架：交易金字塔的三个支点

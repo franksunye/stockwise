@@ -1,9 +1,14 @@
 ---
 title: "投研决议：多维度的共识"
-category: "AI 智慧与分析"
 lastUpdated: "2026-03-18"
 source_docs:
   - docs/1_Engineering/25_AICouncil_Collaboration_Routes_20260318.md
+category: "Engine"
+funnel_stage: "BOFU"
+publish:
+  wechat:
+    status: "published"
+
 ---
 
 在个股详情页的"投研决议" (AI Council) 面板中，你可以看到来自多位不同背景分析师的意见，分为两种类型：

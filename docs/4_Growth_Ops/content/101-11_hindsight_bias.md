@@ -2,12 +2,17 @@
 title: "101-11: 事后聪明偏误 (Hindsight Bias)"
 subtitle: "为什么“早知道”是交易中最昂贵的幻觉？"
 date: "2026-02-04"
-category: "The Mind"
 image: "/images/learn/hindsight_bias.png"
 image_prompt: "**Concept**: A conceptual 3D illustration of Looking Backward vs Reality. **Style**: Swiss Design, Geometric, Minimalist, Clean, Dark Mode (#050508). **Subject**: A single Indigo path that is straight and clear when looking back, but splits into a chaotic, foggy maze of Grey lines when looking forward. **Action**: A glowing white light is illuminating the 'clear' back-path. **Materials**: Glass-like paths, volumetric fog. **Colors**: Indigo (#6366f1) for the past, Slate Grey for the future. **Constraints**: NO text. NO blur. Center composition."
 source_docs:
   - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
   - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
+category: "Growth 101"
+funnel_stage: "TOFU"
+publish:
+  wechat:
+    status: "published"
+
 ---
 
 # 事后聪明：“复盘大师”的诅咒

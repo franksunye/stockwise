@@ -2,12 +2,17 @@
 title: "101-03: 厌恶损失 (Loss Aversion)"
 subtitle: "为什么我们会死扛亏损，却拿不住利润？"
 date: "2026-02-04"
-category: "The Mind"
 image: "/images/learn/loss_aversion.png"
 image_prompt: "A split brain illustration. One side is holding a small diamond (Gain) and looks happy. The other side is holding a burning coal (Loss) of the exact same size, but looks in excruciating pain. The pain side is 2x larger than the pleasure side."
 source_docs:
   - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
   - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
+category: "Growth 101"
+funnel_stage: "TOFU"
+publish:
+  wechat:
+    status: "published"
+
 ---
 
 # 厌恶损失 (Loss Aversion)：为什么你拿不住利润，却死扛亏损？

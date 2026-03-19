@@ -1,9 +1,14 @@
 ---
 title: "策略内参：怎么看干货？"
-category: "AI 智慧与分析"
 lastUpdated: "2026-03-09"
 source_docs:
   - docs/1_Engineering/13_Quant_Engine_Architecture.md
+category: "Features"
+funnel_stage: "BOFU"
+publish:
+  wechat:
+    status: "published"
+
 ---
 
 点开个股详情页的“策略内参” (Tactical Brief)，你会看到一份自动生成的操盘手册：

@@ -1,6 +1,12 @@
 ---
 source_docs:
   - docs/2_Intelligence/22Q_Quant_Research_Framework.md
+category: "Engine"
+funnel_stage: "BOFU"
+publish:
+  wechat:
+    status: "published"
+
 ---
 
 # 共识分级定义 (Consensus Levels)

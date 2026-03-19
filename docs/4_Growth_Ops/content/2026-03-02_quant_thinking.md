@@ -2,12 +2,16 @@
 title: "量化思维入门：像工程师一样处理生活中的‘概率游戏’"
 subtitle: "放弃‘我觉得’，开始‘我测得’。普通用户如何建立自己的执行力模型。"
 date: "2026-03-02"
-category: "The Method"
-funnel_stage: "MOFU"
 rhythm: "Hub"
 image: "/images/learn/quant_logic_premium.png"
 source_docs:
   - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
+category: "Methodology"
+funnel_stage: "MOFU"
+publish:
+  wechat:
+    status: "published"
+
 ---
 
 # 量化思维：为什么优秀的决策者，看起来都像个“冷血机器人”？

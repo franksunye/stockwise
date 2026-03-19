@@ -1,6 +1,12 @@
 ---
 source_docs:
   - docs/2_Intelligence/22Q_Quant_Research_Framework.md
+category: "Growth 101"
+funnel_stage: "TOFU"
+publish:
+  wechat:
+    status: "published"
+
 ---
 
 # 系统与直觉：在暴雪中，你该相信导航还是自己的眼睛？

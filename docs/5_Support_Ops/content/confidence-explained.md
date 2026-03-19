@@ -1,9 +1,14 @@
 ---
 title: "置信度：这不是胜算，是把握"
-category: "量化逻辑与纪律"
 lastUpdated: "2026-03-09"
 source_docs:
   - docs/1_Engineering/19_Dual_Track_Decision_Architecture_Proposal.md
+category: "Data Science"
+funnel_stage: "BOFU"
+publish:
+  wechat:
+    status: "published"
+
 ---
 
 置信度 80% 并不代表 80% 会涨。
