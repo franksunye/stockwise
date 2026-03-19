@@ -8,7 +8,10 @@ const __dirname = path.dirname(__filename);
 
 // 根目录与内容目录配置
 const PROJECT_ROOT = path.resolve(__dirname, '..');
-const CONTENT_DIR = path.join(PROJECT_ROOT, 'docs', '4_Growth_Ops', 'content');
+const CONTENT_DIRS = [
+  path.join(PROJECT_ROOT, 'docs', '4_Growth_Ops', 'content'),
+  path.join(PROJECT_ROOT, 'docs', '5_Support_Ops', 'content')
+];
 const DASHBOARD_FILE = path.join(PROJECT_ROOT, 'docs', '4_Growth_Ops', 'content', 'README.md');
 
 // 支持追踪的平台列表。后续想增加平台，只需在这里添加 key 和展示名称即可。
@@ -72,7 +75,10 @@ function formatPlatformStatus(platformData) {
 
 function generateDashboard() {
   console.log('🔍 Scanning content directory...');
-  const mdFiles = getAllMarkdownFiles(CONTENT_DIR);
+  let mdFiles = [];
+  CONTENT_DIRS.forEach(dir => {
+    mdFiles = mdFiles.concat(getAllMarkdownFiles(dir));
+  });
   
   const contents = [];
 

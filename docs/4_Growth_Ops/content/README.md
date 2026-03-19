@@ -1,6 +1,6 @@
 # 📊 CMO 内容发布全局看板 (Docs-as-Code)
 
-> 自动生成时间：2026/3/19 12:48:51
+> 自动生成时间：2026/3/19 12:53:48
 > 💡 **提示**: 本看板由 `scripts/cmo_sync.mjs` 自动从各 Markdown 文件的头信息 (Frontmatter) 提取并重新渲染。
 
 | 文章标题 | 分类 (Category) | 漏斗层级 | 日期 | 公众号 | 小红书 | Twitter | 头条号 |
@@ -72,6 +72,67 @@
 | [知守宣言：在疯狂的世界里，建立你自己的冰冷要塞](101-99_the_ziso_manifesto.md) | Growth 101 | TOFU | 2026-03-19 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
 | [4 月战役大纲：ZISO 硬核降维打击矩阵 (The 'Cold Steel' Blitz)](April_Content_Matrix_Engineering_2026.md) | Growth 101 | TOFU | 2026-03-19 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
 | [March_Content_Matrix_Execution_2026](March_Content_Matrix_Execution_2026.md) | Growth 101 | TOFU | 2026-03-19 | 📝 草稿 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [投研决议：多维度的共识](../../5_Support_Ops/content/ai-council-logic.md) | Engine | BOFU | 2026-03-19 | ✅ 已发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [脉冲频率：信号强度一眼看](../../5_Support_Ops/content/ai-pulse-resonance.md) | 量化逻辑与纪律 | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [AI 分析师人设框架的边界 (Analyst Personas)](../../5_Support_Ops/content/analyst-personas.md) | Support Ops | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [Android 通知限制说明](../../5_Support_Ops/content/android-notification-limit.md) | 通知与触达 | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [拒绝“未来函数”：咱们不玩虚的](../../5_Support_Ops/content/anti-future-function.md) | 量化逻辑与纪律 | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [角标清除：别被红点牵着走](../../5_Support_Ops/content/badge-hygiene.md) | Product UI | BOFU | 2026-03-19 | ✅ 已发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [渠道分润：共同赚钱](../../5_Support_Ops/content/channel-revenue-guide.md) | 权益与增长 | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [置信度：这不是胜算，是把握](../../5_Support_Ops/content/confidence-explained.md) | Data Science | BOFU | 2026-03-19 | ✅ 已发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [共识分级定义 (Consensus Levels)](../../5_Support_Ops/content/consensus-levels.md) | Engine | BOFU | 2026-03-19 | ✅ 已发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [上下文提取：只看我想要的](../../5_Support_Ops/content/context-extraction.md) | AI Features | BOFU | 2026-03-19 | ✅ 已发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [大盘黄历图卡解读 (Daily Yellow Pages)](../../5_Support_Ops/content/daily-yellow-pages.md) | Support Ops | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [深度链接：一键直达“战场”](../../5_Support_Ops/content/deep-linking-usage.md) | 交互与导航 | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [双轨制：前台生产线，后台实验线](../../5_Support_Ops/content/dual-lane-architecture.md) | 验证与诚信 | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [绑定邮箱：唯一的“救命稻草”](../../5_Support_Ops/content/email-sync-logic.md) | 账号与安全 | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [最高级别用户环境物理隔离 (Env Isolation)](../../5_Support_Ops/content/env-isolation.md) | Support Ops | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [认错审计：出错不可怕](../../5_Support_Ops/content/failure-retrospective.md) | AI 智慧与分析 | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [四态语义验证规则（修订版）](../../5_Support_Ops/content/four-state-validation-rules.md) | 量化逻辑与纪律 | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [动作语义：进场、观察、防守、暂无信号](../../5_Support_Ops/content/four-states-semantics.md) | 量化逻辑与纪律 | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [触反馈：心跳与信号同步](../../5_Support_Ops/content/haptic-sync.md) | 量化逻辑与纪律 | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [胜率矩阵：摸清 AI 的脾气](../../5_Support_Ops/content/history-matrix-viz.md) | AI 智慧与分析 | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [沽空数据透视指南 (HK Only)](../../5_Support_Ops/content/hk-short-pressure.md) | Support Ops | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [身份护照：UserID 就是你的命](../../5_Support_Ops/content/identity-passport.md) | 账号与安全 | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [一键找回：权益瞬间同步](../../5_Support_Ops/content/identity-restore-flow.md) | 账号与安全 | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [交互优先：手感不能断](../../5_Support_Ops/content/interaction-first.md) | 交互与导航 | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [投资模式：切换你的策略风格](../../5_Support_Ops/content/investment-mode-config.md) | 交互与导航 | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [三种投资偏好如何变更量化敏感度 (Investment Mode Selection)](../../5_Support_Ops/content/investment-mode-selection.md) | Support Ops | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [邀请码系统：只接待懂纪律的人](../../5_Support_Ops/content/invitation-ops-guide.md) | 权益与增长 | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [为什么设邀请墙？(Invite Wall Rationale)](../../5_Support_Ops/content/invite-wall-rationale.md) | Support Ops | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [iOS 特供：极致跟手感](../../5_Support_Ops/content/ios-tuning.md) | 交互与导航 | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [关键价位：市场的防线](../../5_Support_Ops/content/key-levels-mapping.md) | AI 智慧与分析 | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [模型层级划分：Pro 版与基础版 AI 引擎切流说明](../../5_Support_Ops/content/model-tiers-diff.md) | Support Ops | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [T+3 验证：趋势需要时间](../../5_Support_Ops/content/multi-day-verification.md) | 验证与诚信 | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [左右滑：你的三个战场](../../5_Support_Ops/content/nav-map-logic.md) | 交互与导航 | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [通知开关：不喜欢就关了](../../5_Support_Ops/content/notification-preference.md) | 通知与触达 | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [按需更新：好钢用在刀刃上](../../5_Support_Ops/content/on-demand-sync.md) | 数据与服务保障 | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [体验期权限发放规则 (Onboarding Trial Rules)](../../5_Support_Ops/content/onboarding-trial-rules.md) | Support Ops | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [乐观更新：不用等圈圈转](../../5_Support_Ops/content/optimistic-ui-logic.md) | 数据与服务保障 | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [性能降级：省电也是战斗力](../../5_Support_Ops/content/perf-adaptation.md) | 交互与导航 | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [五级价位阵地解释系统 (Price Ladder)](../../5_Support_Ops/content/price-ladder.md) | Support Ops | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [隐私承诺：这是你的避风港](../../5_Support_Ops/content/privacy-pledge.md) | 账号与安全 | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [测测通没通：别被系统拦了](../../5_Support_Ops/content/push-debug.md) | 通知与触达 | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [数据拼接：最新指标不求人](../../5_Support_Ops/content/realtime-data-splicing.md) | 数据与服务保障 | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [兑换码：手动给权益充值](../../5_Support_Ops/content/redeem-code-usage.md) | 权益与增长 | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [双向邀请与 Pro 连贯性奖励 (Referral Mechanism)](../../5_Support_Ops/content/referral-mechanism.md) | Support Ops | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [推荐激励：有福同享](../../5_Support_Ops/content/referral-rewards.md) | 权益与增长 | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [颜色反转：戒掉“追涨杀跌”](../../5_Support_Ops/content/rsi-color-metaphor.md) | 量化逻辑与纪律 | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [反转推送：只盯“大转折”](../../5_Support_Ops/content/signal-flip-push.md) | Notifications | BOFU | 2026-03-19 | ✅ 已发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [极端容错解析：大崩盘时的降级渲染预案 (Smart Parser)](../../5_Support_Ops/content/smart-parser-ui.md) | Support Ops | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [聪明搜索：这才是量化速度](../../5_Support_Ops/content/smart-search.md) | 交互与导航 | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [智能标题：随盘面“变脸”](../../5_Support_Ops/content/smart-title-logic.md) | 量化逻辑与纪律 | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [单点对焦：别让散乱害了你](../../5_Support_Ops/content/snap-y-dynamics.md) | 交互与导航 | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [自选股容量与资源算力计算 (Stock Quota Limits)](../../5_Support_Ops/content/stock-quota-limits.md) | Support Ops | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [策略内参：怎么看干货？](../../5_Support_Ops/content/tactical-brief-guide.md) | Features | BOFU | 2026-03-19 | ✅ 已发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [Free 与 Pro：差距在哪？](../../5_Support_Ops/content/tiers-explained.md) | 权益与增长 | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [时光机模式：拒绝“马后炮”](../../5_Support_Ops/content/time-machine-feed.md) | 交互与导航 | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [错误溯源：什么是 Trace ID (Trace ID Audit)](../../5_Support_Ops/content/trace-id-audit.md) | Support Ops | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [治理控制塔：模型上线前的绝对隔离门禁 (Tradeability Tower)](../../5_Support_Ops/content/tradeability-tower.md) | Support Ops | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [认错的价值：咱们不删帖](../../5_Support_Ops/content/value-of-failure.md) | 验证与诚信 | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [验证的三种状态](../../5_Support_Ops/content/verification-states.md) | 验证与诚信 | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [推送指南：不错过每一秒](../../5_Support_Ops/content/web-push-setup.md) | 通知与触达 | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
+| [零过期数据屏障技术白皮书 (Zero-Stale Protocol)](../../5_Support_Ops/content/zero-stale-guarantee.md) | Support Ops | BOFU | 2026-03-19 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
 | [AI 除了写 PPT 还能做什么？论‘冷酷实习生’对焦虑的终极拯救](2026-03-02_ai_lifestyle.md) | The Machine | TOFU | 2026-03-02 | [✅ 已发布](https://mp.weixin.qq.com/s/eR-4uQ1tCHZt0i4x3lBwHw) | 📝 草稿 | ➖ 不发布 | ➖ 不发布 |
 | [AI 时代的决策真相：为什么‘直觉’是你最危险的敌人？](2026-03-02_breakthrough_logic.md) | The Mind | TOFU | 2026-03-02 | [✅ 已发布](https://mp.weixin.qq.com/s/7Lg6jQ8u_V1wY2a3zPqX0A) | 📝 草稿 | ➖ 不发布 | ➖ 不发布 |
 | [量化思维入门：像工程师一样处理生活中的‘概率游戏’](2026-03-02_quant_thinking.md) | Methodology | MOFU | 2026-03-02 | ✅ 已发布 | ➖ 不发布 | ➖ 不发布 | ➖ 不发布 |
