@@ -3,15 +3,7 @@ title: "101-57: 1% 准则"
 subtitle: "职业投资者的最后一套防弹衣"
 date: "2026-02-04"
 category: "The Money"
-image: "/images/learn/one_percent_rule.png"
-image_prompt: "**Concept**: Isolation of small risk. **Style**: Swiss Grid. **Subject**: A large 10x10 array of dim grey cubes. **Action**: One single cube in the corner glows intensely with Indigo (#6366f1). **Colors**: Dark contrast. **Constraints**: NO text."
-source_docs:
-  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
-  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
-funnel_stage: "TOFU"
-publish:
-  wechat:
-    status: "draft"
+image: "/images/learn/101-57_one_percent_rule_cover.png"
 ---
 
 # 1% 准则：控制亏损的“核反应堆”

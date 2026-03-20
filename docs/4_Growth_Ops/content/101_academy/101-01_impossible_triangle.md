@@ -2,20 +2,7 @@
 title: "101-01: 散户的不可能三角"
 subtitle: "为什么 90% 的散户注定亏损？"
 date: "2026-02-04"
-image: "/images/learn/impossible_triangle.png"
-image_prompt: "A minimalist isometric illustration of a triangle floating in a dark void. The three corners are labeled 'Emotion', 'Discipline', and 'Vision'. The center of the triangle is glowing red with the word 'LOSS'. Cyberpunk style, dark background, neon accents."
-source_docs:
-  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
-  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
-category: "Growth 101"
-funnel_stage: "TOFU"
-publish:
-  wechat:
-    status: "published"
-    published_at: "2026-02-17"
-    url: "https://mp.weixin.qq.com/s/IQorGEjEe7l5Aws3RGUhbA"
-    baseline: "frontline_q1_2026"
-
+image: "/images/learn/101-01_impossible_triangle_cover.png"
 ---
 
 # 散户的"不可能三角"：为什么 90% 的人注定亏损？

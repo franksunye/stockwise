@@ -3,15 +3,7 @@ title: "101-54: 仓位管理与分批建仓"
 subtitle: "不要一次性梭哈的艺术"
 date: "2026-02-04"
 category: "The Money"
-image: "/images/learn/position_sizing.png"
-image_prompt: "**Concept**: Allocation within a grid. **Style**: Swiss Geometric. **Subject**: A dark matte grid with holes. **Action**: Only 2 or 3 holes are filled with glowing Indigo (#6366f1) spheres. **Colors**: Minimalist Indigo. **Constraints**: NO text."
-source_docs:
-  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
-  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
-funnel_stage: "TOFU"
-publish:
-  wechat:
-    status: "draft"
+image: "/images/learn/101-54_position_sizing_cover.png"
 ---
 
 # 仓位管理：把你的本金当成军队

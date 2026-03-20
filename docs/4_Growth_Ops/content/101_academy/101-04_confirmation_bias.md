@@ -2,20 +2,7 @@
 title: "101-04: 确认偏误 (Confirmation Bias)"
 subtitle: "为什么你只听得进你想听的消息？"
 date: "2026-02-04"
-image: "/images/learn/confirmation_bias.png"
-image_prompt: "A person wearing VR goggles labeled 'Bullish View'. They are looking at a chart that is clearly crashing, but through the goggles, the red candles are filtered out and only green candles are visible. The background is a chaotic newsroom."
-source_docs:
-  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
-  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
-category: "Growth 101"
-funnel_stage: "TOFU"
-publish:
-  wechat:
-    status: "published"
-    published_at: "2026-02-27"
-    url: "https://mp.weixin.qq.com/s/W2rE5BNMIs3wf3YvT-V0lw"
-    baseline: "frontline_q1_2026"
-
+image: "/images/learn/101-04_confirmation_bias_cover.png"
 ---
 
 # 确认偏误 (Confirmation Bias)：你只看得到你想看的新闻

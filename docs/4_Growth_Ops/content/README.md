@@ -1,53 +1,56 @@
 # 内容运营主索引 (Content Operations Registry)
 
-> 自动生成时间：2026/3/19 23:26:42
+> 自动生成时间：2026/3/20 11:06:14
 > 说明：本索引由 `scripts/cmo_sync.mjs` 统一扫描 `4_Growth_Ops/content` 与 `5_Support_Ops/content` 生成。
 > 日期规则：已发布内容优先显示公众号真实发布日期；未发布内容显示目标发布日期。
 > 视图：[_Pipeline_](_views/pipeline.md) · [_Next Release_](_views/next-release.md) · [_Recently Updated_](_views/recently-updated.md) · [_Change Impact_](_views/change-impact.md) · [_External Maintenance_](_views/external-maintenance.md)
 
 | 标题 | 来源 | 类型 | 漏斗 | 战役角色 | 主流程 | 关键日期 | 网站 | 公众号 | 最近动作 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| [101-06: 禀赋效应 (Endowment Effect)](101_academy/101-06_endowment_effect.md) | Growth | article | TOFU | - | ✍️ 生产中 | 2026-02-04 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
-| [101-09: 为什么聪明人会失败？](101_academy/101-09_why_smart_people_fail.md) | Growth | article | TOFU | - | ✍️ 生产中 | 2026-02-04 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
-| [101-10: 离场休息的艺术](101_academy/101-10_sitting_on_hands.md) | Growth | article | TOFU | - | ✍️ 生产中 | 2026-02-04 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
-| [101-21: RSI 指标新解](101_academy/101-21_rsi_decoded.md) | Growth | article | TOFU | - | ✍️ 生产中 | 2026-02-04 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
-| [101-22: 均线系统 (Moving Averages)](101_academy/101-22_moving_averages.md) | Growth | article | TOFU | - | ✍️ 生产中 | 2026-02-04 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
-| [101-23: MACD (动能之王)](101_academy/101-23_macd.md) | Growth | article | TOFU | - | ✍️ 生产中 | 2026-02-04 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
-| [101-24: 成交量分析 (Volume)](101_academy/101-24_volume.md) | Growth | article | TOFU | - | ✍️ 生产中 | 2026-02-04 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
-| [101-25: 支撑与压力 (Support & Resistance)](101_academy/101-25_support_resistance.md) | Growth | article | TOFU | - | ✍️ 生产中 | 2026-02-04 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
-| [101-26: K 线形态的 AI 视角](101_academy/101-26_candlestick_patterns.md) | Growth | article | TOFU | - | ✍️ 生产中 | 2026-02-04 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
-| [101-27: 布林带 (Bollinger Bands)](101_academy/101-27_bollinger_bands.md) | Growth | article | TOFU | - | ✍️ 生产中 | 2026-02-04 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
-| [101-28: 左侧与右侧交易](101_academy/101-28_left_right_trading.md) | Growth | article | TOFU | - | ✍️ 生产中 | 2026-02-04 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
-| [101-29: 跳空缺口理论](101_academy/101-29_gap_theory.md) | Growth | article | TOFU | - | ✍️ 生产中 | 2026-02-04 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
-| [101-30: 背离 (Divergence)](101_academy/101-30_divergence.md) | Growth | article | TOFU | - | ✍️ 生产中 | 2026-02-04 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
-| [101-31: 行业轮动逻辑](101_academy/101-31_sector_rotation.md) | Growth | article | TOFU | - | ✍️ 生产中 | 2026-02-04 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
-| [101-51: 凯利公式 (The Kelly Criterion)](101_academy/101-51_kelly_criterion.md) | Growth | article | TOFU | - | ✍️ 生产中 | 2026-02-04 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
-| [101-52: 止损的艺术](101_academy/101-52_stop_loss_art.md) | Growth | article | TOFU | - | ✍️ 生产中 | 2026-02-04 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
-| [101-53: 盈亏比 (Risk/Reward Ratio)](101_academy/101-53_risk_reward_ratio.md) | Growth | article | TOFU | - | ✍️ 生产中 | 2026-02-04 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
-| [101-54: 仓位管理与分批建仓](101_academy/101-54_position_sizing.md) | Growth | article | TOFU | - | ✍️ 生产中 | 2026-02-04 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
-| [101-55: 回撤的数学真相](101_academy/101-55_drawdown_math.md) | Growth | article | TOFU | - | ✍️ 生产中 | 2026-02-04 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
-| [101-56: 投资组合的相关性风险](101_academy/101-56_correlation_risk.md) | Growth | article | TOFU | - | ✍️ 生产中 | 2026-02-04 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
-| [101-57: 1% 准则](101_academy/101-57_one_percent_rule.md) | Growth | article | TOFU | - | ✍️ 生产中 | 2026-02-04 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
-| [101-58: 止盈的艺术](101_academy/101-58_profit_taking.md) | Growth | article | TOFU | - | ✍️ 生产中 | 2026-02-04 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
-| [101-61: LLM vs 量化模型](101_academy/101-61_llm_vs_quant.md) | Growth | article | TOFU | - | ✍️ 生产中 | 2026-02-04 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
-| [101-62: AI 幻觉的封印术](101_academy/101-62_hallucination_control.md) | Growth | article | TOFU | - | ✍️ 生产中 | 2026-02-04 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
-| [101-63: 上下文工程](101_academy/101-63_context_engineering.md) | Growth | article | TOFU | - | ✍️ 生产中 | 2026-02-04 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
-| [101-64: 盘后分析 vs 盘中博弈](101_academy/101-64_eod_vs_intraday.md) | Growth | article | TOFU | - | ✍️ 生产中 | 2026-02-04 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
-| [101-65: 置信度解码](101_academy/101-65_confidence_calibration.md) | Growth | article | TOFU | - | ✍️ 生产中 | 2026-02-04 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
-| [101-66: 投研 Prompt 工程](101_academy/101-66_prompt_engineering.md) | Growth | article | TOFU | - | ✍️ 生产中 | 2026-02-04 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
-| [101-67: AI + 人的混合系统](101_academy/101-67_hybrid_system.md) | Growth | article | TOFU | - | ✍️ 生产中 | 2026-02-04 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
-| [101-81: 实战案例：结构化反转](101_academy/101-81_case_reversal.md) | Growth | article | TOFU | - | ✍️ 生产中 | 2026-02-04 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
-| [101-82: 实战案例：识别虚假突破](101_academy/101-82_false_breakout.md) | Growth | article | TOFU | - | ✍️ 生产中 | 2026-02-04 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
-| [101-83: 实战案例：避开下坠飞刀](101_academy/101-83_falling_knife.md) | Growth | article | TOFU | - | ✍️ 生产中 | 2026-02-04 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
-| [101-01: 散户的不可能三角](101_academy/101-01_impossible_triangle.md) | Growth | article | TOFU | - | 🚀 已发布 | 2026-02-17 周二 | ✅ 上线中 | [✅ 已发布](https://mp.weixin.qq.com/s/IQorGEjEe7l5Aws3RGUhbA) | 2026-03-19 |
+| [101-01: 散户的不可能三角](101_academy/101-01_impossible_triangle.md) | Growth | article | Unknown | - | 🚀 已发布 | 2026-02-04 周三 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
+| [101-02: 错失恐惧症 (FOMO)](101_academy/101-02_fomo.md) | Growth | article | Unknown | - | 🚀 已发布 | 2026-02-04 周三 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
+| [101-03: 厌恶损失 (Loss Aversion)](101_academy/101-03_loss_aversion.md) | Growth | article | Unknown | - | 🚀 已发布 | 2026-02-04 周三 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
+| [101-04: 确认偏误 (Confirmation Bias)](101_academy/101-04_confirmation_bias.md) | Growth | article | Unknown | - | 🚀 已发布 | 2026-02-04 周三 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
+| [101-05: 赌徒谬误 (Gambler's Fallacy)](101_academy/101-05_gamblers_fallacy.md) | Growth | article | Unknown | - | 🚀 已发布 | 2026-02-04 周三 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
+| [101-06: 禀赋效应 (Endowment Effect)](101_academy/101-06_endowment_effect.md) | Growth | article | Unknown | - | 🚀 已发布 | 2026-02-04 周三 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
+| [101-07: 报复性交易 (Revenge Trading)](101_academy/101-07_revenge_trading.md) | Growth | article | Unknown | - | 🚀 已发布 | 2026-02-04 周三 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
+| [101-08: 3M 框架 (Mind, Method, Money)](101_academy/101-08_3m_framework.md) | Growth | article | Unknown | - | 🚀 已发布 | 2026-02-04 周三 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
+| [101-09: 为什么聪明人会失败？](101_academy/101-09_why_smart_people_fail.md) | Growth | article | Unknown | - | 🚀 已发布 | 2026-02-04 周三 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
+| [101-10: 离场休息的艺术](101_academy/101-10_sitting_on_hands.md) | Growth | article | Unknown | - | 🚀 已发布 | 2026-02-04 周三 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
+| [101-11: 事后聪明偏误 (Hindsight Bias)](101_academy/101-11_hindsight_bias.md) | Growth | article | Unknown | - | 🚀 已发布 | 2026-02-04 周三 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
+| [101-21: RSI 指标新解](101_academy/101-21_rsi_decoded.md) | Growth | article | Unknown | - | 🚀 已发布 | 2026-02-04 周三 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
+| [101-22: 均线系统 (Moving Averages)](101_academy/101-22_moving_averages.md) | Growth | article | Unknown | - | 🚀 已发布 | 2026-02-04 周三 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
+| [101-23: MACD (动能之王)](101_academy/101-23_macd.md) | Growth | article | Unknown | - | 🚀 已发布 | 2026-02-04 周三 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
+| [101-24: 成交量分析 (Volume)](101_academy/101-24_volume.md) | Growth | article | Unknown | - | 🚀 已发布 | 2026-02-04 周三 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
+| [101-25: 支撑与压力 (Support & Resistance)](101_academy/101-25_support_resistance.md) | Growth | article | Unknown | - | 🚀 已发布 | 2026-02-04 周三 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
+| [101-26: K 线形态的 AI 视角](101_academy/101-26_candlestick_patterns.md) | Growth | article | Unknown | - | 🚀 已发布 | 2026-02-04 周三 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
+| [101-27: 布林带 (Bollinger Bands)](101_academy/101-27_bollinger_bands.md) | Growth | article | Unknown | - | 🚀 已发布 | 2026-02-04 周三 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
+| [101-28: 左侧与右侧交易](101_academy/101-28_left_right_trading.md) | Growth | article | Unknown | - | 🚀 已发布 | 2026-02-04 周三 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
+| [101-29: 跳空缺口理论](101_academy/101-29_gap_theory.md) | Growth | article | Unknown | - | 🚀 已发布 | 2026-02-04 周三 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
+| [101-30: 背离 (Divergence)](101_academy/101-30_divergence.md) | Growth | article | Unknown | - | 🚀 已发布 | 2026-02-04 周三 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
+| [101-31: 行业轮动逻辑](101_academy/101-31_sector_rotation.md) | Growth | article | Unknown | - | 🚀 已发布 | 2026-02-04 周三 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
+| [101-51: 凯利公式 (The Kelly Criterion)](101_academy/101-51_kelly_criterion.md) | Growth | article | Unknown | - | 🚀 已发布 | 2026-02-04 周三 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
+| [101-52: 止损的艺术](101_academy/101-52_stop_loss_art.md) | Growth | article | Unknown | - | 🚀 已发布 | 2026-02-04 周三 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
+| [101-53: 盈亏比 (Risk/Reward Ratio)](101_academy/101-53_risk_reward_ratio.md) | Growth | article | Unknown | - | 🚀 已发布 | 2026-02-04 周三 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
+| [101-54: 仓位管理与分批建仓](101_academy/101-54_position_sizing.md) | Growth | article | Unknown | - | 🚀 已发布 | 2026-02-04 周三 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
+| [101-55: 回撤的数学真相](101_academy/101-55_drawdown_math.md) | Growth | article | Unknown | - | 🚀 已发布 | 2026-02-04 周三 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
+| [101-56: 投资组合的相关性风险](101_academy/101-56_correlation_risk.md) | Growth | article | Unknown | - | 🚀 已发布 | 2026-02-04 周三 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
+| [101-57: 1% 准则](101_academy/101-57_one_percent_rule.md) | Growth | article | Unknown | - | 🚀 已发布 | 2026-02-04 周三 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
+| [101-58: 止盈的艺术](101_academy/101-58_profit_taking.md) | Growth | article | Unknown | - | 🚀 已发布 | 2026-02-04 周三 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
+| [101-61: LLM vs 量化模型](101_academy/101-61_llm_vs_quant.md) | Growth | article | Unknown | - | 🚀 已发布 | 2026-02-04 周三 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
+| [101-62: AI 幻觉的封印术](101_academy/101-62_hallucination_control.md) | Growth | article | Unknown | - | 🚀 已发布 | 2026-02-04 周三 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
+| [101-63: 上下文工程](101_academy/101-63_context_engineering.md) | Growth | article | Unknown | - | 🚀 已发布 | 2026-02-04 周三 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
+| [101-64: 盘后分析 vs 盘中博弈](101_academy/101-64_eod_vs_intraday.md) | Growth | article | Unknown | - | 🚀 已发布 | 2026-02-04 周三 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
+| [101-65: 置信度解码](101_academy/101-65_confidence_calibration.md) | Growth | article | Unknown | - | 🚀 已发布 | 2026-02-04 周三 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
+| [101-66: 投研 Prompt 工程](101_academy/101-66_prompt_engineering.md) | Growth | article | Unknown | - | 🚀 已发布 | 2026-02-04 周三 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
+| [101-67: AI + 人的混合系统](101_academy/101-67_hybrid_system.md) | Growth | article | Unknown | - | 🚀 已发布 | 2026-02-04 周三 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
+| [101-81: 实战案例：结构化反转](101_academy/101-81_case_reversal.md) | Growth | article | Unknown | - | 🚀 已发布 | 2026-02-04 周三 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
+| [101-82: 实战案例：识别虚假突破](101_academy/101-82_false_breakout.md) | Growth | article | Unknown | - | 🚀 已发布 | 2026-02-04 周三 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
+| [101-83: 实战案例：避开下坠飞刀](101_academy/101-83_falling_knife.md) | Growth | article | Unknown | - | 🚀 已发布 | 2026-02-04 周三 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
 | [角标清除：别被红点牵着走](../../5_Support_Ops/content/badge-hygiene.md) | Support | article | BOFU | - | 🚀 已发布 | 2026-02-17 周二 | ✅ 上线中 | [✅ 已发布](https://mp.weixin.qq.com/s/JdHK9Gi-QqlwGf45rT-GMQ) | 2026-03-19 |
 | [投研决议：多维度的共识](../../5_Support_Ops/content/ai-council-logic.md) | Support | guide | BOFU | - | 🚀 已发布 | 2026-02-18 周三 | ✅ 上线中 | [✅ 已发布](https://mp.weixin.qq.com/s/NuvCM1CRxNs1GfKvIiotow) | 2026-03-19 |
 | [共识分级定义 (Consensus Levels)](../../5_Support_Ops/content/consensus-levels.md) | Support | article | BOFU | - | 🚀 已发布 | 2026-02-19 周四 | ✅ 上线中 | [✅ 已发布](https://mp.weixin.qq.com/s/KDT2hCFUH1S4nidyYPOJ1A) | 2026-03-19 |
-| [101-02: 错失恐惧症 (FOMO)](101_academy/101-02_fomo.md) | Growth | article | TOFU | - | 🚀 已发布 | 2026-02-20 周五 | ✅ 上线中 | [✅ 已发布](https://mp.weixin.qq.com/s/ByJpC3-xPOIEcNi2zdDRVA) | 2026-03-19 |
-| [101-03: 厌恶损失 (Loss Aversion)](101_academy/101-03_loss_aversion.md) | Growth | article | TOFU | - | 🚀 已发布 | 2026-02-24 周二 | ✅ 上线中 | [✅ 已发布](https://mp.weixin.qq.com/s/ptvEQ9to1jx6GNnCHY8j9g) | 2026-03-19 |
 | [反转推送：只盯“大转折”](../../5_Support_Ops/content/signal-flip-push.md) | Support | article | BOFU | - | 🚀 已发布 | 2026-02-25 周三 | ✅ 上线中 | [✅ 已发布](https://mp.weixin.qq.com/s/WxeVVxbmUHADEXKgw68vpw) | 2026-03-19 |
-| [101-11: 事后聪明偏误 (Hindsight Bias)](101_academy/101-11_hindsight_bias.md) | Growth | article | TOFU | - | 🚀 已发布 | 2026-02-26 周四 | ✅ 上线中 | [✅ 已发布](https://mp.weixin.qq.com/s/GuMBM_SxNPFV7Odjp2oHqQ) | 2026-03-19 |
-| [101-04: 确认偏误 (Confirmation Bias)](101_academy/101-04_confirmation_bias.md) | Growth | article | TOFU | - | 🚀 已发布 | 2026-02-27 周五 | ✅ 上线中 | [✅ 已发布](https://mp.weixin.qq.com/s/W2rE5BNMIs3wf3YvT-V0lw) | 2026-03-19 |
 | [上下文提取：只看我想要的](../../5_Support_Ops/content/context-extraction.md) | Support | article | BOFU | - | 🚀 已发布 | 2026-03-02 周一 | ✅ 上线中 | [✅ 已发布](https://mp.weixin.qq.com/s/Kiq-ZmQQ6-x6w-6Z9igNGg) | 2026-03-19 |
 | [AI 除了写 PPT 还能做什么？论‘冷酷实习生’对焦虑的终极拯救](101_academy/2026-03-02_ai_lifestyle.md) | Growth | article | TOFU | - | 🚀 已发布 | 2026-03-02 周一 | ✅ 上线中 | [✅ 已发布](https://mp.weixin.qq.com/s/bJtXPV4r4ANCjp7wOOxV_w) | 2026-03-19 |
 | [彻底告别盯盘焦虑！把复盘交给AI后，我每天多出了两小时（附自动化指南）](blitz_hub/Hub_01_Farewell_Screen_Staring.md) | Growth | article | TOFU | - | 🚀 已发布 | 2026-03-03 周二 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
@@ -55,12 +58,9 @@
 | [置信度：这不是胜算，是把握](../../5_Support_Ops/content/confidence-explained.md) | Support | guide | BOFU | - | 🚀 已发布 | 2026-03-04 周三 | ✅ 上线中 | [✅ 已发布](https://mp.weixin.qq.com/s/q2jilWow3swLU91GJyy7wQ) | 2026-03-19 |
 | [策略内参：怎么看干货？](../../5_Support_Ops/content/tactical-brief-guide.md) | Support | guide | BOFU | - | 🚀 已发布 | 2026-03-05 周四 | ✅ 上线中 | [✅ 已发布](https://mp.weixin.qq.com/s/8bpp3YEbcFnLgbuwwFHIXw) | 2026-03-19 |
 | [AI 时代的决策真相：为什么‘直觉’是你最危险的敌人？](101_academy/2026-03-02_breakthrough_logic.md) | Growth | article | TOFU | - | 🚀 已发布 | 2026-03-05 周四 | ✅ 上线中 | [✅ 已发布](https://mp.weixin.qq.com/s/aXQoun4YcB-Sn1ZDsIz3rg) | 2026-03-19 |
-| [101-08: 3M 框架 (Mind, Method, Money)](101_academy/101-08_3m_framework.md) | Growth | article | MOFU | - | 🚀 已发布 | 2026-03-06 周五 | ✅ 上线中 | [✅ 已发布](https://mp.weixin.qq.com/s/9hq7nzRj3l2PokOq5DIMwQ) | 2026-03-19 |
 | [我测试了全网最火的“DeepSeek炒股提示词”，终于看清了AI投资的致命伤……](blitz_hub/Hub_02_ChatGPT_Test_Fail.md) | Growth | article | TOFU | - | 🚀 已发布 | 2026-03-06 周五 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
 | [每天刷 50 条 AI 利好推送，为什么反而越亏越多？](blitz_hub/Hub_03_Information_Overload.md) | Growth | article | TOFU | - | 🚀 已发布 | 2026-03-10 周二 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
-| [101-07: 报复性交易 (Revenge Trading)](101_academy/101-07_revenge_trading.md) | Growth | article | TOFU | - | 🚀 已发布 | 2026-03-13 周五 | ✅ 上线中 | [✅ 已发布](https://mp.weixin.qq.com/s/txW2UEVUw--BcSTd4jwhDA) | 2026-03-19 |
 | [让你上头的“均线金叉”，到底是怎么被量化机器拿来精确割韭菜的？](blitz_hub/Hub_04_Moving_Average_Trap.md) | Growth | article | TOFU | - | 🚀 已发布 | 2026-03-13 周五 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
-| [101-05: 赌徒谬误 (Gambler's Fallacy)](101_academy/101-05_gamblers_fallacy.md) | Growth | article | TOFU | - | 🚀 已发布 | 2026-03-17 周二 | ✅ 上线中 | [✅ 已发布](https://mp.weixin.qq.com/s/oAuy-zm2qN1vsglYEC1jIQ) | 2026-03-19 |
 | [手把手教你：每天收盘只需 5 分钟，用 AI 打造专属的“量化极寒预警”](blitz_hub/Hub_05_Five_Minutes_Daily.md) | Growth | article | MOFU | - | 🚀 已发布 | 2026-03-17 周二 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
 | [“秒应”极速感：为了让你不焦虑，我们在重写物理法则](101_academy/101-79_optimistic_ui.md) | Growth | article | TOFU | - | ✍️ 生产中 | 2026-03-19 周四 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
 | [10 毫秒的生与死：ZISO 的边缘节点加速如何跑赢闪电崩盘](101_academy/101-74_edge_computing.md) | Growth | article | TOFU | - | ✍️ 生产中 | 2026-03-19 周四 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
@@ -144,7 +144,7 @@
 | [iOS 特供：极致跟手感](../../5_Support_Ops/content/ios-tuning.md) | Support | article | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
 | [T+3 验证：趋势需要时间](../../5_Support_Ops/content/multi-day-verification.md) | Support | article | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
 | [复盘一场真实的大跌：当所有人都在疯狂时，AI 是如何冷着脸劝我离场休息的？](blitz_hub/Hub_06_Cold_Feedback_Case.md) | Growth | article | MOFU | - | 🚀 已发布 | 2026-03-20 周五 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
-| [101-68: 让你的“龙虾”替你炒股？听着挺唬人，亏起来也是真快](101_academy/101-68_general_llm_illusion.md) | Growth | article | TOFU | 破圈钩子 | 👀 待审核 | 2026-03-23 周一 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
+| [101-68: 让你的“龙虾”替你炒股？听着挺唬人，亏起来也是真快](101_academy/101-68_general_llm_illusion.md) | Growth | article | TOFU | 破圈钩子 | ✅ 已通过 | 2026-03-23 周一 | ✅ 上线中 | 🟢 就绪 | 2026-03-20 |
 | [101-12: 你以为自己在抢板，很多时候其实只是去给机器送肉](101_academy/101-12_l4_hft_illusion.md) | Growth | article | TOFU | 破圈钩子 | 👀 待审核 | 2026-03-24 周二 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
 | [101-100: 你以为自己在炒股，其实连自己站在哪一层都没弄明白](101_academy/101-100_maturity_prologue.md) | Growth | article | MOFU | 信任桥梁 | 👀 待审核 | 2026-03-25 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
 | [机会成本：一只烂股最狠的地方，不是套你一笔钱，而是拖住你整轮行情](101_academy/101-40_opportunity_cost.md) | Growth | article | TOFU | 破圈钩子 | 👀 待审核 | 2026-03-26 周四 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
@@ -188,8 +188,10 @@
 | [零过期协议：尽量不让你看到旧价格](../../5_Support_Ops/content/zero-stale-guarantee.md) | Support | guide | BOFU | 转化承接 | ✍️ 生产中 | 2026-04-24 周五 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
 | [性能降级：省电也是战斗力](../../5_Support_Ops/content/perf-adaptation.md) | Support | guide | BOFU | - | ✍️ 生产中 | 2026-04-27 周一 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
 | [错误溯源：什么是 Trace ID (Trace ID Audit)](../../5_Support_Ops/content/trace-id-audit.md) | Support | guide | BOFU | - | ✍️ 生产中 | 2026-04-29 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
-| [101-107: L3级——系统化组合投资，是舰队司令部的排兵布阵](101_academy/101-107_institutional_portfolio_l3.md) | Growth | article | MOFU | - | 👀 待审核 | 2026-05-01 周五 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
-| [101-108: L4级——极硬量化，是物理层面的毫秒之战](101_academy/101-108_hard_quant_l4.md) | Growth | article | MOFU | - | 👀 待审核 | 2026-05-08 周五 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
+| [101-107: L3级——系统化组合投资，是舰队司令部的排兵布阵](101_academy/101-107_institutional_portfolio_l3.md) | Growth | article | MOFU | - | 👀 待审核 | 2026-05-01 周五 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
+| [101-108: L4级——极硬量化，是物理层面的毫秒之战](101_academy/101-108_hard_quant_l4.md) | Growth | article | MOFU | - | 👀 待审核 | 2026-05-08 周五 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
 | [101-101: 择时——像发牌员一样思考，而不是赌客](101_academy/101-101_quant_trinity_timing.md) | Growth | article | MOFU | - | 👀 待审核 | 2026-05-15 周五 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
 | [101-102: 交易管理——为什么“状态”是财富的分水岭](101_academy/101-102_quant_trinity_management.md) | Growth | article | MOFU | - | 👀 待审核 | 2026-05-22 周五 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
 | [101-103: 交易执行——别在壕沟里与加特林机枪肉搏](101_academy/101-103_quant_trinity_execution.md) | Growth | article | MOFU | - | 👀 待审核 | 2026-05-29 周五 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
+| [IMAGE_GENERATION_WORKFLOW](IMAGE_GENERATION_WORKFLOW.md) | Growth | article | Unknown | - | 🚀 已发布 | N/A | ✅ 上线中 | ➖ 不发布 | 2026-03-20 |
+| [WECHAT_VISUAL_PLAYBOOK_10W_2026Q2](WECHAT_VISUAL_PLAYBOOK_10W_2026Q2.md) | Growth | article | Unknown | - | 🚀 已发布 | N/A | ✅ 上线中 | ➖ 不发布 | 2026-03-20 |

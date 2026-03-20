@@ -3,15 +3,7 @@ title: "101-31: 行业轮动逻辑"
 subtitle: "寻找大资金迁徙的“北极星”"
 date: "2026-02-04"
 category: "The Method"
-image: "/images/learn/sector_rotation.png"
-image_prompt: "**Concept**: Sequential activation in a cycle. **Style**: Minimalist. **Subject**: A circular arrangement of 8 small cubes. **Action**: One cube is glowing Emerald (#10b981), others are dim Indigo. **Colors**: Emerald vs Indigo contrast. **Constraints**: NO text."
-source_docs:
-  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
-  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
-funnel_stage: "TOFU"
-publish:
-  wechat:
-    status: "draft"
+image: "/images/learn/101-31_sector_rotation_cover.png"
 ---
 
 # 行业轮动：钱在流向哪里？

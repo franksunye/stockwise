@@ -3,15 +3,7 @@ title: "101-83: 实战案例：避开下坠飞刀"
 subtitle: "当全网喊你“估值极低”时，你为什么该等一等？"
 date: "2026-02-04"
 category: "The Case"
-image: "/images/learn/falling_knife.png"
-image_prompt: "**Concept**: High-speed impact. **Style**: Dark Geometric. **Subject**: A sharp Rose Red (#f43f5e) prism. **Action**: It is shown frozen mid-air, pointed downwards, with motion blur streaks. **Colors**: Rose Red highlight. **Constraints**: NO text."
-source_docs:
-  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
-  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
-funnel_stage: "TOFU"
-publish:
-  wechat:
-    status: "draft"
+image: "/images/learn/101-83_falling_knife_cover.png"
 ---
 
 # 案例：估值陷阱

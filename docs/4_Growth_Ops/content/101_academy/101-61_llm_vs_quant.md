@@ -3,15 +3,7 @@ title: "101-61: LLM vs 量化模型"
 subtitle: "预测未来，还是解释未来？"
 date: "2026-02-04"
 category: "The Machine"
-image: "/images/learn/llm_vs_quant.png"
-image_prompt: "**Concept**: Integration of fluid logic and rigid math. **Style**: Cyberpunk Swiss. **Subject**: A glowing Indigo liquid blob merging into a rigid white wireframe grid. **Action**: The two forms intertwine. **Colors**: Indigo, White, Black. **Constraints**: NO text."
-source_docs:
-  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
-  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
-funnel_stage: "TOFU"
-publish:
-  wechat:
-    status: "draft"
+image: "/images/learn/101-61_llm_vs_quant_cover.png"
 ---
 
 # 投研新纪元：语义与数字的合流

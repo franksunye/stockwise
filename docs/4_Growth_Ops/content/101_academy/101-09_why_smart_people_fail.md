@@ -3,15 +3,7 @@ title: "101-09: 为什么聪明人会失败？"
 subtitle: "IQ 并不代表你的账户余额"
 date: "2026-02-04"
 category: "The Mind"
-image: "/images/learn/why_smart_people_fail.png"
-image_prompt: "**Concept**: A conceptual 3D illustration of Intellectual Ego in trading. **Style**: Swiss Design, Geometric, Minimalist, Clean, Dark Mode (#050508). **Subject**: A highly complex, intricate 3D puzzle box (representing IQ/Theory) being crushed by a simple, heavy Indigo block (representing Market Reality/Force). **Action**: The pressure from the block is causing the delicate puzzle to deform. **Materials**: Polished chrome for the puzzle, heavy stone for the block. **Colors**: Indigo (#6366f1) for the crushing block. **Constraints**: NO text. NO blur. Center composition."
-source_docs:
-  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
-  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
-funnel_stage: "TOFU"
-publish:
-  wechat:
-    status: "draft"
+image: "/images/learn/101-09_why_smart_people_fail_cover.png"
 ---
 
 # 为什么聪明人会在股市里失败？

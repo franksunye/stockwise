@@ -2,20 +2,7 @@
 title: "101-07: 报复性交易 (Revenge Trading)"
 subtitle: "不要尝试在亏掉钱的地方，把它赚回来"
 date: "2026-02-04"
-image: "/images/learn/revenge_trading.png"
-image_prompt: "**Concept**: A conceptual 3D illustration of Revenge Trading. **Style**: Swiss Design, Geometric, Minimalist, Clean, Dark Mode (#050508). **Subject**: A fractured red polygon colliding with a serene Indigo grid. The fragments of the red shape are sharp and chaotic. **Action**: The impact is causing a ripple effect across the orderly grid. **Materials**: Matte finish, soft global illumination, high contrast. **Colors**: Rose Red (#f43f5e) for the chaotic fragments, Indigo (#6366f1) for the background grid. **Constraints**: NO text. NO blur. Center composition."
-source_docs:
-  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
-  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
-category: "Growth 101"
-funnel_stage: "TOFU"
-publish:
-  wechat:
-    status: "published"
-    published_at: "2026-03-13"
-    url: "https://mp.weixin.qq.com/s/txW2UEVUw--BcSTd4jwhDA"
-    baseline: "frontline_q1_2026"
-
+image: "/images/learn/101-07_revenge_trading_cover.png"
 ---
 
 # 报复性交易：赌场里最受欢迎的赌徒

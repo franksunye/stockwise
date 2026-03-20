@@ -160,10 +160,13 @@ distribution:
 
 - `image_prompts.cover`
   只用于生成母版封面，是文生图主提示词
+  严格只写“场景与语义”，不要重复风格前缀
 - `derivative_guidance.body`
   不是新的独立 prompt，而是“参考我给的 cover 图片，保持一致，只做局部延展”的派生指令
 - `derivative_guidance.cards`
   不是新的独立 prompt，而是“参考我给的 cover 图片，改成竖版传播卡”的派生指令
+- `visual_style_prefix`
+  只放统一风格 DNA，不要把单篇画面语义写进来
 
 执行优先级：
 

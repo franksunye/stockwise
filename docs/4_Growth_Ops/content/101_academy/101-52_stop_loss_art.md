@@ -3,15 +3,7 @@ title: "101-52: 止损的艺术"
 subtitle: "在哪儿下车，决定了你能不能活到终点"
 date: "2026-02-04"
 category: "The Money"
-image: "/images/learn/stop_loss_art.png"
-image_prompt: "**Concept**: A safety barrier blocking a fall. **Style**: Geometric. **Subject**: An Indigo prism falling vertically. **Action**: A Rose Red (#f43f5e) horizontal laser plane slicing through the path. **Colors**: Rose Red vs Dark Indigo. **Constraints**: NO text."
-source_docs:
-  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
-  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
-funnel_stage: "TOFU"
-publish:
-  wechat:
-    status: "draft"
+image: "/images/learn/101-52_stop_loss_art_cover.png"
 ---
 
 # 止损：交易者的唯一保险单

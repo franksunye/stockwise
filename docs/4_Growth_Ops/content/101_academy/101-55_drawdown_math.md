@@ -3,15 +3,7 @@ title: "101-55: 回撤的数学真相"
 subtitle: "为什么“解套”是世界上最难的事？"
 date: "2026-02-04"
 category: "The Money"
-image: "/images/learn/drawdown_math.png"
-image_prompt: "**Concept**: The cost of recovery. **Style**: 3D Isometric. **Subject**: A smooth white ramp. **Action**: A rectangular portion of the ramp has collapsed downward into shadows. **Colors**: Sharp contrast, dark void. **Constraints**: NO text."
-source_docs:
-  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
-  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
-funnel_stage: "TOFU"
-publish:
-  wechat:
-    status: "draft"
+image: "/images/learn/101-55_drawdown_math_cover.png"
 ---
 
 # 回撤数学：为什么你输不起？

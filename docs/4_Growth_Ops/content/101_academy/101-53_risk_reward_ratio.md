@@ -3,15 +3,7 @@ title: "101-53: 盈亏比 (Risk/Reward Ratio)"
 subtitle: "为什么不需要经常对，也能赚大钱？"
 date: "2026-02-04"
 category: "The Money"
-image: "/images/learn/risk_reward_ratio.png"
-image_prompt: "**Concept**: Leverage and disproportion. **Style**: Clean 3D. **Subject**: A simple fulcrum with a long bar. **Action**: A small Rose cube on the short end balanced against a giant Emerald cube. **Colors**: Rose vs Emerald. **Constraints**: NO text."
-source_docs:
-  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
-  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
-funnel_stage: "TOFU"
-publish:
-  wechat:
-    status: "draft"
+image: "/images/learn/101-53_risk_reward_ratio_cover.png"
 ---
 
 # 盈亏比：成功交易的数学秘密

@@ -82,6 +82,12 @@
 5. `image_prompts.cover`
 6. `image_specs.cover`
 
+注意：
+
+- `visual_style_prefix` 只负责风格
+- `image_prompts.cover` 只负责这篇图的场景语义
+- 不要在 `image_prompts.cover` 里重复整段风格前缀
+
 示例：
 
 ```text
@@ -169,3 +175,17 @@ Do not introduce:
 - `cover`：文生图
 - `body`：参考图派生
 - `cards`：从 `cover` 派生的竖版传播图
+
+## 九、工具入口
+
+如果使用仓库内自动化工具，请直接看：
+
+- [GRSAI_IMAGE_TOOL.md](/Users/yesun/Code/stockwise/docs/4_Growth_Ops/content/GRSAI_IMAGE_TOOL.md)
+
+该文档包含：
+
+- API Key 放置方式
+- `101-68` 全流程命令
+- `--force` 单图重生
+- `--asset-file` 切换其他文章
+- 常见报错排查

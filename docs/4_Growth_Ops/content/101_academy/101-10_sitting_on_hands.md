@@ -3,15 +3,7 @@ title: "101-10: 离场休息的艺术"
 subtitle: "为什么“坐着不动”价值百万？"
 date: "2026-02-04"
 category: "The Mind"
-image: "/images/learn/sitting_on_hands.png"
-image_prompt: "**Concept**: A conceptual 3D illustration of Patience and Discipline in trading. **Style**: Swiss Design, Geometric, Minimalist, Clean, Dark Mode (#050508). **Subject**: A single, perfectly smooth Indigo cylinder standing still in the center of a chaotic, spiraling vortex of white lines. **Action**: The cylinder remains vertical and unaffected by the surrounding motion. **Materials**: Matte finish for the cylinder, glowing ethereal lines for the vortex. **Colors**: Indigo (#6366f1) for the central subject. **Constraints**: NO text. NO blur. Center composition."
-source_docs:
-  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
-  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
-funnel_stage: "TOFU"
-publish:
-  wechat:
-    status: "draft"
+image: "/images/learn/101-10_sitting_on_hands_cover.png"
 ---
 
 # 离场休息的艺术：交易中最值钱的姿势

@@ -3,15 +3,7 @@ title: "101-51: 凯利公式 (The Kelly Criterion)"
 subtitle: "数学告诉我们：到底该买多少？"
 date: "2026-02-04"
 category: "The Money"
-image: "/images/learn/kelly_criterion.png"
-image_prompt: "**Concept**: Mathematical balance and sizing. **Style**: Swiss Design. **Subject**: A nested set of 3 transparent rings. **Action**: An Emerald sphere floats at the exact center, perfectly positioned. **Colors**: Emerald Green (#10b981) core. **Constraints**: NO text."
-source_docs:
-  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
-  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
-funnel_stage: "TOFU"
-publish:
-  wechat:
-    status: "draft"
+image: "/images/learn/101-51_kelly_criterion_cover.png"
 ---
 
 # 凯利公式：告别“拍脑袋”仓位法

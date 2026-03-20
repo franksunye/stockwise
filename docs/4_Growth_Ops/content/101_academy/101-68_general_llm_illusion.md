@@ -26,13 +26,13 @@ traceability:
   status: healthy
   last_reviewed_at: '2026-03-19'
 workflow:
-  stage: reviewing
+  stage: approved
   review_priority: review_first
   owner: cmo
   reviewer: founder
   priority: high
   target_publish_date: '2026-03-23'
-  last_action_at: '2026-03-19'
+  last_action_at: '2026-03-20'
   blocked_reason: ''
 maintenance:
   change_status: updated
@@ -54,7 +54,7 @@ image_specs:
   body: 1080x720
   card: 1080x1440
 image_prompts:
-  cover: Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no brand logos, no readable dashboard text, no luxury car advertisement look, no cheap sci-fi look. Wide horizontal composition for a WeChat article cover. A red mechanical lobster claw gripping a plain black steering wheel in front of a blurred volatile market backdrop. The key message is not AI is driving, but AI is driving without brakes. Brake failure must be visually obvious through a broken brake cable, missing brake symbol, or empty brake warning area. Emphasize danger, loss of control, and hidden risk over cool technology aesthetics.
+  cover: Wide horizontal composition for a WeChat article cover. A red mechanical lobster claw gripping a plain black steering wheel in front of a blurred volatile market backdrop. The key message is not AI is driving, but AI is driving without brakes. Brake failure must be visually obvious through a broken brake cable, missing brake symbol, or empty brake warning area. Emphasize danger, loss of control, and hidden risk over cool technology aesthetics. Avoid brand logos, avoid readable dashboard text, avoid luxury-car-ad aesthetics.
 derivative_guidance:
   body:
   - Use the provided cover image as the visual reference. Keep the same lobster claw, the same danger mood, the same dark metal palette, and the same brake-failure metaphor. Create a closer supporting scene that shifts toward a worried Chinese retail investor facing AI analysis, without changing the visual world.
@@ -84,7 +84,7 @@ visual_style_prefix: Premium editorial finance style, realistic not cartoonish, 
 distribution:
   wechat:
     enabled: true
-    status: draft
+    status: ready
     url: ''
   xhs:
     enabled: true
@@ -152,4 +152,3 @@ ZISO 从来不把大语言模型，更不会把 Agent，当成操盘手。它更
 ## 最后一句
 
 写诗的 AI，可以陪你聊天；会排比的 AI，可以帮你润色；会调工具的“龙虾”，可以替你跑腿。但碰到真金白银，你更需要的还是一面盾，而不是一张嘴，也不是一只更勤快的爪子。嘴再会说，也挡不住回撤。
-

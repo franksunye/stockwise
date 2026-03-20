@@ -3,15 +3,7 @@ title: "101-26: K 线形态的 AI 视角"
 subtitle: "哪些形态是猎人的路标，哪些是噪音？"
 date: "2026-02-04"
 category: "The Method"
-image: "/images/learn/candlestick_patterns.png"
-image_prompt: "**Concept**: A conceptual 3D illustration of a candlestick pattern being scanned by a digital lens. **Style**: Swiss Design, Geometric, Minimalist, Clean, Dark Mode (#050508). **Subject**: A series of Indigo and Rose rectangular blocks arranged in a pattern resembling a Pin Bar. A thin, semi-transparent Indigo laser plane is passing through them. **Action**: The laser is highlighting the critical 'vick' of a candle. **Materials**: Matte blocks, glowing neon laser. **Colors**: Indigo (#6366f1) for the scanning light, Rose Red (#f43f5e) for the falling candle. **Constraints**: NO text. NO blur. Center composition."
-source_docs:
-  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
-  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
-funnel_stage: "TOFU"
-publish:
-  wechat:
-    status: "draft"
+image: "/images/learn/101-26_candlestick_patterns_cover.png"
 ---
 
 # K 线形态：剥离玄学，回归概率

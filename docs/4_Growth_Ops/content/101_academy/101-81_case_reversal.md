@@ -3,15 +3,7 @@ title: "101-81: 实战案例：结构化反转"
 subtitle: "如何捕捉深跌后的第一抹曙光？"
 date: "2026-02-04"
 category: "The Case"
-image: "/images/learn/case_reversal.png"
-image_prompt: "**Concept**: Abrupt change in momentum. **Style**: High Contrast. **Subject**: A trail of white particles falling. **Action**: At the bottom, they suddenly transform into a bright Indigo beam shooting upwards. **Colors**: Indigo. **Constraints**: NO text."
-source_docs:
-  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
-  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
-funnel_stage: "TOFU"
-publish:
-  wechat:
-    status: "draft"
+image: "/images/learn/101-81_case_reversal_cover.png"
 ---
 
 # 案例：死里逃生的底部逻辑

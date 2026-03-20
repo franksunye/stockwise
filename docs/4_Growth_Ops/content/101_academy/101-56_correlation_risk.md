@@ -3,15 +3,7 @@ title: "101-56: 投资组合的相关性风险"
 subtitle: "为什么持有 5 只科技股，不叫分散投资？"
 date: "2026-02-04"
 category: "The Money"
-image: "/images/learn/correlation_risk.png"
-image_prompt: "**Concept**: Interconnected failure. **Style**: Minimalist. **Subject**: Three interlocking glass gears. **Action**: They move in unison, showing dependency. **Colors**: Indigo, Rose, and Emerald. **Constraints**: NO text."
-source_docs:
-  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
-  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
-funnel_stage: "TOFU"
-publish:
-  wechat:
-    status: "draft"
+image: "/images/learn/101-56_correlation_risk_cover.png"
 ---
 
 # 相关性：你以为的分散只是幻觉

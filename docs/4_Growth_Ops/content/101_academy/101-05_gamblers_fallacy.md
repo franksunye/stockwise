@@ -2,20 +2,7 @@
 title: "101-05: 赌徒谬误 (Gambler's Fallacy)"
 subtitle: "市场没有记忆，不要试图抄底"
 date: "2026-02-04"
-image: "/images/learn/gamblers_fallacy.png"
-image_prompt: "A roulette wheel where every number is red. A gambler is aggressively betting on black, sweating profusely. The background is a stock chart forming a waterfall decline."
-source_docs:
-  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
-  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
-category: "Growth 101"
-funnel_stage: "TOFU"
-publish:
-  wechat:
-    status: "published"
-    published_at: "2026-03-17"
-    url: "https://mp.weixin.qq.com/s/oAuy-zm2qN1vsglYEC1jIQ"
-    baseline: "frontline_q1_2026"
-
+image: "/images/learn/101-05_gamblers_fallacy_cover.png"
 ---
 
 # 赌徒谬误：连跌 5 天了，明天一定会涨吗？

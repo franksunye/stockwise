@@ -27,14 +27,10 @@ maintenance:
 website:
   enabled: true
   surface: "learn"
-image: "/images/learn/101-108_maturity_l4_hard_quant.png"
-image_prompt: "A minimalist Swiss-style design of a single sharp, diagonal line cutting through a field of dots with light-speed trails. Dark Mode (#050508). Accent: Rose (#f43f5e). NO text."
-distribution:
-  wechat:
-    enabled: true
-    status: "draft"
-source_docs:
-  - docs/0_Strategy/01_Product_Positioning_and_Boundaries.md
+image: "/images/learn/101-108_hard_quant_l4_cover.png"
+image_prompts:
+  cover: "A premium editorial finance image of ultra-high-frequency trading at the physical layer. Dark server corridor and exchange-proximity hardware with extreme speed tension. Convey that this is an inaccessible machine war of latency, microwave links, and hardware acceleration, not a retail battlefield. Realistic, cold, precise, no text, no watermark."
+visual_style_prefix: "Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel."
 ---
 
 # L4级：极硬量化，是物理层面的毫秒之战

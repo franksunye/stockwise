@@ -3,15 +3,7 @@ title: "101-67: AI + 人的混合系统"
 subtitle: "为什么“半人半马”才是投资界的终极形态？"
 date: "2026-02-04"
 category: "The Machine"
-image: "/images/learn/hybrid_system.png"
-image_prompt: "**Concept**: Complex synthesis. **Style**: Clean 3D. **Subject**: A large sphere composed of different smaller geometric shapes (cones, cubes, toruses). **Action**: It rotates as a single unit. **Colors**: Multiple Indigo shades. **Constraints**: NO text."
-source_docs:
-  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
-  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
-funnel_stage: "TOFU"
-publish:
-  wechat:
-    status: "draft"
+image: "/images/learn/101-67_hybrid_system_cover.png"
 ---
 
 # 混合决策：不迷信，不懈怠

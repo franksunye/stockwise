@@ -3,15 +3,7 @@ title: "101-82: 实战案例：识别虚假突破"
 subtitle: "为什么“创新高”有时是骗子给的剧本？"
 date: "2026-02-04"
 category: "The Case"
-image: "/images/learn/false_breakout.png"
-image_prompt: "**Concept**: Deception and return. **Style**: 3D Shatter. **Subject**: A Indigo sphere breaking through a ceiling. **Action**: The ceiling fragments turn Rose Red (#f43f5e) and spiral around the sphere to drag it down. **Colors**: Indigo/Rose. **Constraints**: NO text."
-source_docs:
-  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
-  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
-funnel_stage: "TOFU"
-publish:
-  wechat:
-    status: "draft"
+image: "/images/learn/101-82_false_breakout_cover.png"
 ---
 
 # 案例：追涨的滑铁卢

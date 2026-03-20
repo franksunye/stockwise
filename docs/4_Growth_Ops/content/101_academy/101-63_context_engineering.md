@@ -3,15 +3,7 @@ title: "101-63: 上下文工程"
 subtitle: "为什么让 AI 深度阅读，比让它大算力计算更重要？"
 date: "2026-02-04"
 category: "The Machine"
-image: "/images/learn/context_engineering.png"
-image_prompt: "**Concept**: Layered information. **Style**: Multi-layer 3D. **Subject**: Stacked glass sheets. **Action**: Data fragments (voxels) organized on different vertical layers. **Colors**: Shades of Indigo. **Constraints**: NO text."
-source_docs:
-  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
-  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
-funnel_stage: "TOFU"
-publish:
-  wechat:
-    status: "draft"
+image: "/images/learn/101-63_context_engineering_cover.png"
 ---
 
 # 上下文：AI 投研的灵魂

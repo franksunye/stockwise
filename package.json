@@ -1,7 +1,10 @@
 {
   "scripts": {
     "content:sync": "node scripts/cmo_sync.mjs",
-    "content:audit": "node scripts/content_audit.mjs"
+    "content:audit": "node scripts/content_audit.mjs",
+    "content:check-image-naming": "node scripts/check_image_naming.mjs",
+    "image:grsai": "node scripts/grsai_generate_image.mjs",
+    "image:101-68:cover": "node scripts/grsai_generate_image.mjs --from-asset --task cover"
   },
   "devDependencies": {
     "yaml": "^2.8.2"

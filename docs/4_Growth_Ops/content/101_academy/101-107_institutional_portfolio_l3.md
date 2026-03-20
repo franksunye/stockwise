@@ -27,14 +27,10 @@ maintenance:
 website:
   enabled: true
   surface: "learn"
-image: "/images/learn/101-107_maturity_l3_portfolio.png"
-image_prompt: "A minimalist Swiss-style design of multiple semi-transparent circles overlapping in a way that minimizes the dark central intersection area. Dark Mode (#050508). Accent: Indigo (#6366f1). NO text."
-distribution:
-  wechat:
-    enabled: true
-    status: "draft"
-source_docs:
-  - docs/0_Strategy/01_Product_Positioning_and_Boundaries.md
+image: "/images/learn/101-107_institutional_portfolio_l3_cover.png"
+image_prompts:
+  cover: "A premium editorial finance image about institutional portfolio construction. Command-center style composition with multiple asset-class screens and a clean risk-allocation map feeling. Emphasize diversification, non-correlation, and disciplined fleet-level positioning rather than single-stock excitement. Dark high-contrast tone, realistic materials, no text, no watermark."
+visual_style_prefix: "Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel."
 ---
 
 # L3级：系统化组合投资，是舰队司令部的排兵布阵

@@ -3,15 +3,7 @@ title: "101-62: AI 幻觉的封印术"
 subtitle: "如何确保你的 AI 不在金融数据上瞎编？"
 date: "2026-02-04"
 category: "The Machine"
-image: "/images/learn/hallucination_control.png"
-image_prompt: "**Concept**: Filtering for clarity. **Style**: Geometric. **Subject**: A blurred grey orb. **Action**: It passes through a series of 3 Indigo (#6366f1) planes and emerges as a sharp Emerald cube. **Colors**: Indigo/Emerald. **Constraints**: NO text."
-source_docs:
-  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
-  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
-funnel_stage: "TOFU"
-publish:
-  wechat:
-    status: "draft"
+image: "/images/learn/101-62_hallucination_control_cover.png"
 ---
 
 # 幻觉：AI 投资最大的敌人

@@ -3,15 +3,7 @@ title: "101-24: 成交量分析 (Volume)"
 subtitle: "价格会撒谎，但成交量不会"
 date: "2026-02-04"
 category: "The Method"
-image: "/images/learn/volume.png"
-image_prompt: "A dark chart. The price candles are misty and translucent (ghostly). The volume bars at the bottom are solid blocks of concrete and steel, glowing with internal heat. Text overlay: 'FUEL'."
-source_docs:
-  - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
-  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
-funnel_stage: "TOFU"
-publish:
-  wechat:
-    status: "draft"
+image: "/images/learn/101-24_volume_cover.png"
 ---
 
 # 成交量 (Volume)：价格会撒谎，但成交量不会
