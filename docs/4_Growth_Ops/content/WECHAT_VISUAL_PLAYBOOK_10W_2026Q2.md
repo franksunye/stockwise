@@ -11,6 +11,7 @@
 - 图片不再只是装饰，而是点击入口、阅读节奏器和转发放大器
 - 从“Silent Math 纯概念图”升级到“读者视角优先”的混合视觉系统
 - 让图片服务 `10w+`：先留人，再解释，再建立品牌
+- 对外传播层不追求“最像品牌海报”，而追求“最容易被普通人接住”
 
 ## 一、图片总原则
 
@@ -19,8 +20,23 @@
 3. 普通投资者优先看“我是不是这样”，再看“这个概念是什么”。
 4. `101` 图片要更像“认知钩子”，不是科技海报。
 5. 宏观、地缘、产业类，优先真实纪实感；方法论、心智、AI 类，优先隐喻概念图。
+6. 公域封面先给情绪入口，再给专业感。
+7. 让用户秒懂，优先于让团队觉得“高级”。
 
-## 二、每篇建议图片数
+## 二、ZISO 三层视觉分工
+
+- 产品 UI：`85%` 克制 + `15%` 温度
+- 品牌官网 / 转化页：`60%` 克制 + `40%` 温度
+- 公域内容封面 / 社媒头图：`15%` 品牌漏出 + `85%` 情绪可达性
+
+说明：
+
+- 产品内可以是交易者 `HUD`
+- 公域封面不能直接照搬 `HUD`
+- 公域图片的第一任务不是解释系统，而是让用户愿意点开
+- 对外传播图里，品牌气质应该“渗出来”，而不是“压上去”
+
+## 三、每篇建议图片数
 
 - `1` 张封面主图
 - `1` 张优先复用 `cover` 的正文图
@@ -34,11 +50,39 @@
 - 强热点文章可加到 `5` 张
 - 纯方法论桥梁文可压到 `3` 张
 
-## 三、图型定义
+## 四、10W+ 封面判断标准
+
+一张图是否适合 `10w+`，先看这 `6` 个问题：
+
+1. 手机里缩成小图后，`1` 秒内能看懂主体是什么吗。
+2. 不看标题，能感到一个明确情绪吗。
+3. 普通投资者会觉得“这像我会遇到的事”吗。
+4. 这张图是在帮助点击，还是在展示概念设计能力。
+5. 前景和背景是否拉开了，而不是糊成一片暗色。
+6. 这张图会让人想读，还是只让团队觉得“做得挺高级”。
+
+符合以下特征，通常更容易被点开和转发：
+
+- 主体单一
+- 情绪明确
+- 场景熟悉
+- 隐喻简单
+- 明暗分离清楚
+- 手机上仍然成立
+
+如果一张图更像下面这些东西，通常要重做：
+
+- 品牌态度海报
+- 科幻电影海报
+- 概念雕塑图
+- 设计作品集封面
+- 团队内部会觉得厉害，但普通人不知所云的图
+
+## 五、图型定义
 
 - `Concept`
   适合：AI、纪律、风险、方法论、系统边界
-  特征：隐喻强、构图简洁、情绪冷、认知感强
+  特征：隐喻简单、构图简洁、秒懂优先、认知感强
 
 - `Editorial`
   适合：地缘、油价、电力、消费、宏观
@@ -46,14 +90,14 @@
 
 - `Hybrid`
   适合：既要热点同频，又要品牌统一的文章
-  特征：现实元素 + 抽象隐喻混搭
+  特征：现实元素 + 轻量隐喻混搭
 
-## 四、统一风格前缀
+## 六、统一风格前缀
 
 所有图片提示词默认共用这一段风格 DNA，再接单篇内容描述：
 
 ```text
-Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel.
+Premium editorial finance style for mass-audience educational content, realistic not cartoonish, emotionally legible before intellectually impressive, Chinese retail investor context, one simple visual metaphor, relatable human tension, clean composition, premium but grounded materials, restrained dark palette with selective contrast, no text, no watermark, no cheap sci-fi look, no hologram overload, no giant robot or monster imagery, no blockbuster poster drama, no generic corporate stock image feel.
 ```
 
 使用规则：
@@ -69,7 +113,15 @@ Premium editorial finance style, realistic not cartoonish, dark high-contrast at
 - 不会一张像财经媒体，一张像科技海报，一张又像 AI 卡通图
 - `cover / body / cards` 更容易保持同一视觉世界
 
-## 五、提示工程规则
+补充理解：
+
+- `mass-audience educational content`：这是大众内容入口，不是内部品牌海报
+- `emotionally legible before intellectually impressive`：先看懂、先有感觉，再谈高级
+- `one simple visual metaphor`：一张图只讲一个简单比喻
+- `relatable human tension`：紧张感要让人能代入，不要宏大灾难感
+- `restrained dark palette with selective contrast`：可以暗，但不能闷，要有一个真正被点亮的重点
+
+## 七、提示工程规则
 
 这里最重要的一条：
 
@@ -97,21 +149,204 @@ Change only...
 - `body_1`: 优先复用 `cover`
 - `body_2`: 按需派生
 - `card`: 从 `cover` 派生
-## 六、逐篇定义
+
+## 八、Prompt Design Language
+
+这一节不是讲某一张图，而是规定 `prompt` 本身怎么写才会稳定。
+
+核心原则：
+
+- 不同图位，不同任务，不同提示词野心
+- `cover` 可以承担完整创意
+- `body` 不要再写成第二张封面
+- `card` 要优先服务移动端传播，不要默认当海报作品
+
+### 1. Cover Prompt
+
+目标：
+
+- 承担母隐喻
+- 建立点击入口
+- 允许更完整的创意表达
+
+写法：
+
+- 先写统一 `visual_style_prefix`
+- 再写一个完整主画面
+- 强调唯一母题
+- 明确一眼可懂的危险或判断
+
+推荐关键词：
+
+- primary cover image
+- mother frame
+- one simple visual metaphor
+- instantly understandable on mobile
+- clickability over spectacle
+
+避免：
+
+- 多隐喻叠加
+- 过多屏幕 / 科技 UI
+- 宏大世界观扩展
+
+### 2. Body Prompt
+
+目标：
+
+- 服务段落理解
+- 做阅读节奏，不做第二次冲击
+- 像正文插图，而不是另一张概念海报
+
+默认判断：
+
+- 先问 `body_1` 能不能直接复用 `cover`
+- 只有复用不够时，才做新的 `body`
+
+写法：
+
+- 明确写 `simple article illustration`
+- 明确写 `not a second cover`
+- 只讲一个细节、一个瞬间、一个小隐喻
+- 优先局部、近景、停顿感
+
+推荐关键词：
+
+- simple article illustration
+- paragraph illustration
+- one relatable detail only
+- partial figure or tighter crop
+- quiet moment
+- easy to scan inside an article
+
+更适合的风格：
+
+- mature editorial illustration
+- stylized realism
+- simplified forms
+- limited details
+- calm, sharp, slightly tense
+
+避免：
+
+- photorealistic AI scene
+- full concept poster
+- complete narrative world
+- large interface panels
+- floating dashboards
+- readable text
+- anime / cute illustration
+
+### 3. Card Prompt
+
+目标：
+
+- 二次传播
+- 竖版移动端识别
+- 给后续标题叠加留设计空间
+
+写法：
+
+- 明确写 `complete portrait-format social card`
+- 主体必须大、集中、手机里一眼能懂
+- 留白是设计空间，不是把一张横图贴在白底上
+
+推荐关键词：
+
+- complete portrait-format social card
+- large central subject
+- strong mobile legibility
+- intentional headline space
+- one obvious danger cue
+
+避免：
+
+- pasted-layout look
+- tiny subject in large blank area
+- exaggerated acting
+- comedy / meme energy unless intentionally needed
+- readable screen text
+
+### 4. 成熟风格中间态
+
+`68` 的试验说明，正文图和传播图都不适合走两个极端：
+
+- 太写实：容易变成 AI 宣传图、科技海报、假人场景图
+- 太软萌：容易变成泛内容平台插画，失去判断感
+
+更合适的中间态是：
+
+- 成熟财经 editorial illustration
+- 半设计化
+- 半现实感
+- 不像照片
+- 也不像卡通
+- 克制、清楚、有判断感
+
+一句话定义：
+
+- 不是画 AI 很强，而是画“你为什么会被 AI 误导”
+
+## 九、颜色与光线规则
+
+默认不要把图做成“厚重一整片黑”。公域封面需要张力，不需要闷感。
+
+推荐：
+
+- 暗底，但不要通篇压死
+- 主体要有明确亮点
+- 前景亮于背景
+- 情绪色只留 `1` 个主色
+- 红色用于风险提示，不要把全图都染成暗红
+- 背景行情屏、城市、界面都要退后变虚
+
+避免：
+
+- 大面积黑灰堆积
+- 所有元素都在中低明度区间
+- 主体和背景同色相混在一起
+- 为了“电影感”把图做得过暗
+- 只有沉重，没有呼吸
+
+判断方法：
+
+- 把图缩小到手机列表图尺寸后，主体还跳得出来，才算合格
+- 如果缩小后只剩下一团暗色和一个模糊红块，说明色调太厚
+
+## 十、负面清单
+
+以下视觉即使“高级”，也不适合 `101` 公域封面：
+
+- 巨型机械龙、怪兽、神像、头部雕塑
+- 大量悬浮屏、全息脑图、未来机舱
+- 宏大灾难、闪电深渊、大片式爆炸
+- 奢侈品广告感、跑车广告感
+- 只有金属感，没有人物代入
+- 太像 `AI 公司品牌 KV`
+- 太像“设计师会喜欢，读者不会点”的图
+
+更优先的视觉：
+
+- 普通投资者的犹豫、迟疑、后悔、侥幸、上头
+- 熟悉物件里的一个明显错误
+- 看起来正常，但关键风险部件缺失
+- 一眼能懂的控制失效、判断失真、情绪失控
+
+## 十一、逐篇定义
 
 ### 1. 101-68 General LLM Illusion
 
 - 文件：[101-68_general_llm_illusion.md](/Users/yesun/Code/stockwise/docs/4_Growth_Ops/content/101_academy/101-68_general_llm_illusion.md)
 - 图型：`Hybrid`
 - 建议图片数：`5`
-- 封面方向：一只“龙虾/机械爪”握着方向盘，前方是剧烈波动的市场屏，视觉重点是“它看起来会开车，但刹车系统是空的”
+- 封面方向：一个大家会联想到 OpenClaw 的“小龙虾机器人”正在握着普通车方向盘，视觉重点是“它看起来在控制，但其实没有刹车和风控”。画面要更像内容入口，不要像电影海报，也不要像机械故障说明图。
 - 正文图建议：
   - “会说人话，不等于能扛风险”
   - “AI 会搜资料，但不会替你止损”
 - 封面提示词：
 
 ```text
-A high-tension editorial-concept hybrid image for a Chinese finance article. A red mechanical lobster claw gripping a luxury car steering wheel in front of a blurred volatile trading screen. The dashboard has no brake indicator, suggesting danger. Cinematic, premium, sharp contrast, realistic materials, dark background, subtle Chinese finance media aesthetic, not sci-fi poster, no text, no watermark.
+A mass-audience editorial finance cover image for a Chinese article. Inside an ordinary everyday car, a red lobster-inspired robotic claw, recognizable as an OpenClaw-like internet-famous device rather than a generic industrial gripper, is awkwardly gripping and turning a plain steering wheel. Use a closer, more focused composition than a normal car interior shot. Keep the interior lighter and clearer than a luxury-car ad, with one obvious lit focal area around the wheel and claw. Brake failure should be shown through one simple clear cue only, such as a snapped brake-related cable or a clearly empty brake-control area. Any market background should stay blurred and secondary. The feeling is "this looks smart, but it is not protecting me." Realistic, clean, emotionally legible, not sci-fi poster, not blockbuster drama, not a repair diagram, no text, no watermark.
 ```
 
 ### 2. 101-12 L4 HFT Illusion

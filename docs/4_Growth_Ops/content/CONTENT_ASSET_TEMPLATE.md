@@ -67,7 +67,7 @@ visual_strategy:
   derivation_rule:
     body: "same_world" # same_world | derived_from_cover | independent
     cards: "derived_from_cover" # derived_from_cover | same_world | independent
-visual_style_prefix: "Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel."
+visual_style_prefix: "Premium editorial finance style for mass-audience educational content, realistic not cartoonish, emotionally legible before intellectually impressive, Chinese retail investor context, one simple visual metaphor, clean composition, relatable human tension, premium but grounded materials, restrained dark palette with selective contrast, lighter and clearer than a movie poster, no text, no watermark, no cheap sci-fi look, no hologram overload, no giant robot or monster imagery, no generic corporate stock image feel, no blockbuster poster drama."
 distribution:
   wechat:
     enabled: true
@@ -162,9 +162,17 @@ distribution:
   只用于生成母版封面，是文生图主提示词
   严格只写“场景与语义”，不要重复风格前缀
 - `derivative_guidance.body`
-  不是新的独立 prompt，而是“参考我给的 cover 图片，保持一致，只做局部延展”的派生指令
+  不是新的独立 prompt，而是“参考我给的 cover 图片，做正文插图或局部延展”的派生指令
+  默认要写成：
+  - `simple article illustration`
+  - `not a second cover`
+  - `one relatable detail only`
 - `derivative_guidance.cards`
   不是新的独立 prompt，而是“参考我给的 cover 图片，改成竖版传播卡”的派生指令
+  默认要写成：
+  - `complete portrait-format social card`
+  - `large central subject`
+  - `intentional headline space`
 - `visual_style_prefix`
   只放统一风格 DNA，不要把单篇画面语义写进来
 
@@ -182,11 +190,35 @@ image_prompts:
   cover: "..."
 derivative_guidance:
   body:
-    - "Use the provided cover image as the visual reference. Keep the same subject, palette, and emotional world. Create a closer supporting scene..."
-    - "Use the provided cover image as the visual reference. Preserve the same metaphor and materials. Extend the same world..."
+    - "Use the provided cover image as the visual reference, but treat this image as a simple article illustration rather than a second cover. Focus on one relatable detail only..."
+    - "Use the provided cover image as the visual reference, but create a simple supporting article illustration instead of a new concept poster..."
   cards:
-    - "Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame..."
+    - "Use the provided cover image as the visual reference. Create a complete portrait-format social card derived from the same mother frame..."
 ```
+
+提示词设计语言默认值：
+
+- `cover`
+  可以承担完整创意和母隐喻
+- `body`
+  只服务正文理解，不做第二张封面
+- `card`
+  优先服务移动端传播，不默认当作品集海报
+
+`body` 避免：
+
+- photorealistic AI scene
+- full concept poster
+- floating dashboards
+- readable screen text
+- anime / cute illustration
+
+`card` 避免：
+
+- pasted-layout look
+- tiny subject in huge blank area
+- exaggerated acting
+- comedy / meme energy
 
 ## 团队使用方式
 

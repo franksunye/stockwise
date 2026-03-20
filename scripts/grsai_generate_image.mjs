@@ -3,7 +3,11 @@
 import fs from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 import YAML from 'yaml';
+
+const execFileAsync = promisify(execFile);
 
 const DEFAULT_BASE_URL = process.env.GRSAI_BASE_URL || 'https://grsaiapi.com';
 const DEFAULT_MODEL = 'nano-banana-fast';
@@ -17,6 +21,7 @@ const DEFAULT_PUBLIC_DIR = 'frontend/public';
 const SUPPORTED_TASKS = ['cover', 'body-1', 'body-2', 'card-1', 'card-2'];
 const SUPPORTED_MODES = ['auto', 'text2image', 'image2image'];
 const REFERENCE_KEYS_FALLBACK = [
+  'urls',
   'image_url',
   'image',
   'input_image',
@@ -42,7 +47,7 @@ Options:
   --task                     cover | body-1 | body-2 | card-1 | card-2 (default: cover)
   --mode                     auto | text2image | image2image (default: auto)
   --reference                Reference image URL or local file path (for image2image)
-  --reference-key            Preferred request key for reference image (default: image_url)
+  --reference-key            Preferred request key for reference image (default: urls)
   --output                   Local output path for downloaded image
   --model                    Model name, default: ${DEFAULT_MODEL}
   --image-size               Image size, default: ${DEFAULT_IMAGE_SIZE}
@@ -65,7 +70,7 @@ Examples:
     --mode image2image
 
   node scripts/grsai_generate_image.mjs \\
-    --prompt "一张黑底高对比的财经概念图，机械龙虾钳握住方向盘，刹车线断裂" \\
+    --prompt "一张黑底高对比的财经概念图，机械小龙虾钳握住方向盘，刹车线断裂" \\
     --output tmp/nano-banana-cover.png
 `);
 }
@@ -80,7 +85,7 @@ function parseArgs(argv) {
     task: 'cover',
     mode: 'auto',
     fromAsset: false,
-    referenceKey: 'image_url',
+    referenceKey: 'urls',
     pollInterval: DEFAULT_POLL_INTERVAL_MS,
     timeout: DEFAULT_TIMEOUT_MS,
     force: false,
@@ -399,20 +404,67 @@ async function saveImage(candidate, outputPath) {
     await fs.writeFile(outputPath, Buffer.from(data, 'base64'));
     return;
   }
-  const response = await fetch(candidate);
-  if (!response.ok) {
-    throw new Error(`Failed to download image: ${response.status} ${response.statusText}`);
+
+  let lastError = null;
+
+  try {
+    const response = await fetch(candidate);
+    if (!response.ok) {
+      throw new Error(`Failed to download image: ${response.status} ${response.statusText}`);
+    }
+    const arrayBuffer = await response.arrayBuffer();
+    await fs.writeFile(outputPath, Buffer.from(arrayBuffer));
+    return;
+  } catch (error) {
+    lastError = error;
   }
-  const arrayBuffer = await response.arrayBuffer();
-  await fs.writeFile(outputPath, Buffer.from(arrayBuffer));
+
+  try {
+    await execFileAsync('curl', [
+      '-L',
+      '--fail',
+      '--silent',
+      '--show-error',
+      '--insecure',
+      candidate,
+      '-o',
+      outputPath,
+    ]);
+    return;
+  } catch (error) {
+    lastError = error;
+  }
+
+  try {
+    await execFileAsync('python3', [
+      '-c',
+      [
+        'import ssl, sys, urllib.request',
+        'url = sys.argv[1]',
+        'out = sys.argv[2]',
+        'ctx = ssl._create_unverified_context()',
+        'with urllib.request.urlopen(url, context=ctx, timeout=60) as r:',
+        '    data = r.read()',
+        "with open(out, 'wb') as f:",
+        '    f.write(data)',
+      ].join('\n'),
+      candidate,
+      outputPath,
+    ]);
+    return;
+  } catch (error) {
+    lastError = error;
+  }
+
+  throw lastError || new Error('Failed to download image');
 }
 
 function buildBasePayload(args, prompt) {
   return {
     model: args.model,
     prompt,
-    image_size: args.imageSize,
-    aspect_ratio: args.aspectRatio,
+    imageSize: args.imageSize,
+    aspectRatio: args.aspectRatio,
   };
 }
 
@@ -513,6 +565,11 @@ async function main() {
   }
 
   const payloadBase = buildBasePayload(args, prompt);
+  const shouldUsePolling = true;
+  if (shouldUsePolling) {
+    payloadBase.webHook = '-1';
+    payloadBase.shutProgress = false;
+  }
   if (args.dryRun) {
     const previewPayload =
       mode === 'image2image'
@@ -576,7 +633,11 @@ async function main() {
   const startedAt = Date.now();
   while (Date.now() - startedAt < args.timeout) {
     await sleep(args.pollInterval);
-    const result = await requestJson(`${args.baseUrl}/v1/draw/result`, apiKey, { task_id: taskId });
+    const result = await requestJson(
+      `${args.baseUrl}/v1/draw/result`,
+      apiKey,
+      { id: taskId, task_id: taskId },
+    );
     const status = pickStatus(result);
     const images = collectImageCandidates(result);
 

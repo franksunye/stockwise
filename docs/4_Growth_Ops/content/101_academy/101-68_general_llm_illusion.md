@@ -1,5 +1,5 @@
 ---
-title: '101-68: 让你的“龙虾”替你炒股？听着挺唬人，亏起来也是真快'
+title: '101-68: 让你的“小龙虾”替你炒股？听着挺唬人，亏起来也是真快'
 subtitle: 从 ChatGPT 到 Agent，越会说人话，越容易让人忘了它根本不负责
 content_id: growth-101-068
 content_source: growth
@@ -14,12 +14,12 @@ timely_anchor: OpenClaw/AI Agent/大模型炒股
 viral_priority: top5
 launch_order: 1
 headline_alternatives:
-- OpenClaw 火了，但让“龙虾”替你炒股这件事，可能从第一步就错了
+- OpenClaw 火了，但让“小龙虾”替你炒股这件事，可能从第一步就错了
 - 从 ChatGPT 到龙虾 Agent，为什么越像人，越容易让散户放下戒心
 cover_lines:
 - 它越像个懂行的人，你越容易忘了亏钱的是你。
 - 会说人话，不等于能替你扛回撤。
-share_copy: 最近很多人都在聊 OpenClaw、Agent、AI 炒股，这篇不是泼冷水，而是把最容易忽略的一件事说透了：会说、会搜、会调工具，不等于能替你碰本金。
+share_copy: 最近很多人都在聊 OpenClaw、AI、大模型炒股，这篇不是泼冷水，而是把最容易忽略的一件事说透了：会说、会搜、会调工具，不等于能替你碰本金。
 campaign: wechat_4_week_sprint_2026q2
 rhythm: Hub
 traceability:
@@ -54,14 +54,81 @@ image_specs:
   body: 1080x720
   card: 1080x1440
 image_prompts:
-  cover: Wide horizontal composition for a WeChat article cover. A red mechanical lobster claw gripping a plain black steering wheel in front of a blurred volatile market backdrop. The key message is not AI is driving, but AI is driving without brakes. Brake failure must be visually obvious through a broken brake cable, missing brake symbol, or empty brake warning area. Emphasize danger, loss of control, and hidden risk over cool technology aesthetics. Avoid brand logos, avoid readable dashboard text, avoid luxury-car-ad aesthetics.
+  cover: >-
+    Wide horizontal composition for a WeChat article cover. Inside an ordinary
+    everyday car, a red lobster-inspired robotic claw, clearly recognizable as
+    an OpenClaw-like internet-famous device rather than a generic industrial
+    gripper, is awkwardly gripping and turning a plain steering wheel. Use a
+    closer, more focused composition than a normal car interior shot: reduce
+    extra dashboard area and prioritize the wheel, the lobster-like robotic
+    claw, and one single obvious brake-failure cue. Use soft diffused daylight
+    or soft early-evening light, not a dark cinematic night scene. The image
+    should feel close, human, and instantly understandable on a mobile screen,
+    as if a normal investor suddenly realizes the car is being driven by
+    something that does not understand risk. Keep the interior visually lighter
+    and cleaner than a luxury-car ad: charcoal gray rather than pure black,
+    with one clear lit focal area around the wheel and claw. Show brake failure
+    through one simple clear cue only, such as a snapped brake-related cable or
+    a clearly empty brake-control area. Any market background should stay
+    blurred, light, and secondary. Prioritize relatable danger, visual clarity,
+    OpenClaw recognizability, and clickability over spectacle, heaviness,
+    coolness, or technical complexity. Avoid extra hoses, pipes, leaking fluid,
+    repair parts, brand logos, readable dashboard text, and luxury-car-ad
+    aesthetics.
 derivative_guidance:
   body:
-  - Use the provided cover image as the visual reference. Keep the same lobster claw, the same danger mood, the same dark metal palette, and the same brake-failure metaphor. Create a closer supporting scene that shifts toward a worried Chinese retail investor facing AI analysis, without changing the visual world.
-  - Use the provided cover image as the visual reference. Preserve the same hidden-risk message and the same premium dark finance tone. Extend the same world into a more symbolic supporting scene about polished AI appearance versus broken risk barriers.
+  - >-
+    Use the provided cover image as the visual reference, but treat this image
+    as a mature editorial illustration rather than a photorealistic scene, a
+    cute illustration, or a second cover. Keep the same lighter restrained
+    palette and only a subtle echo of the OpenClaw-like identity if needed.
+    Show one relatable human moment only: a Chinese retail investor hesitating
+    over a phone or tablet with polished-looking but vague AI stock analysis.
+    Prefer a tighter crop or partial figure rather than a full seated portrait.
+    Focus on the pause, the hands, the device, and the uneasy expression. The
+    image should work like a paragraph illustration, not a complete scene
+    description. Render the scene in a stylized editorial illustration style
+    for a finance magazine: simplified forms, limited details, clean edges,
+    restrained emotion, and visual clarity, but not anime, not cartoon, not
+    soft cute illustration. The image should feel calm, sharp, and slightly
+    tense. The screen content must stay blurred, secondary, and unreadable,
+    with only a faint visual echo of the cover's world if useful. Keep the
+    composition simple, quiet, and easy to scan inside an article. No full
+    car-cabin explanation, no large interface panels, no poster composition,
+    no floating dashboards, no dramatic tech visuals, and no photorealistic
+    skin detail. The goal is to support the paragraph like a premium magazine
+    illustration, not to create a full concept image.
+  - >-
+    Use the provided cover image as the visual reference, but create a simple
+    supporting article illustration instead of a new concept poster. Preserve
+    the same hidden-risk message and premium tone, but focus on one small
+    symbolic detail only: a driving or control setup that appears normal at
+    first glance while one missing risk-control element is quietly obvious on
+    second glance. Render it as a mature editorial illustration with
+    simplified forms, limited details, clean edges, and restrained tension. Do
+    not use a full human scene unless necessary. Keep the composition open,
+    light, and easy to read in one second, like a magazine insert image. Do
+    not add complex mechanical breakdown details, extra cables, industrial
+    repair parts, interface graphics, cinematic spectacle, cute illustration
+    styling, or photorealistic rendering.
   cards:
-  - Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame. Preserve the lobster claw, steering wheel, and missing-brake metaphor. Prioritize strong silhouette and leave space for future headline overlay.
-  - Use the provided cover image as the visual reference. Create a second vertical social card derived from the same mother frame. Keep the same danger world and make the no-brake message visually obvious rather than cool.
+  - >-
+    Use the provided cover image as the visual reference. Create a vertical
+    social card derived from the same mother frame. Preserve the OpenClaw-like
+    lobster claw, steering wheel, and missing-brake metaphor, but simplify the
+    image so a casual social-media user can understand it instantly on mobile.
+    Use a lighter, cleaner tonal structure than a movie poster: strong central
+    silhouette, clean negative space, one obvious danger cue, room for future
+    headline overlay.
+  - >-
+    Use the provided cover image as the visual reference. Create a second
+    vertical social card derived from the same mother frame. Make it a complete
+    portrait-format social card, not a small horizontal image on a blank page.
+    Keep the same danger world, but make it more human and less conceptual.
+    The main subject should be large and central for mobile viewing. Make the
+    no-brake message immediately legible, leave clean intentional space for a
+    future headline, and avoid dark oppressive finish, repair-diagram details,
+    or pasted-layout look.
 visual_strategy:
   concept_core: 会干活的 AI 没有刹车
   image_type: Hybrid
@@ -80,7 +147,15 @@ visual_strategy:
   body_usage_plan:
     body_1: reuse_cover
     body_2: derive_from_cover
-visual_style_prefix: Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel.
+visual_style_prefix: >-
+  Premium editorial finance style for mass-audience educational content,
+  realistic not cartoonish, emotionally legible before intellectually
+  impressive, Chinese retail investor context, one simple visual metaphor,
+  clean composition, relatable human tension, premium but grounded materials,
+  restrained dark palette with selective contrast, lighter and clearer than a
+  movie poster, no text, no watermark, no cheap sci-fi look, no hologram
+  overload, no giant robot or monster imagery, no generic corporate stock
+  image feel, no blockbuster poster drama, no industrial repair-diagram feel.
 distribution:
   wechat:
     enabled: true
@@ -151,4 +226,4 @@ ZISO 从来不把大语言模型，更不会把 Agent，当成操盘手。它更
 
 ## 最后一句
 
-写诗的 AI，可以陪你聊天；会排比的 AI，可以帮你润色；会调工具的“龙虾”，可以替你跑腿。但碰到真金白银，你更需要的还是一面盾，而不是一张嘴，也不是一只更勤快的爪子。嘴再会说，也挡不住回撤。
+写诗的 AI，可以陪你聊天；会排比的 AI，可以帮你润色；会调工具的“小龙虾”，可以替你跑腿。但碰到真金白银，你更需要的还是一面盾，而不是一张嘴，也不是一只更勤快的爪子。嘴再会说，也挡不住回撤。
