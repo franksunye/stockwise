@@ -18,6 +18,7 @@ const DEFAULT_TIMEOUT_MS = 180000;
 const DEFAULT_ASSET_FILE =
   'docs/4_Growth_Ops/content/101_academy/101-68_general_llm_illusion.md';
 const DEFAULT_PUBLIC_DIR = 'frontend/public';
+const DEFAULT_ENV_FILE = '.env.local';
 const SUPPORTED_TASKS = ['cover', 'body-1', 'body-2', 'card-1', 'card-2'];
 const SUPPORTED_MODES = ['auto', 'text2image', 'image2image'];
 const REFERENCE_KEYS_FALLBACK = [
@@ -172,6 +173,26 @@ function parseFrontmatter(markdownText) {
   const match = markdownText.match(/^---\n([\s\S]*?)\n---\n/);
   if (!match) throw new Error('Markdown frontmatter not found');
   return YAML.parse(match[1]) || {};
+}
+
+async function loadEnvFileIfPresent(envFilePath = DEFAULT_ENV_FILE) {
+  if (process.env.GRSAI_API_KEY || !existsSync(envFilePath)) return;
+  const raw = await fs.readFile(envFilePath, 'utf8');
+  for (const line of raw.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    const match = trimmed.match(/^([A-Za-z_][A-Za-z0-9_]*)=(.*)$/);
+    if (!match) continue;
+    const [, key, valueRaw] = match;
+    let value = valueRaw.trim();
+    if (
+      (value.startsWith('"') && value.endsWith('"')) ||
+      (value.startsWith("'") && value.endsWith("'"))
+    ) {
+      value = value.slice(1, -1);
+    }
+    if (!(key in process.env)) process.env[key] = value;
+  }
 }
 
 function dedupePrefix(prefix, prompt) {
@@ -504,6 +525,7 @@ async function submitWithFallback(args, apiKey, payloadBase, mode, referenceData
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   if (args.help) return void printHelp();
+  await loadEnvFileIfPresent();
 
   if (!args.prompt && !args.fromAsset) {
     throw new Error('Missing required input: use --prompt or --from-asset');

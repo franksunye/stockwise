@@ -16,7 +16,15 @@
 GRSAI_API_KEY=你的key
 ```
 
-运行前加载：
+脚本默认会先尝试自动读取项目根目录 `.env.local`，只要文件存在且包含：
+
+```bash
+GRSAI_API_KEY=你的key
+```
+
+就可以直接运行工具。
+
+如果你希望手动加载，也可以：
 
 ```bash
 set -a; source .env.local; set +a
@@ -98,7 +106,7 @@ node scripts/grsai_generate_image.mjs --help
 常见问题：
 
 - 报错 `Missing GRSAI_API_KEY`：
-  没有加载 `.env.local`
+  项目根目录没有 `.env.local`，或其中没有 `GRSAI_API_KEY`
 - 报错 `Image2image mode requires a valid reference image`：
   先生成 `cover`，或显式传 `--reference`
 - 输出路径是 `/images/...`：

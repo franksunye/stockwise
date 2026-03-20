@@ -332,7 +332,38 @@ Change only...
 - 看起来正常，但关键风险部件缺失
 - 一眼能懂的控制失效、判断失真、情绪失控
 
-## 十一、逐篇定义
+## 十一、最近实战经验
+
+`68` 和 `12` 这两篇的出图试验，已经把一个很重要的边界试出来了：
+
+- 好图不是“把概念解释清楚”，而是“把错误现场画清楚”
+- 真正稳定的封面母题，不是抽象技术优势，而是普通人一眼能懂的错位瞬间
+
+更容易出好图的 prompt 结构：
+
+1. 一个普通人熟悉的正常场景
+2. 一个已经发生错位的动作 / 控制 / 时机
+3. 一个非常明显的危险线索
+
+`68` 的有效经验：
+
+- 不是画 “AI 很强”
+- 而是画 “不该握方向盘的东西在握方向盘，而且还没有刹车”
+
+`12` 的有效经验：
+
+- 不是画 “量化速度碾压”
+- 而是画 “普通人还没动手，但机会已经从他面前过去了”
+
+后续 `101` 公域封面默认遵守：
+
+- 优先使用 “正常场景 + 一个明显错误线索” 的母题
+- 先画普通人为什么会被误导，不先画技术系统有多复杂
+- 不让服务器、机房、机械设备、悬浮 UI 成为主角，除非它们本身就是误导源
+- Prompt 要短、具体、像镜头指令，不要堆抽象判断词
+- 如果 Gemini / API 把画面跑成科技海报、机器人故事或概念 poster，说明母题还不够具体
+
+## 十二、逐篇定义
 
 ### 1. 101-68 General LLM Illusion
 
@@ -352,13 +383,13 @@ A mass-audience editorial finance cover image for a Chinese article. Inside an o
 ### 2. 101-12 L4 HFT Illusion
 
 - 文件：[101-12_l4_hft_illusion.md](/Users/yesun/Code/stockwise/docs/4_Growth_Ops/content/101_academy/101-12_l4_hft_illusion.md)
-- 图型：`Concept`
+- 图型：`Hybrid`
 - 建议图片数：`4`
-- 封面方向：散户的手指刚要点下“买入”，另一侧是一排高速机房服务器，形成速度碾压
+- 封面方向：普通投资者还没来得及动手，但机会已经从他面前过去。重点不是“技术很强”，而是“你已经晚了”。优先使用正常交易动作里的错位瞬间，不要把服务器、机房、机器人当成主角。
 - 封面提示词：
 
 ```text
-A conceptual finance image showing a human finger about to tap a mobile buy button, contrasted against towering ultra-fast server racks and fiber lines rushing past. The human side looks fragile and late. Premium editorial lighting, dark Chinese finance tone, strong speed contrast, realistic, no text, no UI overlays.
+WeChat article cover, wide horizontal image. Show one ordinary Chinese retail investor's hand holding a phone and another finger about to tap the screen. A green-red stock price band has already rushed across the front of the phone before the finger lands. The action should clearly feel late: the person is still about to buy, but the move has already passed. Keep the composition very simple and instantly readable on mobile: large hand, large phone, one fast price band crossing in front, dark blurred trading background only. Do not show a face, robot, machine, giant server rack, readable text, clear buy button, floating interface panel, or decorative symbol. Premium editorial finance illustration, stylized realism, simplified forms, limited details, restrained dark palette, one clear lit focal area, mature and calm rather than flashy or cinematic.
 ```
 
 ### 3. 101-100 Maturity Prologue
