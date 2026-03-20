@@ -395,13 +395,13 @@ WeChat article cover, wide horizontal image. Show one ordinary Chinese retail in
 ### 3. 101-100 Maturity Prologue
 
 - 文件：[101-100_maturity_prologue.md](/Users/yesun/Code/stockwise/docs/4_Growth_Ops/content/101_academy/101-100_maturity_prologue.md)
-- 图型：`Concept`
+- 图型：`Editorial`
 - 建议图片数：`4`
-- 封面方向：同一张战场地图上，散户拿着简陋工具，远处是机构舰队，强调“不是一个层级”
+- 封面方向：一个普通投资者踩着过短的小塑料凳往上够，却还是够不到上面的专业交易台。重点不是画“机构舰队”，而是让人一眼看懂：你以为自己快够到了，其实段位还差得很远。
 - 封面提示词：
 
 ```text
-A conceptual hierarchy map of investing levels. In the foreground, a lone retail investor with simple tools; in the distance, an industrial institutional fleet of machines, terminals, and infrastructure. The scene feels like different layers of the same battlefield. Dark premium editorial style, symbolic, no text.
+WeChat article cover, wide horizontal image. Show one ordinary Chinese retail investor standing on a short plastic stool, stretching upward and still unable to reach the edge of a much higher professional trading deck above him. The gap must remain obvious. The meaning must be obvious in one second: he thinks he is close, but his current rank is still far below. Keep the composition very simple and easy to read on mobile: one ordinary person, one too-short stool, one high professional deck. Premium editorial finance illustration, stylized realism, simplified forms, limited details, restrained dark palette, one brighter focal area. No readable text, no sci-fi, no giant robot, no floating UI, no decorative symbols, no crowded battle scene, no game UI.
 ```
 
 ### 4. 101-40 Opportunity Cost
