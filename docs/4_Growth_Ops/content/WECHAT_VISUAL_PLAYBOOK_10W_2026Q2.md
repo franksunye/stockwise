@@ -409,11 +409,11 @@ A conceptual hierarchy map of investing levels. In the foreground, a lone retail
 - 文件：[101-40_opportunity_cost.md](/Users/yesun/Code/stockwise/docs/4_Growth_Ops/content/101_academy/101-40_opportunity_cost.md)
 - 图型：`Editorial`
 - 建议图片数：`4`
-- 封面方向：一个人被锁在一只下跌股票的笼子里，笼子外面远处是上涨的行情列车
+- 封面方向：一个普通投资者被一条下跌股价线形状的透明障碍困住，远处下一班上涨机会已经开走。重点不是“解释机会成本”，而是让人一眼看懂：钱被拖住了，后面的机会也没了。
 - 封面提示词：
 
 ```text
-An editorial-style symbolic image: a retail investor trapped behind a transparent cage shaped like a falling stock chart, while in the background a bright upward market train moves away. Emotional but clean composition, realistic, Chinese investing mood, no text.
+WeChat article cover, wide horizontal image. Show one ordinary Chinese retail investor trapped behind a simple transparent barrier shaped like a falling stock line. In the distance, a bright market train or rising opportunity is already leaving. The meaning must be obvious in one second: his money is stuck here, so he misses what comes next. Keep the composition very simple and easy to read on mobile: one trapped person, one clear barrier, one departing opportunity. The trapped person should be the main subject. The departing opportunity should be secondary but clearly visible. Background should stay blurred and minimal. Premium editorial finance illustration, stylized realism, simplified forms, limited details, restrained dark palette, one brighter focal area. No sci-fi, no floating UI, no readable text, no giant machine room, no complicated crowd scene, no decorative symbols, no cute illustration.
 ```
 
 ### 5. 101-69 ZISO Rhythm

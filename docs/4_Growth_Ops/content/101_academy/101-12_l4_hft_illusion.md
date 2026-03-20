@@ -26,15 +26,15 @@ campaign: wechat_4_week_sprint_2026q2
 rhythm: Hub
 traceability:
   status: healthy
-  last_reviewed_at: '2026-03-19'
+  last_reviewed_at: '2026-03-20'
 workflow:
-  stage: reviewing
-  review_priority: review_next
+  stage: approved
+  review_priority: review_first
   owner: cmo
   reviewer: founder
   priority: high
   target_publish_date: '2026-03-24'
-  last_action_at: '2026-03-19'
+  last_action_at: '2026-03-20'
   blocked_reason: ''
 maintenance:
   change_status: updated
@@ -43,28 +43,28 @@ website:
   enabled: true
   surface: learn
 visual_workflow:
-  stage: not_started
+  stage: approved
   owner: cmo
   reviewer: founder
   priority: high
-  target_ready_date: ''
+  target_ready_date: '2026-03-20'
   last_action_at: '2026-03-20'
   blocked_reason: ''
 visual_assets:
   cover:
     required: true
-    status: missing
+    status: approved
     path: "/images/learn/101-12_l4_hft_illusion_cover.png"
   body:
     required: true
     target_count: 2
-    ready_count: 0
-    status: missing
+    ready_count: 2
+    status: approved
   cards:
     required: true
     target_count: 1
-    ready_count: 0
-    status: missing
+    ready_count: 1
+    status: approved
 image: "/images/learn/101-12_l4_hft_illusion_cover.png"
 images:
   cover: "/images/learn/101-12_l4_hft_illusion_cover.png"
@@ -165,7 +165,7 @@ visual_style_prefix: >-
 distribution:
   wechat:
     enabled: true
-    status: draft
+    status: ready
     url: ''
   xhs:
     enabled: true
