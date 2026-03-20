@@ -97,7 +97,7 @@
 所有图片提示词默认共用这一段风格 DNA，再接单篇内容描述：
 
 ```text
-Premium editorial finance style for mass-audience educational content, realistic not cartoonish, emotionally legible before intellectually impressive, Chinese retail investor context, one simple visual metaphor, relatable human tension, clean composition, premium but grounded materials, restrained dark palette with selective contrast, no text, no watermark, no cheap sci-fi look, no hologram overload, no giant robot or monster imagery, no blockbuster poster drama, no generic corporate stock image feel.
+Premium editorial finance style for mass-audience educational content, realistic not cartoonish, emotionally legible before intellectually impressive, Chinese retail investor context, one simple visual metaphor, relatable human tension, clean composition, premium but grounded materials, lighter premium editorial palette, soft neutral background, clean indoor or daylight-style lighting, calm clear restrained mood, professional finance magazine illustration feel rather than cinematic drama, stylized realism, simplified forms, limited details, no text, no watermark, no cheap sci-fi look, no hologram overload, no giant robot or monster imagery, no blockbuster poster drama, no generic corporate stock image feel, no oppressive darkness, no horror-movie contrast, no thriller atmosphere.
 ```
 
 使用规则：
@@ -119,7 +119,9 @@ Premium editorial finance style for mass-audience educational content, realistic
 - `emotionally legible before intellectually impressive`：先看懂、先有感觉，再谈高级
 - `one simple visual metaphor`：一张图只讲一个简单比喻
 - `relatable human tension`：紧张感要让人能代入，不要宏大灾难感
-- `restrained dark palette with selective contrast`：可以暗，但不能闷，要有一个真正被点亮的重点
+- `lighter premium editorial palette + soft neutral background`：默认先追求轻、清楚、像财经杂志，再决定要不要压暗
+- `clean indoor or daylight-style lighting`：优先用干净室内光或日间光，不要默认电影顶光和压抑阴影
+- `professional finance magazine illustration feel rather than cinematic drama`：目标是成熟财经 editorial，不是情绪海报
 
 ## 七、提示工程规则
 
@@ -419,13 +421,13 @@ WeChat article cover, wide horizontal image. Show one ordinary Chinese retail in
 ### 5. 101-69 ZISO Rhythm
 
 - 文件：[101-69_ziso_rhythm.md](/Users/yesun/Code/stockwise/docs/4_Growth_Ops/content/101_academy/101-69_ziso_rhythm.md)
-- 图型：`Concept`
+- 图型：`Editorial`
 - 建议图片数：`4`
-- 封面方向：白天手机通知爆炸，夜晚只剩两盏稳定的灯 `08:30 / 21:00` 的节律感
+- 封面方向：一个普通投资者坐在安静书桌前，手机扣着不看，白天的通知噪音只留在背景里。重点不是画“抽象节律”，而是让人一眼看懂：系统值钱，不是因为整天吵，而是因为它帮你挡掉盘中噪音，只保留盘前和盘后的固定检查点。
 - 封面提示词：
 
 ```text
-A calm conceptual image about disciplined timing. Chaotic exploding phone notifications fading into the background, while two stable glowing light points anchor the scene like rational checkpoints. Premium dark palette, finance lifestyle mood, minimal but emotionally clear, no text.
+WeChat article cover, wide horizontal image. Show one ordinary Chinese retail investor sitting quietly at a simple desk, with a phone placed face down in the center. Around the outer edge of the image, a small number of blurred notification cards and market flashes feel noisy and distracting, but they must stay secondary and unreadable. The man and the face-down phone must be the clear main focus. The meaning must be obvious in one second: too many reminders create noise, real value is staying calm and not reacting in daytime. Use a lighter premium editorial palette, soft neutral background, and clean indoor lighting. The overall mood should feel calm, clear, restrained, and thoughtful, like a professional finance magazine illustration. It should not feel dark, depressing, cinematic, or emotionally heavy. Avoid harsh shadows, horror-movie contrast, oppressive darkness, or thriller atmosphere. Keep the composition simple and mobile-readable: one person, one quiet desk, one face-down phone, background noise pushed outward. Stylized realism, simplified forms, limited details, clean edges, mature editorial illustration, premium but grounded materials. No readable text, no decorative symbols, no sci-fi, no floating UI, no giant machine room, no bookshelf, no cluttered room, no dramatic spotlight, no exaggerated sadness.
 ```
 
 ### 6. 101-18 Echo Chamber

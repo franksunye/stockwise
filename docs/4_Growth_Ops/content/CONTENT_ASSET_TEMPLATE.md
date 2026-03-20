@@ -90,7 +90,7 @@ visual_strategy:
   derivation_rule:
     body: "same_world" # same_world | derived_from_cover | independent
     cards: "derived_from_cover" # derived_from_cover | same_world | independent
-visual_style_prefix: "Premium editorial finance style for mass-audience educational content, realistic not cartoonish, emotionally legible before intellectually impressive, Chinese retail investor context, one simple visual metaphor, clean composition, relatable human tension, premium but grounded materials, restrained dark palette with selective contrast, lighter and clearer than a movie poster, no text, no watermark, no cheap sci-fi look, no hologram overload, no giant robot or monster imagery, no generic corporate stock image feel, no blockbuster poster drama."
+visual_style_prefix: "Premium editorial finance style for mass-audience educational content, realistic not cartoonish, emotionally legible before intellectually impressive, Chinese retail investor context, one simple visual metaphor, clean composition, relatable human tension, premium but grounded materials, lighter premium editorial palette, soft neutral background, clean indoor or daylight-style lighting, calm clear restrained mood, professional finance magazine illustration feel rather than cinematic drama, stylized realism, simplified forms, limited details, no text, no watermark, no cheap sci-fi look, no hologram overload, no giant robot or monster imagery, no generic corporate stock image feel, no blockbuster poster drama, no industrial repair-diagram feel, no cute illustration style, no oppressive darkness, no horror-movie contrast, no thriller atmosphere."
 distribution:
   wechat:
     enabled: true

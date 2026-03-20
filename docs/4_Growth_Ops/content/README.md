@@ -1,6 +1,6 @@
 # 内容运营主索引 (Content Operations Registry)
 
-> 自动生成时间：2026/3/20 20:09:40
+> 自动生成时间：2026/3/20 20:48:43
 > 说明：本索引由 `scripts/cmo_sync.mjs` 统一扫描 `4_Growth_Ops/content` 与 `5_Support_Ops/content` 生成。
 > 日期规则：已发布内容优先显示公众号真实发布日期；未发布内容显示目标发布日期。
 > 视图：[_Pipeline_](_views/pipeline.md) · [_Next Release_](_views/next-release.md) · [_Recently Updated_](_views/recently-updated.md) · [_Change Impact_](_views/change-impact.md) · [_External Maintenance_](_views/external-maintenance.md)
@@ -149,7 +149,7 @@
 | [101-100: 很多人不是不会炒股，而是连自己是什么段位都没弄明白](101_academy/101-100_maturity_prologue.md) | Growth | article | MOFU | 信任桥梁 | ✅ 已通过 | 2026-03-25 周三 | ✅ 上线中 | 🟢 就绪 | 2026-03-20 |
 | [机会成本：很多人不是没机会，而是钱先被一只烂股拖住了](101_academy/101-40_opportunity_cost.md) | Growth | article | TOFU | 破圈钩子 | ✅ 已通过 | 2026-03-26 周四 | ✅ 上线中 | 🟢 就绪 | 2026-03-20 |
 | [谁在告诉你“炒股发财”？真正的量化交易，其实无聊得让人想睡觉](blitz_hub/Hub_07_Boring_Algorithm.md) | Growth | article | BOFU | - | 👀 待审核 | 2026-03-26 周四 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
-| [101-69: 为什么 ZISO 白天几乎不吭声，反而更可能帮你少亏钱？](101_academy/101-69_ziso_rhythm.md) | Growth | article | BOFU | 转化承接 | ✍️ 生产中 | 2026-03-27 周五 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
+| [101-69: 很多亏损，不是没提醒，而是提醒太多把人带乱了](101_academy/101-69_ziso_rhythm.md) | Growth | article | BOFU | 转化承接 | ✅ 已通过 | 2026-03-27 周五 | ✅ 上线中 | 🟢 就绪 | 2026-03-20 |
 | [回音壁效应：你以为自己在做研究，很多时候其实是在给持仓找安慰](101_academy/101-18_echo_chamber.md) | Growth | article | TOFU | 破圈钩子 | 👀 待审核 | 2026-03-30 周一 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
 | [波动率税：最磨人的行情，不是暴跌，而是天天给你点甜头再扇你一巴掌](101_academy/101-44_volatility_tax.md) | Growth | article | TOFU | 破圈钩子 | 👀 待审核 | 2026-03-31 周二 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
 | [101-104: 只要你的交易还经常从“我觉得”开始，你就还没走出 L0](101_academy/101-104_maturity_l0_discretionary.md) | Growth | article | MOFU | 信任桥梁 | 👀 待审核 | 2026-04-01 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
