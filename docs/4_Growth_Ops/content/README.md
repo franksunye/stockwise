@@ -1,6 +1,6 @@
 # 内容运营主索引 (Content Operations Registry)
 
-> 自动生成时间：2026/3/20 15:35:13
+> 自动生成时间：2026/3/20 16:36:52
 > 说明：本索引由 `scripts/cmo_sync.mjs` 统一扫描 `4_Growth_Ops/content` 与 `5_Support_Ops/content` 生成。
 > 日期规则：已发布内容优先显示公众号真实发布日期；未发布内容显示目标发布日期。
 > 视图：[_Pipeline_](_views/pipeline.md) · [_Next Release_](_views/next-release.md) · [_Recently Updated_](_views/recently-updated.md) · [_Change Impact_](_views/change-impact.md) · [_External Maintenance_](_views/external-maintenance.md)
@@ -143,8 +143,8 @@
 | [Free 与 Pro：差距在哪？](../../5_Support_Ops/content/tiers-explained.md) | Support | article | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
 | [iOS 特供：极致跟手感](../../5_Support_Ops/content/ios-tuning.md) | Support | article | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
 | [T+3 验证：趋势需要时间](../../5_Support_Ops/content/multi-day-verification.md) | Support | article | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
+| [101-68: 让“龙虾”替你炒股？它敢说，你敢信么](101_academy/101-68_general_llm_illusion.md) | Growth | article | TOFU | 破圈钩子 | ✅ 已通过 | 2026-03-20 周五 | ✅ 上线中 | ✅ 已发布 | 2026-03-20 |
 | [复盘一场真实的大跌：当所有人都在疯狂时，AI 是如何冷着脸劝我离场休息的？](blitz_hub/Hub_06_Cold_Feedback_Case.md) | Growth | article | MOFU | - | 🚀 已发布 | 2026-03-20 周五 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
-| [101-68: 让“龙虾”替你炒股？它敢说，你敢信么](101_academy/101-68_general_llm_illusion.md) | Growth | article | TOFU | 破圈钩子 | ✅ 已通过 | 2026-03-23 周一 | ✅ 上线中 | 🟢 就绪 | 2026-03-20 |
 | [101-12: 你以为自己在抢板，很多时候其实只是去给机器送肉](101_academy/101-12_l4_hft_illusion.md) | Growth | article | TOFU | 破圈钩子 | 👀 待审核 | 2026-03-24 周二 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
 | [101-100: 你以为自己在炒股，其实连自己站在哪一层都没弄明白](101_academy/101-100_maturity_prologue.md) | Growth | article | MOFU | 信任桥梁 | 👀 待审核 | 2026-03-25 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
 | [机会成本：一只烂股最狠的地方，不是套你一笔钱，而是拖住你整轮行情](101_academy/101-40_opportunity_cost.md) | Growth | article | TOFU | 破圈钩子 | 👀 待审核 | 2026-03-26 周四 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
