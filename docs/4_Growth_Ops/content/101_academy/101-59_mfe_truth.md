@@ -39,6 +39,29 @@ maintenance:
 website:
   enabled: true
   surface: learn
+visual_workflow:
+  stage: not_started
+  owner: cmo
+  reviewer: founder
+  priority: high
+  target_ready_date: ''
+  last_action_at: '2026-03-20'
+  blocked_reason: ''
+visual_assets:
+  cover:
+    required: true
+    status: missing
+    path: "/images/learn/101-59_mfe_truth_cover.png"
+  body:
+    required: true
+    target_count: 2
+    ready_count: 0
+    status: missing
+  cards:
+    required: true
+    target_count: 1
+    ready_count: 0
+    status: missing
 image: "/images/learn/101-59_mfe_truth_cover.png"
 images:
   cover: "/images/learn/101-59_mfe_truth_cover.png"
@@ -150,4 +173,3 @@ MFE，最大有利运动，说白了就是看一笔交易在进入之后，市�
 这套问题听起来更苛刻，但它会帮你慢慢摆脱一种很危险的习惯：拿结果倒推方法正确。
 
 所以“赚钱了也不代表你买对了”这句话，并不是故意唱反调。它只是提醒你，真正值得被复制的，不是某一次结果，而是那个能稳定产出高质量入场点的方法。
-

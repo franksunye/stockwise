@@ -40,6 +40,29 @@ maintenance:
 website:
   enabled: true
   surface: learn
+visual_workflow:
+  stage: not_started
+  owner: cmo
+  reviewer: founder
+  priority: high
+  target_ready_date: ''
+  last_action_at: '2026-03-20'
+  blocked_reason: ''
+visual_assets:
+  cover:
+    required: true
+    status: missing
+    path: "/images/learn/101-14_eod_edge_cover.png"
+  body:
+    required: true
+    target_count: 2
+    ready_count: 0
+    status: missing
+  cards:
+    required: true
+    target_count: 1
+    ready_count: 0
+    status: missing
 image: "/images/learn/101-14_eod_edge_cover.png"
 images:
   cover: "/images/learn/101-14_eod_edge_cover.png"
@@ -146,4 +169,3 @@ source_docs:
 盘后看计划，第二天按计划执行，这比盘中一会儿看这个、一会儿看那个，更符合 ZISO 想提供的使用方式。它本质上是在帮你减少“临场起意”，而不是增加“实时刺激”。
 
 所以别被分时图绑架。对普通投资者来说，少盯一会儿盘，很多时候不是少努力，而是少给噪音一次把你带跑的机会。
-

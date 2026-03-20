@@ -39,6 +39,29 @@ maintenance:
 website:
   enabled: true
   surface: learn
+visual_workflow:
+  stage: not_started
+  owner: cmo
+  reviewer: founder
+  priority: high
+  target_ready_date: ''
+  last_action_at: '2026-03-20'
+  blocked_reason: ''
+visual_assets:
+  cover:
+    required: true
+    status: missing
+    path: "/images/learn/101-100_maturity_prologue_cover.png"
+  body:
+    required: true
+    target_count: 2
+    ready_count: 0
+    status: missing
+  cards:
+    required: true
+    target_count: 1
+    ready_count: 0
+    status: missing
 image: "/images/learn/101-100_maturity_prologue_cover.png"
 images:
   cover: "/images/learn/101-100_maturity_prologue_cover.png"
@@ -189,4 +212,3 @@ L2 的核心，不是你有没有一个漂亮的公式，而是你开始用规�
 如果你看完以后，第一次清楚知道“我现在在哪一层”“我下一步该补什么”“我绝对不该再碰什么”，那这组文章就值了。
 
 因为从“赌博”走向“投资”，从“被收割”走向“职业化生存”，第一步从来不是更努力，而是先拿到地图。
-

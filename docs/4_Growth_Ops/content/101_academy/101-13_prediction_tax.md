@@ -40,6 +40,29 @@ maintenance:
 website:
   enabled: true
   surface: learn
+visual_workflow:
+  stage: not_started
+  owner: cmo
+  reviewer: founder
+  priority: high
+  target_ready_date: ''
+  last_action_at: '2026-03-20'
+  blocked_reason: ''
+visual_assets:
+  cover:
+    required: true
+    status: missing
+    path: "/images/learn/101-13_prediction_tax_cover.png"
+  body:
+    required: true
+    target_count: 2
+    ready_count: 0
+    status: missing
+  cards:
+    required: true
+    target_count: 1
+    ready_count: 0
+    status: missing
 image: "/images/learn/101-13_prediction_tax_cover.png"
 images:
   cover: "/images/learn/101-13_prediction_tax_cover.png"
@@ -137,4 +160,3 @@ ZISO 的边界一直很清楚。我们做的不是“替你预测宇宙”，而
 所以如果今天你还在四处追问“这票明天还能不能拿”，你真正缺的可能不是更会预测的人，而是一套不会被你的恐惧和贪婪瞬间带歪的系统。
 
 承认自己对明天没有绝对把握，不是弱。那反而是你开始接近专业的第一步。
-

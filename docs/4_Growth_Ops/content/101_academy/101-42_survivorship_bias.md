@@ -36,6 +36,29 @@ maintenance:
 website:
   enabled: true
   surface: learn
+visual_workflow:
+  stage: not_started
+  owner: cmo
+  reviewer: founder
+  priority: high
+  target_ready_date: ''
+  last_action_at: '2026-03-20'
+  blocked_reason: ''
+visual_assets:
+  cover:
+    required: true
+    status: missing
+    path: "/images/learn/101-42_survivorship_bias_cover.png"
+  body:
+    required: true
+    target_count: 2
+    ready_count: 0
+    status: missing
+  cards:
+    required: true
+    target_count: 1
+    ready_count: 0
+    status: missing
 image: "/images/learn/101-42_survivorship_bias_cover.png"
 images:
   cover: "/images/learn/101-42_survivorship_bias_cover.png"
@@ -132,4 +155,3 @@ ZISO 的判断标准从来不是“有没有一次特别惊艳的收益截图”
 所以幸存者偏差这篇文章真正想提醒你的，不是“外面没有高手”，而是：**不要把被看见的赢家，误当成完整的真相。**
 
 你看到的是故事，未必是分布。你看到的是幸存者，未必是规律。
-

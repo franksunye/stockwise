@@ -36,6 +36,29 @@ maintenance:
 website:
   enabled: true
   surface: learn
+visual_workflow:
+  stage: not_started
+  owner: cmo
+  reviewer: founder
+  priority: high
+  target_ready_date: ''
+  last_action_at: '2026-03-20'
+  blocked_reason: ''
+visual_assets:
+  cover:
+    required: true
+    status: missing
+    path: "/images/learn/101-37_black_swan_math_cover.png"
+  body:
+    required: true
+    target_count: 2
+    ready_count: 0
+    status: missing
+  cards:
+    required: true
+    target_count: 2
+    ready_count: 0
+    status: missing
 image: "/images/learn/101-37_black_swan_math_cover.png"
 images:
   cover: "/images/learn/101-37_black_swan_math_cover.png"
@@ -119,4 +142,3 @@ ZISO 的底层逻辑，做的也不是“假设世界永远平稳”。它更像
 因为在市场里，赚慢一点，很多时候还能回来；可一旦在极端事件里把本金和心态一起摔坏，后面的机会往往都与你无关了。
 
 你不用每天都预测灾难，但你必须让自己的系统，默认灾难迟早会来。
-

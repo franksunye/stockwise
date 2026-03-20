@@ -39,6 +39,29 @@ maintenance:
 website:
   enabled: true
   surface: learn
+visual_workflow:
+  stage: not_started
+  owner: cmo
+  reviewer: founder
+  priority: high
+  target_ready_date: ''
+  last_action_at: '2026-03-20'
+  blocked_reason: ''
+visual_assets:
+  cover:
+    required: true
+    status: missing
+    path: "/images/learn/101-104_maturity_l0_discretionary_cover.png"
+  body:
+    required: true
+    target_count: 2
+    ready_count: 0
+    status: missing
+  cards:
+    required: true
+    target_count: 1
+    ready_count: 0
+    status: missing
 image: "/images/learn/101-104_maturity_l0_discretionary_cover.png"
 images:
   cover: "/images/learn/101-104_maturity_l0_discretionary_cover.png"
@@ -133,4 +156,3 @@ ZISO 的角色，从来不是替用户把冲动讲得更漂亮，而是把那些
 所以 L0 不是一种可爱的起点，它更像是所有升级之前，必须先承认并处理掉的底层病灶。
 
 只要你的交易还经常从“我觉得”开始，市场就永远有办法让你为这种感觉买单。
-

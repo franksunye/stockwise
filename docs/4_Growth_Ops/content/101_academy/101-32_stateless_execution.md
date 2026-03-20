@@ -39,6 +39,29 @@ maintenance:
 website:
   enabled: true
   surface: learn
+visual_workflow:
+  stage: not_started
+  owner: cmo
+  reviewer: founder
+  priority: high
+  target_ready_date: ''
+  last_action_at: '2026-03-20'
+  blocked_reason: ''
+visual_assets:
+  cover:
+    required: true
+    status: missing
+    path: "/images/learn/101-32_stateless_execution_cover.png"
+  body:
+    required: true
+    target_count: 2
+    ready_count: 0
+    status: missing
+  cards:
+    required: true
+    target_count: 1
+    ready_count: 0
+    status: missing
 image: "/images/learn/101-32_stateless_execution_cover.png"
 images:
   cover: "/images/learn/101-32_stateless_execution_cover.png"
@@ -147,4 +170,3 @@ source_docs:
 对大多数人来说，这一步很难，但也很值。
 
 因为很多账户真正亏掉的，不是那一笔买贵了的成本，而是后面为了守着那条成本线，不断做错的动作。
-

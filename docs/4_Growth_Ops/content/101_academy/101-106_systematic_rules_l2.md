@@ -39,6 +39,29 @@ maintenance:
 website:
   enabled: true
   surface: learn
+visual_workflow:
+  stage: not_started
+  owner: cmo
+  reviewer: founder
+  priority: high
+  target_ready_date: ''
+  last_action_at: '2026-03-20'
+  blocked_reason: ''
+visual_assets:
+  cover:
+    required: true
+    status: missing
+    path: "/images/learn/101-106_systematic_rules_l2_cover.png"
+  body:
+    required: true
+    target_count: 2
+    ready_count: 0
+    status: missing
+  cards:
+    required: true
+    target_count: 1
+    ready_count: 0
+    status: missing
 image: "/images/learn/101-106_systematic_rules_l2_cover.png"
 images:
   cover: "/images/learn/101-106_systematic_rules_l2_cover.png"
@@ -143,4 +166,3 @@ ZISO 当前的重点，不是去假装自己已经是 L3 组合平台，更不�
 所以 L2 的分水岭，不在于你懂不懂 VCP、突破、均线模板或者动量结构，而在于你是否开始把规则当成一套需要被认真管理的工程系统。
 
 当你开始问“这套规则为什么成立、什么时候失效、我该如何验证它”，而不是只问“它最近准不准”，你就已经真正走进 L2 了。
-

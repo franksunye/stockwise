@@ -74,6 +74,24 @@ const STATUS_LABELS = {
   none: '➖ 不发布',
   old: '📦 历史归档'
 };
+const VISUAL_WORKFLOW_LABELS = {
+  not_started: '⚪ 未开始',
+  briefing: '🧭 已立视觉 brief',
+  prompt_ready: '📝 提示词就绪',
+  generating: '🎨 出图中',
+  reviewing: '👀 视觉待审',
+  approved: '✅ 视觉通过',
+  delivered: '📦 已交付'
+};
+const VISUAL_ASSET_STATUS_LABELS = {
+  not_needed: '➖ 不需要',
+  missing: '❌ 缺失',
+  planned: '🧭 已规划',
+  generating: '🎨 生成中',
+  partial: '🌓 部分完成',
+  ready: '🟢 已齐',
+  approved: '✅ 已通过'
+};
 
 function ensureDir(dirPath) {
   fs.mkdirSync(dirPath, { recursive: true });
@@ -285,6 +303,8 @@ function normalizeContentItem(filePath, sourceRootName) {
   const workflowLastActionAt = meta.workflow?.last_action_at || '';
   const lastActionAt = formatDate(workflowLastActionAt || gitTimestamp);
   const targetPublishDate = meta.workflow?.target_publish_date || meta.date || '';
+  const visualWorkflow = meta.visual_workflow || {};
+  const visualAssets = meta.visual_assets || {};
 
   return {
     title: meta.title || path.basename(filePath, '.md'),
@@ -327,8 +347,45 @@ function normalizeContentItem(filePath, sourceRootName) {
     contentLifecycleStatus: meta.content_lifecycle?.status || 'active',
     supersededBy: meta.content_lifecycle?.superseded_by || '',
     websiteSurface: meta.website?.surface || (sourceRootName === 'support' ? 'support' : 'learn'),
-    distribution
+    distribution,
+    visualWorkflowStage: visualWorkflow.stage || 'not_started',
+    visualWorkflowOwner: visualWorkflow.owner || '',
+    visualWorkflowReviewer: visualWorkflow.reviewer || '',
+    visualWorkflowPriority: visualWorkflow.priority || 'medium',
+    visualWorkflowTargetReadyDate: visualWorkflow.target_ready_date || '',
+    visualWorkflowLastActionAt: visualWorkflow.last_action_at || '',
+    visualWorkflowBlockedReason: visualWorkflow.blocked_reason || '',
+    visualAssets: {
+      cover: {
+        required: visualAssets.cover?.required !== false,
+        status: visualAssets.cover?.status || 'missing',
+        path: visualAssets.cover?.path || meta.images?.cover || meta.image || ''
+      },
+      body: {
+        required: visualAssets.body?.required === true,
+        targetCount: Number(visualAssets.body?.target_count || 0),
+        readyCount: Number(visualAssets.body?.ready_count || 0),
+        status: visualAssets.body?.status || 'missing'
+      },
+      cards: {
+        required: visualAssets.cards?.required === true,
+        targetCount: Number(visualAssets.cards?.target_count || 0),
+        readyCount: Number(visualAssets.cards?.ready_count || 0),
+        status: visualAssets.cards?.status || 'not_needed'
+      }
+    }
   };
+}
+
+function formatVisualWorkflow(stage) {
+  return VISUAL_WORKFLOW_LABELS[stage] || stage || '-';
+}
+
+function formatVisualAssets(item) {
+  const cover = VISUAL_ASSET_STATUS_LABELS[item.visualAssets?.cover?.status] || item.visualAssets?.cover?.status || '-';
+  const body = VISUAL_ASSET_STATUS_LABELS[item.visualAssets?.body?.status] || item.visualAssets?.body?.status || '-';
+  const cards = VISUAL_ASSET_STATUS_LABELS[item.visualAssets?.cards?.status] || item.visualAssets?.cards?.status || '-';
+  return `封面 ${cover}<br>正文 ${body}<br>卡片 ${cards}`;
 }
 
 function formatCampaignRole(role) {
@@ -463,7 +520,7 @@ function renderPipelineBoard(items, generatedAt) {
     }
 
     output += markdownTable(
-      ['标题', '来源', '漏斗', '战役角色', '审核优先级', '优先级', 'Owner', 'Reviewer', '目标日期', '公众号', '阻塞原因'],
+      ['标题', '来源', '漏斗', '战役角色', '审核优先级', '优先级', 'Owner', 'Reviewer', '目标日期', '视觉', '公众号', '阻塞原因'],
       stageItems.map((item) => [
         itemLink(item, 'pipeline'),
         item.contentSource === 'growth' ? 'Growth' : 'Support',
@@ -474,6 +531,7 @@ function renderPipelineBoard(items, generatedAt) {
         item.owner || '-',
         item.reviewer || '-',
         formatDateWithWeekday(item.targetPublishDate) || 'N/A',
+        formatVisualWorkflow(item.visualWorkflowStage),
         formatChannelStatus(item.distribution.wechat),
         item.blockedReason || '-'
       ])
@@ -585,7 +643,7 @@ function renderNextReleaseBoard(items, generatedAt) {
     output += '- 当前无已编入战役的公众号内容\n\n';
   } else {
     output += markdownTable(
-      ['目标日期', '标题', '来源', '漏斗', '战役角色', '审核优先级', '主流程', 'Owner', 'Reviewer', '公众号状态'],
+      ['目标日期', '标题', '来源', '漏斗', '战役角色', '审核优先级', '主流程', '视觉', 'Owner', 'Reviewer', '公众号状态'],
       campaignItems.map((item) => [
         formatDateWithWeekday(item.targetPublishDate) || 'N/A',
         itemLink(item, 'next'),
@@ -594,6 +652,7 @@ function renderNextReleaseBoard(items, generatedAt) {
         formatCampaignRole(item.campaignRole),
         formatReviewPriority(item.reviewPriority),
         STAGE_LABELS[item.workflowStage] || item.workflowStage,
+        formatVisualWorkflow(item.visualWorkflowStage),
         item.owner || '-',
         item.reviewer || '-',
         formatChannelStatus(item.distribution.wechat)
@@ -607,7 +666,7 @@ function renderNextReleaseBoard(items, generatedAt) {
     output += '- 当前无符合条件的内容\n\n';
   } else {
     output += markdownTable(
-      ['标题', '来源', '漏斗', '战役角色', '审核优先级', '主流程', '目标日期', 'Owner', 'Reviewer', '公众号状态'],
+      ['标题', '来源', '漏斗', '战役角色', '审核优先级', '主流程', '视觉', '目标日期', 'Owner', 'Reviewer', '公众号状态'],
       readyForWechat.map((item) => [
         itemLink(item, 'next'),
         item.contentSource === 'growth' ? 'Growth' : 'Support',
@@ -615,6 +674,7 @@ function renderNextReleaseBoard(items, generatedAt) {
         formatCampaignRole(item.campaignRole),
         formatReviewPriority(item.reviewPriority),
         STAGE_LABELS[item.workflowStage] || item.workflowStage,
+        formatVisualWorkflow(item.visualWorkflowStage),
         formatDateWithWeekday(item.targetPublishDate) || 'N/A',
         item.owner || '-',
         item.reviewer || '-',
@@ -629,7 +689,7 @@ function renderNextReleaseBoard(items, generatedAt) {
     output += '- 当前无符合条件的内容\n\n';
   } else {
     output += markdownTable(
-      ['标题', '来源', '漏斗', '战役角色', '审核优先级', '主流程', '目标日期', '公众号状态'],
+      ['标题', '来源', '漏斗', '战役角色', '审核优先级', '主流程', '视觉', '目标日期', '公众号状态'],
       scheduledForWechat.map((item) => [
         itemLink(item, 'next'),
         item.contentSource === 'growth' ? 'Growth' : 'Support',
@@ -637,6 +697,7 @@ function renderNextReleaseBoard(items, generatedAt) {
         formatCampaignRole(item.campaignRole),
         formatReviewPriority(item.reviewPriority),
         STAGE_LABELS[item.workflowStage] || item.workflowStage,
+        formatVisualWorkflow(item.visualWorkflowStage),
         formatDateWithWeekday(item.targetPublishDate) || 'N/A',
         formatChannelStatus(item.distribution.wechat)
       ])
@@ -655,7 +716,7 @@ function renderRecentlyUpdatedBoard(items, generatedAt) {
   output += '> 说明：按最近 Git 变更时间排序，帮助团队快速识别近期被修改或维护的内容资产。\n\n';
 
   output += markdownTable(
-    ['标题', '来源', '漏斗', '最后动作', '维护状态', '修订原因', '主流程', '溯源'],
+    ['标题', '来源', '漏斗', '最后动作', '维护状态', '修订原因', '主流程', '视觉资产', '溯源'],
     recentItems.map((item) => [
       itemLink(item, 'recent'),
       item.contentSource === 'growth' ? 'Growth' : 'Support',
@@ -664,6 +725,7 @@ function renderRecentlyUpdatedBoard(items, generatedAt) {
       item.maintenanceStatus,
       item.maintenanceReason || '-',
       STAGE_LABELS[item.workflowStage] || item.workflowStage,
+      formatVisualAssets(item),
       item.traceabilityStatus
     ])
   );

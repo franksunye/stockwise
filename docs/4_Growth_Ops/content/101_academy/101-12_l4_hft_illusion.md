@@ -39,6 +39,29 @@ maintenance:
 website:
   enabled: true
   surface: learn
+visual_workflow:
+  stage: not_started
+  owner: cmo
+  reviewer: founder
+  priority: high
+  target_ready_date: ''
+  last_action_at: '2026-03-20'
+  blocked_reason: ''
+visual_assets:
+  cover:
+    required: true
+    status: missing
+    path: "/images/learn/101-12_l4_hft_illusion_cover.png"
+  body:
+    required: true
+    target_count: 2
+    ready_count: 0
+    status: missing
+  cards:
+    required: true
+    target_count: 1
+    ready_count: 0
+    status: missing
 image: "/images/learn/101-12_l4_hft_illusion_cover.png"
 images:
   cover: "/images/learn/101-12_l4_hft_illusion_cover.png"
@@ -141,4 +164,3 @@ ZISO 的冷酷之处，恰恰在于它主动退出了这场“拼手速”的幻
 ## 最后一句
 
 你看到的“极速”，在量化面前，很多时候只是慢镜头。真正能让你活下来的，从来不是更快的一次点击，而是更晚一点动手，更早一点认清边界，以及彻底放弃那种“我也许能靠手速赢机构”的幻觉。
-

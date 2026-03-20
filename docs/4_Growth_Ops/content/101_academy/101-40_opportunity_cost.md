@@ -36,6 +36,29 @@ maintenance:
 website:
   enabled: true
   surface: learn
+visual_workflow:
+  stage: not_started
+  owner: cmo
+  reviewer: founder
+  priority: high
+  target_ready_date: ''
+  last_action_at: '2026-03-20'
+  blocked_reason: ''
+visual_assets:
+  cover:
+    required: true
+    status: missing
+    path: "/images/learn/101-40_opportunity_cost_cover.png"
+  body:
+    required: true
+    target_count: 2
+    ready_count: 0
+    status: missing
+  cards:
+    required: true
+    target_count: 1
+    ready_count: 0
+    status: missing
 image: "/images/learn/101-40_opportunity_cost_cover.png"
 images:
   cover: "/images/learn/101-40_opportunity_cost_cover.png"
@@ -118,4 +141,3 @@ ZISO 在底层强调风险否决和动作纪律，本质上也是同一逻辑。
 所以机会成本这件事，真正想提醒你的不是“市场外面永远还有更好的票”，而是：**你的资金需要流动性，你的决策需要再分配能力。**
 
 永远和一只已经走坏的股票谈恋爱，代价从来不只是亏钱，而是把自己后面的机会也一起拖慢了。
-

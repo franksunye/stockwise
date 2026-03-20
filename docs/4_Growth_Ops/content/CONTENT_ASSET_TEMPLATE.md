@@ -46,6 +46,29 @@ content_lifecycle:
 website:
   enabled: true
   surface: "learn" # learn | support | campaign | hidden
+visual_workflow:
+  stage: "not_started" # not_started | briefing | prompt_ready | generating | reviewing | approved | delivered
+  owner: "" # designer | cmo | founder | agent
+  reviewer: ""
+  priority: "medium" # high | medium | low
+  target_ready_date: ""
+  last_action_at: "2026-03-19"
+  blocked_reason: ""
+visual_assets:
+  cover:
+    required: true
+    status: "missing" # missing | planned | generating | ready | approved
+    path: ""
+  body:
+    required: true
+    target_count: 2
+    ready_count: 0
+    status: "missing" # missing | partial | ready | approved
+  cards:
+    required: false
+    target_count: 0
+    ready_count: 0
+    status: "not_needed" # not_needed | missing | partial | ready | approved
 image: ""
 images:
   cover: ""
@@ -95,14 +118,52 @@ distribution:
 - `source_docs`
 - `workflow.stage`
 - `workflow.target_publish_date`
+- `visual_workflow.stage`
 - `website.enabled`
 - `distribution.wechat.status`
 
 推荐补齐：
 
 - `campaign_role`
+- `visual_assets.cover.status`
+- `visual_assets.body.status`
 
 ## 图片命名规范
+
+## 视觉管理规范
+
+仅有 `image_prompts / images / visual_strategy` 还不够，因为这些字段只能描述“设计应该长什么样”，不能回答“设计现在做到哪一步”。
+
+因此每篇内容新增两层视觉管理字段：
+
+- `visual_workflow`
+  管这篇内容的视觉生产流程状态
+- `visual_assets`
+  管不同图片角色是否已经产出、审核、交付
+
+建议这样理解：
+
+- `visual_workflow.stage`
+  管流程阶段：
+  - `not_started`
+  - `briefing`
+  - `prompt_ready`
+  - `generating`
+  - `reviewing`
+  - `approved`
+  - `delivered`
+- `visual_assets.cover.status`
+  管封面图是否已经可用于正文 / 网站 / 公众号
+- `visual_assets.body.status`
+  管正文配图是否已达到最小阅读节奏要求
+- `visual_assets.cards.status`
+  管社媒传播图是否已补齐
+
+推荐协同规则：
+
+1. `workflow.stage` 不应早于 `approved`，如果正文已准备发布，但 `visual_workflow.stage` 仍在 `briefing / generating`，应视为内容资产未真正完稿。
+2. 若 `visual_assets.cover.status != approved`，不应将 `distribution.wechat.status` 设为 `ready` 或更后状态。
+3. 若文章声明有 `images.body` 或 `images.cards` 目标数量，则 `visual_assets.body/cards.ready_count` 应与实际文件数量同步维护。
 
 建议所有内容图片都按“文章 slug + 图片角色”命名，避免后期混乱。
 

@@ -39,6 +39,29 @@ maintenance:
 website:
   enabled: true
   surface: learn
+visual_workflow:
+  stage: not_started
+  owner: cmo
+  reviewer: founder
+  priority: high
+  target_ready_date: ''
+  last_action_at: '2026-03-20'
+  blocked_reason: ''
+visual_assets:
+  cover:
+    required: true
+    status: missing
+    path: "/images/learn/101-17_tower_shield_cover.png"
+  body:
+    required: true
+    target_count: 2
+    ready_count: 0
+    status: missing
+  cards:
+    required: true
+    target_count: 1
+    ready_count: 0
+    status: missing
 image: "/images/learn/101-17_tower_shield_cover.png"
 images:
   cover: "/images/learn/101-17_tower_shield_cover.png"
@@ -141,4 +164,3 @@ source_docs:
 赚钱当然重要，但对大多数普通投资者来说，先学会少犯那些会把自己直接送出场的大错，往往比多抓一两次漂亮机会更有复利价值。
 
 所以 ZISO 不是一辆赛车。赛车让你兴奋，安全屋让你活得久。
-

@@ -18,10 +18,12 @@ StockWise 已经拥有三套分散但非常有价值的能力：
 1. 下周可以发布哪几篇文章到公众号？
 2. 我们最近修订了哪几篇文章？
 3. 产品逻辑变化后，我们应该充实或复核哪些文章？
+4. 哪些文章文案已通过，但封面、配图或社媒卡还没准备好？
+5. 哪些内容视觉方向已经确定，但图片资产尚未审核通过？
 
 这份蓝图的目标，就是把现有系统升级成一条可执行的内容生产线：
 
-**产品研发变化 -> 内容资产识别 -> 策划与生产 -> 审核 -> 渠道发布 -> 修订回流**
+**产品研发变化 -> 内容资产识别 -> 文案生产 -> 视觉生产 -> 审核 -> 渠道发布 -> 修订回流**
 
 ---
 
@@ -38,12 +40,14 @@ StockWise 已经拥有三套分散但非常有价值的能力：
 - 下周公众号可以发哪几篇？
 - 哪些文章已经审核通过但还没有排期？
 - 哪些 Support 内容适合转成 Growth 内容或公众号长文？
+- 哪些文章文案已定稿，但视觉仍卡在封面或配图阶段？
 
 #### B. 维护与修订问题
 
 - 最近 7 天我们修过哪些文章？
 - 哪些文章因为产品更新而需要复核？
 - 哪些内容仍然是旧口径或高风险口径？
+- 哪些内容正文已更新，但图片仍在沿用旧视觉表达？
 
 #### C. 研发联动问题
 
@@ -132,7 +136,7 @@ summary: ""
 
 每篇内容不再只是“文章文件”，而是一个 **内容资产对象**。
 
-### 4.1 内容资产的四层结构
+### 4.1 内容资产的五层结构
 
 #### 第一层：Asset Identity
 
@@ -198,6 +202,46 @@ distribution:
     status: "none"
 ```
 
+#### 第五层：Visual Production
+
+定义这篇内容“视觉生产推进到哪一步，以及图片资产是否交付完成”。
+
+```yaml
+visual_workflow:
+  stage: "not_started" # not_started | briefing | prompt_ready | generating | reviewing | approved | delivered
+  owner: ""
+  reviewer: ""
+  priority: "medium"
+  target_ready_date: "2026-03-25"
+  last_action_at: "2026-03-19"
+  blocked_reason: ""
+visual_assets:
+  cover:
+    required: true
+    status: "missing" # missing | planned | generating | ready | approved
+    path: ""
+  body:
+    required: true
+    target_count: 2
+    ready_count: 0
+    status: "missing" # missing | partial | ready | approved
+  cards:
+    required: false
+    target_count: 0
+    ready_count: 0
+    status: "not_needed" # not_needed | missing | partial | ready | approved
+```
+
+这层的目的不是重复写 `image_prompts / images / visual_strategy`。
+
+它解决的是另一类管理问题：
+
+1. 视觉现在是谁在负责
+2. 视觉生产卡在 briefing、生成，还是审核
+3. 封面、正文配图、社媒卡到底有没有交付完成
+
+如果没有这一层，系统记录的只是“图片应该长什么样”，而不是“图片做到哪一步了”。
+
 ---
 
 ## 5. 统一 frontmatter 规范
@@ -239,6 +283,29 @@ content_lifecycle:
 website:
   enabled: true
   surface: "learn" # learn | support | campaign | hidden
+visual_workflow:
+  stage: "not_started"
+  owner: ""
+  reviewer: ""
+  priority: "medium"
+  target_ready_date: ""
+  last_action_at: "2026-03-19"
+  blocked_reason: ""
+visual_assets:
+  cover:
+    required: true
+    status: "missing"
+    path: ""
+  body:
+    required: true
+    target_count: 2
+    ready_count: 0
+    status: "missing"
+  cards:
+    required: false
+    target_count: 0
+    ready_count: 0
+    status: "not_needed"
 distribution:
   wechat:
     enabled: true
@@ -270,6 +337,18 @@ distribution:
 1. 老文章可以继续只写旧字段
 2. 新脚本优先读取新字段，没有则回退读取旧字段
 3. 新增或大修文章优先补齐新字段
+
+### 5.2 视觉字段的治理规则
+
+图片在内容系统里不再只是“附件”，而是文章生产的一部分。
+
+因此建议建立以下硬约束：
+
+1. `workflow.stage = approved` 只代表文案通过，不等于整篇内容已具备发布条件。
+2. 若 `visual_assets.cover.status != approved`，则不应把 `distribution.wechat.status` 设为 `ready / scheduled / published`。
+3. 若 `visual_assets.body.required = true` 且 `visual_assets.body.status = missing`，则长文资产视为未完稿。
+4. 若 `cards.required = true` 但 `cards.status != approved`，则说明分发资产仍未闭环。
+5. `image_prompts / visual_strategy` 负责定义视觉方案，`visual_workflow / visual_assets` 负责定义视觉执行状态；两层缺一不可。
 
 ---
 

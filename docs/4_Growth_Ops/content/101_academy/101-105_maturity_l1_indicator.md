@@ -39,6 +39,29 @@ maintenance:
 website:
   enabled: true
   surface: learn
+visual_workflow:
+  stage: not_started
+  owner: cmo
+  reviewer: founder
+  priority: high
+  target_ready_date: ''
+  last_action_at: '2026-03-20'
+  blocked_reason: ''
+visual_assets:
+  cover:
+    required: true
+    status: missing
+    path: "/images/learn/101-105_maturity_l1_indicator_cover.png"
+  body:
+    required: true
+    target_count: 2
+    ready_count: 0
+    status: missing
+  cards:
+    required: true
+    target_count: 1
+    ready_count: 0
+    status: missing
 image: "/images/learn/101-105_maturity_l1_indicator_cover.png"
 images:
   cover: "/images/learn/101-105_maturity_l1_indicator_cover.png"
@@ -141,4 +164,3 @@ L1 最典型的问题，不是工具少，而是研究治理几乎没有成型�
 如果你还经常困惑“为什么指标给了买点，我还是亏了”，那大概率不是你学得不够多，而是你已经走到了 L1 的边界。
 
 下一步，不是再装更多插件，而是开始认真问一句: 这些信号，到底有没有被验证过。
-

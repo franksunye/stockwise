@@ -37,6 +37,29 @@ maintenance:
 website:
   enabled: true
   surface: learn
+visual_workflow:
+  stage: not_started
+  owner: cmo
+  reviewer: founder
+  priority: high
+  target_ready_date: ''
+  last_action_at: '2026-03-20'
+  blocked_reason: ''
+visual_assets:
+  cover:
+    required: true
+    status: missing
+    path: "/images/learn/101-44_volatility_tax_cover.png"
+  body:
+    required: true
+    target_count: 2
+    ready_count: 0
+    status: missing
+  cards:
+    required: true
+    target_count: 1
+    ready_count: 0
+    status: missing
 image: "/images/learn/101-44_volatility_tax_cover.png"
 images:
   cover: "/images/learn/101-44_volatility_tax_cover.png"
@@ -114,4 +137,3 @@ distribution:
 ZISO 的逻辑不是否认波动，而是拒绝在没有把握的波动里消耗你。对普通投资者来说，少缴一点波动率税，往往比多抓一次短线反弹更重要。因为你真正需要保留下来的，不只是账上的钱，还有下一次明确机会到来时还能冷静行动的资格。
 
 把刀一直握在手里，不叫专业。知道什么时候该收刀，才是。
-

@@ -37,6 +37,29 @@ maintenance:
 website:
   enabled: true
   surface: learn
+visual_workflow:
+  stage: not_started
+  owner: cmo
+  reviewer: founder
+  priority: high
+  target_ready_date: ''
+  last_action_at: '2026-03-20'
+  blocked_reason: ''
+visual_assets:
+  cover:
+    required: true
+    status: missing
+    path: "/images/learn/101-18_echo_chamber_cover.png"
+  body:
+    required: true
+    target_count: 2
+    ready_count: 0
+    status: missing
+  cards:
+    required: true
+    target_count: 1
+    ready_count: 0
+    status: missing
 image: "/images/learn/101-18_echo_chamber_cover.png"
 images:
   cover: "/images/learn/101-18_echo_chamber_cover.png"
@@ -183,4 +206,3 @@ distribution:
 把“新闻满足感”换成“规则执行感”。
 
 因为只有当你不再被回音壁反复催眠，你才有机会听见真正重要的东西。
-

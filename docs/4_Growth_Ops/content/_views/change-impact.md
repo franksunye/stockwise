@@ -1,6 +1,6 @@
 # 产品变更影响视图 (Change Impact Board)
 
-> 自动生成时间：2026/3/20 11:06:14
+> 自动生成时间：2026/3/20 15:35:13
 > 说明：该视图用于回答“产品/工程文档变化后，哪些内容应该复核或补充”。
 
 ## 受底层文档变更影响，需优先复核的内容
@@ -55,7 +55,6 @@
 
 ## 尚未被转化成内容资产的内部文档机会
 
-- `docs/0_Strategy/00_Product_Business_Vision.md`
 - `docs/0_Strategy/03_Team_Responsibility_Matrix.md`
 - `docs/0_Strategy/04_Milestones_Execution_Log.md`
 - `docs/0_Strategy/08_Globalization_Strategy_and_Evolution.md`
@@ -85,6 +84,7 @@
 - `docs/1_Engineering/legacy_designs/Technical_Design.md`
 - `docs/1_Engineering/LLM_Debug_Traces/0_Handover_Report.md`
 - `docs/1_Engineering/LLM_Debug_Traces/B2_LAB_VS_B2_PROD_SAFE_20260312.md`
+- `docs/1_Engineering/LLM_Debug_Traces/B2_PRODUCTION_MIGRATION_PLAN_20260312.md`
 
 ## 配套参考
 
