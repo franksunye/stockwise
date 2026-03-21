@@ -73,6 +73,10 @@ export async function GET(request: Request) {
                        ${EFFECTIVE_VALIDATION_STATUS_SQL} AS validation_status, p.actual_change,
                        ${EFFECTIVE_LAYER1_STATUS_SQL} AS layer1_status, p.layer1_status AS layer1_signal,
                        p.max_perf_in_window, p.validation_data,
+                       json_object(
+                           'close', json_extract(p.layer1_payload, '$.close'),
+                           'change_percent', json_extract(p.layer1_payload, '$.change_percent')
+                       ) AS layer1_payload,
                        p.is_primary, p.model_id as model, m.display_name,
                        ${EFFECTIVE_DECISION_SEMANTIC_SQL} AS decision_semantic,
                        ? AS mode_id,
