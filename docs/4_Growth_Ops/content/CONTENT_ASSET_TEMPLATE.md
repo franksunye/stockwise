@@ -106,6 +106,17 @@ distribution:
   toutiao:
     enabled: false
     status: "none"
+wechat_layout:
+  profile: "finance_editorial_v1" # finance_editorial_v1 | support_clean_v1 | campaign_brief_v1
+  density: "airy" # airy | balanced | compact
+  body_font_size: 15
+  line_spacing: 1.8
+  paragraph_spacing: 1.0
+  heading_style: "rule_divider" # rule_divider | bold_plain | number_kicker
+  accent_color: "ink_gold" # ink_gold | ink_red | ink_green | neutral_only
+  cover_mode: "light_editorial" # light_editorial | hybrid_editorial | data_brief
+  body_image_policy: "cover_plus_1_or_2" # cover_only | cover_plus_1_or_2 | cover_plus_3
+  checklist_version: "wechat_layout_v1"
 ---
 ```
 
@@ -127,6 +138,35 @@ distribution:
 - `campaign_role`
 - `visual_assets.cover.status`
 - `visual_assets.body.status`
+- `wechat_layout.profile`
+- `wechat_layout.checklist_version`
+
+## 公众号排版管理建议
+
+如果内容要发公众号，仅管理 `distribution.wechat.status` 还不够，因为“能发”不代表“版式已经达标”。
+
+建议把公众号版式也纳入内容资产，最少补这一组字段：
+
+- `wechat_layout.profile`
+  管这篇文章使用哪一套公众号版式模板，例如财经杂志长文、支持说明文、活动短稿
+- `wechat_layout.density`
+  管排版密度，避免有的文章过挤、有的文章过松
+- `wechat_layout.body_font_size / line_spacing / paragraph_spacing`
+  管正文阅读参数，减少每次临场手调
+- `wechat_layout.heading_style`
+  管小标题层级表达方式，避免样式漂移
+- `wechat_layout.accent_color`
+  管强调色，保证品牌统一而不过度装饰
+- `wechat_layout.cover_mode`
+  管封面和正文整体气质是否一致
+- `wechat_layout.checklist_version`
+  管本次发布遵循的是哪一版排版检查清单
+
+协同约束建议：
+
+1. 当 `distribution.wechat.enabled = true` 时，默认要求补齐 `wechat_layout.profile`。
+2. 当文章进入 `workflow.stage = approved` 且待公众号发布时，`wechat_layout.checklist_version` 应视为必填。
+3. 若文章是 `TOFU / MOFU` 长文，默认不应使用 `compact` 密度，除非明确是快讯或战报型内容。
 
 ## 图片命名规范
 

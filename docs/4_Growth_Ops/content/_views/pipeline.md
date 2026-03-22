@@ -1,6 +1,6 @@
 # 内容生产流程看板 (Pipeline Board)
 
-> 自动生成时间：2026/3/20 20:48:43
+> 自动生成时间：2026/3/22 22:18:41
 > 说明：本看板优先服务活跃工作流，只展开需要推进的阶段；已发布内容只保留最近概览，避免看板膨胀。
 
 ## 🧠 待策划
@@ -73,8 +73,6 @@
 | 标题 | 来源 | 漏斗 | 战役角色 | 审核优先级 | 优先级 | Owner | Reviewer | 目标日期 | 视觉 | 公众号 | 阻塞原因 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | [谁在告诉你“炒股发财”？真正的量化交易，其实无聊得让人想睡觉](../blitz_hub/Hub_07_Boring_Algorithm.md) | Growth | BOFU | - | - | 高 | cmo | founder | 2026-03-26 周四 | ⚪ 未开始 | ➖ 不发布 | - |
-| [回音壁效应：你以为自己在做研究，很多时候其实是在给持仓找安慰](../101_academy/101-18_echo_chamber.md) | Growth | TOFU | 破圈钩子 | 次优先审 | 高 | cmo | founder | 2026-03-30 周一 | ⚪ 未开始 | 📝 草稿 | - |
-| [波动率税：最磨人的行情，不是暴跌，而是天天给你点甜头再扇你一巴掌](../101_academy/101-44_volatility_tax.md) | Growth | TOFU | 破圈钩子 | 次优先审 | 高 | cmo | founder | 2026-03-31 周二 | ⚪ 未开始 | 📝 草稿 | - |
 | [101-104: 只要你的交易还经常从“我觉得”开始，你就还没走出 L0](../101_academy/101-104_maturity_l0_discretionary.md) | Growth | MOFU | 信任桥梁 | 基本可发 | 高 | cmo | founder | 2026-04-01 周三 | ⚪ 未开始 | 📝 草稿 | - |
 | [幸存者偏差：你刷到的那些“股神”，很多只是运气暂时还没用完](../101_academy/101-42_survivorship_bias.md) | Growth | TOFU | 破圈钩子 | 基本可发 | 高 | cmo | founder | 2026-04-02 周四 | ⚪ 未开始 | 📝 草稿 | - |
 | [在所有人都在亏钱的行情里，不回撤才是最高维度的炫富](../blitz_hub/Hub_08_No_Drawdown_Wealth.md) | Growth | BOFU | - | - | 高 | cmo | founder | 2026-04-02 周四 | ⚪ 未开始 | ➖ 不发布 | - |
@@ -105,6 +103,8 @@
 | [101-100: 很多人不是不会炒股，而是连自己是什么段位都没弄明白](../101_academy/101-100_maturity_prologue.md) | Growth | MOFU | 信任桥梁 | 建议先审 | 高 | cmo | founder | 2026-03-25 周三 | ✅ 视觉通过 | 🟢 就绪 | - |
 | [机会成本：很多人不是没机会，而是钱先被一只烂股拖住了](../101_academy/101-40_opportunity_cost.md) | Growth | TOFU | 破圈钩子 | 建议先审 | 高 | cmo | founder | 2026-03-26 周四 | ✅ 视觉通过 | 🟢 就绪 | - |
 | [101-69: 很多亏损，不是没提醒，而是提醒太多把人带乱了](../101_academy/101-69_ziso_rhythm.md) | Growth | BOFU | 转化承接 | 建议先审 | 高 | cmo | founder | 2026-03-27 周五 | ✅ 视觉通过 | 🟢 就绪 | - |
+| [买完股票后越刷越踏实，很多时候不是逻辑更强了，而是你更不想认错](../101_academy/101-18_echo_chamber.md) | Growth | TOFU | 破圈钩子 | 次优先审 | 高 | cmo | founder | 2026-03-30 周一 | ✅ 视觉通过 | 🟢 就绪 | - |
+| [很多人不是亏在大跌里，而是亏在天天都有机会的行情里](../101_academy/101-44_volatility_tax.md) | Growth | TOFU | 破圈钩子 | 次优先审 | 高 | cmo | founder | 2026-03-31 周二 | ✅ 视觉通过 | 🟢 就绪 | - |
 
 ## 📅 已排期
 
@@ -112,7 +112,7 @@
 
 ## 🚀 已发布
 
-- 已发布资产总数：105
+- 已发布资产总数：108
 - 系统识别公众号已发布：10 篇
 - 已确认公众号前线基线：9 篇
 - 看板优先展示公众号已发布内容，其次补充仅网站上线的内容；完整清单请看主索引。
@@ -129,6 +129,9 @@
 | [共识分级定义 (Consensus Levels)](../../../5_Support_Ops/content/consensus-levels.md) | Support | 2026-02-19 周四 | ✅ 上线中 | [✅ 已发布](https://mp.weixin.qq.com/s/KDT2hCFUH1S4nidyYPOJ1A) |
 | [投研决议：多维度的共识](../../../5_Support_Ops/content/ai-council-logic.md) | Support | 2026-02-18 周三 | ✅ 上线中 | [✅ 已发布](https://mp.weixin.qq.com/s/NuvCM1CRxNs1GfKvIiotow) |
 | [角标清除：别被红点牵着走](../../../5_Support_Ops/content/badge-hygiene.md) | Support | 2026-02-17 周二 | ✅ 上线中 | [✅ 已发布](https://mp.weixin.qq.com/s/JdHK9Gi-QqlwGf45rT-GMQ) |
+| [101-18_echo_chamber_wechat_release_brief](../101_academy/101-18_echo_chamber_wechat_release_brief.md) | Growth | 2026-03-22 周日 | ✅ 上线中 | ➖ 不发布 |
+| [101-44_volatility_tax_wechat_release_brief](../101_academy/101-44_volatility_tax_wechat_release_brief.md) | Growth | 2026-03-22 周日 | ✅ 上线中 | ➖ 不发布 |
+| [WECHAT_LAYOUT_PLAYBOOK_FINANCE_EDITORIAL](../WECHAT_LAYOUT_PLAYBOOK_FINANCE_EDITORIAL.md) | Growth | 2026-03-22 周日 | ✅ 上线中 | ➖ 不发布 |
 | [101-01: 散户的不可能三角](../101_academy/101-01_impossible_triangle.md) | Growth | 2026-03-20 周五 | ✅ 上线中 | ➖ 不发布 |
 | [101-02: 错失恐惧症 (FOMO)](../101_academy/101-02_fomo.md) | Growth | 2026-03-20 周五 | ✅ 上线中 | ➖ 不发布 |
 | [101-03: 厌恶损失 (Loss Aversion)](../101_academy/101-03_loss_aversion.md) | Growth | 2026-03-20 周五 | ✅ 上线中 | ➖ 不发布 |
@@ -136,9 +139,6 @@
 | [101-05: 赌徒谬误 (Gambler's Fallacy)](../101_academy/101-05_gamblers_fallacy.md) | Growth | 2026-03-20 周五 | ✅ 上线中 | ➖ 不发布 |
 | [101-06: 禀赋效应 (Endowment Effect)](../101_academy/101-06_endowment_effect.md) | Growth | 2026-03-20 周五 | ✅ 上线中 | ➖ 不发布 |
 | [101-07: 报复性交易 (Revenge Trading)](../101_academy/101-07_revenge_trading.md) | Growth | 2026-03-20 周五 | ✅ 上线中 | ➖ 不发布 |
-| [101-08: 3M 框架 (Mind, Method, Money)](../101_academy/101-08_3m_framework.md) | Growth | 2026-03-20 周五 | ✅ 上线中 | ➖ 不发布 |
-| [101-09: 为什么聪明人会失败？](../101_academy/101-09_why_smart_people_fail.md) | Growth | 2026-03-20 周五 | ✅ 上线中 | ➖ 不发布 |
-| [101-10: 离场休息的艺术](../101_academy/101-10_sitting_on_hands.md) | Growth | 2026-03-20 周五 | ✅ 上线中 | ➖ 不发布 |
 
 ## 📦 已归档
 

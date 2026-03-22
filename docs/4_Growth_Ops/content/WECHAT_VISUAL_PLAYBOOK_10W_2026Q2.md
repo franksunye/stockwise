@@ -23,6 +23,48 @@
 6. 公域封面先给情绪入口，再给专业感。
 7. 让用户秒懂，优先于让团队觉得“高级”。
 
+## 一点五、人物使用原则
+
+从这一版开始，公域内容封面默认不使用具体人物形象，不把“投资者肖像”当成默认主角。
+
+默认优先顺序：
+
+1. 静物构图
+2. 符号化构图
+3. 桌面场景 / 设备场景
+4. 必要时才考虑人物，而且优先局部，不露脸
+
+推荐替代元素：
+
+- 手机
+- 桌面
+- 卡片
+- 图表碎片
+- 文档堆叠
+- 光源 / 阴影关系
+- 一个清楚的中心物件 + 一组重复信息
+
+这样做的原因：
+
+- 更像财经杂志 editorial，而不是故事插画
+- 不会被年龄、性别、表情、服装把含义带偏
+- 更容易让不同读者把自己代进去
+- 更容易形成系列统一的视觉语言
+- 更适合小图阅读，主体更集中
+
+只有下面这些情况，才考虑人物作为例外：
+
+- 误区本身必须靠“人的动作”才能一秒讲清
+- 不出现人就无法建立核心冲突
+- 已经验证过静物方案明显不如有人方案清楚
+
+即使使用人物，也遵守：
+
+- 优先局部手势、背影、半身，不优先正脸
+- 不做具体投资者肖像叙事
+- 不让人物表情成为唯一信息来源
+- 仍然要有一个比人物更清楚的中心概念物件
+
 ## 二、ZISO 三层视觉分工
 
 - 产品 UI：`85%` 克制 + `15%` 温度
@@ -97,7 +139,7 @@
 所有图片提示词默认共用这一段风格 DNA，再接单篇内容描述：
 
 ```text
-Premium editorial finance style for mass-audience educational content, realistic not cartoonish, emotionally legible before intellectually impressive, Chinese retail investor context, one simple visual metaphor, relatable human tension, clean composition, premium but grounded materials, lighter premium editorial palette, soft neutral background, clean indoor or daylight-style lighting, calm clear restrained mood, professional finance magazine illustration feel rather than cinematic drama, stylized realism, simplified forms, limited details, no text, no watermark, no cheap sci-fi look, no hologram overload, no giant robot or monster imagery, no blockbuster poster drama, no generic corporate stock image feel, no oppressive darkness, no horror-movie contrast, no thriller atmosphere.
+Premium editorial finance style for mass-audience educational content, realistic not cartoonish, emotionally legible before intellectually impressive, Chinese retail investor context, one simple visual metaphor, object-centered or still-life-first composition, clean composition, premium but grounded materials, lighter premium editorial palette, soft neutral background, clean indoor or daylight-style lighting, calm clear restrained mood, professional finance magazine illustration feel rather than cinematic drama, stylized realism, simplified forms, limited details, no text, no watermark, no cheap sci-fi look, no hologram overload, no giant robot or monster imagery, no blockbuster poster drama, no generic corporate stock image feel, no oppressive darkness, no horror-movie contrast, no thriller atmosphere, no default portrait-centered composition.
 ```
 
 使用规则：
@@ -118,7 +160,7 @@ Premium editorial finance style for mass-audience educational content, realistic
 - `mass-audience educational content`：这是大众内容入口，不是内部品牌海报
 - `emotionally legible before intellectually impressive`：先看懂、先有感觉，再谈高级
 - `one simple visual metaphor`：一张图只讲一个简单比喻
-- `relatable human tension`：紧张感要让人能代入，不要宏大灾难感
+- `object-centered or still-life-first composition`：默认先用物件和关系讲概念，不默认上人物
 - `lighter premium editorial palette + soft neutral background`：默认先追求轻、清楚、像财经杂志，再决定要不要压暗
 - `clean indoor or daylight-style lighting`：优先用干净室内光或日间光，不要默认电影顶光和压抑阴影
 - `professional finance magazine illustration feel rather than cinematic drama`：目标是成熟财经 editorial，不是情绪海报
@@ -191,6 +233,7 @@ Change only...
 - 多隐喻叠加
 - 过多屏幕 / 科技 UI
 - 宏大世界观扩展
+- 默认把一个具体人物放在画面中心
 
 ### 2. Body Prompt
 
@@ -435,11 +478,11 @@ WeChat article cover, wide horizontal image. Show one ordinary Chinese retail in
 - 文件：[101-18_echo_chamber.md](/Users/yesun/Code/stockwise/docs/4_Growth_Ops/content/101_academy/101-18_echo_chamber.md)
 - 图型：`Hybrid`
 - 建议图片数：`4`
-- 封面方向：一个人深夜刷手机，屏幕里不断重复同一只股票的利好标题，像回音墙
+- 封面方向：不出现人物，改成手机中心构图。桌面中央只有一部手机，周围是同一只股票的各种重复“利好说法”，这些内容像安慰性的回音墙一样慢慢围上来。重点不是“信息很多”，而是“一眼看出这是一套重复安慰，而不是新的判断”。
 - 封面提示词：
 
 ```text
-A hybrid editorial image of a retail investor late at night scrolling on a phone, surrounded by repeating finance headlines about the same stock, forming an echo wall. The mood is anxious, self-reinforcing, and claustrophobic. Realistic, dark room lighting, Chinese finance context, no text.
+WeChat article cover, wide horizontal image. Do not show any person or face. Show one phone placed on a simple desk in a quiet late-night room. Around the phone, repeated finance content about the same stock forms a curved echo wall made of similar bullish cards, repeated approval cues, and near-identical optimistic narratives, all unreadable but obviously repetitive. The meaning must be clear in one second: this is not truth expanding, but reassurance repeating. Keep the composition simple and mobile-readable: one central phone, one desk surface, one echo wall closing inward. Use a premium editorial finance-magazine illustration style with lighter premium palette, soft neutral darkness rather than oppressive black, clean composition, restrained tension, and mature magazine still-life feeling. No person, no hands, no face, no giant screens, no sci-fi UI, no poster drama, no readable text.
 ```
 
 ### 7. 101-44 Volatility Tax
@@ -447,11 +490,11 @@ A hybrid editorial image of a retail investor late at night scrolling on a phone
 - 文件：[101-44_volatility_tax.md](/Users/yesun/Code/stockwise/docs/4_Growth_Ops/content/101_academy/101-44_volatility_tax.md)
 - 图型：`Editorial`
 - 建议图片数：`4`
-- 封面方向：同一个账户被来回拉扯，像被市场连续扇耳光，强调“天天给点希望又收走”
+- 封面方向：不出现人物，改成中心账户物件构图。一部手机或一个账户卡片放在画面中央，两侧是相反方向的市场碎片和涨跌信号反复拉扯它。重点不是“大跌毁灭”，而是“天天给点希望又收走”的来回消耗。
 - 封面提示词：
 
 ```text
-An editorial symbolic finance image showing a small investor account being pulled back and forth by violent market swings, like repeated slaps from both directions. The feeling is exhausting rather than catastrophic. Realistic motion, high tension, Chinese stock market mood, no text.
+WeChat article cover, wide horizontal image. Do not show any person or face. Show a phone or simple account card placed at the center of a clean desk surface. From both left and right sides, repeated market fragments, rotating sector cues, and conflicting up-down finance cards pull the same center object back and forth, creating a clear feeling of whiplash and repeated false hope. The image should express exhausting oscillation rather than one catastrophic crash. Keep the composition simple and instantly readable on mobile: one central account object, two opposing directional forces, obvious back-and-forth tension. Use a premium editorial finance-magazine still-life style with lighter premium palette, soft neutral background, restrained tension, and no poster drama. No person, no hands, no face, no giant screens, no sci-fi UI, no readable text.
 ```
 
 ### 8. 101-104 L0
