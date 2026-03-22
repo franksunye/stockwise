@@ -1,0 +1,201 @@
+name: Tradeability Research Weekly Calibration
+
+on:
+  schedule:
+    - cron: '30 19 * * 6' # 03:30 Asia/Shanghai, Sunday
+  workflow_dispatch:
+    inputs:
+      market:
+        description: 'Target market'
+        type: choice
+        required: true
+        default: 'BOTH'
+        options:
+        - CN
+        - HK
+        - BOTH
+      strategy_versions:
+        description: 'Comma-separated strategy versions for calibration'
+        type: string
+        required: false
+        default: 'tradeability_v1,tradeability_v2'
+      parameter_order:
+        description: 'Comma-separated single-parameter order'
+        type: string
+        required: false
+        default: 'breakout_volume_mult,momentum_change_threshold,strong_close_threshold,vcp_ratio,risk_off_ma'
+      cn_research_pool_manifest:
+        description: 'Repo-relative CN research manifest path'
+        type: string
+        required: false
+        default: 'backend/strategy_config/research_pool/cn_core_500.json'
+      hk_research_pool_manifest:
+        description: 'Repo-relative HK research manifest path'
+        type: string
+        required: false
+        default: 'backend/strategy_config/research_pool/hk_core_180.json'
+
+concurrency:
+  group: tradeability-research-weekly-calibration-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  calibrate-cn:
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'schedule' ||
+      (github.event_name == 'workflow_dispatch' && (inputs.market == 'CN' || inputs.market == 'BOTH'))
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Non-Trading-Hour Guard
+        run: |
+          HOUR=$(TZ=Asia/Shanghai date +%H)
+          MIN=$(TZ=Asia/Shanghai date +%M)
+          HHMM="${HOUR}${MIN}"
+          if [ "$HHMM" -ge "0900" ] && [ "$HHMM" -le "1630" ]; then
+            echo "Research workflow blocked during trading hours (Asia/Shanghai): ${HHMM}"
+            exit 1
+          fi
+
+      - name: Coverage Gate CN
+        env:
+          DB_SOURCE: cloud
+          TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+        run: |
+          mkdir -p tmp/tradeability_research tmp/tradeability_calibration
+          python -u backend/scripts/check_research_pool_coverage.py \
+            --market CN \
+            --research-pool-manifest "${{ inputs.cn_research_pool_manifest || 'backend/strategy_config/research_pool/cn_core_500.json' }}" \
+            --min-in-meta-rate 0.99 \
+            --min-latest-price-rate 0.90 \
+            --min-history-rate 0.85 \
+            --min-history-bars 20 \
+            --output-json tmp/tradeability_research/cn_coverage_gate_weekly.json
+
+      - name: Run Weekly Calibration CN (Research Pool)
+        env:
+          PYTHONUNBUFFERED: "1"
+          DB_SOURCE: cloud
+          TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+        run: |
+          STRATEGIES="${{ inputs.strategy_versions }}"
+          if [ -z "$STRATEGIES" ]; then
+            STRATEGIES="tradeability_v1,tradeability_v2"
+          fi
+          PARAM_ORDER="${{ inputs.parameter_order }}"
+          if [ -z "$PARAM_ORDER" ]; then
+            PARAM_ORDER="breakout_volume_mult,momentum_change_threshold,strong_close_threshold,vcp_ratio,risk_off_ma"
+          fi
+          python -u backend/scripts/run_tradeability_weekly_calibration.py \
+            --market CN \
+            --strategy-versions "$STRATEGIES" \
+            --parameter-order "$PARAM_ORDER" \
+            --research-pool-manifest "${{ inputs.cn_research_pool_manifest || 'backend/strategy_config/research_pool/cn_core_500.json' }}" \
+            --output-json tmp/tradeability_calibration/cn_weekly_calibration_research.json \
+            --output-md tmp/tradeability_calibration/cn_weekly_calibration_research.md
+
+      - name: Upload CN Weekly Research Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: tradeability-research-weekly-cn
+          path: |
+            tmp/tradeability_research/cn_coverage_gate_weekly.json
+            tmp/tradeability_calibration/cn_weekly_calibration_research.json
+            tmp/tradeability_calibration/cn_weekly_calibration_research.md
+          if-no-files-found: error
+          retention-days: 14
+
+  calibrate-hk:
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'schedule' ||
+      (github.event_name == 'workflow_dispatch' && (inputs.market == 'HK' || inputs.market == 'BOTH'))
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Non-Trading-Hour Guard
+        run: |
+          HOUR=$(TZ=Asia/Shanghai date +%H)
+          MIN=$(TZ=Asia/Shanghai date +%M)
+          HHMM="${HOUR}${MIN}"
+          if [ "$HHMM" -ge "0900" ] && [ "$HHMM" -le "1630" ]; then
+            echo "Research workflow blocked during trading hours (Asia/Shanghai): ${HHMM}"
+            exit 1
+          fi
+
+      - name: Coverage Gate HK
+        env:
+          DB_SOURCE: cloud
+          TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+        run: |
+          mkdir -p tmp/tradeability_research tmp/tradeability_calibration
+          python -u backend/scripts/check_research_pool_coverage.py \
+            --market HK \
+            --research-pool-manifest "${{ inputs.hk_research_pool_manifest || 'backend/strategy_config/research_pool/hk_core_180.json' }}" \
+            --min-in-meta-rate 0.99 \
+            --min-latest-price-rate 0.90 \
+            --min-history-rate 0.85 \
+            --min-history-bars 20 \
+            --output-json tmp/tradeability_research/hk_coverage_gate_weekly.json
+
+      - name: Run Weekly Calibration HK (Research Pool)
+        env:
+          PYTHONUNBUFFERED: "1"
+          DB_SOURCE: cloud
+          TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+        run: |
+          STRATEGIES="${{ inputs.strategy_versions }}"
+          if [ -z "$STRATEGIES" ]; then
+            STRATEGIES="tradeability_v1,tradeability_v2"
+          fi
+          PARAM_ORDER="${{ inputs.parameter_order }}"
+          if [ -z "$PARAM_ORDER" ]; then
+            PARAM_ORDER="breakout_volume_mult,momentum_change_threshold,strong_close_threshold,vcp_ratio,risk_off_ma"
+          fi
+          python -u backend/scripts/run_tradeability_weekly_calibration.py \
+            --market HK \
+            --strategy-versions "$STRATEGIES" \
+            --parameter-order "$PARAM_ORDER" \
+            --research-pool-manifest "${{ inputs.hk_research_pool_manifest || 'backend/strategy_config/research_pool/hk_core_180.json' }}" \
+            --output-json tmp/tradeability_calibration/hk_weekly_calibration_research.json \
+            --output-md tmp/tradeability_calibration/hk_weekly_calibration_research.md
+
+      - name: Upload HK Weekly Research Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: tradeability-research-weekly-hk
+          path: |
+            tmp/tradeability_research/hk_coverage_gate_weekly.json
+            tmp/tradeability_calibration/hk_weekly_calibration_research.json
+            tmp/tradeability_calibration/hk_weekly_calibration_research.md
+          if-no-files-found: error
+          retention-days: 14

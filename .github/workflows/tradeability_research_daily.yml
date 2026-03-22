@@ -1,0 +1,194 @@
+name: Tradeability Research Daily
+
+on:
+  schedule:
+    - cron: '40 16 * * 1-5' # 00:40 Asia/Shanghai, Tue-Sat
+  workflow_dispatch:
+    inputs:
+      market:
+        description: 'Target market'
+        type: choice
+        required: true
+        default: 'BOTH'
+        options:
+        - CN
+        - HK
+        - BOTH
+      strategy_versions:
+        description: 'Comma-separated sidecar strategy versions'
+        type: string
+        required: false
+        default: 'tradeability_v1,tradeability_v2'
+      cn_research_pool_manifest:
+        description: 'Repo-relative CN research manifest path'
+        type: string
+        required: false
+        default: 'backend/strategy_config/research_pool/cn_core_500.json'
+      hk_research_pool_manifest:
+        description: 'Repo-relative HK research manifest path'
+        type: string
+        required: false
+        default: 'backend/strategy_config/research_pool/hk_core_180.json'
+
+concurrency:
+  group: tradeability-research-daily-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  sample-sync-cn:
+    if: |
+      github.event_name == 'schedule' ||
+      (github.event_name == 'workflow_dispatch' && (inputs.market == 'CN' || inputs.market == 'BOTH'))
+    uses: ./.github/workflows/tradeability_sample_sync_daily.yml
+    with:
+      market: 'CN'
+      cn_target_symbols: 500
+      history_start_date: '2024-01-01'
+      incremental_buffer_days: 14
+      max_workers: 2
+      sync_meta: false
+      research_pool_manifest: ${{ inputs.cn_research_pool_manifest || 'backend/strategy_config/research_pool/cn_core_500.json' }}
+    secrets: inherit
+
+  sample-sync-hk:
+    if: |
+      github.event_name == 'schedule' ||
+      (github.event_name == 'workflow_dispatch' && (inputs.market == 'HK' || inputs.market == 'BOTH'))
+    uses: ./.github/workflows/tradeability_sample_sync_daily.yml
+    with:
+      market: 'HK'
+      hk_target_symbols: 180
+      history_start_date: '2024-01-01'
+      incremental_buffer_days: 14
+      max_workers: 2
+      sync_meta: false
+      research_pool_manifest: ${{ inputs.hk_research_pool_manifest || 'backend/strategy_config/research_pool/hk_core_180.json' }}
+    secrets: inherit
+
+  coverage-gate-cn:
+    needs: [sample-sync-cn]
+    if: success()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Non-Trading-Hour Guard
+        run: |
+          HOUR=$(TZ=Asia/Shanghai date +%H)
+          MIN=$(TZ=Asia/Shanghai date +%M)
+          HHMM="${HOUR}${MIN}"
+          if [ "$HHMM" -ge "0900" ] && [ "$HHMM" -le "1630" ]; then
+            echo "Research workflow blocked during trading hours (Asia/Shanghai): ${HHMM}"
+            exit 1
+          fi
+
+      - name: Coverage Gate CN
+        env:
+          DB_SOURCE: cloud
+          TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+        run: |
+          mkdir -p tmp/tradeability_research
+          python -u backend/scripts/check_research_pool_coverage.py \
+            --market CN \
+            --research-pool-manifest "${{ inputs.cn_research_pool_manifest || 'backend/strategy_config/research_pool/cn_core_500.json' }}" \
+            --min-in-meta-rate 0.99 \
+            --min-latest-price-rate 0.90 \
+            --min-history-rate 0.85 \
+            --min-history-bars 20 \
+            --output-json tmp/tradeability_research/cn_coverage_gate.json
+
+      - name: Upload CN Coverage Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tradeability-research-coverage-cn
+          path: tmp/tradeability_research/cn_coverage_gate.json
+          if-no-files-found: error
+          retention-days: 14
+
+  coverage-gate-hk:
+    needs: [sample-sync-hk]
+    if: success()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Non-Trading-Hour Guard
+        run: |
+          HOUR=$(TZ=Asia/Shanghai date +%H)
+          MIN=$(TZ=Asia/Shanghai date +%M)
+          HHMM="${HOUR}${MIN}"
+          if [ "$HHMM" -ge "0900" ] && [ "$HHMM" -le "1630" ]; then
+            echo "Research workflow blocked during trading hours (Asia/Shanghai): ${HHMM}"
+            exit 1
+          fi
+
+      - name: Coverage Gate HK
+        env:
+          DB_SOURCE: cloud
+          TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+        run: |
+          mkdir -p tmp/tradeability_research
+          python -u backend/scripts/check_research_pool_coverage.py \
+            --market HK \
+            --research-pool-manifest "${{ inputs.hk_research_pool_manifest || 'backend/strategy_config/research_pool/hk_core_180.json' }}" \
+            --min-in-meta-rate 0.99 \
+            --min-latest-price-rate 0.90 \
+            --min-history-rate 0.85 \
+            --min-history-bars 20 \
+            --output-json tmp/tradeability_research/hk_coverage_gate.json
+
+      - name: Upload HK Coverage Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tradeability-research-coverage-hk
+          path: tmp/tradeability_research/hk_coverage_gate.json
+          if-no-files-found: error
+          retention-days: 14
+
+  sidecar-cn:
+    needs: [coverage-gate-cn]
+    if: success()
+    uses: ./.github/workflows/tradeability_sidecar_daily.yml
+    with:
+      market: 'CN'
+      strategy_versions: ${{ inputs.strategy_versions || 'tradeability_v1,tradeability_v2' }}
+      dry_run: false
+      research_pool_manifest: ${{ inputs.cn_research_pool_manifest || 'backend/strategy_config/research_pool/cn_core_500.json' }}
+    secrets: inherit
+
+  sidecar-hk:
+    needs: [coverage-gate-hk]
+    if: success()
+    uses: ./.github/workflows/tradeability_sidecar_daily.yml
+    with:
+      market: 'HK'
+      strategy_versions: ${{ inputs.strategy_versions || 'tradeability_v1,tradeability_v2' }}
+      dry_run: false
+      research_pool_manifest: ${{ inputs.hk_research_pool_manifest || 'backend/strategy_config/research_pool/hk_core_180.json' }}
+    secrets: inherit

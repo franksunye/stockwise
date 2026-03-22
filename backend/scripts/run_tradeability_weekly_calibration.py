@@ -14,6 +14,7 @@ import json
 import os
 import sys
 from datetime import datetime
+from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Tuple
 
 backend_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -40,12 +41,30 @@ DEFAULT_STEP_MAP: Dict[str, Sequence[float]] = {
 }
 
 
-def load_bars_by_market(market: str, start_date: Optional[str], end_date: Optional[str]) -> Dict[str, List[Bar]]:
+def _load_symbols_from_manifest(manifest_path: str) -> List[str]:
+    payload = json.loads(Path(manifest_path).read_text(encoding="utf-8"))
+    symbols = [str(item.get("symbol")) for item in payload.get("symbols") or [] if item.get("symbol")]
+    if not symbols:
+        raise ValueError(f"No symbols found in manifest: {manifest_path}")
+    return symbols
+
+
+def load_bars_by_market(
+    market: str,
+    start_date: Optional[str],
+    end_date: Optional[str],
+    research_pool_manifest: Optional[str] = None,
+) -> Dict[str, List[Bar]]:
     conn = get_connection()
     try:
         cur = conn.cursor()
         where_parts = ["sm.market = ?"]
         params: List[object] = [market]
+        manifest_symbols = _load_symbols_from_manifest(research_pool_manifest) if research_pool_manifest else []
+        if manifest_symbols:
+            placeholders = ",".join(["?"] * len(manifest_symbols))
+            where_parts.append(f"dp.symbol IN ({placeholders})")
+            params.extend(manifest_symbols)
         if start_date:
             where_parts.append("dp.date >= ?")
             params.append(start_date)
@@ -307,11 +326,17 @@ def main() -> None:
     parser.add_argument("--slippage-bps", type=float, default=0.0)
     parser.add_argument("--execution-cost-profile", choices=["fixed", "liquidity_bucketed"], default="fixed")
     parser.add_argument("--params-file", default="")
+    parser.add_argument("--research-pool-manifest", default="", help="Optional manifest used to restrict calibration universe")
     parser.add_argument("--output-json", default="")
     parser.add_argument("--output-md", default="")
     args = parser.parse_args()
 
-    bars_by_symbol = load_bars_by_market(args.market, args.start_date or None, args.end_date or None)
+    bars_by_symbol = load_bars_by_market(
+        args.market,
+        args.start_date or None,
+        args.end_date or None,
+        args.research_pool_manifest or None,
+    )
     if not bars_by_symbol:
         raise RuntimeError(f"No bars found for market={args.market}")
 
