@@ -1,0 +1,183 @@
+/* 
+ * StockWise - Silent Math Theme (for mdnice.com & WeChat Official Account)
+ * 核心理念: 专业是目标，易读是桥梁。保留锋利，去掉花活。
+ * 兼容性: 专为微信公众号内联样式优化
+ */
+
+:root {
+  --sw-bg: #ffffff;
+  --sw-text: #3f3f3f;    /* 降低纯黑对比度，保护视力 */
+  --sw-indigo: #6366f1;  /* AI/Rationality (主品牌色) */
+  --sw-rose: #f43f5e;    /* Risk/Warning (警示色) */
+  --sw-emerald: #10b981; /* Profit/Safety (执行色) */
+  --sw-dark: #050508;    /* Deep Void */
+  --sw-gray: #f8f9fa;    /* 极浅灰，用于块背景 */
+  --sw-border: #eef0f4;
+}
+
+/* =========================================================
+   1. 全局基础排版 (Global Typography)
+   ========================================================= */
+#nice {
+  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei UI", "Microsoft YaHei", Arial, sans-serif;
+  font-size: 15px; /* 【关键】15px 是目前微信中文长文阅读的黄金字号 */
+  line-height: 1.8; /* 极客风需要足够的呼吸感 */
+  letter-spacing: 0.05em; /* 略微拉开字间距，消除文字密度焦虑 */
+  color: var(--sw-text);
+  background: var(--sw-bg);
+  padding: 10px 15px;
+}
+
+/* 段落间距 */
+#nice p {
+  margin-bottom: 22px; 
+}
+
+/* =========================================================
+   2. 标题层级 (Heading Hierarchy)
+   ========================================================= */
+/* H1: 文章主标题 (通常公号不用H1，但保留以防万一) */
+#nice h1 {
+  font-size: 20px;
+  font-weight: bold;
+  color: var(--sw-dark);
+  text-align: center;
+  margin: 40px 0 30px 0;
+  border-bottom: 2px solid var(--sw-indigo);
+  padding-bottom: 10px;
+}
+
+/* H2: 核心视觉锚点 (赛博极客风) 
+   你之前的设计非常棒，我优化了对比度和内边距 */
+#nice h2 {
+  font-size: 17px;
+  font-weight: bold;
+  display: inline-block;
+  background: var(--sw-indigo); 
+  color: #ffffff;
+  padding: 6px 16px;
+  border-radius: 2px; /* 弱化圆角，增加硬朗感 */
+  margin: 45px 0 25px 0;
+  box-shadow: 3px 3px 0px var(--sw-dark); /* 保留你设计的赛博底层感阴影 */
+}
+
+/* H3: 特性/子观点点缀 */
+#nice h3 {
+  font-size: 16px;
+  font-weight: bold;
+  border-left: 4px solid var(--sw-rose); 
+  padding-left: 12px;
+  margin: 35px 0 15px 0;
+  color: var(--sw-dark);
+}
+
+/* =========================================================
+   3. 引用与强调 (Highlights & Quotes)
+   ========================================================= */
+/* 引用块 (Golden Rule Cards / 语录) */
+#nice blockquote {
+  font-style: normal;
+  font-size: 14px;
+  border-left: none;
+  background: var(--sw-gray);
+  padding: 20px 20px 20px 40px;
+  margin: 25px 0;
+  border-radius: 6px;
+  color: #555555;
+  position: relative;
+  /* border: 1px solid var(--sw-border); 换成了更高级的阴影 */
+  box-shadow: inset 4px 0 0 var(--sw-indigo);
+}
+
+#nice blockquote:before {
+  content: "❝";
+  font-size: 32px;
+  color: rgba(99, 102, 241, 0.3); /* 半透明的品牌色 */
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+
+/* 强调文字 (划重点) */
+#nice strong {
+  color: var(--sw-indigo);
+  font-weight: bold;
+}
+
+/* =========================================================
+   4. 列表与代码 (Lists & Code)
+   ========================================================= */
+/* 无序列表 */
+#nice ul {
+  padding-left: 10px;
+  margin-bottom: 20px;
+}
+#nice ul li {
+  margin-bottom: 10px;
+  list-style-type: none; 
+  position: relative;
+  padding-left: 24px;
+}
+#nice ul li:before {
+  content: "➤"; /* 硬核指示符 */
+  color: var(--sw-emerald); 
+  position: absolute;
+  left: 0;
+  font-size: 12px;
+  top: 3px;
+}
+
+/* 代码块 */
+#nice pre code {
+  background-color: var(--sw-dark);
+  color: #e2e8f0;
+  border-radius: 8px;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 13px;
+  padding: 15px;
+  line-height: 1.6;
+}
+#nice p code, #nice li code {
+  background-color: var(--sw-gray);
+  color: var(--sw-rose);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: Consolas, monospace;
+}
+
+/* =========================================================
+   5. 图像与装订 (Images & Dividers)
+   ========================================================= */
+/* 适配 Silent Math 风格图片：增加深色悬浮投影，倒圆角 */
+#nice figure, #nice img {
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(5, 5, 8, 0.15);
+  margin: 20px auto;
+  display: block;
+}
+
+/* 图片描述注释 (居中，小字号) */
+#nice figcaption {
+  text-align: center;
+  font-size: 12px;
+  color: #999;
+  margin-top: -10px;
+  margin-bottom: 25px;
+}
+
+/* 分隔线 */
+#nice hr {
+  border: 0;
+  border-top: 1px solid var(--sw-border);
+  margin: 45px auto;
+  width: 40%; /* 不要太宽，克制 */
+}
+
+/* 脚注/微小注释 (适配行话指南) */
+#nice small {
+  font-size: 12px;
+  color: #888;
+  display: block;
+  margin-top: 5px;
+}

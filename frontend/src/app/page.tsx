@@ -41,7 +41,7 @@ export default function LandingPage() {
             <span className="bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">回归理性的从容</span>
           </h1>
           <p className="text-lg md:text-xl text-slate-400 font-medium max-w-2xl mx-auto leading-relaxed">
-            复杂的分析交给 AI，简单的决策留给你。 <br className="hidden md:block" />
+            复杂的分析交给 AI，简单的决策留自己。 <br className="hidden md:block" />
             ZISO AI 自动为你完成复盘与数据建模，让 <span className="text-white">普通投资者也能拥有机构级的投研能力</span>。
           </p>
           <div className="pt-10 flex flex-col md:flex-row items-center justify-center gap-4">
