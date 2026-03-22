@@ -118,6 +118,12 @@ def _candidate_values(parameter: str, base_value: float) -> List[float]:
     return out
 
 
+def _is_same_value(parameter: str, left: float, right: float) -> bool:
+    if parameter == "risk_off_ma":
+        return int(round(left)) == int(round(right))
+    return abs(float(left) - float(right)) <= 1e-9
+
+
 def _window_metrics(
     bars_by_symbol: Dict[str, List[Bar]],
     windows: Sequence[Tuple[str, str]],
@@ -348,7 +354,17 @@ def main() -> None:
                 execution_cost_profile=args.execution_cost_profile,
             )
             baseline_metrics = baseline_eval["aggregate"]
-            results: List[Dict[str, object]] = []
+            results: List[Dict[str, object]] = [
+                {
+                    "parameter": parameter,
+                    "changed_parameter": None,
+                    "params": dict(current_params),
+                    "metrics": baseline_metrics,
+                    "windows": baseline_eval["windows"],
+                    "guardrails": _guardrail_status(baseline_metrics, baseline_metrics),
+                    "value": current_params[parameter],
+                }
+            ]
             for value in _candidate_values(parameter, float(current_params[parameter])):
                 candidate_params = dict(current_params)
                 candidate_params[parameter] = value
@@ -370,7 +386,7 @@ def main() -> None:
                 results.append(
                     {
                         "parameter": parameter,
-                        "changed_parameter": parameter if value != current_params[parameter] else None,
+                        "changed_parameter": parameter if not _is_same_value(parameter, value, float(current_params[parameter])) else None,
                         "params": candidate_params,
                         "metrics": metrics,
                         "windows": candidate_eval["windows"],
@@ -380,7 +396,7 @@ def main() -> None:
                 )
 
             selection = _select_best_result(results, baseline_metrics)
-            selected = selection["selected"] or next(x for x in results if x["changed_parameter"] is None)
+            selected = selection["selected"] or next((x for x in results if x["changed_parameter"] is None), results[0])
             decision = {
                 "parameter": parameter,
                 "decision": "accepted" if selection["accept_change"] else "kept_baseline",
