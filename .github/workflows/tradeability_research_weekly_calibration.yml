@@ -40,11 +40,27 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  entry-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Non-Trading-Hour Entry Guard
+        run: |
+          HOUR=$(TZ=Asia/Shanghai date +%H)
+          MIN=$(TZ=Asia/Shanghai date +%M)
+          HHMM="${HOUR}${MIN}"
+          if [ "$HHMM" -ge "0900" ] && [ "$HHMM" -le "1630" ]; then
+            echo "Research workflow blocked during trading hours (Asia/Shanghai): ${HHMM}"
+            exit 1
+          fi
+
   calibrate-cn:
+    needs: [entry-guard]
     runs-on: ubuntu-latest
     if: |
+      needs.entry-guard.result == 'success' && (
       github.event_name == 'schedule' ||
       (github.event_name == 'workflow_dispatch' && (inputs.market == 'CN' || inputs.market == 'BOTH'))
+      )
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -59,16 +75,6 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
-
-      - name: Non-Trading-Hour Guard
-        run: |
-          HOUR=$(TZ=Asia/Shanghai date +%H)
-          MIN=$(TZ=Asia/Shanghai date +%M)
-          HHMM="${HOUR}${MIN}"
-          if [ "$HHMM" -ge "0900" ] && [ "$HHMM" -le "1630" ]; then
-            echo "Research workflow blocked during trading hours (Asia/Shanghai): ${HHMM}"
-            exit 1
-          fi
 
       - name: Coverage Gate CN
         env:
@@ -121,10 +127,13 @@ jobs:
           retention-days: 14
 
   calibrate-hk:
+    needs: [entry-guard]
     runs-on: ubuntu-latest
     if: |
+      needs.entry-guard.result == 'success' && (
       github.event_name == 'schedule' ||
       (github.event_name == 'workflow_dispatch' && (inputs.market == 'HK' || inputs.market == 'BOTH'))
+      )
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -139,16 +148,6 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
-
-      - name: Non-Trading-Hour Guard
-        run: |
-          HOUR=$(TZ=Asia/Shanghai date +%H)
-          MIN=$(TZ=Asia/Shanghai date +%M)
-          HHMM="${HOUR}${MIN}"
-          if [ "$HHMM" -ge "0900" ] && [ "$HHMM" -le "1630" ]; then
-            echo "Research workflow blocked during trading hours (Asia/Shanghai): ${HHMM}"
-            exit 1
-          fi
 
       - name: Coverage Gate HK
         env:
