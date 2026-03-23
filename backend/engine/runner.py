@@ -177,10 +177,34 @@ class PredictionRunner:
         conn = get_connection()
         cursor = conn.cursor()
         
-        # Only proceed if we have at least one successful prediction
-        valid_predictions = [p for p in predictions if p]
+        # Classify outcomes explicitly so logs can distinguish "skip-existing" vs real failures.
+        skipped_existing_ids = []
+        failed_model_ids_runtime = []
+        valid_predictions = []
+        for p in predictions:
+            if not p:
+                continue
+            skip_reason = p.get("_skip_reason") if isinstance(p, dict) else None
+            if skip_reason:
+                if skip_reason == "exists":
+                    skipped_existing_ids.append(str(p.get("model_id", "unknown")))
+                else:
+                    failed_model_ids_runtime.append(str(p.get("model_id", "unknown")))
+                continue
+            valid_predictions.append(p)
+
         if not valid_predictions:
-            logger.warning(f"⚠️ [{trace_id}] No successful predictions for {symbol}, aborting save.")
+            if skipped_existing_ids and not failed_model_ids_runtime:
+                logger.info(
+                    f"⏩ [{trace_id}] No new predictions for {symbol}: "
+                    f"all requested models already existed ({sorted(set(skipped_existing_ids))})."
+                )
+            else:
+                logger.warning(
+                    f"⚠️ [{trace_id}] No successful predictions for {symbol}, aborting save. "
+                    f"skipped_existing={sorted(set(skipped_existing_ids))} "
+                    f"runtime_failed={sorted(set(failed_model_ids_runtime))}"
+                )
             conn.close()
             return False
 
@@ -214,9 +238,9 @@ class PredictionRunner:
         # If so, do NOT promote lower-priority models to primary.
         # Reason: PRO users pay for premium model (DeepSeek) analysis.
         # Showing rule-engine or hunyuan-lite as primary would be a degraded experience.
-        attempted_model_ids = [m.model_id for m in models]
+        attempted_model_ids = [m.model_id for m in models if m.model_id not in set(skipped_existing_ids)]
         succeeded_model_ids = {p['model_id'] for p in valid_predictions}
-        failed_model_ids = set(attempted_model_ids) - succeeded_model_ids
+        failed_model_ids = (set(attempted_model_ids) - succeeded_model_ids) | set(failed_model_ids_runtime)
         
         highest_attempted_priority = max(
             (model_priorities.get(mid, 0) for mid in attempted_model_ids), default=0
@@ -246,7 +270,7 @@ class PredictionRunner:
         if selected_primary_model_id:
             primary_pred = next((p for p in valid_predictions if p["model_id"] == selected_primary_model_id), None)
 
-        for i, pred in enumerate(predictions):
+        for i, pred in enumerate(valid_predictions):
             if not pred:
                 continue
                 
@@ -319,14 +343,14 @@ class PredictionRunner:
                     )
                     if cursor.fetchone():
                         logger.debug(f"⏩ Model {model.model_id} already has prediction for {symbol} on {date}, bypassing.")
-                        return None
+                        return {"model_id": model.model_id, "_skip_reason": "exists"}
                 finally:
                     conn.close()
 
             # 2. Execute prediction
             result = await model.predict(symbol, date, data)
             if result is None:
-                return None
+                return {"model_id": model.model_id, "_skip_reason": "no_result"}
 
             # Layer-1 is the single source of directional truth.
             # Model output may keep tactical narrative freedom, but signal is enforced.
@@ -343,7 +367,7 @@ class PredictionRunner:
             ):
                 reason_preview = str(result.get('reasoning', ''))[:80]
                 logger.warning(f"⚠️ [{model.model_id}] Prediction rejected (error result): {reason_preview}...")
-                return None
+                return {"model_id": model.model_id, "_skip_reason": "rejected_error_result"}
                 
             result['model_id'] = model.model_id
             
@@ -357,7 +381,7 @@ class PredictionRunner:
             return result
         except Exception as e:
             logger.error(f"❌ Model {model.model_id} failed: {e}")
-            return None
+            return {"model_id": model.model_id, "_skip_reason": "exception", "_error": str(e)}
 
 
 def _layer1_to_signal(setup_state: str) -> str:
