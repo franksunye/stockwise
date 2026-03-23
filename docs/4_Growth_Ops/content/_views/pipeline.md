@@ -1,6 +1,6 @@
 # 内容生产流程看板 (Pipeline Board)
 
-> 自动生成时间：2026/3/23 16:20:02
+> 自动生成时间：2026/3/23 17:18:40
 > 说明：本看板优先服务活跃工作流，只展开需要推进的阶段；已发布内容只保留最近概览，避免看板膨胀。
 
 ## 🧠 待策划
@@ -93,10 +93,6 @@
 
 | 标题 | 来源 | 漏斗 | 战役角色 | 审核优先级 | 优先级 | Owner | Reviewer | 目标日期 | 视觉 | 公众号 | 阻塞原因 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| [101-68: 让“龙虾”替你炒股？它敢说，你敢信么](../101_academy/101-68_general_llm_illusion.md) | Growth | TOFU | 破圈钩子 | 建议先审 | 高 | cmo | founder | 2026-03-23 周一 | ✅ 视觉通过 | ✅ 已发布 | - |
-| [101-12: 你以为自己在做短线，很多时候其实只是在给人送钱](../101_academy/101-12_l4_hft_illusion.md) | Growth | TOFU | 破圈钩子 | 建议先审 | 高 | cmo | founder | 2026-03-25 周三 | ✅ 视觉通过 | 📬 草稿待发<br>2026-03-23 16:19 | - |
-| [101-100: 很多人不是不会炒股，而是连自己是什么段位都没弄明白](../101_academy/101-100_maturity_prologue.md) | Growth | MOFU | 信任桥梁 | 建议先审 | 高 | cmo | founder | 2026-03-27 周五 | ✅ 视觉通过 | 📬 草稿待发<br>2026-03-23 16:19 | - |
-| [机会成本：很多人不是没机会，而是钱先被一只烂股拖住了](../101_academy/101-40_opportunity_cost.md) | Growth | TOFU | 破圈钩子 | 建议先审 | 高 | cmo | founder | 2026-03-30 周一 | ✅ 视觉通过 | 📬 草稿待发<br>2026-03-23 16:19 | - |
 | [101-69: 很多亏损，不是没提醒，而是提醒太多把人带乱了](../101_academy/101-69_ziso_rhythm.md) | Growth | BOFU | 转化承接 | 建议先审 | 高 | cmo | founder | 2026-04-01 周三 | ✅ 视觉通过 | 📬 草稿待发<br>2026-03-23 16:19 | - |
 | [买完股票后越刷越踏实，很多时候不是逻辑更强了，而是你更不想认错](../101_academy/101-18_echo_chamber.md) | Growth | TOFU | 破圈钩子 | 次优先审 | 高 | cmo | founder | 2026-04-03 周五 | ✅ 视觉通过 | 🟢 就绪 | - |
 | [很多人不是亏在大跌里，而是亏在天天都有机会的行情里](../101_academy/101-44_volatility_tax.md) | Growth | TOFU | 破圈钩子 | 次优先审 | 高 | cmo | founder | 2026-04-06 周一 | ✅ 视觉通过 | 🟢 就绪 | - |
@@ -108,17 +104,22 @@
 
 ## 📅 已排期
 
-- 暂无内容
+| 标题 | 来源 | 漏斗 | 战役角色 | 审核优先级 | 优先级 | Owner | Reviewer | 目标日期 | 视觉 | 公众号 | 阻塞原因 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| [101-100: 很多人不是不会炒股，而是连自己是什么段位都没弄明白](../101_academy/101-100_maturity_prologue.md) | Growth | MOFU | 信任桥梁 | 建议先审 | 高 | cmo | founder | 2026-03-27 周五 | ✅ 视觉通过 | ⏳ 待发布<br>2026-03-27 | - |
+| [机会成本：很多人不是没机会，而是钱先被一只烂股拖住了](../101_academy/101-40_opportunity_cost.md) | Growth | TOFU | 破圈钩子 | 建议先审 | 高 | cmo | founder | 2026-03-30 周一 | ✅ 视觉通过 | ⏳ 待发布<br>2026-03-30 | - |
 
 ## 🚀 已发布
 
-- 已发布资产总数：113
-- 系统识别公众号已发布：10 篇
+- 已发布资产总数：115
+- 系统识别公众号已发布：12 篇
 - 已确认公众号前线基线：9 篇
 - 看板优先展示公众号已发布内容，其次补充仅网站上线的内容；完整清单请看主索引。
 
 | 标题 | 来源 | 最后动作 | 网站 | 公众号 |
 | --- | --- | --- | --- | --- |
+| [101-12: 你以为自己在做短线，很多时候其实只是在给人送钱](../101_academy/101-12_l4_hft_illusion.md) | Growth | 2026-03-23 周一 | ✅ 上线中 | ✅ 已发布 |
+| [101-68: 让“龙虾”替你炒股？它敢说，你敢信么](../101_academy/101-68_general_llm_illusion.md) | Growth | 2026-03-20 周五 | ✅ 上线中 | ✅ 已发布 |
 | [AI 时代的决策真相：为什么‘直觉’是你最危险的敌人？](../101_academy/2026-03-02_breakthrough_logic.md) | Growth | 2026-03-05 周四 | ✅ 上线中 | [✅ 已发布](https://mp.weixin.qq.com/s/aXQoun4YcB-Sn1ZDsIz3rg) |
 | [策略内参：怎么看干货？](../../../5_Support_Ops/content/tactical-brief-guide.md) | Support | 2026-03-05 周四 | ✅ 上线中 | [✅ 已发布](https://mp.weixin.qq.com/s/8bpp3YEbcFnLgbuwwFHIXw) |
 | [置信度：这不是胜算，是把握](../../../5_Support_Ops/content/confidence-explained.md) | Support | 2026-03-04 周三 | ✅ 上线中 | [✅ 已发布](https://mp.weixin.qq.com/s/q2jilWow3swLU91GJyy7wQ) |
@@ -134,11 +135,9 @@
 | [101-15_analyst_vs_trader_wechat_release_brief](../101_academy/101-15_analyst_vs_trader_wechat_release_brief.md) | Growth | 2026-03-23 周一 | ✅ 上线中 | ➖ 不发布 |
 | [101-17_tower_shield_wechat_release_brief](../101_academy/101-17_tower_shield_wechat_release_brief.md) | Growth | 2026-03-23 周一 | ✅ 上线中 | ➖ 不发布 |
 | [101-42_survivorship_bias_wechat_release_brief](../101_academy/101-42_survivorship_bias_wechat_release_brief.md) | Growth | 2026-03-23 周一 | ✅ 上线中 | ➖ 不发布 |
+| [WECHAT_VISUAL_PLAYBOOK_10W_2026Q2](../WECHAT_VISUAL_PLAYBOOK_10W_2026Q2.md) | Growth | 2026-03-23 周一 | ✅ 上线中 | ➖ 不发布 |
 | [101-18_echo_chamber_wechat_release_brief](../101_academy/101-18_echo_chamber_wechat_release_brief.md) | Growth | 2026-03-22 周日 | ✅ 上线中 | ➖ 不发布 |
 | [101-44_volatility_tax_wechat_release_brief](../101_academy/101-44_volatility_tax_wechat_release_brief.md) | Growth | 2026-03-22 周日 | ✅ 上线中 | ➖ 不发布 |
-| [WECHAT_LAYOUT_PLAYBOOK_FINANCE_EDITORIAL](../WECHAT_LAYOUT_PLAYBOOK_FINANCE_EDITORIAL.md) | Growth | 2026-03-22 周日 | ✅ 上线中 | ➖ 不发布 |
-| [WECHAT_VISUAL_PLAYBOOK_10W_2026Q2](../WECHAT_VISUAL_PLAYBOOK_10W_2026Q2.md) | Growth | 2026-03-22 周日 | ✅ 上线中 | ➖ 不发布 |
-| [101-01: 散户的不可能三角](../101_academy/101-01_impossible_triangle.md) | Growth | 2026-03-20 周五 | ✅ 上线中 | ➖ 不发布 |
 
 ## 📦 已归档
 

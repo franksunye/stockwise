@@ -28,7 +28,7 @@ traceability:
   status: healthy
   last_reviewed_at: '2026-03-20'
 workflow:
-  stage: approved
+  stage: scheduled
   review_priority: review_first
   owner: cmo
   reviewer: founder
@@ -154,8 +154,8 @@ visual_style_prefix: >-
 distribution:
   wechat:
     enabled: true
-    status: staged
-    staged_at: '2026-03-23 16:19'
+    status: scheduled
+    scheduled_at: '2026-03-27'
 source_docs:
 - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
 - docs/2_Intelligence/research/01_Quant_Trading_Schools_Taxonomy.md

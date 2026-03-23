@@ -26,12 +26,12 @@ traceability:
   status: healthy
   last_reviewed_at: '2026-03-20'
 workflow:
-  stage: approved
+  stage: published
   review_priority: review_first
   owner: cmo
   reviewer: founder
   priority: high
-  target_publish_date: '2026-03-23'
+  target_publish_date: '2026-03-20'
   last_action_at: '2026-03-20'
   blocked_reason: ''
 maintenance:

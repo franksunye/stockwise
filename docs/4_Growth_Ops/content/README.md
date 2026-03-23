@@ -1,6 +1,6 @@
 # 内容运营主索引 (Content Operations Registry)
 
-> 自动生成时间：2026/3/23 16:20:02
+> 自动生成时间：2026/3/23 17:18:40
 > 说明：本索引由 `scripts/cmo_sync.mjs` 统一扫描 `4_Growth_Ops/content` 与 `5_Support_Ops/content` 生成。
 > 日期规则：已发布内容优先显示公众号真实发布日期；未发布内容显示目标发布日期。
 > 公众号默认发布节奏：固定为 周一 / 周三 / 周五；除非团队明确调整，否则不自动变更。
@@ -144,12 +144,12 @@
 | [Free 与 Pro：差距在哪？](../../5_Support_Ops/content/tiers-explained.md) | Support | article | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
 | [iOS 特供：极致跟手感](../../5_Support_Ops/content/ios-tuning.md) | Support | article | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
 | [T+3 验证：趋势需要时间](../../5_Support_Ops/content/multi-day-verification.md) | Support | article | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
-| [101-68: 让“龙虾”替你炒股？它敢说，你敢信么](101_academy/101-68_general_llm_illusion.md) | Growth | article | TOFU | 破圈钩子 | ✅ 已通过 | 2026-03-20 周五 | ✅ 上线中 | ✅ 已发布 | 2026-03-20 |
+| [101-68: 让“龙虾”替你炒股？它敢说，你敢信么](101_academy/101-68_general_llm_illusion.md) | Growth | article | TOFU | 破圈钩子 | 🚀 已发布 | 2026-03-20 周五 | ✅ 上线中 | ✅ 已发布 | 2026-03-20 |
 | [复盘一场真实的大跌：当所有人都在疯狂时，AI 是如何冷着脸劝我离场休息的？](blitz_hub/Hub_06_Cold_Feedback_Case.md) | Growth | article | MOFU | - | 🚀 已发布 | 2026-03-20 周五 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
-| [101-12: 你以为自己在做短线，很多时候其实只是在给人送钱](101_academy/101-12_l4_hft_illusion.md) | Growth | article | TOFU | 破圈钩子 | ✅ 已通过 | 2026-03-25 周三 | ✅ 上线中 | 📬 草稿待发<br>2026-03-23 16:19 | 2026-03-20 |
+| [101-12: 你以为自己在做短线，很多时候其实只是在给人送钱](101_academy/101-12_l4_hft_illusion.md) | Growth | article | TOFU | 破圈钩子 | 🚀 已发布 | 2026-03-23 周一 | ✅ 上线中 | ✅ 已发布 | 2026-03-20 |
 | [谁在告诉你“炒股发财”？真正的量化交易，其实无聊得让人想睡觉](blitz_hub/Hub_07_Boring_Algorithm.md) | Growth | article | BOFU | - | 👀 待审核 | 2026-03-26 周四 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
-| [101-100: 很多人不是不会炒股，而是连自己是什么段位都没弄明白](101_academy/101-100_maturity_prologue.md) | Growth | article | MOFU | 信任桥梁 | ✅ 已通过 | 2026-03-27 周五 | ✅ 上线中 | 📬 草稿待发<br>2026-03-23 16:19 | 2026-03-20 |
-| [机会成本：很多人不是没机会，而是钱先被一只烂股拖住了](101_academy/101-40_opportunity_cost.md) | Growth | article | TOFU | 破圈钩子 | ✅ 已通过 | 2026-03-30 周一 | ✅ 上线中 | 📬 草稿待发<br>2026-03-23 16:19 | 2026-03-20 |
+| [101-100: 很多人不是不会炒股，而是连自己是什么段位都没弄明白](101_academy/101-100_maturity_prologue.md) | Growth | article | MOFU | 信任桥梁 | 📅 已排期 | 2026-03-27 周五 | ✅ 上线中 | ⏳ 待发布<br>2026-03-27 | 2026-03-20 |
+| [机会成本：很多人不是没机会，而是钱先被一只烂股拖住了](101_academy/101-40_opportunity_cost.md) | Growth | article | TOFU | 破圈钩子 | 📅 已排期 | 2026-03-30 周一 | ✅ 上线中 | ⏳ 待发布<br>2026-03-30 | 2026-03-20 |
 | [101-69: 很多亏损，不是没提醒，而是提醒太多把人带乱了](101_academy/101-69_ziso_rhythm.md) | Growth | article | BOFU | 转化承接 | ✅ 已通过 | 2026-04-01 周三 | ✅ 上线中 | 📬 草稿待发<br>2026-03-23 16:19 | 2026-03-20 |
 | [在所有人都在亏钱的行情里，不回撤才是最高维度的炫富](blitz_hub/Hub_08_No_Drawdown_Wealth.md) | Growth | article | BOFU | - | 👀 待审核 | 2026-04-02 周四 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
 | [买完股票后越刷越踏实，很多时候不是逻辑更强了，而是你更不想认错](101_academy/101-18_echo_chamber.md) | Growth | article | TOFU | 破圈钩子 | ✅ 已通过 | 2026-04-03 周五 | ✅ 上线中 | 🟢 就绪 | 2026-03-22 |
@@ -204,4 +204,4 @@
 | [GRSAI_IMAGE_TOOL](GRSAI_IMAGE_TOOL.md) | Growth | article | Unknown | - | 🚀 已发布 | N/A | ✅ 上线中 | ➖ 不发布 | 2026-03-20 |
 | [IMAGE_GENERATION_WORKFLOW](IMAGE_GENERATION_WORKFLOW.md) | Growth | article | Unknown | - | 🚀 已发布 | N/A | ✅ 上线中 | ➖ 不发布 | 2026-03-20 |
 | [WECHAT_LAYOUT_PLAYBOOK_FINANCE_EDITORIAL](WECHAT_LAYOUT_PLAYBOOK_FINANCE_EDITORIAL.md) | Growth | article | Unknown | - | 🚀 已发布 | N/A | ✅ 上线中 | ➖ 不发布 | 2026-03-22 |
-| [WECHAT_VISUAL_PLAYBOOK_10W_2026Q2](WECHAT_VISUAL_PLAYBOOK_10W_2026Q2.md) | Growth | article | Unknown | - | 🚀 已发布 | N/A | ✅ 上线中 | ➖ 不发布 | 2026-03-22 |
+| [WECHAT_VISUAL_PLAYBOOK_10W_2026Q2](WECHAT_VISUAL_PLAYBOOK_10W_2026Q2.md) | Growth | article | Unknown | - | 🚀 已发布 | N/A | ✅ 上线中 | ➖ 不发布 | 2026-03-23 |

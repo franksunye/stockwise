@@ -25,7 +25,7 @@ traceability:
   status: healthy
   last_reviewed_at: '2026-03-20'
 workflow:
-  stage: approved
+  stage: scheduled
   review_priority: review_first
   owner: cmo
   reviewer: founder
@@ -154,8 +154,8 @@ visual_style_prefix: >-
 distribution:
   wechat:
     enabled: true
-    status: staged
-    staged_at: '2026-03-23 16:19'
+    status: scheduled
+    scheduled_at: '2026-03-30'
 ---
 # 机会成本：很多人不是没机会，而是钱先被一只烂股拖住了
 
@@ -192,8 +192,6 @@ distribution:
 ZISO 在底层强调风险否决和动作纪律，本质上也是同一逻辑。该撤的时候不撤，表面上像是在忍耐，实际是在把错误越拖越大；该放出来的时候不放，表面上像是在坚持，实际上是在牺牲后面更好的机会。
 
 所以机会成本这件事，真正想提醒你的不是“市场外面永远还有更好的票”，而是：**你的钱要能动，你才有资格去抓后面的机会。**
-
-永远和一只已经走坏的股票谈恋爱，代价从来不只是亏钱，而是把自己后面的机会也一起拖慢了。
 
 ---
 
