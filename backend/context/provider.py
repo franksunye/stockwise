@@ -110,15 +110,22 @@ class MarketContextProvider:
         age = (datetime.now() - cache_entry["timestamp"]).total_seconds()
         return age < ttl_seconds
 
-    def _safe_ak_fetch(self, func, *args, timeout: int = 60, **kwargs) -> Optional[Any]:
+    def _safe_ak_fetch(
+        self,
+        func,
+        *args,
+        timeout: int = 60,
+        max_retries: int = 2,
+        **kwargs,
+    ) -> Optional[Any]:
         """
         Safely call an AkShare function with retries and a timeout.
         Uses a thread pool to enforce the timeout globally.
         """
-        max_retries = 2
+        retries = max(0, int(max_retries))
         base_delay = 1.0
         
-        for i in range(max_retries + 1):
+        for i in range(retries + 1):
             try:
                 attempt_str = f"(Attempt {i+1})" if i > 0 else ""
                 logger.info(f"📡  AkShare Fetch: {func.__name__} {attempt_str}")
@@ -141,7 +148,7 @@ class MarketContextProvider:
                     "connection reset", "max retries", "connectionerror"
                 ])
                 
-                if i < max_retries and is_retryable:
+                if i < retries and is_retryable:
                     delay = base_delay * (2 ** i) + random.uniform(0, 0.5)
                     logger.warning(f"⚠️  Retryable Error in {func.__name__}: {type(e).__name__}. Retrying in {delay:.1f}s...")
                     time.sleep(delay)
@@ -854,12 +861,27 @@ class MarketContextProvider:
                 self._stats["stock_flow_success"] += 1
                 return result
 
-            df = ak.stock_individual_fund_flow(stock=symbol, market=market_code)
+            try:
+                flow_timeout = int(os.getenv("AKSHARE_STOCK_FLOW_TIMEOUT_SEC", "12"))
+            except Exception:
+                flow_timeout = 12
+            try:
+                flow_retries = int(os.getenv("AKSHARE_STOCK_FLOW_RETRIES", "1"))
+            except Exception:
+                flow_retries = 1
+
+            df = self._safe_ak_fetch(
+                ak.stock_individual_fund_flow,
+                stock=symbol,
+                market=market_code,
+                timeout=max(3, flow_timeout),
+                max_retries=max(0, flow_retries),
+            )
             
             flow_summary = "N/A"
             big_order_val = "N/A"
             
-            if not df.empty:
+            if df is not None and not df.empty:
                 # DataFrame usually has historical data. We want the LATEST date.
                 # Columns: 日期, 收盘价, ... 主力净流入-净额, 超大单...
                 latest = df.iloc[0] # Usually sorted DESC? Let's verify sort.

@@ -49,10 +49,24 @@ on:
         required: false
         type: boolean
         default: false
+      model:
+        description: '指定模型 (all=按活动模型补缺口)'
+        required: false
+        type: choice
+        default: all
+        options:
+          - all
+          - deepseek-aliyun
+          - deepseek-v3
+          - deepseek-v3.2-exp
+          - gemini-3-flash
+          - hunyuan-lite
+          - rule-engine
 
 jobs:
   backfill:
     runs-on: ubuntu-latest
+    timeout-minutes: 180
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -83,6 +97,9 @@ jobs:
           LLM_PROVIDER__GEMINI_LOCAL__BASE_URL: ${{ secrets.LLM_PROVIDER__GEMINI_LOCAL__BASE_URL }}
           LLM_PROVIDER__DEEPSEEK_OFFICIAL__API_KEY: ${{ secrets.LLM_PROVIDER__DEEPSEEK_OFFICIAL__API_KEY }}
           LLM_PROVIDER__DEEPSEEK_OFFICIAL__BASE_URL: ${{ secrets.LLM_PROVIDER__DEEPSEEK_OFFICIAL__BASE_URL }}
+          # AkShare stock flow guardrails (avoid single-symbol blocking batch backfill)
+          AKSHARE_STOCK_FLOW_TIMEOUT_SEC: "12"
+          AKSHARE_STOCK_FLOW_RETRIES: "1"
           # 通知
           WECOM_ROBOT_KEY: ${{ secrets.WECOM_ROBOT_KEY }}
         run: |
@@ -102,6 +119,13 @@ jobs:
           # 股票代码
           if [ -n "${{ inputs.symbol }}" ]; then
             CMD="$CMD --symbol ${{ inputs.symbol }}"
+          fi
+
+          # 模型（默认 all，避免隐式落回 rule-engine）
+          if [ -n "${{ inputs.model }}" ]; then
+            CMD="$CMD --model ${{ inputs.model }}"
+          else
+            CMD="$CMD --model all"
           fi
           
           # 回填模式
