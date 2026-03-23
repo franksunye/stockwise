@@ -1,11 +1,10 @@
 """
-Daily Validation Success Script.
+Daily Validation Glory Push Script.
 Part of Phase 4: Scheduled Notifications.
-Runs after market close, identifies correct AI predictions, and notifies users.
+Runs after market close, identifies validated wins, and notifies users.
 """
 import sys
 import os
-import json
 from datetime import datetime
 
 # Add backend to path (legacy support)
@@ -17,17 +16,17 @@ sys.path.insert(0, os.path.dirname(backend_path))
 from database import get_connection
 from logger import logger
 from notification_service import NotificationManager
-from notification_templates import NotificationTemplates
-from engine.validator import verify_all_pending
 
 
-def run_validation_notifications(dry_run=False):
+def run_validation_glory_push(dry_run=False, run_verify=False):
     """
-    1. Update validation status in DB.
+    1. Optionally update validation status in DB (manual fallback).
     2. Find successful predictions (Correct).
-    3. Notify users with these stocks in watchlist.
+    3. Push glory notifications to users with these symbols in watchlist.
     """
-    logger.info(f"🏆 Starting Daily Validation Check (Dry Run: {dry_run})")
+    logger.info(
+        f"🏆 Starting Validation Glory Push (Dry Run: {dry_run}, Run Verify: {run_verify})"
+    )
     
     # Step 1: Sync DB validation status
     # Initialize Task Logger
@@ -36,16 +35,20 @@ def run_validation_notifications(dry_run=False):
     except ImportError:
         from engine.task_logger import get_task_logger
         
-    t_logger = get_task_logger("validation_auditor", "validation_check")
-    t_logger.start("Daily Validation Check", "validation")
+    t_logger = get_task_logger("validation_auditor", "validation_glory_push")
+    t_logger.start("Daily Validation Glory Push", "validation")
 
     try:
-        try:
-            verify_all_pending()
-        except Exception as e:
-            logger.error(f"❌ Failed to run verify_all_pending: {e}")
-            t_logger.fail(f"verify_all_pending failed: {e}", notify=True)
-            return
+        if run_verify:
+            try:
+                from engine.validator import verify_all_pending
+                verify_all_pending()
+            except Exception as e:
+                logger.error(f"❌ Failed to run verify_all_pending: {e}")
+                t_logger.fail(f"verify_all_pending failed: {e}", notify=True)
+                return
+        else:
+            logger.info("ℹ️ Skip verify_all_pending (handled by daily pipeline verify jobs).")
         
         # 🎯 方案二核心：基于业务日期（target_date）进行用户导向的通知
         # 获取北京时间的今天日期字符串
@@ -119,12 +122,12 @@ def run_validation_notifications(dry_run=False):
             })
     
         total_sent = nm.flush()
-        logger.info(f"✅ Validation Notification Task Finished. Delivered: {total_sent}")
-        t_logger.success(f"Delivered validation report to {total_sent} users.", notify=True)
+        logger.info(f"✅ Validation Glory Push Finished. Delivered: {total_sent}")
+        t_logger.success(f"Delivered validation glory push to {total_sent} users.", notify=True)
         conn.close()
     
     except Exception as e:
-        logger.error(f"❌ Validation Check Failed: {e}")
+        logger.error(f"❌ Validation Glory Push Failed: {e}")
         t_logger.fail(f"Execution Error: {str(e)}", notify=True, rerun_workflow="daily_validation_check.yml")
 
 
@@ -132,6 +135,11 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("--dry-run", action="store_true", help="Simulate without sending")
+    parser.add_argument(
+        "--run-verify",
+        action="store_true",
+        help="Run verify_all_pending before notifications (manual fallback only)",
+    )
     args = parser.parse_args()
     
-    run_validation_notifications(dry_run=args.dry_run)
+    run_validation_glory_push(dry_run=args.dry_run, run_verify=args.run_verify)
