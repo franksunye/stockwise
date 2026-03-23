@@ -1,6 +1,6 @@
 ---
-title: '101-15: 你昨晚写好的计划，为什么一开盘就不算数了？'
-subtitle: 因为你老想一个人把看盘、判断、下手全包了
+title: '101-15: 很多人不是没计划，而是一开盘就忍不住自己改计划'
+subtitle: 因为盘后会做计划的你，和盘中会下单的你，根本不是一个状态
 content_id: growth-101-015
 content_source: growth
 content_type: article
@@ -11,13 +11,15 @@ funnel_stage: MOFU
 campaign_role: bridge
 timeliness_role: evergreen
 timely_anchor: 盘前计划与盘中变卦/执行纪律/情绪交易
-viral_priority: normal
+viral_priority: high
 headline_alternatives:
-- 为什么你每天晚上都能想明白，一开盘就又乱了
-- 计划写得越认真，盘中越容易变卦？很多人输在自己打自己脸
+- 为什么你昨晚都想明白了，一开盘还是会乱改
+- 为什么你每天晚上都会复盘，一到盘中还是忍不住变卦
+- 昨晚那个冷静的你，为什么一开盘就像换了个人
+- 你亏的很多时候不是没计划，而是盘中总想临时改剧本
 cover_lines:
-- 很多人不是没计划，而是一到盘中，计划就成了摆设。
-- 昨晚那个冷静的你，往往扛不住今天盘中的自己。
+- 计划不是没写，而是开盘一动，你就想改。
+- 很多人输的不是不会复盘，而是盘中总想临时改剧本。
 share_copy: 这篇特别适合那些每天复盘都很认真，但一开盘还是容易乱的人。它讲的不是技巧，而是为什么你总在自己打自己脸。
 campaign: wechat_4_week_sprint_2026q2
 rhythm: Hub
@@ -25,13 +27,13 @@ traceability:
   status: healthy
   last_reviewed_at: '2026-03-19'
 workflow:
-  stage: drafting
+  stage: approved
   review_priority: review_next
   owner: cmo
   reviewer: founder
   priority: high
-  target_publish_date: '2026-04-07'
-  last_action_at: '2026-03-19'
+  target_publish_date: '2026-04-17'
+  last_action_at: '2026-03-23'
   blocked_reason: ''
 maintenance:
   change_status: updated
@@ -40,28 +42,28 @@ website:
   enabled: true
   surface: learn
 visual_workflow:
-  stage: not_started
+  stage: approved
   owner: cmo
   reviewer: founder
   priority: high
   target_ready_date: ''
-  last_action_at: '2026-03-20'
+  last_action_at: '2026-03-23'
   blocked_reason: ''
 visual_assets:
   cover:
     required: true
-    status: missing
+    status: approved
     path: "/images/learn/101-15_analyst_vs_trader_cover.png"
   body:
     required: true
     target_count: 2
-    ready_count: 0
-    status: missing
+    ready_count: 2
+    status: approved
   cards:
     required: true
     target_count: 1
-    ready_count: 0
-    status: missing
+    ready_count: 1
+    status: approved
 image: "/images/learn/101-15_analyst_vs_trader_cover.png"
 images:
   cover: "/images/learn/101-15_analyst_vs_trader_cover.png"
@@ -75,18 +77,29 @@ image_specs:
   body: 1080x720
   card: 1080x1440
 image_prompts:
-  cover: 'A conceptual split-identity image: the same investor divided into two halves, one calmly planning at night, the other frantically trading during market hours. Strong contrast between order and panic. Dark premium finance style, no text.'
+  cover: >-
+    WeChat article cover, wide horizontal image. Do not show any person or
+    face. Show one very concrete split still-life desk that almost fills the
+    frame. On the left half: a neat night-planning setup with a clean written
+    trading plan, ruler, checklist, and orderly chart printouts laid out with
+    obvious control. On the right half: the same desk after market open,
+    filled by a messy phone showing red-green intraday movement, crossed-out
+    plan pages, scattered notes, and a coffee cup moved in a hurry. Make the
+    contrast strong and instantly readable on a mobile screen: last night the
+    plan was calm and clear, after open everything became chaotic and
+    changeable. Premium editorial finance-magazine still-life, lighter premium
+    palette, soft neutral background, concrete objects, no person, no hands,
+    no face, no readable text, no giant screens, no sci-fi UI.
 derivative_guidance:
   body:
-  - Use the provided cover image as the visual reference. Keep the same split-self world, the same dark premium tone, and the same role conflict. Create a supporting scene that emphasizes the neat night plan versus messy intraday panic.
-  - Use the provided cover image as the visual reference. Preserve the same divided identity metaphor and emotional contrast. Extend the same world into a closer human portrait of calm rationality versus market panic.
+  - Use the provided cover image as the visual reference. Keep the same night-plan versus intraday-chaos world, but create a simpler article illustration. Move closer to the tidy planning side and emphasize order, rules, and preparation.
+  - Use the provided cover image as the visual reference. Preserve the same split desk metaphor, but move closer to the messy side and emphasize how execution panic destroys the original plan.
   cards:
-  - Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame. Preserve the dual-role conflict rather than inventing a new scene.
+  - Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame. Preserve the contrast between tidy plan and messy execution.
 visual_strategy:
-  concept_core: 昨晚会做计划的你，和开盘后乱动的你，不是一个人
+  concept_core: 盘后会写计划的你，和盘中总想改计划的你，不是一个状态
   image_type: Concept
   image_count: 3
-  primary_image_model: gemini
   generation_mode: cover_first
   derivation_rule:
     body: same_world
@@ -95,17 +108,29 @@ visual_strategy:
     cover: 1
     body: 2
     social_cards: 0
-  reader_hook: 图上先让人明白：昨晚和今天开盘后的你，根本不是一个人。
+  reader_hook: 一眼就要看懂“左边是昨晚定好的计划，右边是开盘后被改乱的计划”，不能抽象。
   body_asset_policy: derive_only
   cover_reusable_in_body: false
   body_usage_plan:
     body_1: derive_from_cover
     body_2: derive_from_cover
-visual_style_prefix: Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel.
+visual_style_prefix: >-
+  Premium editorial finance style for mass-audience educational content,
+  realistic not cartoonish, emotionally legible before intellectually
+  impressive, Chinese retail investor context, one simple visual metaphor,
+  object-centered or still-life-first composition, clean composition, premium
+  but grounded materials, lighter premium editorial palette, soft neutral
+  background, clean indoor or daylight-style lighting, calm clear restrained
+  mood, professional finance magazine illustration feel rather than cinematic
+  drama, stylized realism, simplified forms, limited details, no text, no
+  watermark, no cheap sci-fi look, no hologram overload, no giant robot or
+  monster imagery, no blockbuster poster drama, no generic corporate stock
+  image feel, no oppressive darkness, no horror-movie contrast, no thriller
+  atmosphere, no default portrait-centered composition.
 distribution:
   wechat:
     enabled: true
-    status: draft
+    status: ready
     url: ''
   xhs:
     enabled: true
@@ -117,41 +142,58 @@ distribution:
   toutiao:
     enabled: true
     status: draft
+    url: ''
+wechat_layout:
+  profile: finance_editorial_v1
+  density: airy
+  body_font_size: 15
+  line_spacing: 1.8
+  paragraph_spacing: 1.0
+  heading_style: rule_divider
+  accent_color: ink_gold
+  cover_mode: light_editorial
+  body_image_policy: cover_plus_1_or_2
+  checklist_version: wechat_layout_v1
 source_docs:
+- docs/0_Strategy/01_Product_Positioning_and_Boundaries.md
 - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
 - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
 ---
-# 101-15: 你昨晚的计划，为什么总在第二天开盘后作废？
+# 101-15: 很多人不是没计划，而是一开盘就忍不住自己改计划
 
-> “很多人不是没计划，而是一到盘中，计划就成了摆设。”
+> “很多人不是没计划，而是开盘一动，就又想临时改剧本。”
 
-如果你做过交易，大概率都经历过这种分裂时刻。
+如果你做过交易，大概率都经历过这种时刻。
 
-昨晚复盘时，你非常冷静。你能画出关键位，能写出计划，能清楚告诉自己：一旦跌破某个位置，就必须离场。可第二天盘中真的跌到了那里，你却突然开始解释：基本面没坏，也许只是洗盘，再等等看。
+昨晚复盘时，你很清醒。买点、止损位、什么情况不能碰，你都写下来了。可第二天一开盘，价格刚动两下，你就开始改主意。跌了，想再等等；涨了，又怕踏空；本来只是观察，一拉升又想追进去。
 
-于是原本写得明明白白的规则，在真金白银面前瞬间失效。
+到收盘再回头看，你不是没计划。你只是盘中又临时换了剧本。很多人亏的，不是不懂复盘，而是一开盘就忍不住自己改计划。
 
-很多人会把这种情况理解成“自己不够自律”。但更深一层的问题其实是: **你让同一个自己，同时扮演了两个根本不同的角色。**
+很多人会把这件事理解成“自己不够自律”。但更深一层的问题其实是：**盘后会做计划的你，和盘中会下单的你，根本不是一个状态。**
 
-## 找信号的人，和做执行的人，本来就不是同一种脑回路
+昨晚那个冷静的你，和开盘后乱动的你，根本不是一个人。
 
-在成熟的交易体系里，研究和执行从来不是一回事。
+## 写计划的人，和盘中按按钮的人，本来就不是一份工作
 
-找信号的人，任务是发现机会，识别结构，评估概率，判断哪里可能已经形成了值得出手的机会。他需要保持开放，需要比较，需要容忍不确定，需要愿意去看各种可能性。
+在成熟的交易体系里，看机会和做执行，本来就不是一回事。
 
-做执行的人，任务却完全不同。他不负责想象更多可能，而是负责在条件满足时照计划行动，在条件破坏时立刻收手。执行这一侧最重要的品质，不是想得多，而是改得少、拖得少、解释得更少。
+写计划的时候，你要做的是看结构、定条件、想清楚什么情况下能做，什么情况下不能做。这时候你需要冷静，需要留余地，需要把各种可能都想一遍。
 
-这两种职责没有高低之分，但它们的逻辑确实不同。前者更像研究员，后者更像纪律官。问题就出在，大多数普通投资者会在同一个身体里，强行让这两个角色同时上班。结果就是，盘后你像分析师，盘中你像赌徒；计划写得很漂亮，真正执行时却总能给自己找到新的例外。
+可一到盘中，任务就变了。你不再需要想更多可能，你需要做的其实只有两件事：条件到了就动，条件坏了就收。盘中最值钱的能力，不是想得多，而是改得少、拖得少、给自己找理由也更少。
 
-## 为什么一到盘中，人就突然“变了”
+这两种工作没有高低之分，但逻辑完全不同。前者更像分析师，后者更像纪律官。问题就在于，大多数普通投资者会在同一个人身上，硬把这两份工作混着做。结果就是，昨晚你像研究员，盘中你像临时改口的交易员；计划写得很完整，执行时却总能给自己找到新的例外。
+
+很多人不是没计划，而是一开盘就忍不住自己改计划。
+
+## 为什么一到盘中，你就总想改计划
 
 不是你人格分裂，而是环境变了。
 
-盘后做分析的时候，你面对的是图表、信息和逻辑，情绪压力相对低，脑子还能保持距离感。可一到盘中，尤其当价格开始朝你不想看到的方向走，事情就完全不同了。亏损金额、分时波动、群聊噪音、错失恐惧，这些都会迅速挤压你的决策空间。
+盘后做分析的时候，你面对的是图表、信息和逻辑，情绪压力没那么大，脑子还能保持距离感。可一到盘中，尤其价格开始朝你不想看到的方向走，事情就完全不一样了。亏损金额、分时波动、群聊噪音、错失恐惧，都会迅速挤压你的决策空间。
 
-这时候，人最常见的反应不是执行原计划，而是临时重写原计划。止损变成“再看一天”，减仓变成“补一笔摊成本”，原本只是观察的标的，也可能因为一根拉升突然变成“现在不上就来不及了”。
+这时候，人最常见的反应不是执行原计划，而是临时重写原计划。止损变成“再等等”，减仓变成“补一笔摊成本”，原本只是观察的标的，也可能因为一根拉升突然变成“现在不上就来不及了”。
 
-所以很多散户不是没有计划，而是计划在真正需要执行的时候，突然失去了权威。研究脑和执行脑互相干扰，最后分析不再客观，执行也不再稳定。
+所以很多散户不是没有计划，而是计划在最需要它出场的时候，突然失去了权威。盘后那个会分析的你，和盘中那个会下单的你互相打架，最后分析不再客观，执行也不再稳定。
 
 ## 机构为什么要把研究和执行分开
 
@@ -159,23 +201,27 @@ source_docs:
 
 在更成熟的量化和机构体系里，信号、组合管理、执行，本来就是分层处理的。信号层负责回答“有没有值得出手的机会”，管理层负责回答“仓位和风险怎么配”，执行层负责回答“到了条件是否按规则动手”。这样拆开，不是为了显得专业，而是为了防止不同职责互相污染。
 
-这个道理放在个人投资者身上其实一样成立。你不一定需要一个大团队，但你至少需要在系统层面承认: **信号负责发牌，执行负责下注与收割。** 如果这两件事永远混在一起，你每次都很容易在最关键的一步上，用情绪把前面的研究全部推翻。
+这个道理放在个人投资者身上其实也一样成立。你不一定需要一个大团队，但你至少需要在系统层面承认：**信号负责发牌，执行负责下注与收手。** 如果这两件事永远混在一起，你就很容易在最关键的一步上，用情绪把前面的研究全部推翻。
 
-## ZISO 的价值，就在于帮你把两件事拆开
+## ZISO 真正帮你的，是别让盘中的你推翻盘后的计划
 
 ZISO 的底层设计，本来就是围绕这个分工展开的。
 
-一边是信号与判断。它负责识别结构、判断有没有值得跟踪或出手的交易机会，再给出观察、进攻、防守或暂无信号这些动作语义。它更像一个研究层，回答的是“外部环境现在长什么样”。
+一边是信号与判断。它负责识别结构、判断有没有值得跟踪或出手的机会，再给出观察、进攻、防守或暂无信号这些动作语义。它更像研究层，回答的是“现在外部环境长什么样”。
 
-另一边是模式与执行约束。它不负责重新解释市场，而是负责把动作映射到不同风险偏好、不同持仓状态和不同纪律框架里。说得更直白一点，它负责防止你在已经有计划的时候，又临时变回情绪动物。
+另一边是模式与执行约束。它不负责重新解释市场，而是负责把动作映射到不同风险偏好、不同持仓状态和不同纪律框架里。说得更直白一点，它负责防止你明明已经有计划了，盘中又临时变回情绪动物。
 
 这也是为什么 ZISO 不会把所有价值都压在“预测准不准”上。因为真正决定长期结果的，往往不是你有没有一次神准判断，而是你有没有一套不会在关键时刻自我篡改的执行体系。
+
+真正值钱的，不是昨晚那份写得多漂亮的计划，而是今天开盘后你还改不改。
 
 ## 对普通投资者来说，承认自己不是全能，反而是升级的开始
 
 很多人觉得，高手就应该既能看懂市场，又能完美执行，还能临盘随机应变。可现实往往正相反。越成熟的体系，越知道要把不同职责拆开，越不迷信“我一个人什么都能搞定”。
 
-所以这篇文章真正想说的不是“你不行”，而是: 你没必要同时扮演所有角色。
+所以这篇文章真正想说的不是“你不行”，而是：你没必要同时扮演所有角色。
 
 先让找信号的人负责看清机会，再让执行系统负责看住你的手。对普通投资者来说，这种分工不是削弱自己，而是第一次真正开始接近专业。
+
+*ZISO AI（中文名 知守AI）：我们不替你临盘编新理由，而是尽量让昨晚那个冷静的计划，能活到今天开盘后。*
  

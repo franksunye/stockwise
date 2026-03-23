@@ -30,7 +30,7 @@ workflow:
   owner: cmo
   reviewer: founder
   priority: high
-  target_publish_date: '2026-04-15'
+  target_publish_date: '2026-05-01'
   last_action_at: '2026-03-19'
 blocked_reason: ''
 maintenance:
@@ -107,6 +107,8 @@ distribution:
     enabled: true
     status: draft
 source_docs:
+- docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
+- docs/2_Intelligence/research/01_Quant_Trading_Schools_Taxonomy.md
 - docs/0_Strategy/01_Product_Positioning_and_Boundaries.md
 ---
 # 真正的 L2，不是会背几条规则，而是知道规则一失灵就该认错
@@ -163,6 +165,10 @@ ZISO 当前的重点，不是去假装自己已经是 L3 组合平台，更不�
 
 这听起来没有神话感，却更接近真实世界里可持续的能力。
 
-所以 L2 的分水岭，不在于你懂不懂 VCP、突破、均线模板或者动量结构，而在于你是否开始把规则当成一套需要被认真管理的工程系统。
+所以 L2 的分水岭，不在于你懂不懂波动收缩形态、突破、均线模板或者动量结构，而在于你是否开始把规则当成一套需要被认真管理的工程系统。
 
 当你开始问“这套规则为什么成立、什么时候失效、我该如何验证它”，而不是只问“它最近准不准”，你就已经真正走进 L2 了。
+
+*这篇属于「量化成熟度金字塔」系列。*
+
+*ZISO AI（中文名 知守AI）：复杂的分析交给 AI，简单的决策留给自己。*

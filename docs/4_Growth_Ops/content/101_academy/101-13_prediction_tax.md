@@ -1,6 +1,6 @@
 ---
-title: '101-13: 为什么“这票明天会不会涨”这句话，本身就是最大的智商税？'
-subtitle: 散户老想要个准话，机构只认概率和纪律
+title: '101-13: “这票明天会不会涨？”这句问得越勤，往往亏得越快'
+subtitle: 你越想听一句准话，动作往往越容易变形
 content_id: growth-101-013
 content_source: growth
 content_type: article
@@ -14,25 +14,27 @@ timely_anchor: AI预测涨跌/明天会不会涨/龙头算命
 viral_priority: top5
 launch_order: 2
 headline_alternatives:
-- "“这票明天会不会涨？”这句问得越勤，往往亏得越快"
+- 为什么“这票明天会不会涨”这句话，本身就是最大的智商税？
 - AI 也好，老师也好，最贵的不是服务费，是你老想听准话
+- 你越想知道明天会不会涨，动作往往越容易变形
+- 很多人不是亏在看错，而是亏在老想先听一句准话
 cover_lines:
 - 市场里最贵的东西，不是会员费，而是你老想听一句准话。
 - 你越想知道明天，动作往往越容易变形。
-share_copy: 问老师、问朋友、问 AI、问明天会不会涨，这几乎是每个股民都干过的事。这篇就是专门拆这个最贵的执念。
+share_copy: 问老师、问朋友、问 AI、问明天会不会涨，这几乎是每个股民都干过的事。可这句话问得越勤，很多时候亏得越快。这篇就是专门拆这个最贵的执念。
 campaign: wechat_4_week_sprint_2026q2
 rhythm: Hub
 traceability:
   status: healthy
   last_reviewed_at: '2026-03-19'
 workflow:
-  stage: reviewing
+  stage: approved
   review_priority: review_first
   owner: cmo
   reviewer: founder
   priority: high
-  target_publish_date: '2026-04-06'
-  last_action_at: '2026-03-19'
+  target_publish_date: '2026-04-15'
+  last_action_at: '2026-03-23'
   blocked_reason: ''
 maintenance:
   change_status: updated
@@ -41,28 +43,28 @@ website:
   enabled: true
   surface: learn
 visual_workflow:
-  stage: not_started
+  stage: approved
   owner: cmo
   reviewer: founder
   priority: high
   target_ready_date: ''
-  last_action_at: '2026-03-20'
+  last_action_at: '2026-03-23'
   blocked_reason: ''
 visual_assets:
   cover:
     required: true
-    status: missing
+    status: approved
     path: "/images/learn/101-13_prediction_tax_cover.png"
   body:
     required: true
     target_count: 2
-    ready_count: 0
-    status: missing
+    ready_count: 2
+    status: approved
   cards:
     required: true
     target_count: 1
-    ready_count: 0
-    status: missing
+    ready_count: 1
+    status: approved
 image: "/images/learn/101-13_prediction_tax_cover.png"
 images:
   cover: "/images/learn/101-13_prediction_tax_cover.png"
@@ -76,16 +78,30 @@ image_specs:
   body: 1080x720
   card: 1080x1440
 image_prompts:
-  cover: A hybrid editorial-concept image of anxious investors surrounding a glowing question mark over a stock chart, like modern fortune-telling. The mood is desperate for certainty. Realistic Chinese retail investing atmosphere, premium dark palette, no text.
+  cover: >-
+    WeChat article cover, wide horizontal image. Do not show any person or
+    face. Show one very concrete tabletop scene like a modern "stock
+    fortune-telling kit". At the center, place a phone screen or message
+    bubble with one huge question mark about tomorrow. Around it, place 2-3
+    very recognizable objects: a crystal ball, several simple divination
+    cards, and one finance object such as a stock chart card or ticker-like
+    token. The phone and question mark must be dominant, and the supporting
+    objects must clearly say "算命", not abstract design. The meaning must be
+    instantly clear on mobile: the user is treating the market like
+    fortune-telling and begging for one certain answer about tomorrow. Use a
+    premium editorial finance-magazine still-life style with lighter premium
+    palette, soft neutral background, clean lighting, strong object clarity,
+    and restrained tension. No person, no hands, no face, no readable text,
+    no giant screens, no sci-fi UI.
 derivative_guidance:
   body:
-  - Use the provided cover image as the visual reference. Keep the glowing question mark, the anxious crowd energy, and the same dark Chinese retail finance atmosphere. Create a supporting scene that shows people asking the same stock question to multiple devices without changing the visual world.
-  - Use the provided cover image as the visual reference. Preserve the same uncertainty metaphor. Extend the same world into a supporting contrast between certainty-seeking and disciplined probability, while keeping the same palette and emotional pressure.
+  - Use the provided cover image as the visual reference. Keep the same concrete certainty-seeking world, but create a simpler article illustration. Show one phone and one fortune-telling-like finance object repeating the same question-seeking mood.
+  - Use the provided cover image as the visual reference. Preserve the same world, but shift toward contrast: one side still seeks certainty, the other side introduces calmer rule-based planning objects.
   cards:
-  - Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame. Preserve the question mark as the core symbol and leave clean space for future headline overlay.
+  - Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame. Preserve the giant question mark and the fortune-telling finance metaphor as the core visual.
 visual_strategy:
   concept_core: 散户把交易当算命，系统把交易当概率
-  image_type: Hybrid
+  image_type: Concept
   image_count: 4
   generation_mode: cover_first
   derivation_rule:
@@ -95,17 +111,29 @@ visual_strategy:
     cover: 1
     body: 2
     social_cards: 1
-  reader_hook: 普通人最熟悉的那句“明天会不会涨”，一眼就能代入。
+  reader_hook: 一眼就要看懂“这是一套股票算命工具”，不能只剩一个抽象问号。
   body_asset_policy: reuse_then_derive
   cover_reusable_in_body: true
   body_usage_plan:
     body_1: reuse_cover
     body_2: derive_from_cover
-visual_style_prefix: Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel.
+visual_style_prefix: >-
+  Premium editorial finance style for mass-audience educational content,
+  realistic not cartoonish, emotionally legible before intellectually
+  impressive, Chinese retail investor context, one simple visual metaphor,
+  object-centered or still-life-first composition, clean composition, premium
+  but grounded materials, lighter premium editorial palette, soft neutral
+  background, clean indoor or daylight-style lighting, calm clear restrained
+  mood, professional finance magazine illustration feel rather than cinematic
+  drama, stylized realism, simplified forms, limited details, no text, no
+  watermark, no cheap sci-fi look, no hologram overload, no giant robot or
+  monster imagery, no blockbuster poster drama, no generic corporate stock
+  image feel, no oppressive darkness, no horror-movie contrast, no thriller
+  atmosphere, no default portrait-centered composition.
 distribution:
   wechat:
     enabled: true
-    status: draft
+    status: ready
     url: ''
   xhs:
     enabled: true
@@ -117,19 +145,36 @@ distribution:
   toutiao:
     enabled: true
     status: draft
+    url: ''
+wechat_layout:
+  profile: finance_editorial_v1
+  density: airy
+  body_font_size: 15
+  line_spacing: 1.8
+  paragraph_spacing: 1.0
+  heading_style: rule_divider
+  accent_color: ink_gold
+  cover_mode: light_editorial
+  body_image_policy: cover_plus_1_or_2
+  checklist_version: wechat_layout_v1
 source_docs:
+- docs/0_Strategy/01_Product_Positioning_and_Boundaries.md
 - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
 - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
 ---
-# 101-13: 为什么“问明天会不会涨”这件事，本身就是最大的智商税？
+# 101-13: “这票明天会不会涨？”这句问得越勤，往往亏得越快
 
 > “市场里最贵的东西，不是会员费，而是你老想听一句准话。”
 
-“这只票明天会不会涨？”这可能是很多人进入股市后最常问的一句话。问朋友，问群聊，问博主，问 AI，问各种“老师”。很多人一打开软件，脑子里的第一个念头不是“我的计划是什么”，而是“谁能告诉我明天的答案”。
+很多人一打开软件，脑子里的第一个念头不是“我的计划是什么”，而是：“这只票明天会不会涨？”
+
+问朋友，问群聊，问博主，问 AI，问各种“老师”。这句话听起来特别正常，几乎每个股民都说过。但很多人后面一连串变形动作，恰恰就是从这句话开始的。
 
 问题就在这里。只要你还在把交易理解成一场“猜明天”的游戏，你就已经站错了位置。市场从来不会因为你特别想知道答案，就额外给你一份确定性。相反，越是执着于“明天一定涨不涨”，越容易把自己训练成一个不断追逐神谕的人。
 
 所以我一直觉得，**“问明天会不会涨”这件事，本身就是散户世界里最贵的一种智商税。** 它贵，不是因为真的要付费，而是因为它会让你在错误的期待里，持续做出错误的动作。
+
+你越想听一句准话，动作往往越容易变形。
 
 ## 你以为自己在求判断，其实是在逃避不确定性
 
@@ -140,6 +185,8 @@ source_docs:
 你去看那些真正严肃的量化体系，它们不是在计算“哪只股票明天一定涨”，而是在寻找**有限但可重复的概率倾斜**。哪怕只比随机好一点点，只要能够长期验证、可回看、可执行，就已经足够有价值。机构不靠神谕赚钱，机构靠的是规则、样本、纪律和持续执行。
 
 散户最容易犯的错，恰恰是把一次判断对错，当成全部价值来源。昨天猜中一只涨停，就觉得自己懂了市场；今天买进去被闷杀，又立刻怀疑世界出了问题。于是情绪越来越重，动作越来越乱，最后账户曲线就变成了“偶尔靠运气，长期靠回撤”。
+
+很多人不是亏在看错，而是亏在老想先听一句准话。
 
 ## 真正昂贵的，不是判断错一次，而是把自己活成了预测机器
 
@@ -160,3 +207,5 @@ ZISO 的边界一直很清楚。我们做的不是“替你预测宇宙”，而
 所以如果今天你还在四处追问“这票明天还能不能拿”，你真正缺的可能不是更会预测的人，而是一套不会被你的恐惧和贪婪瞬间带歪的系统。
 
 承认自己对明天没有绝对把握，不是弱。那反而是你开始接近专业的第一步。
+
+*ZISO AI（中文名 知守AI）：我们不替你算明天，但会尽量把你从“求一句准话”的冲动里拉回来。*

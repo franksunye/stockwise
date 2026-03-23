@@ -1,6 +1,6 @@
 # 外部内容维护队列 (External Maintenance Queue)
 
-> 自动生成时间：2026/3/22 22:18:41
+> 自动生成时间：2026/3/23 16:20:02
 > 说明：这张视图专门提醒“站内内容已更新，但站外已发布内容可能已过时”的维修任务。
 > 发现机制：底层 `source_docs` 变更、站内内容晚于外部发布日期、以及人工显式标记 `maintenance.review_needed`。
 
@@ -8,8 +8,9 @@
 
 - 发布替代文：2 篇
 - 刷新旧文：2 篇
+- 核对同步：1 篇
+- 待处理：3 篇
 - 处理中：2 篇
-- 待处理：2 篇
 
 ## 待复核的已发布外部内容
 
@@ -19,6 +20,7 @@
 | [共识分级定义 (Consensus Levels)](../../../5_Support_Ops/content/consensus-levels.md) | Support | 公众号 | 2026-02-19 周四 | 处理中 / review_needed | 发布替代文<br>旧文建立在历史 AICouncil/共识语义上，建议按现行决议口径发布新版解释文。 | 已显式标记待复核：product_change | `wechat: 投研决议共识机制（现行版，待发布）` |
 | [置信度：这不是胜算，是把握](../../../5_Support_Ops/content/confidence-explained.md) | Support | 公众号 | 2026-03-04 周三 | 待处理 / updated | 刷新旧文<br>公众号旧文主题仍成立，但需要按现行置信度口径补强说明。 | 站内内容晚于外部发布日期，需检查外部口径是否已过时 | - |
 | [策略内参：怎么看干货？](../../../5_Support_Ops/content/tactical-brief-guide.md) | Support | 公众号 | 2026-03-05 周四 | 待处理 / updated | 刷新旧文<br>公众号旧文仍可沿用，但应按当前策略内参结构与术语刷新表述。 | 站内内容晚于外部发布日期，需检查外部口径是否已过时 | - |
+| [101-68: 让“龙虾”替你炒股？它敢说，你敢信么](../101_academy/101-68_general_llm_illusion.md) | Growth | 公众号 | 2026-03-20 周五 | 待处理 / updated | 核对同步 | 底层文档已更新：`docs/0_Strategy/06_Quant_Industry_Positioning_Map.md` | - |
 
 ## 已处理归档
 

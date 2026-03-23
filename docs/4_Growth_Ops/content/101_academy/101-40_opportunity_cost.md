@@ -30,7 +30,7 @@ workflow:
   owner: cmo
   reviewer: founder
   priority: high
-  target_publish_date: '2026-03-26'
+  target_publish_date: '2026-03-30'
   last_action_at: '2026-03-20'
   blocked_reason: ''
 maintenance:
@@ -154,7 +154,8 @@ visual_style_prefix: >-
 distribution:
   wechat:
     enabled: true
-    status: ready
+    status: staged
+    staged_at: '2026-03-23 16:19'
 ---
 # 机会成本：很多人不是没机会，而是钱先被一只烂股拖住了
 

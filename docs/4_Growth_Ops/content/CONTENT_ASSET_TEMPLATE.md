@@ -31,7 +31,7 @@ workflow:
   owner: "cmo"
   reviewer: "founder"
   priority: "medium" # high | medium | low
-  target_publish_date: ""
+  target_publish_date: "" # WeChat sprint defaults to Mon/Wed/Fri cadence unless the team explicitly changes it
   last_action_at: "2026-03-19"
   blocked_reason: ""
 maintenance:
@@ -94,7 +94,8 @@ visual_style_prefix: "Premium editorial finance style for mass-audience educatio
 distribution:
   wechat:
     enabled: true
-    status: "draft" # none | draft | ready | scheduled | published
+    status: "draft" # none | draft | ready | staged | scheduled | published
+    staged_at: "" # optional: uploaded to WeChat backend and typeset, waiting manual publish
     scheduled_at: ""
     url: ""
   xhs:
@@ -132,6 +133,18 @@ wechat_layout:
 - `visual_workflow.stage`
 - `website.enabled`
 - `distribution.wechat.status`
+
+## 默认排期规则
+
+如果内容属于公众号主战役，默认采用固定节奏：
+
+- `周一 / 周三 / 周五`
+
+执行约束：
+
+1. `workflow.target_publish_date` 默认应落在 `周一 / 周三 / 周五`。
+2. 如果业务需要改成别的节奏，应先统一更新战役排期规则，再批量调整目标日期，而不是临时单篇偏移。
+3. `next-release` 视图默认只负责展示当前规则下的排期，不单独发明新的节奏。
 
 推荐补齐：
 

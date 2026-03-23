@@ -33,7 +33,7 @@ workflow:
   owner: cmo
   reviewer: founder
   priority: high
-  target_publish_date: '2026-03-25'
+  target_publish_date: '2026-03-27'
   last_action_at: '2026-03-20'
   blocked_reason: ''
 maintenance:
@@ -154,8 +154,11 @@ visual_style_prefix: >-
 distribution:
   wechat:
     enabled: true
-    status: ready
+    status: staged
+    staged_at: '2026-03-23 16:19'
 source_docs:
+- docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
+- docs/2_Intelligence/research/01_Quant_Trading_Schools_Taxonomy.md
 - docs/0_Strategy/01_Product_Positioning_and_Boundaries.md
 ---
 # 很多人不是不会炒股，而是连自己是什么段位都没弄明白
@@ -231,5 +234,7 @@ source_docs:
 因为从“乱打拳”走向“有章法”，第一步从来不是更努力，而是先把地图拿到手。
 
 ---
+
+*这篇属于「量化成熟度金字塔」系列。*
 
 *ZISO AI（中文名 知守AI）：复杂的分析交给 AI，简单的决策留自己。*

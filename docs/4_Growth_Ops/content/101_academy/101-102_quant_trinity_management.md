@@ -18,7 +18,7 @@ workflow:
   owner: "cmo"
   reviewer: "founder"
   priority: "high"
-  target_publish_date: "2026-05-22"
+  target_publish_date: "2026-05-20"
   last_action_at: "2026-03-19"
 blocked_reason: ""
 maintenance:

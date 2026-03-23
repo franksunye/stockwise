@@ -30,7 +30,7 @@ workflow:
   owner: cmo
   reviewer: founder
   priority: high
-  target_publish_date: '2026-04-08'
+  target_publish_date: '2026-04-20'
   last_action_at: '2026-03-19'
 blocked_reason: ''
 maintenance:
@@ -107,6 +107,8 @@ distribution:
     enabled: true
     status: draft
 source_docs:
+- docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
+- docs/2_Intelligence/research/01_Quant_Trading_Schools_Taxonomy.md
 - docs/0_Strategy/01_Product_Positioning_and_Boundaries.md
 ---
 # 你以为自己在看信号，很多时候其实只是在盯着后视镜开车
@@ -164,3 +166,7 @@ L1 最典型的问题，不是工具少，而是研究治理几乎没有成型�
 如果你还经常困惑“为什么指标给了买点，我还是亏了”，那大概率不是你学得不够多，而是你已经走到了 L1 的边界。
 
 下一步，不是再装更多插件，而是开始认真问一句: 这些信号，到底有没有被验证过。
+
+*这篇属于「量化成熟度金字塔」系列。*
+
+*ZISO AI（中文名 知守AI）：复杂的分析交给 AI，简单的决策留给自己。*

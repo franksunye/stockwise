@@ -502,11 +502,11 @@ WeChat article cover, wide horizontal image. Do not show any person or face. Sho
 - 文件：[101-104_maturity_l0_discretionary.md](/Users/yesun/Code/stockwise/docs/4_Growth_Ops/content/101_academy/101-104_maturity_l0_discretionary.md)
 - 图型：`Concept`
 - 建议图片数：`3`
-- 封面方向：交易按钮上方悬着一团炽热情绪云，表示“心一热就下单”
+- 封面方向：不出现人物，改成交易物件中心构图。画面中心是一枚交易按钮、信号卡或手机出手界面，上方压着一团炽热而不稳定的情绪云。重点不是“有人想下单”，而是“一眼看出这笔交易是被情绪按下去的”。
 - 封面提示词：
 
 ```text
-A conceptual image of an investor's hand hovering over a buy button while a red-hot emotional cloud swirls above it. The idea is impulse-driven trading. Clean composition, premium dark finance style, emotional pressure, no text.
+WeChat article cover, wide horizontal image. Do not show any person or face. Show a simple desk-level still life centered on a trading button, signal card, or phone screen about to be acted on. Above it, a hot, unstable red-orange emotional cloud or impulse shape presses downward, while the rest of the scene stays calm and minimal. The meaning must be obvious in one second: the trade is being pushed by heat and impulse, not by rule or evidence. Keep the composition clean and mobile-readable: one center object, one emotional force, strong negative space. Use a premium editorial finance-magazine style with lighter premium palette, soft neutral background, restrained tension, and no poster drama. No person, no hands, no face, no sci-fi UI, no giant screens, no readable text.
 ```
 
 ### 9. 101-42 Survivorship Bias

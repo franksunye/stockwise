@@ -6,6 +6,9 @@ content_source: "growth"
 content_type: "article"
 canonical_role: "canonical"
 date: "2026-03-20"
+source_docs:
+  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
+  - docs/2_Intelligence/research/01_Quant_Trading_Schools_Taxonomy.md
 category: "The Machine"
 funnel_stage: "MOFU"
 campaign: "wechat_4_week_sprint_2026q2"
@@ -18,7 +21,7 @@ workflow:
   owner: "cmo"
   reviewer: "founder"
   priority: "high"
-  target_publish_date: "2026-05-01"
+  target_publish_date: "2026-05-13"
   last_action_at: "2026-03-19"
 blocked_reason: ""
 maintenance:
@@ -44,10 +47,10 @@ visual_style_prefix: "Premium editorial finance style, realistic not cartoonish,
 你可以把它想象为一个 **舰队司令部**：你不再关心某一条小艇的损耗，你关心的是整个舰队在风暴中的存活率和覆盖面。
 
 ### 2. 行业标准：因子投资与风险平价
-**顶级对冲基金 AQR 管理公司** 的创始人 Cliff Asness 曾揭示过 L3 级的终极武器。他们不直接选股，而是选 **因子**。
+**顶级对冲基金 AQR 管理公司** 的创始人克利夫·阿斯内斯，曾揭示过 L3 级的终极武器。他们不直接选股，而是选 **因子**。
 
 在 L3 级别的系统中，每一只股票都被拆解为一组数学代码：
-- **基本面五因子模型**：这是 **诺贝尔奖得主 Eugene Fama** 的奠基理论。系统会审计一只股票到底是因为“市值小”而涨，还是因为“盈利质量高”而涨。
+- **基本面五因子模型**：这是 **诺贝尔奖得主尤金·法玛** 的奠基理论。系统会审计一只股票到底是因为“市值小”而涨，还是因为“盈利质量高”而涨。
 - **风险平价策略**：系统不会把 100% 的风险压在股市上。它会通过复杂的模型，在股市、债市、大宗商品之间动态调节权重，确保没有任何一个单一风险能够摧毁整个组合。
 
 > **[ 💡 知识点卡片 ]**
@@ -66,13 +69,17 @@ L3 级意味着你已经从一个“猎人”变成了一个“主权财富经�
 
 #### 认知对齐：行话指南
 
-- **因子投资**：Factor Investing (Value, Size, Momentum, Quality, Low Volatility)
-- **风险平价**：Risk Parity (Bridgewater's All Weather style)
-- **风险归因**：Risk Attribution (Alpha vs. Beta)
-- **不相关性**：Non-correlation / Diversification
-- **AQR (Cliff Asness)**：全球顶级量化对冲基金，系统化策略的学术捍卫者。
-- **Eugene Fama**：现代金融之父，有效市场假说与五因子模型奠基人。
+- **因子投资**：按价值、规模、动量、质量、低波动这些因子来拆解资产表现。
+- **风险平价**：不是按资金平均分，而是按风险贡献来分配仓位。
+- **风险归因**：判断收益到底来自市场整体，还是来自系统本身。
+- **不相关性**：尽量让不同资产不要一起涨、一起跌。
+- **AQR 管理公司 / 克利夫·阿斯内斯**：全球顶级量化对冲基金与其代表人物，系统化策略的重要学术捍卫者。
+- **尤金·法玛**：现代金融的重要奠基人，有效市场假说与五因子模型的重要提出者。
 
 
 ---
+*这篇属于「量化成熟度金字塔」系列。*
+
+*ZISO AI（中文名 知守AI）：复杂的分析交给 AI，简单的决策留给自己。*
+
 *下一篇：101-108《L4级——极硬量化，是物理层面的毫秒之战》*

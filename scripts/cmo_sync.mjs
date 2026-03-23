@@ -24,6 +24,8 @@ const NEXT_RELEASE_FILE = path.join(VIEWS_DIR, 'next-release.md');
 const RECENTLY_UPDATED_FILE = path.join(VIEWS_DIR, 'recently-updated.md');
 const CHANGE_IMPACT_FILE = path.join(VIEWS_DIR, 'change-impact.md');
 const EXTERNAL_MAINTENANCE_FILE = path.join(VIEWS_DIR, 'external-maintenance.md');
+const NEXT_RELEASE_WINDOW_START = '2026-03-23'; // Fixed anchor; only change when the team explicitly updates the planning window.
+const WECHAT_RELEASE_CADENCE_LABEL = '周一 / 周三 / 周五';
 
 const SKIP_DIRS = new Set(['archive', 'marketing', '_views']);
 const EXCLUDED_FILES = new Set([
@@ -68,6 +70,7 @@ const STATUS_LABELS = {
   live: '✅ 上线中',
   hidden: '🙈 隐藏',
   ready: '🟢 就绪',
+  staged: '📬 草稿待发',
   published: '✅ 已发布',
   scheduled: '⏳ 待发布',
   draft: '📝 草稿',
@@ -204,6 +207,15 @@ function formatDateTime(dateLike) {
   return date.toLocaleString('zh-CN', { hour12: false, timeZone: 'Asia/Shanghai' });
 }
 
+function parseFixedLocalDate(value) {
+  if (!value || typeof value !== 'string') return null;
+  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return null;
+
+  const [, year, month, day] = match;
+  return new Date(Number(year), Number(month) - 1, Number(day), 0, 0, 0, 0);
+}
+
 function parsePlannedDate(value) {
   if (!value || typeof value !== 'string') return null;
   const trimmed = value.trim();
@@ -234,6 +246,11 @@ function normalizeStage(meta, distribution) {
   );
   if (hasScheduledChannel) return 'scheduled';
 
+  const hasStagedChannel = Object.values(distribution).some(
+    (channel) => channel?.status === 'staged'
+  );
+  if (hasStagedChannel) return 'approved';
+
   const hasDraftChannel = Object.values(distribution).some(
     (channel) => channel?.status === 'draft'
   );
@@ -256,12 +273,12 @@ function normalizeDistribution(meta) {
     const raw = rawDistribution[channel];
 
     if (!raw) {
-      output[channel] = { enabled: false, status: 'none', url: '', scheduled_at: '', published_at: '' };
+      output[channel] = { enabled: false, status: 'none', url: '', scheduled_at: '', staged_at: '', published_at: '' };
       continue;
     }
 
     if (typeof raw === 'string') {
-      output[channel] = { enabled: raw !== 'none', status: raw, url: '', scheduled_at: '', published_at: '' };
+      output[channel] = { enabled: raw !== 'none', status: raw, url: '', scheduled_at: '', staged_at: '', published_at: '' };
       continue;
     }
 
@@ -271,6 +288,7 @@ function normalizeDistribution(meta) {
       status,
       url: raw.url || '',
       scheduled_at: raw.scheduled_at || '',
+      staged_at: raw.staged_at || '',
       published_at: raw.published_at || raw.date || '',
       baseline: raw.baseline || ''
     };
@@ -289,6 +307,10 @@ function formatChannelStatus(channelData) {
 
   if (channelData.status === 'scheduled' && channelData.scheduled_at) {
     return `${label}<br>${channelData.scheduled_at}`;
+  }
+
+  if (channelData.status === 'staged' && channelData.staged_at) {
+    return `${label}<br>${channelData.staged_at}`;
   }
 
   return label;
@@ -489,6 +511,7 @@ function renderMasterRegistry(items, generatedAt) {
   output += `> 自动生成时间：${generatedAt}\n`;
   output += '> 说明：本索引由 `scripts/cmo_sync.mjs` 统一扫描 `4_Growth_Ops/content` 与 `5_Support_Ops/content` 生成。\n';
   output += '> 日期规则：已发布内容优先显示公众号真实发布日期；未发布内容显示目标发布日期。\n';
+  output += `> 公众号默认发布节奏：固定为 ${WECHAT_RELEASE_CADENCE_LABEL}；除非团队明确调整，否则不自动变更。\n`;
   output += '> 视图：';
   output += `[_Pipeline_](${getRelativePath(PIPELINE_FILE, MASTER_FILE)}) · `;
   output += `[_Next Release_](${getRelativePath(NEXT_RELEASE_FILE, MASTER_FILE)}) · `;
@@ -578,12 +601,7 @@ function renderPipelineBoard(items, generatedAt) {
 }
 
 function getNextFourWeekRange() {
-  const now = new Date();
-  const day = now.getDay();
-  const daysUntilNextMonday = day === 0 ? 1 : 8 - day;
-
-  const start = new Date(now);
-  start.setDate(now.getDate() + daysUntilNextMonday);
+  const start = parseFixedLocalDate(NEXT_RELEASE_WINDOW_START) || new Date(NEXT_RELEASE_WINDOW_START);
   start.setHours(0, 0, 0, 0);
 
   const end = new Date(start);
@@ -627,7 +645,7 @@ function renderNextReleaseBoard(items, generatedAt) {
       return (
         ['approved', 'scheduled', 'published'].includes(item.workflowStage) &&
         wechat.enabled &&
-        ['scheduled', 'published'].includes(wechat.status) &&
+        ['staged', 'scheduled', 'published'].includes(wechat.status) &&
         isWithinRange(item.targetPublishDateParsed, start, end)
       );
     })
@@ -636,6 +654,7 @@ function renderNextReleaseBoard(items, generatedAt) {
   let output = '# 未来 4 周发布队列 (Next 4-Week Release Queue)\n\n';
   output += `> 自动生成时间：${generatedAt}\n`;
   output += `> 规划窗口：${formatDateWithWeekday(start)} 至 ${formatDateWithWeekday(end)}\n`;
+  output += `> 当前公众号节奏：固定为 ${WECHAT_RELEASE_CADENCE_LABEL}；除非团队明确要求，否则不自动变更。\n`;
   output += '> 说明：本视图分成两层。第一层展示未来 4 周公众号战役排期；第二层展示窗口内已经达到执行条件的操作清单。\n\n';
 
   output += '## 未来 4 周公众号战役排期\n\n';
@@ -684,7 +703,7 @@ function renderNextReleaseBoard(items, generatedAt) {
     output += '\n\n';
   }
 
-  output += '## 公众号已排期/已发布\n\n';
+  output += '## 公众号已入后台/已排期/已发布\n\n';
   if (scheduledForWechat.length === 0) {
     output += '- 当前无符合条件的内容\n\n';
   } else {

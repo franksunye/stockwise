@@ -6,6 +6,9 @@ content_source: "growth"
 content_type: "article"
 canonical_role: "canonical"
 date: "2026-03-20"
+source_docs:
+  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
+  - docs/2_Intelligence/research/01_Quant_Trading_Schools_Taxonomy.md
 category: "The Machine"
 funnel_stage: "MOFU"
 campaign: "wechat_4_week_sprint_2026q2"
@@ -18,7 +21,7 @@ workflow:
   owner: "cmo"
   reviewer: "founder"
   priority: "high"
-  target_publish_date: "2026-05-08"
+  target_publish_date: "2026-05-15"
   last_action_at: "2026-03-19"
 blocked_reason: ""
 maintenance:
@@ -40,7 +43,7 @@ visual_style_prefix: "Premium editorial finance style, realistic not cartoonish,
 ### 1. 什么是 L4 级？—— “金字塔之巅的禁区”
 当你攀登到 **L4 级**，交易已经从金融学演变成为了 **物理学与通讯工程**。
 
-这是全球极少数顶尖机构（如 **Citadel**、**Virtu**）的游乐场。
+这是全球极少数顶尖机构（如 **城堡证券**、**维图金融**）的游乐场。
 在这一个层级，核心变量不再是“谁更有眼光”，而是“谁的物理位置离交易所更近”、“谁的信号传输延迟更低”。
 你可以把它想象为一个 **超音速歼击机** 的驾驶舱：普通人类的神经传导速度在它面前就像在放慢动作。
 
@@ -49,7 +52,7 @@ visual_style_prefix: "Premium editorial finance style, realistic not cartoonish,
 
 顶级玩家为了节省哪怕一微秒的延迟，会动用以下黑科技：
 - **离散微波塔**：光在真空和空气中的传播速度比在光纤中快 30% 以上。为了在纽约和芝加哥之间建立最快连线，高频机构在全球各地建立微波发射塔，只为让成交信号能“抄近路”。
-- **FPGA 硬件加速**：系统指令不再跑在 CPU 上，而是固化在特制的芯片电路上。这意味着信号从进场到报单，只需要 **几十纳秒**。
+- **可编程硬件加速**：系统指令不再跑在普通处理器上，而是固化在特制的芯片电路上。这意味着信号从进场到报单，只需要 **几十纳秒**。
 - **物理共置**：他们的服务器离交易大撮合机可能只有几厘米的距离。
 
 > **[ 💡 避坑案例 ]**
@@ -71,14 +74,18 @@ L4 是人类目前在二级市场创造出的最精密、最冰冷的效率机�
 
 #### 认知对齐：行话指南
 
-- **极硬量化**：Hard Quant
-- **高频交易**：HFT (High Frequency Trading)
-- **物理共置**：Co-location
-- **微波塔**：Microwave Towers
-- **纳秒**：Nanoseconds (1,000,000,000th of a second)
-- **FPGA**：可编程逻辑阵列硬件。
-- **Citadel / Virtu**：通过物理和算力霸权统治市场的顶级做市巨头。
+- **极硬量化**：拼的是物理速度、机房距离和硬件效率的顶层机器战争。
+- **高频交易**：靠极短时间差完成交易、对冲和做市的算法博弈。
+- **物理共置**：把服务器尽量贴近交易所撮合机房。
+- **微波塔**：为了缩短信号传输路径而建设的超高速通信链路。
+- **纳秒**：十亿分之一秒。
+- **可编程硬件加速**：把交易逻辑固化进专用芯片，进一步压缩延迟。
+- **城堡证券 / 维图金融**：通过物理速度和算力优势统治市场的顶级做市机构。
 
 
 ---
+*这篇属于「量化成熟度金字塔」系列。*
+
+*ZISO AI（中文名 知守AI）：复杂的分析交给 AI，简单的决策留给自己。*
+
 *全系列完结。*

@@ -31,7 +31,7 @@ workflow:
   owner: cmo
   reviewer: founder
   priority: high
-  target_publish_date: '2026-04-09'
+  target_publish_date: '2026-04-22'
   last_action_at: '2026-03-19'
   blocked_reason: ''
 maintenance:

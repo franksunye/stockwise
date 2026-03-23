@@ -1,64 +1,72 @@
 ---
-title: 幸存者偏差：你刷到的那些“股神”，很多只是运气暂时还没用完
-subtitle: 你看到的是赢家截图，看不到的是同一套方法下大多数沉默离场的人
+title: 满屏股神和收益截图，很多只是运气好的人还没翻车
+subtitle: 你看到的是还在赚钱的人，看不到的是同一套方法下已经亏掉的大多数人
+content_id: growth-101-042
+content_source: growth
+content_type: article
+canonical_role: canonical
+date: '2026-03-23'
 source_docs:
 - docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md
-category: Growth 101
+category: The Mind
 funnel_stage: TOFU
 campaign_role: hook
-timeliness_role: timely_candidate
+timeliness_role: timely
 timely_anchor: 社交媒体股神/收益截图/短视频造神
-viral_priority: watchlist
+viral_priority: high
+launch_order: 8
 headline_alternatives:
-- 满屏股神和收益截图，很多只是运气好的人刚好还没翻车
-- 你刷到的那些“老师”，很多不是强，只是暂时还没输出来
+- 你刷到的那些“股神”，很多只是还没翻车
+- 你看到的是赚钱截图，看不到的是同一套方法下已经亏掉的大多数人
+- 很多被吹上天的方法，不是稳，只是还没翻车
+- 社交媒体最容易骗人的，不是假消息，而是那些只晒赢家的方法
 cover_lines:
-- 你看到的是股神截图，看不到的是同一套玩法下沉默离场的大多数人。
-- 很多被吹上天的方法，只是运气暂时还没用完。
-share_copy: 现在社交媒体上最不缺的就是“老师”和收益图，这篇讲的就是为什么你看到的常常不是规律，而只是被放大的幸存者。
+- 你看到的是还在赚钱的人，看不到的是同一套玩法下已经亏掉的大多数人。
+- 很多被吹上天的方法，不是稳，只是还没轮到它翻车。
+share_copy: 现在社交媒体上最不缺的就是“老师”和收益图。可你看到的，很多时候不是规律，而只是运气好、暂时还没翻车的那批人。这篇就是在拆这个错觉。
 campaign: wechat_4_week_sprint_2026q2
 rhythm: Hub
 traceability:
   status: healthy
   last_reviewed_at: '2026-03-19'
 workflow:
-  stage: reviewing
-  review_priority: ready_later
+  stage: approved
+  review_priority: review_next
   owner: cmo
   reviewer: founder
   priority: high
-  target_publish_date: '2026-04-02'
-  last_action_at: '2026-03-19'
-blocked_reason: ''
+  target_publish_date: '2026-04-10'
+  last_action_at: '2026-03-23'
+  blocked_reason: ''
 maintenance:
-  change_status: created
-  update_reason: backlog_activation
+  change_status: updated
+  update_reason: copy_edit
 website:
   enabled: true
   surface: learn
 visual_workflow:
-  stage: not_started
+  stage: approved
   owner: cmo
   reviewer: founder
   priority: high
   target_ready_date: ''
-  last_action_at: '2026-03-20'
+  last_action_at: '2026-03-23'
   blocked_reason: ''
 visual_assets:
   cover:
     required: true
-    status: missing
+    status: approved
     path: "/images/learn/101-42_survivorship_bias_cover.png"
   body:
     required: true
     target_count: 2
-    ready_count: 0
-    status: missing
+    ready_count: 2
+    status: approved
   cards:
     required: true
     target_count: 1
-    ready_count: 0
-    status: missing
+    ready_count: 1
+    status: approved
 image: "/images/learn/101-42_survivorship_bias_cover.png"
 images:
   cover: "/images/learn/101-42_survivorship_bias_cover.png"
@@ -72,18 +80,30 @@ image_specs:
   body: 1080x720
   card: 1080x1440
 image_prompts:
-  cover: An editorial image of a social feed where one bright winning profit screenshot is highlighted while countless dim failed samples disappear into the background. Feels like selective visibility and illusion. Realistic interface-inspired composition without readable text.
+  cover: >-
+    WeChat article cover, wide horizontal image. Do not show any person or
+    face. Show a phone screen or social-feed card centered on a clean neutral
+    desk. Only one profit screenshot is bright, enlarged, and visually pushed
+    to the front, as if the whole feed is celebrating this one winner. Around
+    it, many faded, dropped, or half-hidden losing cards sink into the
+    background and are barely noticed. The image must feel instantly familiar
+    to Chinese retail investors who scroll social feeds full of "高手战绩".
+    The meaning must be obvious in one second: you are only seeing the winner
+    who is still visible, not the full crowd who already lost. Use a premium
+    editorial finance-magazine still-life style with lighter premium palette,
+    soft neutral background, clean lighting, strong foreground-background
+    separation, and no poster drama. No person, no hands, no face, no
+    readable text, no giant screens, no sci-fi UI.
 derivative_guidance:
   body:
-  - Use the provided cover image as the visual reference. Keep the same selective-visibility world, the same highlighted winner, and the same illusion-driven emotional tone. Create a supporting scene that feels more crowd-driven and social.
-  - Use the provided cover image as the visual reference. Preserve the same feed-based illusion and the same realistic interface-inspired world. Extend it into a supporting scene where envy-inducing profit visuals hide losses beneath the surface.
+  - Use the provided cover image as the visual reference. Keep the same selective-visibility world, but create a simpler article illustration. Show one bright winner card still visible while surrounding failed samples fade deeper into the background.
+  - Use the provided cover image as the visual reference. Preserve the same still-life social-feed metaphor, but move closer and quieter. Emphasize that what looks like proof is actually only one surviving sample.
   cards:
-  - Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame. Preserve one bright winner against a field of invisible losers.
+  - Use the provided cover image as the visual reference. Create a vertical social card derived from the same mother frame. Preserve one highlighted winner and many hidden losers.
 visual_strategy:
-  concept_core: 你看到的是股神，没看到的是沉默离场的人
+  concept_core: 你看到的是赢家截图，没看到的是同一套玩法下沉默消失的大多数人
   image_type: Editorial
   image_count: 4
-  primary_image_model: gemini
   generation_mode: cover_first
   derivation_rule:
     body: same_world
@@ -92,66 +112,111 @@ visual_strategy:
     cover: 1
     body: 2
     social_cards: 1
-  reader_hook: 先让人感受到‘满屏股神’的假繁荣。
+  reader_hook: 这张图必须先让人感到“满屏都在晒赚钱”，再意识到其实只有赢家被看见了。
   body_asset_policy: reuse_then_derive
   cover_reusable_in_body: true
   body_usage_plan:
     body_1: reuse_cover
     body_2: derive_from_cover
-visual_style_prefix: Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel.
+visual_style_prefix: >-
+  Premium editorial finance style for mass-audience educational content,
+  realistic not cartoonish, emotionally legible before intellectually
+  impressive, Chinese retail investor context, one simple visual metaphor,
+  object-centered or still-life-first composition, clean composition, premium
+  but grounded materials, lighter premium editorial palette, soft neutral
+  background, clean indoor or daylight-style lighting, calm clear restrained
+  mood, professional finance magazine illustration feel rather than cinematic
+  drama, stylized realism, simplified forms, limited details, no text, no
+  watermark, no cheap sci-fi look, no hologram overload, no giant robot or
+  monster imagery, no blockbuster poster drama, no generic corporate stock
+  image feel, no oppressive darkness, no horror-movie contrast, no thriller
+  atmosphere, no default portrait-centered composition.
 distribution:
   wechat:
     enabled: true
-    status: draft
+    status: ready
+    url: ''
+  xhs:
+    enabled: false
+    status: none
+  twitter:
+    enabled: false
+    status: none
+  toutiao:
+    enabled: false
+    status: none
+wechat_layout:
+  profile: finance_editorial_v1
+  density: airy
+  body_font_size: 15
+  line_spacing: 1.8
+  paragraph_spacing: 1.0
+  heading_style: rule_divider
+  accent_color: ink_gold
+  cover_mode: light_editorial
+  body_image_policy: cover_plus_1_or_2
+  checklist_version: wechat_layout_v1
 ---
-# 幸存者偏差：你刷到的那些“股神”，很多只是运气暂时还没用完
+# 满屏股神和收益截图，很多只是运气好的人还没翻车
 
-> *"社交媒体最擅长做的一件事，就是把少数吃到肉的人，包装成谁学谁会的答案。 "*
+> *"社交媒体最爱放大的，不是规律，而是那些暂时还在赚钱的人。"*
 
-很多人一刷股票社区，就会产生一种很强的错觉：好像别人总能提前埋伏到龙头，总能抓到涨停，总能在最热的时候站在正确一边。
+很多人一刷股票社区，就会突然怀疑自己是不是太笨了。
 
-晒出来的，总是高收益截图、漂亮战绩、极限翻倍故事。久而久之，你很容易开始怀疑：是不是只有我总在错过，只有我一上手就挨打？
+别人天天在晒收益，动不动就是翻倍截图、提前埋伏、满仓吃板。你看着看着就会觉得，好像别人总能买在起涨前，只有自己一上手就挨打。
 
-这就是幸存者偏差最典型的陷阱。
+可你看到的，很可能根本不是“真正更强的人”，而只是**暂时还没翻车的人**。
 
-## 你看到的，往往只是留下来的人
+很多被吹上天的方法，不是稳，只是还没轮到它翻车。
 
-幸存者偏差并不复杂。它真正可怕的地方在于：**你看到的样本，本来就不是全样本。**
+## 你看到的，从来都不是全样本
 
-一个高波动、高风险的玩法，只要参与的人够多，理论上总会有人在一段时间里连续押对、连续爆赚、连续看起来像天才。问题在于，这些人更容易被看见、更愿意发声、也更容易被包装成“方法有效”的证明。
+幸存者偏差最狠的地方，不是概念难，而是它特别像真相。
 
-而那些在同样方法里亏掉、爆仓、沉默退出的人，不会在同样的位置上被你看到。
+一个高波动、高风险的玩法，只要参与的人够多，理论上总会有人在一段时间里连续押对、连续爆赚、连续看起来像天才。问题是，这些人最容易被看见，也最愿意被转发；而那些用同样方法亏掉、爆仓、沉默离场的人，往往不会继续出现在你的信息流里。
 
-于是很多人最后学到的，不是一个被完整验证过的方法，而是少数幸存案例留下来的幻觉。
+于是最后呈现在你面前的，就不再是完整分布，而是一层被筛过的“成功样本”。
 
-## 为什么“看起来有人赚到了”根本不够
+你看到的是赚钱截图，看不到的是同一套方法下已经亏掉的大多数人。
 
-这是散户最容易踩的坑之一。
+你看到的是赢家，不是全体；你看到的是截图，不是分布。
 
-一套方法只要曾经让少数人赚到大钱，就很容易显得特别有吸引力。可在交易里，“曾经有人靠它赚到”远远不等于“它长期值得复制”。因为真正该问的问题不是：有没有赢家，而是：
+## 为什么“真的有人赚到了”依然不够
 
-- 这套方法在更大样本里表现如何？
-- 它的失败率、回撤、爆掉的比例有多高？
-- 赚钱的人，到底是方法稳定，还是运气刚好站在他那边？
+这是散户最容易被带偏的地方。
 
-如果这些问题没有被回答，光看几个赢家案例，得到的往往不是规律，而是幻觉。
+一套方法只要曾经让少数人赚到大钱，就会显得特别有说服力。可在交易里，真正该问的从来不是“有没有人赚到”，而是：
 
-## 幸存者偏差为什么会把人带向更危险的地方
+- 这套方法放进更大样本后，胜率和回撤到底怎么样？
+- 赚到钱的人，靠的是稳定逻辑，还是短期顺风和好运？
+- 如果把那些已经亏掉、退出、闭嘴的人也算进去，这套方法还成立吗？
 
-因为它不只是让你看错别人，还会让你看错自己。
+如果这些问题没有答案，几个亮眼案例本身并不能证明什么。它们最多只能证明一件事：这套玩法里，确实有人暂时活下来了。
 
-你一旦开始用少数赢家的故事来定义“什么才算厉害”，就很容易高估高风险打法的价值，低估稳定方法的意义。那些慢一点、稳一点、不那么抓眼球的方法，会显得不够传奇；而那些高波动、高刺激、极少数人爆赚的玩法，却会不断被包装成“真正的高手都在这样做”。
+社交媒体最容易骗人的，不是假消息，而是那些只晒赢家的方法。
 
-可市场里最贵的，从来不是短期神话，而是长期可复制。
+## 它最危险的地方，是会让你高估高风险打法
 
-## ZISO 为什么看起来不够“传奇”
+幸存者偏差真正害人的，不只是让你看错别人，还会让你重新定义“什么才算厉害”。
+
+你会开始觉得，真正值得学的，一定是那种最刺激、最戏剧化、最容易做出截图效果的打法。反过来，那些慢一点、稳一点、不那么抓眼球的方法，会显得很普通，甚至像“没本事”。
+
+可市场里最贵的，从来不是短期传奇，而是长期可复制。
+
+一旦你习惯了拿少数爆赚样本当标杆，就很容易把高波动误认成高水平，把高刺激误认成高胜率，把“这次还没出事”误认成“这套方法没问题”。
+
+很多人不是被假老师骗进去的，而是被真截图骗进去的。
+
+## ZISO 为什么看起来没那么像“股神”
 
 因为我们不打算用少数极端样本来证明自己。
 
-ZISO 的判断标准从来不是“有没有一次特别惊艳的收益截图”，而是这套逻辑放进更长时间、更大样本、更复杂环境之后，能不能依然站得住。我们更关心的是长期期望、纪律约束、错误控制和稳定性，而不是一两次足够拿来传播的爆发故事。
+ZISO 更在意的，从来不是“有没有一次足够惊艳的收益截图”，而是这套逻辑放进更长时间、更大样本、更复杂环境之后，能不能依然站得住。我们关心的是信号质量、纪律约束、错误控制和稳定性，而不是一两次足够拿来传播的爆发故事。
 
-这也是为什么，真正成熟的系统常常看起来没有那么戏剧化。它不靠少数传奇样本建立信任，而是靠大量不那么刺激、但更可复制的结果慢慢积累可信度。
+真正成熟的系统，很多时候看起来反而没那么传奇。它不给你神话感，但会尽量减少你被神话骗进去的概率。
 
-所以幸存者偏差这篇文章真正想提醒你的，不是“外面没有高手”，而是：**不要把被看见的赢家，误当成完整的真相。**
+所以这篇文章真正想提醒你的，不是“外面没有高手”，而是：**不要把被看见的赢家，误当成完整的真相。**
 
 你看到的是故事，未必是分布。你看到的是幸存者，未必是规律。
+
+*ZISO AI（中文名 知守AI）：我们不帮你追截图神话，只帮你少掉进样本错觉。*

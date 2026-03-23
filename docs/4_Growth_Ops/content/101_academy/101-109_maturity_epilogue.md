@@ -18,7 +18,7 @@ workflow:
   owner: "cmo"
   reviewer: "founder"
   priority: "high"
-  target_publish_date: "2026-04-24"
+  target_publish_date: "2026-05-08"
   last_action_at: "2026-03-19"
 blocked_reason: ""
 maintenance:
@@ -35,6 +35,8 @@ distribution:
     status: "draft"
 source_docs:
   - docs/0_Strategy/01_Product_Positioning_and_Boundaries.md
+  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
+  - docs/2_Intelligence/research/01_Quant_Trading_Schools_Taxonomy.md
 ---
 
 # 结篇：寻找你的量化绿洲
@@ -75,4 +77,8 @@ L4 级的物理霸权，L3 级的算力堡垒，L0/L1 级的认知陷阱…… �
 
 
 ---
+*这篇属于「量化成熟度金字塔」系列。*
+
+*ZISO AI（中文名 知守AI）：复杂的分析交给 AI，简单的决策留给自己。*
+
 *祝你在算法的丛林中，找到属于自己的逻辑之光。*
