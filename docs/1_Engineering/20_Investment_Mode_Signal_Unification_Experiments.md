@@ -5,8 +5,8 @@
 定位：在正式改 API 前，通过分阶段实验验证 mode 信号统一方案在数据覆盖面、模型分化能力和数据库查询性能层面是否皆可行。
 
 关联文档：
-- `docs/1_Engineering/17_Investment_Mode_API_Signal_Unification_Plan.md`
-- `docs/1_Engineering/14_Investment_Mode_Backend_Runbook.md`
+- `docs/1_Engineering/14_Investment_Mode_Backend_Runbook.md` (Part II: API Unification Plan)
+
 
 ---
 
@@ -132,7 +132,7 @@ DB_SOURCE=cloud python backend/scripts/experiment_mode_signal_unification.py --s
 
 ### 9. 实验后的决策
 实验完成后再决定三件事：
-1. 是否按 `17_Investment_Mode_API_Signal_Unification_Plan` 直接推进 API 收口
+1. 是否按 `14_Investment_Mode_Backend_Runbook.md` 中的 Part II (API Unification Plan) 直接推进 API 收口
 2. 是否需要先补索引或修 mode 产数完整性
 3. 是否需要分阶段 rollout：先 `stock/batch`，再 `predictions`
 
