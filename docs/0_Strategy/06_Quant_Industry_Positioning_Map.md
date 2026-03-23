@@ -145,6 +145,13 @@ StockWise 不该直接跳去 L4，也不该假装自己已经在 L3。
 
 **StockWise 当前主要位于这里。**
 
+> [!TIP]
+> **战术延伸阅读：我们的 L2 “兵器库”到底装了什么？**
+> 
+> 确立了深耕 L2 的最高战略基调后，我们必须明确采用哪些交易学派来构造代码护城河。为此，请必须前置阅读深度智库参考文档：**[`../2_Intelligence/research/01_Quant_Trading_Schools_Taxonomy.md`](../2_Intelligence/research/01_Quant_Trading_Schools_Taxonomy.md)**（量化交易流派分类学）。
+> 
+> 该《分类学》文档作为本文的下属“战术执行册”，将全景式地解答：我们是具体运用了哪几个门派的原理（如门派三的 VCP 模式识别做进攻、门派一的均线趋势做防守过滤），来构建系统里的 `Layer-1` 底层架构的。
+
 ### L3 系统化组合投资
 
 特征：
@@ -675,3 +682,8 @@ StockWise 正在建设的，不是一个机构式大规模 alpha 工厂。
    https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2326253
 9. Bailey, López de Prado - The Deflated Sharpe Ratio  
    https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2460551
+
+---
+
+*注：关于行业内各量化交易策略流派（如趋势跟随、统计套利、高频微观、多因子以及形态模式突破）的具体技术分类、哲学信仰与底层规则体系，请参见最新整理的智库概念词典：*
+👉 `../2_Intelligence/research/01_Quant_Trading_Schools_Taxonomy.md`
