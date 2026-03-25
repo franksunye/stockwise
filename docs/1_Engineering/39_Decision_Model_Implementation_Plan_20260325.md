@@ -17,7 +17,8 @@ summary: "将决策栈与统一数据模型落实到代码与表结构的执行�
 1. Step 1 已完成并上线（`completed`）
 2. Step 2 已完成并上线（`completed`）
 3. Step 3 已完成并上线（`completed`）
-4. Step 4-8 待执行（`pending`）
+4. Step 4 已完成并上线（`completed`）
+5. Step 5-8 待执行（`pending`）
 
 已完成项摘要：
 
@@ -33,6 +34,10 @@ summary: "将决策栈与统一数据模型落实到代码与表结构的执行�
    - 新增应用层对象：`ProducerOutcomeView / ArbitrationResultView / ModeActionDecisionView`
    - 在 `predictions / history / stock-batch` API 增量返回新对象字段
    - 旧字段保持不变，页面继续兼容原消费方式
+4. Step 4：动作层语义收口
+   - `mode_decision_log` 在代码语义上明确视为过渡期 `mode_action_decision` 日志
+   - mode 写入链路新增 `action_decision_id` 显式映射，避免语义漂移
+   - 语义注册表补齐 legacy/canonical 别名映射，统一通过常量归一处理旧术语
 
 上线前验证口径（Step 1/2）：
 

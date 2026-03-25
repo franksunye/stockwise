@@ -20,6 +20,7 @@ from backend.engine.semantic_registry import (
     DECISION_SEMANTIC_WATCH,
     normalize_decision_semantic,
     semantic_from_layer1,
+    to_action_decision_id,
 )
 from backend.investment_mode import DEFAULT_MODE_ID, get_mode_definition
 from backend.logger import logger
@@ -258,8 +259,11 @@ def _upsert_mode_decisions(
             bool(mode_definition.get("observe_only")),
         )
         decision_semantic = normalize_decision_semantic(decision_semantic, DECISION_SEMANTIC_NO_SIGNAL)
+        action_decision_id = to_action_decision_id(decision_semantic)
         trigger_flags = json.dumps(
             {
+                "action_decision_id": action_decision_id,
+                "action_semantic": decision_semantic,
                 "mode_rule": mode_note,
                 "params_bundle": snapshot.payload.get("params_bundle"),
                 "opportunity_score": snapshot.opportunity_score,

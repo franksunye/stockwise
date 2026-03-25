@@ -71,7 +71,7 @@ export interface ModeLedgerItem {
     rule_version: string | null;
 }
 
-export interface ModeDecisionItem {
+export interface ModeActionDecisionItem {
     id: string;
     symbol: string;
     decision_date: string;
@@ -82,6 +82,9 @@ export interface ModeDecisionItem {
     trigger_flags: string | null;
     reasoning_snapshot: string | null;
 }
+
+// Transitional alias: `mode_decision_log` currently serves as mode action decision log.
+export type ModeDecisionItem = ModeActionDecisionItem;
 
 type DbClient = (Client | Database.Database) & { $type: 'cloud' | 'local' };
 
@@ -236,6 +239,7 @@ export async function ensureInvestmentModeSchema(db: DbClient): Promise<void> {
     `);
 
     await execute(db, `
+        -- Transitional table: action-layer facts only; producer-layer semantics stay in ai_predictions_v2.
         CREATE TABLE IF NOT EXISTS mode_decision_log (
             id TEXT PRIMARY KEY,
             mode_id TEXT NOT NULL,

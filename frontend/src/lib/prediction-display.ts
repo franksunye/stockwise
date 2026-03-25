@@ -7,6 +7,8 @@ import {
 
 export const NOISE_THRESHOLD_PERCENT = 1.0;
 
+// `dlog.decision_semantic` is treated as transitional action-layer semantic
+// (mode_action_decision lens), not producer-layer semantic.
 function sqlQuote(value: string): string {
     return `'${value.replace(/'/g, "''")}'`;
 }
