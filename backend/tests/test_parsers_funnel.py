@@ -105,6 +105,26 @@ class TestParsersFunnel(unittest.TestCase):
         self.assertEqual(result.signal.value, "Watch")
         self.assertEqual(result.reasoning_trace[0].conclusion, "")
 
+    def test_missing_tactic_trigger_should_still_parse(self):
+        content = (
+            "{"
+            "\"signal\":\"Watch\","
+            "\"confidence\":0.55,"
+            "\"summary\":\"等待\","
+            "\"reasoning_trace\":[],"
+            "\"news_analysis\":[],"
+            "\"tactics\":{"
+            "\"holding_profit\":[{\"priority\":\"P1\",\"action\":\"观察\",\"reason\":\"趋势未坏\"}],"
+            "\"holding_loss\":[{\"priority\":\"P1\",\"action\":\"止损\",\"reason\":\"先控回撤\"}],"
+            "\"empty\":[{\"priority\":\"P1\",\"action\":\"等待\",\"reason\":\"等确认\"}]"
+            "},"
+            "\"key_levels\":{\"immediate_support\":[10,9.6],\"immediate_resistance\":[10.8,11.2]}"
+            "}"
+        )
+        result = parse_ai_response(content)
+        self.assertEqual(result.signal.value, "Watch")
+        self.assertEqual(result.tactics.holding_profit[0].trigger, "")
+
 
 if __name__ == "__main__":
     unittest.main()

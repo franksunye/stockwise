@@ -52,7 +52,8 @@ class ReasoningStep(BaseModel):
 class TacticItem(BaseModel):
     priority: str = "P1"
     action: str
-    trigger: str
+    # Some providers occasionally omit `trigger`; normalize later.
+    trigger: str = ""
     target_price: Optional[Union[float, str, List[Union[float, str]]]] = None
     stop_advance_price: Optional[Union[float, str, List[Union[float, str]]]] = None
     stop_loss_price: Optional[Union[float, str, List[Union[float, str]]]] = None
