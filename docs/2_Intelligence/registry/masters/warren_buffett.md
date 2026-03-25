@@ -1,13 +1,17 @@
 ---
-id: master_buffett
+id: master_warren_buffett
 name: Warren Buffett
 type: master
-status: reviewed
-fit_for_stockwise: medium
-recommended_home: worldview_constraint
+status: baseline
+fit_for_stockwise: low
+recommended_home: research_strategy_map
 ---
 
 # Warren Buffett
+
+> **“价值投资的代名词，伯克希尔·哈撒韦的缔造者，全球投资界的终极参照系。”**
+>
+> 巴菲特以其对“护城河”、企业质量与长期价值的极致坚持而闻名，其通过寻找具备护城河且估值合理的伟大公司来实现跨越数十年的超额收益。
 
 ## 核心价值
 

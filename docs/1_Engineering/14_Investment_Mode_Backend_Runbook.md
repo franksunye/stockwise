@@ -5,6 +5,14 @@
 文档角色：Investment Mode 后端运行手册与 API 信号统一执行方案
 专项状态：Backend 已完成，API Unification 处于 Draft/执行阶段
 
+补充说明：
+
+- `docs/1_Engineering/21_Decision_Data_Model_Architecture.md`
+  - 定义目标数据模型中的 `producer_outcome / arbitration_result / mode_action_decision`
+- 本文件
+  - 继续描述当前 mode 生产链路如何运行
+  - 不等于目标模型的最终形态说明
+
 ---
 
 ## Part I: Backend Operations (原 14 Runbook 内容)
@@ -161,6 +169,13 @@ Dashboard 主卡片（`/api/stock/batch`）与详情历史（`/api/predictions`�
 2. **保留原始预测底稿**：`ai_predictions_v2` 保留为原始底稿、模型身份、reasoning 来源。
 3. **统一收口位置**：优先收口到 API 层，复用现有 `AIPrediction` 结构。
 
+说明：
+
+- 在目标模型中，这相当于过渡期采用：
+  - `ai_predictions_v2 ~= producer_outcome`
+  - `mode_decision_log ~= mode_action_decision`
+- 当前阶段仍未把 `arbitration_result` 物理显式落表
+
 ## 4. 目标口径（To-Be）
 
 - **最终动作信号**：当前用户 `mode_id` 下，对应 `symbol + decision_date` 的 `mode_decision_log` 结果。
@@ -216,4 +231,3 @@ Dashboard 主卡片（`/api/stock/batch`）与详情历史（`/api/predictions`�
 2. 保留 `mode_decision_log` 做最终信号源。
 3. 在 API 层做批量 merge。
 4. 这种路径改动最小，见效最快。
-

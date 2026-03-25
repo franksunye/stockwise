@@ -6,6 +6,12 @@
 
 本文档用于说明 `ai_predictions_v2` 的字段含义、来源、写入时机和主要消费方式。
 
+补充定位：
+
+- `docs/1_Engineering/21_Decision_Data_Model_Architecture.md` 定义目标数据模型
+- 本文件描述的是 `ai_predictions_v2` 在当前实现中的事实口径
+- 因此，本文件不等于目标模型说明，而是过渡期主表的数据字典
+
 它回答四个问题：
 
 1. 每个字段表示什么
@@ -35,6 +41,12 @@
 - `backend/database.py` 中的 `CREATE TABLE` 片段体现基础结构
 - 部分字段通过后续迁移补入
 - 当前本地真实 schema 已包含 `trace_id`
+
+从目标模型视角看，`ai_predictions_v2` 当前是一个混合表：
+
+1. 主体上承载 `producer_outcome`
+2. 同时混入部分 `fact_snapshot` 附加信息
+3. 以及验证、运行与兼容展示元数据
 
 ## 3. 主键与行粒度
 

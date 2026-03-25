@@ -9,6 +9,10 @@ recommended_home: research_principle_and_explanation_overlay
 
 # Alexander Elder
 
+> **“三重滤网（Triple Screen）系统的发明者，交易心理与风险管理领域的权威。”**
+>
+> 埃尔德医生将职业精神分析与技术分析相结合，提出了著名的多周期共振过滤系统，其著作《以交易为生》影响了整整一代投资者对风险控制与执行纪律的认知。
+
 ## 核心价值
 
 1. 多周期框架

@@ -13,6 +13,34 @@ summary: "审计 AICouncil 各分析师的协作线路与独立性，是投研�
 > 本文档是 `24_AICouncil_Review_Opinion_Current_State_20260313.md` 的补充与延伸。
 > 重点记录每位分析师在当前实现中的**真实数据管线**、**独立性状态**，以及 Layer-1 覆盖机制的作用范围。
 
+补充口径：
+
+- 上游术语母本见 `docs/0_Strategy/09_Decision_Stack_and_Producer_Architecture.md`
+- 本文档重点回答的是 AICouncil 页面里各角色在当前代码中的真实落位，而不是产品对外文案本身
+
+## 0. 先给角色定义
+
+结合 2026-03-25 的统一口径，AICouncil 当前涉及三类角色：
+
+1. `Quant Producer`
+   - 如 `Layer-1 / tradeability_v2`、`TrendStrategy`
+   - 负责产出规则侧原始判断
+2. `AI Producer`
+   - 如 `DeepSeek`、`Hunyuan`
+   - 负责产出 AI 侧原始判断
+3. `Interpreter`
+   - 基于量化事实、规则结果或系统主结果做解读和语义转述
+   - 当前也主要由 AI 承担
+
+因此，AICouncil 不能被简单理解为“AI 解释量化”。
+
+更准确地说，AICouncil 是：
+
+- 若干 `Producer Outcome`
+- 再加若干 `Interpretation Output`
+
+组成的一个投研展示视图。
+
 ## 1. 审计结论速查
 
 | 分析师 | 前端标签 | 真实独立性 | 独立性阻断点 | 备注 |
@@ -44,6 +72,11 @@ summary: "审计 AICouncil 各分析师的协作线路与独立性，是投研�
 - ⚠️ `runner.py:334` 的全局 enforcement 会覆盖最终 `signal` 字段
 - ✅ `llm_reasoning` 内的结论文本不受 enforcement 影响，AI 的文字分析保持独立
 
+从统一建模上看：
+
+- 顾深的 `signal / llm_reasoning.summary` 属于 `AI Producer Outcome`
+- 顾深的 `conflict_resolution` 属于 `Interpreter Output`
+
 ### 2.2 林序（混元 Lite）
 
 ```
@@ -57,6 +90,12 @@ summary: "审计 AICouncil 各分析师的协作线路与独立性，是投研�
 林序走的是与顾深**完全相同的代码路径**，区别仅在于调用的 LLM 模型（混元 Lite vs DeepSeek）。
 
 **当前前端展示为"独立判断"，但 signal 字段已被 Layer-1 覆盖。** 文字分析（reasoning 内容）保持 AI 原始输出。
+
+从统一建模上看：
+
+- 林序具备 `AI Producer` 身份
+- 但其 `signal` 当前未在主链上完整保留独立性
+- `reasoning` 仍保留 `Interpreter` 与 `AI Producer` 的文本资产价值
 
 ### 2.3 程矩（Rule Engine）
 
@@ -75,6 +114,12 @@ summary: "审计 AICouncil 各分析师的协作线路与独立性，是投研�
 2. `runner.py:334`：`_enforce_layer1_direction` 全局再覆盖一次（冗余但存在）
 
 **程矩自己的 TrendStrategy 规则与 Layer-1 的 Tradeability 规则是完全不同的两套规则**（详见第 3 节）。
+
+从统一建模上看：
+
+- `TrendStrategy` 是独立 `Quant Producer`
+- 它与 `Layer-1 / tradeability_v2` 是同层关系，不是其子模式
+- 当前问题不在于角色不存在，而在于其 `Producer Outcome` 在主链上被覆盖
 
 ## 3. 程矩规则 vs Layer-1 规则：对比
 
@@ -99,6 +144,13 @@ summary: "审计 AICouncil 各分析师的协作线路与独立性，是投研�
 - 唯一的交集是：都被同一个 Layer-1 覆盖了方向，且都属于 Free 用户 `allowedModels`
 
 用户可能观察到两者"结论很像"，原因是 Layer-1 归一导致，而非两者之间存在协作。
+
+换句话说，林序与程矩在领域上是两个平行 Producer：
+
+- 林序 = `AI Producer`
+- 程矩 = `Quant Producer`
+
+它们的相似，不应被误读为“AI 和规则是一套东西”，而是当前主链裁决口径过强导致的结果收敛。
 
 ## 5. 前端协作线路（`buildCouncilCards()`）
 

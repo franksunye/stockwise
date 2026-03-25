@@ -31,6 +31,13 @@ Hub = 持续更新的“常规内容”节奏（不是一次性爆款）。
 
 本文件定义 知守 AI (ZISO AI) 面向用户的核心领域实体与命名边界，避免产品、前端、后端、内容运营出现同物多名。
 
+上游战略母本补充：
+
+- `docs/0_Strategy/09_Decision_Stack_and_Producer_Architecture.md`
+  - 负责定义 Producer / Interpreter / Mode / Arbitration / Action 的分层关系
+- 本文件
+  - 负责把这些分层翻译成跨团队可复用、对外可控的名词口径
+
 - 用户可见文案以本文件为准。
 - 字段命名可保留历史兼容，但前台展示必须映射到本文件术语。
 - 新功能评审时，若引入新实体，先补本表再开发。
@@ -68,6 +75,14 @@ Hub = 持续更新的“常规内容”节奏（不是一次性爆款）。
 |---|---|---|---|
 | 量化模型 | Quant Model / Quant Engine | 将量化方法与规则组件收敛为结构化状态的后台模型层 | 量化模型 |
 | 分析模型 | Analysis Model / LLM Analysis | 负责 AI 判断、解释、战术展开的分析层 | AI 分析 |
+| 判断生产者 | Producer | 能对某标的某日产出原始判断的来源主体 | 判断来源 |
+| 量化判断生产者 | Quant Producer | 基于量化规则或状态机产出原始判断的主体 | 量化判断来源 |
+| AI 判断生产者 | AI Producer | 基于 AI 模型独立产出原始判断的主体 | AI 判断来源 |
+| 解释器 | Interpreter | 基于量化事实或已有结果做指标解读、纪律说明、语义转述的角色 | 解读层 |
+| 判断结果 | Producer Outcome | 某个 Producer 的原始结论，不等于最终动作 | 原始判断 |
+| 综合裁决 | Arbitration Result | 多个 Producer 的统一综合结果 | 系统裁决 |
+| 动作决策 | Action Decision | 结合投资模式与持仓上下文后的最终动作结果 | 最终动作 |
+| 量化事实层 | Quant Fact Layer | 被 Quant / AI / Interpreter 共享消费的结构化量化事实层 | 量化事实 |
 | 投资模式 | Strategy Product / Mode | 将后台量化策略封装为可理解、可选择、可执行的产品层能力 | 投资模式 |
 | 投研决议 | Investment Decision | 多分析引擎对同一标的的综合意见与倾向结果 | 投研决议 |
 | 动作语义 | Action Semantics | 对用户可执行行为的统一表达集合 | 进场 / 观察 / 防守 / 暂无信号 |
@@ -107,12 +122,16 @@ Hub = 持续更新的“常规内容”节奏（不是一次性爆款）。
 | 量化规则组件 | Quant Rule Components | 可组合、可测试、可替换的规则零件 | 如 Donchian、ATR、MA filter、volume expansion |
 | 量化模型 | Quant Model / Quant Engine | 将规则组件收敛成结构化状态的后台模型 | 当前工程实现对应 `Layer-1 / QuantEngine` |
 | 分析模型 | Analysis Model | 负责 AI 判断、解释、战术展开的模型层 | 当前主要对应 LLM |
+| 判断生产者 | Producer | 可针对同一标的同一日期产出原始判断结果的主体 | 可分为 Quant Producer 与 AI Producer |
+| 解释器 | Interpreter | 对量化事实、判断结果、裁决结果或动作结果做语义说明的能力层 | 可由 AI 或规则模板承担 |
+| 综合裁决层 | Arbitration Layer | 对多个 Producer 的原始判断做统一裁决的中间层 | 解决分歧、优先级与主结果 |
 | 投资模式 | Investment Mode | 面向用户的动作风格层 | 稳健 / 平衡 / 进取 / 仅观察 |
 | 视图层 | View Layer | 决定首页、内参、决议页如何展示不同结论 | 不属于模型本身 |
 
 补充说明：
 - 海龟、MACD、网格、Triple Screen 不属于“投资模式”。
 - 它们应先进入“量化方法框架”或“量化规则组件”。
+- `VCP-like`、`TrendStrategy`、`DeepSeek 独立判断`、`Hunyuan 独立判断` 都属于 Producer，不属于 Investment Mode。
 - `Layer-1` 是当前量化模型的工程实现名，不是未来所有方法体系的总称。
 - 程矩代表规则侧分析视角，不等于量化工程师。
 - 沈策负责量化模型工程实现，不直接承担前台分析表达。
@@ -154,6 +173,9 @@ Hub = 持续更新的“常规内容”节奏（不是一次性爆款）。
 - `量化方法框架` 不等于 `投资模式`。
 - `量化规则组件` 不等于 `投资模式`。
 - `量化模型` 不等于 `分析模型`。
+- `Quant Fact Layer` 不等于 `Quant Producer`。
+- `AI Producer` 不等于 `Interpreter`。
+- `Producer Outcome` 不等于 `Action Decision`。
 - `策略`（内部工程对象）不等于 `投资模式`（用户产品对象）。
 - `Production Decision Lane` 不等于 `Research Quant Lane`。
 - `生产线` 不等于 `实验线`。

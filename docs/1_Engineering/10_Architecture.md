@@ -110,6 +110,48 @@
    - 当前实现更接近“结果表分离”；若后续推进“底座分离”，必须明确是物理分离、逻辑分层还是仅结果口径分离。
    - 推荐共享底层 Layer-1 计算内核，不推荐合并最终结果表。
 
+### 2.4.2 两条轴补充：环境轴与来源轴
+
+结合 `docs/0_Strategy/09_Decision_Stack_and_Producer_Architecture.md`，当前系统讨论“决策链路”时还应同时区分两条轴：
+
+1. `环境轴`
+   - `Production`
+   - `Experiment`
+2. `来源轴`
+   - `Quant Producer`
+   - `AI Producer`
+   - `Interpreter`
+
+当前系统的真实情况是：
+
+- `Production Decision Lane` 与 `Research Quant Lane` 主要是在环境轴上分离
+- `tradeability_v2 / Layer-1`、`TrendStrategy`、LLM 独立判断则是在来源轴上并存
+- AI 还额外承担解释职能，因此不能简单用“AI vs Quant”二分法覆盖全部角色
+
+### 2.4.3 当前主要语义混淆点
+
+截至 2026-03-25，生产链路仍存在三个需要文档先收口的历史语义问题：
+
+1. `mode_decision_log` 同时带有 Producer 来源痕迹与模式结果语义
+2. `tradeability_v2` 既像底层主信号引擎，又直接被模式参数包消费
+3. 部分 AI / 规则原始判断在主链中被 Layer-1 强制对齐，导致“原始判断”和“系统主结果”边界不清
+
+因此，本架构文档中的“生产线 / 实验线”仍是有效事实描述，但不应被理解为已经解决了 Producer / Arbitration / Action 的分层建模问题。
+
+### 2.4.4 架构收敛边界
+
+考虑到 ZISO 当前仍是面向普通投资者的 2C 决策产品，后续演进应遵循以下收敛边界：
+
+1. 保持单体优先
+   - 当前更适合 `Modular Monolith`，不应把多服务化作为升级前提
+2. 保持前台简单
+   - 用户主界面继续以简单动作结论为主，而不是暴露更多中间层术语
+3. 保持后台克制
+   - 优先做逻辑边界与显式对象，不急于把每一层都落成独立物理基础设施
+4. 优先解决真问题
+   - 当前优先级是语义治理、Producer 结果分层、动作层收口
+   - 不是追求更“重”的架构形式
+
 ### 2.5 可观测性现状
 
 - 已有：任务级日志（`task_logs`）、预测追踪表（`chain_execution_traces`、`llm_traces`）。

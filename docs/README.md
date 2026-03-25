@@ -15,6 +15,7 @@ This directory serves as the unified single source of truth for the 知守 AI (Z
 - [Quant Industry Positioning Map](./0_Strategy/06_Quant_Industry_Positioning_Map.md)
 - [GTM & Growth Roadmap](./0_Strategy/07_Growth_and_GTM_Roadmap.md)
 - [Globalization Strategy & Evolution](./0_Strategy/08_Globalization_Strategy_and_Evolution.md)
+- [Decision Stack & Producer Architecture](./0_Strategy/09_Decision_Stack_and_Producer_Architecture.md)
 
 ### [1_Engineering/](./1_Engineering/) - How (System)
 > Project "Backbone": System architecture, reliability, and quality standards.
@@ -22,12 +23,14 @@ This directory serves as the unified single source of truth for the 知守 AI (Z
 - [Reliability & Quality Gates](./1_Engineering/11_Reliability_Protocol.md)
 - [Quant-Engine Architecture](./1_Engineering/13_Quant_Engine_Architecture.md)
 - [Investment Mode Backend Runbook](./1_Engineering/14_Investment_Mode_Backend_Runbook.md)
+- [Decision Data Model Architecture](./1_Engineering/21_Decision_Data_Model_Architecture.md)
 - [Capacity Planning & Scaling Strategy](./1_Engineering/31_Capacity_Planning_And_Scaling_Strategy_20260317.md) *(主路线图：做什么/何时做)*
 - [Frontend Network Zero-Redundancy](./1_Engineering/32_Frontend_Network_Optimization_Zero_Redundancy_20260318.md) *(前端专项实现细则)*
 - [Cloudflare Workers Migration POC](./1_Engineering/33_Cloudflare_Workers_Migration_POC_20260318.md) *(POC 证据与测量数据，不是实施主计划)*
 - [Stock News Fetching Implementation](./1_Engineering/33_Stock_News_Fetching_Implementation.md)
 - [Dashboard Page Refactoring Design](./1_Engineering/34_Dashboard_Page_Refactoring_Design.md)
 - [Broadcast Layer A Operations Runbook](./1_Engineering/35_Broadcast_LayerA_Operations_Runbook_20260319.md) *(上线运行与应急收口标准)*
+- [Decision Model Implementation Plan](./1_Engineering/39_Decision_Model_Implementation_Plan_20260325.md)
 
 ### Current Source of Truth: Investment Mode / Tradeability
 - [Dual-Lane Operations](./2_Intelligence/27C_Dual_Lane_Operations_Manual.md)

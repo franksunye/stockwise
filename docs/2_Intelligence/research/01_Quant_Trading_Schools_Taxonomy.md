@@ -81,9 +81,10 @@ summary: "详细梳理量化交易的全球五大主流门派及其底层信仰�
 * **交易法则**：不对宏观经济作长远假设，只信奉在最小的阻力区域“开火”（The Path of Least Resistance）。通常伴随严格和短促的初始止损。
 
 ### 2. 行业标准与常用兵器
-* **波动收缩模式 (VCP - Volatility Contraction Pattern)**：马克·米勒维尼（Mark Minervini）推广的标志性框架。核心不是“日内振幅”，而是**一段基底内部多轮回撤和波动逐级收窄、成交量逐步干涸**，随后在关键枢轴位附近出现右侧放量突破。
+* **波动收缩模式 (VCP - Volatility Contraction Pattern)**：马克·米勒维尼（Mark Minervini）推广的标志性框架。核心不是“日内振幅”，而是**一段基底内部多轮回撤和波动逐级收窄、成交量逐步干涸**，随后在关键枢轴位附近出现右侧放量突破。详见 [Master: Mark Minervini](../registry/masters/mark_minervini.md) 与 [Methodology: SEPA & VCP](../registry/methodologies/sepa_minervini.md)。
 * **杯柄形态 (Cup and Handle)**：威廉·欧奈尔（William O'Neil）CANSLIM 体系中的核心图表基石。
-* **支撑/阻力与 VWAP 锚定 (S/R Pivot & VWAP Anchoring)**：围绕关键枢轴位、区间高点与成交量加权均价观察突破、假突破与回踩确认。这里更接近**价格结构分析**，而不是狭义订单簿微观结构。
+* **事件拐点 (EP - Episodic Pivot)**：普拉迪普·邦德（Pradeep Bonde / Stockbee）的核心贡献。捕捉由于重大基本面驱动导致的放量跳空突破。详见 [Master: Pradeep Bonde](../registry/masters/pradeep_bonde.md) 与 [Methodology: Episodic Pivot](../registry/methodologies/episodic_pivot_bonde.md)。
+* **支撑/阻力与 VWAP 锚定 (S/R Pivot & VWAP Anchoring)**：围绕关键枢轴位、区间高点与成交量加权均价观察突破、假突破与回踩确认。
 
 ### 3. 在 ZISO 的映射
 * **适用场景**：ZISO 最具攻击力的 alpha 来源。
