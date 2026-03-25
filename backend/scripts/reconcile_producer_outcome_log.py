@@ -25,6 +25,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--producer-id", help="Optional model_id filter.")
     parser.add_argument("--mode-id", default="balanced_v1", help="Mode id for overlay reconciliation.")
     parser.add_argument("--limit", type=int, default=5000, help="Max rows per side. Default: 5000")
+    parser.add_argument("--primary-only", action="store_true", help="Only reconcile ai_predictions_v2 primary rows.")
     parser.add_argument("--json-out", help="Optional path to save full JSON report.")
     return parser.parse_args()
 
@@ -63,7 +64,9 @@ def overlay_from_semantic(base_signal: str, semantic: str) -> Tuple[str, str]:
 
 
 def fetch_primary_predictions(conn, args: argparse.Namespace) -> List[Dict[str, Any]]:
-    filters = ["p.is_primary = 1"]
+    filters = ["1=1"]
+    if args.primary_only:
+        filters.append("p.is_primary = 1")
     params: List[Any] = []
     if args.date_from:
         filters.append("p.date >= ?")
@@ -79,7 +82,7 @@ def fetch_primary_predictions(conn, args: argparse.Namespace) -> List[Dict[str, 
         params.append(args.producer_id)
 
     sql = f"""
-    SELECT p.symbol, p.date AS trade_date, p.model_id AS producer_id, p.signal, p.confidence, p.ai_reasoning
+    SELECT p.symbol, p.date AS trade_date, p.model_id AS producer_id, p.signal, p.confidence, p.ai_reasoning, p.is_primary
     FROM ai_predictions_v2 p
     WHERE {' AND '.join(filters)}
     ORDER BY p.date DESC, p.symbol ASC, p.model_id ASC
@@ -201,7 +204,9 @@ def compare_prediction_vs_outcome(
 
 
 def fetch_mode_overlay_rows(conn, args: argparse.Namespace) -> List[Dict[str, Any]]:
-    filters = ["p.is_primary = 1"]
+    filters = ["1=1"]
+    if args.primary_only:
+        filters.append("p.is_primary = 1")
     params: List[Any] = []
     if args.date_from:
         filters.append("p.date >= ?")
