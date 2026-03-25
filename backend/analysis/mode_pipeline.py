@@ -18,6 +18,7 @@ from backend.engine.semantic_registry import (
     DECISION_SEMANTIC_LONG,
     DECISION_SEMANTIC_NO_SIGNAL,
     DECISION_SEMANTIC_WATCH,
+    normalize_decision_semantic,
     semantic_from_layer1,
 )
 from backend.investment_mode import DEFAULT_MODE_ID, get_mode_definition
@@ -256,6 +257,7 @@ def _upsert_mode_decisions(
             signal,
             bool(mode_definition.get("observe_only")),
         )
+        decision_semantic = normalize_decision_semantic(decision_semantic, DECISION_SEMANTIC_NO_SIGNAL)
         trigger_flags = json.dumps(
             {
                 "mode_rule": mode_note,

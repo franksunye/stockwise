@@ -11,6 +11,7 @@ export type DecisionSemantic = typeof CANONICAL_DECISION_SEMANTICS[number];
 
 export const ACTION_DECISIONS = ['ENTER_LONG', 'WATCH', 'DEFEND', 'NO_SIGNAL'] as const;
 export const ACTION_SEMANTICS = CANONICAL_DECISION_SEMANTICS;
+export type ActionDecision = typeof ACTION_DECISIONS[number];
 
 export const DECISION_SEMANTIC_ALIASES = {
     建议进场: '建议看多',
@@ -26,9 +27,27 @@ export const DECISION_ALIAS_WATCH = ['建议观察', '观察'] as const;
 export const DECISION_ALIAS_DEFENSE = ['建议防守', '防守'] as const;
 export const DECISION_ALIAS_NO_SIGNAL = ['暂无信号', '建议空仓', '空仓'] as const;
 
-export function normalizeDecisionSemantic(value: unknown, fallback: DecisionSemantic = '暂无信号'): DecisionSemantic | string {
+const LEGACY_SIGNAL_SET = new Set<string>(LEGACY_SIGNAL_STATES);
+const CANONICAL_SIGNAL_SET = new Set<string>(CANONICAL_SIGNAL_STATES);
+
+export function normalizeDecisionSemantic(value: unknown, fallback: DecisionSemantic = '暂无信号'): DecisionSemantic {
     const raw = String(value ?? '').trim();
     if (!raw) return fallback;
     if ((CANONICAL_DECISION_SEMANTICS as readonly string[]).includes(raw)) return raw as DecisionSemantic;
-    return DECISION_SEMANTIC_ALIASES[raw as keyof typeof DECISION_SEMANTIC_ALIASES] ?? raw;
+    return DECISION_SEMANTIC_ALIASES[raw as keyof typeof DECISION_SEMANTIC_ALIASES] ?? fallback;
+}
+
+export function normalizeLayer1Status(value: unknown, fallback: SignalState = 'NoSetup'): SignalState {
+    const raw = String(value ?? '').trim();
+    if (CANONICAL_SIGNAL_SET.has(raw)) return raw as SignalState;
+    return fallback;
+}
+
+export function normalizeOverlaySignal(value: unknown, fallback: LegacySignalState = 'Side'): LegacySignalState {
+    const raw = String(value ?? '').trim();
+    if (LEGACY_SIGNAL_SET.has(raw)) return raw as LegacySignalState;
+    if (raw === 'TriggeredLong') return 'Long';
+    if (raw === 'RiskOff') return 'Short';
+    if (raw === 'Watch' || raw === 'NoSetup') return 'Side';
+    return fallback;
 }

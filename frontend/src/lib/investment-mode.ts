@@ -1,5 +1,11 @@
 import type { Client } from '@libsql/client';
 import type Database from 'better-sqlite3';
+import {
+    normalizeDecisionSemantic,
+    normalizeLayer1Status,
+    type DecisionSemantic,
+    type SignalState,
+} from '@/lib/semantic-registry';
 
 export type UserTier = 'free' | 'pro';
 export type RiskBand = 'low' | 'medium' | 'high';
@@ -69,9 +75,9 @@ export interface ModeDecisionItem {
     id: string;
     symbol: string;
     decision_date: string;
-    decision_semantic: string;
+    decision_semantic: DecisionSemantic;
     strategy_version: string;
-    layer1_status: string | null;
+    layer1_status: SignalState | null;
     confidence: number | null;
     trigger_flags: string | null;
     reasoning_snapshot: string | null;
@@ -585,9 +591,9 @@ export async function getModeDecisions(
             id: String(r.id),
             symbol: String(r.symbol),
             decision_date: String(r.decision_date),
-            decision_semantic: String(r.decision_semantic || ''),
+            decision_semantic: normalizeDecisionSemantic(r.decision_semantic),
             strategy_version: String(r.strategy_version || ''),
-            layer1_status: r.layer1_status ? String(r.layer1_status) : null,
+            layer1_status: r.layer1_status ? normalizeLayer1Status(r.layer1_status) : null,
             confidence: toNumber(r.confidence),
             trigger_flags: r.trigger_flags ? String(r.trigger_flags) : null,
             reasoning_snapshot: r.reasoning_snapshot ? String(r.reasoning_snapshot) : null,
