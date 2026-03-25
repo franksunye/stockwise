@@ -13,6 +13,13 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 from backend.database import get_connection
 from backend.engine.layer1_state import build_layer1_snapshot
+from backend.engine.semantic_registry import (
+    DECISION_SEMANTIC_DEFENSE,
+    DECISION_SEMANTIC_LONG,
+    DECISION_SEMANTIC_NO_SIGNAL,
+    DECISION_SEMANTIC_WATCH,
+    semantic_from_layer1,
+)
 from backend.investment_mode import DEFAULT_MODE_ID, get_mode_definition
 from backend.logger import logger
 
@@ -21,10 +28,10 @@ HORIZONS = {"7d": 7, "30d": 30, "90d": 90}
 DEFAULT_STRATEGY_VERSION = "tradeability_v2"
 DEFAULT_RULE_VERSION = "mode_sim_v1"
 
-ENTRY_SEMANTIC = "建议看多"
-WATCH_SEMANTIC = "建议观察"
-DEFENSE_SEMANTIC = "建议防守"
-CASH_SEMANTIC = "暂无信号"
+ENTRY_SEMANTIC = DECISION_SEMANTIC_LONG
+WATCH_SEMANTIC = DECISION_SEMANTIC_WATCH
+DEFENSE_SEMANTIC = DECISION_SEMANTIC_DEFENSE
+CASH_SEMANTIC = DECISION_SEMANTIC_NO_SIGNAL
 
 
 def _today_str() -> str:
@@ -45,20 +52,6 @@ def _safe_float(value: Any) -> float:
         return 0.0
 
 
-def _semantic_from_layer1(layer1_status: Optional[str], signal: Optional[str]) -> str:
-    if layer1_status == "TriggeredLong":
-        return ENTRY_SEMANTIC
-    if layer1_status == "Watch":
-        return WATCH_SEMANTIC
-    if layer1_status == "RiskOff":
-        return DEFENSE_SEMANTIC
-    if layer1_status == "NoSetup":
-        return CASH_SEMANTIC
-    if signal == "Long":
-        return ENTRY_SEMANTIC
-    return WATCH_SEMANTIC
-
-
 def _clip_reasoning(raw_reasoning: Any, mode_id: str, decision_semantic: str, mode_note: str) -> str:
     base = str(raw_reasoning or "").strip()
     prefix = f"[{mode_id}|{decision_semantic}] {mode_note}"
@@ -73,7 +66,7 @@ def _clip_reasoning(raw_reasoning: Any, mode_id: str, decision_semantic: str, mo
 def _semantic_by_mode(mode_id: str, layer1_status: str, signal: Optional[str], observe_only: bool) -> Tuple[str, str]:
     if observe_only:
         return WATCH_SEMANTIC, "observe_only_blocks_entry"
-    semantic = _semantic_from_layer1(layer1_status, signal)
+    semantic = semantic_from_layer1(layer1_status, signal)
     return semantic, f"bundle_state:{layer1_status}"
 
 

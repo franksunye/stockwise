@@ -1,30 +1,45 @@
+import {
+    DECISION_ALIAS_DEFENSE,
+    DECISION_ALIAS_LONG,
+    DECISION_ALIAS_NO_SIGNAL,
+    DECISION_ALIAS_WATCH,
+} from '@/lib/semantic-registry';
+
 export const NOISE_THRESHOLD_PERCENT = 1.0;
+
+function sqlQuote(value: string): string {
+    return `'${value.replace(/'/g, "''")}'`;
+}
+
+function sqlIn(values: readonly string[]): string {
+    return values.map(sqlQuote).join(', ');
+}
 
 export const EFFECTIVE_SIGNAL_SQL = `
     CASE
-        WHEN dlog.decision_semantic IN ('建议看多', '建议进场', '进场') THEN 'Long'
-        WHEN dlog.decision_semantic = '建议防守' OR dlog.decision_semantic = '防守' THEN 'Short'
-        WHEN dlog.decision_semantic IN ('建议观察', '观察', '暂无信号', '建议空仓', '空仓') THEN 'Side'
+        WHEN dlog.decision_semantic IN (${sqlIn(DECISION_ALIAS_LONG)}) THEN 'Long'
+        WHEN dlog.decision_semantic IN (${sqlIn(DECISION_ALIAS_DEFENSE)}) THEN 'Short'
+        WHEN dlog.decision_semantic IN (${sqlIn([...DECISION_ALIAS_WATCH, ...DECISION_ALIAS_NO_SIGNAL])}) THEN 'Side'
         ELSE p.signal
     END
 `;
 
 export const EFFECTIVE_LAYER1_STATUS_SQL = `
     CASE
-        WHEN dlog.decision_semantic IN ('建议看多', '建议进场', '进场') THEN 'TriggeredLong'
-        WHEN dlog.decision_semantic = '建议防守' OR dlog.decision_semantic = '防守' THEN 'RiskOff'
-        WHEN dlog.decision_semantic IN ('暂无信号', '建议空仓', '空仓') THEN 'NoSetup'
-        WHEN dlog.decision_semantic = '建议观察' OR dlog.decision_semantic = '观察' THEN 'Watch'
+        WHEN dlog.decision_semantic IN (${sqlIn(DECISION_ALIAS_LONG)}) THEN 'TriggeredLong'
+        WHEN dlog.decision_semantic IN (${sqlIn(DECISION_ALIAS_DEFENSE)}) THEN 'RiskOff'
+        WHEN dlog.decision_semantic IN (${sqlIn(DECISION_ALIAS_NO_SIGNAL)}) THEN 'NoSetup'
+        WHEN dlog.decision_semantic IN (${sqlIn(DECISION_ALIAS_WATCH)}) THEN 'Watch'
         ELSE p.layer1_status
     END
 `;
 
 export const EFFECTIVE_DECISION_SEMANTIC_SQL = `
     CASE
-        WHEN dlog.decision_semantic IN ('建议空仓', '空仓') THEN '暂无信号'
-        WHEN dlog.decision_semantic = '防守' THEN '建议防守'
-        WHEN dlog.decision_semantic = '观察' THEN '建议观察'
-        WHEN dlog.decision_semantic = '进场' THEN '建议看多'
+        WHEN dlog.decision_semantic IN (${sqlIn(DECISION_ALIAS_NO_SIGNAL.slice(1))}) THEN '暂无信号'
+        WHEN dlog.decision_semantic IN (${sqlIn(DECISION_ALIAS_DEFENSE.slice(1))}) THEN '建议防守'
+        WHEN dlog.decision_semantic IN (${sqlIn(DECISION_ALIAS_WATCH.slice(1))}) THEN '建议观察'
+        WHEN dlog.decision_semantic IN (${sqlIn(DECISION_ALIAS_LONG.slice(1))}) THEN '建议看多'
         ELSE dlog.decision_semantic
     END
 `;

@@ -2,10 +2,11 @@ from __future__ import annotations
 
 from typing import Optional
 
-
-CANONICAL_SIGNAL_STATES = ("TriggeredLong", "Watch", "NoSetup", "RiskOff")
-LEGACY_SIGNAL_STATES = ("Long", "Short", "Side")
-ALL_SIGNAL_STATES = CANONICAL_SIGNAL_STATES + LEGACY_SIGNAL_STATES
+from backend.engine.semantic_registry import (
+    ALL_SIGNAL_STATES,
+    CANONICAL_SIGNAL_STATES,
+    LEGACY_SIGNAL_STATES,
+)
 
 _SIGNAL_CN_LABELS = {
     "TriggeredLong": "可交易",
