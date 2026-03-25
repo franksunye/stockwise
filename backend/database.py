@@ -643,6 +643,33 @@ def init_db():
             CREATE INDEX IF NOT EXISTS idx_mode_perf_query
             ON mode_performance_snapshot(mode_id, scope, horizon, segment_key, as_of_date DESC)
         """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS producer_outcome_log (
+                outcome_id TEXT PRIMARY KEY,
+                env TEXT NOT NULL,
+                symbol TEXT NOT NULL,
+                trade_date TEXT NOT NULL,
+                producer_id TEXT NOT NULL,
+                producer_type TEXT NOT NULL,
+                role_type TEXT NOT NULL,
+                outcome_kind TEXT NOT NULL,
+                signal_state TEXT NOT NULL,
+                decision_semantic TEXT NOT NULL,
+                confidence REAL,
+                reasoning_payload TEXT,
+                run_id TEXT,
+                version TEXT,
+                created_at TIMESTAMP NOT NULL
+            )
+        """)
+        cursor.execute("""
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_producer_outcome_unique
+            ON producer_outcome_log(env, symbol, trade_date, producer_id, role_type, outcome_kind)
+        """)
+        cursor.execute("""
+            CREATE INDEX IF NOT EXISTS idx_producer_outcome_lookup
+            ON producer_outcome_log(symbol, trade_date, producer_id)
+        """)
 
         # 7. Chain Execution Traces (For Multi-turn debugging & observability)
         # Optimized for "Delayed Write" to reduce lock contention on Turso

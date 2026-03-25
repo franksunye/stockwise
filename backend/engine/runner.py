@@ -11,7 +11,11 @@ from backend.database import get_connection
 from backend.engine.models.factory import ModelFactory
 from backend.trading_calendar import get_next_trading_day_str
 
-from backend.db_repo.queries import SAVE_PREDICTION_V2_QUERY, CHECK_PREDICTION_V2_EXISTS_QUERY
+from backend.db_repo.queries import (
+    CHECK_PREDICTION_V2_EXISTS_QUERY,
+    SAVE_PREDICTION_V2_QUERY,
+    SAVE_PRODUCER_OUTCOME_LOG_QUERY,
+)
 from backend.engine.context import SessionContext
 from backend.engine.layer1_state import build_layer1_snapshot
 from backend.logger import logger
@@ -20,10 +24,12 @@ from backend.engine.signal_semantics import (
     is_legacy_signal_inertia,
     normalize_signal_value,
 )
+from backend.engine.semantic_registry import normalize_decision_semantic
 from backend.engine.metaphor import metaphor_engine
 
 DEFAULT_MODE_ID = os.getenv("DEFAULT_INVESTMENT_MODE_ID", "balanced_v1")
 PRIMARY_CONFIDENCE_THRESHOLD = float(os.getenv("PRIMARY_CONFIDENCE_THRESHOLD", "0.6"))
+PRODUCER_OUTCOME_SHADOW_WRITE = os.getenv("PRODUCER_OUTCOME_SHADOW_WRITE", "1").strip().lower() in {"1", "true", "yes", "on"}
 
 
 def _to_float(value: Any, default: float = 0.0) -> float:
@@ -33,6 +39,53 @@ def _to_float(value: Any, default: float = 0.0) -> float:
         return float(value)
     except Exception:
         return default
+
+
+def _env_tag() -> str:
+    return str(os.getenv("DB_SOURCE", "local")).strip().lower() or "local"
+
+
+def _to_decision_semantic_from_signal(signal: Any) -> str:
+    normalized = normalize_signal_value(signal, "Side")
+    return normalize_decision_semantic(normalized, "暂无信号")
+
+
+def _shadow_write_producer_outcome(
+    cursor,
+    *,
+    symbol: str,
+    trade_date: str,
+    model_id: str,
+    signal: Any,
+    confidence: Any,
+    reasoning_payload: Any,
+    run_id: str,
+    version: Any,
+    is_primary: int,
+) -> None:
+    if not PRODUCER_OUTCOME_SHADOW_WRITE:
+        return
+    role_type = "primary" if int(is_primary or 0) == 1 else "secondary"
+    outcome_id = f"{_env_tag()}:{symbol}:{trade_date}:{model_id}:{role_type}:prediction"
+    cursor.execute(
+        SAVE_PRODUCER_OUTCOME_LOG_QUERY,
+        (
+            outcome_id,
+            _env_tag(),
+            symbol,
+            trade_date,
+            model_id,
+            "AI",
+            role_type,
+            "prediction",
+            normalize_signal_value(signal, "Side"),
+            _to_decision_semantic_from_signal(signal),
+            _to_float(confidence, 0.0),
+            str(reasoning_payload or ""),
+            run_id,
+            str(version or "v1"),
+        ),
+    )
 
 
 def select_primary_prediction(
@@ -313,6 +366,18 @@ class PredictionRunner:
                     layer1_payload_json,
                     DEFAULT_MODE_ID,
                 ))
+                _shadow_write_producer_outcome(
+                    cursor,
+                    symbol=symbol,
+                    trade_date=date,
+                    model_id=model_id,
+                    signal=pred.get("signal"),
+                    confidence=pred.get("confidence"),
+                    reasoning_payload=pred.get("reasoning"),
+                    run_id=trace_id,
+                    version=pred.get("prompt_version", "v1"),
+                    is_primary=is_primary,
+                )
                 saved_count += 1
             except Exception as e:
                 logger.error(f"Failed to save V2 result for {model_id}: {e}")

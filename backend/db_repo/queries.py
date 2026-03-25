@@ -50,6 +50,13 @@ SAVE_PREDICTION_V2_QUERY = """
      created_at, updated_at)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now', '+8 hours'), datetime('now', '+8 hours'))
 """
+SAVE_PRODUCER_OUTCOME_LOG_QUERY = """
+    INSERT OR REPLACE INTO producer_outcome_log
+    (outcome_id, env, symbol, trade_date, producer_id, producer_type, role_type,
+     outcome_kind, signal_state, decision_semantic, confidence, reasoning_payload,
+     run_id, version, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now', '+8 hours'))
+"""
 CHECK_PREDICTION_V2_EXISTS_QUERY = "SELECT 1 FROM ai_predictions_v2 WHERE symbol = ? AND date = ? AND model_id = ? LIMIT 1"
 FETCH_PREDICTION_HISTORY_QUERY = "SELECT date, signal, confidence, ai_reasoning, validation_status, actual_change, model_id FROM ai_predictions_v2 WHERE symbol = ? AND {filter_sql} AND validation_status != 'Pending' AND date < ? ORDER BY date DESC LIMIT ?"
 FETCH_ACCURACY_STATS_QUERY = """
