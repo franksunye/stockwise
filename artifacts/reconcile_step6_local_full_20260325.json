@@ -1,0 +1,50 @@
+{
+  "scope": {
+    "date_from": null,
+    "date_to": null,
+    "symbol": null,
+    "producer_id": null,
+    "mode_id": "balanced_v1",
+    "limit": 20000
+  },
+  "inventory": {
+    "ai_predictions_v2_primary": {
+      "rows": 1400,
+      "min_trade_date": "2024-12-30",
+      "max_trade_date": "2026-03-12"
+    },
+    "producer_outcome_log_prediction": {
+      "rows": 3525,
+      "min_trade_date": "2024-12-30",
+      "max_trade_date": "2026-03-12"
+    }
+  },
+  "prediction_outcome_reconciliation": {
+    "totals": {
+      "prediction_rows": 3525,
+      "outcome_rows": 3525,
+      "union_keys": 3525,
+      "matched_pairs": 3525,
+      "missing_in_outcome": 0,
+      "missing_in_prediction": 0
+    },
+    "match_rates": {
+      "signal_state": 1.0,
+      "decision_semantic": 1.0,
+      "confidence": 1.0,
+      "all_fields": 1.0
+    },
+    "mismatch_examples": []
+  },
+  "mode_overlay_reconciliation": {
+    "totals": {
+      "rows": 3525,
+      "comparable": 3403
+    },
+    "match_rates": {
+      "overlay_signal": 1.0,
+      "overlay_layer1_status": 1.0
+    },
+    "mismatch_examples": []
+  }
+}

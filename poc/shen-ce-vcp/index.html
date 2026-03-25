@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>神策 VCP POC | StockWise</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #050508;
+            --panel: #0a0a10;
+            --muted: #94a3b8;
+            --grid: rgba(255, 255, 255, 0.03);
+            --indigo: #6366f1;
+            --emerald: #10b981;
+            --rose: #f43f5e;
+            --slate: #64748b;
+            --amber: #f59e0b;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: white;
+            font-family: "Inter", sans-serif;
+            margin: 0;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        .font-black-italic {
+            font-weight: 900;
+            font-style: italic;
+        }
+
+        .signal-card {
+            transition: border-color 180ms ease, background-color 180ms ease, transform 180ms ease;
+        }
+
+        .signal-card:hover {
+            transform: translateY(-1px);
+        }
+
+        .signal-card.active {
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .chart-fade {
+            background:
+                radial-gradient(circle at top right, rgba(99, 102, 241, 0.08), transparent 38%),
+                linear-gradient(180deg, rgba(99, 102, 241, 0.03), transparent 24%);
+        }
+
+        .metric-chip {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .volume-divider {
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+        }
+    </style>
+</head>
+<body>
+    <main class="max-w-[1480px] mx-auto px-4 lg:px-8 py-8 lg:py-10 space-y-8 lg:space-y-10">
+        <section class="space-y-5 max-w-[1320px] mx-auto text-center flex flex-col items-center">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em]">
+                内部逻辑：Shen Ce VCP
+            </div>
+            <h1 class="text-[2.8rem] sm:text-[3.4rem] lg:text-[4.1rem] font-black-italic tracking-tight uppercase leading-[0.92] text-white">
+                收敛的 <br><span class="text-indigo-500">逻辑</span>
+            </h1>
+            <p class="text-slate-400 text-[15px] lg:text-[16px] font-medium leading-relaxed max-w-[1200px]">
+                我们不再用抽象概念图去暗示结构，而是直接用线上真实数据解释 Shen Ce 为什么把
+                <span class="text-white">科济药业-B（02171）</span>
+                判成 `无结构 / 观察 / 已触发 / 风险关闭`。
+            </p>
+        </section>
+
+        <section class="grid lg:grid-cols-[400px_1fr] gap-7 lg:gap-10 items-start pb-8">
+            <section class="space-y-4 lg:space-y-5">
+                <div class="flex flex-wrap gap-2.5">
+                    <span class="inline-flex items-center px-3 py-1.5 rounded-full border border-white/8 bg-white/[0.03] text-[11px] text-slate-300 font-semibold">02171 · 科济药业-B</span>
+                    <span class="inline-flex items-center px-3 py-1.5 rounded-full border border-white/8 bg-white/[0.03] text-[11px] text-slate-400 font-semibold">2026-01-02 → 2026-03-24</span>
+                </div>
+
+                <div id="state-intro" class="rounded-[26px] border border-white/5 bg-white/[0.03] p-4 lg:p-5 space-y-3.5">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <div id="state-kicker" class="text-[10px] uppercase tracking-[0.22em] text-slate-500 font-black">当前状态</div>
+                            <h2 id="state-title" class="mt-1.5 text-[1.55rem] font-black italic tracking-tight text-white">已触发</h2>
+                        </div>
+                        <div id="state-date-pill" class="px-3 py-1 rounded-full text-[10px] font-black tracking-[0.18em] uppercase border bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
+                            2026-03-18
+                        </div>
+                    </div>
+                    <p id="state-summary" class="text-[13px] text-slate-300 leading-relaxed font-medium">
+                        价格突破关键位，右侧动能与收盘质量达标，系统将结构从等待切换为可执行进攻。
+                    </p>
+                    <div id="metric-strip" class="grid grid-cols-3 gap-2"></div>
+                    <div id="reason-strip" class="flex flex-wrap gap-2"></div>
+                </div>
+
+                <div id="signal-list" class="space-y-2.5"></div>
+            </section>
+
+            <section class="relative w-full h-[740px] bg-[#0A0A10] rounded-[38px] lg:rounded-[48px] border border-white/5 overflow-hidden shadow-2xl chart-fade">
+            <div class="absolute inset-x-0 top-0 z-20 flex items-start justify-between gap-6 px-6 lg:px-8 pt-6">
+                <div>
+                    <div class="text-[10px] uppercase tracking-[0.22em] text-slate-500 font-black">首个演示案例</div>
+                    <div class="mt-2 text-sm lg:text-base font-black italic tracking-tight text-white">02171 · 科济药业-B</div>
+                </div>
+                <div class="text-right max-w-[260px]">
+                    <div id="chart-state-label" class="text-[11px] uppercase tracking-[0.18em] font-black text-emerald-400">2. 已触发</div>
+                    <div id="chart-state-note" class="mt-2 text-xs text-slate-400 font-medium leading-relaxed">价格突破关键位，量能同步确认。</div>
+                </div>
+            </div>
+
+            <div class="absolute inset-x-0 top-[90px] bottom-[16px] px-4 lg:px-5">
+                <div id="price-chart" class="absolute inset-0"></div>
+                <div class="absolute inset-x-0 bottom-[24%] h-px volume-divider z-20"></div>
+                <div class="absolute left-6 bottom-[24%] translate-y-[-9px] z-20 text-[10px] uppercase tracking-[0.22em] text-slate-600 font-black">成交量</div>
+                <svg id="overlay" class="absolute inset-0 z-10 pointer-events-none"></svg>
+            </div>
+
+            <div class="absolute left-[-8px] lg:left-[-10px] bottom-6 z-20 max-w-[220px] rounded-2xl border border-white/5 bg-black/20 backdrop-blur-sm px-4 py-3">
+                <div class="text-[10px] uppercase tracking-[0.22em] text-slate-500 font-black">图形说明</div>
+                <div class="mt-3 space-y-2 text-[11px] text-slate-400 font-medium">
+                    <div><span class="text-indigo-400">靛蓝</span> = 结构包络线</div>
+                    <div><span class="text-emerald-400">绿色</span> = 触发或有效进攻</div>
+                    <div><span class="text-rose-400">玫红</span> = 风险线或结构破坏</div>
+                    <div><span class="text-slate-400">灰色</span> = 无清晰结构</div>
+                </div>
+            </div>
+            </section>
+        </section>
+    </main>
+
+    <script src="./data/02171_20260101_20260324_layer1_replay.js"></script>
+    <script>
+        const FALLBACK_PRICE_DATA = [
+            { time: '2026-01-02', open: 15.0, high: 15.37, low: 14.7, close: 15.32, volume: 906000 },
+            { time: '2026-01-05', open: 15.32, high: 16.6, low: 15.12, close: 16.47, volume: 2369900 },
+            { time: '2026-01-06', open: 16.66, high: 16.8, low: 15.73, close: 15.84, volume: 1386500 },
+            { time: '2026-01-07', open: 16.02, high: 16.64, low: 15.93, close: 16.57, volume: 887000 },
+            { time: '2026-01-08', open: 16.8, high: 17.0, low: 16.38, close: 16.38, volume: 1617000 },
+            { time: '2026-01-09', open: 16.38, high: 16.5, low: 15.9, close: 16.46, volume: 1549065 },
+            { time: '2026-01-12', open: 16.46, high: 16.54, low: 15.9, close: 16.1, volume: 1011000 },
+            { time: '2026-01-13', open: 16.31, high: 16.81, low: 16.1, close: 16.35, volume: 1756362 },
+            { time: '2026-01-14', open: 16.25, high: 16.79, low: 15.73, close: 16.06, volume: 1499500 },
+            { time: '2026-01-15', open: 16.13, high: 16.5, low: 15.86, close: 16.39, volume: 800500 },
+            { time: '2026-01-16', open: 16.39, high: 16.6, low: 15.87, close: 16.19, volume: 1399000 },
+            { time: '2026-01-19', open: 16.19, high: 16.19, low: 15.6, close: 16.0, volume: 959500 },
+            { time: '2026-01-20', open: 15.98, high: 15.98, low: 15.36, close: 15.48, volume: 840500 },
+            { time: '2026-01-21', open: 15.48, high: 15.71, low: 15.22, close: 15.65, volume: 669500 },
+            { time: '2026-01-22', open: 15.74, high: 16.6, low: 15.66, close: 15.87, volume: 1100300 },
+            { time: '2026-01-23', open: 15.75, high: 16.5, low: 15.75, close: 16.4, volume: 1119400 },
+            { time: '2026-01-26', open: 15.4, high: 16.32, low: 15.4, close: 15.8, volume: 1041500 },
+            { time: '2026-01-27', open: 16.5, high: 16.5, low: 15.64, close: 16.04, volume: 1477000 },
+            { time: '2026-01-28', open: 16.46, high: 16.6, low: 15.62, close: 15.89, volume: 1002000 },
+            { time: '2026-01-29', open: 16.21, high: 16.21, low: 15.39, close: 15.49, volume: 968000 },
+            { time: '2026-01-30', open: 15.49, high: 15.55, low: 15.13, close: 15.5, volume: 620000 },
+            { time: '2026-02-02', open: 15.52, high: 15.52, low: 14.3, close: 14.41, volume: 2418000 },
+            { time: '2026-02-03', open: 14.57, high: 14.58, low: 13.95, close: 14.31, volume: 1952000 },
+            { time: '2026-02-04', open: 14.59, high: 14.59, low: 13.88, close: 14.22, volume: 1357000 },
+            { time: '2026-02-05', open: 14.03, high: 14.41, low: 13.14, close: 13.29, volume: 2106000 },
+            { time: '2026-02-06', open: 13.2, high: 14.5, low: 13.2, close: 14.13, volume: 5568687 },
+            { time: '2026-02-09', open: 14.13, high: 14.35, low: 13.5, close: 13.89, volume: 1754000 },
+            { time: '2026-02-10', open: 13.97, high: 14.41, low: 13.81, close: 13.93, volume: 1460500 },
+            { time: '2026-02-11', open: 13.87, high: 14.46, low: 13.87, close: 14.09, volume: 490000 },
+            { time: '2026-02-12', open: 14.09, high: 14.27, low: 13.82, close: 14.0, volume: 964000 },
+            { time: '2026-02-13', open: 13.93, high: 14.4, low: 13.8, close: 14.4, volume: 747500 },
+            { time: '2026-02-16', open: 14.9, high: 15.52, low: 14.44, close: 15.07, volume: 1003000 },
+            { time: '2026-02-20', open: 15.07, high: 15.79, low: 14.6, close: 15.62, volume: 2303000 },
+            { time: '2026-02-21', open: 15.0, high: 16.0, low: 14.0, close: 15.5, volume: 1000000 },
+            { time: '2026-02-23', open: 15.62, high: 16.41, low: 15.62, close: 16.14, volume: 2315500 },
+            { time: '2026-02-24', open: 16.1, high: 16.1, low: 15.18, close: 15.74, volume: 1333340 },
+            { time: '2026-02-25', open: 15.87, high: 15.9, low: 15.37, close: 15.39, volume: 1311400 },
+            { time: '2026-02-26', open: 15.59, high: 15.59, low: 14.35, close: 14.37, volume: 1606500 },
+            { time: '2026-02-27', open: 14.77, high: 14.77, low: 13.56, close: 14.14, volume: 2138855 },
+            { time: '2026-03-02', open: 13.65, high: 13.95, low: 12.2, close: 12.26, volume: 3707550 },
+            { time: '2026-03-03', open: 12.26, high: 12.8, low: 12.1, close: 12.18, volume: 1930000 },
+            { time: '2026-03-04', open: 12.18, high: 12.27, low: 11.15, close: 11.45, volume: 3512249 },
+            { time: '2026-03-05', open: 11.9, high: 12.29, low: 11.8, close: 11.96, volume: 2067940 },
+            { time: '2026-03-06', open: 11.96, high: 12.14, low: 10.87, close: 10.87, volume: 4863530 },
+            { time: '2026-03-09', open: 12.5, high: 15.5, low: 12.11, close: 13.92, volume: 34541000 },
+            { time: '2026-03-10', open: 14.44, high: 16.19, low: 14.0, close: 15.9, volume: 24954030 },
+            { time: '2026-03-11', open: 16.18, high: 17.15, low: 15.71, close: 16.37, volume: 10885130 },
+            { time: '2026-03-12', open: 16.68, high: 16.68, low: 15.69, close: 15.9, volume: 6675792 },
+            { time: '2026-03-13', open: 16.34, high: 16.34, low: 15.03, close: 15.46, volume: 6156000 },
+            { time: '2026-03-16', open: 15.56, high: 16.74, low: 15.08, close: 16.12, volume: 4608500 },
+            { time: '2026-03-17', open: 16.45, high: 16.65, low: 15.6, close: 15.96, volume: 4723015 },
+            { time: '2026-03-18', open: 15.89, high: 16.78, low: 15.8, close: 16.62, volume: 5268680 },
+            { time: '2026-03-19', open: 16.62, high: 16.62, low: 15.6, close: 15.7, volume: 5131000 },
+            { time: '2026-03-20', open: 15.71, high: 16.38, low: 15.19, close: 15.2, volume: 4478000 },
+            { time: '2026-03-23', open: 15.22, high: 15.22, low: 14.35, close: 14.96, volume: 4593510 },
+            { time: '2026-03-24', open: 14.96, high: 15.57, low: 14.54, close: 15.54, volume: 4966500 }
+        ];
+
+        const PRICE_DATA = (
+            window.VCP_POC_DATA
+            && Array.isArray(window.VCP_POC_DATA.priceData)
+            && window.VCP_POC_DATA.priceData.length > 0
+        ) ? window.VCP_POC_DATA.priceData : FALLBACK_PRICE_DATA;
+
+        const VOLUME_DATA = PRICE_DATA.map((bar) => ({
+            time: bar.time,
+            value: bar.volume,
+            color: bar.close >= bar.open ? 'rgba(16, 185, 129, 0.72)' : 'rgba(244, 63, 94, 0.72)'
+        }));
+
+        const FALLBACK_STATES = [
+            {
+                id: 'nosetup',
+                orderLabel: '4',
+                keyLabel: '4. 无结构',
+                title: '无结构',
+                date: '2026-03-17',
+                tone: 'slate',
+                headline: '结构尚未就绪',
+                summary: '波动已经回落，但系统仍不承认这是一段足够干净的可进攻收敛结构。',
+                cardCopy: '价格重新回到观察半径内，但关键位尚未被清晰定义，系统仍保持克制。',
+                chartNote: '可见收敛迹象，但还不具备可执行条件。',
+                reasons: ['尚无清晰关键位', '收缩确认不足', '量能仅回归常态'],
+                metrics: [
+                    { label: '收盘', value: '15.96' },
+                    { label: '成交量', value: '4.72M' },
+                    { label: '倾向', value: '中性' }
+                ],
+                highlightWindow: { start: '2026-03-13', end: '2026-03-18' },
+                upperHull: [
+                    { time: '2026-03-10', price: 16.19 },
+                    { time: '2026-03-11', price: 17.15 },
+                    { time: '2026-03-13', price: 16.34 },
+                    { time: '2026-03-17', price: 16.65 }
+                ],
+                lowerHull: [
+                    { time: '2026-03-10', price: 14.0 },
+                    { time: '2026-03-13', price: 15.03 },
+                    { time: '2026-03-17', price: 15.6 }
+                ],
+                pivot: null,
+                trigger: null,
+                riskLine: { price: 15.03, label: '结构下沿', active: false },
+                annotation: { time: '2026-03-17', price: 16.4, label: '缺少清晰关键位' }
+            },
+            {
+                id: 'watch',
+                orderLabel: '1',
+                keyLabel: '1. 观察',
+                title: '观察',
+                date: '2026-03-19',
+                tone: 'indigo',
+                headline: '盯住关键位',
+                summary: '触发后的优势开始减弱，但结构还没有完全失真，系统把姿态收回到观察。',
+                cardCopy: '这个状态不是继续追击，而是重新盯住关键位与下沿，看结构是否还能维持右侧秩序。',
+                chartNote: '突破后出现回落漂移，观察为主，不追价。',
+                reasons: ['触发后回落', '关键位仍可识别', '进攻质量转弱'],
+                metrics: [
+                    { label: '收盘', value: '15.70' },
+                    { label: '成交量', value: '5.13M' },
+                    { label: '关键位', value: '16.62' }
+                ],
+                highlightWindow: { start: '2026-03-16', end: '2026-03-20' },
+                upperHull: [
+                    { time: '2026-03-12', price: 16.68 },
+                    { time: '2026-03-16', price: 16.74 },
+                    { time: '2026-03-18', price: 16.78 },
+                    { time: '2026-03-19', price: 16.62 }
+                ],
+                lowerHull: [
+                    { time: '2026-03-13', price: 15.03 },
+                    { time: '2026-03-16', price: 15.08 },
+                    { time: '2026-03-19', price: 15.6 }
+                ],
+                pivot: { time: '2026-03-18', price: 16.62, label: '关键位区域' },
+                trigger: null,
+                riskLine: { price: 15.6, label: '观察下沿', active: false },
+                annotation: { time: '2026-03-19', price: 16.15, label: '观察模式' }
+            },
+            {
+                id: 'triggered',
+                orderLabel: '2',
+                keyLabel: '2. 已触发',
+                title: '已触发',
+                date: '2026-03-18',
+                tone: 'emerald',
+                headline: '触发确认',
+                summary: '价格站上关键位，收盘质量与右侧扩张同步出现，系统明确切换为可进攻。',
+                cardCopy: '这是第一版 POC 的核心时刻。价格、量能与结构标签终于落在同一根真实 K 线上。',
+                chartNote: '价格突破关键位，收盘质量与量能同时确认。',
+                reasons: ['触发命中', '突破关键位', '收盘强', '量能扩张'],
+                metrics: [
+                    { label: '收盘', value: '16.62' },
+                    { label: '成交量', value: '5.27M' },
+                    { label: '状态分', value: '70 分' }
+                ],
+                highlightWindow: { start: '2026-03-16', end: '2026-03-19' },
+                upperHull: [
+                    { time: '2026-03-12', price: 16.68 },
+                    { time: '2026-03-13', price: 16.34 },
+                    { time: '2026-03-17', price: 16.65 },
+                    { time: '2026-03-18', price: 16.78 }
+                ],
+                lowerHull: [
+                    { time: '2026-03-13', price: 15.03 },
+                    { time: '2026-03-16', price: 15.08 },
+                    { time: '2026-03-17', price: 15.6 }
+                ],
+                pivot: { time: '2026-03-18', price: 16.34, label: '突破关键位' },
+                trigger: { time: '2026-03-18', price: 16.62, label: '已触发' },
+                riskLine: { price: 15.6, label: '防守位在下方', active: false },
+                annotation: { time: '2026-03-18', price: 16.86, label: '结构对齐' }
+            },
+            {
+                id: 'riskoff',
+                orderLabel: '3',
+                keyLabel: '3. 风险关闭',
+                title: '风险关闭',
+                date: '2026-03-20',
+                tone: 'rose',
+                headline: '结构被破坏',
+                summary: '价格跌回结构下沿之下，进攻假设失效，系统切回防守，不允许继续硬追。',
+                cardCopy: '这里不是情绪化看空，而是结构优势被破坏后的纪律性退出。',
+                chartNote: '结构失效，进入防守模式。',
+                reasons: ['结构破坏', '跌破观察下沿', '进攻假设失效'],
+                metrics: [
+                    { label: '收盘', value: '15.20' },
+                    { label: '下沿', value: '15.60' },
+                    { label: '模式', value: '防守' }
+                ],
+                highlightWindow: { start: '2026-03-18', end: '2026-03-23' },
+                upperHull: [
+                    { time: '2026-03-18', price: 16.78 },
+                    { time: '2026-03-19', price: 16.62 },
+                    { time: '2026-03-20', price: 16.38 }
+                ],
+                lowerHull: [
+                    { time: '2026-03-18', price: 15.8 },
+                    { time: '2026-03-19', price: 15.6 },
+                    { time: '2026-03-20', price: 15.19 }
+                ],
+                pivot: { time: '2026-03-18', price: 16.34, label: '原关键位' },
+                trigger: null,
+                riskLine: { price: 15.6, label: '风险线已跌破', active: true },
+                annotation: { time: '2026-03-20', price: 15.28, label: '结构失效' }
+            }
+        ];
+
+        const STATE_META = {
+            NoSetup: {
+                idPrefix: 'nosetup',
+                orderLabel: '4',
+                keyLabel: '4. 无结构',
+                title: '无结构',
+                tone: 'slate',
+                headline: '结构尚未就绪',
+                summary: '结构仍不够清晰，系统保持克制，等待更高质量的右侧条件出现。',
+                chartNote: '结构仍在形成中，暂不执行。',
+                reasons: ['尚无清晰关键位', '收缩确认不足', '量能仅回归常态'],
+                riskLabel: '结构下沿'
+            },
+            Watch: {
+                idPrefix: 'watch',
+                orderLabel: '1',
+                keyLabel: '1. 观察',
+                title: '观察',
+                tone: 'indigo',
+                headline: '盯住关键位',
+                summary: '结构进入观察状态，关注关键位与下沿，暂不追击。',
+                chartNote: '观察结构与关键位是否继续维持。',
+                reasons: ['结构可观察', '关键位仍可识别', '等待进一步确认'],
+                riskLabel: '观察下沿'
+            },
+            TriggeredLong: {
+                idPrefix: 'triggered',
+                orderLabel: '2',
+                keyLabel: '2. 已触发',
+                title: '已触发',
+                tone: 'emerald',
+                headline: '触发确认',
+                summary: '价格突破关键位并完成质量确认，系统切换到可进攻。',
+                chartNote: '触发日成立，结构与量能同向确认。',
+                reasons: ['触发命中', '突破关键位', '收盘质量达标', '量能扩张'],
+                riskLabel: '防守位在下方'
+            },
+            RiskOff: {
+                idPrefix: 'riskoff',
+                orderLabel: '3',
+                keyLabel: '3. 风险关闭',
+                title: '风险关闭',
+                tone: 'rose',
+                headline: '结构被破坏',
+                summary: '价格跌回关键防线下方，进攻假设失效，系统切回防守。',
+                chartNote: '结构失效，进入防守模式。',
+                reasons: ['结构破坏', '跌破观察下沿', '进攻假设失效'],
+                riskLabel: '风险线已跌破'
+            }
+        };
+
+        function normalizeSetupState(value) {
+            const text = String(value || '').toLowerCase();
+            if (text.includes('trigger')) return 'TriggeredLong';
+            if (text.includes('risk')) return 'RiskOff';
+            if (text.includes('watch')) return 'Watch';
+            return 'NoSetup';
+        }
+
+        function formatVolumeShort(value) {
+            const n = Number(value || 0);
+            if (!Number.isFinite(n) || n <= 0) return '--';
+            return `${(n / 1_000_000).toFixed(2)}M`;
+        }
+
+        function buildDynamicStatesFromSegments() {
+            const segments = window.VCP_POC_DATA?.layer1Segments;
+            if (!Array.isArray(segments) || !segments.length) return [];
+
+            const barByDate = new Map(PRICE_DATA.map((bar, index) => [bar.time, { ...bar, index }]));
+            const replayByDate = new Map(
+                (window.VCP_POC_DATA?.layer1Replay || []).map((row) => [String(row.date), row])
+            );
+
+            return segments.map((seg, idx) => {
+                const canonical = normalizeSetupState(seg.setup_state);
+                const meta = STATE_META[canonical] || STATE_META.NoSetup;
+                const start = String(seg.start_date);
+                const end = String(seg.end_date);
+                const startBar = barByDate.get(start) || PRICE_DATA[0];
+                const endBar = barByDate.get(end) || PRICE_DATA[PRICE_DATA.length - 1];
+                const startIndex = startBar.index ?? 0;
+                const endIndex = endBar.index ?? startIndex;
+                const left = Math.max(0, startIndex - 3);
+                const right = Math.min(PRICE_DATA.length - 1, endIndex + 1);
+                const localBars = PRICE_DATA.slice(left, right + 1);
+                const midBar = localBars[Math.floor(localBars.length / 2)] || endBar;
+                const highMax = Math.max(...localBars.map((b) => Number(b.high || b.close || 0)));
+                const tailBars = localBars.slice(-Math.min(5, localBars.length));
+                const riskFloor = Math.min(...tailBars.map((b) => Number(b.low || b.close || 0)));
+                const replayRow = replayByDate.get(end);
+                const scoreValue = replayRow && Number.isFinite(Number(replayRow.score)) ? Number(replayRow.score).toFixed(0) : '--';
+                const dateLabel = start === end ? end : `${start} → ${end}`;
+
+                return {
+                    id: `${meta.idPrefix}-${start}-${end}-${idx}`,
+                    orderLabel: meta.orderLabel,
+                    keyLabel: meta.keyLabel,
+                    title: meta.title,
+                    date: end,
+                    dateLabel,
+                    tone: meta.tone,
+                    headline: meta.headline,
+                    summary: `${meta.summary}${Number(seg.days) > 1 ? `（持续 ${seg.days} 个交易日）` : ''}`,
+                    cardCopy: meta.summary,
+                    chartNote: meta.chartNote,
+                    reasons: meta.reasons,
+                    metrics: [
+                        { label: '收盘', value: Number(endBar.close || 0).toFixed(2) },
+                        { label: '成交量', value: formatVolumeShort(endBar.volume) },
+                        { label: '状态分', value: scoreValue === '--' ? '--' : `${scoreValue} 分` }
+                    ],
+                    highlightWindow: { start, end },
+                    upperHull: [
+                        { time: startBar.time, price: Number(startBar.high || startBar.close || 0) },
+                        { time: midBar.time, price: Number(midBar.high || midBar.close || 0) },
+                        { time: endBar.time, price: Number(endBar.high || endBar.close || 0) }
+                    ],
+                    lowerHull: [
+                        { time: startBar.time, price: Number(startBar.low || startBar.close || 0) },
+                        { time: midBar.time, price: Number(midBar.low || midBar.close || 0) },
+                        { time: endBar.time, price: Number(endBar.low || endBar.close || 0) }
+                    ],
+                    pivot: canonical === 'NoSetup'
+                        ? null
+                        : { time: endBar.time, price: highMax, label: '关键位' },
+                    trigger: canonical === 'TriggeredLong'
+                        ? { time: endBar.time, price: Number(endBar.close || endBar.high || 0), label: '已触发' }
+                        : null,
+                    riskLine: { price: riskFloor, label: meta.riskLabel, active: canonical === 'RiskOff' },
+                    annotation: { time: endBar.time, price: Number(endBar.high || endBar.close || 0), label: meta.headline }
+                };
+            });
+        }
+
+        const STATES = (() => {
+            const dynamic = buildDynamicStatesFromSegments();
+            return dynamic.length ? dynamic : FALLBACK_STATES;
+        })();
+
+        const SIGNAL_TONES = {
+            slate: {
+                text: 'text-slate-400',
+                border: 'border-slate-500/20',
+                bg: 'bg-slate-500/10',
+                accent: '#94a3b8',
+                stroke: 'rgba(148, 163, 184, 0.5)'
+            },
+            indigo: {
+                text: 'text-indigo-400',
+                border: 'border-indigo-500/20',
+                bg: 'bg-indigo-500/10',
+                accent: '#6366f1',
+                stroke: 'rgba(99, 102, 241, 0.5)'
+            },
+            emerald: {
+                text: 'text-emerald-400',
+                border: 'border-emerald-500/20',
+                bg: 'bg-emerald-500/10',
+                accent: '#10b981',
+                stroke: 'rgba(16, 185, 129, 0.6)'
+            },
+            rose: {
+                text: 'text-rose-400',
+                border: 'border-rose-500/20',
+                bg: 'bg-rose-500/10',
+                accent: '#f43f5e',
+                stroke: 'rgba(244, 63, 94, 0.6)'
+            }
+        };
+
+        const signalList = document.getElementById('signal-list');
+        const reasonStrip = document.getElementById('reason-strip');
+        const overlay = document.getElementById('overlay');
+        const stateTitle = document.getElementById('state-title');
+        const stateSummary = document.getElementById('state-summary');
+        const stateKicker = document.getElementById('state-kicker');
+        const stateDatePill = document.getElementById('state-date-pill');
+        const metricStrip = document.getElementById('metric-strip');
+        const chartStateLabel = document.getElementById('chart-state-label');
+        const chartStateNote = document.getElementById('chart-state-note');
+
+        const priceChartElement = document.getElementById('price-chart');
+
+        const sharedChartOptions = {
+            layout: {
+                background: { color: 'transparent' },
+                textColor: '#64748b',
+                fontSize: 11
+            },
+            grid: {
+                vertLines: { color: 'rgba(255, 255, 255, 0.03)' },
+                horzLines: { color: 'rgba(255, 255, 255, 0.03)' }
+            },
+            timeScale: {
+                borderVisible: false,
+                timeVisible: false
+            },
+            handleScroll: false,
+            handleScale: false
+        };
+
+        const priceChart = LightweightCharts.createChart(priceChartElement, {
+            ...sharedChartOptions,
+            width: priceChartElement.clientWidth,
+            height: priceChartElement.clientHeight,
+            rightPriceScale: {
+                visible: true,
+                borderVisible: false,
+                scaleMargins: { top: 0.16, bottom: 0.14 }
+            },
+            crosshair: {
+                vertLine: { visible: false },
+                horzLine: { visible: false }
+            }
+        });
+
+        const candleSeries = priceChart.addSeries(LightweightCharts.CandlestickSeries, {
+            upColor: '#10b981',
+            downColor: '#f43f5e',
+            borderVisible: false,
+            wickUpColor: '#10b981',
+            wickDownColor: '#f43f5e',
+            wickVisible: true
+        });
+
+        const volumeSeries = priceChart.addSeries(LightweightCharts.HistogramSeries, {
+            priceScaleId: 'volume',
+            priceFormat: { type: 'volume' },
+            base: 0
+        });
+
+        priceChart.priceScale('volume').applyOptions({
+            visible: false,
+            borderVisible: false,
+            scaleMargins: { top: 0.78, bottom: 0.0 }
+        });
+
+        candleSeries.setData(PRICE_DATA);
+        volumeSeries.setData(VOLUME_DATA);
+        priceChart.timeScale().fitContent();
+
+        function buildSmoothPath(points) {
+            if (points.length < 2) return '';
+            let d = `M ${points[0].x.toFixed(2)} ${points[0].y.toFixed(2)}`;
+            for (let i = 1; i < points.length; i += 1) {
+                const prev = points[i - 1];
+                const curr = points[i];
+                const midX = (prev.x + curr.x) / 2;
+                const midY = (prev.y + curr.y) / 2;
+                d += ` Q ${prev.x.toFixed(2)} ${prev.y.toFixed(2)} ${midX.toFixed(2)} ${midY.toFixed(2)}`;
+                if (i === points.length - 1) {
+                    d += ` T ${curr.x.toFixed(2)} ${curr.y.toFixed(2)}`;
+                }
+            }
+            return d;
+        }
+
+        function cubicPoint(p0, p1, p2, p3, t) {
+            const mt = 1 - t;
+            const x = mt * mt * mt * p0.x
+                + 3 * mt * mt * t * p1.x
+                + 3 * mt * t * t * p2.x
+                + t * t * t * p3.x;
+            const y = mt * mt * mt * p0.y
+                + 3 * mt * mt * t * p1.y
+                + 3 * mt * t * t * p2.y
+                + t * t * t * p3.y;
+            return { x, y };
+        }
+
+        function buildConvergingPaths(upperCoords, lowerCoords, pivotCoord) {
+            if (upperCoords.length < 2 || lowerCoords.length < 2) return null;
+            const startUpper = upperCoords[0];
+            const startLower = lowerCoords[0];
+            const targetX = pivotCoord ? pivotCoord.x : (upperCoords[upperCoords.length - 1].x + lowerCoords[lowerCoords.length - 1].x) / 2;
+            const centerY = pivotCoord ? pivotCoord.y : (upperCoords[upperCoords.length - 1].y + lowerCoords[lowerCoords.length - 1].y) / 2;
+            const initialGap = Math.max(26, Math.abs(startLower.y - startUpper.y));
+            const finalGap = Math.max(10, initialGap * 0.16);
+            const endUpper = { x: targetX, y: centerY - finalGap / 2 };
+            const endLower = { x: targetX, y: centerY + finalGap / 2 };
+            const dx = targetX - ((startUpper.x + startLower.x) / 2);
+
+            const upperCp1 = { x: startUpper.x + dx * 0.24, y: startUpper.y + initialGap * 0.1 };
+            const upperCp2 = { x: startUpper.x + dx * 0.72, y: endUpper.y - initialGap * 0.18 };
+            const lowerCp1 = { x: startLower.x + dx * 0.24, y: startLower.y - initialGap * 0.1 };
+            const lowerCp2 = { x: startLower.x + dx * 0.72, y: endLower.y + initialGap * 0.18 };
+
+            const upperD = `M ${startUpper.x.toFixed(2)} ${startUpper.y.toFixed(2)} C ${upperCp1.x.toFixed(2)} ${upperCp1.y.toFixed(2)} ${upperCp2.x.toFixed(2)} ${upperCp2.y.toFixed(2)} ${endUpper.x.toFixed(2)} ${endUpper.y.toFixed(2)}`;
+            const lowerD = `M ${startLower.x.toFixed(2)} ${startLower.y.toFixed(2)} C ${lowerCp1.x.toFixed(2)} ${lowerCp1.y.toFixed(2)} ${lowerCp2.x.toFixed(2)} ${lowerCp2.y.toFixed(2)} ${endLower.x.toFixed(2)} ${endLower.y.toFixed(2)}`;
+
+            const samples = 42;
+            const upperSample = [];
+            const lowerSample = [];
+            for (let i = 0; i <= samples; i += 1) {
+                const t = i / samples;
+                upperSample.push(cubicPoint(startUpper, upperCp1, upperCp2, endUpper, t));
+                lowerSample.push(cubicPoint(startLower, lowerCp1, lowerCp2, endLower, t));
+            }
+            const fillPoints = [...upperSample, ...lowerSample.reverse()];
+            const fillD = `M ${fillPoints[0].x.toFixed(2)} ${fillPoints[0].y.toFixed(2)} ${fillPoints.slice(1).map((p) => `L ${p.x.toFixed(2)} ${p.y.toFixed(2)}`).join(' ')} Z`;
+
+            return {
+                upperD,
+                lowerD,
+                fillD,
+                startX: Math.min(startUpper.x, startLower.x),
+                endX: targetX,
+                centerY: (startUpper.y + startLower.y) / 2,
+                initialGap
+            };
+        }
+
+        function buildDecayingWavePath(paths) {
+            const points = [];
+            const turns = 5.8;
+            const amplitude = Math.max(10, paths.initialGap * 0.42);
+            const total = 72;
+            for (let i = 0; i <= total; i += 1) {
+                const t = i / total;
+                const x = paths.startX + (paths.endX - paths.startX) * t;
+                const decay = Math.pow(1 - t, 1.45);
+                const y = paths.centerY + Math.sin(t * Math.PI * turns) * amplitude * decay;
+                points.push({ x, y });
+            }
+            return buildSmoothPath(points);
+        }
+
+        function toCoord(point) {
+            const x = priceChart.timeScale().timeToCoordinate(point.time);
+            const y = candleSeries.priceToCoordinate(point.price);
+            if (x == null || y == null) return null;
+            return { x, y };
+        }
+
+        function appendSvg(tag, attrs) {
+            const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+            Object.entries(attrs).forEach(([key, value]) => {
+                el.setAttribute(key, String(value));
+            });
+            overlay.appendChild(el);
+            return el;
+        }
+
+        function drawLabel(x, y, text, color, anchor = 'start') {
+            appendSvg('text', {
+                x: x.toFixed(2),
+                y: y.toFixed(2),
+                fill: color,
+                'font-size': '10',
+                'font-weight': '900',
+                'font-style': 'italic',
+                'text-anchor': anchor
+            }).textContent = text;
+        }
+
+        function renderOverlay(state) {
+            const tone = SIGNAL_TONES[state.tone];
+            overlay.setAttribute('viewBox', `0 0 ${priceChartElement.clientWidth} ${priceChartElement.clientHeight}`);
+            overlay.innerHTML = '';
+
+            const width = priceChartElement.clientWidth;
+            const priceHeight = priceChartElement.clientHeight;
+            const highlightStartX = priceChart.timeScale().timeToCoordinate(state.highlightWindow.start);
+            const highlightEndX = priceChart.timeScale().timeToCoordinate(state.highlightWindow.end);
+
+            if (highlightStartX != null && highlightEndX != null) {
+                const rawMinX = Math.min(highlightStartX, highlightEndX);
+                const rawMaxX = Math.max(highlightStartX, highlightEndX);
+                const shrink = Math.min(20, Math.max(8, (rawMaxX - rawMinX) * 0.18));
+                const boxX = rawMinX + shrink;
+                const boxW = Math.max(26, rawMaxX - rawMinX - shrink * 2);
+                appendSvg('rect', {
+                    x: boxX.toFixed(2),
+                    y: '0',
+                    width: boxW.toFixed(2),
+                    height: priceHeight.toFixed(2),
+                    fill: tone.stroke.replace(/0\.\d+\)/, '0.06)'),
+                    rx: '24'
+                });
+            }
+
+            const upperCoords = state.upperHull.map(toCoord).filter(Boolean);
+            const lowerCoords = state.lowerHull.map(toCoord).filter(Boolean);
+            const pivotCoord = state.pivot ? toCoord({ time: state.pivot.time, price: state.pivot.price }) : null;
+            const converge = buildConvergingPaths(upperCoords, lowerCoords, pivotCoord);
+
+            if (converge) {
+                appendSvg('path', {
+                    d: converge.fillD,
+                    fill: tone.stroke.replace(/0\.\d+\)/, '0.06)'),
+                    stroke: 'none'
+                });
+                appendSvg('path', {
+                    d: converge.upperD,
+                    fill: 'none',
+                    stroke: tone.stroke,
+                    'stroke-width': '2.2',
+                    'stroke-linecap': 'round'
+                });
+                appendSvg('path', {
+                    d: converge.lowerD,
+                    fill: 'none',
+                    stroke: tone.stroke,
+                    'stroke-width': '2.2',
+                    'stroke-linecap': 'round'
+                });
+                appendSvg('path', {
+                    d: buildDecayingWavePath(converge),
+                    fill: 'none',
+                    stroke: tone.stroke.replace(/0\.\d+\)/, '0.28)'),
+                    'stroke-width': '1.1',
+                    'stroke-dasharray': '3 7',
+                    'stroke-linecap': 'round'
+                });
+            }
+
+            if (state.pivot) {
+                const pivot = toCoord({ time: state.pivot.time, price: state.pivot.price });
+                if (pivot) {
+                    appendSvg('line', {
+                        x1: '0',
+                        x2: width.toFixed(2),
+                        y1: pivot.y.toFixed(2),
+                        y2: pivot.y.toFixed(2),
+                        stroke: 'rgba(255, 255, 255, 0.12)',
+                        'stroke-width': '1',
+                        'stroke-dasharray': '5 6'
+                    });
+                    appendSvg('rect', {
+                        x: (pivot.x - 7).toFixed(2),
+                        y: (pivot.y - 7).toFixed(2),
+                        width: '14',
+                        height: '14',
+                        fill: 'rgba(10, 10, 16, 0.92)',
+                        stroke: tone.accent,
+                        'stroke-width': '1.2',
+                        transform: `rotate(45 ${pivot.x.toFixed(2)} ${pivot.y.toFixed(2)})`
+                    });
+                    drawLabel(Math.min(width - 36, pivot.x + 12), Math.max(18, pivot.y - 10), state.pivot.label, tone.accent);
+                }
+            }
+
+            if (state.trigger) {
+                const trigger = toCoord({ time: state.trigger.time, price: state.trigger.price });
+                if (trigger) {
+                    appendSvg('line', {
+                        x1: trigger.x.toFixed(2),
+                        x2: trigger.x.toFixed(2),
+                        y1: '0',
+                        y2: priceHeight.toFixed(2),
+                        stroke: 'rgba(16, 185, 129, 0.55)',
+                        'stroke-width': '1.4',
+                        'stroke-dasharray': '7 7'
+                    });
+                    appendSvg('circle', {
+                        cx: trigger.x.toFixed(2),
+                        cy: trigger.y.toFixed(2),
+                        r: '5',
+                        fill: 'rgba(16, 185, 129, 0.15)',
+                        stroke: '#10b981',
+                        'stroke-width': '1.4'
+                    });
+                    drawLabel(Math.max(22, trigger.x - 8), 26, state.trigger.label.toUpperCase(), '#10b981', 'end');
+                }
+            }
+
+            if (state.riskLine) {
+                const riskY = candleSeries.priceToCoordinate(state.riskLine.price);
+                if (riskY != null) {
+                    appendSvg('line', {
+                        x1: '0',
+                        x2: width.toFixed(2),
+                        y1: riskY.toFixed(2),
+                        y2: riskY.toFixed(2),
+                        stroke: state.riskLine.active ? 'rgba(244, 63, 94, 0.7)' : 'rgba(244, 63, 94, 0.35)',
+                        'stroke-width': state.riskLine.active ? '1.8' : '1.2',
+                        'stroke-dasharray': '6 7'
+                    });
+                    drawLabel(width - 18, Math.max(18, riskY - 8), state.riskLine.label, '#f43f5e', 'end');
+                }
+            }
+
+            const currentBar = PRICE_DATA.find((bar) => bar.time === state.date);
+            if (currentBar) {
+                const currentX = priceChart.timeScale().timeToCoordinate(currentBar.time);
+                if (currentX != null) {
+                    appendSvg('line', {
+                        x1: currentX.toFixed(2),
+                        x2: currentX.toFixed(2),
+                        y1: '0',
+                        y2: priceHeight.toFixed(2),
+                        stroke: tone.stroke.replace(/0\.\d+\)/, '0.38)'),
+                        'stroke-width': '1',
+                        'stroke-dasharray': '4 7'
+                    });
+                }
+            }
+
+            if (state.annotation) {
+                const point = toCoord({ time: state.annotation.time, price: state.annotation.price });
+                if (point) {
+                    appendSvg('circle', {
+                        cx: point.x.toFixed(2),
+                        cy: point.y.toFixed(2),
+                        r: '4',
+                        fill: 'rgba(10, 10, 16, 0.92)',
+                        stroke: tone.accent,
+                        'stroke-width': '1.1'
+                    });
+                    drawLabel(
+                        Math.min(width - 90, point.x + 12),
+                        Math.min(priceHeight - 18, point.y - 10),
+                        state.annotation.label,
+                        tone.accent
+                    );
+                }
+            }
+        }
+
+        function renderReasons(state) {
+            reasonStrip.innerHTML = '';
+            const tone = SIGNAL_TONES[state.tone];
+            state.reasons.forEach((reason) => {
+                const chip = document.createElement('span');
+                chip.className = `inline-flex items-center px-2.5 py-1 rounded-full border text-[10px] font-black uppercase tracking-[0.16em] ${tone.bg} ${tone.border} ${tone.text}`;
+                chip.textContent = reason;
+                reasonStrip.appendChild(chip);
+            });
+        }
+
+        function renderMetrics(state) {
+            metricStrip.innerHTML = '';
+            state.metrics.forEach((metric) => {
+                const item = document.createElement('div');
+                item.className = 'metric-chip rounded-2xl px-3 py-2';
+                item.innerHTML = `
+                    <div class="text-[10px] uppercase tracking-[0.18em] text-slate-500 font-black">${metric.label}</div>
+                    <div class="mt-1 text-sm font-black text-white">${metric.value}</div>
+                `;
+                metricStrip.appendChild(item);
+            });
+        }
+
+        function renderSignalList(activeStateId) {
+            signalList.innerHTML = '';
+            const statesByDate = [...STATES].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+            statesByDate.forEach((state) => {
+                const tone = SIGNAL_TONES[state.tone];
+                const active = state.id === activeStateId;
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = `signal-card w-full text-left rounded-[18px] border px-3 py-2.5 ${active ? `${tone.bg} ${tone.border} active` : 'border-white/5 bg-white/[0.02]'}`;
+                button.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-5 h-5 rounded-full border flex items-center justify-center shrink-0 ${tone.border} ${tone.text} ${active ? '' : 'opacity-80'}">
+                            <span class="text-[10px] font-black">${state.orderLabel}</span>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-center justify-between gap-3">
+                                <h3 class="font-black italic text-[15px] uppercase tracking-tight leading-none ${tone.text} ${active ? '' : 'opacity-90'}">${state.title}</h3>
+                                <span class="text-[10px] uppercase tracking-[0.16em] font-black ${tone.text} ${active ? '' : 'opacity-75'}">${state.dateLabel || state.date}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                button.addEventListener('click', () => setActiveState(state.id));
+                signalList.appendChild(button);
+            });
+        }
+
+        let activeStateId = STATES[STATES.length - 1]?.id || 'triggered';
+
+        function setActiveState(stateId) {
+            const state = STATES.find((item) => item.id === stateId) || STATES[STATES.length - 1];
+            if (!state) return;
+            activeStateId = state.id;
+            const tone = SIGNAL_TONES[state.tone];
+
+            stateKicker.textContent = state.headline;
+            stateTitle.textContent = state.title;
+            stateSummary.textContent = state.summary;
+            stateDatePill.textContent = state.date;
+            stateDatePill.className = `px-3 py-1 rounded-full text-[10px] font-black tracking-[0.18em] uppercase border ${tone.bg} ${tone.text} ${tone.border}`;
+            chartStateLabel.textContent = state.keyLabel;
+            chartStateLabel.className = `text-[11px] uppercase tracking-[0.18em] font-black ${tone.text}`;
+            chartStateNote.textContent = state.chartNote;
+
+            renderMetrics(state);
+            renderReasons(state);
+            renderSignalList(state.id);
+            renderOverlay(state);
+        }
+
+        function resizeCharts() {
+            priceChart.resize(priceChartElement.clientWidth, priceChartElement.clientHeight);
+            const state = STATES.find((item) => item.id === activeStateId) || STATES[STATES.length - 1];
+            if (state) {
+                renderOverlay(state);
+            }
+        }
+
+        window.addEventListener('resize', resizeCharts);
+
+        requestAnimationFrame(() => {
+            priceChart.timeScale().fitContent();
+            setActiveState(activeStateId);
+        });
+    </script>
+</body>
+</html>

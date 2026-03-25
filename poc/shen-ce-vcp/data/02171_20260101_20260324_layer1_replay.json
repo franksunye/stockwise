@@ -1,0 +1,1192 @@
+{
+  "symbol": "02171",
+  "start": "2026-01-01",
+  "end": "2026-03-24",
+  "bar_count": 56,
+  "priceData": [
+    {
+      "time": "2026-01-02",
+      "open": 15.0,
+      "high": 15.37,
+      "low": 14.7,
+      "close": 15.32,
+      "volume": 906000
+    },
+    {
+      "time": "2026-01-05",
+      "open": 15.32,
+      "high": 16.6,
+      "low": 15.12,
+      "close": 16.47,
+      "volume": 2369900
+    },
+    {
+      "time": "2026-01-06",
+      "open": 16.66,
+      "high": 16.8,
+      "low": 15.73,
+      "close": 15.84,
+      "volume": 1386500
+    },
+    {
+      "time": "2026-01-07",
+      "open": 16.02,
+      "high": 16.64,
+      "low": 15.93,
+      "close": 16.57,
+      "volume": 887000
+    },
+    {
+      "time": "2026-01-08",
+      "open": 16.8,
+      "high": 17.0,
+      "low": 16.38,
+      "close": 16.38,
+      "volume": 1617000
+    },
+    {
+      "time": "2026-01-09",
+      "open": 16.38,
+      "high": 16.5,
+      "low": 15.9,
+      "close": 16.46,
+      "volume": 1549065
+    },
+    {
+      "time": "2026-01-12",
+      "open": 16.46,
+      "high": 16.54,
+      "low": 15.9,
+      "close": 16.1,
+      "volume": 1011000
+    },
+    {
+      "time": "2026-01-13",
+      "open": 16.31,
+      "high": 16.81,
+      "low": 16.1,
+      "close": 16.35,
+      "volume": 1756362
+    },
+    {
+      "time": "2026-01-14",
+      "open": 16.25,
+      "high": 16.79,
+      "low": 15.73,
+      "close": 16.06,
+      "volume": 1499500
+    },
+    {
+      "time": "2026-01-15",
+      "open": 16.13,
+      "high": 16.5,
+      "low": 15.86,
+      "close": 16.39,
+      "volume": 800500
+    },
+    {
+      "time": "2026-01-16",
+      "open": 16.39,
+      "high": 16.6,
+      "low": 15.87,
+      "close": 16.19,
+      "volume": 1399000
+    },
+    {
+      "time": "2026-01-19",
+      "open": 16.19,
+      "high": 16.19,
+      "low": 15.6,
+      "close": 16.0,
+      "volume": 959500
+    },
+    {
+      "time": "2026-01-20",
+      "open": 15.98,
+      "high": 15.98,
+      "low": 15.36,
+      "close": 15.48,
+      "volume": 840500
+    },
+    {
+      "time": "2026-01-21",
+      "open": 15.48,
+      "high": 15.71,
+      "low": 15.22,
+      "close": 15.65,
+      "volume": 669500
+    },
+    {
+      "time": "2026-01-22",
+      "open": 15.74,
+      "high": 16.6,
+      "low": 15.66,
+      "close": 15.87,
+      "volume": 1100300
+    },
+    {
+      "time": "2026-01-23",
+      "open": 15.75,
+      "high": 16.5,
+      "low": 15.75,
+      "close": 16.4,
+      "volume": 1119400
+    },
+    {
+      "time": "2026-01-26",
+      "open": 15.4,
+      "high": 16.32,
+      "low": 15.4,
+      "close": 15.8,
+      "volume": 1041500
+    },
+    {
+      "time": "2026-01-27",
+      "open": 16.5,
+      "high": 16.5,
+      "low": 15.64,
+      "close": 16.04,
+      "volume": 1477000
+    },
+    {
+      "time": "2026-01-28",
+      "open": 16.46,
+      "high": 16.6,
+      "low": 15.62,
+      "close": 15.89,
+      "volume": 1002000
+    },
+    {
+      "time": "2026-01-29",
+      "open": 16.21,
+      "high": 16.21,
+      "low": 15.39,
+      "close": 15.49,
+      "volume": 968000
+    },
+    {
+      "time": "2026-01-30",
+      "open": 15.49,
+      "high": 15.55,
+      "low": 15.13,
+      "close": 15.5,
+      "volume": 620000
+    },
+    {
+      "time": "2026-02-02",
+      "open": 15.52,
+      "high": 15.52,
+      "low": 14.3,
+      "close": 14.41,
+      "volume": 2418000
+    },
+    {
+      "time": "2026-02-03",
+      "open": 14.57,
+      "high": 14.58,
+      "low": 13.95,
+      "close": 14.31,
+      "volume": 1952000
+    },
+    {
+      "time": "2026-02-04",
+      "open": 14.59,
+      "high": 14.59,
+      "low": 13.88,
+      "close": 14.22,
+      "volume": 1357000
+    },
+    {
+      "time": "2026-02-05",
+      "open": 14.03,
+      "high": 14.41,
+      "low": 13.14,
+      "close": 13.29,
+      "volume": 2106000
+    },
+    {
+      "time": "2026-02-06",
+      "open": 13.2,
+      "high": 14.5,
+      "low": 13.2,
+      "close": 14.13,
+      "volume": 5568687
+    },
+    {
+      "time": "2026-02-09",
+      "open": 14.13,
+      "high": 14.35,
+      "low": 13.5,
+      "close": 13.89,
+      "volume": 1754000
+    },
+    {
+      "time": "2026-02-10",
+      "open": 13.97,
+      "high": 14.41,
+      "low": 13.81,
+      "close": 13.93,
+      "volume": 1460500
+    },
+    {
+      "time": "2026-02-11",
+      "open": 13.87,
+      "high": 14.46,
+      "low": 13.87,
+      "close": 14.09,
+      "volume": 490000
+    },
+    {
+      "time": "2026-02-12",
+      "open": 14.09,
+      "high": 14.27,
+      "low": 13.82,
+      "close": 14.0,
+      "volume": 964000
+    },
+    {
+      "time": "2026-02-13",
+      "open": 13.93,
+      "high": 14.4,
+      "low": 13.8,
+      "close": 14.4,
+      "volume": 747500
+    },
+    {
+      "time": "2026-02-16",
+      "open": 14.9,
+      "high": 15.52,
+      "low": 14.44,
+      "close": 15.07,
+      "volume": 1003000
+    },
+    {
+      "time": "2026-02-20",
+      "open": 15.07,
+      "high": 15.79,
+      "low": 14.6,
+      "close": 15.62,
+      "volume": 2303000
+    },
+    {
+      "time": "2026-02-21",
+      "open": 15.0,
+      "high": 16.0,
+      "low": 14.0,
+      "close": 15.5,
+      "volume": 1000000
+    },
+    {
+      "time": "2026-02-23",
+      "open": 15.62,
+      "high": 16.41,
+      "low": 15.62,
+      "close": 16.14,
+      "volume": 2315500
+    },
+    {
+      "time": "2026-02-24",
+      "open": 16.1,
+      "high": 16.1,
+      "low": 15.18,
+      "close": 15.74,
+      "volume": 1333340
+    },
+    {
+      "time": "2026-02-25",
+      "open": 15.87,
+      "high": 15.9,
+      "low": 15.37,
+      "close": 15.39,
+      "volume": 1311400
+    },
+    {
+      "time": "2026-02-26",
+      "open": 15.59,
+      "high": 15.59,
+      "low": 14.35,
+      "close": 14.37,
+      "volume": 1606500
+    },
+    {
+      "time": "2026-02-27",
+      "open": 14.77,
+      "high": 14.77,
+      "low": 13.56,
+      "close": 14.14,
+      "volume": 2138855
+    },
+    {
+      "time": "2026-03-02",
+      "open": 13.65,
+      "high": 13.95,
+      "low": 12.2,
+      "close": 12.26,
+      "volume": 3707550
+    },
+    {
+      "time": "2026-03-03",
+      "open": 12.26,
+      "high": 12.8,
+      "low": 12.1,
+      "close": 12.18,
+      "volume": 1930000
+    },
+    {
+      "time": "2026-03-04",
+      "open": 12.18,
+      "high": 12.27,
+      "low": 11.15,
+      "close": 11.45,
+      "volume": 3512249
+    },
+    {
+      "time": "2026-03-05",
+      "open": 11.9,
+      "high": 12.29,
+      "low": 11.8,
+      "close": 11.96,
+      "volume": 2067940
+    },
+    {
+      "time": "2026-03-06",
+      "open": 11.96,
+      "high": 12.14,
+      "low": 10.87,
+      "close": 10.87,
+      "volume": 4863530
+    },
+    {
+      "time": "2026-03-09",
+      "open": 12.5,
+      "high": 15.5,
+      "low": 12.11,
+      "close": 13.92,
+      "volume": 34541000
+    },
+    {
+      "time": "2026-03-10",
+      "open": 14.44,
+      "high": 16.19,
+      "low": 14.0,
+      "close": 15.9,
+      "volume": 24954030
+    },
+    {
+      "time": "2026-03-11",
+      "open": 16.18,
+      "high": 17.15,
+      "low": 15.71,
+      "close": 16.37,
+      "volume": 10885130
+    },
+    {
+      "time": "2026-03-12",
+      "open": 16.68,
+      "high": 16.68,
+      "low": 15.69,
+      "close": 15.9,
+      "volume": 6675792
+    },
+    {
+      "time": "2026-03-13",
+      "open": 16.34,
+      "high": 16.34,
+      "low": 15.03,
+      "close": 15.46,
+      "volume": 6156000
+    },
+    {
+      "time": "2026-03-16",
+      "open": 15.56,
+      "high": 16.74,
+      "low": 15.08,
+      "close": 16.12,
+      "volume": 4608500
+    },
+    {
+      "time": "2026-03-17",
+      "open": 16.45,
+      "high": 16.65,
+      "low": 15.6,
+      "close": 15.96,
+      "volume": 4723015
+    },
+    {
+      "time": "2026-03-18",
+      "open": 15.89,
+      "high": 16.78,
+      "low": 15.8,
+      "close": 16.62,
+      "volume": 5268680
+    },
+    {
+      "time": "2026-03-19",
+      "open": 16.62,
+      "high": 16.62,
+      "low": 15.6,
+      "close": 15.7,
+      "volume": 5131000
+    },
+    {
+      "time": "2026-03-20",
+      "open": 15.71,
+      "high": 16.38,
+      "low": 15.19,
+      "close": 15.2,
+      "volume": 4478000
+    },
+    {
+      "time": "2026-03-23",
+      "open": 15.22,
+      "high": 15.22,
+      "low": 14.35,
+      "close": 14.96,
+      "volume": 4593510
+    },
+    {
+      "time": "2026-03-24",
+      "open": 14.96,
+      "high": 15.57,
+      "low": 14.54,
+      "close": 15.54,
+      "volume": 4966500
+    }
+  ],
+  "layer1Replay": [
+    {
+      "date": "2026-01-02",
+      "setup_state": "NoSetup",
+      "score": 0.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 0,
+      "watch": false,
+      "trigger": false,
+      "risk_off": false,
+      "close": 15.32,
+      "volume": 906000.0
+    },
+    {
+      "date": "2026-01-05",
+      "setup_state": "NoSetup",
+      "score": 0.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 0,
+      "watch": false,
+      "trigger": false,
+      "risk_off": false,
+      "close": 16.47,
+      "volume": 2369900.0
+    },
+    {
+      "date": "2026-01-06",
+      "setup_state": "NoSetup",
+      "score": 0.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 0,
+      "watch": false,
+      "trigger": false,
+      "risk_off": false,
+      "close": 15.84,
+      "volume": 1386500.0
+    },
+    {
+      "date": "2026-01-07",
+      "setup_state": "NoSetup",
+      "score": 0.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 0,
+      "watch": false,
+      "trigger": false,
+      "risk_off": false,
+      "close": 16.57,
+      "volume": 887000.0
+    },
+    {
+      "date": "2026-01-08",
+      "setup_state": "NoSetup",
+      "score": 0.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 0,
+      "watch": false,
+      "trigger": false,
+      "risk_off": false,
+      "close": 16.38,
+      "volume": 1617000.0
+    },
+    {
+      "date": "2026-01-09",
+      "setup_state": "NoSetup",
+      "score": 0.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 0,
+      "watch": false,
+      "trigger": false,
+      "risk_off": false,
+      "close": 16.46,
+      "volume": 1549065.0
+    },
+    {
+      "date": "2026-01-12",
+      "setup_state": "NoSetup",
+      "score": 0.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 0,
+      "watch": false,
+      "trigger": false,
+      "risk_off": false,
+      "close": 16.1,
+      "volume": 1011000.0
+    },
+    {
+      "date": "2026-01-13",
+      "setup_state": "NoSetup",
+      "score": 0.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 0,
+      "watch": false,
+      "trigger": false,
+      "risk_off": false,
+      "close": 16.35,
+      "volume": 1756362.0
+    },
+    {
+      "date": "2026-01-14",
+      "setup_state": "NoSetup",
+      "score": 0.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 0,
+      "watch": false,
+      "trigger": false,
+      "risk_off": false,
+      "close": 16.06,
+      "volume": 1499500.0
+    },
+    {
+      "date": "2026-01-15",
+      "setup_state": "NoSetup",
+      "score": 0.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 0,
+      "watch": false,
+      "trigger": false,
+      "risk_off": false,
+      "close": 16.39,
+      "volume": 800500.0
+    },
+    {
+      "date": "2026-01-16",
+      "setup_state": "NoSetup",
+      "score": 0.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 0,
+      "watch": false,
+      "trigger": false,
+      "risk_off": false,
+      "close": 16.19,
+      "volume": 1399000.0
+    },
+    {
+      "date": "2026-01-19",
+      "setup_state": "NoSetup",
+      "score": 0.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 0,
+      "watch": false,
+      "trigger": false,
+      "risk_off": false,
+      "close": 16.0,
+      "volume": 959500.0
+    },
+    {
+      "date": "2026-01-20",
+      "setup_state": "NoSetup",
+      "score": 0.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 0,
+      "watch": false,
+      "trigger": false,
+      "risk_off": false,
+      "close": 15.48,
+      "volume": 840500.0
+    },
+    {
+      "date": "2026-01-21",
+      "setup_state": "NoSetup",
+      "score": 0.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 0,
+      "watch": false,
+      "trigger": false,
+      "risk_off": false,
+      "close": 15.65,
+      "volume": 669500.0
+    },
+    {
+      "date": "2026-01-22",
+      "setup_state": "NoSetup",
+      "score": 0.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 0,
+      "watch": false,
+      "trigger": false,
+      "risk_off": false,
+      "close": 15.87,
+      "volume": 1100300.0
+    },
+    {
+      "date": "2026-01-23",
+      "setup_state": "NoSetup",
+      "score": 0.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 0,
+      "watch": false,
+      "trigger": false,
+      "risk_off": false,
+      "close": 16.4,
+      "volume": 1119400.0
+    },
+    {
+      "date": "2026-01-26",
+      "setup_state": "NoSetup",
+      "score": 0.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 0,
+      "watch": false,
+      "trigger": false,
+      "risk_off": false,
+      "close": 15.8,
+      "volume": 1041500.0
+    },
+    {
+      "date": "2026-01-27",
+      "setup_state": "NoSetup",
+      "score": 0.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 0,
+      "watch": false,
+      "trigger": false,
+      "risk_off": false,
+      "close": 16.04,
+      "volume": 1477000.0
+    },
+    {
+      "date": "2026-01-28",
+      "setup_state": "NoSetup",
+      "score": 0.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 0,
+      "watch": false,
+      "trigger": false,
+      "risk_off": false,
+      "close": 15.89,
+      "volume": 1002000.0
+    },
+    {
+      "date": "2026-01-29",
+      "setup_state": "NoSetup",
+      "score": 0.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 0,
+      "watch": false,
+      "trigger": false,
+      "risk_off": false,
+      "close": 15.49,
+      "volume": 968000.0
+    },
+    {
+      "date": "2026-01-30",
+      "setup_state": "RiskOff",
+      "score": 14.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 1,
+      "watch": false,
+      "trigger": false,
+      "risk_off": true,
+      "close": 15.5,
+      "volume": 620000.0
+    },
+    {
+      "date": "2026-02-02",
+      "setup_state": "RiskOff",
+      "score": 0.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 1,
+      "watch": false,
+      "trigger": false,
+      "risk_off": true,
+      "close": 14.41,
+      "volume": 2418000.0
+    },
+    {
+      "date": "2026-02-03",
+      "setup_state": "RiskOff",
+      "score": 14.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 1,
+      "watch": false,
+      "trigger": false,
+      "risk_off": true,
+      "close": 14.31,
+      "volume": 1952000.0
+    },
+    {
+      "date": "2026-02-04",
+      "setup_state": "RiskOff",
+      "score": 0.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 1,
+      "watch": false,
+      "trigger": false,
+      "risk_off": true,
+      "close": 14.22,
+      "volume": 1357000.0
+    },
+    {
+      "date": "2026-02-05",
+      "setup_state": "RiskOff",
+      "score": 0.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 1,
+      "watch": false,
+      "trigger": false,
+      "risk_off": true,
+      "close": 13.29,
+      "volume": 2106000.0
+    },
+    {
+      "date": "2026-02-06",
+      "setup_state": "RiskOff",
+      "score": 32.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 1,
+      "watch": false,
+      "trigger": false,
+      "risk_off": true,
+      "close": 14.13,
+      "volume": 5568687.0
+    },
+    {
+      "date": "2026-02-09",
+      "setup_state": "RiskOff",
+      "score": 0.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 1,
+      "watch": false,
+      "trigger": false,
+      "risk_off": true,
+      "close": 13.89,
+      "volume": 1754000.0
+    },
+    {
+      "date": "2026-02-10",
+      "setup_state": "RiskOff",
+      "score": 0.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 1,
+      "watch": false,
+      "trigger": false,
+      "risk_off": true,
+      "close": 13.93,
+      "volume": 1460500.0
+    },
+    {
+      "date": "2026-02-11",
+      "setup_state": "RiskOff",
+      "score": 0.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 1,
+      "watch": false,
+      "trigger": false,
+      "risk_off": true,
+      "close": 14.09,
+      "volume": 490000.0
+    },
+    {
+      "date": "2026-02-12",
+      "setup_state": "RiskOff",
+      "score": 0.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 1,
+      "watch": false,
+      "trigger": false,
+      "risk_off": true,
+      "close": 14.0,
+      "volume": 964000.0
+    },
+    {
+      "date": "2026-02-13",
+      "setup_state": "NoSetup",
+      "score": 50.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 0,
+      "watch": false,
+      "trigger": false,
+      "risk_off": false,
+      "close": 14.4,
+      "volume": 747500.0
+    },
+    {
+      "date": "2026-02-16",
+      "setup_state": "TriggeredLong",
+      "score": 70.0,
+      "trigger_rule_hit": 1,
+      "risk_off_hit": 0,
+      "watch": true,
+      "trigger": true,
+      "risk_off": false,
+      "close": 15.07,
+      "volume": 1003000.0
+    },
+    {
+      "date": "2026-02-20",
+      "setup_state": "TriggeredLong",
+      "score": 100.0,
+      "trigger_rule_hit": 1,
+      "risk_off_hit": 0,
+      "watch": true,
+      "trigger": true,
+      "risk_off": false,
+      "close": 15.62,
+      "volume": 2303000.0
+    },
+    {
+      "date": "2026-02-21",
+      "setup_state": "NoSetup",
+      "score": 46.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 0,
+      "watch": false,
+      "trigger": false,
+      "risk_off": false,
+      "close": 15.5,
+      "volume": 1000000.0
+    },
+    {
+      "date": "2026-02-23",
+      "setup_state": "NoSetup",
+      "score": 82.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 0,
+      "watch": false,
+      "trigger": false,
+      "risk_off": false,
+      "close": 16.14,
+      "volume": 2315500.0
+    },
+    {
+      "date": "2026-02-24",
+      "setup_state": "NoSetup",
+      "score": 46.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 0,
+      "watch": false,
+      "trigger": false,
+      "risk_off": false,
+      "close": 15.74,
+      "volume": 1333340.0
+    },
+    {
+      "date": "2026-02-25",
+      "setup_state": "NoSetup",
+      "score": 32.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 0,
+      "watch": false,
+      "trigger": false,
+      "risk_off": false,
+      "close": 15.39,
+      "volume": 1311400.0
+    },
+    {
+      "date": "2026-02-26",
+      "setup_state": "RiskOff",
+      "score": 12.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 1,
+      "watch": false,
+      "trigger": false,
+      "risk_off": true,
+      "close": 14.37,
+      "volume": 1606500.0
+    },
+    {
+      "date": "2026-02-27",
+      "setup_state": "RiskOff",
+      "score": 12.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 1,
+      "watch": false,
+      "trigger": false,
+      "risk_off": true,
+      "close": 14.14,
+      "volume": 2138855.0
+    },
+    {
+      "date": "2026-03-02",
+      "setup_state": "RiskOff",
+      "score": 0.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 1,
+      "watch": false,
+      "trigger": false,
+      "risk_off": true,
+      "close": 12.26,
+      "volume": 3707550.0
+    },
+    {
+      "date": "2026-03-03",
+      "setup_state": "RiskOff",
+      "score": 0.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 1,
+      "watch": false,
+      "trigger": false,
+      "risk_off": true,
+      "close": 12.18,
+      "volume": 1930000.0
+    },
+    {
+      "date": "2026-03-04",
+      "setup_state": "RiskOff",
+      "score": 0.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 1,
+      "watch": false,
+      "trigger": false,
+      "risk_off": true,
+      "close": 11.45,
+      "volume": 3512249.0
+    },
+    {
+      "date": "2026-03-05",
+      "setup_state": "RiskOff",
+      "score": 18.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 1,
+      "watch": false,
+      "trigger": false,
+      "risk_off": true,
+      "close": 11.96,
+      "volume": 2067940.0
+    },
+    {
+      "date": "2026-03-06",
+      "setup_state": "RiskOff",
+      "score": 0.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 1,
+      "watch": false,
+      "trigger": false,
+      "risk_off": true,
+      "close": 10.87,
+      "volume": 4863530.0
+    },
+    {
+      "date": "2026-03-09",
+      "setup_state": "NoSetup",
+      "score": 26.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 0,
+      "watch": false,
+      "trigger": false,
+      "risk_off": false,
+      "close": 13.92,
+      "volume": 34541000.0
+    },
+    {
+      "date": "2026-03-10",
+      "setup_state": "NoSetup",
+      "score": 82.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 0,
+      "watch": false,
+      "trigger": false,
+      "risk_off": false,
+      "close": 15.9,
+      "volume": 24954030.0
+    },
+    {
+      "date": "2026-03-11",
+      "setup_state": "NoSetup",
+      "score": 38.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 0,
+      "watch": false,
+      "trigger": false,
+      "risk_off": false,
+      "close": 16.37,
+      "volume": 10885130.0
+    },
+    {
+      "date": "2026-03-12",
+      "setup_state": "NoSetup",
+      "score": 32.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 0,
+      "watch": false,
+      "trigger": false,
+      "risk_off": false,
+      "close": 15.9,
+      "volume": 6675792.0
+    },
+    {
+      "date": "2026-03-13",
+      "setup_state": "NoSetup",
+      "score": 32.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 0,
+      "watch": false,
+      "trigger": false,
+      "risk_off": false,
+      "close": 15.46,
+      "volume": 6156000.0
+    },
+    {
+      "date": "2026-03-16",
+      "setup_state": "NoSetup",
+      "score": 52.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 0,
+      "watch": false,
+      "trigger": false,
+      "risk_off": false,
+      "close": 16.12,
+      "volume": 4608500.0
+    },
+    {
+      "date": "2026-03-17",
+      "setup_state": "NoSetup",
+      "score": 50.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 0,
+      "watch": false,
+      "trigger": false,
+      "risk_off": false,
+      "close": 15.96,
+      "volume": 4723015.0
+    },
+    {
+      "date": "2026-03-18",
+      "setup_state": "TriggeredLong",
+      "score": 70.0,
+      "trigger_rule_hit": 1,
+      "risk_off_hit": 0,
+      "watch": true,
+      "trigger": true,
+      "risk_off": false,
+      "close": 16.62,
+      "volume": 5268680.0
+    },
+    {
+      "date": "2026-03-19",
+      "setup_state": "Watch",
+      "score": 56.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 0,
+      "watch": true,
+      "trigger": false,
+      "risk_off": false,
+      "close": 15.7,
+      "volume": 5131000.0
+    },
+    {
+      "date": "2026-03-20",
+      "setup_state": "RiskOff",
+      "score": 36.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 1,
+      "watch": false,
+      "trigger": false,
+      "risk_off": true,
+      "close": 15.2,
+      "volume": 4478000.0
+    },
+    {
+      "date": "2026-03-23",
+      "setup_state": "RiskOff",
+      "score": 50.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 1,
+      "watch": false,
+      "trigger": false,
+      "risk_off": true,
+      "close": 14.96,
+      "volume": 4593510.0
+    },
+    {
+      "date": "2026-03-24",
+      "setup_state": "RiskOff",
+      "score": 50.0,
+      "trigger_rule_hit": 0,
+      "risk_off_hit": 1,
+      "watch": false,
+      "trigger": false,
+      "risk_off": true,
+      "close": 15.54,
+      "volume": 4966500.0
+    }
+  ],
+  "layer1Segments": [
+    {
+      "setup_state": "NoSetup",
+      "start_date": "2026-01-02",
+      "end_date": "2026-01-29",
+      "days": 20
+    },
+    {
+      "setup_state": "RiskOff",
+      "start_date": "2026-01-30",
+      "end_date": "2026-02-12",
+      "days": 10
+    },
+    {
+      "setup_state": "NoSetup",
+      "start_date": "2026-02-13",
+      "end_date": "2026-02-13",
+      "days": 1
+    },
+    {
+      "setup_state": "TriggeredLong",
+      "start_date": "2026-02-16",
+      "end_date": "2026-02-20",
+      "days": 2
+    },
+    {
+      "setup_state": "NoSetup",
+      "start_date": "2026-02-21",
+      "end_date": "2026-02-25",
+      "days": 4
+    },
+    {
+      "setup_state": "RiskOff",
+      "start_date": "2026-02-26",
+      "end_date": "2026-03-06",
+      "days": 7
+    },
+    {
+      "setup_state": "NoSetup",
+      "start_date": "2026-03-09",
+      "end_date": "2026-03-17",
+      "days": 7
+    },
+    {
+      "setup_state": "TriggeredLong",
+      "start_date": "2026-03-18",
+      "end_date": "2026-03-18",
+      "days": 1
+    },
+    {
+      "setup_state": "Watch",
+      "start_date": "2026-03-19",
+      "end_date": "2026-03-19",
+      "days": 1
+    },
+    {
+      "setup_state": "RiskOff",
+      "start_date": "2026-03-20",
+      "end_date": "2026-03-24",
+      "days": 3
+    }
+  ]
+}
