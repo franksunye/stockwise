@@ -29,17 +29,18 @@ function getPredCacheKey(symbols: string[], historyLimit: number, tier: string, 
     return `${symbols.join(',')}|${historyLimit}|${tier}|${modeId}`;
 }
 
-const BASE_SIGNAL_SQL = `COALESCE(pol.signal_state, h.signal)`;
-const BASE_REASONING_SQL = `COALESCE(NULLIF(pol.reasoning_payload, ''), h.ai_reasoning)`;
 const EFFECTIVE_SIGNAL_WITH_OUTCOME_SQL = EFFECTIVE_SIGNAL_SQL.replace(/p\.signal/g, `COALESCE(pol.signal_state, p.signal)`);
 
+// SAFE_LLM_SIGNAL_SQL is used in the *outer* SELECT over HistoryRanked (alias `h`),
+// where `pol` is NOT in scope. The inner CTE already resolves pol overrides into
+// `ai_reasoning` and `signal` columns, so we reference those directly.
 const SAFE_LLM_SIGNAL_SQL = `
     COALESCE(
         CASE
-            WHEN json_valid(${BASE_REASONING_SQL}) THEN json_extract(${BASE_REASONING_SQL}, '$.signal')
+            WHEN json_valid(h.ai_reasoning) THEN json_extract(h.ai_reasoning, '$.signal')
             ELSE NULL
         END,
-        ${BASE_SIGNAL_SQL}
+        h.signal
     )
 `;
 

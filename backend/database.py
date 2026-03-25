@@ -919,6 +919,11 @@ def init_db():
         # LLM Registry: Add roles column for unified model routing
         add_column_if_missing('prediction_models', 'roles', 'TEXT')
 
+        # Producer Outcome Log Migrations
+        add_column_if_missing('producer_outcome_log', 'reasoning_payload', 'TEXT')
+        add_column_if_missing('producer_outcome_log', 'run_id', 'TEXT')
+        add_column_if_missing('producer_outcome_log', 'version', 'TEXT')
+
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_task_logs_date_agent ON task_logs(date, agent_id)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_hk_short_daily_date ON hk_short_selling_daily(trade_date)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_hk_short_weekly_date ON hk_short_interest_weekly(report_week)")
