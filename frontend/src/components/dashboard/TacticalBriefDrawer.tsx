@@ -134,6 +134,16 @@ const normalizeActionLabel = (action: string | undefined): string => {
   return action;
 };
 
+function normalizeLegacyTerms(text: string): string {
+  if (!text) return text;
+  return text
+    .replace(/建议进场/g, '建议看多')
+    .replace(/可进攻/g, '可交易')
+    .replace(/触发进攻条件/g, '触发交易条件')
+    .replace(/进攻候选/g, '看多候选')
+    .replace(/进攻/g, '交易');
+}
+
 const getPriceNodes = (data: TacticalData, currentPrice?: number): PriceLevelNode[] => {
   const nodes: PriceLevelNode[] = [];
   
@@ -829,13 +839,13 @@ export function TacticalBriefDrawer({
                                                         {signal === 'Long' && <Zap size={12} className="text-rose-400" />}
                                                         {signal === 'Side' && <Crosshair size={12} className="text-amber-400" />}
                                                         {signal === 'Short' && <Shield size={12} className="text-emerald-400" />}
-                                                        {signal === 'Long' ? '建议进场' : signal === 'Short' ? '建议防守' : '建议观察'}
+                                                        {signal === 'Long' ? '建议看多' : signal === 'Short' ? '建议防守' : '建议观察'}
                                                     </>
                                                 ) : (
                                                     <>
                                                         {normalizeActionLabel(node.action) === '建议防守' && <Shield size={12} />}
                                                         {normalizeActionLabel(node.action) === '建议落袋' && <Target size={12} />}
-                                                        {normalizeActionLabel(node.action) === '建议进场' && <TrendingUp size={12} />}
+                                                        {normalizeActionLabel(node.action) === '建议看多' && <TrendingUp size={12} />}
                                                         {normalizeActionLabel(node.action) === '建议观察' && <Crosshair size={12} />}
                                                         {normalizeActionLabel(node.action)}
                                                     </>
@@ -884,13 +894,13 @@ export function TacticalBriefDrawer({
                           data.news_analysis.map((news, idx) => (
                             <div key={idx} className="flex gap-3 items-start">
                                <span className="text-slate-500 mt-0.5"><Newspaper size={12} /></span>
-                               <p className="text-xs text-slate-300 leading-relaxed font-medium">{news}</p>
+                               <p className="text-xs text-slate-300 leading-relaxed font-medium">{normalizeLegacyTerms(news)}</p>
                             </div>
                           ))
                         ) : (
                           <div className="flex gap-3 items-start">
                              <span className="text-slate-500 mt-0.5"><Newspaper size={12} /></span>
-                             <p className="text-xs text-slate-300 leading-relaxed font-medium">{data.news_analysis}</p>
+                             <p className="text-xs text-slate-300 leading-relaxed font-medium">{normalizeLegacyTerms(data.news_analysis)}</p>
                           </div>
                         )}
                       </div>
@@ -955,11 +965,11 @@ export function TacticalBriefDrawer({
                                         );
                                       })()}
                                       <span className="text-[10px] font-black text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-full italic tracking-tight">
-                                        {step.conclusion}
+                                        {normalizeLegacyTerms(step.conclusion)}
                                       </span>
                                     </div>
                                     <p className="text-xs text-slate-200/60 font-medium leading-relaxed">
-                                      {step.data}
+                                      {normalizeLegacyTerms(step.data)}
                                     </p>
                                   </div>
                                 </div>
@@ -977,13 +987,13 @@ export function TacticalBriefDrawer({
                       <h3 className="text-xs font-black text-rose-400 uppercase tracking-widest mb-2 flex items-center gap-2">
                         <AlertTriangle size={12} /> 思维复盘 / 风险反思
                       </h3>
-                      <p className="text-sm text-rose-300/70 leading-relaxed italic">{data.counter_argument}</p>
+                      <p className="text-sm text-rose-300/70 leading-relaxed italic">{normalizeLegacyTerms(data.counter_argument)}</p>
                     </section>
                   )}
 
                   <section className="p-4 rounded-2xl bg-indigo-500/5 border border-indigo-500/10">
                     <h3 className="text-xs font-black text-indigo-400 uppercase tracking-widest mb-2 flex items-center gap-2"><Info size={12} /> 核心冲突处理原则</h3>
-                    <p className="text-sm text-indigo-300/70 leading-relaxed italic">{data.conflict_resolution || "遵循趋势优先原则。"}</p>
+                    <p className="text-sm text-indigo-300/70 leading-relaxed italic">{normalizeLegacyTerms(data.conflict_resolution || "遵循趋势优先原则。")}</p>
                   </section>
                 </div>
               ) : (

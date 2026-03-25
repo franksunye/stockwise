@@ -130,14 +130,25 @@ function parseReasoning(reasoning: string | undefined): Record<string, unknown> 
 function getCouncilSummary(reasoning: string): string {
   const parsed = parseReasoning(reasoning);
   if (!parsed) return reasoning;
-  return String(parsed.summary || parsed.analysis || reasoning);
+  const content = String(parsed.summary || parsed.analysis || reasoning);
+  return normalizeLegacyTerms(content);
 }
 
 function getConflictSummary(reasoning: string | undefined): string | null {
   const parsed = parseReasoning(reasoning);
   if (!parsed) return null;
   const conflict = parsed.conflict_resolution;
-  return typeof conflict === 'string' && conflict.trim() ? conflict.trim() : null;
+  return typeof conflict === 'string' && conflict.trim() ? normalizeLegacyTerms(conflict.trim()) : null;
+}
+
+function normalizeLegacyTerms(text: string): string {
+  if (!text) return text;
+  return text
+    .replace(/建议进场/g, '建议看多')
+    .replace(/可进攻/g, '可交易')
+    .replace(/触发进攻条件/g, '触发交易条件')
+    .replace(/进攻候选/g, '看多候选')
+    .replace(/进攻/g, '交易');
 }
 
 function getFirstSentence(text: string | null | undefined): string | null {
