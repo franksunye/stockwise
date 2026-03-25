@@ -44,9 +44,10 @@ class KeyLevels(BaseModel):
     stop_loss: Optional[float] = 0.0
 
 class ReasoningStep(BaseModel):
-    step: str
-    data: str
-    conclusion: str
+    step: str = ""
+    data: str = ""
+    # Some providers omit `conclusion`; tolerate and normalize later.
+    conclusion: str = ""
 
 class TacticItem(BaseModel):
     priority: str = "P1"
@@ -56,7 +57,9 @@ class TacticItem(BaseModel):
     stop_advance_price: Optional[Union[float, str, List[Union[float, str]]]] = None
     stop_loss_price: Optional[Union[float, str, List[Union[float, str]]]] = None
     buy_zone_price: Optional[Union[float, str, List[Union[float, str]]]] = None
-    reason: str
+    # Some providers occasionally omit `reason`; keep parser tolerant
+    # and let schema_normalizer backfill canonical copy later.
+    reason: str = ""
 
 class Tactics(BaseModel):
     holding_profit: List[TacticItem] = Field(default_factory=list)

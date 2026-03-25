@@ -68,6 +68,43 @@ class TestParsersFunnel(unittest.TestCase):
         self.assertEqual(ctx.exception.code, ParseErrorCode.TRUNCATED)
         self.assertIn("Invalid JSON syntax", str(ctx.exception))
 
+    def test_missing_tactic_reason_should_still_parse(self):
+        content = (
+            "{"
+            "\"signal\":\"NoSetup\","
+            "\"confidence\":0.42,"
+            "\"summary\":\"观望\","
+            "\"reasoning_trace\":[],"
+            "\"news_analysis\":[],"
+            "\"tactics\":{"
+            "\"holding_profit\":[{\"priority\":\"P1\",\"action\":\"观察\",\"trigger\":\"不破位\",\"target_price\":80}],"
+            "\"holding_loss\":[{\"priority\":\"P1\",\"action\":\"止损\",\"trigger\":\"跌破纪律位\",\"stop_loss_price\":75.5}],"
+            "\"empty\":[{\"priority\":\"P1\",\"action\":\"等待\",\"trigger\":\"确认后再看\",\"buy_zone_price\":74.0}]"
+            "},"
+            "\"key_levels\":{\"immediate_support\":[74,72],\"immediate_resistance\":[79,82]}"
+            "}"
+        )
+        result = parse_ai_response(content)
+        self.assertEqual(result.signal.value, "NoSetup")
+        self.assertEqual(result.tactics.holding_profit[0].reason, "")
+        self.assertEqual(result.tactics.holding_loss[0].reason, "")
+
+    def test_missing_reasoning_trace_conclusion_should_still_parse(self):
+        content = (
+            "{"
+            "\"signal\":\"Watch\","
+            "\"confidence\":0.61,"
+            "\"summary\":\"震荡\","
+            "\"reasoning_trace\":[{\"step\":\"趋势\",\"data\":\"区间震荡\"}],"
+            "\"news_analysis\":[],"
+            "\"tactics\":{\"holding_profit\":[],\"holding_loss\":[],\"empty\":[]},"
+            "\"key_levels\":{\"immediate_support\":[10,9.6],\"immediate_resistance\":[10.8,11.2]}"
+            "}"
+        )
+        result = parse_ai_response(content)
+        self.assertEqual(result.signal.value, "Watch")
+        self.assertEqual(result.reasoning_trace[0].conclusion, "")
+
 
 if __name__ == "__main__":
     unittest.main()
