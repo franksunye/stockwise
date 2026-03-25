@@ -19,7 +19,8 @@ summary: "将决策栈与统一数据模型落实到代码与表结构的执行�
 3. Step 3 已完成并上线（`completed`）
 4. Step 4 已完成并上线（`completed`）
 5. Step 5 已完成并上线（`completed`）
-6. Step 6-8 待执行（`pending`）
+6. Step 6 已完成（`completed`，对账工具与首轮基线）
+7. Step 7-8 待执行（`pending`）
 
 已完成项摘要：
 
@@ -43,6 +44,11 @@ summary: "将决策栈与统一数据模型落实到代码与表结构的执行�
    - 新增目标表 `producer_outcome_log`（含唯一索引与查询索引）
    - 在主预测写入链路对 `ai_predictions_v2` 增加同事务 shadow 写入
    - 新增开关 `PRODUCER_OUTCOME_SHADOW_WRITE`（默认开启），支持紧急停写回退
+6. Step 6：新旧结果对账与一致性报表
+   - 新增只读脚本：`backend/scripts/reconcile_producer_outcome_log.py`
+   - 支持 `symbol / trade_date / producer_id / signal_state / decision_semantic` 维度对账
+   - 支持 mode overlay 对账与 inventory 统计输出
+   - 已完成首轮基线检查：云端 `producer_outcome_log` 当前为 0 行，待后续增量写入后继续观测一致率
 
 上线前验证口径（Step 1/2）：
 
