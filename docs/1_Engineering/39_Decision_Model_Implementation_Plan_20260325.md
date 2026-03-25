@@ -16,7 +16,8 @@ summary: "将决策栈与统一数据模型落实到代码与表结构的执行�
 
 1. Step 1 已完成并上线（`completed`）
 2. Step 2 已完成并上线（`completed`）
-3. Step 3-8 待执行（`pending`）
+3. Step 3 已完成并上线（`completed`）
+4. Step 4-8 待执行（`pending`）
 
 已完成项摘要：
 
@@ -28,6 +29,10 @@ summary: "将决策栈与统一数据模型落实到代码与表结构的执行�
    - 前端关键字段升级为 union type（`decision_semantic / layer1_status / signal`）
    - mode 决策读取链路增加显式归一
    - 后端写入链路增加语义归一约束，收敛自由字符串入口
+3. Step 3：应用层 DTO 显式化
+   - 新增应用层对象：`ProducerOutcomeView / ArbitrationResultView / ModeActionDecisionView`
+   - 在 `predictions / history / stock-batch` API 增量返回新对象字段
+   - 旧字段保持不变，页面继续兼容原消费方式
 
 上线前验证口径（Step 1/2）：
 

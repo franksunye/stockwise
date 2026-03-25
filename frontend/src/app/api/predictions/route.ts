@@ -14,6 +14,7 @@ import {
     EFFECTIVE_SIGNAL_SQL,
     EFFECTIVE_VALIDATION_STATUS_SQL,
 } from '@/lib/prediction-display';
+import { withDecisionViews } from '@/lib/decision-views';
 
 export const dynamic = 'force-dynamic';
 
@@ -134,8 +135,10 @@ export async function GET(request: Request) {
                 rows = rawDb.prepare(sql).all(...sqlArgs);
             }
 
+            const enrichedRows = (rows as Record<string, unknown>[]).map(withDecisionViews);
+
             return NextResponse.json({
-                predictions: rows,
+                predictions: enrichedRows,
                 tier: userTier,
                 mode_id: currentMode.mode_id,
             });

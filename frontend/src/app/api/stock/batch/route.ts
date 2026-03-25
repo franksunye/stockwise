@@ -15,6 +15,7 @@ import {
     EFFECTIVE_SIGNAL_SQL,
     EFFECTIVE_VALIDATION_STATUS_SQL,
 } from '@/lib/prediction-display';
+import { withDecisionViews } from '@/lib/decision-views';
 import { getCachedLatestPrices, getCachedShortMetrics } from '@/lib/stock-cache';
 
 export const dynamic = 'force-dynamic';
@@ -314,6 +315,8 @@ export async function GET(request: Request) {
         } finally {
             closeDb(client);
         }
+
+        allHistory = allHistory.map(withDecisionViews);
 
         const priceMap = new Map(latestPrices.map(p => [p.symbol as string, p]));
         const shortMetricsMap = new Map(shortMetricsRows.map(m => [m.symbol as string, m]));

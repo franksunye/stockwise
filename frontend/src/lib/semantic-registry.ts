@@ -16,10 +16,17 @@ export type ActionDecision = typeof ACTION_DECISIONS[number];
 export const DECISION_SEMANTIC_ALIASES = {
     建议进场: '建议看多',
     进场: '建议看多',
+    Long: '建议看多',
+    TriggeredLong: '建议看多',
     空仓: '暂无信号',
     建议空仓: '暂无信号',
+    Side: '暂无信号',
+    NoSetup: '暂无信号',
     防守: '建议防守',
+    Short: '建议防守',
+    RiskOff: '建议防守',
     观察: '建议观察',
+    Watch: '建议观察',
 } as const satisfies Record<string, DecisionSemantic>;
 
 export const DECISION_ALIAS_LONG = ['建议看多', '建议进场', '进场'] as const;
@@ -50,4 +57,16 @@ export function normalizeOverlaySignal(value: unknown, fallback: LegacySignalSta
     if (raw === 'RiskOff') return 'Short';
     if (raw === 'Watch' || raw === 'NoSetup') return 'Side';
     return fallback;
+}
+
+export function normalizeAnySignal(value: unknown, fallback: AnySignalState = 'Side'): AnySignalState {
+    const raw = String(value ?? '').trim();
+    if (CANONICAL_SIGNAL_SET.has(raw)) return raw as SignalState;
+    if (LEGACY_SIGNAL_SET.has(raw)) return raw as LegacySignalState;
+    if (!raw) return fallback;
+    const legacyFallback: LegacySignalState =
+        fallback === 'TriggeredLong' ? 'Long' :
+            fallback === 'RiskOff' ? 'Short' :
+                'Side';
+    return normalizeOverlaySignal(raw, legacyFallback);
 }

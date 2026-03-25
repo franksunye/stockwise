@@ -14,6 +14,7 @@ import {
     EFFECTIVE_SIGNAL_SQL,
     EFFECTIVE_VALIDATION_STATUS_SQL,
 } from '@/lib/prediction-display';
+import { withDecisionViews } from '@/lib/decision-views';
 
 export const revalidate = 300; // 5 minutes cache
 
@@ -106,7 +107,7 @@ export async function GET(request: Request) {
             closeDb(client);
         }
 
-        return NextResponse.json({ predictions: rows, tier: userTier });
+        return NextResponse.json({ predictions: rows.map(withDecisionViews), tier: userTier });
     } catch (error) {
         console.error('History API Error:', error);
         return NextResponse.json({ error: 'Database error' }, { status: 500 });
