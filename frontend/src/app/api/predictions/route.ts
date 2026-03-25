@@ -18,13 +18,17 @@ import { withDecisionViews } from '@/lib/decision-views';
 
 export const dynamic = 'force-dynamic';
 
+const BASE_SIGNAL_SQL = `COALESCE(pol.signal_state, p.signal)`;
+const BASE_CONFIDENCE_SQL = `COALESCE(pol.confidence, p.confidence)`;
+const BASE_REASONING_SQL = `COALESCE(NULLIF(pol.reasoning_payload, ''), p.ai_reasoning)`;
+const EFFECTIVE_SIGNAL_WITH_OUTCOME_SQL = EFFECTIVE_SIGNAL_SQL.replace(/p\.signal/g, BASE_SIGNAL_SQL);
 const SAFE_LLM_SIGNAL_SQL = `
     COALESCE(
         CASE
-            WHEN json_valid(p.ai_reasoning) THEN json_extract(p.ai_reasoning, '$.signal')
+            WHEN json_valid(${BASE_REASONING_SQL}) THEN json_extract(${BASE_REASONING_SQL}, '$.signal')
             ELSE NULL
         END,
-        p.signal
+        ${BASE_SIGNAL_SQL}
     )
 `;
 
@@ -83,12 +87,12 @@ export async function GET(request: Request) {
                     p.symbol,
                     p.date,
                     p.target_date,
-                    ${EFFECTIVE_SIGNAL_SQL} AS signal,
-                    p.signal AS canonical_signal,
-                    p.confidence,
+                    ${EFFECTIVE_SIGNAL_WITH_OUTCOME_SQL} AS signal,
+                    ${BASE_SIGNAL_SQL} AS canonical_signal,
+                    ${BASE_CONFIDENCE_SQL} AS confidence,
                     p.support_price,
-                    p.ai_reasoning,
-                    p.ai_reasoning AS llm_reasoning,
+                    ${BASE_REASONING_SQL} AS ai_reasoning,
+                    ${BASE_REASONING_SQL} AS llm_reasoning,
                     ${SAFE_LLM_SIGNAL_SQL} AS llm_signal,
                     ${EFFECTIVE_VALIDATION_STATUS_SQL} AS validation_status,
                     p.actual_change,
@@ -115,6 +119,13 @@ export async function GET(request: Request) {
                     ON dlog.mode_id = ?
                    AND dlog.symbol = p.symbol
                    AND dlog.decision_date = p.date
+                LEFT JOIN producer_outcome_log pol
+                    ON pol.symbol = p.symbol
+                   AND pol.trade_date = p.date
+                   AND pol.producer_id = p.model_id
+                   AND pol.outcome_kind = 'prediction'
+                   AND pol.producer_type = 'AI'
+                   AND pol.role_type = CASE WHEN COALESCE(p.is_primary, 0) = 1 THEN 'primary' ELSE 'secondary' END
                 LEFT JOIN daily_prices d
                     ON p.symbol = d.symbol
                    AND p.target_date = d.date
@@ -128,11 +139,73 @@ export async function GET(request: Request) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const rawDb = db as any;
             let rows;
-            if (db.$type === 'cloud') {
-                const rs = await rawDb.execute({ sql, args: sqlArgs });
-                rows = rs.rows;
-            } else {
-                rows = rawDb.prepare(sql).all(...sqlArgs);
+            try {
+                if (db.$type === 'cloud') {
+                    const rs = await rawDb.execute({ sql, args: sqlArgs });
+                    rows = rs.rows;
+                } else {
+                    rows = rawDb.prepare(sql).all(...sqlArgs);
+                }
+            } catch (error) {
+                const message = error instanceof Error ? error.message : String(error);
+                if (!message.includes('producer_outcome_log')) throw error;
+                console.warn('[Predictions] producer_outcome_log unavailable, fallback to ai_predictions_v2 only');
+                const fallbackSql = `
+                    SELECT
+                        p.symbol,
+                        p.date,
+                        p.target_date,
+                        ${EFFECTIVE_SIGNAL_SQL} AS signal,
+                        p.signal AS canonical_signal,
+                        p.confidence,
+                        p.support_price,
+                        p.ai_reasoning,
+                        p.ai_reasoning AS llm_reasoning,
+                        COALESCE(
+                            CASE
+                                WHEN json_valid(p.ai_reasoning) THEN json_extract(p.ai_reasoning, '$.signal')
+                                ELSE NULL
+                            END,
+                            p.signal
+                        ) AS llm_signal,
+                        ${EFFECTIVE_VALIDATION_STATUS_SQL} AS validation_status,
+                        p.actual_change,
+                        p.validation_data,
+                        ${EFFECTIVE_LAYER1_STATUS_SQL} AS layer1_status,
+                        p.layer1_status AS layer1_signal,
+                        p.layer1_score,
+                        p.layer1_trigger_hit,
+                        p.layer1_risk_off_hit,
+                        p.layer1_strategy_version,
+                        json_object(
+                            'close', json_extract(p.layer1_payload, '$.close'),
+                            'change_percent', json_extract(p.layer1_payload, '$.change_percent')
+                        ) AS layer1_payload,
+                        p.is_primary,
+                        p.model_id AS model,
+                        m.display_name,
+                        ${EFFECTIVE_DECISION_SEMANTIC_SQL} AS decision_semantic,
+                        ? AS mode_id,
+                        d.close AS close_price
+                    FROM ai_predictions_v2 p
+                    LEFT JOIN prediction_models m ON p.model_id = m.model_id
+                    LEFT JOIN mode_decision_log dlog
+                        ON dlog.mode_id = ?
+                       AND dlog.symbol = p.symbol
+                       AND dlog.decision_date = p.date
+                    LEFT JOIN daily_prices d
+                        ON p.symbol = d.symbol
+                       AND p.target_date = d.date
+                    WHERE ${whereClause}
+                    ORDER BY p.date DESC, m.priority DESC
+                    LIMIT ?
+                `;
+                if (db.$type === 'cloud') {
+                    const rs = await rawDb.execute({ sql: fallbackSql, args: sqlArgs });
+                    rows = rs.rows;
+                } else {
+                    rows = rawDb.prepare(fallbackSql).all(...sqlArgs);
+                }
             }
 
             const enrichedRows = (rows as Record<string, unknown>[]).map(withDecisionViews);

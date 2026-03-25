@@ -20,7 +20,8 @@ summary: "将决策栈与统一数据模型落实到代码与表结构的执行�
 4. Step 4 已完成并上线（`completed`）
 5. Step 5 已完成并上线（`completed`）
 6. Step 6 已完成（`completed`，对账工具与首轮基线）
-7. Step 7-8 待执行（`pending`）
+7. Step 7 已完成并上线（`completed`）
+8. Step 8 待执行（`pending`）
 
 已完成项摘要：
 
@@ -49,6 +50,10 @@ summary: "将决策栈与统一数据模型落实到代码与表结构的执行�
    - 支持 `symbol / trade_date / producer_id / signal_state / decision_semantic` 维度对账
    - 支持 mode overlay 对账与 inventory 统计输出
    - 已完成首轮基线检查：云端 `producer_outcome_log` 当前为 0 行，待后续增量写入后继续观测一致率
+7. Step 7：读路径灰度切换到新对象
+   - `predictions / history / stock-batch` API 优先读取 `producer_outcome_log` 字段
+   - 读取失败时自动 fallback 到 `ai_predictions_v2`（兼容回退）
+   - 页面继续兼容旧字段消费，运行时读路径支持灰度切换
 
 上线前验证口径（Step 1/2）：
 

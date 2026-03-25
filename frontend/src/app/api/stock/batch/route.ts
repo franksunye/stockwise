@@ -29,13 +29,17 @@ function getPredCacheKey(symbols: string[], historyLimit: number, tier: string, 
     return `${symbols.join(',')}|${historyLimit}|${tier}|${modeId}`;
 }
 
+const BASE_SIGNAL_SQL = `COALESCE(pol.signal_state, h.signal)`;
+const BASE_REASONING_SQL = `COALESCE(NULLIF(pol.reasoning_payload, ''), h.ai_reasoning)`;
+const EFFECTIVE_SIGNAL_WITH_OUTCOME_SQL = EFFECTIVE_SIGNAL_SQL.replace(/p\.signal/g, `COALESCE(pol.signal_state, p.signal)`);
+
 const SAFE_LLM_SIGNAL_SQL = `
     COALESCE(
         CASE
-            WHEN json_valid(h.ai_reasoning) THEN json_extract(h.ai_reasoning, '$.signal')
+            WHEN json_valid(${BASE_REASONING_SQL}) THEN json_extract(${BASE_REASONING_SQL}, '$.signal')
             ELSE NULL
         END,
-        h.signal
+        ${BASE_SIGNAL_SQL}
     )
 `;
 
@@ -136,11 +140,11 @@ export async function GET(request: Request) {
         const historySql = `
             WITH RankedPredictions AS (
                 SELECT p.symbol, p.date, p.target_date,
-                        ${EFFECTIVE_SIGNAL_SQL} AS signal,
-                        p.signal AS canonical_signal,
-                        p.confidence,
+                        ${EFFECTIVE_SIGNAL_WITH_OUTCOME_SQL} AS signal,
+                        COALESCE(pol.signal_state, p.signal) AS canonical_signal,
+                        COALESCE(pol.confidence, p.confidence) AS confidence,
                         p.support_price,
-                        p.ai_reasoning,
+                        COALESCE(NULLIF(pol.reasoning_payload, ''), p.ai_reasoning) AS ai_reasoning,
                         ${EFFECTIVE_VALIDATION_STATUS_SQL} AS validation_status, p.actual_change,
                         p.validation_data,
                         ${EFFECTIVE_LAYER1_STATUS_SQL} AS layer1_status,
@@ -161,6 +165,13 @@ export async function GET(request: Request) {
                     ON dlog.mode_id = ?
                    AND dlog.symbol = p.symbol
                    AND dlog.decision_date = p.date
+                LEFT JOIN producer_outcome_log pol
+                    ON pol.symbol = p.symbol
+                   AND pol.trade_date = p.date
+                   AND pol.producer_id = p.model_id
+                   AND pol.outcome_kind = 'prediction'
+                   AND pol.producer_type = 'AI'
+                   AND pol.role_type = CASE WHEN COALESCE(p.is_primary, 0) = 1 THEN 'primary' ELSE 'secondary' END
                 WHERE p.symbol IN (${placeholders})
                   AND p.target_date >= '${dashboardPredictionThreshold}'
                   AND (${tierFilter})
