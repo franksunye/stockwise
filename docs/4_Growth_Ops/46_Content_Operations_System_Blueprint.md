@@ -72,7 +72,7 @@ StockWise 已经拥有三套分散但非常有价值的能力：
 #### 来源 A: Growth 内容源
 
 - `docs/4_Growth_Ops/content`
-- 典型形态：`101` 系列、Campaign、增长长文、认知型文章
+- 典型形态：`101` 系列、Campaign、增长长文、认知型文章、`master_series` 栏目资产
 
 #### 来源 B: Support 内容源
 
@@ -90,6 +90,17 @@ StockWise 已经拥有三套分散但非常有价值的能力：
 5. 客服答复引用素材
 6. Campaign 素材池
 
+其中需要特别区分三类不同的 canonical 内容：
+
+1. `101_academy`
+   - 主教学线，负责认知教育与世界观搭建
+2. `support`
+   - 产品说明线，负责功能解释与信任承接
+3. `master_series`
+   - 知识库存线，负责人物、门派、方法源流、经典系统拆解
+
+这三类内容应共用统一资产规范，但不强制共用同一发布节奏。
+
 ### 3.3 核心设计原则
 
 1. **不迁移正文**：正文仍留在原目录，不因为治理升级而搬家。
@@ -97,6 +108,7 @@ StockWise 已经拥有三套分散但非常有价值的能力：
 3. **元数据驱动视图**：靠 frontmatter 统一生成看板与队列。
 4. **主流程与分发分层**：内容主状态和各平台状态必须分开建模。
 5. **研发变更可反查内容影响**：产品/工程文档更新后，能自动定位受影响内容。
+6. **栏目共系统，不共前线**：`101`、`support`、`master_series` 共用资产系统，但可拥有不同 release rhythm。
 
 ### 3.4 上游事实源规范
 
@@ -135,6 +147,18 @@ summary: ""
 ## 4. 内容资产模型
 
 每篇内容不再只是“文章文件”，而是一个 **内容资产对象**。
+
+对 Growth 来说，当前至少应支持三种 canonical 栏目资产：
+
+1. `101_academy`
+2. `campaign / blitz / growth longform`
+3. `master_series`
+
+其中 `master_series` 的典型特征是：
+
+1. 上游依赖 `docs/2_Intelligence/registry` 与 Strategy 文档
+2. 默认先形成知识库存，再转译到公众号 / 小红书
+3. 默认不进入高优先级前线排期，除非被显式提级
 
 ### 4.1 内容资产的五层结构
 
@@ -177,6 +201,16 @@ workflow:
   blocked_reason: ""
 ```
 
+对于 `master_series`，默认推荐：
+
+```yaml
+workflow:
+  stage: "planned"
+  priority: "medium"
+```
+
+这样能保证其纳入系统，但不与 `101` / `support` 的前线稿件争抢发布判断。
+
 #### 第四层：Distribution
 
 定义这篇内容“在各个渠道分别走到哪一步”。
@@ -201,6 +235,24 @@ distribution:
     enabled: false
     status: "none"
 ```
+
+对于 `master_series`，默认推荐：
+
+```yaml
+distribution:
+  wechat:
+    enabled: false
+    status: "none"
+  xhs:
+    enabled: true
+    status: "draft"
+```
+
+含义是：
+
+1. 先把它当内容库存生产
+2. 优先跑小红书或卡片渠道
+3. 只有被提级的篇目，才进入公众号前线
 
 #### 第五层：Visual Production
 
