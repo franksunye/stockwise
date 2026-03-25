@@ -8,7 +8,7 @@ LEGACY_SIGNAL_STATES = ("Long", "Short", "Side")
 ALL_SIGNAL_STATES = CANONICAL_SIGNAL_STATES + LEGACY_SIGNAL_STATES
 
 _SIGNAL_CN_LABELS = {
-    "TriggeredLong": "可进攻",
+    "TriggeredLong": "可交易",
     "Watch": "观察",
     "NoSetup": "无机会",
     "RiskOff": "防守",

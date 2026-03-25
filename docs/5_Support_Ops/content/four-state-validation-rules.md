@@ -41,7 +41,7 @@ publish:
 
 四态不是四个“方向预测”，而是四个“行动建议”：
 
-- `TriggeredLong`：建议进场
+- `TriggeredLong`：建议看多
 - `Watch`：建议观察
 - `RiskOff`：建议防守
 - `NoSetup`：暂无信号
@@ -55,7 +55,7 @@ publish:
 
 ## 4.1 正式中文语义
 
-- `TriggeredLong`：建议进场
+- `TriggeredLong`：建议看多
 - `Watch`：建议观察
 - `RiskOff`：建议防守
 - `NoSetup`：暂无信号
@@ -182,9 +182,9 @@ publish:
 
 ## 7.1 `TriggeredLong`
 
-业务语义：当前已满足进场条件，建议采取进攻动作。
+业务语义：当前已满足进场条件，建议看多。
 
-验证重点：不是“有没有涨一点”，而是“进场建议是否值得”。
+验证重点：不是“有没有涨一点”，而是“看多建议是否值得”。
 
 建议规则：
 
@@ -205,7 +205,7 @@ publish:
 
 ## 7.2 `RiskOff`
 
-业务语义：当前风险优先，应该防守、减仓、回避新增进攻。
+业务语义：当前风险优先，应该避险、防守、减仓。
 
 验证重点：不是“能不能做空赚钱”，而是“防守建议是否必要”。
 
@@ -214,7 +214,7 @@ publish:
 - `Validated`
   - `min_cum_change <= -2%`
 - `WeakValidated`
-  - 没有明显下跌，但也没有形成可进攻机会
+  - 没有明显下跌，但也没有形成可交易机会
 - `Invalidated`
   - `max_cum_change >= +2%`
 
@@ -292,7 +292,7 @@ publish:
 
 | signal | 主要验证问题 | `Validated` | `WeakValidated` | `Invalidated` |
 | --- | --- | --- | --- | --- |
-| `TriggeredLong` | 现在进场是否合理 | `max_cum_change >= bull_threshold` | 有正收益但未达强确认 | 窗口结束仍 `<= 0` 或 `min_cum_change <= hard_adverse_long` |
+| `TriggeredLong` | 现在看多是否合理 | `max_cum_change >= bull_threshold` | 有正收益但未达强确认 | 窗口结束仍 `<= 0` 或 `min_cum_change <= hard_adverse_long` |
 | `RiskOff` | 现在防守是否必要 | `min_cum_change <= bear_threshold` | 未下跌但也未形成进攻机会 | `max_cum_change >= bull_threshold` |
 | `Watch` | 先观察是否合理 | T+1 未强突破，且 T+2/T+3 才确认，或持续待确认 | 整体在噪音区，无明确证伪 | T+1 就强突破，或 T+1 就明显走坏 |
 | `NoSetup` | 忽略它是否合理 | 整窗无明显机会也无明显风险 | 低价值噪音波动 | 快速形成明确机会或明确风险 |

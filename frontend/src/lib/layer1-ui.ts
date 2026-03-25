@@ -1,4 +1,4 @@
-﻿import type { AIPrediction } from '@/lib/types';
+import type { AIPrediction } from '@/lib/types';
 
 import { COLORS } from '@/components/dashboard/constants';
 
@@ -17,9 +17,9 @@ export interface PredictionActionMeta {
 
 const LAYER1_META: Record<NonNullable<AIPrediction['layer1_status']>, PredictionActionMeta> = {
   TriggeredLong: {
-    headline: '建议进场',
+    headline: '建议看多',
     badge: '适合开始寻找机会',
-    posterDecision: '建议进场',
+    posterDecision: '建议看多',
     color: COLORS.up,
     dotClass: 'bg-rose-500',
     iconTone: 'up',
@@ -60,9 +60,9 @@ const LAYER1_META: Record<NonNullable<AIPrediction['layer1_status']>, Prediction
 
 const SIGNAL_META: Record<string, PredictionActionMeta> = {
   Long: {
-    headline: '建议进场',
+    headline: '建议看多',
     badge: '适合开始寻找机会',
-    posterDecision: '建议进场',
+    posterDecision: '建议看多',
     color: COLORS.up,
     dotClass: 'bg-rose-500',
     iconTone: 'up',
