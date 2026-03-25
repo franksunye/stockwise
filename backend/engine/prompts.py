@@ -561,7 +561,7 @@ def prepare_stock_analysis_prompt(symbol: str, as_of_date: str = None, ctx: Dict
     if layer1_status and _should_inject_layer1_prompt_context():
         if layer1_status == "TriggeredLong":
             quant_model_guidance = (
-                "量化模型判断当前已进入进攻候选状态。"
+                "量化模型判断当前已进入看多候选状态。"
                 "请将其视为规则侧观点，并结合价格行为与关键位独立判断。"
             )
         elif layer1_status == "RiskOff":

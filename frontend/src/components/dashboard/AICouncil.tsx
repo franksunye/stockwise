@@ -106,7 +106,7 @@ function getCouncilActionKeyFromSignal(signalLike: string | undefined | null): C
 function getCouncilActionLabel(actionKey: CouncilActionKey): string {
   switch (actionKey) {
     case 'enter':
-      return '建议进场';
+      return '建议看多';
     case 'observe':
       return '建议观察';
     case 'defense':
@@ -477,14 +477,14 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
   
   if (isUnanimous) {
     consensusLevel = '结论一致';
-    if (enterCount === total) actionLabel = '建议进场';
+    if (enterCount === total) actionLabel = '建议看多';
     else if (observeCount === total) actionLabel = '建议观察';
     else if (defenseCount === total) actionLabel = '建议防守';
     else actionLabel = '暂无信号';
   } else {
     // Determine majority
     const counts = [
-      { key: 'enter', count: enterCount, label: '建议进场' },
+      { key: 'enter', count: enterCount, label: '建议看多' },
       { key: 'observe', count: observeCount, label: '建议观察' },
       { key: 'defense', count: defenseCount, label: '建议防守' },
       { key: 'empty', count: emptyCount, label: '暂无信号' }
@@ -501,7 +501,7 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
   }
 
   // Set color based on action
-  if (actionLabel.includes('进场')) consensusColor = getCouncilActionMeta('enter').textClass;
+  if (actionLabel.includes('看多') || actionLabel.includes('进场')) consensusColor = getCouncilActionMeta('enter').textClass;
   else if (actionLabel.includes('观察')) consensusColor = getCouncilActionMeta('observe').textClass;
   else if (actionLabel.includes('防守')) consensusColor = getCouncilActionMeta('defense').textClass;
   else if (actionLabel.includes('暂无')) consensusColor = getCouncilActionMeta('empty').textClass;

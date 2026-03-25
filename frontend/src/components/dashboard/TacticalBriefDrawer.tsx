@@ -129,7 +129,7 @@ const normalizeActionLabel = (action: string | undefined): string => {
   if (!action) return '建议观察';
   if (action.includes('观察')) return '建议观察';
   if (action.includes('止损') || action.includes('减仓') || action.includes('防守')) return '建议防守';
-  if (action.includes('加仓') || action.includes('跟随') || action.includes('买')) return '建议进场';
+  if (action.includes('加仓') || action.includes('跟随') || action.includes('买')) return '建议看多';
   if (action.includes('落袋') || action.includes('止盈') || action.includes('离场')) return '建议落袋';
   return action;
 };
@@ -163,14 +163,14 @@ const getPriceNodes = (data: TacticalData, currentPrice?: number): PriceLevelNod
   if (data?.key_levels?.resistance || data?.key_levels?.immediate_resistance) 
     add(data.key_levels.immediate_resistance || data.key_levels.resistance, '挑战位', 'target', '局部阶段目标，注意动能释放', '执行落袋');
   if (data?.key_levels?.breakout_confirmation_level)
-    add(data.key_levels.breakout_confirmation_level, '突破确认', 'breakout', '反转结构成立的关键锚点', '执行进场');
+    add(data.key_levels.breakout_confirmation_level, '突破确认', 'breakout', '反转结构成立的关键锚点', '执行交易');
   
   if (currentPrice) nodes.push({ id: 'current', price: currentPrice, label: '当前价', kind: 'current', description: '目前市场成交活跃点', action: '执行观察' });
 
   if (data?.key_levels?.support || data?.key_levels?.immediate_support) 
     add(data.key_levels.immediate_support || data.key_levels.support, '防守位', 'support', '多头防线，不破即维持强势', '执行防守');
   if (data?.key_levels?.strong_support) 
-    add(data.key_levels.strong_support, '强支撑区', 'support', '底部核心支撑，中长期成本位', '执行进场');
+    add(data.key_levels.strong_support, '强支撑区', 'support', '底部核心支撑，中长期成本位', '执行交易');
   if (data?.key_levels?.stop_loss_reference || data?.key_levels?.stop_loss)
     add(data.key_levels.stop_loss_reference || data.key_levels.stop_loss, '止损参考', 'stoploss', '结构崩溃底线', '执行防守');
 
@@ -237,7 +237,7 @@ const createPlaceholderTactic = (kind: ScenarioKind, idx: number): ScenarioTacti
       },
       {
         priority: 'P2',
-        action: '执行进场',
+        action: '执行交易',
         trigger: '放量突破一攻位并站稳',
         reason: '确认后再交易，避免假突破。',
         buy_zone_price: undefined,

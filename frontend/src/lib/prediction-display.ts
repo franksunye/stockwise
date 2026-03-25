@@ -2,7 +2,7 @@ export const NOISE_THRESHOLD_PERCENT = 1.0;
 
 export const EFFECTIVE_SIGNAL_SQL = `
     CASE
-        WHEN dlog.decision_semantic = '建议进场' OR dlog.decision_semantic = '进场' THEN 'Long'
+        WHEN dlog.decision_semantic IN ('建议看多', '建议进场', '进场') THEN 'Long'
         WHEN dlog.decision_semantic = '建议防守' OR dlog.decision_semantic = '防守' THEN 'Short'
         WHEN dlog.decision_semantic IN ('建议观察', '观察', '暂无信号', '建议空仓', '空仓') THEN 'Side'
         ELSE p.signal
@@ -11,7 +11,7 @@ export const EFFECTIVE_SIGNAL_SQL = `
 
 export const EFFECTIVE_LAYER1_STATUS_SQL = `
     CASE
-        WHEN dlog.decision_semantic = '建议进场' OR dlog.decision_semantic = '进场' THEN 'TriggeredLong'
+        WHEN dlog.decision_semantic IN ('建议看多', '建议进场', '进场') THEN 'TriggeredLong'
         WHEN dlog.decision_semantic = '建议防守' OR dlog.decision_semantic = '防守' THEN 'RiskOff'
         WHEN dlog.decision_semantic IN ('暂无信号', '建议空仓', '空仓') THEN 'NoSetup'
         WHEN dlog.decision_semantic = '建议观察' OR dlog.decision_semantic = '观察' THEN 'Watch'
@@ -24,7 +24,7 @@ export const EFFECTIVE_DECISION_SEMANTIC_SQL = `
         WHEN dlog.decision_semantic IN ('建议空仓', '空仓') THEN '暂无信号'
         WHEN dlog.decision_semantic = '防守' THEN '建议防守'
         WHEN dlog.decision_semantic = '观察' THEN '建议观察'
-        WHEN dlog.decision_semantic = '进场' THEN '建议进场'
+        WHEN dlog.decision_semantic = '进场' THEN '建议看多'
         ELSE dlog.decision_semantic
     END
 `;

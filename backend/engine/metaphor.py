@@ -40,17 +40,17 @@ class MetaphorEngine:
 
         # 3. Rich Variant Pools (Industrial-grade expansion aligned with ZISO DNA)
         POOLS = {
-            "high_bull": { # Long + High Confidence (ZISO: The Rational Blunt Weapon - Attack)
+            "high_bull": { # Long + High Confidence (ZISO: The Rational Blunt Weapon - Trade)
                 "tokens": [
                     "势如破竹", "飞龙在天", "雷霆万钧", "金光叠影", "气贯长虹", "绝尘而去", 
                     "龙吟九霄", "破浪乘风", "主升浪潮", "光芒万丈", "一骑绝尘", "直上青云",
-                    "乾坤扭转", "红岩突围", "万马奔腾", "旭日东升", "铁律进攻", "共振高潮"
+                    "乾坤扭转", "红岩突围", "万马奔腾", "旭日东升", "铁律交易", "共振高潮"
                 ],
                 "actions": {
                     "yi": [
                         "顺势加仓", "握紧筹码", "乘胜追击", "上移止盈", "持股待涨", "让利润奔跑", 
                         "顺应趋势", "逢低吸纳", "看大做小", "享受复利", "拥抱主升", "格局打开",
-                        "坚定持有", "右侧加注", "捕捉龙头", "极致聚焦", "冷酷进攻", "主线守仓"
+                        "坚定持有", "右侧加注", "捕捉龙头", "极致聚焦", "冷酷交易", "主线守仓"
                     ],
                     "ji": [
                         "恐高抛售", "逆势做空", "轻易下车", "微利即逃", "左侧猜顶", "频繁换手", 

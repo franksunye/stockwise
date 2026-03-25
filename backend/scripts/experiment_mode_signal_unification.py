@@ -17,7 +17,7 @@ from backend.database import get_connection  # noqa: E402
 
 CORE_MODE_IDS = ["steady_v1", "balanced_v1", "aggressive_v1"]
 SEMANTIC_TO_SIGNAL = {
-    "建议进场": ("Long", "TriggeredLong"),
+    "建议看多": ("Long", "TriggeredLong"),
     "建议观察": ("Side", "Watch"),
     "建议防守": ("Short", "RiskOff"),
     "暂无信号": ("Side", "NoSetup"),
@@ -27,10 +27,11 @@ SEMANTIC_ALIASES = {
     "空仓": "暂无信号",
     "防守": "建议防守",
     "观察": "建议观察",
-    "进场": "建议进场",
+    "进场": "建议看多",
+    "建议进场": "建议看多",
 }
 RAW_SIGNAL_TO_SEMANTIC = {
-    "Long": "建议进场",
+    "Long": "建议看多",
     "Short": "建议防守",
     "Side": "建议观察",
 }

@@ -18,7 +18,8 @@ SEMANTIC_ALIASES = {
     "空仓": "暂无信号",
     "防守": "建议防守",
     "观察": "建议观察",
-    "进场": "建议进场",
+    "进场": "建议看多",
+    "建议进场": "建议看多",
 }
 
 
@@ -164,7 +165,7 @@ def apply_overlay_two_step(predictions: Sequence[Dict[str, Any]], mode_rows: Seq
         semantic = mode_row["decision_semantic"] if mode_row else ""
         overlay_signal = str(row.get("signal") or "")
         overlay_layer1 = str(row.get("layer1_status") or "")
-        if semantic == "建议进场":
+        if semantic == "建议看多" or semantic == "建议进场":
             overlay_signal = "Long"
             overlay_layer1 = "TriggeredLong"
         elif semantic == "建议观察":
@@ -216,7 +217,7 @@ def fetch_single_sql(conn, symbols: Sequence[str], history_limit: int, mode_id: 
             WHEN d.decision_semantic IN ('建议空仓', '空仓') THEN '暂无信号'
             WHEN d.decision_semantic = '防守' THEN '建议防守'
             WHEN d.decision_semantic = '观察' THEN '建议观察'
-            WHEN d.decision_semantic = '进场' THEN '建议进场'
+            WHEN d.decision_semantic IN ('进场', '建议进场') THEN '建议看多'
             ELSE COALESCE(d.decision_semantic, '')
         END AS decision_semantic,
         CASE
@@ -227,7 +228,7 @@ def fetch_single_sql(conn, symbols: Sequence[str], history_limit: int, mode_id: 
             ELSE b.signal
         END AS overlay_signal,
         CASE
-            WHEN d.decision_semantic = '建议进场' OR d.decision_semantic = '进场' THEN 'TriggeredLong'
+            WHEN d.decision_semantic IN ('建议看多', '建议进场', '进场') THEN 'TriggeredLong'
             WHEN d.decision_semantic = '建议防守' OR d.decision_semantic = '防守' THEN 'RiskOff'
             WHEN d.decision_semantic IN ('暂无信号', '建议空仓', '空仓') THEN 'NoSetup'
             WHEN d.decision_semantic = '建议观察' OR d.decision_semantic = '观察' THEN 'Watch'
