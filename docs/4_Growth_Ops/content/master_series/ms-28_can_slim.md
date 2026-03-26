@@ -1,7 +1,7 @@
 ---
 title: "交易大师图鉴 28｜CAN SLIM：它最重要的地方，不是七个字母本身，而是把成长股进攻拆成了一套筛选顺序"
 social_title: "交易大师图鉴 28｜为什么很多人记住了 CAN SLIM，却还是把成长股做错"
-editorial_title: "交易大师图鉴 28｜CAN SLIM：把成长股进攻写成筛选秩序"
+editorial_title: "交易大师图鉴 28｜CAN SLIM：把成长股进攻写成筛选规则"
 subtitle: "从欧奈尔体系到成长、供需、领导性和大盘环境，CAN SLIM 真正留下来的，不是好记的缩写，而是一套先筛选、再确认、最后执行的顺序"
 content_id: "growth-ms-028"
 content_source: "growth"
@@ -294,7 +294,7 @@ source_docs:
 2. `关键事实卡`
    - 在规划文档里被列为需单独补齐的方法主题
    - 在中文投资圈长期有稳定影响
-   - 真正价值是成长、供需、领导性、环境的筛选秩序
+   - 真正价值是成长、供需、领导性、环境的筛选规则
 3. `关键术语卡`
    - `Current / Annual Earnings`
    - `Leader`
