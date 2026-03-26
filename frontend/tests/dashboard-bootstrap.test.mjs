@@ -6,6 +6,15 @@ import { describe, it } from 'node:test';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const moduleUrl = pathToFileURL(path.resolve(__dirname, '../src/lib/dashboard-bootstrap.ts')).href;
 const {
+    AUTH_CACHE_KEY,
+    AUTH_CACHE_MAX_AGE_MS,
+    DASHBOARD_NAV_INTENT_KEY,
+    DASHBOARD_NAV_INTENT_MAX_AGE_MS,
+    HAS_ONBOARDED_KEY,
+    PROFILE_CACHE_KEY,
+    SPLASH_SESSION_TTL_MS,
+    SPLASH_TS_KEY,
+    buildRootBootstrapInlineScript,
     getDashboardEntryHint,
     getOptimisticDashboardBootstrap,
     readAuthCache,
@@ -49,6 +58,25 @@ describe('dashboard bootstrap helpers', () => {
         });
     });
 
+    it('falls back to profile cache when auth cache is expired', () => {
+        const now = 10_000_000;
+        const state = {
+            authCacheRaw: JSON.stringify({
+                tier: 'pro',
+                authorized: true,
+                timestamp: now - AUTH_CACHE_MAX_AGE_MS - 1,
+            }),
+            profileCacheRaw: JSON.stringify({ userId: 'user_123', hasOnboarded: true, tier: 'free' }),
+            hasOnboardedRaw: 'true',
+        };
+
+        assert.deepEqual(getOptimisticDashboardBootstrap(state, now), {
+            authorized: true,
+            tier: 'free',
+        });
+        assert.equal(shouldMarkDashboardBootReady(state, now), true);
+    });
+
     it('allows optimistic enter when profile exists and dashboard nav intent is still fresh', () => {
         const now = 50_000;
         const state = {
@@ -65,6 +93,18 @@ describe('dashboard bootstrap helpers', () => {
             authorized: true,
             tier: 'free',
         });
+    });
+
+    it('does not allow optimistic enter when nav intent is stale and onboarding is incomplete', () => {
+        const now = 80_000;
+        const state = {
+            profileCacheRaw: JSON.stringify({ userId: 'user_123', hasOnboarded: false, tier: 'free' }),
+            navIntentRaw: JSON.stringify({ symbol: '00700', timestamp: now - DASHBOARD_NAV_INTENT_MAX_AGE_MS - 1 }),
+        };
+
+        assert.equal(readDashboardNavIntent(state.navIntentRaw, now), null);
+        assert.equal(shouldOptimisticallyEnterDashboard(state, now), false);
+        assert.equal(getOptimisticDashboardBootstrap(state, now), null);
     });
 
     it('suppresses splash for recent in-session return visits', () => {
@@ -93,6 +133,35 @@ describe('dashboard bootstrap helpers', () => {
         assert.equal(shouldSuppressDashboardSplash({}, runtime), false);
     });
 
+    it('suppresses splash for desktop and non-dashboard routes', () => {
+        const desktopDashboard = {
+            hostname: 'app.ziso.cc',
+            pathname: '/dashboard',
+            userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0)',
+            now: 300_000,
+        };
+        const mobilePricing = {
+            hostname: 'app.ziso.cc',
+            pathname: '/pricing',
+            userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)',
+            now: 300_000,
+        };
+
+        assert.equal(shouldSuppressDashboardSplash({}, desktopDashboard), true);
+        assert.equal(shouldSuppressDashboardSplash({}, mobilePricing), true);
+    });
+
+    it('keeps splash on cold mobile app-host root opens', () => {
+        const runtime = {
+            hostname: 'app.ziso.cc',
+            pathname: '/',
+            userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)',
+            now: 320_000,
+        };
+
+        assert.equal(shouldSuppressDashboardSplash({}, runtime), false);
+    });
+
     it('produces a combined dashboard entry hint without mutating behavior', () => {
         const now = 400_000;
         const state = {
@@ -110,5 +179,19 @@ describe('dashboard bootstrap helpers', () => {
                 tier: 'free',
             },
         });
+    });
+
+    it('builds root bootstrap script from the same key and ttl constants', () => {
+        const script = buildRootBootstrapInlineScript();
+
+        assert.match(script, new RegExp(AUTH_CACHE_KEY));
+        assert.match(script, new RegExp(PROFILE_CACHE_KEY));
+        assert.match(script, new RegExp(HAS_ONBOARDED_KEY));
+        assert.match(script, new RegExp(SPLASH_TS_KEY));
+        assert.match(script, new RegExp(String(AUTH_CACHE_MAX_AGE_MS)));
+        assert.match(script, new RegExp(String(SPLASH_SESSION_TTL_MS)));
+        assert.match(script, /dashboard-boot-ready/);
+        assert.match(script, /shouldShowSplash/);
+        assert.doesNotMatch(script, new RegExp(DASHBOARD_NAV_INTENT_KEY));
     });
 });
