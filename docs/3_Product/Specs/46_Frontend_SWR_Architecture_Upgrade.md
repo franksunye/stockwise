@@ -107,15 +107,19 @@ SWR 不应被直接等同为：
 1. [`frontend/src/app/layout.tsx`](/Users/yesun/Code/stockwise/frontend/src/app/layout.tsx)
 2. [`frontend/src/app/(dashboard)/dashboard/layout.tsx`](/Users/yesun/Code/stockwise/frontend/src/app/(dashboard)/dashboard/layout.tsx)
 3. [`frontend/src/lib/dashboard-bootstrap.ts`](/Users/yesun/Code/stockwise/frontend/src/lib/dashboard-bootstrap.ts)
-4. [`frontend/src/hooks/useUserProfile.ts`](/Users/yesun/Code/stockwise/frontend/src/hooks/useUserProfile.ts)
-5. [`frontend/src/hooks/useWatchlist.ts`](/Users/yesun/Code/stockwise/frontend/src/hooks/useWatchlist.ts)
-6. [`frontend/src/hooks/useDashboardData.ts`](/Users/yesun/Code/stockwise/frontend/src/hooks/useDashboardData.ts)
+4. [`frontend/src/hooks/useDashboardAuthorization.ts`](/Users/yesun/Code/stockwise/frontend/src/hooks/useDashboardAuthorization.ts)
+5. [`frontend/src/components/dashboard/DashboardEntryGate.tsx`](/Users/yesun/Code/stockwise/frontend/src/components/dashboard/DashboardEntryGate.tsx)
+6. [`frontend/src/components/dashboard/DashboardShell.tsx`](/Users/yesun/Code/stockwise/frontend/src/components/dashboard/DashboardShell.tsx)
+7. [`frontend/src/hooks/useUserProfile.ts`](/Users/yesun/Code/stockwise/frontend/src/hooks/useUserProfile.ts)
+8. [`frontend/src/hooks/useWatchlist.ts`](/Users/yesun/Code/stockwise/frontend/src/hooks/useWatchlist.ts)
+9. [`frontend/src/hooks/useDashboardData.ts`](/Users/yesun/Code/stockwise/frontend/src/hooks/useDashboardData.ts)
 
 当前判断：
 
 1. `PWA 壳层 bootstrap` 已部分统一。
-2. `Dashboard bootstrap state` 已完成第一轮收口。
-3. 但 profile、watchlist、data hook 的写入与刷新侧仍然分散，不应误判为“整体已彻底统一”。
+2. `Dashboard bootstrap state` 已完成第一轮读取侧、写入侧与入口编排收口。
+3. `dashboard/layout.tsx` 已被压薄为三态渲染层，授权编排、entry gate 与 provider 壳层已独立成模块。
+4. 但 profile、watchlist、data hook 的刷新与数据主链路仍然分散，不应误判为“整体已彻底统一”。
 
 ### 4.3 本地快照仍是必要层
 
@@ -139,7 +143,13 @@ SWR 不应被直接等同为：
    - [`frontend/src/app/(dashboard)/dashboard/layout.tsx`](/Users/yesun/Code/stockwise/frontend/src/app/(dashboard)/dashboard/layout.tsx) 已接入 helper
    - [`frontend/src/app/layout.tsx`](/Users/yesun/Code/stockwise/frontend/src/app/layout.tsx) 已改为消费 helper 生成的 inline bootstrap script
    - [`frontend/tests/dashboard-bootstrap.test.mjs`](/Users/yesun/Code/stockwise/frontend/tests/dashboard-bootstrap.test.mjs) 已补齐基础纯逻辑验证
-3. 新用户首次进入 Dashboard 的修复链路已经落地。
+3. `Dashboard` 入口编排已进一步模块化：
+   - [`frontend/src/hooks/useDashboardAuthorization.ts`](/Users/yesun/Code/stockwise/frontend/src/hooks/useDashboardAuthorization.ts) 负责授权与首轮 profile/bootstrap 编排
+   - [`frontend/src/components/dashboard/DashboardEntryGate.tsx`](/Users/yesun/Code/stockwise/frontend/src/components/dashboard/DashboardEntryGate.tsx) 负责 profile/onboarding/skeleton gate
+   - [`frontend/src/components/dashboard/DashboardShell.tsx`](/Users/yesun/Code/stockwise/frontend/src/components/dashboard/DashboardShell.tsx) 负责 provider 组合
+4. bootstrap 边界验证已加固：
+   - [`frontend/tests/dashboard-bootstrap.test.mjs`](/Users/yesun/Code/stockwise/frontend/tests/dashboard-bootstrap.test.mjs) 已覆盖 auth cache、profile cache、nav intent、splash suppress 与读写 round-trip
+5. 新用户首次进入 Dashboard 的修复链路已经落地。
    - 详见 [`25_Onboarding_First_Load_Recovery_Plan_20260314.md`](/Users/yesun/Code/stockwise/docs/1_Engineering/25_Onboarding_First_Load_Recovery_Plan_20260314.md)
 
 ### 5.2 已证伪或已停止推进
@@ -150,23 +160,23 @@ SWR 不应被直接等同为：
 
 ### 5.3 仍未完成
 
-1. `Dashboard bootstrap state` 的写入侧仍未统一收口。
+1. `Dashboard bootstrap state` 尚未形成页面级自动化验证，只完成了纯逻辑护栏。
 2. 非首帧关键数据面的 SWR 迁移尚未系统推进。
-3. 缺少更系统的 bootstrap 边界验证与自动化护栏。
+3. `useUserProfile`、`useWatchlist`、`useDashboardData` 之间的数据刷新边界仍未统一建模。
 
 ## 6. 当前最合理的下一步
 
-下一步不建议继续触碰 Dashboard 首页主请求链路。
+下一步仍不建议继续触碰 Dashboard 首页主请求链路。
 
 更合理的方向只有两类：
 
-### 6.1 加固当前 bootstrap 收口成果
+### 6.1 补页面级轻量验证
 
 建议：
 
-1. 继续补 [`frontend/tests/dashboard-bootstrap.test.mjs`](/Users/yesun/Code/stockwise/frontend/tests/dashboard-bootstrap.test.mjs) 的边界覆盖
-2. 增加对 host/path/splash suppress/auth cache 过期组合的验证
-3. 将这轮收口成果变成稳定护栏，而不是依赖人工记忆
+1. 为 `dashboard` 入口增加页面级 smoke 验证，至少覆盖 direct `/dashboard`、回访打开、已 onboarding 用户进入三条路径
+2. 保持当前纯逻辑测试作为协议护栏，不把页面级验证替换成重型 E2E
+3. 将 `dashboard/layout + useDashboardAuthorization + DashboardEntryGate + DashboardShell` 视为一个完整入口面来验证
 
 这是当前收益最高、风险最低的下一步。
 
@@ -207,7 +217,7 @@ SWR 不应被直接等同为：
 
 1. `AICouncil` 的 SWR 迁移已成功
 2. `Dashboard` 主链路 SWR 迁移曾尝试，但已回滚
-3. `Dashboard bootstrap state` 的第一轮读取侧收口已完成
+3. `Dashboard bootstrap state` 的第一轮读取、写入与入口编排收口已完成
 
 更细的 bug 修复执行过程，请参考：
 
