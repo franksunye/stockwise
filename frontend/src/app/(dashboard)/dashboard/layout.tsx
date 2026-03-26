@@ -1,14 +1,12 @@
 'use client';
 
 import { InviteWall } from '@/components/InviteWall';
-import { DashboardEntryGate } from '@/components/dashboard/DashboardEntryGate';
-import { StockProvider } from '@/context/StockContext';
-import { DashboardAuthProvider } from '@/context/DashboardAuthContext';
+import { DashboardShell } from '@/components/dashboard/DashboardShell';
 import { SystemSync } from '@/components/SystemSync';
 import { ReferralTracker } from '@/components/ReferralTracker';
 import { BadgeManager } from '@/components/BadgeManager';
 import { InstallGuide } from '@/components/InstallGuide';
-import { UserProfileProvider, type Tier } from '@/hooks/useUserProfile';
+import { type Tier } from '@/hooks/useUserProfile';
 import { useDashboardAuthorization } from '@/hooks/useDashboardAuthorization';
 import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -73,15 +71,7 @@ export default function DashboardLayout({
             animate={{ opacity: 1 }}
             transition={{ duration: canSkipTransition.current ? 0 : 0.4 }}
           >
-            <DashboardAuthProvider tier={tier}>
-              <UserProfileProvider>
-                <StockProvider>
-                  <DashboardEntryGate>
-                    {children}
-                  </DashboardEntryGate>
-                </StockProvider>
-              </UserProfileProvider>
-            </DashboardAuthProvider>
+            <DashboardShell tier={tier}>{children}</DashboardShell>
           </motion.div>
         )}
       </AnimatePresence>
