@@ -1,14 +1,21 @@
 # 产品变更影响视图 (Change Impact Board)
 
-> 自动生成时间：2026/3/26 12:44:26
+> 自动生成时间：2026/3/26 13:52:54
 > 说明：该视图用于回答“产品/工程文档变化后，哪些内容应该复核或补充”。
 
 ## 受底层文档变更影响，需优先复核的内容
 
 | 内容资产 | 来源 | 主流程 | 受影响源文档 |
 | --- | --- | --- | --- |
-| [交易大师图鉴 33｜系统开发与期望值：它最重要的地方，不是胜率好不好看，而是长期做下去到底值不值得](../master_series/ms-33_system_development_and_expectancy.md) | Growth | ✍️ 生产中 | `docs/4_Growth_Ops/content/master_series/ms-25_van_tharp.md` |
-| [交易大师图鉴 30｜Darvas Box：它最重要的地方，不是箱体画法，而是先把边界认清，再等市场自己开门](../master_series/ms-30_darvas_box.md) | Growth | ✍️ 生产中 | `docs/4_Growth_Ops/content/master_series/ms-23_william_oneil.md` |
+| [大师系列内容接入方案 2026](../MASTER_SERIES_CONTENT_INTEGRATION_2026.md) | Growth | ✍️ 生产中 | `docs/2_Intelligence/registry/MASTER_SERIES_NOTEBOOKLM_PLAN.md` |
+| [交易大师图鉴 03｜亚历山大·埃尔德：真正的高手，不是多看几张图，而是学会给市场“加滤网”。](../master_series/ms-03_alexander_elder.md) | Growth | ✍️ 生产中 | `docs/2_Intelligence/registry/MASTER_SERIES_NOTEBOOKLM_PLAN.md` |
+| [交易大师图鉴 04｜理查德·丹尼斯：最震撼的一课，不是赚了多少钱，而是他试着证明交易员可以被训练出来](../master_series/ms-04_richard_dennis.md) | Growth | ✍️ 生产中 | `docs/2_Intelligence/registry/MASTER_SERIES_NOTEBOOKLM_PLAN.md` |
+| [交易大师图鉴 05｜沃伦·巴菲特：最难模仿的，不是他会选股，而是他能几十年都按同一套原则活着](../master_series/ms-05_warren_buffett.md) | Growth | ✍️ 生产中 | `docs/2_Intelligence/registry/MASTER_SERIES_NOTEBOOKLM_PLAN.md` |
+| [交易大师图鉴 12｜海龟交易：它最震撼的地方，不是突破本身，而是把交易拆成一套能训练人的规则](../master_series/ms-12_turtle_trading.md) | Growth | ✍️ 生产中 | `docs/2_Intelligence/registry/MASTER_SERIES_NOTEBOOKLM_PLAN.md` |
+| [交易大师图鉴 15｜多周期确认：它最重要的地方，不是多看几张图，而是让方向、节奏和触发终于站到同一边](../master_series/ms-15_multi_timeframe_confirmation.md) | Growth | ✍️ 生产中 | `docs/4_Growth_Ops/content/master_series/ms-08_triple_screen.md` |
+| [交易大师图鉴 16｜事件驱动型进攻结构：它最重要的地方，不是追新闻，而是看懂哪种变化足以改变市场预期](../master_series/ms-16_catalyst_driven_setup.md) | Growth | ✍️ 生产中 | `docs/4_Growth_Ops/content/master_series/ms-02_pradeep_bonde.md` |
+| [交易大师图鉴 19｜什么是规则量化中间层：它最重要的地方，不是神秘，而是把经验压成可以复核的规则](../master_series/ms-19_l2_rule_based_quant.md) | Growth | ✍️ 生产中 | `docs/2_Intelligence/registry/MASTER_SERIES_NOTEBOOKLM_PLAN.md` |
+| [交易大师图鉴 20｜大师不等于产品模式：它最重要的地方，不是泼冷水，而是防止把经典方法误读成万能模板](../master_series/ms-20_masters_not_equal_product_modes.md) | Growth | ✍️ 生产中 | `docs/2_Intelligence/registry/MASTER_SERIES_NOTEBOOKLM_PLAN.md` |
 | [101-100: 很多人不是不会炒股，而是连自己是什么段位都没弄明白](../101_academy/101-100_maturity_prologue.md) | Growth | 📅 已排期 | `docs/2_Intelligence/research/01_Quant_Trading_Schools_Taxonomy.md` |
 | [101-104: 只要你的交易还经常从“我觉得”开始，你就还没走出 L0](../101_academy/101-104_maturity_l0_discretionary.md) | Growth | ✅ 已通过 | `docs/2_Intelligence/research/01_Quant_Trading_Schools_Taxonomy.md` |
 | [101-105: 你以为自己在看信号，很多时候其实只是在盯着后视镜开车](../101_academy/101-105_maturity_l1_indicator.md) | Growth | 👀 待审核 | `docs/2_Intelligence/research/01_Quant_Trading_Schools_Taxonomy.md` |
@@ -50,13 +57,6 @@
 | [iOS 特供：极致跟手感](../../../5_Support_Ops/content/ios-tuning.md) | Support | 🚀 已发布 | `docs/3_Product/30_Notification_Strategy_Design.md` |
 | [关键价位：市场的防线](../../../5_Support_Ops/content/key-levels-mapping.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/45_Stock_Radar_Discovery_Engine.md` |
 | [T+3 验证：趋势需要时间](../../../5_Support_Ops/content/multi-day-verification.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/49_Investment_Mode_Decision_Local_Snapshot_Spec_20260316.md` |
-| [左右滑：你的三个战场](../../../5_Support_Ops/content/nav-map-logic.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/46_Frontend_SWR_Architecture_Upgrade.md` |
-| [通知开关：不喜欢就关了](../../../5_Support_Ops/content/notification-preference.md) | Support | 🚀 已发布 | `docs/3_Product/30_Notification_Strategy_Design.md` |
-| [体验期权限发放规则 (Onboarding Trial Rules)](../../../5_Support_Ops/content/onboarding-trial-rules.md) | Support | 🚀 已发布 | `docs/3_Product/31_Membership_Design_Plan.md` |
-| [乐观更新：不用等圈圈转](../../../5_Support_Ops/content/optimistic-ui-logic.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/46_Frontend_SWR_Architecture_Upgrade.md` |
-| [五级价位阵地解释系统 (Price Ladder)](../../../5_Support_Ops/content/price-ladder.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/45_Stock_Radar_Discovery_Engine.md` |
-| [隐私承诺：这是你的避风港](../../../5_Support_Ops/content/privacy-pledge.md) | Support | 🚀 已发布 | `docs/1_Engineering/11_Reliability_Protocol.md` |
-| [测测通没通：别被系统拦了](../../../5_Support_Ops/content/push-debug.md) | Support | 🚀 已发布 | `docs/3_Product/30_Notification_Strategy_Design.md` |
 
 ## 尚未被转化成内容资产的内部文档机会
 

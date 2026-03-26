@@ -1,6 +1,6 @@
 # 交易大师图鉴 · 生产看板 (Master Series Production Board)
 
-> 自动生成时间：2026/3/26 12:44:26
+> 自动生成时间：2026/3/26 13:52:54
 > 说明：本看板由 `scripts/cmo_sync.mjs` 自动扫描 `master_series/` 目录下的 canonical 母稿生成。
 > 查看范围：仅 canonical 母稿（`ms-xx_*.md`），排除 `_notebooklm.md` 伴稿和规范文件。
 > NLM 状态：⚪ 未开始 · 🔄 生产中 · 🟢 已完成 · ✅ 已通过

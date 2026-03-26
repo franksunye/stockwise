@@ -1,6 +1,6 @@
 # 内容生产流程看板 (Pipeline Board)
 
-> 自动生成时间：2026/3/26 12:44:26
+> 自动生成时间：2026/3/26 13:52:54
 > 说明：本看板优先服务活跃工作流，只展开需要推进的阶段；已发布内容只保留最近概览，避免看板膨胀。
 
 ## 🧠 待策划
@@ -48,8 +48,8 @@
 | [资金放大的恐惧：仓位加倍后动作变形的应对指南](../101_academy/101-88_scale_up_fear.md) | Growth | TOFU | - | - | 中 | - | - | 2026-03-19 周四 | ⚪ 未开始 | 📝 草稿 | - |
 | [大师系列内容接入方案 2026](../MASTER_SERIES_CONTENT_INTEGRATION_2026.md) | Growth | TOFU | - | - | 中 | - | - | 2026-03-25 周三 | ⚪ 未开始 | 📝 草稿 | - |
 | [交易大师图鉴 01｜马克·米勒维尼：他不是教你追涨，他是在教你只打最有把握的仗](../master_series/ms-01_mark_minervini.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | 📦 已交付 | ➖ 不发布 | - |
-| [交易大师图鉴 02｜普拉迪普·邦德：真正的动量，不是天天躁动，而是等那一下真的把世界改了](../master_series/ms-02_pradeep_bonde.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
-| [交易大师图鉴 03｜亚历山大·埃尔德：真正成熟的交易，不是只看一个买点，而是先看方向，再看节奏，再谈风险](../master_series/ms-03_alexander_elder.md) | Growth | MOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
+| [交易大师图鉴 02｜普拉迪普·邦德：真正的动量，不是捕捉无序的躁动，而是等待足以改写叙事的爆发。](../master_series/ms-02_pradeep_bonde.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
+| [交易大师图鉴 03｜亚历山大·埃尔德：真正的高手，不是多看几张图，而是学会给市场“加滤网”。](../master_series/ms-03_alexander_elder.md) | Growth | MOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
 | [交易大师图鉴 04｜理查德·丹尼斯：最震撼的一课，不是赚了多少钱，而是他试着证明交易员可以被训练出来](../master_series/ms-04_richard_dennis.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
 | [交易大师图鉴 05｜沃伦·巴菲特：最难模仿的，不是他会选股，而是他能几十年都按同一套原则活着](../master_series/ms-05_warren_buffett.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
 | [交易大师图鉴 06｜SEPA：它最厉害的地方，不是教你看一个买点，而是把出手资格压得极其苛刻](../master_series/ms-06_sepa.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
