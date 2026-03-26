@@ -112,6 +112,9 @@ class NotificationManager:
         "Strong Bearish": -2,
     }
 
+    # Tag → preference key mapping. Normalizes sub-variant tags to the
+    # canonical preference key used in users.notification_settings.
+    # KEEP IN SYNC with: frontend/src/app/api/internal/notify/route.ts::PREF_KEY_MAP
     PREF_KEY_MAP = {
         "daily_brief_bullish": "daily_brief",
         "daily_brief_bearish": "daily_brief",
@@ -119,7 +122,8 @@ class NotificationManager:
         "morning_call_neutral": "morning_call",
         "signal_flip_batch": "signal_flip",
         "almanac_preview": "market_almanac",
-        "almanac_ritual": "market_almanac"
+        "almanac_ritual": "market_almanac",
+        "prediction_ready": "prediction_updated",  # Legacy tag compat
     }
 
     def check_signal_flip(self, user_id: str, symbol: str, new_signal: str, new_confidence: float) -> Optional[dict]:
@@ -562,10 +566,10 @@ class NotificationManager:
             # But we respect settings.
             
             for uid in users:
-                # Check settings (Default to specific type, fallback to 'price_update')
-                # Load efficient user settings cache? Doing DB query per user is slow for broadcast.
-                # Optimized: We do one-by-one for now as user base is manageable.
-                
+                # Pre-check: skip if user has no push subscription
+                if not self._has_push_subscription(uid):
+                    continue
+
                 # Fetch settings
                 cursor.execute("SELECT notification_settings FROM users WHERE user_id = ?", (uid,))
                 row = cursor.fetchone()

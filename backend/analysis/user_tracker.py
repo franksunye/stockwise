@@ -80,12 +80,32 @@ class UserCompletionTracker:
         return ready_users
 
 def notify_user_prediction_updated(user_id: str, market: str = "CN"):
-    """Send a push notification to the user that their analysis is ready."""
+    """Send push notification that analysis is ready.
+
+    Uses tag='prediction_updated' to align with the user preference key
+    defined in notification-settings/route.ts::getDefaultSettings().
+    """
+    # Pre-check: skip HTTP call if user has no push subscription
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT 1 FROM push_subscriptions WHERE user_id = ? LIMIT 1",
+            (user_id,)
+        )
+        if not cursor.fetchone():
+            logger.debug(f"⏭️ [Tracker] User {user_id} has no push subscription, skipping")
+            return
+    except Exception as e:
+        logger.debug(f"⚠️ [Tracker] Subscription check failed for {user_id}: {e}")
+    finally:
+        conn.close()
+
     market_name = "港股" if market == "HK" else "A股"
     send_push_notification(
         title=f"📈 {market_name} AI 分析已更新",
         body="你关注的股票今日 AI 预测信号已全部生成，点击查看详情。",
         url="/dashboard?utm_source=push&utm_medium=prediction_ready",
         target_user_id=user_id,
-        tag="prediction_ready"
+        tag="prediction_updated"  # Must match preference key in notification-settings
     )

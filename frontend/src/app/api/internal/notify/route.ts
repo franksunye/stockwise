@@ -4,6 +4,9 @@ import { Client } from '@libsql/client';
 import Database from 'better-sqlite3';
 import webpush from 'web-push';
 
+// Tag → preference key mapping. Normalizes sub-variant tags to the
+// canonical key used in users.notification_settings.
+// KEEP IN SYNC with: backend/notification_service.py::NotificationManager.PREF_KEY_MAP
 const PREF_KEY_MAP: Record<string, string> = {
     daily_brief_bullish: 'daily_brief',
     daily_brief_bearish: 'daily_brief',
@@ -11,7 +14,8 @@ const PREF_KEY_MAP: Record<string, string> = {
     morning_call_neutral: 'morning_call',
     signal_flip_batch: 'signal_flip',
     almanac_preview: 'market_almanac',
-    almanac_ritual: 'market_almanac'
+    almanac_ritual: 'market_almanac',
+    prediction_ready: 'prediction_updated',  // Legacy tag compat
 };
 
 // Configure web-push

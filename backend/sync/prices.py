@@ -12,7 +12,6 @@ from database import get_connection, get_stock_pool
 from config import SYNC_CONFIG, BEIJING_TZ
 from fetchers import fetch_stock_data
 from utils import send_wecom_notification, format_volume
-from notifications import send_push_notification
 from engine.indicators import calculate_indicators
 # from engine.validator import validate_previous_prediction  <-- Decoupled
 from helpers import get_last_date, check_trading_day_skip
@@ -340,14 +339,12 @@ def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool =
                 volume_formatted=format_volume(last_row['volume'])
             )
         
-        # 发送给关注该股票的用户，使用 symbol 作为 tag 实现同一个股票通知覆盖
-        send_push_notification(
-            title=notify_title, 
-            body=notify_body,  
-            url=f"/dashboard?symbol={symbol}", 
-            related_symbol=symbol,
-            tag=f"price_update_{symbol}"
-        )
+        # Route through NotificationManager for preference-checked delivery.
+        # broadcast_price_alert() checks per-user notification_settings before
+        # making HTTP calls, respecting the 'price_update' toggle (default OFF).
+        from notification_service import NotificationManager
+        nm = NotificationManager()
+        nm.broadcast_price_alert(symbol, notify_title, notify_body, "price_update")
         
         return {
             "success": True,
