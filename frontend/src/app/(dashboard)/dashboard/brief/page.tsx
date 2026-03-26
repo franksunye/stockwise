@@ -1,30 +1,12 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, Share2, NotebookText, Loader2, Sparkles } from 'lucide-react'
 import { BriefMarkdown } from '@/components/dashboard/BriefMarkdown'
-import { fetchLatestBrief, type BriefData } from '@/lib/brief-client'
+import { useBriefSurface } from '@/hooks/useBriefSurface'
 
 export default function BriefPage() {
-  const [brief, setBrief] = useState<BriefData | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-        const fetchBrief = async () => {
-          try {
-            setBrief(await fetchLatestBrief())
-          } catch (err) {
-            setError('无法加载简报')
-            console.error('Failed to fetch brief:', err)
-          } finally {
-            setLoading(false)
-          }
-        }
-
-    fetchBrief()
-  }, [])
+  const { brief, loading, error } = useBriefSurface(true)
 
   const handleShare = async () => {
     if (navigator.share && brief) {

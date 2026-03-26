@@ -4,11 +4,12 @@ import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X as CloseIcon, FileText, Loader2, Sparkles, NotebookText, CheckCircle2 } from 'lucide-react';
 import { useUserProfile } from '@/hooks/useUserProfile';
+import { useBriefSurface } from '@/hooks/useBriefSurface';
 import { shouldEnableHighPerformance } from '@/lib/device-utils';
 import Multiavatar from '@/components/Multiavatar';
 import { resolveBriefAuthorByTier } from '@/lib/agent-team';
-import { fetchLatestBrief, type BriefData } from '@/lib/brief-client';
 import { BriefMarkdown } from '@/components/dashboard/BriefMarkdown';
+import { extractBriefSectionForSymbol, getBriefPublishedAt } from '@/lib/brief-content';
 
 interface BriefDrawerProps {
   isOpen: boolean;
@@ -18,9 +19,7 @@ interface BriefDrawerProps {
 }
 
 export function BriefDrawer({ isOpen, onClose, limitToSymbol, onUpgrade }: BriefDrawerProps) {
-  const [brief, setBrief] = useState<BriefData | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { brief, loading, error } = useBriefSurface(isOpen);
   const { tier, refreshProfile } = useUserProfile();
   const [showGlobal, setShowGlobal] = useState(false);
   const [isHighPerformance, setIsHighPerformance] = useState(false);
@@ -28,40 +27,14 @@ export function BriefDrawer({ isOpen, onClose, limitToSymbol, onUpgrade }: Brief
   useEffect(() => {
     setIsHighPerformance(shouldEnableHighPerformance());
     if (isOpen) {
-      setLoading(true);
-      setError(null);
       setShowGlobal(false);
-      const fetchBrief = async () => {
-        try {
-          refreshProfile();
-          setBrief(await fetchLatestBrief());
-        } catch (err) {
-          console.error(err);
-          setError('暂无可用简报');
-        } finally {
-          setLoading(false);
-        }
-      };
-      fetchBrief();
+      refreshProfile();
     }
   }, [isOpen, refreshProfile]);
 
   const extractedContent = useMemo(() => {
     if (!brief || !limitToSymbol) return brief?.content;
-    const safeSymbol = limitToSymbol.trim();
-    const stockHeaderPattern = new RegExp(
-      `### [^\\n]*\\(${safeSymbol}(?:\\.HK|\\.SZ|\\.SH)?\\)([\\s\\S]*?)(?=\\n### [^\\n]+\\([A-Z0-9]{5,6}\\)|\\n---\\n|$)`,
-      'i'
-    );
-    const match = brief.content.match(stockHeaderPattern);
-    if (match) return match[0].trim();
-    const sections = brief.content.split(/(?=\n### [^\n]+\([A-Z0-9]+\))/);
-    const fallbackMatch = sections.find(section => section.includes(`(${safeSymbol})`));
-    if (fallbackMatch) {
-      const footerIndex = fallbackMatch.indexOf('\n---');
-      return footerIndex !== -1 ? fallbackMatch.substring(0, footerIndex).trim() : fallbackMatch.trim();
-    }
-    return null;
+    return extractBriefSectionForSymbol(brief.content, limitToSymbol);
   }, [brief, limitToSymbol]);
 
   const isSpecificStock = !!limitToSymbol && !showGlobal;
@@ -133,7 +106,7 @@ export function BriefDrawer({ isOpen, onClose, limitToSymbol, onUpgrade }: Brief
                   <div className="w-16 h-16 rounded-full bg-primary/5 flex items-center justify-center"><Sparkles size={24} className="text-slate-600" /></div>
                   <div>
                     <h3 className="text-white font-bold text-sm mb-1 uppercase tracking-tight">今日简报尚未就绪</h3>
-                    <p className="text-[11px] text-slate-500 leading-relaxed font-medium">收盘后会优先生成新的市场复盘，你也可以稍后再回来查看。</p>
+                    <p className="text-[11px] text-slate-500 leading-relaxed font-medium">{error || '收盘后会优先生成新的市场复盘，你也可以稍后再回来查看。'}</p>
                   </div>
                 </div>
               ) : (isSpecificStock && !showContent) ? (
@@ -193,10 +166,7 @@ export function BriefDrawer({ isOpen, onClose, limitToSymbol, onUpgrade }: Brief
                            </span>
                         </div>
                          <p className="text-[10px] text-slate-500 font-medium font-mono">
-                           发布于 {(() => {
-                              const match = brief.content.match(/(ZISO|StockWise) AI 生成于\s*(\d{1,2}:\d{2})/);
-                              return match ? match[2] : (brief.created_at ? new Date(brief.created_at).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit', hour12: false}) : '--:--');
-                           })()}
+                           发布于 {getBriefPublishedAt(brief)}
                          </p>
                       </div>
                     </div>
