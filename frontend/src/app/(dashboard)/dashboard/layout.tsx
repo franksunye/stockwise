@@ -1,56 +1,17 @@
 'use client';
 
-import { useLayoutEffect, useState } from 'react';
 import { InviteWall } from '@/components/InviteWall';
-import { OnboardingOverlay } from '@/components/onboarding/OnboardingOverlay';
+import { DashboardEntryGate } from '@/components/dashboard/DashboardEntryGate';
 import { StockProvider } from '@/context/StockContext';
 import { DashboardAuthProvider } from '@/context/DashboardAuthContext';
 import { SystemSync } from '@/components/SystemSync';
 import { ReferralTracker } from '@/components/ReferralTracker';
 import { BadgeManager } from '@/components/BadgeManager';
 import { InstallGuide } from '@/components/InstallGuide';
-import { UserProfileProvider, useUserProfile, type Tier } from '@/hooks/useUserProfile';
+import { UserProfileProvider, type Tier } from '@/hooks/useUserProfile';
 import { useDashboardAuthorization } from '@/hooks/useDashboardAuthorization';
 import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  readBrowserBootstrapStorageState,
-  shouldOptimisticallyEnterDashboard,
-} from '@/lib/dashboard-bootstrap';
-
-function DashboardEntryGate({ children }: { children: React.ReactNode }) {
-  const { profile, loading } = useUserProfile();
-  const [canOptimisticallyEnter, setCanOptimisticallyEnter] = useState(false);
-
-  useLayoutEffect(() => {
-    setCanOptimisticallyEnter(
-      shouldOptimisticallyEnterDashboard(readBrowserBootstrapStorageState())
-    );
-  }, []);
-
-  // Block app UI until onboarding status is known to avoid dashboard flash for new users.
-  if (loading || !profile) {
-    if (canOptimisticallyEnter) {
-      return <>{children}</>;
-    }
-
-    return (
-      <div data-dashboard-skeleton="true">
-        <DashboardSkeleton />
-      </div>
-    );
-  }
-
-  if (!profile.hasOnboarded) {
-    return <OnboardingOverlay />;
-  }
-
-  return (
-    <>
-      {children}
-    </>
-  );
-}
 
 export default function DashboardLayout({
   children,
