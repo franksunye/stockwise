@@ -25,6 +25,10 @@ share_copy: "如果你总觉得自己明明看对了一个买点，结果还是�
 traceability:
   status: "healthy"
   last_reviewed_at: "2026-03-25"
+master_series:
+  review_status: "closed"
+  release_bucket: "sample"
+  release_wave: "wave_1"
 workflow:
   stage: "drafting"
   owner: "cmo"

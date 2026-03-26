@@ -25,12 +25,16 @@ share_copy: "如果你以为马克·米勒维尼只是一个讲突破形态的�
 traceability:
   status: "healthy"
   last_reviewed_at: "2026-03-25"
+master_series:
+  review_status: "closed"
+  release_bucket: "sample"
+  release_wave: "wave_1"
 workflow:
-  stage: "drafting"
+  stage: "published"
   owner: "cmo"
   reviewer: "founder"
   priority: "high"
-  target_publish_date: ""
+  target_publish_date: "2026-03-25"
   last_action_at: "2026-03-25"
   blocked_reason: ""
 maintenance:
@@ -96,7 +100,7 @@ distribution:
     status: "none"
   xhs:
     enabled: true
-    status: "draft"
+    status: "published"
   twitter:
     enabled: false
     status: "none"

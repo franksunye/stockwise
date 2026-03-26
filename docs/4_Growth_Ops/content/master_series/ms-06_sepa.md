@@ -1,8 +1,8 @@
 ---
-title: "交易大师图鉴 06｜SEPA：它最厉害的地方，不是教你看一个买点，而是把出手资格压得极其苛刻"
+title: "交易大师图鉴 06｜SEPA：它最厉害的地方，不是教你找买点，而是教你如何拒绝平庸的机会。"
 social_title: "交易大师图鉴 06｜为什么很多人会把突破做成烂交易"
-editorial_title: "交易大师图鉴 06｜SEPA：极其苛刻的出手资格体系"
-subtitle: "Specific Entry Point Analysis 的核心，不是‘突破就买’，而是只有趋势、基本面、结构和风险同时过关，才允许出手"
+editorial_title: "交易大师图鉴 06｜SEPA：这套极其挑剔的算法，才是成长股爆发的真正滤网。"
+subtitle: "米勒维尼成名作：SEPA 的核心不是“看到突破就跟”，而是教你如何通过最严苛的“入场章法”，把 90% 的烂机会挡在门外。"
 content_id: "growth-ms-006"
 content_source: "growth"
 content_type: "article"
@@ -21,10 +21,14 @@ headline_alternatives:
 cover_lines:
   - "SEPA 最厉害的地方，不是教你找买点，而是先决定你有没有资格出手。"
   - "很多人不是不会找买点，而是把根本不配出手的机会也做了。"
-share_copy: "如果你以为 SEPA 只是‘看突破买入’，这篇会把重点拉回来：它真正重要的，不是突破本身，而是把趋势、基本面、结构和风险统一成一套极其挑剔的出手资格体系。"
+share_copy: "如果你以为 SEPA 只是‘看突破买入’，这篇会把重点拉回来：它真正重要的，不是突破本身，而是教你如何用一整套极其挑剔的入场算法，去拒绝那些平庸的机会。"
 traceability:
   status: "healthy"
   last_reviewed_at: "2026-03-25"
+master_series:
+  review_status: "closed"
+  release_bucket: "sample"
+  release_wave: "wave_1"
 workflow:
   stage: "drafting"
   owner: "cmo"
@@ -149,9 +153,8 @@ source_docs:
 
 ## 它为什么会让很多人佩服
 
-普通用户第一次接触 `SEPA`，很容易只记住“突破”两个字。
 
-但真正让很多交易者佩服它的，不是简单，而是它几乎把所有“模糊地也许可以试试”的机会都挡在门外。
+在大众视角下，SEPA 常被简化成“突破就买”。但如果你真的理解米勒维尼，你会发现 SEPA 的真章，不是那个入场瞬间，而是在那之前的每一层严苛筛选。
 
 如果只讲最有代表性的硬特点，可以先记这几条：
 

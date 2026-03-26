@@ -24,6 +24,10 @@ share_copy: "如果你一直将动量交易解读为追逐热点，这篇文章�
 traceability:
   status: "healthy"
   last_reviewed_at: "2026-03-25"
+master_series:
+  review_status: "closed"
+  release_bucket: "candidate"
+  release_wave: ""
 workflow:
   stage: "drafting"
   owner: "cmo"
