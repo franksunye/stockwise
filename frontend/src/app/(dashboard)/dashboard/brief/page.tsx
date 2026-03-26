@@ -4,14 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, Share2, NotebookText, Loader2, Sparkles } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
-import { getCurrentUser } from '@/lib/user'
-
-interface BriefData {
-  date: string
-  content: string
-  push_hook: string
-  created_at: string
-}
+import { fetchLatestBrief, type BriefData } from '@/lib/brief-client'
 
 export default function BriefPage() {
   const [brief, setBrief] = useState<BriefData | null>(null)
@@ -21,24 +14,7 @@ export default function BriefPage() {
   useEffect(() => {
         const fetchBrief = async () => {
           try {
-            await getCurrentUser()
-            const today = new Date().toISOString().split('T')[0]
-            
-            let res = await fetch(`/api/brief?date=${today}`)
-            
-            let data = await res.json()
-            
-            // Fallback to yesterday if today is null
-            if (!data.brief) {
-              const yesterday = new Date()
-              yesterday.setDate(yesterday.getDate() - 1)
-              const yesterdayStr = yesterday.toISOString().split('T')[0]
-              
-              res = await fetch(`/api/brief?date=${yesterdayStr}`)
-              data = await res.json()
-            }
-            
-            setBrief(data.brief)
+            setBrief(await fetchLatestBrief())
           } catch (err) {
             setError('无法加载简报')
             console.error('Failed to fetch brief:', err)
