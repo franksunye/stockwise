@@ -24,6 +24,8 @@ const NEXT_RELEASE_FILE = path.join(VIEWS_DIR, 'next-release.md');
 const RECENTLY_UPDATED_FILE = path.join(VIEWS_DIR, 'recently-updated.md');
 const CHANGE_IMPACT_FILE = path.join(VIEWS_DIR, 'change-impact.md');
 const EXTERNAL_MAINTENANCE_FILE = path.join(VIEWS_DIR, 'external-maintenance.md');
+const MASTER_SERIES_VIEW_FILE = path.join(VIEWS_DIR, 'master-series.md');
+const MASTER_SERIES_DIR = path.join(GROWTH_CONTENT_DIR, 'master_series');
 const NEXT_RELEASE_WINDOW_START = '2026-03-23'; // Fixed anchor; only change when the team explicitly updates the planning window.
 const WECHAT_RELEASE_CADENCE_LABEL = '周一 / 周三 / 周五';
 
@@ -31,6 +33,7 @@ const SKIP_DIRS = new Set(['archive', 'marketing', '_views']);
 const EXCLUDED_FILES = new Set([
   'CONTENT_ASSET_TEMPLATE.md',
   'ZISO_101_SYLLABUS.md',
+  'MASTER_SERIES_MINI_SPEC.md',
   'March_Content_Matrix_Execution_2026.md',
   'April_Content_Matrix_Engineering_2026.md'
 ]);
@@ -95,6 +98,12 @@ const VISUAL_ASSET_STATUS_LABELS = {
   ready: '🟢 已齐',
   approved: '✅ 已通过'
 };
+const NLM_OUTPUT_LABELS = {
+  not_started: '⚪',
+  generating: '🔄',
+  ready: '🟢',
+  approved: '✅'
+};
 
 function ensureDir(dirPath) {
   fs.mkdirSync(dirPath, { recursive: true });
@@ -127,6 +136,7 @@ function walkMarkdownFiles(dirPath, files = []) {
     if (
       entry.name.endsWith('.md') &&
       entry.name !== 'README.md' &&
+      !entry.name.endsWith('_notebooklm.md') &&
       !EXCLUDED_FILES.has(entry.name)
     ) {
       files.push(fullPath);
@@ -517,7 +527,8 @@ function renderMasterRegistry(items, generatedAt) {
   output += `[_Next Release_](${getRelativePath(NEXT_RELEASE_FILE, MASTER_FILE)}) · `;
   output += `[_Recently Updated_](${getRelativePath(RECENTLY_UPDATED_FILE, MASTER_FILE)}) · `;
   output += `[_Change Impact_](${getRelativePath(CHANGE_IMPACT_FILE, MASTER_FILE)}) · `;
-  output += `[_External Maintenance_](${getRelativePath(EXTERNAL_MAINTENANCE_FILE, MASTER_FILE)})\n\n`;
+  output += `[_External Maintenance_](${getRelativePath(EXTERNAL_MAINTENANCE_FILE, MASTER_FILE)}) · `;
+  output += `[_Master Series_](${getRelativePath(MASTER_SERIES_VIEW_FILE, MASTER_FILE)})\n\n`;
   output += markdownTable(
     ['标题', '来源', '类型', '漏斗', '战役角色', '主流程', '关键日期', '网站', '公众号', '最近动作'],
     rows
@@ -1031,6 +1042,200 @@ function renderExternalMaintenanceBoard(items, generatedAt) {
   return output;
 }
 
+// ─── Master Series Production Board ────────────────────────────────────────────
+
+function walkMasterSeriesCanonicals() {
+  if (!fs.existsSync(MASTER_SERIES_DIR)) return [];
+
+  const files = [];
+  for (const entry of fs.readdirSync(MASTER_SERIES_DIR, { withFileTypes: true })) {
+    if (entry.name.startsWith('.')) continue;
+    if (!entry.isFile()) continue;
+    if (!entry.name.endsWith('.md')) continue;
+    if (entry.name === 'README.md') continue;
+    if (entry.name === 'MASTER_SERIES_MINI_SPEC.md') continue;
+    if (entry.name.endsWith('_notebooklm.md')) continue;
+
+    files.push(path.join(MASTER_SERIES_DIR, entry.name));
+  }
+
+  return files.sort();
+}
+
+function shortMasterSeriesTitle(title) {
+  const stripped = title.replace(/^交易大师图鉴\s*\d+[｜|]\s*/, '');
+  if (stripped.length > 25) {
+    const colonIdx = stripped.indexOf('：');
+    if (colonIdx > 0 && colonIdx <= 20) return stripped.substring(0, colonIdx);
+    return `${stripped.substring(0, 23)}…`;
+  }
+  return stripped || title;
+}
+
+function normalizeMasterSeriesItem(filePath) {
+  const fileContent = fs.readFileSync(filePath, 'utf8');
+  const meta = parseFrontmatter(fileContent);
+  if (meta === null) return null;
+
+  const fileName = path.basename(filePath, '.md');
+  const numberMatch = fileName.match(/^ms-(\d+)/);
+  const seriesNumber = numberMatch ? Number.parseInt(numberMatch[1], 10) : 0;
+
+  const notebooklmPath = filePath.replace(/\.md$/, '_notebooklm.md');
+  const hasNotebookLM = fs.existsSync(notebooklmPath);
+
+  const distribution = normalizeDistribution(meta);
+  const gitTimestamp = getGitTimestamp(filePath);
+  const workflowLastActionAt = meta.workflow?.last_action_at || '';
+  const lastActionAt = formatDate(workflowLastActionAt || gitTimestamp);
+  const visualWorkflow = meta.visual_workflow || {};
+  const nlmProduction = meta.nlm_production || {};
+
+  return {
+    title: meta.title || fileName,
+    seriesNumber,
+    seriesId: `ms-${String(seriesNumber).padStart(2, '0')}`,
+    filePath,
+    relativeToView: getRelativePath(filePath, MASTER_SERIES_VIEW_FILE),
+    hasSocialTitle: Boolean(meta.social_title),
+    hasEditorialTitle: Boolean(meta.editorial_title),
+    hasNotebookLM,
+    campaignRole: meta.campaign_role || '',
+    workflowStage: normalizeStage(meta, distribution),
+    priority: meta.workflow?.priority || 'medium',
+    owner: meta.workflow?.owner || '',
+    reviewer: meta.workflow?.reviewer || '',
+    lastActionAt,
+    lastActionTimestamp: gitTimestamp,
+    distribution,
+    visualWorkflowStage: visualWorkflow.stage || 'not_started',
+    nlmSlides: nlmProduction.slides || 'not_started',
+    nlmInfographic: nlmProduction.infographic || 'not_started',
+    nlmAudio: nlmProduction.audio || 'not_started',
+    nlmVideo: nlmProduction.video || 'not_started'
+  };
+}
+
+function renderMasterSeriesBoard(generatedAt) {
+  const files = walkMasterSeriesCanonicals();
+  const items = files.map((f) => normalizeMasterSeriesItem(f)).filter(Boolean);
+  const sorted = [...items].sort((a, b) => a.seriesNumber - b.seriesNumber);
+
+  const total = items.length;
+  const withSocialTitle = items.filter((i) => i.hasSocialTitle).length;
+  const withEditorialTitle = items.filter((i) => i.hasEditorialTitle).length;
+  const withNotebookLM = items.filter((i) => i.hasNotebookLM).length;
+
+  const nlmDone = (status) => ['ready', 'approved'].includes(status);
+  const nlmSlidesReady = items.filter((i) => nlmDone(i.nlmSlides)).length;
+  const nlmInfographicReady = items.filter((i) => nlmDone(i.nlmInfographic)).length;
+  const nlmAudioReady = items.filter((i) => nlmDone(i.nlmAudio)).length;
+  const nlmVideoReady = items.filter((i) => nlmDone(i.nlmVideo)).length;
+
+  const byStage = {};
+  for (const item of items) {
+    byStage[item.workflowStage] = (byStage[item.workflowStage] || 0) + 1;
+  }
+
+  const fmtNlm = (status) => NLM_OUTPUT_LABELS[status] || status || '⚪';
+
+  let output = '# 交易大师图鉴 · 生产看板 (Master Series Production Board)\n\n';
+  output += `> 自动生成时间：${generatedAt}\n`;
+  output += '> 说明：本看板由 `scripts/cmo_sync.mjs` 自动扫描 `master_series/` 目录下的 canonical 母稿生成。\n';
+  output += '> 查看范围：仅 canonical 母稿（`ms-xx_*.md`），排除 `_notebooklm.md` 伴稿和规范文件。\n';
+  output += '> NLM 状态：⚪ 未开始 · 🔄 生产中 · 🟢 已完成 · ✅ 已通过\n\n';
+
+  output += '## 生产概览\n\n';
+  output += markdownTable(
+    ['指标', '数值'],
+    [
+      ['Canonical 母稿总数', `${total}`],
+      ['已补 social_title', `${withSocialTitle} / ${total}`],
+      ['已补 editorial_title', `${withEditorialTitle} / ${total}`],
+      ['已有 NotebookLM 输入稿', `${withNotebookLM} / ${total}`],
+      ['NLM 演示文稿已完成', `${nlmSlidesReady} / ${total}`],
+      ['NLM 信息图已完成', `${nlmInfographicReady} / ${total}`],
+      ['NLM 音频已完成', `${nlmAudioReady} / ${total}`],
+      ['NLM 视频已完成', `${nlmVideoReady} / ${total}`],
+      ...STAGE_ORDER.filter((stage) => byStage[stage]).map((stage) => [
+        STAGE_LABELS[stage] || stage,
+        `${byStage[stage]}`
+      ])
+    ]
+  );
+  output += '\n\n';
+
+  output += '## 逐篇生产状态\n\n';
+  output += markdownTable(
+    ['编号', '标题', '主流程', '优先级', 'social', 'editorial', '视觉', 'Owner', '最近动作'],
+    sorted.map((item) => [
+      item.seriesId,
+      `[${shortMasterSeriesTitle(item.title)}](${item.relativeToView})`,
+      STAGE_LABELS[item.workflowStage] || item.workflowStage,
+      PRIORITY_LABELS[item.priority] || item.priority,
+      item.hasSocialTitle ? '✅' : '❌',
+      item.hasEditorialTitle ? '✅' : '❌',
+      formatVisualWorkflow(item.visualWorkflowStage),
+      item.owner || '-',
+      item.lastActionAt || 'N/A'
+    ])
+  );
+  output += '\n\n';
+
+  output += '## NLM 生产状态\n\n';
+  output += markdownTable(
+    ['编号', '标题', '输入稿', '演示文稿', '信息图', '音频', '视频'],
+    sorted.map((item) => [
+      item.seriesId,
+      `[${shortMasterSeriesTitle(item.title)}](${item.relativeToView})`,
+      item.hasNotebookLM ? '✅' : '❌',
+      fmtNlm(item.nlmSlides),
+      fmtNlm(item.nlmInfographic),
+      fmtNlm(item.nlmAudio),
+      fmtNlm(item.nlmVideo)
+    ])
+  );
+  output += '\n\n';
+
+  const missingSocialTitle = sorted.filter((i) => !i.hasSocialTitle);
+  const missingEditorialTitle = sorted.filter((i) => !i.hasEditorialTitle);
+  const missingNotebookLM = sorted.filter((i) => !i.hasNotebookLM);
+
+  output += '## 待补齐清单\n\n';
+
+  output += `### 缺 social_title（${missingSocialTitle.length} 篇）\n\n`;
+  if (missingSocialTitle.length === 0) {
+    output += '- 全部已补齐 ✅\n\n';
+  } else {
+    for (const item of missingSocialTitle) {
+      output += `- ${item.seriesId} [${shortMasterSeriesTitle(item.title)}](${item.relativeToView})\n`;
+    }
+    output += '\n';
+  }
+
+  output += `### 缺 editorial_title（${missingEditorialTitle.length} 篇）\n\n`;
+  if (missingEditorialTitle.length === 0) {
+    output += '- 全部已补齐 ✅\n\n';
+  } else {
+    for (const item of missingEditorialTitle) {
+      output += `- ${item.seriesId} [${shortMasterSeriesTitle(item.title)}](${item.relativeToView})\n`;
+    }
+    output += '\n';
+  }
+
+  output += `### 缺 NotebookLM 输入稿（${missingNotebookLM.length} 篇）\n\n`;
+  if (missingNotebookLM.length === 0) {
+    output += '- 全部已补齐 ✅\n\n';
+  } else {
+    for (const item of missingNotebookLM) {
+      output += `- ${item.seriesId} [${shortMasterSeriesTitle(item.title)}](${item.relativeToView})\n`;
+    }
+    output += '\n';
+  }
+
+  return output;
+}
+
 function writeFile(filePath, contents) {
   fs.writeFileSync(filePath, contents, 'utf8');
   console.log(`✅ Wrote ${path.relative(PROJECT_ROOT, filePath)}`);
@@ -1049,6 +1254,7 @@ function main() {
   writeFile(RECENTLY_UPDATED_FILE, renderRecentlyUpdatedBoard(items, generatedAt));
   writeFile(CHANGE_IMPACT_FILE, renderChangeImpactBoard(items, generatedAt));
   writeFile(EXTERNAL_MAINTENANCE_FILE, renderExternalMaintenanceBoard(items, generatedAt));
+  writeFile(MASTER_SERIES_VIEW_FILE, renderMasterSeriesBoard(generatedAt));
 
   console.log(`✅ Unified content registry built for ${items.length} assets.`);
 }

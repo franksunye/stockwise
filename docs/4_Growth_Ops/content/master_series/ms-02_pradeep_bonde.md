@@ -1,5 +1,7 @@
 ---
 title: "交易大师图鉴 02｜普拉迪普·邦德：真正的动量，不是天天躁动，而是等那一下真的把世界改了"
+social_title: "交易大师图鉴 02｜为什么真正的动量高手，不是天天追热点"
+editorial_title: "交易大师图鉴 02｜普拉迪普·邦德：识别改写预期的爆发"
 subtitle: "从 事件拐点（Episodic Pivot）到高波动筛选，他留下来的不是追热点冲动，而是一套识别爆发性机会的框架"
 content_id: "growth-ms-002"
 content_source: "growth"

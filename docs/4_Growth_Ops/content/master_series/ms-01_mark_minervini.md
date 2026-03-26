@@ -46,7 +46,7 @@ website:
   enabled: true
   surface: "learn"
 visual_workflow:
-  stage: "not_started"
+  stage: "delivered"
   owner: "cmo"
   reviewer: "founder"
   priority: "medium"
@@ -120,6 +120,11 @@ source_docs:
   - docs/2_Intelligence/registry/archetypes/trend_breakout.md
   - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
   - docs/2_Intelligence/registry/MASTER_SERIES_NOTEBOOKLM_PLAN.md
+nlm_production:
+  slides: "ready"
+  infographic: "ready"
+  audio: "ready"
+  video: "ready"
 ---
 # 马克·米勒维尼：他不是教你追涨，他是在教你只打最有把握的仗
 

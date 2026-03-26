@@ -1,12 +1,21 @@
 # 产品变更影响视图 (Change Impact Board)
 
-> 自动生成时间：2026/3/23 17:18:40
+> 自动生成时间：2026/3/26 12:44:26
 > 说明：该视图用于回答“产品/工程文档变化后，哪些内容应该复核或补充”。
 
 ## 受底层文档变更影响，需优先复核的内容
 
 | 内容资产 | 来源 | 主流程 | 受影响源文档 |
 | --- | --- | --- | --- |
+| [交易大师图鉴 33｜系统开发与期望值：它最重要的地方，不是胜率好不好看，而是长期做下去到底值不值得](../master_series/ms-33_system_development_and_expectancy.md) | Growth | ✍️ 生产中 | `docs/4_Growth_Ops/content/master_series/ms-25_van_tharp.md` |
+| [交易大师图鉴 30｜Darvas Box：它最重要的地方，不是箱体画法，而是先把边界认清，再等市场自己开门](../master_series/ms-30_darvas_box.md) | Growth | ✍️ 生产中 | `docs/4_Growth_Ops/content/master_series/ms-23_william_oneil.md` |
+| [101-100: 很多人不是不会炒股，而是连自己是什么段位都没弄明白](../101_academy/101-100_maturity_prologue.md) | Growth | 📅 已排期 | `docs/2_Intelligence/research/01_Quant_Trading_Schools_Taxonomy.md` |
+| [101-104: 只要你的交易还经常从“我觉得”开始，你就还没走出 L0](../101_academy/101-104_maturity_l0_discretionary.md) | Growth | ✅ 已通过 | `docs/2_Intelligence/research/01_Quant_Trading_Schools_Taxonomy.md` |
+| [101-105: 你以为自己在看信号，很多时候其实只是在盯着后视镜开车](../101_academy/101-105_maturity_l1_indicator.md) | Growth | 👀 待审核 | `docs/2_Intelligence/research/01_Quant_Trading_Schools_Taxonomy.md` |
+| [101-106: 真正的 L2，不是会背几条规则，而是知道规则一失灵就该认错](../101_academy/101-106_systematic_rules_l2.md) | Growth | 👀 待审核 | `docs/2_Intelligence/research/01_Quant_Trading_Schools_Taxonomy.md` |
+| [101-107: L3级——系统化组合投资，是舰队司令部的排兵布阵](../101_academy/101-107_institutional_portfolio_l3.md) | Growth | 👀 待审核 | `docs/2_Intelligence/research/01_Quant_Trading_Schools_Taxonomy.md` |
+| [101-108: L4级——极硬量化，是物理层面的毫秒之战](../101_academy/101-108_hard_quant_l4.md) | Growth | 👀 待审核 | `docs/2_Intelligence/research/01_Quant_Trading_Schools_Taxonomy.md` |
+| [101-109: 结篇——寻找你的量化绿洲](../101_academy/101-109_maturity_epilogue.md) | Growth | 👀 待审核 | `docs/2_Intelligence/research/01_Quant_Trading_Schools_Taxonomy.md` |
 | [101-33: 为什么你的指标总是变成反指？](../101_academy/101-33_indicator_failure.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md` |
 | [101-34: 把“止损”推迟到明天的代价](../101_academy/101-34_mae_cost.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md` |
 | [101-35: 回测与未来的鸿沟](../101_academy/101-35_overfitting_trap.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md` |
@@ -17,7 +26,6 @@
 | [101-63: “再看看”：散户字典里最昂贵的三个字](../101_academy/101-63_wait_and_see_cost.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md` |
 | [101-64: 如果没有信号，空仓就是最高级策略](../101_academy/101-64_empty_position.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md` |
 | [101-65: 盈利的恐惧：为什么赚钱时你总是拿不住？](../101_academy/101-65_profit_fear.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md` |
-| [101-68: 让“龙虾”替你炒股？它敢说，你敢信么](../101_academy/101-68_general_llm_illusion.md) | Growth | 🚀 已发布 | `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md` |
 | [101-72: 置信度解码：AI 的“看好”到底几分真](../101_academy/101-72_confidence_decode.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md` |
 | [101-73: 接受不完美：与市场的不确定性做朋友](../101_academy/101-73_embrace_uncertainty.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md` |
 | [脉冲频率：信号强度一眼看](../../../5_Support_Ops/content/ai-pulse-resonance.md) | Support | 🚀 已发布 | `docs/1_Engineering/13_Quant_Engine_Architecture.md` |
@@ -30,7 +38,6 @@
 | [绑定邮箱：唯一的“救命稻草”](../../../5_Support_Ops/content/email-sync-logic.md) | Support | 🚀 已发布 | `docs/1_Engineering/11_Reliability_Protocol.md` |
 | [最高级别用户环境物理隔离 (Env Isolation)](../../../5_Support_Ops/content/env-isolation.md) | Support | 🚀 已发布 | `docs/1_Engineering/16_Observability_Thresholds_and_Incidents.md` |
 | [认错审计：出错不可怕](../../../5_Support_Ops/content/failure-retrospective.md) | Support | 🚀 已发布 | `docs/1_Engineering/24_AICouncil_Review_Opinion_Current_State_20260313.md` |
-| [四态语义验证规则（修订版）](../../../5_Support_Ops/content/four-state-validation-rules.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/40_Quant_AI_Dual_Layer_UX.md` |
 | [动作语义：进场、观察、防守、暂无信号](../../../5_Support_Ops/content/four-states-semantics.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/40_Quant_AI_Dual_Layer_UX.md` |
 | [触反馈：心跳与信号同步](../../../5_Support_Ops/content/haptic-sync.md) | Support | 🚀 已发布 | `docs/3_Product/30_Notification_Strategy_Design.md` |
 | [胜率矩阵：摸清 AI 的脾气](../../../5_Support_Ops/content/history-matrix-viz.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/49_Investment_Mode_Decision_Local_Snapshot_Spec_20260316.md` |
@@ -50,13 +57,6 @@
 | [五级价位阵地解释系统 (Price Ladder)](../../../5_Support_Ops/content/price-ladder.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/45_Stock_Radar_Discovery_Engine.md` |
 | [隐私承诺：这是你的避风港](../../../5_Support_Ops/content/privacy-pledge.md) | Support | 🚀 已发布 | `docs/1_Engineering/11_Reliability_Protocol.md` |
 | [测测通没通：别被系统拦了](../../../5_Support_Ops/content/push-debug.md) | Support | 🚀 已发布 | `docs/3_Product/30_Notification_Strategy_Design.md` |
-| [数据拼接：最新指标不求人](../../../5_Support_Ops/content/realtime-data-splicing.md) | Support | 🚀 已发布 | `docs/1_Engineering/32_Frontend_Network_Optimization_Zero_Redundancy_20260318.md` |
-| [兑换码：手动给权益充值](../../../5_Support_Ops/content/redeem-code-usage.md) | Support | 🚀 已发布 | `docs/0_Strategy/02_Monetization_Pricing_Strategy.md` |
-| [双向邀请与 Pro 连贯性奖励 (Referral Mechanism)](../../../5_Support_Ops/content/referral-mechanism.md) | Support | 🚀 已发布 | `docs/3_Product/31_Membership_Design_Plan.md` |
-| [推荐激励：有福同享](../../../5_Support_Ops/content/referral-rewards.md) | Support | 🚀 已发布 | `docs/0_Strategy/02_Monetization_Pricing_Strategy.md` |
-| [颜色反转：戒掉“追涨杀跌”](../../../5_Support_Ops/content/rsi-color-metaphor.md) | Support | 🚀 已发布 | `docs/3_Product/03_Product_Features_Manifest.md` |
-| [聪明搜索：这才是量化速度](../../../5_Support_Ops/content/smart-search.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/45_Stock_Radar_Discovery_Engine.md` |
-| [智能标题：随盘面“变脸”](../../../5_Support_Ops/content/smart-title-logic.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/45_Stock_Radar_Discovery_Engine.md` |
 
 ## 尚未被转化成内容资产的内部文档机会
 
@@ -68,10 +68,9 @@
 - `docs/1_Engineering/12_Release_Quality_Gates.md`
 - `docs/1_Engineering/14_Investment_Mode_Backend_Runbook.md`
 - `docs/1_Engineering/15_Layer1_Indicator_and_Param_Governance.md`
-- `docs/1_Engineering/17_Investment_Mode_API_Signal_Unification_Plan.md`
 - `docs/1_Engineering/18_Backend_Workflow_Orchestration_Map.md`
-- `docs/1_Engineering/20_Investment_Mode_Signal_Unification_Experiment.md`
-- `docs/1_Engineering/21_Investment_Mode_Single_SQL_Experiment.md`
+- `docs/1_Engineering/20_Investment_Mode_Signal_Unification_Experiments.md`
+- `docs/1_Engineering/21_Decision_Data_Model_Architecture.md`
 - `docs/1_Engineering/22_ai_predictions_v2_Data_Dictionary.md`
 - `docs/1_Engineering/23_PWA_Dashboard_Refresh_Strategy_Regression_20260313.md`
 - `docs/1_Engineering/25_Onboarding_First_Load_Recovery_Plan_20260314.md`
@@ -84,12 +83,13 @@
 - `docs/1_Engineering/34_Dashboard_Page_Refactoring_Design.md`
 - `docs/1_Engineering/35_Broadcast_LayerA_Operations_Runbook_20260319.md`
 - `docs/1_Engineering/36_Quant_Engine_Bias_Enforcement_20260323.md`
+- `docs/1_Engineering/37_VCP_Visualization_Adapter_Design_20260324.md`
+- `docs/1_Engineering/38_VCP_First_Demo_Case_02171_20260324.md`
+- `docs/1_Engineering/39_Decision_Model_Implementation_Plan_20260325.md`
+- `docs/1_Engineering/40_Decision_Model_Phase1_Closure_20260325.md`
 - `docs/1_Engineering/GLOBALIZATION_IMPLEMENTATION_DESIGN.md`
 - `docs/1_Engineering/legacy_designs/refactoring-dashboard-page.md`
 - `docs/1_Engineering/legacy_designs/Stock_News_Fetching.md`
-- `docs/1_Engineering/legacy_designs/Technical_Design.md`
-- `docs/1_Engineering/LLM_Debug_Traces/0_Handover_Report.md`
-- `docs/1_Engineering/LLM_Debug_Traces/B2_LAB_VS_B2_PROD_SAFE_20260312.md`
 
 ## 配套参考
 

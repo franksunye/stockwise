@@ -1,5 +1,7 @@
 ---
 title: "交易大师图鉴 11｜固定止损 vs ATR 止损：真正重要的，不是哪套更高级，而是哪套更贴近真实波动"
+social_title: "交易大师图鉴 11｜固定止损和 ATR 止损，到底差在哪"
+editorial_title: "交易大师图鉴 11｜固定止损 vs ATR 止损：两种风险尺子的差别"
 subtitle: "这不是两个公式的对决，而是两种风险观的差别：你是想用一把尺子量所有对象，还是承认市场本来就有不同脾气"
 content_id: "growth-ms-011"
 content_source: "growth"

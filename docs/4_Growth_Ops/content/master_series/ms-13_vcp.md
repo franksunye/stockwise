@@ -1,5 +1,7 @@
 ---
 title: "交易大师图鉴 13｜VCP：它真正迷人的地方，不是一个形态名字，而是卖压一层层变轻的过程"
+social_title: "交易大师图鉴 13｜为什么很多人反复讲 VCP，不只是因为它长得好看"
+editorial_title: "交易大师图鉴 13｜VCP：观察卖压逐层衰减的语言"
 subtitle: "Volatility Contraction Pattern 最经典的地方，不是图形本身，而是它把供给收缩、波动变小、突破临近这件事讲得非常直观"
 content_id: "growth-ms-013"
 content_source: "growth"

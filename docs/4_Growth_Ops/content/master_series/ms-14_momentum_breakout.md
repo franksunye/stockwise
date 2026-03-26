@@ -1,5 +1,7 @@
 ---
 title: "交易大师图鉴 14｜Momentum Breakout：它最重要的地方，不是追最热，而是只在强势已经获得加速度后才进攻"
+social_title: "交易大师图鉴 14｜为什么真正的动量突破，不是追最热"
+editorial_title: "交易大师图鉴 14｜Momentum Breakout：只在强势获得加速度后进攻"
 subtitle: "动量突破真正厉害的，不是冲进热点，而是识别强者为什么会继续强，以及什么时候这种强开始具备延续性"
 content_id: "growth-ms-014"
 content_source: "growth"

@@ -1,5 +1,11 @@
 # Master Series 极简生产规范
 
+命名约定：
+
+1. 对外栏目名默认使用 `交易大师图鉴`
+2. 内部总线理解可使用 `交易经典图鉴`
+3. repo 目录、文件名前缀、frontmatter 中继续保留 `master_series / ms`
+
 适用范围：
 
 - `docs/4_Growth_Ops/content/master_series/*.md`
@@ -293,3 +299,34 @@ NotebookLM 输入稿默认固定为以下 `7` 个区块，顺序不要乱：
    - 事件驱动 / 动量型人物样板
 4. `ms-03_alexander_elder_notebooklm.md`
    - 著作 / 方法秩序型人物样板
+
+## 11. NLM 生产状态跟踪
+
+为了在看板中清晰区分 NLM 的不同产出类型，每篇 canonical 母稿的 frontmatter 建议包含 `nlm_production` 块。
+
+### A. Frontmatter 结构
+
+```yaml
+nlm_production:
+  slides: "not_started"       # 演示文稿
+  infographic: "not_started"  # 信息图
+  audio: "not_started"        # 音频
+  video: "not_started"        # 视频
+```
+
+### B. 状态取值范围
+
+- `not_started`: ⚪ 未开始（默认）
+- `generating`: 🔄 生产中
+- `ready`: 🟢 已完成
+- `approved`: ✅ 已通过
+
+### C. 看板显示规则
+
+1. 脚本会自动统计四类产出的完成比例
+2. 在 `NLM 生产状态` 专表中，每篇稿件的四类产出将以 Emoji 形式并排显示
+3. 如果 frontmatter 中缺失该块，脚本将自动默认为 `not_started`
+
+一句话：
+
+**母稿管深度，输入稿管效率，nlm_production 管多模态产出落地。**

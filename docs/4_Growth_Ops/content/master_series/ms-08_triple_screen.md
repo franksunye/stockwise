@@ -1,5 +1,7 @@
 ---
 title: "交易大师图鉴 08｜Triple Screen：它最重要的地方，不是多看几个周期，而是先把错误的机会一层层筛掉"
+social_title: "交易大师图鉴 08｜为什么很多人明明看见买点，最后还是做错"
+editorial_title: "交易大师图鉴 08｜Triple Screen：分层过滤错误机会"
 subtitle: "三重滤网的真正价值，不是复杂，而是它强迫你承认：一个周期里的信号，常常根本不够"
 content_id: "growth-ms-008"
 content_source: "growth"

@@ -1,5 +1,7 @@
 ---
 title: "交易大师图鉴 07｜Episodic Pivot：真正重要的，不是涨了，而是市场突然开始用新逻辑看它"
+social_title: "交易大师图鉴 07｜为什么有些大阳线只是热闹，有些却会改写估值逻辑"
+editorial_title: "交易大师图鉴 07｜Episodic Pivot：识别估值故事被改写的时刻"
 subtitle: "事件拐点最厉害的地方，不是抓一根大阳线，而是识别估值故事被突然改写的时刻"
 content_id: "growth-ms-007"
 content_source: "growth"

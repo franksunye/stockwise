@@ -1,5 +1,7 @@
 ---
 title: "交易大师图鉴 10｜ATR Stop：它最重要的地方，不是让止损更复杂，而是让风险终于开始按波动说话"
+social_title: "交易大师图鉴 10｜为什么所有股票都用同一把止损尺子，常常会出事"
+editorial_title: "交易大师图鉴 10｜ATR Stop：让止损贴着真实波动走"
 subtitle: "真正成熟的止损，不是所有股票都一刀切，而是承认不同标的的波动天生就不一样"
 content_id: "growth-ms-010"
 content_source: "growth"

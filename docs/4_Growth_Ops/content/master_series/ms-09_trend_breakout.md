@@ -1,5 +1,7 @@
 ---
 title: "交易大师图鉴 09｜Trend Breakout：它最重要的地方，不是追涨，而是只在趋势真正站稳后才允许你进攻"
+social_title: "交易大师图鉴 09｜为什么很多人把趋势突破做成了追高"
+editorial_title: "交易大师图鉴 09｜Trend Breakout：确认后的进攻许可"
 subtitle: "趋势突破真正厉害的，不是突破两个字，而是它把‘什么时候允许进攻’讲成了一套更清楚的纪律"
 content_id: "growth-ms-009"
 content_source: "growth"

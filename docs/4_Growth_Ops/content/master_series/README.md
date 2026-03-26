@@ -2,6 +2,16 @@
 
 这是 Growth 体系下独立于 `101_academy` 与 `support` 的第三条内容线。
 
+中文命名建议：
+
+1. 对外栏目名：`交易大师图鉴`
+2. 内部总线名：`交易经典图鉴`
+3. repo 内部目录与缩写：继续保留 `master_series / ms`
+
+一句话：
+
+**对外更适合叫 `交易大师图鉴`，内部更适合理解成一条更宽的 `交易经典图鉴` 内容线。**
+
 定位：
 
 1. 人物、门派、方法源流
@@ -42,6 +52,21 @@
 18. `ms-18_direction_trigger_risk_return.md`
 19. `ms-19_l2_rule_based_quant.md`
 20. `ms-20_masters_not_equal_product_modes.md`
+21. `ms-21_benjamin_graham.md`
+22. `ms-22_philip_fisher.md`
+23. `ms-23_william_oneil.md`
+24. `ms-24_jesse_livermore.md`
+25. `ms-25_van_tharp.md`
+26. `ms-26_richard_wyckoff.md`
+27. `ms-27_jack_schwager.md`
+28. `ms-28_can_slim.md`
+29. `ms-29_donchian_breakout.md`
+30. `ms-30_darvas_box.md`
+31. `ms-31_right_side_trading.md`
+32. `ms-32_position_sizing_and_r_multiple.md`
+33. `ms-33_system_development_and_expectancy.md`
+34. `ms-34_method_fact_layer_producer_mode.md`
+35. `ms-35_market_wizards_as_reading_map.md`
 
 复用规范：
 
@@ -51,6 +76,19 @@
    - 当前人物稿与 NotebookLM 交接的母版
 3. `*_notebooklm.md`
    - 当前最适合直接上传到 NotebookLM 的输入稿
+
+## 扩展阶段状态
+
+目标：
+
+把原先在规划文档里的 `21-35` 扩展母题，继续按 `01 / 02 / 03` 与 `MASTER_SERIES_MINI_SPEC` 的标准落成完整稿件，而不是只停留在选题表里。
+
+当前状态：
+
+1. `21-35` 已全部补齐 canonical 母稿
+2. `21-35` 已全部补齐对应 `*_notebooklm.md`
+3. 整套系列当前已形成 `01-35` 的完整骨架
+4. 下一阶段重点不再是补题，而是统一总检、标题收口与第二批样板筛选
 
 ## 精修计划
 
@@ -254,3 +292,155 @@
 1. 题材分布更均衡
 2. 更容易测试小红书与公众号对不同类型内容的反馈
 3. 也更容易测试 NotebookLM 在人物稿、方法稿、世界观稿上的稳定性差别
+
+## `01-35` 总检结论
+
+### A. 当前整体判断
+
+当前这条线已经不只是 `01-20` 的首发库存，而是形成了完整的 `01-35` 母题库。
+
+一句话判断：
+
+**现在的主要问题已经不是“有没有稿”，而是“整套是不是已经完全收口成同一出版级系列”。**
+
+当前总判断：
+
+1. `01-35` 的正文骨架已经完整
+2. 人物、方法、原型、风险、桥梁五类主干已经齐了
+3. 后续最该做的是统一标题、封面文案与系列强弱校正
+4. 不建议在这一步继续机械扩题
+
+### B. 当前最强的一组样板
+
+从整套 `01-35` 来看，目前最成熟、最适合作为整套样板继续向后约束其他篇目的，仍然是这几篇：
+
+1. `ms-01_mark_minervini.md`
+2. `ms-03_alexander_elder.md`
+3. `ms-04_richard_dennis.md`
+4. `ms-05_warren_buffett.md`
+5. `ms-06_sepa.md`
+6. `ms-12_turtle_trading.md`
+7. `ms-21_benjamin_graham.md`
+8. `ms-23_william_oneil.md`
+9. `ms-25_van_tharp.md`
+
+一句话判断：
+
+**这几篇现在最像“可长期连载、可做样板、可拿去继续校正文风”的系列核心样板。**
+
+### C. 当前最需要收口的不是正文，而是标题层
+
+目前最明显的统一性问题，不在正文大改，而在标题层还没有完全收成同一套系列口径。
+
+重点有两类：
+
+1. 一部分旧稿还没有补齐 `social_title / editorial_title`
+2. 一部分后期桥梁 / 抽象稿标题已经准确，但抽象度仍略高
+
+#### 第 1 类：优先补齐双标题的篇目
+
+当前最值得优先补齐 `social_title / editorial_title` 的篇目：
+
+1. `ms-02_pradeep_bonde.md`
+2. `ms-07_episodic_pivot.md`
+3. `ms-08_triple_screen.md`
+4. `ms-09_trend_breakout.md`
+5. `ms-10_atr_stop.md`
+6. `ms-11_fixed_vs_atr_stop.md`
+7. `ms-13_vcp.md`
+8. `ms-14_momentum_breakout.md`
+9. `ms-17_fixed_vs_structure_stop.md`
+10. `ms-18_direction_trigger_risk_return.md`
+
+一句话判断：
+
+**这些篇目正文已经能站住，但还没完全进入“一个标题给社媒、一个标题给出版”的成熟状态。**
+
+#### 第 2 类：标题还值得再收的抽象稿
+
+当前最值得再做一轮标题收口的篇目：
+
+1. `ms-30_darvas_box.md`
+2. `ms-31_right_side_trading.md`
+3. `ms-33_system_development_and_expectancy.md`
+4. `ms-34_method_fact_layer_producer_mode.md`
+5. `ms-35_market_wizards_as_reading_map.md`
+
+当前判断：
+
+1. 它们的正文方向是对的
+2. 标题也基本准确
+3. 但如果要进入更大范围分发，仍可再降低一点抽象门槛
+
+### D. 桥梁稿当前状态
+
+桥梁稿现在已经比前一阶段稳定很多，但仍然要继续守住两个底线：
+
+1. 不写成内部黑话
+2. 不写成产品说明书
+
+当前判断：
+
+1. `19 / 20 / 34 / 35` 已经基本建立桥梁稿写法
+2. `34 / 35` 还需要在后续标题与封面文案层面再做一次“外部读者能不能一眼接住”的检查
+3. 桥梁稿现在更大的提升空间在入口表达，而不是正文方向重写
+
+### E. 当前最合理的下一步
+
+如果继续推进这条线，建议固定按这个顺序做：
+
+1. 先补齐上面那 `10` 篇的 `social_title / editorial_title`
+2. 再收 `30-35` 里最抽象的 `5` 篇标题
+3. 最后从 `21-35` 里选出第二批最适合试产和真实分发的 `6-8` 篇
+
+一句话：
+
+**这条线下一步最值钱的工作，不是再写新题，而是把已经写出来的 `01-35` 真正收成一套强弱更均匀、标题更成熟、入口更统一的出版级系列。**
+
+### F. 第二批最适合先发 / 先试产的 `8` 篇
+
+从 `21-35` 来看，当前最适合作为第二批先发样板的，不是最抽象的桥梁稿，而是那些同时满足下面几条的篇目：
+
+1. 事实锚点够硬
+2. 中文入口够顺
+3. 英文术语即使存在，也不至于把中文用户挡在门外
+4. 更像长青科普，而不是高度依赖内部语境
+
+建议优先顺序：
+
+1. `ms-21_benjamin_graham.md`
+2. `ms-23_william_oneil.md`
+3. `ms-25_van_tharp.md`
+4. `ms-24_jesse_livermore.md`
+5. `ms-28_can_slim.md`
+6. `ms-32_position_sizing_and_r_multiple.md`
+7. `ms-26_richard_wyckoff.md`
+8. `ms-35_market_wizards_as_reading_map.md`
+
+一句话判断：
+
+**这 `8` 篇最适合作为 `21-35` 里的第二批试产样板，因为它们兼顾了事实、长青、中文可读性和系列辨识度。**
+
+#### 为什么优先是这 `8` 篇
+
+1. `21 / 23 / 24 / 25 / 26`
+   - 这几篇人物稿更容易建立读者敬佩感，也更容易靠事实锚点站住
+2. `28 / 32`
+   - 这两篇方法 / 风险稿概念清楚，科普入口比更抽象的桥梁稿更顺
+3. `35`
+   - 这篇桥梁稿虽然是桥梁，但入口比 `34` 更软，更适合做系列扩展期的阅读入口
+
+#### 当前不建议第二批优先上的篇目
+
+不是因为它们不好，而是因为当前更适合在标题、封面一句话或入口表达上再收一轮：
+
+1. `ms-30_darvas_box.md`
+2. `ms-31_right_side_trading.md`
+3. `ms-33_system_development_and_expectancy.md`
+4. `ms-34_method_fact_layer_producer_mode.md`
+
+当前判断：
+
+1. 这几篇正文方向是对的
+2. 它们更适合作为第二批后半程，或先试产后再决定是否进入更大分发
+3. 最大原因不是内容不稳，而是科普入口还比前面那 `8` 篇更窄一点
