@@ -149,7 +149,12 @@ SWR 不应被直接等同为：
    - [`frontend/src/components/dashboard/DashboardShell.tsx`](/Users/yesun/Code/stockwise/frontend/src/components/dashboard/DashboardShell.tsx) 负责 provider 组合
 4. bootstrap 边界验证已加固：
    - [`frontend/tests/dashboard-bootstrap.test.mjs`](/Users/yesun/Code/stockwise/frontend/tests/dashboard-bootstrap.test.mjs) 已覆盖 auth cache、profile cache、nav intent、splash suppress 与读写 round-trip
-5. 新用户首次进入 Dashboard 的修复链路已经落地。
+5. `Dashboard` 入口页面级 smoke 验证已落地：
+   - [`frontend/scripts/dashboard-entry-smoke.mjs`](/Users/yesun/Code/stockwise/frontend/scripts/dashboard-entry-smoke.mjs) 已覆盖 returning user、nav intent、onboarding、invite wall 四类入口状态
+   - [`frontend/scripts/verify-dashboard-entry.mjs`](/Users/yesun/Code/stockwise/frontend/scripts/verify-dashboard-entry.mjs) 已提供可重复执行的本地发布前检查
+   - [`frontend/package.json`](/Users/yesun/Code/stockwise/frontend/package.json) 已提供 `check:dashboard-entry` 与 `verify:dashboard-entry`
+6. `RootLayout` 的 bootstrap hydration mismatch 已修正，当前 smoke 验证同时要求 `console:error` 与 `pageerror` 为零。
+7. 新用户首次进入 Dashboard 的修复链路已经落地。
    - 详见 [`25_Onboarding_First_Load_Recovery_Plan_20260314.md`](/Users/yesun/Code/stockwise/docs/1_Engineering/25_Onboarding_First_Load_Recovery_Plan_20260314.md)
 
 ### 5.2 已证伪或已停止推进
@@ -160,9 +165,9 @@ SWR 不应被直接等同为：
 
 ### 5.3 仍未完成
 
-1. `Dashboard bootstrap state` 尚未形成页面级自动化验证，只完成了纯逻辑护栏。
-2. 非首帧关键数据面的 SWR 迁移尚未系统推进。
-3. `useUserProfile`、`useWatchlist`、`useDashboardData` 之间的数据刷新边界仍未统一建模。
+1. 非首帧关键数据面的 SWR 迁移尚未系统推进。
+2. `useUserProfile`、`useWatchlist`、`useDashboardData` 之间的数据刷新边界仍未统一建模。
+3. 页面级 smoke 目前仍是本地发布前检查，尚未并入更高层 CI / release pipeline。
 
 ## 6. 当前最合理的下一步
 
@@ -170,13 +175,13 @@ SWR 不应被直接等同为：
 
 更合理的方向只有两类：
 
-### 6.1 补页面级轻量验证
+### 6.1 固化页面级轻量验证
 
 建议：
 
-1. 为 `dashboard` 入口增加页面级 smoke 验证，至少覆盖 direct `/dashboard`、回访打开、已 onboarding 用户进入三条路径
+1. 将 `npm run verify:dashboard-entry` 视为 `dashboard` 入口回归的标准本地检查
 2. 保持当前纯逻辑测试作为协议护栏，不把页面级验证替换成重型 E2E
-3. 将 `dashboard/layout + useDashboardAuthorization + DashboardEntryGate + DashboardShell` 视为一个完整入口面来验证
+3. 在需要扩大发布护栏时，优先考虑把这条命令并入更高层验证，而不是重写成大而重的全链路自动化
 
 这是当前收益最高、风险最低的下一步。
 
