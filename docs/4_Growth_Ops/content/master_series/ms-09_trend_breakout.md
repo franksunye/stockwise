@@ -14,7 +14,7 @@ campaign_role: "bridge"
 campaign: "master_series_2026q2"
 rhythm: "Hub"
 headline_alternatives:
-  - "趋势突破（Trend Breakout）：它最值钱的地方，不是追涨，而是只在趋势站稳后才允许自己进攻"
+  - "趋势突破（Trend Breakout）：它最重要的地方，不是追涨，而是只在趋势真正站稳后才允许你进攻"
   - "很多人把趋势突破理解成追高，其实它更像一种‘进攻许可机制’"
   - "趋势突破为什么经典？因为它真正回答的是：什么时候你才有资格变得更进攻"
 cover_lines:
