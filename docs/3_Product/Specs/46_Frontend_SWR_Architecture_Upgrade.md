@@ -4,8 +4,8 @@ doc_id: "spec-frontend-swr-architecture-upgrade"
 doc_domain: "product"
 doc_status: "active"
 owner: "founder"
-last_reviewed_at: "2026-03-19"
-summary: "定义前端 SWR 与统一缓存架构的现行边界，是秒开、快照与零闪烁相关内容的产品事实源。"
+last_reviewed_at: "2026-03-26"
+summary: "定义前端 SWR 与统一缓存架构的现行边界，是秒开、快照、PWA bootstrap 与零闪烁相关内容的产品事实源。"
 ---
 
 # Frontend Architecture Upgrade: SWR & Unified Caching
@@ -50,7 +50,58 @@ summary: "定义前端 SWR 与统一缓存架构的现行边界，是秒开、�
 - 冷启动 / 重新打开应用时，仍可能有极短的快速闪烁，但已不再暴露 Dashboard 骨架屏。
 - 这说明当前主矛盾已从“数据层退化”收敛为“入口 bootstrap / hydration 切换细节”。
 
+## 1.2 当前实现状态补记（2026-03-26）
+
+这份文档不是从零开始重写。
+
+截至 2026-03-26，仓库中的实际状态更准确地说是：
+
+- `PWA 壳层 bootstrap` 已经有了明确入口，并不处于“尚未开始”的状态。
+- `Dashboard bootstrap state` 已经经过多轮战术修复，回访秒开、splash 收敛、profile 桥接、watchlist 本地恢复都已有落地。
+- 但 `Dashboard bootstrap state` 仍未形成单独工具层，当前仍是“部分统一”，不是“完全收口”。
+
+具体来说：
+
+1. [`frontend/src/app/layout.tsx`](/Users/yesun/Code/stockwise/frontend/src/app/layout.tsx) 已统一承担：
+   - `manifest` 注入，
+   - `app-splash` 首屏壳层，
+   - 移动端设备标记，
+   - 基于本地 auth/profile/onboarding 缓存的 `dashboard-boot-ready` 预判，
+   - splash 的首屏保留与抑制逻辑。
+2. [`frontend/src/components/ServiceWorkerRegistrar.tsx`](/Users/yesun/Code/stockwise/frontend/src/components/ServiceWorkerRegistrar.tsx) 与 [`frontend/public/sw.js`](/Users/yesun/Code/stockwise/frontend/public/sw.js) 已形成独立的 PWA 注册与缓存策略层。
+3. [`frontend/src/app/(dashboard)/dashboard/layout.tsx`](/Users/yesun/Code/stockwise/frontend/src/app/(dashboard)/dashboard/layout.tsx) 仍承担：
+   - auth/profile/onboarding gate，
+   - invite wall 判定，
+   - profile 预热与桥接缓存，
+   - onboarding 准入，
+   - splash 关闭时机，
+   - transition skip 判定。
+4. [`frontend/src/hooks/useUserProfile.ts`](/Users/yesun/Code/stockwise/frontend/src/hooks/useUserProfile.ts)、[`frontend/src/hooks/useWatchlist.ts`](/Users/yesun/Code/stockwise/frontend/src/hooks/useWatchlist.ts)、[`frontend/src/hooks/useDashboardData.ts`](/Users/yesun/Code/stockwise/frontend/src/hooks/useDashboardData.ts) 仍分别维护自己的本地恢复、静默刷新、防抖与兜底策略。
+
+因此，当前更准确的架构判断应更新为：
+
+- 我们已经完成了 `PWA 壳层 bootstrap` 级别的一次收口。
+- 我们还没有完成 `Dashboard bootstrap state` 级别的统一建模。
+- 下一步不是另起炉灶，而是在现有实现上继续把分散判断收口为统一的 `dashboard bootstrap state`。
+
 ## 2. 当前现状梳理
+
+### 2.0 统一术语
+
+为避免后续文档把不同层次的问题混写，本文统一使用以下术语：
+
+- `PWA 壳层 bootstrap`
+  - 指 `RootLayout + manifest + splash + service worker + 设备标记` 这一层启动外壳。
+- `Dashboard bootstrap state`
+  - 指 Dashboard 进入前后的状态判定集合，包含 auth、profile、onboarding、navigation intent、splash 关闭时机等入口规则。
+- `本地快照`
+  - 指为了跨刷新保留并支撑首帧恢复而写入 `localStorage` 的持久化数据，不等同于 SWR 运行时缓存。
+- `乐观进入`
+  - 指在本地条件已足够时，不等待完整网络闭环，先允许用户进入 Dashboard 内容层。
+- `gate`
+  - 指具体的页面准入判定逻辑，是 `Dashboard bootstrap state` 的一个实现位置，而不是独立架构层。
+
+后文若只写 `bootstrap`，默认指 `Dashboard bootstrap state`，不是泛指全部前端启动过程。
 
 ### 2.1 已经被验证有效的行为
 
@@ -214,6 +265,12 @@ summary: "定义前端 SWR 与统一缓存架构的现行边界，是秒开、�
 3. 统一管理 bootstrap 生命周期与过期策略。
 4. 将显示层、数据层、导航层的入口判断从页面组件中剥离。
 
+补充状态说明（2026-03-26）：
+
+- 这项工作目前仍是 `未完成但已具备现实基础`，不是概念阶段。
+- 已有实现已经覆盖了大部分“读取条件”和“乐观进入”能力，只是这些能力还散落在多个入口与 hook 中。
+- 后续的主要工作应是把现有判断搬运并收口，而不是重新发明另一套 bootstrap 机制。
+
 这一步不属于当前 SWR 迁移的直接实施项，但它是 Dashboard 首页长期稳定性的必要前置条件。
 
 文档关系说明：
@@ -286,6 +343,7 @@ summary: "定义前端 SWR 与统一缓存架构的现行边界，是秒开、�
 
 - Dashboard 主链路暂不作为下一个 SWR 落点。
 - 后续若重启此项，必须先设计“本地快照优先于 SWR 运行时状态”的更严格混合方案，并在真实设备上做封闭验证。
+- 在真正重启 Dashboard SWR 主链路之前，应先完成 `dashboard bootstrap state` 的统一收口评估。
 
 ### 6.3 Phase 3: Watchlist 最后迁
 
@@ -335,6 +393,110 @@ summary: "定义前端 SWR 与统一缓存架构的现行边界，是秒开、�
 
 - 当前 Dashboard 首页体验的主要残留问题，已经不是 SWR 本身，而是 bootstrap 状态收口还不统一。
 - 因此，在重新触碰 Dashboard 主链路之前，应优先评估是否先抽出统一的 `dashboard bootstrap state`。
+- 这项评估应以“复用现有 RootLayout / dashboard layout / profile / watchlist / data hook 中的既有逻辑”为前提，而不是重写一套新机制。
+
+### 6.5 Next Step: Dashboard Bootstrap State Consolidation
+
+目标：
+
+- 以最小风险向前推进一小步，先统一 `Dashboard bootstrap state` 的读取与判定来源，而不改动当前产品体感与主请求链路。
+
+为什么先做这一步：
+
+1. 当前最分散、最容易继续漂移的不是 SWR 本身，而是 Dashboard 入口判定。
+2. 这些规则已经在真实代码中存在并被证明有效，不需要从零重新设计。
+3. 先收口读取层，不触碰 `useDashboardData`、`useWatchlist` mutation、轮询与 Service Worker，回归面最小。
+4. 这一步完成后，后续无论继续修 splash、skeleton、invite/onboarding 进入体验，还是未来重新评估 Dashboard SWR，都会更稳。
+
+实施范围：
+
+#### Phase A: 抽只读 `dashboard bootstrap state` 工具层
+
+建议新增一个统一模块，例如：
+
+- [`frontend/src/lib/dashboard-bootstrap.ts`](/Users/yesun/Code/stockwise/frontend/src/lib/dashboard-bootstrap.ts)
+
+职责：
+
+1. 统一读取：
+   - `ZISO_AUTH_CACHE_V1`
+   - `stockwise_user_profile_v1`
+   - `STOCKWISE_HAS_ONBOARDED`
+   - `stockwise_dashboard_nav_intent`
+   - `stockwise_splash_ts`
+2. 统一给出：
+   - `getOptimisticDashboardBootstrap()`
+   - `getDashboardEntryHint()`
+   - `shouldSkipDashboardSkeleton()`
+   - `shouldSuppressDashboardSplash()`
+
+边界：
+
+- 只搬运当前已存在的判断。
+- 不修改 key。
+- 不修改 TTL。
+- 不新增网络请求。
+- 不改变现有缓存策略。
+
+#### Phase B: 替换两个核心消费点
+
+优先替换：
+
+1. [`frontend/src/app/layout.tsx`](/Users/yesun/Code/stockwise/frontend/src/app/layout.tsx)
+2. [`frontend/src/app/(dashboard)/dashboard/layout.tsx`](/Users/yesun/Code/stockwise/frontend/src/app/(dashboard)/dashboard/layout.tsx)
+
+目标：
+
+- 让 `RootLayout` 与 Dashboard layout 基于同一套 bootstrap 语义工作。
+- 删除双边重复解析逻辑，减少“改一边忘另一边”的风险。
+
+边界：
+
+- 保留现有渲染结构。
+- 保留现有 `InviteWall`、`UserProfileProvider`、`StockProvider` 组织方式。
+- 不把本阶段扩展成 UI 重构。
+
+#### Phase C: 补轻量验证
+
+建议验证方式：
+
+1. 为纯函数判定补最小单测，覆盖典型缓存组合。
+2. 手工验证以下三条关键路径：
+   - 回访用户直接打开 `/dashboard`
+   - `stock-pool -> dashboard`
+   - onboarding 后首次进入 dashboard
+
+验收标准：
+
+1. 行为与当前版本一致。
+2. 不新增 skeleton 闪现。
+3. 不新增 splash 残留。
+4. 不新增 onboarding / auth / profile 误判。
+
+本阶段明确不做：
+
+1. 不触碰 `useDashboardData` 请求编排。
+2. 不触碰 `useWatchlist` mutation 语义。
+3. 不重启 Dashboard SWR 主链路迁移。
+4. 不改 Service Worker 策略。
+5. 不引入新的全局持久化缓存层。
+
+当前判断：
+
+- 这是当前“收益最高、风险最小”的前进一步。
+- 它属于架构收口，不属于重新打开 Dashboard 主链路改造。
+- 若要为后续 Dashboard 主链路继续演进打基础，应优先完成这一小步。
+
+状态（2026-03-26）：
+
+- `Phase A` 已完成：
+  - 已新增 [`frontend/src/lib/dashboard-bootstrap.ts`](/Users/yesun/Code/stockwise/frontend/src/lib/dashboard-bootstrap.ts)
+  - 已补充 [`frontend/tests/dashboard-bootstrap.test.mjs`](/Users/yesun/Code/stockwise/frontend/tests/dashboard-bootstrap.test.mjs)
+- `Phase B` 已部分完成：
+  - [`frontend/src/app/(dashboard)/dashboard/layout.tsx`](/Users/yesun/Code/stockwise/frontend/src/app/(dashboard)/dashboard/layout.tsx) 已切换为消费统一 helper
+  - [`frontend/src/app/layout.tsx`](/Users/yesun/Code/stockwise/frontend/src/app/layout.tsx) 尚未接入，当前仍保留原有 inline bootstrap script
+- 当前结论：
+  - 现阶段已完成“低风险等价重构”的第一步，可以作为后续继续收口的基线。
 
 ## 7. 不建议做的事
 
@@ -415,6 +577,7 @@ summary: "定义前端 SWR 与统一缓存架构的现行边界，是秒开、�
   - 保留本地快照秒开。
   - 引入 SWR 统一运行时请求层。
   - 将 Dashboard 首页的 bootstrap 判断视为独立架构问题，而不是附属在 SWR 迁移里的顺手修补。
+  - 承认 `PWA 壳层 bootstrap` 已部分统一，后续重点转向 `Dashboard bootstrap state` 的收口，而不是从零重新定义前端启动架构。
   - 分阶段迁移。
   - 先局部组件，再外围数据面，最后才回到首页主链路。
   - 一旦首帧体感退化，优先回滚，不硬推。

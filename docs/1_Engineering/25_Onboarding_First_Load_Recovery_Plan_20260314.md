@@ -12,6 +12,12 @@ Document relationship:
 4. Therefore this plan intentionally avoids broad SWR expansion and focuses on small, reversible bootstrap repairs.
 5. For adjacent incident context on Dashboard refresh/cache regressions, see [`23_PWA_Dashboard_Refresh_Strategy_Regression_20260313.md`](/Users/yesun/Code/stockwise/docs/1_Engineering/23_PWA_Dashboard_Refresh_Strategy_Regression_20260313.md).
 
+Terminology note:
+
+1. This document follows the terminology defined in [`46_Frontend_SWR_Architecture_Upgrade.md`](/Users/yesun/Code/stockwise/docs/3_Product/Specs/46_Frontend_SWR_Architecture_Upgrade.md).
+2. Here, `bootstrap` defaults to `Dashboard bootstrap state`, not the entire PWA shell.
+3. `local truth` in this document means the same thing as `本地快照 / local snapshot` when discussing first-render recovery inputs.
+
 Target symptom:
 
 1. User enters from an invite link.
@@ -25,7 +31,7 @@ This is an execution document, not a brainstorming note.
 
 Current code indicates the delay is not caused by one single slow API.
 
-It is a chained bootstrap problem across these layers:
+It is a chained `Dashboard bootstrap state` problem across these layers:
 
 1. [`frontend/src/app/(dashboard)/dashboard/layout.tsx`](/Users/yesun/Code/stockwise/frontend/src/app/(dashboard)/dashboard/layout.tsx)
 2. [`frontend/src/lib/user.ts`](/Users/yesun/Code/stockwise/frontend/src/lib/user.ts)
@@ -36,9 +42,32 @@ It is a chained bootstrap problem across these layers:
 Observed risk chain:
 
 1. New user path may wait for `/api/user/register` too early.
-2. Watchlist bootstrap can stay in `loading=true` too long when local cache is empty.
+2. Watchlist local bootstrap can stay in `loading=true` too long when local snapshot is empty.
 3. Dashboard data fetch waits on watchlist recovery even when the first selected stock is already logically known.
-4. Onboarding completion writes server truth, but does not reliably seed local truth for immediate render.
+4. Onboarding completion writes server truth, but does not reliably seed local snapshot truth for immediate render.
+
+## 2.1 Status Update (2026-03-26)
+
+This document should now be read as a completed repair record plus remaining-risk note, not as a brand-new pending plan.
+
+As of 2026-03-26:
+
+1. The main first-load hang described in this document has already been repaired in production code paths.
+2. The repo is no longer at the stage of "discovering whether bootstrap-state repairs are needed".
+3. The remaining issue is architectural consolidation, not root-cause uncertainty.
+
+What is already true in the current codebase:
+
+1. local identity recovery is no longer strictly blocked on `/api/user/register`,
+2. watchlist local bootstrap finishes before remote sync,
+3. onboarding seeds local snapshot truth needed for immediate first render,
+4. dashboard can proceed once usable local state exists,
+5. profile cache is bridged between layout and provider to reduce duplicate blocking fetches.
+
+Therefore, this document now serves two purposes:
+
+1. preserve the reasoning and rollout sequence that produced the fix,
+2. make clear which parts are already landed versus which parts still need later `Dashboard bootstrap state` consolidation.
 
 ## 3. Constraints
 
@@ -60,6 +89,12 @@ The issue is considered fixed only if all of the following hold:
 3. A slow `/api/user/register` does not leave the user stuck on Almanac-only view.
 4. Returning-user behavior does not regress.
 5. Each step can be reverted independently.
+
+Current assessment on 2026-03-26:
+
+1. Criteria 1 through 4 are considered met by the current repaired path.
+2. Criterion 5 was respected during the original rollout and remains useful as historical guardrail.
+3. The remaining unfinished work is outside the original bug scope: `Dashboard bootstrap state` consolidation across multiple layers.
 
 ## 5. Rollout Strategy
 
@@ -392,6 +427,22 @@ Do not start Phase 5 unless Phase 1 through Phase 4 already prove:
 
 After that, if the flow is stable, a separate follow-up can formalize a unified Dashboard bootstrap state layer.
 
+Update on 2026-03-26:
+
+That follow-up has not yet been formalized into a single unified bootstrap module.
+
+Instead, the repo currently contains a partially consolidated implementation spread across:
+
+1. [`frontend/src/app/layout.tsx`](/Users/yesun/Code/stockwise/frontend/src/app/layout.tsx),
+2. [`frontend/src/app/(dashboard)/dashboard/layout.tsx`](/Users/yesun/Code/stockwise/frontend/src/app/(dashboard)/dashboard/layout.tsx),
+3. [`frontend/src/hooks/useUserProfile.ts`](/Users/yesun/Code/stockwise/frontend/src/hooks/useUserProfile.ts),
+4. [`frontend/src/hooks/useWatchlist.ts`](/Users/yesun/Code/stockwise/frontend/src/hooks/useWatchlist.ts),
+5. [`frontend/src/hooks/useDashboardData.ts`](/Users/yesun/Code/stockwise/frontend/src/hooks/useDashboardData.ts).
+
+The correct next step is not to re-run this repair plan from scratch.
+
+The correct next step is to document and then gradually extract the already-landed bootstrap rules into a unified `dashboard bootstrap state` layer.
+
 ## 16. Execution Status and Local Verification
 
 Status as of 2026-03-14:
@@ -401,6 +452,12 @@ Status as of 2026-03-14:
 3. Phase 3 completed.
 4. Phase 4 completed.
 5. Phase 5 not started and not required for correctness.
+
+Status update as of 2026-03-26:
+
+1. The completed status above remains valid.
+2. Additional entry/bootstrap work has since accumulated in root layout and dashboard layout.
+3. The repo should now treat this issue as `fixed but not yet fully consolidated`.
 
 ### Code Paths Changed
 
@@ -465,3 +522,19 @@ The following were not fully closed by this repair cycle:
 1. no dedicated automated E2E test was committed to the repo,
 2. real iOS Safari / iOS standalone PWA hardware verification is still required,
 3. dashboard bootstrap still spans multiple layers and remains a candidate for later consolidation.
+
+## 17. Current Interpretation for Ongoing Architecture Work
+
+This document should not be used to argue that frontend bootstrap work is still at phase-zero.
+
+The more accurate interpretation is:
+
+1. the onboarding first-load repair path is already landed,
+2. the repo now has real, working bootstrap behavior across multiple layers,
+3. the remaining architecture task is to consolidate those working rules without regressing first-load behavior.
+
+In other words:
+
+- this bugfix plan is `done enough`,
+- the next doc task is revision and consolidation,
+- not a restart from scratch.
