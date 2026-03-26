@@ -43,7 +43,10 @@ export function InviteWall({ onSuccess }: Props) {
   };
 
   return (
-    <div className="fixed inset-0 z-[500] bg-[#050508] flex items-center justify-center p-6 text-white overflow-hidden font-sans">
+    <div
+      data-dashboard-invite-wall="true"
+      className="fixed inset-0 z-[500] bg-[#050508] flex items-center justify-center p-6 text-white overflow-hidden font-sans"
+    >
       {/* 动态背景 */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-600/10 blur-[120px] rounded-full" />

@@ -186,7 +186,10 @@ export function OnboardingOverlay() {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed inset-0 z-[999] bg-[#050508] text-white overflow-y-auto">
+    <div
+      data-dashboard-onboarding-overlay="true"
+      className="fixed inset-0 z-[999] bg-[#050508] text-white overflow-y-auto"
+    >
       {/* Background Ambience */}
       <div className="absolute inset-0 bg-[#050508]">
         {!isHighPerformance && (

@@ -67,6 +67,7 @@ export default function DashboardLayout({
         {isAuthorized === true && (
           <motion.div 
             key="dashboard-content"
+            data-dashboard-content="true"
             initial={canSkipTransition.current ? { opacity: 1 } : { opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: canSkipTransition.current ? 0 : 0.4 }}
