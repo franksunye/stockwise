@@ -14,6 +14,8 @@ const BROADCAST_FAILURE_THRESHOLD = 3;
 const BROADCAST_CIRCUIT_BREAKER_MS = 5 * 60 * 1000;
 const CACHE_KEY = 'stockwise_dashboard_cache_v1';
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24小时过期
+const PREDICTION_VERSION_CHECK_KEY = 'stockwise_prediction_version_check_v1';
+const PREDICTION_VERSION_CHECK_INTERVAL = 10 * 60 * 1000;
 
 // 预测层轮询间隔：仅在收盘后等待当日预测时使用
 const PREDICTION_POLL_INTERVAL = 5 * 60 * 1000; // 5 min
@@ -27,6 +29,13 @@ function shouldPollBatch(stocks: StockData[]): boolean {
     if (getMarketScene() !== 'post_market') return false;
     if (!isTradingDay()) return false;
     return !arePredictionsFreshForToday(stocks);
+}
+
+function shouldCheckPredictionVersions(stocks: StockData[]): boolean {
+    if (getMarketScene() !== 'post_market') return false;
+    if (!isTradingDay()) return false;
+    if (stocks.length === 0) return false;
+    return arePredictionsFreshForToday(stocks);
 }
 
 function formatRefreshError(error: unknown, sessionRecoveryAttempted: boolean): string {
@@ -82,6 +91,7 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
 
     const lastFetchTimeRef = useRef<number>(0);
     const fetchGenRef = useRef<number>(0);
+    const predictionVersionCheckInFlightRef = useRef(false);
     const stocksRef = useRef<StockData[]>(stocks);
     const almanacRef = useRef<MarketAlmanacData | null>(almanac);
     const almanacsRef = useRef<MarketAlmanacData[]>(almanacs);
@@ -108,6 +118,66 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
     const broadcastCircuitOpenUntilRef = useRef<number>(0);
     const lastFallbackEventAtRef = useRef<number>(0);
     const lastRecoveryEventAtRef = useRef<number>(0);
+
+    const shouldThrottlePredictionVersionCheck = useCallback(() => {
+        const now = Date.now();
+        try {
+            const lastCheckAt = Number(localStorage.getItem(PREDICTION_VERSION_CHECK_KEY) || '0');
+            if (lastCheckAt > 0 && now - lastCheckAt < PREDICTION_VERSION_CHECK_INTERVAL) {
+                return true;
+            }
+            localStorage.setItem(PREDICTION_VERSION_CHECK_KEY, String(now));
+            return false;
+        } catch {
+            return false;
+        }
+    }, []);
+
+    const checkPredictionVersionDrift = useCallback(async (): Promise<boolean> => {
+        if (predictionVersionCheckInFlightRef.current) return false;
+        if (!shouldCheckPredictionVersions(stocksRef.current)) return false;
+        if (watchlist.length === 0) return false;
+        if (shouldThrottlePredictionVersionCheck()) return false;
+
+        predictionVersionCheckInFlightRef.current = true;
+        try {
+            const params = new URLSearchParams({
+                symbols: watchlist.map((w) => w.symbol).join(','),
+                _t: String(Date.now()),
+            });
+            const res = await fetch(`/api/stock/prediction-versions?${params.toString()}`, {
+                cache: 'no-store',
+                headers: { 'Cache-Control': 'no-cache' }
+            });
+            if (!res.ok) return false;
+
+            const body = await res.json() as {
+                items?: Array<{ symbol?: string; date?: string; target_date?: string; updated_at?: string }>;
+            };
+            const remoteMap = new Map(
+                (body.items || [])
+                    .filter((item): item is { symbol: string; date?: string; target_date?: string; updated_at?: string } => typeof item?.symbol === 'string')
+                    .map((item) => [item.symbol, item])
+            );
+
+            return stocksRef.current.some((stock) => {
+                const localPrediction = stock.prediction;
+                const remotePrediction = remoteMap.get(stock.symbol);
+                if (!localPrediction || !remotePrediction) return false;
+
+                return (
+                    localPrediction.date !== remotePrediction.date ||
+                    localPrediction.target_date !== remotePrediction.target_date ||
+                    (localPrediction.updated_at || '') !== (remotePrediction.updated_at || '')
+                );
+            });
+        } catch (error) {
+            console.warn('[Dashboard] Prediction version check failed:', error);
+            return false;
+        } finally {
+            predictionVersionCheckInFlightRef.current = false;
+        }
+    }, [shouldThrottlePredictionVersionCheck, watchlist]);
 
     // 1. 初始化：尝试从本地缓存读取，实现【秒开】
     useEffect(() => {
@@ -582,6 +652,12 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
         const refreshOnResume = () => {
             if (!priceOnlyRefresh && shouldPollBatch(stocksRef.current)) {
                 loadAllData(true);
+            } else if (!priceOnlyRefresh) {
+                void checkPredictionVersionDrift().then((hasDrift) => {
+                    if (hasDrift) {
+                        void loadAllData(true, true);
+                    }
+                });
             }
             const symbols = watchlist.map(w => w.symbol);
             if (symbols.length > 0) {
@@ -606,7 +682,7 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
             window.removeEventListener('pageshow', refreshOnResume);
             window.removeEventListener('online', refreshOnResume);
         };
-    }, [loadAllData, watchlist, refreshPrices, priceOnlyRefresh]);
+    }, [checkPredictionVersionDrift, loadAllData, watchlist, refreshPrices, priceOnlyRefresh]);
 
     // 预测层智能轮询：仅在收盘后等待当日预测时每 5 分钟检查一次
     // 盘中/周末/预测已到达 → 定时器空转不发请求

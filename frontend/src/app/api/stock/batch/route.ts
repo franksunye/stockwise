@@ -141,6 +141,7 @@ export async function GET(request: Request) {
         const historySql = `
             WITH RankedPredictions AS (
                 SELECT p.symbol, p.date, p.target_date,
+                        p.updated_at,
                         ${EFFECTIVE_SIGNAL_WITH_OUTCOME_SQL} AS signal,
                         COALESCE(pol.signal_state, p.signal) AS canonical_signal,
                         COALESCE(pol.confidence, p.confidence) AS confidence,
@@ -198,6 +199,7 @@ export async function GET(request: Request) {
         const fallbackHistorySql = `
             WITH RankedPredictions AS (
                 SELECT p.symbol, p.date, p.target_date,
+                        p.updated_at,
                         p.signal AS signal,
                         p.signal AS canonical_signal,
                         p.confidence,

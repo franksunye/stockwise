@@ -40,6 +40,7 @@ export interface AIPrediction {
     symbol: string;
     date: string;
     target_date: string;
+    updated_at?: string;
     signal: LegacySignalState; // compatibility field; may include mode overlay
     canonical_signal?: AnySignalState; // base stored final signal before mode overlay
     llm_signal?: string; // AI-side conclusion extracted from ai_reasoning
