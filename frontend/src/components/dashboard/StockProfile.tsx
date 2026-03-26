@@ -2,68 +2,23 @@
 
 import { motion } from 'framer-motion';
 import { X as CloseIcon } from 'lucide-react';
-import { StockData, AIPrediction } from '@/lib/types';
-
-import { useState, useEffect } from 'react';
-import { getCurrentUser } from '@/lib/user';
+import { StockData } from '@/lib/types';
+import { useStockProfileHistory } from '@/hooks/useStockProfileHistory';
+import {
+  formatStockProfileHistoryLabel,
+  getStockProfileStats,
+} from '@/lib/stock-profile-metrics';
 
 interface StockProfileProps {
   stock: StockData;
   onClose: () => void;
 }
 
-// 简单的内存缓存，避免短时间内重复请求
-const historyCache: Record<string, { data: AIPrediction[]; timestamp: number }> = {};
-const CACHE_TTL = 30 * 1000; // 30秒缓存
-
 export function StockProfile({ stock, onClose }: StockProfileProps) {
-
-  const [fullHistory, setFullHistory] = useState<AIPrediction[]>([]);
-  const [loadingHistory, setLoadingHistory] = useState(false);
-
-
-  // 优化：将数据请求推迟到动画结束之后，避免 IO/State 更新操作阻塞 iOS 的动画主线程
-  // 典型的 "Interaction First, Data Later" 模式
-  useEffect(() => {
-    if (stock) {
-      // 检查缓存 - 如果有缓存，可以立即显示，因为它是同步的，不会造成太多闪烁
-      const cached = historyCache[stock.symbol];
-      const now = Date.now();
-      
-      if (cached && (now - cached.timestamp) < CACHE_TTL) {
-        setFullHistory(cached.data);
-        return;
-      }
-      
-      // 如果没有缓存，我们设置一个定时器，等动画跑完（约300-400ms）再发起请求
-      // 这样保证了“点击->弹出”这关键的 100ms 是纯 UI 线程在跑
-      const timer = setTimeout(() => {
-        setLoadingHistory(true);
-        getCurrentUser()
-          .then(() => fetch(`/api/predictions?symbol=${stock.symbol}&limit=30`, {
-            cache: 'no-store'
-          }))
-          .then(r => r.json())
-          .then(data => {
-            const predictions = data.predictions || [];
-            setFullHistory(predictions);
-            historyCache[stock.symbol] = { data: predictions, timestamp: Date.now() };
-          })
-          .catch(console.error)
-          .finally(() => setLoadingHistory(false));
-      }, 400); // 400ms 延迟，确保 spring 动画最剧烈的部分已经完成
-
-      return () => clearTimeout(timer);
-    }
-  }, [stock]);
-
-
+  const { historyToUse, loadingHistory } = useStockProfileHistory(stock);
 
   // 使用完整的历史数据计算回看通过率，如果还在加载则使用传入的数据
-  const historyToUse = fullHistory.length > 0 ? fullHistory : stock.history;
-  const winCount = historyToUse?.filter(h => h.validation_status === 'Correct').length || 0;
-  const totalCount = historyToUse?.filter(h => h.validation_status === 'Correct' || h.validation_status === 'Incorrect').length || 0;
-  const winRate = totalCount > 0 ? Math.round((winCount / totalCount) * 100) : 0;
+  const { totalCount, winRate } = getStockProfileStats(historyToUse);
 
   return (
     <motion.div 
@@ -126,7 +81,7 @@ export function StockProfile({ stock, onClose }: StockProfileProps) {
                 h.validation_status === 'Incorrect' ? 'bg-rose-500/10 text-rose-500/50' : 'bg-white/5 text-slate-700'
               }`}
             >
-              {h.target_date.split('-').slice(1).join('/')}
+              {formatStockProfileHistoryLabel(h.target_date)}
             </div>
           ))}
         </div>

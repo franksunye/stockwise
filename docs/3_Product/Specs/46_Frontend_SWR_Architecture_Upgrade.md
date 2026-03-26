@@ -159,7 +159,12 @@ SWR 不应被直接等同为：
    - [`frontend/src/lib/brief-dates.ts`](/Users/yesun/Code/stockwise/frontend/src/lib/brief-dates.ts) 已下沉 fallback 日期候选计算
    - [`frontend/tests/brief-client.test.mjs`](/Users/yesun/Code/stockwise/frontend/tests/brief-client.test.mjs) 已锁住 brief fallback 语义
    - [`frontend/src/components/dashboard/BriefMarkdown.tsx`](/Users/yesun/Code/stockwise/frontend/src/components/dashboard/BriefMarkdown.tsx) 已收口 `BriefDrawer` 与 `Brief` 页的 markdown 展示层
-8. 新用户首次进入 Dashboard 的修复链路已经落地。
+8. `StockProfile` 非首帧数据面已完成第一轮数据逻辑收口：
+   - [`frontend/src/hooks/useStockProfileHistory.ts`](/Users/yesun/Code/stockwise/frontend/src/hooks/useStockProfileHistory.ts) 已统一历史数据读取、延迟请求与组件内状态
+   - [`frontend/src/lib/stock-profile-history.ts`](/Users/yesun/Code/stockwise/frontend/src/lib/stock-profile-history.ts) 已下沉 30 秒缓存、响应归一化与历史回退语义
+   - [`frontend/src/lib/stock-profile-metrics.ts`](/Users/yesun/Code/stockwise/frontend/src/lib/stock-profile-metrics.ts) 已下沉胜率与日期标签等派生规则
+   - [`frontend/tests/stock-profile-history.test.mjs`](/Users/yesun/Code/stockwise/frontend/tests/stock-profile-history.test.mjs) 与 [`frontend/tests/stock-profile-metrics.test.mjs`](/Users/yesun/Code/stockwise/frontend/tests/stock-profile-metrics.test.mjs) 已锁住缓存和派生逻辑
+9. 新用户首次进入 Dashboard 的修复链路已经落地。
    - 详见 [`25_Onboarding_First_Load_Recovery_Plan_20260314.md`](/Users/yesun/Code/stockwise/docs/1_Engineering/25_Onboarding_First_Load_Recovery_Plan_20260314.md)
 
 ### 5.2 已证伪或已停止推进
@@ -170,7 +175,7 @@ SWR 不应被直接等同为：
 
 ### 5.3 仍未完成
 
-1. 非首帧关键数据面的 SWR 迁移尚未系统推进，但 `Brief` 面已开始低风险收口。
+1. 非首帧关键数据面的 SWR 迁移尚未系统推进，但 `Brief` 与 `StockProfile` 两个面已完成第一轮低风险收口。
 2. `useUserProfile`、`useWatchlist`、`useDashboardData` 之间的数据刷新边界仍未统一建模。
 3. 页面级 smoke 目前仍是本地发布前检查，尚未并入更高层 CI / release pipeline。
 
@@ -195,6 +200,7 @@ SWR 不应被直接等同为：
 若继续推进 SWR，只建议从非首帧关键数据面开始，例如：
 
 1. `StockProfile` 的完整历史加载
+   - 当前已完成缓存、延迟请求、派生指标的第一轮收口；后续若继续推进，应优先考虑局部请求层或按需缓存，而不是接入 Dashboard 主数据链路
 2. `Brief` 页 / `BriefDrawer`
    - 当前已完成 fetch fallback 与 markdown renderer 的第一轮收口，后续若继续推进，应优先考虑数据请求层与局部缓存层，而不是重写页面壳
 3. 个人中心二级页中的非首屏关键模块
