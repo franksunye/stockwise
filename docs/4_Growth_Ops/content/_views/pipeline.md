@@ -1,6 +1,6 @@
 # 内容生产流程看板 (Pipeline Board)
 
-> 自动生成时间：2026/3/26 15:03:41
+> 自动生成时间：2026/3/26 16:16:06
 > 说明：本看板优先服务活跃工作流，只展开需要推进的阶段；已发布内容只保留最近概览，避免看板膨胀。
 
 ## 🧠 待策划
@@ -53,16 +53,16 @@
 | [交易大师图鉴 05｜沃伦·巴菲特：最难模仿的，不是他会选股，而是他能几十年都按同一套原则活着](../master_series/ms-05_warren_buffett.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
 | [交易大师图鉴 06｜SEPA：它最厉害的地方，不是教你找买点，而是教你如何拒绝平庸的机会。](../master_series/ms-06_sepa.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
 | [交易大师图鉴 07｜事件拐点（Episodic Pivot）：真正重要的，不是涨了，而是市场突然开始用新逻辑看它](../master_series/ms-07_episodic_pivot.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
-| [交易大师图鉴 08｜三重滤网（Triple Screen）：它最重要的地方，不是多看几个周期，而是先把错误的机会一层层筛掉](../master_series/ms-08_triple_screen.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
-| [交易大师图鉴 09｜趋势突破（Trend Breakout）：它最重要的地方，不是追涨，而是只在趋势真正站稳后才允许你进攻](../master_series/ms-09_trend_breakout.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
+| [交易大师图鉴 08｜三重滤网（Triple Screen）：它最震撼的地方，不是教你多看几张图，而是戳破了单周期里的“虚假繁荣”。](../master_series/ms-08_triple_screen.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
+| [交易大师图鉴 09｜趋势突破（Trend Breakout）：真正重要的，不是教你追涨，而是教你只在趋势站稳后，才准许自己进攻。](../master_series/ms-09_trend_breakout.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
 | [交易大师图鉴 10｜ATR 止损：它最重要的地方，不是让止损更复杂，而是让风险终于开始按波动说话](../master_series/ms-10_atr_stop.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
 | [交易大师图鉴 11｜固定止损 vs ATR 止损：真正重要的，不是哪套更高级，而是哪套更贴近真实波动](../master_series/ms-11_fixed_vs_atr_stop.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
 | [交易大师图鉴 12｜海龟交易：它最震撼的地方，不是突破本身，而是把交易拆成一套能训练人的规则](../master_series/ms-12_turtle_trading.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
-| [交易大师图鉴 13｜波动收缩形态（VCP）：它真正迷人的地方，不是一个形态名字，而是卖压一层层变轻的过程](../master_series/ms-13_vcp.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
-| [交易大师图鉴 14｜动量突破（Momentum Breakout）：它最重要的地方，不是追最热，而是只在强势已经获得加速度后才进攻](../master_series/ms-14_momentum_breakout.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
-| [交易大师图鉴 15｜多周期确认：它最重要的地方，不是多看几张图，而是让方向、节奏和触发终于站到同一边](../master_series/ms-15_multi_timeframe_confirmation.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
+| [交易大师图鉴 13｜波动收缩形态（VCP）：真正迷人的，不是那个图形，而是市场在突破前最后一次“阻力排查”。](../master_series/ms-13_vcp.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
+| [交易大师图鉴 14｜动量突破（Momentum Breakout）：真正伟大的进攻，不是教你追热点，而是教你只在强者获得“二次加速”时，才果断入场。](../master_series/ms-14_momentum_breakout.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
+| [交易大师图鉴 15｜多周期确认：真正的高手章法，不是看更多图，而是当大方向与小触发“吵架”时，敢于立刻停下来。](../master_series/ms-15_multi_timeframe_confirmation.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
 | [交易大师图鉴 16｜事件驱动型进攻结构：它最重要的地方，不是追新闻，而是看懂哪种变化足以改变市场预期](../master_series/ms-16_catalyst_driven_setup.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
-| [交易大师图鉴 17｜固定止损 vs 结构止损：更重要的，不是参数更好看，而是你的风险边界有没有贴着逻辑走](../master_series/ms-17_fixed_vs_structure_stop.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
+| [交易大师图鉴 17｜固定止损 vs 结构止损：更重要的，不是参数漂不漂亮，而是你的风险边界有没有贴着逻辑走](../master_series/ms-17_fixed_vs_structure_stop.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
 | [交易大师图鉴 18｜先方向，后触发，先风控，后收益：它最重要的地方，不是口号，而是一整套决策顺序](../master_series/ms-18_direction_trigger_risk_return.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
 | [交易大师图鉴 19｜什么是规则量化中间层：它最重要的地方，不是神秘，而是把经验压成可以复核的规则](../master_series/ms-19_l2_rule_based_quant.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
 | [交易大师图鉴 20｜大师不等于产品模式：它最重要的地方，不是泼冷水，而是防止把经典方法误读成万能模板](../master_series/ms-20_masters_not_equal_product_modes.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |

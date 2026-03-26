@@ -1195,6 +1195,12 @@ function renderMasterSeriesBoard(generatedAt) {
 
   const samplePool = sorted.filter((item) => item.releaseBucket === 'sample');
   const holdPool = sorted.filter((item) => item.releaseBucket === 'hold');
+  const readyToPublish = sorted.filter(
+    (item) => item.reviewStatus === 'closed' && item.releaseBucket === 'sample'
+  );
+  const readyToNlm = sorted.filter(
+    (item) => item.reviewStatus === 'closed' && item.hasNotebookLM
+  );
 
   const fmtNlm = (status) => NLM_OUTPUT_LABELS[status] || status || '⚪';
 
@@ -1257,6 +1263,36 @@ function renderMasterSeriesBoard(generatedAt) {
     );
     output += '\n\n';
   }
+
+  output += '## Ready To Publish\n\n';
+  output += '> 定义：`已收口` + 位于 `首发样板池`。这代表内容层已经过线，可直接进入排期、封面和分发动作。\n\n';
+  output += markdownTable(
+    ['编号', '标题', '波次', '当前动作', '主流程'],
+    readyToPublish.map((item) => [
+      item.seriesId,
+      `[${shortMasterSeriesTitle(item.title)}](${item.relativeToView})`,
+      MASTER_SERIES_WAVE_LABELS[item.releaseWave] || item.releaseWave || '-',
+      item.nextAction,
+      STAGE_LABELS[item.workflowStage] || item.workflowStage
+    ])
+  );
+  output += '\n\n';
+
+  output += '## Ready To NLM\n\n';
+  output += '> 定义：`已收口` + 已有 `NotebookLM` 输入稿。这代表文案和 handoff 已齐，可直接进入 PPT / 信息图 / 音频试产。\n\n';
+  output += markdownTable(
+    ['编号', '标题', '首发分层', '当前动作', '输入稿'],
+    readyToNlm.map((item) => [
+      item.seriesId,
+      `[${shortMasterSeriesTitle(item.title)}](${item.relativeToView})`,
+      item.releaseBucket === 'sample'
+        ? `${MASTER_SERIES_BUCKET_LABELS[item.releaseBucket]} ${MASTER_SERIES_WAVE_LABELS[item.releaseWave] || ''}`.trim()
+        : MASTER_SERIES_BUCKET_LABELS[item.releaseBucket] || item.releaseBucket,
+      item.nextAction,
+      item.hasNotebookLM ? '✅' : '❌'
+    ])
+  );
+  output += '\n\n';
 
   output += '## 逐篇生产状态\n\n';
   output += markdownTable(

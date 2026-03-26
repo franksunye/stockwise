@@ -25,6 +25,10 @@ share_copy: "如果你把海龟交易理解成一个老派突破系统，这篇�
 traceability:
   status: "healthy"
   last_reviewed_at: "2026-03-25"
+master_series:
+  review_status: "closed"
+  release_bucket: "sample"
+  release_wave: "wave_1"
 workflow:
   stage: "drafting"
   owner: "cmo"

@@ -487,3 +487,69 @@
 1. 这几篇正文方向是对的
 2. 它们更适合作为第二批后半程，或先试产后再决定是否进入更大分发
 3. 最大原因不是内容不稳，而是科普入口还比前面那 `8` 篇更窄一点
+
+## 最终执行清单
+
+### A. Ready To Publish
+
+定义：
+
+1. 已按当前审核标准收口
+2. 已进入 `首发样板池`
+3. 可以直接进入排期、封面、渠道分发动作
+
+当前名单：
+
+1. `ms-01_mark_minervini.md`
+2. `ms-03_alexander_elder.md`
+3. `ms-04_richard_dennis.md`
+4. `ms-05_warren_buffett.md`
+5. `ms-06_sepa.md`
+6. `ms-12_turtle_trading.md`
+7. `ms-21_benjamin_graham.md`
+8. `ms-23_william_oneil.md`
+9. `ms-24_jesse_livermore.md`
+10. `ms-25_van_tharp.md`
+11. `ms-26_richard_wyckoff.md`
+12. `ms-28_can_slim.md`
+13. `ms-32_position_sizing_and_r_multiple.md`
+14. `ms-35_market_wizards_as_reading_map.md`
+
+一句话判断：
+
+**这 `14` 篇已经不是“文案还要继续修”的状态，而是可以直接进入真实分发动作。**
+
+### B. Ready To NLM
+
+定义：
+
+1. canonical 母稿已收口
+2. 对应 `*_notebooklm.md` 已齐
+3. 可以直接进入 `NotebookLM` 试产
+
+当前判断：
+
+1. `01-35` 已全部满足这三个条件
+2. 整套 `35` 篇都已经具备 `PPT / 信息图 / 音频` 试产条件
+3. 差别不在“能不能做”，而在“先做哪一批”
+
+执行顺序建议：
+
+1. 先做 `首发样板池` 的 `14` 篇
+2. 再做 `候补池` 的 `17` 篇
+3. `库存观察池` 的 `4` 篇最后做，先看渠道反馈再决定是否前推
+
+### C. 当前不建议优先前推的 `4` 篇
+
+它们不是不合格，而是更适合继续作为库存观察：
+
+1. `ms-19_l2_rule_based_quant.md`
+2. `ms-20_masters_not_equal_product_modes.md`
+3. `ms-33_system_development_and_expectancy.md`
+4. `ms-34_method_fact_layer_producer_mode.md`
+
+原因：
+
+1. 正文已过线
+2. `NotebookLM` 也可做
+3. 但入口仍相对更窄，更适合后推，或先内部试产后再决定是否前移
