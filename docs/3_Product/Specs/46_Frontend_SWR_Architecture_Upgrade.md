@@ -154,7 +154,12 @@ SWR 不应被直接等同为：
    - [`frontend/scripts/verify-dashboard-entry.mjs`](/Users/yesun/Code/stockwise/frontend/scripts/verify-dashboard-entry.mjs) 已提供可重复执行的本地发布前检查
    - [`frontend/package.json`](/Users/yesun/Code/stockwise/frontend/package.json) 已提供 `check:dashboard-entry` 与 `verify:dashboard-entry`
 6. `RootLayout` 的 bootstrap hydration mismatch 已修正，当前 smoke 验证同时要求 `console:error` 与 `pageerror` 为零。
-7. 新用户首次进入 Dashboard 的修复链路已经落地。
+7. `Brief` 非首帧数据面已开始第一轮低风险收口：
+   - [`frontend/src/lib/brief-client.ts`](/Users/yesun/Code/stockwise/frontend/src/lib/brief-client.ts) 已统一 `BriefDrawer` 与 `Brief` 页的当日 / 上个交易日 fallback 获取逻辑
+   - [`frontend/src/lib/brief-dates.ts`](/Users/yesun/Code/stockwise/frontend/src/lib/brief-dates.ts) 已下沉 fallback 日期候选计算
+   - [`frontend/tests/brief-client.test.mjs`](/Users/yesun/Code/stockwise/frontend/tests/brief-client.test.mjs) 已锁住 brief fallback 语义
+   - [`frontend/src/components/dashboard/BriefMarkdown.tsx`](/Users/yesun/Code/stockwise/frontend/src/components/dashboard/BriefMarkdown.tsx) 已收口 `BriefDrawer` 与 `Brief` 页的 markdown 展示层
+8. 新用户首次进入 Dashboard 的修复链路已经落地。
    - 详见 [`25_Onboarding_First_Load_Recovery_Plan_20260314.md`](/Users/yesun/Code/stockwise/docs/1_Engineering/25_Onboarding_First_Load_Recovery_Plan_20260314.md)
 
 ### 5.2 已证伪或已停止推进
@@ -165,7 +170,7 @@ SWR 不应被直接等同为：
 
 ### 5.3 仍未完成
 
-1. 非首帧关键数据面的 SWR 迁移尚未系统推进。
+1. 非首帧关键数据面的 SWR 迁移尚未系统推进，但 `Brief` 面已开始低风险收口。
 2. `useUserProfile`、`useWatchlist`、`useDashboardData` 之间的数据刷新边界仍未统一建模。
 3. 页面级 smoke 目前仍是本地发布前检查，尚未并入更高层 CI / release pipeline。
 
@@ -191,6 +196,7 @@ SWR 不应被直接等同为：
 
 1. `StockProfile` 的完整历史加载
 2. `Brief` 页 / `BriefDrawer`
+   - 当前已完成 fetch fallback 与 markdown renderer 的第一轮收口，后续若继续推进，应优先考虑数据请求层与局部缓存层，而不是重写页面壳
 3. 个人中心二级页中的非首屏关键模块
 4. 仅在 Drawer / Modal 打开后才触发的数据面
 
