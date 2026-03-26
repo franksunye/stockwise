@@ -28,10 +28,17 @@ else
   exit 1
 fi
 
+echo "Ignored build check:"
+echo "  cwd=$(pwd)"
+echo "  target_path=${TARGET_PATH}"
+echo "  base_sha=${BASE_SHA}"
+echo "  head_sha=${HEAD_SHA}"
+
 if git diff --quiet "${BASE_SHA}" "${HEAD_SHA}" -- "${TARGET_PATH}"; then
   echo "No changes in ${TARGET_PATH}/. Skip build."
   exit 0
 fi
 
 echo "Changes detected in ${TARGET_PATH}/. Build required."
+git diff --name-only "${BASE_SHA}" "${HEAD_SHA}" -- "${TARGET_PATH}" | sed 's/^/  - /'
 exit 1
