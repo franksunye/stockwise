@@ -2,6 +2,7 @@
 
 import { getHKTime, getLastTradingDay } from '@/lib/date-utils';
 import { getCurrentUser } from '@/lib/user';
+import { getBriefDateCandidates } from '@/lib/brief-dates';
 
 export interface BriefData {
     date: string;
@@ -10,17 +11,10 @@ export interface BriefData {
     created_at: string;
 }
 
-function getBriefDateCandidates(): string[] {
-    const today = getHKTime().toISOString().split('T')[0];
-    const lastTradingDay = getLastTradingDay().toISOString().split('T')[0];
-
-    return today === lastTradingDay ? [today] : [today, lastTradingDay];
-}
-
 export async function fetchLatestBrief(): Promise<BriefData | null> {
     await getCurrentUser();
 
-    for (const date of getBriefDateCandidates()) {
+    for (const date of getBriefDateCandidates(getHKTime(), getLastTradingDay())) {
         const response = await fetch(`/api/brief?date=${date}`);
         const data = (await response.json()) as { brief?: BriefData | null };
 
