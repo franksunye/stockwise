@@ -3,12 +3,12 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X as CloseIcon, FileText, Loader2, Sparkles, NotebookText, CheckCircle2 } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { shouldEnableHighPerformance } from '@/lib/device-utils';
 import Multiavatar from '@/components/Multiavatar';
 import { resolveBriefAuthorByTier } from '@/lib/agent-team';
 import { fetchLatestBrief, type BriefData } from '@/lib/brief-client';
+import { BriefMarkdown } from '@/components/dashboard/BriefMarkdown';
 
 interface BriefDrawerProps {
   isOpen: boolean;
@@ -155,20 +155,10 @@ export function BriefDrawer({ isOpen, onClose, limitToSymbol, onUpgrade }: Brief
                   )}
 
                   <div className="prose prose-invert prose-sm max-w-none">
-                    <ReactMarkdown
-                      components={{
-                        h1: ({children}) => <h3 className="text-lg font-black text-white mt-8 mb-4 tracking-tight uppercase italic">{children}</h3>,
-                        h2: ({children}) => <h4 className="text-base font-bold text-slate-200 mt-6 mb-3">{children}</h4>,
-                        h3: ({children}) => <h5 className="text-base font-black text-indigo-400 mt-6 mb-3 flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0" />{children}</h5>,
-                        p: ({children}) => <p className="text-sm text-slate-400 leading-relaxed mb-4 text-justify">{children}</p>,
-                        ul: ({children}) => <ul className="space-y-2 mb-4 list-disc pl-4 marker:text-indigo-500/50">{children}</ul>,
-                        li: ({children}) => <li className="text-sm text-slate-400 pl-1">{children}</li>,
-                        strong: ({children}) => <span className="text-indigo-200 font-bold">{children}</span>,
-                        hr: () => <hr className="border-white/5 my-8" />,
-                      }}
-                    >
-                      {showContent?.replace(/(ZISO|StockWise) AI 生成于\s*\d{1,2}:\d{2}/g, '').trim() || ''}
-                    </ReactMarkdown>
+                    <BriefMarkdown
+                      content={showContent || ''}
+                      variant="drawer"
+                    />
                   </div>
                   
                   <div className="pt-8 border-t border-white/5 flex flex-col items-center space-y-4">

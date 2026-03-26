@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, Share2, NotebookText, Loader2, Sparkles } from 'lucide-react'
-import ReactMarkdown from 'react-markdown'
+import { BriefMarkdown } from '@/components/dashboard/BriefMarkdown'
 import { fetchLatestBrief, type BriefData } from '@/lib/brief-client'
 
 export default function BriefPage() {
@@ -146,35 +146,7 @@ export default function BriefPage() {
 
           {/* Main Markdown Content */}
           <div className="prose prose-invert prose-sm max-w-none">
-            <ReactMarkdown
-              components={{
-                h1: ({children}) => <h3 className="text-lg font-black text-white mt-8 mb-4 tracking-tight">{children}</h3>,
-                h2: ({children}) => <h4 className="text-base font-bold text-slate-200 mt-6 mb-3">{children}</h4>,
-                h3: ({children}) => <h5 className="text-sm font-bold text-slate-300 mt-4 mb-2 uppercase tracking-wide">{children}</h5>,
-                p: ({children}) => <p className="text-sm text-slate-400 leading-relaxed mb-4 text-justify">{children}</p>,
-                ul: ({children}) => <ul className="space-y-2 mb-4 list-disc pl-4 marker:text-indigo-500/50">{children}</ul>,
-                li: ({children}) => <li className="text-sm text-slate-400 pl-1">{children}</li>,
-                strong: ({children}) => <span className="text-indigo-200 font-bold">{children}</span>,
-                a: ({href, children}) => (
-                  <a 
-                    href={href} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className="text-indigo-400 hover:text-indigo-300 font-bold underline decoration-indigo-500/30 underline-offset-4 transition-colors inline-flex items-center gap-1"
-                  >
-                    {children}
-                  </a>
-                ),
-                blockquote: ({children}) => (
-                  <blockquote className="border-l-2 border-indigo-500/30 pl-4 py-2 my-6 bg-white/[0.02] rounded-r-xl italic text-slate-400">
-                    {children}
-                  </blockquote>
-                ),
-                hr: () => <hr className="border-white/10 my-8" />,
-              }}
-            >
-              {brief.content}
-            </ReactMarkdown>
+            <BriefMarkdown content={brief.content} variant="page" />
           </div>
           
           {/* Footer */}
