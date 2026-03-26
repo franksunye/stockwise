@@ -18,21 +18,57 @@ try:
 except ImportError:
     from logger import logger
 
+def post_internal_api(path, payload, timeout=10):
+    base_url = os.getenv("NEXT_PUBLIC_SITE_URL") or "http://localhost:3000"
+    api_url = f"{base_url}{path}"
+    secret = os.getenv("INTERNAL_API_SECRET")
+
+    if not secret:
+        logger.warning(f"⚠️ Skipping internal API call {path}: INTERNAL_API_SECRET not set")
+        return None
+
+    try:
+        response = requests.post(
+            api_url,
+            json=payload,
+            headers={
+                "Authorization": f"Bearer {secret}",
+                "Content-Type": "application/json"
+            },
+            timeout=timeout
+        )
+        return response
+    except Exception as e:
+        logger.error(f"❌ Internal API request failed [{path}]: {e}")
+        return None
+
+def revalidate_frontend_cache(tags, timeout=10):
+    tag_list = [tag for tag in tags if isinstance(tag, str) and tag.strip()]
+    if not tag_list:
+        logger.warning("⚠️ Skipping cache revalidation: no tags provided")
+        return False
+
+    response = post_internal_api(
+        "/api/internal/cache/revalidate",
+        {"tags": tag_list},
+        timeout=timeout
+    )
+    if response is None:
+        return False
+
+    if response.status_code == 200:
+        logger.info(f"✅ Cache revalidated successfully: {', '.join(tag_list)}")
+        return True
+
+    logger.warning(f"⚠️ Cache revalidation failed [{response.status_code}]: {response.text}")
+    return False
+
 def send_push_notification(title, body, url=None, related_symbol=None, broadcast=False, tag=None, target_user_id=None, skip_log=False):
     """
     调用 Internal API 发送 Web Push 通知
     """
     # 在 GitHub Actions 中，NEXT_PUBLIC_SITE_URL 或类似变量应指向生产环境
     # 如果没有设置，默认为 localhost (开发用)
-    base_url = os.getenv("NEXT_PUBLIC_SITE_URL") or "http://localhost:3000"
-    api_url = f"{base_url}/api/internal/notify"
-    
-    secret = os.getenv("INTERNAL_API_SECRET")
-    
-    if not secret:
-        logger.warning("⚠️ Skipping push notification: INTERNAL_API_SECRET not set")
-        return False
-
     payload = {
         "title": title,
         "body": body,
@@ -45,15 +81,9 @@ def send_push_notification(title, body, url=None, related_symbol=None, broadcast
     }
 
     try:
-        response = requests.post(
-            api_url,
-            json=payload,
-            headers={
-                "Authorization": f"Bearer {secret}",
-                "Content-Type": "application/json"
-            },
-            timeout=10
-        )
+        response = post_internal_api("/api/internal/notify", payload, timeout=10)
+        if response is None:
+            return False
         if response.status_code == 200:
             logger.info(f"✅ 推送发送成功: {title} (Target: {target_user_id or 'Broadcast'})")
             return True

@@ -20,7 +20,7 @@ const PREDICTION_POLL_INTERVAL = 5 * 60 * 1000; // 5 min
 
 function arePredictionsFreshForToday(stocks: StockData[]): boolean {
     const todayStr = formatDateStr(getHKTime());
-    return stocks.some(s => s.prediction?.date === todayStr);
+    return stocks.length > 0 && stocks.every(s => s.prediction?.date === todayStr);
 }
 
 function shouldPollBatch(stocks: StockData[]): boolean {

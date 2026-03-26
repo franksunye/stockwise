@@ -41,6 +41,7 @@ try:
     from backend.engine.market_facts_service import get_or_generate_market_facts
     from backend.config import BEIJING_TZ, ADMIN_MOBILES
     from backend.utils import send_wecom_notification
+    from backend.notifications import revalidate_frontend_cache
 except ImportError:
     # Fallback for environments where the 'backend' prefix might fail
     from database import get_connection
@@ -49,6 +50,7 @@ except ImportError:
     from market_facts_service import get_or_generate_market_facts
     from config import BEIJING_TZ, ADMIN_MOBILES
     from utils import send_wecom_notification
+    from notifications import revalidate_frontend_cache
 
 def get_next_trading_day(current_date_str: str, cursor: sqlite3.Cursor) -> str:
     """
@@ -527,6 +529,7 @@ def generate_almanac(target_date: str = None, force_t_plus_1: bool = True) -> bo
         logger.info(f"✨ Almanac generation completed for {target_date} in total {t_end - t_start:.2f}s")
         
         conn.commit()
+        revalidate_frontend_cache(["shared-almanac"])
         return True
 
     except Exception as e:
