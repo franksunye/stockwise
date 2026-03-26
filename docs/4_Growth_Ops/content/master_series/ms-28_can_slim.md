@@ -25,6 +25,10 @@ share_copy: "后来很多人记住了 CAN SLIM 这七个字母，却没真的用
 traceability:
   status: "healthy"
   last_reviewed_at: "2026-03-25"
+master_series:
+  review_status: "closed"
+  release_bucket: "sample"
+  release_wave: "wave_2"
 workflow:
   stage: "drafting"
   owner: "cmo"

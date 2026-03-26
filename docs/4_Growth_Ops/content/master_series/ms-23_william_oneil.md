@@ -25,6 +25,10 @@ share_copy: "很多人后来把欧奈尔简化成“做强势股的人”，这�
 traceability:
   status: "healthy"
   last_reviewed_at: "2026-03-25"
+master_series:
+  review_status: "closed"
+  release_bucket: "sample"
+  release_wave: "wave_2"
 workflow:
   stage: "drafting"
   owner: "cmo"

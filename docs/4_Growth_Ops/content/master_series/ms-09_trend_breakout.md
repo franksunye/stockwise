@@ -1,7 +1,7 @@
 ---
-title: "交易大师图鉴 09｜Trend Breakout：它最重要的地方，不是追涨，而是只在趋势真正站稳后才允许你进攻"
+title: "交易大师图鉴 09｜趋势突破（Trend Breakout）：它最重要的地方，不是追涨，而是只在趋势真正站稳后才允许你进攻"
 social_title: "交易大师图鉴 09｜为什么很多人把趋势突破做成了追高"
-editorial_title: "交易大师图鉴 09｜Trend Breakout：确认后的进攻许可"
+editorial_title: "交易大师图鉴 09｜趋势突破（Trend Breakout）：确认后的进攻许可"
 subtitle: "趋势突破真正厉害的，不是突破两个字，而是它把‘什么时候允许进攻’讲成了一套更清楚的纪律"
 content_id: "growth-ms-009"
 content_source: "growth"
@@ -14,7 +14,7 @@ campaign_role: "bridge"
 campaign: "master_series_2026q2"
 rhythm: "Hub"
 headline_alternatives:
-  - "Trend Breakout：它最重要的地方，不是追涨，而是只在趋势真正站稳后才允许你进攻"
+  - "趋势突破（Trend Breakout）：它最重要的地方，不是追涨，而是只在趋势真正站稳后才允许你进攻"
   - "很多人把趋势突破理解成追高，其实它更像一种‘进攻许可机制’"
   - "趋势突破为什么经典？因为它真正回答的是：什么时候你才有资格变得更进攻"
 cover_lines:
@@ -24,6 +24,10 @@ share_copy: "如果你一直把趋势突破理解成‘冲上去买’，这篇�
 traceability:
   status: "healthy"
   last_reviewed_at: "2026-03-25"
+master_series:
+  review_status: "closed"
+  release_bucket: "candidate"
+  release_wave: ""
 workflow:
   stage: "drafting"
   owner: "cmo"
@@ -119,7 +123,7 @@ source_docs:
   - docs/2_Intelligence/registry/methodologies/sepa_minervini.md
   - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
 ---
-# Trend Breakout：它最重要的地方，不是追涨，而是只在趋势真正站稳后才允许你进攻
+# 趋势突破（Trend Breakout）：它最重要的地方，不是追涨，而是只在趋势真正站稳后才允许你进攻
 
 ## 一句话先讲明白
 
@@ -312,7 +316,7 @@ source_docs:
 自定义提示词直接用这版：
 
 ```text
-请基于我上传的资料，生成一份 8 页中文社媒型极简 PPT，采用 Presenter Slides 风格。每页只承载 1 个核心信息点，文字尽量控制在 20-60 字。突出方法定义、趋势确认、右侧交易、进攻许可与长期影响。不要写成长篇讲义，不要把多条观点塞进同一页。整体风格适合小红书、公众号配图和信息图传播，强调视觉留白、信息识别和快速记忆。
+请基于我上传的资料，生成一份 8 页中文极简 PPT，采用 Presenter Slides 风格。每页只放 1 个核心信息点，文字尽量控制在 20-60 字。重点讲清方法定义、趋势确认、右侧交易、进攻许可与长期影响。不要写成长篇讲义，不要把多条观点塞进同一页。整体适合做小红书图卡、公众号配图和信息图，强调留白、识别度和快速理解。
 ```
 
 ### 第 4 步：用这 8 页结构检查 PPT

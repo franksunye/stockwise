@@ -1,6 +1,6 @@
 # 产品变更影响视图 (Change Impact Board)
 
-> 自动生成时间：2026/3/26 14:06:36
+> 自动生成时间：2026/3/26 15:03:41
 > 说明：该视图用于回答“产品/工程文档变化后，哪些内容应该复核或补充”。
 
 ## 受底层文档变更影响，需优先复核的内容
@@ -8,16 +8,14 @@
 | 内容资产 | 来源 | 主流程 | 受影响源文档 |
 | --- | --- | --- | --- |
 | [大师系列内容接入方案 2026](../MASTER_SERIES_CONTENT_INTEGRATION_2026.md) | Growth | ✍️ 生产中 | `docs/4_Growth_Ops/content/README.md` |
-| [交易大师图鉴 12｜海龟交易：它最震撼的地方，不是突破本身，而是把交易拆成一套能训练人的规则](../master_series/ms-12_turtle_trading.md) | Growth | ✍️ 生产中 | `docs/4_Growth_Ops/content/master_series/ms-04_richard_dennis.md` |
-| [交易大师图鉴 13｜VCP：它真正迷人的地方，不是一个形态名字，而是卖压一层层变轻的过程](../master_series/ms-13_vcp.md) | Growth | ✍️ 生产中 | `docs/4_Growth_Ops/content/master_series/ms-01_mark_minervini.md` |
-| [交易大师图鉴 15｜多周期确认：它最重要的地方，不是多看几张图，而是让方向、节奏和触发终于站到同一边](../master_series/ms-15_multi_timeframe_confirmation.md) | Growth | ✍️ 生产中 | `docs/4_Growth_Ops/content/master_series/ms-03_alexander_elder.md` |
-| [交易大师图鉴 16｜事件驱动型进攻结构：它最重要的地方，不是追新闻，而是看懂哪种变化足以改变市场预期](../master_series/ms-16_catalyst_driven_setup.md) | Growth | ✍️ 生产中 | `docs/4_Growth_Ops/content/master_series/ms-02_pradeep_bonde.md` |
 | [交易大师图鉴 18｜先方向，后触发，先风控，后收益：它最重要的地方，不是口号，而是一整套决策顺序](../master_series/ms-18_direction_trigger_risk_return.md) | Growth | ✍️ 生产中 | `docs/4_Growth_Ops/content/master_series/ms-03_alexander_elder.md` |
-| [交易大师图鉴 28｜CAN SLIM：它最重要的地方，不是七个字母本身，而是把成长股进攻拆成了一套筛选顺序](../master_series/ms-28_can_slim.md) | Growth | ✍️ 生产中 | `docs/4_Growth_Ops/content/master_series/ms-23_william_oneil.md` |
-| [交易大师图鉴 29｜Donchian Breakout：它最重要的地方，不是通道画法，而是把趋势突破写成了最干净的祖型组件](../master_series/ms-29_donchian_breakout.md) | Growth | ✍️ 生产中 | `docs/4_Growth_Ops/content/master_series/ms-04_richard_dennis.md` |
-| [交易大师图鉴 30｜Darvas Box：它最重要的地方，不是箱体画法，而是先把边界认清，再等市场自己开门](../master_series/ms-30_darvas_box.md) | Growth | ✍️ 生产中 | `docs/4_Growth_Ops/content/master_series/ms-23_william_oneil.md` |
+| [交易大师图鉴 22｜菲利普·费雪：他最重要的地方，不是找热门公司，而是先问这家公司能不能很多年都继续长大](../master_series/ms-22_philip_fisher.md) | Growth | ✍️ 生产中 | `docs/4_Growth_Ops/content/master_series/ms-05_warren_buffett.md` |
+| [交易大师图鉴 29｜Donchian Breakout：它最重要的地方，不是通道画法，而是把趋势突破写成了最干净的祖型组件](../master_series/ms-29_donchian_breakout.md) | Growth | ✍️ 生产中 | `docs/4_Growth_Ops/content/master_series/ms-12_turtle_trading.md` |
 | [交易大师图鉴 32｜仓位管理与 R 倍数：它最重要的地方，不是算得更细，而是让交易终于能用统一风险单位说话](../master_series/ms-32_position_sizing_and_r_multiple.md) | Growth | ✍️ 生产中 | `docs/4_Growth_Ops/content/master_series/ms-25_van_tharp.md` |
 | [交易大师图鉴 33｜系统开发与期望值：它最重要的地方，不是胜率好不好看，而是长期做下去到底值不值得](../master_series/ms-33_system_development_and_expectancy.md) | Growth | ✍️ 生产中 | `docs/4_Growth_Ops/content/master_series/ms-25_van_tharp.md` |
+| [交易大师图鉴 13｜波动收缩形态（VCP）：它真正迷人的地方，不是一个形态名字，而是卖压一层层变轻的过程](../master_series/ms-13_vcp.md) | Growth | ✍️ 生产中 | `docs/4_Growth_Ops/content/master_series/ms-01_mark_minervini.md` |
+| [交易大师图鉴 16｜事件驱动型进攻结构：它最重要的地方，不是追新闻，而是看懂哪种变化足以改变市场预期](../master_series/ms-16_catalyst_driven_setup.md) | Growth | ✍️ 生产中 | `docs/4_Growth_Ops/content/master_series/ms-02_pradeep_bonde.md` |
+| [交易大师图鉴 30｜Darvas Box：它最重要的地方，不是箱体画法，而是先把边界认清，再等市场自己开门](../master_series/ms-30_darvas_box.md) | Growth | ✍️ 生产中 | `docs/4_Growth_Ops/content/master_series/ms-23_william_oneil.md` |
 | [交易大师图鉴 35｜金融怪杰：它最重要的地方，不是传奇合集，而是替后来人留下一张进入交易世界的阅读地图](../master_series/ms-35_market_wizards_as_reading_map.md) | Growth | ✍️ 生产中 | `docs/4_Growth_Ops/content/master_series/ms-27_jack_schwager.md` |
 | [交易大师图鉴 19｜什么是规则量化中间层：它最重要的地方，不是神秘，而是把经验压成可以复核的规则](../master_series/ms-19_l2_rule_based_quant.md) | Growth | ✍️ 生产中 | `docs/2_Intelligence/registry/MASTER_SERIES_NOTEBOOKLM_PLAN.md` |
 | [交易大师图鉴 20｜大师不等于产品模式：它最重要的地方，不是泼冷水，而是防止把经典方法误读成万能模板](../master_series/ms-20_masters_not_equal_product_modes.md) | Growth | ✍️ 生产中 | `docs/2_Intelligence/registry/MASTER_SERIES_NOTEBOOKLM_PLAN.md` |
@@ -57,6 +55,8 @@
 | [身份护照：UserID 就是你的命](../../../5_Support_Ops/content/identity-passport.md) | Support | 🚀 已发布 | `docs/3_Product/31_Membership_Design_Plan.md` |
 | [一键找回：权益瞬间同步](../../../5_Support_Ops/content/identity-restore-flow.md) | Support | 🚀 已发布 | `docs/3_Product/31_Membership_Design_Plan.md` |
 | [交互优先：手感不能断](../../../5_Support_Ops/content/interaction-first.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/46_Frontend_SWR_Architecture_Upgrade.md` |
+| [邀请码系统：只接待懂纪律的人](../../../5_Support_Ops/content/invitation-ops-guide.md) | Support | 🚀 已发布 | `docs/0_Strategy/07_Growth_and_GTM_Roadmap.md` |
+| [为什么设邀请墙？(Invite Wall Rationale)](../../../5_Support_Ops/content/invite-wall-rationale.md) | Support | 🚀 已发布 | `docs/0_Strategy/07_Growth_and_GTM_Roadmap.md` |
 
 ## 尚未被转化成内容资产的内部文档机会
 

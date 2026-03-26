@@ -25,6 +25,10 @@ share_copy: "很多人复盘交易，讲的还是赚了多少、亏了多少，�
 traceability:
   status: "healthy"
   last_reviewed_at: "2026-03-25"
+master_series:
+  review_status: "closed"
+  release_bucket: "sample"
+  release_wave: "wave_2"
 workflow:
   stage: "drafting"
   owner: "cmo"

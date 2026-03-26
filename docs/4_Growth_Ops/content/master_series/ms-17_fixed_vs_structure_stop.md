@@ -24,6 +24,10 @@ share_copy: "如果你一直在纠结固定止损和结构止损哪个更好，�
 traceability:
   status: "healthy"
   last_reviewed_at: "2026-03-25"
+master_series:
+  review_status: "closed"
+  release_bucket: "candidate"
+  release_wave: ""
 workflow:
   stage: "drafting"
   owner: "cmo"

@@ -1,7 +1,7 @@
 ---
-title: "交易大师图鉴 10｜ATR Stop：它最重要的地方，不是让止损更复杂，而是让风险终于开始按波动说话"
+title: "交易大师图鉴 10｜ATR 止损：它最重要的地方，不是让止损更复杂，而是让风险终于开始按波动说话"
 social_title: "交易大师图鉴 10｜为什么所有股票都用同一把止损尺子，常常会出事"
-editorial_title: "交易大师图鉴 10｜ATR Stop：让止损贴着真实波动走"
+editorial_title: "交易大师图鉴 10｜ATR 止损：让止损贴着真实波动走"
 subtitle: "真正成熟的止损，不是所有股票都一刀切，而是承认不同标的的波动天生就不一样"
 content_id: "growth-ms-010"
 content_source: "growth"
@@ -14,7 +14,7 @@ campaign_role: "bridge"
 campaign: "master_series_2026q2"
 rhythm: "Hub"
 headline_alternatives:
-  - "ATR Stop：它最重要的地方，不是让止损更复杂，而是让风险终于开始按波动说话"
+  - "ATR 止损：它最重要的地方，不是让止损更复杂，而是让风险终于开始按波动说话"
   - "很多人喜欢固定止损，但 ATR Stop 真正解决的是：不同股票本来就不该用同一把尺子"
   - "ATR 止损为什么经典？因为它不再假装所有波动都一样"
 cover_lines:
@@ -24,6 +24,10 @@ share_copy: "如果你一直把止损理解成固定百分比，这篇会把重�
 traceability:
   status: "healthy"
   last_reviewed_at: "2026-03-25"
+master_series:
+  review_status: "closed"
+  release_bucket: "candidate"
+  release_wave: ""
 workflow:
   stage: "drafting"
   owner: "cmo"
@@ -117,7 +121,7 @@ source_docs:
   - docs/2_Intelligence/registry/risk_rules/atr_stop.md
   - docs/2_Intelligence/registry/methodologies/turtle_trading.md
 ---
-# ATR Stop：它最重要的地方，不是让止损更复杂，而是让风险终于开始按波动说话
+# ATR 止损：它最重要的地方，不是让止损更复杂，而是让风险终于开始按波动说话
 
 ## 一句话先讲明白
 
@@ -317,7 +321,7 @@ source_docs:
 自定义提示词直接用这版：
 
 ```text
-请基于我上传的资料，生成一份 8 页中文社媒型极简 PPT，采用 Presenter Slides 风格。每页只承载 1 个核心信息点，文字尽量控制在 20-60 字。突出方法定义、波动率、动态止损、风险思维与长期影响。不要写成长篇讲义，不要把多条观点塞进同一页。整体风格适合小红书、公众号配图和信息图传播，强调视觉留白、信息识别和快速记忆。
+请基于我上传的资料，生成一份 8 页中文极简 PPT，采用 Presenter Slides 风格。每页只放 1 个核心信息点，文字尽量控制在 20-60 字。重点讲清方法定义、波动率、动态止损、风险思维与长期影响。不要写成长篇讲义，不要把多条观点塞进同一页。整体适合做小红书图卡、公众号配图和信息图，强调留白、识别度和快速理解。
 ```
 
 ### 第 4 步：用这 8 页结构检查 PPT

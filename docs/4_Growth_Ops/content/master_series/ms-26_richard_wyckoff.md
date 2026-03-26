@@ -25,6 +25,10 @@ share_copy: "很多人第一次接触威科夫，会先被吸筹、派发这些�
 traceability:
   status: "healthy"
   last_reviewed_at: "2026-03-25"
+master_series:
+  review_status: "closed"
+  release_bucket: "sample"
+  release_wave: "wave_2"
 workflow:
   stage: "drafting"
   owner: "cmo"

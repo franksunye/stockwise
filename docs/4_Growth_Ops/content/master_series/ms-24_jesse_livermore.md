@@ -25,6 +25,10 @@ share_copy: "如果只把利弗莫尔当成一个传奇人物，反而会错过�
 traceability:
   status: "healthy"
   last_reviewed_at: "2026-03-25"
+master_series:
+  review_status: "closed"
+  release_bucket: "sample"
+  release_wave: "wave_2"
 workflow:
   stage: "drafting"
   owner: "cmo"

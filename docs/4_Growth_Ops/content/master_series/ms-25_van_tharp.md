@@ -25,6 +25,10 @@ share_copy: "范·撒普最重要的提醒，其实不花哨。他不是在教�
 traceability:
   status: "healthy"
   last_reviewed_at: "2026-03-25"
+master_series:
+  review_status: "closed"
+  release_bucket: "sample"
+  release_wave: "wave_2"
 workflow:
   stage: "drafting"
   owner: "cmo"

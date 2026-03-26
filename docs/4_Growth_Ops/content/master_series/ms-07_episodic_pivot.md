@@ -1,7 +1,7 @@
 ---
-title: "交易大师图鉴 07｜Episodic Pivot：真正重要的，不是涨了，而是市场突然开始用新逻辑看它"
+title: "交易大师图鉴 07｜事件拐点（Episodic Pivot）：真正重要的，不是涨了，而是市场突然开始用新逻辑看它"
 social_title: "交易大师图鉴 07｜为什么有些大阳线只是热闹，有些却会改写估值逻辑"
-editorial_title: "交易大师图鉴 07｜Episodic Pivot：识别估值故事被改写的时刻"
+editorial_title: "交易大师图鉴 07｜事件拐点（Episodic Pivot）：识别估值故事被改写的时刻"
 subtitle: "事件拐点最厉害的地方，不是抓一根大阳线，而是识别估值故事被突然改写的时刻"
 content_id: "growth-ms-007"
 content_source: "growth"
@@ -14,7 +14,7 @@ campaign_role: "bridge"
 campaign: "master_series_2026q2"
 rhythm: "Hub"
 headline_alternatives:
-  - "Episodic Pivot：真正重要的，不是涨了，而是市场突然开始用新逻辑看它"
+  - "事件拐点（Episodic Pivot）：真正重要的，不是涨了，而是市场突然开始用新逻辑看它"
   - "很多人看到的是一根大阳线，EP 真正要抓的是估值故事被改写的瞬间"
   - "EP 为什么重要？因为它不是抓热闹，而是抓市场突然换了一套定价逻辑"
 cover_lines:
@@ -24,6 +24,10 @@ share_copy: "如果你一直把 EP 理解成‘突然暴涨’，这篇会把重
 traceability:
   status: "healthy"
   last_reviewed_at: "2026-03-25"
+master_series:
+  review_status: "closed"
+  release_bucket: "candidate"
+  release_wave: ""
 workflow:
   stage: "drafting"
   owner: "cmo"
@@ -117,7 +121,7 @@ source_docs:
   - docs/2_Intelligence/registry/methodologies/episodic_pivot_bonde.md
   - docs/2_Intelligence/registry/masters/pradeep_bonde.md
 ---
-# Episodic Pivot：真正重要的，不是涨了，而是市场突然开始用新逻辑看它
+# 事件拐点（Episodic Pivot）：真正重要的，不是涨了，而是市场突然开始用新逻辑看它
 
 ## 一句话先讲明白
 
@@ -153,8 +157,8 @@ source_docs:
 
 如果只讲最有代表性的硬特点，可以先记这几条：
 
-1. `Stockbee` 官网到今天仍把 `Stockbee Episodic Pivots Breakouts` 列为核心学习主题
-2. `2026` 年公开 Bootcamp 页面里，`Episodic Pivots (EP)`、`EP Entry, Stops, Size and Exits` 仍然是单列模块
+1. `Stockbee` 长期把 `Stockbee Episodic Pivots Breakouts` 当成核心学习主题
+2. 这条路线长期把 `Episodic Pivots (EP)` 与 `EP Entry, Stops, Size and Exits` 单独拆出来讲
 3. 必须有明确催化剂、极高参与度和明显价格冲击
 4. 后续最好仍有趋势延续空间
 
@@ -220,7 +224,7 @@ source_docs:
 
 因为它把“事件驱动动量”讲得足够具体。
 
-更关键的是，它到今天还在被原始提出路线持续公开教学。能被一条方法线讲很多年、到 `2026` 年还在公开课里保留，才说明它不是一时的术语热度。
+更关键的是，它一直被原始提出路线持续公开教学。能被一条方法线讲很多年，说明它不是一时的术语热度，而是那条路线里的核心原理。
 
 ## 它和 `Catalyst-Driven Setup`、普通动量突破的差别，到底在哪
 
@@ -323,7 +327,7 @@ source_docs:
 自定义提示词直接用这版：
 
 ```text
-请基于我上传的资料，生成一份 8 页中文社媒型极简 PPT，采用 Presenter Slides 风格。每页只承载 1 个核心信息点，文字尽量控制在 20-60 字。突出方法定义、催化剂、参与度、核心判断与长期影响。不要写成长篇讲义，不要把多条观点塞进同一页。整体风格适合小红书、公众号配图和信息图传播，强调视觉留白、信息识别和快速记忆。
+请基于我上传的资料，生成一份 8 页中文极简 PPT，采用 Presenter Slides 风格。每页只放 1 个核心信息点，文字尽量控制在 20-60 字。重点讲清方法定义、催化剂、参与度、核心判断和长期影响。不要写成长篇讲义，不要把多条观点塞进同一页。整体适合做小红书图卡、公众号配图和信息图，强调留白、识别度和快速理解。
 ```
 
 ### 第 4 步：用这 8 页结构检查 PPT
@@ -367,7 +371,7 @@ source_docs:
 提示词直接用这版：
 
 ```text
-请生成一段简洁的中文音频概览，先讲 Episodic Pivot 为什么值得被记住，再讲它最有代表性的催化剂与预期切换逻辑。不要空泛聊天，不要展开太多细节，适合社交媒体快速收听。
+请生成一段简洁的中文音频概览，先讲 Episodic Pivot 为什么值得被记住，再讲它最有代表性的催化剂与预期切换逻辑。不要空泛聊天，不要展开太多细节，适合快速收听。
 ```
 
 ### 第 8 步：人工复核

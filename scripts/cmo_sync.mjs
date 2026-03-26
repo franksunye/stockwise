@@ -104,6 +104,23 @@ const NLM_OUTPUT_LABELS = {
   ready: '🟢',
   approved: '✅'
 };
+const MASTER_SERIES_REVIEW_LABELS = {
+  closed: '✅ 已收口',
+  light_polish: '🟡 还需轻修',
+  heavy_rework: '🟠 还需重修',
+  unknown: '⚪ 未标注'
+};
+const MASTER_SERIES_BUCKET_LABELS = {
+  sample: '🚀 首发样板',
+  candidate: '🗂 候补池',
+  hold: '📦 库存观察',
+  unknown: '⚪ 未标注'
+};
+const MASTER_SERIES_WAVE_LABELS = {
+  wave_1: '第 1 批',
+  wave_2: '第 2 批',
+  none: '-'
+};
 
 function ensureDir(dirPath) {
   fs.mkdirSync(dirPath, { recursive: true });
@@ -1072,6 +1089,29 @@ function shortMasterSeriesTitle(title) {
   return stripped || title;
 }
 
+function normalizeMasterSeriesReviewStatus(meta) {
+  return meta.master_series?.review_status || 'unknown';
+}
+
+function normalizeMasterSeriesReleaseBucket(meta) {
+  return meta.master_series?.release_bucket || 'unknown';
+}
+
+function normalizeMasterSeriesReleaseWave(meta) {
+  return meta.master_series?.release_wave || 'none';
+}
+
+function inferMasterSeriesNextAction(item) {
+  if (item.workflowStage === 'published') return '已发布';
+  if (item.reviewStatus === 'heavy_rework') return '先重修正文';
+  if (item.reviewStatus === 'light_polish') return '继续轻修';
+  if (item.releaseBucket === 'sample' && item.visualWorkflowStage === 'not_started') return '进入试产';
+  if (item.releaseBucket === 'sample') return '推进分发';
+  if (item.releaseBucket === 'candidate') return '留在候补池';
+  if (item.releaseBucket === 'hold') return '继续观察';
+  return '补标阶段';
+}
+
 function normalizeMasterSeriesItem(filePath) {
   const fileContent = fs.readFileSync(filePath, 'utf8');
   const meta = parseFrontmatter(fileContent);
@@ -1100,6 +1140,9 @@ function normalizeMasterSeriesItem(filePath) {
     hasSocialTitle: Boolean(meta.social_title),
     hasEditorialTitle: Boolean(meta.editorial_title),
     hasNotebookLM,
+    reviewStatus: normalizeMasterSeriesReviewStatus(meta),
+    releaseBucket: normalizeMasterSeriesReleaseBucket(meta),
+    releaseWave: normalizeMasterSeriesReleaseWave(meta),
     campaignRole: meta.campaign_role || '',
     workflowStage: normalizeStage(meta, distribution),
     priority: meta.workflow?.priority || 'medium',
@@ -1112,13 +1155,20 @@ function normalizeMasterSeriesItem(filePath) {
     nlmSlides: nlmProduction.slides || 'not_started',
     nlmInfographic: nlmProduction.infographic || 'not_started',
     nlmAudio: nlmProduction.audio || 'not_started',
-    nlmVideo: nlmProduction.video || 'not_started'
+    nlmVideo: nlmProduction.video || 'not_started',
+    nextAction: ''
   };
 }
 
 function renderMasterSeriesBoard(generatedAt) {
   const files = walkMasterSeriesCanonicals();
-  const items = files.map((f) => normalizeMasterSeriesItem(f)).filter(Boolean);
+  const items = files
+    .map((f) => normalizeMasterSeriesItem(f))
+    .filter(Boolean)
+    .map((item) => ({
+      ...item,
+      nextAction: inferMasterSeriesNextAction(item)
+    }));
   const sorted = [...items].sort((a, b) => a.seriesNumber - b.seriesNumber);
 
   const total = items.length;
@@ -1136,6 +1186,15 @@ function renderMasterSeriesBoard(generatedAt) {
   for (const item of items) {
     byStage[item.workflowStage] = (byStage[item.workflowStage] || 0) + 1;
   }
+  const byReviewStatus = {};
+  const byReleaseBucket = {};
+  for (const item of items) {
+    byReviewStatus[item.reviewStatus] = (byReviewStatus[item.reviewStatus] || 0) + 1;
+    byReleaseBucket[item.releaseBucket] = (byReleaseBucket[item.releaseBucket] || 0) + 1;
+  }
+
+  const samplePool = sorted.filter((item) => item.releaseBucket === 'sample');
+  const holdPool = sorted.filter((item) => item.releaseBucket === 'hold');
 
   const fmtNlm = (status) => NLM_OUTPUT_LABELS[status] || status || '⚪';
 
@@ -1143,6 +1202,7 @@ function renderMasterSeriesBoard(generatedAt) {
   output += `> 自动生成时间：${generatedAt}\n`;
   output += '> 说明：本看板由 `scripts/cmo_sync.mjs` 自动扫描 `master_series/` 目录下的 canonical 母稿生成。\n';
   output += '> 查看范围：仅 canonical 母稿（`ms-xx_*.md`），排除 `_notebooklm.md` 伴稿和规范文件。\n';
+  output += '> 系列状态来源：优先读取各篇 frontmatter 里的 `master_series.*` 字段，用来标注编辑收口、首发分层和当前动作。\n';
   output += '> NLM 状态：⚪ 未开始 · 🔄 生产中 · 🟢 已完成 · ✅ 已通过\n\n';
 
   output += '## 生产概览\n\n';
@@ -1165,18 +1225,52 @@ function renderMasterSeriesBoard(generatedAt) {
   );
   output += '\n\n';
 
+  output += '## 系列阶段概览\n\n';
+  output += markdownTable(
+    ['维度', '状态', '数量'],
+    [
+      ...Object.entries(MASTER_SERIES_REVIEW_LABELS)
+        .filter(([key]) => byReviewStatus[key])
+        .map(([key, label]) => ['编辑收口', label, `${byReviewStatus[key]}`]),
+      ...Object.entries(MASTER_SERIES_BUCKET_LABELS)
+        .filter(([key]) => byReleaseBucket[key])
+        .map(([key, label]) => ['首发分层', label, `${byReleaseBucket[key]}`])
+    ]
+  );
+  output += '\n\n';
+
+  output += '## 首发样板池\n\n';
+  if (samplePool.length === 0) {
+    output += '- 当前还没有标记为首发样板的篇目\n\n';
+  } else {
+    output += markdownTable(
+      ['编号', '标题', '波次', '编辑状态', '当前动作', '视觉', 'NLM'],
+      samplePool.map((item) => [
+        item.seriesId,
+        `[${shortMasterSeriesTitle(item.title)}](${item.relativeToView})`,
+        MASTER_SERIES_WAVE_LABELS[item.releaseWave] || item.releaseWave || '-',
+        MASTER_SERIES_REVIEW_LABELS[item.reviewStatus] || item.reviewStatus,
+        item.nextAction,
+        formatVisualWorkflow(item.visualWorkflowStage),
+        `${fmtNlm(item.nlmSlides)} / ${fmtNlm(item.nlmInfographic)} / ${fmtNlm(item.nlmAudio)}`
+      ])
+    );
+    output += '\n\n';
+  }
+
   output += '## 逐篇生产状态\n\n';
   output += markdownTable(
-    ['编号', '标题', '主流程', '优先级', 'social', 'editorial', '视觉', 'Owner', '最近动作'],
+    ['编号', '标题', '编辑状态', '首发分层', '当前动作', '主流程', '视觉', '最近动作'],
     sorted.map((item) => [
       item.seriesId,
       `[${shortMasterSeriesTitle(item.title)}](${item.relativeToView})`,
+      MASTER_SERIES_REVIEW_LABELS[item.reviewStatus] || item.reviewStatus,
+      item.releaseBucket === 'sample'
+        ? `${MASTER_SERIES_BUCKET_LABELS[item.releaseBucket]} ${MASTER_SERIES_WAVE_LABELS[item.releaseWave] || ''}`.trim()
+        : MASTER_SERIES_BUCKET_LABELS[item.releaseBucket] || item.releaseBucket,
+      item.nextAction,
       STAGE_LABELS[item.workflowStage] || item.workflowStage,
-      PRIORITY_LABELS[item.priority] || item.priority,
-      item.hasSocialTitle ? '✅' : '❌',
-      item.hasEditorialTitle ? '✅' : '❌',
       formatVisualWorkflow(item.visualWorkflowStage),
-      item.owner || '-',
       item.lastActionAt || 'N/A'
     ])
   );
@@ -1229,6 +1323,16 @@ function renderMasterSeriesBoard(generatedAt) {
   } else {
     for (const item of missingNotebookLM) {
       output += `- ${item.seriesId} [${shortMasterSeriesTitle(item.title)}](${item.relativeToView})\n`;
+    }
+    output += '\n';
+  }
+
+  output += '## 库存观察池\n\n';
+  if (holdPool.length === 0) {
+    output += '- 当前没有单独放在库存观察池的篇目\n\n';
+  } else {
+    for (const item of holdPool) {
+      output += `- ${item.seriesId} [${shortMasterSeriesTitle(item.title)}](${item.relativeToView})：${item.nextAction}\n`;
     }
     output += '\n';
   }

@@ -1,7 +1,7 @@
 ---
-title: "交易大师图鉴 14｜Momentum Breakout：它最重要的地方，不是追最热，而是只在强势已经获得加速度后才进攻"
+title: "交易大师图鉴 14｜动量突破（Momentum Breakout）：它最重要的地方，不是追最热，而是只在强势已经获得加速度后才进攻"
 social_title: "交易大师图鉴 14｜为什么真正的动量突破，不是追最热"
-editorial_title: "交易大师图鉴 14｜Momentum Breakout：只在强势获得加速度后进攻"
+editorial_title: "交易大师图鉴 14｜动量突破（Momentum Breakout）：只在强势获得加速度后进攻"
 subtitle: "动量突破真正厉害的，不是冲进热点，而是识别强者为什么会继续强，以及什么时候这种强开始具备延续性"
 content_id: "growth-ms-014"
 content_source: "growth"
@@ -14,7 +14,7 @@ campaign_role: "bridge"
 campaign: "master_series_2026q2"
 rhythm: "Hub"
 headline_alternatives:
-  - "Momentum Breakout：它最重要的地方，不是追最热，而是只在强势获得加速度后才进攻"
+  - "动量突破（Momentum Breakout）：它最重要的地方，不是追最热，而是只在强势获得加速度后才进攻"
   - "很多人把动量突破理解成追热点，其实它更像一种识别强者继续变强的框架"
   - "动量突破为什么经典？因为它回答的是：什么时候强势开始具备延续性"
 cover_lines:
@@ -24,6 +24,10 @@ share_copy: "如果你一直把动量突破理解成追热点，这篇会把重�
 traceability:
   status: "healthy"
   last_reviewed_at: "2026-03-25"
+master_series:
+  review_status: "closed"
+  release_bucket: "candidate"
+  release_wave: ""
 workflow:
   stage: "drafting"
   owner: "cmo"
@@ -118,7 +122,7 @@ source_docs:
   - docs/4_Growth_Ops/content/master_series/ms-07_episodic_pivot.md
   - docs/4_Growth_Ops/content/master_series/ms-09_trend_breakout.md
 ---
-# Momentum Breakout：它最重要的地方，不是追最热，而是只在强势已经获得加速度后才进攻
+# 动量突破（Momentum Breakout）：它最重要的地方，不是追最热，而是只在强势已经获得加速度后才进攻
 
 ## 一句话先讲明白
 
@@ -161,7 +165,7 @@ source_docs:
 如果只讲最有代表性的硬特点，可以先记这几条：
 
 1. 威廉·欧奈尔在 `1988` 年出版的《How to Make Money in Stocks》把强势股突破写成公开方法，后来销量超过 `400` 万册
-2. `Stockbee` 官网到今天仍公开保留 `Momentum Burst breakouts` 作为核心学习主题
+2. `Stockbee` 长期把 `Momentum Burst breakouts` 作为核心学习主题
 3. 它偏爱已经明显领先市场、并且强势进一步增强的对象
 4. 它常与放量、催化、相对强度提升一起出现，不想抄底，只想等市场自己证明强度
 
@@ -332,7 +336,7 @@ source_docs:
 自定义提示词直接用这版：
 
 ```text
-请基于我上传的资料，生成一份 8 页中文社媒型极简 PPT，采用 Presenter Slides 风格。每页只承载 1 个核心信息点，文字尽量控制在 20-60 字。突出动量突破的定义、强势加速度、关键术语、进攻逻辑与长期影响。不要写成长篇讲义，不要把多条观点塞进同一页。整体风格适合小红书、公众号配图和信息图传播，强调视觉留白、信息识别和快速记忆。
+请基于我上传的资料，生成一份 8 页中文极简 PPT，采用 Presenter Slides 风格。每页只放 1 个核心信息点，文字尽量控制在 20-60 字。重点讲清动量突破的定义、强势加速度、关键术语、进攻逻辑和长期影响。不要写成长篇讲义，不要把多条观点塞进同一页。整体适合做小红书图卡、公众号配图和信息图，强调留白、识别度和快速理解。
 ```
 
 ### 第 4 步：用这 8 页结构检查 PPT
@@ -376,7 +380,7 @@ source_docs:
 提示词直接用这版：
 
 ```text
-请生成一段简洁的中文音频概览，先讲动量突破为什么经典，再讲它最有代表性的强势延续逻辑和普通人最该记住的一条纪律。不要空泛聊天，不要展开太多细节，适合社交媒体快速收听。
+请生成一段简洁的中文音频概览，先讲动量突破为什么经典，再讲它最有代表性的强势延续逻辑和普通人最该记住的一条纪律。不要空泛聊天，不要展开太多细节，适合快速收听。
 ```
 
 ### 第 8 步：人工复核

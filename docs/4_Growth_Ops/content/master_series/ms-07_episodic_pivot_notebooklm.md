@@ -1,4 +1,4 @@
-# Episodic Pivot｜NotebookLM 输入稿
+# 事件拐点（Episodic Pivot）｜NotebookLM 输入稿
 
 ## 方法身份
 
@@ -9,8 +9,8 @@
 
 ## 关键事实
 
-- `Stockbee` 官网至今仍把 `Stockbee Episodic Pivots Breakouts` 列为核心学习主题
-- `2026` 年公开 Bootcamp 仍单列 `Episodic Pivots (EP)` 与 `EP Entry, Stops, Size and Exits`
+- `Stockbee` 长期把 `Stockbee Episodic Pivots Breakouts` 列为核心学习主题
+- 这条路线长期单列 `Episodic Pivots (EP)` 与 `EP Entry, Stops, Size and Exits`
 - 重点不只是上涨，而是预期切换
 - 必须有催化剂
 - 必须有参与度
@@ -32,13 +32,13 @@
 
 ## 生成硬约束
 
-- 做成 `8` 页中文社媒型极简 PPT
-- 每页只承载 `1` 个核心信息点
+- 做成 `8` 页中文极简 PPT
+- 每页只放 `1` 个核心信息点
 - 每页文字尽量控制在 `20-60` 字
 - 不要把一页做成小文章
 - 重点放方法定义、催化剂、参与度、预期切换、长期影响
 - 适合小红书、公众号配图、信息图传播
-- 强调高留白、大字号、快速识别
+- 强调留白、大字号、快速理解
 
 ## 8 页页序
 
@@ -56,4 +56,4 @@
 - 平静表面被突发事件击穿
 - 量价同时升级
 - 旧逻辑被打断
-- 强对比、低字量、高留白
+- 强对比、低字量、留白

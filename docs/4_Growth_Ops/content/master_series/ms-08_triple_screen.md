@@ -1,7 +1,7 @@
 ---
-title: "交易大师图鉴 08｜Triple Screen：它最重要的地方，不是多看几个周期，而是先把错误的机会一层层筛掉"
+title: "交易大师图鉴 08｜三重滤网（Triple Screen）：它最重要的地方，不是多看几个周期，而是先把错误的机会一层层筛掉"
 social_title: "交易大师图鉴 08｜为什么很多人明明看见买点，最后还是做错"
-editorial_title: "交易大师图鉴 08｜Triple Screen：分层过滤错误机会"
+editorial_title: "交易大师图鉴 08｜三重滤网（Triple Screen）：分层过滤错误机会"
 subtitle: "三重滤网的真正价值，不是复杂，而是它强迫你承认：一个周期里的信号，常常根本不够"
 content_id: "growth-ms-008"
 content_source: "growth"
@@ -14,7 +14,7 @@ campaign_role: "bridge"
 campaign: "master_series_2026q2"
 rhythm: "Hub"
 headline_alternatives:
-  - "Triple Screen：它最重要的地方，不是多看几个周期，而是先把错误的机会一层层筛掉"
+  - "三重滤网（Triple Screen）：它最重要的地方，不是多看几个周期，而是先把错误的机会一层层筛掉"
   - "很多人以为三重滤网只是多周期分析，其实它更像错误交易清除器"
   - "Triple Screen 为什么经典？因为它逼你承认：一个周期里的信号，常常根本不够"
 cover_lines:
@@ -24,6 +24,10 @@ share_copy: "如果你总觉得自己明明看到买点，结果还是常常做�
 traceability:
   status: "healthy"
   last_reviewed_at: "2026-03-25"
+master_series:
+  review_status: "closed"
+  release_bucket: "candidate"
+  release_wave: ""
 workflow:
   stage: "drafting"
   owner: "cmo"
@@ -117,7 +121,7 @@ source_docs:
   - docs/2_Intelligence/registry/masters/alexander_elder.md
   - docs/2_Intelligence/registry/MASTER_SERIES_NOTEBOOKLM_PLAN.md
 ---
-# Triple Screen：它最重要的地方，不是多看几个周期，而是先把错误的机会一层层筛掉
+# 三重滤网（Triple Screen）：它最重要的地方，不是多看几个周期，而是先把错误的机会一层层筛掉
 
 ## 一句话先讲明白
 
@@ -314,7 +318,7 @@ source_docs:
 自定义提示词直接用这版：
 
 ```text
-请基于我上传的资料，生成一份 8 页中文社媒型极简 PPT，采用 Presenter Slides 风格。每页只承载 1 个核心信息点，文字尽量控制在 20-60 字。突出方法定义、三层过滤、错误清除、核心纪律与长期影响。不要写成长篇讲义，不要把多条观点塞进同一页。整体风格适合小红书、公众号配图和信息图传播，强调视觉留白、信息识别和快速记忆。
+请基于我上传的资料，生成一份 8 页中文极简 PPT，采用 Presenter Slides 风格。每页只放 1 个核心信息点，文字尽量控制在 20-60 字。重点讲清方法定义、三层过滤、错误清除、核心纪律与长期影响。不要写成长篇讲义，不要把多条观点塞进同一页。整体适合做小红书图卡、公众号配图和信息图，强调留白、识别度和快速理解。
 ```
 
 ### 第 4 步：用这 8 页结构检查 PPT

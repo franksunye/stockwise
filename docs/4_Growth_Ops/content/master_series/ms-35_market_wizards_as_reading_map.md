@@ -25,6 +25,10 @@ share_copy: "《金融怪杰》常被当成一本人物故事书来看，但它�
 traceability:
   status: "healthy"
   last_reviewed_at: "2026-03-25"
+master_series:
+  review_status: "closed"
+  release_bucket: "sample"
+  release_wave: "wave_2"
 workflow:
   stage: "drafting"
   owner: "cmo"

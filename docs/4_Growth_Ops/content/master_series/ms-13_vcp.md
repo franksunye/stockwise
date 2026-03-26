@@ -1,8 +1,8 @@
 ---
-title: "交易大师图鉴 13｜VCP：它真正迷人的地方，不是一个形态名字，而是卖压一层层变轻的过程"
+title: "交易大师图鉴 13｜波动收缩形态（VCP）：它真正迷人的地方，不是一个形态名字，而是卖压一层层变轻的过程"
 social_title: "交易大师图鉴 13｜为什么很多人反复讲 VCP，不只是因为它长得好看"
 editorial_title: "交易大师图鉴 13｜VCP：观察卖压逐层衰减的语言"
-subtitle: "Volatility Contraction Pattern 最经典的地方，不是图形本身，而是它把供给收缩、波动变小、突破临近这件事讲得非常直观"
+subtitle: "波动收缩形态（VCP）最经典的地方，不是图形本身，而是它把供给收缩、波动变小、突破临近这件事讲得非常直观"
 content_id: "growth-ms-013"
 content_source: "growth"
 content_type: "article"
@@ -14,7 +14,7 @@ campaign_role: "bridge"
 campaign: "master_series_2026q2"
 rhythm: "Hub"
 headline_alternatives:
-  - "VCP：真正迷人的，不是形态名字，而是卖压一层层变轻的过程"
+  - "波动收缩形态（VCP）：真正迷人的，不是形态名字，而是卖压一层层变轻的过程"
   - "为什么很多交易者会反复讲 VCP？因为它把供给收缩这件事画得太直观了"
   - "很多人把 VCP 当成图形技巧，其实它更像一套观察卖压衰减的语言"
 cover_lines:
@@ -24,6 +24,10 @@ share_copy: "如果你总觉得 VCP 只是一个流行形态，这篇会把重�
 traceability:
   status: "healthy"
   last_reviewed_at: "2026-03-25"
+master_series:
+  review_status: "closed"
+  release_bucket: "candidate"
+  release_wave: ""
 workflow:
   stage: "drafting"
   owner: "cmo"
@@ -337,7 +341,7 @@ source_docs:
 自定义提示词直接用这版：
 
 ```text
-请基于我上传的资料，生成一份 8 页中文社媒型极简 PPT，采用 Presenter Slides 风格。每页只承载 1 个核心信息点，文字尽量控制在 20-60 字。突出 VCP 的定义、卖压收缩逻辑、关键术语、风险优势与长期影响。不要写成长篇讲义，不要把多条观点塞进同一页。整体风格适合小红书、公众号配图和信息图传播，强调视觉留白、信息识别和快速记忆。
+请基于我上传的资料，生成一份 8 页中文极简 PPT，采用 Presenter Slides 风格。每页只放 1 个核心信息点，文字尽量控制在 20-60 字。重点讲清 VCP 的定义、卖压收缩逻辑、关键术语、风险优势与长期影响。不要写成长篇讲义，不要把多条观点塞进同一页。整体适合做小红书图卡、公众号配图和信息图，强调留白、识别度和快速理解。
 ```
 
 ### 第 4 步：用这 8 页结构检查 PPT
