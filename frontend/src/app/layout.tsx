@@ -50,7 +50,7 @@ export default function RootLayout({
   const rootBootstrapInlineScript = buildRootBootstrapInlineScript();
 
   return (
-    <html lang="zh-CN">
+    <html lang="zh-CN" suppressHydrationWarning>
       <head>
         <link rel="manifest" href="/manifest.json" />
         <link rel="preconnect" href="https://app.ziso.cc" />
@@ -76,6 +76,7 @@ export default function RootLayout({
             Visible by default; the inline script below removes it for desktop / non-dashboard. */}
         <div
           id="app-splash"
+          suppressHydrationWarning
           style={{
             position: 'fixed',
             inset: '0',

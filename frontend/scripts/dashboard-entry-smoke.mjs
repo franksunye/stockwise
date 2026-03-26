@@ -252,9 +252,21 @@ async function runCase(browser, options, smokeCase) {
     await seedStorage(context, smokeCase.storage);
     const page = await context.newPage();
     const logs = [];
+    const consoleErrors = [];
+    const pageErrors = [];
 
-    page.on('console', msg => logs.push(`[console:${msg.type()}] ${msg.text()}`));
-    page.on('pageerror', err => logs.push(`[pageerror] ${err.message}`));
+    page.on('console', msg => {
+        const entry = `[console:${msg.type()}] ${msg.text()}`;
+        logs.push(entry);
+        if (msg.type() === 'error') {
+            consoleErrors.push(entry);
+        }
+    });
+    page.on('pageerror', err => {
+        const entry = `[pageerror] ${err.message}`;
+        logs.push(entry);
+        pageErrors.push(entry);
+    });
 
     await addApiStubs(page, smokeCase.profileResponse);
 
@@ -275,7 +287,10 @@ async function runCase(browser, options, smokeCase) {
             await page.waitForTimeout(250);
         }
 
-        const success = observedState === smokeCase.expectedState;
+        const success =
+            observedState === smokeCase.expectedState &&
+            consoleErrors.length === 0 &&
+            pageErrors.length === 0;
 
         return {
             name: smokeCase.name,
@@ -284,6 +299,8 @@ async function runCase(browser, options, smokeCase) {
             observedState,
             urlAfter: page.url(),
             expectedSelector: getSelectorForState(smokeCase.expectedState),
+            consoleErrors,
+            pageErrors,
             logTail: logs.slice(-20),
         };
     } finally {
