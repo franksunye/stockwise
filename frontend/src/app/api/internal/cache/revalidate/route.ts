@@ -13,9 +13,9 @@ export async function POST(request: Request) {
 
     try {
         const body = await request.json().catch(() => ({}));
-        const rawTags = Array.isArray(body?.tags) ? body.tags : [];
+        const rawTags: unknown[] = Array.isArray(body?.tags) ? body.tags : [];
         const tags = rawTags
-            .filter((tag): tag is string => typeof tag === 'string')
+            .filter((tag: unknown): tag is string => typeof tag === 'string')
             .map((tag) => tag.trim())
             .filter(Boolean);
 
