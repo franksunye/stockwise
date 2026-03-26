@@ -492,11 +492,15 @@ summary: "定义前端 SWR 与统一缓存架构的现行边界，是秒开、�
 - `Phase A` 已完成：
   - 已新增 [`frontend/src/lib/dashboard-bootstrap.ts`](/Users/yesun/Code/stockwise/frontend/src/lib/dashboard-bootstrap.ts)
   - 已补充 [`frontend/tests/dashboard-bootstrap.test.mjs`](/Users/yesun/Code/stockwise/frontend/tests/dashboard-bootstrap.test.mjs)
-- `Phase B` 已部分完成：
+- `Phase B` 已完成：
   - [`frontend/src/app/(dashboard)/dashboard/layout.tsx`](/Users/yesun/Code/stockwise/frontend/src/app/(dashboard)/dashboard/layout.tsx) 已切换为消费统一 helper
-  - [`frontend/src/app/layout.tsx`](/Users/yesun/Code/stockwise/frontend/src/app/layout.tsx) 尚未接入，当前仍保留原有 inline bootstrap script
+  - [`frontend/src/app/layout.tsx`](/Users/yesun/Code/stockwise/frontend/src/app/layout.tsx) 已改为消费由 helper 生成的 inline bootstrap script
+- `Phase C` 已按当前目标完成：
+  - [`frontend/tests/dashboard-bootstrap.test.mjs`](/Users/yesun/Code/stockwise/frontend/tests/dashboard-bootstrap.test.mjs) 通过
+  - `npx tsc -p tsconfig.json --noEmit` 通过
+  - targeted lint 已通过；当前仅保留 [`frontend/src/app/layout.tsx`](/Users/yesun/Code/stockwise/frontend/src/app/layout.tsx) 既有的 `img` 优化 warning
 - 当前结论：
-  - 现阶段已完成“低风险等价重构”的第一步，可以作为后续继续收口的基线。
+  - 现阶段已完成这轮 `Dashboard bootstrap state consolidation` 的既定三步，可以作为后续继续收口的基线。
 
 ## 7. 不建议做的事
 
