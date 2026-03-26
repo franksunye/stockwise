@@ -19,31 +19,18 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { isIOS, isStandalone } from '@/lib/device-utils';
 import {
   getOptimisticDashboardBootstrap as getOptimisticDashboardBootstrapState,
+  markDashboardSplashSeen,
   readAuthCache,
   readBrowserBootstrapStorageState,
   shouldOptimisticallyEnterDashboard,
-  type AuthCache,
+  writeAuthCache,
+  writeProfileCache,
 } from '@/lib/dashboard-bootstrap';
-
-// ── 本地 Auth 缓存 ──
-// 已验证的 Pro 用户信息缓存在 localStorage 中，
-// 实现"打开即用"：不等待网络，先用缓存展示内容。
-const AUTH_CACHE_KEY = 'ZISO_AUTH_CACHE_V1';
 
 // P1: 用于桥接 Layout 的 profile 响应到 UserProfileProvider 的缓存
 // 避免 Provider 再次发起重复的 /api/user/profile 请求
-const USER_PROFILE_CACHE_KEY = 'stockwise_user_profile_v1';
 const PROFILE_SYNC_SESSION_KEY = 'last_profile_sync';
 const PROFILE_SYNC_IN_FLIGHT_KEY = 'profile_sync_in_flight_v1';
-
-function setAuthCache(tier: Tier, authorized: boolean): void {
-  try {
-    const cache: AuthCache = { tier, authorized, timestamp: Date.now() };
-    localStorage.setItem(AUTH_CACHE_KEY, JSON.stringify(cache));
-  } catch {
-    // localStorage may be full — non-critical
-  }
-}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function populateUserProfileCache(apiData: any): void {
@@ -64,7 +51,7 @@ function populateUserProfileCache(apiData: any): void {
       referralCount: apiData.referralCount,
       recentTransactions: apiData.recentTransactions,
     };
-    localStorage.setItem(USER_PROFILE_CACHE_KEY, JSON.stringify(profileForCache));
+    writeProfileCache(profileForCache);
     sessionStorage.setItem(PROFILE_SYNC_SESSION_KEY, String(Date.now()));
   } catch { /* non-critical */ }
 }
@@ -162,7 +149,7 @@ export default function DashboardLayout({
       // 如果邀请墙关闭，直接放行（公测/正式期）
       if (!switches.requireInvite) {
         setIsAuthorized(true);
-        setAuthCache('free', true);
+        writeAuthCache('free', true);
         try {
           try {
             sessionStorage.setItem(PROFILE_SYNC_IN_FLIGHT_KEY, '1');
@@ -187,7 +174,7 @@ export default function DashboardLayout({
             const newTier = (data.tier || 'free') as Tier;
             populateUserProfileCache(data); // P1: 桥接到 UserProfileProvider 缓存
             setTier(newTier);
-            setAuthCache(newTier, true);
+            writeAuthCache(newTier, true);
           }
         } catch (e) {
           console.warn('Tier warmup failed (invite disabled mode):', e);
@@ -286,12 +273,12 @@ export default function DashboardLayout({
         if (!isUnauthorizedFreeUser) {
           // 已注册且授权用户（无论是 pro 或者老 free）：放行
           setIsAuthorized(true);
-          setAuthCache(newTier, true);
+          writeAuthCache(newTier, true);
           localStorage.removeItem('STOCKWISE_REFERRED_BY');
         } else {
           // 全新 free 用户，或从未成功完成 onboarding 的 free 用户：需要邀请码
           setIsAuthorized(false);
-          setAuthCache(newTier, false);
+          writeAuthCache(newTier, false);
         }
       } catch (e) {
         console.error('Auth verification failed or timed out', e);
@@ -334,7 +321,7 @@ export default function DashboardLayout({
       // Uses localStorage (not sessionStorage) because iOS standalone WKWebView
       // can silently clear sessionStorage during background/resume cycles.
       // The boot script uses a 2-minute TTL to still show splash on true cold starts.
-      try { localStorage.setItem('stockwise_splash_ts', String(Date.now())); } catch { /* non-critical */ }
+      try { markDashboardSplashSeen(); } catch { /* non-critical */ }
     }
   }, [isAuthorized]);
 

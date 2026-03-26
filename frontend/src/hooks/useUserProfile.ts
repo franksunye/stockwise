@@ -13,6 +13,7 @@ import {
 import type { ReactNode } from 'react';
 import { getCurrentUser } from '@/lib/user';
 import { getWatchlist } from '@/lib/storage';
+import { readProfileCache, writeProfileCache } from '@/lib/dashboard-bootstrap';
 
 const PROFILE_CACHE_KEY = 'stockwise_user_profile_v1';
 const PROFILE_SYNC_SESSION_KEY = 'last_profile_sync';
@@ -73,18 +74,11 @@ function useUserProfileStore(): UserProfileContextValue {
     // 1. 从缓存初始化 — 关键：命中缓存时立即标记 loading=false
     //    这使得 DashboardEntryGate 不会再显示第二层骨架屏
     useLayoutEffect(() => {
-        const cached = localStorage.getItem(PROFILE_CACHE_KEY);
-        if (cached) {
-            try {
-                const parsed = JSON.parse(cached);
-                if (parsed && parsed.userId) {
-                    setProfile(parsed);
-                    profileRef.current = parsed;
-                    setLoading(false); // P0 核心修复：缓存命中 → 立即可渲染
-                }
-            } catch (e) {
-                console.error('Failed to parse profile cache', e);
-            }
+        const parsed = readProfileCache<UserProfile>(localStorage.getItem(PROFILE_CACHE_KEY));
+        if (parsed?.userId) {
+            setProfile(parsed);
+            profileRef.current = parsed;
+            setLoading(false); // P0 核心修复：缓存命中 → 立即可渲染
         }
     }, []);
 
@@ -158,7 +152,7 @@ function useUserProfileStore(): UserProfileContextValue {
 
             setProfile(newProfile);
             profileRef.current = newProfile;
-            localStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify(newProfile));
+            writeProfileCache(newProfile);
             sessionStorage.setItem(PROFILE_SYNC_SESSION_KEY, now.toString());
             return newProfile;
         } catch (e) {

@@ -65,8 +65,10 @@ export function readAuthCache(
     return cache;
 }
 
-export function readProfileCache(raw: string | null | undefined): ProfileCache | null {
-    const profile = parseJson<ProfileCache>(raw);
+export function readProfileCache<T extends object = ProfileCache>(
+    raw: string | null | undefined
+): T | null {
+    const profile = parseJson<T>(raw);
     if (!profile || typeof profile !== 'object') return null;
     return profile;
 }
@@ -186,6 +188,47 @@ export function readBrowserBootstrapStorageState(): DashboardBootstrapStorageSta
         navIntentRaw: window.sessionStorage.getItem(DASHBOARD_NAV_INTENT_KEY),
         splashTsRaw: window.localStorage.getItem(SPLASH_TS_KEY),
     };
+}
+
+export function writeAuthCache(
+    tier: BootstrapTier,
+    authorized: boolean,
+    now: number = Date.now()
+): AuthCache | null {
+    if (typeof window === 'undefined') {
+        return null;
+    }
+
+    const payload: AuthCache = { tier, authorized, timestamp: now };
+    window.localStorage.setItem(AUTH_CACHE_KEY, JSON.stringify(payload));
+    return payload;
+}
+
+export function clearAuthCache(): void {
+    if (typeof window === 'undefined') {
+        return;
+    }
+
+    window.localStorage.removeItem(AUTH_CACHE_KEY);
+}
+
+export function writeProfileCache<T extends { userId: string }>(profile: T): T | null {
+    if (typeof window === 'undefined') {
+        return null;
+    }
+
+    window.localStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify(profile));
+    return profile;
+}
+
+export function markDashboardSplashSeen(now: number = Date.now()): string | null {
+    if (typeof window === 'undefined') {
+        return null;
+    }
+
+    const timestamp = String(now);
+    window.localStorage.setItem(SPLASH_TS_KEY, timestamp);
+    return timestamp;
 }
 
 export function getDashboardEntryHint(

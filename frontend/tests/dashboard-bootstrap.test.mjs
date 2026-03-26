@@ -15,13 +15,18 @@ const {
     SPLASH_SESSION_TTL_MS,
     SPLASH_TS_KEY,
     buildRootBootstrapInlineScript,
+    clearAuthCache,
     getDashboardEntryHint,
     getOptimisticDashboardBootstrap,
+    markDashboardSplashSeen,
     readAuthCache,
     readDashboardNavIntent,
+    readProfileCache,
     shouldMarkDashboardBootReady,
     shouldOptimisticallyEnterDashboard,
     shouldSuppressDashboardSplash,
+    writeAuthCache,
+    writeProfileCache,
 } = await import(moduleUrl);
 
 describe('dashboard bootstrap helpers', () => {
@@ -193,5 +198,68 @@ describe('dashboard bootstrap helpers', () => {
         assert.match(script, /dashboard-boot-ready/);
         assert.match(script, /shouldShowSplash/);
         assert.doesNotMatch(script, new RegExp(DASHBOARD_NAV_INTENT_KEY));
+    });
+
+    it('round-trips auth cache payloads through write and read helpers', () => {
+        const store = new Map();
+        globalThis.window = {
+            localStorage: {
+                getItem: (key) => store.get(key) ?? null,
+                setItem: (key, value) => store.set(key, value),
+                removeItem: (key) => store.delete(key),
+            },
+        };
+
+        const now = 500_000;
+        const written = writeAuthCache('pro', true, now);
+
+        assert.deepEqual(written, { tier: 'pro', authorized: true, timestamp: now });
+        assert.deepEqual(readAuthCache(store.get(AUTH_CACHE_KEY), now + 1), written);
+
+        clearAuthCache();
+        assert.equal(store.get(AUTH_CACHE_KEY), undefined);
+
+        delete globalThis.window;
+    });
+
+    it('round-trips profile cache payloads through write and read helpers', () => {
+        const store = new Map();
+        globalThis.window = {
+            localStorage: {
+                getItem: (key) => store.get(key) ?? null,
+                setItem: (key, value) => store.set(key, value),
+                removeItem: (key) => store.delete(key),
+            },
+        };
+
+        const profile = {
+            userId: 'user_123',
+            tier: 'free',
+            hasOnboarded: true,
+            watchlistCount: 3,
+        };
+
+        const written = writeProfileCache(profile);
+        assert.deepEqual(written, profile);
+        assert.deepEqual(readProfileCache(store.get(PROFILE_CACHE_KEY)), profile);
+
+        delete globalThis.window;
+    });
+
+    it('writes splash seen timestamps as strings', () => {
+        const store = new Map();
+        globalThis.window = {
+            localStorage: {
+                getItem: (key) => store.get(key) ?? null,
+                setItem: (key, value) => store.set(key, value),
+                removeItem: (key) => store.delete(key),
+            },
+        };
+
+        const written = markDashboardSplashSeen(987654);
+        assert.equal(written, '987654');
+        assert.equal(store.get(SPLASH_TS_KEY), '987654');
+
+        delete globalThis.window;
     });
 });
