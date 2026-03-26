@@ -44,6 +44,7 @@ class NotificationManager:
         self.signal_cache: Dict[str, Dict[str, dict]] = {}  # user_id -> {symbol -> state_dict}
         self.pending_state_updates: List[dict] = []  # List of state updates to flush to DB
         self.user_tier_cache: Dict[str, str] = {}  # user_id -> tier
+        self._sub_cache: Dict[str, bool] = {}  # user_id -> has_subscription
         
         # Internal stats
         self.stats = {
@@ -420,6 +421,29 @@ class NotificationManager:
             if not self.conn:
                 conn.close()
 
+    def _has_push_subscription(self, user_id: str) -> bool:
+        """Check if user has at least one active push subscription.
+        Cached per-instance to avoid repeated DB queries within one flush cycle."""
+        if user_id in self._sub_cache:
+            return self._sub_cache[user_id]
+
+        conn = self._get_conn()
+        try:
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT 1 FROM push_subscriptions WHERE user_id = ? LIMIT 1",
+                (user_id,)
+            )
+            has_sub = cursor.fetchone() is not None
+            self._sub_cache[user_id] = has_sub
+            return has_sub
+        except Exception as e:
+            logger.debug(f"⚠️ Failed to check push subscription for {user_id}: {e}")
+            return True  # Fail-open
+        finally:
+            if not self.conn:
+                conn.close()
+
     def _send_notification(self, user_id: str, payload: dict) -> bool:
         """Helper to send push and log it."""
         log_id = f"notif_{uuid.uuid4().hex[:12]}"
@@ -429,6 +453,11 @@ class NotificationManager:
         if not self._check_user_preference(user_id, notif_type):
             logger.debug(f"⏭️ User {user_id} has disabled '{notif_type}' notifications, skipping")
             self.stats["skipped_by_preference"] += 1
+            return False
+
+        # [NEW] Pre-check: Skip HTTP call if user has no push subscription
+        if not self._has_push_subscription(user_id):
+            logger.debug(f"⏭️ User {user_id} has no push subscription, skipping HTTP call")
             return False
         
         # Add tracking ID to URL
