@@ -65,6 +65,7 @@
 - `tactics` 必须包含 `holding_profit`、`holding_loss`、`empty`
 - `tactics.holding_profit`、`tactics.holding_loss`、`tactics.empty` 必须各输出恰好 2 条策略
 - 每条策略都必须包含 `priority`、`action`、`trigger`、`reason`
+- 触发条件数值化约束：所有的 `trigger` 必须包含具体的价位数字（如“有效跌破 380.65”），禁止使用“一防位”、“压力位”等模糊代称。
 - 不适用的价位字段请显式输出 `null`
 
 ### 关键位契约
