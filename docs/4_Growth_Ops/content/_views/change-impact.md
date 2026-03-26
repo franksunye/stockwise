@@ -1,16 +1,17 @@
 # 产品变更影响视图 (Change Impact Board)
 
-> 自动生成时间：2026/3/26 16:16:06
+> 自动生成时间：2026/3/26 18:15:33
 > 说明：该视图用于回答“产品/工程文档变化后，哪些内容应该复核或补充”。
 
 ## 受底层文档变更影响，需优先复核的内容
 
 | 内容资产 | 来源 | 主流程 | 受影响源文档 |
 | --- | --- | --- | --- |
-| [交易大师图鉴 14｜动量突破（Momentum Breakout）：真正伟大的进攻，不是教你追热点，而是教你只在强者获得“二次加速”时，才果断入场。](../master_series/ms-14_momentum_breakout.md) | Growth | ✍️ 生产中 | `docs/4_Growth_Ops/content/master_series/ms-09_trend_breakout.md` |
-| [交易大师图鉴 15｜多周期确认：真正的高手章法，不是看更多图，而是当大方向与小触发“吵架”时，敢于立刻停下来。](../master_series/ms-15_multi_timeframe_confirmation.md) | Growth | ✍️ 生产中 | `docs/4_Growth_Ops/content/master_series/ms-08_triple_screen.md` |
-| [交易大师图鉴 16｜事件驱动型进攻结构：它最重要的地方，不是追新闻，而是看懂哪种变化足以改变市场预期](../master_series/ms-16_catalyst_driven_setup.md) | Growth | ✍️ 生产中 | `docs/4_Growth_Ops/content/master_series/ms-07_episodic_pivot.md` |
+| [交易大师图鉴 28｜CAN SLIM：它最重要的地方，不是七个字母本身，而是把成长股进攻拆成了一套筛选顺序](../master_series/ms-28_can_slim.md) | Growth | ✍️ 生产中 | `docs/4_Growth_Ops/content/master_series/ms-23_william_oneil.md` |
+| [交易大师图鉴 30｜尼古拉斯·达瓦斯：交易的真谛，不是去听小道消息，而是看清股票正在哪层“箱子”里跳舞。](../master_series/ms-30_darvas_box.md) | Growth | ✍️ 生产中 | `docs/4_Growth_Ops/content/master_series/ms-23_william_oneil.md` |
 | [大师系列内容接入方案 2026](../MASTER_SERIES_CONTENT_INTEGRATION_2026.md) | Growth | ✍️ 生产中 | `docs/4_Growth_Ops/content/README.md` |
+| [交易大师图鉴 29｜理查德·唐契安：趋势跟随的真谛，不是去抓每个拐点，而是学会“随波逐流”。](../master_series/ms-29_donchian_breakout.md) | Growth | ✍️ 生产中 | `docs/4_Growth_Ops/content/master_series/ms-12_turtle_trading.md` |
+| [交易大师图鉴 16｜事件驱动型进攻结构：它最重要的地方，不是追新闻，而是看懂哪种变化足以改变市场预期](../master_series/ms-16_catalyst_driven_setup.md) | Growth | ✍️ 生产中 | `docs/4_Growth_Ops/content/master_series/ms-07_episodic_pivot.md` |
 | [101-100: 很多人不是不会炒股，而是连自己是什么段位都没弄明白](../101_academy/101-100_maturity_prologue.md) | Growth | 📅 已排期 | `docs/2_Intelligence/research/01_Quant_Trading_Schools_Taxonomy.md` |
 | [101-104: 只要你的交易还经常从“我觉得”开始，你就还没走出 L0](../101_academy/101-104_maturity_l0_discretionary.md) | Growth | ✅ 已通过 | `docs/2_Intelligence/research/01_Quant_Trading_Schools_Taxonomy.md` |
 | [101-105: 你以为自己在看信号，很多时候其实只是在盯着后视镜开车](../101_academy/101-105_maturity_l1_indicator.md) | Growth | 👀 待审核 | `docs/2_Intelligence/research/01_Quant_Trading_Schools_Taxonomy.md` |
@@ -56,7 +57,6 @@
 | [通知开关：不喜欢就关了](../../../5_Support_Ops/content/notification-preference.md) | Support | 🚀 已发布 | `docs/3_Product/30_Notification_Strategy_Design.md` |
 | [体验期权限发放规则 (Onboarding Trial Rules)](../../../5_Support_Ops/content/onboarding-trial-rules.md) | Support | 🚀 已发布 | `docs/3_Product/31_Membership_Design_Plan.md` |
 | [乐观更新：不用等圈圈转](../../../5_Support_Ops/content/optimistic-ui-logic.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/46_Frontend_SWR_Architecture_Upgrade.md` |
-| [五级价位阵地解释系统 (Price Ladder)](../../../5_Support_Ops/content/price-ladder.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/45_Stock_Radar_Discovery_Engine.md` |
 
 ## 尚未被转化成内容资产的内部文档机会
 

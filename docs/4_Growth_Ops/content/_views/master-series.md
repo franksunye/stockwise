@@ -1,6 +1,6 @@
 # 交易大师图鉴 · 生产看板 (Master Series Production Board)
 
-> 自动生成时间：2026/3/26 16:16:06
+> 自动生成时间：2026/3/26 18:15:33
 > 说明：本看板由 `scripts/cmo_sync.mjs` 自动扫描 `master_series/` 目录下的 canonical 母稿生成。
 > 查看范围：仅 canonical 母稿（`ms-xx_*.md`），排除 `_notebooklm.md` 伴稿和规范文件。
 > 系列状态来源：优先读取各篇 frontmatter 里的 `master_series.*` 字段，用来标注编辑收口、首发分层和当前动作。
@@ -10,24 +10,24 @@
 
 | 指标 | 数值 |
 | --- | --- |
-| Canonical 母稿总数 | 35 |
-| 已补 social_title | 35 / 35 |
-| 已补 editorial_title | 35 / 35 |
-| 已有 NotebookLM 输入稿 | 35 / 35 |
-| NLM 演示文稿已完成 | 1 / 35 |
-| NLM 信息图已完成 | 1 / 35 |
-| NLM 音频已完成 | 1 / 35 |
-| NLM 视频已完成 | 1 / 35 |
-| ✍️ 生产中 | 34 |
+| Canonical 母稿总数 | 36 |
+| 已补 social_title | 36 / 36 |
+| 已补 editorial_title | 36 / 36 |
+| 已有 NotebookLM 输入稿 | 36 / 36 |
+| NLM 演示文稿已完成 | 1 / 36 |
+| NLM 信息图已完成 | 1 / 36 |
+| NLM 音频已完成 | 1 / 36 |
+| NLM 视频已完成 | 1 / 36 |
+| ✍️ 生产中 | 35 |
 | 🚀 已发布 | 1 |
 
 ## 系列阶段概览
 
 | 维度 | 状态 | 数量 |
 | --- | --- | --- |
-| 编辑收口 | ✅ 已收口 | 35 |
+| 编辑收口 | ✅ 已收口 | 36 |
 | 首发分层 | 🚀 首发样板 | 14 |
-| 首发分层 | 🗂 候补池 | 17 |
+| 首发分层 | 🗂 候补池 | 18 |
 | 首发分层 | 📦 库存观察 | 4 |
 
 ## 首发样板池
@@ -47,7 +47,7 @@
 | ms-26 | [理查德·威科夫](../master_series/ms-26_richard_wyckoff.md) | 第 2 批 | ✅ 已收口 | 进入试产 | ⚪ 未开始 | ⚪ / ⚪ / ⚪ |
 | ms-28 | [CAN SLIM](../master_series/ms-28_can_slim.md) | 第 2 批 | ✅ 已收口 | 进入试产 | ⚪ 未开始 | ⚪ / ⚪ / ⚪ |
 | ms-32 | [仓位管理与 R 倍数](../master_series/ms-32_position_sizing_and_r_multiple.md) | 第 2 批 | ✅ 已收口 | 进入试产 | ⚪ 未开始 | ⚪ / ⚪ / ⚪ |
-| ms-35 | [金融怪杰](../master_series/ms-35_market_wizards_as_reading_map.md) | 第 2 批 | ✅ 已收口 | 进入试产 | ⚪ 未开始 | ⚪ / ⚪ / ⚪ |
+| ms-36 | [金融怪杰](../master_series/ms-36_market_wizards_as_reading_map.md) | 第 2 批 | ✅ 已收口 | 进入试产 | ⚪ 未开始 | ⚪ / ⚪ / ⚪ |
 
 ## Ready To Publish
 
@@ -68,7 +68,7 @@
 | ms-26 | [理查德·威科夫](../master_series/ms-26_richard_wyckoff.md) | 第 2 批 | 进入试产 | ✍️ 生产中 |
 | ms-28 | [CAN SLIM](../master_series/ms-28_can_slim.md) | 第 2 批 | 进入试产 | ✍️ 生产中 |
 | ms-32 | [仓位管理与 R 倍数](../master_series/ms-32_position_sizing_and_r_multiple.md) | 第 2 批 | 进入试产 | ✍️ 生产中 |
-| ms-35 | [金融怪杰](../master_series/ms-35_market_wizards_as_reading_map.md) | 第 2 批 | 进入试产 | ✍️ 生产中 |
+| ms-36 | [金融怪杰](../master_series/ms-36_market_wizards_as_reading_map.md) | 第 2 批 | 进入试产 | ✍️ 生产中 |
 
 ## Ready To NLM
 
@@ -93,9 +93,9 @@
 | ms-15 | [多周期确认](../master_series/ms-15_multi_timeframe_confirmation.md) | 🗂 候补池 | 留在候补池 | ✅ |
 | ms-16 | [事件驱动型进攻结构](../master_series/ms-16_catalyst_driven_setup.md) | 🗂 候补池 | 留在候补池 | ✅ |
 | ms-17 | [固定止损 vs 结构止损](../master_series/ms-17_fixed_vs_structure_stop.md) | 🗂 候补池 | 留在候补池 | ✅ |
-| ms-18 | [先方向，后触发，先风控，后收益](../master_series/ms-18_direction_trigger_risk_return.md) | 🗂 候补池 | 留在候补池 | ✅ |
-| ms-19 | [什么是规则量化中间层](../master_series/ms-19_l2_rule_based_quant.md) | 📦 库存观察 | 继续观察 | ✅ |
-| ms-20 | [大师不等于产品模式](../master_series/ms-20_masters_not_equal_product_modes.md) | 📦 库存观察 | 继续观察 | ✅ |
+| ms-18 | [DTR-R](../master_series/ms-18_direction_trigger_risk_return.md) | 🗂 候补池 | 留在候补池 | ✅ |
+| ms-19 | [L2 级规则量化](../master_series/ms-19_l2_rule_based_quant.md) | 📦 库存观察 | 继续观察 | ✅ |
+| ms-20 | [交易大师不等于资管产品](../master_series/ms-20_masters_not_equal_product_modes.md) | 📦 库存观察 | 继续观察 | ✅ |
 | ms-21 | [本杰明·格雷厄姆](../master_series/ms-21_benjamin_graham.md) | 🚀 首发样板 第 2 批 | 进入试产 | ✅ |
 | ms-22 | [菲利普·费雪](../master_series/ms-22_philip_fisher.md) | 🗂 候补池 | 留在候补池 | ✅ |
 | ms-23 | [威廉·欧奈尔](../master_series/ms-23_william_oneil.md) | 🚀 首发样板 第 2 批 | 进入试产 | ✅ |
@@ -104,13 +104,14 @@
 | ms-26 | [理查德·威科夫](../master_series/ms-26_richard_wyckoff.md) | 🚀 首发样板 第 2 批 | 进入试产 | ✅ |
 | ms-27 | [杰克·施瓦格](../master_series/ms-27_jack_schwager.md) | 🗂 候补池 | 留在候补池 | ✅ |
 | ms-28 | [CAN SLIM](../master_series/ms-28_can_slim.md) | 🚀 首发样板 第 2 批 | 进入试产 | ✅ |
-| ms-29 | [Donchian Breakout](../master_series/ms-29_donchian_breakout.md) | 🗂 候补池 | 留在候补池 | ✅ |
-| ms-30 | [Darvas Box](../master_series/ms-30_darvas_box.md) | 🗂 候补池 | 留在候补池 | ✅ |
-| ms-31 | [Right-side Trading](../master_series/ms-31_right_side_trading.md) | 🗂 候补池 | 留在候补池 | ✅ |
+| ms-29 | [理查德·唐契安](../master_series/ms-29_donchian_breakout.md) | 🗂 候补池 | 留在候补池 | ✅ |
+| ms-30 | [尼古拉斯·达瓦斯](../master_series/ms-30_darvas_box.md) | 🗂 候补池 | 留在候补池 | ✅ |
+| ms-31 | [右侧交易](../master_series/ms-31_right_side_trading.md) | 🗂 候补池 | 留在候补池 | ✅ |
 | ms-32 | [仓位管理与 R 倍数](../master_series/ms-32_position_sizing_and_r_multiple.md) | 🚀 首发样板 第 2 批 | 进入试产 | ✅ |
 | ms-33 | [系统开发与期望值](../master_series/ms-33_system_development_and_expectancy.md) | 📦 库存观察 | 继续观察 | ✅ |
-| ms-34 | [方法、事实层、判断模块与模式层](../master_series/ms-34_method_fact_layer_producer_mode.md) | 📦 库存观察 | 继续观察 | ✅ |
-| ms-35 | [金融怪杰](../master_series/ms-35_market_wizards_as_reading_map.md) | 🚀 首发样板 第 2 批 | 进入试产 | ✅ |
+| ms-34 | [事实层与生产商模式](../master_series/ms-34_method_fact_layer_producer_mode.md) | 📦 库存观察 | 继续观察 | ✅ |
+| ms-35 | [霍华德·马克斯](../master_series/ms-35_howard_marks.md) | 🗂 候补池 | 留在候补池 | ✅ |
+| ms-36 | [金融怪杰](../master_series/ms-36_market_wizards_as_reading_map.md) | 🚀 首发样板 第 2 批 | 进入试产 | ✅ |
 
 ## 逐篇生产状态
 
@@ -133,9 +134,9 @@
 | ms-15 | [多周期确认](../master_series/ms-15_multi_timeframe_confirmation.md) | ✅ 已收口 | 🗂 候补池 | 留在候补池 | ✍️ 生产中 | ⚪ 未开始 | 2026-03-25 |
 | ms-16 | [事件驱动型进攻结构](../master_series/ms-16_catalyst_driven_setup.md) | ✅ 已收口 | 🗂 候补池 | 留在候补池 | ✍️ 生产中 | ⚪ 未开始 | 2026-03-25 |
 | ms-17 | [固定止损 vs 结构止损](../master_series/ms-17_fixed_vs_structure_stop.md) | ✅ 已收口 | 🗂 候补池 | 留在候补池 | ✍️ 生产中 | ⚪ 未开始 | 2026-03-25 |
-| ms-18 | [先方向，后触发，先风控，后收益](../master_series/ms-18_direction_trigger_risk_return.md) | ✅ 已收口 | 🗂 候补池 | 留在候补池 | ✍️ 生产中 | ⚪ 未开始 | 2026-03-25 |
-| ms-19 | [什么是规则量化中间层](../master_series/ms-19_l2_rule_based_quant.md) | ✅ 已收口 | 📦 库存观察 | 继续观察 | ✍️ 生产中 | ⚪ 未开始 | 2026-03-25 |
-| ms-20 | [大师不等于产品模式](../master_series/ms-20_masters_not_equal_product_modes.md) | ✅ 已收口 | 📦 库存观察 | 继续观察 | ✍️ 生产中 | ⚪ 未开始 | 2026-03-25 |
+| ms-18 | [DTR-R](../master_series/ms-18_direction_trigger_risk_return.md) | ✅ 已收口 | 🗂 候补池 | 留在候补池 | ✍️ 生产中 | ⚪ 未开始 | 2026-03-25 |
+| ms-19 | [L2 级规则量化](../master_series/ms-19_l2_rule_based_quant.md) | ✅ 已收口 | 📦 库存观察 | 继续观察 | ✍️ 生产中 | ⚪ 未开始 | 2026-03-25 |
+| ms-20 | [交易大师不等于资管产品](../master_series/ms-20_masters_not_equal_product_modes.md) | ✅ 已收口 | 📦 库存观察 | 继续观察 | ✍️ 生产中 | ⚪ 未开始 | 2026-03-25 |
 | ms-21 | [本杰明·格雷厄姆](../master_series/ms-21_benjamin_graham.md) | ✅ 已收口 | 🚀 首发样板 第 2 批 | 进入试产 | ✍️ 生产中 | ⚪ 未开始 | 2026-03-25 |
 | ms-22 | [菲利普·费雪](../master_series/ms-22_philip_fisher.md) | ✅ 已收口 | 🗂 候补池 | 留在候补池 | ✍️ 生产中 | ⚪ 未开始 | 2026-03-25 |
 | ms-23 | [威廉·欧奈尔](../master_series/ms-23_william_oneil.md) | ✅ 已收口 | 🚀 首发样板 第 2 批 | 进入试产 | ✍️ 生产中 | ⚪ 未开始 | 2026-03-25 |
@@ -144,13 +145,14 @@
 | ms-26 | [理查德·威科夫](../master_series/ms-26_richard_wyckoff.md) | ✅ 已收口 | 🚀 首发样板 第 2 批 | 进入试产 | ✍️ 生产中 | ⚪ 未开始 | 2026-03-25 |
 | ms-27 | [杰克·施瓦格](../master_series/ms-27_jack_schwager.md) | ✅ 已收口 | 🗂 候补池 | 留在候补池 | ✍️ 生产中 | ⚪ 未开始 | 2026-03-25 |
 | ms-28 | [CAN SLIM](../master_series/ms-28_can_slim.md) | ✅ 已收口 | 🚀 首发样板 第 2 批 | 进入试产 | ✍️ 生产中 | ⚪ 未开始 | 2026-03-25 |
-| ms-29 | [Donchian Breakout](../master_series/ms-29_donchian_breakout.md) | ✅ 已收口 | 🗂 候补池 | 留在候补池 | ✍️ 生产中 | ⚪ 未开始 | 2026-03-25 |
-| ms-30 | [Darvas Box](../master_series/ms-30_darvas_box.md) | ✅ 已收口 | 🗂 候补池 | 留在候补池 | ✍️ 生产中 | ⚪ 未开始 | 2026-03-25 |
-| ms-31 | [Right-side Trading](../master_series/ms-31_right_side_trading.md) | ✅ 已收口 | 🗂 候补池 | 留在候补池 | ✍️ 生产中 | ⚪ 未开始 | 2026-03-25 |
+| ms-29 | [理查德·唐契安](../master_series/ms-29_donchian_breakout.md) | ✅ 已收口 | 🗂 候补池 | 留在候补池 | ✍️ 生产中 | ⚪ 未开始 | 2026-03-25 |
+| ms-30 | [尼古拉斯·达瓦斯](../master_series/ms-30_darvas_box.md) | ✅ 已收口 | 🗂 候补池 | 留在候补池 | ✍️ 生产中 | ⚪ 未开始 | 2026-03-25 |
+| ms-31 | [右侧交易](../master_series/ms-31_right_side_trading.md) | ✅ 已收口 | 🗂 候补池 | 留在候补池 | ✍️ 生产中 | ⚪ 未开始 | 2026-03-25 |
 | ms-32 | [仓位管理与 R 倍数](../master_series/ms-32_position_sizing_and_r_multiple.md) | ✅ 已收口 | 🚀 首发样板 第 2 批 | 进入试产 | ✍️ 生产中 | ⚪ 未开始 | 2026-03-25 |
 | ms-33 | [系统开发与期望值](../master_series/ms-33_system_development_and_expectancy.md) | ✅ 已收口 | 📦 库存观察 | 继续观察 | ✍️ 生产中 | ⚪ 未开始 | 2026-03-25 |
-| ms-34 | [方法、事实层、判断模块与模式层](../master_series/ms-34_method_fact_layer_producer_mode.md) | ✅ 已收口 | 📦 库存观察 | 继续观察 | ✍️ 生产中 | ⚪ 未开始 | 2026-03-25 |
-| ms-35 | [金融怪杰](../master_series/ms-35_market_wizards_as_reading_map.md) | ✅ 已收口 | 🚀 首发样板 第 2 批 | 进入试产 | ✍️ 生产中 | ⚪ 未开始 | 2026-03-25 |
+| ms-34 | [事实层与生产商模式](../master_series/ms-34_method_fact_layer_producer_mode.md) | ✅ 已收口 | 📦 库存观察 | 继续观察 | ✍️ 生产中 | ⚪ 未开始 | 2026-03-25 |
+| ms-35 | [霍华德·马克斯](../master_series/ms-35_howard_marks.md) | ✅ 已收口 | 🗂 候补池 | 留在候补池 | ✍️ 生产中 | ⚪ 未开始 | 2026-03-26 |
+| ms-36 | [金融怪杰](../master_series/ms-36_market_wizards_as_reading_map.md) | ✅ 已收口 | 🚀 首发样板 第 2 批 | 进入试产 | ✍️ 生产中 | ⚪ 未开始 | 2026-03-25 |
 
 ## NLM 生产状态
 
@@ -173,9 +175,9 @@
 | ms-15 | [多周期确认](../master_series/ms-15_multi_timeframe_confirmation.md) | ✅ | ⚪ | ⚪ | ⚪ | ⚪ |
 | ms-16 | [事件驱动型进攻结构](../master_series/ms-16_catalyst_driven_setup.md) | ✅ | ⚪ | ⚪ | ⚪ | ⚪ |
 | ms-17 | [固定止损 vs 结构止损](../master_series/ms-17_fixed_vs_structure_stop.md) | ✅ | ⚪ | ⚪ | ⚪ | ⚪ |
-| ms-18 | [先方向，后触发，先风控，后收益](../master_series/ms-18_direction_trigger_risk_return.md) | ✅ | ⚪ | ⚪ | ⚪ | ⚪ |
-| ms-19 | [什么是规则量化中间层](../master_series/ms-19_l2_rule_based_quant.md) | ✅ | ⚪ | ⚪ | ⚪ | ⚪ |
-| ms-20 | [大师不等于产品模式](../master_series/ms-20_masters_not_equal_product_modes.md) | ✅ | ⚪ | ⚪ | ⚪ | ⚪ |
+| ms-18 | [DTR-R](../master_series/ms-18_direction_trigger_risk_return.md) | ✅ | ⚪ | ⚪ | ⚪ | ⚪ |
+| ms-19 | [L2 级规则量化](../master_series/ms-19_l2_rule_based_quant.md) | ✅ | ⚪ | ⚪ | ⚪ | ⚪ |
+| ms-20 | [交易大师不等于资管产品](../master_series/ms-20_masters_not_equal_product_modes.md) | ✅ | ⚪ | ⚪ | ⚪ | ⚪ |
 | ms-21 | [本杰明·格雷厄姆](../master_series/ms-21_benjamin_graham.md) | ✅ | ⚪ | ⚪ | ⚪ | ⚪ |
 | ms-22 | [菲利普·费雪](../master_series/ms-22_philip_fisher.md) | ✅ | ⚪ | ⚪ | ⚪ | ⚪ |
 | ms-23 | [威廉·欧奈尔](../master_series/ms-23_william_oneil.md) | ✅ | ⚪ | ⚪ | ⚪ | ⚪ |
@@ -184,13 +186,14 @@
 | ms-26 | [理查德·威科夫](../master_series/ms-26_richard_wyckoff.md) | ✅ | ⚪ | ⚪ | ⚪ | ⚪ |
 | ms-27 | [杰克·施瓦格](../master_series/ms-27_jack_schwager.md) | ✅ | ⚪ | ⚪ | ⚪ | ⚪ |
 | ms-28 | [CAN SLIM](../master_series/ms-28_can_slim.md) | ✅ | ⚪ | ⚪ | ⚪ | ⚪ |
-| ms-29 | [Donchian Breakout](../master_series/ms-29_donchian_breakout.md) | ✅ | ⚪ | ⚪ | ⚪ | ⚪ |
-| ms-30 | [Darvas Box](../master_series/ms-30_darvas_box.md) | ✅ | ⚪ | ⚪ | ⚪ | ⚪ |
-| ms-31 | [Right-side Trading](../master_series/ms-31_right_side_trading.md) | ✅ | ⚪ | ⚪ | ⚪ | ⚪ |
+| ms-29 | [理查德·唐契安](../master_series/ms-29_donchian_breakout.md) | ✅ | ⚪ | ⚪ | ⚪ | ⚪ |
+| ms-30 | [尼古拉斯·达瓦斯](../master_series/ms-30_darvas_box.md) | ✅ | ⚪ | ⚪ | ⚪ | ⚪ |
+| ms-31 | [右侧交易](../master_series/ms-31_right_side_trading.md) | ✅ | ⚪ | ⚪ | ⚪ | ⚪ |
 | ms-32 | [仓位管理与 R 倍数](../master_series/ms-32_position_sizing_and_r_multiple.md) | ✅ | ⚪ | ⚪ | ⚪ | ⚪ |
 | ms-33 | [系统开发与期望值](../master_series/ms-33_system_development_and_expectancy.md) | ✅ | ⚪ | ⚪ | ⚪ | ⚪ |
-| ms-34 | [方法、事实层、判断模块与模式层](../master_series/ms-34_method_fact_layer_producer_mode.md) | ✅ | ⚪ | ⚪ | ⚪ | ⚪ |
-| ms-35 | [金融怪杰](../master_series/ms-35_market_wizards_as_reading_map.md) | ✅ | ⚪ | ⚪ | ⚪ | ⚪ |
+| ms-34 | [事实层与生产商模式](../master_series/ms-34_method_fact_layer_producer_mode.md) | ✅ | ⚪ | ⚪ | ⚪ | ⚪ |
+| ms-35 | [霍华德·马克斯](../master_series/ms-35_howard_marks.md) | ✅ | ⚪ | ⚪ | ⚪ | ⚪ |
+| ms-36 | [金融怪杰](../master_series/ms-36_market_wizards_as_reading_map.md) | ✅ | ⚪ | ⚪ | ⚪ | ⚪ |
 
 ## 待补齐清单
 
@@ -208,8 +211,8 @@
 
 ## 库存观察池
 
-- ms-19 [什么是规则量化中间层](../master_series/ms-19_l2_rule_based_quant.md)：继续观察
-- ms-20 [大师不等于产品模式](../master_series/ms-20_masters_not_equal_product_modes.md)：继续观察
+- ms-19 [L2 级规则量化](../master_series/ms-19_l2_rule_based_quant.md)：继续观察
+- ms-20 [交易大师不等于资管产品](../master_series/ms-20_masters_not_equal_product_modes.md)：继续观察
 - ms-33 [系统开发与期望值](../master_series/ms-33_system_development_and_expectancy.md)：继续观察
-- ms-34 [方法、事实层、判断模块与模式层](../master_series/ms-34_method_fact_layer_producer_mode.md)：继续观察
+- ms-34 [事实层与生产商模式](../master_series/ms-34_method_fact_layer_producer_mode.md)：继续观察
 

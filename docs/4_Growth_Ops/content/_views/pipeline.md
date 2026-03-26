@@ -1,6 +1,6 @@
 # 内容生产流程看板 (Pipeline Board)
 
-> 自动生成时间：2026/3/26 16:16:06
+> 自动生成时间：2026/3/26 18:15:33
 > 说明：本看板优先服务活跃工作流，只展开需要推进的阶段；已发布内容只保留最近概览，避免看板膨胀。
 
 ## 🧠 待策划
@@ -60,27 +60,28 @@
 | [交易大师图鉴 12｜海龟交易：它最震撼的地方，不是突破本身，而是把交易拆成一套能训练人的规则](../master_series/ms-12_turtle_trading.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
 | [交易大师图鉴 13｜波动收缩形态（VCP）：真正迷人的，不是那个图形，而是市场在突破前最后一次“阻力排查”。](../master_series/ms-13_vcp.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
 | [交易大师图鉴 14｜动量突破（Momentum Breakout）：真正伟大的进攻，不是教你追热点，而是教你只在强者获得“二次加速”时，才果断入场。](../master_series/ms-14_momentum_breakout.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
-| [交易大师图鉴 15｜多周期确认：真正的高手章法，不是看更多图，而是当大方向与小触发“吵架”时，敢于立刻停下来。](../master_series/ms-15_multi_timeframe_confirmation.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
+| [交易大师图鉴 15｜多周期确认：真正的高手，不是看更多图，而是当大方向与小触发“吵架”时，敢于立刻停下来。](../master_series/ms-15_multi_timeframe_confirmation.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
 | [交易大师图鉴 16｜事件驱动型进攻结构：它最重要的地方，不是追新闻，而是看懂哪种变化足以改变市场预期](../master_series/ms-16_catalyst_driven_setup.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
-| [交易大师图鉴 17｜固定止损 vs 结构止损：更重要的，不是参数漂不漂亮，而是你的风险边界有没有贴着逻辑走](../master_series/ms-17_fixed_vs_structure_stop.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
-| [交易大师图鉴 18｜先方向，后触发，先风控，后收益：它最重要的地方，不是口号，而是一整套决策顺序](../master_series/ms-18_direction_trigger_risk_return.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
-| [交易大师图鉴 19｜什么是规则量化中间层：它最重要的地方，不是神秘，而是把经验压成可以复核的规则](../master_series/ms-19_l2_rule_based_quant.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
-| [交易大师图鉴 20｜大师不等于产品模式：它最重要的地方，不是泼冷水，而是防止把经典方法误读成万能模板](../master_series/ms-20_masters_not_equal_product_modes.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
-| [交易大师图鉴 21｜本杰明·格雷厄姆：他最重要的地方，不是抄底技巧，而是先逼你分清价格和价值不是一回事](../master_series/ms-21_benjamin_graham.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
-| [交易大师图鉴 22｜菲利普·费雪：他最重要的地方，不是找热门公司，而是先问这家公司能不能很多年都继续长大](../master_series/ms-22_philip_fisher.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
-| [交易大师图鉴 23｜威廉·欧奈尔：他最重要的地方，不是教你迷信强势，而是把成长股进攻写成了一套公开方法](../master_series/ms-23_william_oneil.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
-| [交易大师图鉴 24｜杰西·利弗莫尔：他最重要的地方，不是传奇故事，而是很早就把趋势、关键点和人性弱点讲穿了](../master_series/ms-24_jesse_livermore.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
-| [交易大师图鉴 25｜范·撒普：他最重要的地方，不是找神奇买点，而是逼你承认仓位和退出才真正决定长期结果](../master_series/ms-25_van_tharp.md) | Growth | MOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
-| [交易大师图鉴 26｜理查德·威科夫：他最重要的地方，不是神秘图谱，而是很早就把供需、结构和主力行为讲成了观察框架](../master_series/ms-26_richard_wyckoff.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
-| [交易大师图鉴 27｜杰克·施瓦格：他最重要的地方，不是自己代表某一门派，而是替整个行业留下了集体记忆](../master_series/ms-27_jack_schwager.md) | Growth | TOFU | 信任桥梁 | - | 中 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
+| [交易大师图鉴 17｜固定止损 vs 结构止损：止损不只是一个数字，而是你敢不敢给这笔交易定死一个“承认看错”的边界。](../master_series/ms-17_fixed_vs_structure_stop.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
+| [交易大师图鉴 18｜DTR-R：交易不是一团乱麻，它是由四个拆得开、说得清的“核心零件”组成的逻辑闭环。](../master_series/ms-18_direction_trigger_risk_return.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
+| [交易大师图鉴 19｜L2 级规则量化：交易高手的分水岭，不在于电脑多快，而在于你敢不敢把模糊的“手感”压成死板的“算法”。](../master_series/ms-19_l2_rule_based_quant.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
+| [交易大师图鉴 20｜交易大师不等于资管产品：师傅领进门，修行在个人。学大师是为了拿一张“入门票”，而不是买一份“保票”。](../master_series/ms-20_masters_not_equal_product_modes.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
+| [交易大师图鉴 21｜本杰明·格雷厄姆：价值投资的真谛，不是教你捡便宜，而是教你先分清价格和价值的区别。](../master_series/ms-21_benjamin_graham.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
+| [交易大师图鉴 22｜菲利普·费雪：成长股投资的真谛，不是追最火的热门股，而是看这家公司的“根”扎得够不够深。](../master_series/ms-22_philip_fisher.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
+| [交易大师图鉴 23｜威廉·欧奈尔：跟上那些正在起飞的好公司，真谛不在于盲目追高，而是教你先过一遍 CAN SLIM 这道“标准流水线”。](../master_series/ms-23_william_oneil.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
+| [交易大师图鉴 24｜杰西·利弗莫尔：交易赚大钱，不是靠频繁出手，而是靠看准了趋势不半路下车。](../master_series/ms-24_jesse_livermore.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
+| [交易大师图鉴 25｜范·撒普：交易的真谛，不是找那个“百发百中”的神奇买点，而是算清你每一次出手的赢面。](../master_series/ms-25_van_tharp.md) | Growth | MOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
+| [交易大师图鉴 26｜理查德·威科夫：交易的真谛，不是去猜股价涨跌，而是学会看清大资金留下的“脚印”。](../master_series/ms-26_richard_wyckoff.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
+| [交易大师图鉴 27｜杰克·施瓦格：交易的真谛，不是找唯一的标准答案，而是找到最适合你的那条路。](../master_series/ms-27_jack_schwager.md) | Growth | TOFU | 信任桥梁 | - | 中 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
 | [交易大师图鉴 28｜CAN SLIM：它最重要的地方，不是七个字母本身，而是把成长股进攻拆成了一套筛选顺序](../master_series/ms-28_can_slim.md) | Growth | MOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
-| [交易大师图鉴 29｜Donchian Breakout：它最重要的地方，不是通道画法，而是把趋势突破写成了最干净的祖型组件](../master_series/ms-29_donchian_breakout.md) | Growth | MOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
-| [交易大师图鉴 30｜Darvas Box：它最重要的地方，不是箱体画法，而是先把边界认清，再等市场自己开门](../master_series/ms-30_darvas_box.md) | Growth | MOFU | 信任桥梁 | - | 中 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
-| [交易大师图鉴 31｜Right-side Trading：它最重要的地方，不是买得更晚，而是只在确认之后才给自己行动许可](../master_series/ms-31_right_side_trading.md) | Growth | MOFU | 信任桥梁 | - | 中 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
-| [交易大师图鉴 32｜仓位管理与 R 倍数：它最重要的地方，不是算得更细，而是让交易终于能用统一风险单位说话](../master_series/ms-32_position_sizing_and_r_multiple.md) | Growth | MOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
-| [交易大师图鉴 33｜系统开发与期望值：它最重要的地方，不是胜率好不好看，而是长期做下去到底值不值得](../master_series/ms-33_system_development_and_expectancy.md) | Growth | MOFU | 信任桥梁 | - | 中 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
-| [交易大师图鉴 34｜方法、事实层、判断模块与模式层：它最重要的地方，不是画图，而是别再把方法和产品动作混成一团](../master_series/ms-34_method_fact_layer_producer_mode.md) | Growth | MOFU | 信任桥梁 | - | 中 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
-| [交易大师图鉴 35｜金融怪杰：它最重要的地方，不是传奇合集，而是替后来人留下一张进入交易世界的阅读地图](../master_series/ms-35_market_wizards_as_reading_map.md) | Growth | TOFU | 信任桥梁 | - | 中 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
+| [交易大师图鉴 29｜理查德·唐契安：趋势跟随的真谛，不是去抓每个拐点，而是学会“随波逐流”。](../master_series/ms-29_donchian_breakout.md) | Growth | MOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
+| [交易大师图鉴 30｜尼古拉斯·达瓦斯：交易的真谛，不是去听小道消息，而是看清股票正在哪层“箱子”里跳舞。](../master_series/ms-30_darvas_box.md) | Growth | MOFU | 信任桥梁 | - | 中 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
+| [交易大师图鉴 31｜右侧交易：交易的真谛，不是去抄那个“最低点”，而是等事实出来后再给自己行动许可。](../master_series/ms-31_right_side_trading.md) | Growth | MOFU | 信任桥梁 | - | 中 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
+| [交易大师图鉴 32｜仓位管理与 R 倍数：交易的真谛，不是去猜赚多少钱，而是算清每一次下注的“风险单位”。](../master_series/ms-32_position_sizing_and_r_multiple.md) | Growth | MOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
+| [交易大师图鉴 33｜系统开发与期望值：交易的真谛，不是追求每次都对，而是确认这套打法长期做下去到底“值不值得”。](../master_series/ms-33_system_development_and_expectancy.md) | Growth | MOFU | 信任桥梁 | - | 中 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
+| [交易大师图鉴 34｜事实层与生产商模式：交易的真谛，不是去消费别人的情绪，而是建立自己的“逻辑生产线”。](../master_series/ms-34_method_fact_layer_producer_mode.md) | Growth | MOFU | 信任桥梁 | - | 中 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
+| [交易大师图鉴 36｜金融怪杰：交易的真谛，不是去背诵英雄故事，而是借施瓦格的眼，看请进入行业的“阅读地图”。](../master_series/ms-36_market_wizards_as_reading_map.md) | Growth | TOFU | 信任桥梁 | - | 中 | cmo | founder | 2026-03-25 周三 | ⚪ 未开始 | ➖ 不发布 | - |
+| [交易大师图鉴 35｜霍华德·马克斯：投资的真谛，不是靠预测未来，而是靠比别人“多想一层”。](../master_series/ms-35_howard_marks.md) | Growth | TOFU | 信任桥梁 | - | 高 | cmo | founder | 2026-03-26 周四 | ⚪ 未开始 | ➖ 不发布 | - |
 | [101-33: 为什么你的指标总是变成反指？](../101_academy/101-33_indicator_failure.md) | Growth | MOFU | - | - | 中 | - | - | 2026-04-10 周五 | ⚪ 未开始 | 📝 草稿 | - |
 | [101-34: 把“止损”推迟到明天的代价](../101_academy/101-34_mae_cost.md) | Growth | MOFU | - | - | 中 | - | - | 2026-04-10 周五 | ⚪ 未开始 | 📝 草稿 | - |
 | [101-35: 回测与未来的鸿沟](../101_academy/101-35_overfitting_trap.md) | Growth | TOFU | - | - | 中 | - | - | 2026-04-10 周五 | ⚪ 未开始 | 📝 草稿 | - |
