@@ -1,6 +1,6 @@
 # 产品变更影响视图 (Change Impact Board)
 
-> 自动生成时间：2026/3/27 14:40:27
+> 自动生成时间：2026/3/27 16:38:35
 > 说明：该视图用于回答“产品/工程文档变化后，哪些内容应该复核或补充”。
 
 ## 受底层文档变更影响，需优先复核的内容
@@ -13,8 +13,6 @@
 | [乐观更新：不用等圈圈转](../../../5_Support_Ops/content/optimistic-ui-logic.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/46_Frontend_SWR_Architecture_Upgrade.md` |
 | [单点对焦：别让散乱害了你](../../../5_Support_Ops/content/snap-y-dynamics.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/46_Frontend_SWR_Architecture_Upgrade.md` |
 | [大师系列内容接入方案 2026](../MASTER_SERIES_CONTENT_INTEGRATION_2026.md) | Growth | ✍️ 生产中 | `docs/4_Growth_Ops/content/README.md` |
-| [交易大师图鉴 28｜CAN SLIM：它最重要的地方，不是七个字母本身，而是把成长股进攻拆成了一套筛选顺序](../master_series/ms-28_can_slim.md) | Growth | ✍️ 生产中 | `docs/4_Growth_Ops/content/master_series/ms-23_william_oneil.md` |
-| [交易大师图鉴 16｜事件驱动型进攻结构：它最重要的地方，不是追新闻，而是看懂哪种变化足以改变市场预期](../master_series/ms-16_catalyst_driven_setup.md) | Growth | ✍️ 生产中 | `docs/4_Growth_Ops/content/master_series/ms-07_episodic_pivot.md` |
 | [101-100: 很多人不是不会炒股，而是连自己是什么段位都没弄明白](../101_academy/101-100_maturity_prologue.md) | Growth | 📅 已排期 | `docs/2_Intelligence/research/01_Quant_Trading_Schools_Taxonomy.md` |
 | [101-104: 只要你的交易还经常从“我觉得”开始，你就还没走出 L0](../101_academy/101-104_maturity_l0_discretionary.md) | Growth | ✅ 已通过 | `docs/2_Intelligence/research/01_Quant_Trading_Schools_Taxonomy.md` |
 | [101-105: 你以为自己在看信号，很多时候其实只是在盯着后视镜开车](../101_academy/101-105_maturity_l1_indicator.md) | Growth | 👀 待审核 | `docs/2_Intelligence/research/01_Quant_Trading_Schools_Taxonomy.md` |
@@ -57,6 +55,8 @@
 | [通知开关：不喜欢就关了](../../../5_Support_Ops/content/notification-preference.md) | Support | 🚀 已发布 | `docs/3_Product/30_Notification_Strategy_Design.md` |
 | [体验期权限发放规则 (Onboarding Trial Rules)](../../../5_Support_Ops/content/onboarding-trial-rules.md) | Support | 🚀 已发布 | `docs/3_Product/31_Membership_Design_Plan.md` |
 | [五级价位阵地解释系统 (Price Ladder)](../../../5_Support_Ops/content/price-ladder.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/45_Stock_Radar_Discovery_Engine.md` |
+| [隐私承诺：这是你的避风港](../../../5_Support_Ops/content/privacy-pledge.md) | Support | 🚀 已发布 | `docs/1_Engineering/11_Reliability_Protocol.md` |
+| [测测通没通：别被系统拦了](../../../5_Support_Ops/content/push-debug.md) | Support | 🚀 已发布 | `docs/3_Product/30_Notification_Strategy_Design.md` |
 
 ## 尚未被转化成内容资产的内部文档机会
 
@@ -87,9 +87,9 @@
 - `docs/1_Engineering/38_VCP_First_Demo_Case_02171_20260324.md`
 - `docs/1_Engineering/39_Decision_Model_Implementation_Plan_20260325.md`
 - `docs/1_Engineering/40_Decision_Model_Phase1_Closure_20260325.md`
+- `docs/1_Engineering/41_Frontend_Architecture_Baseline_20260327.md`
 - `docs/1_Engineering/GLOBALIZATION_IMPLEMENTATION_DESIGN.md`
 - `docs/1_Engineering/legacy_designs/refactoring-dashboard-page.md`
-- `docs/1_Engineering/legacy_designs/Stock_News_Fetching.md`
 
 ## 配套参考
 

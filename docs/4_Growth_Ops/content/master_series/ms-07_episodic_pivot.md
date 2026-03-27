@@ -122,10 +122,10 @@ source_docs:
   - docs/2_Intelligence/registry/masters/pradeep_bonde.md
 
 nlm_production:
-  slides: "not_started"       # 演示文稿
-  infographic: "not_started"  # 信息图
-  audio: "not_started"        # 音频
-  video: "not_started"        # 视频
+  slides: "ready"             # 演示文稿
+  infographic: "ready"        # 信息图
+  audio: "ready"              # 音频
+  video: "ready"              # 视频
 ---
 # 事件拐点（Episodic Pivot）：真正重要的，不是涨了，而是市场突然开始用新逻辑看它
 

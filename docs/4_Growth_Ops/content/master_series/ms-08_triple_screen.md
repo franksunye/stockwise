@@ -122,10 +122,10 @@ source_docs:
   - docs/2_Intelligence/registry/MASTER_SERIES_NOTEBOOKLM_PLAN.md
 
 nlm_production:
-  slides: "not_started"       # 演示文稿
-  infographic: "not_started"  # 信息图
-  audio: "not_started"        # 音频
-  video: "not_started"        # 视频
+  slides: "ready"             # 演示文稿
+  infographic: "ready"        # 信息图
+  audio: "ready"              # 音频
+  video: "ready"              # 视频
 ---
 # 三重滤网（Triple Screen）：它最重要的地方，不是多看几个周期，而是先把错误的机会一层层筛掉
 

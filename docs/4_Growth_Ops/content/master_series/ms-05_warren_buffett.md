@@ -124,10 +124,10 @@ source_docs:
   - docs/2_Intelligence/registry/MASTER_SERIES_NOTEBOOKLM_PLAN.md
 
 nlm_production:
-  slides: "not_started"       # 演示文稿
-  infographic: "not_started"  # 信息图
-  audio: "not_started"        # 音频
-  video: "not_started"        # 视频
+  slides: "ready"             # 演示文稿
+  infographic: "ready"        # 信息图
+  audio: "ready"              # 音频
+  video: "ready"              # 视频
 ---
 # 沃伦·巴菲特：最难模仿的，不是他会选股，而是他能几十年都按同一套原则活着
 

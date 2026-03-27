@@ -125,10 +125,10 @@ source_docs:
   - docs/2_Intelligence/registry/MASTER_SERIES_NOTEBOOKLM_PLAN.md
 
 nlm_production:
-  slides: "not_started"       # 演示文稿
-  infographic: "not_started"  # 信息图
-  audio: "not_started"        # 音频
-  video: "not_started"        # 视频
+  slides: "ready"             # 演示文稿
+  infographic: "ready"        # 信息图
+  audio: "ready"              # 音频
+  video: "ready"              # 视频
 ---
 # 亚历山大·埃尔德：真正的高手，不是多看几张图，而是学会给市场“加滤网”。
 

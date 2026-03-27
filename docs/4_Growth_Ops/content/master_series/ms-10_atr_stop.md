@@ -122,10 +122,10 @@ source_docs:
   - docs/2_Intelligence/registry/methodologies/turtle_trading.md
 
 nlm_production:
-  slides: "not_started"       # 演示文稿
-  infographic: "not_started"  # 信息图
-  audio: "not_started"        # 音频
-  video: "not_started"        # 视频
+  slides: "ready"             # 演示文稿
+  infographic: "ready"        # 信息图
+  audio: "ready"              # 音频
+  video: "ready"              # 视频
 ---
 # ATR 止损：它最重要的地方，不是让止损更复杂，而是让风险终于开始按波动说话
 

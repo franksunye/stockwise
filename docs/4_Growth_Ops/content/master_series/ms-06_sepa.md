@@ -124,10 +124,10 @@ source_docs:
   - docs/2_Intelligence/registry/archetypes/trend_breakout.md
 
 nlm_production:
-  slides: "not_started"       # 演示文稿
-  infographic: "not_started"  # 信息图
-  audio: "not_started"        # 音频
-  video: "not_started"        # 视频
+  slides: "ready"             # 演示文稿
+  infographic: "ready"        # 信息图
+  audio: "ready"              # 音频
+  video: "ready"              # 视频
 ---
 # SEPA：它最厉害的地方，不是教你看一个买点，而是把出手资格压得极其苛刻
 

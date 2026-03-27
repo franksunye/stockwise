@@ -1,6 +1,6 @@
 # 交易大师图鉴 · 生产看板 (Master Series Production Board)
 
-> 自动生成时间：2026/3/27 14:40:27
+> 自动生成时间：2026/3/27 16:38:35
 > 说明：本看板由 `scripts/cmo_sync.mjs` 自动扫描 `master_series/` 目录下的 canonical 母稿生成。
 > 查看范围：仅 canonical 母稿（`ms-xx_*.md`），排除 `_notebooklm.md` 伴稿和规范文件。
 > 系列状态来源：优先读取各篇 frontmatter 里的 `master_series.*` 字段，用来标注编辑收口、首发分层和当前动作。
@@ -14,10 +14,10 @@
 | 已补 social_title | 36 / 36 |
 | 已补 editorial_title | 36 / 36 |
 | 已有 NotebookLM 输入稿 | 36 / 36 |
-| NLM 演示文稿已完成 | 1 / 36 |
-| NLM 信息图已完成 | 1 / 36 |
-| NLM 音频已完成 | 1 / 36 |
-| NLM 视频已完成 | 1 / 36 |
+| NLM 演示文稿已完成 | 10 / 36 |
+| NLM 信息图已完成 | 10 / 36 |
+| NLM 音频已完成 | 10 / 36 |
+| NLM 视频已完成 | 10 / 36 |
 | ✍️ 生产中 | 35 |
 | 🚀 已发布 | 1 |
 
@@ -35,10 +35,10 @@
 | 编号 | 标题 | 波次 | 编辑状态 | 当前动作 | 视觉 | NLM |
 | --- | --- | --- | --- | --- | --- | --- |
 | ms-01 | [马克·米勒维尼](../master_series/ms-01_mark_minervini.md) | 第 1 批 | ✅ 已收口 | 已发布 | 📦 已交付 | 🟢 / 🟢 / 🟢 |
-| ms-03 | [亚历山大·埃尔德](../master_series/ms-03_alexander_elder.md) | 第 1 批 | ✅ 已收口 | 进入试产 | ⚪ 未开始 | ⚪ / ⚪ / ⚪ |
-| ms-04 | [理查德·丹尼斯](../master_series/ms-04_richard_dennis.md) | 第 1 批 | ✅ 已收口 | 进入试产 | ⚪ 未开始 | ⚪ / ⚪ / ⚪ |
-| ms-05 | [沃伦·巴菲特](../master_series/ms-05_warren_buffett.md) | 第 1 批 | ✅ 已收口 | 进入试产 | ⚪ 未开始 | ⚪ / ⚪ / ⚪ |
-| ms-06 | [SEPA](../master_series/ms-06_sepa.md) | 第 1 批 | ✅ 已收口 | 进入试产 | ⚪ 未开始 | ⚪ / ⚪ / ⚪ |
+| ms-03 | [亚历山大·埃尔德](../master_series/ms-03_alexander_elder.md) | 第 1 批 | ✅ 已收口 | 进入试产 | ⚪ 未开始 | 🟢 / 🟢 / 🟢 |
+| ms-04 | [理查德·丹尼斯](../master_series/ms-04_richard_dennis.md) | 第 1 批 | ✅ 已收口 | 进入试产 | ⚪ 未开始 | 🟢 / 🟢 / 🟢 |
+| ms-05 | [沃伦·巴菲特](../master_series/ms-05_warren_buffett.md) | 第 1 批 | ✅ 已收口 | 进入试产 | ⚪ 未开始 | 🟢 / 🟢 / 🟢 |
+| ms-06 | [SEPA](../master_series/ms-06_sepa.md) | 第 1 批 | ✅ 已收口 | 进入试产 | ⚪ 未开始 | 🟢 / 🟢 / 🟢 |
 | ms-12 | [海龟交易](../master_series/ms-12_turtle_trading.md) | 第 1 批 | ✅ 已收口 | 进入试产 | ⚪ 未开始 | ⚪ / ⚪ / ⚪ |
 | ms-21 | [本杰明·格雷厄姆](../master_series/ms-21_benjamin_graham.md) | 第 2 批 | ✅ 已收口 | 进入试产 | ⚪ 未开始 | ⚪ / ⚪ / ⚪ |
 | ms-23 | [威廉·欧奈尔](../master_series/ms-23_william_oneil.md) | 第 2 批 | ✅ 已收口 | 进入试产 | ⚪ 未开始 | ⚪ / ⚪ / ⚪ |
@@ -159,15 +159,15 @@
 | 编号 | 标题 | 输入稿 | 演示文稿 | 信息图 | 音频 | 视频 |
 | --- | --- | --- | --- | --- | --- | --- |
 | ms-01 | [马克·米勒维尼](../master_series/ms-01_mark_minervini.md) | ✅ | 🟢 | 🟢 | 🟢 | 🟢 |
-| ms-02 | [普拉迪普·邦德](../master_series/ms-02_pradeep_bonde.md) | ✅ | ⚪ | ⚪ | ⚪ | ⚪ |
-| ms-03 | [亚历山大·埃尔德](../master_series/ms-03_alexander_elder.md) | ✅ | ⚪ | ⚪ | ⚪ | ⚪ |
-| ms-04 | [理查德·丹尼斯](../master_series/ms-04_richard_dennis.md) | ✅ | ⚪ | ⚪ | ⚪ | ⚪ |
-| ms-05 | [沃伦·巴菲特](../master_series/ms-05_warren_buffett.md) | ✅ | ⚪ | ⚪ | ⚪ | ⚪ |
-| ms-06 | [SEPA](../master_series/ms-06_sepa.md) | ✅ | ⚪ | ⚪ | ⚪ | ⚪ |
-| ms-07 | [事件拐点（Episodic Pivot）](../master_series/ms-07_episodic_pivot.md) | ✅ | ⚪ | ⚪ | ⚪ | ⚪ |
-| ms-08 | [三重滤网（Triple Screen）](../master_series/ms-08_triple_screen.md) | ✅ | ⚪ | ⚪ | ⚪ | ⚪ |
-| ms-09 | [趋势突破（Trend Breakout）](../master_series/ms-09_trend_breakout.md) | ✅ | ⚪ | ⚪ | ⚪ | ⚪ |
-| ms-10 | [ATR 止损](../master_series/ms-10_atr_stop.md) | ✅ | ⚪ | ⚪ | ⚪ | ⚪ |
+| ms-02 | [普拉迪普·邦德](../master_series/ms-02_pradeep_bonde.md) | ✅ | 🟢 | 🟢 | 🟢 | 🟢 |
+| ms-03 | [亚历山大·埃尔德](../master_series/ms-03_alexander_elder.md) | ✅ | 🟢 | 🟢 | 🟢 | 🟢 |
+| ms-04 | [理查德·丹尼斯](../master_series/ms-04_richard_dennis.md) | ✅ | 🟢 | 🟢 | 🟢 | 🟢 |
+| ms-05 | [沃伦·巴菲特](../master_series/ms-05_warren_buffett.md) | ✅ | 🟢 | 🟢 | 🟢 | 🟢 |
+| ms-06 | [SEPA](../master_series/ms-06_sepa.md) | ✅ | 🟢 | 🟢 | 🟢 | 🟢 |
+| ms-07 | [事件拐点（Episodic Pivot）](../master_series/ms-07_episodic_pivot.md) | ✅ | 🟢 | 🟢 | 🟢 | 🟢 |
+| ms-08 | [三重滤网（Triple Screen）](../master_series/ms-08_triple_screen.md) | ✅ | 🟢 | 🟢 | 🟢 | 🟢 |
+| ms-09 | [趋势突破（Trend Breakout）](../master_series/ms-09_trend_breakout.md) | ✅ | 🟢 | 🟢 | 🟢 | 🟢 |
+| ms-10 | [ATR 止损](../master_series/ms-10_atr_stop.md) | ✅ | 🟢 | 🟢 | 🟢 | 🟢 |
 | ms-11 | [固定止损 vs ATR 止损](../master_series/ms-11_fixed_vs_atr_stop.md) | ✅ | ⚪ | ⚪ | ⚪ | ⚪ |
 | ms-12 | [海龟交易](../master_series/ms-12_turtle_trading.md) | ✅ | ⚪ | ⚪ | ⚪ | ⚪ |
 | ms-13 | [波动收缩形态（VCP）](../master_series/ms-13_vcp.md) | ✅ | ⚪ | ⚪ | ⚪ | ⚪ |

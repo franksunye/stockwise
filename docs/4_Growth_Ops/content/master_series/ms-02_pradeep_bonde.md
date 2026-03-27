@@ -124,10 +124,10 @@ source_docs:
   - docs/2_Intelligence/registry/MASTER_SERIES_NOTEBOOKLM_PLAN.md
 
 nlm_production:
-  slides: "not_started"       # 演示文稿
-  infographic: "not_started"  # 信息图
-  audio: "not_started"        # 音频
-  video: "not_started"        # 视频
+  slides: "ready"             # 演示文稿
+  infographic: "ready"        # 信息图
+  audio: "ready"              # 音频
+  video: "ready"              # 视频
 ---
 # 普拉迪普·邦德：真正的动量，不是捕捉无序的躁动，而是等待足以改写叙事的爆发。
 

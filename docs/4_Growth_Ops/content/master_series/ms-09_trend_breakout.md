@@ -124,10 +124,10 @@ source_docs:
   - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
 
 nlm_production:
-  slides: "not_started"       # 演示文稿
-  infographic: "not_started"  # 信息图
-  audio: "not_started"        # 音频
-  video: "not_started"        # 视频
+  slides: "ready"             # 演示文稿
+  infographic: "ready"        # 信息图
+  audio: "ready"              # 音频
+  video: "ready"              # 视频
 ---
 # 趋势突破（Trend Breakout）：它最重要的地方，不是追涨，而是只在趋势真正站稳后才允许你进攻
 

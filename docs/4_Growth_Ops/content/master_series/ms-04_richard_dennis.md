@@ -124,10 +124,10 @@ source_docs:
   - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
 
 nlm_production:
-  slides: "not_started"       # 演示文稿
-  infographic: "not_started"  # 信息图
-  audio: "not_started"        # 音频
-  video: "not_started"        # 视频
+  slides: "ready"             # 演示文稿
+  infographic: "ready"        # 信息图
+  audio: "ready"              # 音频
+  video: "ready"              # 视频
 ---
 # 理查德·丹尼斯：最震撼的一课，不是赚了多少钱，而是他试着证明交易员可以被训练出来
 
