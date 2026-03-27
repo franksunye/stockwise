@@ -17,6 +17,7 @@ import {
   Hash,
   AlertTriangle,
   Calendar,
+  Sparkles,
   TrendingDown,
   Shield,
   ChevronUp
@@ -731,7 +732,10 @@ export function TacticalBriefDrawer({
                         className={`w-full flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/5 group active:scale-[0.98] transition-all ${isFree ? 'opacity-50 cursor-not-allowed' : ''}`}
                       >
                         <div className="flex items-center gap-3">
-                           <div className={`w-1.5 h-1.5 rounded-full bg-indigo-500 transition-all duration-500 ${isExpanded ? 'shadow-[0_0_12px_rgba(99,102,241,0.8)] scale-125' : 'opacity-40'}`} />
+                           <Sparkles
+                             size={12}
+                             className={`text-indigo-400 transition-all duration-500 ${isExpanded ? 'scale-110' : 'opacity-50'}`}
+                           />
                            <span className="text-xs font-black text-slate-400 uppercase tracking-widest group-hover:text-slate-200 transition-colors">查看策略推演过程</span>
                         </div>
                         <motion.div
