@@ -4,6 +4,8 @@ import React, { createContext, useContext, ReactNode, useMemo } from 'react';
 import { usePathname } from 'next/navigation';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { useWatchlist, WatchlistItem } from '@/hooks/useWatchlist';
+import { useUserProfile } from '@/hooks/useUserProfile';
+import { useDashboardRefreshContract } from '@/hooks/useDashboardRefreshContract';
 import { StockData, MarketAlmanacData } from '@/lib/types';
 
 const LITE_HISTORY_LIMIT = 1;
@@ -33,10 +35,12 @@ export function StockProvider({ children }: { children: ReactNode }) {
     const historyLimit = isStockPool ? LITE_HISTORY_LIMIT : FULL_HISTORY_LIMIT;
 
     const { watchlist, loading: loadingList, addStock, removeStock } = useWatchlist();
+    const { refreshProfile } = useUserProfile();
     const {
         stocks,
         almanac,
         almanacs,
+        runRefreshEvent,
         loadingPool,
         isRefreshing,
         lastRefreshTime,
@@ -44,6 +48,14 @@ export function StockProvider({ children }: { children: ReactNode }) {
         refresh,
         loadMoreHistory
     } = useDashboardData(watchlist, loadingList, historyLimit, isStockPool);
+
+    useDashboardRefreshContract({
+        watchlist,
+        loadingWatchlist: loadingList,
+        historyLimit,
+        refreshProfile,
+        runDashboardRefreshEvent: runRefreshEvent,
+    });
 
     const value = useMemo(() => ({
         stocks,

@@ -187,17 +187,23 @@ SWR 不应被直接等同为：
    - [`frontend/src/lib/stock-profile-history.ts`](/Users/yesun/Code/stockwise/frontend/src/lib/stock-profile-history.ts) 已下沉 30 秒缓存、响应归一化与历史回退语义
    - [`frontend/src/lib/stock-profile-metrics.ts`](/Users/yesun/Code/stockwise/frontend/src/lib/stock-profile-metrics.ts) 已下沉胜率与日期标签等派生规则
    - [`frontend/tests/stock-profile-history.test.mjs`](/Users/yesun/Code/stockwise/frontend/tests/stock-profile-history.test.mjs) 与 [`frontend/tests/stock-profile-metrics.test.mjs`](/Users/yesun/Code/stockwise/frontend/tests/stock-profile-metrics.test.mjs) 已锁住缓存和派生逻辑
-9. 新用户首次进入 Dashboard 的修复链路已经落地。
+9. `Dashboard Data Refresh Contract` 第一轮已完成：
+   - [`frontend/src/lib/dashboard-refresh-contract.ts`](/Users/yesun/Code/stockwise/frontend/src/lib/dashboard-refresh-contract.ts) 已将 watchlist 变化、historyLimit 升级、resume、online、post-market poll 统一建模为同一套刷新计划
+   - [`frontend/src/hooks/useDashboardRefreshContract.ts`](/Users/yesun/Code/stockwise/frontend/src/hooks/useDashboardRefreshContract.ts) 已作为薄 orchestrator 接入 `StockProvider`
+   - [`frontend/src/context/StockContext.tsx`](/Users/yesun/Code/stockwise/frontend/src/context/StockContext.tsx) 现在负责把 `useUserProfile`、`useWatchlist`、`useDashboardData` 绑定到同一套 refresh contract 上
+   - [`frontend/src/hooks/useDashboardData.ts`](/Users/yesun/Code/stockwise/frontend/src/hooks/useDashboardData.ts) 不再自己散落实现 watchlist/history/resume/post-market 的刷新触发，而是统一消费 contract plan
+   - [`frontend/tests/dashboard-refresh-contract.test.mjs`](/Users/yesun/Code/stockwise/frontend/tests/dashboard-refresh-contract.test.mjs) 已锁住事件到刷新计划的核心语义
+10. 新用户首次进入 Dashboard 的修复链路已经落地。
    - 详见 [`25_Onboarding_First_Load_Recovery_Plan_20260314.md`](/Users/yesun/Code/stockwise/docs/1_Engineering/25_Onboarding_First_Load_Recovery_Plan_20260314.md)
-10. `shared almanac` 已完成主动失效改造：
+11. `shared almanac` 已完成主动失效改造：
    - [`frontend/src/app/api/shared/almanac/route.ts`](/Users/yesun/Code/stockwise/frontend/src/app/api/shared/almanac/route.ts)
    - [`frontend/src/app/api/internal/cache/revalidate/route.ts`](/Users/yesun/Code/stockwise/frontend/src/app/api/internal/cache/revalidate/route.ts)
    - [`backend/engine/almanac_generator.py`](/Users/yesun/Code/stockwise/backend/engine/almanac_generator.py)
-11. 收盘后恢复应用的轻量版本探测已落地：
+12. 收盘后恢复应用的轻量版本探测已落地：
    - [`frontend/src/app/api/stock/prediction-versions/route.ts`](/Users/yesun/Code/stockwise/frontend/src/app/api/stock/prediction-versions/route.ts)
    - [`frontend/src/hooks/useDashboardData.ts`](/Users/yesun/Code/stockwise/frontend/src/hooks/useDashboardData.ts)
    - 当前最小探测间隔为 10 分钟，仅在 `post_market` 执行
-12. `Dashboard` 收盘后轮询停止条件已收紧：
+13. `Dashboard` 收盘后轮询停止条件已收紧：
    - 不再是“任一股票进入今日批次即可停止”
    - 而是“所有股票都进入今日批次后才停止”
 
@@ -210,7 +216,7 @@ SWR 不应被直接等同为：
 ### 5.3 仍未完成
 
 1. 非首帧关键数据面的 SWR 迁移尚未系统推进，但 `Brief` 与 `StockProfile` 两个面已完成第一轮低风险收口。
-2. `useUserProfile`、`useWatchlist`、`useDashboardData` 之间的数据刷新边界仍未统一建模。
+2. `Dashboard Data Refresh Contract` 已完成第一轮，但对实际线上刷新频率、重复请求和 watchlist 变更后的稳定性仍需要观测。
 3. 页面级 smoke 目前已并入正式 `verify:release`，但仍未接入更高层 CI。
 4. 轻量版本探测目前仅覆盖 `Dashboard` 主列表，不覆盖更深层详情面或 Drawer 内局部数据面。
 
@@ -231,7 +237,18 @@ SWR 不应被直接等同为：
 
 这一步已经完成，后续只需继续固化与复用。
 
-### 6.2 只推进非首帧关键数据面
+### 6.2 观测并稳固 Refresh Contract
+
+在继续扩大 SWR 落点之前，优先观测这轮 `Dashboard Data Refresh Contract` 的真实表现：
+
+1. watchlist 增删后，Dashboard 内容同步是否稳定
+2. 焦点切回 / `pageshow` / `online` 是否出现过刷或漏刷
+3. 收盘后版本探测与 batch 补拉是否按 contract 工作
+4. profile 刷新是否仍保持静默，不引入新的骨架或闪烁
+
+若观测稳定，再继续扩大到下一批非首帧关键数据面。
+
+### 6.3 只推进非首帧关键数据面
 
 若继续推进 SWR，只建议从非首帧关键数据面开始，例如：
 
@@ -272,6 +289,7 @@ SWR 不应被直接等同为：
 1. `AICouncil` 的 SWR 迁移已成功
 2. `Dashboard` 主链路 SWR 迁移曾尝试，但已回滚
 3. `Dashboard bootstrap state` 的第一轮读取、写入与入口编排收口已完成
+4. `Dashboard Data Refresh Contract` 的第一轮统一建模已完成
 
 更细的 bug 修复执行过程，请参考：
 

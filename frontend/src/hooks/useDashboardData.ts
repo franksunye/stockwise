@@ -5,6 +5,7 @@ import { getCurrentUser } from '@/lib/user';
 import { StockData, MarketAlmanacData } from '@/lib/types';
 import { getRule } from '@/lib/storage';
 import { getMarketScene, isTradingDay, getHKTime, formatDateStr } from '@/lib/date-utils';
+import { getDashboardRefreshPlan, type DashboardRefreshEvent } from '@/lib/dashboard-refresh-contract';
 import { WatchlistItem } from './useWatchlist';
 
 // 价格层刷新间隔：盘中 1 分钟，非交易时段 10 分钟
@@ -16,9 +17,6 @@ const CACHE_KEY = 'stockwise_dashboard_cache_v1';
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24小时过期
 const PREDICTION_VERSION_CHECK_KEY = 'stockwise_prediction_version_check_v1';
 const PREDICTION_VERSION_CHECK_INTERVAL = 10 * 60 * 1000;
-
-// 预测层轮询间隔：仅在收盘后等待当日预测时使用
-const PREDICTION_POLL_INTERVAL = 5 * 60 * 1000; // 5 min
 
 function arePredictionsFreshForToday(stocks: StockData[]): boolean {
     const todayStr = formatDateStr(getHKTime());
@@ -95,8 +93,6 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
     const stocksRef = useRef<StockData[]>(stocks);
     const almanacRef = useRef<MarketAlmanacData | null>(almanac);
     const almanacsRef = useRef<MarketAlmanacData[]>(almanacs);
-    const prevHistoryLimitRef = useRef<number>(historyLimit);
-    const prevWatchlistRef = useRef<WatchlistItem[]>(watchlist);
 
     // Sync ref with state
     useEffect(() => {
@@ -111,7 +107,6 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
         almanacsRef.current = almanacs;
     }, [almanacs]);
 
-    const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const priceIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const lastPriceRefreshTimeRef = useRef<number>(0);
     const broadcastFailureStreakRef = useRef<number>(0);
@@ -206,6 +201,51 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
             console.error('Cache load error', e);
         }
     }, []);
+
+    const remapStocksToWatchlist = useCallback((sourceStocks: StockData[] = stocksRef.current) => {
+        if (watchlist.length === 0) {
+            if (!loadingWatchlist) {
+                setStocks([]);
+            }
+            return;
+        }
+
+        const remapped = watchlist.map(item => {
+            const existing = sourceStocks.find(s => s.symbol === item.symbol);
+            if (existing) return existing;
+            return {
+                symbol: item.symbol,
+                name: item.name,
+                price: null,
+                change: 0,
+                lastUpdated: '...',
+                history: [],
+                loading: true,
+                prediction: null,
+                previousPrediction: null,
+                rule: null
+            } as StockData;
+        });
+
+        setStocks(remapped);
+    }, [loadingWatchlist, watchlist]);
+
+    const hasMissingWatchlistSymbols = useCallback(() => {
+        const watchSymbols = new Set(watchlist.map((item) => item.symbol));
+        const stockSymbols = new Set((stocksRef.current || []).map((stock) => stock.symbol));
+
+        for (const symbol of watchSymbols) {
+            if (!stockSymbols.has(symbol)) {
+                return true;
+            }
+        }
+
+        return false;
+    }, [watchlist]);
+
+    const isHistorySatisfied = useCallback(() => {
+        return (stocksRef.current || []).every((stock) => (stock.history?.length || 0) >= historyLimit);
+    }, [historyLimit]);
 
     const loadAllData = useCallback(async (silent = false, ignoreDebounce = false): Promise<boolean> => {
         // 如果 watchlist 还在加载中，跳过
@@ -587,116 +627,49 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
         }
     }, []);
 
-    // Watchlist 变更时，强制触发一次刷新 (Ignore Debounce)
-    // Skip when only loadAllData reference changed (e.g. historyLimit transition);
-    // Effect 6 below handles that case.
-    useEffect(() => {
-        const prev = prevWatchlistRef.current;
-        const changed = prev.length !== watchlist.length ||
-            prev.some((item, i) => item.symbol !== watchlist[i]?.symbol);
-        prevWatchlistRef.current = watchlist;
+    const runRefreshEvent = useCallback(async (event: DashboardRefreshEvent): Promise<void> => {
+        const plan = getDashboardRefreshPlan(event, {
+            hasWatchlist: watchlist.length > 0,
+            loadingWatchlist,
+            hasMissingSymbols: hasMissingWatchlistSymbols(),
+            shouldPollBatch: shouldPollBatch(stocksRef.current),
+            shouldCheckPredictionDrift: shouldCheckPredictionVersions(stocksRef.current),
+            historySatisfied: isHistorySatisfied(),
+            priceOnlyRefresh,
+        });
 
-        if (!changed) return;
-
-        if (watchlist.length > 0) {
-            // Inventory Check: only force a batch fetch when local cache cannot satisfy watchlist.
-            // This avoids cold-start fan-out when watchlist is restored from local storage (0 -> N)
-            // but dashboard stocks were already restored from snapshot cache.
-            const watchSymbols = new Set(watchlist.map(w => w.symbol));
-            const stockSymbols = new Set((stocksRef.current || []).map(s => s.symbol));
-            let hasMissingSymbol = false;
-            for (const sym of watchSymbols) {
-                if (!stockSymbols.has(sym)) {
-                    hasMissingSymbol = true;
-                    break;
-                }
-            }
-
-            if (hasMissingSymbol) {
-                loadAllData(false, true); // silent=false, ignoreDebounce=true
-                return;
-            }
-
-            // No missing symbols: trust local cache, but re-map ordering and fill placeholders if needed.
-            const remapped = watchlist.map(item => {
-                const existing = (stocksRef.current || []).find(s => s.symbol === item.symbol);
-                if (existing) return existing;
-                return {
-                    symbol: item.symbol, name: item.name, price: null,
-                    change: 0, lastUpdated: '...', history: [], loading: true,
-                    prediction: null, previousPrediction: null, rule: null
-                } as StockData;
-            });
-            setStocks(remapped);
-        } else if (watchlist.length === 0 && !loadingWatchlist) {
-            setStocks([]);
+        if (plan.dashboard === 'force') {
+            await loadAllData(false, true);
+        } else if (plan.dashboard === 'silent') {
+            await loadAllData(true);
+        } else if (plan.dashboard === 'remap') {
+            remapStocksToWatchlist();
         }
-    }, [watchlist, loadingWatchlist, loadAllData]);
 
-    // historyLimit 升级时（如从 stock-pool 导航回 dashboard），立即补拉历史数据
-    useEffect(() => {
-        if (historyLimit > prevHistoryLimitRef.current && watchlist.length > 0) {
-            // Inventory Check: only fetch when existing cache cannot satisfy the new historyLimit.
-            // Note: silent=true already bypasses the 30s debounce in loadAllData.
-            const allSatisfied = (stocksRef.current || []).every(s => (s.history?.length || 0) >= historyLimit);
-            if (!allSatisfied) {
-                loadAllData(true);
+        if (plan.checkPredictionDrift) {
+            const hasDrift = await checkPredictionVersionDrift();
+            if (hasDrift) {
+                await loadAllData(true, true);
             }
         }
-        prevHistoryLimitRef.current = historyLimit;
-    }, [historyLimit, watchlist.length, loadAllData]);
 
-    // 页面可见性检测：切回页面时刷新
-    // Batch 仅在收盘后等待当日预测时触发；其余场景只刷价格
-    useEffect(() => {
-        const refreshOnResume = () => {
-            if (!priceOnlyRefresh && shouldPollBatch(stocksRef.current)) {
-                loadAllData(true);
-            } else if (!priceOnlyRefresh) {
-                void checkPredictionVersionDrift().then((hasDrift) => {
-                    if (hasDrift) {
-                        void loadAllData(true, true);
-                    }
-                });
-            }
-            const symbols = watchlist.map(w => w.symbol);
+        if (plan.prices === 'refresh') {
+            const symbols = watchlist.map((item) => item.symbol);
             if (symbols.length > 0) {
-                void refreshPrices(symbols);
+                await refreshPrices(symbols);
             }
-        };
-
-        const handleVisibilityChange = () => {
-            if (document.visibilityState === 'visible') {
-                refreshOnResume();
-            }
-        };
-
-        document.addEventListener('visibilitychange', handleVisibilityChange);
-        window.addEventListener('focus', refreshOnResume);
-        window.addEventListener('pageshow', refreshOnResume);
-        window.addEventListener('online', refreshOnResume);
-
-        return () => {
-            document.removeEventListener('visibilitychange', handleVisibilityChange);
-            window.removeEventListener('focus', refreshOnResume);
-            window.removeEventListener('pageshow', refreshOnResume);
-            window.removeEventListener('online', refreshOnResume);
-        };
-    }, [checkPredictionVersionDrift, loadAllData, watchlist, refreshPrices, priceOnlyRefresh]);
-
-    // 预测层智能轮询：仅在收盘后等待当日预测时每 5 分钟检查一次
-    // 盘中/周末/预测已到达 → 定时器空转不发请求
-    useEffect(() => {
-        if (priceOnlyRefresh) return;
-        intervalRef.current = setInterval(() => {
-            if (shouldPollBatch(stocksRef.current)) {
-                loadAllData(true);
-            }
-        }, PREDICTION_POLL_INTERVAL);
-        return () => {
-            if (intervalRef.current) clearInterval(intervalRef.current);
-        };
-    }, [loadAllData, priceOnlyRefresh]);
+        }
+    }, [
+        checkPredictionVersionDrift,
+        hasMissingWatchlistSymbols,
+        isHistorySatisfied,
+        loadAllData,
+        loadingWatchlist,
+        priceOnlyRefresh,
+        refreshPrices,
+        remapStocksToWatchlist,
+        watchlist,
+    ]);
 
     // 价格层定时刷新（高频）
     // 首次价格数据由 batch 端点返回，无需在 mount 时额外调用 refreshPrices。
@@ -784,6 +757,7 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
         almanac,
         almanacs,
         setStocks,
+        runRefreshEvent,
         loadingPool,
         isRefreshing,
         lastRefreshTime,
