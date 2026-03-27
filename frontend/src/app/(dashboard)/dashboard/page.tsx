@@ -24,6 +24,14 @@ import {
   clearDashboardNavIntentSymbol,
   readDashboardSymbolFromSearchParams,
 } from '@/lib/dashboard-symbol-navigation';
+import {
+  createDashboardTacticalSelection,
+  findDashboardSelectedStock,
+  getBriefDrawerSymbol,
+  getDashboardActiveModal,
+  getDashboardContentStock,
+  parseDashboardSelectedTactics,
+} from '@/lib/dashboard-modal-context';
 
 const UserCenterDrawer = dynamic(() => import('@/components/UserCenterDrawer'), {
   ssr: false,
@@ -139,8 +147,15 @@ function DashboardContent() {
   const { tier } = useUserProfile();
 
   const currentStock = displayStocks[currentIndex];
+  const contextStock = getDashboardContentStock(currentStock);
   // 严格布尔检查以消除警告
   const isMarketAlmanac = !!(currentStock && currentStock.isAlmanac);
+  const activeModal = getDashboardActiveModal({
+    userCenterOpen,
+    briefOpen,
+    selectedTactics,
+    profileStock,
+  });
 
   // 【核心修复：粘性标题】用来保持标题内容的“粘性”，防止在切换到黄历时由于数据过快切换而显示黄历的内部 ID
   const stickyStockInfo = useRef({ name: '', symbol: '' });
@@ -160,7 +175,7 @@ function DashboardContent() {
   const closeProfile = useCallback(() => setProfileStock(null), []);
   
   const handleShowTactics = useCallback((symbol: string, prediction: AIPrediction) => {
-    setSelectedTactics({ symbol, prediction });
+    setSelectedTactics(createDashboardTacticalSelection(symbol, prediction));
   }, []);
 
   const handleVerticalScrollStable = useCallback((top: number, symbol: string) => {
@@ -173,16 +188,11 @@ function DashboardContent() {
 
   // 预解析战术数据，避免渲染时 JSON.parse
   const parsedTacticsData = useMemo(() => {
-    if (!selectedTactics?.prediction?.ai_reasoning) return {};
-    try {
-      return JSON.parse(selectedTactics.prediction.ai_reasoning);
-    } catch {
-      return {};
-    }
+    return parseDashboardSelectedTactics(selectedTactics);
   }, [selectedTactics]);
 
   const selectedTacticStock = useMemo(
-    () => stocks.find((s) => s.symbol === selectedTactics?.symbol),
+    () => findDashboardSelectedStock(stocks, selectedTactics?.symbol),
     [stocks, selectedTactics?.symbol]
   );
 
@@ -218,6 +228,8 @@ function DashboardContent() {
     <main
       className="fixed inset-0 bg-[#050508] text-white overflow-hidden select-none font-sans"
       data-dashboard-current-symbol={currentStock?.symbol || ''}
+      data-dashboard-context-symbol={contextStock?.symbol || ''}
+      data-dashboard-active-modal={activeModal}
     >
       <DashboardBackground 
         isAlmanac={isMarketAlmanac} 
@@ -227,7 +239,7 @@ function DashboardContent() {
       <header className="fixed top-0 left-0 right-0 z-[100] p-6 pointer-events-none">
         <div className="w-full flex justify-between items-start pointer-events-auto relative h-12">
            <div className="flex items-center gap-2 cursor-pointer group shrink-0" 
-             onClick={() => isMarketAlmanac ? almanacRef.current?.share() : setProfileStock(currentStock)}
+             onClick={() => isMarketAlmanac ? almanacRef.current?.share() : setProfileStock(contextStock)}
            >
               <div className="w-10 h-10 rounded-[16px] bg-white/5 border border-white/10 flex items-center justify-center transition-all group-active:scale-90 group-hover:bg-white/10 overflow-hidden relative">
                   <div className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${isMarketAlmanac ? 'opacity-100 scale-100' : 'opacity-0 scale-75 pointer-events-none'}`}>
@@ -240,7 +252,7 @@ function DashboardContent() {
            </div>
 
           <div className="absolute left-1/2 transform -translate-x-1/2 top-0 cursor-pointer group flex flex-col items-center h-12 justify-center w-48"
-            onClick={() => !isMarketAlmanac && setProfileStock(currentStock)}
+            onClick={() => !isMarketAlmanac && setProfileStock(contextStock)}
           >
             <div className={`absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-300 ${isMarketAlmanac ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
                <h1 className="text-xl font-black italic tracking-tight text-white group-hover:text-indigo-400 transition-colors text-center">
@@ -330,28 +342,30 @@ function DashboardContent() {
         </div>
       </footer>
 
-      <TacticalBriefDrawer 
-        isOpen={!!selectedTactics} 
-        onClose={closeTactics} 
-        tier={tier}
-        data={parsedTacticsData}
-        userPos={selectedTacticStock?.rule?.position || 'none'}
-        model={selectedTactics?.prediction?.model}
-        symbol={selectedTactics?.symbol || ''}
-        targetDate={selectedTactics?.prediction?.target_date || ''}
-        signal={selectedTactics?.prediction?.signal}
-        confidence={selectedTactics?.prediction?.confidence}
-        stockName={selectedTacticStock?.name}
-        currentPrice={selectedTacticStock?.price?.close}
-        shortMetrics={selectedTacticStock?.shortMetrics || null}
-      />
+      {parsedTacticsData && selectedTactics && (
+        <TacticalBriefDrawer 
+          isOpen
+          onClose={closeTactics} 
+          tier={tier}
+          data={parsedTacticsData}
+          userPos={selectedTacticStock?.rule?.position || 'none'}
+          model={selectedTactics.prediction?.model}
+          symbol={selectedTactics.symbol || ''}
+          targetDate={selectedTactics.prediction?.target_date || ''}
+          signal={selectedTactics.prediction?.signal}
+          confidence={selectedTactics.prediction?.confidence}
+          stockName={selectedTacticStock?.name}
+          currentPrice={selectedTacticStock?.price?.close}
+          shortMetrics={selectedTacticStock?.shortMetrics || null}
+        />
+      )}
 
       <AnimatePresence>
         {profileStock && <StockProfile stock={profileStock} onClose={closeProfile} />}
       </AnimatePresence>
 
       <UserCenterDrawer isOpen={userCenterOpen} onClose={closeUserCenter} />
-      <BriefDrawer isOpen={briefOpen} onClose={closeBrief} limitToSymbol={currentStock?.symbol} onUpgrade={openUserCenter} />
+      <BriefDrawer isOpen={briefOpen} onClose={closeBrief} limitToSymbol={getBriefDrawerSymbol(currentStock)} onUpgrade={openUserCenter} />
     </main>
   );
 }
