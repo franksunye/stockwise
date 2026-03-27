@@ -26,7 +26,6 @@ import { shouldEnableHighPerformance } from '@/lib/device-utils';
 import { AICouncil } from './AICouncil';
 import Multiavatar from '@/components/Multiavatar';
 import { resolveAnalystForBriefSource } from '@/lib/agent-team';
-import { formatModelName } from '@/lib/model-names';
 import {
   getBriefSourceKind,
   getGeneralTactics,
@@ -138,10 +137,7 @@ export function TacticalBriefDrawer({
   const isFree = tier === 'free';
   const sourceKind = getBriefSourceKind(data, model);
   const analystProfile = resolveAnalystForBriefSource(sourceKind, model);
-  const modelFact = sourceKind === 'llm'
-    ? (model ? formatModelName(model) : 'LLM 深度推理版')
-    : '量化规则引擎';
-  const sourceFact = `${modelFact} 生成`;
+  const sourceFact = sourceKind === 'llm' ? '独立视角' : '规则视角';
   const newsItems = getNormalizedNewsItems(data);
   const generalTactics = getGeneralTactics(data);
   const { scenarioHoldingProfit, scenarioHoldingLoss, scenarioEmpty } = getScenarioTacticGroups(data);

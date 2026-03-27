@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { preload } from 'swr';
 import useSWR from 'swr';
-import { ShieldCheck, AlertTriangle, RotateCw } from 'lucide-react';
+import { AlertTriangle, RotateCw } from 'lucide-react';
 import { getCurrentUser } from '@/lib/user';
 import { AIPrediction } from '@/lib/types';
 import Multiavatar from '@/components/Multiavatar';
@@ -119,6 +119,24 @@ function getCouncilActionLabel(actionKey: CouncilActionKey): string {
   }
 }
 
+function getCouncilHeadlineAction(predictions: AIPrediction[]): CouncilActionKey {
+  const primaryPrediction = predictions.find((pred) => pred.is_primary === true || pred.is_primary === 1);
+  const primaryAction = primaryPrediction ? getCouncilActionKey(primaryPrediction) : 'mixed';
+  if (primaryAction !== 'mixed') return primaryAction;
+
+  const counts = new Map<CouncilActionKey, number>();
+  for (const pred of predictions) {
+    const actionKey = getCouncilActionKey(pred);
+    counts.set(actionKey, (counts.get(actionKey) || 0) + 1);
+  }
+
+  const ranked = Array.from(counts.entries()).sort((a, b) => b[1] - a[1]);
+  if (ranked.length === 0) return 'mixed';
+  if (ranked.length === 1) return ranked[0][0];
+  if (ranked[0][1] === ranked[1][1]) return 'mixed';
+  return ranked[0][0];
+}
+
 function buildCollabSummary(pred: AIPrediction, analystName: string): string {
   const actionLabel = getCouncilActionLabel(
     getCouncilActionKeyFromSignal(pred.layer1_signal || pred.layer1_status || pred.canonical_signal || pred.signal)
@@ -128,9 +146,9 @@ function buildCollabSummary(pred: AIPrediction, analystName: string): string {
 
   const summary = getFirstSentence(getTacticalSummary(pred.llm_reasoning || pred.ai_reasoning));
   if (summary) {
-    return `基于量化模型当前${actionLabel}结论，${analystName}复核后给出协同汇报：${summary}`;
+    return `当前结论为${actionLabel}，${analystName}复核后认为：${summary}`;
   }
-  return `基于量化模型当前${actionLabel}结论，${analystName}复核后维持协同判断。`;
+  return `${analystName}复核后，当前结论维持${actionLabel}。`;
 }
 
 function buildRuleSummary(pred: AIPrediction): string {
@@ -139,7 +157,7 @@ function buildRuleSummary(pred: AIPrediction): string {
   const actionLabel = getCouncilActionLabel(
     getCouncilActionKeyFromSignal(pred.layer1_signal || pred.layer1_status || pred.canonical_signal || pred.signal)
   );
-  return `规则侧当前给出${actionLabel}判断，继续以量化模型结论作为纪律锚点。`;
+  return `规则侧当前判断为${actionLabel}。`;
 }
 
 function getActionChipClass(actionKey: CouncilActionKey): string {
@@ -180,7 +198,7 @@ function buildCouncilCards(predictions: AIPrediction[]): CouncilCardData[] {
     cards.push({
       key: 'shen-ce-gu-shen-collab',
       title: `${shenCe.name} × ${guShen.name}`,
-      role: '复核意见',
+      role: '主结论复核',
       summary: buildCollabSummary(deepseekPred, guShen.name),
       actionKey: collabAction,
       confidence: deepseekPred.confidence,
@@ -192,7 +210,7 @@ function buildCouncilCards(predictions: AIPrediction[]): CouncilCardData[] {
     cards.push({
       key: 'gu-shen-independent',
       title: guShen.name,
-      role: '独立判断',
+      role: '独立视角',
       summary: getTacticalSummary(deepseekPred.llm_reasoning || deepseekPred.ai_reasoning),
       actionKey: getCouncilActionKeyFromSignal(deepseekPred.llm_signal || deepseekPred.signal),
       confidence: deepseekPred.confidence,
@@ -206,7 +224,7 @@ function buildCouncilCards(predictions: AIPrediction[]): CouncilCardData[] {
     cards.push({
       key: 'lin-xu-independent',
       title: linXu.name,
-      role: '独立判断',
+      role: '独立视角',
       summary: getTacticalSummary(linxuPred.llm_reasoning || linxuPred.ai_reasoning),
       actionKey: getCouncilActionKeyFromSignal(linxuPred.llm_signal || linxuPred.signal),
       confidence: linxuPred.confidence,
@@ -223,7 +241,7 @@ function buildCouncilCards(predictions: AIPrediction[]): CouncilCardData[] {
     cards.push({
       key: 'shen-ce-cheng-ju-rule',
       title: `${shenCe.name} × ${chengJu.name}`,
-      role: '复核意见',
+      role: '规则视角',
       summary: buildRuleSummary(rulePred),
       actionKey: ruleAction,
       confidence: rulePred.confidence,
@@ -430,54 +448,16 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
     );
   }
 
-  // Calculate Consensus
-  const actionKeys = predictions.map(getCouncilActionKey);
-  const enterCount = actionKeys.filter((k) => k === 'enter').length;
-  const observeCount = actionKeys.filter((k) => k === 'observe').length;
-  const defenseCount = actionKeys.filter((k) => k === 'defense').length;
-  const emptyCount = actionKeys.filter((k) => k === 'empty').length;
-  
-  let consensusLevel = '更多共识';
-  let actionLabel = '暂无信号';
-  let consensusColor = 'text-slate-400';
-  
-  const total = predictions.length;
-  const isUnanimous = enterCount === total || observeCount === total || defenseCount === total || emptyCount === total;
-  
-  if (isUnanimous) {
-    consensusLevel = '结论一致';
-    if (enterCount === total) actionLabel = '建议看多';
-    else if (observeCount === total) actionLabel = '建议观察';
-    else if (defenseCount === total) actionLabel = '建议防守';
-    else actionLabel = '暂无信号';
-  } else {
-    // Determine majority
-    const counts = [
-      { key: 'enter', count: enterCount, label: '建议看多' },
-      { key: 'observe', count: observeCount, label: '建议观察' },
-      { key: 'defense', count: defenseCount, label: '建议防守' },
-      { key: 'empty', count: emptyCount, label: '暂无信号' }
-    ];
-    counts.sort((a, b) => b.count - a.count);
-    
-    if (counts[0].count > counts[1].count) {
-      consensusLevel = '更多共识';
-      actionLabel = counts[0].label;
-    } else {
-      consensusLevel = '判断分歧';
-      actionLabel = '意见不一';
-    }
-  }
-
-  // Set color based on action
-  if (actionLabel.includes('看多') || actionLabel.includes('进场')) consensusColor = getCouncilActionMeta('enter').textClass;
-  else if (actionLabel.includes('观察')) consensusColor = getCouncilActionMeta('observe').textClass;
-  else if (actionLabel.includes('防守')) consensusColor = getCouncilActionMeta('defense').textClass;
-  else if (actionLabel.includes('暂无')) consensusColor = getCouncilActionMeta('empty').textClass;
+  const headlineActionKey = getCouncilHeadlineAction(predictions);
+  const actionLabel = getCouncilActionLabel(headlineActionKey);
+  const consensusColor =
+    headlineActionKey === 'mixed'
+      ? 'text-slate-400'
+      : getCouncilActionMeta(headlineActionKey).textClass;
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      {/* Consensus Header */}
+      {/* Council Header */}
       <div className="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/10">
         <div>
            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">{symbol}</p>
@@ -485,11 +465,10 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
         </div>
         <div className="text-right">
            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">
-              {predictions.length}席 {consensusLevel}
+              {predictions.length}席 当前结论
            </p>
            <h3 className={`text-xl font-black tracking-tight ${consensusColor} flex items-center justify-end gap-2`}>
               {actionLabel}
-              {isUnanimous && <ShieldCheck size={18} />}
            </h3>
         </div>
       </div>
@@ -539,7 +518,7 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
            );
         })}
         <p className="px-1 pt-1 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-600">
-          复核意见基于量化模型底座生成，独立判断保留分析师原始观点
+          主结论复核基于系统结果生成，独立视角保留分析师原始判断
         </p>
       </div>
     </div>
