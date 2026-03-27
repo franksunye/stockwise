@@ -114,6 +114,13 @@ export function TacticalReportPoster({
   );
   const councilHeadline = councilHeadlineAction ? getCouncilActionLabel(councilHeadlineAction) : actionMeta.posterDecision;
   const councilHeadlineMeta = councilHeadlineAction ? getCouncilActionMeta(councilHeadlineAction) : actionMeta;
+  const exportDate = useMemo(() => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = `${now.getMonth() + 1}`.padStart(2, '0');
+    const day = `${now.getDate()}`.padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }, []);
 
   const reportText = useMemo(() => {
     return `ZISO AI 投研报告｜${stockName} (${symbol})\n适用日期：${targetDate}\n当前结论：${councilHeadline}`;
@@ -367,7 +374,7 @@ export function TacticalReportPoster({
                             <p className={`text-[10px] font-black uppercase tracking-[0.16em] ${node.kind === 'current' ? 'text-slate-300' : 'text-slate-500'}`}>{node.label}</p>
                             <p className={`mt-1 line-clamp-1 text-[11px] leading-5 ${node.kind === 'current' ? 'text-slate-500' : 'text-slate-600'}`}>{node.description}</p>
                           </div>
-                          <p className={`${node.kind === 'current' ? 'text-[2rem]' : 'text-[10px] uppercase tracking-[0.16em]'} font-black text-white`}>{node.price}</p>
+                          <p className={`${node.kind === 'current' ? 'text-[1.75rem]' : 'text-[10px] uppercase tracking-[0.16em]'} font-black text-white`}>{node.price}</p>
                         </div>
                       ))}
                     </div>
@@ -379,7 +386,7 @@ export function TacticalReportPoster({
                     <div className="flex items-center gap-2 text-slate-500">
                       <span className="text-[10px] font-black uppercase tracking-[0.24em]">- ZISO AI -</span>
                     </div>
-                    <span className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-600">{targetDate}</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-600">导出于 {exportDate}</span>
                   </div>
                 </section>
               </div>
