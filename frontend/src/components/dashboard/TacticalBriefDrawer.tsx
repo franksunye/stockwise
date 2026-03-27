@@ -16,13 +16,13 @@ import {
   Layers,
   Hash,
   AlertTriangle,
-  Calendar,
   Sparkles,
   TrendingDown,
   Shield,
   ChevronUp,
   Copy,
-  Check
+  Check,
+  Share2
 } from 'lucide-react';
 import { AIPrediction, TacticalData, ShortMetrics } from '@/lib/types';
 import { shouldEnableHighPerformance } from '@/lib/device-utils';
@@ -57,6 +57,8 @@ interface TacticalBriefDrawerProps {
 }
 
 import { SilentPoster } from './SilentPoster';
+import { BriefExportSheet } from './BriefExportSheet';
+import { TacticalReportPoster } from './TacticalReportPoster';
 
 // 辅助函数：获取步骤对应的图标和标签配置
 const getStepConfig = (step: string) => {
@@ -129,6 +131,8 @@ export function TacticalBriefDrawer({
 }: TacticalBriefDrawerProps) {
   const [isMounted, setIsMounted] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
+  const [isExportOpen, setIsExportOpen] = useState(false);
+  const [isReportOpen, setIsReportOpen] = useState(false);
   const [isCounterArgumentExpanded, setIsCounterArgumentExpanded] = useState(false);
   const [isConflictResolutionExpanded, setIsConflictResolutionExpanded] = useState(false);
   const [isScenarioCopied, setIsScenarioCopied] = useState(false);
@@ -267,6 +271,16 @@ export function TacticalBriefDrawer({
     }
   };
 
+  const handleOpenAlmanac = () => {
+    setIsExportOpen(false);
+    setIsShareOpen(true);
+  };
+
+  const handleOpenReport = () => {
+    setIsExportOpen(false);
+    setIsReportOpen(true);
+  };
+
   if (!isMounted) return null;
 
   return (
@@ -305,16 +319,16 @@ export function TacticalBriefDrawer({
 
             {/* 固定 Header */}
             <header className="relative flex items-center justify-center py-2 px-6 bg-[#0a0a0f] border-b border-white/5 shadow-lg shadow-black/20 shrink-0 z-20">
-                 {/* Left: Almanac */}
+                 {/* Left: Export */}
                  <button 
                    onClick={(e) => {
                      e.stopPropagation();
-                     setIsShareOpen(true);
+                     setIsExportOpen(true);
                    }} 
                    className="absolute left-4 p-2.5 rounded-full bg-white/5 border border-white/10 text-indigo-400 active:scale-95 transition-all hover:bg-white/10 hover:text-indigo-300 z-20"
-                   title="查看投资黄历"
+                   title="导出当前分析"
                  >
-                   <Calendar size={18} />
+                   <Share2 size={18} />
                  </button>
 
                  {/* Center: Tabs */}
@@ -393,11 +407,11 @@ export function TacticalBriefDrawer({
                         </h3>
                         <button
                           onClick={handleCopyScenario}
-                          className="shrink-0 flex items-center justify-center bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 hover:border-white/10 transition-all rounded-xl px-3 py-2 group"
+                          className="shrink-0 flex items-center justify-center rounded-lg p-1 group"
                           aria-label="复制当前交易预案"
                           title="复制当前交易预案"
                         >
-                          <div className="bg-white/5 p-1.5 rounded-lg text-slate-500 group-hover:text-white transition-colors">
+                          <div className="bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 hover:border-white/10 p-1.5 rounded-lg text-slate-500 group-hover:text-white transition-colors">
                             {isScenarioCopied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
                           </div>
                         </button>
@@ -958,12 +972,34 @@ export function TacticalBriefDrawer({
     </AnimatePresence>
 
     {isOpen && (
+      <BriefExportSheet
+        isOpen={isExportOpen}
+        onClose={() => setIsExportOpen(false)}
+        onOpenAlmanac={handleOpenAlmanac}
+        onOpenReport={handleOpenReport}
+      />
+    )}
+
+    {isOpen && (
       <SilentPoster 
         isOpen={isShareOpen}
         onClose={() => setIsShareOpen(false)}
         prediction={posterPrediction}
         stockName={stockName || symbol}
         userPos={userPos}
+      />
+    )}
+
+    {isOpen && (
+      <TacticalReportPoster
+        isOpen={isReportOpen}
+        onClose={() => setIsReportOpen(false)}
+        prediction={posterPrediction}
+        stockName={stockName || symbol}
+        symbol={symbol}
+        targetDate={targetDate}
+        data={data}
+        currentPrice={currentPrice}
       />
     )}
     </>
