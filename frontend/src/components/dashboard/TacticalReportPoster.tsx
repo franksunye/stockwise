@@ -4,19 +4,29 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import useSWR from 'swr';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
-  CheckCircle2,
+  BarChart3,
+  Crosshair,
   Download,
+  Hash,
+  Layers,
   Loader2,
+  Newspaper,
+  RotateCcw,
   Share2,
   Sparkles,
   Target,
+  TrendingUp,
   X,
+  Zap,
 } from 'lucide-react';
+import Multiavatar from '@/components/Multiavatar';
 import { getPredictionActionMeta } from '@/lib/layer1-ui';
 import {
   buildCouncilCards,
   fetchAICouncilData,
+  getActionChipClass,
   getCouncilActionLabel,
+  getCouncilActionMeta,
   getCouncilHeadlineAction,
 } from '@/lib/ai-council-surface';
 import {
@@ -51,6 +61,22 @@ function formatPrice(val: number | string | number[] | undefined, isRange = fals
   return String(val);
 }
 
+function getStepConfig(step: string) {
+  const s = step.toLowerCase();
+
+  if (s.includes('trend')) return { icon: <TrendingUp size={12} />, label: '趋势' };
+  if (s.includes('momentum')) return { icon: <Zap size={12} />, label: '动能' };
+  if (s.includes('volume')) return { icon: <BarChart3 size={12} />, label: '成交量' };
+  if (s.includes('history')) return { icon: <RotateCcw size={12} />, label: '历史' };
+  if (s.includes('decision')) return { icon: <Target size={12} />, label: '决策' };
+  if (s.includes('news') || s.includes('fundamental')) return { icon: <Newspaper size={12} />, label: '情报' };
+  if (s.includes('position') || s.includes('level') || s.includes('price')) return { icon: <Crosshair size={12} />, label: '价格行为' };
+  if (s.includes('context')) return { icon: <Layers size={12} />, label: '上下文' };
+  if (s.includes('fund') || s.includes('capital') || s.includes('flow') || s.includes('money')) return { icon: <Hash size={12} />, label: '资金博弈' };
+
+  return { icon: <Hash size={12} />, label: '综合研判' };
+}
+
 export function TacticalReportPoster({
   isOpen,
   onClose,
@@ -64,10 +90,14 @@ export function TacticalReportPoster({
   const posterRef = useRef<HTMLDivElement>(null);
   const [isCapturing, setIsCapturing] = useState(false);
   const actionMeta = useMemo(() => getPredictionActionMeta(prediction), [prediction]);
-  const { scenarioHoldingProfit, scenarioHoldingLoss, scenarioEmpty } = useMemo(
-    () => getScenarioTacticGroups(data),
-    [data],
-  );
+  const { scenarioHoldingProfit, scenarioHoldingLoss, scenarioEmpty } = useMemo(() => {
+    const groups = getScenarioTacticGroups(data);
+    return {
+      scenarioHoldingProfit: groups.scenarioHoldingProfit.slice(0, 1),
+      scenarioHoldingLoss: groups.scenarioHoldingLoss.slice(0, 1),
+      scenarioEmpty: groups.scenarioEmpty.slice(0, 1),
+    };
+  }, [data]);
   const priceNodes = useMemo(() => getPriceNodes(data, currentPrice).slice(0, 4), [data, currentPrice]);
   const reasoningSteps = Array.isArray(data.reasoning_trace) ? data.reasoning_trace.slice(0, 5) : [];
 
@@ -78,7 +108,12 @@ export function TacticalReportPoster({
   );
   const councilPredictions = useMemo(() => councilPayload?.data || [], [councilPayload]);
   const councilCards = useMemo(() => buildCouncilCards(councilPredictions).slice(0, 2), [councilPredictions]);
-  const councilHeadline = councilPredictions.length > 0 ? getCouncilActionLabel(getCouncilHeadlineAction(councilPredictions)) : actionMeta.posterDecision;
+  const councilHeadlineAction = useMemo(
+    () => (councilPredictions.length > 0 ? getCouncilHeadlineAction(councilPredictions) : null),
+    [councilPredictions],
+  );
+  const councilHeadline = councilHeadlineAction ? getCouncilActionLabel(councilHeadlineAction) : actionMeta.posterDecision;
+  const councilHeadlineMeta = councilHeadlineAction ? getCouncilActionMeta(councilHeadlineAction) : actionMeta;
 
   const reportText = useMemo(() => {
     return `ZISO AI 投研报告｜${stockName} (${symbol})\n适用日期：${targetDate}\n当前结论：${councilHeadline}`;
@@ -154,7 +189,7 @@ export function TacticalReportPoster({
           className="absolute inset-0 bg-black/85 backdrop-blur-xl"
         />
 
-        <div className="relative z-10 flex h-full max-h-[92vh] w-full max-w-md flex-col overflow-hidden rounded-[32px] border border-white/10 bg-[#0a0b10] shadow-[0_24px_100px_rgba(0,0,0,0.6)]">
+        <div className="relative z-10 flex h-full max-h-[92vh] w-full max-w-md flex-col overflow-hidden rounded-[26px] border border-white/10 bg-[#0a0b10] shadow-[0_24px_100px_rgba(0,0,0,0.6)]">
           <div className="capture-hidden flex items-center justify-between border-b border-white/5 px-5 py-4">
             <div>
               <p className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-600">ZISO AI</p>
@@ -173,41 +208,34 @@ export function TacticalReportPoster({
               ref={posterRef}
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              className="relative mx-auto w-full max-w-md overflow-hidden rounded-[36px] border border-white/10 bg-[#06070b] shadow-[0_20px_60px_rgba(0,0,0,0.45)]"
+              className="relative mx-auto w-full max-w-md overflow-hidden rounded-[24px] border border-white/10 bg-[#06070b] shadow-[0_20px_60px_rgba(0,0,0,0.45)]"
             >
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(99,102,241,0.18),transparent_35%),radial-gradient(circle_at_bottom_right,rgba(244,63,94,0.12),transparent_28%)] pointer-events-none" />
               <div className="absolute inset-0 opacity-[0.05] pointer-events-none" style={{ backgroundImage: 'linear-gradient(to bottom, rgba(255,255,255,0.12) 1px, transparent 1px)', backgroundSize: '100% 22px' }} />
 
               <div className="relative z-10 px-5 pt-5 pb-7">
-                <section className="rounded-[28px] border border-white/10 bg-white/[0.03] p-4.5">
+                <section className="px-1 pb-1">
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <p className="text-[10px] font-black uppercase tracking-[0.28em] text-slate-500">ZISO AI · 投研报告</p>
-                      <h1 className="mt-2.5 text-[28px] font-black tracking-tight text-white">{stockName}</h1>
+                      <h1 className="text-[28px] font-black tracking-tight text-white">{stockName}</h1>
                       <p className="mt-1 text-xs font-black uppercase tracking-[0.24em] text-slate-500">{symbol}</p>
                     </div>
-                    <div className={`rounded-2xl border px-3 py-2 text-right ${actionMeta.bgClass}`}>
-                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">当前结论</p>
-                      <p className={`mt-1 text-sm font-black ${actionMeta.textClass}`}>{councilHeadline}</p>
+                    <div className="pt-0.5 text-right">
+                      <p className={`text-[28px] font-black tracking-tight ${councilHeadlineMeta.textClass}`}>{councilHeadline}</p>
                     </div>
                   </div>
 
-                  <div className="mt-4 grid grid-cols-3 gap-2.5">
-                    <div className="rounded-2xl border border-white/5 bg-white/[0.03] p-3">
-                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600">适用日期</p>
-                      <p className="mt-2 text-sm font-black text-white">{targetDate}</p>
+                  <div className="mt-4 flex items-center gap-5 text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">
+                    <div className="flex items-center gap-2">
+                      <span className="text-white">{targetDate}</span>
                     </div>
-                    <div className="rounded-2xl border border-white/5 bg-white/[0.03] p-3">
-                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600">系统信号</p>
-                      <p className={`mt-2 text-sm font-black ${actionMeta.textClass}`}>{actionMeta.posterDecision}</p>
-                    </div>
-                    <div className="rounded-2xl border border-white/5 bg-white/[0.03] p-3">
-                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600">把握度</p>
-                      <p className="mt-2 text-sm font-black text-white">{(prediction.confidence * 100).toFixed(0)}%</p>
+                    <div className="h-3.5 w-px bg-white/10" />
+                    <div className="flex items-center gap-2">
+                      <span className="text-slate-400">{(prediction.confidence * 100).toFixed(0)}%</span>
                     </div>
                   </div>
 
-                  <div className="mt-4 rounded-[24px] border border-indigo-500/15 bg-indigo-500/[0.06] p-4">
+                  <div className="mt-4 rounded-[18px] border border-indigo-500/12 bg-indigo-500/[0.05] p-4">
                     <div className="flex items-center gap-2">
                       <Sparkles size={14} className="text-indigo-300" />
                       <p className="text-[10px] font-black uppercase tracking-[0.22em] text-indigo-300/80">摘要</p>
@@ -216,7 +244,7 @@ export function TacticalReportPoster({
                   </div>
                 </section>
 
-                <section className="mt-4 rounded-[28px] border border-white/10 bg-white/[0.03] p-5">
+                <section className="mt-5 border-t border-white/5 pt-5">
                   <div className="mb-4 flex items-center gap-2">
                     <div className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
                     <h2 className="text-xs font-black uppercase tracking-[0.24em] text-slate-400">投研决议</h2>
@@ -224,28 +252,44 @@ export function TacticalReportPoster({
                   <div className="grid gap-2.5">
                     {councilCards.length > 0 ? (
                       councilCards.map((card) => (
-                        <div key={card.key} className={`rounded-2xl border p-3.5 ${card.isPrimary ? 'border-indigo-500/20 bg-indigo-500/[0.08]' : 'border-white/5 bg-white/[0.02]'}`}>
+                        <div key={card.key} className={`rounded-[18px] border p-3.5 ${card.isPrimary ? 'border-indigo-500/16 bg-indigo-500/[0.06]' : 'border-white/4 bg-white/[0.015]'}`}>
                           <div className="flex items-center justify-between gap-3">
-                            <div>
-                              <p className={`text-sm font-black ${card.isPrimary ? 'text-indigo-200' : 'text-white'}`}>{card.title}</p>
-                              <p className="mt-1 text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">{card.role}</p>
+                            <div className="flex items-center gap-3 min-w-0">
+                              {card.avatarSeeds.length === 1 ? (
+                                <div className={`h-8 w-8 shrink-0 overflow-hidden rounded-full border ${card.isPrimary ? 'bg-indigo-500/8 border-indigo-500/20' : 'bg-white/5 border-white/10'}`}>
+                                  <Multiavatar name={card.avatarSeeds[0]} className="h-full w-full" />
+                                </div>
+                              ) : (
+                                <div className="relative h-8 w-10 shrink-0">
+                                  <div className={`absolute left-3 top-0 h-8 w-8 overflow-hidden rounded-full border z-10 ${card.isPrimary ? 'bg-indigo-500/8 border-indigo-500/20' : 'bg-white/5 border-white/10'}`}>
+                                    <Multiavatar name={card.avatarSeeds[1]} className="h-full w-full" />
+                                  </div>
+                                  <div className="absolute left-0 top-0 h-8 w-8 overflow-hidden rounded-full border border-white/10 bg-white/5 z-20">
+                                    <Multiavatar name={card.avatarSeeds[0]} className="h-full w-full" />
+                                  </div>
+                                </div>
+                              )}
+                              <div className="min-w-0">
+                                <p className={`truncate text-sm font-black ${card.isPrimary ? 'text-indigo-100' : 'text-white'}`}>{card.title}</p>
+                                <p className="mt-0.5 text-[10px] font-black uppercase tracking-[0.18em] text-slate-600">{card.role}</p>
+                              </div>
                             </div>
-                            <span className={`rounded-full px-2.5 py-1 text-[10px] font-black ${card.isPrimary ? 'bg-indigo-500/15 text-indigo-200' : 'bg-white/5 text-slate-400'}`}>
+                            <span className={`rounded-full px-2.5 py-1 text-[10px] font-black ${getActionChipClass(card.actionKey)}`}>
                               {getCouncilActionLabel(card.actionKey)}
                             </span>
                           </div>
-                          <p className="mt-2.5 text-xs leading-5 text-slate-300">{card.summary}</p>
+                          <p className="mt-2.5 text-xs leading-5 text-slate-300/95">{card.summary}</p>
                         </div>
                       ))
                     ) : (
-                      <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-4 text-sm text-slate-500">
+                      <div className="rounded-[18px] border border-white/5 bg-white/[0.02] p-4 text-sm text-slate-500">
                         投研决议正在调阅中，生成图片时会自动带上当前摘要与策略结构。
                       </div>
                     )}
                   </div>
                 </section>
 
-                <section className="mt-4 rounded-[28px] border border-white/10 bg-white/[0.03] p-5">
+                <section className="mt-5 border-t border-white/5 pt-5">
                   <div className="mb-4 flex items-center gap-2">
                     <div className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
                     <h2 className="text-xs font-black uppercase tracking-[0.24em] text-slate-400">推演过程</h2>
@@ -253,24 +297,28 @@ export function TacticalReportPoster({
                   <div className="relative space-y-3.5 before:absolute before:left-[8px] before:top-2 before:bottom-2 before:w-px before:bg-white/5">
                     {reasoningSteps.map((step, idx) => (
                       <div key={`${step.step}-${idx}`} className="relative pl-7">
-                        <div className="absolute left-0 top-1.5 h-4 w-4 rounded-full border border-indigo-500/20 bg-[#0f1120] flex items-center justify-center">
-                          <div className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
+                        <div className="absolute left-0 top-1.5 h-4 w-4 rounded-full border border-indigo-500/20 bg-[#0f1120] flex items-center justify-center text-indigo-300">
+                          {getStepConfig(step.step).icon}
                         </div>
                         <div className="flex items-start justify-between gap-3">
                           <div>
-                            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">{step.step}</p>
-                            <p className="mt-1 text-sm font-black leading-5 text-white">{normalizeLegacyTerms(step.data)}</p>
+                            <p className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">
+                              <span>{getStepConfig(step.step).label}</span>
+                            </p>
+                            <p className="mt-1 text-[12px] font-medium leading-5 text-slate-100/92">{normalizeLegacyTerms(step.data)}</p>
                           </div>
-                          <span className="shrink-0 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-2.5 py-1 text-[10px] font-black text-indigo-200">
-                            {normalizeLegacyTerms(step.conclusion)}
-                          </span>
+                          {idx < 2 ? (
+                            <span className="shrink-0 rounded-full border border-indigo-500/16 bg-indigo-500/[0.08] px-2.5 py-1 text-[10px] font-black text-indigo-200">
+                              {normalizeLegacyTerms(step.conclusion)}
+                            </span>
+                          ) : null}
                         </div>
                       </div>
                     ))}
                   </div>
                 </section>
 
-                <section className="mt-4 rounded-[28px] border border-white/10 bg-white/[0.03] p-5">
+                <section className="mt-5 border-t border-white/5 pt-5">
                   <div className="mb-4 flex items-center gap-2">
                     <div className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
                     <h2 className="text-xs font-black uppercase tracking-[0.24em] text-slate-400">操作建议</h2>
@@ -281,14 +329,14 @@ export function TacticalReportPoster({
                       { title: '持仓亏损', tone: 'border-rose-500/15 bg-rose-500/[0.05]', badge: '亏损中', items: scenarioHoldingLoss },
                       { title: '空仓等待', tone: 'border-indigo-500/15 bg-indigo-500/[0.05]', badge: '等待入场', items: scenarioEmpty },
                     ].map((group) => (
-                      <div key={group.title} className={`rounded-[24px] border p-4 ${group.tone}`}>
+                      <div key={group.title} className={`rounded-[18px] border p-4 ${group.tone}`}>
                         <div className="mb-2.5 flex items-center justify-between">
                           <p className="text-sm font-black text-white">场景：{group.title}</p>
                           <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] font-black text-slate-400">{group.badge}</span>
                         </div>
-                        <div className="space-y-0 divide-y divide-white/5 overflow-hidden rounded-2xl border border-white/5 bg-[#090a10]/55">
+                        <div className="space-y-0 divide-y divide-white/5">
                           {group.items.map((item, idx) => (
-                            <div key={`${group.title}-${idx}`} className="p-3">
+                            <div key={`${group.title}-${idx}`} className="py-3 first:pt-1 last:pb-0">
                               <div className="flex items-center gap-2">
                                 <span className="rounded-md bg-white/8 px-1.5 py-0.5 text-[10px] font-black text-white">{item.priority}</span>
                                 <p className="text-sm font-black text-white">{normalizeActionLabel(item.action)}</p>
@@ -309,57 +357,32 @@ export function TacticalReportPoster({
                   </div>
                 </section>
 
-                <section className="mt-4 grid grid-cols-1 gap-4">
-                  <div className="rounded-[28px] border border-white/10 bg-white/[0.03] p-5">
+                <section className="mt-5 border-t border-white/5 pt-5">
+                  <div>
                     <div className="mb-4 flex items-center gap-2">
                       <div className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
                       <h2 className="text-xs font-black uppercase tracking-[0.24em] text-slate-400">关键点位</h2>
                     </div>
-                    <div className="grid grid-cols-2 gap-2.5">
+                    <div className="overflow-hidden rounded-[18px] border border-white/5 bg-white/[0.02]">
                       {priceNodes.map((node) => (
-                        <div key={node.id} className="rounded-2xl border border-white/5 bg-white/[0.02] p-3">
-                          <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-500">{node.label}</p>
-                          <p className="mt-2 text-lg font-black text-white">{node.price}</p>
-                          <p className="mt-1 line-clamp-2 text-[11px] leading-5 text-slate-500">{node.description}</p>
+                      <div key={node.id} className="grid grid-cols-[1fr_auto] gap-3 border-t border-white/5 px-3 py-3 first:border-t-0">
+                        <div className="min-w-0">
+                            <p className={`text-[10px] font-black uppercase tracking-[0.16em] ${node.kind === 'current' ? 'text-slate-300' : 'text-slate-500'}`}>{node.label}</p>
+                            <p className={`mt-1 line-clamp-1 text-[11px] leading-5 ${node.kind === 'current' ? 'text-slate-500' : 'text-slate-600'}`}>{node.description}</p>
+                          </div>
+                          <p className={`${node.kind === 'current' ? 'text-[2rem]' : 'text-lg'} font-black text-white`}>{node.price}</p>
                         </div>
                       ))}
                     </div>
                   </div>
-
-                  <div className="rounded-[28px] border border-white/10 bg-white/[0.03] p-5">
-                    <div className="mb-4 flex items-center gap-2">
-                      <div className="h-1.5 w-1.5 rounded-full bg-rose-500" />
-                      <h2 className="text-xs font-black uppercase tracking-[0.24em] text-slate-400">风险提示</h2>
-                    </div>
-                    <div className="space-y-3">
-                      {data.counter_argument && (
-                        <div className="rounded-2xl border border-rose-500/15 bg-rose-500/[0.05] p-4">
-                          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-rose-300/80">思维复盘 / 风险反思</p>
-                          <p className="mt-2 text-sm leading-6 text-rose-100/85">{normalizeLegacyTerms(data.counter_argument)}</p>
-                        </div>
-                      )}
-                      <div className="rounded-2xl border border-indigo-500/15 bg-indigo-500/[0.05] p-4">
-                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-indigo-300/80">核心冲突处理原则</p>
-                        <p className="mt-2 text-sm leading-6 text-indigo-100/85">{normalizeLegacyTerms(data.conflict_resolution || '遵循趋势优先原则。')}</p>
-                      </div>
-                    </div>
-                  </div>
                 </section>
 
-                <section className="mt-4 rounded-[24px] border border-white/10 bg-white/[0.03] px-5 py-4">
+                <section className="mt-5 border-t border-white/5 px-1 pt-5">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-slate-500">
-                      <CheckCircle2 size={14} className="text-emerald-400" />
-                      <span className="text-[10px] font-black uppercase tracking-[0.24em]">策略导出版本</span>
+                      <span className="text-[10px] font-black uppercase tracking-[0.24em]">- ZISO AI -</span>
                     </div>
                     <span className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-600">{targetDate}</span>
-                  </div>
-                  <div className="mt-3 flex items-center justify-between">
-                    <p className="text-sm font-black tracking-[0.18em] text-white">- ZISO AI -</p>
-                    <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-slate-600">
-                      <Target size={12} />
-                      专业投研输出
-                    </div>
                   </div>
                 </section>
               </div>
