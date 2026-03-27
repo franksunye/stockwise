@@ -28,9 +28,10 @@ summary: "定义前端 SWR、PWA 壳层 bootstrap、Dashboard bootstrap state、
 3. 当前主问题已经不是“要不要上 SWR”，而是：
    - `Dashboard bootstrap state` 的长期收口
    - 与非首帧关键数据面的渐进迁移
-4. `Dashboard` 首页主链路目前不作为下一步 SWR 落点。
-5. `shared almanac` 已从“长 ISR route cache”切换为“可主动失效的数据级缓存 + 5 分钟兜底”。
-6. `Dashboard` 收盘后恢复应用时，允许先做轻量版本检查，但不允许无条件重拉完整预测。
+4. 第一阶段前端架构基线已经建立，当前工作模式应从“持续扩工程”切换为“收口、冻结、观测”。
+5. `Dashboard` 首页主链路目前不作为下一步 SWR 落点。
+6. `shared almanac` 已从“长 ISR route cache”切换为“可主动失效的数据级缓存 + 5 分钟兜底”。
+7. `Dashboard` 收盘后恢复应用时，允许先做轻量版本检查，但不允许无条件重拉完整预测。
 
 ## 2. 统一术语
 
@@ -264,24 +265,21 @@ SWR 不应被直接等同为：
 3. 页面级 smoke 目前已并入正式 `verify:release`，并已接入 GitHub Actions 的 `frontend_quality_gates`；但尚未扩展到更高层 staging / device CI。
 4. 轻量版本探测目前仅覆盖 `Dashboard` 主列表，不覆盖更深层详情面或 Drawer 内局部数据面。
 
-## 6. 当前最合理的下一步
+## 6. 当前阶段结论
 
-下一步仍不建议继续触碰 Dashboard 首页主请求链路。
+截至 2026-03-27，这轮前端架构升级的第一阶段可以视为已完成。
 
-更合理的方向只有两类：
+当前更合理的默认策略不是继续扩工程，而是：
 
-### 6.1 固化页面级轻量验证
+1. 固化当前 release gate 与本地 smoke
+2. 观测 refresh contract 的真实表现
+3. 仅在出现明确业务需求或真实回归时，再继续推进下一轮架构改造
 
-建议：
+对应的执行基线见：
 
-1. 将 `npm run verify:dashboard-entry` 视为 `dashboard` 入口回归的标准本地检查
-2. 将 `npm run verify:release` 视为正式 release gate，其中已内置 `dashboard entry gate`
-3. 保持当前纯逻辑测试作为协议护栏，不把页面级验证替换成重型 E2E
-4. 若后续要继续加固，优先考虑接入更高层 CI，而不是重写成大而重的全链路自动化
+- [`41_Frontend_Architecture_Baseline_20260327.md`](/Users/yesun/Code/stockwise/docs/1_Engineering/41_Frontend_Architecture_Baseline_20260327.md)
 
-这一步已经完成，后续只需继续固化与复用。
-
-### 6.2 观测并稳固 Refresh Contract
+### 6.1 观测并稳固 Refresh Contract
 
 在继续扩大 SWR 落点之前，优先观测这轮 `Dashboard Data Refresh Contract` 的真实表现：
 
@@ -292,7 +290,7 @@ SWR 不应被直接等同为：
 
 若观测稳定，再继续扩大到下一批非首帧关键数据面。
 
-### 6.3 只推进非首帧关键数据面
+### 6.2 只在问题驱动下推进下一批非首帧关键数据面
 
 若继续推进 SWR，只建议从非首帧关键数据面开始，例如：
 
@@ -322,7 +320,7 @@ SWR 不应被直接等同为：
 
 这些位置更接近 `AICouncil` 已验证成功的模式。
 
-## 7. 不建议做的事
+## 7. 当前冻结边界
 
 当前不建议：
 
@@ -331,6 +329,8 @@ SWR 不应被直接等同为：
 3. 将身份、授权、profile、watchlist、dashboard 全部混入一个持久化 SWR cache
 4. 把 Watchlist 当成普通读请求重构，忽略业务一致性约束
 5. 为了“代码更统一”而牺牲首页首帧体感
+6. 继续扩张 `Dashboard Data Refresh Contract`，把它做成更大的平台层或事件框架
+7. 在没有真实回归证据前，贸然重构 `useDashboardData` 主链路
 
 ## 8. 验收基线
 
