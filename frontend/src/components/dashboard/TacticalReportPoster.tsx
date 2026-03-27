@@ -98,7 +98,7 @@ export function TacticalReportPoster({
       scenarioEmpty: groups.scenarioEmpty.slice(0, 1),
     };
   }, [data]);
-  const priceNodes = useMemo(() => getPriceNodes(data, currentPrice).slice(0, 4), [data, currentPrice]);
+  const priceNodes = useMemo(() => getPriceNodes(data, currentPrice).slice(0, 6), [data, currentPrice]);
   const reasoningSteps = Array.isArray(data.reasoning_trace) ? data.reasoning_trace.slice(0, 5) : [];
 
   const { data: councilPayload } = useSWR(
@@ -367,7 +367,7 @@ export function TacticalReportPoster({
                             <p className={`text-[10px] font-black uppercase tracking-[0.16em] ${node.kind === 'current' ? 'text-slate-300' : 'text-slate-500'}`}>{node.label}</p>
                             <p className={`mt-1 line-clamp-1 text-[11px] leading-5 ${node.kind === 'current' ? 'text-slate-500' : 'text-slate-600'}`}>{node.description}</p>
                           </div>
-                          <p className={`${node.kind === 'current' ? 'text-[2rem]' : 'text-lg'} font-black text-white`}>{node.price}</p>
+                          <p className={`${node.kind === 'current' ? 'text-[2rem]' : 'text-[10px] uppercase tracking-[0.16em]'} font-black text-white`}>{node.price}</p>
                         </div>
                       ))}
                     </div>
