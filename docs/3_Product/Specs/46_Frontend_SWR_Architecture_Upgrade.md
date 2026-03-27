@@ -187,7 +187,12 @@ SWR 不应被直接等同为：
    - [`frontend/src/lib/stock-profile-history.ts`](/Users/yesun/Code/stockwise/frontend/src/lib/stock-profile-history.ts) 已下沉 30 秒缓存、响应归一化与历史回退语义
    - [`frontend/src/lib/stock-profile-metrics.ts`](/Users/yesun/Code/stockwise/frontend/src/lib/stock-profile-metrics.ts) 已下沉胜率与日期标签等派生规则
    - [`frontend/tests/stock-profile-history.test.mjs`](/Users/yesun/Code/stockwise/frontend/tests/stock-profile-history.test.mjs) 与 [`frontend/tests/stock-profile-metrics.test.mjs`](/Users/yesun/Code/stockwise/frontend/tests/stock-profile-metrics.test.mjs) 已锁住缓存和派生逻辑
-9. `Dashboard Data Refresh Contract` 第一轮已完成：
+9. `UserCenterDrawer` 已完成第一轮数据准备收口：
+   - [`frontend/src/hooks/useUserCenterData.ts`](/Users/yesun/Code/stockwise/frontend/src/hooks/useUserCenterData.ts) 已统一 Drawer 打开时的 profile refresh、investment mode summary 读取、push 状态同步与 notification settings 读写
+   - [`frontend/src/lib/user-center-data.ts`](/Users/yesun/Code/stockwise/frontend/src/lib/user-center-data.ts) 已下沉默认通知设置、设置归一化与 investment mode cache 读取逻辑
+   - [`frontend/tests/user-center-data.test.mjs`](/Users/yesun/Code/stockwise/frontend/tests/user-center-data.test.mjs) 已锁住默认设置和缓存读取语义
+   - [`frontend/scripts/user-center-smoke.mjs`](/Users/yesun/Code/stockwise/frontend/scripts/user-center-smoke.mjs) 与 [`frontend/package.json`](/Users/yesun/Code/stockwise/frontend/package.json) 中的 `check:user-center` 已支持本地验证 Drawer 打开后的 profile refresh 与 mode summary 加载
+10. `Dashboard Data Refresh Contract` 第一轮已完成：
    - [`frontend/src/lib/dashboard-refresh-contract.ts`](/Users/yesun/Code/stockwise/frontend/src/lib/dashboard-refresh-contract.ts) 已将 watchlist 变化、historyLimit 升级、resume、online、post-market poll 统一建模为同一套刷新计划
    - [`frontend/src/hooks/useDashboardRefreshContract.ts`](/Users/yesun/Code/stockwise/frontend/src/hooks/useDashboardRefreshContract.ts) 已作为薄 orchestrator 接入 `StockProvider`
    - [`frontend/src/context/StockContext.tsx`](/Users/yesun/Code/stockwise/frontend/src/context/StockContext.tsx) 现在负责把 `useUserProfile`、`useWatchlist`、`useDashboardData` 绑定到同一套 refresh contract 上
@@ -198,17 +203,17 @@ SWR 不应被直接等同为：
      - watchlist 新增缺失 symbol 时触发 batch
      - `resume` 在无 drift 时只刷价格与版本探测
      - `resume` 在检测到 drift 时触发 batch 补拉
-10. 新用户首次进入 Dashboard 的修复链路已经落地。
+11. 新用户首次进入 Dashboard 的修复链路已经落地。
    - 详见 [`25_Onboarding_First_Load_Recovery_Plan_20260314.md`](/Users/yesun/Code/stockwise/docs/1_Engineering/25_Onboarding_First_Load_Recovery_Plan_20260314.md)
-11. `shared almanac` 已完成主动失效改造：
+12. `shared almanac` 已完成主动失效改造：
    - [`frontend/src/app/api/shared/almanac/route.ts`](/Users/yesun/Code/stockwise/frontend/src/app/api/shared/almanac/route.ts)
    - [`frontend/src/app/api/internal/cache/revalidate/route.ts`](/Users/yesun/Code/stockwise/frontend/src/app/api/internal/cache/revalidate/route.ts)
    - [`backend/engine/almanac_generator.py`](/Users/yesun/Code/stockwise/backend/engine/almanac_generator.py)
-12. 收盘后恢复应用的轻量版本探测已落地：
+13. 收盘后恢复应用的轻量版本探测已落地：
    - [`frontend/src/app/api/stock/prediction-versions/route.ts`](/Users/yesun/Code/stockwise/frontend/src/app/api/stock/prediction-versions/route.ts)
    - [`frontend/src/hooks/useDashboardData.ts`](/Users/yesun/Code/stockwise/frontend/src/hooks/useDashboardData.ts)
    - 当前最小探测间隔为 10 分钟，仅在 `post_market` 执行
-13. `Dashboard` 收盘后轮询停止条件已收紧：
+14. `Dashboard` 收盘后轮询停止条件已收紧：
    - 不再是“任一股票进入今日批次即可停止”
    - 而是“所有股票都进入今日批次后才停止”
 
@@ -220,7 +225,7 @@ SWR 不应被直接等同为：
 
 ### 5.3 仍未完成
 
-1. 非首帧关键数据面的 SWR 迁移尚未系统推进，但 `Brief` 与 `StockProfile` 两个面已完成第一轮低风险收口。
+1. 非首帧关键数据面的 SWR 迁移尚未系统推进，但 `Brief`、`StockProfile` 与 `UserCenterDrawer` 三个面已完成第一轮低风险收口。
 2. `Dashboard Data Refresh Contract` 已完成第一轮，但对实际线上刷新频率、重复请求和 watchlist 变更后的稳定性仍需要观测。
 3. 页面级 smoke 目前已并入正式 `verify:release`，但仍未接入更高层 CI。
 4. 轻量版本探测目前仅覆盖 `Dashboard` 主列表，不覆盖更深层详情面或 Drawer 内局部数据面。
@@ -261,7 +266,8 @@ SWR 不应被直接等同为：
    - 当前已完成缓存、延迟请求、派生指标的第一轮收口；后续若继续推进，应优先考虑局部请求层或按需缓存，而不是接入 Dashboard 主数据链路
 2. `Brief` 页 / `BriefDrawer`
    - 当前已完成 fetch fallback 与 markdown renderer 的第一轮收口，后续若继续推进，应优先考虑数据请求层与局部缓存层，而不是重写页面壳
-3. 个人中心二级页中的非首屏关键模块
+3. `UserCenterDrawer` 的通知设置与 investment mode 详情页下钻
+   - 当前已完成 Drawer 打开时数据准备的第一轮收口；后续若继续推进，应优先考虑局部数据页和动作写回，而不是重写整个个人中心
 4. 仅在 Drawer / Modal 打开后才触发的数据面
 
 这些位置更接近 `AICouncil` 已验证成功的模式。

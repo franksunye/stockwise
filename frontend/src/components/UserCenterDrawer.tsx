@@ -6,15 +6,14 @@ import {
   Check, RefreshCw, Key, Bell, ChevronDown, ArrowLeftRight, Sun, 
   Trophy, FileText, ChevronRight, Mail, HelpCircle, BookOpen, Info
 } from 'lucide-react';
-import { useState, useEffect } from 'react';
-import { getCurrentUser, restoreUserIdentity } from '@/lib/user';
+import { useState } from 'react';
+import { restoreUserIdentity } from '@/lib/user';
 import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
-import { isPushSupported, subscribeUserToPush } from '@/lib/notifications';
-import { shouldEnableHighPerformance } from '@/lib/device-utils';
 import { getRiskBandLabel } from '@/lib/investment-mode';
 import { IdentityPassport } from '@/components/IdentityPassport';
 import { InvestmentModeCard } from '@/components/InvestmentModeCard';
 import { useUserProfile } from '@/hooks/useUserProfile';
+import { useUserCenterData } from '@/hooks/useUserCenterData';
 import { UserPricingView } from './UserPricingView';
 import { SupportCenterView } from './SupportCenterView';
 import { LearnCenterView } from './LearnCenterView';
@@ -66,22 +65,14 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
   const [restoring, setRestoring] = useState(false);
   const [restoreMsg, setRestoreMsg] = useState<{type: 'success' | 'error', text: string} | null>(null);
 
-  const [isSubscribed, setIsSubscribed] = useState(false);
-  const [pushSupported, setPushSupported] = useState(false);
-  const [isSubscribing, setIsSubscribing] = useState(false);
-  const [testingPush, setTestingPush] = useState(false);
   const [showNotificationSettings, setShowNotificationSettings] = useState(false);
   const [showReferralDetails, setShowReferralDetails] = useState(false);
   const [showInvestmentModeDetails, setShowInvestmentModeDetails] = useState(false);
-  
-  const [isHighPerformance, setIsHighPerformance] = useState(false);
   const [showIdentityCenter, setShowIdentityCenter] = useState(false);
   const [showInvestmentMode, setShowInvestmentMode] = useState(false);
   const [showPricing, setShowPricing] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
   const [showLearn, setShowLearn] = useState(false);
-  const [isAndroid, setIsAndroid] = useState(false);
-  const [currentMode, setCurrentMode] = useState<{name: string, risk_band: string, tagline: string, default_horizon: string} | null>(null);
 
   // Fix: Separate visibility state from loading state
   const [showEmailForm, setShowEmailForm] = useState(false);
@@ -89,153 +80,20 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
   const [tempEmail, setTempEmail] = useState('');
   const [emailMsg, setEmailMsg] = useState<{type: 'success' | 'error', text: string} | null>(null);
 
-  const [notificationSettings, setNotificationSettings] = useState({
-    types: {
-      signal_flip: { enabled: true },
-      morning_call: { enabled: true },
-      validation_glory: { enabled: true },
-      prediction_updated: { enabled: true },
-      daily_brief: { enabled: true },
-      price_update: { enabled: true },
-      market_almanac: { enabled: true }
-    },
-  });
-
-  useEffect(() => {
-    setIsHighPerformance(shouldEnableHighPerformance());
-    const isAndroidDevice = /android/i.test(navigator.userAgent);
-    let isMainlandChina = false;
-    try {
-        isMainlandChina = Intl.DateTimeFormat().resolvedOptions().timeZone === 'Asia/Shanghai';
-    } catch {}
-    setIsAndroid(isAndroidDevice && isMainlandChina);
-    if (isOpen) {
-      refreshProfile({ force: true });
-      checkPushStatus();
-      
-      // Load and fetch real investment mode data
-      const cachedMode = localStorage.getItem('stockwise:investment-mode-card');
-      if (cachedMode) {
-          try {
-              const parsed = JSON.parse(cachedMode);
-              if (parsed?.modeResponse?.mode) {
-                  setCurrentMode(parsed.modeResponse.mode);
-              }
-          } catch {}
-      }
-      fetch('/api/user/mode/summary', { cache: 'no-store' })
-          .then(res => res.json())
-          .then(data => {
-              if (data.mode) setCurrentMode(data.mode);
-          })
-          .catch(console.error);
-    }
-  }, [isOpen, refreshProfile]);
-
-  const checkPushStatus = async () => {
-    const supported = isPushSupported();
-    setPushSupported(supported);
-    if (supported) {
-      const registration = await navigator.serviceWorker.ready;
-      const subscription = await registration.pushManager.getSubscription();
-      setIsSubscribed(!!subscription);
-
-      if (subscription) {
-        try {
-          await getCurrentUser();
-          const res = await fetch('/api/user/notification-settings');
-          if (res.ok) {
-            const data = await res.json();
-            if (data.settings) setNotificationSettings(data.settings);
-          }
-        } catch (e) { console.error('Failed to load settings', e); }
-      }
-    }
-  };
-
-  const handleEnableNotifications = async () => {
-    setIsSubscribing(true);
-    setRedeemMsg(null);
-    try {
-      const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
-      if (!vapidKey) {
-        setRedeemMsg({ type: 'error', text: 'VAPID Key 未配置' });
-        return;
-      }
-      const { registerServiceWorker } = await import('@/lib/notifications');
-      const registration = await registerServiceWorker();
-      if (!registration) {
-        setRedeemMsg({ type: 'error', text: 'Service Worker 注册失败' });
-        return;
-      }
-      let perm = Notification.permission;
-      if (perm !== 'granted') perm = await Notification.requestPermission();
-      if (perm === 'granted') {
-        const swRegistration = await navigator.serviceWorker.ready;
-        let subscription = await swRegistration.pushManager.getSubscription();
-        if (!subscription) subscription = await subscribeUserToPush(vapidKey);
-        
-        if (subscription) {
-          const response = await fetch('/api/notifications/subscribe', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ subscription: subscription.toJSON() })
-          });
-          if (response.ok) {
-            setIsSubscribed(true);
-            setRedeemMsg({ type: 'success', text: '通知开启成功' });
-            setTimeout(() => setRedeemMsg(null), 3000);
-          } else {
-            const data = await response.json().catch(() => ({}));
-            setRedeemMsg({ type: 'error', text: '保存失败: ' + (data.error || response.status) });
-          }
-        } else {
-          setRedeemMsg({ type: 'error', text: '无法获取推送权限' });
-        }
-      } else {
-        setRedeemMsg({ type: 'error', text: '请允许通知权限' });
-      }
-    } catch (e) {
-      console.error(e);
-      setRedeemMsg({ type: 'error', text: '开启失败，请重试' });
-    } finally {
-      setIsSubscribing(false);
-    }
-  };
-
-  const handleDisableNotifications = async () => {
-    setIsSubscribing(true);
-    try {
-      const registration = await navigator.serviceWorker.ready;
-      const subscription = await registration.pushManager.getSubscription();
-      if (subscription) {
-        await subscription.unsubscribe();
-        await fetch('/api/notifications/unsubscribe', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ endpoint: subscription.endpoint }),
-        });
-        setIsSubscribed(false);
-      }
-    } catch (e) { console.error(e); }
-    finally { setIsSubscribing(false); }
-  };
-
-  const handleTestPush = async () => {
-    if (testingPush) return;
-    setTestingPush(true);
-    try {
-      const registration = await navigator.serviceWorker.ready;
-      if (!registration) return;
-      await registration.showNotification('🔔 测试通知 - ZISO AI', {
-        body: `测试成功！当前时间: ${new Date().toLocaleTimeString('zh-CN')}`,
-        icon: '/logo.png',
-        badge: '/logo.png',
-        data: { url: '/dashboard' }
-      });
-    } catch (e) { console.error(e); }
-    finally { setTestingPush(false); }
-  };
+  const {
+    currentMode,
+    handleDisableNotifications,
+    handleEnableNotifications,
+    handleTestPush,
+    isAndroid,
+    isHighPerformance,
+    isSubscribed,
+    isSubscribing,
+    notificationSettings,
+    pushSupported,
+    testingPush,
+    updateNotificationSetting,
+  } = useUserCenterData({ isOpen, refreshProfile });
 
   const handleRedeem = async () => {
     if (!redeemCode || redeeming) return;
@@ -304,7 +162,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
   return (
     <AnimatePresence onExitComplete={resetDrawerState}>
       {isOpen && (
-        <div className="fixed inset-0 z-[200] flex flex-col items-center justify-end bg-black/80 pointer-events-auto overflow-hidden">
+        <div data-user-center-drawer="true" className="fixed inset-0 z-[200] flex flex-col items-center justify-end bg-black/80 pointer-events-auto overflow-hidden">
           <motion.div 
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             onClick={onClose} className="absolute inset-0 will-change-opacity"
@@ -484,7 +342,9 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                       投资模式
                                   </h4>
                                   <span className="px-2 py-0.5 rounded-lg bg-indigo-500/10 text-[10px] font-bold text-indigo-400 border border-indigo-500/20">
+                                      <span data-user-center-current-mode="true">
                                       {currentMode ? currentMode.name : '加载中...'}
+                                      </span>
                                   </span>
                               </div>
                               <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform duration-300 ${showInvestmentModeDetails ? 'rotate-180' : ''}`} />
@@ -534,9 +394,20 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                         <div className="px-5 py-4 pb-2 flex items-center justify-between">
                             <h4 className="text-sm font-bold text-white uppercase">推送通知</h4>
                             {isSubscribed ? (
-                                <button onClick={handleDisableNotifications} disabled={isSubscribing} className="px-3 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/30 transition-all uppercase">{isSubscribing ? '...' : '已开启'}</button>
+                                <button onClick={async () => {
+                                  const ok = await handleDisableNotifications();
+                                  if (!ok) {
+                                    setRedeemMsg({ type: 'error', text: '关闭失败，请重试' });
+                                  }
+                                }} disabled={isSubscribing} className="px-3 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/30 transition-all uppercase">{isSubscribing ? '...' : '已开启'}</button>
                             ) : (
-                                <button onClick={handleEnableNotifications} disabled={isSubscribing} className="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg transition-all active:scale-95 disabled:opacity-50 uppercase">{isSubscribing ? '...' : '开启'}</button>
+                                <button onClick={async () => {
+                                  const result = await handleEnableNotifications();
+                                  setRedeemMsg({ type: result.success ? 'success' : 'error', text: result.message });
+                                  if (result.success) {
+                                    setTimeout(() => setRedeemMsg(null), 3000);
+                                  }
+                                }} disabled={isSubscribing} className="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg transition-all active:scale-95 disabled:opacity-50 uppercase">{isSubscribing ? '...' : '开启'}</button>
                             )}
                         </div>
                         {isSubscribed && (
@@ -551,7 +422,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                             <button onClick={() => {
                                 setShowNotificationSettings(!showNotificationSettings);
                                 if (!showNotificationSettings) setShowReferralDetails(false);
-                            }} className="w-full flex items-center justify-between text-[10px] text-slate-500 hover:text-indigo-400 transition-colors uppercase font-bold tracking-widest">
+                            }} data-user-center-notification-settings-button="true" className="w-full flex items-center justify-between text-[10px] text-slate-500 hover:text-indigo-400 transition-colors uppercase font-bold tracking-widest">
                                 高级偏好设置
                                 <ChevronDown className={`w-3 h-3 transition-transform ${showNotificationSettings ? 'rotate-180' : ''}`} />
                             </button>
@@ -580,11 +451,9 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                             <span className={`text-[11px] font-medium ${isPro ? 'text-amber-200' : 'text-slate-200'}`}>{type.label}</span>
                                             <span className={`text-[9px] px-1.5 py-0.5 rounded ${isPro ? 'bg-amber-500/20 text-amber-400 font-black' : 'bg-slate-800/60 text-slate-500 font-bold'}`}>{type.badge}</span>
                                           </div>
-                                          <button onClick={async () => {
-                                            const newSettings = { ...notificationSettings, types: { ...notificationSettings.types, [type.key]: { enabled: !isEnabled } } };
-                                            setNotificationSettings(newSettings);
-                                            try { await fetch('/api/user/notification-settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ settings: newSettings }) }); } catch (e) { console.error(e); }
-                                          }} className={`w-9 h-5 rounded-full transition-all flex items-center px-0.5 ${isEnabled ? 'bg-indigo-600 justify-end' : 'bg-slate-700 justify-start'}`}>
+                                          <button onClick={() => {
+                                            void updateNotificationSetting(type.key as keyof typeof notificationSettings.types, !isEnabled);
+                                          }} data-user-center-notification-toggle={type.key} className={`w-9 h-5 rounded-full transition-all flex items-center px-0.5 ${isEnabled ? 'bg-indigo-600 justify-end' : 'bg-slate-700 justify-start'}`}>
                                             <motion.div className="w-4 h-4 bg-white rounded-full shadow" layout transition={{ type: 'spring', stiffness: 500, damping: 30 }} />
                                           </button>
                                         </div>

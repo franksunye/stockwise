@@ -315,7 +315,7 @@ function DashboardContent() {
           <Link href="/dashboard/stock-pool" className="p-3 rounded-2xl bg-white/5 border border-white/10 active:scale-95 transition-all pointer-events-auto inline-flex items-center justify-center cursor-pointer">
             <Grid className="w-5 h-5 text-indigo-400" />
           </Link>
-          <button onClick={openUserCenter} className="w-11 h-11 rounded-full bg-white/5 border border-white/10 flex items-center justify-center transition-all active:scale-90 hover:bg-white/10 shrink-0 cursor-pointer">
+          <button data-open-user-center="true" onClick={openUserCenter} className="w-11 h-11 rounded-full bg-white/5 border border-white/10 flex items-center justify-center transition-all active:scale-90 hover:bg-white/10 shrink-0 cursor-pointer">
             <User className="w-5 h-5 text-slate-400" />
           </button>
         </div>

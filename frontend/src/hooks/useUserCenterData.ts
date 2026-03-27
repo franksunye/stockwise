@@ -1,0 +1,244 @@
+'use client';
+
+import { useCallback, useEffect, useState } from 'react';
+import { getCurrentUser } from '@/lib/user';
+import {
+    isPushSupported,
+    registerServiceWorker,
+    subscribeUserToPush,
+} from '@/lib/notifications';
+import { shouldEnableHighPerformance } from '@/lib/device-utils';
+import {
+    DEFAULT_NOTIFICATION_SETTINGS,
+    normalizeNotificationSettings,
+    readCachedUserCenterMode,
+    type NotificationSettings,
+    type UserCenterModeSummary,
+} from '@/lib/user-center-data';
+import type { UserProfile } from '@/hooks/useUserProfile';
+
+type RefreshProfile = (options?: { watchlist?: string[]; force?: boolean }) => Promise<UserProfile | null>;
+
+type UseUserCenterDataArgs = {
+    isOpen: boolean;
+    refreshProfile: RefreshProfile;
+};
+
+export function useUserCenterData({ isOpen, refreshProfile }: UseUserCenterDataArgs) {
+    const [isSubscribed, setIsSubscribed] = useState(false);
+    const [pushSupported, setPushSupported] = useState(false);
+    const [isSubscribing, setIsSubscribing] = useState(false);
+    const [testingPush, setTestingPush] = useState(false);
+    const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>(DEFAULT_NOTIFICATION_SETTINGS);
+    const [isHighPerformance, setIsHighPerformance] = useState(false);
+    const [isAndroid, setIsAndroid] = useState(false);
+    const [currentMode, setCurrentMode] = useState<UserCenterModeSummary | null>(null);
+
+    useEffect(() => {
+        setIsHighPerformance(shouldEnableHighPerformance());
+        const isAndroidDevice = /android/i.test(navigator.userAgent);
+        let isMainlandChina = false;
+        try {
+            isMainlandChina = Intl.DateTimeFormat().resolvedOptions().timeZone === 'Asia/Shanghai';
+        } catch {
+            isMainlandChina = false;
+        }
+        setIsAndroid(isAndroidDevice && isMainlandChina);
+    }, []);
+
+    const loadCurrentMode = useCallback(async () => {
+        const cachedMode = readCachedUserCenterMode(localStorage.getItem('stockwise:investment-mode-card'));
+        if (cachedMode) {
+            setCurrentMode(cachedMode);
+        }
+
+        try {
+            const res = await fetch('/api/user/mode/summary', { cache: 'no-store' });
+            const data = await res.json();
+            if (data.mode) {
+                setCurrentMode(data.mode);
+            }
+        } catch (error) {
+            console.error('Failed to load investment mode summary', error);
+        }
+    }, []);
+
+    const loadNotificationSettings = useCallback(async () => {
+        try {
+            await getCurrentUser();
+            const res = await fetch('/api/user/notification-settings');
+            if (!res.ok) return;
+            const data = await res.json();
+            if (data.settings) {
+                setNotificationSettings(normalizeNotificationSettings(data.settings));
+            }
+        } catch (error) {
+            console.error('Failed to load notification settings', error);
+        }
+    }, []);
+
+    const refreshPushStatus = useCallback(async () => {
+        const supported = isPushSupported();
+        setPushSupported(supported);
+        if (!supported) {
+            setIsSubscribed(false);
+            setNotificationSettings(DEFAULT_NOTIFICATION_SETTINGS);
+            return;
+        }
+
+        const registration = await navigator.serviceWorker.ready;
+        const subscription = await registration.pushManager.getSubscription();
+        setIsSubscribed(!!subscription);
+
+        if (subscription) {
+            await loadNotificationSettings();
+        }
+    }, [loadNotificationSettings]);
+
+    useEffect(() => {
+        if (!isOpen) return;
+
+        void refreshProfile({ force: true });
+        void refreshPushStatus();
+        void loadCurrentMode();
+    }, [isOpen, loadCurrentMode, refreshProfile, refreshPushStatus]);
+
+    const handleEnableNotifications = async () => {
+        setIsSubscribing(true);
+        try {
+            const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+            if (!vapidKey) {
+                return { success: false, message: 'VAPID Key 未配置' };
+            }
+
+            const registration = await registerServiceWorker();
+            if (!registration) {
+                return { success: false, message: 'Service Worker 注册失败' };
+            }
+
+            let permission = Notification.permission;
+            if (permission !== 'granted') {
+                permission = await Notification.requestPermission();
+            }
+            if (permission !== 'granted') {
+                return { success: false, message: '请允许通知权限' };
+            }
+
+            const swRegistration = await navigator.serviceWorker.ready;
+            let subscription = await swRegistration.pushManager.getSubscription();
+            if (!subscription) {
+                subscription = await subscribeUserToPush(vapidKey);
+            }
+
+            if (!subscription) {
+                return { success: false, message: '无法获取推送权限' };
+            }
+
+            const response = await fetch('/api/notifications/subscribe', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ subscription: subscription.toJSON() }),
+            });
+
+            if (!response.ok) {
+                const data = await response.json().catch(() => ({}));
+                return { success: false, message: `保存失败: ${data.error || response.status}` };
+            }
+
+            setIsSubscribed(true);
+            await loadNotificationSettings();
+            return { success: true, message: '通知开启成功' };
+        } catch (error) {
+            console.error(error);
+            return { success: false, message: '开启失败，请重试' };
+        } finally {
+            setIsSubscribing(false);
+        }
+    };
+
+    const handleDisableNotifications = async () => {
+        setIsSubscribing(true);
+        try {
+            const registration = await navigator.serviceWorker.ready;
+            const subscription = await registration.pushManager.getSubscription();
+            if (subscription) {
+                await subscription.unsubscribe();
+                await fetch('/api/notifications/unsubscribe', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ endpoint: subscription.endpoint }),
+                });
+            }
+            setIsSubscribed(false);
+            return true;
+        } catch (error) {
+            console.error(error);
+            return false;
+        } finally {
+            setIsSubscribing(false);
+        }
+    };
+
+    const handleTestPush = async () => {
+        if (testingPush) return false;
+        setTestingPush(true);
+        try {
+            const registration = await navigator.serviceWorker.ready;
+            if (!registration) return false;
+            await registration.showNotification('🔔 测试通知 - ZISO AI', {
+                body: `测试成功！当前时间: ${new Date().toLocaleTimeString('zh-CN')}`,
+                icon: '/logo.png',
+                badge: '/logo.png',
+                data: { url: '/dashboard' },
+            });
+            return true;
+        } catch (error) {
+            console.error(error);
+            return false;
+        } finally {
+            setTestingPush(false);
+        }
+    };
+
+    const updateNotificationSetting = async (
+        key: keyof NotificationSettings['types'],
+        enabled: boolean,
+    ) => {
+        const newSettings = normalizeNotificationSettings({
+            ...notificationSettings,
+            types: {
+                ...notificationSettings.types,
+                [key]: {
+                    ...notificationSettings.types[key],
+                    enabled,
+                },
+            },
+        });
+
+        setNotificationSettings(newSettings);
+        try {
+            await fetch('/api/user/notification-settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ settings: newSettings }),
+            });
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    return {
+        currentMode,
+        handleDisableNotifications,
+        handleEnableNotifications,
+        handleTestPush,
+        isAndroid,
+        isHighPerformance,
+        isSubscribed,
+        isSubscribing,
+        notificationSettings,
+        pushSupported,
+        testingPush,
+        updateNotificationSetting,
+    };
+}
