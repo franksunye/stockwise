@@ -209,7 +209,7 @@ export function TacticalBriefDrawer({
         <div
           data-tactical-brief-drawer="true"
           data-tactical-brief-symbol={symbol}
-          className="fixed inset-0 z-[200] flex items-end justify-center bg-black/60 pointer-events-auto overflow-hidden"
+          className="fixed inset-0 z-[200] flex items-end justify-center bg-black/60 pointer-events-auto overflow-hidden overscroll-none"
         >
           <motion.div 
             initial={{ opacity: 0 }}
@@ -229,7 +229,7 @@ export function TacticalBriefDrawer({
               ? { type: 'tween', ease: 'easeOut', duration: 0.25 }
               : { type: 'spring', damping: 25, stiffness: 200 }
             }
-            className="w-full max-w-md bg-[#0a0a0f] border-t border-white/10 rounded-t-[32px] shadow-[0_-20px_50px_rgba(0,0,0,0.5)] overflow-hidden pointer-events-auto z-10 h-[85vh] flex flex-col transform-gpu will-change-transform"
+            className="w-full max-w-md bg-[#0a0a0f] border-t border-white/10 rounded-t-[32px] shadow-[0_-20px_50px_rgba(0,0,0,0.5)] overflow-hidden pointer-events-auto z-10 h-[85vh] flex flex-col transform-gpu will-change-transform touch-pan-y"
           >
             {/* 顶部视觉拉手 */}
             <div className="w-full flex justify-center pt-3 pb-1 shrink-0 bg-[#0a0a0f]">
@@ -342,7 +342,7 @@ export function TacticalBriefDrawer({
                                if (viewState !== 'empty') setViewState('empty');
                            }
                         }}
-                        className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide -mx-6 px-6 pb-2"
+                        className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide -mx-6 px-6 pb-2 overscroll-x-contain touch-pan-x"
                     >
                        
  	                       {/* CARD 1: HOLDING PROFIT (Subtle Green) */}
@@ -602,7 +602,7 @@ export function TacticalBriefDrawer({
                                setActiveIndex(index);
                            }
                         }}
-                        className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide -mx-6 px-6 pb-2"
+                        className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide -mx-6 px-6 pb-2 overscroll-x-contain touch-pan-x"
                       >
                          {nodes.map((node, i) => {
                             const isActive = activeIndex === i;

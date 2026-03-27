@@ -156,6 +156,7 @@ function DashboardContent() {
     selectedTactics,
     profileStock,
   });
+  const isHorizontalScrollLocked = activeModal !== 'none';
 
   // 【核心修复：粘性标题】用来保持标题内容的“粘性”，防止在切换到黄历时由于数据过快切换而显示黄历的内部 ID
   const stickyStockInfo = useRef({ name: '', symbol: '' });
@@ -224,6 +225,27 @@ function DashboardContent() {
     }
   }, [preferredSymbol]);
 
+  useEffect(() => {
+    if (isHorizontalScrollLocked) return;
+
+    const container = scrollRef.current;
+    if (!container) return;
+
+    const target = container.children[currentIndex];
+    if (!(target instanceof HTMLElement)) return;
+
+    const snapBack = () => {
+      container.scrollTo({
+        left: target.offsetLeft,
+        behavior: 'instant',
+      });
+    };
+
+    snapBack();
+    const frame = window.requestAnimationFrame(snapBack);
+    return () => window.cancelAnimationFrame(frame);
+  }, [currentIndex, isHorizontalScrollLocked, scrollRef]);
+
   return (
     <main
       className="fixed inset-0 bg-[#050508] text-white overflow-hidden select-none font-sans"
@@ -290,7 +312,11 @@ function DashboardContent() {
         </div>
       </header>
 
-      <div ref={scrollRef} onScroll={handleScroll} className="h-full w-full flex overflow-x-scroll snap-x snap-mandatory scrollbar-hide">
+      <div
+        ref={scrollRef}
+        onScroll={handleScroll}
+        className={`h-full w-full flex snap-x snap-mandatory scrollbar-hide ${isHorizontalScrollLocked ? 'overflow-x-hidden' : 'overflow-x-scroll'}`}
+      >
         {displayStocks.map((stock, idx) => {
           if (stock.isAlmanac) {
             return (
