@@ -193,6 +193,11 @@ SWR 不应被直接等同为：
    - [`frontend/src/context/StockContext.tsx`](/Users/yesun/Code/stockwise/frontend/src/context/StockContext.tsx) 现在负责把 `useUserProfile`、`useWatchlist`、`useDashboardData` 绑定到同一套 refresh contract 上
    - [`frontend/src/hooks/useDashboardData.ts`](/Users/yesun/Code/stockwise/frontend/src/hooks/useDashboardData.ts) 不再自己散落实现 watchlist/history/resume/post-market 的刷新触发，而是统一消费 contract plan
    - [`frontend/tests/dashboard-refresh-contract.test.mjs`](/Users/yesun/Code/stockwise/frontend/tests/dashboard-refresh-contract.test.mjs) 已锁住事件到刷新计划的核心语义
+   - [`frontend/scripts/dashboard-refresh-smoke.mjs`](/Users/yesun/Code/stockwise/frontend/scripts/dashboard-refresh-smoke.mjs) 与 [`frontend/package.json`](/Users/yesun/Code/stockwise/frontend/package.json) 中的 `check:dashboard-refresh` 已支持本地验证四类关键行为：
+     - watchlist reorder 仅 remap，不触发 batch
+     - watchlist 新增缺失 symbol 时触发 batch
+     - `resume` 在无 drift 时只刷价格与版本探测
+     - `resume` 在检测到 drift 时触发 batch 补拉
 10. 新用户首次进入 Dashboard 的修复链路已经落地。
    - 详见 [`25_Onboarding_First_Load_Recovery_Plan_20260314.md`](/Users/yesun/Code/stockwise/docs/1_Engineering/25_Onboarding_First_Load_Recovery_Plan_20260314.md)
 11. `shared almanac` 已完成主动失效改造：

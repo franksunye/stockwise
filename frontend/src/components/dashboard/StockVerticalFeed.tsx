@@ -150,7 +150,10 @@ export const StockVerticalFeed = memo(function StockVerticalFeed({
   };
 
   return (
-    <div className="min-w-full h-full shrink-0 relative snap-start snap-always overflow-hidden">
+    <div
+      className="min-w-full h-full shrink-0 relative snap-start snap-always overflow-hidden"
+      data-stock-feed-symbol={stock.symbol}
+    >
       <VerticalIndicator container={container} onScroll={handleScroll} />
       {/* Layout Contract:
           This is a snap-y viewport. Each child card must occupy one full viewport page
