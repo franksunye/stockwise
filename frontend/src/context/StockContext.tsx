@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, ReactNode, useMemo } from 'react';
+import React, { createContext, useContext, ReactNode, useEffect, useMemo } from 'react';
 import { usePathname } from 'next/navigation';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { useWatchlist, WatchlistItem } from '@/hooks/useWatchlist';
@@ -56,6 +56,20 @@ export function StockProvider({ children }: { children: ReactNode }) {
         refreshProfile,
         runDashboardRefreshEvent: runRefreshEvent,
     });
+
+    useEffect(() => {
+        (window as typeof window & {
+            __stockwiseRunDashboardRefreshEvent?: typeof runRefreshEvent;
+        }).__stockwiseRunDashboardRefreshEvent = runRefreshEvent;
+        document.documentElement.dataset.dashboardRefreshContractReady = 'true';
+
+        return () => {
+            delete (window as typeof window & {
+                __stockwiseRunDashboardRefreshEvent?: typeof runRefreshEvent;
+            }).__stockwiseRunDashboardRefreshEvent;
+            delete document.documentElement.dataset.dashboardRefreshContractReady;
+        };
+    }, [runRefreshEvent]);
 
     const value = useMemo(() => ({
         stocks,

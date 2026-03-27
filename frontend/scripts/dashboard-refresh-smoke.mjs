@@ -9,6 +9,7 @@ function parseArgs(argv) {
         baseUrl: DEFAULT_BASE_URL,
         headless: DEFAULT_HEADLESS,
         caseName: '',
+        profile: 'full',
     };
 
     for (let i = 0; i < argv.length; i += 1) {
@@ -18,6 +19,9 @@ function parseArgs(argv) {
             i += 1;
         } else if (arg === '--case' && argv[i + 1]) {
             options.caseName = argv[i + 1];
+            i += 1;
+        } else if (arg === '--profile' && argv[i + 1]) {
+            options.profile = argv[i + 1];
             i += 1;
         } else if (arg === '--headed') {
             options.headless = false;
@@ -31,7 +35,7 @@ function parseArgs(argv) {
 
 function printHelp() {
     console.log(`Usage:
-  node scripts/dashboard-refresh-smoke.mjs [--base-url http://127.0.0.1:3000] [--case reorder-watchlist-remap]
+  node scripts/dashboard-refresh-smoke.mjs [--base-url http://127.0.0.1:3000] [--case reorder-watchlist-remap] [--profile full|release]
 
 Environment variables:
   DASHBOARD_REFRESH_BASE_URL
@@ -40,7 +44,8 @@ Environment variables:
 Notes:
   - Start local frontend first.
   - This script validates dashboard refresh-contract behavior with Playwright route stubs.
-  - It is a local observation tool, not part of verify:release.`);
+  - 'full' runs all local observation cases.
+  - 'release' runs the deterministic mutation-side cases that are stable in production gating.`);
 }
 
 async function loadPlaywright() {
@@ -126,6 +131,18 @@ function buildBatchStock(symbol, stockCatalog, today, updatedAtSuffix) {
         shortMetrics: null,
         lastUpdated: item.lastUpdated,
     };
+}
+
+async function triggerResumeEvent(page) {
+    await page.evaluate(() => {
+        const runner = window.__stockwiseRunDashboardRefreshEvent;
+        if (typeof runner === 'function') {
+            return runner('resume_visible');
+        }
+        window.dispatchEvent(new CustomEvent('stockwise-dashboard-refresh-smoke', {
+            detail: 'resume_visible',
+        }));
+    });
 }
 
 const FIXED_POST_MARKET_MS = Date.parse('2026-03-27T17:30:00+08:00');
@@ -244,9 +261,7 @@ const CASES = [
             await resetCounters();
             setPredictionVersionMode('same');
 
-            await page.evaluate(() => {
-                window.dispatchEvent(new Event('focus'));
-            });
+            await triggerResumeEvent(page);
 
             await page.waitForTimeout(1200);
 
@@ -265,9 +280,7 @@ const CASES = [
             await resetCounters();
             setPredictionVersionMode('drift');
 
-            await page.evaluate(() => {
-                window.dispatchEvent(new Event('focus'));
-            });
+            await triggerResumeEvent(page);
 
             await page.waitForTimeout(1200);
 
@@ -293,13 +306,19 @@ async function main() {
     const today = getTodayInShanghai();
     const browser = await chromium.launch({
         headless: options.headless,
-        channel: 'chrome',
     });
 
     try {
-        const casesToRun = options.caseName
-            ? CASES.filter((item) => item.name === options.caseName)
+        const releaseCases = new Set([
+            'reorder-watchlist-remap',
+            'watchlist-add-missing-symbol-forces-batch',
+        ]);
+        const baseCases = options.profile === 'release'
+            ? CASES.filter((item) => releaseCases.has(item.name))
             : CASES;
+        const casesToRun = options.caseName
+            ? baseCases.filter((item) => item.name === options.caseName)
+            : baseCases;
 
         if (casesToRun.length === 0) {
             throw new Error(`Unknown case: ${options.caseName}`);
@@ -448,6 +467,11 @@ async function main() {
                     !document.querySelector('[data-dashboard-skeleton="true"]')
                 );
             }, { timeout: 15000 });
+            await page.waitForFunction(() => {
+                return document.documentElement.dataset.dashboardRefreshContractReady === 'true';
+            }, {
+                timeout: 15000,
+            });
             await page.waitForTimeout(1200);
 
             const resetCounters = async () => {

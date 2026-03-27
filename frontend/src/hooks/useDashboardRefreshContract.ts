@@ -83,6 +83,34 @@ export function useDashboardRefreshContract({
     }, [runDashboardRefreshEvent]);
 
     useEffect(() => {
+        // Debug seam for deterministic local/release smoke validation.
+        (window as typeof window & {
+            __stockwiseRunDashboardRefreshEvent?: RunDashboardRefreshEvent;
+        }).__stockwiseRunDashboardRefreshEvent = runDashboardRefreshEvent;
+
+        const handleDebugRefresh = (event: Event) => {
+            const nextEvent = (event as CustomEvent<DashboardRefreshEvent | undefined>).detail;
+            if (
+                nextEvent === 'watchlist_changed' ||
+                nextEvent === 'history_limit_upgraded' ||
+                nextEvent === 'resume_visible' ||
+                nextEvent === 'network_online' ||
+                nextEvent === 'post_market_poll'
+            ) {
+                void runDashboardRefreshEvent(nextEvent);
+            }
+        };
+
+        window.addEventListener('stockwise-dashboard-refresh-smoke', handleDebugRefresh);
+        return () => {
+            delete (window as typeof window & {
+                __stockwiseRunDashboardRefreshEvent?: RunDashboardRefreshEvent;
+            }).__stockwiseRunDashboardRefreshEvent;
+            window.removeEventListener('stockwise-dashboard-refresh-smoke', handleDebugRefresh);
+        };
+    }, [runDashboardRefreshEvent]);
+
+    useEffect(() => {
         const timer = window.setInterval(() => {
             void runDashboardRefreshEvent('post_market_poll');
         }, 5 * 60 * 1000);

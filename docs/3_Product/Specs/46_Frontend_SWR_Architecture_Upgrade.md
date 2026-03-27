@@ -231,11 +231,12 @@ SWR 不应被直接等同为：
    - [`frontend/src/context/StockContext.tsx`](/Users/yesun/Code/stockwise/frontend/src/context/StockContext.tsx) 现在负责把 `useUserProfile`、`useWatchlist`、`useDashboardData` 绑定到同一套 refresh contract 上
    - [`frontend/src/hooks/useDashboardData.ts`](/Users/yesun/Code/stockwise/frontend/src/hooks/useDashboardData.ts) 不再自己散落实现 watchlist/history/resume/post-market 的刷新触发，而是统一消费 contract plan
    - [`frontend/tests/dashboard-refresh-contract.test.mjs`](/Users/yesun/Code/stockwise/frontend/tests/dashboard-refresh-contract.test.mjs) 已锁住事件到刷新计划的核心语义
-   - [`frontend/scripts/dashboard-refresh-smoke.mjs`](/Users/yesun/Code/stockwise/frontend/scripts/dashboard-refresh-smoke.mjs) 与 [`frontend/package.json`](/Users/yesun/Code/stockwise/frontend/package.json) 中的 `check:dashboard-refresh` 已支持本地验证四类关键行为：
+   - [`frontend/scripts/dashboard-refresh-smoke.mjs`](/Users/yesun/Code/stockwise/frontend/scripts/dashboard-refresh-smoke.mjs)、[`frontend/scripts/verify-dashboard-refresh.mjs`](/Users/yesun/Code/stockwise/frontend/scripts/verify-dashboard-refresh.mjs) 与 [`frontend/package.json`](/Users/yesun/Code/stockwise/frontend/package.json) 中的 `check:dashboard-refresh` / `verify:dashboard-refresh` 已支持本地与 release 前验证 refresh contract
      - watchlist reorder 仅 remap，不触发 batch
      - watchlist 新增缺失 symbol 时触发 batch
      - `resume` 在无 drift 时只刷价格与版本探测
      - `resume` 在检测到 drift 时触发 batch 补拉
+   - [`frontend/scripts/verify-release.mjs`](/Users/yesun/Code/stockwise/frontend/scripts/verify-release.mjs) 已将 refresh gate 纳入正式 release 验证链路；当前 release profile 先锁住 watchlist mutation 侧的确定性 contract，`resume/drift` 继续保留为本地观测项
 19. 新用户首次进入 Dashboard 的修复链路已经落地。
    - 详见 [`25_Onboarding_First_Load_Recovery_Plan_20260314.md`](/Users/yesun/Code/stockwise/docs/1_Engineering/25_Onboarding_First_Load_Recovery_Plan_20260314.md)
 20. `shared almanac` 已完成主动失效改造：
@@ -259,7 +260,7 @@ SWR 不应被直接等同为：
 ### 5.3 仍未完成
 
 1. 非首帧关键数据面的 SWR 迁移尚未系统推进，但 `Brief`、`StockProfile`、`UserCenterDrawer`、`TacticalBriefDrawer`、其邻接 content surface、`StockDashboardCard`、`HistoricalCard`、`StockVerticalFeed`、`Dashboard symbol navigation contract`、`Dashboard modal context contract` 与 `Dashboard interaction smoke` 十一个面已完成第一轮低风险收口或交付闭环。
-2. `Dashboard Data Refresh Contract` 已完成第一轮，但对实际线上刷新频率、重复请求和 watchlist 变更后的稳定性仍需要观测。
+2. `Dashboard Data Refresh Contract` 已完成第一轮，且 production refresh gate 已建立；但对实际线上刷新频率、重复请求和 watchlist 变更后的稳定性仍需要持续观测。
 3. 页面级 smoke 目前已并入正式 `verify:release`，并已接入 GitHub Actions 的 `frontend_quality_gates`；但尚未扩展到更高层 staging / device CI。
 4. 轻量版本探测目前仅覆盖 `Dashboard` 主列表，不覆盖更深层详情面或 Drawer 内局部数据面。
 

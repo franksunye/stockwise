@@ -16,6 +16,7 @@ This command does:
 2. `npm run test:quality`
 3. `npm run verify:dashboard-entry -- --mode start --base-url http://127.0.0.1:3311`
 4. `npm run verify:dashboard-interaction -- --mode start --base-url http://127.0.0.1:3312`
+5. `npm run verify:dashboard-refresh -- --mode start --profile release --base-url http://127.0.0.1:3313`
 
 `test:quality` covers:
 
@@ -40,6 +41,16 @@ This command does:
 5. `TacticalBriefDrawer` symbol binding
 6. `UserCenterDrawer` modal priority and context stability
 7. `console:error` and `pageerror` must both stay empty
+
+`verify:dashboard-refresh` covers:
+
+1. watchlist reorder 只 remap，不触发 batch
+2. watchlist 新增缺失 symbol 时触发 batch
+
+本地 `check:dashboard-refresh` 仍继续覆盖更宽的观察项：
+
+1. `resume` 无 drift 时只刷价格与版本探测
+2. `resume` 有 drift 时触发 batch 补拉
 
 ### Auth Contract Gate
 
@@ -87,6 +98,15 @@ Ensures the production build still preserves the `dashboard` interaction contrac
 1. runs against `next start`, not `next dev`
 2. seeds storage and API stubs for controlled symbol / modal verification
 3. fails on symbol mismatch, modal mismatch, `console:error`, or `pageerror`
+4. requires Playwright Chromium to be installed in CI and local verification env
+
+### Dashboard Refresh Gate
+
+Ensures the production build still preserves the refresh contract:
+
+1. runs against `next start`, not `next dev`
+2. seeds storage and API stubs for controlled refresh-event verification
+3. 当前 release profile 先锁住 watchlist mutation 侧的确定性 contract
 4. requires Playwright Chromium to be installed in CI and local verification env
 
 ## 2) Manual Device Gates (must pass before full rollout)
