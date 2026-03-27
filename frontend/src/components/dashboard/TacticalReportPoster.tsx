@@ -215,17 +215,19 @@ export function TacticalReportPoster({
 
               <div className="relative z-10 px-5 pt-5 pb-7">
                 <section className="px-1 pb-1">
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <h1 className="text-[28px] font-black tracking-tight text-white">{stockName}</h1>
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+                    <div className="min-w-0 flex-1">
+                      <h1 className="text-[26px] leading-[1.05] font-black tracking-tight text-white sm:text-[28px]">{stockName}</h1>
                       <p className="mt-1 text-xs font-black uppercase tracking-[0.24em] text-slate-500">{symbol}</p>
                     </div>
-                    <div className="pt-0.5 text-right">
-                      <p className={`text-[28px] font-black tracking-tight ${councilHeadlineMeta.textClass}`}>{councilHeadline}</p>
+                    <div className="text-left sm:pt-0.5 sm:text-right">
+                      <p className={`text-[22px] leading-none font-black tracking-tight ${councilHeadlineMeta.textClass} sm:text-[28px]`}>
+                        {councilHeadline}
+                      </p>
                     </div>
                   </div>
 
-                  <div className="mt-4 flex items-center gap-5 text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">
+                  <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] font-black uppercase tracking-[0.18em] text-slate-500 sm:mt-4 sm:gap-5">
                     <div className="flex items-center gap-2">
                       <span className="text-white">{targetDate}</span>
                     </div>
