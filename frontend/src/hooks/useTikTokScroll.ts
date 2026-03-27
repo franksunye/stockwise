@@ -2,9 +2,7 @@
 
 import { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
 import { StockData } from '@/lib/types';
-
-const DASHBOARD_NAV_INTENT_KEY = 'stockwise_dashboard_nav_intent';
-const NAV_INTENT_MAX_AGE = 15_000;
+import { clearDashboardNavIntentSymbol, readDashboardNavIntentSymbol, resolveDashboardPreferredSymbol } from '@/lib/dashboard-symbol-navigation';
 
 export interface VerticalLayerState {
     type: 'today' | 'history';
@@ -20,6 +18,7 @@ export interface VerticalPositionRequest {
 interface UseTikTokScrollOptions {
     onOverscrollRight?: () => void;  // 在最后一个股票继续左滑时触发
     onOverscrollLeft?: () => void;   // 在第一个股票继续右滑时触发
+    preferredSymbol?: string | null;
 }
 
 export function useTikTokScroll(stocks: StockData[], options?: UseTikTokScrollOptions) {
@@ -37,6 +36,7 @@ export function useTikTokScroll(stocks: StockData[], options?: UseTikTokScrollOp
     const navIntentSymbol = useRef<string | null | undefined>(undefined);
     const hasAutoScrolled = useRef(false);
     const stockCount = stocks.length;
+    const preferredSymbol = options && 'preferredSymbol' in options ? (options as UseTikTokScrollOptions & { preferredSymbol?: string | null }).preferredSymbol : null;
 
     // 边缘过滑检测
     const touchStartX = useRef<number>(0);
@@ -195,19 +195,14 @@ export function useTikTokScroll(stocks: StockData[], options?: UseTikTokScrollOp
     // ref 不参与 React 渲染树比对，彻底消除跨平台 hydration 风险。
     useLayoutEffect(() => {
         if (navIntentSymbol.current === undefined) {
-            navIntentSymbol.current = null;
-            try {
-                const raw = sessionStorage.getItem(DASHBOARD_NAV_INTENT_KEY);
-                if (raw) {
-                    const parsed = JSON.parse(raw);
-                    if (parsed?.symbol && Date.now() - (parsed.timestamp || 0) < NAV_INTENT_MAX_AGE) {
-                        navIntentSymbol.current = parsed.symbol;
-                    }
-                }
-            } catch { /* non-critical */ }
+            navIntentSymbol.current = readDashboardNavIntentSymbol();
         }
 
-        const target = navIntentSymbol.current;
+        const target = resolveDashboardPreferredSymbol({
+            searchSymbol: preferredSymbol,
+            navIntentSymbol: navIntentSymbol.current,
+            availableSymbols: stocks.map(stock => stock.symbol),
+        });
         const container = scrollRef.current;
         if (target && stockCount > 0 && container && !hasAutoScrolled.current) {
             const index = stocks.findIndex(s => s.symbol === target || s.symbol.endsWith(target));
@@ -215,6 +210,7 @@ export function useTikTokScroll(stocks: StockData[], options?: UseTikTokScrollOp
                 hasAutoScrolled.current = true;
 
                 setCurrentIndex(index);
+                clearDashboardNavIntentSymbol();
 
                 const width = container.clientWidth || window.innerWidth;
                 container.scrollTo({
@@ -234,7 +230,7 @@ export function useTikTokScroll(stocks: StockData[], options?: UseTikTokScrollOp
                 return () => clearTimeout(timer);
             }
         }
-    }, [stockCount, stocks]);
+    }, [preferredSymbol, stockCount, stocks]);
 
     return {
         currentIndex,

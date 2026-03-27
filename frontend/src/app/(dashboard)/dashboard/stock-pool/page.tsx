@@ -11,6 +11,7 @@ import { useStocks } from '@/context/StockContext';
 import { useDashboardAuth } from '@/context/DashboardAuthContext';
 import { getPredictionActionMeta } from '@/lib/layer1-ui';
 import type { AIPrediction } from '@/lib/types';
+import { writeDashboardNavIntentSymbol } from '@/lib/dashboard-symbol-navigation';
 
 interface StockSnapshot {
   symbol: string;
@@ -21,8 +22,6 @@ interface StockSnapshot {
   layer1Status?: AIPrediction['layer1_status'];
   updateTag?: string;
 }
-
-const DASHBOARD_NAV_INTENT_KEY = 'stockwise_dashboard_nav_intent';
 
 const StockItem = memo(({ 
   stock, 
@@ -51,10 +50,7 @@ const StockItem = memo(({
         href="/dashboard"
         onClick={() => {
           try {
-            sessionStorage.setItem(DASHBOARD_NAV_INTENT_KEY, JSON.stringify({
-              symbol: stock.symbol,
-              timestamp: Date.now()
-            }));
+            writeDashboardNavIntentSymbol(stock.symbol);
           } catch {
             // non-critical
           }

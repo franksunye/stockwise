@@ -20,8 +20,10 @@ import { useTikTokScroll } from '@/hooks/useTikTokScroll';
 
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { getPredictionActionMeta } from '@/lib/layer1-ui';
-
-const DASHBOARD_NAV_INTENT_KEY = 'stockwise_dashboard_nav_intent';
+import {
+  clearDashboardNavIntentSymbol,
+  readDashboardSymbolFromSearchParams,
+} from '@/lib/dashboard-symbol-navigation';
 
 const UserCenterDrawer = dynamic(() => import('@/components/UserCenterDrawer'), {
   ssr: false,
@@ -70,6 +72,7 @@ DashboardBackground.displayName = 'DashboardBackground';
 
 function DashboardContent() {
   const searchParams = useSearchParams();
+  const preferredSymbol = readDashboardSymbolFromSearchParams(searchParams);
   const [userCenterOpen, setUserCenterOpen] = useState(false);
   const [briefOpen, setBriefOpen] = useState(false);
   const almanacRef = useRef<MarketAlmanacHandle>(null);
@@ -115,8 +118,9 @@ function DashboardContent() {
 
   const scrollOptions = useMemo(() => ({
     onOverscrollRight: () => setUserCenterOpen(true),
-    onOverscrollLeft: () => router.push('/dashboard/stock-pool')
-  }), [router]);
+    onOverscrollLeft: () => router.push('/dashboard/stock-pool'),
+    preferredSymbol,
+  }), [preferredSymbol, router]);
 
   const {
     currentIndex,
@@ -202,14 +206,19 @@ function DashboardContent() {
 
   useEffect(() => {
     try {
-      sessionStorage.removeItem(DASHBOARD_NAV_INTENT_KEY);
+      if (!preferredSymbol) {
+        clearDashboardNavIntentSymbol();
+      }
     } catch {
       // non-critical
     }
-  }, []);
+  }, [preferredSymbol]);
 
   return (
-    <main className="fixed inset-0 bg-[#050508] text-white overflow-hidden select-none font-sans">
+    <main
+      className="fixed inset-0 bg-[#050508] text-white overflow-hidden select-none font-sans"
+      data-dashboard-current-symbol={currentStock?.symbol || ''}
+    >
       <DashboardBackground 
         isAlmanac={isMarketAlmanac} 
         prediction={currentStock?.prediction} 
