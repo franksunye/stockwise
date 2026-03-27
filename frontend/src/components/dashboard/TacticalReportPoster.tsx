@@ -180,7 +180,7 @@ export function TacticalReportPoster({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[310] flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-[310] flex items-center justify-center px-4 pt-6 pb-4 sm:p-4">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -213,7 +213,7 @@ export function TacticalReportPoster({
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(99,102,241,0.18),transparent_35%),radial-gradient(circle_at_bottom_right,rgba(244,63,94,0.12),transparent_28%)] pointer-events-none" />
               <div className="absolute inset-0 opacity-[0.05] pointer-events-none" style={{ backgroundImage: 'linear-gradient(to bottom, rgba(255,255,255,0.12) 1px, transparent 1px)', backgroundSize: '100% 22px' }} />
 
-              <div className="relative z-10 px-5 pt-5 pb-7">
+              <div className="relative z-10 px-5 pt-6 pb-7 sm:pt-5">
                 <section className="px-1 pb-1">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
                     <div className="min-w-0 flex-1">
