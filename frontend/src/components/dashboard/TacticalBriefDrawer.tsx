@@ -126,6 +126,8 @@ export function TacticalBriefDrawer({
 }: TacticalBriefDrawerProps) {
   const [isMounted, setIsMounted] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
+  const [isCounterArgumentExpanded, setIsCounterArgumentExpanded] = useState(false);
+  const [isConflictResolutionExpanded, setIsConflictResolutionExpanded] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
@@ -792,17 +794,71 @@ export function TacticalBriefDrawer({
 
                   {/* 思维复盘 / 反向论点 (Counter Argument) */}
                   {data.counter_argument && (
-                    <section className="p-4 rounded-2xl bg-rose-500/5 border border-rose-500/10">
-                      <h3 className="text-xs font-black text-rose-400 uppercase tracking-widest mb-2 flex items-center gap-2">
-                        <AlertTriangle size={12} /> 思维复盘 / 风险反思
-                      </h3>
-                      <p className="text-sm text-rose-300/70 leading-relaxed italic">{normalizeLegacyTerms(data.counter_argument)}</p>
+                    <section className="space-y-4">
+                      <button
+                        onClick={() => setIsCounterArgumentExpanded(!isCounterArgumentExpanded)}
+                        className="w-full flex items-center justify-between p-4 rounded-2xl bg-rose-500/5 border border-rose-500/10 group active:scale-[0.98] transition-all"
+                      >
+                        <div className="flex items-center gap-3">
+                          <AlertTriangle size={12} className="text-rose-400" />
+                          <span className="text-xs font-black text-rose-400 uppercase tracking-widest">思维复盘 / 风险反思</span>
+                        </div>
+                        <motion.div
+                          animate={{ rotate: isCounterArgumentExpanded ? 180 : 0 }}
+                          className="text-rose-400/70 group-hover:text-rose-300 transition-colors"
+                        >
+                          <ChevronDown size={16} />
+                        </motion.div>
+                      </button>
+
+                      <AnimatePresence>
+                        {isCounterArgumentExpanded && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            className="overflow-hidden"
+                          >
+                            <div className="p-4 rounded-2xl bg-rose-500/5 border border-rose-500/10">
+                              <p className="text-sm text-rose-300/70 leading-relaxed italic">{normalizeLegacyTerms(data.counter_argument)}</p>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </section>
                   )}
 
-                  <section className="p-4 rounded-2xl bg-indigo-500/5 border border-indigo-500/10">
-                    <h3 className="text-xs font-black text-indigo-400 uppercase tracking-widest mb-2 flex items-center gap-2"><Info size={12} /> 核心冲突处理原则</h3>
-                    <p className="text-sm text-indigo-300/70 leading-relaxed italic">{normalizeLegacyTerms(data.conflict_resolution || "遵循趋势优先原则。")}</p>
+                  <section className="space-y-4">
+                    <button
+                      onClick={() => setIsConflictResolutionExpanded(!isConflictResolutionExpanded)}
+                      className="w-full flex items-center justify-between p-4 rounded-2xl bg-indigo-500/5 border border-indigo-500/10 group active:scale-[0.98] transition-all"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Info size={12} className="text-indigo-400" />
+                        <span className="text-xs font-black text-indigo-400 uppercase tracking-widest">核心冲突处理原则</span>
+                      </div>
+                      <motion.div
+                        animate={{ rotate: isConflictResolutionExpanded ? 180 : 0 }}
+                        className="text-indigo-400/70 group-hover:text-indigo-300 transition-colors"
+                      >
+                        <ChevronDown size={16} />
+                      </motion.div>
+                    </button>
+
+                    <AnimatePresence>
+                      {isConflictResolutionExpanded && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          className="overflow-hidden"
+                        >
+                          <div className="p-4 rounded-2xl bg-indigo-500/5 border border-indigo-500/10">
+                            <p className="text-sm text-indigo-300/70 leading-relaxed italic">{normalizeLegacyTerms(data.conflict_resolution || "遵循趋势优先原则。")}</p>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </section>
                 </div>
               ) : (
