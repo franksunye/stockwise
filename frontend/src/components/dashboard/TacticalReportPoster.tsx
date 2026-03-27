@@ -193,7 +193,7 @@ export function TacticalReportPoster({
           <div className="capture-hidden flex items-center justify-between border-b border-white/5 px-5 py-4">
             <div>
               <p className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-600">ZISO AI</p>
-              <h3 className="mt-1 text-lg font-black tracking-tight text-white">投研报告图</h3>
+              <h3 className="mt-1 text-lg font-black tracking-tight text-white">投研报告预览</h3>
             </div>
             <button
               onClick={onClose}
