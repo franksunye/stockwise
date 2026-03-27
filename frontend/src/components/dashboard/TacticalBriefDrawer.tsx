@@ -584,7 +584,7 @@ export function TacticalBriefDrawer({
                       </div>
                       
                       {/* Price Structure Graph */}
-                      <div className="relative h-[280px] w-full mb-6 px-4 bg-white/[0.01] rounded-[24px] border border-white/[0.03] overflow-hidden">
+                      <div className="relative h-[280px] w-full mb-6 px-4 bg-white/[0.01] rounded-[24px] border border-white/[0.03] overflow-hidden pointer-events-none select-none">
                           {/* Y-axis Guides */}
                           <div className="absolute inset-0 flex flex-col justify-between py-6 opacity-20 pointer-events-none">
                               {[0, 1, 2, 3, 4].map(idx => (
@@ -875,15 +875,19 @@ export function TacticalBriefDrawer({
                     <section className="space-y-4">
                       <button
                         onClick={() => setIsCounterArgumentExpanded(!isCounterArgumentExpanded)}
-                        className="w-full flex items-center justify-between p-4 rounded-2xl bg-rose-500/5 border border-rose-500/10 group active:scale-[0.98] transition-all"
+                        className={`w-full flex items-center justify-between p-4 rounded-2xl group active:scale-[0.98] transition-all ${
+                          isCounterArgumentExpanded
+                            ? 'bg-rose-500/5 border border-rose-500/10'
+                            : 'bg-rose-500/[0.03] border border-rose-500/[0.08]'
+                        }`}
                       >
                         <div className="flex items-center gap-3">
-                          <AlertTriangle size={12} className="text-rose-400" />
-                          <span className="text-xs font-black text-rose-400 uppercase tracking-widest">思维复盘 / 风险反思</span>
+                          <AlertTriangle size={12} className={isCounterArgumentExpanded ? 'text-rose-400' : 'text-rose-400/75'} />
+                          <span className={`text-xs font-black uppercase tracking-widest transition-colors ${isCounterArgumentExpanded ? 'text-rose-400' : 'text-rose-400/75 group-hover:text-rose-300/90'}`}>思维复盘 / 风险反思</span>
                         </div>
                         <motion.div
                           animate={{ rotate: isCounterArgumentExpanded ? 180 : 0 }}
-                          className="text-rose-400/70 group-hover:text-rose-300 transition-colors"
+                          className={`transition-colors ${isCounterArgumentExpanded ? 'text-rose-400/70 group-hover:text-rose-300' : 'text-rose-400/50 group-hover:text-rose-300/80'}`}
                         >
                           <ChevronDown size={16} />
                         </motion.div>
@@ -909,15 +913,19 @@ export function TacticalBriefDrawer({
                   <section className="space-y-4">
                     <button
                       onClick={() => setIsConflictResolutionExpanded(!isConflictResolutionExpanded)}
-                      className="w-full flex items-center justify-between p-4 rounded-2xl bg-indigo-500/5 border border-indigo-500/10 group active:scale-[0.98] transition-all"
+                      className={`w-full flex items-center justify-between p-4 rounded-2xl group active:scale-[0.98] transition-all ${
+                        isConflictResolutionExpanded
+                          ? 'bg-indigo-500/5 border border-indigo-500/10'
+                          : 'bg-indigo-500/[0.03] border border-indigo-500/[0.08]'
+                      }`}
                     >
                       <div className="flex items-center gap-3">
-                        <Info size={12} className="text-indigo-400" />
-                        <span className="text-xs font-black text-indigo-400 uppercase tracking-widest">核心冲突处理原则</span>
+                        <Info size={12} className={isConflictResolutionExpanded ? 'text-indigo-400' : 'text-indigo-400/75'} />
+                        <span className={`text-xs font-black uppercase tracking-widest transition-colors ${isConflictResolutionExpanded ? 'text-indigo-400' : 'text-indigo-400/75 group-hover:text-indigo-300/90'}`}>核心冲突处理原则</span>
                       </div>
                       <motion.div
                         animate={{ rotate: isConflictResolutionExpanded ? 180 : 0 }}
-                        className="text-indigo-400/70 group-hover:text-indigo-300 transition-colors"
+                        className={`transition-colors ${isConflictResolutionExpanded ? 'text-indigo-400/70 group-hover:text-indigo-300' : 'text-indigo-400/50 group-hover:text-indigo-300/80'}`}
                       >
                         <ChevronDown size={16} />
                       </motion.div>
