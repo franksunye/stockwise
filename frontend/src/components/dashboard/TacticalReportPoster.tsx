@@ -231,7 +231,7 @@ export function TacticalReportPoster({
                     </div>
                     <div className="h-3.5 w-px bg-white/10" />
                     <div className="flex items-center gap-2">
-                      <span className="text-slate-400">{(prediction.confidence * 100).toFixed(0)}%</span>
+                      <span className="text-slate-400">把握 {(prediction.confidence * 100).toFixed(0)}%</span>
                     </div>
                   </div>
 
@@ -307,11 +307,6 @@ export function TacticalReportPoster({
                             </p>
                             <p className="mt-1 text-[12px] font-medium leading-5 text-slate-100/92">{normalizeLegacyTerms(step.data)}</p>
                           </div>
-                          {idx < 2 ? (
-                            <span className="shrink-0 rounded-full border border-indigo-500/16 bg-indigo-500/[0.08] px-2.5 py-1 text-[10px] font-black text-indigo-200">
-                              {normalizeLegacyTerms(step.conclusion)}
-                            </span>
-                          ) : null}
                         </div>
                       </div>
                     ))}
