@@ -24,10 +24,15 @@ import { getPredictionActionMeta } from '@/lib/layer1-ui';
 import {
   buildCouncilCards,
   fetchAICouncilData,
+  getAICouncilSWRKey,
   getActionChipClass,
   getCouncilActionLabel,
   getCouncilActionMeta,
   getCouncilHeadlineAction,
+  getCouncilMemorySnapshot,
+  readCouncilSessionSnapshot,
+  setCouncilMemorySnapshot,
+  writeCouncilSessionSnapshot,
 } from '@/lib/ai-council-surface';
 import {
   getPriceNodes,
@@ -100,11 +105,24 @@ export function TacticalReportPoster({
   }, [data]);
   const priceNodes = useMemo(() => getPriceNodes(data, currentPrice).slice(0, 6), [data, currentPrice]);
   const reasoningSteps = Array.isArray(data.reasoning_trace) ? data.reasoning_trace.slice(0, 5) : [];
+  const snapshotKey = `${symbol}_${targetDate}`;
+  const memoryPayload = getCouncilMemorySnapshot(snapshotKey);
+  const sessionPayload = !memoryPayload ? readCouncilSessionSnapshot(symbol, targetDate) : null;
+  const fallbackPayload = memoryPayload || sessionPayload || undefined;
 
   const { data: councilPayload } = useSWR(
-    isOpen ? ['report-council', symbol, targetDate] : null,
+    isOpen ? getAICouncilSWRKey(symbol, targetDate) : null,
     ([, nextSymbol, nextDate]) => fetchAICouncilData(nextSymbol, nextDate),
-    { revalidateOnFocus: false, dedupingInterval: 10 * 1000 },
+    {
+      fallbackData: fallbackPayload,
+      keepPreviousData: true,
+      revalidateOnFocus: false,
+      dedupingInterval: 10 * 1000,
+      onSuccess: (nextPayload) => {
+        setCouncilMemorySnapshot(snapshotKey, nextPayload);
+        writeCouncilSessionSnapshot(symbol, targetDate, nextPayload);
+      },
+    },
   );
   const councilPredictions = useMemo(() => councilPayload?.data || [], [councilPayload]);
   const councilCards = useMemo(() => buildCouncilCards(councilPredictions).slice(0, 2), [councilPredictions]);

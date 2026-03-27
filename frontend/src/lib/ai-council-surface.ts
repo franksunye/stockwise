@@ -253,6 +253,91 @@ export interface CouncilCachePayload {
   fetchedAt: number;
 }
 
+const SNAPSHOT_TTL = 1000 * 60 * 60 * 24;
+const SNAPSHOT_VERSION = 'v2';
+const MAX_CACHE_SIZE = 50;
+const councilSnapshotCache = new Map<string, CouncilCachePayload>();
+
+export function getAICouncilSWRKey(symbol: string, targetDate: string) {
+  return ['ai-council', symbol, targetDate] as const;
+}
+
+export function getCouncilMemorySnapshot(key: string): CouncilCachePayload | undefined {
+  const cached = councilSnapshotCache.get(key);
+  if (!cached) return undefined;
+
+  councilSnapshotCache.delete(key);
+  councilSnapshotCache.set(key, cached);
+  return cached;
+}
+
+export function setCouncilMemorySnapshot(key: string, payload: CouncilCachePayload): void {
+  if (councilSnapshotCache.has(key)) {
+    councilSnapshotCache.delete(key);
+  }
+  councilSnapshotCache.set(key, payload);
+
+  if (councilSnapshotCache.size > MAX_CACHE_SIZE) {
+    const oldestKey = councilSnapshotCache.keys().next().value;
+    if (oldestKey) councilSnapshotCache.delete(oldestKey);
+  }
+}
+
+function buildSessionSnapshotKey(symbol: string, targetDate: string): string {
+  return `ziso:ai-council:${SNAPSHOT_VERSION}:${symbol}:${targetDate}`;
+}
+
+function pruneStaleSnapshots(): void {
+  if (typeof window === 'undefined') return;
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    const storage = window.localStorage;
+    const keysToRemove: string[] = [];
+    for (let i = 0; i < storage.length; i++) {
+      const key = storage.key(i);
+      if (!key || !key.startsWith('ziso:ai-council:')) continue;
+      const datePart = key.split(':').pop();
+      if (datePart && datePart < today) keysToRemove.push(key);
+    }
+    for (const key of keysToRemove) storage.removeItem(key);
+  } catch {
+    // best-effort
+  }
+}
+
+let didPruneSnapshots = false;
+
+export function readCouncilSessionSnapshot(symbol: string, targetDate: string): CouncilCachePayload | null {
+  if (typeof window === 'undefined') return null;
+  if (!didPruneSnapshots) {
+    didPruneSnapshots = true;
+    pruneStaleSnapshots();
+  }
+  try {
+    const raw = window.localStorage.getItem(buildSessionSnapshotKey(symbol, targetDate));
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<CouncilCachePayload>;
+    if (!parsed || !Array.isArray(parsed.data) || typeof parsed.fetchedAt !== 'number') {
+      return null;
+    }
+    if (Date.now() - parsed.fetchedAt > SNAPSHOT_TTL) {
+      return null;
+    }
+    return parsed as CouncilCachePayload;
+  } catch {
+    return null;
+  }
+}
+
+export function writeCouncilSessionSnapshot(symbol: string, targetDate: string, payload: CouncilCachePayload): void {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(buildSessionSnapshotKey(symbol, targetDate), JSON.stringify(payload));
+  } catch {
+    // best-effort
+  }
+}
+
 export async function fetchAICouncilData(symbol: string, targetDate: string): Promise<CouncilCachePayload> {
   let res = await fetch(`/api/predictions?symbol=${symbol}&limit=10&mode=full&targetDate=${targetDate}`);
   if (res.status === 401) {

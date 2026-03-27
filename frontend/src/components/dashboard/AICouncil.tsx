@@ -9,11 +9,16 @@ import Multiavatar from '@/components/Multiavatar';
 import {
   buildCouncilCards,
   fetchAICouncilData,
+  getAICouncilSWRKey,
   getActionChipClass,
   getCouncilActionLabel,
   getCouncilActionMeta,
   getCouncilHeadlineAction,
+  getCouncilMemorySnapshot,
+  readCouncilSessionSnapshot,
+  setCouncilMemorySnapshot,
   type CouncilCachePayload,
+  writeCouncilSessionSnapshot,
 } from '@/lib/ai-council-surface';
 
 interface AICouncilProps {
@@ -23,84 +28,7 @@ interface AICouncilProps {
 }
 
 const CACHE_TTL = 1000 * 60 * 5;
-const SNAPSHOT_TTL = 1000 * 60 * 60 * 24; // 24h — predictions are daily-immutable; target_date in key handles invalidation
-const SNAPSHOT_VERSION = 'v2';
-const MAX_CACHE_SIZE = 50;
 const LOADING_INDICATOR_DELAY_MS = 150;
-const councilSnapshotCache = new Map<string, CouncilCachePayload>();
-
-function getCouncilSnapshot(key: string): CouncilCachePayload | undefined {
-  const cached = councilSnapshotCache.get(key);
-  if (!cached) return undefined;
-
-  councilSnapshotCache.delete(key);
-  councilSnapshotCache.set(key, cached);
-  return cached;
-}
-
-function setCouncilSnapshot(key: string, payload: CouncilCachePayload): void {
-  if (councilSnapshotCache.has(key)) {
-    councilSnapshotCache.delete(key);
-  }
-  councilSnapshotCache.set(key, payload);
-
-  if (councilSnapshotCache.size > MAX_CACHE_SIZE) {
-    const oldestKey = councilSnapshotCache.keys().next().value;
-    if (oldestKey) councilSnapshotCache.delete(oldestKey);
-  }
-}
-
-function buildSessionSnapshotKey(symbol: string, targetDate: string): string {
-  return `ziso:ai-council:${SNAPSHOT_VERSION}:${symbol}:${targetDate}`;
-}
-
-function pruneStaleSnapshots(): void {
-  if (typeof window === 'undefined') return;
-  try {
-    const today = new Date().toISOString().split('T')[0];
-    const storage = window.localStorage;
-    const keysToRemove: string[] = [];
-    for (let i = 0; i < storage.length; i++) {
-      const key = storage.key(i);
-      if (!key || !key.startsWith('ziso:ai-council:')) continue;
-      const datePart = key.split(':').pop();
-      if (datePart && datePart < today) keysToRemove.push(key);
-    }
-    for (const key of keysToRemove) storage.removeItem(key);
-  } catch {
-    // best-effort
-  }
-}
-
-let _pruned = false;
-
-function readSessionSnapshot(symbol: string, targetDate: string): CouncilCachePayload | null {
-  if (typeof window === 'undefined') return null;
-  if (!_pruned) { _pruned = true; pruneStaleSnapshots(); }
-  try {
-    const raw = window.localStorage.getItem(buildSessionSnapshotKey(symbol, targetDate));
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as Partial<CouncilCachePayload>;
-    if (!parsed || !Array.isArray(parsed.data) || typeof parsed.fetchedAt !== 'number') {
-      return null;
-    }
-    if (Date.now() - parsed.fetchedAt > SNAPSHOT_TTL) {
-      return null;
-    }
-    return parsed as CouncilCachePayload;
-  } catch {
-    return null;
-  }
-}
-
-function writeSessionSnapshot(symbol: string, targetDate: string, payload: CouncilCachePayload): void {
-  if (typeof window === 'undefined') return;
-  try {
-    window.localStorage.setItem(buildSessionSnapshotKey(symbol, targetDate), JSON.stringify(payload));
-  } catch {
-    // best-effort — quota exceeded or private mode
-  }
-}
 
 async function fetchCouncilData([
   ,
@@ -117,15 +45,15 @@ export function preloadAICouncil(symbol: string, targetDate: string): void {
 
 export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
   const snapshotKey = `${symbol}_${targetDate}`;
-  const memoryPayload = getCouncilSnapshot(snapshotKey);
+  const memoryPayload = getCouncilMemorySnapshot(snapshotKey);
   const sessionPayload = !memoryPayload && symbol && targetDate
-    ? readSessionSnapshot(symbol, targetDate)
+    ? readCouncilSessionSnapshot(symbol, targetDate)
     : null;
   const fallbackPayload = memoryPayload || sessionPayload || undefined;
   const hasSessionSnapshot = !!sessionPayload;
 
   const swrKey = symbol && targetDate
-    ? (['ai-council', symbol, targetDate] as const)
+    ? getAICouncilSWRKey(symbol, targetDate)
     : null;
   const isFreshMemory = memoryPayload
     ? Date.now() - memoryPayload.fetchedAt < CACHE_TTL
@@ -145,9 +73,9 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
     revalidateOnMount: shouldRevalidateOnMount,
     dedupingInterval: 10 * 1000,
     onSuccess: (nextPayload) => {
-      setCouncilSnapshot(snapshotKey, nextPayload);
+      setCouncilMemorySnapshot(snapshotKey, nextPayload);
       if (symbol && targetDate) {
-        writeSessionSnapshot(symbol, targetDate, nextPayload);
+        writeCouncilSessionSnapshot(symbol, targetDate, nextPayload);
       }
     },
   });
