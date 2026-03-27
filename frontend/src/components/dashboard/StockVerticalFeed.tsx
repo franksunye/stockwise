@@ -4,6 +4,7 @@ import { StockDashboardCard } from './StockDashboardCard';
 import { HistoricalCard } from './HistoricalCard';
 import { VerticalIndicator } from './VerticalIndicator';
 import { VerticalLayerState, VerticalPositionRequest } from '@/hooks/useTikTokScroll';
+import { getStockFeedCards, getVerticalLayerState, resolveClosestHistoryIndex } from '@/lib/stock-vertical-feed-surface';
 
 interface StockVerticalFeedProps {
   stock: StockData;
@@ -26,42 +27,12 @@ export const StockVerticalFeed = memo(function StockVerticalFeed({
 }: StockVerticalFeedProps) {
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const loaderRef = useRef<HTMLDivElement>(null);
+  const feedCards = getStockFeedCards(stock);
 
   const getCardElements = useCallback(() => {
     if (!container) return [];
-    return Array.from(container.children).slice(0, stock.history.length) as HTMLElement[];
-  }, [container, stock.history.length]);
-
-  const resolveClosestHistoryIndex = useCallback((targetDate: string) => {
-    const historyCards = stock.history.slice(1);
-    if (historyCards.length === 0) return 0;
-
-    const exactIndex = historyCards.findIndex(item => item.target_date === targetDate);
-    if (exactIndex !== -1) return exactIndex + 1;
-
-    const targetTime = new Date(`${targetDate}T00:00:00`).getTime();
-    let earlierMatchIndex: number | null = null;
-    let earlierMatchTime = Number.NEGATIVE_INFINITY;
-    let nearestIndex = 1;
-    let nearestDistance = Number.POSITIVE_INFINITY;
-
-    historyCards.forEach((item, itemIndex) => {
-      const candidateTime = new Date(`${item.target_date}T00:00:00`).getTime();
-      const distance = Math.abs(candidateTime - targetTime);
-
-      if (candidateTime <= targetTime && candidateTime > earlierMatchTime) {
-        earlierMatchTime = candidateTime;
-        earlierMatchIndex = itemIndex + 1;
-      }
-
-      if (distance < nearestDistance) {
-        nearestDistance = distance;
-        nearestIndex = itemIndex + 1;
-      }
-    });
-
-    return earlierMatchIndex ?? nearestIndex;
-  }, [stock.history]);
+    return Array.from(container.children).slice(0, feedCards.length) as HTMLElement[];
+  }, [container, feedCards.length]);
   
   // 监听回顶请求
   const prevScrollRequestRef = useRef(scrollRequest || 0);
@@ -85,7 +56,7 @@ export const StockVerticalFeed = memo(function StockVerticalFeed({
       return;
     }
 
-    const targetIndex = resolveClosestHistoryIndex(positionRequest.date);
+    const targetIndex = resolveClosestHistoryIndex(stock.history, positionRequest.date);
     const cards = getCardElements();
     const targetCard = cards[targetIndex];
 
@@ -96,11 +67,8 @@ export const StockVerticalFeed = memo(function StockVerticalFeed({
     }
 
     container.scrollTo({ top: targetCard.offsetTop, behavior: 'smooth' });
-    onVerticalLayerChange?.(stock.symbol, {
-      type: targetIndex === 0 ? 'today' : 'history',
-      date: targetIndex === 0 ? null : stock.history[targetIndex]?.target_date || null
-    });
-  }, [container, getCardElements, onVerticalLayerChange, positionRequest, resolveClosestHistoryIndex, stock.history, stock.symbol]);
+    onVerticalLayerChange?.(stock.symbol, getVerticalLayerState(stock.history, targetIndex));
+  }, [container, getCardElements, onVerticalLayerChange, positionRequest, stock.history, stock.symbol]);
 
   // 懒加载触发
   useEffect(() => {
@@ -143,10 +111,7 @@ export const StockVerticalFeed = memo(function StockVerticalFeed({
       }
     });
 
-    onVerticalLayerChange?.(stock.symbol, {
-      type: nearestIndex === 0 ? 'today' : 'history',
-      date: nearestIndex === 0 ? null : stock.history[nearestIndex]?.target_date || null
-    });
+    onVerticalLayerChange?.(stock.symbol, getVerticalLayerState(stock.history, nearestIndex));
   };
 
   return (
@@ -163,8 +128,27 @@ export const StockVerticalFeed = memo(function StockVerticalFeed({
         className="w-full h-full absolute inset-0 overflow-y-scroll snap-y snap-mandatory scrollbar-hide flex flex-col items-center"
       >
         {/* Y轴 垂直内容 (TikTok Mode) */}
-        <StockDashboardCard data={stock} onShowTactics={handleShowTactics} />
-        {stock.history.slice(1).map((h, i) => <HistoricalCard key={i} data={h} onClick={handleShowTactics} />)}
+        {feedCards.map((card, index) => {
+          if (card.kind === 'today') {
+            return (
+              <StockDashboardCard
+                key={`today-${card.prediction?.target_date || index}`}
+                data={stock}
+                onShowTactics={handleShowTactics}
+              />
+            );
+          }
+
+          if (!card.prediction) return null;
+
+          return (
+            <HistoricalCard
+              key={`history-${card.prediction.target_date}-${index}`}
+              data={card.prediction}
+              onClick={handleShowTactics}
+            />
+          );
+        })}
         
         {/* 底部加载触发区 */}
         <div ref={loaderRef} className="w-full py-8 flex items-center justify-center min-h-[60px] snap-end">

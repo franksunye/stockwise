@@ -208,7 +208,11 @@ SWR 不应被直接等同为：
    - [`frontend/src/lib/historical-card-surface.ts`](/Users/yesun/Code/stockwise/frontend/src/lib/historical-card-surface.ts) 已统一 `layer1_payload` 基准日解析、summary 提取、验证状态标签与日期格式化
    - [`frontend/src/components/dashboard/HistoricalCard.tsx`](/Users/yesun/Code/stockwise/frontend/src/components/dashboard/HistoricalCard.tsx) 现在只消费展示层 helper，不再内联维护 validation/status parse 细节
    - [`frontend/tests/historical-card-surface.test.mjs`](/Users/yesun/Code/stockwise/frontend/tests/historical-card-surface.test.mjs) 已锁住 summary/base snapshot 提取、验证状态映射与日期格式化语义
-14. `Dashboard Data Refresh Contract` 第一轮已完成：
+14. `StockVerticalFeed` 已完成第一轮编排层收口：
+   - [`frontend/src/lib/stock-vertical-feed-surface.ts`](/Users/yesun/Code/stockwise/frontend/src/lib/stock-vertical-feed-surface.ts) 已统一 feed 卡片顺序、历史定位解析与 vertical layer state 映射
+   - [`frontend/src/components/dashboard/StockVerticalFeed.tsx`](/Users/yesun/Code/stockwise/frontend/src/components/dashboard/StockVerticalFeed.tsx) 现在只消费编排层 helper，不再内联维护 feed 顺序与 layer 判定
+   - [`frontend/tests/stock-vertical-feed-surface.test.mjs`](/Users/yesun/Code/stockwise/frontend/tests/stock-vertical-feed-surface.test.mjs) 已锁住 today card 保留、closest history 匹配与 layer state 语义
+15. `Dashboard Data Refresh Contract` 第一轮已完成：
    - [`frontend/src/lib/dashboard-refresh-contract.ts`](/Users/yesun/Code/stockwise/frontend/src/lib/dashboard-refresh-contract.ts) 已将 watchlist 变化、historyLimit 升级、resume、online、post-market poll 统一建模为同一套刷新计划
    - [`frontend/src/hooks/useDashboardRefreshContract.ts`](/Users/yesun/Code/stockwise/frontend/src/hooks/useDashboardRefreshContract.ts) 已作为薄 orchestrator 接入 `StockProvider`
    - [`frontend/src/context/StockContext.tsx`](/Users/yesun/Code/stockwise/frontend/src/context/StockContext.tsx) 现在负责把 `useUserProfile`、`useWatchlist`、`useDashboardData` 绑定到同一套 refresh contract 上
@@ -219,17 +223,17 @@ SWR 不应被直接等同为：
      - watchlist 新增缺失 symbol 时触发 batch
      - `resume` 在无 drift 时只刷价格与版本探测
      - `resume` 在检测到 drift 时触发 batch 补拉
-15. 新用户首次进入 Dashboard 的修复链路已经落地。
+16. 新用户首次进入 Dashboard 的修复链路已经落地。
    - 详见 [`25_Onboarding_First_Load_Recovery_Plan_20260314.md`](/Users/yesun/Code/stockwise/docs/1_Engineering/25_Onboarding_First_Load_Recovery_Plan_20260314.md)
-16. `shared almanac` 已完成主动失效改造：
+17. `shared almanac` 已完成主动失效改造：
    - [`frontend/src/app/api/shared/almanac/route.ts`](/Users/yesun/Code/stockwise/frontend/src/app/api/shared/almanac/route.ts)
    - [`frontend/src/app/api/internal/cache/revalidate/route.ts`](/Users/yesun/Code/stockwise/frontend/src/app/api/internal/cache/revalidate/route.ts)
    - [`backend/engine/almanac_generator.py`](/Users/yesun/Code/stockwise/backend/engine/almanac_generator.py)
-17. 收盘后恢复应用的轻量版本探测已落地：
+18. 收盘后恢复应用的轻量版本探测已落地：
    - [`frontend/src/app/api/stock/prediction-versions/route.ts`](/Users/yesun/Code/stockwise/frontend/src/app/api/stock/prediction-versions/route.ts)
    - [`frontend/src/hooks/useDashboardData.ts`](/Users/yesun/Code/stockwise/frontend/src/hooks/useDashboardData.ts)
    - 当前最小探测间隔为 10 分钟，仅在 `post_market` 执行
-18. `Dashboard` 收盘后轮询停止条件已收紧：
+19. `Dashboard` 收盘后轮询停止条件已收紧：
    - 不再是“任一股票进入今日批次即可停止”
    - 而是“所有股票都进入今日批次后才停止”
 
@@ -241,7 +245,7 @@ SWR 不应被直接等同为：
 
 ### 5.3 仍未完成
 
-1. 非首帧关键数据面的 SWR 迁移尚未系统推进，但 `Brief`、`StockProfile`、`UserCenterDrawer`、`TacticalBriefDrawer`、其邻接 content surface、`StockDashboardCard` 与 `HistoricalCard` 七个面已完成第一轮低风险收口。
+1. 非首帧关键数据面的 SWR 迁移尚未系统推进，但 `Brief`、`StockProfile`、`UserCenterDrawer`、`TacticalBriefDrawer`、其邻接 content surface、`StockDashboardCard`、`HistoricalCard` 与 `StockVerticalFeed` 八个面已完成第一轮低风险收口。
 2. `Dashboard Data Refresh Contract` 已完成第一轮，但对实际线上刷新频率、重复请求和 watchlist 变更后的稳定性仍需要观测。
 3. 页面级 smoke 目前已并入正式 `verify:release`，但仍未接入更高层 CI。
 4. 轻量版本探测目前仅覆盖 `Dashboard` 主列表，不覆盖更深层详情面或 Drawer 内局部数据面。
@@ -292,7 +296,9 @@ SWR 不应被直接等同为：
    - 当前已完成标题、摘要、首条 tactic 与 pending copy 的第一轮收口；后续若继续推进，应优先考虑验证面与交互细化，而不是碰主请求链路
 7. `HistoricalCard` 的验证展示层
    - 当前已完成 summary、base snapshot 与 validation style 的第一轮收口；后续若继续推进，应优先考虑历史回顾交互与展示层复用，而不是碰 history 主数据来源
-8. 仅在 Drawer / Modal 打开后才触发的数据面
+8. `StockVerticalFeed` 的主展示编排层
+   - 当前已完成 feed 卡片顺序、历史定位与 vertical layer state 的第一轮收口；后续若继续推进，应优先考虑页面级观测与交互验证，而不是碰 Dashboard 主数据链路
+9. 仅在 Drawer / Modal 打开后才触发的数据面
 
 这些位置更接近 `AICouncil` 已验证成功的模式。
 
