@@ -5,7 +5,7 @@ import { ShieldCheck, XCircle, TrendingUp, TrendingDown, Minus, Target, Clock } 
 import { AIPrediction } from '@/lib/types';
 import { getPredictionActionMeta } from '@/lib/layer1-ui';
 import { formatModelName } from '@/lib/model-names';
-import { getValidationWindowLabel, parseValidationData } from '@/lib/prediction-display';
+import { formatHistoricalCardDate, getHistoricalCardSurface } from '@/lib/historical-card-surface';
 
 /**
  * 历史预测卡片
@@ -15,63 +15,14 @@ export const HistoricalCard = memo(function HistoricalCard({ data, onClick }: { 
   const isUp = data.signal === 'Long';
   const isDown = data.signal === 'Short';
   const actionMeta = getPredictionActionMeta(data);
-  const validationData = parseValidationData(data.validation_data);
-  const windowLabel = getValidationWindowLabel(validationData?.window);
-
-  // 解析基准日数据 (从 layer1_payload 或回退到 data)
-  let basePrice = data.close_price; // 默认回退
-  let baseChange = 0;
-  try {
-    if (data.layer1_payload) {
-      const payload = typeof data.layer1_payload === 'string' 
-        ? JSON.parse(data.layer1_payload) 
-        : data.layer1_payload;
-      basePrice = payload.close || basePrice;
-      baseChange = payload.change_percent || 0;
-    }
-  } catch (e) {
-    console.error('Failed to parse layer1_payload', e);
-  }
-
-  const displayResult = validationData?.window && validationData.window > 1
-    ? validationData.cum_change ?? data.actual_change
-    : data.actual_change;
-  const resultLabel = validationData?.window && validationData.window > 1 ? `${validationData.window}日累计` : '首日变动';
-  
-  // 尝试解析 JSON 理由
-  let displayReason = data.ai_reasoning;
-  try {
-    const parsed = JSON.parse(data.ai_reasoning);
-    displayReason = parsed.summary || data.ai_reasoning;
-  } catch {
-    // 如果不是 JSON，则保持原样
-  }
-
-  // 格式化日期显示
-  const formatDate = (dateStr: string) => {
-    const parts = dateStr.split('-');
-    if (parts.length === 3) {
-      return `${parts[1]}/${parts[2]}`;
-    }
-    return dateStr;
-  };
-
-  // 验证结果样式
-  const getValidationStyle = () => {
-    switch (data.validation_status) {
-      case 'Correct':
-        return { icon: ShieldCheck, color: 'text-emerald-500', bg: 'bg-emerald-500/10 border-emerald-500/20', label: `${windowLabel}通过` };
-      case 'Incorrect':
-        return { icon: XCircle, color: 'text-rose-500', bg: 'bg-rose-500/10 border-rose-500/20', label: `${windowLabel}偏离` };
-      case 'Verifying':
-        return { icon: Clock, color: 'text-indigo-400', bg: 'bg-indigo-500/10 border-indigo-500/20', label: `${windowLabel}中` };
-      default:
-        return { icon: Minus, color: 'text-slate-500', bg: 'bg-slate-500/10 border-slate-500/20', label: '待回看' };
-    }
-  };
-
-  const validation = getValidationStyle();
-  const ValidationIcon = validation.icon;
+  const { displayReason, basePrice, baseChange, validationData, validationStyle } = getHistoricalCardSurface(data);
+  const ValidationIcon = validationStyle.iconName === 'correct'
+    ? ShieldCheck
+    : validationStyle.iconName === 'incorrect'
+      ? XCircle
+      : validationStyle.iconName === 'verifying'
+        ? Clock
+        : Minus;
 
   // 信号图标
   const SignalIcon = isUp ? TrendingUp : isDown ? TrendingDown : Minus;
@@ -89,7 +40,7 @@ export const HistoricalCard = memo(function HistoricalCard({ data, onClick }: { 
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <div className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-[11px] font-black text-slate-400 tracking-widest mono">
-              {formatDate(data.target_date)}
+              {formatHistoricalCardDate(data.target_date)}
               {data.model && (
                 <span className="ml-2 text-[9px] text-indigo-500/50 italic opacity-80 uppercase tracking-tighter">
                    {formatModelName(data.model)}
@@ -101,10 +52,10 @@ export const HistoricalCard = memo(function HistoricalCard({ data, onClick }: { 
                 <span className="text-[9px] text-indigo-400 font-bold uppercase tracking-wider">点击回顾</span>
             </div>
           </div>
-          <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border ${validation.bg}`}>
-            <ValidationIcon size={12} className={validation.color} />
-            <span className={`text-[10px] font-black uppercase tracking-widest ${validation.color}`}>
-              {validation.label}
+          <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border ${validationStyle.bg}`}>
+            <ValidationIcon size={12} className={validationStyle.color} />
+            <span className={`text-[10px] font-black uppercase tracking-widest ${validationStyle.color}`}>
+              {validationStyle.label}
             </span>
           </div>
         </div>
@@ -144,7 +95,7 @@ export const HistoricalCard = memo(function HistoricalCard({ data, onClick }: { 
           <div className="flex items-center justify-between mb-6">
             <div>
               <span className="text-xs text-slate-500 font-bold uppercase block mb-1 tracking-widest leading-tight">
-                {formatDate(data.target_date)} 收盘价
+                {formatHistoricalCardDate(data.target_date)} 收盘价
               </span>
               <p className="text-2xl font-black mono text-slate-100">
                 {data.close_price ? data.close_price.toFixed(2) : '--'}
@@ -177,7 +128,7 @@ export const HistoricalCard = memo(function HistoricalCard({ data, onClick }: { 
                   <div className="w-1.5 h-1.5 rounded-full bg-indigo-500/40 border border-indigo-400/20" />
                   <span className="text-[10px] font-black text-indigo-400/40 uppercase tracking-[0.2em] w-12 mr-[-8px]">基准日</span>
                   <span className="text-[10px] font-bold text-slate-500 mono">
-                    {formatDate(data.date)}
+                    {formatHistoricalCardDate(data.date)}
                   </span>
                 </div>
                 
@@ -202,7 +153,7 @@ export const HistoricalCard = memo(function HistoricalCard({ data, onClick }: { 
                     <div className="flex items-center gap-3">
                       <span className="text-xs font-bold text-slate-600 mono w-12">{dayLabel}</span>
                       <span className="text-xs font-medium text-slate-400 mono">
-                        {dayData ? formatDate(dayData.date) : '--/--'}
+                        {dayData ? formatHistoricalCardDate(dayData.date) : '--/--'}
                       </span>
                     </div>
                     
