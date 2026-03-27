@@ -54,7 +54,11 @@ export function BriefDrawer({ isOpen, onClose, limitToSymbol, onUpgrade }: Brief
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[200] flex flex-col items-center justify-end bg-black/80 pointer-events-auto overflow-hidden">
+        <div
+          data-dashboard-brief-drawer="true"
+          data-brief-drawer-symbol={limitToSymbol || ''}
+          className="fixed inset-0 z-[200] flex flex-col items-center justify-end bg-black/80 pointer-events-auto overflow-hidden"
+        >
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="absolute inset-0" />
 
           <motion.div 

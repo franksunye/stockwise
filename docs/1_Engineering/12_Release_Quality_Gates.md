@@ -15,6 +15,7 @@ This command does:
 1. `npm run build`
 2. `npm run test:quality`
 3. `npm run verify:dashboard-entry -- --mode start --base-url http://127.0.0.1:3311`
+4. `npm run verify:dashboard-interaction -- --mode start --base-url http://127.0.0.1:3312`
 
 `test:quality` covers:
 
@@ -29,6 +30,16 @@ This command does:
 3. authorized-but-not-onboarded gate
 4. invite wall gate
 5. `console:error` and `pageerror` must both stay empty
+
+`verify:dashboard-interaction` covers:
+
+1. direct `?symbol=` symbol restoration
+2. `stock-pool -> dashboard` nav intent restoration
+3. `BriefDrawer` symbol binding
+4. `StockProfile` symbol binding
+5. `TacticalBriefDrawer` symbol binding
+6. `UserCenterDrawer` modal priority and context stability
+7. `console:error` and `pageerror` must both stay empty
 
 ### Auth Contract Gate
 
@@ -68,6 +79,15 @@ Ensures the production build still preserves the `dashboard` bootstrap contract:
 2. seeds storage and API stubs for controlled entry-state verification
 3. fails on visible state mismatch, `console:error`, or `pageerror`
 4. requires local `playwright` devDependency to be installed
+
+### Dashboard Interaction Gate
+
+Ensures the production build still preserves the `dashboard` interaction contract:
+
+1. runs against `next start`, not `next dev`
+2. seeds storage and API stubs for controlled symbol / modal verification
+3. fails on symbol mismatch, modal mismatch, `console:error`, or `pageerror`
+4. requires Playwright Chromium to be installed in CI and local verification env
 
 ## 2) Manual Device Gates (must pass before full rollout)
 

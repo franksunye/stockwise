@@ -238,7 +238,8 @@ function DashboardContent() {
 
       <header className="fixed top-0 left-0 right-0 z-[100] p-6 pointer-events-none">
         <div className="w-full flex justify-between items-start pointer-events-auto relative h-12">
-           <div className="flex items-center gap-2 cursor-pointer group shrink-0" 
+           <div className="flex items-center gap-2 cursor-pointer group shrink-0"
+             data-open-profile="true"
              onClick={() => isMarketAlmanac ? almanacRef.current?.share() : setProfileStock(contextStock)}
            >
               <div className="w-10 h-10 rounded-[16px] bg-white/5 border border-white/10 flex items-center justify-center transition-all group-active:scale-90 group-hover:bg-white/10 overflow-hidden relative">
@@ -252,6 +253,7 @@ function DashboardContent() {
            </div>
 
           <div className="absolute left-1/2 transform -translate-x-1/2 top-0 cursor-pointer group flex flex-col items-center h-12 justify-center w-48"
+            data-open-profile="true"
             onClick={() => !isMarketAlmanac && setProfileStock(contextStock)}
           >
             <div className={`absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-300 ${isMarketAlmanac ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
@@ -274,7 +276,7 @@ function DashboardContent() {
           </div>
 
           <div className="flex items-start gap-2 pointer-events-auto">
-            <button onClick={() => isMarketAlmanac ? almanacRef.current?.copy() : openBrief()}
+            <button data-open-brief="true" onClick={() => isMarketAlmanac ? almanacRef.current?.copy() : openBrief()}
               className="w-10 h-10 rounded-[16px] bg-white/5 border border-white/10 flex items-center justify-center active:scale-90 transition-all hover:bg-white/10 group overflow-hidden relative"
             >
               <div className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${isMarketAlmanac ? 'opacity-100 scale-100' : 'opacity-0 scale-50 pointer-events-none'}`}>

@@ -48,6 +48,7 @@ const StockItem = memo(({
     >
       <Link 
         href="/dashboard"
+        data-stock-pool-symbol={stock.symbol}
         onClick={() => {
           try {
             writeDashboardNavIntentSymbol(stock.symbol);

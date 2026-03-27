@@ -21,7 +21,9 @@ export function StockProfile({ stock, onClose }: StockProfileProps) {
   const { totalCount, winRate } = getStockProfileStats(historyToUse);
 
   return (
-    <motion.div 
+    <motion.div
+      data-stock-profile="true"
+      data-stock-profile-symbol={stock.symbol}
       initial={{ y: '100%' }}
       animate={{ y: 0 }}
       exit={{ y: '100%' }}

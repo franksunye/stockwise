@@ -4,15 +4,22 @@ import { spawn } from 'node:child_process';
 function parseArgs(argv) {
     const options = {
         skipDashboardEntry: false,
+        skipDashboardInteraction: false,
         dashboardCase: '',
+        dashboardInteractionCase: '',
     };
 
     for (let i = 0; i < argv.length; i += 1) {
         const arg = argv[i];
         if (arg === '--skip-dashboard-entry') {
             options.skipDashboardEntry = true;
+        } else if (arg === '--skip-dashboard-interaction') {
+            options.skipDashboardInteraction = true;
         } else if (arg === '--dashboard-case' && argv[i + 1]) {
             options.dashboardCase = argv[i + 1];
+            i += 1;
+        } else if (arg === '--dashboard-interaction-case' && argv[i + 1]) {
+            options.dashboardInteractionCase = argv[i + 1];
             i += 1;
         } else if (arg === '--help' || arg === '-h') {
             options.help = true;
@@ -23,17 +30,19 @@ function parseArgs(argv) {
 }
 
 function printHelp() {
-    console.log(`Usage:
-  node scripts/verify-release.mjs [--dashboard-case authorized-returning-user] [--skip-dashboard-entry]
+console.log(`Usage:
+  node scripts/verify-release.mjs [--dashboard-case authorized-returning-user] [--dashboard-interaction-case url-symbol-context] [--skip-dashboard-entry] [--skip-dashboard-interaction]
 
 Steps:
   1. npm run build
   2. npm run test:quality
   3. npm run verify:dashboard-entry -- --mode start
+  4. npm run verify:dashboard-interaction -- --mode start
 
 Notes:
   - Dashboard entry verification runs against a production Next server.
-  - Use --skip-dashboard-entry only when Playwright/browser execution is intentionally unavailable.`);
+  - Interaction verification runs against a production Next server too.
+  - Use skip flags only when Playwright/browser execution is intentionally unavailable.`);
 }
 
 function runStep(label, command, args, extraEnv = {}) {
@@ -75,6 +84,17 @@ async function main() {
             verifyArgs.push('--case', options.dashboardCase);
         }
         await runStep('Dashboard Entry Gate', 'npm', verifyArgs, {
+            USER_SESSION_SECRET: process.env.USER_SESSION_SECRET || 'test_user_session_secret_for_quality_gate_only',
+            DB_STRATEGY: process.env.DB_STRATEGY || 'local',
+        });
+    }
+
+    if (!options.skipDashboardInteraction) {
+        const verifyArgs = ['run', 'verify:dashboard-interaction', '--', '--mode', 'start', '--base-url', 'http://127.0.0.1:3312'];
+        if (options.dashboardInteractionCase) {
+            verifyArgs.push('--case', options.dashboardInteractionCase);
+        }
+        await runStep('Dashboard Interaction Gate', 'npm', verifyArgs, {
             USER_SESSION_SECRET: process.env.USER_SESSION_SECRET || 'test_user_session_secret_for_quality_gate_only',
             DB_STRATEGY: process.env.DB_STRATEGY || 'local',
         });

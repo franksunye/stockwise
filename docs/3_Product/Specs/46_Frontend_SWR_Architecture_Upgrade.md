@@ -220,7 +220,12 @@ SWR 不应被直接等同为：
    - [`frontend/src/lib/dashboard-modal-context.ts`](/Users/yesun/Code/stockwise/frontend/src/lib/dashboard-modal-context.ts) 已统一 modal 上下文股票、brief symbol 绑定、tactical selection 与 active modal 判定语义
    - [`frontend/src/app/(dashboard)/dashboard/page.tsx`](/Users/yesun/Code/stockwise/frontend/src/app/(dashboard)/dashboard/page.tsx) 现在只消费这层 helper，不再内联维护 modal 对当前股票的绑定规则
    - [`frontend/tests/dashboard-modal-context.test.mjs`](/Users/yesun/Code/stockwise/frontend/tests/dashboard-modal-context.test.mjs) 已锁住 almanac/stock 上下文边界、modal 优先级和 selected stock 解析
-17. `Dashboard Data Refresh Contract` 第一轮已完成：
+17. `Dashboard interaction smoke` 已完成第一轮页面级交付闭环：
+   - [`frontend/scripts/dashboard-interaction-smoke.mjs`](/Users/yesun/Code/stockwise/frontend/scripts/dashboard-interaction-smoke.mjs) 已覆盖 `?symbol` 恢复、`stock-pool -> dashboard` nav intent、`BriefDrawer` / `StockProfile` / `TacticalBriefDrawer` / `UserCenterDrawer` 的 modal context 语义
+   - [`frontend/scripts/verify-dashboard-interaction.mjs`](/Users/yesun/Code/stockwise/frontend/scripts/verify-dashboard-interaction.mjs) 已提供可重复执行的本地与 release 前验证入口
+   - [`frontend/package.json`](/Users/yesun/Code/stockwise/frontend/package.json) 与 [`frontend/scripts/verify-release.mjs`](/Users/yesun/Code/stockwise/frontend/scripts/verify-release.mjs) 已将 interaction gate 纳入正式 release 验证链路
+   - [`.github/workflows/frontend_quality_gates.yml`](/Users/yesun/Code/stockwise/.github/workflows/frontend_quality_gates.yml) 已补上 Playwright Chromium 安装，以保证 CI 与本地 release gate 一致
+18. `Dashboard Data Refresh Contract` 第一轮已完成：
    - [`frontend/src/lib/dashboard-refresh-contract.ts`](/Users/yesun/Code/stockwise/frontend/src/lib/dashboard-refresh-contract.ts) 已将 watchlist 变化、historyLimit 升级、resume、online、post-market poll 统一建模为同一套刷新计划
    - [`frontend/src/hooks/useDashboardRefreshContract.ts`](/Users/yesun/Code/stockwise/frontend/src/hooks/useDashboardRefreshContract.ts) 已作为薄 orchestrator 接入 `StockProvider`
    - [`frontend/src/context/StockContext.tsx`](/Users/yesun/Code/stockwise/frontend/src/context/StockContext.tsx) 现在负责把 `useUserProfile`、`useWatchlist`、`useDashboardData` 绑定到同一套 refresh contract 上
@@ -231,17 +236,17 @@ SWR 不应被直接等同为：
      - watchlist 新增缺失 symbol 时触发 batch
      - `resume` 在无 drift 时只刷价格与版本探测
      - `resume` 在检测到 drift 时触发 batch 补拉
-18. 新用户首次进入 Dashboard 的修复链路已经落地。
+19. 新用户首次进入 Dashboard 的修复链路已经落地。
    - 详见 [`25_Onboarding_First_Load_Recovery_Plan_20260314.md`](/Users/yesun/Code/stockwise/docs/1_Engineering/25_Onboarding_First_Load_Recovery_Plan_20260314.md)
-19. `shared almanac` 已完成主动失效改造：
+20. `shared almanac` 已完成主动失效改造：
    - [`frontend/src/app/api/shared/almanac/route.ts`](/Users/yesun/Code/stockwise/frontend/src/app/api/shared/almanac/route.ts)
    - [`frontend/src/app/api/internal/cache/revalidate/route.ts`](/Users/yesun/Code/stockwise/frontend/src/app/api/internal/cache/revalidate/route.ts)
    - [`backend/engine/almanac_generator.py`](/Users/yesun/Code/stockwise/backend/engine/almanac_generator.py)
-20. 收盘后恢复应用的轻量版本探测已落地：
+21. 收盘后恢复应用的轻量版本探测已落地：
    - [`frontend/src/app/api/stock/prediction-versions/route.ts`](/Users/yesun/Code/stockwise/frontend/src/app/api/stock/prediction-versions/route.ts)
    - [`frontend/src/hooks/useDashboardData.ts`](/Users/yesun/Code/stockwise/frontend/src/hooks/useDashboardData.ts)
    - 当前最小探测间隔为 10 分钟，仅在 `post_market` 执行
-21. `Dashboard` 收盘后轮询停止条件已收紧：
+22. `Dashboard` 收盘后轮询停止条件已收紧：
    - 不再是“任一股票进入今日批次即可停止”
    - 而是“所有股票都进入今日批次后才停止”
 
@@ -253,9 +258,9 @@ SWR 不应被直接等同为：
 
 ### 5.3 仍未完成
 
-1. 非首帧关键数据面的 SWR 迁移尚未系统推进，但 `Brief`、`StockProfile`、`UserCenterDrawer`、`TacticalBriefDrawer`、其邻接 content surface、`StockDashboardCard`、`HistoricalCard`、`StockVerticalFeed`、`Dashboard symbol navigation contract` 与 `Dashboard modal context contract` 十个面已完成第一轮低风险收口。
+1. 非首帧关键数据面的 SWR 迁移尚未系统推进，但 `Brief`、`StockProfile`、`UserCenterDrawer`、`TacticalBriefDrawer`、其邻接 content surface、`StockDashboardCard`、`HistoricalCard`、`StockVerticalFeed`、`Dashboard symbol navigation contract`、`Dashboard modal context contract` 与 `Dashboard interaction smoke` 十一个面已完成第一轮低风险收口或交付闭环。
 2. `Dashboard Data Refresh Contract` 已完成第一轮，但对实际线上刷新频率、重复请求和 watchlist 变更后的稳定性仍需要观测。
-3. 页面级 smoke 目前已并入正式 `verify:release`，但仍未接入更高层 CI。
+3. 页面级 smoke 目前已并入正式 `verify:release`，并已接入 GitHub Actions 的 `frontend_quality_gates`；但尚未扩展到更高层 staging / device CI。
 4. 轻量版本探测目前仅覆盖 `Dashboard` 主列表，不覆盖更深层详情面或 Drawer 内局部数据面。
 
 ## 6. 当前最合理的下一步
@@ -310,7 +315,9 @@ SWR 不应被直接等同为：
    - 当前已完成 URL `?symbol`、stock-pool nav intent、dashboard 恢复优先级的第一轮收口；后续若继续推进，应优先考虑页面级 symbol smoke，而不是重写 dashboard 主数据加载
 10. `Dashboard` 的 modal 上下文语义
    - 当前已完成 `TacticalBriefDrawer`、`StockProfile`、`BriefDrawer`、`UserCenterDrawer` 的第一轮上下文收口；后续若继续推进，应优先考虑页面级 modal smoke，而不是做新的全局状态系统
-11. 仅在 Drawer / Modal 打开后才触发的数据面
+11. `Dashboard` 的 interaction smoke
+   - 当前已完成 symbol 与 modal 的页面级 smoke，并已进入正式 release gate；后续若继续推进，应优先考虑观测与局部补强，而不是继续扩测试框架
+12. 仅在 Drawer / Modal 打开后才触发的数据面
 
 这些位置更接近 `AICouncil` 已验证成功的模式。
 

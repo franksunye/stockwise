@@ -147,7 +147,9 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
         </section>
 
         {/* 2. AI 理由与动态价格区块 */}
-        <section 
+        <section
+          data-open-tactics="true"
+          data-stock-dashboard-card-symbol={data.symbol}
           onClick={() => displayPrediction && onShowTactics(displayPrediction)}
           className={`glass-card relative overflow-hidden group cursor-pointer active:scale-[0.98] transition-all hover:bg-white/[0.04] ${isTriggered ? 'warning-pulse' : ''}`}
         >

@@ -210,7 +210,11 @@ export function TacticalBriefDrawer({
     <>
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[200] flex items-end justify-center bg-black/60 pointer-events-auto overflow-hidden">
+        <div
+          data-tactical-brief-drawer="true"
+          data-tactical-brief-symbol={symbol}
+          className="fixed inset-0 z-[200] flex items-end justify-center bg-black/60 pointer-events-auto overflow-hidden"
+        >
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
