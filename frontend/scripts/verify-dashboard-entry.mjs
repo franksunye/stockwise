@@ -1,15 +1,22 @@
 import process from 'node:process';
 import { spawn } from 'node:child_process';
 import { once } from 'node:events';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { waitForServerReady } from '../tests/test-utils.mjs';
 
 const DEFAULT_BASE_URL = process.env.DASHBOARD_VERIFY_BASE_URL || 'http://127.0.0.1:3000';
 const DEFAULT_USER_SESSION_SECRET = process.env.USER_SESSION_SECRET || 'dev-stockwise-secret';
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const FRONTEND_DIR = path.resolve(__dirname, '..');
+const REPO_ROOT = path.resolve(FRONTEND_DIR, '..');
+const LOCAL_DB_PATH = path.join(REPO_ROOT, 'data', 'stockwise.db');
 
 function parseArgs(argv) {
     const options = {
         baseUrl: DEFAULT_BASE_URL,
         caseName: '',
+        mode: 'dev',
     };
 
     for (let i = 0; i < argv.length; i += 1) {
@@ -19,6 +26,9 @@ function parseArgs(argv) {
             i += 1;
         } else if (arg === '--case' && argv[i + 1]) {
             options.caseName = argv[i + 1];
+            i += 1;
+        } else if (arg === '--mode' && argv[i + 1]) {
+            options.mode = argv[i + 1];
             i += 1;
         } else if (arg === '--help' || arg === '-h') {
             options.help = true;
@@ -30,16 +40,18 @@ function parseArgs(argv) {
 
 function printHelp() {
     console.log(`Usage:
-  node scripts/verify-dashboard-entry.mjs [--base-url http://127.0.0.1:3000] [--case authorized-returning-user]
+  node scripts/verify-dashboard-entry.mjs [--base-url http://127.0.0.1:3000] [--case authorized-returning-user] [--mode dev|start]
 
 Environment variables:
   DASHBOARD_VERIFY_BASE_URL
   USER_SESSION_SECRET
 
 Notes:
-  - Starts a local Next dev server automatically.
+  - Starts a local Next server automatically.
   - Runs dashboard entry smoke coverage against that local server.
-  - Cleans up the dev server when finished.`);
+  - 'dev' mode uses next dev for local iteration.
+  - 'start' mode uses next start and is suitable for release verification.
+  - Cleans up the local server when finished.`);
 }
 
 function prefixOutput(stream, prefix) {
@@ -60,11 +72,28 @@ async function main() {
         return;
     }
 
-    const devServer = spawn('npm', ['run', 'dev'], {
+    const serverUrl = new URL(options.baseUrl);
+    const serverPort = serverUrl.port || (serverUrl.protocol === 'https:' ? '443' : '80');
+    const isStartMode = options.mode === 'start';
+    if (options.mode !== 'dev' && options.mode !== 'start') {
+        throw new Error(`Unknown mode: ${options.mode}`);
+    }
+
+    const serverArgs = isStartMode
+        ? ['run', 'start', '--', '-p', serverPort, '--hostname', serverUrl.hostname]
+        : ['run', 'dev', '--', '--hostname', serverUrl.hostname, '--port', serverPort];
+
+    const devServer = spawn('npm', serverArgs, {
         cwd: process.cwd(),
         env: {
             ...process.env,
             USER_SESSION_SECRET: DEFAULT_USER_SESSION_SECRET,
+            ...(isStartMode ? {
+                NODE_ENV: 'production',
+                DB_STRATEGY: process.env.DB_STRATEGY || 'local',
+                LOCAL_DB_PATH: process.env.LOCAL_DB_PATH || LOCAL_DB_PATH,
+                ALLOW_LEGACY_USERID_BOOTSTRAP: process.env.ALLOW_LEGACY_USERID_BOOTSTRAP || 'false',
+            } : {}),
         },
         stdio: ['ignore', 'pipe', 'pipe'],
     });
@@ -82,9 +111,9 @@ async function main() {
     process.on('SIGTERM', shutdown);
 
     try {
-        await waitForServerReady(options.baseUrl);
+        await waitForServerReady(serverUrl.origin);
 
-        const smokeArgs = ['scripts/dashboard-entry-smoke.mjs', '--base-url', options.baseUrl];
+        const smokeArgs = ['scripts/dashboard-entry-smoke.mjs', '--base-url', serverUrl.origin];
         if (options.caseName) {
             smokeArgs.push('--case', options.caseName);
         }

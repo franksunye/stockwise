@@ -14,12 +14,21 @@ This command does:
 
 1. `npm run build`
 2. `npm run test:quality`
+3. `npm run verify:dashboard-entry -- --mode start --base-url http://127.0.0.1:3311`
 
 `test:quality` covers:
 
 1. `Auth Contract Gate`
 2. `Frontend Smoke Gate`
 3. `PWA Baseline Gate`
+
+`verify:dashboard-entry` covers:
+
+1. returning user direct `/dashboard` open
+2. optimistic nav intent recovery
+3. authorized-but-not-onboarded gate
+4. invite wall gate
+5. `console:error` and `pageerror` must both stay empty
 
 ### Auth Contract Gate
 
@@ -50,6 +59,15 @@ Ensures core PWA assets are served correctly:
 1. `/manifest.json`
 2. `/sw.js`
 3. `/offline.html`
+
+### Dashboard Entry Gate
+
+Ensures the production build still preserves the `dashboard` bootstrap contract:
+
+1. runs against `next start`, not `next dev`
+2. seeds storage and API stubs for controlled entry-state verification
+3. fails on visible state mismatch, `console:error`, or `pageerror`
+4. requires local `playwright` devDependency to be installed
 
 ## 2) Manual Device Gates (must pass before full rollout)
 

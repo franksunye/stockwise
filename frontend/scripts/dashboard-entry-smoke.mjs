@@ -194,6 +194,13 @@ async function seedStorage(context, seed) {
 }
 
 async function addApiStubs(page, profileResponse) {
+    await page.route('**/_vercel/insights/**', async route => {
+        await route.fulfill({
+            status: 204,
+            body: '',
+        });
+    });
+
     await page.route('**/api/user/register', async route => {
         await route.fulfill({
             status: 200,

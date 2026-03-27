@@ -174,7 +174,8 @@ SWR 不应被直接等同为：
 5. `Dashboard` 入口页面级 smoke 验证已落地：
    - [`frontend/scripts/dashboard-entry-smoke.mjs`](/Users/yesun/Code/stockwise/frontend/scripts/dashboard-entry-smoke.mjs) 已覆盖 returning user、nav intent、onboarding、invite wall 四类入口状态
    - [`frontend/scripts/verify-dashboard-entry.mjs`](/Users/yesun/Code/stockwise/frontend/scripts/verify-dashboard-entry.mjs) 已提供可重复执行的本地发布前检查
-   - [`frontend/package.json`](/Users/yesun/Code/stockwise/frontend/package.json) 已提供 `check:dashboard-entry` 与 `verify:dashboard-entry`
+   - [`frontend/package.json`](/Users/yesun/Code/stockwise/frontend/package.json) 已提供 `check:dashboard-entry`、`verify:dashboard-entry` 与 `verify:release`
+   - `verify:release` 现已将 `dashboard entry gate` 纳入正式 release 验证链路，并以 `next start` 运行生产构建
 6. `RootLayout` 的 bootstrap hydration mismatch 已修正，当前 smoke 验证同时要求 `console:error` 与 `pageerror` 为零。
 7. `Brief` 非首帧数据面已开始第一轮低风险收口：
    - [`frontend/src/lib/brief-client.ts`](/Users/yesun/Code/stockwise/frontend/src/lib/brief-client.ts) 已统一 `BriefDrawer` 与 `Brief` 页的当日 / 上个交易日 fallback 获取逻辑
@@ -210,7 +211,7 @@ SWR 不应被直接等同为：
 
 1. 非首帧关键数据面的 SWR 迁移尚未系统推进，但 `Brief` 与 `StockProfile` 两个面已完成第一轮低风险收口。
 2. `useUserProfile`、`useWatchlist`、`useDashboardData` 之间的数据刷新边界仍未统一建模。
-3. 页面级 smoke 目前仍是本地发布前检查，尚未并入更高层 CI / release pipeline。
+3. 页面级 smoke 目前已并入正式 `verify:release`，但仍未接入更高层 CI。
 4. 轻量版本探测目前仅覆盖 `Dashboard` 主列表，不覆盖更深层详情面或 Drawer 内局部数据面。
 
 ## 6. 当前最合理的下一步
@@ -224,10 +225,11 @@ SWR 不应被直接等同为：
 建议：
 
 1. 将 `npm run verify:dashboard-entry` 视为 `dashboard` 入口回归的标准本地检查
-2. 保持当前纯逻辑测试作为协议护栏，不把页面级验证替换成重型 E2E
-3. 在需要扩大发布护栏时，优先考虑把这条命令并入更高层验证，而不是重写成大而重的全链路自动化
+2. 将 `npm run verify:release` 视为正式 release gate，其中已内置 `dashboard entry gate`
+3. 保持当前纯逻辑测试作为协议护栏，不把页面级验证替换成重型 E2E
+4. 若后续要继续加固，优先考虑接入更高层 CI，而不是重写成大而重的全链路自动化
 
-这是当前收益最高、风险最低的下一步。
+这一步已经完成，后续只需继续固化与复用。
 
 ### 6.2 只推进非首帧关键数据面
 
