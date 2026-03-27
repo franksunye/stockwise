@@ -4,8 +4,8 @@ doc_id: "spec-frontend-swr-architecture-upgrade"
 doc_domain: "product"
 doc_status: "active"
 owner: "founder"
-last_reviewed_at: "2026-03-26"
-summary: "定义前端 SWR、PWA 壳层 bootstrap、Dashboard bootstrap state 与本地快照边界的当前事实源。"
+last_reviewed_at: "2026-03-27"
+summary: "定义前端 SWR、PWA 壳层 bootstrap、Dashboard bootstrap state、本地快照边界，以及收盘后恢复探测与黄历失效策略的当前事实源。"
 ---
 
 # Frontend Architecture Upgrade: SWR & Unified Caching
@@ -14,7 +14,7 @@ summary: "定义前端 SWR、PWA 壳层 bootstrap、Dashboard bootstrap state �
 
 这份文档不再作为“待实施方案草稿”，而是当前前端架构的事实源。
 
-截至 2026-03-26，结论如下：
+截至 2026-03-27，结论如下：
 
 1. 当前前端体验基线已经明确：
    - 回访用户优先从本地快照恢复，保持秒开；
@@ -29,6 +29,8 @@ summary: "定义前端 SWR、PWA 壳层 bootstrap、Dashboard bootstrap state �
    - `Dashboard bootstrap state` 的长期收口
    - 与非首帧关键数据面的渐进迁移
 4. `Dashboard` 首页主链路目前不作为下一步 SWR 落点。
+5. `shared almanac` 已从“长 ISR route cache”切换为“可主动失效的数据级缓存 + 5 分钟兜底”。
+6. `Dashboard` 收盘后恢复应用时，允许先做轻量版本检查，但不允许无条件重拉完整预测。
 
 ## 2. 统一术语
 
@@ -66,6 +68,7 @@ SWR 适合承担：
 4. 条件与依赖式 key
 5. optimistic mutation
 6. 统一错误与加载语义
+7. 收盘后恢复应用的轻量版本探测
 
 ### 3.3 SWR 不负责什么
 
@@ -132,6 +135,25 @@ SWR 不应被直接等同为：
 3. Investment Mode Card 也使用本地 TTL 快照
 4. iOS PWA 的身份与存储隔离问题决定了不能把所有能力都压到单一运行时缓存中
 
+### 4.4 共享黄历与个股预测的刷新边界
+
+截至 2026-03-27，首页顶部的共享黄历与个股预测不再共享同一种“新鲜度判定”。
+
+当前边界如下：
+
+1. `shared almanac`
+   - 属于公共数据面
+   - 使用数据级缓存 + tag
+   - 黄历生成成功后主动失效
+   - 并保留 5 分钟兜底 revalidate
+2. `stock batch / dashboard predictions`
+   - 仍以本地 snapshot 秒开为主
+   - 收盘后只有当所有股票都进入当日批次，才允许停止 batch 新鲜度检查
+   - 若只是“同日重跑、date 未变化”，则交由轻量版本探测补位
+3. 两条链路共同遵守：
+   - 不为追求一致性而放弃本地秒开
+   - 不为追求省请求而允许长期 stale
+
 ## 5. 已完成与未完成
 
 ### 5.1 已完成
@@ -166,6 +188,17 @@ SWR 不应被直接等同为：
    - [`frontend/tests/stock-profile-history.test.mjs`](/Users/yesun/Code/stockwise/frontend/tests/stock-profile-history.test.mjs) 与 [`frontend/tests/stock-profile-metrics.test.mjs`](/Users/yesun/Code/stockwise/frontend/tests/stock-profile-metrics.test.mjs) 已锁住缓存和派生逻辑
 9. 新用户首次进入 Dashboard 的修复链路已经落地。
    - 详见 [`25_Onboarding_First_Load_Recovery_Plan_20260314.md`](/Users/yesun/Code/stockwise/docs/1_Engineering/25_Onboarding_First_Load_Recovery_Plan_20260314.md)
+10. `shared almanac` 已完成主动失效改造：
+   - [`frontend/src/app/api/shared/almanac/route.ts`](/Users/yesun/Code/stockwise/frontend/src/app/api/shared/almanac/route.ts)
+   - [`frontend/src/app/api/internal/cache/revalidate/route.ts`](/Users/yesun/Code/stockwise/frontend/src/app/api/internal/cache/revalidate/route.ts)
+   - [`backend/engine/almanac_generator.py`](/Users/yesun/Code/stockwise/backend/engine/almanac_generator.py)
+11. 收盘后恢复应用的轻量版本探测已落地：
+   - [`frontend/src/app/api/stock/prediction-versions/route.ts`](/Users/yesun/Code/stockwise/frontend/src/app/api/stock/prediction-versions/route.ts)
+   - [`frontend/src/hooks/useDashboardData.ts`](/Users/yesun/Code/stockwise/frontend/src/hooks/useDashboardData.ts)
+   - 当前最小探测间隔为 10 分钟，仅在 `post_market` 执行
+12. `Dashboard` 收盘后轮询停止条件已收紧：
+   - 不再是“任一股票进入今日批次即可停止”
+   - 而是“所有股票都进入今日批次后才停止”
 
 ### 5.2 已证伪或已停止推进
 
@@ -178,6 +211,7 @@ SWR 不应被直接等同为：
 1. 非首帧关键数据面的 SWR 迁移尚未系统推进，但 `Brief` 与 `StockProfile` 两个面已完成第一轮低风险收口。
 2. `useUserProfile`、`useWatchlist`、`useDashboardData` 之间的数据刷新边界仍未统一建模。
 3. 页面级 smoke 目前仍是本地发布前检查，尚未并入更高层 CI / release pipeline。
+4. 轻量版本探测目前仅覆盖 `Dashboard` 主列表，不覆盖更深层详情面或 Drawer 内局部数据面。
 
 ## 6. 当前最合理的下一步
 
@@ -227,6 +261,7 @@ SWR 不应被直接等同为：
 3. 添加 / 删除自选仍然即时反馈
 4. 弱网和接口失败下页面结构稳定
 5. 身份恢复与 iOS PWA 兼容逻辑不退化
+6. 收盘后同日重跑的预测，在恢复应用且超过最小间隔后可以被感知
 
 ## 9. 历史注记
 

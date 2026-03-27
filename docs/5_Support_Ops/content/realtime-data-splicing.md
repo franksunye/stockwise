@@ -3,7 +3,7 @@ title: "数据拼接：最新指标不求人"
 category: "数据与服务保障"
 lastUpdated: "2026-03-09"
 source_docs:
-  - docs/1_Engineering/32_Frontend_Network_Optimization_Zero_Redundancy_20260318.md
+  - docs/1_Engineering/32_Frontend_Network_Optimization_Zero_Redundancy.md
 funnel_stage: "BOFU"
 date: "2026-03-19"
 publish:

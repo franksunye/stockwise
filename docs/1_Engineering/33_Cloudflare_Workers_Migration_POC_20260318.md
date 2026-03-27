@@ -347,7 +347,7 @@ Cloudflare Workers 费用细节来源：[`workers.cloudflare.com/pricing`](https
 
 - [31_Capacity_Planning_And_Scaling_Strategy_20260317.md](./31_Capacity_Planning_And_Scaling_Strategy_20260317.md)
 - [28_Price_Sync_Zero_Stale_Protocol_20260316.md](./28_Price_Sync_Zero_Stale_Protocol_20260316.md)
-- [32_Frontend_Network_Optimization_Zero_Redundancy_20260318.md](./32_Frontend_Network_Optimization_Zero_Redundancy_20260318.md)
+- [32_Frontend_Network_Optimization_Zero_Redundancy.md](./32_Frontend_Network_Optimization_Zero_Redundancy.md)
 
 ### 10.2 DX 评估结论（POC 阶段）
 

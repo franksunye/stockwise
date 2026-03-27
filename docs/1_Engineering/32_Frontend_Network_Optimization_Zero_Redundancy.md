@@ -4,13 +4,13 @@ doc_id: "engineering-frontend-network-optimization-zero-redundancy-20260318"
 doc_domain: "engineering"
 doc_status: "active"
 owner: "founder"
-last_reviewed_at: "2026-03-19"
-summary: "定义前端零冗余请求协议，是秒开、弱网与网络优化相关内容的工程事实源。"
+last_reviewed_at: "2026-03-27"
+summary: "定义前端零冗余请求协议，是秒开、弱网、黄历主动失效、收盘后恢复探测与网络优化相关内容的工程事实源。"
 ---
 
 # 32. Frontend Network Optimization: Zero-Redundancy Protocol
 
-**Date**: 2026-03-18
+**Date**: 2026-03-18 / Updated 2026-03-27
 **Status**: Active implementation
 
 ## 1. Purpose
@@ -60,15 +60,51 @@ summary: "定义前端零冗余请求协议，是秒开、弱网与网络优化�
 - **决策点 1 (针对 Effect 5：本地缓存与新列表的冲突)**：当 `watchlist` 加载完毕触发 Effect 5 时，循环核查现有从 `CACHE_KEY` 恢复的 `stocks` 数据。**只有当社群手动新增了缺失代码实体时**，才触发 `ignoreDebounce` 放行强制 batch 获取。若全量吻合则立即退回，信任本地 cache。
 - **决策点 2 (针对 Effect 6：高频率导航历史长度规格提升)**：当从 `stock-pool` 导航回 `dashboard`，`historyLimit` 发生 1 → 5 切换时，查核所有标的的 `history.length`。若均已达到 5 的限额（意味着这些缓存在上一轮主页时已留存），立刻拦截该次因突破 `prevHistoryLimit` 而强杀的新 Batch。
 
+### 3.4 Shared Almanac Invalidation Protocol (共享黄历主动失效协议)
+**目标文件**: `frontend/src/app/api/shared/almanac/route.ts`、`frontend/src/app/api/internal/cache/revalidate/route.ts`、`backend/engine/almanac_generator.py`
+- **背景**: 2026-03-26 incident 暴露出 `/api/shared/almanac` 的长时间服务端缓存会把已生成的 `T+1` 黄历卡在 `T`，且跨浏览器刷新无效。
+- **逻辑**:
+  - 共享黄历改为 `cache tag + 数据级缓存`
+  - 黄历写库成功并 `commit()` 后，生成链路主动调用内部 revalidate API
+  - 同时保留 `5 分钟` 作为兜底 revalidate
+- **边界**:
+  - 目标不是取消缓存，而是把“缓存是否仍然有效”的控制权从整条 route 的长 ISR，转移到生成链路完成事件
+  - route 自身返回 `no-store`，避免浏览器 / CDN 再次锁住旧 JSON
+- **意义**: 保留减压收益，但不再允许“数据库已是明日、前端仍显示今日黄历”的 stale lock。
+
+### 3.5 Post-Close Prediction Freshness Gate (收盘后预测批次完备门)
+**目标文件**: `useDashboardData.ts`
+- **背景**: 2026-03-26 incident 中，同一用户同时出现“某只股票已切到明日建议，另一只仍停留今日建议”的混合态。
+- **旧逻辑**: 只要 `stocks.some(prediction.date === todayStr)` 成立，就视为首页预测已新鲜，停止收盘后 batch 检查。
+- **新逻辑**: 必须 `stocks.every(prediction.date === todayStr)` 才允许停止轮询。
+- **意义**: 只要自选池中仍有任一 symbol 停留旧批次，恢复应用与轮询链路都必须继续允许 batch 拉新，避免“局部已更新 -> 整页停更”的误判。
+
+### 3.6 Post-Close Resume Version Probe (收盘后恢复应用版本探测)
+**目标文件**: `frontend/src/app/api/stock/prediction-versions/route.ts`、`useDashboardData.ts`
+- **背景**: 若云端在同一天内重跑了预测记录，仅靠 `date = todayStr` 仍无法判断内容是否被修正，iPhone PWA 热启动 / 切回应用时会错过同日更新。
+- **逻辑**:
+  - 仅在 `post_market`
+  - 仅在 `pageshow` / `focus` / `visibilitychange` / `online` 等恢复事件
+  - 且距离上次检查超过最小间隔（当前 10 分钟）
+  - 才调用轻量接口 `/api/stock/prediction-versions`
+  - 接口只返回 `symbol / date / target_date / updated_at`
+  - 若远端版本与本地 snapshot 不一致，才触发完整 `batch` 刷新
+- **边界**:
+  - 不在盘中运行
+  - 不替代正常 batch 轮询
+  - 不把每次恢复应用都变成重 payload 刷新
+- **意义**: 以很小 CPU 成本补上“同日重跑感知”这条缺口，特别适配 iPhone PWA 的恢复场景。
+
 ---
 
 ## 4. Expected Outcomes (预期收益)
 
 本轮零冗余协议部署后，配合之前部署的单例模式与 CDN 化，前端网络的呈现将发生质变：
 
-1. **绝对纯净的热启动**：无论是锁屏后重启、进程存活下切后台切回来，**网络请求数为真正的 0**。更新交由周期性 Polling（如价格引擎）统一调度。
+1. **受控而非绝对为零的热启动**：默认仍以本地快照秒开；但在 `post_market` 下，允许以极轻量的版本探测识别“同日重跑”与“部分股票仍停留旧批次”的真实 stale 状态。
 2. **极轻快的冷启动**：微信强制杀后台、内存释放后重新打开浏览器标签卡。控制台预期只剩 HTML 与静态资源。`profile`、`stock-pool`、`batch` 会在这类虚假重置中被截获。
-3. **消除页面 Fan-out**：大幅响应 [31_Capacity_Planning_...](./31_Capacity_Planning_And_Scaling_Strategy_20260317.md) 提到的 Tier 1+ 容量隐患危机，Vercel 函数账单和 Turso Row Reads 预计进一步下降 20-30%。
+3. **黄历不再被服务端长缓存锁死**：只要 `T+1` 黄历已成功入库，生成链路会主动失效共享缓存；即使主动失效偶发失败，也有 5 分钟兜底。
+4. **消除页面 Fan-out**：大幅响应 [31_Capacity_Planning_...](./31_Capacity_Planning_And_Scaling_Strategy_20260317.md) 提到的 Tier 1+ 容量隐患危机，Vercel 函数账单和 Turso Row Reads 预计进一步下降 20-30%。
 
 ---
 
@@ -178,9 +214,9 @@ summary: "定义前端零冗余请求协议，是秒开、弱网与网络优化�
     - **不可级联**：不得触发 `batch` / `stock-pool` / `profile` 等重端点的连锁请求
     - **边缘命中预期**：应命中 ISR/CDN（例如 `revalidate: 3600`），不得走重 DB 路径
 - **Hot Start / Resume（活体回前台）**：当应用进程未被系统杀死（切后台 → 30s/2min/10min 后回前台），**回到可交互**前的 API origin hits 目标值：
-  - **P0（严格）**：**0 个 origin hits**（包括 `shared/almanac`）。仅允许本地渲染 + 价格层/预测层由既定 polling 策略在“阈值到期后”触发。
-  - **P1（可接受）**：允许 **仅价格层**在阈值到期后发起 1 次刷新（如 `/api/stock/prices`），但不得触发 `batch` / `stock-pool` / `profile`。
-  - **iOS PWA 回归保护**：在 iPhone PWA standalone 模式下，至少覆盖 `pageshow` / `online` / `visibilitychange` 三类恢复事件，确保不会因事件缺失导致“长期不更新”。（若引入 hard stale cap，则以 hard stale cap 作为最终兜底触发器。）
+  - **P0（严格）**：默认 **0 个重端点 origin hits**，仅允许本地渲染。
+  - **P1（现行可接受口径）**：允许在 `post_market` 且满足最小间隔时，增加 **1 个轻量版本探测端点**（`/api/stock/prediction-versions`）与价格层刷新；但不得无条件触发 `batch` / `stock-pool` / `profile`。
+  - **iOS PWA 回归保护**：在 iPhone PWA standalone 模式下，至少覆盖 `pageshow` / `online` / `visibilitychange` 三类恢复事件，确保不会因事件缺失导致“长期不更新”。收盘后同日重跑探测属于这条保护链的一部分，而非对“零冗余原则”的否定。
 - **Hot Nav**：`stock-pool ↔ dashboard` 往返 10 次，`/api/stock/batch` 与 `/api/stock-pool` 请求次数应接近 0（除非触发 hard stale cap 或确有增删标的）。
 - **Correctness**：在 `401/403` 场景下，profile TTL 必须被强制失效并在一次交互内纠正授权状态。
 - **Cross-Device Consistency（跨端一致性）**：在设备 A 增删 watchlist 后，设备 B 在可接受窗口内（需明确：例如 1-5 分钟 / 或“下次回前台”）能看到一致的 watchlist；若选择 12h TTL，则必须在此处明确这是一个产品 trade-off，并提供 mismatch 触发的强制校验路径。

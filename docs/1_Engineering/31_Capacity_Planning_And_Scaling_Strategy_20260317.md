@@ -25,7 +25,7 @@ summary: "定义容量规划与扩容路线，是广播、流量与容量相关�
 
 - **本文件（31）负责**：`做什么`、`什么时候做`、`到哪个规模触发`（Tier roadmap + breakpoints）。
 - **[33_Cloudflare_Workers_Migration_POC_20260318.md](./33_Cloudflare_Workers_Migration_POC_20260318.md) 负责**：Cloudflare POC 的实验方法、结果数据与结论证据（不是实施主计划）。
-- **[32_Frontend_Network_Optimization_Zero_Redundancy_20260318.md](./32_Frontend_Network_Optimization_Zero_Redundancy_20260318.md) 负责**：前端请求冗余治理的实现细则（是本路线图的专项子方案）。
+- **[32_Frontend_Network_Optimization_Zero_Redundancy.md](./32_Frontend_Network_Optimization_Zero_Redundancy.md) 负责**：前端请求冗余治理的实现细则（是本路线图的专项子方案）。
 
 执行顺序约束（以本文件为准）：
 
@@ -823,4 +823,4 @@ FROM HistoryRanked h LEFT JOIN daily_prices dp ...
 
 **影响评估**: 极大降低单用户每天应用生命周期的接口请求基数。彻底屏蔽掉纯展示类操作引发的不必要函数调用，将架构平稳过渡到按需获取的最佳实践状态。
 
-详见: [32_Frontend_Network_Optimization_Zero_Redundancy_20260318.md](./32_Frontend_Network_Optimization_Zero_Redundancy_20260318.md)
+详见: [32_Frontend_Network_Optimization_Zero_Redundancy.md](./32_Frontend_Network_Optimization_Zero_Redundancy.md)

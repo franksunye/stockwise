@@ -25,7 +25,7 @@ This directory serves as the unified single source of truth for the 知守 AI (Z
 - [Investment Mode Backend Runbook](./1_Engineering/14_Investment_Mode_Backend_Runbook.md)
 - [Decision Data Model Architecture](./1_Engineering/21_Decision_Data_Model_Architecture.md)
 - [Capacity Planning & Scaling Strategy](./1_Engineering/31_Capacity_Planning_And_Scaling_Strategy_20260317.md) *(主路线图：做什么/何时做)*
-- [Frontend Network Zero-Redundancy](./1_Engineering/32_Frontend_Network_Optimization_Zero_Redundancy_20260318.md) *(前端专项实现细则)*
+- [Frontend Network Zero-Redundancy](./1_Engineering/32_Frontend_Network_Optimization_Zero_Redundancy.md) *(前端专项实现细则)*
 - [Cloudflare Workers Migration POC](./1_Engineering/33_Cloudflare_Workers_Migration_POC_20260318.md) *(POC 证据与测量数据，不是实施主计划)*
 - [Stock News Fetching Implementation](./1_Engineering/33_Stock_News_Fetching_Implementation.md)
 - [Dashboard Page Refactoring Design](./1_Engineering/34_Dashboard_Page_Refactoring_Design.md)
