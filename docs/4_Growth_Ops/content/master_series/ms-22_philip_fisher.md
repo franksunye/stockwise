@@ -122,6 +122,12 @@ source_docs:
   - docs/2_Intelligence/registry/MASTER_SERIES_NOTEBOOKLM_PLAN.md
   - docs/2_Intelligence/22Q_Quant_Research_Framework.md
   - docs/4_Growth_Ops/content/master_series/ms-05_warren_buffett.md
+
+nlm_production:
+  slides: "not_started"       # 演示文稿
+  infographic: "not_started"  # 信息图
+  audio: "not_started"        # 音频
+  video: "not_started"        # 视频
 ---
 # 菲利普·费雪：他最重要的地方，不是找热门公司，而是先问这家公司能不能很多年都继续长大
 
@@ -378,7 +384,28 @@ source_docs:
 请生成一段简洁的中文音频概览，先讲菲利普·费雪为什么值得被记住，再讲成长投资为什么不能只看热度。不要空泛聊天，不要展开太多细节，适合快速收听。
 ```
 
-### 第 8 步：人工复核
+### 第 8 步：生成视频概览 (Video Overview)
+
+可以直接在 NotebookLM 中利用最新的 **Video Overview** 功能生成。
+
+**推荐设置：**
+1. **格式**：选 `说明视频` (Explainer) 或 `摘要` (Summary)。
+2. **语言**：选 `中文（简体）`。
+3. **视觉风格**：推荐 `经典` (Classic) 或 `生长` (Nature-inspired)。
+4. **横竖构图提示**：由于此视频主要用于竖屏传播，需在下方引导词中请求垂直构图。
+
+**AI 主持人引导词（直接复制）：**
+
+```text
+请生成一段中文视频概览。主持人侧重讲清“费雪：高质量成长股的侦探”核心方法。
+1. 开场：用“觉得成长股就是追热门赛道、追涨幅榜，结果却买了一堆绚烂的泡沫”这一投资误区切入。
+2. 核心：解释费雪如何通过“闲聊法（Scuttlebutt）”侧面验证企业质量，真正做到“像选接班人一样选公司”。
+3. 重点：提到高质量成长（Quality Growth）、管理层信誉、长期持有而非故事消费。
+4. 金句：引用关于“不要只问公司现在热不热，要先问它有没有能力很多年都继续长大”的深度洞见。
+注意：生成的视频主要用于竖屏传播，请在画面布局时尽量让核心图表居中垂直显示。
+```
+
+### 第 9 步：人工复核
 
 1. 经典著作年份有没有错
 2. 术语有没有写错

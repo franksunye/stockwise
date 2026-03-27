@@ -122,6 +122,12 @@ source_docs:
   - docs/2_Intelligence/registry/methodologies/turtle_trading.md
   - docs/4_Growth_Ops/content/master_series/ms-04_richard_dennis.md
   - docs/2_Intelligence/registry/MASTER_SERIES_NOTEBOOKLM_PLAN.md
+
+nlm_production:
+  slides: "not_started"       # 演示文稿
+  infographic: "not_started"  # 信息图
+  audio: "not_started"        # 音频
+  video: "not_started"        # 视频
 ---
 # 海龟交易：它最震撼的地方，不是突破本身，而是把交易拆成一套能训练人的规则
 
@@ -399,7 +405,28 @@ source_docs:
 请生成一段简洁的中文音频概览，先讲海龟交易为什么经典，再讲它最有代表性的规则系统和普通人最该记住的一条纪律。不要空泛聊天，不要展开太多细节，适合社交媒体快速收听。
 ```
 
-### 第 8 步：人工复核
+### 第 8 步：生成视频概览 (Video Overview)
+
+可以直接在 NotebookLM 中利用最新的 **Video Overview** 功能生成。
+
+**推荐设置：**
+1. **格式**：选 `摘要` (Summary) 或 `说明视频` (Explainer)。
+2. **语言**：选 `中文（简体）`。
+3. **视觉风格**：推荐 `白板` (Whiteboard) 以体现规则感。
+4. **横竖构图提示**：由于此视频主要用于竖屏传播，需在下方引导词中请求垂直构图。
+
+**AI 主持人引导词（直接复制）：**
+
+```text
+请生成一段中文视频概览。主持人侧重讲清“海龟交易：规则重于天赋”的核心思想。
+1. 开场：用“交易高手到底是天生的，还是可以练出来的”这个著名实验背景切入。
+2. 核心：解释海龟系统如何把入场、止损、加仓、仓位全部锁死在规则里。
+3. 重点：提到唐奇安通道、ATR 止损和金字塔加仓这些经典行话。
+4. 金句：引用关于“放弃对神秘灵感的迷信，去死磕一套诚实的规则”的纪律观。
+注意：生成的视频主要用于竖屏传播，请在画面布局时尽量让核心图表居中垂直显示。
+```
+
+### 第 9 步：人工复核
 
 1. `1983` 年前后这个时间锚点有没有写错
 2. `Donchian Breakout / ATR / Pyramiding` 有没有写错

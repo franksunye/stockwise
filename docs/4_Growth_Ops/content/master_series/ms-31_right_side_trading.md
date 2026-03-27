@@ -122,6 +122,12 @@ source_docs:
   - docs/2_Intelligence/registry/MASTER_SERIES_NOTEBOOKLM_PLAN.md
   - docs/4_Growth_Ops/content/master_series/ms-09_trend_breakout.md
   - docs/4_Growth_Ops/content/101_academy/101-28_left_right_trading.md
+
+nlm_production:
+  slides: "not_started"       # 演示文稿
+  infographic: "not_started"  # 信息图
+  audio: "not_started"        # 音频
+  video: "not_started"        # 视频
 ---
 # Right-side Trading：它最重要的地方，不是买得更晚，而是只在事实已经开始站队时才允许行动
 
@@ -357,7 +363,28 @@ source_docs:
 请生成一段简洁的中文音频概览，先讲 Right-side Trading 为什么经典，再讲为什么它不能简单理解成追涨。不要空泛聊天，不要展开太多细节，适合快速收听。
 ```
 
-### 第 8 步：人工复核
+### 第 8 步：生成视频概览 (Video Overview)
+
+可以直接在 NotebookLM 中利用最新的 **Video Overview** 功能生成。
+
+**推荐设置：**
+1. **格式**：选 `摘要` (Summary) 或 `说明视频` (Explainer)。
+2. **语言**：选 `中文（简体）`。
+3. **视觉风格**：推荐 `现代` (Modern) 或 `极简` (Minimalist) 以体现逻辑的纯粹。
+4. **横竖构图提示**：由于此视频主要用于竖屏传播，需在下方引导词中请求垂直构图。
+
+**AI 主持人引导词（直接复制）：**
+
+```text
+请生成一段中文视频概览。主持人侧重讲清“右侧交易：等事实先行站队”的核心哲学。
+1. 开场：用“总想买在最低点，结果却抄底抄在半山腰，反复被套”这一典型交易者痛点切入。
+2. 核心：解释右侧交易最重要的价值并不是买得更晚，而是只在事实证据已经明确表态后，才允许自己行动。
+3. 重点：提到确认（Confirmation）、突破（Breakout）、行动许可（Permission to Act）等底逻辑。
+4. 金句：引用关于“买在最低点往往是陷阱，买在起飞点才是真经；动作要准，许可要对”的实战智慧。
+注意：生成的视频主要用于竖屏传播，请在画面布局时尽量让核心图表居中垂直显示。
+```
+
+### 第 9 步：人工复核
 
 1. 术语有没有写错
 2. 中文表达是否顺

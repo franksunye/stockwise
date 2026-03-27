@@ -121,6 +121,12 @@ source_docs:
   - docs/4_Growth_Ops/content/master_series/ms-10_atr_stop.md
   - docs/4_Growth_Ops/content/master_series/ms-11_fixed_vs_atr_stop.md
   - docs/2_Intelligence/registry/MASTER_SERIES_NOTEBOOKLM_PLAN.md
+
+nlm_production:
+  slides: "not_started"       # 演示文稿
+  infographic: "not_started"  # 信息图
+  audio: "not_started"        # 音频
+  video: "not_started"        # 视频
 ---
 # 固定止损 vs 结构止损：更重要的，不是参数漂不漂亮，而是你的风险边界有没有贴着逻辑走
 
@@ -369,7 +375,28 @@ source_docs:
 请生成一段简洁的中文音频概览，先讲固定止损和结构止损为什么值得比较，再讲它们最核心的风险边界差别和普通人最该记住的一条纪律。不要空泛聊天，不要展开太多细节，适合社交媒体快速收听。
 ```
 
-### 第 8 步：人工复核
+### 第 8 步：生成视频概览 (Video Overview)
+
+可以直接在 NotebookLM 中利用最新的 **Video Overview** 功能生成。
+
+**推荐设置：**
+1. **格式**：选 `说明视频` (Explainer) 或 `摘要` (Summary)。
+2. **语言**：选 `中文（简体）`。
+3. **视觉风格**：推荐 `经典` 或 `白板` (Whiteboard)。
+4. **横竖构图提示**：由于此视频主要用于竖屏传播，需在下方引导词中请求垂直构图。
+
+**AI 主持人引导词（直接复制）：**
+
+```text
+请生成一段中文视频概览。主持人侧重讲清“固定止损 vs 结构止损”的本质差异。
+1. 开场：用“止损总是被精准猎杀，或者止损得太晚让你心痛”这一极端痛点切入。
+2. 核心：解释止损不应只是一个死板数字（固定止损），而应贴着逻辑失效点（结构止损）走。
+3. 重点：提到失效点（Invalidation）、价格结构、风险观对齐等核心概念。
+4. 金句：引用关于“止损不仅是离场距离，更是你承认看错的那道边界”的原则。
+注意：生成的视频主要用于竖屏传播，请在画面布局时尽量让核心图表居中垂直显示。
+```
+
+### 第 9 步：人工复核
 
 1. 中文表达是否顺
 2. 有没有把结构止损写得过于神秘

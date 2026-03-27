@@ -1,6 +1,6 @@
 # 内容生产流程看板 (Pipeline Board)
 
-> 自动生成时间：2026/3/26 18:15:33
+> 自动生成时间：2026/3/27 14:40:27
 > 说明：本看板优先服务活跃工作流，只展开需要推进的阶段；已发布内容只保留最近概览，避免看板膨胀。
 
 ## 🧠 待策划
@@ -166,6 +166,7 @@
 | [共识分级定义 (Consensus Levels)](../../../5_Support_Ops/content/consensus-levels.md) | Support | 2026-02-19 周四 | ✅ 上线中 | [✅ 已发布](https://mp.weixin.qq.com/s/KDT2hCFUH1S4nidyYPOJ1A) |
 | [投研决议：多维度的共识](../../../5_Support_Ops/content/ai-council-logic.md) | Support | 2026-02-18 周三 | ✅ 上线中 | [✅ 已发布](https://mp.weixin.qq.com/s/NuvCM1CRxNs1GfKvIiotow) |
 | [角标清除：别被红点牵着走](../../../5_Support_Ops/content/badge-hygiene.md) | Support | 2026-02-17 周二 | ✅ 上线中 | [✅ 已发布](https://mp.weixin.qq.com/s/JdHK9Gi-QqlwGf45rT-GMQ) |
+| [数据拼接：最新指标不求人](../../../5_Support_Ops/content/realtime-data-splicing.md) | Support | 2026-03-27 周五 | ✅ 上线中 | ➖ 不发布 |
 | [交易大师图鉴 01｜马克·米勒维尼：他不是教你追涨，他是在教你只打最有把握的仗](../master_series/ms-01_mark_minervini.md) | Growth | 2026-03-25 周三 | ✅ 上线中 | ➖ 不发布 |
 | [四态语义验证规则（修订版）](../../../5_Support_Ops/content/four-state-validation-rules.md) | Support | 2026-03-25 周三 | ✅ 上线中 | ➖ 不发布 |
 | [101-104_maturity_l0_discretionary_wechat_release_brief](../101_academy/101-104_maturity_l0_discretionary_wechat_release_brief.md) | Growth | 2026-03-23 周一 | ✅ 上线中 | ➖ 不发布 |
@@ -173,7 +174,6 @@
 | [101-15_analyst_vs_trader_wechat_release_brief](../101_academy/101-15_analyst_vs_trader_wechat_release_brief.md) | Growth | 2026-03-23 周一 | ✅ 上线中 | ➖ 不发布 |
 | [101-17_tower_shield_wechat_release_brief](../101_academy/101-17_tower_shield_wechat_release_brief.md) | Growth | 2026-03-23 周一 | ✅ 上线中 | ➖ 不发布 |
 | [101-42_survivorship_bias_wechat_release_brief](../101_academy/101-42_survivorship_bias_wechat_release_brief.md) | Growth | 2026-03-23 周一 | ✅ 上线中 | ➖ 不发布 |
-| [WECHAT_VISUAL_PLAYBOOK_10W_2026Q2](../WECHAT_VISUAL_PLAYBOOK_10W_2026Q2.md) | Growth | 2026-03-23 周一 | ✅ 上线中 | ➖ 不发布 |
 
 ## 📦 已归档
 

@@ -123,6 +123,12 @@ source_docs:
   - docs/2_Intelligence/registry/MASTER_SERIES_NOTEBOOKLM_PLAN.md
   - docs/4_Growth_Ops/content/101_academy/101-102_quant_trinity_management.md
   - docs/4_Growth_Ops/content/101_academy/101-62_one_percent_survival.md
+
+nlm_production:
+  slides: "not_started"       # 演示文稿
+  infographic: "not_started"  # 信息图
+  audio: "not_started"        # 音频
+  video: "not_started"        # 视频
 ---
 # 范·撒普：他最重要的地方，不是找神奇买点，而是逼你承认仓位和退出才真正决定长期结果
 
@@ -384,7 +390,28 @@ source_docs:
 请生成一段简洁的中文音频概览，先讲范·撒普为什么值得被记住，再讲为什么仓位和退出常常比买点更影响长期结果。不要空泛聊天，不要展开太多细节，适合快速收听。
 ```
 
-### 第 8 步：人工复核
+### 第 8 步：生成视频概览 (Video Overview)
+
+可以直接在 NotebookLM 中利用最新的 **Video Overview** 功能生成。
+
+**推荐设置：**
+1. **格式**：选 `摘要` (Summary) 或 `说明视频` (Explainer)。
+2. **语言**：选 `中文（简体）`。
+3. **视觉风格**：推荐 `专业` (Professional) 或 `数字/数据` (Data-driven) 以体现系统量化感。
+4. **横竖构图提示**：由于此视频主要用于竖屏传播，需在下方引导词中请求垂直构图。
+
+**AI 主持人引导词（直接复制）：**
+
+```text
+请生成一段中文视频概览。主持人侧重讲清“范·撒普：交易系统的数学精髓”核心逻辑。
+1. 开场：用“花大精力研究各种神奇指标和买入信号，结果账户还是没起色”这一普遍入场崇拜痛点切入。
+2. 核心：解释撒普最重要的贡献——将重点从“怎么买”移向“下多大（仓位管理）”和“怎么退（退出规则）”。
+3. 重点：提到 R 倍数（R-Multiple）、头寸规模（Position Sizing）、正期望值系统等核心行话。
+4. 金句：引用关于“你交易的不是股票本身，而是你的这套系统；长期盈利拉开差距的往往是配仓和退出”的清醒结论。
+注意：生成的视频主要用于竖屏传播，请在画面布局时尽量让核心图表居中垂直显示。
+```
+
+### 第 9 步：人工复核
 
 1. 书名有没有写错
 2. 术语有没有写错

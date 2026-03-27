@@ -122,6 +122,12 @@ source_docs:
   - docs/2_Intelligence/registry/methodologies/episodic_pivot_bonde.md
   - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
   - docs/2_Intelligence/registry/MASTER_SERIES_NOTEBOOKLM_PLAN.md
+
+nlm_production:
+  slides: "not_started"       # 演示文稿
+  infographic: "not_started"  # 信息图
+  audio: "not_started"        # 音频
+  video: "not_started"        # 视频
 ---
 # 普拉迪普·邦德：真正的动量，不是捕捉无序的躁动，而是等待足以改写叙事的爆发。
 
@@ -397,7 +403,28 @@ PPT 方向确定后，再做 `Infographic`。
 请生成一段简洁的中文音频概览，先讲普拉迪普·邦德为什么值得被记住，再讲 Episodic Pivot 和他最有代表性的动量观点。不要空泛聊天，不要展开太多细节，适合社交媒体快速收听。
 ```
 
-### 第 8 步：人工复核
+### 第 8 步：生成视频概览 (Video Overview)
+
+利用 NotebookLM 最新的 **Video Overview** 功能直接生成。
+
+**推荐设置：**
+1. **格式**：选 `摘要` (Summary)（侧重核心思想）或 `说明视频` (Explainer)（侧重结构解析）。
+2. **语言**：选 `中文（简体）`。
+3. **视觉风格**：推荐 `经典` 或 `白板` (Whiteboard)。
+4. **竖屏提示**：NLM 暂无原生竖屏开关，需在下方引导词中请求垂直构图。
+
+**AI 主持人引导词（直接复制到文本框）：**
+
+```text
+请生成一段中文视频概览。主持人应侧重讲清为何普拉迪普·邦德是“事件拐点(EP)”的代名词。
+1. 开场：用一个关于“假动量”的痛点切入（如：追高被套）。
+2. 核心：解释什么是 EP，为什么它是逻辑的质变而非单纯的阳线。
+3. 规则：提到 4% 突破和 ADR 波动弹性。
+4. 金句：引用邦德关于“动量不是捕捉无序躁动”的判断。
+注意：生成的视频主要用于竖屏传播，请在画面布局时尽量让核心图表居中垂直显示。
+```
+
+### 第 9 步：人工复核
 
 NotebookLM 生成完以后，至少人工检查这几件事：
 

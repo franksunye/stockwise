@@ -123,6 +123,12 @@ source_docs:
   - docs/2_Intelligence/research/01_Quant_Trading_Schools_Taxonomy.md
   - docs/4_Growth_Ops/content/101_academy/101-10_sitting_on_hands.md
   - docs/4_Growth_Ops/content/master_series/ms-14_momentum_breakout.md
+
+nlm_production:
+  slides: "not_started"       # 演示文稿
+  infographic: "not_started"  # 信息图
+  audio: "not_started"        # 音频
+  video: "not_started"        # 视频
 ---
 # 杰西·利弗莫尔：交易要赚大钱，不是靠频繁出手，而是靠在大势里“坐得住”
 
@@ -383,7 +389,28 @@ source_docs:
 请生成一段简洁的中文音频概览，先讲杰西·利弗莫尔为什么值得被记住，再讲为什么趋势、关键点和人性问题到今天还常被提起。不要空泛聊天，不要展开太多细节，适合快速收听。
 ```
 
-### 第 8 步：人工复核
+### 第 8 步：生成视频概览 (Video Overview)
+
+可以直接在 NotebookLM 中利用最新的 **Video Overview** 功能生成。
+
+**推荐设置：**
+1. **格式**：选 `说明视频` (Explainer) 或 `摘要` (Summary)。
+2. **语言**：选 `中文（简体）`。
+3. **视觉风格**：推荐 `复古` (Retro) 或 `经典` (Classic) 以致敬 20 世纪早期的交易先驱。
+4. **横竖构图提示**：由于此视频主要用于竖屏传播，需在下方引导词中请求垂直构图。
+
+**AI 主持人引导词（直接复制）：**
+
+```text
+请生成一段中文视频概览。主持人侧重讲清“利弗莫尔：顺势、关键点与定力”的核心智慧。
+1. 开场：用“总是想赚快钱、频繁进出，结果却在牛市里空手而归”这一交易者永恒的遗憾切入。
+2. 核心：解释利弗莫尔最重要的贡献——关键点（Pivot Point）思维。它要求我们等待价格行为的真实确认，而不是靠模糊的感觉。
+3. 重点：提到最小阻力线 (Path of Least Resistance)、在大势里“坐得住” (Sitting Tight)、以及防范人性弱点。
+4. 金句：引用关于“市场永远是对的，错的只有你那颗躁动的心”的清醒洞察。
+注意：生成的视频主要用于竖屏传播，请在画面布局时尽量让核心图表居中垂直显示。
+```
+
+### 第 9 步：人工复核
 
 1. `1907 / 1929 / 1940` 年份有没有错
 2. 术语有没有写错

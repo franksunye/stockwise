@@ -122,6 +122,12 @@ source_docs:
   - docs/4_Growth_Ops/content/master_series/ms-03_alexander_elder.md
   - docs/4_Growth_Ops/content/master_series/ms-08_triple_screen.md
   - docs/2_Intelligence/registry/MASTER_SERIES_NOTEBOOKLM_PLAN.md
+
+nlm_production:
+  slides: "not_started"       # 演示文稿
+  infographic: "not_started"  # 信息图
+  audio: "not_started"        # 音频
+  video: "not_started"        # 视频
 ---
 # Multi-Timeframe Confirmation：它最重要的地方，不是多看几张图，而是让方向、节奏和触发终于站到同一边
 
@@ -368,7 +374,28 @@ source_docs:
 请生成一段简洁的中文音频概览，先讲多周期确认为什么经典，再讲它最有代表性的分工逻辑和普通人最该记住的一条纪律。不要空泛聊天，不要展开太多细节，适合快速收听。
 ```
 
-### 第 8 步：人工复核
+### 第 8 步：生成视频概览 (Video Overview)
+
+可以直接在 NotebookLM 中利用最新的 **Video Overview** 功能生成。
+
+**推荐设置：**
+1. **格式**：选 `摘要` (Summary) 或 `说明视频` (Explainer)。
+2. **语言**：选 `中文（简体）`。
+3. **视觉风格**：推荐 `经典` 或 `白板` (Whiteboard)。
+4. **横竖构图提示**：由于此视频主要用于竖屏传播，需在下方引导词中请求垂直构图。
+
+**AI 主持人引导词（直接复制）：**
+
+```text
+请生成一段中文视频概览。主持人侧重讲清“多周期确认（Multi-Timeframe Confirmation）”的实战秩序。
+1. 开场：用“不同级别的走势老在打架，让你无所适从”这一核心痛点切入。
+2. 核心：解释如何建立“长幼秩序”——大周期定方向、中周期看节奏、小周期找触发。
+3. 重点：提到分层负责、对齐、共振等核心决策行话。
+4. 金句：引用关于“真正好的决策，不是所有信息往你脸上扑，而是让每个尺度只做分内事”的秩序观。
+注意：生成的视频主要用于竖屏传播，请在画面布局时尽量让核心图表居中垂直显示。
+```
+
+### 第 9 步：人工复核
 
 1. 中文表达是否顺
 2. 有没有把多周期写成“越多越好”

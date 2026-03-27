@@ -122,6 +122,12 @@ source_docs:
   - docs/2_Intelligence/registry/MASTER_SERIES_NOTEBOOKLM_PLAN.md
   - docs/4_Growth_Ops/content/master_series/ms-12_turtle_trading.md
   - docs/4_Growth_Ops/content/master_series/ms-04_richard_dennis.md
+
+nlm_production:
+  slides: "not_started"       # 演示文稿
+  infographic: "not_started"  # 信息图
+  audio: "not_started"        # 音频
+  video: "not_started"        # 视频
 ---
 理查德·唐契安（Richard Donchian）最重要的地方，不是发明了一个简单的画图工具，而是把趋势突破这件事变成了一个非常干净、不可动摇的规则：
 
@@ -364,7 +370,28 @@ source_docs:
 请生成一段简洁的中文音频概览，先讲 Donchian Breakout 为什么经典，再讲为什么很多趋势系统拆到最后都会回到它。不要空泛聊天，不要展开太多细节，适合快速收听。
 ```
 
-### 第 8 步：人工复核
+### 第 8 步：生成视频概览 (Video Overview)
+
+可以直接在 NotebookLM 中利用最新的 **Video Overview** 功能生成。
+
+**推荐设置：**
+1. **格式**：选 `说明视频` (Explainer) 或 `摘要` (Summary)。
+2. **语言**：选 `中文（简体）`。
+3. **视觉风格**：推荐 `极简` (Minimalist) 或 `经典` (Classic) 以体现规则的简洁。
+4. **横竖构图提示**：由于此视频主要用于竖屏传播，需在下方引导词中请求垂直构图。
+
+**AI 主持人引导词（直接复制）：**
+
+```text
+请生成一段中文视频概览。主持人侧重讲清“Donchian Breakout：趋势跟随的骨架组件”核心原理。
+1. 开场：用“总是想猜大盘哪天见底，结果却在漫长的下跌里反复受伤”这一逆势操作痛点切入。
+2. 核心：解释理查德·唐契安最重要的贡献——唐奇安通道。它不是预测，而是通过新高新低（边界）来机械地定义趋势方向。
+3. 重点：提到突破确认（Breakout）、不预判拐点、随波逐流的最高境界。
+4. 金句：引用关于“新高不会骗人，它是市场在用真金白银表态；真正有效的方法，是学会站在足够干净的规则上”的系统观。
+注意：生成的视频主要用于竖屏传播，请在画面布局时尽量让核心图表居中垂直显示。
+```
+
+### 第 9 步：人工复核
 
 1. 术语有没有写错
 2. 中文表达是否顺

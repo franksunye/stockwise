@@ -122,6 +122,12 @@ source_docs:
   - docs/2_Intelligence/registry/MASTER_SERIES_NOTEBOOKLM_PLAN.md
   - docs/4_Growth_Ops/content/master_series/ms-09_trend_breakout.md
   - docs/4_Growth_Ops/content/master_series/ms-23_william_oneil.md
+
+nlm_production:
+  slides: "not_started"       # 演示文稿
+  infographic: "not_started"  # 信息图
+  audio: "not_started"        # 音频
+  video: "not_started"        # 视频
 ---
 达瓦斯（Nicolas Darvas）的真谛，是把交易变成了一场“舞池博弈”的游戏。他最伟大的贡献不是发明了方框，而是发明了“用箱体边界屏蔽噪音”的心理战法：
 
@@ -355,7 +361,28 @@ source_docs:
 请生成一段简洁的中文音频概览，先讲 Darvas Box 为什么经典，再讲为什么边界确认比提前猜更重要。不要空泛聊天，不要展开太多细节，适合快速收听。
 ```
 
-### 第 8 步：人工复核
+### 第 8 步：生成视频概览 (Video Overview)
+
+可以直接在 NotebookLM 中利用最新的 **Video Overview** 功能生成。
+
+**推荐设置：**
+1. **格式**：选 `说明视频` (Explainer) 或 `摘要` (Summary)。
+2. **语言**：选 `中文（简体）`。
+3. **视觉风格**：推荐 `动感` (Dynamic) 或 `白板` (Whiteboard) 以体现箱体节奏与突破感。
+4. **横竖构图提示**：由于此视频主要用于竖屏传播，需在下方引导词中请求垂直构图。
+
+**AI 主持人引导词（直接复制）：**
+
+```text
+请生成一段中文视频概览。主持人侧重讲清“达瓦斯箱体：用边界管理交易心理”核心逻辑。
+1. 开场：用“在横盘期间频繁预判、反复横跳，结果钱没赚到，心态却先崩了”这一横盘期交易痛点切入。
+2. 核心：解释尼古拉斯·达瓦斯最重要的贡献——箱体理论。它把模糊的整理区，压成了一个看得见、摸得着的箱体边界。
+3. 重点：提到突破前绝对闭嘴（不乱猜）、突破后大步起舞（顺势跟）、用箱体屏蔽市场噪音。
+4. 金句：引用关于“箱子不会骗人，它是供需博弈出的真实边界；只有新箱子的开启，才是你可以踏步进场的唯一发号令”的纪律观。
+注意：生成的视频主要用于竖屏传播，请在画面布局时尽量让核心图表居中垂直显示。
+```
+
+### 第 9 步：人工复核
 
 1. 术语有没有写错
 2. 中文表达是否顺

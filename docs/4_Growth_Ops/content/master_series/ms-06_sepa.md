@@ -122,6 +122,12 @@ source_docs:
   - docs/2_Intelligence/registry/methodologies/sepa_minervini.md
   - docs/2_Intelligence/registry/masters/mark_minervini.md
   - docs/2_Intelligence/registry/archetypes/trend_breakout.md
+
+nlm_production:
+  slides: "not_started"       # 演示文稿
+  infographic: "not_started"  # 信息图
+  audio: "not_started"        # 音频
+  video: "not_started"        # 视频
 ---
 # SEPA：它最厉害的地方，不是教你看一个买点，而是把出手资格压得极其苛刻
 
@@ -373,7 +379,28 @@ source_docs:
 请生成一段简洁的中文音频概览，先讲 SEPA 为什么值得被记住，再讲它最有代表性的出手资格筛选逻辑。不要空泛聊天，不要展开太多细节，适合社交媒体快速收听。
 ```
 
-### 第 8 步：人工复核
+### 第 8 步：生成视频概览 (Video Overview)
+
+可以直接在 NotebookLM 中利用最新的 **Video Overview** 功能生成。
+
+**推荐设置：**
+1. **格式**：选 `说明视频` (Explainer) 或 `摘要` (Summary)。
+2. **语言**：选 `中文（简体）`。
+3. **视觉风格**：推荐 `经典` 或 `白板` (Whiteboard)。
+4. **垂直构图建议**：在下方引导词中请求垂直构图以适配短视频传播。
+
+**AI 主持人引导词（直接复制）：**
+
+```text
+请生成一段中文视频概览。主持人侧重讲清 SEPA（特定入场点分析）系统的核心逻辑。
+1. 开场：用“普通投资者总是在随机买入”这一痛点切入。
+2. 核心：解释什么是 SEPA，为什么它强调“出手资格”先于“入场点”。
+3. 重点：提到基本面、技术面与市场环境的共振筛选。
+4. 金句：引用米勒维尼关于“只在胜率最高时扣动扳机”的纪律。
+注意：生成的视频主要用于竖屏传播，请在画面布局时尽量让核心图表居中垂直显示。
+```
+
+### 第 9 步：人工复核
 
 1. 术语有没有写错
 2. 中文表达是否顺

@@ -1,6 +1,6 @@
 # 内容运营主索引 (Content Operations Registry)
 
-> 自动生成时间：2026/3/26 18:15:33
+> 自动生成时间：2026/3/27 14:40:27
 > 说明：本索引由 `scripts/cmo_sync.mjs` 统一扫描 `4_Growth_Ops/content` 与 `5_Support_Ops/content` 生成。
 > 日期规则：已发布内容优先显示公众号真实发布日期；未发布内容显示目标发布日期。
 > 公众号默认发布节奏：固定为 周一 / 周三 / 周五；除非团队明确调整，否则不自动变更。
@@ -107,7 +107,7 @@
 | [胜率矩阵：摸清 AI 的脾气](../../5_Support_Ops/content/history-matrix-viz.md) | Support | article | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
 | [时光机模式：拒绝“马后炮”](../../5_Support_Ops/content/time-machine-feed.md) | Support | article | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
 | [时间价值陷阱：横盘不仅折磨心智，更是对资金使用率的谋杀](101_academy/101-45_time_decay.md) | Growth | article | TOFU | - | ✍️ 生产中 | 2026-03-19 周四 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
-| [数据拼接：最新指标不求人](../../5_Support_Ops/content/realtime-data-splicing.md) | Support | article | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
+| [数据拼接：最新指标不求人](../../5_Support_Ops/content/realtime-data-splicing.md) | Support | article | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-03-27 |
 | [双向邀请与 Pro 连贯性奖励 (Referral Mechanism)](../../5_Support_Ops/content/referral-mechanism.md) | Support | article | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
 | [四态语义验证规则（修订版）](../../5_Support_Ops/content/four-state-validation-rules.md) | Support | article | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-03-25 |
 | [随机游走假说：承认市场短期的不可预测性，是走向成熟的第一步](101_academy/101-47_random_walk.md) | Growth | article | TOFU | - | ✍️ 生产中 | 2026-03-19 周四 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |

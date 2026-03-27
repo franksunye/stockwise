@@ -123,6 +123,12 @@ source_docs:
   - docs/2_Intelligence/23Q_Method_Registry_Design.md
   - docs/4_Growth_Ops/content/master_series/ms-23_william_oneil.md
   - docs/4_Growth_Ops/content/master_series/ms-20_masters_not_equal_product_modes.md
+
+nlm_production:
+  slides: "not_started"       # 演示文稿
+  infographic: "not_started"  # 信息图
+  audio: "not_started"        # 音频
+  video: "not_started"        # 视频
 ---
 # CAN SLIM：它最重要的地方，不是七个字母本身，而是把成长股进攻拆成了一套筛选顺序
 
@@ -377,7 +383,28 @@ source_docs:
 请生成一段简洁的中文音频概览，先讲 CAN SLIM 为什么经典，再讲为什么它不能简单理解成追强。不要空泛聊天，不要展开太多细节，适合快速收听。
 ```
 
-### 第 8 步：人工复核
+### 第 8 步：生成视频概览 (Video Overview)
+
+可以直接在 NotebookLM 中利用最新的 **Video Overview** 功能生成。
+
+**推荐设置：**
+1. **格式**：选 `说明视频` (Explainer) 或 `摘要` (Summary)。
+2. **语言**：选 `中文（简体）`。
+3. **视觉风格**：推荐 `专业` (Professional) 或 `现代` (Modern) 以体现系统化筛选。
+4. **横竖构图提示**：由于此视频主要用于竖屏传播，需在下方引导词中请求垂直构图。
+
+**AI 主持人引导词（直接复制）：**
+
+```text
+请生成一段中文视频概览。主持人侧重讲清“CAN SLIM：成长股的七重筛选顺序”核心逻辑。
+1. 开场：用“听过很多厉害的指标，见过很多大涨的股票，但总觉得自己抓不住重点，只能眼看别人起飞”这一成长股投资痛点切入。
+2. 核心：解释 CAN SLIM 最重要的价值并不是这七个字母，而是它建立了一套包含盈利增长（C/A）、领导性（L）、供需（S）和大盘趋势（M）的筛选逻辑。
+3. 重点：提到不是单一追强势股，而是多重条件重叠后的“合力确认”。
+4. 金句：引用关于“成长股不是因为热度高才值得追，而是因为它按顺序通过了每一个严苛门槛，才值得被允许进攻”的秩序观。
+注意：生成的视频主要用于竖屏传播，请在画面布局时尽量让核心图表居中垂直显示。
+```
+
+### 第 9 步：人工复核
 
 1. 术语有没有写错
 2. 中文表达是否顺

@@ -122,6 +122,12 @@ source_docs:
   - docs/2_Intelligence/registry/MASTER_SERIES_NOTEBOOKLM_PLAN.md
   - docs/2_Intelligence/22Q_Quant_Research_Framework.md
   - docs/4_Growth_Ops/content/master_series/ms-05_warren_buffett.md
+
+nlm_production:
+  slides: "not_started"       # 演示文稿
+  infographic: "not_started"  # 信息图
+  audio: "not_started"        # 音频
+  video: "not_started"        # 视频
 ---
 # 本杰明·格雷厄姆：他最重要的地方，不是抄底技巧，而是先逼你分清价格和价值不是一回事
 
@@ -385,7 +391,28 @@ source_docs:
 请生成一段简洁的中文音频概览，先讲本杰明·格雷厄姆为什么值得被记住，再讲市场先生和安全边际为什么到今天还常被反复提起。不要空泛聊天，不要展开太多细节，适合快速收听。
 ```
 
-### 第 8 步：人工复核
+### 第 8 步：生成视频概览 (Video Overview)
+
+可以直接在 NotebookLM 中利用最新的 **Video Overview** 功能生成。
+
+**推荐设置：**
+1. **格式**：选 `说明视频` (Explainer) 或 `摘要` (Summary)。
+2. **语言**：选 `中文（简体）`。
+3. **视觉风格**：推荐 `经典` (Classic) 以匹配价值投资的沉稳。
+4. **横竖构图提示**：由于此视频主要用于竖屏传播，需在下方引导词中请求垂直构图。
+
+**AI 主持人引导词（直接复制）：**
+
+```text
+请生成一段中文视频概览。主持人侧重讲清“格雷厄姆：价值投资的定海神针”核心逻辑。
+1. 开场：用“总是想抄底却抄在半山腰，或者被市场情绪搞得心神不宁”这一经典投资困境切入。
+2. 核心：解释格雷厄姆最重要的贡献——分清价格（Price）与价值（Value），并引入“市场先生”这个情绪化报价员。
+3. 重点：提到安全边际（Margin of Safety）、防错思维、内在价值等核心理念。
+4. 金句：引用关于“不要因为市场给了一个报价，就误以为那是价值本身”的深刻见解。
+注意：生成的视频主要用于竖屏传播，请在画面布局时尽量让核心图表居中垂直显示。
+```
+
+### 第 9 步：人工复核
 
 1. 《证券分析》与《聪明的投资者》年份有没有错
 2. 术语有没有写错

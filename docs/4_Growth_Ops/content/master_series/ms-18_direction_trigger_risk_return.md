@@ -121,6 +121,12 @@ source_docs:
   - docs/4_Growth_Ops/content/master_series/ms-03_alexander_elder.md
   - docs/4_Growth_Ops/content/master_series/ms-10_atr_stop.md
   - docs/2_Intelligence/registry/MASTER_SERIES_NOTEBOOKLM_PLAN.md
+
+nlm_production:
+  slides: "not_started"       # 演示文稿
+  infographic: "not_started"  # 信息图
+  audio: "not_started"        # 开音频
+  video: "not_started"        # 视频
 ---
 # 先方向，后触发，先风控，后收益：它最重要的地方，不是口号，而是一整套决策顺序
 
@@ -375,7 +381,28 @@ source_docs:
 请生成一段简洁的中文音频概览，先讲这条原则为什么值得反复讲，再讲它最核心的顺序逻辑和普通人最该记住的一条纪律。不要空泛聊天，不要展开太多细节，适合社交媒体快速收听。
 ```
 
-### 第 8 步：人工复核
+### 第 8 步：生成视频概览 (Video Overview)
+
+可以直接在 NotebookLM 中利用最新的 **Video Overview** 功能生成。
+
+**推荐设置：**
+1. **格式**：选 `摘要` (Summary) 或 `说明视频` (Explainer)。
+2. **语言**：选 `中文（简体）`。
+3. **视觉风格**：推荐 `经典` 或 `白板` (Whiteboard) 以体现流程感。
+4. **横竖构图提示**：由于此视频主要用于竖屏传播，需在下方引导词中请求垂直构图。
+
+**AI 主持人引导词（直接复制）：**
+
+```text
+请生成一段中文视频概览。主持人侧重讲清“DTR-R：四位一体的决策顺序”核心逻辑。
+1. 开场：用“看见信号就想冲，赚了点钱就想跑，结果最后还是亏”这一普遍交易乱象切入。
+2. 核心：解释如何通过顺序来归位——先定方向（D），再找触发（T），先控风险（R），最后才看收益（R）。
+3. 重点：提到决策分层、风控优先、拒绝对动作的盲目迷信。
+4. 金句：引用关于“如果顺序摆歪了，再好的指标也救不了这笔交易”的秩序观。
+注意：生成的视频主要用于竖屏传播，请在画面布局时尽量让核心图表居中垂直显示。
+```
+
+### 第 9 步：人工复核
 
 1. 中文表达是否顺
 2. 有没有把原则稿写成空泛口号

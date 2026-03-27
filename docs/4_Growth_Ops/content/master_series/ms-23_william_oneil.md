@@ -124,6 +124,12 @@ source_docs:
   - docs/2_Intelligence/registry/archetypes/trend_breakout.md
   - docs/4_Growth_Ops/content/master_series/ms-14_momentum_breakout.md
   - docs/4_Growth_Ops/content/master_series/ms-20_masters_not_equal_product_modes.md
+
+nlm_production:
+  slides: "not_started"       # 演示文稿
+  infographic: "not_started"  # 信息图
+  audio: "not_started"        # 音频
+  video: "not_started"        # 视频
 ---
 # 威廉·欧奈尔：他最重要的地方，不是教你迷信强势，而是把成长股进攻写成了一套公开方法
 
@@ -375,7 +381,28 @@ source_docs:
 请生成一段简洁的中文音频概览，先讲威廉·欧奈尔为什么值得被记住，再讲 CAN SLIM 和成长股进攻为什么不能简单理解成追强。不要空泛聊天，不要展开太多细节，适合快速收听。
 ```
 
-### 第 8 步：人工复核
+### 第 8 步：生成视频概览 (Video Overview)
+
+可以直接在 NotebookLM 中利用最新的 **Video Overview** 功能生成。
+
+**推荐设置：**
+1. **格式**：选 `说明视频` (Explainer) 或 `摘要` (Summary)。
+2. **语言**：选 `中文（简体）`。
+3. **视觉风格**：推荐 `现代` (Modern) 或 `工业` (Industrial) 以匹配流水线筛选感。
+4. **横竖构图提示**：由于此视频主要用于竖屏传播，需在下方引导词中请求垂直构图。
+
+**AI 主持人引导词（直接复制）：**
+
+```text
+请生成一段中文视频概览。主持人侧重讲清“欧奈尔：成长股的工业化筛选流水线”核心逻辑。
+1. 开场：用“看见强势股就想冲，结果买在最高点，或者错过了真正的大题材”这一成长股投资通病切入。
+2. 核心：解释欧奈尔最重要的贡献——CAN SLIM 筛选法。它不是一个信号，而是一整套包含基本面、供需、市场环境的严苛门槛。
+3. 重点：提到相对强度（RS）、突破确认（Breakout）、大盘趋势判断等实战组件。
+4. 金句：引用关于“买入只是扣动扳机的瞬间，而前面的 CAN SLIM 过滤才是漫长的瞄准过程”的纪律观。
+注意：生成的视频主要用于竖屏传播，请在画面布局时尽量让核心图表居中垂直显示。
+```
+
+### 第 9 步：人工复核
 
 1. `1984 / 1988` 年份有没有错
 2. 术语有没有写错

@@ -120,6 +120,12 @@ wechat_layout:
 source_docs:
   - docs/2_Intelligence/registry/methodologies/episodic_pivot_bonde.md
   - docs/2_Intelligence/registry/masters/pradeep_bonde.md
+
+nlm_production:
+  slides: "not_started"       # 演示文稿
+  infographic: "not_started"  # 信息图
+  audio: "not_started"        # 音频
+  video: "not_started"        # 视频
 ---
 # 事件拐点（Episodic Pivot）：真正重要的，不是涨了，而是市场突然开始用新逻辑看它
 
@@ -374,7 +380,28 @@ source_docs:
 请生成一段简洁的中文音频概览，先讲 Episodic Pivot 为什么值得被记住，再讲它最有代表性的催化剂与预期切换逻辑。不要空泛聊天，不要展开太多细节，适合快速收听。
 ```
 
-### 第 8 步：人工复核
+### 第 8 步：生成视频概览 (Video Overview)
+
+可以直接在 NotebookLM 中利用最新的 **Video Overview** 功能生成。
+
+**推荐设置：**
+1. **格式**：选 `说明视频` (Explainer) 或 `摘要` (Summary)。
+2. **语言**：选 `中文（简体）`。
+3. **视觉风格**：推荐 `经典` 或 `白板` (Whiteboard)。
+4. **横竖构图提示**：由于此视频主要用于竖屏传播，需在下方引导词中请求垂直构图。
+
+**AI 主持人引导词（直接复制）：**
+
+```text
+请生成一段中文视频概览。主持人侧重讲清 Episodic Pivot (EP) 的底层逻辑。
+1. 开场：用“有些阳线只是随机波动，但有些阳线却改变了命运”切入。
+2. 核心：解释什么是 EP，它是如何通过“催化剂”改写市场叙事的。
+3. 关键点：提到成交量和价格同时质变的信号意义。
+4. 金句：引用关于“EP 是新行情的发令枪”的判断。
+注意：生成的视频主要用于竖屏传播，请在画面布局时尽量让核心图表居中垂直显示。
+```
+
+### 第 9 步：人工复核
 
 1. 术语有没有写错
 2. 中文表达是否顺

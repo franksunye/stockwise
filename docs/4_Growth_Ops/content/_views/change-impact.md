@@ -1,16 +1,19 @@
 # 产品变更影响视图 (Change Impact Board)
 
-> 自动生成时间：2026/3/26 18:15:33
+> 自动生成时间：2026/3/27 14:40:27
 > 说明：该视图用于回答“产品/工程文档变化后，哪些内容应该复核或补充”。
 
 ## 受底层文档变更影响，需优先复核的内容
 
 | 内容资产 | 来源 | 主流程 | 受影响源文档 |
 | --- | --- | --- | --- |
-| [交易大师图鉴 28｜CAN SLIM：它最重要的地方，不是七个字母本身，而是把成长股进攻拆成了一套筛选顺序](../master_series/ms-28_can_slim.md) | Growth | ✍️ 生产中 | `docs/4_Growth_Ops/content/master_series/ms-23_william_oneil.md` |
-| [交易大师图鉴 30｜尼古拉斯·达瓦斯：交易的真谛，不是去听小道消息，而是看清股票正在哪层“箱子”里跳舞。](../master_series/ms-30_darvas_box.md) | Growth | ✍️ 生产中 | `docs/4_Growth_Ops/content/master_series/ms-23_william_oneil.md` |
+| [深度链接：一键直达“战场”](../../../5_Support_Ops/content/deep-linking-usage.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/46_Frontend_SWR_Architecture_Upgrade.md` |
+| [交互优先：手感不能断](../../../5_Support_Ops/content/interaction-first.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/46_Frontend_SWR_Architecture_Upgrade.md` |
+| [左右滑：你的三个战场](../../../5_Support_Ops/content/nav-map-logic.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/46_Frontend_SWR_Architecture_Upgrade.md` |
+| [乐观更新：不用等圈圈转](../../../5_Support_Ops/content/optimistic-ui-logic.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/46_Frontend_SWR_Architecture_Upgrade.md` |
+| [单点对焦：别让散乱害了你](../../../5_Support_Ops/content/snap-y-dynamics.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/46_Frontend_SWR_Architecture_Upgrade.md` |
 | [大师系列内容接入方案 2026](../MASTER_SERIES_CONTENT_INTEGRATION_2026.md) | Growth | ✍️ 生产中 | `docs/4_Growth_Ops/content/README.md` |
-| [交易大师图鉴 29｜理查德·唐契安：趋势跟随的真谛，不是去抓每个拐点，而是学会“随波逐流”。](../master_series/ms-29_donchian_breakout.md) | Growth | ✍️ 生产中 | `docs/4_Growth_Ops/content/master_series/ms-12_turtle_trading.md` |
+| [交易大师图鉴 28｜CAN SLIM：它最重要的地方，不是七个字母本身，而是把成长股进攻拆成了一套筛选顺序](../master_series/ms-28_can_slim.md) | Growth | ✍️ 生产中 | `docs/4_Growth_Ops/content/master_series/ms-23_william_oneil.md` |
 | [交易大师图鉴 16｜事件驱动型进攻结构：它最重要的地方，不是追新闻，而是看懂哪种变化足以改变市场预期](../master_series/ms-16_catalyst_driven_setup.md) | Growth | ✍️ 生产中 | `docs/4_Growth_Ops/content/master_series/ms-07_episodic_pivot.md` |
 | [101-100: 很多人不是不会炒股，而是连自己是什么段位都没弄明白](../101_academy/101-100_maturity_prologue.md) | Growth | 📅 已排期 | `docs/2_Intelligence/research/01_Quant_Trading_Schools_Taxonomy.md` |
 | [101-104: 只要你的交易还经常从“我觉得”开始，你就还没走出 L0](../101_academy/101-104_maturity_l0_discretionary.md) | Growth | ✅ 已通过 | `docs/2_Intelligence/research/01_Quant_Trading_Schools_Taxonomy.md` |
@@ -37,7 +40,6 @@
 | [拒绝“未来函数”：咱们不玩虚的](../../../5_Support_Ops/content/anti-future-function.md) | Support | 🚀 已发布 | `docs/2_Intelligence/28Q_Quant_Backtesting_Methodology.md` |
 | [渠道分润：共同赚钱](../../../5_Support_Ops/content/channel-revenue-guide.md) | Support | 🚀 已发布 | `docs/0_Strategy/02_Monetization_Pricing_Strategy.md` |
 | [大盘黄历图卡解读 (Daily Yellow Pages)](../../../5_Support_Ops/content/daily-yellow-pages.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/45_Stock_Radar_Discovery_Engine.md` |
-| [深度链接：一键直达“战场”](../../../5_Support_Ops/content/deep-linking-usage.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/46_Frontend_SWR_Architecture_Upgrade.md` |
 | [绑定邮箱：唯一的“救命稻草”](../../../5_Support_Ops/content/email-sync-logic.md) | Support | 🚀 已发布 | `docs/1_Engineering/11_Reliability_Protocol.md` |
 | [最高级别用户环境物理隔离 (Env Isolation)](../../../5_Support_Ops/content/env-isolation.md) | Support | 🚀 已发布 | `docs/1_Engineering/16_Observability_Thresholds_and_Incidents.md` |
 | [认错审计：出错不可怕](../../../5_Support_Ops/content/failure-retrospective.md) | Support | 🚀 已发布 | `docs/1_Engineering/24_AICouncil_Review_Opinion_Current_State_20260313.md` |
@@ -47,16 +49,14 @@
 | [沽空数据透视指南 (HK Only)](../../../5_Support_Ops/content/hk-short-pressure.md) | Support | 🚀 已发布 | `docs/2_Intelligence/22Q_Quant_Research_Framework.md` |
 | [身份护照：UserID 就是你的命](../../../5_Support_Ops/content/identity-passport.md) | Support | 🚀 已发布 | `docs/3_Product/31_Membership_Design_Plan.md` |
 | [一键找回：权益瞬间同步](../../../5_Support_Ops/content/identity-restore-flow.md) | Support | 🚀 已发布 | `docs/3_Product/31_Membership_Design_Plan.md` |
-| [交互优先：手感不能断](../../../5_Support_Ops/content/interaction-first.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/46_Frontend_SWR_Architecture_Upgrade.md` |
 | [邀请码系统：只接待懂纪律的人](../../../5_Support_Ops/content/invitation-ops-guide.md) | Support | 🚀 已发布 | `docs/0_Strategy/07_Growth_and_GTM_Roadmap.md` |
 | [为什么设邀请墙？(Invite Wall Rationale)](../../../5_Support_Ops/content/invite-wall-rationale.md) | Support | 🚀 已发布 | `docs/0_Strategy/07_Growth_and_GTM_Roadmap.md` |
 | [iOS 特供：极致跟手感](../../../5_Support_Ops/content/ios-tuning.md) | Support | 🚀 已发布 | `docs/3_Product/30_Notification_Strategy_Design.md` |
 | [关键价位：市场的防线](../../../5_Support_Ops/content/key-levels-mapping.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/45_Stock_Radar_Discovery_Engine.md` |
 | [T+3 验证：趋势需要时间](../../../5_Support_Ops/content/multi-day-verification.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/49_Investment_Mode_Decision_Local_Snapshot_Spec_20260316.md` |
-| [左右滑：你的三个战场](../../../5_Support_Ops/content/nav-map-logic.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/46_Frontend_SWR_Architecture_Upgrade.md` |
 | [通知开关：不喜欢就关了](../../../5_Support_Ops/content/notification-preference.md) | Support | 🚀 已发布 | `docs/3_Product/30_Notification_Strategy_Design.md` |
 | [体验期权限发放规则 (Onboarding Trial Rules)](../../../5_Support_Ops/content/onboarding-trial-rules.md) | Support | 🚀 已发布 | `docs/3_Product/31_Membership_Design_Plan.md` |
-| [乐观更新：不用等圈圈转](../../../5_Support_Ops/content/optimistic-ui-logic.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/46_Frontend_SWR_Architecture_Upgrade.md` |
+| [五级价位阵地解释系统 (Price Ladder)](../../../5_Support_Ops/content/price-ladder.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/45_Stock_Radar_Discovery_Engine.md` |
 
 ## 尚未被转化成内容资产的内部文档机会
 
