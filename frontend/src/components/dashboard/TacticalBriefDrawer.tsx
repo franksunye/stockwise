@@ -20,7 +20,9 @@ import {
   Sparkles,
   TrendingDown,
   Shield,
-  ChevronUp
+  ChevronUp,
+  Copy,
+  Check
 } from 'lucide-react';
 import { AIPrediction, TacticalData, ShortMetrics } from '@/lib/types';
 import { shouldEnableHighPerformance } from '@/lib/device-utils';
@@ -129,6 +131,7 @@ export function TacticalBriefDrawer({
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isCounterArgumentExpanded, setIsCounterArgumentExpanded] = useState(false);
   const [isConflictResolutionExpanded, setIsConflictResolutionExpanded] = useState(false);
+  const [isScenarioCopied, setIsScenarioCopied] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
@@ -152,6 +155,24 @@ export function TacticalBriefDrawer({
   const scrollRef = useRef<HTMLDivElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
   const { shortRatio, ...shortPressure } = getShortPressureState(symbol, shortMetrics);
+
+  const scenarioCopyConfig = {
+    holding_profit: {
+      title: '持仓盈利',
+      badge: '盈利中',
+      items: scenarioHoldingProfit,
+    },
+    holding_loss: {
+      title: '持仓亏损',
+      badge: '亏损中',
+      items: scenarioHoldingLoss,
+    },
+    empty: {
+      title: '空仓等待',
+      badge: '等待入场',
+      items: scenarioEmpty,
+    },
+  } as const;
 
   const defaultActiveIndex = useMemo(() => {
     const nowIdx = nodes.findIndex((node) => node.kind === 'current');
@@ -201,6 +222,47 @@ export function TacticalBriefDrawer({
     support_price: 0,
     validation_status: 'Pending',
     actual_change: null
+  };
+
+  const buildScenarioCopyText = () => {
+    const currentScenario = scenarioCopyConfig[viewState];
+    const lines: string[] = [`交易预案｜${stockName || symbol}`, `适用日期：${targetDate}`, '', `【${currentScenario.title}】`];
+
+    currentScenario.items.forEach((tactic, index) => {
+      lines.push(`${tactic.priority} ${normalizeActionLabel(tactic.action)}`);
+      lines.push(`触发：${normalizeLegacyTerms(tactic.trigger)}`);
+
+      if (tactic.target_price) {
+        lines.push(`目标：${formatPrice(tactic.target_price)}`);
+      }
+      if (tactic.stop_advance_price) {
+        lines.push(`移动止盈：${formatPrice(tactic.stop_advance_price, true)}`);
+      }
+      if (tactic.stop_loss_price) {
+        lines.push(`止损价：${formatPrice(tactic.stop_loss_price, true)}`);
+      }
+      if (tactic.buy_zone_price) {
+        lines.push(`理想买入区：${formatPrice(tactic.buy_zone_price, true)}`);
+      }
+
+      lines.push(`理由：${normalizeLegacyTerms(tactic.reason)}`);
+
+      if (index < currentScenario.items.length - 1) {
+        lines.push('');
+      }
+    });
+
+    return lines.join('\n');
+  };
+
+  const handleCopyScenario = async () => {
+    try {
+      await navigator.clipboard.writeText(buildScenarioCopyText());
+      setIsScenarioCopied(true);
+      setTimeout(() => setIsScenarioCopied(false), 2000);
+    } catch (error) {
+      console.error('Failed to copy tactical scenario', error);
+    }
   };
 
   if (!isMounted) return null;
@@ -323,10 +385,20 @@ export function TacticalBriefDrawer({
 
                   <section>
                      {/* Header */}
-                     <div className="mb-4">
+                     <div className="mb-4 flex items-center justify-between gap-3">
                         <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
                            <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" /> 交易预案
                         </h3>
+                        <button
+                          onClick={handleCopyScenario}
+                          className="shrink-0 flex items-center justify-center bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 hover:border-white/10 transition-all rounded-xl px-3 py-2 group"
+                          aria-label="复制当前交易预案"
+                          title="复制当前交易预案"
+                        >
+                          <div className="bg-white/5 p-1.5 rounded-lg text-slate-500 group-hover:text-white transition-colors">
+                            {isScenarioCopied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+                          </div>
+                        </button>
                      </div>
 
                      {/* Horizontal Scroll Container for Scenarios */}
