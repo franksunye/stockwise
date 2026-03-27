@@ -3,7 +3,7 @@
 import { useMemo, memo } from 'react';
 
 import { Zap, Target, ShieldCheck, ChevronDown, Clock } from 'lucide-react';
-import { StockData, TacticalData, AIPrediction } from '@/lib/types';
+import { StockData, AIPrediction } from '@/lib/types';
 
 import { getMarketScene, getPredictionTitle, getClosePriceLabelFromData, getValidationLabelFromData, isTradingDay, getMarketFromSymbol, getLastTradingDay, getHKTime, normalizeToTradingDate } from '@/lib/date-utils';
 import { COLORS } from './constants';
@@ -11,6 +11,7 @@ import { COLORS } from './constants';
 import { formatModelName } from '@/lib/model-names';
 import { getPredictionActionMeta } from '@/lib/layer1-ui';
 import { getValidationWindowLabel, parseValidationData } from '@/lib/prediction-display';
+import { getStockDashboardCardSurface, getStockDashboardCardTitle } from '@/lib/stock-dashboard-card-surface';
 
 interface StockDashboardCardProps {
   data: StockData;
@@ -63,14 +64,11 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
       ? candidate 
       : null;
   
-  // Optimization: Memoize the heavy JSON parsing operation
-  const tacticalData = useMemo(() => {
-    try {
-      return JSON.parse(displayPrediction?.ai_reasoning || '') as TacticalData;
-    } catch {
-      return null;
-    }
-  }, [displayPrediction?.ai_reasoning]);
+  const userPosition = data.rule?.position === 'holding' ? 'holding' : 'empty';
+  const { tacticalData, summaryText, topTactic, pendingText } = useMemo(
+    () => getStockDashboardCardSurface({ displayPrediction, position: userPosition }),
+    [displayPrediction, userPosition]
+  );
 
   const actionMeta = useMemo(
     () => getPredictionActionMeta(displayPrediction),
@@ -100,25 +98,12 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
 
   // 1. 智能标题文案：优先从实际数据推断，而非仅依赖交易日历
   // 这确保标题与内容一致
-  const getSmartTitle = () => {
-    if (!displayPrediction?.target_date) return getPredictionTitle(scene, marketType);
-    
-    const targetDate = normalizeTargetDate(displayPrediction.target_date);
-    
-    // 如果 target_date = 今天，显示"今日建议"
-    if (targetDate === todayStr) return '今日建议';
-    
-    // 如果数据过时（target_date < 今天），显示带日期的标题
-    if (targetDate < todayStr) {
-      const [, m, d] = targetDate.split('-');
-      return `${parseInt(m)}/${parseInt(d)} 建议`;
-    }
-    
-    // target_date > 今天，使用日历推算的标题
-    return getPredictionTitle(scene, marketType);
-  };
-  
-  const mainTitle = getSmartTitle();
+  const mainTitle = getStockDashboardCardTitle({
+    displayPrediction,
+    todayStr,
+    fallbackTitle: getPredictionTitle(scene, marketType),
+    normalizeTargetDate,
+  });
   
   return (
     // Layout Contract: one vertical feed page = one viewport.
@@ -185,30 +170,21 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
               <div className="space-y-4">
                 {(() => {
                   if (tacticalData) {
-                    const userPos = data.rule?.position === 'holding' ? 'holding' : 'empty';
-                    const rawTactics = tacticalData.tactics?.[userPos];
-                    const tacticsArr = Array.isArray(rawTactics) ? rawTactics : (rawTactics ? [rawTactics] : []);
-                    const p1 = tacticsArr[0];
                     return (
                       <>
                         <p className="text-sm leading-relaxed text-slate-300 font-medium italic pl-1 border-l-2 border-indigo-500/20">
-                          &quot;{tacticalData.summary || displayPrediction?.ai_reasoning}&quot;
+                          &quot;{summaryText}&quot;
                         </p>
-                        {p1 && <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 w-full overflow-hidden">
-                          <span className="text-[10px] font-black bg-indigo-500 text-white px-1 py-0.5 rounded italic shrink-0">{p1.priority}</span>
+                        {topTactic && <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 w-full overflow-hidden">
+                          <span className="text-[10px] font-black bg-indigo-500 text-white px-1 py-0.5 rounded italic shrink-0">{topTactic.priority}</span>
                           <div className="flex items-center gap-1 min-w-0">
-                            <span className="text-[10px] font-bold text-indigo-400 shrink-0">{p1.action}:</span>
-                            <span className="text-xs text-slate-400 font-medium truncate">{p1.trigger}</span>
+                            <span className="text-[10px] font-bold text-indigo-400 shrink-0">{topTactic.action}:</span>
+                            <span className="text-xs text-slate-400 font-medium truncate">{topTactic.trigger}</span>
                           </div>
                         </div>}
                       </>
                     );
                   } else {
-                    // Fallback for No Data
-                    const pendingText = !displayPrediction 
-                        ? "该股票刚刚加入自选池。AI 量化引擎正在排队处理历史数据，预计将在下一个市场窗口（盘前或收盘后）生成深度策略。"
-                        : (displayPrediction?.ai_reasoning || '正在评估行情...');
-                    
                     return <p className="text-sm leading-relaxed text-slate-400 font-medium italic pl-1 border-l-2 border-slate-500/20">&quot;{pendingText}&quot;</p>;
                   }
                 })()}
