@@ -11,6 +11,7 @@ import Multiavatar from '@/components/Multiavatar';
 import { formatModelName } from '@/lib/model-names';
 import { getTeamMemberById, resolveAnalystFromModel } from '@/lib/agent-team';
 import { getPredictionActionMeta } from '@/lib/layer1-ui';
+import { getFirstSentence, getTacticalConflictSummary, getTacticalSummary } from '@/lib/tactical-brief-content';
 
 interface AICouncilProps {
   symbol: string;
@@ -118,55 +119,14 @@ function getCouncilActionLabel(actionKey: CouncilActionKey): string {
   }
 }
 
-function parseReasoning(reasoning: string | undefined): Record<string, unknown> | null {
-  if (!reasoning) return null;
-  try {
-    return JSON.parse(reasoning) as Record<string, unknown>;
-  } catch {
-    return null;
-  }
-}
-
-function getCouncilSummary(reasoning: string): string {
-  const parsed = parseReasoning(reasoning);
-  if (!parsed) return reasoning;
-  const content = String(parsed.summary || parsed.analysis || reasoning);
-  return normalizeLegacyTerms(content);
-}
-
-function getConflictSummary(reasoning: string | undefined): string | null {
-  const parsed = parseReasoning(reasoning);
-  if (!parsed) return null;
-  const conflict = parsed.conflict_resolution;
-  return typeof conflict === 'string' && conflict.trim() ? normalizeLegacyTerms(conflict.trim()) : null;
-}
-
-function normalizeLegacyTerms(text: string): string {
-  if (!text) return text;
-  return text
-    .replace(/建议进场/g, '建议看多')
-    .replace(/可进攻/g, '可交易')
-    .replace(/触发进攻条件/g, '触发交易条件')
-    .replace(/进攻候选/g, '看多候选')
-    .replace(/进攻/g, '交易');
-}
-
-function getFirstSentence(text: string | null | undefined): string | null {
-  if (!text) return null;
-  const normalized = text.trim();
-  if (!normalized) return null;
-  const match = normalized.match(/^.+?[。！？!?]/);
-  return match ? match[0] : normalized;
-}
-
 function buildCollabSummary(pred: AIPrediction, analystName: string): string {
   const actionLabel = getCouncilActionLabel(
     getCouncilActionKeyFromSignal(pred.layer1_signal || pred.layer1_status || pred.canonical_signal || pred.signal)
   );
-  const conflict = getFirstSentence(getConflictSummary(pred.llm_reasoning || pred.ai_reasoning));
+  const conflict = getFirstSentence(getTacticalConflictSummary(pred.llm_reasoning || pred.ai_reasoning));
   if (conflict) return conflict;
 
-  const summary = getFirstSentence(getCouncilSummary(pred.llm_reasoning || pred.ai_reasoning));
+  const summary = getFirstSentence(getTacticalSummary(pred.llm_reasoning || pred.ai_reasoning));
   if (summary) {
     return `基于量化模型当前${actionLabel}结论，${analystName}复核后给出协同汇报：${summary}`;
   }
@@ -174,7 +134,7 @@ function buildCollabSummary(pred: AIPrediction, analystName: string): string {
 }
 
 function buildRuleSummary(pred: AIPrediction): string {
-  const summary = getFirstSentence(getCouncilSummary(pred.llm_reasoning || pred.ai_reasoning));
+  const summary = getFirstSentence(getTacticalSummary(pred.llm_reasoning || pred.ai_reasoning));
   if (summary) return summary;
   const actionLabel = getCouncilActionLabel(
     getCouncilActionKeyFromSignal(pred.layer1_signal || pred.layer1_status || pred.canonical_signal || pred.signal)
@@ -233,7 +193,7 @@ function buildCouncilCards(predictions: AIPrediction[]): CouncilCardData[] {
       key: 'gu-shen-independent',
       title: guShen.name,
       role: '独立判断',
-      summary: getCouncilSummary(deepseekPred.llm_reasoning || deepseekPred.ai_reasoning),
+      summary: getTacticalSummary(deepseekPred.llm_reasoning || deepseekPred.ai_reasoning),
       actionKey: getCouncilActionKeyFromSignal(deepseekPred.llm_signal || deepseekPred.signal),
       confidence: deepseekPred.confidence,
       supportPrice: deepseekPred.support_price,
@@ -247,7 +207,7 @@ function buildCouncilCards(predictions: AIPrediction[]): CouncilCardData[] {
       key: 'lin-xu-independent',
       title: linXu.name,
       role: '独立判断',
-      summary: getCouncilSummary(linxuPred.llm_reasoning || linxuPred.ai_reasoning),
+      summary: getTacticalSummary(linxuPred.llm_reasoning || linxuPred.ai_reasoning),
       actionKey: getCouncilActionKeyFromSignal(linxuPred.llm_signal || linxuPred.signal),
       confidence: linxuPred.confidence,
       supportPrice: linxuPred.support_price,
@@ -281,7 +241,7 @@ function buildCouncilCards(predictions: AIPrediction[]): CouncilCardData[] {
       key: `fallback-${idx}`,
       title: member.name,
       role: member.role,
-      summary: getCouncilSummary(pred.ai_reasoning),
+      summary: getTacticalSummary(pred.ai_reasoning),
       actionKey: getCouncilActionKey(pred),
       confidence: pred.confidence,
       supportPrice: pred.support_price,
@@ -315,8 +275,6 @@ function setCouncilSnapshot(key: string, payload: CouncilCachePayload): void {
 function buildSessionSnapshotKey(symbol: string, targetDate: string): string {
   return `ziso:ai-council:${SNAPSHOT_VERSION}:${symbol}:${targetDate}`;
 }
-
-const SNAPSHOT_KEY_PREFIX = `ziso:ai-council:${SNAPSHOT_VERSION}:`;
 
 function pruneStaleSnapshots(): void {
   if (typeof window === 'undefined') return;

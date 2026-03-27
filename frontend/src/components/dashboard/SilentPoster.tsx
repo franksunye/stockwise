@@ -3,9 +3,10 @@
 import React, { useRef, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Share2, Download, Wind, Shield, AlertTriangle, Loader2, Copy } from 'lucide-react';
-import { AIPrediction, TacticalData, VisualStory } from '@/lib/types';
+import { AIPrediction, VisualStory } from '@/lib/types';
 import { COLORS } from './constants';
 import { getPredictionActionMeta } from '@/lib/layer1-ui';
+import { getPosterSurface } from '@/lib/tactical-brief-content';
 
 interface SilentPosterProps {
   isOpen: boolean;
@@ -54,43 +55,11 @@ export const SilentPoster: React.FC<SilentPosterProps> = ({ isOpen, onClose, pre
     return () => window.removeEventListener('resize', checkScale);
   }, []);
 
-  const tacticalData = React.useMemo(() => {
-    try {
-      return JSON.parse(prediction.ai_reasoning) as TacticalData;
-    } catch {
-      return null;
-    }
-  }, [prediction.ai_reasoning]);
-
-  const story = tacticalData?.visual_story;
+  const { story, intelligence, tacticText: tacticStr, resistanceText: resistanceStr, supportText: supportStr } = React.useMemo(
+    () => getPosterSurface({ prediction, userPos }),
+    [prediction, userPos],
+  );
   const actionMeta = React.useMemo(() => getPredictionActionMeta(prediction), [prediction]);
-
-  // Almanac Insights Extraction
-  const keyLevels = tacticalData?.key_levels;
-  const resistanceStr = keyLevels?.strong_resistance || keyLevels?.resistance || '';
-  const supportStr = keyLevels?.stop_loss_reference || keyLevels?.strong_support || keyLevels?.support || '';
-
-  let intelligence = '';
-  if (tacticalData?.summary) {
-    intelligence = tacticalData.summary;
-  } else if (tacticalData?.reasoning_trace && tacticalData.reasoning_trace.length > 0) {
-    intelligence = tacticalData.reasoning_trace[0].data;
-  }
-  // Allow line-clamp to handle truncation, but have a higher max safety limit
-  if (intelligence.length > 70) {
-     intelligence = intelligence.substring(0, 69) + '...';
-  }
-
-  let topTactic = null;
-  if (userPos === 'holding') {
-    topTactic = tacticalData?.tactics?.holding_profit?.[0] || tacticalData?.tactics?.holding_loss?.[0];
-  } else {
-    topTactic = tacticalData?.tactics?.empty?.[0] || tacticalData?.tactics?.general?.[0];
-  }
-  if (!topTactic && tacticalData?.tactics) {
-    topTactic = tacticalData.tactics.empty?.[0] || tacticalData.tactics.holding_profit?.[0] || tacticalData.tactics.general?.[0];
-  }
-  const tacticStr = topTactic?.action || '';
 
   const showToast = useCallback((msg: string) => {
     setToastMessage(msg);

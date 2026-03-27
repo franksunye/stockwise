@@ -21,13 +21,22 @@ import {
   Shield,
   ChevronUp
 } from 'lucide-react';
-import { AIPrediction, TacticalData, Tactic, ShortMetrics } from '@/lib/types';
+import { AIPrediction, TacticalData, ShortMetrics } from '@/lib/types';
 import { shouldEnableHighPerformance } from '@/lib/device-utils';
 import { AICouncil } from './AICouncil';
 import Multiavatar from '@/components/Multiavatar';
 import { resolveAnalystForBriefSource } from '@/lib/agent-team';
-
 import { formatModelName } from '@/lib/model-names';
+import {
+  getBriefSourceKind,
+  getGeneralTactics,
+  getPriceNodes,
+  getScenarioTacticGroups,
+  getShortPressureState,
+  normalizeActionLabel,
+  normalizeLegacyTerms,
+} from '@/lib/tactical-brief-surface';
+import { getNormalizedNewsItems } from '@/lib/tactical-brief-content';
 
 interface TacticalBriefDrawerProps {
   isOpen: boolean;
@@ -113,184 +122,11 @@ const formatDistancePercent = (distance: number | undefined): string => {
   return `${sign}${abs.toFixed(2)}%`;
 };
 
-type BriefSourceKind = 'llm' | 'rule';
-
-
-interface PriceLevelNode {
-  id: string;
-  price: number;
-  label: string;
-  kind: 'resistance' | 'target' | 'current' | 'support' | 'stoploss' | 'breakout';
-  description: string;
-  action: string;
-}
-
-const normalizeActionLabel = (action: string | undefined): string => {
-  if (!action) return '建议观察';
-  if (action.includes('观察')) return '建议观察';
-  if (action.includes('止损') || action.includes('减仓') || action.includes('防守')) return '建议防守';
-  if (action.includes('加仓') || action.includes('跟随') || action.includes('买')) return '建议看多';
-  if (action.includes('落袋') || action.includes('止盈') || action.includes('离场')) return '建议落袋';
-  return action;
-};
-
-function normalizeLegacyTerms(text: string): string {
-  if (!text) return text;
-  return text
-    .replace(/建议进场/g, '建议看多')
-    .replace(/可进攻/g, '可交易')
-    .replace(/触发进攻条件/g, '触发交易条件')
-    .replace(/进攻候选/g, '看多候选')
-    .replace(/进攻/g, '交易');
-}
-
-const getPriceNodes = (data: TacticalData, currentPrice?: number): PriceLevelNode[] => {
-  const nodes: PriceLevelNode[] = [];
-  
-  const add = (raw: number | string | number[] | undefined, label: string, kind: PriceLevelNode['kind'], desc: string, action: string) => {
-    const list = Array.isArray(raw) ? raw : [raw];
-    const parsed = list
-      .map((x) => (typeof x === 'number' ? x : Number(x)))
-      .filter((x) => Number.isFinite(x));
-    const prices = Array.from(new Map(parsed.map((x) => [x.toFixed(4), x])).values());
-    
-    prices.forEach((p, idx) => {
-      const CN_ORD = ["第一", "第二", "第三"];
-      nodes.push({
-        id: `${kind}-${idx}-${p}`,
-        price: p,
-        label: prices.length > 1 ? CN_ORD[idx] + label : label,
-        kind,
-        description: desc,
-        action
-      });
-    });
-  };
-
-  // 按业务优先级和角色添加节点
-  if (data?.key_levels?.strong_resistance) 
-    add(data.key_levels.strong_resistance, '强压力区', 'resistance', '核心供给区，多空博弈终点', '执行落袋');
-  if (data?.key_levels?.resistance || data?.key_levels?.immediate_resistance) 
-    add(data.key_levels.immediate_resistance || data.key_levels.resistance, '挑战位', 'target', '局部阶段目标，注意动能释放', '执行落袋');
-  if (data?.key_levels?.breakout_confirmation_level)
-    add(data.key_levels.breakout_confirmation_level, '突破确认', 'breakout', '反转结构成立的关键锚点', '执行交易');
-  
-  if (currentPrice) nodes.push({ id: 'current', price: currentPrice, label: '当前价', kind: 'current', description: '目前市场成交活跃点', action: '执行观察' });
-
-  if (data?.key_levels?.support || data?.key_levels?.immediate_support) 
-    add(data.key_levels.immediate_support || data.key_levels.support, '防守位', 'support', '多头防线，不破即维持强势', '执行防守');
-  if (data?.key_levels?.strong_support) 
-    add(data.key_levels.strong_support, '强支撑区', 'support', '底部核心支撑，中长期成本位', '执行交易');
-  if (data?.key_levels?.stop_loss_reference || data?.key_levels?.stop_loss)
-    add(data.key_levels.stop_loss_reference || data.key_levels.stop_loss, '止损参考', 'stoploss', '结构崩溃底线', '执行防守');
-
-  const sorted = nodes.sort((a, b) => b.price - a.price);
-  // Dedup: remove nodes with identical prices to prevent phantom pagination dots
-  return sorted.filter((node, idx, self) => 
-    idx === 0 || Math.abs(node.price - self[idx-1].price) > 0.001
-  );
-};
-
-type ScenarioKind = 'holding_profit' | 'holding_loss' | 'empty';
-type ScenarioTactic = Tactic & { __placeholder?: boolean };
-
-const PRIORITY_ORDER: Record<string, number> = { P1: 1, P2: 2, P3: 3 };
-
-const createPlaceholderTactic = (kind: ScenarioKind, idx: number): ScenarioTactic => {
-  const templates: Record<ScenarioKind, ScenarioTactic[]> = {
-    holding_profit: [
-      {
-        priority: 'P1',
-        action: '执行观察',
-        trigger: '不跌破一防位',
-        reason: '趋势未被破坏，先守纪律。',
-        target_price: undefined,
-        stop_advance_price: undefined,
-        __placeholder: true,
-      },
-      {
-        priority: 'P2',
-        action: '执行落袋',
-        trigger: '接近一攻位且动能放缓',
-        reason: '锁定波段利润，避免冲高回落。',
-        target_price: undefined,
-        stop_advance_price: undefined,
-        __placeholder: true,
-      },
-    ],
-    holding_loss: [
-      {
-        priority: 'P1',
-        action: '执行防守',
-        trigger: '有效跌破一防位',
-        reason: '优先控制回撤，避免亏损扩大。',
-        stop_loss_price: undefined,
-        __placeholder: true,
-      },
-      {
-        priority: 'P2',
-        action: '执行防守',
-        trigger: '反抽压力位但未能突破',
-        reason: '弱势反弹先降风险敞口。',
-        stop_loss_price: undefined,
-        __placeholder: true,
-      },
-    ],
-    empty: [
-      {
-        priority: 'P1',
-        action: '执行观察',
-        trigger: '回踩一防位企稳后再评估',
-        reason: '先等右侧信号，再考虑入场。',
-        buy_zone_price: undefined,
-        __placeholder: true,
-      },
-      {
-        priority: 'P2',
-        action: '执行交易',
-        trigger: '放量突破一攻位并站稳',
-        reason: '确认后再交易，避免假突破。',
-        buy_zone_price: undefined,
-        __placeholder: true,
-      },
-    ],
-  };
-  return templates[kind][idx] ?? templates[kind][1];
-};
-
-const normalizeScenarioTactics = (items: Tactic[] | undefined, kind: ScenarioKind): ScenarioTactic[] => {
-  const list = Array.isArray(items) ? items : [];
-  const normalized = list
-    .filter((t) => t && typeof t.action === 'string' && typeof t.trigger === 'string')
-    .map((t) => ({
-      ...t,
-      priority: (String(t.priority).toUpperCase() as Tactic['priority']) || 'P3',
-      __placeholder: false,
-    }))
-    .sort((a, b) => (PRIORITY_ORDER[a.priority] || 99) - (PRIORITY_ORDER[b.priority] || 99));
-
-  const deduped: ScenarioTactic[] = [];
-  const seen = new Set<string>();
-  for (const t of normalized) {
-    const key = `${t.action.trim()}|${t.trigger.trim()}`.toLowerCase();
-    if (seen.has(key)) continue;
-    seen.add(key);
-    deduped.push(t);
-    if (deduped.length === 2) break;
-  }
-
-  while (deduped.length < 2) {
-    deduped.push(createPlaceholderTactic(kind, deduped.length));
-  }
-  return deduped.slice(0, 2);
-};
-
 export function TacticalBriefDrawer({ 
   isOpen, onClose, data, tier, model, symbol, targetDate, signal, confidence, stockName, currentPrice, shortMetrics, userPos
 }: TacticalBriefDrawerProps) {
   const [isMounted, setIsMounted] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
-  const isFetchingDetail = false;
 
   useEffect(() => {
     setIsMounted(true);
@@ -300,20 +136,15 @@ export function TacticalBriefDrawer({
   const [isExpanded, setIsExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState<'brief' | 'council'>('brief');
   const isFree = tier === 'free';
-  const sourceKind: BriefSourceKind = data.is_llm || (model && model !== 'rule-based') ? 'llm' : 'rule';
+  const sourceKind = getBriefSourceKind(data, model);
   const analystProfile = resolveAnalystForBriefSource(sourceKind, model);
   const modelFact = sourceKind === 'llm'
     ? (model ? formatModelName(model) : 'LLM 深度推理版')
     : '量化规则引擎';
   const sourceFact = `${modelFact} 生成`;
-  
-  const rawGeneral = data?.tactics?.general;
-  const generalTactics = Array.isArray(rawGeneral) ? rawGeneral : (rawGeneral ? [rawGeneral] : []);
-
-  const profitRaw = [...(data?.tactics?.holding_profit || []), ...(data?.tactics?.holding || [])];
-  const scenarioHoldingProfit = normalizeScenarioTactics(profitRaw, 'holding_profit');
-  const scenarioHoldingLoss = normalizeScenarioTactics(data?.tactics?.holding_loss || [], 'holding_loss');
-  const scenarioEmpty = normalizeScenarioTactics(data?.tactics?.empty || [], 'empty');
+  const newsItems = getNormalizedNewsItems(data);
+  const generalTactics = getGeneralTactics(data);
+  const { scenarioHoldingProfit, scenarioHoldingLoss, scenarioEmpty } = getScenarioTacticGroups(data);
 
   const [viewState, setViewState] = useState<'holding_profit'|'holding_loss'|'empty'>('holding_profit');
   const [activeIndex, setActiveIndex] = useState(0);
@@ -321,22 +152,7 @@ export function TacticalBriefDrawer({
   const isHK = symbol.length === 5;
   const scrollRef = useRef<HTMLDivElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
-
-  const shortRatio = (() => {
-    const v = shortMetrics?.short_turnover_ratio;
-    if (v === null || v === undefined) return null;
-    const n = Number(v);
-    return Number.isFinite(n) ? n : null;
-  })();
-
-  const shortPressure = (() => {
-    if (!isHK) return { label: '--', color: 'text-slate-500', interpretation: '仅港股显示' };
-    if (shortRatio === null) return { label: '待同步', color: 'text-slate-500', interpretation: '港交所日度数据收盘后更新' };
-    if (shortRatio > 0.25) return { label: '极高', color: 'text-rose-500', interpretation: '空头压力极高，优先风险控制' };
-    if (shortRatio > 0.15) return { label: '高', color: 'text-rose-400', interpretation: '空头压力偏高，注意反弹质量' };
-    if (shortRatio >= 0.05) return { label: '中', color: 'text-amber-400', interpretation: '空头压力中性，保持观察' };
-    return { label: '低', color: 'text-emerald-400', interpretation: '空头压力偏低，抛压有限' };
-  })();
+  const { shortRatio, ...shortPressure } = getShortPressureState(symbol, shortMetrics);
 
   const defaultActiveIndex = useMemo(() => {
     const nowIdx = nodes.findIndex((node) => node.kind === 'current');
@@ -884,25 +700,18 @@ export function TacticalBriefDrawer({
                    </section>
 
                   {/* 重点情报 (News Radar) */}
-                  {((Array.isArray(data.news_analysis) && data.news_analysis.length > 0) || (typeof data.news_analysis === 'string' && data.news_analysis.trim() !== '')) && (
+                  {newsItems.length > 0 && (
                     <section className="relative">
                       <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> 重点情报 (Last 48h)
                       </h3>
                       <div className={`p-4 rounded-2xl bg-gradient-to-br from-emerald-500/[0.05] to-transparent border border-emerald-500/10 space-y-3 ${isFree ? (isHighPerformance ? 'opacity-20 grayscale brightness-50 select-none pointer-events-none' : 'blur-md select-none pointer-events-none opacity-40') : ''}`}>
-                        {Array.isArray(data.news_analysis) ? (
-                          data.news_analysis.map((news, idx) => (
-                            <div key={idx} className="flex gap-3 items-start">
-                               <span className="text-slate-500 mt-0.5"><Newspaper size={12} /></span>
-                               <p className="text-xs text-slate-300 leading-relaxed font-medium">{normalizeLegacyTerms(news)}</p>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="flex gap-3 items-start">
-                             <span className="text-slate-500 mt-0.5"><Newspaper size={12} /></span>
-                             <p className="text-xs text-slate-300 leading-relaxed font-medium">{normalizeLegacyTerms(data.news_analysis)}</p>
+                        {newsItems.map((news, idx) => (
+                          <div key={idx} className="flex gap-3 items-start">
+                            <span className="text-slate-500 mt-0.5"><Newspaper size={12} /></span>
+                            <p className="text-xs text-slate-300 leading-relaxed font-medium">{news}</p>
                           </div>
-                        )}
+                        ))}
                       </div>
                       {isFree && (
                           <div className="absolute inset-x-0 bottom-4 flex justify-center z-10">
