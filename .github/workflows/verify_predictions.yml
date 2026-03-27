@@ -15,6 +15,10 @@ on:
         description: '指定重跑分析日期 (YYYY-MM-DD)'
         type: string
         required: false
+      market:
+        description: '只验证指定市场 (CN/HK)，默认全市场'
+        type: string
+        required: false
   workflow_dispatch:
     inputs:
       force:
@@ -24,6 +28,10 @@ on:
         required: false
       date:
         description: '指定重跑分析日期 (YYYY-MM-DD)'
+        type: string
+        required: false
+      market:
+        description: '只验证指定市场 (CN/HK)，默认全市场'
         type: string
         required: false
 
@@ -63,4 +71,10 @@ jobs:
           elif [ -n "${{ github.event.inputs.date }}" ]; then
             DATE_ARGS+=(--date "${{ github.event.inputs.date }}")
           fi
-          python -u backend/main.py --verify "${FORCE_ARGS[@]}" "${DATE_ARGS[@]}"
+          MARKET_ARGS=()
+          if [ -n "${{ inputs.market }}" ]; then
+            MARKET_ARGS+=(--market "${{ inputs.market }}")
+          elif [ -n "${{ github.event.inputs.market }}" ]; then
+            MARKET_ARGS+=(--market "${{ github.event.inputs.market }}")
+          fi
+          python -u backend/main.py --verify "${FORCE_ARGS[@]}" "${DATE_ARGS[@]}" "${MARKET_ARGS[@]}"

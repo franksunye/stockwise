@@ -55,6 +55,7 @@ class TestValidatorSemantics(unittest.TestCase):
                 ("000001", "2026-03-03", "rule-engine", "2026-03-04", "Watch", 0.8, "Watch", "Pending"),
                 ("000002", "2026-03-03", "rule-engine", "2026-03-04", "NoSetup", 0.6, "NoSetup", "Pending"),
                 ("000003", "2026-03-03", "legacy-model", "2026-03-04", "Side", 0.5, None, "Pending"),
+                ("00700", "2026-03-03", "rule-engine", "2026-03-04", "Watch", 0.9, "Watch", "Pending"),
             ],
         )
         cur.executemany(
@@ -69,6 +70,9 @@ class TestValidatorSemantics(unittest.TestCase):
                 ("000003", "2026-03-04", 0.2, 30.0),
                 ("000003", "2026-03-05", -0.2, 29.9),
                 ("000003", "2026-03-06", 0.1, 29.95),
+                ("00700", "2026-03-04", 1.0, 300.0),
+                ("00700", "2026-03-05", 1.2, 303.6),
+                ("00700", "2026-03-06", 0.4, 304.8),
             ],
         )
         conn.commit()
@@ -82,15 +86,18 @@ class TestValidatorSemantics(unittest.TestCase):
         except OSError:
             pass
 
-    def _run(self):
+    def _run(self, market_filter=None):
         def _next_trading_day(date_str, market=None):
             return (datetime.strptime(date_str, "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
 
+        def _market_for_symbol(symbol):
+            return "HK" if len(symbol) == 5 else "CN"
+
         with patch("backend.engine.validator.get_connection", side_effect=lambda: sqlite3.connect(self.db_path)):
-            with patch("backend.engine.validator.get_market_from_symbol", return_value="CN"):
+            with patch("backend.engine.validator.get_market_from_symbol", side_effect=_market_for_symbol):
                 with patch("backend.engine.validator.is_trading_day", return_value=True):
                     with patch("backend.engine.validator.get_next_trading_day_str", side_effect=_next_trading_day):
-                        return verify_all_pending(force=True, target_date="2026-03-04")
+                        return verify_all_pending(force=True, target_date="2026-03-04", market_filter=market_filter)
 
     def test_watch_uses_canonical_delayed_breakout_rule(self):
         self._run()
@@ -130,4 +137,18 @@ class TestValidatorSemantics(unittest.TestCase):
         self.assertEqual(payload["effective_signal"], "Side")
         self.assertEqual(payload["signal_family"], "legacy")
         self.assertEqual(payload["reason_code"], "legacy_side_neutral")
+        conn.close()
+
+    def test_market_filter_only_updates_requested_market(self):
+        stats = self._run(market_filter="CN")
+        self.assertEqual(stats["market_filter"], "CN")
+
+        conn = sqlite3.connect(self.db_path)
+        cur = conn.cursor()
+        cur.execute("SELECT validation_status FROM ai_predictions_v2 WHERE symbol = '000001'")
+        cn_status = cur.fetchone()[0]
+        cur.execute("SELECT validation_status FROM ai_predictions_v2 WHERE symbol = '00700'")
+        hk_status = cur.fetchone()[0]
+        self.assertEqual(cn_status, "Correct")
+        self.assertEqual(hk_status, "Pending")
         conn.close()

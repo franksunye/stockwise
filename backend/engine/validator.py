@@ -188,7 +188,7 @@ def _evaluate_final(signal_meta: Dict[str, str], trajectory: List[Dict[str, floa
     return verdict
 
 
-def verify_all_pending(force: bool = False, target_date: str = None):
+def verify_all_pending(force: bool = False, target_date: str = None, market_filter: str = None):
     """
     Batch verify predictions using four-state semantics when available.
     Legacy Long/Short/Side rows are still supported for historical compatibility.
@@ -198,15 +198,24 @@ def verify_all_pending(force: bool = False, target_date: str = None):
         cursor = conn.cursor()
 
         conditions = []
+        params: List[Any] = []
         if not force:
             conditions.append("(validation_status = 'Pending' OR validation_status = 'Verifying' OR validation_status = 'Incorrect')")
 
         if target_date:
-            conditions.append(f"target_date='{target_date}'")
+            conditions.append("target_date = ?")
+            params.append(target_date)
             logger.info(f"🔍 Verifying V2 predictions for target date: {target_date}...")
         else:
             conditions.append("date >= date('now', '-10 days')")
             logger.info("🔍 Verifying recent V2 predictions (T+3 mode)...")
+
+        if market_filter:
+            if market_filter == "HK":
+                conditions.append("length(symbol) = 5")
+            elif market_filter == "CN":
+                conditions.append("length(symbol) != 5")
+            logger.info(f"📍 Limiting verification to market: {market_filter}")
 
         where_clause = " AND ".join(conditions) if conditions else "1=1"
 
@@ -215,7 +224,8 @@ def verify_all_pending(force: bool = False, target_date: str = None):
             SELECT symbol, date, target_date, model_id, signal, confidence, layer1_status
             FROM ai_predictions_v2
             WHERE {where_clause}
-        """
+        """,
+            params,
         ).fetchall()
 
         validated_count = 0
@@ -223,6 +233,8 @@ def verify_all_pending(force: bool = False, target_date: str = None):
         for row in pending_v2:
             symbol, p_date, t0_date, model_id, signal, confidence, layer1_status = row
             market = get_market_from_symbol(symbol)
+            if market_filter and market != market_filter:
+                continue
             signal_meta = _resolve_signal(layer1_status, signal)
 
             start_date = t0_date
@@ -309,6 +321,7 @@ def verify_all_pending(force: bool = False, target_date: str = None):
         return {
             "validated_count": validated_count,
             "target_date_filter": target_date or "Recent 10 Days",
+            "market_filter": market_filter or "ALL",
             "condition": "Pending/Verifying" if not force else "All",
             "window": VALIDATION_WINDOW,
         }

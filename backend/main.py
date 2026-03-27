@@ -48,7 +48,7 @@ if __name__ == "__main__":
         choices=['core', 'periods', 'full'],
         help='单票按需同步模式: core=daily+realtime, periods=weekly+monthly, full=daily+weekly+monthly+realtime'
     )
-    parser.add_argument('--market', type=str, choices=['CN', 'HK'], help='只同步/分析特定市场')
+    parser.add_argument('--market', type=str, choices=['CN', 'HK'], help='只同步/分析/验证特定市场')
     parser.add_argument(
         '--model',
         type=str,
@@ -75,7 +75,9 @@ if __name__ == "__main__":
     if args.verify:
         with JobGuard("Prediction Verification", task_type="maintenance", rerun_workflow="verify_predictions.yml") as job:
             from backend.engine.validator import verify_all_pending
-            stats = verify_all_pending(force=args.force, target_date=args.date)
+            if args.market:
+                job.set_dimensions(market=args.market)
+            stats = verify_all_pending(force=args.force, target_date=args.date, market_filter=args.market)
             if stats:
                 job.set_stats(**stats)
         sys.exit(0)
