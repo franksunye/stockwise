@@ -419,7 +419,7 @@ export function TacticalBriefDrawer({
                                if (viewState !== 'empty') setViewState('empty');
                            }
                         }}
-                        className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide -mx-6 px-6 pb-2 overscroll-x-contain touch-pan-x"
+                        className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide -mx-6 px-6 pb-2 overscroll-x-contain"
                     >
                        
  	                       {/* CARD 1: HOLDING PROFIT (Subtle Green) */}
@@ -679,7 +679,7 @@ export function TacticalBriefDrawer({
                                setActiveIndex(index);
                            }
                         }}
-                        className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide -mx-6 px-6 pb-2 overscroll-x-contain touch-pan-x"
+                        className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide -mx-6 px-6 pb-2 overscroll-x-contain"
                       >
                          {nodes.map((node, i) => {
                             const isActive = activeIndex === i;
