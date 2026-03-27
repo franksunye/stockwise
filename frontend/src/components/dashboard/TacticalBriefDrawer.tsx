@@ -226,7 +226,7 @@ export function TacticalBriefDrawer({
 
   const buildScenarioCopyText = () => {
     const currentScenario = scenarioCopyConfig[viewState];
-    const lines: string[] = [`交易预案｜${stockName || symbol}`, `适用日期：${targetDate}`, '', `【${currentScenario.title}】`];
+    const lines: string[] = [`操作建议｜${stockName || symbol}`, `适用日期：${targetDate}`, '', `场景：${currentScenario.title}`];
 
     currentScenario.items.forEach((tactic, index) => {
       lines.push(`${tactic.priority} ${normalizeActionLabel(tactic.action)}`);
@@ -251,6 +251,8 @@ export function TacticalBriefDrawer({
         lines.push('');
       }
     });
+
+    lines.push('', '- ZISO AI -');
 
     return lines.join('\n');
   };
