@@ -238,6 +238,21 @@ export default function AdminDashboard() {
                 </div>
              </Link>
 
+             <Link href="/admin/trade-positions" className="group block">
+                <div className="glass-card p-8 flex items-center justify-between hover:bg-white/[0.04] transition-all border-cyan-500/20">
+                 <div className="flex items-center gap-6">
+                   <div className="w-14 h-14 rounded-2xl bg-cyan-500/10 flex items-center justify-center group-hover:bg-cyan-500/20 transition-all">
+                     <Ticket className="w-7 h-7 text-cyan-400" />
+                   </div>
+                   <div>
+                     <h2 className="text-xl font-black italic tracking-tighter mb-1">持仓数据管理</h2>
+                     <p className="text-xs text-slate-500 font-medium">直接管理真实持仓记录，供交易管理建议闭环消费</p>
+                   </div>
+                 </div>
+                 <ArrowRight className="text-slate-700 group-hover:text-cyan-400 group-hover:translate-x-1 transition-all" />
+                </div>
+             </Link>
+
              <Link href="/admin/observability" className="group block">
                <div className="glass-card p-8 flex items-center justify-between hover:bg-white/[0.04] transition-all border-cyan-500/20">
                  <div className="flex items-center gap-6">
