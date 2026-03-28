@@ -143,9 +143,17 @@ def build_trade_card_markdown(
     lines = [
         f"### 交易管理卡 | {stock_label} {position.symbol}",
         "",
-        f"> **持仓**: {position.remaining_size:.0f}股 @ {position.entry_price:.2f}",
+        f"> **持仓**: {position.remaining_size:.0f}股（原始 {position.position_size:.0f}股） @ {position.entry_price:.2f}",
         f"> **最新收盘**: {snapshot.close:.2f}",
         f"> **浮盈**: {format_pct(snapshot.unrealized_pnl_pct)}",
+    ]
+    if position.latest_sell_date and position.latest_sell_quantity:
+        sell_price = format_price(position.latest_sell_price)
+        lines.append(f"> **最近减仓**: {position.latest_sell_date} 卖出 {position.latest_sell_quantity:.0f}股 @ {sell_price}")
+        if snapshot.state_id == "ProfitProtection":
+            reason_text = "你已先行部分止盈，当前重点是管理剩余仓位，避免把已锁定利润又吐回去。"
+
+    lines.extend([
         "",
         f"**当前状态**：{state_desc}",
         f"**{next_action_label}**：{plan.summary}",
@@ -155,7 +163,7 @@ def build_trade_card_markdown(
         f"- 纪律线：{discipline_price}",
         "",
         f"> 说明：{reason_text}",
-    ]
+    ])
     return "\n".join(lines)
 
 
@@ -200,7 +208,12 @@ def build_advice_record(
             "symbol": position.symbol,
             "entry_date": position.entry_date,
             "entry_price": position.entry_price,
+            "position_size": position.position_size,
             "remaining_size": position.remaining_size,
+            "sold_quantity": position.sold_quantity,
+            "latest_sell_date": position.latest_sell_date,
+            "latest_sell_price": position.latest_sell_price,
+            "latest_sell_quantity": position.latest_sell_quantity,
             "latest_trade_date": snapshot.trade_date,
             "next_trade_date": next_trade_date,
             "state_id": snapshot.state_id,

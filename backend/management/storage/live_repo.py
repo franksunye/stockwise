@@ -28,9 +28,22 @@ def list_active_trade_positions(
         sql = """
             SELECT p.position_id, p.user_id, p.symbol, COALESCE(p.market, m.market),
                    p.entry_date, p.entry_price, p.position_size, p.remaining_size,
-                   p.direction, p.status, p.source, p.note, m.name
+                   p.direction, p.status, p.source, p.note, m.name,
+                   (p.position_size - p.remaining_size) AS sold_quantity,
+                   evt.event_date AS latest_sell_date,
+                   evt.price AS latest_sell_price,
+                   evt.quantity AS latest_sell_quantity
             FROM user_trade_positions p
             LEFT JOIN stock_meta m ON m.symbol = p.symbol
+            LEFT JOIN user_trade_position_events evt
+              ON evt.position_id = p.position_id
+             AND evt.event_type = 'SELL'
+             AND evt.event_date = (
+                SELECT MAX(e2.event_date)
+                FROM user_trade_position_events e2
+                WHERE e2.position_id = p.position_id
+                  AND e2.event_type = 'SELL'
+             )
             WHERE p.status = 'active' AND p.remaining_size > 0
         """
         params: list[object] = []
@@ -64,6 +77,10 @@ def list_active_trade_positions(
                     source=str(row[10] or "manual"),
                     note=row[11],
                     stock_name=row[12],
+                    sold_quantity=float(row[13] or 0.0),
+                    latest_sell_date=row[14],
+                    latest_sell_price=float(row[15]) if row[15] is not None else None,
+                    latest_sell_quantity=float(row[16]) if row[16] is not None else None,
                 )
             )
         return positions
@@ -93,7 +110,12 @@ def insert_trade_advice_log(record: TradeAdviceRecord) -> str:
                 discipline_price=excluded.discipline_price,
                 resistance_price=excluded.resistance_price,
                 unrealized_pnl_pct=excluded.unrealized_pnl_pct,
-                card_markdown=excluded.card_markdown,
+                card_markdown=CASE
+                    WHEN trade_management_advice_log.webhook_delivery_status = 'sent'
+                     AND excluded.webhook_delivery_status = 'dry_run'
+                    THEN trade_management_advice_log.card_markdown
+                    ELSE excluded.card_markdown
+                END,
                 webhook_delivery_status=CASE
                     WHEN trade_management_advice_log.webhook_delivery_status = 'sent'
                      AND excluded.webhook_delivery_status = 'dry_run'
@@ -106,7 +128,12 @@ def insert_trade_advice_log(record: TradeAdviceRecord) -> str:
                     THEN trade_management_advice_log.webhook_delivery_error
                     ELSE excluded.webhook_delivery_error
                 END,
-                source_ref=excluded.source_ref,
+                source_ref=CASE
+                    WHEN trade_management_advice_log.webhook_delivery_status = 'sent'
+                     AND excluded.webhook_delivery_status = 'dry_run'
+                    THEN trade_management_advice_log.source_ref
+                    ELSE excluded.source_ref
+                END,
                 updated_at={NOW_EXPR}
             """,
             (

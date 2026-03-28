@@ -772,6 +772,27 @@ def init_db():
             ON user_trade_positions(status, user_id, symbol, entry_date)
         """)
         cursor.execute("""
+            CREATE TABLE IF NOT EXISTS user_trade_position_events (
+                event_id TEXT PRIMARY KEY,
+                position_id TEXT NOT NULL,
+                user_id TEXT NOT NULL,
+                symbol TEXT NOT NULL,
+                market TEXT,
+                event_date TEXT NOT NULL,
+                event_type TEXT NOT NULL,
+                quantity REAL NOT NULL,
+                price REAL,
+                note TEXT,
+                created_at TIMESTAMP NOT NULL,
+                updated_at TIMESTAMP NOT NULL,
+                FOREIGN KEY (position_id) REFERENCES user_trade_positions(position_id)
+            )
+        """)
+        cursor.execute("""
+            CREATE INDEX IF NOT EXISTS idx_user_trade_position_events_lookup
+            ON user_trade_position_events(position_id, event_date DESC, event_type)
+        """)
+        cursor.execute("""
             CREATE TABLE IF NOT EXISTS trade_management_advice_log (
                 advice_id TEXT PRIMARY KEY,
                 position_id TEXT NOT NULL,

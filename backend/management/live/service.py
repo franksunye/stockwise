@@ -135,6 +135,13 @@ def run_trade_management_advice_loop(
                         primary_action, secondary_action = _split_action_summary(plan.summary)
                         source_desc, source_desc_color = _state_theme(latest.state_id)
                         stock_label = position.stock_name or position.symbol
+                        holding_text = f"{position.remaining_size:.0f}/{position.position_size:.0f}股 @ {position.entry_price:.2f}"
+                        detail_lines = list(plan.bullets or [])
+                        if position.latest_sell_date and position.latest_sell_quantity:
+                            sell_price = format_price(position.latest_sell_price)
+                            detail_lines.append(
+                                f"最近减仓 {position.latest_sell_date}: 卖出 {position.latest_sell_quantity:.0f}股 @ {sell_price}"
+                            )
                         send_wecom_template_card(
                             title=stock_label,
                             subtitle=f"{position.symbol} · {next_trade_date or latest.trade_date} 建议",
@@ -142,10 +149,10 @@ def run_trade_management_advice_loop(
                             summary_line=f"最新收盘 {format_price(latest.close)} · 浮盈 {format_pct(latest.unrealized_pnl_pct)}",
                             action_label=primary_action,
                             action_desc=secondary_action,
-                            holding_text=f"{position.remaining_size:.0f}股 @ {position.entry_price:.2f}",
+                            holding_text=holding_text,
                             observation_text=format_price(resolve_observation_price(latest)),
                             discipline_text=format_price(latest.discipline_price),
-                            detail_lines=plan.bullets or [],
+                            detail_lines=detail_lines,
                             observation_price=format_price(resolve_observation_price(latest)),
                             discipline_price=format_price(latest.discipline_price),
                             detail=plan.detail,

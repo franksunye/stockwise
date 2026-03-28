@@ -19,6 +19,10 @@ class UserTradePosition:
     source: str = "manual"
     note: Optional[str] = None
     stock_name: Optional[str] = None
+    sold_quantity: float = 0.0
+    latest_sell_date: Optional[str] = None
+    latest_sell_price: Optional[float] = None
+    latest_sell_quantity: Optional[float] = None
 
 
 @dataclass
