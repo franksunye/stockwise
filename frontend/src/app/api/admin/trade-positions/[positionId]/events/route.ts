@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { Client } from '@libsql/client';
 import Database from 'better-sqlite3';
 import { requireAdminAuth } from '@/lib/admin-auth';
+import { recomputeRemainingSize } from '@/lib/admin-trade-positions';
 import { getDbClient } from '@/lib/db';
 
 interface TradePositionEventRow {
@@ -50,7 +51,7 @@ export async function GET(
   try {
     const { positionId } = await params;
     const client = getDbClient();
-    const strategy = process.env.DB_STRATEGY || process.env.DB_SOURCE || 'local';
+    const strategy = (process.env.DB_STRATEGY || process.env.DB_SOURCE || 'local') as 'cloud' | 'local';
 
     if (strategy === 'cloud') {
       const turso = client as Client;
@@ -103,9 +104,11 @@ export async function POST(
     if (strategy === 'cloud') {
       const turso = client as Client;
       await turso.execute({ sql, args: [eventId, positionId, userId, symbol, market, eventDate, eventType, quantity, price, note] });
+      await recomputeRemainingSize(turso, strategy, positionId);
     } else {
       const db = client as Database.Database;
       db.prepare(sql).run(eventId, positionId, userId, symbol, market, eventDate, eventType, quantity, price, note);
+      await recomputeRemainingSize(db, strategy, positionId);
       db.close();
     }
 

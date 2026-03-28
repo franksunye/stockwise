@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { Client } from '@libsql/client';
 import Database from 'better-sqlite3';
 import { requireAdminAuth } from '@/lib/admin-auth';
+import { buildPositionDetailSql, recomputeRemainingSize } from '@/lib/admin-trade-positions';
 import { getDbClient } from '@/lib/db';
 
 function normalizeSymbol(input: unknown): string {
@@ -16,6 +17,35 @@ function toNumber(input: unknown): number {
     const value = Number(input);
     if (!Number.isFinite(value)) return NaN;
     return value;
+}
+
+export async function GET(
+    request: Request,
+    { params }: { params: Promise<{ positionId: string }> }
+) {
+    const unauthorized = requireAdminAuth(request);
+    if (unauthorized) return unauthorized;
+
+    try {
+        const { positionId } = await params;
+        const client = getDbClient();
+        const strategy = (process.env.DB_STRATEGY || process.env.DB_SOURCE || 'local') as 'cloud' | 'local';
+        const sql = buildPositionDetailSql();
+
+        if (strategy === 'cloud') {
+            const turso = client as Client;
+            const result = await turso.execute({ sql, args: [positionId] });
+            return NextResponse.json({ position: result.rows[0] || null });
+        }
+
+        const db = client as Database.Database;
+        const position = db.prepare(sql).get(positionId) || null;
+        db.close();
+        return NextResponse.json({ position });
+    } catch (error) {
+        console.error('Failed to fetch trade position detail:', error);
+        return NextResponse.json({ error: 'Failed to fetch trade position detail' }, { status: 500 });
+    }
 }
 
 export async function PATCH(
@@ -45,7 +75,7 @@ export async function PATCH(
         }
 
         const client = getDbClient();
-        const strategy = process.env.DB_STRATEGY || process.env.DB_SOURCE || 'local';
+        const strategy = (process.env.DB_STRATEGY || process.env.DB_SOURCE || 'local') as 'cloud' | 'local';
 
         if (strategy === 'cloud') {
             const turso = client as Client;
@@ -58,6 +88,7 @@ export async function PATCH(
                 `,
                 args: [userId, symbol, market, entryDate, entryPrice, positionSize, remainingSize, direction, status, source, note, positionId],
             });
+            await recomputeRemainingSize(turso, strategy, positionId);
         } else {
             const db = client as Database.Database;
             db.prepare(`
@@ -66,6 +97,7 @@ export async function PATCH(
                     remaining_size = ?, direction = ?, status = ?, source = ?, note = ?, updated_at = datetime('now', '+8 hours')
                 WHERE position_id = ?
             `).run(userId, symbol, market, entryDate, entryPrice, positionSize, remainingSize, direction, status, source, note, positionId);
+            await recomputeRemainingSize(db, strategy, positionId);
             db.close();
         }
 

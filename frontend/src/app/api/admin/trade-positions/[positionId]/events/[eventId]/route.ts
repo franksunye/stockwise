@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { Client } from '@libsql/client';
 import Database from 'better-sqlite3';
 import { requireAdminAuth } from '@/lib/admin-auth';
+import { recomputeRemainingSize } from '@/lib/admin-trade-positions';
 import { getDbClient } from '@/lib/db';
 
 function toNumber(input: unknown): number {
@@ -40,7 +41,7 @@ export async function PATCH(
     }
 
     const client = getDbClient();
-    const strategy = process.env.DB_STRATEGY || process.env.DB_SOURCE || 'local';
+    const strategy = (process.env.DB_STRATEGY || process.env.DB_SOURCE || 'local') as 'cloud' | 'local';
     const sql = `
       UPDATE user_trade_position_events
       SET user_id = ?, symbol = ?, market = ?, event_date = ?, event_type = ?, quantity = ?, price = ?, note = ?, updated_at = datetime('now', '+8 hours')
@@ -50,9 +51,11 @@ export async function PATCH(
     if (strategy === 'cloud') {
       const turso = client as Client;
       await turso.execute({ sql, args: [userId, symbol, market, eventDate, eventType, quantity, price, note, positionId, eventId] });
+      await recomputeRemainingSize(turso, strategy, positionId);
     } else {
       const db = client as Database.Database;
       db.prepare(sql).run(userId, symbol, market, eventDate, eventType, quantity, price, note, positionId, eventId);
+      await recomputeRemainingSize(db, strategy, positionId);
       db.close();
     }
 
@@ -73,15 +76,17 @@ export async function DELETE(
   try {
     const { positionId, eventId } = await params;
     const client = getDbClient();
-    const strategy = process.env.DB_STRATEGY || process.env.DB_SOURCE || 'local';
+    const strategy = (process.env.DB_STRATEGY || process.env.DB_SOURCE || 'local') as 'cloud' | 'local';
     const sql = 'DELETE FROM user_trade_position_events WHERE position_id = ? AND event_id = ?';
 
     if (strategy === 'cloud') {
       const turso = client as Client;
       await turso.execute({ sql, args: [positionId, eventId] });
+      await recomputeRemainingSize(turso, strategy, positionId);
     } else {
       const db = client as Database.Database;
       db.prepare(sql).run(positionId, eventId);
+      await recomputeRemainingSize(db, strategy, positionId);
       db.close();
     }
 

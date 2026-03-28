@@ -443,7 +443,9 @@ export default function TradePositionsAdminPage() {
                 }`}
               >
                 <div>
-                  <div className="font-mono text-base font-semibold">{position.symbol}</div>
+                  <Link href={`/admin/trade-positions/${position.position_id}`} className="font-mono text-base font-semibold hover:text-cyan-300 transition">
+                    {position.symbol}
+                  </Link>
                   <div className="text-sm text-slate-300">{position.stock_name || '-'}</div>
                   <div className="text-xs text-slate-500 mt-1">{position.user_id}</div>
                 </div>
