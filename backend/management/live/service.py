@@ -49,8 +49,8 @@ def _state_theme(snapshot_state_id: str) -> tuple[str, int]:
     mapping = {
         "ProfitProtection": ("盈利保护期", 2),
         "TrendHolding": ("趋势持有", 2),
-        "BreakoutPending": ("突破待确认", 1),
-        "EntryTriggered": ("建仓确认期", 1),
+        "BreakoutPending": ("突破待确认", 0),
+        "EntryTriggered": ("建仓确认期", 0),
         "FailureRisk": ("风险抬升", 3),
         "ExitCompleted": ("已退出", 0),
     }
@@ -134,9 +134,10 @@ def run_trade_management_advice_loop(
                         plan = build_action_plan(latest, str(final_lane["recommended_policy"]))
                         primary_action, secondary_action = _split_action_summary(plan.summary)
                         source_desc, source_desc_color = _state_theme(latest.state_id)
+                        stock_label = position.stock_name or position.symbol
                         send_wecom_template_card(
-                            title=f"{position.stock_name or position.symbol} {position.symbol}",
-                            subtitle=f"{next_trade_date or latest.trade_date} 交易建议",
+                            title=stock_label,
+                            subtitle=f"{position.symbol} · {next_trade_date or latest.trade_date} 建议",
                             state_label=str(record.extra_payload.get("state_id_text") or latest.state_id or ""),
                             summary_line=f"最新收盘 {format_price(latest.close)} · 浮盈 {format_pct(latest.unrealized_pnl_pct)}",
                             action_label=primary_action,
