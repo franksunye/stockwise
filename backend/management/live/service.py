@@ -137,10 +137,11 @@ def run_trade_management_advice_loop(
                         stock_label = position.stock_name or position.symbol
                         holding_text = f"{position.remaining_size:.0f}/{position.position_size:.0f}股 @ {position.entry_price:.2f}"
                         detail_lines = list(plan.bullets or [])
-                        if position.latest_sell_date and position.latest_sell_quantity:
-                            sell_price = format_price(position.latest_sell_price)
+                        if position.latest_event_date and position.latest_event_quantity and position.latest_event_type:
+                            event_label = "加仓" if str(position.latest_event_type).upper() == "BUY" else "减仓"
+                            event_price = format_price(position.latest_event_price)
                             detail_lines.append(
-                                f"最近减仓 {position.latest_sell_date}: 卖出 {position.latest_sell_quantity:.0f}股 @ {sell_price}"
+                                f"最近{event_label} {position.latest_event_date}: {position.latest_event_quantity:.0f}股 @ {event_price}"
                             )
                         send_wecom_template_card(
                             title=stock_label,

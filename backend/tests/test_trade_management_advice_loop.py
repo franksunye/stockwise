@@ -52,6 +52,10 @@ def _sample_position() -> UserTradePosition:
         latest_sell_date="2026-03-27",
         latest_sell_price=17.58,
         latest_sell_quantity=1000.0,
+        latest_event_date="2026-03-27",
+        latest_event_type="SELL",
+        latest_event_price=17.58,
+        latest_event_quantity=1000.0,
     )
 
 
@@ -69,7 +73,7 @@ def test_profit_protection_card_contains_core_fields() -> None:
 
     assert "交易管理卡 | 科济药业-B 02171" in card
     assert "**持仓**: 3000股（原始 4000股） @ 14.50" in card
-    assert "**最近减仓**: 2026-03-27 卖出 1000股 @ 17.58" in card
+    assert "**最近操作**: 2026-03-27 减仓 1000股 @ 17.58" in card
     assert "**当前状态**：已有明确浮盈，核心任务转为保护利润。" in card
     assert "**2026-03-30 建议**：继续持有，不追高" in card
     assert "你已先行部分止盈" in card
@@ -208,7 +212,7 @@ def test_advice_loop_can_use_template_card_style() -> None:
     assert template_mock.call_args.kwargs["detail_lines"] == [
         "站稳 17.74：继续持有",
         "冲高不稳：先止盈 1/3",
-        "最近减仓 2026-03-27: 卖出 1000股 @ 17.58",
+        "最近减仓 2026-03-27: 1000股 @ 17.58",
     ]
 
 

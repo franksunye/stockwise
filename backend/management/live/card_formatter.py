@@ -147,10 +147,13 @@ def build_trade_card_markdown(
         f"> **最新收盘**: {snapshot.close:.2f}",
         f"> **浮盈**: {format_pct(snapshot.unrealized_pnl_pct)}",
     ]
-    if position.latest_sell_date and position.latest_sell_quantity:
-        sell_price = format_price(position.latest_sell_price)
-        lines.append(f"> **最近减仓**: {position.latest_sell_date} 卖出 {position.latest_sell_quantity:.0f}股 @ {sell_price}")
-        if snapshot.state_id == "ProfitProtection":
+    if position.latest_event_date and position.latest_event_quantity and position.latest_event_type:
+        latest_event_label = "加仓" if str(position.latest_event_type).upper() == "BUY" else "减仓"
+        latest_event_price = format_price(position.latest_event_price)
+        lines.append(
+            f"> **最近操作**: {position.latest_event_date} {latest_event_label} {position.latest_event_quantity:.0f}股 @ {latest_event_price}"
+        )
+        if snapshot.state_id == "ProfitProtection" and str(position.latest_event_type).upper() == "SELL":
             reason_text = "你已先行部分止盈，当前重点是管理剩余仓位，避免把已锁定利润又吐回去。"
 
     lines.extend([

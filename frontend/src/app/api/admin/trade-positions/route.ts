@@ -23,6 +23,13 @@ interface TradePositionRow {
     latest_action_summary: string | null;
     latest_next_trade_date: string | null;
     latest_delivery_status: string | null;
+    latest_event_date: string | null;
+    latest_event_type: string | null;
+    latest_event_price: number | null;
+    latest_event_quantity: number | null;
+    event_count: number;
+    buy_event_count: number;
+    sell_event_count: number;
     updated_at: string | null;
 }
 
@@ -61,6 +68,13 @@ function buildListSql(): string {
             a.action_summary AS latest_action_summary,
             a.next_trade_date AS latest_next_trade_date,
             a.webhook_delivery_status AS latest_delivery_status,
+            e.event_date AS latest_event_date,
+            e.event_type AS latest_event_type,
+            e.price AS latest_event_price,
+            e.quantity AS latest_event_quantity,
+            COALESCE(ec.event_count, 0) AS event_count,
+            COALESCE(ec.buy_event_count, 0) AS buy_event_count,
+            COALESCE(ec.sell_event_count, 0) AS sell_event_count,
             p.updated_at
         FROM user_trade_positions p
         LEFT JOIN stock_meta m ON m.symbol = p.symbol
@@ -71,6 +85,22 @@ function buildListSql(): string {
             FROM trade_management_advice_log a2
             WHERE a2.position_id = p.position_id
          )
+        LEFT JOIN user_trade_position_events e
+          ON e.position_id = p.position_id
+         AND e.event_date = (
+            SELECT MAX(e2.event_date)
+            FROM user_trade_position_events e2
+            WHERE e2.position_id = p.position_id
+         )
+        LEFT JOIN (
+            SELECT
+                position_id,
+                COUNT(*) AS event_count,
+                SUM(CASE WHEN event_type = 'BUY' THEN 1 ELSE 0 END) AS buy_event_count,
+                SUM(CASE WHEN event_type = 'SELL' THEN 1 ELSE 0 END) AS sell_event_count
+            FROM user_trade_position_events
+            GROUP BY position_id
+        ) ec ON ec.position_id = p.position_id
         ORDER BY p.status = 'active' DESC, p.updated_at DESC, p.entry_date DESC
     `;
 }

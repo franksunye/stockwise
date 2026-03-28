@@ -5,6 +5,22 @@ from typing import Any, Dict, Optional
 
 
 @dataclass
+class TradePositionEvent:
+    event_id: str
+    position_id: str
+    user_id: str
+    symbol: str
+    market: Optional[str]
+    event_date: str
+    event_type: str
+    quantity: float
+    price: Optional[float] = None
+    note: Optional[str] = None
+    created_at: Optional[str] = None
+    updated_at: Optional[str] = None
+
+
+@dataclass
 class UserTradePosition:
     position_id: str
     user_id: str
@@ -23,6 +39,13 @@ class UserTradePosition:
     latest_sell_date: Optional[str] = None
     latest_sell_price: Optional[float] = None
     latest_sell_quantity: Optional[float] = None
+    latest_event_date: Optional[str] = None
+    latest_event_type: Optional[str] = None
+    latest_event_price: Optional[float] = None
+    latest_event_quantity: Optional[float] = None
+    event_count: int = 0
+    buy_event_count: int = 0
+    sell_event_count: int = 0
 
 
 @dataclass

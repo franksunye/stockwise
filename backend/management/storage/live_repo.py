@@ -6,7 +6,7 @@ from typing import Optional
 from uuid import uuid4
 
 from backend.database import get_connection
-from backend.management.domain.live_advice import TradeAdviceRecord, UserTradePosition
+from backend.management.domain.live_advice import TradeAdviceRecord, TradePositionEvent, UserTradePosition
 from backend.trading_calendar import get_market_from_symbol
 
 
@@ -32,7 +32,14 @@ def list_active_trade_positions(
                    (p.position_size - p.remaining_size) AS sold_quantity,
                    evt.event_date AS latest_sell_date,
                    evt.price AS latest_sell_price,
-                   evt.quantity AS latest_sell_quantity
+                   evt.quantity AS latest_sell_quantity,
+                   le.event_date AS latest_event_date,
+                   le.event_type AS latest_event_type,
+                   le.price AS latest_event_price,
+                   le.quantity AS latest_event_quantity,
+                   COALESCE(ec.event_count, 0) AS event_count,
+                   COALESCE(ec.buy_event_count, 0) AS buy_event_count,
+                   COALESCE(ec.sell_event_count, 0) AS sell_event_count
             FROM user_trade_positions p
             LEFT JOIN stock_meta m ON m.symbol = p.symbol
             LEFT JOIN user_trade_position_events evt
@@ -44,6 +51,22 @@ def list_active_trade_positions(
                 WHERE e2.position_id = p.position_id
                   AND e2.event_type = 'SELL'
              )
+            LEFT JOIN user_trade_position_events le
+              ON le.position_id = p.position_id
+             AND le.event_date = (
+                SELECT MAX(e3.event_date)
+                FROM user_trade_position_events e3
+                WHERE e3.position_id = p.position_id
+             )
+            LEFT JOIN (
+                SELECT
+                    position_id,
+                    COUNT(*) AS event_count,
+                    SUM(CASE WHEN event_type = 'BUY' THEN 1 ELSE 0 END) AS buy_event_count,
+                    SUM(CASE WHEN event_type = 'SELL' THEN 1 ELSE 0 END) AS sell_event_count
+                FROM user_trade_position_events
+                GROUP BY position_id
+            ) ec ON ec.position_id = p.position_id
             WHERE p.status = 'active' AND p.remaining_size > 0
         """
         params: list[object] = []
@@ -81,9 +104,51 @@ def list_active_trade_positions(
                     latest_sell_date=row[14],
                     latest_sell_price=float(row[15]) if row[15] is not None else None,
                     latest_sell_quantity=float(row[16]) if row[16] is not None else None,
+                    latest_event_date=row[17],
+                    latest_event_type=row[18],
+                    latest_event_price=float(row[19]) if row[19] is not None else None,
+                    latest_event_quantity=float(row[20]) if row[20] is not None else None,
+                    event_count=int(row[21] or 0),
+                    buy_event_count=int(row[22] or 0),
+                    sell_event_count=int(row[23] or 0),
                 )
             )
         return positions
+    finally:
+        conn.close()
+
+
+def list_trade_position_events(position_id: str) -> list[TradePositionEvent]:
+    conn = get_connection()
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            """
+            SELECT event_id, position_id, user_id, symbol, market, event_date, event_type, quantity, price, note, created_at, updated_at
+            FROM user_trade_position_events
+            WHERE position_id = ?
+            ORDER BY event_date DESC, updated_at DESC, event_id DESC
+            """,
+            (position_id,),
+        )
+        rows = cur.fetchall()
+        return [
+            TradePositionEvent(
+                event_id=str(row[0]),
+                position_id=str(row[1]),
+                user_id=str(row[2]),
+                symbol=str(row[3]),
+                market=row[4],
+                event_date=str(row[5]),
+                event_type=str(row[6]),
+                quantity=float(row[7]),
+                price=float(row[8]) if row[8] is not None else None,
+                note=row[9],
+                created_at=row[10],
+                updated_at=row[11],
+            )
+            for row in rows
+        ]
     finally:
         conn.close()
 

@@ -95,12 +95,17 @@ export async function DELETE(
                 args: [positionId],
             });
             await turso.execute({
+                sql: 'DELETE FROM user_trade_position_events WHERE position_id = ?',
+                args: [positionId],
+            });
+            await turso.execute({
                 sql: 'DELETE FROM user_trade_positions WHERE position_id = ?',
                 args: [positionId],
             });
         } else {
             const db = client as Database.Database;
             db.prepare('DELETE FROM trade_management_advice_log WHERE position_id = ?').run(positionId);
+            db.prepare('DELETE FROM user_trade_position_events WHERE position_id = ?').run(positionId);
             db.prepare('DELETE FROM user_trade_positions WHERE position_id = ?').run(positionId);
             db.close();
         }
