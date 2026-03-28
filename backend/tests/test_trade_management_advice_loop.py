@@ -100,6 +100,7 @@ def test_advice_loop_runs_with_mocked_dependencies() -> None:
     assert result.persisted_count == 1
     assert result.failed_count == 0
     assert result.delivered_count == 0
+    assert result.suppressed_count == 0
     assert len(result.cards) == 1
     persist_mock.assert_called_once()
 
@@ -127,6 +128,51 @@ def test_advice_loop_persists_failed_webhook_status() -> None:
     assert result.processed_count == 1
     assert result.persisted_count == 1
     assert result.delivered_count == 0
+    assert result.suppressed_count == 0
     assert result.failed_count == 1
     assert "webhook 发送失败" in result.errors[0]
     assert persist_mock.call_count == 2
+
+
+def test_advice_loop_suppresses_duplicate_sent_card() -> None:
+    position = _sample_position()
+    snapshot = _sample_snapshot()
+
+    with patch("backend.management.live.service.init_db"), \
+         patch("backend.management.live.service.list_active_trade_positions", return_value=[position]), \
+         patch("backend.management.live.service.build_position_snapshots", return_value=[snapshot]), \
+         patch(
+             "backend.management.live.service.route_case_lanes",
+             return_value={
+                 "final": {
+                     "lane_id": "baseline_3d",
+                     "recommended_policy": "buy_and_hold_baseline",
+                 }
+             },
+         ), \
+         patch(
+             "backend.management.live.service.fetch_latest_trade_advice",
+             return_value={
+                 "latest_trade_date": "2026-03-27",
+                 "card_markdown": build_trade_card_markdown(
+                     position=position,
+                     snapshot=snapshot,
+                     next_trade_date="2026-03-30",
+                     lane_id="baseline_3d",
+                     recommended_policy="buy_and_hold_baseline",
+                 ),
+                 "webhook_delivery_status": "sent",
+                 "webhook_delivery_error": None,
+             },
+         ), \
+         patch("backend.management.live.service.send_wecom_notification") as notify_mock, \
+         patch("backend.management.live.service.insert_trade_advice_log") as persist_mock:
+        result = run_trade_management_advice_loop(persist_log=True, notify=True)
+
+    assert result.processed_count == 1
+    assert result.persisted_count == 0
+    assert result.delivered_count == 0
+    assert result.suppressed_count == 1
+    assert result.failed_count == 0
+    notify_mock.assert_not_called()
+    persist_mock.assert_not_called()

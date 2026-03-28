@@ -138,6 +138,33 @@ def insert_trade_advice_log(record: TradeAdviceRecord) -> str:
         conn.close()
 
 
+def fetch_latest_trade_advice(position_id: str) -> dict[str, object] | None:
+    conn = get_connection()
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            """
+            SELECT latest_trade_date, card_markdown, webhook_delivery_status, webhook_delivery_error
+            FROM trade_management_advice_log
+            WHERE position_id = ?
+            ORDER BY updated_at DESC
+            LIMIT 1
+            """,
+            (position_id,),
+        )
+        row = cur.fetchone()
+        if not row:
+            return None
+        return {
+            "latest_trade_date": row[0],
+            "card_markdown": row[1],
+            "webhook_delivery_status": row[2],
+            "webhook_delivery_error": row[3],
+        }
+    finally:
+        conn.close()
+
+
 def build_position_id() -> str:
     return f"pos_{uuid4().hex[:12]}"
 

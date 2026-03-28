@@ -10,6 +10,7 @@ from backend.management.research.lanes import route_case_lanes
 from backend.management.state.snapshot_builder import build_position_snapshots
 from backend.management.storage.live_repo import (
     build_advice_id,
+    fetch_latest_trade_advice,
     insert_trade_advice_log,
     list_active_trade_positions,
 )
@@ -22,6 +23,7 @@ class AdviceLoopResult:
     processed_count: int
     persisted_count: int
     delivered_count: int
+    suppressed_count: int
     failed_count: int
     skipped_count: int
     cards: list[str]
@@ -43,6 +45,7 @@ def run_trade_management_advice_loop(
     processed_count = 0
     persisted_count = 0
     delivered_count = 0
+    suppressed_count = 0
     failed_count = 0
     skipped_count = 0
 
@@ -75,6 +78,20 @@ def run_trade_management_advice_loop(
                 recommended_policy=str(final_lane["recommended_policy"]),
                 advice_id=build_advice_id(),
             )
+            previous = fetch_latest_trade_advice(position.position_id)
+            is_duplicate_sent = bool(
+                notify
+                and previous
+                and str(previous.get("latest_trade_date") or "") == record.latest_trade_date
+                and str(previous.get("card_markdown") or "") == record.card_markdown
+                and str(previous.get("webhook_delivery_status") or "") == "sent"
+            )
+            if is_duplicate_sent:
+                processed_count += 1
+                suppressed_count += 1
+                cards.append(record.card_markdown)
+                continue
+
             if not notify:
                 record.webhook_delivery_status = "dry_run"
 
@@ -111,6 +128,7 @@ def run_trade_management_advice_loop(
         processed_count=processed_count,
         persisted_count=persisted_count,
         delivered_count=delivered_count,
+        suppressed_count=suppressed_count,
         failed_count=failed_count,
         skipped_count=skipped_count,
         cards=cards,
