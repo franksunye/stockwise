@@ -670,6 +670,84 @@ def init_db():
             CREATE INDEX IF NOT EXISTS idx_producer_outcome_lookup
             ON producer_outcome_log(symbol, trade_date, producer_id)
         """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS position_state_snapshots (
+                id TEXT PRIMARY KEY,
+                symbol TEXT NOT NULL,
+                trade_date TEXT NOT NULL,
+                entry_date TEXT NOT NULL,
+                entry_price REAL NOT NULL,
+                position_size REAL NOT NULL,
+                holding_days INTEGER NOT NULL,
+                close REAL NOT NULL,
+                high REAL,
+                low REAL,
+                unrealized_pnl_pct REAL,
+                mfe_pct REAL,
+                mae_pct REAL,
+                signal_state TEXT,
+                confidence REAL,
+                support_price REAL,
+                resistance_price REAL,
+                discipline_price REAL,
+                breakout_confirmed INTEGER DEFAULT 0,
+                near_resistance INTEGER DEFAULT 0,
+                failed_breakout_risk INTEGER DEFAULT 0,
+                partial_exit_done INTEGER DEFAULT 0,
+                state_id TEXT,
+                feature_payload TEXT,
+                source_ref TEXT,
+                created_at TIMESTAMP NOT NULL,
+                updated_at TIMESTAMP NOT NULL
+            )
+        """)
+        cursor.execute("""
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_position_state_unique
+            ON position_state_snapshots(symbol, trade_date, entry_date)
+        """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS management_policy_runs (
+                run_id TEXT PRIMARY KEY,
+                policy_id TEXT NOT NULL,
+                universe TEXT NOT NULL,
+                date_from TEXT NOT NULL,
+                date_to TEXT NOT NULL,
+                benchmark_policy_id TEXT,
+                objective_id TEXT,
+                params_json TEXT,
+                sample_size INTEGER,
+                triggered_by TEXT,
+                note TEXT,
+                created_at TIMESTAMP NOT NULL
+            )
+        """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS management_policy_results (
+                id TEXT PRIMARY KEY,
+                run_id TEXT NOT NULL,
+                policy_id TEXT NOT NULL,
+                symbol TEXT NOT NULL,
+                entry_date TEXT NOT NULL,
+                exit_date TEXT,
+                holding_days INTEGER,
+                entry_price REAL NOT NULL,
+                exit_price REAL,
+                realized_pnl_pct REAL,
+                max_drawdown_pct REAL,
+                profit_giveback_pct REAL,
+                win_flag INTEGER,
+                action_count INTEGER DEFAULT 0,
+                action_log_json TEXT,
+                result_payload TEXT,
+                created_at TIMESTAMP NOT NULL,
+                updated_at TIMESTAMP NOT NULL,
+                FOREIGN KEY (run_id) REFERENCES management_policy_runs(run_id)
+            )
+        """)
+        cursor.execute("""
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_management_policy_results_unique
+            ON management_policy_results(run_id, policy_id, symbol, entry_date)
+        """)
 
         # 7. Chain Execution Traces (For Multi-turn debugging & observability)
         # Optimized for "Delayed Write" to reduce lock contention on Turso

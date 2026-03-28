@@ -1,0 +1,182 @@
+[
+  {
+    "label": "000630_20260318",
+    "symbol": "000630",
+    "name": "铜陵有色",
+    "entry_date": "2026-03-18",
+    "entry_price": 6.5,
+    "position_size": 3000.0,
+    "note": "20-case pilot"
+  },
+  {
+    "label": "000988_20260318",
+    "symbol": "000988",
+    "name": "华工科技",
+    "entry_date": "2026-03-18",
+    "entry_price": 114.78,
+    "position_size": 3000.0,
+    "note": "20-case pilot"
+  },
+  {
+    "label": "001258_20260318",
+    "symbol": "001258",
+    "name": "立新能源",
+    "entry_date": "2026-03-18",
+    "entry_price": 9.32,
+    "position_size": 3000.0,
+    "note": "20-case pilot"
+  },
+  {
+    "label": "002149_20260318",
+    "symbol": "002149",
+    "name": "西部材料",
+    "entry_date": "2026-03-18",
+    "entry_price": 45.33,
+    "position_size": 3000.0,
+    "note": "20-case pilot"
+  },
+  {
+    "label": "002202_20260318",
+    "symbol": "002202",
+    "name": "金风科技",
+    "entry_date": "2026-03-18",
+    "entry_price": 31.0,
+    "position_size": 3000.0,
+    "note": "20-case pilot"
+  },
+  {
+    "label": "002281_20260318",
+    "symbol": "002281",
+    "name": "光迅科技",
+    "entry_date": "2026-03-18",
+    "entry_price": 83.6,
+    "position_size": 3000.0,
+    "note": "20-case pilot"
+  },
+  {
+    "label": "002487_20260318",
+    "symbol": "002487",
+    "name": "大金重工",
+    "entry_date": "2026-03-18",
+    "entry_price": 71.03,
+    "position_size": 3000.0,
+    "note": "20-case pilot"
+  },
+  {
+    "label": "002837_20260318",
+    "symbol": "002837",
+    "name": "英维克",
+    "entry_date": "2026-03-18",
+    "entry_price": 106.68,
+    "position_size": 3000.0,
+    "note": "20-case pilot"
+  },
+  {
+    "label": "00700_20260318",
+    "symbol": "00700",
+    "name": "腾讯控股",
+    "entry_date": "2026-03-18",
+    "entry_price": 550.5,
+    "position_size": 3000.0,
+    "note": "20-case pilot"
+  },
+  {
+    "label": "01167_20260318",
+    "symbol": "01167",
+    "name": "加科思-B",
+    "entry_date": "2026-03-18",
+    "entry_price": 6.93,
+    "position_size": 3000.0,
+    "note": "20-case pilot"
+  },
+  {
+    "label": "01810_20260318",
+    "symbol": "01810",
+    "name": "小米集团-W",
+    "entry_date": "2026-03-18",
+    "entry_price": 35.14,
+    "position_size": 3000.0,
+    "note": "20-case pilot"
+  },
+  {
+    "label": "02171_20260318",
+    "symbol": "02171",
+    "name": "科济药业-B",
+    "entry_date": "2026-03-18",
+    "entry_price": 16.62,
+    "position_size": 3000.0,
+    "note": "20-case pilot"
+  },
+  {
+    "label": "300015_20260318",
+    "symbol": "300015",
+    "name": "爱尔眼科",
+    "entry_date": "2026-03-18",
+    "entry_price": 10.21,
+    "position_size": 3000.0,
+    "note": "20-case pilot"
+  },
+  {
+    "label": "300308_20260318",
+    "symbol": "300308",
+    "name": "中际旭创",
+    "entry_date": "2026-03-18",
+    "entry_price": 580.0,
+    "position_size": 3000.0,
+    "note": "20-case pilot"
+  },
+  {
+    "label": "300394_20260318",
+    "symbol": "300394",
+    "name": "天孚通信",
+    "entry_date": "2026-03-18",
+    "entry_price": 303.3,
+    "position_size": 3000.0,
+    "note": "20-case pilot"
+  },
+  {
+    "label": "300395_20260318",
+    "symbol": "300395",
+    "name": "菲利华",
+    "entry_date": "2026-03-18",
+    "entry_price": 109.3,
+    "position_size": 3000.0,
+    "note": "20-case pilot"
+  },
+  {
+    "label": "300436_20260318",
+    "symbol": "300436",
+    "name": "广生堂",
+    "entry_date": "2026-03-18",
+    "entry_price": 106.9,
+    "position_size": 3000.0,
+    "note": "20-case pilot"
+  },
+  {
+    "label": "300502_20260318",
+    "symbol": "300502",
+    "name": "新易盛",
+    "entry_date": "2026-03-18",
+    "entry_price": 430.9,
+    "position_size": 3000.0,
+    "note": "20-case pilot"
+  },
+  {
+    "label": "300516_20260318",
+    "symbol": "300516",
+    "name": "久之洋",
+    "entry_date": "2026-03-18",
+    "entry_price": 62.53,
+    "position_size": 3000.0,
+    "note": "20-case pilot"
+  },
+  {
+    "label": "300684_20260318",
+    "symbol": "300684",
+    "name": "中石科技",
+    "entry_date": "2026-03-18",
+    "entry_price": 54.2,
+    "position_size": 3000.0,
+    "note": "20-case pilot"
+  }
+]

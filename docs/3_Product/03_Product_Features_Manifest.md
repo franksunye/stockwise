@@ -132,9 +132,15 @@ summary: "面向产品、研发与增长团队的功能事实总表，用于确�
    - 典型链路：`daily_prices -> sample sync -> sidecar -> calibration`
    - 对应工程能力：`quant_tradeability_signals`、策略版本并行观测、weekly calibration。
 
-3. 边界约束
+3. `Trade Management Research Lane`
+   - 面向持仓管理研究与执行策略比较。
+   - 典型链路：`daily_prices + ai_predictions_v2 + position_state -> management policy simulation -> evaluation`
+   - 对应未来能力：部分止盈、纪律退出、跟踪止损、执行卡生成。
+
+4. 边界约束
    - 两条 lane 都建立在真实行情数据之上。
    - 但 `Research Quant Lane` 不是当前前台正式展示的数据源。
+   - `Trade Management Research Lane` 也不是当前前台正式展示的数据源。
    - 生产侧当前重点是按模式分别查看正式绩效，而不是把模式总和作为核心展示目标。
 
 | 模块       | 子功能              | 描述与技术细节                                                               | 代码位置 (Backend/Engine)                     | 状态     |

@@ -31,6 +31,7 @@ This directory serves as the unified single source of truth for the 知守 AI (Z
 - [Dashboard Page Refactoring Design](./1_Engineering/34_Dashboard_Page_Refactoring_Design.md)
 - [Broadcast Layer A Operations Runbook](./1_Engineering/35_Broadcast_LayerA_Operations_Runbook_20260319.md) *(上线运行与应急收口标准)*
 - [Decision Model Implementation Plan](./1_Engineering/39_Decision_Model_Implementation_Plan_20260325.md)
+- [Trade Management Research Architecture](./1_Engineering/42_Trade_Management_Research_Architecture_20260327.md)
 
 ### Current Source of Truth: Investment Mode / Tradeability
 - [Dual-Lane Operations](./2_Intelligence/27C_Dual_Lane_Operations_Manual.md)
@@ -47,6 +48,7 @@ This directory serves as the unified single source of truth for the 知守 AI (Z
 - [AI Context Limits (DeepSeek)](./2_Intelligence/25A_AI_Context_Limits_DeepSeek.md)
 - [Quant + AI Acceptance Criteria](./2_Intelligence/26C_Quant_AI_Acceptance_Criteria.md)
 - [Quant Backtesting Methodology](./2_Intelligence/28Q_Quant_Backtesting_Methodology.md)
+- [Trade Management Research Framework](./2_Intelligence/30Q_Trade_Management_Research_Framework.md)
 - [Validation Logic Research (Legacy)](./2_Intelligence/31Q_Validation_Logic_Research_Legacy.md)
 
 ### [3_Product/](./3_Product/) - What & UX

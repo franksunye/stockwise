@@ -31,8 +31,8 @@ from backend.engine.models.rule_based import RuleAdapter
 from backend.trading_calendar import get_next_trading_day_str
 
 
-MODEL_ID = "rule-engine-shadow"
-MODE_ID = "balanced_v1"
+DEFAULT_MODEL_ID = "rule-engine-shadow"
+DEFAULT_MODE_ID = "balanced_v1"
 
 
 def _load_symbols(manifest_path: str) -> list[str]:
@@ -114,12 +114,15 @@ def main() -> None:
     parser.add_argument("--start-date", required=True)
     parser.add_argument("--end-date", required=True)
     parser.add_argument("--force", action="store_true")
+    parser.add_argument("--model-id", default=DEFAULT_MODEL_ID)
+    parser.add_argument("--mode-id", default=DEFAULT_MODE_ID)
+    parser.add_argument("--set-primary", action="store_true")
     args = parser.parse_args()
 
     symbols = _load_symbols(args.manifest)
     conn = get_connection()
     cur = conn.cursor()
-    model = RuleAdapter(MODEL_ID, {"display_name": "Rule Engine Shadow", "capabilities_json": {}})
+    model = RuleAdapter(args.model_id, {"display_name": "Rule Engine Shadow", "capabilities_json": {}})
 
     success_rows = 0
     skipped_rows = 0
@@ -140,7 +143,7 @@ def main() -> None:
                 if not args.force:
                     exists = cur.execute(
                         "SELECT 1 FROM ai_predictions_v2 WHERE symbol = ? AND date = ? AND model_id = ? LIMIT 1",
-                        (symbol, date_str, MODEL_ID),
+                        (symbol, date_str, args.model_id),
                     ).fetchone()
                     if exists:
                         skipped_rows += 1
@@ -157,13 +160,14 @@ def main() -> None:
                     continue
 
                 layer1 = prediction["layer1"]
-                cur.execute("UPDATE ai_predictions_v2 SET is_primary = 0 WHERE symbol = ? AND date = ?", (symbol, date_str))
+                if args.set_primary:
+                    cur.execute("UPDATE ai_predictions_v2 SET is_primary = 0 WHERE symbol = ? AND date = ?", (symbol, date_str))
                 cur.execute(
                     SAVE_PREDICTION_V2_QUERY,
                     (
                         symbol,
                         date_str,
-                        MODEL_ID,
+                        args.model_id,
                         prediction.get("target_date"),
                         prediction.get("signal"),
                         prediction.get("confidence"),
@@ -174,15 +178,15 @@ def main() -> None:
                         prediction.get("token_usage_input", 0),
                         prediction.get("token_usage_output", 0),
                         prediction.get("execution_time_ms", 0),
-                        1,
-                        f"shadow-{symbol}-{date_str}",
+                        1 if args.set_primary else 0,
+                        f"{args.model_id}-{symbol}-{date_str}",
                         layer1.setup_state,
                         layer1.opportunity_score,
                         layer1.trigger_rule_hit,
                         layer1.risk_off_hit,
                         layer1.strategy_version,
                         json.dumps(layer1.payload, ensure_ascii=False),
-                        MODE_ID,
+                        args.mode_id,
                     ),
                 )
                 success_rows += 1
@@ -200,7 +204,9 @@ def main() -> None:
                 "success_rows": success_rows,
                 "skipped_rows": skipped_rows,
                 "processed_preview": processed[:20],
-                "model_id": MODEL_ID,
+                "model_id": args.model_id,
+                "set_primary": args.set_primary,
+                "mode_id": args.mode_id,
                 "run_at": now_text,
             },
             ensure_ascii=False,

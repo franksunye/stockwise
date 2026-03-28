@@ -4,7 +4,7 @@ doc_id: "strategy-decision-stack-and-producer-architecture"
 doc_domain: "strategy"
 doc_status: "active"
 owner: "founder"
-last_reviewed_at: "2026-03-25"
+last_reviewed_at: "2026-03-27"
 summary: "统一量化规则、AI 判断、解释职能、实验/生产双场景与投资模式之间的分层关系，作为后续 glossary、engineering 与 support 口径的上游事实源。"
 ---
 
@@ -114,7 +114,74 @@ summary: "统一量化规则、AI 判断、解释职能、实验/生产双场景
 - `aggressive_v1`
 - `observe_only_v1`
 
-### 2.4 一个关键判断
+它的当前职责是：
+
+- 接收已经裁决后的市场判断
+- 结合用户偏好，映射为不同风格的动作倾向
+- 作为当前用户侧“交易管理产品层”的第一阶段入口
+
+但它不是未来完整交易管理引擎的全部。
+
+### 2.4 Position State
+
+随着系统从“发牌”走向“如何管理已有仓位”，必须新增一个明确对象：
+
+`Position State`
+
+它回答的问题不是“市场当前怎么看”，而是：
+
+- 用户是否已有仓位
+- 成本价是多少
+- 当前浮盈/浮亏多少
+- 已持有多久
+- 是否已经部分止盈
+- 当前纪律位、目标位、利润回吐状态如何
+
+这个对象既不属于 Producer，也不属于 Interpreter，更不等于 Investment Mode。
+
+### 2.5 Management Policy
+
+`Management Policy` 是未来交易管理系统中的独立层。
+
+它的职责是：
+
+- 消费 `Arbitration Result`
+- 消费 `Position State`
+- 在明确目标函数下，产出：
+  - `Hold`
+  - `Reduce`
+  - `Exit`
+  - `Add`
+  - `Move Stop`
+
+它与 `Investment Mode` 的关系应理解为：
+
+- `Investment Mode` 更偏用户选择的风格层
+- `Management Policy` 更偏后台研究与执行映射层
+
+进一步写死为一句话：
+
+- **模式系统是用户入口层**
+- **持仓状态机是交易管理决策骨架**
+
+### 2.6 一个新的关键判断
+
+因此当前必须新增一个上游共识：
+
+- `Investment Mode` 不是 Producer
+- `Investment Mode` 也不是完整的交易管理研究对象
+- `Position State + Management Policy` 才是后续交易管理能力真正长出来的地方
+- 二者不是冲突关系，而是不同层级：
+  - 面向普通用户，优先暴露 `Investment Mode`
+  - 面向系统内部与进阶能力，使用 `Position State + Management Policy`
+
+进一步约束：
+
+- `Position State` 不应停留为抽象容器
+- 第一阶段必须以一套固定的 `Trade Management State Machine V1` 落地
+- `Management Policy` 的职责，是在这套固定状态之上定义动作，而不是反向发明状态
+
+### 2.7 一个关键判断
 
 `VCP-like`、`TrendStrategy`、`DeepSeek 独立判断`、`Hunyuan 独立判断` 都应视为平行的 `Producer`。
 
@@ -153,7 +220,7 @@ Producer 自己的原始判断结果。
 
 ### 3.3 Action Decision
 
-在 `Arbitration Result` 基础上，再结合 `Investment Mode` 与持仓上下文后，得到最终动作。
+在 `Arbitration Result` 基础上，再结合 `Investment Mode`、`Position State` 与 `Management Policy` 后，得到最终动作。
 
 例子：
 
@@ -215,6 +282,8 @@ Market Data
   -> Producer Outcomes (Quant / AI)
   -> Arbitration Result
   -> Investment Mode
+  -> Position State
+  -> Management Policy
   -> Action Decision
   -> Ledger / Performance / Notification
 ```
@@ -238,7 +307,9 @@ Quant Fact Layer / Producer Outcome / Arbitration / Action
 | `TrendStrategy` | 独立 `Quant Producer` |
 | `DeepSeek` / `Hunyuan` 独立判断 | `AI Producer` |
 | AI 对指标、关键位、纪律的解读 | `Interpreter` |
-| `steady / balanced / aggressive / observe_only` | `Investment Mode` |
+| `steady / balanced / aggressive / observe_only` | 当前 `Investment Mode`（用户风格层） |
+| `entry_price / unrealized_pnl / holding_days / partial_exit_done` | 未来 `Position State` |
+| `部分止盈 / 跟踪止损 / 失败突破退出 / 突破后加仓` | 未来 `Management Policy` |
 | `mode_decision_log` | 应逐步收口为 `Action Decision` 记录表 |
 | `quant_tradeability_signals` | 偏研究口径的 Producer 结果表 |
 
@@ -249,6 +320,7 @@ Quant Fact Layer / Producer Outcome / Arbitration / Action
 1. `Layer-1 / tradeability_v2` 同时承担了底层信号引擎和模式输入源角色
 2. `mode_decision_log` 同时混入了规则来源与模式结果语义
 3. `TrendStrategy` 与部分 AI 原始判断被 Layer-1 覆盖后，原始 Producer 独立性不清晰
+4. `Investment Mode` 与未来交易管理引擎边界尚未显式化
 
 ---
 
@@ -263,6 +335,8 @@ Quant Fact Layer / Producer Outcome / Arbitration / Action
 2. `arbitration_log`
    - 记录综合裁决结果
 3. `mode_action_log`
+4. `position_state_snapshot`
+5. `management_policy_result`
    - 记录模式层后的最终动作决策
 
 ### 7.2 语义治理不是旁支
@@ -304,4 +378,4 @@ Quant Fact Layer / Producer Outcome / Arbitration / Action
 
 StockWise 的统一决策栈应理解为：
 
-**数据先沉淀为量化事实，再由 Quant / AI 两类 Producer 产出原始判断，经系统裁决后，由 Investment Mode 映射为最终动作，并在生产与实验两种环境中分别落账、观测与解释。**
+**数据先沉淀为量化事实，再由 Quant / AI 两类 Producer 产出原始判断，经系统裁决后，结合 Investment Mode、Position State 与 Management Policy 映射为最终动作，并在生产与实验两种环境中分别落账、观测与解释。**

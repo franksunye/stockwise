@@ -11,11 +11,12 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import json
 import os
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
-from typing import Dict, List, Sequence, Tuple
+from typing import Dict, List, Sequence, Set, Tuple
 
 import pandas as pd
 
@@ -60,12 +61,45 @@ def _candidate_query(market: str, limit: int) -> str:
     """
 
 
-def load_candidate_symbols(market: str, limit: int) -> List[Tuple[str, str, int, str | None, int]]:
+def _load_manifest_entries(path: str | None) -> Tuple[Set[str], Dict[str, int]]:
+    if not path:
+        return set(), {}
+    with open(path, "r", encoding="utf-8") as f:
+        payload = json.load(f)
+    symbols = payload.get("symbols", [])
+    resolved: Set[str] = set()
+    order_map: Dict[str, int] = {}
+    for item in symbols:
+        if isinstance(item, dict):
+            symbol = str(item.get("symbol", "")).strip()
+            latest_close = item.get("latest_close")
+            priced_days_20d = int(item.get("priced_days_20d", 0) or 0)
+            if latest_close is None and priced_days_20d <= 0:
+                continue
+        else:
+            symbol = str(item).strip()
+        if symbol:
+            order_map.setdefault(symbol, len(order_map))
+            resolved.add(symbol)
+    return resolved, order_map
+
+
+def load_candidate_symbols(
+    market: str,
+    limit: int,
+    research_pool_symbols: Set[str] | None = None,
+    research_pool_order: Dict[str, int] | None = None,
+) -> List[Tuple[str, str, int, str | None, int]]:
     conn = get_connection()
     try:
         cur = conn.cursor()
         rows = cur.execute(_candidate_query(market, limit), (market,)).fetchall()
         candidates = [(str(r[0]), str(r[1]), int(r[2] or 0), str(r[3]) if r[3] else None, int(r[4] or 0)) for r in rows]
+        if research_pool_symbols:
+            candidates = [row for row in candidates if row[0] in research_pool_symbols]
+            order = research_pool_order or {}
+            candidates.sort(key=lambda row: (row[2], order.get(row[0], 10**9), row[0]))
+            return candidates[:limit]
         if market != "CN":
             return candidates[:limit]
         return _select_cn_candidates(candidates, limit)
@@ -278,14 +312,29 @@ def main() -> None:
     parser.add_argument("--start-date", default="2024-01-01")
     parser.add_argument("--max-workers", type=int, default=4)
     parser.add_argument("--sync-meta", action="store_true")
+    parser.add_argument("--research-pool-manifest")
     args = parser.parse_args()
 
     before = _market_summary(args.market)
     if args.sync_meta:
         sync_stock_meta()
 
-    candidates = load_candidate_symbols(args.market, args.target_symbols)
-    logger.info(f"Local enhancement starting. market={args.market}, candidates={len(candidates)}, start={args.start_date}")
+    research_pool_symbols, research_pool_order = _load_manifest_entries(args.research_pool_manifest)
+    target_symbols = args.target_symbols
+    if research_pool_symbols:
+        target_symbols = min(target_symbols, len(research_pool_symbols))
+
+    candidates = load_candidate_symbols(
+        args.market,
+        target_symbols,
+        research_pool_symbols=research_pool_symbols or None,
+        research_pool_order=research_pool_order or None,
+    )
+    logger.info(
+        "Local enhancement starting. "
+        f"market={args.market}, candidates={len(candidates)}, start={args.start_date}, "
+        f"research_pool={bool(research_pool_symbols)}"
+    )
 
     results: List[Dict[str, object]] = []
     with ThreadPoolExecutor(max_workers=max(1, args.max_workers)) as pool:
@@ -299,7 +348,8 @@ def main() -> None:
         "market": args.market,
         "run_at": datetime.now().isoformat(timespec="seconds"),
         "start_date": args.start_date,
-        "target_symbols": args.target_symbols,
+        "target_symbols": target_symbols,
+        "research_pool_manifest": args.research_pool_manifest,
         "selected_candidates": [
             {
                 "symbol": symbol,

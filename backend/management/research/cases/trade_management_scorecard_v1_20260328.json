@@ -1,0 +1,128 @@
+{
+  "scorecard_date": "2026-03-28",
+  "scorecard_id": "trade_management_research_baseline_v1",
+  "evaluated_object": "Trade Management Research Baseline v1",
+  "evaluation_scope": {
+    "full_stack_window_from": "2025-12-27",
+    "full_stack_window_to": "2026-03-27",
+    "case_entry_date_from": "2026-03-18",
+    "case_entry_date_to": "2026-03-25",
+    "universes": [
+      "CN500",
+      "HK180",
+      "CNHK680"
+    ]
+  },
+  "rubric": {
+    "max_total_score": 100,
+    "dimensions": [
+      {
+        "dimension": "distribution_improvement",
+        "max_score": 20,
+        "description": "是否持续改善收益分布，而不是只在个别 case 更赚钱。"
+      },
+      {
+        "dimension": "risk_and_giveback_control",
+        "max_score": 20,
+        "description": "是否持续降低平均回撤与利润回吐。"
+      },
+      {
+        "dimension": "stability_and_generalization",
+        "max_score": 20,
+        "description": "是否在时间切分、跨市场上仍保持正向改善。"
+      },
+      {
+        "dimension": "explainability_and_executability",
+        "max_score": 20,
+        "description": "是否具备状态、动作、纪律三层可解释输出。"
+      },
+      {
+        "dimension": "objective_alignment_and_product_readiness",
+        "max_score": 20,
+        "description": "是否符合 StockWise 的目标函数与产品边界。"
+      }
+    ]
+  },
+  "current_metrics": {
+    "CN500": {
+      "sample_size": 500,
+      "avg_baseline_return": -0.0047850641,
+      "avg_routed_return": -0.0003488956,
+      "improvement_vs_baseline": 0.0044361685,
+      "avg_baseline_drawdown": -0.0061665504,
+      "avg_routed_drawdown": -0.0030235723,
+      "avg_baseline_giveback": 0.0064493806,
+      "avg_routed_giveback": 0.0030489107,
+      "positive_holdout_splits": 4,
+      "nonnegative_holdout_splits": 4,
+      "total_holdout_splits": 5
+    },
+    "HK180": {
+      "sample_size": 180,
+      "avg_baseline_return": -0.0062126199,
+      "avg_routed_return": -0.0046664044,
+      "improvement_vs_baseline": 0.0015462155,
+      "avg_baseline_drawdown": -0.0076450585,
+      "avg_routed_drawdown": -0.0064958962,
+      "avg_baseline_giveback": 0.0110956407,
+      "avg_routed_giveback": 0.0096553136,
+      "positive_holdout_splits": 5,
+      "nonnegative_holdout_splits": 5,
+      "total_holdout_splits": 5
+    },
+    "CNHK680": {
+      "sample_size": 680,
+      "avg_baseline_return": -0.0051629465,
+      "avg_routed_return": -0.0014917656,
+      "improvement_vs_baseline": 0.0036711809,
+      "avg_baseline_drawdown": -0.0065579202,
+      "avg_routed_drawdown": -0.0039427168,
+      "avg_baseline_giveback": 0.007679273,
+      "avg_routed_giveback": 0.0047976644,
+      "positive_holdout_splits": 4,
+      "nonnegative_holdout_splits": 4,
+      "total_holdout_splits": 5
+    }
+  },
+  "scores": {
+    "distribution_improvement": {
+      "score": 16,
+      "max_score": 20,
+      "judgement": "good",
+      "reason": "CN/HK/合并池均相对基准转好，合并池 improvement_vs_baseline 约 +0.37%，但与样本内最优动作仍有明显 gap。"
+    },
+    "risk_and_giveback_control": {
+      "score": 18,
+      "max_score": 20,
+      "judgement": "strong",
+      "reason": "合并池平均回撤由 -0.656% 改善到 -0.394%，平均利润回吐由 0.768% 降到 0.480%。"
+    },
+    "stability_and_generalization": {
+      "score": 16,
+      "max_score": 20,
+      "judgement": "good",
+      "reason": "CN 4/5、HK 5/5、合并池 4/5 时间切分 holdout 为正；跨市场方向一致，但并非所有切分都稳定转正。"
+    },
+    "explainability_and_executability": {
+      "score": 18,
+      "max_score": 20,
+      "judgement": "strong",
+      "reason": "已具备状态机、lane 路由、动作建议与纪律线表达基础，但前台用户呈现尚未完全产品化。"
+    },
+    "objective_alignment_and_product_readiness": {
+      "score": 15,
+      "max_score": 20,
+      "judgement": "qualified",
+      "reason": "方向与边界高度一致，已形成正式研究资产；但仍应视为研究基线 v1，而非产品终版默认规则。"
+    }
+  },
+  "total_score": 83,
+  "grade": "B+",
+  "stage_verdict": "研究基线已成立，可持续比较；适合继续扩样本与对比，不宜直接宣告为最终产品默认模型。",
+  "verification_sources": [
+    "backend/scripts/compare_management_policies.py --cases-file backend/management/research/cases/cn_fullstack_500_cases_20260328.json",
+    "backend/scripts/compare_management_policies.py --cases-file backend/management/research/cases/hk_fullstack_180_cases_20260328.json",
+    "backend/scripts/compare_management_policies.py --cases-file backend/management/research/cases/cn_hk_fullstack_680_cases_20260328.json",
+    "backend/scripts/compare_management_lanes.py --cases-file backend/management/research/cases/cn_hk_fullstack_680_cases_20260328.json"
+  ]
+}

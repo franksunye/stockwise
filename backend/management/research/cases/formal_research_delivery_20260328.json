@@ -1,0 +1,51 @@
+{
+  "delivery_date": "2026-03-28",
+  "delivery_type": "trade_management_research_formal_base",
+  "window": {
+    "full_stack_window_from": "2025-12-27",
+    "full_stack_window_to": "2026-03-27",
+    "case_entry_date_from": "2026-03-18",
+    "case_entry_date_to": "2026-03-25"
+  },
+  "model_stack": {
+    "prediction_model_id": "rule-engine",
+    "tradeability_strategy_version": "tradeability_v2",
+    "min_price_days": 50
+  },
+  "universes": [
+    {
+      "market": "CN",
+      "manifest": "backend/strategy_config/research_pool/cn_core_500.json",
+      "full_stack_symbols": 425,
+      "latest_date_coverage": 428,
+      "case_pool_file": "backend/management/research/cases/cn_fullstack_500_cases_20260328.json",
+      "case_pool_size": 500,
+      "lane_routed_improvement_vs_baseline": 0.0044
+    },
+    {
+      "market": "HK",
+      "manifest": "backend/strategy_config/research_pool/hk_core_180.json",
+      "full_stack_symbols": 80,
+      "latest_date_coverage": 102,
+      "case_pool_file": "backend/management/research/cases/hk_fullstack_180_cases_20260328.json",
+      "case_pool_size": 180,
+      "lane_routed_improvement_vs_baseline": 0.0015
+    },
+    {
+      "market": "CN+HK",
+      "manifest": "combined",
+      "full_stack_symbols": 505,
+      "latest_date_coverage": 530,
+      "case_pool_file": "backend/management/research/cases/cn_hk_fullstack_680_cases_20260328.json",
+      "case_pool_size": 680,
+      "lane_routed_improvement_vs_baseline": 0.0037
+    }
+  ],
+  "verification_commands": [
+    "DB_SOURCE=local .venv/bin/python backend/scripts/compare_management_policies.py --cases-file backend/management/research/cases/cn_fullstack_500_cases_20260328.json",
+    "DB_SOURCE=local .venv/bin/python backend/scripts/compare_management_policies.py --cases-file backend/management/research/cases/hk_fullstack_180_cases_20260328.json",
+    "DB_SOURCE=local .venv/bin/python backend/scripts/compare_management_policies.py --cases-file backend/management/research/cases/cn_hk_fullstack_680_cases_20260328.json",
+    "DB_SOURCE=local .venv/bin/python backend/scripts/compare_management_lanes.py --cases-file backend/management/research/cases/cn_hk_fullstack_680_cases_20260328.json",
+    ".venv/bin/python -m pytest -q backend/tests/test_management_research.py"
+  ]
+}
