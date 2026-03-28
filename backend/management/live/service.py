@@ -104,6 +104,7 @@ def run_trade_management_advice_loop(
                     send_wecom_notification(
                         record.card_markdown,
                         mentioned_mobile_list=get_admin_mobiles() or ["@all"],
+                        mention_text="交易管理提醒：请查收上一条持仓建议卡",
                     )
                     record.webhook_delivery_status = "sent"
                     delivered_count += 1

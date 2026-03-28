@@ -91,29 +91,38 @@ def build_trade_card_markdown(
 ) -> str:
     plan = build_action_plan(snapshot, recommended_policy)
     stock_label = position.stock_name or position.symbol
-    next_label = next_trade_date or "下一交易日"
     state_desc = get_state_description(snapshot.state_id)
+    observation_price = format_price(resolve_observation_price(snapshot))
+    discipline_price = format_price(snapshot.discipline_price)
+    next_action_label = f"{next_trade_date} 建议" if next_trade_date else "下一交易日建议"
+    reason_text = state_desc
+    if snapshot.state_id == "ProfitProtection":
+        reason_text = "这笔仓已有明确浮盈，当前更重要的是保护利润，而不是继续激进加仓。"
+    elif snapshot.state_id == "FailureRisk":
+        reason_text = "这笔仓的风险已经抬升，当前更重要的是先降风险，避免继续硬扛。"
+    elif snapshot.state_id == "TrendHolding":
+        reason_text = "趋势仍在，当前重点是避免过早下车，同时守住纪律线。"
+    elif snapshot.state_id == "BreakoutPending":
+        reason_text = "这笔仓还处在待确认阶段，当前重点是看突破能否真正站稳。"
+    elif snapshot.state_id == "EntryTriggered":
+        reason_text = "这笔仓仍在早期确认阶段，当前重点是先看结构是否成立。"
 
     lines = [
-        f"### 交易管理卡 | {stock_label} `{position.symbol}`",
-        f"> **用户**: {position.user_id}",
-        f"> **持仓**: {position.remaining_size:.0f}股 @ {position.entry_price:.2f}",
-        f"> **建仓日**: {position.entry_date}",
-        f"> **最新交易日**: {snapshot.trade_date}",
-        f"> **下一交易日**: {next_label}",
+        f"### 交易管理卡 | {stock_label} {position.symbol}",
         "",
-        f"- **当前状态**: {snapshot.state_id} / {state_desc}",
-        f"- **信号状态**: {snapshot.signal_state}",
-        f"- **最新收盘**: {snapshot.close:.2f}",
-        f"- **浮盈**: {format_pct(snapshot.unrealized_pnl_pct)}",
-        f"- **默认动作**: {plan.summary}",
-        f"- **执行说明**: {plan.detail}",
-        f"- **纪律线**: {format_price(snapshot.discipline_price)}",
-        f"- **观察位**: {format_price(resolve_observation_price(snapshot))}",
-        f"- **研究路由**: {lane_id} -> {recommended_policy}",
+        f"> **持仓**: {position.remaining_size:.0f}股 @ {position.entry_price:.2f}",
+        f"> **最新收盘**: {snapshot.close:.2f}",
+        f"> **浮盈**: {format_pct(snapshot.unrealized_pnl_pct)}",
+        "",
+        f"**当前状态**：{state_desc}",
+        f"**{next_action_label}**：{plan.summary}",
+        "",
+        f"- 执行说明：{plan.detail}",
+        f"- 观察位：{observation_price}",
+        f"- 纪律线：{discipline_price}",
+        "",
+        f"> 说明：{reason_text}",
     ]
-    if position.note:
-        lines.append(f"- **备注**: {position.note}")
     return "\n".join(lines)
 
 
@@ -153,12 +162,21 @@ def build_advice_record(
         unrealized_pnl_pct=snapshot.unrealized_pnl_pct,
         card_markdown=card_markdown,
         extra_payload={
+            "user_id": position.user_id,
             "symbol": position.symbol,
+            "entry_date": position.entry_date,
+            "entry_price": position.entry_price,
+            "remaining_size": position.remaining_size,
             "latest_trade_date": snapshot.trade_date,
             "next_trade_date": next_trade_date,
             "state_id": snapshot.state_id,
             "signal_state": snapshot.signal_state,
             "lane_id": lane_id,
             "recommended_policy": recommended_policy,
+            "action_summary": plan.summary,
+            "action_detail": plan.detail,
+            "discipline_price": snapshot.discipline_price,
+            "observation_price": observation_price,
+            "position_note": position.note,
         },
     )

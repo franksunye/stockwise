@@ -72,7 +72,11 @@ def get_pinyin_info(name: str):
         return "", ""
 
 @retry_request(max_retries=3, delay=1.0)
-def send_wecom_notification(content: str, mentioned_mobile_list: list = None):
+def send_wecom_notification(
+    content: str,
+    mentioned_mobile_list: list = None,
+    mention_text: str | None = "⚠️ 运维提醒: 请关注上述报警",
+):
     """
     发送企业微信机器人通知
     :param content: 消息内容 (Markdown)
@@ -124,11 +128,11 @@ def send_wecom_notification(content: str, mentioned_mobile_list: list = None):
         response.raise_for_status()
         
         # 2. 如果需要 @人，额外发一条 Text 消息 (因为 Markdown 无法通过 API 参数 @手机号)
-        if mentioned_mobile_list:
+        if mentioned_mobile_list and mention_text:
              text_payload = {
                 "msgtype": "text",
                 "text": {
-                    "content": "⚠️ 运维提醒: 请关注上述报警",
+                    "content": mention_text,
                     "mentioned_mobile_list": mentioned_mobile_list
                 }
              }
@@ -161,4 +165,3 @@ def format_volume(volume):
         return str(int(val))
     except:
         return str(volume)
-

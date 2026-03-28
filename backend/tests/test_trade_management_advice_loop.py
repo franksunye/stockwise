@@ -62,11 +62,13 @@ def test_profit_protection_card_contains_core_fields() -> None:
         recommended_policy="buy_and_hold_baseline",
     )
 
-    assert "交易管理卡 | 科济药业-B `02171`" in card
-    assert "**当前状态**: ProfitProtection" in card
-    assert "**默认动作**: 继续持有，不追高" in card
+    assert "交易管理卡 | 科济药业-B 02171" in card
+    assert "**当前状态**：已有明确浮盈，核心任务转为保护利润。" in card
+    assert "**2026-03-30 建议**：继续持有，不追高" in card
     assert "17.74" in card
     assert "14.79" in card
+    assert "TriggeredLong" not in card
+    assert "baseline_3d" not in card
 
 
 def test_failure_risk_plan_prefers_exit_when_policy_high_risk() -> None:
@@ -132,6 +134,33 @@ def test_advice_loop_persists_failed_webhook_status() -> None:
     assert result.failed_count == 1
     assert "webhook 发送失败" in result.errors[0]
     assert persist_mock.call_count == 2
+
+
+def test_advice_loop_uses_non_alert_followup_text_for_mentions() -> None:
+    position = _sample_position()
+    snapshot = _sample_snapshot()
+
+    with patch("backend.management.live.service.init_db"), \
+         patch("backend.management.live.service.list_active_trade_positions", return_value=[position]), \
+         patch("backend.management.live.service.build_position_snapshots", return_value=[snapshot]), \
+         patch(
+             "backend.management.live.service.route_case_lanes",
+             return_value={
+                 "final": {
+                     "lane_id": "baseline_3d",
+                     "recommended_policy": "buy_and_hold_baseline",
+                 }
+             },
+         ), \
+         patch("backend.management.live.service.get_admin_mobiles", return_value=["13800000000"]), \
+         patch("backend.management.live.service.send_wecom_notification", return_value=True) as notify_mock, \
+         patch("backend.utils.send_wecom_notification", return_value=True), \
+         patch("backend.management.live.service.insert_trade_advice_log"):
+        result = run_trade_management_advice_loop(persist_log=True, notify=True)
+
+    assert result.delivered_count == 1
+    assert notify_mock.call_count == 1
+    assert notify_mock.call_args.kwargs["mention_text"] == "交易管理提醒：请查收上一条持仓建议卡"
 
 
 def test_advice_loop_suppresses_duplicate_sent_card() -> None:
