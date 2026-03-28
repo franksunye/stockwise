@@ -31,6 +31,32 @@ class AdviceLoopResult:
     errors: list[str]
 
 
+def _split_action_summary(summary: str) -> tuple[str, str]:
+    text = (summary or "").strip()
+    if not text:
+        return ("继续观察", "默认动作")
+    for sep in ["，", "、", ",", " "]:
+        if sep in text:
+            left, right = text.split(sep, 1)
+            left = left.strip()
+            right = right.strip()
+            if left and right:
+                return (left, right)
+    return (text, "默认动作")
+
+
+def _state_theme(snapshot_state_id: str) -> tuple[str, int]:
+    mapping = {
+        "ProfitProtection": ("盈利保护期", 2),
+        "TrendHolding": ("趋势持有", 2),
+        "BreakoutPending": ("突破待确认", 1),
+        "EntryTriggered": ("建仓确认期", 1),
+        "FailureRisk": ("风险抬升", 3),
+        "ExitCompleted": ("已退出", 0),
+    }
+    return mapping.get(snapshot_state_id, ("交易管理", 0))
+
+
 def run_trade_management_advice_loop(
     user_id: Optional[str] = None,
     symbol: Optional[str] = None,
@@ -106,16 +132,23 @@ def run_trade_management_advice_loop(
                     mentions = get_admin_mobiles() or ["@all"]
                     if advice_style == "template_card":
                         plan = build_action_plan(latest, str(final_lane["recommended_policy"]))
+                        primary_action, secondary_action = _split_action_summary(plan.summary)
+                        source_desc, source_desc_color = _state_theme(latest.state_id)
                         send_wecom_template_card(
-                            title=f"交易管理卡 | {position.stock_name or position.symbol}",
-                            subtitle=f"{position.symbol} · {next_trade_date or latest.trade_date}",
+                            title=f"{position.stock_name or position.symbol} {position.symbol}",
+                            subtitle=f"{next_trade_date or latest.trade_date} 交易建议",
                             state_label=str(record.extra_payload.get("state_id_text") or latest.state_id or ""),
-                            action_label=plan.summary,
+                            action_label=primary_action,
+                            action_desc=secondary_action,
                             latest_close=format_price(latest.close),
                             pnl_text=format_pct(latest.unrealized_pnl_pct),
+                            holding_text=f"{position.remaining_size:.0f}股 @ {position.entry_price:.2f}",
                             observation_price=format_price(resolve_observation_price(latest)),
                             discipline_price=format_price(latest.discipline_price),
                             detail=plan.detail,
+                            source_desc=source_desc,
+                            source_desc_color=source_desc_color,
+                            jump_url=f"{os.getenv('NEXT_PUBLIC_SITE_URL', 'https://ziso.cc').rstrip('/')}/admin/trade-positions",
                             mentioned_mobile_list=mentions,
                             mention_text="交易管理提醒：请查收上一条持仓建议卡",
                         )

@@ -170,12 +170,16 @@ def send_wecom_template_card(
     subtitle: str,
     state_label: str,
     action_label: str,
+    action_desc: str,
     latest_close: str,
     pnl_text: str,
+    holding_text: str,
     observation_price: str,
     discipline_price: str,
     detail: str,
     jump_url: Optional[str] = None,
+    source_desc: str = "StockWise 交易管理",
+    source_desc_color: int = 0,
     mentioned_mobile_list: list | None = None,
     mention_text: str | None = "交易管理提醒：请查收上一条持仓建议卡",
 ) -> bool:
@@ -188,8 +192,8 @@ def send_wecom_template_card(
         "template_card": {
             "card_type": "text_notice",
             "source": {
-                "desc": "StockWise 交易管理",
-                "desc_color": 0,
+                "desc": source_desc,
+                "desc_color": source_desc_color,
             },
             "main_title": {
                 "title": title,
@@ -197,14 +201,15 @@ def send_wecom_template_card(
             },
             "emphasis_content": {
                 "title": action_label,
-                "desc": "默认动作",
+                "desc": action_desc,
             },
             "quote_area": {
                 "type": 0,
                 "quote_text": detail,
             },
-            "sub_title_text": f"状态：{state_label} | 最新收盘：{latest_close} | 浮盈：{pnl_text}",
+            "sub_title_text": f"{state_label} · 最新收盘 {latest_close} · 浮盈 {pnl_text}",
             "horizontal_content_list": [
+                {"keyname": "持仓", "value": holding_text},
                 {"keyname": "观察位", "value": observation_price},
                 {"keyname": "纪律线", "value": discipline_price},
             ],

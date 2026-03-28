@@ -190,6 +190,11 @@ def test_advice_loop_can_use_template_card_style() -> None:
     assert result.delivered_count == 1
     template_mock.assert_called_once()
     markdown_mock.assert_not_called()
+    assert template_mock.call_args.kwargs["title"] == "科济药业-B 02171"
+    assert template_mock.call_args.kwargs["subtitle"] == "2026-03-30 交易建议"
+    assert template_mock.call_args.kwargs["action_label"] == "继续持有"
+    assert template_mock.call_args.kwargs["action_desc"] == "不追高"
+    assert template_mock.call_args.kwargs["holding_text"] == "3000股 @ 14.50"
 
 
 def test_advice_loop_falls_back_to_markdown_when_template_card_fails() -> None:
