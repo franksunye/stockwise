@@ -4,7 +4,7 @@ doc_id: "spec-investment-mode-product-layer"
 doc_domain: "product"
 doc_status: "active"
 owner: "founder"
-last_reviewed_at: "2026-03-27"
+last_reviewed_at: "2026-03-28"
 summary: "Investment Mode 的现行产品规格，定义模式对象、边界、术语与上线标准，是相关内容资产的重要事实源。"
 ---
 
@@ -198,6 +198,29 @@ summary: "Investment Mode 的现行产品规格，定义模式对象、边界、
 结论：
 
 **StockWise 的产品价值，不是让用户理解行业评分板，而是让用户在真实持仓时拥有简单、可信、可执行的纪律。**
+
+### 2.3.d 后台闭环 POC（无 UI）
+
+在正式前台产品化之前，交易管理允许先以后台闭环 POC 落地，验证“真实持仓 -> 建议卡 -> webhook”这条链路。
+
+第一阶段定义：
+
+1. 用户持仓允许由后台直接录入数据库
+   - 不要求先做录入 UI
+   - 可通过 SQLite / Turso GUI 手工录入
+2. 后台 job 自动运行交易管理建议
+   - 支持 `schedule`
+   - 支持 `workflow_dispatch`
+3. 输出物不是研究报表，而是文本交易卡
+   - 发送到 webhook
+   - `@ADMIN`
+   - 形成 `trade_management_advice_log`
+
+产品意义：
+
+- 先验证真实闭环，而不是先做界面
+- 先让“状态 / 动作 / 纪律”进入真实后台交付
+- 后续前台只是消费同一套建议对象，而不是重写一套逻辑
 
 ### 2.4 模式发布物（Release Artifact）
 

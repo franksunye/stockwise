@@ -748,6 +748,60 @@ def init_db():
             CREATE UNIQUE INDEX IF NOT EXISTS idx_management_policy_results_unique
             ON management_policy_results(run_id, policy_id, symbol, entry_date)
         """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS user_trade_positions (
+                position_id TEXT PRIMARY KEY,
+                user_id TEXT NOT NULL,
+                symbol TEXT NOT NULL,
+                market TEXT,
+                entry_date TEXT NOT NULL,
+                entry_price REAL NOT NULL,
+                position_size REAL NOT NULL,
+                remaining_size REAL NOT NULL,
+                direction TEXT NOT NULL DEFAULT 'long',
+                status TEXT NOT NULL DEFAULT 'active',
+                source TEXT DEFAULT 'manual',
+                note TEXT,
+                tags_json TEXT,
+                created_at TIMESTAMP NOT NULL,
+                updated_at TIMESTAMP NOT NULL
+            )
+        """)
+        cursor.execute("""
+            CREATE INDEX IF NOT EXISTS idx_user_trade_positions_active
+            ON user_trade_positions(status, user_id, symbol, entry_date)
+        """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS trade_management_advice_log (
+                advice_id TEXT PRIMARY KEY,
+                position_id TEXT NOT NULL,
+                user_id TEXT NOT NULL,
+                symbol TEXT NOT NULL,
+                market TEXT,
+                latest_trade_date TEXT NOT NULL,
+                next_trade_date TEXT,
+                latest_close REAL,
+                signal_state TEXT,
+                state_id TEXT,
+                lane_id TEXT,
+                recommended_policy TEXT,
+                action_summary TEXT,
+                discipline_price REAL,
+                resistance_price REAL,
+                unrealized_pnl_pct REAL,
+                card_markdown TEXT,
+                webhook_delivery_status TEXT,
+                webhook_delivery_error TEXT,
+                source_ref TEXT,
+                created_at TIMESTAMP NOT NULL,
+                updated_at TIMESTAMP NOT NULL,
+                FOREIGN KEY (position_id) REFERENCES user_trade_positions(position_id)
+            )
+        """)
+        cursor.execute("""
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_trade_management_advice_unique
+            ON trade_management_advice_log(position_id, latest_trade_date)
+        """)
 
         # 7. Chain Execution Traces (For Multi-turn debugging & observability)
         # Optimized for "Delayed Write" to reduce lock contention on Turso

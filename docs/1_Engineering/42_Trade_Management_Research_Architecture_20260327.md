@@ -4,7 +4,7 @@ doc_id: "engineering-trade-management-research-architecture-20260327"
 doc_domain: "engineering"
 doc_status: "active"
 owner: "founder"
-last_reviewed_at: "2026-03-27"
+last_reviewed_at: "2026-03-28"
 summary: "给出交易管理研究子系统的模块边界、对象模型、表结构草图与第一期实施清单，用于承接未来执行卡与管理策略产品化。"
 ---
 
@@ -136,12 +136,14 @@ backend/
     run_management_research.py
     backfill_position_states.py
     compare_management_policies.py
+    run_trade_management_advice_loop.py
 ```
 
 其中：
 
 - `run_management_research.py` 负责单票、单 case 回放
 - `compare_management_policies.py` 负责固定 case set 或外部 JSON case file 的批量策略比较
+- `run_trade_management_advice_loop.py` 负责面向真实用户持仓的后台建议闭环
 
 ### 4.1 `domain/`
 
@@ -209,6 +211,21 @@ backend/
 - 落每笔策略结果
 - 支撑复盘与比较
 
+### 4.7 `live/`
+
+职责：
+
+- 面向真实持仓生成后台建议卡
+- 将研究层输出压缩成 `状态 / 动作 / 纪律`
+- 通过 webhook 发送给 ADMIN 或未来的前台消费层
+
+第一阶段约束：
+
+- 不做前台 UI
+- 用户持仓允许通过 SQLite / Turso GUI 手工录入
+- 后台 job 每次只消费 `active` 持仓
+- 每次运行都必须落建议日志，保证可追溯
+
 ---
 
 ## 5. 关键对象草图
@@ -268,6 +285,45 @@ backend/
 - `profit_giveback_pct`
 - `holding_days`
 - `action_count`
+
+### 5.4 后台闭环对象（Backend Delivery POC）
+
+第一阶段新增两张表：
+
+1. `user_trade_positions`
+   - 作用：保存用户真实持仓输入
+   - 特征：允许手工录入，不依赖前台 UI
+   - 最小字段：
+     - `position_id`
+     - `user_id`
+     - `symbol`
+     - `market`
+     - `entry_date`
+     - `entry_price`
+     - `position_size`
+     - `remaining_size`
+     - `status`
+
+2. `trade_management_advice_log`
+   - 作用：保存每次后台输出的建议卡
+   - 最小字段：
+     - `position_id`
+     - `latest_trade_date`
+     - `next_trade_date`
+     - `state_id`
+     - `lane_id`
+     - `recommended_policy`
+     - `action_summary`
+     - `discipline_price`
+     - `resistance_price`
+     - `card_markdown`
+     - `webhook_delivery_status`
+
+工程意义：
+
+- `user_trade_positions` 是产品输入层
+- `trade_management_advice_log` 是产品输出留痕层
+- 研究层与产品层之间由 `live/` 做压缩翻译，不直接把研究 JSON 暴露给用户
 
 ---
 

@@ -1,7 +1,7 @@
 # 知守 AI (ZISO AI) 里程碑与执行进度日志 (Milestones Execution Log)
 
 > **文档版本**: v3.9（承接战略排期与执行归档）  
-> **更新日期**: 2026-03-27  
+> **更新日期**: 2026-03-28  
 > **适用范围**: 2026 Q2（到 2026-06-30）
 
 ## 0. 原则
@@ -56,6 +56,11 @@
   - 在这版三个月底座上，`Lane Routed Recommendation` 相对 `buy_and_hold_baseline` 的 `100-case` 改善约 `+0.73%`。
   - 已形成正式交付资产：`CN 500-case`、`HK 180-case`、`CN+HK 680-case` 与独立交付索引。
   - 近期目标不是立刻产品化，而是继续收敛低分端盲区，并确认双轨 lane 的长期稳定性。
+- **交易管理后台闭环 POC 已落地**
+  - 已新增 `user_trade_positions` 与 `trade_management_advice_log`。
+  - 已支持后台脚本消费真实持仓，输出文本交易卡，并可通过 webhook `@ADMIN`。
+  - 已补 GitHub workflow：`trade_management_advice_loop.yml`。
+  - 当前阶段不做前台 UI，先验证真实交付闭环。
 
 ---
 
