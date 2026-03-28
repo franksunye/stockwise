@@ -94,8 +94,18 @@ def insert_trade_advice_log(record: TradeAdviceRecord) -> str:
                 resistance_price=excluded.resistance_price,
                 unrealized_pnl_pct=excluded.unrealized_pnl_pct,
                 card_markdown=excluded.card_markdown,
-                webhook_delivery_status=excluded.webhook_delivery_status,
-                webhook_delivery_error=excluded.webhook_delivery_error,
+                webhook_delivery_status=CASE
+                    WHEN trade_management_advice_log.webhook_delivery_status = 'sent'
+                     AND excluded.webhook_delivery_status = 'dry_run'
+                    THEN trade_management_advice_log.webhook_delivery_status
+                    ELSE excluded.webhook_delivery_status
+                END,
+                webhook_delivery_error=CASE
+                    WHEN trade_management_advice_log.webhook_delivery_status = 'sent'
+                     AND excluded.webhook_delivery_status = 'dry_run'
+                    THEN trade_management_advice_log.webhook_delivery_error
+                    ELSE excluded.webhook_delivery_error
+                END,
                 source_ref=excluded.source_ref,
                 updated_at={NOW_EXPR}
             """,

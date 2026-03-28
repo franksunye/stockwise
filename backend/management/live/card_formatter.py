@@ -152,4 +152,13 @@ def build_advice_record(
         resistance_price=observation_price,
         unrealized_pnl_pct=snapshot.unrealized_pnl_pct,
         card_markdown=card_markdown,
+        extra_payload={
+            "symbol": position.symbol,
+            "latest_trade_date": snapshot.trade_date,
+            "next_trade_date": next_trade_date,
+            "state_id": snapshot.state_id,
+            "signal_state": snapshot.signal_state,
+            "lane_id": lane_id,
+            "recommended_policy": recommended_policy,
+        },
     )

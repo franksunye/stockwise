@@ -20,6 +20,7 @@ from backend.utils import send_wecom_notification
 @dataclass
 class AdviceLoopResult:
     processed_count: int
+    persisted_count: int
     delivered_count: int
     failed_count: int
     skipped_count: int
@@ -40,6 +41,7 @@ def run_trade_management_advice_loop(
     cards: list[str] = []
     errors: list[str] = []
     processed_count = 0
+    persisted_count = 0
     delivered_count = 0
     failed_count = 0
     skipped_count = 0
@@ -73,18 +75,31 @@ def run_trade_management_advice_loop(
                 recommended_policy=str(final_lane["recommended_policy"]),
                 advice_id=build_advice_id(),
             )
-            if notify:
-                send_wecom_notification(
-                    record.card_markdown,
-                    mentioned_mobile_list=get_admin_mobiles() or ["@all"],
-                )
-                record.webhook_delivery_status = "sent"
-                delivered_count += 1
-            else:
+            if not notify:
                 record.webhook_delivery_status = "dry_run"
 
             if persist_log:
                 insert_trade_advice_log(record)
+                persisted_count += 1
+
+            if notify:
+                try:
+                    send_wecom_notification(
+                        record.card_markdown,
+                        mentioned_mobile_list=get_admin_mobiles() or ["@all"],
+                    )
+                    record.webhook_delivery_status = "sent"
+                    delivered_count += 1
+                except Exception as notify_exc:
+                    record.webhook_delivery_status = "failed"
+                    record.webhook_delivery_error = str(notify_exc)
+                    failed_count += 1
+                    errors.append(f"{position.symbol}: webhook 发送失败 - {notify_exc}")
+                if persist_log:
+                    insert_trade_advice_log(record)
+            elif persist_log:
+                # dry_run/status-initialized rows are already persisted once above
+                pass
 
             cards.append(record.card_markdown)
             processed_count += 1
@@ -94,6 +109,7 @@ def run_trade_management_advice_loop(
 
     return AdviceLoopResult(
         processed_count=processed_count,
+        persisted_count=persisted_count,
         delivered_count=delivered_count,
         failed_count=failed_count,
         skipped_count=skipped_count,

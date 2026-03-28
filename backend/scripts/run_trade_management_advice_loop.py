@@ -36,6 +36,7 @@ def main() -> int:
         json.dumps(
             {
                 "processed_count": result.processed_count,
+                "persisted_count": result.persisted_count,
                 "delivered_count": result.delivered_count,
                 "failed_count": result.failed_count,
                 "skipped_count": result.skipped_count,
