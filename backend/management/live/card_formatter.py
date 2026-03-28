@@ -127,7 +127,8 @@ def build_trade_card_markdown(
     state_desc = get_state_description(snapshot.state_id)
     observation_price = format_price(resolve_observation_price(snapshot))
     discipline_price = format_price(snapshot.discipline_price)
-    next_action_label = f"{next_trade_date} 建议" if next_trade_date else "下一交易日建议"
+    has_execution_context = bool(position.latest_event_date and position.latest_event_type and position.latest_event_quantity)
+    next_action_label = f"{next_trade_date} 剩余仓位建议" if next_trade_date and has_execution_context else (f"{next_trade_date} 建议" if next_trade_date else "下一交易日建议")
     reason_text = state_desc
     if snapshot.state_id == "ProfitProtection":
         reason_text = "这笔仓已有明确浮盈，当前更重要的是保护利润，而不是继续激进加仓。"
@@ -155,6 +156,8 @@ def build_trade_card_markdown(
         )
         if snapshot.state_id == "ProfitProtection" and str(position.latest_event_type).upper() == "SELL":
             reason_text = "你已先行部分止盈，当前重点是管理剩余仓位，避免把已锁定利润又吐回去。"
+        elif str(position.latest_event_type).upper() == "BUY":
+            reason_text = "你最近刚做过加仓，当前建议应理解为对最新剩余仓位的继续管理，而不是回看式重算。"
 
     lines.extend([
         "",

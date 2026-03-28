@@ -179,6 +179,7 @@ def send_wecom_template_card(
     observation_price: str,
     discipline_price: str,
     detail: str,
+    recent_event_text: str | None = None,
     jump_url: Optional[str] = None,
     source_desc: str = "StockWise 交易管理",
     source_desc_color: int = 0,
@@ -212,6 +213,7 @@ def send_wecom_template_card(
             "sub_title_text": summary_line,
             "horizontal_content_list": [
                 {"keyname": "持仓", "value": holding_text},
+                *([{"keyname": "最近操作", "value": recent_event_text}] if recent_event_text else []),
                 {"keyname": "纪律线", "value": discipline_text or discipline_price},
                 {"keyname": "观察位", "value": observation_text or observation_price},
             ],

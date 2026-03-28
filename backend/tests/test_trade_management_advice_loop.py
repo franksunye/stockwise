@@ -75,7 +75,7 @@ def test_profit_protection_card_contains_core_fields() -> None:
     assert "**持仓**: 3000股（原始 4000股） @ 14.50" in card
     assert "**最近操作**: 2026-03-27 减仓 1000股 @ 17.58" in card
     assert "**当前状态**：已有明确浮盈，核心任务转为保护利润。" in card
-    assert "**2026-03-30 建议**：继续持有，不追高" in card
+    assert "**2026-03-30 剩余仓位建议**：继续持有，不追高" in card
     assert "你已先行部分止盈" in card
     assert "17.74" in card
     assert "14.79" in card
@@ -202,10 +202,11 @@ def test_advice_loop_can_use_template_card_style() -> None:
     template_mock.assert_called_once()
     markdown_mock.assert_not_called()
     assert template_mock.call_args.kwargs["title"] == "科济药业-B"
-    assert template_mock.call_args.kwargs["subtitle"] == "02171 · 2026-03-30 建议"
+    assert template_mock.call_args.kwargs["subtitle"] == "02171 · 2026-03-30 剩余仓位建议"
     assert template_mock.call_args.kwargs["action_label"] == "继续持有"
-    assert template_mock.call_args.kwargs["action_desc"] == "不追高"
+    assert template_mock.call_args.kwargs["action_desc"] == "管理剩余 3000股"
     assert template_mock.call_args.kwargs["holding_text"] == "3000/4000股 @ 14.50"
+    assert template_mock.call_args.kwargs["recent_event_text"] == "2026-03-27 减仓 1000股 @ 17.58"
     assert template_mock.call_args.kwargs["summary_line"] == "最新收盘 17.46 · 浮盈 +20.4%"
     assert template_mock.call_args.kwargs["discipline_text"] == "14.79"
     assert template_mock.call_args.kwargs["observation_text"] == "17.74"

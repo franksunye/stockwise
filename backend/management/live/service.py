@@ -137,15 +137,21 @@ def run_trade_management_advice_loop(
                         stock_label = position.stock_name or position.symbol
                         holding_text = f"{position.remaining_size:.0f}/{position.position_size:.0f}股 @ {position.entry_price:.2f}"
                         detail_lines = list(plan.bullets or [])
+                        recent_event_text: str | None = None
                         if position.latest_event_date and position.latest_event_quantity and position.latest_event_type:
                             event_label = "加仓" if str(position.latest_event_type).upper() == "BUY" else "减仓"
                             event_price = format_price(position.latest_event_price)
+                            recent_event_text = f"{position.latest_event_date} {event_label} {position.latest_event_quantity:.0f}股 @ {event_price}"
                             detail_lines.append(
                                 f"最近{event_label} {position.latest_event_date}: {position.latest_event_quantity:.0f}股 @ {event_price}"
                             )
+                            if event_label == "减仓":
+                                secondary_action = f"管理剩余 {position.remaining_size:.0f}股"
+                            elif event_label == "加仓":
+                                secondary_action = f"管理最新 {position.remaining_size:.0f}股仓位"
                         send_wecom_template_card(
                             title=stock_label,
-                            subtitle=f"{position.symbol} · {next_trade_date or latest.trade_date} 建议",
+                            subtitle=f"{position.symbol} · {next_trade_date or latest.trade_date} 剩余仓位建议" if recent_event_text else f"{position.symbol} · {next_trade_date or latest.trade_date} 建议",
                             state_label=str(record.extra_payload.get("state_id_text") or latest.state_id or ""),
                             summary_line=f"最新收盘 {format_price(latest.close)} · 浮盈 {format_pct(latest.unrealized_pnl_pct)}",
                             action_label=primary_action,
@@ -157,6 +163,7 @@ def run_trade_management_advice_loop(
                             observation_price=format_price(resolve_observation_price(latest)),
                             discipline_price=format_price(latest.discipline_price),
                             detail=plan.detail,
+                            recent_event_text=recent_event_text,
                             source_desc=source_desc,
                             source_desc_color=source_desc_color,
                             jump_url=f"{os.getenv('NEXT_PUBLIC_SITE_URL', 'https://ziso.cc').rstrip('/')}/admin/trade-positions",
