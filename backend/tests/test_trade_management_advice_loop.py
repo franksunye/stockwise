@@ -195,6 +195,10 @@ def test_advice_loop_can_use_template_card_style() -> None:
     assert template_mock.call_args.kwargs["action_label"] == "继续持有"
     assert template_mock.call_args.kwargs["action_desc"] == "不追高"
     assert template_mock.call_args.kwargs["holding_text"] == "3000股 @ 14.50"
+    assert template_mock.call_args.kwargs["summary_line"] == "最新收盘 17.46 · 浮盈 +20.4%"
+    assert template_mock.call_args.kwargs["discipline_text"] == "14.79"
+    assert template_mock.call_args.kwargs["observation_text"] == "17.74"
+    assert template_mock.call_args.kwargs["detail_lines"] == ["站稳 17.74：继续持有", "冲高不稳：先止盈 1/3"]
 
 
 def test_advice_loop_falls_back_to_markdown_when_template_card_fails() -> None:

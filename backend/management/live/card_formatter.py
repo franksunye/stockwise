@@ -12,6 +12,7 @@ from backend.management.state.state_machine import get_state_description
 class ActionPlan:
     summary: str
     detail: str
+    bullets: list[str] | None = None
 
 
 def format_pct(value: Optional[float]) -> str:
@@ -42,10 +43,18 @@ def build_action_plan(snapshot: PositionState, recommended_policy: str) -> Actio
             return ActionPlan(
                 summary="优先退出，避免继续硬扛",
                 detail=f"下一交易日如果仍然偏弱，以退出为主；若有反抽，也优先借反抽离场。纪律线参考 {discipline}。",
+                bullets=[
+                    "仍弱：优先退出",
+                    "有反抽：借反抽离场",
+                ],
             )
         return ActionPlan(
             summary="先减仓一半，保留观察仓",
             detail=f"当前风险已经抬升，先减仓 1/2，剩余仓位继续观察；若再次转弱或失守 {discipline}，再继续退出。",
+            bullets=[
+                "先减仓 1/2",
+                f"再转弱或失守 {discipline}：继续退出",
+            ],
         )
 
     if snapshot.state_id == "ProfitProtection":
@@ -53,16 +62,28 @@ def build_action_plan(snapshot: PositionState, recommended_policy: str) -> Actio
             return ActionPlan(
                 summary="继续持有，不追高",
                 detail=f"若下一交易日能站稳 {resistance} 上方，继续持有；若冲高后站不稳，先止盈 1/3。持仓保护线参考 {discipline}。",
+                bullets=[
+                    f"站稳 {resistance}：继续持有",
+                    "冲高不稳：先止盈 1/3",
+                ],
             )
         return ActionPlan(
             summary="继续持有，优先保护利润",
             detail=f"当前仓位已进入盈利保护期，优先保住已有浮盈；若后续失守 {discipline}，再明显减仓或退出。",
+            bullets=[
+                "继续持有，优先保护利润",
+                f"失守 {discipline}：明显减仓或退出",
+            ],
         )
 
     if snapshot.state_id == "TrendHolding":
         return ActionPlan(
             summary="继续持有，让趋势先走",
             detail=f"趋势仍在，先避免过早下车；如后续失守 {discipline}，再把仓位收紧。",
+            bullets=[
+                "趋势仍在：继续持有",
+                f"失守 {discipline}：收紧仓位",
+            ],
         )
 
     if snapshot.state_id == "BreakoutPending":
@@ -70,15 +91,27 @@ def build_action_plan(snapshot: PositionState, recommended_policy: str) -> Actio
             return ActionPlan(
                 summary="先观察突破是否确认",
                 detail=f"下一交易日重点看 {resistance} 一带是否有效站稳；若站稳可继续持有，若重新转弱则优先防守，纪律线参考 {discipline}。",
+                bullets=[
+                    f"站稳 {resistance}：继续持有",
+                    "重新转弱：优先防守",
+                ],
             )
         return ActionPlan(
             summary="继续观察，不急着重动作",
             detail=f"当前更像待确认阶段，先看是否延续；若后续结构转弱，再按纪律线 {discipline} 处理。",
+            bullets=[
+                "先观察是否延续",
+                f"结构转弱：按 {discipline} 处理",
+            ],
         )
 
     return ActionPlan(
         summary="持有观察，先确认结构",
         detail=f"这笔仓还在早期确认阶段，暂不激进加仓；若后续转弱，纪律线参考 {discipline}。",
+        bullets=[
+            "先确认结构",
+            f"转弱：参考 {discipline}",
+        ],
     )
 
 
