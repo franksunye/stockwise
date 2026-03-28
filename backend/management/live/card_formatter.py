@@ -136,6 +136,7 @@ def build_advice_record(
 ) -> TradeAdviceRecord:
     plan = build_action_plan(snapshot, recommended_policy)
     observation_price = resolve_observation_price(snapshot)
+    state_desc = get_state_description(snapshot.state_id)
     card_markdown = build_trade_card_markdown(
         position=position,
         snapshot=snapshot,
@@ -170,6 +171,7 @@ def build_advice_record(
             "latest_trade_date": snapshot.trade_date,
             "next_trade_date": next_trade_date,
             "state_id": snapshot.state_id,
+            "state_id_text": state_desc,
             "signal_state": snapshot.signal_state,
             "lane_id": lane_id,
             "recommended_policy": recommended_policy,

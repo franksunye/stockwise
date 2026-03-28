@@ -4,6 +4,7 @@ import random
 import requests
 from functools import wraps
 from datetime import datetime
+from typing import Optional
 from pypinyin import pinyin, Style
 from config import BEIJING_TZ
 from database import get_connection
@@ -71,6 +72,30 @@ def get_pinyin_info(name: str):
     except:
         return "", ""
 
+
+def _resolve_wecom_webhook_url() -> Optional[str]:
+    wecom_robot_key = get_wecom_robot_key()
+    if not wecom_robot_key:
+        logger.warning("⚠️ WECOM_ROBOT_KEY 未配置，跳过企业微信通知。")
+        return None
+
+    if wecom_robot_key.startswith("http"):
+        return wecom_robot_key
+    return f"https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key={wecom_robot_key}"
+
+
+def _post_wecom_payload(url: str, payload: dict, timeout: int = 10) -> None:
+    response = requests.post(url, json=payload, timeout=timeout)
+    response.raise_for_status()
+    try:
+        data = response.json()
+    except Exception:
+        data = {}
+    errcode = data.get("errcode", 0)
+    if errcode not in (0, "0", None):
+        errmsg = data.get("errmsg", "unknown wecom error")
+        raise RuntimeError(f"WeCom webhook errcode={errcode} errmsg={errmsg}")
+
 @retry_request(max_retries=3, delay=1.0)
 def send_wecom_notification(
     content: str,
@@ -82,16 +107,10 @@ def send_wecom_notification(
     :param content: 消息内容 (Markdown)
     :param mentioned_mobile_list: 需要 @ 的手机号列表 (["138...", "@all"])
     """
-    wecom_robot_key = get_wecom_robot_key()
-    if not wecom_robot_key:
-        logger.warning("⚠️ WECOM_ROBOT_KEY 未配置，跳过企业微信通知。")
+    url = _resolve_wecom_webhook_url()
+    if not url:
         return False
-    
-    if wecom_robot_key.startswith("http"):
-        url = wecom_robot_key
-    else:
-        url = f"https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key={wecom_robot_key}"
-    
+
     payload = {
         "msgtype": "markdown",
         "markdown": { "content": content }
@@ -124,8 +143,7 @@ def send_wecom_notification(
 
     try:
         # 1. 发送 Markdown
-        response = requests.post(url, json=payload, timeout=10)
-        response.raise_for_status()
+        _post_wecom_payload(url, payload, timeout=10)
         
         # 2. 如果需要 @人，额外发一条 Text 消息 (因为 Markdown 无法通过 API 参数 @手机号)
         if mentioned_mobile_list and mention_text:
@@ -136,13 +154,82 @@ def send_wecom_notification(
                     "mentioned_mobile_list": mentioned_mobile_list
                 }
              }
-             text_response = requests.post(url, json=text_payload, timeout=5)
-             text_response.raise_for_status()
+             _post_wecom_payload(url, text_payload, timeout=5)
 
         logger.info("📲 企业微信通知发送成功")
         return True
     except Exception as e:
         logger.error(f"⚠️ 企业微信通知发送失败: {e}")
+        raise
+
+
+@retry_request(max_retries=2, delay=1.0)
+def send_wecom_template_card(
+    *,
+    title: str,
+    subtitle: str,
+    state_label: str,
+    action_label: str,
+    latest_close: str,
+    pnl_text: str,
+    observation_price: str,
+    discipline_price: str,
+    detail: str,
+    jump_url: Optional[str] = None,
+    mentioned_mobile_list: list | None = None,
+    mention_text: str | None = "交易管理提醒：请查收上一条持仓建议卡",
+) -> bool:
+    url = _resolve_wecom_webhook_url()
+    if not url:
+        return False
+
+    payload = {
+        "msgtype": "template_card",
+        "template_card": {
+            "card_type": "text_notice",
+            "source": {
+                "desc": "StockWise 交易管理",
+                "desc_color": 0,
+            },
+            "main_title": {
+                "title": title,
+                "desc": subtitle,
+            },
+            "emphasis_content": {
+                "title": action_label,
+                "desc": "默认动作",
+            },
+            "quote_area": {
+                "type": 0,
+                "quote_text": detail,
+            },
+            "sub_title_text": f"状态：{state_label} | 最新收盘：{latest_close} | 浮盈：{pnl_text}",
+            "horizontal_content_list": [
+                {"keyname": "观察位", "value": observation_price},
+                {"keyname": "纪律线", "value": discipline_price},
+            ],
+            "card_action": {
+                "type": 1,
+                "url": jump_url or os.getenv("NEXT_PUBLIC_SITE_URL", "https://ziso.cc"),
+            },
+        },
+    }
+
+    try:
+        _post_wecom_payload(url, payload, timeout=10)
+        if mentioned_mobile_list and mention_text:
+            text_payload = {
+                "msgtype": "text",
+                "text": {
+                    "content": mention_text,
+                    "mentioned_mobile_list": mentioned_mobile_list,
+                },
+            }
+            _post_wecom_payload(url, text_payload, timeout=5)
+        logger.info("📲 企业微信 template_card 通知发送成功")
+        return True
+    except Exception as e:
+        logger.error(f"⚠️ 企业微信 template_card 发送失败: {e}")
         raise
 
 def format_date(dt_str: str, format_in="%Y%m%d", format_out="%Y-%m-%d") -> str:

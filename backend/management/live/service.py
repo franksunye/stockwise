@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import os
 from typing import Optional
 
 from backend.admin_notifications import get_admin_mobiles
 from backend.database import init_db
-from backend.management.live.card_formatter import build_advice_record
+from backend.management.live.card_formatter import build_action_plan, build_advice_record, format_pct, format_price, resolve_observation_price
 from backend.management.research.lanes import route_case_lanes
 from backend.management.state.snapshot_builder import build_position_snapshots
 from backend.management.storage.live_repo import (
@@ -15,7 +16,7 @@ from backend.management.storage.live_repo import (
     list_active_trade_positions,
 )
 from backend.trading_calendar import get_next_trading_day_str
-from backend.utils import send_wecom_notification
+from backend.utils import send_wecom_notification, send_wecom_template_card
 
 
 @dataclass
@@ -48,6 +49,7 @@ def run_trade_management_advice_loop(
     suppressed_count = 0
     failed_count = 0
     skipped_count = 0
+    advice_style = os.getenv("WECOM_TRADE_ADVICE_STYLE", "markdown").strip().lower()
 
     for position in positions:
         try:
@@ -101,18 +103,52 @@ def run_trade_management_advice_loop(
 
             if notify:
                 try:
-                    send_wecom_notification(
-                        record.card_markdown,
-                        mentioned_mobile_list=get_admin_mobiles() or ["@all"],
-                        mention_text="交易管理提醒：请查收上一条持仓建议卡",
-                    )
+                    mentions = get_admin_mobiles() or ["@all"]
+                    if advice_style == "template_card":
+                        plan = build_action_plan(latest, str(final_lane["recommended_policy"]))
+                        send_wecom_template_card(
+                            title=f"交易管理卡 | {position.stock_name or position.symbol}",
+                            subtitle=f"{position.symbol} · {next_trade_date or latest.trade_date}",
+                            state_label=str(record.extra_payload.get("state_id_text") or latest.state_id or ""),
+                            action_label=plan.summary,
+                            latest_close=format_price(latest.close),
+                            pnl_text=format_pct(latest.unrealized_pnl_pct),
+                            observation_price=format_price(resolve_observation_price(latest)),
+                            discipline_price=format_price(latest.discipline_price),
+                            detail=plan.detail,
+                            mentioned_mobile_list=mentions,
+                            mention_text="交易管理提醒：请查收上一条持仓建议卡",
+                        )
+                    else:
+                        send_wecom_notification(
+                            record.card_markdown,
+                            mentioned_mobile_list=mentions,
+                            mention_text="交易管理提醒：请查收上一条持仓建议卡",
+                        )
                     record.webhook_delivery_status = "sent"
                     delivered_count += 1
                 except Exception as notify_exc:
-                    record.webhook_delivery_status = "failed"
-                    record.webhook_delivery_error = str(notify_exc)
-                    failed_count += 1
-                    errors.append(f"{position.symbol}: webhook 发送失败 - {notify_exc}")
+                    if advice_style == "template_card":
+                        try:
+                            send_wecom_notification(
+                                record.card_markdown,
+                                mentioned_mobile_list=get_admin_mobiles() or ["@all"],
+                                mention_text="交易管理提醒：请查收上一条持仓建议卡",
+                            )
+                            record.webhook_delivery_status = "sent"
+                            delivered_count += 1
+                        except Exception as fallback_exc:
+                            record.webhook_delivery_status = "failed"
+                            record.webhook_delivery_error = (
+                                f"template_card failed: {notify_exc}; markdown fallback failed: {fallback_exc}"
+                            )
+                            failed_count += 1
+                            errors.append(f"{position.symbol}: webhook 发送失败 - {record.webhook_delivery_error}")
+                    else:
+                        record.webhook_delivery_status = "failed"
+                        record.webhook_delivery_error = str(notify_exc)
+                        failed_count += 1
+                        errors.append(f"{position.symbol}: webhook 发送失败 - {notify_exc}")
                 if persist_log:
                     insert_trade_advice_log(record)
             elif persist_log:

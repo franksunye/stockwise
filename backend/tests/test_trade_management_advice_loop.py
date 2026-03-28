@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from unittest.mock import patch
 
 from backend.management.domain.live_advice import UserTradePosition
@@ -161,6 +162,62 @@ def test_advice_loop_uses_non_alert_followup_text_for_mentions() -> None:
     assert result.delivered_count == 1
     assert notify_mock.call_count == 1
     assert notify_mock.call_args.kwargs["mention_text"] == "交易管理提醒：请查收上一条持仓建议卡"
+
+
+def test_advice_loop_can_use_template_card_style() -> None:
+    position = _sample_position()
+    snapshot = _sample_snapshot()
+
+    with patch.dict(os.environ, {"WECOM_TRADE_ADVICE_STYLE": "template_card"}, clear=False), \
+         patch("backend.management.live.service.init_db"), \
+         patch("backend.management.live.service.list_active_trade_positions", return_value=[position]), \
+         patch("backend.management.live.service.build_position_snapshots", return_value=[snapshot]), \
+         patch(
+             "backend.management.live.service.route_case_lanes",
+             return_value={
+                 "final": {
+                     "lane_id": "baseline_3d",
+                     "recommended_policy": "buy_and_hold_baseline",
+                 }
+             },
+         ), \
+         patch("backend.management.live.service.get_admin_mobiles", return_value=["13800000000"]), \
+         patch("backend.management.live.service.send_wecom_template_card", return_value=True) as template_mock, \
+         patch("backend.management.live.service.send_wecom_notification", return_value=True) as markdown_mock, \
+         patch("backend.management.live.service.insert_trade_advice_log"):
+        result = run_trade_management_advice_loop(persist_log=True, notify=True)
+
+    assert result.delivered_count == 1
+    template_mock.assert_called_once()
+    markdown_mock.assert_not_called()
+
+
+def test_advice_loop_falls_back_to_markdown_when_template_card_fails() -> None:
+    position = _sample_position()
+    snapshot = _sample_snapshot()
+
+    with patch.dict(os.environ, {"WECOM_TRADE_ADVICE_STYLE": "template_card"}, clear=False), \
+         patch("backend.management.live.service.init_db"), \
+         patch("backend.management.live.service.list_active_trade_positions", return_value=[position]), \
+         patch("backend.management.live.service.build_position_snapshots", return_value=[snapshot]), \
+         patch(
+             "backend.management.live.service.route_case_lanes",
+             return_value={
+                 "final": {
+                     "lane_id": "baseline_3d",
+                     "recommended_policy": "buy_and_hold_baseline",
+                 }
+             },
+         ), \
+         patch("backend.management.live.service.get_admin_mobiles", return_value=["13800000000"]), \
+         patch("backend.management.live.service.send_wecom_template_card", side_effect=RuntimeError("unsupported")) as template_mock, \
+         patch("backend.management.live.service.send_wecom_notification", return_value=True) as markdown_mock, \
+         patch("backend.management.live.service.insert_trade_advice_log"):
+        result = run_trade_management_advice_loop(persist_log=True, notify=True)
+
+    assert result.delivered_count == 1
+    template_mock.assert_called_once()
+    markdown_mock.assert_called_once()
 
 
 def test_advice_loop_suppresses_duplicate_sent_card() -> None:
