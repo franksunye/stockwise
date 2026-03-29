@@ -208,7 +208,7 @@ def send_wecom_template_card(
             },
             "quote_area": {
                 "type": 0,
-                "quote_text": "\n".join(detail_lines[:2]) if detail_lines else detail,
+                "quote_text": "\n".join(detail_lines[:3]) if detail_lines else detail,
             },
             "sub_title_text": summary_line,
             "horizontal_content_list": [

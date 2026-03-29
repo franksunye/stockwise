@@ -6,7 +6,14 @@ from typing import Optional
 
 from backend.admin_notifications import get_admin_mobiles
 from backend.database import init_db
-from backend.management.live.card_formatter import build_action_plan, build_advice_record, format_pct, format_price, resolve_observation_price
+from backend.management.live.card_formatter import (
+    build_action_plan,
+    build_advice_record,
+    build_execution_mode_plan,
+    format_pct,
+    format_price,
+    resolve_observation_price,
+)
 from backend.management.research.lanes import route_case_lanes
 from backend.management.state.snapshot_builder import build_position_snapshots
 from backend.management.storage.live_repo import (
@@ -132,30 +139,34 @@ def run_trade_management_advice_loop(
                     mentions = get_admin_mobiles() or ["@all"]
                     if advice_style == "template_card":
                         plan = build_action_plan(latest, str(final_lane["recommended_policy"]))
+                        execution_mode = build_execution_mode_plan(latest, position)
                         primary_action, secondary_action = _split_action_summary(plan.summary)
                         source_desc, source_desc_color = _state_theme(latest.state_id)
                         stock_label = position.stock_name or position.symbol
                         holding_text = f"{position.remaining_size:.0f}/{position.position_size:.0f}股 @ {position.entry_price:.2f}"
-                        detail_lines = list(plan.bullets or [])
+                        success_branch = (plan.bullets or ["继续观察"])[0]
+                        failure_branch = (plan.bullets or ["继续观察", "按纪律处理"])[1] if plan.bullets and len(plan.bullets) > 1 else "按纪律处理"
+                        detail_lines = [
+                            f"判断层：{success_branch}；{failure_branch}",
+                            f"执行层：默认 {execution_mode.default_mode}；备选 {execution_mode.backup_mode}",
+                            f"依据层：{execution_mode.rationale}",
+                        ]
                         recent_event_text: str | None = None
                         if position.latest_event_date and position.latest_event_quantity and position.latest_event_type:
                             event_label = "加仓" if str(position.latest_event_type).upper() == "BUY" else "减仓"
                             event_price = format_price(position.latest_event_price)
                             recent_event_text = f"{position.latest_event_date} {event_label} {position.latest_event_quantity:.0f}股 @ {event_price}"
-                            detail_lines.append(
-                                f"最近{event_label} {position.latest_event_date}: {position.latest_event_quantity:.0f}股 @ {event_price}"
-                            )
                             if event_label == "减仓":
                                 secondary_action = f"管理剩余 {position.remaining_size:.0f}股"
                             elif event_label == "加仓":
                                 secondary_action = f"管理最新 {position.remaining_size:.0f}股仓位"
                         send_wecom_template_card(
                             title=stock_label,
-                            subtitle=f"{position.symbol} · {next_trade_date or latest.trade_date} 剩余仓位建议" if recent_event_text else f"{position.symbol} · {next_trade_date or latest.trade_date} 建议",
+                            subtitle=f"{position.symbol} · {next_trade_date or latest.trade_date} 剩余仓位决策卡" if recent_event_text else f"{position.symbol} · {next_trade_date or latest.trade_date} 决策卡",
                             state_label=str(record.extra_payload.get("state_id_text") or latest.state_id or ""),
                             summary_line=f"最新收盘 {format_price(latest.close)} · 浮盈 {format_pct(latest.unrealized_pnl_pct)}",
                             action_label=primary_action,
-                            action_desc=secondary_action,
+                            action_desc=f"默认执行：{execution_mode.default_mode}",
                             holding_text=holding_text,
                             observation_text=format_price(resolve_observation_price(latest)),
                             discipline_text=format_price(latest.discipline_price),

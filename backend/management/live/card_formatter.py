@@ -15,6 +15,13 @@ class ActionPlan:
     bullets: list[str] | None = None
 
 
+@dataclass
+class ExecutionModePlan:
+    default_mode: str
+    backup_mode: str
+    rationale: str
+
+
 def format_pct(value: Optional[float]) -> str:
     if value is None:
         return "-"
@@ -115,6 +122,50 @@ def build_action_plan(snapshot: PositionState, recommended_policy: str) -> Actio
     )
 
 
+def build_execution_mode_plan(snapshot: PositionState, position: UserTradePosition) -> ExecutionModePlan:
+    has_recent_event = bool(position.latest_event_date and position.latest_event_type and position.latest_event_quantity)
+
+    if snapshot.state_id == "FailureRisk":
+        return ExecutionModePlan(
+            default_mode="条件单保护优先",
+            backup_mode="盘中判断",
+            rationale="当前首要目标是先降风险，默认优先减少犹豫和拖延；若你能持续盯盘，再用盘中判断争取更好的离场质量。",
+        )
+
+    if snapshot.state_id == "ProfitProtection" and snapshot.near_resistance:
+        if has_recent_event and str(position.latest_event_type).upper() == "SELL":
+            return ExecutionModePlan(
+                default_mode="盘中判断优先",
+                backup_mode="条件单保护",
+                rationale="当前处在关键位确认区，默认先保留突破后的上行弹性；如果你周一无法盯盘，条件单更适合保护已锁定利润。",
+            )
+        return ExecutionModePlan(
+            default_mode="盘中判断优先",
+            backup_mode="条件单保护",
+            rationale="当前位置接近突破确认位，盘中判断更能区分“真突破”和“冲高失败”；若无法盯盘，再退回条件单保护。",
+        )
+
+    if snapshot.state_id == "ProfitProtection":
+        return ExecutionModePlan(
+            default_mode="条件单保护优先",
+            backup_mode="盘中判断",
+            rationale="当前核心目标是保护已有浮盈，默认优先用更纪律化的方式降低利润回吐；若你能盯盘，再保留手动判断空间。",
+        )
+
+    if snapshot.state_id in {"TrendHolding", "BreakoutPending", "EntryTriggered"}:
+        return ExecutionModePlan(
+            default_mode="盘中判断优先",
+            backup_mode="条件单保护",
+            rationale="当前更需要判断结构是否延续，默认保留手动确认空间；若无法盯盘，再用条件单把失败分支先自动化。",
+        )
+
+    return ExecutionModePlan(
+        default_mode="盘中判断优先",
+        backup_mode="条件单保护",
+        rationale="默认先保留判断弹性；若你无法持续盯盘，再切到条件单保护。",
+    )
+
+
 def build_trade_card_markdown(
     position: UserTradePosition,
     snapshot: PositionState,
@@ -123,6 +174,7 @@ def build_trade_card_markdown(
     recommended_policy: str,
 ) -> str:
     plan = build_action_plan(snapshot, recommended_policy)
+    execution_mode = build_execution_mode_plan(snapshot, position)
     stock_label = position.stock_name or position.symbol
     state_desc = get_state_description(snapshot.state_id)
     observation_price = format_price(resolve_observation_price(snapshot))
@@ -161,9 +213,19 @@ def build_trade_card_markdown(
 
     lines.extend([
         "",
-        f"**当前状态**：{state_desc}",
-        f"**{next_action_label}**：{plan.summary}",
+        "#### 判断层",
+        f"- 当前状态：{state_desc}",
+        f"- 默认动作：{plan.summary}",
+        f"- 成功分支：{(plan.bullets or ['-'])[0]}",
+        f"- 失败分支：{(plan.bullets or ['-','-'])[1] if plan.bullets and len(plan.bullets) > 1 else plan.detail}",
         "",
+        "#### 执行层",
+        f"- 默认执行方式：{execution_mode.default_mode}",
+        f"- 备选执行方式：{execution_mode.backup_mode}",
+        f"- {next_action_label}：{plan.summary}",
+        "",
+        "#### 依据层",
+        f"- 选择依据：{execution_mode.rationale}",
         f"- 执行说明：{plan.detail}",
         f"- 观察位：{observation_price}",
         f"- 纪律线：{discipline_price}",
