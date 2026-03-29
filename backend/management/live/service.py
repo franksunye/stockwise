@@ -147,10 +147,10 @@ def run_trade_management_advice_loop(
                         success_branch = (plan.bullets or ["继续观察"])[0]
                         failure_branch = (plan.bullets or ["继续观察", "按纪律处理"])[1] if plan.bullets and len(plan.bullets) > 1 else "按纪律处理"
                         detail_lines = [
-                            f"判断层：{success_branch}；{failure_branch}",
-                            f"执行层：默认 {execution_mode.default_mode}；备选 {execution_mode.backup_mode}",
-                            f"依据层：{execution_mode.rationale}",
+                            success_branch,
+                            failure_branch,
                         ]
+                        followup_text = f"执行依据：{execution_mode.rationale}"
                         recent_event_text: str | None = None
                         if position.latest_event_date and position.latest_event_quantity and position.latest_event_type:
                             event_label = "加仓" if str(position.latest_event_type).upper() == "BUY" else "减仓"
@@ -166,7 +166,7 @@ def run_trade_management_advice_loop(
                             state_label=str(record.extra_payload.get("state_id_text") or latest.state_id or ""),
                             summary_line=f"最新收盘 {format_price(latest.close)} · 浮盈 {format_pct(latest.unrealized_pnl_pct)}",
                             action_label=primary_action,
-                            action_desc=f"默认执行：{execution_mode.default_mode}",
+                            action_desc=execution_mode.default_mode,
                             holding_text=holding_text,
                             observation_text=format_price(resolve_observation_price(latest)),
                             discipline_text=format_price(latest.discipline_price),
@@ -179,13 +179,14 @@ def run_trade_management_advice_loop(
                             source_desc_color=source_desc_color,
                             jump_url=f"{os.getenv('NEXT_PUBLIC_SITE_URL', 'https://ziso.cc').rstrip('/')}/admin/trade-positions",
                             mentioned_mobile_list=mentions,
-                            mention_text="交易管理提醒：请查收上一条持仓建议卡",
+                            mention_text=followup_text,
                         )
                     else:
+                        followup_text = f"执行依据：{build_execution_mode_plan(latest, position).rationale}"
                         send_wecom_notification(
                             record.card_markdown,
                             mentioned_mobile_list=mentions,
-                            mention_text="交易管理提醒：请查收上一条持仓建议卡",
+                            mention_text=followup_text,
                         )
                     record.webhook_delivery_status = "sent"
                     delivered_count += 1

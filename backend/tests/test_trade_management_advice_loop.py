@@ -185,7 +185,7 @@ def test_advice_loop_uses_non_alert_followup_text_for_mentions() -> None:
 
     assert result.delivered_count == 1
     assert notify_mock.call_count == 1
-    assert notify_mock.call_args.kwargs["mention_text"] == "交易管理提醒：请查收上一条持仓建议卡"
+    assert notify_mock.call_args.kwargs["mention_text"] == "执行依据：当前处在关键位确认区，默认先保留突破后的上行弹性；如果你周一无法盯盘，条件单更适合保护已锁定利润。"
 
 
 def test_advice_loop_can_use_template_card_style() -> None:
@@ -219,17 +219,17 @@ def test_advice_loop_can_use_template_card_style() -> None:
     assert template_mock.call_args.kwargs["title"] == "科济药业-B"
     assert template_mock.call_args.kwargs["subtitle"] == "02171 · 2026-03-30 剩余仓位决策卡"
     assert template_mock.call_args.kwargs["action_label"] == "继续持有"
-    assert template_mock.call_args.kwargs["action_desc"] == "默认执行：盘中判断优先"
+    assert template_mock.call_args.kwargs["action_desc"] == "盘中判断优先"
     assert template_mock.call_args.kwargs["holding_text"] == "3000/4000股 @ 14.50"
     assert template_mock.call_args.kwargs["recent_event_text"] == "2026-03-27 减仓 1000股 @ 17.58"
     assert template_mock.call_args.kwargs["summary_line"] == "最新收盘 17.46 · 浮盈 +20.4%"
     assert template_mock.call_args.kwargs["discipline_text"] == "14.79"
     assert template_mock.call_args.kwargs["observation_text"] == "17.74"
     assert template_mock.call_args.kwargs["detail_lines"] == [
-        "判断层：站稳 17.74：继续持有；冲高不稳：先止盈 1/3",
-        "执行层：默认 盘中判断优先；备选 条件单保护",
-        "依据层：当前处在关键位确认区，默认先保留突破后的上行弹性；如果你周一无法盯盘，条件单更适合保护已锁定利润。",
+        "站稳 17.74：继续持有",
+        "冲高不稳：先止盈 1/3",
     ]
+    assert template_mock.call_args.kwargs["mention_text"] == "执行依据：当前处在关键位确认区，默认先保留突破后的上行弹性；如果你周一无法盯盘，条件单更适合保护已锁定利润。"
 
 
 def test_advice_loop_falls_back_to_markdown_when_template_card_fails() -> None:

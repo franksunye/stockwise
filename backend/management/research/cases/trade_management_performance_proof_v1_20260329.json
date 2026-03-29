@@ -1,0 +1,106 @@
+{
+  "as_of": "2026-03-29",
+  "proof_id": "trade_management_performance_proof_v1",
+  "scope": {
+    "full_stack_window_from": "2025-12-27",
+    "full_stack_window_to": "2026-03-27",
+    "case_entry_date_from": "2026-03-18",
+    "case_entry_date_to": "2026-03-25",
+    "management_horizon": "3 trading days",
+    "interpretation": "Proof focuses on trade-management overlay improvement over the same-entry buy-and-hold baseline. It is not yet a full portfolio backtest."
+  },
+  "headline": {
+    "current_grade": "B+",
+    "current_total_score": 83,
+    "proved_statement": "Current v1 already proves positive trade-management overlay improvement on formal local case pools. On CN500, the routed model also beats a same-window HS300 reference on average over the tested 3-day management horizon."
+  },
+  "cn500": {
+    "sample_size": 500,
+    "avg_baseline_return": -0.0047850641,
+    "avg_routed_return": -0.0003488956,
+    "improvement_vs_baseline": 0.0044361685,
+    "avg_baseline_drawdown": -0.0061665504,
+    "avg_routed_drawdown": -0.0030235723,
+    "avg_baseline_giveback": 0.0064493806,
+    "avg_routed_giveback": 0.0030489107,
+    "positive_holdout_splits": 4,
+    "total_holdout_splits": 5,
+    "same_window_hs300_avg_return": -0.0135713263,
+    "baseline_excess_vs_hs300": 0.0087862622,
+    "routed_excess_vs_hs300": 0.0132224307,
+    "benchmark_path_breakdown": [
+      {
+        "entry_date": "2026-03-18",
+        "end_date": "2026-03-23",
+        "benchmark_symbol": "sh000300",
+        "benchmark_name": "沪深300",
+        "return_pct": -0.0515905226,
+        "case_count": 84
+      },
+      {
+        "entry_date": "2026-03-19",
+        "end_date": "2026-03-24",
+        "benchmark_symbol": "sh000300",
+        "benchmark_name": "沪深300",
+        "return_pct": -0.0236803432,
+        "case_count": 84
+      },
+      {
+        "entry_date": "2026-03-20",
+        "end_date": "2026-03-25",
+        "benchmark_symbol": "sh000300",
+        "benchmark_name": "沪深300",
+        "return_pct": -0.0064654856,
+        "case_count": 83
+      },
+      {
+        "entry_date": "2026-03-23",
+        "end_date": "2026-03-26",
+        "benchmark_symbol": "sh000300",
+        "benchmark_name": "沪深300",
+        "return_pct": 0.0134744237,
+        "case_count": 83
+      },
+      {
+        "entry_date": "2026-03-24",
+        "end_date": "2026-03-26",
+        "benchmark_symbol": "sh000300",
+        "benchmark_name": "沪深300",
+        "return_pct": 0.0006279739,
+        "case_count": 83
+      },
+      {
+        "entry_date": "2026-03-25",
+        "end_date": "2026-03-26",
+        "benchmark_symbol": "sh000300",
+        "benchmark_name": "沪深300",
+        "return_pct": -0.0132121109,
+        "case_count": 83
+      }
+    ]
+  },
+  "hk180": {
+    "sample_size": 180,
+    "avg_baseline_return": -0.0062126199,
+    "avg_routed_return": -0.0046664044,
+    "improvement_vs_baseline": 0.0015462155,
+    "avg_baseline_drawdown": -0.0076450585,
+    "avg_routed_drawdown": -0.0064958962,
+    "avg_baseline_giveback": 0.0110956407,
+    "avg_routed_giveback": 0.0096553136,
+    "positive_holdout_splits": 5,
+    "total_holdout_splits": 5
+  },
+  "cn_hk_680": {
+    "sample_size": 680,
+    "avg_baseline_return": -0.0051629465,
+    "avg_routed_return": -0.0014917656,
+    "improvement_vs_baseline": 0.0036711809,
+    "avg_baseline_drawdown": -0.0065579202,
+    "avg_routed_drawdown": -0.0039427168,
+    "avg_baseline_giveback": 0.007679273,
+    "avg_routed_giveback": 0.0047976644,
+    "positive_holdout_splits": 4,
+    "total_holdout_splits": 5
+  }
+}
