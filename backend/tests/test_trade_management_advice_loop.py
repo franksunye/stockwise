@@ -98,6 +98,8 @@ def test_advice_loop_runs_with_mocked_dependencies() -> None:
     with patch("backend.management.live.service.init_db"), \
          patch("backend.management.live.service.list_active_trade_positions", return_value=[position]), \
          patch("backend.management.live.service.build_position_snapshots", return_value=[snapshot]), \
+         patch("backend.management.live.service.get_next_trading_day_str", return_value="2026-03-30"), \
+         patch("backend.management.live.service.fetch_latest_trade_advice", return_value=None), \
          patch(
              "backend.management.live.service.route_case_lanes",
              return_value={
@@ -126,6 +128,8 @@ def test_advice_loop_persists_failed_webhook_status() -> None:
     with patch("backend.management.live.service.init_db"), \
          patch("backend.management.live.service.list_active_trade_positions", return_value=[position]), \
          patch("backend.management.live.service.build_position_snapshots", return_value=[snapshot]), \
+         patch("backend.management.live.service.get_next_trading_day_str", return_value="2026-03-30"), \
+         patch("backend.management.live.service.fetch_latest_trade_advice", return_value=None), \
          patch(
              "backend.management.live.service.route_case_lanes",
              return_value={
@@ -155,6 +159,8 @@ def test_advice_loop_uses_non_alert_followup_text_for_mentions() -> None:
     with patch("backend.management.live.service.init_db"), \
          patch("backend.management.live.service.list_active_trade_positions", return_value=[position]), \
          patch("backend.management.live.service.build_position_snapshots", return_value=[snapshot]), \
+         patch("backend.management.live.service.get_next_trading_day_str", return_value="2026-03-30"), \
+         patch("backend.management.live.service.fetch_latest_trade_advice", return_value=None), \
          patch(
              "backend.management.live.service.route_case_lanes",
              return_value={
@@ -183,6 +189,8 @@ def test_advice_loop_can_use_template_card_style() -> None:
          patch("backend.management.live.service.init_db"), \
          patch("backend.management.live.service.list_active_trade_positions", return_value=[position]), \
          patch("backend.management.live.service.build_position_snapshots", return_value=[snapshot]), \
+         patch("backend.management.live.service.get_next_trading_day_str", return_value="2026-03-30"), \
+         patch("backend.management.live.service.fetch_latest_trade_advice", return_value=None), \
          patch(
              "backend.management.live.service.route_case_lanes",
              return_value={
@@ -225,6 +233,8 @@ def test_advice_loop_falls_back_to_markdown_when_template_card_fails() -> None:
          patch("backend.management.live.service.init_db"), \
          patch("backend.management.live.service.list_active_trade_positions", return_value=[position]), \
          patch("backend.management.live.service.build_position_snapshots", return_value=[snapshot]), \
+         patch("backend.management.live.service.get_next_trading_day_str", return_value="2026-03-30"), \
+         patch("backend.management.live.service.fetch_latest_trade_advice", return_value=None), \
          patch(
              "backend.management.live.service.route_case_lanes",
              return_value={
@@ -252,6 +262,7 @@ def test_advice_loop_suppresses_duplicate_sent_card() -> None:
     with patch("backend.management.live.service.init_db"), \
          patch("backend.management.live.service.list_active_trade_positions", return_value=[position]), \
          patch("backend.management.live.service.build_position_snapshots", return_value=[snapshot]), \
+         patch("backend.management.live.service.get_next_trading_day_str", return_value="2026-03-30"), \
          patch(
              "backend.management.live.service.route_case_lanes",
              return_value={
