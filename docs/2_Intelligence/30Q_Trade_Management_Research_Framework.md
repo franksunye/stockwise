@@ -301,6 +301,54 @@ StockWise 不应自己重造完整通用回测基础设施。
 因此，本阶段最准确的结论是：
 
 **交易管理模型的增益已经成立；完整整机业绩背书仍需要后续组合级正式回测。**
+
+### 5D. 下一阶段：从“增益证明”走向“整机业绩证明”
+
+如果要正式回答用户会问的终极问题：
+
+- 近 `6M / 12M` 总收益多少
+- 最大回撤多少
+- 相对 `沪深300 / 恒指` 超额多少
+- 风险收益比如何
+
+则下一阶段必须从当前“交易管理增益证明”升级到“完整组合级回测证明”。
+
+这一步的正式目标是：
+
+1. 将 `Signal Discovery` 与 `Trade Management` 接成一条统一回测链
+2. 以组合净值路径而不是 case 均值作为最终绩效口径
+3. 正式输出：
+   - `total_return`
+   - `annualized_return`
+   - `max_drawdown`
+   - `volatility`
+   - `sharpe_like`
+   - `excess_vs_benchmark`
+   - `win_rate`
+   - `profit_giveback`
+
+推荐最小实施顺序：
+
+1. 先做 `CN` 组合级回测
+   - benchmark：`沪深300`
+2. 再做 `HK` 组合级回测
+   - benchmark：`恒指` 或 `恒生科技`
+3. 最后再做 `CN+HK` 合并视角
+
+当前阶段的研究资产会继续保留：
+
+- case pool
+- trade-management scorecard
+- overlay improvement proof
+
+但它们将退为：
+
+- 研究增益证明
+- 局部优化比较口径
+
+组合级回测完成后，用户侧的正式业绩表述才应升级为：
+
+**完整系统（信号发现 + 交易管理）的收益、回撤与超额表现。**
 3. `lane_stability`
    - 同一 lane 是否只在样本内有效
 
