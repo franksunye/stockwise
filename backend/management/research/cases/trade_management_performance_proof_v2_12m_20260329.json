@@ -1,0 +1,119 @@
+{
+  "as_of": "2026-03-29",
+  "baseline_id": "trade_management_performance_proof_v2_12m",
+  "window": "12M",
+  "regions": {
+    "CN500": {
+      "sample_size": 500,
+      "date_from": "2025-03-27",
+      "date_to": "2026-03-27",
+      "benchmark_symbols": [
+        "510300"
+      ],
+      "benchmark_names": [
+        "沪深300ETF"
+      ],
+      "baseline": {
+        "total_return": 0.06359,
+        "annualized_return": 0.066303,
+        "max_drawdown": -0.06908,
+        "annualized_volatility": 0.057178,
+        "sharpe_like": 1.15153
+      },
+      "routed": {
+        "total_return": 0.053839,
+        "annualized_return": 0.056125,
+        "max_drawdown": -0.06017,
+        "annualized_volatility": 0.049396,
+        "sharpe_like": 1.130327
+      },
+      "benchmark": {
+        "total_return": 0.064703,
+        "annualized_return": 0.067465,
+        "max_drawdown": -0.072519,
+        "annualized_volatility": 0.09221,
+        "sharpe_like": 0.754354
+      },
+      "improvement_vs_baseline": -0.009751,
+      "excess_vs_benchmark": -0.010864,
+      "baseline_excess_vs_benchmark": -0.001113
+    },
+    "HK180": {
+      "sample_size": 180,
+      "date_from": "2025-03-27",
+      "date_to": "2026-03-27",
+      "benchmark_symbols": [
+        "02800"
+      ],
+      "benchmark_names": [
+        "恒生指数ETF"
+      ],
+      "baseline": {
+        "total_return": 0.004214,
+        "annualized_return": 0.004317,
+        "max_drawdown": -0.011115,
+        "annualized_volatility": 0.014256,
+        "sharpe_like": 0.309262
+      },
+      "routed": {
+        "total_return": 0.007229,
+        "annualized_return": 0.007406,
+        "max_drawdown": -0.008804,
+        "annualized_volatility": 0.010247,
+        "sharpe_like": 0.725261
+      },
+      "benchmark": {
+        "total_return": 0.028368,
+        "annualized_return": 0.02907,
+        "max_drawdown": -0.123492,
+        "annualized_volatility": 0.141101,
+        "sharpe_like": 0.273701
+      },
+      "improvement_vs_baseline": 0.003016,
+      "excess_vs_benchmark": -0.021139,
+      "baseline_excess_vs_benchmark": -0.024155
+    },
+    "CNHK680": {
+      "sample_size": 680,
+      "date_from": "2025-03-27",
+      "date_to": "2026-03-27",
+      "benchmark_symbols": [
+        "02800",
+        "510300"
+      ],
+      "benchmark_names": [
+        "恒生指数ETF",
+        "沪深300ETF"
+      ],
+      "baseline": {
+        "total_return": 0.047873,
+        "annualized_return": 0.047873,
+        "max_drawdown": -0.052336,
+        "annualized_volatility": 0.042067,
+        "sharpe_like": 1.132757
+      },
+      "routed": {
+        "total_return": 0.041501,
+        "annualized_return": 0.041501,
+        "max_drawdown": -0.045261,
+        "annualized_volatility": 0.036162,
+        "sharpe_like": 1.142657
+      },
+      "benchmark": {
+        "total_return": 0.055085,
+        "annualized_return": 0.055085,
+        "max_drawdown": -0.083033,
+        "annualized_volatility": 0.09358,
+        "sharpe_like": 0.620029
+      },
+      "improvement_vs_baseline": -0.006372,
+      "excess_vs_benchmark": -0.013584,
+      "baseline_excess_vs_benchmark": -0.007212
+    }
+  },
+  "summary": {
+    "cn_positioning": "risk_optimizer_not_return_maximizer",
+    "hk_positioning": "improves_return_and_risk_inside_pool_but_not_benchmark_winner_yet",
+    "cnhk_positioning": "lower_drawdown_and_better_risk_quality_with_lower_total_return"
+  }
+}
