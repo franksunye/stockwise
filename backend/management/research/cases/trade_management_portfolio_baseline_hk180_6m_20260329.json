@@ -1,0 +1,82 @@
+{
+  "as_of": "2026-03-29",
+  "baseline_id": "trade_management_portfolio_baseline_v1",
+  "scope": {
+    "case_file": "hk_fullstack_6m_cases_20260329.json",
+    "preset": null,
+    "capital_method": "equal_notional_per_case_with_idle_cash_before_entry",
+    "interpretation": "Portfolio-level baseline over the formal case pool. Results compare routed trade management against same-entry buy-and-hold baseline and market-matched benchmark."
+  },
+  "regions": {
+    "ALL": {
+      "sample_size": 180,
+      "date_from": "2025-10-23",
+      "date_to": "2026-03-27",
+      "benchmark_symbols": [
+        "02800"
+      ],
+      "benchmark_names": [
+        "恒生指数ETF"
+      ],
+      "baseline": {
+        "total_return": -0.027372,
+        "annualized_return": -0.064438,
+        "max_drawdown": -0.02917,
+        "annualized_volatility": 0.035233,
+        "sharpe_like": -1.872603
+      },
+      "routed": {
+        "total_return": -0.013115,
+        "annualized_return": -0.031187,
+        "max_drawdown": -0.014311,
+        "annualized_volatility": 0.021755,
+        "sharpe_like": -1.44543
+      },
+      "benchmark": {
+        "total_return": -0.044987,
+        "annualized_return": -0.104589,
+        "max_drawdown": -0.109192,
+        "annualized_volatility": 0.141231,
+        "sharpe_like": -0.711279
+      },
+      "improvement_vs_baseline": 0.014257,
+      "excess_vs_benchmark": 0.031872,
+      "baseline_excess_vs_benchmark": 0.017615
+    },
+    "HK": {
+      "sample_size": 180,
+      "date_from": "2025-10-23",
+      "date_to": "2026-03-27",
+      "benchmark_symbols": [
+        "02800"
+      ],
+      "benchmark_names": [
+        "恒生指数ETF"
+      ],
+      "baseline": {
+        "total_return": -0.027372,
+        "annualized_return": -0.064438,
+        "max_drawdown": -0.02917,
+        "annualized_volatility": 0.035233,
+        "sharpe_like": -1.872603
+      },
+      "routed": {
+        "total_return": -0.013115,
+        "annualized_return": -0.031187,
+        "max_drawdown": -0.014311,
+        "annualized_volatility": 0.021755,
+        "sharpe_like": -1.44543
+      },
+      "benchmark": {
+        "total_return": -0.044987,
+        "annualized_return": -0.104589,
+        "max_drawdown": -0.109192,
+        "annualized_volatility": 0.141231,
+        "sharpe_like": -0.711279
+      },
+      "improvement_vs_baseline": 0.014257,
+      "excess_vs_benchmark": 0.031872,
+      "baseline_excess_vs_benchmark": 0.017615
+    }
+  }
+}
