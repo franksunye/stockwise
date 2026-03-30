@@ -6,16 +6,19 @@ A precision scheduler built on Cloudflare Workers, designed to solve the inaccur
 
 1. 交易时段内触发 `data_sync_realtime.yml`
 2. 每个交易日北京时间 `08:30` 精确触发 `daily_morning_call.yml`
+3. 每个交易日北京时间 `20:30` 精确触发 `trade_management_advice_loop.yml`
 
 ## 🏗️ Architecture
 
 ```text
-Cloudflare Worker (Cron: */15 * * * *)
+Cloudflare Worker
         ↓
-Checks Beijing time and trading window
+Receives exact Cron patterns
         ↓
-If 08:30 on a weekday:
+If weekday 08:30 Beijing:
   triggers daily_morning_call.yml
+Else if weekday 20:30 Beijing:
+  triggers trade_management_advice_loop.yml
 Else if during trading hours (09:15-16:30, Mon-Fri):
   triggers data_sync_realtime.yml
         ↓
@@ -24,13 +27,17 @@ GitHub Actions executes the Python ETL script
 
 ## ⏰ Scheduling Rules
 
-The Worker itself runs every `15` minutes, but decides which workflow to dispatch based on Beijing time:
+The Worker uses a mix of exact cron triggers and a `15`-minute polling trigger:
 
 | Beijing Time Window | Workflow | Trigger Type |
 | --- | --- | --- |
 | `08:30` on weekdays | `daily_morning_call.yml` | Precision daily trigger |
+| `20:30` on weekdays | `trade_management_advice_loop.yml` | Precision daily trigger |
 | `09:15-16:30` on weekdays | `data_sync_realtime.yml` | Intraday production trigger |
 | Other times | None | Skip |
+
+Implementation note:
+- Precision tasks are registered in the `PRECISION_SCHEDULES` table inside [worker.js](/Users/yesun/Code/stockwise/cloudflare-worker/worker.js). To add a new exact-time task later, add one route entry plus the matching cron in [wrangler.toml](/Users/yesun/Code/stockwise/cloudflare-worker/wrangler.toml).
 
 ## 🚀 Deployment Steps
 
@@ -90,7 +97,8 @@ wrangler secret put GITHUB_WORKFLOW
 Note:
 
 1. `GITHUB_WORKFLOW` is the default intraday workflow
-2. `daily_morning_call.yml` is triggered explicitly by the Worker at `08:30` Beijing time and does not rely on `GITHUB_WORKFLOW`
+2. `daily_morning_call.yml` is triggered explicitly by the Worker at `08:30` Beijing time
+3. `trade_management_advice_loop.yml` is triggered explicitly by the Worker at `20:30` Beijing time
 
 Alternatively, configure them in the [Cloudflare Dashboard](https://dash.cloudflare.com/):
 1. Navigate to **Workers & Pages**.
@@ -146,6 +154,10 @@ View the following in your Cloudflare Dashboard:
 **Issue: Morning call did not fire at 08:30**
 - Check the Cron execution around `00:30 UTC`.
 - Verify the Worker logs for `triggering daily_morning_call`.
+
+**Issue: Trade management advice loop did not fire at 20:30**
+- Check the Cron execution around `12:30 UTC`.
+- Verify the Worker logs for `triggering trade_management_advice_loop`.
 
 **Issue: Inaccurate trading hour calculation**
 - The Worker uses UTC to calculate Beijing Time.

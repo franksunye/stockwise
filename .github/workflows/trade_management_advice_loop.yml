@@ -1,9 +1,6 @@
 name: Trade Management Advice Loop
 
 on:
-  schedule:
-    # 每个工作日北京时间 20:30 触发一次；实际是否执行由 CN/HK 市场闸门决定
-    - cron: '30 12 * * 1-5'
   workflow_dispatch:
     inputs:
       user_id:
@@ -42,32 +39,24 @@ concurrency:
 
 jobs:
   gate-cn:
-    if: |
-      github.event_name == 'schedule' ||
-      (github.event_name == 'workflow_dispatch' && (inputs.market == 'ALL' || inputs.market == 'CN'))
+    if: ${{ inputs.market == 'ALL' || inputs.market == 'CN' }}
     uses: ./.github/workflows/trading_day_gate.yml
     with:
       market: 'CN'
-      force: ${{ github.event_name == 'workflow_dispatch' && inputs.force || false }}
+      force: ${{ inputs.force || false }}
     secrets: inherit
 
   gate-hk:
-    if: |
-      github.event_name == 'schedule' ||
-      (github.event_name == 'workflow_dispatch' && (inputs.market == 'ALL' || inputs.market == 'HK'))
+    if: ${{ inputs.market == 'ALL' || inputs.market == 'HK' }}
     uses: ./.github/workflows/trading_day_gate.yml
     with:
       market: 'HK'
-      force: ${{ github.event_name == 'workflow_dispatch' && inputs.force || false }}
+      force: ${{ inputs.force || false }}
     secrets: inherit
 
   advice-cn:
     needs: [gate-cn]
-    if: |
-      always() && needs.gate-cn.result != 'skipped' && (
-        github.event_name == 'workflow_dispatch' ||
-        needs.gate-cn.outputs.should_run == 'true'
-      )
+    if: ${{ always() && needs.gate-cn.result != 'skipped' && needs.gate-cn.outputs.should_run == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -102,7 +91,7 @@ jobs:
           if [ -n "$SYMBOL_INPUT" ]; then
             ARGS="$ARGS --symbol $SYMBOL_INPUT"
           fi
-          if [ "$NOTIFY_INPUT" = "true" ] || [ "${{ github.event_name }}" = "schedule" ]; then
+          if [ "$NOTIFY_INPUT" = "true" ]; then
             ARGS="$ARGS --notify"
           fi
 
@@ -110,11 +99,7 @@ jobs:
 
   advice-hk:
     needs: [gate-hk]
-    if: |
-      always() && needs.gate-hk.result != 'skipped' && (
-        github.event_name == 'workflow_dispatch' ||
-        needs.gate-hk.outputs.should_run == 'true'
-      )
+    if: ${{ always() && needs.gate-hk.result != 'skipped' && needs.gate-hk.outputs.should_run == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -149,7 +134,7 @@ jobs:
           if [ -n "$SYMBOL_INPUT" ]; then
             ARGS="$ARGS --symbol $SYMBOL_INPUT"
           fi
-          if [ "$NOTIFY_INPUT" = "true" ] || [ "${{ github.event_name }}" = "schedule" ]; then
+          if [ "$NOTIFY_INPUT" = "true" ]; then
             ARGS="$ARGS --notify"
           fi
 

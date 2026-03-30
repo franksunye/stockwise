@@ -1,16 +1,31 @@
 /**
  * StockWise Precision Scheduler
  * 
- * 这个 Cloudflare Worker 作为精准调度器，每 15 分钟运行一次。
- * 它会根据北京时间决定触发哪个 GitHub Actions workflow：
- * 1. 08:30 触发 daily_morning_call.yml
- * 2. 交易时段触发 data_sync_realtime.yml
+ * 这个 Cloudflare Worker 作为精准调度器，支持：
+ * 1. 每个工作日 20:30 精确触发 trade_management_advice_loop.yml
+ * 2. 每 15 分钟检查一次早报与交易时段内的 realtime sync
  */
+
+const PRECISION_SCHEDULES = [
+  {
+    cron: '30 12 * * 1-5',
+    workflow: 'trade_management_advice_loop.yml',
+    label: 'trade-management-advice',
+  },
+];
 
 export default {
   // Cron Trigger 入口
   async scheduled(event, env, ctx) {
-    console.log(`⏰ Cron triggered at ${new Date().toISOString()}`);
+    console.log(`⏰ Cron triggered at ${new Date().toISOString()} (pattern: ${event.cron || 'unknown'})`);
+
+    const precisionSchedule = PRECISION_SCHEDULES.find((item) => item.cron === event.cron);
+    if (precisionSchedule) {
+      console.log(`🎯 Exact ${precisionSchedule.label} cron hit, triggering ${precisionSchedule.workflow}...`);
+      const result = await triggerGitHubWorkflow(env, precisionSchedule.workflow);
+      console.log(`✅ Precision workflow triggered (${precisionSchedule.label}):`, result);
+      return;
+    }
     
     // 计算北京时间
     const now = new Date();
@@ -33,15 +48,12 @@ export default {
     }
     
     const currentMinutes = beijingHour * 60 + beijingMinute;
-    
+
     // ========== 早报任务检测 (08:30 北京时间) ==========
-    const morningCallTime = 8 * 60 + 30; // 08:30
-    
-    // 精确判定：仅在 08:30 这一分钟内执行
     if (beijingHour === 8 && beijingMinute === 30) {
-      console.log(`☀️ Morning Call time (Beijing: 08:30), triggering daily_morning_call...`);
+      console.log('☀️ Morning Call time (Beijing: 08:30), triggering daily_morning_call.yml...');
       const result = await triggerGitHubWorkflow(env, 'daily_morning_call.yml');
-      console.log(`✅ Morning Call workflow triggered:`, result);
+      console.log('✅ Morning Call workflow triggered:', result);
       return;
     }
     
@@ -83,7 +95,8 @@ export default {
         utc_time: now.toISOString(),
         beijing_time: beijingTime.toISOString().replace('T', ' ').substring(0, 19),
         github_repo: `${env.GITHUB_OWNER}/${env.GITHUB_REPO}`,
-        workflow: env.GITHUB_WORKFLOW
+        workflow: env.GITHUB_WORKFLOW,
+        precision_workflows: PRECISION_SCHEDULES,
       }, null, 2), {
         headers: { 'Content-Type': 'application/json' }
       });
