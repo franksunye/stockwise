@@ -212,12 +212,6 @@ export function TradeManagementTab({
               <p className={sectionLabelClass}>成本价</p>
               <p className="mt-1.5 truncate text-[17px] font-black text-white">{formatPrice(position?.entry_price)}</p>
             </div>
-            <div className={`${metricCardClass} min-w-0`}>
-              <p className={sectionLabelClass}>最近动作</p>
-              <p className="mt-2 truncate text-sm font-bold text-slate-300">
-                {getTradeEventLabel(position?.latest_event_type)}
-              </p>
-            </div>
           </div>
         </section>
 
