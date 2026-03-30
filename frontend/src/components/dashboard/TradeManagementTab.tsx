@@ -219,7 +219,7 @@ export function TradeManagementTab({
 
         <section className="mt-8">
           <div className="mb-4 flex items-center justify-between gap-3">
-            {renderSectionHeading('执行闭环')}
+            {renderSectionHeading('执行详情')}
             <button
               type="button"
               onClick={handleRefresh}
