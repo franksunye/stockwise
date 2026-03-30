@@ -112,7 +112,7 @@ export function TradeManagementTab({
               <h3 className="text-xl font-black tracking-tight text-white">{stockName || symbol}</h3>
             </div>
             <div className="text-right">
-              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">管理状态</p>
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">交易管理状态</p>
               <h3 className="text-xl font-black tracking-tight text-slate-300">待建立</h3>
             </div>
           </div>
@@ -156,7 +156,7 @@ export function TradeManagementTab({
             <h3 className="text-xl font-black tracking-tight text-white">{stockName || position?.stock_name || symbol}</h3>
           </div>
           <div className="text-right">
-            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">管理状态</p>
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">交易管理状态</p>
             <h3 className="text-xl font-black tracking-tight text-emerald-300">{stateLabel}</h3>
           </div>
         </div>
