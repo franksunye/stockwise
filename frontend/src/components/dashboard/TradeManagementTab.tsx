@@ -239,7 +239,7 @@ export function TradeManagementTab({
             >
               <div className="flex items-center gap-2">
                 <List size={14} className="text-slate-500" />
-                <span className="text-xs font-bold text-slate-300">详细执行依据历史</span>
+                <span className="text-xs font-bold text-slate-300">详细推演依据</span>
               </div>
               <motion.div
                 animate={{ rotate: isDetailExpanded ? 180 : 0 }}
