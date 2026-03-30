@@ -79,6 +79,7 @@ jobs:
           TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
           TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
           WECOM_ROBOT_KEY: ${{ secrets.WECOM_ROBOT_KEY }}
+          WECOM_TRADE_ADVICE_STYLE: template_card
           ADMIN_MOBILES: ${{ secrets.ADMIN_MOBILES }}
           USER_ID_INPUT: ${{ inputs.user_id || '' }}
           SYMBOL_INPUT: ${{ inputs.symbol || '' }}
@@ -122,6 +123,7 @@ jobs:
           TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
           TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
           WECOM_ROBOT_KEY: ${{ secrets.WECOM_ROBOT_KEY }}
+          WECOM_TRADE_ADVICE_STYLE: template_card
           ADMIN_MOBILES: ${{ secrets.ADMIN_MOBILES }}
           USER_ID_INPUT: ${{ inputs.user_id || '' }}
           SYMBOL_INPUT: ${{ inputs.symbol || '' }}

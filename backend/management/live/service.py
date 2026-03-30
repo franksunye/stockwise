@@ -96,7 +96,7 @@ def run_trade_management_advice_loop(
     suppressed_count = 0
     failed_count = 0
     skipped_count = 0
-    advice_style = os.getenv("WECOM_TRADE_ADVICE_STYLE", "markdown").strip().lower()
+    advice_style = os.getenv("WECOM_TRADE_ADVICE_STYLE", "template_card").strip().lower()
 
     for position in positions:
         try:

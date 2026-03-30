@@ -181,16 +181,18 @@ def test_advice_loop_uses_non_alert_followup_text_for_mentions() -> None:
              "backend.management.live.service.fetch_user_wecom_delivery",
              return_value={"wecom_webhook_url": "https://example.com/hook", "mobile": "13800000000"},
          ), \
+         patch("backend.management.live.service.send_wecom_template_card", return_value=True) as template_mock, \
          patch("backend.management.live.service.send_wecom_notification", return_value=True) as notify_mock, \
          patch("backend.utils.send_wecom_notification", return_value=True), \
          patch("backend.management.live.service.insert_trade_advice_log"):
         result = run_trade_management_advice_loop(persist_log=True, notify=True)
 
     assert result.delivered_count == 1
-    assert notify_mock.call_count == 1
-    assert notify_mock.call_args.kwargs["webhook_url"] == "https://example.com/hook"
-    assert notify_mock.call_args.kwargs["mentioned_mobile_list"] == ["13800000000"]
-    assert notify_mock.call_args.kwargs["mention_text"] == "执行依据：当前处在关键位确认区，默认先保留突破后的上行弹性；如果你周一无法盯盘，条件单更适合保护已锁定利润。"
+    assert template_mock.call_count == 1
+    notify_mock.assert_not_called()
+    assert template_mock.call_args.kwargs["webhook_url"] == "https://example.com/hook"
+    assert template_mock.call_args.kwargs["mentioned_mobile_list"] == ["13800000000"]
+    assert template_mock.call_args.kwargs["mention_text"] == "执行依据：当前处在关键位确认区，默认先保留突破后的上行弹性；如果你周一无法盯盘，条件单更适合保护已锁定利润。"
 
 
 def test_advice_loop_can_use_template_card_style() -> None:
@@ -295,13 +297,16 @@ def test_advice_loop_falls_back_to_admin_delivery_when_user_route_missing() -> N
          ), \
          patch("backend.management.live.service.fetch_user_wecom_delivery", return_value=None), \
          patch("backend.management.live.service.get_admin_mobiles", return_value=["13800000000"]), \
+         patch("backend.management.live.service.send_wecom_template_card", return_value=True) as template_mock, \
          patch("backend.management.live.service.send_wecom_notification", return_value=True) as notify_mock, \
          patch("backend.management.live.service.insert_trade_advice_log"):
         result = run_trade_management_advice_loop(persist_log=True, notify=True)
 
     assert result.delivered_count == 1
-    assert notify_mock.call_args.kwargs["webhook_url"] is None
-    assert notify_mock.call_args.kwargs["mentioned_mobile_list"] == ["13800000000"]
+    template_mock.assert_called_once()
+    notify_mock.assert_not_called()
+    assert template_mock.call_args.kwargs["webhook_url"] is None
+    assert template_mock.call_args.kwargs["mentioned_mobile_list"] == ["13800000000"]
 
 
 def test_advice_loop_suppresses_duplicate_sent_card() -> None:
