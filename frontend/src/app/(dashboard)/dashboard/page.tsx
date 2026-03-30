@@ -139,7 +139,6 @@ function DashboardContent() {
     handleVerticalLayerChange,
     backToTopCounter,
     scrollToToday,
-    isInteracting,
     positionRequest
   } = useTikTokScroll(displayStocks, scrollOptions);
 
@@ -226,11 +225,8 @@ function DashboardContent() {
     }
   }, [preferredSymbol]);
 
-  // 【Android 兼容性加固：微小偏移矫正】
-  // 原生 CSS snap-x 在某些 Android 机型上（如 10.5px 的页宽）连续多次滑动可能产生 1px 左右的累计偏离。
-  // 我们在用户手指松开且此时并未主动发生异常跳变时，进行静默的像素级校准，确保 isSnapped 状态正确。
   useEffect(() => {
-    if (isHorizontalScrollLocked || isInteracting) return;
+    if (isHorizontalScrollLocked) return;
 
     const container = scrollRef.current;
     if (!container) return;
@@ -238,21 +234,17 @@ function DashboardContent() {
     const target = container.children[currentIndex];
     if (!(target instanceof HTMLElement)) return;
 
-    // 如果偏离量小于 0.5px，说明 snap-x 已经处理得足够好，不需要 JS 再搅局。
-    const drift = Math.abs(container.scrollLeft - target.offsetLeft);
-    if (drift < 0.5) return;
-
-    const snapCorrection = () => {
-      // 仅在此时未在交互时纠偏，保持“苹果天气”般的视觉一致性。
+    const snapBack = () => {
       container.scrollTo({
         left: target.offsetLeft,
         behavior: 'instant',
       });
     };
 
-    const frame = window.requestAnimationFrame(snapCorrection);
+    snapBack();
+    const frame = window.requestAnimationFrame(snapBack);
     return () => window.cancelAnimationFrame(frame);
-  }, [currentIndex, isHorizontalScrollLocked, isInteracting, scrollRef]);
+  }, [currentIndex, isHorizontalScrollLocked, scrollRef]);
 
   return (
     <main
@@ -323,7 +315,7 @@ function DashboardContent() {
       <div
         ref={scrollRef}
         onScroll={handleScroll}
-        className={`h-full w-full flex snap-x snap-mandatory scrollbar-hide overscroll-x-contain touch-pan-x ${isHorizontalScrollLocked ? 'overflow-x-hidden' : 'overflow-x-scroll'}`}
+        className={`h-full w-full flex snap-x snap-mandatory scrollbar-hide ${isHorizontalScrollLocked ? 'overflow-x-hidden' : 'overflow-x-scroll'}`}
       >
         {displayStocks.map((stock, idx) => {
           if (stock.isAlmanac) {
@@ -365,7 +357,7 @@ function DashboardContent() {
 
         <div className="flex gap-2">
           {displayStocks.map((_, idx) => (
-            <div key={idx} className={`h-1 rounded-full transition-all duration-200 ${idx === currentIndex ? 'w-6 bg-white' : 'w-1 bg-white/20'}`} />
+            <div key={idx} className={`h-1 rounded-full transition-all duration-300 ${idx === currentIndex ? 'w-6 bg-white' : 'w-1 bg-white/20'}`} />
           ))}
         </div>
         <div className="w-full flex justify-between items-center pointer-events-auto">

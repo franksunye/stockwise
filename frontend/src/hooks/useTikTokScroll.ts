@@ -33,12 +33,8 @@ export function useTikTokScroll(stocks: StockData[], options?: UseTikTokScrollOp
     const positionNonceRef = useRef(0);
 
     const scrollRef = useRef<HTMLDivElement>(null);
-    const pageOffsetsRef = useRef<number[]>([]);
-    const viewportWidthRef = useRef(0);
-    const maxScrollLeftRef = useRef(0);
     const navIntentSymbol = useRef<string | null | undefined>(undefined);
     const hasAutoScrolled = useRef(false);
-    const isInteracting = useRef(false); // 新增：记录用户是否正在交互
     const stockCount = stocks.length;
     const preferredSymbol = options && 'preferredSymbol' in options ? (options as UseTikTokScrollOptions & { preferredSymbol?: string | null }).preferredSymbol : null;
 
@@ -47,98 +43,63 @@ export function useTikTokScroll(stocks: StockData[], options?: UseTikTokScrollOp
     const isAtRightEdge = useRef<boolean>(false);
     const isAtLeftEdge = useRef<boolean>(true);  // 默认在左边缘
 
-    const refreshHorizontalMetrics = useCallback(() => {
-        const container = scrollRef.current;
-        if (!container) {
-            pageOffsetsRef.current = [];
-            viewportWidthRef.current = 0;
-            maxScrollLeftRef.current = 0;
-            return;
-        }
-
+    const getNearestIndex = useCallback((container: HTMLDivElement, scrollLeft: number) => {
         const children = Array.from(container.children) as HTMLElement[];
-        pageOffsetsRef.current = children.map(child => child.offsetLeft);
-        viewportWidthRef.current = container.clientWidth;
-        maxScrollLeftRef.current = Math.max(container.scrollWidth - container.clientWidth, 0);
-    }, []);
+        if (children.length === 0) return 0;
 
-    const getNearestIndex = useCallback((scrollLeft: number) => {
-        const offsets = pageOffsetsRef.current;
-        const width = viewportWidthRef.current;
+        let nearestIndex = 0;
+        let nearestDistance = Number.POSITIVE_INFINITY;
 
-        if (offsets.length === 0) return 0;
-        if (width <= 0) return 0;
-
-        // Start from the ideal page index, then only compare nearby cached pages.
-        const approximateIndex = Math.max(0, Math.min(Math.round(scrollLeft / width), offsets.length - 1));
-        let nearestIndex = approximateIndex;
-        let nearestDistance = Math.abs(offsets[approximateIndex] - scrollLeft);
-
-        for (let index = Math.max(0, approximateIndex - 1); index <= Math.min(offsets.length - 1, approximateIndex + 1); index += 1) {
-            const distance = Math.abs(offsets[index] - scrollLeft);
+        children.forEach((child, index) => {
+            const distance = Math.abs(child.offsetLeft - scrollLeft);
             if (distance < nearestDistance) {
                 nearestDistance = distance;
                 nearestIndex = index;
             }
-        }
+        });
 
         return nearestIndex;
     }, []);
-
-    useEffect(() => {
-        refreshHorizontalMetrics();
-
-        const container = scrollRef.current;
-        if (!container || typeof ResizeObserver === 'undefined') return;
-
-        const observer = new ResizeObserver(() => {
-            refreshHorizontalMetrics();
-        });
-
-        observer.observe(container);
-        Array.from(container.children).forEach(child => observer.observe(child));
-
-        return () => observer.disconnect();
-    }, [refreshHorizontalMetrics, stockCount]);
 
     // 处理横向滚动 (切股)
     const handleScroll = useCallback(() => {
         const container = scrollRef.current;
         if (!container) return;
         const scrollLeft = container.scrollLeft;
-        const width = viewportWidthRef.current || container.clientWidth;
+        const width = container.clientWidth;
+        const scrollWidth = container.scrollWidth;
 
         if (width <= 0) return;
 
-        // 1. 索引切换逻辑：仍按真实页偏移计算，但只读取预缓存布局，避免 scroll 中同步 layout thrash。
-        const newIndex = Math.max(0, Math.min(getNearestIndex(scrollLeft), stocks.length - 1));
+        // 1. 索引切换逻辑：不要依赖 scrollLeft / width 的理想模型。
+        // Android 上在连续多页 snap 后可能出现累计偏差，改为按真实子元素 offsetLeft 找最近页。
+        const newIndex = Math.max(0, Math.min(getNearestIndex(container, scrollLeft), stocks.length - 1));
 
         if (newIndex !== currentIndex) {
             setCurrentIndex(newIndex);
         }
 
-        // 2. 稳定态（吸附）检测：同样基于缓存的目标页偏移。
-        const targetLeft = pageOffsetsRef.current[newIndex] ?? (newIndex * width);
+        // 2. 稳定态（吸附）检测：对准最近子页的真实 offsetLeft，而不是假设每页宽度完全相等。
+        const children = container.children;
+        const targetLeft = children[newIndex] instanceof HTMLElement ? (children[newIndex] as HTMLElement).offsetLeft : newIndex * width;
         const stable = Math.abs(scrollLeft - targetLeft) < 2;
         if (stable !== isSnapped) {
             setIsSnapped(stable);
         }
 
         // 3. 边界检测
-        const maxScrollLeft = maxScrollLeftRef.current || Math.max(container.scrollWidth - width, 0);
+        const maxScrollLeft = scrollWidth - width;
         isAtRightEdge.current = scrollLeft >= maxScrollLeft - 5;
         isAtLeftEdge.current = scrollLeft <= 5;
     }, [currentIndex, getNearestIndex, isSnapped, stocks.length]);
 
     // 处理触摸开始
     const handleTouchStart = useCallback((e: TouchEvent) => {
-        isInteracting.current = true;
         touchStartX.current = e.touches[0].clientX;
     }, []);
 
     // 处理触摸结束 - 检测过滑
     const handleTouchEnd = useCallback((e: TouchEvent) => {
-        isInteracting.current = false;
         const touchEndX = e.changedTouches[0].clientX;
         const deltaX = touchStartX.current - touchEndX;
 
@@ -282,7 +243,6 @@ export function useTikTokScroll(stocks: StockData[], options?: UseTikTokScrollOp
         handleVerticalLayerChange,
         backToTopCounter,
         scrollToToday,
-        isInteracting: isInteracting.current,
         positionRequest: positionRequests[stocks[currentIndex]?.symbol || ''] || null
     };
 }
