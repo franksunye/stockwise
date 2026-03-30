@@ -315,7 +315,7 @@ function DashboardContent() {
       <div
         ref={scrollRef}
         onScroll={handleScroll}
-        className={`h-full w-full flex snap-x snap-mandatory scrollbar-hide ${isHorizontalScrollLocked ? 'overflow-x-hidden' : 'overflow-x-scroll'}`}
+        className={`h-full w-full flex snap-x snap-mandatory scrollbar-hide overscroll-x-contain touch-pan-x ${isHorizontalScrollLocked ? 'overflow-x-hidden' : 'overflow-x-scroll'}`}
       >
         {displayStocks.map((stock, idx) => {
           if (stock.isAlmanac) {
