@@ -288,6 +288,71 @@ const CASES = [
             });
         },
     },
+    {
+        name: 'horizontal-swipe-native-snap',
+        path: '/dashboard?symbol=AAPL',
+        expectedCurrentSymbol: 'MSFT',
+        expectedContextSymbol: 'MSFT',
+        expectedActiveModal: 'none',
+        contextOptions: {
+            viewport: { width: 390, height: 844 },
+            isMobile: true,
+            hasTouch: true,
+        },
+        assert: async ({ page, assertMainState }) => {
+            await page.evaluate(async () => {
+                const container = Array.from(document.querySelectorAll('div')).find((node) => {
+                    if (!(node instanceof HTMLDivElement)) return false;
+                    const style = window.getComputedStyle(node);
+                    return node.scrollWidth > node.clientWidth + 20 &&
+                        (style.overflowX === 'scroll' || style.overflowX === 'auto');
+                });
+
+                if (!(container instanceof HTMLDivElement)) {
+                    throw new Error('Horizontal dashboard scroller not found');
+                }
+
+                const calls = [];
+                const originalScrollTo = container.scrollTo.bind(container);
+                container.scrollTo = (...args) => {
+                    calls.push(args);
+                    return originalScrollTo(...args);
+                };
+                window.__dashboardScrollToCalls = calls;
+
+                const startLeft = container.scrollLeft;
+                const targetLeft = Math.min(startLeft + container.clientWidth, container.scrollWidth - container.clientWidth);
+
+                await new Promise((resolve) => {
+                    const start = performance.now();
+                    const duration = 220;
+                    const step = (timestamp) => {
+                        const progress = Math.min((timestamp - start) / duration, 1);
+                        container.scrollLeft = startLeft + ((targetLeft - startLeft) * progress);
+                        if (progress < 1) {
+                            requestAnimationFrame(step);
+                            return;
+                        }
+                        resolve();
+                    };
+                    requestAnimationFrame(step);
+                });
+
+                await new Promise(resolve => setTimeout(resolve, 120));
+            });
+
+            await assertMainState({
+                currentSymbol: 'MSFT',
+                contextSymbol: 'MSFT',
+                activeModal: 'none',
+            });
+
+            const scrollToCalls = await page.evaluate(() => window.__dashboardScrollToCalls || []);
+            if (scrollToCalls.length > 0) {
+                throw new Error(`Expected native snap without JS correction, but recorded ${scrollToCalls.length} horizontal scrollTo call(s)`);
+            }
+        },
+    },
 ];
 
 async function loadPlaywright() {
@@ -564,6 +629,7 @@ async function assertMainState(page, expected) {
 async function runCase(browser, options, smokeCase) {
     const context = await browser.newContext({
         viewport: { width: 1440, height: 900 },
+        ...(smokeCase.contextOptions || {}),
     });
     await seedStorage(context, {
         local: { ...BASE_STORAGE.local, ...(smokeCase.storage?.local || {}) },

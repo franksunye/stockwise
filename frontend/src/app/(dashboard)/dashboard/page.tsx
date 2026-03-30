@@ -139,6 +139,7 @@ function DashboardContent() {
     handleVerticalLayerChange,
     backToTopCounter,
     scrollToToday,
+    isInteracting,
     positionRequest
   } = useTikTokScroll(displayStocks, scrollOptions);
 
@@ -225,7 +226,33 @@ function DashboardContent() {
     }
   }, [preferredSymbol]);
 
-  // 移除 JS 对滑动手感的干预，完全交给原生 CSS snap-x 处理
+  // 【Android 兼容性加固：微小偏移矫正】
+  // 原生 CSS snap-x 在某些 Android 机型上（如 10.5px 的页宽）连续多次滑动可能产生 1px 左右的累计偏离。
+  // 我们在用户手指松开且此时并未主动发生异常跳变时，进行静默的像素级校准，确保 isSnapped 状态正确。
+  useEffect(() => {
+    if (isHorizontalScrollLocked || isInteracting) return;
+
+    const container = scrollRef.current;
+    if (!container) return;
+
+    const target = container.children[currentIndex];
+    if (!(target instanceof HTMLElement)) return;
+
+    // 如果偏离量小于 0.5px，说明 snap-x 已经处理得足够好，不需要 JS 再搅局。
+    const drift = Math.abs(container.scrollLeft - target.offsetLeft);
+    if (drift < 0.5) return;
+
+    const snapCorrection = () => {
+      // 仅在此时未在交互时纠偏，保持“苹果天气”般的视觉一致性。
+      container.scrollTo({
+        left: target.offsetLeft,
+        behavior: 'instant',
+      });
+    };
+
+    const frame = window.requestAnimationFrame(snapCorrection);
+    return () => window.cancelAnimationFrame(frame);
+  }, [currentIndex, isHorizontalScrollLocked, isInteracting, scrollRef]);
 
   return (
     <main

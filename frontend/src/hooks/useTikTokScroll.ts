@@ -38,6 +38,7 @@ export function useTikTokScroll(stocks: StockData[], options?: UseTikTokScrollOp
     const maxScrollLeftRef = useRef(0);
     const navIntentSymbol = useRef<string | null | undefined>(undefined);
     const hasAutoScrolled = useRef(false);
+    const isInteracting = useRef(false); // 新增：记录用户是否正在交互
     const stockCount = stocks.length;
     const preferredSymbol = options && 'preferredSymbol' in options ? (options as UseTikTokScrollOptions & { preferredSymbol?: string | null }).preferredSymbol : null;
 
@@ -131,11 +132,13 @@ export function useTikTokScroll(stocks: StockData[], options?: UseTikTokScrollOp
 
     // 处理触摸开始
     const handleTouchStart = useCallback((e: TouchEvent) => {
+        isInteracting.current = true;
         touchStartX.current = e.touches[0].clientX;
     }, []);
 
     // 处理触摸结束 - 检测过滑
     const handleTouchEnd = useCallback((e: TouchEvent) => {
+        isInteracting.current = false;
         const touchEndX = e.changedTouches[0].clientX;
         const deltaX = touchStartX.current - touchEndX;
 
@@ -279,6 +282,7 @@ export function useTikTokScroll(stocks: StockData[], options?: UseTikTokScrollOp
         handleVerticalLayerChange,
         backToTopCounter,
         scrollToToday,
+        isInteracting: isInteracting.current,
         positionRequest: positionRequests[stocks[currentIndex]?.symbol || ''] || null
     };
 }
