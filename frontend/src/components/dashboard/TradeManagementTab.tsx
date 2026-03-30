@@ -117,45 +117,22 @@ export function TradeManagementTab({
             </div>
           </div>
 
-          <div className="relative overflow-hidden rounded-[24px] border border-indigo-500/20 bg-gradient-to-br from-indigo-500/10 via-indigo-500/[0.02] to-transparent p-6 mt-4">
-            {/* Background glowing orb */}
-            <div className="absolute -top-12 -right-12 h-40 w-40 rounded-full bg-indigo-500/20 blur-3xl pointer-events-none" />
-            
-            <div className="relative z-10 flex flex-col items-center text-center mb-6">
-              <div className="mb-4 flex h-14 w-14 shrink-0 items-center justify-center rounded-[16px] border border-indigo-500/30 bg-indigo-500/20 text-indigo-300 shadow-[0_0_20px_rgba(99,102,241,0.2)]">
-                <BriefcaseBusiness size={24} strokeWidth={1.5} />
-              </div>
-              <h3 className="text-xl font-black text-white tracking-tight">录入持仓，解锁专属管理建议</h3>
-              <p className="mt-2 text-[13px] leading-relaxed text-indigo-200/70 max-w-[260px]">
-                记录你的真实成本与仓位，系统将为你定制计算最佳的移动止盈与止损防守策略。
-              </p>
+          <div className="mt-2 rounded-2xl border border-white/5 bg-white/[0.01] py-10 px-6 text-center">
+            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-white/[0.03] text-slate-500">
+              <BriefcaseBusiness size={18} strokeWidth={1.5} />
             </div>
+            <h3 className="text-base font-black tracking-tight text-slate-300">尚无管理记录</h3>
+            <p className="mx-auto mt-2 max-w-[240px] text-xs leading-relaxed text-slate-500">
+              录入实盘成本与仓位信息，系统将为你定制专属的移动止盈与止损策略。
+            </p>
 
-            <div className="relative z-10 mb-6 flex items-center justify-between gap-3">
-              {['建仓日期', '建仓成本', '持仓数量'].map((label) => (
-                <div key={label} className="flex-1 rounded-2xl border border-dashed border-indigo-500/20 bg-indigo-500/5 py-3 text-center">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-indigo-300/60">{label}</p>
-                  <p className="mt-1 text-sm font-black text-indigo-300/30">—</p>
-                </div>
-              ))}
-            </div>
-
-            <div className="relative z-10 flex flex-col items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setIsEntryOpen(true)}
-                className="w-full rounded-2xl bg-indigo-500 py-3.5 text-xs font-black uppercase tracking-widest text-white shadow-[0_8px_20px_rgba(99,102,241,0.3)] transition-all hover:bg-indigo-400 active:scale-95"
-              >
-                立即录入此票
-              </button>
-              <button
-                type="button"
-                onClick={handleRefresh}
-                className="w-full rounded-xl py-3 text-[11px] font-bold uppercase tracking-widest text-slate-500 transition-colors hover:text-slate-300"
-              >
-                先看别的
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => setIsEntryOpen(true)}
+              className="mt-6 rounded-full border border-white/10 bg-white/[0.03] px-6 py-2.5 text-[11px] font-bold uppercase tracking-widest text-slate-300 transition-all hover:bg-white/[0.08] hover:text-white active:scale-95"
+            >
+              录入持仓
+            </button>
           </div>
         </div>
 
