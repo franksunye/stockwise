@@ -108,12 +108,12 @@ export function TradeManagementTab({
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
           <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 p-4">
             <div>
-              <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">{symbol}</p>
-              <h3 className="text-2xl font-black tracking-tight text-white mt-1">{stockName || symbol}</h3>
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">{symbol}</p>
+              <h3 className="text-xl font-black tracking-tight text-white">{stockName || symbol}</h3>
             </div>
             <div className="text-right">
-              <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">管理状态</p>
-              <h3 className="text-xl font-black tracking-tight text-slate-300 mt-1">待建立</h3>
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">管理状态</p>
+              <h3 className="text-xl font-black tracking-tight text-slate-300">待建立</h3>
             </div>
           </div>
 
@@ -173,12 +173,12 @@ export function TradeManagementTab({
       <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
         <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 p-4">
           <div>
-            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">{symbol}</p>
-            <h3 className="text-2xl font-black tracking-tight text-white mt-1">{stockName || position?.stock_name || symbol}</h3>
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">{symbol}</p>
+            <h3 className="text-xl font-black tracking-tight text-white">{stockName || position?.stock_name || symbol}</h3>
           </div>
           <div className="text-right">
-            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">管理状态</p>
-            <h3 className="text-xl font-black tracking-tight text-emerald-300 mt-1">{stateLabel}</h3>
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">管理状态</p>
+            <h3 className="text-xl font-black tracking-tight text-emerald-300">{stateLabel}</h3>
           </div>
         </div>
 
