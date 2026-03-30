@@ -94,7 +94,7 @@ export async function POST(
 
     const eventId = String(body.event_id || `evt_${crypto.randomUUID().replace(/-/g, '').slice(0, 24)}`);
     const client = getDbClient();
-    const strategy = process.env.DB_STRATEGY || process.env.DB_SOURCE || 'local';
+    const strategy = (process.env.DB_STRATEGY || process.env.DB_SOURCE || 'local') as 'cloud' | 'local';
     const sql = `
       INSERT INTO user_trade_position_events (
         event_id, position_id, user_id, symbol, market, event_date, event_type, quantity, price, note, created_at, updated_at

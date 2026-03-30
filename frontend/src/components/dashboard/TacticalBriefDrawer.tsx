@@ -27,6 +27,7 @@ import {
 import { AIPrediction, TacticalData, ShortMetrics } from '@/lib/types';
 import { shouldEnableHighPerformance } from '@/lib/device-utils';
 import { AICouncil } from './AICouncil';
+import { TradeManagementTab } from './TradeManagementTab';
 import Multiavatar from '@/components/Multiavatar';
 import { resolveAnalystForBriefSource } from '@/lib/agent-team';
 import {
@@ -143,7 +144,7 @@ export function TacticalBriefDrawer({
 
   const isHighPerformance = shouldEnableHighPerformance();
   const [isExpanded, setIsExpanded] = useState(false);
-  const [activeTab, setActiveTab] = useState<'brief' | 'council'>('brief');
+  const [activeTab, setActiveTab] = useState<'brief' | 'council' | 'management'>('brief');
   const isFree = tier === 'free';
   const sourceKind = getBriefSourceKind(data, model);
   const analystProfile = resolveAnalystForBriefSource(sourceKind, model);
@@ -335,9 +336,9 @@ export function TacticalBriefDrawer({
                  <div className="flex p-1 rounded-full bg-white/5 border border-white/10 relative z-10">
                      <button 
                        onClick={() => setActiveTab('brief')}
-                       className={`relative z-10 px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-colors duration-200 ${activeTab === 'brief' ? 'text-white' : 'text-slate-500 hover:text-slate-300'}`}
+                       className={`relative z-10 px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-colors duration-200 ${activeTab === 'brief' ? 'text-white' : 'text-slate-500 hover:text-slate-300'}`}
                      >
-                       策略内参
+                       内参
                        {activeTab === 'brief' && (
                          <motion.div 
                            className="absolute inset-0 bg-indigo-500 rounded-full -z-10 shadow-lg shadow-indigo-500/20"
@@ -350,10 +351,25 @@ export function TacticalBriefDrawer({
                      </button>
                      <button 
                        onClick={() => setActiveTab('council')}
-                       className={`relative z-10 px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-colors duration-200 ${activeTab === 'council' ? 'text-white' : 'text-slate-500 hover:text-slate-300'}`}
+                       className={`relative z-10 px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-colors duration-200 ${activeTab === 'council' ? 'text-white' : 'text-slate-500 hover:text-slate-300'}`}
                      >
-                       投研决议
+                       决议
                        {activeTab === 'council' && (
+                         <motion.div 
+                           className="absolute inset-0 bg-indigo-500 rounded-full -z-10 shadow-lg shadow-indigo-500/20"
+                           initial={{ opacity: 0, scale: 0.9 }}
+                           animate={{ opacity: 1, scale: 1 }}
+                           layoutId="activeTab"
+                           transition={{ type: "spring", bounce: 0.2, duration: 0.3 }}
+                         />
+                       )}
+                     </button>
+                     <button 
+                       onClick={() => setActiveTab('management')}
+                       className={`relative z-10 px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-colors duration-200 ${activeTab === 'management' ? 'text-white' : 'text-slate-500 hover:text-slate-300'}`}
+                     >
+                       管理
+                       {activeTab === 'management' && (
                          <motion.div 
                            className="absolute inset-0 bg-indigo-500 rounded-full -z-10 shadow-lg shadow-indigo-500/20"
                            initial={{ opacity: 0, scale: 0.9 }}
@@ -961,8 +977,15 @@ export function TacticalBriefDrawer({
                     </AnimatePresence>
                   </section>
                 </div>
-              ) : (
+              ) : activeTab === 'council' ? (
                 <AICouncil symbol={symbol} stockName={stockName} targetDate={targetDate} />
+              ) : (
+                <TradeManagementTab
+                  isActive={activeTab === 'management'}
+                  isOpen={isOpen}
+                  symbol={symbol}
+                  stockName={stockName}
+                />
               )}
             </div>
 

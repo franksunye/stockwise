@@ -5,6 +5,18 @@ const DEFAULT_HEADLESS = process.env.DASHBOARD_INTERACTION_HEADLESS !== 'false';
 
 const NOW = 1760000000000;
 
+function formatDate(value) {
+    const year = value.getFullYear();
+    const month = String(value.getMonth() + 1).padStart(2, '0');
+    const day = String(value.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+const TODAY = formatDate(new Date());
+const YESTERDAY_DATE = new Date();
+YESTERDAY_DATE.setDate(YESTERDAY_DATE.getDate() - 1);
+const YESTERDAY = formatDate(YESTERDAY_DATE);
+
 const WATCHLIST = [
     { symbol: 'AAPL', name: 'Apple', addedAt: NOW - 2000 },
     { symbol: 'MSFT', name: 'Microsoft', addedAt: NOW - 1000 },
@@ -107,7 +119,7 @@ function buildBatchStock(symbol, overrides = {}) {
         lastUpdated: '15:30',
         price: {
             symbol,
-            date: '2026-03-27',
+            date: TODAY,
             close: symbol === 'AAPL' ? 182.35 : 417.1,
             change_percent: symbol === 'AAPL' ? 1.24 : -0.42,
             open: 0,
@@ -132,8 +144,8 @@ function buildBatchStock(symbol, overrides = {}) {
         },
         prediction: {
             symbol,
-            date: '2026-03-27',
-            target_date: '2026-03-27',
+            date: TODAY,
+            target_date: TODAY,
             signal: symbol === 'AAPL' ? 'Long' : 'Side',
             confidence: symbol === 'AAPL' ? 0.81 : 0.62,
             support_price: symbol === 'AAPL' ? 178 : 410,
@@ -147,8 +159,8 @@ function buildBatchStock(symbol, overrides = {}) {
         history: [
             {
                 symbol,
-                date: '2026-03-26',
-                target_date: '2026-03-26',
+                date: YESTERDAY,
+                target_date: YESTERDAY,
                 signal: 'Side',
                 confidence: 0.55,
                 support_price: 0,
@@ -385,7 +397,7 @@ async function addApiStubs(page) {
             contentType: 'application/json',
             body: JSON.stringify({
                 brief: {
-                    date: '2026-03-27',
+                    date: TODAY,
                     push_hook: '今天更适合盯住结构确认，而不是追逐杂讯。',
                     content: '## AAPL\n苹果维持结构完整。\n\n## MSFT\n微软偏向震荡整理。',
                 },
@@ -409,7 +421,7 @@ async function addApiStubs(page) {
     await page.route('**/api/predictions**', async route => {
         const requestUrl = new URL(route.request().url());
         const symbol = requestUrl.searchParams.get('symbol') || 'AAPL';
-        const targetDate = requestUrl.searchParams.get('targetDate') || '2026-03-27';
+        const targetDate = requestUrl.searchParams.get('targetDate') || TODAY;
         const prediction = buildBatchStock(symbol).prediction;
         const historyPrediction = {
             ...prediction,
