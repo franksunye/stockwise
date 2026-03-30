@@ -1,7 +1,8 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { AlertTriangle, BriefcaseBusiness, Loader2, RefreshCw } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { AlertTriangle, BriefcaseBusiness, Loader2, RefreshCw, ChevronDown, List } from 'lucide-react';
 
 import { TradeManagementEntryDrawer } from './TradeManagementEntryDrawer';
 import { TradeManagementEventDrawer } from './TradeManagementEventDrawer';
@@ -228,119 +229,139 @@ export function TradeManagementTab({
             </button>
           </div>
 
-          <div className="mt-4 flex flex-wrap gap-3">
+          <div className="mt-4">
             <button
               type="button"
-              onClick={() => setIsDetailExpanded((current) => !current)}
-              className="rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-3 text-xs font-black uppercase tracking-widest text-slate-200 transition-colors hover:bg-white/[0.07] hover:text-white"
+              onClick={() => setIsDetailExpanded(!isDetailExpanded)}
+              className="group flex w-full items-center justify-between rounded-xl border border-white/5 bg-white/[0.02] p-4 transition-colors hover:bg-white/[0.04]"
             >
-              {isDetailExpanded ? '收起依据' : '展开依据'}
+              <div className="flex items-center gap-2">
+                <List size={14} className="text-slate-500" />
+                <span className="text-xs font-bold text-slate-300">详细执行依据历史</span>
+              </div>
+              <motion.div
+                animate={{ rotate: isDetailExpanded ? 180 : 0 }}
+                className="text-slate-500 transition-colors group-hover:text-slate-400"
+              >
+                <ChevronDown size={14} />
+              </motion.div>
             </button>
-            <button
-              type="button"
-              onClick={() => setIsEventOpen(true)}
-              className="rounded-2xl bg-indigo-500 px-5 py-3 text-xs font-black uppercase tracking-widest text-white shadow-[0_10px_20px_rgba(99,102,241,0.25)] transition-all active:scale-95"
-            >
-              已执行
-            </button>
-          </div>
 
-          {isDetailExpanded ? (
-            <div className="mt-4 space-y-3">
-              {detailSections.length > 0 ? (
-                detailSections.map((section, index) => (
-                  <div
-                    key={section.title}
-                    className={`rounded-xl border px-4 py-3 ${
-                      index === 0
-                        ? 'border-indigo-500/20 bg-indigo-500/5'
-                        : 'border-white/5 bg-white/[0.02]'
-                    }`}
-                  >
-                    <p className={sectionTitleClass}>
-                      <span className={`h-1.5 w-1.5 rounded-full ${index === 0 ? 'bg-indigo-400/90' : 'bg-slate-500'}`} />
-                      {section.title}
-                    </p>
-                    <div className="mt-2 space-y-2">
-                      {section.lines.slice(0, 2).map((line) => (
-                        <p key={line} className="flex items-start gap-2 text-sm leading-relaxed text-slate-300">
-                          <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-white/25" />
-                          <span>{line}</span>
-                        </p>
-                      ))}
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3">
-                  <p className={sectionTitleClass}>
-                    <span className="h-1.5 w-1.5 rounded-full bg-indigo-400/80" />
-                    管理依据
-                  </p>
-                  <div className="mt-2 space-y-2">
-                    {detailLines.length > 0 ? (
-                      detailLines.slice(0, 3).map((line) => (
-                        <p key={line} className="flex items-start gap-2 text-sm leading-relaxed text-slate-300">
-                          <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-white/25" />
-                          <span>{line}</span>
-                        </p>
+            <AnimatePresence initial={false}>
+              {isDetailExpanded && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="overflow-hidden"
+                >
+                  <div className="pt-3 space-y-3">
+                    {detailSections.length > 0 ? (
+                      detailSections.map((section, index) => (
+                        <div
+                          key={section.title}
+                          className={`rounded-xl border px-4 py-3 ${
+                            index === 0
+                              ? 'border-indigo-500/20 bg-indigo-500/5'
+                              : 'border-white/5 bg-white/[0.02]'
+                          }`}
+                        >
+                          <p className={sectionTitleClass}>
+                            <span className={`h-1.5 w-1.5 rounded-full ${index === 0 ? 'bg-indigo-400/90' : 'bg-slate-500'}`} />
+                            {section.title}
+                          </p>
+                          <div className="mt-2 space-y-2">
+                            {section.lines.slice(0, 2).map((line) => (
+                              <p key={line} className="flex items-start gap-2 text-sm leading-relaxed text-slate-300">
+                                <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-white/25" />
+                                <span>{line}</span>
+                              </p>
+                            ))}
+                          </div>
+                        </div>
                       ))
                     ) : (
-                      <p className="text-sm leading-relaxed text-slate-400">
-                        当前先开放摘要层，完整管理历史会在后续阶段继续补齐。
-                      </p>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3">
-                  <p className={sectionLabelClass}>当前建议日</p>
-                  <p className="mt-1.5 text-base font-black text-slate-200">{formatTradeDateLabel(advice?.latest_trade_date)}</p>
-                </div>
-                <div className="rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3">
-                  <p className={sectionLabelClass}>最近事件</p>
-                  <p className="mt-1.5 text-base font-black text-slate-200">
-                    {recentEvents[0]?.event_type
-                      ? getTradeEventLabel(recentEvents[0].event_type)
-                      : position?.latest_event_type
-                        ? getTradeEventLabel(position.latest_event_type)
-                        : '暂无'}
-                  </p>
-                </div>
-              </div>
-
-              <div className="rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3">
-                <p className={sectionTitleClass}>
-                  <span className="h-1.5 w-1.5 rounded-full bg-indigo-400/80" />
-                  近期执行
-                </p>
-                <div className="mt-2 space-y-2">
-                  {recentEvents.length > 0 ? (
-                    recentEvents.slice(0, 3).map((event) => (
-                      <div key={event.event_id} className="flex items-center justify-between gap-3 rounded-xl border border-white/5 bg-black/20 px-3 py-3">
-                        <div className="min-w-0">
-                          <p className="text-sm font-bold text-slate-200">
-                            {getTradeEventLabel(event.event_type)} · {formatQuantity(event.quantity)}
-                          </p>
-                          <p className="mt-0.5 text-xs text-slate-500">
-                            {formatTradeDateLabel(event.event_date)}
-                            {event.price != null ? ` · ${formatPrice(event.price)}` : ''}
-                          </p>
+                      <div className="rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3">
+                        <p className={sectionTitleClass}>
+                          <span className="h-1.5 w-1.5 rounded-full bg-indigo-400/80" />
+                          管理依据
+                        </p>
+                        <div className="mt-2 space-y-2">
+                          {detailLines.length > 0 ? (
+                            detailLines.slice(0, 3).map((line) => (
+                              <p key={line} className="flex items-start gap-2 text-sm leading-relaxed text-slate-300">
+                                <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-white/25" />
+                                <span>{line}</span>
+                              </p>
+                            ))
+                          ) : (
+                            <p className="text-sm leading-relaxed text-slate-400">
+                              当前先开放摘要层，完整管理历史会在后续阶段继续补齐。
+                            </p>
+                          )}
                         </div>
-                        {event.note ? (
-                          <span className="max-w-[120px] truncate text-[11px] text-slate-500">{event.note}</span>
-                        ) : null}
                       </div>
-                    ))
-                  ) : (
-                    <p className="text-sm leading-relaxed text-slate-400">还没有记录执行动作。完成后可以点“已执行”留痕。</p>
-                  )}
-                </div>
-              </div>
-            </div>
-          ) : null}
+                    )}
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3">
+                        <p className={sectionLabelClass}>当前建议日</p>
+                        <p className="mt-1.5 text-base font-black text-slate-200">{formatTradeDateLabel(advice?.latest_trade_date)}</p>
+                      </div>
+                      <div className="rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3">
+                        <p className={sectionLabelClass}>最近事件</p>
+                        <p className="mt-1.5 text-base font-black text-slate-200">
+                          {recentEvents[0]?.event_type
+                            ? getTradeEventLabel(recentEvents[0].event_type)
+                            : position?.latest_event_type
+                              ? getTradeEventLabel(position.latest_event_type)
+                              : '暂无'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3">
+                      <p className={sectionTitleClass}>
+                        <span className="h-1.5 w-1.5 rounded-full bg-indigo-400/80" />
+                        近期执行
+                      </p>
+                      <div className="mt-2 space-y-2">
+                        {recentEvents.length > 0 ? (
+                          recentEvents.slice(0, 3).map((event) => (
+                            <div key={event.event_id} className="flex items-center justify-between gap-3 rounded-xl border border-white/5 bg-black/20 px-3 py-3">
+                              <div className="min-w-0">
+                                <p className="text-sm font-bold text-slate-200">
+                                  {getTradeEventLabel(event.event_type)} · {formatQuantity(event.quantity)}
+                                </p>
+                                <p className="mt-0.5 text-xs text-slate-500">
+                                  {formatTradeDateLabel(event.event_date)}
+                                  {event.price != null ? ` · ${formatPrice(event.price)}` : ''}
+                                </p>
+                              </div>
+                              {event.note ? (
+                                <span className="max-w-[120px] truncate text-[11px] text-slate-500">{event.note}</span>
+                              ) : null}
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-sm leading-relaxed text-slate-400">还没有记录执行动作。完成后可以点底部按钮留痕。</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setIsEventOpen(true)}
+            className="mt-4 w-full flex items-center justify-center rounded-2xl bg-indigo-500 px-5 py-3.5 text-[13px] font-black uppercase tracking-widest text-white shadow-[0_8px_20px_rgba(99,102,241,0.25)] transition-all active:scale-95 hover:bg-indigo-400"
+          >
+            完成并记录执行结果
+          </button>
         </section>
       </div>
 
