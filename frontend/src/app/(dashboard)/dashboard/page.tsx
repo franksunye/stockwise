@@ -225,26 +225,7 @@ function DashboardContent() {
     }
   }, [preferredSymbol]);
 
-  useEffect(() => {
-    if (isHorizontalScrollLocked) return;
-
-    const container = scrollRef.current;
-    if (!container) return;
-
-    const target = container.children[currentIndex];
-    if (!(target instanceof HTMLElement)) return;
-
-    const snapBack = () => {
-      container.scrollTo({
-        left: target.offsetLeft,
-        behavior: 'instant',
-      });
-    };
-
-    snapBack();
-    const frame = window.requestAnimationFrame(snapBack);
-    return () => window.cancelAnimationFrame(frame);
-  }, [currentIndex, isHorizontalScrollLocked, scrollRef]);
+  // 移除 JS 对滑动手感的干预，完全交给原生 CSS snap-x 处理
 
   return (
     <main
@@ -357,7 +338,7 @@ function DashboardContent() {
 
         <div className="flex gap-2">
           {displayStocks.map((_, idx) => (
-            <div key={idx} className={`h-1 rounded-full transition-all duration-300 ${idx === currentIndex ? 'w-6 bg-white' : 'w-1 bg-white/20'}`} />
+            <div key={idx} className={`h-1 rounded-full transition-all duration-200 ${idx === currentIndex ? 'w-6 bg-white' : 'w-1 bg-white/20'}`} />
           ))}
         </div>
         <div className="w-full flex justify-between items-center pointer-events-auto">
