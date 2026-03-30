@@ -165,7 +165,7 @@ export function TradeManagementTab({
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-[11px] font-bold uppercase tracking-wider text-indigo-300/80">管理结论</p>
-              <h3 className="mt-1 text-2xl font-black text-white tracking-tight">{actionLabel}</h3>
+              <h3 className="mt-1 text-xl font-black text-white tracking-tight">{actionLabel}</h3>
               <p className="mt-2 text-sm leading-relaxed font-medium text-slate-200">
                 {getManagementPolicyLabel(advice)}
               </p>
@@ -173,13 +173,13 @@ export function TradeManagementTab({
           </div>
 
           <div className="mt-4 grid grid-cols-2 gap-3">
-            <div className="rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3">
+            <div className="min-w-0 rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3">
               <p className={sectionLabelClass}>下次观察</p>
-              <p className="mt-1.5 text-base font-black text-slate-200">{formatTradeDateLabel(advice?.next_trade_date)}</p>
+              <p className="mt-1.5 truncate text-[15px] font-black tracking-tight text-slate-200">{formatTradeDateLabel(advice?.next_trade_date)}</p>
             </div>
-            <div className="rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3">
+            <div className="min-w-0 rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3">
               <p className={sectionLabelClass}>更新时间</p>
-              <p className="mt-1.5 text-base font-black text-slate-200">{formatTradeDateTimeLabel(advice?.updated_at)}</p>
+              <p className="mt-1.5 truncate text-[15px] font-black tracking-tight text-slate-200">{formatTradeDateTimeLabel(advice?.updated_at)}</p>
             </div>
           </div>
 
@@ -201,19 +201,20 @@ export function TradeManagementTab({
           </div>
 
           <div className="mt-4 grid grid-cols-2 gap-3">
-            <div className={metricCardClass}>
+            <div className={`${metricCardClass} min-w-0`}>
               <p className={sectionLabelClass}>剩余仓位</p>
-              <p className="mt-1 text-base font-black text-white">
-                {formatQuantity(position?.remaining_size)} / {formatQuantity(position?.position_size)}
-              </p>
+              <div className="mt-1.5 flex items-baseline gap-1 overflow-hidden">
+                <p className="truncate text-[17px] font-black text-white">{formatQuantity(position?.remaining_size)}</p>
+                <p className="truncate text-xs font-bold text-slate-500">/ {formatQuantity(position?.position_size)}</p>
+              </div>
             </div>
-            <div className={metricCardClass}>
+            <div className={`${metricCardClass} min-w-0`}>
               <p className={sectionLabelClass}>成本价</p>
-              <p className="mt-1 text-base font-black text-white">{formatPrice(position?.entry_price)}</p>
+              <p className="mt-1.5 truncate text-[17px] font-black text-white">{formatPrice(position?.entry_price)}</p>
             </div>
-            <div className={metricCardClass}>
+            <div className={`${metricCardClass} min-w-0`}>
               <p className={sectionLabelClass}>最近动作</p>
-              <p className="mt-1 text-base font-black text-slate-200">
+              <p className="mt-2 truncate text-sm font-bold text-slate-300">
                 {getTradeEventLabel(position?.latest_event_type)}
               </p>
             </div>
