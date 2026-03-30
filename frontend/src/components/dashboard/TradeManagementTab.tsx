@@ -62,8 +62,8 @@ export function TradeManagementTab({
 
   const cardBaseClass = 'rounded-2xl border border-white/5 bg-white/[0.02]';
   const metricCardClass = 'rounded-2xl border border-white/5 bg-white/[0.02] px-4 py-3';
-  const sectionLabelClass = 'text-[10px] font-black uppercase tracking-[0.18em] text-slate-500';
-  const sectionTitleClass = 'flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.18em] text-slate-500';
+  const sectionLabelClass = 'text-[11px] font-bold text-slate-500 uppercase tracking-wider';
+  const sectionTitleClass = 'flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-500';
 
   const renderSectionHeading = (title: string) => (
     <div>
@@ -78,7 +78,7 @@ export function TradeManagementTab({
     return (
       <div className="flex min-h-[260px] flex-col items-center justify-center space-y-3 pb-8 pt-10">
         <Loader2 size={24} className="animate-spin text-indigo-400" />
-        <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">正在调取持仓管理...</p>
+        <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500">正在调取持仓管理...</p>
       </div>
     );
   }
@@ -108,12 +108,12 @@ export function TradeManagementTab({
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
           <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 p-4">
             <div>
-              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{symbol}</p>
-              <h3 className="text-xl font-black tracking-tight text-white">{stockName || symbol}</h3>
+              <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">{symbol}</p>
+              <h3 className="text-2xl font-black tracking-tight text-white mt-1">{stockName || symbol}</h3>
             </div>
             <div className="text-right">
-              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">管理状态</p>
-              <h3 className="text-lg font-black tracking-tight text-slate-300">待建立</h3>
+              <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">管理状态</p>
+              <h3 className="text-xl font-black tracking-tight text-slate-300 mt-1">待建立</h3>
             </div>
           </div>
 
@@ -123,17 +123,17 @@ export function TradeManagementTab({
                 <BriefcaseBusiness size={18} />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-indigo-300/70">管理入口</p>
-                <h3 className="mt-1 text-lg font-black text-white">录入持仓后查看管理建议</h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-200">只服务于你在这只票上的真实仓位。</p>
+                <p className="text-[11px] font-bold uppercase tracking-wider text-indigo-300/80">管理入口</p>
+                <h3 className="mt-1 text-xl font-black text-white tracking-tight">录入持仓后查看管理建议</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-slate-300">只服务于你在这只票上的真实仓位。</p>
               </div>
             </div>
 
             <div className="grid grid-cols-3 gap-3">
               {['建仓日期', '建仓成本', '持仓数量'].map((label) => (
-                <div key={label} className="rounded-xl border border-white/5 bg-white/[0.02] px-3 py-3">
+                <div key={label} className="rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3">
                   <p className={sectionLabelClass}>{label}</p>
-                  <p className="mt-1 text-xs font-bold text-slate-300">最小录入</p>
+                  <p className="mt-1.5 text-sm font-black text-slate-400">最小录入</p>
                 </div>
               ))}
             </div>
@@ -173,20 +173,20 @@ export function TradeManagementTab({
       <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
         <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 p-4">
           <div>
-            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{symbol}</p>
-            <h3 className="text-xl font-black tracking-tight text-white">{stockName || position?.stock_name || symbol}</h3>
+            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">{symbol}</p>
+            <h3 className="text-2xl font-black tracking-tight text-white mt-1">{stockName || position?.stock_name || symbol}</h3>
           </div>
           <div className="text-right">
-            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">管理状态</p>
-            <h3 className="text-lg font-black tracking-tight text-emerald-300">{stateLabel}</h3>
+            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">管理状态</p>
+            <h3 className="text-xl font-black tracking-tight text-emerald-300 mt-1">{stateLabel}</h3>
           </div>
         </div>
 
         <section className="rounded-2xl border border-indigo-500/20 bg-indigo-500/10 p-4">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-indigo-300/70">管理结论</p>
-              <h3 className="mt-1 text-lg font-black text-white">{actionLabel}</h3>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-indigo-300/80">管理结论</p>
+              <h3 className="mt-1 text-2xl font-black text-white tracking-tight">{actionLabel}</h3>
               <p className="mt-2 text-sm leading-relaxed font-medium text-slate-200">
                 {getManagementPolicyLabel(advice)}
               </p>
@@ -196,11 +196,11 @@ export function TradeManagementTab({
           <div className="mt-4 grid grid-cols-2 gap-3">
             <div className="rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3">
               <p className={sectionLabelClass}>下次观察</p>
-              <p className="mt-1 text-sm font-bold text-slate-200">{formatTradeDateLabel(advice?.next_trade_date)}</p>
+              <p className="mt-1.5 text-base font-black text-slate-200">{formatTradeDateLabel(advice?.next_trade_date)}</p>
             </div>
             <div className="rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3">
               <p className={sectionLabelClass}>更新时间</p>
-              <p className="mt-1 text-sm font-bold text-slate-200">{formatTradeDateTimeLabel(advice?.updated_at)}</p>
+              <p className="mt-1.5 text-base font-black text-slate-200">{formatTradeDateTimeLabel(advice?.updated_at)}</p>
             </div>
           </div>
 
@@ -234,7 +234,7 @@ export function TradeManagementTab({
             </div>
             <div className={metricCardClass}>
               <p className={sectionLabelClass}>最近动作</p>
-              <p className="mt-1 text-sm font-bold text-slate-200">
+              <p className="mt-1 text-base font-black text-slate-200">
                 {getTradeEventLabel(position?.latest_event_type)}
               </p>
             </div>
@@ -323,11 +323,11 @@ export function TradeManagementTab({
               <div className="grid grid-cols-2 gap-3">
                 <div className="rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3">
                   <p className={sectionLabelClass}>当前建议日</p>
-                  <p className="mt-1 text-sm font-bold text-slate-200">{formatTradeDateLabel(advice?.latest_trade_date)}</p>
+                  <p className="mt-1.5 text-base font-black text-slate-200">{formatTradeDateLabel(advice?.latest_trade_date)}</p>
                 </div>
                 <div className="rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3">
                   <p className={sectionLabelClass}>最近事件</p>
-                  <p className="mt-1 text-sm font-bold text-slate-200">
+                  <p className="mt-1.5 text-base font-black text-slate-200">
                     {recentEvents[0]?.event_type
                       ? getTradeEventLabel(recentEvents[0].event_type)
                       : position?.latest_event_type
