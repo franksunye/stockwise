@@ -168,8 +168,7 @@ export function TradeManagementTab({
           </div>
           
           <div className="rounded-2xl border border-indigo-500/20 bg-indigo-500/15 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.12)]">
-            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-indigo-400">结论分层</p>
-            <h3 className="mt-1.5 text-xl font-black text-white tracking-tight">{actionLabel}</h3>
+            <h3 className="text-xl font-black text-white tracking-tight">{actionLabel}</h3>
             <p className="mt-2.5 text-sm leading-relaxed font-medium text-slate-300">
               {getManagementPolicyLabel(advice)}
             </p>
