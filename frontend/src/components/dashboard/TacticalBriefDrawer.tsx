@@ -338,7 +338,7 @@ export function TacticalBriefDrawer({
                        onClick={() => setActiveTab('brief')}
                        className={`relative z-10 px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-colors duration-200 ${activeTab === 'brief' ? 'text-white' : 'text-slate-500 hover:text-slate-300'}`}
                      >
-                       内参
+                       择时
                        {activeTab === 'brief' && (
                          <motion.div 
                            className="absolute inset-0 bg-indigo-500 rounded-full -z-10 shadow-lg shadow-indigo-500/20"
@@ -368,7 +368,7 @@ export function TacticalBriefDrawer({
                        onClick={() => setActiveTab('management')}
                        className={`relative z-10 px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-colors duration-200 ${activeTab === 'management' ? 'text-white' : 'text-slate-500 hover:text-slate-300'}`}
                      >
-                       管理
+                       交易
                        {activeTab === 'management' && (
                          <motion.div 
                            className="absolute inset-0 bg-indigo-500 rounded-full -z-10 shadow-lg shadow-indigo-500/20"
