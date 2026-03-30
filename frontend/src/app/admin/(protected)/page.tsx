@@ -246,7 +246,7 @@ export default function AdminDashboard() {
                    </div>
                    <div>
                      <h2 className="text-xl font-black italic tracking-tighter mb-1">持仓数据管理</h2>
-                     <p className="text-xs text-slate-500 font-medium">直接管理真实持仓记录，供交易管理建议闭环消费</p>
+                     <p className="text-xs text-slate-500 font-medium">直接管理真实持仓记录，供交易决策建议闭环消费</p>
                    </div>
                  </div>
                  <ArrowRight className="text-slate-700 group-hover:text-cyan-400 group-hover:translate-x-1 transition-all" />

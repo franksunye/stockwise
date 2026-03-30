@@ -162,7 +162,7 @@ export function getManagementStateLabel(advice: TradeManagementAdvice | null): s
 export function getManagementActionLabel(advice: TradeManagementAdvice | null): string {
   if (advice?.action_summary?.trim()) return advice.action_summary.trim();
   if (advice?.recommended_policy?.trim()) return advice.recommended_policy.trim();
-  return '等待系统生成今日管理建议';
+  return '暂无交易建议';
 }
 
 function normalizeCardMarkdown(input: string): string {
@@ -249,7 +249,16 @@ export function getTradeEventLabel(value: string | null | undefined): string {
 
 export function getManagementPolicyLabel(advice: TradeManagementAdvice | null): string {
   const normalized = String(advice?.recommended_policy || '').trim().toLowerCase();
-  if (!normalized) return advice?.signal_state || '等待系统生成下一步管理纪律。';
-  if (normalized === 'buy_and_hold_baseline') return '继续持有，不追高，优先保护已形成利润。';
-  return advice?.recommended_policy || advice?.signal_state || '等待系统生成下一步管理纪律。';
+
+  if (normalized === 'buy_and_hold_baseline') {
+    return '优先保护已形成利润，等待下一个观察确认周期。';
+  }
+  if (normalized === 'failure_risk_reduce_50') {
+    return '该标的风险级别已上调，建议先主动减仓 1/2 以规避不确定性。';
+  }
+  if (normalized === 'failure_risk_exit_all') {
+    return '检测到破位或结构性假修复风险，建议先全盘离场避险。';
+  }
+
+  return advice?.recommended_policy || advice?.signal_state || '系统已接管此仓位，定量的执行交易纪律将在下个计算周期生成。';
 }

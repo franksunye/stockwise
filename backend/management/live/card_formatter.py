@@ -194,7 +194,7 @@ def build_trade_card_markdown(
         reason_text = "这笔仓仍在早期确认阶段，当前重点是先看结构是否成立。"
 
     lines = [
-        f"### 交易管理卡 | {stock_label} {position.symbol}",
+        f"### 交易决策卡 | {stock_label} {position.symbol}",
         "",
         f"> **持仓**: {position.remaining_size:.0f}股（原始 {position.position_size:.0f}股） @ {position.entry_price:.2f}",
         f"> **最新收盘**: {snapshot.close:.2f}",

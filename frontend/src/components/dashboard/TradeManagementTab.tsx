@@ -164,7 +164,7 @@ export function TradeManagementTab({
 
         <section className="mt-6">
           <div className="mb-4">
-            {renderSectionHeading('交易管理建议')}
+            {renderSectionHeading('交易建议')}
           </div>
           
           <div className="rounded-2xl border border-indigo-500/20 bg-indigo-500/15 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.12)]">
@@ -224,7 +224,7 @@ export function TradeManagementTab({
               type="button"
               onClick={handleRefresh}
               className="rounded-full border border-white/10 bg-white/[0.05] p-2 text-slate-300 transition-colors hover:bg-white/[0.1] hover:text-white"
-              aria-label="刷新管理建议"
+              aria-label="刷新交易建议"
             >
               <RefreshCw size={14} className={isValidating ? 'animate-spin' : ''} />
             </button>
@@ -298,7 +298,7 @@ export function TradeManagementTab({
                             ))
                           ) : (
                             <p className="text-sm leading-relaxed text-slate-400">
-                              当前先开放摘要层，完整管理历史会在后续阶段继续补齐。
+                              当前先开放摘要层，完整交易历史会在后续阶段继续补齐。
                             </p>
                           )}
                         </div>
