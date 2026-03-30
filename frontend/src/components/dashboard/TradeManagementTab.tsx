@@ -162,33 +162,35 @@ export function TradeManagementTab({
           </div>
         </div>
 
-        <section className="rounded-2xl border border-indigo-500/20 bg-indigo-500/10 p-4">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="text-[11px] font-bold uppercase tracking-wider text-indigo-300/80">管理结论</p>
-              <h3 className="mt-1 text-xl font-black text-white tracking-tight">{actionLabel}</h3>
-              <p className="mt-2 text-sm leading-relaxed font-medium text-slate-200">
-                {getManagementPolicyLabel(advice)}
-              </p>
-            </div>
+        <section className="mt-6">
+          <div className="mb-4">
+            {renderSectionHeading('管理建议')}
+          </div>
+          
+          <div className="rounded-2xl border border-indigo-500/20 bg-indigo-500/15 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.12)]">
+            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-indigo-400">结论分层</p>
+            <h3 className="mt-1.5 text-xl font-black text-white tracking-tight">{actionLabel}</h3>
+            <p className="mt-2.5 text-sm leading-relaxed font-medium text-slate-300">
+              {getManagementPolicyLabel(advice)}
+            </p>
           </div>
 
           <div className="mt-4 grid grid-cols-2 gap-3">
             <div className="min-w-0 rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3">
               <p className={sectionLabelClass}>下次观察</p>
-              <p className="mt-1.5 truncate text-[15px] font-black tracking-tight text-slate-200">{formatTradeDateLabel(advice?.next_trade_date)}</p>
+              <p className="mt-1.5 truncate text-[15px] font-black tracking-tight text-slate-300">{formatTradeDateLabel(advice?.next_trade_date)}</p>
             </div>
             <div className="min-w-0 rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3">
               <p className={sectionLabelClass}>更新时间</p>
-              <p className="mt-1.5 truncate text-[15px] font-black tracking-tight text-slate-200">{formatTradeDateTimeLabel(advice?.updated_at)}</p>
+              <p className="mt-1.5 truncate text-[15px] font-black tracking-tight text-slate-300">{formatTradeDateTimeLabel(advice?.updated_at)}</p>
             </div>
           </div>
 
           {factLines.length > 0 ? (
-            <div className="mt-4 space-y-2 rounded-xl border border-white/5 bg-black/20 px-4 py-3">
+            <div className="mt-4 space-y-2 rounded-xl border border-white/5 bg-black/30 px-4 py-4">
               {factLines.slice(0, 3).map((line) => (
-                <p key={line} className="flex items-start gap-2 text-sm leading-relaxed text-slate-300">
-                  <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-300/80" />
+                <p key={line} className="flex items-start gap-2 text-sm leading-relaxed text-slate-400">
+                  <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-500/40" />
                   <span>{line}</span>
                 </p>
               ))}
