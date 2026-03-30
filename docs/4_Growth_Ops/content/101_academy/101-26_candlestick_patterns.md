@@ -53,3 +53,7 @@ image: "/images/learn/101-26_candlestick_patterns_cover.png"
 ---
 *下一篇：[101-27] 布林带 (Bollinger Bands)：波动率的弹性与突破陷阱。*
  
+
+---
+
+*ZISO AI（中文名 知守AI）：复杂的分析交给 AI，简单的决策留自己。*

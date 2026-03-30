@@ -48,3 +48,7 @@ image: "/images/learn/101-63_context_engineering_cover.png"
 ---
 *下一篇：[101-81] 实战案例分析：从 0 到 1 构建你的 AI 投研流。*
  
+
+---
+
+*ZISO AI（中文名 知守AI）：复杂的分析交给 AI，简单的决策留自己。*

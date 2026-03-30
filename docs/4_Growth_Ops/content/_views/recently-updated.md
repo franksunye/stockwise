@@ -1,11 +1,10 @@
 # 最近修订内容 (Recently Updated)
 
-> 自动生成时间：2026/3/27 16:38:35
+> 自动生成时间：2026/3/30 15:24:40
 > 说明：按最近 Git 变更时间排序，帮助团队快速识别近期被修改或维护的内容资产。
 
 | 标题 | 来源 | 漏斗 | 最后动作 | 维护状态 | 修订原因 | 主流程 | 视觉资产 | 溯源 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| [交易大师图鉴 01｜马克·米勒维尼：他不是教你追涨，他是在教你只打最有把握的仗](../master_series/ms-01_mark_minervini.md) | Growth | TOFU | 2026-03-25 | stable | - | 🚀 已发布 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ❌ 缺失 | healthy |
 | [交易大师图鉴 02｜普拉迪普·邦德：真正的动量，不是捕捉无序的躁动，而是等待足以改写叙事的爆发。](../master_series/ms-02_pradeep_bonde.md) | Growth | TOFU | 2026-03-25 | stable | - | ✍️ 生产中 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ❌ 缺失 | healthy |
 | [交易大师图鉴 03｜亚历山大·埃尔德：真正的高手，不是多看几张图，而是学会给市场“加滤网”。](../master_series/ms-03_alexander_elder.md) | Growth | MOFU | 2026-03-25 | stable | - | ✍️ 生产中 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ❌ 缺失 | healthy |
 | [交易大师图鉴 04｜理查德·丹尼斯：比起赚多少钱，他更想证明：交易员不是天生的，而是可以被“练”出来的。](../master_series/ms-04_richard_dennis.md) | Growth | TOFU | 2026-03-25 | stable | - | ✍️ 生产中 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ❌ 缺失 | healthy |
@@ -15,6 +14,7 @@
 | [交易大师图鉴 08｜三重滤网（Triple Screen）：它最震撼的地方，不是教你多看几张图，而是戳破了单周期里的“虚假繁荣”。](../master_series/ms-08_triple_screen.md) | Growth | TOFU | 2026-03-25 | stable | - | ✍️ 生产中 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ❌ 缺失 | healthy |
 | [交易大师图鉴 09｜趋势突破（Trend Breakout）：真正重要的，不是教你追涨，而是教你只在趋势站稳后，才准许自己进攻。](../master_series/ms-09_trend_breakout.md) | Growth | TOFU | 2026-03-25 | stable | - | ✍️ 生产中 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ❌ 缺失 | healthy |
 | [交易大师图鉴 10｜ATR 止损：它最重要的地方，不是让止损更复杂，而是让风险终于开始按波动说话](../master_series/ms-10_atr_stop.md) | Growth | TOFU | 2026-03-25 | stable | - | ✍️ 生产中 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ❌ 缺失 | healthy |
+| [交易大师图鉴 01｜马克·米勒维尼：他不是教你追涨，他是在教你只打最有把握的仗](../master_series/ms-01_mark_minervini.md) | Growth | TOFU | 2026-03-25 | stable | - | 🚀 已发布 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ❌ 缺失 | healthy |
 | [交易大师图鉴 11｜固定止损 vs ATR 止损：真正重要的，不是哪套更高级，而是哪套更贴近真实波动](../master_series/ms-11_fixed_vs_atr_stop.md) | Growth | TOFU | 2026-03-25 | stable | - | ✍️ 生产中 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ❌ 缺失 | healthy |
 | [交易大师图鉴 12｜海龟交易：它最震撼的地方，不是突破本身，而是把交易拆成一套能训练人的规则](../master_series/ms-12_turtle_trading.md) | Growth | TOFU | 2026-03-25 | stable | - | ✍️ 生产中 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ❌ 缺失 | healthy |
 | [交易大师图鉴 13｜波动收缩形态（VCP）：真正迷人的，不是那个图形，而是市场在突破前最后一次“阻力排查”。](../master_series/ms-13_vcp.md) | Growth | TOFU | 2026-03-25 | stable | - | ✍️ 生产中 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ❌ 缺失 | healthy |

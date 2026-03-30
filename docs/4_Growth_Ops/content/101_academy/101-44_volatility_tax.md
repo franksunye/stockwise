@@ -35,7 +35,7 @@ workflow:
   owner: cmo
   reviewer: founder
   priority: high
-  target_publish_date: '2026-04-06'
+  target_publish_date: '2026-04-03'
   last_action_at: '2026-03-22'
   blocked_reason: ''
 maintenance:
@@ -134,7 +134,7 @@ visual_style_prefix: >-
 distribution:
   wechat:
     enabled: true
-    status: ready
+    status: scheduled
     url: ''
   xhs:
     enabled: false
@@ -200,3 +200,17 @@ wechat_layout:
 ZISO 的逻辑不是否认波动，而是拒绝在没有把握的波动里消耗你。对普通投资者来说，少缴一点波动率税，往往比多抓一次短线反弹更重要。因为你真正需要保留下来的，不只是账上的钱，还有下一次明确机会到来时还能冷静行动的资格。
 
 把刀一直握在手里，不叫专业。知道什么时候该收刀，才是。
+
+---
+
+#### 认知对齐：行话指南
+
+- **波动率税 (Volatility Tax)**：在缺乏单边趋势的震荡市里，每一次追涨杀跌所产生的摩擦成本、滑点和情绪折损。
+- **NoSetup / RiskOff**：量化系统中的防守状态。当市场不提供高胜率机会时，最佳策略是空仓等待，而不是在混沌中强行交易。
+
+---
+*这篇属于「系统防线构建」系列。*
+
+*ZISO AI（中文名 知守AI）：复杂的分析交给 AI，简单的决策留给自己。*
+
+*下一篇：[101-104: 只要你的交易还经常从“我觉得”开始，你就还没走出 L0](../101_academy/101-104_maturity_l0_discretionary.md)*

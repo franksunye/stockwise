@@ -25,13 +25,13 @@ traceability:
   status: healthy
   last_reviewed_at: '2026-03-20'
 workflow:
-  stage: scheduled
+  stage: published
   review_priority: review_first
   owner: cmo
   reviewer: founder
   priority: high
-  target_publish_date: '2026-03-30'
-  last_action_at: '2026-03-20'
+  target_publish_date: '2026-03-27'
+  last_action_at: '2026-03-30'
   blocked_reason: ''
 maintenance:
   change_status: updated
@@ -154,8 +154,8 @@ visual_style_prefix: >-
 distribution:
   wechat:
     enabled: true
-    status: scheduled
-    scheduled_at: '2026-03-30'
+    status: published
+    published_at: '2026-03-27'
 ---
 # 机会成本：很多人不是没机会，而是钱先被一只烂股拖住了
 
@@ -195,4 +195,14 @@ ZISO 在底层强调风险否决和动作纪律，本质上也是同一逻辑。
 
 ---
 
-*ZISO AI（中文名 知守AI）：复杂的分析交给 AI，简单的决策留自己。*
+#### 认知对齐：行话指南
+
+- **机会成本 (Opportunity Cost)**：你把钱卡在一只烂股上死扛，真正损失的不仅是账面的浮亏，更是这笔钱本可以去买别的好股票所能赚到的潜在利润。
+- **风险否决 (Risk Veto)**：量化系统在出手前，首要考虑的不是“能赚多少”，而是“如果错了，会不会伤及继续迎战的本金”。
+
+---
+*这篇属于「交易思维重塑」系列。*
+
+*ZISO AI（中文名 知守AI）：复杂的分析交给 AI，简单的决策留给自己。*
+
+*下一篇：[101-69: 很多亏损，不是没提醒，而是提醒太多把人带乱了](../101_academy/101-69_ziso_rhythm.md)*

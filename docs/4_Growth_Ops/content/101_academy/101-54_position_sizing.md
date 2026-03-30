@@ -45,3 +45,7 @@ image: "/images/learn/101-54_position_sizing_cover.png"
 ---
 *下一篇：[101-55] 回撤的数学真相：为什么跌下去容易，涨回来难？*
  
+
+---
+
+*ZISO AI（中文名 知守AI）：复杂的分析交给 AI，简单的决策留自己。*

@@ -20,3 +20,7 @@ publish:
 ---
 
 *注意：此文档框架已自动挂靠底层核心逻辑 `30_Notification_Strategy_Design.md`。*
+
+---
+
+*ZISO AI（中文名 知守AI）：复杂的分析交给 AI，简单的决策留自己。*

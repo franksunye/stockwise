@@ -57,3 +57,7 @@ image: "/images/learn/101-29_gap_theory_cover.png"
 ---
 *下一篇：[101-30] 背离 (Divergence)：价格在撒谎，指标在尖叫。*
  
+
+---
+
+*ZISO AI（中文名 知守AI）：复杂的分析交给 AI，简单的决策留自己。*

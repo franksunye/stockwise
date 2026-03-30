@@ -56,3 +56,7 @@ image: "/images/learn/101-56_correlation_risk_cover.png"
 ---
 *下一篇：[101-57] 1% 准则：职业投资者的最后一套防弹衣。*
  
+
+---
+
+*ZISO AI（中文名 知守AI）：复杂的分析交给 AI，简单的决策留自己。*

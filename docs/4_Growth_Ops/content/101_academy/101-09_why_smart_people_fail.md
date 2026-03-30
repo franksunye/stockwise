@@ -55,3 +55,7 @@ image: "/images/learn/101-09_why_smart_people_fail_cover.png"
 ---
 *下一篇：[101-10] “空手观望”的艺术：为什么坐着不动价值百万。*
  
+
+---
+
+*ZISO AI（中文名 知守AI）：复杂的分析交给 AI，简单的决策留自己。*

@@ -33,7 +33,7 @@ workflow:
   owner: cmo
   reviewer: founder
   priority: high
-  target_publish_date: '2026-04-08'
+  target_publish_date: '2026-04-06'
   last_action_at: '2026-03-23'
   blocked_reason: ''
 maintenance:
@@ -131,7 +131,7 @@ visual_style_prefix: >-
 distribution:
   wechat:
     enabled: true
-    status: ready
+    status: scheduled
     url: ''
   xhs:
     enabled: false
@@ -220,6 +220,16 @@ ZISO 的角色，从来不是替用户把冲动讲得更漂亮，而是把那些
 
 只要你的交易还经常从“我觉得”开始，市场就永远有办法让你为这种感觉买单。
 
+---
+
+#### 认知对齐：行话指南
+
+- **快思考/慢思考 (System 1 / System 2)**：卡尼曼提出的双系统理论。人在面对复杂交易时，很容易退行到依赖直觉的“快思考”，从而被市场情绪收割。
+- **心理账户 (Mental Accounting)**：散户常见心理，认为只要没卖出就不算真实亏损，导致无法客观评估当前的持仓质量。
+
+---
 *这篇属于「量化成熟度金字塔」系列。*
 
-*ZISO AI（中文名 知守AI）：不是替你把直觉包装得更漂亮，而是帮你把冲动挡在规则之外。*
+*ZISO AI（中文名 知守AI）：复杂的分析交给 AI，简单的决策留给自己。*
+
+*下一篇：[101-105: L1级——为什么你买了一堆高级指标，业绩却还是像个散户](../101_academy/101-105_maturity_l1_indicator.md)*

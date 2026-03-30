@@ -115,3 +115,7 @@ WeChat article cover, wide horizontal image. Do not show any person or face. Sho
 5. 封面是否是无人像、两侧物件对比清楚
 6. 正文图片是否不超过 `2` 张
 7. 结尾是否收在“少做大错”而不是“万能赚钱承诺”
+
+---
+
+*ZISO AI（中文名 知守AI）：复杂的分析交给 AI，简单的决策留自己。*

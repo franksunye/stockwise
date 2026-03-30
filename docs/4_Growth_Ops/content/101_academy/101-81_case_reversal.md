@@ -57,3 +57,7 @@ image: "/images/learn/101-81_case_reversal_cover.png"
 ---
 *下一篇：[101-82] 实战案例：识别虚假突破。*
  
+
+---
+
+*ZISO AI（中文名 知守AI）：复杂的分析交给 AI，简单的决策留自己。*

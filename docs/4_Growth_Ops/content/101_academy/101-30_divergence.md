@@ -59,3 +59,7 @@ image: "/images/learn/101-30_divergence_cover.png"
 ---
 *下一篇：[101-56] 投资组合的相关性风险：分散投资的陷阱。*
  
+
+---
+
+*ZISO AI（中文名 知守AI）：复杂的分析交给 AI，简单的决策留自己。*

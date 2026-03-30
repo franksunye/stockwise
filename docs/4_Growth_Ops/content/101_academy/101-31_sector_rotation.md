@@ -57,3 +57,7 @@ image: "/images/learn/101-31_sector_rotation_cover.png"
 ---
 *下一篇：[101-58] 止盈的艺术：带走属于你的那部分。*
  
+
+---
+
+*ZISO AI（中文名 知守AI）：复杂的分析交给 AI，简单的决策留自己。*

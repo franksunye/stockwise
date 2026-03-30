@@ -33,7 +33,7 @@ workflow:
   owner: cmo
   reviewer: founder
   priority: high
-  target_publish_date: '2026-04-01'
+  target_publish_date: '2026-03-30'
   last_action_at: '2026-03-20'
   blocked_reason: ''
 maintenance:
@@ -163,7 +163,7 @@ visual_style_prefix: >-
 distribution:
   wechat:
     enabled: true
-    status: staged
+    status: scheduled
     staged_at: '2026-03-23 16:19'
     url: ''
   xhs:
@@ -247,4 +247,14 @@ source_docs:
 
 ---
 
-*ZISO AI（中文名 知守AI）：复杂的分析交给 AI，简单的决策留自己。*
+#### 认知对齐：行话指南
+
+- **信息过载 (Information Overload)**：盘中密集的弹窗和价格跳动，常常会耗尽你的决策带宽，逼你做出计划外的本能反应。
+- **静态点位 (Static Levels)**：在开盘前（无情绪影响时）设定好的支撑、阻力和止损价。它们比盘中大脑临时计算的点位真实 100 倍。
+
+---
+*这篇属于「系统防御机制」系列。*
+
+*ZISO AI（中文名 知守AI）：复杂的分析交给 AI，简单的决策留给自己。*
+
+*下一篇：[买完股票就到处搜利好：您那不叫研究，是在给自己“洗脑”](../101_academy/101-18_echo_chamber.md)*

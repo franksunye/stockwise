@@ -1,6 +1,6 @@
 # 内容生产流程看板 (Pipeline Board)
 
-> 自动生成时间：2026/3/27 16:38:35
+> 自动生成时间：2026/3/30 15:24:40
 > 说明：本看板优先服务活跃工作流，只展开需要推进的阶段；已发布内容只保留最近概览，避免看板膨胀。
 
 ## 🧠 待策划
@@ -129,31 +129,30 @@
 
 | 标题 | 来源 | 漏斗 | 战役角色 | 审核优先级 | 优先级 | Owner | Reviewer | 目标日期 | 视觉 | 公众号 | 阻塞原因 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| [101-69: 很多亏损，不是没提醒，而是提醒太多把人带乱了](../101_academy/101-69_ziso_rhythm.md) | Growth | BOFU | 转化承接 | 建议先审 | 高 | cmo | founder | 2026-04-01 周三 | ✅ 视觉通过 | 📬 草稿待发<br>2026-03-23 16:19 | - |
-| [买完股票后越刷越踏实，很多时候不是逻辑更强了，而是你更不想认错](../101_academy/101-18_echo_chamber.md) | Growth | TOFU | 破圈钩子 | 次优先审 | 高 | cmo | founder | 2026-04-03 周五 | ✅ 视觉通过 | 🟢 就绪 | - |
-| [很多人不是亏在大跌里，而是亏在天天都有机会的行情里](../101_academy/101-44_volatility_tax.md) | Growth | TOFU | 破圈钩子 | 次优先审 | 高 | cmo | founder | 2026-04-06 周一 | ✅ 视觉通过 | 🟢 就绪 | - |
-| [101-104: 只要你的交易还经常从“我觉得”开始，你就还没走出 L0](../101_academy/101-104_maturity_l0_discretionary.md) | Growth | MOFU | 信任桥梁 | 基本可发 | 高 | cmo | founder | 2026-04-08 周三 | ✅ 视觉通过 | 🟢 就绪 | - |
-| [满屏股神和收益截图，很多只是运气好的人还没翻车](../101_academy/101-42_survivorship_bias.md) | Growth | TOFU | 破圈钩子 | 次优先审 | 高 | cmo | founder | 2026-04-10 周五 | ✅ 视觉通过 | 🟢 就绪 | - |
-| [101-17: 很多人真正缺的，不是更会赚钱的工具，而是一个能在关键时刻拦住自己的系统](../101_academy/101-17_tower_shield.md) | Growth | BOFU | 转化承接 | 建议先审 | 高 | cmo | founder | 2026-04-13 周一 | ✅ 视觉通过 | 🟢 就绪 | - |
-| [101-13: “这票明天会不会涨？”这句问得越勤，往往亏得越快](../101_academy/101-13_prediction_tax.md) | Growth | TOFU | 破圈钩子 | 建议先审 | 高 | cmo | founder | 2026-04-15 周三 | ✅ 视觉通过 | 🟢 就绪 | - |
-| [101-15: 很多人不是没计划，而是一开盘就忍不住自己改计划](../101_academy/101-15_analyst_vs_trader.md) | Growth | MOFU | 信任桥梁 | 次优先审 | 高 | cmo | founder | 2026-04-17 周五 | ✅ 视觉通过 | 🟢 就绪 | - |
+| [101-69: 很多亏损，不是没提醒，而是提醒太多把人带乱了](../101_academy/101-69_ziso_rhythm.md) | Growth | BOFU | 转化承接 | 建议先审 | 高 | cmo | founder | 2026-03-30 周一 | ✅ 视觉通过 | ⏳ 待发布 | - |
+| [为什么股票一被套，你总能刷到漫山遍野的“重大利好”？](../101_academy/101-18_echo_chamber.md) | Growth | TOFU | 破圈钩子 | 次优先审 | 高 | cmo | founder | 2026-04-01 周三 | ✅ 视觉通过 | ⏳ 待发布 | - |
+| [很多人不是亏在大跌里，而是亏在天天都有机会的行情里](../101_academy/101-44_volatility_tax.md) | Growth | TOFU | 破圈钩子 | 次优先审 | 高 | cmo | founder | 2026-04-03 周五 | ✅ 视觉通过 | ⏳ 待发布 | - |
+| [101-104: 只要你的交易还经常从“我觉得”开始，你就还没走出 L0](../101_academy/101-104_maturity_l0_discretionary.md) | Growth | MOFU | 信任桥梁 | 基本可发 | 高 | cmo | founder | 2026-04-06 周一 | ✅ 视觉通过 | ⏳ 待发布 | - |
+| [满屏股神和收益截图，很多只是运气好的人还没翻车](../101_academy/101-42_survivorship_bias.md) | Growth | TOFU | 破圈钩子 | 次优先审 | 高 | cmo | founder | 2026-04-08 周三 | ✅ 视觉通过 | ⏳ 待发布 | - |
+| [101-17: 很多人真正缺的，不是更会赚钱的工具，而是一个能在关键时刻拦住自己的系统](../101_academy/101-17_tower_shield.md) | Growth | BOFU | 转化承接 | 建议先审 | 高 | cmo | founder | 2026-04-10 周五 | ✅ 视觉通过 | ⏳ 待发布 | - |
+| [101-13: “这票明天会不会涨？”这句问得越勤，往往亏得越快](../101_academy/101-13_prediction_tax.md) | Growth | TOFU | 破圈钩子 | 建议先审 | 高 | cmo | founder | 2026-04-13 周一 | ✅ 视觉通过 | ⏳ 待发布 | - |
+| [101-15: 很多人不是没计划，而是一开盘就忍不住自己改计划](../101_academy/101-15_analyst_vs_trader.md) | Growth | MOFU | 信任桥梁 | 次优先审 | 高 | cmo | founder | 2026-04-15 周三 | ✅ 视觉通过 | ⏳ 待发布 | - |
 
 ## 📅 已排期
 
-| 标题 | 来源 | 漏斗 | 战役角色 | 审核优先级 | 优先级 | Owner | Reviewer | 目标日期 | 视觉 | 公众号 | 阻塞原因 |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| [101-100: 很多人不是不会炒股，而是连自己是什么段位都没弄明白](../101_academy/101-100_maturity_prologue.md) | Growth | MOFU | 信任桥梁 | 建议先审 | 高 | cmo | founder | 2026-03-27 周五 | ✅ 视觉通过 | ⏳ 待发布<br>2026-03-27 | - |
-| [机会成本：很多人不是没机会，而是钱先被一只烂股拖住了](../101_academy/101-40_opportunity_cost.md) | Growth | TOFU | 破圈钩子 | 建议先审 | 高 | cmo | founder | 2026-03-30 周一 | ✅ 视觉通过 | ⏳ 待发布<br>2026-03-30 | - |
+- 暂无内容
 
 ## 🚀 已发布
 
-- 已发布资产总数：116
-- 系统识别公众号已发布：12 篇
+- 已发布资产总数：117
+- 系统识别公众号已发布：14 篇
 - 已确认公众号前线基线：9 篇
 - 看板优先展示公众号已发布内容，其次补充仅网站上线的内容；完整清单请看主索引。
 
 | 标题 | 来源 | 最后动作 | 网站 | 公众号 |
 | --- | --- | --- | --- | --- |
+| [机会成本：很多人不是没机会，而是钱先被一只烂股拖住了](../101_academy/101-40_opportunity_cost.md) | Growth | 2026-03-27 周五 | ✅ 上线中 | ✅ 已发布 |
+| [101-100: 很多人不是不会炒股，而是连自己是什么段位都没弄明白](../101_academy/101-100_maturity_prologue.md) | Growth | 2026-03-25 周三 | ✅ 上线中 | ✅ 已发布 |
 | [101-12: 你以为自己在做短线，很多时候其实只是在给人送钱](../101_academy/101-12_l4_hft_illusion.md) | Growth | 2026-03-23 周一 | ✅ 上线中 | ✅ 已发布 |
 | [101-68: 让“龙虾”替你炒股？它敢说，你敢信么](../101_academy/101-68_general_llm_illusion.md) | Growth | 2026-03-20 周五 | ✅ 上线中 | ✅ 已发布 |
 | [AI 时代的决策真相：为什么‘直觉’是你最危险的敌人？](../101_academy/2026-03-02_breakthrough_logic.md) | Growth | 2026-03-05 周四 | ✅ 上线中 | [✅ 已发布](https://mp.weixin.qq.com/s/aXQoun4YcB-Sn1ZDsIz3rg) |
@@ -172,8 +171,6 @@
 | [101-104_maturity_l0_discretionary_wechat_release_brief](../101_academy/101-104_maturity_l0_discretionary_wechat_release_brief.md) | Growth | 2026-03-23 周一 | ✅ 上线中 | ➖ 不发布 |
 | [101-13_prediction_tax_wechat_release_brief](../101_academy/101-13_prediction_tax_wechat_release_brief.md) | Growth | 2026-03-23 周一 | ✅ 上线中 | ➖ 不发布 |
 | [101-15_analyst_vs_trader_wechat_release_brief](../101_academy/101-15_analyst_vs_trader_wechat_release_brief.md) | Growth | 2026-03-23 周一 | ✅ 上线中 | ➖ 不发布 |
-| [101-17_tower_shield_wechat_release_brief](../101_academy/101-17_tower_shield_wechat_release_brief.md) | Growth | 2026-03-23 周一 | ✅ 上线中 | ➖ 不发布 |
-| [101-42_survivorship_bias_wechat_release_brief](../101_academy/101-42_survivorship_bias_wechat_release_brief.md) | Growth | 2026-03-23 周一 | ✅ 上线中 | ➖ 不发布 |
 
 ## 📦 已归档
 

@@ -58,3 +58,7 @@ image: "/images/learn/101-83_falling_knife_cover.png"
 ---
 *恭喜你！至此你已经完成了 ZISO 101 的全部核心指南。你已经比 95% 的散户更懂这个市场的生存法则。*
  
+
+---
+
+*ZISO AI（中文名 知守AI）：复杂的分析交给 AI，简单的决策留自己。*

@@ -46,3 +46,7 @@ image: "/images/learn/101-66_prompt_engineering_cover.png"
 ---
 *下一篇：[101-67] 混合系统：AI 辅助下的终极决策。*
  
+
+---
+
+*ZISO AI（中文名 知守AI）：复杂的分析交给 AI，简单的决策留自己。*

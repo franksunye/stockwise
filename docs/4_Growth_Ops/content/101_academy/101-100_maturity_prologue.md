@@ -28,13 +28,13 @@ traceability:
   status: healthy
   last_reviewed_at: '2026-03-20'
 workflow:
-  stage: scheduled
+  stage: published
   review_priority: review_first
   owner: cmo
   reviewer: founder
   priority: high
-  target_publish_date: '2026-03-27'
-  last_action_at: '2026-03-20'
+  target_publish_date: '2026-03-25'
+  last_action_at: '2026-03-30'
   blocked_reason: ''
 maintenance:
   change_status: updated
@@ -154,8 +154,8 @@ visual_style_prefix: >-
 distribution:
   wechat:
     enabled: true
-    status: scheduled
-    scheduled_at: '2026-03-27'
+    status: published
+    published_at: '2026-03-25'
 source_docs:
 - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
 - docs/2_Intelligence/research/01_Quant_Trading_Schools_Taxonomy.md
@@ -237,4 +237,6 @@ source_docs:
 
 *这篇属于「量化成熟度金字塔」系列。*
 
-*ZISO AI（中文名 知守AI）：复杂的分析交给 AI，简单的决策留自己。*
+*ZISO AI（中文名 知守AI）：复杂的分析交给 AI，简单的决策留给自己。*
+
+*下一篇：[101-104: 只要你的交易还经常从“我觉得”开始，你就还没走出 L0](../101_academy/101-104_maturity_l0_discretionary.md)*

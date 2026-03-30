@@ -49,3 +49,7 @@ image: "/images/learn/101-58_profit_taking_cover.png"
 ---
 *下一篇：[101-64] 盘后分析 vs 盘中博弈。*
  
+
+---
+
+*ZISO AI（中文名 知守AI）：复杂的分析交给 AI，简单的决策留自己。*

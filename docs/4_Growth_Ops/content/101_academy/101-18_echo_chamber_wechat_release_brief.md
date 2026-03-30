@@ -122,3 +122,7 @@ WeChat article cover, wide horizontal image. Do not show any person or face. Sho
 - 公众号版式：已指定 `finance_editorial_v1`
 - 视觉：待开始
 - 公众号分发：待从 `draft` 推进到 `ready`
+
+---
+
+*ZISO AI（中文名 知守AI）：复杂的分析交给 AI，简单的决策留自己。*

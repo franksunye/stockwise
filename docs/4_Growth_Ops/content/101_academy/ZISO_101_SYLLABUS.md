@@ -125,3 +125,7 @@ source_docs:
   - *Concept*: Portfolio and Risk Model. Stateful context mapping.
 - **101-103**: **Execution: Escaping the Trenches**
   - *Concept*: Tactics and Micro-level execution. Avoiding HFT traps.
+
+---
+
+*ZISO AI（中文名 知守AI）：复杂的分析交给 AI，简单的决策留自己。*

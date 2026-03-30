@@ -45,3 +45,7 @@ image: "/images/learn/101-57_one_percent_rule_cover.png"
 ---
 *恭喜你完成了【资金篇】！这是你通往长期生存的最强防盾。*
  
+
+---
+
+*ZISO AI（中文名 知守AI）：复杂的分析交给 AI，简单的决策留自己。*

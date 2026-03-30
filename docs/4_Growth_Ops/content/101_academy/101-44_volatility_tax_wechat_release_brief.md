@@ -100,3 +100,7 @@ WeChat article cover, wide horizontal image. Do not show any person or face. Sho
 5. 正文图片是否不超过 `2` 张
 6. 是否存在太多重复加粗
 7. 结尾是否干净有力
+
+---
+
+*ZISO AI（中文名 知守AI）：复杂的分析交给 AI，简单的决策留自己。*

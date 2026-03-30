@@ -46,3 +46,7 @@ image: "/images/learn/101-67_hybrid_system_cover.png"
 ---
 *恭喜你完成了【工具篇】！下面我们将通过实战案例来复盘。*
  
+
+---
+
+*ZISO AI（中文名 知守AI）：复杂的分析交给 AI，简单的决策留自己。*

@@ -60,3 +60,7 @@ image: "/images/learn/101-64_eod_vs_intraday_cover.png"
 ---
 *下一篇：[101-65] 置信度解码：当 AI 说“不确定”时，你在听吗？*
  
+
+---
+
+*ZISO AI（中文名 知守AI）：复杂的分析交给 AI，简单的决策留自己。*

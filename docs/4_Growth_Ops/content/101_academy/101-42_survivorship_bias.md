@@ -35,7 +35,7 @@ workflow:
   owner: cmo
   reviewer: founder
   priority: high
-  target_publish_date: '2026-04-10'
+  target_publish_date: '2026-04-08'
   last_action_at: '2026-03-23'
   blocked_reason: ''
 maintenance:
@@ -134,7 +134,7 @@ visual_style_prefix: >-
 distribution:
   wechat:
     enabled: true
-    status: ready
+    status: scheduled
     url: ''
   xhs:
     enabled: false
