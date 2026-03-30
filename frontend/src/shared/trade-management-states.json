@@ -1,0 +1,38 @@
+[
+  {
+    "id": "EntryTriggered",
+    "label_zh": "建仓确认期",
+    "description_zh": "新信号刚成立，优先确认初始错误是否可控。",
+    "sort_order": 10
+  },
+  {
+    "id": "BreakoutPending",
+    "label_zh": "突破待确认",
+    "description_zh": "接近或刚触及关键确认位，先防假突破。",
+    "sort_order": 20
+  },
+  {
+    "id": "TrendHolding",
+    "label_zh": "趋势持有",
+    "description_zh": "趋势延续条件仍在，核心任务是避免过早下车。",
+    "sort_order": 30
+  },
+  {
+    "id": "ProfitProtection",
+    "label_zh": "盈利保护期",
+    "description_zh": "已有明确浮盈，核心任务转为保护利润。",
+    "sort_order": 40
+  },
+  {
+    "id": "FailureRisk",
+    "label_zh": "风险抬升",
+    "description_zh": "结构开始失真或风险抬升，优先降风险。",
+    "sort_order": 50
+  },
+  {
+    "id": "ExitCompleted",
+    "label_zh": "已退出",
+    "description_zh": "本轮仓位管理结束，转入观察或复盘。",
+    "sort_order": 60
+  }
+]

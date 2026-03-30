@@ -94,6 +94,23 @@
 - [ ] **历史数据清洗 (Data Migration)**: 执行幂等数据库更新，将历史记录中的“建议进场”统一修正为“建议看多”。
 - [ ] **AI 内容审计 (LLM-as-a-Judge)**: 自动抽检 AI 生成摘要，确保叙事逻辑不误用旧版“进攻/进场”术语。
 
+### 6. Cloudflare Scheduler 配额治理与统一编排（P2）
+
+#### 6.1 Cron 配额盘点与任务分层
+- [ ] 盘点当前 Cloudflare 账号下全部 Workers 的 cron 占用，形成 `precision cron / heartbeat routed / do-alarm backed` 三层分类表。
+- [ ] 明确哪些任务必须保留独立精确 cron，哪些任务应回收到统一 heartbeat 路由，避免继续线性消耗 `5` 个 cron 配额。
+- [ ] 验收标准：任意一个后台任务都能回答“为什么它值得单独占用一个 cron”。
+
+#### 6.2 StockWise Scheduler 配置化路由
+- [ ] 将 `stockwise-scheduler` 进一步收口为配置驱动任务表，新增精确任务时只需补配置而非手改分支。
+- [ ] 统一输出每个任务的 `cron / workflow / Beijing time / owner / fallback path`，降低后续接手成本。
+- [ ] 验收标准：新增一个精确调度任务时，不需要重写主调度逻辑。
+
+#### 6.3 Durable Object Alarms 迁移评估
+- [ ] 评估是否将未来更多“准确但不值得独占 cron”的任务迁到 Durable Object Alarms。
+- [ ] 明确迁移边界：哪些任务适合静态 cron，哪些适合 DO alarm，哪些继续留在 heartbeat 内部判时。
+- [ ] 验收标准：形成一份可执行迁移方案，而不是继续临时追加 cron。
+
 ---
 
 ## 使用规则
@@ -124,4 +141,4 @@
 
 ---
 
-**最后更新**: 2026-03-23
+**最后更新**: 2026-03-30

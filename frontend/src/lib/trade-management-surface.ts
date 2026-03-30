@@ -1,3 +1,5 @@
+import tradeManagementStates from '@/shared/trade-management-states.json';
+
 export interface TradeManagementPosition {
   position_id: string;
   user_id: string;
@@ -21,7 +23,7 @@ export interface TradeManagementAdvice {
   position_id: string;
   latest_trade_date: string;
   next_trade_date: string | null;
-  state_id: string | null;
+  state_id: TradeManagementStateId | null;
   signal_state: string | null;
   recommended_policy: string | null;
   action_summary: string | null;
@@ -61,8 +63,23 @@ export interface TradeManagementCardSection {
   lines: string[];
 }
 
+export type TradeManagementStateId =
+  | 'EntryTriggered'
+  | 'BreakoutPending'
+  | 'TrendHolding'
+  | 'ProfitProtection'
+  | 'FailureRisk'
+  | 'ExitCompleted';
+
 const MEMORY_CACHE = new Map<string, TradeManagementSnapshot>();
 const SESSION_KEY_PREFIX = 'trade_management_surface';
+
+interface TradeManagementStateDefinition {
+  id: TradeManagementStateId;
+  label_zh: string;
+  description_zh: string;
+  sort_order: number;
+}
 
 export function getTradeManagementSWRKey(symbol: string): readonly [string, string] {
   return ['trade-management', symbol] as const;
@@ -145,18 +162,14 @@ export function formatPrice(value: number | null | undefined): string {
   return Number(value).toFixed(2).replace(/\.?0+$/, '');
 }
 
-export function getManagementStateLabel(advice: TradeManagementAdvice | null): string {
-  const source = advice?.state_id || advice?.signal_state || advice?.recommended_policy || '';
-  if (!source) return '等待建立';
+const MANAGEMENT_STATE_LABELS = Object.fromEntries(
+  (tradeManagementStates as TradeManagementStateDefinition[]).map((item) => [item.id, item.label_zh]),
+) as Record<TradeManagementStateId, string>;
 
-  const normalized = source.toLowerCase();
-  if (normalized.includes('profit')) return '盈利保护';
-  if (normalized.includes('loss')) return '风险抬升';
-  if (normalized.includes('wait')) return '等待确认';
-  if (normalized.includes('hold')) return '继续跟踪';
-  if (normalized.includes('reduce')) return '分批减仓';
-  if (normalized.includes('exit')) return '纪律退出';
-  return advice?.state_id || advice?.signal_state || advice?.recommended_policy || '管理中';
+export function getManagementStateLabel(advice: TradeManagementAdvice | null): string {
+  const stateId = advice?.state_id;
+  if (!stateId) return '等待建立';
+  return MANAGEMENT_STATE_LABELS[stateId] || '管理中';
 }
 
 export function getManagementActionLabel(advice: TradeManagementAdvice | null): string {
