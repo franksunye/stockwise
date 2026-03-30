@@ -19,6 +19,7 @@ from backend.management.state.snapshot_builder import build_position_snapshots
 from backend.management.storage.live_repo import (
     build_advice_id,
     fetch_latest_trade_advice,
+    fetch_user_wecom_delivery,
     insert_trade_advice_log,
     list_active_trade_positions,
 )
@@ -62,6 +63,19 @@ def _state_theme(snapshot_state_id: str) -> tuple[str, int]:
         "ExitCompleted": ("已退出", 0),
     }
     return mapping.get(snapshot_state_id, ("交易管理", 0))
+
+
+def _resolve_delivery_target(user_id: str) -> tuple[str | None, list[str] | None]:
+    delivery = fetch_user_wecom_delivery(user_id) or {}
+    user_webhook_url = str(delivery.get("wecom_webhook_url") or "").strip() or None
+    user_mobile = str(delivery.get("mobile") or "").strip() or None
+
+    if user_webhook_url:
+        mentions = [user_mobile] if user_mobile else None
+        return user_webhook_url, mentions
+
+    admin_mobiles = get_admin_mobiles() or ["@all"]
+    return None, admin_mobiles
 
 
 def run_trade_management_advice_loop(
@@ -136,7 +150,7 @@ def run_trade_management_advice_loop(
 
             if notify:
                 try:
-                    mentions = get_admin_mobiles() or ["@all"]
+                    webhook_url, mentions = _resolve_delivery_target(position.user_id)
                     if advice_style == "template_card":
                         plan = build_action_plan(latest, str(final_lane["recommended_policy"]))
                         execution_mode = build_execution_mode_plan(latest, position)
@@ -180,6 +194,7 @@ def run_trade_management_advice_loop(
                             jump_url=f"{os.getenv('NEXT_PUBLIC_SITE_URL', 'https://ziso.cc').rstrip('/')}/admin/trade-positions",
                             mentioned_mobile_list=mentions,
                             mention_text=followup_text,
+                            webhook_url=webhook_url,
                         )
                     else:
                         followup_text = f"执行依据：{build_execution_mode_plan(latest, position).rationale}"
@@ -187,16 +202,19 @@ def run_trade_management_advice_loop(
                             record.card_markdown,
                             mentioned_mobile_list=mentions,
                             mention_text=followup_text,
+                            webhook_url=webhook_url,
                         )
                     record.webhook_delivery_status = "sent"
                     delivered_count += 1
                 except Exception as notify_exc:
                     if advice_style == "template_card":
                         try:
+                            webhook_url, mentions = _resolve_delivery_target(position.user_id)
                             send_wecom_notification(
                                 record.card_markdown,
-                                mentioned_mobile_list=get_admin_mobiles() or ["@all"],
+                                mentioned_mobile_list=mentions,
                                 mention_text="交易管理提醒：请查收上一条持仓建议卡",
+                                webhook_url=webhook_url,
                             )
                             record.webhook_delivery_status = "sent"
                             delivered_count += 1

@@ -421,6 +421,8 @@ def init_db():
                 user_id TEXT PRIMARY KEY, 
                 username TEXT, 
                 email TEXT, 
+                wecom_webhook_url TEXT,
+                mobile TEXT,
                 registration_type TEXT NOT NULL, 
                 created_at TIMESTAMP DEFAULT (datetime('now', '+8 hours')), 
                 last_active_at TIMESTAMP DEFAULT (datetime('now', '+8 hours')), 
@@ -952,6 +954,20 @@ def init_db():
             # Column might already exist or table might not exist yet
             if "duplicate column" not in str(e).lower() and "no such table" not in str(e).lower():
                 logger.debug(f"ℹ️ notification_settings column: {e}")
+
+        try:
+            cursor.execute("ALTER TABLE users ADD COLUMN wecom_webhook_url TEXT")
+            logger.info("✅ Added wecom_webhook_url column to users table")
+        except Exception as e:
+            if "duplicate column" not in str(e).lower() and "no such table" not in str(e).lower():
+                logger.debug(f"ℹ️ wecom_webhook_url column: {e}")
+
+        try:
+            cursor.execute("ALTER TABLE users ADD COLUMN mobile TEXT")
+            logger.info("✅ Added mobile column to users table")
+        except Exception as e:
+            if "duplicate column" not in str(e).lower() and "no such table" not in str(e).lower():
+                logger.debug(f"ℹ️ mobile column: {e}")
 
         # 11. Task Logs (For Agent Status Dashboard)
         # Enhanced for "Agentic" view with attribution and dimensions

@@ -257,6 +257,32 @@ def fetch_latest_trade_advice(position_id: str) -> dict[str, object] | None:
         conn.close()
 
 
+def fetch_user_wecom_delivery(user_id: str) -> dict[str, str | None] | None:
+    conn = get_connection()
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            """
+            SELECT wecom_webhook_url, mobile
+            FROM users
+            WHERE user_id = ?
+            LIMIT 1
+            """,
+            (user_id,),
+        )
+        row = cur.fetchone()
+        if not row:
+            return None
+        webhook_url = str(row[0]).strip() if row[0] else None
+        mobile = str(row[1]).strip() if row[1] else None
+        return {
+            "wecom_webhook_url": webhook_url or None,
+            "mobile": mobile or None,
+        }
+    finally:
+        conn.close()
+
+
 def build_position_id() -> str:
     return f"pos_{uuid4().hex[:12]}"
 

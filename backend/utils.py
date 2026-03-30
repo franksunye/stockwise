@@ -73,15 +73,26 @@ def get_pinyin_info(name: str):
         return "", ""
 
 
-def _resolve_wecom_webhook_url() -> Optional[str]:
+def _normalize_wecom_webhook_url(raw: str | None) -> Optional[str]:
+    value = (raw or "").strip()
+    if not value:
+        return None
+    if value.startswith("http"):
+        return value
+    return f"https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key={value}"
+
+
+def _resolve_wecom_webhook_url(webhook_url: str | None = None) -> Optional[str]:
+    normalized = _normalize_wecom_webhook_url(webhook_url)
+    if normalized:
+        return normalized
+
     wecom_robot_key = get_wecom_robot_key()
     if not wecom_robot_key:
         logger.warning("⚠️ WECOM_ROBOT_KEY 未配置，跳过企业微信通知。")
         return None
 
-    if wecom_robot_key.startswith("http"):
-        return wecom_robot_key
-    return f"https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key={wecom_robot_key}"
+    return _normalize_wecom_webhook_url(wecom_robot_key)
 
 
 def _post_wecom_payload(url: str, payload: dict, timeout: int = 10) -> None:
@@ -101,13 +112,14 @@ def send_wecom_notification(
     content: str,
     mentioned_mobile_list: list = None,
     mention_text: str | None = "⚠️ 运维提醒: 请关注上述报警",
+    webhook_url: str | None = None,
 ):
     """
     发送企业微信机器人通知
     :param content: 消息内容 (Markdown)
     :param mentioned_mobile_list: 需要 @ 的手机号列表 (["138...", "@all"])
     """
-    url = _resolve_wecom_webhook_url()
+    url = _resolve_wecom_webhook_url(webhook_url)
     if not url:
         return False
 
@@ -185,8 +197,9 @@ def send_wecom_template_card(
     source_desc_color: int = 0,
     mentioned_mobile_list: list | None = None,
     mention_text: str | None = "交易管理提醒：请查收上一条持仓建议卡",
+    webhook_url: str | None = None,
 ) -> bool:
-    url = _resolve_wecom_webhook_url()
+    url = _resolve_wecom_webhook_url(webhook_url)
     if not url:
         return False
 

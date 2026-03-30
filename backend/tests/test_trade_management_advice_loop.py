@@ -177,7 +177,10 @@ def test_advice_loop_uses_non_alert_followup_text_for_mentions() -> None:
                  }
              },
          ), \
-         patch("backend.management.live.service.get_admin_mobiles", return_value=["13800000000"]), \
+         patch(
+             "backend.management.live.service.fetch_user_wecom_delivery",
+             return_value={"wecom_webhook_url": "https://example.com/hook", "mobile": "13800000000"},
+         ), \
          patch("backend.management.live.service.send_wecom_notification", return_value=True) as notify_mock, \
          patch("backend.utils.send_wecom_notification", return_value=True), \
          patch("backend.management.live.service.insert_trade_advice_log"):
@@ -185,6 +188,8 @@ def test_advice_loop_uses_non_alert_followup_text_for_mentions() -> None:
 
     assert result.delivered_count == 1
     assert notify_mock.call_count == 1
+    assert notify_mock.call_args.kwargs["webhook_url"] == "https://example.com/hook"
+    assert notify_mock.call_args.kwargs["mentioned_mobile_list"] == ["13800000000"]
     assert notify_mock.call_args.kwargs["mention_text"] == "执行依据：当前处在关键位确认区，默认先保留突破后的上行弹性；如果你周一无法盯盘，条件单更适合保护已锁定利润。"
 
 
@@ -207,7 +212,10 @@ def test_advice_loop_can_use_template_card_style() -> None:
                  }
              },
          ), \
-         patch("backend.management.live.service.get_admin_mobiles", return_value=["13800000000"]), \
+         patch(
+             "backend.management.live.service.fetch_user_wecom_delivery",
+             return_value={"wecom_webhook_url": "https://example.com/hook", "mobile": "13800000000"},
+         ), \
          patch("backend.management.live.service.send_wecom_template_card", return_value=True) as template_mock, \
          patch("backend.management.live.service.send_wecom_notification", return_value=True) as markdown_mock, \
          patch("backend.management.live.service.insert_trade_advice_log"):
@@ -229,6 +237,8 @@ def test_advice_loop_can_use_template_card_style() -> None:
         "站稳 17.74：继续持有",
         "冲高不稳：先止盈 1/3",
     ]
+    assert template_mock.call_args.kwargs["webhook_url"] == "https://example.com/hook"
+    assert template_mock.call_args.kwargs["mentioned_mobile_list"] == ["13800000000"]
     assert template_mock.call_args.kwargs["mention_text"] == "执行依据：当前处在关键位确认区，默认先保留突破后的上行弹性；如果你周一无法盯盘，条件单更适合保护已锁定利润。"
 
 
@@ -251,7 +261,10 @@ def test_advice_loop_falls_back_to_markdown_when_template_card_fails() -> None:
                  }
              },
          ), \
-         patch("backend.management.live.service.get_admin_mobiles", return_value=["13800000000"]), \
+         patch(
+             "backend.management.live.service.fetch_user_wecom_delivery",
+             return_value={"wecom_webhook_url": "https://example.com/hook", "mobile": "13800000000"},
+         ), \
          patch("backend.management.live.service.send_wecom_template_card", side_effect=RuntimeError("unsupported")) as template_mock, \
          patch("backend.management.live.service.send_wecom_notification", return_value=True) as markdown_mock, \
          patch("backend.management.live.service.insert_trade_advice_log"):
@@ -260,6 +273,35 @@ def test_advice_loop_falls_back_to_markdown_when_template_card_fails() -> None:
     assert result.delivered_count == 1
     template_mock.assert_called_once()
     markdown_mock.assert_called_once()
+
+
+def test_advice_loop_falls_back_to_admin_delivery_when_user_route_missing() -> None:
+    position = _sample_position()
+    snapshot = _sample_snapshot()
+
+    with patch("backend.management.live.service.init_db"), \
+         patch("backend.management.live.service.list_active_trade_positions", return_value=[position]), \
+         patch("backend.management.live.service.build_position_snapshots", return_value=[snapshot]), \
+         patch("backend.management.live.service.get_next_trading_day_str", return_value="2026-03-30"), \
+         patch("backend.management.live.service.fetch_latest_trade_advice", return_value=None), \
+         patch(
+             "backend.management.live.service.route_case_lanes",
+             return_value={
+                 "final": {
+                     "lane_id": "baseline_3d",
+                     "recommended_policy": "buy_and_hold_baseline",
+                 }
+             },
+         ), \
+         patch("backend.management.live.service.fetch_user_wecom_delivery", return_value=None), \
+         patch("backend.management.live.service.get_admin_mobiles", return_value=["13800000000"]), \
+         patch("backend.management.live.service.send_wecom_notification", return_value=True) as notify_mock, \
+         patch("backend.management.live.service.insert_trade_advice_log"):
+        result = run_trade_management_advice_loop(persist_log=True, notify=True)
+
+    assert result.delivered_count == 1
+    assert notify_mock.call_args.kwargs["webhook_url"] is None
+    assert notify_mock.call_args.kwargs["mentioned_mobile_list"] == ["13800000000"]
 
 
 def test_advice_loop_suppresses_duplicate_sent_card() -> None:
