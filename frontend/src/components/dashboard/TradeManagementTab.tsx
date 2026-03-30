@@ -79,7 +79,7 @@ export function TradeManagementTab({
     return (
       <div className="flex min-h-[260px] flex-col items-center justify-center space-y-3 pb-8 pt-10">
         <Loader2 size={24} className="animate-spin text-indigo-400" />
-        <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500">正在调取持仓管理...</p>
+        <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500">正在同步交易快照...</p>
       </div>
     );
   }
@@ -90,7 +90,7 @@ export function TradeManagementTab({
         <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full border border-rose-500/20 bg-rose-500/10 text-rose-200">
           <AlertTriangle size={18} />
         </div>
-        <p className="text-sm font-bold text-rose-100">管理信息暂时不可用</p>
+        <p className="text-sm font-bold text-rose-100">交易数据暂时不可用</p>
         <p className="mt-1 text-xs leading-relaxed text-rose-200/80">当前不影响择时阅读，你稍后再试即可。</p>
         <button
           type="button"
@@ -113,8 +113,8 @@ export function TradeManagementTab({
               <h3 className="text-xl font-black tracking-tight text-white">{stockName || symbol}</h3>
             </div>
             <div className="text-right">
-              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">交易管理状态</p>
-              <h3 className="text-xl font-black tracking-tight text-slate-300">待建立</h3>
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">交易跟踪状态</p>
+              <h3 className="text-xl font-black tracking-tight text-slate-300">待开始</h3>
             </div>
           </div>
 
@@ -122,7 +122,7 @@ export function TradeManagementTab({
             <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-white/[0.03] text-slate-500">
               <BriefcaseBusiness size={18} strokeWidth={1.5} />
             </div>
-            <h3 className="text-base font-black tracking-tight text-slate-300">尚无管理记录</h3>
+            <h3 className="text-base font-black tracking-tight text-slate-300">尚无交易记录</h3>
             <p className="mx-auto mt-2 max-w-[240px] text-xs leading-relaxed text-slate-500">
               录入实盘成本与仓位信息，系统将为你定制专属的移动止盈与止损策略。
             </p>
@@ -157,7 +157,7 @@ export function TradeManagementTab({
             <h3 className="text-xl font-black tracking-tight text-white">{stockName || position?.stock_name || symbol}</h3>
           </div>
           <div className="text-right">
-            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">交易管理状态</p>
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">交易跟踪状态</p>
             <h3 className="text-xl font-black tracking-tight text-emerald-300">{stateLabel}</h3>
           </div>
         </div>
@@ -186,13 +186,18 @@ export function TradeManagementTab({
           </div>
 
           {factLines.length > 0 ? (
-            <div className="mt-4 space-y-2 rounded-xl border border-white/5 bg-black/30 px-4 py-4">
-              {factLines.slice(0, 3).map((line) => (
-                <p key={line} className="flex items-start gap-2 text-sm leading-relaxed text-slate-400">
-                  <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-500/40" />
-                  <span>{line}</span>
-                </p>
-              ))}
+            <div className="mt-4 space-y-3 rounded-xl border border-white/5 bg-black/30 px-4 py-4">
+              <p className="flex items-center gap-2 text-[10px] font-black text-slate-600 uppercase tracking-[0.1em]">
+                <div className="w-1 h-1 rounded-full bg-indigo-500/50" /> 策略执行依据
+              </p>
+              <div className="space-y-2">
+                {factLines.slice(0, 3).map((line) => (
+                  <p key={line} className="flex items-start gap-2 text-sm leading-relaxed text-slate-400">
+                    <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-500/40" />
+                    <span>{line}</span>
+                  </p>
+                ))}
+              </div>
             </div>
           ) : null}
         </section>
@@ -238,7 +243,7 @@ export function TradeManagementTab({
             >
               <div className="flex items-center gap-2">
                 <List size={14} className="text-slate-500" />
-                <span className="text-xs font-bold text-slate-300">详细推演依据</span>
+                <span className="text-xs font-bold text-slate-300">查看策略推演逻辑</span>
               </div>
               <motion.div
                 animate={{ rotate: isDetailExpanded ? 180 : 0 }}
@@ -286,7 +291,7 @@ export function TradeManagementTab({
                       <div className="rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3">
                         <p className={sectionTitleClass}>
                           <span className="h-1.5 w-1.5 rounded-full bg-indigo-400/80" />
-                          管理依据
+                          策略推演依据
                         </p>
                         <div className="mt-2 space-y-2">
                           {detailLines.length > 0 ? (
@@ -298,7 +303,7 @@ export function TradeManagementTab({
                             ))
                           ) : (
                             <p className="text-sm leading-relaxed text-slate-400">
-                              当前先开放摘要层，完整交易历史会在后续阶段继续补齐。
+                              该仓位目前由量化引擎实时跟踪，交易轨迹将随您的操作实时更新。
                             </p>
                           )}
                         </div>
@@ -325,7 +330,7 @@ export function TradeManagementTab({
                     <div className="rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3">
                       <p className={sectionTitleClass}>
                         <span className="h-1.5 w-1.5 rounded-full bg-indigo-400/80" />
-                        近期执行
+                        近期执行记录
                       </p>
                       <div className="mt-2 space-y-2">
                         {recentEvents.length > 0 ? (
@@ -346,7 +351,9 @@ export function TradeManagementTab({
                             </div>
                           ))
                         ) : (
-                          <p className="text-sm leading-relaxed text-slate-400">还没有记录执行动作。完成后可以点底部按钮留痕。</p>
+                          <p className="text-sm leading-relaxed text-slate-400">
+                            该仓位暂无执行记录。您可以手动录入买卖操作，以此完善交易闭环。
+                          </p>
                         )}
                       </div>
                     </div>
@@ -361,7 +368,7 @@ export function TradeManagementTab({
             onClick={() => setIsEventOpen(true)}
             className="mt-4 w-full flex items-center justify-center rounded-2xl bg-indigo-500 px-5 py-3.5 text-[13px] font-black uppercase tracking-widest text-white shadow-[0_8px_20px_rgba(99,102,241,0.25)] transition-all active:scale-95 hover:bg-indigo-400"
           >
-            完成并记录执行结果
+            记录交易执行结果
           </button>
         </section>
       </div>
