@@ -164,7 +164,7 @@ export function TradeManagementTab({
 
         <section className="mt-6">
           <div className="mb-4">
-            {renderSectionHeading('管理建议')}
+            {renderSectionHeading('管理结论')}
           </div>
           
           <div className="rounded-2xl border border-indigo-500/20 bg-indigo-500/15 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.12)]">
