@@ -196,12 +196,12 @@ export function TradeManagementTab({
           ) : null}
         </section>
 
-        <section className={`${cardBaseClass} p-4`}>
-          <div className="flex items-start justify-between gap-3">
+        <section className="mt-8">
+          <div className="mb-4 flex items-start justify-between gap-3">
             {renderSectionHeading('仓位结构')}
           </div>
 
-          <div className="mt-4 grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3">
             <div className={`${metricCardClass} min-w-0`}>
               <p className={sectionLabelClass}>剩余仓位</p>
               <div className="mt-1.5 flex items-baseline gap-1 overflow-hidden">
@@ -216,8 +216,8 @@ export function TradeManagementTab({
           </div>
         </section>
 
-        <section className={`${cardBaseClass} p-4`}>
-          <div className="flex items-center justify-between gap-3">
+        <section className="mt-8">
+          <div className="mb-4 flex items-center justify-between gap-3">
             {renderSectionHeading('执行闭环')}
             <button
               type="button"
@@ -229,7 +229,7 @@ export function TradeManagementTab({
             </button>
           </div>
 
-          <div className="mt-4">
+          <div>
             <button
               type="button"
               onClick={() => setIsDetailExpanded(!isDetailExpanded)}
