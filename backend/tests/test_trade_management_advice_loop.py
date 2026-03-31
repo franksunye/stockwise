@@ -110,6 +110,15 @@ def test_failure_risk_plan_supports_reduce_33_and_partial_take_profit_copy() -> 
     assert "止盈 1/2" in partial_plan.detail
 
 
+def test_profit_protection_exit_policy_keeps_exit_semantics_in_summary() -> None:
+    snapshot = _sample_snapshot(state_id="ProfitProtection")
+
+    plan = build_action_plan(snapshot, "failure_risk_exit_all")
+
+    assert "退出" in plan.summary
+    assert "离场" in plan.detail
+
+
 def test_advice_loop_runs_with_mocked_dependencies() -> None:
     position = _sample_position()
     snapshot = _sample_snapshot()

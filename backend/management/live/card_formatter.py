@@ -45,43 +45,61 @@ def build_action_plan(snapshot: PositionState, recommended_policy: str) -> Actio
     discipline = format_price(snapshot.discipline_price)
     resistance = format_price(resolve_observation_price(snapshot))
 
+    if recommended_policy == "failure_risk_exit_all":
+        summary = "优先退出，保护已形成利润" if snapshot.state_id == "ProfitProtection" else "优先退出，避免继续硬扛"
+        detail = (
+            f"当前路径已不适合继续扛仓，下一交易日以退出为主；若有反抽，也优先借反抽离场。纪律线参考 {discipline}。"
+        )
+        return ActionPlan(
+            summary=summary,
+            detail=detail,
+            bullets=[
+                "仍弱：优先退出",
+                "有反抽：借反抽离场",
+            ],
+        )
+
+    if recommended_policy == "failure_risk_reduce_33":
+        return ActionPlan(
+            summary="先减仓三分之一，保留观察仓",
+            detail=f"当前风险已经抬升，但先不一次收得过重；先减仓 1/3，若再次转弱或失守 {discipline}，再继续退出。",
+            bullets=[
+                "先减仓 1/3",
+                f"再转弱或失守 {discipline}：继续退出",
+            ],
+        )
+
+    if recommended_policy == "failure_risk_reduce_50":
+        return ActionPlan(
+            summary="先减仓一半，保留观察仓",
+            detail=f"当前风险已经抬升，先减仓 1/2，剩余仓位继续观察；若再次转弱或失守 {discipline}，再继续退出。",
+            bullets=[
+                "先减仓 1/2",
+                f"再转弱或失守 {discipline}：继续退出",
+            ],
+        )
+
+    if recommended_policy == "partial_take_profit_50":
+        return ActionPlan(
+            summary="先兑现一半利润，剩余仓位继续观察",
+            detail=f"虽然结构已有波动，但当前更像弱修复而非彻底失真；先止盈 1/2，剩余仓位继续观察，若再次转弱或失守 {discipline}，再继续退出。",
+            bullets=[
+                "先止盈 1/2",
+                f"再转弱或失守 {discipline}：继续退出",
+            ],
+        )
+
+    if recommended_policy == "partial_take_profit_33":
+        return ActionPlan(
+            summary="先兑现三分之一利润，剩余仓位继续观察",
+            detail=f"当前波动已有抬升，但先用更轻的方式锁定部分利润；先止盈 1/3，若再次转弱或失守 {discipline}，再继续退出。",
+            bullets=[
+                "先止盈 1/3",
+                f"再转弱或失守 {discipline}：继续退出",
+            ],
+        )
+
     if snapshot.state_id == "FailureRisk":
-        if recommended_policy == "failure_risk_exit_all":
-            return ActionPlan(
-                summary="优先退出，避免继续硬扛",
-                detail=f"下一交易日如果仍然偏弱，以退出为主；若有反抽，也优先借反抽离场。纪律线参考 {discipline}。",
-                bullets=[
-                    "仍弱：优先退出",
-                    "有反抽：借反抽离场",
-                ],
-            )
-        if recommended_policy == "failure_risk_reduce_33":
-            return ActionPlan(
-                summary="先减仓三分之一，保留观察仓",
-                detail=f"当前风险已经抬升，但先不一次收得过重；先减仓 1/3，若再次转弱或失守 {discipline}，再继续退出。",
-                bullets=[
-                    "先减仓 1/3",
-                    f"再转弱或失守 {discipline}：继续退出",
-                ],
-            )
-        if recommended_policy == "partial_take_profit_50":
-            return ActionPlan(
-                summary="先兑现一半利润，剩余仓位继续观察",
-                detail=f"虽然结构已有波动，但当前更像弱修复而非彻底失真；先止盈 1/2，剩余仓位继续观察，若再次转弱或失守 {discipline}，再继续退出。",
-                bullets=[
-                    "先止盈 1/2",
-                    f"再转弱或失守 {discipline}：继续退出",
-                ],
-            )
-        if recommended_policy == "partial_take_profit_33":
-            return ActionPlan(
-                summary="先兑现三分之一利润，剩余仓位继续观察",
-                detail=f"当前波动已有抬升，但先用更轻的方式锁定部分利润；先止盈 1/3，若再次转弱或失守 {discipline}，再继续退出。",
-                bullets=[
-                    "先止盈 1/3",
-                    f"再转弱或失守 {discipline}：继续退出",
-                ],
-            )
         return ActionPlan(
             summary="先减仓一半，保留观察仓",
             detail=f"当前风险已经抬升，先减仓 1/2，剩余仓位继续观察；若再次转弱或失守 {discipline}，再继续退出。",

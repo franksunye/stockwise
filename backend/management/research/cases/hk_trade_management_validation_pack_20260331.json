@@ -1,0 +1,614 @@
+{
+  "as_of": "2026-03-31",
+  "validation_id": "hk_trade_management_path_aware_validation_v1",
+  "frozen_observation_config_version": "tm_market_routing_v5",
+  "frozen_baseline_reference": "hk_fullstack_12m_cases_20260329.json",
+  "long_windows": {
+    "12m": {
+      "sample_size": 180,
+      "date_from": "2025-03-27",
+      "date_to": "2026-03-27",
+      "benchmark_symbols": [
+        "02800"
+      ],
+      "benchmark_names": [
+        "恒生指数ETF"
+      ],
+      "baseline": {
+        "total_return": 0.004214,
+        "annualized_return": 0.004317,
+        "max_drawdown": -0.011115,
+        "annualized_volatility": 0.014256,
+        "sharpe_like": 0.309262
+      },
+      "routed": {
+        "total_return": 0.013193,
+        "annualized_return": 0.013517,
+        "max_drawdown": -0.004638,
+        "annualized_volatility": 0.009499,
+        "sharpe_like": 1.418279
+      },
+      "benchmark": {
+        "total_return": 0.028368,
+        "annualized_return": 0.02907,
+        "max_drawdown": -0.123492,
+        "annualized_volatility": 0.141101,
+        "sharpe_like": 0.273701
+      },
+      "improvement_vs_baseline": 0.00898,
+      "excess_vs_benchmark": -0.015175,
+      "baseline_excess_vs_benchmark": -0.024155
+    },
+    "24m": {
+      "sample_size": 180,
+      "date_from": "2024-03-27",
+      "date_to": "2026-03-27",
+      "benchmark_symbols": [
+        "02800"
+      ],
+      "benchmark_names": [
+        "恒生指数ETF"
+      ],
+      "baseline": {
+        "total_return": -0.001691,
+        "annualized_return": -0.000978,
+        "max_drawdown": -0.014591,
+        "annualized_volatility": 0.010547,
+        "sharpe_like": -0.087453
+      },
+      "routed": {
+        "total_return": 0.008077,
+        "annualized_return": 0.00466,
+        "max_drawdown": -0.009222,
+        "annualized_volatility": 0.00903,
+        "sharpe_like": 0.519448
+      },
+      "benchmark": {
+        "total_return": 0.090437,
+        "annualized_return": 0.051314,
+        "max_drawdown": -0.235317,
+        "annualized_volatility": 0.187738,
+        "sharpe_like": 0.36249
+      },
+      "improvement_vs_baseline": 0.009768,
+      "excess_vs_benchmark": -0.08236,
+      "baseline_excess_vs_benchmark": -0.092128
+    },
+    "36m": {
+      "sample_size": 180,
+      "date_from": "2023-03-27",
+      "date_to": "2026-03-27",
+      "benchmark_symbols": [
+        "02800"
+      ],
+      "benchmark_names": [
+        "恒生指数ETF"
+      ],
+      "baseline": {
+        "total_return": -0.009125,
+        "annualized_return": -0.005408,
+        "max_drawdown": -0.010332,
+        "annualized_volatility": 0.006411,
+        "sharpe_like": -0.842591
+      },
+      "routed": {
+        "total_return": -0.002742,
+        "annualized_return": -0.001623,
+        "max_drawdown": -0.007289,
+        "annualized_volatility": 0.004786,
+        "sharpe_like": -0.33694
+      },
+      "benchmark": {
+        "total_return": 0.090437,
+        "annualized_return": 0.05255,
+        "max_drawdown": -0.235317,
+        "annualized_volatility": 0.189927,
+        "sharpe_like": 0.366723
+      },
+      "improvement_vs_baseline": 0.006383,
+      "excess_vs_benchmark": -0.093179,
+      "baseline_excess_vs_benchmark": -0.099562
+    }
+  },
+  "rolling_6m": {
+    "window_months": 6,
+    "step_months": 1,
+    "windows": [
+      {
+        "start_date": "2023-03-27",
+        "end_date": "2023-09-26",
+        "case_count": 123,
+        "improvement_vs_baseline": 0.008043,
+        "baseline_total_return": -0.012445,
+        "routed_total_return": -0.004402,
+        "baseline_max_drawdown": -0.013433,
+        "routed_max_drawdown": -0.008903
+      },
+      {
+        "start_date": "2023-04-27",
+        "end_date": "2023-10-26",
+        "case_count": 123,
+        "improvement_vs_baseline": 0.004017,
+        "baseline_total_return": -0.008602,
+        "routed_total_return": -0.004585,
+        "baseline_max_drawdown": -0.014046,
+        "routed_max_drawdown": -0.009972
+      },
+      {
+        "start_date": "2023-05-27",
+        "end_date": "2023-11-26",
+        "case_count": 124,
+        "improvement_vs_baseline": 0.005239,
+        "baseline_total_return": -0.007581,
+        "routed_total_return": -0.002342,
+        "baseline_max_drawdown": -0.014593,
+        "routed_max_drawdown": -0.010552
+      },
+      {
+        "start_date": "2023-06-27",
+        "end_date": "2023-12-26",
+        "case_count": 120,
+        "improvement_vs_baseline": 0.002946,
+        "baseline_total_return": -0.00477,
+        "routed_total_return": -0.001824,
+        "baseline_max_drawdown": -0.005817,
+        "routed_max_drawdown": -0.004725
+      },
+      {
+        "start_date": "2023-07-27",
+        "end_date": "2024-01-26",
+        "case_count": 99,
+        "improvement_vs_baseline": 0.003105,
+        "baseline_total_return": -0.004151,
+        "routed_total_return": -0.001046,
+        "baseline_max_drawdown": -0.006927,
+        "routed_max_drawdown": -0.005221
+      },
+      {
+        "start_date": "2023-08-27",
+        "end_date": "2024-02-26",
+        "case_count": 77,
+        "improvement_vs_baseline": 0.001955,
+        "baseline_total_return": -0.00174,
+        "routed_total_return": 0.000215,
+        "baseline_max_drawdown": -0.008867,
+        "routed_max_drawdown": -0.006695
+      },
+      {
+        "start_date": "2023-09-27",
+        "end_date": "2024-03-26",
+        "case_count": 57,
+        "improvement_vs_baseline": 0.002802,
+        "baseline_total_return": -0.001961,
+        "routed_total_return": 0.000841,
+        "baseline_max_drawdown": -0.011944,
+        "routed_max_drawdown": -0.009017
+      },
+      {
+        "start_date": "2023-10-27",
+        "end_date": "2024-04-26",
+        "case_count": 37,
+        "improvement_vs_baseline": 0.004557,
+        "baseline_total_return": 0.000337,
+        "routed_total_return": 0.004895,
+        "baseline_max_drawdown": -0.018241,
+        "routed_max_drawdown": -0.013768
+      }
+    ],
+    "summary": {
+      "window_count": 8,
+      "return_improved_count": 8,
+      "drawdown_improved_count": 8,
+      "dual_improved_count": 8,
+      "return_improved_ratio": 1.0,
+      "drawdown_improved_ratio": 1.0,
+      "dual_improved_ratio": 1.0,
+      "median_improvement_vs_baseline": 0.003561
+    }
+  },
+  "subtype_policy_outcomes": {
+    "case_count": 63,
+    "summary": {
+      "persistent_false_stability": {
+        "case_count": 30,
+        "avg_realized_pnl_pct": 0.00191,
+        "median_realized_pnl_pct": -0.004935,
+        "win_rate": 0.4333,
+        "dominant_policy": "failure_risk_exit_all",
+        "dominant_policy_count": 30,
+        "policy_counts": {
+          "failure_risk_exit_all": 30
+        }
+      },
+      "persistent_failure_loop": {
+        "case_count": 6,
+        "avg_realized_pnl_pct": -0.038727,
+        "median_realized_pnl_pct": -0.039396,
+        "win_rate": 0.0,
+        "dominant_policy": "failure_risk_exit_all",
+        "dominant_policy_count": 6,
+        "policy_counts": {
+          "failure_risk_exit_all": 6
+        }
+      },
+      "repair_candidate": {
+        "case_count": 7,
+        "avg_realized_pnl_pct": -0.005038,
+        "median_realized_pnl_pct": 0.0,
+        "win_rate": 0.0,
+        "dominant_policy": "buy_and_hold_baseline",
+        "dominant_policy_count": 7,
+        "policy_counts": {
+          "buy_and_hold_baseline": 7
+        }
+      },
+      "weak_rebound": {
+        "case_count": 5,
+        "avg_realized_pnl_pct": 0.0,
+        "median_realized_pnl_pct": 0.0,
+        "win_rate": 0.0,
+        "dominant_policy": "partial_take_profit_50",
+        "dominant_policy_count": 5,
+        "policy_counts": {
+          "partial_take_profit_50": 5
+        }
+      },
+      "persistent_stress": {
+        "case_count": 6,
+        "avg_realized_pnl_pct": -0.008829,
+        "median_realized_pnl_pct": -0.002231,
+        "win_rate": 0.5,
+        "dominant_policy": "failure_risk_reduce_33",
+        "dominant_policy_count": 6,
+        "policy_counts": {
+          "failure_risk_reduce_33": 6
+        }
+      },
+      "no_confirmation_drift": {
+        "case_count": 9,
+        "avg_realized_pnl_pct": 0.004649,
+        "median_realized_pnl_pct": 0.006661,
+        "win_rate": 0.5556,
+        "dominant_policy": "failure_risk_exit_all",
+        "dominant_policy_count": 9,
+        "policy_counts": {
+          "failure_risk_exit_all": 9
+        }
+      }
+    },
+    "preview": [
+      {
+        "label": "00700_20230327",
+        "symbol": "00700",
+        "entry_date": "2023-03-27",
+        "subtype": "persistent_false_stability",
+        "chosen_policy": "failure_risk_exit_all",
+        "realized_pnl_pct": 0.039149
+      },
+      {
+        "label": "00700_20230328",
+        "symbol": "00700",
+        "entry_date": "2023-03-28",
+        "subtype": "persistent_false_stability",
+        "chosen_policy": "failure_risk_exit_all",
+        "realized_pnl_pct": -0.004349
+      },
+      {
+        "label": "00700_20230329",
+        "symbol": "00700",
+        "entry_date": "2023-03-29",
+        "subtype": "persistent_false_stability",
+        "chosen_policy": "failure_risk_exit_all",
+        "realized_pnl_pct": -0.021896
+      },
+      {
+        "label": "00700_20230330",
+        "symbol": "00700",
+        "entry_date": "2023-03-30",
+        "subtype": "persistent_false_stability",
+        "chosen_policy": "failure_risk_exit_all",
+        "realized_pnl_pct": -0.022418
+      },
+      {
+        "label": "00700_20230331",
+        "symbol": "00700",
+        "entry_date": "2023-03-31",
+        "subtype": "persistent_false_stability",
+        "chosen_policy": "failure_risk_exit_all",
+        "realized_pnl_pct": -0.024501
+      },
+      {
+        "label": "00700_20230403",
+        "symbol": "00700",
+        "entry_date": "2023-04-03",
+        "subtype": "persistent_failure_loop",
+        "chosen_policy": "failure_risk_exit_all",
+        "realized_pnl_pct": -0.030696
+      },
+      {
+        "label": "00700_20230404",
+        "symbol": "00700",
+        "entry_date": "2023-04-04",
+        "subtype": "persistent_false_stability",
+        "chosen_policy": "failure_risk_exit_all",
+        "realized_pnl_pct": -0.022418
+      },
+      {
+        "label": "00700_20230512",
+        "symbol": "00700",
+        "entry_date": "2023-05-12",
+        "subtype": "repair_candidate",
+        "chosen_policy": "buy_and_hold_baseline",
+        "realized_pnl_pct": 0.0
+      },
+      {
+        "label": "00700_20230515",
+        "symbol": "00700",
+        "entry_date": "2023-05-15",
+        "subtype": "weak_rebound",
+        "chosen_policy": "partial_take_profit_50",
+        "realized_pnl_pct": 0.0
+      },
+      {
+        "label": "00700_20230518",
+        "symbol": "00700",
+        "entry_date": "2023-05-18",
+        "subtype": "persistent_stress",
+        "chosen_policy": "failure_risk_reduce_33",
+        "realized_pnl_pct": -0.008498
+      },
+      {
+        "label": "00700_20230519",
+        "symbol": "00700",
+        "entry_date": "2023-05-19",
+        "subtype": "persistent_stress",
+        "chosen_policy": "failure_risk_reduce_33",
+        "realized_pnl_pct": 0.004919
+      },
+      {
+        "label": "00700_20230531",
+        "symbol": "00700",
+        "entry_date": "2023-05-31",
+        "subtype": "repair_candidate",
+        "chosen_policy": "buy_and_hold_baseline",
+        "realized_pnl_pct": 0.0
+      },
+      {
+        "label": "00700_20230601",
+        "symbol": "00700",
+        "entry_date": "2023-06-01",
+        "subtype": "weak_rebound",
+        "chosen_policy": "partial_take_profit_50",
+        "realized_pnl_pct": 0.0
+      },
+      {
+        "label": "00700_20230602",
+        "symbol": "00700",
+        "entry_date": "2023-06-02",
+        "subtype": "no_confirmation_drift",
+        "chosen_policy": "failure_risk_exit_all",
+        "realized_pnl_pct": 0.019001
+      },
+      {
+        "label": "00700_20230605",
+        "symbol": "00700",
+        "entry_date": "2023-06-05",
+        "subtype": "no_confirmation_drift",
+        "chosen_policy": "failure_risk_exit_all",
+        "realized_pnl_pct": 0.006661
+      },
+      {
+        "label": "00700_20230606",
+        "symbol": "00700",
+        "entry_date": "2023-06-06",
+        "subtype": "persistent_false_stability",
+        "chosen_policy": "failure_risk_exit_all",
+        "realized_pnl_pct": 0.028457
+      },
+      {
+        "label": "00700_20230607",
+        "symbol": "00700",
+        "entry_date": "2023-06-07",
+        "subtype": "persistent_false_stability",
+        "chosen_policy": "failure_risk_exit_all",
+        "realized_pnl_pct": 0.014648
+      },
+      {
+        "label": "00700_20230608",
+        "symbol": "00700",
+        "entry_date": "2023-06-08",
+        "subtype": "persistent_false_stability",
+        "chosen_policy": "failure_risk_exit_all",
+        "realized_pnl_pct": 0.017131
+      },
+      {
+        "label": "00700_20230609",
+        "symbol": "00700",
+        "entry_date": "2023-06-09",
+        "subtype": "persistent_false_stability",
+        "chosen_policy": "failure_risk_exit_all",
+        "realized_pnl_pct": 0.013411
+      },
+      {
+        "label": "00700_20230612",
+        "symbol": "00700",
+        "entry_date": "2023-06-12",
+        "subtype": "persistent_false_stability",
+        "chosen_policy": "failure_risk_exit_all",
+        "realized_pnl_pct": 0.006051
+      },
+      {
+        "label": "00700_20230613",
+        "symbol": "00700",
+        "entry_date": "2023-06-13",
+        "subtype": "persistent_false_stability",
+        "chosen_policy": "failure_risk_exit_all",
+        "realized_pnl_pct": -0.01306
+      },
+      {
+        "label": "00700_20230614",
+        "symbol": "00700",
+        "entry_date": "2023-06-14",
+        "subtype": "persistent_false_stability",
+        "chosen_policy": "failure_risk_exit_all",
+        "realized_pnl_pct": -0.015398
+      },
+      {
+        "label": "00700_20230615",
+        "symbol": "00700",
+        "entry_date": "2023-06-15",
+        "subtype": "persistent_false_stability",
+        "chosen_policy": "failure_risk_exit_all",
+        "realized_pnl_pct": -0.042063
+      },
+      {
+        "label": "00700_20230616",
+        "symbol": "00700",
+        "entry_date": "2023-06-16",
+        "subtype": "persistent_failure_loop",
+        "chosen_policy": "failure_risk_exit_all",
+        "realized_pnl_pct": -0.063644
+      },
+      {
+        "label": "00700_20230619",
+        "symbol": "00700",
+        "entry_date": "2023-06-19",
+        "subtype": "persistent_failure_loop",
+        "chosen_policy": "failure_risk_exit_all",
+        "realized_pnl_pct": -0.048096
+      },
+      {
+        "label": "00700_20230710",
+        "symbol": "00700",
+        "entry_date": "2023-07-10",
+        "subtype": "repair_candidate",
+        "chosen_policy": "buy_and_hold_baseline",
+        "realized_pnl_pct": 0.0
+      },
+      {
+        "label": "00700_20230711",
+        "symbol": "00700",
+        "entry_date": "2023-07-11",
+        "subtype": "persistent_stress",
+        "chosen_policy": "failure_risk_reduce_33",
+        "realized_pnl_pct": 0.005319
+      },
+      {
+        "label": "00700_20230712",
+        "symbol": "00700",
+        "entry_date": "2023-07-12",
+        "subtype": "persistent_false_stability",
+        "chosen_policy": "failure_risk_exit_all",
+        "realized_pnl_pct": -0.01084
+      },
+      {
+        "label": "00700_20230713",
+        "symbol": "00700",
+        "entry_date": "2023-07-13",
+        "subtype": "persistent_stress",
+        "chosen_policy": "failure_risk_reduce_33",
+        "realized_pnl_pct": -0.045822
+      },
+      {
+        "label": "00700_20230724",
+        "symbol": "00700",
+        "entry_date": "2023-07-24",
+        "subtype": "weak_rebound",
+        "chosen_policy": "partial_take_profit_50",
+        "realized_pnl_pct": 0.0
+      }
+    ]
+  },
+  "live_observation": {
+    "as_of": "2026-03-31",
+    "observation_id": "hk_live_advice_snapshot_v1",
+    "active_position_count": 2,
+    "sample_note": "Current local HK active positions are limited; this artifact is an observation snapshot, not a large-sample live verdict.",
+    "subtype_counts": {
+      "persistent_false_stability": 2
+    },
+    "policy_counts": {
+      "failure_risk_exit_all": 2
+    },
+    "state_counts": {
+      "ProfitProtection": 2
+    },
+    "action_summary_counts": {
+      "优先退出，保护已形成利润": 2
+    },
+    "summary_mismatch_count": 0,
+    "focus_review_subtypes": [
+      "persistent_failure_loop",
+      "persistent_false_stability",
+      "persistent_stress"
+    ],
+    "focus_reviews": [
+      {
+        "symbol": "02171",
+        "stock_name": "科济药业-B",
+        "state_id": "ProfitProtection",
+        "subtype": "persistent_false_stability",
+        "recommended_policy": "failure_risk_exit_all",
+        "action_summary": "优先退出，保护已形成利润",
+        "summary_mismatch": false,
+        "unrealized_pnl_pct": 0.204138,
+        "remaining_size": 3000.0,
+        "action_detail": "当前路径已不适合继续扛仓，下一交易日以退出为主；若有反抽，也优先借反抽离场。纪律线参考 14.79。",
+        "discipline_price": 14.79,
+        "observation_price": 17.74,
+        "lane_id": "baseline_3d"
+      },
+      {
+        "symbol": "02171",
+        "stock_name": "科济药业-B",
+        "state_id": "ProfitProtection",
+        "subtype": "persistent_false_stability",
+        "recommended_policy": "failure_risk_exit_all",
+        "action_summary": "优先退出，保护已形成利润",
+        "summary_mismatch": false,
+        "unrealized_pnl_pct": 0.204138,
+        "remaining_size": 3900.0,
+        "action_detail": "当前路径已不适合继续扛仓，下一交易日以退出为主；若有反抽，也优先借反抽离场。纪律线参考 14.79。",
+        "discipline_price": 14.79,
+        "observation_price": 17.74,
+        "lane_id": "baseline_3d"
+      }
+    ],
+    "preview": [
+      {
+        "symbol": "02171",
+        "stock_name": "科济药业-B",
+        "state_id": "ProfitProtection",
+        "subtype": "persistent_false_stability",
+        "recommended_policy": "failure_risk_exit_all",
+        "action_summary": "优先退出，保护已形成利润",
+        "summary_mismatch": false,
+        "unrealized_pnl_pct": 0.204138,
+        "remaining_size": 3000.0
+      },
+      {
+        "symbol": "02171",
+        "stock_name": "科济药业-B",
+        "state_id": "ProfitProtection",
+        "subtype": "persistent_false_stability",
+        "recommended_policy": "failure_risk_exit_all",
+        "action_summary": "优先退出，保护已形成利润",
+        "summary_mismatch": false,
+        "unrealized_pnl_pct": 0.204138,
+        "remaining_size": 3900.0
+      }
+    ]
+  },
+  "next_phase_gate": {
+    "long_window_positive": true,
+    "rolling_stable": true,
+    "live_review_ready": true,
+    "eligible_for_hk_v3": true,
+    "verdict": "v2_validated_continue_observation",
+    "notes": [
+      "Long-window gate requires both 24m and 36m to beat same-entry buy-and-hold while keeping better max drawdown.",
+      "Rolling gate requires majority drawdown improvement and no obvious return collapse.",
+      "Live advice still needs manual language review; this gate only confirms the observation sample exists."
+    ]
+  }
+}

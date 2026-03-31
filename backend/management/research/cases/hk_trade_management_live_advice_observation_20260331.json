@@ -1,0 +1,80 @@
+{
+  "as_of": "2026-03-31",
+  "observation_id": "hk_live_advice_snapshot_v1",
+  "active_position_count": 2,
+  "sample_note": "Current local HK active positions are limited; this artifact is an observation snapshot, not a large-sample live verdict.",
+  "subtype_counts": {
+    "persistent_false_stability": 2
+  },
+  "policy_counts": {
+    "failure_risk_exit_all": 2
+  },
+  "state_counts": {
+    "ProfitProtection": 2
+  },
+  "action_summary_counts": {
+    "优先退出，保护已形成利润": 2
+  },
+  "summary_mismatch_count": 0,
+  "focus_review_subtypes": [
+    "persistent_failure_loop",
+    "persistent_false_stability",
+    "persistent_stress"
+  ],
+  "focus_reviews": [
+    {
+      "symbol": "02171",
+      "stock_name": "科济药业-B",
+      "state_id": "ProfitProtection",
+      "subtype": "persistent_false_stability",
+      "recommended_policy": "failure_risk_exit_all",
+      "action_summary": "优先退出，保护已形成利润",
+      "summary_mismatch": false,
+      "unrealized_pnl_pct": 0.204138,
+      "remaining_size": 3000.0,
+      "action_detail": "当前路径已不适合继续扛仓，下一交易日以退出为主；若有反抽，也优先借反抽离场。纪律线参考 14.79。",
+      "discipline_price": 14.79,
+      "observation_price": 17.74,
+      "lane_id": "baseline_3d"
+    },
+    {
+      "symbol": "02171",
+      "stock_name": "科济药业-B",
+      "state_id": "ProfitProtection",
+      "subtype": "persistent_false_stability",
+      "recommended_policy": "failure_risk_exit_all",
+      "action_summary": "优先退出，保护已形成利润",
+      "summary_mismatch": false,
+      "unrealized_pnl_pct": 0.204138,
+      "remaining_size": 3900.0,
+      "action_detail": "当前路径已不适合继续扛仓，下一交易日以退出为主；若有反抽，也优先借反抽离场。纪律线参考 14.79。",
+      "discipline_price": 14.79,
+      "observation_price": 17.74,
+      "lane_id": "baseline_3d"
+    }
+  ],
+  "preview": [
+    {
+      "symbol": "02171",
+      "stock_name": "科济药业-B",
+      "state_id": "ProfitProtection",
+      "subtype": "persistent_false_stability",
+      "recommended_policy": "failure_risk_exit_all",
+      "action_summary": "优先退出，保护已形成利润",
+      "summary_mismatch": false,
+      "unrealized_pnl_pct": 0.204138,
+      "remaining_size": 3000.0
+    },
+    {
+      "symbol": "02171",
+      "stock_name": "科济药业-B",
+      "state_id": "ProfitProtection",
+      "subtype": "persistent_false_stability",
+      "recommended_policy": "failure_risk_exit_all",
+      "action_summary": "优先退出，保护已形成利润",
+      "summary_mismatch": false,
+      "unrealized_pnl_pct": 0.204138,
+      "remaining_size": 3900.0
+    }
+  ]
+}

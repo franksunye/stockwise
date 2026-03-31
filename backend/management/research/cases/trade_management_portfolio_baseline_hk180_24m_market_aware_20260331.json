@@ -1,0 +1,122 @@
+{
+  "as_of": "2026-03-31",
+  "baseline_id": "trade_management_portfolio_baseline_v1",
+  "scope": {
+    "case_file": "hk_fullstack_24m_cases_20260331.json",
+    "preset": null,
+    "capital_method": "equal_notional_per_case_with_idle_cash_before_entry",
+    "interpretation": "Portfolio-level baseline over the formal case pool. Results compare routed trade management against same-entry buy-and-hold baseline and market-matched benchmark.",
+    "routing_mode": "market_aware_v2",
+    "market_routing_configs": {
+      "CN": {
+        "market": "CN",
+        "config_version": "tm_market_routing_v2",
+        "default_lane_ids": [
+          "baseline_3d",
+          "low_risk_5d"
+        ],
+        "second_pass_activation_bucket": "score_low",
+        "second_pass_takeover_score_threshold": 8,
+        "reduce_50_threshold": 6,
+        "exit_all_threshold": 10,
+        "positioning": "risk_optimizer",
+        "rationale": "A股当前正式定位更偏风险优化器，继续保持较早接管与较低防守阈值。",
+        "low_side_subtype_policies": null
+      },
+      "HK": {
+        "market": "HK",
+        "config_version": "tm_market_routing_v5",
+        "default_lane_ids": [
+          "baseline_3d",
+          "low_risk_5d"
+        ],
+        "second_pass_activation_bucket": "score_low",
+        "second_pass_takeover_score_threshold": 10,
+        "reduce_50_threshold": 6,
+        "exit_all_threshold": 10,
+        "positioning": "trend_preserving_dual_improver",
+        "rationale": "港股 v5 在保持趋势弹性的前提下，把 persistent_risk 进一步拆成 failure_loop / stress / false_stability 三类，用更细的低侧 policy family 提升收益/回撤平衡。",
+        "low_side_subtype_policies": {
+          "repair_candidate": "buy_and_hold_baseline",
+          "weak_rebound": "partial_take_profit_50",
+          "no_confirmation_drift": "failure_risk_exit_all",
+          "persistent_failure_loop": "failure_risk_exit_all",
+          "persistent_stress": "failure_risk_reduce_33",
+          "persistent_false_stability": "failure_risk_exit_all"
+        }
+      }
+    }
+  },
+  "regions": {
+    "ALL": {
+      "sample_size": 180,
+      "date_from": "2024-03-27",
+      "date_to": "2026-03-27",
+      "benchmark_symbols": [
+        "02800"
+      ],
+      "benchmark_names": [
+        "恒生指数ETF"
+      ],
+      "baseline": {
+        "total_return": -0.001691,
+        "annualized_return": -0.000978,
+        "max_drawdown": -0.014591,
+        "annualized_volatility": 0.010547,
+        "sharpe_like": -0.087453
+      },
+      "routed": {
+        "total_return": 0.008077,
+        "annualized_return": 0.00466,
+        "max_drawdown": -0.009222,
+        "annualized_volatility": 0.00903,
+        "sharpe_like": 0.519448
+      },
+      "benchmark": {
+        "total_return": 0.090437,
+        "annualized_return": 0.051314,
+        "max_drawdown": -0.235317,
+        "annualized_volatility": 0.187738,
+        "sharpe_like": 0.36249
+      },
+      "improvement_vs_baseline": 0.009768,
+      "excess_vs_benchmark": -0.08236,
+      "baseline_excess_vs_benchmark": -0.092128
+    },
+    "HK": {
+      "sample_size": 180,
+      "date_from": "2024-03-27",
+      "date_to": "2026-03-27",
+      "benchmark_symbols": [
+        "02800"
+      ],
+      "benchmark_names": [
+        "恒生指数ETF"
+      ],
+      "baseline": {
+        "total_return": -0.001691,
+        "annualized_return": -0.000978,
+        "max_drawdown": -0.014591,
+        "annualized_volatility": 0.010547,
+        "sharpe_like": -0.087453
+      },
+      "routed": {
+        "total_return": 0.008077,
+        "annualized_return": 0.00466,
+        "max_drawdown": -0.009222,
+        "annualized_volatility": 0.00903,
+        "sharpe_like": 0.519448
+      },
+      "benchmark": {
+        "total_return": 0.090437,
+        "annualized_return": 0.051314,
+        "max_drawdown": -0.235317,
+        "annualized_volatility": 0.187738,
+        "sharpe_like": 0.36249
+      },
+      "improvement_vs_baseline": 0.009768,
+      "excess_vs_benchmark": -0.08236,
+      "baseline_excess_vs_benchmark": -0.092128
+    }
+  }
+}
