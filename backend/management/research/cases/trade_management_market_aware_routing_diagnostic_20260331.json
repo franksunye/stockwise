@@ -1,0 +1,265 @@
+{
+  "as_of": "2026-03-31",
+  "diagnostic_id": "trade_management_market_aware_routing_v1",
+  "markets": {
+    "CN": {
+      "market": "CN",
+      "sample_size": 500,
+      "legacy_reference_market": "CN",
+      "routing_config": {
+        "market": "CN",
+        "config_version": "tm_market_routing_v1",
+        "default_lane_ids": [
+          "baseline_3d",
+          "low_risk_5d"
+        ],
+        "second_pass_activation_bucket": "score_low",
+        "second_pass_takeover_score_threshold": 8,
+        "reduce_50_threshold": 6,
+        "exit_all_threshold": 10,
+        "positioning": "risk_optimizer",
+        "rationale": "A股当前正式定位更偏风险优化器，继续保持较早接管与较低防守阈值。"
+      },
+      "lane_counts_before": {
+        "baseline_3d": 470,
+        "low_risk_5d": 30
+      },
+      "lane_counts_after": {
+        "baseline_3d": 470,
+        "low_risk_5d": 30
+      },
+      "policy_counts_before": {
+        "buy_and_hold_baseline": 259,
+        "failure_risk_reduce_50": 47,
+        "failure_risk_exit_all": 194
+      },
+      "policy_counts_after": {
+        "buy_and_hold_baseline": 259,
+        "failure_risk_reduce_50": 47,
+        "failure_risk_exit_all": 194
+      },
+      "changed_case_count": 0,
+      "changed_cases_preview": []
+    },
+    "HK": {
+      "market": "HK",
+      "sample_size": 180,
+      "legacy_reference_market": "CN",
+      "routing_config": {
+        "market": "HK",
+        "config_version": "tm_market_routing_v1",
+        "default_lane_ids": [
+          "baseline_3d",
+          "low_risk_5d"
+        ],
+        "second_pass_activation_bucket": "score_low",
+        "second_pass_takeover_score_threshold": 9,
+        "reduce_50_threshold": 7,
+        "exit_all_threshold": 11,
+        "positioning": "trend_preserving_dual_improver",
+        "rationale": "港股当前更值得保留趋势弹性，第二通道接管和防守阈值都更克制。"
+      },
+      "lane_counts_before": {
+        "baseline_3d": 162,
+        "low_risk_5d": 18
+      },
+      "lane_counts_after": {
+        "baseline_3d": 165,
+        "low_risk_5d": 15
+      },
+      "policy_counts_before": {
+        "failure_risk_exit_all": 76,
+        "buy_and_hold_baseline": 83,
+        "failure_risk_reduce_50": 21
+      },
+      "policy_counts_after": {
+        "failure_risk_exit_all": 71,
+        "buy_and_hold_baseline": 93,
+        "failure_risk_reduce_50": 16
+      },
+      "changed_case_count": 15,
+      "changed_cases_preview": [
+        {
+          "label": "00001_20250520",
+          "symbol": "00001",
+          "entry_date": "2025-05-20",
+          "baseline_bucket": "score_low",
+          "legacy_final_lane": "low_risk_5d",
+          "legacy_policy": "failure_risk_reduce_50",
+          "market_final_lane": "baseline_3d",
+          "market_policy": "buy_and_hold_baseline",
+          "legacy_takeover": true,
+          "market_takeover": false
+        },
+        {
+          "label": "00001_20250527",
+          "symbol": "00001",
+          "entry_date": "2025-05-27",
+          "baseline_bucket": "score_medium",
+          "legacy_final_lane": "baseline_3d",
+          "legacy_policy": "failure_risk_reduce_50",
+          "market_final_lane": "baseline_3d",
+          "market_policy": "buy_and_hold_baseline",
+          "legacy_takeover": false,
+          "market_takeover": false
+        },
+        {
+          "label": "00001_20250728",
+          "symbol": "00001",
+          "entry_date": "2025-07-28",
+          "baseline_bucket": "score_low",
+          "legacy_final_lane": "low_risk_5d",
+          "legacy_policy": "failure_risk_exit_all",
+          "market_final_lane": "low_risk_5d",
+          "market_policy": "failure_risk_reduce_50",
+          "legacy_takeover": true,
+          "market_takeover": true
+        },
+        {
+          "label": "00001_20250730",
+          "symbol": "00001",
+          "entry_date": "2025-07-30",
+          "baseline_bucket": "score_high",
+          "legacy_final_lane": "baseline_3d",
+          "legacy_policy": "failure_risk_exit_all",
+          "market_final_lane": "baseline_3d",
+          "market_policy": "failure_risk_reduce_50",
+          "legacy_takeover": false,
+          "market_takeover": false
+        },
+        {
+          "label": "00001_20250822",
+          "symbol": "00001",
+          "entry_date": "2025-08-22",
+          "baseline_bucket": "score_medium",
+          "legacy_final_lane": "baseline_3d",
+          "legacy_policy": "failure_risk_reduce_50",
+          "market_final_lane": "baseline_3d",
+          "market_policy": "buy_and_hold_baseline",
+          "legacy_takeover": false,
+          "market_takeover": false
+        },
+        {
+          "label": "00001_20250901",
+          "symbol": "00001",
+          "entry_date": "2025-09-01",
+          "baseline_bucket": "score_medium",
+          "legacy_final_lane": "baseline_3d",
+          "legacy_policy": "failure_risk_reduce_50",
+          "market_final_lane": "baseline_3d",
+          "market_policy": "buy_and_hold_baseline",
+          "legacy_takeover": false,
+          "market_takeover": false
+        },
+        {
+          "label": "00001_20251002",
+          "symbol": "00001",
+          "entry_date": "2025-10-02",
+          "baseline_bucket": "score_high",
+          "legacy_final_lane": "baseline_3d",
+          "legacy_policy": "failure_risk_exit_all",
+          "market_final_lane": "baseline_3d",
+          "market_policy": "failure_risk_reduce_50",
+          "legacy_takeover": false,
+          "market_takeover": false
+        },
+        {
+          "label": "00001_20251003",
+          "symbol": "00001",
+          "entry_date": "2025-10-03",
+          "baseline_bucket": "score_medium",
+          "legacy_final_lane": "baseline_3d",
+          "legacy_policy": "failure_risk_reduce_50",
+          "market_final_lane": "baseline_3d",
+          "market_policy": "buy_and_hold_baseline",
+          "legacy_takeover": false,
+          "market_takeover": false
+        },
+        {
+          "label": "00001_20251006",
+          "symbol": "00001",
+          "entry_date": "2025-10-06",
+          "baseline_bucket": "score_medium",
+          "legacy_final_lane": "baseline_3d",
+          "legacy_policy": "failure_risk_reduce_50",
+          "market_final_lane": "baseline_3d",
+          "market_policy": "buy_and_hold_baseline",
+          "legacy_takeover": false,
+          "market_takeover": false
+        },
+        {
+          "label": "00001_20251016",
+          "symbol": "00001",
+          "entry_date": "2025-10-16",
+          "baseline_bucket": "score_high",
+          "legacy_final_lane": "baseline_3d",
+          "legacy_policy": "failure_risk_exit_all",
+          "market_final_lane": "baseline_3d",
+          "market_policy": "failure_risk_reduce_50",
+          "legacy_takeover": false,
+          "market_takeover": false
+        },
+        {
+          "label": "00001_20251017",
+          "symbol": "00001",
+          "entry_date": "2025-10-17",
+          "baseline_bucket": "score_low",
+          "legacy_final_lane": "low_risk_5d",
+          "legacy_policy": "failure_risk_reduce_50",
+          "market_final_lane": "baseline_3d",
+          "market_policy": "buy_and_hold_baseline",
+          "legacy_takeover": true,
+          "market_takeover": false
+        },
+        {
+          "label": "00001_20251020",
+          "symbol": "00001",
+          "entry_date": "2025-10-20",
+          "baseline_bucket": "score_medium",
+          "legacy_final_lane": "baseline_3d",
+          "legacy_policy": "failure_risk_reduce_50",
+          "market_final_lane": "baseline_3d",
+          "market_policy": "buy_and_hold_baseline",
+          "legacy_takeover": false,
+          "market_takeover": false
+        },
+        {
+          "label": "00001_20251022",
+          "symbol": "00001",
+          "entry_date": "2025-10-22",
+          "baseline_bucket": "score_medium",
+          "legacy_final_lane": "baseline_3d",
+          "legacy_policy": "failure_risk_reduce_50",
+          "market_final_lane": "baseline_3d",
+          "market_policy": "buy_and_hold_baseline",
+          "legacy_takeover": false,
+          "market_takeover": false
+        },
+        {
+          "label": "00700_20251028",
+          "symbol": "00700",
+          "entry_date": "2025-10-28",
+          "baseline_bucket": "score_low",
+          "legacy_final_lane": "low_risk_5d",
+          "legacy_policy": "failure_risk_exit_all",
+          "market_final_lane": "low_risk_5d",
+          "market_policy": "failure_risk_reduce_50",
+          "legacy_takeover": true,
+          "market_takeover": true
+        },
+        {
+          "label": "00700_20251112",
+          "symbol": "00700",
+          "entry_date": "2025-11-12",
+          "baseline_bucket": "score_low",
+          "legacy_final_lane": "low_risk_5d",
+          "legacy_policy": "failure_risk_reduce_50",
+          "market_final_lane": "baseline_3d",
+          "market_policy": "buy_and_hold_baseline",
+          "legacy_takeover": true,
+          "market_takeover": false
+        }
+      ]
+    }
+  }
+}

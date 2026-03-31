@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+from datetime import date
 import json
 import math
 import os
@@ -21,6 +22,7 @@ from backend.management.policies.base import PolicyContext
 from backend.management.policies.policy_registry import build_default_policies
 from backend.management.research.case_sets import get_case_set
 from backend.management.research.lanes import route_case_lanes
+from backend.management.research.market_routing import MARKET_ROUTING_CONFIGS, market_routing_config_to_dict
 from backend.management.state.snapshot_builder import build_position_snapshots
 
 
@@ -190,7 +192,7 @@ def _build_portfolio_metrics(cases: list[dict]) -> dict:
             continue
 
         baseline_curve = _simulate_daily_multiples(policies["buy_and_hold_baseline"], [s for s in snapshots])
-        lane_route = route_case_lanes([s for s in snapshots])
+        lane_route = route_case_lanes([s for s in snapshots], market=market)
         routed_policy_id = str(lane_route["final"]["recommended_policy"])
         routed_curve = _simulate_daily_multiples(policies[routed_policy_id], [s for s in snapshots])
         end_date = max(baseline_curve["last_date"], routed_curve["last_date"])
@@ -315,13 +317,18 @@ def main() -> int:
         grouped[markets[0]] = cases
 
     payload = {
-        "as_of": "2026-03-29",
+        "as_of": date.today().isoformat(),
         "baseline_id": "trade_management_portfolio_baseline_v1",
         "scope": {
             "case_file": Path(args.cases_file).name if args.cases_file else None,
             "preset": args.preset,
             "capital_method": "equal_notional_per_case_with_idle_cash_before_entry",
             "interpretation": "Portfolio-level baseline over the formal case pool. Results compare routed trade management against same-entry buy-and-hold baseline and market-matched benchmark.",
+            "routing_mode": "market_aware_v1",
+            "market_routing_configs": {
+                market: market_routing_config_to_dict(config)
+                for market, config in MARKET_ROUTING_CONFIGS.items()
+            },
         },
         "regions": {},
     }

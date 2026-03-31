@@ -28,6 +28,7 @@ from backend.management.simulation.engine import simulate_policy
 from backend.management.state.snapshot_builder import build_position_snapshots
 from backend.management.state.state_machine import get_state_description
 from backend.management.storage.repo import persist_run_and_results, persist_snapshots
+from backend.trading_calendar import get_market_from_symbol
 
 
 def main() -> int:
@@ -57,7 +58,7 @@ def main() -> int:
     results = [simulate_policy(policy, [s for s in snapshots]) for policy in policies]
     early_features = build_early_path_features(snapshots, lookahead_days=args.lookahead_days)
     early_risk_score = score_early_path_risk(early_features)
-    lane_route = route_case_lanes(snapshots)
+    lane_route = route_case_lanes(snapshots, market=get_market_from_symbol(args.symbol))
     by_policy = defaultdict(list)
     for result in results:
         by_policy[result.policy_id].append(result)

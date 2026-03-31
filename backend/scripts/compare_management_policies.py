@@ -404,6 +404,7 @@ def main() -> int:
 
     for case in cases:
         symbol = str(case["symbol"])
+        market = str(case.get("market") or ("HK" if len(symbol) == 5 else "CN"))
         entry_date = str(case["entry_date"])
         entry_price = float(case["entry_price"])
         position_size = float(case.get("position_size", 3000.0))
@@ -437,7 +438,7 @@ def main() -> int:
         early_risk_score = score_early_path_risk(early_features)
         early_risk_bucket = bucket_early_risk_score(early_risk_score)
         recovery_quality_score = compute_recovery_quality_score(early_features)
-        lane_route = route_case_lanes(snapshots)
+        lane_route = route_case_lanes(snapshots, market=market)
         per_case_results = []
         for policy in policies:
             result = simulate_policy(policy, [s for s in snapshots])

@@ -71,17 +71,17 @@ def test_profit_protection_card_contains_core_fields() -> None:
         recommended_policy="buy_and_hold_baseline",
     )
 
-    assert "交易管理卡 | 科济药业-B 02171" in card
+    assert "交易决策卡 | 科济药业-B 02171" in card
     assert "**持仓**: 3000股（原始 4000股） @ 14.50" in card
     assert "**最近操作**: 2026-03-27 减仓 1000股 @ 17.58" in card
-    assert "#### 判断层" in card
+    assert "#### 逻辑研判" in card
     assert "- 当前状态：已有明确浮盈，核心任务转为保护利润。" in card
     assert "- 默认动作：继续持有，不追高" in card
-    assert "#### 执行层" in card
+    assert "#### 执行方案" in card
     assert "- 默认执行方式：盘中判断优先" in card
     assert "- 备选执行方式：条件单保护" in card
     assert "- 2026-03-30 剩余仓位建议：继续持有，不追高" in card
-    assert "#### 依据层" in card
+    assert "#### 推演依据" in card
     assert "当前处在关键位确认区，默认先保留突破后的上行弹性" in card
     assert "你已先行部分止盈" in card
     assert "17.74" in card
@@ -102,7 +102,8 @@ def test_advice_loop_runs_with_mocked_dependencies() -> None:
     position = _sample_position()
     snapshot = _sample_snapshot()
 
-    with patch("backend.management.live.service.init_db"), \
+    with patch.dict(os.environ, {"WECOM_TRADE_ADVICE_STYLE": "markdown"}, clear=False), \
+         patch("backend.management.live.service.init_db"), \
          patch("backend.management.live.service.list_active_trade_positions", return_value=[position]), \
          patch("backend.management.live.service.build_position_snapshots", return_value=[snapshot]), \
          patch("backend.management.live.service.get_next_trading_day_str", return_value="2026-03-30"), \
@@ -128,11 +129,55 @@ def test_advice_loop_runs_with_mocked_dependencies() -> None:
     persist_mock.assert_called_once()
 
 
-def test_advice_loop_persists_failed_webhook_status() -> None:
+def test_advice_loop_persists_market_routing_metadata() -> None:
     position = _sample_position()
     snapshot = _sample_snapshot()
 
     with patch("backend.management.live.service.init_db"), \
+         patch("backend.management.live.service.list_active_trade_positions", return_value=[position]), \
+         patch("backend.management.live.service.build_position_snapshots", return_value=[snapshot]), \
+         patch("backend.management.live.service.get_next_trading_day_str", return_value="2026-03-30"), \
+         patch("backend.management.live.service.fetch_latest_trade_advice", return_value=None), \
+         patch(
+             "backend.management.live.service.route_case_lanes",
+             return_value={
+                 "market": "HK",
+                 "routing_config_version": "tm_market_routing_v1",
+                 "routing_config": {
+                     "market": "HK",
+                     "second_pass_takeover_score_threshold": 9,
+                     "reduce_50_threshold": 7,
+                     "exit_all_threshold": 11,
+                 },
+                 "takeover_applied": False,
+                 "takeover_score_threshold": 9,
+                 "active_lane_ids": ["baseline_3d"],
+                 "final": {
+                     "lane_id": "baseline_3d",
+                     "recommended_policy": "buy_and_hold_baseline",
+                 },
+             },
+         ), \
+         patch("backend.management.live.service.insert_trade_advice_log") as persist_mock:
+        result = run_trade_management_advice_loop(persist_log=True, notify=False)
+
+    assert result.processed_count == 1
+    assert persist_mock.call_count == 1
+    record = persist_mock.call_args.args[0]
+    assert record.source_ref == "tm_market_routing_v1:HK"
+    assert record.extra_payload["routing_market"] == "HK"
+    assert record.extra_payload["routing_config_version"] == "tm_market_routing_v1"
+    assert record.extra_payload["routing_config"]["exit_all_threshold"] == 11
+    assert record.extra_payload["takeover_score_threshold"] == 9
+    assert record.extra_payload["active_lane_ids"] == ["baseline_3d"]
+
+
+def test_advice_loop_persists_failed_webhook_status() -> None:
+    position = _sample_position()
+    snapshot = _sample_snapshot()
+
+    with patch.dict(os.environ, {"WECOM_TRADE_ADVICE_STYLE": "markdown"}, clear=False), \
+         patch("backend.management.live.service.init_db"), \
          patch("backend.management.live.service.list_active_trade_positions", return_value=[position]), \
          patch("backend.management.live.service.build_position_snapshots", return_value=[snapshot]), \
          patch("backend.management.live.service.get_next_trading_day_str", return_value="2026-03-30"), \

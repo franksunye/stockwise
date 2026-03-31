@@ -112,7 +112,7 @@ def run_trade_management_advice_loop(
                 continue
 
             latest = snapshots[-1]
-            lane_route = route_case_lanes(snapshots)
+            lane_route = route_case_lanes(snapshots, market=position.market)
             final_lane = lane_route["final"]
             next_trade_date = get_next_trading_day_str(
                 latest.trade_date,
@@ -126,6 +126,20 @@ def run_trade_management_advice_loop(
                 lane_id=str(final_lane["lane_id"]),
                 recommended_policy=str(final_lane["recommended_policy"]),
                 advice_id=build_advice_id(),
+            )
+            record.source_ref = (
+                f"{lane_route.get('routing_config_version', 'tm_market_routing_v1')}"
+                f":{lane_route.get('market', position.market)}"
+            )
+            record.extra_payload.update(
+                {
+                    "routing_market": lane_route.get("market", position.market),
+                    "routing_config_version": lane_route.get("routing_config_version"),
+                    "routing_config": lane_route.get("routing_config"),
+                    "takeover_applied": lane_route.get("takeover_applied", False),
+                    "takeover_score_threshold": lane_route.get("takeover_score_threshold"),
+                    "active_lane_ids": lane_route.get("active_lane_ids", []),
+                }
             )
             previous = fetch_latest_trade_advice(position.position_id)
             is_duplicate_sent = bool(
