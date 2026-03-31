@@ -93,11 +93,26 @@
     - `Trade Management v1` 已完成从“短窗口增益证明”到“12M 长窗口组合级基线”的升级
     - 当前更像一个已证明的风险结构优化器，而不是已经成熟的跑赢指数模型
     - 当前已完成的是“系统内正式评估（A）”，后续还必须补“交易管理独立评估（B）”
+    - `CN/HK market-aware routing` 已完成第一阶段闭环：
+      - `CN` 继续作为稳定风险优化器口径
+      - `HK` 已完成 `routing v2`，当前默认配置为：
+        - `second_pass_takeover_score_threshold = 10`
+        - `reduce_50_threshold = 6`
+        - `exit_all_threshold = 10`
+      - `HK 12M` 当前相对 baseline 仍保持收益与回撤双改善
   - 下一阶段已明确：
     - 从“12M 组合级基线”升级到“更完整的真实组合级证明”
     - 优先补资金复用 / 交易成本 / 仓位约束
     - 再做信号发现 + 交易管理的整机联动回测
     - 最终形成用户可读的完整模型表现页
+  - 交易管理后续接力项已明确：
+    - `HK vNext` 不再优先继续做阈值微调
+    - 下一棒应转向：
+      - `HK low-side subtyping`
+      - `HK mid-risk policy design`
+    - 成功标准：
+      - 在不恶化回撤的前提下，继续提升 `HK routed return`
+      - 并维持 `CN+HK` 合并视角不退化
   - 外部对照组也已明确，后续正式比较应固定至少四层：
     - `buy-and-hold baseline`
     - `LEAN 因子策略基线`

@@ -13,6 +13,7 @@ def build_default_policies():
         PartialTakeProfitPolicy(policy_id="partial_take_profit_33", take_ratio=1.0 / 3.0),
         PartialTakeProfitPolicy(policy_id="partial_take_profit_50", take_ratio=0.5),
         FixedDisciplineExitPolicy(),
+        FailureRiskReducePolicy(policy_id="failure_risk_reduce_33", reduce_ratio=1.0 / 3.0),
         FailureRiskReducePolicy(),
         FailureRiskExitPolicy(),
     ]

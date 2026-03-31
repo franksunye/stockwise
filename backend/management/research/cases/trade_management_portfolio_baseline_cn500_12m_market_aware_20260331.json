@@ -6,7 +6,7 @@
     "preset": null,
     "capital_method": "equal_notional_per_case_with_idle_cash_before_entry",
     "interpretation": "Portfolio-level baseline over the formal case pool. Results compare routed trade management against same-entry buy-and-hold baseline and market-matched benchmark.",
-    "routing_mode": "market_aware_v1",
+    "routing_mode": "market_aware_v2",
     "market_routing_configs": {
       "CN": {
         "market": "CN",
@@ -20,7 +20,8 @@
         "reduce_50_threshold": 6,
         "exit_all_threshold": 10,
         "positioning": "risk_optimizer",
-        "rationale": "A股当前正式定位更偏风险优化器，继续保持较早接管与较低防守阈值。"
+        "rationale": "A股当前正式定位更偏风险优化器，继续保持较早接管与较低防守阈值。",
+        "low_side_subtype_policies": null
       },
       "HK": {
         "market": "HK",
@@ -34,7 +35,13 @@
         "reduce_50_threshold": 6,
         "exit_all_threshold": 10,
         "positioning": "trend_preserving_dual_improver",
-        "rationale": "港股 v2 默认继续保留趋势弹性，但放宽 second-pass 接管，同时允许更早做 50% 风险收缩，以换取更好的收益/回撤平衡。"
+        "rationale": "港股 v2 默认继续保留趋势弹性，但放宽 second-pass 接管，同时允许更早做 50% 风险收缩，以换取更好的收益/回撤平衡。",
+        "low_side_subtype_policies": {
+          "repair_candidate": "buy_and_hold_baseline",
+          "weak_rebound": "partial_take_profit_50",
+          "no_confirmation_drift": "failure_risk_reduce_50",
+          "persistent_risk": "failure_risk_reduce_33"
+        }
       }
     }
   },

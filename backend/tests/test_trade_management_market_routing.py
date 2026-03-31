@@ -5,6 +5,7 @@ from unittest.mock import patch
 from backend.management.domain.position_state import PositionState
 from backend.management.research.lanes import route_case_lanes
 from backend.management.research.market_routing import build_market_routing_config
+from backend.management.research.path_classifier import classify_low_side_subtype
 
 
 def _high_risk_snapshots() -> list[PositionState]:
@@ -108,6 +109,12 @@ def test_hk_second_pass_requires_higher_takeover_score_than_cn() -> None:
         "early_risk_bucket": "score_low",
         "early_risk_score": 5,
         "recommended_policy": "buy_and_hold_baseline",
+        "features": {
+            "risk_days": 2,
+            "riskoff_days": 2,
+            "breakout_days": 0,
+            "triggered_days": 0,
+        },
     }
     second_pass = {
         "lane_id": "low_risk_5d",
@@ -132,6 +139,7 @@ def test_hk_second_pass_requires_higher_takeover_score_than_cn() -> None:
     assert cn_route["final"]["lane_id"] == "low_risk_5d"
     assert hk_route["takeover_applied"] is False
     assert hk_route["final"]["lane_id"] == "baseline_3d"
+    assert hk_route["final"]["recommended_policy"] == "failure_risk_reduce_33"
 
 
 def test_explicit_routing_config_override_is_honored() -> None:
@@ -147,3 +155,29 @@ def test_explicit_routing_config_override_is_honored() -> None:
 
     assert route["routing_config_version"] == "tm_hk_custom_test"
     assert route["final"]["recommended_policy"] == "failure_risk_exit_all"
+
+
+def test_low_side_subtype_classifier_marks_persistent_risk() -> None:
+    baseline = {
+        "lane_id": "baseline_3d",
+        "early_risk_bucket": "score_low",
+        "early_risk_score": 5,
+        "recommended_policy": "buy_and_hold_baseline",
+        "features": {
+            "risk_days": 2,
+            "riskoff_days": 2,
+            "breakout_days": 0,
+            "triggered_days": 0,
+        },
+    }
+
+    with patch(
+        "backend.management.research.lanes.evaluate_lane",
+        return_value=baseline,
+    ):
+        route = route_case_lanes(_high_risk_snapshots(), market="HK")
+
+    assert classify_low_side_subtype(route["baseline"]["features"]) == "persistent_risk"
+    assert route["low_side_subtype"] == "persistent_risk"
+    assert route["subtype_policy_override"] == "failure_risk_reduce_33"
+    assert route["final"]["recommended_policy"] == "failure_risk_reduce_33"

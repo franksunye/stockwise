@@ -1,0 +1,315 @@
+{
+  "as_of": "2026-03-31",
+  "diagnostic_id": "hk_low_side_subtyping_v1",
+  "cases_file": "hk_fullstack_12m_cases_20260329.json",
+  "score_low_case_count": 101,
+  "subtype_counts": {
+    "repair_candidate": 16,
+    "weak_rebound": 3,
+    "persistent_risk": 79,
+    "no_confirmation_drift": 3
+  },
+  "subtype_best_policy_counts": {
+    "repair_candidate": {
+      "buy_and_hold_baseline": 7,
+      "partial_take_profit_50": 2,
+      "failure_risk_exit_all": 2,
+      "failure_risk_reduce_33": 5
+    },
+    "weak_rebound": {
+      "partial_take_profit_50": 2,
+      "buy_and_hold_baseline": 1
+    },
+    "persistent_risk": {
+      "failure_risk_reduce_33": 32,
+      "failure_risk_reduce_50": 15,
+      "partial_take_profit_50": 2,
+      "failure_risk_exit_all": 23,
+      "buy_and_hold_baseline": 7
+    },
+    "no_confirmation_drift": {
+      "failure_risk_reduce_33": 2,
+      "failure_risk_exit_all": 1
+    }
+  },
+  "subtype_avg_policy_returns": {
+    "repair_candidate": {
+      "buy_and_hold_baseline": 0.055238,
+      "partial_take_profit_33": 0.054666,
+      "partial_take_profit_50": 0.05438,
+      "discipline_exit_only": 0.055238,
+      "failure_risk_reduce_33": 0.003962,
+      "failure_risk_reduce_50": 0.002971,
+      "failure_risk_exit_all": 0.0
+    },
+    "weak_rebound": {
+      "buy_and_hold_baseline": 0.075737,
+      "partial_take_profit_33": 0.082687,
+      "partial_take_profit_50": 0.086162,
+      "discipline_exit_only": 0.075737,
+      "failure_risk_reduce_33": 0.056432,
+      "failure_risk_reduce_50": 0.042324,
+      "failure_risk_exit_all": 0.0
+    },
+    "persistent_risk": {
+      "buy_and_hold_baseline": 0.002387,
+      "partial_take_profit_33": 0.00292,
+      "partial_take_profit_50": 0.003186,
+      "discipline_exit_only": 0.002387,
+      "failure_risk_reduce_33": 0.014017,
+      "failure_risk_reduce_50": 0.014113,
+      "failure_risk_exit_all": 0.014403
+    },
+    "no_confirmation_drift": {
+      "buy_and_hold_baseline": -0.006776,
+      "partial_take_profit_33": -0.006776,
+      "partial_take_profit_50": -0.006776,
+      "discipline_exit_only": -0.006776,
+      "failure_risk_reduce_33": 0.003768,
+      "failure_risk_reduce_50": 0.003758,
+      "failure_risk_exit_all": 0.003729
+    }
+  },
+  "preview_cases": [
+    {
+      "label": "00700_20250331",
+      "symbol": "00700",
+      "entry_date": "2025-03-31",
+      "score_low_subtype": "repair_candidate",
+      "best_policy": "buy_and_hold_baseline",
+      "best_return_pct": 0.011574
+    },
+    {
+      "label": "00700_20250407",
+      "symbol": "00700",
+      "entry_date": "2025-04-07",
+      "score_low_subtype": "repair_candidate",
+      "best_policy": "buy_and_hold_baseline",
+      "best_return_pct": 0.156185
+    },
+    {
+      "label": "00700_20250408",
+      "symbol": "00700",
+      "entry_date": "2025-04-08",
+      "score_low_subtype": "repair_candidate",
+      "best_policy": "buy_and_hold_baseline",
+      "best_return_pct": 0.142923
+    },
+    {
+      "label": "00700_20250409",
+      "symbol": "00700",
+      "entry_date": "2025-04-09",
+      "score_low_subtype": "repair_candidate",
+      "best_policy": "buy_and_hold_baseline",
+      "best_return_pct": 0.140829
+    },
+    {
+      "label": "00700_20250410",
+      "symbol": "00700",
+      "entry_date": "2025-04-10",
+      "score_low_subtype": "repair_candidate",
+      "best_policy": "buy_and_hold_baseline",
+      "best_return_pct": 0.131501
+    },
+    {
+      "label": "00700_20250411",
+      "symbol": "00700",
+      "entry_date": "2025-04-11",
+      "score_low_subtype": "repair_candidate",
+      "best_policy": "buy_and_hold_baseline",
+      "best_return_pct": 0.135111
+    },
+    {
+      "label": "00700_20250415",
+      "symbol": "00700",
+      "entry_date": "2025-04-15",
+      "score_low_subtype": "repair_candidate",
+      "best_policy": "partial_take_profit_50",
+      "best_return_pct": 0.119823
+    },
+    {
+      "label": "00700_20250416",
+      "symbol": "00700",
+      "entry_date": "2025-04-16",
+      "score_low_subtype": "weak_rebound",
+      "best_policy": "partial_take_profit_50",
+      "best_return_pct": 0.140023
+    },
+    {
+      "label": "00700_20250417",
+      "symbol": "00700",
+      "entry_date": "2025-04-17",
+      "score_low_subtype": "persistent_risk",
+      "best_policy": "failure_risk_reduce_33",
+      "best_return_pct": 0.127527
+    },
+    {
+      "label": "00700_20250422",
+      "symbol": "00700",
+      "entry_date": "2025-04-22",
+      "score_low_subtype": "persistent_risk",
+      "best_policy": "failure_risk_reduce_33",
+      "best_return_pct": 0.121591
+    },
+    {
+      "label": "00700_20250423",
+      "symbol": "00700",
+      "entry_date": "2025-04-23",
+      "score_low_subtype": "persistent_risk",
+      "best_policy": "failure_risk_reduce_33",
+      "best_return_pct": 0.088638
+    },
+    {
+      "label": "00700_20250424",
+      "symbol": "00700",
+      "entry_date": "2025-04-24",
+      "score_low_subtype": "persistent_risk",
+      "best_policy": "failure_risk_reduce_33",
+      "best_return_pct": 0.096106
+    },
+    {
+      "label": "00700_20250425",
+      "symbol": "00700",
+      "entry_date": "2025-04-25",
+      "score_low_subtype": "persistent_risk",
+      "best_policy": "failure_risk_reduce_33",
+      "best_return_pct": 0.079445
+    },
+    {
+      "label": "00001_20250428",
+      "symbol": "00001",
+      "entry_date": "2025-04-28",
+      "score_low_subtype": "persistent_risk",
+      "best_policy": "failure_risk_reduce_50",
+      "best_return_pct": 0.051496
+    },
+    {
+      "label": "00001_20250429",
+      "symbol": "00001",
+      "entry_date": "2025-04-29",
+      "score_low_subtype": "persistent_risk",
+      "best_policy": "failure_risk_reduce_50",
+      "best_return_pct": 0.041282
+    },
+    {
+      "label": "00001_20250430",
+      "symbol": "00001",
+      "entry_date": "2025-04-30",
+      "score_low_subtype": "persistent_risk",
+      "best_policy": "failure_risk_reduce_50",
+      "best_return_pct": 0.031265
+    },
+    {
+      "label": "00001_20250502",
+      "symbol": "00001",
+      "entry_date": "2025-05-02",
+      "score_low_subtype": "persistent_risk",
+      "best_policy": "failure_risk_reduce_50",
+      "best_return_pct": 0.031265
+    },
+    {
+      "label": "00001_20250506",
+      "symbol": "00001",
+      "entry_date": "2025-05-06",
+      "score_low_subtype": "persistent_risk",
+      "best_policy": "failure_risk_reduce_50",
+      "best_return_pct": 0.027558
+    },
+    {
+      "label": "00001_20250507",
+      "symbol": "00001",
+      "entry_date": "2025-05-07",
+      "score_low_subtype": "persistent_risk",
+      "best_policy": "failure_risk_reduce_50",
+      "best_return_pct": 0.011798
+    },
+    {
+      "label": "00001_20250508",
+      "symbol": "00001",
+      "entry_date": "2025-05-08",
+      "score_low_subtype": "persistent_risk",
+      "best_policy": "failure_risk_reduce_50",
+      "best_return_pct": 0.022657
+    },
+    {
+      "label": "00001_20250509",
+      "symbol": "00001",
+      "entry_date": "2025-05-09",
+      "score_low_subtype": "persistent_risk",
+      "best_policy": "failure_risk_reduce_50",
+      "best_return_pct": 0.011798
+    },
+    {
+      "label": "00001_20250512",
+      "symbol": "00001",
+      "entry_date": "2025-05-12",
+      "score_low_subtype": "persistent_risk",
+      "best_policy": "failure_risk_reduce_50",
+      "best_return_pct": -0.002327
+    },
+    {
+      "label": "00001_20250513",
+      "symbol": "00001",
+      "entry_date": "2025-05-13",
+      "score_low_subtype": "persistent_risk",
+      "best_policy": "failure_risk_reduce_50",
+      "best_return_pct": 0.007046
+    },
+    {
+      "label": "00001_20250514",
+      "symbol": "00001",
+      "entry_date": "2025-05-14",
+      "score_low_subtype": "persistent_risk",
+      "best_policy": "failure_risk_reduce_50",
+      "best_return_pct": -0.005796
+    },
+    {
+      "label": "00001_20250515",
+      "symbol": "00001",
+      "entry_date": "2025-05-15",
+      "score_low_subtype": "persistent_risk",
+      "best_policy": "failure_risk_reduce_50",
+      "best_return_pct": -0.009242
+    },
+    {
+      "label": "00001_20250516",
+      "symbol": "00001",
+      "entry_date": "2025-05-16",
+      "score_low_subtype": "persistent_risk",
+      "best_policy": "failure_risk_reduce_50",
+      "best_return_pct": -0.003486
+    },
+    {
+      "label": "00001_20250519",
+      "symbol": "00001",
+      "entry_date": "2025-05-19",
+      "score_low_subtype": "persistent_risk",
+      "best_policy": "failure_risk_reduce_50",
+      "best_return_pct": -0.004643
+    },
+    {
+      "label": "00001_20250520",
+      "symbol": "00001",
+      "entry_date": "2025-05-20",
+      "score_low_subtype": "persistent_risk",
+      "best_policy": "failure_risk_reduce_50",
+      "best_return_pct": -0.010385
+    },
+    {
+      "label": "00001_20250528",
+      "symbol": "00001",
+      "entry_date": "2025-05-28",
+      "score_low_subtype": "repair_candidate",
+      "best_policy": "partial_take_profit_50",
+      "best_return_pct": 0.118464
+    },
+    {
+      "label": "00001_20250529",
+      "symbol": "00001",
+      "entry_date": "2025-05-29",
+      "score_low_subtype": "weak_rebound",
+      "best_policy": "partial_take_profit_50",
+      "best_return_pct": 0.118464
+    }
+  ]
+}

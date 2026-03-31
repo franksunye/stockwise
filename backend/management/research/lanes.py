@@ -12,6 +12,7 @@ from backend.management.research.path_classifier import (
     build_early_path_features,
     bucket_early_risk_score,
     classify_early_path_risk,
+    classify_low_side_subtype,
     compute_recovery_quality_score,
     recommend_policy_for_thresholds,
     score_early_path_risk,
@@ -150,6 +151,22 @@ def route_case_lanes(
             final = second_pass
             takeover_applied = True
 
+    low_side_subtype = None
+    subtype_policy_override = None
+    if (
+        resolved_market == "HK"
+        and str(baseline["early_risk_bucket"]) == "score_low"
+        and config.low_side_subtype_policies
+        and isinstance(baseline.get("features"), dict)
+    ):
+        low_side_subtype = classify_low_side_subtype(dict(baseline["features"]))
+        subtype_policy_override = config.low_side_subtype_policies.get(low_side_subtype)
+        if subtype_policy_override:
+            final = {
+                **final,
+                "recommended_policy": subtype_policy_override,
+            }
+
     return {
         "market": resolved_market,
         "routing_config_version": config.config_version,
@@ -160,4 +177,6 @@ def route_case_lanes(
         "final": final,
         "takeover_applied": takeover_applied,
         "takeover_score_threshold": config.second_pass_takeover_score_threshold,
+        "low_side_subtype": low_side_subtype,
+        "subtype_policy_override": subtype_policy_override,
     }

@@ -14,6 +14,7 @@ class TradeManagementMarketRoutingConfig:
     exit_all_threshold: int
     positioning: str
     rationale: str
+    low_side_subtype_policies: dict[str, str] | None = None
 
 
 MARKET_ROUTING_CONFIGS: dict[str, TradeManagementMarketRoutingConfig] = {
@@ -27,6 +28,7 @@ MARKET_ROUTING_CONFIGS: dict[str, TradeManagementMarketRoutingConfig] = {
         exit_all_threshold=10,
         positioning="risk_optimizer",
         rationale="A股当前正式定位更偏风险优化器，继续保持较早接管与较低防守阈值。",
+        low_side_subtype_policies=None,
     ),
     "HK": TradeManagementMarketRoutingConfig(
         market="HK",
@@ -38,6 +40,12 @@ MARKET_ROUTING_CONFIGS: dict[str, TradeManagementMarketRoutingConfig] = {
         exit_all_threshold=10,
         positioning="trend_preserving_dual_improver",
         rationale="港股 v2 默认继续保留趋势弹性，但放宽 second-pass 接管，同时允许更早做 50% 风险收缩，以换取更好的收益/回撤平衡。",
+        low_side_subtype_policies={
+            "repair_candidate": "buy_and_hold_baseline",
+            "weak_rebound": "partial_take_profit_50",
+            "no_confirmation_drift": "failure_risk_reduce_50",
+            "persistent_risk": "failure_risk_reduce_33",
+        },
     ),
 }
 
@@ -61,6 +69,7 @@ def build_market_routing_config(
     exit_all_threshold: int | None = None,
     positioning: str | None = None,
     rationale: str | None = None,
+    low_side_subtype_policies: dict[str, str] | None = None,
 ) -> TradeManagementMarketRoutingConfig:
     base = get_market_routing_config(market)
     return replace(
@@ -79,6 +88,11 @@ def build_market_routing_config(
         ),
         positioning=positioning or base.positioning,
         rationale=rationale or base.rationale,
+        low_side_subtype_policies=(
+            low_side_subtype_policies
+            if low_side_subtype_policies is not None
+            else base.low_side_subtype_policies
+        ),
     )
 
 

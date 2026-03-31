@@ -421,3 +421,26 @@ def recommend_policy_for_thresholds(score: int, exit_all_threshold: int, reduce_
     if score >= reduce_threshold:
         return "failure_risk_reduce_50"
     return "buy_and_hold_baseline"
+
+
+def classify_low_side_subtype(features: Dict[str, Any]) -> str:
+    if not features:
+        return "unknown_low_side"
+
+    if int(features.get("no_confirmation_entry_drift_candidate", 0)) >= 1:
+        return "no_confirmation_drift"
+
+    if (
+        int(features.get("contained_rebuild_candidate", 0)) >= 1
+        or int(features.get("shallow_risk_repair_candidate", 0)) >= 1
+        or int(features.get("risk_rebound_recovery", 0)) >= 1
+    ):
+        return "repair_candidate"
+
+    if (
+        int(features.get("weak_recovery_without_signal", 0)) >= 1
+        or int(features.get("persistent_risk_but_positive_pnl_candidate", 0)) >= 1
+    ):
+        return "weak_rebound"
+
+    return "persistent_risk"

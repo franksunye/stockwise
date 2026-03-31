@@ -111,7 +111,7 @@ def main() -> int:
 
     payload = {
         "as_of": date.today().isoformat(),
-        "diagnostic_id": "trade_management_market_aware_routing_v1",
+        "diagnostic_id": "trade_management_market_aware_routing_v2",
         "markets": {
             "CN": _summarize_market(_load_cases(args.cn_cases_file), "CN"),
             "HK": _summarize_market(_load_cases(args.hk_cases_file), "HK"),

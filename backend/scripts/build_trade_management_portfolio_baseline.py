@@ -335,7 +335,7 @@ def main() -> int:
             "preset": args.preset,
             "capital_method": "equal_notional_per_case_with_idle_cash_before_entry",
             "interpretation": "Portfolio-level baseline over the formal case pool. Results compare routed trade management against same-entry buy-and-hold baseline and market-matched benchmark.",
-            "routing_mode": "market_aware_v1",
+            "routing_mode": "market_aware_v2",
             "market_routing_configs": {
                 market: market_routing_config_to_dict(config)
                 for market, config in MARKET_ROUTING_CONFIGS.items()

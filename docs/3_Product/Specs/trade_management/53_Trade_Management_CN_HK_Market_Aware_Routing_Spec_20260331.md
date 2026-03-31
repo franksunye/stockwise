@@ -203,3 +203,23 @@ markets.HK:
 交易管理下一步最值得做的，不是继续扩前台，也不是急着拆成两套系统。
 
 **正确下一步是：在统一状态机之上，把 CN/HK 的差异正式沉淀到 market-aware routing 层，并用研究与 live advice loop 一起完成闭环。**
+
+---
+
+## 11. Current Status / Next
+
+当前已完成：
+
+1. `market-aware routing` 已落地到 live runner
+2. `CN` 当前保持稳定控制组定位
+3. `HK routing v2` 已完成，并成为当前默认配置
+
+后续候选工作项：
+
+1. `HK low-side subtyping`
+2. `HK mid-risk policy design`
+
+后续成功标准：
+
+1. 在不恶化 `HK` 回撤的前提下，继续提升 `HK routed return`
+2. 不破坏 `CN+HK` 合并视角下的风险收益表现

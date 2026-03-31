@@ -55,6 +55,15 @@ def build_action_plan(snapshot: PositionState, recommended_policy: str) -> Actio
                     "有反抽：借反抽离场",
                 ],
             )
+        if recommended_policy == "failure_risk_reduce_33":
+            return ActionPlan(
+                summary="先减仓三分之一，保留观察仓",
+                detail=f"当前风险已经抬升，但先不一次收得过重；先减仓 1/3，若再次转弱或失守 {discipline}，再继续退出。",
+                bullets=[
+                    "先减仓 1/3",
+                    f"再转弱或失守 {discipline}：继续退出",
+                ],
+            )
         return ActionPlan(
             summary="先减仓一半，保留观察仓",
             detail=f"当前风险已经抬升，先减仓 1/2，剩余仓位继续观察；若再次转弱或失守 {discipline}，再继续退出。",
