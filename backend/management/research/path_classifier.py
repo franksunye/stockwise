@@ -427,6 +427,12 @@ def classify_low_side_subtype(features: Dict[str, Any]) -> str:
     if not features:
         return "unknown_low_side"
 
+    support_breach_days = int(features.get("support_breach_days", 0))
+    positive_pnl_days = int(features.get("positive_pnl_days", 0))
+    risk_days = int(features.get("risk_days", 0))
+    min_pnl_pct = float(features.get("min_pnl_pct", 0.0))
+    end_pnl_pct = float(features.get("end_pnl_pct", 0.0))
+
     if int(features.get("no_confirmation_entry_drift_candidate", 0)) >= 1:
         return "no_confirmation_drift"
 
@@ -443,4 +449,10 @@ def classify_low_side_subtype(features: Dict[str, Any]) -> str:
     ):
         return "weak_rebound"
 
-    return "persistent_risk"
+    if positive_pnl_days == 0 and end_pnl_pct < 0:
+        return "persistent_failure_loop"
+
+    if support_breach_days >= 1 or min_pnl_pct <= -0.06 or (risk_days >= 3 and end_pnl_pct <= -0.04):
+        return "persistent_stress"
+
+    return "persistent_false_stability"

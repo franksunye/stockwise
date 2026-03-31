@@ -114,6 +114,9 @@ def test_hk_second_pass_requires_higher_takeover_score_than_cn() -> None:
             "riskoff_days": 2,
             "breakout_days": 0,
             "triggered_days": 0,
+            "positive_pnl_days": 0,
+            "end_pnl_pct": -0.01,
+            "support_breach_days": 0,
         },
     }
     second_pass = {
@@ -139,7 +142,7 @@ def test_hk_second_pass_requires_higher_takeover_score_than_cn() -> None:
     assert cn_route["final"]["lane_id"] == "low_risk_5d"
     assert hk_route["takeover_applied"] is False
     assert hk_route["final"]["lane_id"] == "baseline_3d"
-    assert hk_route["final"]["recommended_policy"] == "failure_risk_reduce_33"
+    assert hk_route["final"]["recommended_policy"] == "failure_risk_exit_all"
 
 
 def test_explicit_routing_config_override_is_honored() -> None:
@@ -157,7 +160,7 @@ def test_explicit_routing_config_override_is_honored() -> None:
     assert route["final"]["recommended_policy"] == "failure_risk_exit_all"
 
 
-def test_low_side_subtype_classifier_marks_persistent_risk() -> None:
+def test_low_side_subtype_classifier_marks_persistent_failure_loop() -> None:
     baseline = {
         "lane_id": "baseline_3d",
         "early_risk_bucket": "score_low",
@@ -168,6 +171,9 @@ def test_low_side_subtype_classifier_marks_persistent_risk() -> None:
             "riskoff_days": 2,
             "breakout_days": 0,
             "triggered_days": 0,
+            "positive_pnl_days": 0,
+            "end_pnl_pct": -0.01,
+            "support_breach_days": 0,
         },
     }
 
@@ -177,7 +183,37 @@ def test_low_side_subtype_classifier_marks_persistent_risk() -> None:
     ):
         route = route_case_lanes(_high_risk_snapshots(), market="HK")
 
-    assert classify_low_side_subtype(route["baseline"]["features"]) == "persistent_risk"
-    assert route["low_side_subtype"] == "persistent_risk"
-    assert route["subtype_policy_override"] == "failure_risk_reduce_33"
-    assert route["final"]["recommended_policy"] == "failure_risk_reduce_33"
+    assert classify_low_side_subtype(route["baseline"]["features"]) == "persistent_failure_loop"
+    assert route["low_side_subtype"] == "persistent_failure_loop"
+    assert route["subtype_policy_override"] == "failure_risk_exit_all"
+    assert route["final"]["recommended_policy"] == "failure_risk_exit_all"
+
+
+def test_low_side_subtype_classifier_marks_persistent_stress() -> None:
+    features = {
+        "risk_days": 3,
+        "riskoff_days": 3,
+        "breakout_days": 0,
+        "triggered_days": 0,
+        "support_breach_days": 1,
+        "positive_pnl_days": 1,
+        "min_pnl_pct": -0.08,
+        "end_pnl_pct": -0.05,
+    }
+
+    assert classify_low_side_subtype(features) == "persistent_stress"
+
+
+def test_low_side_subtype_classifier_marks_persistent_false_stability() -> None:
+    features = {
+        "risk_days": 2,
+        "riskoff_days": 2,
+        "breakout_days": 0,
+        "triggered_days": 0,
+        "support_breach_days": 0,
+        "positive_pnl_days": 1,
+        "min_pnl_pct": -0.03,
+        "end_pnl_pct": 0.01,
+    }
+
+    assert classify_low_side_subtype(features) == "persistent_false_stability"

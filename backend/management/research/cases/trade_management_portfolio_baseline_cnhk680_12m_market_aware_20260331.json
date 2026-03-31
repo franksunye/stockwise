@@ -25,7 +25,7 @@
       },
       "HK": {
         "market": "HK",
-        "config_version": "tm_market_routing_v2",
+        "config_version": "tm_market_routing_v5",
         "default_lane_ids": [
           "baseline_3d",
           "low_risk_5d"
@@ -35,12 +35,14 @@
         "reduce_50_threshold": 6,
         "exit_all_threshold": 10,
         "positioning": "trend_preserving_dual_improver",
-        "rationale": "港股 v2 默认继续保留趋势弹性，但放宽 second-pass 接管，同时允许更早做 50% 风险收缩，以换取更好的收益/回撤平衡。",
+        "rationale": "港股 v5 在保持趋势弹性的前提下，把 persistent_risk 进一步拆成 failure_loop / stress / false_stability 三类，用更细的低侧 policy family 提升收益/回撤平衡。",
         "low_side_subtype_policies": {
           "repair_candidate": "buy_and_hold_baseline",
           "weak_rebound": "partial_take_profit_50",
-          "no_confirmation_drift": "failure_risk_reduce_50",
-          "persistent_risk": "failure_risk_reduce_33"
+          "no_confirmation_drift": "failure_risk_exit_all",
+          "persistent_failure_loop": "failure_risk_exit_all",
+          "persistent_stress": "failure_risk_reduce_33",
+          "persistent_false_stability": "failure_risk_exit_all"
         }
       }
     }
@@ -66,11 +68,11 @@
         "sharpe_like": 1.132757
       },
       "routed": {
-        "total_return": 0.042937,
-        "annualized_return": 0.042937,
-        "max_drawdown": -0.045201,
-        "annualized_volatility": 0.036117,
-        "sharpe_like": 1.182192
+        "total_return": 0.04308,
+        "annualized_return": 0.04308,
+        "max_drawdown": -0.045195,
+        "annualized_volatility": 0.036122,
+        "sharpe_like": 1.185829
       },
       "benchmark": {
         "total_return": 0.055085,
@@ -79,8 +81,8 @@
         "annualized_volatility": 0.09358,
         "sharpe_like": 0.620029
       },
-      "improvement_vs_baseline": -0.004935,
-      "excess_vs_benchmark": -0.012148,
+      "improvement_vs_baseline": -0.004793,
+      "excess_vs_benchmark": -0.012005,
       "baseline_excess_vs_benchmark": -0.007212
     },
     "CN": {
@@ -136,11 +138,11 @@
         "sharpe_like": 0.309262
       },
       "routed": {
-        "total_return": 0.012656,
-        "annualized_return": 0.012967,
-        "max_drawdown": -0.00571,
-        "annualized_volatility": 0.0099,
-        "sharpe_like": 1.306268
+        "total_return": 0.013193,
+        "annualized_return": 0.013517,
+        "max_drawdown": -0.004638,
+        "annualized_volatility": 0.009499,
+        "sharpe_like": 1.418279
       },
       "benchmark": {
         "total_return": 0.028368,
@@ -149,8 +151,8 @@
         "annualized_volatility": 0.141101,
         "sharpe_like": 0.273701
       },
-      "improvement_vs_baseline": 0.008442,
-      "excess_vs_benchmark": -0.015712,
+      "improvement_vs_baseline": 0.00898,
+      "excess_vs_benchmark": -0.015175,
       "baseline_excess_vs_benchmark": -0.024155
     }
   }
