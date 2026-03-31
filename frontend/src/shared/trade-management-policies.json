@@ -1,0 +1,44 @@
+[
+  {
+    "id": "buy_and_hold_baseline",
+    "label_zh": "继续持有",
+    "description_zh": "优先保护已形成利润，等待下一个观察确认周期。",
+    "sort_order": 10
+  },
+  {
+    "id": "partial_take_profit_33",
+    "label_zh": "先止盈三分之一",
+    "description_zh": "当前更适合先兑现三分之一利润，保留剩余仓位继续确认后续结构。",
+    "sort_order": 20
+  },
+  {
+    "id": "partial_take_profit_50",
+    "label_zh": "先止盈一半",
+    "description_zh": "当前位置更适合先兑现一半利润，先锁定利润，再观察剩余仓位的延续性。",
+    "sort_order": 30
+  },
+  {
+    "id": "discipline_exit_only",
+    "label_zh": "纪律线退出",
+    "description_zh": "未破纪律线前保持持有，一旦有效失守纪律位，再执行退出。",
+    "sort_order": 40
+  },
+  {
+    "id": "failure_risk_reduce_33",
+    "label_zh": "先减仓三分之一",
+    "description_zh": "风险已经抬升，但还不需要一次性收得过重，建议先减仓 1/3，保留观察仓。",
+    "sort_order": 50
+  },
+  {
+    "id": "failure_risk_reduce_50",
+    "label_zh": "先减仓一半",
+    "description_zh": "该标的风险级别已上调，建议先主动减仓 1/2 以规避不确定性。",
+    "sort_order": 60
+  },
+  {
+    "id": "failure_risk_exit_all",
+    "label_zh": "优先全部退出",
+    "description_zh": "检测到破位或结构性假修复风险，建议先全盘离场避险。",
+    "sort_order": 70
+  }
+]

@@ -61,7 +61,6 @@ export function TradeManagementTab({
     await mutateSurface();
   };
 
-  const cardBaseClass = 'rounded-2xl border border-white/5 bg-white/[0.02]';
   const metricCardClass = 'rounded-2xl border border-white/5 bg-white/[0.02] px-4 py-3';
   const sectionLabelClass = 'text-[11px] font-bold text-slate-500 uppercase tracking-wider';
   const sectionTitleClass = 'flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-500';

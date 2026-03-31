@@ -1,4 +1,5 @@
 import tradeManagementStates from '@/shared/trade-management-states.json';
+import tradeManagementPolicies from '@/shared/trade-management-policies.json';
 
 export interface TradeManagementPosition {
   position_id: string;
@@ -76,6 +77,13 @@ const SESSION_KEY_PREFIX = 'trade_management_surface';
 
 interface TradeManagementStateDefinition {
   id: TradeManagementStateId;
+  label_zh: string;
+  description_zh: string;
+  sort_order: number;
+}
+
+interface TradeManagementPolicyDefinition {
+  id: string;
   label_zh: string;
   description_zh: string;
   sort_order: number;
@@ -165,6 +173,10 @@ export function formatPrice(value: number | null | undefined): string {
 const MANAGEMENT_STATE_LABELS = Object.fromEntries(
   (tradeManagementStates as TradeManagementStateDefinition[]).map((item) => [item.id, item.label_zh]),
 ) as Record<TradeManagementStateId, string>;
+
+const MANAGEMENT_POLICY_DESCRIPTIONS = Object.fromEntries(
+  (tradeManagementPolicies as TradeManagementPolicyDefinition[]).map((item) => [item.id.toLowerCase(), item.description_zh]),
+) as Record<string, string>;
 
 export function getManagementStateLabel(advice: TradeManagementAdvice | null): string {
   const stateId = advice?.state_id;
@@ -263,14 +275,8 @@ export function getTradeEventLabel(value: string | null | undefined): string {
 export function getManagementPolicyLabel(advice: TradeManagementAdvice | null): string {
   const normalized = String(advice?.recommended_policy || '').trim().toLowerCase();
 
-  if (normalized === 'buy_and_hold_baseline') {
-    return '优先保护已形成利润，等待下一个观察确认周期。';
-  }
-  if (normalized === 'failure_risk_reduce_50') {
-    return '该标的风险级别已上调，建议先主动减仓 1/2 以规避不确定性。';
-  }
-  if (normalized === 'failure_risk_exit_all') {
-    return '检测到破位或结构性假修复风险，建议先全盘离场避险。';
+  if (normalized && MANAGEMENT_POLICY_DESCRIPTIONS[normalized]) {
+    return MANAGEMENT_POLICY_DESCRIPTIONS[normalized];
   }
 
   return advice?.recommended_policy || advice?.signal_state || '系统已接管此仓位，定量的执行交易纪律将在下个计算周期生成。';

@@ -64,6 +64,24 @@ def build_action_plan(snapshot: PositionState, recommended_policy: str) -> Actio
                     f"再转弱或失守 {discipline}：继续退出",
                 ],
             )
+        if recommended_policy == "partial_take_profit_50":
+            return ActionPlan(
+                summary="先兑现一半利润，剩余仓位继续观察",
+                detail=f"虽然结构已有波动，但当前更像弱修复而非彻底失真；先止盈 1/2，剩余仓位继续观察，若再次转弱或失守 {discipline}，再继续退出。",
+                bullets=[
+                    "先止盈 1/2",
+                    f"再转弱或失守 {discipline}：继续退出",
+                ],
+            )
+        if recommended_policy == "partial_take_profit_33":
+            return ActionPlan(
+                summary="先兑现三分之一利润，剩余仓位继续观察",
+                detail=f"当前波动已有抬升，但先用更轻的方式锁定部分利润；先止盈 1/3，若再次转弱或失守 {discipline}，再继续退出。",
+                bullets=[
+                    "先止盈 1/3",
+                    f"再转弱或失守 {discipline}：继续退出",
+                ],
+            )
         return ActionPlan(
             summary="先减仓一半，保留观察仓",
             detail=f"当前风险已经抬升，先减仓 1/2，剩余仓位继续观察；若再次转弱或失守 {discipline}，再继续退出。",

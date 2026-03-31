@@ -98,6 +98,18 @@ def test_failure_risk_plan_prefers_exit_when_policy_high_risk() -> None:
     assert "14.79" in plan.detail
 
 
+def test_failure_risk_plan_supports_reduce_33_and_partial_take_profit_copy() -> None:
+    snapshot = _sample_snapshot(state_id="FailureRisk")
+
+    reduce_plan = build_action_plan(snapshot, "failure_risk_reduce_33")
+    partial_plan = build_action_plan(snapshot, "partial_take_profit_50")
+
+    assert "减仓三分之一" in reduce_plan.summary
+    assert "1/3" in reduce_plan.detail
+    assert "兑现一半利润" in partial_plan.summary
+    assert "止盈 1/2" in partial_plan.detail
+
+
 def test_advice_loop_runs_with_mocked_dependencies() -> None:
     position = _sample_position()
     snapshot = _sample_snapshot()
