@@ -1,0 +1,72 @@
+{
+  "as_of": "2026-03-31",
+  "proof_id": "trade_management_performance_proof_hk_v2",
+  "validation_source": "hk_trade_management_validation_pack_20260331.json",
+  "config_version": "tm_market_routing_v5",
+  "market": "HK",
+  "positioning": {
+    "current_stage": "independent_proof_v1_completed",
+    "official_judgement": "dual_improver_not_yet_benchmark_winner",
+    "what_is_proven": [
+      "HK v2 improves return versus same-entry buy-and-hold in 12M, 24M, and 36M windows.",
+      "HK v2 improves max drawdown versus same-entry buy-and-hold in 12M, 24M, and 36M windows.",
+      "HK v2 shows stable 6M rolling improvement with 8/8 dual-improved windows.",
+      "Current live advice sample shows zero summary mismatch."
+    ],
+    "what_is_not_proven": [
+      "It is not yet proven to beat the market benchmark over long horizons.",
+      "It is not yet a large-sample live execution verdict."
+    ]
+  },
+  "evaluation_framework": [
+    "return improvement vs same-entry buy-and-hold",
+    "max drawdown improvement",
+    "rolling window stability",
+    "live advice consistency"
+  ],
+  "long_windows": {
+    "12m": {
+      "baseline_return": 0.004214,
+      "routed_return": 0.013193,
+      "improvement_vs_baseline": 0.00898,
+      "baseline_max_drawdown": -0.011115,
+      "routed_max_drawdown": -0.004638,
+      "excess_vs_benchmark": -0.015175
+    },
+    "24m": {
+      "baseline_return": -0.001691,
+      "routed_return": 0.008077,
+      "improvement_vs_baseline": 0.009768,
+      "baseline_max_drawdown": -0.014591,
+      "routed_max_drawdown": -0.009222,
+      "excess_vs_benchmark": -0.08236
+    },
+    "36m": {
+      "baseline_return": -0.009125,
+      "routed_return": -0.002742,
+      "improvement_vs_baseline": 0.006383,
+      "baseline_max_drawdown": -0.010332,
+      "routed_max_drawdown": -0.007289,
+      "excess_vs_benchmark": -0.093179
+    }
+  },
+  "rolling_6m": {
+    "window_count": 8,
+    "dual_improved_count": 8,
+    "dual_improved_ratio": 1.0,
+    "median_improvement_vs_baseline": 0.003561
+  },
+  "live_consistency": {
+    "active_position_count": 2,
+    "summary_mismatch_count": 0,
+    "focus_review_subtypes": [
+      "persistent_failure_loop",
+      "persistent_false_stability",
+      "persistent_stress"
+    ]
+  },
+  "next_gate": {
+    "eligible_for_hk_v3": true,
+    "verdict": "v2_validated_continue_observation"
+  }
+}

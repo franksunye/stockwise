@@ -4,8 +4,8 @@ doc_id: "intelligence-trade-management-research-framework"
 doc_domain: "intelligence"
 doc_status: "active"
 owner: "founder"
-last_reviewed_at: "2026-03-29"
-summary: "定义 StockWise 交易管理研究的目标、边界、方法、评估尺子、正式基线与下一阶段路线，是后续启动与迭代的研究母本。"
+last_reviewed_at: "2026-03-31"
+summary: "定义 StockWise 交易管理研究的目标、边界、方法、评估尺子、正式基线与下一阶段路线，是后续启动与迭代的研究母本；当前已纳入 HK v2 独立证明期 v1 的正式长窗结论。"
 ---
 
 # 30Q 交易管理研究框架 (Trade Management Research Framework)
@@ -330,14 +330,17 @@ StockWise 应该：
    - 正式路由规则
    - 正式评分卡
 
-### 9.2 组合级 12M 基线
+### 9.2 当前正式基线与 HK v2 结果源
 
-当前最新正式性能基线来自：
+当前正式性能基线与 HK v2 独立证明期结果来自：
 
-- [trade_management_portfolio_baseline_cn500_12m_20260329.json](/Users/yesun/Code/stockwise/backend/management/research/cases/trade_management_portfolio_baseline_cn500_12m_20260329.json)
-- [trade_management_portfolio_baseline_hk180_12m_20260329.json](/Users/yesun/Code/stockwise/backend/management/research/cases/trade_management_portfolio_baseline_hk180_12m_20260329.json)
-- [trade_management_portfolio_baseline_cnhk680_12m_20260329.json](/Users/yesun/Code/stockwise/backend/management/research/cases/trade_management_portfolio_baseline_cnhk680_12m_20260329.json)
-- [trade_management_performance_proof_v2_12m_20260329.json](/Users/yesun/Code/stockwise/backend/management/research/cases/trade_management_performance_proof_v2_12m_20260329.json)
+- [trade_management_portfolio_baseline_cn500_12m_market_aware_20260331.json](/Users/yesun/Code/stockwise/backend/management/research/cases/trade_management_portfolio_baseline_cn500_12m_market_aware_20260331.json)
+- [trade_management_portfolio_baseline_hk180_12m_market_aware_20260331.json](/Users/yesun/Code/stockwise/backend/management/research/cases/trade_management_portfolio_baseline_hk180_12m_market_aware_20260331.json)
+- [trade_management_portfolio_baseline_hk180_24m_market_aware_20260331.json](/Users/yesun/Code/stockwise/backend/management/research/cases/trade_management_portfolio_baseline_hk180_24m_market_aware_20260331.json)
+- [trade_management_portfolio_baseline_hk180_36m_market_aware_20260331.json](/Users/yesun/Code/stockwise/backend/management/research/cases/trade_management_portfolio_baseline_hk180_36m_market_aware_20260331.json)
+- [trade_management_portfolio_baseline_cnhk680_12m_market_aware_20260331.json](/Users/yesun/Code/stockwise/backend/management/research/cases/trade_management_portfolio_baseline_cnhk680_12m_market_aware_20260331.json)
+- [hk_trade_management_validation_pack_20260331.json](/Users/yesun/Code/stockwise/backend/management/research/cases/hk_trade_management_validation_pack_20260331.json)
+- [trade_management_performance_proof_hk_v2_20260331.json](/Users/yesun/Code/stockwise/backend/management/research/cases/trade_management_performance_proof_hk_v2_20260331.json)
 
 #### CN500（12M）
 
@@ -354,20 +357,51 @@ StockWise 应该：
 - 更稳，但不是更赚
 - 当前更像风险优化器，而不是收益放大器
 
-#### HK180（12M）
+#### HK180（正式独立证明期 v1）
+
+当前 HK 不再只看单一 `12M` 窗口，而是按 `12M / 24M / 36M` 长窗、`6M rolling` 稳定性、以及 live advice 一致性一起判断。
+
+`12M`
 
 - baseline：`+0.42%`
-- routed：`+0.72%`
-- 改善：`+0.30%`
-- 回撤：`-1.11% -> -0.88%`
+- routed：`+1.32%`
+- 改善：`+0.90%`
+- 回撤：`-1.11% -> -0.46%`
 - 相对 `恒生指数ETF`：
   - baseline：`-2.42%`
-  - routed：`-2.11%`
+  - routed：`-1.52%`
+
+`24M`
+
+- baseline：`-0.17%`
+- routed：`+0.81%`
+- 改善：`+0.98%`
+- 回撤：`-1.46% -> -0.92%`
+
+`36M`
+
+- baseline：`-0.91%`
+- routed：`-0.27%`
+- 改善：`+0.64%`
+- 回撤：`-1.03% -> -0.73%`
+
+`6M rolling`
+
+- `8/8` 窗口实现收益改善
+- `8/8` 窗口实现回撤改善
+- `8/8` 窗口实现双改善
+
+`live advice consistency`
+
+- 当前 observation sample 中：`summary_mismatch_count = 0`
+- 当前重点 subtype 的建议文案与推荐动作保持一致
 
 正式判断：
 
-- 在池内继续实现收益与回撤双改善
-- 但仍未跑赢市场基准
+- `HK v2` 已完成独立证明期 `v1`
+- 当前在 HK 正式样本中实现收益与回撤双改善
+- 当前已经是 `dual improver`
+- 但仍不是 `benchmark winner`
 
 #### CN+HK680（12M）
 
@@ -384,7 +418,23 @@ StockWise 应该：
   - 略优风险收益质量
 - 但没有把总收益进一步做高
 
-### 9.3 当前最准确的用户表达
+### 9.3 HK 当前正式评估框架
+
+HK 当前正式评估框架固定为四项，以后用户价值、产品口径、研究复验统一按这四项回答：
+
+1. `return improvement vs same-entry buy-and-hold`
+2. `max drawdown improvement`
+3. `rolling window stability`
+4. `live advice consistency`
+
+这四项的作用分别是：
+
+- 判断相对“持有不动”有没有增益
+- 判断风险有没有同步改善
+- 判断结果是不是单一窗口偶然成立
+- 判断 live 建议是否自然、可信、没有语义错位
+
+### 9.4 当前最准确的用户表达
 
 当前最准确的对外表达，不是：
 
@@ -392,7 +442,12 @@ StockWise 应该：
 
 而是：
 
-**这是一套已经证明能改善持仓风险结构、并在部分市场环境里提升收益质量的交易管理模型。**
+**这是一套已经证明能改善持仓风险结构，并且在 HK 正式样本中实现收益与回撤双改善的交易管理模型。**
+
+但当前仍应保留两个限制：
+
+- 它不保证每笔都赚钱
+- 它仍未证明长期跑赢市场基准
 
 ---
 
