@@ -1,0 +1,578 @@
+{
+  "as_of": "2026-03-31",
+  "tuning_id": "trade_management_market_routing_tuning_v1",
+  "market": "HK",
+  "cases_file": "hk_fullstack_12m_cases_20260329.json",
+  "baseline_config": {
+    "market": "HK",
+    "config_version": "tm_market_routing_v1",
+    "default_lane_ids": [
+      "baseline_3d",
+      "low_risk_5d"
+    ],
+    "second_pass_activation_bucket": "score_low",
+    "second_pass_takeover_score_threshold": 9,
+    "reduce_50_threshold": 7,
+    "exit_all_threshold": 11,
+    "positioning": "trend_preserving_dual_improver",
+    "rationale": "港股当前更值得保留趋势弹性，第二通道接管和防守阈值都更克制。"
+  },
+  "baseline_metrics": {
+    "sample_size": 180,
+    "date_from": "2025-03-27",
+    "date_to": "2026-03-27",
+    "benchmark_symbols": [
+      "02800"
+    ],
+    "benchmark_names": [
+      "恒生指数ETF"
+    ],
+    "baseline": {
+      "total_return": 0.004214,
+      "annualized_return": 0.004317,
+      "max_drawdown": -0.011115,
+      "annualized_volatility": 0.014256,
+      "sharpe_like": 0.309262
+    },
+    "routed": {
+      "total_return": 0.005492,
+      "annualized_return": 0.005626,
+      "max_drawdown": -0.009329,
+      "annualized_volatility": 0.010164,
+      "sharpe_like": 0.557062
+    },
+    "benchmark": {
+      "total_return": 0.028368,
+      "annualized_return": 0.02907,
+      "max_drawdown": -0.123492,
+      "annualized_volatility": 0.141101,
+      "sharpe_like": 0.273701
+    },
+    "improvement_vs_baseline": 0.001278,
+    "excess_vs_benchmark": -0.022876,
+    "baseline_excess_vs_benchmark": -0.024155
+  },
+  "candidate_count": 27,
+  "top_candidates": [
+    {
+      "config": {
+        "market": "HK",
+        "config_version": "tm_hk_tuning_v1",
+        "default_lane_ids": [
+          "baseline_3d",
+          "low_risk_5d"
+        ],
+        "second_pass_activation_bucket": "score_low",
+        "second_pass_takeover_score_threshold": 10,
+        "reduce_50_threshold": 6,
+        "exit_all_threshold": 10,
+        "positioning": "trend_preserving_dual_improver",
+        "rationale": "HK tuning grid search candidate"
+      },
+      "score": 43.860097,
+      "metrics": {
+        "sample_size": 180,
+        "date_from": "2025-03-27",
+        "date_to": "2026-03-27",
+        "benchmark_symbols": [
+          "02800"
+        ],
+        "benchmark_names": [
+          "恒生指数ETF"
+        ],
+        "baseline": {
+          "total_return": 0.004214,
+          "annualized_return": 0.004317,
+          "max_drawdown": -0.011115,
+          "annualized_volatility": 0.014256,
+          "sharpe_like": 0.309262
+        },
+        "routed": {
+          "total_return": 0.00774,
+          "annualized_return": 0.00793,
+          "max_drawdown": -0.008967,
+          "annualized_volatility": 0.010633,
+          "sharpe_like": 0.748176
+        },
+        "benchmark": {
+          "total_return": 0.028368,
+          "annualized_return": 0.02907,
+          "max_drawdown": -0.123492,
+          "annualized_volatility": 0.141101,
+          "sharpe_like": 0.273701
+        },
+        "improvement_vs_baseline": 0.003527,
+        "excess_vs_benchmark": -0.020628,
+        "baseline_excess_vs_benchmark": -0.024155
+      }
+    },
+    {
+      "config": {
+        "market": "HK",
+        "config_version": "tm_hk_tuning_v1",
+        "default_lane_ids": [
+          "baseline_3d",
+          "low_risk_5d"
+        ],
+        "second_pass_activation_bucket": "score_low",
+        "second_pass_takeover_score_threshold": 10,
+        "reduce_50_threshold": 6,
+        "exit_all_threshold": 12,
+        "positioning": "trend_preserving_dual_improver",
+        "rationale": "HK tuning grid search candidate"
+      },
+      "score": 42.996636,
+      "metrics": {
+        "sample_size": 180,
+        "date_from": "2025-03-27",
+        "date_to": "2026-03-27",
+        "benchmark_symbols": [
+          "02800"
+        ],
+        "benchmark_names": [
+          "恒生指数ETF"
+        ],
+        "baseline": {
+          "total_return": 0.004214,
+          "annualized_return": 0.004317,
+          "max_drawdown": -0.011115,
+          "annualized_volatility": 0.014256,
+          "sharpe_like": 0.309262
+        },
+        "routed": {
+          "total_return": 0.007678,
+          "annualized_return": 0.007866,
+          "max_drawdown": -0.009028,
+          "annualized_volatility": 0.010644,
+          "sharpe_like": 0.741453
+        },
+        "benchmark": {
+          "total_return": 0.028368,
+          "annualized_return": 0.02907,
+          "max_drawdown": -0.123492,
+          "annualized_volatility": 0.141101,
+          "sharpe_like": 0.273701
+        },
+        "improvement_vs_baseline": 0.003465,
+        "excess_vs_benchmark": -0.02069,
+        "baseline_excess_vs_benchmark": -0.024155
+      }
+    },
+    {
+      "config": {
+        "market": "HK",
+        "config_version": "tm_hk_tuning_v1",
+        "default_lane_ids": [
+          "baseline_3d",
+          "low_risk_5d"
+        ],
+        "second_pass_activation_bucket": "score_low",
+        "second_pass_takeover_score_threshold": 10,
+        "reduce_50_threshold": 6,
+        "exit_all_threshold": 11,
+        "positioning": "trend_preserving_dual_improver",
+        "rationale": "HK tuning grid search candidate"
+      },
+      "score": 42.606992,
+      "metrics": {
+        "sample_size": 180,
+        "date_from": "2025-03-27",
+        "date_to": "2026-03-27",
+        "benchmark_symbols": [
+          "02800"
+        ],
+        "benchmark_names": [
+          "恒生指数ETF"
+        ],
+        "baseline": {
+          "total_return": 0.004214,
+          "annualized_return": 0.004317,
+          "max_drawdown": -0.011115,
+          "annualized_volatility": 0.014256,
+          "sharpe_like": 0.309262
+        },
+        "routed": {
+          "total_return": 0.00765,
+          "annualized_return": 0.007838,
+          "max_drawdown": -0.009056,
+          "annualized_volatility": 0.010644,
+          "sharpe_like": 0.738849
+        },
+        "benchmark": {
+          "total_return": 0.028368,
+          "annualized_return": 0.02907,
+          "max_drawdown": -0.123492,
+          "annualized_volatility": 0.141101,
+          "sharpe_like": 0.273701
+        },
+        "improvement_vs_baseline": 0.003437,
+        "excess_vs_benchmark": -0.020718,
+        "baseline_excess_vs_benchmark": -0.024155
+      }
+    },
+    {
+      "config": {
+        "market": "HK",
+        "config_version": "tm_hk_tuning_v1",
+        "default_lane_ids": [
+          "baseline_3d",
+          "low_risk_5d"
+        ],
+        "second_pass_activation_bucket": "score_low",
+        "second_pass_takeover_score_threshold": 8,
+        "reduce_50_threshold": 6,
+        "exit_all_threshold": 10,
+        "positioning": "trend_preserving_dual_improver",
+        "rationale": "HK tuning grid search candidate"
+      },
+      "score": 39.406049,
+      "metrics": {
+        "sample_size": 180,
+        "date_from": "2025-03-27",
+        "date_to": "2026-03-27",
+        "benchmark_symbols": [
+          "02800"
+        ],
+        "benchmark_names": [
+          "恒生指数ETF"
+        ],
+        "baseline": {
+          "total_return": 0.004214,
+          "annualized_return": 0.004317,
+          "max_drawdown": -0.011115,
+          "annualized_volatility": 0.014256,
+          "sharpe_like": 0.309262
+        },
+        "routed": {
+          "total_return": 0.007229,
+          "annualized_return": 0.007406,
+          "max_drawdown": -0.008804,
+          "annualized_volatility": 0.010247,
+          "sharpe_like": 0.725261
+        },
+        "benchmark": {
+          "total_return": 0.028368,
+          "annualized_return": 0.02907,
+          "max_drawdown": -0.123492,
+          "annualized_volatility": 0.141101,
+          "sharpe_like": 0.273701
+        },
+        "improvement_vs_baseline": 0.003016,
+        "excess_vs_benchmark": -0.021139,
+        "baseline_excess_vs_benchmark": -0.024155
+      }
+    },
+    {
+      "config": {
+        "market": "HK",
+        "config_version": "tm_hk_tuning_v1",
+        "default_lane_ids": [
+          "baseline_3d",
+          "low_risk_5d"
+        ],
+        "second_pass_activation_bucket": "score_low",
+        "second_pass_takeover_score_threshold": 8,
+        "reduce_50_threshold": 6,
+        "exit_all_threshold": 12,
+        "positioning": "trend_preserving_dual_improver",
+        "rationale": "HK tuning grid search candidate"
+      },
+      "score": 38.542423,
+      "metrics": {
+        "sample_size": 180,
+        "date_from": "2025-03-27",
+        "date_to": "2026-03-27",
+        "benchmark_symbols": [
+          "02800"
+        ],
+        "benchmark_names": [
+          "恒生指数ETF"
+        ],
+        "baseline": {
+          "total_return": 0.004214,
+          "annualized_return": 0.004317,
+          "max_drawdown": -0.011115,
+          "annualized_volatility": 0.014256,
+          "sharpe_like": 0.309262
+        },
+        "routed": {
+          "total_return": 0.007168,
+          "annualized_return": 0.007343,
+          "max_drawdown": -0.008865,
+          "annualized_volatility": 0.010259,
+          "sharpe_like": 0.718277
+        },
+        "benchmark": {
+          "total_return": 0.028368,
+          "annualized_return": 0.02907,
+          "max_drawdown": -0.123492,
+          "annualized_volatility": 0.141101,
+          "sharpe_like": 0.273701
+        },
+        "improvement_vs_baseline": 0.002954,
+        "excess_vs_benchmark": -0.021201,
+        "baseline_excess_vs_benchmark": -0.024155
+      }
+    },
+    {
+      "config": {
+        "market": "HK",
+        "config_version": "tm_hk_tuning_v1",
+        "default_lane_ids": [
+          "baseline_3d",
+          "low_risk_5d"
+        ],
+        "second_pass_activation_bucket": "score_low",
+        "second_pass_takeover_score_threshold": 8,
+        "reduce_50_threshold": 6,
+        "exit_all_threshold": 11,
+        "positioning": "trend_preserving_dual_improver",
+        "rationale": "HK tuning grid search candidate"
+      },
+      "score": 38.152704,
+      "metrics": {
+        "sample_size": 180,
+        "date_from": "2025-03-27",
+        "date_to": "2026-03-27",
+        "benchmark_symbols": [
+          "02800"
+        ],
+        "benchmark_names": [
+          "恒生指数ETF"
+        ],
+        "baseline": {
+          "total_return": 0.004214,
+          "annualized_return": 0.004317,
+          "max_drawdown": -0.011115,
+          "annualized_volatility": 0.014256,
+          "sharpe_like": 0.309262
+        },
+        "routed": {
+          "total_return": 0.00714,
+          "annualized_return": 0.007314,
+          "max_drawdown": -0.008892,
+          "annualized_volatility": 0.010258,
+          "sharpe_like": 0.715574
+        },
+        "benchmark": {
+          "total_return": 0.028368,
+          "annualized_return": 0.02907,
+          "max_drawdown": -0.123492,
+          "annualized_volatility": 0.141101,
+          "sharpe_like": 0.273701
+        },
+        "improvement_vs_baseline": 0.002926,
+        "excess_vs_benchmark": -0.021229,
+        "baseline_excess_vs_benchmark": -0.024155
+      }
+    },
+    {
+      "config": {
+        "market": "HK",
+        "config_version": "tm_hk_tuning_v1",
+        "default_lane_ids": [
+          "baseline_3d",
+          "low_risk_5d"
+        ],
+        "second_pass_activation_bucket": "score_low",
+        "second_pass_takeover_score_threshold": 9,
+        "reduce_50_threshold": 6,
+        "exit_all_threshold": 10,
+        "positioning": "trend_preserving_dual_improver",
+        "rationale": "HK tuning grid search candidate"
+      },
+      "score": 36.516639,
+      "metrics": {
+        "sample_size": 180,
+        "date_from": "2025-03-27",
+        "date_to": "2026-03-27",
+        "benchmark_symbols": [
+          "02800"
+        ],
+        "benchmark_names": [
+          "恒生指数ETF"
+        ],
+        "baseline": {
+          "total_return": 0.004214,
+          "annualized_return": 0.004317,
+          "max_drawdown": -0.011115,
+          "annualized_volatility": 0.014256,
+          "sharpe_like": 0.309262
+        },
+        "routed": {
+          "total_return": 0.007006,
+          "annualized_return": 0.007178,
+          "max_drawdown": -0.008968,
+          "annualized_volatility": 0.010267,
+          "sharpe_like": 0.701757
+        },
+        "benchmark": {
+          "total_return": 0.028368,
+          "annualized_return": 0.02907,
+          "max_drawdown": -0.123492,
+          "annualized_volatility": 0.141101,
+          "sharpe_like": 0.273701
+        },
+        "improvement_vs_baseline": 0.002793,
+        "excess_vs_benchmark": -0.021362,
+        "baseline_excess_vs_benchmark": -0.024155
+      }
+    },
+    {
+      "config": {
+        "market": "HK",
+        "config_version": "tm_hk_tuning_v1",
+        "default_lane_ids": [
+          "baseline_3d",
+          "low_risk_5d"
+        ],
+        "second_pass_activation_bucket": "score_low",
+        "second_pass_takeover_score_threshold": 9,
+        "reduce_50_threshold": 6,
+        "exit_all_threshold": 12,
+        "positioning": "trend_preserving_dual_improver",
+        "rationale": "HK tuning grid search candidate"
+      },
+      "score": 35.653,
+      "metrics": {
+        "sample_size": 180,
+        "date_from": "2025-03-27",
+        "date_to": "2026-03-27",
+        "benchmark_symbols": [
+          "02800"
+        ],
+        "benchmark_names": [
+          "恒生指数ETF"
+        ],
+        "baseline": {
+          "total_return": 0.004214,
+          "annualized_return": 0.004317,
+          "max_drawdown": -0.011115,
+          "annualized_volatility": 0.014256,
+          "sharpe_like": 0.309262
+        },
+        "routed": {
+          "total_return": 0.006944,
+          "annualized_return": 0.007114,
+          "max_drawdown": -0.009029,
+          "annualized_volatility": 0.010279,
+          "sharpe_like": 0.694815
+        },
+        "benchmark": {
+          "total_return": 0.028368,
+          "annualized_return": 0.02907,
+          "max_drawdown": -0.123492,
+          "annualized_volatility": 0.141101,
+          "sharpe_like": 0.273701
+        },
+        "improvement_vs_baseline": 0.002731,
+        "excess_vs_benchmark": -0.021424,
+        "baseline_excess_vs_benchmark": -0.024155
+      }
+    },
+    {
+      "config": {
+        "market": "HK",
+        "config_version": "tm_hk_tuning_v1",
+        "default_lane_ids": [
+          "baseline_3d",
+          "low_risk_5d"
+        ],
+        "second_pass_activation_bucket": "score_low",
+        "second_pass_takeover_score_threshold": 9,
+        "reduce_50_threshold": 6,
+        "exit_all_threshold": 11,
+        "positioning": "trend_preserving_dual_improver",
+        "rationale": "HK tuning grid search candidate"
+      },
+      "score": 35.263275,
+      "metrics": {
+        "sample_size": 180,
+        "date_from": "2025-03-27",
+        "date_to": "2026-03-27",
+        "benchmark_symbols": [
+          "02800"
+        ],
+        "benchmark_names": [
+          "恒生指数ETF"
+        ],
+        "baseline": {
+          "total_return": 0.004214,
+          "annualized_return": 0.004317,
+          "max_drawdown": -0.011115,
+          "annualized_volatility": 0.014256,
+          "sharpe_like": 0.309262
+        },
+        "routed": {
+          "total_return": 0.006917,
+          "annualized_return": 0.007086,
+          "max_drawdown": -0.009057,
+          "annualized_volatility": 0.010278,
+          "sharpe_like": 0.692114
+        },
+        "benchmark": {
+          "total_return": 0.028368,
+          "annualized_return": 0.02907,
+          "max_drawdown": -0.123492,
+          "annualized_volatility": 0.141101,
+          "sharpe_like": 0.273701
+        },
+        "improvement_vs_baseline": 0.002703,
+        "excess_vs_benchmark": -0.021452,
+        "baseline_excess_vs_benchmark": -0.024155
+      }
+    },
+    {
+      "config": {
+        "market": "HK",
+        "config_version": "tm_hk_tuning_v1",
+        "default_lane_ids": [
+          "baseline_3d",
+          "low_risk_5d"
+        ],
+        "second_pass_activation_bucket": "score_low",
+        "second_pass_takeover_score_threshold": 10,
+        "reduce_50_threshold": 7,
+        "exit_all_threshold": 10,
+        "positioning": "trend_preserving_dual_improver",
+        "rationale": "HK tuning grid search candidate"
+      },
+      "score": 28.525948,
+      "metrics": {
+        "sample_size": 180,
+        "date_from": "2025-03-27",
+        "date_to": "2026-03-27",
+        "benchmark_symbols": [
+          "02800"
+        ],
+        "benchmark_names": [
+          "恒生指数ETF"
+        ],
+        "baseline": {
+          "total_return": 0.004214,
+          "annualized_return": 0.004317,
+          "max_drawdown": -0.011115,
+          "annualized_volatility": 0.014256,
+          "sharpe_like": 0.309262
+        },
+        "routed": {
+          "total_return": 0.006316,
+          "annualized_return": 0.00647,
+          "max_drawdown": -0.009239,
+          "annualized_volatility": 0.010524,
+          "sharpe_like": 0.61806
+        },
+        "benchmark": {
+          "total_return": 0.028368,
+          "annualized_return": 0.02907,
+          "max_drawdown": -0.123492,
+          "annualized_volatility": 0.141101,
+          "sharpe_like": 0.273701
+        },
+        "improvement_vs_baseline": 0.002102,
+        "excess_vs_benchmark": -0.022053,
+        "baseline_excess_vs_benchmark": -0.024155
+      }
+    }
+  ]
+}

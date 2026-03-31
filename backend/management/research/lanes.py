@@ -125,11 +125,12 @@ def evaluate_lane(
 def route_case_lanes(
     snapshots: list[PositionState],
     market: str | None = None,
+    routing_config: TradeManagementMarketRoutingConfig | None = None,
 ) -> dict[str, object]:
-    resolved_market = resolve_routing_market(snapshots, market)
-    routing_config = get_market_routing_config(resolved_market)
+    config = routing_config or get_market_routing_config(resolve_routing_market(snapshots, market))
+    resolved_market = config.market
 
-    baseline = evaluate_lane(snapshots, "baseline_3d", routing_config=routing_config)
+    baseline = evaluate_lane(snapshots, "baseline_3d", routing_config=config)
     active_lane_ids = ["baseline_3d"]
     second_pass = None
     final = baseline
@@ -138,25 +139,25 @@ def route_case_lanes(
     if should_activate_lane(
         "low_risk_5d",
         baseline_bucket=str(baseline["early_risk_bucket"]),
-        routing_config=routing_config,
+        routing_config=config,
     ):
-        second_pass = evaluate_lane(snapshots, "low_risk_5d", routing_config=routing_config)
+        second_pass = evaluate_lane(snapshots, "low_risk_5d", routing_config=config)
         active_lane_ids.append("low_risk_5d")
         if (
             int(second_pass["early_risk_score"])
-            >= routing_config.second_pass_takeover_score_threshold
+            >= config.second_pass_takeover_score_threshold
         ):
             final = second_pass
             takeover_applied = True
 
     return {
         "market": resolved_market,
-        "routing_config_version": routing_config.config_version,
-        "routing_config": market_routing_config_to_dict(routing_config),
+        "routing_config_version": config.config_version,
+        "routing_config": market_routing_config_to_dict(config),
         "active_lane_ids": active_lane_ids,
         "baseline": baseline,
         "second_pass": second_pass,
         "final": final,
         "takeover_applied": takeover_applied,
-        "takeover_score_threshold": routing_config.second_pass_takeover_score_threshold,
+        "takeover_score_threshold": config.second_pass_takeover_score_threshold,
     }

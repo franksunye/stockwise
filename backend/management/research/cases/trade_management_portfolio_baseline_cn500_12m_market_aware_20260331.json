@@ -10,7 +10,7 @@
     "market_routing_configs": {
       "CN": {
         "market": "CN",
-        "config_version": "tm_market_routing_v1",
+        "config_version": "tm_market_routing_v2",
         "default_lane_ids": [
           "baseline_3d",
           "low_risk_5d"
@@ -24,17 +24,17 @@
       },
       "HK": {
         "market": "HK",
-        "config_version": "tm_market_routing_v1",
+        "config_version": "tm_market_routing_v2",
         "default_lane_ids": [
           "baseline_3d",
           "low_risk_5d"
         ],
         "second_pass_activation_bucket": "score_low",
-        "second_pass_takeover_score_threshold": 9,
-        "reduce_50_threshold": 7,
-        "exit_all_threshold": 11,
+        "second_pass_takeover_score_threshold": 10,
+        "reduce_50_threshold": 6,
+        "exit_all_threshold": 10,
         "positioning": "trend_preserving_dual_improver",
-        "rationale": "港股当前更值得保留趋势弹性，第二通道接管和防守阈值都更克制。"
+        "rationale": "港股 v2 默认继续保留趋势弹性，但放宽 second-pass 接管，同时允许更早做 50% 风险收缩，以换取更好的收益/回撤平衡。"
       }
     }
   },

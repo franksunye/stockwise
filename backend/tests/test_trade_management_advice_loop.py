@@ -142,7 +142,7 @@ def test_advice_loop_persists_market_routing_metadata() -> None:
              "backend.management.live.service.route_case_lanes",
              return_value={
                  "market": "HK",
-                 "routing_config_version": "tm_market_routing_v1",
+                 "routing_config_version": "tm_market_routing_v2",
                  "routing_config": {
                      "market": "HK",
                      "second_pass_takeover_score_threshold": 9,
@@ -164,9 +164,9 @@ def test_advice_loop_persists_market_routing_metadata() -> None:
     assert result.processed_count == 1
     assert persist_mock.call_count == 1
     record = persist_mock.call_args.args[0]
-    assert record.source_ref == "tm_market_routing_v1:HK"
+    assert record.source_ref == "tm_market_routing_v2:HK"
     assert record.extra_payload["routing_market"] == "HK"
-    assert record.extra_payload["routing_config_version"] == "tm_market_routing_v1"
+    assert record.extra_payload["routing_config_version"] == "tm_market_routing_v2"
     assert record.extra_payload["routing_config"]["exit_all_threshold"] == 11
     assert record.extra_payload["takeover_score_threshold"] == 9
     assert record.extra_payload["active_lane_ids"] == ["baseline_3d"]

@@ -4,6 +4,7 @@ from unittest.mock import patch
 
 from backend.management.domain.position_state import PositionState
 from backend.management.research.lanes import route_case_lanes
+from backend.management.research.market_routing import build_market_routing_config
 
 
 def _high_risk_snapshots() -> list[PositionState]:
@@ -86,7 +87,7 @@ def _high_risk_snapshots() -> list[PositionState]:
     ]
 
 
-def test_hk_routing_preserves_more_trend_on_same_high_risk_score() -> None:
+def test_hk_routing_v2_keeps_same_high_risk_exit_but_uses_higher_takeover_gate() -> None:
     snapshots = _high_risk_snapshots()
 
     cn_route = route_case_lanes(snapshots, market="CN")
@@ -94,9 +95,10 @@ def test_hk_routing_preserves_more_trend_on_same_high_risk_score() -> None:
 
     assert cn_route["baseline"]["early_risk_score"] == hk_route["baseline"]["early_risk_score"] == 10
     assert cn_route["final"]["recommended_policy"] == "failure_risk_exit_all"
-    assert hk_route["final"]["recommended_policy"] == "failure_risk_reduce_50"
+    assert hk_route["final"]["recommended_policy"] == "failure_risk_exit_all"
     assert cn_route["routing_config"]["exit_all_threshold"] == 10
-    assert hk_route["routing_config"]["exit_all_threshold"] == 11
+    assert hk_route["routing_config"]["exit_all_threshold"] == 10
+    assert hk_route["routing_config"]["second_pass_takeover_score_threshold"] == 10
 
 
 def test_hk_second_pass_requires_higher_takeover_score_than_cn() -> None:
@@ -130,3 +132,18 @@ def test_hk_second_pass_requires_higher_takeover_score_than_cn() -> None:
     assert cn_route["final"]["lane_id"] == "low_risk_5d"
     assert hk_route["takeover_applied"] is False
     assert hk_route["final"]["lane_id"] == "baseline_3d"
+
+
+def test_explicit_routing_config_override_is_honored() -> None:
+    snapshots = _high_risk_snapshots()
+    custom_hk = build_market_routing_config(
+        "HK",
+        config_version="tm_hk_custom_test",
+        reduce_50_threshold=6,
+        exit_all_threshold=10,
+    )
+
+    route = route_case_lanes(snapshots, market="HK", routing_config=custom_hk)
+
+    assert route["routing_config_version"] == "tm_hk_custom_test"
+    assert route["final"]["recommended_policy"] == "failure_risk_exit_all"

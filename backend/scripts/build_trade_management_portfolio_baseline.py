@@ -22,7 +22,11 @@ from backend.management.policies.base import PolicyContext
 from backend.management.policies.policy_registry import build_default_policies
 from backend.management.research.case_sets import get_case_set
 from backend.management.research.lanes import route_case_lanes
-from backend.management.research.market_routing import MARKET_ROUTING_CONFIGS, market_routing_config_to_dict
+from backend.management.research.market_routing import (
+    MARKET_ROUTING_CONFIGS,
+    TradeManagementMarketRoutingConfig,
+    market_routing_config_to_dict,
+)
 from backend.management.state.snapshot_builder import build_position_snapshots
 
 
@@ -169,7 +173,10 @@ def _sharpe_like(daily_returns: list[float]) -> float | None:
     return mean / std * math.sqrt(252)
 
 
-def _build_portfolio_metrics(cases: list[dict]) -> dict:
+def _build_portfolio_metrics(
+    cases: list[dict],
+    routing_config_overrides: dict[str, TradeManagementMarketRoutingConfig] | None = None,
+) -> dict:
     policies = {policy.policy_id: policy for policy in build_default_policies()}
     rendered_cases = []
     all_dates = set()
@@ -192,7 +199,11 @@ def _build_portfolio_metrics(cases: list[dict]) -> dict:
             continue
 
         baseline_curve = _simulate_daily_multiples(policies["buy_and_hold_baseline"], [s for s in snapshots])
-        lane_route = route_case_lanes([s for s in snapshots], market=market)
+        lane_route = route_case_lanes(
+            [s for s in snapshots],
+            market=market,
+            routing_config=(routing_config_overrides or {}).get(market),
+        )
         routed_policy_id = str(lane_route["final"]["recommended_policy"])
         routed_curve = _simulate_daily_multiples(policies[routed_policy_id], [s for s in snapshots])
         end_date = max(baseline_curve["last_date"], routed_curve["last_date"])

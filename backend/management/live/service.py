@@ -128,7 +128,7 @@ def run_trade_management_advice_loop(
                 advice_id=build_advice_id(),
             )
             record.source_ref = (
-                f"{lane_route.get('routing_config_version', 'tm_market_routing_v1')}"
+                f"{lane_route.get('routing_config_version', 'tm_market_routing_v2')}"
                 f":{lane_route.get('market', position.market)}"
             )
             record.extra_payload.update(
