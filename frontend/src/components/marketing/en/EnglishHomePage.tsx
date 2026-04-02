@@ -25,7 +25,7 @@ export function EnglishHomePage() {
         "name": "How does the AI reasoning work?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Unlike simple prediction bots, ZISO AI uses a 'Council of Agents' architecture. It combines the deep logical reasoning of DeepSeek-R1 with the linguistic nuance of Hunyuan and fixed quant rule engines to ensure every tactical briefing is explainable and grounded in data."
+          "text": "Unlike simple prediction bots, ZISO AI uses a 'Council of Agents' architecture. It combines the deep logical reasoning of DeepSeek with the linguistic nuance of Hunyuan and fixed quant rule engines to ensure every tactical briefing is explainable and grounded in data."
         }
       },
       {
@@ -217,7 +217,7 @@ export function EnglishHomePage() {
             </div>
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
               <p className="text-white font-bold mb-3 uppercase tracking-tighter">How does the AI reasoning work?</p>
-              <p className="text-slate-400 text-sm leading-relaxed">Unlike simple prediction bots, ZISO AI uses a &quot;Council of Agents&quot; architecture. It combines the deep logical reasoning of DeepSeek-R1 with the linguistic nuance of Hunyuan and fixed quant rule engines to ensure every tactical briefing is explainable and grounded in data.</p>
+              <p className="text-slate-400 text-sm leading-relaxed">Unlike simple prediction bots, ZISO AI uses a &quot;Council of Agents&quot; architecture. It combines the deep logical reasoning of DeepSeek with the linguistic nuance of Hunyuan and fixed quant rule engines to ensure every tactical briefing is explainable and grounded in data.</p>
             </div>
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
               <p className="text-white font-bold mb-3 uppercase tracking-tighter">Why the 75% confidence gate?</p>

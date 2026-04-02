@@ -25,7 +25,7 @@ export function KoreanHomePage() {
         "name": "AI 추론은 어떻게 작동하나요?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "단순한 예측 봇과 달리, ZISO AI는 '에이전트 위원회(Council of Agents)' 아키텍처를 사용합니다. DeepSeek-R1의 깊은 논리적 추론과 Hunyuan의 언어적 뉘앙스, 그리고 정형화된 퀀트 규칙 엔진을 결합하여 모든 전략적 브리핑이 데이터에 근거하고 설명 가능하도록 보장합니다."
+          "text": "단순한 예측 봇과 달리, ZISO AI는 '에이전트 위원회(Council of Agents)' 아키텍처를 사용합니다. DeepSeek의 깊은 논리적 추론과 Hunyuan의 언어적 뉘앙스, 그리고 정형화된 퀀트 규칙 엔진을 결합하여 모든 전략적 브리핑이 데이터에 근거하고 설명 가능하도록 보장합니다."
         }
       }
     ]
@@ -207,7 +207,7 @@ export function KoreanHomePage() {
             </div>
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
               <p className="text-white font-bold mb-3 uppercase tracking-tighter">AI 추론은 어떻게 작동하나요?</p>
-              <p className="text-slate-400 text-sm leading-relaxed">단순한 예측 봇과 달리, ZISO AI는 &apos;에이전트 위원회&apos; 아키텍처를 사용합니다. DeepSeek-R1의 깊은 논리적 추론과 Hunyuan의 맥락 파악 능력, 그리고 고정된 퀀트 규칙 엔진을 결합하여 모든 전술 브리핑이 데이터에 기반하고 설명 가능하도록 보장합니다.</p>
+              <p className="text-slate-400 text-sm leading-relaxed">단순한 예측 봇과 달리, ZISO AI는 &apos;에이전트 위원회&apos; 아키텍처를 사용합니다. DeepSeek의 깊은 논리적 추론과 Hunyuan의 맥락 파악 능력, 그리고 고정된 퀀트 규칙 엔진을 결합하여 모든 전술 브리핑이 데이터에 기반하고 설명 가능하도록 보장합니다.</p>
             </div>
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
               <p className="text-white font-bold mb-3 uppercase tracking-tighter">왜 75% 신뢰도 게이트를 유지하나요?</p>

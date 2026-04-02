@@ -25,7 +25,7 @@ export function SpanishHomePage() {
         "name": "¿Cómo funciona el razonamiento de la IA?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "ZISO AI utiliza una arquitectura de 'Consejo de Agentes'. Combina el razonamiento lógico profundo de DeepSeek-R1 con el matiz contextual de Hunyuan y motores de reglas quant fijos para asegurar que cada informe táctico sea explicable y fundamentado."
+          "text": "ZISO AI utiliza una arquitectura de 'Consejo de Agentes'. Combina el razonamiento lógico profundo de DeepSeek con el matiz contextual de Hunyuan y motores de reglas quant fijos para asegurar que cada informe táctico sea explicable y fundamentado."
         }
       },
       {
@@ -225,7 +225,7 @@ export function SpanishHomePage() {
             </div>
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
               <p className="text-white font-bold mb-3 uppercase tracking-tighter">¿Cómo funciona el razonamiento de la IA?</p>
-              <p className="text-slate-400 text-sm leading-relaxed">A diferencia de los bots de predicción simples, ZISO AI utiliza una arquitectura de &quot;Consejo de Agentes&quot;. Combina el razonamiento lógico profundo de DeepSeek-R1 con el matiz contextual de Hunyuan y motores de reglas quant fijos para asegurar que cada informe táctico sea explicable y fundamentado.</p>
+              <p className="text-slate-400 text-sm leading-relaxed">A diferencia de los bots de predicción simples, ZISO AI utiliza una arquitectura de &quot;Consejo de Agentes&quot;. Combina el razonamiento lógico profundo de DeepSeek con el matiz contextual de Hunyuan y motores de reglas quant fijos para asegurar que cada informe táctico sea explicable y fundamentado.</p>
             </div>
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
               <p className="text-white font-bold mb-3 uppercase tracking-tighter">¿Por qué el límite de confianza del 75%?</p>

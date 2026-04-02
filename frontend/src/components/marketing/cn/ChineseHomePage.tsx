@@ -28,7 +28,7 @@ export function ChineseHomePage() {
         "name": "AI 推理是如何工作的？",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "与简单的预测机器人不同，ZISO AI 使用“智能体委员会”架构。它结合了 DeepSeek-R1 的深度逻辑推理与混元的语言映射，以及固定的量化规则引擎，确保每份战术简报都是可解释的且有据可依。"
+          "text": "与简单的预测机器人不同，ZISO AI 使用“智能体委员会”架构。它结合了 DeepSeek 的深度逻辑推理与混元的语言映射，以及固定的量化规则引擎，确保每份战术简报都是可解释的且有据可依。"
         }
       }
     ]

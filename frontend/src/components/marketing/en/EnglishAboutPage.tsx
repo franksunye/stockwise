@@ -147,7 +147,7 @@ export function EnglishAboutPage() {
                 locale="en"
                 summary={[
                   'Mission: Democratize institutional-grade market research for retail investors via a multi-agent AI council.',
-                  'Roles: DeepSeek-R1 (Tactical reasoning), Hunyuan (Contextual mapping), Quant Engine (Structural rules), Verifier (Outcome auditing).',
+                  'Roles: DeepSeek (Tactical reasoning), Hunyuan (Contextual mapping), Quant Engine (Structural rules), Verifier (Outcome auditing).',
                   'Methodology: Separation of concerns ensures that analysis, risk oversight, and historical auditing remain independent and accountable.',
                 ]}
               />

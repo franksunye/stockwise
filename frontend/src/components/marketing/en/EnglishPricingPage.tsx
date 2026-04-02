@@ -221,7 +221,7 @@ export function EnglishPricingPage() {
             </div>
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
               <p className="text-white font-bold mb-3 uppercase tracking-tighter">What makes Pro different from Free?</p>
-              <p className="text-slate-400 text-sm leading-relaxed">Free is rule-based. Pro is reasoning-based. Pro unlocks the DeepSeek-R1 logic layer, providing deeper tactical narratives, key price levels, and the defensive 75% circuit breaker gate.</p>
+              <p className="text-slate-400 text-sm leading-relaxed">Free is rule-based. Pro is reasoning-based. Pro unlocks the DeepSeek logic layer, providing deeper tactical narratives, key price levels, and the defensive 75% circuit breaker gate.</p>
             </div>
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
               <p className="text-white font-bold mb-3 uppercase tracking-tighter">Is the 75% Gate available to Free users?</p>
@@ -242,7 +242,7 @@ export function EnglishPricingPage() {
                 summary={[
                   'Subscription: Access to a multi-agent AI research desk for nightly tactical briefings.',
                   'Free Tier: Logic-only recap using basic rule engines for trend identification.',
-                  'Pro Tier: Reasoning-first reports powered by DeepSeek-R1, including the 75% risk circuit breaker logic.',
+                  'Pro Tier: Reasoning-first reports powered by DeepSeek, including the 75% risk circuit breaker logic.',
                 ]}
               />
             </div>

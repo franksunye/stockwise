@@ -150,7 +150,7 @@ export function SpanishAboutPage() {
                 locale="es"
                 summary={[
                   'Misión: Democratizar la disciplina de investigación de mercado institucional para inversores minoristas a través de un consejo de IA multi-agente.',
-                  'Roles: DeepSeek-R1 (Razonamiento táctico), Hunyuan (Mapeo de contexto), Motor Quant (Reglas estructurales), Verificador (Auditoría de resultados).',
+                  'Roles: DeepSeek (Razonamiento táctico), Hunyuan (Mapeo de contexto), Motor Quant (Reglas estructurales), Verificador (Auditoría de resultados).',
                   'Metodología: La separación de intereses asegura que el análisis, la supervisión de riesgos y la auditoría histórica sigan siendo independientes y responsables.',
                 ]}
               />

@@ -221,7 +221,7 @@ export function SpanishPricingPage() {
             </div>
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
               <p className="text-white font-bold mb-3 uppercase tracking-tighter">¿Qué hace a Pro diferente de Gratis?</p>
-              <p className="text-slate-400 text-sm leading-relaxed">Gratis se basa en reglas. Pro se basa en razonamiento. Pro desbloquea la capa lógica profunda de DeepSeek-R1, proporcionando informes tácticos más profundos, niveles clave y el disyuntor de riesgo del 75%.</p>
+              <p className="text-slate-400 text-sm leading-relaxed">Gratis se basa en reglas. Pro se basa en razonamiento. Pro desbloquea la capa lógica profunda de DeepSeek, proporcionando informes tácticos más profundos, niveles clave y el disyuntor de riesgo del 75%.</p>
             </div>
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
               <p className="text-white font-bold mb-3 uppercase tracking-tighter">¿El límite del 75% está disponible para usuarios Gratis?</p>
@@ -242,7 +242,7 @@ export function SpanishPricingPage() {
                 summary={[
                   'Suscripción: Acceso a una mesa de investigación de IA multi-agente para informes tácticos nocturnos.',
                   'Nivel Gratis: Resumen basado en reglas para identificación básica de tendencias.',
-                  'Nivel Pro: Informes de razonamiento impulsados por DeepSeek-R1, incluyendo la lógica de disyuntor del 75%.',
+                  'Nivel Pro: Informes de razonamiento impulsados por DeepSeek, incluyendo la lógica de disyuntor del 75%.',
                 ]}
               />
             </div>

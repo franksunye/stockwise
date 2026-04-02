@@ -220,7 +220,7 @@ export function KoreanPricingPage() {
             </div>
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
               <p className="text-white font-bold mb-3 uppercase tracking-tighter">Pro와 Free의 가장 큰 차이점은 무엇인가요?</p>
-              <p className="text-slate-400 text-sm leading-relaxed">Free는 규칙 기반입니다. Pro는 추론 기반입니다. Pro는 DeepSeek-R1 논리 레이어를 활성화하여 더 깊은 전술적 서사, 가격대 분석, 그리고 방어적인 75% 서킷 브레이커 게이트를 제공합니다.</p>
+              <p className="text-slate-400 text-sm leading-relaxed">Free는 규칙 기반입니다. Pro는 추론 기반입니다. Pro는 DeepSeek 논리 레이어를 활성화하여 더 깊은 전술적 서사, 가격대 분석, 그리고 방어적인 75% 서킷 브레이커 게이트를 제공합니다.</p>
             </div>
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
               <p className="text-white font-bold mb-3 uppercase tracking-tighter">75% 게이트는 Free 사용자도 사용할 수 있나요?</p>
@@ -241,7 +241,7 @@ export function KoreanPricingPage() {
                 summary={[
                   '구독 서비스: 야간 전술 브리핑을 위한 다중 에이전트 AI 리서치 데스크 이용 권한.',
                   'Free 티어: 트렌드 식별을 위한 기본 규칙 엔진 기반의 데이터 요약.',
-                  'Pro 티어: DeepSeek-R1으로 구동되는 추론 우선 보고서 및 75% 리스크 서킷 브레이커 로직 포함.',
+                  'Pro 티어: DeepSeek으로 구동되는 추론 우선 보고서 및 75% 리스크 서킷 브레이커 로직 포함.',
                 ]}
               />
             </div>
