@@ -31,6 +31,19 @@ export function buildCanonicalUrl(baseUrl: string, path: string): string {
   return `${baseUrl.replace(/\/$/, "")}${normalized}`;
 }
 
+function getOpenGraphLocale(locale: PublicLocale): string {
+  switch (locale) {
+    case "cn":
+      return "zh_CN";
+    case "ko":
+      return "ko_KR";
+    case "es":
+      return "es_ES";
+    default:
+      return "en_US";
+  }
+}
+
 export function buildPageMetadata(baseUrl: string, input: SeoInput): Metadata {
   const locale = input.locale || DEFAULT_PUBLIC_LOCALE;
   const canonicalLocale = input.canonicalLocale || locale;
@@ -49,10 +62,6 @@ export function buildPageMetadata(baseUrl: string, input: SeoInput): Metadata {
   const index = input.index ?? isIndexablePublicLocale(locale);
   const follow = input.follow ?? true;
 
-  const metadataLocale = getLocaleHrefLang(locale).includes('-') 
-    ? getLocaleHrefLang(locale).replace("-", "_")
-    : `${getLocaleHrefLang(locale)}_${getLocaleHrefLang(locale).toUpperCase()}`;
-
   return {
     title: input.title,
     description: input.description,
@@ -70,7 +79,7 @@ export function buildPageMetadata(baseUrl: string, input: SeoInput): Metadata {
       description: input.description,
       url: buildCanonicalUrl(baseUrl, currentPath),
       type: ogType,
-      locale: metadataLocale,
+      locale: getOpenGraphLocale(locale),
     },
     twitter: {
       card: "summary_large_image",
