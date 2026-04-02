@@ -11,6 +11,7 @@
     "check:dashboard-entry": "node scripts/dashboard-entry-smoke.mjs",
     "check:dashboard-interaction": "node scripts/dashboard-interaction-smoke.mjs",
     "check:dashboard-refresh": "node scripts/dashboard-refresh-smoke.mjs",
+    "check:ssg-safety": "node scripts/check-ssg-safety.mjs",
     "check:user-center": "node scripts/user-center-smoke.mjs",
     "verify:dashboard-entry": "node scripts/verify-dashboard-entry.mjs",
     "verify:dashboard-interaction": "node scripts/verify-dashboard-interaction.mjs",
@@ -18,8 +19,8 @@
     "db:sync-local": "node scripts/sync-remote-to-local.mjs",
     "db:sync-local:incremental": "node scripts/sync-remote-to-local.mjs --incremental",
     "db:audit-local": "node scripts/local-db-audit.mjs",
-    "test:quality": "node --test tests/quality-gates.test.mjs",
-    "verify:release": "node scripts/verify-release.mjs"
+    "test:quality": "node scripts/check-ssg-safety.mjs && node --test tests/quality-gates.test.mjs",
+    "verify:release": "npm run check:ssg-safety && node scripts/verify-release.mjs"
   },
   "dependencies": {
     "@libsql/client": "^0.15.15",
