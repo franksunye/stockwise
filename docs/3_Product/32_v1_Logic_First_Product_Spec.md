@@ -51,7 +51,7 @@ summary: "定义 v1 阶段 (Free, Go, Plus) 的核心交互逻辑、国际化标
 | 等级 (Tier) | 研判引擎规格 | 用户感知的“研判依据” |
 | :--- | :--- | :--- |
 | **Free** | 单 LLM (Hunyuan Lite) | **研判摘要**：极简逻辑支撑点。 |
-| **Go** | 单 LLM (DeepSeek-R1) | **深度推演**：展示 AI 完整的思考轨迹 (`thought` 过程)。 |
+| **Go** | 单 LLM (DeepSeek) | **深度推演**：展示 AI 完整的思考轨迹 (`thought` 过程)。 |
 | **Plus** | 双 LLM (DS + Gemini) | **专家共识**：展示两个顶级模型的意见重合点与潜在分歧点。 |
 
 ---
@@ -83,7 +83,7 @@ summary: "定义 v1 阶段 (Free, Go, Plus) 的核心交互逻辑、国际化标
 | 方案 (Tier) | 内部阶段 | 研备引擎路由 (LLM Registry Role) | 研判详情 (Rationale) 表现 |
 | :--- | :--- | :--- | :--- |
 | **Free** | **v1** | `brief_free` (Hunyuan Lite) | **极简版**：纯文本动作摘要。 |
-| **Go** | **v1** | `brief_go` (DeepSeek-R1) | **推演版**：展示实时 `thought` 推理过程。 |
+| **Go** | **v1** | `brief_go` (DeepSeek) | **推演版**：展示实时 `thought` 推理过程。 |
 | **Plus** | **v1** | `brief_plus` (Gemini + DS) | **共识版**：双模型交叉复核，展示共识点。 |
 | **Pro** | **v2** | **AI + 量化规则引擎** | **双轨版**：AI 逻辑研判 + 量化硬规则校验。 |
 | **Alpha** | **v3** | **全私有化算力独占** | **优化版**：极致择时与成本防御。 |

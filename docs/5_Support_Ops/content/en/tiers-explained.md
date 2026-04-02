@@ -18,7 +18,7 @@ ZISO AI uses a "Reasoning Tier" structure. You can choose your AI research partn
 
 ### 🔵 Advanced Tier (Go)
 *   **Watchlist Capacity**: 10 stocks.
-*   **Thought Chain (Reasoning)**: Powered by DeepSeek-R1. See the underlying logic and "thinking path" the AI took to reach the briefing. (v1 Stage)
+*   **Thought Chain (Reasoning)**: Powered by DeepSeek. See the underlying logic and "thinking path" the AI took to reach the briefing. (v1 Stage)
 
 ### 🟣 Enhanced Tier (Plus)
 *   **Watchlist Capacity**: 10 stocks.
