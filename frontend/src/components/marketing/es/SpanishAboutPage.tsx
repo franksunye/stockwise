@@ -5,10 +5,33 @@ import Link from 'next/link';
 import Multiavatar from '@/components/Multiavatar';
 import { PageShell, ES_FOUNDERS, ES_AGENT_TEAM, ES_BOUNDARY_NOTICE, ES_DEFAULT_SOURCES } from './EsLayout';
 import { GeoSummary, SourceBlock, BoundaryNotice } from '@/components/seo/GeoBlocks';
+import { JsonLd } from '@/components/seo/JsonLd';
 
 export function SpanishAboutPage() {
+  const aboutSchema = {
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    "mainEntity": {
+      "@type": "Organization",
+      "name": "ZISO AI",
+      "description": "ZISO AI es un socio de investigación profesional y coach de ejecución para inversores minoristas. Utiliza una arquitectura de razonamiento multi-agente (el Consejo de Agentes) para transformar datos de mercado complejos en informes tácticos estructurados.",
+      "founder": ES_FOUNDERS.map(f => ({
+        "@type": "Person",
+        "name": f.name,
+        "jobTitle": f.label
+      })),
+      "knowsAbout": [
+        "Investigación de Mercado",
+        "Razonamiento de IA",
+        "Modelado Quant",
+        "Gestión de Riesgos"
+      ]
+    }
+  };
+
   return (
     <PageShell currentPage="about">
+      <JsonLd data={aboutSchema} />
       <main className="relative z-10 max-w-5xl mx-auto px-8 pt-20 pb-32">
         <div className="space-y-8 text-center sm:text-left">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[10px] font-black uppercase tracking-widest">

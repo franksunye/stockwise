@@ -5,14 +5,38 @@ import Link from 'next/link';
 import Image from 'next/image';
 import Multiavatar from '@/components/Multiavatar';
 import { agentTeam, founders } from '@/lib/agent-team';
-import { BoundaryNotice, GeoSummary, SourceBlock } from '@/components/seo/GeoBlocks';
+import { PageShell, CN_BOUNDARY_NOTICE, CN_DEFAULT_SOURCES } from './CnLayout';
+import { GeoSummary, SourceBlock, BoundaryNotice } from '@/components/seo/GeoBlocks';
+import { JsonLd } from '@/components/seo/JsonLd';
 import { brandCoreZhCN } from '@/content/brand-core.zh-CN';
-import { PageShell } from './CnLayout';
 
 export function ChineseHomePage() {
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "ZISO AI 到底是什么？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "它是一个专业的投研桌面，接管了枯燥的市场复盘工作。通过将深度的历史建模与多智能体推理委员会结合，它将复杂的市场噪音转化为结构化、可执行的决策脚本。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "AI 推理是如何工作的？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "与简单的预测机器人不同，ZISO AI 使用“智能体委员会”架构。它结合了 DeepSeek-R1 的深度逻辑推理与混元的语言映射，以及固定的量化规则引擎，确保每份战术简报都是可解释的且有据可依。"
+        }
+      }
+    ]
+  };
+
   return (
     <PageShell currentPage="home">
-      {/* Hero Section */}
+      <JsonLd data={faqSchema} />
       <main className="relative z-10 max-w-7xl mx-auto px-8 pt-12 pb-40 flex flex-col items-center text-center">
         <div className="space-y-6 max-w-3xl mb-16">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-black uppercase tracking-widest mb-4">

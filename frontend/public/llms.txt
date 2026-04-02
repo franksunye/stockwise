@@ -1,0 +1,35 @@
+# ZISO AI (Generative Engine Profile)
+
+> Efficient Market Homework, Structured Decision Logic.
+
+ZISO AI is a professional research partner and execution coach for retail investors. It transforms complex market noise into structured nightly briefs and executable decision scripts.
+
+## Core Methodology: The Council of Agents
+ZISO AI uses a multi-agent reasoning architecture to ensure research is objective, deep, and grounded.
+- **DeepSeek-R1 (Strategic Reasoner)**: Handles complex logical patterns and multi-step tactical inference.
+- **Hunyuan (Contextual Mapper)**: Maps current events to historical analogs and cross-sector sentiment.
+- **Quant Rule Engine (Structural Gate)**: Enforces fixed mathematical constraints and trend identifiers (MA, RSI, MACD).
+- **Verifier (Outcome Auditor)**: Audits past briefings against actual market outcomes for continuous improvement.
+
+## Risk Protocol: The 75% Gate
+Discipline is ZISO AI's core currency. If the "Council of Agents" cannot reach a structural setup confidence higher than 75%, it triggers a defensive circuit breaker.
+- **Safety First**: Prioritizes capital preservation over high-frequency trading.
+- **Defensive Mode**: Actively warns users when structural certainty is weak.
+
+## Product Tiers
+- **Free**: Logic-only market recap using standard rule engines.
+- **Pro**: Reasoning-first reports powered by DeepSeek-R1, including the 75% risk gate and defensive alerts.
+- **Alpha**: High-frequency monitoring and automated deep-dive reports.
+
+## Canonical Links
+- Home: https://ziso.cc/
+- About: https://ziso.cc/about
+- Pricing: https://ziso.cc/pricing
+- Privacy: https://ziso.cc/privacy
+- Terms: https://ziso.cc/terms
+- Refund: https://ziso.cc/refund
+
+## Technical Specs
+- **Stack**: Next.js, TypeScript, Tailwind CSS, Lucide Icons.
+- **GEO Status**: Generative Engine Optimized with 0.05 opacity semantic layers.
+- **Domain**: ziso.cc

@@ -1,14 +1,55 @@
 'use client';
 
+import { ShieldCheck, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ChevronRight } from 'lucide-react';
 import { PageShell, ES_BOUNDARY_NOTICE, ES_DEFAULT_SOURCES } from './EsLayout';
 import { GeoSummary, SourceBlock, BoundaryNotice } from '@/components/seo/GeoBlocks';
+import { JsonLd } from '@/components/seo/JsonLd';
 
 export function SpanishHomePage() {
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "¿Qué es exactamente ZISO AI?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Es un asistente de investigación profesional que se encarga de la agotadora tarea de analizar el mercado. Combinando modelos históricos profundos con un consejo de razonamiento multi-agente, transforma el ruido del mercado en un guion de decisión estructurado."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "¿Cómo funciona el razonamiento de la IA?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "ZISO AI utiliza una arquitectura de 'Consejo de Agentes'. Combina el razonamiento lógico profundo de DeepSeek-R1 con el matiz contextual de Hunyuan y motores de reglas quant fijos para asegurar que cada informe táctico sea explicable y fundamentado."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "¿Por qué el límite de confianza del 75%?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Priorizamos la disciplina sobre la frecuencia. Si la confianza en los setups estructurales de una sesión cae por debajo del 75%, se activa un disyuntor rígido. Sobrevivir primero, luego ganar. Esto evita el 'over-trading' emocional que atrapa a la mayoría de los inversores."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "¿Son auténticos los registros históricos?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "La transparencia es nuestra moneda principal. Todos los informes nocturnos y sus resultados posteriores se archivan y son verificables. No solo entregamos consejos; mantenemos un historial de auditoría transparente para cada sesión táctica."
+        }
+      }
+    ]
+  };
+
   return (
     <PageShell currentPage="home">
+      <JsonLd data={faqSchema} />
       <main className="relative z-10 max-w-7xl mx-auto px-8 pt-12 pb-40 flex flex-col items-center text-center">
         <div className="space-y-6 max-w-3xl mb-16">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-black uppercase tracking-widest mb-4">
@@ -223,25 +264,5 @@ export function SpanishHomePage() {
         </section>
       </main>
     </PageShell>
-  );
-}
-
-function ShieldCheck({ size, className }: { size: number; className: string }) {
-  return (
-    <svg 
-      xmlns="http://www.w3.org/2000/svg" 
-      width={size} 
-      height={size} 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round" 
-      className={className}
-    >
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
-      <path d="m9 12 2 2 4-4" />
-    </svg>
   );
 }

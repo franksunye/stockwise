@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { getCurrentUser } from '@/lib/user';
 import { pricingPlans, featureComparison } from '@/lib/pricing-data';
 import { PageShell } from './CnLayout';
+import { JsonLd } from '@/components/seo/JsonLd';
 
 function PricingContent() {
   const [loadingPriceId, setLoadingPriceId] = useState<string | null>(null);
@@ -16,6 +17,36 @@ function PricingContent() {
   const [hasStripeCustomer, setHasStripeCustomer] = useState(false);
   const [loadingPortal, setLoadingPortal] = useState(false);
   const searchParams = useSearchParams();
+
+  const softwareSchema = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "知守 AI (ZISO AI)",
+    "applicationCategory": "FinanceApplication",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "AggregateOffer",
+      "offerCount": "2",
+      "lowPrice": "0",
+      "highPrice": "299",
+      "priceCurrency": "CNY"
+    }
+  };
+
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "为什么是订阅制？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "订阅是为了维持交付深夜战术简报所需的持续计算和多智能体推理。你正在聘请一个在市场收盘后仍在工作的纪律严明的委员会。"
+        }
+      }
+    ]
+  };
 
   useEffect(() => {
     getCurrentUser().then(() => {
@@ -84,6 +115,8 @@ function PricingContent() {
 
   return (
     <PageShell currentPage="pricing">
+      <JsonLd data={softwareSchema} />
+      <JsonLd data={faqSchema} />
       <AnimatePresence>
         {showSuccess && (
           <motion.div 
@@ -252,7 +285,7 @@ function PricingContent() {
                 </tr>
               </thead>
               <tbody className="text-sm font-medium">
-                {featureComparison.map((row, i) => (
+                {featureComparison.map((row: { label: string; free: string; pro: string; highlight?: boolean }, i: number) => (
                   <tr key={i} className="border-b border-white/[0.03] hover:bg-white/[0.01] transition-colors">
                     <td className="py-5 px-8 text-slate-400 font-bold">{row.label}</td>
                     <td className="py-5 px-8 text-slate-500">{row.free}</td>

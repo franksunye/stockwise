@@ -2,13 +2,46 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, ShieldCheck } from 'lucide-react';
 import { PageShell, EN_BOUNDARY_NOTICE, EN_DEFAULT_SOURCES } from './EnLayout';
 import { GeoSummary, SourceBlock, BoundaryNotice } from '@/components/seo/GeoBlocks';
+import { JsonLd } from '@/components/seo/JsonLd';
 
 export function EnglishHomePage() {
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What exactly is ZISO AI?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "It is a professional research desk that takes over the exhausting market homework. By combining deep historical modeling with a multi-agent reasoning council, it transforms complex market noise into a structured, executable decision script."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does the AI reasoning work?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Unlike simple prediction bots, ZISO AI uses a 'Council of Agents' architecture. It combines the deep logical reasoning of DeepSeek-R1 with the linguistic nuance of Hunyuan and fixed quant rule engines to ensure every tactical briefing is explainable and grounded in data."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why the 75% confidence gate?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "We prioritize execution discipline over frequency. If the system's confidence in a session's structural setups falls below 75%, it triggers a hard circuit breaker. This gate prevents the emotional 'over-trading' that traps most retail investors."
+        }
+      }
+    ]
+  };
+
   return (
     <PageShell currentPage="home">
+      <JsonLd data={faqSchema} />
       <main className="relative z-10 max-w-7xl mx-auto px-8 pt-12 pb-40 flex flex-col items-center text-center">
         <div className="space-y-6 max-w-3xl mb-16">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-black uppercase tracking-widest mb-4">
@@ -223,26 +256,5 @@ export function EnglishHomePage() {
         </section>
       </main>
     </PageShell>
-  );
-}
-
-// Sub-components like ShieldCheck would need to be imported or redefined.
-function ShieldCheck({ size, className }: { size: number; className: string }) {
-  return (
-    <svg 
-      xmlns="http://www.w3.org/2000/svg" 
-      width={size} 
-      height={size} 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round" 
-      className={className}
-    >
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
-      <path d="m9 12 2 2 4-4" />
-    </svg>
   );
 }

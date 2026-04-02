@@ -4,6 +4,7 @@ import { Check, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { PageShell, EN_BOUNDARY_NOTICE, EN_DEFAULT_SOURCES } from './EnLayout';
 import { GeoSummary, SourceBlock, BoundaryNotice } from '@/components/seo/GeoBlocks';
+import { JsonLd } from '@/components/seo/JsonLd';
 
 const EN_PRICING_PLANS = [
   {
@@ -73,8 +74,40 @@ const EN_FEATURE_COMPARISON = [
 ] as const;
 
 export function EnglishPricingPage() {
+  const softwareSchema = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "ZISO AI",
+    "applicationCategory": "FinanceApplication",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "AggregateOffer",
+      "offerCount": "3",
+      "lowPrice": "0",
+      "highPrice": "1999",
+      "priceCurrency": "CNY"
+    }
+  };
+
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Why is this a subscription?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "A subscription is for the continuous compute and multi-agent reasoning required to deliver a nightly briefing."
+        }
+      }
+    ]
+  };
+
   return (
     <PageShell currentPage="pricing">
+      <JsonLd data={softwareSchema} />
+      <JsonLd data={faqSchema} />
       <main className="relative z-10 max-w-7xl mx-auto px-8 pt-12 pb-40">
         <div className="text-center space-y-4 mb-20">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[10px] font-black uppercase tracking-[0.2em] mb-4">

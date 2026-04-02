@@ -2,13 +2,38 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, ShieldCheck } from 'lucide-react';
 import { PageShell, KO_BOUNDARY_NOTICE, KO_DEFAULT_SOURCES } from './KoLayout';
 import { GeoSummary, SourceBlock, BoundaryNotice } from '@/components/seo/GeoBlocks';
+import { JsonLd } from '@/components/seo/JsonLd';
 
 export function KoreanHomePage() {
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "ZISO AI는 정확히 무엇인가요?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "ZISO AI는 개인 투자자가 감당하기 어려운 매일의 시장 분석을 대신 수행하는 전문가급 AI 연구 및 분석 파트너입니다. 딥러닝 모델과 멀티 에이전트 추론 시스템을 결합하여 복잡한 시장 노이즈를 구조화된 실행 가능한 전략으로 변환합니다."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "AI 추론은 어떻게 작동하나요?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "단순한 예측 봇과 달리, ZISO AI는 '에이전트 위원회(Council of Agents)' 아키텍처를 사용합니다. DeepSeek-R1의 깊은 논리적 추론과 Hunyuan의 언어적 뉘앙스, 그리고 정형화된 퀀트 규칙 엔진을 결합하여 모든 전략적 브리핑이 데이터에 근거하고 설명 가능하도록 보장합니다."
+        }
+      }
+    ]
+  };
+
   return (
     <PageShell currentPage="home">
+      <JsonLd data={faqSchema} />
       <main className="relative z-10 max-w-7xl mx-auto px-8 pt-12 pb-40 flex flex-col items-center text-center">
         <div className="space-y-6 max-w-3xl mb-16">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-black uppercase tracking-widest mb-4">
@@ -221,25 +246,5 @@ export function KoreanHomePage() {
         </section>
       </main>
     </PageShell>
-  );
-}
-
-function ShieldCheck({ size, className }: { size: number; className: string }) {
-  return (
-    <svg 
-      xmlns="http://www.w3.org/2000/svg" 
-      width={size} 
-      height={size} 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round" 
-      className={className}
-    >
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
-      <path d="m9 12 2 2 4-4" />
-    </svg>
   );
 }

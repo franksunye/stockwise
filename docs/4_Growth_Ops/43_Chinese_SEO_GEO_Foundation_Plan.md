@@ -1,9 +1,12 @@
-# 知守 AI (ZISO AI) 中文 SEO/GEO 主执行文档（精简版）
+# 知守 AI (ZISO AI) 中文 SEO/GEO 执行文档
 
-> 状态：Executing  
-> 版本：v1.0（精简）  
-> 更新：2026-03-05  
-> 负责人：Frank + Codex
+> [!IMPORTANT]
+> **全球化升级公告 (2026-04-02)**:  
+> 本文档中的中文专项策略已整合并升级为 **[知守 AI 全球生成引擎优化 (GEO) 与技术溯源标准 (v2.0)](./47_Global_GEO_Technical_Grounding_Standard.md)**。  
+> 
+> 全球站点（EN, KO, ES, CN）统一遵循最新的技术底座、语义化 ID 和 JSON-LD 注入规范。
+
+> 状态：Combined into Global Standard (v2.0)
 
 ## 1. 目标
 

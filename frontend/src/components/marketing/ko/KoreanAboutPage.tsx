@@ -5,10 +5,33 @@ import Link from 'next/link';
 import Multiavatar from '@/components/Multiavatar';
 import { PageShell, KO_FOUNDERS, KO_AGENT_TEAM, KO_BOUNDARY_NOTICE, KO_DEFAULT_SOURCES } from './KoLayout';
 import { GeoSummary, SourceBlock, BoundaryNotice } from '@/components/seo/GeoBlocks';
+import { JsonLd } from '@/components/seo/JsonLd';
 
 export function KoreanAboutPage() {
+  const aboutSchema = {
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    "mainEntity": {
+      "@type": "Organization",
+      "name": "ZISO AI",
+      "description": "ZISO AI는 멀티 에이전트 추론 아키텍처(에이전트 위원회)를 통해 복잡한 시장 데이터를 구조화된 전략적 브리핑으로 변환하는 개인 투자자용 전문 연구 파트너입니다.",
+      "founder": KO_FOUNDERS.map(f => ({
+        "@type": "Person",
+        "name": f.name,
+        "jobTitle": f.label
+      })),
+      "knowsAbout": [
+        "시장 조사",
+        "AI 추론",
+        "퀀트 모델링",
+        "리스크 관리"
+      ]
+    }
+  };
+
   return (
     <PageShell currentPage="about">
+      <JsonLd data={aboutSchema} />
       <main className="relative z-10 max-w-5xl mx-auto px-8 pt-20 pb-32">
         <div className="space-y-8 text-center sm:text-left">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[10px] font-black uppercase tracking-widest">

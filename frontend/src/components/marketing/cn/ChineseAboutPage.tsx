@@ -6,10 +6,33 @@ import Link from 'next/link';
 import Multiavatar from '@/components/Multiavatar';
 import { agentTeam, founders } from '@/lib/agent-team';
 import { PageShell } from './CnLayout';
+import { JsonLd } from '@/components/seo/JsonLd';
 
 export function ChineseAboutPage() {
+  const aboutSchema = {
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    "mainEntity": {
+      "@type": "Organization",
+      "name": "知守 AI (ZISO AI)",
+      "description": "知守 AI 是个人投资者的专业研究伙伴和执行教练。它利用多智能体推理架构（智能体委员会）将复杂的市场数据转化为结构化的战术简报。",
+      "founder": founders.map(f => ({
+        "@type": "Person",
+        "name": f.name,
+        "jobTitle": f.label
+      })),
+      "knowsAbout": [
+        "市场研究",
+        "AI 推理",
+        "量化建模",
+        "风险管理"
+      ]
+    }
+  };
+
   return (
     <PageShell currentPage="about">
+      <JsonLd data={aboutSchema} />
       <main className="relative z-10 max-w-4xl mx-auto px-8 pt-20 pb-40">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}

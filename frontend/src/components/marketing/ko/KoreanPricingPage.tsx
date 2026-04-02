@@ -4,6 +4,7 @@ import { Check, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { PageShell, KO_BOUNDARY_NOTICE, KO_DEFAULT_SOURCES } from './KoLayout';
 import { GeoSummary, SourceBlock, BoundaryNotice } from '@/components/seo/GeoBlocks';
+import { JsonLd } from '@/components/seo/JsonLd';
 
 const KO_PRICING_PLANS = [
   {
@@ -73,8 +74,40 @@ const KO_FEATURE_COMPARISON = [
 ] as const;
 
 export function KoreanPricingPage() {
+  const softwareSchema = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "ZISO AI",
+    "applicationCategory": "FinanceApplication",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "AggregateOffer",
+      "offerCount": "3",
+      "lowPrice": "0",
+      "highPrice": "299",
+      "priceCurrency": "CNY"
+    }
+  };
+
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "왜 구독제인가요?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "구독은 매일 밤 브리핑을 제공하기 위해 필요한 지속적인 컴퓨팅 및 멀티 에이전트 추론 비용을 위한 것입니다."
+        }
+      }
+    ]
+  };
+
   return (
     <PageShell currentPage="pricing">
+      <JsonLd data={softwareSchema} />
+      <JsonLd data={faqSchema} />
       <main className="relative z-10 max-w-7xl mx-auto px-8 pt-12 pb-40">
         <div className="text-center space-y-4 mb-20">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[10px] font-black uppercase tracking-[0.2em] mb-4">

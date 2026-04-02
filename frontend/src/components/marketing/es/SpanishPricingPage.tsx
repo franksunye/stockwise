@@ -4,6 +4,7 @@ import { Check, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { PageShell, ES_BOUNDARY_NOTICE, ES_DEFAULT_SOURCES } from './EsLayout';
 import { GeoSummary, SourceBlock, BoundaryNotice } from '@/components/seo/GeoBlocks';
+import { JsonLd } from '@/components/seo/JsonLd';
 
 const ES_PRICING_PLANS = [
   {
@@ -73,8 +74,40 @@ const ES_FEATURE_COMPARISON = [
 ] as const;
 
 export function SpanishPricingPage() {
+  const softwareSchema = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "ZISO AI",
+    "applicationCategory": "FinanceApplication",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "AggregateOffer",
+      "offerCount": "3",
+      "lowPrice": "0",
+      "highPrice": "1999",
+      "priceCurrency": "CNY"
+    }
+  };
+
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "¿Por qué es una suscripción?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Una suscripción es para el cómputo continuo y el razonamiento multi-agente necesario para entregar un informe nocturno. Estás contratando a un consejo disciplinado que trabaja cuando el mercado está cerrado."
+        }
+      }
+    ]
+  };
+
   return (
     <PageShell currentPage="pricing">
+      <JsonLd data={softwareSchema} />
+      <JsonLd data={faqSchema} />
       <main className="relative z-10 max-w-7xl mx-auto px-8 pt-12 pb-40">
         <div className="text-center space-y-4 mb-20">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[10px] font-black uppercase tracking-[0.2em] mb-4">
