@@ -3,7 +3,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
-import { PageShell } from './EnLayout';
+import { PageShell, EN_BOUNDARY_NOTICE, EN_DEFAULT_SOURCES } from './EnLayout';
+import { GeoSummary, SourceBlock, BoundaryNotice } from '@/components/seo/GeoBlocks';
 
 export function EnglishHomePage() {
   return (
@@ -169,6 +170,31 @@ export function EnglishHomePage() {
               </div>
             ))}
           </div>
+        </section>
+
+        <section className="w-full max-w-4xl pt-10 pb-0 opacity-[0.25] hover:opacity-100 transition-opacity">
+          <div className="flex flex-col md:flex-row gap-6 mb-6">
+            <div className="flex-1 text-left">
+              <GeoSummary
+                locale="en"
+                summary={[
+                  'ZISO AI focuses on post-close review and next-day strategy to reduce emotional trading interference.',
+                  'Core mechanisms include tactical briefings, hit-rate tracking, key price levels, and risk warnings.',
+                  'Analysis results are traceable and historically verifiable, emphasizing process transparency over profit guarantees.',
+                ]}
+              />
+            </div>
+            <div className="flex-1 text-left">
+              <SourceBlock
+                locale="en"
+                sources={[
+                  ...EN_DEFAULT_SOURCES,
+                  { name: 'Product Positioning', url: 'https://ziso.cc', accessedAt: '2026-03-15' },
+                ]}
+              />
+            </div>
+          </div>
+          <BoundaryNotice locale="en" text={EN_BOUNDARY_NOTICE} />
         </section>
       </main>
     </PageShell>

@@ -2,7 +2,8 @@
 
 import { Check, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
-import { PageShell } from './EnLayout';
+import { PageShell, EN_BOUNDARY_NOTICE, EN_DEFAULT_SOURCES } from './EnLayout';
+import { GeoSummary, SourceBlock, BoundaryNotice } from '@/components/seo/GeoBlocks';
 
 const EN_PRICING_PLANS = [
   {
@@ -173,6 +174,31 @@ export function EnglishPricingPage() {
               </tbody>
             </table>
           </div>
+        </section>
+
+        <section className="w-full pt-10 pb-0 opacity-[0.25] hover:opacity-100 transition-opacity">
+          <div className="flex flex-col md:flex-row gap-6 mb-6">
+            <div className="flex-1 text-left">
+              <GeoSummary
+                locale="en"
+                summary={[
+                  'Free Tier: Access to rule-based trend signals and daily market recaps.',
+                  'Pro Tier: High-reasoning tactical briefings, key support/resistance levels, and realtime discipline alerts.',
+                  'Value Proposition: Subscribe to an around-the-clock "AI Research Council" to ensure disciplined trading.',
+                ]}
+              />
+            </div>
+            <div className="flex-1 text-left">
+              <SourceBlock
+                locale="en"
+                sources={[
+                  ...EN_DEFAULT_SOURCES,
+                  { name: 'Subscription Pricing', url: 'https://ziso.cc/pricing', accessedAt: '2026-03-15' },
+                ]}
+              />
+            </div>
+          </div>
+          <BoundaryNotice locale="en" text={EN_BOUNDARY_NOTICE} />
         </section>
       </main>
     </PageShell>

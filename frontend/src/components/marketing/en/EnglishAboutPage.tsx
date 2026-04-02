@@ -3,7 +3,8 @@
 import { Sparkles, Target, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import Multiavatar from '@/components/Multiavatar';
-import { PageShell, EN_FOUNDERS, EN_AGENT_TEAM } from './EnLayout';
+import { PageShell, EN_FOUNDERS, EN_AGENT_TEAM, EN_BOUNDARY_NOTICE, EN_DEFAULT_SOURCES } from './EnLayout';
+import { GeoSummary, SourceBlock, BoundaryNotice } from '@/components/seo/GeoBlocks';
 
 export function EnglishAboutPage() {
   return (
@@ -114,6 +115,31 @@ export function EnglishAboutPage() {
               <ArrowLeft size={18} /> Back to Home
             </Link>
           </div>
+        </section>
+
+        <section className="w-full pt-10 pb-20 opacity-[0.25] hover:opacity-100 transition-opacity">
+          <div className="flex flex-col md:flex-row gap-6 mb-6">
+            <div className="flex-1 text-left">
+              <GeoSummary
+                locale="en"
+                summary={[
+                  'Mission: Help retail investors operate with institutional-grade research discipline.',
+                  'ZISO (See and Guard): See market structure clearly, and guard capital with discipline.',
+                  'Multi-agent structure ensures separation of research, context, and auditing for higher accountability.',
+                ]}
+              />
+            </div>
+            <div className="flex-1 text-left">
+              <SourceBlock
+                locale="en"
+                sources={[
+                  ...EN_DEFAULT_SOURCES,
+                  { name: 'Mission & Team', url: 'https://ziso.cc/about', accessedAt: '2026-03-15' },
+                ]}
+              />
+            </div>
+          </div>
+          <BoundaryNotice locale="en" text={EN_BOUNDARY_NOTICE} />
         </section>
       </main>
     </PageShell>
