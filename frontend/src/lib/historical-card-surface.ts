@@ -93,14 +93,14 @@ function getValidationStyle(data: AIPrediction, windowLabel: string, validationD
                     iconName: 'correct', 
                     color: 'text-amber-950 font-black', 
                     bg: 'bg-gradient-to-r from-amber-300 to-yellow-400 border-amber-400/50 shadow-[0_2px_10px_rgba(245,158,11,0.2)]', 
-                    label: `金牌验证 +${maxPerf.toFixed(1)}% ✅` 
+                    label: `金牌验证 +${maxPerf.toFixed(1)}%` 
                 };
             }
             return { 
                 iconName: 'correct', 
                 color: 'text-emerald-500', 
                 bg: 'bg-emerald-500/10 border-emerald-500/20', 
-                label: `验证通过 ${maxPerf > 0 ? '+' + maxPerf.toFixed(1) + '%' : ''} ✅` 
+                label: `验证通过 ${maxPerf > 0 ? '+' + maxPerf.toFixed(1) + '%' : ''}` 
             };
         case 'Incorrect':
             return { iconName: 'incorrect', color: 'text-rose-500', bg: 'bg-rose-500/10 border-rose-500/20', label: `${windowLabel}偏离` };
