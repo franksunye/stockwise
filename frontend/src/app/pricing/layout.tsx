@@ -3,12 +3,12 @@ import { brandCoreZhCN } from "@/content/brand-core.zh-CN";
 import { buildPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata(brandCoreZhCN.domain, {
-  title: "定价与订阅 | 知守 AI (ZISO AI)",
-  description: "查看知守 AI 免费版与 Pro 版能力差异、订阅方案与计费说明。",
+  title: "Pricing | ZISO AI",
+  description: "Subscription plans for investors who want stronger nightly research and execution discipline.",
   path: "/pricing",
-  locale: "zh",
-  alternateLocales: ["zh", "en"],
-  keywords: ["知守AI定价", "AI炒股工具订阅", "Pro会员"],
+  locale: "en",
+  alternateLocales: ["en", "ko", "es", "cn"],
+  keywords: ["ZISO AI pricing", "Pro subscription", "Alpha plan"],
 });
 
 export default function PricingLayout({

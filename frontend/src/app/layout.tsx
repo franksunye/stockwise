@@ -1,8 +1,10 @@
 import type { Metadata, Viewport } from "next";
+import { headers } from "next/headers";
 import { Analytics } from "@vercel/analytics/react";
 import { brandCoreZhCN } from "@/content/brand-core.zh-CN";
 import { ServiceWorkerRegistrar } from "@/components/ServiceWorkerRegistrar";
 import { buildRootBootstrapInlineScript } from "@/lib/dashboard-bootstrap";
+import { getHtmlLang, isSupportedPublicLocale } from "@/lib/public-i18n";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -42,15 +44,18 @@ export const viewport: Viewport = {
   userScalable: false,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   const rootBootstrapInlineScript = buildRootBootstrapInlineScript();
+  const requestHeaders = await headers();
+  const localeHeader = requestHeaders.get("x-ziso-locale");
+  const htmlLang = isSupportedPublicLocale(localeHeader) ? getHtmlLang(localeHeader) : "en";
 
   return (
-    <html lang="zh-CN" suppressHydrationWarning>
+    <html lang={htmlLang} suppressHydrationWarning>
       <head>
         <link rel="manifest" href="/manifest.json" />
         <link rel="preconnect" href="https://app.ziso.cc" />
@@ -63,8 +68,15 @@ export default function RootLayout({
               (function() {
                 try {
                   var pathname = window.location.pathname || '/';
-                  var isEnglishPublicPath = pathname === '/en' || pathname === '/en/' || pathname.indexOf('/en/') === 0;
-                  document.documentElement.lang = isEnglishPublicPath ? 'en' : 'zh-CN';
+                  if (pathname === '/cn' || pathname.indexOf('/cn/') === 0) {
+                    document.documentElement.lang = 'zh-CN';
+                  } else if (pathname === '/ko' || pathname.indexOf('/ko/') === 0) {
+                    document.documentElement.lang = 'ko';
+                  } else if (pathname === '/es' || pathname.indexOf('/es/') === 0) {
+                    document.documentElement.lang = 'es';
+                  } else {
+                    document.documentElement.lang = 'en';
+                  }
                 } catch (e) {}
               })();
             `,

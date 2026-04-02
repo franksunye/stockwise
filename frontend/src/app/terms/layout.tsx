@@ -3,12 +3,12 @@ import { brandCoreZhCN } from "@/content/brand-core.zh-CN";
 import { buildPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata(brandCoreZhCN.domain, {
-  title: "服务条款 | 知守 AI (ZISO AI)",
-  description: "知守 AI 服务条款与使用规则。",
+  title: "Terms of Service | ZISO AI",
+  description: "Terms governing the use of ZISO AI analysis, briefings, and subscription services.",
   path: "/terms",
-  locale: "zh",
-  alternateLocales: ["zh", "en"],
-  keywords: ["服务条款", "知守AI", "使用协议"],
+  locale: "en",
+  alternateLocales: ["en", "ko", "es", "cn"],
+  keywords: ["terms of service", "ZISO AI", "user agreement"],
 });
 
 export default function TermsLayout({

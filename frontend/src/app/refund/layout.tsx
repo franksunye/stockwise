@@ -3,12 +3,12 @@ import { brandCoreZhCN } from "@/content/brand-core.zh-CN";
 import { buildPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata(brandCoreZhCN.domain, {
-  title: "退款政策 | 知守 AI (ZISO AI)",
-  description: "查看知守 AI 退款条件、处理流程与到账说明。",
+  title: "Refund Policy | ZISO AI",
+  description: "Refund policy for first-time Pro subscribers and billing support flows.",
   path: "/refund",
-  locale: "zh",
-  alternateLocales: ["zh", "en"],
-  keywords: ["退款政策", "知守AI订阅", "售后支持"],
+  locale: "en",
+  alternateLocales: ["en", "ko", "es", "cn"],
+  keywords: ["refund policy", "ZISO AI", "subscription refund"],
 });
 
 export default function RefundLayout({

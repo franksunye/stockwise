@@ -4,72 +4,78 @@ import Link from 'next/link';
 import Image from 'next/image';
 import LandingMobileMenu, { type MarketingMenuLink } from '@/components/LandingMobileMenu';
 
-type MarketingHeaderPage = 'home' | 'about' | 'pricing';
-type MarketingHeaderLocale = 'zh' | 'en';
+import { type PublicLocale, localizePublicPath } from '@/lib/public-i18n';
+
+type MarketingHeaderPage = 'home' | 'about' | 'pricing' | 'privacy' | 'terms' | 'refund';
 
 interface MarketingHeaderProps {
   currentPage: MarketingHeaderPage;
-  locale?: MarketingHeaderLocale;
+  locale?: PublicLocale;
 }
 
-export default function MarketingHeader({ currentPage, locale = 'zh' }: MarketingHeaderProps) {
-  const basePrefix = locale === 'zh' ? '' : '/en';
-  const localizedHome = locale === 'zh' ? '/' : '/en';
-  const localizedHomeAnchorPrefix = currentPage === 'home' ? '' : localizedHome;
-  const currentLocalePathByPage: Record<MarketingHeaderPage, string> = {
-    home: locale === 'zh' ? '/' : '/en',
-    about: locale === 'zh' ? '/about' : '/en/about',
-    pricing: locale === 'zh' ? '/pricing' : '/en/pricing',
-  };
-  const zhPathByPage: Record<MarketingHeaderPage, string> = {
-    home: '/',
-    about: '/about',
-    pricing: '/pricing',
-  };
-  const enPathByPage: Record<MarketingHeaderPage, string> = {
-    home: '/en',
-    about: '/en/about',
-    pricing: '/en/pricing',
-  };
-  const labels = locale === 'zh'
-    ? {
-        features: '功能',
-        about: '关于',
-        pricing: '价格',
-        faq: 'FAQ',
-        openApp: '进入应用',
-        localeZh: '中',
-        localeEn: 'EN',
-      }
-    : {
-        features: 'Features',
-        about: 'About',
-        pricing: 'Pricing',
-        faq: 'FAQ',
-        openApp: 'Open App',
-        localeZh: '中',
-        localeEn: 'EN',
-      };
+interface NavLabels {
+  features: string;
+  about: string;
+  pricing: string;
+  faq: string;
+  openApp: string;
+}
 
-  const links: MarketingMenuLink[] = locale === 'zh'
-    ? [
-        { href: `${localizedHomeAnchorPrefix}#features`, label: '功能' },
-        { href: `${basePrefix}/learn`, label: '101 手册', prefetch: false },
-        { href: `${basePrefix}/about`, label: '关于', prefetch: false, isActive: currentPage === 'about' },
-        { href: `${basePrefix}/pricing`, label: '价格', prefetch: false, isActive: currentPage === 'pricing' },
-        { href: `${basePrefix}/support`, label: '支持', prefetch: false },
-        { href: `${localizedHomeAnchorPrefix}#faq`, label: 'FAQ' },
-      ]
-    : [
-        { href: `${localizedHomeAnchorPrefix}#features`, label: 'Features' },
-        { href: `${basePrefix}/about`, label: 'About', prefetch: false, isActive: currentPage === 'about' },
-        { href: `${basePrefix}/pricing`, label: 'Pricing', prefetch: false, isActive: currentPage === 'pricing' },
-        { href: `${localizedHomeAnchorPrefix}#faq`, label: 'FAQ' },
-      ];
+export default function MarketingHeader({ currentPage, locale = 'en' }: MarketingHeaderProps) {
+  const localizedHome = localizePublicPath('/', locale);
+  const localizedHomeAnchorPrefix = currentPage === 'home' ? '' : localizedHome;
+  
+  const labels: Record<PublicLocale, NavLabels> = {
+    en: {
+      features: 'Features',
+      about: 'About',
+      pricing: 'Pricing',
+      faq: 'FAQ',
+      openApp: 'Open App',
+    },
+    cn: {
+      features: '功能',
+      about: '关于',
+      pricing: '价格',
+      faq: 'FAQ',
+      openApp: '进入应用',
+    },
+    ko: {
+      features: '기능',
+      about: '소개',
+      pricing: '가격',
+      faq: 'FAQ',
+      openApp: '앱 열기',
+    },
+    es: {
+      features: 'Funciones',
+      about: 'Nosotros',
+      pricing: 'Precios',
+      faq: 'FAQ',
+      openApp: 'Abrir App',
+    }
+  };
+
+  const currentLabels = labels[locale] || labels.en;
+
+  const links: MarketingMenuLink[] = [
+    { href: `${localizedHomeAnchorPrefix}#features`, label: currentLabels.features },
+    { href: localizePublicPath('/about', locale), label: currentLabels.about, prefetch: false, isActive: currentPage === 'about' },
+    { href: localizePublicPath('/pricing', locale), label: currentLabels.pricing, prefetch: false, isActive: currentPage === 'pricing' },
+    { href: `${localizedHomeAnchorPrefix}#faq`, label: currentLabels.faq },
+  ];
+
+  // If Chinese, add Learn/Support link
+  if (locale === 'cn') {
+    links.splice(1, 0, { href: '/cn/learn', label: '101 手册', prefetch: false });
+    links.splice(2, 0, { href: '/cn/support', label: '支持中心', prefetch: false });
+  }
 
   const localeSwitches = [
-    { href: locale === 'zh' ? currentLocalePathByPage[currentPage] : zhPathByPage[currentPage], label: labels.localeZh, isActive: locale === 'zh' },
-    { href: locale === 'en' ? currentLocalePathByPage[currentPage] : enPathByPage[currentPage], label: labels.localeEn, isActive: locale === 'en' },
+    { href: localizePublicPath(`/${currentPage === 'home' ? '' : currentPage}`, 'en'), label: 'EN', isActive: locale === 'en' },
+    { href: localizePublicPath(`/${currentPage === 'home' ? '' : currentPage}`, 'cn'), label: '中文', isActive: locale === 'cn' },
+    { href: localizePublicPath(`/${currentPage === 'home' ? '' : currentPage}`, 'ko'), label: '한', isActive: locale === 'ko' },
+    { href: localizePublicPath(`/${currentPage === 'home' ? '' : currentPage}`, 'es'), label: 'ES', isActive: locale === 'es' },
   ];
 
   return (
@@ -92,13 +98,13 @@ export default function MarketingHeader({ currentPage, locale = 'zh' }: Marketin
             {item.label}
           </Link>
         ))}
-        <div className="flex items-center rounded-full border border-white/10 bg-white/5 p-1">
+        <div className="flex items-center rounded-full border border-white/10 bg-white/5 p-0.5">
           {localeSwitches.map((item) => (
             <Link
               key={item.label}
               href={item.href}
-              className={`rounded-full px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.24em] transition-colors ${
-                item.isActive ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white'
+              className={`rounded-full px-2 py-1 text-[9px] font-black uppercase tracking-widest transition-colors ${
+                item.isActive ? 'bg-indigo-500 text-white' : 'text-slate-500 hover:text-white'
               }`}
             >
               {item.label}
@@ -111,13 +117,13 @@ export default function MarketingHeader({ currentPage, locale = 'zh' }: Marketin
           rel="noopener noreferrer"
           className="px-5 py-2.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-white"
         >
-          {labels.openApp}
+          {currentLabels.openApp}
         </Link>
       </div>
 
       <LandingMobileMenu
         links={links}
-        cta={{ href: 'https://app.ziso.cc', label: labels.openApp }}
+        cta={{ href: 'https://app.ziso.cc', label: currentLabels.openApp }}
         localeSwitches={localeSwitches}
       />
     </nav>

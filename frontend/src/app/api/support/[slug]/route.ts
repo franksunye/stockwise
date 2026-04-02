@@ -7,7 +7,7 @@ export async function GET(
 ) {
   try {
     const { slug } = await params;
-    const article = getArticleBySlug(slug);
+    const article = getArticleBySlug(slug, { locale: 'cn' });
 
     if (!article) {
       return NextResponse.json({ error: "Article not found" }, { status: 404 });

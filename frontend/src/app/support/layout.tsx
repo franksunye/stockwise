@@ -3,12 +3,12 @@ import { brandCoreZhCN } from "@/content/brand-core.zh-CN";
 import { buildPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata(brandCoreZhCN.domain, {
-  title: "支持中心 | 知守 AI (ZISO AI)",
-  description: "查看知守 AI 功能说明、通知设置、验证逻辑与常见问题。",
+  title: "Support Center | ZISO AI",
+  description: "Get help with ZISO AI analysis, account management, and investment workflow.",
   path: "/support",
-  locale: "zh",
-  alternateLocales: ["zh", "en"],
-  keywords: ["知守AI支持中心", "AI复盘说明", "通知设置"],
+  locale: "en",
+  alternateLocales: ["en", "ko", "es", "cn"],
+  keywords: ["ZISO AI support", "help center", "customer care"],
 });
 
 export default function SupportLayout({

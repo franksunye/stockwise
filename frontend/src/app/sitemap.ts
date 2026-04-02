@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { brandCoreZhCN } from "@/content/brand-core.zh-CN";
+import { brandCoreEn } from "@/content/brand-core.en";
 import { getAllArticles } from "@/lib/learn-content";
 import { getAllSupportArticles } from "@/lib/support-content";
 
@@ -8,39 +8,60 @@ function nowIso() {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const base = brandCoreZhCN.domain;
+  const base = brandCoreEn.domain;
   const updated = nowIso();
 
-  const staticRoutes: MetadataRoute.Sitemap = [
-    { url: `${base}/`, lastModified: updated, changeFrequency: "daily", priority: 1.0 },
-    { url: `${base}/en`, lastModified: updated, changeFrequency: "daily", priority: 0.7 },
-    { url: `${base}/about`, lastModified: updated, changeFrequency: "monthly", priority: 0.6 },
-    { url: `${base}/en/about`, lastModified: updated, changeFrequency: "monthly", priority: 0.5 },
-    { url: `${base}/pricing`, lastModified: updated, changeFrequency: "weekly", priority: 0.8 },
-    { url: `${base}/en/pricing`, lastModified: updated, changeFrequency: "weekly", priority: 0.6 },
-    { url: `${base}/learn`, lastModified: updated, changeFrequency: "daily", priority: 0.9 },
-    { url: `${base}/support`, lastModified: updated, changeFrequency: "weekly", priority: 0.8 },
-    { url: `${base}/privacy`, lastModified: updated, changeFrequency: "yearly", priority: 0.3 },
-    { url: `${base}/en/privacy`, lastModified: updated, changeFrequency: "yearly", priority: 0.2 },
-    { url: `${base}/terms`, lastModified: updated, changeFrequency: "yearly", priority: 0.3 },
-    { url: `${base}/en/terms`, lastModified: updated, changeFrequency: "yearly", priority: 0.2 },
-    { url: `${base}/refund`, lastModified: updated, changeFrequency: "yearly", priority: 0.3 },
-    { url: `${base}/en/refund`, lastModified: updated, changeFrequency: "yearly", priority: 0.2 },
-  ];
+  // 1. Static Routes for all 4 locales
+  const locales = ["", "/cn", "/ko", "/es"] as const;
+  const staticPages = ["", "/about", "/pricing", "/privacy", "/terms", "/refund"] as const;
 
-  const learnRoutes = (await getAllArticles()).map((article) => ({
-    url: `${base}/learn/${article.slug}`,
+  const staticRoutes: MetadataRoute.Sitemap = [];
+
+  locales.forEach((localePrefix) => {
+    staticPages.forEach((page) => {
+      const isRoot = localePrefix === "" && page === "";
+      const isEnglishRoot = localePrefix === "" && page !== "";
+      
+      staticRoutes.push({
+        url: `${base}${localePrefix}${page}`,
+        lastModified: updated,
+        changeFrequency: page === "" ? "daily" : page.includes("pricing") ? "weekly" : "monthly",
+        priority: isRoot ? 1.0 : isEnglishRoot ? 0.8 : 0.6,
+      });
+    });
+  });
+
+  // 2. Add Learn/Support root for Chinese only until English content is translated
+  const contentRoots = ["/learn", "/support"] as const;
+  contentRoots.forEach((root) => {
+    staticRoutes.push({
+      url: `${base}/cn${root}`,
+      lastModified: updated,
+      changeFrequency: "daily",
+      priority: 0.8,
+    });
+  });
+
+  // 3. Dynamic Chinese Article Routes
+  const cnArticles = await getAllArticles({ locale: "cn" });
+  const cnLearnRoutes = cnArticles.map((article) => ({
+    url: `${base}/cn/learn/${article.slug}`,
     lastModified: article.date || updated,
     changeFrequency: "weekly" as const,
     priority: 0.7,
   }));
 
-  const supportRoutes = getAllSupportArticles().map((article) => ({
-    url: `${base}/support/${article.slug}`,
+  const cnSupportArticles = getAllSupportArticles({ locale: "cn" });
+  const cnSupportRoutes = cnSupportArticles.map((article) => ({
+    url: `${base}/cn/support/${article.slug}`,
     lastModified: article.lastUpdated || updated,
     changeFrequency: "monthly" as const,
     priority: 0.6,
   }));
 
-  return [...staticRoutes, ...learnRoutes, ...supportRoutes];
+  return [
+    ...staticRoutes,
+    ...cnLearnRoutes,
+    ...cnSupportRoutes,
+  ];
 }

@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import {
-    DEFAULT_PUBLIC_LOCALE,
     getPublicLocaleFromPathname,
     getLocaleHrefLang,
     hasPublicLocalePrefix,
@@ -74,6 +73,16 @@ export function middleware(request: NextRequest) {
         return withDebugHeaders(response, branch);
     };
 
+    // 0. SEO 重定向：由于 'en' 变为默认语言（无前缀），强制将旧的 '/en' 前缀重定向到根
+    if (isLocalePrefixed && locale === 'en') {
+        const cleanUrl = url.clone();
+        cleanUrl.pathname = strippedPathname;
+        return withDebugHeaders(
+            NextResponse.redirect(cleanUrl, 301),
+            'main-redirect-en-to-root'
+        );
+    }
+
     // 1. App 子域名策略 (app.ziso.cc)
     if (isAppDomain) {
         if (isLocalePrefixed) {
@@ -141,13 +150,7 @@ export function middleware(request: NextRequest) {
         return withLocaleRequestHeader(isLocalePrefixed ? 'main-public-locale' : 'main-public-default-locale');
     }
 
-    if (locale !== DEFAULT_PUBLIC_LOCALE) {
-        const response = NextResponse.next();
-        response.headers.set('content-language', getLocaleHrefLang(locale));
-        return withDebugHeaders(response, 'pass-through-locale');
-    }
-
-    return withDebugHeaders(NextResponse.next(), 'pass-through');
+    return withLocaleRequestHeader('pass-through-locale');
 }
 
 export const config = {

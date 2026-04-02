@@ -38,7 +38,7 @@ export function buildPageMetadata(baseUrl: string, input: SeoInput): Metadata {
   const canonicalPath = localizePublicPath(input.canonicalPath || input.path, canonicalLocale);
   const canonical = buildCanonicalUrl(baseUrl, canonicalPath);
   const ogType = input.type || "website";
-  const alternateLocales = input.alternateLocales || [DEFAULT_PUBLIC_LOCALE, "en"];
+  const alternateLocales = input.alternateLocales || ["en", "ko", "es", "cn"];
   const languages = Object.fromEntries(
     alternateLocales.map((altLocale) => [
       getLocaleHrefLang(altLocale),
@@ -48,6 +48,10 @@ export function buildPageMetadata(baseUrl: string, input: SeoInput): Metadata {
   languages["x-default"] = buildCanonicalUrl(baseUrl, localizePublicPath(input.path, DEFAULT_PUBLIC_LOCALE));
   const index = input.index ?? isIndexablePublicLocale(locale);
   const follow = input.follow ?? true;
+
+  const metadataLocale = getLocaleHrefLang(locale).includes('-') 
+    ? getLocaleHrefLang(locale).replace("-", "_")
+    : `${getLocaleHrefLang(locale)}_${getLocaleHrefLang(locale).toUpperCase()}`;
 
   return {
     title: input.title,
@@ -66,7 +70,7 @@ export function buildPageMetadata(baseUrl: string, input: SeoInput): Metadata {
       description: input.description,
       url: buildCanonicalUrl(baseUrl, currentPath),
       type: ogType,
-      locale: getLocaleHrefLang(locale).replace("-", "_"),
+      locale: metadataLocale,
     },
     twitter: {
       card: "summary_large_image",

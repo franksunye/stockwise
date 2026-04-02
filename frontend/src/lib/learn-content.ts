@@ -91,7 +91,9 @@ function getContentDirectory(locale: PublicLocale): string | null {
     if (fs.existsSync(localizedDir)) {
         return localizedDir;
     }
-    if (locale === DEFAULT_PUBLIC_LOCALE && fs.existsSync(CONTENT_DIR)) {
+
+    // Legacy Chinese content still lives in the root content directory.
+    if (locale === 'cn' && fs.existsSync(CONTENT_DIR)) {
         return CONTENT_DIR;
     }
     return null;

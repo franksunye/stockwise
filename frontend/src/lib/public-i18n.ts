@@ -1,6 +1,6 @@
-export const DEFAULT_PUBLIC_LOCALE = 'zh' as const;
-export const SUPPORTED_PUBLIC_LOCALES = ['zh', 'en'] as const;
-export const INDEXABLE_PUBLIC_LOCALES = ['zh'] as const;
+export const DEFAULT_PUBLIC_LOCALE = 'en' as const;
+export const SUPPORTED_PUBLIC_LOCALES = ['en', 'ko', 'es', 'cn'] as const;
+export const INDEXABLE_PUBLIC_LOCALES = ['en', 'ko', 'es', 'cn'] as const;
 export const PUBLIC_ROUTE_ALLOWLIST = ['/', '/about', '/pricing', '/privacy', '/terms', '/refund', '/learn', '/support'] as const;
 
 export type PublicLocale = (typeof SUPPORTED_PUBLIC_LOCALES)[number];
@@ -57,9 +57,19 @@ export function isExcludedAppPath(pathname: string): boolean {
 }
 
 export function getLocaleHrefLang(locale: PublicLocale): string {
-  return locale === 'zh' ? 'zh-CN' : 'en';
+  switch (locale) {
+    case 'cn': return 'zh-CN';
+    case 'ko': return 'ko';
+    case 'es': return 'es';
+    default: return 'en';
+  }
 }
 
 export function getHtmlLang(locale: PublicLocale): string {
-  return locale === 'zh' ? 'zh-CN' : 'en';
+  switch (locale) {
+    case 'cn': return 'zh-CN';
+    case 'ko': return 'ko';
+    case 'es': return 'es';
+    default: return 'en';
+  }
 }

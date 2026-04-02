@@ -3,7 +3,7 @@ import { getAllArticles } from '@/lib/learn-content';
 
 export async function GET() {
     try {
-        const articles = await getAllArticles();
+        const articles = await getAllArticles({ locale: 'cn' });
         // Only return 101-* articles, exclude internal docs
         const filtered = articles.filter(a => a.slug.startsWith('101-'));
         return NextResponse.json(filtered);
