@@ -146,7 +146,7 @@ export function EnglishPricingPage() {
 
               <div className="mb-8">
                 <div className="flex items-baseline gap-1">
-                  <span className="text-sm font-bold">¥</span>
+                  <span className="text-sm font-bold">$</span>
                   <span className="text-5xl font-black tracking-tighter">{plan.price}</span>
                 </div>
                 <p className="text-slate-500 text-sm mt-2">{plan.period}</p>
@@ -193,7 +193,7 @@ export function EnglishPricingPage() {
                 <tr className="border-b border-white/5 bg-white/[0.02]">
                   <th className="py-6 px-8 text-sm font-black uppercase tracking-widest text-slate-500">Capability</th>
                   <th className="py-6 px-8 text-sm font-black text-slate-300">Free</th>
-                  <th className="py-6 px-8 text-sm font-black text-indigo-300">Pro</th>
+                  <th className="py-6 px-8 text-sm font-black text-indigo-300">Go</th>
                 </tr>
               </thead>
               <tbody className="text-sm font-medium">
@@ -220,8 +220,8 @@ export function EnglishPricingPage() {
               <p className="text-slate-400 text-sm leading-relaxed">A subscription is not just for software; it is for the continuous compute and multi-agent reasoning required to deliver a nightly briefing. You are hiring a disciplined council that works when the market is closed.</p>
             </div>
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
-              <p className="text-white font-bold mb-3 uppercase tracking-tighter">What makes Pro different from Free?</p>
-              <p className="text-slate-400 text-sm leading-relaxed">Free is rule-based. Pro is reasoning-based. Pro unlocks the DeepSeek logic layer, providing deeper tactical narratives, key price levels, and the defensive 75% circuit breaker gate.</p>
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter">What makes Go different from Free?</p>
+              <p className="text-slate-400 text-sm leading-relaxed">Free is rule-based. Go is reasoning-based. Go unlocks the DeepSeek logic layer, providing deeper tactical narratives, key price levels, and the defensive 75% circuit breaker gate.</p>
             </div>
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
               <p className="text-white font-bold mb-3 uppercase tracking-tighter">Is the 75% Gate available to Free users?</p>
@@ -242,7 +242,7 @@ export function EnglishPricingPage() {
                 summary={[
                   'Subscription: Access to a multi-agent AI research desk for nightly tactical briefings.',
                   'Free Tier: Logic-only recap using basic rule engines for trend identification.',
-                  'Pro Tier: Reasoning-first reports powered by DeepSeek, including the 75% risk circuit breaker logic.',
+                  'Go Tier: Reasoning-first reports powered by DeepSeek, including the 75% risk circuit breaker logic.',
                 ]}
               />
             </div>

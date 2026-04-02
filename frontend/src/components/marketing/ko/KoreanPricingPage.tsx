@@ -26,18 +26,18 @@ const KO_PRICING_PLANS = [
     accent: 'text-slate-300',
   },
   {
-    name: 'Pro',
+    name: 'Go',
     eyebrow: '코어 제품',
-    price: '29.9',
-    period: '월간 / 연간 ¥299',
+    price: '4.99',
+    period: '월간 / 연간 $49.9',
     description: '더 깊이 있는 야간 리서치와 강력한 실행 규율을 원하는 투자자를 위한 플랜입니다.',
     features: [
-      'DeepSeek 추론 레이어 (Go)',
+      'DeepSeek 추론 레이어',
       '코칭 스타일의 전술 브리핑',
       '10개의 관심 종목 정밀 모니터링',
       '주요 가격대 및 심리 분석 잠금 해제',
       '주요 설정 변경 시 실시간 규율 알림',
-      'Pro 전용 아이덴티티 배지',
+      'Go 전용 아이덴티티 배지',
     ],
     cta: '앱 열기',
     href: 'https://app.ziso.cc',
@@ -84,8 +84,8 @@ export function KoreanPricingPage() {
       "@type": "AggregateOffer",
       "offerCount": "3",
       "lowPrice": "0",
-      "highPrice": "299",
-      "priceCurrency": "CNY"
+      "highPrice": "1999",
+      "priceCurrency": "USD"
     }
   };
 
@@ -145,7 +145,7 @@ export function KoreanPricingPage() {
 
               <div className="mb-8">
                 <div className="flex items-baseline gap-1">
-                  <span className="text-sm font-bold">¥</span>
+                  <span className="text-sm font-bold">$</span>
                   <span className="text-5xl font-black tracking-tighter">{plan.price}</span>
                 </div>
                 <p className="text-slate-500 text-sm mt-2">{plan.period}</p>
@@ -192,7 +192,7 @@ export function KoreanPricingPage() {
                 <tr className="border-b border-white/5 bg-white/[0.02]">
                   <th className="py-6 px-8 text-sm font-black uppercase tracking-widest text-slate-500">핵심 역량</th>
                   <th className="py-6 px-8 text-sm font-black text-slate-300">Free</th>
-                  <th className="py-6 px-8 text-sm font-black text-indigo-300">Pro</th>
+                  <th className="py-6 px-8 text-sm font-black text-indigo-300">Go</th>
                 </tr>
               </thead>
               <tbody className="text-sm font-medium">
@@ -219,8 +219,8 @@ export function KoreanPricingPage() {
               <p className="text-slate-400 text-sm leading-relaxed">구독은 단순한 소프트웨어 사용료가 아니라, 매일 밤 브리핑을 생성하기 위해 가동되는 다중 에이전트 리서치 위원회에 대한 고용 비용입니다. 시장이 닫혀 있을 때 일하는 당신만의 리서치 팀을 갖게 되는 것입니다.</p>
             </div>
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
-              <p className="text-white font-bold mb-3 uppercase tracking-tighter">Pro와 Free의 가장 큰 차이점은 무엇인가요?</p>
-              <p className="text-slate-400 text-sm leading-relaxed">Free는 규칙 기반입니다. Pro는 추론 기반입니다. Pro는 DeepSeek 논리 레이어를 활성화하여 더 깊은 전술적 서사, 가격대 분석, 그리고 방어적인 75% 서킷 브레이커 게이트를 제공합니다.</p>
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter">Go와 Free의 가장 큰 차이점은 무엇인가요?</p>
+              <p className="text-slate-400 text-sm leading-relaxed">Free는 규칙 기반입니다. Go는 추론 기반입니다. Go는 DeepSeek 논리 레이어를 활성화하여 더 깊은 전술적 서사, 가격대 분석, 그리고 방어적인 75% 서킷 브레이커 게이트를 제공합니다.</p>
             </div>
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
               <p className="text-white font-bold mb-3 uppercase tracking-tighter">75% 게이트는 Free 사용자도 사용할 수 있나요?</p>
@@ -241,7 +241,7 @@ export function KoreanPricingPage() {
                 summary={[
                   '구독 서비스: 야간 전술 브리핑을 위한 다중 에이전트 AI 리서치 데스크 이용 권한.',
                   'Free 티어: 트렌드 식별을 위한 기본 규칙 엔진 기반의 데이터 요약.',
-                  'Pro 티어: DeepSeek으로 구동되는 추론 우선 보고서 및 75% 리스크 서킷 브레이커 로직 포함.',
+                  'Go 티어: DeepSeek으로 구동되는 추론 우선 보고서 및 75% 리스크 서킷 브레이커 로직 포함.',
                 ]}
               />
             </div>

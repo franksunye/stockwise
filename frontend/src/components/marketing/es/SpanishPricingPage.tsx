@@ -85,7 +85,7 @@ export function SpanishPricingPage() {
       "offerCount": "3",
       "lowPrice": "0",
       "highPrice": "1999",
-      "priceCurrency": "CNY"
+      "priceCurrency": "USD"
     }
   };
 
@@ -146,7 +146,7 @@ export function SpanishPricingPage() {
 
               <div className="mb-8">
                 <div className="flex items-baseline gap-1">
-                  <span className="text-sm font-bold">¥</span>
+                  <span className="text-sm font-bold">$</span>
                   <span className="text-5xl font-black tracking-tighter">{plan.price}</span>
                 </div>
                 <p className="text-slate-500 text-sm mt-2">{plan.period}</p>
@@ -193,7 +193,7 @@ export function SpanishPricingPage() {
                 <tr className="border-b border-white/5 bg-white/[0.02]">
                   <th className="py-6 px-8 text-sm font-black uppercase tracking-widest text-slate-500">Capacidad</th>
                   <th className="py-6 px-8 text-sm font-black text-slate-300">Gratis</th>
-                  <th className="py-6 px-8 text-sm font-black text-indigo-300">Pro</th>
+                  <th className="py-6 px-8 text-sm font-black text-indigo-300">Go</th>
                 </tr>
               </thead>
               <tbody className="text-sm font-medium">
@@ -220,8 +220,8 @@ export function SpanishPricingPage() {
               <p className="text-slate-400 text-sm leading-relaxed">Una suscripción no es solo por software; es por el cómputo continuo y el razonamiento multi-agente necesario para entregar un informe nocturno. Estás contratando a un consejo disciplinado que trabaja mientras el mercado está cerrado.</p>
             </div>
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
-              <p className="text-white font-bold mb-3 uppercase tracking-tighter">¿Qué hace a Pro diferente de Gratis?</p>
-              <p className="text-slate-400 text-sm leading-relaxed">Gratis se basa en reglas. Pro se basa en razonamiento. Pro desbloquea la capa lógica profunda de DeepSeek, proporcionando informes tácticos más profundos, niveles clave y el disyuntor de riesgo del 75%.</p>
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter">¿En qué se diferencia Go de Gratis?</p>
+              <p className="text-slate-400 text-sm leading-relaxed">Gratis se basa en reglas. Go se basa en razonamiento. Go desbloquea la capa lógica profunda de DeepSeek, proporcionando informes tácticos más profundos, niveles clave y el disyuntor de riesgo del 75%.</p>
             </div>
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
               <p className="text-white font-bold mb-3 uppercase tracking-tighter">¿El límite del 75% está disponible para usuarios Gratis?</p>
@@ -242,7 +242,7 @@ export function SpanishPricingPage() {
                 summary={[
                   'Suscripción: Acceso a una mesa de investigación de IA multi-agente para informes tácticos nocturnos.',
                   'Nivel Gratis: Resumen basado en reglas para identificación básica de tendencias.',
-                  'Nivel Pro: Informes de razonamiento impulsados por DeepSeek, incluyendo la lógica de disyuntor del 75%.',
+                  'Nivel Go: Informes de razonamiento impulsados por DeepSeek, incluyendo la lógica de disyuntor del 75%.',
                 ]}
               />
             </div>
