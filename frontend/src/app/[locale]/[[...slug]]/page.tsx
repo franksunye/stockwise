@@ -17,12 +17,54 @@ import { ChineseLearnArticlePage } from '@/components/public/ChineseLearnArticle
 import { ChineseLearnIndexPage } from '@/components/public/ChineseLearnIndexPage';
 import { ChineseSupportArticlePage } from '@/components/public/ChineseSupportArticlePage';
 import { ChineseSupportIndexPage } from '@/components/public/ChineseSupportIndexPage';
-import { isSupportedPublicLocale, type PublicLocale } from '@/lib/public-i18n';
+import { isSupportedPublicLocale, type PublicLocale, SUPPORTED_PUBLIC_LOCALES } from '@/lib/public-i18n';
 import { buildPageMetadata } from '@/lib/seo';
+import { getAllArticles } from '@/lib/learn-content';
+import { getAllSupportArticles } from '@/lib/support-content';
 
-type Params = Promise<{ locale: string; slug?: string[] }>;
+type PageParams = { locale: string; slug?: string[] };
+type PageProps = { params: Promise<PageParams> };
+
+export async function generateStaticParams(): Promise<PageParams[]> {
+  const params: PageParams[] = [];
+
+  // 1. Core localized marketing paths (excluding default 'en' which is handled at root level)
+  const locales: PublicLocale[] = ['cn', 'ko', 'es'];
+  const staticMarketingPaths = ['', 'about', 'pricing', 'privacy', 'terms', 'refund', 'learn', 'support'];
+
+  for (const locale of locales) {
+    // Basic pages
+    for (const path of staticMarketingPaths) {
+      params.push({
+        locale,
+        slug: path === '' ? undefined : path.split('/'),
+      });
+    }
+
+    // 2. Localized Learn Articles
+    const learnArticles = await getAllArticles({ locale });
+    for (const article of learnArticles) {
+      params.push({
+        locale,
+        slug: ['learn', article.slug],
+      });
+    }
+
+    // 3. Localized Support Articles
+    const supportArticles = await getAllSupportArticles({ locale });
+    for (const article of supportArticles) {
+      params.push({
+        locale,
+        slug: ['support', article.slug],
+      });
+    }
+  }
+
+  return params;
+}
 
 interface PageConfig {
+
   title: string;
   description: string;
   path: string;
@@ -212,13 +254,16 @@ function getPageConfig(locale: PublicLocale, slugParts: string[]): PageConfig | 
   return null;
 }
 
-export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { locale, slug } = await params;
   if (!isSupportedPublicLocale(locale)) return {};
 
   const slugParts = slug || [];
-  if (locale !== 'cn' && isContentPath(slugParts)) {
-    return {};
+  if (isContentPath(slugParts)) {
+    // Content pages in non-CN locales either render their own or redirect to EN
+    if (locale !== 'cn') {
+      return {}; // Metadata will be handled by the redirect or the target page
+    }
   }
 
   const config = getPageConfig(locale, slugParts);
@@ -234,13 +279,18 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   });
 }
 
-export default async function LocalePreviewRoute({ params }: { params: Params }) {
+export default async function LocalePreviewRoute({ params }: PageProps) {
   const { locale, slug } = await params;
   if (!isSupportedPublicLocale(locale)) notFound();
 
+
   const slugParts = slug || [];
-  if (locale !== 'cn' && isContentPath(slugParts)) {
-    permanentRedirect(`/cn/${slugParts.join('/')}`);
+  if (isContentPath(slugParts)) {
+    if (locale !== 'cn') {
+      // Redirect KO/ES content paths to the root English content
+      permanentRedirect(`/${slugParts.join('/')}`);
+    }
+    // CN content paths continue to render below via getPageConfig
   }
 
   const config = getPageConfig(locale, slugParts);

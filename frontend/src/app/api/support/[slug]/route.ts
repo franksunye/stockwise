@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getArticleBySlug } from "@/lib/support-content";
+import { getSupportArticleBySlug } from "@/lib/support-content";
 
 export async function GET(
   request: NextRequest,
@@ -7,7 +7,7 @@ export async function GET(
 ) {
   try {
     const { slug } = await params;
-    const article = getArticleBySlug(slug, { locale: 'cn' });
+    const article = getSupportArticleBySlug(slug, { locale: "cn" });
 
     if (!article) {
       return NextResponse.json({ error: "Article not found" }, { status: 404 });

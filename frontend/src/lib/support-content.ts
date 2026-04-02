@@ -78,13 +78,9 @@ function getContentDirectory(locale: PublicLocale): string | null {
     if (fs.existsSync(localizedDir)) {
         return localizedDir;
     }
-
-    // Legacy Chinese support docs still live in the root content directory.
-    if (locale === 'cn' && fs.existsSync(CONTENT_DIR)) {
-        return CONTENT_DIR;
-    }
     return null;
 }
+
 
 function resolveDirectory(options?: ContentRequestOptions): { dir: string | null; sourceLocale: PublicLocale; isFallback: boolean } {
     const locale = options?.locale || DEFAULT_PUBLIC_LOCALE;
@@ -135,7 +131,7 @@ export function getAllSupportArticles(options?: ContentRequestOptions): SupportA
     return articles;
 }
 
-export function getArticleBySlug(slug: string, options?: ContentRequestOptions): SupportArticle | undefined {
+export function getSupportArticleBySlug(slug: string, options?: ContentRequestOptions): SupportArticle | undefined {
     const locale = options?.locale || DEFAULT_PUBLIC_LOCALE;
     const { dir } = resolveDirectory(options);
     if (!dir) {

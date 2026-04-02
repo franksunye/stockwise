@@ -1,4 +1,4 @@
-'use client';
+
 
 import { EnglishAboutPage } from '@/components/marketing/en/EnglishAboutPage';
 

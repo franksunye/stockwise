@@ -6,10 +6,10 @@ import MarketingFooter from '@/components/MarketingFooter';
 import { BoundaryNotice, FreshnessBlock, GeoSummary, SourceBlock } from '@/components/seo/GeoBlocks';
 import { brandCoreZhCN } from '@/content/brand-core.zh-CN';
 import { buildArticleJsonLd } from '@/lib/geo';
-import { getAllSupportArticles, getArticleBySlug } from '@/lib/support-content';
+import { getAllSupportArticles, getSupportArticleBySlug } from '@/lib/support-content';
 
 export function ChineseSupportArticlePage({ slug }: { slug: string }) {
-  const article = getArticleBySlug(slug, { locale: 'cn' });
+  const article = getSupportArticleBySlug(slug, { locale: 'cn' });
   if (!article) notFound();
 
   const related = getAllSupportArticles({ locale: 'cn' })

@@ -1,5 +1,5 @@
-import { permanentRedirect } from 'next/navigation';
+import { EnglishSupportIndexPage } from '@/components/public/EnglishSupportIndexPage';
 
-export default function SupportPage() {
-  permanentRedirect('/cn/support');
+export default async function SupportRootPage() {
+  return <EnglishSupportIndexPage />;
 }

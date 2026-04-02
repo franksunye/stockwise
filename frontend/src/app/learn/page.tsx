@@ -1,5 +1,5 @@
-import { permanentRedirect } from 'next/navigation';
+import { EnglishLearnIndexPage } from '@/components/public/EnglishLearnIndexPage';
 
-export default function LearnPage() {
-  permanentRedirect('/cn/learn');
+export default async function LearnRootPage() {
+  return <EnglishLearnIndexPage />;
 }

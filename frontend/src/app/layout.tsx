@@ -1,10 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { headers } from "next/headers";
 import { Analytics } from "@vercel/analytics/react";
 import { brandCoreZhCN } from "@/content/brand-core.zh-CN";
 import { ServiceWorkerRegistrar } from "@/components/ServiceWorkerRegistrar";
 import { buildRootBootstrapInlineScript } from "@/lib/dashboard-bootstrap";
 import { getHtmlLang, isSupportedPublicLocale } from "@/lib/public-i18n";
+
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -50,12 +50,9 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const rootBootstrapInlineScript = buildRootBootstrapInlineScript();
-  const requestHeaders = await headers();
-  const localeHeader = requestHeaders.get("x-ziso-locale");
-  const htmlLang = isSupportedPublicLocale(localeHeader) ? getHtmlLang(localeHeader) : "en";
 
   return (
-    <html lang={htmlLang} suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="manifest" href="/manifest.json" />
         <link rel="preconnect" href="https://app.ziso.cc" />
