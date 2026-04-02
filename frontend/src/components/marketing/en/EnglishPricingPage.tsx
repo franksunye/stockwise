@@ -26,10 +26,10 @@ const EN_PRICING_PLANS = [
     accent: 'text-slate-300',
   },
   {
-    name: 'Pro',
+    name: 'Go',
     eyebrow: 'Core product',
-    price: '29.9',
-    period: 'Per month / ¥299 yearly',
+    price: '4.99',
+    period: 'Per month / $49.9 yearly',
     description: 'For investors who want deeper nightly research and stronger execution discipline.',
     features: [
       'DeepSeek reasoning layer',
@@ -37,7 +37,7 @@ const EN_PRICING_PLANS = [
       '10 fully monitored watchlist names',
       'Key levels and sentiment unlocks',
       'Realtime discipline alerts on major setup changes',
-      'Pro identity badge',
+      'Go identity badge',
     ],
     cta: 'Open App',
     href: 'https://app.ziso.cc',
@@ -85,7 +85,7 @@ export function EnglishPricingPage() {
       "offerCount": "3",
       "lowPrice": "0",
       "highPrice": "1999",
-      "priceCurrency": "CNY"
+      "priceCurrency": "USD"
     }
   };
 

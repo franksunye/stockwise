@@ -65,12 +65,12 @@ const KO_PRICING_PLANS = [
 ] as const;
 
 const KO_FEATURE_COMPARISON = [
-  { label: 'AI 추론 깊이', free: '규칙 엔진 + 기본 AI', pro: '심층 추론 레이어 (Go)', highlight: true },
-  { label: '브리핑 스타일', free: '기본 요약', pro: '코칭 스타일 서사 및 원인 분석', highlight: true },
+  { label: 'AI 추론 깊이', free: '규칙 엔진 + 기본 AI', pro: '심층 추론 레이어', highlight: true },
+  { label: '브리핑 스타일', free: '기본 요약', pro: '코치 스타일의 서사 및 귀인 분석', highlight: true },
   { label: '관심 종목 용량', free: '3개', pro: '10개', highlight: true },
-  { label: '시장 커버리지', free: '중국 및 홍콩 주식', pro: '중국 및 홍콩 주식', highlight: false },
-  { label: '실시간 규율 알림', free: '없음', pro: '있음 (주요 설정 변경 시)', highlight: true },
-  { label: '데이터 리듬', free: '장 마감 후', pro: '장 마감 후 + 선별적 실시간 알림', highlight: false },
+  { label: '시장 커버리지', free: '중국 + 홍콩 주식 전용', pro: '중국 + 홍콩 주식 전용', highlight: false },
+  { label: '실시간 규율 알림', free: '미지원', pro: '지원 (주요 셋업 변경 시)', highlight: true },
+  { label: '데이터 리듬', free: '장 마감 후', pro: '장 마감 후 + 선택적 실시간 알림', highlight: false },
 ] as const;
 
 export function KoreanPricingPage() {
