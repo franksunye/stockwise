@@ -13,6 +13,14 @@ import { EnglishPricingPage } from '@/components/marketing/en/EnglishPricingPage
 import { EnglishPrivacyPage } from '@/components/marketing/en/EnglishPrivacyPage';
 import { EnglishRefundPage } from '@/components/marketing/en/EnglishRefundPage';
 import { EnglishTermsPage } from '@/components/marketing/en/EnglishTermsPage';
+import { KoreanAboutPage } from '@/components/marketing/ko/KoreanAboutPage';
+import { KoreanHomePage } from '@/components/marketing/ko/KoreanHomePage';
+import { KoreanPricingPage } from '@/components/marketing/ko/KoreanPricingPage';
+import { KoreanPrivacyPage, KoreanTermsPage, KoreanRefundPage } from '@/components/marketing/ko/KoreanLegalPages';
+import { SpanishAboutPage } from '@/components/marketing/es/SpanishAboutPage';
+import { SpanishHomePage } from '@/components/marketing/es/SpanishHomePage';
+import { SpanishPricingPage } from '@/components/marketing/es/SpanishPricingPage';
+import { SpanishPrivacyPage, SpanishTermsPage, SpanishRefundPage } from '@/components/marketing/es/SpanishLegalPages';
 import { ChineseLearnArticlePage } from '@/components/public/ChineseLearnArticlePage';
 import { ChineseLearnIndexPage } from '@/components/public/ChineseLearnIndexPage';
 import { ChineseSupportArticlePage } from '@/components/public/ChineseSupportArticlePage';
@@ -192,6 +200,124 @@ function getPageConfig(locale: PublicLocale, slugParts: string[]): PageConfig | 
     }
 
     return null;
+  }
+
+  if (locale === 'ko') {
+    if (path === '') {
+      const meta = buildLocalizedMeta('ko', 'home');
+      return {
+        title: meta.title,
+        description: meta.desc,
+        path: '/',
+        render: () => <KoreanHomePage />,
+      };
+    }
+
+    if (path === 'about') {
+      const meta = buildLocalizedMeta('ko', 'about');
+      return {
+        title: meta.title,
+        description: meta.desc,
+        path: '/about',
+        render: () => <KoreanAboutPage />,
+      };
+    }
+
+    if (path === 'pricing') {
+      const meta = buildLocalizedMeta('ko', 'pricing');
+      return {
+        title: meta.title,
+        description: meta.desc,
+        path: '/pricing',
+        render: () => <KoreanPricingPage />,
+      };
+    }
+
+    if (path === 'privacy') {
+      return {
+        title: '개인정보 처리방침 | ZISO AI',
+        description: 'ZISO AI 한국어 사이트 개인정보 처리방침 및 데이터 처리 안내.',
+        path: '/privacy',
+        render: () => <KoreanPrivacyPage />,
+      };
+    }
+
+    if (path === 'terms') {
+      return {
+        title: '서비스 이용약관 | ZISO AI',
+        description: 'ZISO AI 한국어 사이트 서비스 이용약관 및 사용 범위 안내.',
+        path: '/terms',
+        render: () => <KoreanTermsPage />,
+      };
+    }
+
+    if (path === 'refund') {
+      return {
+        title: '환불 규정 | ZISO AI',
+        description: 'ZISO AI 한국어 사이트 구독 환불 및 취소 규칙 안내.',
+        path: '/refund',
+        render: () => <KoreanRefundPage />,
+      };
+    }
+  }
+
+  if (locale === 'es') {
+    if (path === '') {
+      const meta = buildLocalizedMeta('es', 'home');
+      return {
+        title: meta.title,
+        description: meta.desc,
+        path: '/',
+        render: () => <SpanishHomePage />,
+      };
+    }
+
+    if (path === 'about') {
+      const meta = buildLocalizedMeta('es', 'about');
+      return {
+        title: meta.title,
+        description: meta.desc,
+        path: '/about',
+        render: () => <SpanishAboutPage />,
+      };
+    }
+
+    if (path === 'pricing') {
+      const meta = buildLocalizedMeta('es', 'pricing');
+      return {
+        title: meta.title,
+        description: meta.desc,
+        path: '/pricing',
+        render: () => <SpanishPricingPage />,
+      };
+    }
+
+    if (path === 'privacy') {
+      return {
+        title: 'Política de Privacidad | ZISO AI',
+        description: 'Política de privacidad y tratamiento de datos para el sitio web en español de ZISO AI.',
+        path: '/privacy',
+        render: () => <SpanishPrivacyPage />,
+      };
+    }
+
+    if (path === 'terms') {
+      return {
+        title: 'Términos de Servicio | ZISO AI',
+        description: 'Términos que rigen el uso de los servicios y análisis del sitio web en español de ZISO AI.',
+        path: '/terms',
+        render: () => <SpanishTermsPage />,
+      };
+    }
+
+    if (path === 'refund') {
+      return {
+        title: 'Política de Reembolso | ZISO AI',
+        description: 'Política de reembolso y reglas de cancelación para el sitio web en español de ZISO AI.',
+        path: '/refund',
+        render: () => <SpanishRefundPage />,
+      };
+    }
   }
 
   if (path === '') {
