@@ -66,7 +66,6 @@ const EN_PRICING_PLANS = [
 
 const EN_FEATURE_COMPARISON = [
   { label: 'AI reasoning depth', free: 'Rule engine + basic AI', pro: 'Deep reasoning layer', highlight: true },
-  { label: 'Briefing style', free: 'Basic recap', pro: 'Coach-style narrative and attribution', highlight: true },
   { label: 'Watchlist capacity', free: '3 names', pro: '10 names', highlight: true },
   { label: 'Market coverage', free: 'China + Hong Kong equities', pro: 'China + Hong Kong equities', highlight: false },
   { label: 'Realtime discipline alerts', free: 'No', pro: 'Yes, for major setup changes', highlight: true },

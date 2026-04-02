@@ -66,7 +66,6 @@ const ES_PRICING_PLANS = [
 
 const ES_FEATURE_COMPARISON = [
   { label: 'Profundidad de razonamiento de IA', gratis: 'Motor de reglas + IA básica', pro: 'Capa de razonamiento profundo (Go)', highlight: true },
-  { label: 'Estilo de informe', gratis: 'Resumen básico', pro: 'Narrativa estilo coach y atribución', highlight: true },
   { label: 'Capacidad de lista de vigilancia', gratis: '3 nombres', pro: '10 nombres', highlight: true },
   { label: 'Cobertura de mercado', gratis: 'Acciones de China + Hong Kong', pro: 'Acciones de China + Hong Kong', highlight: false },
   { label: 'Alertas de disciplina en tiempo real', gratis: 'No', pro: 'Sí, para cambios importantes de setup', highlight: true },
