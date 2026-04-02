@@ -265,6 +265,8 @@ export function resolveAnalystForBriefSource(
   return resolveAnalystFromModel(modelLike);
 }
 
-export function resolveBriefAuthorByTier(tier: 'free' | 'pro'): AnalystProfile {
-  return tier === 'pro' ? TEAM_MEMBER_DIRECTORY.gu_shen : TEAM_MEMBER_DIRECTORY.lin_xu;
+export function resolveBriefAuthorByTier(tier: 'free' | 'go' | 'plus' | 'pro' | 'alpha'): AnalystProfile {
+  return (tier === 'plus' || tier === 'pro' || tier === 'alpha')
+    ? TEAM_MEMBER_DIRECTORY.gu_shen
+    : TEAM_MEMBER_DIRECTORY.lin_xu;
 }

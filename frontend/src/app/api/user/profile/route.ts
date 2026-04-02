@@ -63,10 +63,10 @@ export async function POST(request: Request) {
                     // to ensure the invited user truly engages with the product.
                     validReferrerId = referredBy;
 
-                    // Referee Reward (New User gets Pro trial immediately)
+                    // Referee Reward (New User gets Go trial immediately)
                     const expiryDate = new Date();
                     expiryDate.setDate(expiryDate.getDate() + MEMBERSHIP_CONFIG.referral.refereeDays);
-                    initialTier = 'pro';
+                    initialTier = 'go';
                     expiresAt = expiryDate.toISOString();
                 } else {
                     console.warn(`Referral skipped: Referrer ${referredBy} not found`);
@@ -149,16 +149,16 @@ export async function POST(request: Request) {
                     try {
                         if (isCloud) {
                             await client.execute({
-                                sql: "UPDATE users SET subscription_tier = 'pro', subscription_expires_at = ?, referred_by = ? WHERE user_id = ?",
+                                sql: "UPDATE users SET subscription_tier = 'go', subscription_expires_at = ?, referred_by = ? WHERE user_id = ?",
                                 args: [newExpiresAt, referredBy, userId]
                             });
                         } else {
-                            client.prepare("UPDATE users SET subscription_tier = 'pro', subscription_expires_at = ?, referred_by = ? WHERE user_id = ?").run(newExpiresAt, referredBy, userId);
+                            client.prepare("UPDATE users SET subscription_tier = 'go', subscription_expires_at = ?, referred_by = ? WHERE user_id = ?").run(newExpiresAt, referredBy, userId);
                         }
 
                         user = {
                             ...user,
-                            subscription_tier: 'pro',
+                            subscription_tier: 'go',
                             subscription_expires_at: newExpiresAt,
                             referred_by: referredBy
                         };

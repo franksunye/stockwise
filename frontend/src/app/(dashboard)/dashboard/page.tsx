@@ -84,11 +84,17 @@ function DashboardContent() {
   const [userCenterOpen, setUserCenterOpen] = useState(false);
   const [briefOpen, setBriefOpen] = useState(false);
   const almanacRef = useRef<MarketAlmanacHandle>(null);
+  const { tier } = useUserProfile();
+  const showMarketAlmanac = tier === 'pro' || tier === 'alpha';
 
   const { stocks, almanac, almanacs, loadMoreHistory } = useStocks();
 
-  // Create an extended array where the first items are the Market Almanacs
+  // Show Market Almanac only for pro/alpha tiers.
   const displayStocks = useMemo(() => {
+    if (!showMarketAlmanac) {
+      return stocks as ExtendedStockData[];
+    }
+
     const almanacList = almanacs.length > 0 ? almanacs : (almanac ? [almanac] : []);
     const almanacCard: ExtendedStockData = {
       symbol: `MARKET_ALMANAC`,
@@ -116,7 +122,7 @@ function DashboardContent() {
     };
 
     return [almanacCard, ...stocks] as ExtendedStockData[];
-  }, [stocks, almanacs, almanac]);
+  }, [showMarketAlmanac, stocks, almanacs, almanac]);
 
   const router = useRouter();
 
@@ -144,7 +150,7 @@ function DashboardContent() {
 
   const [selectedTactics, setSelectedTactics] = useState<{ symbol: string; prediction: AIPrediction } | null>(null);
   const [profileStock, setProfileStock] = useState<StockData | null>(null);
-  const { tier } = useUserProfile();
+  const showDailyBriefEntry = tier === 'pro' || tier === 'alpha';
 
   const currentStock = displayStocks[currentIndex];
   const contextStock = getDashboardContentStock(currentStock);
@@ -278,18 +284,20 @@ function DashboardContent() {
             </div>
           </div>
 
-          <div className="flex items-start gap-2 pointer-events-auto">
-            <button data-open-brief="true" onClick={() => isMarketAlmanac ? almanacRef.current?.copy() : openBrief()}
-              className="w-10 h-10 rounded-[16px] bg-white/5 border border-white/10 flex items-center justify-center active:scale-90 transition-all hover:bg-white/10 group overflow-hidden relative"
-            >
-              <div className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${isMarketAlmanac ? 'opacity-100 scale-100' : 'opacity-0 scale-50 pointer-events-none'}`}>
-                <Copy className="w-5 h-5 text-slate-400 group-hover:text-indigo-400 transition-colors" />
-              </div>
-              <div className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${!isMarketAlmanac ? 'opacity-100 scale-100' : 'opacity-0 scale-50 pointer-events-none'}`}>
-                <FileText className="w-5 h-5 text-slate-400 group-hover:text-indigo-400 transition-colors" />
-              </div>
-            </button>
-          </div>
+          {showDailyBriefEntry && (
+            <div className="flex items-start gap-2 pointer-events-auto">
+              <button data-open-brief="true" onClick={() => isMarketAlmanac ? almanacRef.current?.copy() : openBrief()}
+                className="w-10 h-10 rounded-[16px] bg-white/5 border border-white/10 flex items-center justify-center active:scale-90 transition-all hover:bg-white/10 group overflow-hidden relative"
+              >
+                <div className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${isMarketAlmanac ? 'opacity-100 scale-100' : 'opacity-0 scale-50 pointer-events-none'}`}>
+                  <Copy className="w-5 h-5 text-slate-400 group-hover:text-indigo-400 transition-colors" />
+                </div>
+                <div className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${!isMarketAlmanac ? 'opacity-100 scale-100' : 'opacity-0 scale-50 pointer-events-none'}`}>
+                  <FileText className="w-5 h-5 text-slate-400 group-hover:text-indigo-400 transition-colors" />
+                </div>
+              </button>
+            </div>
+          )}
         </div>
       </header>
 

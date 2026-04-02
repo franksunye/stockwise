@@ -77,7 +77,13 @@ function buildBatchUrl(symbols: string, historyLimit: number): string {
 
 const DEFAULT_HISTORY_LIMIT = 5;
 
-export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: boolean, historyLimit: number = DEFAULT_HISTORY_LIMIT, priceOnlyRefresh = false) {
+export function useDashboardData(
+    watchlist: WatchlistItem[],
+    loadingWatchlist: boolean,
+    historyLimit: number = DEFAULT_HISTORY_LIMIT,
+    priceOnlyRefresh = false,
+    enableAlmanac = true
+) {
 
     const [stocks, setStocks] = useState<StockData[]>([]);
     const [almanac, setAlmanac] = useState<MarketAlmanacData | null>(null);
@@ -190,8 +196,10 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
                     setLastRefreshTime(new Date(timestamp));
 
                     // 兼容性尝试性加载：即便缓存是 v1 版本的（没有 almanac），也不影响 stocks 的展示
-                    if (parsed.almanac) setAlmanac(parsed.almanac);
-                    if (parsed.almanacs) setAlmanacs(parsed.almanacs);
+                    if (enableAlmanac) {
+                        if (parsed.almanac) setAlmanac(parsed.almanac);
+                        if (parsed.almanacs) setAlmanacs(parsed.almanacs);
+                    }
 
                     // 【核心回归】只要股票恢复了，立即关掉骨架屏进入 App
                     setLoadingPool(false);
@@ -200,7 +208,14 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
         } catch (e) {
             console.error('Cache load error', e);
         }
-    }, []);
+    }, [enableAlmanac]);
+
+    useEffect(() => {
+        if (!enableAlmanac) {
+            setAlmanac(null);
+            setAlmanacs([]);
+        }
+    }, [enableAlmanac]);
 
     const remapStocksToWatchlist = useCallback((sourceStocks: StockData[] = stocksRef.current) => {
         if (watchlist.length === 0) {
@@ -299,8 +314,9 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort('请求超时 (12s)'), 12000); // 12s timeout
 
-            // Step 1: Fetch Shared Almanac context (Stage 1)
+            // Step 1: Fetch Shared Almanac context (Stage 1, pro/alpha only)
             const fetchAlmanac = async () => {
+                if (!enableAlmanac) return null;
                 const almanacController = new AbortController();
                 const almanacTimeoutId = setTimeout(() => almanacController.abort(), 3000);
                 try {
@@ -337,7 +353,9 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
             };
 
             // Execute Stage 1 in background so Almanac failure/latency never blocks stocks.
-            void fetchAlmanac();
+            if (enableAlmanac) {
+                void fetchAlmanac();
+            }
 
             let batchRes = await fetch(url, fetchOptions);
             if (batchRes.status === 401) {
@@ -415,8 +433,8 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
             try {
                 localStorage.setItem(CACHE_KEY, JSON.stringify({
                     data: validResults,
-                    almanac: almanacRef.current,
-                    almanacs: almanacsRef.current,
+                    almanac: enableAlmanac ? almanacRef.current : null,
+                    almanacs: enableAlmanac ? almanacsRef.current : [],
                     timestamp: Date.now()
                 }));
             } catch (e) { console.error('Cache save error', e); }
@@ -451,7 +469,7 @@ export function useDashboardData(watchlist: WatchlistItem[], loadingWatchlist: b
         } finally {
             setIsRefreshing(false);
         }
-    }, [watchlist, loadingWatchlist, historyLimit]);
+    }, [watchlist, loadingWatchlist, historyLimit, enableAlmanac]);
 
     interface PriceSnapshot {
         symbol: string;

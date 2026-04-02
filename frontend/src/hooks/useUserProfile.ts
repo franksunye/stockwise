@@ -19,7 +19,7 @@ const PROFILE_CACHE_KEY = 'stockwise_user_profile_v1';
 const PROFILE_SYNC_SESSION_KEY = 'last_profile_sync';
 const PROFILE_SYNC_IN_FLIGHT_KEY = 'profile_sync_in_flight_v1';
 
-export type Tier = 'free' | 'pro';
+export type Tier = 'free' | 'go' | 'plus' | 'pro' | 'alpha';
 
 export interface ReferralTransaction {
     type: string;

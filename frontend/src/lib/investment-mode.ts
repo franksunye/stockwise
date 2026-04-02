@@ -7,7 +7,7 @@ import {
     type SignalState,
 } from '@/lib/semantic-registry';
 
-export type UserTier = 'free' | 'pro';
+export type UserTier = 'free' | 'go' | 'plus' | 'pro' | 'alpha';
 export type RiskBand = 'low' | 'medium' | 'high';
 export type Horizon = '7d' | '30d' | '90d';
 export type PerformanceScope = 'universal' | 'pool';
@@ -106,7 +106,7 @@ const MODE_DEFINITIONS: InvestmentModeDefinition[] = [
         is_default: false,
         status: 'active',
         effective_from: '2026-03-07T00:00:00.000Z',
-        allowed_tiers: ['pro'],
+        allowed_tiers: ['pro', 'alpha'],
     },
     {
         mode_id: 'balanced_v1',
@@ -119,7 +119,7 @@ const MODE_DEFINITIONS: InvestmentModeDefinition[] = [
         is_default: true,
         status: 'active',
         effective_from: '2026-03-07T00:00:00.000Z',
-        allowed_tiers: ['free', 'pro'],
+        allowed_tiers: ['free', 'go', 'plus', 'pro', 'alpha'],
     },
     {
         mode_id: 'aggressive_v1',
@@ -132,7 +132,7 @@ const MODE_DEFINITIONS: InvestmentModeDefinition[] = [
         is_default: false,
         status: 'active',
         effective_from: '2026-03-07T00:00:00.000Z',
-        allowed_tiers: ['pro'],
+        allowed_tiers: ['plus', 'pro', 'alpha'],
     },
     {
         mode_id: 'observe_only_v1',
@@ -145,7 +145,7 @@ const MODE_DEFINITIONS: InvestmentModeDefinition[] = [
         is_default: false,
         status: 'active',
         effective_from: '2026-03-07T00:00:00.000Z',
-        allowed_tiers: ['pro'],
+        allowed_tiers: ['plus', 'pro', 'alpha'],
     },
 ];
 

@@ -35,7 +35,8 @@ export function StockProvider({ children }: { children: ReactNode }) {
     const historyLimit = isStockPool ? LITE_HISTORY_LIMIT : FULL_HISTORY_LIMIT;
 
     const { watchlist, loading: loadingList, addStock, removeStock } = useWatchlist();
-    const { refreshProfile } = useUserProfile();
+    const { refreshProfile, tier } = useUserProfile();
+    const enableAlmanac = tier === 'pro' || tier === 'alpha';
     const {
         stocks,
         almanac,
@@ -47,7 +48,7 @@ export function StockProvider({ children }: { children: ReactNode }) {
         lastRefreshError,
         refresh,
         loadMoreHistory
-    } = useDashboardData(watchlist, loadingList, historyLimit, isStockPool);
+    } = useDashboardData(watchlist, loadingList, historyLimit, isStockPool, enableAlmanac);
 
     useDashboardRefreshContract({
         watchlist,

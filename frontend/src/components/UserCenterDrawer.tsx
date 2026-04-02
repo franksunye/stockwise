@@ -27,6 +27,16 @@ interface Props {
 
 export function UserCenterDrawer({ isOpen, onClose }: Props) {
   const { profile, tier, userId, refreshProfile, loading } = useUserProfile();
+  const canAccessInvestmentMode = tier === 'pro' || tier === 'alpha';
+  const isPremiumTier = tier !== 'free';
+  const tierDisplayName: Record<typeof tier, string> = {
+    free: '普通用户',
+    go: 'Go 会员',
+    plus: 'Plus 会员',
+    pro: 'Pro 会员',
+    alpha: 'Alpha 会员',
+  };
+  const tierWatchlistLimit = tier === 'free' ? 3 : 10;
 
   const resetDrawerState = () => {
     setShowPricing(false);
@@ -186,7 +196,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
             {/* Navigation Header */}
             <header className="shrink-0 z-20 px-5 py-4 flex items-center justify-between border-b border-white/5 bg-[#0a0a0f]/80 backdrop-blur-xl">
               <div className="w-10">
-                {(showIdentityCenter || showInvestmentMode || showPricing || showSupport || showLearn) && (
+                {(showIdentityCenter || (showInvestmentMode && canAccessInvestmentMode) || showPricing || showSupport || showLearn) && (
                   <button onClick={() => { setShowPricing(false); setShowIdentityCenter(false); setShowInvestmentMode(false); setShowSupport(false); setShowLearn(false); }} className="p-2 rounded-full hover:bg-white/5 active:scale-90 transition-all text-slate-400">
                     <ArrowLeftRight className="w-5 h-5 rotate-180" />
                   </button>
@@ -194,7 +204,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
               </div>
               <div className="flex-1 text-center">
                 <h2 className="text-xl font-black italic tracking-tighter text-white uppercase mt-1">
-                  {showPricing ? '订阅方案' : showIdentityCenter ? '账号设置' : showInvestmentMode ? '投资模式' : showSupport ? '帮助与支持' : showLearn ? '101 手册' : '个人中心'}
+                  {showPricing ? '订阅方案' : showIdentityCenter ? '账号设置' : (showInvestmentMode && canAccessInvestmentMode) ? '投资模式' : showSupport ? '帮助与支持' : showLearn ? '101 手册' : '个人中心'}
                 </h2>
               </div>
               <div className="w-10 flex justify-end">
@@ -272,7 +282,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                       {restoreMsg && <p className={`text-[10px] mt-2 text-left ${restoreMsg.type === 'success' ? 'text-emerald-400' : 'text-rose-400'}`}>{restoreMsg.text}</p>}
                     </div>
                   </motion.div>
-                ) : showInvestmentMode ? (
+                ) : showInvestmentMode && canAccessInvestmentMode ? (
                   <motion.div key="investment-mode" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.25 }}>
                     <InvestmentModeCard currentTier={tier} onUpgrade={() => setShowPricing(true)} />
                   </motion.div>
@@ -289,14 +299,14 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                   <motion.div key="main" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.25 }} className="space-y-6 pb-12">
                     {/* User Card */}
                     <div className="p-1 rounded-[24px] bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-white/10 overflow-hidden relative">
-                      {tier === 'pro' && <div className="absolute top-0 right-0 p-3"><Crown className="text-amber-400 w-6 h-6 drop-shadow-[0_0_8px_rgba(251,191,36,0.5)]" /></div>}
+                      {isPremiumTier && <div className="absolute top-0 right-0 p-3"><Crown className="text-amber-400 w-6 h-6 drop-shadow-[0_0_8px_rgba(251,191,36,0.5)]" /></div>}
                       <div className="bg-[#0f0f16]/90 backdrop-blur rounded-[22px] p-4 flex items-center gap-4">
-                        <div className={`w-14 h-14 rounded-full border-2 flex items-center justify-center relative ${tier === 'pro' ? 'border-amber-500/50 bg-amber-500/10' : 'bg-white/5 border-white/10'}`}>
-                           {loading ? <Loader2 className="w-7 h-7 text-slate-400 animate-spin" /> : <User className={`w-7 h-7 ${tier === 'pro' ? 'text-amber-200' : 'text-slate-400'}`} />}
+                        <div className={`w-14 h-14 rounded-full border-2 flex items-center justify-center relative ${isPremiumTier ? 'border-amber-500/50 bg-amber-500/10' : 'bg-white/5 border-white/10'}`}>
+                           {loading ? <Loader2 className="w-7 h-7 text-slate-400 animate-spin" /> : <User className={`w-7 h-7 ${isPremiumTier ? 'text-amber-200' : 'text-slate-400'}`} />}
                         </div>
                         <div className="flex-1 text-left">
-                          <h3 className="text-base font-black italic text-white uppercase">{tier === 'pro' ? 'Pro 会员' : '普通用户'}</h3>
-                          {expiresAt && tier === 'pro' && (
+                          <h3 className="text-base font-black italic text-white uppercase">{tierDisplayName[tier]}</h3>
+                          {expiresAt && isPremiumTier && (
                             <p className="text-[10px] text-emerald-500/80 font-bold flex items-center gap-1.5 mt-0.5">
                                 <ShieldCheck size={10} /> 有效期至: {expiresAt.split('T')[0]}
                             </p>
@@ -310,22 +320,23 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                       <div className="px-5 py-4 flex items-center justify-between">
                         <span className="text-sm font-bold text-slate-400 uppercase tracking-wide">自选额度</span>
                         <div className="flex items-center gap-2">
-                          <span className={`text-base font-black ${watchlistCount >= (tier === 'pro' ? 10 : 3) ? 'text-amber-400' : 'text-white'}`}>{watchlistCount}</span>
-                          <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">/ {tier === 'pro' ? '10' : '3'}</span>
+                          <span className={`text-base font-black ${watchlistCount >= tierWatchlistLimit ? 'text-amber-400' : 'text-white'}`}>{watchlistCount}</span>
+                          <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">/ {tierWatchlistLimit}</span>
                         </div>
                       </div>
                     </div>
 
                     {/* Nav Buttons */}
                     <div className="space-y-3">
-                      <button onClick={() => setShowIdentityCenter(true)} className={`w-full py-4 px-5 rounded-[24px] border transition-all flex items-center justify-between group ${tier === 'pro' ? 'bg-amber-500/[0.03] border-amber-500/20 hover:border-amber-500/40 hover:bg-amber-500/[0.06]' : 'bg-white/5 border-white/5 hover:border-white/10'}`}>
-                        <span className={`text-sm font-bold ${tier === 'pro' ? 'text-amber-100' : 'text-white'} uppercase`}>账号设置</span>
+                      <button onClick={() => setShowIdentityCenter(true)} className={`w-full py-4 px-5 rounded-[24px] border transition-all flex items-center justify-between group ${isPremiumTier ? 'bg-amber-500/[0.03] border-amber-500/20 hover:border-amber-500/40 hover:bg-amber-500/[0.06]' : 'bg-white/5 border-white/5 hover:border-white/10'}`}>
+                        <span className={`text-sm font-bold ${isPremiumTier ? 'text-amber-100' : 'text-white'} uppercase`}>账号设置</span>
                         <div className="flex items-center gap-3">
                             {userEmail && <span className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 text-xs font-bold border border-emerald-500/20"><ShieldCheck size={12} /> 已保护</span>}
-                            {!userEmail && tier === 'pro' && <div className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />}
+                            {!userEmail && isPremiumTier && <div className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />}
                             <ChevronRight size={14} className="text-slate-600 group-hover:text-white transition-colors" />
                         </div>
                       </button>
+                      {canAccessInvestmentMode && (
                       <div className="glass-card !p-0 rounded-[24px] overflow-hidden border-white/5 bg-white/[0.02]">
                           <div 
                               className="px-5 py-4 flex items-center justify-between cursor-pointer hover:bg-white/[0.02] transition-colors"
@@ -386,6 +397,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                               )}
                           </AnimatePresence>
                       </div>
+                      )}
                     </div>
 
                     {/* Push Switch */}
@@ -480,7 +492,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                           <div className="relative z-10 px-5 py-4 pb-2">
                              <div className="flex items-center justify-between mb-3">
                                 <h4 className="text-sm font-black italic text-white flex items-center gap-2">
-                                    {isChannel ? (referralAlias || '合伙人') : '邀请好友领 Pro'}
+                                    {isChannel ? (referralAlias || '合伙人') : '邀请好友领 Go'}
                                     {isChannel ? (
                                         <span className="px-1.5 py-0.5 rounded bg-amber-500 text-[8px] font-black uppercase not-italic text-black">C</span>
                                     ) : (
@@ -621,10 +633,10 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                         <ChevronRight size={14} className="text-slate-600 group-hover:text-white transition-colors" />
                       </button>
 
-                      <button onClick={() => setShowPricing(true)} className={`w-full py-4 px-5 rounded-[24px] border transition-all flex items-center justify-between group ${tier === 'pro' ? 'bg-white/[0.02] border-white/5 hover:border-indigo-500/20' : 'bg-indigo-500/5 border-indigo-500/10 hover:border-indigo-500/20'}`}>
+                      <button onClick={() => setShowPricing(true)} className={`w-full py-4 px-5 rounded-[24px] border transition-all flex items-center justify-between group ${isPremiumTier ? 'bg-white/[0.02] border-white/5 hover:border-indigo-500/20' : 'bg-indigo-500/5 border-indigo-500/10 hover:border-indigo-500/20'}`}>
                         <div className="flex items-center gap-3">
-                          <Crown className={`w-5 h-5 ${tier === 'pro' ? 'text-slate-400' : 'text-amber-400'}`} />
-                          <span className="text-sm font-bold text-white uppercase text-left">{tier === 'pro' ? '订阅方案' : '解锁 PRO 权益'}</span>
+                          <Crown className={`w-5 h-5 ${isPremiumTier ? 'text-slate-400' : 'text-amber-400'}`} />
+                          <span className="text-sm font-bold text-white uppercase text-left">{isPremiumTier ? '订阅方案' : '解锁 Go 权益'}</span>
                         </div>
                         <ChevronRight size={14} className="text-slate-600 group-hover:text-white transition-colors" />
                       </button>

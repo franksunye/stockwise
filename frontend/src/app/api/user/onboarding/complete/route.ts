@@ -52,7 +52,7 @@ export async function POST(request: Request) {
                 const expiryDate = new Date();
                 expiryDate.setDate(expiryDate.getDate() + trialDays);
 
-                newTier = 'pro';
+                newTier = 'go';
                 newExpiresAt = expiryDate.toISOString();
             }
         }

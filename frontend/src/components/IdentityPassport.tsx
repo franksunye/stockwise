@@ -5,7 +5,7 @@ import { useState } from 'react';
 
 interface Props {
   userId: string;
-  tier: 'free' | 'pro';
+  tier: 'free' | 'go' | 'plus' | 'pro' | 'alpha';
   onLinkEmail: () => void;
   emailLinked?: string | null;
 }

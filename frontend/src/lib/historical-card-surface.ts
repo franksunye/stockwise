@@ -82,10 +82,26 @@ function parseDisplayReason(reasoning: string): string {
     }
 }
 
-function getValidationStyle(data: AIPrediction, windowLabel: string): HistoricalCardValidationStyle {
+function getValidationStyle(data: AIPrediction, windowLabel: string, validationData: ParsedValidationData | null): HistoricalCardValidationStyle {
+    const maxPerf = validationData?.max_cum_change || 0;
+    const isGoldMedal = maxPerf >= 8.0;
+
     switch (data.validation_status) {
         case 'Correct':
-            return { iconName: 'correct', color: 'text-emerald-500', bg: 'bg-emerald-500/10 border-emerald-500/20', label: `${windowLabel}通过` };
+            if (isGoldMedal) {
+                return { 
+                    iconName: 'correct', 
+                    color: 'text-amber-950 font-black', 
+                    bg: 'bg-gradient-to-r from-amber-300 to-yellow-400 border-amber-400/50 shadow-[0_2px_10px_rgba(245,158,11,0.2)]', 
+                    label: `金牌验证 +${maxPerf.toFixed(1)}% ✅` 
+                };
+            }
+            return { 
+                iconName: 'correct', 
+                color: 'text-emerald-500', 
+                bg: 'bg-emerald-500/10 border-emerald-500/20', 
+                label: `验证通过 ${maxPerf > 0 ? '+' + maxPerf.toFixed(1) + '%' : ''} ✅` 
+            };
         case 'Incorrect':
             return { iconName: 'incorrect', color: 'text-rose-500', bg: 'bg-rose-500/10 border-rose-500/20', label: `${windowLabel}偏离` };
         case 'Verifying':
@@ -106,7 +122,7 @@ export function getHistoricalCardSurface(data: AIPrediction): HistoricalCardSurf
         baseChange,
         validationData,
         windowLabel,
-        validationStyle: getValidationStyle(data, windowLabel),
+        validationStyle: getValidationStyle(data, windowLabel, validationData),
     };
 }
 

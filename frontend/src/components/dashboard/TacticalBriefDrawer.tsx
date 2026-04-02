@@ -46,7 +46,7 @@ interface TacticalBriefDrawerProps {
   onClose: () => void;
   data: TacticalData;
   userPos: 'holding' | 'empty' | 'none';
-  tier: 'free' | 'pro';
+  tier: 'free' | 'go' | 'plus' | 'pro' | 'alpha';
   model?: string;
   symbol: string;
   targetDate: string;
@@ -145,6 +145,9 @@ export function TacticalBriefDrawer({
   const isHighPerformance = shouldEnableHighPerformance();
   const [isExpanded, setIsExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState<'brief' | 'council' | 'management'>('brief');
+  const isV10 = ['free', 'go', 'plus'].includes(tier);
+  const showManagement = ['pro', 'alpha'].includes(tier);
+  const showStockAlmanacExport = tier === 'pro' || tier === 'alpha';
   const isFree = tier === 'free';
   const sourceKind = getBriefSourceKind(data, model);
   const analystProfile = resolveAnalystForBriefSource(sourceKind, model);
@@ -196,7 +199,13 @@ export function TacticalBriefDrawer({
   }, []);
 
   // Reset carousel position whenever drawer opens, stock context changes,
-  // or the user switches back to the tactical brief tab.
+  // Safety: reset activeTab to 'brief' if user is v1.0 but somehow in another tab
+  useEffect(() => {
+    if (isV10 && activeTab !== 'brief') {
+      setActiveTab('brief');
+    }
+  }, [tier, isV10, activeTab]);
+
   useEffect(() => {
     if (!isOpen || activeTab !== 'brief') return;
     setActiveIndex(defaultActiveIndex);
@@ -332,54 +341,56 @@ export function TacticalBriefDrawer({
                    <Share2 size={18} />
                  </button>
 
-                 {/* Center: Tabs */}
-                 <div className="flex p-1 rounded-full bg-white/5 border border-white/10 relative z-10">
-                     <button 
-                       onClick={() => setActiveTab('brief')}
-                       className={`relative z-10 px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-colors duration-200 ${activeTab === 'brief' ? 'text-white' : 'text-slate-500 hover:text-slate-300'}`}
-                     >
-                       择时
-                       {activeTab === 'brief' && (
-                         <motion.div 
-                           className="absolute inset-0 bg-indigo-500 rounded-full -z-10 shadow-lg shadow-indigo-500/20"
-                           initial={{ opacity: 0, scale: 0.9 }}
-                           animate={{ opacity: 1, scale: 1 }}
-                           layoutId="activeTab"
-                           transition={{ type: "spring", bounce: 0.2, duration: 0.3 }}
-                         />
-                       )}
-                     </button>
-                     <button 
-                       onClick={() => setActiveTab('council')}
-                       className={`relative z-10 px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-colors duration-200 ${activeTab === 'council' ? 'text-white' : 'text-slate-500 hover:text-slate-300'}`}
-                     >
-                       决议
-                       {activeTab === 'council' && (
-                         <motion.div 
-                           className="absolute inset-0 bg-indigo-500 rounded-full -z-10 shadow-lg shadow-indigo-500/20"
-                           initial={{ opacity: 0, scale: 0.9 }}
-                           animate={{ opacity: 1, scale: 1 }}
-                           layoutId="activeTab"
-                           transition={{ type: "spring", bounce: 0.2, duration: 0.3 }}
-                         />
-                       )}
-                     </button>
-                     <button 
-                       onClick={() => setActiveTab('management')}
-                       className={`relative z-10 px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-colors duration-200 ${activeTab === 'management' ? 'text-white' : 'text-slate-500 hover:text-slate-300'}`}
-                     >
-                       交易
-                       {activeTab === 'management' && (
-                         <motion.div 
-                           className="absolute inset-0 bg-indigo-500 rounded-full -z-10 shadow-lg shadow-indigo-500/20"
-                           initial={{ opacity: 0, scale: 0.9 }}
-                           animate={{ opacity: 1, scale: 1 }}
-                           layoutId="activeTab"
-                           transition={{ type: "spring", bounce: 0.2, duration: 0.3 }}
-                         />
-                       )}
-                     </button>
-                 </div>
+                 {/* Center: Navigation (Tier-Aware) */}
+                  {isV10 ? (
+                    <div className="flex p-1 rounded-full bg-white/5 border border-white/10 relative z-10">
+                      <button
+                        type="button"
+                        disabled
+                        className="relative z-10 px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest text-white cursor-default"
+                        aria-current="page"
+                      >
+                        研判报告
+                        <div className="absolute inset-0 bg-indigo-500 rounded-full -z-10 shadow-lg shadow-indigo-500/20" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex p-1 rounded-full bg-white/5 border border-white/10 relative z-10">
+                        <button 
+                          onClick={() => setActiveTab('brief')}
+                          className={`relative z-10 px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-colors duration-200 ${activeTab === 'brief' ? 'text-white' : 'text-slate-500 hover:text-slate-300'}`}
+                        >
+                          研判报告
+                          {activeTab === 'brief' && (
+                            <motion.div 
+                              className="absolute inset-0 bg-indigo-500 rounded-full -z-10 shadow-lg shadow-indigo-500/20"
+                              initial={{ opacity: 0, scale: 0.9 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              layoutId="activeTab"
+                              transition={{ type: "spring", bounce: 0.2, duration: 0.3 }}
+                            />
+                          )}
+                        </button>
+                        
+                        {showManagement && (
+                          <button 
+                            onClick={() => setActiveTab('management')}
+                            className={`relative z-10 px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-colors duration-200 ${activeTab === 'management' ? 'text-white' : 'text-slate-500 hover:text-slate-300'}`}
+                          >
+                            交易管理
+                            {activeTab === 'management' && (
+                              <motion.div 
+                                className="absolute inset-0 bg-indigo-500 rounded-full -z-10 shadow-lg shadow-indigo-500/20"
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                layoutId="activeTab"
+                                transition={{ type: "spring", bounce: 0.2, duration: 0.3 }}
+                              />
+                            )}
+                          </button>
+                        )}
+                    </div>
+                  )}
 
                  {/* Right: Close Button */}
                  <button 
@@ -840,7 +851,7 @@ export function TacticalBriefDrawer({
                              size={12}
                              className={`text-indigo-400 transition-all duration-500 ${isExpanded ? 'scale-110' : 'opacity-50'}`}
                            />
-                           <span className="text-xs font-black text-slate-400 uppercase tracking-widest group-hover:text-slate-200 transition-colors">查看策略推演过程</span>
+                           <span className="text-xs font-black text-slate-400 uppercase tracking-widest group-hover:text-slate-200 transition-colors">策略推演过程</span>
                         </div>
                         <motion.div
                           animate={{ rotate: isExpanded ? 180 : 0 }}
@@ -1000,6 +1011,7 @@ export function TacticalBriefDrawer({
         onClose={() => setIsExportOpen(false)}
         onOpenAlmanac={handleOpenAlmanac}
         onOpenReport={handleOpenReport}
+        showAlmanac={showStockAlmanacExport}
       />
     )}
 
@@ -1017,6 +1029,7 @@ export function TacticalBriefDrawer({
       <TacticalReportPoster
         isOpen={isReportOpen}
         onClose={() => setIsReportOpen(false)}
+        tier={tier}
         prediction={posterPrediction}
         stockName={stockName || symbol}
         symbol={symbol}

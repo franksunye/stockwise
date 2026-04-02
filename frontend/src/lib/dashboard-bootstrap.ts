@@ -1,4 +1,10 @@
-export type BootstrapTier = 'free' | 'pro';
+export type BootstrapTier = 'free' | 'go' | 'plus' | 'pro' | 'alpha';
+
+function normalizeBootstrapTier(raw: unknown): BootstrapTier {
+    const tier = String(raw || 'free').toLowerCase();
+    if (tier === 'go' || tier === 'plus' || tier === 'pro' || tier === 'alpha') return tier;
+    return 'free';
+}
 
 export const AUTH_CACHE_KEY = 'ZISO_AUTH_CACHE_V1';
 export const PROFILE_CACHE_KEY = 'stockwise_user_profile_v1';
@@ -61,7 +67,7 @@ export function readAuthCache(
     if (typeof cache.timestamp !== 'number') return null;
     if (now - cache.timestamp > AUTH_CACHE_MAX_AGE_MS) return null;
     if (cache.authorized !== true && cache.authorized !== false) return null;
-    if (cache.tier !== 'free' && cache.tier !== 'pro') return null;
+    if (!['free', 'go', 'plus', 'pro', 'alpha'].includes(String(cache.tier))) return null;
     return cache;
 }
 
@@ -125,7 +131,7 @@ export function getOptimisticDashboardBootstrap(
     if (profile?.userId && (profile.hasOnboarded !== false || onboarded || hasRecentDashboardIntent)) {
         return {
             authorized: true,
-            tier: profile.tier === 'pro' ? 'pro' : 'free',
+            tier: normalizeBootstrapTier(profile.tier),
         };
     }
 

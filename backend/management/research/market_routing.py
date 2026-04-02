@@ -49,12 +49,28 @@ MARKET_ROUTING_CONFIGS: dict[str, TradeManagementMarketRoutingConfig] = {
             "persistent_false_stability": "failure_risk_exit_all",
         },
     ),
+    "US": TradeManagementMarketRoutingConfig(
+        market="US",
+        config_version="tm_market_routing_us_v1",
+        default_lane_ids=("baseline_3d", "low_risk_5d"),
+        second_pass_activation_bucket="score_low",
+        second_pass_takeover_score_threshold=10,
+        reduce_50_threshold=5,
+        exit_all_threshold=10,
+        positioning="global_trend_optimizer",
+        rationale="美股市场流动性极强且机构博弈充分，路由策略侧重于全球宏观趋势捕获与极致止损保护。",
+        low_side_subtype_policies=None,
+    ),
 }
 
 
 def normalize_trade_management_market(value: str | None) -> str:
     text = str(value or "CN").strip().upper()
-    return "HK" if text == "HK" else "CN"
+    if text == "HK":
+        return "HK"
+    if text == "US" or text == "USA":
+        return "US"
+    return "CN"
 
 
 def get_market_routing_config(market: str | None) -> TradeManagementMarketRoutingConfig:

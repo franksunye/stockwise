@@ -54,15 +54,33 @@ export const MEMBERSHIP_CONFIG = {
     tiers: {
         free: {
             maxStocks: 3,
-            analysisMode: 'rule' as const,
-            allowedModels: ['hunyuan-lite', 'rule-engine'],
-            sqlFilter: "p.model_id IN ('hunyuan-lite', 'rule-engine')"
+            analysisMode: 'ai' as const,
+            allowedModels: ['hunyuan-lite'],
+            sqlFilter: "p.model_id = 'hunyuan-lite'"
+        },
+        go: {
+            maxStocks: 10,
+            analysisMode: 'ai' as const,
+            allowedModels: ['deepseek-v3', 'deepseek-v3.2-exp', 'deepseek-aliyun'],
+            sqlFilter: "p.is_primary = 1 AND p.model_id LIKE 'deepseek-%'"
+        },
+        plus: {
+            maxStocks: 10,
+            analysisMode: 'ai' as const,
+            allowedModels: ['deepseek-v3', 'deepseek-v3.2-exp', 'deepseek-aliyun', 'gemini-3-flash'],
+            sqlFilter: "p.is_primary = 1 AND (p.model_id LIKE 'deepseek-%' OR p.model_id LIKE 'gemini-%')"
         },
         pro: {
             maxStocks: 10,
             analysisMode: 'ai' as const,
             allowedModels: ['deepseek-v3', 'hunyuan-lite', 'rule-engine'],
             sqlFilter: "p.is_primary = 1" // Pro 始终看到最高优先级模型
+        },
+        alpha: {
+            maxStocks: 10,
+            analysisMode: 'ai' as const,
+            allowedModels: ['deepseek-v3', 'hunyuan-lite', 'rule-engine'],
+            sqlFilter: "p.is_primary = 1"
         },
     } as const,
 };
@@ -71,6 +89,9 @@ export const MEMBERSHIP_CONFIG = {
  * 根据等级获取 SQL 过滤片段
  */
 export function getModelSqlFilter(tier: string = 'free'): string {
-    const t = (tier === 'pro' ? 'pro' : 'free') as keyof typeof MEMBERSHIP_CONFIG.tiers;
+    const normalized = String(tier || 'free').toLowerCase();
+    const t = (normalized in MEMBERSHIP_CONFIG.tiers
+        ? normalized
+        : 'free') as keyof typeof MEMBERSHIP_CONFIG.tiers;
     return MEMBERSHIP_CONFIG.tiers[t].sqlFilter;
 }

@@ -8,6 +8,7 @@ interface BriefExportSheetProps {
   onClose: () => void;
   onOpenAlmanac: () => void;
   onOpenReport: () => void;
+  showAlmanac?: boolean;
 }
 
 export function BriefExportSheet({
@@ -15,6 +16,7 @@ export function BriefExportSheet({
   onClose,
   onOpenAlmanac,
   onOpenReport,
+  showAlmanac = true,
 }: BriefExportSheetProps) {
   return (
     <AnimatePresence>
@@ -38,17 +40,19 @@ export function BriefExportSheet({
             <div className="mx-auto mb-6 h-1 w-12 rounded-full bg-white/15" />
 
             <div className="flex items-start justify-center gap-8">
-              <button
-                onClick={onOpenAlmanac}
-                className="group flex w-[104px] flex-col items-center text-center transition-transform active:scale-[0.96]"
-              >
-                <div className="flex h-16 w-16 items-center justify-center rounded-[22px] border border-indigo-500/10 bg-indigo-500/10 text-indigo-300 transition-colors group-hover:bg-indigo-500/14 group-hover:text-indigo-200">
-                  <Calendar size={26} />
-                </div>
-                <span className="mt-3 text-[12px] font-bold tracking-[0.02em] text-slate-400 transition-colors group-hover:text-white">
-                  个股黄历
-                </span>
-              </button>
+              {showAlmanac && (
+                <button
+                  onClick={onOpenAlmanac}
+                  className="group flex w-[104px] flex-col items-center text-center transition-transform active:scale-[0.96]"
+                >
+                  <div className="flex h-16 w-16 items-center justify-center rounded-[22px] border border-indigo-500/10 bg-indigo-500/10 text-indigo-300 transition-colors group-hover:bg-indigo-500/14 group-hover:text-indigo-200">
+                    <Calendar size={26} />
+                  </div>
+                  <span className="mt-3 text-[12px] font-bold tracking-[0.02em] text-slate-400 transition-colors group-hover:text-white">
+                    个股黄历
+                  </span>
+                </button>
+              )}
 
               <button
                 onClick={onOpenReport}

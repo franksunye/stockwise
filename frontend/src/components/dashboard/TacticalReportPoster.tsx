@@ -45,6 +45,7 @@ import type { AIPrediction, TacticalData } from '@/lib/types';
 interface TacticalReportPosterProps {
   isOpen: boolean;
   onClose: () => void;
+  tier: 'free' | 'go' | 'plus' | 'pro' | 'alpha';
   prediction: AIPrediction;
   stockName: string;
   symbol: string;
@@ -85,6 +86,7 @@ function getStepConfig(step: string) {
 export function TacticalReportPoster({
   isOpen,
   onClose,
+  tier,
   prediction,
   stockName,
   symbol,
@@ -105,13 +107,14 @@ export function TacticalReportPoster({
   }, [data]);
   const priceNodes = useMemo(() => getPriceNodes(data, currentPrice).slice(0, 6), [data, currentPrice]);
   const reasoningSteps = Array.isArray(data.reasoning_trace) ? data.reasoning_trace.slice(0, 5) : [];
+  const showCouncilSection = tier === 'pro' || tier === 'alpha';
   const snapshotKey = `${symbol}_${targetDate}`;
   const memoryPayload = getCouncilMemorySnapshot(snapshotKey);
   const sessionPayload = !memoryPayload ? readCouncilSessionSnapshot(symbol, targetDate) : null;
   const fallbackPayload = memoryPayload || sessionPayload || undefined;
 
   const { data: councilPayload } = useSWR(
-    isOpen ? getAICouncilSWRKey(symbol, targetDate) : null,
+    isOpen && showCouncilSection ? getAICouncilSWRKey(symbol, targetDate) : null,
     ([, nextSymbol, nextDate]) => fetchAICouncilData(nextSymbol, nextDate),
     {
       fallbackData: fallbackPayload,
@@ -130,8 +133,8 @@ export function TacticalReportPoster({
     () => (councilPredictions.length > 0 ? getCouncilHeadlineAction(councilPredictions) : null),
     [councilPredictions],
   );
-  const councilHeadline = councilHeadlineAction ? getCouncilActionLabel(councilHeadlineAction) : actionMeta.posterDecision;
-  const councilHeadlineMeta = councilHeadlineAction ? getCouncilActionMeta(councilHeadlineAction) : actionMeta;
+  const councilHeadline = showCouncilSection && councilHeadlineAction ? getCouncilActionLabel(councilHeadlineAction) : actionMeta.posterDecision;
+  const councilHeadlineMeta = showCouncilSection && councilHeadlineAction ? getCouncilActionMeta(councilHeadlineAction) : actionMeta;
   const exportDate = useMemo(() => {
     const now = new Date();
     const year = now.getFullYear();
@@ -271,50 +274,52 @@ export function TacticalReportPoster({
                   </div>
                 </section>
 
-                <section className="mt-5 border-t border-white/5 pt-5">
-                  <div className="mb-4 flex items-center gap-2">
-                    <div className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
-                    <h2 className="text-xs font-black uppercase tracking-[0.24em] text-slate-400">投研决议</h2>
-                  </div>
-                  <div className="grid gap-2.5">
-                    {councilCards.length > 0 ? (
-                      councilCards.map((card) => (
-                        <div key={card.key} className={`rounded-[18px] border p-3.5 ${card.isPrimary ? 'border-indigo-500/16 bg-indigo-500/[0.06]' : 'border-white/4 bg-white/[0.015]'}`}>
-                          <div className="flex items-center justify-between gap-3">
-                            <div className="flex items-center gap-3 min-w-0">
-                              {card.avatarSeeds.length === 1 ? (
-                                <div className={`h-8 w-8 shrink-0 overflow-hidden rounded-full border ${card.isPrimary ? 'bg-indigo-500/8 border-indigo-500/20' : 'bg-white/5 border-white/10'}`}>
-                                  <Multiavatar name={card.avatarSeeds[0]} className="h-full w-full" />
-                                </div>
-                              ) : (
-                                <div className="relative h-8 w-10 shrink-0">
-                                  <div className={`absolute left-3 top-0 h-8 w-8 overflow-hidden rounded-full border z-10 ${card.isPrimary ? 'bg-indigo-500/8 border-indigo-500/20' : 'bg-white/5 border-white/10'}`}>
-                                    <Multiavatar name={card.avatarSeeds[1]} className="h-full w-full" />
-                                  </div>
-                                  <div className="absolute left-0 top-0 h-8 w-8 overflow-hidden rounded-full border border-white/10 bg-white/5 z-20">
+                {showCouncilSection && (
+                  <section className="mt-5 border-t border-white/5 pt-5">
+                    <div className="mb-4 flex items-center gap-2">
+                      <div className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
+                      <h2 className="text-xs font-black uppercase tracking-[0.24em] text-slate-400">投研决议</h2>
+                    </div>
+                    <div className="grid gap-2.5">
+                      {councilCards.length > 0 ? (
+                        councilCards.map((card) => (
+                          <div key={card.key} className={`rounded-[18px] border p-3.5 ${card.isPrimary ? 'border-indigo-500/16 bg-indigo-500/[0.06]' : 'border-white/4 bg-white/[0.015]'}`}>
+                            <div className="flex items-center justify-between gap-3">
+                              <div className="flex items-center gap-3 min-w-0">
+                                {card.avatarSeeds.length === 1 ? (
+                                  <div className={`h-8 w-8 shrink-0 overflow-hidden rounded-full border ${card.isPrimary ? 'bg-indigo-500/8 border-indigo-500/20' : 'bg-white/5 border-white/10'}`}>
                                     <Multiavatar name={card.avatarSeeds[0]} className="h-full w-full" />
                                   </div>
+                                ) : (
+                                  <div className="relative h-8 w-10 shrink-0">
+                                    <div className={`absolute left-3 top-0 h-8 w-8 overflow-hidden rounded-full border z-10 ${card.isPrimary ? 'bg-indigo-500/8 border-indigo-500/20' : 'bg-white/5 border-white/10'}`}>
+                                      <Multiavatar name={card.avatarSeeds[1]} className="h-full w-full" />
+                                    </div>
+                                    <div className="absolute left-0 top-0 h-8 w-8 overflow-hidden rounded-full border border-white/10 bg-white/5 z-20">
+                                      <Multiavatar name={card.avatarSeeds[0]} className="h-full w-full" />
+                                    </div>
+                                  </div>
+                                )}
+                                <div className="min-w-0">
+                                  <p className={`truncate text-sm font-black ${card.isPrimary ? 'text-indigo-100' : 'text-white'}`}>{card.title}</p>
+                                  <p className="mt-0.5 text-[10px] font-black uppercase tracking-[0.18em] text-slate-600">{card.role}</p>
                                 </div>
-                              )}
-                              <div className="min-w-0">
-                                <p className={`truncate text-sm font-black ${card.isPrimary ? 'text-indigo-100' : 'text-white'}`}>{card.title}</p>
-                                <p className="mt-0.5 text-[10px] font-black uppercase tracking-[0.18em] text-slate-600">{card.role}</p>
                               </div>
+                              <span className={`rounded-full px-2.5 py-1 text-[10px] font-black ${getActionChipClass(card.actionKey)}`}>
+                                {getCouncilActionLabel(card.actionKey)}
+                              </span>
                             </div>
-                            <span className={`rounded-full px-2.5 py-1 text-[10px] font-black ${getActionChipClass(card.actionKey)}`}>
-                              {getCouncilActionLabel(card.actionKey)}
-                            </span>
+                            <p className="mt-2.5 text-xs leading-5 text-slate-300/95">{card.summary}</p>
                           </div>
-                          <p className="mt-2.5 text-xs leading-5 text-slate-300/95">{card.summary}</p>
+                        ))
+                      ) : (
+                        <div className="rounded-[18px] border border-white/5 bg-white/[0.02] p-4 text-sm text-slate-500">
+                          投研决议正在调阅中，生成图片时会自动带上当前摘要与策略结构。
                         </div>
-                      ))
-                    ) : (
-                      <div className="rounded-[18px] border border-white/5 bg-white/[0.02] p-4 text-sm text-slate-500">
-                        投研决议正在调阅中，生成图片时会自动带上当前摘要与策略结构。
-                      </div>
-                    )}
-                  </div>
-                </section>
+                      )}
+                    </div>
+                  </section>
+                )}
 
                 <section className="mt-5 border-t border-white/5 pt-5">
                   <div className="mb-4 flex items-center gap-2">
@@ -392,7 +397,7 @@ export function TacticalReportPoster({
                             <p className={`text-[10px] font-black uppercase tracking-[0.16em] ${node.kind === 'current' ? 'text-slate-300' : 'text-slate-500'}`}>{node.label}</p>
                             <p className={`mt-1 line-clamp-1 text-[11px] leading-5 ${node.kind === 'current' ? 'text-slate-500' : 'text-slate-600'}`}>{node.description}</p>
                           </div>
-                          <p className={`${node.kind === 'current' ? 'text-[1.75rem]' : 'text-[10px] uppercase tracking-[0.16em]'} font-black text-white`}>{node.price}</p>
+                          <p className={`${node.kind === 'current' ? 'text-[1.0rem]' : 'text-[10px] uppercase tracking-[0.16em]'} font-black text-white`}>{node.price}</p>
                         </div>
                       ))}
                     </div>
