@@ -3,7 +3,8 @@
 import { Sparkles, Target, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import Multiavatar from '@/components/Multiavatar';
-import { PageShell, ES_FOUNDERS, ES_AGENT_TEAM } from './EsLayout';
+import { PageShell, ES_FOUNDERS, ES_AGENT_TEAM, ES_BOUNDARY_NOTICE, ES_DEFAULT_SOURCES } from './EsLayout';
+import { GeoSummary, SourceBlock, BoundaryNotice } from '@/components/seo/GeoBlocks';
 
 export function SpanishAboutPage() {
   return (
@@ -117,6 +118,31 @@ export function SpanishAboutPage() {
               <ArrowLeft size={18} /> Volver al Inicio
             </Link>
           </div>
+        </section>
+
+        <section className="w-full pt-10 pb-20 opacity-[0.05] hover:opacity-100 transition-opacity">
+          <div className="flex flex-col md:flex-row gap-6 mb-6">
+            <div className="flex-1 text-left">
+              <GeoSummary
+                locale="es"
+                summary={[
+                  'Misión: Democratizar la disciplina de investigación de mercado institucional para inversores minoristas a través de un consejo de IA multi-agente.',
+                  'Roles: DeepSeek-R1 (Razonamiento táctico), Hunyuan (Mapeo de contexto), Motor Quant (Reglas estructurales), Verificador (Auditoría de resultados).',
+                  'Metodología: La separación de intereses asegura que el análisis, la supervisión de riesgos y la auditoría histórica sigan siendo independientes y responsables.',
+                ]}
+              />
+            </div>
+            <div className="flex-1 text-left">
+              <SourceBlock
+                locale="es"
+                sources={[
+                  ...ES_DEFAULT_SOURCES,
+                  { name: 'Misión y Equipo', url: 'https://ziso.cc/es/about', accessedAt: '2026-03-25' },
+                ]}
+              />
+            </div>
+          </div>
+          <BoundaryNotice locale="es" text={ES_BOUNDARY_NOTICE} />
         </section>
       </main>
     </PageShell>

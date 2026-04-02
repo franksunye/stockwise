@@ -3,7 +3,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
-import { PageShell } from './EsLayout';
+import { PageShell, ES_BOUNDARY_NOTICE, ES_DEFAULT_SOURCES } from './EsLayout';
+import { GeoSummary, SourceBlock, BoundaryNotice } from '@/components/seo/GeoBlocks';
 
 export function SpanishHomePage() {
   return (
@@ -169,6 +170,56 @@ export function SpanishHomePage() {
               </div>
             ))}
           </div>
+        </section>
+
+        <section id="faq" className="pt-40 pb-10 w-full max-w-4xl space-y-12">
+          <div className="text-center space-y-4">
+            <h2 className="text-3xl md:text-4xl font-black tracking-tighter uppercase mb-2"> Preguntas frecuentes <span className="text-indigo-500 uppercase">FAQ</span> </h2>
+            <p className="text-slate-400 font-medium italic text-lg">Profundiza en la metodología de ZISO AI</p>
+          </div>
+          <div className="grid md:grid-cols-2 gap-4 text-left">
+            <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter">¿Qué es exactamente ZISO AI?</p>
+              <p className="text-slate-400 text-sm leading-relaxed">Es un asistente de investigación profesional que se encarga de la agotadora tarea de analizar el mercado. Combinando modelos históricos profundos con un consejo de razonamiento multi-agente, transforma el ruido del mercado en un guion de decisión estructurado.</p>
+            </div>
+            <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter">¿Cómo funciona el razonamiento de la IA?</p>
+              <p className="text-slate-400 text-sm leading-relaxed">A diferencia de los bots de predicción simples, ZISO AI utiliza una arquitectura de &quot;Consejo de Agentes&quot;. Combina el razonamiento lógico profundo de DeepSeek-R1 con el matiz contextual de Hunyuan y motores de reglas quant fijos para asegurar que cada informe táctico sea explicable y fundamentado.</p>
+            </div>
+            <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter">¿Por qué el límite de confianza del 75%?</p>
+              <p className="text-slate-400 text-sm leading-relaxed">Priorizamos la disciplina sobre la frecuencia. Si la confianza en los setups estructurales de una sesión cae por debajo del 75%, se activa un disyuntor rígido. Sobrevivir primero, luego ganar. Esto evita el &quot;over-trading&quot; emocional que atrapa a la mayoría de los inversores.</p>
+            </div>
+            <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter">¿Son auténticos los registros históricos?</p>
+              <p className="text-slate-400 text-sm leading-relaxed">La transparencia es nuestra moneda principal. Todos los informes nocturnos y sus resultados posteriores se archivan y son verificables. No solo entregamos consejos; mantenemos un historial de auditoría transparente para cada sesión táctica.</p>
+            </div>
+          </div>
+        </section>
+
+        <section className="w-full max-w-4xl pt-10 pb-20 opacity-[0.05] hover:opacity-100 transition-opacity">
+          <div className="flex flex-col md:flex-row gap-6 mb-6">
+            <div className="flex-1 text-left">
+              <GeoSummary
+                locale="es"
+                summary={[
+                  'Investigación principal: Revisión post-cierre basada en resonancia de tendencias multi-plazo (MA, RSI, MACD).',
+                  'Lógica de decisión: Arquitectura de sinergia multi-agente que separa razonamiento, análisis de contexto y reglas quant.',
+                  'Protocolo de riesgo: Disyuntor de confianza del 75% para límites de decisión, asegurando disciplina institucional.',
+                ]}
+              />
+            </div>
+            <div className="flex-1 text-left">
+              <SourceBlock
+                locale="es"
+                sources={[
+                  ...ES_DEFAULT_SOURCES,
+                  { name: 'Posicionamiento del producto', url: 'https://ziso.cc/es', accessedAt: '2026-03-25' },
+                ]}
+              />
+            </div>
+          </div>
+          <BoundaryNotice locale="es" text={ES_BOUNDARY_NOTICE} />
         </section>
       </main>
     </PageShell>

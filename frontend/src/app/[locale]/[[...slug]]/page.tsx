@@ -111,6 +111,7 @@ function getPageConfig(locale: PublicLocale, slugParts: string[]): PageConfig | 
         description: '复杂的分析交给 AI，简单的决策留自己。知守 AI 自动为你完成复盘与数据建模。',
         path: '/',
         render: () => <ChineseHomePage />,
+        alternateLocales: ['en', 'cn', 'ko', 'es'],
       };
     }
 
@@ -120,6 +121,7 @@ function getPageConfig(locale: PublicLocale, slugParts: string[]): PageConfig | 
         description: '让普通投资者也能拥有机构级的投研外脑。',
         path: '/about',
         render: () => <ChineseAboutPage />,
+        alternateLocales: ['en', 'cn', 'ko', 'es'],
       };
     }
 
@@ -129,6 +131,7 @@ function getPageConfig(locale: PublicLocale, slugParts: string[]): PageConfig | 
         description: '选聘您的知守委员会。订阅不仅是购买功能，更是雇佣了一组 24/7 在岗的专业交易委员会。',
         path: '/pricing',
         render: () => <ChinesePricingPage />,
+        alternateLocales: ['en', 'cn', 'ko', 'es'],
       };
     }
 
@@ -138,6 +141,7 @@ function getPageConfig(locale: PublicLocale, slugParts: string[]): PageConfig | 
         description: '知守 AI 中文站隐私政策与数据处理说明。',
         path: '/privacy',
         render: () => <ChinesePrivacyPage />,
+        alternateLocales: ['en', 'cn', 'ko', 'es'],
       };
     }
 
@@ -147,6 +151,7 @@ function getPageConfig(locale: PublicLocale, slugParts: string[]): PageConfig | 
         description: '知守 AI 中文站服务条款与使用边界说明。',
         path: '/terms',
         render: () => <ChineseTermsPage />,
+        alternateLocales: ['en', 'cn', 'ko', 'es'],
       };
     }
 
@@ -156,6 +161,7 @@ function getPageConfig(locale: PublicLocale, slugParts: string[]): PageConfig | 
         description: '知守 AI 中文站订阅退款与取消续订规则。',
         path: '/refund',
         render: () => <ChineseRefundPage />,
+        alternateLocales: ['en', 'cn', 'ko', 'es'],
       };
     }
 
@@ -210,6 +216,7 @@ function getPageConfig(locale: PublicLocale, slugParts: string[]): PageConfig | 
         description: meta.desc,
         path: '/',
         render: () => <KoreanHomePage />,
+        alternateLocales: ['en', 'cn', 'ko', 'es'],
       };
     }
 
@@ -220,6 +227,7 @@ function getPageConfig(locale: PublicLocale, slugParts: string[]): PageConfig | 
         description: meta.desc,
         path: '/about',
         render: () => <KoreanAboutPage />,
+        alternateLocales: ['en', 'cn', 'ko', 'es'],
       };
     }
 
@@ -230,6 +238,7 @@ function getPageConfig(locale: PublicLocale, slugParts: string[]): PageConfig | 
         description: meta.desc,
         path: '/pricing',
         render: () => <KoreanPricingPage />,
+        alternateLocales: ['en', 'cn', 'ko', 'es'],
       };
     }
 
@@ -239,6 +248,7 @@ function getPageConfig(locale: PublicLocale, slugParts: string[]): PageConfig | 
         description: 'ZISO AI 한국어 사이트 개인정보 처리방침 및 데이터 처리 안내.',
         path: '/privacy',
         render: () => <KoreanPrivacyPage />,
+        alternateLocales: ['en', 'cn', 'ko', 'es'],
       };
     }
 
@@ -248,6 +258,7 @@ function getPageConfig(locale: PublicLocale, slugParts: string[]): PageConfig | 
         description: 'ZISO AI 한국어 사이트 서비스 이용약관 및 사용 범위 안내.',
         path: '/terms',
         render: () => <KoreanTermsPage />,
+        alternateLocales: ['en', 'cn', 'ko', 'es'],
       };
     }
 
@@ -257,6 +268,7 @@ function getPageConfig(locale: PublicLocale, slugParts: string[]): PageConfig | 
         description: 'ZISO AI 한국어 사이트 구독 환불 및 취소 규칙 안내.',
         path: '/refund',
         render: () => <KoreanRefundPage />,
+        alternateLocales: ['en', 'cn', 'ko', 'es'],
       };
     }
   }
@@ -269,6 +281,7 @@ function getPageConfig(locale: PublicLocale, slugParts: string[]): PageConfig | 
         description: meta.desc,
         path: '/',
         render: () => <SpanishHomePage />,
+        alternateLocales: ['en', 'cn', 'ko', 'es'],
       };
     }
 
@@ -279,6 +292,7 @@ function getPageConfig(locale: PublicLocale, slugParts: string[]): PageConfig | 
         description: meta.desc,
         path: '/about',
         render: () => <SpanishAboutPage />,
+        alternateLocales: ['en', 'cn', 'ko', 'es'],
       };
     }
 
@@ -289,6 +303,7 @@ function getPageConfig(locale: PublicLocale, slugParts: string[]): PageConfig | 
         description: meta.desc,
         path: '/pricing',
         render: () => <SpanishPricingPage />,
+        alternateLocales: ['en', 'cn', 'ko', 'es'],
       };
     }
 
@@ -298,6 +313,7 @@ function getPageConfig(locale: PublicLocale, slugParts: string[]): PageConfig | 
         description: 'Política de privacidad y tratamiento de datos para el sitio web en español de ZISO AI.',
         path: '/privacy',
         render: () => <SpanishPrivacyPage />,
+        alternateLocales: ['en', 'cn', 'ko', 'es'],
       };
     }
 
@@ -307,6 +323,7 @@ function getPageConfig(locale: PublicLocale, slugParts: string[]): PageConfig | 
         description: 'Términos que rigen el uso de los servicios y análisis del sitio web en español de ZISO AI.',
         path: '/terms',
         render: () => <SpanishTermsPage />,
+        alternateLocales: ['en', 'cn', 'ko', 'es'],
       };
     }
 
@@ -316,6 +333,7 @@ function getPageConfig(locale: PublicLocale, slugParts: string[]): PageConfig | 
         description: 'Política de reembolso y reglas de cancelación para el sitio web en español de ZISO AI.',
         path: '/refund',
         render: () => <SpanishRefundPage />,
+        alternateLocales: ['en', 'cn', 'ko', 'es'],
       };
     }
   }
@@ -327,6 +345,7 @@ function getPageConfig(locale: PublicLocale, slugParts: string[]): PageConfig | 
       description: meta?.desc || 'Structured market research, tactical briefings, and execution discipline for serious retail investors.',
       path: '/',
       render: () => <EnglishHomePage />,
+      alternateLocales: ['en', 'cn', 'ko', 'es'],
     };
   }
 
@@ -337,6 +356,7 @@ function getPageConfig(locale: PublicLocale, slugParts: string[]): PageConfig | 
       description: meta?.desc || 'Why ZISO AI exists, how it frames research, and how the workflow is structured.',
       path: '/about',
       render: () => <EnglishAboutPage />,
+      alternateLocales: ['en', 'cn', 'ko', 'es'],
     };
   }
 
@@ -347,6 +367,7 @@ function getPageConfig(locale: PublicLocale, slugParts: string[]): PageConfig | 
       description: meta?.desc || 'Subscription plans for investors who want stronger nightly research and execution discipline.',
       path: '/pricing',
       render: () => <EnglishPricingPage />,
+      alternateLocales: ['en', 'cn', 'ko', 'es'],
     };
   }
 
@@ -356,6 +377,7 @@ function getPageConfig(locale: PublicLocale, slugParts: string[]): PageConfig | 
       description: 'Privacy and data handling policy for the ZISO AI public website.',
       path: '/privacy',
       render: () => <EnglishPrivacyPage />,
+      alternateLocales: ['en', 'cn', 'ko', 'es'],
     };
   }
 

@@ -117,15 +117,15 @@ export function EnglishAboutPage() {
           </div>
         </section>
 
-        <section className="w-full pt-10 pb-20 opacity-[0.25] hover:opacity-100 transition-opacity">
+        <section className="w-full pt-10 pb-20 opacity-[0.05] hover:opacity-100 transition-opacity text-left">
           <div className="flex flex-col md:flex-row gap-6 mb-6">
             <div className="flex-1 text-left">
               <GeoSummary
                 locale="en"
                 summary={[
-                  'Mission: Help retail investors operate with institutional-grade research discipline.',
-                  'ZISO (See and Guard): See market structure clearly, and guard capital with discipline.',
-                  'Multi-agent structure ensures separation of research, context, and auditing for higher accountability.',
+                  'Mission: Democratize institutional-grade market research for retail investors via a multi-agent AI council.',
+                  'Roles: DeepSeek-R1 (Tactical reasoning), Hunyuan (Contextual mapping), Quant Engine (Structural rules), Verifier (Outcome auditing).',
+                  'Methodology: Separation of concerns ensures that analysis, risk oversight, and historical auditing remain independent and accountable.',
                 ]}
               />
             </div>

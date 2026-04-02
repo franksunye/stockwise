@@ -2,7 +2,8 @@
 
 import { Check, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
-import { PageShell } from './KoLayout';
+import { PageShell, KO_BOUNDARY_NOTICE, KO_DEFAULT_SOURCES } from './KoLayout';
+import { GeoSummary, SourceBlock, BoundaryNotice } from '@/components/seo/GeoBlocks';
 
 const KO_PRICING_PLANS = [
   {
@@ -172,6 +173,56 @@ export function KoreanPricingPage() {
               </tbody>
             </table>
           </div>
+        </section>
+
+        <section id="faq" className="pt-24 pb-10 w-full max-w-4xl mx-auto space-y-12">
+          <div className="text-center space-y-4">
+            <h2 className="text-3xl font-black tracking-tighter uppercase mb-2"> 요금제 <span className="text-indigo-500 uppercase">FAQ</span> </h2>
+            <p className="text-slate-400 font-medium italic text-lg">ZISO 리서치 위원회의 가치 이해</p>
+          </div>
+          <div className="grid md:grid-cols-2 gap-4 text-left">
+            <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter">왜 구독 모델인가요?</p>
+              <p className="text-slate-400 text-sm leading-relaxed">구독은 단순한 소프트웨어 사용료가 아니라, 매일 밤 브리핑을 생성하기 위해 가동되는 다중 에이전트 리서치 위원회에 대한 고용 비용입니다. 시장이 닫혀 있을 때 일하는 당신만의 리서치 팀을 갖게 되는 것입니다.</p>
+            </div>
+            <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter">Pro와 Free의 가장 큰 차이점은 무엇인가요?</p>
+              <p className="text-slate-400 text-sm leading-relaxed">Free는 규칙 기반입니다. Pro는 추론 기반입니다. Pro는 DeepSeek-R1 논리 레이어를 활성화하여 더 깊은 전술적 서사, 가격대 분석, 그리고 방어적인 75% 서킷 브레이커 게이트를 제공합니다.</p>
+            </div>
+            <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter">75% 게이트는 Free 사용자도 사용할 수 있나요?</p>
+              <p className="text-slate-400 text-sm leading-relaxed">아니요. 리스크 컨트롤 프로토콜과 수비 모드 알림은 우리의 프리미엄 실행 규율 스위트의 일부입니다. Free 사용자는 데이터 요약을 제공받지만, 전술적 경계 집행 서비스는 포함되지 않습니다.</p>
+            </div>
+            <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter">언제든 업그레이드나 해지가 가능한가요?</p>
+              <p className="text-slate-400 text-sm leading-relaxed">네, 가능합니다. 모든 결제는 보안 포털을 통해 관리되며, 숨겨진 비용 없이 언제든지 티어를 변경하거나 월간 구독을 취소할 수 있습니다.</p>
+            </div>
+          </div>
+        </section>
+
+        <section className="w-full pt-10 pb-20 opacity-[0.05] hover:opacity-100 transition-opacity">
+          <div className="flex flex-col md:flex-row gap-6 mb-6">
+            <div className="flex-1 text-left">
+              <GeoSummary
+                locale="ko"
+                summary={[
+                  '구독 서비스: 야간 전술 브리핑을 위한 다중 에이전트 AI 리서치 데스크 이용 권한.',
+                  'Free 티어: 트렌드 식별을 위한 기본 규칙 엔진 기반의 데이터 요약.',
+                  'Pro 티어: DeepSeek-R1으로 구동되는 추론 우선 보고서 및 75% 리스크 서킷 브레이커 로직 포함.',
+                ]}
+              />
+            </div>
+            <div className="flex-1 text-left">
+              <SourceBlock
+                locale="ko"
+                sources={[
+                  ...KO_DEFAULT_SOURCES,
+                  { name: '구독 요금제', url: 'https://ziso.cc/ko/pricing', accessedAt: '2026-03-20' },
+                ]}
+              />
+            </div>
+          </div>
+          <BoundaryNotice locale="ko" text={KO_BOUNDARY_NOTICE} />
         </section>
       </main>
     </PageShell>

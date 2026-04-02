@@ -172,15 +172,40 @@ export function EnglishHomePage() {
           </div>
         </section>
 
-        <section className="w-full max-w-4xl pt-10 pb-0 opacity-[0.25] hover:opacity-100 transition-opacity">
+        <section id="faq" className="pt-40 pb-10 w-full max-w-4xl space-y-12">
+          <div className="text-center space-y-4">
+            <h2 className="text-3xl md:text-4xl font-black tracking-tighter uppercase mb-2"> Common Questions <span className="text-indigo-500 uppercase">FAQ</span> </h2>
+            <p className="text-slate-400 font-medium italic">Deepening your understanding of the ZISO AI methodology</p>
+          </div>
+          <div className="grid md:grid-cols-2 gap-4 text-left">
+            <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter">What exactly is ZISO AI?</p>
+              <p className="text-slate-400 text-sm leading-relaxed">It is a professional research desk that takes over the exhausting market homework. By combining deep historical modeling with a multi-agent reasoning council, it transforms complex market noise into a structured, executable decision script.</p>
+            </div>
+            <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter">How does the AI reasoning work?</p>
+              <p className="text-slate-400 text-sm leading-relaxed">Unlike simple prediction bots, ZISO AI uses a &quot;Council of Agents&quot; architecture. It combines the deep logical reasoning of DeepSeek-R1 with the linguistic nuance of Hunyuan and fixed quant rule engines to ensure every tactical briefing is explainable and grounded in data.</p>
+            </div>
+            <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter">Why the 75% confidence gate?</p>
+              <p className="text-slate-400 text-sm leading-relaxed">We prioritize execution discipline over frequency. If the system&apos;s confidence in a session&apos;s structural setups falls below 75%, it triggers a hard circuit breaker. Survive first, then win. This gate prevents the emotional &quot;over-trading&quot; that traps most retail investors.</p>
+            </div>
+            <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter">Are the historical records authentic?</p>
+              <p className="text-slate-400 text-sm leading-relaxed">Transparency is our core currency. All nightly briefings and their subsequent outcomes are archived and verifiable within the individual stock files. We don&apos;t just deliver advice; we maintain a full, transparent audit trail for every tactical session.</p>
+            </div>
+          </div>
+        </section>
+
+        <section className="w-full max-w-4xl pt-10 pb-20 opacity-[0.05] hover:opacity-100 transition-opacity text-left">
           <div className="flex flex-col md:flex-row gap-6 mb-6">
             <div className="flex-1 text-left">
               <GeoSummary
                 locale="en"
                 summary={[
-                  'ZISO AI focuses on post-close review and next-day strategy to reduce emotional trading interference.',
-                  'Core mechanisms include tactical briefings, hit-rate tracking, key price levels, and risk warnings.',
-                  'Analysis results are traceable and historically verifiable, emphasizing process transparency over profit guarantees.',
+                  'Core Research: Post-close review focusing on multi-timeframe trend resonance (MA, RSI, MACD).',
+                  'Decision Logic: Multi-agent synergy architecture separating reasoning, context analysis, and quant structural constraints.',
+                  'Risk Protocol: 75% confidence circuit breaker for decision boundaries, ensuring institutional-grade execution discipline.',
                 ]}
               />
             </div>

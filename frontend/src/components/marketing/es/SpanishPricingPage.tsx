@@ -2,7 +2,8 @@
 
 import { Check, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
-import { PageShell } from './EsLayout';
+import { PageShell, ES_BOUNDARY_NOTICE, ES_DEFAULT_SOURCES } from './EsLayout';
+import { GeoSummary, SourceBlock, BoundaryNotice } from '@/components/seo/GeoBlocks';
 
 const ES_PRICING_PLANS = [
   {
@@ -173,6 +174,56 @@ export function SpanishPricingPage() {
               </tbody>
             </table>
           </div>
+        </section>
+
+        <section id="faq" className="pt-24 pb-10 w-full max-w-4xl mx-auto space-y-12">
+          <div className="text-center space-y-4">
+            <h2 className="text-3xl font-black tracking-tighter uppercase mb-2"> Precios <span className="text-indigo-500 uppercase">FAQ</span> </h2>
+            <p className="text-slate-400 font-medium italic text-lg">Comprendiendo el valor de tu consejo de investigación ZISO</p>
+          </div>
+          <div className="grid md:grid-cols-2 gap-4 text-left">
+            <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter">¿Por qué es una suscripción?</p>
+              <p className="text-slate-400 text-sm leading-relaxed">Una suscripción no es solo por software; es por el cómputo continuo y el razonamiento multi-agente necesario para entregar un informe nocturno. Estás contratando a un consejo disciplinado que trabaja mientras el mercado está cerrado.</p>
+            </div>
+            <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter">¿Qué hace a Pro diferente de Gratis?</p>
+              <p className="text-slate-400 text-sm leading-relaxed">Gratis se basa en reglas. Pro se basa en razonamiento. Pro desbloquea la capa lógica profunda de DeepSeek-R1, proporcionando informes tácticos más profundos, niveles clave y el disyuntor de riesgo del 75%.</p>
+            </div>
+            <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter">¿El límite del 75% está disponible para usuarios Gratis?</p>
+              <p className="text-slate-400 text-sm leading-relaxed">No. El protocolo de control de riesgos y las alertas de modo defensa son parte de nuestra suite de ejecución disciplinada premium. Los usuarios gratis reciben el resumen de datos, pero no la aplicación de límites tácticos.</p>
+            </div>
+            <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter">¿Puedo cambiar o cancelar mi plan en cualquier momento?</p>
+              <p className="text-slate-400 text-sm leading-relaxed">Por supuesto. Todo el proceso se gestiona a través de un portal seguro, lo que te permite cambiar de nivel o cancelar tu suscripción mensual en cualquier momento sin cargos ocultos.</p>
+            </div>
+          </div>
+        </section>
+
+        <section className="w-full pt-10 pb-20 opacity-[0.05] hover:opacity-100 transition-opacity">
+          <div className="flex flex-col md:flex-row gap-6 mb-6">
+            <div className="flex-1 text-left">
+              <GeoSummary
+                locale="es"
+                summary={[
+                  'Suscripción: Acceso a una mesa de investigación de IA multi-agente para informes tácticos nocturnos.',
+                  'Nivel Gratis: Resumen basado en reglas para identificación básica de tendencias.',
+                  'Nivel Pro: Informes de razonamiento impulsados por DeepSeek-R1, incluyendo la lógica de disyuntor del 75%.',
+                ]}
+              />
+            </div>
+            <div className="flex-1 text-left">
+              <SourceBlock
+                locale="es"
+                sources={[
+                  ...ES_DEFAULT_SOURCES,
+                  { name: 'Precios de Suscripción', url: 'https://ziso.cc/es/pricing', accessedAt: '2026-03-25' },
+                ]}
+              />
+            </div>
+          </div>
+          <BoundaryNotice locale="es" text={ES_BOUNDARY_NOTICE} />
         </section>
       </main>
     </PageShell>

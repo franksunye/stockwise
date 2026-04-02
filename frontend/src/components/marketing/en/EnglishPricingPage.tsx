@@ -176,15 +176,40 @@ export function EnglishPricingPage() {
           </div>
         </section>
 
-        <section className="w-full pt-10 pb-0 opacity-[0.25] hover:opacity-100 transition-opacity">
+        <section id="faq" className="pt-24 pb-10 w-full max-w-4xl mx-auto space-y-12">
+          <div className="text-center space-y-4">
+            <h2 className="text-3xl font-black tracking-tighter uppercase mb-2"> Pricing <span className="text-indigo-500 uppercase">FAQ</span> </h2>
+            <p className="text-slate-400 font-medium italic">Understanding the value of your ZISO research council</p>
+          </div>
+          <div className="grid md:grid-cols-2 gap-4 text-left">
+            <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter">Why is this a subscription?</p>
+              <p className="text-slate-400 text-sm leading-relaxed">A subscription is not just for software; it is for the continuous compute and multi-agent reasoning required to deliver a nightly briefing. You are hiring a disciplined council that works when the market is closed.</p>
+            </div>
+            <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter">What makes Pro different from Free?</p>
+              <p className="text-slate-400 text-sm leading-relaxed">Free is rule-based. Pro is reasoning-based. Pro unlocks the DeepSeek-R1 logic layer, providing deeper tactical narratives, key price levels, and the defensive 75% circuit breaker gate.</p>
+            </div>
+            <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter">Is the 75% Gate available to Free users?</p>
+              <p className="text-slate-400 text-sm leading-relaxed">No. The risk-control protocol and defense-mode alerts are part of our premium disciplined execution suite. Free users receive the data recap, but not the tactical boundary enforcement.</p>
+            </div>
+            <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter">Can I upgrade or downgrade anytime?</p>
+              <p className="text-slate-400 text-sm leading-relaxed">Absolutely. All billing is handled via a secure portal, allowing you to move between tiers or cancel your monthly commitment at any time with no hidden fees.</p>
+            </div>
+          </div>
+        </section>
+
+        <section className="w-full pt-10 pb-20 opacity-[0.05] hover:opacity-100 transition-opacity">
           <div className="flex flex-col md:flex-row gap-6 mb-6">
             <div className="flex-1 text-left">
               <GeoSummary
                 locale="en"
                 summary={[
-                  'Free Tier: Access to rule-based trend signals and daily market recaps.',
-                  'Pro Tier: High-reasoning tactical briefings, key support/resistance levels, and realtime discipline alerts.',
-                  'Value Proposition: Subscribe to an around-the-clock "AI Research Council" to ensure disciplined trading.',
+                  'Subscription: Access to a multi-agent AI research desk for nightly tactical briefings.',
+                  'Free Tier: Logic-only recap using basic rule engines for trend identification.',
+                  'Pro Tier: Reasoning-first reports powered by DeepSeek-R1, including the 75% risk circuit breaker logic.',
                 ]}
               />
             </div>

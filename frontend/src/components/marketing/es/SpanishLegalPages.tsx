@@ -38,7 +38,7 @@ export function SpanishPrivacyPage() {
         </p>
       </section>
 
-      <section className="pt-6 opacity-30 hover:opacity-100 transition-opacity text-left">
+      <section className="pt-6 opacity-[0.05] hover:opacity-100 transition-opacity text-left">
         <div className="flex flex-col md:flex-row gap-6 mb-6">
           <div className="flex-1 text-left">
             <GeoSummary
@@ -97,7 +97,7 @@ export function SpanishTermsPage() {
         </p>
       </section>
 
-      <section className="pt-6 opacity-30 hover:opacity-100 transition-opacity text-left">
+      <section className="pt-6 opacity-[0.05] hover:opacity-100 transition-opacity text-left">
         <div className="flex flex-col md:flex-row gap-6 mb-6">
           <div className="flex-1 text-left">
             <GeoSummary

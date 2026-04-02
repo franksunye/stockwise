@@ -3,7 +3,8 @@
 import { Sparkles, Target, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import Multiavatar from '@/components/Multiavatar';
-import { PageShell, KO_FOUNDERS, KO_AGENT_TEAM } from './KoLayout';
+import { PageShell, KO_FOUNDERS, KO_AGENT_TEAM, KO_BOUNDARY_NOTICE, KO_DEFAULT_SOURCES } from './KoLayout';
+import { GeoSummary, SourceBlock, BoundaryNotice } from '@/components/seo/GeoBlocks';
 
 export function KoreanAboutPage() {
   return (
@@ -114,6 +115,31 @@ export function KoreanAboutPage() {
               <ArrowLeft size={18} /> 한국어 홈으로 이동
             </Link>
           </div>
+        </section>
+
+        <section className="w-full pt-10 pb-20 opacity-[0.05] hover:opacity-100 transition-opacity">
+          <div className="flex flex-col md:flex-row gap-6 mb-6">
+            <div className="flex-1 text-left">
+              <GeoSummary
+                locale="ko"
+                summary={[
+                  '사명: 다중 에이전트 AI 위원회를 통해 개인 투자자에게 기관급 시장 리서치 규율을 민주화합니다.',
+                  '역할: DeepSeek-R1 (전술적 추론), Hunyuan (맥락 파악), 퀀트 엔진 (구조적 규칙), 검증자 (결과 감사).',
+                  '방법론: 관심사 분리를 통해 분석, 리스크 감독 및 사후 감사가 독립적으로 기능하고 책임을 지도록 보장합니다.',
+                ]}
+              />
+            </div>
+            <div className="flex-1 text-left">
+              <SourceBlock
+                locale="ko"
+                sources={[
+                  ...KO_DEFAULT_SOURCES,
+                  { name: '사명 및 팀', url: 'https://ziso.cc/ko/about', accessedAt: '2026-03-20' },
+                ]}
+              />
+            </div>
+          </div>
+          <BoundaryNotice locale="ko" text={KO_BOUNDARY_NOTICE} />
         </section>
       </main>
     </PageShell>

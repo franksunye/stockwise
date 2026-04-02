@@ -169,7 +169,7 @@ export function ChineseHomePage() {
           </div>
         </section>
 
-        <section className="w-full max-w-4xl pt-10 pb-20 opacity-[0.25] hover:opacity-100 transition-opacity">
+        <section className="w-full max-w-4xl pt-10 pb-20 opacity-[0.05] hover:opacity-100 transition-opacity">
           <div className="flex flex-col md:flex-row gap-6 mb-6">
             <div className="flex-1 text-left">
               <GeoSummary

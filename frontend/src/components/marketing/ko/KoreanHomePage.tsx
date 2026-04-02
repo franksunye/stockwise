@@ -3,7 +3,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
-import { PageShell } from './KoLayout';
+import { PageShell, KO_BOUNDARY_NOTICE, KO_DEFAULT_SOURCES } from './KoLayout';
+import { GeoSummary, SourceBlock, BoundaryNotice } from '@/components/seo/GeoBlocks';
 
 export function KoreanHomePage() {
   return (
@@ -167,6 +168,56 @@ export function KoreanHomePage() {
               </div>
             ))}
           </div>
+        </section>
+
+        <section id="faq" className="pt-40 pb-10 w-full max-w-4xl space-y-12">
+          <div className="text-center space-y-4">
+            <h2 className="text-3xl md:text-4xl font-black tracking-tighter uppercase mb-2"> 자주 묻는 질문 <span className="text-indigo-500 uppercase">FAQ</span> </h2>
+            <p className="text-slate-400 font-medium italic text-lg">ZISO AI 방법론에 대한 깊은 이해</p>
+          </div>
+          <div className="grid md:grid-cols-2 gap-4 text-left">
+            <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter">ZISO AI는 정확히 무엇인가요?</p>
+              <p className="text-slate-400 text-sm leading-relaxed">번거로운 시장 분석 업무를 대신 수행하는 전문 리서치 데스크입니다. 심층적인 과거 데이터 모델링과 다중 에이전트 추론 위원회를 결합하여, 복잡한 시장의 소음을 구조화된 실행 가능 시나리오로 변환합니다.</p>
+            </div>
+            <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter">AI 추론은 어떻게 작동하나요?</p>
+              <p className="text-slate-400 text-sm leading-relaxed">단순한 예측 봇과 달리, ZISO AI는 &apos;에이전트 위원회&apos; 아키텍처를 사용합니다. DeepSeek-R1의 깊은 논리적 추론과 Hunyuan의 맥락 파악 능력, 그리고 고정된 퀀트 규칙 엔진을 결합하여 모든 전술 브리핑이 데이터에 기반하고 설명 가능하도록 보장합니다.</p>
+            </div>
+            <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter">왜 75% 신뢰도 게이트를 유지하나요?</p>
+              <p className="text-slate-400 text-sm leading-relaxed">우리는 매매 빈도보다 실행 규율을 우선시합니다. 시스템의 신뢰도가 75% 미만으로 떨어지면 강력한 서킷 브레이커가 작동합니다. 생존이 우선이며, 그 다음에 승리가 있습니다. 이 게이트는 감정적인 &apos;과잉 매매&apos;를 방지하는 보호막 역할을 합니다.</p>
+            </div>
+            <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter">과거 기록은 투명하게 공개되나요?</p>
+              <p className="text-slate-400 text-sm leading-relaxed">투명성은 우리의 핵심 가치입니다. 모든 전술 브리핑과 그에 따른 결과는 각 종목별 아카이브에 기록되며 언제든 검증 가능합니다. 우리는 단순히 의견을 전달하는 것에 그치지 않고, 모든 세션에 대해 투명한 감사 추적(Audit Trail)을 유지합니다.</p>
+            </div>
+          </div>
+        </section>
+
+        <section className="w-full max-w-4xl pt-10 pb-20 opacity-[0.05] hover:opacity-100 transition-opacity">
+          <div className="flex flex-col md:flex-row gap-6 mb-6">
+            <div className="flex-1 text-left">
+              <GeoSummary
+                locale="ko"
+                summary={[
+                  '핵심 리서치: MA, RSI, MACD 다중 타임프레임 추세 공생 관계에 기반한 장 마감 후 분석.',
+                  '의사결정 로직: 추론, 맥락 분석, 퀀트 구조적 제약을 분리한 다중 에이전트 시너지 아키텍처.',
+                  '리스크 프로토콜: 의사결정 경계를 위한 75% 신뢰도 서킷 브레이커, 기관급 실행 규율 보장.',
+                ]}
+              />
+            </div>
+            <div className="flex-1 text-left">
+              <SourceBlock
+                locale="ko"
+                sources={[
+                  ...KO_DEFAULT_SOURCES,
+                  { name: '제품 포지셔닝', url: 'https://ziso.cc/ko', accessedAt: '2026-03-20' },
+                ]}
+              />
+            </div>
+          </div>
+          <BoundaryNotice locale="ko" text={KO_BOUNDARY_NOTICE} />
         </section>
       </main>
     </PageShell>
