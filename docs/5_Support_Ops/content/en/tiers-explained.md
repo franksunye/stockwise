@@ -12,23 +12,23 @@ ZISO AI uses a "Reasoning Tier" structure. You can choose your AI research partn
 
 ---
 
-### 🟢 Experience Tier (Free)
+### Experience Tier (Free)
 *   **Watchlist Capacity**: 3 stocks.
 *   **Tactical Briefing**: Provides high-level briefings. Designed to walk through the UI and decision-making loop with zero friction. (v1 Stage)
 
-### 🔵 Advanced Tier (Go)
+### Advanced Tier (Go)
 *   **Watchlist Capacity**: 10 stocks.
 *   **Thought Chain (Reasoning)**: Powered by DeepSeek. See the underlying logic and "thinking path" the AI took to reach the briefing. (v1 Stage)
 
-### 🟣 Enhanced Tier (Plus)
+### Enhanced Tier (Plus)
 *   **Watchlist Capacity**: 10 stocks.
 *   **Actionable Insights**: Powered by a multi-model consensus (Gemini + DeepSeek). The council cross-checks data to puncture cognitive hallucinations. (v1 Stage)
 
-### 🟠 Professional Tier (Pro)
+### Professional Tier (Pro)
 *   **Watchlist Capacity**: 30 stocks.
 *   **Quant Management Engine**: Unlocks industrial-grade trade execution monitoring and risk circuit breakers. (v2 Stage)
 
-### 🔴 Ultimate Tier (Alpha)
+### Ultimate Tier (Alpha)
 *   **Watchlist Capacity**: 200+ stocks.
 *   **Optimal Defense**: Pursuit of the ultimate form of timing and cost defense. (v3 Stage)
 

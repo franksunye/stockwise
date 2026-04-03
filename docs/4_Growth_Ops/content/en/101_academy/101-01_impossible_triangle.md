@@ -41,17 +41,17 @@ At ZISO, we’ve analyzed tens of thousands of failed trades. We’ve found that
 
 The three corners of the triangle are: **Emotion**, **Discipline**, and **Vision**.
 
-### 🔴 Emotion: The Survival Instinct
-This is your biology at work. Your amygdala is hardwired for fear and greed.
+### Emotion: The Survival Instinct
+This is your biology at work. Your amygdala is hardwired for fear and greed. 
 *   **The Symptom**: Euphoria when the screen is green; paralyzing anxiety when it's red.
 *   **The Result**: Chasing highs and fleeing lows. You are greedy when you should be fearful (at the top) and fearful when you should be greedy (at the bottom).
 
-### 🔴 Lack of Discipline: The Execution Gap
+### Lack of Discipline: The Execution Gap
 Knowing what to do is not the same as doing it.
 *   **The Symptom**: Before the trade, you swear to "cut losses at 10%." When it hits 10%, you say, "let me just check one more candle."
 *   **The Result**: The plan becomes a ghost. Your wins are accidental "luck," while your losses are permanent "anchors."
 
-### 🔴 Short-Sightedness: The Noise Trap
+### Short-Sightedness: The Noise Trap
 Making long-term decisions based on 1-minute charts.
 *   **The Symptom**: Staring at every penny move on the screen. Being hijacked by the latest "breaking news" while ignoring the structural trend.
 *   **The Result**: Choosing the noise over the signal. You trade frequently, enriching only your broker.
