@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { Calendar, FileText } from 'lucide-react';
+import { useT } from '@/context/LocaleContext';
 
 interface BriefExportSheetProps {
   isOpen: boolean;
@@ -18,6 +19,8 @@ export function BriefExportSheet({
   onOpenReport,
   showAlmanac = true,
 }: BriefExportSheetProps) {
+  const t = useT('brief');
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -49,7 +52,7 @@ export function BriefExportSheet({
                     <Calendar size={26} />
                   </div>
                   <span className="mt-3 text-[12px] font-bold tracking-[0.02em] text-slate-400 transition-colors group-hover:text-white">
-                    个股黄历
+                    {t('exportSheetAlmanac')}
                   </span>
                 </button>
               )}
@@ -62,7 +65,7 @@ export function BriefExportSheet({
                   <FileText size={26} />
                 </div>
                 <span className="mt-3 text-[12px] font-bold tracking-[0.02em] text-slate-400 transition-colors group-hover:text-white">
-                  投研报告
+                  {t('exportSheetReport')}
                 </span>
               </button>
             </div>

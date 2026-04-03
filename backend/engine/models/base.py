@@ -8,7 +8,7 @@ class BasePredictionModel(ABC):
         self.display_name = config.get("display_name", model_id)
         
     @abstractmethod
-    async def predict(self, symbol: str, date: str, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def predict(self, symbol: str, date: str, data: Dict[str, Any], locale: str = 'cn') -> Dict[str, Any]:
         """
         Execute prediction logic.
         

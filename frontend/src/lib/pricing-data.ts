@@ -24,38 +24,37 @@ export interface PricingPlan {
  */
 export const pricingPlans: PricingPlan[] = [
     {
-        name: '基础版',
+        name: 'pricing.free.name',
         enName: 'Free',
         price: '0',
-        period: '永久免费',
-        description: '适合刚接触 AI 投资的个人投资者',
+        period: 'pricing.free.period',
+        description: 'pricing.free.description',
         features: [
-            'AI 趋势信号 (量化多空判断)',
-            '每日市场复盘 (基础行情摘要)',
-            '大盘黄历 (每日宜忌与气象推演)',
-            '每日 3 次个股 AI 诊断',
-            '投资者共学社区权限',
+            'pricing.features.aiTrend',
+            'pricing.features.dailyBrief',
+            'pricing.features.almanac',
+            '3 Actionable Insights / day',
+            'Community access',
         ],
-        cta: '立即开始',
+        cta: 'pricing.free.cta',
         href: process.env.NEXT_PUBLIC_APP_URL || 'https://app.ziso.cc',
         highlight: false,
         icon: Zap,
         color: 'slate',
     },
     {
-        name: 'Pro 会员',
-        enName: 'Pro',
+        name: 'pricing.go.name',
+        enName: 'Go',
         price: '29.9',
-        period: '每月 / ¥299 每年',
-        description: '专为追求深度认知与交易纪律的进阶投资者设计',
+        period: 'pricing.go.period',
+        description: 'pricing.go.description',
         features: [
-            'DeepSeek 深度推理 (揭示涨跌逻辑)',
-            '教练式 AI 研报 (拒绝术语堆砌)',
-            '10 只自选股全权托管 (覆盖主力持仓)',
-            '大盘黄历 (每日宜忌与气象推演)',
-            '主力情绪与资金关键指标解锁',
-            '关键变盘点实时推送* (纪律提醒)',
-            '⭐ 专属 Pro 身份勋章',
+            'pricing.features.deepseek',
+            '10 Actionable Insights / day',
+            'Full Real-time Notifications',
+            'pricing.features.indicators',
+            'pricing.features.realtime',
+            'pricing.features.badge',
         ],
         priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_MONTHLY || 'price_1Su1zqS3fDFObThpZbYXr2GG',
         priceIdAnnual: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_YEARLY || 'price_1Su1zqS3fDFObThp7iG6X6bK',
@@ -64,20 +63,20 @@ export const pricingPlans: PricingPlan[] = [
         color: 'indigo',
     },
     {
-        name: '机构/大户版',
-        enName: 'Alpha',
-        price: '1,999',
-        period: '每年',
-        description: '顶级阿尔法收益工具，实时深度追踪',
+        name: 'pricing.plus.name',
+        enName: 'Plus',
+        price: '69', // Strategy price
+        period: 'pricing.plus.period',
+        description: 'pricing.plus.description',
         features: [
-            '实时盘中突发事件 AI 分析',
-            '1对1 AI 专属策略看板',
-            '专属深度研报自动生成',
-            'API 原始数据访问接口',
-            '行业专家优先支持',
+            'DeepSeek + Gemini consensus',
+            '10 Actionable Insights / day',
+            'Full Real-time Notifications',
+            'Advanced priority analytics',
+            'Premium expert support',
         ],
-        cta: '联系我们',
-        href: 'mailto:hi@ziso.cc',
+        cta: 'pricing.plus.cta', // Will be "Join Waiting List"
+        href: 'mailto:hi@ziso.cc?subject=Join%20StockWise%20Plus%20Waiting%20List',
         highlight: false,
         icon: ShieldCheck,
         color: 'emerald',
@@ -86,15 +85,27 @@ export const pricingPlans: PricingPlan[] = [
 
 /**
  * Feature comparison data for the pricing table.
+ * Grouped by category as per user request.
  */
 export const featureComparison = [
-    { label: 'AI 分析深度', free: '规则引擎 + 基础 AI', pro: 'DeepSeek (顶级思维链模型)', highlight: true },
-    { label: '自选资产上限', free: '3 只', pro: '10 只', highlight: true },
-    { label: '量化信号底座', free: '标准趋势判断', pro: '标准趋势判断', common: true },
-    { label: '行情覆盖范围', free: 'A股 / 港股 全覆盖', pro: 'A股 / 港股 全覆盖', common: true },
-    { label: '宏观大盘黄历', free: '每日宜忌与气象推演', pro: '每日宜忌与气象推演', common: true },
-    { label: '核心指标解锁', free: '仅收盘价', pro: '主力情绪、支撑压力位、量能状态', highlight: true },
-    { label: '通知与纪律', free: '无', pro: '关键变盘点 / 突发异动 实时推送*', highlight: true },
-    { label: '数据时效性', free: '盘后同步', pro: '盘后同步', common: true },
-    { label: '专属身份标识', free: '-', pro: '⭐ 专属 Pro 勋章' },
+    // --- Actionable Insights / 逻辑研判 ---
+    { label: 'actionableInsights.group', isGroup: true },
+    { label: 'actionableInsights.model', free: 'Hunyuan Lite', go: 'DeepSeek (推理)', plus: 'DeepSeek + Gemini', highlight: true },
+    { label: 'actionableInsights.dailyLimit', free: '3 / day', go: '10 / day', plus: '10 / day', highlight: true },
+    { label: 'actionableInsights.monthlyLimit', free: '60 / mo', go: '200 / mo', plus: '200 / mo' },
+    { label: 'actionableInsights.signals', free: '✅', go: '✅', plus: '✅' },
+    { label: 'actionableInsights.levels', free: '✅', go: '✅', plus: '✅' },
+    { label: 'actionableInsights.reasoning', free: '✅', go: '✅', plus: '✅' },
+    { label: 'actionableInsights.markets', free: 'US / HK / CN', go: 'US / HK / CN', plus: 'US / HK / CN' },
+    { label: 'actionableInsights.sharing', free: 'Unlimited', go: 'Unlimited', plus: 'Unlimited' },
+
+    // --- Notifications / 系统通知 ---
+    { label: 'notifications.group', isGroup: true },
+    { label: 'notifications.realtime', free: 'Limited', go: 'Full Real-time', plus: 'Full Real-time', highlight: true },
+    { label: 'notifications.types', free: 'Basic', go: 'All Categories', plus: 'All Categories' },
+
+    // --- Academy / 知守学院 ---
+    { label: 'academy.group', isGroup: true },
+    { label: 'academy.content', free: 'All Access', go: 'All Access', plus: 'All Access' },
+    { label: 'academy.masters', free: '✅', go: '✅', plus: '✅' },
 ];

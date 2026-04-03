@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { getWatchlist } from '@/lib/storage';
 import { getCurrentUser } from '@/lib/user';
 import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
 import { resolveReferralCode } from '@/lib/referral-resolver';
 import { isIOS, isStandalone } from '@/lib/device-utils';
+import { mapApiJsonToUserProfile } from '@/lib/map-user-profile';
 import {
     getOptimisticDashboardBootstrap as getOptimisticDashboardBootstrapState,
     markDashboardSplashSeen,
@@ -13,71 +14,127 @@ import {
     readBrowserBootstrapStorageState,
     writeAuthCache,
     writeProfileCache,
+    readProfileCache,
+    purgeLegacyUserProfileCache,
+    PROFILE_CACHE_KEY,
 } from '@/lib/dashboard-bootstrap';
-import type { Tier } from '@/hooks/useUserProfile';
+import type {
+    Tier,
+    UserProfile,
+    UserProfileContextValue,
+    RefreshProfileOptions,
+} from '@/hooks/useUserProfile';
 
 const PROFILE_SYNC_SESSION_KEY = 'last_profile_sync';
 const PROFILE_SYNC_IN_FLIGHT_KEY = 'profile_sync_in_flight_v1';
 
-interface ProfileApiData {
-    userId?: string;
-    tier?: string;
-    expiresAt?: string | null;
-    watchlistCount?: number;
-    email?: string | null;
-    referralBalance?: number;
-    totalEarned?: number;
-    commissionRate?: number;
-    hasOnboarded?: boolean;
-    hasStripeCustomer?: boolean;
-    isChannel?: boolean;
-    referralAlias?: string | null;
-    referralCount?: number;
-    recentTransactions?: unknown[];
-}
-
-function populateUserProfileCache(apiData: ProfileApiData): void {
-    if (!apiData.userId) return;
-
-    try {
-        writeProfileCache({
-            userId: apiData.userId,
-            tier: apiData.tier || 'free',
-            expiresAt: apiData.expiresAt ?? null,
-            watchlistCount: apiData.watchlistCount,
-            email: apiData.email,
-            referralBalance: apiData.referralBalance,
-            totalEarned: apiData.totalEarned,
-            commissionRate: apiData.commissionRate,
-            hasOnboarded: apiData.hasOnboarded,
-            hasStripeCustomer: apiData.hasStripeCustomer,
-            isChannel: apiData.isChannel,
-            referralAlias: apiData.referralAlias,
-            referralCount: apiData.referralCount,
-            recentTransactions: apiData.recentTransactions,
-        });
-        sessionStorage.setItem(PROFILE_SYNC_SESSION_KEY, String(Date.now()));
-    } catch {
-        // non-critical
-    }
+function coerceTierFromData(data: Record<string, unknown>): Tier {
+    const t = String(data.tier || 'free').toLowerCase();
+    if (t === 'go' || t === 'plus' || t === 'pro' || t === 'alpha') return t;
+    return 'free';
 }
 
 export function useDashboardAuthorization() {
     const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
-    const [tier, setTier] = useState<Tier>('free');
+    const [profile, setProfile] = useState<UserProfile | null>(null);
+    /** Optimistic tier from auth cache when profile row not yet loaded. */
+    const [bootstrapTier, setBootstrapTier] = useState<Tier>('free');
+    const [profileLoading, setProfileLoading] = useState(true);
+
+    const profileRef = useRef<UserProfile | null>(null);
     const canSkipTransition = useRef(false);
+
+    useEffect(() => {
+        profileRef.current = profile;
+    }, [profile]);
+
+    const applyServerProfilePayload = useCallback((data: Record<string, unknown> | null | undefined, resOk: boolean) => {
+        if (!data) return;
+        const mapped = mapApiJsonToUserProfile(data);
+        setBootstrapTier(coerceTierFromData(data));
+        if (resOk && mapped) {
+            writeProfileCache(mapped);
+            sessionStorage.setItem(PROFILE_SYNC_SESSION_KEY, String(Date.now()));
+            setProfile(mapped);
+        }
+    }, []);
 
     useLayoutEffect(() => {
         canSkipTransition.current = document.documentElement.classList.contains('dashboard-boot-ready');
 
-        const optimisticBootstrap = getOptimisticDashboardBootstrapState(
-            readBrowserBootstrapStorageState()
-        );
+        purgeLegacyUserProfileCache();
+        const cached = readProfileCache<UserProfile>(localStorage.getItem(PROFILE_CACHE_KEY));
+        if (cached?.userId) {
+            setProfile(cached);
+            profileRef.current = cached;
+            setBootstrapTier(cached.tier);
+            setProfileLoading(false);
+        }
+
+        const optimisticBootstrap = getOptimisticDashboardBootstrapState(readBrowserBootstrapStorageState());
         if (optimisticBootstrap) {
             setIsAuthorized(optimisticBootstrap.authorized);
-            setTier(optimisticBootstrap.tier);
+            setBootstrapTier(optimisticBootstrap.tier);
+            if (cached?.userId && cached.tier !== optimisticBootstrap.tier) {
+                const aligned = { ...cached, tier: optimisticBootstrap.tier };
+                setProfile(aligned);
+                profileRef.current = aligned;
+                writeProfileCache(aligned);
+            }
         }
     }, []);
+
+    const refreshProfile = useCallback(async (options?: RefreshProfileOptions) => {
+        const now = Date.now();
+        const lastSync = parseInt(sessionStorage.getItem(PROFILE_SYNC_SESSION_KEY) || '0', 10);
+        if (!options?.force && now - lastSync < 30000 && profileRef.current) {
+            setProfileLoading(false);
+            return profileRef.current;
+        }
+
+        if (!options?.force) {
+            try {
+                if (sessionStorage.getItem(PROFILE_SYNC_IN_FLIGHT_KEY) === '1') {
+                    setProfileLoading(false);
+                    return profileRef.current ?? null;
+                }
+            } catch {
+                // ignore
+            }
+        }
+
+        if (!profileRef.current) {
+            setProfileLoading(true);
+        }
+
+        try {
+            await getCurrentUser();
+            const watchlist = options?.watchlist || getWatchlist();
+            const referredBy = localStorage.getItem('STOCKWISE_REFERRED_BY');
+
+            const res = await fetch('/api/user/profile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                cache: 'no-store',
+                body: JSON.stringify({ watchlist, referredBy }),
+            });
+
+            if (!res.ok) {
+                const errBody = await res.json().catch(() => ({}));
+                console.error('refreshProfile failed', errBody?.error || `status ${res.status}`);
+                return null;
+            }
+
+            const data = (await res.json()) as Record<string, unknown>;
+            applyServerProfilePayload(data, true);
+            return mapApiJsonToUserProfile(data);
+        } catch (e) {
+            console.error('refreshProfile failed', e);
+            return null;
+        } finally {
+            setProfileLoading(false);
+        }
+    }, [applyServerProfilePayload]);
 
     useEffect(() => {
         const cachedAuth = readAuthCache(readBrowserBootstrapStorageState().authCacheRaw);
@@ -89,7 +146,7 @@ export function useDashboardAuthorization() {
             let uid = '';
             if (isReturningUser) {
                 uid = localStorage.getItem('STOCKWISE_USER_ID') || '';
-                getCurrentUser().catch(e => console.warn('Background user sync:', e));
+                getCurrentUser().catch((e) => console.warn('Background user sync:', e));
             } else {
                 const currentUser = await getCurrentUser({ waitForSessionSync: false });
                 uid = currentUser.userId;
@@ -118,11 +175,12 @@ export function useDashboardAuthorization() {
                         });
                     }
                     if (res.ok) {
-                        const data = await res.json() as ProfileApiData;
-                        const newTier = (data.tier || 'free') as Tier;
-                        populateUserProfileCache(data);
-                        setTier(newTier);
-                        writeAuthCache(newTier, true);
+                        const data = (await res.json()) as Record<string, unknown>;
+                        applyServerProfilePayload(data, true);
+                        const mapped = mapApiJsonToUserProfile(data);
+                        if (mapped) {
+                            writeAuthCache(mapped.tier, true);
+                        }
                     }
                 } catch (e) {
                     console.warn('Tier warmup failed (invite disabled mode):', e);
@@ -133,6 +191,7 @@ export function useDashboardAuthorization() {
                         // ignore
                     }
                 }
+                setProfileLoading(false);
                 return;
             }
 
@@ -167,10 +226,9 @@ export function useDashboardAuthorization() {
                 }
             }
 
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 20000);
             try {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 20000);
-
                 try {
                     sessionStorage.setItem(PROFILE_SYNC_IN_FLIGHT_KEY, '1');
                 } catch {
@@ -192,16 +250,22 @@ export function useDashboardAuthorization() {
                         signal: controller.signal,
                     });
                 }
-                clearTimeout(timeoutId);
-                const data = await res.json() as ProfileApiData;
-                const newTier = (data.tier || 'free') as Tier;
 
-                if (res.ok && data.userId) {
-                    populateUserProfileCache(data);
+                let data: Record<string, unknown> = {};
+                try {
+                    data = (await res.json()) as Record<string, unknown>;
+                } catch {
+                    /* ignore malformed body */
                 }
-                setTier(newTier);
 
-                const isUnauthorizedFreeUser = data.tier === 'free' && !data.hasOnboarded;
+                const newTier = coerceTierFromData(data);
+                if (res.ok && data.userId) {
+                    applyServerProfilePayload(data, true);
+                } else {
+                    applyServerProfilePayload(data, false);
+                }
+
+                const isUnauthorizedFreeUser = newTier === 'free' && data.hasOnboarded === false;
                 if (!isUnauthorizedFreeUser) {
                     setIsAuthorized(true);
                     writeAuthCache(newTier, true);
@@ -216,16 +280,18 @@ export function useDashboardAuthorization() {
                     setIsAuthorized(false);
                 }
             } finally {
+                clearTimeout(timeoutId);
                 try {
                     sessionStorage.removeItem(PROFILE_SYNC_IN_FLIGHT_KEY);
                 } catch {
                     // ignore
                 }
+                setProfileLoading(false);
             }
         };
 
         checkAuth();
-    }, []);
+    }, [applyServerProfilePayload]);
 
     useEffect(() => {
         if (isAuthorized !== null) {
@@ -242,11 +308,24 @@ export function useDashboardAuthorization() {
         }
     }, [isAuthorized]);
 
+    const tier: Tier = profile?.tier ?? bootstrapTier;
+
+    const userSession: UserProfileContextValue = useMemo(
+        () => ({
+            profile,
+            tier,
+            userId: profile?.userId ?? '',
+            loading: profileLoading,
+            refreshProfile,
+        }),
+        [profile, tier, profileLoading, refreshProfile],
+    );
+
     return {
         isAuthorized,
         setIsAuthorized,
-        tier,
-        setTier,
+        refreshProfile,
+        userSession,
         canSkipTransition,
     };
 }

@@ -56,6 +56,6 @@ describe('stock dashboard card surface helpers', () => {
         const surface = getStockDashboardCardSurface({ displayPrediction: null, position: 'empty' });
 
         assert.equal(surface.tacticalData, null);
-        assert.match(surface.pendingText, /刚刚加入自选池/);
+        assert.equal(surface.pendingKey, 'common.noData');
     });
 });

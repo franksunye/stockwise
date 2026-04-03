@@ -137,7 +137,7 @@ class PredictionRunner:
         self.model_filter = model_filter
         self.force = force
 
-    async def run_analysis(self, symbol: str, date: str = None, data: Dict[str, Any] = None, force: bool = False):
+    async def run_analysis(self, symbol: str, date: str = None, data: Dict[str, Any] = None, force: bool = False, locale: str = 'cn'):
         """
         Run multi-model analysis for a given stock.
         """
@@ -221,7 +221,7 @@ class PredictionRunner:
             except Exception as e:
                 logger.warning(f"⚠️ Failed to fetch specific history for {model.model_id}: {e}")
             
-            tasks.append(self._safe_predict(model, symbol, date, model_specific_data, force=effective_force))
+            tasks.append(self._safe_predict(model, symbol, date, model_specific_data, force=effective_force, locale=locale))
             
         predictions = await asyncio.gather(*tasks)
         logger.info(f"🏁 Analysis round finished. {ctx.stats()}")
@@ -268,7 +268,8 @@ class PredictionRunner:
                 FROM ai_predictions_v2 p 
                 JOIN prediction_models m ON p.model_id = m.model_id
                 WHERE p.symbol = ? AND p.date = ? AND p.is_primary = 1
-            """, (symbol, date))
+                  AND COALESCE(p.content_locale, 'cn') = ?
+            """, (symbol, date, locale))
             existing_primary = cursor.fetchone()
             existing_primary_model_id = existing_primary[0] if existing_primary else None
             existing_priority = existing_primary[1] if existing_primary else -1
@@ -330,7 +331,10 @@ class PredictionRunner:
             model_id = pred['model_id']
             is_primary = 0
             if selected_primary_model_id and model_id == selected_primary_model_id:
-                cursor.execute("UPDATE ai_predictions_v2 SET is_primary = 0 WHERE symbol = ? AND date = ?", (symbol, date))
+                cursor.execute(
+                    "UPDATE ai_predictions_v2 SET is_primary = 0 WHERE symbol = ? AND date = ? AND COALESCE(content_locale, 'cn') = ?",
+                    (symbol, date, locale),
+                )
                 is_primary = 1
                 existing_priority = model_priorities.get(model_id, existing_priority)
                 existing_primary_model_id = model_id
@@ -365,6 +369,7 @@ class PredictionRunner:
                     layer1_snapshot.strategy_version,
                     layer1_payload_json,
                     DEFAULT_MODE_ID,
+                    locale,
                 ))
                 _shadow_write_producer_outcome(
                     cursor,
@@ -395,7 +400,7 @@ class PredictionRunner:
             "models": [p['model_id'] for p in valid_predictions if p] # All models that succeeded
         } if valid_predictions else False
 
-    async def _safe_predict(self, model, symbol, date, data, force: bool = False):
+    async def _safe_predict(self, model, symbol, date, data, force: bool = False, locale: str = 'cn'):
         try:
             # 1. Idempotency check per model
             if not force:
@@ -404,7 +409,7 @@ class PredictionRunner:
                 try:
                     cursor.execute(
                     CHECK_PREDICTION_V2_EXISTS_QUERY,
-                    (symbol, date, model.model_id)
+                    (symbol, date, model.model_id, locale)
                     )
                     if cursor.fetchone():
                         logger.debug(f"⏩ Model {model.model_id} already has prediction for {symbol} on {date}, bypassing.")
@@ -413,7 +418,7 @@ class PredictionRunner:
                     conn.close()
 
             # 2. Execute prediction
-            result = await model.predict(symbol, date, data)
+            result = await model.predict(symbol, date, data, locale=locale)
             if result is None:
                 return {"model_id": model.model_id, "_skip_reason": "no_result"}
 
@@ -463,8 +468,9 @@ def _enforce_layer1_direction(result: Dict[str, Any], layer1: Dict[str, Any]) ->
     expected = _layer1_to_signal(setup_state)
     signal = normalize_signal_value(result.get("signal", "Side"), "Side")
 
-    # Keep a kill-switch for emergency rollback in production.
-    if not _is_truthy_env("LAYER1_SIGNAL_ENFORCE", "1"):
+    # v1 default: LLM output is the product-facing truth.
+    # Layer-1 enforcement is now opt-in for internal experiments only.
+    if not _is_truthy_env("LAYER1_SIGNAL_ENFORCE", "0"):
         return result
 
     if expected and signal != expected:
@@ -479,4 +485,21 @@ def _enforce_layer1_direction(result: Dict[str, Any], layer1: Dict[str, Any]) ->
                 f"(status={setup_state})"
             )
         result["signal"] = expected
+        # Keep DB `signal` and JSON payload `reasoning.signal` aligned.
+        # This avoids locale/quality audits seeing contradictory signals.
+        for key in ("reasoning", "ai_reasoning"):
+            payload = result.get(key)
+            if isinstance(payload, dict):
+                payload["signal"] = expected
+                result[key] = payload
+                continue
+            if isinstance(payload, str) and payload.strip().startswith("{"):
+                try:
+                    obj = json.loads(payload)
+                    if isinstance(obj, dict):
+                        obj["signal"] = expected
+                        result[key] = json.dumps(obj, ensure_ascii=False)
+                except Exception:
+                    # Non-fatal: leave original payload untouched if parsing fails.
+                    pass
     return result

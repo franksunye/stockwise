@@ -130,7 +130,7 @@ export function useLocale(): { locale: AppLocale; setLocale: (l: AppLocale) => v
  */
 export function useT<NS extends MessageNamespace>(
   namespace: NS,
-): (key: MessageKey<NS>, params?: Record<string, string | number>) => string {
+): (key: MessageKey<NS>, params?: Record<string, string | number | boolean>) => string {
   const ctx = useContext(LocaleContext);
   if (!ctx) {
     throw new Error('useT must be used within <LocaleProvider>');
@@ -153,7 +153,7 @@ export function useT<NS extends MessageNamespace>(
  */
 export function useGlobalT(): (
   key: FullMessageKey,
-  params?: Record<string, string | number>,
+  params?: Record<string, string | number | boolean>,
 ) => string {
   const ctx = useContext(LocaleContext);
   if (!ctx) {

@@ -58,6 +58,16 @@ if __name__ == "__main__":
     )
 
     parser.add_argument('--date', type=str, help='指定分析日期 (YYYY-MM-DD)')
+    _default_prediction_locale = os.getenv("PREDICTION_CONTENT_LOCALE", "cn").strip().lower()
+    if _default_prediction_locale not in ("en", "cn"):
+        _default_prediction_locale = "cn"
+    parser.add_argument(
+        '--locale',
+        type=str,
+        default=_default_prediction_locale,
+        choices=['cn', 'en'],
+        help='分析提示词与推理输出语言（可用环境变量 PREDICTION_CONTENT_LOCALE 覆盖默认）',
+    )
     parser.add_argument('--start-date', type=str, help='日期范围起始 (YYYY-MM-DD)')
     parser.add_argument('--end-date', type=str, help='日期范围结束 (YYYY-MM-DD)')
     parser.add_argument('--days', type=int, help='回填最近N天')
@@ -158,7 +168,8 @@ if __name__ == "__main__":
                 days=args.days,
                 auto_fill=args.auto_fill,
                 model_filter=args.model,
-                force=args.force
+                force=args.force,
+                locale=args.locale
             )
             if stats:
                 job.set_stats(**stats)
@@ -171,8 +182,8 @@ if __name__ == "__main__":
         if args.market == "HK":
             rerun_workflow = "ai_analyze_hk.yml"
         with JobGuard(f"AI Analysis ({market_dim})", task_type="prediction", rerun_workflow=rerun_workflow) as job:
-            job.set_dimensions(market=market_dim, model=args.model)
-            stats = run_ai_analysis(symbol=args.symbol, market_filter=args.market, force=args.force, model_filter=args.model)
+            job.set_dimensions(market=market_dim, model=args.model, locale=args.locale)
+            stats = run_ai_analysis(symbol=args.symbol, market_filter=args.market, force=args.force, model_filter=args.model, locale=args.locale)
             if stats:
                 job.set_stats(**stats)
             if not args.skip_mode_pipeline:

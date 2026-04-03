@@ -17,6 +17,7 @@ import {
 } from '@/lib/prediction-display';
 import { withDecisionViews } from '@/lib/decision-views';
 import { getCachedLatestPrices, getCachedShortMetrics } from '@/lib/stock-cache';
+import { parsePredictionContentLocaleParam } from '@/lib/prediction-content-locale';
 
 export const dynamic = 'force-dynamic';
 const DASHBOARD_PREDICTION_LOOKBACK_DAYS = 10;
@@ -25,8 +26,14 @@ const DASHBOARD_PREDICTION_LOOKBACK_DAYS = 10;
 const _predCache = new Map<string, { rows: Record<string, unknown>[]; ts: number }>();
 const PRED_CACHE_TTL = 300_000; // 5 min
 
-function getPredCacheKey(symbols: string[], historyLimit: number, tier: string, modeId: string): string {
-    return `${symbols.join(',')}|${historyLimit}|${tier}|${modeId}`;
+function getPredCacheKey(
+    symbols: string[],
+    historyLimit: number,
+    tier: string,
+    modeId: string,
+    contentLocale: string,
+): string {
+    return `${symbols.join(',')}|${historyLimit}|${tier}|${modeId}|${contentLocale}`;
 }
 
 const EFFECTIVE_SIGNAL_WITH_OUTCOME_SQL = EFFECTIVE_SIGNAL_SQL.replace(/p\.signal/g, `COALESCE(pol.signal_state, p.signal)`);
@@ -112,6 +119,7 @@ export async function GET(request: Request) {
     const symbols = symbolsParam ? symbolsParam.split(',').map(s => s.trim()).filter(s => s.length > 0) : [];
     if (symbols.length > 50) return NextResponse.json({ error: 'Too many symbols' }, { status: 400 });
     const normalizedCacheSymbols = Array.from(new Set(symbols)).sort();
+    const predictionContentLocale = parsePredictionContentLocaleParam(searchParams);
 
     const startTime = Date.now();
     const dashboardPredictionThreshold = new Date(Date.now() - DASHBOARD_PREDICTION_LOOKBACK_DAYS * 86400000)
@@ -158,6 +166,7 @@ export async function GET(request: Request) {
                         ) AS layer1_payload,
                         p.max_perf_in_window,
                         p.is_primary, p.model_id as model, m.display_name,
+                        COALESCE(p.content_locale, 'cn') AS content_locale,
                         ${EFFECTIVE_DECISION_SEMANTIC_SQL} AS decision_semantic,
                         ? AS mode_id,
                         ROW_NUMBER() OVER (PARTITION BY p.symbol, p.target_date ORDER BY m.priority DESC) as rn_daily
@@ -177,6 +186,7 @@ export async function GET(request: Request) {
                 WHERE p.symbol IN (${placeholders})
                   AND p.target_date >= '${dashboardPredictionThreshold}'
                   AND (${tierFilter})
+                  AND COALESCE(p.content_locale, 'cn') = ?
             ),
             DailyBest AS (
                 SELECT * FROM RankedPredictions WHERE rn_daily = 1
@@ -216,6 +226,7 @@ export async function GET(request: Request) {
                         ) AS layer1_payload,
                         p.max_perf_in_window,
                         p.is_primary, p.model_id as model, m.display_name,
+                        COALESCE(p.content_locale, 'cn') AS content_locale,
                         p.signal AS decision_semantic,
                         ? AS mode_id,
                         ROW_NUMBER() OVER (PARTITION BY p.symbol, p.target_date ORDER BY m.priority DESC) as rn_daily
@@ -224,6 +235,7 @@ export async function GET(request: Request) {
                 WHERE p.symbol IN (${placeholders})
                   AND p.target_date >= '${dashboardPredictionThreshold}'
                   AND (${tierFilter})
+                  AND COALESCE(p.content_locale, 'cn') = ?
             ),
             DailyBest AS (
                 SELECT * FROM RankedPredictions WHERE rn_daily = 1
@@ -268,7 +280,7 @@ export async function GET(request: Request) {
                 try {
                     debugStage = 'fetch_predictions';
 
-                    const cacheKey = getPredCacheKey(normalizedCacheSymbols, historyLimit, userTier, currentModeId);
+                    const cacheKey = getPredCacheKey(normalizedCacheSymbols, historyLimit, userTier, currentModeId, predictionContentLocale);
                     const cached = _predCache.get(cacheKey);
                     if (cached && Date.now() - cached.ts < PRED_CACHE_TTL) {
                         allHistory = cached.rows;
@@ -284,7 +296,7 @@ export async function GET(request: Request) {
                                     const historyRs = await Promise.race([
                                         client.execute({
                                             sql: historySql,
-                                            args: [currentModeId, currentModeId, ...symbols]
+                                            args: [currentModeId, currentModeId, ...symbols, predictionContentLocale]
                                         }),
                                         new Promise<never>((_, reject) =>
                                             setTimeout(() => reject(new Error('Rich query timeout')), RICH_QUERY_TIMEOUT_MS)
@@ -305,16 +317,16 @@ export async function GET(request: Request) {
                             if (!richQuerySucceeded) {
                                 const historyRs = await client.execute({
                                     sql: fallbackHistorySql,
-                                    args: [currentModeId, ...symbols]
+                                    args: [currentModeId, ...symbols, predictionContentLocale]
                                 });
                                 allHistory = historyRs.rows as Record<string, unknown>[];
                             }
                         } else {
                             try {
-                                allHistory = client.prepare(historySql).all(currentModeId, currentModeId, ...symbols) as Record<string, unknown>[];
+                                allHistory = client.prepare(historySql).all(currentModeId, currentModeId, ...symbols, predictionContentLocale) as Record<string, unknown>[];
                             } catch {
                                 console.warn('[Batch] Local rich history failed, falling back...');
-                                allHistory = client.prepare(fallbackHistorySql).all(currentModeId, ...symbols) as Record<string, unknown>[];
+                                allHistory = client.prepare(fallbackHistorySql).all(currentModeId, ...symbols, predictionContentLocale) as Record<string, unknown>[];
                             }
                         }
 

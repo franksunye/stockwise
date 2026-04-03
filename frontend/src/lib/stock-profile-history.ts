@@ -9,17 +9,22 @@ type StockProfileHistoryCacheEntry = {
 
 const historyCache = new Map<string, StockProfileHistoryCacheEntry>();
 
+function profileHistoryCacheKey(symbol: string, contentLocale: string): string {
+    return `${symbol}:${contentLocale}`;
+}
+
 export function readStockProfileHistoryCache(
     symbol: string,
+    contentLocale: string,
     now: number = Date.now()
 ): AIPrediction[] | null {
-    const cached = historyCache.get(symbol);
+    const cached = historyCache.get(profileHistoryCacheKey(symbol, contentLocale));
     if (!cached) {
         return null;
     }
 
     if (now - cached.timestamp >= STOCK_PROFILE_HISTORY_CACHE_TTL_MS) {
-        historyCache.delete(symbol);
+        historyCache.delete(profileHistoryCacheKey(symbol, contentLocale));
         return null;
     }
 
@@ -29,18 +34,25 @@ export function readStockProfileHistoryCache(
 export function writeStockProfileHistoryCache(
     symbol: string,
     predictions: AIPrediction[],
+    contentLocale: string,
     now: number = Date.now()
 ): AIPrediction[] {
-    historyCache.set(symbol, {
+    historyCache.set(profileHistoryCacheKey(symbol, contentLocale), {
         data: predictions,
         timestamp: now,
     });
     return predictions;
 }
 
-export function clearStockProfileHistoryCache(symbol?: string): void {
+export function clearStockProfileHistoryCache(symbol?: string, contentLocale?: string): void {
+    if (typeof symbol === 'string' && typeof contentLocale === 'string') {
+        historyCache.delete(profileHistoryCacheKey(symbol, contentLocale));
+        return;
+    }
     if (typeof symbol === 'string') {
-        historyCache.delete(symbol);
+        for (const key of historyCache.keys()) {
+            if (key.startsWith(`${symbol}:`)) historyCache.delete(key);
+        }
         return;
     }
 

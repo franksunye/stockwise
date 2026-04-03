@@ -24,14 +24,14 @@ class ChainRunner:
         self.steps = steps
         self.client = llm_client
 
-    async def run(self, symbol: str, date: str, input_data: Dict[str, Any]) -> Dict[str, Any]:
+    async def run(self, symbol: str, date: str, input_data: Dict[str, Any], locale: str = 'cn') -> Dict[str, Any]:
         """
         Executes the chain and returns the final result artifact.
         Persists trace to DB *after* completion (Delayed Write).
         """
         trace_id = input_data.get("trace_id") or str(uuid.uuid4())
         pipeline_run_id = input_data.get("pipeline_run_id") or f"chain-{date}-{uuid.uuid4().hex[:8]}"
-        context = ChainContext(symbol=symbol, date=date, input_data=input_data)
+        context = ChainContext(symbol=symbol, date=date, input_data=input_data, locale=locale)
         context.artifacts["trace_envelope"] = {
             "trace_id": trace_id,
             "parent_trace_id": input_data.get("parent_trace_id"),

@@ -6,6 +6,8 @@ import { StockData, MarketAlmanacData } from '@/lib/types';
 import { getRule } from '@/lib/storage';
 import { getMarketScene, isTradingDay, getHKTime, formatDateStr } from '@/lib/date-utils';
 import { getDashboardRefreshPlan, type DashboardRefreshEvent } from '@/lib/dashboard-refresh-contract';
+import { useLocale } from '@/context/LocaleContext';
+import { appLocaleToPredictionContentLocale } from '@/lib/prediction-content-locale';
 import { WatchlistItem } from './useWatchlist';
 
 // 价格层刷新间隔：盘中 1 分钟，非交易时段 10 分钟
@@ -65,10 +67,11 @@ function formatRefreshError(error: unknown, sessionRecoveryAttempted: boolean): 
     return '未知错误';
 }
 
-function buildBatchUrl(symbols: string, historyLimit: number): string {
+function buildBatchUrl(symbols: string, historyLimit: number, predictionContentLocale: string): string {
     const params = new URLSearchParams({
         symbols,
         historyLimit: String(historyLimit),
+        locale: predictionContentLocale,
         _t: String(Date.now())
     });
 
@@ -84,6 +87,9 @@ export function useDashboardData(
     priceOnlyRefresh = false,
     enableAlmanac = true
 ) {
+    const { locale: appLocale } = useLocale();
+    const predictionContentLocale = appLocaleToPredictionContentLocale(appLocale);
+    const dashboardCacheStorageKey = `${CACHE_KEY}_${predictionContentLocale}`;
 
     const [stocks, setStocks] = useState<StockData[]>([]);
     const [almanac, setAlmanac] = useState<MarketAlmanacData | null>(null);
@@ -183,7 +189,7 @@ export function useDashboardData(
     // 1. 初始化：尝试从本地缓存读取，实现【秒开】
     useEffect(() => {
         try {
-            const cached = localStorage.getItem(CACHE_KEY);
+            const cached = localStorage.getItem(dashboardCacheStorageKey);
             if (cached) {
                 const parsed = JSON.parse(cached);
                 const { data, timestamp } = parsed;
@@ -208,7 +214,7 @@ export function useDashboardData(
         } catch (e) {
             console.error('Cache load error', e);
         }
-    }, [enableAlmanac]);
+    }, [enableAlmanac, dashboardCacheStorageKey]);
 
     useEffect(() => {
         if (!enableAlmanac) {
@@ -342,7 +348,7 @@ export function useDashboardData(
 
             // Step 3: Fetch Batch Stock Data (Stage 2)
             const symbols = watchlist.map(w => w.symbol).join(',');
-            const url = buildBatchUrl(symbols, historyLimit);
+            const url = buildBatchUrl(symbols, historyLimit, predictionContentLocale);
 
             const fetchOptions: RequestInit = {
                 signal: controller.signal,
@@ -360,7 +366,7 @@ export function useDashboardData(
             let batchRes = await fetch(url, fetchOptions);
             if (batchRes.status === 401) {
                 await getCurrentUser({ forceSessionSync: true });
-                batchRes = await fetch(buildBatchUrl(symbols, historyLimit), fetchOptions);
+                batchRes = await fetch(buildBatchUrl(symbols, historyLimit, predictionContentLocale), fetchOptions);
             }
             clearTimeout(timeoutId);
 
@@ -431,7 +437,7 @@ export function useDashboardData(
 
             // 💾 写入本地缓存 (后台静默)
             try {
-                localStorage.setItem(CACHE_KEY, JSON.stringify({
+                localStorage.setItem(dashboardCacheStorageKey, JSON.stringify({
                     data: validResults,
                     almanac: enableAlmanac ? almanacRef.current : null,
                     almanacs: enableAlmanac ? almanacsRef.current : [],
@@ -469,7 +475,19 @@ export function useDashboardData(
         } finally {
             setIsRefreshing(false);
         }
-    }, [watchlist, loadingWatchlist, historyLimit, enableAlmanac]);
+    }, [watchlist, loadingWatchlist, historyLimit, enableAlmanac, predictionContentLocale, dashboardCacheStorageKey]);
+
+    const isFirstPredictionLocaleEffectRef = useRef(true);
+    useEffect(() => {
+        if (isFirstPredictionLocaleEffectRef.current) {
+            isFirstPredictionLocaleEffectRef.current = false;
+            return;
+        }
+        if (loadingWatchlist && watchlist.length === 0) return;
+        if (watchlist.length === 0) return;
+        lastFetchTimeRef.current = 0;
+        void loadAllData(false, true);
+    }, [predictionContentLocale, loadingWatchlist, watchlist.length, loadAllData]);
 
     interface PriceSnapshot {
         symbol: string;
@@ -739,7 +757,13 @@ export function useDashboardData(
 
         try {
             await getCurrentUser();
-            const res = await fetch(`/api/history?symbol=${symbol}&offset=${offset}&limit=10`);
+            const hp = new URLSearchParams({
+                symbol,
+                offset: String(offset),
+                limit: '10',
+                locale: predictionContentLocale,
+            });
+            const res = await fetch(`/api/history?${hp.toString()}`);
             const data = await res.json();
 
             if (data.predictions) {
@@ -768,7 +792,7 @@ export function useDashboardData(
             console.error('Failed to load history', e);
             setStocks(prev => prev.map(s => s.symbol === symbol ? { ...s, loadingMore: false } : s));
         }
-    }, []);
+    }, [predictionContentLocale]);
 
     return {
         stocks,

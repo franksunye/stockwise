@@ -51,7 +51,7 @@ async function seedStorage(context) {
             authorized: true,
             timestamp: Date.now(),
         }));
-        localStorage.setItem('stockwise_user_profile_v1', JSON.stringify({
+        localStorage.setItem('stockwise_user_profile_v2', JSON.stringify({
             userId: 'user_center_smoke',
             tier: 'free',
             hasOnboarded: true,

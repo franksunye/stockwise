@@ -15,6 +15,7 @@ import {
     EFFECTIVE_VALIDATION_STATUS_SQL,
 } from '@/lib/prediction-display';
 import { withDecisionViews } from '@/lib/decision-views';
+import { parsePredictionContentLocaleParam } from '@/lib/prediction-content-locale';
 
 export const dynamic = 'force-dynamic';
 
@@ -47,10 +48,11 @@ function closeDb(db: unknown): void {
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const symbol = searchParams.get('symbol');
-    const limit = parseInt(searchParams.get('limit') || '30');
-    const targetDate = searchParams.get('targetDate');
+        const limit = parseInt(searchParams.get('limit') || '30');
+        const targetDate = searchParams.get('targetDate');
+        const predictionContentLocale = parsePredictionContentLocaleParam(searchParams);
 
-    if (!symbol) {
+        if (!symbol) {
         return NextResponse.json({ error: 'Missing symbol' }, { status: 400 });
     }
 
@@ -80,6 +82,8 @@ export async function GET(request: Request) {
                 whereClause += ' AND p.target_date = ?';
                 queryArgs.push(targetDate);
             }
+            whereClause += ` AND COALESCE(p.content_locale, 'cn') = ?`;
+            queryArgs.push(predictionContentLocale);
             queryArgs.push(limit);
 
             const sql = `
@@ -110,6 +114,7 @@ export async function GET(request: Request) {
                     p.is_primary,
                     p.model_id AS model,
                     m.display_name,
+                    COALESCE(p.content_locale, 'cn') AS content_locale,
                     ${EFFECTIVE_DECISION_SEMANTIC_SQL} AS decision_semantic,
                     ? AS mode_id,
                     d.close AS close_price
@@ -184,6 +189,7 @@ export async function GET(request: Request) {
                         p.is_primary,
                         p.model_id AS model,
                         m.display_name,
+                        COALESCE(p.content_locale, 'cn') AS content_locale,
                         ${EFFECTIVE_DECISION_SEMANTIC_SQL} AS decision_semantic,
                         ? AS mode_id,
                         d.close AS close_price

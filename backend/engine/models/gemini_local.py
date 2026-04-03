@@ -71,7 +71,7 @@ class GeminiLocalAdapter(BasePredictionModel):
             except Exception as e:
                 logger.warning(f"⚠️ GeminiLocalAdapter V2 初始化失败: {e}")
         
-    async def predict(self, symbol: str, date: str, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def predict(self, symbol: str, date: str, data: Dict[str, Any], locale: str = 'cn') -> Dict[str, Any]:
         if not self.api_key or not self._client:
             logger.warning(f"Skipping {self.model_id}: Missing API Key ({self.api_key_env})")
             return None
@@ -79,7 +79,7 @@ class GeminiLocalAdapter(BasePredictionModel):
         # Prepare prompts
         try:
             from backend.engine.prompts import prepare_stock_analysis_prompt
-            prompt_result = prepare_stock_analysis_prompt(symbol, date, ctx=data)
+            prompt_result = prepare_stock_analysis_prompt(symbol, date, ctx=data, locale=locale)
             
             if len(prompt_result) == 3:
                  system_prompt, user_prompt, prompt_version = prompt_result
@@ -172,7 +172,7 @@ class GeminiLocalAdapter(BasePredictionModel):
             # Normalize and Return
             end_time = time.time()
             execution_time = int((end_time - start_time) * 1000)
-            parsed = normalize_ai_response(parsed)
+            parsed = normalize_ai_response(parsed, content_locale=locale)
             key_levels = parsed.get("key_levels", {})
             clean_reasoning = json.dumps(parsed, ensure_ascii=False)
             

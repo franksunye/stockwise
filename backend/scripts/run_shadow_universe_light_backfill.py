@@ -160,8 +160,12 @@ def main() -> None:
                     continue
 
                 layer1 = prediction["layer1"]
+                content_locale = prediction.get("content_locale", "cn")
                 if args.set_primary:
-                    cur.execute("UPDATE ai_predictions_v2 SET is_primary = 0 WHERE symbol = ? AND date = ?", (symbol, date_str))
+                    cur.execute(
+                        "UPDATE ai_predictions_v2 SET is_primary = 0 WHERE symbol = ? AND date = ? AND COALESCE(content_locale, 'cn') = ?",
+                        (symbol, date_str, content_locale),
+                    )
                 cur.execute(
                     SAVE_PREDICTION_V2_QUERY,
                     (
@@ -187,6 +191,7 @@ def main() -> None:
                         layer1.strategy_version,
                         json.dumps(layer1.payload, ensure_ascii=False),
                         args.mode_id,
+                        content_locale,
                     ),
                 )
                 success_rows += 1

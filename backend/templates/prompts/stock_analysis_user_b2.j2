@@ -1,33 +1,71 @@
 <analysis_input>
 
 <meta_context>
+{% if locale == 'en' -%}
+Stock: {{ stock_name }} ({{ symbol }})
+Analysis Base Date: {{ date }}
+Market Context: {{ market_context }}
+Price Altitude: {{ altitude_str }}
+{% else -%}
 股票: {{ stock_name }} ({{ symbol }})
 分析基准日: {{ date }}
 市场背景: {{ market_context }}
 股价海拔: {{ altitude_str }}
+{% endif -%}
 </meta_context>
 
 <profile_data>
+{% if locale == 'en' -%}
+Industry: {{ profile.industry | default('Unknown') }}
+Main Business: {{ profile.main_business | default('N/A') }}
+Company Profile: {{ (profile.description | default('N/A'))[:150] }}
+{% else -%}
 行业: {{ profile.industry | default('未知') }}
 主营业务: {{ profile.main_business | default('暂无') }}
 公司简介: {{ (profile.description | default('暂无'))[:100] }}
+{% endif -%}
 </profile_data>
 
 <macro_and_flow>
+{% if locale == 'en' -%}
+Macro: GDP {{ macro_context.gdp | default('N/A') }} | CPI {{ macro_context.cpi | default('N/A') }} | 10Y {{ macro_context.bond_10y | default('N/A') }}
+Market Liquidity: Northbound {{ market_flow_context.northbound_net_inflow | default('N/A') }} | Leading Sectors {{ market_flow_context.top_inflow_sectors | default('None') }}
+Stock Liquidity: Big Orders {{ stock_flow_context.big_order_inflow | default('N/A') }} | Interpretation {{ stock_flow_context.interpretation | default('None') }}
+{% else -%}
 宏观: GDP {{ macro_context.gdp | default('N/A') }} | CPI {{ macro_context.cpi | default('N/A') }} | 10Y {{ macro_context.bond_10y | default('N/A') }}
 市场资金: 北向 {{ market_flow_context.northbound_net_inflow | default('N/A') }} | 领涨板块 {{ market_flow_context.top_inflow_sectors | default('暂无') }}
 个股资金: 主力大单 {{ stock_flow_context.big_order_inflow | default('N/A') }} | 解读 {{ stock_flow_context.interpretation | default('暂无') }}
+{% endif -%}
 </macro_and_flow>
 
 <price_action_daily>
+{% if locale == 'en' -%}
+| Date | Open | High | Low | Close | Change % | Volume |
+|------|------|------|-----|-------|----------|--------|
+{% else -%}
 | 日期 | 开盘 | 最高 | 最低 | 收盘 | 涨跌幅 | 成交量 |
 |------|------|------|------|------|--------|--------|
+{% endif -%}
 {% for h in daily_history -%}
 | {{ h.date }} | {{ h.open }} | {{ h.high }} | {{ h.low }} | {{ h.close }} | {{ "%+.2f"|format(h.change_percent or 0) }}% | {{ h.volume | int }} |
 {% endfor %}
 </price_action_daily>
 
 <technical_indicators>
+{% if locale == 'en' -%}
+Moving Averages: {{ tech.ma_alignment }}
+Price Position: {{ tech.price_pos_desc }}
+Mid-term Confirmation: {{ tech.mid_term_desc }}
+MACD: {{ tech.macd_desc }}
+RSI: {{ "%.1f"|format(tech.rsi) }} ({{ tech.rsi_desc }})
+KDJ: K{{ "%.1f"|format(tech.k) }}/D{{ "%.1f"|format(tech.d) }} -> {{ tech.kdj_desc }}
+Bollinger Position: {{ tech.boll_desc }}
+Resonance Score: {{ "%+d"|format(tech.total_score) }} ({{ tech.score_meaning }})
+ATR-14: {{ structural_hints.atr_14 }}
+20D High/Low: {{ structural_hints.low_20d }} ~ {{ structural_hints.high_20d }}
+Volume Anchor: {{ structural_hints.heavy_volume_anchor }}
+MA Reference: MA20({{ structural_hints.ma20 }}) / MA60({{ structural_hints.ma60 }})
+{% else -%}
 均线: {{ tech.ma_alignment }}
 价格位置: {{ tech.price_pos_desc }}
 中期确认: {{ tech.mid_term_desc }}
@@ -40,40 +78,83 @@ ATR-14: {{ structural_hints.atr_14 }}
 20日高低: {{ structural_hints.low_20d }} ~ {{ structural_hints.high_20d }}
 筹码锚点: {{ structural_hints.heavy_volume_anchor }}
 均线参考: MA20({{ structural_hints.ma20 }}) / MA60({{ structural_hints.ma60 }})
+{% endif -%}
 </technical_indicators>
 
 <price_action_weekly>
+{% if locale == 'en' -%}
+| Week Ending | Close | Change % | MA20 | RSI |
+|-------------|-------|----------|------|-----|
+{% else -%}
 | 周末日期 | 收盘 | 涨跌幅 | MA20 | RSI |
 |----------|------|--------|------|-----|
+{% endif -%}
 {% for w in weekly_history -%}
 | {{ w.date }} | {{ w.close }} | {{ "%+.2f"|format(w.change_percent or 0) }}% | {{ "%.2f"|format(w.ma20) }} | {{ "%.1f"|format(w.rsi) }} |
 {% endfor %}
+{% if locale == 'en' -%}
+Quarterly Range: {{ weekly_stats.low }} ~ {{ weekly_stats.high }}
+{% else -%}
 季度区间: {{ weekly_stats.low }} ~ {{ weekly_stats.high }}
+{% endif -%}
 </price_action_weekly>
 
 <price_action_monthly>
+{% if locale == 'en' -%}
+| Month Ending | Close | Change % |
+|--------------|-------|----------|
+{% else -%}
 | 月末日期 | 收盘 | 涨跌幅 |
 |----------|------|--------|
+{% endif -%}
 {% for m in monthly_history -%}
 | {{ m.date }} | {{ m.close }} | {{ "%+.2f"|format(m.change_percent or 0) }}% |
 {% endfor %}
+{% if locale == 'en' -%}
+Annual Range: {{ monthly_stats.low }} ~ {{ monthly_stats.high }}
+Long-term Trend: {{ long_term_trend }}
+{% else -%}
 年度区间: {{ monthly_stats.low }} ~ {{ monthly_stats.high }}
 长期趋势: {{ long_term_trend }}
+{% endif -%}
 </price_action_monthly>
 
 {% if ai_history %}
 <ai_prediction_history>
+{% if locale == 'en' -%}
+| Date | Signal | Confidence | Key Judgment | Result | Actual Chg |
+|------|--------|------------|--------------|--------|------------|
+{% else -%}
 | 预测日期 | 信号 | 置信度 | 核心判断 | 结果 | 实际涨跌 |
 |----------|------|--------|----------|------|----------|
+{% endif -%}
 {% for pred in ai_history -%}
-| {{ pred.date }} | {{ signal_to_cn_label(pred.signal) }} | {{ "%.0f"|format(pred.confidence * 100) }}% | {{ pred.summary }} | {{ "✅" if pred.validation_status == "Correct" else ("❌" if pred.validation_status == "Incorrect" else "➖") }} | {{ "%+.2f"|format(pred.actual_change) }}% |
+| {{ pred.date }} | {{ signal_to_cn_label(pred.signal) if locale != 'en' else pred.signal }} | {{ "%.0f"|format(pred.confidence * 100) }}% | {{ pred.summary }} | {{ "✅" if pred.validation_status == "Correct" else ("❌" if pred.validation_status == "Incorrect" else "-") }} | {{ "%+.2f"|format(pred.actual_change) }}% |
 {% endfor %}
+{% if locale == 'en' -%}
+Historical Accuracy: {{ ai_accuracy.total }} times / {{ "%.1f"|format(ai_accuracy.rate) }}%
+{% else -%}
 历史准确率: {{ ai_accuracy.total }} 次 / {{ "%.1f"|format(ai_accuracy.rate) }}%
+{% endif -%}
 </ai_prediction_history>
 {% endif %}
 
 {% if quant_model_status %}
 <quant_model_context>
+{% if locale == 'en' -%}
+Model Role: Rule-side structural judgment; not your final output. Background reference for risk.
+Model Definitions:
+- TriggeredLong = Quant model believes entrance trigger conditions are met.
+- Watch = Quant model believes worth tracking, but lacks confirmation.
+- NoSetup = Quant model believes no clear setup exists.
+- RiskOff = Quant model believes defensive stance is required.
+Current Quant Conclusion: {{ quant_model_status }}
+Quant Guidance: {{ quant_model_guidance }}
+Instructions:
+- Give your own `signal` based on your analysis.
+- You can agree or disagree with the quant model.
+- If you disagree, explain the most critical evidence in `conflict_resolution`.
+{% else -%}
 量化模型角色: 规则侧结构判断，不等于你的最终输出；它用于提供状态对照与风险背景。
 四状态定义:
 - TriggeredLong = 量化模型认为进攻触发条件已成立
@@ -86,6 +167,7 @@ ATR-14: {{ structural_hints.atr_14 }}
 - 你需要给出分析模型自己的 `signal`
 - 你可以与量化模型一致，也可以分歧
 - 若分歧，请在 `conflict_resolution` 中说明最关键的分歧证据
+{% endif -%}
 </quant_model_context>
 {% endif %}
 
@@ -94,16 +176,39 @@ ATR-14: {{ structural_hints.atr_14 }}
 </execution_constraints>
 
 <signal_language_contract>
+{% if locale == 'en' -%}
+`signal` field must use ONLY these four values:
+- TriggeredLong = Entrance trigger conditions met; execute candidate entry plan.
+- Watch = Observational value exists, but lacks confirmation.
+- NoSetup = No setup currently worth executing or tracking.
+- RiskOff = Defense/contraction oriented.
+Determine the `signal` first, then generate other fields.
+{% else -%}
 `signal` 字段只能使用以下四个值：
 - TriggeredLong = 进攻触发条件已成立，可开始执行候选进场计划
 - Watch = 有观察价值，但还缺确认，继续等待触发
 - NoSetup = 当前没有值得执行或继续跟踪的 setup
 - RiskOff = 当前应防守
 请先确定 `signal`，再生成其余字段。
+{% endif -%}
 </signal_language_contract>
 
+<tactics_json_contract>
+{% if locale == 'en' -%}
+Self-check before printing JSON: `tactics.holding_profit`, `tactics.holding_loss`, and `tactics.empty` must **each** have **exactly 2** objects. Length 0 or 1 for any of these arrays is **invalid**. Do not copy empty `[]` from older examples; always emit six tactic objects total (2+2+2) with numeric triggers from the price table.
+**Price keys:** After `key_levels`, go tactic-by-tactic and fill `target_price` / `stop_advance_price` / `stop_loss_price` / `buy_zone_price` when the plan implies a level — aim for **at least one non-null** price field per row whenever the trigger names a price; use `[low, high]` for `buy_zone_price` when defining a dip band. Avoid all-null rows by default.
+{% else -%}
+输出 JSON 前自检：`tactics.holding_profit`、`tactics.holding_loss`、`tactics.empty` **各自必须恰好 2 条**；任一项为 `[]` 或仅 1 条均为**无效**。不要照抄空数组示例；三个场景共 6 条战术，`trigger` 须带输入表推出的具体价位数字。
+**价位键：**在写完 `key_levels` 后，逐条检查 6 条战术：凡 `trigger` 已写价位，尽量填入 `target_price`、`stop_advance_price`、`stop_loss_price`、`buy_zone_price` 中与该计划对应的项；`buy_zone_price` 计划接货区间时用升序 `[低, 高]`。尽量避免每条四维全 `null`。
+{% endif -%}
+</tactics_json_contract>
+
 <decision_anchor>
+{% if locale == 'en' -%}
+Focus primarily on the close price of {{ date }}, key support/resistance levels, and risk-reward ratio.
+{% else -%}
 请务必以 {{ date }} 的收盘价、关键支撑/压力位和风险收益比作为最敏感依据。
+{% endif -%}
 </decision_anchor>
 
 </analysis_input>

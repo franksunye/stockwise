@@ -5,7 +5,6 @@ StockWise Database Module (Raw Interface - No ORM)
 在 Serverless (Turso) 环境下，无状态的短连接比连接池更稳定。
 """
 import sqlite3
-import libsql
 import os
 import sys
 import requests
@@ -538,6 +537,7 @@ def init_db():
                 symbol TEXT NOT NULL,
                 date TEXT NOT NULL,
                 model_id TEXT NOT NULL,
+                content_locale TEXT NOT NULL DEFAULT 'cn',
                 target_date TEXT NOT NULL,
                 signal TEXT,
                 confidence REAL,
@@ -560,9 +560,10 @@ def init_db():
                 validation_data TEXT, -- JSON for multi-day trajectories
                 max_perf_in_window REAL, -- Peak/Bottom performance indicator
                 is_primary BOOLEAN DEFAULT 0,
+                trace_id TEXT,
                 created_at TIMESTAMP DEFAULT (datetime('now', '+8 hours')),
                 updated_at TIMESTAMP DEFAULT (datetime('now', '+8 hours')),
-                PRIMARY KEY (symbol, date, model_id),
+                PRIMARY KEY (symbol, date, model_id, content_locale),
                 FOREIGN KEY (model_id) REFERENCES prediction_models(model_id)
             )
         """)
@@ -1051,6 +1052,74 @@ def init_db():
                     if "duplicate column" not in str(e).lower():
                         logger.warning(f"⚠️ Migration failed for {table}.{column}: {e}")
 
+        def migrate_ai_predictions_v2_primary_key_with_locale():
+            cols = get_table_columns(cursor, 'ai_predictions_v2')
+            if not cols:
+                return
+            cursor.execute("PRAGMA table_info(ai_predictions_v2)")
+            pragma_rows = cursor.fetchall()
+            # PRAGMA row: (cid, name, type, notnull, dflt_value, pk)
+            pk_cols = [r[1] for r in sorted(pragma_rows, key=lambda r: int(r[5] or 0)) if int(r[5] or 0) > 0]
+            if pk_cols == ['symbol', 'date', 'model_id', 'content_locale']:
+                return
+            logger.info("🧱 Migrating ai_predictions_v2 PK to include content_locale ...")
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS ai_predictions_v2_new (
+                    symbol TEXT NOT NULL,
+                    date TEXT NOT NULL,
+                    model_id TEXT NOT NULL,
+                    content_locale TEXT NOT NULL DEFAULT 'cn',
+                    target_date TEXT NOT NULL,
+                    signal TEXT,
+                    confidence REAL,
+                    layer1_status TEXT,
+                    layer1_score REAL,
+                    layer1_trigger_hit INTEGER DEFAULT 0,
+                    layer1_risk_off_hit INTEGER DEFAULT 0,
+                    layer1_strategy_version TEXT,
+                    layer1_payload TEXT,
+                    mode_id TEXT,
+                    support_price REAL,
+                    pressure_price REAL,
+                    ai_reasoning TEXT,
+                    prompt_version TEXT,
+                    token_usage_input INTEGER,
+                    token_usage_output INTEGER,
+                    execution_time_ms INTEGER,
+                    validation_status TEXT DEFAULT 'Pending',
+                    actual_change REAL,
+                    validation_data TEXT,
+                    max_perf_in_window REAL,
+                    is_primary BOOLEAN DEFAULT 0,
+                    trace_id TEXT,
+                    created_at TIMESTAMP DEFAULT (datetime('now', '+8 hours')),
+                    updated_at TIMESTAMP DEFAULT (datetime('now', '+8 hours')),
+                    PRIMARY KEY (symbol, date, model_id, content_locale),
+                    FOREIGN KEY (model_id) REFERENCES prediction_models(model_id)
+                )
+            """)
+            cursor.execute("""
+                INSERT OR REPLACE INTO ai_predictions_v2_new (
+                    symbol, date, model_id, content_locale, target_date, signal, confidence,
+                    layer1_status, layer1_score, layer1_trigger_hit, layer1_risk_off_hit, layer1_strategy_version, layer1_payload,
+                    mode_id, support_price, pressure_price, ai_reasoning, prompt_version,
+                    token_usage_input, token_usage_output, execution_time_ms,
+                    validation_status, actual_change, validation_data, max_perf_in_window,
+                    is_primary, trace_id, created_at, updated_at
+                )
+                SELECT
+                    symbol, date, model_id, COALESCE(content_locale, 'cn') AS content_locale, target_date, signal, confidence,
+                    layer1_status, layer1_score, layer1_trigger_hit, layer1_risk_off_hit, layer1_strategy_version, layer1_payload,
+                    mode_id, support_price, pressure_price, ai_reasoning, prompt_version,
+                    token_usage_input, token_usage_output, execution_time_ms,
+                    validation_status, actual_change, validation_data, max_perf_in_window,
+                    is_primary, trace_id, created_at, updated_at
+                FROM ai_predictions_v2
+            """)
+            cursor.execute("DROP TABLE ai_predictions_v2")
+            cursor.execute("ALTER TABLE ai_predictions_v2_new RENAME TO ai_predictions_v2")
+            logger.info("✅ ai_predictions_v2 PK migration completed")
+
         # Task Logs Migrations
         add_column_if_missing('task_logs', 'updated_at', 'TIMESTAMP')
         
@@ -1076,6 +1145,9 @@ def init_db():
         add_column_if_missing('ai_predictions_v2', 'layer1_strategy_version', 'TEXT')
         add_column_if_missing('ai_predictions_v2', 'layer1_payload', 'TEXT')
         add_column_if_missing('ai_predictions_v2', 'mode_id', 'TEXT')
+        add_column_if_missing('ai_predictions_v2', 'content_locale', "TEXT DEFAULT 'cn'")
+        add_column_if_missing('ai_predictions_v2', 'trace_id', 'TEXT')
+        migrate_ai_predictions_v2_primary_key_with_locale()
         add_column_if_missing('mode_decision_log', 'job_id', 'TEXT')
         add_column_if_missing('mode_decision_log', 'rule_version', 'TEXT')
         add_column_if_missing('mode_decision_log', 'triggered_by', 'TEXT')

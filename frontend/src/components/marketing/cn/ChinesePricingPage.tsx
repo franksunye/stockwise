@@ -26,7 +26,7 @@ function PricingContent() {
     "operatingSystem": "Web",
     "offers": {
       "@type": "AggregateOffer",
-      "offerCount": "2",
+      "offerCount": "3",
       "lowPrice": "0",
       "highPrice": "299",
       "priceCurrency": "CNY"
@@ -139,7 +139,7 @@ function PricingContent() {
               <div className="w-20 h-20 bg-indigo-500/20 text-indigo-400 rounded-full flex items-center justify-center mx-auto mb-6">
                 <PartyPopper size={40} />
               </div>
-              <h2 className="text-3xl font-black italic mb-4">欢迎加入 PRO 会员!</h2>
+              <h2 className="text-3xl font-black italic mb-4">欢迎加入 Go 会员!</h2>
               <p className="text-slate-400 font-medium mb-8 leading-relaxed">
                 您的权限已自动激活。现在您可以享受深度复盘、更多自选额度以及实时推送。
               </p>
@@ -181,7 +181,7 @@ function PricingContent() {
             >
               {plan.highlight && (
                 <div className="absolute top-5 right-[-35px] rotate-45 bg-indigo-600 text-white text-[10px] font-black px-10 py-1 uppercase tracking-tighter">
-                  Popular
+                  Recommended
                 </div>
               )}
               
@@ -193,18 +193,24 @@ function PricingContent() {
                 }`}>
                   <plan.icon size={24} />
                 </div>
-                <h3 className="text-2xl font-black italic mb-1">{plan.name}</h3>
+                <h3 className="text-2xl font-black italic mb-1">
+                  {plan.enName === 'Go' ? 'Go 会员' : plan.enName === 'Plus' ? 'Plus 卓越版' : '基础版 (FREE)'}
+                </h3>
                 <p className="text-slate-500 text-sm font-bold uppercase tracking-wider">{plan.enName}</p>
               </div>
 
-              <div className="mb-8">
+              <div className="mb-8 text-left">
                 <div className="flex items-baseline gap-1">
                   <span className="text-sm font-bold">¥</span>
                   <span className="text-5xl font-black tracking-tighter">{plan.price}</span>
-                  <span className="text-slate-500 text-sm ml-2">{plan.period}</span>
+                  <span className="text-slate-500 text-sm ml-2">
+                    {plan.enName === 'Plus' ? '待发布' : (plan.enName === 'Go' ? '/月 (¥299/年)' : '/永久免费')}
+                  </span>
                 </div>
                 <p className="text-slate-400 text-sm mt-4 leading-relaxed italic">
-                  {plan.description}
+                  {plan.description === 'pricing.free.description' ? '适合初学者体验 AI 辅助分析。' : 
+                   plan.description === 'pricing.go.description' ? '最具性价比。解锁顶级推理模型与全量实时通知。' :
+                   '顶配共识分析。包含多模型交叉验证与优先专家支持。'}
                 </p>
               </div>
 
@@ -214,13 +220,20 @@ function PricingContent() {
                     <div className="mt-1 w-4 h-4 rounded-full bg-white/5 flex items-center justify-center flex-shrink-0">
                       <Check size={10} className={plan.highlight ? 'text-indigo-400' : 'text-slate-500'} />
                     </div>
-                    <span className="text-slate-300 font-medium">{feature}</span>
+                    <span className="text-slate-300 font-medium">
+                        {feature.includes('Actionable') ? feature.replace('Actionable Insights', '逻辑研判') : 
+                         feature.includes('Notifications') ? '全量实时通知' :
+                         feature.includes('Community') ? '投资者社区访问' :
+                         feature.includes('consensus') ? 'DeepSeek + Gemini 双模型共识' :
+                         feature.includes('DeepSeek') ? 'DeepSeek 顶级推理模型' :
+                         feature}
+                    </span>
                   </div>
                 ))}
               </div>
 
               <div className="flex flex-col gap-3">
-                {userTier === 'pro' && plan.enName === 'Pro' && hasStripeCustomer && (
+                {userTier === 'go' && plan.enName === 'Go' && hasStripeCustomer && (
                   <button 
                     onClick={handleManageSubscription}
                     disabled={loadingPortal}
@@ -230,7 +243,7 @@ function PricingContent() {
                   </button>
                 )}
 
-                {plan.priceId && (
+                {plan.priceId ? (
                   <button 
                     onClick={() => handleUpgrade(plan.priceId!)}
                     disabled={!!loadingPriceId}
@@ -243,12 +256,24 @@ function PricingContent() {
                     {loadingPriceId === plan.priceId 
                       ? '正在前往收银台...' 
                       : (plan.priceIdAnnual 
-                          ? (userTier === 'pro' && plan.enName === 'Pro' ? '按月续费' : '按月支付') 
-                          : plan.cta
+                          ? (userTier === 'go' && plan.enName === 'Go' ? '按月续费' : '按月支付') 
+                          : '免费开始'
                         )
                     }
                     {loadingPriceId !== plan.priceId && <ChevronRight size={18} />}
                   </button>
+                ) : (
+                  <Link
+                    href={plan.href || '#'}
+                    className={`w-full py-4 rounded-2xl flex items-center justify-center gap-2 font-black italic transition-all active:scale-95 ${
+                      plan.enName === 'Plus'
+                      ? 'bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-600/30'
+                      : 'bg-white/5 border border-white/10 hover:bg-white/10 text-white'
+                    }`}
+                  >
+                    {plan.enName === 'Plus' ? '加入等待名单' : '免费开始'}
+                    <ChevronRight size={18} />
+                  </Link>
                 )}
 
                 {plan.priceIdAnnual && (
@@ -260,7 +285,7 @@ function PricingContent() {
                     <div className="flex items-center gap-2">
                        {loadingPriceId === plan.priceIdAnnual 
                          ? '正在前往收银台...' 
-                         : (userTier === 'pro' && plan.enName === 'Pro' ? '按年续费 (¥299)' : '按年支付 (¥299)')
+                         : (userTier === 'go' && plan.enName === 'Go' ? '按年续费 (¥299)' : '按年支付 (¥299)')
                        }
                        {loadingPriceId !== plan.priceIdAnnual && <ChevronRight size={18} />}
                     </div>
@@ -273,7 +298,7 @@ function PricingContent() {
 
         <section className="mb-24 hidden md:block">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-black italic tracking-tighter">功能深度对照</h2>
+            <h2 className="text-3xl font-black italic tracking-tighter uppercase">功能深度对照</h2>
           </div>
           <div className="glass-card overflow-hidden border-white/5 bg-white/[0.01]">
             <table className="w-full text-left border-collapse">
@@ -281,17 +306,54 @@ function PricingContent() {
                 <tr className="border-b border-white/5 bg-white/[0.02]">
                   <th className="py-6 px-8 text-sm font-black uppercase tracking-widest text-slate-500">能力维度</th>
                   <th className="py-6 px-8 text-sm font-black italic">基础版 (FREE)</th>
-                  <th className="py-6 px-8 text-sm font-black italic text-indigo-400">PRO 会员</th>
+                  <th className="py-6 px-8 text-sm font-black italic text-indigo-400">GO 会员 (核心)</th>
+                  <th className="py-6 px-8 text-sm font-black italic text-emerald-400/60">PLUS (待发布)</th>
                 </tr>
               </thead>
               <tbody className="text-sm font-medium">
-                {featureComparison.map((row: { label: string; free: string; pro: string; highlight?: boolean }, i: number) => (
-                  <tr key={i} className="border-b border-white/[0.03] hover:bg-white/[0.01] transition-colors">
-                    <td className="py-5 px-8 text-slate-400 font-bold">{row.label}</td>
-                    <td className="py-5 px-8 text-slate-500">{row.free}</td>
-                    <td className={`py-5 px-8 ${row.highlight ? 'text-indigo-100 font-black' : 'text-slate-300'}`}>{row.pro}</td>
-                  </tr>
-                ))}
+                {featureComparison.map((row: any, i: number) => {
+                  if (row.isGroup) {
+                    const groupTitle = row.label === 'actionableInsights.group' ? '逻辑研判 (Actionable Insights)' :
+                                     row.label === 'notifications.group' ? '实时通知 (Notifications)' :
+                                     '知守学院 (Academy)';
+                    return (
+                      <tr key={i} className="bg-white/[0.03]">
+                        <td colSpan={4} className="py-4 px-8 text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400/80 text-left">
+                          {groupTitle}
+                        </td>
+                      </tr>
+                    );
+                  }
+                  
+                  const label = row.label.split('.')[1] || row.label;
+                  const labelCN = label === 'model' ? '分析模型' :
+                                label === 'dailyLimit' ? '研判额度 (每日)' :
+                                label === 'monthlyLimit' ? '研判上限 (每月)' :
+                                label === 'signals' ? '趋势信号 / 交易预案' :
+                                label === 'levels' ? '核心点位 / 空头压力' :
+                                label === 'reasoning' ? '推演过程 / 风险反思' :
+                                label === 'markets' ? '市场覆盖 (US/HK/CN)' :
+                                label === 'sharing' ? '报告分享' :
+                                label === 'realtime' ? '送达实效性' :
+                                label === 'types' ? '通知品类' :
+                                label === 'content' ? '教学内容' :
+                                label === 'masters' ? '大师逻辑' : label;
+
+                  return (
+                    <tr key={i} className="border-b border-white/[0.03] hover:bg-white/[0.01] transition-colors">
+                      <td className="py-5 px-8 text-slate-400 font-bold">{labelCN}</td>
+                      <td className="py-5 px-8 text-slate-500">
+                        {row.free === 'Limited' ? '基础/受限' : row.free === 'Unlimited' ? '无限制' : row.free === 'All Access' ? '全量访问' : row.free}
+                      </td>
+                      <td className={`py-5 px-8 ${row.highlight ? 'text-indigo-100 font-black bg-indigo-500/5' : 'text-slate-300'}`}>
+                        {row.go === 'Full Real-time' ? '全量实时推送' : row.go === 'All Categories' ? '全品类' : row.go === 'All Access' ? '全量访问' : row.go}
+                      </td>
+                      <td className="py-5 px-8 text-slate-500 italic opacity-60">
+                        {row.plus === 'Full Real-time' ? '全量实时推送' : row.plus === 'All Categories' ? '全品类' : row.plus === 'All Access' ? '全量访问' : row.plus}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

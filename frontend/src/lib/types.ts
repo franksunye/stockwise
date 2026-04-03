@@ -77,6 +77,8 @@ export interface AIPrediction {
     layer1_payload?: string;
     model?: string; // model_id (legacy or identifier)
     display_name?: string; // Display name from DB
+    /** Language of stored ai_reasoning / prompt (`cn` | `en`), from ai_predictions_v2.content_locale */
+    content_locale?: 'cn' | 'en';
     is_primary?: number | boolean; // Whether it is the primary prediction
     close_price?: number;
     // 技术指标快照 (可选)

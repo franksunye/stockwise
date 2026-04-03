@@ -23,6 +23,10 @@ export interface HistoricalCardValidationStyle {
     bg: string;
     label: string;
     iconName: 'correct' | 'incorrect' | 'verifying' | 'pending';
+    __i18n?: {
+        key: string;
+        params?: Record<string, string | number | boolean>;
+    };
 }
 
 export interface HistoricalCardSurface {
@@ -50,8 +54,8 @@ function parseValidationData(raw: unknown): ParsedValidationData | null {
 }
 
 function getValidationWindowLabel(windowDays: number | null | undefined): string {
-    if (!windowDays || windowDays <= 1) return '收盘验证';
-    return `${windowDays}日回看`;
+    if (!windowDays || windowDays <= 1) return 'closeVerify';
+    return 'windowVerify';
 }
 
 function parseBaseSnapshot(data: AIPrediction): BaseSnapshot {
@@ -82,9 +86,10 @@ function parseDisplayReason(reasoning: string): string {
     }
 }
 
-function getValidationStyle(data: AIPrediction, windowLabel: string, validationData: ParsedValidationData | null): HistoricalCardValidationStyle {
+function getValidationStyle(data: AIPrediction, windowKey: string, validationData: ParsedValidationData | null): HistoricalCardValidationStyle {
     const maxPerf = validationData?.max_cum_change || 0;
     const isGoldMedal = maxPerf >= 8.0;
+    const windowDays = validationData?.window || 0;
 
     switch (data.validation_status) {
         case 'Correct':
@@ -93,21 +98,55 @@ function getValidationStyle(data: AIPrediction, windowLabel: string, validationD
                     iconName: 'correct', 
                     color: 'text-amber-950 font-black', 
                     bg: 'bg-gradient-to-r from-amber-300 to-yellow-400 border-amber-400/50 shadow-[0_2px_10px_rgba(245,158,11,0.2)]', 
-                    label: `金牌验证 +${maxPerf.toFixed(1)}%` 
+                    label: isGoldMedal ? 'goldMedal' : 'passed',
+                    __i18n: {
+                        key: isGoldMedal ? 'goldMedal' : 'passed',
+                        params: { perf: maxPerf.toFixed(1) }
+                    }
                 };
             }
             return { 
                 iconName: 'correct', 
                 color: 'text-emerald-500', 
                 bg: 'bg-emerald-500/10 border-emerald-500/20', 
-                label: `验证通过 ${maxPerf > 0 ? '+' + maxPerf.toFixed(1) + '%' : ''}` 
+                label: 'passed',
+                __i18n: {
+                    key: 'passed',
+                    params: { perf: maxPerf.toFixed(1), showPerf: maxPerf > 0 }
+                }
             };
         case 'Incorrect':
-            return { iconName: 'incorrect', color: 'text-rose-500', bg: 'bg-rose-500/10 border-rose-500/20', label: `${windowLabel}偏离` };
+            return { 
+                iconName: 'incorrect', 
+                color: 'text-rose-500', 
+                bg: 'bg-rose-500/10 border-rose-500/20', 
+                label: 'deviated',
+                __i18n: {
+                    key: 'deviated',
+                    params: { window: windowDays }
+                }
+            };
         case 'Verifying':
-            return { iconName: 'verifying', color: 'text-indigo-400', bg: 'bg-indigo-500/10 border-indigo-500/20', label: `${windowLabel}中` };
+            return { 
+                iconName: 'verifying', 
+                color: 'text-indigo-400', 
+                bg: 'bg-indigo-500/10 border-indigo-500/20', 
+                label: 'verifying',
+                __i18n: {
+                    key: 'verifying',
+                    params: { window: windowDays }
+                }
+            };
         default:
-            return { iconName: 'pending', color: 'text-slate-500', bg: 'bg-slate-500/10 border-slate-500/20', label: '待回看' };
+            return { 
+                iconName: 'pending', 
+                color: 'text-slate-500', 
+                bg: 'bg-slate-500/10 border-slate-500/20', 
+                label: 'waiting',
+                __i18n: {
+                    key: 'waiting'
+                }
+            };
     }
 }
 

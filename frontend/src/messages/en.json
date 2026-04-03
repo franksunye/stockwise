@@ -1,7 +1,8 @@
 {
   "common": {
     "loading": "Loading...",
-    "error": "Something went wrong",
+    "error": "Error",
+    "errorRetry": "Error, please try again",
     "retry": "Retry",
     "confirm": "Confirm",
     "cancel": "Cancel",
@@ -10,40 +11,40 @@
     "close": "Close",
     "back": "Back",
     "more": "More",
-    "noData": "No data available",
-    "unknownStock": "Unknown stock",
+    "noData": "No data",
+    "unknownStock": "Unknown Stock",
     "upgrade": "Upgrade",
-    "manageSub": "Manage subscription"
+    "manageSub": "Manage Subscription",
+    "tradeManagement": "Trade Management"
   },
   "dashboard": {
     "title": "Dashboard",
     "stockPool": "Watchlist",
+    "stockPoolWordmark": "POOL",
+    "stockPoolAssetsHeading": "Watchlist assets ({count})",
+    "stockProfilePassRateLabel": "Lookback pass rate",
+    "stockProfileCompletedLabel": "Completed lookbacks",
+    "stockProfileMatrixTitle": "Review matrix (last {days} days)",
+    "stockProfileMatrixLoading": "Loading...",
     "addStock": "Add to watchlist",
     "removeStock": "Remove from watchlist",
+    "staleData": "Data Syncing",
+    "initialData": "Initializing data",
+    "engineIntervening": "AI engine intervening",
+    "traceHistory": "Swipe up for history",
     "signal": {
-      "buy": "Bullish",
-      "hold": "Hold",
-      "sell": "Defensive",
-      "neutral": "No signal",
+      "triggeredLong": "Bullish",
+      "watching": "Watching",
+      "riskOff": "Defensive",
+      "noSignal": "No Signal",
       "pending": "Awaiting analysis"
     },
     "badge": {
-      "buy": "Good time to look for opportunities",
-      "hold": "Watch first, no rush to act",
-      "sell": "Prioritize risk control",
-      "neutral": "Not recommended to act now",
+      "triggeredLong": "Good time to look for opportunities",
+      "watching": "Watch first, no rush to act",
+      "riskOff": "Prioritize risk control",
+      "noSignal": "Not recommended to act now",
       "pending": "Generating actionable conclusion"
-    },
-    "price": {
-      "currentPrice": "Current price",
-      "todayPrice": "Today's price",
-      "todayClose": "Today's close",
-      "closePrice": "{date} close"
-    },
-    "rsi": {
-      "overbought": "Overbought",
-      "oversold": "Oversold",
-      "stable": "Stable"
     },
     "date": {
       "today": "Today",
@@ -51,29 +52,182 @@
       "friday": "Friday",
       "todayAdvice": "Today's advice",
       "tomorrowAdvice": "Tomorrow's advice",
-      "nextMondayAdvice": "Next Monday's advice",
-      "nextTradingDay": "Next trading day ({date}) advice",
+      "mondayAdvice": "Next Monday's advice",
+      "tradingDayAdvice": "{date} advice",
+      "nextTradingDayAdvice": "Next trading day ({date}) advice",
       "todayVerify": "Today's verification",
-      "verification": "{date} verification"
+      "verification": "{date} verification",
+      "currentPrice": "Current price",
+      "todayClose": "Today's close",
+      "closePrice": "{label} close",
+      "todayFact": "Today's Fact",
+      "factLabel": "{label} Fact",
+      "waitingFact": "Waiting for market fact"
+    },
+    "validation": {
+      "goldMedal": "Gold Medal +{perf}%",
+      "passed": "Validation Passed {perf}",
+      "deviated": "{window}-Day Deviated",
+      "verifying": "{window}-Day Verifying",
+      "waiting": "Waiting for Review",
+      "closeVerify": "Close Verification",
+      "windowVerify": "{window}-Day Review",
+      "accumulation": "Historical validation is still accumulating",
+      "waitingFlow": "Waiting for market to complete this trend"
+    },
+    "rsi": {
+      "overbought": "Overbought",
+      "oversold": "Oversold",
+      "stable": "Stable"
     },
     "confidence": "Confidence",
     "reasoning": "Reasoning"
   },
   "brief": {
-    "title": "Tactical Brief",
-    "fullReport": "Full report",
-    "keyLevels": "Key levels",
-    "sentiment": "Sentiment analysis",
+    "title": "Actionable Insights",
+    "fullReport": "Full Report",
+    "keyLevels": "Key Levels",
+    "keyLevelsHeadline": "Core Tactical Levels",
+    "sentiment": "Sentiment Analysis",
     "support": "Support",
     "resistance": "Resistance",
-    "riskGate": "Risk gate",
-    "circuitBreaker": "75% discipline gate",
-    "exportPoster": "Export poster",
-    "shareReport": "Share report"
+    "riskGate": "Risk Gate",
+    "circuitBreaker": "75% Discipline Gate",
+    "exportPoster": "Export Poster",
+    "shareReport": "Share Report",
+    "exportSheetAlmanac": "Symbol almanac",
+    "exportSheetReport": "Research report",
+    "exportBrief": "Export Analysis",
+    "analyst": "{name} · {role}",
+    "independentView": "Independent",
+    "ruleView": "Rule-Based View",
+    "date": {
+      "tradingDayAdvice": "{date} Advice"
+    },
+    "tradingPlan": "Trading Plan",
+    "copyScenario": "Copy Trading Plan",
+    "baseMarket": "Market Context",
+    "shortPressure": "Short Pressure",
+    "pressureLevel": "Pressure Level",
+    "shortRatio": "Daily Short Ratio",
+    "shortInterest": "Short Position",
+    "eligible": "Shortable",
+    "now": "NOW",
+    "upside": "Upside Potential",
+    "downside": "Downside Buffer",
+    "currentAnchor": "Live Market Anchor",
+    "target": "Target",
+    "stopAdvance": "Trailing Stop",
+    "stopLoss": "Stop Loss",
+    "buyZone": "Ideal Entry",
+    "condition": "Condition",
+    "triggerLabel": "Trigger",
+    "reasonLabel": "Reason",
+    "yes": "Yes",
+    "no": "No",
+    "staleDate": "Syncing Date",
+    "staleWeek": "Syncing Weekly",
+    "intelligence": "Intelligence",
+    "upgradeUnlock": "Upgrade Pro to unlock intelligence",
+    "reasoningChain": "Strategy Reasoning",
+    "upgradeUnlockReasoning": "Upgrade PRO to unlock AI reasoning details",
+    "riskReflection": "Risk Reflection",
+    "conflictResolution": "Conflict Resolution Principles",
+    "trend": "Trend",
+    "momentum": "Momentum",
+    "volume": "Volume",
+    "history": "History",
+    "decision": "Decision",
+    "priceAction": "Price Action",
+    "context": "Context",
+    "capital": "Capital Flow",
+    "general": "General Analysis",
+    "shortLevels": {
+      "extreme": "Extreme",
+      "high": "High",
+      "mid": "Mid",
+      "low": "Low"
+    },
+    "shortInterpretations": {
+      "extreme": "Extreme short pressure, prioritize risk control",
+      "high": "High short pressure, watch rally quality",
+      "mid": "Neutral short pressure, keep watching",
+      "low": "Low short pressure, limited supply",
+      "notEligible": "Not eligible for shorting",
+      "onlyHK": "HK stocks only",
+      "waitingData": "HKEX daily data updates after close"
+    },
+    "scenario": {
+      "holding_profit": "Holding Profit",
+      "holding_loss": "Holding Loss",
+      "empty": "Empty/Waiting"
+    },
+    "scenarioBadge": {
+      "holding_profit": "Profitable",
+      "holding_loss": "In Loss",
+      "empty": "Awaiting Entry"
+    },
+    "actions": {
+      "long": "Bullish",
+      "observe": "Watching",
+      "defense": "Defensive",
+      "profit": "Take Profit"
+    },
+    "levelLabels": {
+      "resistance": "Strong Resistance",
+      "target": "Challenge Level",
+      "breakout": "Breakout Pivot",
+      "current": "Current Price",
+      "support": "Support Level",
+      "strongSupport": "Strong Support",
+      "stoploss": "Stop Loss Ref"
+    },
+    "levelDescriptions": {
+      "resistance": "Supply zone, major battleground",
+      "target": "Local target, watch momentum",
+      "breakout": "Key pivot for reversal structure",
+      "current": "Current market trading point",
+      "support": "Bullish support, maintain strength",
+      "strongSupport": "Core bottom, long-term cost basis",
+      "stoploss": "Final line of defense"
+    },
+    "ordinals": {
+      "first": "1st",
+      "second": "2nd",
+      "third": "3rd"
+    },
+    "trigger": {
+      "not_below_support_1": "Price stays above support",
+      "near_resistance_1": "Near resistance with slowing momentum",
+      "break_support_1": "Price breaks below support",
+      "rebound_resistance": "Rebound to resistance failed",
+      "wait_support_stable": "Wait for stabilization at support",
+      "breakout_confirmation": "Volume breakout confirmed"
+    },
+    "reason": {
+      "discipline": "Trend intact, maintain discipline.",
+      "lock_profit": "Lock in swing profit, avoid pullback.",
+      "control_drawdown": "Prioritize risk control, limit losses.",
+      "reduce_exposure": "Reduce exposure on weak rebound.",
+      "right_side_signal": "Wait for right-side signal before entry.",
+      "confirm_before_entry": "Confirm breakout before entering."
+    }
+  },
+  "history": {
+    "title": "Historical View",
+    "viewDetail": "Detail",
+    "noHistory": "Historical validation is still accumulating",
+    "medalPassed": "Passed",
+    "medalDeviated": "Deviated",
+    "clickReview": "Click to review",
+    "closingPrice": "Closing Price",
+    "dayChange": "Day Change",
+    "baseDay": "Base Day",
+    "dayOffset": "Day {day}"
   },
   "council": {
-    "title": "Research Council",
-    "consensus": "Consensus vote",
+    "title": "AI Council",
+    "consensus": "Consensus Vote",
     "bullish": "Bullish",
     "bearish": "Bearish",
     "neutral": "Neutral",
@@ -81,39 +235,379 @@
     "voteSummary": "{count} seats voted"
   },
   "user": {
-    "center": "Profile",
+    "center": "User Center",
+    "identity": "Account Identity",
+    "investmentMode": "Investment Mode",
+    "support": "Help & Support",
+    "learn": "101 Handbook",
+    "learnSubtitle": "Retail survival: avoiding common pitfalls",
     "tier": {
-      "free": "Free",
-      "go": "Go",
-      "plus": "Plus",
-      "pro": "Pro",
-      "alpha": "Alpha"
+      "free": "Free User",
+      "go": "Go Member",
+      "plus": "Plus Member",
+      "pro": "Pro Member",
+      "alpha": "Alpha Member"
     },
-    "invite": "Invite friends",
-    "copyLink": "Copy invite link",
-    "linkCopied": "Link copied",
-    "settings": "Settings",
-    "language": "Language",
-    "expiresAt": "Expires: {date}",
-    "watchlistUsage": "Watchlist: {used}/{total}"
+    "linkEmail": "Link Email / Recovery",
+    "linkEmailDesc": "Link your email to prevent account loss and recover paid benefits.",
+    "placeholderEmail": "your@email.com",
+    "confirm": "Confirm",
+    "idLabel": "User ID",
+    "emailLabel": "Linked Email",
+    "emailNotLinked": "No email linked",
+    "linkNow": "Link Now",
+    "restoreAccount": "Restore Account",
+    "placeholderUserId": "user_xxxx",
+    "expiresAt": "Expires at: {date}",
+    "watchlistUsage": "Watchlist Quota",
+    "protected": "Protected",
+    "settings": "Account Settings",
+    "successRedeem": "Redemption Success! Upgraded to Go",
+    "failRedeem": "Redemption Failed",
+    "networkFail": "Network request failed",
+    "referral": {
+      "title": "Invite Friends",
+      "partner": "Partner Center",
+      "rewardDays": "+{days} Days",
+      "successCount": "{count} users invited",
+      "copied": "Link copied to clipboard!",
+      "copyFail": "Copy failed, please long-press to copy",
+      "inviteLink": "Copy Invite Link",
+      "revenue": "Revenue Details",
+      "rules": "Reward Rules",
+      "inviteCountLabel": "Successful invites",
+      "unitPeople": "users",
+      "earnedProDaysLabel": "Pro days earned",
+      "unitDays": "days",
+      "rulesExplainerBefore": "For each new user you successfully invite to your watchlist, you and your friend each automatically receive ",
+      "rulesExplainerHighlight": "{days} days",
+      "rulesExplainerAfter": " of Go membership benefits.",
+      "partnerBalanceLabel": "Partner balance",
+      "partnerTotalEarnedLabel": "Lifetime earnings ({percent}%)",
+      "partnerRecentTx": "Recent transactions",
+      "channelCommissionWord": "Commission rate"
+    },
+    "redeem": "Enter Code",
+    "redeemPlaceholder": "PRO-XXXX",
+    "onboardingReset": "Re-enter activation guide",
+    "push": {
+      "title": "Push Notifications",
+      "enable": "Turn On",
+      "enabled": "On",
+      "disableFailed": "Couldn't turn off notifications. Try again.",
+      "advancedSettings": "Notification preferences",
+      "androidLimited": "Push may be unreliable on Android. Open the app for the latest data.",
+      "success": "Notifications enabled",
+      "enableFailed": "Couldn't enable notifications. Try again.",
+      "permissionDenied": "Please allow notifications in your browser or system settings.",
+      "noSubscription": "Couldn't create a push subscription.",
+      "saveFailed": "Save failed: {detail}",
+      "vapidMissing": "Push isn't configured on this server.",
+      "swRegisterFailed": "Couldn't register background updates.",
+      "testPush": "Send test notification",
+      "testPushSending": "Sending...",
+      "testNotificationTitle": "Test notification — ZISO AI",
+      "testNotificationBody": "It works. Local time: {time}",
+      "types": {
+        "signal_flip": { "label": "Trend reversal", "badge": "Key" },
+        "morning_call": { "label": "Morning brief", "badge": "08:30" },
+        "validation_glory": { "label": "Lookback report", "badge": "Hit rate" },
+        "prediction_updated": { "label": "Prediction refresh", "badge": "Done" },
+        "daily_brief": {
+          "labelPro": "Pro deep debrief",
+          "labelStandard": "Daily brief",
+          "badgePro": "Pro",
+          "badgeStandard": "17:30"
+        },
+        "price_update": { "label": "Live quotes", "badge": "Session" },
+        "market_almanac": { "label": "Market almanac", "badge": "2×/day" }
+      }
+    }
+  },
+  "pricing": {
+    "title": "Pricing Plans",
+    "subtitle": "Subscription Benefits",
+    "desc": "Unlock expert-grade insights and industrial-strength analysis.",
+    "mostValue": "Best Value",
+    "active": "Active",
+    "expiryLabel": "Service Expiry",
+    "expiryFormat": "{year}-{month}-{day}",
+    "lifetimeLabel": "Lifetime",
+    "manageSub": "Manage Subscription / Cancel Auto-renewal",
+    "portalRedirecting": "Redirecting to portal...",
+    "currentStatus": "Current Account Status",
+    "subscribe": "Subscribe Pro",
+    "monthly": "Monthly Renewal ($29.9)",
+    "annual": "Annual Subscription (Best Offer)",
+    "annualExtended": "Annual Extension ($299)",
+    "annualBenefit": "Immediately increase validity by 365 days",
+    "annualDiscount": "Save approx. 17%",
+    "processing": "Processing...",
+    "ctaDefault": "Get Started",
+    "manualChannel": "Manual Channel",
+    "manualSupport": "Scan for Human Support",
+    "manualSupportDesc": "Supports direct transfers or payment issues.",
+    "androidPushWarning": "*Due to system limitations, real-time push on some Android devices may be unavailable. Manual check recommended.",
+    "riskWarning": "Stock market involves risk. All content generated by this app is AI-driven and for reference only. Subscription implies agreement to Terms & Privacy.",
+    "systemMaintenance": "⚠️ System maintenance in progress. Please try again later or contact support.",
+    "checkoutError": "⚠️ Payment failed to initiate",
+    "supportContactNote": "Please check your network or try another card. If issues persist, add the support QR code below.",
+    "portalError": "Cannot open subscription portal",
+    "systemBusy": "System busy, please try again later",
+    "free": {
+      "name": "Standard Free",
+      "period": "Forever Free",
+      "description": "Perfect for starters exploring AI-assisted analysis.",
+      "cta": "Start Free"
+    },
+    "go": {
+      "name": "Go Member",
+      "period": "$4.99/mo or $49.9/yr",
+      "description": "Best Value. Unlock top-tier reasoning and full real-time alerts.",
+      "cta": "Subscribe Go"
+    },
+    "plus": {
+      "name": "Plus Prestige",
+      "period": "Coming Soon",
+      "description": "Peak consensus analysis with multi-model validation and priority support.",
+      "cta": "Join Waiting List"
+    },
+    "alpha": {
+      "name": "Alpha Elite",
+      "period": "Annual Subscription",
+      "description": "Top-tier Alpha tools with real-time deep tracking.",
+      "cta": "Contact Us"
+    },
+    "features": {
+      "aiTrend": "AI Trend Analysis",
+      "dailyBrief": "Daily Market Brief",
+      "almanac": "Macro Almanac",
+      "diagnosis": "Basic Stock Check",
+      "community": "Community Access",
+      "deepseek": "DeepSeek Full Reasoning",
+      "aiReport": "Deep AI Analytics",
+      "watchlist": "Watchlist Expansion (10)",
+      "indicators": "Levels & Sentiment",
+      "realtime": "Real-time Alerts",
+      "badge": "⭐ Identity Badge",
+      "breaking": "Breaking Intel & Game Theory",
+      "dashboard": "Expert Console",
+      "reportAuto": "Auto-generated Insights",
+      "api": "Strategy API Access",
+      "expert": "Exclusive Research Assets"
+    },
+    "actionableInsights": {
+      "group": "Actionable Insights",
+      "model": "Analysis Model",
+      "dailyLimit": "Intelligence Quota (Daily)",
+      "monthlyLimit": "Insight Limit (Monthly)",
+      "signals": "Trend Signals / Plans",
+      "levels": "Key Levels / Short Interest",
+      "reasoning": "Reasoning / Risk Reflection",
+      "markets": "Markets (US/HK/CN)",
+      "sharing": "Infinite Sharing"
+    },
+    "notifications": {
+      "group": "Notifications",
+      "realtime": "Real-time Delivery",
+      "types": "Full Push Categories"
+    },
+    "academy": {
+      "group": "Academy",
+      "content": "101 Guides / Masters",
+      "masters": "Master Logic Unlocks"
+    }
+  },
+  "investment": {
+    "title": "Investment Mode",
+    "subtitle": "Choose the investment style that suits you and view the corresponding performance.",
+    "syncing": "Syncing your mode and performance...",
+    "errorLoading": "Unable to display investment mode for now.",
+    "errorRetry": "Please try re-entering this page later.",
+    "currentMode": "Current Mode",
+    "defaultMode": "Default Mode",
+    "modeStatus": "Current Status",
+    "modeRange": "Mode Range",
+    "multiModes": "Multi-mode",
+    "balancedMode": "Balanced Mode",
+    "selectionTitle": "Select Mode",
+    "freeDefault": "Free version defaults to Balanced mode.",
+    "switchNote": "Switching only affects future insights.",
+    "performanceTitle": "Mode Performance",
+    "selectionCurrent": "Current",
+    "selectionSelect": "Select",
+    "metrics": {
+      "coverage": "Coverage",
+      "hitRate": "Hit Rate",
+      "drawdown": "Max Drawdown",
+      "sampleSize": "Sample Size",
+      "payoffRatio": "Payoff Ratio",
+      "stability": "Stability Score"
+    },
+    "advancedDetails": "Details",
+    "unlockProTitle": "Unlock more modes and watchlist performance.",
+    "unlockProDesc": "Currently defaulting to Balanced mode. Upgrade to Pro to switch modes and view specific watchlist performance.",
+    "viewProBenefits": "View Pro Benefits",
+    "switchSuccess": "Switched successfully. Future insights will follow this mode.",
+    "switchFail": "Switch failed, please try again later.",
+    "historyNote": "Switching only affects future insights. History remains unchanged.",
+    "scope": {
+      "universal": {
+        "title": "Universal",
+        "subtitle": "Overall performance robustness."
+      },
+      "pool": {
+        "title": "Watchlist",
+        "subtitle": "Tailored to your symbols."
+      }
+    }
+  },
+  "learn": {
+    "searchPlaceholder": "Search courses...",
+    "all": "All",
+    "backToCatalog": "Back to catalog",
+    "noResults": "No matching courses found",
+    "statsGuides": "{count} Guides",
+    "statsModules": "{count} Modules",
+    "readingTime": "{minutes} min",
+    "loadFail": "Loading failed, please try again later.",
+    "categories": {
+      "The Mind": "The Mind",
+      "The Method": "The Method",
+      "The Money": "The Money",
+      "The Machine": "The Machine",
+      "The Case": "The Case"
+    },
+    "categoryDescs": {
+      "The Mind": "Cognitive & Decision Psychology",
+      "The Method": "Technical & Vol-Price Analysis",
+      "The Money": "Position & Risk Management",
+      "The Machine": "AI Research Mechanism",
+      "The Case": "Real-world Trade Reviews"
+    }
+  },
+  "support": {
+    "searchPlaceholder": "Search questions...",
+    "backToList": "Back to list",
+    "noResults": "No matching questions found",
+    "loading": "Loading...",
+    "sections": {
+      "experience": "UX & Navigation",
+      "ai-logic": "AI Intelligence",
+      "quant": "Quant Logic & Discipline",
+      "trust": "Verification & Trust",
+      "account": "Account & Security",
+      "growth": "Benefits & Growth",
+      "notifications": "Notifications & Alerts",
+      "infra": "Data & Infra"
+    }
   },
   "onboarding": {
-    "welcome": "Welcome to ZISO AI",
-    "step1Title": "Add your first stock",
-    "step1Desc": "Enter a stock code or name. ZISO will generate daily reviews for you.",
-    "step2Title": "Read your tactical brief",
-    "step2Desc": "After market close, the ZISO research council generates a deep report for you.",
-    "getStarted": "Get started",
-    "skipTour": "Skip tour"
+    "welcome": "Hi, I'm ZISO",
+    "assistant": "Your AI Research Analyst",
+    "subtitle": "I'll do the market homework for you, so you can trade with clarity.",
+    "start": "Start Journey",
+    "analysis": {
+      "defaultReasoning": "AI analysis summary based on recent market performance and technical indicators."
+    },
+    "selectTitle": "Select a stock to experience",
+    "selectDesc": "Choose from trending stocks to unlock full AI analysis.",
+    "selectNote": "* After onboarding, you can add any HK or China A stocks.",
+    "analyzing": {
+      "connecting": "Connecting to global market data...",
+      "flows": "Tracking institutional capital flows...",
+      "ai": "AI generating deep decision logic..."
+    },
+    "reveal": {
+      "proUnlocked": "Pro Feature Unlocked",
+      "reportTitle": "AI Deep Full-Dimensional Report",
+      "advice": "AI Advice",
+      "insight": "AI Core Logic",
+      "confidence": "Historical Confidence",
+      "support": "Support Level",
+      "privilegeNote": "* Logic and Support data are usually Pro-only. Temporarily unlocked for you.",
+      "cta": "Get This Insight"
+    },
+    "complete": {
+      "ready": "All set!",
+      "added": "{symbol} added to your watchlist.",
+      "gift": "Special Gift",
+      "trial": "{days}-Day Pro Trial Activated",
+      "trialDesc": "Add up to 10 symbols and unlock all AI core logic.",
+      "cta": "Enter Dashboard"
+    }
+  },
+  "install": {
+    "guideTitle": "Open in Browser",
+    "iosTitle": "Add to Home Screen",
+    "iosDesc": "Enjoy full-screen experience and real-time alerts.",
+    "iosStep1": "Click bottom share button",
+    "iosStep2": "Select 'Add to Home Screen'",
+    "androidTitle": "Install ZISO AI",
+    "androidDesc": "One-click install to desktop for better experience.",
+    "androidCta": "Install to Desktop",
+    "manualTitle": "Add to Desktop",
+    "manualDetect": "{browser} detected, please add manually:",
+    "manualHint": "💡 Chrome is recommended for one-click installation.",
+    "browsers": {
+      "huawei": "Huawei Browser",
+      "xiaomi": "Xiaomi Browser",
+      "uc": "UC Browser",
+      "quark": "Quark Browser",
+      "qq": "QQ Browser",
+      "sogou": "Sogou Browser",
+      "baidu": "Baidu Browser",
+      "default": "Current Browser"
+    },
+    "steps": {
+      "clickMenu": "Click menu button",
+      "clickDots": "Click menu ⋯",
+      "selectAdd": "Select 'Add to Home Screen'",
+      "allowPermission": "Allow permission for shortcuts in settings if blocked",
+      "allowXiaomi": "Select 'Allow' if prompted"
+    }
+  },
+  "settings": {
+    "title": "Personalization",
+    "positionStatus": "Position Status",
+    "desc": "Choose your current state for better AI advice.",
+    "holding": {
+      "label": "Holding",
+      "desc": "AI provides stop-loss/profit advice"
+    },
+    "empty": {
+      "label": "Empty",
+      "desc": "AI provides entry/test advice"
+    },
+    "none": {
+      "label": "Watching",
+      "desc": "AI provides general reference"
+    }
   },
   "trade": {
     "title": "Trade Management",
     "positions": "Current Positions",
-    "suggestion": "Trade suggestion",
-    "reasoning": "Logic assessment",
-    "plan": "Execution plan",
-    "basis": "Projection basis",
-    "detail": "Execution details",
-    "noPositions": "No positions recorded"
+    "suggestion": "Trade Management Suggestion",
+    "reasoning": "Logical Judgment",
+    "plan": "Execution Plan",
+    "basis": "Deduction Basis",
+    "detail": "Execution Detail",
+    "noPositions": "No position records"
+  },
+  "poster": {
+    "title": "ZISO AI Research Report",
+    "preview": "Report Preview",
+    "certainty": "Certainty {percent}%",
+    "summary": "Summary",
+    "decision": "AI Council Decision",
+    "decisionLoading": "Awaiting AI Council decision...",
+    "reasoning": "Reasoning Trace",
+    "suggestion": "Action Suggestions",
+    "scenario": "Scenario: {title}",
+    "trigger": "Trigger: ",
+    "reason": "Reason: ",
+    "keyLevels": "Key Levels",
+    "exportedAt": "Exported {date}",
+    "share": "Share Report"
   }
 }

@@ -17,7 +17,7 @@ from logger import logger
 from trading_calendar import get_market_from_symbol, is_market_closed
 
 
-def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool = False, model_filter: str = None):
+def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool = False, model_filter: str = None, locale: str = 'cn'):
     """独立运行 AI 预测任务
     
     Args:
@@ -174,7 +174,7 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool =
                         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
                     except: pass
                      
-                analysis_result = asyncio.run(runner.run_analysis(stock, today_str))
+                analysis_result = asyncio.run(runner.run_analysis(stock, today_str, locale=locale))
                 
                 if analysis_result:
                     # analysis_result is now a dict: {"primary": ..., "models": [...]}

@@ -7,15 +7,16 @@ import { useUserProfile } from '@/hooks/useUserProfile';
 import { shouldEnableHighPerformance } from '@/lib/device-utils';
 import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
 import { getPredictionActionMeta } from '@/lib/layer1-ui';
+import { useT } from '@/context/LocaleContext';
 
 // Fallback data for the reveal step
 const DEFAULT_REVEAL_DATA = { 
-  name: '您选择的股票', 
+  name: 'Stock', 
   price: 100.00, 
   change: 2.5, 
   signal: 'Long', 
   confidence: 0.85, 
-  reason: '多头排列形态完整，量能配合理想，上涨空间打开。', 
+  reason: 'Strong bullish pattern with ideal volume support.', 
   support: 95.00 
 };
 
@@ -29,6 +30,7 @@ interface RecommendedStock {
 }
 
 export function OnboardingOverlay() { 
+  const t = useT('onboarding');
   const isHighPerformance = shouldEnableHighPerformance();
   const [isVisible, setIsVisible] = useState(false);
   const [step, setStep] = useState(1);
@@ -143,7 +145,7 @@ export function OnboardingOverlay() {
       
       if (data.price || data.prediction) {
         // Parse ai_reasoning JSON
-        let reasoningSummary = '基于近期市场表现和技术指标的综合分析结论。';
+        let reasoningSummary = t('analysis.defaultReasoning');
         try {
           const rawReasoning = data.prediction?.ai_reasoning || '';
           if (rawReasoning.startsWith('{')) {
@@ -233,14 +235,14 @@ export function OnboardingOverlay() {
                         </div>
                         <div className="space-y-4">
                             <h1 className="text-4xl font-black italic tracking-tighter">
-                                你好，我是 ZISO<br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">你的 AI 投研助理</span>
+                                {t('welcome')}<br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">{t('assistant')}</span>
                             </h1>
                             <p className="text-slate-400 text-lg font-medium leading-relaxed max-w-xs mx-auto">
-                                我会替你做股市功课，<br/>带你从容看清投资门道。
+                                {t('subtitle')}
                             </p>
                         </div>
                         <button onClick={() => setStep(2)} className="w-full py-4 bg-white text-black font-black text-lg rounded-2xl active:scale-95 transition-all shadow-[0_0_40px_rgba(255,255,255,0.3)] hover:shadow-[0_0_60px_rgba(255,255,255,0.5)]">
-                            开启旅程
+                            {t('start')}
                         </button>
                     </motion.div>
                 )}
@@ -256,8 +258,8 @@ export function OnboardingOverlay() {
                     >
                         {analyzingStage === 0 ? (
                             <>
-                                <h2 className="text-2xl font-bold">选择一只股票体验</h2>
-                                <p className="text-slate-400 text-sm">从热门标的中选择，我们将<br/><span className="text-indigo-400 font-bold">完全解锁</span>它的 AI 深度分析。</p>
+                                <h2 className="text-2xl font-bold">{t('selectTitle')}</h2>
+                                <p className="text-slate-400 text-sm">{t('selectDesc')}</p>
                                 
                                 {/* Curated Stock List - Only stocks with AI predictions */}
                                 <div className="space-y-3 text-left">
@@ -292,7 +294,7 @@ export function OnboardingOverlay() {
                                     })}
                                 </div>
                                 
-                                <p className="text-[10px] text-slate-600 italic">* 正式使用后，您可以添加任意港股或A股到自选池</p>
+                                <p className="text-[10px] text-slate-600 italic">{t('selectNote')}</p>
                             </>
                         ) : (
                             <div className="py-12 space-y-8">
@@ -312,9 +314,9 @@ export function OnboardingOverlay() {
                                         animate={{ opacity: 1, y: 0 }}
                                         className="text-lg font-bold text-white tracking-wide"
                                     >
-                                        {analyzingStage === 1 && "正在连接全球市场数据..."}
-                                        {analyzingStage === 2 && "正在追踪机构资金流向..."}
-                                        {analyzingStage === 3 && "AI 正在生成深度决策逻辑..."}
+                                        {analyzingStage === 1 && t('analyzing.connecting')}
+                                        {analyzingStage === 2 && t('analyzing.flows')}
+                                        {analyzingStage === 3 && t('analyzing.ai')}
                                     </motion.p>
                                 </div>
                             </div>
@@ -332,9 +334,9 @@ export function OnboardingOverlay() {
                         className="relative"
                     >
                         <div className="absolute -top-10 left-0 right-0 text-center mb-4">
-                            <span className="inline-block px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-bold border border-amber-500/30 uppercase tracking-widest animate-pulse">
-                                Pro Feature Unlocked
-                            </span>
+                                <span className="inline-block px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-bold border border-amber-500/30 uppercase tracking-widest animate-pulse">
+                                    {t('reveal.proUnlocked')}
+                                </span>
                         </div>
 
                         {/* HERO CARD UI */}
@@ -351,7 +353,7 @@ export function OnboardingOverlay() {
                                 <div className="flex justify-between items-start">
                                     <div>
                                         <h3 className="text-3xl font-black italic text-white tracking-tighter">{revealData.name}</h3>
-                                        <p className="text-xs font-bold text-slate-500 tracking-[0.2em] uppercase mt-1">AI 深度全维分析报告</p>
+                                        <p className="text-xs font-bold text-slate-500 tracking-[0.2em] uppercase mt-1">{t('reveal.reportTitle')}</p>
                                     </div>
                                     <div className={`flex flex-col items-end ${revealData.change >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                                         <span className="text-2xl font-black mono">{revealData.price.toFixed(2)}</span>
@@ -364,7 +366,7 @@ export function OnboardingOverlay() {
                                      <div className={`text-[10px] font-black uppercase tracking-widest mb-2 ${
                                          revealData.signal === 'Long' ? 'text-emerald-500' : revealData.signal === 'Short' ? 'text-rose-500' : 'text-amber-500'
                                      }`}>
-                                         AI 建议
+                                         {t('reveal.advice')}
                                      </div>
                                      <div className={`text-3xl font-black tracking-tighter ${
                                          revealData.signal === 'Long' ? 'text-emerald-400' : revealData.signal === 'Short' ? 'text-rose-400' : 'text-amber-400'
@@ -377,7 +379,7 @@ export function OnboardingOverlay() {
                                 <div className="space-y-3">
                                     <div className="flex items-center gap-2 text-indigo-400">
                                         <Zap className="w-4 h-4 fill-current" />
-                                        <span className="text-xs font-bold uppercase tracking-wider">AI 核心逻辑</span>
+                                        <span className="text-xs font-bold uppercase tracking-wider">{t('reveal.insight')}</span>
                                     </div>
                                     <p className="text-sm font-medium text-slate-300 leading-relaxed border-l-2 border-indigo-500/50 pl-3">
                                         &quot;{revealData.reason}&quot;
@@ -388,13 +390,13 @@ export function OnboardingOverlay() {
                                 <div className="grid grid-cols-2 gap-3">
                                     <div className="bg-white/5 rounded-xl p-3 flex flex-col justify-between">
                                         <div className="text-[10px] text-slate-500 uppercase font-bold flex items-center gap-1">
-                                            <Target className="w-3 h-3" /> 历史表现置信度
+                                            <Target className="w-3 h-3" /> {t('reveal.confidence')}
                                         </div>
                                         <span className="text-xl font-bold text-white mt-1">{(revealData.confidence * 100).toFixed(0)}%</span>
                                     </div>
                                     <div className="bg-white/5 rounded-xl p-3 flex flex-col justify-between">
                                         <div className="text-[10px] text-slate-500 uppercase font-bold flex items-center gap-1">
-                                            <ShieldCheck className="w-3 h-3" /> 支撑位
+                                            <ShieldCheck className="w-3 h-3" /> {t('reveal.support')}
                                         </div>
                                         <span className="text-xl font-bold text-white mt-1">{revealData.support.toFixed(2)}</span>
                                     </div>
@@ -403,7 +405,7 @@ export function OnboardingOverlay() {
                                 {/* Prompt */}
                                 <div className="pt-2">
                                      <p className="text-[10px] text-center text-slate-500 italic">
-                                        * 普通用户通常无法查看到“核心逻辑”与“支撑位”数据。<br/>此特权已为您临时解锁。
+                                        {t('reveal.privilegeNote')}
                                      </p>
                                 </div>
                            </div>
@@ -411,7 +413,7 @@ export function OnboardingOverlay() {
 
                         <div className="mt-8 space-y-3">
                              <button onClick={() => setStep(4)} className="w-full py-4 bg-indigo-600 text-white font-bold text-lg rounded-2xl active:scale-95 transition-all shadow-lg hover:bg-indigo-500">
-                                收下这份洞察
+                                {t('reveal.cta')}
                              </button>
                         </div>
                     </motion.div>
@@ -433,24 +435,24 @@ export function OnboardingOverlay() {
                         </div>
                         
                         <div className="space-y-4">
-                            <h2 className="text-3xl font-black italic text-white">一切就绪!</h2>
+                            <h2 className="text-3xl font-black italic text-white">{t('complete.ready')}</h2>
                             <p className="text-slate-400">
-                                <span className="text-white font-bold">{selectedStockName || selectedStock || '测试资产'}</span> 已添加到您的自选池。
+                                <span className="text-white font-bold">{selectedStockName || selectedStock || 'Trial Asset'}</span> {t('complete.added', { symbol: '' })}
                             </p>
                             
                             {/* Upsell Card */}
                             <div className="bg-gradient-to-br from-indigo-900/40 to-black border border-indigo-500/30 p-6 rounded-2xl relative overflow-hidden">
                                 <div className="relative z-10">
-                                     <h3 className="text-indigo-300 font-bold uppercase tracking-widest text-xs mb-2">特别礼物</h3>
-                                      <p className="text-white font-bold text-lg mb-1">已激活 {trialDays} 天 Pro 体验权</p>
-                                     <p className="text-slate-400 text-xs">支持添加 10 只自选并在全站解锁 AI 核心逻辑。</p>
+                                     <h3 className="text-indigo-300 font-bold uppercase tracking-widest text-xs mb-2">{t('complete.gift')}</h3>
+                                      <p className="text-white font-bold text-lg mb-1">{t('complete.trial', { days: trialDays })}</p>
+                                     <p className="text-slate-400 text-xs">{t('complete.trialDesc')}</p>
                                 </div>
                                 <Clock className="absolute -bottom-4 -right-4 w-24 h-24 text-indigo-500/10" />
                             </div>
                         </div>
 
                         <button onClick={handleComplete} className="w-full py-4 bg-white text-black font-black text-lg rounded-2xl active:scale-95 transition-all">
-                            进入控制台
+                            {t('complete.cta')}
                         </button>
                     </motion.div>
                 )}

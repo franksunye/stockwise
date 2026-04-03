@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useLocale } from '@/context/LocaleContext';
 import type { AIPrediction, StockData } from '@/lib/types';
+import { appLocaleToPredictionContentLocale } from '@/lib/prediction-content-locale';
 import { getCurrentUser } from '@/lib/user';
 import {
     normalizeStockProfileHistoryResponse,
@@ -13,13 +15,15 @@ import {
 const STOCK_PROFILE_FETCH_DELAY_MS = 400;
 
 export function useStockProfileHistory(stock: StockData) {
+    const { locale: appLocale } = useLocale();
+    const predictionContentLocale = appLocaleToPredictionContentLocale(appLocale);
     const [fullHistory, setFullHistory] = useState<AIPrediction[]>([]);
     const [loadingHistory, setLoadingHistory] = useState(false);
 
     useEffect(() => {
         let cancelled = false;
 
-        const cached = readStockProfileHistoryCache(stock.symbol);
+        const cached = readStockProfileHistoryCache(stock.symbol, predictionContentLocale);
         if (cached) {
             setFullHistory(cached);
             setLoadingHistory(false);
@@ -33,9 +37,12 @@ export function useStockProfileHistory(stock: StockData) {
 
             getCurrentUser()
                 .then(() =>
-                    fetch(`/api/predictions?symbol=${stock.symbol}&limit=30`, {
-                        cache: 'no-store',
-                    })
+                    fetch(
+                        `/api/predictions?symbol=${encodeURIComponent(stock.symbol)}&limit=30&locale=${predictionContentLocale}`,
+                        {
+                            cache: 'no-store',
+                        },
+                    )
                 )
                 .then(response => response.json())
                 .then(payload => {
@@ -45,7 +52,7 @@ export function useStockProfileHistory(stock: StockData) {
 
                     const predictions = normalizeStockProfileHistoryResponse(payload);
                     setFullHistory(predictions);
-                    writeStockProfileHistoryCache(stock.symbol, predictions);
+                    writeStockProfileHistoryCache(stock.symbol, predictions, predictionContentLocale);
                 })
                 .catch(error => {
                     if (!cancelled) {
@@ -63,7 +70,7 @@ export function useStockProfileHistory(stock: StockData) {
             cancelled = true;
             clearTimeout(timer);
         };
-    }, [stock.symbol]);
+    }, [stock.symbol, predictionContentLocale]);
 
     return {
         fullHistory,

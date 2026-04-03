@@ -17,9 +17,9 @@ export interface PredictionActionMeta {
 
 const LAYER1_META: Record<NonNullable<AIPrediction['layer1_status']>, PredictionActionMeta> = {
   TriggeredLong: {
-    headline: '建议看多',
-    badge: '适合开始寻找机会',
-    posterDecision: '建议看多',
+    headline: 'triggeredLong',
+    badge: 'triggeredLong',
+    posterDecision: 'triggeredLong',
     color: COLORS.up,
     dotClass: 'bg-rose-500',
     iconTone: 'up',
@@ -27,9 +27,9 @@ const LAYER1_META: Record<NonNullable<AIPrediction['layer1_status']>, Prediction
     textClass: 'text-rose-500',
   },
   Watch: {
-    headline: '建议观察',
-    badge: '先观察，不急着出手',
-    posterDecision: '建议观察',
+    headline: 'watching',
+    badge: 'watching',
+    posterDecision: 'watching',
     color: COLORS.hold,
     dotClass: 'bg-amber-500',
     iconTone: 'flat',
@@ -37,9 +37,9 @@ const LAYER1_META: Record<NonNullable<AIPrediction['layer1_status']>, Prediction
     textClass: 'text-amber-500',
   },
   RiskOff: {
-    headline: '建议防守',
-    badge: '优先控制风险',
-    posterDecision: '建议防守',
+    headline: 'riskOff',
+    badge: 'riskOff',
+    posterDecision: 'riskOff',
     color: COLORS.down,
     dotClass: 'bg-emerald-500',
     iconTone: 'down',
@@ -47,9 +47,9 @@ const LAYER1_META: Record<NonNullable<AIPrediction['layer1_status']>, Prediction
     textClass: 'text-emerald-500',
   },
   NoSetup: {
-    headline: '暂无信号',
-    badge: '当前不建议出手',
-    posterDecision: '暂无信号',
+    headline: 'noSignal',
+    badge: 'noSignal',
+    posterDecision: 'noSignal',
     color: COLORS.muted,
     dotClass: 'bg-slate-500',
     iconTone: 'flat',
@@ -60,9 +60,9 @@ const LAYER1_META: Record<NonNullable<AIPrediction['layer1_status']>, Prediction
 
 const SIGNAL_META: Record<string, PredictionActionMeta> = {
   Long: {
-    headline: '建议看多',
-    badge: '适合开始寻找机会',
-    posterDecision: '建议看多',
+    headline: 'triggeredLong',
+    badge: 'triggeredLong',
+    posterDecision: 'triggeredLong',
     color: COLORS.up,
     dotClass: 'bg-rose-500',
     iconTone: 'up',
@@ -70,9 +70,9 @@ const SIGNAL_META: Record<string, PredictionActionMeta> = {
     textClass: 'text-rose-500',
   },
   Short: {
-    headline: '建议防守',
-    badge: '优先控制风险',
-    posterDecision: '建议防守',
+    headline: 'riskOff',
+    badge: 'riskOff',
+    posterDecision: 'riskOff',
     color: COLORS.down,
     dotClass: 'bg-emerald-500',
     iconTone: 'down',
@@ -80,9 +80,9 @@ const SIGNAL_META: Record<string, PredictionActionMeta> = {
     textClass: 'text-emerald-500',
   },
   Side: {
-    headline: '建议观察',
-    badge: '先观察，不急着出手',
-    posterDecision: '建议观察',
+    headline: 'watching',
+    badge: 'watching',
+    posterDecision: 'watching',
     color: COLORS.hold,
     dotClass: 'bg-amber-500',
     iconTone: 'flat',
@@ -92,9 +92,9 @@ const SIGNAL_META: Record<string, PredictionActionMeta> = {
 };
 
 const FALLBACK_META: PredictionActionMeta = {
-  headline: '等待分析',
-  badge: '正在生成可执行结论',
-  posterDecision: '等待分析',
+  headline: 'pending',
+  badge: 'pending',
+  posterDecision: 'pending',
   color: '#94a3b8',
   dotClass: 'bg-slate-500',
   iconTone: 'flat',

@@ -8,13 +8,17 @@ import {
   formatStockProfileHistoryLabel,
   getStockProfileStats,
 } from '@/lib/stock-profile-metrics';
+import { useT } from '@/context/LocaleContext';
 
 interface StockProfileProps {
   stock: StockData;
   onClose: () => void;
 }
 
+const STOCK_PROFILE_MATRIX_DAYS = 30;
+
 export function StockProfile({ stock, onClose }: StockProfileProps) {
+  const t = useT('dashboard');
   const { historyToUse, loadingHistory } = useStockProfileHistory(stock);
 
   // 使用完整的历史数据计算回看通过率，如果还在加载则使用传入的数据
@@ -60,11 +64,11 @@ export function StockProfile({ stock, onClose }: StockProfileProps) {
 
         <div className="grid grid-cols-2 gap-4 mb-8">
           <div className="glass-card p-4 text-center">
-            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest block mb-2">回看通过率</span>
+            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest block mb-2">{t('stockProfilePassRateLabel')}</span>
             <p className="text-3xl font-black mono text-emerald-500">{winRate}%</p>
           </div>
           <div className="glass-card p-4 text-center">
-            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest block mb-2">完成回看</span>
+            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest block mb-2">{t('stockProfileCompletedLabel')}</span>
             <p className="text-3xl font-black mono text-white">{totalCount}</p>
           </div>
         </div>
@@ -72,7 +76,10 @@ export function StockProfile({ stock, onClose }: StockProfileProps) {
 
 
         <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 px-2">
-          复盘矩阵 (最近 30 天) {loadingHistory && <span className="text-indigo-500 animate-pulse">加载中...</span>}
+          {t('stockProfileMatrixTitle', { days: STOCK_PROFILE_MATRIX_DAYS })}{' '}
+          {loadingHistory && (
+            <span className="text-indigo-500 animate-pulse">{t('stockProfileMatrixLoading')}</span>
+          )}
         </h3>
         <div className="grid grid-cols-4 gap-2">
           {historyToUse.map((h, i) => (

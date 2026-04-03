@@ -2,6 +2,11 @@
 export type MarketScene = 'pre_market' | 'trading' | 'post_market';
 export type MarketType = 'HK' | 'CN';
 
+export interface I18nLabel {
+    key: string;
+    params?: Record<string, string | number>;
+}
+
 // ============ 港股 (HK) 交易日历 ============
 const HK_HOLIDAYS_2025: string[] = [
     '2025-01-01', // 元旦
@@ -208,12 +213,12 @@ function getDaysDiff(from: Date, to: Date): number {
  * - 间隔 2-7 天 → "M/D 建议" (如 "12/30 建议")
  * - 间隔 > 7 天 → "下一交易日 (M/D) 建议"
  */
-export function getPredictionTitle(scene: MarketScene, market: MarketType = 'HK'): string {
+export function getPredictionTitle(scene: MarketScene, market: MarketType = 'HK'): I18nLabel {
     const hkNow = getHKTime();
 
     // 交易中或开市前：显示"今日建议"
     if (scene !== 'post_market') {
-        return '今日建议';
+        return { key: 'dashboard.date.todayAdvice' };
     }
 
     // 收市后：计算下一交易日（根据市场类型）
@@ -226,20 +231,20 @@ export function getPredictionTitle(scene: MarketScene, market: MarketType = 'HK'
     // 如果是下周一（间隔3天内，跨越周末）
     // 优先判读：避免周日时显示"明日建议"（虽然物理上正确，但在深夜/周末语境下容易造成"明日是周日"的误解）
     if (daysDiff <= 3 && nextDayOfWeek === 1) {
-        return '下周一建议';
+        return { key: 'dashboard.date.mondayAdvice' };
     }
 
     if (daysDiff === 1) {
-        return '明日建议';
+        return { key: 'dashboard.date.tomorrowAdvice' };
     }
 
     // 间隔在 3 天内（普通周末）
     if (daysDiff <= 3) {
-        return `${nextMonth}/${nextDate} 建议`;
+        return { key: 'dashboard.date.tradingDayAdvice', params: { date: `${nextMonth}/${nextDate}` } };
     }
 
     // 长假期（如春节、国庆）
-    return `下一个交易日 (${nextMonth}/${nextDate}) 建议`;
+    return { key: 'dashboard.date.nextTradingDayAdvice', params: { date: `${nextMonth}/${nextDate}` } };
 }
 
 /**
@@ -268,13 +273,13 @@ export function getLastTradingDay(from?: Date, market: MarketType = 'HK'): Date 
  * - 如果上一交易日是上周五（周末查看）→ "周五"
  * - 其他情况 → "M/D"（如 "12/24"）
  */
-export function getLastTradingDayLabel(market: MarketType = 'HK'): string {
+export function getLastTradingDayLabel(market: MarketType = 'HK'): I18nLabel {
     const hkNow = getHKTime();
     const todayIsTradingDay = !isMarketClosed(hkNow, market);
 
     // 如果今天是交易日，显示"今日"
     if (todayIsTradingDay) {
-        return '今日';
+        return { key: 'dashboard.date.today' };
     }
 
     // 计算上一交易日
@@ -284,18 +289,18 @@ export function getLastTradingDayLabel(market: MarketType = 'HK'): string {
 
     // 昨天
     if (daysDiff === 1) {
-        return '昨日';
+        return { key: 'dashboard.date.yesterday' };
     }
 
     // 周末查看，上一交易日是周五
     if (daysDiff <= 3 && lastDayOfWeek === 5) {
-        return '周五';
+        return { key: 'dashboard.date.friday' };
     }
 
     // 其他情况显示日期
     const month = lastDay.getMonth() + 1;
     const date = lastDay.getDate();
-    return `${month}/${date}`;
+    return { key: '', params: { date: `${month}/${date}` } }; // Empty key indicates literal date
 }
 
 /**
@@ -304,13 +309,11 @@ export function getLastTradingDayLabel(market: MarketType = 'HK'): string {
  * - 今日收市后 → "今日收盘价"
  * - 周末/假期 → "周五收盘价" / "12/24 收盘价"
  */
-export function getClosePriceLabel(scene: MarketScene, market: MarketType = 'HK'): string {
+export function getClosePriceLabel(scene: MarketScene): I18nLabel {
     if (scene === 'trading') {
-        return '当前成交价';
+        return { key: 'dashboard.date.currentPrice' };
     }
-
-    const label = getLastTradingDayLabel(market);
-    return `${label}收盘价`;
+    return { key: 'dashboard.date.todayClose' };
 }
 
 /**
@@ -318,9 +321,8 @@ export function getClosePriceLabel(scene: MarketScene, market: MarketType = 'HK'
  * - 交易日收市后 → "今日验证"
  * - 周末/假期 → "周五验证" / "12/24 验证"
  */
-export function getValidationLabel(market: MarketType = 'HK'): string {
-    const label = getLastTradingDayLabel(market);
-    return `${label}验证`;
+export function getValidationLabel(): I18nLabel {
+    return { key: 'dashboard.date.todayVerify' };
 }
 
 /**
@@ -330,7 +332,7 @@ export function getValidationLabel(market: MarketType = 'HK'): string {
  * @param dataDateStr 后端返回的日期字符串，格式如 "2025-12-24" 或 "2025/12/24"
  * @returns 如 "今日" / "昨日" / "周五" / "12/24"
  */
-export function formatDataDateLabel(dataDateStr: string, market: MarketType = 'HK'): string {
+export function formatDataDateLabel(dataDateStr: string, market: MarketType = 'HK'): I18nLabel {
     if (!dataDateStr) return getLastTradingDayLabel(market); // 无数据时降级到推算
 
     // 解析日期字符串
@@ -343,17 +345,17 @@ export function formatDataDateLabel(dataDateStr: string, market: MarketType = 'H
     const daysDiff = getDaysDiff(dataDate, today);
 
     // 今天
-    if (daysDiff === 0) return '今日';
+    if (daysDiff === 0) return { key: 'dashboard.date.today' };
 
     // 昨天
-    if (daysDiff === 1) return '昨日';
+    if (daysDiff === 1) return { key: 'dashboard.date.yesterday' };
 
     // 前天是周五（周末查看）
     const dataDayOfWeek = dataDate.getDay();
-    if (daysDiff <= 3 && dataDayOfWeek === 5) return '周五';
+    if (daysDiff <= 3 && dataDayOfWeek === 5) return { key: 'dashboard.date.friday' };
 
     // 其他情况显示日期
-    return `${month}/${day}`;
+    return { key: '', params: { date: `${month}/${day}` } };
 }
 
 /**
@@ -380,21 +382,23 @@ export function normalizeToTradingDate(dataDateStr?: string, market: MarketType 
 /**
  * 获取收盘价标签（基于实际数据日期）
  */
-export function getClosePriceLabelFromData(scene: MarketScene, dataDateStr?: string, market: MarketType = 'HK'): string {
+export function getClosePriceLabelFromData(scene: MarketScene, dataDateStr?: string, market: MarketType = 'HK'): I18nLabel {
     if (scene === 'trading') {
-        return '当前成交价';
+        return { key: 'dashboard.date.currentPrice' };
     }
 
-    const label = dataDateStr ? formatDataDateLabel(dataDateStr, market) : getLastTradingDayLabel(market);
-    return `${label}收盘价`;
+    const labelObj = dataDateStr ? formatDataDateLabel(dataDateStr, market) : getLastTradingDayLabel(market);
+    if (!labelObj.key) return { key: 'dashboard.date.closePrice', params: { label: labelObj.params?.date || '' } };
+    return { key: 'dashboard.date.todayClose' };
 }
 
 /**
  * 获取验证结果标签（基于实际数据日期）
  */
-export function getValidationLabelFromData(dataDateStr?: string, market: MarketType = 'HK'): string {
-    const label = dataDateStr ? formatDataDateLabel(dataDateStr, market) : getLastTradingDayLabel(market);
-    return `${label}验证`;
+export function getValidationLabelFromData(dataDateStr?: string, market: MarketType = 'HK'): I18nLabel {
+    const labelObj = dataDateStr ? formatDataDateLabel(dataDateStr, market) : getLastTradingDayLabel(market);
+    if (!labelObj.key) return { key: 'dashboard.date.verification', params: { date: labelObj.params?.date || '' } };
+    return { key: 'dashboard.date.todayVerify' };
 }
 
 /**

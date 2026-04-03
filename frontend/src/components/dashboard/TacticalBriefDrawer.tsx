@@ -36,10 +36,16 @@ import {
   getPriceNodes,
   getScenarioTacticGroups,
   getShortPressureState,
+  formatBriefActionLabel,
   normalizeActionLabel,
   normalizeLegacyTerms,
 } from '@/lib/tactical-brief-surface';
 import { getNormalizedNewsItems } from '@/lib/tactical-brief-content';
+import { useT, useLocale } from '@/context/LocaleContext';
+import type { MessageKey } from '@/lib/i18n';
+import { SilentPoster } from './SilentPoster';
+import { BriefExportSheet } from './BriefExportSheet';
+import { TacticalReportPoster } from './TacticalReportPoster';
 
 interface TacticalBriefDrawerProps {
   isOpen: boolean;
@@ -57,28 +63,22 @@ interface TacticalBriefDrawerProps {
   shortMetrics?: ShortMetrics | null;
 }
 
-import { SilentPoster } from './SilentPoster';
-import { BriefExportSheet } from './BriefExportSheet';
-import { TacticalReportPoster } from './TacticalReportPoster';
-
-// 辅助函数：获取步骤对应的图标和标签配置
+// 辅助函数：获取步骤对应的图标和 i18n key 配置
 const getStepConfig = (step: string) => {
   const s = step.toLowerCase();
   
-  if (s.includes('trend')) return { icon: <TrendingUp size={12} />, label: '趋势' };
-  if (s.includes('momentum')) return { icon: <Zap size={12} />, label: '动能' };
-  if (s.includes('volume')) return { icon: <BarChart3 size={12} />, label: '成交量' };
-  if (s.includes('history')) return { icon: <RotateCcw size={12} />, label: '历史' };
-  if (s.includes('decision')) return { icon: <Target size={12} />, label: '决策' };
+  if (s.includes('trend')) return { icon: <TrendingUp size={12} />, key: 'trend' };
+  if (s.includes('momentum')) return { icon: <Zap size={12} />, key: 'momentum' };
+  if (s.includes('volume')) return { icon: <BarChart3 size={12} />, key: 'volume' };
+  if (s.includes('history')) return { icon: <RotateCcw size={12} />, key: 'history' };
+  if (s.includes('decision')) return { icon: <Target size={12} />, key: 'decision' };
   
-  // 新增映射
-  if (s.includes('news') || s.includes('fundamental')) return { icon: <Newspaper size={12} />, label: '情报' };
-  if (s.includes('position') || s.includes('level') || s.includes('price')) return { icon: <Crosshair size={12} />, label: '价格行为' };
-  if (s.includes('context')) return { icon: <Layers size={12} />, label: '上下文' };
-  if (s.includes('fund') || s.includes('capital') || s.includes('flow') || s.includes('money')) return { icon: <Hash size={12} />, label: '资金博弈' };
+  if (s.includes('news') || s.includes('fundamental')) return { icon: <Newspaper size={12} />, key: 'intelligence' };
+  if (s.includes('position') || s.includes('level') || s.includes('price')) return { icon: <Crosshair size={12} />, key: 'priceAction' };
+  if (s.includes('context')) return { icon: <Layers size={12} />, key: 'context' };
+  if (s.includes('fund') || s.includes('capital') || s.includes('flow') || s.includes('money')) return { icon: <Hash size={12} />, key: 'capital' };
 
-  // 兜底使用更专业的词汇
-  return { icon: <Hash size={12} />, label: '综合研判' };
+  return { icon: <Hash size={12} />, key: 'general' };
 };
 
 // 语义化价格格式化
@@ -100,7 +100,6 @@ const formatPrice = (val: number | string | number[] | undefined, isRange: boole
   
   return String(val);
 };
-
 
 const formatLevel = (val: number | undefined): string => {
   if (val === undefined || !Number.isFinite(val)) return '--';
@@ -130,6 +129,9 @@ const formatDistancePercent = (distance: number | undefined): string => {
 export function TacticalBriefDrawer({ 
   isOpen, onClose, data, tier, model, symbol, targetDate, signal, confidence, stockName, currentPrice, shortMetrics, userPos
 }: TacticalBriefDrawerProps) {
+  const t = useT('brief');
+  const tCommon = useT('common');
+  const { locale } = useLocale();
   const [isMounted, setIsMounted] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
@@ -151,7 +153,11 @@ export function TacticalBriefDrawer({
   const isFree = tier === 'free';
   const sourceKind = getBriefSourceKind(data, model);
   const analystProfile = resolveAnalystForBriefSource(sourceKind, model);
-  const sourceFact = sourceKind === 'llm' ? '独立视角' : '规则视角';
+  const analystDisplayName =
+    locale === 'en' ? analystProfile.nameEn ?? analystProfile.name : analystProfile.name;
+  const analystDisplayRole =
+    locale === 'en' ? analystProfile.roleEn ?? analystProfile.role : analystProfile.role;
+  const sourceFact = sourceKind === 'llm' ? t('independentView') : t('ruleView');
   const newsItems = getNormalizedNewsItems(data);
   const generalTactics = getGeneralTactics(data);
   const { scenarioHoldingProfit, scenarioHoldingLoss, scenarioEmpty } = getScenarioTacticGroups(data);
@@ -166,18 +172,18 @@ export function TacticalBriefDrawer({
 
   const scenarioCopyConfig = {
     holding_profit: {
-      title: '持仓盈利',
-      badge: '盈利中',
+      title: t('scenario.holding_profit'),
+      badge: t('scenarioBadge.holding_profit'),
       items: scenarioHoldingProfit,
     },
     holding_loss: {
-      title: '持仓亏损',
-      badge: '亏损中',
+      title: t('scenario.holding_loss'),
+      badge: t('scenarioBadge.holding_loss'),
       items: scenarioHoldingLoss,
     },
     empty: {
-      title: '空仓等待',
-      badge: '等待入场',
+      title: t('scenario.empty'),
+      badge: t('scenarioBadge.empty'),
       items: scenarioEmpty,
     },
   } as const;
@@ -198,8 +204,6 @@ export function TacticalBriefDrawer({
     });
   }, []);
 
-  // Reset carousel position whenever drawer opens, stock context changes,
-  // Safety: reset activeTab to 'brief' if user is v1.0 but somehow in another tab
   useEffect(() => {
     if (isV10 && activeTab !== 'brief') {
       setActiveTab('brief');
@@ -211,10 +215,6 @@ export function TacticalBriefDrawer({
     setActiveIndex(defaultActiveIndex);
     syncCarouselToIndex(defaultActiveIndex);
   }, [activeTab, defaultActiveIndex, isOpen, syncCarouselToIndex]);
-
-  // Council preload removed — AICouncil's useSWR is the single fetch entry point.
-  // localStorage cache keyed by target_date handles cross-session reuse.
-
 
   const priceRange = {
     max: Math.max(...nodes.map(n => n.price)) * 1.05,
@@ -240,26 +240,26 @@ export function TacticalBriefDrawer({
 
   const buildScenarioCopyText = () => {
     const currentScenario = scenarioCopyConfig[viewState];
-    const lines: string[] = [`操作建议｜${stockName || symbol}`, `适用日期：${targetDate}`, '', `场景：${currentScenario.title}`];
+    const lines: string[] = [`${t('tradingPlan')}｜${stockName || symbol}`, `${t('date.tradingDayAdvice' as MessageKey<'brief'>, { date: targetDate })}`, '', `${t('condition')}：${currentScenario.title}`];
 
     currentScenario.items.forEach((tactic, index) => {
-      lines.push(`${tactic.priority} ${normalizeActionLabel(tactic.action)}`);
-      lines.push(`触发：${normalizeLegacyTerms(tactic.trigger)}`);
+      lines.push(`${tactic.priority} ${formatBriefActionLabel(tactic.action, (slug) => t(`actions.${slug}` as MessageKey<'brief'>))}`);
+      lines.push(`${t('triggerLabel')}：${normalizeLegacyTerms(tactic.trigger)}`);
 
       if (tactic.target_price) {
-        lines.push(`目标：${formatPrice(tactic.target_price)}`);
+        lines.push(`${t('target')}：${formatPrice(tactic.target_price)}`);
       }
       if (tactic.stop_advance_price) {
-        lines.push(`移动止盈：${formatPrice(tactic.stop_advance_price, true)}`);
+        lines.push(`${t('stopAdvance')}：${formatPrice(tactic.stop_advance_price, true)}`);
       }
       if (tactic.stop_loss_price) {
-        lines.push(`止损价：${formatPrice(tactic.stop_loss_price, true)}`);
+        lines.push(`${t('stopLoss')}：${formatPrice(tactic.stop_loss_price, true)}`);
       }
       if (tactic.buy_zone_price) {
-        lines.push(`理想买入区：${formatPrice(tactic.buy_zone_price, true)}`);
+        lines.push(`${t('buyZone')}：${formatPrice(tactic.buy_zone_price, true)}`);
       }
 
-      lines.push(`理由：${normalizeLegacyTerms(tactic.reason)}`);
+      lines.push(`${t('reasonLabel')}：${normalizeLegacyTerms(tactic.reason)}`);
 
       if (index < currentScenario.items.length - 1) {
         lines.push('');
@@ -336,7 +336,7 @@ export function TacticalBriefDrawer({
                      setIsExportOpen(true);
                    }} 
                    className="absolute left-4 p-2.5 rounded-full bg-white/5 border border-white/10 text-indigo-400 active:scale-95 transition-all hover:bg-white/10 hover:text-indigo-300 z-20"
-                   title="导出当前分析"
+                   title={t('exportBrief')}
                  >
                    <Share2 size={18} />
                  </button>
@@ -344,13 +344,13 @@ export function TacticalBriefDrawer({
                  {/* Center: Navigation (Tier-Aware) */}
                   {isV10 ? (
                     <div className="flex p-1 rounded-full bg-white/5 border border-white/10 relative z-10">
-                      <button
+                        <button
                         type="button"
                         disabled
                         className="relative z-10 px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest text-white cursor-default"
                         aria-current="page"
                       >
-                        研判报告
+                        {t('title')}
                         <div className="absolute inset-0 bg-indigo-500 rounded-full -z-10 shadow-lg shadow-indigo-500/20" />
                       </button>
                     </div>
@@ -360,7 +360,7 @@ export function TacticalBriefDrawer({
                           onClick={() => setActiveTab('brief')}
                           className={`relative z-10 px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-colors duration-200 ${activeTab === 'brief' ? 'text-white' : 'text-slate-500 hover:text-slate-300'}`}
                         >
-                          研判报告
+                          {t('title')}
                           {activeTab === 'brief' && (
                             <motion.div 
                               className="absolute inset-0 bg-indigo-500 rounded-full -z-10 shadow-lg shadow-indigo-500/20"
@@ -377,7 +377,7 @@ export function TacticalBriefDrawer({
                             onClick={() => setActiveTab('management')}
                             className={`relative z-10 px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-colors duration-200 ${activeTab === 'management' ? 'text-white' : 'text-slate-500 hover:text-slate-300'}`}
                           >
-                            交易管理
+                            {tCommon('tradeManagement')}
                             {activeTab === 'management' && (
                               <motion.div 
                                 className="absolute inset-0 bg-indigo-500 rounded-full -z-10 shadow-lg shadow-indigo-500/20"
@@ -418,7 +418,7 @@ export function TacticalBriefDrawer({
                       </div>
                       <div className="flex-1 min-w-0">
                           <p className={`text-xs font-bold truncate ${sourceKind === 'llm' ? 'text-indigo-200' : 'text-slate-200'}`}>
-                            {analystProfile.name} · {analystProfile.role}
+                            {t('analyst', { name: analystDisplayName, role: analystDisplayRole })}
                           </p>
                           <p className={`text-xs leading-tight mt-0.5 ${sourceKind === 'llm' ? 'text-indigo-300/80' : 'text-slate-400'}`}>
                             {sourceFact}
@@ -430,13 +430,13 @@ export function TacticalBriefDrawer({
                      {/* Header */}
                      <div className="mb-4 flex items-center justify-between gap-3">
                         <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
-                           <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" /> 交易预案
+                           <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" /> {t('tradingPlan')}
                         </h3>
                         <button
                           onClick={handleCopyScenario}
                           className="shrink-0 flex items-center justify-center rounded-lg p-1 group"
-                          aria-label="复制当前交易预案"
-                          title="复制当前交易预案"
+                          aria-label={t('copyScenario')}
+                          title={t('copyScenario')}
                         >
                           <div className="bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 hover:border-white/10 p-1.5 rounded-lg text-slate-500 group-hover:text-white transition-colors">
                             {isScenarioCopied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
@@ -462,95 +462,93 @@ export function TacticalBriefDrawer({
                         }}
                         className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide -mx-6 px-6 pb-2 overscroll-x-contain"
                     >
-                       
- 	                       {/* CARD 1: HOLDING PROFIT (Subtle Green) */}
- 	                       <div className="min-w-full snap-center space-y-3">
- 	                            {scenarioHoldingProfit.map((t, idx) => (
- 	                                <div key={idx} className="glass-card p-4 min-h-[152px] relative overflow-hidden bg-white/[0.02] border-white/5">
-                                       {/* Subtle Side Indicator */}
-                                       <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-[#2ECC71]/30" />
-                                       
-                                       <div className="flex items-center justify-between mb-2.5">
-                                            <div className="flex items-center gap-2">
-                                                <span className={`text-[10px] font-black px-1.5 py-0.5 rounded italic ${t.priority === 'P1' ? 'bg-indigo-500' : 'bg-slate-700'} text-white`}>{t.priority}</span>
-                                                <span className="text-sm font-bold text-white">{normalizeActionLabel(t.action)}</span>
-                                            </div>
-                                            <div className="px-2 py-0.5 rounded-lg bg-[#2ECC71]/10 border border-[#2ECC71]/20 text-[10px] font-bold text-[#2ECC71]">
-                                                盈利中
-                                            </div>
+                        {/* CARD 1: HOLDING PROFIT (Subtle Green) */}
+                        <div className="min-w-full snap-center space-y-3">
+                             {scenarioHoldingProfit.map((tactic, idx) => (
+                                 <div key={idx} className="glass-card p-4 min-h-[152px] relative overflow-hidden bg-white/[0.02] border-white/5">
+                                    <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-[#2ECC71]/30" />
+                                    
+                                    <div className="flex items-center justify-between mb-2.5">
+                                         <div className="flex items-center gap-2">
+                                             <span className={`text-[10px] font-black px-1.5 py-0.5 rounded italic ${tactic.priority === 'P1' ? 'bg-indigo-500' : 'bg-slate-700'} text-white`}>{tactic.priority}</span>
+                                             <span className="text-sm font-bold text-white">{formatBriefActionLabel(tactic.action, (slug) => t(`actions.${slug}` as MessageKey<'brief'>))}</span>
+                                         </div>
+                                         <div className="px-2 py-0.5 rounded-lg bg-[#2ECC71]/10 border border-[#2ECC71]/20 text-[10px] font-bold text-[#2ECC71]">
+                                             {t('scenarioBadge.holding_profit')}
+                                         </div>
+                                     </div>
+
+                                     <div className="space-y-1.5">
+                                         <p className="text-xs text-slate-400">{t('triggerLabel')}: <span className="text-slate-200">{tactic.trigger.startsWith('trigger.') ? t(tactic.trigger as MessageKey<'brief'>) : tactic.trigger}</span></p>
+                                         {(tactic.target_price || tactic.stop_advance_price) && (
+                                             <div className="flex flex-wrap gap-x-4 gap-y-1 py-1 px-2 bg-white/5 rounded-lg w-fit">
+                                                 {tactic.target_price && <p className="text-[10px] text-emerald-400 font-bold uppercase">{t('target')}: {tactic.target_price}</p>}
+                                                 {tactic.stop_advance_price && <p className="text-[10px] text-amber-400 font-bold uppercase">{t('stopAdvance')}: {tactic.stop_advance_price}</p>}
+                                             </div>
+                                         )}
+                                         <p className="text-xs text-slate-500 font-medium italic border-t border-white/5 pt-1.5 mt-1.5">{t('reasonLabel')}: {tactic.reason.startsWith('reason.') ? t(tactic.reason as MessageKey<'brief'>) : tactic.reason}</p>
+                                     </div>
+                                 </div>
+                             ))}
+                        </div>
+
+                        {/* CARD 2: HOLDING LOSS (Subtle Red) */}
+                        <div className="min-w-full snap-center space-y-3">
+                             {scenarioHoldingLoss.map((tactic, idx) => (
+                                 <div key={idx} className="glass-card p-4 min-h-[152px] relative overflow-hidden bg-white/[0.02] border-white/5">
+                                    <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-[#FF4D4F]/30" />
+                                    
+                                    <div className="flex items-center justify-between mb-2.5">
+                                         <div className="flex items-center gap-2">
+                                             <span className={`text-[10px] font-black px-1.5 py-0.5 rounded italic ${tactic.priority === 'P1' ? 'bg-rose-500' : 'bg-slate-700'} text-white`}>{tactic.priority}</span>
+                                             <span className="text-sm font-bold text-white">{formatBriefActionLabel(tactic.action, (slug) => t(`actions.${slug}` as MessageKey<'brief'>))}</span>
+                                         </div>
+                                         <div className="px-2 py-0.5 rounded-lg bg-[#FF4D4F]/10 border border-[#FF4D4F]/20 text-[10px] font-bold text-[#FF4D4F]">
+                                             {t('scenarioBadge.holding_loss')}
+                                         </div>
+                                     </div>
+
+                                     <div className="space-y-1.5">
+                                         <p className="text-xs text-slate-400">{t('triggerLabel')}: <span className="text-slate-200">{tactic.trigger.startsWith('trigger.') ? t(tactic.trigger as MessageKey<'brief'>) : tactic.trigger}</span></p>
+                                         {tactic.stop_loss_price && (
+                                             <div className="py-1 px-2 bg-rose-500/10 rounded-lg w-fit">
+                                                 <p className="text-[10px] text-rose-400 font-bold uppercase">{t('stopLoss')}: {tactic.stop_loss_price}</p>
+                                             </div>
+                                         )}
+                                         <p className="text-xs text-slate-500 font-medium italic border-t border-white/5 pt-1.5 mt-1.5">{t('reasonLabel')}: {tactic.reason.startsWith('reason.') ? t(tactic.reason as MessageKey<'brief'>) : tactic.reason}</p>
+                                     </div>
+                                 </div>
+                             ))}
+                        </div>
+
+                        {/* CARD 3: WATCH (Subtle Blue) */}
+                        <div className="min-w-full snap-center space-y-3">
+                            {scenarioEmpty.map((tactic, idx) => (
+                               <div key={idx} className="glass-card p-4 min-h-[152px] relative overflow-hidden bg-white/[0.02] border-white/5">
+                                  <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-[#3A7AFE]/30" />
+                                  
+                                  <div className="flex items-center justify-between mb-2.5">
+                                        <div className="flex items-center gap-2">
+                                            <span className={`text-[10px] font-black px-1.5 py-0.5 rounded italic ${tactic.priority === 'P1' ? 'bg-indigo-500' : 'bg-slate-700'} text-white`}>{tactic.priority}</span>
+                                            <span className="text-sm font-bold text-white">{formatBriefActionLabel(tactic.action, (slug) => t(`actions.${slug}` as MessageKey<'brief'>))}</span>
                                         </div>
-
-                                        <div className="space-y-1.5">
-                                            <p className="text-xs text-slate-400">触发: <span className="text-slate-200">{t.trigger}</span></p>
-                                            {(t.target_price || t.stop_advance_price) && (
-                                                <div className="flex flex-wrap gap-x-4 gap-y-1 py-1 px-2 bg-white/5 rounded-lg w-fit">
-                                                    {t.target_price && <p className="text-[10px] text-emerald-400 font-bold uppercase">目标: {t.target_price}</p>}
-                                                    {t.stop_advance_price && <p className="text-[10px] text-amber-400 font-bold uppercase">移动止盈: {t.stop_advance_price}</p>}
-                                                </div>
-                                            )}
-                                            <p className="text-xs text-slate-500 font-medium italic border-t border-white/5 pt-1.5 mt-1.5">理由: {t.reason}</p>
+                                        <div className="px-2 py-0.5 rounded-lg bg-[#3A7AFE]/10 border border-[#3A7AFE]/20 text-[10px] font-bold text-[#5DA9FF]">
+                                            {t('scenarioBadge.empty')}
                                         </div>
- 	                                </div>
- 	                            ))}
- 	                       </div>
+                                   </div>
 
- 	                       {/* CARD 2: HOLDING LOSS (Subtle Red) */}
- 	                       <div className="min-w-full snap-center space-y-3">
- 	                            {scenarioHoldingLoss.map((t, idx) => (
- 	                                <div key={idx} className="glass-card p-4 min-h-[152px] relative overflow-hidden bg-white/[0.02] border-white/5">
-                                       <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-[#FF4D4F]/30" />
-                                       
-                                       <div className="flex items-center justify-between mb-2.5">
-                                            <div className="flex items-center gap-2">
-                                                <span className={`text-[10px] font-black px-1.5 py-0.5 rounded italic ${t.priority === 'P1' ? 'bg-rose-500' : 'bg-slate-700'} text-white`}>{t.priority}</span>
-                                                <span className="text-sm font-bold text-white">{normalizeActionLabel(t.action)}</span>
-                                            </div>
-                                            <div className="px-2 py-0.5 rounded-lg bg-[#FF4D4F]/10 border border-[#FF4D4F]/20 text-[10px] font-bold text-[#FF4D4F]">
-                                                亏损中
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-1.5">
-                                            <p className="text-xs text-slate-400">触发: <span className="text-slate-200">{t.trigger}</span></p>
-                                            {t.stop_loss_price && (
-                                                <div className="py-1 px-2 bg-rose-500/10 rounded-lg w-fit">
-                                                    <p className="text-[10px] text-rose-400 font-bold uppercase">止损价: {t.stop_loss_price}</p>
-                                                </div>
-                                            )}
-                                            <p className="text-xs text-slate-500 font-medium italic border-t border-white/5 pt-1.5 mt-1.5">理由: {t.reason}</p>
-                                        </div>
- 	                                </div>
- 	                            ))}
- 	                       </div>
-
- 	                       {/* CARD 3: WATCH (Subtle Blue) */}
- 	                       <div className="min-w-full snap-center space-y-3">
- 	                           {scenarioEmpty.map((t, idx) => (
- 	                              <div key={idx} className="glass-card p-4 min-h-[152px] relative overflow-hidden bg-white/[0.02] border-white/5">
-                                     <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-[#3A7AFE]/30" />
-                                     
-                                     <div className="flex items-center justify-between mb-2.5">
-                                          <div className="flex items-center gap-2">
-                                              <span className={`text-[10px] font-black px-1.5 py-0.5 rounded italic ${t.priority === 'P1' ? 'bg-indigo-500' : 'bg-slate-700'} text-white`}>{t.priority}</span>
-                                              <span className="text-sm font-bold text-white">{normalizeActionLabel(t.action)}</span>
-                                          </div>
-                                          <div className="px-2 py-0.5 rounded-lg bg-[#3A7AFE]/10 border border-[#3A7AFE]/20 text-[10px] font-bold text-[#5DA9FF]">
-                                              等待入场
-                                          </div>
-                                      </div>
-
-                                      <div className="space-y-1.5">
-                                          <p className="text-xs text-slate-400">触发: <span className="text-slate-200">{t.trigger}</span></p>
-                                          {t.buy_zone_price && (
-                                              <div className="py-1 px-2 bg-white/5 rounded-lg w-fit">
-                                                  <p className="text-[10px] text-indigo-400 font-bold uppercase italic">理想买入区: {formatPrice(t.buy_zone_price, true)}</p>
-                                              </div>
-                                          )}
-                                          <p className="text-xs text-slate-500 font-medium italic border-t border-white/5 pt-1.5 mt-1.5">理由: {t.reason}</p>
-                                      </div>
- 	                              </div>
- 	                           ))}
- 	                       </div>
+                                   <div className="space-y-1.5">
+                                       <p className="text-xs text-slate-400">{t('triggerLabel')}: <span className="text-slate-200">{tactic.trigger.startsWith('trigger.') ? t(tactic.trigger as MessageKey<'brief'>) : tactic.trigger}</span></p>
+                                       {tactic.buy_zone_price && (
+                                           <div className="py-1 px-2 bg-white/5 rounded-lg w-fit">
+                                               <p className="text-[10px] text-indigo-400 font-bold uppercase italic">{t('buyZone')}: {formatPrice(tactic.buy_zone_price, true)}</p>
+                                           </div>
+                                       )}
+                                       <p className="text-xs text-slate-500 font-medium italic border-t border-white/5 pt-1.5 mt-1.5">{t('reasonLabel')}: {tactic.reason.startsWith('reason.') ? t(tactic.reason as MessageKey<'brief'>) : tactic.reason}</p>
+                                   </div>
+                               </div>
+                            ))}
+                        </div>
                     </div>
                     
                     {/* Pagination Dots */}
@@ -564,16 +562,16 @@ export function TacticalBriefDrawer({
                   {generalTactics.length > 0 && (
                     <section>
                       <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-slate-500" /> 基础市场研判
+                        <div className="w-1.5 h-1.5 rounded-full bg-slate-500" /> {t('baseMarket')}
                       </h3>
                       <div className="grid grid-cols-1 gap-3">
-                        {generalTactics.map((t, idx) => (
+                        {generalTactics.map((tactic, idx) => (
                           <div key={idx} className="p-4 rounded-2xl border border-white/5 bg-white/[0.01]">
                             <div className="flex items-center gap-2 mb-2">
                                <div className="w-1 h-1 rounded-full bg-slate-700" />
-                               <span className="text-xs font-bold text-slate-300">{normalizeActionLabel(t.action)}</span>
+                               <span className="text-xs font-bold text-slate-300">{formatBriefActionLabel(tactic.action, (slug) => t(`actions.${slug}` as MessageKey<'brief'>))}</span>
                             </div>
-                            <p className="text-xs text-slate-500 leading-relaxed"><span className="text-slate-400">条件:</span> {t.trigger}</p>
+                            <p className="text-xs text-slate-500 leading-relaxed"><span className="text-slate-400">{t('condition')}:</span> {tactic.trigger}</p>
                           </div>
                         ))}
                       </div>
@@ -583,33 +581,35 @@ export function TacticalBriefDrawer({
                   {isHK && (
                     <section>
                       <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" /> 空头压力
+                        <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" /> {t('shortPressure')}
                       </h3>
                       <div className="p-4 rounded-2xl border border-white/5 bg-white/[0.01] space-y-3">
                         <div className="flex items-center justify-between">
-                          <span className="text-[11px] text-slate-500 font-bold uppercase tracking-wider">压力等级</span>
-                          <span className={`text-sm font-black ${shortPressure.color}`}>{shortPressure.label}</span>
+                          <span className="text-[11px] text-slate-500 font-bold uppercase tracking-wider">{t('pressureLevel')}</span>
+                          <span className={`text-sm font-black ${shortPressure.color}`}>
+                            {t(shortPressure.label as MessageKey<'brief'>)}
+                          </span>
                         </div>
                         <div className="grid grid-cols-2 gap-3">
                           <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5">
-                            <p className="text-[10px] text-slate-600 font-bold uppercase tracking-wider mb-1">日度沽空比</p>
+                            <p className="text-[10px] text-slate-600 font-bold uppercase tracking-wider mb-1">{t('shortRatio')}</p>
                             <p className={`text-xs font-black ${shortPressure.color}`}>
                               {shortRatio === null ? '--' : `${(shortRatio * 100).toFixed(1)}%`}
                             </p>
-                            <p className="text-[10px] text-slate-600 mt-1">{shortMetrics?.trade_date || '日期待同步'}</p>
+                            <p className="text-[10px] text-slate-600 mt-1">{shortMetrics?.trade_date || t('staleDate')}</p>
                           </div>
                           <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5">
-                            <p className="text-[10px] text-slate-600 font-bold uppercase tracking-wider mb-1">做空仓位</p>
+                            <p className="text-[10px] text-slate-600 font-bold uppercase tracking-wider mb-1">{t('shortInterest')}</p>
                             <p className="text-xs font-black text-slate-300">
                               {shortMetrics?.short_interest_shares != null ? Number(shortMetrics.short_interest_shares).toLocaleString() : '--'}
                             </p>
-                            <p className="text-[10px] text-slate-600 mt-1">{shortMetrics?.report_week || '周度待同步'}</p>
+                            <p className="text-[10px] text-slate-600 mt-1">{shortMetrics?.report_week || t('staleWeek')}</p>
                           </div>
                         </div>
                         <div className="flex items-center justify-between border-t border-white/5 pt-2.5">
-                          <p className="text-xs text-slate-500 italic">{shortPressure.interpretation}</p>
+                          <p className="text-xs text-slate-500 italic">{t(shortPressure.interpretation as MessageKey<'brief'>)}</p>
                           <span className="text-[10px] text-slate-500 font-bold">
-                            可沽空: {shortMetrics?.is_eligible ? '是' : '未知'}
+                            {t('eligible')}: {shortMetrics?.is_eligible ? t('yes') : t('no')}
                           </span>
                         </div>
                       </div>
@@ -620,7 +620,7 @@ export function TacticalBriefDrawer({
                    <section className="animate-in fade-in slide-in-from-bottom-4 duration-1000">
                       <div className="mb-4">
                         <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
-                          <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" /> 核心操盘点位
+                           <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" /> {t('keyLevelsHeadline')}
                         </h3>
                       </div>
                       
@@ -638,7 +638,7 @@ export function TacticalBriefDrawer({
                               const isActive = activeIndex === i;
                               const y = getY(node.price);
                               const isCurrent = node.kind === 'current';
-                              const isLeft = i % 2 === 0; // 奇偶错位逻辑
+                              const isLeft = i % 2 === 0;
                               
                               let color = 'text-slate-400';
                               let badgeColor = 'bg-white/5 border-white/10';
@@ -670,26 +670,27 @@ export function TacticalBriefDrawer({
                                                     <div className="absolute inset-0 rounded-full bg-indigo-500 animate-ping opacity-40" />
                                                 </div>
                                                 <span className="text-[11px] font-black text-white bg-indigo-500/20 px-2 py-0.5 rounded-full border border-indigo-500/40 uppercase tracking-tighter">
-                                                    NOW · {formatLevel(node.price)}
+                                                    {t('now')} · {formatLevel(node.price)}
                                                 </span>
                                               </div>
                                               <div className="flex-1 border-t border-indigo-500/30 border-dashed" />
                                            </div>
                                       ) : (
                                           <div className={`w-full flex items-center ${isLeft ? 'flex-row' : 'flex-row-reverse'}`}>
-                                              {/* 这里的线段根据左右位置弹性伸缩 */}
                                               <div className={`w-4 border-t ${isActive ? 'border-solid border-2' : 'border-dashed border-[1px]'} ${isActive ? 'border-indigo-400' : 'border-white/5'}`} />
                                               
                                               {isActive ? (
                                                   <div className={`px-3 py-1.5 rounded-xl border ${badgeColor} shadow-xl shadow-black/40 flex flex-col items-center min-w-[100px] pointer-events-auto`}>
-                                                      <span className={`text-[9px] font-black uppercase tracking-[0.1em] ${color}`}>{node.label}</span>
+                                                      <span className={`text-[9px] font-black uppercase tracking-[0.1em] ${color}`}>
+                                                          {node.__i18n?.ordinal ? t(node.label as MessageKey<'brief'>, { label: t(`levelLabels.${node.__i18n.key}` as MessageKey<'brief'>) }) : t(node.label as MessageKey<'brief'>)}
+                                                      </span>
                                                       <span className="text-sm font-black text-white">{formatLevel(node.price)}</span>
                                                   </div>
                                               ) : (
                                                   <div className={`mx-2 flex items-center gap-2 ${isLeft ? 'flex-row' : 'flex-row-reverse'}`}>
                                                       <span className="text-[10px] font-black text-slate-600 uppercase tracking-tight flex items-center gap-0.5">
                                                           {node.price > (currentPrice || 0) ? <ChevronUp size={10} className="text-slate-700" /> : <ChevronDown size={10} className="text-slate-700" />}
-                                                          {node.label}
+                                                          {node.__i18n?.ordinal ? t(node.label as MessageKey<'brief'>, { label: t(`levelLabels.${node.__i18n.key}` as MessageKey<'brief'>) }) : t(node.label as MessageKey<'brief'>)}
                                                       </span>
                                                       <span className="text-[11px] font-black text-slate-400">{formatLevel(node.price)}</span>
                                                   </div>
@@ -699,7 +700,7 @@ export function TacticalBriefDrawer({
                                           </div>
                                       )}
                                   </motion.div>
-                              )
+                              );
                           })}
                       </div>
 
@@ -709,11 +710,9 @@ export function TacticalBriefDrawer({
                         onScroll={(e) => {
                            const target = e.currentTarget;
                            const scrollPos = target.scrollLeft;
-                            const firstChild = target.children[0] as HTMLElement;
-                            // physical step = card offsetWidth + gap(16px)
-                            const itemWidth = firstChild ? firstChild.offsetWidth + 16 : target.clientWidth - 16; 
+                           const firstChild = target.children[0] as HTMLElement;
+                           const itemWidth = firstChild ? firstChild.offsetWidth + 16 : target.clientWidth - 16; 
                            
-                           // 使用中心点偏移算法，确保在滚动到一半时就触发索引切换
                            const index = Math.round(scrollPos / itemWidth);
                            
                            if (index !== activeIndex && index >= 0 && index < nodes.length) {
@@ -749,45 +748,46 @@ export function TacticalBriefDrawer({
                                     <div className={`h-[140px] rounded-[24px] p-5 border transition-all duration-300 relative overflow-hidden flex flex-col justify-between ${isActive ? `bg-gradient-to-br ${accentColor} to-[#0a0a0f] border-white/10 shadow-2xl` : 'bg-white/[0.01] border-white/5 opacity-40'}`}>
                                         <div className="flex justify-between items-start">
                                             <div>
-                                                <span className={`text-[10px] font-black uppercase tracking-widest ${isActive ? textColor : 'text-slate-500'}`}>{node.label}</span>
+                                                <span className={`text-[10px] font-black uppercase tracking-widest ${isActive ? textColor : 'text-slate-500'}`}>
+                                                    {node.__i18n?.ordinal ? t(node.label as MessageKey<'brief'>, { label: t(`levelLabels.${node.__i18n.key}` as MessageKey<'brief'>) }) : t(node.label as MessageKey<'brief'>)}
+                                                </span>
                                                 <h4 className="text-xl font-black text-white mt-1">{formatLevel(node.price)}</h4>
                                             </div>
                                             {isActive && (
                                                 <div className={`px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-tighter bg-white/5 border border-white/10 ${textColor} flex items-center`}>
                                                     {isCurrent ? (
-                                                        '当前实时锚点'
+                                                        t('currentAnchor')
                                                     ) : (
                                                         <span className="flex items-center gap-1">
                                                             {node.price > (currentPrice || 0) ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
-                                                            {node.price > (currentPrice || 0) ? '上方空间' : '向下缓冲'} {formatDistancePercent(getLevelDistance(currentPrice, node.price))}
+                                                            {node.price > (currentPrice || 0) ? t('upside') : t('downside')} {formatDistancePercent(getLevelDistance(currentPrice, node.price))}
                                                         </span>
                                                     )}
                                                 </div>
                                             )}
                                         </div>
                                         <div>
-                                            <p className={`text-xs font-bold leading-relaxed ${isActive ? 'text-slate-200' : 'text-slate-500'}`}>{node.description}</p>
+                                            <p className={`text-xs font-bold leading-relaxed ${isActive ? 'text-slate-200' : 'text-slate-500'}`}>{t(node.description as MessageKey<'brief'>)}</p>
                                             <p className={`text-[10px] mt-2 flex items-center gap-1.5 font-bold ${isActive ? textColor : 'text-slate-600'}`}>
                                                 {isCurrent ? (
                                                     <>
                                                         {signal === 'Long' && <Zap size={12} className="text-rose-400" />}
                                                         {signal === 'Side' && <Crosshair size={12} className="text-amber-400" />}
                                                         {signal === 'Short' && <Shield size={12} className="text-emerald-400" />}
-                                                        {signal === 'Long' ? '建议看多' : signal === 'Short' ? '建议防守' : '建议观察'}
+                                                        {t(`actions.${normalizeActionLabel(signal === 'Long' ? 'long' : signal === 'Short' ? 'defense' : 'observe')}` as MessageKey<'brief'>)}
                                                     </>
                                                 ) : (
                                                     <>
-                                                        {normalizeActionLabel(node.action) === '建议防守' && <Shield size={12} />}
-                                                        {normalizeActionLabel(node.action) === '建议落袋' && <Target size={12} />}
-                                                        {normalizeActionLabel(node.action) === '建议看多' && <TrendingUp size={12} />}
-                                                        {normalizeActionLabel(node.action) === '建议观察' && <Crosshair size={12} />}
-                                                        {normalizeActionLabel(node.action)}
+                                                        {t(`actions.${node.action}` as MessageKey<'brief'>) === t('actions.defense') && <Shield size={12} />}
+                                                        {t(`actions.${node.action}` as MessageKey<'brief'>) === t('actions.profit') && <Target size={12} />}
+                                                        {t(`actions.${node.action}` as MessageKey<'brief'>) === t('actions.long') && <TrendingUp size={12} />}
+                                                        {t(`actions.${node.action}` as MessageKey<'brief'>) === t('actions.observe') && <Crosshair size={12} />}
+                                                        {t(`actions.${node.action}` as MessageKey<'brief'>)}
                                                     </>
                                                 )}
                                             </p>
                                         </div>
                                         
-                                        {/* Background Decorative Price */}
                                         <span className="absolute -bottom-4 -right-2 text-6xl font-black opacity-[0.02] pointer-events-none italic select-none">
                                             {formatLevel(node.price)}
                                         </span>
@@ -821,7 +821,7 @@ export function TacticalBriefDrawer({
                   {newsItems.length > 0 && (
                     <section className="relative">
                       <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> 重点情报 (Last 48h)
+                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> {t('intelligence')} (Last 48h)
                       </h3>
                       <div className={`p-4 rounded-2xl bg-gradient-to-br from-emerald-500/[0.05] to-transparent border border-emerald-500/10 space-y-3 ${isFree ? (isHighPerformance ? 'opacity-20 grayscale brightness-50 select-none pointer-events-none' : 'blur-md select-none pointer-events-none opacity-40') : ''}`}>
                         {newsItems.map((news, idx) => (
@@ -833,7 +833,7 @@ export function TacticalBriefDrawer({
                       </div>
                       {isFree && (
                           <div className="absolute inset-x-0 bottom-4 flex justify-center z-10">
-                              <span className={`px-3 py-1 rounded-full border border-white/10 text-[10px] font-bold text-white uppercase tracking-wider ${!isHighPerformance ? 'bg-white/10 backdrop-blur-md' : 'bg-slate-800'}`}>升级 Pro 解锁情报</span>
+                              <span className={`px-3 py-1 rounded-full border border-white/10 text-[10px] font-bold text-white uppercase tracking-wider ${!isHighPerformance ? 'bg-white/10 backdrop-blur-md' : 'bg-slate-800'}`}>{t('upgradeUnlock')}</span>
                           </div>
                       )}
                     </section>
@@ -851,7 +851,7 @@ export function TacticalBriefDrawer({
                              size={12}
                              className={`text-indigo-400 transition-all duration-500 ${isExpanded ? 'scale-110' : 'opacity-50'}`}
                            />
-                           <span className="text-xs font-black text-slate-400 uppercase tracking-widest group-hover:text-slate-200 transition-colors">策略推演过程</span>
+                           <span className="text-xs font-black text-slate-400 uppercase tracking-widest group-hover:text-slate-200 transition-colors">{t('reasoningChain')}</span>
                         </div>
                         <motion.div
                           animate={{ rotate: isExpanded ? 180 : 0 }}
@@ -863,7 +863,7 @@ export function TacticalBriefDrawer({
                       {isFree && (
                           <div className="absolute inset-0 flex items-center justify-center">
                               <div className={`px-4 py-2 rounded-2xl border border-indigo-500/30 text-[10px] font-black italic text-indigo-400 uppercase tracking-widest shadow-2xl ${!isHighPerformance ? 'bg-indigo-500/20 backdrop-blur-xl' : 'bg-[#0f0f18]'}`}>
-                                  升级 PRO 解锁 AI 推理详情
+                                  {t('upgradeUnlockReasoning')}
                               </div>
                           </div>
                       )}
@@ -889,7 +889,7 @@ export function TacticalBriefDrawer({
                                           <div className="flex items-center gap-2">
                                             <span className="text-slate-500">{config.icon}</span>
                                             <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider">
-                                              {config.label}
+                                               {t(config.key as MessageKey<'brief'>)}
                                             </span>
                                           </div>
                                         );
@@ -924,7 +924,7 @@ export function TacticalBriefDrawer({
                       >
                         <div className="flex items-center gap-3">
                           <AlertTriangle size={12} className={isCounterArgumentExpanded ? 'text-rose-400' : 'text-rose-400/75'} />
-                          <span className={`text-xs font-black uppercase tracking-widest transition-colors ${isCounterArgumentExpanded ? 'text-rose-400' : 'text-rose-400/75 group-hover:text-rose-300/90'}`}>思维复盘 / 风险反思</span>
+                          <span className={`text-xs font-black uppercase tracking-widest transition-colors ${isCounterArgumentExpanded ? 'text-rose-400' : 'text-rose-400/75 group-hover:text-rose-300/90'}`}>{t('riskReflection')}</span>
                         </div>
                         <motion.div
                           animate={{ rotate: isCounterArgumentExpanded ? 180 : 0 }}
@@ -962,7 +962,7 @@ export function TacticalBriefDrawer({
                     >
                       <div className="flex items-center gap-3">
                         <Info size={12} className={isConflictResolutionExpanded ? 'text-indigo-400' : 'text-indigo-400/75'} />
-                        <span className={`text-xs font-black uppercase tracking-widest transition-colors ${isConflictResolutionExpanded ? 'text-indigo-400' : 'text-indigo-400/75 group-hover:text-indigo-300/90'}`}>核心冲突处理原则</span>
+                        <span className={`text-xs font-black uppercase tracking-widest transition-colors ${isConflictResolutionExpanded ? 'text-indigo-400' : 'text-indigo-400/75 group-hover:text-indigo-300/90'}`}>{t('conflictResolution')}</span>
                       </div>
                       <motion.div
                         animate={{ rotate: isConflictResolutionExpanded ? 180 : 0 }}

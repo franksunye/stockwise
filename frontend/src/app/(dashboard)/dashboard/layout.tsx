@@ -1,14 +1,19 @@
 'use client';
 
+import { useLayoutEffect } from 'react';
 import { InviteWall } from '@/components/InviteWall';
 import { DashboardShell } from '@/components/dashboard/DashboardShell';
 import { SystemSync } from '@/components/SystemSync';
 import { ReferralTracker } from '@/components/ReferralTracker';
 import { BadgeManager } from '@/components/BadgeManager';
 import { InstallGuide } from '@/components/InstallGuide';
-import { type Tier } from '@/hooks/useUserProfile';
 import { useDashboardAuthorization } from '@/hooks/useDashboardAuthorization';
 import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton';
+import {
+    installLegacyProfileCacheWriteGuard,
+    purgeLegacyUserProfileCache,
+    LEGACY_PROFILE_CACHE_KEY,
+} from '@/lib/dashboard-bootstrap';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function DashboardLayout({
@@ -16,7 +21,27 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { isAuthorized, setIsAuthorized, tier, setTier, canSkipTransition } = useDashboardAuthorization();
+  const { isAuthorized, setIsAuthorized, userSession, refreshProfile, canSkipTransition } =
+    useDashboardAuthorization();
+
+  useLayoutEffect(() => {
+    installLegacyProfileCacheWriteGuard();
+    purgeLegacyUserProfileCache();
+    const onPageShow = () => {
+      purgeLegacyUserProfileCache();
+    };
+    const onStorage = (ev: StorageEvent) => {
+      if (ev.key === LEGACY_PROFILE_CACHE_KEY && ev.newValue) {
+        purgeLegacyUserProfileCache();
+      }
+    };
+    window.addEventListener('pageshow', onPageShow);
+    window.addEventListener('storage', onStorage);
+    return () => {
+      window.removeEventListener('pageshow', onPageShow);
+      window.removeEventListener('storage', onStorage);
+    };
+  }, []);
 
   const appBootstrap = (
     <>
@@ -54,10 +79,12 @@ export default function DashboardLayout({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <InviteWall onSuccess={(newTier) => {
-              if (newTier) setTier(newTier as Tier);
-              setIsAuthorized(true);
-            }} />
+            <InviteWall
+              onSuccess={() => {
+                setIsAuthorized(true);
+                void refreshProfile({ force: true });
+              }}
+            />
           </motion.div>
         )}
 
@@ -72,7 +99,7 @@ export default function DashboardLayout({
             animate={{ opacity: 1 }}
             transition={{ duration: canSkipTransition.current ? 0 : 0.4 }}
           >
-            <DashboardShell tier={tier}>{children}</DashboardShell>
+            <DashboardShell userSession={userSession}>{children}</DashboardShell>
           </motion.div>
         )}
       </AnimatePresence>

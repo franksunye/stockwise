@@ -4,6 +4,7 @@ import { formatModelName } from '@/lib/model-names';
 import { getFirstSentence, getTacticalConflictSummary, getTacticalSummary } from '@/lib/tactical-brief-content';
 import type { AIPrediction } from '@/lib/types';
 import { getCurrentUser } from '@/lib/user';
+import type { PredictionContentLocale } from '@/lib/prediction-content-locale';
 
 export type CouncilActionKey = 'enter' | 'observe' | 'defense' | 'empty' | 'mixed';
 export type CouncilCardMode = 'collab' | 'independent' | 'rule';
@@ -254,12 +255,12 @@ export interface CouncilCachePayload {
 }
 
 const SNAPSHOT_TTL = 1000 * 60 * 60 * 24;
-const SNAPSHOT_VERSION = 'v2';
+const SNAPSHOT_VERSION = 'v3';
 const MAX_CACHE_SIZE = 50;
 const councilSnapshotCache = new Map<string, CouncilCachePayload>();
 
-export function getAICouncilSWRKey(symbol: string, targetDate: string) {
-  return ['ai-council', symbol, targetDate] as const;
+export function getAICouncilSWRKey(symbol: string, targetDate: string, contentLocale: PredictionContentLocale) {
+  return ['ai-council', symbol, targetDate, contentLocale] as const;
 }
 
 export function getCouncilMemorySnapshot(key: string): CouncilCachePayload | undefined {
@@ -283,8 +284,8 @@ export function setCouncilMemorySnapshot(key: string, payload: CouncilCachePaylo
   }
 }
 
-function buildSessionSnapshotKey(symbol: string, targetDate: string): string {
-  return `ziso:ai-council:${SNAPSHOT_VERSION}:${symbol}:${targetDate}`;
+function buildSessionSnapshotKey(symbol: string, targetDate: string, contentLocale: PredictionContentLocale): string {
+  return `ziso:ai-council:${SNAPSHOT_VERSION}:${symbol}:${targetDate}:${contentLocale}`;
 }
 
 function pruneStaleSnapshots(): void {
@@ -296,7 +297,7 @@ function pruneStaleSnapshots(): void {
     for (let i = 0; i < storage.length; i++) {
       const key = storage.key(i);
       if (!key || !key.startsWith('ziso:ai-council:')) continue;
-      const datePart = key.split(':').pop();
+      const datePart = key.split(':').find((p) => /^\d{4}-\d{2}-\d{2}$/.test(p));
       if (datePart && datePart < today) keysToRemove.push(key);
     }
     for (const key of keysToRemove) storage.removeItem(key);
@@ -307,14 +308,18 @@ function pruneStaleSnapshots(): void {
 
 let didPruneSnapshots = false;
 
-export function readCouncilSessionSnapshot(symbol: string, targetDate: string): CouncilCachePayload | null {
+export function readCouncilSessionSnapshot(
+  symbol: string,
+  targetDate: string,
+  contentLocale: PredictionContentLocale,
+): CouncilCachePayload | null {
   if (typeof window === 'undefined') return null;
   if (!didPruneSnapshots) {
     didPruneSnapshots = true;
     pruneStaleSnapshots();
   }
   try {
-    const raw = window.localStorage.getItem(buildSessionSnapshotKey(symbol, targetDate));
+    const raw = window.localStorage.getItem(buildSessionSnapshotKey(symbol, targetDate, contentLocale));
     if (!raw) return null;
     const parsed = JSON.parse(raw) as Partial<CouncilCachePayload>;
     if (!parsed || !Array.isArray(parsed.data) || typeof parsed.fetchedAt !== 'number') {
@@ -329,20 +334,37 @@ export function readCouncilSessionSnapshot(symbol: string, targetDate: string): 
   }
 }
 
-export function writeCouncilSessionSnapshot(symbol: string, targetDate: string, payload: CouncilCachePayload): void {
+export function writeCouncilSessionSnapshot(
+  symbol: string,
+  targetDate: string,
+  contentLocale: PredictionContentLocale,
+  payload: CouncilCachePayload,
+): void {
   if (typeof window === 'undefined') return;
   try {
-    window.localStorage.setItem(buildSessionSnapshotKey(symbol, targetDate), JSON.stringify(payload));
+    window.localStorage.setItem(
+      buildSessionSnapshotKey(symbol, targetDate, contentLocale),
+      JSON.stringify(payload),
+    );
   } catch {
     // best-effort
   }
 }
 
-export async function fetchAICouncilData(symbol: string, targetDate: string): Promise<CouncilCachePayload> {
-  let res = await fetch(`/api/predictions?symbol=${symbol}&limit=10&mode=full&targetDate=${targetDate}`);
+export async function fetchAICouncilData(
+  symbol: string,
+  targetDate: string,
+  contentLocale: PredictionContentLocale,
+): Promise<CouncilCachePayload> {
+  const localeQ = `&locale=${contentLocale === 'en' ? 'en' : 'cn'}`;
+  let res = await fetch(
+    `/api/predictions?symbol=${encodeURIComponent(symbol)}&limit=10&mode=full&targetDate=${encodeURIComponent(targetDate)}${localeQ}`,
+  );
   if (res.status === 401) {
     await getCurrentUser();
-    res = await fetch(`/api/predictions?symbol=${symbol}&limit=10&mode=full&targetDate=${targetDate}`);
+    res = await fetch(
+      `/api/predictions?symbol=${encodeURIComponent(symbol)}&limit=10&mode=full&targetDate=${encodeURIComponent(targetDate)}${localeQ}`,
+    );
   }
   if (!res.ok) {
     const error = new Error('Failed to fetch council data') as Error & { status?: number };

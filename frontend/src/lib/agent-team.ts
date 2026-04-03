@@ -39,6 +39,8 @@ interface TeamVisualStyle {
 export interface TeamMemberProfile {
   id: TeamMemberId;
   name: string;
+  /** English given name for dashboard / brief UI when locale is `en`. */
+  nameEn?: string;
   displayName: string;
   role: string;
   roleEn?: string;
@@ -78,6 +80,7 @@ const TEAM_MEMBER_DIRECTORY: Record<TeamMemberId, TeamMemberProfile> = {
   lin_xu: {
     id: 'lin_xu',
     name: '林序',
+    nameEn: 'Lin Xu',
     displayName: '林序（混元 Lite）',
     role: '初级分析师',
     roleEn: 'JUNIOR ANALYST',
@@ -96,6 +99,7 @@ const TEAM_MEMBER_DIRECTORY: Record<TeamMemberId, TeamMemberProfile> = {
   gu_shen: {
     id: 'gu_shen',
     name: '顾深',
+    nameEn: 'Gu Shen',
     displayName: '顾深（DeepSeek）',
     role: '资深分析师',
     roleEn: 'SENIOR ANALYST',
@@ -114,6 +118,7 @@ const TEAM_MEMBER_DIRECTORY: Record<TeamMemberId, TeamMemberProfile> = {
   cheng_ju: {
     id: 'cheng_ju',
     name: '程矩',
+    nameEn: 'Cheng Ju',
     displayName: '程矩（量化规则）',
     role: '初级规则分析师',
     roleEn: 'JUNIOR RULE ANALYST',
@@ -186,8 +191,10 @@ const TEAM_MEMBER_DIRECTORY: Record<TeamMemberId, TeamMemberProfile> = {
   fallback: {
     id: 'fallback',
     name: '量化分析成员',
+    nameEn: 'Quant Analyst',
     displayName: '量化分析成员',
     role: 'AI 研判席',
+    roleEn: 'AI ANALYST',
     avatarSeed: 'ziso-council-fallback',
     briefSummary: '基于结构化推理流程输出结论，并与风控约束联合校验。',
     aboutDescription: '基于结构化推理流程输出结论，并与风控约束联合校验。',

@@ -2,6 +2,7 @@
   "common": {
     "loading": "加载中...",
     "error": "出错了",
+    "errorRetry": "出错了，请重试",
     "retry": "重试",
     "confirm": "确认",
     "cancel": "取消",
@@ -13,63 +14,216 @@
     "noData": "暂无数据",
     "unknownStock": "未知股票",
     "upgrade": "升级",
-    "manageSub": "管理订阅"
+    "manageSub": "管理订阅",
+    "tradeManagement": "交易管理"
   },
   "dashboard": {
     "title": "仪表盘",
     "stockPool": "自选池",
+    "stockPoolWordmark": "POOL",
+    "stockPoolAssetsHeading": "自选资产 ({count})",
+    "stockProfilePassRateLabel": "回看通过率",
+    "stockProfileCompletedLabel": "完成回看",
+    "stockProfileMatrixTitle": "复盘矩阵（最近 {days} 天）",
+    "stockProfileMatrixLoading": "加载中...",
     "addStock": "添加自选",
     "removeStock": "移除自选",
+    "staleData": "数据待同步",
+    "initialData": "初始数据构建中",
+    "engineIntervening": "AI 引擎即将介入",
+    "traceHistory": "上划追溯历史轨迹",
     "signal": {
-      "buy": "建议看多",
-      "hold": "建议观察",
-      "sell": "建议防守",
-      "neutral": "暂无信号",
+      "triggeredLong": "看多",
+      "watching": "观察",
+      "riskOff": "防守",
+      "noSignal": "暂无信号",
       "pending": "等待分析"
     },
     "badge": {
-      "buy": "适合开始寻找机会",
-      "hold": "先观察，不急着出手",
-      "sell": "优先控制风险",
-      "neutral": "当前不建议出手",
+      "triggeredLong": "适合开始寻找机会",
+      "watching": "先观察，不急降仓",
+      "riskOff": "优先控制风险",
+      "noSignal": "当前不建议出手",
       "pending": "正在生成可执行结论"
-    },
-    "price": {
-      "currentPrice": "当前成交价",
-      "todayPrice": "今日成交价",
-      "todayClose": "今日收盘价",
-      "closePrice": "{date} 收盘价"
-    },
-    "rsi": {
-      "overbought": "超买",
-      "oversold": "超卖",
-      "stable": "稳定"
     },
     "date": {
       "today": "今日",
       "yesterday": "昨日",
       "friday": "周五",
       "todayAdvice": "今日建议",
-      "tomorrowAdvice": "明日建议",
-      "nextMondayAdvice": "下周一建议",
-      "nextTradingDay": "下一交易日 ({date}) 建议",
+      "tomorrowAdvice": "明日预判",
+      "mondayAdvice": "下周一建议",
+      "tradingDayAdvice": "{date} 建议",
+      "nextTradingDayAdvice": "下一交易日 ({date}) 建议",
       "todayVerify": "今日验证",
-      "verification": "{date} 验证"
+      "verification": "{date} 验证",
+      "currentPrice": "当前价",
+      "todayClose": "今日结算",
+      "closePrice": "{label}结算",
+      "todayFact": "今日成交",
+      "factLabel": "{label}成交",
+      "waitingFact": "等待市场下发事实"
+    },
+    "validation": {
+      "goldMedal": "金牌验证 +{perf}%",
+      "passed": "验证通过 {perf}",
+      "deviated": "{window}日偏离",
+      "verifying": "{window}日验证中",
+      "waiting": "待回看",
+      "closeVerify": "收盘验证",
+      "windowVerify": "{window}日回看",
+      "accumulation": "历史验证还在累积中",
+      "waitingFlow": "等待市场把这段走势走完"
+    },
+    "rsi": {
+      "overbought": "超买",
+      "oversold": "超卖",
+      "stable": "稳定"
     },
     "confidence": "置信度",
     "reasoning": "推理依据"
   },
   "brief": {
-    "title": "战术简报",
+    "title": "研判报告",
     "fullReport": "完整报告",
     "keyLevels": "关键价位",
+    "keyLevelsHeadline": "核心操盘点位",
     "sentiment": "情绪分析",
     "support": "支撑位",
     "resistance": "压力位",
     "riskGate": "风险闸门",
     "circuitBreaker": "75% 纪律闸门",
     "exportPoster": "导出海报",
-    "shareReport": "分享报告"
+    "shareReport": "分享报告",
+    "exportSheetAlmanac": "个股黄历",
+    "exportSheetReport": "投研报告",
+    "exportBrief": "导出当前分析",
+    "analyst": "{name} · {role}",
+    "independentView": "独立视角",
+    "ruleView": "规则视角",
+    "date": {
+      "tradingDayAdvice": "{date} 建议"
+    },
+    "tradingPlan": "交易预案",
+    "copyScenario": "复制当前交易预案",
+    "baseMarket": "基础市场研判",
+    "shortPressure": "空头压力",
+    "pressureLevel": "压力等级",
+    "shortRatio": "日度沽空比",
+    "shortInterest": "做空仓位",
+    "eligible": "可沽空",
+    "now": "NOW",
+    "upside": "上方空间",
+    "downside": "向下缓冲",
+    "currentAnchor": "当前实时锚点",
+    "target": "目标",
+    "stopAdvance": "移动止盈",
+    "stopLoss": "止损价",
+    "buyZone": "理想买入区",
+    "condition": "条件",
+    "triggerLabel": "触发",
+    "reasonLabel": "理由",
+    "yes": "是",
+    "no": "否",
+    "staleDate": "日期待同步",
+    "staleWeek": "周度待同步",
+    "intelligence": "重点情报",
+    "upgradeUnlock": "升级 Pro 解锁情报",
+    "reasoningChain": "策略推演过程",
+    "upgradeUnlockReasoning": "升级 PRO 解锁 AI 推理详情",
+    "riskReflection": "思维复盘 / 风险反思",
+    "conflictResolution": "核心冲突处理原则",
+    "trend": "趋势",
+    "momentum": "动能",
+    "volume": "成交量",
+    "history": "历史",
+    "decision": "决策",
+    "priceAction": "价格行为",
+    "context": "上下文",
+    "capital": "资金博弈",
+    "general": "综合研判",
+    "shortLevels": {
+      "extreme": "极高",
+      "high": "高",
+      "mid": "中",
+      "low": "低"
+    },
+    "shortInterpretations": {
+      "extreme": "空头压力极高，优先风险控制",
+      "high": "空头压力偏高，注意反弹质量",
+      "mid": "空头压力中性，保持观察",
+      "low": "空头压力偏低，抛压有限",
+      "notEligible": "该标的暂不可沽空",
+      "onlyHK": "仅港股显示",
+      "waitingData": "港交所日度数据收盘后更新"
+    },
+    "scenario": {
+      "holding_profit": "持仓盈利",
+      "holding_loss": "持仓亏损",
+      "empty": "空仓等待"
+    },
+    "scenarioBadge": {
+      "holding_profit": "盈利中",
+      "holding_loss": "亏损中",
+      "empty": "等待入场"
+    },
+    "actions": {
+      "long": "建议看多",
+      "observe": "建议观察",
+      "defense": "建议防守",
+      "profit": "建议落袋"
+    },
+    "levelLabels": {
+      "resistance": "强压力区",
+      "target": "挑战位",
+      "breakout": "突破确认",
+      "current": "当前价",
+      "support": "防守位",
+      "strongSupport": "强支撑区",
+      "stoploss": "止损参考"
+    },
+    "levelDescriptions": {
+      "resistance": "核心供给区，多空博弈终点",
+      "target": "局部阶段目标，注意动能释放",
+      "breakout": "反转结构成立的关键锚点",
+      "current": "目前市场成交活跃点",
+      "support": "多头防线，不破即维持强势",
+      "strongSupport": "底部核心支撑，中长期成本位",
+      "stoploss": "结构崩溃底线"
+    },
+    "ordinals": {
+      "first": "第一",
+      "second": "第二",
+      "third": "第三"
+    },
+    "trigger": {
+      "not_below_support_1": "不跌破一防位",
+      "near_resistance_1": "接近一攻位且动能放缓",
+      "break_support_1": "有效跌破一防位",
+      "rebound_resistance": "反抽压力位但未能突破",
+      "wait_support_stable": "回踩一防位企稳后再评估",
+      "breakout_confirmation": "放量突破一攻位并站稳"
+    },
+    "reason": {
+      "discipline": "趋势未被破坏，先守纪律。",
+      "lock_profit": "锁定波段利润，避免冲高回落。",
+      "control_drawdown": "优先控制回撤，避免亏损扩大。",
+      "reduce_exposure": "弱势反弹先降风险敞口。",
+      "right_side_signal": "先等右侧信号，再考虑入场。",
+      "confirm_before_entry": "确认后再交易，避免假突破。"
+    }
+  },
+  "history": {
+    "title": "历史回看",
+    "viewDetail": "详情",
+    "noHistory": "历史验证还在累积中",
+    "medalPassed": "通过",
+    "medalDeviated": "偏离",
+    "clickReview": "点击回顾",
+    "closingPrice": "收盘价",
+    "dayChange": "当日涨跌",
+    "baseDay": "基准日",
+    "dayOffset": "第 {day} 日"
   },
   "council": {
     "title": "投研决议",
@@ -82,29 +236,353 @@
   },
   "user": {
     "center": "个人中心",
+    "identity": "账号设置",
+    "investmentMode": "投资模式",
+    "support": "帮助与支持",
+    "learn": "101 手册",
+    "learnSubtitle": "散户避坑与生存指南",
     "tier": {
-      "free": "免费版",
+      "free": "普通用户",
       "go": "Go 会员",
       "plus": "Plus 会员",
       "pro": "Pro 会员",
       "alpha": "Alpha 会员"
     },
-    "invite": "邀请好友",
-    "copyLink": "复制邀请链接",
-    "linkCopied": "链接已复制",
-    "settings": "设置",
-    "language": "语言",
-    "expiresAt": "到期时间: {date}",
-    "watchlistUsage": "自选: {used}/{total}"
+    "linkEmail": "绑定支付/恢复邮箱",
+    "linkEmailDesc": "绑定邮箱以防丢失账号，找回所有付费权益。",
+    "placeholderEmail": "your@email.com",
+    "confirm": "确定",
+    "idLabel": "用户 ID",
+    "emailLabel": "绑定邮箱",
+    "emailNotLinked": "尚未绑定邮箱",
+    "linkNow": "立即绑定",
+    "restoreAccount": "换机/找回账号",
+    "placeholderUserId": "user_xxxx",
+    "expiresAt": "有效期至: {date}",
+    "watchlistUsage": "自选额度",
+    "protected": "已保护",
+    "settings": "账户设置",
+    "successRedeem": "兑换成功！已升级为 Go 会员",
+    "failRedeem": "兑换失败",
+    "networkFail": "网络请求失败",
+    "referral": {
+      "title": "邀请好友",
+      "partner": "合伙人中心",
+      "rewardDays": "+{days} 天",
+      "successCount": "已成功邀请 {count} 位好友",
+      "copied": "链接已复制到剪贴板！",
+      "copyFail": "复制失败，请长按链接手动复制",
+      "inviteLink": "复制邀请链接",
+      "revenue": "收益详情",
+      "rules": "奖励规则",
+      "inviteCountLabel": "成功邀请人数",
+      "unitPeople": "人",
+      "earnedProDaysLabel": "累计获赠时长",
+      "unitDays": "天",
+      "rulesExplainerBefore": "每成功邀请 1 位新用户入池，你与好友均可自动获得 ",
+      "rulesExplainerHighlight": "{days} 天",
+      "rulesExplainerAfter": " Go 会员权益。",
+      "partnerBalanceLabel": "分润余额",
+      "partnerTotalEarnedLabel": "累计收益 ({percent}%)",
+      "partnerRecentTx": "最近交易",
+      "channelCommissionWord": "佣金比例"
+    },
+    "redeem": "输入兑换码",
+    "redeemPlaceholder": "PRO-XXXX",
+    "onboardingReset": "重新进入激活引导",
+    "push": {
+      "title": "推送通知",
+      "enable": "开启",
+      "enabled": "已开启",
+      "disableFailed": "关闭失败，请重试",
+      "advancedSettings": "高级偏好设置",
+      "androidLimited": "Android 推送不可用，请主动打开应用获取数据。",
+      "success": "通知开启成功",
+      "enableFailed": "开启失败，请重试",
+      "permissionDenied": "请允许通知权限",
+      "noSubscription": "无法获取推送权限",
+      "saveFailed": "保存失败: {detail}",
+      "vapidMissing": "VAPID Key 未配置",
+      "swRegisterFailed": "Service Worker 注册失败",
+      "testPush": "测试推送",
+      "testPushSending": "发送中...",
+      "testNotificationTitle": "🔔 测试通知 - ZISO AI",
+      "testNotificationBody": "测试成功！当前时间: {time}",
+      "types": {
+        "signal_flip": { "label": "趋势反转", "badge": "重要" },
+        "morning_call": { "label": "每日早报", "badge": "08:30" },
+        "validation_glory": { "label": "回看战报", "badge": "通过率" },
+        "prediction_updated": { "label": "预测更新", "badge": "分析完成" },
+        "daily_brief": {
+          "labelPro": "Pro 深度复盘",
+          "labelStandard": "简报生成",
+          "badgePro": "★ 专属",
+          "badgeStandard": "17:30"
+        },
+        "price_update": { "label": "实时行情", "badge": "盘中推送" },
+        "market_almanac": { "label": "投资黄历", "badge": "每日双发" }
+      }
+    }
+  },
+  "pricing": {
+    "title": "方案选择",
+    "subtitle": "订阅权益",
+    "desc": "解锁专家级研判，让知守专家替你完成投研深度。",
+    "mostValue": "最具性价比",
+    "active": "生效中",
+    "expiryLabel": "服务到期",
+    "expiryFormat": "{year}年{month}月{day}日",
+    "lifetimeLabel": "终身会员",
+    "manageSub": "管理订阅 / 取消自动续费",
+    "portalRedirecting": "正在跳转至管理门户...",
+    "currentStatus": "当前账户状态",
+    "subscribe": "订阅 Pro",
+    "monthly": "月度续费 (¥29.9)",
+    "annual": "年度订阅 (最优惠)",
+    "annualExtended": "年度续延 (¥299)",
+    "annualBenefit": "立即增加 365 天服务有效期",
+    "annualDiscount": "节省约 17%",
+    "processing": "处理中...",
+    "ctaDefault": "立即开始",
+    "manualChannel": "人工专属通道",
+    "manualSupport": "扫码直连人工",
+    "manualSupportDesc": "支持直接转账或处理支付疑难。",
+    "androidPushWarning": "*由于系统限制，部分安卓机型可能无法实时推送。建议手动查看。",
+    "riskWarning": "股市有风险，所有内容由 AI 生成，仅供参考。订阅即代表同意服务协议与隐私条款。",
+    "systemMaintenance": "⚠️ 系统正在维护，请稍后重试或联系客服。",
+    "checkoutError": "⚠️ 支付无法发起",
+    "supportContactNote": "请检查网络或更换卡片。若持续失败，请添加下方客服二维码。",
+    "portalError": "无法打开订阅门户",
+    "systemBusy": "系统繁忙，请稍后再试",
+    "free": {
+      "name": "普通版",
+      "period": "永久免费",
+      "description": "适合初学者体验 AI 辅助分析。",
+      "cta": "免费开始"
+    },
+    "go": {
+      "name": "Go 会员",
+      "period": "¥29/月 或 ¥299/年",
+      "description": "最具性价比。解锁顶级推理模型与全量实时通知。",
+      "cta": "订阅 Go"
+    },
+    "plus": {
+      "name": "Plus 卓越版",
+      "period": "即将发布",
+      "description": "顶配共识分析。包含多模型交叉验证与优先专家支持。",
+      "cta": "加入等待名单"
+    },
+    "alpha": {
+      "name": "Alpha 领航",
+      "period": "年度订阅",
+      "description": "顶级 Alpha 工具，实时深度追踪。",
+      "cta": "联系我们"
+    },
+    "features": {
+      "aiTrend": "AI 趋势分析",
+      "dailyBrief": "每日市场详报",
+      "almanac": "宏观黄历看板",
+      "diagnosis": "基础个股诊断",
+      "community": "投资者社区访问",
+      "deepseek": "DeepSeek Full 思维链",
+      "aiReport": "Deep AI 深度投研报告",
+      "watchlist": "自选上限提升 (10 只)",
+      "indicators": "关键价位与情绪指标",
+      "realtime": "实时预警与信号",
+      "badge": "⭐ 专属勋章",
+      "breaking": "突发情报与情绪博弈分析",
+      "dashboard": "专家席位控制台",
+      "reportAuto": "特定标的 研判自动生成",
+      "api": "策略 API 接口对接",
+      "expert": "独家知守高级投研资源"
+    },
+    "actionableInsights": {
+      "group": "逻辑研判 (Actionable Insights)",
+      "model": "分析模型",
+      "dailyLimit": "研判额度 (每日)",
+      "monthlyLimit": "研判上限 (月度)",
+      "signals": "趋势信号 / 交易预案",
+      "levels": "核心点位 / 空头压力",
+      "reasoning": "推演过程 / 风险反思",
+      "markets": "市场覆盖 (US/HK/CN)",
+      "sharing": "报告无限制分享"
+    },
+    "notifications": {
+      "group": "系统通知",
+      "realtime": "实时送达性",
+      "types": "全量通知类型"
+    },
+    "academy": {
+      "group": "知守学院",
+      "content": "101 手册 / 大师图鉴",
+      "masters": "大师逻辑拆解"
+    }
+  },
+  "investment": {
+    "title": "投资模式",
+    "subtitle": "选择适合你的投资风格，并查看对应表现。",
+    "syncing": "正在同步你的模式与表现...",
+    "errorLoading": "暂时无法显示投资模式",
+    "errorRetry": "请稍后重新进入此页。",
+    "currentMode": "当前模式",
+    "defaultMode": "默认模式",
+    "modeStatus": "当前生效",
+    "modeRange": "模式范围",
+    "multiModes": "多模式",
+    "balancedMode": "平衡模式",
+    "selectionTitle": "选择模式",
+    "freeDefault": "免费版默认使用平衡模式",
+    "switchNote": "切换只影响后续新结论",
+    "performanceTitle": "模式表现",
+    "selectionCurrent": "当前",
+    "selectionSelect": "选择",
+    "metrics": {
+      "coverage": "出手率",
+      "hitRate": "通过率",
+      "drawdown": "最大回撤",
+      "sampleSize": "实测样本",
+      "payoffRatio": "风报比",
+      "stability": "稳定分"
+    },
+    "advancedDetails": "详情",
+    "unlockProTitle": "解锁更多模式与自选整体表现",
+    "unlockProDesc": "当前默认使用平衡模式，并可查看对应的通用表现。升级 Pro 后，可按自己的投资风格切换更多模式，并查看自选表现。",
+    "viewProBenefits": "查看 Pro 权益",
+    "switchSuccess": "已切换，后续新结论将按当前模式展示",
+    "switchFail": "切换失败，请稍后再试",
+    "historyNote": "模式切换只影响后续新结论，历史记录保持不变。",
+    "scope": {
+      "universal": {
+        "title": "通用表现",
+        "subtitle": "看这个模式整体是否稳健"
+      },
+      "pool": {
+        "title": "自选表现",
+        "subtitle": "看这个模式对你的自选股是否更合适"
+      }
+    }
+  },
+  "learn": {
+    "searchPlaceholder": "搜索课程...",
+    "all": "全部",
+    "backToCatalog": "返回目录",
+    "noResults": "没有找到相关课程",
+    "statsGuides": "{count} 篇指南",
+    "statsModules": "{count} 大模块",
+    "readingTime": "{minutes} 分钟",
+    "loadFail": "加载失败，请稍后重试。",
+    "categories": {
+      "The Mind": "心法篇",
+      "The Method": "方法篇",
+      "The Money": "资金篇",
+      "The Machine": "工具篇",
+      "The Case": "案例篇"
+    },
+    "categoryDescs": {
+      "The Mind": "认知与决策心理学",
+      "The Method": "技术面与量价分析",
+      "The Money": "仓位管理与风控",
+      "The Machine": "AI 投研机制",
+      "The Case": "历史实战复盘"
+    }
+  },
+  "support": {
+    "searchPlaceholder": "搜索问题...",
+    "backToList": "返回列表",
+    "noResults": "没有找到相关问题",
+    "loading": "加载中...",
+    "sections": {
+      "experience": "交互与导航",
+      "ai-logic": "AI 智慧与分析",
+      "quant": "量化逻辑与纪律",
+      "trust": "验证与诚信",
+      "account": "账号与安全",
+      "growth": "权益与增长",
+      "notifications": "通知与触达",
+      "infra": "数据与服务保障"
+    }
   },
   "onboarding": {
-    "welcome": "欢迎使用知守 AI",
-    "step1Title": "添加你的第一只股票",
-    "step1Desc": "输入股票代码或名称，知守会为你每日复盘",
-    "step2Title": "查看你的战术简报",
-    "step2Desc": "每天收盘后，知守投研委员会为你生成深度报告",
-    "getStarted": "开始使用",
-    "skipTour": "跳过引导"
+    "welcome": "你好，我是 ZISO",
+    "assistant": "你的 AI 投研助理",
+    "subtitle": "我会替你做股市功课，带你从容看清投资门道。",
+    "start": "开启旅程",
+    "analysis": {
+      "defaultReasoning": "基于近期市场表现和技术指标的综合分析结论。"
+    },
+    "selectTitle": "选择一只股票体验",
+    "selectDesc": "从热门标的中选择，我们将完全解锁它的 AI 深度分析。",
+    "selectNote": "* 正式使用后，您可以添加任意港股或A股到自选池",
+    "analyzing": {
+      "connecting": "正在连接全球市场数据...",
+      "flows": "正在追踪机构资金流向...",
+      "ai": "AI 正在生成深度决策逻辑..."
+    },
+    "reveal": {
+      "proUnlocked": "Pro Feature Unlocked",
+      "reportTitle": "AI 深度全维分析报告",
+      "advice": "AI 建议",
+      "insight": "AI 核心逻辑",
+      "confidence": "历史表现置信度",
+      "support": "支撑位",
+      "privilegeNote": "* 普通用户通常无法查看到“核心逻辑”与“支撑位”数据。此特权已为您临时解锁。",
+      "cta": "收下这份洞察"
+    },
+    "complete": {
+      "ready": "一切就绪!",
+      "added": "{symbol} 已添加到您的自选池。",
+      "gift": "特别礼物",
+      "trial": "已激活 {days} 天 Pro 体验权",
+      "trialDesc": "支持添加 10 只自选并在全站解锁 AI 核心逻辑。",
+      "cta": "进入控制台"
+    }
+  },
+  "install": {
+    "guideTitle": "在浏览器中打开",
+    "iosTitle": "添加到主屏幕",
+    "iosDesc": "获得全屏 App 体验，实时接收行情通知。",
+    "iosStep1": "点击底部分享按钮",
+    "iosStep2": "选择“添加到主屏幕”",
+    "androidTitle": "安装 ZISO AI",
+    "androidDesc": "一键安装到桌面，全屏使用、实时通知、秒开体验。",
+    "androidCta": "安装到桌面",
+    "manualTitle": "添加到桌面",
+    "manualDetect": "检测到 {browser}，请手动添加：",
+    "manualHint": "💡 推荐使用 Chrome 浏览器打开 ziso.cc，可一键安装为独立 App。",
+    "browsers": {
+      "huawei": "华为浏览器",
+      "xiaomi": "小米浏览器",
+      "uc": "UC 浏览器",
+      "quark": "夸克浏览器",
+      "qq": "QQ 浏览器",
+      "sogou": "搜狗浏览器",
+      "baidu": "百度浏览器",
+      "default": "当前浏览器"
+    },
+    "steps": {
+      "clickMenu": "点击底部或右上角的菜单",
+      "clickDots": "点击底部菜单 ⋯",
+      "selectAdd": "找到“添加到桌面”或“添加快捷方式”",
+      "allowPermission": "若被拦截，前往 设置 → 应用 → 权限，允许创建桌面快捷方式",
+      "allowXiaomi": "若提示权限，选择“允许”"
+    }
+  },
+  "settings": {
+    "title": "个人化配置",
+    "positionStatus": "持仓状态",
+    "desc": "选择你当前的持仓状态，AI 将据此提供更精准的操作建议",
+    "holding": {
+      "label": "已持仓",
+      "desc": "AI 将提供止损和减仓建议"
+    },
+    "empty": {
+      "label": "未建仓",
+      "desc": "AI 将提供入场 and 试错建议"
+    },
+    "none": {
+      "label": "观察中",
+      "desc": "AI 将提供通用决策参考"
+    }
   },
   "trade": {
     "title": "交易管理",
@@ -115,5 +593,21 @@
     "basis": "推演依据",
     "detail": "执行详情",
     "noPositions": "暂无持仓记录"
+  },
+  "poster": {
+    "title": "ZISO AI 投研报告",
+    "preview": "投研报告预览",
+    "certainty": "把握 {percent}%",
+    "summary": "摘要",
+    "decision": "投研决议",
+    "decisionLoading": "投研决议正在调阅中，生成图片时会自动带上当前摘要与策略结构。",
+    "reasoning": "推演过程",
+    "suggestion": "操作建议",
+    "scenario": "场景：{title}",
+    "trigger": "触发：",
+    "reason": "理由：",
+    "keyLevels": "关键点位",
+    "exportedAt": "导出于 {date}",
+    "share": "分享报告"
   }
 }

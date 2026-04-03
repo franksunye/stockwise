@@ -172,8 +172,14 @@ def _normalize_priority(val: Any, fallback: str) -> str:
     return p if p in _PRIORITY_RANK else fallback
 
 
-def _default_tactic(category: str, idx: int) -> Dict[str, Any]:
-    templates = {
+def _normalize_content_locale(content_locale: str | None) -> str:
+    loc = (content_locale or "cn").strip().lower()
+    return "en" if loc == "en" else "cn"
+
+
+# CN defaults must stay aligned with `frontend/src/messages/cn.json` brief.trigger/reason semantics.
+_DEFAULT_TACTIC_TEMPLATES: Dict[str, Dict[str, List[Dict[str, str]]]] = {
+    "cn": {
         "holding_profit": [
             {"priority": "P1", "action": "持仓观察", "trigger": "不跌破一防位", "reason": "趋势未被破坏，先守纪律。"},
             {"priority": "P2", "action": "分批止盈预案", "trigger": "接近一攻位且动能放缓", "reason": "锁定波段利润，避免冲高回落。"},
@@ -186,18 +192,67 @@ def _default_tactic(category: str, idx: int) -> Dict[str, Any]:
             {"priority": "P1", "action": "等待确认", "trigger": "回踩一防位企稳后再评估", "reason": "先等右侧信号，再考虑入场。"},
             {"priority": "P2", "action": "突破跟随预案", "trigger": "放量突破一攻位并站稳", "reason": "只做确定性，不做猜顶猜底。"},
         ],
-    }
+    },
+    "en": {
+        "holding_profit": [
+            {"priority": "P1", "action": "Hold & observe", "trigger": "Price stays above support", "reason": "Trend intact, maintain discipline."},
+            {"priority": "P2", "action": "Scaled take-profit plan", "trigger": "Near resistance with slowing momentum", "reason": "Lock in swing profit, avoid pullback."},
+        ],
+        "holding_loss": [
+            {"priority": "P1", "action": "Strict stop", "trigger": "Effective break below support", "reason": "Prioritize risk control, limit losses."},
+            {"priority": "P2", "action": "Reduce on rebound", "trigger": "Rebound toward resistance but no breakout", "reason": "Reduce exposure on a weak bounce."},
+        ],
+        "empty": [
+            {"priority": "P1", "action": "Wait for confirmation", "trigger": "Pullback holds at support, then reassess", "reason": "Wait for a right-side signal before entry."},
+            {"priority": "P2", "action": "Breakout follow-on plan", "trigger": "Volume breakout above resistance holds", "reason": "Trade only high conviction; avoid guessing extremes."},
+        ],
+    },
+}
+
+# When content_locale=en, remap exact CN boilerplate (defaults or model echo) to EN.
+_CN_TACTIC_BOILERPLATE_TO_EN: Dict[str, str] = {}
+for _cat, _rows in _DEFAULT_TACTIC_TEMPLATES["cn"].items():
+    _en_rows = _DEFAULT_TACTIC_TEMPLATES["en"][_cat]
+    for _i, _cn_row in enumerate(_rows):
+        _en_row = _en_rows[_i]
+        for _k in ("action", "trigger", "reason"):
+            _CN_TACTIC_BOILERPLATE_TO_EN[_cn_row[_k]] = _en_row[_k]
+
+
+def _default_tactic(category: str, idx: int, content_locale: str = "cn") -> Dict[str, Any]:
+    loc = _normalize_content_locale(content_locale)
+    templates = _DEFAULT_TACTIC_TEMPLATES[loc]
     base = templates.get(category, templates["empty"])[0 if idx <= 0 else 1].copy()
     for field in _TACTIC_PRICE_FIELDS:
         base[field] = None
     return base
 
 
-def _normalize_tactic_item(item: Any, category: str, idx: int) -> Dict[str, Any]:
-    if not isinstance(item, dict):
-        return _default_tactic(category, idx)
+def _apply_en_tactic_boilerplate_remap(tactics: Dict[str, Any]) -> None:
+    """Replace known Chinese default strings with English when output is EN locale."""
+    if not isinstance(tactics, dict):
+        return
+    for category in _TACTIC_BUCKETS:
+        items = tactics.get(category)
+        if not isinstance(items, list):
+            continue
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+            for key in ("action", "trigger", "reason"):
+                val = item.get(key)
+                if not isinstance(val, str):
+                    continue
+                mapped = _CN_TACTIC_BOILERPLATE_TO_EN.get(val.strip())
+                if mapped:
+                    item[key] = mapped
 
-    fallback = _default_tactic(category, idx)
+
+def _normalize_tactic_item(item: Any, category: str, idx: int, content_locale: str = "cn") -> Dict[str, Any]:
+    if not isinstance(item, dict):
+        return _default_tactic(category, idx, content_locale)
+
+    fallback = _default_tactic(category, idx, content_locale)
     out: Dict[str, Any] = {
         "priority": _normalize_priority(item.get("priority"), fallback["priority"]),
         "action": str(item.get("action") or fallback["action"]).strip(),
@@ -231,26 +286,37 @@ def _dedupe_tactics(items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     return deduped
 
 
-def _normalize_tactic_bucket(raw_items: Any, category: str, target_count: int = 2) -> List[Dict[str, Any]]:
+def _normalize_tactic_bucket(
+    raw_items: Any,
+    category: str,
+    target_count: int = 2,
+    content_locale: str = "cn",
+) -> List[Dict[str, Any]]:
     items = raw_items if isinstance(raw_items, list) else []
     normalized = [
-        _normalize_tactic_item(item, category, idx)
+        _normalize_tactic_item(item, category, idx, content_locale)
         for idx, item in enumerate(items)
     ]
     normalized.sort(key=lambda x: _PRIORITY_RANK.get(str(x.get("priority", "P3")).upper(), 99))
     normalized = _dedupe_tactics(normalized)
     normalized = normalized[:target_count]
     while len(normalized) < target_count:
-        normalized.append(_default_tactic(category, len(normalized)))
+        normalized.append(_default_tactic(category, len(normalized), content_locale))
     return normalized
 
 
-def _record_quality_metrics(raw_tactics: Dict[str, Any], normalized_tactics: Dict[str, Any]) -> None:
+def _record_quality_metrics(
+    raw_tactics: Dict[str, Any],
+    normalized_tactics: Dict[str, Any],
+    *,
+    content_locale: str = "cn",
+) -> None:
     if not isinstance(raw_tactics, dict):
         raw_tactics = {}
 
     compliant = True
     repairs = 0
+    broken_categories: List[str] = []
     for category in _TACTIC_BUCKETS:
         raw_list = raw_tactics.get(category)
         norm_list = normalized_tactics.get(category, [])
@@ -259,6 +325,7 @@ def _record_quality_metrics(raw_tactics: Dict[str, Any], normalized_tactics: Dic
         if not isinstance(raw_list, list) or len(raw_list) != 2:
             compliant = False
             repairs += 1
+            broken_categories.append(f"{category}(len={len(raw_list) if isinstance(raw_list, list) else 'n/a'})")
             continue
 
         # Contract: distinct action+trigger between 2 items.
@@ -267,6 +334,8 @@ def _record_quality_metrics(raw_tactics: Dict[str, Any], normalized_tactics: Dic
             if not isinstance(item, dict):
                 compliant = False
                 repairs += 1
+                if category not in broken_categories:
+                    broken_categories.append(f"{category}(invalid_item)")
                 break
             key = (
                 str(item.get("action", "")).strip().lower(),
@@ -276,11 +345,19 @@ def _record_quality_metrics(raw_tactics: Dict[str, Any], normalized_tactics: Dic
         if len(keys) == 2 and keys[0] == keys[1]:
             compliant = False
             repairs += 1
+            broken_categories.append(f"{category}(duplicate)")
 
         # Post state should be stable with 2 items.
         if len(norm_list) != 2:
             compliant = False
             repairs += 1
+
+    if not compliant and broken_categories:
+        logger.warning(
+            "[TACTICS_CONTRACT] Model output did not satisfy 2+2+2 tactics (locale=%s). Issues: %s — normalizer backfilled.",
+            (content_locale or "cn").strip().lower(),
+            ", ".join(broken_categories),
+        )
 
     with _QUALITY_LOCK:
         _QUALITY_STATS["total"] += 1
@@ -316,11 +393,14 @@ def _record_quality_metrics(raw_tactics: Dict[str, Any], normalized_tactics: Dic
                 _QUALITY_ALERT_THRESHOLD,
             )
 
-def normalize_ai_response(data: Dict[str, Any]) -> Dict[str, Any]:
+def normalize_ai_response(data: Dict[str, Any], *, content_locale: str = "cn") -> Dict[str, Any]:
     """
     Standardize the data format returned by LLM...
     """
     if not isinstance(data, dict): return {}
+
+    loc = _normalize_content_locale(content_locale)
+    is_en = loc == "en"
 
     # ... (前序信号/新闻处理保持不变) ...
 
@@ -406,13 +486,20 @@ def normalize_ai_response(data: Dict[str, Any]) -> Dict[str, Any]:
     # 3.1 Enforce tactics contract:
     # each scenario must be exactly 2 strategy items with stable fields.
     for category in _TACTIC_BUCKETS:
-        data["tactics"][category] = _normalize_tactic_bucket(data["tactics"].get(category), category, target_count=2)
+        data["tactics"][category] = _normalize_tactic_bucket(
+            data["tactics"].get(category),
+            category,
+            target_count=2,
+            content_locale=content_locale,
+        )
         for item in data["tactics"][category]:
             if "buy_zone_price" in item:
                 item["buy_zone_price"] = _semantic_normalize_price(item["buy_zone_price"], is_range=True)
             if "target_price" in item:
                 item["target_price"] = _semantic_normalize_price(item["target_price"], is_range=False)
-    _record_quality_metrics(raw_tactics_snapshot, data["tactics"])
+    if is_en:
+        _apply_en_tactic_boilerplate_remap(data["tactics"])
+    _record_quality_metrics(raw_tactics_snapshot, data["tactics"], content_locale=content_locale)
 
     # Remove legacy buckets from normalized output.
     # Keep compatibility for input parsing/migration, but avoid leaking deprecated fields downstream.

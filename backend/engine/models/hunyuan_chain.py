@@ -9,11 +9,13 @@ try:
     from backend.engine.chain.step_factory import StepFactory
     from backend.config import CHAIN_STRATEGIES
     from backend.engine.llm_client import LLMClient
+    from backend.engine.schema_normalizer import normalize_ai_response
 except ImportError:
     from engine.chain.runner import ChainRunner
     from engine.chain.step_factory import StepFactory
     from config import CHAIN_STRATEGIES
     from engine.llm_client import LLMClient
+    from engine.schema_normalizer import normalize_ai_response
 
 class HunyuanChainModel(BasePredictionModel):
     """
@@ -74,7 +76,7 @@ class HunyuanChainModel(BasePredictionModel):
             llm_client=self.client
         )
 
-    async def predict(self, symbol: str, date: str, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def predict(self, symbol: str, date: str, data: Dict[str, Any], locale: str = 'cn') -> Dict[str, Any]:
         """
         The entry point called by AnalysisRunner.
         Delegates completely to ChainRunner.
@@ -83,7 +85,7 @@ class HunyuanChainModel(BasePredictionModel):
             # Inject model_name into data for downstream steps to use
             data["model_name"] = self.model_id
             
-            result = await self.runner.run(symbol, date, data)
+            result = await self.runner.run(symbol, date, data, locale=locale)
             
             if not result:
                 raise ValueError("Chain finished but returned no result (Synthesis step failed?)")
@@ -135,6 +137,9 @@ class HunyuanChainModel(BasePredictionModel):
 
             # 4. Prompt version marker for chain models (distinct from b2 templates)
             result.setdefault("prompt_version", "chain.hunyuan-lite.v1")
+
+            # Tactics contract + EN locale defaults (parity with OpenAI/Gemini path)
+            result = normalize_ai_response(result, content_locale=locale)
             
             # 2. Add 'reasoning' for PredictionRunner (mapped to ai_reasoning column)
             # We store the FULL structured result as JSON string, 

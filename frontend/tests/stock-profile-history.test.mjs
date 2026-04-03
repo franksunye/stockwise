@@ -21,11 +21,12 @@ describe('stock profile history helpers', () => {
         const now = 1_000_000;
         const predictions = [{ symbol: '00700', target_date: '2026-03-26' }];
 
-        writeStockProfileHistoryCache('00700', predictions, now);
-        assert.deepEqual(readStockProfileHistoryCache('00700', now + 1), predictions);
+        writeStockProfileHistoryCache('00700', predictions, 'cn', now);
+        assert.deepEqual(readStockProfileHistoryCache('00700', 'cn', now + 1), predictions);
         assert.equal(
             readStockProfileHistoryCache(
                 '00700',
+                'cn',
                 now + STOCK_PROFILE_HISTORY_CACHE_TTL_MS
             ),
             null

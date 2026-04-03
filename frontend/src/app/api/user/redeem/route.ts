@@ -3,6 +3,8 @@ import { getDbClient } from '@/lib/db';
 import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
 import { requireUserSession } from '@/lib/user-session';
 
+const INVITATION_REDEEM_TIER = 'go';
+
 export async function POST(request: Request) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let db: any;
@@ -88,11 +90,11 @@ export async function POST(request: Request) {
             // Only proceed to update user if code update succeeded (Optimistic Lock passed)
             await client.execute({
                 sql: `INSERT INTO users (user_id, subscription_tier, subscription_expires_at, registration_type) 
-                      VALUES (?, 'pro', ?, 'anonymous') 
+                      VALUES (?, ?, ?, 'anonymous') 
                       ON CONFLICT(user_id) DO UPDATE SET 
-                      subscription_tier = 'pro', 
+                      subscription_tier = ?, 
                       subscription_expires_at = ?`,
-                args: [userId, newExpiryStr, newExpiryStr]
+                args: [userId, INVITATION_REDEEM_TIER, newExpiryStr, INVITATION_REDEEM_TIER, newExpiryStr]
             });
 
         } else {
@@ -107,11 +109,11 @@ export async function POST(request: Request) {
 
                 client.prepare(`
                 INSERT INTO users (user_id, subscription_tier, subscription_expires_at, registration_type) 
-                VALUES (?, 'pro', ?, 'anonymous') 
+                VALUES (?, ?, ?, 'anonymous') 
                 ON CONFLICT(user_id) DO UPDATE SET 
-                subscription_tier = 'pro', 
+                subscription_tier = ?, 
                 subscription_expires_at = ?
-                `).run(userId, newExpiryStr, newExpiryStr);
+                `).run(userId, INVITATION_REDEEM_TIER, newExpiryStr, INVITATION_REDEEM_TIER, newExpiryStr);
             });
 
             try {
@@ -127,7 +129,7 @@ export async function POST(request: Request) {
 
         return NextResponse.json({
             success: true,
-            tier: 'pro',
+            tier: INVITATION_REDEEM_TIER,
             expiresAt: newExpiryStr
         });
 

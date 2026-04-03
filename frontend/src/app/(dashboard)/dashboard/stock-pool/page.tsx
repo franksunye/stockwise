@@ -8,10 +8,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { getMarketScene } from '@/lib/date-utils';
 
 import { useStocks } from '@/context/StockContext';
-import { useDashboardAuth } from '@/context/DashboardAuthContext';
+import { useUserProfile } from '@/hooks/useUserProfile';
 import { getPredictionActionMeta } from '@/lib/layer1-ui';
 import type { AIPrediction } from '@/lib/types';
 import { writeDashboardNavIntentSymbol } from '@/lib/dashboard-symbol-navigation';
+import { useT } from '@/context/LocaleContext';
 
 interface StockSnapshot {
   symbol: string;
@@ -115,6 +116,7 @@ const StockItem = memo(({
 StockItem.displayName = 'StockItem';
 
 export default function StockPoolPage() {
+  const t = useT('dashboard');
   const { 
     stocks: globalStocks, 
     loadingPool, 
@@ -152,7 +154,7 @@ export default function StockPoolPage() {
   const scene = getMarketScene();
   const isPreMarket = scene === 'pre_market';
 
-  const { tier } = useDashboardAuth();
+  const { tier } = useUserProfile();
   const router = useRouter();
 
   useEffect(() => {
@@ -254,7 +256,10 @@ export default function StockPoolPage() {
         
         <div className="flex-1 text-center">
           <h1 className="text-xl font-black italic tracking-tighter text-white uppercase">
-            自选池 <span className="text-indigo-500 underline decoration-2 underline-offset-4" data-en="POOL">POOL</span>
+            {t('stockPool')}{' '}
+            <span className="text-indigo-500 underline decoration-2 underline-offset-4" data-en="POOL">
+              {t('stockPoolWordmark')}
+            </span>
           </h1>
         </div>
 
@@ -350,7 +355,9 @@ export default function StockPoolPage() {
         </AnimatePresence>
 
         <div className="space-y-4">
-          <h2 className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] px-2 mb-4">自选资产 ({stocks.length})</h2>
+          <h2 className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] px-2 mb-4">
+            {t('stockPoolAssetsHeading', { count: stocks.length })}
+          </h2>
           {loading && !stocks.length ? (
             [1, 2, 3].map(i => <div key={i} className="glass-card h-24 animate-pulse" />)
           ) : stocks.length === 0 ? (

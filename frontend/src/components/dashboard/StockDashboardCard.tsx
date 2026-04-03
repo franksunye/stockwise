@@ -12,6 +12,9 @@ import { formatModelName } from '@/lib/model-names';
 import { getPredictionActionMeta } from '@/lib/layer1-ui';
 import { getValidationWindowLabel, parseValidationData } from '@/lib/prediction-display';
 import { getStockDashboardCardSurface, getStockDashboardCardTitle } from '@/lib/stock-dashboard-card-surface';
+import { formatBriefActionLabel, normalizeLegacyTerms } from '@/lib/tactical-brief-surface';
+import { useT, useGlobalT } from '@/context/LocaleContext';
+import type { FullMessageKey, MessageKey } from '@/lib/i18n';
 
 interface StockDashboardCardProps {
   data: StockData;
@@ -19,7 +22,10 @@ interface StockDashboardCardProps {
 }
 
 export const StockDashboardCard = memo(function StockDashboardCard({ data, onShowTactics }: StockDashboardCardProps) {
-
+  const t = useT('dashboard');
+  const tBrief = useT('brief');
+  const tGlobal = useGlobalT();
+  const tCommon = useT('common');
 
   const marketType = getMarketFromSymbol(data.symbol);
 
@@ -65,10 +71,13 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
       : null;
   
   const userPosition = data.rule?.position === 'holding' ? 'holding' : 'empty';
-  const { tacticalData, summaryText, topTactic, pendingText } = useMemo(
+  const { tacticalData, topTactic } = useMemo(
     () => getStockDashboardCardSurface({ displayPrediction, position: userPosition }),
     [displayPrediction, userPosition]
   );
+
+  const summaryText = normalizeLegacyTerms(tacticalData?.summary || displayPrediction?.ai_reasoning || '');
+  const reasoningFallback = !displayPrediction ? tCommon('noData') : t('signal.pending');
 
   const actionMeta = useMemo(
     () => getPredictionActionMeta(displayPrediction),
@@ -82,7 +91,7 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
       </div>
       <div className="text-center">
         <h2 className="text-2xl font-black italic tracking-tighter text-white">{data.name}</h2>
-        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mt-1">核心数据同步中...</p>
+        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mt-1">{tCommon('loading')}</p>
       </div>
     </div>
   );
@@ -98,12 +107,14 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
 
   // 1. 智能标题文案：优先从实际数据推断，而非仅依赖交易日历
   // 这确保标题与内容一致
-  const mainTitle = getStockDashboardCardTitle({
+  const mainTitleInfo = getStockDashboardCardTitle({
     displayPrediction,
     todayStr,
     fallbackTitle: getPredictionTitle(scene, marketType),
     normalizeTargetDate,
   });
+
+  const mainTitle = tGlobal(mainTitleInfo.key as FullMessageKey, mainTitleInfo.params);
   
   return (
     // Layout Contract: one vertical feed page = one viewport.
@@ -116,13 +127,13 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
             {isDataStale ? (
               <>
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                <span className="text-[10px] font-bold text-amber-500/80 tracking-wider uppercase">{mainTitle} · 数据待同步</span>
+                <span className="text-[10px] font-bold text-amber-500/80 tracking-wider uppercase">{mainTitle} · {t('staleData')}</span>
               </>
             ) : !displayPrediction ? (
                // New: 针对全然无数据的新股
                <>
                  <span className="w-1.5 h-1.5 rounded-full bg-slate-500" />
-                 <span className="text-[10px] font-bold text-slate-500 tracking-wider uppercase">初始数据构建中</span>
+                 <span className="text-[10px] font-bold text-slate-500 tracking-wider uppercase">{t('initialData')}</span>
                </>
             ) : (
               <>
@@ -135,13 +146,13 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
           <h2 className="text-4xl font-black tracking-tighter" style={{ 
             color: actionMeta.color
           }}>
-            {actionMeta.headline}
+            {t(`signal.${actionMeta.headline}` as MessageKey<'dashboard'>)}
           </h2>
           <div className="flex items-center justify-center gap-3 text-[10px] font-bold text-slate-600">
             {displayPrediction ? (
-              <span className="flex items-center gap-1 uppercase tracking-widest"><Target className="w-3 h-3" /> 把握 {((displayPrediction?.confidence || 0) * 100).toFixed(0)}%</span>
+              <span className="flex items-center gap-1 uppercase tracking-widest"><Target className="w-3 h-3" /> {t('confidence')} {((displayPrediction?.confidence || 0) * 100).toFixed(0)}%</span>
             ) : (
-                <span className="flex items-center gap-1 uppercase tracking-widest italic">AI 引擎即将介入</span>
+                <span className="flex items-center gap-1 uppercase tracking-widest italic">{t('engineIntervening')}</span>
             )}
           </div>
         </section>
@@ -160,7 +171,7 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
                   <Zap className="w-2.5 h-2.5 text-indigo-400 fill-indigo-400/20" />
                 </div>
                 <h3 className="text-[10px] font-black text-slate-600 uppercase tracking-widest">
-                  要点速递 
+                  {t('reasoning')}
                   {displayPrediction?.model && (
                     <span className="ml-2 text-indigo-500/60 font-black italic">
                       · {formatModelName(displayPrediction.model)}
@@ -180,14 +191,20 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
                         {topTactic && <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 w-full overflow-hidden">
                           <span className="text-[10px] font-black bg-indigo-500 text-white px-1 py-0.5 rounded italic shrink-0">{topTactic.priority}</span>
                           <div className="flex items-center gap-1 min-w-0">
-                            <span className="text-[10px] font-bold text-indigo-400 shrink-0">{topTactic.action}:</span>
-                            <span className="text-xs text-slate-400 font-medium truncate">{topTactic.trigger}</span>
+                            <span className="text-[10px] font-bold text-indigo-400 shrink-0">
+                              {`${formatBriefActionLabel(topTactic.action, (slug) =>
+                                tBrief(`actions.${slug}` as MessageKey<'brief'>),
+                              )}:`}
+                            </span>
+                            <span className="text-xs text-slate-400 font-medium truncate">
+                              {topTactic.trigger.startsWith('trigger.') ? tBrief(topTactic.trigger as MessageKey<'brief'>) : normalizeLegacyTerms(topTactic.trigger)}
+                            </span>
                           </div>
                         </div>}
                       </>
                     );
                   } else {
-                    return <p className="text-sm leading-relaxed text-slate-400 font-medium italic pl-1 border-l-2 border-slate-500/20">&quot;{pendingText}&quot;</p>;
+                    return <p className="text-sm leading-relaxed text-slate-400 font-medium italic pl-1 border-l-2 border-slate-500/20">&quot;{reasoningFallback}&quot;</p>;
                   }
                 })()}
               </div>
@@ -207,7 +224,10 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
                   <>
                     <div className="relative group">
                       <span className="text-[9px] text-slate-600 font-black uppercase tracking-widest block mb-1 transition-colors group-hover:text-slate-400">
-                        {isMarketOpenSoon ? '今日成交价' : getClosePriceLabelFromData(scene, data.price.date, marketType)}
+                        {(() => {
+                          const labelInfo = isMarketOpenSoon ? { key: 'dashboard.date.todayFact' } : getClosePriceLabelFromData(scene, data.price.date, marketType);
+                          return tGlobal(labelInfo.key as FullMessageKey, labelInfo.params);
+                        })()}
                       </span>
                       {isMarketOpenSoon ? (
                         <div className="flex items-baseline gap-1.5 h-7">
@@ -230,7 +250,7 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
                         <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-full bg-white/5 ${
                           data.price.rsi > 70 ? 'text-rose-500' : data.price.rsi < 30 ? 'text-emerald-500' : 'text-slate-500'
                         }`}>
-                          {data.price.rsi.toFixed(0)} · {data.price.rsi > 70 ? '超买' : data.price.rsi < 30 ? '超卖' : '稳定'}
+                          {data.price.rsi.toFixed(0)} · {data.price.rsi > 70 ? t('rsi.overbought') : data.price.rsi < 30 ? t('rsi.oversold') : t('rsi.stable')}
                         </span>
                       </div>
                     )}
@@ -240,7 +260,7 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
                     {/* 周一盘前显示一条微弱的提示线 */}
                     {isMarketOpenSoon && (
                       <div className="mt-2 pt-2 border-t border-dashed border-white/5">
-                        <span className="text-[10px] text-slate-700 font-bold italic">等待开盘后更新市场事实</span>
+                        <span className="text-[10px] text-slate-700 font-bold italic">{t('date.waitingFact')}</span>
                       </div>
                     )}
                   </>
@@ -273,36 +293,39 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
                 return (
                   <>
                     <span className="text-[10px] text-slate-600 font-black uppercase tracking-widest absolute top-4 left-4">
-                      {getValidationLabelFromData(labelDate || '', marketType)}
+                      {(() => {
+                        const labelInfo = getValidationLabelFromData(labelDate || '', marketType);
+                        return tGlobal(labelInfo.key as FullMessageKey, labelInfo.params);
+                      })()}
                     </span>
                     
                     <div className="flex-1 flex flex-col items-center justify-center pt-4">
                       {!validationPrediction ? (
-                        <p className="text-xs font-bold text-slate-600 italic">历史验证还在累积中</p>
+                        <p className="text-xs font-bold text-slate-600 italic">{t('validation.accumulation')}</p>
                       ) : (
                         <>
                            {status === 'Correct' ? (
                              <div className="flex flex-col items-center gap-2">
                                <ShieldCheck size={28} className="text-emerald-500" />
-                               <span className="text-xs font-black text-emerald-500 tracking-wide">{windowLabel}通过</span>
+                               <span className="text-xs font-black text-emerald-500 tracking-wide">{t('validation.passed', { label: windowLabel })}</span>
                              </div>
                            ) : status === 'Verifying' ? (
                              <div className="flex flex-col items-center gap-2">
                                <Clock size={24} className="text-indigo-400 animate-pulse" />
                                <div className="flex flex-col items-center">
-                                 <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">{windowLabel}</span>
-                                 <span className="text-[9px] font-bold text-slate-500 italic">等待市场把这段走势走完</span>
+                                 <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">{windowLabel} {t('validation.verifying')}</span>
+                                 <span className="text-[9px] font-bold text-slate-500 italic">{t('validation.waitingFlow')}</span>
                                </div>
                              </div>
                            ) : status === 'Incorrect' ? (
                              <div className="flex flex-col items-center gap-2">
                                <div className="text-rose-500 text-2xl font-black leading-none">❌</div>
-                               <span className="text-xs font-black text-rose-500 tracking-wide">{windowLabel}偏离</span>
+                               <span className="text-xs font-black text-rose-500 tracking-wide">{t('validation.deviated', { label: windowLabel })}</span>
                              </div>
                            ) : (
                              <div className="flex flex-col items-center gap-2">
                                <Clock size={24} className="text-slate-700" />
-                               <span className="text-[10px] font-bold text-slate-500 italic">等待回看窗口</span>
+                               <span className="text-[10px] font-bold text-slate-500 italic">{t('validation.waiting')}</span>
                              </div>
                            )}
                         </>
@@ -315,7 +338,7 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
         </section>
 
         <div className={`flex flex-col items-center gap-1.5 pt-2 opacity-20 transition-opacity duration-300 ${data.history.length > 1 ? 'visible' : 'invisible'}`}>
-          <span className="text-[10px] font-black tracking-[0.2em] text-slate-500 uppercase">上划追溯历史轨迹</span>
+          <span className="text-[10px] font-black tracking-[0.2em] text-slate-500 uppercase">{t('traceHistory')}</span>
           <ChevronDown size={14} className="animate-bounce" />
         </div>
       </div>

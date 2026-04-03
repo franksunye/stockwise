@@ -178,7 +178,7 @@ function buildBatchStock(symbol, overrides = {}) {
 const BASE_STORAGE = {
     local: {
         ZISO_AUTH_CACHE_V1: buildAuthCache(),
-        stockwise_user_profile_v1: buildProfileCache(),
+        stockwise_user_profile_v2: buildProfileCache(),
         STOCKWISE_HAS_ONBOARDED: 'true',
         STOCKWISE_USER_ID: 'user_interaction_case',
         STOCKWISE_WATCHLIST_V2: JSON.stringify(WATCHLIST),

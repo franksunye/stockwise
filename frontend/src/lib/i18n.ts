@@ -137,7 +137,7 @@ function resolveKeyPath(obj: unknown, keyPath: string): string | undefined {
  * Interpolate {param} placeholders in a translated string.
  * e.g. interpolate('到期时间: {date}', { date: '2026-04-01' }) → '到期时间: 2026-04-01'
  */
-function interpolate(template: string, params?: Record<string, string | number>): string {
+function interpolate(template: string, params?: Record<string, string | number | boolean>): string {
   if (!params) return template;
   return template.replace(/\{(\w+)\}/g, (_, key: string) => {
     const value = params[key];
@@ -158,7 +158,7 @@ function interpolate(template: string, params?: Record<string, string | number>)
 export function createTranslator<NS extends MessageNamespace>(
   messages: MessageBundle,
   namespace: NS,
-): (key: MessageKey<NS>, params?: Record<string, string | number>) => string {
+): (key: MessageKey<NS>, params?: Record<string, string | number | boolean>) => string {
   const nsMessages = messages[namespace];
 
   return (key, params?) => {
@@ -185,7 +185,7 @@ export function createTranslator<NS extends MessageNamespace>(
  */
 export function createGlobalTranslator(
   messages: MessageBundle,
-): (key: FullMessageKey, params?: Record<string, string | number>) => string {
+): (key: FullMessageKey, params?: Record<string, string | number | boolean>) => string {
   return (key, params?) => {
     const raw = resolveKeyPath(messages, key as string);
     if (raw == null) {

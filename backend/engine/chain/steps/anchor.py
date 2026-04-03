@@ -10,8 +10,27 @@ class DataAnchorStep(BaseStep):
     """
     async def build_prompt(self, context: ChainContext) -> str:
         d = context.input_data
-        
+        locale = context.locale or "cn"
+
         profile = d.get('profile', {})
+        if locale == "en":
+            return self._build_prompt_en(d, context, profile)
+        return self._build_prompt_cn(d, context, profile)
+
+    def _format_volume(self, vol: float, locale: str) -> str:
+        if locale == "en":
+            if vol > 100_000_000:
+                return f"{vol / 100_000_000:.1f}B"
+            if vol > 10_000:
+                return f"{vol / 10_000:.1f}M"
+            return str(vol)
+        if vol > 100000000:
+            return f"{vol/100000000:.1f}亿"
+        elif vol > 10000:
+            return f"{vol/10000:.1f}万"
+        return str(vol)
+
+    def _build_prompt_cn(self, d: dict, context: ChainContext, profile: dict) -> str:
         prompt = f"""### 步骤1：基础锚定数据投喂
 请精准记录以下股票基础数据及近10日行情：
 
@@ -26,27 +45,19 @@ class DataAnchorStep(BaseStep):
 | 日期 | 收盘 | 涨跌幅 | 成交量 | 状态 |
 |---|---|---|---|---|
 """
-        # Append formatted price table
         prices = d.get('daily_prices', [])
-        # Sort by date asc (oldest first) so context flows naturally? 
-        # Actually usually recent is most important. Let's show chronological.
-        # Check input data format. Assuming list of dicts or tuples.
-        # Implementation assumes input_data['daily_prices'] is a list of dicts.
-        
-        # Take last 10 days
         recent_prices = prices[-10:] if prices else []
-        
+
         for p in recent_prices:
             date_str = p.get('date', '')
             close = f"{p.get('close', 0):.2f}"
             pct = p.get('change_percent', 0)
             pct_str = f"{pct:+.2f}%"
-            vol = self._format_volume(p.get('volume', 0))
-            
-            # Simple heuristic for 'Status' column to help weak models
+            vol = self._format_volume(p.get('volume', 0), "cn")
+
             status = "放量大涨" if pct > 3 and p.get('volume', 0) > 0 else \
                      "大跌" if pct < -3 else "震荡"
-            
+
             prompt += f"| {date_str} | {close} | {pct_str} | {vol} | {status} |\n"
 
         latest_date = recent_prices[-1].get('date', 'Unknown') if recent_prices else 'Unknown'
@@ -59,18 +70,55 @@ class DataAnchorStep(BaseStep):
 """
         return prompt
 
+    def _build_prompt_en(self, d: dict, context: ChainContext, profile: dict) -> str:
+        prompt = f"""### Step 1: Data anchoring
+Record the following baseline data and the last ~10 daily bars accurately.
+
+## 1. Profile
+- **{d.get('name', 'Unknown')}** ({context.symbol})
+- **As-of date**: {context.date}
+- **Industry**: {profile.get('industry', 'N/A')}
+- **Main business**: {profile.get('main_business', 'N/A')}
+- **Company description** (truncated): {profile.get('description', 'N/A')[:200]}...
+
+## 2. Price action (last 10 daily bars)
+| Date | Close | Chg % | Volume | Note |
+|---|---|---|---|---|
+"""
+        prices = d.get('daily_prices', [])
+        recent_prices = prices[-10:] if prices else []
+
+        for p in recent_prices:
+            date_str = p.get('date', '')
+            close = f"{p.get('close', 0):.2f}"
+            pct = p.get('change_percent', 0)
+            pct_str = f"{pct:+.2f}%"
+            vol = self._format_volume(p.get('volume', 0), "en")
+
+            if pct > 3 and p.get('volume', 0) > 0:
+                status = "Strong up + volume"
+            elif pct < -3:
+                status = "Large down day"
+            else:
+                status = "Chop / balance"
+
+            prompt += f"| {date_str} | {close} | {pct_str} | {vol} | {status} |\n"
+
+        latest_date = recent_prices[-1].get('date', 'Unknown') if recent_prices else 'Unknown'
+
+        prompt += f"""
+## Tasks
+1. **Snapshot**: Confirm the **latest session ({latest_date})** close and daily change.
+2. **Extremes**: Any day with a move beyond **±9%**? (Answer yes/no; if yes, list dates.)
+3. **Conclusion**: If the feed looks complete, reply with: `[Data Anchored] Complete — ready for technical analysis`.
+"""
+        return prompt
+
     async def parse_response(self, response: str, context: ChainContext):
         # Store full response as artifact
         context.artifacts["anchor"] = response
-        
+
         # Extract a short summary for context compression
         # We try to grab the first few lines or the conclusion
         summary = response[:300] + "..." if len(response) > 300 else response
         context.structured_memory["anchor_summary"] = summary
-
-    def _format_volume(self, vol: float) -> str:
-        if vol > 100000000:
-            return f"{vol/100000000:.1f}亿"
-        elif vol > 10000:
-            return f"{vol/10000:.1f}万"
-        return str(vol)

@@ -2,6 +2,7 @@
 
 import { Copy, Check, Mail } from 'lucide-react';
 import { useState } from 'react';
+import { useT } from '@/context/LocaleContext';
 
 interface Props {
   userId: string;
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export function IdentityPassport({ userId, onLinkEmail, emailLinked }: Props) {
+  const t = useT('user');
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -27,7 +29,7 @@ export function IdentityPassport({ userId, onLinkEmail, emailLinked }: Props) {
             
             {/* User ID Row */}
             <div>
-                <label className="text-[10px] font-bold text-slate-500 mb-1.5 block">用户 ID</label>
+                <label className="text-[10px] font-bold text-slate-500 mb-1.5 block">{t('idLabel')}</label>
                 <button 
                     onClick={handleCopy}
                     className="w-full flex items-center justify-between gap-3 bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 hover:border-white/10 transition-all rounded-xl px-4 py-3 group text-left"
@@ -43,7 +45,7 @@ export function IdentityPassport({ userId, onLinkEmail, emailLinked }: Props) {
 
             {/* Email Row */}
             <div>
-                <label className="text-[10px] font-bold text-slate-500 mb-1.5 block">绑定邮箱</label>
+                <label className="text-[10px] font-bold text-slate-500 mb-1.5 block">{t('emailLabel')}</label>
                 {emailLinked ? (
                      <div className="w-full py-3 px-4 rounded-xl bg-emerald-500/5 border border-emerald-500/10 flex items-center justify-between">
                         <div className="flex items-center gap-2.5">
@@ -51,7 +53,7 @@ export function IdentityPassport({ userId, onLinkEmail, emailLinked }: Props) {
                             <span className="text-xs font-medium text-slate-300">{emailLinked}</span>
                         </div>
                         <span className="text-[10px] font-bold text-emerald-500 flex items-center gap-1">
-                            <Check size={10} /> 已保护
+                            <Check size={10} /> {t('protected')}
                         </span>
                      </div>
                 ) : (
@@ -61,9 +63,9 @@ export function IdentityPassport({ userId, onLinkEmail, emailLinked }: Props) {
                     >
                         <div className="flex items-center gap-2.5">
                             <Mail size={14} className="text-indigo-400" />
-                            <span className="text-xs font-medium text-indigo-200">尚未绑定邮箱</span>
+                            <span className="text-xs font-medium text-indigo-200">{t('emailNotLinked')}</span>
                         </div>
-                        <span className="text-[10px] font-bold text-indigo-400">立即绑定 &rarr;</span>
+                        <span className="text-[10px] font-bold text-indigo-400">{t('linkNow')} &rarr;</span>
                     </button>
                 )}
             </div>

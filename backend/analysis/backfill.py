@@ -1,4 +1,4 @@
-﻿"""
+"""
 AI 分析回填模块
 支持历史数据的补充分析
 """
@@ -62,7 +62,8 @@ def run_ai_analysis_backfill(
     days: int = None,
     auto_fill: bool = False,
     model_filter: str = None,
-    force: bool = False
+    force: bool = False,
+    locale: str = 'cn'
 ):
     """
     AI 分析回填功能
@@ -133,7 +134,7 @@ def run_ai_analysis_backfill(
         for date_str in sorted(dates_with_stocks.keys()):
             stocks_to_fill = dates_with_stocks[date_str]
             logger.info(f"\n🧠 开始补充 {date_str}...")
-            success = _analyze_stocks_for_date(conn, stocks_to_fill, date_str, model_filter=model_filter, force=force)
+            success = _analyze_stocks_for_date(conn, stocks_to_fill, date_str, model_filter=model_filter, force=force, locale=locale)
             total_success += success
 
         conn.close()
@@ -209,8 +210,7 @@ def run_ai_analysis_backfill(
         logger.info(f"\n{'=' * 50}")
         logger.info(f"🗓️ 分析日期: {date_str}")
         logger.info(f"{'=' * 50}")
-
-        success = _analyze_stocks_for_date(conn, targets, date_str, model_filter=model_filter, force=force, tracker=tracker)
+        success = _analyze_stocks_for_date(conn, targets, date_str, model_filter=model_filter, force=force, tracker=tracker, locale=locale)
         total_success += success
 
     conn.close()
@@ -224,7 +224,7 @@ def run_ai_analysis_backfill(
     }
 
 
-def _analyze_stocks_for_date(conn, stocks: list, date_str: str, model_filter: str = None, force: bool = False, tracker=None) -> int:
+def _analyze_stocks_for_date(conn, stocks: list, date_str: str, model_filter: str = None, force: bool = False, tracker=None, locale: str = 'cn') -> int:
     """为指定日期分析一组股票，返回成功数量。"""
     success_count = 0
 
@@ -257,7 +257,7 @@ def _analyze_stocks_for_date(conn, stocks: list, date_str: str, model_filter: st
 
             logger.info(f"   >>> 分析 {stock} ({date_str})")
 
-            result = asyncio.run(runner.run_analysis(stock, date_str, data=None, force=force))
+            result = asyncio.run(runner.run_analysis(stock, date_str, data=None, force=force, locale=locale))
             if result:
                 success_count += 1
 

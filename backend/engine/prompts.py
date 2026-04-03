@@ -345,7 +345,7 @@ def fetch_ai_history_for_model(symbol: str, analysis_date: str, model_id: str = 
         if _conn:
             _conn.close()
 
-def prepare_stock_analysis_prompt(symbol: str, as_of_date: str = None, ctx: Dict[str, Any] = None):
+def prepare_stock_analysis_prompt(symbol: str, as_of_date: str = None, ctx: Dict[str, Any] = None, locale: str = "cn"):
     """
     准备用于 LLM 分析的系统提示词和用户输入数据
     (One-shot 模式专用) - 已迁移至 Jinja2 模板
@@ -365,7 +365,7 @@ def prepare_stock_analysis_prompt(symbol: str, as_of_date: str = None, ctx: Dict
     system_template_name, user_template_name = _resolve_stock_analysis_template_names()
 
     try:
-        system_prompt = render_template(system_template_name)
+        system_prompt = render_template(system_template_name, locale=locale)
     except Exception as e:
         print(f"System Template rendering failed: {e}")
         return None, f"System Template Error: {e}"
@@ -381,42 +381,54 @@ def prepare_stock_analysis_prompt(symbol: str, as_of_date: str = None, ctx: Dict
     # Trend
     if ma5 and ma10 and ma20:
         if ma5 > ma10 > ma20:
-            ma_alignment = f"MA5({ma5}) > MA10({ma10}) > MA20({ma20}) ✅ 短期多头"
+            if locale == 'en':
+                ma_alignment = f"MA5({ma5}) > MA10({ma10}) > MA20({ma20}) ✅ Short-term Bullish"
+            else:
+                ma_alignment = f"MA5({ma5}) > MA10({ma10}) > MA20({ma20}) ✅ 短期多头"
             trend_score = 2
         elif ma5 < ma10 < ma20:
-            ma_alignment = f"MA5({ma5}) < MA10({ma10}) < MA20({ma20}) ❌ 短期空头"
+            if locale == 'en':
+                ma_alignment = f"MA5({ma5}) < MA10({ma10}) < MA20({ma20}) ❌ Short-term Bearish"
+            else:
+                ma_alignment = f"MA5({ma5}) < MA10({ma10}) < MA20({ma20}) ❌ 短期空头"
             trend_score = -2
         else:
-            ma_alignment = "均线纠缠震荡"
+            ma_alignment = "Sideways/Consolidation" if locale == 'en' else "均线纠缠震荡"
             trend_score = 0
     else:
-        ma_alignment = "均线数据不足"
+        ma_alignment = "Incomplete MA data" if locale == 'en' else "均线数据不足"
         trend_score = 0
         
-    if close > ma5: price_pos_desc = "站上所有短期均线 ✅"
-    elif close > ma20: price_pos_desc = "回踩MA20支撑"
-    else: price_pos_desc = "跌破MA20支撑 ❌"
+    if close > ma5: 
+        price_pos_desc = "Above all short-term MAs ✅" if locale == 'en' else "站上所有短期均线 ✅"
+    elif close > ma20: 
+        price_pos_desc = "Backtesting MA20 Support" if locale == 'en' else "回踩MA20支撑"
+    else: 
+        price_pos_desc = "Below MA20 Support ❌" if locale == 'en' else "跌破MA20支撑 ❌"
     
-    mid_term_desc = f"MA60({ma60}) {'向上' if close > ma60 else '承压'}" if ma60 else "MA60 数据不足"
+    if locale == 'en':
+        mid_term_desc = f"MA60({ma60}) {'Upward' if close > ma60 else 'Under Pressure'}" if ma60 else "Incomplete MA60 data"
+    else:
+        mid_term_desc = f"MA60({ma60}) {'向上' if close > ma60 else '承压'}" if ma60 else "MA60 数据不足"
 
     # Momentum
     rsi = data.get('rsi', 50)
     if rsi > 70: 
-        rsi_desc = "超买 (Overbought)"
+        rsi_desc = "Overbought" if locale == 'en' else "超买 (Overbought)"
         rsi_score = -1
     elif rsi < 30: 
-        rsi_desc = "超卖 (Oversold)"
+        rsi_desc = "Oversold" if locale == 'en' else "超卖 (Oversold)"
         rsi_score = 1
     else: 
-        rsi_desc = "中性区间"
+        rsi_desc = "Neutral Zone" if locale == 'en' else "中性区间"
         rsi_score = 0
     
     k, d, j = data.get('kdj_k', 50), data.get('kdj_d', 50), data.get('kdj_j', 50)
     if k > d:
-        kdj_desc = "K>D 金叉向上"
+        kdj_desc = "K>D Golden Cross (Upward)" if locale == 'en' else "K>D 金叉向上"
         kdj_score = 1
     else:
-        kdj_desc = "K<D 死叉向下"
+        kdj_desc = "K<D Dead Cross (Downward)" if locale == 'en' else "K<D 死叉向下"
         kdj_score = -1
         
     macd = data.get('macd', 0)
@@ -465,16 +477,16 @@ def prepare_stock_analysis_prompt(symbol: str, as_of_date: str = None, ctx: Dict
     prev_hist = daily_history[-2].get('macd_hist', 0) if len(daily_history) >= 2 else 0
     
     if macd_hist > 0:
-        macd_desc = "金叉 (多头)"
+        macd_desc = "Golden Cross (Bullish)" if locale == 'en' else "金叉 (多头)"
         macd_score = 1
         if macd_hist < prev_hist: 
-            macd_desc += " ⚠️ 动能减弱"
+            macd_desc += (" ⚠️ Momentum weakening" if locale == 'en' else " ⚠️ 动能减弱")
             macd_score = 0 
     else:
-        macd_desc = "死叉 (空头)"
+        macd_desc = "Dead Cross (Bearish)" if locale == 'en' else "死叉 (空头)"
         macd_score = -1
         if macd_hist > prev_hist: 
-            macd_desc += " 💡 快线收敛中"
+            macd_desc += (" 💡 Convergence in progress" if locale == 'en' else " 💡 快线收敛中")
             macd_score = 0 
 
     # Position
@@ -483,27 +495,37 @@ def prepare_stock_analysis_prompt(symbol: str, as_of_date: str = None, ctx: Dict
     b_low = data.get('boll_lower', 0)
     
     boll_score = 0
-    boll_desc = "通道无效"
+    boll_desc = "Invalid band / missing Bollinger data" if locale == 'en' else "通道无效"
     if b_up and b_low and b_up > b_low:
         pct_b = (close - b_low) / (b_up - b_low) * 100
         if pct_b > 90:
-            boll_desc = f"{pct_b:.0f}% (触及上轨压力)"
+            boll_desc = f"{pct_b:.0f}% ({'Touching Upper Band Resistance' if locale == 'en' else '触及上轨压力'})"
             boll_score = -1 
         elif pct_b > 70:
-            boll_desc = f"{pct_b:.0f}% (强势区)"
+            boll_desc = f"{pct_b:.0f}% ({'Strong Zone' if locale == 'en' else '强势区'})"
             boll_score = 1 
         elif pct_b > 30:
-            boll_desc = f"{pct_b:.0f}% (中轨平衡区)"
+            boll_desc = f"{pct_b:.0f}% ({'Buffer/Middle Zone' if locale == 'en' else '中轨平衡区'})"
             boll_score = 0
         elif pct_b > 10:
-            boll_desc = f"{pct_b:.0f}% (弱势区)"
+            boll_desc = f"{pct_b:.0f}% ({'Weak Zone' if locale == 'en' else '弱势区'})"
             boll_score = -1
         else:
-            boll_desc = f"{pct_b:.0f}% (触及下轨支撑)"
+            boll_desc = f"{pct_b:.0f}% ({'Touching Lower Band Support' if locale == 'en' else '触及下轨支撑'})"
             boll_score = 1 
             
     total_score = trend_score + rsi_score + kdj_score + macd_score + boll_score
-    score_meaning = "强烈看多" if total_score >= 4 else ("偏多" if total_score > 0 else ("强烈看空" if total_score <= -4 else ("偏空" if total_score < 0 else "完全中性")))
+    if locale == 'en':
+        score_meaning_map = {
+            "Strongly Bullish": total_score >= 4,
+            "Bullish": total_score > 0,
+            "Strongly Bearish": total_score <= -4,
+            "Bearish": total_score < 0,
+            "Neutral": True
+        }
+        score_meaning = next(k for k, v in score_meaning_map.items() if v)
+    else:
+        score_meaning = "强烈看多" if total_score >= 4 else ("偏多" if total_score > 0 else ("强烈看空" if total_score <= -4 else ("偏空" if total_score < 0 else "完全中性")))
 
     tech_data = {
         "ma_alignment": ma_alignment,
@@ -549,50 +571,56 @@ def prepare_stock_analysis_prompt(symbol: str, as_of_date: str = None, ctx: Dict
 
     # 4. Context Instruction
     if as_of_date:
-        context_instruction = (
-            f"👉 **历史复盘模式**：本次分析基准日为 {data['date']}。"
-            "请仅基于该日及之前已提供的数据判断，不要引入之后的信息。"
-        )
+        if locale == 'en':
+            context_instruction = (
+                f"👉 **History Review Mode**: Analysis date is {data['date']}. "
+                "Judge based ONLY on data provided up to this date; do not include future information."
+            )
+        else:
+            context_instruction = (
+                f"👉 **历史复盘模式**：本次分析基准日为 {data['date']}。"
+                "请仅基于该日及之前已提供的数据判断，不要引入之后的信息。"
+            )
     else:
-        context_instruction = f"👉 **实时分析**：今天是 {data['date']}。请基于提供的数据判断。"
+        if locale == 'en':
+            context_instruction = f"👉 **Real-time Analysis**: Today is {data['date']}. Please judge based on provided data."
+        else:
+            context_instruction = f"👉 **实时分析**：今天是 {data['date']}。请基于提供的数据判断。"
+    
     layer1 = ctx.get("layer1") or {}
     layer1_status = str(layer1.get("status") or "")
     quant_model_guidance = ""
     if layer1_status and _should_inject_layer1_prompt_context():
         if layer1_status == "TriggeredLong":
             quant_model_guidance = (
+                "Quant model considers the entrance triggers are met." if locale == 'en' else
                 "量化模型判断当前已进入看多候选状态。"
-                "请将其视为规则侧观点，并结合价格行为与关键位独立判断。"
             )
         elif layer1_status == "RiskOff":
             quant_model_guidance = (
+                "Quant model is in defensive/contraction mode." if locale == 'en' else
                 "量化模型判断当前偏防守，这不等于走势中性。"
-                "请将其视为规则侧观点，并独立分析风险来源与是否存在分歧。"
             )
         elif layer1_status == "Watch":
             quant_model_guidance = (
+                "Quant model is in observation mode." if locale == 'en' else
                 "量化模型判断当前为观察态。"
-                "请将其视为规则侧观点，并独立分析还缺哪一步确认。"
             )
         elif layer1_status == "NoSetup":
             quant_model_guidance = (
+                "Quant model finds no clear setup." if locale == 'en' else
                 "量化模型判断当前无明确机会。"
-                "请将其视为规则侧观点，并独立分析是否确实缺少可执行 setup。"
-            )
-        elif layer1_status in {"Wait", "NoTrade", "Blocked"}:
-            quant_model_guidance = (
-                "量化模型判断当前偏等待/防守。"
-                "请将其视为规则侧观点，并独立分析其与价格行为是否一致。"
             )
         else:
             quant_model_guidance = (
-                "请将该状态视为规则侧结论输入。"
-                "你的职责是解释其含义，并独立给出分析模型的判断。"
+                f"Quant Status = {layer1_status}." if locale == 'en' else
+                f"量化模型结论: {layer1_status}。"
             )
-        context_instruction += (
-            f"\n👉 **量化模型结论**：当前量化状态={layer1_status}。"
-            f"{quant_model_guidance}"
-        )
+        
+        if locale == 'en':
+            context_instruction += f"\n👉 **Quant Model**: {layer1_status}. {quant_model_guidance} Analyze independently from price action."
+        else:
+            context_instruction += f"\n👉 **量化模型结论**：当前量化状态={layer1_status}。{quant_model_guidance}"
 
     # Get Version
     from backend.templating import get_template_version
@@ -600,26 +628,46 @@ def prepare_stock_analysis_prompt(symbol: str, as_of_date: str = None, ctx: Dict
 
     # Render User Prompt
     try:
+        _unknown_name = "Unknown name" if locale == 'en' else "未知股票"
+        _market_sync = (
+            "Market context syncing; focus on this symbol's data."
+            if locale == 'en'
+            else "数据同步中，请以此个股分析为主"
+        )
+        if locale == 'en':
+            _altitude_str = "Short (20d) {} | Mid (60d) {} | Long (250d) {}".format(
+                ctx.get("altitude_context", {}).get('short_term_20d', '-'),
+                ctx.get("altitude_context", {}).get('medium_term_60d', '-'),
+                ctx.get("altitude_context", {}).get('long_term_250d', '-'),
+            )
+        else:
+            _altitude_str = "短期(20d) {} | 中期(60d) {} | 长期(250d) {}".format(
+                ctx.get("altitude_context", {}).get('short_term_20d', '-'),
+                ctx.get("altitude_context", {}).get('medium_term_60d', '-'),
+                ctx.get("altitude_context", {}).get('long_term_250d', '-'),
+            )
+        _m0 = ctx["monthly_prices"][0] if ctx["monthly_prices"] else {}
+        _long_term = (
+            "Bullish structure vs monthly MA20" if data['close'] > (_m0.get('ma20') or 0) else "Bearish / corrective vs monthly MA20"
+        ) if locale == 'en' else (
+            "牛市" if data['close'] > (_m0.get('ma20') or 0) else "熊市/调整"
+        )
         user_prompt = render_template(user_template_name,
-            stock_name=ctx.get("name", "未知股票"),
+            stock_name=ctx.get("name", _unknown_name),
             symbol=symbol,
             date=data['date'],
-            market_context=ctx.get("market_context", "数据同步中，请以此个股分析为主"),
+            market_context=ctx.get("market_context", _market_sync),
             macro_context=ctx.get("macro_context") or {},
             market_flow_context=ctx.get("market_flow_context") or {},
             stock_flow_context=ctx.get("stock_flow_context") or {},
-            altitude_str="短期(20d) {} | 中期(60d) {} | 长期(250d) {}".format(
-                ctx.get("altitude_context", {}).get('short_term_20d', '-'),
-                ctx.get("altitude_context", {}).get('medium_term_60d', '-'),
-                ctx.get("altitude_context", {}).get('long_term_250d', '-')
-            ),
+            altitude_str=_altitude_str,
             profile=ctx["profile"],
             daily_history=ctx["daily_prices"][::-1],
             weekly_history=ctx["weekly_prices"][:8],
             weekly_stats=weekly_stats,
             monthly_history=ctx["monthly_prices"][:3],
             monthly_stats=monthly_stats,
-            long_term_trend="牛市" if data['close'] > (ctx["monthly_prices"][0]['ma20'] if ctx["monthly_prices"] else 0) else "熊市/调整",
+            long_term_trend=_long_term,
             ai_history=processed_ai_history,
             ai_accuracy=ctx.get("accuracy", {"total":0, "rate":0}),
             tech=tech_data,
@@ -628,6 +676,7 @@ def prepare_stock_analysis_prompt(symbol: str, as_of_date: str = None, ctx: Dict
             quant_model_status=layer1_status if _should_inject_layer1_prompt_context() else "",
             quant_model_guidance=quant_model_guidance,
             signal_to_cn_label=signal_to_cn_label,
+            locale=locale,
         )
     except Exception as e:
         print(f"User Template rendering failed: {e}")

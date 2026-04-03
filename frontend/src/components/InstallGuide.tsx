@@ -3,6 +3,8 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Download, Share, ExternalLink, Smartphone, Monitor } from 'lucide-react';
 import { useInstallPrompt } from '@/hooks/useInstallPrompt';
+import { useT } from '@/context/LocaleContext';
+import type { MessageKey } from '@/lib/i18n';
 
 /**
  * InstallGuide — 全局 PWA 安装引导组件
@@ -79,6 +81,7 @@ function GuideCard({
 
 // 1. WeChat Guide — Must exit to external browser
 function WeChatGuide({ onDismiss }: { onDismiss: () => void }) {
+  const t = useT('install');
   return (
     <GuideCard onDismiss={onDismiss}>
       <div className="flex items-start gap-3">
@@ -86,10 +89,9 @@ function WeChatGuide({ onDismiss }: { onDismiss: () => void }) {
           <ExternalLink className="w-5 h-5 text-emerald-400" />
         </div>
         <div className="flex-1 text-left">
-          <h4 className="text-sm font-black text-white mb-1">在浏览器中打开</h4>
+          <h4 className="text-sm font-black text-white mb-1">{t('guideTitle')}</h4>
           <p className="text-xs text-slate-400 leading-relaxed">
-            点击右上角 <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-white/10 text-white font-bold text-[10px]">⋯</span> 选择
-            <span className="text-white font-bold">&ldquo;在浏览器打开&rdquo;</span>，即可安装为独立 App。
+            {t('steps.clickDots')} <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-white/10 text-white font-bold text-[10px]">⋯</span> {t('steps.selectAdd')}
           </p>
         </div>
       </div>
@@ -97,7 +99,7 @@ function WeChatGuide({ onDismiss }: { onDismiss: () => void }) {
       <div className="mt-3 flex justify-end pr-2">
         <div className="flex items-center gap-1.5 text-[10px] text-emerald-400 font-bold uppercase tracking-wider animate-bounce">
           <span>↗</span>
-          <span>点击右上角</span>
+          <span>{t('steps.clickDots')}</span>
         </div>
       </div>
     </GuideCard>
@@ -106,6 +108,7 @@ function WeChatGuide({ onDismiss }: { onDismiss: () => void }) {
 
 // 2. iOS Safari Guide — Share → Add to Home Screen
 function IOSSafariGuide({ onDismiss }: { onDismiss: () => void }) {
+  const t = useT('install');
   return (
     <GuideCard onDismiss={onDismiss}>
       <div className="flex items-start gap-3">
@@ -113,19 +116,19 @@ function IOSSafariGuide({ onDismiss }: { onDismiss: () => void }) {
           <Smartphone className="w-5 h-5 text-blue-400" />
         </div>
         <div className="flex-1 text-left">
-          <h4 className="text-sm font-black text-white mb-1">添加到主屏幕</h4>
+          <h4 className="text-sm font-black text-white mb-1">{t('iosTitle')}</h4>
           <p className="text-xs text-slate-400 leading-relaxed">
-            获得全屏 App 体验，实时接收行情通知。
+            {t('iosDesc')}
           </p>
         </div>
       </div>
       <div className="mt-4 flex items-center gap-3">
         <Step number={1}>
-          点击底部 <Share className="inline w-3.5 h-3.5 text-blue-400 -mt-0.5" /> 分享按钮
+          {t('iosStep1')} <Share className="inline w-3.5 h-3.5 text-blue-400 -mt-0.5" />
         </Step>
         <div className="text-slate-600 text-xs">→</div>
         <Step number={2}>
-          选择 <span className="text-white font-bold">&ldquo;添加到主屏幕&rdquo;</span>
+          {t('iosStep2')}
         </Step>
       </div>
     </GuideCard>
@@ -142,6 +145,7 @@ function AndroidNativeGuide({
   onDismiss: () => void;
   canPrompt: boolean;
 }) {
+  const t = useT('install');
   return (
     <GuideCard onDismiss={onDismiss}>
       <div className="flex items-start gap-3">
@@ -149,9 +153,9 @@ function AndroidNativeGuide({
           <Download className="w-5 h-5 text-indigo-400" />
         </div>
         <div className="flex-1 text-left">
-          <h4 className="text-sm font-black text-white mb-1">安装 ZISO AI</h4>
+          <h4 className="text-sm font-black text-white mb-1">{t('androidTitle')}</h4>
           <p className="text-xs text-slate-400 leading-relaxed">
-            一键安装到桌面，全屏使用、实时通知、秒开体验。
+            {t('androidDesc')}
           </p>
         </div>
       </div>
@@ -161,7 +165,7 @@ function AndroidNativeGuide({
         className="mt-4 w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-[0.98] transition-all text-white text-sm font-black tracking-wide uppercase flex items-center justify-center gap-2 disabled:opacity-50"
       >
         <Download size={16} />
-        安装到桌面
+        {t('androidCta')}
       </button>
     </GuideCard>
   );
@@ -175,17 +179,18 @@ function AndroidManualGuide({
   cnBrowser: string | null;
   onDismiss: () => void;
 }) {
-  const brandNames: Record<string, string> = {
-    huawei: '华为浏览器',
-    xiaomi: '小米浏览器',
-    uc: 'UC 浏览器',
-    quark: '夸克浏览器',
-    qq: 'QQ 浏览器',
-    sogou: '搜狗浏览器',
-    baidu: '百度浏览器',
+  const t = useT('install');
+  const brandNames: Record<string, MessageKey<'install'>> = {
+    huawei: 'browsers.huawei',
+    xiaomi: 'browsers.xiaomi',
+    uc: 'browsers.uc',
+    quark: 'browsers.quark',
+    qq: 'browsers.qq',
+    sogou: 'browsers.sogou',
+    baidu: 'browsers.baidu',
   };
 
-  const browserName = cnBrowser ? brandNames[cnBrowser] || '当前浏览器' : '当前浏览器';
+  const browserName = cnBrowser ? t(brandNames[cnBrowser] || 'browsers.default') : t('browsers.default');
 
   // Brand-specific instructions
   const getInstructions = () => {
@@ -193,24 +198,24 @@ function AndroidManualGuide({
       case 'huawei':
         return (
           <>
-            <Step number={1}>点击底部菜单 <span className="text-white font-bold">⋯</span></Step>
-            <Step number={2}>选择 <span className="text-white font-bold">&ldquo;添加到桌面&rdquo;</span></Step>
-            <Step number={3}>若被拦截，前往 <span className="text-white font-bold">设置 → 应用 → 权限</span>，允许创建桌面快捷方式</Step>
+            <Step number={1}>{t('steps.clickDots')}</Step>
+            <Step number={2}>{t('steps.selectAdd')}</Step>
+            <Step number={3}>{t('steps.allowPermission')}</Step>
           </>
         );
       case 'xiaomi':
         return (
           <>
-            <Step number={1}>点击底部菜单 <span className="text-white font-bold">⋯</span></Step>
-            <Step number={2}>选择 <span className="text-white font-bold">&ldquo;添加到桌面&rdquo;</span></Step>
-            <Step number={3}>若提示权限，选择 <span className="text-white font-bold">&ldquo;允许&rdquo;</span></Step>
+            <Step number={1}>{t('steps.clickDots')}</Step>
+            <Step number={2}>{t('steps.selectAdd')}</Step>
+            <Step number={3}>{t('steps.allowXiaomi')}</Step>
           </>
         );
       default:
         return (
           <>
-            <Step number={1}>点击底部或右上角的 <span className="text-white font-bold">菜单</span></Step>
-            <Step number={2}>找到 <span className="text-white font-bold">&ldquo;添加到桌面&rdquo;</span> 或 <span className="text-white font-bold">&ldquo;添加快捷方式&rdquo;</span></Step>
+            <Step number={1}>{t('steps.clickMenu')}</Step>
+            <Step number={2}>{t('steps.selectAdd')}</Step>
           </>
         );
     }
@@ -223,9 +228,9 @@ function AndroidManualGuide({
           <Monitor className="w-5 h-5 text-amber-400" />
         </div>
         <div className="flex-1 text-left">
-          <h4 className="text-sm font-black text-white mb-1">添加到桌面</h4>
+          <h4 className="text-sm font-black text-white mb-1">{t('manualTitle')}</h4>
           <p className="text-xs text-slate-400 leading-relaxed">
-            检测到 <span className="text-amber-300 font-bold">{browserName}</span>，请手动添加：
+            {t('manualDetect', { browser: browserName })}
           </p>
         </div>
       </div>
@@ -234,7 +239,7 @@ function AndroidManualGuide({
       </div>
       <div className="mt-3 pt-3 border-t border-white/5">
         <p className="text-[10px] text-slate-600 text-left leading-relaxed">
-          💡 推荐使用 Chrome 浏览器打开 <span className="text-slate-400 font-bold">ziso.cc</span>，可一键安装为独立 App。
+          {t('manualHint')}
         </p>
       </div>
     </GuideCard>

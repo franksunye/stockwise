@@ -46,9 +46,9 @@ SAVE_PREDICTION_V2_QUERY = """
      token_usage_input, token_usage_output, execution_time_ms,
      is_primary, trace_id,
      layer1_status, layer1_score, layer1_trigger_hit, layer1_risk_off_hit, layer1_strategy_version, layer1_payload,
-     mode_id,
+     mode_id, content_locale,
      created_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now', '+8 hours'), datetime('now', '+8 hours'))
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now', '+8 hours'), datetime('now', '+8 hours'))
 """
 SAVE_PRODUCER_OUTCOME_LOG_QUERY = """
     INSERT OR REPLACE INTO producer_outcome_log
@@ -57,7 +57,15 @@ SAVE_PRODUCER_OUTCOME_LOG_QUERY = """
      run_id, version, created_at)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now', '+8 hours'))
 """
-CHECK_PREDICTION_V2_EXISTS_QUERY = "SELECT 1 FROM ai_predictions_v2 WHERE symbol = ? AND date = ? AND model_id = ? LIMIT 1"
+CHECK_PREDICTION_V2_EXISTS_QUERY = """
+    SELECT 1
+    FROM ai_predictions_v2
+    WHERE symbol = ?
+      AND date = ?
+      AND model_id = ?
+      AND COALESCE(content_locale, 'cn') = ?
+    LIMIT 1
+"""
 FETCH_PREDICTION_HISTORY_QUERY = "SELECT date, signal, confidence, ai_reasoning, validation_status, actual_change, model_id FROM ai_predictions_v2 WHERE symbol = ? AND {filter_sql} AND validation_status != 'Pending' AND date < ? ORDER BY date DESC LIMIT ?"
 FETCH_ACCURACY_STATS_QUERY = """
     SELECT COUNT(*) as total,

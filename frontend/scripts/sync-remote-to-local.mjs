@@ -24,7 +24,8 @@ const TURSO_DB_URL = process.env.TURSO_DB_URL;
 const TURSO_AUTH_TOKEN = process.env.TURSO_AUTH_TOKEN;
 const BATCH_SIZE = Number(process.env.LOCAL_DB_SYNC_BATCH_SIZE || '1000');
 const args = new Set(process.argv.slice(2));
-const isIncremental = args.has('--incremental');
+const isFullRefresh = args.has('--full');
+const isIncremental = !isFullRefresh;
 const isHelp = args.has('--help') || args.has('-h');
 
 const CURSOR_CANDIDATES = [
@@ -55,9 +56,9 @@ const CURSOR_CANDIDATES = [
 const SYNC_STATE_TABLE = '_local_sync_state';
 
 if (isHelp) {
-  console.log('用法: node scripts/sync-remote-to-local.mjs [--incremental]');
-  console.log('  默认: 全量重建本地 SQLite');
-  console.log('  --incremental: 增量同步并 upsert 到本地 SQLite');
+  console.log('用法: node scripts/sync-remote-to-local.mjs [--full]');
+  console.log('  默认: 增量同步并 upsert 到本地 SQLite');
+  console.log('  --full: 全量重建本地 SQLite');
   process.exit(0);
 }
 

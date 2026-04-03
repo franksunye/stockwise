@@ -16,9 +16,9 @@ import {
 import { formatStockSymbol } from '@/lib/date-utils';
 import dynamic from 'next/dynamic';
 import { useStocks } from '@/context/StockContext';
+import { useUserProfile } from '@/hooks/useUserProfile';
 import { useTikTokScroll } from '@/hooks/useTikTokScroll';
 
-import { useUserProfile } from '@/hooks/useUserProfile';
 import { getPredictionActionMeta } from '@/lib/layer1-ui';
 import {
   clearDashboardNavIntentSymbol,

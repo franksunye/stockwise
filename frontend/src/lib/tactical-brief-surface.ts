@@ -11,6 +11,10 @@ export interface PriceLevelNode {
     kind: 'resistance' | 'target' | 'current' | 'support' | 'stoploss' | 'breakout';
     description: string;
     action: string;
+    __i18n?: {
+        key: string;
+        ordinal?: string;
+    };
 }
 
 export interface ShortPressureState {
@@ -22,23 +26,43 @@ export interface ShortPressureState {
 
 const PRIORITY_ORDER: Record<string, number> = { P1: 1, P2: 2, P3: 3 };
 
+/** Leaf tokens that map 1:1 to `brief.actions.*` message keys (ASCII only). */
+const CANONICAL_ACTION_LEAVES = new Set(['observe', 'watch', 'defense', 'long', 'profit']);
+
+/** Normalized slugs that exist under `brief.actions` in messages. */
+export const BRIEF_ACTION_I18N_SLUGS = ['observe', 'defense', 'long', 'profit'] as const;
+export type BriefActionI18nSlug = (typeof BRIEF_ACTION_I18N_SLUGS)[number];
+
+export function isBriefActionI18nSlug(s: string): s is BriefActionI18nSlug {
+    return (BRIEF_ACTION_I18N_SLUGS as readonly string[]).includes(s);
+}
+
+/** Translate tactic `action` when it maps to `brief.actions.*`; otherwise show legacy / free-text (no fake i18n keys). */
+export function formatBriefActionLabel(action: string | undefined, translateAction: (slug: BriefActionI18nSlug) => string): string {
+    const slug = normalizeActionLabel(action);
+    if (isBriefActionI18nSlug(slug)) {
+        return translateAction(slug);
+    }
+    return normalizeLegacyTerms(slug);
+}
+
 const createPlaceholderTactic = (kind: ScenarioKind, idx: number): ScenarioTactic => {
     const templates: Record<ScenarioKind, ScenarioTactic[]> = {
         holding_profit: [
             {
                 priority: 'P1',
-                action: '执行观察',
-                trigger: '不跌破一防位',
-                reason: '趋势未被破坏，先守纪律。',
+                action: 'observe', // actions.observe
+                trigger: 'trigger.not_below_support_1',
+                reason: 'reason.discipline',
                 target_price: undefined,
                 stop_advance_price: undefined,
                 __placeholder: true,
             },
             {
                 priority: 'P2',
-                action: '执行落袋',
-                trigger: '接近一攻位且动能放缓',
-                reason: '锁定波段利润，避免冲高回落。',
+                action: 'profit', // actions.profit
+                trigger: 'trigger.near_resistance_1',
+                reason: 'reason.lock_profit',
                 target_price: undefined,
                 stop_advance_price: undefined,
                 __placeholder: true,
@@ -47,17 +71,17 @@ const createPlaceholderTactic = (kind: ScenarioKind, idx: number): ScenarioTacti
         holding_loss: [
             {
                 priority: 'P1',
-                action: '执行防守',
-                trigger: '有效跌破一防位',
-                reason: '优先控制回撤，避免亏损扩大。',
+                action: 'defense', // actions.defense
+                trigger: 'trigger.break_support_1',
+                reason: 'reason.control_drawdown',
                 stop_loss_price: undefined,
                 __placeholder: true,
             },
             {
                 priority: 'P2',
-                action: '执行防守',
-                trigger: '反抽压力位但未能突破',
-                reason: '弱势反弹先降风险敞口。',
+                action: 'defense',
+                trigger: 'trigger.rebound_resistance',
+                reason: 'reason.reduce_exposure',
                 stop_loss_price: undefined,
                 __placeholder: true,
             },
@@ -65,17 +89,17 @@ const createPlaceholderTactic = (kind: ScenarioKind, idx: number): ScenarioTacti
         empty: [
             {
                 priority: 'P1',
-                action: '执行观察',
-                trigger: '回踩一防位企稳后再评估',
-                reason: '先等右侧信号，再考虑入场。',
+                action: 'observe',
+                trigger: 'trigger.wait_support_stable',
+                reason: 'reason.right_side_signal',
                 buy_zone_price: undefined,
                 __placeholder: true,
             },
             {
                 priority: 'P2',
-                action: '执行交易',
-                trigger: '放量突破一攻位并站稳',
-                reason: '确认后再交易，避免假突破。',
+                action: 'long', // actions.long
+                trigger: 'trigger.breakout_confirmation',
+                reason: 'reason.confirm_before_entry',
                 buy_zone_price: undefined,
                 __placeholder: true,
             },
@@ -86,16 +110,39 @@ const createPlaceholderTactic = (kind: ScenarioKind, idx: number): ScenarioTacti
 };
 
 export function normalizeActionLabel(action: string | undefined): string {
-    if (!action) return '建议观察';
-    if (action.includes('观察')) return '建议观察';
-    if (action.includes('止损') || action.includes('减仓') || action.includes('防守')) return '建议防守';
-    if (action.includes('加仓') || action.includes('跟随') || action.includes('买')) return '建议看多';
-    if (action.includes('落袋') || action.includes('止盈') || action.includes('离场')) return '建议落袋';
-    return action;
+    if (!action) return 'observe';
+    const trimmed = action.trim();
+    const a = trimmed.toLowerCase();
+
+    // LLM sometimes echoes `brief.actions.<free text>`; only treat leaf as i18n slug if it is canonical.
+    if (a.startsWith('dashboard.actions.') || a.startsWith('brief.actions.')) {
+        const leaf = trimmed.split('.').pop()?.trim() ?? '';
+        const leafKey = leaf.toLowerCase();
+        if (leafKey && CANONICAL_ACTION_LEAVES.has(leafKey)) {
+            return leafKey === 'watch' ? 'observe' : leafKey;
+        }
+        if (leaf) {
+            return normalizeActionLabel(leaf);
+        }
+    }
+
+    if (a === 'observe' || a === 'watch') return 'observe';
+    if (a === 'defense') return 'defense';
+    if (a === 'long') return 'long';
+    if (a === 'profit') return 'profit';
+    if (a.includes('观察') || a.includes('观望') || a.includes('空仓')) return 'observe';
+    if (a.includes('observe') || a.includes('watch')) return 'observe';
+    if (a.includes('止损') || a.includes('减仓') || a.includes('防守') || a.includes('defense')) return 'defense';
+    if (a.includes('加仓') || a.includes('跟随') || a.includes('买入') || a.includes('long') || a.includes('交易')) return 'long';
+    if (a.includes('落袋') || a.includes('止盈') || a.includes('离场') || a.includes('profit')) return 'profit';
+    // Unmapped free text: show as-is (no fake i18n key); caller may pass through translate or legacy normalize.
+    return trimmed;
 }
 
 export function normalizeLegacyTerms(text: string): string {
     if (!text) return text;
+    // Note: These replacements are becoming less necessary as we move to i18n keys for LLM instructions too,
+    // but we keep them for legacy data points.
     return text
         .replace(/建议进场/g, '建议看多')
         .replace(/可进攻/g, '可交易')
@@ -113,9 +160,8 @@ export function getPriceNodes(data: TacticalData, currentPrice?: number): PriceL
 
     const add = (
         raw: number | string | number[] | undefined,
-        label: string,
+        key: string,
         kind: PriceLevelNode['kind'],
-        description: string,
         action: string,
     ) => {
         const list = Array.isArray(raw) ? raw : [raw];
@@ -125,45 +171,54 @@ export function getPriceNodes(data: TacticalData, currentPrice?: number): PriceL
         const prices = Array.from(new Map(parsed.map((value) => [value.toFixed(4), value])).values());
 
         prices.forEach((price, idx) => {
-            const cnOrd = ['第一', '第二', '第三'];
+            const ordinals = ['first', 'second', 'third'];
+            const ordinalKey = prices.length > 1 ? ordinals[idx] : undefined;
+            
             nodes.push({
                 id: `${kind}-${idx}-${price}`,
                 price,
-                label: prices.length > 1 ? `${cnOrd[idx]}${label}` : label,
+                // Label structure for i18n: { key, ordinal }
+                label: ordinalKey ? `ordinals.${ordinalKey}` : `levelLabels.${key}`, 
                 kind,
-                description,
-                action,
+                description: `levelDescriptions.${key}`,
+                action: normalizeActionLabel(action),
+                // Extra field for complex labels
+                __i18n: { 
+                  key, 
+                  ordinal: ordinalKey 
+                }
             });
         });
     };
 
     if (data?.key_levels?.strong_resistance) {
-        add(data.key_levels.strong_resistance, '强压力区', 'resistance', '核心供给区，多空博弈终点', '执行落袋');
+        add(data.key_levels.strong_resistance, 'resistance', 'resistance', 'profit');
     }
     if (data?.key_levels?.resistance || data?.key_levels?.immediate_resistance) {
-        add(data.key_levels.immediate_resistance || data.key_levels.resistance, '挑战位', 'target', '局部阶段目标，注意动能释放', '执行落袋');
+        add(data.key_levels.immediate_resistance || data.key_levels.resistance, 'target', 'target', 'profit');
     }
     if (data?.key_levels?.breakout_confirmation_level) {
-        add(data.key_levels.breakout_confirmation_level, '突破确认', 'breakout', '反转结构成立的关键锚点', '执行交易');
+        add(data.key_levels.breakout_confirmation_level, 'breakout', 'breakout', 'long');
     }
     if (currentPrice) {
         nodes.push({
             id: 'current',
             price: currentPrice,
-            label: '当前价',
+            label: 'levelLabels.current',
             kind: 'current',
-            description: '目前市场成交活跃点',
-            action: '执行观察',
+            description: 'levelDescriptions.current',
+            action: 'observe',
+            __i18n: { key: 'current' }
         });
     }
     if (data?.key_levels?.support || data?.key_levels?.immediate_support) {
-        add(data.key_levels.immediate_support || data.key_levels.support, '防守位', 'support', '多头防线，不破即维持强势', '执行防守');
+        add(data.key_levels.immediate_support || data.key_levels.support, 'support', 'support', 'defense');
     }
     if (data?.key_levels?.strong_support) {
-        add(data.key_levels.strong_support, '强支撑区', 'support', '底部核心支撑，中长期成本位', '执行交易');
+        add(data.key_levels.strong_support, 'strongSupport', 'support', 'long');
     }
     if (data?.key_levels?.stop_loss_reference || data?.key_levels?.stop_loss) {
-        add(data.key_levels.stop_loss_reference || data.key_levels.stop_loss, '止损参考', 'stoploss', '结构崩溃底线', '执行防守');
+        add(data.key_levels.stop_loss_reference || data.key_levels.stop_loss, 'stoploss', 'stoploss', 'defense');
     }
 
     return nodes
@@ -209,21 +264,21 @@ export function getShortPressureState(symbol: string, shortMetrics?: ShortMetric
             : null;
 
     if (!isHK) {
-        return { shortRatio, label: '--', color: 'text-slate-500', interpretation: '仅港股显示' };
+        return { shortRatio, label: 'shortInterpretations.onlyHK', color: 'text-slate-500', interpretation: 'shortInterpretations.onlyHK' };
     }
     if (shortRatio === null) {
-        return { shortRatio, label: '待同步', color: 'text-slate-500', interpretation: '港交所日度数据收盘后更新' };
+        return { shortRatio, label: 'staleDate', color: 'text-slate-500', interpretation: 'shortInterpretations.waitingData' };
     }
     if (shortRatio > 0.25) {
-        return { shortRatio, label: '极高', color: 'text-rose-500', interpretation: '空头压力极高，优先风险控制' };
+        return { shortRatio, label: 'shortLevels.extreme', color: 'text-rose-500', interpretation: 'shortInterpretations.extreme' };
     }
     if (shortRatio > 0.15) {
-        return { shortRatio, label: '高', color: 'text-rose-400', interpretation: '空头压力偏高，注意反弹质量' };
+        return { shortRatio, label: 'shortLevels.high', color: 'text-rose-400', interpretation: 'shortInterpretations.high' };
     }
     if (shortRatio >= 0.05) {
-        return { shortRatio, label: '中', color: 'text-amber-400', interpretation: '空头压力中性，保持观察' };
+        return { shortRatio, label: 'shortLevels.mid', color: 'text-amber-400', interpretation: 'shortInterpretations.mid' };
     }
-    return { shortRatio, label: '低', color: 'text-emerald-400', interpretation: '空头压力偏低，抛压有限' };
+    return { shortRatio, label: 'shortLevels.low', color: 'text-emerald-400', interpretation: 'shortInterpretations.low' };
 }
 
 export function getGeneralTactics(data: TacticalData): Tactic[] {

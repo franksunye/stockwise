@@ -37,7 +37,7 @@ class RuleAdapter(BasePredictionModel):
         }
         return profiles.get(setup_state, profiles["NoSetup"])
 
-    async def predict(self, symbol: str, date: str, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def predict(self, symbol: str, date: str, data: Dict[str, Any], locale: str = 'cn') -> Dict[str, Any]:
         """
         Rule Engine based on quant indicators.
         In the two-layer architecture, Layer-1 owns final direction authority.

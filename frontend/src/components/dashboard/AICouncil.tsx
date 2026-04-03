@@ -6,6 +6,8 @@ import useSWR from 'swr';
 import { AlertTriangle, RotateCw } from 'lucide-react';
 import Multiavatar from '@/components/Multiavatar';
 
+import { useLocale } from '@/context/LocaleContext';
+import { type PredictionContentLocale, appLocaleToPredictionContentLocale } from '@/lib/prediction-content-locale';
 import {
   buildCouncilCards,
   fetchAICouncilData,
@@ -34,26 +36,29 @@ async function fetchCouncilData([
   ,
   symbol,
   targetDate,
-]: readonly [string, string, string]): Promise<CouncilCachePayload> {
-  return fetchAICouncilData(symbol, targetDate);
+  predictionContentLocale,
+]: readonly [string, string, string, PredictionContentLocale]): Promise<CouncilCachePayload> {
+  return fetchAICouncilData(symbol, targetDate, predictionContentLocale);
 }
 
-export function preloadAICouncil(symbol: string, targetDate: string): void {
+export function preloadAICouncil(symbol: string, targetDate: string, predictionContentLocale: PredictionContentLocale): void {
   if (!symbol || !targetDate) return;
-  preload(['ai-council', symbol, targetDate] as const, fetchCouncilData);
+  preload(['ai-council', symbol, targetDate, predictionContentLocale] as const, fetchCouncilData);
 }
 
 export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
-  const snapshotKey = `${symbol}_${targetDate}`;
+  const { locale: appLocale } = useLocale();
+  const predictionLocale = appLocaleToPredictionContentLocale(appLocale);
+  const snapshotKey = `${symbol}_${targetDate}_${predictionLocale}`;
   const memoryPayload = getCouncilMemorySnapshot(snapshotKey);
   const sessionPayload = !memoryPayload && symbol && targetDate
-    ? readCouncilSessionSnapshot(symbol, targetDate)
+    ? readCouncilSessionSnapshot(symbol, targetDate, predictionLocale)
     : null;
   const fallbackPayload = memoryPayload || sessionPayload || undefined;
   const hasSessionSnapshot = !!sessionPayload;
 
   const swrKey = symbol && targetDate
-    ? getAICouncilSWRKey(symbol, targetDate)
+    ? getAICouncilSWRKey(symbol, targetDate, predictionLocale)
     : null;
   const isFreshMemory = memoryPayload
     ? Date.now() - memoryPayload.fetchedAt < CACHE_TTL
@@ -75,7 +80,7 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
     onSuccess: (nextPayload) => {
       setCouncilMemorySnapshot(snapshotKey, nextPayload);
       if (symbol && targetDate) {
-        writeCouncilSessionSnapshot(symbol, targetDate, nextPayload);
+        writeCouncilSessionSnapshot(symbol, targetDate, predictionLocale, nextPayload);
       }
     },
   });

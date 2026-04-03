@@ -76,7 +76,7 @@ const CASES = [
         storage: {
             local: {
                 ZISO_AUTH_CACHE_V1: buildAuthCache(),
-                stockwise_user_profile_v1: buildProfileCache(),
+                stockwise_user_profile_v2: buildProfileCache(),
                 STOCKWISE_HAS_ONBOARDED: 'true',
                 STOCKWISE_USER_ID: 'user_smoke_case',
                 stockwise_splash_ts: String(NOW),
@@ -98,7 +98,7 @@ const CASES = [
                 ZISO_AUTH_CACHE_V1: buildAuthCache({
                     timestamp: NOW - AUTH_CACHE_MAX_AGE_MS - 1000,
                 }),
-                stockwise_user_profile_v1: buildProfileCache({
+                stockwise_user_profile_v2: buildProfileCache({
                     hasOnboarded: false,
                 }),
                 STOCKWISE_USER_ID: 'user_smoke_case',
@@ -122,7 +122,7 @@ const CASES = [
         storage: {
             local: {
                 ZISO_AUTH_CACHE_V1: buildAuthCache(),
-                stockwise_user_profile_v1: buildProfileCache({
+                stockwise_user_profile_v2: buildProfileCache({
                     hasOnboarded: false,
                 }),
                 STOCKWISE_USER_ID: 'user_smoke_case',
@@ -141,7 +141,7 @@ const CASES = [
         name: 'free-user-hits-invite-wall',
         storage: {
             local: {
-                stockwise_user_profile_v1: buildProfileCache({
+                stockwise_user_profile_v2: buildProfileCache({
                     hasOnboarded: false,
                 }),
                 STOCKWISE_USER_ID: 'user_smoke_case',

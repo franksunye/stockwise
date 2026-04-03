@@ -8,6 +8,8 @@ import {
     type ModeCatalogItem,
     type UserTier,
 } from '@/lib/investment-mode';
+import { useT } from '@/context/LocaleContext';
+import type { MessageKey } from '@/lib/i18n';
 
 type PerformanceScope = 'universal' | 'pool';
 
@@ -51,15 +53,15 @@ interface CachedCardData {
 const CARD_CACHE_KEY = 'stockwise:investment-mode-card';
 const CARD_CACHE_TTL_MS = 10 * 60 * 1000;
 
-const SCOPE_META: Record<PerformanceScope, { title: string; subtitle: string; icon: typeof Sparkles }> = {
+const SCOPE_META: Record<PerformanceScope, { titleKey: MessageKey<'investment'>; subtitleKey: MessageKey<'investment'>; icon: typeof Sparkles }> = {
     universal: {
-        title: '通用表现',
-        subtitle: '看这个模式整体是否稳健',
+        titleKey: 'scope.universal.title',
+        subtitleKey: 'scope.universal.subtitle',
         icon: Sparkles,
     },
     pool: {
-        title: '自选表现',
-        subtitle: '看这个模式对你的自选股是否更合适',
+        titleKey: 'scope.pool.title',
+        subtitleKey: 'scope.pool.subtitle',
         icon: Radar,
     },
 };
@@ -75,7 +77,7 @@ async function fetchCardData(): Promise<{
     };
 
     if (!modeRes.ok) {
-        throw new Error(modeJson.error || '暂时无法加载投资模式');
+        throw new Error(modeJson.error || 'investment.errorLoading');
     }
 
     return {
@@ -150,10 +152,10 @@ function formatPercent(value: number | null, options?: { signed?: boolean }): st
     return scaled < 0 ? `-${text}` : text;
 }
 
-function formatUpdatedAt(value: string | null): string {
-    if (!value) return '默认模式';
+function formatUpdatedAt(value: string | null, defaultModeLabel: string): string {
+    if (!value) return defaultModeLabel;
     const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return '默认模式';
+    if (Number.isNaN(date.getTime())) return defaultModeLabel;
     return date.toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' });
 }
 
@@ -175,6 +177,7 @@ function SectionHeader({
 }
 
 export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
+    const t = useT('investment');
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [savingModeId, setSavingModeId] = useState<string | null>(null);
@@ -218,7 +221,7 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
             } catch (err) {
                 if (cancelled) return;
                 if (!cached) {
-                    setError(err instanceof Error ? err.message : '暂时无法加载投资模式');
+                    setError(err instanceof Error ? err.message : t('errorLoading'));
                 }
             } finally {
                 if (cancelled) return;
@@ -231,7 +234,7 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
         return () => {
             cancelled = true;
         };
-    }, [currentTier]);
+    }, [currentTier, t]);
 
     async function handleRefresh(options?: { keepNotice?: boolean }): Promise<void> {
         if (!options?.keepNotice) {
@@ -246,7 +249,7 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
             writeCachedCardData(currentTier, nextModeResponse, summaries);
         } catch (err) {
             if (!modeResponse) {
-                setError(err instanceof Error ? err.message : '暂时无法加载投资模式');
+                setError(err instanceof Error ? err.message : t('errorLoading'));
             }
         } finally {
             setRefreshing(false);
@@ -268,7 +271,7 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
                 mode: {
                     ...(modeResponse.mode || {}),
                     ...targetMode,
-                } as unknown as InvestmentModeDefinition,
+                } as InvestmentModeDefinition,
             });
         }
 
@@ -284,10 +287,10 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
             });
             const json = (await res.json().catch(() => ({}))) as { error?: string; note?: string };
             if (!res.ok) {
-                throw new Error(json.error || '切换失败，请稍后再试');
+                throw new Error(json.error || t('switchFail'));
             }
             // 3. 成功后设置提示语
-            setNotice(json.note || '已切换，后续新结论将按当前模式展示');
+            setNotice(json.note || t('switchSuccess'));
             
             // 4. 不阻塞当前函数执行，在后台静默刷新统计数据 (覆盖率/命中率等)
             // 保持 keepNotice 为 true 以免提示语被 handleRefresh 清除
@@ -295,7 +298,7 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
         } catch (err) {
             // 5. 发生错误则回滚 UI
             setModeResponse(previousModeResponse);
-            setError(err instanceof Error ? err.message : '切换失败，请稍后再试');
+            setError(err instanceof Error ? err.message : t('switchFail'));
         } finally {
             setSavingModeId(null);
         }
@@ -311,7 +314,7 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
         return (
             <div className="min-h-[320px] flex flex-col items-center justify-center gap-3 text-slate-500">
                 <Loader2 className="w-6 h-6 animate-spin" />
-                <p className="text-[11px] font-medium text-slate-500">正在同步你的模式与表现...</p>
+                <p className="text-[11px] font-medium text-slate-500">{t('syncing')}</p>
             </div>
         );
     }
@@ -319,8 +322,8 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
     if (error && !modeResponse) {
         return (
             <div className="rounded-[28px] border border-rose-500/20 bg-rose-500/5 px-5 py-5 text-left">
-                <p className="text-sm font-bold text-rose-200">暂时无法显示投资模式</p>
-                <p className="mt-2 text-[12px] leading-6 text-rose-200/75">{error || '请稍后重新进入此页。'}</p>
+                <p className="text-sm font-bold text-rose-200">{t('errorLoading')}</p>
+                <p className="mt-2 text-[12px] leading-6 text-rose-200/75">{error === 'investment.errorLoading' ? t('errorRetry') : error}</p>
             </div>
         );
     }
@@ -329,13 +332,13 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
         <div className="space-y-7 pb-12">
             <div className="flex items-start justify-between gap-4">
                 <div className="text-left">
-                    <p className="text-sm text-slate-400 leading-6">选择适合你的投资风格，并查看对应表现。</p>
+                    <p className="text-sm text-slate-400 leading-6">{t('subtitle')}</p>
                 </div>
                 <button
                     onClick={() => void handleRefresh()}
                     disabled={refreshing || !!savingModeId}
                     className="shrink-0 rounded-full border border-white/10 bg-white/[0.03] p-2.5 text-slate-400 transition-colors hover:text-white hover:border-white/20 hover:bg-white/[0.06] disabled:opacity-40"
-                    aria-label="刷新投资模式"
+                    aria-label={t('title')}
                 >
                     {refreshing ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
                 </button>
@@ -347,15 +350,15 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
                     <div className="absolute -left-10 bottom-0 h-24 w-24 rounded-full bg-sky-500/10 blur-3xl" />
                     <div className="relative flex items-start justify-between gap-4">
                         <div className="min-w-0 text-left">
-                            <p className="text-[10px] font-black uppercase tracking-[0.22em] text-indigo-300/80">当前模式</p>
+                            <p className="text-[10px] font-black uppercase tracking-[0.22em] text-indigo-300/80">{t('currentMode')}</p>
                             <div className="mt-3 flex items-center gap-2">
-                                <h3 className="text-3xl font-black italic tracking-tighter text-white uppercase">{currentMode?.name || '平衡'}</h3>
+                                <h3 className="text-3xl font-black italic tracking-tighter text-white uppercase">{currentMode?.name || t('selectionCurrent')}</h3>
                                 <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-bold text-slate-300 uppercase">
                                     {getRiskBandLabel(currentMode?.risk_band)}
                                 </span>
                             </div>
                             <p className="mt-3 max-w-[240px] text-sm leading-6 text-slate-300">
-                                {currentMode?.tagline || '覆盖与质量平衡，默认推荐'}
+                                {currentMode?.tagline || t('unlockProDesc')}
                             </p>
                         </div>
                         <span
@@ -371,12 +374,12 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
 
                     <div className="relative mt-6 grid grid-cols-2 gap-3">
                         <div className="rounded-xl border border-white/5 bg-white/[0.02] px-3 py-2.5 text-left">
-                            <p className="text-[9px] font-black uppercase tracking-[0.18em] text-slate-500">当前生效</p>
-                            <p className="mt-1 text-sm font-black italic text-white">{formatUpdatedAt(modeResponse?.updated_at || null)}</p>
+                            <p className="text-[9px] font-black uppercase tracking-[0.18em] text-slate-500">{t('modeStatus')}</p>
+                            <p className="mt-1 text-sm font-black italic text-white">{formatUpdatedAt(modeResponse?.updated_at || null, t('defaultMode'))}</p>
                         </div>
                         <div className="rounded-xl border border-white/5 bg-white/[0.02] px-3 py-2.5 text-left">
-                            <p className="text-[9px] font-black uppercase tracking-[0.18em] text-slate-500">模式范围</p>
-                            <p className="mt-1 text-sm font-black italic text-white">{currentTier === 'pro' ? '多模式' : '平衡模式'}</p>
+                            <p className="text-[9px] font-black uppercase tracking-[0.18em] text-slate-500">{t('modeRange')}</p>
+                            <p className="mt-1 text-sm font-black italic text-white">{currentTier === 'pro' ? t('multiModes') : t('balancedMode')}</p>
                         </div>
                     </div>
                 </div>
@@ -384,8 +387,8 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
 
             <section className="space-y-4">
                 <SectionHeader
-                    title="选择模式"
-                    detail={currentTier === 'free' ? '免费版默认使用平衡模式' : '切换只影响后续新结论'}
+                    title={t('selectionTitle')}
+                    detail={currentTier === 'free' ? t('freeDefault') : t('switchNote')}
                 />
                 <div className="grid grid-cols-2 gap-3">
                     {allowedModes.map((mode) => {
@@ -434,11 +437,11 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
                                             </span>
                                         ) : active ? (
                                             <span className="rounded-full border border-indigo-500/30 bg-indigo-500/20 px-3 py-1 text-[11px] font-black uppercase tracking-widest text-indigo-300">
-                                                当前
+                                                {t('selectionCurrent')}
                                             </span>
                                         ) : (
                                             <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-slate-300">
-                                                选择
+                                                {t('selectionSelect')}
                                             </span>
                                         )}
                                     </div>
@@ -450,7 +453,7 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
             </section>
 
             <section className="space-y-4">
-                <SectionHeader title="模式表现" />
+                <SectionHeader title={t('performanceTitle')} />
                 <div className="space-y-4">
                     {scopes.map((scope) => {
                         const summary = summaryByScope[scope];
@@ -468,8 +471,8 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
                                         <div className="flex items-center justify-between gap-3">
                                             <div className="flex items-center gap-3">
                                                 <div>
-                                                    <h4 className="text-sm font-black italic tracking-tighter text-white uppercase">{meta.title}</h4>
-                                                    <p className="mt-1 text-[11px] font-medium leading-relaxed text-slate-500">{meta.subtitle}</p>
+                                                    <h4 className="text-sm font-black italic tracking-tighter text-white uppercase">{t(meta.titleKey)}</h4>
+                                                    <p className="mt-1 text-[11px] font-medium leading-relaxed text-slate-500">{t(meta.subtitleKey)}</p>
                                                 </div>
                                                 <button
                                                     onClick={(e) => {
@@ -479,7 +482,7 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
                                                     className="inline-flex items-center gap-1 rounded-full border border-white/5 bg-white/5 px-2 py-0.5 text-[9px] font-bold text-slate-400 hover:bg-white/10 hover:text-slate-300 transition-colors"
                                                 >
                                                     {showAdvancedByScope[scope] ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-                                                    详情
+                                                    {t('advancedDetails')}
                                                 </button>
                                             </div>
                                             <span className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">30D</span>
@@ -490,19 +493,19 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
                                                 <div className="text-sm font-black italic tracking-tighter text-white">
                                                     {formatPercent(summary?.metrics?.coverage ?? null)}
                                                 </div>
-                                                <div className="mt-1 text-[9px] font-bold uppercase tracking-widest text-slate-500">出手率</div>
+                                                <div className="mt-1 text-[9px] font-bold uppercase tracking-widest text-slate-500">{t('metrics.coverage')}</div>
                                             </div>
                                             <div className="rounded-xl border border-white/5 bg-black/40 px-3 py-3 text-center">
                                                 <div className="text-sm font-black italic tracking-tighter text-emerald-400">
                                                     {formatPercent(summary?.metrics?.hit_rate ?? null)}
                                                 </div>
-                                                <div className="mt-1 text-[9px] font-bold uppercase tracking-widest text-slate-500">通过率</div>
+                                                <div className="mt-1 text-[9px] font-bold uppercase tracking-widest text-slate-500">{t('metrics.hitRate')}</div>
                                             </div>
                                             <div className="rounded-xl border border-white/5 bg-black/40 px-3 py-3 text-center">
                                                 <div className={`text-sm font-black italic tracking-tighter ${insufficient ? 'text-slate-600' : 'text-rose-500'}`}>
                                                     {formatPercent(summary?.metrics?.max_drawdown ?? null, { signed: true })}
                                                 </div>
-                                                <div className="mt-1 text-[9px] font-bold uppercase tracking-widest text-slate-500">最大回撤</div>
+                                                <div className="mt-1 text-[9px] font-bold uppercase tracking-widest text-slate-500">{t('metrics.drawdown')}</div>
                                             </div>
                                         </div>
 
@@ -512,19 +515,19 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
                                                     <div className="text-[11px] font-bold text-slate-300">
                                                         {summary?.metrics?.sample_size ?? '--'}
                                                     </div>
-                                                    <div className="mt-0.5 text-[8px] font-bold uppercase tracking-widest text-slate-600">实测样本</div>
+                                                    <div className="mt-0.5 text-[8px] font-bold uppercase tracking-widest text-slate-600">{t('metrics.sampleSize')}</div>
                                                 </div>
                                                 <div className="rounded-xl border border-white/5 bg-black/20 px-3 py-2 text-center">
                                                     <div className="text-[11px] font-bold text-slate-300">
                                                         {summary?.metrics?.payoff_ratio != null ? summary.metrics.payoff_ratio.toFixed(2) : '--'}
                                                     </div>
-                                                    <div className="mt-0.5 text-[8px] font-bold uppercase tracking-widest text-slate-600">风报比</div>
+                                                    <div className="mt-0.5 text-[8px] font-bold uppercase tracking-widest text-slate-600">{t('metrics.payoffRatio')}</div>
                                                 </div>
                                                 <div className="rounded-xl border border-white/5 bg-black/20 px-3 py-2 text-center">
                                                     <div className="text-[11px] font-bold text-slate-300">
                                                         {summary?.metrics?.stability_score != null ? summary.metrics.stability_score.toFixed(1) : '--'}
                                                     </div>
-                                                    <div className="mt-0.5 text-[8px] font-bold uppercase tracking-widest text-slate-600">稳定分</div>
+                                                    <div className="mt-0.5 text-[8px] font-bold uppercase tracking-widest text-slate-600">{t('metrics.stability')}</div>
                                                 </div>
                                             </div>
                                         )}
@@ -550,22 +553,22 @@ export function InvestmentModeCard({ currentTier, onUpgrade }: Props) {
                 <div className="rounded-[24px] border border-amber-500/20 bg-amber-500/[0.03] p-5 text-left">
                     <div className="flex items-center gap-2 mb-2.5">
                         <Crown className="w-4 h-4 text-amber-400" />
-                        <p className="text-sm font-black italic tracking-tighter text-amber-100 uppercase">解锁更多模式与自选整体表现</p>
+                        <p className="text-sm font-black italic tracking-tighter text-amber-100 uppercase">{t('unlockProTitle')}</p>
                     </div>
                     <p className="text-[11px] leading-relaxed text-slate-400 font-medium">
-                        当前默认使用平衡模式，并可查看对应的通用表现。升级 Pro 后，可按自己的投资风格切换更多模式，并查看自选表现。
+                        {t('unlockProDesc')}
                     </p>
                     <button
                         type="button"
                         onClick={onUpgrade}
                         className="mt-4 inline-flex items-center rounded-xl bg-amber-500/10 border border-amber-500/20 px-4 py-2 text-xs font-black italic uppercase tracking-wider text-amber-300 transition-all hover:bg-amber-500/20"
                     >
-                        查看 Pro 权益
+                        {t('viewProBenefits')}
                     </button>
                 </div>
             ) : (
                 <p className="text-[10px] font-bold uppercase tracking-wide leading-6 text-slate-500/80 text-center border border-white/5 bg-white/[0.02] rounded-xl py-3 px-4">
-                    模式切换只影响后续新结论，历史记录保持不变。
+                    {t('historyNote')}
                 </p>
             )}
         </div>

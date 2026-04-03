@@ -11,6 +11,7 @@ class ChainContext:
     symbol: str
     date: str
     input_data: Dict[str, Any]
+    locale: str = "cn"
     
     # --- Conversation State ---
     # raw_messages: Complete debug history

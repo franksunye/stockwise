@@ -81,7 +81,7 @@ class OpenAIAdapter(BasePredictionModel):
             timeout=timeout
         )
         
-    async def predict(self, symbol: str, date: str, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def predict(self, symbol: str, date: str, data: Dict[str, Any], locale: str = 'cn') -> Dict[str, Any]:
         if not self.api_key:
             logger.warning(f"Skipping {self.model_id}: Missing API Key ({self.api_key_env})")
             return None
@@ -90,7 +90,7 @@ class OpenAIAdapter(BasePredictionModel):
         try:
              from ..prompts import prepare_stock_analysis_prompt
              # Now returns system_prompt, user_prompt, version
-             prompt_result = prepare_stock_analysis_prompt(symbol, date, ctx=data)
+             prompt_result = prepare_stock_analysis_prompt(symbol, date, ctx=data, locale=locale)
              
              if len(prompt_result) == 3:
                  system_prompt, user_prompt, prompt_version = prompt_result
@@ -228,7 +228,7 @@ class OpenAIAdapter(BasePredictionModel):
             # Normalize and Return
             end_time = time.time()
             execution_time = int((end_time - start_time) * 1000)
-            parsed = normalize_ai_response(parsed)
+            parsed = normalize_ai_response(parsed, content_locale=locale)
             key_levels = parsed.get("key_levels", {})
             clean_reasoning = json.dumps(parsed, ensure_ascii=False)
             
@@ -248,7 +248,7 @@ class OpenAIAdapter(BasePredictionModel):
         return self._error_result(f"Failed after {max_retries + 1} attempts. Last Error: {last_error}")
         
         # Normalize schema (Anti-Corruption Layer)
-        parsed = normalize_ai_response(parsed)
+        parsed = normalize_ai_response(parsed, content_locale=locale)
         
         # Construct result compatible with Runner
         key_levels = parsed.get("key_levels", {})

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 import { getDbClient } from '@/lib/db';
+import { parsePredictionContentLocaleParam } from '@/lib/prediction-content-locale';
 
 const SAFE_LLM_SIGNAL_SQL = `
     COALESCE(
@@ -20,6 +21,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const symbol = searchParams.get('symbol');
     const history = searchParams.get('history');
+    const predictionContentLocale = parsePredictionContentLocaleParam(searchParams);
 
     try {
         const client = getDbClient();
@@ -69,15 +71,16 @@ export async function GET(request: Request) {
                                    'close', json_extract(p.layer1_payload, '$.close'),
                                    'change_percent', json_extract(p.layer1_payload, '$.change_percent')
                                ) AS layer1_payload,
-                               d.close as close_price, m.display_name as model
+                               d.close as close_price, m.display_name as model,
+                               COALESCE(p.content_locale, 'cn') AS content_locale
                         FROM ai_predictions_v2 p
                         LEFT JOIN daily_prices d ON p.symbol = d.symbol AND p.date = d.date
                         LEFT JOIN prediction_models m ON p.model_id = m.model_id
-                        WHERE p.symbol = ? AND p.is_primary = 1
+                        WHERE p.symbol = ? AND p.is_primary = 1 AND COALESCE(p.content_locale, 'cn') = ?
                         ORDER BY p.date DESC 
                         LIMIT 2
                     `,
-                    args: [symbol]
+                    args: [symbol, predictionContentLocale]
                 });
                 row = rsPrice.rows[0];
                 latestPrediction = rsPred.rows[0];
@@ -94,14 +97,15 @@ export async function GET(request: Request) {
                                'close', json_extract(p.layer1_payload, '$.close'),
                                'change_percent', json_extract(p.layer1_payload, '$.change_percent')
                            ) AS layer1_payload,
-                           d.close as close_price, m.display_name as model
+                           d.close as close_price, m.display_name as model,
+                           COALESCE(p.content_locale, 'cn') AS content_locale
                     FROM ai_predictions_v2 p
                     LEFT JOIN daily_prices d ON p.symbol = d.symbol AND p.date = d.date
                     LEFT JOIN prediction_models m ON p.model_id = m.model_id
-                    WHERE p.symbol = ? AND p.is_primary = 1
+                    WHERE p.symbol = ? AND p.is_primary = 1 AND COALESCE(p.content_locale, 'cn') = ?
                     ORDER BY p.date DESC 
                     LIMIT 2
-                `).all(symbol) as Record<string, unknown>[];
+                `).all(symbol, predictionContentLocale) as Record<string, unknown>[];
                 latestPrediction = predictions[0];
                 prevPrediction = predictions[1];
             }

@@ -13,6 +13,13 @@ import { useEffect } from "react";
  * 注册时机策略：
  * - Desktop/Chrome: 使用 requestIdleCallback 避免阻塞首屏
  * - iOS Safari: load 事件后 100ms（iOS 不支持 requestIdleCallback）
+ *
+ * ── 本地开发（next dev）特别说明 — 不影响线上 ──
+ * 仅当同时满足：hostname 为 localhost 或 127.0.0.1，且 NODE_ENV === 'development' 时，
+ * 会先注销本来源下已有 SW 并清空 Cache Storage，然后直接 return，不再注册 /sw.js。
+ * 原因：`public/sw.js` 对 /_next/static 使用 CacheFirst，在不停改代码的 next dev 下极易命中旧 chunk，
+ * 表现为偶发旧逻辑（例如已废弃的 localStorage 键）复活；卸载 SW 可避免误判为业务代码回归。
+ * 线上（如 Vercel：NODE_ENV=production、域名为正式域名）不满足上述条件，仍走下方完整注册与更新逻辑，行为与改动前一致。
  */
 export function ServiceWorkerRegistrar() {
   useEffect(() => {
@@ -25,6 +32,23 @@ export function ServiceWorkerRegistrar() {
 
     const register = async () => {
       try {
+        const host = window.location.hostname;
+        const isLocalDevHost = host === "localhost" || host === "127.0.0.1";
+        // 必须「本机环回 + development」同时成立，才卸载 SW；线上 production 永远不会进此分支。
+        if (isLocalDevHost && process.env.NODE_ENV === "development") {
+          // 若用户曾在 localhost 上注册过 SW，浏览器会持续用 Cache Storage 里的旧 /_next/static，
+          // 与当前磁盘上的源码不一致 → 强刷也可能跑到旧包（例：已废弃的 stockwise_user_profile_v1）。
+          const regs = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(regs.map((r) => r.unregister()));
+          if ("caches" in window) {
+            const keys = await caches.keys();
+            await Promise.all(keys.map((k) => caches.delete(k)));
+          }
+          console.info("[SW] Local dev: unregistered service worker(s) and cleared Cache Storage.");
+          return;
+        }
+
+        // 线上与其它环境：照常注册 PWA Service Worker（见文件头注释）。
         const registration = await navigator.serviceWorker.register("/sw.js");
         console.log("[SW] Registered:", registration.scope);
 

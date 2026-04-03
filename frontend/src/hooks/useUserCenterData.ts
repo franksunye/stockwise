@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { useGlobalT, useLocale } from '@/context/LocaleContext';
 import { getCurrentUser } from '@/lib/user';
 import {
     isPushSupported,
@@ -25,6 +26,8 @@ type UseUserCenterDataArgs = {
 };
 
 export function useUserCenterData({ isOpen, refreshProfile }: UseUserCenterDataArgs) {
+    const tGlobal = useGlobalT();
+    const { locale } = useLocale();
     const [isSubscribed, setIsSubscribed] = useState(false);
     const [pushSupported, setPushSupported] = useState(false);
     const [isSubscribing, setIsSubscribing] = useState(false);
@@ -108,12 +111,12 @@ export function useUserCenterData({ isOpen, refreshProfile }: UseUserCenterDataA
         try {
             const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
             if (!vapidKey) {
-                return { success: false, message: 'VAPID Key 未配置' };
+                return { success: false, message: tGlobal('user.push.vapidMissing') };
             }
 
             const registration = await registerServiceWorker();
             if (!registration) {
-                return { success: false, message: 'Service Worker 注册失败' };
+                return { success: false, message: tGlobal('user.push.swRegisterFailed') };
             }
 
             let permission = Notification.permission;
@@ -121,7 +124,7 @@ export function useUserCenterData({ isOpen, refreshProfile }: UseUserCenterDataA
                 permission = await Notification.requestPermission();
             }
             if (permission !== 'granted') {
-                return { success: false, message: '请允许通知权限' };
+                return { success: false, message: tGlobal('user.push.permissionDenied') };
             }
 
             const swRegistration = await navigator.serviceWorker.ready;
@@ -131,7 +134,7 @@ export function useUserCenterData({ isOpen, refreshProfile }: UseUserCenterDataA
             }
 
             if (!subscription) {
-                return { success: false, message: '无法获取推送权限' };
+                return { success: false, message: tGlobal('user.push.noSubscription') };
             }
 
             const response = await fetch('/api/notifications/subscribe', {
@@ -142,15 +145,20 @@ export function useUserCenterData({ isOpen, refreshProfile }: UseUserCenterDataA
 
             if (!response.ok) {
                 const data = await response.json().catch(() => ({}));
-                return { success: false, message: `保存失败: ${data.error || response.status}` };
+                return {
+                    success: false,
+                    message: tGlobal('user.push.saveFailed', {
+                        detail: String((data as { error?: string }).error || response.status),
+                    }),
+                };
             }
 
             setIsSubscribed(true);
             await loadNotificationSettings();
-            return { success: true, message: '通知开启成功' };
+            return { success: true, message: tGlobal('user.push.success') };
         } catch (error) {
             console.error(error);
-            return { success: false, message: '开启失败，请重试' };
+            return { success: false, message: tGlobal('user.push.enableFailed') };
         } finally {
             setIsSubscribing(false);
         }
@@ -185,8 +193,13 @@ export function useUserCenterData({ isOpen, refreshProfile }: UseUserCenterDataA
         try {
             const registration = await navigator.serviceWorker.ready;
             if (!registration) return false;
-            await registration.showNotification('🔔 测试通知 - ZISO AI', {
-                body: `测试成功！当前时间: ${new Date().toLocaleTimeString('zh-CN')}`,
+            const timeStr = new Date().toLocaleTimeString(locale === 'en' ? 'en-US' : 'zh-CN', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+            });
+            await registration.showNotification(tGlobal('user.push.testNotificationTitle'), {
+                body: tGlobal('user.push.testNotificationBody', { time: timeStr }),
                 icon: '/logo.png',
                 badge: '/logo.png',
                 data: { url: '/dashboard' },

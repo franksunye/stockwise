@@ -15,6 +15,7 @@ import {
     EFFECTIVE_VALIDATION_STATUS_SQL,
 } from '@/lib/prediction-display';
 import { withDecisionViews } from '@/lib/decision-views';
+import { parsePredictionContentLocaleParam } from '@/lib/prediction-content-locale';
 
 export const revalidate = 300; // 5 minutes cache
 
@@ -48,6 +49,7 @@ export async function GET(request: Request) {
     let symbol = searchParams.get('symbol');
     const offset = parseInt(searchParams.get('offset') || '0');
     const limit = parseInt(searchParams.get('limit') || '10');
+    const predictionContentLocale = parsePredictionContentLocaleParam(searchParams);
 
     if (!symbol) {
         return NextResponse.json({ error: 'Missing symbol' }, { status: 400 });
@@ -83,6 +85,7 @@ export async function GET(request: Request) {
                            'change_percent', json_extract(p.layer1_payload, '$.change_percent')
                        ) AS layer1_payload,
                        p.is_primary, p.model_id as model, m.display_name,
+                       COALESCE(p.content_locale, 'cn') AS content_locale,
                        ${EFFECTIVE_DECISION_SEMANTIC_SQL} AS decision_semantic,
                        ? AS mode_id,
                        d.close as close_price,
@@ -103,11 +106,11 @@ export async function GET(request: Request) {
                    AND pol.producer_type = 'AI'
                    AND pol.role_type = CASE WHEN COALESCE(p.is_primary, 0) = 1 THEN 'primary' ELSE 'secondary' END
                 LEFT JOIN daily_prices d ON p.symbol = d.symbol AND p.target_date = d.date
-                WHERE p.symbol = ? AND (${tierFilter})
+                WHERE p.symbol = ? AND COALESCE(p.content_locale, 'cn') = ? AND (${tierFilter})
                 ORDER BY p.date DESC, m.priority DESC
                 LIMIT ? OFFSET ?
             `;
-            const sqlArgs = [currentMode.mode_id, currentMode.mode_id, symbol, limit, offset];
+            const sqlArgs = [currentMode.mode_id, currentMode.mode_id, symbol, predictionContentLocale, limit, offset];
             try {
                 if ('execute' in client) {
                     const rs = await client.execute({ sql, args: sqlArgs });
@@ -137,6 +140,7 @@ export async function GET(request: Request) {
                                'change_percent', json_extract(p.layer1_payload, '$.change_percent')
                            ) AS layer1_payload,
                            p.is_primary, p.model_id as model, m.display_name,
+                           COALESCE(p.content_locale, 'cn') AS content_locale,
                            ${EFFECTIVE_DECISION_SEMANTIC_SQL} AS decision_semantic,
                            ? AS mode_id,
                            d.close as close_price,
@@ -150,7 +154,7 @@ export async function GET(request: Request) {
                        AND dlog.symbol = p.symbol
                        AND dlog.decision_date = p.date
                     LEFT JOIN daily_prices d ON p.symbol = d.symbol AND p.target_date = d.date
-                    WHERE p.symbol = ? AND (${tierFilter})
+                    WHERE p.symbol = ? AND COALESCE(p.content_locale, 'cn') = ? AND (${tierFilter})
                     ORDER BY p.date DESC, m.priority DESC
                     LIMIT ? OFFSET ?
                 `;

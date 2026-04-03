@@ -148,6 +148,42 @@ class TestSchemaNormalizerTacticsContract(unittest.TestCase):
         out = normalize_ai_response(data)
         self.assertEqual(out["signal"], "RiskOff")
 
+    def test_en_locale_uses_english_default_tactics(self):
+        data = {"signal": "Watch", "confidence": 0.5}
+        out = normalize_ai_response(data, content_locale="en")
+        hp = out["tactics"]["holding_profit"]
+        self.assertIn("Price stays above support", hp[0]["trigger"])
+        self.assertIn("maintain discipline", hp[0]["reason"])
+        self.assertNotIn("不跌破", hp[0]["trigger"])
+
+    def test_en_locale_remaps_chinese_boilerplate_tactics(self):
+        data = {
+            "signal": "RiskOff",
+            "confidence": 0.5,
+            "tactics": {
+                "holding_profit": [
+                    {
+                        "priority": "P1",
+                        "action": "持仓观察",
+                        "trigger": "不跌破一防位",
+                        "reason": "趋势未被破坏，先守纪律。",
+                    },
+                    {
+                        "priority": "P2",
+                        "action": "分批止盈预案",
+                        "trigger": "接近一攻位且动能放缓",
+                        "reason": "锁定波段利润，避免冲高回落。",
+                    },
+                ],
+                "holding_loss": [],
+                "empty": [],
+            },
+        }
+        out = normalize_ai_response(data, content_locale="en")
+        p1 = out["tactics"]["holding_profit"][0]
+        self.assertEqual(p1["trigger"], "Price stays above support")
+        self.assertEqual(p1["reason"], "Trend intact, maintain discipline.")
+
 
 if __name__ == "__main__":
     unittest.main()

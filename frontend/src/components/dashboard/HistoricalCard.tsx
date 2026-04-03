@@ -6,6 +6,8 @@ import { AIPrediction } from '@/lib/types';
 import { getPredictionActionMeta } from '@/lib/layer1-ui';
 import { formatModelName } from '@/lib/model-names';
 import { formatHistoricalCardDate, getHistoricalCardSurface } from '@/lib/historical-card-surface';
+import { useT } from '@/context/LocaleContext';
+import type { MessageKey } from '@/lib/i18n';
 
 /**
  * 历史预测卡片
@@ -14,6 +16,8 @@ import { formatHistoricalCardDate, getHistoricalCardSurface } from '@/lib/histor
 export const HistoricalCard = memo(function HistoricalCard({ data, onClick }: { data: AIPrediction; onClick?: (data: AIPrediction) => void }) {
   const isUp = data.signal === 'Long';
   const isDown = data.signal === 'Short';
+  const tDashboard = useT('dashboard');
+  const tHistory = useT('history');
   const actionMeta = getPredictionActionMeta(data);
   const { displayReason, basePrice, baseChange, validationData, validationStyle } = getHistoricalCardSurface(data);
   const ValidationIcon = validationStyle.iconName === 'correct'
@@ -49,13 +53,13 @@ export const HistoricalCard = memo(function HistoricalCard({ data, onClick }: { 
             </div>
             <div className="h-px w-8 bg-white/10" />
             <div className="hidden group-hover:block transition-all">
-                <span className="text-[9px] text-indigo-400 font-bold uppercase tracking-wider">点击回顾</span>
+                <span className="text-[9px] text-indigo-400 font-bold uppercase tracking-wider">{tHistory('clickReview')}</span>
             </div>
           </div>
           <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border ${validationStyle.bg}`}>
             <ValidationIcon size={12} className={validationStyle.color} />
             <span className={`text-[10px] font-black uppercase tracking-widest ${validationStyle.color}`}>
-              {validationStyle.label}
+              {validationStyle.__i18n ? tDashboard(`validation.${validationStyle.__i18n.key}` as MessageKey<'dashboard'>, validationStyle.__i18n.params) : validationStyle.label}
             </span>
           </div>
         </div>
@@ -73,7 +77,7 @@ export const HistoricalCard = memo(function HistoricalCard({ data, onClick }: { 
             <h3 className="text-2xl font-black italic tracking-tighter" style={{ 
               color: actionMeta.color
             }}>
-              {actionMeta.headline}
+              {tDashboard(`signal.${actionMeta.headline}` as MessageKey<'dashboard'>)}
             </h3>
             {/* Confidence Badge */}
             <div className="flex items-center gap-1 opacity-60 ml-1">
@@ -95,7 +99,7 @@ export const HistoricalCard = memo(function HistoricalCard({ data, onClick }: { 
           <div className="flex items-center justify-between mb-6">
             <div>
               <span className="text-xs text-slate-500 font-bold uppercase block mb-1 tracking-widest leading-tight">
-                {formatHistoricalCardDate(data.target_date)} 收盘价
+                {formatHistoricalCardDate(data.target_date)} {tHistory('closingPrice')}
               </span>
               <p className="text-2xl font-black mono text-slate-100">
                 {data.close_price ? data.close_price.toFixed(2) : '--'}
@@ -104,7 +108,7 @@ export const HistoricalCard = memo(function HistoricalCard({ data, onClick }: { 
             
             <div className="text-right">
               <span className="text-xs text-slate-500 font-bold uppercase block mb-1 tracking-widest leading-tight">
-                当日涨跌
+                {tHistory('dayChange')}
               </span>
               <p className={`text-2xl font-black italic tracking-tighter ${
                 (data.actual_change || 0) >= 0 ? 'text-rose-500' : 'text-emerald-500'
@@ -126,7 +130,7 @@ export const HistoricalCard = memo(function HistoricalCard({ data, onClick }: { 
                 <div className="flex items-center gap-3 relative">
                   {/* 锚点小圆点 */}
                   <div className="w-1.5 h-1.5 rounded-full bg-indigo-500/40 border border-indigo-400/20" />
-                  <span className="text-[10px] font-black text-indigo-400/40 uppercase tracking-[0.2em] w-12 mr-[-8px]">基准日</span>
+                  <span className="text-[10px] font-black text-indigo-400/40 uppercase tracking-[0.2em] w-12 mr-[-8px]">{tHistory('baseDay')}</span>
                   <span className="text-[10px] font-bold text-slate-500 mono">
                     {formatHistoricalCardDate(data.date)}
                   </span>
@@ -146,12 +150,11 @@ export const HistoricalCard = memo(function HistoricalCard({ data, onClick }: { 
 
               {[0, 1, 2].map((dayOffset) => {
                 const dayData = validationData?.trajectory?.[dayOffset];
-                const dayLabel = `第 ${dayOffset + 1} 日`;
                 
                 return (
                   <div key={dayOffset} className="flex items-center justify-between group/row">
                     <div className="flex items-center gap-3">
-                      <span className="text-xs font-bold text-slate-600 mono w-12">{dayLabel}</span>
+                      <span className="text-xs font-bold text-slate-600 mono w-12">{tHistory('dayOffset', { day: dayOffset + 1 })}</span>
                       <span className="text-xs font-medium text-slate-400 mono">
                         {dayData ? formatHistoricalCardDate(dayData.date) : '--/--'}
                       </span>

@@ -1,4 +1,6 @@
 import type { AIPrediction, TacticalData, Tactic } from './types';
+import { I18nLabel } from './date-utils';
+import { normalizeLegacyTerms } from './tactical-brief-surface';
 
 interface StockDashboardCardSurfaceOptions {
     displayPrediction: AIPrediction | null;
@@ -8,7 +10,7 @@ interface StockDashboardCardSurfaceOptions {
 interface StockDashboardCardTitleOptions {
     displayPrediction: AIPrediction | null;
     todayStr: string;
-    fallbackTitle: string;
+    fallbackTitle: I18nLabel;
     normalizeTargetDate: (targetDate?: string) => string;
 }
 
@@ -16,7 +18,7 @@ export interface StockDashboardCardSurface {
     tacticalData: TacticalData | null;
     summaryText: string;
     topTactic: Tactic | null;
-    pendingText: string;
+    pendingKey: string;
 }
 
 function parseTacticalData(reasoning: string | undefined): TacticalData | null {
@@ -33,15 +35,15 @@ export function getStockDashboardCardTitle({
     todayStr,
     fallbackTitle,
     normalizeTargetDate,
-}: StockDashboardCardTitleOptions): string {
+}: StockDashboardCardTitleOptions): I18nLabel {
     if (!displayPrediction?.target_date) return fallbackTitle;
 
     const targetDate = normalizeTargetDate(displayPrediction.target_date);
 
-    if (targetDate === todayStr) return '今日建议';
+    if (targetDate === todayStr) return { key: 'dashboard.date.todayAdvice' };
     if (targetDate < todayStr) {
         const [, month, day] = targetDate.split('-');
-        return `${parseInt(month, 10)}/${parseInt(day, 10)} 建议`;
+        return { key: 'dashboard.date.tradingDayAdvice', params: { date: `${parseInt(month, 10)}/${parseInt(day, 10)}` } };
     }
     return fallbackTitle;
 }
@@ -57,15 +59,14 @@ export function getStockDashboardCardSurface({
         : tactics?.empty || tactics?.general || tactics?.holding_profit;
     const tacticList = Array.isArray(bucket) ? bucket : bucket ? [bucket] : [];
     const topTactic = tacticList[0] || null;
-    const summaryText = tacticalData?.summary || displayPrediction?.ai_reasoning || '正在评估行情...';
-    const pendingText = !displayPrediction
-        ? '该股票刚刚加入自选池。AI 量化引擎正在排队处理历史数据，预计将在下一个市场窗口（盘前或收盘后）生成深度策略。'
-        : displayPrediction.ai_reasoning || '正在评估行情...';
+    const summaryText = normalizeLegacyTerms(tacticalData?.summary || displayPrediction?.ai_reasoning || '');
+    /** Full bundle keys for `createGlobalTranslator` / `useGlobalT` (not for nested `useT` + namespace prefix). */
+    const pendingKey = !displayPrediction ? 'common.noData' : 'dashboard.signal.pending';
 
     return {
         tacticalData,
         summaryText,
         topTactic,
-        pendingText,
+        pendingKey,
     };
 }

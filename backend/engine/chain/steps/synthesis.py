@@ -15,15 +15,30 @@ class SynthesisStep(BaseStep):
         ai_history = d.get('ai_history', [])
         layer1 = d.get('layer1') or {}
         layer1_status = str(layer1.get('status') or "")
-        layer1_signal = self._layer1_to_signal(layer1_status)
-        layer1_instruction = ""
-        if layer1_status:
-            layer1_instruction = (
-                f"\n## Layer-1 系统裁决（硬约束）\n"
-                f"- 量化状态: {layer1_status}\n"
-                f"- 系统信号: {layer1_signal}\n"
-                f"- 说明: 方向已由 Layer-1 决定，你只负责解释与战术，不得改写方向。"
-            )
+        locale = context.locale
+
+        if locale == 'en':
+            layer1_signal = {"TriggeredLong": "Long", "Watch": "Side", "NoSetup": "Side", "RiskOff": "Side"}.get(layer1_status, "Side")
+            if layer1_status:
+                layer1_instruction = (
+                    f"\n## Layer-1 System Verdict (Hard Constraint)\n"
+                    f"- Quant Status: {layer1_status}\n"
+                    f"- System Signal: {layer1_signal}\n"
+                    f"- Note: Direction is fixed by Layer-1. You are responsible for explanation and tactics ONLY. Do not change the direction."
+                )
+            else:
+                layer1_instruction = ""
+        else:
+            layer1_signal = self._layer1_to_signal(layer1_status)
+            if layer1_status:
+                layer1_instruction = (
+                    f"\n## Layer-1 系统裁决（硬约束）\n"
+                    f"- 量化状态: {layer1_status}\n"
+                    f"- 系统信号: {layer1_signal}\n"
+                    f"- 说明: 方向已由 Layer-1 决定，你只负责解释与战术，不得改写方向。"
+                )
+            else:
+                layer1_instruction = ""
         
         # --- Dynamic Key Levels Calculation ---
         daily_prices = d.get('daily_prices', [])
@@ -61,11 +76,25 @@ class SynthesisStep(BaseStep):
         if ai_history:
             rows = []
             for pred in ai_history:
-                signal_cn = {"Long": "做多", "Side": "观望", "Short": "避险"}.get(pred['signal'], pred['signal'])
-                status_icon = "✅" if pred['validation_status'] == "Correct" else ("❌" if pred['validation_status'] == "Incorrect" else "➖")
-                rows.append(f"| {pred['date']} | {signal_cn} | {pred['confidence']:.0%} | {status_icon} | {pred.get('actual_change', 'N/A')}% |")
+                if locale == 'en':
+                    signal_label = pred['signal']
+                    status_icon = "✅" if pred['validation_status'] == "Correct" else ("❌" if pred['validation_status'] == "Incorrect" else "➖")
+                    rows.append(f"| {pred['date']} | {signal_label} | {pred['confidence']:.0%} | {status_icon} | {pred.get('actual_change', 'N/A')}% |")
+                else:
+                    signal_cn = {"Long": "做多", "Side": "观望", "Short": "避险"}.get(pred['signal'], pred['signal'])
+                    status_icon = "✅" if pred['validation_status'] == "Correct" else ("❌" if pred['validation_status'] == "Incorrect" else "➖")
+                    rows.append(f"| {pred['date']} | {signal_cn} | {pred['confidence']:.0%} | {status_icon} | {pred.get('actual_change', 'N/A')}% |")
             
-            prediction_review = f"""
+            if locale == 'en':
+                prediction_review = f"""
+## AI History Review
+| Date | Signal | Confidence | Result | Actual Chg |
+|------|--------|------------|--------|------------|
+{chr(10).join(rows)}
+Historical Accuracy: {d.get('accuracy', {}).get('rate', 0):.1f}%
+"""
+            else:
+                prediction_review = f"""
 ## AI 历史预测回顾
 | 预测日期 | 信号 | 置信度 | 结果 | 实际涨跌 |
 |----------|------|--------|------|----------|
@@ -74,7 +103,22 @@ class SynthesisStep(BaseStep):
 """
 
         # Context Consolidation: Inject summarized insights
-        prior_analysis = f"""
+        if locale == 'en':
+            prior_analysis = f"""
+## Prior Analysis Insights (Must aggregate into final JSON)
+- Data Anchor: {context.structured_memory.get('anchor_summary', 'Normal')[:100]}
+- Daily Technicals: {context.structured_memory.get('technical_insight', 'Trend unclear')[:150]}  
+- Multi-period Sync: {context.structured_memory.get('period_insight', 'No conflict')[:150]}
+
+{technical_facts}
+
+## Pre-calculated Key Levels (Use directly)
+- **Support**: {boll_lower:.2f} (Bollinger Lower Band)
+- **Resistance**: {high_10d:.2f} (10-day High)
+- **Stop Loss**: {stop_ref:.2f} (3% or 5% below support)
+"""
+        else:
+            prior_analysis = f"""
 ## 前序分析结论摘要（必须整合到最终JSON）
 - 数据锚定: {context.structured_memory.get('anchor_summary', '正常')[:100]}
 - 日线技术: {context.structured_memory.get('technical_insight', '趋势未明')[:150]}  
@@ -117,33 +161,113 @@ class SynthesisStep(BaseStep):
                     pass
 
             # 2. Determine strategy based on score direction
-            if score_val > 0:
-                holding_action = "持股观察"
-                holding_trigger = f"跌破{boll_lower:.2f}"
-                empty_action = "逢低介入"
-            elif score_val < 0:
-                holding_action = "逢高减仓"
-                holding_trigger = f"反弹至{high_10d:.2f}"
-                empty_action = "观望等待"
+            if locale == 'en':
+                if score_val > 0:
+                    holding_action = "Hold & Observe"
+                    holding_trigger = f"Break below {boll_lower:.2f}"
+                    empty_action = "Buy on Dips"
+                elif score_val < 0:
+                    holding_action = "Reduce on Rallies"
+                    holding_trigger = f"Rally to {high_10d:.2f}"
+                    empty_action = "Wait & Watch"
+                else:
+                    holding_action = "Neutral Hold"
+                    holding_trigger = "Wait for dir confirmation"
+                    empty_action = "Watch"
+                
+                if score_val > 0:
+                    decision_conclusion = "Bullish/Watch"
+                    conflict_text = "Short-term bullish but waiting for confirmation"
+                    focus_text = f"Can price break {high_10d:.2f} resistance"
+                elif score_val < 0:
+                    decision_conclusion = "Bearish/RiskOff"
+                    conflict_text = "Technical weakness, priority is defense"
+                    focus_text = f"Can price hold {boll_lower:.2f} support"
+                else:
+                    decision_conclusion = "Neutral/Watch"
+                    conflict_text = "Balanced forces, waiting for directional choice"
+                    focus_text = "Volume changes to confirm direction"
             else:
-                holding_action = "持股待变"
-                holding_trigger = f"方向确认后"
-                empty_action = "观望"
-            # Pre-calculate decision and conflict resolution
-            if score_val > 0:
-                decision_conclusion = "偏多观望"
-                conflict_text = "短期技术面偏多，但等待更强确认信号"
-                focus_text = f"关注能否突破{high_10d:.2f}阻力"
-            elif score_val < 0:
-                decision_conclusion = "偏空避险"
-                conflict_text = "技术面转弱，以防守为主"
-                focus_text = f"关注能否守住{boll_lower:.2f}支撑"
-            else:
-                decision_conclusion = "中性观望"
-                conflict_text = "多空力量均衡，等待方向选择"
-                focus_text = "关注成交量变化确认方向"
+                if score_val > 0:
+                    holding_action = "持股观察"
+                    holding_trigger = f"跌破{boll_lower:.2f}"
+                    empty_action = "逢低介入"
+                elif score_val < 0:
+                    holding_action = "逢高减仓"
+                    holding_trigger = f"反弹至{high_10d:.2f}"
+                    empty_action = "观望等待"
+                else:
+                    holding_action = "持股待变"
+                    holding_trigger = f"方向确认后"
+                    empty_action = "观望"
+                
+                if score_val > 0:
+                    decision_conclusion = "偏多观望"
+                    conflict_text = "短期技术面偏多，但等待更强确认信号"
+                    focus_text = f"关注能否突破{high_10d:.2f}阻力"
+                elif score_val < 0:
+                    decision_conclusion = "偏空避险"
+                    conflict_text = "技术面转弱，以防守为主"
+                    focus_text = f"关注能否守住{boll_lower:.2f}支撑"
+                else:
+                    decision_conclusion = "中性观望"
+                    conflict_text = "多空力量均衡，等待方向选择"
+                    focus_text = "关注成交量变化确认方向"
 
-            prompt = f"""### 任务：量化信号翻译 (Zero-Shot JSON Generation)
+            if locale == 'en':
+                prompt = f"""### Task: Quant Signal Translation (Zero-Shot JSON Generation)
+You are a **Financial Data Translator**. Please translate the following analysis data into JSON format.
+
+{prediction_review}
+
+{prior_analysis}
+{layer1_instruction}
+
+---
+## ⚠️ Data Anchors (CRITICAL - Use EXACT values)
+- **Current Close**: {close:.2f}
+- **MA20**: {ma20:.2f}
+- **Support**: {boll_lower:.2f}
+- **Resistance**: {high_10d:.2f}
+- **Stop Loss**: {stop_ref:.2f}
+- **Final Score**: {score_val:+d}
+---
+
+## Mandatory Fields (Pre-calculated, fill directly and keep format)
+```json
+{{
+  "signal": "{calculated_signal}",
+  "confidence": {calculated_conf},
+  "key_levels": {{ 
+    "immediate_support": [{boll_lower:.2f}], 
+    "immediate_resistance": [{high_10d:.2f}], 
+    "stop_loss_reference": {stop_ref:.2f} 
+  }},
+  "tactics": {{
+    "holding_profit": [{{ "priority": "P1", "action": "{holding_action}", "trigger": "{holding_trigger}", "target_price": {high_10d:.2f}, "stop_advance_price": {close:.2f}, "reason": "Technical trigger" }}],
+    "holding_loss": [{{ "priority": "P1", "action": "Scale out", "trigger": "Break below {boll_lower:.2f}", "stop_loss_price": {stop_ref:.2f}, "reason": "Stop loss triggered" }}],
+    "empty": [{{ "priority": "P1", "action": "{empty_action}", "trigger": "Price stabilizes", "buy_zone_price": {boll_lower:.2f}, "reason": "Seeking safety margin" }}]
+  }},
+  "counter_argument": "If close falls below {stop_ref:.2f} on high volume, the {calculated_signal} logic is invalidated.",
+  "news_analysis": ["No real-time news"],
+  "conflict_resolution": "{conflict_text}",
+  "tomorrow_focus": "{focus_text}"
+}}
+```
+
+## Fields to Supplement
+**Only fill the following 3 fields**, and merge them with the mandatory ones into a **complete, valid JSON**:
+1. `"summary"`: One simple sentence summarizing the current trend (Must be based on score {score_val:+d}).
+2. `"reasoning_trace"`: List containing exactly 3 objects:
+   - {{ "step": "trend", "data": "Extract MA5/MA10/MA20 values and status from above", "conclusion": "Trend assessment" }}
+   - {{ "step": "momentum", "data": "Extract MACD hist/RSI/KDJ from above", "conclusion": "Momentum assessment" }}
+   - {{ "step": "decision", "data": "Verdict reason after score {score_val:+d}", "conclusion": "{decision_conclusion}" }}
+3. `"signal"`: "{calculated_signal}" (Keep as is)
+
+Directly output the full JSON. All text values must be in double quotes.
+"""
+            else:
+                prompt = f"""### 任务：量化信号翻译 (Zero-Shot JSON Generation)
 你是一个**金融数据翻译官**。请将下方的分析数据翻译成 JSON 格式。
 
 {prediction_review}
@@ -199,7 +323,49 @@ class SynthesisStep(BaseStep):
 
 
         # --- STANDARD PROMPT (Analyst Mode) ---
-        prompt = f"""### 步骤4：最终结论推导 (Synthesis)
+        if locale == 'en':
+            prompt = f"""### Step 4: Final Conclusion Derivation (Synthesis)
+Integrate all information (Daily/Weekly/Monthly) to generate the final trading recommendation.
+{prediction_review}
+{prior_analysis}
+{layer1_instruction}
+
+## Core Logic (Conservative Trader)
+1. **Risk Aversion**: As long as there is "divergence" or "multi-period conflict", default to "Side" (Watch).
+2. **Quality over Quantity**: No "Long" unless there is 80% confidence (Day/Week alignment + volume support).
+
+## Full Output Example (Strictly follow this format)
+{{
+  "signal": "Side",
+  "confidence": 0.7,
+  "summary": "Price is in overbought zone, MACD death cross suggests weakening momentum",
+  "reasoning_trace": [
+    {{ "step": "trend", "data": "MA5/10/20 in bearish alignment, price retraces to MA60 support", "conclusion": "Trend reversal" }},
+    {{ "step": "momentum", "data": "MACD highly converged with golden cross omen, RSI retraces near 40 and stabilizes", "conclusion": "Momentum bottoming" }},
+    {{ "step": "levels", "data": "Support at 6.06 density zone, resistance at 10-day MA 6.29", "conclusion": "Limited space" }},
+    {{ "step": "context", "data": "Market sentiment is low, but sector performs stronger than benchmark showing resilience", "conclusion": "Strong defense" }},
+    {{ "step": "decision", "data": "Verdict: Indicators recovering but lacks significant volume confirmation, maintain Watch", "conclusion": "Watch" }}
+  ],
+  "key_levels": {{ "support": 588.52, "resistance": 638.5, "stop_loss": 571.07 }},
+  "tactics": {{
+    "holding": [{{ "priority": "P1", "action": "Trim", "trigger": "Break below MA20", "reason": "Weakening momentum" }}],
+    "empty": [{{ "priority": "P1", "action": "Watch", "trigger": "Wait for dip and stabilization", "reason": "Overbought risk" }}],
+    "general": [{{ "priority": "P2", "action": "Watch support", "trigger": "Retrace near 588", "reason": "Can try re-entry if stabilized" }}]
+  }},
+  "news_analysis": ["No real-time news input"],
+  "conflict_resolution": "Short-term overbought vs medium-term bullish trend, taking watch strategy",
+  "tomorrow_focus": "Watch if MA20 support holds valid"
+}}
+
+## Output Requirements
+Must output pure JSON format, strictly following the example Schema above:
+1. `reasoning_trace.data` must contain actual values (e.g. MA20=xxx), NO placeholders.
+2. `reasoning_trace.conclusion` must be a short label (3-6 words).
+3. `key_levels` use pre-calculated values above.
+4. `tactics` must provide one suggestion for each: holding/empty/general.
+"""
+        else:
+            prompt = f"""### 步骤4：最终结论推导 (Synthesis)
 整合所有信息（日线/周线/月线），生成最终操作建议。
 {prediction_review}
 {prior_analysis}
@@ -275,8 +441,29 @@ class SynthesisStep(BaseStep):
         # 2. Backfill tactics if missing or empty (v3.3 Schema)
         if not parsed.get('tactics') or (not parsed['tactics'].get('holding_profit') and not parsed['tactics'].get('holding')):
             signal = parsed.get('signal', 'Side')
-            base_holding = "持股观察" if signal == "Long" else "持币观望"
-            base_empty = "逢低介入" if signal == "Long" else "观望等待"
+            locale = context.locale
+            if locale == 'en':
+                base_holding = "Hold & Observe" if signal == "Long" else "Wait & Watch"
+                base_empty = "Buy on Dips" if signal == "Long" else "Watch"
+                loss_action = "Scale out"
+                loss_reason = "Protective stop-loss"
+                rebound_action = "Reduce on Rally"
+                rebound_reason = "Reduce risk on weakness"
+                wait_action = "Watch"
+                wait_reason = "Wait for right-side opportunity"
+                breakout_action = "Breakout Follow-up"
+                breakout_reason = "Confirm before entry"
+            else:
+                base_holding = "持股观察" if signal == "Long" else "持币观望"
+                base_empty = "逢低介入" if signal == "Long" else "观望等待"
+                loss_action = "分批减仓"
+                loss_reason = "保护性止损"
+                rebound_action = "反弹减仓"
+                rebound_reason = "弱势反抽先降风险"
+                wait_action = "观望等待"
+                wait_reason = "等待右侧机会"
+                breakout_action = "突破跟随预案"
+                breakout_reason = "确认后再入场，避免假突破"
             
             # Get support for trigger
             supp = parsed['key_levels'].get('immediate_support', [0])[0]
@@ -285,43 +472,49 @@ class SynthesisStep(BaseStep):
             parsed['tactics'] = {
                 "holding_profit": [
                     {
-                        "priority": "P1", "action": base_holding, "trigger": f"不跌破{supp:.2f}",
-                        "target_price": round(high_10d, 2), "stop_advance_price": round(latest.get('close', 0), 2), "reason": "趋势持仓"
+                        "priority": "P1", "action": base_holding, "trigger": f"Above {supp:.2f}" if locale == 'en' else f"不跌破{supp:.2f}",
+                        "target_price": round(high_10d, 2), "stop_advance_price": round(latest.get('close', 0), 2), "reason": "Trend Holding" if locale == 'en' else "趋势持仓"
                     },
                     {
-                        "priority": "P2", "action": "分批止盈预案", "trigger": f"接近{resistance_ref:.2f}且动能转弱",
-                        "target_price": round(resistance_ref * 1.015, 2), "stop_advance_price": round(supp, 2), "reason": "锁定收益，防止回撤"
+                        "priority": "P2", "action": "Take Profit Plan" if locale == 'en' else "分批止盈预案", "trigger": f"Near {resistance_ref:.2f} & weak" if locale == 'en' else f"接近{resistance_ref:.2f}且动能转弱",
+                        "target_price": round(resistance_ref * 1.015, 2), "stop_advance_price": round(supp, 2), "reason": "Lock profit, prevent drawdown" if locale == 'en' else "锁定收益，防止回撤"
                     }
                 ],
                 "holding_loss": [
                     {
-                        "priority": "P1", "action": "触发减仓", "trigger": f"跌破{supp:.2f}",
-                        "stop_loss_price": round(stop_ref, 2), "reason": "保护性止损"
+                        "priority": "P1", "action": loss_action, "trigger": f"Below {supp:.2f}" if locale == 'en' else f"跌破{supp:.2f}",
+                        "stop_loss_price": round(stop_ref, 2), "reason": loss_reason
                     },
                     {
-                        "priority": "P2", "action": "反弹减仓", "trigger": f"反弹至{resistance_ref:.2f}但未突破",
-                        "stop_loss_price": round(stop_ref, 2), "reason": "弱势反抽先降风险"
+                        "priority": "P2", "action": rebound_action, "trigger": f"Rally to {resistance_ref:.2f} but fail" if locale == 'en' else f"反弹至{resistance_ref:.2f}但未突破",
+                        "stop_loss_price": round(stop_ref, 2), "reason": rebound_reason
                     }
                 ],
                 "empty": [
                     {
-                        "priority": "P1", "action": base_empty, "trigger": f"回踩{supp:.2f}企稳",
-                        "buy_zone_price": round(boll_lower, 2), "reason": "等待右侧机会"
+                        "priority": "P1", "action": base_empty, "trigger": f"Test {supp:.2f} & stabilize" if locale == 'en' else f"回踩{supp:.2f}企稳",
+                        "buy_zone_price": round(boll_lower, 2), "reason": wait_reason
                     },
                     {
-                        "priority": "P2", "action": "突破跟随预案", "trigger": f"放量突破{resistance_ref:.2f}并站稳",
-                        "buy_zone_price": [round(resistance_ref, 2), round(resistance_ref * 1.015, 2)], "reason": "确认后再入场，避免假突破"
+                        "priority": "P2", "action": breakout_action, "trigger": f"Break {resistance_ref:.2f} with vol" if locale == 'en' else f"放量突破{resistance_ref:.2f}并站稳",
+                        "buy_zone_price": [round(resistance_ref, 2), round(resistance_ref * 1.015, 2)], "reason": breakout_reason
                     }
                 ]
             }
 
         # 3. Ensure other fields exist
         if "conflict_resolution" not in parsed:
-            parsed["conflict_resolution"] = "综合多周期指标与市场情绪，当前处于关键决策点。"
+            parsed["conflict_resolution"] = (
+                "Integrating multi-period indicators and market sentiment for decision." if context.locale == 'en' 
+                else "综合多周期指标与市场情绪，当前处于关键决策点。"
+            )
         if "tomorrow_focus" not in parsed:
-            parsed["tomorrow_focus"] = f"关注价格能否站稳 {parsed['key_levels'].get('support', 0):.2f} 支撑位。"
+            parsed["tomorrow_focus"] = (
+                f"Focus on whether price holds {parsed['key_levels'].get('support', 0):.2f} support." if context.locale == 'en'
+                else f"关注价格能否站稳 {parsed['key_levels'].get('support', 0):.2f} 支撑位。"
+            )
         if "news_analysis" not in parsed:
-            parsed["news_analysis"] = ["无实时新闻输入，仅基于技术面分析"]
+            parsed["news_analysis"] = ["No real-time news" if context.locale == 'en' else "无实时新闻输入，仅基于技术面分析"]
 
         # 4. Backfill signal and confidence if missing or placeholder
         valid_signals = ["Long", "Side", "Short"]
@@ -338,7 +531,7 @@ class SynthesisStep(BaseStep):
             expected_signal = self._layer1_to_signal(layer1_status)
             if parsed.get('signal') != expected_signal:
                 parsed['signal'] = expected_signal
-            parsed = self._apply_layer1_action_language(parsed, layer1_status)
+            parsed = self._apply_layer1_action_language(parsed, layer1_status, context.locale)
 
         # 5. LITE MODEL OVERRIDE: Force pre-calculated values (v3.3 Schema)
         model_name = d.get('model_name', '').lower()
@@ -378,37 +571,48 @@ class SynthesisStep(BaseStep):
             parsed['reasoning_trace'] = new_rt
         elif isinstance(rt, str) and rt:
             # Handle string-based trace (common in weak models)
-            # Try to split by semicolon or comma to separate trend from momentum
+            locale = context.locale
             parts = re.split(r'[；;，,]', rt)
             trend_part = parts[0].strip() if len(parts) > 0 else rt
-            mom_part = parts[1].strip() if len(parts) > 1 else "详见趋势分析"
+            mom_part = parts[1].strip() if len(parts) > 1 else ("See trend analysis" if locale == 'en' else "详见趋势分析")
             
             parsed['reasoning_trace'] = [
-                { "step": "trend", "data": trend_part, "conclusion": "趋势观察" },
-                { "step": "momentum", "data": mom_part, "conclusion": "动能监测" },
-                { "step": "decision", "data": "综合研判", "conclusion": parsed.get('summary', '观望')[:10] }
+                { "step": "trend", "data": trend_part, "conclusion": "Trend Observation" if locale == 'en' else "趋势观察" },
+                { "step": "momentum", "data": mom_part, "conclusion": "Momentum Monitoring" if locale == 'en' else "动能监测" },
+                { "step": "decision", "data": "Combined Analysis" if locale == 'en' else "综合研判", "conclusion": parsed.get('summary', 'Side')[:10] }
             ]
             
         # 7. Final Sanity Check for 6-step reasoning trace (v3.3 requirement)
         rt = parsed.get('reasoning_trace', [])
+        locale = context.locale
         if not isinstance(rt, list) or len(rt) < 3:
-            rt = [
-                { "step": "trend", "data": "均线及K线形态综合分析", "conclusion": "趋势确认" },
-                { "step": "momentum", "data": "MACD/RSI 动能强度监测", "conclusion": "动能评估" },
-                { "step": "levels", "data": f"支撑位 {boll_lower:.2f} 附近博弈", "conclusion": "空间格局" },
-                { "step": "context", "data": "大盘环境及板块共振分析", "conclusion": "环境对齐" },
-                { "step": "psychology", "data": "盘面多空情绪与诱多/诱空识别", "conclusion": "博弈心理" },
-                { "step": "decision", "data": "综合以上维度的最终风控裁决", "conclusion": parsed.get('signal', 'Side') }
-            ]
+            if locale == 'en':
+                rt = [
+                    { "step": "trend", "data": "Comprehensive analysis of moving averages and K-line patterns", "conclusion": "Trend Confirmed" },
+                    { "step": "momentum", "data": "MACD/RSI momentum intensity monitoring", "conclusion": "Momentum Assessment" },
+                    { "step": "levels", "data": f"Price play near support {boll_lower:.2f}", "conclusion": "Space Pattern" },
+                    { "step": "context", "data": "Market environment and sector resonance analysis", "conclusion": "Env Alignment" },
+                    { "step": "psychology", "data": "Bull/Bear sentiment and trap identification", "conclusion": "Game Psychology" },
+                    { "step": "decision", "data": "Final risk control verdict from above dimensions", "conclusion": parsed.get('signal', 'Side') }
+                ]
+            else:
+                rt = [
+                    { "step": "trend", "data": "均线及K线形态综合分析", "conclusion": "趋势确认" },
+                    { "step": "momentum", "data": "MACD/RSI 动能强度监测", "conclusion": "动能评估" },
+                    { "step": "levels", "data": f"支撑位 {boll_lower:.2f} 附近博弈", "conclusion": "空间格局" },
+                    { "step": "context", "data": "大盘环境及板块共振分析", "conclusion": "环境对齐" },
+                    { "step": "psychology", "data": "盘面多空情绪与诱多/诱空识别", "conclusion": "博弈心理" },
+                    { "step": "decision", "data": "综合以上维度的最终风控裁决", "conclusion": parsed.get('signal', 'Side') }
+                ]
         elif len(rt) < 6:
             # If model only provided 3, backfill the others to keep UI consistent
             existing_steps = [s.get('step') for s in rt if isinstance(s, dict)]
             if "levels" not in existing_steps:
-                rt.append({ "step": "levels", "data": "基于支撑阻力位的量价博弈", "conclusion": "空间格局" })
+                rt.append({ "step": "levels", "data": "Technical play based on support/resistance" if locale == 'en' else "基于支撑阻力位的量价博弈", "conclusion": "Space Pattern" if locale == 'en' else "空间格局" })
             if "context" not in existing_steps:
-                rt.append({ "step": "context", "data": "综合外部环境与资金面流向分析", "conclusion": "环境共鸣" })
+                rt.append({ "step": "context", "data": "Comprehensive market environment and capital flow analysis" if locale == 'en' else "综合外部环境与资金面流向分析", "conclusion": "Env Resonance" if locale == 'en' else "环境共鸣" })
             if "psychology" not in existing_steps:
-                rt.append({ "step": "psychology", "data": "多空心理博弈与关键节点情绪监测", "conclusion": "心理对冲" })
+                rt.append({ "step": "psychology", "data": "Sentiment monitoring at key nodes" if locale == 'en' else "多空心理博弈与关键节点情绪监测", "conclusion": "Psych Hedge" if locale == 'en' else "心理对敲" })
             
         parsed['reasoning_trace'] = rt
 
@@ -427,63 +631,115 @@ class SynthesisStep(BaseStep):
         return "Side"
 
     @staticmethod
-    def _layer1_action_profile(setup_state: str) -> Dict[str, str]:
-        profiles = {
-            "TriggeredLong": {
-                "summary_prefix": "当前进入可尝试建仓区间",
-                "holding_profit_action": "持仓观察",
-                "holding_profit_trigger": "不跌破一防位",
-                "holding_profit_reason": "量价结构仍支持多头尝试，先按纪律持有。",
-                "holding_loss_action": "跌破纪律位应退出",
-                "holding_loss_trigger": "有效跌破一防位",
-                "holding_loss_reason": "入场逻辑被破坏时先退出，避免小错拖大。",
-                "empty_action": "可尝试建仓",
-                "empty_trigger": "回踩企稳或放量确认",
-                "empty_reason": "只在右侧确认后试仓，不做主观抄底。",
-            },
-            "Watch": {
-                "summary_prefix": "当前仅适合继续观察",
-                "holding_profit_action": "持仓观察",
-                "holding_profit_trigger": "不破关键支撑先观察",
-                "holding_profit_reason": "结构未坏，但仍缺少更强确认信号。",
-                "holding_loss_action": "反弹减仓",
-                "holding_loss_trigger": "反抽无力或跌破一防位",
-                "holding_loss_reason": "确认不足时先降风险，不抢方向。",
-                "empty_action": "继续观察",
-                "empty_trigger": "等待放量突破或回踩企稳",
-                "empty_reason": "先看确认，再决定是否出手。",
-            },
-            "RiskOff": {
-                "summary_prefix": "当前进入风险收缩区",
-                "holding_profit_action": "已有仓位应收缩",
-                "holding_profit_trigger": "反弹无力或仍处风险线下方",
-                "holding_profit_reason": "优先收缩风险暴露，而不是继续加码。",
-                "holding_loss_action": "跌破纪律位应退出",
-                "holding_loss_trigger": "有效跌破风险线",
-                "holding_loss_reason": "当前核心任务是止损和控回撤。",
-                "empty_action": "暂停新增仓位",
-                "empty_trigger": "等待重新站回风险线之上",
-                "empty_reason": "风险状态未解除前，不建议新开仓。",
-            },
-            "NoSetup": {
-                "summary_prefix": "当前不建议出手",
-                "holding_profit_action": "持仓观察",
-                "holding_profit_trigger": "无新增催化前不主动加仓",
-                "holding_profit_reason": "没有清晰新机会，先守住已有纪律。",
-                "holding_loss_action": "触发减仓",
-                "holding_loss_trigger": "跌破一防位",
-                "holding_loss_reason": "既然没有新 setup，就更要保护已有仓位。",
-                "empty_action": "不建议出手",
-                "empty_trigger": "等待明确 setup 形成",
-                "empty_reason": "没有 setup 的时候，观望就是动作。",
-            },
-        }
+    def _layer1_action_profile(setup_state: str, locale: str = 'cn') -> Dict[str, str]:
+        if locale == 'en':
+            profiles = {
+                "TriggeredLong": {
+                    "summary_prefix": "Currently entering potential entry zone",
+                    "holding_profit_action": "Hold & Observe",
+                    "holding_profit_trigger": "Keep above primary support",
+                    "holding_profit_reason": "Price structure supports bullish attempt, hold by discipline.",
+                    "holding_loss_action": "Exit on violation",
+                    "holding_loss_trigger": "Valid break of primary support",
+                    "holding_loss_reason": "Exit when entry logic is broken to avoid larger loss.",
+                    "empty_action": "Try entry",
+                    "empty_trigger": "Retrace & stabilize or volume confirmation",
+                    "empty_reason": "Entry only after right-side confirmation.",
+                },
+                "Watch": {
+                    "summary_prefix": "Focus on observation for now",
+                    "holding_profit_action": "Hold & Observe",
+                    "holding_profit_trigger": "Observe as long as key support holds",
+                    "holding_profit_reason": "Structure not broken but lacks strong confirmation signal.",
+                    "holding_loss_action": "Reduce on Rally",
+                    "holding_loss_trigger": "Weak rally or break of primary support",
+                    "holding_loss_reason": "Reduce risk when confirmation is lacking.",
+                    "empty_action": "Continue observation",
+                    "empty_trigger": "Wait for breakout or stabilization",
+                    "empty_reason": "Wait for confirmation before acting.",
+                },
+                "RiskOff": {
+                    "summary_prefix": "Entering risk contraction zone",
+                    "holding_profit_action": "Reduce existing positions",
+                    "holding_profit_trigger": "Weak rally or staying below risk line",
+                    "holding_profit_reason": "Priority is reducing risk exposure, not increasing it.",
+                    "holding_loss_action": "Exit on violation",
+                    "holding_loss_trigger": "Valid break of risk line",
+                    "holding_loss_reason": "Main task is to stop loss and control drawdown.",
+                    "empty_action": "Pause new entries",
+                    "empty_trigger": "Wait for recovery above risk line",
+                    "empty_reason": "No new entries until risk state is cleared.",
+                },
+                "NoSetup": {
+                    "summary_prefix": "No action recommended for now",
+                    "holding_profit_action": "Hold & Observe",
+                    "holding_profit_trigger": "No proactive addition before new catalyst",
+                    "holding_profit_reason": "No clear new opportunity, stick to existing discipline.",
+                    "holding_loss_action": "Trigger reduction",
+                    "holding_loss_trigger": "Break below primary support",
+                    "holding_loss_reason": "Protect existing positions since no new setup exists.",
+                    "empty_action": "No entry recommended",
+                    "empty_trigger": "Wait for clear setup formation",
+                    "empty_reason": "Observation is the action when no setup is present.",
+                },
+            }
+        else:
+            profiles = {
+                "TriggeredLong": {
+                    "summary_prefix": "当前进入可尝试建仓区间",
+                    "holding_profit_action": "持仓观察",
+                    "holding_profit_trigger": "不跌破一防位",
+                    "holding_profit_reason": "量价结构仍支持多头尝试，先按纪律持有。",
+                    "holding_loss_action": "跌破纪律位应退出",
+                    "holding_loss_trigger": "有效跌破一防位",
+                    "holding_loss_reason": "入场逻辑被破坏时先退出，避免小错拖大。",
+                    "empty_action": "可尝试建仓",
+                    "empty_trigger": "回踩企稳或放量确认",
+                    "empty_reason": "只在右侧确认后试仓，不做主观抄底。",
+                },
+                "Watch": {
+                    "summary_prefix": "当前仅适合继续观察",
+                    "holding_profit_action": "持仓观察",
+                    "holding_profit_trigger": "不破关键支撑先观察",
+                    "holding_profit_reason": "结构未坏，但仍缺少更强确认信号。",
+                    "holding_loss_action": "反弹减仓",
+                    "holding_loss_trigger": "反抽无力或跌破一防位",
+                    "holding_loss_reason": "确认不足时先降风险，不抢方向。",
+                    "empty_action": "继续观察",
+                    "empty_trigger": "等待放量突破或回踩企稳",
+                    "empty_reason": "先看确认，再决定是否出手。",
+                },
+                "RiskOff": {
+                    "summary_prefix": "当前进入风险收缩区",
+                    "holding_profit_action": "已有仓位应收缩",
+                    "holding_profit_trigger": "反弹无力或仍处风险线下方",
+                    "holding_profit_reason": "优先收缩风险暴露，而不是继续加码。",
+                    "holding_loss_action": "跌破纪律位应退出",
+                    "holding_loss_trigger": "有效跌破风险线",
+                    "holding_loss_reason": "当前核心任务是止损和控回撤。",
+                    "empty_action": "暂停新增仓位",
+                    "empty_trigger": "等待重新站回风险线之上",
+                    "empty_reason": "风险状态未解除前，不建议新开仓。",
+                },
+                "NoSetup": {
+                    "summary_prefix": "当前不建议出手",
+                    "holding_profit_action": "持仓观察",
+                    "holding_profit_trigger": "无新增催化前不主动加仓",
+                    "holding_profit_reason": "没有清晰新机会，先守住已有纪律。",
+                    "holding_loss_action": "触发减仓",
+                    "holding_loss_trigger": "跌破一防位",
+                    "holding_loss_reason": "既然没有新 setup，就更要保护已有仓位。",
+                    "empty_action": "不建议出手",
+                    "empty_trigger": "等待明确 setup 形成",
+                    "empty_reason": "没有 setup 的时候，观望就是动作。",
+                },
+            }
         return profiles.get(setup_state, profiles["NoSetup"])
 
-    def _apply_layer1_action_language(self, parsed: Dict[str, Any], setup_state: str) -> Dict[str, Any]:
-        profile = self._layer1_action_profile(setup_state)
+    def _apply_layer1_action_language(self, parsed: Dict[str, Any], setup_state: str, locale: str = 'cn') -> Dict[str, Any]:
+        profile = self._layer1_action_profile(setup_state, locale)
         summary = str(parsed.get("summary") or "").strip()
-        summary_prefix = f"{profile['summary_prefix']}。"
+        summary_prefix = f"{profile['summary_prefix']}." if locale == 'en' else f"{profile['summary_prefix']}。"
         parsed["summary"] = f"{summary_prefix}{summary}"[:160] if summary else summary_prefix[:160]
 
         tactics = parsed.setdefault("tactics", {})

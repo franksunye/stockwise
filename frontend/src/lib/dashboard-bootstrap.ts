@@ -7,7 +7,58 @@ function normalizeBootstrapTier(raw: unknown): BootstrapTier {
 }
 
 export const AUTH_CACHE_KEY = 'ZISO_AUTH_CACHE_V1';
-export const PROFILE_CACHE_KEY = 'stockwise_user_profile_v1';
+/** Bump when tier semantics change so stale localStorage cannot flash wrong entitlements (e.g. invite → go vs legacy pro cache). */
+export const PROFILE_CACHE_KEY = 'stockwise_user_profile_v2';
+/** Older key — never read by current code; removed on load/write so DevTools won’t show a “ghost” duplicate. */
+export const LEGACY_PROFILE_CACHE_KEY = 'stockwise_user_profile_v1';
+
+/** Remove deprecated profile key (stale tier / duplicate row in Application → Local Storage). */
+export function purgeLegacyUserProfileCache(): void {
+    if (typeof window === 'undefined') {
+        return;
+    }
+    try {
+        window.localStorage.removeItem(LEGACY_PROFILE_CACHE_KEY);
+    } catch {
+        // ignore
+    }
+}
+
+const LEGACY_PROFILE_WRITE_GUARD = '__stockwiseLegacyProfileV1SetItemGuard';
+
+/**
+ * Blocks any runtime `localStorage.setItem('stockwise_user_profile_v1', ...)`.
+ * Current app only writes {@link PROFILE_CACHE_KEY}; v1 reappearing is almost always a stale chunk / other tab.
+ * In development, logs a stack trace to locate the caller.
+ */
+export function installLegacyProfileCacheWriteGuard(): void {
+    if (typeof window === 'undefined') {
+        return;
+    }
+    const w = window as Window & Record<string, boolean>;
+    if (w[LEGACY_PROFILE_WRITE_GUARD]) {
+        return;
+    }
+    w[LEGACY_PROFILE_WRITE_GUARD] = true;
+
+    const original = Storage.prototype.setItem;
+    Storage.prototype.setItem = function setItemGuard(this: Storage, key: string, value: string) {
+        if (key === LEGACY_PROFILE_CACHE_KEY) {
+            if (process.env.NODE_ENV === 'development') {
+                console.warn(
+                    '[StockWise] Blocked write to deprecated',
+                    LEGACY_PROFILE_CACHE_KEY,
+                    '— app only uses',
+                    PROFILE_CACHE_KEY + '.',
+                    'Capture stack if debugging stale JS.',
+                    new Error().stack,
+                );
+            }
+            return;
+        }
+        return original.call(this, key, value);
+    };
+}
 export const HAS_ONBOARDED_KEY = 'STOCKWISE_HAS_ONBOARDED';
 export const DASHBOARD_NAV_INTENT_KEY = 'stockwise_dashboard_nav_intent';
 export const SPLASH_TS_KEY = 'stockwise_splash_ts';
@@ -223,6 +274,7 @@ export function writeProfileCache<T extends { userId: string }>(profile: T): T |
         return null;
     }
 
+    purgeLegacyUserProfileCache();
     window.localStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify(profile));
     return profile;
 }

@@ -9,6 +9,24 @@ export type AnySignalState = typeof ALL_SIGNAL_STATES[number];
 export const CANONICAL_DECISION_SEMANTICS = ['建议看多', '建议观察', '建议防守', '暂无信号'] as const;
 export type DecisionSemantic = typeof CANONICAL_DECISION_SEMANTICS[number];
 
+/**
+ * Mapping between Backend Logic Tags and i18n Keys (dashboard.signal.*)
+ */
+export const SIGNAL_I18N_MAP = {
+    '建议看多': 'triggeredLong',
+    '建议观察': 'watching',
+    '建议防守': 'riskOff',
+    '暂无信号': 'noSignal',
+    'triggeredLong': 'triggeredLong', // Support for direct canonical state
+    'watching': 'watching',
+    'riskOff': 'riskOff',
+    'noSignal': 'noSignal',
+    'Watch': 'watching',
+    'RiskOff': 'riskOff',
+    'TriggeredLong': 'triggeredLong',
+    'NoSetup': 'noSignal',
+} as const;
+
 export const ACTION_DECISIONS = ['ENTER_LONG', 'WATCH', 'DEFEND', 'NO_SIGNAL'] as const;
 export const ACTION_SEMANTICS = CANONICAL_DECISION_SEMANTICS;
 export type ActionDecision = typeof ACTION_DECISIONS[number];
@@ -69,4 +87,21 @@ export function normalizeAnySignal(value: unknown, fallback: AnySignalState = 'S
             fallback === 'RiskOff' ? 'Short' :
                 'Side';
     return normalizeOverlaySignal(raw, legacyFallback);
+}
+/**
+ * Safely resolve a database/backend value to an i18n key for the signal label.
+ */
+export function getSignalI18nKey(value: unknown): string {
+    const normalized = normalizeDecisionSemantic(value);
+    const key = SIGNAL_I18N_MAP[normalized as keyof typeof SIGNAL_I18N_MAP] ||
+                SIGNAL_I18N_MAP[value as keyof typeof SIGNAL_I18N_MAP];
+    return key || 'noSignal';
+}
+
+/**
+ * Get i18n key for the signal's badge/description.
+ */
+export function getSignalBadgeI18nKey(value: unknown): string {
+    const key = getSignalI18nKey(value);
+    return key; // Same key used in "badge" namespace
 }

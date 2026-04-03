@@ -21,6 +21,9 @@ import {
 } from 'lucide-react';
 import Multiavatar from '@/components/Multiavatar';
 import { getPredictionActionMeta } from '@/lib/layer1-ui';
+import { useGlobalT, useLocale, useT } from '@/context/LocaleContext';
+import { appLocaleToPredictionContentLocale } from '@/lib/prediction-content-locale';
+import type { MessageKey, FullMessageKey } from '@/lib/i18n';
 import {
   buildCouncilCards,
   fetchAICouncilData,
@@ -37,7 +40,7 @@ import {
 import {
   getPriceNodes,
   getScenarioTacticGroups,
-  normalizeActionLabel,
+  formatBriefActionLabel,
   normalizeLegacyTerms,
 } from '@/lib/tactical-brief-surface';
 import type { AIPrediction, TacticalData } from '@/lib/types';
@@ -67,20 +70,20 @@ function formatPrice(val: number | string | number[] | undefined, isRange = fals
   return String(val);
 }
 
-function getStepConfig(step: string) {
+function getStepConfig(step: string, t: (key: MessageKey<'brief'>) => string) {
   const s = step.toLowerCase();
 
-  if (s.includes('trend')) return { icon: <TrendingUp size={12} />, label: '趋势' };
-  if (s.includes('momentum')) return { icon: <Zap size={12} />, label: '动能' };
-  if (s.includes('volume')) return { icon: <BarChart3 size={12} />, label: '成交量' };
-  if (s.includes('history')) return { icon: <RotateCcw size={12} />, label: '历史' };
-  if (s.includes('decision')) return { icon: <Target size={12} />, label: '决策' };
-  if (s.includes('news') || s.includes('fundamental')) return { icon: <Newspaper size={12} />, label: '情报' };
-  if (s.includes('position') || s.includes('level') || s.includes('price')) return { icon: <Crosshair size={12} />, label: '价格行为' };
-  if (s.includes('context')) return { icon: <Layers size={12} />, label: '上下文' };
-  if (s.includes('fund') || s.includes('capital') || s.includes('flow') || s.includes('money')) return { icon: <Hash size={12} />, label: '资金博弈' };
+  if (s.includes('trend')) return { icon: <TrendingUp size={12} />, label: t('trend') };
+  if (s.includes('momentum')) return { icon: <Zap size={12} />, label: t('momentum') };
+  if (s.includes('volume')) return { icon: <BarChart3 size={12} />, label: t('volume') };
+  if (s.includes('history')) return { icon: <RotateCcw size={12} />, label: t('history') };
+  if (s.includes('decision')) return { icon: <Target size={12} />, label: t('decision') };
+  if (s.includes('news') || s.includes('fundamental')) return { icon: <Newspaper size={12} />, label: t('intelligence') };
+  if (s.includes('position') || s.includes('level') || s.includes('price')) return { icon: <Crosshair size={12} />, label: t('priceAction') };
+  if (s.includes('context')) return { icon: <Layers size={12} />, label: t('context') };
+  if (s.includes('fund') || s.includes('capital') || s.includes('flow') || s.includes('money')) return { icon: <Hash size={12} />, label: t('capital') };
 
-  return { icon: <Hash size={12} />, label: '综合研判' };
+  return { icon: <Hash size={12} />, label: t('general') };
 }
 
 export function TacticalReportPoster({
@@ -96,6 +99,11 @@ export function TacticalReportPoster({
 }: TacticalReportPosterProps) {
   const posterRef = useRef<HTMLDivElement>(null);
   const [isCapturing, setIsCapturing] = useState(false);
+  const tGlobal = useGlobalT();
+  const tBrief = useT('brief');
+  const tPoster = useT('poster');
+  const { locale: appLocale } = useLocale();
+  const predictionLocale = appLocaleToPredictionContentLocale(appLocale);
   const actionMeta = useMemo(() => getPredictionActionMeta(prediction), [prediction]);
   const { scenarioHoldingProfit, scenarioHoldingLoss, scenarioEmpty } = useMemo(() => {
     const groups = getScenarioTacticGroups(data);
@@ -108,14 +116,14 @@ export function TacticalReportPoster({
   const priceNodes = useMemo(() => getPriceNodes(data, currentPrice).slice(0, 6), [data, currentPrice]);
   const reasoningSteps = Array.isArray(data.reasoning_trace) ? data.reasoning_trace.slice(0, 5) : [];
   const showCouncilSection = tier === 'pro' || tier === 'alpha';
-  const snapshotKey = `${symbol}_${targetDate}`;
+  const snapshotKey = `${symbol}_${targetDate}_${predictionLocale}`;
   const memoryPayload = getCouncilMemorySnapshot(snapshotKey);
-  const sessionPayload = !memoryPayload ? readCouncilSessionSnapshot(symbol, targetDate) : null;
+  const sessionPayload = !memoryPayload ? readCouncilSessionSnapshot(symbol, targetDate, predictionLocale) : null;
   const fallbackPayload = memoryPayload || sessionPayload || undefined;
 
   const { data: councilPayload } = useSWR(
-    isOpen && showCouncilSection ? getAICouncilSWRKey(symbol, targetDate) : null,
-    ([, nextSymbol, nextDate]) => fetchAICouncilData(nextSymbol, nextDate),
+    isOpen && showCouncilSection ? getAICouncilSWRKey(symbol, targetDate, predictionLocale) : null,
+    ([, nextSymbol, nextDate, nextLocale]) => fetchAICouncilData(nextSymbol, nextDate, nextLocale),
     {
       fallbackData: fallbackPayload,
       keepPreviousData: true,
@@ -123,7 +131,7 @@ export function TacticalReportPoster({
       dedupingInterval: 10 * 1000,
       onSuccess: (nextPayload) => {
         setCouncilMemorySnapshot(snapshotKey, nextPayload);
-        writeCouncilSessionSnapshot(symbol, targetDate, nextPayload);
+        writeCouncilSessionSnapshot(symbol, targetDate, predictionLocale, nextPayload);
       },
     },
   );
@@ -133,7 +141,8 @@ export function TacticalReportPoster({
     () => (councilPredictions.length > 0 ? getCouncilHeadlineAction(councilPredictions) : null),
     [councilPredictions],
   );
-  const councilHeadline = showCouncilSection && councilHeadlineAction ? getCouncilActionLabel(councilHeadlineAction) : actionMeta.posterDecision;
+  const councilHeadlineRaw = showCouncilSection && councilHeadlineAction ? getCouncilActionLabel(councilHeadlineAction) : actionMeta.posterDecision;
+  const councilHeadline = tGlobal(`dashboard.signal.${councilHeadlineRaw}` as FullMessageKey);
   const councilHeadlineMeta = showCouncilSection && councilHeadlineAction ? getCouncilActionMeta(councilHeadlineAction) : actionMeta;
   const exportDate = useMemo(() => {
     const now = new Date();
@@ -144,8 +153,8 @@ export function TacticalReportPoster({
   }, []);
 
   const reportText = useMemo(() => {
-    return `ZISO AI 投研报告｜${stockName} (${symbol})\n适用日期：${targetDate}\n当前结论：${councilHeadline}`;
-  }, [councilHeadline, stockName, symbol, targetDate]);
+    return `${tPoster('title')}｜${stockName} (${symbol})\n${tBrief('condition')}${tGlobal('dashboard.date.todayAdvice' as FullMessageKey)}：${targetDate}\n${tGlobal('dashboard.signal.pending' as FullMessageKey)}：${councilHeadline}`;
+  }, [councilHeadline, stockName, symbol, targetDate, tBrief, tPoster, tGlobal]);
 
   const generateImage = useCallback(async () => {
     if (!posterRef.current) return null;
@@ -189,7 +198,7 @@ export function TacticalReportPoster({
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({
           files: [file],
-          title: `ZISO AI 投研报告｜${stockName}`,
+          title: `${tPoster('title')}｜${stockName}`,
           text: reportText,
         });
         return;
@@ -202,7 +211,7 @@ export function TacticalReportPoster({
     } finally {
       setIsCapturing(false);
     }
-  }, [generateImage, isCapturing, reportText, stockName, symbol, targetDate]);
+  }, [generateImage, isCapturing, reportText, stockName, symbol, targetDate, tPoster]);
 
   if (!isOpen) return null;
 
@@ -221,7 +230,7 @@ export function TacticalReportPoster({
           <div className="capture-hidden flex items-center justify-between border-b border-white/5 px-5 py-4">
             <div>
               <p className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-600">ZISO AI</p>
-              <h3 className="mt-1 text-lg font-black tracking-tight text-white">投研报告预览</h3>
+              <h3 className="mt-1 text-lg font-black tracking-tight text-white">{tPoster('preview')}</h3>
             </div>
             <button
               onClick={onClose}
@@ -261,14 +270,14 @@ export function TacticalReportPoster({
                     </div>
                     <div className="h-3.5 w-px bg-white/10" />
                     <div className="flex items-center gap-2">
-                      <span className="text-slate-400">把握 {(prediction.confidence * 100).toFixed(0)}%</span>
+                      <span className="text-slate-400">{tPoster('certainty', { percent: (prediction.confidence * 100).toFixed(0) })}</span>
                     </div>
                   </div>
 
                   <div className="mt-4 rounded-[18px] border border-indigo-500/12 bg-indigo-500/[0.05] p-4">
                     <div className="flex items-center gap-2">
                       <Sparkles size={14} className="text-indigo-300" />
-                      <p className="text-[10px] font-black uppercase tracking-[0.22em] text-indigo-300/80">摘要</p>
+                      <p className="text-[10px] font-black uppercase tracking-[0.22em] text-indigo-300/80">{tPoster('summary')}</p>
                     </div>
                     <p className="mt-2.5 text-[14px] font-medium leading-6 text-slate-100">{normalizeLegacyTerms(data.summary)}</p>
                   </div>
@@ -278,7 +287,7 @@ export function TacticalReportPoster({
                   <section className="mt-5 border-t border-white/5 pt-5">
                     <div className="mb-4 flex items-center gap-2">
                       <div className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
-                      <h2 className="text-xs font-black uppercase tracking-[0.24em] text-slate-400">投研决议</h2>
+                      <h2 className="text-xs font-black uppercase tracking-[0.24em] text-slate-400">{tPoster('decision')}</h2>
                     </div>
                     <div className="grid gap-2.5">
                       {councilCards.length > 0 ? (
@@ -306,7 +315,7 @@ export function TacticalReportPoster({
                                 </div>
                               </div>
                               <span className={`rounded-full px-2.5 py-1 text-[10px] font-black ${getActionChipClass(card.actionKey)}`}>
-                                {getCouncilActionLabel(card.actionKey)}
+                                {tGlobal(`dashboard.signal.${getCouncilActionLabel(card.actionKey)}` as FullMessageKey)}
                               </span>
                             </div>
                             <p className="mt-2.5 text-xs leading-5 text-slate-300/95">{card.summary}</p>
@@ -314,7 +323,7 @@ export function TacticalReportPoster({
                         ))
                       ) : (
                         <div className="rounded-[18px] border border-white/5 bg-white/[0.02] p-4 text-sm text-slate-500">
-                          投研决议正在调阅中，生成图片时会自动带上当前摘要与策略结构。
+                          {tPoster('decisionLoading')}
                         </div>
                       )}
                     </div>
@@ -324,18 +333,18 @@ export function TacticalReportPoster({
                 <section className="mt-5 border-t border-white/5 pt-5">
                   <div className="mb-4 flex items-center gap-2">
                     <div className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
-                    <h2 className="text-xs font-black uppercase tracking-[0.24em] text-slate-400">推演过程</h2>
+                    <h2 className="text-xs font-black uppercase tracking-[0.24em] text-slate-400">{tPoster('reasoning')}</h2>
                   </div>
                   <div className="relative space-y-3.5 before:absolute before:left-[8px] before:top-2 before:bottom-2 before:w-px before:bg-white/5">
                     {reasoningSteps.map((step, idx) => (
                       <div key={`${step.step}-${idx}`} className="relative pl-7">
                         <div className="absolute left-0 top-1.5 h-4 w-4 rounded-full border border-indigo-500/20 bg-[#0f1120] flex items-center justify-center text-indigo-300">
-                          {getStepConfig(step.step).icon}
+                          {getStepConfig(step.step, tBrief).icon}
                         </div>
                         <div className="flex items-start justify-between gap-3">
                           <div>
                             <p className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">
-                              <span>{getStepConfig(step.step).label}</span>
+                              <span>{getStepConfig(step.step, tBrief).label}</span>
                             </p>
                             <p className="mt-1 text-[12px] font-medium leading-5 text-slate-100/92">{normalizeLegacyTerms(step.data)}</p>
                           </div>
@@ -348,17 +357,17 @@ export function TacticalReportPoster({
                 <section className="mt-5 border-t border-white/5 pt-5">
                   <div className="mb-4 flex items-center gap-2">
                     <div className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
-                    <h2 className="text-xs font-black uppercase tracking-[0.24em] text-slate-400">操作建议</h2>
+                    <h2 className="text-xs font-black uppercase tracking-[0.24em] text-slate-400">{tPoster('suggestion')}</h2>
                   </div>
                   <div className="space-y-3">
                     {[
-                      { title: '持仓盈利', tone: 'border-emerald-500/15 bg-emerald-500/[0.05]', badge: '盈利中', items: scenarioHoldingProfit },
-                      { title: '持仓亏损', tone: 'border-rose-500/15 bg-rose-500/[0.05]', badge: '亏损中', items: scenarioHoldingLoss },
-                      { title: '空仓等待', tone: 'border-indigo-500/15 bg-indigo-500/[0.05]', badge: '等待入场', items: scenarioEmpty },
+                      { title: tBrief('scenario.holding_profit'), tone: 'border-emerald-500/15 bg-emerald-500/[0.05]', badge: tBrief('scenarioBadge.holding_profit'), items: scenarioHoldingProfit },
+                      { title: tBrief('scenario.holding_loss'), tone: 'border-rose-500/15 bg-rose-500/[0.05]', badge: tBrief('scenarioBadge.holding_loss'), items: scenarioHoldingLoss },
+                      { title: tBrief('scenario.empty'), tone: 'border-indigo-500/15 bg-indigo-500/[0.05]', badge: tBrief('scenarioBadge.empty'), items: scenarioEmpty },
                     ].map((group) => (
                       <div key={group.title} className={`rounded-[18px] border p-4 ${group.tone}`}>
                         <div className="mb-2.5 flex items-center justify-between">
-                          <p className="text-sm font-black text-white">场景：{group.title}</p>
+                          <p className="text-sm font-black text-white">{tPoster('scenario', { title: group.title })}</p>
                           <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] font-black text-slate-400">{group.badge}</span>
                         </div>
                         <div className="space-y-0 divide-y divide-white/5">
@@ -366,16 +375,16 @@ export function TacticalReportPoster({
                             <div key={`${group.title}-${idx}`} className="py-3 first:pt-1 last:pb-0">
                               <div className="flex items-center gap-2">
                                 <span className="rounded-md bg-white/8 px-1.5 py-0.5 text-[10px] font-black text-white">{item.priority}</span>
-                                <p className="text-sm font-black text-white">{normalizeActionLabel(item.action)}</p>
+                                <p className="text-sm font-black text-white">{formatBriefActionLabel(item.action, (slug) => tBrief(`actions.${slug}` as MessageKey<'brief'>))}</p>
                               </div>
-                              <p className="mt-2 text-xs leading-5 text-slate-300">触发：{normalizeLegacyTerms(item.trigger)}</p>
+                              <p className="mt-2 text-xs leading-5 text-slate-300">{tBrief('triggerLabel')}：{normalizeLegacyTerms(item.trigger)}</p>
                               <div className="mt-2 flex flex-wrap gap-2">
-                                {item.target_price && <span className="rounded-full bg-emerald-500/10 px-2 py-1 text-[10px] font-black text-emerald-300">目标 {formatPrice(item.target_price)}</span>}
-                                {item.stop_advance_price && <span className="rounded-full bg-amber-500/10 px-2 py-1 text-[10px] font-black text-amber-300">移动止盈 {formatPrice(item.stop_advance_price, true)}</span>}
-                                {item.stop_loss_price && <span className="rounded-full bg-rose-500/10 px-2 py-1 text-[10px] font-black text-rose-300">止损价 {formatPrice(item.stop_loss_price, true)}</span>}
-                                {item.buy_zone_price && <span className="rounded-full bg-indigo-500/10 px-2 py-1 text-[10px] font-black text-indigo-300">买入区 {formatPrice(item.buy_zone_price, true)}</span>}
+                                {item.target_price && <span className="rounded-full bg-emerald-500/10 px-2 py-1 text-[10px] font-black text-emerald-300">{tBrief('target')} {formatPrice(item.target_price)}</span>}
+                                {item.stop_advance_price && <span className="rounded-full bg-amber-500/10 px-2 py-1 text-[10px] font-black text-amber-300">{tBrief('stopAdvance')} {formatPrice(item.stop_advance_price, true)}</span>}
+                                {item.stop_loss_price && <span className="rounded-full bg-rose-500/10 px-2 py-1 text-[10px] font-black text-rose-300">{tBrief('stopLoss')} {formatPrice(item.stop_loss_price, true)}</span>}
+                                {item.buy_zone_price && <span className="rounded-full bg-indigo-500/10 px-2 py-1 text-[10px] font-black text-indigo-300">{tBrief('buyZone')} {formatPrice(item.buy_zone_price, true)}</span>}
                               </div>
-                              <p className="mt-2 text-xs leading-5 text-slate-500">理由：{normalizeLegacyTerms(item.reason)}</p>
+                              <p className="mt-2 text-xs leading-5 text-slate-500">{tBrief('reasonLabel')}：{normalizeLegacyTerms(item.reason)}</p>
                             </div>
                           ))}
                         </div>
@@ -388,14 +397,16 @@ export function TacticalReportPoster({
                   <div>
                     <div className="mb-4 flex items-center gap-2">
                       <div className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
-                      <h2 className="text-xs font-black uppercase tracking-[0.24em] text-slate-400">关键点位</h2>
+                      <h2 className="text-xs font-black uppercase tracking-[0.24em] text-slate-400">{tPoster('keyLevels')}</h2>
                     </div>
                     <div className="overflow-hidden rounded-[18px] border border-white/5 bg-white/[0.02]">
                       {priceNodes.map((node) => (
                       <div key={node.id} className="grid grid-cols-[1fr_auto] gap-3 border-t border-white/5 px-3 py-3 first:border-t-0">
                         <div className="min-w-0">
-                            <p className={`text-[10px] font-black uppercase tracking-[0.16em] ${node.kind === 'current' ? 'text-slate-300' : 'text-slate-500'}`}>{node.label}</p>
-                            <p className={`mt-1 line-clamp-1 text-[11px] leading-5 ${node.kind === 'current' ? 'text-slate-500' : 'text-slate-600'}`}>{node.description}</p>
+                            <p className={`text-[10px] font-black uppercase tracking-[0.16em] ${node.kind === 'current' ? 'text-slate-300' : 'text-slate-500'}`}>
+                                {node.__i18n ? tBrief(`levelLabels.${node.__i18n.key}` as MessageKey<'brief'>, { label: tBrief(`ordinals.${node.__i18n.ordinal}` as MessageKey<'brief'>) }) : tBrief(`levelLabels.${node.label}` as MessageKey<'brief'>)}
+                            </p>
+                            <p className={`mt-1 line-clamp-1 text-[11px] leading-5 ${node.kind === 'current' ? 'text-slate-500' : 'text-slate-600'}`}>{normalizeLegacyTerms(node.description)}</p>
                           </div>
                           <p className={`${node.kind === 'current' ? 'text-[1.0rem]' : 'text-[10px] uppercase tracking-[0.16em]'} font-black text-white`}>{node.price}</p>
                         </div>
@@ -409,7 +420,7 @@ export function TacticalReportPoster({
                     <div className="flex items-center gap-2 text-slate-500">
                       <span className="text-[10px] font-black uppercase tracking-[0.24em]">- ZISO AI -</span>
                     </div>
-                    <span className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-600">导出于 {exportDate}</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-600">{tPoster('exportedAt', { date: exportDate })}</span>
                   </div>
                 </section>
               </div>
@@ -423,7 +434,7 @@ export function TacticalReportPoster({
               className="flex h-14 flex-1 items-center justify-center gap-2 rounded-2xl bg-white text-black font-black transition-transform active:scale-95 disabled:opacity-50"
             >
               {isCapturing ? <Loader2 className="animate-spin" size={18} /> : <Share2 size={18} />}
-              分享报告
+              {tPoster('share')}
             </button>
             <button
               onClick={handleDownload}

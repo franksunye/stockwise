@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { X, User, Briefcase, Eye } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getRule, saveRule } from '@/lib/storage';
+import { useT } from '@/context/LocaleContext';
+import type { MessageKey } from '@/lib/i18n';
 
 interface Props {
   symbol: string;
@@ -17,6 +19,7 @@ interface Props {
  * 仅保留持仓状态切换，止损/压力位由 AI 自动计算
  */
 export function SettingsModal({ symbol, isOpen, onClose, onSave }: Props) {
+  const t = useT('settings');
   const [position, setPosition] = useState<'holding' | 'empty' | 'none'>('none');
 
   useEffect(() => {
@@ -39,26 +42,26 @@ export function SettingsModal({ symbol, isOpen, onClose, onSave }: Props) {
   const positionOptions = [
     { 
       id: 'holding', 
-      label: '已持仓', 
+      labelKey: 'holding.label', 
       icon: Briefcase,
-      description: 'AI 将提供止损和减仓建议',
+      descriptionKey: 'holding.desc',
       color: 'emerald'
     },
     { 
       id: 'empty', 
-      label: '未建仓', 
+      labelKey: 'empty.label', 
       icon: Eye,
-      description: 'AI 将提供入场和试错建议',
+      descriptionKey: 'empty.desc',
       color: 'blue'
     },
     { 
       id: 'none', 
-      label: '观察中', 
+      labelKey: 'none.label', 
       icon: User,
-      description: 'AI 将提供通用决策参考',
+      descriptionKey: 'none.desc',
       color: 'slate'
     }
-  ];
+  ] as const;
 
   return (
     <AnimatePresence>
@@ -85,8 +88,8 @@ export function SettingsModal({ symbol, isOpen, onClose, onSave }: Props) {
             <div className="p-8 pt-4 flex flex-col">
               <header className="flex items-center justify-between mb-8">
                 <div>
-                  <span className="text-[10px] uppercase tracking-[0.3em] text-slate-500 font-bold">个人化配置</span>
-                  <h2 className="text-xl font-black italic tracking-tighter text-white">持仓状态 <span className="text-indigo-500">STATUS</span></h2>
+                  <span className="text-[10px] uppercase tracking-[0.3em] text-slate-500 font-bold">{t('title')}</span>
+                  <h2 className="text-xl font-black italic tracking-tighter text-white">{t('positionStatus')} <span className="text-indigo-500">STATUS</span></h2>
                 </div>
                 <button onClick={onClose} className="p-2.5 rounded-full bg-white/5 border border-white/10 active:scale-90 transition-all">
                   <X className="w-5 h-5 text-slate-400" />
@@ -95,7 +98,7 @@ export function SettingsModal({ symbol, isOpen, onClose, onSave }: Props) {
 
               <div className="space-y-3">
                 <p className="text-xs text-slate-500 mb-4">
-                  选择你当前的持仓状态，AI 将据此提供更精准的操作建议
+                  {t('desc')}
                 </p>
                 
                 {positionOptions.map((opt) => {
@@ -127,10 +130,10 @@ export function SettingsModal({ symbol, isOpen, onClose, onSave }: Props) {
                       </div>
                       <div className="flex-1">
                         <p className={`text-sm font-bold ${isSelected ? 'text-white' : 'text-slate-300'}`}>
-                          {opt.label}
+                          {t(opt.labelKey as MessageKey<'settings'>)}
                         </p>
                         <p className="text-[10px] text-slate-500 mt-0.5">
-                          {opt.description}
+                          {t(opt.descriptionKey as MessageKey<'settings'>)}
                         </p>
                       </div>
                       {isSelected && (
@@ -146,13 +149,13 @@ export function SettingsModal({ symbol, isOpen, onClose, onSave }: Props) {
                   onClick={onClose}
                   className="flex-1 py-4 rounded-2xl font-black italic text-sm text-slate-500 border border-white/5 hover:bg-white/5 transition-all"
                 >
-                  取消
+                  {t('common.cancel' as MessageKey<'settings'>) || 'Cancel'}
                 </button>
                 <button
                   onClick={handleSave}
                   className="flex-[2] py-4 bg-indigo-600 hover:bg-indigo-500 rounded-2xl font-black italic text-sm text-white shadow-[0_10px_20px_rgba(79,70,229,0.3)] active:scale-95 transition-all"
                 >
-                  保存设置
+                  {t('common.save' as MessageKey<'settings'>) || 'Save'}
                 </button>
               </div>
             </div>

@@ -17,6 +17,8 @@ import { useUserCenterData } from '@/hooks/useUserCenterData';
 import { UserPricingView } from './UserPricingView';
 import { SupportCenterView } from './SupportCenterView';
 import { LearnCenterView } from './LearnCenterView';
+import { useT, useGlobalT } from '@/context/LocaleContext';
+import type { MessageKey } from '@/lib/i18n';
 import pkg from '../../package.json';
 
 interface Props {
@@ -26,15 +28,18 @@ interface Props {
 }
 
 export function UserCenterDrawer({ isOpen, onClose }: Props) {
+  const t = useT('user');
+  const tCommon = useT('common');
+  const tGlobal = useGlobalT();
   const { profile, tier, userId, refreshProfile, loading } = useUserProfile();
   const canAccessInvestmentMode = tier === 'pro' || tier === 'alpha';
   const isPremiumTier = tier !== 'free';
   const tierDisplayName: Record<typeof tier, string> = {
-    free: '普通用户',
-    go: 'Go 会员',
-    plus: 'Plus 会员',
-    pro: 'Pro 会员',
-    alpha: 'Alpha 会员',
+    free: t('tier.free'),
+    go: t('tier.go'),
+    plus: t('tier.plus'),
+    pro: t('tier.pro'),
+    alpha: t('tier.alpha'),
   };
   const tierWatchlistLimit = tier === 'free' ? 3 : 10;
 
@@ -117,15 +122,15 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
       });
       const data = await res.json();
       if (data.success) {
-        setRedeemMsg({ type: 'success', text: '激活成功！欢迎成为 Pro 会员' });
+        setRedeemMsg({ type: 'success', text: t('successRedeem') });
         await refreshProfile({ force: true });
         setRedeemCode('');
         setTimeout(() => setRedeemMsg(null), 3000);
       } else {
-        setRedeemMsg({ type: 'error', text: data.error || '激活失败' });
+        setRedeemMsg({ type: 'error', text: data.error || t('failRedeem') });
       }
     } catch {
-      setRedeemMsg({ type: 'error', text: '网络请求失败' });
+      setRedeemMsg({ type: 'error', text: t('networkFail') });
     } finally {
       setRedeeming(false);
     }
@@ -136,7 +141,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
     const normalizedEmail = tempEmail.trim().toLowerCase();
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(normalizedEmail)) {
-      setEmailMsg({ type: 'error', text: '邮箱格式不正确' });
+      setEmailMsg({ type: 'error', text: tCommon('errorRetry') });
       return;
     }
 
@@ -151,20 +156,20 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
 
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.success) {
-        setEmailMsg({ type: 'error', text: data.error || `绑定失败 (${res.status})` });
+        setEmailMsg({ type: 'error', text: data.error || `${tCommon('error')} (${res.status})` });
         return;
       }
 
       const refreshed = await refreshProfile({ force: true });
       const linkedEmail = refreshed?.email || data.email || normalizedEmail;
-      setEmailMsg({ type: 'success', text: `绑定成功：${linkedEmail}` });
+      setEmailMsg({ type: 'success', text: `${t('successRedeem')}: ${linkedEmail}` });
       setTempEmail('');
       setTimeout(() => {
         setEmailMsg(null);
         setShowEmailForm(false);
       }, 1200);
     } catch {
-      setEmailMsg({ type: 'error', text: '网络请求失败' });
+      setEmailMsg({ type: 'error', text: t('networkFail') });
     } finally {
       setIsLinkingEmail(false);
     }
@@ -204,7 +209,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
               </div>
               <div className="flex-1 text-center">
                 <h2 className="text-xl font-black italic tracking-tighter text-white uppercase mt-1">
-                  {showPricing ? '订阅方案' : showIdentityCenter ? '账号设置' : (showInvestmentMode && canAccessInvestmentMode) ? '投资模式' : showSupport ? '帮助与支持' : showLearn ? '101 手册' : '个人中心'}
+                  {showPricing ? tCommon('save') : showIdentityCenter ? t('identity') : (showInvestmentMode && canAccessInvestmentMode) ? t('investmentMode') : showSupport ? t('support') : showLearn ? t('learn') : t('center')}
                 </h2>
               </div>
               <div className="w-10 flex justify-end">
@@ -231,19 +236,19 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                                 <Mail size={14} className="text-indigo-400" />
-                                <span className="text-xs font-bold text-indigo-200 uppercase tracking-widest">绑定支付/恢复邮箱</span>
+                                <span className="text-xs font-bold text-indigo-200 uppercase tracking-widest">{t('linkEmail')}</span>
                             </div>
                             <button onClick={() => setShowEmailForm(false)} className="text-slate-600 hover:text-slate-400"><X size={12} /></button>
                         </div>
                         <p className="text-[10px] text-slate-500 leading-relaxed text-left">
-                            绑定邮箱以防丢失账号，找回所有付费权益。
+                            {t('linkEmailDesc')}
                         </p>
                         <div className="flex gap-2">
                           <input 
                             type="email" 
                             value={tempEmail} 
                             onChange={(e) => setTempEmail(e.target.value)} 
-                            placeholder="your@email.com" 
+                            placeholder={t('placeholderEmail')} 
                             disabled={isLinkingEmail}
                             className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 disabled:opacity-50" 
                           />
@@ -252,7 +257,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                             disabled={!tempEmail || isLinkingEmail} 
                             className="bg-indigo-600 text-white min-w-[70px] px-4 py-2 rounded-xl text-xs font-bold active:scale-95 transition-all flex items-center justify-center disabled:opacity-50"
                           >
-                            {isLinkingEmail ? <Loader2 size={14} className="animate-spin" /> : '确定'}
+                            {isLinkingEmail ? <Loader2 size={14} className="animate-spin" /> : t('confirm')}
                           </button>
                         </div>
                         {emailMsg && <p className={`text-[10px] font-bold mt-1 ${emailMsg.type === 'success' ? 'text-emerald-400' : 'text-rose-400'}`}>{emailMsg.text}</p>}
@@ -262,11 +267,11 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                       <div className="flex items-center justify-between mb-3 text-left">
                           <div className="flex items-center gap-2">
                               <RefreshCw size={14} className="text-slate-500" />
-                              <span className="text-xs font-bold text-slate-400">换机/找回账号</span>
+                              <span className="text-xs font-bold text-slate-400">{t('restoreAccount')}</span>
                           </div>
                       </div>
                       <div className="flex gap-2">
-                        <input type="text" value={restoreId} onChange={(e) => setRestoreId(e.target.value.toLowerCase())} placeholder="user_xxxx" className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-indigo-500" />
+                        <input type="text" value={restoreId} onChange={(e) => setRestoreId(e.target.value.toLowerCase())} placeholder={t('placeholderUserId')} className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-indigo-500" />
                         <button onClick={async () => {
                           if (!restoreId || restoring) return;
                           setRestoring(true);
@@ -308,7 +313,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                           <h3 className="text-base font-black italic text-white uppercase">{tierDisplayName[tier]}</h3>
                           {expiresAt && isPremiumTier && (
                             <p className="text-[10px] text-emerald-500/80 font-bold flex items-center gap-1.5 mt-0.5">
-                                <ShieldCheck size={10} /> 有效期至: {expiresAt.split('T')[0]}
+                                <ShieldCheck size={10} /> {t('expiresAt', { date: expiresAt.split('T')[0] })}
                             </p>
                           )}
                         </div>
@@ -318,7 +323,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                     {/* Quota Section */}
                     <div className="glass-card !p-0 rounded-[24px] overflow-hidden border-white/5 bg-white/[0.02]">
                       <div className="px-5 py-4 flex items-center justify-between">
-                        <span className="text-sm font-bold text-slate-400 uppercase tracking-wide">自选额度</span>
+                        <span className="text-sm font-bold text-slate-400 uppercase tracking-wide">{t('watchlistUsage')}</span>
                         <div className="flex items-center gap-2">
                           <span className={`text-base font-black ${watchlistCount >= tierWatchlistLimit ? 'text-amber-400' : 'text-white'}`}>{watchlistCount}</span>
                           <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">/ {tierWatchlistLimit}</span>
@@ -329,9 +334,9 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                     {/* Nav Buttons */}
                     <div className="space-y-3">
                       <button onClick={() => setShowIdentityCenter(true)} className={`w-full py-4 px-5 rounded-[24px] border transition-all flex items-center justify-between group ${isPremiumTier ? 'bg-amber-500/[0.03] border-amber-500/20 hover:border-amber-500/40 hover:bg-amber-500/[0.06]' : 'bg-white/5 border-white/5 hover:border-white/10'}`}>
-                        <span className={`text-sm font-bold ${isPremiumTier ? 'text-amber-100' : 'text-white'} uppercase`}>账号设置</span>
+                        <span className={`text-sm font-bold ${isPremiumTier ? 'text-amber-100' : 'text-white'} uppercase`}>{t('settings')}</span>
                         <div className="flex items-center gap-3">
-                            {userEmail && <span className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 text-xs font-bold border border-emerald-500/20"><ShieldCheck size={12} /> 已保护</span>}
+                            {userEmail && <span className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 text-xs font-bold border border-emerald-500/20"><ShieldCheck size={12} /> {t('protected')}</span>}
                             {!userEmail && isPremiumTier && <div className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />}
                             <ChevronRight size={14} className="text-slate-600 group-hover:text-white transition-colors" />
                         </div>
@@ -350,11 +355,11 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                           >
                               <div className="flex items-center gap-3">
                                   <h4 className="text-sm font-bold text-white">
-                                      投资模式
+                                      {t('investmentMode')}
                                   </h4>
                                   <span className="px-2 py-0.5 rounded-lg bg-indigo-500/10 text-[10px] font-bold text-indigo-400 border border-indigo-500/20">
                                       <span data-user-center-current-mode="true">
-                                      {currentMode ? currentMode.name : '加载中...'}
+                                      {currentMode ? currentMode.name : tCommon('loading')}
                                       </span>
                                   </span>
                               </div>
@@ -404,14 +409,14 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                     {pushSupported && (
                       <div className="glass-card !p-0 rounded-[24px] overflow-hidden border-white/5 bg-white/[0.02]">
                         <div className="px-5 py-4 pb-2 flex items-center justify-between">
-                            <h4 className="text-sm font-bold text-white uppercase">推送通知</h4>
+                            <h4 className="text-sm font-bold text-white uppercase">{t('push.title')}</h4>
                             {isSubscribed ? (
                                 <button onClick={async () => {
                                   const ok = await handleDisableNotifications();
                                   if (!ok) {
-                                    setRedeemMsg({ type: 'error', text: '关闭失败，请重试' });
+                                    setRedeemMsg({ type: 'error', text: t('push.disableFailed') });
                                   }
-                                }} disabled={isSubscribing} className="px-3 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/30 transition-all uppercase">{isSubscribing ? '...' : '已开启'}</button>
+                                }} disabled={isSubscribing} className="px-3 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/30 transition-all uppercase">{isSubscribing ? '...' : t('push.enabled')}</button>
                             ) : (
                                 <button onClick={async () => {
                                   const result = await handleEnableNotifications();
@@ -419,7 +424,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                   if (result.success) {
                                     setTimeout(() => setRedeemMsg(null), 3000);
                                   }
-                                }} disabled={isSubscribing} className="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg transition-all active:scale-95 disabled:opacity-50 uppercase">{isSubscribing ? '...' : '开启'}</button>
+                                }} disabled={isSubscribing} className="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg transition-all active:scale-95 disabled:opacity-50 uppercase">{isSubscribing ? '...' : t('push.enable')}</button>
                             )}
                         </div>
                         {isSubscribed && (
@@ -427,7 +432,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                             {isAndroid && (
                               <div className="mt-2 mb-3 px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-left">
                                 <p className="text-[10px] text-amber-200/90 font-bold">
-                                  ⚠️ Android 推送不可用，请主动打开应用获取数据。
+                                  ⚠️ {t('push.androidLimited')}
                                 </p>
                               </div>
                             )}
@@ -435,33 +440,45 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                 setShowNotificationSettings(!showNotificationSettings);
                                 if (!showNotificationSettings) setShowReferralDetails(false);
                             }} data-user-center-notification-settings-button="true" className="w-full flex items-center justify-between text-[10px] text-slate-500 hover:text-indigo-400 transition-colors uppercase font-bold tracking-widest">
-                                高级偏好设置
+                                {t('push.advancedSettings')}
                                 <ChevronDown className={`w-3 h-3 transition-transform ${showNotificationSettings ? 'rotate-180' : ''}`} />
                             </button>
                             <AnimatePresence>
                               {showNotificationSettings && (
                                 <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
                                   <div className="mt-3 space-y-1.5 pb-2">
-                                    {[
-                                      { key: 'signal_flip', icon: ArrowLeftRight, label: '趋势反转', badge: '重要' },
-                                      { key: 'morning_call', icon: Sun, label: '每日早报', badge: '08:30' },
-                                      { key: 'validation_glory', icon: Trophy, label: '回看战报', badge: '通过率' },
-                                      { key: 'prediction_updated', icon: Zap, label: '预测更新', badge: '分析完成' },
-                                      { key: 'daily_brief', icon: FileText, label: tier === 'pro' ? 'Pro 深度复盘' : '简报生成', badge: tier === 'pro' ? '★ 专属' : '17:30', isPro: tier === 'pro' },
-                                      { key: 'price_update', icon: Info, label: '实时行情', badge: '盘中推送' },
-                                      { key: 'market_almanac', icon: Sun, label: '投资黄历', badge: '每日双发' },
-                                    ].map((type) => {
+                                    {([
+                                      { key: 'signal_flip', icon: ArrowLeftRight },
+                                      { key: 'morning_call', icon: Sun },
+                                      { key: 'validation_glory', icon: Trophy },
+                                      { key: 'prediction_updated', icon: Zap },
+                                      { key: 'daily_brief', icon: FileText, isDailyBrief: true as const, isPro: tier === 'pro' },
+                                      { key: 'price_update', icon: Info },
+                                      { key: 'market_almanac', icon: Sun },
+                                    ] as const).map((type) => {
                                       const isEnabled = notificationSettings.types[type.key as keyof typeof notificationSettings.types]?.enabled ?? true;
                                       const isPro = 'isPro' in type && type.isPro;
                                       const IconComponent = type.icon;
+                                      const label =
+                                        'isDailyBrief' in type && type.isDailyBrief
+                                          ? tier === 'pro'
+                                            ? t('push.types.daily_brief.labelPro' as MessageKey<'user'>)
+                                            : t('push.types.daily_brief.labelStandard' as MessageKey<'user'>)
+                                          : t(`push.types.${type.key}.label` as MessageKey<'user'>);
+                                      const badge =
+                                        'isDailyBrief' in type && type.isDailyBrief
+                                          ? tier === 'pro'
+                                            ? t('push.types.daily_brief.badgePro' as MessageKey<'user'>)
+                                            : t('push.types.daily_brief.badgeStandard' as MessageKey<'user'>)
+                                          : t(`push.types.${type.key}.badge` as MessageKey<'user'>);
                                       return (
                                         <div key={type.key} className={`flex items-center justify-between py-1.5 ${isPro ? 'bg-amber-500/5 -mx-1 px-1 rounded-lg' : ''}`}>
                                           <div className="flex items-center gap-2.5 flex-1">
                                             <div className={`w-6 h-6 rounded-md flex items-center justify-center ${isPro ? 'bg-amber-500/20' : 'bg-white/5'}`}>
                                                 <IconComponent className={`w-3.5 h-3.5 ${isPro ? 'text-amber-400' : 'text-indigo-400'}`} />
                                             </div>
-                                            <span className={`text-[11px] font-medium ${isPro ? 'text-amber-200' : 'text-slate-200'}`}>{type.label}</span>
-                                            <span className={`text-[9px] px-1.5 py-0.5 rounded ${isPro ? 'bg-amber-500/20 text-amber-400 font-black' : 'bg-slate-800/60 text-slate-500 font-bold'}`}>{type.badge}</span>
+                                            <span className={`text-[11px] font-medium ${isPro ? 'text-amber-200' : 'text-slate-200'}`}>{label}</span>
+                                            <span className={`text-[9px] px-1.5 py-0.5 rounded ${isPro ? 'bg-amber-500/20 text-amber-400 font-black' : 'bg-slate-800/60 text-slate-500 font-bold'}`}>{badge}</span>
                                           </div>
                                           <button onClick={() => {
                                             void updateNotificationSetting(type.key as keyof typeof notificationSettings.types, !isEnabled);
@@ -473,7 +490,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                     })}
                                     <div className="pt-1.5 mt-1.5 border-t border-white/5 flex justify-center">
                                         <button onClick={handleTestPush} disabled={testingPush} className="flex items-center gap-2 py-1.5 px-4 rounded-xl hover:bg-white/5 transition-colors text-[10px] text-slate-500 hover:text-indigo-400 font-bold uppercase tracking-wider disabled:opacity-50">
-                                            <Bell size={12} /> {testingPush ? '发送中...' : '测试推送'}
+                                            <Bell size={12} /> {testingPush ? t('push.testPushSending') : t('push.testPush')}
                                         </button>
                                     </div>
                                   </div>
@@ -491,19 +508,19 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                         <div className="glass-card !p-0 rounded-[24px] overflow-hidden relative group border-white/5 bg-white/[0.02]">
                           <div className="relative z-10 px-5 py-4 pb-2">
                              <div className="flex items-center justify-between mb-3">
-                                <h4 className="text-sm font-black italic text-white flex items-center gap-2">
-                                    {isChannel ? (referralAlias || '合伙人') : '邀请好友领 Go'}
-                                    {isChannel ? (
-                                        <span className="px-1.5 py-0.5 rounded bg-amber-500 text-[8px] font-black uppercase not-italic text-black">C</span>
-                                    ) : (
-                                        <span className="px-1.5 py-0.5 rounded bg-emerald-500 text-[8px] font-black uppercase not-italic">+{MEMBERSHIP_CONFIG.referral.referrerDays} Days</span>
-                                    )}
-                                </h4>
-                                {referralCount > 0 && (
-                                    <span className="px-2 py-0.5 rounded-full bg-indigo-500/20 text-[10px] font-black text-indigo-300">
-                                        成功邀请 {referralCount} 人
-                                    </span>
-                                )}
+                 <h4 className="text-sm font-black italic text-white flex items-center gap-2">
+                                     {isChannel ? (referralAlias || t('referral.partner')) : t('referral.title')}
+                                     {isChannel ? (
+                                         <span className="px-1.5 py-0.5 rounded bg-amber-500 text-[8px] font-black uppercase not-italic text-black">C</span>
+                                     ) : (
+                                         <span className="px-1.5 py-0.5 rounded bg-emerald-500 text-[8px] font-black uppercase not-italic">{t('referral.rewardDays', { days: MEMBERSHIP_CONFIG.referral.referrerDays })}</span>
+                                     )}
+                                 </h4>
+                                 {referralCount > 0 && (
+                                     <span className="px-2 py-0.5 rounded-full bg-indigo-500/20 text-[10px] font-black text-indigo-300">
+                                         {t('referral.successCount', { count: referralCount })}
+                                     </span>
+                                 )}
                                 <Share2 className="w-8 h-8 text-indigo-500/10 absolute top-4 right-4" />
                              </div>
 
@@ -518,17 +535,17 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                     
                                     try {
                                         await navigator.clipboard.writeText(url);
-                                        setRedeemMsg({ type: 'success', text: '邀请链接已复制！' });
+                                        setRedeemMsg({ type: 'success', text: t('referral.copied') });
                                     } catch (err) {
                                         console.error('Copy failed', err);
-                                        setRedeemMsg({ type: 'error', text: '复制失败，请手动长按复制' });
+                                        setRedeemMsg({ type: 'error', text: t('referral.copyFail') });
                                     }
                                     setTimeout(() => setRedeemMsg(null), 2000);
                                 }}
                                 className="w-full py-2.5 mb-2 rounded-xl bg-indigo-500/10 border border-indigo-500/20 hover:bg-indigo-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-xs font-bold text-indigo-300"
                              >
-                                {(redeemMsg?.text === '邀请链接已复制！') ? <Check size={14} className="text-emerald-400" /> : <Share2 size={14} />}
-                                {(redeemMsg?.text === '邀请链接已复制！') ? '已复制' : '复制分享链接'}
+                                {(redeemMsg?.text === t('referral.copied')) ? <Check size={14} className="text-emerald-400" /> : <Share2 size={14} />}
+                                {(redeemMsg?.text === t('referral.copied')) ? t('referral.copied') : t('referral.inviteLink')}
                              </button>
                           </div>
 
@@ -537,7 +554,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                 setShowReferralDetails(!showReferralDetails);
                                 if (!showReferralDetails) setShowNotificationSettings(false);
                             }} className="w-full flex items-center justify-between text-[10px] text-slate-500 hover:text-indigo-400 transition-colors uppercase font-bold tracking-widest">
-                                {isChannel ? '收益详情' : '奖励规则'}
+                                {isChannel ? t('referral.revenue') : t('referral.rules')}
                                 <ChevronDown className={`w-3 h-3 transition-transform ${showReferralDetails ? 'rotate-180' : ''}`} />
                             </button>
                             <AnimatePresence>
@@ -548,32 +565,37 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                     <>
                                       <div className="grid grid-cols-2 gap-2 mt-2 mb-2">
                                         <div className="bg-white/5 rounded-2xl p-3 border border-white/5 text-left">
-                                          <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-1">成功邀请人数</div>
-                                          <div className="text-lg font-black text-indigo-300">{referralCount} <span className="text-xs font-bold text-slate-500">人</span></div>
+                                          <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-1">{t('referral.inviteCountLabel')}</div>
+                                          <div className="text-lg font-black text-indigo-300">{referralCount} <span className="text-xs font-bold text-slate-500">{t('referral.unitPeople')}</span></div>
                                         </div>
                                         <div className="bg-white/5 rounded-2xl p-3 border border-white/5 text-left">
-                                          <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-1">累计获赠时长</div>
-                                          <div className="text-lg font-black text-emerald-400">{referralCount * MEMBERSHIP_CONFIG.referral.referrerDays} <span className="text-xs font-bold text-slate-500">天</span></div>
+                                          <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-1">{t('referral.earnedProDaysLabel')}</div>
+                                          <div className="text-lg font-black text-emerald-400">{referralCount * MEMBERSHIP_CONFIG.referral.referrerDays} <span className="text-xs font-bold text-slate-500">{t('referral.unitDays')}</span></div>
                                         </div>
                                       </div>
                                       <div className="px-1 mb-3">
                                           <p className="text-[10px] text-slate-500 leading-relaxed text-left">
-                                            每成功邀请 1 位新用户入池，你与好友均可自动获得 <span className="text-emerald-400 font-bold">{MEMBERSHIP_CONFIG.referral.refereeDays} 天</span> Pro 会员权益。
+                                            {t('referral.rulesExplainerBefore')}
+                                            <span className="text-emerald-400 font-bold">
+                                              {t('referral.rulesExplainerHighlight', { days: MEMBERSHIP_CONFIG.referral.refereeDays })}
+                                            </span>
+                                            {t('referral.rulesExplainerAfter')}
                                           </p>
                                       </div>
                                     </>
                                   )}
 
-                                  {/* Earnings Dashboard (shown for all, enhanced for channels) */}
                                   {/* Earnings Dashboard (shown for channels only) */}
                                   {isChannel && (
                                     <div className="grid grid-cols-2 gap-2 mt-2 mb-1">
                                       <div className="rounded-2xl p-3 border text-left bg-amber-500/5 border-amber-500/10">
-                                        <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-1">分润余额</div>
+                                        <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-1">{t('referral.partnerBalanceLabel')}</div>
                                         <div className="text-lg font-black text-amber-400">¥{referralBalance.toFixed(2)}</div>
                                       </div>
                                       <div className="bg-white/5 rounded-2xl p-3 border border-white/5 text-left">
-                                        <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-1">累计收益 ({(commissionRate * 100).toFixed(0)}%)</div>
+                                        <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-1">
+                                          {t('referral.partnerTotalEarnedLabel', { percent: (commissionRate * 100).toFixed(0) })}
+                                        </div>
                                         <div className="text-lg font-black text-white">¥{totalEarned.toFixed(2)}</div>
                                       </div>
                                     </div>
@@ -582,7 +604,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                   {/* Channel-specific: Transaction History */}
                                   {isChannel && recentTransactions.length > 0 && (
                                     <div className="mt-3 mb-1">
-                                      <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-2 px-1">最近交易</div>
+                                      <div className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-2 px-1">{t('referral.partnerRecentTx')}</div>
                                       <div className="space-y-1 max-h-[160px] overflow-y-auto">
                                         {recentTransactions.map((tx, i) => (
                                           <div key={i} className="flex items-center justify-between py-1.5 px-2 rounded-lg bg-white/[0.02]">
@@ -603,7 +625,10 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                   {isChannel && (
                                     <div className="mt-2 mb-1 px-1">
                                       <p className="text-[10px] text-slate-600 leading-relaxed text-left">
-                                        佣金比例 <span className="text-amber-400 font-bold">{(commissionRate * 100).toFixed(0)}%</span> · 成功推荐 <span className="text-white font-bold">{referralCount}</span> 人
+                                        {t('referral.channelCommissionWord')}{' '}
+                                        <span className="text-amber-400 font-bold">{(commissionRate * 100).toFixed(0)}%</span>
+                                        {' · '}
+                                        {t('referral.successCount', { count: referralCount })}
                                       </p>
                                     </div>
                                   )}
@@ -618,7 +643,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                     {/* Support & Links */}
                     <div className="space-y-3">
                       <button onClick={() => setShowSupport(true)} className="w-full py-4 px-5 rounded-[24px] bg-white/5 border border-white/5 flex items-center justify-between group">
-                          <div className="flex items-center gap-3"><HelpCircle className="text-emerald-400" size={18} /><span className="text-sm font-bold text-white uppercase tracking-tight">帮助与支持</span></div>
+                          <div className="flex items-center gap-3"><HelpCircle className="text-emerald-400" size={18} /><span className="text-sm font-bold text-white uppercase tracking-tight">{t('support')}</span></div>
                           <ChevronRight size={14} className="text-slate-600 group-hover:text-white transition-colors" />
                       </button>
                       
@@ -626,8 +651,8 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                         <div className="flex items-center gap-3">
                           <BookOpen className="w-5 h-5 text-indigo-400" />
                           <div className="text-left">
-                            <span className="block text-sm font-bold text-white">101 手册</span>
-                            <span className="block text-[10px] text-slate-500 font-medium">散户避坑与生存指南</span>
+                            <span className="block text-sm font-bold text-white">{t('learn')}</span>
+                            <span className="block text-[10px] text-slate-500 font-medium">{t('learnSubtitle')}</span>
                           </div>
                         </div>
                         <ChevronRight size={14} className="text-slate-600 group-hover:text-white transition-colors" />
@@ -636,7 +661,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                       <button onClick={() => setShowPricing(true)} className={`w-full py-4 px-5 rounded-[24px] border transition-all flex items-center justify-between group ${isPremiumTier ? 'bg-white/[0.02] border-white/5 hover:border-indigo-500/20' : 'bg-indigo-500/5 border-indigo-500/10 hover:border-indigo-500/20'}`}>
                         <div className="flex items-center gap-3">
                           <Crown className={`w-5 h-5 ${isPremiumTier ? 'text-slate-400' : 'text-amber-400'}`} />
-                          <span className="text-sm font-bold text-white uppercase text-left">{isPremiumTier ? '订阅方案' : '解锁 Go 权益'}</span>
+                          <span className="text-sm font-bold text-white uppercase text-left">{isPremiumTier ? tGlobal('pricing.title') : '解锁 Go 权益'}</span>
                         </div>
                         <ChevronRight size={14} className="text-slate-600 group-hover:text-white transition-colors" />
                       </button>
@@ -650,12 +675,12 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                             <div className="flex items-center justify-between mb-3 px-1 text-left">
                                <div className="flex items-center gap-2">
                                  <Key size={14} className="text-slate-500" />
-                                 <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">使用激活码</span>
+                                 <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">{t('redeem')}</span>
                                </div>
                                {redeemMsg && <span className={`text-[10px] font-black uppercase ${redeemMsg.type === 'success' ? 'text-emerald-400' : 'text-rose-400'}`}>{redeemMsg.text}</span>}
                             </div>
                             <div className="flex gap-2">
-                               <input type="text" value={redeemCode} onChange={(e) => setRedeemCode(e.target.value.toUpperCase())} placeholder="PRO-XXXX" className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-sm text-white uppercase font-mono focus:border-indigo-500 transition-colors" />
+                               <input type="text" value={redeemCode} onChange={(e) => setRedeemCode(e.target.value.toUpperCase())} placeholder={t('redeemPlaceholder')} className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-sm text-white uppercase font-mono focus:border-indigo-500 transition-colors" />
                                <button onClick={handleRedeem} disabled={!redeemCode || redeeming} className="bg-indigo-600 px-5 rounded-xl text-white active:scale-95 transition-all">
                                   {redeeming ? <Loader2 className="animate-spin w-5 h-5" /> : <ArrowRight className="w-5 h-5" />}
                                </button>
@@ -676,7 +701,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                             }} 
                             className="text-[9px] text-slate-700 hover:text-slate-500 font-bold uppercase tracking-[0.3em] transition-colors"
                           >
-                            重新进入激活引导
+                            {t('onboardingReset')}
                           </button>
                           <div className="mt-4 opacity-60 text-[8px] text-slate-400 uppercase tracking-widest font-medium">ZISO AI v{pkg.version}</div>
                         </div>
