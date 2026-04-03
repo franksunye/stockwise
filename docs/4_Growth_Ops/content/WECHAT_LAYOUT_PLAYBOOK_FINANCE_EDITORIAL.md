@@ -1,4 +1,16 @@
-# 公众号排版发布手册：财经杂志风格
+---
+title: "微信公众号财经深度编辑排版手册"
+content_id: "ops-wechat-layout-playbook"
+content_source: "growth"
+content_type: "guide"
+source_docs:
+  - docs/4_Growth_Ops/46_Content_Operations_System_Blueprint.md
+workflow:
+  stage: "published"
+  last_action_at: "2026-04-03"
+---
+
+# 微信公众号财经深度编辑排版手册
 
 适用范围：
 

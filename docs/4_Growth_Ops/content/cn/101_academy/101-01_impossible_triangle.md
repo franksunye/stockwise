@@ -3,7 +3,25 @@ title: "101-01: 散户的不可能三角"
 subtitle: "为什么 90% 的散户注定亏损？"
 date: "2026-02-04"
 image: "/images/learn/101-01_impossible_triangle_cover.png"
+content_id: "growth-101-01"
+content_source: "growth"
+content_type: "article"
+funnel_stage: "TOFU"
+category: "The Mind"
+source_docs:
+  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
+workflow:
+  stage: "published"
+  last_action_at: "2026-04-03"
+website:
+  enabled: true
+  surface: "learn"
+distribution:
+  wechat:
+    status: "published"
 ---
+
+
 
 # 散户的"不可能三角"：为什么 90% 的人注定亏损？
 

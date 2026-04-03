@@ -1,4 +1,16 @@
-# GRSAI 图片生成工具说明
+---
+title: "GRSAI 图像生成工具使用说明"
+content_id: "ops-image-tool-guide"
+content_source: "growth"
+content_type: "guide"
+source_docs:
+  - docs/4_Growth_Ops/46_Content_Operations_System_Blueprint.md
+workflow:
+  stage: "published"
+  last_action_at: "2026-04-03"
+---
+
+# GRSAI 图像生成工具说明
 
 工具脚本：
 

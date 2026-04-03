@@ -3,7 +3,24 @@ title: "101-05: 赌徒谬误 (Gambler's Fallacy)"
 subtitle: "市场没有记忆，不要试图抄底"
 date: "2026-02-04"
 image: "/images/learn/101-05_gamblers_fallacy_cover.png"
+content_id: "growth-101-05"
+content_source: "growth"
+content_type: "article"
+funnel_stage: "TOFU"
+category: "The Mind"
+source_docs:
+  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
+workflow:
+  stage: "published"
+  last_action_at: "2026-04-03"
+website:
+  enabled: true
+  surface: "learn"
+distribution:
+  wechat:
+    status: "published"
 ---
+
 
 # 赌徒谬误：连跌 5 天了，明天一定会涨吗？
 

@@ -3,7 +3,25 @@ title: "101-03: 厌恶损失 (Loss Aversion)"
 subtitle: "为什么我们会死扛亏损，却拿不住利润？"
 date: "2026-02-04"
 image: "/images/learn/101-03_loss_aversion_cover.png"
+content_id: "growth-101-03"
+content_source: "growth"
+content_type: "article"
+funnel_stage: "TOFU"
+category: "The Mind"
+source_docs:
+  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
+workflow:
+  stage: "published"
+  last_action_at: "2026-04-03"
+website:
+  enabled: true
+  surface: "learn"
+distribution:
+  wechat:
+    status: "published"
 ---
+
+
 
 # 厌恶损失 (Loss Aversion)：为什么你拿不住利润，却死扛亏损？
 

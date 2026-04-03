@@ -1,3 +1,15 @@
+---
+title: "2026Q2 10W+ 图片作战稿"
+content_id: "ops-visual-playbook-2026q2"
+content_source: "growth"
+content_type: "guide"
+source_docs:
+  - docs/4_Growth_Ops/46_Content_Operations_System_Blueprint.md
+workflow:
+  stage: "published"
+  last_action_at: "2026-04-03"
+---
+
 # 2026Q2 10W+ 图片作战稿
 
 适用范围：

@@ -1,37 +1,37 @@
 # 最近修订内容 (Recently Updated)
 
-> 自动生成时间：2026/3/30 15:24:40
+> 自动生成时间：2026/4/3 15:53:41
 > 说明：按最近 Git 变更时间排序，帮助团队快速识别近期被修改或维护的内容资产。
 
 | 标题 | 来源 | 漏斗 | 最后动作 | 维护状态 | 修订原因 | 主流程 | 视觉资产 | 溯源 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| [交易大师图鉴 02｜普拉迪普·邦德：真正的动量，不是捕捉无序的躁动，而是等待足以改写叙事的爆发。](../master_series/ms-02_pradeep_bonde.md) | Growth | TOFU | 2026-03-25 | stable | - | ✍️ 生产中 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ❌ 缺失 | healthy |
-| [交易大师图鉴 03｜亚历山大·埃尔德：真正的高手，不是多看几张图，而是学会给市场“加滤网”。](../master_series/ms-03_alexander_elder.md) | Growth | MOFU | 2026-03-25 | stable | - | ✍️ 生产中 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ❌ 缺失 | healthy |
-| [交易大师图鉴 04｜理查德·丹尼斯：比起赚多少钱，他更想证明：交易员不是天生的，而是可以被“练”出来的。](../master_series/ms-04_richard_dennis.md) | Growth | TOFU | 2026-03-25 | stable | - | ✍️ 生产中 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ❌ 缺失 | healthy |
-| [交易大师图鉴 05｜沃伦·巴菲特：最难模仿的，不是他会选股，而是他能几十年都按同一套原则活着](../master_series/ms-05_warren_buffett.md) | Growth | TOFU | 2026-03-25 | stable | - | ✍️ 生产中 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ❌ 缺失 | healthy |
-| [交易大师图鉴 06｜SEPA：它最厉害的地方，不是教你找买点，而是教你如何拒绝平庸的机会。](../master_series/ms-06_sepa.md) | Growth | TOFU | 2026-03-25 | stable | - | ✍️ 生产中 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ❌ 缺失 | healthy |
-| [交易大师图鉴 07｜事件拐点（Episodic Pivot）：真正重要的，不是涨了，而是市场突然开始用新逻辑看它](../master_series/ms-07_episodic_pivot.md) | Growth | TOFU | 2026-03-25 | stable | - | ✍️ 生产中 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ❌ 缺失 | healthy |
-| [交易大师图鉴 08｜三重滤网（Triple Screen）：它最震撼的地方，不是教你多看几张图，而是戳破了单周期里的“虚假繁荣”。](../master_series/ms-08_triple_screen.md) | Growth | TOFU | 2026-03-25 | stable | - | ✍️ 生产中 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ❌ 缺失 | healthy |
-| [交易大师图鉴 09｜趋势突破（Trend Breakout）：真正重要的，不是教你追涨，而是教你只在趋势站稳后，才准许自己进攻。](../master_series/ms-09_trend_breakout.md) | Growth | TOFU | 2026-03-25 | stable | - | ✍️ 生产中 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ❌ 缺失 | healthy |
-| [交易大师图鉴 10｜ATR 止损：它最重要的地方，不是让止损更复杂，而是让风险终于开始按波动说话](../master_series/ms-10_atr_stop.md) | Growth | TOFU | 2026-03-25 | stable | - | ✍️ 生产中 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ❌ 缺失 | healthy |
-| [交易大师图鉴 01｜马克·米勒维尼：他不是教你追涨，他是在教你只打最有把握的仗](../master_series/ms-01_mark_minervini.md) | Growth | TOFU | 2026-03-25 | stable | - | 🚀 已发布 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ❌ 缺失 | healthy |
-| [交易大师图鉴 11｜固定止损 vs ATR 止损：真正重要的，不是哪套更高级，而是哪套更贴近真实波动](../master_series/ms-11_fixed_vs_atr_stop.md) | Growth | TOFU | 2026-03-25 | stable | - | ✍️ 生产中 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ❌ 缺失 | healthy |
-| [交易大师图鉴 12｜海龟交易：它最震撼的地方，不是突破本身，而是把交易拆成一套能训练人的规则](../master_series/ms-12_turtle_trading.md) | Growth | TOFU | 2026-03-25 | stable | - | ✍️ 生产中 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ❌ 缺失 | healthy |
-| [交易大师图鉴 13｜波动收缩形态（VCP）：真正迷人的，不是那个图形，而是市场在突破前最后一次“阻力排查”。](../master_series/ms-13_vcp.md) | Growth | TOFU | 2026-03-25 | stable | - | ✍️ 生产中 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ❌ 缺失 | healthy |
-| [交易大师图鉴 14｜动量突破（Momentum Breakout）：真正伟大的进攻，不是教你追热点，而是教你只在强者获得“二次加速”时，才果断入场。](../master_series/ms-14_momentum_breakout.md) | Growth | TOFU | 2026-03-25 | stable | - | ✍️ 生产中 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ❌ 缺失 | healthy |
-| [交易大师图鉴 15｜多周期确认：真正的高手，不是看更多图，而是当大方向与小触发“吵架”时，敢于立刻停下来。](../master_series/ms-15_multi_timeframe_confirmation.md) | Growth | TOFU | 2026-03-25 | stable | - | ✍️ 生产中 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ❌ 缺失 | healthy |
-| [交易大师图鉴 16｜事件驱动型进攻结构：它最重要的地方，不是追新闻，而是看懂哪种变化足以改变市场预期](../master_series/ms-16_catalyst_driven_setup.md) | Growth | TOFU | 2026-03-25 | stable | - | ✍️ 生产中 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ❌ 缺失 | healthy |
-| [交易大师图鉴 17｜固定止损 vs 结构止损：止损不只是一个数字，而是你敢不敢给这笔交易定死一个“承认看错”的边界。](../master_series/ms-17_fixed_vs_structure_stop.md) | Growth | TOFU | 2026-03-25 | stable | - | ✍️ 生产中 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ❌ 缺失 | healthy |
-| [交易大师图鉴 18｜DTR-R：交易不是一团乱麻，它是由四个拆得开、说得清的“核心零件”组成的逻辑闭环。](../master_series/ms-18_direction_trigger_risk_return.md) | Growth | TOFU | 2026-03-25 | stable | - | ✍️ 生产中 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ❌ 缺失 | healthy |
-| [交易大师图鉴 19｜L2 级规则量化：交易高手的分水岭，不在于电脑多快，而在于你敢不敢把模糊的“手感”压成死板的“算法”。](../master_series/ms-19_l2_rule_based_quant.md) | Growth | TOFU | 2026-03-25 | stable | - | ✍️ 生产中 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ❌ 缺失 | healthy |
-| [交易大师图鉴 20｜交易大师不等于资管产品：师傅领进门，修行在个人。学大师是为了拿一张“入门票”，而不是买一份“保票”。](../master_series/ms-20_masters_not_equal_product_modes.md) | Growth | TOFU | 2026-03-25 | stable | - | ✍️ 生产中 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ❌ 缺失 | healthy |
-| [交易大师图鉴 21｜本杰明·格雷厄姆：价值投资的真谛，不是教你捡便宜，而是教你先分清价格和价值的区别。](../master_series/ms-21_benjamin_graham.md) | Growth | TOFU | 2026-03-25 | new | second_batch_expansion | ✍️ 生产中 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ❌ 缺失 | healthy |
-| [交易大师图鉴 22｜菲利普·费雪：成长股投资的真谛，不是追最火的热门股，而是看这家公司的“根”扎得够不够深。](../master_series/ms-22_philip_fisher.md) | Growth | TOFU | 2026-03-25 | new | second_batch_expansion | ✍️ 生产中 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ❌ 缺失 | healthy |
-| [交易大师图鉴 23｜威廉·欧奈尔：跟上那些正在起飞的好公司，真谛不在于盲目追高，而是教你先过一遍 CAN SLIM 这道“标准流水线”。](../master_series/ms-23_william_oneil.md) | Growth | TOFU | 2026-03-25 | new | second_batch_expansion | ✍️ 生产中 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ❌ 缺失 | healthy |
-| [交易大师图鉴 24｜杰西·利弗莫尔：交易赚大钱，不是靠频繁出手，而是靠看准了趋势不半路下车。](../master_series/ms-24_jesse_livermore.md) | Growth | TOFU | 2026-03-25 | new | second_batch_expansion | ✍️ 生产中 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ❌ 缺失 | healthy |
-| [交易大师图鉴 25｜范·撒普：交易的真谛，不是找那个“百发百中”的神奇买点，而是算清你每一次出手的赢面。](../master_series/ms-25_van_tharp.md) | Growth | MOFU | 2026-03-25 | new | second_batch_expansion | ✍️ 生产中 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ❌ 缺失 | healthy |
-| [交易大师图鉴 26｜理查德·威科夫：交易的真谛，不是去猜股价涨跌，而是学会看清大资金留下的“脚印”。](../master_series/ms-26_richard_wyckoff.md) | Growth | TOFU | 2026-03-25 | new | second_batch_expansion | ✍️ 生产中 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ❌ 缺失 | healthy |
-| [交易大师图鉴 27｜杰克·施瓦格：交易的真谛，不是找唯一的标准答案，而是找到最适合你的那条路。](../master_series/ms-27_jack_schwager.md) | Growth | TOFU | 2026-03-25 | new | second_batch_expansion | ✍️ 生产中 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ❌ 缺失 | healthy |
-| [交易大师图鉴 28｜CAN SLIM：它最重要的地方，不是七个字母本身，而是把成长股进攻拆成了一套筛选顺序](../master_series/ms-28_can_slim.md) | Growth | MOFU | 2026-03-25 | new | second_batch_expansion | ✍️ 生产中 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ❌ 缺失 | healthy |
-| [交易大师图鉴 29｜理查德·唐契安：趋势跟随的真谛，不是去抓每个拐点，而是学会“随波逐流”。](../master_series/ms-29_donchian_breakout.md) | Growth | MOFU | 2026-03-25 | new | second_batch_expansion | ✍️ 生产中 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ❌ 缺失 | healthy |
-| [交易大师图鉴 30｜尼古拉斯·达瓦斯：交易的真谛，不是去听小道消息，而是看清股票正在哪层“箱子”里跳舞。](../master_series/ms-30_darvas_box.md) | Growth | MOFU | 2026-03-25 | new | third_batch_expansion | ✍️ 生产中 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ❌ 缺失 | healthy |
+| [Free 与 Pro：差距在哪？](../../../5_Support_Ops/content/cn/tiers-explained.md) | Support | BOFU | 2026-04-02 | stable | - | 🚀 已发布 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ➖ 不需要 | healthy |
+| [Free vs Pro: What's the Difference?](../../../5_Support_Ops/content/en/tiers-explained.md) | Support | Unknown | 2026-04-02 | stable | - | 🚀 已发布 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ➖ 不需要 | healthy |
+| [101-01: 散户的不可能三角](../cn/101_academy/101-01_impossible_triangle.md) | Growth | Unknown | 2026-04-02 | stable | - | 🚀 已发布 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ➖ 不需要 | missing |
+| [101-02: 错失恐惧症 (FOMO)](../cn/101_academy/101-02_fomo.md) | Growth | Unknown | 2026-04-02 | stable | - | 🚀 已发布 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ➖ 不需要 | missing |
+| [101-03: 厌恶损失 (Loss Aversion)](../cn/101_academy/101-03_loss_aversion.md) | Growth | Unknown | 2026-04-02 | stable | - | 🚀 已发布 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ➖ 不需要 | missing |
+| [101-05: 赌徒谬误 (Gambler's Fallacy)](../cn/101_academy/101-05_gamblers_fallacy.md) | Growth | Unknown | 2026-04-02 | stable | - | 🚀 已发布 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ➖ 不需要 | missing |
+| [101-06: 禀赋效应 (Endowment Effect)](../cn/101_academy/101-06_endowment_effect.md) | Growth | Unknown | 2026-04-02 | stable | - | 🚀 已发布 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ➖ 不需要 | missing |
+| [101-07: 报复性交易 (Revenge Trading)](../cn/101_academy/101-07_revenge_trading.md) | Growth | Unknown | 2026-04-02 | stable | - | 🚀 已发布 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ➖ 不需要 | missing |
+| [101-08: 3M 框架 (Mind, Method, Money)](../cn/101_academy/101-08_3m_framework.md) | Growth | Unknown | 2026-04-02 | stable | - | 🚀 已发布 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ➖ 不需要 | missing |
+| [101-09: 为什么聪明人会失败？](../cn/101_academy/101-09_why_smart_people_fail.md) | Growth | Unknown | 2026-04-02 | stable | - | 🚀 已发布 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ➖ 不需要 | missing |
+| [超越交易：用量化思维审视人生风险的终局](../cn/101_academy/101-100_beyond_trading.md) | Growth | TOFU | 2026-04-02 | stable | - | ✍️ 生产中 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ➖ 不需要 | healthy |
+| [101-100: 很多人不是不会炒股，而是连自己是什么段位都没弄明白](../cn/101_academy/101-100_maturity_prologue.md) | Growth | MOFU | 2026-03-30 | updated | copy_edit | 🚀 已发布 | 封面 ✅ 已通过<br>正文 ✅ 已通过<br>卡片 ✅ 已通过 | healthy |
+| [101-101: 择时——像发牌员一样思考，而不是赌客](../cn/101_academy/101-101_quant_trinity_timing.md) | Growth | MOFU | 2026-03-19 | updated | strategy_shift | 👀 待审核 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ➖ 不需要 | healthy |
+| [101-102: 交易管理——为什么“状态”是财富的分水岭](../cn/101_academy/101-102_quant_trinity_management.md) | Growth | MOFU | 2026-03-19 | updated | strategy_shift | 👀 待审核 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ➖ 不需要 | healthy |
+| [101-103: 交易执行——别在壕沟里与加特林机枪肉搏](../cn/101_academy/101-103_quant_trinity_execution.md) | Growth | MOFU | 2026-03-19 | updated | strategy_shift | 👀 待审核 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ➖ 不需要 | healthy |
+| [101-104: 只要你的交易还经常从“我觉得”开始，你就还没走出 L0](../cn/101_academy/101-104_maturity_l0_discretionary.md) | Growth | MOFU | 2026-03-23 | updated | copy_edit | ✅ 已通过 | 封面 ✅ 已通过<br>正文 ✅ 已通过<br>卡片 ✅ 已通过 | healthy |
+| [101-104_maturity_l0_discretionary_wechat_release_brief](../cn/101_academy/101-104_maturity_l0_discretionary_wechat_release_brief.md) | Growth | Unknown | 2026-04-02 | stable | - | 🚀 已发布 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ➖ 不需要 | missing |
+| [101-105: 你以为自己在看信号，很多时候其实只是在盯着后视镜开车](../cn/101_academy/101-105_maturity_l1_indicator.md) | Growth | MOFU | 2026-03-19 | created | new_series | 👀 待审核 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ❌ 缺失 | healthy |
+| [101-106: 真正的 L2，不是会背几条规则，而是知道规则一失灵就该认错](../cn/101_academy/101-106_systematic_rules_l2.md) | Growth | MOFU | 2026-03-19 | created | new_series | 👀 待审核 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ❌ 缺失 | healthy |
+| [101-107: L3级——系统化组合投资，是舰队司令部的排兵布阵](../cn/101_academy/101-107_institutional_portfolio_l3.md) | Growth | MOFU | 2026-03-19 | created | new_series | 👀 待审核 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ➖ 不需要 | healthy |
+| [101-108: L4级——极硬量化，是物理层面的毫秒之战](../cn/101_academy/101-108_hard_quant_l4.md) | Growth | MOFU | 2026-03-19 | created | new_series | 👀 待审核 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ➖ 不需要 | healthy |
+| [101-109: 结篇——寻找你的量化绿洲](../cn/101_academy/101-109_maturity_epilogue.md) | Growth | MOFU | 2026-03-19 | created | series_framing | 👀 待审核 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ➖ 不需要 | healthy |
+| [101-10: 离场休息的艺术](../cn/101_academy/101-10_sitting_on_hands.md) | Growth | Unknown | 2026-04-02 | stable | - | 🚀 已发布 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ➖ 不需要 | missing |
+| [101-11: 事后聪明偏误 (Hindsight Bias)](../cn/101_academy/101-11_hindsight_bias.md) | Growth | Unknown | 2026-04-02 | stable | - | 🚀 已发布 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ➖ 不需要 | missing |
+| [101-12: 你以为自己在做短线，很多时候其实只是在给人送钱](../cn/101_academy/101-12_l4_hft_illusion.md) | Growth | TOFU | 2026-03-20 | updated | copy_edit | 🚀 已发布 | 封面 ✅ 已通过<br>正文 ✅ 已通过<br>卡片 ✅ 已通过 | healthy |
+| [101-13: “这票明天会不会涨？”这句问得越勤，往往亏得越快](../cn/101_academy/101-13_prediction_tax.md) | Growth | TOFU | 2026-03-23 | updated | copy_edit | ✅ 已通过 | 封面 ✅ 已通过<br>正文 ✅ 已通过<br>卡片 ✅ 已通过 | healthy |
+| [101-13_prediction_tax_wechat_release_brief](../cn/101_academy/101-13_prediction_tax_wechat_release_brief.md) | Growth | Unknown | 2026-04-02 | stable | - | 🚀 已发布 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ➖ 不需要 | missing |
+| [101-14: 越盯盘，越容易亏大钱：很多大跌，都是盯出来的](../cn/101_academy/101-14_eod_edge.md) | Growth | MOFU | 2026-03-19 | updated | copy_edit | 👀 待审核 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ❌ 缺失 | healthy |
+| [101-15: 很多人不是没计划，而是一开盘就忍不住自己改计划](../cn/101_academy/101-15_analyst_vs_trader.md) | Growth | MOFU | 2026-03-23 | updated | copy_edit | ✅ 已通过 | 封面 ✅ 已通过<br>正文 ✅ 已通过<br>卡片 ✅ 已通过 | healthy |
+| [101-15_analyst_vs_trader_wechat_release_brief](../cn/101_academy/101-15_analyst_vs_trader_wechat_release_brief.md) | Growth | Unknown | 2026-04-02 | stable | - | 🚀 已发布 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ➖ 不需要 | missing |

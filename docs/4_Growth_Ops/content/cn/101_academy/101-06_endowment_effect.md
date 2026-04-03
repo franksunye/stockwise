@@ -2,9 +2,25 @@
 title: "101-06: 禀赋效应 (Endowment Effect)"
 subtitle: "为什么你手里的垃圾股，总觉得它是明珠？"
 date: "2026-02-04"
-category: "The Mind"
 image: "/images/learn/101-06_endowment_effect_cover.png"
+content_id: "growth-101-06"
+content_source: "growth"
+content_type: "article"
+funnel_stage: "TOFU"
+category: "The Mind"
+source_docs:
+  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
+workflow:
+  stage: "published"
+  last_action_at: "2026-04-03"
+website:
+  enabled: true
+  surface: "learn"
+distribution:
+  wechat:
+    status: "published"
 ---
+
 
 # 禀赋效应：为什么你买入的那一刻，它就“变贵”了？
 

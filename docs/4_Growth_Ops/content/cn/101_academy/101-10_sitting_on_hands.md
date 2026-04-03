@@ -2,9 +2,25 @@
 title: "101-10: 离场休息的艺术"
 subtitle: "为什么“坐着不动”价值百万？"
 date: "2026-02-04"
-category: "The Mind"
 image: "/images/learn/101-10_sitting_on_hands_cover.png"
+content_id: "growth-101-10"
+content_source: "growth"
+content_type: "article"
+funnel_stage: "TOFU"
+category: "The Mind"
+source_docs:
+  - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
+workflow:
+  stage: "published"
+  last_action_at: "2026-04-03"
+website:
+  enabled: true
+  surface: "learn"
+distribution:
+  wechat:
+    status: "published"
 ---
+
 
 # 离场休息的艺术：交易中最值钱的姿势
 

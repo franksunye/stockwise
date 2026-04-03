@@ -1,3 +1,15 @@
+---
+title: "AI 图像生成工作流"
+content_id: "ops-image-flow"
+content_source: "growth"
+content_type: "guide"
+source_docs:
+  - docs/4_Growth_Ops/46_Content_Operations_System_Blueprint.md
+workflow:
+  stage: "published"
+  last_action_at: "2026-04-03"
+---
+
 # 图片生成工作流
 
 适用范围：
