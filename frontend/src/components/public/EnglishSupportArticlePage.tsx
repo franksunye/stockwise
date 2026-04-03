@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import ReactMarkdown from 'react-markdown';
 import { ChevronLeft, Share2, HelpCircle, FileText, Calendar } from 'lucide-react';
 import MarketingFooter from '@/components/MarketingFooter';
 import { getSupportArticleBySlug } from '@/lib/support-content';
@@ -47,17 +48,22 @@ export async function EnglishSupportArticlePage({ slug }: { slug: string }) {
             </div>
           </header>
 
-          <div
-            className="prose prose-invert prose-indigo max-w-none 
-              prose-headings:font-black prose-headings:tracking-tighter
-              prose-h2:text-2xl prose-h2:mt-12 prose-h2:mb-6 prose-h2:border-b prose-h2:border-white/5 prose-h2:pb-3
-              prose-p:text-slate-400 prose-p:leading-relaxed prose-p:text-lg
-              prose-strong:text-white prose-strong:font-black
-              prose-ul:list-disc prose-li:text-slate-400
-              prose-code:text-indigo-300 prose-code:bg-indigo-500/10 prose-code:px-1 prose-code:rounded
-            "
-            dangerouslySetInnerHTML={{ __html: article.content }}
-          />
+          <div className="selection:bg-indigo-500/30">
+            <ReactMarkdown
+              components={{
+                h1: ({ children }) => <h2 className="text-2xl font-black text-white mt-12 mb-6 tracking-tight italic border-l-4 border-indigo-500 pl-4">{children}</h2>,
+                h2: ({ children }) => <h3 className="text-xl font-bold text-slate-200 mt-10 mb-4">{children}</h3>,
+                h3: ({ children }) => <h4 className="text-lg font-bold text-slate-300 mt-8 mb-3">{children}</h4>,
+                p: ({ children }) => <p className="text-base text-slate-400 leading-relaxed mb-6 font-medium">{children}</p>,
+                ul: ({ children }) => <ul className="space-y-3 mb-8 list-disc list-outside ml-6 text-slate-400">{children}</ul>,
+                li: ({ children }) => <li className="pl-2 leading-relaxed">{children}</li>,
+                strong: ({ children }) => <strong className="text-indigo-100 font-black">{children}</strong>,
+                a: ({ href, children }) => <a href={href} target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300 font-bold underline decoration-indigo-500/30 underline-offset-4 decoration-2">{children}</a>,
+              }}
+            >
+              {article.content}
+            </ReactMarkdown>
+          </div>
 
           <footer className="mt-20 pt-10 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="text-sm text-slate-500 font-medium">Was this article helpful?</div>

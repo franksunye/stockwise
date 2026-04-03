@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import ReactMarkdown from 'react-markdown';
 import { ChevronLeft, BookOpen, Clock, Calendar, Share2, ArrowRight } from 'lucide-react';
 import MarketingFooter from '@/components/MarketingFooter';
 import { getArticleBySlug, getAllArticles } from '@/lib/learn-content';
@@ -61,18 +62,24 @@ export async function EnglishLearnArticlePage({ slug }: { slug: string }) {
             </div>
           </header>
 
-          <div
-            className="prose prose-invert prose-slate max-w-none 
-              prose-headings:font-black prose-headings:tracking-tighter
-              prose-h2:text-3xl prose-h2:mt-16 prose-h2:mb-8 prose-h2:border-b prose-h2:border-white/5 prose-h2:pb-4
-              prose-p:text-slate-300 prose-p:leading-relaxed prose-p:text-lg
-              prose-blockquote:border-indigo-500 prose-blockquote:bg-indigo-500/5 prose-blockquote:py-2 prose-blockquote:rounded-r-2xl
-              prose-strong:text-white prose-strong:font-black
-              prose-li:text-slate-300 prose-li:text-lg
-              prose-code:text-indigo-300 prose-code:bg-indigo-500/10 prose-code:px-1 prose-code:rounded
-            "
-            dangerouslySetInnerHTML={{ __html: article.content }}
-          />
+          <div className="selection:bg-indigo-500/30">
+            <ReactMarkdown
+              components={{
+                h1: ({ children }) => <h1 className="text-3xl md:text-5xl font-black tracking-tighter text-white mb-10 mt-16 first:mt-0 leading-tight">{children}</h1>,
+                h2: ({ children }) => <h2 className="text-2xl md:text-3xl font-black tracking-tight text-white mb-8 mt-16 border-l-4 border-indigo-500 pl-5 leading-tight">{children}</h2>,
+                h3: ({ children }) => <h3 className="text-xl md:text-2xl font-bold text-indigo-100 mb-6 mt-12 leading-snug">{children}</h3>,
+                p: ({ children }) => <p className="text-slate-300 leading-[1.8] mb-8 text-[1.1rem] tracking-wide">{children}</p>,
+                ul: ({ children }) => <ul className="list-disc list-outside ml-6 space-y-3 mb-8 text-slate-300 text-[1.1rem]">{children}</ul>,
+                ol: ({ children }) => <ol className="list-decimal list-outside ml-6 space-y-3 mb-8 text-slate-300 text-[1.1rem]">{children}</ol>,
+                li: ({ children }) => <li className="pl-2 leading-[1.8]">{children}</li>,
+                blockquote: ({ children }) => <blockquote className="border-l-4 border-indigo-500/50 bg-white/[0.03] p-8 rounded-r-2xl my-10 italic text-indigo-100 text-lg leading-relaxed [&_p]:mb-0">{children}</blockquote>,
+                a: ({ href, children }) => <a href={href} target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300 underline underline-offset-4 decoration-indigo-500/30 font-medium transition-colors">{children}</a>,
+                strong: ({ children }) => <strong className="font-black text-white px-0.5">{children}</strong>,
+              }}
+            >
+              {article.content}
+            </ReactMarkdown>
+          </div>
 
           {nextArticle && (
             <footer className="mt-24 pt-12 border-t border-white/5">
