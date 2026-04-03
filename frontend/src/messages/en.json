@@ -1,0 +1,119 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "retry": "Retry",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "close": "Close",
+    "back": "Back",
+    "more": "More",
+    "noData": "No data available",
+    "unknownStock": "Unknown stock",
+    "upgrade": "Upgrade",
+    "manageSub": "Manage subscription"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "stockPool": "Watchlist",
+    "addStock": "Add to watchlist",
+    "removeStock": "Remove from watchlist",
+    "signal": {
+      "buy": "Bullish",
+      "hold": "Hold",
+      "sell": "Defensive",
+      "neutral": "No signal",
+      "pending": "Awaiting analysis"
+    },
+    "badge": {
+      "buy": "Good time to look for opportunities",
+      "hold": "Watch first, no rush to act",
+      "sell": "Prioritize risk control",
+      "neutral": "Not recommended to act now",
+      "pending": "Generating actionable conclusion"
+    },
+    "price": {
+      "currentPrice": "Current price",
+      "todayPrice": "Today's price",
+      "todayClose": "Today's close",
+      "closePrice": "{date} close"
+    },
+    "rsi": {
+      "overbought": "Overbought",
+      "oversold": "Oversold",
+      "stable": "Stable"
+    },
+    "date": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "friday": "Friday",
+      "todayAdvice": "Today's advice",
+      "tomorrowAdvice": "Tomorrow's advice",
+      "nextMondayAdvice": "Next Monday's advice",
+      "nextTradingDay": "Next trading day ({date}) advice",
+      "todayVerify": "Today's verification",
+      "verification": "{date} verification"
+    },
+    "confidence": "Confidence",
+    "reasoning": "Reasoning"
+  },
+  "brief": {
+    "title": "Tactical Brief",
+    "fullReport": "Full report",
+    "keyLevels": "Key levels",
+    "sentiment": "Sentiment analysis",
+    "support": "Support",
+    "resistance": "Resistance",
+    "riskGate": "Risk gate",
+    "circuitBreaker": "75% discipline gate",
+    "exportPoster": "Export poster",
+    "shareReport": "Share report"
+  },
+  "council": {
+    "title": "Research Council",
+    "consensus": "Consensus vote",
+    "bullish": "Bullish",
+    "bearish": "Bearish",
+    "neutral": "Neutral",
+    "agentPrefix": "Seat",
+    "voteSummary": "{count} seats voted"
+  },
+  "user": {
+    "center": "Profile",
+    "tier": {
+      "free": "Free",
+      "go": "Go",
+      "plus": "Plus",
+      "pro": "Pro",
+      "alpha": "Alpha"
+    },
+    "invite": "Invite friends",
+    "copyLink": "Copy invite link",
+    "linkCopied": "Link copied",
+    "settings": "Settings",
+    "language": "Language",
+    "expiresAt": "Expires: {date}",
+    "watchlistUsage": "Watchlist: {used}/{total}"
+  },
+  "onboarding": {
+    "welcome": "Welcome to ZISO AI",
+    "step1Title": "Add your first stock",
+    "step1Desc": "Enter a stock code or name. ZISO will generate daily reviews for you.",
+    "step2Title": "Read your tactical brief",
+    "step2Desc": "After market close, the ZISO research council generates a deep report for you.",
+    "getStarted": "Get started",
+    "skipTour": "Skip tour"
+  },
+  "trade": {
+    "title": "Trade Management",
+    "positions": "Current Positions",
+    "suggestion": "Trade suggestion",
+    "reasoning": "Logic assessment",
+    "plan": "Execution plan",
+    "basis": "Projection basis",
+    "detail": "Execution details",
+    "noPositions": "No positions recorded"
+  }
+}

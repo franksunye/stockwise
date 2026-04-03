@@ -1,0 +1,119 @@
+{
+  "common": {
+    "loading": "加载中...",
+    "error": "出错了",
+    "retry": "重试",
+    "confirm": "确认",
+    "cancel": "取消",
+    "save": "保存",
+    "delete": "删除",
+    "close": "关闭",
+    "back": "返回",
+    "more": "更多",
+    "noData": "暂无数据",
+    "unknownStock": "未知股票",
+    "upgrade": "升级",
+    "manageSub": "管理订阅"
+  },
+  "dashboard": {
+    "title": "仪表盘",
+    "stockPool": "自选池",
+    "addStock": "添加自选",
+    "removeStock": "移除自选",
+    "signal": {
+      "buy": "建议看多",
+      "hold": "建议观察",
+      "sell": "建议防守",
+      "neutral": "暂无信号",
+      "pending": "等待分析"
+    },
+    "badge": {
+      "buy": "适合开始寻找机会",
+      "hold": "先观察，不急着出手",
+      "sell": "优先控制风险",
+      "neutral": "当前不建议出手",
+      "pending": "正在生成可执行结论"
+    },
+    "price": {
+      "currentPrice": "当前成交价",
+      "todayPrice": "今日成交价",
+      "todayClose": "今日收盘价",
+      "closePrice": "{date} 收盘价"
+    },
+    "rsi": {
+      "overbought": "超买",
+      "oversold": "超卖",
+      "stable": "稳定"
+    },
+    "date": {
+      "today": "今日",
+      "yesterday": "昨日",
+      "friday": "周五",
+      "todayAdvice": "今日建议",
+      "tomorrowAdvice": "明日建议",
+      "nextMondayAdvice": "下周一建议",
+      "nextTradingDay": "下一交易日 ({date}) 建议",
+      "todayVerify": "今日验证",
+      "verification": "{date} 验证"
+    },
+    "confidence": "置信度",
+    "reasoning": "推理依据"
+  },
+  "brief": {
+    "title": "战术简报",
+    "fullReport": "完整报告",
+    "keyLevels": "关键价位",
+    "sentiment": "情绪分析",
+    "support": "支撑位",
+    "resistance": "压力位",
+    "riskGate": "风险闸门",
+    "circuitBreaker": "75% 纪律闸门",
+    "exportPoster": "导出海报",
+    "shareReport": "分享报告"
+  },
+  "council": {
+    "title": "投研决议",
+    "consensus": "共识投票",
+    "bullish": "看多",
+    "bearish": "看空",
+    "neutral": "中性",
+    "agentPrefix": "席位",
+    "voteSummary": "{count} 位席位完成投票"
+  },
+  "user": {
+    "center": "个人中心",
+    "tier": {
+      "free": "免费版",
+      "go": "Go 会员",
+      "plus": "Plus 会员",
+      "pro": "Pro 会员",
+      "alpha": "Alpha 会员"
+    },
+    "invite": "邀请好友",
+    "copyLink": "复制邀请链接",
+    "linkCopied": "链接已复制",
+    "settings": "设置",
+    "language": "语言",
+    "expiresAt": "到期时间: {date}",
+    "watchlistUsage": "自选: {used}/{total}"
+  },
+  "onboarding": {
+    "welcome": "欢迎使用知守 AI",
+    "step1Title": "添加你的第一只股票",
+    "step1Desc": "输入股票代码或名称，知守会为你每日复盘",
+    "step2Title": "查看你的战术简报",
+    "step2Desc": "每天收盘后，知守投研委员会为你生成深度报告",
+    "getStarted": "开始使用",
+    "skipTour": "跳过引导"
+  },
+  "trade": {
+    "title": "交易管理",
+    "positions": "当前持仓",
+    "suggestion": "交易管理建议",
+    "reasoning": "逻辑研判",
+    "plan": "执行方案",
+    "basis": "推演依据",
+    "detail": "执行详情",
+    "noPositions": "暂无持仓记录"
+  }
+}

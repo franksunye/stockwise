@@ -35,6 +35,7 @@ export interface UserProfile {
     expiresAt: string | null;
     watchlistCount?: number;
     email?: string | null;
+    locale?: string | null;
     referralBalance?: number;
     totalEarned?: number;
     commissionRate?: number;
@@ -138,6 +139,7 @@ function useUserProfileStore(): UserProfileContextValue {
                 expiresAt: data.expiresAt,
                 watchlistCount: data.watchlistCount,
                 email: data.email,
+                locale: data.locale ?? null,
                 referralBalance: data.referralBalance,
                 totalEarned: data.totalEarned,
                 commissionRate: data.commissionRate,
