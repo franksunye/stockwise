@@ -68,7 +68,7 @@ export default function MarketingHeader({ currentPage, locale = 'en' }: Marketin
 
   const currentLabels = labels[locale] || labels.en;
 
-  const links: MarketingMenuLink[] = [
+  const allLinks: MarketingMenuLink[] = [
     { href: `${localizedHomeAnchorPrefix}#features`, label: currentLabels.features },
     { href: localizePublicPath('/about', locale), label: currentLabels.about, prefetch: false, isActive: currentPage === 'about' },
     { href: localizePublicPath('/learn', locale), label: currentLabels.academy, prefetch: false },
@@ -76,6 +76,13 @@ export default function MarketingHeader({ currentPage, locale = 'en' }: Marketin
     { href: localizePublicPath('/pricing', locale), label: currentLabels.pricing, prefetch: false, isActive: currentPage === 'pricing' },
     { href: `${localizedHomeAnchorPrefix}#faq`, label: currentLabels.faq },
   ];
+
+  // Only show core links in desktop header to avoid crowding
+  const headerLinks = allLinks.filter(link => 
+    link.label === currentLabels.features || 
+    link.label === currentLabels.academy || 
+    link.label === currentLabels.pricing
+  );
 
   const localeSwitches = [
     { href: localizePublicPath(`/${currentPage === 'home' ? '' : currentPage}`, 'en'), label: 'EN', isActive: locale === 'en' },
@@ -94,12 +101,12 @@ export default function MarketingHeader({ currentPage, locale = 'en' }: Marketin
       </Link>
 
       <div className="hidden md:flex items-center gap-8 text-sm font-bold text-slate-400">
-        {links.map((item) => (
+        {headerLinks.map((item) => (
           <Link
             key={item.href}
             href={item.href}
             prefetch={item.prefetch}
-            className={item.isActive ? 'text-white transition-colors' : 'hover:text-white transition-colors'}
+            className={item.isActive ? 'text-white' : 'hover:text-white transition-colors'}
           >
             {item.label}
           </Link>
@@ -128,7 +135,7 @@ export default function MarketingHeader({ currentPage, locale = 'en' }: Marketin
       </div>
 
       <LandingMobileMenu
-        links={links}
+        links={allLinks}
         cta={{ href: 'https://app.ziso.cc', label: currentLabels.openApp }}
         localeSwitches={localeSwitches}
       />
