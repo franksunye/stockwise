@@ -16,6 +16,8 @@ interface MarketingHeaderProps {
 interface NavLabels {
   features: string;
   about: string;
+  academy: string;
+  support: string;
   pricing: string;
   faq: string;
   openApp: string;
@@ -29,6 +31,8 @@ export default function MarketingHeader({ currentPage, locale = 'en' }: Marketin
     en: {
       features: 'Features',
       about: 'About',
+      academy: '101 Academy',
+      support: 'Support',
       pricing: 'Pricing',
       faq: 'FAQ',
       openApp: 'Open App',
@@ -36,6 +40,8 @@ export default function MarketingHeader({ currentPage, locale = 'en' }: Marketin
     cn: {
       features: '功能',
       about: '关于',
+      academy: '101 手册',
+      support: '支持中心',
       pricing: '价格',
       faq: 'FAQ',
       openApp: '进入应用',
@@ -43,6 +49,8 @@ export default function MarketingHeader({ currentPage, locale = 'en' }: Marketin
     ko: {
       features: '기능',
       about: '소개',
+      academy: '101 아카데미',
+      support: '지원 센터',
       pricing: '가격',
       faq: 'FAQ',
       openApp: '앱 열기',
@@ -50,6 +58,8 @@ export default function MarketingHeader({ currentPage, locale = 'en' }: Marketin
     es: {
       features: 'Funciones',
       about: 'Nosotros',
+      academy: 'Academia 101',
+      support: 'Soporte',
       pricing: 'Precios',
       faq: 'FAQ',
       openApp: 'Abrir App',
@@ -61,15 +71,11 @@ export default function MarketingHeader({ currentPage, locale = 'en' }: Marketin
   const links: MarketingMenuLink[] = [
     { href: `${localizedHomeAnchorPrefix}#features`, label: currentLabels.features },
     { href: localizePublicPath('/about', locale), label: currentLabels.about, prefetch: false, isActive: currentPage === 'about' },
+    { href: localizePublicPath('/learn', locale), label: currentLabels.academy, prefetch: false },
+    { href: localizePublicPath('/support', locale), label: currentLabels.support, prefetch: false },
     { href: localizePublicPath('/pricing', locale), label: currentLabels.pricing, prefetch: false, isActive: currentPage === 'pricing' },
     { href: `${localizedHomeAnchorPrefix}#faq`, label: currentLabels.faq },
   ];
-
-  // If Chinese, add Learn/Support link
-  if (locale === 'cn') {
-    links.splice(1, 0, { href: '/cn/learn', label: '101 手册', prefetch: false });
-    links.splice(2, 0, { href: '/cn/support', label: '支持中心', prefetch: false });
-  }
 
   const localeSwitches = [
     { href: localizePublicPath(`/${currentPage === 'home' ? '' : currentPage}`, 'en'), label: 'EN', isActive: locale === 'en' },

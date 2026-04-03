@@ -7,39 +7,66 @@ export default function MarketingFooter({ locale = 'en' }: { locale?: PublicLoca
   const footerLinks: Array<{ href: string; label: string }> = [];
   const homePath = localizePublicPath('/', locale);
 
-  if (locale === 'cn') {
-    footerLinks.push(
-      { href: '/cn/learn', label: '101 手册' },
-      { href: '/cn/support', label: '支持中心' },
-      { href: localizePublicPath('/pricing', 'cn'), label: '价格方案' },
-      { href: localizePublicPath('/about', 'cn'), label: '关于我们' },
-      { href: localizePublicPath('/privacy', 'cn'), label: '隐私协议' },
-      { href: localizePublicPath('/terms', 'cn'), label: '服务条款' },
-      { href: localizePublicPath('/refund', 'cn'), label: '退款政策' }
-    );
-  } else {
-    interface FooterLocaleLabels {
-      pricing: string;
-      about: string;
-      privacy: string;
-      terms: string;
-      refund: string;
-    }
-    const labels: Record<Exclude<PublicLocale, 'cn'>, FooterLocaleLabels> = {
-      en: { pricing: 'Pricing', about: 'About', privacy: 'Privacy', terms: 'Terms', refund: 'Refund' },
-      ko: { pricing: '가격', about: '소개', privacy: '개인정보', terms: '약관', refund: '환불' },
-      es: { pricing: 'Precios', about: 'Nosotros', privacy: 'Privacidad', terms: 'Términos', refund: 'Reembolso' }
-    };
-    const currentLabels = (labels[locale as Exclude<PublicLocale, 'cn'>] || labels.en) as FooterLocaleLabels;
-
-    footerLinks.push(
-      { href: localizePublicPath('/pricing', locale), label: currentLabels.pricing },
-      { href: localizePublicPath('/about', locale), label: currentLabels.about },
-      { href: localizePublicPath('/privacy', locale), label: currentLabels.privacy },
-      { href: localizePublicPath('/terms', locale), label: currentLabels.terms },
-      { href: localizePublicPath('/refund', locale), label: currentLabels.refund }
-    );
+  interface FooterLocaleLabels {
+    academy: string;
+    support: string;
+    pricing: string;
+    about: string;
+    privacy: string;
+    terms: string;
+    refund: string;
   }
+
+  const labels: Record<PublicLocale, FooterLocaleLabels> = {
+    cn: {
+      academy: '101 手册',
+      support: '支持中心',
+      pricing: '价格方案',
+      about: '关于我们',
+      privacy: '隐私协议',
+      terms: '服务条款',
+      refund: '退款政策',
+    },
+    en: {
+      academy: '101 Academy',
+      support: 'Support',
+      pricing: 'Pricing',
+      about: 'About',
+      privacy: 'Privacy',
+      terms: 'Terms',
+      refund: 'Refund',
+    },
+    ko: {
+      academy: '101 아카데미',
+      support: '지원 센터',
+      pricing: '가격',
+      about: '소개',
+      privacy: '개인정보',
+      terms: '약관',
+      refund: '환불',
+    },
+    es: {
+      academy: 'Academia 101',
+      support: 'Soporte',
+      pricing: 'Precios',
+      about: 'Nosotros',
+      privacy: 'Privacidad',
+      terms: 'Términos',
+      refund: 'Reembolso',
+    },
+  };
+
+  const currentLabels = labels[locale] || labels.en;
+
+  footerLinks.push(
+    { href: localizePublicPath('/learn', locale), label: currentLabels.academy },
+    { href: localizePublicPath('/support', locale), label: currentLabels.support },
+    { href: localizePublicPath('/pricing', locale), label: currentLabels.pricing },
+    { href: localizePublicPath('/about', locale), label: currentLabels.about },
+    { href: localizePublicPath('/privacy', locale), label: currentLabels.privacy },
+    { href: localizePublicPath('/terms', locale), label: currentLabels.terms },
+    { href: localizePublicPath('/refund', locale), label: currentLabels.refund }
+  );
 
   return (
     <footer className="relative z-10 border-t border-white/5 py-20 px-8">
