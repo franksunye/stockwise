@@ -1,15 +1,17 @@
 # Content Traceability Matrix 溯源总控表
 
 > 这是一份由 `/content-audit` 命令自动生成的核心物料与外部发布内容追踪表。
-> **生成时间**: 2026-04-03T08:44:45.776Z
+> **生成时间**: 2026-04-03T09:03:54.571Z
 
 ## 🚨 预警区：逻辑过期风险 (Outdated)
 
 底层战略/工程文档已经更新，对应的外部内容需要复核以防止文案逻辑冲突。
 
-- 🔴 [`docs/4_Growth_Ops/content/April_Content_Matrix_Engineering_2026.md`](../../docs/4_Growth_Ops/content/April_Content_Matrix_Engineering_2026.md) -> 需复核底层更新 `docs/3_Product/Specs/48_Admin_Tradeability_Control_Tower.md`
-- 🔴 [`docs/4_Growth_Ops/content/MASTER_SERIES_CONTENT_INTEGRATION_2026.md`](../../docs/4_Growth_Ops/content/MASTER_SERIES_CONTENT_INTEGRATION_2026.md) -> 需复核底层更新 `docs/0_Strategy/09_Decision_Stack_and_Producer_Architecture.md`
+- 🔴 [`docs/4_Growth_Ops/content/GRSAI_IMAGE_TOOL.md`](../../docs/4_Growth_Ops/content/GRSAI_IMAGE_TOOL.md) -> 需复核底层更新 `docs/4_Growth_Ops/46_Content_Operations_System_Blueprint.md`
+- 🔴 [`docs/4_Growth_Ops/content/IMAGE_GENERATION_WORKFLOW.md`](../../docs/4_Growth_Ops/content/IMAGE_GENERATION_WORKFLOW.md) -> 需复核底层更新 `docs/4_Growth_Ops/46_Content_Operations_System_Blueprint.md`
 - 🔴 [`docs/4_Growth_Ops/content/March_Content_Matrix_Execution_2026.md`](../../docs/4_Growth_Ops/content/March_Content_Matrix_Execution_2026.md) -> 需复核底层更新 `docs/0_Strategy/07_Growth_and_GTM_Roadmap.md`
+- 🔴 [`docs/4_Growth_Ops/content/WECHAT_LAYOUT_PLAYBOOK_FINANCE_EDITORIAL.md`](../../docs/4_Growth_Ops/content/WECHAT_LAYOUT_PLAYBOOK_FINANCE_EDITORIAL.md) -> 需复核底层更新 `docs/4_Growth_Ops/46_Content_Operations_System_Blueprint.md`
+- 🔴 [`docs/4_Growth_Ops/content/WECHAT_VISUAL_PLAYBOOK_10W_2026Q2.md`](../../docs/4_Growth_Ops/content/WECHAT_VISUAL_PLAYBOOK_10W_2026Q2.md) -> 需复核底层更新 `docs/4_Growth_Ops/46_Content_Operations_System_Blueprint.md`
 
 ## ⚠️ 预警区：孤儿内容 (Orphaned)
 

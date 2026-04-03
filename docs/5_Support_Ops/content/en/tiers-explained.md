@@ -1,9 +1,32 @@
 ---
 title: "Free vs Pro: What's the Difference?"
+subtitle: "Choosing Your AI Research Partner"
+date: "2026-03-19"
+image: "/images/support/tiers-explained_cover.png"
+content_id: "support-tiers-explained"
+content_source: "support"
+content_type: "guide"
+canonical_role: "canonical"
 category: "Tiers & Growth"
-lastUpdated: "2026-03-09"
+funnel_stage: "BOFU"
+rhythm: "Hygiene"
 source_docs:
   - docs/3_Product/31_Membership_Design_Plan.md
+traceability:
+  status: "healthy"
+  last_reviewed_at: "2026-04-03"
+workflow:
+  stage: "published"
+  last_action_at: "2026-04-03"
+maintenance:
+  change_status: "updated"
+  update_reason: "ziso_standard_upgrade"
+website:
+  enabled: true
+  surface: "support"
+distribution:
+  wechat:
+    status: "none"
 ---
 
 # Free vs Pro: What's the Difference?
