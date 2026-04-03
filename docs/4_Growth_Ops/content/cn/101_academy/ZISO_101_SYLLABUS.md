@@ -1,4 +1,10 @@
 ---
+doc_id: GROW-101-SYLLABUS
+doc_domain: Growth & Ops
+doc_status: stable
+---
+
+---
 
 ## Module 1: The Mind (Psychology & Discipline)
 *Understanding the enemy within.*

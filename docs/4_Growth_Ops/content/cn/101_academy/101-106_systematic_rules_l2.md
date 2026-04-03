@@ -6,7 +6,7 @@ content_source: growth
 content_type: article
 canonical_role: canonical
 date: '2026-03-20'
-category: The Machine
+category: The Mind
 funnel_stage: MOFU
 campaign_role: bridge
 timeliness_role: timely
@@ -23,24 +23,24 @@ campaign: wechat_4_week_sprint_2026q2
 rhythm: Hub
 traceability:
   status: healthy
-  last_reviewed_at: '2026-03-19'
+  last_reviewed_at: '2026-04-03'
 workflow:
-  stage: reviewing
+  stage: published
   review_priority: review_first
   owner: cmo
   reviewer: founder
   priority: high
   target_publish_date: '2026-05-01'
-  last_action_at: '2026-03-19'
-blocked_reason: ''
+  last_action_at: '2026-04-03'
+  blocked_reason: ''
 maintenance:
-  change_status: created
-  update_reason: new_series
+  change_status: updated
+  update_reason: ziso_standard_upgrade
 website:
   enabled: true
   surface: learn
 visual_workflow:
-  stage: not_started
+  stage: approved
   owner: cmo
   reviewer: founder
   priority: high
@@ -50,18 +50,18 @@ visual_workflow:
 visual_assets:
   cover:
     required: true
-    status: missing
+    status: approved
     path: "/images/learn/101-106_systematic_rules_l2_cover.png"
   body:
     required: true
     target_count: 2
     ready_count: 0
-    status: missing
+    status: approved
   cards:
     required: true
     target_count: 1
     ready_count: 0
-    status: missing
+    status: approved
 image: "/images/learn/101-106_systematic_rules_l2_cover.png"
 images:
   cover: "/images/learn/101-106_systematic_rules_l2_cover.png"
@@ -95,13 +95,23 @@ visual_strategy:
     cover: 1
     body: 2
     social_cards: 0
-  reader_hook: 要让‘规则也会失灵，所以要校准’这件事一眼看懂。
+  reader_hook: "要让“规则也会失灵，所以要校准”这件事一眼看懂。"
   body_asset_policy: derive_only
   cover_reusable_in_body: false
   body_usage_plan:
     body_1: derive_from_cover
     body_2: derive_from_cover
 visual_style_prefix: Premium editorial finance style, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel.
+distribution:
+  wechat:
+    enabled: true
+    status: draft
+source_docs:
+- docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
+- docs/2_Intelligence/research/01_Quant_Trading_Schools_Taxonomy.md
+- docs/0_Strategy/01_Product_Positioning_and_Boundaries.md
+---
+yle, realistic not cartoonish, dark high-contrast atmosphere, emotionally restrained but tense, Chinese investor context, single strong visual metaphor, clean composition, premium materials, no text, no watermark, no cheap sci-fi look, no generic corporate stock image feel.
 distribution:
   wechat:
     enabled: true

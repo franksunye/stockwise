@@ -9,10 +9,13 @@ source_docs:
   - docs/3_Product/Specs/48_Admin_Tradeability_Control_Tower.md
 category: "Growth 101"
 funnel_stage: "TOFU"
-date: "2026-03-19"
+date: "2026-04-03"
 publish:
   wechat:
-    status: "draft"
+    status: "ready_for_production"
+workflow:
+  last_action_at: "2026-04-03"
+  review_status: "content_approved_v1.1"
 ---
 
 # 4 月战役大纲：ZISO 硬核降维打击矩阵 (The "Cold Steel" Blitz)

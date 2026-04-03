@@ -1,3 +1,11 @@
+---
+title: "Growth & Ops Content Dashboard"
+doc_id: "GROW-OPS-DASH-001"
+doc_domain: "Growth & Ops"
+doc_status: "stable"
+# CMO-SYNC:START
+---
+
 # 内容运营主索引 (Content Operations Registry)
 
 > 自动生成时间：2026/4/3 15:53:41

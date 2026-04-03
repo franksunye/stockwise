@@ -6,13 +6,22 @@ image: "/images/learn/101-06_endowment_effect_cover.png"
 content_id: "growth-101-06"
 content_source: "growth"
 content_type: "article"
-funnel_stage: "TOFU"
+canonical_role: "canonical"
 category: "The Mind"
+funnel_stage: "TOFU"
+campaign: "wechat_4_week_sprint_2026q2"
+rhythm: "Hub"
 source_docs:
   - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
+traceability:
+  status: "healthy"
+  last_reviewed_at: "2026-04-03"
 workflow:
   stage: "published"
   last_action_at: "2026-04-03"
+maintenance:
+  change_status: "updated"
+  update_reason: "ziso_standard_upgrade"
 website:
   enabled: true
   surface: "learn"
@@ -20,6 +29,7 @@ distribution:
   wechat:
     status: "none"
 ---
+
 
 # 101-06: The Endowment Effect—Why it "becomes expensive" the moment you buy it?
 
@@ -33,7 +43,7 @@ If you wouldn't buy it, then why haven't you sold it? This is a factory default 
 
 ---
 
-## 💎 What is the Endowment Effect?
+## What is the Endowment Effect?
 
 The psychological definition is simple: **Once you own something, you immediately value it more than its objective market value.**
 
@@ -43,12 +53,12 @@ In the stock market, this psychology is deadly.
 
 ---
 
-## 📉 How it Kills Your Account
+## How it Kills Your Account
 
-### 💰 Emotional Premium
+### Emotional Premium
 The moment you hit "Buy," that ticker becomes "My Asset." You subconsciously filter out negative news and amplify the positives. You haven't bought a stock; you've bought your own **expectations**.
 
-### ⚓ The Cost of Admitting Error
+### The Cost of Admitting Error
 Selling means admitting that your initial decision was wrong. To escape this "intellectual humiliation," the brain triggers protection mechanisms:
 *   "It's a value investment; I'm holding for the long term."
 *   "The big money hasn't left yet; they're just shaking out the weak hands."
@@ -56,11 +66,11 @@ Selling means admitting that your initial decision was wrong. To escape this "in
 
 ---
 
-## ⚖️ Practical: The ZISO "Cold-Water Therapy"
+## Practical: The ZISO "Cold-Water Therapy"
 
 The core value of ZISO is to help you strip away this **excessive loyalty**.
 
-### 🤖 The Mirror Test
+### The Mirror Test
 ZISO's AI scoring system is "color-blind" and "heartless." It never looks at what price you bought in at. It only looks at: **Based on the current distribution of chips, price-volume trends, and sentiment scores, does it have upward momentum *now*?**
 
 If you're struggling between staying or leaving, please execute this **Actionable Tactic**:

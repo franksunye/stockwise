@@ -4,7 +4,7 @@ source_docs:
   - docs/2_Intelligence/registry/MASTER_SERIES_NOTEBOOKLM_PLAN.md
   - docs/4_Growth_Ops/content/CONTENT_ASSET_TEMPLATE.md
   - docs/4_Growth_Ops/content/README.md
-  - docs/4_Growth_Ops/content/101_academy/ZISO_101_SYLLABUS.md
+  - docs/4_Growth_Ops/content/cn/101_academy/ZISO_101_SYLLABUS.md
   - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
   - docs/0_Strategy/09_Decision_Stack_and_Producer_Architecture.md
 category: "Content Ops"

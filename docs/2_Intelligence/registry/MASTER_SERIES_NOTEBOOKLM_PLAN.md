@@ -1,3 +1,9 @@
+---
+doc_id: INT-REG-MASTER-001
+doc_domain: Intelligence
+doc_status: work-in-progress
+---
+
 # 大师系列月度内容规划（NotebookLM + PPT）
 
 ## 1. 这件事的目标，不只是做 20 份 PPT

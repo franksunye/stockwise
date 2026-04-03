@@ -1,3 +1,9 @@
+---
+doc_id: GROW-OPS-ASSET-TMPL
+doc_domain: Growth & Ops
+doc_status: stable
+---
+
 # 内容资产 Frontmatter 模板
 
 适用范围：
@@ -12,7 +18,11 @@
 
 ```yaml
 ---
-title: ""
+title: "ZISO Content Asset Standard Template"
+doc_id: "GROW-OPS-ASSET-TMPL"
+doc_domain: "Growth & Ops"
+doc_status: "stable"
+description: "All content assets (Academy/Support) MUST follow this ZISO standard."
 content_id: ""
 content_source: "growth" # growth | support
 content_type: "article" # article | faq | guide | campaign | glossary | update

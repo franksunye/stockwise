@@ -6,13 +6,22 @@ image: "/images/learn/101-01_impossible_triangle_cover.png"
 content_id: "growth-101-01"
 content_source: "growth"
 content_type: "article"
-funnel_stage: "TOFU"
+canonical_role: "canonical"
 category: "The Mind"
+funnel_stage: "TOFU"
+campaign: "wechat_4_week_sprint_2026q2"
+rhythm: "Hero"
 source_docs:
   - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
+traceability:
+  status: "healthy"
+  last_reviewed_at: "2026-04-03"
 workflow:
   stage: "published"
   last_action_at: "2026-04-03"
+maintenance:
+  change_status: "updated"
+  update_reason: "ziso_standard_upgrade"
 website:
   enabled: true
   surface: "learn"

@@ -1,3 +1,11 @@
+---
+title: "Content Operations System Blueprint"
+doc_id: "STRAT-OPS-CONTENT-001"
+doc_domain: "Growth & Ops"
+doc_status: "stable"
+last_updated: "2026-03-12"
+---
+
 # 内容运营系统总纲 (Content Operations Master Guide)
 
 **Last Updated:** 2026-03-19
@@ -302,9 +310,11 @@ visual_assets:
 
 ```yaml
 ---
-title: ""
-content_id: ""
-content_source: "growth"
+title: "NotebookLM 大师系列知识包生产计划"
+doc_id: "INT-REG-MASTER-001"
+doc_domain: "Intelligence"
+doc_status: "work-in-progress"
+category: "Registry Support"
 content_type: "article"
 canonical_role: "canonical"
 category: ""

@@ -9,24 +9,24 @@ date: "2026-03-20"
 source_docs:
   - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
   - docs/2_Intelligence/research/01_Quant_Trading_Schools_Taxonomy.md
-category: "The Machine"
+category: "The Mind"
 funnel_stage: "MOFU"
 campaign: "wechat_4_week_sprint_2026q2"
 rhythm: "Hub"
 traceability:
   status: "healthy"
-  last_reviewed_at: "2026-03-19"
+  last_reviewed_at: "2026-04-03"
 workflow:
-  stage: "reviewing"
+  stage: "published"
   owner: "cmo"
   reviewer: "founder"
   priority: "high"
   target_publish_date: "2026-05-15"
-  last_action_at: "2026-03-19"
+  last_action_at: "2026-04-03"
 blocked_reason: ""
 maintenance:
-  change_status: "created"
-  update_reason: "new_series"
+  change_status: "updated"
+  update_reason: "ziso_standard_upgrade"
 website:
   enabled: true
   surface: "learn"

@@ -26,19 +26,19 @@ campaign: wechat_4_week_sprint_2026q2
 rhythm: Hub
 traceability:
   status: healthy
-  last_reviewed_at: '2026-03-19'
+  last_reviewed_at: '2026-04-03'
 workflow:
-  stage: approved
+  stage: published
   review_priority: ready_later
   owner: cmo
   reviewer: founder
   priority: high
   target_publish_date: '2026-04-06'
-  last_action_at: '2026-03-23'
+  last_action_at: '2026-04-03'
   blocked_reason: ''
 maintenance:
   change_status: updated
-  update_reason: copy_edit
+  update_reason: ziso_standard_upgrade
 website:
   enabled: true
   surface: learn

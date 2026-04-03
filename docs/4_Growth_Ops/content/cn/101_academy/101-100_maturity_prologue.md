@@ -6,7 +6,7 @@ content_source: growth
 content_type: article
 canonical_role: canonical
 date: '2026-03-20'
-category: The Machine
+category: The Mind
 funnel_stage: MOFU
 campaign_role: bridge
 timeliness_role: timely
@@ -26,7 +26,7 @@ campaign: wechat_4_week_sprint_2026q2
 rhythm: Hero
 traceability:
   status: healthy
-  last_reviewed_at: '2026-03-20'
+  last_reviewed_at: '2026-04-03'
 workflow:
   stage: published
   review_priority: review_first
@@ -34,11 +34,11 @@ workflow:
   reviewer: founder
   priority: high
   target_publish_date: '2026-03-25'
-  last_action_at: '2026-03-30'
+  last_action_at: '2026-04-03'
   blocked_reason: ''
 maintenance:
   change_status: updated
-  update_reason: copy_edit
+  update_reason: ziso_standard_upgrade
 website:
   enabled: true
   surface: learn

@@ -1,25 +1,21 @@
 # Content Traceability Matrix 溯源总控表
 
 > 这是一份由 `/content-audit` 命令自动生成的核心物料与外部发布内容追踪表。
-> **生成时间**: 2026-04-03T08:09:30.103Z
+> **生成时间**: 2026-04-03T08:44:45.776Z
 
 ## 🚨 预警区：逻辑过期风险 (Outdated)
 
 底层战略/工程文档已经更新，对应的外部内容需要复核以防止文案逻辑冲突。
 
 - 🔴 [`docs/4_Growth_Ops/content/April_Content_Matrix_Engineering_2026.md`](../../docs/4_Growth_Ops/content/April_Content_Matrix_Engineering_2026.md) -> 需复核底层更新 `docs/3_Product/Specs/48_Admin_Tradeability_Control_Tower.md`
-- 🔴 [`docs/4_Growth_Ops/content/GRSAI_IMAGE_TOOL.md`](../../docs/4_Growth_Ops/content/GRSAI_IMAGE_TOOL.md) -> 需复核底层更新 `docs/4_Growth_Ops/46_Content_Operations_System_Blueprint.md`
-- 🔴 [`docs/4_Growth_Ops/content/IMAGE_GENERATION_WORKFLOW.md`](../../docs/4_Growth_Ops/content/IMAGE_GENERATION_WORKFLOW.md) -> 需复核底层更新 `docs/4_Growth_Ops/46_Content_Operations_System_Blueprint.md`
-- 🔴 [`docs/4_Growth_Ops/content/MASTER_SERIES_CONTENT_INTEGRATION_2026.md`](../../docs/4_Growth_Ops/content/MASTER_SERIES_CONTENT_INTEGRATION_2026.md) -> 需复核底层更新 `docs/4_Growth_Ops/content/README.md`
+- 🔴 [`docs/4_Growth_Ops/content/MASTER_SERIES_CONTENT_INTEGRATION_2026.md`](../../docs/4_Growth_Ops/content/MASTER_SERIES_CONTENT_INTEGRATION_2026.md) -> 需复核底层更新 `docs/0_Strategy/09_Decision_Stack_and_Producer_Architecture.md`
 - 🔴 [`docs/4_Growth_Ops/content/March_Content_Matrix_Execution_2026.md`](../../docs/4_Growth_Ops/content/March_Content_Matrix_Execution_2026.md) -> 需复核底层更新 `docs/0_Strategy/07_Growth_and_GTM_Roadmap.md`
-- 🔴 [`docs/4_Growth_Ops/content/WECHAT_LAYOUT_PLAYBOOK_FINANCE_EDITORIAL.md`](../../docs/4_Growth_Ops/content/WECHAT_LAYOUT_PLAYBOOK_FINANCE_EDITORIAL.md) -> 需复核底层更新 `docs/4_Growth_Ops/46_Content_Operations_System_Blueprint.md`
-- 🔴 [`docs/4_Growth_Ops/content/WECHAT_VISUAL_PLAYBOOK_10W_2026Q2.md`](../../docs/4_Growth_Ops/content/WECHAT_VISUAL_PLAYBOOK_10W_2026Q2.md) -> 需复核底层更新 `docs/4_Growth_Ops/46_Content_Operations_System_Blueprint.md`
 
 ## ⚠️ 预警区：孤儿内容 (Orphaned)
 
 缺乏底层文档支撑（没有 source_docs 字段或指向丢失）。属于纯脑洞散点营销，需绑定源头。
 
-- 🟠 [`docs/4_Growth_Ops/content/MASTER_SERIES_CONTENT_INTEGRATION_2026.md (Missing Source: docs/4_Growth_Ops/content/101_academy/ZISO_101_SYLLABUS.md)`](../../docs/4_Growth_Ops/content/MASTER_SERIES_CONTENT_INTEGRATION_2026.md (Missing Source: docs/4_Growth_Ops/content/101_academy/ZISO_101_SYLLABUS.md))
+- *无孤儿内容 / No Orphans*
 
 ## 🧭 预警区：引用了已废弃源文档 (Deprecated Sources)
 
@@ -31,10 +27,7 @@
 
 如果某篇内容引用的上游文档还没有补齐 `doc_id / doc_domain / doc_status`，系统虽可追踪路径，但还不能稳定判断它是否属于现行事实源。
 
-- 🟡 `docs/4_Growth_Ops/46_Content_Operations_System_Blueprint.md` 缺少 `doc_id`, `doc_domain`, `doc_status`；当前影响 4 篇内容（例如：`docs/4_Growth_Ops/content/GRSAI_IMAGE_TOOL.md`、`docs/4_Growth_Ops/content/IMAGE_GENERATION_WORKFLOW.md`、`docs/4_Growth_Ops/content/WECHAT_LAYOUT_PLAYBOOK_FINANCE_EDITORIAL.md`）
-- 🟡 `docs/2_Intelligence/registry/MASTER_SERIES_NOTEBOOKLM_PLAN.md` 缺少 `doc_id`, `doc_domain`, `doc_status`；当前影响 1 篇内容（例如：`docs/4_Growth_Ops/content/MASTER_SERIES_CONTENT_INTEGRATION_2026.md`）
-- 🟡 `docs/4_Growth_Ops/content/CONTENT_ASSET_TEMPLATE.md` 缺少 `doc_id`, `doc_domain`, `doc_status`；当前影响 1 篇内容（例如：`docs/4_Growth_Ops/content/MASTER_SERIES_CONTENT_INTEGRATION_2026.md`）
-- 🟡 `docs/4_Growth_Ops/content/README.md` 缺少 `doc_id`, `doc_domain`, `doc_status`；当前影响 1 篇内容（例如：`docs/4_Growth_Ops/content/MASTER_SERIES_CONTENT_INTEGRATION_2026.md`）
+- *当前被引用的源文档都已具备最小元数据*
 
 ## 💡 IP 闲置榜 (Under-utilized Internal Docs)
 
@@ -46,9 +39,7 @@
 - 🔵 [`docs/0_Strategy/03_Team_Responsibility_Matrix.md`](../../docs/0_Strategy/03_Team_Responsibility_Matrix.md)
 - 🔵 [`docs/0_Strategy/04_Milestones_Execution_Log.md`](../../docs/0_Strategy/04_Milestones_Execution_Log.md)
 - 🔵 [`docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md`](../../docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md)
-- 🔵 [`docs/0_Strategy/06_Quant_Industry_Positioning_Map.md`](../../docs/0_Strategy/06_Quant_Industry_Positioning_Map.md)
 - 🔵 [`docs/0_Strategy/08_Globalization_Strategy_and_Evolution.md`](../../docs/0_Strategy/08_Globalization_Strategy_and_Evolution.md)
-- 🔵 [`docs/0_Strategy/09_Decision_Stack_and_Producer_Architecture.md`](../../docs/0_Strategy/09_Decision_Stack_and_Producer_Architecture.md)
 - 🔵 [`docs/0_Strategy/10_RFC_2026Q2_GTM_and_Product_Strategy_Pivot.md`](../../docs/0_Strategy/10_RFC_2026Q2_GTM_and_Product_Strategy_Pivot.md)
 - 🔵 [`docs/0_Strategy/history/MILESTONE_2025.md`](../../docs/0_Strategy/history/MILESTONE_2025.md)
 - 🔵 [`docs/2_Intelligence/20_Doc_Index_and_Governance.md`](../../docs/2_Intelligence/20_Doc_Index_and_Governance.md)
@@ -182,9 +173,15 @@
 
 ## ✅ 健康溯源映射表 (Healthy Reference Map)
 
+### [`docs/0_Strategy/06_Quant_Industry_Positioning_Map.md`](../../docs/0_Strategy/06_Quant_Industry_Positioning_Map.md)
+- -> `docs/4_Growth_Ops/content/MASTER_SERIES_CONTENT_INTEGRATION_2026.md`
+
 ### [`docs/0_Strategy/07_Growth_and_GTM_Roadmap.md`](../../docs/0_Strategy/07_Growth_and_GTM_Roadmap.md)
 - -> `docs/4_Growth_Ops/content/April_Content_Matrix_Engineering_2026.md`
 - -> `docs/4_Growth_Ops/content/March_Content_Matrix_Execution_2026.md`
+
+### [`docs/0_Strategy/09_Decision_Stack_and_Producer_Architecture.md`](../../docs/0_Strategy/09_Decision_Stack_and_Producer_Architecture.md)
+- -> `docs/4_Growth_Ops/content/MASTER_SERIES_CONTENT_INTEGRATION_2026.md`
 
 ### [`docs/2_Intelligence/25A_AI_Context_Limits_DeepSeek.md`](../../docs/2_Intelligence/25A_AI_Context_Limits_DeepSeek.md)
 - -> `docs/4_Growth_Ops/content/April_Content_Matrix_Engineering_2026.md`
@@ -214,5 +211,8 @@
 - -> `docs/4_Growth_Ops/content/MASTER_SERIES_CONTENT_INTEGRATION_2026.md`
 
 ### [`docs/4_Growth_Ops/content/README.md`](../../docs/4_Growth_Ops/content/README.md)
+- -> `docs/4_Growth_Ops/content/MASTER_SERIES_CONTENT_INTEGRATION_2026.md`
+
+### [`docs/4_Growth_Ops/content/cn/101_academy/ZISO_101_SYLLABUS.md`](../../docs/4_Growth_Ops/content/cn/101_academy/ZISO_101_SYLLABUS.md)
 - -> `docs/4_Growth_Ops/content/MASTER_SERIES_CONTENT_INTEGRATION_2026.md`
 

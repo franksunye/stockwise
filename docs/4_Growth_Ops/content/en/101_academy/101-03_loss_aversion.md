@@ -6,13 +6,22 @@ image: "/images/learn/101-03_loss_aversion_cover.png"
 content_id: "growth-101-03"
 content_source: "growth"
 content_type: "article"
-funnel_stage: "TOFU"
+canonical_role: "canonical"
 category: "The Mind"
+funnel_stage: "TOFU"
+campaign: "wechat_4_week_sprint_2026q2"
+rhythm: "Hub"
 source_docs:
   - docs/0_Strategy/06_Quant_Industry_Positioning_Map.md
+traceability:
+  status: "healthy"
+  last_reviewed_at: "2026-04-03"
 workflow:
   stage: "published"
   last_action_at: "2026-04-03"
+maintenance:
+  change_status: "updated"
+  update_reason: "ziso_standard_upgrade"
 website:
   enabled: true
   surface: "learn"
@@ -22,7 +31,7 @@ distribution:
 ---
 
 
-# 101-03: Loss Aversion: Why you can't hold winners but refuse to cut losers.
+# 101-03: Loss Aversion: Why you can't hold winners but refuse to cut losers
 
 > *"The Disposition Effect: The tendency of investors to sell assets that have increased in value, while keeping assets that have dropped in value."* — Behavioral Finance Theorem
 
@@ -73,7 +82,7 @@ The AI doesn't care about your cost basis. It only looks forward:
 
 Even if you're down 20%, if the AI predicts another 30% drop, it will tell you to sell. Because -20% is better than -50%.
 
-### 🔧 The Survival Tool: 3M Risk Management
+### The Survival Tool: 3M Risk Management
 
 We implement the core rules of risk management:
 1.  **Hard Stops**: Set your stop-loss before you buy (e.g., 2% below support).
@@ -85,7 +94,7 @@ Cash is your soldier. Don't let your soldiers die in a battle that's already los
 
 ---
 
-*Next: [101-18] The Echo Chamber: Why you only search for good news after your stock drops.*
+*Next: [101-05] Gambler's Fallacy: Why you think a stock "must" rebound after dropping.*
 
 ---
 *ZISO AI: AI does the research. You keep the decision.*
