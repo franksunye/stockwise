@@ -9,6 +9,8 @@ import { getCurrentUser } from '@/lib/user';
 import { pricingPlans, featureComparison } from '@/lib/pricing-data';
 import { PageShell } from './CnLayout';
 import { JsonLd } from '@/components/seo/JsonLd';
+import { createTranslator } from '@/lib/i18n';
+import cnMessages from '@/messages/cn.json';
 
 function PricingContent() {
   const [loadingPriceId, setLoadingPriceId] = useState<string | null>(null);
@@ -17,6 +19,19 @@ function PricingContent() {
   const [hasStripeCustomer, setHasStripeCustomer] = useState(false);
   const [loadingPortal, setLoadingPortal] = useState(false);
   const searchParams = useSearchParams();
+
+  const t = createTranslator(cnMessages as any, 'pricing');
+
+  const renderFeature = (feature: string) => {
+    if (feature.startsWith('pricing.')) {
+        const [keyWithPrefix, val] = feature.split('|');
+        const key = keyWithPrefix.replace('pricing.', '');
+        if (key === 'features.insights') return t('features.insights', { count: val });
+        if (key === 'features.model') return t('features.model', { model: val });
+        return t(key as any);
+    }
+    return feature;
+  };
 
   const softwareSchema = {
     "@context": "https://schema.org",
@@ -194,7 +209,7 @@ function PricingContent() {
                   <plan.icon size={24} />
                 </div>
                 <h3 className="text-2xl font-black italic mb-1">
-                  {plan.enName === 'Go' ? 'Go 会员' : plan.enName === 'Plus' ? 'Plus 卓越版' : '基础版 (FREE)'}
+                  {t(`${plan.enName.toLowerCase()}.name` as any)}
                 </h3>
                 <p className="text-slate-500 text-sm font-bold uppercase tracking-wider">{plan.enName}</p>
               </div>
@@ -203,14 +218,12 @@ function PricingContent() {
                 <div className="flex items-baseline gap-1">
                   <span className="text-sm font-bold">¥</span>
                   <span className="text-5xl font-black tracking-tighter">{plan.price}</span>
-                  <span className="text-slate-500 text-sm ml-2">
-                    {plan.enName === 'Plus' ? '待发布' : (plan.enName === 'Go' ? '/月 (¥299/年)' : '/永久免费')}
+                <span className="text-slate-500 text-sm ml-2">
+                    {t(`${plan.enName.toLowerCase()}.period` as any)}
                   </span>
                 </div>
                 <p className="text-slate-400 text-sm mt-4 leading-relaxed italic">
-                  {plan.description === 'pricing.free.description' ? '适合初学者体验 AI 辅助分析。' : 
-                   plan.description === 'pricing.go.description' ? '最具性价比。解锁顶级推理模型与全量实时通知。' :
-                   '顶配共识分析。包含多模型交叉验证与优先专家支持。'}
+                  {t(`${plan.enName.toLowerCase()}.description` as any)}
                 </p>
               </div>
 
@@ -221,12 +234,7 @@ function PricingContent() {
                       <Check size={10} className={plan.highlight ? 'text-indigo-400' : 'text-slate-500'} />
                     </div>
                     <span className="text-slate-300 font-medium">
-                        {feature.includes('Actionable') ? feature.replace('Actionable Insights', '逻辑研判') : 
-                         feature.includes('Notifications') ? '全量实时通知' :
-                         feature.includes('Community') ? '投资者社区访问' :
-                         feature.includes('consensus') ? 'DeepSeek + Gemini 双模型共识' :
-                         feature.includes('DeepSeek') ? 'DeepSeek 顶级推理模型' :
-                         feature}
+                        {renderFeature(feature)}
                     </span>
                   </div>
                 ))}
@@ -313,43 +321,28 @@ function PricingContent() {
               <tbody className="text-sm font-medium">
                 {featureComparison.map((row: any, i: number) => {
                   if (row.isGroup) {
-                    const groupTitle = row.label === 'actionableInsights.group' ? '逻辑研判 (Actionable Insights)' :
-                                     row.label === 'notifications.group' ? '实时通知 (Notifications)' :
-                                     '知守学院 (Academy)';
                     return (
                       <tr key={i} className="bg-white/[0.03]">
-                        <td colSpan={4} className="py-4 px-8 text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400/80 text-left">
-                          {groupTitle}
+                        <td colSpan={4} className="py-4 px-8 text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400/80">
+                          {row.label.startsWith('pricing.') ? t(row.label.replace('pricing.', '') as any) : row.label}
                         </td>
                       </tr>
                     );
                   }
-                  
-                  const label = row.label.split('.')[1] || row.label;
-                  const labelCN = label === 'model' ? '分析模型' :
-                                label === 'dailyLimit' ? '研判额度 (每日)' :
-                                label === 'monthlyLimit' ? '研判上限 (每月)' :
-                                label === 'signals' ? '趋势信号 / 交易预案' :
-                                label === 'levels' ? '核心点位 / 空头压力' :
-                                label === 'reasoning' ? '推演过程 / 风险反思' :
-                                label === 'markets' ? '市场覆盖 (US/HK/CN)' :
-                                label === 'sharing' ? '报告分享' :
-                                label === 'realtime' ? '送达实效性' :
-                                label === 'types' ? '通知品类' :
-                                label === 'content' ? '教学内容' :
-                                label === 'masters' ? '大师逻辑' : label;
+
+                  const label = row.label.startsWith('pricing.') ? t(row.label.replace('pricing.', '') as any) : row.label;
 
                   return (
                     <tr key={i} className="border-b border-white/[0.03] hover:bg-white/[0.01] transition-colors">
-                      <td className="py-5 px-8 text-slate-400 font-bold">{labelCN}</td>
+                      <td className="py-5 px-8 text-slate-400 font-bold whitespace-nowrap">{label}</td>
                       <td className="py-5 px-8 text-slate-500">
-                        {row.free === 'Limited' ? '基础/受限' : row.free === 'Unlimited' ? '无限制' : row.free === 'All Access' ? '全量访问' : row.free}
+                        {row.free}
                       </td>
                       <td className={`py-5 px-8 ${row.highlight ? 'text-indigo-100 font-black bg-indigo-500/5' : 'text-slate-300'}`}>
-                        {row.go === 'Full Real-time' ? '全量实时推送' : row.go === 'All Categories' ? '全品类' : row.go === 'All Access' ? '全量访问' : row.go}
+                        {row.go}
                       </td>
                       <td className="py-5 px-8 text-slate-500 italic opacity-60">
-                        {row.plus === 'Full Real-time' ? '全量实时推送' : row.plus === 'All Categories' ? '全品类' : row.plus === 'All Access' ? '全量访问' : row.plus}
+                        {row.plus}
                       </td>
                     </tr>
                   );

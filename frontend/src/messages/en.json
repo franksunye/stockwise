@@ -354,6 +354,7 @@
     "supportContactNote": "Please check your network or try another card. If issues persist, add the support QR code below.",
     "portalError": "Cannot open subscription portal",
     "systemBusy": "System busy, please try again later",
+    "recommend": "Recommended",
     "free": {
       "name": "Standard Free",
       "period": "Forever Free",
@@ -395,6 +396,27 @@
       "reportAuto": "Auto-generated Insights",
       "api": "Strategy API Access",
       "expert": "Exclusive Research Assets"
+    },
+    "groups": {
+      "insights": "Actionable Insights",
+      "notifications": "Notifications",
+      "academy": "Academy"
+    },
+    "rows": {
+      "model": "AI Service Model",
+      "quota": "Watchlist Quota",
+      "quotaMonthly": "Monthly Report Quota",
+      "signalsTactical": "Signals / Tactical Briefs",
+      "levelsShort": "Key Levels / Short Pressure",
+      "reasoningReflection": "Deduction / Risk Reflection",
+      "conflict": "Conflict Explanation",
+      "sharing": "Report Sharing",
+      "market": "Market Coverage (US / HK / CN)",
+      "realtime": "Real-time Frequency",
+      "categories": "Notification Categories",
+      "academy101": "ZISO 101 Course",
+      "masterLogics": "Master Logic Library",
+      "upcoming": "Upcoming Content"
     },
     "actionableInsights": {
       "group": "Actionable Insights",

@@ -8,17 +8,16 @@ import { JsonLd } from '@/components/seo/JsonLd';
 
 const ES_PRICING_PLANS = [
   {
-    name: 'Gratis',
-    eyebrow: 'Acceso inicial',
+    name: 'Gratis Estándar',
+    eyebrow: 'Acceso Inicial',
     price: '0',
-    period: 'Para siempre',
+    period: 'Gratis por Siempre',
     description: 'Para inversores que exploran por primera vez la revisión del mercado asistida por IA.',
     features: [
-      'Capa de señales de tendencia basada en reglas',
-      'Resumen diario del mercado',
-      'Almanaque del mercado y tarjeta de humor macro',
-      '3 verificaciones de acciones por IA al día',
-      'Acceso a la comunidad',
+      '3 Acciones en Lista (con Informes/día)',
+      'Modelo de Servicio: Hunyuan Lite',
+      'Notificaciones Básicas del Sistema',
+      'Academia ZISO (101/Maestros)',
     ],
     cta: 'Empezar Gratis',
     href: 'https://app.ziso.cc',
@@ -26,38 +25,37 @@ const ES_PRICING_PLANS = [
     accent: 'text-slate-300',
   },
   {
-    name: 'Go',
-    eyebrow: 'Producto principal',
+    name: 'Miembro Go',
+    eyebrow: 'Más Popular',
     price: '4.99',
-    period: 'Mensual / $49.9 anual',
-    description: 'Para inversores que buscan una investigación nocturna profunda y una disciplina de ejecución más fuerte.',
+    period: 'Mensual / $49.9 Anual',
+    description: 'Nuestro producto principal GTM. Desbloquea toda la capa de razonamiento y alertas.',
     features: [
-      'Capa de razonamiento DeepSeek',
-      'Informes tácticos estilo entrenador',
-      '10 nombres de lista de vigilancia monitoreados',
-      'Niveles clave y unlocks de sentimiento',
-      'Alertas de disciplina en tiempo real',
+      '10 Acciones en Lista (con Informes/día)',
+      'Modelo de Servicio: DeepSeek',
+      'Notificaciones en Tiempo Real',
+      'Academia ZISO (101/Maestros)',
       'Insignia de identidad Go',
     ],
-    cta: 'Abrir App',
+    cta: 'Suscribirse a Go',
     href: 'https://app.ziso.cc',
     highlight: true,
     accent: 'text-indigo-300',
   },
   {
-    name: 'Alpha',
-    eyebrow: 'Flujo de trabajo avanzado',
-    price: '1,999',
-    period: 'Al año',
-    description: 'Para usuarios avanzados que necesitan monitoreo profundo y soporte prioritario.',
+    name: 'Plus Prestige',
+    eyebrow: 'Alta Gama Próximamente',
+    price: 'TBA',
+    period: 'Lista de Espera',
+    description: 'Razonamiento avanzado por consenso y soporte prioritario de expertos.',
     features: [
-      'Análisis de eventos intradía',
-      'Panel de estrategia dedicado',
-      'Informes detallados automatizados',
-      'Acceso a datos crudos nivel API',
-      'Soporte prioritario',
+      '10 Acciones en Lista (con Informes/día)',
+      'Modelo de Servicio: DeepSeek + Gemini',
+      'Notificaciones en Tiempo Real',
+      'Academia ZISO (101/Maestros)',
+      'Insignia de identidad Plus',
     ],
-    cta: 'Contactar Soporte',
+    cta: 'Unirse a la Lista',
     href: 'mailto:hi@ziso.cc',
     highlight: false,
     accent: 'text-emerald-300',
@@ -65,11 +63,25 @@ const ES_PRICING_PLANS = [
 ] as const;
 
 const ES_FEATURE_COMPARISON = [
-  { label: 'Profundidad de razonamiento de IA', gratis: 'Motor de reglas + IA básica', pro: 'Capa de razonamiento profundo (Go)', highlight: true },
-  { label: 'Capacidad de lista de vigilancia', gratis: '3 nombres', pro: '10 nombres', highlight: true },
-  { label: 'Cobertura de mercado', gratis: 'Acciones de China + Hong Kong', pro: 'Acciones de China + Hong Kong', highlight: false },
-  { label: 'Alertas de disciplina en tiempo real', gratis: 'No', pro: 'Sí, para cambios importantes de setup', highlight: true },
-  { label: 'Ritmo de datos', gratis: 'Post-cierre', pro: 'Post-cierre + alertas selectivas en tiempo real', highlight: false },
+  { isGroup: true, label: 'Informes de Investigación (Actionable Insights)' },
+  { label: 'Modelo de Servicio', gratis: 'Hunyuan Lite', go: 'DeepSeek', plus: 'DeepSeek + Gemini', highlight: true },
+  { label: 'Acciones en Lista', gratis: '3 Acciones', go: '10 Acciones', plus: '10 Acciones', highlight: true },
+  { label: 'Cuota Mensual de Informes', gratis: '60 / Mes', go: '200 / Mes', plus: '200 / Mes' },
+  { label: 'Señales / Informes Tácticos', gratis: '✅', go: '✅', plus: '✅' },
+  { label: 'Niveles Clave / Presión Corta', gratis: '✅', go: '✅', plus: '✅' },
+  { label: 'Deducción / Reflexión de Riesgo', gratis: '❌', go: '✅', plus: '✅' },
+  { label: 'Explicación de Conflicto', gratis: '❌', go: '✅', plus: '✅' },
+  { label: 'Compartir Informes', gratis: '❌', go: 'Ilimitado', plus: 'Ilimitado' },
+  { label: 'Cobertura de Mercado', gratis: 'US / HK / CN', go: 'US / HK / CN', plus: 'US / HK / CN' },
+  
+  { isGroup: true, label: 'Notificaciones del Sistema (Notifications)' },
+  { label: 'Frecuencia en Tiempo Real', gratis: 'Limitado', go: 'Full Tiempo Real', plus: 'Full Tiempo Real', highlight: true },
+  { label: 'Categorías de Notificación', gratis: 'Básico', go: 'Todas las Categorías', plus: 'Todas las Categorías' },
+
+  { isGroup: true, label: 'Academia ZISO (Academy)' },
+  { label: 'Guías 101', gratis: 'Incluido', go: 'Incluido', plus: 'Incluido' },
+  { label: 'Lógicas Maestras', gratis: 'Incluido', go: 'Incluido', plus: 'Incluido' },
+  { label: 'Contenido Adicional', gratis: 'Incluido', go: 'Included', plus: 'Included' },
 ] as const;
 
 export function SpanishPricingPage() {
@@ -83,7 +95,7 @@ export function SpanishPricingPage() {
       "@type": "AggregateOffer",
       "offerCount": "3",
       "lowPrice": "0",
-      "highPrice": "1999",
+      "highPrice": "49.9",
       "priceCurrency": "USD"
     }
   };
@@ -97,7 +109,7 @@ export function SpanishPricingPage() {
         "name": "¿Por qué es una suscripción?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Una suscripción es para el cómputo continuo y el razonamiento multi-agente necesario para entregar un informe nocturno. Estás contratando a un consejo disciplinado que trabaja cuando el mercado está cerrado."
+          "text": "Una suscripción es para el cómputo continuo y el razonamiento multi-agente necesario para entregar Análisis Accionables y tácticos profesionales."
         }
       }
     ]
@@ -112,15 +124,15 @@ export function SpanishPricingPage() {
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[10px] font-black uppercase tracking-[0.2em] mb-4">
             Precios estructurados para inversores disciplinados
           </div>
-          <h1 className="text-4xl md:text-6xl font-black tracking-tighter leading-tight">
+          <h1 className="text-4xl md:text-6xl font-black tracking-tighter leading-tight italic">
             Nombra a tu propio
             <br />
-            <span className="bg-gradient-to-r from-indigo-400 to-cyan-300 bg-clip-text text-transparent">Consejo de investigación ZISO.</span>
+            <span className="bg-gradient-to-r from-indigo-400 to-cyan-300 bg-clip-text text-transparent italic">Consejo de investigación ZISO.</span>
           </h1>
           <p className="text-lg text-slate-400 font-medium max-w-3xl mx-auto leading-relaxed mt-6">
             Una suscripción aquí no es solo comprar características. Es más parecido a contratar a un consejo de investigación 24/7.
-            El producto está diseñado para reducir la interferencia emocional, fortalecer tu hábito de revisión nocturna y hacer 
-            que la toma de decisiones sea más tranquila y consistente.
+            Nuestro nivel "Go" está diseñado para reducir la interferencia emocional, fortalecer tu hábito de revisión nocturna y hacer 
+            que la toma de decisiones sea más tranquila, limpia y consistente.
           </p>
         </div>
 
@@ -128,19 +140,19 @@ export function SpanishPricingPage() {
           {ES_PRICING_PLANS.map((plan) => (
             <div
               key={plan.name}
-              className={`glass-card p-8 flex flex-col relative overflow-hidden ${
+              className={`glass-card p-8 flex flex-col relative overflow-hidden text-left ${
                 plan.highlight ? 'border-indigo-500/40 ring-1 ring-indigo-500/20' : 'border-white/5'
               }`}
             >
               {plan.highlight && (
                 <div className="absolute top-5 right-[-35px] rotate-45 bg-indigo-600 text-white text-[10px] font-black px-10 py-1 uppercase tracking-tighter">
-                  Plan principal
+                  Recomendado
                 </div>
               )}
 
               <div className="mb-8">
                 <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${plan.accent}`}>{plan.eyebrow}</p>
-                <h3 className="text-3xl font-black mt-4">{plan.name}</h3>
+                <h3 className="text-3xl font-black mt-4 italic">{plan.name}</h3>
               </div>
 
               <div className="mb-8">
@@ -167,7 +179,7 @@ export function SpanishPricingPage() {
                 href={plan.href}
                 target={plan.href.startsWith('mailto:') ? undefined : '_blank'}
                 rel={plan.href.startsWith('mailto:') ? undefined : 'noopener noreferrer'}
-                className={`w-full py-4 rounded-2xl flex items-center justify-center gap-2 font-black transition-all active:scale-95 ${
+                className={`w-full py-4 rounded-2xl flex items-center justify-center gap-2 font-black italic transition-all active:scale-95 ${
                   plan.highlight
                     ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-500'
                     : 'bg-white/5 border border-white/10 hover:bg-white/10 text-white'
@@ -182,7 +194,7 @@ export function SpanishPricingPage() {
 
         <section className="mb-24 hidden md:block">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-black tracking-tighter">Comparativa de profundidad</h2>
+            <h2 className="text-3xl font-black tracking-tighter italic uppercase">Comparativa de profundidad</h2>
             <p className="text-slate-500 text-sm mt-2">Una visión más clara de qué cambia cuando pasas de la exploración a la disciplina diaria.</p>
           </div>
 
@@ -191,18 +203,31 @@ export function SpanishPricingPage() {
               <thead>
                 <tr className="border-b border-white/5 bg-white/[0.02]">
                   <th className="py-6 px-8 text-sm font-black uppercase tracking-widest text-slate-500">Capacidad</th>
-                  <th className="py-6 px-8 text-sm font-black text-slate-300">Gratis</th>
-                  <th className="py-6 px-8 text-sm font-black text-indigo-300">Go</th>
+                  <th className="py-6 px-8 text-sm font-black italic">Gratis</th>
+                  <th className="py-6 px-8 text-sm font-black italic text-indigo-300">Go (Principal)</th>
+                  <th className="py-6 px-8 text-sm font-black italic text-emerald-400/60">Plus (Próximamente)</th>
                 </tr>
               </thead>
               <tbody className="text-sm font-medium">
-                {ES_FEATURE_COMPARISON.map((row) => (
-                  <tr key={row.label} className="border-b border-white/[0.03] hover:bg-white/[0.01] transition-colors">
-                    <td className="py-5 px-8 text-slate-400 font-bold">{row.label}</td>
-                    <td className="py-5 px-8 text-slate-500 font-bold">{row.gratis}</td>
-                    <td className={`py-5 px-8 font-black ${row.highlight ? 'text-indigo-400' : 'text-slate-400'}`}>{row.pro}</td>
-                  </tr>
-                ))}
+                {ES_FEATURE_COMPARISON.map((row: any, i: number) => {
+                  if (row.isGroup) {
+                    return (
+                      <tr key={i} className="bg-white/[0.03]">
+                        <td colSpan={4} className="py-4 px-8 text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400/80">
+                          {row.label}
+                        </td>
+                      </tr>
+                    );
+                  }
+                  return (
+                    <tr key={i} className="border-b border-white/[0.03] hover:bg-white/[0.01] transition-colors">
+                      <td className="py-5 px-8 text-slate-400 font-bold">{row.label}</td>
+                      <td className="py-5 px-8 text-slate-500">{row.gratis}</td>
+                      <td className={`py-5 px-8 ${row.highlight ? 'text-indigo-100 font-black bg-indigo-500/5' : 'text-slate-300'}`}>{row.go}</td>
+                      <td className="py-5 px-8 text-slate-500 italic opacity-60">{row.plus}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -210,25 +235,25 @@ export function SpanishPricingPage() {
 
         <section id="faq" className="pt-24 pb-10 w-full max-w-4xl mx-auto space-y-12">
           <div className="text-center space-y-4">
-            <h2 className="text-3xl font-black tracking-tighter uppercase mb-2"> Precios <span className="text-indigo-500 uppercase">FAQ</span> </h2>
-            <p className="text-slate-400 font-medium italic text-lg">Comprendiendo el valor de tu consejo de investigación ZISO</p>
+            <h2 className="text-3xl font-black tracking-tighter uppercase mb-2 italic"> Precios <span className="text-indigo-500 uppercase">FAQ</span> </h2>
+            <p className="text-slate-400 font-medium italic text-lg text-center">Comprendiendo el valor de tu consejo de investigación ZISO</p>
           </div>
           <div className="grid md:grid-cols-2 gap-4 text-left">
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
-              <p className="text-white font-bold mb-3 uppercase tracking-tighter">¿Por qué es una suscripción?</p>
-              <p className="text-slate-400 text-sm leading-relaxed">Una suscripción no es solo por software; es por el cómputo continuo y el razonamiento multi-agente necesario para entregar un informe nocturno. Estás contratando a un consejo disciplinado que trabaja mientras el mercado está cerrado.</p>
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter italic text-indigo-400">¿Por qué es una suscripción?</p>
+              <p className="text-slate-400 text-sm leading-relaxed">Una suscripción no es solo por software; es por el cómputo continuo y el razonamiento multi-agente necesario para entregar Análisis Accionables profesionales. Estás contratando a un consejo disciplinado que trabaja mientras el mercado está cerrado.</p>
             </div>
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
-              <p className="text-white font-bold mb-3 uppercase tracking-tighter">¿En qué se diferencia Go de Gratis?</p>
-              <p className="text-slate-400 text-sm leading-relaxed">Gratis se basa en reglas. Go se basa en razonamiento. Go desbloquea la capa lógica profunda de DeepSeek, proporcionando informes tácticos más profundos, niveles clave y el disyuntor de riesgo del 75%.</p>
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter italic text-indigo-400">¿En qué se diferencia Go de Gratis?</p>
+              <p className="text-slate-400 text-sm leading-relaxed">Gratis se basa en reglas con 3 verificaciones al día. Go se basa en razonamiento con 10 verificaciones al día. Go desbloquea la capa lógica profunda de DeepSeek, proporcionando informes tácticos más profundos, notificaciones completas en tiempo real y niveles clave de precios.</p>
             </div>
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
-              <p className="text-white font-bold mb-3 uppercase tracking-tighter">¿El límite del 75% está disponible para usuarios Gratis?</p>
-              <p className="text-slate-400 text-sm leading-relaxed">No. El protocolo de control de riesgos y las alertas de modo defensa son parte de nuestra suite de ejecución disciplinada premium. Los usuarios gratis reciben el resumen de datos, pero no la aplicación de límites tácticos.</p>
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter italic text-indigo-400">¿Qué es "Plus"?</p>
+              <p className="text-slate-400 text-sm leading-relaxed">Plus es nuestro nivel de alta gama próximamente. Presentará el "Razonamiento por Consenso", donde múltiples modelos (DeepSeek + Gemini) se validan entre sí para ofrecer los niveles de confianza más altos para traders profesionales.</p>
             </div>
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
-              <p className="text-white font-bold mb-3 uppercase tracking-tighter">¿Puedo cambiar o cancelar mi plan en cualquier momento?</p>
-              <p className="text-slate-400 text-sm leading-relaxed">Por supuesto. Todo el proceso se gestiona a través de un portal seguro, lo que te permite cambiar de nivel o cancelar tu suscripción mensual en cualquier momento sin cargos ocultos.</p>
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter italic text-indigo-400">¿Puedo cambiar o cancelar mi plan en cualquier momento?</p>
+              <p className="text-slate-400 text-sm leading-relaxed">Por supuesto. Todo el proceso se gestiona a través del portal seguro de Stripe, lo que te permite cambiar de nivel o cancelar tu suscripción mensual en cualquier momento sin cargos ocultos.</p>
             </div>
           </div>
         </section>
@@ -240,8 +265,9 @@ export function SpanishPricingPage() {
                 locale="es"
                 summary={[
                   'Suscripción: Acceso a una mesa de investigación de IA multi-agente para informes tácticos nocturnos.',
-                  'Nivel Gratis: Resumen basado en reglas para identificación básica de tendencias.',
-                  'Nivel Go: Informes de razonamiento impulsados por DeepSeek, incluyendo la lógica de disyuntor del 75%.',
+                  'Nivel Gratis: 3 Análisis Accionables por día usando motores de reglas básicos.',
+                  'Nivel Go: 10 Análisis Accionables por día impulsados por el razonamiento de DeepSeek.',
+                  'Nivel Plus: Perspectivas impulsadas por consenso con validación multi-modelo (DeepSeek + Gemini).',
                 ]}
               />
             </div>
@@ -250,7 +276,7 @@ export function SpanishPricingPage() {
                 locale="es"
                 sources={[
                   ...ES_DEFAULT_SOURCES,
-                  { name: 'Precios de Suscripción', url: 'https://ziso.cc/es/pricing', accessedAt: '2026-03-25' },
+                  { name: 'Precios de Suscripción', url: 'https://ziso.cc/es/pricing', accessedAt: '2026-04-03' },
                 ]}
               />
             </div>

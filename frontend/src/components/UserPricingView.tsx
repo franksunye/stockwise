@@ -199,12 +199,27 @@ export function UserPricingView({ currentTier, hasStripeCustomer, expiresAt }: P
               </div>
 
               <ul className="grid grid-cols-1 gap-2.5 mb-6">
-                {plan.features.slice(0, isPremium ? 3 : 5).map((feature) => (
-                  <li key={feature} className="flex items-start gap-2 text-[11px] leading-relaxed text-slate-400 font-medium text-left">
-                    <Check size={12} className={`mt-0.5 shrink-0 ${plan.highlight ? 'text-indigo-400' : 'text-slate-500'}`} />
-                    <span>{feature.includes('Actionable') ? feature : tGlobal(feature as FullMessageKey)}</span>
-                  </li>
-                ))}
+                {plan.features.slice(0, isPremium ? 3 : 5).map((feature) => {
+                  let rendered = feature;
+                  if (feature.startsWith('pricing.')) {
+                    const [keyWithPrefix, val] = feature.split('|');
+                    const key = keyWithPrefix as FullMessageKey;
+                    if (key === 'pricing.features.insights') {
+                      rendered = tGlobal(key, { count: val });
+                    } else if (key === 'pricing.features.model') {
+                      rendered = tGlobal(key, { model: val });
+                    } else {
+                      rendered = tGlobal(key);
+                    }
+                  }
+
+                  return (
+                    <li key={feature} className="flex items-start gap-2 text-[11px] leading-relaxed text-slate-400 font-medium text-left">
+                      <Check size={12} className={`mt-0.5 shrink-0 ${plan.highlight ? 'text-indigo-400' : 'text-slate-500'}`} />
+                      <span>{rendered}</span>
+                    </li>
+                  );
+                })}
               </ul>
 
               {/* Actions Section */}

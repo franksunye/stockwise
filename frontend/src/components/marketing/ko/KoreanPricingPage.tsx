@@ -8,17 +8,16 @@ import { JsonLd } from '@/components/seo/JsonLd';
 
 const KO_PRICING_PLANS = [
   {
-    name: 'Free',
-    eyebrow: '스타터 액세스',
+    name: 'Standard Free',
+    eyebrow: 'Starter Access',
     price: '0',
-    period: '영구 무료',
-    description: 'AI 지원 시장 복기를 처음 경험해보려는 투자자를 위한 플랜입니다.',
+    period: '평생 무료',
+    description: 'AI 지원 시장 검토를 처음 경험해보려는 투자자를 위한 플랜입니다.',
     features: [
-      '규칙 기반 추세 신호 레이어',
-      '일일 시장 요약 브리핑',
-      '시장 황력 및 매크로 분위기 카드',
-      '일일 3회 AI 종목 체크',
-      '커뮤니티 접속 권한',
+      '3종 자선주/관심종목 (연판 보고서 포함)',
+      '서비스 모델: Hunyuan Lite',
+      '기본 시스템 알림',
+      '지수 아카데미 (101/마스터)',
     ],
     cta: '무료로 시작하기',
     href: 'https://app.ziso.cc',
@@ -26,38 +25,37 @@ const KO_PRICING_PLANS = [
     accent: 'text-slate-300',
   },
   {
-    name: 'Go',
-    eyebrow: '코어 제품',
+    name: 'Go Member',
+    eyebrow: '가장 인기 있는 선택',
     price: '4.99',
     period: '월간 / 연간 $49.9',
-    description: '더 깊이 있는 야간 리서치와 강력한 실행 규율을 원하는 투자자를 위한 플랜입니다.',
+    description: '우리의 핵심 GTM 제품입니다. 모든 추론 레이어와 알림을 잠금 해제합니다.',
     features: [
-      'DeepSeek 추론 레이어',
-      '코칭 스타일의 전술 브리핑',
-      '10개의 관심 종목 정밀 모니터링',
-      '주요 가격대 및 심리 분석 잠금 해제',
-      '주요 설정 변경 시 실시간 규율 알림',
+      '10종 자선주/관심종목 (연판 보고서 포함)',
+      '서비스 모델: DeepSeek',
+      '전 기능 실시간 알림',
+      '지수 아카데미 (101/마스터)',
       'Go 전용 아이덴티티 배지',
     ],
-    cta: '앱 열기',
+    cta: 'Go 구독하기',
     href: 'https://app.ziso.cc',
     highlight: true,
     accent: 'text-indigo-300',
   },
   {
-    name: 'Alpha',
-    eyebrow: '하이엔드 워크플로우',
-    price: '1,999',
-    period: '연간',
-    description: '더 심도 있는 모니터링과 우선적인 지원이 필요한 고급 사용자를 위한 플랜입니다.',
+    name: 'Plus Prestige',
+    eyebrow: '출시 예정 하이엔드',
+    price: 'TBA',
+    period: '대기 예약',
+    description: '합의 추론과 우선 지원이 필요한 고급 사용자를 위한 플랜입니다.',
     features: [
-      '장중 이벤트 분석',
-      '전용 전략 대시보드',
-      '자동화된 심층 분석 보고서',
-      'API 레벨의 로우 데이터 접근',
-      '우선 순위 고객 지원',
+      '10종 자선주/관심종목 (연판 보고서 포함)',
+      '서비스 모델: DeepSeek + Gemini',
+      '전 기능 실시간 알림',
+      '지수 아카데미 (101/마스터)',
+      'Plus 전용 아이덴티티 배지',
     ],
-    cta: '고객 지원 문의',
+    cta: '대기 명단 합류',
     href: 'mailto:hi@ziso.cc',
     highlight: false,
     accent: 'text-emerald-300',
@@ -65,11 +63,25 @@ const KO_PRICING_PLANS = [
 ] as const;
 
 const KO_FEATURE_COMPARISON = [
-  { label: 'AI 추론 깊이', free: '규칙 엔진 + 기본 AI', pro: '심층 추론 레이어', highlight: true },
-  { label: '관심 종목 용량', free: '3개', pro: '10개', highlight: true },
-  { label: '시장 커버리지', free: '중국 + 홍콩 주식 전용', pro: '중국 + 홍콩 주식 전용', highlight: false },
-  { label: '실시간 규율 알림', free: '미지원', pro: '지원 (주요 셋업 변경 시)', highlight: true },
-  { label: '데이터 리듬', free: '장 마감 후', pro: '장 마감 후 + 선택적 실시간 알림', highlight: false },
+  { isGroup: true, label: '실전 연판 (Actionable Insights)' },
+  { label: '서비스 모델', free: 'Hunyuan Lite', go: 'DeepSeek', plus: 'DeepSeek + Gemini', highlight: true },
+  { label: '자선주/관심종목 수량', free: '3종', go: '10종', plus: '10종', highlight: true },
+  { label: '월간 보고서 한도', free: '60 / 월', go: '200 / 월', plus: '200 / 월' },
+  { label: '추세 신호 / 전술 브리핑', free: '✅', go: '✅', plus: '✅' },
+  { label: '핵심 매매가점 / 공매도 압력', free: '✅', go: '✅', plus: '✅' },
+  { label: '시나리오 추론 / 위험 리플렉션', free: '❌', go: '✅', plus: '✅' },
+  { label: '충돌/이견 설명', free: '❌', go: '✅', plus: '✅' },
+  { label: '보고서 공유', free: '❌', go: '무제한', plus: '무제한' },
+  { label: '시장 커버리지', free: 'US / HK / CN', go: 'US / HK / CN', plus: 'US / HK / CN' },
+  
+  { isGroup: true, label: '시스템 알림 (Notifications)' },
+  { label: '실시간 알림 빈도', free: '제한적', go: '전 기능 실시간', plus: '전 기능 실시간', highlight: true },
+  { label: '알림 카테고리', free: '기본형', go: '모든 카테고리', plus: '모든 카테고리' },
+
+  { isGroup: true, label: '지守 아카데미 (Academy)' },
+  { label: '101 가이드', free: '포함됨', go: '포함됨', plus: '포함됨' },
+  { label: '마스터 로직', free: '포함됨', go: '포함됨', plus: '포함됨' },
+  { label: '기타 추가 콘텐츠', free: '포함됨', go: '포함됨', plus: '포함됨' },
 ] as const;
 
 export function KoreanPricingPage() {
@@ -83,7 +95,7 @@ export function KoreanPricingPage() {
       "@type": "AggregateOffer",
       "offerCount": "3",
       "lowPrice": "0",
-      "highPrice": "1999",
+      "highPrice": "49.9",
       "priceCurrency": "USD"
     }
   };
@@ -97,7 +109,7 @@ export function KoreanPricingPage() {
         "name": "왜 구독제인가요?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "구독은 매일 밤 브리핑을 제공하기 위해 필요한 지속적인 컴퓨팅 및 멀티 에이전트 추론 비용을 위한 것입니다."
+          "text": "구독은 매일 밤 전술적 연판과 브리핑을 제공하기 위해 필요한 지속적인 컴퓨팅 및 멀티 에이전트 추론 비용을 위한 것입니다."
         }
       }
     ]
@@ -112,14 +124,14 @@ export function KoreanPricingPage() {
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[10px] font-black uppercase tracking-[0.2em] mb-4">
             규율 있는 투자자를 위한 체계적인 요금제
           </div>
-          <h1 className="text-4xl md:text-6xl font-black tracking-tighter leading-tight">
+          <h1 className="text-4xl md:text-6xl font-black tracking-tighter leading-tight italic">
             당신만의 전용
             <br />
-            <span className="bg-gradient-to-r from-indigo-400 to-cyan-300 bg-clip-text text-transparent">ZISO 리서치 위원회를 선임하십시오.</span>
+            <span className="bg-gradient-to-r from-indigo-400 to-cyan-300 bg-clip-text text-transparent italic">ZISO 리서치 위원회를 선임하십시오.</span>
           </h1>
           <p className="text-lg text-slate-400 font-medium max-w-3xl mx-auto leading-relaxed mt-6">
             ZISO AI 구독은 단순한 기능 구매가 아닙니다. 24시간 가동되는 전문 리서치 위원회를 고용하는 것에 가깝습니다.
-            감정적 간섭을 줄이고, 야간 복기 습관을 강화하며, 의사결정을 더 차분하고 투명하며 일관되게 만들도록 설계되었습니다.
+            우리의 "Go" 티어는 감정적 간섭을 줄이고, 야간 복기 습관을 강화하며, 의사결정을 더 차분하고 투명하며 일관되게 만들도록 설계되었습니다.
           </p>
         </div>
 
@@ -127,19 +139,19 @@ export function KoreanPricingPage() {
           {KO_PRICING_PLANS.map((plan) => (
             <div
               key={plan.name}
-              className={`glass-card p-8 flex flex-col relative overflow-hidden ${
+              className={`glass-card p-8 flex flex-col relative overflow-hidden text-left ${
                 plan.highlight ? 'border-indigo-500/40 ring-1 ring-indigo-500/20' : 'border-white/5'
               }`}
             >
               {plan.highlight && (
                 <div className="absolute top-5 right-[-35px] rotate-45 bg-indigo-600 text-white text-[10px] font-black px-10 py-1 uppercase tracking-tighter">
-                  코어 플랜
+                  Recommended
                 </div>
               )}
 
               <div className="mb-8">
                 <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${plan.accent}`}>{plan.eyebrow}</p>
-                <h3 className="text-3xl font-black mt-4">{plan.name}</h3>
+                <h3 className="text-3xl font-black mt-4 italic">{plan.name}</h3>
               </div>
 
               <div className="mb-8">
@@ -166,7 +178,7 @@ export function KoreanPricingPage() {
                 href={plan.href}
                 target={plan.href.startsWith('mailto:') ? undefined : '_blank'}
                 rel={plan.href.startsWith('mailto:') ? undefined : 'noopener noreferrer'}
-                className={`w-full py-4 rounded-2xl flex items-center justify-center gap-2 font-black transition-all active:scale-95 ${
+                className={`w-full py-4 rounded-2xl flex items-center justify-center gap-2 font-black italic transition-all active:scale-95 ${
                   plan.highlight
                     ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-500'
                     : 'bg-white/5 border border-white/10 hover:bg-white/10 text-white'
@@ -181,7 +193,7 @@ export function KoreanPricingPage() {
 
         <section className="mb-24 hidden md:block">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-black tracking-tighter">기능 상세 비교</h2>
+            <h2 className="text-3xl font-black tracking-tighter italic uppercase">기능 상세 비교</h2>
             <p className="text-slate-500 text-sm mt-2">단순 탐색 단계에서 규율 있는 데일리 매매 시스템으로 전환할 때 무엇이 달라지는지 확인해 보십시오.</p>
           </div>
 
@@ -190,18 +202,31 @@ export function KoreanPricingPage() {
               <thead>
                 <tr className="border-b border-white/5 bg-white/[0.02]">
                   <th className="py-6 px-8 text-sm font-black uppercase tracking-widest text-slate-500">핵심 역량</th>
-                  <th className="py-6 px-8 text-sm font-black text-slate-300">Free</th>
-                  <th className="py-6 px-8 text-sm font-black text-indigo-300">Go</th>
+                  <th className="py-6 px-8 text-sm font-black italic">Free</th>
+                  <th className="py-6 px-8 text-sm font-black italic text-indigo-300">Go (Core)</th>
+                  <th className="py-6 px-8 text-sm font-black italic text-emerald-400/60">Plus (대기 예약)</th>
                 </tr>
               </thead>
               <tbody className="text-sm font-medium">
-                {KO_FEATURE_COMPARISON.map((row) => (
-                  <tr key={row.label} className="border-b border-white/[0.03] hover:bg-white/[0.01] transition-colors">
-                    <td className="py-5 px-8 text-slate-400 font-bold">{row.label}</td>
-                    <td className="py-5 px-8 text-slate-500 font-bold">{row.free}</td>
-                    <td className={`py-5 px-8 font-black ${row.highlight ? 'text-indigo-400' : 'text-slate-400'}`}>{row.pro}</td>
-                  </tr>
-                ))}
+                {KO_FEATURE_COMPARISON.map((row: any, i: number) => {
+                  if (row.isGroup) {
+                    return (
+                      <tr key={i} className="bg-white/[0.03]">
+                        <td colSpan={4} className="py-4 px-8 text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400/80">
+                          {row.label}
+                        </td>
+                      </tr>
+                    );
+                  }
+                  return (
+                    <tr key={i} className="border-b border-white/[0.03] hover:bg-white/[0.01] transition-colors">
+                      <td className="py-5 px-8 text-slate-400 font-bold">{row.label}</td>
+                      <td className="py-5 px-8 text-slate-500">{row.free}</td>
+                      <td className={`py-5 px-8 ${row.highlight ? 'text-indigo-100 font-black bg-indigo-500/5' : 'text-slate-300'}`}>{row.go}</td>
+                      <td className="py-5 px-8 text-slate-500 italic opacity-60">{row.plus}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -209,25 +234,25 @@ export function KoreanPricingPage() {
 
         <section id="faq" className="pt-24 pb-10 w-full max-w-4xl mx-auto space-y-12">
           <div className="text-center space-y-4">
-            <h2 className="text-3xl font-black tracking-tighter uppercase mb-2"> 요금제 <span className="text-indigo-500 uppercase">FAQ</span> </h2>
+            <h2 className="text-3xl font-black tracking-tighter uppercase mb-2 italic"> 요금제 <span className="text-indigo-500 uppercase">FAQ</span> </h2>
             <p className="text-slate-400 font-medium italic text-lg">ZISO 리서치 위원회의 가치 이해</p>
           </div>
           <div className="grid md:grid-cols-2 gap-4 text-left">
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
-              <p className="text-white font-bold mb-3 uppercase tracking-tighter">왜 구독 모델인가요?</p>
-              <p className="text-slate-400 text-sm leading-relaxed">구독은 단순한 소프트웨어 사용료가 아니라, 매일 밤 브리핑을 생성하기 위해 가동되는 다중 에이전트 리서치 위원회에 대한 고용 비용입니다. 시장이 닫혀 있을 때 일하는 당신만의 리서치 팀을 갖게 되는 것입니다.</p>
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter italic text-indigo-400">왜 구독 모델인가요?</p>
+              <p className="text-slate-400 text-sm leading-relaxed">구독은 단순한 소프트웨어 사용료가 아니라, 매일 전문적인 실전 연판(Actionable Insights)을 생성하기 위해 가동되는 다중 에이전트 리서치 위원회에 대한 고용 비용입니다. 시장이 닫혀 있을 때 일하는 당신만의 리서치 팀을 갖게 되는 것입니다.</p>
             </div>
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
-              <p className="text-white font-bold mb-3 uppercase tracking-tighter">Go와 Free의 가장 큰 차이점은 무엇인가요?</p>
-              <p className="text-slate-400 text-sm leading-relaxed">Free는 규칙 기반입니다. Go는 추론 기반입니다. Go는 DeepSeek 논리 레이어를 활성화하여 더 깊은 전술적 서사, 가격대 분석, 그리고 방어적인 75% 서킷 브레이커 게이트를 제공합니다.</p>
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter italic text-indigo-400">Go와 Free의 가장 큰 차이점은 무엇인가요?</p>
+              <p className="text-slate-400 text-sm leading-relaxed">Free는 규칙 기반이며 하루 3회 체크가 가능합니다. Go는 추론 기반이며 하루 10회 체크가 가능합니다. Go는 DeepSeek 논리 레이어를 활성화하여 더 깊은 전술적 서사, 전 기능 실시간 알림, 그리고 주요 가격대 분석을 제공합니다.</p>
             </div>
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
-              <p className="text-white font-bold mb-3 uppercase tracking-tighter">75% 게이트는 Free 사용자도 사용할 수 있나요?</p>
-              <p className="text-slate-400 text-sm leading-relaxed">아니요. 리스크 컨트롤 프로토콜과 수비 모드 알림은 우리의 프리미엄 실행 규율 스위트의 일부입니다. Free 사용자는 데이터 요약을 제공받지만, 전술적 경계 집행 서비스는 포함되지 않습니다.</p>
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter italic text-indigo-400">"Plus"는 무엇인가요?</p>
+              <p className="text-slate-400 text-sm leading-relaxed">Plus는 곧 출시될 하이엔드 티어입니다. 다중 모델(DeepSeek + Gemini)이 서로를 교차 검증하는 "합의 추론" 기능을 제공하며, 전문 트레이더에게 최고 수준의 신뢰도를 제공할 예정입니다.</p>
             </div>
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
-              <p className="text-white font-bold mb-3 uppercase tracking-tighter">언제든 업그레이드나 해지가 가능한가요?</p>
-              <p className="text-slate-400 text-sm leading-relaxed">네, 가능합니다. 모든 결제는 보안 포털을 통해 관리되며, 숨겨진 비용 없이 언제든지 티어를 변경하거나 월간 구독을 취소할 수 있습니다.</p>
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter italic text-indigo-400">언제든 업그레이드나 해지가 가능한가요?</p>
+              <p className="text-slate-400 text-sm leading-relaxed">네, 가능합니다. 모든 결제는 Stripe의 보안 포털을 통해 관리되며, 숨겨진 비용 없이 언제든지 티어를 변경하거나 월간 구독을 취소할 수 있습니다.</p>
             </div>
           </div>
         </section>
@@ -239,8 +264,9 @@ export function KoreanPricingPage() {
                 locale="ko"
                 summary={[
                   '구독 서비스: 야간 전술 브리핑을 위한 다중 에이전트 AI 리서치 데스크 이용 권한.',
-                  'Free 티어: 트렌드 식별을 위한 기본 규칙 엔진 기반의 데이터 요약.',
-                  'Go 티어: DeepSeek으로 구동되는 추론 우선 보고서 및 75% 리스크 서킷 브레이커 로직 포함.',
+                  'Free 티어: 일일 3회의 실전 연판 제공, 기본 규칙 엔진 기반.',
+                  'Go 티어: 일일 10회의 실전 연판 제공, DeepSeek 추론 레이어 중심.',
+                  'Plus 티어: 다중 모델 검증(DeepSeek + Gemini) 기반의 합의 추론 통찰 제공.',
                 ]}
               />
             </div>
@@ -249,7 +275,7 @@ export function KoreanPricingPage() {
                 locale="ko"
                 sources={[
                   ...KO_DEFAULT_SOURCES,
-                  { name: '구독 요금제', url: 'https://ziso.cc/ko/pricing', accessedAt: '2026-03-20' },
+                  { name: '구독 요금제', url: 'https://ziso.cc/ko/pricing', accessedAt: '2026-04-03' },
                 ]}
               />
             </div>
