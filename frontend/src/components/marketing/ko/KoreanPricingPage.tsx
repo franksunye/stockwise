@@ -29,7 +29,7 @@ const KO_PRICING_PLANS = [
     eyebrow: '가장 인기 있는 선택',
     price: '4.99',
     period: '월간 / 연간 $49.9',
-    description: '우리의 핵심 GTM 제품입니다. 모든 추론 레이어와 알림을 잠금 해제합니다.',
+    description: '핵심 패키지. DeepSeek 추론, 10종 관심종목, 월간 200회 연판 보고서 및 전 기능 실시간 알림 잠금 해제.',
     features: [
       '10종 자선주/관심종목 (연판 보고서 포함)',
       '서비스 모델: DeepSeek',
