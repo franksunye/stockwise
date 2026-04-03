@@ -74,6 +74,8 @@ function parseFrontmatter(fileContent: string): { meta: Partial<ArticleMeta>, co
                 // Remove quotes if present
                 if (value.startsWith('"') && value.endsWith('"')) {
                     value = value.slice(1, -1);
+                } else if (value.startsWith("'") && value.endsWith("'")) {
+                    value = value.slice(1, -1);
                 }
                 meta[key] = value;
             }
