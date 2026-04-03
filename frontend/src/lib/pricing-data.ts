@@ -79,11 +79,20 @@ export const pricingPlans: PricingPlan[] = [
     },
 ];
 
+export interface FeatureComparisonRow {
+    isGroup?: boolean;
+    label: string;
+    free?: string;
+    go?: string;
+    plus?: string;
+    highlight?: boolean;
+}
+
 /**
  * Feature comparison data for the pricing table.
  * Grouped by category as per user request.
  */
-export const featureComparison = [
+export const featureComparison: FeatureComparisonRow[] = [
     // --- Actionable Insights ---
     { isGroup: true, label: 'pricing.groups.insights' },
     { label: 'pricing.rows.model', free: 'Hunyuan Lite', go: 'DeepSeek', plus: 'DeepSeek + Gemini', highlight: true },
@@ -100,7 +109,7 @@ export const featureComparison = [
     { isGroup: true, label: 'pricing.groups.notifications' },
     { label: 'pricing.rows.realtime', free: '受限', go: '全量实时', plus: '全量实时', highlight: true },
     { label: 'pricing.rows.categories', free: '基础通知', go: '全品类通知', plus: '全品类通知' },
-
+ 
     // --- Academy ---
     { isGroup: true, label: 'pricing.groups.academy' },
     { label: 'pricing.rows.academy101', free: '✅', go: '✅', plus: '✅' },

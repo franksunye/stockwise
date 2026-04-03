@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { PageShell, KO_BOUNDARY_NOTICE, KO_DEFAULT_SOURCES } from './KoLayout';
 import { GeoSummary, SourceBlock, BoundaryNotice } from '@/components/seo/GeoBlocks';
 import { JsonLd } from '@/components/seo/JsonLd';
+import { type FeatureComparisonRow } from '@/lib/pricing-data';
 
 const KO_PRICING_PLANS = [
   {
@@ -82,7 +83,7 @@ const KO_FEATURE_COMPARISON = [
   { label: '101 가이드', free: '포함됨', go: '포함됨', plus: '포함됨' },
   { label: '마스터 로직', free: '포함됨', go: '포함됨', plus: '포함됨' },
   { label: '기타 추가 콘텐츠', free: '포함됨', go: '포함됨', plus: '포함됨' },
-] as const;
+] as FeatureComparisonRow[];
 
 export function KoreanPricingPage() {
   const softwareSchema = {
@@ -131,7 +132,7 @@ export function KoreanPricingPage() {
           </h1>
           <p className="text-lg text-slate-400 font-medium max-w-3xl mx-auto leading-relaxed mt-6">
             ZISO AI 구독은 단순한 기능 구매가 아닙니다. 24시간 가동되는 전문 리서치 위원회를 고용하는 것에 가깝습니다.
-            우리의 "Go" 티어는 감정적 간섭을 줄이고, 야간 복기 습관을 강화하며, 의사결정을 더 차분하고 투명하며 일관되게 만들도록 설계되었습니다.
+            우리의 &quot;Go&quot; 티어는 감정적 간섭을 줄이고, 야간 복기 습관을 강화하며, 의사결정을 더 차분하고 투명하며 일관되게 만들도록 설계되었습니다.
           </p>
         </div>
 
@@ -208,7 +209,7 @@ export function KoreanPricingPage() {
                 </tr>
               </thead>
               <tbody className="text-sm font-medium">
-                {KO_FEATURE_COMPARISON.map((row: any, i: number) => {
+                {KO_FEATURE_COMPARISON.map((row: FeatureComparisonRow, i: number) => {
                   if (row.isGroup) {
                     return (
                       <tr key={i} className="bg-white/[0.03]">
@@ -247,8 +248,8 @@ export function KoreanPricingPage() {
               <p className="text-slate-400 text-sm leading-relaxed">Free는 규칙 기반이며 하루 3회 체크가 가능합니다. Go는 추론 기반이며 하루 10회 체크가 가능합니다. Go는 DeepSeek 논리 레이어를 활성화하여 더 깊은 전술적 서사, 전 기능 실시간 알림, 그리고 주요 가격대 분석을 제공합니다.</p>
             </div>
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
-              <p className="text-white font-bold mb-3 uppercase tracking-tighter italic text-indigo-400">"Plus"는 무엇인가요?</p>
-              <p className="text-slate-400 text-sm leading-relaxed">Plus는 곧 출시될 하이엔드 티어입니다. 다중 모델(DeepSeek + Gemini)이 서로를 교차 검증하는 "합의 추론" 기능을 제공하며, 전문 트레이더에게 최고 수준의 신뢰도를 제공할 예정입니다.</p>
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter italic text-indigo-400">&quot;Plus&quot;는 무엇인가요?</p>
+              <p className="text-slate-400 text-sm leading-relaxed">Plus는 곧 출시될 하이엔드 티어입니다. 여러 모델(DeepSeek + Gemini)이 서로를 교차 검증하는 &quot;합의 추론&quot; 기능을 제공하며, 전문 트레이더에게 최고 수준의 신뢰도를 제공할 예정입니다.</p>
             </div>
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
               <p className="text-white font-bold mb-3 uppercase tracking-tighter italic text-indigo-400">언제든 업그레이드나 해지가 가능한가요?</p>

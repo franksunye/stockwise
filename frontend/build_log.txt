@@ -1,0 +1,81 @@
+
+> frontend@1.0.0 build
+> next build
+
+ ⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of /Users/yesun/Code/stockwise/package-lock.json as the root directory.
+ To silence this warning, set `outputFileTracingRoot` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/output#caveats for more information.
+ Detected additional lockfiles: 
+   * /Users/yesun/Code/stockwise/frontend/package-lock.json
+
+   ▲ Next.js 15.5.9
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 3.6s
+   Linting and checking validity of types ...
+
+Failed to compile.
+
+./src/app/[locale]/[[...slug]]/page.tsx
+28:54  Warning: 'SUPPORTED_PUBLIC_LOCALES' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/global-error.tsx
+7:3  Warning: 'reset' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/layout.tsx
+6:10  Warning: 'getHtmlLang' is defined but never used.  @typescript-eslint/no-unused-vars
+6:23  Warning: 'isSupportedPublicLocale' is defined but never used.  @typescript-eslint/no-unused-vars
+101:11  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/components/MarketingFooter.tsx
+7:9  Warning: 'footerLinks' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+8:9  Warning: 'homePath' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/marketing/cn/ChineseHomePage.tsx
+8:21  Warning: 'CN_BOUNDARY_NOTICE' is defined but never used.  @typescript-eslint/no-unused-vars
+8:41  Warning: 'CN_DEFAULT_SOURCES' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/marketing/cn/ChinesePricingPage.tsx
+23:44  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+31:25  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+212:61  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+222:65  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+226:68  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+322:46  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+327:102  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+333:107  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/components/marketing/en/EnglishPricingPage.tsx
+134:17  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+134:20  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+212:50  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+251:114  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+251:119  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+252:121  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+252:141  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+256:114  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./src/components/marketing/es/SpanishPricingPage.tsx
+134:27  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+134:30  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+212:50  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+251:114  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+251:119  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+252:132  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+252:158  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+
+./src/components/marketing/ko/KoreanPricingPage.tsx
+134:17  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+134:20  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+211:50  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+250:106  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+250:111  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+251:131  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+251:137  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+
+./src/lib/pricing-data.ts
+3:10  Warning: 'Zap' is defined but never used.  @typescript-eslint/no-unused-vars
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules

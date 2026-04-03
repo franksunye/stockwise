@@ -380,22 +380,13 @@
       "cta": "Contact Us"
     },
     "features": {
-      "aiTrend": "AI Trend Analysis",
-      "dailyBrief": "Daily Market Brief",
-      "almanac": "Macro Almanac",
-      "diagnosis": "Basic Stock Check",
-      "community": "Community Access",
-      "deepseek": "DeepSeek Full Reasoning",
-      "aiReport": "Deep AI Analytics",
-      "watchlist": "Watchlist Expansion (10)",
-      "indicators": "Levels & Sentiment",
-      "realtime": "Real-time Alerts",
-      "badge": "⭐ Identity Badge",
-      "breaking": "Breaking Intel & Game Theory",
-      "dashboard": "Expert Console",
-      "reportAuto": "Auto-generated Insights",
-      "api": "Strategy API Access",
-      "expert": "Exclusive Research Assets"
+      "insights": "{count} Watchlist Stocks (incl. Insights/day)",
+      "model": "Service Model: {model}",
+      "notifications_basic": "Basic System Notifications",
+      "notifications_full": "Full Real-time Notifications",
+      "academy": "ZISO Academy (101/Masters)",
+      "badge_go": "Go Identity Badge",
+      "badge_plus": "Plus Identity Badge"
     },
     "groups": {
       "insights": "Actionable Insights",

@@ -1,0 +1,52 @@
+
+> frontend@1.0.0 build
+> next build
+
+ ⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of /Users/yesun/Code/stockwise/package-lock.json as the root directory.
+ To silence this warning, set `outputFileTracingRoot` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/output#caveats for more information.
+ Detected additional lockfiles: 
+   * /Users/yesun/Code/stockwise/frontend/package-lock.json
+
+   ▲ Next.js 15.5.9
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 2.5s
+   Linting and checking validity of types ...
+
+./src/app/[locale]/[[...slug]]/page.tsx
+28:54  Warning: 'SUPPORTED_PUBLIC_LOCALES' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/global-error.tsx
+7:3  Warning: 'reset' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/layout.tsx
+6:10  Warning: 'getHtmlLang' is defined but never used.  @typescript-eslint/no-unused-vars
+6:23  Warning: 'isSupportedPublicLocale' is defined but never used.  @typescript-eslint/no-unused-vars
+101:11  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/components/marketing/cn/ChineseHomePage.tsx
+8:21  Warning: 'CN_BOUNDARY_NOTICE' is defined but never used.  @typescript-eslint/no-unused-vars
+8:41  Warning: 'CN_DEFAULT_SOURCES' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/lib/pricing-data.ts
+3:10  Warning: 'Zap' is defined but never used.  @typescript-eslint/no-unused-vars
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+Failed to compile.
+
+./src/lib/dashboard-bootstrap.ts:38:15
+Type error: Conversion of type 'Window & typeof globalThis' to type 'Window & Record<string, boolean>' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type 'Window & typeof globalThis' is not comparable to type 'Record<string, boolean>'.
+    Index signature for type 'string' is missing in type 'Window & typeof globalThis'.
+
+[0m [90m 36 |[39m         [36mreturn[39m[33m;[39m
+ [90m 37 |[39m     }
+[31m[1m>[22m[39m[90m 38 |[39m     [36mconst[39m w [33m=[39m window [36mas[39m [33mWindow[39m [33m&[39m [33mRecord[39m[33m<[39m[33mstring[39m[33m,[39m boolean[33m>[39m[33m;[39m
+ [90m    |[39m               [31m[1m^[22m[39m
+ [90m 39 |[39m     [36mif[39m (w[[33mLEGACY_PROFILE_WRITE_GUARD[39m]) {
+ [90m 40 |[39m         [36mreturn[39m[33m;[39m
+ [90m 41 |[39m     }[0m
+Next.js build worker exited with code: 1 and signal: null

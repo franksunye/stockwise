@@ -35,7 +35,7 @@ export function installLegacyProfileCacheWriteGuard(): void {
     if (typeof window === 'undefined') {
         return;
     }
-    const w = window as Window & Record<string, boolean>;
+    const w = window as unknown as Window & Record<string, boolean>;
     if (w[LEGACY_PROFILE_WRITE_GUARD]) {
         return;
     }

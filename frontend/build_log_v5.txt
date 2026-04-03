@@ -1,0 +1,168 @@
+
+> frontend@1.0.0 build
+> next build
+
+ ⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of /Users/yesun/Code/stockwise/package-lock.json as the root directory.
+ To silence this warning, set `outputFileTracingRoot` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/output#caveats for more information.
+ Detected additional lockfiles: 
+   * /Users/yesun/Code/stockwise/frontend/package-lock.json
+
+   ▲ Next.js 15.5.9
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 2.6s
+   Linting and checking validity of types ...
+
+./src/app/[locale]/[[...slug]]/page.tsx
+28:54  Warning: 'SUPPORTED_PUBLIC_LOCALES' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/global-error.tsx
+7:3  Warning: 'reset' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/layout.tsx
+6:10  Warning: 'getHtmlLang' is defined but never used.  @typescript-eslint/no-unused-vars
+6:23  Warning: 'isSupportedPublicLocale' is defined but never used.  @typescript-eslint/no-unused-vars
+101:11  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/components/marketing/cn/ChineseHomePage.tsx
+8:21  Warning: 'CN_BOUNDARY_NOTICE' is defined but never used.  @typescript-eslint/no-unused-vars
+8:41  Warning: 'CN_DEFAULT_SOURCES' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/lib/pricing-data.ts
+3:10  Warning: 'Zap' is defined but never used.  @typescript-eslint/no-unused-vars
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+   Collecting page data ...
+   Generating static pages (0/290) ...
+   Generating static pages (72/290) 
+   Generating static pages (144/290) 
+   Generating static pages (217/290) 
+ ✓ Generating static pages (290/290)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                                      Size  First Load JS  Revalidate  Expire
+┌ ○ /                                                           564 B         125 kB
+├ ○ /_not-found                                                  1 kB         103 kB
+├ ● /[locale]/[[...slug]]                                     39.2 kB         250 kB
+├   ├ /cn
+├   ├ /cn/about
+├   ├ /cn/pricing
+├   └ [+195 more paths]
+├ ○ /about                                                    2.97 kB         150 kB
+├ ƒ /admin                                                    4.68 kB         150 kB
+├ ƒ /admin/invitations                                        6.32 kB         152 kB
+├ ƒ /admin/llm-traces                                         4.29 kB         110 kB
+├ ○ /admin/login                                              2.38 kB         105 kB
+├ ƒ /admin/observability                                      3.85 kB         109 kB
+├ ƒ /admin/pool                                               2.57 kB         108 kB
+├ ƒ /admin/traces                                             4.43 kB         110 kB
+├ ƒ /admin/trade-positions                                    5.63 kB         111 kB
+├ ƒ /admin/trade-positions/[positionId]                       2.98 kB         109 kB
+├ ƒ /admin/tradeability                                       8.71 kB         114 kB
+├ ƒ /api/admin/auth/login                                       323 B         103 kB
+├ ƒ /api/admin/auth/logout                                      323 B         103 kB
+├ ƒ /api/admin/invitations                                      323 B         103 kB
+├ ƒ /api/admin/llm-traces                                       323 B         103 kB
+├ ƒ /api/admin/llm-traces/[id]                                  323 B         103 kB
+├ ƒ /api/admin/observability                                    323 B         103 kB
+├ ƒ /api/admin/observability/broadcast                          323 B         103 kB
+├ ƒ /api/admin/pool                                             323 B         103 kB
+├ ƒ /api/admin/pool/[symbol]                                    323 B         103 kB
+├ ƒ /api/admin/stats                                            323 B         103 kB
+├ ƒ /api/admin/traces                                           323 B         103 kB
+├ ƒ /api/admin/traces/[id]                                      323 B         103 kB
+├ ƒ /api/admin/trade-positions                                  323 B         103 kB
+├ ƒ /api/admin/trade-positions/[positionId]                     323 B         103 kB
+├ ƒ /api/admin/trade-positions/[positionId]/advice              323 B         103 kB
+├ ƒ /api/admin/trade-positions/[positionId]/events              323 B         103 kB
+├ ƒ /api/admin/trade-positions/[positionId]/events/[eventId]    323 B         103 kB
+├ ƒ /api/admin/tradeability                                     323 B         103 kB
+├ ƒ /api/billing/portal                                         323 B         103 kB
+├ ƒ /api/brief                                                  323 B         103 kB
+├ ƒ /api/checkout                                               323 B         103 kB
+├ ƒ /api/dashboard                                              323 B         103 kB
+├ ƒ /api/history                                                323 B         103 kB
+├ ƒ /api/internal/cache/revalidate                              323 B         103 kB
+├ ƒ /api/internal/notify                                        323 B         103 kB
+├ ƒ /api/learn                                                  323 B         103 kB
+├ ƒ /api/learn/[slug]                                           323 B         103 kB
+├ ƒ /api/modes                                                  323 B         103 kB
+├ ƒ /api/modes/decisions                                        323 B         103 kB
+├ ƒ /api/modes/performance                                      323 B         103 kB
+├ ƒ /api/modes/performance/ledger                               323 B         103 kB
+├ ƒ /api/modes/performance/summary                              323 B         103 kB
+├ ƒ /api/notifications/subscribe                                323 B         103 kB
+├ ƒ /api/notifications/unsubscribe                              323 B         103 kB
+├ ƒ /api/ops/broadcast/events                                   323 B         103 kB
+├ ƒ /api/predictions                                            323 B         103 kB
+├ ƒ /api/shared/almanac                                         323 B         103 kB
+├ ƒ /api/status/tasks                                           323 B         103 kB
+├ ƒ /api/stock                                                  323 B         103 kB
+├ ƒ /api/stock-pool                                             323 B         103 kB
+├ ƒ /api/stock/batch                                            323 B         103 kB
+├ ƒ /api/stock/prediction-versions                              323 B         103 kB
+├ ƒ /api/stock/prices                                           323 B         103 kB
+├ ƒ /api/stock/prices/all                                       323 B         103 kB
+├ ƒ /api/stock/search                                           323 B         103 kB
+├ ƒ /api/support/[slug]                                         323 B         103 kB
+├ ○ /api/system/calendar                                        323 B         103 kB          1d      1y
+├ ƒ /api/user/activity                                          323 B         103 kB
+├ ƒ /api/user/mode                                              323 B         103 kB
+├ ƒ /api/user/mode/summary                                      323 B         103 kB
+├ ƒ /api/user/notification-settings                             323 B         103 kB
+├ ƒ /api/user/onboarding/complete                               323 B         103 kB
+├ ƒ /api/user/onboarding/reset                                  323 B         103 kB
+├ ƒ /api/user/onboarding/stocks                                 323 B         103 kB
+├ ƒ /api/user/pay-success                                       323 B         103 kB
+├ ƒ /api/user/profile                                           323 B         103 kB
+├ ƒ /api/user/recovery/link                                     323 B         103 kB
+├ ƒ /api/user/recovery/restore                                  323 B         103 kB
+├ ƒ /api/user/redeem                                            323 B         103 kB
+├ ƒ /api/user/register                                          323 B         103 kB
+├ ƒ /api/user/resolve-referral                                  323 B         103 kB
+├ ƒ /api/user/trade-management/positions                        323 B         103 kB
+├ ƒ /api/user/trade-management/positions/[positionId]/events    323 B         103 kB
+├ ƒ /api/user/trade-management/stock                            323 B         103 kB
+├ ƒ /api/user/upgrade                                           323 B         103 kB
+├ ƒ /api/ux-experiment/ping                                     323 B         103 kB
+├ ƒ /api/webhook/stripe                                         323 B         103 kB
+├ ○ /dashboard                                                53.1 kB         284 kB
+├ ○ /dashboard/brief                                          5.66 kB         146 kB
+├ ○ /dashboard/stock-pool                                     6.96 kB         177 kB
+├ ○ /icon.png                                                     0 B            0 B
+├ ○ /learn                                                      183 B         111 kB
+├ ● /learn/[slug]                                               183 B         111 kB
+├   ├ /learn/101-01_impossible_triangle
+├   ├ /learn/101-02_fomo
+├   ├ /learn/101-03_loss_aversion
+├   └ [+18 more paths]
+├ ○ /pricing                                                    594 B         125 kB
+├ ○ /privacy                                                  1.64 kB         122 kB
+├ ○ /refund                                                   1.76 kB         122 kB
+├ ○ /robots.txt                                                 323 B         103 kB
+├ ○ /sitemap.xml                                                323 B         103 kB
+├ ○ /status                                                   8.77 kB         111 kB
+├ ○ /support                                                    183 B         111 kB
+├ ● /support/[slug]                                             183 B         111 kB
+├   ├ /support/four-states-semantics
+├   ├ /support/identity-restore-flow
+├   ├ /support/investment-mode-config
+├   └ [+8 more paths]
+├ ○ /terms                                                    1.71 kB         122 kB
+└ ○ /ux-experiment                                              323 B         103 kB
++ First Load JS shared by all                                  102 kB
+  ├ chunks/1255-9494d7e861e97d68.js                           45.9 kB
+  ├ chunks/4bd1b696-f785427dddbba9fb.js                       54.2 kB
+  └ other shared chunks (total)                               2.02 kB
+
+
+ƒ Middleware                                                  34.7 kB
+
+○  (Static)   prerendered as static content
+●  (SSG)      prerendered as static HTML (uses generateStaticParams)
+ƒ  (Dynamic)  server-rendered on demand
+

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { PageShell, EN_BOUNDARY_NOTICE, EN_DEFAULT_SOURCES } from './EnLayout';
 import { GeoSummary, SourceBlock, BoundaryNotice } from '@/components/seo/GeoBlocks';
 import { JsonLd } from '@/components/seo/JsonLd';
+import { type FeatureComparisonRow } from '@/lib/pricing-data';
 
 const EN_PRICING_PLANS = [
   {
@@ -82,7 +83,7 @@ const EN_FEATURE_COMPARISON = [
   { label: '101 Guides', free: 'Included', go: 'Included', plus: 'Included' },
   { label: 'Master Logics', free: 'Included', go: 'Included', plus: 'Included' },
   { label: 'Upcoming Content', free: 'Included', go: 'Included', plus: 'Included' },
-] as const;
+] as FeatureComparisonRow[];
 
 export function EnglishPricingPage() {
   const softwareSchema = {
@@ -131,7 +132,7 @@ export function EnglishPricingPage() {
           </h1>
           <p className="text-lg text-slate-400 font-medium max-w-3xl mx-auto leading-relaxed mt-6">
             A subscription here is not just buying features. It is closer to hiring a round-the-clock research council.
-            Our "Go" tier is designed to reduce emotional interference, strengthen your nightly review habit, and make
+            Our &quot;Go&quot; tier is designed to reduce emotional interference, strengthen your nightly review habit, and make
             decision-making calmer, cleaner, and more consistent.
           </p>
         </div>
@@ -209,7 +210,7 @@ export function EnglishPricingPage() {
                 </tr>
               </thead>
               <tbody className="text-sm font-medium">
-                {EN_FEATURE_COMPARISON.map((row: any, i: number) => {
+                {EN_FEATURE_COMPARISON.map((row, i: number) => {
                   if (row.isGroup) {
                     return (
                       <tr key={i} className="bg-white/[0.03]">
@@ -248,12 +249,12 @@ export function EnglishPricingPage() {
               <p className="text-slate-400 text-sm leading-relaxed">Free is rule-based with 3 checks/day. Go is reasoning-based with 10 checks/day. Go unlocks the DeepSeek logic layer, providing deeper tactical narratives, full realtime notifications, and key price levels.</p>
             </div>
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
-              <p className="text-white font-bold mb-3 uppercase tracking-tighter italic text-indigo-400">What is "Plus"?</p>
-              <p className="text-slate-400 text-sm leading-relaxed">Plus is our upcoming high-end tier. It will feature "Consensus Reasoning" where multiple models (DeepSeek + Gemini) cross-validate each other to provide the highest confidence levels for professional traders.</p>
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter italic text-indigo-400">What is &quot;Plus&quot;?</p>
+              <p className="text-slate-400 text-sm leading-relaxed">Plus is our upcoming high-end tier. It will feature &quot;Consensus Reasoning&quot; where multiple models (DeepSeek + Gemini) cross-validate each other to provide the highest confidence levels for professional traders.</p>
             </div>
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
               <p className="text-white font-bold mb-3 uppercase tracking-tighter italic text-indigo-400">Can I upgrade or downgrade anytime?</p>
-              <p className="text-slate-400 text-sm leading-relaxed">Absolutely. All billing is handled via Stripe's secure portal, allowing you to move between tiers or cancel your monthly commitment at any time with no hidden fees.</p>
+              <p className="text-slate-400 text-sm leading-relaxed">Absolutely. All billing is handled via Stripe&apos;s secure portal, allowing you to move between tiers or cancel your monthly commitment at any time with no hidden fees.</p>
             </div>
           </div>
         </section>

@@ -6,10 +6,10 @@ import { Check, ChevronRight, PartyPopper, X } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { getCurrentUser } from '@/lib/user';
-import { pricingPlans, featureComparison } from '@/lib/pricing-data';
+import { pricingPlans, featureComparison, type FeatureComparisonRow } from '@/lib/pricing-data';
 import { PageShell } from './CnLayout';
 import { JsonLd } from '@/components/seo/JsonLd';
-import { createTranslator } from '@/lib/i18n';
+import { createTranslator, type MessageBundle } from '@/lib/i18n';
 import cnMessages from '@/messages/cn.json';
 
 function PricingContent() {
@@ -20,7 +20,7 @@ function PricingContent() {
   const [loadingPortal, setLoadingPortal] = useState(false);
   const searchParams = useSearchParams();
 
-  const t = createTranslator(cnMessages as any, 'pricing');
+  const t = createTranslator(cnMessages as MessageBundle, 'pricing');
 
   const renderFeature = (feature: string) => {
     if (feature.startsWith('pricing.')) {
@@ -28,7 +28,7 @@ function PricingContent() {
         const key = keyWithPrefix.replace('pricing.', '');
         if (key === 'features.insights') return t('features.insights', { count: val });
         if (key === 'features.model') return t('features.model', { model: val });
-        return t(key as any);
+        return t(key as Parameters<typeof t>[0]);
     }
     return feature;
   };
@@ -209,7 +209,7 @@ function PricingContent() {
                   <plan.icon size={24} />
                 </div>
                 <h3 className="text-2xl font-black italic mb-1">
-                  {t(`${plan.enName.toLowerCase()}.name` as any)}
+                  {t(`${plan.enName.toLowerCase()}.name` as Parameters<typeof t>[0])}
                 </h3>
                 <p className="text-slate-500 text-sm font-bold uppercase tracking-wider">{plan.enName}</p>
               </div>
@@ -219,11 +219,11 @@ function PricingContent() {
                   <span className="text-sm font-bold">¥</span>
                   <span className="text-5xl font-black tracking-tighter">{plan.price}</span>
                 <span className="text-slate-500 text-sm ml-2">
-                    {t(`${plan.enName.toLowerCase()}.period` as any)}
+                    {t(`${plan.enName.toLowerCase()}.period` as Parameters<typeof t>[0])}
                   </span>
                 </div>
                 <p className="text-slate-400 text-sm mt-4 leading-relaxed italic">
-                  {t(`${plan.enName.toLowerCase()}.description` as any)}
+                  {t(`${plan.enName.toLowerCase()}.description` as Parameters<typeof t>[0])}
                 </p>
               </div>
 
@@ -319,18 +319,18 @@ function PricingContent() {
                 </tr>
               </thead>
               <tbody className="text-sm font-medium">
-                {featureComparison.map((row: any, i: number) => {
+                {featureComparison.map((row: FeatureComparisonRow, i: number) => {
                   if (row.isGroup) {
                     return (
                       <tr key={i} className="bg-white/[0.03]">
                         <td colSpan={4} className="py-4 px-8 text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400/80">
-                          {row.label.startsWith('pricing.') ? t(row.label.replace('pricing.', '') as any) : row.label}
+                          {row.label.startsWith('pricing.') ? t(row.label.replace('pricing.', '') as Parameters<typeof t>[0]) : row.label}
                         </td>
                       </tr>
                     );
                   }
 
-                  const label = row.label.startsWith('pricing.') ? t(row.label.replace('pricing.', '') as any) : row.label;
+                  const label = row.label.startsWith('pricing.') ? t(row.label.replace('pricing.', '') as Parameters<typeof t>[0]) : row.label;
 
                   return (
                     <tr key={i} className="border-b border-white/[0.03] hover:bg-white/[0.01] transition-colors">

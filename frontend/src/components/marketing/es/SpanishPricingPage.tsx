@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { PageShell, ES_BOUNDARY_NOTICE, ES_DEFAULT_SOURCES } from './EsLayout';
 import { GeoSummary, SourceBlock, BoundaryNotice } from '@/components/seo/GeoBlocks';
 import { JsonLd } from '@/components/seo/JsonLd';
+import { type FeatureComparisonRow } from '@/lib/pricing-data';
 
 const ES_PRICING_PLANS = [
   {
@@ -64,25 +65,25 @@ const ES_PRICING_PLANS = [
 
 const ES_FEATURE_COMPARISON = [
   { isGroup: true, label: 'Informes de Investigación (Actionable Insights)' },
-  { label: 'Modelo de Servicio', gratis: 'Hunyuan Lite', go: 'DeepSeek', plus: 'DeepSeek + Gemini', highlight: true },
-  { label: 'Acciones en Lista', gratis: '3 Acciones', go: '10 Acciones', plus: '10 Acciones', highlight: true },
-  { label: 'Cuota Mensual de Informes', gratis: '60 / Mes', go: '200 / Mes', plus: '200 / Mes' },
-  { label: 'Señales / Informes Tácticos', gratis: '✅', go: '✅', plus: '✅' },
-  { label: 'Niveles Clave / Presión Corta', gratis: '✅', go: '✅', plus: '✅' },
-  { label: 'Deducción / Reflexión de Riesgo', gratis: '❌', go: '✅', plus: '✅' },
-  { label: 'Explicación de Conflicto', gratis: '❌', go: '✅', plus: '✅' },
-  { label: 'Compartir Informes', gratis: '❌', go: 'Ilimitado', plus: 'Ilimitado' },
-  { label: 'Cobertura de Mercado', gratis: 'US / HK / CN', go: 'US / HK / CN', plus: 'US / HK / CN' },
+  { label: 'Modelo de Servicio', free: 'Hunyuan Lite', go: 'DeepSeek', plus: 'DeepSeek + Gemini', highlight: true },
+  { label: 'Acciones en Lista', free: '3 Acciones', go: '10 Acciones', plus: '10 Acciones', highlight: true },
+  { label: 'Cuota Mensual de Informes', free: '60 / Mes', go: '200 / Mes', plus: '200 / Mes' },
+  { label: 'Señales / Informes Tácticos', free: '✅', go: '✅', plus: '✅' },
+  { label: 'Niveles Clave / Presión Corta', free: '✅', go: '✅', plus: '✅' },
+  { label: 'Deducción / Reflexión de Riesgo', free: '❌', go: '✅', plus: '✅' },
+  { label: 'Explicación de Conflicto', free: '❌', go: '✅', plus: '✅' },
+  { label: 'Compartir Informes', free: '❌', go: 'Ilimitado', plus: 'Ilimitado' },
+  { label: 'Cobertura de Mercado', free: 'US / HK / CN', go: 'US / HK / CN', plus: 'US / HK / CN' },
   
   { isGroup: true, label: 'Notificaciones del Sistema (Notifications)' },
-  { label: 'Frecuencia en Tiempo Real', gratis: 'Limitado', go: 'Full Tiempo Real', plus: 'Full Tiempo Real', highlight: true },
-  { label: 'Categorías de Notificación', gratis: 'Básico', go: 'Todas las Categorías', plus: 'Todas las Categorías' },
+  { label: 'Frecuencia en Tiempo Real', free: 'Limitado', go: 'Full Tiempo Real', plus: 'Full Tiempo Real', highlight: true },
+  { label: 'Categorías de Notificación', free: 'Básico', go: 'Todas las Categorías', plus: 'Todas las Categorías' },
 
   { isGroup: true, label: 'Academia ZISO (Academy)' },
-  { label: 'Guías 101', gratis: 'Incluido', go: 'Incluido', plus: 'Incluido' },
-  { label: 'Lógicas Maestras', gratis: 'Incluido', go: 'Incluido', plus: 'Incluido' },
-  { label: 'Contenido Adicional', gratis: 'Incluido', go: 'Included', plus: 'Included' },
-] as const;
+  { label: 'Guías 101', free: 'Incluido', go: 'Incluido', plus: 'Incluido' },
+  { label: 'Lógicas Maestras', free: 'Incluido', go: 'Incluido', plus: 'Incluido' },
+  { label: 'Contenido Adicional', free: 'Incluido', go: 'Included', plus: 'Included' },
+] as FeatureComparisonRow[];
 
 export function SpanishPricingPage() {
   const softwareSchema = {
@@ -130,9 +131,8 @@ export function SpanishPricingPage() {
             <span className="bg-gradient-to-r from-indigo-400 to-cyan-300 bg-clip-text text-transparent italic">Consejo de investigación ZISO.</span>
           </h1>
           <p className="text-lg text-slate-400 font-medium max-w-3xl mx-auto leading-relaxed mt-6">
-            Una suscripción aquí no es solo comprar características. Es más parecido a contratar a un consejo de investigación 24/7.
-            Nuestro nivel "Go" está diseñado para reducir la interferencia emocional, fortalecer tu hábito de revisión nocturna y hacer 
-            que la toma de decisiones sea más tranquila, limpia y consistente.
+            Una suscripción aquí no es solo comprar funciones. Es más parecido a contratar un consejo de investigación las 24 horas.
+            Nuestro plan &quot;Go&quot; está diseñado para reducir la interferencia emocional, fortalecer su hábito de revisión nocturna y hacer que la toma de decisiones sea más tranquila, limpia y consistente.
           </p>
         </div>
 
@@ -209,8 +209,8 @@ export function SpanishPricingPage() {
                 </tr>
               </thead>
               <tbody className="text-sm font-medium">
-                {ES_FEATURE_COMPARISON.map((row: any, i: number) => {
-                  if (row.isGroup) {
+                {ES_FEATURE_COMPARISON.map((row: FeatureComparisonRow, i: number) => {
+                  if ('isGroup' in row) {
                     return (
                       <tr key={i} className="bg-white/[0.03]">
                         <td colSpan={4} className="py-4 px-8 text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400/80">
@@ -222,7 +222,7 @@ export function SpanishPricingPage() {
                   return (
                     <tr key={i} className="border-b border-white/[0.03] hover:bg-white/[0.01] transition-colors">
                       <td className="py-5 px-8 text-slate-400 font-bold">{row.label}</td>
-                      <td className="py-5 px-8 text-slate-500">{row.gratis}</td>
+                      <td className="py-5 px-8 text-slate-500">{row.free}</td>
                       <td className={`py-5 px-8 ${row.highlight ? 'text-indigo-100 font-black bg-indigo-500/5' : 'text-slate-300'}`}>{row.go}</td>
                       <td className="py-5 px-8 text-slate-500 italic opacity-60">{row.plus}</td>
                     </tr>
@@ -248,8 +248,8 @@ export function SpanishPricingPage() {
               <p className="text-slate-400 text-sm leading-relaxed">Gratis se basa en reglas con 3 verificaciones al día. Go se basa en razonamiento con 10 verificaciones al día. Go desbloquea la capa lógica profunda de DeepSeek, proporcionando informes tácticos más profundos, notificaciones completas en tiempo real y niveles clave de precios.</p>
             </div>
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
-              <p className="text-white font-bold mb-3 uppercase tracking-tighter italic text-indigo-400">¿Qué es "Plus"?</p>
-              <p className="text-slate-400 text-sm leading-relaxed">Plus es nuestro nivel de alta gama próximamente. Presentará el "Razonamiento por Consenso", donde múltiples modelos (DeepSeek + Gemini) se validan entre sí para ofrecer los niveles de confianza más altos para traders profesionales.</p>
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter italic text-indigo-400">¿Qué es &quot;Plus&quot;?</p>
+              <p className="text-slate-400 text-sm leading-relaxed">Plus es nuestro próximo nivel de alta gama. Contará con &quot;Razonamiento por Consenso&quot; donde múltiples modelos (DeepSeek + Gemini) se validan entre sí para proporcionar los niveles de confianza más altos para traders profesionales.</p>
             </div>
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
               <p className="text-white font-bold mb-3 uppercase tracking-tighter italic text-indigo-400">¿Puedo cambiar o cancelar mi plan en cualquier momento?</p>

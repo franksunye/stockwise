@@ -4,9 +4,6 @@ import Link from 'next/link';
 import { type PublicLocale, localizePublicPath } from '@/lib/public-i18n';
 
 export default function MarketingFooter({ locale = 'en' }: { locale?: PublicLocale }) {
-  const footerLinks: Array<{ href: string; label: string }> = [];
-  const homePath = localizePublicPath('/', locale);
-
   interface FooterLocaleLabels {
     academy: string;
     support: string;
@@ -61,7 +58,7 @@ export default function MarketingFooter({ locale = 'en' }: { locale?: PublicLoca
       app: 'Abrir ZISO App',
       about: 'Nosotros',
       privacy: 'Privacidad',
-      terms: 'Términos',
+      terms: 'T&eacute;rminos',
       refund: 'Reembolso',
     },
   };
