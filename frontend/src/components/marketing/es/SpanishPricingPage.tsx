@@ -29,7 +29,7 @@ const ES_PRICING_PLANS = [
     eyebrow: 'Más Popular',
     price: '4.99',
     period: 'Mensual / $49.9 Anual',
-    description: 'Plan principal GTM. Desbloquea razonamiento DeepSeek, 10 acciones en lista, 200 informes mensuales y alertas en tiempo real.',
+    description: 'Desbloquea los insights accionables de DeepSeek, 10 acciones en lista, 200 informes mensuales y alertas en tiempo real.',
     features: [
       '10 Acciones en Lista (con Informes/día)',
       'Modelo de Servicio: DeepSeek',

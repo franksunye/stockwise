@@ -29,7 +29,7 @@ const EN_PRICING_PLANS = [
     eyebrow: 'Most Popular',
     price: '4.99',
     period: 'Monthly / $49.9 Yearly',
-    description: 'Unlock DeepSeek reasoning, 10 watchlist stocks, 200 monthly reports, and all-category real-time alerts.',
+    description: 'Unlock DeepSeek actionable insights, 10 watchlist stocks, 200 monthly reports, and all-category real-time alerts.',
     features: [
       '10 Watchlist Stocks (incl. Insights/day)',
       'Service Model: DeepSeek',
