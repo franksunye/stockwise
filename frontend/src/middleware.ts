@@ -6,6 +6,7 @@ import {
     hasPublicLocalePrefix,
     isExcludedAppPath,
     stripPublicLocalePrefix,
+    PUBLIC_ROUTE_ALLOWLIST,
 } from '@/lib/public-i18n';
 
 function normalizeHost(raw: string | null | undefined): string | null {
@@ -37,7 +38,7 @@ export function middleware(request: NextRequest) {
         (host) => host === 'app.ziso.cc' || host.startsWith('app.')
     );
     const isMainDomain = hostCandidates.some(
-        (host) => host === 'ziso.cc' || host === 'www.ziso.cc'
+        (host) => host === 'ziso.cc' || host === 'www.ziso.cc' || host === '127.0.0.1' || host === 'localhost'
     );
 
     const locale = getPublicLocaleFromPathname(pathname);
@@ -60,6 +61,20 @@ export function middleware(request: NextRequest) {
         return res;
     };
 
+    const setLocaleCookie = (res: NextResponse, val: string) => {
+        const domain = hostCandidates.some(h => h.endsWith('.ziso.cc') || h === 'ziso.cc') 
+            ? '.ziso.cc' 
+            : undefined;
+            
+        res.cookies.set('ziso_locale', val, {
+            path: '/',
+            domain,
+            maxAge: 60 * 60 * 24 * 365, // 1 year
+            sameSite: 'lax',
+        });
+        return res;
+    };
+
     const withLocaleRequestHeader = (branch: string): NextResponse => {
         const headers = new Headers(request.headers);
         headers.set('x-ziso-locale', locale);
@@ -70,28 +85,26 @@ export function middleware(request: NextRequest) {
             },
         });
         response.headers.set('content-language', getLocaleHrefLang(locale));
+        
+        // High-Risk Audit Fix: Only sync the cookie if we have an EXPLICIT locale prefix
+        // This prevents ziso.cc/ (no prefix, defaults to en) from overwriting 
+        // a user's manual choice (e.g. cn) made in the App.
+        if (isLocalePrefixed) {
+            setLocaleCookie(response, locale);
+        }
+        
         return withDebugHeaders(response, branch);
     };
 
-    // 0. SEO 重定向：由于 'en' 变为默认语言（无前缀），强制将旧的 '/en' 前缀重定向到根
-    if (isLocalePrefixed && locale === 'en') {
-        const cleanUrl = url.clone();
-        cleanUrl.pathname = strippedPathname;
-        return withDebugHeaders(
-            NextResponse.redirect(cleanUrl, 301),
-            'main-redirect-en-to-root'
-        );
-    }
-
-    // 1. App 子域名策略 (app.ziso.cc)
+    // 1. App 子域名策略 (app.ziso.cc) - Highest Priority
+    // Must handle App subdomain rules (e.g. prefix stripping) before any global SEO redirects
     if (isAppDomain) {
         if (isLocalePrefixed) {
             const cleanUrl = url.clone();
             cleanUrl.pathname = strippedPathname === '/dashboard' ? '/' : strippedPathname;
-            return withDebugHeaders(
-                NextResponse.redirect(cleanUrl, 307),
-                'app-strip-locale-prefix'
-            );
+            const res = NextResponse.redirect(cleanUrl, 307);
+            setLocaleCookie(res, locale);
+            return withDebugHeaders(res, 'app-strip-locale-prefix');
         }
 
         if (pathname === '/') {
@@ -111,15 +124,28 @@ export function middleware(request: NextRequest) {
         }
     }
 
+    // 0. SEO 重定向：由于 'en' 变为默认语言（无前缀），强制将旧 of '/en' 前缀重定向到根 
+    // 限制在主域名场景以满足审计要求，同时保证 app 域名不受 301 影响
+    if (isLocalePrefixed && locale === 'en' && !isAppDomain) {
+        const isSafePublicPage = (PUBLIC_ROUTE_ALLOWLIST as readonly string[]).includes(strippedPathname);
+        
+        if (isSafePublicPage) {
+            const cleanUrl = url.clone();
+            cleanUrl.pathname = strippedPathname;
+            const res = NextResponse.redirect(cleanUrl, 301);
+            setLocaleCookie(res, 'en');
+            return withDebugHeaders(res, 'main-redirect-en-to-root');
+        }
+    }
+
     // 2. 官网主域名策略 (ziso.cc)
     if (isMainDomain) {
         if (isLocalePrefixed && isExcludedAfterLocaleStrip) {
             const cleanUrl = url.clone();
             cleanUrl.pathname = strippedPathname;
-            return withDebugHeaders(
-                NextResponse.redirect(cleanUrl, 307),
-                'main-strip-locale-excluded-path'
-            );
+            const res = NextResponse.redirect(cleanUrl, 307);
+            setLocaleCookie(res, locale);
+            return withDebugHeaders(res, 'main-strip-locale-excluded-path');
         }
 
         // [优化] 处理 /v/[code] 极速跳转

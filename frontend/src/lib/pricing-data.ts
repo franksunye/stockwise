@@ -1,6 +1,7 @@
 'use client';
 
-import { Zap, Crown, ShieldCheck, LucideIcon, User } from 'lucide-react';
+import { Crown, ShieldCheck, LucideIcon, User } from 'lucide-react';
+import { STRIPE_PRICE_IDS } from './stripe-constants';
 
 export interface PricingPlan {
     name: string;
@@ -19,65 +20,74 @@ export interface PricingPlan {
 }
 
 /**
- * Single Source of Truth for all pricing plans.
- * Used by both /pricing page and UserPricingView component.
+ * getPricingPlans — Returns the appropriate pricing plans based on locale.
  */
-export const pricingPlans: PricingPlan[] = [
-    {
-        name: 'pricing.free.name',
-        enName: 'Free',
-        price: '0',
-        period: 'pricing.free.period',
-        description: 'pricing.free.description',
-        features: [
-            'pricing.features.insights|3',
-            'pricing.features.model|Hunyuan Lite',
-            'pricing.features.notifications_basic',
-            'pricing.features.academy',
-        ],
-        highlight: false,
-        icon: User,
-        color: 'slate',
-        href: 'https://app.ziso.cc',
-    },
-    {
-        name: 'pricing.go.name',
-        enName: 'Go',
-        price: '29.9',
-        period: 'pricing.go.period',
-        description: 'pricing.go.description',
-        features: [
-            'pricing.features.insights|10',
-            'pricing.features.model|DeepSeek',
-            'pricing.features.notifications_full',
-            'pricing.features.academy',
-            'pricing.features.badge_go',
-        ],
-        priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_GO_MONTHLY || process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_MONTHLY || 'price_1TI91aS3fDFObThpM9Y6A6YE',
-        priceIdAnnual: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_GO_YEARLY || process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_YEARLY || 'price_1TI91aS3fDFObThpgSKgQss6',
-        highlight: true,
-        icon: Crown,
-        color: 'indigo',
-    },
-    {
-        name: 'pricing.plus.name',
-        enName: 'Plus',
-        price: '---',
-        period: 'pricing.plus.period',
-        description: 'pricing.plus.description',
-        features: [
-            'pricing.features.insights|10',
-            'pricing.features.model|DeepSeek + Gemini',
-            'pricing.features.notifications_full',
-            'pricing.features.academy',
-            'pricing.features.badge_plus',
-        ],
-        highlight: false,
-        icon: ShieldCheck,
-        color: 'emerald',
-        href: 'mailto:hi@ziso.cc',
-    },
-];
+export function getPricingPlans(locale: string): PricingPlan[] {
+    const isCN = locale === 'cn';
+    
+    return [
+        {
+            name: 'pricing.free.name',
+            enName: 'Free',
+            price: '0',
+            period: 'pricing.free.period',
+            description: 'pricing.free.description',
+            features: [
+                'pricing.features.insights|3',
+                'pricing.features.model|Hunyuan Lite',
+                'pricing.features.notifications_basic',
+                'pricing.features.academy',
+            ],
+            highlight: false,
+            icon: User,
+            color: 'slate',
+            href: 'https://app.ziso.cc',
+        },
+        {
+            name: 'pricing.go.name',
+            enName: 'Go',
+            price: isCN ? '29.9' : '4.99',
+            period: 'pricing.go.period',
+            description: 'pricing.go.description',
+            features: [
+                'pricing.features.insights|10',
+                'pricing.features.model|DeepSeek',
+                'pricing.features.notifications_full',
+                'pricing.features.academy',
+                'pricing.features.badge_go',
+            ],
+            priceId: isCN ? STRIPE_PRICE_IDS.PRO_MONTHLY : STRIPE_PRICE_IDS.GO_MONTHLY,
+            priceIdAnnual: isCN ? STRIPE_PRICE_IDS.PRO_YEARLY : STRIPE_PRICE_IDS.GO_YEARLY,
+            highlight: true,
+            icon: Crown,
+            color: 'indigo',
+        },
+        {
+            name: 'pricing.plus.name',
+            enName: 'Plus',
+            price: '---',
+            period: 'pricing.plus.period',
+            description: 'pricing.plus.description',
+            features: [
+                'pricing.features.insights|10',
+                'pricing.features.model|DeepSeek + Gemini',
+                'pricing.features.notifications_full',
+                'pricing.features.academy',
+                'pricing.features.badge_plus',
+            ],
+            highlight: false,
+            icon: ShieldCheck,
+            color: 'emerald',
+            href: 'mailto:hi@ziso.cc',
+        },
+    ];
+}
+
+/**
+ * DEPRECATED: Use getPricingPlans(locale) instead.
+ * Kept for backward compatibility during migration.
+ */
+export const pricingPlans = getPricingPlans('cn');
 
 export interface FeatureComparisonRow {
     isGroup?: boolean;

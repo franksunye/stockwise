@@ -31,9 +31,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
   });
 
-  // 2. Add Learn/Support root for Chinese only until English content is translated
+  // 2. Content roots: English on root, Chinese under /cn
   const contentRoots = ["/learn", "/support"] as const;
   contentRoots.forEach((root) => {
+    staticRoutes.push({
+      url: `${base}${root}`,
+      lastModified: updated,
+      changeFrequency: "daily",
+      priority: 0.8,
+    });
     staticRoutes.push({
       url: `${base}/cn${root}`,
       lastModified: updated,
@@ -42,13 +48,29 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
   });
 
-  // 3. Dynamic Chinese Article Routes
+  // 3. Dynamic English + Chinese Article Routes
+  const enArticles = await getAllArticles({ locale: "en" });
+  const enLearnRoutes = enArticles.map((article) => ({
+    url: `${base}/learn/${article.slug}`,
+    lastModified: article.date || updated,
+    changeFrequency: "weekly" as const,
+    priority: 0.7,
+  }));
+
   const cnArticles = await getAllArticles({ locale: "cn" });
   const cnLearnRoutes = cnArticles.map((article) => ({
     url: `${base}/cn/learn/${article.slug}`,
     lastModified: article.date || updated,
     changeFrequency: "weekly" as const,
     priority: 0.7,
+  }));
+
+  const enSupportArticles = getAllSupportArticles({ locale: "en" });
+  const enSupportRoutes = enSupportArticles.map((article) => ({
+    url: `${base}/support/${article.slug}`,
+    lastModified: article.lastUpdated || updated,
+    changeFrequency: "monthly" as const,
+    priority: 0.6,
   }));
 
   const cnSupportArticles = getAllSupportArticles({ locale: "cn" });
@@ -61,7 +83,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [
     ...staticRoutes,
+    ...enLearnRoutes,
     ...cnLearnRoutes,
+    ...enSupportRoutes,
     ...cnSupportRoutes,
   ];
 }

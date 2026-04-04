@@ -6,6 +6,7 @@ import { PageShell, ES_BOUNDARY_NOTICE, ES_DEFAULT_SOURCES } from './EsLayout';
 import { GeoSummary, SourceBlock, BoundaryNotice } from '@/components/seo/GeoBlocks';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { type FeatureComparisonRow } from '@/lib/pricing-data';
+import { STRIPE_PRICE_IDS } from '@/lib/stripe-constants';
 
 const ES_PRICING_PLANS = [
   {
@@ -38,8 +39,8 @@ const ES_PRICING_PLANS = [
       'Academia ZISO (101/Maestros)',
       'Insignia de identidad Go',
     ],
-    cta: 'Suscribirse a Go',
-    href: 'https://app.ziso.cc',
+    cta: 'Suscríbete a Go',
+    href: `https://app.ziso.cc/pricing?priceId=${STRIPE_PRICE_IDS.GO_MONTHLY}`,
     highlight: true,
     accent: 'text-indigo-300',
   },

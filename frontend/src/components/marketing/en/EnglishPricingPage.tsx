@@ -6,6 +6,7 @@ import { PageShell, EN_BOUNDARY_NOTICE, EN_DEFAULT_SOURCES } from './EnLayout';
 import { GeoSummary, SourceBlock, BoundaryNotice } from '@/components/seo/GeoBlocks';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { type FeatureComparisonRow } from '@/lib/pricing-data';
+import { STRIPE_PRICE_IDS } from '@/lib/stripe-constants';
 
 const EN_PRICING_PLANS = [
   {
@@ -39,7 +40,7 @@ const EN_PRICING_PLANS = [
       'Go Identity Badge',
     ],
     cta: 'Subscribe Go',
-    href: 'https://app.ziso.cc',
+    href: `https://app.ziso.cc/pricing?priceId=${STRIPE_PRICE_IDS.GO_MONTHLY}`,
     highlight: true,
     accent: 'text-indigo-300',
   },

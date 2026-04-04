@@ -293,6 +293,12 @@ describe('Frontend Smoke Gate', () => {
         const pages = ['/', '/dashboard', '/dashboard/brief', '/pricing'];
         for (const page of pages) {
             const response = await client.request(page);
+            if (page.startsWith('/dashboard')) {
+                assert.equal(response.status, 307, page);
+                assert.ok(response.headers.get('location')?.includes('app.ziso.cc'));
+                continue;
+            }
+
             assert.equal(response.status, 200, page);
             const contentType = response.headers.get('content-type') || '';
             assert.ok(contentType.includes('text/html'), `Expected HTML for ${page}`);
@@ -311,24 +317,28 @@ describe('Public i18n/SEO Gate', () => {
         assert.ok(appLocaleRes.headers.get('location')?.endsWith('/?__mwdebug=1'));
     });
 
-    it('serves english public pages only on the main domain', async () => {
-        const enRes = await requestWithForwardedHost('/en?__mwdebug=1', 'ziso.cc');
-        assert.equal(enRes.status, 200);
-        assert.equal(enRes.headers.get('x-ziso-mw-branch'), 'main-public-locale');
-        const html = await enRes.text();
+    it('serves english public pages on the main domain root', async () => {
+        const rootRes = await requestWithForwardedHost('/?__mwdebug=1', 'ziso.cc');
+        assert.equal(rootRes.status, 200);
+        assert.equal(rootRes.headers.get('x-ziso-mw-branch'), 'main-public-default-locale');
+        const html = await rootRes.text();
         assert.ok(html.includes('AI does the research.'));
-        assert.ok(!html.includes('noindex,follow'));
-        assert.ok(html.includes('hrefLang="zh-CN"'));
-        assert.ok(html.includes('hrefLang="x-default"'));
-        assert.ok(html.includes('href="https://ziso.cc/en"'));
     });
 
-    it('keeps english content routes out of scope', async () => {
+    it('redirects old english prefix routes to root for SEO', async () => {
+        const enAboutRes = await requestWithForwardedHost('/en/about?__mwdebug=1', 'ziso.cc');
+        assert.equal(enAboutRes.status, 301);
+        assert.equal(enAboutRes.headers.get('x-ziso-mw-branch'), 'main-redirect-en-to-root');
+        assert.ok(enAboutRes.headers.get('location')?.endsWith('/about?__mwdebug=1'));
+    });
+    it('redirects old english content routes to the root english content', async () => {
         const res = await requestWithForwardedHost('/en/learn/101-64_eod_vs_intraday', 'ziso.cc');
-        assert.equal(res.status, 404);
+        assert.equal(res.status, 308);
+        assert.ok(res.headers.get('location')?.includes('/learn/101-64_eod_vs_intraday'));
 
         const supportRes = await requestWithForwardedHost('/en/support/tactical-brief-guide', 'ziso.cc');
-        assert.equal(supportRes.status, 404);
+        assert.equal(supportRes.status, 308);
+        assert.ok(supportRes.headers.get('location')?.includes('/support/tactical-brief-guide'));
     });
 
     it('publishes only formal english static pages in the official sitemap', async () => {
@@ -339,8 +349,9 @@ describe('Public i18n/SEO Gate', () => {
         );
         assert.equal(sitemapRes.status, 200);
         const body = await sitemapRes.text();
-        assert.ok(body.includes('https://ziso.cc/en'));
-        assert.ok(body.includes('https://ziso.cc/en/about'));
+        assert.ok(body.includes('https://ziso.cc/'));
+        assert.ok(body.includes('https://ziso.cc/about'));
+        assert.ok(!body.includes('https://ziso.cc/en/'));
         assert.ok(body.includes('https://ziso.cc/learn'));
         assert.ok(!body.includes('https://ziso.cc/en/learn'));
         assert.ok(!body.includes('https://ziso.cc/en/support'));

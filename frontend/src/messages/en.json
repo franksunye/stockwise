@@ -337,9 +337,9 @@
     "portalRedirecting": "Redirecting to portal...",
     "currentStatus": "Current Account Status",
     "subscribe": "Subscribe Pro",
-    "monthly": "Monthly Renewal ($29.9)",
+    "monthly": "Monthly Renewal ({price})",
     "annual": "Annual Subscription (Best Offer)",
-    "annualExtended": "Annual Extension ($299)",
+    "annualExtended": "Annual Extension ({price})",
     "annualBenefit": "Immediately increase validity by 365 days",
     "annualDiscount": "Save approx. 17%",
     "processing": "Processing...",
@@ -363,7 +363,7 @@
     },
     "go": {
       "name": "Go Member",
-      "period": "Monthly / $49.9 Yearly",
+      "period": "Monthly / {price} Yearly",
       "description": "Unlock DeepSeek actionable insights, 10 watchlist stocks, 200 monthly reports, and all-category real-time alerts.",
       "cta": "Subscribe Go"
     },

@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { getDbClient } from '@/lib/db';
+import { isSupportedPriceId } from '@/lib/stripe-constants';
 import { requireUserSession } from '@/lib/user-session';
 
 export async function POST(request: Request) {
@@ -33,6 +34,12 @@ export async function POST(request: Request) {
 
         if (!priceId) {
             return NextResponse.json({ error: 'Missing priceId' }, { status: 400 });
+        }
+
+        // Security Audit Fix: Server-side validation of priceId
+        if (!isSupportedPriceId(priceId)) {
+            console.warn(`🛑 Unauthorized Price ID attempt: ${priceId} by user ${userId}`);
+            return NextResponse.json({ error: 'Invalid or unsupported subscription plan' }, { status: 403 });
         }
 
         // 1. Lookup User to reuse Stripe Customer ID (Single Customer View)

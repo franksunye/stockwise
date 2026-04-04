@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import Multiavatar from '@/components/Multiavatar';
 import { agentTeam, founders } from '@/lib/agent-team';
-import { PageShell, CN_BOUNDARY_NOTICE, CN_DEFAULT_SOURCES } from './CnLayout';
+import { PageShell } from './CnLayout';
 import { GeoSummary, SourceBlock, BoundaryNotice } from '@/components/seo/GeoBlocks';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { brandCoreZhCN } from '@/content/brand-core.zh-CN';

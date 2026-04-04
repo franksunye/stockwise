@@ -57,6 +57,14 @@ const MESSAGE_REGISTRY: Record<AppLocale, MessageBundle> = {
 
 // ─── Locale Detection ───────────────────────────────────────────
 
+function getCookie(name: string): string | null {
+  if (typeof document === 'undefined') return null;
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(';').shift() ?? null;
+  return null;
+}
+
 export function isAppLocale(value: unknown): value is AppLocale {
   return typeof value === 'string' && APP_LOCALES.includes(value as AppLocale);
 }
@@ -65,10 +73,11 @@ export function isAppLocale(value: unknown): value is AppLocale {
  * Resolve the user's preferred locale.
  *
  * Priority:
- * 1. localStorage cache (fastest, zero-latency)
- * 2. Explicit override (from user profile API)
- * 3. navigator.language / Accept-Language
- * 4. Default: 'cn'
+ * 1. localStorage cache (fastest, user choice within this app)
+ * 2. Cross-subdomain Cookie (choice from landing page / other app part)
+ * 3. Explicit override (from user profile API)
+ * 4. Browser language (Best guess)
+ * 5. Default: 'en' (Since we are English-first now)
  */
 export function resolveLocale(profileLocale?: string | null): AppLocale {
   // 1. localStorage cache
@@ -77,22 +86,33 @@ export function resolveLocale(profileLocale?: string | null): AppLocale {
       const cached = localStorage.getItem(LOCALE_STORAGE_KEY);
       if (isAppLocale(cached)) return cached;
     } catch {
-      // SSR or storage unavailable
+      // Storage unavailable
     }
   }
 
-  // 2. User profile locale
+  // 2. Cross-subdomain Cookie (Link between ziso.cc and app.ziso.cc)
+  const cookieLocale = getCookie('ziso_locale');
+  if (isAppLocale(cookieLocale)) return cookieLocale;
+  
+  // High-Risk Audit Fix: Enable international mode for ES/KO marketing visitors
+  // If we have a language choice from the marketing site that isn't cn,
+  // we force 'en' to ensure International Pricing (USD) is shown.
+  if (cookieLocale === 'es' || cookieLocale === 'ko') return 'en';
+
+  // 3. User profile locale
   if (isAppLocale(profileLocale)) return profileLocale;
 
-  // 3. Browser language
+  // 4. Browser language
   if (typeof navigator !== 'undefined') {
     const browserLang = navigator.language?.toLowerCase() ?? '';
     if (browserLang.startsWith('zh')) return 'cn';
+    if (browserLang.startsWith('ko')) return 'en'; // Keep en for KO users if no explicit choice yet
+    if (browserLang.startsWith('es')) return 'en';
     if (browserLang.startsWith('en')) return 'en';
   }
 
-  // 4. Default
-  return DEFAULT_APP_LOCALE;
+  // 5. Default
+  return 'en';
 }
 
 /**

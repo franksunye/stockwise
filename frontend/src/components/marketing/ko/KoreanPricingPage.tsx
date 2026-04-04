@@ -6,6 +6,7 @@ import { PageShell, KO_BOUNDARY_NOTICE, KO_DEFAULT_SOURCES } from './KoLayout';
 import { GeoSummary, SourceBlock, BoundaryNotice } from '@/components/seo/GeoBlocks';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { type FeatureComparisonRow } from '@/lib/pricing-data';
+import { STRIPE_PRICE_IDS } from '@/lib/stripe-constants';
 
 const KO_PRICING_PLANS = [
   {
@@ -39,7 +40,7 @@ const KO_PRICING_PLANS = [
       'Go 전용 아이덴티티 배지',
     ],
     cta: 'Go 구독하기',
-    href: 'https://app.ziso.cc',
+    href: `https://app.ziso.cc/pricing?priceId=${STRIPE_PRICE_IDS.GO_MONTHLY}`,
     highlight: true,
     accent: 'text-indigo-300',
   },

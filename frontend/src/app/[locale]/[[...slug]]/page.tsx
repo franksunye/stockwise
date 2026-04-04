@@ -25,7 +25,7 @@ import { ChineseLearnArticlePage } from '@/components/public/ChineseLearnArticle
 import { ChineseLearnIndexPage } from '@/components/public/ChineseLearnIndexPage';
 import { ChineseSupportArticlePage } from '@/components/public/ChineseSupportArticlePage';
 import { ChineseSupportIndexPage } from '@/components/public/ChineseSupportIndexPage';
-import { isSupportedPublicLocale, type PublicLocale, SUPPORTED_PUBLIC_LOCALES } from '@/lib/public-i18n';
+import { isSupportedPublicLocale, type PublicLocale } from '@/lib/public-i18n';
 import { buildPageMetadata } from '@/lib/seo';
 import { getAllArticles } from '@/lib/learn-content';
 import { getAllSupportArticles } from '@/lib/support-content';

@@ -163,69 +163,6 @@ async function navigationCacheFirst(request, fallbackUrl) {
 }
 
 /**
- * RSC CacheFirst strategy (StaleWhileRevalidate for Next.js soft navigations):
- * This matches the "秒开本地内容，后台更新" strategy perfectly.
- * 1. Normalize URL to strip `_rsc` so we can match it consistently.
- * 2. If cached -> Return instantly (Client Router proceeds with old tree, no spinner).
- * 3. Background -> Fetch fresh RSC payload and update cache.
- */
-async function rscCacheFirst(request) {
-  const cache = await getCache();
-  const url = new URL(request.url);
-  // Remove _rsc param to consolidate cache keys for the same route
-  url.searchParams.delete('_rsc');
-  // KEY FIX: Append suffix to prevent collision with HTML pages sharing the same URL
-  const cacheKey = url.toString() + '__RSC';
-
-  // ignoreVary is critical because Next.js changes Next-Router-State-Tree etc.
-  const cachedResponse = await cache.match(cacheKey, { ignoreVary: true });
-
-  if (cachedResponse) {
-    // Background update
-    fetchWithTimeout(request, 8000)
-      .then((networkResponse) => {
-        const isRSC = networkResponse.headers.get('Content-Type')?.includes('text/x-component') || 
-                      networkResponse.headers.get('X-NextJS-Data') ||
-                      request.headers.has('RSC');
-        if (networkResponse.ok && isRSC) {
-          cache.put(cacheKey, networkResponse);
-        }
-      })
-      .catch(() => { /* silent */ });
-    
-    // VERIFICATION: Ensure we are not returning HTML for an RSC request
-    const contentType = cachedResponse.headers.get('Content-Type') || '';
-    if (contentType.includes('text/html')) {
-       console.warn('[SW] Detected HTML in RSC cache, skipping...');
-    } else {
-       return cachedResponse;
-    }
-  }
-
-  // First visit cache miss
-  try {
-    const networkResponse = await fetchWithTimeout(request, 8000);
-    if (networkResponse.ok) {
-      // Only cache if it actually looks like an RSC response
-      const isRSC = networkResponse.headers.get('Content-Type')?.includes('text/x-component') || 
-                    networkResponse.headers.get('X-NextJS-Data');
-      if (isRSC) {
-        cache.put(cacheKey, networkResponse.clone());
-      }
-    }
-    return networkResponse;
-  } catch {
-    // RSC cache empty + network failed.
-    // Return 504 so the dashboard error boundary can auto-recover via
-    // hard navigation, which hits navigationCacheFirst → cached HTML shell.
-    // NOTE: Do NOT throw here — rejected respondWith() has unpredictable
-    // behavior on iOS Safari PWA and does NOT reliably trigger Next.js
-    // MPA fallback. A synthetic 504 is safer and consistently handled.
-    return new Response('Offline or Timeout', { status: 504, statusText: 'Gateway Timeout' });
-  }
-}
-
-/**
  * NetworkFirst strategy:
  * Try network, cache the response, fall back to cache, then to fallback.
  * Used for non-navigation dynamic content (e.g. _next/data/*.json).

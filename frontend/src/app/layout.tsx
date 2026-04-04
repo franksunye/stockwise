@@ -1,9 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/react";
+import Image from "next/image";
 import { brandCoreZhCN } from "@/content/brand-core.zh-CN";
 import { ServiceWorkerRegistrar } from "@/components/ServiceWorkerRegistrar";
 import { buildRootBootstrapInlineScript } from "@/lib/dashboard-bootstrap";
-import { getHtmlLang, isSupportedPublicLocale } from "@/lib/public-i18n";
 
 import "./globals.css";
 
@@ -98,11 +98,12 @@ export default async function RootLayout({
             transition: 'opacity 220ms ease-out',
           }}
         >
-          <img
+          <Image
             src="/logo.png"
             alt="ZISO AI"
             width={88}
             height={88}
+            priority
             style={{ borderRadius: '18px', opacity: 0.9 }}
           />
         </div>

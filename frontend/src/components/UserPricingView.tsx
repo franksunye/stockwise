@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { Check, ChevronRight, Zap, Crown, Loader2, ArrowRight } from 'lucide-react';
 import Image from 'next/image';
-import { pricingPlans } from '@/lib/pricing-data';
-import { useT, useGlobalT } from '@/context/LocaleContext';
+import { useT, useGlobalT, useLocale } from '@/context/LocaleContext';
+import { getPricingPlans } from '@/lib/pricing-data';
 import type { FullMessageKey } from '@/lib/i18n';
 
 interface Props {
@@ -19,11 +19,21 @@ export function UserPricingView({ currentTier, hasStripeCustomer, expiresAt }: P
   const [loadingPriceId, setLoadingPriceId] = useState<string | null>(null);
   const [loadingPortal, setLoadingPortal] = useState(false);
 
+  const { locale } = useLocale();
+  const pricingPlans = useMemo(() => getPricingPlans(locale), [locale]);
+  const hasAttemptedAutoCheckoutRef = useRef(false);
+  const isCN = locale === 'cn';
+  const currencySymbol = isCN ? '¥' : '$';
+
   const isGo = currentTier === 'go';
   const isPlus = currentTier === 'plus';
   const isPremium = isGo || isPlus;
 
-  // 格式化到期时间
+  // Strategic prices for translation placeholders
+  const monthlyPriceStr = `${currencySymbol}${isCN ? '29.9' : '4.99'}`;
+  const annualPriceStr = `${currencySymbol}${isCN ? '299' : '49.9'}`;
+
+  // Formatter for expiry date
   const formatExpiry = (dateStr: string) => {
     try {
       const d = new Date(dateStr);
@@ -33,23 +43,39 @@ export function UserPricingView({ currentTier, hasStripeCustomer, expiresAt }: P
     }
   };
 
+  const createCheckoutSession = async (
+    priceId: string,
+    options?: { bootstrapUser?: boolean; silentUnauthorized?: boolean }
+  ): Promise<string | null> => {
+    if (options?.bootstrapUser) {
+      const { getCurrentUser } = await import('@/lib/user');
+      await getCurrentUser();
+    }
+
+    const response = await fetch('/api/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ priceId }),
+    });
+    const data = await response.json();
+
+    if (response.status === 401 && options?.silentUnauthorized) {
+      return null;
+    }
+
+    if (!response.ok || !data.url) {
+      throw new Error(data.error || '无法创建支付会话');
+    }
+
+    return data.url as string;
+  };
+
   const handleUpgrade = async (priceId: string) => {
     setLoadingPriceId(priceId);
     try {
-      const { getCurrentUser } = await import('@/lib/user');
-      await getCurrentUser();
-
-      const response = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ priceId }),
-      });
-
-      const data = await response.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        throw new Error(data.error || '无法创建支付会话');
+      const checkoutUrl = await createCheckoutSession(priceId, { bootstrapUser: true });
+      if (checkoutUrl) {
+        window.location.href = checkoutUrl;
       }
     } catch (error: unknown) {
       console.error('Checkout error:', error);
@@ -88,6 +114,46 @@ export function UserPricingView({ currentTier, hasStripeCustomer, expiresAt }: P
       setLoadingPortal(false);
     }
   };
+
+  // 3. 极速跳转逻辑 - URL Parameter Bridge
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (hasAttemptedAutoCheckoutRef.current) return;
+    const params = new URLSearchParams(window.location.search);
+    const targetPriceId = params.get('priceId');
+    
+    // Security Audit Fix: Validate Price ID against whitelist before auto-trigger
+    const isWhitelisted = targetPriceId && pricingPlans.some(p => 
+      p.priceId === targetPriceId || p.priceIdAnnual === targetPriceId
+    );
+
+    if (targetPriceId && isWhitelisted) {
+      hasAttemptedAutoCheckoutRef.current = true;
+      void (async () => {
+        try {
+          const response = await fetch('/api/checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ priceId: targetPriceId }),
+          });
+          const data = await response.json();
+
+          if (response.status === 401) {
+            return;
+          }
+
+          if (response.ok && data.url) {
+            window.location.href = data.url;
+            return;
+          }
+
+          throw new Error(data.error || 'Unable to create checkout session');
+        } catch (error) {
+          console.error('Auto checkout error:', error);
+        }
+      })();
+    }
+  }, [pricingPlans]);
 
   return (
     <div className="animate-in fade-in slide-in-from-right-4 duration-300 space-y-4 pb-12">
@@ -146,9 +212,9 @@ export function UserPricingView({ currentTier, hasStripeCustomer, expiresAt }: P
                             (planEnName === 'go' && currentTier === 'go') ||
                             (planEnName === 'plus' && currentTier === 'plus');
           
-          // 对 Go/Plus 用户隐藏基础版
+          // Hide free plan for premium users
           if (isPremium && planEnName === 'free') return null;
-          // 对 Plus 用户隐藏 Go
+          // Hide Go plan for Plus users
           if (isPlus && planEnName === 'go') return null;
 
           return (
@@ -169,9 +235,9 @@ export function UserPricingView({ currentTier, hasStripeCustomer, expiresAt }: P
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-4">
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                    plan.color === 'indigo' ? 'bg-indigo-500/20 text-indigo-400' :
-                    plan.color === 'emerald' ? 'bg-emerald-500/20 text-emerald-400' :
-                    'bg-slate-500/20 text-slate-400'
+                    plan.color === 'indigo' ? 'bg-indigo-500/10 text-indigo-400' :
+                    plan.color === 'emerald' ? 'bg-emerald-500/10 text-emerald-400' :
+                    'bg-slate-500/10 text-slate-400'
                   }`}>
                     <plan.icon size={20} />
                   </div>
@@ -188,10 +254,10 @@ export function UserPricingView({ currentTier, hasStripeCustomer, expiresAt }: P
                       )}
                     </div>
                     <div className="flex items-baseline gap-1">
-                      <span className="text-[10px] font-bold text-slate-500">¥</span>
+                      <span className="text-[10px] font-bold text-slate-500">{currencySymbol}</span>
                       <span className="text-xl font-black tracking-tighter text-white">{plan.price}</span>
                       {planEnName !== 'free' && <span className="text-[10px] text-slate-500 ml-1 font-bold uppercase">
-                        {planEnName === 'plus' ? 'Coming Soon' : tGlobal(plan.period as FullMessageKey).split('/')[0]}
+                        {planEnName === 'plus' ? 'Coming Soon' : tGlobal(plan.period as FullMessageKey, { price: annualPriceStr }).split('/')[0]}
                       </span>}
                     </div>
                   </div>
@@ -237,18 +303,18 @@ export function UserPricingView({ currentTier, hasStripeCustomer, expiresAt }: P
                     >
                       {loadingPriceId === plan.priceId 
                         ? t('processing') 
-                        : (isPremium ? t('monthly') : t('subscribe'))
+                        : (isPremium ? t('monthly', { price: monthlyPriceStr }) : t('subscribe'))
                       }
                       {!loadingPriceId && <ChevronRight size={14} />}
                     </button>
-                     {plan.priceIdAnnual && (
+                    {plan.priceIdAnnual && (
                       <button
                         onClick={() => handleUpgrade(plan.priceIdAnnual!)}
                         disabled={!!loadingPriceId}
                         className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 active:scale-95 transition-all text-white text-xs font-black italic flex items-center justify-center gap-2 shadow-lg shadow-orange-500/20"
                       >
                         <div className="flex flex-col items-center leading-none gap-0.5">
-                          <span>{isPremium ? t('annualExtended') : t('annual')}</span>
+                          <span>{isPremium ? t('annualExtended', { price: annualPriceStr }) : t('annual')}</span>
                           <span className="text-[8px] opacity-80 uppercase tracking-wider font-bold">
                             {isPremium ? t('annualBenefit') : t('annualDiscount')}
                           </span>

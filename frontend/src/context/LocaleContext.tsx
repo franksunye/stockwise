@@ -82,6 +82,13 @@ export function LocaleProvider({ children, profileLocale }: LocaleProviderProps)
   const setLocale = useCallback((newLocale: AppLocale) => {
     setLocaleState(newLocale);
     persistLocale(newLocale);
+
+    // Sync to cross-subdomain cookie for landing page persistence
+    if (typeof window !== 'undefined') {
+      const isProd = window.location.hostname.endsWith('.ziso.cc') || window.location.hostname === 'ziso.cc';
+      const domain = isProd ? '; domain=.ziso.cc' : '';
+      document.cookie = `ziso_locale=${newLocale}; path=/; max-age=31536000; samesite=lax${domain}`;
+    }
   }, []);
 
   const messages = useMemo(() => getMessages(locale), [locale]);

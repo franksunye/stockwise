@@ -337,9 +337,9 @@
     "portalRedirecting": "正在跳转至管理门户...",
     "currentStatus": "当前账户状态",
     "subscribe": "订阅 Pro",
-    "monthly": "月度续费 (¥29.9)",
+    "monthly": "月度续费 ({price})",
     "annual": "年度订阅 (最优惠)",
-    "annualExtended": "年度续延 (¥299)",
+    "annualExtended": "年度续期 ({price})",
     "annualBenefit": "立即增加 365 天服务有效期",
     "annualDiscount": "节省约 17%",
     "processing": "处理中...",
@@ -363,7 +363,7 @@
     },
     "go": {
       "name": "核心版 (Go)",
-      "period": "每月 / 每年 ¥299",
+      "period": "每月 / 每年 {price}",
       "description": "解锁 DeepSeek 深度洞察、10 只自选股、每月 200 份研判报告及全量实时预警。",
       "cta": "订阅 Go"
     },
