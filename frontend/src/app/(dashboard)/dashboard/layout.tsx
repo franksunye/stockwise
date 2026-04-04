@@ -6,7 +6,6 @@ import { DashboardShell } from '@/components/dashboard/DashboardShell';
 import { SystemSync } from '@/components/SystemSync';
 import { ReferralTracker } from '@/components/ReferralTracker';
 import { BadgeManager } from '@/components/BadgeManager';
-import { InstallGuide } from '@/components/InstallGuide';
 import { useDashboardAuthorization } from '@/hooks/useDashboardAuthorization';
 import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton';
 import {
@@ -48,7 +47,6 @@ export default function DashboardLayout({
       <SystemSync />
       <ReferralTracker />
       <BadgeManager />
-      <InstallGuide />
     </>
   );
 

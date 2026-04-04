@@ -5,6 +5,7 @@ import { StockProvider } from '@/context/StockContext';
 import { UserProfileProvider, useUserProfile, type UserProfileContextValue } from '@/hooks/useUserProfile';
 import { LocaleProvider } from '@/context/LocaleContext';
 import { DashboardEntryGate } from '@/components/dashboard/DashboardEntryGate';
+import { InstallGuide } from '@/components/InstallGuide';
 
 function LocaleGate({ children }: { children: ReactNode }) {
     const { profile } = useUserProfile();
@@ -25,6 +26,7 @@ export function DashboardShell({
     return (
         <UserProfileProvider value={userSession}>
             <LocaleGate>
+                <InstallGuide />
                 <StockProvider>
                     <DashboardEntryGate>{children}</DashboardEntryGate>
                 </StockProvider>
