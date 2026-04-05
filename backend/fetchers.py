@@ -20,6 +20,7 @@ from datetime import datetime, timedelta
 from config import BEIJING_TZ
 from utils import get_market, get_pinyin_info, retry_request
 from name_en_sanitize import sanitize_hk_name_en_candidate
+from name_en_backfill import run_name_en_backfill
 from database import get_connection
 from backend.db_repo.queries import build_upsert_stock_meta_sql, UPDATE_STOCK_PROFILE_QUERY
 from backend.logger import logger
@@ -580,6 +581,9 @@ def sync_stock_meta():
             cursor.execute(sql, flat_values)
             if (i + batch_size) % 2000 == 0 or i + batch_size >= total:
                 logger.info(f"   💾 已写入 {min(i + batch_size, total)}/{total} 条...")
+
+        # Tushare (optional) + Yahoo Finance gap fill; curated JSON still wins below.
+        run_name_en_backfill(cursor)
 
         _apply_curated_cn_name_en(cursor)
         _apply_curated_hk_name_en(cursor)

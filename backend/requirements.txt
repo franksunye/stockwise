@@ -9,3 +9,5 @@ loguru
 tavily-python
 Jinja2
 pydantic
+yfinance
+tushare
