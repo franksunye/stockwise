@@ -1,8 +1,7 @@
 """
-Periodic stock_meta.name_en backfill: Tushare bulk (CN, optional) + Yahoo Finance (CN/HK gaps).
+Periodic stock_meta.name_en backfill: Yahoo Finance (yfinance) for CN/HK gaps (free tier).
 
 Env (see config.load or os.environ):
-  NAME_EN_TUSHARE=1          — enable Tushare stock_basic.enname (needs TUSHARE_TOKEN or TS_TOKEN)
   NAME_EN_YAHOO=1            — enable yfinance gap fill (default on if unset)
   NAME_EN_YAHOO_MAX_CN       — max Yahoo lookups per run for CN (default 2500)
   NAME_EN_YAHOO_MAX_HK       — max Yahoo lookups per run for HK (default 1500)
@@ -95,80 +94,6 @@ def _try_yfinance_info(yahoo_ticker: str) -> Optional[Dict[str, Any]]:
     return None
 
 
-def load_tushare_cn_enname_map() -> Dict[str, str]:
-    """
-    One-shot A-share symbol -> English name from Tushare stock_basic (enname).
-    """
-    if not _env_bool("NAME_EN_TUSHARE", False):
-        return {}
-    token = (os.getenv("TUSHARE_TOKEN") or os.getenv("TS_TOKEN") or "").strip()
-    if not token:
-        logger.info("   ℹ️ NAME_EN_TUSHARE 已开启但未配置 TUSHARE_TOKEN，跳过 Tushare")
-        return {}
-    try:
-        import tushare as ts
-        import pandas as pd
-    except ImportError:
-        logger.warning("   ⚠️ name_en backfill: tushare/pandas 不可用，跳过 Tushare")
-        return {}
-    try:
-        pro = ts.pro_api(token)
-        df = pro.stock_basic(
-            exchange="",
-            list_status="L",
-            fields="ts_code,symbol,name,enname",
-        )
-        if df is None or df.empty:
-            return {}
-        out: Dict[str, str] = {}
-        for _, row in df.iterrows():
-            sym = str(row.get("symbol") or "").strip()
-            en = row.get("enname")
-            name_cn = str(row.get("name") or "").strip()
-            if not sym or en is None or (isinstance(en, float) and pd.isna(en)):
-                continue
-            en_s = str(en).strip()
-            if not en_s or en_s.lower() in ("nan", "none"):
-                continue
-            ok = sanitize_name_en_candidate(name_cn, en_s)
-            if ok:
-                out[sym] = ok
-        logger.info(f"   ✅ Tushare stock_basic: 载入 {len(out)} 条 A 股英文名映射")
-        return out
-    except Exception as e:
-        logger.warning(f"   ⚠️ Tushare stock_basic 英文名拉取失败: {e}")
-        return {}
-
-
-def apply_tushare_cn_updates(cursor, ts_map: Dict[str, str]) -> int:
-    """UPDATE stock_meta rows where market=CN and name_en empty (only symbols still missing)."""
-    if not ts_map:
-        return 0
-    cursor.execute(
-        """
-        SELECT symbol FROM stock_meta
-        WHERE market = 'CN' AND (name_en IS NULL OR TRIM(name_en) = '')
-        """
-    )
-    gaps = {str(r[0]).strip() for r in (cursor.fetchall() or []) if r and r[0]}
-    updated = 0
-    for sym in gaps:
-        en = ts_map.get(sym)
-        if not en:
-            continue
-        cursor.execute(
-            """
-            UPDATE stock_meta
-            SET name_en = ?
-            WHERE symbol = ? AND market = 'CN'
-              AND (name_en IS NULL OR TRIM(name_en) = '')
-            """,
-            (en, sym),
-        )
-        updated += 1
-    return updated
-
-
 def _select_gaps(cursor, market: str, limit: int) -> List[Tuple[str, str]]:
     cursor.execute(
         """
@@ -236,18 +161,11 @@ def run_name_en_backfill(cursor) -> Dict[str, int]:
     Run after bulk upsert, before curated JSON overrides.
     Returns simple counters for logging / JobGuard stats.
     """
-    out: Dict[str, int] = {"tushare_cn_rows": 0}
-    ts_map = load_tushare_cn_enname_map()
-    if ts_map:
-        out["tushare_cn_rows"] = apply_tushare_cn_updates(cursor, ts_map)
+    out = apply_yahoo_gap_fill(cursor)
 
-    y = apply_yahoo_gap_fill(cursor)
-    out.update(y)
-
-    if out.get("tushare_cn_rows") or out.get("yahoo_cn") or out.get("yahoo_hk"):
+    if out.get("yahoo_cn") or out.get("yahoo_hk"):
         logger.info(
-            f"   📌 name_en 自动补全: Tushare 更新≈{out.get('tushare_cn_rows', 0)} 行, "
-            f"Yahoo CN={out.get('yahoo_cn', 0)} HK={out.get('yahoo_hk', 0)} "
-            f"skip/fail={out.get('yahoo_skipped', 0)}"
+            f"   📌 name_en 自动补全 (Yahoo): CN={out.get('yahoo_cn', 0)} "
+            f"HK={out.get('yahoo_hk', 0)} skip/fail={out.get('yahoo_skipped', 0)}"
         )
     return out

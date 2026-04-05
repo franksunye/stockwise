@@ -30,9 +30,6 @@ jobs:
           TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
           TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
           WECOM_ROBOT_KEY: ${{ secrets.WECOM_ROBOT_KEY }}
-          # Optional: set secret TUSHARE_TOKEN and NAME_EN_TUSHARE=1 for one-shot A-share enname (stock_basic.enname)
-          TUSHARE_TOKEN: ${{ secrets.TUSHARE_TOKEN }}
-          NAME_EN_TUSHARE: "0"
           # Yahoo gap fill (defaults in name_en_backfill.py); tune to control job duration
           NAME_EN_YAHOO_MAX_CN: "2000"
           NAME_EN_YAHOO_MAX_HK: "1200"

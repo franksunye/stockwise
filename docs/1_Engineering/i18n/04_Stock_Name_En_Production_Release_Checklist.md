@@ -32,8 +32,7 @@
 
 每次 `sync_stock_meta` 在批量 UPSERT 之后、策展 JSON 之前会执行：
 
-1. **可选 Tushare**：设置 `NAME_EN_TUSHARE=1` 且配置 `TUSHARE_TOKEN`（或 `TS_TOKEN`），一次性拉 `stock_basic.enname` 回填 **A 股**缺口（质量高、请求少）。
-2. **Yahoo Finance（yfinance）**：默认开启，对仍为空的 **CN/HK** 按 symbol 映射为 `.SS/.SZ/.BJ/.HK` 拉 `longName`/`shortName`；限速由 `NAME_EN_YAHOO_SLEEP_SEC` 控制，每轮上限 `NAME_EN_YAHOO_MAX_CN` / `NAME_EN_YAHOO_MAX_HK`（多跑几轮元数据任务可逐步扫完）。关闭：`NAME_EN_YAHOO=0`。
+- **Yahoo Finance（yfinance）**：默认开启，对仍为空的 **CN/HK** 按 symbol 映射为 `.SS/.SZ/.BJ/.HK` 拉 `longName`/`shortName`；限速由 `NAME_EN_YAHOO_SLEEP_SEC` 控制，每轮上限 `NAME_EN_YAHOO_MAX_CN` / `NAME_EN_YAHOO_MAX_HK`（多跑几轮元数据任务可逐步扫完）。关闭：`NAME_EN_YAHOO=0`。
 
 策展 JSON 仍最后写入，覆盖自动结果。
 
@@ -79,7 +78,7 @@ SELECT symbol, name, name_en FROM stock_meta WHERE symbol IN ('00700', '600519',
 | 定时/手动元数据同步 | `.github/workflows/meta_sync.yml` |
 | 生产 schema 校验 | `backend/scripts/validate_prod_schema.py` |
 | 抽样打印 `name_en` | `backend/scripts/verify_prod_stock_meta_name_en_sample.py` |
-| Tushare / Yahoo 周期补全 | `backend/name_en_backfill.py`（由 `fetchers.sync_stock_meta` 调用） |
+| Yahoo 周期补全 | `backend/name_en_backfill.py`（由 `fetchers.sync_stock_meta` 调用） |
 | 本地库自检 | `frontend`: `npm run verify:local-stock-name-en` |
 
 ---
