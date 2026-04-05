@@ -365,7 +365,8 @@ def init_db():
         # 2. Meta & Pool
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS stock_meta (
-                symbol TEXT PRIMARY KEY, name TEXT NOT NULL, market TEXT NOT NULL,
+                symbol TEXT PRIMARY KEY, name TEXT NOT NULL, name_en TEXT,
+                market TEXT NOT NULL,
                 last_updated TEXT, pinyin TEXT, pinyin_abbr TEXT,
                 industry TEXT, main_business TEXT, description TEXT
             )
@@ -1044,7 +1045,8 @@ def init_db():
         # 12. Robust Schema Migrations (Fixing production drift)
         def add_column_if_missing(table, column, definition):
             cols = get_table_columns(cursor, table)
-            if cols and column not in cols:
+            # Do not require non-empty cols: empty PRAGMA would skip migrations forever.
+            if column not in (cols or []):
                 try:
                     cursor.execute(f"ALTER TABLE {table} ADD COLUMN {column} {definition}")
                     logger.info(f"✅ Migrated: Added {column} to {table}")
@@ -1156,6 +1158,9 @@ def init_db():
         add_column_if_missing('mode_performance_snapshot', 'job_id', 'TEXT')
         add_column_if_missing('mode_performance_snapshot', 'rule_version', 'TEXT')
         add_column_if_missing('mode_performance_snapshot', 'triggered_by', 'TEXT')
+
+        # Stock meta: trusted English display name (nullable; HK/CN i18n)
+        add_column_if_missing('stock_meta', 'name_en', 'TEXT')
 
         # LLM Registry: Add roles column for unified model routing
         add_column_if_missing('prediction_models', 'roles', 'TEXT')
