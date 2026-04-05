@@ -4,9 +4,23 @@ import { getCurrentUser } from '@/lib/user';
 const WATCHLIST_STORAGE_KEY = 'STOCKWISE_WATCHLIST_V2'; // Version 2 for clean slate
 const WATCHLIST_SYNC_EVENT = 'stockwise-watchlist-sync';
 
+function watchlistMetaDiffers(current: WatchlistItem[], remote: WatchlistItem[]): boolean {
+    if (current.length !== remote.length) return true;
+    const remoteBySym = new Map(remote.map((i) => [i.symbol, i]));
+    for (const c of current) {
+        const r = remoteBySym.get(c.symbol);
+        if (!r) return true;
+        const enC = c.name_en ?? null;
+        const enR = r.name_en ?? null;
+        if (c.name !== r.name || enC !== enR) return true;
+    }
+    return false;
+}
+
 export interface WatchlistItem {
     symbol: string;
     name: string;
+    name_en?: string | null;
     addedAt: number;
 }
 
@@ -86,6 +100,7 @@ export function useWatchlist() {
                     const remoteList: WatchlistItem[] = (data.stocks || []).map((s: any) => ({
                         symbol: s.symbol,
                         name: s.name,
+                        name_en: s.name_en ?? undefined,
                         addedAt: s.added_at ? new Date(s.added_at).getTime() : Date.now()
                     }));
 
@@ -96,7 +111,7 @@ export function useWatchlist() {
                         const currentStr = JSON.stringify(current.map(i => i.symbol).sort());
                         const remoteStr = JSON.stringify(remoteList.map(i => i.symbol).sort());
 
-                        if (currentStr !== remoteStr) {
+                        if (currentStr !== remoteStr || watchlistMetaDiffers(current, remoteList)) {
                             console.log('🔄 Watchlist sync: updated from server');
                             localStorage.setItem(WATCHLIST_STORAGE_KEY, JSON.stringify(remoteList));
                             return remoteList;
@@ -115,14 +130,19 @@ export function useWatchlist() {
         return () => clearTimeout(timer);
     }, [localBootstrapDone]);
 
-    const addStock = useCallback(async (symbol: string, name: string) => {
+    const addStock = useCallback(async (symbol: string, name: string, name_en?: string | null) => {
         const user = await getCurrentUser();
         if (!user) return false;
 
         // [Fix] Update mutation time
         lastMutationTime.current = Date.now();
 
-        const newItem: WatchlistItem = { symbol, name, addedAt: Date.now() };
+        const newItem: WatchlistItem = {
+            symbol,
+            name,
+            name_en: name_en !== undefined ? name_en : undefined,
+            addedAt: Date.now(),
+        };
 
         // Optimistic Update
         setWatchlist(prev => {

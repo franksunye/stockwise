@@ -19,6 +19,7 @@ interface TradePositionRow {
     source: string | null;
     note: string | null;
     stock_name: string | null;
+    stock_name_en?: string | null;
     latest_trade_date: string | null;
     latest_state_id: string | null;
     latest_action_summary: string | null;

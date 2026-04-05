@@ -13,7 +13,8 @@ import { getPredictionActionMeta } from '@/lib/layer1-ui';
 import { getValidationWindowLabel, parseValidationData } from '@/lib/prediction-display';
 import { getStockDashboardCardSurface, getStockDashboardCardTitle } from '@/lib/stock-dashboard-card-surface';
 import { formatBriefActionLabel, normalizeLegacyTerms } from '@/lib/tactical-brief-surface';
-import { useT, useGlobalT } from '@/context/LocaleContext';
+import { useT, useGlobalT, useLocale } from '@/context/LocaleContext';
+import { getLocalizedStockName } from '@/lib/stock-name';
 import type { FullMessageKey, MessageKey } from '@/lib/i18n';
 
 interface StockDashboardCardProps {
@@ -26,6 +27,9 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
   const tBrief = useT('brief');
   const tGlobal = useGlobalT();
   const tCommon = useT('common');
+  const { locale } = useLocale();
+  const stockLocale = locale === 'en' ? 'en' : 'cn';
+  const displayName = getLocalizedStockName(data, stockLocale);
 
   const marketType = getMarketFromSymbol(data.symbol);
 
@@ -90,7 +94,7 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
         <Zap className="w-8 h-8 text-indigo-500 animate-pulse fill-indigo-500/20" />
       </div>
       <div className="text-center">
-        <h2 className="text-2xl font-black italic tracking-tighter text-white">{data.name}</h2>
+        <h2 className="text-2xl font-black italic tracking-tighter text-white">{displayName}</h2>
         <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mt-1">{tCommon('loading')}</p>
       </div>
     </div>

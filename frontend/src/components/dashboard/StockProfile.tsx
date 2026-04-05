@@ -8,7 +8,8 @@ import {
   formatStockProfileHistoryLabel,
   getStockProfileStats,
 } from '@/lib/stock-profile-metrics';
-import { useT } from '@/context/LocaleContext';
+import { useT, useLocale } from '@/context/LocaleContext';
+import { getLocalizedStockName } from '@/lib/stock-name';
 
 interface StockProfileProps {
   stock: StockData;
@@ -19,6 +20,9 @@ const STOCK_PROFILE_MATRIX_DAYS = 30;
 
 export function StockProfile({ stock, onClose }: StockProfileProps) {
   const t = useT('dashboard');
+  const { locale } = useLocale();
+  const stockLocale = locale === 'en' ? 'en' : 'cn';
+  const displayName = getLocalizedStockName(stock, stockLocale);
   const { historyToUse, loadingHistory } = useStockProfileHistory(stock);
 
   // 使用完整的历史数据计算回看通过率，如果还在加载则使用传入的数据
@@ -53,7 +57,7 @@ export function StockProfile({ stock, onClose }: StockProfileProps) {
             </div>
             <div className="space-y-1">
               <h2 className="text-xl font-black italic tracking-tighter text-white">
-                {stock.name}
+                {displayName}
               </h2>
             </div>
           </div>

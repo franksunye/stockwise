@@ -20,12 +20,15 @@ import {
   getManagementStateLabel,
   getTradeEventLabel,
 } from '@/lib/trade-management-surface';
+import { useLocale } from '@/context/LocaleContext';
+import { getLocalizedStockName } from '@/lib/stock-name';
 
 interface TradeManagementTabProps {
   isActive: boolean;
   isOpen: boolean;
   symbol: string;
   stockName?: string;
+  stockNameEn?: string | null;
 }
 
 export function TradeManagementTab({
@@ -33,7 +36,10 @@ export function TradeManagementTab({
   isOpen,
   symbol,
   stockName,
+  stockNameEn,
 }: TradeManagementTabProps) {
+  const { locale } = useLocale();
+  const stockLocale = locale === 'en' ? 'en' : 'cn';
   const [isEntryOpen, setIsEntryOpen] = useState(false);
   const [isEventOpen, setIsEventOpen] = useState(false);
   const [isDetailExpanded, setIsDetailExpanded] = useState(false);
@@ -52,6 +58,23 @@ export function TradeManagementTab({
   const detailSections = useMemo(() => getManagementCardSections(advice), [advice]);
   const hasManagementContent = !!position;
   const isInitialLoading = isLoading && !payload;
+
+  const tradeStockDisplayName = useMemo(() => {
+    if (position?.stock_name) {
+      return getLocalizedStockName(
+        {
+          symbol,
+          name: position.stock_name,
+          name_en: position.stock_name_en ?? null,
+        },
+        stockLocale,
+      );
+    }
+    return getLocalizedStockName(
+      { symbol, name: stockName || symbol, name_en: stockNameEn ?? null },
+      stockLocale,
+    );
+  }, [position, symbol, stockName, stockNameEn, stockLocale]);
 
   const handleRefresh = async () => {
     await mutateSurface();
@@ -109,7 +132,7 @@ export function TradeManagementTab({
           <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 p-4">
             <div>
               <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">{symbol}</p>
-              <h3 className="text-xl font-black tracking-tight text-white">{stockName || symbol}</h3>
+              <h3 className="text-xl font-black tracking-tight text-white">{tradeStockDisplayName}</h3>
             </div>
             <div className="text-right">
               <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">交易跟踪状态</p>
@@ -141,7 +164,7 @@ export function TradeManagementTab({
           onClose={() => setIsEntryOpen(false)}
           onCreated={handleCreated}
           symbol={symbol}
-          stockName={stockName}
+          stockName={tradeStockDisplayName}
         />
       </>
     );
@@ -153,7 +176,7 @@ export function TradeManagementTab({
         <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 p-4">
           <div>
             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">{symbol}</p>
-            <h3 className="text-xl font-black tracking-tight text-white">{stockName || position?.stock_name || symbol}</h3>
+            <h3 className="text-xl font-black tracking-tight text-white">{tradeStockDisplayName}</h3>
           </div>
           <div className="text-right">
             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">交易跟踪状态</p>

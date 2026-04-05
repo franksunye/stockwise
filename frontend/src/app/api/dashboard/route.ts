@@ -23,27 +23,33 @@ export async function GET(request: Request) {
 
         try {
             // Step 1: 仅获取用户监控列表 (私有数据)
-            let watchlist: { symbol: string; name: string }[];
+            let watchlist: { symbol: string; name: string; name_en: string | null }[];
             if ('execute' in client) {
                 const rs = await client.execute({
-                    sql: `SELECT uw.symbol, gp.name 
+                    sql: `SELECT uw.symbol,
+                                 COALESCE(sm.name, gp.name) AS name,
+                                 sm.name_en AS name_en
                           FROM user_watchlist uw
                           LEFT JOIN global_stock_pool gp ON uw.symbol = gp.symbol
+                          LEFT JOIN stock_meta sm ON uw.symbol = sm.symbol
                           WHERE uw.user_id = ?
                           ORDER BY uw.added_at DESC`,
                     args: [userId],
                 });
-                watchlist = rs.rows as unknown as { symbol: string; name: string }[];
+                watchlist = rs.rows as unknown as { symbol: string; name: string; name_en: string | null }[];
             } else {
                 watchlist = client
                     .prepare(
-                        `SELECT uw.symbol, gp.name 
+                        `SELECT uw.symbol,
+                                COALESCE(sm.name, gp.name) AS name,
+                                sm.name_en AS name_en
                          FROM user_watchlist uw
                          LEFT JOIN global_stock_pool gp ON uw.symbol = gp.symbol
+                         LEFT JOIN stock_meta sm ON uw.symbol = sm.symbol
                          WHERE uw.user_id = ?
                          ORDER BY uw.added_at DESC`
                     )
-                    .all(userId) as { symbol: string; name: string }[];
+                    .all(userId) as { symbol: string; name: string; name_en: string | null }[];
             }
 
 

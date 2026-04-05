@@ -21,7 +21,7 @@ interface StockContextType {
     lastRefreshError: string | null;
     refresh: () => Promise<boolean>;
     loadMoreHistory: (symbol: string, offset: number) => Promise<void>;
-    addStock: (symbol: string, name: string) => Promise<boolean>;
+    addStock: (symbol: string, name: string, name_en?: string | null) => Promise<boolean>;
     removeStock: (symbol: string) => Promise<boolean>;
     almanac: MarketAlmanacData | null;
     almanacs: MarketAlmanacData[];

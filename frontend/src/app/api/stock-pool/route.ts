@@ -18,30 +18,38 @@ export async function GET(request: Request) {
 
     const client = getDbClient() as Client | Database;
     try {
-        let stocks: { symbol: string, name?: string, added_at?: string }[] = [];
+        let stocks: { symbol: string; name?: string; name_en?: string | null; added_at?: string }[] = [];
 
         if ('execute' in client) {
             // Turso
             const rs = await client.execute({
-                sql: `SELECT uw.symbol, gp.name, uw.added_at
+                sql: `SELECT uw.symbol,
+                             COALESCE(sm.name, gp.name) AS name,
+                             sm.name_en AS name_en,
+                             uw.added_at
                       FROM user_watchlist uw
                       LEFT JOIN global_stock_pool gp ON uw.symbol = gp.symbol
+                      LEFT JOIN stock_meta sm ON uw.symbol = sm.symbol
                       WHERE uw.user_id = ?
                       ORDER BY uw.added_at DESC`,
                 args: [userId],
             });
-            stocks = rs.rows as unknown as { symbol: string, name?: string, added_at?: string }[];
+            stocks = rs.rows as unknown as { symbol: string; name?: string; name_en?: string | null; added_at?: string }[];
         } else {
             // SQLite
             stocks = client
                 .prepare(
-                    `SELECT uw.symbol, gp.name, uw.added_at
+                    `SELECT uw.symbol,
+                            COALESCE(sm.name, gp.name) AS name,
+                            sm.name_en AS name_en,
+                            uw.added_at
                      FROM user_watchlist uw
                      LEFT JOIN global_stock_pool gp ON uw.symbol = gp.symbol
+                     LEFT JOIN stock_meta sm ON uw.symbol = sm.symbol
                      WHERE uw.user_id = ?
                       ORDER BY uw.added_at DESC`
                 )
-                .all(userId) as { symbol: string, name?: string, added_at?: string }[];
+                .all(userId) as { symbol: string; name?: string; name_en?: string | null; added_at?: string }[];
         }
 
         return NextResponse.json({ stocks });

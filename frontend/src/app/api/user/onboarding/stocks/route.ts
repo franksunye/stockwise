@@ -6,6 +6,7 @@ export const dynamic = 'force-dynamic';
 interface Stock {
     symbol: string;
     name: string;
+    name_en?: string | null;
     market: string;
 }
 
@@ -15,7 +16,7 @@ export async function GET() {
         db = getDbClient();
 
         const sql = `
-            SELECT DISTINCT ap.symbol, sm.name, sm.market, ap.date
+            SELECT DISTINCT ap.symbol, sm.name, sm.name_en, sm.market, ap.date
             FROM ai_predictions_v2 ap
             JOIN stock_meta sm ON ap.symbol = sm.symbol
             WHERE ap.is_primary = 1
@@ -27,10 +28,11 @@ export async function GET() {
         let pool: Stock[] = [];
 
         if (db && typeof db === 'object' && 'execute' in db) {
-            const res = await (db as { execute: (sql: string) => Promise<{ rows: unknown[] }> }).execute(sql);
-            pool = (res.rows as { symbol: unknown, name: unknown, market: unknown }[]).map((row) => ({
+            const res = await (db as { execute: (q: { sql: string; args?: unknown[] }) => Promise<{ rows: unknown[] }> }).execute({ sql, args: [] });
+            pool = (res.rows as { symbol: unknown; name: unknown; name_en: unknown; market: unknown }[]).map((row) => ({
                 symbol: String(row.symbol),
                 name: String(row.name),
+                name_en: row.name_en != null ? String(row.name_en) : null,
                 market: String(row.market)
             }));
         } else if (db && typeof db === 'object' && 'prepare' in db) {
@@ -53,8 +55,8 @@ export async function GET() {
 
         if (stocks.length < 4) {
             const fallbacks: Stock[] = [
-                { symbol: '688256', name: '寒武纪', market: 'CN' },
-                { symbol: '601398', name: '工商银行', market: 'CN' },
+                { symbol: '688256', name: '寒武纪', name_en: 'Cambricon', market: 'CN' },
+                { symbol: '601398', name: '工商银行', name_en: 'Industrial and Commercial Bank of China', market: 'CN' },
                 { symbol: '02171', name: '科济药业', market: 'HK' },
                 { symbol: '01167', name: '加科思', market: 'HK' }
             ];
@@ -72,8 +74,8 @@ export async function GET() {
         console.error('[API] Onboarding stocks error:', error);
         return NextResponse.json({
             stocks: [
-                { symbol: '688256', name: '寒武纪', market: 'CN' },
-                { symbol: '601398', name: '工商银行', market: 'CN' },
+                { symbol: '688256', name: '寒武纪', name_en: 'Cambricon', market: 'CN' },
+                { symbol: '601398', name: '工商银行', name_en: 'Industrial and Commercial Bank of China', market: 'CN' },
                 { symbol: '02171', name: '科济药业', market: 'HK' },
                 { symbol: '01167', name: '加科思', market: 'HK' }
             ]

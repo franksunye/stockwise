@@ -15,7 +15,9 @@ def test_resolve_prediction_dates_filters_market_and_range():
         )
         """
     )
-    cur.execute("CREATE TABLE stock_meta (symbol TEXT PRIMARY KEY, market TEXT NOT NULL)")
+    cur.execute(
+        "CREATE TABLE stock_meta (symbol TEXT PRIMARY KEY, name TEXT, name_en TEXT, market TEXT NOT NULL)"
+    )
     cur.executemany(
         "INSERT INTO stock_meta(symbol, market) VALUES (?, ?)",
         [

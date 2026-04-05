@@ -16,7 +16,7 @@ SAVE_PRICES_QUERY = """
 FETCH_HISTORY_QUERY = "SELECT * FROM {table} WHERE symbol = ? ORDER BY date DESC LIMIT ?"
 
 # --- Stock Metadata ---
-GET_STOCK_NAME_QUERY = "SELECT name FROM stock_meta WHERE symbol = ?"
+GET_STOCK_NAME_QUERY = "SELECT name, name_en FROM stock_meta WHERE symbol = ?"
 GET_STOCK_PROFILE_QUERY = "SELECT industry, main_business, description FROM stock_meta WHERE symbol = ?"
 GET_STOCK_POOL_QUERY = "SELECT symbol FROM global_stock_pool WHERE watchers_count > 0 ORDER BY watchers_count DESC"
 UPDATE_STOCK_PROFILE_QUERY = """
@@ -24,7 +24,23 @@ UPDATE_STOCK_PROFILE_QUERY = """
     SET industry = ?, main_business = ?, description = ?
     WHERE symbol = ?
 """
-BULK_INSERT_STOCK_META_BASE = "INSERT OR REPLACE INTO stock_meta (symbol, name, market, last_updated, pinyin, pinyin_abbr) VALUES"
+def build_upsert_stock_meta_sql(batch_size: int) -> str:
+    """UPSERT core metadata columns without wiping industry/main_business/description."""
+    if batch_size < 1:
+        raise ValueError("batch_size must be >= 1")
+    placeholders = ",".join(["(?, ?, ?, ?, ?, ?, ?)"] * batch_size)
+    return f"""INSERT INTO stock_meta (symbol, name, name_en, market, last_updated, pinyin, pinyin_abbr) VALUES {placeholders}
+ON CONFLICT(symbol) DO UPDATE SET
+  name = excluded.name,
+  name_en = CASE WHEN excluded.name_en IS NOT NULL AND TRIM(excluded.name_en) != '' THEN TRIM(excluded.name_en) ELSE stock_meta.name_en END,
+  market = excluded.market,
+  last_updated = excluded.last_updated,
+  pinyin = excluded.pinyin,
+  pinyin_abbr = excluded.pinyin_abbr"""
+
+
+# Backward-compatible alias (deprecated: use build_upsert_stock_meta_sql)
+BULK_INSERT_STOCK_META_BASE = "INSERT INTO stock_meta (symbol, name, name_en, market, last_updated, pinyin, pinyin_abbr) VALUES"
 
 # --- User & Watchlist ---
 CHECK_PRO_WATCHER_QUERY = """

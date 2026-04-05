@@ -10,10 +10,13 @@
 
 import { createClient } from '@libsql/client';
 import { config } from 'dotenv';
-import { resolve } from 'path';
+import { dirname, resolve } from 'path';
+import { fileURLToPath } from 'url';
 
-// 加载 backend/.env 文件
-config({ path: resolve(process.cwd(), 'backend/.env') });
+// 始终从仓库根解析 backend/.env（避免在 frontend/ 下 cwd 错误导致未加载 Turso 密钥）
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const repoRoot = resolve(__dirname, '../..');
+config({ path: resolve(repoRoot, 'backend/.env') });
 
 const TURSO_DB_URL = process.env.TURSO_DB_URL;
 const TURSO_AUTH_TOKEN = process.env.TURSO_AUTH_TOKEN;

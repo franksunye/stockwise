@@ -16,6 +16,8 @@ import {
 import { formatStockSymbol } from '@/lib/date-utils';
 import dynamic from 'next/dynamic';
 import { useStocks } from '@/context/StockContext';
+import { useLocale } from '@/context/LocaleContext';
+import { getLocalizedStockName } from '@/lib/stock-name';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useTikTokScroll } from '@/hooks/useTikTokScroll';
 
@@ -79,6 +81,8 @@ const DashboardBackground = memo(({ isAlmanac, prediction }: { isAlmanac: boolea
 DashboardBackground.displayName = 'DashboardBackground';
 
 function DashboardContent() {
+  const { locale } = useLocale();
+  const stockLocale = locale === 'en' ? 'en' : 'cn';
   const searchParams = useSearchParams();
   const preferredSymbol = readDashboardSymbolFromSearchParams(searchParams);
   const [userCenterOpen, setUserCenterOpen] = useState(false);
@@ -165,12 +169,20 @@ function DashboardContent() {
   const isHorizontalScrollLocked = activeModal !== 'none';
 
   // 【核心修复：粘性标题】用来保持标题内容的“粘性”，防止在切换到黄历时由于数据过快切换而显示黄历的内部 ID
-  const stickyStockInfo = useRef({ name: '', symbol: '' });
+  const stickyStockInfo = useRef({ name: '', name_en: null as string | null, symbol: '' });
   if (currentStock && !currentStock.isAlmanac) {
-    stickyStockInfo.current = { name: currentStock.name, symbol: currentStock.symbol };
+    stickyStockInfo.current = {
+      name: currentStock.name,
+      name_en: currentStock.name_en ?? null,
+      symbol: currentStock.symbol,
+    };
   } else if (!stickyStockInfo.current.name && stocks.length > 0) {
     // 初始状态下若在黄历，预填入第一个真实股票的信息作为备选
-    stickyStockInfo.current = { name: stocks[0].name, symbol: stocks[0].symbol };
+    stickyStockInfo.current = {
+      name: stocks[0].name,
+      name_en: stocks[0].name_en ?? null,
+      symbol: stocks[0].symbol,
+    };
   }
 
   // 2. 缓存所有 Modal 处理函数 (极致稳定性)
@@ -276,7 +288,14 @@ function DashboardContent() {
             
             <div className={`absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-300 ${!isMarketAlmanac ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
                <h1 className="text-xl font-black italic tracking-tight text-white group-hover:text-indigo-400 transition-colors text-center">
-                 {stickyStockInfo.current.name}
+                 {getLocalizedStockName(
+                   {
+                     symbol: stickyStockInfo.current.symbol,
+                     name: stickyStockInfo.current.name,
+                     name_en: stickyStockInfo.current.name_en,
+                   },
+                   stockLocale,
+                 )}
                </h1>
                <span className="text-[10px] font-black italic text-slate-500 tracking-widest uppercase mt-0.5 leading-none">
                  {stickyStockInfo.current.symbol ? formatStockSymbol(stickyStockInfo.current.symbol) : ''}
@@ -372,6 +391,7 @@ function DashboardContent() {
           signal={selectedTactics.prediction?.signal}
           confidence={selectedTactics.prediction?.confidence}
           stockName={selectedTacticStock?.name}
+          stockNameEn={selectedTacticStock?.name_en}
           currentPrice={selectedTacticStock?.price?.close}
           shortMetrics={selectedTacticStock?.shortMetrics || null}
         />

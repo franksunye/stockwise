@@ -1,6 +1,8 @@
 import os
 import sys
 import io
+import json
+from pathlib import Path
 from abc import ABC, abstractmethod
 from typing import List, Optional
 
@@ -17,8 +19,9 @@ import pandas as pd
 from datetime import datetime, timedelta
 from config import BEIJING_TZ
 from utils import get_market, get_pinyin_info, retry_request
+from name_en_sanitize import sanitize_hk_name_en_candidate
 from database import get_connection
-from backend.db_repo.queries import BULK_INSERT_STOCK_META_BASE, UPDATE_STOCK_PROFILE_QUERY
+from backend.db_repo.queries import build_upsert_stock_meta_sql, UPDATE_STOCK_PROFILE_QUERY
 from backend.logger import logger
 
 
@@ -353,8 +356,66 @@ def fetch_stock_data(symbol: str, period: str = "daily", start_date: str = None,
         
     return fetcher.fetch_history(symbol, period, start_date)
 
+def _apply_curated_cn_name_en(cursor) -> None:
+    """Apply trusted CN English names from bundled JSON (curated universe)."""
+    data_path = Path(__file__).resolve().parent / "data" / "cn_name_en_curated.json"
+    if not data_path.is_file():
+        return
+    try:
+        raw = json.loads(data_path.read_text(encoding="utf-8"))
+    except Exception as e:
+        logger.warning(f"   ⚠️ 无法读取策展 CN 英文名映射: {e}")
+        return
+    if not isinstance(raw, dict):
+        return
+    n = 0
+    for symbol, name_en in raw.items():
+        if not symbol or not name_en:
+            continue
+        ne = str(name_en).strip()
+        if not ne:
+            continue
+        sym = str(symbol).strip()
+        cursor.execute(
+            "UPDATE stock_meta SET name_en = ? WHERE symbol = ? AND market = 'CN'",
+            (ne, sym),
+        )
+        n += 1
+    if n:
+        logger.info(f"   ✅ 已应用策展 A 股英文名配置 ({n} 条)")
+
+
+def _apply_curated_hk_name_en(cursor) -> None:
+    """Apply trusted HK English names from bundled JSON (curated universe, same pattern as CN)."""
+    data_path = Path(__file__).resolve().parent / "data" / "hk_name_en_curated.json"
+    if not data_path.is_file():
+        return
+    try:
+        raw = json.loads(data_path.read_text(encoding="utf-8"))
+    except Exception as e:
+        logger.warning(f"   ⚠️ 无法读取策展港股英文名映射: {e}")
+        return
+    if not isinstance(raw, dict):
+        return
+    n = 0
+    for symbol, name_en in raw.items():
+        if not symbol or not name_en:
+            continue
+        ne = str(name_en).strip()
+        if not ne:
+            continue
+        sym = str(symbol).strip()
+        cursor.execute(
+            "UPDATE stock_meta SET name_en = ? WHERE symbol = ? AND market = 'HK'",
+            (ne, sym),
+        )
+        n += 1
+    if n:
+        logger.info(f"   ✅ 已应用策展港股英文名配置 ({n} 条)")
+
+
 def sync_stock_meta():
-    """同步股票基础信息 (名称、市场、拼音)"""
+    """同步股票基础信息 (名称、市场、拼音、港股英文名)"""
     import time
     start_time = time.time()  # 统计完整同步耗时
     
@@ -362,21 +423,51 @@ def sync_stock_meta():
     now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     all_records = []
 
-    # 1. 港股列表
+    # 1. 港股列表：优先新浪行情（含英文名称），失败则回退东财 EM
+    hk_loaded = False
     try:
-        hk_stocks = ak.stock_hk_spot_em()
-        if not hk_stocks.empty:
-            symbol_col = "代码" if "代码" in hk_stocks.columns else "symbol"
-            name_col = "名称" if "名称" in hk_stocks.columns else "name"
-            for _, row in hk_stocks.iterrows():
-                symbol = str(row[symbol_col])
-                name = str(row[name_col])
-                if symbol.isdigit():
+        hk_stocks = ak.stock_hk_spot()
+        if hk_stocks is not None and not hk_stocks.empty:
+            symbol_col = "代码" if "代码" in hk_stocks.columns else None
+            name_col = (
+                "中文名称"
+                if "中文名称" in hk_stocks.columns
+                else ("名称" if "名称" in hk_stocks.columns else None)
+            )
+            en_col = "英文名称" if "英文名称" in hk_stocks.columns else None
+            if symbol_col and name_col:
+                for _, row in hk_stocks.iterrows():
+                    symbol = str(row[symbol_col]).strip()
+                    name = str(row[name_col]).strip()
+                    if not symbol.isdigit():
+                        continue
+                    name_en = None
+                    if en_col and pd.notna(row.get(en_col)):
+                        en_raw = str(row[en_col]).strip()
+                        if en_raw and en_raw.lower() not in ("nan", "none"):
+                            name_en = sanitize_hk_name_en_candidate(name, en_raw)
                     py, abbr = get_pinyin_info(name)
-                    all_records.append((symbol, name, "HK", now_str, py, abbr))
-            logger.info(f"   已获取 {len(hk_stocks)} 条港股元数据")
+                    all_records.append((symbol, name, name_en, "HK", now_str, py, abbr))
+                hk_loaded = True
+                logger.info(f"   已获取 {len(hk_stocks)} 条港股元数据 (Sina，含英文名)")
     except Exception as e:
-        logger.warning(f"   ⚠️ 港股列表获取失败: {e}")
+        logger.warning(f"   ⚠️ 港股 Sina 列表获取失败: {e}")
+
+    if not hk_loaded:
+        try:
+            hk_stocks = ak.stock_hk_spot_em()
+            if not hk_stocks.empty:
+                symbol_col = "代码" if "代码" in hk_stocks.columns else "symbol"
+                name_col = "名称" if "名称" in hk_stocks.columns else "name"
+                for _, row in hk_stocks.iterrows():
+                    symbol = str(row[symbol_col]).strip()
+                    name = str(row[name_col]).strip()
+                    if symbol.isdigit():
+                        py, abbr = get_pinyin_info(name)
+                        all_records.append((symbol, name, None, "HK", now_str, py, abbr))
+                logger.info(f"   已获取 {len(hk_stocks)} 条港股元数据 (EM 回退，无英文名)")
+        except Exception as e:
+            logger.warning(f"   ⚠️ 港股 EM 列表获取失败: {e}")
         
     def _process_ak_dataframe(df, market_code="CN", symbol_col="证券代码", name_col="证券简称", label="列表"):
         """Helper to process akshare stock list dataframe"""
@@ -389,7 +480,7 @@ def sync_stock_meta():
                 name = str(row.get(name_col, "")).strip()
                 if symbol.isdigit() and len(symbol) == 6:
                     py, abbr = get_pinyin_info(name)
-                    all_records.append((symbol, name, market_code, now_str, py, abbr))
+                    all_records.append((symbol, name, None, market_code, now_str, py, abbr))
                     count += 1
             logger.info(f"   ✅ [AkShare] {label}: {count} 条")
             return count
@@ -436,7 +527,7 @@ def sync_stock_meta():
                 name = str(s.get("f14", ""))
                 if symbol.isdigit() and len(symbol) == 6:
                     py, abbr = get_pinyin_info(name)
-                    all_records.append((symbol, name, "CN", now_str, py, abbr))
+                    all_records.append((symbol, name, None, "CN", now_str, py, abbr))
                     cn_count += 1
             logger.info(f"   ✅ [HTTP API] 沪深 A 股: {cn_count} 条")
             http_success = True
@@ -484,21 +575,21 @@ def sync_stock_meta():
         total = len(all_records)
         for i in range(0, total, batch_size):
             batch = all_records[i:i+batch_size]
-            # 使用单条 INSERT 语句批量插入
-            placeholders = ",".join(["(?, ?, ?, ?, ?, ?)"] * len(batch))
             flat_values = tuple(val for record in batch for val in record)
-            cursor.execute(f"""
-                {BULK_INSERT_STOCK_META_BASE} {placeholders}
-            """, flat_values)
-        if (i + batch_size) % 2000 == 0 or i + batch_size >= total:
+            sql = build_upsert_stock_meta_sql(len(batch))
+            cursor.execute(sql, flat_values)
+            if (i + batch_size) % 2000 == 0 or i + batch_size >= total:
                 logger.info(f"   💾 已写入 {min(i + batch_size, total)}/{total} 条...")
-        
+
+        _apply_curated_cn_name_en(cursor)
+        _apply_curated_hk_name_en(cursor)
+
         conn.commit()
         conn.close()
         
         duration = time.time() - start_time
-        hk_count = len([r for r in all_records if r[2] == "HK"])
-        cn_count = len([r for r in all_records if r[2] == "CN"])
+        hk_count = len([r for r in all_records if r[3] == "HK"])
+        cn_count = len([r for r in all_records if r[3] == "CN"])
         
         logger.info(f"✅ 元数据同步完成 ({total} 条, 耗时 {duration:.1f}s)")
         

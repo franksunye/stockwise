@@ -42,6 +42,7 @@ import {
 } from '@/lib/tactical-brief-surface';
 import { getNormalizedNewsItems } from '@/lib/tactical-brief-content';
 import { useT, useLocale } from '@/context/LocaleContext';
+import { getLocalizedStockName } from '@/lib/stock-name';
 import type { MessageKey } from '@/lib/i18n';
 import { SilentPoster } from './SilentPoster';
 import { BriefExportSheet } from './BriefExportSheet';
@@ -59,6 +60,7 @@ interface TacticalBriefDrawerProps {
   signal?: 'Long' | 'Short' | 'Side';
   confidence?: number;
   stockName?: string;
+  stockNameEn?: string | null;
   currentPrice?: number;
   shortMetrics?: ShortMetrics | null;
 }
@@ -127,11 +129,20 @@ const formatDistancePercent = (distance: number | undefined): string => {
 };
 
 export function TacticalBriefDrawer({ 
-  isOpen, onClose, data, tier, model, symbol, targetDate, signal, confidence, stockName, currentPrice, shortMetrics, userPos
+  isOpen, onClose, data, tier, model, symbol, targetDate, signal, confidence, stockName, stockNameEn, currentPrice, shortMetrics, userPos
 }: TacticalBriefDrawerProps) {
   const t = useT('brief');
   const tCommon = useT('common');
   const { locale } = useLocale();
+  const stockLocale = locale === 'en' ? 'en' : 'cn';
+  const displayStockName = useMemo(
+    () =>
+      getLocalizedStockName(
+        { symbol, name: stockName || symbol, name_en: stockNameEn ?? null },
+        stockLocale,
+      ),
+    [symbol, stockName, stockNameEn, stockLocale],
+  );
   const [isMounted, setIsMounted] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
@@ -240,7 +251,7 @@ export function TacticalBriefDrawer({
 
   const buildScenarioCopyText = () => {
     const currentScenario = scenarioCopyConfig[viewState];
-    const lines: string[] = [`${t('tradingPlan')}｜${stockName || symbol}`, `${t('date.tradingDayAdvice' as MessageKey<'brief'>, { date: targetDate })}`, '', `${t('condition')}：${currentScenario.title}`];
+    const lines: string[] = [`${t('tradingPlan')}｜${displayStockName}`, `${t('date.tradingDayAdvice' as MessageKey<'brief'>, { date: targetDate })}`, '', `${t('condition')}：${currentScenario.title}`];
 
     currentScenario.items.forEach((tactic, index) => {
       lines.push(`${tactic.priority} ${formatBriefActionLabel(tactic.action, (slug) => t(`actions.${slug}` as MessageKey<'brief'>))}`);
@@ -989,13 +1000,14 @@ export function TacticalBriefDrawer({
                   </section>
                 </div>
               ) : activeTab === 'council' ? (
-                <AICouncil symbol={symbol} stockName={stockName} targetDate={targetDate} />
+                <AICouncil symbol={symbol} stockName={displayStockName} targetDate={targetDate} />
               ) : (
                 <TradeManagementTab
                   isActive={activeTab === 'management'}
                   isOpen={isOpen}
                   symbol={symbol}
                   stockName={stockName}
+                  stockNameEn={stockNameEn}
                 />
               )}
             </div>
@@ -1020,7 +1032,7 @@ export function TacticalBriefDrawer({
         isOpen={isShareOpen}
         onClose={() => setIsShareOpen(false)}
         prediction={posterPrediction}
-        stockName={stockName || symbol}
+        stockName={displayStockName}
         userPos={userPos}
       />
     )}
@@ -1031,7 +1043,7 @@ export function TacticalBriefDrawer({
         onClose={() => setIsReportOpen(false)}
         tier={tier}
         prediction={posterPrediction}
-        stockName={stockName || symbol}
+        stockName={displayStockName}
         symbol={symbol}
         targetDate={targetDate}
         data={data}

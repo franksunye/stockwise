@@ -8,6 +8,7 @@ export interface UserTradePositionView {
   user_id: string;
   symbol: string;
   stock_name: string | null;
+  stock_name_en?: string | null;
   market: string | null;
   entry_date: string;
   entry_price: number;
@@ -67,6 +68,7 @@ const POSITION_SQL = `
     p.symbol,
     COALESCE(p.market, m.market) AS market,
     m.name AS stock_name,
+    m.name_en AS stock_name_en,
     p.entry_date,
     p.entry_price,
     p.position_size,
@@ -225,6 +227,7 @@ export async function getUserTradePositionById(
       p.symbol,
       COALESCE(p.market, m.market) AS market,
       m.name AS stock_name,
+      m.name_en AS stock_name_en,
       p.entry_date,
       p.entry_price,
       p.position_size,

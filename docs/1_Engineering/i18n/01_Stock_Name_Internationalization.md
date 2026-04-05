@@ -670,93 +670,150 @@ This design does **not** require long-cycle research, but it **does** require a 
 
 Use this checklist as the execution order for implementation.
 
+**Execution status (2026-04)**: P0 minimum loop is **shipped** end-to-end (local + design validation). Checkboxes below use **`[x]` = done**, **`[ ]` = remaining follow-up** (typically broader audits or extra coverage).
+
 ### 15.1 Priority Summary
 
 #### P0: Minimum shippable closed loop
 
-- [ ] Add `name_en` to `stock_meta` schema and migration path
-- [ ] Update schema validation/tests for `name_en`
-- [ ] Replace metadata sync `INSERT OR REPLACE` with safe `UPSERT`
-- [ ] Extend metadata sync contract to write nullable `name_en`
-- [ ] Ship HK `name_en` ingestion from a verified source
-- [ ] Update dashboard/search/onboarding API contracts to expose `name_en`
-- [ ] Add optional `name_en` to relevant frontend TS types
-- [ ] Introduce shared locale-aware stock name rendering helper
-- [ ] Render `name_en || symbol` in English app locale, keep Chinese locale unchanged
-- [ ] Verify missing `name_en` degrades to `symbol`, not fake translations
-- [ ] Verify search/watchlist/onboarding do not regress
+- [x] Add `name_en` to `stock_meta` schema and migration path
+- [x] Update schema validation/tests for `name_en`
+- [x] Replace metadata sync `INSERT OR REPLACE` with safe `UPSERT`
+- [x] Extend metadata sync contract to write nullable `name_en`
+- [x] Ship HK `name_en` ingestion from a verified source
+- [x] Update dashboard/search/onboarding API contracts to expose `name_en`
+- [x] Add optional `name_en` to relevant frontend TS types
+- [x] Introduce shared locale-aware stock name rendering helper
+- [x] Render `name_en || symbol` in English app locale, keep Chinese locale unchanged
+- [x] Verify missing `name_en` degrades to `symbol`, not fake translations
+- [x] Verify search/watchlist/onboarding do not regress
 
 #### P1: Coverage expansion and hardening
 
-- [ ] Expand dual-name support to stock pool, trade management, and admin surfaces
-- [ ] Add `name_en` matching into search ranking without degrading Chinese relevance
-- [ ] Backfill curated CN high-priority universe with trusted English names
-- [ ] Add more complete automated tests for ETL overwrite safety and UI rendering surfaces
+- [x] Expand dual-name support to stock pool, trade management, and admin surfaces
+- [x] Add `name_en` matching into search ranking without degrading Chinese relevance
+- [x] Backfill curated CN high-priority universe with trusted English names
+- [x] Add more complete automated tests for ETL overwrite safety and UI rendering surfaces
 - [ ] Audit backend scripts/reports that still assume `stock_meta.name` is the only display field
 
 ### 15.2 Schema and migration
 
-- [ ] Add `name_en` to `stock_meta` in persistent schema creation (`backend/database.py`)
-- [ ] Add/prepare one-time migration for existing SQLite/Turso environments
-- [ ] Update schema validation scripts/tests to expect `name_en`
-- [ ] Audit tests that manually create `stock_meta` and add the new column where needed
+- [x] Add `name_en` to `stock_meta` in persistent schema creation (`backend/database.py`)
+- [x] Add/prepare one-time migration for existing SQLite/Turso environments
+- [x] Update schema validation scripts/tests to expect `name_en`
+- [x] Audit tests that manually create `stock_meta` and add the new column where needed
 
 ### 15.3 Query and write-path safety
 
-- [ ] Update `BULK_INSERT_STOCK_META_BASE` to include `name_en`
-- [ ] Replace metadata sync `INSERT OR REPLACE` behavior with safe `UPSERT`
-- [ ] Ensure metadata sync does not wipe `industry`, `main_business`, or `description`
-- [ ] Update `GET_STOCK_NAME_QUERY` and any stock meta lookup helpers as needed
+- [x] Update `BULK_INSERT_STOCK_META_BASE` to include `name_en`
+- [x] Replace metadata sync `INSERT OR REPLACE` behavior with safe `UPSERT`
+- [x] Ensure metadata sync does not wipe `industry`, `main_business`, or `description`
+- [x] Update `GET_STOCK_NAME_QUERY` and any stock meta lookup helpers as needed
 
 ### 15.4 ETL ingestion
 
-- [ ] Define the HK truth source for `name_en`
-- [ ] Implement HK metadata extraction for `name_en`
-- [ ] Keep `name_en` nullable when upstream English name is missing
-- [ ] Prevent empty/low-quality values from overwriting existing trusted `name_en`
-- [ ] Define CN source strategy for trusted English names
-- [ ] Limit initial CN rollout to curated/high-priority universe if source quality is not uniform
+- [x] Define the HK truth source for `name_en`
+- [x] Implement HK metadata extraction for `name_en`
+- [x] Keep `name_en` nullable when upstream English name is missing
+- [x] Prevent empty/low-quality values from overwriting existing trusted `name_en`
+- [x] Define CN source strategy for trusted English names
+- [x] Limit initial CN rollout to curated/high-priority universe if source quality is not uniform
 
 ### 15.5 API contracts
 
-- [ ] Update dashboard watchlist API to return `name` and `name_en`
-- [ ] Update stock search API to return `name`, `name_en`, and `market`
-- [ ] Update onboarding stock candidate APIs to return `name_en` where available
+- [x] Update dashboard watchlist API to return `name` and `name_en`
+- [x] Update stock search API to return `name`, `name_en`, and `market`
+- [x] Update onboarding stock candidate APIs to return `name_en` where available
 - [ ] Audit stock pool, trade management, and admin APIs that surface stock labels
 
 ### 15.6 Frontend types and rendering
 
-- [ ] Add optional `name_en?: string | null` to relevant TS types
-- [ ] Introduce a shared helper for locale-aware stock name rendering
-- [ ] Use `useLocale()` / route locale instead of calling `resolveLocale()` directly in components
-- [ ] Update dashboard watchlist rendering
-- [ ] Update search result rendering
-- [ ] Update onboarding stock picker rendering
-- [ ] Update stock pool rendering
-- [ ] Update trade management and admin label rendering where applicable
+- [x] Add optional `name_en?: string | null` to relevant TS types
+- [x] Introduce a shared helper for locale-aware stock name rendering
+- [x] Use `useLocale()` / route locale instead of calling `resolveLocale()` directly in components
+- [x] Update dashboard watchlist rendering
+- [x] Update search result rendering
+- [x] Update onboarding stock picker rendering
+- [x] Update stock pool rendering
+- [x] Update trade management and admin label rendering where applicable
 
 ### 15.7 Search behavior
 
-- [ ] Preserve Chinese exact/fuzzy search behavior
-- [ ] Preserve pinyin / pinyin_abbr search behavior
-- [ ] Add optional `name_en` matching without degrading Chinese relevance ordering
-- [ ] Verify symbol exact/prefix ranking remains stable
+- [x] Preserve Chinese exact/fuzzy search behavior
+- [x] Preserve pinyin / pinyin_abbr search behavior
+- [x] Add optional `name_en` matching without degrading Chinese relevance ordering
+- [x] Verify symbol exact/prefix ranking remains stable
 
 ### 15.8 Verification and release gates
 
-- [ ] Verify old DB migration succeeds
-- [ ] Verify fresh DB bootstrap includes `name_en`
-- [ ] Verify metadata sync preserves existing profile fields
-- [ ] Verify HK stocks with trusted English names render correctly in English locale
-- [ ] Verify CN stocks without `name_en` fall back to `symbol` in English locale
-- [ ] Verify Chinese locale remains unchanged
-- [ ] Verify no crash on `name_en = NULL`
-- [ ] Verify search, watchlist, onboarding, admin, and trade management flows for regressions
-- [ ] Add/extend automated tests for schema, ETL safety, API contract, and rendering helper behavior
+- [x] Verify old DB migration succeeds
+- [x] Verify fresh DB bootstrap includes `name_en`
+- [x] Verify metadata sync preserves existing profile fields
+- [x] Verify HK stocks with trusted English names render correctly in English locale
+- [x] Verify CN stocks without `name_en` fall back to `symbol` in English locale
+- [x] Verify Chinese locale remains unchanged
+- [x] Verify no crash on `name_en = NULL`
+- [x] Verify search, watchlist, onboarding, admin, and trade management flows for regressions
+- [x] Add/extend automated tests for schema, ETL safety, API contract, and rendering helper behavior
 
 ### 15.9 Rollout recommendation
 
-- [ ] Merge schema + contract support first
-- [ ] Backfill HK names second
-- [ ] Enable UI rendering third
-- [ ] Expand curated CN coverage last
+- [x] Merge schema + contract support first
+- [x] Backfill HK names second
+- [x] Enable UI rendering third
+- [x] Expand curated CN coverage last
+
+## 16. Production best practices (runtime vs ETL)
+
+This section **freezes** how stock English names behave in production and how repo assets relate to the database.
+
+### 16.1 Request-time source of truth
+
+- **Authoritative field**: `stock_meta.name_en` (nullable).
+- **APIs** that surface watchlist or search results must **JOIN** `stock_meta` and return both `name` and `name_en` (e.g. `/api/stock-pool`, `/api/stock/search`, dashboard watchlist helpers).
+- **Frontend** reads `name_en` only from API payloads / merged client state. It **must not** load `backend/data/*.json` at runtime.
+
+English UI display rule stays in **`getLocalizedStockName`**: use trimmed `name_en` when present; otherwise **`symbol`** (never invent English in the UI layer).
+
+### 16.2 Ops / fallback JSON (ETL only, allowed in production)
+
+Bundled maps under `backend/data/` are **sync-time overlays**, not a parallel runtime catalog:
+
+| File | Market | When applied |
+|------|--------|----------------|
+| `cn_name_en_curated.json` | CN | End of `sync_stock_meta`, after bulk upsert |
+| `hk_name_en_curated.json` | HK | Same |
+
+They **UPDATE** existing `stock_meta` rows for listed symbols. Changes are **git-reviewed** (PR) and deployed with the backend; Turso/production DB is updated by running metadata sync, not by shipping JSON to the browser.
+
+### 16.3 ETL quality (HK upstream)
+
+- `backend/name_en_sanitize.py` — `sanitize_hk_name_en_candidate`: drop values that are empty, `nan`-like, **CJK**, or **identical to the Chinese `name`** before persisting as `name_en`.
+- Keeps bad Sina “English name” cells from polluting `stock_meta.name_en`.
+
+### 16.4 Frontend invariants (watchlist + dashboard)
+
+- **Stock-pool sync**: if the **symbol list** is unchanged but **`name` or `name_en`** differs from server, still apply the server list (see `watchlistMetaDiffers` in `useWatchlist`). Otherwise optimistic `addStock` without `name_en` could never heal after `/api/stock-pool` returns DB-backed names.
+- **`addStock(symbol, name, name_en?)`**: when adding from search, pass **`name_en`** from the search row so the first paint matches DB.
+- **Dashboard**: merge watchlist `name` / `name_en` onto `stocks` when watchlist updates, so **localStorage dashboard cache** cannot hide `name_en` after sync.
+- **Search API**: any change to the SQL `CASE` / `WHERE` must keep **`?` count == `args.length`** (easy regression; caused 500s if mismatched).
+
+### 16.5 Middleware (marketing site vs local dev)
+
+- **Production**: `ziso.cc` / `www.ziso.cc` may **307** `/dashboard` (and `/v/*` invite shortcuts) to **`https://app.ziso.cc`**.
+- **Local dev**: **`localhost` / `127.0.0.1`** must **not** use that redirect, so `http://localhost:3000/dashboard` stays on the dev server (`isZisoMarketingHost` vs `isLocalDevHost` in `middleware.ts`).
+
+### 16.6 Local verification
+
+- `frontend`: `npm run verify:local-stock-name-en` — confirms `stock_meta.name_en` for a symbol (default `00700`) against `LOCAL_DB_PATH` / default `data/stockwise.db`.
+- Pair with **`DB_SOURCE=local`** and English app locale to confirm dashboard header shows `name_en`.
+
+### 16.7 Recent hardening summary (reference)
+
+Items implemented or tightened in the same initiative as the above practices:
+
+- **Schema / ETL**: `stock_meta.name_en`, safe UPSERT, HK ingestion + `sanitize_hk_name_en_candidate`, CN/HK curated JSON overlays after upsert.
+- **APIs**: search + stock-pool + types expose `name_en`; search SQL arg count fix.
+- **Frontend**: `getLocalizedStockName`, watchlist metadata sync, `addStock` + dashboard overlay, stock-pool search pick passes `name_en`.
+- **Middleware**: local vs `ziso.cc` dashboard redirect split.
+- **Tests**: `backend/tests/test_sanitize_hk_name_en.py`, `test_hk_name_en_curated_json.py`; `frontend/tests/quality-gates` updated for local `/dashboard` and marketing-host redirect coverage.

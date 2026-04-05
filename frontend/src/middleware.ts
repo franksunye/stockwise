@@ -37,9 +37,15 @@ export function middleware(request: NextRequest) {
     const isAppDomain = hostCandidates.some(
         (host) => host === 'app.ziso.cc' || host.startsWith('app.')
     );
-    const isMainDomain = hostCandidates.some(
-        (host) => host === 'ziso.cc' || host === 'www.ziso.cc' || host === '127.0.0.1' || host === 'localhost'
+    /** 官网生产域名：/dashboard、/v/* 等需进 App 子域 */
+    const isZisoMarketingHost = hostCandidates.some(
+        (host) => host === 'ziso.cc' || host === 'www.ziso.cc',
     );
+    /** 本地开发：与官网共用部分 i18n 行为，但不得 307 到 app.ziso.cc */
+    const isLocalDevHost = hostCandidates.some(
+        (host) => host === '127.0.0.1' || host === 'localhost',
+    );
+    const isMainDomain = isZisoMarketingHost || isLocalDevHost;
 
     const locale = getPublicLocaleFromPathname(pathname);
     const isLocalePrefixed = hasPublicLocalePrefix(pathname);
@@ -57,6 +63,8 @@ export function middleware(request: NextRequest) {
         res.headers.set('x-ziso-mw-next-hostname', request.nextUrl.hostname || 'none');
         res.headers.set('x-ziso-mw-is-app-domain', String(isAppDomain));
         res.headers.set('x-ziso-mw-is-main-domain', String(isMainDomain));
+        res.headers.set('x-ziso-mw-is-ziso-marketing-host', String(isZisoMarketingHost));
+        res.headers.set('x-ziso-mw-is-local-dev-host', String(isLocalDevHost));
         res.headers.set('cache-control', 'no-store');
         return res;
     };
@@ -148,29 +156,32 @@ export function middleware(request: NextRequest) {
             return withDebugHeaders(res, 'main-strip-locale-excluded-path');
         }
 
-        // [优化] 处理 /v/[code] 极速跳转
-        // 直接 307 重定向到 App 域名并带上参数，DashboardLayout 会接手别名解析
-        if (pathname.startsWith('/v/')) {
-            const code = pathname.split('/v/')[1];
-            if (code) {
+        // 仅官网生产域名外链到 App；localhost 开发留在本机，避免误跳 app.ziso.cc
+        if (isZisoMarketingHost) {
+            // [优化] 处理 /v/[code] 极速跳转
+            // 直接 307 重定向到 App 域名并带上参数，DashboardLayout 会接手别名解析
+            if (pathname.startsWith('/v/')) {
+                const code = pathname.split('/v/')[1];
+                if (code) {
+                    const appUrl = new URL(`https://app.ziso.cc`, request.url);
+                    appUrl.searchParams.set('invite', code);
+                    return withDebugHeaders(
+                        NextResponse.redirect(appUrl, 307),
+                        'main-v-code-redirect-app'
+                    );
+                }
+            }
+
+            if (pathname.startsWith('/dashboard')) {
                 const appUrl = new URL(`https://app.ziso.cc`, request.url);
-                appUrl.searchParams.set('invite', code);
+                appUrl.pathname = pathname.replace('/dashboard', '');
+                if (appUrl.pathname === '') appUrl.pathname = '/';
+                appUrl.search = url.search;
                 return withDebugHeaders(
                     NextResponse.redirect(appUrl, 307),
-                    'main-v-code-redirect-app'
+                    'main-dashboard-redirect-app'
                 );
             }
-        }
-
-        if (pathname.startsWith('/dashboard')) {
-            const appUrl = new URL(`https://app.ziso.cc`, request.url);
-            appUrl.pathname = pathname.replace('/dashboard', '');
-            if (appUrl.pathname === '') appUrl.pathname = '/';
-            appUrl.search = url.search;
-            return withDebugHeaders(
-                NextResponse.redirect(appUrl, 307),
-                'main-dashboard-redirect-app'
-            );
         }
 
         return withLocaleRequestHeader(isLocalePrefixed ? 'main-public-locale' : 'main-public-default-locale');

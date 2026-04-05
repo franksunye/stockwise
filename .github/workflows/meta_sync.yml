@@ -24,12 +24,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
 
-      - name: Sync Stock Metadata
+      - name: Sync stock metadata (name + name_en, HK Sina + curated CN/HK JSON)
         env:
           PYTHONUNBUFFERED: "1"
           TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
           TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
           WECOM_ROBOT_KEY: ${{ secrets.WECOM_ROBOT_KEY }}
         run: |
-          # 仅运行元数据同步模式
+          # Writes stock_meta including nullable name_en; see docs/1_Engineering/i18n/04_Stock_Name_En_Production_Release_Checklist.md
           python backend/main.py --sync-meta

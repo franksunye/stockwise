@@ -17,6 +17,7 @@ export interface TradePositionDetailRow {
   source: string | null;
   note: string | null;
   stock_name: string | null;
+  stock_name_en?: string | null;
   latest_trade_date: string | null;
   latest_state_id: string | null;
   latest_action_summary: string | null;
@@ -63,6 +64,7 @@ export function buildPositionDetailSql(): string {
       p.source,
       p.note,
       m.name AS stock_name,
+      m.name_en AS stock_name_en,
       a.latest_trade_date,
       a.state_id AS latest_state_id,
       a.action_summary AS latest_action_summary,

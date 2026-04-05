@@ -293,12 +293,6 @@ describe('Frontend Smoke Gate', () => {
         const pages = ['/', '/dashboard', '/dashboard/brief', '/pricing'];
         for (const page of pages) {
             const response = await client.request(page);
-            if (page.startsWith('/dashboard')) {
-                assert.equal(response.status, 307, page);
-                assert.ok(response.headers.get('location')?.includes('app.ziso.cc'));
-                continue;
-            }
-
             assert.equal(response.status, 200, page);
             const contentType = response.headers.get('content-type') || '';
             assert.ok(contentType.includes('text/html'), `Expected HTML for ${page}`);
@@ -323,6 +317,15 @@ describe('Public i18n/SEO Gate', () => {
         assert.equal(rootRes.headers.get('x-ziso-mw-branch'), 'main-public-default-locale');
         const html = await rootRes.text();
         assert.ok(html.includes('AI does the research.'));
+    });
+
+    it('redirects marketing host /dashboard to app.ziso.cc (production split)', async () => {
+        const res = await requestWithForwardedHost('/dashboard?keep=1', 'ziso.cc');
+        assert.equal(res.status, 307);
+        assert.equal(res.headers.get('x-ziso-mw-branch'), 'main-dashboard-redirect-app');
+        const loc = res.headers.get('location');
+        assert.ok(loc?.startsWith('https://app.ziso.cc/'), loc);
+        assert.ok(loc?.includes('keep=1'), loc);
     });
 
     it('redirects old english prefix routes to root for SEO', async () => {

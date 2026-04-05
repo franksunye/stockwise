@@ -12,11 +12,13 @@ import { useUserProfile } from '@/hooks/useUserProfile';
 import { getPredictionActionMeta } from '@/lib/layer1-ui';
 import type { AIPrediction } from '@/lib/types';
 import { writeDashboardNavIntentSymbol } from '@/lib/dashboard-symbol-navigation';
-import { useT } from '@/context/LocaleContext';
+import { useT, useLocale } from '@/context/LocaleContext';
+import { getLocalizedStockName } from '@/lib/stock-name';
 
 interface StockSnapshot {
   symbol: string;
   name: string;
+  name_en?: string | null;
   price: number;
   change: number;
   aiSignal: 'Long' | 'Short' | 'Side';
@@ -37,6 +39,9 @@ const StockItem = memo(({
   onRemove: (e: React.MouseEvent, stock: StockSnapshot) => void,
   setNavigatingTo: (symbol: string) => void
 }) => {
+  const { locale } = useLocale();
+  const stockLocale = locale === 'en' ? 'en' : 'cn';
+  const listName = getLocalizedStockName(stock, stockLocale);
   const meta = getPredictionActionMeta({ signal: stock.aiSignal, layer1_status: stock.layer1Status });
   
   return (
@@ -67,7 +72,7 @@ const StockItem = memo(({
                meta.iconTone === 'down' ? <TrendingDown className={meta.textClass} /> : <Minus className={meta.textClass} />}
            </div>
            <div>
-             <h3 className="text-base font-black italic tracking-tighter text-white">{stock.name}</h3>
+             <h3 className="text-base font-black italic tracking-tighter text-white">{listName}</h3>
              <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest flex items-center gap-1.5 mt-0.5">
                <span className={`w-1 h-1 rounded-full ${meta.dotClass}`} />
                {meta.headline}
@@ -117,6 +122,8 @@ StockItem.displayName = 'StockItem';
 
 export default function StockPoolPage() {
   const t = useT('dashboard');
+  const { locale } = useLocale();
+  const stockLocale = locale === 'en' ? 'en' : 'cn';
   const { 
     stocks: globalStocks, 
     loadingPool, 
@@ -130,6 +137,7 @@ export default function StockPoolPage() {
   const stocks = useMemo(() => globalStocks.map(s => ({
     symbol: s.symbol,
     name: s.name,
+    name_en: s.name_en,
     price: s.price?.close || 0,
     change: s.price?.change_percent || 0,
     aiSignal: s.prediction?.signal || 'Side' as const,
@@ -142,7 +150,7 @@ export default function StockPoolPage() {
   
   const [newSymbol, setNewSymbol] = useState('');
   const [showAdd, setShowAdd] = useState(false);
-  const [searchResults, setSearchResults] = useState<{symbol: string; name: string; market?: string}[]>([]);
+  const [searchResults, setSearchResults] = useState<{symbol: string; name: string; name_en?: string | null; market?: string}[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [stockToDelete, setStockToDelete] = useState<StockSnapshot | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -194,7 +202,7 @@ export default function StockPoolPage() {
     };
   }, [newSymbol]);
 
-  const handleAdd = async (symbolOverride?: string, nameOverride?: string) => {
+  const handleAdd = async (symbolOverride?: string, nameOverride?: string, nameEnOverride?: string | null) => {
     const targetSymbol = symbolOverride || newSymbol.trim();
     if (!targetSymbol) return;
     
@@ -205,7 +213,7 @@ export default function StockPoolPage() {
       return;
     }
 
-    const ok = await addStock(targetSymbol, nameOverride || targetSymbol);
+    const ok = await addStock(targetSymbol, nameOverride || targetSymbol, nameEnOverride);
     if (!ok) {
       setLimitMsg('添加失败，请稍后重试');
       setTimeout(() => setLimitMsg(null), 3000);
@@ -327,13 +335,13 @@ export default function StockPoolPage() {
                       const isHK = item.market === 'HK';
                       const suffix = isHK ? '.HK' : '';
                       return (
-                        <button key={item.symbol} onClick={() => handleAdd(item.symbol, item.name)} className="w-full flex items-center justify-between p-4 bg-white/5 rounded-2xl hover:bg-white/10 transition-colors">
+                        <button key={item.symbol} onClick={() => handleAdd(item.symbol, item.name, item.name_en)} className="w-full flex items-center justify-between p-4 bg-white/5 rounded-2xl hover:bg-white/10 transition-colors">
                           <div className="flex items-center gap-3">
                             <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-[10px] font-black ${isHK ? 'bg-blue-500/10 text-blue-400' : 'bg-rose-500/10 text-rose-400'}`}>
                               {isHK ? '港' : 'A'}
                             </div>
                             <div className="text-left">
-                               <p className="text-sm font-bold">{item.name}</p>
+                               <p className="text-sm font-bold">{getLocalizedStockName(item, stockLocale)}</p>
                                <p className="text-[10px] text-slate-500 mono uppercase">{item.symbol}{suffix}</p>
                             </div>
                           </div>
@@ -402,7 +410,7 @@ export default function StockPoolPage() {
                 </div>
                 <h3 className="text-xl font-black italic tracking-tighter mb-2 text-white">确认移除？</h3>
                 <p className="text-sm text-slate-400 mb-8 leading-relaxed">
-                  确定要从自选池中移除 <span className="text-white font-bold">{stockToDelete.name} ({stockToDelete.symbol})</span> 吗？
+                  确定要从自选池中移除 <span className="text-white font-bold">{getLocalizedStockName(stockToDelete, stockLocale)} ({stockToDelete.symbol})</span> 吗？
                 </p>
                 <div className="flex gap-3 w-full">
                   <button 

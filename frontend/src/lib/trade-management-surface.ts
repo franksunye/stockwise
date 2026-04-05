@@ -6,6 +6,7 @@ export interface TradeManagementPosition {
   user_id: string;
   symbol: string;
   stock_name: string | null;
+  stock_name_en?: string | null;
   market: string | null;
   entry_date: string;
   entry_price: number;

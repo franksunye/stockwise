@@ -216,6 +216,25 @@ export function useDashboardData(
         }
     }, [enableAlmanac, dashboardCacheStorageKey]);
 
+    // stock-pool 上的 name / name_en 为权威；缓存秒开或乐观 add 可能缺 name_en，随 watchlist 修正
+    useEffect(() => {
+        if (watchlist.length === 0) return;
+        setStocks((prev) => {
+            const w = new Map(watchlist.map((i) => [i.symbol, i]));
+            let changed = false;
+            const next = prev.map((s) => {
+                const item = w.get(s.symbol);
+                if (!item) return s;
+                const nameNext = item.name;
+                const nameEnNext = item.name_en !== undefined ? item.name_en ?? null : s.name_en;
+                if (s.name === nameNext && s.name_en === nameEnNext) return s;
+                changed = true;
+                return { ...s, name: nameNext, name_en: nameEnNext };
+            });
+            return changed ? next : prev;
+        });
+    }, [watchlist]);
+
     useEffect(() => {
         if (!enableAlmanac) {
             setAlmanac(null);
@@ -237,6 +256,7 @@ export function useDashboardData(
             return {
                 symbol: item.symbol,
                 name: item.name,
+                name_en: item.name_en,
                 price: null,
                 change: 0,
                 lastUpdated: '...',
@@ -296,7 +316,7 @@ export function useDashboardData(
                     const existing = stocksRef.current.find(s => s.symbol === item.symbol);
                     if (existing) return existing;
                     return {
-                        symbol: item.symbol, name: item.name, price: null,
+                        symbol: item.symbol, name: item.name, name_en: item.name_en, price: null,
                         change: 0, lastUpdated: '...', history: [], loading: true,
                         prediction: null, previousPrediction: null, rule: null
                     } as StockData; // Placeholder
@@ -411,6 +431,7 @@ export function useDashboardData(
                 return {
                     symbol: item.symbol,
                     name: item.name,
+                    name_en: item.name_en,
                     price: base.price,
                     prediction: base.prediction,
                     previousPrediction: base.previousPrediction,
@@ -463,7 +484,7 @@ export function useDashboardData(
                 const fallback = watchlist.map(item => {
                     const existing = stocksRef.current.find(s => s.symbol === item.symbol);
                     return existing || {
-                        symbol: item.symbol, name: item.name, price: null, loading: false,
+                        symbol: item.symbol, name: item.name, name_en: item.name_en, price: null, loading: false,
                         change: 0, lastUpdated: '...', history: [],
                         prediction: null, previousPrediction: null, rule: null
                     } as StockData;

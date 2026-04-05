@@ -13,14 +13,16 @@ export async function GET(request: Request) {
     try {
         let rows;
         const sql = `
-            SELECT symbol, name, market, pinyin_abbr,
+            SELECT symbol, name, name_en, market, pinyin_abbr,
             (CASE 
                 WHEN symbol = ? THEN 100
                 WHEN pinyin_abbr = ? THEN 95
                 WHEN name = ? THEN 90
+                WHEN name_en IS NOT NULL AND name_en = ? THEN 87
                 WHEN symbol LIKE ? THEN 80
                 WHEN pinyin_abbr LIKE ? THEN 70
                 WHEN name LIKE ? THEN 60
+                WHEN name_en IS NOT NULL AND name_en LIKE ? THEN 58
                 ELSE 10
             END) as score
             FROM stock_meta 
@@ -28,6 +30,7 @@ export async function GET(request: Request) {
                OR name LIKE ? 
                OR pinyin_abbr LIKE ? 
                OR pinyin LIKE ?
+               OR (name_en IS NOT NULL AND name_en LIKE ?)
             ORDER BY score DESC, LENGTH(name) ASC
             LIMIT 10
         `;
@@ -36,9 +39,9 @@ export async function GET(request: Request) {
         const startMatch = `${rawQuery}%`;
         const containsMatch = `%${rawQuery}%`;
         const args = [
-            query, rawQuery, query, // 完全匹配
-            startMatch, startMatch, startMatch, // 前缀匹配
-            containsMatch, containsMatch, containsMatch, containsMatch // 包含匹配
+            query, rawQuery, query, query,
+            startMatch, startMatch, startMatch, startMatch,
+            containsMatch, containsMatch, containsMatch, containsMatch, containsMatch,
         ];
 
         if ('execute' in db) {

@@ -23,6 +23,7 @@ sys.path.append(backend_dir)
 sys.path.append(root_dir)
 
 from database import get_connection
+from backend.db_repo.queries import build_upsert_stock_meta_sql
 from notification_service import NotificationManager
 from engine.brief_generator import assemble_user_brief
 from logger import logger
@@ -41,7 +42,11 @@ def setup_mock_data(conn, user_id, symbol, today):
         INSERT OR REPLACE INTO users (user_id, notification_settings, registration_type, subscription_tier) 
         VALUES (?, ?, 'simulation', 'free')
     """, (user_id, json.dumps({"enabled": True})))
-    cursor.execute("INSERT OR REPLACE INTO stock_meta (symbol, name, market) VALUES (?, ?, ?)", (symbol, "腾讯控股模拟", "HK"))
+    now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    cursor.execute(
+        build_upsert_stock_meta_sql(1),
+        (symbol, "腾讯控股模拟", None, "HK", now_str, "", ""),
+    )
                    
     # 2. 插入关注列表
     cursor.execute("INSERT OR IGNORE INTO user_watchlist (user_id, symbol) VALUES (?, ?)", (user_id, symbol))

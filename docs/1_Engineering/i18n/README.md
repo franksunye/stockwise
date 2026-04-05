@@ -5,9 +5,10 @@ Welcome to the Internationalization (i18n) subdirectory. This section provides t
 ## 📁 Directory Structure
 
 - [00_Globalization_Strategy_V2.md](./00_Globalization_Strategy_V2.md): The core V2 strategy for globalizing the marketing site and content.
-- [01_Stock_Name_Internationalization.md](./01_Stock_Name_Internationalization.md): Design and implementation of CN/HK stock name localization in the data layer.
+- [01_Stock_Name_Internationalization.md](./01_Stock_Name_Internationalization.md): Design and implementation of CN/HK stock name localization in the data layer. **§15** = task checklist (shipped vs backlog); **§16** = production best practices (runtime DB vs ETL JSON).
 - [02_Global_First_ISR_Architecture.md](./02_Global_First_ISR_Architecture.md): Architecture for performance optimization and static generation in a global context.
 - [03_Globalization_Strategy_and_Evolution.md](./03_Globalization_Strategy_and_Evolution.md): High-level strategy for global expansion and evolution.
+- [04_Stock_Name_En_Production_Release_Checklist.md](./04_Stock_Name_En_Production_Release_Checklist.md): Ship `name_en` to production (Turso + `meta_sync` + spot checks).
 
 ## 🌐 Principles and Strategy
 
@@ -26,4 +27,4 @@ Key engineering principles:
 - **Translating Marketing Content**: Create localized Markdown files under `docs/4_Growth_Ops/content/`.
 
 ---
-*Last Updated: 2026-04-04*
+*Last Updated: 2026-04-05 (added §04 release checklist)*

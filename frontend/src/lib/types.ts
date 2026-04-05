@@ -201,6 +201,8 @@ export interface ShortMetrics {
 export interface StockData {
     symbol: string;
     name: string;
+    /** Trusted English name from stock_meta; English UI falls back to symbol when missing */
+    name_en?: string | null;
     price: DailyPrice | null;
     prediction: AIPrediction | null;
     previousPrediction: AIPrediction | null;

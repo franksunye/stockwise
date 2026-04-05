@@ -7,7 +7,8 @@ import { useUserProfile } from '@/hooks/useUserProfile';
 import { shouldEnableHighPerformance } from '@/lib/device-utils';
 import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
 import { getPredictionActionMeta } from '@/lib/layer1-ui';
-import { useT } from '@/context/LocaleContext';
+import { useT, useLocale } from '@/context/LocaleContext';
+import { getLocalizedStockName } from '@/lib/stock-name';
 
 // Fallback data for the reveal step
 const DEFAULT_REVEAL_DATA = { 
@@ -26,11 +27,14 @@ const WATCHLIST_SYNC_EVENT = 'stockwise-watchlist-sync';
 interface RecommendedStock {
   symbol: string;
   name: string;
+  name_en?: string | null;
   market: string;
 }
 
 export function OnboardingOverlay() { 
   const t = useT('onboarding');
+  const { locale } = useLocale();
+  const stockLocale = locale === 'en' ? 'en' : 'cn';
   const isHighPerformance = shouldEnableHighPerformance();
   const [isVisible, setIsVisible] = useState(false);
   const [step, setStep] = useState(1);
@@ -38,6 +42,7 @@ export function OnboardingOverlay() {
 
   const [selectedStock, setSelectedStock] = useState<string | null>(null);
   const [selectedStockName, setSelectedStockName] = useState<string | null>(null);
+  const [selectedStockNameEn, setSelectedStockNameEn] = useState<string | null>(null);
   const [analyzingStage, setAnalyzingStage] = useState(0); // 0: None, 1: Connecting, 2: Flows, 3: AI
   const [revealData, setRevealData] = useState(DEFAULT_REVEAL_DATA);
   const [recommendedStocks, setRecommendedStocks] = useState<RecommendedStock[]>([]);
@@ -122,9 +127,10 @@ export function OnboardingOverlay() {
     }
   };
 
-  const startAnalysis = async (symbol: string, name?: string) => {
+  const startAnalysis = async (symbol: string, name?: string, nameEn?: string | null) => {
     setSelectedStock(symbol);
     setSelectedStockName(name || symbol);
+    setSelectedStockNameEn(nameEn ?? null);
     setAnalyzingStage(1);
     
     // Simulate Steps Timeline (Ensures progress even if API is slow)
@@ -159,7 +165,10 @@ export function OnboardingOverlay() {
         }
         
         setRevealData({
-          name: name || symbol,
+          name: getLocalizedStockName(
+            { symbol, name: name || symbol, name_en: nameEn ?? null },
+            stockLocale,
+          ),
           price: data.price?.close || 0,
           change: data.price?.change_percent || 0,
           signal: data.prediction?.signal || 'Side',
@@ -173,7 +182,10 @@ export function OnboardingOverlay() {
       // Data is already set to default or will be updated if fetch eventually succeeds before step 4
       setRevealData({
         ...DEFAULT_REVEAL_DATA,
-        name: name || symbol
+        name: getLocalizedStockName(
+          { symbol, name: name || symbol, name_en: nameEn ?? null },
+          stockLocale,
+        ),
       });
     }
 
@@ -274,7 +286,7 @@ export function OnboardingOverlay() {
                                         return (
                                             <button 
                                                 key={item.symbol} 
-                                                onClick={() => startAnalysis(item.symbol, item.name)} 
+                                                onClick={() => startAnalysis(item.symbol, item.name, item.name_en)} 
                                                 className="w-full flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 hover:border-indigo-500/30 transition-all active:scale-[0.98]"
                                             >
                                                 <div className="flex items-center gap-3">
@@ -282,7 +294,7 @@ export function OnboardingOverlay() {
                                                         {isHK ? '港股' : 'A股'}
                                                     </div>
                                                     <div className="text-left">
-                                                        <p className="text-base font-bold text-white">{item.name}</p>
+                                                        <p className="text-base font-bold text-white">{getLocalizedStockName(item, stockLocale)}</p>
                                                         <p className="text-[10px] text-slate-500 mono uppercase tracking-wider">{item.symbol}{suffix}</p>
                                                     </div>
                                                 </div>
@@ -437,7 +449,7 @@ export function OnboardingOverlay() {
                         <div className="space-y-4">
                             <h2 className="text-3xl font-black italic text-white">{t('complete.ready')}</h2>
                             <p className="text-slate-400">
-                                <span className="text-white font-bold">{selectedStockName || selectedStock || 'Trial Asset'}</span> {t('complete.added', { symbol: '' })}
+                                <span className="text-white font-bold">{selectedStock && selectedStockName ? getLocalizedStockName({ symbol: selectedStock, name: selectedStockName, name_en: selectedStockNameEn }, stockLocale) : (selectedStock || 'Trial Asset')}</span> {t('complete.added', { symbol: '' })}
                             </p>
                             
                             {/* Upsell Card */}

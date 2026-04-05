@@ -40,7 +40,7 @@ To reduce CPU load on Vercel, frequently accessed public data is served via **Sh
 | **Public Static Gen** | ✅ Done | Home, About, and Content pages are fully static (O). |
 | **Root Layout De-carbonation** | ✅ Done | Removed `headers()` from `RootLayout`; locale set via inline script. |
 | **Shared Almanac API** | ✅ Done | Decoupled from private dashboard batch API; highly cached. |
-| **Stock Name i18n** | 🔄 In-Progress | DB schema updated; ETL sync for HK `name_en` enabled. |
+| **Stock Name i18n** | ✅ Done | `stock_meta.name_en` + safe UPSERT; HK Sina + `sanitize_hk_name_en_candidate`; CN/HK **ETL-only** curated JSON → DB; dashboard/search/onboarding/trade use `getLocalizedStockName`; watchlist meta sync + dashboard cache overlay; local `middleware` host split; `npm run verify:local-stock-name-en`. Details: `01_Stock_Name_Internationalization.md` §16. |
 | **Dashboard Refresh Throttling** | ✅ Done | Throttled background refreshes to 10-20 min based on market hours. |
 
 ## 4. Maintenance Guidelines

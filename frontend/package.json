@@ -19,6 +19,7 @@
     "db:sync-local": "node scripts/sync-remote-to-local.mjs",
     "db:sync-local:incremental": "node scripts/sync-remote-to-local.mjs --incremental",
     "db:audit-local": "node scripts/local-db-audit.mjs",
+    "verify:local-stock-name-en": "node scripts/verify-local-stock-name-en.mjs",
     "test:quality": "node scripts/check-ssg-safety.mjs && node --test tests/quality-gates.test.mjs && node --test tests/i18n-integrity.test.mjs && node --test tests/dashboard-locale-boundary.test.mjs",
     "verify:release": "npm run check:ssg-safety && node scripts/verify-release.mjs"
   },

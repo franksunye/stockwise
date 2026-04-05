@@ -48,7 +48,7 @@ def main():
         check_table_schema(conn, "users", users_cols)
 
         # 2. Check Stock Meta
-        meta_cols = ["symbol", "name", "market"]
+        meta_cols = ["symbol", "name", "name_en", "market"]
         check_table_schema(conn, "stock_meta", meta_cols)
         
         # 3. Check AI Predictions V2
