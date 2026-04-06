@@ -4,6 +4,8 @@ import { ChevronLeft, Share2, HelpCircle, FileText, Calendar } from 'lucide-reac
 import MarketingFooter from '@/components/MarketingFooter';
 import { getSupportArticleBySlug } from '@/lib/support-content';
 import { notFound } from 'next/navigation';
+import { buildArticleJsonLd } from '@/lib/geo';
+import { brandCoreEn } from '@/content/brand-core.en';
 
 export async function EnglishSupportArticlePage({ slug }: { slug: string }) {
   const article = await getSupportArticleBySlug(slug, { locale: 'en' });
@@ -12,8 +14,21 @@ export async function EnglishSupportArticlePage({ slug }: { slug: string }) {
     notFound();
   }
 
+  const jsonLd = buildArticleJsonLd({
+    pageTitle: article.title,
+    pageDescription: article.title, // Support articles use title as fallback description
+    pageUrl: `${brandCoreEn.domain}/support/${article.slug}`,
+    datePublished: article.lastUpdated,
+    dateModified: article.lastUpdated,
+    sources: brandCoreEn.defaultSources,
+  });
+
   return (
     <div className="min-h-screen bg-[#050508] text-white font-sans selection:bg-indigo-500/30">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <nav className="sticky top-0 z-[60] bg-[#050508]/80 backdrop-blur-xl border-b border-white/5">
         <div className="max-w-4xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/support" className="flex items-center gap-2 p-2 -ml-2 rounded-full hover:bg-white/5 active:scale-95 transition-all text-slate-400 hover:text-white">

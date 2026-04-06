@@ -20,6 +20,7 @@ export function ChineseSupportArticlePage({ slug }: { slug: string }) {
     pageTitle: article.title,
     pageDescription: `${article.category} - ${article.title}`,
     pageUrl: `${brandCoreZhCN.domain}/cn/support/${article.slug}`,
+    datePublished: article.lastUpdated,
     dateModified: article.lastUpdated,
     sources: brandCoreZhCN.defaultSources,
   });

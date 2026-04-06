@@ -35,6 +35,7 @@ export async function ChineseLearnArticlePage({ slug }: { slug: string }) {
     pageUrl: `${brandCoreZhCN.domain}/cn/learn/${article.slug}`,
     datePublished: article.date,
     dateModified: article.date,
+    image: article.image,
     sources: brandCoreZhCN.defaultSources,
   });
 

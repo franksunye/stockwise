@@ -84,8 +84,8 @@ V2 里明确区分：
 
 ### 3.1 技术栈
 
-1. `next-intl` 用于 Public Surface 的 UI 文案国际化。
-2. Next.js App Router 继续保留。
+1. **废弃 `next-intl`，采用“组件级物理隔离”（Component-Level Splitting）** 作为 Public Surface 的多语言架构核心。即针对不同语言渲染独立的页面级 React 组件（如 `<ChineseHomePage />`、`<EnglishHomePage />`）。
+2. Next.js App Router 继续保留，在路由层结合动态路由调度。
 3. Markdown 内容继续本地文件驱动，但升级为“有稳定内容 ID 的多语言内容模型”。
 
 ### 3.2 路由策略
@@ -327,25 +327,22 @@ publish: true
 
 ## 6. UI 文本国际化策略
 
-### 6.1 适用范围
+> **架构变更说明**：实践中已正式废弃底层字典层架库（即提取 JSON），全面转向组件级替换方案（Component-Level Splitting）。
 
-只对 Public Surface 做 `messages/*.json` 提取。
+### 6.1 采用组件级物理隔离的原因
 
-适用对象：
+经过落地评估，不引入底层 i18n 字典库（如 next-intl）具备以下核心优势：
 
-1. Header
-2. Footer
-3. 首页 Hero / CTA
-4. About / Pricing / Learn / Support 页面的固定 UI
-5. 公共法律页文案
+1. **营销内容结构独立性优先**：Marketing 主要页面（如首页、关于、Pricing）在不同语种（尤其是中西方）受众间的营销切入点差异巨大。通过撰写独立的页面组件，不仅能差异化文案，更允许各语种定制专属的 DOM 结构、模块长短与配图逻辑，彻底摆脱模板化和翻译腔。
+2. **底层零运行时开销**：完全规避掉引入 `LocaleProvider` 带来的嵌套与 Client 开销隐患，完美符合 V2 策略中对 App 核心应用面的性能防侵入边界，继续维持营销面的全量静态 Server Components 渲染特权。
+3. **SEO 控制更精准静态化**：各语种页面组件可极为显式、直观地配置专属的高低阶 metadata，排查及类型校验更加安全。
 
-暂不要求对 dashboard 内部所有组件做文案抽离。
+### 6.2 处理核心公共胶水组件
 
-### 6.2 文案提取原则
+对于 Navbar、Footer 以及 Language Switcher 等少部分在各类市场上形态高度一致的核心挂载级组件：
 
-1. 固定 UI 文案进入 messages 文件。
-2. 内容正文不进入 messages，继续由 Markdown 承载。
-3. SEO metadata 文案也要能按 locale 输出，不要只翻译组件可见文本。
+1. 杜绝引入 `messages/*.json` 文件式字典调度。
+2. 直接通过向这些公共组件传递 `locale` props，在组件代码内部构建一套极轻量的静态映射表（`switch-case` 或 Object Record），原生地输出翻译文本即可。
 
 ---
 
@@ -449,13 +446,13 @@ Middleware 只做 public 页面 locale 解析与重写，不做业务鉴权，�
 4. hreflang / x-default 输出
 5. 翻译缺失页的 canonical / noindex 策略
 
-### Phase 2: UI 文案国际化
+### Phase 2: 组件级多语言重构（当前已落地应用）
 
 交付项：
 
-1. 首页、About、Pricing、法律页 messages 提取
-2. Header / Footer 语言切换器
-3. 公共导航与 CTA locale 化
+1. 确立 `app/[locale]/[[...slug]]/page.tsx` 下的语言分发体系加载模式。
+2. 完成首页、About、Pricing、法律页多语种版本专属 React 物理组件文件的隔离与创建（例如韩版、西版、中英版）。
+3. 构建具备极轻量 Props Locale 映射表基础的 Header / Footer / CTA 组件与路由跳转切换机制。
 
 ### Phase 3: 内容系统国际化
 

@@ -4,6 +4,8 @@ import { ChevronLeft, BookOpen, Clock, Calendar, Share2, ArrowRight } from 'luci
 import MarketingFooter from '@/components/MarketingFooter';
 import { getArticleBySlug, getAllArticles } from '@/lib/learn-content';
 import { notFound } from 'next/navigation';
+import { buildArticleJsonLd } from '@/lib/geo';
+import { brandCoreEn } from '@/content/brand-core.en';
 
 export async function EnglishLearnArticlePage({ slug }: { slug: string }) {
   const article = await getArticleBySlug(slug, { locale: 'en' });
@@ -15,9 +17,23 @@ export async function EnglishLearnArticlePage({ slug }: { slug: string }) {
   const allArticles = await getAllArticles({ locale: 'en' });
   const currentIndex = allArticles.findIndex((a) => a.slug === slug);
   const nextArticle = allArticles[currentIndex + 1];
+  
+  const jsonLd = buildArticleJsonLd({
+    pageTitle: article.title,
+    pageDescription: article.subtitle,
+    pageUrl: `${brandCoreEn.domain}/learn/${article.slug}`,
+    datePublished: article.date,
+    dateModified: article.date,
+    image: article.image,
+    sources: brandCoreEn.defaultSources,
+  });
 
   return (
     <div className="min-h-screen bg-[#050508] text-white font-sans selection:bg-indigo-500/30">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <nav className="sticky top-0 z-[60] bg-[#050508]/80 backdrop-blur-xl border-b border-white/5">
         <div className="max-w-4xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/learn" className="flex items-center gap-2 p-2 -ml-2 rounded-full hover:bg-white/5 active:scale-95 transition-all text-slate-400 hover:text-white">
