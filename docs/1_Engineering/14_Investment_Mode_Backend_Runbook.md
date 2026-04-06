@@ -1,6 +1,6 @@
 # 14 Investment Mode Backend & API Unification Runbook
 
-更新时间：2026-03-23
+更新时间：2026-04-06
 范围：本地开发环境（SQLite / Turso-compat SQL）与前端 API 信号收口
 文档角色：Investment Mode 后端运行手册与 API 信号统一执行方案
 专项状态：Backend 已完成，API Unification 处于 Draft/执行阶段
@@ -110,13 +110,20 @@ Investment Mode 与 `tradeability sidecar` 都使用真实 market 数据，但�
 Investment Mode 当前依赖的生产编排顺序应理解为：
 1. `daily_pipeline_cn_main.yml` / `daily_pipeline_hk.yml`
    - 先完成行情同步与预测分析
-2. `tradeability_postclose_pipeline.yml`
+2. `daily_pipeline_us.yml`（或等价 US 独立链）
+   - 先完成 `data_sync_us`，再执行 `verify_predictions --market US` 与 `ai_analyze_us`
+   - 与 CN/HK 分时执行，避免抢占同一关键窗口
+3. `tradeability_postclose_pipeline.yml`
    - 先执行盘后样本补量（实验线）
    - 再执行 `tradeability_sidecar_daily.yml`
-3. `run_mode_pipeline()`
+4. `run_mode_pipeline()`
    - 默认随 `--analyze` 自动执行，属于生产线
-4. `tradeability_sidecar_weekly_calibration.yml`
+5. `tradeability_sidecar_weekly_calibration.yml`
    - 周末独立执行，属于实验线周度治理
+
+补充说明（US）：
+1. US 生产链建议按美东收盘后窗口执行（北京时间清晨），不与 CN/HK 盘后链串行堆叠。
+2. `mode_pipeline` 口径不变，US 也遵循“分析后自动触发 mode 管线”的生产规则。
 
 ## 3.2 线上实验的运行纪律
 

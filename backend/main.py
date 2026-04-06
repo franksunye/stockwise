@@ -28,6 +28,7 @@ from backend.analysis.backfill import run_ai_analysis_backfill
 from backend.logger import logger
 from backend.engine import register_all_models
 from backend.job_guard import JobGuard
+from utils import get_market
 
 
 if __name__ == "__main__":
@@ -48,7 +49,7 @@ if __name__ == "__main__":
         choices=['core', 'periods', 'full'],
         help='单票按需同步模式: core=daily+realtime, periods=weekly+monthly, full=daily+weekly+monthly+realtime'
     )
-    parser.add_argument('--market', type=str, choices=['CN', 'HK'], help='只同步/分析/验证特定市场')
+    parser.add_argument('--market', type=str, choices=['CN', 'HK', 'US'], help='只同步/分析/验证特定市场')
     parser.add_argument(
         '--model',
         type=str,
@@ -58,15 +59,15 @@ if __name__ == "__main__":
     )
 
     parser.add_argument('--date', type=str, help='指定分析日期 (YYYY-MM-DD)')
-    _default_prediction_locale = os.getenv("PREDICTION_CONTENT_LOCALE", "cn").strip().lower()
-    if _default_prediction_locale not in ("en", "cn"):
-        _default_prediction_locale = "cn"
+    _default_prediction_locale = os.getenv("PREDICTION_CONTENT_LOCALE", "auto").strip().lower()
+    if _default_prediction_locale not in ("auto", "en", "cn"):
+        _default_prediction_locale = "auto"
     parser.add_argument(
         '--locale',
         type=str,
         default=_default_prediction_locale,
-        choices=['cn', 'en'],
-        help='分析提示词与推理输出语言（可用环境变量 PREDICTION_CONTENT_LOCALE 覆盖默认）',
+        choices=['auto', 'cn', 'en'],
+        help='分析语言：auto=按关注用户语言集合产出；cn/en=强制单语言',
     )
     parser.add_argument('--start-date', type=str, help='日期范围起始 (YYYY-MM-DD)')
     parser.add_argument('--end-date', type=str, help='日期范围结束 (YYYY-MM-DD)')
@@ -137,7 +138,7 @@ if __name__ == "__main__":
             if args.symbol:
                 target_stocks = [args.symbol]
             elif args.market:
-                target_stocks = [s for s in all_stocks if (args.market == 'HK' and len(s) == 5) or (args.market == 'CN' and len(s) != 5)]
+                target_stocks = [s for s in all_stocks if get_market(s) == args.market]
             else:
                 target_stocks = all_stocks
 
@@ -181,6 +182,8 @@ if __name__ == "__main__":
         rerun_workflow = "ai_analyze_cn.yml"
         if args.market == "HK":
             rerun_workflow = "ai_analyze_hk.yml"
+        elif args.market == "US":
+            rerun_workflow = "ai_analyze_us.yml"
         with JobGuard(f"AI Analysis ({market_dim})", task_type="prediction", rerun_workflow=rerun_workflow) as job:
             job.set_dimensions(market=market_dim, model=args.model, locale=args.locale)
             stats = run_ai_analysis(symbol=args.symbol, market_filter=args.market, force=args.force, model_filter=args.model, locale=args.locale)
@@ -258,6 +261,8 @@ if __name__ == "__main__":
         rerun_workflow = "data_sync_cn.yml"
         if args.market == "HK":
             rerun_workflow = "data_sync_hk.yml"
+        elif args.market == "US":
+            rerun_workflow = "data_sync_us.yml"
         with JobGuard(f"Full Market Sync ({market_dim})", task_type="ingestion", rerun_workflow=rerun_workflow) as job:
             job.set_dimensions(market=market_dim)
             stats = run_full_sync(market_filter=args.market, force_full=args.full_periods)

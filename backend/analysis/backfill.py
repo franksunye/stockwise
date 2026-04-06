@@ -12,6 +12,7 @@ from database import get_connection, get_stock_pool
 from engine.validator import validate_previous_prediction
 from trading_calendar import is_trading_day, get_market_from_symbol
 from logger import logger
+from utils import get_market
 
 
 def _build_missing_predictions_query(symbol_count: int, model_filter: str = None):
@@ -84,7 +85,7 @@ def run_ai_analysis_backfill(
             return
 
         if market_filter:
-            targets = [s for s in pool if (market_filter == "HK" and len(s) == 5) or (market_filter == "CN" and len(s) != 5)]
+            targets = [s for s in pool if get_market(s) == market_filter]
         else:
             targets = pool
 
@@ -265,8 +266,8 @@ def _analyze_stocks_for_date(conn, stocks: list, date_str: str, model_filter: st
                     from backend.analysis.user_tracker import notify_user_prediction_updated
                     ready_users = tracker.mark_stock_complete(stock)
                     for uid in ready_users:
-                        mkt = "CN" if len(stock) > 5 else "HK"
-                        if model_filter and model_filter in ["CN", "HK"]:
+                        mkt = get_market(stock)
+                        if model_filter and model_filter in ["CN", "HK", "US"]:
                             mkt = model_filter
                         notify_user_prediction_updated(uid, market=mkt)
 

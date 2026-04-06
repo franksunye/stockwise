@@ -1,7 +1,7 @@
 """
 交易日历工具
-支持港股 (HK) 和 A股 (CN) 两个市场
-用于计算下一个交易日、判断是否休市等
+支持港股(HK)、A股(CN)与美股(US)。
+用于计算下一个交易日、判断是否休市等。
 """
 
 from datetime import datetime, timedelta
@@ -114,10 +114,21 @@ CN_HOLIDAYS_DEFAULT = {
     '2026-10-07',
 }
 
+# ============ 美股 (US) 交易日历 (Fallback) ============
+US_HOLIDAYS_DEFAULT = {
+    # 2025 US market holidays (NYSE/Nasdaq full close)
+    '2025-01-01', '2025-01-20', '2025-02-17', '2025-04-18', '2025-05-26',
+    '2025-06-19', '2025-07-04', '2025-09-01', '2025-11-27', '2025-12-25',
+    # 2026
+    '2026-01-01', '2026-01-19', '2026-02-16', '2026-04-03', '2026-05-25',
+    '2026-06-19', '2026-07-03', '2026-09-07', '2026-11-26', '2026-12-25',
+}
+
 # --- Cache State ---
 _HOLIDAYS_CACHE = {
     "HK": None,
-    "CN": None
+    "CN": None,
+    "US": None,
 }
 _LAST_CACHE_TIME = 0
 CACHE_TTL = 3600 * 24  # Cache for 24 hours
@@ -150,16 +161,20 @@ def refresh_holidays_from_db():
         
         hk_set = set()
         cn_set = set()
+        us_set = set()
         
         for date_str, market in rows:
             if market == 'HK':
                 hk_set.add(date_str)
             elif market == 'CN':
                 cn_set.add(date_str)
+            elif market == 'US':
+                us_set.add(date_str)
         
         # DB is authoritative once loaded, even if one market list is empty
         _HOLIDAYS_CACHE["HK"] = hk_set
         _HOLIDAYS_CACHE["CN"] = cn_set
+        _HOLIDAYS_CACHE["US"] = us_set
             
         _LAST_CACHE_TIME = datetime.now().timestamp()
         _DB_CALENDAR_READY = True
@@ -175,9 +190,14 @@ def refresh_holidays_from_db():
 
 def get_market_from_symbol(symbol: str) -> str:
     """根据股票代码判断市场"""
-    if symbol and len(symbol) == 5:
+    sym = str(symbol or "").strip()
+    if sym.startswith(("sh", "sz", "bj")):
+        return "CN"
+    if sym and len(sym) == 5 and sym.isdigit():
         return "HK"
-    return "CN"
+    if sym and len(sym) == 6 and sym.isdigit():
+        return "CN"
+    return "US"
 
 
 def get_holidays(market: str) -> set:
@@ -200,6 +220,8 @@ def get_holidays(market: str) -> set:
     # Fallback to default
     if market == "HK":
         return HK_HOLIDAYS_DEFAULT
+    if market == "US":
+        return US_HOLIDAYS_DEFAULT
     return CN_HOLIDAYS_DEFAULT
 
 

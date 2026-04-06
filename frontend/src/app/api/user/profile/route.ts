@@ -3,6 +3,14 @@ import { getDbClient } from '@/lib/db';
 import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
 import { requireUserSession } from '@/lib/user-session';
 
+function normalizeLocale(input: unknown): 'cn' | 'en' {
+    const raw = String(input || '').trim().toLowerCase();
+    if (!raw) return 'en';
+    // Chinese family -> cn; all other locales route to en for prediction content.
+    if (raw === 'cn' || raw === 'zh' || raw.startsWith('zh-')) return 'cn';
+    return 'en';
+}
+
 export async function POST(request: Request) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let db: any;
@@ -11,7 +19,8 @@ export async function POST(request: Request) {
         if ('response' in auth) return auth.response;
         const userId = auth.userId;
 
-        const { watchlist, referredBy } = await request.json().catch(() => ({}));
+        const { watchlist, referredBy, locale } = await request.json().catch(() => ({}));
+        const preferredLocale = normalizeLocale(locale);
 
         db = getDbClient();
         const isCloud = db.$type === 'cloud';
@@ -75,17 +84,18 @@ export async function POST(request: Request) {
 
             if (isCloud) {
                 await client.execute({
-                    sql: "INSERT INTO users (user_id, registration_type, subscription_tier, subscription_expires_at, referred_by, created_at) VALUES (?, 'anonymous', ?, ?, ?, ?)",
-                    args: [userId, initialTier, expiresAt, validReferrerId, now]
+                    sql: "INSERT INTO users (user_id, registration_type, subscription_tier, subscription_expires_at, locale, referred_by, created_at) VALUES (?, 'anonymous', ?, ?, ?, ?, ?)",
+                    args: [userId, initialTier, expiresAt, preferredLocale, validReferrerId, now]
                 });
             } else {
-                client.prepare("INSERT INTO users (user_id, registration_type, subscription_tier, subscription_expires_at, referred_by, created_at) VALUES (?, 'anonymous', ?, ?, ?, ?)").run(userId, initialTier, expiresAt, validReferrerId, now);
+                client.prepare("INSERT INTO users (user_id, registration_type, subscription_tier, subscription_expires_at, locale, referred_by, created_at) VALUES (?, 'anonymous', ?, ?, ?, ?, ?)").run(userId, initialTier, expiresAt, preferredLocale, validReferrerId, now);
             }
 
             user = {
                 user_id: userId,
                 subscription_tier: initialTier,
                 subscription_expires_at: expiresAt,
+                locale: preferredLocale,
                 referred_by: validReferrerId,
                 is_new_user_flag: true
             };
@@ -98,12 +108,13 @@ export async function POST(request: Request) {
                 if (isCloud) {
                     // Fire and forget update (awaiting only to ensure db instance is valid, but ignoring result)
                     await client.execute({
-                        sql: "UPDATE users SET last_active_at = ? WHERE user_id = ?",
-                        args: [now, userId]
+                        sql: "UPDATE users SET last_active_at = ?, locale = ? WHERE user_id = ?",
+                        args: [now, preferredLocale, userId]
                     });
                 } else {
-                    client.prepare("UPDATE users SET last_active_at = ? WHERE user_id = ?").run(now, userId);
+                    client.prepare("UPDATE users SET last_active_at = ?, locale = ? WHERE user_id = ?").run(now, preferredLocale, userId);
                 }
+                user = { ...user, locale: preferredLocale };
             } catch (activeErr) {
                 // Ignore errors here to not block the main flow
                 console.error('Failed to update last_active_at:', activeErr);
@@ -271,6 +282,7 @@ export async function POST(request: Request) {
             hasOnboarded: Boolean(user.has_onboarded),
             watchlistCount: watchlistCount,
             email: user.email,
+            locale: normalizeLocale(user.locale),
             referralBalance: user.referral_balance || 0,
             totalEarned: user.total_earned || 0,
             commissionRate: user.custom_commission_rate ?? undefined,

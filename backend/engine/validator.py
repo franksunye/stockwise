@@ -211,10 +211,8 @@ def verify_all_pending(force: bool = False, target_date: str = None, market_filt
             logger.info("🔍 Verifying recent V2 predictions (T+3 mode)...")
 
         if market_filter:
-            if market_filter == "HK":
-                conditions.append("length(symbol) = 5")
-            elif market_filter == "CN":
-                conditions.append("length(symbol) != 5")
+            # Market filtering is applied safely per-row using get_market_from_symbol,
+            # which supports CN/HK/US consistently.
             logger.info(f"📍 Limiting verification to market: {market_filter}")
 
         where_clause = " AND ".join(conditions) if conditions else "1=1"

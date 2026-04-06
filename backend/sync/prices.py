@@ -11,7 +11,7 @@ import pandas as pd
 from database import get_connection, get_stock_pool
 from config import SYNC_CONFIG, BEIJING_TZ
 from fetchers import fetch_stock_data
-from utils import send_wecom_notification, format_volume
+from utils import send_wecom_notification, format_volume, get_market
 from engine.indicators import calculate_indicators
 # from engine.validator import validate_previous_prediction  <-- Decoupled
 from helpers import get_last_date, check_trading_day_skip
@@ -387,14 +387,7 @@ def run_full_sync(market_filter: str = None, force_full: bool = False):
     
     # 按市场过滤
     if market_filter:
-        filtered_stocks = []
-        for symbol in target_stocks:
-            is_hk = len(symbol) == 5
-            if market_filter == "HK" and is_hk:
-                filtered_stocks.append(symbol)
-            elif market_filter == "CN" and not is_hk:
-                filtered_stocks.append(symbol)
-        target_stocks = filtered_stocks
+        target_stocks = [symbol for symbol in target_stocks if get_market(symbol) == market_filter]
         print(f"📍 过滤市场: {market_filter}，共 {len(target_stocks)} 只股票")
 
     if not target_stocks:
@@ -425,11 +418,10 @@ def run_full_sync(market_filter: str = None, force_full: bool = False):
         all_anchors = MARKET_ANCHORS
 
     for anchor in all_anchors:
-        # Check market filter compatibility (simple heuristic)
+        # Check market filter compatibility
         if market_filter:
-            is_hk_anchor = len(anchor) == 5
-            if market_filter == "HK" and not is_hk_anchor: continue
-            if market_filter == "CN" and is_hk_anchor: continue
+            if get_market(anchor) != market_filter:
+                continue
         
         if anchor not in current_set:
             target_stocks.append(anchor)

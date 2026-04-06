@@ -9,7 +9,7 @@ on:
   workflow_call:
     inputs:
       market:
-        description: '目标市场 (CN / HK / ALL). ALL = CN 和 HK 都休市才跳过.'
+        description: '目标市场 (CN / HK / US / ALL). ALL = CN/HK/US 都休市才跳过.'
         type: string
         required: false
         default: 'ALL'
@@ -78,15 +78,16 @@ jobs:
           if market == 'ALL':
               cn_closed = is_market_closed(now, 'CN')
               hk_closed = is_market_closed(now, 'HK')
-              all_closed = cn_closed and hk_closed
+              us_closed = is_market_closed(now, 'US')
+              all_closed = cn_closed and hk_closed and us_closed
               if all_closed:
-                  reason = f'{today_str}: CN={\"休市\" if cn_closed else \"开市\"}, HK={\"休市\" if hk_closed else \"开市\"} → 全部休市'
+                  reason = f'{today_str}: CN={\"休市\" if cn_closed else \"开市\"}, HK={\"休市\" if hk_closed else \"开市\"}, US={\"休市\" if us_closed else \"开市\"} → 全部休市'
                   print(f'🔴 {reason}')
                   with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
                       f.write('should_run=false\n')
                       f.write(f'reason={reason}\n')
               else:
-                  reason = f'{today_str}: CN={\"休市\" if cn_closed else \"开市\"}, HK={\"休市\" if hk_closed else \"开市\"} → 部分开市'
+                  reason = f'{today_str}: CN={\"休市\" if cn_closed else \"开市\"}, HK={\"休市\" if hk_closed else \"开市\"}, US={\"休市\" if us_closed else \"开市\"} → 部分开市'
                   print(f'🟢 {reason}')
                   with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
                       f.write('should_run=true\n')

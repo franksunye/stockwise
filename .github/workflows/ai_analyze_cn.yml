@@ -27,6 +27,15 @@ on:
         - deepseek-v3.2-exp
         - gemini-3-flash
         - rule-engine
+      locale:
+        description: 'Prediction content locale (auto/cn/en)'
+        type: choice
+        required: false
+        default: 'auto'
+        options:
+        - auto
+        - cn
+        - en
   workflow_call:     # 支持被其他 workflow 调用
     inputs:
       force:
@@ -44,6 +53,11 @@ on:
         type: string
         required: false
         default: 'all'
+      locale:
+        description: 'Prediction content locale (auto/cn/en)'
+        type: string
+        required: false
+        default: 'auto'
 
 concurrency:
   group: ai-analyze-cn-${{ github.ref }}
@@ -121,5 +135,14 @@ jobs:
             MODEL_ARGS=(--model "${{ inputs.model }}")
           fi
 
-          echo "🚀 Executing: python -u backend/main.py --analyze --market CN ${MODEL_ARGS[*]} ${FORCE_ARGS[*]} ${DATE_ARGS[*]}"
-          python -u backend/main.py --analyze --market CN "${MODEL_ARGS[@]}" "${FORCE_ARGS[@]}" "${DATE_ARGS[@]}"
+          LOCALE_VALUE="${{ inputs.locale }}"
+          if [ -z "${LOCALE_VALUE}" ]; then
+            LOCALE_VALUE="${{ github.event.inputs.locale }}"
+          fi
+          if [ -z "${LOCALE_VALUE}" ]; then
+            LOCALE_VALUE="auto"
+          fi
+          LOCALE_ARGS=(--locale "${LOCALE_VALUE}")
+
+          echo "🚀 Executing: python -u backend/main.py --analyze --market CN ${MODEL_ARGS[*]} ${FORCE_ARGS[*]} ${DATE_ARGS[*]} ${LOCALE_ARGS[*]}"
+          python -u backend/main.py --analyze --market CN "${MODEL_ARGS[@]}" "${FORCE_ARGS[@]}" "${DATE_ARGS[@]}" "${LOCALE_ARGS[@]}"

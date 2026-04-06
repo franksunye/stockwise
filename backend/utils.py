@@ -47,11 +47,12 @@ def retry_request(max_retries=5, delay=2.0, backoff=2.0):
     return decorator
 
 def get_market(symbol: str) -> str:
-    """获取股票所属市场 (CN/HK)"""
+    """获取股票所属市场 (CN/HK/US)"""
+    sym = str(symbol or "").strip()
     try:
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT market FROM stock_meta WHERE symbol = ?", (symbol,))
+        cursor.execute("SELECT market FROM stock_meta WHERE symbol = ?", (sym,))
         row = cursor.fetchone()
         conn.close()
         if row:
@@ -59,9 +60,14 @@ def get_market(symbol: str) -> str:
     except:
         pass
     
-    if len(symbol) == 5:
+    if sym.startswith(("sh", "sz", "bj")):
+        return "CN"
+    if len(sym) == 5 and sym.isdigit():
         return "HK"
-    return "CN"
+    if len(sym) == 6 and sym.isdigit():
+        return "CN"
+    # US tickers are typically alphabetic and variable-length (e.g. AAPL, BRK.B).
+    return "US"
 
 def get_pinyin_info(name: str):
     """生成全拼和首字母简写"""

@@ -16,7 +16,7 @@ on:
         type: string
         required: false
       market:
-        description: '只验证指定市场 (CN/HK)，默认全市场'
+        description: '只验证指定市场 (CN/HK/US)，默认全市场'
         type: string
         required: false
   workflow_dispatch:
@@ -31,7 +31,7 @@ on:
         type: string
         required: false
       market:
-        description: '只验证指定市场 (CN/HK)，默认全市场'
+        description: '只验证指定市场 (CN/HK/US)，默认全市场'
         type: string
         required: false
 

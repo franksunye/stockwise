@@ -56,15 +56,19 @@ def check_trading_day_skip(market: str = None) -> bool:
     # 获取北京时间日期
     today_str = datetime.now(BEIJING_TZ).strftime("%Y-%m-%d")
     
-    # 如果指定了具体市场 (CN/HK)
+    # 如果指定了具体市场 (CN/HK/US)
     if market:
         if is_market_closed(datetime.now(BEIJING_TZ), market):
             logger.info(f"📅 今日 ({today_str}) 为 {market} 市场休市日，跳过例行同步。")
             return True
     else:
-        # 如果没指定市场，检查 A 股和港股是否都休市
-        if is_market_closed(datetime.now(BEIJING_TZ), "CN") and is_market_closed(datetime.now(BEIJING_TZ), "HK"):
-            logger.info(f"📅 今日 ({today_str}) 为 A股/港股 全面休市日，跳过所有例行同步。")
+        # 如果没指定市场，检查 CN/HK/US 是否都休市
+        if (
+            is_market_closed(datetime.now(BEIJING_TZ), "CN")
+            and is_market_closed(datetime.now(BEIJING_TZ), "HK")
+            and is_market_closed(datetime.now(BEIJING_TZ), "US")
+        ):
+            logger.info(f"📅 今日 ({today_str}) 为 CN/HK/US 全面休市日，跳过所有例行同步。")
             return True
             
     return False

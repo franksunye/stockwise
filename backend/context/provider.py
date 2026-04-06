@@ -17,6 +17,7 @@ from concurrent.futures import ThreadPoolExecutor, TimeoutError
 from concurrent.futures.thread import _worker, _threads_queues
 from backend.logger import logger
 from backend.database import get_connection
+from backend.utils import get_market
 try:
     import backend.config # Ensure NO_PROXY and other environment fixes are applied
 except ImportError:
@@ -854,9 +855,14 @@ class MarketContextProvider:
             # HK stocks might not work with this specific API, check docs
             # stock_individual_fund_flow is for A-share
             
-            if len(symbol) == 5:
+            if get_market(symbol) == "HK":
                 # HK stock: use local short-selling context synced by hk_short job.
                 result = self._get_hk_short_context(symbol)
+                self._cache["stock_flow"][symbol] = {"data": result, "timestamp": datetime.now()}
+                self._stats["stock_flow_success"] += 1
+                return result
+            if get_market(symbol) == "US":
+                result = {"summary": "US market flow is not supported in current free datasource."}
                 self._cache["stock_flow"][symbol] = {"data": result, "timestamp": datetime.now()}
                 self._stats["stock_flow_success"] += 1
                 return result

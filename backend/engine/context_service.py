@@ -12,20 +12,26 @@ import threading
 try:
     from backend.logger import logger
     from backend.database import get_connection
+    from backend.utils import get_market
 except ImportError:
     from logger import logger
     from database import get_connection
+    from utils import get_market
 
 # Global Market Anchors for mood calculation
 MARKET_ANCHORS = {
     "HK": ["02800"],
-    "CN": ["sh000001", "sh000300", "510300"]
+    "CN": ["sh000001", "sh000300", "510300"],
+    "US": ["SPY", "QQQ", "DIA"],
 }
 MARKET_SYMBOL_MAP = {
     "02800": "恒生指数(ETF)", 
     "sh000001": "上证指数", 
     "sh000300": "沪深300",
-    "510300": "沪深300ETF"
+    "510300": "沪深300ETF",
+    "SPY": "S&P500 ETF",
+    "QQQ": "Nasdaq100 ETF",
+    "DIA": "Dow Jones ETF",
 }
 
 class ContextService:
@@ -81,11 +87,9 @@ class ContextService:
 
         # 2. Market Mood (Cached by market within the call)
         # We need to know which market each symbol belongs to
-        markets = set()
-        for s in symbols:
-            markets.add("HK" if len(s) == 5 else "CN")
-        
-        moods = {m: self._get_cached_market_mood(date_str, "02800" if m == "HK" else "sh000001") for m in markets}
+        markets = {get_market(s) for s in symbols}
+        anchor_symbol = {"HK": "02800", "CN": "sh000001", "US": "SPY"}
+        moods = {m: self._get_cached_market_mood(date_str, anchor_symbol.get(m, "sh000001")) for m in markets}
         
         # 3. Meso & Micro: Altitude and Volume (The heavy lifting)
         # Use optimized SQL to calculate stats for all symbols
@@ -150,7 +154,7 @@ class ContextService:
                     elif ratio > 1.5: vol_status = f"温和放量 (量比 {ratio:.1f}x)"
                     elif ratio < 0.5: vol_status = f"极度缩量 (量比 {ratio:.1f}x)"
                 
-                m = "HK" if len(sym) == 5 else "CN"
+                m = get_market(sym)
                 batch_results[sym] = {
                     "meta": {"symbol": sym, "name": name_map.get(sym, sym), "date": date_str},
                     "market_context": moods.get(m),
@@ -169,7 +173,7 @@ class ContextService:
             # Fill missing with empty context
             for sym in symbols:
                 if sym not in batch_results:
-                    m = "HK" if len(sym) == 5 else "CN"
+                    m = get_market(sym)
                     batch_results[sym] = {
                         "meta": {"symbol": sym, "name": name_map.get(sym, sym), "date": date_str},
                         "market_context": moods.get(m),
@@ -189,9 +193,7 @@ class ContextService:
 
     def _get_cached_market_mood(self, date_str: str, target_symbol: str = None) -> str:
         """Fetch market mood with date and market-based caching."""
-        market = "CN"
-        if target_symbol and len(target_symbol) == 5:
-            market = "HK"
+        market = get_market(target_symbol) if target_symbol else "CN"
             
         cache_key = f"market_mood_{market}_{date_str}"
         if cache_key in self._global_cache:
@@ -231,18 +233,15 @@ class ContextService:
             proxy_msg = "，".join(proxy_parts)
             
             # Market Breadth (Filtered by Market)
-            if market == "HK":
-                # HK stocks have 5 digits
-                cursor.execute("""
-                    SELECT change_percent FROM daily_prices 
-                    WHERE date = ? AND length(symbol) = 5
-                """, (date_str,))
-            else:
-                # CN stocks have != 5 digits (usually 6)
-                cursor.execute("""
-                    SELECT change_percent FROM daily_prices 
-                    WHERE date = ? AND length(symbol) != 5
-                """, (date_str,))
+            cursor.execute(
+                """
+                SELECT dp.change_percent
+                FROM daily_prices dp
+                JOIN stock_meta sm ON sm.symbol = dp.symbol
+                WHERE dp.date = ? AND sm.market = ?
+                """,
+                (date_str, market),
+            )
             rows = cursor.fetchall()
             
             if not rows or len(rows) < 5: 

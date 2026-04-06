@@ -15,9 +15,54 @@ from logger import logger
 
 
 from trading_calendar import get_market_from_symbol, is_market_closed
+from utils import get_market
 
 
-def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool = False, model_filter: str = None, locale: str = 'cn'):
+def _normalize_locale(value: str) -> str:
+    loc = (value or "auto").strip().lower()
+    return loc if loc in ("auto", "cn", "en") else "auto"
+
+
+def _build_target_locale_map(conn, targets: list[str], forced_locale: str) -> dict[str, list[str]]:
+    """
+    Derive required locales for each symbol from active watchlist users.
+    - forced_locale in {"cn","en"}: use that locale for all targets.
+    - forced_locale == "auto": use watchers' locale set per symbol.
+    """
+    mode = _normalize_locale(forced_locale)
+    if mode in ("cn", "en"):
+        return {s: [mode] for s in targets}
+
+    if not targets:
+        return {}
+
+    cursor = conn.cursor()
+    placeholders = ",".join(["?"] * len(targets))
+    query = f"""
+        SELECT uw.symbol,
+               CASE WHEN lower(COALESCE(u.locale, 'cn')) = 'en' THEN 'en' ELSE 'cn' END AS content_locale
+        FROM user_watchlist uw
+        JOIN users u ON u.user_id = uw.user_id
+        WHERE uw.symbol IN ({placeholders})
+        GROUP BY uw.symbol, content_locale
+    """
+    cursor.execute(query, list(targets))
+    rows = cursor.fetchall()
+
+    out: dict[str, list[str]] = {s: [] for s in targets}
+    for sym, loc in rows:
+        loc_norm = "en" if str(loc).lower() == "en" else "cn"
+        if loc_norm not in out[sym]:
+            out[sym].append(loc_norm)
+
+    # Keep production behavior stable for uncovered symbols.
+    for s in targets:
+        if not out[s]:
+            out[s] = ["cn"]
+    return out
+
+
+def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool = False, model_filter: str = None, locale: str = 'auto'):
     """独立运行 AI 预测任务
     
     Args:
@@ -39,10 +84,7 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool =
         
         # 按市场过滤
         if market_filter:
-            for s in pool:
-                is_hk = len(s) == 5
-                if (market_filter == "HK" and is_hk) or (market_filter == "CN" and not is_hk):
-                    targets.append(s)
+            targets = [s for s in pool if get_market(s) == market_filter]
         else:
             targets = pool
     
@@ -56,6 +98,7 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool =
     from backend.config import ENABLE_SMART_NOTIFICATIONS
     from backend.notification_service import NotificationManager
     
+    effective_locale = _normalize_locale(locale)
     notif_manager = None
     stock_subscribers = {} # symbol -> set[uid]
     
@@ -111,6 +154,7 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool =
     
     conn = get_connection()
     cursor = conn.cursor()
+    target_locale_map = _build_target_locale_map(conn, targets, effective_locale)
     
     # 获取当前北京时间用于判断休市
     now_date = datetime.now(BEIJING_TZ)
@@ -139,78 +183,77 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool =
             today_data = df.iloc[0]
             today_str = today_data['date']
             
-            # --- Idempotency Check (幂等性检查) ---
-            # 改良逻辑：如果是单模型运行，只检查该模型。如果是 all 运行，交给 PredictionRunner 内部处理。
-            if not force:
-                if model_filter and model_filter != 'all':
+            locales_for_stock = target_locale_map.get(stock, ["cn"])
+            for target_locale in locales_for_stock:
+                # --- Idempotency Check (per-locale) ---
+                if not force and model_filter and model_filter != 'all':
                     cursor.execute(
-                        "SELECT 1 FROM ai_predictions_v2 WHERE symbol = ? AND date = ? AND model_id = ? LIMIT 1",
-                        (stock, today_str, model_filter)
+                        """
+                        SELECT 1
+                        FROM ai_predictions_v2
+                        WHERE symbol = ? AND date = ? AND model_id = ? AND COALESCE(content_locale, 'cn') = ?
+                        LIMIT 1
+                        """,
+                        (stock, today_str, model_filter, target_locale)
                     )
                     if cursor.fetchone():
-                        logger.info(f"⏩ {stock}: {today_str} ({model_filter}) 预测已存在，跳过")
+                        logger.info(f"⏩ {stock}: {today_str} ({model_filter}/{target_locale}) 预测已存在，跳过")
                         success_count += 1
-                        # No notification here for skipped items in new logic
                         continue
-                # 如果是 all，这里不再做整体跳过，让子引擎去判断具体哪个模型没跑
-            # --------------------------------------
 
-            logger.info(f">>> 分析 {stock} ({today_str})")
-            
-            # 确定分析模式 (AI vs Rule) - Now handled by Race Mode internally, but we can keep log
-            # analysis_mode = check_stock_analysis_mode(stock) # Deprecated but harmless
-            
-            # 生成预测 (New Multi-Model Engine)
-            # Use local import to avoid circular dependency issues if any
-            try:
-                from backend.engine.runner import PredictionRunner
-                import asyncio
-                
-                runner = PredictionRunner(model_filter=model_filter, force=force)
-                
-                # Run async in sync context
-                if os.name == 'nt':
-                    try:
-                        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-                    except: pass
-                     
-                analysis_result = asyncio.run(runner.run_analysis(stock, today_str, locale=locale))
-                
-                if analysis_result:
-                    # analysis_result is now a dict: {"primary": ..., "models": [...]}
-                    primary_result = analysis_result.get('primary')
-                    all_models = analysis_result.get('models', [])
-                    
-                    # [NEW] Check for Signal Flips for each subscriber
-                    if notif_manager and isinstance(primary_result, dict):
-                        subscribers = stock_subscribers.get(stock, set())
-                        for uid in subscribers:
-                            notif_manager.check_signal_flip(
-                                uid, stock, 
-                                primary_result.get('signal'), 
-                                primary_result.get('confidence')
-                            )
-                            # Queue service-level update notification ("Data Ready")
-                            notif_manager.queue_notification(
-                                uid, 
-                                "prediction_updated", 
-                                {"symbol": stock, "market": market_filter or "CN"}
-                            )
+                logger.info(f">>> 分析 {stock} ({today_str}, locale={target_locale})")
 
-                    success_count += 1
-                    
-                    # Distinguish AI and Rule successes for reporting
-                    if any(m != 'rule-engine' for m in all_models):
-                        ai_count += 1
-                    if 'rule-engine' in all_models:
-                        rule_count += 1
-                    
-                else:
-                    logger.warning(f"⚠️ {stock}: Analysis failed or returned no results.")
-                
-            except Exception as e:
-                logger.error(f"❌ {stock} AI Engine Failed: {e}")
-                continue
+                # 生成预测 (New Multi-Model Engine)
+                # Use local import to avoid circular dependency issues if any
+                try:
+                    from backend.engine.runner import PredictionRunner
+                    import asyncio
+
+                    runner = PredictionRunner(model_filter=model_filter, force=force)
+
+                    # Run async in sync context
+                    if os.name == 'nt':
+                        try:
+                            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+                        except:
+                            pass
+
+                    analysis_result = asyncio.run(runner.run_analysis(stock, today_str, locale=target_locale))
+
+                    if analysis_result:
+                        # analysis_result is now a dict: {"primary": ..., "models": [...]}
+                        primary_result = analysis_result.get('primary')
+                        all_models = analysis_result.get('models', [])
+
+                        # Keep notification semantics stable; avoid duplicate fanout in auto-locale mode.
+                        if notif_manager and isinstance(primary_result, dict) and target_locale == "cn":
+                            subscribers = stock_subscribers.get(stock, set())
+                            for uid in subscribers:
+                                notif_manager.check_signal_flip(
+                                    uid, stock,
+                                    primary_result.get('signal'),
+                                    primary_result.get('confidence')
+                                )
+                                notif_manager.queue_notification(
+                                    uid,
+                                    "prediction_updated",
+                                    {"symbol": stock, "market": market_filter or get_market(stock)}
+                                )
+
+                        success_count += 1
+
+                        # Distinguish AI and Rule successes for reporting
+                        if any(m != 'rule-engine' for m in all_models):
+                            ai_count += 1
+                        if 'rule-engine' in all_models:
+                            rule_count += 1
+
+                    else:
+                        logger.warning(f"⚠️ {stock}: Analysis failed or returned no results (locale={target_locale}).")
+
+                except Exception as e:
+                    logger.error(f"❌ {stock} AI Engine Failed (locale={target_locale}): {e}")
+                    continue
             
         except Exception as e:
             logger.error(f"❌ {stock} 分析失败: {e}")

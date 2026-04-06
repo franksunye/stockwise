@@ -1,13 +1,19 @@
-name: Daily Stock Metadata Sync
+name: Data Sync - US Market
+
+# 职责：仅负责美股数据同步，不包含 AI 分析
 
 on:
-  schedule:
-    # 每日北京时间 06:00 (UTC 22:00 前一天) 执行
-    - cron: '0 22 * * *'
   workflow_dispatch: # 支持手动触发
+    inputs:
+      force_full:
+        description: '强制同步全周期 (周/月线)'
+        type: boolean
+        default: false
+        required: false
+  workflow_call:     # 支持被其他 workflow 调用
 
 jobs:
-  sync-meta:
+  sync-us-data:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -24,17 +30,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
 
-      - name: Sync stock metadata (name + name_en, HK Sina + curated CN/HK JSON)
+      - name: Sync US Market Data
         env:
           PYTHONUNBUFFERED: "1"
           TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
           TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
           WECOM_ROBOT_KEY: ${{ secrets.WECOM_ROBOT_KEY }}
-          # Yahoo gap fill (defaults in name_en_backfill.py); tune to control job duration
-          NAME_EN_YAHOO_MAX_CN: "2000"
-          NAME_EN_YAHOO_MAX_HK: "1200"
-          NAME_EN_YAHOO_MAX_US: "1200"
-          NAME_EN_YAHOO_SLEEP_SEC: "0.12"
         run: |
-          # Writes stock_meta including nullable name_en; see docs/1_Engineering/i18n/01_Stock_Name_Internationalization.md
-          python backend/main.py --sync-meta
+          python -u backend/main.py --market US ${{ inputs.force_full == true && '--full-periods' || '' }}

@@ -1,10 +1,11 @@
 """
-Periodic stock_meta.name_en backfill: Yahoo Finance (yfinance) for CN/HK gaps (free tier).
+Periodic stock_meta.name_en backfill: Yahoo Finance (yfinance) for CN/HK/US gaps (free tier).
 
 Env (see config.load or os.environ):
   NAME_EN_YAHOO=1            — enable yfinance gap fill (default on if unset)
   NAME_EN_YAHOO_MAX_CN       — max Yahoo lookups per run for CN (default 2500)
   NAME_EN_YAHOO_MAX_HK       — max Yahoo lookups per run for HK (default 1500)
+  NAME_EN_YAHOO_MAX_US       — max Yahoo lookups per run for US (default 1500)
   NAME_EN_YAHOO_SLEEP_SEC   — delay between Yahoo requests (default 0.15)
 """
 
@@ -52,6 +53,12 @@ def symbol_to_yahoo_ticker(symbol: str, market: str) -> Optional[str]:
             return None
         return f"{n:04d}.HK"
     if m != "CN":
+        if m == "US":
+            # US tickers in DB are stored in Yahoo-compatible form, usually uppercase and
+            # class shares with '-' (e.g. BRK-B). Convert accidental '.' to '-'.
+            if not sym:
+                return None
+            return sym.upper().replace(".", "-")
         return None
     if len(sym) != 6 or not sym.isdigit():
         return None
@@ -109,12 +116,13 @@ def _select_gaps(cursor, market: str, limit: int) -> List[Tuple[str, str]]:
 
 
 def apply_yahoo_gap_fill(cursor) -> Dict[str, int]:
-    stats = {"yahoo_cn": 0, "yahoo_hk": 0, "yahoo_skipped": 0}
+    stats = {"yahoo_cn": 0, "yahoo_hk": 0, "yahoo_us": 0, "yahoo_skipped": 0}
     if not _env_bool("NAME_EN_YAHOO", True):
         logger.info("   ℹ️ NAME_EN_YAHOO 已关闭，跳过 Yahoo 补全")
         return stats
     max_cn = max(0, _env_int("NAME_EN_YAHOO_MAX_CN", 2500))
     max_hk = max(0, _env_int("NAME_EN_YAHOO_MAX_HK", 1500))
+    max_us = max(0, _env_int("NAME_EN_YAHOO_MAX_US", 1500))
     sleep_s = max(0.0, _env_float("NAME_EN_YAHOO_SLEEP_SEC", 0.15))
 
     try:
@@ -123,7 +131,11 @@ def apply_yahoo_gap_fill(cursor) -> Dict[str, int]:
         logger.warning("   ⚠️ yfinance 未安装，跳过 Yahoo name_en 补全")
         return stats
 
-    for market, key, mmax in (("CN", "yahoo_cn", max_cn), ("HK", "yahoo_hk", max_hk)):
+    for market, key, mmax in (
+        ("CN", "yahoo_cn", max_cn),
+        ("HK", "yahoo_hk", max_hk),
+        ("US", "yahoo_us", max_us),
+    ):
         if mmax <= 0:
             continue
         gaps = _select_gaps(cursor, market, mmax)
@@ -163,9 +175,10 @@ def run_name_en_backfill(cursor) -> Dict[str, int]:
     """
     out = apply_yahoo_gap_fill(cursor)
 
-    if out.get("yahoo_cn") or out.get("yahoo_hk"):
+    if out.get("yahoo_cn") or out.get("yahoo_hk") or out.get("yahoo_us"):
         logger.info(
             f"   📌 name_en 自动补全 (Yahoo): CN={out.get('yahoo_cn', 0)} "
-            f"HK={out.get('yahoo_hk', 0)} skip/fail={out.get('yahoo_skipped', 0)}"
+            f"HK={out.get('yahoo_hk', 0)} US={out.get('yahoo_us', 0)} "
+            f"skip/fail={out.get('yahoo_skipped', 0)}"
         )
     return out

@@ -175,10 +175,49 @@ class AkShareFetcher(BaseFetcher):
             
             return pd.DataFrame()
 
+        @retry_request(max_retries=2, delay=2.0)
+        def _fetch_us():
+            # Yahoo is the primary free source for US prices.
+            try:
+                import yfinance as yf
+            except ImportError:
+                logger.warning("⚠️ [Yahoo] yfinance 未安装，无法获取 US 行情")
+                return pd.DataFrame()
+
+            try:
+                ticker = str(symbol).strip().upper()
+                s_dt = datetime.strptime(start_date, "%Y%m%d").strftime("%Y-%m-%d")
+                hist = yf.Ticker(ticker).history(start=s_dt, interval="1d", auto_adjust=False)
+                if hist is None or hist.empty:
+                    return pd.DataFrame()
+                hist = hist.reset_index()
+                date_col = "Date" if "Date" in hist.columns else hist.columns[0]
+                hist = hist.rename(
+                    columns={
+                        date_col: "日期",
+                        "Open": "开盘",
+                        "High": "最高",
+                        "Low": "最低",
+                        "Close": "收盘",
+                        "Volume": "成交量",
+                    }
+                )
+                hist["日期"] = pd.to_datetime(hist["日期"]).dt.strftime("%Y-%m-%d")
+                hist["涨跌幅"] = pd.to_numeric(hist["收盘"], errors="coerce").pct_change() * 100
+                out_cols = ["日期", "开盘", "最高", "最低", "收盘", "成交量", "涨跌幅"]
+                hist = hist[[c for c in out_cols if c in hist.columns]]
+                logger.info(f"✅ [Yahoo] US {symbol} fetched ({len(hist)} rows)")
+                return hist
+            except Exception as e:
+                logger.warning(f"⚠️ [Yahoo] US {symbol} history failed: {e}")
+                return pd.DataFrame()
+
 
         try:
             if market == "HK":
                 return _fetch_hk()
+            elif market == "US":
+                return _fetch_us()
             else:
                 return _fetch_cn()
         except Exception as e:
@@ -209,7 +248,35 @@ class SinaSpotFetcher(BaseFetcher):
         market = get_market(symbol)
         
         # 1. 构建 Code
-        if market == 'HK':
+        if market == 'US':
+            # Yahoo fallback for US realtime snapshot
+            try:
+                import yfinance as yf
+                ticker = str(symbol).strip().upper()
+                info = yf.Ticker(ticker).fast_info
+                last_price = float(info.get("lastPrice") or 0)
+                prev_close = float(info.get("previousClose") or 0)
+                if last_price <= 0:
+                    return None
+                change_pct = ((last_price - prev_close) / prev_close * 100) if prev_close > 0 else 0.0
+                now = datetime.now(BEIJING_TZ)
+                d = now.strftime("%Y-%m-%d")
+                return {
+                    "symbol": symbol,
+                    "price": last_price,
+                    "open": float(info.get("open") or last_price),
+                    "high": float(info.get("dayHigh") or last_price),
+                    "low": float(info.get("dayLow") or last_price),
+                    "close": last_price,
+                    "volume": float(info.get("lastVolume") or 0),
+                    "change_pct": change_pct,
+                    "date": d,
+                    "time": f"{d} {now.strftime('%H:%M:%S')}",
+                }
+            except Exception as e:
+                logger.warning(f"⚠️ [YahooSpot] {symbol} US realtime failed: {e}")
+                return None
+        elif market == 'HK':
             code = f"rt_hk{symbol}"
         else:
             # A 股
@@ -416,7 +483,7 @@ def _apply_curated_hk_name_en(cursor) -> None:
 
 
 def sync_stock_meta():
-    """同步股票基础信息 (名称、市场、拼音、港股英文名)"""
+    """同步股票基础信息 (名称、市场、拼音、港股英文名 + 美股元数据)"""
     import time
     start_time = time.time()  # 统计完整同步耗时
     
@@ -567,6 +634,67 @@ def sync_stock_meta():
 
     logger.info(f"   📊 A 股合计: {cn_count} 条")
 
+    # 3. 美股列表 (Yahoo universe: S&P500 + Nasdaq100 + Dow30)
+    us_count = 0
+    try:
+        us_name_map = {}
+        # Free public universe bootstrap: S&P 500, Nasdaq-100, Dow 30.
+        wiki_sources = [
+            ("https://en.wikipedia.org/wiki/List_of_S%26P_500_companies", "Symbol", "Security"),
+            ("https://en.wikipedia.org/wiki/Nasdaq-100", "Ticker", "Company"),
+            ("https://en.wikipedia.org/wiki/Dow_Jones_Industrial_Average", "Symbol", "Company"),
+        ]
+        for url, symbol_col, name_col in wiki_sources:
+            try:
+                dfs = pd.read_html(url)
+            except Exception:
+                dfs = []
+            for df in dfs:
+                # Flatten multi-index headers if present.
+                if isinstance(df.columns, pd.MultiIndex):
+                    df.columns = [str(c[-1]).strip() for c in df.columns]
+                # Tolerate slight column naming drift on wiki pages.
+                cols = {str(c).strip(): c for c in df.columns}
+                sym_key = cols.get(symbol_col) or cols.get("Ticker symbol") or cols.get("Ticker")
+                name_key = cols.get(name_col) or cols.get("Company") or cols.get("Security")
+                if sym_key is None or name_key is None:
+                    continue
+                for _, row in df[[sym_key, name_key]].dropna().iterrows():
+                    raw = row[sym_key]
+                    sym = str(raw).strip().upper()
+                    if not sym:
+                        continue
+                    # Yahoo uses '-' for class shares (e.g. BRK-B).
+                    sym = sym.replace(".", "-")
+                    name_en = str(row[name_key]).strip()
+                    if not name_en:
+                        name_en = sym
+                    us_name_map[sym] = name_en
+        # Hard fallback so US pipeline never degenerates to zero symbols.
+        if not us_name_map:
+            us_name_map = {
+                "SPY": "SPDR S&P 500 ETF Trust",
+                "QQQ": "Invesco QQQ Trust",
+                "DIA": "SPDR Dow Jones Industrial Average ETF Trust",
+                "AAPL": "Apple Inc.",
+                "MSFT": "Microsoft Corporation",
+                "AMZN": "Amazon.com, Inc.",
+                "NVDA": "NVIDIA Corporation",
+                "GOOGL": "Alphabet Inc.",
+                "META": "Meta Platforms, Inc.",
+                "TSLA": "Tesla, Inc.",
+            }
+        for sym, name_en in sorted(us_name_map.items()):
+            name = name_en
+            if not name:
+                continue
+            py, abbr = "", ""
+            all_records.append((sym, name, name_en, "US", now_str, py, abbr))
+            us_count += 1
+        logger.info(f"   ✅ [Yahoo] 美股元数据: {us_count} 条")
+    except Exception as e:
+        logger.warning(f"   ⚠️ 美股 Yahoo 列表获取失败: {e}")
+
     # 批量写入数据库 (每 500 条一批，优化 Turso 远程写入性能)
     if all_records:
         conn = get_connection()
@@ -594,6 +722,7 @@ def sync_stock_meta():
         duration = time.time() - start_time
         hk_count = len([r for r in all_records if r[3] == "HK"])
         cn_count = len([r for r in all_records if r[3] == "CN"])
+        us_count = len([r for r in all_records if r[3] == "US"])
         
         logger.info(f"✅ 元数据同步完成 ({total} 条, 耗时 {duration:.1f}s)")
         
@@ -601,6 +730,7 @@ def sync_stock_meta():
             "total_records": total,
             "hk_count": hk_count,
             "cn_count": cn_count,
+            "us_count": us_count,
             "duration_seconds": round(duration, 1)
         }
 
@@ -668,6 +798,15 @@ def sync_profiles(limit=20):
                             main_bus = "" 
                     except Exception as e_hk:
                         print(f"     ⚠️ 港股接口异常: {e_hk}")
+                elif market == "US":
+                    try:
+                        import yfinance as yf
+                        info = yf.Ticker(symbol).info or {}
+                        industry = str(info.get("industry") or "")
+                        main_bus = str(info.get("longBusinessSummary") or "")
+                        desc = str(info.get("longName") or "")
+                    except Exception as e_us:
+                        logger.warning(f"     ⚠️ 美股概况接口异常 {symbol}: {e_us}")
 
                 # 共有逻辑：更新数据库
                 if industry or main_bus or desc:

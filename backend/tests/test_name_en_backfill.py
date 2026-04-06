@@ -1,4 +1,4 @@
-"""Unit tests for Yahoo/Tushare ticker mapping and Yahoo name pick (no network)."""
+"""Unit tests for Yahoo ticker mapping and Yahoo name pick (no network)."""
 import os
 import sys
 import unittest
@@ -25,6 +25,10 @@ class TestSymbolToYahoo(unittest.TestCase):
     def test_invalid(self):
         self.assertIsNone(symbol_to_yahoo_ticker("", "HK"))
         self.assertIsNone(symbol_to_yahoo_ticker("abc", "CN"))
+
+    def test_us_ticker_passthrough(self):
+        self.assertEqual(symbol_to_yahoo_ticker("AAPL", "US"), "AAPL")
+        self.assertEqual(symbol_to_yahoo_ticker("brk.b", "US"), "BRK-B")
 
 
 class TestPickYahooNameEn(unittest.TestCase):

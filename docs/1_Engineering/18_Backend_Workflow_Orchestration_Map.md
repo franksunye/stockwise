@@ -1,6 +1,6 @@
 # 18 Backend Workflow Orchestration Map
 
-更新时间：2026-03-09
+更新时间：2026-04-06
 
 ## 1. 目标
 
@@ -511,11 +511,13 @@ Production 内部分为两组：
 | `meta_sync.yml` | Maintenance | ingestion | GitHub Schedule / Manual | 无 | best_effort | 元数据维护 |
 | `data_sync_cn.yml` | Post-Close | ingestion | Workflow Call / Manual | `trading_day_gate(CN)` | hard_blocking | A 股正式同步 |
 | `data_sync_hk.yml` | Post-Close | ingestion | Workflow Call / Manual | `trading_day_gate(HK)` | hard_blocking | 港股正式同步 |
+| `data_sync_us.yml` | Post-Close (US) | ingestion | Workflow Call / Manual | `trading_day_gate(US)` | hard_blocking | 美股正式同步（独立链） |
 | `data_sync_realtime.yml` | Intraday | ingestion | Cloudflare Worker / Manual | Worker / API 节拍 | soft_blocking | 前端实时行情能力，属于生产链 |
 | `data_sync_single.yml` | Manual / Backfill | ingestion | Manual / API Dispatch | 手工触发 | manual_only | 默认只做前端最小可展示补数；周期补数为可选扩展 |
 | `verify_predictions.yml` | Post-Close | production_validation | Workflow Call / Manual | `data_sync_*` | soft_blocking | 用户可见验证结果，属于生产口径 |
 | `ai_analyze_cn.yml` | Post-Close | analysis | Workflow Call / Manual | `data_sync_cn` | soft_blocking | 纯分析 workflow；内部仍会触发 `mode_pipeline` |
 | `ai_analyze_hk.yml` | Post-Close | analysis | Workflow Call / Manual | `data_sync_hk` | soft_blocking | 纯分析 workflow；与 CN 保持相同边界 |
+| `ai_analyze_us.yml` | Post-Close (US) | analysis | Workflow Call / Manual | `data_sync_us` | soft_blocking | 美股纯分析 workflow；与 CN/HK 同口径 |
 | `mode_pipeline` | Post-Close | analysis | Internal Program Call | `ai_analyze_*` 内部触发 | soft_blocking | 正式 Investment Mode 产数 |
 
 #### 6.1.2 Production Content
@@ -567,11 +569,13 @@ Production 内部分为两组：
 | `meta_sync.yml` | `ADMIN` | `WeCom` | 已实现 | `backend/main.py --sync-meta` 走 `JobGuard`，成功/失败都会发内部通知 |
 | `data_sync_cn.yml` | `ADMIN` | `WeCom` | 已实现 | 盘后正式同步，失败不应静默 |
 | `data_sync_hk.yml` | `ADMIN` | `WeCom` | 已实现 | 含 HK short sync，内部告警链已接入 |
+| `data_sync_us.yml` | `ADMIN` | `WeCom` | 已实现 | 美股盘后正式同步（独立链），失败不应静默 |
 | `data_sync_realtime.yml` | `User + ADMIN` | `Mixed` | 已实现 | 盘中价格波动会走 `price_update` push；作业本身走 `JobGuard` 发 ADMIN 告警 |
 | `data_sync_single.yml` | `ADMIN` | `WeCom` | 已实现 | 手工补数不直接通知用户，只向运维侧暴露执行结果 |
 | `verify_predictions.yml` | `User + ADMIN` | `Push + WeCom` | 已实现 | 用户侧验证结果/战报与 ADMIN 成功/失败告警都已接入，workflow 已注入 `WECOM_ROBOT_KEY` 与 `ADMIN_MOBILES` |
 | `ai_analyze_cn.yml` | `User + ADMIN` | `Mixed` | 已实现 | 用户会收到 `prediction_updated` / `signal_flip`，作业本身会发 ADMIN 通知 |
 | `ai_analyze_hk.yml` | `User + ADMIN` | `Mixed` | 已实现 | 与 CN 同口径 |
+| `ai_analyze_us.yml` | `User + ADMIN` | `Mixed` | 已实现 | 与 CN/HK 同口径，按 US 独立链条执行 |
 | `mode_pipeline` | `ADMIN` | `WeCom` | 已实现 | 目前通过 `--analyze` 内部耦合承接；无独立用户通知职责 |
 | `daily_almanac_cn.yml` | `User + ADMIN` | `Mixed` | 已实现 | 预览广播触达用户；生成降级与 `market_facts_healthcheck` 触达 ADMIN |
 | `daily_morning_call.yml` | `User + ADMIN` | `Mixed` | 已实现 | morning call push + ritual broadcast 面向用户；脚本成功/失败会发 WeCom |
@@ -663,6 +667,8 @@ Production 内部分为两组：
 | 16:30 | Production Core | `data_sync_hk.yml` / `ai_analyze_hk.yml` | 港股盘后正式链 |
 | 17:30 | Ops Governance / Production Content | `daily_validation_check.yml` / `daily_brief_push.yml` | 巡检与摘要 |
 | 08:30 | Production Content | `daily_morning_call.yml` | 由 Cloudflare Worker 精确触发，盘前基于隔夜信息刷新并广播 |
+| 21:30-04:00（夏令时）/ 22:30-05:00（冬令时） | Production Core | `data_sync_realtime.yml` (US) | 美股盘中实时链，建议独立市场窗口调度 |
+| 美东收盘后（北京清晨） | Production Core | `data_sync_us.yml` -> `verify_predictions.yml --market US` -> `ai_analyze_us.yml` | US 独立盘后链，避免与 CN/HK 主链抢资源 |
 
 ### 8.2 每日 Research
 
@@ -722,6 +728,13 @@ Production 内部分为两组：
 | 周日 10:10 | Ops Governance | `acceptance_weekly.yml` | 周验收快照 |
 
 ## 9. 第一优先级拆分建议
+
+### 9.0 新增：US 独立链条编排原则（2026-04）
+
+1. US 必须独立于 CN/HK 盘后链执行，不复用同一时间窗口串行堆叠。
+2. 调度应按市场时区拆段：CN/HK（日间/傍晚）与 US（北京时间夜间/清晨）分离。
+3. 验证与分析仍保持同口径：`data_sync_us -> verify_predictions(US) -> ai_analyze_us`。
+4. 若资源紧张，优先保 CN/HK 主链 SLA，再保证 US 链条在美东收盘后完成。
 
 第一阶段边界清理已经完成：
 

@@ -1,6 +1,6 @@
-name: AI Analysis - Hong Kong (HK)
+name: AI Analysis - US Market
 
-# 职责：仅负责港股 AI 分析，不包含数据同步
+# 职责：仅负责美股 AI 分析，不包含数据同步
 
 on:
   workflow_dispatch: # 支持手动触发
@@ -60,12 +60,13 @@ on:
         default: 'auto'
 
 concurrency:
-  group: ai-analyze-hk-${{ github.ref }}
+  group: ai-analyze-us-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  analyze-hk:
+  analyze-us:
     runs-on: ubuntu-latest
+    timeout-minutes: 180
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -81,7 +82,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
 
-      - name: Run AI Analysis for Hong Kong
+      - name: Run AI Analysis for US Market
         env:
           PYTHONUNBUFFERED: "1"
           # 数据库
@@ -105,7 +106,7 @@ jobs:
           # Canonical DeepSeek Official (kept for rollback model entries, even if inactive)
           LLM_PROVIDER__DEEPSEEK_OFFICIAL__API_KEY: ${{ secrets.LLM_PROVIDER__DEEPSEEK_OFFICIAL__API_KEY }}
           LLM_PROVIDER__DEEPSEEK_OFFICIAL__BASE_URL: ${{ secrets.LLM_PROVIDER__DEEPSEEK_OFFICIAL__BASE_URL }}
-          
+
           # 通知
           WECOM_ROBOT_KEY: ${{ secrets.WECOM_ROBOT_KEY }}
           INTERNAL_API_SECRET: ${{ secrets.INTERNAL_API_SECRET }}
@@ -124,7 +125,7 @@ jobs:
             DATE_ARGS+=(--date "${{ inputs.date }}")
             echo "📅 Target date set to: ${{ inputs.date }}"
           fi
-          
+
           if [ -z "${{ inputs.model }}" ]; then
             MODEL_ARGS=(--model all)
           else
@@ -140,5 +141,5 @@ jobs:
           fi
           LOCALE_ARGS=(--locale "${LOCALE_VALUE}")
 
-          echo "🚀 Executing: python -u backend/main.py --analyze --market HK ${MODEL_ARGS[*]} ${FORCE_ARGS[*]} ${DATE_ARGS[*]} ${LOCALE_ARGS[*]}"
-          python -u backend/main.py --analyze --market HK "${MODEL_ARGS[@]}" "${FORCE_ARGS[@]}" "${DATE_ARGS[@]}" "${LOCALE_ARGS[@]}"
+          echo "🚀 Executing: python -u backend/main.py --analyze --market US ${MODEL_ARGS[*]} ${FORCE_ARGS[*]} ${DATE_ARGS[*]} ${LOCALE_ARGS[*]}"
+          python -u backend/main.py --analyze --market US "${MODEL_ARGS[@]}" "${FORCE_ARGS[@]}" "${DATE_ARGS[@]}" "${LOCALE_ARGS[@]}"
