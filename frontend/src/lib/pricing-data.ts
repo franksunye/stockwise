@@ -65,7 +65,7 @@ export function getPricingPlans(locale: string): PricingPlan[] {
         {
             name: 'pricing.plus.name',
             enName: 'Plus',
-            price: '---',
+            price: isCN ? '69.9' : '9.9',
             period: 'pricing.plus.period',
             description: 'pricing.plus.description',
             features: [

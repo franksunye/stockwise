@@ -47,8 +47,8 @@ const KO_PRICING_PLANS = [
   {
     name: 'Plus Prestige',
     eyebrow: '출시 예정 하이엔드',
-    price: 'TBA',
-    period: '대기 예약',
+    price: '9.9',
+    period: '월간 / 연간 $99',
     description: '합의 추론과 우선 지원이 필요한 고급 사용자를 위한 플랜입니다.',
     features: [
       '10종 자선주/관심종목 (연판 보고서 포함)',

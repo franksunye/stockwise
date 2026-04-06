@@ -47,8 +47,8 @@ const EN_PRICING_PLANS = [
   {
     name: 'Plus',
     eyebrow: 'Coming Soon High-End',
-    price: 'TBA',
-    period: 'Waiting List',
+    price: '9.9',
+    period: 'Monthly / $99 Yearly',
     description: 'Advanced consensus reasoning and priority expert support.',
     features: [
       '10 Watchlist Stocks (incl. Insights/day)',

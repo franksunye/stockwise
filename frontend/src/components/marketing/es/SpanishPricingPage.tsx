@@ -47,8 +47,8 @@ const ES_PRICING_PLANS = [
   {
     name: 'Plus Prestige',
     eyebrow: 'Alta Gama Próximamente',
-    price: 'TBA',
-    period: 'Lista de Espera',
+    price: '9.9',
+    period: 'Mensual / $99 Anual',
     description: 'Razonamiento avanzado por consenso y soporte prioritario de expertos.',
     features: [
       '10 Acciones en Lista (con Informes/día)',
