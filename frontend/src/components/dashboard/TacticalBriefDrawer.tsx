@@ -40,7 +40,6 @@ import {
   normalizeActionLabel,
   normalizeLegacyTerms,
 } from '@/lib/tactical-brief-surface';
-import { getNormalizedNewsItems } from '@/lib/tactical-brief-content';
 import { useT, useLocale } from '@/context/LocaleContext';
 import { getLocalizedStockName } from '@/lib/stock-name';
 import type { MessageKey } from '@/lib/i18n';
@@ -162,7 +161,6 @@ export function TacticalBriefDrawer({
   const isV10 = ['free', 'go', 'plus'].includes(tier);
   const showManagement = ['pro', 'alpha'].includes(tier);
   const showStockAlmanacExport = tier === 'pro' || tier === 'alpha';
-  const isFree = tier === 'free';
   const sourceKind = getBriefSourceKind(data, model);
   const analystProfile = resolveAnalystForBriefSource(sourceKind, model);
   const analystDisplayName =
@@ -170,7 +168,6 @@ export function TacticalBriefDrawer({
   const analystDisplayRole =
     locale === 'en' ? analystProfile.roleEn ?? analystProfile.role : analystProfile.role;
   const sourceFact = sourceKind === 'llm' ? t('independentView') : t('ruleView');
-  const newsItems = getNormalizedNewsItems(data);
   const generalTactics = getGeneralTactics(data);
   const { scenarioHoldingProfit, scenarioHoldingLoss, scenarioEmpty } = getScenarioTacticGroups(data);
 
@@ -832,34 +829,12 @@ export function TacticalBriefDrawer({
                       </div>
                    </section>
 
-                  {/* 重点情报 (News Radar) */}
-                  {newsItems.length > 0 && (
-                    <section className="relative">
-                      <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> {t('intelligence')} (Last 48h)
-                      </h3>
-                      <div className={`p-4 rounded-2xl bg-gradient-to-br from-emerald-500/[0.05] to-transparent border border-emerald-500/10 space-y-3 ${isFree ? (isHighPerformance ? 'opacity-20 grayscale brightness-50 select-none pointer-events-none' : 'blur-md select-none pointer-events-none opacity-40') : ''}`}>
-                        {newsItems.map((news, idx) => (
-                          <div key={idx} className="flex gap-3 items-start">
-                            <span className="text-slate-500 mt-0.5"><Newspaper size={12} /></span>
-                            <p className="text-xs text-slate-300 leading-relaxed font-medium">{news}</p>
-                          </div>
-                        ))}
-                      </div>
-                      {isFree && (
-                          <div className="absolute inset-x-0 bottom-4 flex justify-center z-10">
-                              <span className={`px-3 py-1 rounded-full border border-white/10 text-[10px] font-bold text-white uppercase tracking-wider ${!isHighPerformance ? 'bg-white/10 backdrop-blur-md' : 'bg-slate-800'}`}>{t('upgradeUnlock')}</span>
-                          </div>
-                      )}
-                    </section>
-                  )}
-
                   {/* 分析过程 - 推理链 (带折叠交互) */}
                   {Array.isArray(data.reasoning_trace) && data.reasoning_trace.length > 0 && (
                     <section className="space-y-4 relative">
                       <button 
-                        onClick={() => !isFree && setIsExpanded(!isExpanded)}
-                        className={`w-full flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/5 group active:scale-[0.98] transition-all ${isFree ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        onClick={() => setIsExpanded(!isExpanded)}
+                        className="w-full flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/5 group active:scale-[0.98] transition-all"
                       >
                         <div className="flex items-center gap-3">
                            <Sparkles
@@ -875,16 +850,9 @@ export function TacticalBriefDrawer({
                            <ChevronDown size={16} />
                         </motion.div>
                       </button>
-                      {isFree && (
-                          <div className="absolute inset-0 flex items-center justify-center">
-                              <div className={`px-4 py-2 rounded-2xl border border-indigo-500/30 text-[10px] font-black italic text-indigo-400 uppercase tracking-widest shadow-2xl ${!isHighPerformance ? 'bg-indigo-500/20 backdrop-blur-xl' : 'bg-[#0f0f18]'}`}>
-                                  {t('upgradeUnlockReasoning')}
-                              </div>
-                          </div>
-                      )}
 
                       <AnimatePresence>
-                        {isExpanded && !isFree && (
+                        {isExpanded && (
                           <motion.div
                             initial={{ height: 0, opacity: 0 }}
                             animate={{ height: 'auto', opacity: 1 }}
