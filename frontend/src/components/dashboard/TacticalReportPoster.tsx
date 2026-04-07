@@ -107,6 +107,7 @@ export function TacticalReportPoster({
   // Report must follow the same semantic gate as dashboard card to avoid
   // "outer card vs report" mismatches for non-pro tiers.
   const allowLayer1Status = tier === 'pro' || tier === 'alpha';
+  const isFree = tier === 'free';
   const actionMeta = useMemo(
     () => getPredictionActionMeta(prediction, { useLayer1Status: allowLayer1Status }),
     [prediction, allowLayer1Status],
@@ -336,29 +337,31 @@ export function TacticalReportPoster({
                   </section>
                 )}
 
-                <section className="mt-5 border-t border-white/5 pt-5">
-                  <div className="mb-4 flex items-center gap-2">
-                    <div className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
-                    <h2 className="text-xs font-black uppercase tracking-[0.24em] text-slate-400">{tPoster('reasoning')}</h2>
-                  </div>
-                  <div className="relative space-y-3.5 before:absolute before:left-[8px] before:top-2 before:bottom-2 before:w-px before:bg-white/5">
-                    {reasoningSteps.map((step, idx) => (
-                      <div key={`${step.step}-${idx}`} className="relative pl-7">
-                        <div className="absolute left-0 top-1.5 h-4 w-4 rounded-full border border-indigo-500/20 bg-[#0f1120] flex items-center justify-center text-indigo-300">
-                          {getStepConfig(step.step, tBrief).icon}
-                        </div>
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <p className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">
-                              <span>{getStepConfig(step.step, tBrief).label}</span>
-                            </p>
-                            <p className="mt-1 text-[12px] font-medium leading-5 text-slate-100/92">{normalizeLegacyTerms(step.data)}</p>
+                {!isFree && (
+                  <section className="mt-5 border-t border-white/5 pt-5">
+                    <div className="mb-4 flex items-center gap-2">
+                      <div className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
+                      <h2 className="text-xs font-black uppercase tracking-[0.24em] text-slate-400">{tPoster('reasoning')}</h2>
+                    </div>
+                    <div className="relative space-y-3.5 before:absolute before:left-[8px] before:top-2 before:bottom-2 before:w-px before:bg-white/5">
+                      {reasoningSteps.map((step, idx) => (
+                        <div key={`${step.step}-${idx}`} className="relative pl-7">
+                          <div className="absolute left-0 top-1.5 h-4 w-4 rounded-full border border-indigo-500/20 bg-[#0f1120] flex items-center justify-center text-indigo-300">
+                            {getStepConfig(step.step, tBrief).icon}
+                          </div>
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <p className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">
+                                <span>{getStepConfig(step.step, tBrief).label}</span>
+                              </p>
+                              <p className="mt-1 text-[12px] font-medium leading-5 text-slate-100/92">{normalizeLegacyTerms(step.data)}</p>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                </section>
+                      ))}
+                    </div>
+                  </section>
+                )}
 
                 <section className="mt-5 border-t border-white/5 pt-5">
                   <div className="mb-4 flex items-center gap-2">

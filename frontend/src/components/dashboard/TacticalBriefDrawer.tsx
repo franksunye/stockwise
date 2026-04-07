@@ -161,6 +161,7 @@ export function TacticalBriefDrawer({
   const isV10 = ['free', 'go', 'plus'].includes(tier);
   const showManagement = ['pro', 'alpha'].includes(tier);
   const showStockAlmanacExport = tier === 'pro' || tier === 'alpha';
+  const isFree = tier === 'free';
   const sourceKind = getBriefSourceKind(data, model);
   const analystProfile = resolveAnalystForBriefSource(sourceKind, model);
   const analystDisplayName =
@@ -833,8 +834,8 @@ export function TacticalBriefDrawer({
                   {Array.isArray(data.reasoning_trace) && data.reasoning_trace.length > 0 && (
                     <section className="space-y-4 relative">
                       <button 
-                        onClick={() => setIsExpanded(!isExpanded)}
-                        className="w-full flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/5 group active:scale-[0.98] transition-all"
+                        onClick={() => !isFree && setIsExpanded(!isExpanded)}
+                        className={`w-full flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/5 group active:scale-[0.98] transition-all ${isFree ? 'opacity-70 cursor-not-allowed' : ''}`}
                       >
                         <div className="flex items-center gap-3">
                            <Sparkles
@@ -850,9 +851,16 @@ export function TacticalBriefDrawer({
                            <ChevronDown size={16} />
                         </motion.div>
                       </button>
+                      {isFree && (
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                          <div className="px-4 py-2 rounded-2xl border border-indigo-500/30 text-[10px] font-black italic text-indigo-300 uppercase tracking-widest shadow-2xl bg-[#0f0f18]/90">
+                            {t('unlockGo')}
+                          </div>
+                        </div>
+                      )}
 
                       <AnimatePresence>
-                        {isExpanded && (
+                        {isExpanded && !isFree && (
                           <motion.div
                             initial={{ height: 0, opacity: 0 }}
                             animate={{ height: 'auto', opacity: 1 }}
@@ -896,14 +904,14 @@ export function TacticalBriefDrawer({
 
                   {/* 思维复盘 / 反向论点 (Counter Argument) */}
                   {data.counter_argument && (
-                    <section className="space-y-4">
+                    <section className="space-y-4 relative">
                       <button
-                        onClick={() => setIsCounterArgumentExpanded(!isCounterArgumentExpanded)}
+                        onClick={() => !isFree && setIsCounterArgumentExpanded(!isCounterArgumentExpanded)}
                         className={`w-full flex items-center justify-between p-4 rounded-2xl group active:scale-[0.98] transition-all ${
                           isCounterArgumentExpanded
                             ? 'bg-rose-500/5 border border-rose-500/10'
                             : 'bg-rose-500/[0.03] border border-rose-500/[0.08]'
-                        }`}
+                        } ${isFree ? 'opacity-70 cursor-not-allowed' : ''}`}
                       >
                         <div className="flex items-center gap-3">
                           <AlertTriangle size={12} className={isCounterArgumentExpanded ? 'text-rose-400' : 'text-rose-400/75'} />
@@ -916,9 +924,16 @@ export function TacticalBriefDrawer({
                           <ChevronDown size={16} />
                         </motion.div>
                       </button>
+                      {isFree && (
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                          <div className="px-4 py-2 rounded-2xl border border-rose-500/30 text-[10px] font-black italic text-rose-300 uppercase tracking-widest shadow-2xl bg-[#1a0f14]/90">
+                            {t('unlockGo')}
+                          </div>
+                        </div>
+                      )}
 
                       <AnimatePresence>
-                        {isCounterArgumentExpanded && (
+                        {isCounterArgumentExpanded && !isFree && (
                           <motion.div
                             initial={{ height: 0, opacity: 0 }}
                             animate={{ height: 'auto', opacity: 1 }}
