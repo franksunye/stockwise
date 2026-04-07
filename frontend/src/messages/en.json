@@ -19,9 +19,9 @@
   },
   "dashboard": {
     "title": "CONTROL CENTER",
-    "stockPool": "PORTFOLIO RADAR",
+    "stockPool": "PORTFOLIO",
     "stockPoolWordmark": "RADAR",
-    "stockPoolAssetsHeading": "Radar assets ({count})",
+    "stockPoolAssetsHeading": "ASSETS ({count})",
     "stockProfilePassRateLabel": "Validation rate",
     "stockProfileCompletedLabel": "Completed lookbacks",
     "stockProfileMatrixTitle": "Strategy matrix (last {days} days)",
