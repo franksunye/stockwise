@@ -67,8 +67,10 @@
     "validation": {
       "goldMedal": "金牌验证 +{perf}%",
       "passed": "验证通过 {perf}",
+      "passedWindow": "{window}验证通过",
       "deviated": "{window}日偏离",
       "verifying": "{window}日验证中",
+      "verifyingWindow": "{window}验证中",
       "waiting": "待回看",
       "closeVerify": "收盘验证",
       "windowVerify": "{window}日回看",

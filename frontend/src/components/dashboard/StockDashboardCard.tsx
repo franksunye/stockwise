@@ -311,13 +311,17 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
                            {status === 'Correct' ? (
                              <div className="flex flex-col items-center gap-2">
                                <ShieldCheck size={28} className="text-emerald-500" />
-                               <span className="text-xs font-black text-emerald-500 tracking-wide">{t('validation.passed', { label: windowLabel })}</span>
+                               <span className="text-xs font-black text-emerald-500 tracking-wide">
+                                 {t('validation.passedWindow', { window: windowLabel })}
+                               </span>
                              </div>
                            ) : status === 'Verifying' ? (
                              <div className="flex flex-col items-center gap-2">
                                <Clock size={24} className="text-indigo-400 animate-pulse" />
                                <div className="flex flex-col items-center">
-                                 <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">{windowLabel} {t('validation.verifying')}</span>
+                                 <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">
+                                   {t('validation.verifyingWindow', { window: windowLabel })}
+                                 </span>
                                  <span className="text-[9px] font-bold text-slate-500 italic">{t('validation.waitingFlow')}</span>
                                </div>
                              </div>

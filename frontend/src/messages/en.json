@@ -67,8 +67,10 @@
     "validation": {
       "goldMedal": "Gold Medal +{perf}%",
       "passed": "Validation Passed {perf}",
+      "passedWindow": "{window} Passed",
       "deviated": "{window}-Day Deviated",
       "verifying": "{window}-Day Verifying",
+      "verifyingWindow": "{window} Verifying",
       "waiting": "Waiting for Review",
       "closeVerify": "Close Verification",
       "windowVerify": "{window}-Day Review",
