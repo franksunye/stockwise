@@ -98,19 +98,19 @@ def generate_morning_calls(dry_run=False, target_date=None, force=False):
             buy_ratio = len(buy_signals) / total_preds
             sell_ratio = len(sell_signals) / total_preds
             
-            # Watchlist Sentiment Logic
+            # Watchlist Sentiment & Stock Selection Logic
             if buy_ratio > 0.5:
                 sentiment_tag = "多头进攻"
+                stock_names_to_show = ", ".join(buy_signals[:3])
+                notif_type = "morning_call"
             elif sell_ratio > 0.5:
                 sentiment_tag = "避险防御"
+                stock_names_to_show = ", ".join(sell_signals[:3])
+                notif_type = "morning_call"
             else:
                 sentiment_tag = "震荡观望"
-            
-            # Decide which template type to use
-            notif_type = "morning_call" if buy_signals else "morning_call_neutral"
-            
-            # Target fallback
-            stock_names_to_show = ", ".join(buy_signals[:3]) if buy_signals else ", ".join([f"{p[4]}" for p in predictions][:3])
+                stock_names_to_show = ", ".join([f"{p[4]}" for p in predictions][:3])
+                notif_type = "morning_call_neutral"
             
             # Queue for NotificationManager to handle (it will fetch tier and render during flush)
             nm.queue_notification(user_id, notif_type, {
