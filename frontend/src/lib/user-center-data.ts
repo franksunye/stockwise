@@ -13,6 +13,7 @@ export interface NotificationSettings {
         daily_brief: NotificationTypeSetting;
         price_update: NotificationTypeSetting;
         market_almanac: NotificationTypeSetting;
+        ai_radar_alert: NotificationTypeSetting;
     };
 }
 
@@ -33,6 +34,7 @@ export const DEFAULT_NOTIFICATION_SETTINGS: NotificationSettings = {
         daily_brief: { enabled: false, priority: 'low' },
         price_update: { enabled: false, priority: 'low' },
         market_almanac: { enabled: false, priority: 'medium' },
+        ai_radar_alert: { enabled: true, priority: 'high' },
     },
 };
 
@@ -69,6 +71,10 @@ export function normalizeNotificationSettings(
             market_almanac: {
                 ...DEFAULT_NOTIFICATION_SETTINGS.types.market_almanac,
                 ...(settings?.types?.market_almanac || {}),
+            },
+            ai_radar_alert: {
+                ...DEFAULT_NOTIFICATION_SETTINGS.types.ai_radar_alert,
+                ...(settings?.types?.ai_radar_alert || {}),
             },
         },
     };

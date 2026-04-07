@@ -325,7 +325,8 @@
           "badgeStandard": "TBD"
         },
         "price_update": { "label": "Live quotes", "badge": "Session" },
-        "market_almanac": { "label": "Market almanac (Paused)", "badge": "TBD" }
+        "market_almanac": { "label": "Market almanac (Paused)", "badge": "TBD" },
+        "ai_radar_alert": { "label": "Session Radar", "badge": "Pro Only" }
       }
     }
   },
