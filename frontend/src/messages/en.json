@@ -262,6 +262,11 @@
     "watchlistUsage": "Watchlist Quota",
     "protected": "Protected",
     "settings": "Account Settings",
+    "language": {
+      "title": "Language",
+      "cn": "Chinese",
+      "en": "English"
+    },
     "successRedeem": "Redemption Success! Upgraded to Go",
     "failRedeem": "Redemption Failed",
     "networkFail": "Network request failed",

@@ -17,7 +17,7 @@ import { useUserCenterData } from '@/hooks/useUserCenterData';
 import { UserPricingView } from './UserPricingView';
 import { SupportCenterView } from './SupportCenterView';
 import { LearnCenterView } from './LearnCenterView';
-import { useT, useGlobalT } from '@/context/LocaleContext';
+import { useT, useGlobalT, useLocale } from '@/context/LocaleContext';
 import type { MessageKey } from '@/lib/i18n';
 import pkg from '../../package.json';
 
@@ -31,6 +31,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
   const t = useT('user');
   const tCommon = useT('common');
   const tGlobal = useGlobalT();
+  const { locale, setLocale } = useLocale();
   const { profile, tier, userId, refreshProfile, loading } = useUserProfile();
   const canAccessInvestmentMode = tier === 'pro' || tier === 'alpha';
   const isPremiumTier = tier !== 'free';
@@ -173,6 +174,12 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
     } finally {
       setIsLinkingEmail(false);
     }
+  };
+
+  const handleSwitchLocale = async (nextLocale: 'cn' | 'en') => {
+    if (locale === nextLocale) return;
+    setLocale(nextLocale);
+    await refreshProfile({ force: true });
   };
   return (
     <AnimatePresence onExitComplete={resetDrawerState}>
@@ -669,6 +676,37 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
 
                     {/* Footer Tools */}
                     <div className="pt-8 border-t border-white/5 text-center">
+                        <div className="mb-8">
+                          <div className="flex items-center justify-between mb-3 px-1 text-left">
+                            <div className="flex items-center gap-2">
+                              <ArrowLeftRight size={14} className="text-slate-500" />
+                              <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">{t('language.title')}</span>
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2">
+                            <button
+                              onClick={() => { void handleSwitchLocale('cn'); }}
+                              className={`rounded-xl px-3 py-2 text-xs font-bold transition-all ${
+                                locale === 'cn'
+                                  ? 'bg-indigo-500/20 border border-indigo-500/40 text-indigo-200'
+                                  : 'bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10'
+                              }`}
+                            >
+                              {t('language.cn')}
+                            </button>
+                            <button
+                              onClick={() => { void handleSwitchLocale('en'); }}
+                              className={`rounded-xl px-3 py-2 text-xs font-bold transition-all ${
+                                locale === 'en'
+                                  ? 'bg-indigo-500/20 border border-indigo-500/40 text-indigo-200'
+                                  : 'bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10'
+                              }`}
+                            >
+                              {t('language.en')}
+                            </button>
+                          </div>
+                        </div>
+
                         {/* 激活码兑换区域 (Beta) */}
                         {MEMBERSHIP_CONFIG.switches.enableRedemption && tier === 'free' && (
                           <div className="mb-10">

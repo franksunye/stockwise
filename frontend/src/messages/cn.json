@@ -262,6 +262,11 @@
     "watchlistUsage": "自选额度",
     "protected": "已保护",
     "settings": "账户设置",
+    "language": {
+      "title": "语言",
+      "cn": "中文",
+      "en": "英文"
+    },
     "successRedeem": "兑换成功！已升级为 Go 会员",
     "failRedeem": "兑换失败",
     "networkFail": "网络请求失败",
