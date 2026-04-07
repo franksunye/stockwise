@@ -1,16 +1,19 @@
 ---
-title: "知守 AI (ZISO AI) 通知系统专项设计（2026-03）"
+title: "知守 AI (ZISO AI) 通知系统专项设计"
 doc_id: "product-notification-strategy-design-202603"
 doc_domain: "product"
 doc_status: "active"
 owner: "founder"
-last_reviewed_at: "2026-03-19"
+created_at: "2026-03-04"
+updated_at: "2026-04-07"
+last_reviewed_at: "2026-04-07"
 summary: "定义通知系统的生产基线与研究延续，是通知、节奏与触达类内容的现行事实源。"
 ---
 
-# 知守 AI (ZISO AI) 通知系统专项设计（2026-03）
-> **版本**: 2.0  
-> **日期**: 2026-03-04  
+# 知守 AI (ZISO AI) 通知系统专项设计
+
+> **首次制定**: 2026-03-04  
+> **最后更新**: 2026-04-07  
 > **状态**: 生效中（Production Baseline）+ 研究亮点保留（Research Continuity）
 
 ## 0. 文档使用方式（重要）
