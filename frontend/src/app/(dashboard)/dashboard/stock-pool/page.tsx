@@ -14,6 +14,7 @@ import type { AIPrediction } from '@/lib/types';
 import { writeDashboardNavIntentSymbol } from '@/lib/dashboard-symbol-navigation';
 import { useT, useLocale } from '@/context/LocaleContext';
 import { getLocalizedStockName } from '@/lib/stock-name';
+import type { MessageKey } from '@/lib/i18n';
 
 interface StockSnapshot {
   symbol: string;
@@ -75,7 +76,7 @@ const StockItem = memo(({
              <h3 className="text-base font-black italic tracking-tighter text-white">{listName}</h3>
              <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest flex items-center gap-1.5 mt-0.5">
                <span className={`w-1 h-1 rounded-full ${meta.dotClass}`} />
-               {meta.headline}
+               {t(`signal.${meta.headline}` as MessageKey<'dashboard'>)}
              </p>
            </div>
          </div>
