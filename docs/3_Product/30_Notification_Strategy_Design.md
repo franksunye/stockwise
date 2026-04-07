@@ -85,13 +85,14 @@ summary: "定义通知系统的生产基线与研究延续，是通知、节奏�
 具体通知话术是系统向用户交付价值和传递专业度的核心触点，这些具体的文本规范内聚于产品设计文档当中并与 `backend/notification_templates.py` 强绑定。
 
 #### 1. 信号反转 (signal_flip)
-> 逻辑：仅在观点跨中轴线时触发，强调关键时刻的转向动作。
+> 触发逻辑：遵循“单一周期收盘确认 (Once Per Bar Close)”原则。必须在目标级别 K 线收平后确立跨越中轴，才会触发。系统通过冷却期过滤盘中的高频假摔或来回摩擦噪音。
 *   **Free (基础告知)**
-    *   **Title**: `🚨 信号反转：{symbol}`
-    *   **Body**: `观点从 [{old_signal}] 变为 [{new_signal}]，置信度 {confidence_pct}%。点开看原因。`
+    *   **Title**: `🚨 {timeframe}信号反转：{stock_names}`
+    *   **Body**: `观点从 [{old_signal}] 变为 [{new_signal}]，置信度 {confidence_pct}%。点击查看突破动因。`
 *   **Pro (动作导向)**
-    *   **Title**: `🎯 Pro 反转提醒：{symbol}`
-    *   **Body**: `核心方向已切换到 [{new_signal}]。已生成仓位动作与风险阈值。`
+    *   **Title**: `🎯 Pro {timeframe}反转预警：{stock_names}`
+    *   **Body**: `结构已确立切换为 [{new_signal}]。{direction_action} 查看最新计划。`
+    *   *(注：当多转空时 `{direction_action}` = "关注防守与破位边界"；当空转多时 `{direction_action}` = "蓄势转强，关注试仓条件")*
 
 #### 2. 开盘早报 (morning_call)
 > 逻辑：开盘前的注意力引导与情绪定调。
@@ -138,7 +139,7 @@ summary: "定义通知系统的生产基线与研究延续，是通知、节奏�
 #### 7. 实时行情 (price_update)
 > 逻辑：应对盘中极端波动（目前按战略为“降噪”，此通知不发）。
 *   **All (通用)**
-    *   **Title**: `{stock_name} ({symbol}) {emoji} {change_pct}%`
+    *   **Title**: `{stock_names} {emoji} {change_pct}%`
     *   **Body**: `最新: {price} | 成交: {volume_formatted}`
 
 
