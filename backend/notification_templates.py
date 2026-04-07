@@ -133,17 +133,31 @@ class NotificationTemplates:
                 }
             }
         },
-        "prediction_updated": {
+        "prediction_updated_alert": {
             "free": {
                 "zh": {
-                    "title": "🤖 预测数据已更新",
-                    "body": "{market_name} 监控池已完成刷新，可查看最新趋势。"
+                    "title": "⚡ {market_name} 最新异动已捕获",
+                    "body": "模型扫描已完成。您的自选池中析出 {action_count} 个核心形态变化，建议立即查看 AI 评级。"
                 }
             },
             "pro": {
                 "zh": {
-                    "title": "⭐ Pro 深度预测已就绪",
-                    "body": "{market_name} 深度分析已生成，含情绪建模与策略解释。"
+                    "title": "🚨 Pro 盘后核心沙盘：发现战机",
+                    "body": "{market_name} 模型算力结算完毕。已锁定 {action_count} 处建仓/防守级拐点，风控参数与进场节点已更新。"
+                }
+            }
+        },
+        "prediction_updated_routine": {
+            "free": {
+                "zh": {
+                    "title": "🔄 {market_name} 夜间推演完成",
+                    "body": "全场标的走势模拟已更新。当前无结构性发散，请继续跟踪网格支撑位。"
+                }
+            },
+            "pro": {
+                "zh": {
+                    "title": "🛡️ Pro 盘后例行维护：阵型稳固",
+                    "body": "{market_name} 核心标的深度评估完毕。当日无系统性风控事件，明日纪律计划已下发。"
                 }
             }
         },
