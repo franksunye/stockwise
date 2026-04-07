@@ -83,7 +83,7 @@ const EN_FEATURE_COMPARISON = [
     plus: '10 Symbols',
     highlight: true,
   },
-  { label: 'MONTHLY QUOTA', free: '60 / Month', go: '200 / Month', plus: '200 / Month' },
+  { label: 'MONTHLY RESEARCH REPORTS', free: '60 / Month', go: '200 / Month', plus: '200 / Month' },
   { label: 'MARKET COVERAGE', free: 'US / HK / CN', go: 'US / HK / CN', plus: 'US / HK / CN' },
   { label: 'SIGNALS / PROTOCOLS', free: '✅', go: '✅', plus: '✅' },
   { label: 'TACTICAL ANCHORS', free: '✅', go: '✅', plus: '✅' },

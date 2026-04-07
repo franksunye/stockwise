@@ -419,7 +419,7 @@
     "rows": {
       "model": "AI Service Model",
       "quota": "Watchlist Quota",
-      "quotaMonthly": "Monthly Report Quota",
+      "quotaMonthly": "Monthly Research Reports",
       "signalsTactical": "Signals / Tactical Briefs",
       "levelsShort": "Key Levels / Short Pressure",
       "reasoningReflection": "Deduction / Risk Reflection",
@@ -436,7 +436,7 @@
       "group": "Actionable Insights",
       "model": "Analysis Engine",
       "dailyLimit": "Monitoring Quota (Daily)",
-      "monthlyLimit": "Computational Quota (Monthly)",
+      "monthlyLimit": "Research Reports (Monthly)",
       "signals": "Trend Signals / Protocols",
       "levels": "Tactical Anchers / Short Interest",
       "reasoning": "Logic Trace / Rationale Audit",
