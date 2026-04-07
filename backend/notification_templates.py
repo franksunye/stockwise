@@ -169,6 +169,20 @@ class NotificationTemplates:
                 }
             }
         },
+        "ai_radar_alert": {
+            "free": {
+                "zh": {
+                    "title": "📡 [AI雷达] 捕捉到结构性偏移",
+                    "body": "{stock_names} 实际走势与晨间预判出现逻辑背离。重点观察其在 {current_price} 附近的表现。"
+                }
+            },
+            "pro": {
+                "zh": {
+                    "title": "🕵️ Pro 结构雷达：逻辑共振确认",
+                    "body": "{stock_names} 盘中逻辑共振。放量突破 AI 强压力位 {resistance}。请根据 Pro 盘中实时计划调整策略。"
+                }
+            }
+        },
         "almanac_preview": {
             "all": {
                 "zh": {
