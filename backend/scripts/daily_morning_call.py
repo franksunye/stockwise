@@ -25,9 +25,11 @@ except ImportError:
     from engine.task_logger import get_task_logger
 
 
-def generate_morning_calls(dry_run=False, target_date=None, force=False):
+def generate_morning_calls(dry_run=False, target_date=None, force=False, market="CN"):
     """
     Generate and send personalized morning calls for all active users.
+    Args:
+        market: Market identifying code ("CN", "HK", "US").
     """
     today_str = target_date or datetime.now(BEIJING_TZ).strftime("%Y-%m-%d")
     
@@ -35,15 +37,12 @@ def generate_morning_calls(dry_run=False, target_date=None, force=False):
     if not force:
         try:
             # Lazy import to avoid circular dependency
-            import sys
-            sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
             from trading_calendar import is_market_closed
             
             check_date = datetime.strptime(today_str, "%Y-%m-%d")
-            # Morning Call usually targets opening markets. If CN is closed, no morning call.
-            # Assuming Morning Call is primarily for A-share/HK open.
-            if is_market_closed(check_date, "CN") and is_market_closed(check_date, "HK"):
-                logger.info(f"📅 [TradingDayGuard] {today_str} 为全市场休市日，跳过早报推送。")
+            # Market-specific holiday check
+            if is_market_closed(check_date, market):
+                logger.info(f"📅 [TradingDayGuard] {today_str} 为 {market} 市场休市日，跳过早报推送。")
                 return 0
         except ImportError:
             # Fallback if trading_calendar not found (e.g. strict path issues)
@@ -51,7 +50,7 @@ def generate_morning_calls(dry_run=False, target_date=None, force=False):
         except Exception as e:
             logger.warning(f"⚠️ [TradingDayGuard] Check failed: {e}, proceeding.")
 
-    logger.info(f"🌅 Starting Daily Morning Call generation for {today_str} (Dry Run: {dry_run}, Force: {force})")
+    logger.info(f"🌅 Starting Daily Morning Call [{market}] for {today_str} (Dry Run: {dry_run}, Force: {force})")
     
     t_logger = get_task_logger("news_desk", "morning_call")
     t_logger.start("Daily Morning Call", "delivery", dimensions={})
@@ -69,8 +68,17 @@ def generate_morning_calls(dry_run=False, target_date=None, force=False):
         
         sent_count = 0
         for user_id in users:
-            # Fetch user's watchlist symbols
-            cursor.execute("SELECT symbol FROM user_watchlist WHERE user_id = ?", (user_id,))
+            # Fetch user's watchlist symbols and filter by market
+            # Symbol logic: .HK for Hong Kong, .US for US, no suffix for CN
+            symbol_filter = ""
+            if market == "CN":
+                symbol_filter = "AND symbol NOT LIKE '%.HK' AND symbol NOT LIKE '%.US'"
+            elif market == "HK":
+                symbol_filter = "AND symbol LIKE '%.HK'"
+            elif market == "US":
+                symbol_filter = "AND symbol LIKE '%.US'"
+
+            cursor.execute(f"SELECT symbol FROM user_watchlist WHERE user_id = ? {symbol_filter}", (user_id,))
             watchlist = [row[0] for row in cursor.fetchall()]
             
             if not watchlist:
@@ -142,6 +150,7 @@ if __name__ == "__main__":
     parser.add_argument("--dry-run", action="store_true", help="Simulate without sending")
     parser.add_argument("--date", type=str, help="Specify date in YYYY-MM-DD format")
     parser.add_argument("--force", action="store_true", help="Force execution on holidays")
+    parser.add_argument("--market", type=str, default="CN", choices=["CN", "HK", "US"], help="Target market (CN, HK, US)")
     args = parser.parse_args()
     
-    raise SystemExit(generate_morning_calls(dry_run=args.dry_run, target_date=args.date, force=args.force))
+    raise SystemExit(generate_morning_calls(dry_run=args.dry_run, target_date=args.date, force=args.force, market=args.market))

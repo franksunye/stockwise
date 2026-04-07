@@ -51,7 +51,7 @@ CHECK_PRO_WATCHER_QUERY = """
     AND (u.subscription_expires_at IS NULL OR u.subscription_expires_at > ?)
 """
 GET_USER_WATCHLIST_QUERY = "SELECT symbol FROM user_watchlist WHERE user_id = ?"
-GET_USER_TIER_QUERY = "SELECT subscription_tier FROM users WHERE user_id = ?"
+GET_USER_TIER_QUERY = "SELECT subscription_tier, locale FROM users WHERE user_id = ?"
 GET_USER_NOTIF_SETTINGS_QUERY = "SELECT notification_settings FROM users WHERE user_id = ?"
 
 # --- AI & Predictions ---

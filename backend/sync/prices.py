@@ -329,22 +329,22 @@ def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool =
             notify_title = f"{stock_name} ({symbol}) {emoji} {change:+.2f}%"
             notify_body = f"最新: {price} | 成交: {format_volume(last_row['volume'])}"
         else:
-            notify_title, notify_body = NotificationTemplates.render(
-                "price_update",
-                stock_name=stock_name,
-                symbol=symbol,
-                emoji=emoji,
-                change_pct=f"{change:+.2f}",
-                price=price,
-                volume_formatted=format_volume(last_row['volume'])
-            )
-        
-        # Route through NotificationManager for preference-checked delivery.
-        # broadcast_price_alert() checks per-user notification_settings before
-        # making HTTP calls, respecting the 'price_update' toggle (default OFF).
-        from notification_service import NotificationManager
-        nm = NotificationManager()
-        nm.broadcast_price_alert(symbol, notify_title, notify_body, "price_update")
+            # Route through NotificationManager for preference-checked delivery.
+            # broadcast_price_alert() checks per-user notification_settings before
+            # making HTTP calls. Rendering is now handled inside the loop for i18n.
+            from notification_service import NotificationManager
+            nm = NotificationManager()
+            
+            context = {
+                "stock_name": stock_name,
+                "symbol": symbol,
+                "emoji": emoji,
+                "change_pct": f"{change:+.2f}",
+                "price": price,
+                "volume_formatted": format_volume(last_row['volume']),
+                "url": f"/dashboard/stock/{symbol}"
+            }
+            nm.broadcast_price_alert(symbol, "price_update", context, tag="price_update")
         
         # [NEW] Active Radar Audit: Compare price action against AI strategy anchors
         try:

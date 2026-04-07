@@ -24,12 +24,20 @@ class NotificationTemplates:
                 "zh": {
                     "title": "📊 今日复盘已就绪",
                     "body": "{push_hook}"
+                },
+                "en": {
+                    "title": "📊 Daily Recap Ready",
+                    "body": "{push_hook}"
                 }
             },
             "pro": {
                 "zh": {
                     "title": "⭐ Pro 深度复盘已就绪",
                     "body": "{push_hook} | 含明日执行计划"
+                },
+                "en": {
+                    "title": "⭐ Pro Daily Recap Ready",
+                    "body": "{push_hook} | Action plan for tomorrow included"
                 }
             }
         },
@@ -38,12 +46,20 @@ class NotificationTemplates:
                 "zh": {
                     "title": "🚀 今日复盘：机会信号集中",
                     "body": "{push_hook}"
+                },
+                "en": {
+                    "title": "🚀 Daily Recap: Bullish Signals",
+                    "body": "{push_hook}"
                 }
             },
             "pro": {
                 "zh": {
                     "title": "🟢 Pro 机会窗口已确认",
                     "body": "{push_hook} | 已附仓位与节奏建议"
+                },
+                "en": {
+                    "title": "🟢 Pro Opportunity Confirmed",
+                    "body": "{push_hook} | Sizing & timing advice included"
                 }
             }
         },
@@ -52,12 +68,20 @@ class NotificationTemplates:
                 "zh": {
                     "title": "🛡️ 今日复盘：风险信号升温",
                     "body": "{push_hook}"
+                },
+                "en": {
+                    "title": "🛡️ Daily Recap: Risk Warning",
+                    "body": "{push_hook}"
                 }
             },
             "pro": {
                 "zh": {
                     "title": "🔴 Pro 避险信号已触发",
                     "body": "{push_hook} | 已附减仓与防守方案"
+                },
+                "en": {
+                    "title": "🔴 Pro Risk-Off Alert",
+                    "body": "{push_hook} | Exit & defense plans included"
                 }
             }
         },
@@ -66,12 +90,20 @@ class NotificationTemplates:
                 "zh": {
                     "title": "📊 今日复盘：市场偏中性",
                     "body": "{push_hook}"
+                },
+                "en": {
+                    "title": "📊 Daily Recap: Neutral Mood",
+                    "body": "{push_hook}"
                 }
             },
             "pro": {
                 "zh": {
                     "title": "⚪ Pro 震荡策略更新",
                     "body": "{push_hook} | 已附观望与试仓边界"
+                },
+                "en": {
+                    "title": "⚪ Pro Neutral Strategy Update",
+                    "body": "{push_hook} | Observation & entry levels included"
                 }
             }
         },
@@ -80,12 +112,20 @@ class NotificationTemplates:
                 "zh": {
                     "title": "🚨 信号反转：{symbol}",
                     "body": "观点从 [{old_signal}] 变为 [{new_signal}]，置信度 {confidence_pct}%。点开看原因。"
+                },
+                "en": {
+                    "title": "🚨 Signal Flip: {symbol}",
+                    "body": "Signal changed from [{old_signal}] to [{new_signal}] ({confidence_pct}% conf). Tap for details."
                 }
             },
             "pro": {
                 "zh": {
                     "title": "🎯 Pro 反转提醒：{symbol}",
                     "body": "核心方向已切换到 [{new_signal}]。已生成仓位动作与风险阈值。"
+                },
+                "en": {
+                    "title": "🎯 Pro Signal Flip: {symbol}",
+                    "body": "Direction flipped to [{new_signal}]. Sizing & risk levels updated."
                 }
             }
         },
@@ -94,6 +134,10 @@ class NotificationTemplates:
                 "zh": {
                     "title": "🎯 {count} 只关注股信号更新",
                     "body": "{symbols} 等股票出现新的交易信号，点击查看 AI 深度复盘。"
+                },
+                "en": {
+                    "title": "🎯 {count} Signal Updates in Watchlist",
+                    "body": "New signals for {symbols}. Check AI deep analysis now."
                 }
             }
         },
@@ -102,12 +146,20 @@ class NotificationTemplates:
                 "zh": {
                     "title": "☕ 开盘前早报",
                     "body": "自选池情绪：[{sentiment_tag}]。重点观察 {stock_names} 等标的盘口异动。"
+                },
+                "en": {
+                    "title": "☕ Pre-Market Brief",
+                    "body": "Watchlist Mood: [{sentiment_tag}]. Watch {stock_names} for opening action."
                 }
             },
             "pro": {
                 "zh": {
                     "title": "☀️ Pro 开盘作战简报",
                     "body": "高优盯盘资产：{stock_names}。自选池情绪：[{sentiment_tag}]。带好战术防线入场。"
+                },
+                "en": {
+                    "title": "☀️ Pro Opening Brief",
+                    "body": "High-Priority: {stock_names}. Mood: [{sentiment_tag}]. Enter with tactical levels."
                 }
             }
         },
@@ -116,6 +168,10 @@ class NotificationTemplates:
                 "zh": {
                     "title": "☕ 开盘前早报：观望日",
                     "body": "自选池无明确多头信号，情绪：[{sentiment_tag}]。今日以耐心等待为主。"
+                },
+                "en": {
+                    "title": "☕ Pre-Market: Wait & See",
+                    "body": "No strong entry signals in watchlist. Mood: [{sentiment_tag}]. Patience is key today."
                 }
             }
         },
@@ -124,6 +180,10 @@ class NotificationTemplates:
                  "zh": {
                     "title": "📊 AI 策略执行追踪：{stock_names}",
                     "body": "该标的今日触及预测网格，录得日内最高浮盈 {peak_gain}%。进入详情查看 AI 复盘。"
+                },
+                "en": {
+                    "title": "📊 AI Strategy Tracking: {stock_names}",
+                    "body": "Grid hit! Intra-day peak gain: {peak_gain}%. Tap to view AI recap."
                 }
             },
             "pro": {
@@ -138,12 +198,20 @@ class NotificationTemplates:
                 "zh": {
                     "title": "⚡ {market_name} 最新异动已捕获",
                     "body": "模型扫描已完成。您的自选池中析出 {action_count} 个核心形态变化，建议立即查看 AI 评级。"
+                },
+                "en": {
+                    "title": "⚡ {market_name} Movement Detected",
+                    "body": "Scan complete. {action_count} core pattern changes found in your watchlist. Check AI ratings now."
                 }
             },
             "pro": {
                 "zh": {
                     "title": "🚨 Pro 盘后核心沙盘：发现战机",
                     "body": "{market_name} 模型算力结算完毕。已锁定 {action_count} 处建仓/防守级拐点，风控参数与进场节点已更新。"
+                },
+                "en": {
+                    "title": "🚨 Pro Post-Market Sandbox: Opportunities",
+                    "body": "{market_name} compute complete. {action_count} entry/defense pivots locked. Risk levels & entry points updated."
                 }
             }
         },
@@ -152,12 +220,20 @@ class NotificationTemplates:
                 "zh": {
                     "title": "🔄 {market_name} 夜间推演完成",
                     "body": "全场标的走势模拟已更新。当前无结构性发散，请继续跟踪网格支撑位。"
+                },
+                "en": {
+                    "title": "🔄 {market_name} Nightly Simulation Done",
+                    "body": "Market simulation updated. No structural divergence found. Keep tracking grid support levels."
                 }
             },
             "pro": {
                 "zh": {
                     "title": "🛡️ Pro 盘后例行维护：阵型稳固",
                     "body": "{market_name} 核心标的深度评估完毕。当日无系统性风控事件，明日纪律计划已下发。"
+                },
+                "en": {
+                    "title": "🛡️ Pro Post-Market Maintenance: Solid",
+                    "body": "{market_name} assessment done. No systemic risk detected. Discipline plan for tomorrow issued."
                 }
             }
         },
@@ -166,6 +242,10 @@ class NotificationTemplates:
                 "zh": {
                     "title": "{stock_name} ({symbol}) {emoji} {change_pct}%",
                     "body": "最新: {price} | 成交: {volume_formatted}"
+                },
+                "en": {
+                    "title": "{stock_name} ({symbol}) {emoji} {change_pct}%",
+                    "body": "Last: {price} | Vol: {volume_formatted}"
                 }
             }
         },
@@ -196,6 +276,10 @@ class NotificationTemplates:
                 "zh": {
                     "title": "📜 明日投资黄历已出炉",
                     "body": "意境：{mood_tag} | 宜：{strategy}。抢先看明日市场势能推演。"
+                },
+                "en": {
+                    "title": "📜 Tomorrow's Market Almanac Ready",
+                    "body": "Mood: {mood_tag} | Best for: {strategy}. View tomorrow's energy map."
                 }
             }
         },
@@ -204,6 +288,10 @@ class NotificationTemplates:
                 "zh": {
                     "title": "📜 今日投资黄历：{mood_tag}",
                     "body": "{strategy} | AI 天机：{insight_snippet}"
+                },
+                "en": {
+                    "title": "📜 Daily Almanac: {mood_tag}",
+                    "body": "{strategy} | AI Insight: {insight_snippet}"
                 }
             }
         },
@@ -212,6 +300,9 @@ class NotificationTemplates:
             "all": {
                 "zh": {
                     "body": "📈 {stocks}{etc}出现上行动能，点击查看复盘与计划。"
+                },
+                "en": {
+                    "body": "📈 Bullish momentum for {stocks}{etc}. Tap for recap & plan."
                 }
             }
         },
@@ -219,6 +310,9 @@ class NotificationTemplates:
             "all": {
                 "zh": {
                     "body": "⚠️ {stocks}{etc}下行压力加大，点击查看风控建议。"
+                },
+                "en": {
+                    "body": "⚠️ Bearish pressure for {stocks}{etc}. Tap for risk-off advice."
                 }
             }
         },
@@ -226,6 +320,9 @@ class NotificationTemplates:
             "all": {
                 "zh": {
                     "body": "今日复盘：{count} 只股票中性震荡，点击查看执行边界。"
+                },
+                "en": {
+                    "body": "Daily Recap: {count} stocks neutral/range-bound. Tap for levels."
                 }
             }
         },

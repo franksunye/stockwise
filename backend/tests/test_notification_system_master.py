@@ -77,10 +77,12 @@ class TestNotificationMasterQA(unittest.TestCase):
                         # Basic safety checks
                         self.assertIsInstance(title, str)
                         self.assertIsInstance(body, str)
+                        self.assertGreater(len(title), 0, f"Title empty for {ntype} ({tier}/{lang})")
+                        self.assertGreater(len(body), 0, f"Body empty for {ntype} ({tier}/{lang})")
                         
                         # Check for residual placeholders (e.g. "{xxx}")
                         if "{" in title or "}" in title or "{" in body or "}" in body:
-                            results["errors"].append(f"Residual placeholder in '{ntype}' ({tier}/{lang})")
+                            results["errors"].append(f"Residual placeholder in '{ntype}' ({tier}/{lang}) - Title: {title}, Body: {body}")
                             results["failed"] += 1
                         else:
                             results["passed"] += 1
@@ -139,12 +141,28 @@ class TestNotificationMasterQA(unittest.TestCase):
             {"type": "prediction_updated_alert", "market_name": "HK", "action_count": 5}
         ]
         
-        # Aggregate with Pro tier
-        payload = self.nm._aggregate_notifications(user_id, events, user_tier="pro")
+        # Aggregate with Pro tier profile
+        profile = {"tier": "pro", "locale": "cn"}
+        payload = self.nm._aggregate_notifications(user_id, events, user_profile=profile)
         
         # Priority Check: Morning Call should win over Daily Brief/Updates
         self.assertEqual(payload["type"], "morning_call", "Morning Call should have higher priority in aggregation.")
         self.assertIn("简报", payload["title"])
+
+    def test_locale_aware_rendering(self):
+        """Verify that NotificationManager routes based on user locale."""
+        user_id = "international_user"
+        events = [{"type": "morning_call", "sentiment_tag": "Bullish", "stock_names": "AAPL"}]
+        
+        # 1. Test EN Locale
+        profile_en = {"tier": "free", "locale": "en"}
+        payload_en = self.nm._aggregate_notifications(user_id, events, user_profile=profile_en)
+        self.assertIn("Pre-Market", payload_en["title"], "English locale should trigger English template.")
+        
+        # 2. Test CN Locale
+        profile_cn = {"tier": "free", "locale": "cn"}
+        payload_cn = self.nm._aggregate_notifications(user_id, events, user_profile=profile_cn)
+        self.assertIn("早报", payload_cn["title"], "Chinese locale should trigger Chinese template.")
 
     # --- T3: Intraday Radar Logic Verification ---
 

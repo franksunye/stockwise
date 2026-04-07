@@ -43,7 +43,7 @@ class NotificationManager:
         self.queued_notifications: Dict[str, List[dict]] = {}  # user_id -> List[event]
         self.signal_cache: Dict[str, Dict[str, dict]] = {}  # user_id -> {symbol -> state_dict}
         self.pending_state_updates: List[dict] = []  # List of state updates to flush to DB
-        self.user_tier_cache: Dict[str, str] = {}  # user_id -> tier
+        self.user_profile_cache: Dict[str, Dict[str, str]] = {}  # user_id -> {tier, locale}
         self._sub_cache: Dict[str, bool] = {}  # user_id -> has_subscription
         
         # Internal stats
@@ -217,9 +217,9 @@ class NotificationManager:
             if not events:
                 continue
                 
-            # Pre-fetch user tier for rendering
-            user_tier = self._get_user_tier(user_id)
-            payload = self._aggregate_notifications(user_id, events, user_tier)
+            # Pre-fetch user profile for rendering
+            profile = self._get_user_profile(user_id)
+            payload = self._aggregate_notifications(user_id, events, profile)
             if payload:
                 success = self._send_notification(user_id, payload)
                 if success:
@@ -236,31 +236,45 @@ class NotificationManager:
         
         return total_sent
 
-    def _get_user_tier(self, user_id: str) -> str:
-        """Fetch or return cached user tier."""
-        if user_id in self.user_tier_cache:
-            return self.user_tier_cache[user_id]
+    def _get_user_profile(self, user_id: str) -> Dict[str, str]:
+        """Fetch or return cached user profile (tier and locale)."""
+        if user_id in self.user_profile_cache:
+            return self.user_profile_cache[user_id]
         
         conn = self._get_conn()
         try:
             cursor = conn.cursor()
             cursor.execute(GET_USER_TIER_QUERY, (user_id,))
             row = cursor.fetchone()
-            tier = row[0] if row and row[0] else "free"
-            self.user_tier_cache[user_id] = tier
-            return tier
-        except Exception:
-            return "free"
+            
+            # Default profile: free tier, cn locale
+            profile = {"tier": "free", "locale": "cn"}
+            
+            if row:
+                profile["tier"] = row[0] or "free"
+                profile["locale"] = row[1] or "cn"
+                
+            self.user_profile_cache[user_id] = profile
+            return profile
+        except Exception as e:
+            logger.warning(f"⚠️ Failed to get user profile for {user_id}: {e}")
+            return {"tier": "free", "locale": "cn"}
         finally:
             if not self.conn:
                 conn.close()
 
-    def _aggregate_notifications(self, user_id: str, events: List[dict], user_tier: str = "free") -> Optional[dict]:
+    def _aggregate_notifications(self, user_id: str, events: List[dict], user_profile: Optional[dict] = None) -> Optional[dict]:
         """
         Logic to merge multiple notifications into a single, clean push message.
         """
         if not events:
             return None
+
+        if not user_profile:
+            user_profile = self.get_user_profile(user_id)
+            
+        tier = user_profile.get("tier", "free")
+        lang = user_profile.get("locale", "cn")
             
         # 1. Handle Morning Call (Take the first one if multiple, usually just one)
         mc_events = [e for e in events if e["type"] in ("morning_call", "morning_call_neutral")]
@@ -269,7 +283,8 @@ class NotificationManager:
             # Use all fields from event as context for template rendering
             title, body = NotificationTemplates.render(
                 e["type"], 
-                tier=user_tier, 
+                tier=tier, 
+                lang=lang,
                 **e
             )
             return {
@@ -288,7 +303,8 @@ class NotificationManager:
                 e = flips[0]
                 title, body = NotificationTemplates.render(
                     "signal_flip", 
-                    tier=user_tier, 
+                    tier=tier, 
+                    lang=lang,
                     symbol=e["symbol"], 
                     old_signal=e["old_signal"], 
                     new_signal=e["new_signal"],
@@ -299,7 +315,8 @@ class NotificationManager:
                 symbols = [e["symbol"] for e in flips]
                 title, body = NotificationTemplates.render(
                     "signal_flip_batch", 
-                    tier=user_tier, 
+                    tier=tier, 
+                    lang=lang,
                     count=len(flips),
                     symbols=", ".join(symbols)
                 )
@@ -320,7 +337,8 @@ class NotificationManager:
             e = wins[0]
             title, body = NotificationTemplates.render(
                 "validation_glory", 
-                tier=user_tier, 
+                tier=tier, 
+                lang=lang,
                 **e
             )
             return {
@@ -341,7 +359,8 @@ class NotificationManager:
             push_hook = e.get("push_hook") or "点击查看今日 AI 复盘"
             title, body = NotificationTemplates.render(
                 e["type"],
-                tier=user_tier,
+                tier=tier,
+                lang=lang,
                 push_hook=push_hook
             )
             return {
@@ -361,7 +380,8 @@ class NotificationManager:
             
             title, body = NotificationTemplates.render(
                 "prediction_updated",
-                tier=user_tier,
+                tier=tier,
+                lang=lang,
                 market_name=m_str
             )
             
@@ -379,7 +399,8 @@ class NotificationManager:
             e = almanacs[0]
             title, body = NotificationTemplates.render(
                 e["type"], 
-                tier=user_tier, 
+                tier=tier, 
+                lang=lang,
                 **e
             )
             return {
@@ -543,10 +564,10 @@ class NotificationManager:
             if not self.conn:
                 conn.close()
 
-    def broadcast_price_alert(self, symbol: str, title: str, body: str, alert_type: str, tag: str = "price_update"):
+    def broadcast_price_alert(self, symbol: str, event_type: str, context: dict, tag: str = "price_update"):
         """
         Intraday specific: Send immediate alert to all users watching this stock.
-        Used by IntradayMonitor.
+        Used by IntradayMonitor and Prices Sync.
         """
         conn = get_connection()
         try:
@@ -559,37 +580,35 @@ class NotificationManager:
                 logger.info(f"🔕 No watchers for {symbol}, alert skipped.")
                 return
 
-            logger.info(f"📢 Broadcasting {alert_type} for {symbol} to {len(users)} users...")
+            logger.info(f"📢 Broadcasting {event_type} for {symbol} to {len(users)} users...")
             
             # 2. Filter & Send
-            # Note: For Intraday, we skip the 'Queue' and send immediately for speed.
-            # But we respect settings.
-            
             for uid in users:
                 # Pre-check: skip if user has no push subscription
                 if not self._has_push_subscription(uid):
                     continue
 
-                # Fetch settings
-                cursor.execute("SELECT notification_settings FROM users WHERE user_id = ?", (uid,))
-                row = cursor.fetchone()
-                settings = {}
-                if row and row[0]:
-                    try:
-                        settings = json.loads(row[0])
-                    except: pass
+                # Fetch user profile (tier + locale)
+                profile = self._get_user_profile(uid)
+                tier = profile.get("tier", "free")
+                lang = profile.get("locale", "cn")
 
-                if settings.get("enabled", True) is False:
+                # Fetch settings for preference check
+                if not self._check_user_preference(uid, event_type):
                     continue
                 
-                # Check specific type or 'price_update' (Phase 1 key)
-                types = settings.get('types', {})
-                # Key maps to UI setting "Price Update"
-                is_enabled = types.get('price_update', {}).get('enabled', True) 
-                
-                if not is_enabled:
+                # Render content per user language
+                try:
+                    title, body = NotificationTemplates.render(
+                        event_type,
+                        tier=tier,
+                        lang=lang,
+                        **context
+                    )
+                except Exception as e:
+                    logger.warning(f"⚠️ Template render failed for user {uid} ({lang}): {e}")
                     continue
-                    
+
                 # Send Push
                 try:
                     log_id = f"price_{uuid.uuid4().hex[:12]}"
@@ -597,28 +616,26 @@ class NotificationManager:
                         target_user_id=uid, 
                         title=title, 
                         body=body, 
-                        url=f"/dashboard/stock/{symbol}",
+                        url=context.get("url", f"/dashboard/stock/{symbol}"),
                         tag=tag,
                         skip_log=True
                     )
                     if not delivered:
-                        self.stats["errors"] = self.stats.get("errors", 0) + 1
+                        self.stats["errors"] += 1
                         continue
                     
                     # Log for audit trail
                     self._log_to_db(log_id, uid, {
-                        "type": "price_update",
+                        "type": event_type,
                         "related_symbols": [symbol],
                         "title": title,
                         "body": body,
-                        "url": f"/dashboard/stock/{symbol}"
+                        "url": context.get("url", f"/dashboard/stock/{symbol}")
                     })
-                    
-                    self.stats["notifications_sent"] += 1
                 except Exception as e:
-                    logger.error(f"Failed to push to {uid}: {e}")
-                    self.stats["errors"] = self.stats.get("errors", 0) + 1
-                    
+                    logger.error(f"❌ Failed to broadcast to {uid}: {e}")
+                    self.stats["errors"] += 1
+            
         except Exception as e:
             logger.error(f"❌ Broadcast failed: {e}")
         finally:

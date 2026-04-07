@@ -1,12 +1,11 @@
-name: Daily Morning Call (Smart)
+name: Daily Morning Call (US Market)
 
-# 职责：每日早盘前发送个性化 AI 交易计划提醒
-# 触发：北京时间 08:30 (M-F)
+# 职责：每日美股开盘前发送个性化 AI 交易计划提醒
+# 触发：北京时间 20:30 (M-F) -> UTC 12:30
 
 on:
   schedule:
-    # 每日北京时间 08:30 (UTC 00:30) 执行
-    - cron: '30 0 * * 1-5'
+    - cron: '30 12 * * 1-5'
   workflow_dispatch:
     inputs:
       date:
@@ -20,7 +19,7 @@ on:
         default: false
 
 concurrency:
-  group: daily-morning-call-${{ github.ref }}
+  group: daily-morning-call-us-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -29,7 +28,7 @@ jobs:
     if: github.event_name == 'schedule'
     uses: ./.github/workflows/trading_day_gate.yml
     with:
-      market: 'CN'
+      market: 'US'
     secrets: inherit
 
   morning-call:
@@ -44,7 +43,7 @@ jobs:
       - name: Log Gate Decision
         if: github.event_name == 'schedule'
         run: |
-          echo "📅 Trading Day Gate: ${{ needs.gate.outputs.reason }}"
+          echo "📅 Trading Day Gate (US): ${{ needs.gate.outputs.reason }}"
 
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -60,17 +59,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
 
-      - name: Refresh Market Almanac with Overnight Data
-        timeout-minutes: 10
-        env:
-          PYTHONUNBUFFERED: "1"
-          TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
-          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
-        run: |
-          echo "🚀 Refreshing Almanac with closed US market data..."
-          python -u backend/engine/almanac_generator.py
-
-      - name: Run Morning Call
+      - name: Run US Morning Call
         timeout-minutes: 10
         env:
           TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
@@ -85,16 +74,4 @@ jobs:
           ARGS=()
           if [ "$DRY_RUN" = "true" ]; then ARGS+=(--dry-run); fi
           if [ -n "$TARGET_DATE" ]; then ARGS+=(--date "$TARGET_DATE"); fi
-          python backend/scripts/daily_morning_call.py --market CN "${ARGS[@]}"
-
-      # - name: Broadcast Market Almanac Ritual
-      #   timeout-minutes: 5
-      #   env:
-      #     PYTHONUNBUFFERED: "1"
-      #     TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
-      #     TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
-      #     TARGET_DATE: ${{ github.event.inputs.date }}
-      #   run: |
-      #     ARGS=()
-      #     if [ -n "$TARGET_DATE" ]; then ARGS+=(--date "$TARGET_DATE"); fi
-      #     python backend/scripts/broadcast_almanac.py --phase ritual "${ARGS[@]}"
+          python backend/scripts/daily_morning_call.py --market US "${ARGS[@]}"

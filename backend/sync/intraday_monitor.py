@@ -167,29 +167,23 @@ class IntradayMonitor:
             return
             
         # 2. Use unified NotificationTemplates
-        try:
-            # Map semantic types
-            res_types = {
-                "resonance": "逻辑共振 (脚本加速)",
-                "deviation": "剧本背离 (逻辑回撤)"
-            }
-            strat_tips = {
-                "resonance": f"突破了关键压力点 {trigger_val:.2f}。请根据 Pro 计划关注进攻性。",
-                "deviation": f"回撤并跌破了止损支撑线 {trigger_val:.2f}。注意防守。"
-            }
+        # 2. Prepare Context for NotificationManager (Rendering handled inside loop for i18n)
+        res_types = {
+            "resonance": "逻辑共振 (脚本加速)",
+            "deviation": "剧本背离 (逻辑回撤)"
+        }
+        strat_tips = {
+            "resonance": f"突破了关键压力点 {trigger_val:.2f}。请根据 Pro 计划关注进攻性。",
+            "deviation": f"回撤并跌破了止损支撑线 {trigger_val:.2f}。注意防守。"
+        }
 
-            title, body = NotificationTemplates.render(
-                "ai_radar_alert",
-                tier="pro", # Broadcast uses Pro template for maximum detail
-                stock_names=symbol, 
-                current_price=f"{price:.2f}",
-                resonance_type=res_types.get(alert_type, "结构化偏移"),
-                strategy_tip=strat_tips.get(alert_type, "请关注盘中异动。")
-            )
-        except Exception as e:
-            logger.warning(f"⚠️ Template render failed, using legacy fallback: {e}")
-            title = f"📡 [AI雷达] {symbol} {'剧本背离' if alert_type == 'deviation' else '逻辑共振'}"
-            body = f"{symbol} 现价 {price} ({change:+.2f}%) 穿越关键位 {trigger_val}。"
+        context = {
+            "stock_names": symbol,
+            "current_price": f"{price:.2f}",
+            "resonance_type": res_types.get(alert_type, "结构化偏移"),
+            "strategy_tip": strat_tips.get(alert_type, "请关注盘中异动。"),
+            "url": f"/dashboard?symbol={symbol}&utm_source=push&utm_medium=ai_radar"
+        }
 
         logger.info(f"🔔 RADAR SNAP: {symbol} [{alert_type}] @ {price}")
         
@@ -198,4 +192,4 @@ class IntradayMonitor:
         
         # 3. Fire Notification (Unified Radar tag)
         threading.Thread(target=self.notif_manager.broadcast_price_alert, 
-                         args=(symbol, title, body, alert_type, "ai_radar_alert")).start()
+                         args=(symbol, "ai_radar_alert", context, "ai_radar_alert")).start()

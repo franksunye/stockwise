@@ -1,6 +1,6 @@
-name: Daily Validation Glory Push (Smart)
+name: Daily Validation Glory Push - CN/HK (Smart)
 
-# 职责：每日收盘后基于已验证结果发送“命中战报”（默认不再重复执行 verify）
+# 职责：每日收盘后基于已验证结果发送“命中战报”（A 股与港股）
 # 触发：北京时间 17:30 (M-F)
 # 安全：通过 Trading Day Gate 闸门确保仅在交易日执行
 
@@ -53,25 +53,34 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
 
-      - name: Run Validation Glory Push
+      - name: Run CN Validation Glory Push
         env:
-          # Database (Turso)
           TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
           TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
-          
-          # Push Service
           NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
           INTERNAL_API_SECRET: ${{ secrets.INTERNAL_API_SECRET }}
-          
-          # Logic Control
           ENABLE_SMART_NOTIFICATIONS: "true"
-          
-          # Notification Secrets
           WECOM_ROBOT_KEY: ${{ secrets.WECOM_ROBOT_KEY }}
           ADMIN_MOBILES: ${{ secrets.ADMIN_MOBILES }}
         run: |
-          EXTRA_ARGS=()
+          ARGS=(--market CN)
           if [ "${{ inputs.run_verify }}" = "true" ]; then
-            EXTRA_ARGS+=(--run-verify)
+            ARGS+=(--run-verify)
           fi
-          python backend/scripts/daily_validation_check.py "${EXTRA_ARGS[@]}"
+          python backend/scripts/daily_validation_check.py "${ARGS[@]}"
+
+      - name: Run HK Validation Glory Push
+        env:
+          TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+          INTERNAL_API_SECRET: ${{ secrets.INTERNAL_API_SECRET }}
+          ENABLE_SMART_NOTIFICATIONS: "true"
+          WECOM_ROBOT_KEY: ${{ secrets.WECOM_ROBOT_KEY }}
+          ADMIN_MOBILES: ${{ secrets.ADMIN_MOBILES }}
+        run: |
+          ARGS=(--market HK)
+          if [ "${{ inputs.run_verify }}" = "true" ]; then
+            ARGS+=(--run-verify)
+          fi
+          python backend/scripts/daily_validation_check.py "${ARGS[@]}"
