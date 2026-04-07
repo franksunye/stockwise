@@ -275,9 +275,9 @@ class NotificationManager:
             return {
                 "title": title,
                 "body": body,
-                "url": e["url"],
+                "url": e.get("url") or "/monitor?utm_source=push&utm_campaign=morning_call",
                 "type": e["type"],
-                "related_symbols": e.get("related_symbols", [])
+                "related_symbols": e.get("related_symbols") or []
             }
 
         # 2. Handle Signal Flips
@@ -543,7 +543,7 @@ class NotificationManager:
             if not self.conn:
                 conn.close()
 
-    def broadcast_price_alert(self, symbol: str, title: str, body: str, alert_type: str):
+    def broadcast_price_alert(self, symbol: str, title: str, body: str, alert_type: str, tag: str = "price_update"):
         """
         Intraday specific: Send immediate alert to all users watching this stock.
         Used by IntradayMonitor.
@@ -598,7 +598,7 @@ class NotificationManager:
                         title=title, 
                         body=body, 
                         url=f"/dashboard/stock/{symbol}",
-                        tag="price_update",
+                        tag=tag,
                         skip_log=True
                     )
                     if not delivered:

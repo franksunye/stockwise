@@ -346,6 +346,15 @@ def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool =
         nm = NotificationManager()
         nm.broadcast_price_alert(symbol, notify_title, notify_body, "price_update")
         
+        # [NEW] Active Radar Audit: Compare price action against AI strategy anchors
+        try:
+            from backend.sync.intraday_monitor import IntradayMonitor
+            radar = IntradayMonitor()
+            radar.load_rules() # Internal dedup handles frequency
+            radar.check(symbol, price, change)
+        except Exception as e:
+            logger.warning(f"⚠️ Radar audit failed for {symbol}: {e}")
+        
         return {
             "success": True,
             "symbol": symbol,

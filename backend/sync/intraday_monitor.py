@@ -21,10 +21,14 @@ try:
     from backend.logger import logger
     from backend.database import get_connection
     from backend.notification_service import NotificationManager
+    from backend.notification_templates import NotificationTemplates
+    from backend.engine.signal_semantics import signal_weight
 except ImportError:
     from logger import logger
     from database import get_connection
     from notification_service import NotificationManager
+    from notification_templates import NotificationTemplates
+    from engine.signal_semantics import signal_weight
 
 class IntradayMonitor:
     _instance = None
@@ -49,7 +53,7 @@ class IntradayMonitor:
         self._initialized = True
         self.notif_manager = NotificationManager()
         self.last_reload_time = 0
-        self.RELOAD_INTERVAL = 3600  # Reload rules every hour (incase of manual updates)
+        self.RELOAD_INTERVAL = 1800  # Reload rules every 30 minutes for fresher targets
 
     def load_rules(self):
         """
@@ -65,16 +69,15 @@ class IntradayMonitor:
         conn = get_connection()
         try:
             cursor = conn.cursor()
-            # Fetch the LATEST primary prediction for each stock
-            # Logic: Get predictions generated within last 3 days (to cover weekends)
-            # that are marked 'is_primary=1'.
+            # Fetch the LATEST primary prediction for each stock targeting TODAY
+            # Logic: Use the signal generated most recently for active tracking.
             sql = """
                 SELECT 
                     symbol, signal, confidence, support_price, pressure_price, ai_reasoning, date
                 FROM ai_predictions_v2
-                WHERE is_primary = 1 
-                  AND date >= date('now', '-4 days') 
-                ORDER BY date DESC
+                WHERE (is_primary = 1 OR model_id = 'rule-engine')
+                  AND date >= date('now', '-3 days') 
+                ORDER BY created_at DESC
             """
             cursor.execute(sql)
             rows = cursor.fetchall()
@@ -85,29 +88,32 @@ class IntradayMonitor:
             for row in rows:
                 sym, signal, conf, support, pressure, reason, p_date = row
                 
-                # Basic Validation
-                if not signal or not support or not pressure:
+                # Basic Validation: Must have at least one anchor price to monitor
+                if not signal or (not support and not pressure):
                     continue
                 
-                # Strategy logic based on signal
-                # Only monitor high confidence setups? Or all? Let's do all Is_Primary.
-                strategy = {
+                # Use unified weight from semantic registry
+                weight = signal_weight(signal)
+                
+                # Radar logic: We only care about stocks that have an active 'Bias' (Long/Short)
+                # or a specific 'Trigger' setup from the morning call.
+                if weight == 0 and signal not in ("Watch", "Side"):
+                    continue
+
+                new_watch_list[sym] = {
                     "signal": signal,
+                    "weight": weight,
                     "confidence": conf or 0,
-                    "support": float(support),
-                    "pressure": float(pressure),
-                    "reason_snippet": (reason[:50] + "...") if reason else "AI分析",
+                    "support": float(support) if support else None,
+                    "pressure": float(pressure) if pressure else None,
+                    "reason_snippet": (reason[:50] + "...") if reason else "AI策略点位",
                     "date": p_date
                 }
-                
-                # Keep the latest prediction for each symbol
-                if sym not in new_watch_list:
-                    new_watch_list[sym] = strategy
-                    count += 1
+                count += 1
             
             self.watch_list = new_watch_list
             self.last_reload_time = time.time()
-            logger.info(f"🔭 IntradayMonitor: Loaded {count} active strategies.")
+            logger.info(f"🔭 IntradayMonitor: Optimized {count} radar tracking targets.")
             
         except Exception as e:
             logger.error(f"❌ IntradayMonitor Load Failed: {e}")
@@ -124,89 +130,72 @@ class IntradayMonitor:
             return
 
         signal = strategy['signal']
+        weight = strategy.get('weight', 0)
         pressure = strategy['pressure']
         support = strategy['support']
         
-        # 2. Rule Evaluation
+        # 2. Advanced Radar Evaluation
         alert_type = None
-        trigger_price = 0
+        trigger_val = 0
         
-        # Scenario A: Bullish Signal - Watch for Resistance Breakout
-        if "Bullish" in signal:
-            # Upside Breakout
-            if current_price > pressure:
-                alert_type = "bull_breakout" # 突破压力
-                trigger_price = pressure
-            # Downside Breakdown (Stop Loss Alert)
-            elif current_price < support:
-                alert_type = "norm_breakdown" # 跌破支撑
-                trigger_price = support
-                
-        # Scenario B: Bearish Signal - Watch for Support Breakdown
-        elif "Bearish" in signal:
-             if current_price < support:
-                alert_type = "bear_breakdown" # 确认跌破
-                trigger_price = support
+        # Case A: Logic Resonance (剧本加速 - 共振)
+        # Prediction was Long/Strong and price breaks the Resistance
+        if weight > 0 and pressure and current_price > pressure:
+            alert_type = "resonance"
+            trigger_val = pressure
+            
+        # Case B: Logic Deviation (剧本偏离 - 背离)
+        # Prediction was Long but price drops below Support (Stop Loss Zone)
+        elif weight > 0 and support and current_price < support:
+            alert_type = "deviation"
+            trigger_val = support
+            
+        # Case C: Bearish Extension (空头加速)
+        elif weight < 0 and support and current_price < support:
+            alert_type = "resonance" # Also a resonance of its bearish intent
+            trigger_val = support
         
-        # Scenario C: Big Move Alert (Safety Net)
-        # Assuming we also want to catch massive moves regardless of levels
-        # (Optional, skipping for now to keep rules pure)
-
         if alert_type:
-            self._trigger_alert(symbol, current_price, current_change, alert_type, strategy, trigger_price)
+            self._trigger_alert(symbol, current_price, current_change, alert_type, strategy, trigger_val)
 
     def _trigger_alert(self, symbol: str, price: float, change: float, alert_type: str, strategy: Dict, trigger_val: float):
-        """
-        Handle dedup and notification dispatch.
-        """
-        # 1. Dedup Key: Symbol + AlertType + Day
-        # Ensures we only alert once per type per day per stock
-        # e.g. "00700_bull_breakout_2024-02-05"
+        # 1. Dedup Logic (Once per day per type per stock)
         today = datetime.now().strftime("%Y%m%d")
         dedup_key = f"{symbol}_{alert_type}_{today}"
         
         if dedup_key in self.alert_history:
             return
             
-        # 2. Cooldown check (Double safety)
-        now = time.time()
-        # Clean old history logic could go here, but memory is cheap for string keys
-        
-        # 3. Construct Message
-        titles = {
-            "bull_breakout": "🚀 强势突破预警",
-            "norm_breakdown": "🛡️ 支撑位跌破提示",
-            "bear_breakdown": "📉 确认破位下行"
-        }
-        
-        status_emoji = "🔴" if change > 0 else "🟢" # CN Colors: Red is Up
-        
-        title = titles.get(alert_type, "股价异动预警")
-        body = (
-            f"{symbol} 现价 {price} ({status_emoji}{change:.2f}%) "
-            f"越过关键图表位置 {trigger_val}。\n"
-            f"AI策略: {strategy['signal']} (信心{strategy['confidence']})\n"
-            f"分析依据: {strategy['reason_snippet']}"
-        )
-        
-        # 4. Fire Notification
-        # We send to ALL subscribers of this stock
-        # Limitation: NotificationManager.send_prediction_update usually takes a UserID.
-        # We need a broadcast method or iterate users. 
-        # IntradayMonitor doesn't know users. It relies on Manager.
-        
-        # Quick Hack: Use a special "System Broadcast" per stock?
-        # Better: Reuse NotificationManager's valid logic.
-        # For MVP, we log and maybe notify Admin first, or use a new method in NotifManager.
-        
-        logger.info(f"🔔 SNIPER ALERT: {symbol} {alert_type} @ {price}")
+        # 2. Use unified NotificationTemplates
+        try:
+            # Map semantic types
+            res_types = {
+                "resonance": "逻辑共振 (脚本加速)",
+                "deviation": "剧本背离 (逻辑回撤)"
+            }
+            strat_tips = {
+                "resonance": f"突破了关键压力点 {trigger_val:.2f}。请根据 Pro 计划关注进攻性。",
+                "deviation": f"回撤并跌破了止损支撑线 {trigger_val:.2f}。注意防守。"
+            }
+
+            title, body = NotificationTemplates.render(
+                "ai_radar_alert",
+                tier="pro", # Broadcast uses Pro template for maximum detail
+                stock_names=symbol, 
+                current_price=f"{price:.2f}",
+                resonance_type=res_types.get(alert_type, "结构化偏移"),
+                strategy_tip=strat_tips.get(alert_type, "请关注盘中异动。")
+            )
+        except Exception as e:
+            logger.warning(f"⚠️ Template render failed, using legacy fallback: {e}")
+            title = f"📡 [AI雷达] {symbol} {'剧本背离' if alert_type == 'deviation' else '逻辑共振'}"
+            body = f"{symbol} 现价 {price} ({change:+.2f}%) 穿越关键位 {trigger_val}。"
+
+        logger.info(f"🔔 RADAR SNAP: {symbol} [{alert_type}] @ {price}")
         
         # Update State
-        self.alert_history[dedup_key] = now
+        self.alert_history[dedup_key] = time.time()
         
-        # Call Notification Manager (Async)
-        # We need to broadcast this to anyone watching 'symbol'.
-        # Since calculating that list is expensive here, we delegate to NotifManager.
+        # 3. Fire Notification (Unified Radar tag)
         threading.Thread(target=self.notif_manager.broadcast_price_alert, 
-                         args=(symbol, title, body, alert_type)).start()
-
+                         args=(symbol, title, body, alert_type, "ai_radar_alert")).start()

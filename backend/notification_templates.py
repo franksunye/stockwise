@@ -173,13 +173,21 @@ class NotificationTemplates:
             "free": {
                 "zh": {
                     "title": "📡 [AI雷达] 捕捉到结构性偏移",
-                    "body": "{stock_names} 实际走势与晨间预判出现逻辑背离。重点观察其在 {current_price} 附近的表现。"
+                    "body": "{stock_names} 实际走势与预判逻辑不符。观测价: {current_price}。请回看支撑/压力位计划。"
+                },
+                "en": {
+                    "title": "📡 [AI Radar] Logic Deviation Detected",
+                    "body": "{stock_names} action deviates from prediction. Price: {current_price}. Review your plan."
                 }
             },
             "pro": {
                 "zh": {
-                    "title": "🕵️ Pro 结构雷达：逻辑共振确认",
-                    "body": "{stock_names} 盘中逻辑共振。放量突破 AI 强压力位 {resistance}。请根据 Pro 盘中实时计划调整策略。"
+                    "title": "🕵️ Pro 结构雷达：{resonance_type}",
+                    "body": "{stock_names} 现价 {current_price}。{strategy_tip}"
+                },
+                "en": {
+                    "title": "🕵️ Pro Radar: {resonance_type}",
+                    "body": "{stock_names} Price: {current_price}. {strategy_tip}"
                 }
             }
         },
