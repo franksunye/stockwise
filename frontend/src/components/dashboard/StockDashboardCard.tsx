@@ -86,7 +86,7 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
   );
 
   const summaryText = normalizeLegacyTerms(tacticalData?.summary || displayPrediction?.ai_reasoning || '');
-  const reasoningFallback = !displayPrediction ? tCommon('noData') : t('signal.pending');
+  const reasoningFallback = !displayPrediction ? t('pendingAnalysisRationale') : t('signal.pending');
 
   const actionMeta = useMemo(
     // IMPORTANT: top card headline/color must match report/export semantics.

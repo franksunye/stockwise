@@ -97,7 +97,8 @@
     "limit10": "MAX QUOTA REACHED (10)",
     "limit3": "UPGRADE TO EXPAND QUOTA (LIMIT: 3)",
     "errorRemove": "TERMINATION FAILED. RETRY.",
-    "errorAdd": "INITIALIZATION FAILED. RETRY."
+    "errorAdd": "INITIALIZATION FAILED. RETRY.",
+    "pendingAnalysisRationale": "Calibrating market inertia. ZISO suggests maintaining strategic composure amidst intraday volatility to avoid impulsive decisions. Full logical trace will be available after the current or next session close to ensure disciplined execution."
   },
   "brief": {
     "title": "STRATEGIC BRIEF",
