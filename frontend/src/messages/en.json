@@ -334,11 +334,11 @@
     }
   },
   "pricing": {
-    "title": "Pricing Plans",
-    "subtitle": "Subscription Benefits",
-    "desc": "Unlock expert-grade insights and industrial-strength analysis.",
-    "mostValue": "Best Value",
-    "active": "Active",
+    "title": "SUBSCRIPTION TIERS",
+    "subtitle": "TERMINAL PRIVILEGES",
+    "desc": "DEPLOY INDUSTRIAL-GRADE ANALYTICS.",
+    "mostValue": "OPTIMAL",
+    "active": "ACTIVE",
     "expiryLabel": "Service Expiry",
     "expiryFormat": "{year}-{month}-{day}",
     "lifetimeLabel": "Lifetime",
@@ -365,16 +365,16 @@
     "systemBusy": "System busy, please try again later",
     "recommend": "Recommended",
     "free": {
-      "name": "Standard Free",
-      "period": "Forever Free",
-      "description": "Perfect for starters exploring AI-assisted analysis.",
-      "cta": "Start Free"
+      "name": "COMMUNITY NODE",
+      "period": "FOREVER FREE",
+      "description": "Standard telemetry for individual operators.",
+      "cta": "INITIALIZE"
     },
     "go": {
-      "name": "Go Member",
-      "period": "Monthly / {price} Yearly",
-      "description": "Unlock DeepSeek actionable insights, 10 watchlist stocks, 200 monthly reports, and all-category real-time alerts.",
-      "cta": "Subscribe Go"
+      "name": "CORE NODE (GO)",
+      "period": "{price} / ANNUALLY",
+      "description": "DeepSeek engine access, 10 symbol monitoring, and unrestricted real-time telemetry.",
+      "cta": "SUBSCRIBE CORE"
     },
     "plus": {
       "name": "Plus Prestige",
@@ -410,7 +410,7 @@
       "levelsShort": "Key Levels / Short Pressure",
       "reasoningReflection": "Deduction / Risk Reflection",
       "conflict": "Conflict Explanation",
-      "sharing": "Report Sharing",
+      "sharing": "REPORT DISTRIBUTION",
       "market": "Market Coverage (US / HK / CN)",
       "realtime": "Real-time Frequency",
       "categories": "Notification Categories",
@@ -420,14 +420,14 @@
     },
     "actionableInsights": {
       "group": "Actionable Insights",
-      "model": "Analysis Model",
-      "dailyLimit": "Intelligence Quota (Daily)",
-      "monthlyLimit": "Insight Limit (Monthly)",
-      "signals": "Trend Signals / Plans",
-      "levels": "Key Levels / Short Interest",
-      "reasoning": "Reasoning / Risk Reflection",
+      "model": "Analysis Engine",
+      "dailyLimit": "Monitoring Quota (Daily)",
+      "monthlyLimit": "Computational Quota (Monthly)",
+      "signals": "Trend Signals / Protocols",
+      "levels": "Tactical Anchers / Short Interest",
+      "reasoning": "Logic Trace / Rationale Audit",
       "markets": "Markets (US/HK/CN)",
-      "sharing": "Infinite Sharing"
+      "sharing": "UNRESTRICTED"
     },
     "notifications": {
       "group": "Notifications",
