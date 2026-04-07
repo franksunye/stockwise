@@ -415,7 +415,7 @@ export function TacticalReportPoster({
                             <p className={`text-[10px] font-black uppercase tracking-[0.16em] ${node.kind === 'current' ? 'text-slate-300' : 'text-slate-500'}`}>
                                 {node.__i18n ? tBrief(`levelLabels.${node.__i18n.key}` as MessageKey<'brief'>, { label: tBrief(`ordinals.${node.__i18n.ordinal}` as MessageKey<'brief'>) }) : tBrief(`levelLabels.${node.label}` as MessageKey<'brief'>)}
                             </p>
-                            <p className={`mt-1 line-clamp-1 text-[11px] leading-5 ${node.kind === 'current' ? 'text-slate-500' : 'text-slate-600'}`}>{tBrief(node.description as MessageKey<'brief'>)}</p>
+                            <p className={`mt-1 line-clamp-1 text-[11px] leading-5 ${node.kind === 'current' ? 'text-slate-500' : 'text-slate-600'}`}>{tGlobal(`brief.${node.description}` as FullMessageKey)}</p>
                           </div>
                           <p className={`${node.kind === 'current' ? 'text-[1.0rem]' : 'text-[10px] uppercase tracking-[0.16em]'} font-black text-white`}>{node.price}</p>
                         </div>
