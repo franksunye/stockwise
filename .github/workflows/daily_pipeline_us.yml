@@ -4,9 +4,8 @@ name: Daily Pipeline - US Market
 # 安全：通过 Trading Day Gate 闸门确保仅在 US 市场交易日执行
 
 on:
-  schedule:
-    # UTC 22:30 (北京时间次日 06:30)；覆盖美东收盘后窗口（含夏令时/冬令时）
-    - cron: '30 22 * * 1-5'
+  # Trigger Source: Cloudflare Worker Only (US Main Chain)
+  # 每日 06:30 BJT 结算节奏由 Worker 控制触发
   workflow_dispatch: # 支持手动触发
 
 concurrency:
@@ -33,18 +32,43 @@ jobs:
     uses: ./.github/workflows/data_sync_us.yml
     secrets: inherit
 
+  # Step 1.5: 市场事实健康检查 (US)
+  healthcheck:
+    needs: sync
+    if: success()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+      - name: Run Market Facts Health Check (US)
+        env:
+          TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+          WECOM_ROBOT_KEY: ${{ secrets.WECOM_ROBOT_KEY }}
+        run: |
+          python backend/scripts/market_facts_healthcheck.py --market US --strict
+
   # Step 2: 验证历史预测 (按市场切片执行)
   verify:
-    needs: sync
+    needs: [sync, healthcheck]
     if: success()
     uses: ./.github/workflows/verify_predictions.yml
     with:
       market: 'US'
     secrets: inherit
 
-  # Step 3: AI 分析 (仅当数据同步成功后执行)
+  # Step 3: AI 分析 (仅当同步与健康检查均通过时执行)
   analyze:
-    needs: sync
+    needs: [sync, healthcheck]
     if: success()
     uses: ./.github/workflows/ai_analyze_us.yml
     secrets: inherit

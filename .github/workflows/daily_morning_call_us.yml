@@ -4,8 +4,8 @@ name: Daily Morning Call (US Market)
 # 触发：北京时间 20:30 (M-F) -> UTC 12:30
 
 on:
-  schedule:
-    - cron: '30 12 * * 1-5'
+  # Trigger Source: Cloudflare Worker Only (20:30 BJT)
+  # 调度权已全权移交给 Cloudflare Worker，以此确保全球调度一致性
   workflow_dispatch:
     inputs:
       date:

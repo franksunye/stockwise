@@ -4,9 +4,8 @@ name: Daily Morning Call (Smart)
 # 触发：北京时间 08:30 (M-F)
 
 on:
-  schedule:
-    # 每日北京时间 08:30 (UTC 00:30) 执行
-    - cron: '30 0 * * 1-5'
+  # Trigger Source: Cloudflare Worker Only (08:30 BJT)
+  # 调度权已全权移交给 Cloudflare Worker，不再保留 GitHub 原生 schedule
   workflow_dispatch:
     inputs:
       date:

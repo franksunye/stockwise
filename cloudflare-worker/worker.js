@@ -6,71 +6,95 @@
  * 2. 每 15 分钟检查一次早报与交易时段内的 realtime sync
  */
 
-const PRECISION_SCHEDULES = [
+/**
+ * JOB_REGISTRY: 核心任务注册表 (BJT)
+ * 仅在每 15 分钟 (xx:00, xx:15, xx:30, xx:45) 的心跳时刻执行精确匹配
+ */
+const JOB_REGISTRY = [
   {
-    cron: '30 12 * * 1-5',
+    hour: 6, minute: 30, days: [1, 2, 3, 4, 5],
+    workflow: 'daily_pipeline_us.yml',
+    label: 'us-pipeline-settlement',
+  },
+  {
+    hour: 8, minute: 30, days: [1, 2, 3, 4, 5],
+    workflow: 'daily_morning_call.yml',
+    label: 'cn-morning-call',
+  },
+  {
+    hour: 8, minute: 30, days: [2, 3, 4, 5, 6],
+    workflow: 'daily_validation_check_us.yml',
+    label: 'us-validation-glory', // 美股清晨战报 (对齐至 08:30 格点)
+  },
+  {
+    hour: 20, minute: 30, days: [1, 2, 3, 4, 5],
     workflow: 'trade_management_advice_loop.yml',
     label: 'trade-management-advice',
+  },
+  {
+    hour: 20, minute: 30, days: [1, 2, 3, 4, 5],
+    workflow: 'daily_morning_call_us.yml',
+    label: 'us-morning-call',
   },
 ];
 
 export default {
-  // Cron Trigger 入口
+  // Cron Trigger 入口 (已配置为每 15 分钟触发一次)
   async scheduled(event, env, ctx) {
-    console.log(`⏰ Cron triggered at ${new Date().toISOString()} (pattern: ${event.cron || 'unknown'})`);
+    console.log(`⏰ Heartbeat triggered at ${new Date().toISOString()}`);
 
-    const precisionSchedule = PRECISION_SCHEDULES.find((item) => item.cron === event.cron);
-    if (precisionSchedule) {
-      console.log(`🎯 Exact ${precisionSchedule.label} cron hit, triggering ${precisionSchedule.workflow}...`);
-      const result = await triggerGitHubWorkflow(env, precisionSchedule.workflow);
-      console.log(`✅ Precision workflow triggered (${precisionSchedule.label}):`, result);
-      return;
-    }
-    
-    // 计算北京时间
+    // 1. 计算北京时间与星期
     const now = new Date();
     const beijingOffset = 8 * 60; // UTC+8
-    const utcMinutes = now.getUTCHours() * 60 + now.getUTCMinutes();
-    const beijingMinutes = (utcMinutes + beijingOffset) % (24 * 60);
-    const beijingHour = Math.floor(beijingMinutes / 60);
-    const beijingMinute = beijingMinutes % 60;
+    const utcMinutesTotal = now.getUTCHours() * 60 + now.getUTCMinutes();
+    const beijingMinutesTotal = (utcMinutesTotal + beijingOffset) % (24 * 60);
+    const beijingHour = Math.floor(beijingMinutesTotal / 60);
+    const beijingMinute = beijingMinutesTotal % 60;
     
-    // 周几 (0=周日, 1=周一, ..., 6=周六)
     let beijingDay = now.getUTCDay();
-    if (utcMinutes + beijingOffset >= 24 * 60) {
+    if (utcMinutesTotal + beijingOffset >= 24 * 60) {
       beijingDay = (beijingDay + 1) % 7;
     }
     
-    // 只在周一到周五执行
-    if (beijingDay === 0 || beijingDay === 6) {
-      console.log(`📅 Weekend (Beijing day: ${beijingDay}), skipping...`);
-      return;
-    }
-    
-    const currentMinutes = beijingHour * 60 + beijingMinute;
+    console.log(`🕙 Beijing Time: ${String(beijingHour).padStart(2, '0')}:${String(beijingMinute).padStart(2, '0')} (Day: ${beijingDay})`);
 
-    // ========== 早报任务检测 (08:30 北京时间) ==========
-    if (beijingHour === 8 && beijingMinute === 30) {
-      console.log('☀️ Morning Call time (Beijing: 08:30), triggering daily_morning_call.yml...');
-      const result = await triggerGitHubWorkflow(env, 'daily_morning_call.yml');
-      console.log('✅ Morning Call workflow triggered:', result);
-      return;
+    // 2. 精确任务匹配 (Precision Hits)
+    const hits = JOB_REGISTRY.filter((job) => {
+      const timeMatch = job.hour === beijingHour && job.minute === beijingMinute;
+      const dayMatch = !job.days || job.days.includes(beijingDay);
+      return timeMatch && dayMatch;
+    });
+
+    if (hits.length > 0) {
+      console.log(`🎯 Precision Hits! Triggering ${hits.length} workflow(s)...`);
+      for (const hit of hits) {
+        const result = await triggerGitHubWorkflow(env, hit.workflow);
+        console.log(`✅ [${hit.label}] triggered:`, result);
+      }
     }
-    
-    // ========== 实时同步任务检测 (09:15 - 16:30) ==========
-    const tradingStart = 9 * 60 + 15;  // 09:15
-    const tradingEnd = 16 * 60 + 30;   // 16:30
-    
-    if (currentMinutes < tradingStart || currentMinutes > tradingEnd) {
-      console.log(`🌙 Outside trading hours (Beijing: ${beijingHour}:${String(beijingMinute).padStart(2, '0')}), skipping realtime sync...`);
-      return;
+
+    // 3. 全球实时同步逻辑 (Realtime Sync & Radar)
+    // A. 中港时段: 09:15 - 16:30
+    const cnStart = 9 * 60 + 15;
+    const cnEnd = 16 * 60 + 30;
+    // B. 美股时段: 21:30 - 05:00 (跨天判断)
+    const usStart = 21 * 60 + 30;
+    const usEnd = 300; // 05:00
+
+    let isTrading = (beijingMinutesTotal >= cnStart && beijingMinutesTotal <= cnEnd);
+    if (!isTrading) {
+      if (beijingMinutesTotal >= usStart || beijingMinutesTotal <= usEnd) {
+        isTrading = true;
+      }
     }
-    
-    console.log(`📊 Trading hours active (Beijing: ${beijingHour}:${String(beijingMinute).padStart(2, '0')}), triggering sync...`);
-    
-    // 触发 GitHub Actions realtime sync workflow
-    const result = await triggerGitHubWorkflow(env, env.GITHUB_WORKFLOW || 'data_sync_realtime.yml');
-    console.log(`✅ GitHub Actions triggered:`, result);
+
+    if (isTrading && beijingDay !== 0 && beijingDay !== 6) {
+      console.log(`📊 Global Trading Windows Active. Triggering heartbeat sync...`);
+      const result = await triggerGitHubWorkflow(env, env.GITHUB_WORKFLOW || 'data_sync_realtime.yml');
+      console.log(`✅ Realtime Sync triggered:`, result);
+    } else {
+      console.log(`🌙 Non-trading hours or weekend. Realtime sync skipped.`);
+    }
   },
   
   // HTTP 请求入口 (用于手动测试)
@@ -94,9 +118,9 @@ export default {
         status: 'running',
         utc_time: now.toISOString(),
         beijing_time: beijingTime.toISOString().replace('T', ' ').substring(0, 19),
-        github_repo: `${env.GITHUB_OWNER}/${env.GITHUB_REPO}`,
-        workflow: env.GITHUB_WORKFLOW,
-        precision_workflows: PRECISION_SCHEDULES,
+        github_repo: `${env.GITHUB_OWNER || 'N/A'}/${env.GITHUB_REPO || 'N/A'}`,
+        workflow: env.GITHUB_WORKFLOW || 'data_sync_realtime.yml',
+        job_registry: JOB_REGISTRY,
       }, null, 2), {
         headers: { 'Content-Type': 'application/json' }
       });

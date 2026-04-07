@@ -6,7 +6,7 @@ compatibility_date = "2024-01-01"
 # 1. 每 15 分钟执行一次 (实时同步，Worker 内部会检查是否在交易时段)
 # 2. 每个工作日 12:30 UTC (20:30 北京) 精确触发 Trade Management Advice Loop
 [triggers]
-crons = ["*/15 * * * *", "30 12 * * 1-5"]
+crons = ["*/15 * * * *"]
 
 # 环境变量 (敏感信息请在 Cloudflare Dashboard 中设置)
 # [vars]

@@ -5,10 +5,7 @@ name: Daily Validation Glory Push - US (Smart)
 # 安全：通过 Trading Day Gate 闸门确保仅在 US 交易日执行
 
 on:
-  schedule:
-    # 00:30 UTC = 08:30 BJT
-    # 周二至周六对应美股周一至周五的结算
-    - cron: '30 0 * * 2-6'
+  # Trigger Source: Cloudflare Worker Only (08:30 BJT Post-Close)
   workflow_dispatch:
     inputs:
       run_verify:
