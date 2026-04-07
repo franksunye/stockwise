@@ -91,8 +91,9 @@ def generate_morning_calls(dry_run=False, target_date=None, force=False):
                 continue
                 
             # Compose personalized message placeholders
-            buy_signals = [f"{p[4]}" for p in predictions if p[1] in ('Buy', 'Strong Buy', 'Long')]
-            sell_signals = [f"{p[4]}" for p in predictions if p[1] in ('Sell', 'Strong Sell', 'Short')]
+            # Align with ZISO AI's unified semantics: TriggeredLong, Watch, NoSetup, RiskOff
+            buy_signals = [f"{p[4]}" for p in predictions if p[1] in ('TriggeredLong', 'Long')]
+            sell_signals = [f"{p[4]}" for p in predictions if p[1] in ('RiskOff', 'Short')]
             
             total_preds = len(predictions)
             buy_ratio = len(buy_signals) / total_preds
