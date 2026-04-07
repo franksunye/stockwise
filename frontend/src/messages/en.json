@@ -106,7 +106,7 @@
     "date": {
       "tradingDayAdvice": "{date} Advice"
     },
-    "tradingPlan": "Trading Plan",
+    "tradingPlan": "TACTICAL PROTOCOLS",
     "copyScenario": "Copy Trading Plan",
     "baseMarket": "Market Context",
     "shortPressure": "Short Pressure",
@@ -123,8 +123,8 @@
     "stopLoss": "Stop Loss",
     "buyZone": "Ideal Entry",
     "condition": "Condition",
-    "triggerLabel": "Trigger",
-    "reasonLabel": "Reason",
+    "triggerLabel": "CONDITION",
+    "reasonLabel": "RATIONALE",
     "yes": "Yes",
     "no": "No",
     "staleDate": "Syncing Date",
@@ -160,20 +160,20 @@
       "waitingData": "HKEX daily data updates after close"
     },
     "scenario": {
-      "holding_profit": "Holding Profit",
-      "holding_loss": "Holding Loss",
-      "empty": "Empty/Waiting"
+      "holding_profit": "LONG POSITION (GAIN)",
+      "holding_loss": "LONG POSITION (DRAWDOWN)",
+      "empty": "NO POSITION"
     },
     "scenarioBadge": {
-      "holding_profit": "Profitable",
-      "holding_loss": "In Loss",
-      "empty": "Awaiting Entry"
+      "holding_profit": "PROFITABLE",
+      "holding_loss": "DRAWDOWN",
+      "empty": "IDLE"
     },
     "actions": {
-      "long": "Bullish",
-      "observe": "Watching",
-      "defense": "Defensive",
-      "profit": "Take Profit"
+      "long": "ACCUMULATE",
+      "observe": "MONITOR",
+      "defense": "RISK PARITY",
+      "profit": "PROFIT LOCK"
     },
     "levelLabels": {
       "resistance": "Strong Resistance",
@@ -200,15 +200,15 @@
     },
     "trigger": {
       "not_below_support_1": "Price stays above support",
-      "near_resistance_1": "Near resistance with slowing momentum",
+      "near_resistance_1": "RESISTANCE PROXIMITY / MOMENTUM DECAY",
       "break_support_1": "Price breaks below support",
       "rebound_resistance": "Rebound to resistance failed",
       "wait_support_stable": "Wait for stabilization at support",
       "breakout_confirmation": "Volume breakout confirmed"
     },
     "reason": {
-      "discipline": "Trend intact, maintain discipline.",
-      "lock_profit": "Lock in swing profit, avoid pullback.",
+      "discipline": "MAINTAIN DISCIPLINE; TREND PERSISTS",
+      "lock_profit": "REALIZE GAINS; HEDGE REVERSAL",
       "control_drawdown": "Prioritize risk control, limit losses.",
       "reduce_exposure": "Reduce exposure on weak rebound.",
       "right_side_signal": "Wait for right-side signal before entry.",
