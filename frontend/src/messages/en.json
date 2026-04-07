@@ -636,7 +636,7 @@
     "title": "ZISO AI Research Report",
     "preview": "Report Preview",
     "certainty": "CONFIDENCE: {percent}%",
-    "summary": "Summary",
+    "summary": "Rationale",
     "decision": "TERMINAL RESOLUTION",
     "decisionLoading": "Awaiting AI Council decision...",
     "reasoning": "LOGICAL TRACE",

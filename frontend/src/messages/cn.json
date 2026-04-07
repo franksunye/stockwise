@@ -636,7 +636,7 @@
     "title": "ZISO AI 投研报告",
     "preview": "投研报告预览",
     "certainty": "把握 {percent}%",
-    "summary": "摘要",
+    "summary": "策略摘要",
     "decision": "投研决议",
     "decisionLoading": "投研决议正在调阅中，生成图片时会自动带上当前摘要与策略结构。",
     "reasoning": "推演过程",
