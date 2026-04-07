@@ -95,17 +95,17 @@ def generate_morning_calls(dry_run=False, target_date=None, force=False):
             buy_signals = [f"{p[4]}" for p in predictions if p[1] in ('TriggeredLong', 'Long')]
             sell_signals = [f"{p[4]}" for p in predictions if p[1] in ('RiskOff', 'Short')]
             
-            total_preds = len(predictions)
-            buy_ratio = len(buy_signals) / total_preds
-            sell_ratio = len(sell_signals) / total_preds
+            buy_count = len(buy_signals)
+            sell_count = len(sell_signals)
             
-            # Watchlist Sentiment & Stock Selection Logic
-            if buy_ratio > 0.5:
-                sentiment_tag = "多头进攻"
+            # Watchlist Sentiment & Stock Selection Logic (Sparcity Adjusted)
+            if buy_count > 0 and buy_count >= sell_count:
+                # Even 1-2 buy signals in a sea of neutral is highly actionable
+                sentiment_tag = "局部试多" if buy_count <= 2 else "多头进攻"
                 stock_names_to_show = ", ".join(buy_signals[:3])
                 notif_type = "morning_call"
-            elif sell_ratio > 0.5:
-                sentiment_tag = "避险防御"
+            elif sell_count > 0 and sell_count > buy_count:
+                sentiment_tag = "局部承压" if sell_count <= 2 else "避险防御"
                 stock_names_to_show = ", ".join(sell_signals[:3])
                 notif_type = "morning_call"
             else:
