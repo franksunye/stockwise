@@ -287,7 +287,7 @@ function DashboardContent() {
             </div>
             
             <div className={`absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-300 ${!isMarketAlmanac ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-               <h1 className="text-xl font-black italic tracking-tight text-white group-hover:text-indigo-400 transition-colors text-center">
+               <h1 className="text-xl font-black italic tracking-tight text-white group-hover:text-indigo-400 transition-colors text-center px-1 leading-tight truncate w-full">
                  {getLocalizedStockName(
                    {
                      symbol: stickyStockInfo.current.symbol,
