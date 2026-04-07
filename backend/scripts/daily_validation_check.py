@@ -111,12 +111,12 @@ def run_validation_glory_push(dry_run=False, run_verify=False):
             stock_names = ", ".join(stock_names_list)
             
             # Identify the single best win in this batch for the user
-            max_gain = max([abs(success_map[s]['change']) for s in symbols])
+            peak_gain = max([abs(success_map[s]['change']) for s in symbols])
             
             url = "/dashboard?utm_source=push&utm_medium=validation_glory"
             nm.queue_notification(user_id, "validation_glory", {
                 "stock_names": stock_names,
-                "max_gain": f"{max_gain:+.1f}",
+                "peak_gain": f"{peak_gain:+.1f}",
                 "url": url,
                 "related_symbols": symbols
             })

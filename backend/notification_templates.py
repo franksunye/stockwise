@@ -122,14 +122,14 @@ class NotificationTemplates:
         "validation_glory": {
             "free": {
                  "zh": {
-                    "title": "🏅 昨日判断已被验证",
-                    "body": "{stock_names} 与昨日判断一致，最大波动 {max_gain}%。继续按纪律执行。"
+                    "title": "📊 AI 策略执行追踪：{stock_names}",
+                    "body": "该标的今日触及预测网格，录得日内最高浮盈 {peak_gain}%。进入详情查看 AI 复盘。"
                 }
             },
             "pro": {
                  "zh": {
-                    "title": "🏆 Pro 策略验证成功",
-                    "body": "{stock_names} 命中关键节奏，最大波动 {max_gain}%。下一步计划已更新。"
+                    "title": "🎯 Pro 策略复盘与进阶：{stock_names}",
+                    "body": "已达成预期推演 (日内最高浮盈 {peak_gain}%)。最新止损边界与持仓计划已更新，请检查。"
                 }
             }
         },
