@@ -60,21 +60,8 @@ def generate_morning_calls(dry_run=False, target_date=None, force=False):
     conn = get_connection()
     cursor = conn.cursor()
     
-    # 1. Fetch Market Sentiment (from latest stock analysis)
-    # The daily_briefs table doesn't have a 'type' column - it's user-specific
-    # Use stock_briefs for a sample market sentiment instead
     try:
-        cursor.execute("""
-            SELECT analysis_markdown FROM stock_briefs 
-            WHERE date = ? ORDER BY created_at DESC LIMIT 1
-        """, (today_str,))
-        brief_row = cursor.fetchone()
-        market_sentiment = brief_row[0] if brief_row else "市场情绪稳定，关注 AI 交易计划。"
-        
-        # Extract just a snippet for the body
-        sentiment_snippet = market_sentiment[:100] + "..." if len(market_sentiment) > 100 else market_sentiment
-
-        # 2. Get Users with Watchlists
+        # 1. Get Users with Watchlists
         cursor.execute("""
             SELECT DISTINCT user_id FROM user_watchlist
         """)
@@ -105,14 +92,30 @@ def generate_morning_calls(dry_run=False, target_date=None, force=False):
                 
             # Compose personalized message placeholders
             buy_signals = [f"{p[4]}" for p in predictions if p[1] in ('Buy', 'Strong Buy', 'Long')]
+            sell_signals = [f"{p[4]}" for p in predictions if p[1] in ('Sell', 'Strong Sell', 'Short')]
+            
+            total_preds = len(predictions)
+            buy_ratio = len(buy_signals) / total_preds
+            sell_ratio = len(sell_signals) / total_preds
+            
+            # Watchlist Sentiment Logic
+            if buy_ratio > 0.5:
+                sentiment_tag = "多头进攻"
+            elif sell_ratio > 0.5:
+                sentiment_tag = "避险防御"
+            else:
+                sentiment_tag = "震荡观望"
             
             # Decide which template type to use
             notif_type = "morning_call" if buy_signals else "morning_call_neutral"
             
+            # Target fallback
+            stock_names_to_show = ", ".join(buy_signals[:3]) if buy_signals else ", ".join([f"{p[4]}" for p in predictions][:3])
+            
             # Queue for NotificationManager to handle (it will fetch tier and render during flush)
             nm.queue_notification(user_id, notif_type, {
-                "stock_names": ", ".join(buy_signals[:3]),
-                "sentiment_snippet": sentiment_snippet,
+                "stock_names": stock_names_to_show,
+                "sentiment_tag": sentiment_tag,
                 "url": "/monitor?utm_source=push&utm_medium=morning_call",
                 "related_symbols": watchlist
             })

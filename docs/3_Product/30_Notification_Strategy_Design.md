@@ -95,13 +95,13 @@ summary: "定义通知系统的生产基线与研究延续，是通知、节奏�
     *   *(注：当多转空时 `{direction_action}` = "关注防守与破位边界"；当空转多时 `{direction_action}` = "蓄势转强，关注试仓条件")*
 
 #### 2. 开盘早报 (morning_call)
-> 逻辑：开盘前的注意力引导与情绪定调。
-*   **Free (基础告知)**
+> 触发逻辑：于开盘前 15~30 分钟固定触发。不采用宏观大盘情绪，而是直接聚合用户**个人自选股池 (Watchlist)** 当日的 AI 预测多空比例，为用户生成极其个性化的局部情绪定调（避险/试仓/观望），帮助其在开盘前完成对核心关注区的规划。
+*   **Free (基础广度认知)**
     *   **Title**: `☕ 开盘前早报`
-    *   **Body**: `重点观察 {stock_names} 等标的。{sentiment_snippet}`
-*   **Pro (动作导向)**
+    *   **Body**: `自选池情绪：[{sentiment_tag}]。重点观察 {stock_names} 等标的盘口异动。`
+*   **Pro (战术深度聚焦)**
     *   **Title**: `☀️ Pro 开盘作战简报`
-    *   **Body**: `高优先级标的：{stock_names}。{sentiment_snippet}`
+    *   **Body**: `高优盯盘资产：{stock_names}。自选池情绪：[{sentiment_tag}]。带好战术防线入场。`
 
 #### 3. 验证战报 (validation_glory)
 > 逻辑：展现 AI 实力的关键闭环，形成持续复用的信任飞轮。

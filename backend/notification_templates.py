@@ -101,13 +101,13 @@ class NotificationTemplates:
             "free": {
                 "zh": {
                     "title": "☕ 开盘前早报",
-                    "body": "重点观察 {stock_names} 等标的。{sentiment_snippet}"
+                    "body": "自选池情绪：[{sentiment_tag}]。重点观察 {stock_names} 等标的盘口异动。"
                 }
             },
             "pro": {
                 "zh": {
                     "title": "☀️ Pro 开盘作战简报",
-                    "body": "高优先级标的：{stock_names}。{sentiment_snippet}"
+                    "body": "高优盯盘资产：{stock_names}。自选池情绪：[{sentiment_tag}]。带好战术防线入场。"
                 }
             }
         },
@@ -115,7 +115,7 @@ class NotificationTemplates:
             "all": {
                 "zh": {
                     "title": "☕ 开盘前早报：观望日",
-                    "body": "今日以纪律与等待为主。{sentiment_snippet}"
+                    "body": "自选池无明确多头信号，情绪：[{sentiment_tag}]。今日以耐心等待为主。"
                 }
             }
         },
