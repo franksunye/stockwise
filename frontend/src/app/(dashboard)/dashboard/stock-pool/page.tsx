@@ -99,7 +99,7 @@ const StockItem = memo(({
                    {stock.price > 0 ? stock.price.toFixed(2) : '--.--'}
                  </p>
                    <p className={`text-[10px] font-black mono ${stock.change > 0 ? 'text-rose-500' : stock.change < 0 ? 'text-emerald-500' : 'text-slate-500'}`}>
-                     {stock.price > 0 ? `${stock.change >= 0 ? '+' : ''}${stock.change.toFixed(2)}%` : '同步中...'}
+                     {stock.price > 0 ? `${stock.change >= 0 ? '+' : ''}${stock.change.toFixed(2)}%` : t('syncing')}
                    </p>
                    {stock.updateTag && (
                      <p className="text-[8px] text-slate-500 mono mt-1 font-bold">
@@ -108,7 +108,7 @@ const StockItem = memo(({
                    )}
                  </>
                ) : (
-               <p className="text-[10px] text-slate-600 font-black italic uppercase tracking-widest">盘前静默</p>
+               <p className="text-[10px] text-slate-600 font-black italic uppercase tracking-widest">{t('preMarketSilence')}</p>
              )}
            </div>
            <button 
@@ -219,14 +219,14 @@ export default function StockPoolPage() {
     
     const limit = tier === 'pro' ? 10 : 3;
     if (watchlist.length >= limit) {
-      setLimitMsg(tier === 'pro' ? '已达到 10 只自选上限' : '升级 Pro 可添加更多自选 (上限 3 只)');
+      setLimitMsg(tier === 'pro' ? t('limit10') : t('limit3'));
       setTimeout(() => setLimitMsg(null), 3000);
       return;
     }
 
     const ok = await addStock(targetSymbol, nameOverride || targetSymbol, nameEnOverride);
     if (!ok) {
-      setLimitMsg('添加失败，请稍后重试');
+      setLimitMsg(t('errorAdd'));
       setTimeout(() => setLimitMsg(null), 3000);
       return;
     }
@@ -252,7 +252,7 @@ export default function StockPoolPage() {
     if (ok) {
       setStockToDelete(null);
     } else {
-      setLimitMsg('移除失败，请重试');
+      setLimitMsg(t('errorRemove'));
       setTimeout(() => setLimitMsg(null), 3000);
     }
   };
@@ -288,7 +288,7 @@ export default function StockPoolPage() {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-indigo-500"></span>
             </div>
-            <span className="text-[10px] font-medium text-slate-500 tracking-wide uppercase">实时同步</span>
+            <span className="text-[10px] font-medium text-slate-500 tracking-wide uppercase">{t('liveSync')}</span>
           </div>
           <button 
             onClick={() => setShowAdd(!showAdd)} 
@@ -323,7 +323,7 @@ export default function StockPoolPage() {
               <div className="relative">
                 <input 
                   autoFocus
-                  placeholder="输入代码、名称或拼音首字母 (如: GZMT)"
+                  placeholder={t('searchHint')}
                   value={newSymbol}
                   onChange={(e) => setNewSymbol(e.target.value)}
                   className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 mono text-sm focus:outline-none focus:border-indigo-500/50"
@@ -364,8 +364,7 @@ export default function StockPoolPage() {
                 )}
                 {showSuggestions && searchResults.length === 0 && newSymbol.trim().length > 0 && (
                   <div className="mt-4 py-8 text-center text-slate-500 text-xs">
-                    <p className="mb-1">未找到匹配的股票</p>
-                    <p className="text-[10px] text-slate-600">试试输入完整代码或拼音首字母</p>
+                    <p className="mb-1">{t('noResults')}</p>
                   </div>
                 )}
               </div>
@@ -382,7 +381,7 @@ export default function StockPoolPage() {
           ) : stocks.length === 0 ? (
             <div className="py-20 flex flex-col items-center opacity-20 text-center">
               <LayoutGrid size={48} className="mb-4" />
-              <p className="text-xs font-black uppercase tracking-widest">暂无资产</p>
+              <p className="text-xs font-black uppercase tracking-widest">{t('noAssets')}</p>
             </div>
           ) : (
             stocks.map(stock => (
@@ -420,9 +419,9 @@ export default function StockPoolPage() {
                 <div className="w-16 h-16 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center mb-6">
                   <Trash2 className="text-rose-500" size={28} />
                 </div>
-                <h3 className="text-xl font-black italic tracking-tighter mb-2 text-white">确认移除？</h3>
+                <h3 className="text-xl font-black italic tracking-tighter mb-2 text-white">{t('removeTitle')}</h3>
                 <p className="text-sm text-slate-400 mb-8 leading-relaxed">
-                  确定要从自选池中移除 <span className="text-white font-bold">{getLocalizedStockName(stockToDelete, stockLocale)} ({stockToDelete.symbol})</span> 吗？
+                  {t('removeContent', { name: getLocalizedStockName(stockToDelete, stockLocale), symbol: stockToDelete.symbol })}
                 </p>
                 <div className="flex gap-3 w-full">
                   <button 
@@ -430,14 +429,14 @@ export default function StockPoolPage() {
                     onClick={() => setStockToDelete(null)}
                     className="flex-1 px-6 py-4 rounded-2xl bg-white/5 border border-white/10 text-xs font-black uppercase tracking-widest active:scale-95 transition-all disabled:opacity-50"
                   >
-                    取消
+                    {t('removeCancel')}
                   </button>
                   <button 
                     disabled={isDeleting}
                     onClick={confirmDelete}
                     className="flex-1 px-6 py-4 rounded-2xl bg-rose-500 text-white text-xs font-black uppercase tracking-widest active:scale-95 transition-all shadow-[0_10px_20px_rgba(244,63,94,0.3)] disabled:opacity-50 flex items-center justify-center gap-2"
                   >
-                    {isDeleting ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : '确认移除'}
+                    {isDeleting ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : t('removeConfirm')}
                   </button>
                 </div>
               </div>

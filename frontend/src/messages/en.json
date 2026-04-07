@@ -82,8 +82,22 @@
       "oversold": "Oversold",
       "stable": "Stable"
     },
-    "confidence": "Confidence",
-    "reasoning": "Rationale"
+    "confidence": "CONFIDENCE",
+    "reasoning": "Rationale",
+    "liveSync": "LIVE TELEMETRY",
+    "preMarketSilence": "PRE-MARKET STANDBY",
+    "syncing": "SYNCING...",
+    "searchHint": "Enter symbol, name or pinyin",
+    "noResults": "NULL SET / NO MATCH",
+    "noAssets": "ZERO FOOTPRINT",
+    "removeTitle": "TERMINATE TRACKING?",
+    "removeContent": "Terminate tracking for {name} ({symbol})?",
+    "removeConfirm": "TERMINATE",
+    "removeCancel": "ABORT",
+    "limit10": "MAX QUOTA REACHED (10)",
+    "limit3": "UPGRADE TO EXPAND QUOTA (LIMIT: 3)",
+    "errorRemove": "TERMINATION FAILED. RETRY.",
+    "errorAdd": "INITIALIZATION FAILED. RETRY."
   },
   "brief": {
     "title": "STRATEGIC BRIEF",

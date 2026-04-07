@@ -83,7 +83,21 @@
       "stable": "稳定"
     },
     "confidence": "置信度",
-    "reasoning": "推理依据"
+    "reasoning": "推理依据",
+    "liveSync": "实时同步",
+    "preMarketSilence": "盘前静默",
+    "syncing": "同步中...",
+    "searchHint": "输入代码、名称或拼音首字母",
+    "noResults": "未找到匹配的股票",
+    "noAssets": "暂无资产",
+    "removeTitle": "确认终止追踪？",
+    "removeContent": "确定要从自选池中移除 {name} ({symbol}) 吗？",
+    "removeConfirm": "确认终止",
+    "removeCancel": "取消",
+    "limit10": "已达到 10 只自选上限",
+    "limit3": "升级 Pro 可添加更多自选 (上限 3 只)",
+    "errorRemove": "移除失败，请重试",
+    "errorAdd": "添加失败，请稍后重试"
   },
   "brief": {
     "title": "研判报告",
