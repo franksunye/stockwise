@@ -104,7 +104,13 @@ export function TacticalReportPoster({
   const tPoster = useT('poster');
   const { locale: appLocale } = useLocale();
   const predictionLocale = appLocaleToPredictionContentLocale(appLocale);
-  const actionMeta = useMemo(() => getPredictionActionMeta(prediction), [prediction]);
+  // Report must follow the same semantic gate as dashboard card to avoid
+  // "outer card vs report" mismatches for non-pro tiers.
+  const allowLayer1Status = tier === 'pro' || tier === 'alpha';
+  const actionMeta = useMemo(
+    () => getPredictionActionMeta(prediction, { useLayer1Status: allowLayer1Status }),
+    [prediction, allowLayer1Status],
+  );
   const { scenarioHoldingProfit, scenarioHoldingLoss, scenarioEmpty } = useMemo(() => {
     const groups = getScenarioTacticGroups(data);
     return {

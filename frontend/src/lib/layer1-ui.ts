@@ -3,6 +3,12 @@ import type { AIPrediction } from '@/lib/types';
 import { COLORS } from '@/components/dashboard/constants';
 
 type PredictionLike = Pick<AIPrediction, 'signal' | 'layer1_status'> | null | undefined;
+interface PredictionMetaOptions {
+  // Product contract:
+  // - v1 tiers (free/go/plus) must render from `signal` only.
+  // - v2+ tiers (pro/alpha) may render from `layer1_status` first.
+  useLayer1Status?: boolean;
+}
 
 export interface PredictionActionMeta {
   headline: string;
@@ -102,9 +108,15 @@ const FALLBACK_META: PredictionActionMeta = {
   textClass: 'text-slate-400',
 };
 
-export function getPredictionActionMeta(prediction: PredictionLike): PredictionActionMeta {
+export function getPredictionActionMeta(
+  prediction: PredictionLike,
+  options?: PredictionMetaOptions,
+): PredictionActionMeta {
+  // Keep default true for backward compatibility at call sites.
+  // New/updated UI surfaces should pass explicit tier-gated options.
+  const useLayer1Status = options?.useLayer1Status ?? true;
   const layer1Status = prediction?.layer1_status;
-  if (layer1Status && layer1Status in LAYER1_META) {
+  if (useLayer1Status && layer1Status && layer1Status in LAYER1_META) {
     return LAYER1_META[layer1Status];
   }
 

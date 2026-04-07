@@ -32,19 +32,26 @@ const StockItem = memo(({
   navigatingTo, 
   isPreMarket, 
   onRemove,
-  setNavigatingTo 
+  setNavigatingTo,
+  tier,
 }: { 
   stock: StockSnapshot, 
   navigatingTo: string | null, 
   isPreMarket: boolean, 
   onRemove: (e: React.MouseEvent, stock: StockSnapshot) => void,
-  setNavigatingTo: (symbol: string) => void
+  setNavigatingTo: (symbol: string) => void,
+  tier: 'free' | 'go' | 'plus' | 'pro' | 'alpha',
 }) => {
   const t = useT('dashboard');
   const { locale } = useLocale();
   const stockLocale = locale === 'en' ? 'en' : 'cn';
   const listName = getLocalizedStockName(stock, stockLocale);
-  const meta = getPredictionActionMeta({ signal: stock.aiSignal, layer1_status: stock.layer1Status });
+  // Keep watchlist semantics aligned with dashboard/report:
+  // free/go/plus => signal, pro/alpha => layer1_status allowed.
+  const meta = getPredictionActionMeta(
+    { signal: stock.aiSignal, layer1_status: stock.layer1Status },
+    { useLayer1Status: tier === 'pro' || tier === 'alpha' },
+  );
   
   return (
     <motion.div
@@ -386,6 +393,7 @@ export default function StockPoolPage() {
                 isPreMarket={isPreMarket}
                 onRemove={handleRemoveClick}
                 setNavigatingTo={setNavigatingTo}
+                tier={tier}
               />
             ))
           )}

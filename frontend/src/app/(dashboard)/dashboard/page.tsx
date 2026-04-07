@@ -60,11 +60,21 @@ interface ExtendedStockData extends StockData {
 }
 
 // 1. 性能组件：独立背景辉光 (隔离 Modal 开关带来的重绘)
-const DashboardBackground = memo(({ isAlmanac, prediction }: { isAlmanac: boolean, prediction?: AIPrediction | null }) => {
+const DashboardBackground = memo(({
+  isAlmanac,
+  prediction,
+  useLayer1Status,
+}: {
+  isAlmanac: boolean,
+  prediction?: AIPrediction | null,
+  useLayer1Status: boolean,
+}) => {
   const color = useMemo(() => {
     if (isAlmanac) return '#4F46E5';
-    return getPredictionActionMeta(prediction).color;
-  }, [isAlmanac, prediction]);
+    // Background color is semantic; keep it under the same tier gate
+    // as card/report signal rendering.
+    return getPredictionActionMeta(prediction, { useLayer1Status }).color;
+  }, [isAlmanac, prediction, useLayer1Status]);
 
   return (
     <motion.div 
@@ -255,6 +265,8 @@ function DashboardContent() {
       <DashboardBackground 
         isAlmanac={isMarketAlmanac} 
         prediction={currentStock?.prediction} 
+        // Product rule: only pro/alpha can render by layer1_status.
+        useLayer1Status={tier === 'pro' || tier === 'alpha'}
       />
 
       <header className="fixed top-0 left-0 right-0 z-[100] p-6 pointer-events-none">
@@ -389,6 +401,7 @@ function DashboardContent() {
           symbol={selectedTactics.symbol || ''}
           targetDate={selectedTactics.prediction?.target_date || ''}
           signal={selectedTactics.prediction?.signal}
+          layer1Status={selectedTactics.prediction?.layer1_status}
           confidence={selectedTactics.prediction?.confidence}
           stockName={selectedTacticStock?.name}
           stockNameEn={selectedTacticStock?.name_en}

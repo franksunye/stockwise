@@ -58,6 +58,7 @@ interface TacticalBriefDrawerProps {
   symbol: string;
   targetDate: string;
   signal?: 'Long' | 'Short' | 'Side';
+  layer1Status?: AIPrediction['layer1_status'];
   confidence?: number;
   stockName?: string;
   stockNameEn?: string | null;
@@ -129,7 +130,7 @@ const formatDistancePercent = (distance: number | undefined): string => {
 };
 
 export function TacticalBriefDrawer({ 
-  isOpen, onClose, data, tier, model, symbol, targetDate, signal, confidence, stockName, stockNameEn, currentPrice, shortMetrics, userPos
+  isOpen, onClose, data, tier, model, symbol, targetDate, signal, layer1Status, confidence, stockName, stockNameEn, currentPrice, shortMetrics, userPos
 }: TacticalBriefDrawerProps) {
   const t = useT('brief');
   const tCommon = useT('common');
@@ -241,6 +242,9 @@ export function TacticalBriefDrawer({
     symbol,
     target_date: targetDate,
     signal: signal || 'Side',
+    // Pass through layer1_status so TacticalReportPoster can apply tier gating
+    // consistently with the dashboard card.
+    layer1_status: layer1Status,
     confidence: confidence || 0,
     ai_reasoning: JSON.stringify(data),
     date: '',

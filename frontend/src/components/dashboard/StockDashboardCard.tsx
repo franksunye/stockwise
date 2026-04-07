@@ -16,6 +16,7 @@ import { formatBriefActionLabel, normalizeLegacyTerms } from '@/lib/tactical-bri
 import { useT, useGlobalT, useLocale } from '@/context/LocaleContext';
 import { getLocalizedStockName } from '@/lib/stock-name';
 import type { FullMessageKey, MessageKey } from '@/lib/i18n';
+import { useUserProfile } from '@/hooks/useUserProfile';
 
 interface StockDashboardCardProps {
   data: StockData;
@@ -28,6 +29,10 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
   const tGlobal = useGlobalT();
   const tCommon = useT('common');
   const { locale } = useLocale();
+  const { tier } = useUserProfile();
+  // Tier-gated semantic source:
+  // v1 (free/go/plus) => `signal` only, v2+ (pro/alpha) => allow `layer1_status`.
+  const allowLayer1Status = tier === 'pro' || tier === 'alpha';
   const stockLocale = locale === 'en' ? 'en' : 'cn';
   const displayName = getLocalizedStockName(data, stockLocale);
 
@@ -84,8 +89,10 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
   const reasoningFallback = !displayPrediction ? tCommon('noData') : t('signal.pending');
 
   const actionMeta = useMemo(
-    () => getPredictionActionMeta(displayPrediction),
-    [displayPrediction]
+    // IMPORTANT: top card headline/color must match report/export semantics.
+    // Do not bypass this gate with raw `layer1_status`.
+    () => getPredictionActionMeta(displayPrediction, { useLayer1Status: allowLayer1Status }),
+    [displayPrediction, allowLayer1Status]
   );
 
   if (data.loading || !data.price) return (

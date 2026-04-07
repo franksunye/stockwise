@@ -69,12 +69,17 @@ summary: "定义量化层与 AI 分析层在前台的协同呈现方式，并约
 由于该挂载在 `Feed` 上的组件还会被用于查看半年甚至一年前的历史数据，必须考虑**向后兼容 (Backward Compatibility)**。
 
 *   **API 与 DB 调整**：确保 `/api/predictions?mode=full` 及数据库 `ai_predictions_v2` 在返回时，附加 `layer1_status`。而针对前端的 `AIPrediction` TypeScript Interface 也需增加对应字段。
+*   **版本分层门控 (Tier Gating)**：
+    *   `layer1_status` 明确定义为 **v2 量化语义字段**，默认仅供 Pro/Alpha 使用。
+    *   Free/Go/Plus（v1）展示层必须只用 `signal`，不可直接展示 `layer1_status`。
 *   **平滑回退 (Graceful Fallback)**：
-    *   在渲染前检查 `const displaySignal = prediction?.layer1_status || prediction?.signal;`。
+    *   在渲染前按会员层级判断：
+        *   Pro/Alpha：`displaySignal = prediction?.layer1_status || prediction?.signal`
+        *   Free/Go/Plus：`displaySignal = prediction?.signal`
     *   如果为旧数据结构（无独立量化信号），代码必须能原封不动地回退执行现有的“统计算票 logic (longCount, shortCount)” 和“建议做多”这种基于选票的翻译。绝不能让旧数据的页面崩溃。
 
 ---
 
 ## 5. 验收标准 (Done)
-- [ ] 确保前端架构（`StockDashboardCard`, `AICouncil`）在不修改 UI 的前提下，平滑兼容包含或不包含 `layer1_status` 的新老 API 数据。
+- [ ] 确保前端架构（`StockDashboardCard`, `AICouncil`）在不修改 UI 的前提下，平滑兼容包含或不包含 `layer1_status` 的新老 API 数据，并严格遵守 tier 门控（v1 不展示 layer1_status）。
 - [ ] 量化层的重构主要聚焦在 `backend/engine` 中，对最终输出给前端的 `predictions` 的包装，而非打碎重做前台。

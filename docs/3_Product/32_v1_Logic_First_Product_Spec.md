@@ -88,6 +88,19 @@ summary: "定义 v1 阶段 (Free, Go, Plus) 的核心交互逻辑、国际化标
 | **Pro** | **v2** | **AI + 量化规则引擎** | **双轨版**：AI 逻辑研判 + 量化硬规则校验。 |
 | **Alpha** | **v3** | **全私有化算力独占** | **优化版**：极致择时与成本防御。 |
 
+### 3.1 语义字段分层规则（强约束）
+
+为避免前端口径混乱，信号语义字段按版本严格分层：
+
+- `signal`：v1 公共动作语义（Free/Go/Plus/Pro/Alpha 均可展示）。
+- `layer1_status`：v2 量化纪律语义（仅 Pro/Alpha 展示）。
+
+前端渲染约束：
+
+1. **Free/Go/Plus**：禁止使用 `layer1_status` 作为主展示语义，只能使用 `signal`。
+2. **Pro/Alpha**：允许 `layer1_status` 优先，`signal` 作为兼容回退。
+3. 同一页面内（外层卡片、详情抽屉、报告导出）必须使用同一 tier 门控，禁止混用。
+
 ---
 
 ## 4. 信任与验证 UI 规格 (Trust & Validation)
