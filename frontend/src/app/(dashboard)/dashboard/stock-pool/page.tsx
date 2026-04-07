@@ -40,6 +40,7 @@ const StockItem = memo(({
   onRemove: (e: React.MouseEvent, stock: StockSnapshot) => void,
   setNavigatingTo: (symbol: string) => void
 }) => {
+  const t = useT('dashboard');
   const { locale } = useLocale();
   const stockLocale = locale === 'en' ? 'en' : 'cn';
   const listName = getLocalizedStockName(stock, stockLocale);

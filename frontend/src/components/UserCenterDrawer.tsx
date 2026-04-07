@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, User, Crown, Zap, ShieldCheck, Loader2, ArrowRight, Share2, 
   Check, RefreshCw, Key, Bell, ChevronDown, ArrowLeftRight, Sun, 
-  Trophy, FileText, ChevronRight, Mail, HelpCircle, BookOpen, Info, Activity
+  Trophy, ChevronRight, Mail, HelpCircle, BookOpen, Info, Activity
 } from 'lucide-react';
 import { useState } from 'react';
 import { restoreUserIdentity } from '@/lib/user';
@@ -669,7 +669,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                       <button onClick={() => setShowPricing(true)} className={`w-full py-4 px-5 rounded-[24px] border transition-all flex items-center justify-between group ${isPremiumTier ? 'bg-white/[0.02] border-white/5 hover:border-indigo-500/20' : 'bg-indigo-500/5 border-indigo-500/10 hover:border-indigo-500/20'}`}>
                         <div className="flex items-center gap-3">
                           <Crown className={`w-5 h-5 ${isPremiumTier ? 'text-slate-400' : 'text-amber-400'}`} />
-                          <span className="text-sm font-bold text-white uppercase text-left">{isPremiumTier ? tGlobal('pricing.title') : '解锁 Go 权益'}</span>
+                          <span className="text-sm font-bold text-white uppercase text-left">{isPremiumTier ? tGlobal('pricing.title') : t('unlockGoBenefits')}</span>
                         </div>
                         <ChevronRight size={14} className="text-slate-600 group-hover:text-white transition-colors" />
                       </button>
