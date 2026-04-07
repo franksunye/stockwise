@@ -54,6 +54,35 @@ def _build_missing_predictions_query(symbol_count: int, model_filter: str = None
     return query, []
 
 
+def _symbol_effective_tiers(conn, symbol: str) -> list[str]:
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        SELECT DISTINCT
+            CASE
+                WHEN lower(COALESCE(u.subscription_tier, 'free')) IN ('go', 'plus', 'pro', 'alpha')
+                     AND u.subscription_expires_at IS NOT NULL
+                     AND u.subscription_expires_at <= datetime('now')
+                    THEN 'free'
+                WHEN lower(COALESCE(u.subscription_tier, 'free')) IN ('free', 'go', 'plus', 'pro', 'alpha')
+                    THEN lower(COALESCE(u.subscription_tier, 'free'))
+                ELSE 'free'
+            END AS effective_tier
+        FROM user_watchlist w
+        JOIN users u ON u.user_id = w.user_id
+        WHERE w.symbol = ?
+        LIMIT 50
+        """,
+        (symbol,),
+    )
+    tiers = []
+    for row in cursor.fetchall():
+        tier = str(row[0] if isinstance(row, (tuple, list)) else row["effective_tier"]).strip().lower()
+        if tier and tier not in tiers:
+            tiers.append(tier)
+    return tiers or ["free"]
+
+
 def run_ai_analysis_backfill(
     symbol: str = None,
     market_filter: str = None,
@@ -233,8 +262,6 @@ def _analyze_stocks_for_date(conn, stocks: list, date_str: str, model_filter: st
     import asyncio
     import os
 
-    runner = PredictionRunner(model_filter=model_filter, force=force)
-
     if os.name == 'nt':
         try:
             asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
@@ -258,6 +285,8 @@ def _analyze_stocks_for_date(conn, stocks: list, date_str: str, model_filter: st
 
             logger.info(f"   >>> 分析 {stock} ({date_str})")
 
+            effective_tiers = _symbol_effective_tiers(conn, stock)
+            runner = PredictionRunner(model_filter=model_filter, force=force, effective_tiers=effective_tiers)
             result = asyncio.run(runner.run_analysis(stock, date_str, data=None, force=force, locale=locale))
             if result:
                 success_count += 1

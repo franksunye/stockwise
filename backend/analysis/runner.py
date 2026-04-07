@@ -62,6 +62,39 @@ def _build_target_locale_map(conn, targets: list[str], forced_locale: str) -> di
     return out
 
 
+def _symbol_effective_tiers(conn, symbol: str) -> list[str]:
+    """
+    Resolve effective tiers from watchers for a symbol.
+    Expired paid subscriptions degrade to free.
+    """
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        SELECT DISTINCT
+            CASE
+                WHEN lower(COALESCE(u.subscription_tier, 'free')) IN ('go', 'plus', 'pro', 'alpha')
+                     AND u.subscription_expires_at IS NOT NULL
+                     AND u.subscription_expires_at <= datetime('now')
+                    THEN 'free'
+                WHEN lower(COALESCE(u.subscription_tier, 'free')) IN ('free', 'go', 'plus', 'pro', 'alpha')
+                    THEN lower(COALESCE(u.subscription_tier, 'free'))
+                ELSE 'free'
+            END AS effective_tier
+        FROM user_watchlist w
+        JOIN users u ON u.user_id = w.user_id
+        WHERE w.symbol = ?
+        LIMIT 50
+        """,
+        (symbol,),
+    )
+    tiers = []
+    for row in cursor.fetchall():
+        tier = str(row[0] if isinstance(row, (tuple, list)) else row["effective_tier"]).strip().lower()
+        if tier and tier not in tiers:
+            tiers.append(tier)
+    return tiers or ["free"]
+
+
 def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool = False, model_filter: str = None, locale: str = 'auto'):
     """独立运行 AI 预测任务
     
@@ -209,7 +242,12 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool =
                     from backend.engine.runner import PredictionRunner
                     import asyncio
 
-                    runner = PredictionRunner(model_filter=model_filter, force=force)
+                    effective_tiers = _symbol_effective_tiers(conn, stock)
+                    runner = PredictionRunner(
+                        model_filter=model_filter,
+                        force=force,
+                        effective_tiers=effective_tiers,
+                    )
 
                     # Run async in sync context
                     if os.name == 'nt':

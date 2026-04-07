@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getDbClient } from '@/lib/db';
 import { getUserTier } from '@/lib/user-server';
-import { getModelSqlFilter } from '@/lib/membership-config';
+import { getAllowedPredictionModelIdsForTier } from '@/lib/model-access-policy';
 import { requireUserSession } from '@/lib/user-session';
 import {
     DEFAULT_MODE_ID,
@@ -136,7 +136,6 @@ export async function GET(request: Request) {
         const userId = auth.userId;
         debugStage = 'get_user_tier';
         const userTier = await getUserTier(userId);
-        const tierFilter = getModelSqlFilter(userTier);
 
         debugStage = 'get_db_client';
         const client = getDbClient();
@@ -146,6 +145,19 @@ export async function GET(request: Request) {
         let currentModeId = DEFAULT_MODE_ID;
 
         const placeholders = symbols.length > 0 ? symbols.map(() => '?').join(',') : '';
+        const allowedModelIds = await getAllowedPredictionModelIdsForTier(client, userTier);
+        if (allowedModelIds.length === 0) {
+            const response = NextResponse.json({
+                stocks: symbols.map(sym => ({ symbol: sym, price: null, prediction: null, previousPrediction: null, lastUpdated: formatPriceUpdateTag(new Date()) })),
+                timestamp: new Date().toISOString(),
+                tier: userTier,
+                queryTime: Date.now() - startTime,
+                requestId
+            });
+            response.headers.set('X-Stockwise-Request-Id', requestId);
+            return applyNoStoreHeaders(response);
+        }
+        const modelPlaceholders = allowedModelIds.map(() => '?').join(',');
         const historySql = `
             WITH RankedPredictions AS (
                 SELECT p.symbol, p.date, p.target_date,
@@ -185,7 +197,7 @@ export async function GET(request: Request) {
                    AND pol.role_type = CASE WHEN COALESCE(p.is_primary, 0) = 1 THEN 'primary' ELSE 'secondary' END
                 WHERE p.symbol IN (${placeholders})
                   AND p.target_date >= '${dashboardPredictionThreshold}'
-                  AND (${tierFilter})
+                  AND p.model_id IN (${modelPlaceholders})
                   AND COALESCE(p.content_locale, 'cn') = ?
             ),
             DailyBest AS (
@@ -234,7 +246,7 @@ export async function GET(request: Request) {
                 LEFT JOIN prediction_models m ON p.model_id = m.model_id
                 WHERE p.symbol IN (${placeholders})
                   AND p.target_date >= '${dashboardPredictionThreshold}'
-                  AND (${tierFilter})
+                  AND p.model_id IN (${modelPlaceholders})
                   AND COALESCE(p.content_locale, 'cn') = ?
             ),
             DailyBest AS (
@@ -296,7 +308,7 @@ export async function GET(request: Request) {
                                     const historyRs = await Promise.race([
                                         client.execute({
                                             sql: historySql,
-                                            args: [currentModeId, currentModeId, ...symbols, predictionContentLocale]
+                                            args: [currentModeId, currentModeId, ...symbols, ...allowedModelIds, predictionContentLocale]
                                         }),
                                         new Promise<never>((_, reject) =>
                                             setTimeout(() => reject(new Error('Rich query timeout')), RICH_QUERY_TIMEOUT_MS)
@@ -317,16 +329,16 @@ export async function GET(request: Request) {
                             if (!richQuerySucceeded) {
                                 const historyRs = await client.execute({
                                     sql: fallbackHistorySql,
-                                    args: [currentModeId, ...symbols, predictionContentLocale]
+                                    args: [currentModeId, ...symbols, ...allowedModelIds, predictionContentLocale]
                                 });
                                 allHistory = historyRs.rows as Record<string, unknown>[];
                             }
                         } else {
                             try {
-                                allHistory = client.prepare(historySql).all(currentModeId, currentModeId, ...symbols, predictionContentLocale) as Record<string, unknown>[];
+                                allHistory = client.prepare(historySql).all(currentModeId, currentModeId, ...symbols, ...allowedModelIds, predictionContentLocale) as Record<string, unknown>[];
                             } catch {
                                 console.warn('[Batch] Local rich history failed, falling back...');
-                                allHistory = client.prepare(fallbackHistorySql).all(currentModeId, ...symbols, predictionContentLocale) as Record<string, unknown>[];
+                                allHistory = client.prepare(fallbackHistorySql).all(currentModeId, ...symbols, ...allowedModelIds, predictionContentLocale) as Record<string, unknown>[];
                             }
                         }
 

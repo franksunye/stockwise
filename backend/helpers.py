@@ -6,7 +6,7 @@ from datetime import datetime
 from config import BEIJING_TZ
 from database import get_connection, execute_with_retry
 from trading_calendar import is_market_closed
-from backend.db_repo.queries import LAST_DATE_QUERY, CHECK_PRO_WATCHER_QUERY
+from backend.db_repo.queries import LAST_DATE_QUERY, CHECK_PAID_WATCHER_QUERY
 from backend.logger import logger
 
 
@@ -25,7 +25,7 @@ def get_last_date(symbol: str, table: str = "daily_prices") -> str:
 
 
 def check_stock_analysis_mode(symbol: str) -> str:
-    """检查股票分析模式：如果有 Pro/Premium 用户关注，则使用 AI，否则使用 Rules"""
+    """检查股票分析模式：如果有 GO/PLUS/PRO 付费用户关注，则使用 AI，否则使用 Rules"""
     try:
         def _logic(conn, sym):
             cursor = conn.cursor()
@@ -33,7 +33,7 @@ def check_stock_analysis_mode(symbol: str) -> str:
             now_str = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S")
             
             # 检查是否有有效期内的付费用户关注
-            cursor.execute(CHECK_PRO_WATCHER_QUERY, (sym, now_str))
+            cursor.execute(CHECK_PAID_WATCHER_QUERY, (sym, now_str))
             return cursor.fetchone()
 
         row = execute_with_retry(_logic, 3, symbol)
@@ -45,7 +45,7 @@ def check_stock_analysis_mode(symbol: str) -> str:
         else:
             logger.info(f"   ⚪ 仅普通用户关注，使用规则引擎")
             
-        return "ai"
+        return mode
     except Exception as e:
         logger.warning(f"   ⚠️ 权限检查失败 ({e})，默认使用规则引擎 (Cost Saving)")
         return 'rule'

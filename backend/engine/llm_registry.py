@@ -31,6 +31,7 @@ import json
 import os
 import time
 from typing import Dict, List, Optional, Any
+from backend.engine.model_policy import normalize_tier, parse_model_policy
 
 try:
     from backend.database import get_connection
@@ -244,6 +245,23 @@ class LLMRegistry:
             m['model_id'] for m in models
             if m.get('is_active') and cls._has_role(m, role)
         ]
+
+    @classmethod
+    def get_active_model_ids_for_tier(cls, role: str, tier: str) -> List[str]:
+        """
+        Tier-aware model list for SSOT policy enforcement.
+        Uses config_json.access visibility_tiers/prediction_tiers.
+        """
+        normalized_tier = normalize_tier(tier)
+        ids: List[str] = []
+        for m in cls._load():
+            if not (m.get("is_active") and cls._has_role(m, role)):
+                continue
+            policy = parse_model_policy(m.get("model_id", "unknown"), m.get("config_json"))
+            visibility = set(policy.get("visibility_tiers") or policy.get("prediction_tiers") or [])
+            if normalized_tier in visibility:
+                ids.append(m["model_id"])
+        return ids
 
     @classmethod
     def list_all(cls) -> List[Dict]:

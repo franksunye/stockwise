@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getDbClient } from '@/lib/db';
 import { getUserTier } from '@/lib/user-server';
-import { getModelSqlFilter } from '@/lib/membership-config';
+import { getAllowedPredictionModelIdsForTier } from '@/lib/model-access-policy';
 import { requireUserSession } from '@/lib/user-session';
 
 export const dynamic = 'force-dynamic';
@@ -40,9 +40,13 @@ export async function GET(request: Request) {
         const auth = requireUserSession(request);
         if ('response' in auth) return applyNoStoreHeaders(auth.response);
         const userTier = await getUserTier(auth.userId);
-        const tierFilter = getModelSqlFilter(userTier);
         const db = getDbClient();
+        const allowedModelIds = await getAllowedPredictionModelIdsForTier(db, userTier);
+        if (allowedModelIds.length === 0) {
+            return applyNoStoreHeaders(NextResponse.json({ items: [] }));
+        }
         const placeholders = symbols.map(() => '?').join(',');
+        const modelPlaceholders = allowedModelIds.map(() => '?').join(',');
         const dashboardPredictionThreshold = new Date(Date.now() - 10 * 86400000)
             .toISOString()
             .split('T')[0];
@@ -62,7 +66,7 @@ export async function GET(request: Request) {
                 LEFT JOIN prediction_models m ON p.model_id = m.model_id
                 WHERE p.symbol IN (${placeholders})
                   AND p.target_date >= ?
-                  AND (${tierFilter})
+                  AND p.model_id IN (${modelPlaceholders})
             ),
             DailyBest AS (
                 SELECT symbol, date, target_date, updated_at
@@ -91,11 +95,11 @@ export async function GET(request: Request) {
             if ('execute' in db) {
                 const rs = await db.execute({
                     sql,
-                    args: [...symbols, dashboardPredictionThreshold],
+                    args: [...symbols, dashboardPredictionThreshold, ...allowedModelIds],
                 });
                 rows = rs.rows as Record<string, unknown>[];
             } else {
-                rows = db.prepare(sql).all(...symbols, dashboardPredictionThreshold) as Record<string, unknown>[];
+                rows = db.prepare(sql).all(...symbols, dashboardPredictionThreshold, ...allowedModelIds) as Record<string, unknown>[];
             }
 
             return applyNoStoreHeaders(NextResponse.json({ items: rows }));

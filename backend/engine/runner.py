@@ -128,14 +128,16 @@ def select_primary_prediction(
     return None
 
 class PredictionRunner:
-    def __init__(self, model_filter: str = None, force: bool = False):
+    def __init__(self, model_filter: str = None, force: bool = False, effective_tiers: list[str] | None = None):
         """
         Args:
             model_filter: 指定要使用的模型 ID，如果为 None 则使用所有活动模型
             force: 是否强制重新运行已存在的预测
+            effective_tiers: 当前 symbol 对应 watcher tiers（模型策略过滤入口）
         """
         self.model_filter = model_filter
         self.force = force
+        self.effective_tiers = effective_tiers or ["free"]
 
     async def run_analysis(self, symbol: str, date: str = None, data: Dict[str, Any] = None, force: bool = False, locale: str = 'cn'):
         """
@@ -149,7 +151,7 @@ class PredictionRunner:
         logger.info(f"🏁 [{trace_id}] Starting Multi-Model Analysis for {symbol} on {date}")
         
         # 1. Get Active Models (Already sorted by priority DESC)
-        models = ModelFactory.get_active_models()
+        models = ModelFactory.get_active_models(self.effective_tiers)
         if not models:
             logger.warning("⚠️ No active models found!")
             return False
@@ -158,7 +160,10 @@ class PredictionRunner:
         if self.model_filter and self.model_filter != 'all':
             models = [m for m in models if m.model_id == self.model_filter]
             if not models:
-                logger.warning(f"⚠️ Model '{self.model_filter}' not found or not active!")
+                logger.warning(
+                    f"⚠️ Model '{self.model_filter}' not found, inactive, or not allowed "
+                    f"for tiers={self.effective_tiers}"
+                )
                 return False
             logger.info(f"🎯 指定模型: {self.model_filter}")
         

@@ -50,6 +50,13 @@ CHECK_PRO_WATCHER_QUERY = """
     AND u.subscription_tier IN ('pro', 'premium')
     AND (u.subscription_expires_at IS NULL OR u.subscription_expires_at > ?)
 """
+CHECK_PAID_WATCHER_QUERY = """
+    SELECT COUNT(*) FROM users u
+    JOIN user_watchlist w ON u.user_id = w.user_id
+    WHERE w.symbol = ?
+    AND u.subscription_tier IN ('go', 'plus', 'pro')
+    AND (u.subscription_expires_at IS NULL OR u.subscription_expires_at > ?)
+"""
 GET_USER_WATCHLIST_QUERY = "SELECT symbol FROM user_watchlist WHERE user_id = ?"
 GET_USER_TIER_QUERY = "SELECT subscription_tier, locale FROM users WHERE user_id = ?"
 GET_USER_NOTIF_SETTINGS_QUERY = "SELECT notification_settings FROM users WHERE user_id = ?"

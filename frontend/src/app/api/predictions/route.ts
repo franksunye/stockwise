@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getDbClient } from '@/lib/db';
 import { getUserTier } from '@/lib/user-server';
-import { getModelSqlFilter } from '@/lib/membership-config';
+import { getAllowedPredictionModelIdsForTier } from '@/lib/model-access-policy';
 import { requireUserSession } from '@/lib/user-session';
 import {
     ensureInvestmentModeSchema,
@@ -61,7 +61,6 @@ export async function GET(request: Request) {
         if ('response' in auth) return auth.response;
         const userId = auth.userId;
         const userTier = await getUserTier(userId);
-        const tierFilter = getModelSqlFilter(userTier);
         const db = getDbClient();
 
         const mode = searchParams.get('mode') || 'simple';
@@ -70,12 +69,22 @@ export async function GET(request: Request) {
         try {
             await ensureInvestmentModeSchema(db);
             const currentMode = await getUserMode(db, userId, userTier as UserTier);
+            const allowedModelIds = await getAllowedPredictionModelIdsForTier(db, userTier);
+            if (allowedModelIds.length === 0) {
+                return NextResponse.json({
+                    predictions: [],
+                    tier: userTier,
+                    mode_id: currentMode.mode_id,
+                });
+            }
 
             let whereClause = 'p.symbol = ?';
             const queryArgs: (string | number)[] = [symbol];
 
             if (isPrimaryOnly) {
-                whereClause += ` AND ${tierFilter}`;
+                const modelPlaceholders = allowedModelIds.map(() => '?').join(',');
+                whereClause += ` AND p.model_id IN (${modelPlaceholders})`;
+                queryArgs.push(...allowedModelIds);
             }
 
             if (targetDate) {

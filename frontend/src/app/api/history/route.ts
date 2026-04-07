@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getDbClient } from '@/lib/db';
 import { getUserTier } from '@/lib/user-server';
-import { getModelSqlFilter } from '@/lib/membership-config';
+import { getAllowedPredictionModelIdsForTier } from '@/lib/model-access-policy';
 import { requireUserSession } from '@/lib/user-session';
 import {
     ensureInvestmentModeSchema,
@@ -65,13 +65,17 @@ export async function GET(request: Request) {
         if ('response' in auth) return auth.response;
         const userId = auth.userId;
         const userTier = await getUserTier(userId);
-        const tierFilter = getModelSqlFilter(userTier);
 
         const client = getDbClient();
         let rows: Record<string, unknown>[];
         try {
             await ensureInvestmentModeSchema(client);
             const currentMode = await getUserMode(client, userId, userTier as UserTier);
+            const allowedModelIds = await getAllowedPredictionModelIdsForTier(client, userTier);
+            if (allowedModelIds.length === 0) {
+                return NextResponse.json({ predictions: [], tier: userTier });
+            }
+            const modelPlaceholders = allowedModelIds.map(() => '?').join(',');
 
             const sql = `
                 SELECT p.symbol, p.date, p.target_date, ${EFFECTIVE_SIGNAL_WITH_OUTCOME_SQL} AS signal, ${BASE_SIGNAL_SQL} AS canonical_signal, ${BASE_CONFIDENCE_SQL} AS confidence,
@@ -106,11 +110,19 @@ export async function GET(request: Request) {
                    AND pol.producer_type = 'AI'
                    AND pol.role_type = CASE WHEN COALESCE(p.is_primary, 0) = 1 THEN 'primary' ELSE 'secondary' END
                 LEFT JOIN daily_prices d ON p.symbol = d.symbol AND p.target_date = d.date
-                WHERE p.symbol = ? AND COALESCE(p.content_locale, 'cn') = ? AND (${tierFilter})
+                WHERE p.symbol = ? AND COALESCE(p.content_locale, 'cn') = ? AND p.model_id IN (${modelPlaceholders})
                 ORDER BY p.date DESC, m.priority DESC
                 LIMIT ? OFFSET ?
             `;
-            const sqlArgs = [currentMode.mode_id, currentMode.mode_id, symbol, predictionContentLocale, limit, offset];
+            const sqlArgs = [
+                currentMode.mode_id,
+                currentMode.mode_id,
+                symbol,
+                predictionContentLocale,
+                ...allowedModelIds,
+                limit,
+                offset,
+            ];
             try {
                 if ('execute' in client) {
                     const rs = await client.execute({ sql, args: sqlArgs });
@@ -154,7 +166,7 @@ export async function GET(request: Request) {
                        AND dlog.symbol = p.symbol
                        AND dlog.decision_date = p.date
                     LEFT JOIN daily_prices d ON p.symbol = d.symbol AND p.target_date = d.date
-                    WHERE p.symbol = ? AND COALESCE(p.content_locale, 'cn') = ? AND (${tierFilter})
+                    WHERE p.symbol = ? AND COALESCE(p.content_locale, 'cn') = ? AND p.model_id IN (${modelPlaceholders})
                     ORDER BY p.date DESC, m.priority DESC
                     LIMIT ? OFFSET ?
                 `;

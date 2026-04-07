@@ -2,6 +2,8 @@ import json
 from typing import Dict, Any, Type
 from .base import BasePredictionModel
 from backend.database import get_connection
+from backend.engine.model_policy import model_allows_tier, normalize_tiers, parse_model_policy
+from backend.logger import logger
 
 class ModelFactory:
     _registry: Dict[str, Type[BasePredictionModel]] = {}
@@ -68,12 +70,12 @@ class ModelFactory:
         return model_class(model_id, config)
 
     @classmethod
-    def get_active_models(cls):
+    def get_active_models(cls, effective_tiers=None):
         conn = get_connection()
         cursor = conn.cursor()
         try:
             cursor.execute("""
-                SELECT model_id FROM prediction_models 
+                SELECT model_id, config_json FROM prediction_models
                 WHERE is_active = 1 
                   AND (roles LIKE '%"prediction"%' OR roles IS NULL)
                 ORDER BY priority DESC
@@ -83,19 +85,26 @@ class ModelFactory:
             conn.close()
         
         models = []
+        requested_tiers = normalize_tiers(effective_tiers)
         for row in rows:
-            # Robustly access first column (model_id)
+            # Robustly access columns
             if isinstance(row, (tuple, list)):
                 mid = row[0]
+                config_json_raw = row[1] if len(row) > 1 else None
             elif hasattr(row, '__getitem__'):
                 mid = row[0]
+                config_json_raw = row[1] if len(row) > 1 else None
             else:
                  # Try attribute if named row
                  mid = getattr(row, 'model_id', None)
+                 config_json_raw = getattr(row, 'config_json', None)
                  
             if mid:
                 try:
+                    policy = parse_model_policy(str(mid), str(config_json_raw or "{}"))
+                    if not model_allows_tier(policy, requested_tiers):
+                        continue
                     models.append(cls.create_model(mid))
                 except Exception as e:
-                    print(f"⚠️ Failed to load model {mid}: {e}")
+                    logger.warning(f"⚠️ Failed to load model {mid}: {e}")
         return models
