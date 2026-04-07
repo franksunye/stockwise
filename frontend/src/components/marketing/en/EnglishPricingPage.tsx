@@ -10,8 +10,8 @@ import { STRIPE_PRICE_IDS } from '@/lib/stripe-constants';
 
 const EN_PRICING_PLANS = [
   {
-    name: 'Free',
-    eyebrow: 'Starter Access',
+    name: 'COMMUNITY NODE',
+    eyebrow: 'BASIC ACCESS',
     price: '0',
     period: 'Forever Free',
     description: 'Perfect for starters exploring AI-assisted market reviews.',
@@ -27,8 +27,8 @@ const EN_PRICING_PLANS = [
     accent: 'text-slate-300',
   },
   {
-    name: 'Go',
-    eyebrow: 'Most Popular',
+    name: 'CORE NODE (GO)',
+    eyebrow: 'OPTIMAL CHOICE',
     price: '4.99',
     period: 'Monthly / $49.9 Yearly',
     description: 'Unlock DeepSeek actionable insights, 10 watchlist stocks, 200 monthly reports, and all-category real-time alerts.',
@@ -65,16 +65,31 @@ const EN_PRICING_PLANS = [
 ] as const;
 
 const EN_FEATURE_COMPARISON = [
-  { isGroup: true, label: 'Actionable Insights' },
-  { label: 'Service Model', free: 'Hunyuan Lite', go: 'DeepSeek', plus: 'DeepSeek + Gemini', highlight: true },
-  { label: 'Watchlist Stock Count', free: '3 Stocks', go: '10 Stocks', plus: '10 Stocks', highlight: true },
-  { label: 'Monthly Report Quota', free: '60 / Month', go: '200 / Month', plus: '200 / Month' },
-  { label: 'Market Coverage', free: 'US / HK / CN', go: 'US / HK / CN', plus: 'US / HK / CN' },
-  { label: 'Signals / Tactical Briefs', free: '✅', go: '✅', plus: '✅' },
-  { label: 'Key Levels / Short Pressure', free: '✅', go: '✅', plus: '✅' },
-  { label: 'Deduction / Risk Reflection', free: '❌', go: '✅', plus: '✅' },
-  { label: 'Conflict Explanation', free: '❌', go: '✅', plus: '✅' },
-  { label: 'Report Sharing', free: '❌', go: 'Unlimited', plus: 'Unlimited' },
+  {
+    isGroup: true,
+    label: 'STRATEGIC ANALYTICS',
+  },
+  {
+    label: 'ANALYSIS ENGINE',
+    free: 'Hunyuan Lite',
+    go: 'DeepSeek',
+    plus: 'DeepSeek + Gemini',
+    highlight: true,
+  },
+  {
+    label: 'SYMBOL MONITORING',
+    free: '3 Symbols',
+    go: '10 Symbols',
+    plus: '10 Symbols',
+    highlight: true,
+  },
+  { label: 'MONTHLY QUOTA', free: '60 / Month', go: '200 / Month', plus: '200 / Month' },
+  { label: 'MARKET COVERAGE', free: 'US / HK / CN', go: 'US / HK / CN', plus: 'US / HK / CN' },
+  { label: 'SIGNALS / PROTOCOLS', free: '✅', go: '✅', plus: '✅' },
+  { label: 'TACTICAL ANCHORS', free: '✅', go: '✅', plus: '✅' },
+  { label: 'LOGICAL TRACE', free: '❌', go: '✅', plus: '✅' },
+  { label: 'RATIONALE AUDIT', free: '❌', go: '✅', plus: '✅' },
+  { label: 'REPORT DISTRIBUTION', free: 'Unlimited', go: 'Unlimited', plus: 'Unlimited' },
   
   { isGroup: true, label: 'System Notifications' },
   { label: 'Real-time Alerts', free: 'Limited', go: 'Full Real-time', plus: 'Full Real-time', highlight: true },
