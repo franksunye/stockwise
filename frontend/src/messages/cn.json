@@ -319,13 +319,13 @@
         "validation_glory": { "label": "回看战报", "badge": "通过率" },
         "prediction_updated": { "label": "预测更新", "badge": "分析完成" },
         "daily_brief": {
-          "labelPro": "Pro 深度复盘",
-          "labelStandard": "简报生成",
-          "badgePro": "★ 专属",
-          "badgeStandard": "17:30"
+          "labelPro": "Pro 深度复盘 (暂停)",
+          "labelStandard": "简报生成 (暂停)",
+          "badgePro": "待启用",
+          "badgeStandard": "待启用"
         },
         "price_update": { "label": "实时行情", "badge": "盘中推送" },
-        "market_almanac": { "label": "投资黄历", "badge": "每日双发" }
+        "market_almanac": { "label": "投资黄历 (暂停)", "badge": "待启用" }
       }
     }
   },

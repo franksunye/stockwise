@@ -51,9 +51,9 @@ jobs:
     uses: ./.github/workflows/ai_analyze_cn.yml
     secrets: inherit
 
-  # Step 4: 大盘黄历 (与分析并行，避免互相阻塞)
-  almanac:
-    needs: sync
-    if: always() && needs.sync.result == 'success'
-    uses: ./.github/workflows/daily_almanac_cn.yml
-    secrets: inherit
+  # Step 4: 大盘黄历 (与分析并行，避免互相阻塞) (已暂停)
+  # almanac:
+  #   needs: sync
+  #   if: always() && needs.sync.result == 'success'
+  #   uses: ./.github/workflows/daily_almanac_cn.yml
+  #   secrets: inherit

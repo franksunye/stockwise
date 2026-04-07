@@ -36,9 +36,9 @@ summary: "定义通知系统的生产基线与研究延续，是通知、节奏�
 | 开盘早报 | `morning_call` / `morning_call_neutral` | `morning_call` | `scripts/daily_morning_call.py` | 开盘前优先级排序 | 开启 |
 | 验证战报 | `validation_glory` | `validation_glory` | `scripts/daily_validation_check.py` | 建立信任、强化留存 | 开启 |
 | 预测更新 | `prediction_updated` | `prediction_updated` | `analysis/runner.py` | 服务状态告知 | 开启 |
-| 每日复盘 | `daily_brief` / `daily_brief_*` | `daily_brief` | `engine/services/brief_assembler.py` | 复盘内容送达 | 开启 |
+| 每日复盘 | `daily_brief` / `daily_brief_*` | `daily_brief` | `engine/services/brief_assembler.py` | 复盘内容送达 | 暂停 |
 | 实时行情 | `price_update` | `price_update` | `sync/prices.py` | 盘中波动提醒 | 关闭 |
-| 投资黄历 | `almanac_preview` / `almanac_ritual` | `market_almanac` | `scripts/broadcast_almanac.py` | 日级节奏与情绪框架 | 开启 |
+| 投资黄历 | `almanac_preview` / `almanac_ritual` | `market_almanac` | `scripts/broadcast_almanac.py` | 日级节奏与情绪框架 | 暂停 |
 
 ## 2.1 研究亮点（保留，不代表已全部实现）
 

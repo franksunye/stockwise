@@ -459,9 +459,9 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                       { key: 'morning_call', icon: Sun },
                                       { key: 'validation_glory', icon: Trophy },
                                       { key: 'prediction_updated', icon: Zap },
-                                      { key: 'daily_brief', icon: FileText, isDailyBrief: true as const, isPro: tier === 'pro' },
+                                      // { key: 'daily_brief', icon: FileText, isDailyBrief: true as const, isPro: tier === 'pro' },
                                       { key: 'price_update', icon: Info },
-                                      { key: 'market_almanac', icon: Sun },
+                                      // { key: 'market_almanac', icon: Sun },
                                     ] as const).map((type) => {
                                       const isEnabled = notificationSettings.types[type.key as keyof typeof notificationSettings.types]?.enabled ?? true;
                                       const isPro = 'isPro' in type && type.isPro;

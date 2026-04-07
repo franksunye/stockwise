@@ -319,13 +319,13 @@
         "validation_glory": { "label": "Lookback report", "badge": "Hit rate" },
         "prediction_updated": { "label": "Prediction refresh", "badge": "Done" },
         "daily_brief": {
-          "labelPro": "Pro deep debrief",
-          "labelStandard": "Daily brief",
-          "badgePro": "Pro",
-          "badgeStandard": "17:30"
+          "labelPro": "Pro deep debrief (Paused)",
+          "labelStandard": "Daily brief (Paused)",
+          "badgePro": "TBD",
+          "badgeStandard": "TBD"
         },
         "price_update": { "label": "Live quotes", "badge": "Session" },
-        "market_almanac": { "label": "Market almanac", "badge": "2×/day" }
+        "market_almanac": { "label": "Market almanac (Paused)", "badge": "TBD" }
       }
     }
   },

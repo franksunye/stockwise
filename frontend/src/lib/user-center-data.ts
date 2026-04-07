@@ -30,9 +30,9 @@ export const DEFAULT_NOTIFICATION_SETTINGS: NotificationSettings = {
         morning_call: { enabled: true, priority: 'medium' },
         validation_glory: { enabled: true, priority: 'medium' },
         prediction_updated: { enabled: true, priority: 'low' },
-        daily_brief: { enabled: true, priority: 'low' },
+        daily_brief: { enabled: false, priority: 'low' },
         price_update: { enabled: false, priority: 'low' },
-        market_almanac: { enabled: true, priority: 'medium' },
+        market_almanac: { enabled: false, priority: 'medium' },
     },
 };
 
