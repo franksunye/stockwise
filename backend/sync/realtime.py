@@ -1,15 +1,17 @@
 """
 盘中实时同步模块
 """
+import os
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from database import get_stock_pool
-from utils import send_wecom_notification
+from utils import get_market, send_wecom_notification
 from helpers import check_trading_day_skip
 from sync.prices import process_stock_period
 from config import SYNC_CONFIG
 from logger import logger
+from trading_calendar import is_realtime_session_open
 
 
 def sync_spot_prices(symbols: list):
@@ -23,6 +25,36 @@ def sync_spot_prices(symbols: list):
             "duration": 0,
             "message": "Market closed, skipping."
         }
+
+    pool_total = len(symbols)
+    _ignore = os.getenv("REALTIME_SYNC_IGNORE_SESSION", "").strip().lower() in (
+        "1",
+        "true",
+        "yes",
+    )
+    if _ignore:
+        active = list(symbols)
+        skipped_session = 0
+        logger.warning("⚠️ REALTIME_SYNC_IGNORE_SESSION set — 跳过交易时段过滤（全量标的）")
+    else:
+        active = [s for s in symbols if is_realtime_session_open(get_market(s))]
+        skipped_session = pool_total - len(active)
+    if skipped_session:
+        logger.info(
+            f"⏭️ Realtime: {skipped_session}/{pool_total} 只股票不在常规交易时段内，跳过同步"
+        )
+    if not active:
+        return {
+            "success_count": 0,
+            "failed_count": 0,
+            "total_count": 0,
+            "duration": 0,
+            "message": "No market in regular session; skipping realtime fetch.",
+            "pool_total": pool_total,
+            "skipped_off_session": skipped_session,
+        }
+
+    symbols = active
 
     start_time = time.time()
     success_count = 0

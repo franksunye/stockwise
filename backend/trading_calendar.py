@@ -6,6 +6,7 @@
 
 from datetime import datetime, timedelta
 import logging
+from zoneinfo import ZoneInfo
 
 try:
     from backend.database import get_connection
@@ -233,6 +234,51 @@ def is_market_closed(date: datetime, market: str = "HK") -> bool:
     # 检查假期列表
     date_str = date.strftime('%Y-%m-%d')
     return date_str in get_holidays(market)
+
+
+_ASIA_SHANGHAI = ZoneInfo("Asia/Shanghai")
+_US_EASTERN = ZoneInfo("America/New_York")
+
+
+def is_realtime_session_open(market: str, at: datetime | None = None) -> bool:
+    """
+    是否处于该市场「常规现货交易时段」内（用于盘中实时同步过滤）。
+
+    - CN: 北京时间 09:30–11:30、13:00–15:00（交易日、非假期）
+    - HK: 北京时间 09:30–12:00、13:00–16:00（交易日、非假期）
+    - US: 美东 09:30–16:00（NYSE 常规时段，交易日、非假期；不含盘前盘后）
+    """
+    if at is None:
+        at = datetime.now(_ASIA_SHANGHAI)
+    elif at.tzinfo is None:
+        at = at.replace(tzinfo=_ASIA_SHANGHAI)
+    else:
+        at = at.astimezone(_ASIA_SHANGHAI)
+
+    m = (market or "CN").strip().upper()
+    if m not in ("CN", "HK", "US"):
+        return False
+
+    if m == "US":
+        et = at.astimezone(_US_EASTERN)
+        if et.weekday() >= 5:
+            return False
+        d_str = et.strftime("%Y-%m-%d")
+        if d_str in get_holidays("US"):
+            return False
+        minutes = et.hour * 60 + et.minute
+        open_m = 9 * 60 + 30
+        close_m = 16 * 60
+        return open_m <= minutes < close_m
+
+    if is_market_closed(at, m):
+        return False
+
+    minutes = at.hour * 60 + at.minute
+    if m == "CN":
+        return (9 * 60 + 30 <= minutes < 11 * 60 + 30) or (13 * 60 <= minutes < 15 * 60)
+    # HK
+    return (9 * 60 + 30 <= minutes < 12 * 60) or (13 * 60 <= minutes < 16 * 60)
 
 
 def is_trading_day(date_str: str, symbol: str = None, market: str = None) -> bool:
