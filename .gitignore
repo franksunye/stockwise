@@ -45,3 +45,4 @@ data/stockwise.db-wal
 
 # Local experiment artifacts
 tmp/
+backend/keys/*.json

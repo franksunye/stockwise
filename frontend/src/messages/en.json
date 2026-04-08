@@ -249,7 +249,7 @@
     "dayOffset": "Day {day}"
   },
   "council": {
-    "title": "CONSENSUS NODE",
+    "title": "CONSENSUS ACCESS",
     "consensus": "Consensus Vote",
     "bullish": "Bullish",
     "bearish": "Bearish",
@@ -285,8 +285,8 @@
       "free": "Free User",
       "go": "Go Member",
       "plus": "Plus Member",
-      "pro": "PRO NODE",
-      "alpha": "ALPHA NODE"
+      "pro": "PRO",
+      "alpha": "ALPHA"
     },
     "linkEmail": "Link Email / Recovery",
     "linkEmailDesc": "Link your email to prevent account loss and recover paid benefits.",
@@ -402,13 +402,13 @@
     "systemBusy": "System busy, please try again later",
     "recommend": "Recommended",
     "free": {
-      "name": "COMMUNITY NODE",
+      "name": "COMMUNITY",
       "period": "FOREVER FREE",
       "description": "Standard telemetry for individual operators.",
       "cta": "INITIALIZE"
     },
     "go": {
-      "name": "CORE NODE (GO)",
+      "name": "GO",
       "period": "{price} / ANNUALLY",
       "description": "DeepSeek engine access, 10 symbol monitoring, and unrestricted real-time telemetry.",
       "cta": "SUBSCRIBE CORE"
@@ -437,7 +437,8 @@
     "groups": {
       "insights": "Actionable Insights",
       "notifications": "Notifications",
-      "academy": "Academy"
+      "academy": "Academy",
+      "account": "Account & Security"
     },
     "rows": {
       "model": "AI Service Model",
@@ -453,7 +454,12 @@
       "categories": "Notification Categories",
       "academy101": "ZISO 101 Course",
       "masterLogics": "Master Logic Library",
-      "upcoming": "Upcoming Content"
+      "upcoming": "Upcoming Content",
+      "dormantProtection": "Dormant Detection"
+    },
+    "values": {
+      "pruned30": "30-day Pruning (Ghost)",
+      "permanent": "Permanent Retention"
     },
     "actionableInsights": {
       "group": "Actionable Insights",

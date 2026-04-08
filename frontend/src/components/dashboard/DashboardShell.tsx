@@ -6,6 +6,7 @@ import { UserProfileProvider, useUserProfile, type UserProfileContextValue } fro
 import { LocaleProvider } from '@/context/LocaleContext';
 import { DashboardEntryGate } from '@/components/dashboard/DashboardEntryGate';
 import { InstallGuide } from '@/components/InstallGuide';
+import { AnalyticsTracker } from '@/components/analytics/AnalyticsTracker';
 
 function LocaleGate({ children }: { children: ReactNode }) {
     const { profile } = useUserProfile();
@@ -25,6 +26,7 @@ export function DashboardShell({
 }) {
     return (
         <UserProfileProvider value={userSession}>
+            <AnalyticsTracker />
             <LocaleGate>
                 <InstallGuide />
                 <StockProvider>

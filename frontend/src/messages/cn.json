@@ -437,7 +437,8 @@
     "groups": {
       "insights": "研判报告 (Actionable Insights)",
       "notifications": "系统通知 (Notifications)",
-      "academy": "知守学院 (Academy)"
+      "academy": "知守学院 (Academy)",
+      "account": "账户与安全 (Account & Security)"
     },
     "rows": {
       "model": "AI 服务模型",
@@ -453,7 +454,12 @@
       "categories": "通知品类覆盖",
       "academy101": "知守 101 课程",
       "masterLogics": "大师图鉴逻辑",
-      "upcoming": "后续更多内容"
+      "upcoming": "后续更多内容",
+      "dormantProtection": "休眠账户保护"
+    },
+    "values": {
+      "pruned30": "30天不活跃清理",
+      "permanent": "永久数据留存"
     },
     "actionableInsights": {
       "group": "研判报告 (Actionable Insights)",

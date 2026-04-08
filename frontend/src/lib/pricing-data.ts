@@ -125,4 +125,14 @@ export const featureComparison: FeatureComparisonRow[] = [
     { label: 'pricing.rows.academy101', free: '✅', go: '✅', plus: '✅' },
     { label: 'pricing.rows.masterLogics', free: '✅', go: '✅', plus: '✅' },
     { label: 'pricing.rows.upcoming', free: '✅', go: '✅', plus: '✅' },
+
+    // --- Account & Security ---
+    { isGroup: true, label: 'pricing.groups.account' },
+    { 
+        label: 'pricing.rows.dormantProtection', 
+        free: 'pricing.values.pruned30', 
+        go: 'pricing.values.permanent', 
+        plus: 'pricing.values.permanent', 
+        highlight: true 
+    },
 ];

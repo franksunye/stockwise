@@ -49,7 +49,31 @@ When running A/B tests or landing page updates:
 
 ---
 
-## 3. SEO & GEO Performance
+## 3. Daily Growth Pulse (Unified Intelligence)
+
+We bridge external traffic (GA4/Clarity) with internal conversion (DB) to identify growth loops and friction points.
+
+### 3.1 Running the Digest
+To generate a 24h performance snapshot across all layers:
+```bash
+# Required: GA4_PROPERTY_ID, GA4_CREDENTIALS_PATH, CLARITY_API_TOKEN in .env
+export DB_SOURCE=cloud; python3 backend/scripts/daily_growth_digest.py
+```
+**Output**: `tmp/latest_growth_pulse.md`
+
+### 3.2 Key Attribution Channels
+- **Search (GEO/SEO)**: High-intent users seeking prediction models.
+- **Social (Hero Content)**: Viral spikes from WeChat/X posts.
+- **Direct (Retention)**: Existing users returning for daily reports.
+
+### 3.3 Behavioral Segmentation (Clarity/GA4 Tagging)
+All frontend sessions are tagged for deep filtering:
+- `user_id`: Cross-correlate session behavior with specific account history.
+- `tier`: Analyze how "Pro" behavior differs from "Free" (e.g., higher engagement time).
+
+---
+
+## 4. SEO & GEO Performance
 
 Content is optimized not just for humans, but for AI Search (GEO) and standard Search Engines (SEO).
 - **Structured Data**: Inject JSON-LD (Schema.org) into all article and FAQ pages.
@@ -61,4 +85,5 @@ Content is optimized not just for humans, but for AI Search (GEO) and standard S
 - [ ] Content adheres to the "Ultra-Minimalist" style guide.
 - [ ] Bilingual parity achieved for all marketing routes.
 - [ ] Structured data (JSON-LD) is verified for search indexing.
-- [ ] Conversion impact analyzed after major feature launches.
+- [ ] **Growth Digest**: Daily report reviewed for conversion leaks.
+- [ ] **Clarity Audit**: Filter recordings by `tier=pro` to ensure premium experience.

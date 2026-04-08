@@ -68,9 +68,14 @@ export default {
     
     console.log(`🕙 Beijing Time: ${String(beijingHour).padStart(2, '0')}:${String(beijingMinute).padStart(2, '0')} (Day: ${beijingDay})`);
 
-    // 2. 精确任务匹配 (Precision Hits)
+    // 2. 精确任务匹配 (Precision Hits) - 增加 5 分钟容错窗口，防止分钟级漂移
     const hits = JOB_REGISTRY.filter((job) => {
-      const timeMatch = job.hour === beijingHour && job.minute === beijingMinute;
+      const jobMinutesTotal = job.hour * 60 + job.minute;
+      let diff = Math.abs(beijingMinutesTotal - jobMinutesTotal);
+      // 处理跨天边界 (e.g., 23:59 匹配 00:00)
+      if (diff > 720) diff = 1440 - diff;
+      
+      const timeMatch = diff <= 5;
       const dayMatch = !job.days || job.days.includes(beijingDay);
       return timeMatch && dayMatch;
     });

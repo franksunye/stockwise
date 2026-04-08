@@ -10,7 +10,7 @@ import { STRIPE_PRICE_IDS } from '@/lib/stripe-constants';
 
 const EN_PRICING_PLANS = [
   {
-    name: 'COMMUNITY NODE',
+    name: 'COMMUNITY',
     eyebrow: 'BASIC ACCESS',
     price: '0',
     period: 'Forever Free',
@@ -27,7 +27,7 @@ const EN_PRICING_PLANS = [
     accent: 'text-slate-300',
   },
   {
-    name: 'CORE NODE (GO)',
+    name: 'GO',
     eyebrow: 'OPTIMAL CHOICE',
     price: '4.99',
     period: 'Monthly / $49.9 Yearly',
@@ -45,7 +45,7 @@ const EN_PRICING_PLANS = [
     accent: 'text-indigo-300',
   },
   {
-    name: 'Plus',
+    name: 'PLUS',
     eyebrow: 'Coming Soon High-End',
     price: '9.9',
     period: 'Monthly / $99 Yearly',

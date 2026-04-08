@@ -81,6 +81,29 @@ node frontend/scripts/turso-cli.mjs query "UPDATE table SET col = val WHERE id =
 
 ---
 
+## 4. Periodic User Cleanup (Ghost User Purge)
+
+To maintain database performance and reduce "noise" for marketing push notifications, we perform periodic cleanups of inactive free users.
+
+### 4.1 "Ghost User" Criteria
+A user is marked for cleanup if they meet **ALL** of the following:
+*   **Tier**: `free` (PRO and GO members are **NEVER** purged).
+*   **Inactivity**: `last_active_at` is older than **30 days**.
+*   **Zero Data**: No stocks in `user_watchlist` and no simulator data (`user_trade_positions`).
+
+### 4.2 Cleanup SOP
+1.  **Dry Run**:
+    ```bash
+    export DB_SOURCE=cloud; python backend/scripts/cleanup_inactive_users.py
+    ```
+2.  **Verify Backup**: Check the generated CSV in `tmp/` to ensure no active or premium users are listed.
+3.  **Execute**:
+    ```bash
+    export DB_SOURCE=cloud; python backend/scripts/cleanup_inactive_users.py --execute
+    ```
+
+---
+
 ## 🛡️ Service Level Standards (SLA)
 - **Data Latency**: Daily syncs must complete within 30 minutes of market close.
 - **Task Success**: 99.5% completion rate across global markets.
