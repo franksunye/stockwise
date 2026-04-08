@@ -32,7 +32,11 @@ const LOCALE_STORAGE_KEY = 'stockwise_locale';
 function getPreferredLocaleForProfileSync(): 'cn' | 'en' {
     if (typeof window === 'undefined') return 'cn';
     const raw = (localStorage.getItem(LOCALE_STORAGE_KEY) || '').trim().toLowerCase();
-    if (!raw) return 'en';
+    if (!raw) {
+        const nav = (navigator.language || '').toLowerCase();
+        if (nav.startsWith('zh')) return 'cn';
+        return 'cn';
+    }
     if (raw === 'cn' || raw === 'zh' || raw.startsWith('zh-')) return 'cn';
     return 'en';
 }

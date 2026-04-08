@@ -5,7 +5,7 @@ import { requireUserSession } from '@/lib/user-session';
 
 function normalizeLocale(input: unknown): 'cn' | 'en' {
     const raw = String(input || '').trim().toLowerCase();
-    if (!raw) return 'en';
+    if (!raw) return 'cn';
     // Chinese family -> cn; all other locales route to en for prediction content.
     if (raw === 'cn' || raw === 'zh' || raw.startsWith('zh-')) return 'cn';
     return 'en';
