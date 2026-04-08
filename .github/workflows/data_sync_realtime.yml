@@ -4,6 +4,24 @@ on:
   # Trigger Source: Cloudflare Worker Only (Global Realtime Sweep)
   # 调度由 Cloudflare Worker 全权负责 (15min 间隔)
   workflow_dispatch: # 由 Cloudflare Worker 或手动触发
+    inputs:
+      market:
+        description: '可选市场过滤 (ALL/CN/HK/US)'
+        type: choice
+        required: false
+        default: 'ALL'
+        options:
+          - ALL
+          - CN
+          - HK
+          - US
+  workflow_call:
+    inputs:
+      market:
+        description: '可选市场过滤 (ALL/CN/HK/US)'
+        required: false
+        type: string
+        default: 'ALL'
 
 concurrency:
   group: realtime-sync
@@ -35,5 +53,10 @@ jobs:
           WECOM_ROBOT_KEY: ${{ secrets.WECOM_ROBOT_KEY }}
           INTERNAL_API_SECRET: ${{ secrets.INTERNAL_API_SECRET }}
           NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+          INPUT_MARKET: ${{ inputs.market || 'ALL' }}
         run: |
-          python backend/main.py --realtime
+          if [ "$INPUT_MARKET" = "ALL" ] || [ -z "$INPUT_MARKET" ]; then
+            python backend/main.py --realtime
+          else
+            python backend/main.py --realtime --market "$INPUT_MARKET"
+          fi
