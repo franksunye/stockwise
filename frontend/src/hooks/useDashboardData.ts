@@ -9,6 +9,7 @@ import { getDashboardRefreshPlan, type DashboardRefreshEvent } from '@/lib/dashb
 import { useLocale } from '@/context/LocaleContext';
 import { appLocaleToPredictionContentLocale } from '@/lib/prediction-content-locale';
 import { WatchlistItem } from './useWatchlist';
+import { useUserProfile } from '@/hooks/useUserProfile';
 
 // 价格层刷新间隔：盘中 1 分钟，非交易时段 10 分钟
 const TRADING_PRICE_REFRESH_INTERVAL = 1 * 60 * 1000;
@@ -131,7 +132,9 @@ export function useDashboardData(
     enableAlmanac = true
 ) {
     const { locale: appLocale } = useLocale();
-    const predictionContentLocale = appLocaleToPredictionContentLocale(appLocale);
+    const { profile } = useUserProfile();
+    const profileLocaleRaw = String(profile?.locale || '').trim().toLowerCase();
+    const predictionContentLocale = profileLocaleRaw === 'en' ? 'en' : appLocaleToPredictionContentLocale(appLocale);
     const dashboardCacheStorageKey = `${CACHE_KEY}_${predictionContentLocale}`;
 
     const [stocks, setStocks] = useState<StockData[]>([]);
