@@ -180,7 +180,7 @@ export function EnglishPricingPage() {
                     <span className="text-sm font-bold">$</span>
                     <span className="text-5xl font-black tracking-tighter">{plan.price}</span>
                   </div>
-                  {plan.msrp && (
+                  {'msrp' in plan && plan.msrp && (
                     <div className="flex items-baseline gap-0.5 text-slate-500/50 line-through decoration-indigo-500/30">
                       <span className="text-[10px] font-bold">$</span>
                       <span className="text-xl font-bold tracking-tighter">{plan.msrp}</span>

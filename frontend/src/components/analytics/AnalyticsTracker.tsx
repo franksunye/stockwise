@@ -17,8 +17,8 @@ export function AnalyticsTracker() {
         if (!userId) return;
 
         // 1. Tag Microsoft Clarity
-        if (typeof window !== 'undefined' && (window as any).clarity) {
-            const clarity = (window as any).clarity;
+        if (typeof window !== 'undefined' && 'clarity' in window) {
+            const clarity = (window as unknown as { clarity: (action: string, ...args: string[]) => void }).clarity;
             
             // Identify the unique user
             clarity('identify', userId);
@@ -28,8 +28,8 @@ export function AnalyticsTracker() {
         }
 
         // 2. Tag Google Analytics 4
-        if (typeof window !== 'undefined' && (window as any).gtag) {
-            const gtag = (window as any).gtag;
+        if (typeof window !== 'undefined' && 'gtag' in window) {
+            const gtag = (window as unknown as { gtag: (action: string, ...args: unknown[]) => void }).gtag;
             
             // Set User ID for cross-device tracking
             gtag('set', 'user_id', userId);
