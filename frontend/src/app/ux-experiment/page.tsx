@@ -1,3 +1,13 @@
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+    title: "Performance Test (UX-Exp) | ZISO AI",
+    robots: {
+        index: false,
+        follow: false,
+    },
+};
+
 export default function UXExperimentPage() {
     const serverTime = new Date().toISOString();
     

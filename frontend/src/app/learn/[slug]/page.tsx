@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
   return buildPageMetadata('ziso.cc', {
     title: article.title,
-    description: article.subtitle || `Learn about ${article.title} in ZISO 101 Academy.`,
+    description: article.subtitle || `Master the principles of systematical trading: Learn about ${article.title} in ZISO 101 Academy. Explore how AI and probability theory help you manage risk and emotional biases.`,
     path: `/learn/${slug}`,
     locale: 'en',
     index: true,

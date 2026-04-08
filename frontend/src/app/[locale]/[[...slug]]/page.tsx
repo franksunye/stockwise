@@ -108,7 +108,7 @@ function getPageConfig(locale: PublicLocale, slugParts: string[]): PageConfig | 
     if (path === '') {
       return {
         title: '知守 AI | 让交易回归理性的从容',
-        description: '复杂的分析交给 AI，简单的决策留自己。知守 AI 自动为你完成复盘与数据建模。',
+        description: '复杂的分析交给 AI，简单的决策留自己。知守 AI 为严肃零售投资者提供盘后复盘、数据建模与战术简报，助您跨越情绪波峰，建立稳健的交易纪律。',
         path: '/',
         render: () => <ChineseHomePage />,
         alternateLocales: ['en', 'cn', 'ko', 'es'],
@@ -118,7 +118,7 @@ function getPageConfig(locale: PublicLocale, slugParts: string[]): PageConfig | 
     if (path === 'about') {
       return {
         title: '关于知守 AI',
-        description: '让普通投资者也能拥有机构级的投研外脑。',
+        description: '了解知守 AI 的愿景与内核：我们致力于将机构级的投研外脑普惠化，通过 AI 技术标准化盘后复盘、战术解读与风险预警，帮助投资者构建理性的避难所。',
         path: '/about',
         render: () => <ChineseAboutPage />,
         alternateLocales: ['en', 'cn', 'ko', 'es'],
@@ -128,7 +128,7 @@ function getPageConfig(locale: PublicLocale, slugParts: string[]): PageConfig | 
     if (path === 'pricing') {
       return {
         title: '价格方案 | 知守投研委员会',
-        description: '选聘您的知守委员会。订阅不仅是购买功能，更是雇佣了一组 24/7 在岗的专业交易委员会。',
+        description: '选聘您的专属知守委员会。订阅 ZISO AI 不仅是购买分析工具，更是雇佣了一组 24/7 全天候在岗、具备深度调研与量化审计能力的专业投研支持团队。',
         path: '/pricing',
         render: () => <ChinesePricingPage />,
         alternateLocales: ['en', 'cn', 'ko', 'es'],
@@ -138,7 +138,7 @@ function getPageConfig(locale: PublicLocale, slugParts: string[]): PageConfig | 
     if (path === 'privacy') {
       return {
         title: '隐私政策 | 知守 AI',
-        description: '知守 AI 中文站隐私政策与数据处理说明。',
+        description: '知守 AI 中文站隐私政策详细说明：我们如何根据最高安全标准处理您的数据，确保您的个人信息、偏好及交易研究过程在加密环境下得到严密保护。',
         path: '/privacy',
         render: () => <ChinesePrivacyPage />,
         alternateLocales: ['en', 'cn', 'ko', 'es'],
@@ -148,7 +148,7 @@ function getPageConfig(locale: PublicLocale, slugParts: string[]): PageConfig | 
     if (path === 'terms') {
       return {
         title: '服务条款 | 知守 AI',
-        description: '知守 AI 中文站服务条款与使用边界说明。',
+        description: '知守 AI 中文站服务条款：明确我们提供的投研辅助服务边界、用户权责说明及合规使用指南，致力于在合规透明的基础上提供高质量的 AI 分析支持。',
         path: '/terms',
         render: () => <ChineseTermsPage />,
         alternateLocales: ['en', 'cn', 'ko', 'es'],
@@ -158,7 +158,7 @@ function getPageConfig(locale: PublicLocale, slugParts: string[]): PageConfig | 
     if (path === 'refund') {
       return {
         title: '退款政策 | 知守 AI',
-        description: '知守 AI 中文站订阅退款与取消续订规则。',
+        description: '知守 AI 中文站订阅退款与取消续订规则：我们提供清晰、公平的费用结算与退还流程，确保每一位订阅者都能在无忧的消费环境下享受专业投研服务。',
         path: '/refund',
         render: () => <ChineseRefundPage />,
         alternateLocales: ['en', 'cn', 'ko', 'es'],
@@ -168,7 +168,7 @@ function getPageConfig(locale: PublicLocale, slugParts: string[]): PageConfig | 
     if (path === 'learn') {
       return {
         title: 'ZISO AI 101 | 知守日课',
-        description: '你的理性避难所。教你如何用 AI 和概率论在市场中活下来。',
+        description: '知守 101 学院：您的理性交易避难所。教你如何将 AI 思维与概率论结合，在波动的市场中建立交易边界并活下来，适合所有追求系统化成长的投资者。',
         path: '/learn',
         render: () => <ChineseLearnIndexPage />,
         alternateLocales: ['cn'],
@@ -178,7 +178,7 @@ function getPageConfig(locale: PublicLocale, slugParts: string[]): PageConfig | 
     if (slugParts[0] === 'learn' && slugParts[1]) {
       return {
         title: 'ZISO AI 101 | 知守日课',
-        description: '中文 101 学院文章详情页。',
+        description: '深入学习知守 101 学院文章：了解如何通过 AI 深度复盘、概率思维与量化规则提升交易纪律，构建属于您自己的系统化交易框架。',
         path: `/learn/${slugParts[1]}`,
         render: () => <ChineseLearnArticlePage slug={slugParts[1]} />,
         alternateLocales: ['cn'],
@@ -188,7 +188,7 @@ function getPageConfig(locale: PublicLocale, slugParts: string[]): PageConfig | 
     if (path === 'support') {
       return {
         title: '支持中心 | 知守 AI',
-        description: '查看知守 AI 的功能说明、支持文档与机制边界。',
+        description: '知守 AI 支持中心：查看核心功能说明、机制边界及常见问题解答。我们提供详尽的指引文档，帮助您高效配置 AI 外脑并掌握系统化工具的使用技巧。',
         path: '/support',
         render: () => <ChineseSupportIndexPage />,
         alternateLocales: ['cn'],
@@ -198,7 +198,7 @@ function getPageConfig(locale: PublicLocale, slugParts: string[]): PageConfig | 
     if (slugParts[0] === 'support' && slugParts[1]) {
       return {
         title: '支持文档 | 知守 AI',
-        description: '知守 AI 中文帮助中心详情页。',
+        description: '知守 AI 专项指引文档：详细了解相关功能的操作流程、适用场景、机制逻辑与风险边界说明，确保您能专业且准确地使用 AI 辅助分析服务。',
         path: `/support/${slugParts[1]}`,
         render: () => <ChineseSupportArticlePage slug={slugParts[1]} />,
         alternateLocales: ['cn'],
