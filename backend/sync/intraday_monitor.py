@@ -168,20 +168,22 @@ class IntradayMonitor:
             
         # 2. Use unified NotificationTemplates
         # 2. Prepare Context for NotificationManager (Rendering handled inside loop for i18n)
-        res_types = {
-            "resonance": "逻辑共振 (脚本加速)",
-            "deviation": "剧本背离 (逻辑回撤)"
-        }
-        strat_tips = {
-            "resonance": f"突破了关键压力点 {trigger_val:.2f}。请根据 Pro 计划关注进攻性。",
-            "deviation": f"回撤并跌破了止损支撑线 {trigger_val:.2f}。注意防守。"
-        }
+        is_bearish_resonance = alert_type == "resonance" and strategy.get("weight", 0) < 0
+        if is_bearish_resonance:
+            resonance_type = "逻辑共振 (空头延续)"
+            strategy_tip = f"跌破了关键支撑位 {trigger_val:.2f}。请根据 Pro 计划优先防守。"
+        elif alert_type == "resonance":
+            resonance_type = "逻辑共振 (脚本加速)"
+            strategy_tip = f"突破了关键压力点 {trigger_val:.2f}。请根据 Pro 计划关注进攻性。"
+        else:
+            resonance_type = "剧本背离 (逻辑回撤)"
+            strategy_tip = f"回撤并跌破了止损支撑线 {trigger_val:.2f}。注意防守。"
 
         context = {
             "stock_names": symbol,
             "current_price": f"{price:.2f}",
-            "resonance_type": res_types.get(alert_type, "结构化偏移"),
-            "strategy_tip": strat_tips.get(alert_type, "请关注盘中异动。"),
+            "resonance_type": resonance_type,
+            "strategy_tip": strategy_tip,
             "url": f"/dashboard?symbol={symbol}&utm_source=push&utm_medium=ai_radar"
         }
 

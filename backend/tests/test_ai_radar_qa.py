@@ -88,6 +88,36 @@ class TestAiRadarQA(unittest.TestCase):
         dedup_key = f"{symbol}_resonance_{today}"
         self.assertIn(dedup_key, self.radar.alert_history)
 
+    @patch("backend.sync.intraday_monitor.threading.Thread")
+    def test_bearish_resonance_message_uses_support_break(self, mock_thread):
+        """Bearish resonance should say breakdown of support, not pressure breakout."""
+        symbol = "300059"
+        strategy = {
+            "signal": "RiskOff",
+            "weight": -1,
+            "pressure": 20.08,
+            "support": 20.08,
+        }
+        self.radar.watch_list[symbol] = strategy
+
+        # Execute threaded send inline for deterministic assertion.
+        def _inline_thread(*args, **kwargs):
+            target = kwargs.get("target")
+            t_args = kwargs.get("args", ())
+            class _T:
+                def start(self_nonlocal):
+                    target(*t_args)
+            return _T()
+        mock_thread.side_effect = _inline_thread
+
+        self.radar.check(symbol, 18.45, -3.2)
+        self.assertTrue(self.radar.notif_manager.broadcast_price_alert.called)
+
+        _, call_args, _ = self.radar.notif_manager.broadcast_price_alert.mock_calls[0]
+        context = call_args[2]
+        self.assertIn("跌破了关键支撑位", context.get("strategy_tip", ""))
+        self.assertNotIn("突破了关键压力点", context.get("strategy_tip", ""))
+
     def test_radar_silence_on_watch(self):
         """Scenario: 'Watch' or 'Side' signals should not trigger radar alerts (Noise reduction)."""
         symbol = "BABA"
