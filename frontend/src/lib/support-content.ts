@@ -57,6 +57,14 @@ function parseFrontmatter(fileContent: string): { meta: Partial<SupportArticle>,
             if (colIndex !== -1) {
                 const key = line.slice(0, colIndex).trim();
                 let value = line.slice(colIndex + 1).trim();
+                
+                // Strip inline comments (e.g., // or #)
+                const commentIndex = value.search(/\s(\/\/|#)/);
+                if (commentIndex !== -1) {
+                    value = value.slice(0, commentIndex).trim();
+                }
+
+                // Remove quotes if present
                 if (value.startsWith('"') && value.endsWith('"')) {
                     value = value.slice(1, -1);
                 } else if (value.startsWith("'") && value.endsWith("'")) {

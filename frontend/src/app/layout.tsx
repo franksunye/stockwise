@@ -4,6 +4,7 @@ import Image from "next/image";
 import { brandCoreZhCN } from "@/content/brand-core.zh-CN";
 import { ServiceWorkerRegistrar } from "@/components/ServiceWorkerRegistrar";
 import { buildRootBootstrapInlineScript } from "@/lib/dashboard-bootstrap";
+import Script from "next/script";
 
 import "./globals.css";
 
@@ -115,6 +116,21 @@ export default async function RootLayout({
         {children}
         <ServiceWorkerRegistrar />
         <Analytics />
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-QXYCXRCL4P"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            if (window.location.hostname === 'ziso.cc' || window.location.hostname === 'www.ziso.cc') {
+              gtag('config', 'G-QXYCXRCL4P');
+            }
+          `}
+        </Script>
       </body>
     </html>
   );

@@ -1,7 +1,7 @@
 ---
 title: "101-08: The 3M Framework (Mind, Method, Money)"
 subtitle: "The Pyramid of Trading Success: Which Piece is Missing?"
-date: "2026-02-04" // Original Creation Date
+date: "2026-02-04"
 image: "/images/learn/101-08_3m_framework_cover.png"
 content_id: "growth-101-08"
 content_source: "growth"

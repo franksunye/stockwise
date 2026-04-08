@@ -7,6 +7,12 @@ function nowIso() {
   return new Date().toISOString();
 }
 
+function formatDate(dateStr: string, fallback: string): string {
+  if (!dateStr) return fallback;
+  const match = dateStr.match(/^\d{4}-\d{2}-\d{2}/);
+  return match ? match[0] : fallback;
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = brandCoreEn.domain;
   const updated = nowIso();
@@ -52,7 +58,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const enArticles = await getAllArticles({ locale: "en" });
   const enLearnRoutes = enArticles.map((article) => ({
     url: `${base}/learn/${article.slug}`,
-    lastModified: article.date || updated,
+    lastModified: formatDate(article.date, updated),
     changeFrequency: "weekly" as const,
     priority: 0.7,
   }));
@@ -60,7 +66,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const cnArticles = await getAllArticles({ locale: "cn" });
   const cnLearnRoutes = cnArticles.map((article) => ({
     url: `${base}/cn/learn/${article.slug}`,
-    lastModified: article.date || updated,
+    lastModified: formatDate(article.date, updated),
     changeFrequency: "weekly" as const,
     priority: 0.7,
   }));
@@ -68,7 +74,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const enSupportArticles = getAllSupportArticles({ locale: "en" });
   const enSupportRoutes = enSupportArticles.map((article) => ({
     url: `${base}/support/${article.slug}`,
-    lastModified: article.lastUpdated || updated,
+    lastModified: formatDate(article.lastUpdated, updated),
     changeFrequency: "monthly" as const,
     priority: 0.6,
   }));
@@ -76,7 +82,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const cnSupportArticles = getAllSupportArticles({ locale: "cn" });
   const cnSupportRoutes = cnSupportArticles.map((article) => ({
     url: `${base}/cn/support/${article.slug}`,
-    lastModified: article.lastUpdated || updated,
+    lastModified: formatDate(article.lastUpdated, updated),
     changeFrequency: "monthly" as const,
     priority: 0.6,
   }));
