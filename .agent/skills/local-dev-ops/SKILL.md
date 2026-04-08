@@ -1,19 +1,19 @@
 ---
 name: local-dev-ops
-description: Offline Developer Operations. Covers local environment setup (PowerShell/Git), SQLite database synchronization (Bootstrap), and Local AI/Data experimentation.
+description: Offline Developer Operations. Covers local environment setup (zsh/Git), SQLite database synchronization (Bootstrap), and Local AI/Data experimentation.
 ---
 
 # Local Developer Operations (Offline)
 
 This skill is the master guide for maintaining and operating within the StockWise **Local Development Environment**. It ensures that your local machine is correctly configured, synchronized with production data for testing, and capable of running local AI prediction experiments.
 
-## 1. PowerShell & Environment Setups
+## 1. Local Environment & Setups
 
-We operate primarily in **macOS (zsh)** in this environment, but these guidelines also respect project standards for cross-platform compatibility where mentioned.
+We operate primarily in **macOS (zsh)**. All commands and scripts follow standard shell conventions.
 
 ### ⚠️ Environment Variables
-*   **Targeting Local**: Ensure `$env:DB_SOURCE = "local"` (or `export DB_SOURCE=local`) is set to use the local `data/stockwise.db`.
-*   **Targeting Cloud**: Use `cloud` for production-related scripts (only when explicitly necessary for debugging).
+*   **Targeting Local**: Ensure `export DB_SOURCE=local` is used to target the local `data/stockwise.db`.
+*   **Targeting Cloud**: Use `export DB_SOURCE=cloud` for production-related debugging.
 
 ---
 
@@ -63,8 +63,8 @@ Use the local environment to test new prompts, models, or data pipelines without
     ```
 
 ### 3.2 Troubleshooting Common Issues
-- **Missing PRO Symbols**: Use `turso-cli` (wrapped in `local-data-ops` logic previously) to fetch the target list from production before running local backfills.
-- **SQL Parsing Errors**: If PowerShell strips quotes, use a one-off Python migration script for JSON updates.
+- **Missing PRO Symbols**: Use `turso-cli` to fetch the target list from production before running local backfills.
+- **Data Inconsistency**: If local results differ significantly from cloud, run `node scripts/local-db-audit.mjs` to ensure your local market data is up-to-date.
 
 ---
 
