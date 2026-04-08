@@ -73,10 +73,10 @@ const StockItem = memo(({
           }
           setNavigatingTo(stock.symbol);
         }}
-        className={`glass-card pl-4 pr-2 py-5 group transition-all relative block active:scale-95 touch-optimized ${navigatingTo === stock.symbol ? 'bg-white/10 border-indigo-500/30 ring-1 ring-indigo-500/20' : 'hover:bg-white/[0.04]'}`}
+        className={`glass-card pl-3 pr-0 py-5 group transition-all relative block active:scale-95 touch-optimized ${navigatingTo === stock.symbol ? 'bg-white/10 border-indigo-500/30 ring-1 ring-indigo-500/20' : 'hover:bg-white/[0.04]'}`}
       >
-       <div className="flex items-center justify-between gap-2">
-         <div className="flex items-center gap-3 min-w-0 flex-1">
+       <div className="flex items-center justify-between gap-1">
+         <div className="flex items-center gap-2 min-w-0 flex-1">
            <div className={`w-14 h-14 rounded-[22px] flex items-center justify-center border-2 ${meta.bgClass}`}>
               {meta.iconTone === 'up' ? <TrendingUp className={meta.textClass} /> :
                meta.iconTone === 'down' ? <TrendingDown className={meta.textClass} /> : <Minus className={meta.textClass} />}
@@ -85,25 +85,25 @@ const StockItem = memo(({
              <h3 className="text-base font-black italic tracking-tighter text-white leading-tight overflow-hidden [display:-webkit-box] [-webkit-line-clamp:2] [-webkit-box-orient:vertical]">
                {listName}
              </h3>
-             <p className="text-[9px] font-bold text-slate-600 uppercase tracking-widest flex items-center gap-1 mt-0.5">
+             <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest flex items-center gap-1.5 mt-1">
                <span className={`w-1 h-1 rounded-full ${meta.dotClass}`} />
                {t(`signal.${meta.headline}` as MessageKey<'dashboard'>)}
              </p>
            </div>
          </div>
          
-         <div className="flex items-center gap-2 shrink-0">
+         <div className="flex items-center gap-1 shrink-0">
            <div className="text-right">
              {!isPreMarket ? (
                <>
-                 <p className="text-lg font-black mono tracking-tighter text-white">
+                 <p className="text-xl font-black mono tracking-tighter text-white">
                    {stock.price > 0 ? stock.price.toFixed(2) : '--.--'}
                  </p>
                    <p className={`text-[10px] font-black mono ${stock.change > 0 ? 'text-rose-500' : stock.change < 0 ? 'text-emerald-500' : 'text-slate-500'}`}>
                      {stock.price > 0 ? `${stock.change >= 0 ? '+' : ''}${stock.change.toFixed(2)}%` : t('syncing')}
                    </p>
                    {stock.updateTag && (
-                     <p className="text-[8px] text-slate-500 mono mt-0.5 font-bold">
+                     <p className="text-[8px] text-slate-500 mono mt-1 font-bold">
                        {stock.updateTag}
                      </p>
                    )}
