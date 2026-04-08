@@ -35,7 +35,7 @@ jobs:
   # Step 2: 验证历史预测 (按市场切片执行，避免与 CN 主链重复)
   verify:
     needs: sync
-    if: success()
+    if: ${{ always() && needs.sync.result == 'success' }}
     uses: ./.github/workflows/verify_predictions.yml
     with:
       market: 'HK'
@@ -44,6 +44,6 @@ jobs:
   # Step 3: AI 分析 (仅当数据同步成功后执行)
   analyze:
     needs: sync
-    if: success()
+    if: ${{ always() && needs.sync.result == 'success' }}
     uses: ./.github/workflows/ai_analyze_hk.yml
     secrets: inherit
