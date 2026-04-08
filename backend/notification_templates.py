@@ -429,7 +429,7 @@ class NotificationTemplates:
 
         # C. Render with safe formatting
         try:
-            title_tpl = lang_data.get("title", "ZISO AI 通知")
+            title_tpl = lang_data.get("title", "重要更新")
             body_tpl = lang_data.get("body", "点击查看行情详情")
             
             title = title_tpl.format(**kwargs)
@@ -447,6 +447,6 @@ class NotificationTemplates:
     @staticmethod
     def _fallback_render(payload: Dict[str, Any]) -> Tuple[str, str]:
         """Final safety net."""
-        title = payload.get("title") or "ZISO AI 重要更新"
+        title = payload.get("title") or "重要更新"
         body = payload.get("body") or "您有一条新的 AI 策略通知，点击查看。"
         return str(title), str(body)
