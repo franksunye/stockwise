@@ -37,9 +37,9 @@
     "engineIntervening": "AI 引擎即将介入",
     "traceHistory": "上划追溯历史轨迹",
     "signal": {
-      "triggeredLong": "看多",
-      "watching": "观察",
-      "riskOff": "防守",
+      "triggeredLong": "建议看多",
+      "watching": "建议观察",
+      "riskOff": "建议防守",
       "noSignal": "暂无信号",
       "pending": "等待分析",
       "mixed": "判断分歧"

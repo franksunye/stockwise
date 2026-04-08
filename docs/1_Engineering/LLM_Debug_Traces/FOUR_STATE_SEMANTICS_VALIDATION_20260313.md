@@ -28,7 +28,7 @@
 
 明确写出：
 
-- `TriggeredLong` = 建议进场
+- `TriggeredLong` = 建议看多
 - `Watch` = 建议观察
 - `RiskOff` = 建议防守
 - `NoSetup` = 暂无信号
@@ -48,7 +48,7 @@
 
 明确写出：
 
-- `TriggeredLong -> 建议进场`
+- `TriggeredLong -> 建议看多`
 - `Watch -> 建议观察`
 - `RiskOff -> 建议防守`
 - `NoSetup -> 暂无信号`

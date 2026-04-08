@@ -9,10 +9,10 @@ from backend.engine.semantic_registry import (
 )
 
 _SIGNAL_CN_LABELS = {
-    "TriggeredLong": "可交易",
-    "Watch": "观察",
-    "NoSetup": "无机会",
-    "RiskOff": "防守",
+    "TriggeredLong": "建议看多",
+    "Watch": "建议观察",
+    "NoSetup": "暂无信号",
+    "RiskOff": "建议防守",
     "Long": "做多",
     "Short": "避险",
     "Side": "观望",

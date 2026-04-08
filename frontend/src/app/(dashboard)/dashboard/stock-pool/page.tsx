@@ -73,7 +73,7 @@ const StockItem = memo(({
           }
           setNavigatingTo(stock.symbol);
         }}
-        className={`glass-card p-5 group transition-all relative block active:scale-95 touch-optimized ${navigatingTo === stock.symbol ? 'bg-white/10 border-indigo-500/30 ring-1 ring-indigo-500/20' : 'hover:bg-white/[0.04]'}`}
+        className={`glass-card pl-5 pr-3 py-5 group transition-all relative block active:scale-95 touch-optimized ${navigatingTo === stock.symbol ? 'bg-white/10 border-indigo-500/30 ring-1 ring-indigo-500/20' : 'hover:bg-white/[0.04]'}`}
       >
        <div className="flex items-center justify-between gap-4">
          <div className="flex items-center gap-4 min-w-0 flex-1">
@@ -92,7 +92,7 @@ const StockItem = memo(({
            </div>
          </div>
          
-         <div className="flex items-center gap-6 shrink-0">
+         <div className="flex items-center gap-4 shrink-0">
            <div className="text-right">
              {!isPreMarket ? (
                <>

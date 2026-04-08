@@ -193,7 +193,7 @@ Dashboard 主卡片（`/api/stock/batch`）与详情历史（`/api/predictions`�
 
 | mode_decision_log.decision_semantic | overlay signal | overlay layer1_status |
 |---|---|---|
-| 建议进场 | `Long` | `TriggeredLong` |
+| 建议看多 | `Long` | `TriggeredLong` |
 | 建议观察 | `Side` | `Watch` |
 | 建议防守 | `Short` | `RiskOff` |
 | 暂无信号 | `Side` | `NoSetup` |
