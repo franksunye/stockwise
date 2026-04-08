@@ -25,6 +25,12 @@ export const SIGNAL_I18N_MAP = {
     'RiskOff': 'riskOff',
     'TriggeredLong': 'triggeredLong',
     'NoSetup': 'noSignal',
+    // Council specific mappings
+    'enter': 'triggeredLong',
+    'observe': 'watching',
+    'defense': 'riskOff',
+    'empty': 'noSignal',
+    'mixed': 'mixed',
 } as const;
 
 export const ACTION_DECISIONS = ['ENTER_LONG', 'WATCH', 'DEFEND', 'NO_SIGNAL'] as const;

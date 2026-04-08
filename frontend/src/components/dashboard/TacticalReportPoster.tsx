@@ -29,7 +29,7 @@ import {
   fetchAICouncilData,
   getAICouncilSWRKey,
   getActionChipClass,
-  getCouncilActionLabel,
+  getCouncilActionI18nKey,
   getCouncilActionMeta,
   getCouncilHeadlineAction,
   getCouncilMemorySnapshot,
@@ -143,12 +143,12 @@ export function TacticalReportPoster({
     },
   );
   const councilPredictions = useMemo(() => councilPayload?.data || [], [councilPayload]);
-  const councilCards = useMemo(() => buildCouncilCards(councilPredictions).slice(0, 2), [councilPredictions]);
+  const councilCards = useMemo(() => buildCouncilCards(councilPredictions, appLocale).slice(0, 2), [councilPredictions, appLocale]);
   const councilHeadlineAction = useMemo(
     () => (councilPredictions.length > 0 ? getCouncilHeadlineAction(councilPredictions) : null),
     [councilPredictions],
   );
-  const councilHeadlineRaw = showCouncilSection && councilHeadlineAction ? getCouncilActionLabel(councilHeadlineAction) : actionMeta.posterDecision;
+  const councilHeadlineRaw = showCouncilSection && councilHeadlineAction ? getCouncilActionI18nKey(councilHeadlineAction) : actionMeta.posterDecision;
   const councilHeadline = tGlobal(`dashboard.signal.${councilHeadlineRaw}` as FullMessageKey);
   const councilHeadlineMeta = showCouncilSection && councilHeadlineAction ? getCouncilActionMeta(councilHeadlineAction) : actionMeta;
   const exportDate = useMemo(() => {
@@ -261,7 +261,7 @@ export function TacticalReportPoster({
                 <section className="px-1 pb-1">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
                     <div className="min-w-0 flex-1">
-                      <h1 className="text-[26px] leading-[1.05] font-black tracking-tight text-white sm:text-[28px]">{stockName}</h1>
+                      <h1 className="text-[26px] leading-[1.05] font-black tracking-tight text-white sm:text-[28px]">{stockName || tGlobal('common.unknownStock')}</h1>
                       <p className="mt-1 text-xs font-black uppercase tracking-[0.24em] text-slate-500">{symbol}</p>
                     </div>
                     <div className="text-left sm:pt-0.5 sm:text-right">
@@ -317,15 +317,27 @@ export function TacticalReportPoster({
                                   </div>
                                 )}
                                 <div className="min-w-0">
-                                  <p className={`truncate text-sm font-black ${card.isPrimary ? 'text-indigo-100' : 'text-white'}`}>{card.title}</p>
-                                  <p className="mt-0.5 text-[10px] font-black uppercase tracking-[0.18em] text-slate-600">{card.role}</p>
+                                  <p className={`truncate text-sm font-black ${card.isPrimary ? 'text-indigo-100' : 'text-white'}`}>
+                                    {typeof card.title === 'string' ? card.title : tGlobal(card.title.i18nKey as FullMessageKey, card.title.params)}
+                                  </p>
+                                  <p className="mt-0.5 text-[10px] font-black uppercase tracking-[0.18em] text-slate-600">
+                                    {typeof card.role === 'string' ? card.role : tGlobal(card.role.i18nKey as FullMessageKey, card.role.params)}
+                                  </p>
                                 </div>
                               </div>
                               <span className={`rounded-full px-2.5 py-1 text-[10px] font-black ${getActionChipClass(card.actionKey)}`}>
-                                {tGlobal(`dashboard.signal.${getCouncilActionLabel(card.actionKey)}` as FullMessageKey)}
+                                {tGlobal(`dashboard.signal.${getCouncilActionI18nKey(card.actionKey)}` as FullMessageKey)}
                               </span>
                             </div>
-                            <p className="mt-2.5 text-xs leading-5 text-slate-300/95">{card.summary}</p>
+                            <p className="mt-2.5 text-xs leading-5 text-slate-300/95">
+                              {typeof card.summary === 'string' 
+                                ? card.summary 
+                                : tGlobal(card.summary.i18nKey as FullMessageKey, {
+                                    ...card.summary.params,
+                                    action: tGlobal(`dashboard.signal.${card.summary.params.actionKey}` as FullMessageKey)
+                                  })
+                              }
+                            </p>
                           </div>
                         ))
                       ) : (
@@ -425,6 +437,9 @@ export function TacticalReportPoster({
                 </section>
 
                 <section className="mt-5 border-t border-white/5 px-1 pt-5">
+                  <p className="mb-4 text-[10px] font-medium leading-relaxed text-slate-500">
+                    {tGlobal('common.posterDisclaimer')}
+                  </p>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-slate-500">
                       <span className="text-[10px] font-black uppercase tracking-[0.24em]">- ZISO AI -</span>

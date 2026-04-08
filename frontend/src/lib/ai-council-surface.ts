@@ -1,19 +1,20 @@
-import { getTeamMemberById, resolveAnalystFromModel } from '@/lib/agent-team';
+import { getTeamMemberById, resolveAnalystFromModel, getMemberLocalizedName, getMemberLocalizedRole } from '@/lib/agent-team';
 import { getPredictionActionMeta } from '@/lib/layer1-ui';
 import { formatModelName } from '@/lib/model-names';
 import { getFirstSentence, getTacticalConflictSummary, getTacticalSummary } from '@/lib/tactical-brief-content';
 import type { AIPrediction } from '@/lib/types';
 import { getCurrentUser } from '@/lib/user';
 import type { PredictionContentLocale } from '@/lib/prediction-content-locale';
+import { getSignalI18nKey } from '@/lib/semantic-registry';
 
 export type CouncilActionKey = 'enter' | 'observe' | 'defense' | 'empty' | 'mixed';
 export type CouncilCardMode = 'collab' | 'independent' | 'rule';
 
 export interface CouncilCardData {
   key: string;
-  title: string;
-  role: string;
-  summary: string;
+  title: string | { i18nKey: string; params?: Record<string, string> };
+  role: string | { i18nKey: string; params?: Record<string, string> };
+  summary: string | { i18nKey: string; params: Record<string, string> };
   actionKey: CouncilActionKey;
   confidence?: number;
   supportPrice?: number;
@@ -79,6 +80,11 @@ export function getCouncilActionKeyFromSignal(signalLike: string | undefined | n
   }
 }
 
+export function getCouncilActionI18nKey(actionKey: CouncilActionKey): string {
+  return getSignalI18nKey(actionKey);
+}
+
+// Deprecated: Use getCouncilActionI18nKey and translate in UI
 export function getCouncilActionLabel(actionKey: CouncilActionKey): string {
   switch (actionKey) {
     case 'enter':
@@ -94,8 +100,8 @@ export function getCouncilActionLabel(actionKey: CouncilActionKey): string {
   }
 }
 
-function buildCollabSummary(pred: AIPrediction, analystName: string): string {
-  const actionLabel = getCouncilActionLabel(
+function buildCollabSummary(pred: AIPrediction, analystName: string): CouncilCardData['summary'] {
+  const signalKey = getCouncilActionI18nKey(
     getCouncilActionKeyFromSignal(pred.layer1_signal || pred.layer1_status || pred.canonical_signal || pred.signal)
   );
   const conflict = getFirstSentence(getTacticalConflictSummary(pred.llm_reasoning || pred.ai_reasoning));
@@ -103,18 +109,27 @@ function buildCollabSummary(pred: AIPrediction, analystName: string): string {
 
   const summary = getFirstSentence(getTacticalSummary(pred.llm_reasoning || pred.ai_reasoning));
   if (summary) {
-    return `当前结论为${actionLabel}，${analystName}复核后认为：${summary}`;
+    return {
+      i18nKey: 'council.collabReviewWithSummary',
+      params: { actionKey: signalKey, analystName, summary }
+    };
   }
-  return `${analystName}复核后，当前结论维持${actionLabel}。`;
+  return {
+    i18nKey: 'council.collabReviewMaintain',
+    params: { actionKey: signalKey, analystName }
+  };
 }
 
-function buildRuleSummary(pred: AIPrediction): string {
+function buildRuleSummary(pred: AIPrediction): CouncilCardData['summary'] {
   const summary = getFirstSentence(getTacticalSummary(pred.llm_reasoning || pred.ai_reasoning));
   if (summary) return summary;
-  const actionLabel = getCouncilActionLabel(
+  const signalKey = getCouncilActionI18nKey(
     getCouncilActionKeyFromSignal(pred.layer1_signal || pred.layer1_status || pred.canonical_signal || pred.signal)
   );
-  return `规则侧当前判断为${actionLabel}。`;
+  return {
+    i18nKey: 'council.ruleVerdict',
+    params: { actionKey: signalKey }
+  };
 }
 
 export function getCouncilActionMeta(actionKey: CouncilActionKey) {
@@ -159,11 +174,16 @@ export function getCouncilHeadlineAction(predictions: AIPrediction[]): CouncilAc
   return ranked[0][0];
 }
 
-export function buildCouncilCards(predictions: AIPrediction[]): CouncilCardData[] {
+export function buildCouncilCards(predictions: AIPrediction[], locale: string = 'cn'): CouncilCardData[] {
   const shenCe = getTeamMemberById('shen_ce');
   const guShen = getTeamMemberById('gu_shen');
   const linXu = getTeamMemberById('lin_xu');
   const chengJu = getTeamMemberById('cheng_ju');
+
+  const shenCeName = getMemberLocalizedName(shenCe, locale);
+  const guShenName = getMemberLocalizedName(guShen, locale);
+  const linXuName = getMemberLocalizedName(linXu, locale);
+  const chengJuName = getMemberLocalizedName(chengJu, locale);
 
   const deepseekPred = predictions.find((pred) => resolveAnalystFromModel(`${pred.display_name || ''} ${pred.model || ''}`).id === 'gu_shen');
   const linxuPred = predictions.find((pred) => resolveAnalystFromModel(`${pred.display_name || ''} ${pred.model || ''}`).id === 'lin_xu');
@@ -177,9 +197,9 @@ export function buildCouncilCards(predictions: AIPrediction[]): CouncilCardData[
     );
     cards.push({
       key: 'shen-ce-gu-shen-collab',
-      title: `${shenCe.name} × ${guShen.name}`,
-      role: '主结论复核',
-      summary: buildCollabSummary(deepseekPred, guShen.name),
+      title: { i18nKey: 'council.collabTitle', params: { member1: shenCeName, member2: guShenName } },
+      role: { i18nKey: 'council.roles.mainReview' },
+      summary: buildCollabSummary(deepseekPred, guShenName),
       actionKey: collabAction,
       confidence: deepseekPred.confidence,
       supportPrice: deepseekPred.support_price,
@@ -189,8 +209,8 @@ export function buildCouncilCards(predictions: AIPrediction[]): CouncilCardData[
     });
     cards.push({
       key: 'gu-shen-independent',
-      title: guShen.name,
-      role: '独立视角',
+      title: guShenName,
+      role: { i18nKey: 'council.roles.independentView' },
       summary: getTacticalSummary(deepseekPred.llm_reasoning || deepseekPred.ai_reasoning),
       actionKey: getCouncilActionKeyFromSignal(deepseekPred.llm_signal || deepseekPred.signal),
       confidence: deepseekPred.confidence,
@@ -203,8 +223,8 @@ export function buildCouncilCards(predictions: AIPrediction[]): CouncilCardData[
   if (linxuPred) {
     cards.push({
       key: 'lin-xu-independent',
-      title: linXu.name,
-      role: '独立视角',
+      title: linXuName,
+      role: { i18nKey: 'council.roles.independentView' },
       summary: getTacticalSummary(linxuPred.llm_reasoning || linxuPred.ai_reasoning),
       actionKey: getCouncilActionKeyFromSignal(linxuPred.llm_signal || linxuPred.signal),
       confidence: linxuPred.confidence,
@@ -220,8 +240,8 @@ export function buildCouncilCards(predictions: AIPrediction[]): CouncilCardData[
     );
     cards.push({
       key: 'shen-ce-cheng-ju-rule',
-      title: `${shenCe.name} × ${chengJu.name}`,
-      role: '规则视角',
+      title: { i18nKey: 'council.collabTitle', params: { member1: shenCeName, member2: chengJuName } },
+      role: { i18nKey: 'council.roles.ruleView' },
       summary: buildRuleSummary(rulePred),
       actionKey: ruleAction,
       confidence: rulePred.confidence,
@@ -237,8 +257,8 @@ export function buildCouncilCards(predictions: AIPrediction[]): CouncilCardData[
     const member = mapCouncilMember(pred);
     return {
       key: `fallback-${idx}`,
-      title: member.name,
-      role: member.role,
+      title: getMemberLocalizedName(resolveAnalystFromModel(`${pred.display_name || ''} ${pred.model || ''}`), locale),
+      role: getMemberLocalizedRole(resolveAnalystFromModel(`${pred.display_name || ''} ${pred.model || ''}`), locale),
       summary: getTacticalSummary(pred.ai_reasoning),
       actionKey: getCouncilActionKey(pred),
       confidence: pred.confidence,

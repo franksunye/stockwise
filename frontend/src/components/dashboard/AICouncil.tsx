@@ -13,7 +13,7 @@ import {
   fetchAICouncilData,
   getAICouncilSWRKey,
   getActionChipClass,
-  getCouncilActionLabel,
+  getCouncilActionI18nKey,
   getCouncilActionMeta,
   getCouncilHeadlineAction,
   getCouncilMemorySnapshot,
@@ -22,6 +22,8 @@ import {
   type CouncilCachePayload,
   writeCouncilSessionSnapshot,
 } from '@/lib/ai-council-surface';
+import { useGlobalT, useT } from '@/context/LocaleContext';
+import { FullMessageKey } from '@/lib/i18n';
 
 interface AICouncilProps {
   symbol: string;
@@ -47,6 +49,8 @@ export function preloadAICouncil(symbol: string, targetDate: string, predictionC
 }
 
 export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
+  const tGlobal = useGlobalT();
+  const tCouncil = useT('council');
   const { locale: appLocale } = useLocale();
   const predictionLocale = appLocaleToPredictionContentLocale(appLocale);
   const snapshotKey = `${symbol}_${targetDate}_${predictionLocale}`;
@@ -88,7 +92,7 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
   const predictions = payload?.data || [];
   const loading = isLoading && predictions.length === 0;
   const [showLoadingIndicator, setShowLoadingIndicator] = useState(false);
-  const councilCards = buildCouncilCards(predictions);
+  const councilCards = buildCouncilCards(predictions, appLocale);
 
   useEffect(() => {
     if (!loading) {
@@ -113,7 +117,7 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
     return (
       <div className="flex flex-col items-center justify-center p-8 space-y-3">
         <RotateCw className="animate-spin text-indigo-500" size={24} />
-        <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">正在调阅投研决议...</p>
+        <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">{tCouncil('fetching')}</p>
       </div>
     );
   }
@@ -122,14 +126,14 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
     return (
       <div className="flex flex-col items-center justify-center p-8 space-y-2 text-center">
         <AlertTriangle className="text-slate-600 mb-2" size={24} />
-        <p className="text-sm font-bold text-slate-400">暂无更多顾问意见</p>
-        <p className="text-xs text-slate-600">该标的目前仅由主模型覆盖</p>
+        <p className="text-sm font-bold text-slate-400">{tCouncil('noOpinions')}</p>
+        <p className="text-xs text-slate-600">{tCouncil('mainModelOnly')}</p>
       </div>
     );
   }
 
   const headlineActionKey = getCouncilHeadlineAction(predictions);
-  const actionLabel = getCouncilActionLabel(headlineActionKey);
+  const actionLabel = tGlobal(`dashboard.signal.${getCouncilActionI18nKey(headlineActionKey)}` as FullMessageKey);
   const consensusColor =
     headlineActionKey === 'mixed'
       ? 'text-slate-400'
@@ -141,11 +145,11 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
       <div className="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/10">
         <div>
            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">{symbol}</p>
-           <h3 className="text-xl font-black tracking-tight text-white">{stockName || '未知股票'}</h3>
+           <h3 className="text-xl font-black tracking-tight text-white">{stockName || tGlobal('common.unknownStock')}</h3>
         </div>
         <div className="text-right">
            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">
-              {predictions.length}席 当前结论
+              {tCouncil('currentConclusion', { count: predictions.length })}
            </p>
            <h3 className={`text-xl font-black tracking-tight ${consensusColor} flex items-center justify-end gap-2`}>
               {actionLabel}
@@ -157,7 +161,7 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
       <div className="space-y-3">
         {councilCards.map((card) => {
            const chipClass = getActionChipClass(card.actionKey);
-           const chipText = getCouncilActionLabel(card.actionKey);
+           const chipText = tGlobal(`dashboard.signal.${getCouncilActionI18nKey(card.actionKey)}` as FullMessageKey);
            return (
              <div key={card.key} className={`p-4 rounded-xl border ${card.isPrimary ? 'bg-indigo-500/10 border-indigo-500/20' : 'bg-white/[0.02] border-white/5'}`}>
                 <div className="flex items-center justify-between mb-3">
@@ -177,8 +181,12 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
                         </div>
                       )}
                       <div className="flex items-center gap-2">
-                        <p className={`text-xs font-black tracking-wide ${card.isPrimary ? 'text-indigo-300' : 'text-slate-300'}`}>{card.title}</p>
-                        <p className="text-[10px] text-slate-500/80 font-bold">| {card.role}</p>
+                        <p className={`text-xs font-black tracking-wide ${card.isPrimary ? 'text-indigo-300' : 'text-slate-300'}`}>
+                          {typeof card.title === 'string' ? card.title : tGlobal(card.title.i18nKey as FullMessageKey, card.title.params)}
+                        </p>
+                        <p className="text-[10px] text-slate-500/80 font-bold">
+                          | {typeof card.role === 'string' ? card.role : tGlobal(card.role.i18nKey as FullMessageKey, card.role.params)}
+                        </p>
                       </div>
                     </div>
                    <div className={`px-2 py-1 rounded text-[10px] font-black uppercase tracking-wide ${chipClass}`}>
@@ -187,18 +195,24 @@ export function AICouncil({ symbol, stockName, targetDate }: AICouncilProps) {
                 </div>
                 
                 <p className="text-xs text-slate-300 leading-relaxed font-medium line-clamp-2">
-                   {card.summary}
+                   {typeof card.summary === 'string' 
+                     ? card.summary 
+                     : tGlobal(card.summary.i18nKey as FullMessageKey, {
+                         ...card.summary.params,
+                         action: tGlobal(`dashboard.signal.${card.summary.params.actionKey}` as FullMessageKey)
+                       })
+                   }
                 </p>
 
                 <div className="mt-3 flex items-center gap-4 text-[10px] text-slate-500 font-bold">
-                   {typeof card.confidence === 'number' && <span>把握: {(card.confidence * 100).toFixed(0)}%</span>}
-                   {card.supportPrice && <span>支撑位: {card.supportPrice}</span>}
+                   {typeof card.confidence === 'number' && <span>{tCouncil('confidence')}: {(card.confidence * 100).toFixed(0)}%</span>}
+                   {card.supportPrice && <span>{tCouncil('supportPrice')}: {card.supportPrice}</span>}
                 </div>
              </div>
            );
         })}
         <p className="px-1 pt-1 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-600">
-          主结论复核基于系统结果生成，独立视角保留分析师原始判断
+          {tCouncil('disclaimer')}
         </p>
       </div>
     </div>

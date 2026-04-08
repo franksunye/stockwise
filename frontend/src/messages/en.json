@@ -15,7 +15,11 @@
     "unknownStock": "Unknown Stock",
     "upgrade": "Upgrade",
     "manageSub": "Manage Subscription",
-    "tradeManagement": "Execution Management"
+    "tradeManagement": "Execution Management",
+    "unknownAnalyst": "Analyst",
+    "unknownInstitution": "Unknown Inst.",
+    "exportDate": "Export Date",
+    "posterDisclaimer": "RISK WARNING: This report is for information only and does not constitute investment advice. Content is synthesized by AI quantitative engine. Investors should evaluate prudently."
   },
   "dashboard": {
     "title": "CONTROL CENTER",
@@ -37,7 +41,8 @@
       "watching": "Watching",
       "riskOff": "Defensive",
       "noSignal": "No Signal",
-      "pending": "ANALYSIS PENDING"
+      "pending": "ANALYSIS PENDING",
+      "mixed": "Consensus Conflict"
     },
     "badge": {
       "triggeredLong": "Strategic opportunity identified",
@@ -250,7 +255,23 @@
     "bearish": "Bearish",
     "neutral": "Neutral",
     "agentPrefix": "Seat",
-    "voteSummary": "{count} seats voted"
+    "voteSummary": "{count} seats voted",
+    "collabReviewWithSummary": "Current conclusion is {action}. After review, {analystName} believes: {summary}",
+    "collabReviewMaintain": "After review by {analystName}, the current conclusion remains {action}.",
+    "ruleVerdict": "The rule-based analysis currently indicates: {action}.",
+    "fetching": "ACCESSING COUNCILS...",
+    "noOpinions": "NULL SET / NO ADDITIONAL OPINIONS",
+    "mainModelOnly": "CURRENT SYMBOL COVERED BY PRIMARY ENGINE ONLY",
+    "currentConclusion": "{count}-SEAT CONSENSUS",
+    "confidence": "CONFIDENCE",
+    "supportPrice": "SUPPORT",
+    "disclaimer": "Consensus validation synthesized from multi-agent logic trace. Independent views retain raw analyst judgment.",
+    "collabTitle": "{member1} × {member2}",
+    "roles": {
+      "mainReview": "Consensus Review",
+      "independentView": "Independent View",
+      "ruleView": "Rule-based Node"
+    }
   },
   "user": {
     "center": "User Center",

@@ -256,6 +256,16 @@ export function getAnalystById(id: AnalystId): AnalystProfile {
   return TEAM_MEMBER_DIRECTORY[id];
 }
 
+export function getMemberLocalizedName(member: TeamMemberProfile, locale: string): string {
+  if (locale === 'en' && member.nameEn) return member.nameEn;
+  return member.name;
+}
+
+export function getMemberLocalizedRole(member: TeamMemberProfile, locale: string): string {
+  if (locale === 'en' && member.roleEn) return member.roleEn;
+  return member.role;
+}
+
 export function resolveAnalystFromModel(modelLike: string | undefined | null): AnalystProfile {
   const raw = (modelLike || '').toLowerCase();
   if (raw.includes('deepseek')) return TEAM_MEMBER_DIRECTORY.gu_shen;

@@ -15,7 +15,11 @@
     "unknownStock": "未知股票",
     "upgrade": "升级",
     "manageSub": "管理订阅",
-    "tradeManagement": "交易管理"
+    "tradeManagement": "交易管理",
+    "unknownAnalyst": "分析师",
+    "unknownInstitution": "未知机构",
+    "exportDate": "导出日期",
+    "posterDisclaimer": "风险提示：本报告仅供参考，不构成投资建议。内容由 AI 量化引擎自动生成，请投资者审慎评估。"
   },
   "dashboard": {
     "title": "仪表盘",
@@ -37,7 +41,8 @@
       "watching": "观察",
       "riskOff": "防守",
       "noSignal": "暂无信号",
-      "pending": "等待分析"
+      "pending": "等待分析",
+      "mixed": "判断分歧"
     },
     "badge": {
       "triggeredLong": "适合开始寻找机会",
@@ -250,7 +255,23 @@
     "bearish": "看空",
     "neutral": "中性",
     "agentPrefix": "席位",
-    "voteSummary": "{count} 位席位完成投票"
+    "voteSummary": "{count} 位席位完成投票",
+    "collabReviewWithSummary": "当前结论为{action}，{analystName}复核后认为：{summary}",
+    "collabReviewMaintain": "{analystName}复核后，当前结论维持{action}。",
+    "ruleVerdict": "规则侧当前判断为{action}。",
+    "fetching": "正在调阅投研决议...",
+    "noOpinions": "暂无更多顾问意见",
+    "mainModelOnly": "该标的目前仅由主模型覆盖",
+    "currentConclusion": "{count}席 当前结论",
+    "confidence": "把握",
+    "supportPrice": "支撑位",
+    "disclaimer": "主结论复核基于系统结果生成，独立视角保留分析师原始判断",
+    "collabTitle": "{member1} × {member2}",
+    "roles": {
+      "mainReview": "主结论复核",
+      "independentView": "独立视角",
+      "ruleView": "规则视角"
+    }
   },
   "user": {
     "center": "个人中心",
