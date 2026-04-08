@@ -6,9 +6,8 @@ name: Daily Pipeline - A-Share (CN)
 # 安全：通过 Trading Day Gate 闸门确保仅在 CN 市场交易日执行
 
 on:
-  schedule:
-    # 每日北京时间 16:00 (UTC 08:00) 执行 - A股15:00收盘后1小时
-    - cron: '0 8 * * 1-5'
+  # Trigger Source: Cloudflare Worker Only (Precision Scheduling)
+  # 每日北京时间 16:00 精给由 Worker 控制触发
   workflow_dispatch: # 支持手动触发
 
 concurrency:
@@ -50,10 +49,3 @@ jobs:
     if: always() && needs.sync.result == 'success'
     uses: ./.github/workflows/ai_analyze_cn.yml
     secrets: inherit
-
-  # Step 4: 大盘黄历 (与分析并行，避免互相阻塞) (已暂停)
-  # almanac:
-  #   needs: sync
-  #   if: always() && needs.sync.result == 'success'
-  #   uses: ./.github/workflows/daily_almanac_cn.yml
-  #   secrets: inherit

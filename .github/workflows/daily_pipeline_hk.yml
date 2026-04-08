@@ -4,9 +4,8 @@ name: Daily Pipeline - Hong Kong (HK)
 # 安全：通过 Trading Day Gate 闸门确保仅在 HK 市场交易日执行
 
 on:
-  schedule:
-    # 每日北京时间 16:30 (UTC 08:30) 执行 - 港股16:00收盘后30分钟
-    - cron: '30 8 * * 1-5'
+  # Trigger Source: Cloudflare Worker Only (Precision Scheduling)
+  # 每日北京时间 16:30 节奏由 Worker 控制触发
   workflow_dispatch: # 支持手动触发
 
 concurrency:

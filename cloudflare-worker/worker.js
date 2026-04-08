@@ -27,6 +27,16 @@ const JOB_REGISTRY = [
     label: 'us-validation-glory', // 美股清晨战报 (对齐至 08:30 格点)
   },
   {
+    hour: 16, minute: 0, days: [1, 2, 3, 4, 5],
+    workflow: 'daily_pipeline_cn_main.yml',
+    label: 'cn-pipeline-settlement',
+  },
+  {
+    hour: 16, minute: 30, days: [1, 2, 3, 4, 5],
+    workflow: 'daily_pipeline_hk.yml',
+    label: 'hk-pipeline-settlement',
+  },
+  {
     hour: 20, minute: 30, days: [1, 2, 3, 4, 5],
     workflow: 'trade_management_advice_loop.yml',
     label: 'trade-management-advice',
