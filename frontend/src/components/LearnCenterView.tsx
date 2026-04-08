@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import { Search, BookOpen, Clock, ChevronRight, ArrowLeft, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useT } from '@/context/LocaleContext';
+import { useLocale, useT } from '@/context/LocaleContext';
 import type { MessageKey } from '@/lib/i18n';
 
 interface CourseMetadata {
@@ -15,6 +15,19 @@ interface CourseMetadata {
   slug: string;
 }
 
+type CourseLocalizedContent = Pick<CourseMetadata, 'title' | 'description'>;
+
+interface CourseCatalogEntry {
+  id: string;
+  category: CourseMetadata['category'];
+  readingTime: number;
+  slug: string;
+  localized: {
+    cn: CourseLocalizedContent;
+    en: CourseLocalizedContent;
+  };
+}
+
 const CATEGORIES: { id: string; labelKey: MessageKey<'learn'> }[] = [
   { id: 'all', labelKey: 'all' },
   { id: 'The Mind', labelKey: 'categories.The Mind' },
@@ -24,55 +37,107 @@ const CATEGORIES: { id: string; labelKey: MessageKey<'learn'> }[] = [
   { id: 'The Case', labelKey: 'categories.The Case' },
 ];
 
+const COURSE_CATALOG: CourseCatalogEntry[] = [
+  {
+    id: '1',
+    category: 'The Mind',
+    readingTime: 5,
+    slug: 'intro-to-ziso-philosophy',
+    localized: {
+      cn: {
+        title: 'ZISO 认知：为什么你需要 AI 席位？',
+        description: '理解知守 AI 的核心设计哲学，以及它如何帮助你克服贪婪与恐惧。',
+      },
+      en: {
+        title: 'ZISO Mindset: Why You Need AI Seats',
+        description: 'Understand ZISO AI design philosophy and how it helps neutralize greed and fear in execution.',
+      },
+    },
+  },
+  {
+    id: '2',
+    category: 'The Method',
+    readingTime: 8,
+    slug: 'volume-price-divergence',
+    localized: {
+      cn: {
+        title: '量价背离：识别趋势反转的第一个信号',
+        description: '深入学习如何通过成交量与价格的矛盾关系，预判市场潜在的变盘点。',
+      },
+      en: {
+        title: 'Volume-Price Divergence: First Reversal Signal',
+        description: 'Learn how to detect possible trend reversals by reading conflicts between volume and price action.',
+      },
+    },
+  },
+  {
+    id: '3',
+    category: 'The Money',
+    readingTime: 6,
+    slug: 'position-sizing-235',
+    localized: {
+      cn: {
+        title: '仓位控制的艺术：知守 2-3-5 原则',
+        description: '学习如何在不同市场环境下分配仓位，确保账户曲线的平滑与回撤控制。',
+      },
+      en: {
+        title: 'Position Sizing Mastery: The 2-3-5 Rule',
+        description: 'Apply disciplined sizing across market regimes to smooth equity curve volatility and control drawdowns.',
+      },
+    },
+  },
+  {
+    id: '4',
+    category: 'The Machine',
+    readingTime: 7,
+    slug: 'understanding-ai-seats',
+    localized: {
+      cn: {
+        title: '理解 AI 席位：不同性格的算法如何投票',
+        description: '拆解知守议会下各席位的逻辑差异，从趋势跟随到价值对冲。',
+      },
+      en: {
+        title: 'Inside AI Seats: How Different Models Vote',
+        description: 'Break down each seat in the AI council, from trend-following logic to value-hedging behavior.',
+      },
+    },
+  },
+  {
+    id: '5',
+    category: 'The Case',
+    readingTime: 10,
+    slug: '2024-q1-tech-review',
+    localized: {
+      cn: {
+        title: '历史实战：2024 年 Q1 科技股调整复盘',
+        description: '通过真实案例，看 AI 席位如何在剧烈波动中给出防守信号。',
+      },
+      en: {
+        title: 'Case Study: 2024 Q1 Tech Pullback Review',
+        description: 'Review a real volatility episode and see how AI seats issued defensive signals during the drawdown.',
+      },
+    },
+  },
+];
+
 export function LearnCenterView() {
   const t = useT('learn');
+  const { locale } = useLocale();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
 
-  // Mock data - in a real app, this would come from an API or static files
-  const courses: CourseMetadata[] = useMemo(() => [
-    {
-      id: '1',
-      title: 'ZISO 认知：为什么你需要 AI 席位？',
-      description: '理解知守 AI 的核心设计哲学，以及它如何帮助你克服贪婪与恐惧。',
-      category: 'The Mind',
-      readingTime: 5,
-      slug: 'intro-to-ziso-philosophy',
-    },
-    {
-      id: '2',
-      title: '量价背离：识别趋势反转的第一个信号',
-      description: '深入学习如何通过成交量与价格的矛盾关系，预判市场潜在的变盘点。',
-      category: 'The Method',
-      readingTime: 8,
-      slug: 'volume-price-divergence',
-    },
-    {
-      id: '3',
-      title: '仓位控制的艺术：知守 2-3-5 原则',
-      description: '学习如何在不同市场环境下分配仓位，确保账户曲线的平滑与回撤控制。',
-      category: 'The Money',
-      readingTime: 6,
-      slug: 'position-sizing-235',
-    },
-    {
-      id: '4',
-      title: '理解 AI 席位：不同性格的算法如何投票',
-      description: '拆解知守议会下各席位的逻辑差异，从趋势跟随到价值对冲。',
-      category: 'The Machine',
-      readingTime: 7,
-      slug: 'understanding-ai-seats',
-    },
-    {
-      id: '5',
-      title: '历史实战：2024 年 Q1 科技股调整复盘',
-      description: '通过真实案例，看 AI 席位如何在剧烈波动中给出防守信号。',
-      category: 'The Case',
-      readingTime: 10,
-      slug: '2024-q1-tech-review',
-    },
-  ], []);
+  const courses: CourseMetadata[] = useMemo(() => {
+    const contentLocale = locale === 'en' ? 'en' : 'cn';
+    return COURSE_CATALOG.map((entry) => ({
+      id: entry.id,
+      category: entry.category,
+      readingTime: entry.readingTime,
+      slug: entry.slug,
+      title: entry.localized[contentLocale].title,
+      description: entry.localized[contentLocale].description,
+    }));
+  }, [locale]);
 
   const filteredCourses = useMemo(() => {
     return courses.filter((course) => {
