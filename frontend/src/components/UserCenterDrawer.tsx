@@ -455,44 +455,64 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                 <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
                                   <div className="mt-3 space-y-1.5 pb-2">
                                     {([
-                                      { key: 'signal_flip', icon: ArrowLeftRight },
+                                      { key: 'signal_flip', icon: ArrowLeftRight, isAdvanced: true },
                                       { key: 'morning_call', icon: Sun },
                                       { key: 'validation_glory', icon: Trophy },
                                       { key: 'prediction_updated', icon: Zap },
-                                      { key: 'ai_radar_alert', icon: Activity, isPro: tier === 'pro' },
-                                      // { key: 'daily_brief', icon: FileText, isDailyBrief: true as const, isPro: tier === 'pro' },
+                                      { key: 'ai_radar_alert', icon: Activity, isAdvanced: true },
+                                      // { key: 'daily_brief', icon: FileText, isDailyBrief: true as const, isAdvanced: true },
                                       { key: 'price_update', icon: Info },
                                       // { key: 'market_almanac', icon: Sun },
                                     ] as const).map((type) => {
                                       const isEnabled = notificationSettings.types[type.key as keyof typeof notificationSettings.types]?.enabled ?? true;
-                                      const isPro = 'isPro' in type && type.isPro;
+                                      const isAdvanced = 'isAdvanced' in type && type.isAdvanced;
+                                      const isLocked = tier === 'free' && isAdvanced;
                                       const IconComponent = type.icon;
+                                      
                                       const label =
                                         'isDailyBrief' in type && type.isDailyBrief
                                           ? tier === 'pro'
                                             ? t('push.types.daily_brief.labelPro' as MessageKey<'user'>)
                                             : t('push.types.daily_brief.labelStandard' as MessageKey<'user'>)
                                           : t(`push.types.${type.key}.label` as MessageKey<'user'>);
-                                      const badge =
-                                        'isDailyBrief' in type && type.isDailyBrief
-                                          ? tier === 'pro'
-                                            ? t('push.types.daily_brief.badgePro' as MessageKey<'user'>)
-                                            : t('push.types.daily_brief.badgeStandard' as MessageKey<'user'>)
-                                          : t(`push.types.${type.key}.badge` as MessageKey<'user'>);
+                                          
+                                      const badge = t(`push.types.${type.key}.badge` as MessageKey<'user'>);
+
                                       return (
-                                        <div key={type.key} className={`flex items-center justify-between py-1.5 ${isPro ? 'bg-amber-500/5 -mx-1 px-1 rounded-lg' : ''}`}>
+                                        <div 
+                                          key={type.key} 
+                                          onClick={() => {
+                                            if (isLocked) setShowPricing(true);
+                                          }}
+                                          className={`flex items-center justify-between py-1.5 px-1 rounded-xl transition-all ${isLocked ? 'bg-amber-500/[0.03] cursor-pointer hover:bg-amber-500/[0.08]' : ''}`}
+                                        >
                                           <div className="flex items-center gap-2.5 flex-1">
-                                            <div className={`w-6 h-6 rounded-md flex items-center justify-center ${isPro ? 'bg-amber-500/20' : 'bg-white/5'}`}>
-                                                <IconComponent className={`w-3.5 h-3.5 ${isPro ? 'text-amber-400' : 'text-indigo-400'}`} />
+                                            <div className={`w-6 h-6 rounded-md flex items-center justify-center ${isLocked ? 'bg-amber-500/20' : 'bg-white/5'}`}>
+                                                <IconComponent className={`w-3.5 h-3.5 ${isLocked ? 'text-amber-400' : 'text-indigo-400'}`} />
                                             </div>
-                                            <span className={`text-[11px] font-medium ${isPro ? 'text-amber-200' : 'text-slate-200'}`}>{label}</span>
-                                            <span className={`text-[9px] px-1.5 py-0.5 rounded ${isPro ? 'bg-amber-500/20 text-amber-400 font-black' : 'bg-slate-800/60 text-slate-500 font-bold'}`}>{badge}</span>
+                                            <span className={`text-[11px] font-medium ${isLocked ? 'text-amber-100/60' : 'text-slate-200'}`}>{label}</span>
+                                            {!isLocked && (
+                                              <span className="text-[9px] px-1.5 py-0.5 rounded bg-slate-800/60 text-slate-500 font-bold uppercase">{badge}</span>
+                                            )}
                                           </div>
-                                          <button onClick={() => {
-                                            void updateNotificationSetting(type.key as keyof typeof notificationSettings.types, !isEnabled);
-                                          }} data-user-center-notification-toggle={type.key} className={`w-9 h-5 rounded-full transition-all flex items-center px-0.5 ${isEnabled ? 'bg-indigo-600 justify-end' : 'bg-slate-700 justify-start'}`}>
-                                            <motion.div className="w-4 h-4 bg-white rounded-full shadow" layout transition={{ type: 'spring', stiffness: 500, damping: 30 }} />
-                                          </button>
+                                          
+                                          {isLocked ? (
+                                            <div className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                                              <Crown size={10} className="text-amber-400" />
+                                              <span className="text-[9px] font-black text-amber-400 uppercase tracking-tighter">PRO</span>
+                                            </div>
+                                          ) : (
+                                            <button 
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                void updateNotificationSetting(type.key as keyof typeof notificationSettings.types, !isEnabled);
+                                              }} 
+                                              data-user-center-notification-toggle={type.key} 
+                                              className={`w-9 h-5 rounded-full transition-all flex items-center px-0.5 ${isEnabled ? 'bg-indigo-600 justify-end' : 'bg-slate-700 justify-start'}`}
+                                            >
+                                              <motion.div className="w-4 h-4 bg-white rounded-full shadow" layout transition={{ type: 'spring', stiffness: 500, damping: 30 }} />
+                                            </button>
+                                          )}
                                         </div>
                                       );
                                     })}

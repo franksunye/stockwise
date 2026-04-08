@@ -30,7 +30,7 @@ class NotificationTemplates:
                     "body": "{push_hook}"
                 }
             },
-            "pro": {
+            "paid": {
                 "zh": {
                     "title": "⭐ Pro 深度复盘已就绪",
                     "body": "{push_hook} | 含明日执行计划"
@@ -52,7 +52,7 @@ class NotificationTemplates:
                     "body": "{push_hook}"
                 }
             },
-            "pro": {
+            "paid": {
                 "zh": {
                     "title": "🟢 Pro 机会窗口已确认",
                     "body": "{push_hook} | 已附仓位与节奏建议"
@@ -74,7 +74,7 @@ class NotificationTemplates:
                     "body": "{push_hook}"
                 }
             },
-            "pro": {
+            "paid": {
                 "zh": {
                     "title": "🔴 Pro 避险信号已触发",
                     "body": "{push_hook} | 已附减仓与防守方案"
@@ -96,7 +96,7 @@ class NotificationTemplates:
                     "body": "{push_hook}"
                 }
             },
-            "pro": {
+            "paid": {
                 "zh": {
                     "title": "⚪ Pro 震荡策略更新",
                     "body": "{push_hook} | 已附观望与试仓边界"
@@ -118,7 +118,7 @@ class NotificationTemplates:
                     "body": "Signal changed from [{old_signal}] to [{new_signal}] ({confidence_pct}% conf). Tap for details."
                 }
             },
-            "pro": {
+            "paid": {
                 "zh": {
                     "title": "🎯 Pro 反转提醒：{symbol}",
                     "body": "核心方向已切换到 [{new_signal}]。已生成仓位动作与风险阈值。"
@@ -130,14 +130,24 @@ class NotificationTemplates:
             }
         },
         "signal_flip_batch": {
-            "all": {
+            "free": {
                 "zh": {
                     "title": "🎯 {count} 只关注股信号更新",
-                    "body": "{symbols} 等股票出现新的交易信号，点击查看 AI 深度复盘。"
+                    "body": "{symbols} 等股票出现新的交易信号，点击查看详情。"
                 },
                 "en": {
                     "title": "🎯 {count} Signal Updates in Watchlist",
-                    "body": "New signals for {symbols}. Check AI deep analysis now."
+                    "body": "New signals for {symbols}. Check details now."
+                }
+            },
+            "paid": {
+                "zh": {
+                    "title": "🚨 Pro 自选池信号集中反转: {count} 只",
+                    "body": "观测到 {symbols} 等标的结构性转向。建议立即核对 Pro 盘中计划。"
+                },
+                "en": {
+                    "title": "🚨 Pro Batch Signal Flip: {count} Symbols",
+                    "body": "Structural reversal detected in {symbols}. Please review Pro intraday plans."
                 }
             }
         },
@@ -152,7 +162,7 @@ class NotificationTemplates:
                     "body": "Watchlist Mood: [{sentiment_tag}]. Watch {stock_names} for opening action."
                 }
             },
-            "pro": {
+            "paid": {
                 "zh": {
                     "title": "☀️ Pro 开盘作战简报",
                     "body": "高优盯盘资产：{stock_names}。自选池情绪：[{sentiment_tag}]。带好战术防线入场。"
@@ -164,7 +174,7 @@ class NotificationTemplates:
             }
         },
         "morning_call_neutral": {
-            "all": {
+            "free": {
                 "zh": {
                     "title": "☕ 开盘前早报：观望日",
                     "body": "自选池无明确多头信号，情绪：[{sentiment_tag}]。今日以耐心等待为主。"
@@ -172,6 +182,16 @@ class NotificationTemplates:
                 "en": {
                     "title": "☕ Pre-Market: Wait & See",
                     "body": "No strong entry signals in watchlist. Mood: [{sentiment_tag}]. Patience is key today."
+                }
+            },
+            "paid": {
+                "zh": {
+                    "title": "⚪ Pro 晨间简报：无进入机会",
+                    "body": "池内标的处于逻辑真空期。情绪：[{sentiment_tag}]。建议保持空仓/低位观察，等待信号。"
+                },
+                "en": {
+                    "title": "⚪ Pro Morning Brief: No Entry",
+                    "body": "Logic vacuum in watchlist. Mood: [{sentiment_tag}]. Stay neutral and wait for resonance."
                 }
             }
         },
@@ -186,7 +206,7 @@ class NotificationTemplates:
                     "body": "Grid hit! Intra-day peak gain: {peak_gain}%. Tap to view AI recap."
                 }
             },
-            "pro": {
+            "paid": {
                  "zh": {
                     "title": "🎯 Pro 策略复盘与进阶：{stock_names}",
                     "body": "已达成预期推演 (日内最高浮盈 {peak_gain}%)。最新止损边界与持仓计划已更新，请检查。"
@@ -204,7 +224,7 @@ class NotificationTemplates:
                     "body": "Scan complete. {action_count} core pattern changes found in your watchlist. Check AI ratings now."
                 }
             },
-            "pro": {
+            "paid": {
                 "zh": {
                     "title": "🚨 Pro 盘后核心沙盘：发现战机",
                     "body": "{market_name} 模型算力结算完毕。已锁定 {action_count} 处建仓/防守级拐点，风控参数与进场节点已更新。"
@@ -226,7 +246,7 @@ class NotificationTemplates:
                     "body": "Market simulation updated. No structural divergence found. Keep tracking grid support levels."
                 }
             },
-            "pro": {
+            "paid": {
                 "zh": {
                     "title": "🛡️ Pro 盘后例行维护：阵型稳固",
                     "body": "{market_name} 核心标的深度评估完毕。当日无系统性风控事件，明日纪律计划已下发。"
@@ -260,7 +280,7 @@ class NotificationTemplates:
                     "body": "{stock_names} action deviates from prediction. Price: {current_price}. Review your plan."
                 }
             },
-            "pro": {
+            "paid": {
                 "zh": {
                     "title": "🕵️ Pro 结构雷达：{resonance_type}",
                     "body": "{stock_names} 现价 {current_price}。{strategy_tip}"
@@ -358,15 +378,23 @@ class NotificationTemplates:
             A tuple of (title, body).
         """
         # A. Resolve Tier & Type
+        # Normalize Tier: Semantic distinction between 'free' and 'paid' (members)
+        effective_tier = "free" if tier == "free" else "paid"
+
         type_group = cls.TEMPLATES.get(notif_type)
         if not type_group:
             logger.warning(f"⚠️ Template for type '{notif_type}' not found. Using default.")
             return cls._fallback_render(kwargs)
 
-        # Tier Priority: Requested Tier -> 'all' -> 'free'
-        tier_data = type_group.get(tier) or type_group.get("all") or type_group.get("free")
+        # Tier Priority: Effective Tier -> 'all' -> 'free' -> 'paid' (last resort)
+        tier_data = (
+            type_group.get(effective_tier) 
+            or type_group.get("all") 
+            or type_group.get("free") 
+            or type_group.get("paid")
+        )
         if not tier_data:
-            logger.error(f"❌ Failed to find tier '{tier}' or fallback for type '{notif_type}'")
+            logger.error(f"❌ Failed to find tier '{effective_tier}' or fallback for type '{notif_type}'")
             return cls._fallback_render(kwargs)
 
         # B. Resolve Language

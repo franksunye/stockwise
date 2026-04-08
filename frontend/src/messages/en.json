@@ -354,19 +354,19 @@
       "testNotificationTitle": "Test notification — ZISO AI",
       "testNotificationBody": "It works. Local time: {time}",
       "types": {
-        "signal_flip": { "label": "Trend reversal", "badge": "Key" },
-        "morning_call": { "label": "Morning brief", "badge": "08:30" },
-        "validation_glory": { "label": "Lookback report", "badge": "Hit rate" },
-        "prediction_updated": { "label": "Analysis refresh", "badge": "READY" },
+        "signal_flip": { "label": "Trend Reversal", "badge": "KEY" },
+        "morning_call": { "label": "Morning Brief", "badge": "08:30" },
+        "validation_glory": { "label": "Lookback Report", "badge": "AUDIT" },
+        "prediction_updated": { "label": "Analysis Refresh", "badge": "READY" },
         "daily_brief": {
-          "labelPro": "Pro deep debrief (Paused)",
-          "labelStandard": "Daily brief (Paused)",
-          "badgePro": "TBD",
-          "badgeStandard": "TBD"
+          "labelPro": "Market Debrief",
+          "labelStandard": "Daily Brief",
+          "badgePro": "PRO",
+          "badgeStandard": "BASIC"
         },
-        "price_update": { "label": "Live quotes", "badge": "Session" },
-        "market_almanac": { "label": "Market almanac (Paused)", "badge": "TBD" },
-        "ai_radar_alert": { "label": "Session Radar", "badge": "Pro Only" }
+        "price_update": { "label": "Live Quotes", "badge": "SESSION" },
+        "market_almanac": { "label": "Market Almanac", "badge": "TBD" },
+        "ai_radar_alert": { "label": "Session Radar", "badge": "LIVE AI" }
       }
     }
   },

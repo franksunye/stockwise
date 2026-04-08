@@ -1,5 +1,6 @@
+from __future__ import annotations
 import json
-from typing import Any, Dict, Iterable, List, Set
+from typing import Any, Dict, Iterable, List, Set, Optional, Union
 
 from backend.logger import logger
 

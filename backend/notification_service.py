@@ -126,6 +126,15 @@ class NotificationManager:
         "prediction_ready": "prediction_updated",  # Legacy tag compat
     }
 
+    # [Option A Implementation]
+    # Categories that are ONLY available to Pro/Premium users.
+    # If a Free user triggers these, they will be silently dropped.
+    ADVANCED_CATEGORIES = {
+        "signal_flip",
+        "signal_flip_batch",
+        "ai_radar_alert"
+    }
+
     def check_signal_flip(self, user_id: str, symbol: str, new_signal: str, new_confidence: float) -> Optional[dict]:
         """
         Compare new prediction with cached state to detect a 'Signal Flip'.
@@ -473,14 +482,22 @@ class NotificationManager:
         """Helper to send push and log it."""
         log_id = f"notif_{uuid.uuid4().hex[:12]}"
         
-        # [NEW] Check user preferences before sending
+        # 1. Tier & Category Guard (Option A)
         notif_type = payload.get("type", "unknown")
+        profile = self._get_user_profile(user_id)
+        tier = profile.get("tier", "free")
+        
+        if tier == "free" and notif_type in self.ADVANCED_CATEGORIES:
+            logger.debug(f"🛑 [TierGuard] User {user_id} is FREE, blocking advanced notification '{notif_type}'")
+            return False
+
+        # 2. Check user preferences before sending
         if not self._check_user_preference(user_id, notif_type):
             logger.debug(f"⏭️ User {user_id} has disabled '{notif_type}' notifications, skipping")
             self.stats["skipped_by_preference"] += 1
             return False
 
-        # [NEW] Pre-check: Skip HTTP call if user has no push subscription
+        # 3. Pre-check: Skip HTTP call if user has no push subscription
         if not self._has_push_subscription(user_id):
             logger.debug(f"⏭️ User {user_id} has no push subscription, skipping HTTP call")
             return False
