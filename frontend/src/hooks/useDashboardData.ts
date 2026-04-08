@@ -587,12 +587,18 @@ export function useDashboardData(
     }, [watchlist, loadingWatchlist, historyLimit, enableAlmanac, predictionContentLocale, dashboardCacheStorageKey]);
 
     const isFirstPredictionLocaleEffectRef = useRef(true);
+    const prevPredictionContentLocaleRef = useRef(predictionContentLocale);
     useEffect(() => {
         if (isFirstPredictionLocaleEffectRef.current) {
             isFirstPredictionLocaleEffectRef.current = false;
             activeLocaleRef.current = predictionContentLocale;
+            prevPredictionContentLocaleRef.current = predictionContentLocale;
             return;
         }
+        if (prevPredictionContentLocaleRef.current === predictionContentLocale) {
+            return;
+        }
+        prevPredictionContentLocaleRef.current = predictionContentLocale;
         if (loadingWatchlist && watchlist.length === 0) return;
         if (watchlist.length === 0) return;
         activeLocaleRef.current = predictionContentLocale;
