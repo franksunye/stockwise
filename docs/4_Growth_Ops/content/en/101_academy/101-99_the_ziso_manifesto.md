@@ -1,6 +1,6 @@
 ---
-title: "The ZISO Manifesto: Building an Icy Fortress in a World of Madness"
-subtitle: "Stop Chasing Myths. Start Enforcing Boundaries."
+title: "The ZISO Manifesto: Advanced Market Intelligence Powered by DeepSeek-V3"
+subtitle: "Stop Chasing Myths. Start Enforcing Boundaries with DeepSeek-V3 Intelligence."
 date: "2026-03-19"
 image: "/images/learn/101-99_manifesto_cover.png"
 category: Academy
@@ -8,7 +8,7 @@ source_docs:
   - docs/0_Strategy/01_Product_Positioning_and_Boundaries.md
 ---
 
-# The ZISO Manifesto: Building an Icy Fortress in a World of Madness
+# The ZISO Manifesto: Building an Icy Fortress with DeepSeek-V3
 
 > *"Know the limit, avoid the danger. Carry yourself with the cold clarity of a machine. We don't create myths; we end delusions."*
 

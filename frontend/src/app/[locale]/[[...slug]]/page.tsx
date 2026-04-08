@@ -341,8 +341,8 @@ function getPageConfig(locale: PublicLocale, slugParts: string[]): PageConfig | 
   if (path === '') {
     const meta = locale === 'en' ? null : buildLocalizedMeta(locale, 'home');
     return {
-      title: meta?.title || 'ZISO AI | AI Does the Research. You Keep the Decision.',
-      description: meta?.desc || 'Structured market research, tactical briefings, and execution discipline for serious retail investors.',
+      title: meta?.title || 'ZISO AI | DeepSeek-V3 Powered Stock Intelligence',
+      description: meta?.desc || 'Advanced market research, tactical briefings, and execution discipline powered by DeepSeek-V3. Built for serious retail investors seeking institutional-grade Alpha.',
       path: '/',
       render: () => <EnglishHomePage />,
       alternateLocales: ['en', 'cn', 'ko', 'es'],
@@ -352,8 +352,8 @@ function getPageConfig(locale: PublicLocale, slugParts: string[]): PageConfig | 
   if (path === 'about') {
     const meta = locale === 'en' ? null : buildLocalizedMeta(locale, 'about');
     return {
-      title: meta?.title || 'About ZISO AI',
-      description: meta?.desc || 'Why ZISO AI exists, how it frames research, and how the workflow is structured.',
+      title: meta?.title || 'About ZISO AI | DeepSeek-V3 Research Framework',
+      description: meta?.desc || 'Discover how ZISO AI leverages DeepSeek-V3 to frame professional stock research and disciplined trading workflows.',
       path: '/about',
       render: () => <EnglishAboutPage />,
       alternateLocales: ['en', 'cn', 'ko', 'es'],
@@ -363,8 +363,8 @@ function getPageConfig(locale: PublicLocale, slugParts: string[]): PageConfig | 
   if (path === 'pricing') {
     const meta = locale === 'en' ? null : buildLocalizedMeta(locale, 'pricing');
     return {
-      title: meta?.title || 'Pricing | ZISO AI',
-      description: meta?.desc || 'Subscription plans for investors who want stronger nightly research and execution discipline.',
+      title: meta?.title || 'Pricing | ZISO AI Subscription Plans',
+      description: meta?.desc || 'Appoint your personal research council powered by DeepSeek-V3. Subscription plans for disciplined investors seeking professional nightly research.',
       path: '/pricing',
       render: () => <EnglishPricingPage />,
       alternateLocales: ['en', 'cn', 'ko', 'es'],

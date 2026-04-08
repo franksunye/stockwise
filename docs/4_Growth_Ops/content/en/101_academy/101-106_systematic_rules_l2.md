@@ -1,6 +1,6 @@
 ---
-title: '101-106: Maturity Level L2 — It’s Not Just About Knowing the Rules, It’s Knowing When They Fail'
-subtitle: Transitioning from "Holy Grail" Obsession to Treating Rules as Machines That Need Recalibration.
+title: 'Maturity Level L2: Systematic Rule Governance via DeepSeek-V3 Intelligence'
+subtitle: Transitioning from "Holy Grail" Obsession to Treating Trading Rules as Machines Verified by DeepSeek-V3.
 content_id: growth-101-106
 content_source: growth
 content_type: article

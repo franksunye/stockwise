@@ -26,6 +26,13 @@ export async function EnglishLearnArticlePage({ slug }: { slug: string }) {
     dateModified: article.date,
     image: article.image,
     sources: brandCoreEn.defaultSources,
+    keywords: [
+      'DeepSeek-V3',
+      'AI Analysis',
+      'Stock Market',
+      article.category || 'Trading Strategy',
+      'Quant Research'
+    ],
   });
 
   return (
@@ -40,7 +47,12 @@ export async function EnglishLearnArticlePage({ slug }: { slug: string }) {
             <ChevronLeft size={18} />
             <span className="text-sm font-bold">Back to Academy</span>
           </Link>
-          <div className="hidden md:block font-bold text-lg tracking-tight">ZISO AI <span className="text-indigo-500">101</span></div>
+          <div className="flex items-center gap-3">
+             <div className="px-2 py-0.5 rounded bg-indigo-500/10 border border-indigo-500/20 text-[9px] font-bold text-indigo-400 uppercase tracking-tighter">
+               DeepSeek-V3 Verified
+             </div>
+             <div className="hidden md:block font-bold text-lg tracking-tight">ZISO AI <span className="text-indigo-500">101</span></div>
+          </div>
           <button className="p-2 rounded-full hover:bg-white/5 text-slate-400 hover:text-white transition-colors">
             <Share2 size={18} />
           </button>

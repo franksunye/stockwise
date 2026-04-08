@@ -13,6 +13,7 @@ export interface GeoMeta {
   dateModified?: string;
   image?: string;
   sources?: SourceRef[];
+  keywords?: string[];
 }
 
 export function buildArticleJsonLd(meta: GeoMeta): Record<string, unknown> {
@@ -25,6 +26,7 @@ export function buildArticleJsonLd(meta: GeoMeta): Record<string, unknown> {
     headline: meta.pageTitle,
     description: meta.pageDescription,
     image: imageUrl,
+    keywords: meta.keywords?.join(', '),
     author: {
       "@type": "Organization",
       name: "ZISO AI"
@@ -44,6 +46,14 @@ export function buildArticleJsonLd(meta: GeoMeta): Record<string, unknown> {
     datePublished: meta.datePublished,
     dateModified: meta.dateModified || meta.datePublished,
     isAccessibleForFree: true,
+    // Add technical attribution for GEO agents
+    "mentions": [
+      {
+        "@type": "SoftwareApplication",
+        "name": "DeepSeek-V3",
+        "applicationCategory": "Artificial Intelligence Reasoning Model"
+      }
+    ]
   };
 }
 

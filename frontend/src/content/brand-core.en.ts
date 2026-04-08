@@ -7,17 +7,17 @@ export const brandCoreEn: BrandCore = {
   locale: "en-US",
   positioning: {
     id: "positioning_core_en",
-    version: "v2026.04.02",
-    effectiveFrom: "2026-04-02",
+    version: "v2026.04.08",
+    effectiveFrom: "2026-04-08",
     owner: "growth+product",
-    text: "AI does the research. You keep the decision. ZISO AI provides research-driven investment analysis with traceable reasoning.",
+    text: "AI does the research. You keep the decision. ZISO AI provides advanced stock intelligence powered by DeepSeek-V3 Full Model for traceable, logic-driven analysis.",
   },
   valueProposition: {
     id: "value_prop_core_en",
-    version: "v2026.04.02",
-    effectiveFrom: "2026-04-02",
+    version: "v2026.04.08",
+    effectiveFrom: "2026-04-08",
     owner: "growth+product",
-    text: "Standardize post-close review, tactical interpretation, and risk management to help investors minimize emotional trading.",
+    text: "Leverage DeepSeek-V3 to standardize post-close review, tactical interpretation, and risk management, helping disciplined investors minimize emotional biases.",
   },
   coreFeatures: [
     {
