@@ -268,4 +268,6 @@ if __name__ == "__main__":
             stats = run_full_sync(market_filter=args.market, force_full=args.full_periods)
             if stats:
                 job.set_stats(**stats)
+        if not stats or not stats.get("success"):
+            sys.exit(1)
         sys.exit(0)

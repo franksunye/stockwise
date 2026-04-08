@@ -35,7 +35,8 @@ jobs:
   # Step 1.5: 市场事实健康检查 (US)
   healthcheck:
     needs: sync
-    if: success()
+    # success() is false when upstream jobs (e.g. gate) are skipped; key off sync only.
+    if: ${{ needs.sync.result == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -60,7 +61,7 @@ jobs:
   # Step 2: 验证历史预测 (按市场切片执行)
   verify:
     needs: [sync, healthcheck]
-    if: success()
+    if: ${{ needs.sync.result == 'success' && needs.healthcheck.result == 'success' }}
     uses: ./.github/workflows/verify_predictions.yml
     with:
       market: 'US'
@@ -69,6 +70,6 @@ jobs:
   # Step 3: AI 分析 (仅当同步与健康检查均通过时执行)
   analyze:
     needs: [sync, healthcheck]
-    if: success()
+    if: ${{ needs.sync.result == 'success' && needs.healthcheck.result == 'success' }}
     uses: ./.github/workflows/ai_analyze_us.yml
     secrets: inherit

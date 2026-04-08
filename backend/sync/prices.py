@@ -376,7 +376,13 @@ def run_full_sync(market_filter: str = None, force_full: bool = False):
     target_stocks = get_stock_pool()
     if not target_stocks:
         logger.warning("⚠️ 股票池为空")
-        return
+        return {
+            "success": False,
+            "error": "股票池为空",
+            "success_count": 0,
+            "error_count": 0,
+            "target_count": 0,
+        }
     
     # 智能调度策略：
     # 1. 强制模式 (--full-periods): 总是同步所有周期
@@ -401,7 +407,13 @@ def run_full_sync(market_filter: str = None, force_full: bool = False):
 
     if not target_stocks:
         logger.warning(f"⚠️ {market_filter} 市场股票池为空")
-        return
+        return {
+            "success": False,
+            "error": f"{market_filter} 市场股票池为空",
+            "success_count": 0,
+            "error_count": 0,
+            "target_count": 0,
+        }
 
     start_time = time.time()
     success_count = 0
@@ -476,13 +488,21 @@ def run_full_sync(market_filter: str = None, force_full: bool = False):
                 logger.info(f"   ⏩ 进度: {i + 1}/{len(target_stocks)} ...")
     
     duration = time.time() - start_time
+    err_summary = None
+    if errors:
+        err_summary = "; ".join(errors[:3])
+        if len(errors) > 3:
+            err_summary += f" (+{len(errors) - 3} more)"
     # [Refactored] Use JobGuard to send notification
     return {
+        "success": len(errors) == 0,
+        "error": err_summary,
         "success_count": success_count,
         "error_count": len(errors),
         "target_count": len(target_stocks),
         "strategy": mode_label,
         "is_friday": is_friday,
         "sync_weekly": sync_weekly,
-        "errors": errors[:5] if errors else None # Only show first 5 errors in summary
+        "duration_sec": round(duration, 1),
+        "errors": errors[:5] if errors else None,  # Only show first 5 errors in summary
     }

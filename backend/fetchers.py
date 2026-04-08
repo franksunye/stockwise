@@ -26,6 +26,23 @@ from backend.db_repo.queries import build_upsert_stock_meta_sql, UPDATE_STOCK_PR
 from backend.logger import logger
 
 
+def _yf_ticker_no_shared_cache(symbol: str):
+    """
+    yfinance attaches a SQLite-backed HTTP cache by default. Concurrent
+    ThreadPoolExecutor workers share that file and often hit
+    sqlite3.OperationalError: database is locked. A plain requests.Session
+    disables that cache path for this ticker instance.
+    """
+    import yfinance as yf
+
+    sym = str(symbol).strip().upper()
+    try:
+        return yf.Ticker(sym, session=requests.Session())
+    except TypeError:
+        # Older yfinance without session= on Ticker
+        return yf.Ticker(sym)
+
+
 class BaseFetcher(ABC):
     """數據獲取器基類，定義統一接口"""
     
@@ -179,7 +196,7 @@ class AkShareFetcher(BaseFetcher):
         def _fetch_us():
             # Yahoo is the primary free source for US prices.
             try:
-                import yfinance as yf
+                import yfinance  # noqa: F401
             except ImportError:
                 logger.warning("⚠️ [Yahoo] yfinance 未安装，无法获取 US 行情")
                 return pd.DataFrame()
@@ -187,7 +204,9 @@ class AkShareFetcher(BaseFetcher):
             try:
                 ticker = str(symbol).strip().upper()
                 s_dt = datetime.strptime(start_date, "%Y%m%d").strftime("%Y-%m-%d")
-                hist = yf.Ticker(ticker).history(start=s_dt, interval="1d", auto_adjust=False)
+                hist = _yf_ticker_no_shared_cache(ticker).history(
+                    start=s_dt, interval="1d", auto_adjust=False
+                )
                 if hist is None or hist.empty:
                     return pd.DataFrame()
                 hist = hist.reset_index()
@@ -251,9 +270,8 @@ class SinaSpotFetcher(BaseFetcher):
         if market == 'US':
             # Yahoo fallback for US realtime snapshot
             try:
-                import yfinance as yf
                 ticker = str(symbol).strip().upper()
-                info = yf.Ticker(ticker).fast_info
+                info = _yf_ticker_no_shared_cache(ticker).fast_info
                 last_price = float(info.get("lastPrice") or 0)
                 prev_close = float(info.get("previousClose") or 0)
                 if last_price <= 0:
@@ -800,8 +818,7 @@ def sync_profiles(limit=20):
                         print(f"     ⚠️ 港股接口异常: {e_hk}")
                 elif market == "US":
                     try:
-                        import yfinance as yf
-                        info = yf.Ticker(symbol).info or {}
+                        info = _yf_ticker_no_shared_cache(symbol).info or {}
                         industry = str(info.get("industry") or "")
                         main_bus = str(info.get("longBusinessSummary") or "")
                         desc = str(info.get("longName") or "")
