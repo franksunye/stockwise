@@ -60,4 +60,18 @@ export const brandCoreEn: BrandCore = {
     { name: "ZISO AI Research Center", url: "https://ziso.cc/learn" },
     { name: "ZISO AI Help Center", url: "https://ziso.cc/support" },
   ],
+  keywords: [
+    "ZISO AI",
+    "DeepSeek-V3 Stock Intelligence",
+    "Multi-agent AI Research",
+    "Consensus Reasoning",
+    "AI Trading Discipline",
+    "US Stock Market Analysis",
+    "HK Market AI Insights",
+    "A-shares Quantitative Research",
+    "Disciplined Investment Workflows",
+    "Market Rationale Audit",
+    "DeepSeek-V3",
+    "Gemini AI Finance",
+  ],
 };

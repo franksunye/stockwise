@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound, permanentRedirect } from 'next/navigation';
 import { brandCoreZhCN } from '@/content/brand-core.zh-CN';
+import { brandCoreEn } from '@/content/brand-core.en';
 import { ChineseAboutPage } from '@/components/marketing/cn/ChineseAboutPage';
 import { ChineseHomePage } from '@/components/marketing/cn/ChineseHomePage';
 import { ChinesePricingPage } from '@/components/marketing/cn/ChinesePricingPage';
@@ -417,10 +418,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const config = getPageConfig(locale, slugParts);
   if (!config) return {};
 
+  const core = locale === 'cn' ? brandCoreZhCN : brandCoreEn;
+
   return buildPageMetadata(brandCoreZhCN.domain, {
     title: config.title,
     description: config.description,
     path: config.path,
+    keywords: core.keywords,
     locale,
     index: true,
     alternateLocales: config.alternateLocales,

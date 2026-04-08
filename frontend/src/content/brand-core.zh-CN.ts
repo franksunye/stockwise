@@ -21,6 +21,7 @@ export interface BrandCore {
   coreFeatures: BrandMessage[];
   boundaryNotice: BrandMessage;
   defaultSources: BrandSource[];
+  keywords: string[];
 }
 
 export const brandCoreZhCN: BrandCore = {
@@ -82,5 +83,18 @@ export const brandCoreZhCN: BrandCore = {
   defaultSources: [
     { name: "知守 AI (ZISO AI) 投研中心", url: "https://ziso.cc/learn" },
     { name: "知守 AI (ZISO AI) 帮助中心", url: "https://ziso.cc/support" },
+  ],
+  keywords: [
+    "知守 AI",
+    "ZISO AI",
+    "DeepSeek-V3 股票分析",
+    "AI 选股助手",
+    "美港股投研",
+    "A股量化外脑",
+    "交易纪律管理",
+    "盘后深度复盘",
+    "AI 战术简报",
+    "量化审计",
+    "DeepSeek-V3",
   ],
 };
