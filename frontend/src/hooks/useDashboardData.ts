@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { getCurrentUser } from '@/lib/user';
 import { StockData, MarketAlmanacData } from '@/lib/types';
 import { getRule } from '@/lib/storage';
-import { getMarketScene, isTradingDay, getHKTime, formatDateStr } from '@/lib/date-utils';
+import { getMarketScene, isTradingDay, getHKTime, getUSEasternTime, formatDateStr, getMarketFromSymbol, type MarketType } from '@/lib/date-utils';
 import { getDashboardRefreshPlan, type DashboardRefreshEvent } from '@/lib/dashboard-refresh-contract';
 import { useLocale } from '@/context/LocaleContext';
 import { appLocaleToPredictionContentLocale } from '@/lib/prediction-content-locale';
@@ -20,21 +20,40 @@ const CACHE_TTL = 24 * 60 * 60 * 1000; // 24小时过期
 const PREDICTION_VERSION_CHECK_KEY = 'stockwise_prediction_version_check_v1';
 const PREDICTION_VERSION_CHECK_INTERVAL = 10 * 60 * 1000;
 
+function getTodayByMarket(market: MarketType): string {
+    const now = market === 'US' ? getUSEasternTime() : getHKTime();
+    return formatDateStr(now);
+}
+
+function isPredictionFreshForToday(stock: StockData): boolean {
+    const market = getMarketFromSymbol(stock.symbol);
+    const today = getTodayByMarket(market);
+    return stock.prediction?.date === today;
+}
+
+function getMarketsFromStocks(stocks: StockData[]): MarketType[] {
+    const markets = new Set<MarketType>();
+    for (const s of stocks) markets.add(getMarketFromSymbol(s.symbol));
+    return Array.from(markets);
+}
+
+function hasPostMarketOpenForAny(stocks: StockData[]): boolean {
+    const markets = getMarketsFromStocks(stocks);
+    return markets.some((m) => getMarketScene(m) === 'post_market' && isTradingDay(undefined, m));
+}
+
 function arePredictionsFreshForToday(stocks: StockData[]): boolean {
-    const todayStr = formatDateStr(getHKTime());
-    return stocks.length > 0 && stocks.every(s => s.prediction?.date === todayStr);
+    return stocks.length > 0 && stocks.every(isPredictionFreshForToday);
 }
 
 function shouldPollBatch(stocks: StockData[]): boolean {
-    if (getMarketScene() !== 'post_market') return false;
-    if (!isTradingDay()) return false;
+    if (!hasPostMarketOpenForAny(stocks)) return false;
     return !arePredictionsFreshForToday(stocks);
 }
 
 function shouldCheckPredictionVersions(stocks: StockData[]): boolean {
-    if (getMarketScene() !== 'post_market') return false;
-    if (!isTradingDay()) return false;
     if (stocks.length === 0) return false;
+    if (!hasPostMarketOpenForAny(stocks)) return false;
     return arePredictionsFreshForToday(stocks);
 }
 
@@ -744,8 +763,9 @@ export function useDashboardData(
         if (priceIntervalRef.current) {
             clearInterval(priceIntervalRef.current);
         }
-        const scene = getMarketScene();
-        const interval = scene === 'trading'
+        const markets = watchlist.map((w) => getMarketFromSymbol(w.symbol));
+        const isAnyMarketTrading = markets.some((m) => getMarketScene(m) === 'trading');
+        const interval = isAnyMarketTrading
             ? TRADING_PRICE_REFRESH_INTERVAL
             : DEFAULT_PRICE_REFRESH_INTERVAL;
         priceIntervalRef.current = setInterval(() => {
