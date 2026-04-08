@@ -245,7 +245,22 @@ export function useTikTokScroll(stocks: StockData[], options?: UseTikTokScrollOp
             if (index !== -1) {
                 hasAutoScrolled.current = true;
 
+                const targetSymbol = stocks[index]?.symbol;
                 setCurrentIndex(index);
+                if (targetSymbol) {
+                    // Stock-pool -> dashboard intent should always open at the "today" layer.
+                    // Prevent carrying over history-layer state from previously focused symbols.
+                    setYPositions(prev => ({ ...prev, [targetSymbol]: 0 }));
+                    setLayerStates(prev => ({ ...prev, [targetSymbol]: { type: 'today', date: null } }));
+                    setPositionRequests(prev => ({
+                        ...prev,
+                        [targetSymbol]: {
+                            nonce: ++positionNonceRef.current,
+                            type: 'today',
+                            date: null,
+                        }
+                    }));
+                }
                 clearDashboardNavIntentSymbol();
 
                 const width = container.clientWidth || window.innerWidth;
