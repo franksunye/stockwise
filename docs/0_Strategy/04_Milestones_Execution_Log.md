@@ -1,3 +1,20 @@
+---
+title: "知守 AI (ZISO AI) 里程碑与执行进度日志 (Milestones Execution Log)"
+doc_id: "strategy-milestones-execution-log"
+doc_domain: "strategy"
+doc_status: "active"
+owner: "founder"
+created_at: "2026-03-01"
+updated_at: "2026-04-08"
+last_reviewed_at: "2026-04-08"
+version: "3.9.0"
+maintenance:
+  status: "healthy"
+  priority: "high"
+  change_status: "updated"
+summary: "追踪产品的执行进度、里程碑达成情况以及近期（30天）的战术排期，是研发与产品节奏的核心同步文档。"
+---
+
 # 知守 AI (ZISO AI) 里程碑与执行进度日志 (Milestones Execution Log)
 
 > **文档版本**: v3.9（承接战略排期与执行归档）  

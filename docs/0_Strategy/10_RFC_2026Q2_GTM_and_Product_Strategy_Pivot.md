@@ -4,7 +4,14 @@ doc_id: "strategy-rfc-2026-q2-pivot"
 doc_domain: "strategy"
 doc_status: "draft/rfc"
 owner: "founder"
-last_reviewed_at: "2026-04-02"
+created_at: "2026-04-02"
+updated_at: "2026-04-08"
+last_reviewed_at: "2026-04-08"
+version: "1.0.0"
+maintenance:
+  status: "healthy"
+  priority: "high"
+  change_status: "updated"
 summary: "在双引擎已实装但 v1 尚未市场验证的背景下，讨论如何收缩 GTM 叙事并简化产品交互，建立以“逻辑解释”为核心的信任锚点。"
 ---
 

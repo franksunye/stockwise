@@ -1,3 +1,20 @@
+---
+title: "团队职责矩阵 (Team Responsibility Matrix)"
+doc_id: "strategy-team-responsibility-matrix"
+doc_domain: "strategy"
+doc_status: "active"
+owner: "founder"
+created_at: "2026-03-12"
+updated_at: "2026-04-08"
+last_reviewed_at: "2026-04-08"
+version: "1.0.0"
+maintenance:
+  status: "healthy"
+  priority: "high"
+  change_status: "updated"
+summary: "定义投研团队各成员（AI 与人类协作）的角色定位、SLA/SLO 以及 RACI 矩阵，确保研发与分析职责清晰解耦。"
+---
+
 # 团队职责矩阵（拟人化）
 
 ## 当前团队

@@ -1,3 +1,20 @@
+---
+title: "知守 AI (ZISO AI) 产品商业思考与愿景规划"
+doc_id: "strategy-product-business-vision"
+doc_domain: "strategy"
+doc_status: "active"
+owner: "founder"
+created_at: "2026-03-01"
+updated_at: "2026-04-08"
+last_reviewed_at: "2026-04-08"
+version: "1.0.0"
+maintenance:
+  status: "healthy"
+  priority: "high"
+  change_status: "updated"
+summary: "产品的顶层商业逻辑与愿景规划，定义了“择时 + 交易管理”的核心价值主张，并锚定“行为干预”作为核心护城河。"
+---
+
 # 知守 AI (ZISO AI) 产品商业思考与愿景规划
 
 > **核心信念**: 投资是一场反人性的修行。知守 AI (ZISO AI) 不仅仅是一个工具，它是投资者的"外脑"和"纪律合伙人"。

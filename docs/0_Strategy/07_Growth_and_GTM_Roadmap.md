@@ -4,8 +4,15 @@ doc_id: "strategy-growth-and-gtm-roadmap"
 doc_domain: "strategy"
 doc_status: "active"
 owner: "founder"
-last_reviewed_at: "2026-03-19"
-summary: "定义增长、变现与阶段性 GTM 路线，是 campaign 与邀请增长内容的战略事实源。"
+created_at: "2026-02-22"
+updated_at: "2026-04-08"
+last_reviewed_at: "2026-04-08"
+version: "1.0.0"
+maintenance:
+  status: "healthy"
+  priority: "high"
+  change_status: "updated"
+summary: "定义增长目标、变现路线图（3-3-3 计划）以及 GTM 阶段性动作，是市场营销与用户增长的战略事实源。"
 ---
 
 # 07 增长与变现路线图 (GTM & Growth Roadmap)

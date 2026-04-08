@@ -7,6 +7,8 @@ export interface PricingPlan {
     name: string;
     enName: string;
     price: string;
+    msrp?: string;
+    msrpCN?: string;
     period: string;
     description: string;
     features: string[];
@@ -46,7 +48,9 @@ export function getPricingPlans(locale: string): PricingPlan[] {
         {
             name: 'pricing.go.name',
             enName: 'Go',
-            price: isCN ? '29.9' : '4.99',
+            price: isCN ? '49' : '6.99',
+            msrp: '9.99',
+            msrpCN: '69',
             period: 'pricing.go.period',
             description: 'pricing.go.description',
             features: [
@@ -65,7 +69,9 @@ export function getPricingPlans(locale: string): PricingPlan[] {
         {
             name: 'pricing.plus.name',
             enName: 'Plus',
-            price: isCN ? '69.9' : '9.9',
+            price: isCN ? '89' : '12.99',
+            msrp: '19.99',
+            msrpCN: '129',
             period: 'pricing.plus.period',
             description: 'pricing.plus.description',
             features: [

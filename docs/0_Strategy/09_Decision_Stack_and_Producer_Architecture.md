@@ -4,7 +4,14 @@ doc_id: "strategy-decision-stack-and-producer-architecture"
 doc_domain: "strategy"
 doc_status: "active"
 owner: "founder"
-last_reviewed_at: "2026-03-27"
+created_at: "2026-03-27"
+updated_at: "2026-04-08"
+last_reviewed_at: "2026-04-08"
+version: "1.0.0"
+maintenance:
+  status: "healthy"
+  priority: "high"
+  change_status: "updated"
 summary: "统一量化规则、AI 判断、解释职能、实验/生产双场景与投资模式之间的分层关系，作为后续 glossary、engineering 与 support 口径的上游事实源。"
 ---
 

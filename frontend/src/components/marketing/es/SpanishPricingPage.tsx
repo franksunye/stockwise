@@ -28,9 +28,10 @@ const ES_PRICING_PLANS = [
   },
   {
     name: 'Miembro Go',
-    eyebrow: 'Más Popular',
-    price: '4.99',
-    period: 'Mensual / $49.9 Anual',
+    eyebrow: 'BLOQUEO EARLY BIRD',
+    price: '6.99',
+    msrp: '9.99',
+    period: 'Mensual / $69.9 Anual',
     description: 'Desbloquea los insights accionables de DeepSeek, 10 acciones en lista, 200 informes mensuales y alertas en tiempo real.',
     features: [
       '10 Acciones en Lista (con Informes/día)',
@@ -46,9 +47,10 @@ const ES_PRICING_PLANS = [
   },
   {
     name: 'Plus Prestige',
-    eyebrow: 'Alta Gama Próximamente',
-    price: '9.9',
-    period: 'Mensual / $99 Anual',
+    eyebrow: 'BLOQUEO EARLY BIRD',
+    price: '12.99',
+    msrp: '19.99',
+    period: 'Mensual / $129 Anual',
     description: 'Razonamiento avanzado por consenso y soporte prioritario de expertos.',
     features: [
       '10 Acciones en Lista (con Informes/día)',
@@ -97,7 +99,7 @@ export function SpanishPricingPage() {
       "@type": "AggregateOffer",
       "offerCount": "3",
       "lowPrice": "0",
-      "highPrice": "49.9",
+      "highPrice": "69.9",
       "priceCurrency": "USD"
     }
   };
@@ -157,9 +159,17 @@ export function SpanishPricingPage() {
               </div>
 
               <div className="mb-8">
-                <div className="flex items-baseline gap-1">
-                  <span className="text-sm font-bold">$</span>
-                  <span className="text-5xl font-black tracking-tighter">{plan.price}</span>
+                <div className="flex items-baseline gap-2">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-sm font-bold">$</span>
+                    <span className="text-5xl font-black tracking-tighter">{plan.price}</span>
+                  </div>
+                  {(plan as any).msrp && (
+                    <div className="flex items-baseline gap-0.5 text-slate-500/50 line-through decoration-indigo-500/30">
+                      <span className="text-[10px] font-bold">$</span>
+                      <span className="text-xl font-bold tracking-tighter">{(plan as any).msrp}</span>
+                    </div>
+                  )}
                 </div>
                 <p className="text-slate-500 text-sm mt-2">{plan.period}</p>
                 <p className="text-slate-400 text-sm mt-4 leading-relaxed italic">{plan.description}</p>

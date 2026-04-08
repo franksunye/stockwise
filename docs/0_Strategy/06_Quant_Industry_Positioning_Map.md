@@ -4,7 +4,14 @@ doc_id: "strategy-quant-industry-positioning-map"
 doc_domain: "strategy"
 doc_status: "active"
 owner: "founder"
-last_reviewed_at: "2026-03-31"
+created_at: "2026-03-12"
+updated_at: "2026-04-08"
+last_reviewed_at: "2026-04-08"
+version: "1.0.0"
+maintenance:
+  status: "healthy"
+  priority: "high"
+  change_status: "updated"
 summary: "定义 ZISO 在量化行业中的定位与边界，是多篇 Growth 101 叙事的战略事实源，并补充当前已形成的“择时 + 交易管理”双引擎定位。"
 ---
 

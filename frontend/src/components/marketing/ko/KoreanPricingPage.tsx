@@ -28,9 +28,10 @@ const KO_PRICING_PLANS = [
   },
   {
     name: 'Go Member',
-    eyebrow: '가장 인기 있는 선택',
-    price: '4.99',
-    period: '월간 / 연간 $49.9',
+    eyebrow: '얼리버드 혜택 단계',
+    price: '6.99',
+    msrp: '9.99',
+    period: '월간 / 연간 $69.9',
     description: 'DeepSeek의 깊은 통찰(actionable insights), 10종 관심종목, 월간 200회 연판 보고서 및 전 기능 실시간 알림 잠금 해제.',
     features: [
       '10종 자선주/관심종목 (연판 보고서 포함)',
@@ -46,9 +47,10 @@ const KO_PRICING_PLANS = [
   },
   {
     name: 'Plus Prestige',
-    eyebrow: '출시 예정 하이엔드',
-    price: '9.9',
-    period: '월간 / 연간 $99',
+    eyebrow: '얼리버드 혜택 단계',
+    price: '12.99',
+    msrp: '19.99',
+    period: '월간 / 연간 $129',
     description: '합의 추론과 우선 지원이 필요한 고급 사용자를 위한 플랜입니다.',
     features: [
       '10종 자선주/관심종목 (연판 보고서 포함)',
@@ -97,7 +99,7 @@ export function KoreanPricingPage() {
       "@type": "AggregateOffer",
       "offerCount": "3",
       "lowPrice": "0",
-      "highPrice": "49.9",
+      "highPrice": "69.9",
       "priceCurrency": "USD"
     }
   };
@@ -157,9 +159,17 @@ export function KoreanPricingPage() {
               </div>
 
               <div className="mb-8">
-                <div className="flex items-baseline gap-1">
-                  <span className="text-sm font-bold">$</span>
-                  <span className="text-5xl font-black tracking-tighter">{plan.price}</span>
+                <div className="flex items-baseline gap-2">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-sm font-bold">$</span>
+                    <span className="text-5xl font-black tracking-tighter">{plan.price}</span>
+                  </div>
+                  {(plan as any).msrp && (
+                    <div className="flex items-baseline gap-0.5 text-slate-500/50 line-through decoration-indigo-500/30">
+                      <span className="text-[10px] font-bold">$</span>
+                      <span className="text-xl font-bold tracking-tighter">{(plan as any).msrp}</span>
+                    </div>
+                  )}
                 </div>
                 <p className="text-slate-500 text-sm mt-2">{plan.period}</p>
                 <p className="text-slate-400 text-sm mt-4 leading-relaxed italic">{plan.description}</p>

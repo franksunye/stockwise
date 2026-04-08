@@ -30,8 +30,8 @@ export function UserPricingView({ currentTier, hasStripeCustomer, expiresAt }: P
   const isPremium = isGo || isPlus;
 
   // Strategic prices for translation placeholders
-  const monthlyPriceStr = `${currencySymbol}${isCN ? '29.9' : '4.99'}`;
-  const annualPriceStr = `${currencySymbol}${isCN ? '299' : '49.9'}`;
+  const monthlyPriceStr = `${currencySymbol}${isCN ? '49' : '6.99'}`;
+  const annualPriceStr = `${currencySymbol}${isCN ? '499' : '69.9'}`;
 
   // Formatter for expiry date
   const formatExpiry = (dateStr: string) => {

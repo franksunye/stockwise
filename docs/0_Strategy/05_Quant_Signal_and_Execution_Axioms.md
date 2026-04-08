@@ -4,7 +4,14 @@ doc_id: "strategy-quant-signal-and-execution-axioms"
 doc_domain: "strategy"
 doc_status: "active"
 owner: "founder"
-last_reviewed_at: "2026-03-27"
+created_at: "2026-03-27"
+updated_at: "2026-04-08"
+last_reviewed_at: "2026-04-08"
+version: "1.0.0"
+maintenance:
+  status: "healthy"
+  priority: "high"
+  change_status: "updated"
 summary: "定义信号验证、MFE、公理边界与投资模式职责，是大量 101 内容的核心上游事实源。"
 ---
 
