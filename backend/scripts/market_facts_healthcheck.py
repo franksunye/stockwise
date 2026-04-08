@@ -108,7 +108,7 @@ def run_healthcheck(target_date: str, market: str, strict: bool, notify_on_warni
 def main() -> int:
     parser = argparse.ArgumentParser(description="Market facts healthcheck for almanac production readiness.")
     parser.add_argument("--date", default=None, help="Target date (YYYY-MM-DD). Defaults to today in Beijing.")
-    parser.add_argument("--market", default="CN", choices=["CN", "HK", "ALL"], help="Market label for logs.")
+    parser.add_argument("--market", default="CN", choices=["CN", "HK", "US", "ALL"], help="Market label for logs.")
     parser.add_argument("--strict", action="store_true", help="Exit non-zero when gate fails or fallback is used.")
     parser.add_argument(
         "--no-notify-on-warning",
