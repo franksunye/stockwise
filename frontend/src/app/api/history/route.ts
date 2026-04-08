@@ -39,6 +39,31 @@ function closeDb(db: unknown): void {
     }
 }
 
+async function resolvePredictionContentLocaleForUser(
+    client: ReturnType<typeof getDbClient>,
+    userId: string,
+    requestedLocale: string,
+): Promise<string> {
+    const fallback = requestedLocale === 'en' ? 'en' : 'cn';
+    try {
+        if ('execute' in client) {
+            const rs = await client.execute({
+                sql: 'SELECT lower(COALESCE(locale, ?)) AS locale FROM users WHERE user_id = ? LIMIT 1',
+                args: [fallback, userId],
+            });
+            const row = (rs.rows?.[0] || null) as { locale?: string } | null;
+            return String(row?.locale || fallback).trim().toLowerCase() === 'en' ? 'en' : 'cn';
+        }
+        const row = client
+            .prepare('SELECT lower(COALESCE(locale, ?)) AS locale FROM users WHERE user_id = ? LIMIT 1')
+            .get(fallback, userId) as { locale?: string } | undefined;
+        return String(row?.locale || fallback).trim().toLowerCase() === 'en' ? 'en' : 'cn';
+    } catch (error) {
+        console.warn('[History] Failed to resolve user locale, fallback to requested locale:', error);
+        return fallback;
+    }
+}
+
 // History route exposes both compatibility fields and explicit dual-track fields.
 // Consumers that need richer decision context should prefer:
 // - canonical_signal / layer1_signal for base rule-disciplined view
@@ -72,6 +97,11 @@ export async function GET(request: Request) {
             await ensureInvestmentModeSchema(client);
             const currentMode = await getUserMode(client, userId, userTier as UserTier);
             const allowedModelIds = await getAllowedPredictionModelIdsForTier(client, userTier);
+            const effectivePredictionContentLocale = await resolvePredictionContentLocaleForUser(
+                client,
+                userId,
+                predictionContentLocale,
+            );
             if (allowedModelIds.length === 0) {
                 return NextResponse.json({ predictions: [], tier: userTier });
             }
@@ -118,7 +148,7 @@ export async function GET(request: Request) {
                 currentMode.mode_id,
                 currentMode.mode_id,
                 symbol,
-                predictionContentLocale,
+                effectivePredictionContentLocale,
                 ...allowedModelIds,
                 limit,
                 offset,

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 import { getDbClient } from '@/lib/db';
 import { parsePredictionContentLocaleParam } from '@/lib/prediction-content-locale';
+import { getTrustedUserIdFromRequest } from '@/lib/user-session';
 
 const SAFE_LLM_SIGNAL_SQL = `
     COALESCE(
@@ -12,6 +13,32 @@ const SAFE_LLM_SIGNAL_SQL = `
         p.signal
     )
 `;
+
+async function resolvePredictionContentLocaleForUser(
+    client: ReturnType<typeof getDbClient>,
+    userId: string | null,
+    requestedLocale: string,
+): Promise<string> {
+    const fallback = requestedLocale === 'en' ? 'en' : 'cn';
+    if (!userId) return fallback;
+    try {
+        if ('execute' in client) {
+            const rs = await client.execute({
+                sql: 'SELECT lower(COALESCE(locale, ?)) AS locale FROM users WHERE user_id = ? LIMIT 1',
+                args: [fallback, userId],
+            });
+            const row = (rs.rows?.[0] || null) as { locale?: string } | null;
+            return String(row?.locale || fallback).trim().toLowerCase() === 'en' ? 'en' : 'cn';
+        }
+        const row = client
+            .prepare('SELECT lower(COALESCE(locale, ?)) AS locale FROM users WHERE user_id = ? LIMIT 1')
+            .get(fallback, userId) as { locale?: string } | undefined;
+        return String(row?.locale || fallback).trim().toLowerCase() === 'en' ? 'en' : 'cn';
+    } catch (error) {
+        console.warn('[Stock] Failed to resolve user locale, fallback to requested locale:', error);
+        return fallback;
+    }
+}
 
 // Stock detail keeps the original prediction shape and adds explicit dual-track aliases:
 // - canonical_signal / layer1_signal for the stored base result
@@ -25,8 +52,14 @@ export async function GET(request: Request) {
 
     try {
         const client = getDbClient();
+        const userId = getTrustedUserIdFromRequest(request);
 
         try {
+            const effectivePredictionContentLocale = await resolvePredictionContentLocaleForUser(
+                client,
+                userId,
+                predictionContentLocale,
+            );
             if (!symbol) {
                 let rowObjects;
                 if ('execute' in client) {
@@ -80,7 +113,7 @@ export async function GET(request: Request) {
                         ORDER BY p.date DESC 
                         LIMIT 2
                     `,
-                    args: [symbol, predictionContentLocale]
+                    args: [symbol, effectivePredictionContentLocale]
                 });
                 row = rsPrice.rows[0];
                 latestPrediction = rsPred.rows[0];
@@ -105,7 +138,7 @@ export async function GET(request: Request) {
                     WHERE p.symbol = ? AND p.is_primary = 1 AND COALESCE(p.content_locale, 'cn') = ?
                     ORDER BY p.date DESC 
                     LIMIT 2
-                `).all(symbol, predictionContentLocale) as Record<string, unknown>[];
+                `).all(symbol, effectivePredictionContentLocale) as Record<string, unknown>[];
                 latestPrediction = predictions[0];
                 prevPrediction = predictions[1];
             }
