@@ -14,6 +14,7 @@ interface StockVerticalFeedProps {
   onLoadMore?: (symbol: string, offset: number) => void;
   scrollRequest?: number;
   positionRequest?: VerticalPositionRequest | null;
+  isLocaleSwitching?: boolean;
 }
 
 export const StockVerticalFeed = memo(function StockVerticalFeed({ 
@@ -23,7 +24,8 @@ export const StockVerticalFeed = memo(function StockVerticalFeed({
   onVerticalLayerChange,
   onLoadMore,
   scrollRequest,
-  positionRequest
+  positionRequest,
+  isLocaleSwitching = false,
 }: StockVerticalFeedProps) {
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const loaderRef = useRef<HTMLDivElement>(null);
@@ -135,6 +137,7 @@ export const StockVerticalFeed = memo(function StockVerticalFeed({
                 key={`today-${card.prediction?.target_date || index}`}
                 data={stock}
                 onShowTactics={handleShowTactics}
+                isLocaleSwitching={isLocaleSwitching}
               />
             );
           }

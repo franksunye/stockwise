@@ -32,6 +32,8 @@ import {
   type FullMessageKey,
   resolveLocale,
   persistLocale,
+  LOCALE_COOKIE_KEY,
+  getLocaleCookieDomain,
   getMessages,
   createTranslator,
   createGlobalTranslator,
@@ -85,9 +87,9 @@ export function LocaleProvider({ children, profileLocale }: LocaleProviderProps)
 
     // Sync to cross-subdomain cookie for landing page persistence
     if (typeof window !== 'undefined') {
-      const isProd = window.location.hostname.endsWith('.ziso.cc') || window.location.hostname === 'ziso.cc';
-      const domain = isProd ? '; domain=.ziso.cc' : '';
-      document.cookie = `ziso_locale=${newLocale}; path=/; max-age=31536000; samesite=lax${domain}`;
+      const cookieDomain = getLocaleCookieDomain(window.location.hostname);
+      const domainPart = cookieDomain ? `; domain=${cookieDomain}` : '';
+      document.cookie = `${LOCALE_COOKIE_KEY}=${newLocale}; path=/; max-age=31536000; samesite=lax${domainPart}`;
     }
   }, []);
 

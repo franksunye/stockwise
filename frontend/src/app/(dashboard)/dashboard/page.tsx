@@ -101,7 +101,7 @@ function DashboardContent() {
   const { tier } = useUserProfile();
   const showMarketAlmanac = tier === 'pro' || tier === 'alpha';
 
-  const { stocks, almanac, almanacs, loadMoreHistory } = useStocks();
+  const { stocks, almanac, almanacs, loadMoreHistory, loadingPool, isLocaleSwitching } = useStocks();
 
   // Show Market Almanac only for pro/alpha tiers.
   const displayStocks = useMemo(() => {
@@ -337,6 +337,16 @@ function DashboardContent() {
         onScroll={handleScroll}
         className={`h-full w-full flex snap-x snap-mandatory scrollbar-hide overscroll-x-contain touch-pan-x ${isHorizontalScrollLocked ? 'overflow-x-hidden' : 'overflow-x-scroll'}`}
       >
+        {loadingPool && displayStocks.length === 0 && (
+          <div className="min-w-full h-full shrink-0 flex flex-col items-center justify-center gap-4">
+            <div className="w-16 h-16 rounded-[24px] bg-white/5 border border-white/10 flex items-center justify-center">
+              <div className="w-6 h-6 border-2 border-white/20 border-t-indigo-500 rounded-full animate-spin" />
+            </div>
+            <p className="text-xs font-bold text-slate-500 tracking-widest uppercase">
+              {isLocaleSwitching ? (locale === 'en' ? 'Switching language...' : '正在切换语言...') : (locale === 'en' ? 'Loading...' : '加载中...')}
+            </p>
+          </div>
+        )}
         {displayStocks.map((stock, idx) => {
           if (stock.isAlmanac) {
             return (
@@ -357,6 +367,7 @@ function DashboardContent() {
               scrollRequest={backToTopCounter}
               positionRequest={idx === currentIndex ? positionRequest : null}
               onLoadMore={loadMoreHistory}
+              isLocaleSwitching={isLocaleSwitching}
             />
           );
         })}

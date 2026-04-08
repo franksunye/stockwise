@@ -15,6 +15,7 @@ interface StockContextType {
     stocks: StockData[];
     watchlist: WatchlistItem[];
     loadingPool: boolean;
+    isLocaleSwitching: boolean;
     loadingList: boolean;
     isRefreshing: boolean;
     lastRefreshTime: Date | null;
@@ -43,6 +44,7 @@ export function StockProvider({ children }: { children: ReactNode }) {
         almanacs,
         runRefreshEvent,
         loadingPool,
+        isLocaleSwitching,
         isRefreshing,
         lastRefreshTime,
         lastRefreshError,
@@ -75,6 +77,7 @@ export function StockProvider({ children }: { children: ReactNode }) {
     const value = useMemo(() => ({
         stocks,
         loadingPool,
+        isLocaleSwitching,
         isRefreshing,
         lastRefreshTime,
         lastRefreshError,
@@ -86,7 +89,7 @@ export function StockProvider({ children }: { children: ReactNode }) {
         removeStock,
         almanac,
         almanacs
-    }), [stocks, loadingPool, isRefreshing, lastRefreshTime, lastRefreshError, refresh, loadMoreHistory, watchlist, loadingList, addStock, removeStock, almanac, almanacs]);
+    }), [stocks, loadingPool, isLocaleSwitching, isRefreshing, lastRefreshTime, lastRefreshError, refresh, loadMoreHistory, watchlist, loadingList, addStock, removeStock, almanac, almanacs]);
 
     return (
         <StockContext.Provider value={value}>

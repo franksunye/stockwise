@@ -20,6 +20,7 @@ export type AppLocale = (typeof APP_LOCALES)[number];
 export const DEFAULT_APP_LOCALE: AppLocale = 'cn';
 
 const LOCALE_STORAGE_KEY = 'stockwise_locale';
+export const LOCALE_COOKIE_KEY = 'ziso_locale';
 
 // ─── Message Types ──────────────────────────────────────────────
 
@@ -69,6 +70,22 @@ export function isAppLocale(value: unknown): value is AppLocale {
   return typeof value === 'string' && APP_LOCALES.includes(value as AppLocale);
 }
 
+function normalizeLocaleToken(value: string | null): string | null {
+  if (!value) return null;
+  return value.trim().toLowerCase();
+}
+
+export function getLocaleCookieDomain(hostname: string): string | null {
+  const host = hostname.toLowerCase();
+  if (!host || host === 'localhost' || /^\d+\.\d+\.\d+\.\d+$/.test(host)) {
+    return null;
+  }
+  if (host === 'ziso.cc' || host.endsWith('.ziso.cc')) {
+    return '.ziso.cc';
+  }
+  return null;
+}
+
 /**
  * Resolve the user's preferred locale.
  *
@@ -91,7 +108,7 @@ export function resolveLocale(profileLocale?: string | null): AppLocale {
   }
 
   // 2. Cross-subdomain Cookie (Link between ziso.cc and app.ziso.cc)
-  const cookieLocale = getCookie('ziso_locale');
+  const cookieLocale = normalizeLocaleToken(getCookie(LOCALE_COOKIE_KEY));
   if (isAppLocale(cookieLocale)) return cookieLocale;
   
   // High-Risk Audit Fix: Enable international mode for ES/KO marketing visitors

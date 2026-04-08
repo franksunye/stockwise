@@ -20,6 +20,30 @@ const CACHE_TTL = 24 * 60 * 60 * 1000; // 24小时过期
 const PREDICTION_VERSION_CHECK_KEY = 'stockwise_prediction_version_check_v1';
 const PREDICTION_VERSION_CHECK_INTERVAL = 10 * 60 * 1000;
 
+type LocaleSwitchEventType =
+    | 'locale_switch_start'
+    | 'locale_switch_cache_hit'
+    | 'locale_switch_cache_miss'
+    | 'locale_switch_stale_drop'
+    | 'locale_switch_finish'
+    | 'locale_switch_error';
+
+function reportLocaleSwitchEvent(
+    eventType: LocaleSwitchEventType,
+    payload: Record<string, unknown> = {}
+): void {
+    try {
+        const event = {
+            eventType,
+            ts: new Date().toISOString(),
+            ...payload,
+        };
+        console.info('[DashboardLocaleSync]', event);
+    } catch {
+        // no-op
+    }
+}
+
 function getTodayByMarket(market: MarketType): string {
     const now = market === 'US' ? getUSEasternTime() : getHKTime();
     return formatDateStr(now);
@@ -114,12 +138,14 @@ export function useDashboardData(
     const [almanac, setAlmanac] = useState<MarketAlmanacData | null>(null);
     const [almanacs, setAlmanacs] = useState<MarketAlmanacData[]>([]);
     const [loadingPool, setLoadingPool] = useState(true);
+    const [isLocaleSwitching, setIsLocaleSwitching] = useState(false);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [lastRefreshTime, setLastRefreshTime] = useState<Date | null>(null);
     const [lastRefreshError, setLastRefreshError] = useState<string | null>(null);
 
     const lastFetchTimeRef = useRef<number>(0);
     const fetchGenRef = useRef<number>(0);
+    const activeLocaleRef = useRef<string>(predictionContentLocale);
     const predictionVersionCheckInFlightRef = useRef(false);
     const stocksRef = useRef<StockData[]>(stocks);
     const almanacRef = useRef<MarketAlmanacData | null>(almanac);
@@ -205,13 +231,15 @@ export function useDashboardData(
         }
     }, [shouldThrottlePredictionVersionCheck, watchlist]);
 
-    // 1. 初始化：尝试从本地缓存读取，实现【秒开】
-    useEffect(() => {
+    const hydrateFromCache = useCallback((storageKey: string, locale: string): boolean => {
         try {
-            const cached = localStorage.getItem(dashboardCacheStorageKey);
+            const cached = localStorage.getItem(storageKey);
             if (cached) {
                 const parsed = JSON.parse(cached);
                 const { data, timestamp } = parsed;
+                if (typeof parsed.contentLocale === 'string' && parsed.contentLocale !== locale) {
+                    return false;
+                }
                 const age = Date.now() - timestamp;
 
                 // 只有未过期的缓存才使用 (24小时)
@@ -228,12 +256,26 @@ export function useDashboardData(
 
                     // 【核心回归】只要股票恢复了，立即关掉骨架屏进入 App
                     setLoadingPool(false);
+                    reportLocaleSwitchEvent('locale_switch_cache_hit', {
+                        locale,
+                        stocks: data.length,
+                        cacheAgeMs: age,
+                    });
+                    return true;
                 }
             }
+            reportLocaleSwitchEvent('locale_switch_cache_miss', { locale });
         } catch (e) {
             console.error('Cache load error', e);
+            reportLocaleSwitchEvent('locale_switch_cache_miss', { locale, reason: 'cache_parse_error' });
         }
-    }, [enableAlmanac, dashboardCacheStorageKey]);
+        return false;
+    }, [enableAlmanac]);
+
+    // 1. 初始化：尝试从本地缓存读取，实现【秒开】
+    useEffect(() => {
+        void hydrateFromCache(dashboardCacheStorageKey, predictionContentLocale);
+    }, [dashboardCacheStorageKey, hydrateFromCache, predictionContentLocale]);
 
     // stock-pool 上的 name / name_en 为权威；缓存秒开或乐观 add 可能缺 name_en，随 watchlist 修正
     useEffect(() => {
@@ -348,6 +390,7 @@ export function useDashboardData(
 
         lastFetchTimeRef.current = now;
         const gen = ++fetchGenRef.current;
+        const requestLocale = predictionContentLocale;
 
         if (!silent) {
             setIsRefreshing(true);
@@ -387,7 +430,7 @@ export function useDashboardData(
 
             // Step 3: Fetch Batch Stock Data (Stage 2)
             const symbols = watchlist.map(w => w.symbol).join(',');
-            const url = buildBatchUrl(symbols, historyLimit, predictionContentLocale);
+            const url = buildBatchUrl(symbols, historyLimit, requestLocale);
 
             const fetchOptions: RequestInit = {
                 signal: controller.signal,
@@ -405,7 +448,7 @@ export function useDashboardData(
             let batchRes = await fetch(url, fetchOptions);
             if (batchRes.status === 401) {
                 await getCurrentUser({ forceSessionSync: true });
-                batchRes = await fetch(buildBatchUrl(symbols, historyLimit, predictionContentLocale), fetchOptions);
+                batchRes = await fetch(buildBatchUrl(symbols, historyLimit, requestLocale), fetchOptions);
             }
             clearTimeout(timeoutId);
 
@@ -466,7 +509,12 @@ export function useDashboardData(
 
             // Discard stale response: a newer loadAllData was triggered while
             // this one was in flight (e.g. lite→full historyLimit transition).
-            if (gen !== fetchGenRef.current) {
+            if (gen !== fetchGenRef.current || requestLocale !== activeLocaleRef.current) {
+                reportLocaleSwitchEvent('locale_switch_stale_drop', {
+                    requestLocale,
+                    activeLocale: activeLocaleRef.current,
+                    reason: 'response_guard',
+                });
                 return false;
             }
 
@@ -474,6 +522,11 @@ export function useDashboardData(
             setLoadingPool(false);
             setLastRefreshTime(new Date());
             setLastRefreshError(null);
+            reportLocaleSwitchEvent('locale_switch_finish', {
+                locale: requestLocale,
+                stocks: validResults.length,
+                fetchMs: fetchTime,
+            });
 
             // 💾 写入本地缓存 (后台静默)
             try {
@@ -481,7 +534,8 @@ export function useDashboardData(
                     data: validResults,
                     almanac: enableAlmanac ? almanacRef.current : null,
                     almanacs: enableAlmanac ? almanacsRef.current : [],
-                    timestamp: Date.now()
+                    timestamp: Date.now(),
+                    contentLocale: requestLocale
                 }));
             } catch (e) { console.error('Cache save error', e); }
 
@@ -493,7 +547,19 @@ export function useDashboardData(
             }
             return true;
         } catch (e) {
+            if (gen !== fetchGenRef.current || requestLocale !== activeLocaleRef.current) {
+                reportLocaleSwitchEvent('locale_switch_stale_drop', {
+                    requestLocale,
+                    activeLocale: activeLocaleRef.current,
+                    reason: 'error_guard',
+                });
+                return false;
+            }
             console.error('Dashboard fetch error:', e);
+            reportLocaleSwitchEvent('locale_switch_error', {
+                locale: requestLocale,
+                reason: e instanceof Error ? e.message : 'unknown',
+            });
             const sessionRecoveryAttempted =
                 e instanceof Error && e.message.includes('401');
             setLastRefreshError(formatRefreshError(e, sessionRecoveryAttempted));
@@ -513,7 +579,10 @@ export function useDashboardData(
             setLoadingPool(false);
             return false;
         } finally {
-            setIsRefreshing(false);
+            if (gen === fetchGenRef.current && requestLocale === activeLocaleRef.current) {
+                setIsRefreshing(false);
+                setIsLocaleSwitching(false);
+            }
         }
     }, [watchlist, loadingWatchlist, historyLimit, enableAlmanac, predictionContentLocale, dashboardCacheStorageKey]);
 
@@ -521,13 +590,28 @@ export function useDashboardData(
     useEffect(() => {
         if (isFirstPredictionLocaleEffectRef.current) {
             isFirstPredictionLocaleEffectRef.current = false;
+            activeLocaleRef.current = predictionContentLocale;
             return;
         }
         if (loadingWatchlist && watchlist.length === 0) return;
         if (watchlist.length === 0) return;
+        activeLocaleRef.current = predictionContentLocale;
+        fetchGenRef.current += 1;
+        reportLocaleSwitchEvent('locale_switch_start', {
+            locale: predictionContentLocale,
+            watchlistSize: watchlist.length,
+        });
         lastFetchTimeRef.current = 0;
+        setIsLocaleSwitching(true);
+        setLoadingPool(true);
+        setStocks([]);
+        if (enableAlmanac) {
+            setAlmanac(null);
+            setAlmanacs([]);
+        }
+        void hydrateFromCache(dashboardCacheStorageKey, predictionContentLocale);
         void loadAllData(false, true);
-    }, [predictionContentLocale, loadingWatchlist, watchlist.length, loadAllData]);
+    }, [predictionContentLocale, loadingWatchlist, watchlist.length, loadAllData, enableAlmanac, hydrateFromCache, dashboardCacheStorageKey]);
 
     interface PriceSnapshot {
         symbol: string;
@@ -842,6 +926,7 @@ export function useDashboardData(
         setStocks,
         runRefreshEvent,
         loadingPool,
+        isLocaleSwitching,
         isRefreshing,
         lastRefreshTime,
         lastRefreshError,

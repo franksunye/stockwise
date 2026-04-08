@@ -21,9 +21,10 @@ import { useUserProfile } from '@/hooks/useUserProfile';
 interface StockDashboardCardProps {
   data: StockData;
   onShowTactics: (prediction: AIPrediction) => void;
+  isLocaleSwitching?: boolean;
 }
 
-export const StockDashboardCard = memo(function StockDashboardCard({ data, onShowTactics }: StockDashboardCardProps) {
+export const StockDashboardCard = memo(function StockDashboardCard({ data, onShowTactics, isLocaleSwitching = false }: StockDashboardCardProps) {
   const t = useT('dashboard');
   const tBrief = useT('brief');
   const tGlobal = useGlobalT();
@@ -95,14 +96,16 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
     [displayPrediction, allowLayer1Status]
   );
 
-  if (data.loading || !data.price) return (
+  if (isLocaleSwitching || data.loading || !data.price) return (
     <div className="h-full w-full flex flex-col items-center justify-center space-y-4">
       <div className="w-20 h-20 rounded-[32px] bg-white/5 border border-white/10 flex items-center justify-center">
         <Zap className="w-8 h-8 text-indigo-500 animate-pulse fill-indigo-500/20" />
       </div>
       <div className="text-center">
         <h2 className="text-2xl font-black italic tracking-tighter text-white">{displayName}</h2>
-        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mt-1">{tCommon('loading')}</p>
+        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mt-1">
+          {isLocaleSwitching ? (locale === 'en' ? 'Switching language...' : '正在切换语言...') : tCommon('loading')}
+        </p>
       </div>
     </div>
   );
