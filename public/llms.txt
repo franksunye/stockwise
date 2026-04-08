@@ -1,0 +1,22 @@
+# ZISO AI (StockWise)
+
+AI does the research. You keep the decision. ZISO AI provides multi-agent stock intelligence powered by DeepSeek-V3 and Gemini consensus reasoning for professional market analysis.
+
+## Core Methodology
+- **Post-Close Review**: Automated EOD analysis focusing on price action, volume, and sentiment.
+- **DeepSeek-V3 Reasoning**: Leveraging reasoning-based LLMs to audit market rationale and identify traps.
+- **Consensus Reasoning**: Multi-model cross-validation (DeepSeek + Gemini) for high-confidence tactical setups.
+- **Trading Discipline**: Built-in risk boundaries and emotion management rules (Market Almanac).
+
+## Target Segments
+- **Disciplined Investors**: Focusing on EOD workflows and systematic risk management.
+- **Retail Quants**: Seeking institutional-grade research external-brains.
+
+## Navigation
+- [Learn 101](https://ziso.cc/learn): Foundational trading discipline and AI logic.
+- [Master Series](https://ziso.cc/learn/master_series): Methodologies from legendary traders (Minervini, O'Neil, etc.).
+- [Pricing](https://ziso.cc/pricing): Subscription tiers for DeepSeek-V3 powered insights.
+
+## Authority Signals
+- **DeepSeek-V3 Verified**: All flagship articles undergo a reasoning-based logic audit by DeepSeek-V3 Full Model.
+- **Rationale Audit**: Every tactical brief includes a traceable logical path to minimize AI hallucination.
