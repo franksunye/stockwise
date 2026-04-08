@@ -326,7 +326,7 @@ def process_stock_period(symbol: str, period: str = "daily", is_realtime: bool =
             from notification_templates import NotificationTemplates
         except ImportError:
             # Fallback if templates are missing
-            notify_title = f"{stock_name} ({symbol}) {emoji} {change:+.2f}%"
+            notify_title = f"{stock_name} {emoji} {change:+.2f}%"
             notify_body = f"最新: {price} | 成交: {format_volume(last_row['volume'])}"
         else:
             # Route through NotificationManager for preference-checked delivery.

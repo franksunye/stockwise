@@ -110,21 +110,21 @@ class NotificationTemplates:
         "signal_flip": {
             "free": {
                 "zh": {
-                    "title": "🚨 信号反转：{symbol}",
+                    "title": "🚨 信号反转：{stock_name}",
                     "body": "观点从 [{old_signal}] 变为 [{new_signal}]，置信度 {confidence_pct}%。点开看原因。"
                 },
                 "en": {
-                    "title": "🚨 Signal Flip: {symbol}",
+                    "title": "🚨 Signal Flip: {stock_name}",
                     "body": "Signal changed from [{old_signal}] to [{new_signal}] ({confidence_pct}% conf). Tap for details."
                 }
             },
             "paid": {
                 "zh": {
-                    "title": "🎯 Pro 反转提醒：{symbol}",
+                    "title": "🎯 Pro 反转提醒：{stock_name}",
                     "body": "核心方向已切换到 [{new_signal}]。已生成仓位动作与风险阈值。"
                 },
                 "en": {
-                    "title": "🎯 Pro Signal Flip: {symbol}",
+                    "title": "🎯 Pro Signal Flip: {stock_name}",
                     "body": "Direction flipped to [{new_signal}]. Sizing & risk levels updated."
                 }
             }
@@ -133,21 +133,21 @@ class NotificationTemplates:
             "free": {
                 "zh": {
                     "title": "🎯 {count} 只关注股信号更新",
-                    "body": "{symbols} 等股票出现新的交易信号，点击查看详情。"
+                    "body": "{stock_names} 等股票出现新的交易信号，点击查看详情。"
                 },
                 "en": {
                     "title": "🎯 {count} Signal Updates in Watchlist",
-                    "body": "New signals for {symbols}. Check details now."
+                    "body": "New signals for {stock_names}. Check details now."
                 }
             },
             "paid": {
                 "zh": {
                     "title": "🚨 Pro 自选池信号集中反转: {count} 只",
-                    "body": "观测到 {symbols} 等标的结构性转向。建议立即核对 Pro 盘中计划。"
+                    "body": "观测到 {stock_names} 等标的结构性转向。建议立即核对 Pro 盘中计划。"
                 },
                 "en": {
                     "title": "🚨 Pro Batch Signal Flip: {count} Symbols",
-                    "body": "Structural reversal detected in {symbols}. Please review Pro intraday plans."
+                    "body": "Structural reversal detected in {stock_names}. Please review Pro intraday plans."
                 }
             }
         },
@@ -260,11 +260,11 @@ class NotificationTemplates:
         "price_update": {
             "all": {
                 "zh": {
-                    "title": "{stock_name} ({symbol}) {emoji} {change_pct}%",
+                    "title": "{stock_name} {emoji} {change_pct}%",
                     "body": "最新: {price} | 成交: {volume_formatted}"
                 },
                 "en": {
-                    "title": "{stock_name} ({symbol}) {emoji} {change_pct}%",
+                    "title": "{stock_name} {emoji} {change_pct}%",
                     "body": "Last: {price} | Vol: {volume_formatted}"
                 }
             }

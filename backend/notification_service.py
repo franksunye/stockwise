@@ -272,6 +272,37 @@ class NotificationManager:
             if not self.conn:
                 conn.close()
 
+    def _resolve_stock_display_names(self, symbols: List[str], lang: str = "zh") -> List[str]:
+        """
+        Resolve stock display names from stock_meta for push copy.
+        Falls back to symbol when name is unavailable.
+        """
+        if not symbols:
+            return []
+
+        unique_symbols = list(dict.fromkeys(symbols))
+        conn = self._get_conn()
+        name_map: Dict[str, str] = {}
+        try:
+            cursor = conn.cursor()
+            placeholders = ",".join(["?"] * len(unique_symbols))
+            cursor.execute(
+                f"SELECT symbol, name, name_en FROM stock_meta WHERE symbol IN ({placeholders})",
+                tuple(unique_symbols),
+            )
+            for row in cursor.fetchall():
+                symbol, name_zh, name_en = row
+                chosen_name = name_en if lang == "en" and name_en else name_zh
+                if chosen_name and str(chosen_name).strip():
+                    name_map[str(symbol)] = str(chosen_name).strip()
+        except Exception as e:
+            logger.debug(f"⚠️ Failed to resolve stock names for symbols {unique_symbols}: {e}")
+        finally:
+            if not self.conn:
+                conn.close()
+
+        return [name_map.get(sym, sym) for sym in unique_symbols]
+
     def _aggregate_notifications(self, user_id: str, events: List[dict], user_profile: Optional[dict] = None) -> Optional[dict]:
         """
         Logic to merge multiple notifications into a single, clean push message.
@@ -310,11 +341,12 @@ class NotificationManager:
         if flips:
             if len(flips) == 1:
                 e = flips[0]
+                stock_name = self._resolve_stock_display_names([e["symbol"]], lang=lang)[0]
                 title, body = NotificationTemplates.render(
                     "signal_flip", 
                     tier=tier, 
                     lang=lang,
-                    symbol=e["symbol"], 
+                    stock_name=stock_name,
                     old_signal=e["old_signal"], 
                     new_signal=e["new_signal"],
                     confidence_pct=int(e["confidence"]*100)
@@ -322,12 +354,13 @@ class NotificationManager:
                 url = f"/dashboard?symbol={e['symbol']}&utm_source=push&utm_medium=smart_notify"
             else:
                 symbols = [e["symbol"] for e in flips]
+                stock_names = self._resolve_stock_display_names(symbols, lang=lang)
                 title, body = NotificationTemplates.render(
                     "signal_flip_batch", 
                     tier=tier, 
                     lang=lang,
                     count=len(flips),
-                    symbols=", ".join(symbols)
+                    stock_names=", ".join(stock_names)
                 )
                 url = f"/dashboard?utm_source=push&utm_medium=smart_notify_batch"
                 

@@ -12,6 +12,7 @@ from unittest.mock import MagicMock, patch
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from notification_service import NotificationManager
+from notification_templates import NotificationTemplates
 
 
 class TestNotificationService(unittest.TestCase):
@@ -68,7 +69,11 @@ class TestNotificationService(unittest.TestCase):
             {"type": "signal_flip", "symbol": "AAPL", "old_signal": "Side", "new_signal": "Long", "confidence": 0.9}
         ]
         
-        payload = self.manager._aggregate_notifications(user_id, events)
+        payload = self.manager._aggregate_notifications(
+            user_id,
+            events,
+            user_profile={"tier": "free", "locale": "zh"},
+        )
         
         self.assertIn("AAPL", payload["title"])
         self.assertIn("[Side]", payload["body"])
@@ -83,11 +88,49 @@ class TestNotificationService(unittest.TestCase):
             {"type": "signal_flip", "symbol": "TSLA", "old_signal": "Long", "new_signal": "Short", "confidence": 0.8}
         ]
         
-        payload = self.manager._aggregate_notifications(user_id, events)
+        payload = self.manager._aggregate_notifications(
+            user_id,
+            events,
+            user_profile={"tier": "free", "locale": "zh"},
+        )
         
         self.assertIn("2 只", payload["title"])
         self.assertIn("AAPL, TSLA", payload["body"])
         self.assertEqual(set(payload["related_symbols"]), {"AAPL", "TSLA"})
+
+    def test_aggregation_multiple_flips_prefers_stock_names_in_body(self):
+        """Batch signal-flip body should use stock names, not raw codes."""
+        user_id = "user1"
+        events = [
+            {"type": "signal_flip", "symbol": "600519", "old_signal": "Neutral", "new_signal": "Bullish", "confidence": 0.9},
+            {"type": "signal_flip", "symbol": "300750", "old_signal": "Neutral", "new_signal": "Bullish", "confidence": 0.8}
+        ]
+
+        with patch.object(self.manager, '_resolve_stock_display_names', return_value=["贵州茅台", "宁德时代"]):
+            payload = self.manager._aggregate_notifications(
+                user_id,
+                events,
+                user_profile={"tier": "free", "locale": "zh"},
+            )
+
+        self.assertIn("贵州茅台, 宁德时代", payload["body"])
+
+    def test_price_update_template_title_prefers_name_without_symbol_code(self):
+        """Price update title should prioritize stock name readability."""
+        title, body = NotificationTemplates.render(
+            "price_update",
+            tier="free",
+            lang="zh",
+            stock_name="腾讯控股",
+            symbol="0700.HK",
+            emoji="📈",
+            change_pct="+1.23",
+            price=512.3,
+            volume_formatted="1.2M",
+        )
+        self.assertEqual(title, "腾讯控股 📈 +1.23%")
+        self.assertNotIn("0700.HK", title)
+        self.assertIn("最新:", body)
 
     def test_aggregation_daily_brief_variant(self):
         """Daily brief variants should be aggregated and rendered."""
