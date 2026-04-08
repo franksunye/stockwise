@@ -2,6 +2,7 @@ import os
 import sys
 import io
 import json
+import threading
 from pathlib import Path
 from abc import ABC, abstractmethod
 from typing import List, Optional
@@ -25,22 +26,17 @@ from database import get_connection
 from backend.db_repo.queries import build_upsert_stock_meta_sql, UPDATE_STOCK_PROFILE_QUERY
 from backend.logger import logger
 
+# Newer yfinance talks to Yahoo via curl_cffi and rejects requests.Session;
+# it must use the library default session. That path still uses a shared
+# on-disk cache, so concurrent workers need serialization to avoid
+# sqlite "database is locked" on the HTTP cache DB.
+_YF_US_LOCK = threading.Lock()
 
-def _yf_ticker_no_shared_cache(symbol: str):
-    """
-    yfinance attaches a SQLite-backed HTTP cache by default. Concurrent
-    ThreadPoolExecutor workers share that file and often hit
-    sqlite3.OperationalError: database is locked. A plain requests.Session
-    disables that cache path for this ticker instance.
-    """
+
+def _yf_ticker(symbol: str):
     import yfinance as yf
 
-    sym = str(symbol).strip().upper()
-    try:
-        return yf.Ticker(sym, session=requests.Session())
-    except TypeError:
-        # Older yfinance without session= on Ticker
-        return yf.Ticker(sym)
+    return yf.Ticker(str(symbol).strip().upper())
 
 
 class BaseFetcher(ABC):
@@ -204,9 +200,10 @@ class AkShareFetcher(BaseFetcher):
             try:
                 ticker = str(symbol).strip().upper()
                 s_dt = datetime.strptime(start_date, "%Y%m%d").strftime("%Y-%m-%d")
-                hist = _yf_ticker_no_shared_cache(ticker).history(
-                    start=s_dt, interval="1d", auto_adjust=False
-                )
+                with _YF_US_LOCK:
+                    hist = _yf_ticker(ticker).history(
+                        start=s_dt, interval="1d", auto_adjust=False
+                    )
                 if hist is None or hist.empty:
                     return pd.DataFrame()
                 hist = hist.reset_index()
@@ -271,7 +268,8 @@ class SinaSpotFetcher(BaseFetcher):
             # Yahoo fallback for US realtime snapshot
             try:
                 ticker = str(symbol).strip().upper()
-                info = _yf_ticker_no_shared_cache(ticker).fast_info
+                with _YF_US_LOCK:
+                    info = _yf_ticker(ticker).fast_info
                 last_price = float(info.get("lastPrice") or 0)
                 prev_close = float(info.get("previousClose") or 0)
                 if last_price <= 0:
@@ -818,7 +816,8 @@ def sync_profiles(limit=20):
                         print(f"     ⚠️ 港股接口异常: {e_hk}")
                 elif market == "US":
                     try:
-                        info = _yf_ticker_no_shared_cache(symbol).info or {}
+                        with _YF_US_LOCK:
+                            info = _yf_ticker(symbol).info or {}
                         industry = str(info.get("industry") or "")
                         main_bus = str(info.get("longBusinessSummary") or "")
                         desc = str(info.get("longName") or "")
