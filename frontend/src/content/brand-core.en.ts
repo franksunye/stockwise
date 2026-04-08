@@ -10,14 +10,14 @@ export const brandCoreEn: BrandCore = {
     version: "v2026.04.08",
     effectiveFrom: "2026-04-08",
     owner: "growth+product",
-    text: "AI does the research. You keep the decision. ZISO AI provides advanced stock intelligence powered by DeepSeek-V3 Full Model for traceable, logic-driven analysis.",
+    text: "AI does the research. You keep the decision. ZISO AI provides multi-agent stock intelligence powered by DeepSeek-V3 and Gemini consensus reasoning for professional market analysis.",
   },
   valueProposition: {
     id: "value_prop_core_en",
     version: "v2026.04.08",
     effectiveFrom: "2026-04-08",
     owner: "growth+product",
-    text: "Leverage DeepSeek-V3 to standardize post-close review, tactical interpretation, and risk management, helping disciplined investors minimize emotional biases.",
+    text: "Deploy a personal research council using DeepSeek-V3 to standardize rationale audits, tactical briefs, and disciplined risk management across US, HK, and CN markets.",
   },
   coreFeatures: [
     {

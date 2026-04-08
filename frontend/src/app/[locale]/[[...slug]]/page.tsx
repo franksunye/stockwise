@@ -352,8 +352,8 @@ function getPageConfig(locale: PublicLocale, slugParts: string[]): PageConfig | 
   if (path === 'about') {
     const meta = locale === 'en' ? null : buildLocalizedMeta(locale, 'about');
     return {
-      title: meta?.title || 'About ZISO AI | DeepSeek-V3 Research Framework',
-      description: meta?.desc || 'Discover how ZISO AI leverages DeepSeek-V3 to frame professional stock research and disciplined trading workflows.',
+      title: meta?.title || 'About ZISO AI | Institutional-Grade Research Framework',
+      description: meta?.desc || 'Discover how ZISO AI leverages DeepSeek-V3 and multi-agent consensus to provide institutional-grade transparency, logic-driven research, and disciplined trading workflows.',
       path: '/about',
       render: () => <EnglishAboutPage />,
       alternateLocales: ['en', 'cn', 'ko', 'es'],
@@ -363,8 +363,8 @@ function getPageConfig(locale: PublicLocale, slugParts: string[]): PageConfig | 
   if (path === 'pricing') {
     const meta = locale === 'en' ? null : buildLocalizedMeta(locale, 'pricing');
     return {
-      title: meta?.title || 'Pricing | ZISO AI Subscription Plans',
-      description: meta?.desc || 'Appoint your personal research council powered by DeepSeek-V3. Subscription plans for disciplined investors seeking professional nightly research.',
+      title: meta?.title || 'Pricing | ZISO AI Multi-Agent Research Desk',
+      description: meta?.desc || 'Deploy your personal research council powered by DeepSeek-V3 and Gemini. Professional plans featuring consensus reasoning, rationale audits, and nightly tactical briefs for disciplined investors.',
       path: '/pricing',
       render: () => <EnglishPricingPage />,
       alternateLocales: ['en', 'cn', 'ko', 'es'],
