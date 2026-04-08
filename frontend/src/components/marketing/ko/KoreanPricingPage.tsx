@@ -41,7 +41,7 @@ const KO_PRICING_PLANS = [
       'Go 전용 아이덴티티 배지',
     ],
     cta: 'Go 구독하기',
-    href: `https://app.ziso.cc/pricing?priceId=${STRIPE_PRICE_IDS.GO_MONTHLY}`,
+    href: `https://app.ziso.cc/pricing?priceId=${STRIPE_PRICE_IDS.USD_GO_MONTHLY}`,
     highlight: true,
     accent: 'text-indigo-300',
   },

@@ -41,7 +41,7 @@ const ES_PRICING_PLANS = [
       'Insignia de identidad Go',
     ],
     cta: 'Suscríbete a Go',
-    href: `https://app.ziso.cc/pricing?priceId=${STRIPE_PRICE_IDS.GO_MONTHLY}`,
+    href: `https://app.ziso.cc/pricing?priceId=${STRIPE_PRICE_IDS.USD_GO_MONTHLY}`,
     highlight: true,
     accent: 'text-indigo-300',
   },

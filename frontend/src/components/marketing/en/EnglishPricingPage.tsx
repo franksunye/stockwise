@@ -41,7 +41,7 @@ const EN_PRICING_PLANS = [
       'Go Identity Badge',
     ],
     cta: 'Subscribe Go',
-    href: `https://app.ziso.cc/pricing?priceId=${STRIPE_PRICE_IDS.GO_MONTHLY}`,
+    href: `https://app.ziso.cc/pricing?priceId=${STRIPE_PRICE_IDS.USD_GO_MONTHLY}`,
     highlight: true,
     accent: 'text-indigo-300',
   },
