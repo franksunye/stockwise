@@ -5,7 +5,7 @@ import { Plus, Trash2, ArrowLeft, TrendingUp, TrendingDown, Minus, LayoutGrid } 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getMarketScene } from '@/lib/date-utils';
+import { getMarketFromSymbol, getMarketScene } from '@/lib/date-utils';
 
 import { useStocks } from '@/context/StockContext';
 import { useUserProfile } from '@/hooks/useUserProfile';
@@ -20,6 +20,7 @@ interface StockSnapshot {
   symbol: string;
   name: string;
   name_en?: string | null;
+  market: 'CN' | 'HK' | 'US';
   price: number;
   change: number;
   aiSignal: 'Long' | 'Short' | 'Side';
@@ -30,7 +31,7 @@ interface StockSnapshot {
 const StockItem = memo(({ 
   stock, 
   navigatingTo, 
-  isPreMarket, 
+  isPreMarket,
   onRemove,
   setNavigatingTo,
   tier,
@@ -149,6 +150,7 @@ export default function StockPoolPage() {
     symbol: s.symbol,
     name: s.name,
     name_en: s.name_en,
+    market: getMarketFromSymbol(s.symbol),
     price: s.price?.close || 0,
     change: s.price?.change_percent || 0,
     aiSignal: s.prediction?.signal || 'Side' as const,
@@ -169,9 +171,6 @@ export default function StockPoolPage() {
   const searchAbortRef = useRef<AbortController | null>(null);
 
   const [limitMsg, setLimitMsg] = useState<string | null>(null);
-
-  const scene = getMarketScene();
-  const isPreMarket = scene === 'pre_market';
 
   const { tier } = useUserProfile();
   const router = useRouter();
@@ -389,7 +388,7 @@ export default function StockPoolPage() {
                 key={stock.symbol}
                 stock={stock}
                 navigatingTo={navigatingTo}
-                isPreMarket={isPreMarket}
+                isPreMarket={getMarketScene(stock.market) === 'pre_market'}
                 onRemove={handleRemoveClick}
                 setNavigatingTo={setNavigatingTo}
                 tier={tier}

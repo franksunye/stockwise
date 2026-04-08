@@ -1,6 +1,6 @@
 
 export type MarketScene = 'pre_market' | 'trading' | 'post_market';
-export type MarketType = 'HK' | 'CN';
+export type MarketType = 'HK' | 'CN' | 'US';
 
 export interface I18nLabel {
     key: string;
@@ -107,6 +107,36 @@ const CN_HOLIDAYS_2026: string[] = [
 
 let CN_HOLIDAYS = new Set([...CN_HOLIDAYS_2025, ...CN_HOLIDAYS_2026]);
 
+// ============ 美股 (US) 交易日历 ============
+// NYSE/Nasdaq full close days
+const US_HOLIDAYS_2025: string[] = [
+    '2025-01-01',
+    '2025-01-20',
+    '2025-02-17',
+    '2025-04-18',
+    '2025-05-26',
+    '2025-06-19',
+    '2025-07-04',
+    '2025-09-01',
+    '2025-11-27',
+    '2025-12-25',
+];
+
+const US_HOLIDAYS_2026: string[] = [
+    '2026-01-01',
+    '2026-01-19',
+    '2026-02-16',
+    '2026-04-03',
+    '2026-05-25',
+    '2026-06-19',
+    '2026-07-03',
+    '2026-09-07',
+    '2026-11-26',
+    '2026-12-25',
+];
+
+const US_HOLIDAYS = new Set([...US_HOLIDAYS_2025, ...US_HOLIDAYS_2026]);
+
 /**
  * Update holiday lists from remote source (Database/API)
  * Call this on app initialization to sync valid holidays.
@@ -121,17 +151,20 @@ export function updateHolidays(holidays: { HK: string[], CN: string[] }) {
  */
 export function getMarketFromSymbol(symbol?: string): MarketType {
     if (!symbol) return 'HK';
-    // 港股通常是5位
-    if (symbol.length === 5) return 'HK';
-    // A股通常是6位
-    return 'CN';
+    const sym = String(symbol).trim();
+    if (sym.startsWith('sh') || sym.startsWith('sz') || sym.startsWith('bj')) return 'CN';
+    if (sym.length === 5 && /^\d+$/.test(sym)) return 'HK';
+    if (sym.length === 6 && /^\d+$/.test(sym)) return 'CN';
+    return 'US';
 }
 
 /**
  * 获取指定市场的假期列表
  */
 function getHolidays(market: MarketType): Set<string> {
-    return market === 'HK' ? HK_HOLIDAYS : CN_HOLIDAYS;
+    if (market === 'HK') return HK_HOLIDAYS;
+    if (market === 'US') return US_HOLIDAYS;
+    return CN_HOLIDAYS;
 }
 
 /**
@@ -141,6 +174,14 @@ export function getHKTime(date?: Date): Date {
     const d = date || new Date();
     const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
     return new Date(utc + (3600000 * 8));
+}
+
+/**
+ * 获取美东时间（用于 US 市场会话判定）
+ */
+export function getUSEasternTime(date?: Date): Date {
+    const d = date || new Date();
+    return new Date(d.toLocaleString('en-US', { timeZone: 'America/New_York' }));
 }
 
 /**
@@ -172,8 +213,8 @@ export function isMarketClosed(date: Date, market: MarketType = 'HK'): boolean {
  * @param market 市场类型，默认 HK
  */
 export function isTradingDay(date?: Date, market: MarketType = 'HK'): boolean {
-    const hkDate = getHKTime(date);
-    return !isMarketClosed(hkDate, market);
+    const localDate = market === 'US' ? getUSEasternTime(date) : getHKTime(date);
+    return !isMarketClosed(localDate, market);
 }
 
 /**
@@ -183,8 +224,8 @@ export function isTradingDay(date?: Date, market: MarketType = 'HK'): boolean {
  * @returns 下一个交易日的 Date 对象
  */
 export function getNextTradingDay(from?: Date, market: MarketType = 'HK'): Date {
-    const hkNow = getHKTime(from);
-    const next = new Date(hkNow);
+    const localNow = market === 'US' ? getUSEasternTime(from) : getHKTime(from);
+    const next = new Date(localNow);
     next.setDate(next.getDate() + 1);
 
     // 循环跳过所有休市日
@@ -214,7 +255,7 @@ function getDaysDiff(from: Date, to: Date): number {
  * - 间隔 > 7 天 → "下一交易日 (M/D) 建议"
  */
 export function getPredictionTitle(scene: MarketScene, market: MarketType = 'HK'): I18nLabel {
-    const hkNow = getHKTime();
+    const localNow = market === 'US' ? getUSEasternTime() : getHKTime();
 
     // 交易中或开市前：显示"今日建议"
     if (scene !== 'post_market') {
@@ -223,7 +264,7 @@ export function getPredictionTitle(scene: MarketScene, market: MarketType = 'HK'
 
     // 收市后：计算下一交易日（根据市场类型）
     const nextDay = getNextTradingDay(undefined, market);
-    const daysDiff = getDaysDiff(hkNow, nextDay);
+    const daysDiff = getDaysDiff(localNow, nextDay);
     const nextMonth = nextDay.getMonth() + 1;
     const nextDate = nextDay.getDate();
     const nextDayOfWeek = nextDay.getDay();
@@ -254,8 +295,8 @@ export function getPredictionTitle(scene: MarketScene, market: MarketType = 'HK'
  * @returns 上一个交易日的 Date 对象
  */
 export function getLastTradingDay(from?: Date, market: MarketType = 'HK'): Date {
-    const hkNow = getHKTime(from);
-    const prev = new Date(hkNow);
+    const localNow = market === 'US' ? getUSEasternTime(from) : getHKTime(from);
+    const prev = new Date(localNow);
     prev.setDate(prev.getDate() - 1);
 
     // 循环跳过所有休市日
@@ -274,8 +315,8 @@ export function getLastTradingDay(from?: Date, market: MarketType = 'HK'): Date 
  * - 其他情况 → "M/D"（如 "12/24"）
  */
 export function getLastTradingDayLabel(market: MarketType = 'HK'): I18nLabel {
-    const hkNow = getHKTime();
-    const todayIsTradingDay = !isMarketClosed(hkNow, market);
+    const localNow = market === 'US' ? getUSEasternTime() : getHKTime();
+    const todayIsTradingDay = !isMarketClosed(localNow, market);
 
     // 如果今天是交易日，显示"今日"
     if (todayIsTradingDay) {
@@ -284,7 +325,7 @@ export function getLastTradingDayLabel(market: MarketType = 'HK'): I18nLabel {
 
     // 计算上一交易日
     const lastDay = getLastTradingDay(undefined, market);
-    const daysDiff = getDaysDiff(lastDay, hkNow);
+    const daysDiff = getDaysDiff(lastDay, localNow);
     const lastDayOfWeek = lastDay.getDay();
 
     // 昨天
@@ -340,8 +381,8 @@ export function formatDataDateLabel(dataDateStr: string, market: MarketType = 'H
     const [year, month, day] = normalized.split('-').map(Number);
     const dataDate = new Date(year, month - 1, day);
 
-    const hkNow = getHKTime();
-    const today = new Date(hkNow.getFullYear(), hkNow.getMonth(), hkNow.getDate());
+    const localNow = market === 'US' ? getUSEasternTime() : getHKTime();
+    const today = new Date(localNow.getFullYear(), localNow.getMonth(), localNow.getDate());
     const daysDiff = getDaysDiff(dataDate, today);
 
     // 今天
@@ -408,22 +449,20 @@ export function getValidationLabelFromData(dataDateStr?: string, market: MarketT
  * 2. 非交易日统一判定为 post_market (展示既定事实)
  */
 export function getMarketScene(market: MarketType = 'HK'): MarketScene {
-    const now = new Date();
-    // 转换为 UTC+8 (香港时间/北京时间)
-    const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-    const hkTime = new Date(utc + (3600000 * 8));
+    const now = market === 'US' ? getUSEasternTime() : getHKTime();
 
     // 如果今天不是交易日，无论几点，都视为上一周期的 post_market 状态
-    if (isMarketClosed(hkTime, market)) {
+    if (isMarketClosed(now, market)) {
         return 'post_market';
     }
 
-    const hours = hkTime.getHours();
-    const minutes = hkTime.getMinutes();
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
     const totalMinutes = hours * 60 + minutes;
 
     // 不同市场的收盘判定
-    const closeThreshold = market === 'CN' ? 900 : 960; // 15:00 vs 16:00
+    // CN: 15:00, HK: 16:00, US(ET): 16:00
+    const closeThreshold = market === 'CN' ? 900 : 960;
 
     // 交易日收市后
     if (totalMinutes >= closeThreshold) return 'post_market';
@@ -466,27 +505,27 @@ export function formatStockSymbol(symbol: string): string {
  * @returns YYYY-MM-DD 格式的日期字符串
  */
 export function getExpectedLatestDataDate(market: MarketType = 'HK'): string {
-    const hkNow = getHKTime();
+    const localNow = market === 'US' ? getUSEasternTime() : getHKTime();
 
     // 非交易日 → 预期为上一交易日
-    if (isMarketClosed(hkNow, market)) {
-        const lastTradingDay = getLastTradingDay(hkNow, market);
+    if (isMarketClosed(localNow, market)) {
+        const lastTradingDay = getLastTradingDay(localNow, market);
         return formatDateStr(lastTradingDay);
     }
 
     // 交易日：根据当前时间判断
-    const totalMinutes = hkNow.getHours() * 60 + hkNow.getMinutes();
+    const totalMinutes = localNow.getHours() * 60 + localNow.getMinutes();
 
-    // 收盘阈值：A股 15:00 (900分), 港股 16:00 (960分)
+    // 收盘阈值：A股 15:00 (900分), 港股/美股常规收盘 16:00 (960分)
     const closeThreshold = market === 'CN' ? 900 : 960;
 
     // 收盘后 → 期待今日完整日线
     if (totalMinutes >= closeThreshold) {
-        return formatDateStr(hkNow);
+        return formatDateStr(localNow);
     }
 
     // 开盘前或盘中 → 期待上一交易日的完整日线
     // 注意：盘中实时价格由实时行情 API 单独处理，与日线数据补全是两套机制
-    const lastTradingDay = getLastTradingDay(hkNow, market);
+    const lastTradingDay = getLastTradingDay(localNow, market);
     return formatDateStr(lastTradingDay);
 }
