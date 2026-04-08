@@ -7,6 +7,13 @@ description: Online Systems Operations (SRE). Covers production task auditing, C
 
 This skill provides the definitive guide for maintaining the **StockWise Production Ecosystem**. It focuses on observability, reliability, and precision scheduling of the global market data pipelines.
 
+## 核心原则 (Core Principles)
+*   **Turso CLI First**: 对于线上/生产数据库的所有查询与修改，**必须优先使用** `node frontend/scripts/turso-cli.mjs`。
+    *   *理由*：无需编写样板代码、自动加载生产凭据、执行极速且结果易于审计。
+*   **Observability First**: 任何线上手动操作（如数据 Patching 或 Purging）前必须先执行 `COUNT` 验证受影响行数。
+
+---
+
 ## 1. Production Pipeline Auditing (Daily Check)
 
 Every day, the system health must be audited to ensure that CN, HK, and US market tasks executed within their canonical windows.
