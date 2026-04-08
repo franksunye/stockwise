@@ -218,6 +218,9 @@ for _cat, _rows in _DEFAULT_TACTIC_TEMPLATES["cn"].items():
         for _k in ("action", "trigger", "reason"):
             _CN_TACTIC_BOILERPLATE_TO_EN[_cn_row[_k]] = _en_row[_k]
 
+# When content_locale=cn, remap exact EN boilerplate (defaults or model echo) to CN.
+_EN_TACTIC_BOILERPLATE_TO_CN: Dict[str, str] = {v: k for k, v in _CN_TACTIC_BOILERPLATE_TO_EN.items()}
+
 
 def _default_tactic(category: str, idx: int, content_locale: str = "cn") -> Dict[str, Any]:
     loc = _normalize_content_locale(content_locale)
@@ -244,6 +247,26 @@ def _apply_en_tactic_boilerplate_remap(tactics: Dict[str, Any]) -> None:
                 if not isinstance(val, str):
                     continue
                 mapped = _CN_TACTIC_BOILERPLATE_TO_EN.get(val.strip())
+                if mapped:
+                    item[key] = mapped
+
+
+def _apply_cn_tactic_boilerplate_remap(tactics: Dict[str, Any]) -> None:
+    """Replace known English default strings with Chinese when output is CN locale."""
+    if not isinstance(tactics, dict):
+        return
+    for category in _TACTIC_BUCKETS:
+        items = tactics.get(category)
+        if not isinstance(items, list):
+            continue
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+            for key in ("action", "trigger", "reason"):
+                val = item.get(key)
+                if not isinstance(val, str):
+                    continue
+                mapped = _EN_TACTIC_BOILERPLATE_TO_CN.get(val.strip())
                 if mapped:
                     item[key] = mapped
 
@@ -499,6 +522,8 @@ def normalize_ai_response(data: Dict[str, Any], *, content_locale: str = "cn") -
                 item["target_price"] = _semantic_normalize_price(item["target_price"], is_range=False)
     if is_en:
         _apply_en_tactic_boilerplate_remap(data["tactics"])
+    else:
+        _apply_cn_tactic_boilerplate_remap(data["tactics"])
     _record_quality_metrics(raw_tactics_snapshot, data["tactics"], content_locale=content_locale)
 
     # Remove legacy buckets from normalized output.

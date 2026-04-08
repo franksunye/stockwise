@@ -100,6 +100,31 @@ function applyNoStoreHeaders(response: NextResponse): NextResponse {
     return response;
 }
 
+async function resolvePredictionContentLocaleForUser(
+    client: ReturnType<typeof getDbClient>,
+    userId: string,
+    requestedLocale: string,
+): Promise<string> {
+    const fallback = requestedLocale === 'en' ? 'en' : 'cn';
+    try {
+        if ('execute' in client) {
+            const rs = await client.execute({
+                sql: 'SELECT lower(COALESCE(locale, ?)) AS locale FROM users WHERE user_id = ? LIMIT 1',
+                args: [fallback, userId],
+            });
+            const row = (rs.rows?.[0] || null) as { locale?: string } | null;
+            return String(row?.locale || fallback).trim().toLowerCase() === 'en' ? 'en' : 'cn';
+        }
+        const row = client
+            .prepare('SELECT lower(COALESCE(locale, ?)) AS locale FROM users WHERE user_id = ? LIMIT 1')
+            .get(fallback, userId) as { locale?: string } | undefined;
+        return String(row?.locale || fallback).trim().toLowerCase() === 'en' ? 'en' : 'cn';
+    } catch (error) {
+        console.warn('[Batch] Failed to resolve user locale, fallback to requested locale:', error);
+        return fallback;
+    }
+}
+
 // Batch payload carries three decision lenses in one row:
 // - overlay lens: signal / layer1_status / decision_semantic
 // - base lens: canonical_signal / layer1_signal
@@ -146,6 +171,11 @@ export async function GET(request: Request) {
 
         const placeholders = symbols.length > 0 ? symbols.map(() => '?').join(',') : '';
         const allowedModelIds = await getAllowedPredictionModelIdsForTier(client, userTier);
+        const effectivePredictionContentLocale = await resolvePredictionContentLocaleForUser(
+            client,
+            userId,
+            predictionContentLocale,
+        );
         if (allowedModelIds.length === 0) {
             const response = NextResponse.json({
                 stocks: symbols.map(sym => ({ symbol: sym, price: null, prediction: null, previousPrediction: null, lastUpdated: formatPriceUpdateTag(new Date()) })),
@@ -292,7 +322,13 @@ export async function GET(request: Request) {
                 try {
                     debugStage = 'fetch_predictions';
 
-                    const cacheKey = getPredCacheKey(normalizedCacheSymbols, historyLimit, userTier, currentModeId, predictionContentLocale);
+                    const cacheKey = getPredCacheKey(
+                        normalizedCacheSymbols,
+                        historyLimit,
+                        userTier,
+                        currentModeId,
+                        effectivePredictionContentLocale,
+                    );
                     const cached = _predCache.get(cacheKey);
                     if (cached && Date.now() - cached.ts < PRED_CACHE_TTL) {
                         allHistory = cached.rows;
@@ -308,7 +344,7 @@ export async function GET(request: Request) {
                                     const historyRs = await Promise.race([
                                         client.execute({
                                             sql: historySql,
-                                            args: [currentModeId, currentModeId, ...symbols, ...allowedModelIds, predictionContentLocale]
+                                            args: [currentModeId, currentModeId, ...symbols, ...allowedModelIds, effectivePredictionContentLocale]
                                         }),
                                         new Promise<never>((_, reject) =>
                                             setTimeout(() => reject(new Error('Rich query timeout')), RICH_QUERY_TIMEOUT_MS)
@@ -329,16 +365,27 @@ export async function GET(request: Request) {
                             if (!richQuerySucceeded) {
                                 const historyRs = await client.execute({
                                     sql: fallbackHistorySql,
-                                    args: [currentModeId, ...symbols, ...allowedModelIds, predictionContentLocale]
+                                    args: [currentModeId, ...symbols, ...allowedModelIds, effectivePredictionContentLocale]
                                 });
                                 allHistory = historyRs.rows as Record<string, unknown>[];
                             }
                         } else {
                             try {
-                                allHistory = client.prepare(historySql).all(currentModeId, currentModeId, ...symbols, ...allowedModelIds, predictionContentLocale) as Record<string, unknown>[];
+                                allHistory = client.prepare(historySql).all(
+                                    currentModeId,
+                                    currentModeId,
+                                    ...symbols,
+                                    ...allowedModelIds,
+                                    effectivePredictionContentLocale,
+                                ) as Record<string, unknown>[];
                             } catch {
                                 console.warn('[Batch] Local rich history failed, falling back...');
-                                allHistory = client.prepare(fallbackHistorySql).all(currentModeId, ...symbols, ...allowedModelIds, predictionContentLocale) as Record<string, unknown>[];
+                                allHistory = client.prepare(fallbackHistorySql).all(
+                                    currentModeId,
+                                    ...symbols,
+                                    ...allowedModelIds,
+                                    effectivePredictionContentLocale,
+                                ) as Record<string, unknown>[];
                             }
                         }
 
