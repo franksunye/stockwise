@@ -257,6 +257,30 @@ class NotificationTemplates:
                 }
             }
         },
+        # Canonical event type used by NotificationManager aggregation.
+        # Keep this in sync with docs: `prediction_updated`.
+        "prediction_updated": {
+            "free": {
+                "zh": {
+                    "title": "🔄 {market_name} 预测已更新",
+                    "body": "新一轮模型结算已完成，点击查看最新 AI 评级与关键位。"
+                },
+                "en": {
+                    "title": "🔄 {market_name} Predictions Updated",
+                    "body": "New model cycle is ready. Tap to view latest AI ratings and key levels."
+                }
+            },
+            "paid": {
+                "zh": {
+                    "title": "🛡️ Pro {market_name} 盘后推演已完成",
+                    "body": "策略计划与风控边界已同步更新，点击查看可执行动作。"
+                },
+                "en": {
+                    "title": "🛡️ Pro {market_name} Post-Market Update",
+                    "body": "Execution plan and risk boundaries are updated. Tap for actionable steps."
+                }
+            }
+        },
         "price_update": {
             "all": {
                 "zh": {
@@ -405,7 +429,7 @@ class NotificationTemplates:
 
         # C. Render with safe formatting
         try:
-            title_tpl = lang_data.get("title", "StockWise 通知")
+            title_tpl = lang_data.get("title", "ZISO AI 通知")
             body_tpl = lang_data.get("body", "点击查看行情详情")
             
             title = title_tpl.format(**kwargs)
@@ -423,6 +447,6 @@ class NotificationTemplates:
     @staticmethod
     def _fallback_render(payload: Dict[str, Any]) -> Tuple[str, str]:
         """Final safety net."""
-        title = payload.get("title") or "StockWise 重要更新"
+        title = payload.get("title") or "ZISO AI 重要更新"
         body = payload.get("body") or "您有一条新的 AI 策略通知，点击查看。"
         return str(title), str(body)
