@@ -46,7 +46,7 @@ export function InviteWall({ onSuccess }: Props) {
         trackEvent('invite_redeem_error', { reason: errorMsg });
         setError(errorMsg);
       }
-    } catch (err) {
+    } catch {
       trackEvent('invite_redeem_error', { reason: 'network_failure' });
       setError('网络请求失败，请稍后重试');
     } finally {
