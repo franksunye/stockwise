@@ -47,7 +47,7 @@ def run_healthcheck(target_date: str, market: str, strict: bool, notify_on_warni
     ) as guard:
         guard.set_dimensions(market=market, target_date=target_date)
 
-        bundle = get_or_generate_market_facts(target_date)
+        bundle = get_or_generate_market_facts(target_date, market=market)
         facts_date = str(bundle.get("fact_date") or "")
         quality = bundle.get("quality") or {}
         gate_pass = bool(quality.get("gate_pass"))

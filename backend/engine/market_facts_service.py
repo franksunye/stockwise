@@ -39,36 +39,87 @@ def _isolated_ak_fetch(func, **kwargs) -> Any:
             os.environ['NO_PROXY'] = original_no_proxy
 
 
-def _fetch_breadth_stable() -> Tuple[Optional[int], Optional[int], Dict[str, Any]]:
-    """Fetch market breadth using stable LeGu aggregate API."""
+def _fetch_breadth_stable(fact_date: str, market: str = "CN") -> Tuple[Optional[int], Optional[int], Dict[str, Any]]:
+    """Fetch market breadth using stable aggregate API (CN) or DB calculation (Global)."""
+    if market == "CN":
+        try:
+            df = _isolated_ak_fetch(ak.stock_market_activity_legu)
+            if df is not None and not df.empty:
+                adv = _safe_float(df[df["item"] == "上涨"]["value"].iloc[0])
+                dec = _safe_float(df[df["item"] == "下跌"]["value"].iloc[0])
+                if adv is not None and dec is not None:
+                    return int(adv), int(dec), {"status": "ok", "source": "akshare:stock_market_activity_legu"}
+        except Exception as e:
+            logger.warning(f"Stable breadth logic failed (CN): {e}")
+    
+    # Global Fallback: Calculate from local daily_prices
     try:
-        df = _isolated_ak_fetch(ak.stock_market_activity_legu)
-        if df is not None and not df.empty:
-            adv = _safe_float(df[df["item"] == "上涨"]["value"].iloc[0])
-            dec = _safe_float(df[df["item"] == "下跌"]["value"].iloc[0])
-            if adv is not None and dec is not None:
-                return int(adv), int(dec), {"status": "ok", "source": "akshare:stock_market_activity_legu"}
+        conn = get_connection()
+        try:
+            cur = conn.cursor()
+            cur.execute("""
+                SELECT 
+                    SUM(CASE WHEN change_percent > 0 THEN 1 ELSE 0 END) as adv,
+                    SUM(CASE WHEN change_percent < 0 THEN 1 ELSE 0 END) as dec
+                FROM daily_prices dp
+                JOIN stock_meta sm ON sm.symbol = dp.symbol
+                WHERE dp.date = ? AND sm.market = ?
+            """, (fact_date, market))
+            row = cur.fetchone()
+            if row and row[0] is not None:
+                return int(row[0]), int(row[1]), {"status": "ok", "source": f"db:daily_prices:{market}"}
+        finally:
+            conn.close()
     except Exception as e:
-        logger.warning(f"Stable breadth logic failed: {e}")
-    return None, None, {"status": "missing", "source": "akshare:stock_market_activity_legu"}
+        logger.warning(f"DB breadth calculation failed for {market}: {e}")
+            
+    return None, None, {"status": "missing", "source": "breadth_fetcher"}
 
 
-def _fetch_total_turnover_stable() -> Tuple[Optional[float], Dict[str, Any]]:
-    """Fetch total market turnover by summing SH and SZ indices."""
-    try:
-        df = _isolated_ak_fetch(ak.stock_zh_index_spot_em)
-        if df is not None and not df.empty:
-            sh = df[df["代码"] == "000001"]
-            sz = df[df["代码"] == "399001"]
-            if not sh.empty and not sz.empty:
-                sh_amt = _safe_float(sh["成交额"].iloc[0])
-                sz_amt = _safe_float(sz["成交额"].iloc[0])
-                if sh_amt is not None and sz_amt is not None:
-                    total_yi = (sh_amt + sz_amt) / 1e8
-                    return total_yi, {"status": "ok", "source": "akshare:stock_zh_index_spot_em"}
-    except Exception as e:
-        logger.warning(f"Stable turnover logic failed: {e}")
-    return None, {"status": "missing", "source": "akshare:stock_zh_index_spot_em"}
+def _fetch_total_turnover_stable(fact_date: str, market: str = "CN") -> Tuple[Optional[float], Dict[str, Any]]:
+    """Fetch total market turnover by summing major indices (CN) or core anchors (Global)."""
+    if market == "CN":
+        try:
+            df = _isolated_ak_fetch(ak.stock_zh_index_spot_em)
+            if df is not None and not df.empty:
+                sh = df[df["代码"] == "000001"]
+                sz = df[df["代码"] == "399001"]
+                if not sh.empty and not sz.empty:
+                    sh_amt = _safe_float(sh["成交额"].iloc[0])
+                    sz_amt = _safe_float(sz["成交额"].iloc[0])
+                    if sh_amt is not None and sz_amt is not None:
+                        total_yi = (sh_amt + sz_amt) / 1e8
+                        return total_yi, {"status": "ok", "source": "akshare:stock_zh_index_spot_em"}
+        except Exception as e:
+            logger.warning(f"Stable turnover logic failed (CN): {e}")
+
+    # Global Fallback: Sum turnover of index anchors from daily_prices
+    from backend.engine.context_service import MARKET_ANCHORS
+    anchors = MARKET_ANCHORS.get(market, [])
+    if anchors:
+        try:
+            conn = get_connection()
+            try:
+                cur = conn.cursor()
+                placeholders = ','.join(['?' for _ in anchors])
+                # Note: daily_prices doesn't have native turnover column, 
+                # but we can proxy it via close * volume
+                cur.execute(f"""
+                    SELECT SUM(close * volume) 
+                    FROM daily_prices 
+                    WHERE date = ? AND symbol IN ({placeholders})
+                """, (fact_date, *anchors))
+                total_val = cur.fetchone()[0]
+                if total_val:
+                    # For US, maybe we want Billions? 
+                    # For consistency with CN (Units = 100M / 1亿), we divide by 1e8.
+                    return total_val / 1e8, {"status": "ok", "source": f"db:anchors_proxy:{market}"}
+            finally:
+                conn.close()
+        except Exception as e:
+            logger.warning(f"DB turnover proxy failed for {market}: {e}")
+
+    return None, {"status": "missing", "source": "turnover_fetcher"}
 
 
 
@@ -123,34 +174,36 @@ def _ensure_market_facts_table() -> None:
         cur.execute(
             """
             CREATE TABLE IF NOT EXISTS market_facts_daily (
-                fact_date TEXT PRIMARY KEY,
+                fact_date TEXT NOT NULL,
+                market TEXT NOT NULL DEFAULT 'CN',
                 facts_json TEXT NOT NULL,
                 quality_json TEXT NOT NULL,
                 gate_pass INTEGER NOT NULL DEFAULT 0,
                 coverage_score REAL,
                 created_at TIMESTAMP DEFAULT (datetime('now', '+8 hours')),
-                updated_at TIMESTAMP DEFAULT (datetime('now', '+8 hours'))
+                updated_at TIMESTAMP DEFAULT (datetime('now', '+8 hours')),
+                PRIMARY KEY (fact_date, market)
             )
             """
         )
         cur.execute(
-            "CREATE INDEX IF NOT EXISTS idx_market_facts_gate_date ON market_facts_daily(gate_pass, fact_date DESC)"
+            "CREATE INDEX IF NOT EXISTS idx_market_facts_gate_date ON market_facts_daily(market, gate_pass, fact_date DESC)"
         )
         conn.commit()
     finally:
         conn.close()
 
 
-def _load_recent_facts(cur, fact_date: str, limit: int = 25) -> List[Dict[str, Any]]:
+def _load_recent_facts(cur, fact_date: str, market: str = "CN", limit: int = 25) -> List[Dict[str, Any]]:
     cur.execute(
         """
         SELECT fact_date, facts_json, quality_json, gate_pass
         FROM market_facts_daily
-        WHERE fact_date <= ?
+        WHERE fact_date <= ? AND market = ?
         ORDER BY fact_date DESC
         LIMIT ?
         """,
-        (fact_date, limit),
+        (fact_date, market, limit),
     )
     rows = cur.fetchall()
     out = []
@@ -169,7 +222,10 @@ def _load_recent_facts(cur, fact_date: str, limit: int = 25) -> List[Dict[str, A
     return out
 
 
-def _extract_limit_stats(fact_date: str) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+def _extract_limit_stats(fact_date: str, market: str = "CN") -> Tuple[Dict[str, Any], Dict[str, Any]]:
+    if market != "CN":
+        return {"limit_up": None, "limit_down": None, "broken_rate": None}, {"status": "skipped", "reason": "non-CN market"}
+    
     dt = fact_date.replace("-", "")
     result = {"limit_up": None, "limit_down": None, "broken_rate": None}
     status_meta = {"status": "missing", "source": "akshare:zt_pool"}
@@ -196,12 +252,31 @@ def _extract_limit_stats(fact_date: str) -> Tuple[Dict[str, Any], Dict[str, Any]
 def _extract_index_trend(symbol: str) -> Dict[str, Any]:
     out = {"symbol": symbol, "pct_1d": None, "pct_5d": None, "pct_20d": None, "direction": "flat", "status": "missing"}
     try:
-        df = _isolated_ak_fetch(ak.stock_zh_index_daily_em, symbol=symbol)
-        if df is None or df.empty or "close" not in df.columns:
-            return out
-        closes = pd.to_numeric(df["close"], errors="coerce").dropna().tolist()
+        # Check if index is in local daily_prices first (Global unified storage)
+        conn = get_connection()
+        try:
+            cur = conn.cursor()
+            cur.execute("""
+                SELECT close FROM daily_prices 
+                WHERE symbol = ? 
+                ORDER BY date DESC LIMIT 20
+            """, (symbol,))
+            closes = [r[0] for r in cur.fetchall()]
+            # Reverse to Chronological (Old -> New)
+            closes = closes[::-1]
+        finally:
+            conn.close()
+
+        if len(closes) < 2:
+            # Fallback to AkShare (CN Indices only)
+            if symbol.startswith(('sh', 'sz')):
+                df = _isolated_ak_fetch(ak.stock_zh_index_daily_em, symbol=symbol)
+                if df is not None and not df.empty and "close" in df.columns:
+                    closes = pd.to_numeric(df["close"], errors="coerce").dropna().tolist()
+            
         if len(closes) < 2:
             return out
+            
         c_now = closes[-1]
         c_prev = closes[-2]
         c_5 = closes[-5] if len(closes) >= 5 else closes[0]
@@ -228,7 +303,7 @@ def _trend_3d(values: List[Optional[float]]) -> str:
     return _to_direction(delta, eps=1e-6)
 
 
-def _compute_quality_and_gate(facts: Dict[str, Any]) -> Dict[str, Any]:
+def _compute_quality_and_gate(facts: Dict[str, Any], market: str = "CN") -> Dict[str, Any]:
     # Yellow Pages MVP: do not hard-require fragile upstream modules.
     # We keep "breadth" as the only truly critical fetch; other modules may degrade.
     required = [
@@ -239,6 +314,10 @@ def _compute_quality_and_gate(facts: Dict[str, Any]) -> Dict[str, Any]:
         "northbound",
         "sector_flow",
     ]
+    if market != "CN":
+        # Remove CN-only features for other markets
+        required = [r for r in required if r not in ("limit_stats", "northbound", "sector_flow")]
+
     critical = ["breadth"]
     missing: List[str] = []
     for k in required:
@@ -279,6 +358,7 @@ def _compute_quality_and_gate(facts: Dict[str, Any]) -> Dict[str, Any]:
         flags.append("risk_conflict_detected")
 
     return {
+        "market": market,
         "required_fields": required,
         "critical_fields": critical,
         "missing_critical_fields": missing_critical,
@@ -293,7 +373,7 @@ def _compute_quality_and_gate(facts: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
-def generate_market_facts(fact_date: Optional[str] = None) -> Dict[str, Any]:
+def generate_market_facts(fact_date: Optional[str] = None, market: str = "CN") -> Dict[str, Any]:
     fact_date = fact_date or _today_str()
     _ensure_market_facts_table()
 
@@ -302,7 +382,7 @@ def generate_market_facts(fact_date: Optional[str] = None) -> Dict[str, Any]:
     conn = get_connection()
     try:
         cur = conn.cursor()
-        recent = _load_recent_facts(cur, fact_date, limit=30)
+        recent = _load_recent_facts(cur, fact_date, market=market, limit=30)
         prev_turnovers = [
             _safe_float((item.get("facts") or {}).get("turnover", {}).get("total_amount_yi"))
             for item in reversed(recent)
@@ -311,21 +391,24 @@ def generate_market_facts(fact_date: Optional[str] = None) -> Dict[str, Any]:
 
         # Parallel Fetching
         from concurrent.futures import ThreadPoolExecutor
+        from backend.engine.context_service import MARKET_ANCHORS
+        anchors = MARKET_ANCHORS.get(market, ["sh000001", "sz399001", "sz399006"])
+
         with ThreadPoolExecutor(max_workers=6) as executor:
-            future_turnover = executor.submit(_fetch_total_turnover_stable)
-            future_breadth = executor.submit(_fetch_breadth_stable)
-            future_limit = executor.submit(_extract_limit_stats, fact_date)
-            future_sh = executor.submit(_extract_index_trend, "sh000001")
-            future_sz = executor.submit(_extract_index_trend, "sz399001")
-            future_cyb = executor.submit(_extract_index_trend, "sz399006")
+            future_turnover = executor.submit(_fetch_total_turnover_stable, fact_date, market)
+            future_breadth = executor.submit(_fetch_breadth_stable, fact_date, market)
+            future_limit = executor.submit(_extract_limit_stats, fact_date, market)
+            
+            # Index Trends
+            future_indices = {sym: executor.submit(_extract_index_trend, sym) for sym in anchors}
+            
             future_flow = executor.submit(provider.get_market_flow_context)
 
             turnover_now, turnover_meta = future_turnover.result()
             adv, dec, breadth_meta = future_breadth.result()
             limit_stats, limit_meta = future_limit.result()
-            idx_sh = future_sh.result()
-            idx_sz = future_sz.result()
-            idx_cyb = future_cyb.result()
+            
+            idx_results = {sym: f.result() for sym, f in future_indices.items()}
             flow_data = future_flow.result()
         turnover_series = [v for v in prev_turnovers if v is not None]
         if turnover_now is not None:
@@ -352,6 +435,7 @@ def generate_market_facts(fact_date: Optional[str] = None) -> Dict[str, Any]:
             if item.get("fact_date") < fact_date
         ]
         breadth_trend = _trend_3d((prev_breadth + [breadth_ratio])[-3:])
+        breadth_type = "neutral"
         if breadth_ratio is None:
             breadth_type = "neutral"
         elif breadth_ratio >= 0.6:
@@ -361,11 +445,11 @@ def generate_market_facts(fact_date: Optional[str] = None) -> Dict[str, Any]:
         else:
             breadth_type = "neutral"
 
-        idx_ok = all(i.get("status") == "ok" for i in [idx_sh, idx_sz, idx_cyb])
+        idx_ok = any(i.get("status") == "ok" for i in idx_results.values())
         core_indices = {
             "status": "ok" if idx_ok else "missing",
-            "source": "akshare:stock_zh_index_daily_em",
-            "items": {"sh000001": idx_sh, "sz399001": idx_sz, "sz399006": idx_cyb},
+            "source": "db:daily_prices",
+            "items": idx_results,
         }
         north = flow_data.get("northbound_breadth")
         north_score = None
@@ -456,9 +540,9 @@ def generate_market_facts(fact_date: Optional[str] = None) -> Dict[str, Any]:
             },
         }
 
-        quality = _compute_quality_and_gate(facts)
+        quality = _compute_quality_and_gate(facts, market=market)
 
-        cur.execute("SELECT 1 FROM market_facts_daily WHERE fact_date = ?", (fact_date,))
+        cur.execute("SELECT 1 FROM market_facts_daily WHERE fact_date = ? AND market = ?", (fact_date, market))
         exists = cur.fetchone()
         payload_facts = json.dumps(facts, ensure_ascii=False)
         payload_quality = json.dumps(quality, ensure_ascii=False)
@@ -469,27 +553,27 @@ def generate_market_facts(fact_date: Optional[str] = None) -> Dict[str, Any]:
                 """
                 UPDATE market_facts_daily
                 SET facts_json = ?, quality_json = ?, gate_pass = ?, coverage_score = ?, updated_at = datetime('now', '+8 hours')
-                WHERE fact_date = ?
+                WHERE fact_date = ? AND market = ?
                 """,
-                (payload_facts, payload_quality, gate_pass, quality.get("coverage_score"), fact_date),
+                (payload_facts, payload_quality, gate_pass, quality.get("coverage_score"), fact_date, market),
             )
         else:
             cur.execute(
                 """
                 INSERT INTO market_facts_daily
-                (fact_date, facts_json, quality_json, gate_pass, coverage_score)
-                VALUES (?, ?, ?, ?, ?)
+                (fact_date, market, facts_json, quality_json, gate_pass, coverage_score)
+                VALUES (?, ?, ?, ?, ?, ?)
                 """,
-                (fact_date, payload_facts, payload_quality, gate_pass, quality.get("coverage_score")),
+                (fact_date, market, payload_facts, payload_quality, gate_pass, quality.get("coverage_score")),
             )
         conn.commit()
 
-        return {"fact_date": fact_date, "facts": facts, "quality": quality}
+        return {"fact_date": fact_date, "market": market, "facts": facts, "quality": quality}
     finally:
         conn.close()
 
 
-def get_market_facts(fact_date: str) -> Optional[Dict[str, Any]]:
+def get_market_facts(fact_date: str, market: str = "CN") -> Optional[Dict[str, Any]]:
     _ensure_market_facts_table()
     conn = get_connection()
     try:
@@ -498,15 +582,16 @@ def get_market_facts(fact_date: str) -> Optional[Dict[str, Any]]:
             """
             SELECT fact_date, facts_json, quality_json, gate_pass
             FROM market_facts_daily
-            WHERE fact_date = ?
+            WHERE fact_date = ? AND market = ?
             """,
-            (fact_date,),
+            (fact_date, market),
         )
         row = cur.fetchone()
         if not row:
             return None
         return {
             "fact_date": row[0],
+            "market": market,
             "facts": json.loads(row[1]) if row[1] else {},
             "quality": json.loads(row[2]) if row[2] else {},
             "gate_pass": bool(row[3]),
@@ -515,7 +600,7 @@ def get_market_facts(fact_date: str) -> Optional[Dict[str, Any]]:
         conn.close()
 
 
-def get_latest_market_facts_on_or_before(fact_date: str) -> Optional[Dict[str, Any]]:
+def get_latest_market_facts_on_or_before(fact_date: str, market: str = "CN") -> Optional[Dict[str, Any]]:
     _ensure_market_facts_table()
     conn = get_connection()
     try:
@@ -524,17 +609,18 @@ def get_latest_market_facts_on_or_before(fact_date: str) -> Optional[Dict[str, A
             """
             SELECT fact_date, facts_json, quality_json, gate_pass
             FROM market_facts_daily
-            WHERE fact_date <= ?
+            WHERE fact_date <= ? AND market = ?
             ORDER BY fact_date DESC
             LIMIT 1
             """,
-            (fact_date,),
+            (fact_date, market),
         )
         row = cur.fetchone()
         if not row:
             return None
         return {
             "fact_date": row[0],
+            "market": market,
             "facts": json.loads(row[1]) if row[1] else {},
             "quality": json.loads(row[2]) if row[2] else {},
             "gate_pass": bool(row[3]),
@@ -543,17 +629,17 @@ def get_latest_market_facts_on_or_before(fact_date: str) -> Optional[Dict[str, A
         conn.close()
 
 
-def get_or_generate_market_facts(fact_date: str) -> Dict[str, Any]:
-    existing = get_market_facts(fact_date)
+def get_or_generate_market_facts(fact_date: str, market: str = "CN") -> Dict[str, Any]:
+    existing = get_market_facts(fact_date, market=market)
     # Only use existing if it has data AND passed the quality gate.
     # This allows re-triggering jobs to attempt fresh fetching if earlier attempts failed.
     if existing and existing.get("facts") and existing.get("quality") and existing.get("gate_pass"):
         return existing
     try:
-        return generate_market_facts(fact_date)
+        return generate_market_facts(fact_date, market=market)
     except Exception as e:
-        logger.warning(f"generate_market_facts failed for {fact_date}, trying historical fallback: {e}")
-        fallback = get_latest_market_facts_on_or_before(fact_date)
+        logger.warning(f"generate_market_facts failed for {fact_date} ({market}), trying historical fallback: {e}")
+        fallback = get_latest_market_facts_on_or_before(fact_date, market=market)
         if fallback and fallback.get("facts"):
             quality = fallback.get("quality")
             if not isinstance(quality, dict):
