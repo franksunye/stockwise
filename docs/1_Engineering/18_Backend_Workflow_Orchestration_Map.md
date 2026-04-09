@@ -113,7 +113,7 @@
 2. `verify_predictions.yml`
 3. `ai_analyze_cn.yml` / `ai_analyze_hk.yml`
 4. `daily_almanac_cn.yml`
-5. `daily_brief_push.yml`
+- [x] ~~`daily_brief_push.yml`~~ (已停用：国际版 Free/Go/Plus 暂不提供)
 
 规则：
 
@@ -530,7 +530,7 @@ Production 内部分为两组：
 | `almanac_generator.py` | Post-Close / Pre-Market | market_content | Workflow / Program Entry | `data_sync_cn` 或已有事实表 | best_effort | T+1 黄历生产 |
 | `daily_morning_call.yml` | Pre-Market (CN/HK) | distribution | Cloudflare Worker (15min Grid) | 08:30 BJT 触发 | best_effort | 盘前 ritual |
 | `daily_morning_call_us.yml` | Pre-Market (US) | distribution | Cloudflare Worker (15min Grid) | 20:30 BJT 触发 | best_effort | 美股盘前 ritual |
-| `daily_brief_push.yml` | Post-Close | distribution | GitHub Schedule / Manual | brief source 数据 | best_effort | 简报推送 |
+| `daily_brief_push.yml` | Post-Close | distribution | GitHub Schedule / Manual | brief source 数据 | - | **[已停用]** 国际版暂不提供 |
 | `daily_validation_check.yml` | Post-Close | distribution | GitHub Schedule / Manual | 生产链验证结果 | best_effort | 中港验证战报 |
 | `daily_validation_check_us.yml`| Post-Close (US) | distribution | Cloudflare Worker (15min Grid) | 08:30 BJT 触发 | best_effort | 美股验证战报 (已对齐 15min 格点) |
 | `broadcast_almanac.py` | Post-Close / Pre-Market | distribution | Workflow / Program Entry | 已生成黄历 | best_effort | 只负责广播，不应重算 |
@@ -586,7 +586,7 @@ Production 内部分为两组：
 | `daily_almanac_cn.yml` | `User + ADMIN` | `Mixed` | 已实现 | 预览广播触达用户；生成降级与 `market_facts_healthcheck` 触达 ADMIN |
 | `daily_morning_call.yml` | `User + ADMIN` | `Mixed` | 已实现 | morning call push + ritual broadcast 面向用户；脚本成功/失败会发 WeCom |
 | `daily_morning_call_us.yml`| `User + ADMIN` | `Mixed` | 已实现 | 美股早报 push，针对 US 市场 locale 感知渲染 |
-| `daily_brief_push.yml` | `User + ADMIN` | `Mixed` | 已收口 | 正式口径已切到 `brief_generator` 逐用户即时推送；旧版批量广播仅在 `send_legacy_batch_push=true` 时作为人工补发使用 |
+| `daily_brief_push.yml` | `User + ADMIN` | `Mixed` | **已停用** | 国际版 Free/Go/Plus 暂不提供服务，任务已暂停 |
 | `daily_validation_check_us.yml`|`User + ADMIN`| `Mixed` | 已实现 | 美股战报 push，北京时间早晨及时发送 |
 | `broadcast_almanac.py` | `User` | `Push` | 已实现 | 作为分发器使用时职责清晰，不应再承担重算或内部告警职责 |
 | `tradeability_postclose_pipeline.yml` | `ADMIN` | `WeCom` | 已实现 | 顶层 `notify-summary` job 会汇总 CN/HK 样本同步与 sidecar 结果，成功/失败都向 ADMIN 发中文摘要，失败带重试入口 |
@@ -673,7 +673,7 @@ Production 内部分为两组：
 | 16:10 | Production Core | `ai_analyze_cn.yml` | 只做分析与 mode pipeline |
 | 16:12 | Production Content | `daily_almanac_cn` | 只做 T+1 黄历，依赖同步，不依赖整批分析 |
 | 16:30 | Production Core | `data_sync_hk.yml` / `ai_analyze_hk.yml` | 港股盘后正式链 |
-| 17:30 | Ops Governance / Production Content | `daily_validation_check.yml` / `daily_brief_push.yml` | 巡检与摘要 |
+| 17:30 | Ops Governance / Production Content | `daily_validation_check.yml` | 巡检与摘要（`daily_brief_push` 已停用） |
 | 06:30 | Production Core | `daily_pipeline_us.yml` (US Main Chain) | 美股独立盘后主流水线，完成数据同步、AI 预测与结算 |
 | 08:30 | Production Content | `daily_morning_call.yml` | 中国市场早报推送 (CN/HK) —— 由 Worker 驱动 |
 | 08:30 | Production Content | `daily_validation_check_us.yml` | 美股验证战报 (US Validation Glory) —— 已对齐 15min 格点 |

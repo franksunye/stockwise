@@ -52,7 +52,7 @@ def generate_morning_calls(dry_run=False, target_date=None, force=False, market=
 
     logger.info(f"🌅 Starting Daily Morning Call [{market}] for {today_str} (Dry Run: {dry_run}, Force: {force})")
     
-    t_logger = get_task_logger("news_desk", "morning_call")
+    t_logger = get_task_logger("news_desk", f"morning_call_{market.lower()}")
     t_logger.start("Daily Morning Call", "delivery", dimensions={})
 
     nm = NotificationManager(dry_run=dry_run)

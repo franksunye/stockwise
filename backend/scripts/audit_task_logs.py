@@ -23,11 +23,15 @@ except ImportError:
 # Plan derived from docs/1_Engineering/18_Backend_Workflow_Orchestration_Map.md
 EXPECTATIONS = {
     "Full Market Sync (CN)": {"time": "16:00", "window_mins": 60, "type": "Production Core"},
-    "AI Analysis (CN)": {"time": "16:10", "window_mins": 60, "type": "Production Core"},
+    "ai_analyze_cn": {"time": "16:10", "window_mins": 60, "type": "Production Core"},
     "Full Market Sync (HK)": {"time": "16:30", "window_mins": 60, "type": "Production Core"},
     "Full Market Sync (US)": {"time": "06:30", "window_mins": 60, "type": "Production Core"},
-    "morning_call": {"time": "08:31", "window_mins": 10, "type": "Production Content"},
+    "morning_call_cn": {"time": "08:31", "window_mins": 10, "type": "Production Content"},
+    "morning_call_us": {"time": "20:30", "window_mins": 10, "type": "Production Content"},
     "Prediction Verification": {"time": "16:10", "window_mins": 60, "type": "Production Core"},
+    "validation_glory_push_cn": {"time": "17:30", "window_mins": 60, "type": "Production Content"},
+    "validation_glory_push_us": {"time": "08:30", "window_mins": 60, "type": "Production Content"},
+    "market_facts_health_cn": {"time": "16:12", "window_mins": 30, "type": "Ops Governance"},
     "Metadata Sync": {"time": "06:00", "window_mins": 120, "type": "Maintenance"},
 }
 
