@@ -153,6 +153,7 @@ def run_validation_glory_push(market="CN", dry_run=False, run_verify=False):
 
 if __name__ == "__main__":
     import argparse
+    parser = argparse.ArgumentParser(description="Run daily validation glory push notifications.")
     parser.add_argument(
         "--market",
         type=str,
@@ -160,6 +161,8 @@ if __name__ == "__main__":
         choices=["CN", "HK", "US"],
         help="Target market (CN/HK/US)",
     )
+    parser.add_argument("--dry-run", action="store_true", help="Print notifications without sending.")
+    parser.add_argument("--verify", action="store_true", help="Run pending validations before pushing.")
     args = parser.parse_args()
     
-    run_validation_glory_push(market=args.market, dry_run=args.dry_run, run_verify=args.run_verify)
+    run_validation_glory_push(market=args.market, dry_run=args.dry_run, run_verify=args.verify)
