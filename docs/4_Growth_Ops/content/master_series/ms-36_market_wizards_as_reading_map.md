@@ -47,23 +47,23 @@ workflow:
 当你合上这套图鉴，你会发现这些智慧并非碎片，它们严丝合缝地锚定了交易世界的五个核心派系：
 
 ### 1. 进攻大陆：趋势与动量 (Momentum/Growth)
-*   **代表逻辑**：[MS-01 米勒维尼](file:///Users/yesun/Code/stockwise/docs/4_Growth_Ops/content/master_series/ms-01_mark_minervini.md)、[MS-09 趋势突围](file:///Users/yesun/Code/stockwise/docs/4_Growth_Ops/content/master_series/ms-09_trend_breakout.md)、[MS-23 欧奈尔](file:///Users/yesun/Code/stockwise/docs/4_Growth_Ops/content/master_series/ms-23_william_oneil.md)、[MS-28 CAN SLIM](file:///Users/yesun/Code/stockwise/docs/4_Growth_Ops/content/master_series/ms-28_can_slim.md)。
+*   **代表逻辑**：MS-01 米勒维尼、MS-09 趋势突围、MS-23 欧奈尔、MS-28 CAN SLIM。
 *   **认知内核**：顺势而为，强者恒强。寻找阻力最小的方向，在右侧事实发生时起舞。
 
 ### 2. 防御大陆：基本面与周期 (Value/Cycle)
-*   **代表逻辑**：[MS-05 巴菲特](file:///Users/yesun/Code/stockwise/docs/4_Growth_Ops/content/master_series/ms-05_warren_buffett.md)、[MS-21 格雷厄姆](file:///Users/yesun/Code/stockwise/docs/4_Growth_Ops/content/master_series/ms-21_benjamin_graham.md)、[MS-35 马克斯](file:///Users/yesun/Code/stockwise/docs/4_Growth_Ops/content/master_series/ms-35_howard_marks.md)的第二层思维。
+*   **代表逻辑**：MS-05 巴菲特、MS-21 格雷厄姆、MS-35 马克斯的第二层思维。
 *   **认知内核**：安全边际，高质量估值。在价格低于价值时播种，靠比别人“多想一层”建立超额。
 
 ### 3. 架构大陆：系统与规则 (System/Quant)
-*   **代表逻辑**：[MS-12 海龟交易](file:///Users/yesun/Code/stockwise/docs/4_Growth_Ops/content/master_series/ms-12_turtle_trading.md)、[MS-19 规则量化](file:///Users/yesun/Code/stockwise/docs/4_Growth_Ops/content/master_series/ms-19_l2_rule_based_quant.md)、[MS-29 唐契安通道](file:///Users/yesun/Code/stockwise/docs/4_Growth_Ops/content/master_series/ms-29_donchian_breakout.md)。
+*   **代表逻辑**：MS-12 海龟交易、MS-19 规则量化、MS-29 唐契安通道。
 *   **认知内核**：规则至上，机器思维。用钢铁般的纪律压制人性噪音，将交易工业化。
 
 ### 4. 生存大陆：风险与数学 (Risk/Mathematics)
-*   **代表逻辑**：[MS-10 止损架构](file:///Users/yesun/Code/stockwise/docs/4_Growth_Ops/content/master_series/ms-10_atr_stop.md)、[MS-32 仓位管理与 R 倍数](file:///Users/yesun/Code/stockwise/docs/4_Growth_Ops/content/master_series/ms-32_position_sizing_and_r_multiple.md)、[MS-33 期望值](file:///Users/yesun/Code/stockwise/docs/4_Growth_Ops/content/master_series/ms-33_system_development_and_expectancy.md)。
+*   **代表逻辑**：MS-10 止损架构、MS-32 仓位管理与 R 倍数、MS-33 期望值。
 *   **认知内核**：交易的本质是胜率、盈亏比与数学博弈。不计风险的利润，只是市场的暂借。
 
 ### 5. 心智大陆：思维与生产模式 (Mentality/Production)
-*   **代表逻辑**：[MS-03 埃尔德](file:///Users/yesun/Code/stockwise/docs/4_Growth_Ops/content/master_series/ms-03_alexander_elder.md)、[MS-24 利弗莫尔](file:///Users/yesun/Code/stockwise/docs/4_Growth_Ops/content/master_series/ms-24_jesse_livermore.md)、[MS-34 生产商模式](file:///Users/yesun/Code/stockwise/docs/4_Growth_Ops/content/master_series/ms-34_method_fact_layer_producer_mode.md)。
+*   **代表逻辑**：MS-03 埃尔德、MS-24 利弗莫尔、MS-34 生产商模式。
 *   **认知内核**：向内求索，逻辑分层。心里的迷雾如果不散，手里的技术永远只是屠龙术。
 
 ## 术语卡：全系列收官的三次跃迁
