@@ -13,11 +13,7 @@ except ImportError:
     from config import LLM_CONFIG
 from .llm_tracker import get_tracker, estimate_tokens
 from .schema_normalizer import normalize_ai_response
-try:
-    from backend.logger import logger
-except ImportError:
-    from logger import logger
-
+from loguru import logger
 import asyncio
 
 class AsyncRateLimiter:
@@ -79,7 +75,7 @@ class LLMClient:
                 from google import genai
                 self._gemini_client = genai.Client(api_key=self.api_key)
             except Exception as e:
-                print(f"⚠️ 初始化 Gemini V2 SDK 失败: {e}")
+                logger.error(f"⚠️ 初始化 Gemini V2 SDK 失败: {e}")
         
         # Gemini Local Client 缓存 (用于本地代理)
         self._gemini_local_client = None
@@ -91,9 +87,9 @@ class LLMClient:
                     api_key=self.api_key,
                     http_options={'base_url': self.base_url}
                 )
-                print(f"✅ Gemini Local V2 SDK 初始化成功 -> {self.base_url}")
+                logger.success(f"✅ Gemini Local V2 SDK 初始化成功 -> {self.base_url}")
             except Exception as e:
-                print(f"⚠️ 初始化 Gemini Local V2 SDK 失败: {e}")
+                logger.error(f"⚠️ 初始化 Gemini Local V2 SDK 失败: {e}")
         
     def is_available(self) -> bool:
         """检查 LLM 服务是否可用"""
@@ -158,7 +154,7 @@ class LLMClient:
         # [Guardrail] Explicitly log the model being used to detect config overrides
         used_model = payload["model"]
         display_prov = self.provider.upper()
-        print(f"   🤖 [LLM] Sending request to {display_prov} using model: {used_model}")
+        logger.info(f"🤖 [LLM] Sending request to {display_prov} using model: {used_model}")
 
         # [Cost Alert] Warn if expensive reasoning model is detected for DeepSeek
         if self.provider == "deepseek" and "reasoner" in used_model:
@@ -195,18 +191,18 @@ class LLMClient:
                     if not meta["total_tokens"]:
                         meta["total_tokens"] = meta["input_tokens"] + meta["output_tokens"]
                     
-                    print(f"   🤖 {display_prov} 响应成功 ({elapsed:.1f}s, {meta['total_tokens']} tokens)")
+                    logger.success(f"🤖 {display_prov} 响应成功 ({elapsed:.1f}s, {meta['total_tokens']} tokens)")
                     return content, meta
                 else:
                     meta["error"] = f"响应格式异常: {data}"
                     return None, meta
             else:
                 meta["error"] = f"HTTP {response.status_code}: {response.text[:200]}"
-                print(f"   ❌ {display_prov} 请求失败: HTTP {response.status_code}")
+                logger.error(f"❌ {display_prov} 请求失败: HTTP {response.status_code}")
                 return None, meta
         except Exception as e:
             meta["error"] = str(e)
-            print(f"   ❌ {display_prov} 请求异常: {e}")
+            logger.error(f"❌ {display_prov} 请求异常: {e}")
             return None, meta
 
     def _chat_gemini(
@@ -270,11 +266,11 @@ class LLMClient:
                 meta["output_tokens"] = response.usage_metadata.candidates_token_count
                 meta["total_tokens"] = response.usage_metadata.total_token_count
             
-            print(f"   🤖 GEMINI 响应成功 ({elapsed:.1f}s, {meta['total_tokens']} tokens)")
+            logger.success(f"🤖 GEMINI 响应成功 ({elapsed:.1f}s, {meta['total_tokens']} tokens)")
             return content, meta
         except Exception as e:
             meta["error"] = str(e)
-            print(f"   ❌ GEMINI 请求异常: {e}")
+            logger.error(f"❌ GEMINI 请求异常: {e}")
             return None, meta
     
     def _chat_gemini_local(
@@ -339,11 +335,11 @@ class LLMClient:
                 meta["output_tokens"] = estimate_tokens(content)
                 meta["total_tokens"] = meta["input_tokens"] + meta["output_tokens"]
                 
-            print(f"   🤖 GEMINI_LOCAL 响应成功 ({elapsed:.1f}s, {meta['total_tokens']} tokens)")
+            logger.success(f"🤖 GEMINI_LOCAL 响应成功 ({elapsed:.1f}s, {meta['total_tokens']} tokens)")
             return content, meta
         except Exception as e:
             meta["error"] = str(e)
-            print(f"   ❌ GEMINI_LOCAL 请求异常: {e}")
+            logger.error(f"❌ GEMINI_LOCAL 请求异常: {e}")
             return None, meta
     
     def generate_stock_prediction(
@@ -381,7 +377,7 @@ class LLMClient:
         
         for attempt in range(retries + 1):
             if attempt > 0:
-                print(f"   🔄 重试 {attempt}/{retries}...")
+                logger.warning(f"🔄 重试 {attempt}/{retries}...")
                 tracker.increment_retry()
                 
             content, meta = self.chat(messages, temperature=0.5)
@@ -397,7 +393,7 @@ class LLMClient:
                     final_result = result
                     break
                 else:
-                    print(f"   ⚠️ JSON 解析失败，原始内容:\n{content[:500]}...")
+                    logger.warning(f"⚠️ JSON 解析失败，原始内容:\n{content[:500]}...")
         
         # 记录追踪结果
         tracker.set_tokens(
@@ -418,7 +414,7 @@ class LLMClient:
         trace = tracker.end_trace()
         if trace:
             status_emoji = "✅" if trace.status == "success" else "❌"
-            print(f"   📊 追踪完成: {status_emoji} {trace.latency_ms}ms | {trace.total_tokens} tokens | 重试 {trace.retry_count} 次")
+            logger.info(f"📊 追踪完成: {status_emoji} {trace.latency_ms}ms | {trace.total_tokens} tokens | 重试 {trace.retry_count} 次")
         
         return final_result
     
@@ -438,7 +434,7 @@ class LLMClient:
             # Only log detailed error if it's not a common "searching" failure
             # But here we want to know why schema validation failed
             if "Invalid JSON syntax" not in str(e):
-                 print(f"   ⚠️ Response Parser Validation Error: {e}")
+                 logger.warning(f"⚠️ Response Parser Validation Error: {e}")
             return None
 
 
@@ -458,14 +454,14 @@ def test_llm_connection() -> bool:
     """测试 LLM 连接"""
     client = get_llm_client()
     if not client.is_available():
-        print("❌ LLM 服务不可用")
+        logger.error("❌ LLM 服务不可用")
         return False
     
-    print("✅ LLM 服务连接成功")
+    logger.success("✅ LLM 服务连接成功")
     response, meta = client.chat([{"role": "user", "content": "回复'OK'"}])
     if response:
-        print(f"   测试响应: {response[:50]}...")
-        print(f"   Token 使用: {meta.get('total_tokens', 'N/A')}")
+        logger.info(f"测试响应: {response[:50]}...")
+        logger.info(f"Token 使用: {meta.get('total_tokens', 'N/A')}")
         return True
     return False
 
