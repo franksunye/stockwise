@@ -8,8 +8,8 @@ description: Online Systems Operations (SRE). Covers production task auditing, C
 This skill provides the definitive guide for maintaining the **StockWise Production Ecosystem**. It focuses on observability, reliability, and precision scheduling of the global market data pipelines.
 
 ## 核心原则 (Core Principles)
-*   **Turso CLI First**: 对于线上/生产数据库的所有查询与修改，**必须优先使用** `node frontend/scripts/turso-cli.mjs`。
-    *   *理由*：无需编写样板代码、自动加载生产凭据、执行极速且结果易于审计。
+*   **Turso CLI First**: 对于线上/生产数据库的所有**临时探索 (Exploration)**、查询与修改，**必须优先使用** `node frontend/scripts/turso-cli.mjs`。
+    *   *理由*：无需编写样板代码、自动加载生产凭据、执行极速且结果以表格形式呈现，易于审计数据状态。
 *   **Observability First**: 任何线上手动操作（如数据 Patching 或 Purging）前必须先执行 `COUNT` 验证受影响行数。
 
 ---
@@ -73,9 +73,14 @@ When tasked with repairing or purging sensitive production data (e.g., "Delete u
     - Delete Root Last (`DELETE FROM users WHERE user_id = '...'`).
 4.  **Final Audit**: Re-verify with counts to ensure 0 records remain.
 
-### 3.2 SQL Execution (Cloud)
-Always use the `turso-cli` wrapper to interact with the production database:
+### 3.2 SQL Execution & Exploration (Cloud)
+Always use the `turso-cli` wrapper for both quick exploration and precise data logic patching:
 ```bash
+# Exploration: List tables, show stocks, count records
+node frontend/scripts/turso-cli.mjs tables
+node frontend/scripts/turso-cli.mjs count <table_name>
+
+# Execution: Run arbitrary SQL safely
 node frontend/scripts/turso-cli.mjs query "UPDATE table SET col = val WHERE id = '...'"
 ```
 

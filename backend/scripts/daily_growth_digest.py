@@ -131,7 +131,7 @@ def get_internal_metrics():
     conn = get_connection()
     cursor = conn.cursor()
     
-    # New users in last 24h (considering +8h offset)
+    # New users count in last 24h (considering +8h offset)
     cursor.execute("""
         SELECT COUNT(*) FROM users 
         WHERE created_at > datetime('now', '-24 hours', '+8 hours')
@@ -156,13 +156,38 @@ def get_internal_metrics():
     # Total user breakdown
     cursor.execute("SELECT subscription_tier, COUNT(*) FROM users GROUP BY subscription_tier")
     tiers = {row[0]: row[1] for row in cursor.fetchall()}
+
+    # Detailed Info for New Signups (Last 10)
+    cursor.execute("""
+        SELECT user_id, registration_type, created_at, subscription_tier, referred_by, has_onboarded, locale
+        FROM users 
+        WHERE created_at > datetime('now', '-24 hours', '+8 hours')
+        ORDER BY created_at DESC LIMIT 10
+    """)
+    new_users_detailed = []
+    for row in cursor.fetchall():
+        uid = row[0]
+        # Check their watchlist count
+        cursor.execute("SELECT COUNT(*) FROM user_watchlist WHERE user_id = ?", (uid,))
+        w_count = cursor.fetchone()[0]
+        new_users_detailed.append({
+            "user_id": uid,
+            "type": row[1],
+            "created_at": row[2],
+            "tier": row[3],
+            "referred_by": row[4],
+            "onboarded": row[5],
+            "locale": row[6],
+            "watchlist_count": w_count
+        })
     
     conn.close()
     return {
         "new_signups": new_signups,
         "active_watchers": active_watchers,
         "top_symbols": top_symbols,
-        "tiers": tiers
+        "tiers": tiers,
+        "new_users_detailed": new_users_detailed
     }
 
 def generate_report():
@@ -213,7 +238,16 @@ def generate_report():
 - **Free**: {internal['tiers'].get('free', 0)}
 - **Go/Plus/Pro**: {internal['tiers'].get('go', 0) + internal['tiers'].get('plus', 0) + internal['tiers'].get('pro', 0)}
 - **Ghost Users Cleaned (Cumulative)**: Done
+
+## 👤 New User Intelligence (Last 10)
+| User ID | Created (UTC) | Type | Tier | Referred By | Watchlist | Onboarded |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 """
+        if not internal['new_users_detailed']:
+            report_md += "| No new signups | - | - | - | - | - | - |\n"
+        else:
+            for u in internal['new_users_detailed']:
+                report_md += f"| `{u['user_id']}` | {u['created_at']} | {u['type']} | {u['tier']} | {u['referred_by'] if u['referred_by'] else '-'} | {u['watchlist_count']} | {'✅' if u['onboarded'] else '❌'} |\n"
 
         report_md += "\n## 📡 Top Traffic Sources (GA4)\n"
         for s in top_sources:

@@ -9,6 +9,7 @@ import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
 import { getPredictionActionMeta } from '@/lib/layer1-ui';
 import { useT, useLocale } from '@/context/LocaleContext';
 import { getLocalizedStockName } from '@/lib/stock-name';
+import { useAnalytics } from '@/hooks/useAnalytics';
 
 // Fallback data for the reveal step
 const DEFAULT_REVEAL_DATA = { 
@@ -39,6 +40,7 @@ export function OnboardingOverlay() {
   const [isVisible, setIsVisible] = useState(false);
   const [step, setStep] = useState(1);
   const [trialDays, setTrialDays] = useState(MEMBERSHIP_CONFIG.onboarding.trialDays);
+  const { trackEvent } = useAnalytics();
 
   const [selectedStock, setSelectedStock] = useState<string | null>(null);
   const [selectedStockName, setSelectedStockName] = useState<string | null>(null);
@@ -68,6 +70,9 @@ export function OnboardingOverlay() {
     if (!profileLoading && profile) {
       if (!profile.hasOnboarded) {
         setIsVisible(true);
+        // Track the start of onboarding
+        trackEvent('onboarding_start', { tier: profile.tier });
+        
         // If they are already Pro (via referral), check their expiry to show correct trial length
         if (profile.tier === 'pro' && profile.expiresAt) {
           const expiry = new Date(profile.expiresAt);
@@ -80,7 +85,17 @@ export function OnboardingOverlay() {
         setIsVisible(false);
       }
     }
-  }, [profile, profileLoading]);
+  }, [profile, profileLoading, trackEvent]);
+
+  // Track each step view
+  useEffect(() => {
+    if (isVisible) {
+      trackEvent('onboarding_step_view', { 
+        step_number: step,
+        step_name: ['Welcome', 'Select Stock', 'Reveal Analysis', 'Complete'][step - 1]
+      });
+    }
+  }, [step, isVisible, trackEvent]);
 
   useEffect(() => {
     fetchRecommendedStocks();
@@ -119,6 +134,10 @@ export function OnboardingOverlay() {
           }
         }
         
+        // Track final completion (Standard Sign-Up)
+        trackEvent('sign_up', { method: 'onboarding_invite', tier: profile?.tier });
+        trackEvent('onboarding_complete');
+
         // Use global state to naturally unmount the overlay without reloading the page
         await refreshProfile({ force: true });
         
@@ -128,6 +147,7 @@ export function OnboardingOverlay() {
   };
 
   const startAnalysis = async (symbol: string, name?: string, nameEn?: string | null) => {
+    trackEvent('onboarding_stock_selected', { symbol });
     setSelectedStock(symbol);
     setSelectedStockName(name || symbol);
     setSelectedStockNameEn(nameEn ?? null);

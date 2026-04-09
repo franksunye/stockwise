@@ -1,5 +1,5 @@
 ---
-title: '101-104: As Long as Your Trading Starts with "I Think," You Haven't Left L0'
+title: "101-104: As Long as Your Trading Starts with \"I Think,\" You Haven't Left L0"
 subtitle: Many traders don't lack analysis; they just lack the discipline to stop making excuses for their impulses.
 content_id: growth-101-104
 content_source: growth

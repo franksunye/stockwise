@@ -1,6 +1,6 @@
 # 内容生产流程看板 (Pipeline Board)
 
-> 自动生成时间：2026/4/3 15:53:41
+> 自动生成时间：2026/4/9 10:17:02
 > 说明：本看板优先服务活跃工作流，只展开需要推进的阶段；已发布内容只保留最近概览，避免看板膨胀。
 
 ## 🧠 待策划
@@ -108,7 +108,6 @@
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | [谁在告诉你“炒股发财”？真正的量化交易，其实无聊得让人想睡觉](../blitz_hub/Hub_07_Boring_Algorithm.md) | Growth | BOFU | - | - | 高 | cmo | founder | 2026-03-26 周四 | ⚪ 未开始 | ➖ 不发布 | - |
 | [在所有人都在亏钱的行情里，不回撤才是最高维度的炫富](../blitz_hub/Hub_08_No_Drawdown_Wealth.md) | Growth | BOFU | - | - | 高 | cmo | founder | 2026-04-02 周四 | ⚪ 未开始 | ➖ 不发布 | - |
-| [101-105: 你以为自己在看信号，很多时候其实只是在盯着后视镜开车](../cn/101_academy/101-105_maturity_l1_indicator.md) | Growth | MOFU | 信任桥梁 | 基本可发 | 高 | cmo | founder | 2026-04-20 周一 | ⚪ 未开始 | 📝 草稿 | - |
 | [模型层级划分：Pro 版与基础版 AI 引擎切流说明](../../../5_Support_Ops/content/cn/model-tiers-diff.md) | Support | BOFU | - | - | 高 | cmo | founder | 2026-04-21 周二 | ⚪ 未开始 | 📝 草稿 | - |
 | [投资模式：切换你的策略风格](../../../5_Support_Ops/content/cn/investment-mode-config.md) | Support | BOFU | 转化承接 | - | 高 | cmo | founder | 2026-04-21 周二 | ⚪ 未开始 | 📝 草稿 | - |
 | [101-14: 越盯盘，越容易亏大钱：很多大跌，都是盯出来的](../cn/101_academy/101-14_eod_edge.md) | Growth | MOFU | 信任桥梁 | 建议先审 | 高 | cmo | founder | 2026-04-22 周三 | ⚪ 未开始 | 📝 草稿 | - |
@@ -116,14 +115,7 @@
 | [双轨制：前台生产线，后台实验线](../../../5_Support_Ops/content/cn/dual-lane-architecture.md) | Support | BOFU | - | - | 高 | cmo | founder | 2026-04-22 周三 | ⚪ 未开始 | 📝 草稿 | - |
 | [黑天鹅数学：你以为十年一遇，市场却隔三差五就教你做人](../cn/101_academy/101-37_black_swan_math.md) | Growth | TOFU | 破圈钩子 | 基本可发 | 高 | cmo | founder | 2026-04-27 周一 | ⚪ 未开始 | 📝 草稿 | - |
 | [101-32: 市场根本不在乎你亏了多少，只有你自己还在死守成本线](../cn/101_academy/101-32_stateless_execution.md) | Growth | MOFU | 信任桥梁 | 基本可发 | 高 | cmo | founder | 2026-04-29 周三 | ⚪ 未开始 | 📝 草稿 | - |
-| [101-106: 真正的 L2，不是会背几条规则，而是知道规则一失灵就该认错](../cn/101_academy/101-106_systematic_rules_l2.md) | Growth | MOFU | 信任桥梁 | 建议先审 | 高 | cmo | founder | 2026-05-01 周五 | ⚪ 未开始 | 📝 草稿 | - |
 | [101-59: 赚钱了，不代表你这笔买得漂亮，有时候只是运气救了你](../cn/101_academy/101-59_mfe_truth.md) | Growth | MOFU | 信任桥梁 | 建议先审 | 高 | cmo | founder | 2026-05-04 周一 | ⚪ 未开始 | 📝 草稿 | - |
-| [101-109: 结篇——寻找你的量化绿洲](../cn/101_academy/101-109_maturity_epilogue.md) | Growth | MOFU | - | - | 高 | cmo | founder | 2026-05-08 周五 | ⚪ 未开始 | 📝 草稿 | - |
-| [101-107: L3级——系统化组合投资，是舰队司令部的排兵布阵](../cn/101_academy/101-107_institutional_portfolio_l3.md) | Growth | MOFU | - | - | 高 | cmo | founder | 2026-05-13 周三 | ⚪ 未开始 | ➖ 不发布 | - |
-| [101-108: L4级——极硬量化，是物理层面的毫秒之战](../cn/101_academy/101-108_hard_quant_l4.md) | Growth | MOFU | - | - | 高 | cmo | founder | 2026-05-15 周五 | ⚪ 未开始 | ➖ 不发布 | - |
-| [101-101: 择时——像发牌员一样思考，而不是赌客](../cn/101_academy/101-101_quant_trinity_timing.md) | Growth | MOFU | - | - | 高 | cmo | founder | 2026-05-18 周一 | ⚪ 未开始 | 📝 草稿 | - |
-| [101-102: 交易管理——为什么“状态”是财富的分水岭](../cn/101_academy/101-102_quant_trinity_management.md) | Growth | MOFU | - | - | 高 | cmo | founder | 2026-05-20 周三 | ⚪ 未开始 | 📝 草稿 | - |
-| [101-103: 交易执行——别在壕沟里与加特林机枪肉搏](../cn/101_academy/101-103_quant_trinity_execution.md) | Growth | MOFU | - | - | 高 | cmo | founder | 2026-05-22 周五 | ⚪ 未开始 | 📝 草稿 | - |
 
 ## ✅ 已通过
 
@@ -132,7 +124,6 @@
 | [101-69: 很多亏损，不是没提醒，而是提醒太多把人带乱了](../cn/101_academy/101-69_ziso_rhythm.md) | Growth | BOFU | 转化承接 | 建议先审 | 高 | cmo | founder | 2026-03-30 周一 | ✅ 视觉通过 | ⏳ 待发布 | - |
 | [为什么股票一被套，你总能刷到漫山遍野的“重大利好”？](../cn/101_academy/101-18_echo_chamber.md) | Growth | TOFU | 破圈钩子 | 次优先审 | 高 | cmo | founder | 2026-04-01 周三 | ✅ 视觉通过 | ⏳ 待发布 | - |
 | [很多人不是亏在大跌里，而是亏在天天都有机会的行情里](../cn/101_academy/101-44_volatility_tax.md) | Growth | TOFU | 破圈钩子 | 次优先审 | 高 | cmo | founder | 2026-04-03 周五 | ✅ 视觉通过 | ⏳ 待发布 | - |
-| [101-104: 只要你的交易还经常从“我觉得”开始，你就还没走出 L0](../cn/101_academy/101-104_maturity_l0_discretionary.md) | Growth | MOFU | 信任桥梁 | 基本可发 | 高 | cmo | founder | 2026-04-06 周一 | ✅ 视觉通过 | ⏳ 待发布 | - |
 | [满屏股神和收益截图，很多只是运气好的人还没翻车](../cn/101_academy/101-42_survivorship_bias.md) | Growth | TOFU | 破圈钩子 | 次优先审 | 高 | cmo | founder | 2026-04-08 周三 | ✅ 视觉通过 | ⏳ 待发布 | - |
 | [101-17: 很多人真正缺的，不是更会赚钱的工具，而是一个能在关键时刻拦住自己的系统](../cn/101_academy/101-17_tower_shield.md) | Growth | BOFU | 转化承接 | 建议先审 | 高 | cmo | founder | 2026-04-10 周五 | ✅ 视觉通过 | ⏳ 待发布 | - |
 | [101-13: “这票明天会不会涨？”这句问得越勤，往往亏得越快](../cn/101_academy/101-13_prediction_tax.md) | Growth | TOFU | 破圈钩子 | 建议先审 | 高 | cmo | founder | 2026-04-13 周一 | ✅ 视觉通过 | ⏳ 待发布 | - |
@@ -144,13 +135,22 @@
 
 ## 🚀 已发布
 
-- 已发布资产总数：122
-- 系统识别公众号已发布：14 篇
+- 已发布资产总数：157
+- 系统识别公众号已发布：23 篇
 - 已确认公众号前线基线：9 篇
 - 看板优先展示公众号已发布内容，其次补充仅网站上线的内容；完整清单请看主索引。
 
 | 标题 | 来源 | 最后动作 | 网站 | 公众号 |
 | --- | --- | --- | --- | --- |
+| [101-01: 散户的不可能三角](../cn/101_academy/101-01_impossible_triangle.md) | Growth | 2026-04-03 周五 | ✅ 上线中 | ✅ 已发布 |
+| [101-02: 错失恐惧症 (FOMO)](../cn/101_academy/101-02_fomo.md) | Growth | 2026-04-03 周五 | ✅ 上线中 | ✅ 已发布 |
+| [101-03: 厌恶损失 (Loss Aversion)](../cn/101_academy/101-03_loss_aversion.md) | Growth | 2026-04-03 周五 | ✅ 上线中 | ✅ 已发布 |
+| [101-05: 赌徒谬误 (Gambler's Fallacy)](../cn/101_academy/101-05_gamblers_fallacy.md) | Growth | 2026-04-03 周五 | ✅ 上线中 | ✅ 已发布 |
+| [101-06: 禀赋效应 (Endowment Effect)](../cn/101_academy/101-06_endowment_effect.md) | Growth | 2026-04-03 周五 | ✅ 上线中 | ✅ 已发布 |
+| [101-07: 报复性交易 (Revenge Trading)](../cn/101_academy/101-07_revenge_trading.md) | Growth | 2026-04-03 周五 | ✅ 上线中 | ✅ 已发布 |
+| [101-08: 3M 框架 (Mind, Method, Money)](../cn/101_academy/101-08_3m_framework.md) | Growth | 2026-04-03 周五 | ✅ 上线中 | ✅ 已发布 |
+| [101-09: 为什么聪明人会失败？](../cn/101_academy/101-09_why_smart_people_fail.md) | Growth | 2026-04-03 周五 | ✅ 上线中 | ✅ 已发布 |
+| [101-10: 离场休息的艺术](../cn/101_academy/101-10_sitting_on_hands.md) | Growth | 2026-04-03 周五 | ✅ 上线中 | ✅ 已发布 |
 | [机会成本：很多人不是没机会，而是钱先被一只烂股拖住了](../cn/101_academy/101-40_opportunity_cost.md) | Growth | 2026-03-27 周五 | ✅ 上线中 | ✅ 已发布 |
 | [101-100: 很多人不是不会炒股，而是连自己是什么段位都没弄明白](../cn/101_academy/101-100_maturity_prologue.md) | Growth | 2026-03-25 周三 | ✅ 上线中 | ✅ 已发布 |
 | [101-12: 你以为自己在做短线，很多时候其实只是在给人送钱](../cn/101_academy/101-12_l4_hft_illusion.md) | Growth | 2026-03-23 周一 | ✅ 上线中 | ✅ 已发布 |
@@ -162,15 +162,6 @@
 | [AI 除了写 PPT 还能做什么？论‘冷酷实习生’对焦虑的终极拯救](../cn/101_academy/2026-03-02_ai_lifestyle.md) | Growth | 2026-03-02 周一 | ✅ 上线中 | [✅ 已发布](https://mp.weixin.qq.com/s/bJtXPV4r4ANCjp7wOOxV_w) |
 | [上下文提取：只看我想要的](../../../5_Support_Ops/content/cn/context-extraction.md) | Support | 2026-03-02 周一 | ✅ 上线中 | [✅ 已发布](https://mp.weixin.qq.com/s/Kiq-ZmQQ6-x6w-6Z9igNGg) |
 | [反转推送：只盯“大转折”](../../../5_Support_Ops/content/cn/signal-flip-push.md) | Support | 2026-02-25 周三 | ✅ 上线中 | [✅ 已发布](https://mp.weixin.qq.com/s/WxeVVxbmUHADEXKgw68vpw) |
-| [共识分级定义 (Consensus Levels)](../../../5_Support_Ops/content/cn/consensus-levels.md) | Support | 2026-02-19 周四 | ✅ 上线中 | [✅ 已发布](https://mp.weixin.qq.com/s/KDT2hCFUH1S4nidyYPOJ1A) |
-| [投研决议：多维度的共识](../../../5_Support_Ops/content/cn/ai-council-logic.md) | Support | 2026-02-18 周三 | ✅ 上线中 | [✅ 已发布](https://mp.weixin.qq.com/s/NuvCM1CRxNs1GfKvIiotow) |
-| [角标清除：别被红点牵着走](../../../5_Support_Ops/content/cn/badge-hygiene.md) | Support | 2026-02-17 周二 | ✅ 上线中 | [✅ 已发布](https://mp.weixin.qq.com/s/JdHK9Gi-QqlwGf45rT-GMQ) |
-| [101-01: 散户的不可能三角](../cn/101_academy/101-01_impossible_triangle.md) | Growth | 2026-04-02 周四 | ✅ 上线中 | ➖ 不发布 |
-| [101-02: 错失恐惧症 (FOMO)](../cn/101_academy/101-02_fomo.md) | Growth | 2026-04-02 周四 | ✅ 上线中 | ➖ 不发布 |
-| [101-03: 厌恶损失 (Loss Aversion)](../cn/101_academy/101-03_loss_aversion.md) | Growth | 2026-04-02 周四 | ✅ 上线中 | ➖ 不发布 |
-| [101-05: 赌徒谬误 (Gambler's Fallacy)](../cn/101_academy/101-05_gamblers_fallacy.md) | Growth | 2026-04-02 周四 | ✅ 上线中 | ➖ 不发布 |
-| [101-06: 禀赋效应 (Endowment Effect)](../cn/101_academy/101-06_endowment_effect.md) | Growth | 2026-04-02 周四 | ✅ 上线中 | ➖ 不发布 |
-| [101-07: 报复性交易 (Revenge Trading)](../cn/101_academy/101-07_revenge_trading.md) | Growth | 2026-04-02 周四 | ✅ 上线中 | ➖ 不发布 |
 
 ## 📦 已归档
 

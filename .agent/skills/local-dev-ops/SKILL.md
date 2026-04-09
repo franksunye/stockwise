@@ -63,8 +63,8 @@ Use the local environment to test new prompts, models, or data pipelines without
     ```
 
 ### 3.2 Troubleshooting Common Issues
-- **Missing PRO Symbols**: Use `turso-cli` to fetch the target list from production before running local backfills.
-- **Data Inconsistency**: If local results differ significantly from cloud, run `node scripts/local-db-audit.mjs` to ensure your local market data is up-to-date.
+- **Missing PRO Symbols**: 使用 `node frontend/scripts/turso-cli.mjs query "..."` 直接从生产环境（Cloud）探索并获取目标列表，避免本地回填时的盲区。
+- **Data Inconsistency**: If local results differ significantly from cloud, use the **Turso CLI Wrapper** to explore cloud data and compare with `node scripts/local-db-audit.mjs` outputs.
 
 ---
 

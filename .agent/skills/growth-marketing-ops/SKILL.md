@@ -29,6 +29,18 @@ Our content must feel human, professional, and institutional.
 We optimize the product by analyzing the behavior of the current user base via SQL.
 
 ### 2.1 Core Metrics & SQL Templates
+
+While `daily_growth_digest.py` provides automated reporting, use the **Turso CLI Wrapper** for **manual exploration (探索)** of user behavior and conversion leaks:
+
+```bash
+# Explore high-potential users (Referred and active)
+node frontend/scripts/turso-cli.mjs query "SELECT user_id, registration_type, subscription_tier, referred_by FROM users WHERE created_at > datetime('now', '-7 days') ORDER BY created_at DESC"
+
+# Check symbol popularity for content mapping
+node frontend/scripts/turso-cli.mjs query "SELECT symbol, count(*) as count FROM user_watchlist GROUP BY symbol ORDER BY count DESC LIMIT 10"
+```
+
+### 2.2 Standard Metrics
 - **Pro Conversion Rate**:
     ```sql
     SELECT count(*) filter (where subscription_tier = 'pro') * 1.0 / count(*) as conv_rate 
@@ -59,7 +71,7 @@ To generate a 24h performance snapshot across all layers:
 # Required: GA4_PROPERTY_ID, GA4_CREDENTIALS_PATH, CLARITY_API_TOKEN in .env
 export DB_SOURCE=cloud; python3 backend/scripts/daily_growth_digest.py
 ```
-**Output**: `tmp/latest_growth_pulse.md`
+**Output**: `tmp/latest_growth_pulse.md` (Includes conversions, top pages, and **Detailed New User Intelligence**).
 
 ### 3.2 Key Attribution Channels
 - **Search (GEO/SEO)**: High-intent users seeking prediction models.

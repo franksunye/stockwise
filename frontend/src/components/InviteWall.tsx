@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Lock, ArrowRight, Loader2, ShieldCheck, Zap } from 'lucide-react';
 import { getCurrentUser } from '@/lib/user';
+import { useAnalytics } from '@/hooks/useAnalytics';
+import { useEffect } from 'react';
 
 interface Props {
   onSuccess: (tier: string, expiresAt: string | null) => void;
@@ -13,6 +15,11 @@ export function InviteWall({ onSuccess }: Props) {
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { trackEvent } = useAnalytics();
+
+  useEffect(() => {
+    trackEvent('view_invite_wall');
+  }, [trackEvent]);
 
   const handleRedeem = async () => {
     if (!code || loading) return;
@@ -23,6 +30,7 @@ export function InviteWall({ onSuccess }: Props) {
     await getCurrentUser();
 
     try {
+      trackEvent('invite_redeem_attempt', { code_length: code.length });
       const res = await fetch('/api/user/redeem', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -31,11 +39,15 @@ export function InviteWall({ onSuccess }: Props) {
       const data = await res.json();
 
       if (data.success) {
+        trackEvent('invite_redeem_success', { tier: data.tier });
         onSuccess(data.tier, data.expiresAt);
       } else {
-        setError(data.error || '无效的激活码');
+        const errorMsg = data.error || '无效的激活码';
+        trackEvent('invite_redeem_error', { reason: errorMsg });
+        setError(errorMsg);
       }
-    } catch {
+    } catch (err) {
+      trackEvent('invite_redeem_error', { reason: 'network_failure' });
       setError('网络请求失败，请稍后重试');
     } finally {
       setLoading(false);
