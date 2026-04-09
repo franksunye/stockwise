@@ -1,8 +1,8 @@
 ---
-title: "系列终章｜全景地图：这是由 35 组智慧内核合拢后的最后一张底牌"
-social_title: "系列终章｜当 35 盘交易逻辑的拼图合拢，你看见的是整座逻辑森林"
-editorial_title: "全系列终结号：这是第 36 篇。前 35 篇是点与线，这一篇是面与光。"
-subtitle: "认知闭环：在前 35 个章节中，我们分别会见了 35 种关于交易真相的侧面。而今天，在第 36 章，我们不再低头看星星，而是抬头看星座。"
+title: "系列终章｜逻辑全图：36 篇图鉴沉淀后的最后一张底牌"
+social_title: "系列终章｜35 盘逻辑合拢：交易的真谛，是看清整座森林"
+editorial_title: "全系列终结号：第 36 篇。前 35 篇是散落的星点，这一篇是全景导航。"
+subtitle: "认知闭环：在前 35 个维度里，我们拆解了 35 种关于市场真相的侧面。第 36 章，我们要抬头看清整张星座全图。"
 content_id: "growth-ms-036"
 content_source: "growth"
 content_type: "article"
@@ -14,14 +14,14 @@ campaign_role: "bridge"
 campaign: "master_series_2026q2"
 rhythm: "Hub"
 headline_alternatives:
-  - "35 组逻辑内核全部到齐：一张带你识破市场迷雾、按图索骥的全景图"
-  - "系列收官：不要崇拜英雄，要拆解逻辑。全系列 35 项内核背后的生存法则"
-  - "当 35 组交易逻辑被并排放在一起，你会发现成功其实只有这几条路"
-  - "从入口到闭环：为什么识图能力是顶级交易者和业余爱好者的分水岭"
+  - "35 组逻辑内核全部到齐：一张识破市场噪音、按图索骥的全景地图"
+  - "系列收官：不迷信英雄，只拆解逻辑。全系列 35 项内核背后的生存公约"
+  - "当 35 盘交易棋局被并排放在一起，你会发现成功其实只有这几条通径"
+  - "从入口到闭环：识图能力是顶级交易者与业余爱好者的分水岭"
 cover_lines:
   - "单学一招是拼图，看全地图才是大格局。"
-  - "35 组智慧内核，最终连接成一张带你穿越周期的实战地图。"
-share_copy: "StockWise 交易大师图鉴系列今日正式收官。从基本面先驱到趋势之王，从风险架构师到心理大师，这 35 组智慧内核共同构建了一张全景地图。真正的交易艺术，就是在看清全貌后，找到最适合自己的那个坐标点。"
+  - "35 组逻辑内核，连接成一张跨越牛熊的实战全图。"
+share_copy: "StockWise 交易大师图鉴系列今日正式收官。从基本面先驱到趋势之王，从风险架构师到心智大师，这 35 组逻辑内核共同构筑了一套全景导航系统。真正的交易平衡，就是在看清版图全貌后，精准锚定属于你自己的生存坐标。"
 traceability:
   status: "healthy"
   last_reviewed_at: "2026-03-25"
@@ -35,95 +35,78 @@ workflow:
   reviewer: "founder"
   priority: "medium"
   target_publish_date: ""
-  last_action_at: "2026-03-25"
-  blocked_reason: ""
-maintenance:
-  change_status: "new"
-  update_reason: "series_conclusion_pivot_v2"
-  external_action: ""
-  external_status: "pending"
-  external_note: ""
-content_lifecycle:
-  status: "active"
-  superseded_by: ""
-website:
-  enabled: true
-  surface: "learn"
 ---
-看到这一篇，你已经和 StockWise 一起，走完了这段横跨交易历史与流派的深度漫游。
+漫游已至此。
 
-**这第 36 篇图鉴，不是第 36 个故事，而是由前 35 组逻辑内核共同拼成的一张“全景全息图”。**
+**这第 36 篇图鉴，不是一个新故事，而是由前 35 组逻辑内核高压浓缩后的“全景全息图”。**
 
-在 MS-27 中，我们借施瓦格的眼看清了进入行业的入口；而在今天这个收官节点，你需要做的是：把这 35 组闪亮的智慧内核连点成线，构建属于你自己的“交易母星”。真正的交易艺术，是看清这整张地图后，不再被单点信息带偏，而是锚定那个最适合你的“实战坐标”。
+在 MS-27 中，我们借施瓦格的眼定位了行业的入口；而在今天，你需要把这 35 组闪亮的智慧内核连点成线，构建属于你自己的“交易母星”。交易的艺术，是看清整张地图后，拒绝单点迷信，精准缩放至最适合你的那个实战位置。
 
-## 35 组逻辑内核的森林：五大认知大陆
+## 35 组逻辑内核：五大认知大陆
 
-当你合上这套图鉴，你会发现这 35 组高手的智慧并非杂乱无章，它们严丝合缝地构成了交易世界的五块核心大陆：
+当你合上这套图鉴，你会发现这些智慧并非碎片，它们严丝合缝地锚定了交易世界的五块核心大陆：
 
 ### 1. 进攻大陆：趋势与动量 (Momentum/Growth)
-*   **代表逻辑**：MS-01 欧奈尔、MS-09 趋势突围、MS-13 VCP 模式、MS-23 威廉·欧奈尔、MS-28 CAN SLIM、MS-30 达瓦斯箱体。
-*   **大陆心法**：顺势而为，强者恒强。寻找股价阻力最小的方向，只在右侧起舞。
+*   **代表逻辑**：[MS-01 米勒维尼](file:///Users/yesun/Code/stockwise/docs/4_Growth_Ops/content/master_series/ms-01_mark_minervini.md)、[MS-09 趋势突围](file:///Users/yesun/Code/stockwise/docs/4_Growth_Ops/content/master_series/ms-09_trend_breakout.md)、[MS-23 欧奈尔](file:///Users/yesun/Code/stockwise/docs/4_Growth_Ops/content/master_series/ms-23_william_oneil.md)、[MS-28 CAN SLIM](file:///Users/yesun/Code/stockwise/docs/4_Growth_Ops/content/master_series/ms-28_can_slim.md)。
+*   **认知内核**：顺势而为，强者恒强。寻找阻力最小的方向，在右侧事实发生时起舞。
 
 ### 2. 防御大陆：基本面与周期 (Value/Cycle)
-*   **代表逻辑**：MS-05 巴菲特、MS-21 格雷厄姆、MS-22 菲利普·费雪、MS-35 霍华德·马克斯的第二层思维。
-*   **大陆心法**：安全边际，高质量估值。在价格低于价值时播种，靠比别人“多想一层”取胜。
+*   **代表逻辑**：[MS-05 巴菲特](file:///Users/yesun/Code/stockwise/docs/4_Growth_Ops/content/master_series/ms-05_warren_buffett.md)、[MS-21 格雷厄姆](file:///Users/yesun/Code/stockwise/docs/4_Growth_Ops/content/master_series/ms-21_benjamin_graham.md)、[MS-35 马克斯](file:///Users/yesun/Code/stockwise/docs/4_Growth_Ops/content/master_series/ms-35_howard_marks.md)的第二层思维。
+*   **认知内核**：安全边际，高质量估值。在价格低于价值时播种，靠比别人“多想一层”建立超额。
 
 ### 3. 架构大陆：系统与规则 (System/Quant)
-*   **代表逻辑**：MS-04 理查德·丹尼斯、MS-12 海龟交易、MS-19 规则化量化、MS-29 唐契安通道、MS-31 右侧确认。
-*   **大陆心法**：规则至上，机器思维。用钢铁般的纪律执行系统，剔除人性的所有噪音。
+*   **代表逻辑**：[MS-12 海龟交易](file:///Users/yesun/Code/stockwise/docs/4_Growth_Ops/content/master_series/ms-12_turtle_trading.md)、[MS-19 规则量化](file:///Users/yesun/Code/stockwise/docs/4_Growth_Ops/content/master_series/ms-19_l2_rule_based_quant.md)、[MS-29 唐契安通道](file:///Users/yesun/Code/stockwise/docs/4_Growth_Ops/content/master_series/ms-29_donchian_breakout.md)。
+*   **认知内核**：规则至上，机器思维。用钢铁般的纪律压制人性噪音，将交易工业化。
 
-### 4. 生存大陆：风险与资管 (Risk/Game Theory)
-*   **代表逻辑**：MS-10/11 止损架构、MS-17/18 风险管理、MS-25 范·萨普、MS-32 仓位管理与 R 倍数。
-*   **大陆心法**：R 倍数决定成败。交易不只是买卖，更是一场关于盈亏比与概率分布的数学博弈。
+### 4. 生存大陆：风险与数学 (Risk/Mathematics)
+*   **代表逻辑**：[MS-10 止损架构](file:///Users/yesun/Code/stockwise/docs/4_Growth_Ops/content/master_series/ms-10_atr_stop.md)、[MS-32 仓位管理与 R 倍数](file:///Users/yesun/Code/stockwise/docs/4_Growth_Ops/content/master_series/ms-32_position_sizing_and_r_multiple.md)、[MS-33 期望值](file:///Users/yesun/Code/stockwise/docs/4_Growth_Ops/content/master_series/ms-33_system_development_and_expectancy.md)。
+*   **认知内核**：交易的本质是胜率、盈亏比与数学博弈。不计风险的利润，只是市场的暂借。
 
-### 5. 底层大陆：逻辑、心智与生产力 (Philosophy/Mind)
-*   **代表逻辑**：MS-03 亚历山大·埃尔德、MS-08 三重滤网、MS-15 多周期确认、MS-24 利弗莫尔、MS-27 施瓦格阅读地图、MS-34 生产商模式。
-*   **大陆心法**：向内求索，逻辑分层。心里的迷雾如果不散，手里的技术永远只是屠龙术。
+### 5. 心智大陆：思维与生产模式 (Mentality/Production)
+*   **代表逻辑**：[MS-03 埃尔德](file:///Users/yesun/Code/stockwise/docs/4_Growth_Ops/content/master_series/ms-03_alexander_elder.md)、[MS-24 利弗莫尔](file:///Users/yesun/Code/stockwise/docs/4_Growth_Ops/content/master_series/ms-24_jesse_livermore.md)、[MS-34 生产商模式](file:///Users/yesun/Code/stockwise/docs/4_Growth_Ops/content/master_series/ms-34_method_fact_layer_producer_mode.md)。
+*   **认知内核**：向内求索，逻辑分层。心里的迷雾如果不散，手里的技术永远只是屠龙术。
 
-## 术语卡：全系列收官的三次认知跳跃
+## 术语卡：全系列收官的三次跃迁
 
-1. `From Points to Atlas`
-   - **从点到图**：前 35 篇是散落在行业各处的逻辑碎片，第 36 篇是让它们发生化学反应的罗盘。
-2. `The 35+1 Principle`
-   - **35+1 原则**：35 种不同的路径证明了“条条大路通罗马”，但第 36 篇告诉你，每一条路其实都被“风险控制”给焊死了。
-3. `The Atlas of Mastery`
-   - **大师全图**：看清全地图是大格局，单学一招是拼图。
+1. `The 35+1 Principle`
+   - **35+1 原则**：用 35 套独立的点线逻辑，合拢成 1 张全景全息图。
+2. `Atlas of Logic`
+   - **逻辑全图**：识图能力是顶级交易者的第一生产力，它可以让你在行情波动时一眼看清“当下谁的逻辑在生效”。
+3. `Actionable Constellation`
+   - **实战星座**：将孤立的大师连接成导航系统，从而实现从“单点迷信”到“系统决策”的跨越。
 
-## 这一套图鉴最终解决了什么问题
+## 这 35+1 篇最终解决了什么问题
 
-它解决了普通投资者最容易陷入的**“单点迷信”**与**“碎片化幻觉”**。
+它解决了普通投资者最容易陷入的**“认知碎片化”**。
 
-如果你只读其中某一个逻辑，你会觉得那是唯一的真理。但当你读完这 35 组内核，你会明白：
-- 为什么格雷厄姆（MS-21）在买入，而唐契安（MS-29）在卖出。
-- 为什么有人胜率很高却会大亏（MS-33），而有人胜率极低却是最后的赢家（MS-32）。
-- **真正的正见，是看清这整张地图后，不被单点信息带偏，而是能动态看清当下行情“谁的逻辑在生效”。**
+当你读完这 35 组逻辑内核，你会明白：
+- 为什么格雷厄姆（MS-21）在买入，而唐契安（MS-29）在卖出。这不是对错，这是流派的边界。
+- 为什么有人胜率极高却最终破产（MS-33），而有人胜率惨淡却是最后的巨头（MS-32）。
+- **真正的正念，是看清这整张全景地图后，不再被碎片信息操控，而是拥有“识图”的上帝视角。**
 
-## 系列的终响：第 36 章属于你
+## 系列终响：第 36 章属于你
 
-这 36 篇图鉴提供的是**“眼界”**。眼界不到，再好的策略也接不住。
+这套图鉴交付的是**“眼界”**。眼界不到，再好的策略也接不住。
 
-《金融怪杰》帮施瓦格留下了口述史，而 StockWise 通过这 35 组逻辑内核的深度拆解，帮你留下一张即便在最剧烈的行情波动中，也能让你看清“我是谁、我在哪、我要往哪走”的航海全图。
+《金融怪杰》帮施瓦格留下了口述史，而 StockWise 通过对这 35 组核心逻辑的深度萃取，帮你留下一张即便在最剧烈的波动中，也能看清“我是谁、我在哪、我要往哪走”的航海全图。
 
-**系列已正式收官。**
+**系列已封笔。**
 
-第 36 章没有正文，它是你合上图鉴后，走向实战的第一个动作。祝你在属于自己的那条路上，旗开得胜。
+第 36 章没有正文，它是你合上图鉴、独立行走的第一步。祝你在属于自己的坐标点上，旗开得胜。
 
 ---
 
-## NotebookLM 交接要点 (Grand Synthesis Edition)
+## NotebookLM 精修要点
 
-### 关键定位：**系列总结（35+1 逻辑）**
-彻底去除对《金融怪杰》单本书的推荐，直接切入全系列的智慧归总。
+### 视觉策略：**史诗感的黑金全景**
+- **提示词建议**：35 颗发光的 logic nodes 在浩瀚星空中连接成一个深邃的金色 StockWise 导航星盘。整体呈黑金工业风，大字留白，营造出“认知登顶”的氛围感。
 
-### PPT 8 页结构建议：
-1. **终点亦是起点**：36 篇大师系列今日圆满收官（35 组智慧 + 1 张全图）。
-2. **连接 35 颗星**：我们的目的是带你从看“每一棵树”到看清“整座森林”。
-3. **进攻版图回顾**：动量与趋势（从 Minervini 到 Darvas）。
-4. **防御版图回顾**：价值与周期（从 Graham 到 Howard Marks）。
-5. **系统与风险回顾**：架构与博弈（从 Turtle 到 R-Multiple）。
-6. **逻辑与心底回顾**：认知与心态（从 Elder 到 Producer Mode）。
-7. **它是你的导航系统**：不再单点迷信，而是动态看清当下谁的逻辑在生效。
+### PPT 结构精修：
+1. **终点亦是起点**：36 篇漫游结束，全景地图正式交付。
+2. **逻辑拼图**：拒绝单点迷信，构建由 35 组内核组成的森林。
+3. **进攻版图**：顺势、动量、强者的右侧共识。
+4. **防御版图**：周期、深度、第二层思维的边界。
+5. **系统版图**：规则、量化、用纪律压制人性噪音。
+6. **生存版图**：R 倍数、期望值、资产管理的数学本能。
+7. **心智版图**：分层思考、向内求法、建立生产商模式。
 8. **一句话总结**：全景地图放胸中，按图索骥走长路。
-
-### 视觉引导词：
-35 颗微弱但明亮的逻辑星辰，跨越时间与空间，最终汇聚成一个深邃的金色 StockWise 导航罗盘。画面要有极高的黑金质感与史诗感，象征认知闭环的完成。
