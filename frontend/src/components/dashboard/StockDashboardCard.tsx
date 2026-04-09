@@ -302,7 +302,8 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
                 const labelDate = validationPrediction ? normalizeTargetDate(validationPrediction.target_date) : anchorDate;
                 const status = validationPrediction?.validation_status;
                 const validationMeta = parseValidationData(validationPrediction?.validation_data);
-                const windowLabel = getValidationWindowLabel(validationMeta?.window);
+                const windowLabelKey = getValidationWindowLabel(validationMeta?.window);
+                const windowLabel = t(windowLabelKey as MessageKey<'dashboard'>, { window: validationMeta?.window || 0 });
 
                 return (
                   <>

@@ -22,7 +22,7 @@ describe('prediction display validation helpers', () => {
     });
 
     it('formats window labels conservatively', () => {
-        assert.equal(getValidationWindowLabel(3), '3日回看');
-        assert.equal(getValidationWindowLabel(1), '收盘验证');
+        assert.equal(getValidationWindowLabel(3), 'validation.windowVerify');
+        assert.equal(getValidationWindowLabel(1), 'validation.closeVerify');
     });
 });

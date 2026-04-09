@@ -79,6 +79,6 @@ export function parseValidationData(raw: unknown): ParsedValidationData | null {
 }
 
 export function getValidationWindowLabel(windowDays: number | null | undefined): string {
-    if (!windowDays || windowDays <= 1) return '收盘验证';
-    return `${windowDays}日回看`;
+    if (!windowDays || windowDays <= 1) return 'validation.closeVerify';
+    return 'validation.windowVerify';
 }
