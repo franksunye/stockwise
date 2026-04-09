@@ -25,10 +25,10 @@ export function ChineseHomePage() {
       },
       {
         "@type": "Question",
-        "name": "AI 推理是如何工作的？",
+        "name": "支持哪些市场？",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "与简单的预测机器人不同，ZISO AI 使用“智能体委员会”架构。它结合了 DeepSeek 的深度逻辑推理与混元的语言映射，以及固定的量化规则引擎，确保每份战术简报都是可解释的且有据可依。"
+          "text": "ZISO AI 目前涵盖美股、港股和中国 A 股市场。引擎捕捉本地化的流动性矢量和特定市场上下文，确保全球投资组合的覆盖。"
         }
       }
     ]
@@ -48,8 +48,8 @@ export function ChineseHomePage() {
             <span className="bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">回归理性的从容</span>
           </h1>
           <p className="text-lg md:text-xl text-slate-400 font-medium max-w-2xl mx-auto leading-relaxed">
-            复杂的分析交给 AI，简单的决策留自己。 <br className="hidden md:block" />
-            ZISO AI 自动为你完成复盘与数据建模，让 <span className="text-white">普通投资者也能拥有机构级的投研能力</span>。
+            复杂的分析交给 AI，简单的决策留给用户。<br className="hidden md:block" />
+            ZISO AI 通过分析 <strong>整合上下文（宏观、资金流、波动率）</strong> 生成 <strong>逻辑严密的决策脚本</strong>，确保您的执行基于客观遥测数据，而非盘中情绪。
           </p>
           <div className="pt-10 flex flex-col md:flex-row items-center justify-center gap-4">
             <Link 
@@ -100,7 +100,7 @@ export function ChineseHomePage() {
               <span className="text-indigo-500">制定明日剧本</span>
             </h2>
             <p className="text-slate-400 font-medium leading-relaxed">
-              职业交易员的核心秘密不在于盘中的手感，而在于闭市后的功课。ZISO AI 在每日收盘后自动接入海量行情与新闻，为您生成多维度的决策逻辑。不提供随机预测，只提供可执行的博弈边界。
+              职业交易员的长期优势源于收盘后的专注。ZISO AI 在每日收盘后整合市场上下文、资金流向与量价动态，将其转化为结构化的决策脚本。它不通过随机预测制造幻觉，它致力于定义可执行的博弈边界。
             </p>
             <ul className="space-y-4">
               {[ "多周期趋势共振捕捉 (MA/RSI/MACD)", "量价异动深度溯源", "基于历史表现的置信度评分" ].map((item, i) => (
@@ -124,18 +124,71 @@ export function ChineseHomePage() {
               <ShieldCheck size={120} className="absolute bottom-4 right-4 opacity-[0.1] text-red-500 pointer-events-none" />
           </div>
           <div className="order-1 md:order-2 space-y-8">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] font-black uppercase tracking-[0.2em]"> 安全风控系统 </div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[10px] font-black uppercase tracking-[0.2em]"> 纪律框架 </div>
             <h2 className="text-4xl md:text-5xl font-black italic tracking-tighter leading-tight uppercase">
-              即便在最疯狂的行情 <br />
-              <span className="text-red-500">也要恪守 75% 闸门</span>
+              透明度是
+              <br />
+              <span className="text-indigo-500">终极的交易纪律</span>
             </h2>
             <p className="text-slate-400 font-medium leading-relaxed">
-              知其博弈，也要守其方寸。如果 AI 对于次日的逻辑推演置信度低于 75%，系统将冷酷通过“熔断指令”强制阻断所有激进操作，建议保持观察。不亏损，是您在市场中长期生存并最终获胜的第一条铁律。
+              通过理解每个信号背后的“如何”与“为何”，消除情绪干扰。ZISO Go 为每一个交易设置提供全面的 <strong>逻辑追踪</strong>、<strong>逻辑审计</strong> 和 <strong>干预协议</strong>，确保您的执行扎根于客观推理。
             </p>
+            <div className="grid grid-cols-1 gap-3">
+              {[
+                { title: '逻辑追踪 (Logical Trace)', desc: '步进式推理链条', active: true },
+                { title: '逻辑审计 (Rationale Audit)', desc: '批判性的风险反射与审计', active: true },
+                { title: '干预协议 (Intervention Protocols)', desc: '冲突解决与执行脚本', active: true },
+              ].map((pillar) => (
+                <div key={pillar.title} className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-colors">
+                  <div>
+                    <div className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-1">{pillar.title}</div>
+                    <div className="text-xs text-slate-500 font-medium">{pillar.desc}</div>
+                  </div>
+                  <div className="px-2 py-1 rounded-md bg-indigo-500/10 border border-indigo-500/20 text-[8px] font-bold text-indigo-400 uppercase tracking-tighter">
+                    Go 版解锁
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
-        {/* Team */}
+        <section className="pt-32 w-full">
+          <div className="text-center mb-20">
+            <h2 className="text-4xl md:text-5xl font-black tracking-tighter leading-tight">
+              只需 <span className="text-indigo-500">3 步</span>，开启独立的量化决策
+            </h2>
+          </div>
+          <div className="grid md:grid-cols-3 gap-12 text-left">
+            {[
+              {
+                num: '01',
+                title: '锁定自选清单',
+                desc: '添加您关心的股票。系统立即开始同步并建模约 250 个交易日的历史数据。',
+              },
+              {
+                num: '02',
+                title: '审计盘后推理',
+                desc: '收盘后分钟内，研究助手将交付包含支撑压力位、战术框架和决策逻辑的推理审计。',
+              },
+              {
+                num: '03',
+                title: '恪守交易纪律',
+                desc: '不再让盘中随机波动干扰决策。当价格触及昨晚设定的脚本边界时，委员会将协助您恢复执行纪律。',
+              },
+            ].map((step) => (
+              <div key={step.num} className="space-y-6 relative group">
+                <div className="text-7xl font-black text-white/[0.03] group-hover:text-indigo-500/10 transition-colors absolute -top-10 -left-4">
+                  {step.num}
+                </div>
+                <h3 className="font-extrabold text-2xl relative z-10">{step.title}</h3>
+                <p className="text-slate-500 text-sm leading-relaxed font-medium relative z-10">{step.desc}</p>
+                <div className="w-12 h-1 bg-white/5 rounded-full group-hover:w-20 group-hover:bg-indigo-500/30 transition-all duration-500" />
+              </div>
+            ))}
+          </div>
+        </section>
+
         <section className="pt-32 w-full space-y-16">
           <div className="text-center space-y-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]"> 我们的团队 </div>
@@ -187,8 +240,12 @@ export function ChineseHomePage() {
               <p className="text-slate-400 text-sm leading-relaxed">一个不仅替你完成股市功课，还能带你看清投资门道的 AI 投研助理。它通过海量历史回测与 AI 智囊团会诊，将复杂的行情分析转化为具体的决策剧本。</p>
             </div>
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
-              <p className="text-white font-bold mb-3 uppercase tracking-tighter">AI 的判断准吗？</p>
-              <p className="text-slate-400 text-sm leading-relaxed">AI 复盘的结果支持全量核销。我们不仅替你做功课，更对每一笔“功课”的质量负责。历史判断的回看结果会在个股档案中公开透明。</p>
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter">历史记录真实吗？</p>
+              <p className="text-slate-400 text-sm leading-relaxed">透明度是我们的核心。所有盘后推理及其后续表现均可回溯校验。我们不只是提供建议，我们为每一次战术会议保留完整的审计追踪。</p>
+            </div>
+            <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter">支持哪些市场？</p>
+              <p className="text-slate-400 text-sm leading-relaxed">ZISO AI 目前覆盖美股、港股和中国 A 股市场，确保您的自选清单能跨全球流动性矢量和特定市场上下文进行同步。</p>
             </div>
           </div>
         </section>
@@ -198,9 +255,9 @@ export function ChineseHomePage() {
             <div className="flex-1 text-left">
               <GeoSummary
                 summary={[
-                  "知守 AI 聚焦盘后复盘与次日策略，降低情绪化交易干扰。",
-                  "核心机制包括战术简报、回看追踪、关键价位与风险提示。",
-                  "分析结果可回看、可追溯，强调过程透明而非收益承诺。",
+                  "核心研究：聚焦多周期量价与动态脉络的盘后深度复盘。",
+                  "决策逻辑：多智能体协作架构，分析包括宏观、资金流与历史胜率在内的整合上下文。",
+                  "透明度协议：三柱审计框架（追踪、审计、协议），用严谨的纪律化替代盘中的情绪反应。",
                 ]}
               />
             </div>

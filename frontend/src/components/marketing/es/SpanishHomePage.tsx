@@ -30,10 +30,10 @@ export function SpanishHomePage() {
       },
       {
         "@type": "Question",
-        "name": "¿Por qué el límite de confianza del 75%?",
+        "name": "¿Qué mercados están soportados?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Priorizamos la disciplina sobre la frecuencia. Si la confianza en los setups estructurales de una sesión cae por debajo del 75%, se activa un disyuntor rígido. Sobrevivir primero, luego ganar. Esto evita el 'over-trading' emocional que atrapa a la mayoría de los inversores."
+          "text": "ZISO AI actualmente cubre los mercados de EE. UU., Hong Kong y acciones A de China. El motor captura vectores de liquidez localizados y contexto específico del mercado para asegurar la cobertura global de la cartera."
         }
       },
       {
@@ -64,8 +64,7 @@ export function SpanishHomePage() {
             </span>
           </h1>
           <p className="text-lg md:text-xl text-slate-400 font-medium max-w-2xl mx-auto leading-relaxed">
-            ZISO AI convierte los datos de mercado post-cierre en un informe disciplinado con niveles clave, estados de acción, contexto 
-            y límites de riesgo, para que los inversores minoristas puedan prepararse para la próxima sesión en lugar de reaccionar dentro de ella.
+            ZISO AI analiza el <strong>contexto integrado (macro, flujo de capital y volatilidad)</strong> para generar un <strong>guion de decisión fundamentado</strong>, asegurando que su ejecución se base en telemetría objetiva, no en la emoción intradía.
           </p>
           <div className="pt-10 flex flex-col md:flex-row items-center justify-center gap-4">
             <Link
@@ -118,9 +117,7 @@ export function SpanishHomePage() {
               <span className="text-indigo-400">Escribe el guion de mañana antes de que llegue el mañana.</span>
             </h2>
             <p className="text-slate-400 font-medium leading-relaxed">
-              Los traders profesionales no se definen solo por su instinto rápido intradía. Su verdadera ventaja proviene del trabajo
-              que realizan después del cierre. ZISO AI conecta los datos del mercado y las noticias cada noche, convirtiéndolos en un
-              guion de decisión estructurado. No fabrica predicciones aleatorias. Define límites ejecutables.
+              La verdadera ventaja proviene del trabajo realizado después del cierre. ZISO AI sintetiza el contexto del mercado, el flujo de capital y la acción del precio cada noche, convirtiéndolos en un guion de decisión estructurado. No fabrica predicciones aleatorias. Define límites ejecutables.
             </p>
             <ul className="space-y-4">
               {[
@@ -148,31 +145,34 @@ export function SpanishHomePage() {
             <ShieldCheck size={120} className="absolute bottom-4 right-4 opacity-[0.1] text-red-500 pointer-events-none" />
           </div>
           <div className="order-1 md:order-2 space-y-8">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] font-black uppercase tracking-[0.2em]">
-              Sistema de control de riesgos
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[10px] font-black uppercase tracking-[0.2em]">
+              Marco de Disciplina
             </div>
             <h2 className="text-4xl md:text-5xl font-black tracking-tighter leading-tight">
-              Incluso en el mercado más volátil,
+              La transparencia es la
               <br />
-              <span className="text-red-400">la puerta del 75% se mantiene firme.</span>
+              <span className="text-indigo-400">disciplina definitiva.</span>
             </h2>
             <p className="text-slate-400 font-medium leading-relaxed">
-              Comprender el juego no es suficiente. También necesitas defender tus límites. Si la confianza del sistema
-              en la próxima sesión cae por debajo del 75%, ZISO AI activa un disyuntor rígido y bloquea acciones agresivas.
-              Observar primero. Sobrevivir primero. No perder la disciplina es la primera regla para permanecer en el 
-              mercado el tiempo suficiente para ganar algo significativo.
+              Elimine la interferencia emocional comprendiendo el &quot;cómo&quot; y el &quot;por qué&quot; detrás de cada señal. 
+              ZISO Go proporciona un <strong>Rastro Lógico</strong>, una <strong>Auditoría de Fundamentos</strong> y <strong>Protocolos de Intervención</strong> para cada operación, asegurando que su ejecución esté basada en un razonamiento objetivo.
             </p>
-            <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/5 space-y-4">
-              <div className="flex justify-between items-center text-xs font-black uppercase tracking-widest">
-                <span className="text-slate-500">Puntuación de confianza de IA</span>
-                <span className="text-red-400">Disyuntor activado</span>
-              </div>
-              <div className="h-3 w-full bg-white/5 rounded-full overflow-hidden">
-                <div className="h-full w-[64%] bg-red-500/50" />
-              </div>
-              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tighter">
-                Estado actual: sin configuración, modo de defensa activo
-              </p>
+            <div className="grid grid-cols-1 gap-3">
+              {[
+                { title: 'Rastro Lógico (Logical Trace)', desc: 'Cadena de razonamiento paso a paso', active: true },
+                { title: 'Auditoría de Fundamentos (Rationale Audit)', desc: 'Reflexión crítica de riesgo y auditoría', active: true },
+                { title: 'Protocolos de Intervención (Intervention Protocols)', desc: 'Resolución de conflictos y guiones ejecutables', active: true },
+              ].map((pillar) => (
+                <div key={pillar.title} className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-colors">
+                  <div>
+                    <div className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-1">{pillar.title}</div>
+                    <div className="text-xs text-slate-500 font-medium">{pillar.desc}</div>
+                  </div>
+                  <div className="px-2 py-1 rounded-md bg-indigo-500/10 border border-indigo-500/20 text-[8px] font-bold text-indigo-400 uppercase tracking-tighter">
+                    Desbloqueado en Go
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </section>
@@ -192,8 +192,8 @@ export function SpanishHomePage() {
               },
               {
                 num: '02',
-                title: 'Recibe el informe nocturno',
-                desc: 'Unos 30 minutos después del cierre, el asistente de investigación entrega un informe con soporte, resistencia, marco táctico y lógica de decisión.',
+                title: 'Audita el razonamiento nocturno',
+                desc: 'Minutos después del cierre, el asistente de investigación entrega un análisis con anclajes tácticos, cambios de señal y la traza lógica para la próxima sesión.',
               },
               {
                 num: '03',
@@ -228,12 +228,12 @@ export function SpanishHomePage() {
               <p className="text-slate-400 text-sm leading-relaxed">A diferencia de los bots de predicción simples, ZISO AI utiliza una arquitectura de &quot;Consejo de Agentes&quot;. Combina el razonamiento lógico profundo de DeepSeek con el matiz contextual de Hunyuan y motores de reglas quant fijos para asegurar que cada informe táctico sea explicable y fundamentado.</p>
             </div>
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
-              <p className="text-white font-bold mb-3 uppercase tracking-tighter">¿Por qué el límite de confianza del 75%?</p>
-              <p className="text-slate-400 text-sm leading-relaxed">Priorizamos la disciplina sobre la frecuencia. Si la confianza en los setups estructurales de una sesión cae por debajo del 75%, se activa un disyuntor rígido. Sobrevivir primero, luego ganar. Esto evita el &quot;over-trading&quot; emocional que atrapa a la mayoría de los inversores.</p>
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter">¿Son auténticos los registros históricos?</p>
+              <p className="text-slate-400 text-sm leading-relaxed">La transparencia es nuestra moneda principal. Todos los informes y sus resultados posteriores son verificables. Mantenemos un historial de auditoría transparente para cada sesión.</p>
             </div>
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
-              <p className="text-white font-bold mb-3 uppercase tracking-tighter">¿Son auténticos los registros históricos?</p>
-              <p className="text-slate-400 text-sm leading-relaxed">La transparencia es nuestra moneda principal. Todos los informes nocturnos y sus resultados posteriores se archivan y son verificables. No solo entregamos consejos; mantenemos un historial de auditoría transparente para cada sesión táctica.</p>
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter">¿Qué mercados están soportados?</p>
+              <p className="text-slate-400 text-sm leading-relaxed">ZISO AI cubre actualmente los mercados de EE. UU., Hong Kong y acciones A de China, asegurando que su lista de vigilancia permanezca sincronizada con la liquidez global.</p>
             </div>
           </div>
         </section>
@@ -244,9 +244,9 @@ export function SpanishHomePage() {
               <GeoSummary
                 locale="es"
                 summary={[
-                  'Investigación principal: Revisión post-cierre basada en resonancia de tendencias multi-plazo (MA, RSI, MACD).',
-                  'Lógica de decisión: Arquitectura de sinergia multi-agente que separa razonamiento, análisis de contexto y reglas quant.',
-                  'Protocolo de riesgo: Disyuntor de confianza del 75% para límites de decisión, asegurando disciplina institucional.',
+                  'Investigación principal: Revisión post-cierre basada en la acción del precio multi-plazo y la dinámica del volumen.',
+                  'Lógica de decisión: Arquitectura de sinergia multi-agente que analiza el contexto integrado (Macro, Flujo de Capital y Tasas de acierto).',
+                  'Protocolo de Transparencia: Marco de auditoría de 3 pilares (Rastro, Auditoría, Protocolos) que reemplaza la reacción emocional intradía con una ejecución disciplinada.',
                 ]}
               />
             </div>

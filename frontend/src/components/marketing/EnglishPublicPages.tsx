@@ -315,31 +315,35 @@ export function EnglishHomePage() {
             <ShieldCheck size={120} className="absolute bottom-4 right-4 opacity-[0.1] text-red-500 pointer-events-none" />
           </div>
           <div className="order-1 md:order-2 space-y-8">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] font-black uppercase tracking-[0.2em]">
-              Risk control system
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[10px] font-black uppercase tracking-[0.2em]">
+              Transparency Protocol
             </div>
             <h2 className="text-4xl md:text-5xl font-black tracking-tighter leading-tight">
-              Even in the wildest tape,
+              Transparency is the
               <br />
-              <span className="text-red-400">the 75% gate still holds.</span>
+              <span className="text-indigo-400">ultimate trading discipline.</span>
             </h2>
             <p className="text-slate-400 font-medium leading-relaxed">
-              Understanding the game is not enough. You also need to defend your boundaries. If the system&apos;s confidence
-              in the next session falls below 75%, ZISO AI triggers a hard circuit breaker and blocks aggressive action.
-              Observe first. Survive first. Not losing discipline is the first rule of staying in the market long enough
-              to win anything meaningful.
+              Remove emotional interference by understanding the &quot;how&quot; and &quot;why&quot; behind each signal. ZISO
+              Go provides a <strong>Logical Trace</strong>, a <strong>Rationale Audit</strong>, and <strong>Intervention Protocols</strong> for every
+              setup, ensuring your execution is rooted in objective reasoning.
             </p>
-            <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/5 space-y-4">
-              <div className="flex justify-between items-center text-xs font-black uppercase tracking-widest">
-                <span className="text-slate-500">AI confidence score</span>
-                <span className="text-red-400">Circuit breaker triggered</span>
-              </div>
-              <div className="h-3 w-full bg-white/5 rounded-full overflow-hidden">
-                <div className="h-full w-[64%] bg-red-500/50" />
-              </div>
-              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tighter">
-                Current state: no setup, defense mode active
-              </p>
+            <div className="grid grid-cols-1 gap-3">
+              {[
+                { title: 'Logical Trace', desc: 'Step-by-step reasoning chain' },
+                { title: 'Rationale Audit', desc: 'Critical risk reflection & audit' },
+                { title: 'Intervention Protocols', desc: 'Conflict resolution & decision scripts' },
+              ].map((pillar) => (
+                <div key={pillar.title} className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-colors">
+                  <div>
+                    <div className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-1">{pillar.title}</div>
+                    <div className="text-xs text-slate-500 font-medium">{pillar.desc}</div>
+                  </div>
+                  <div className="px-2 py-1 rounded-md bg-indigo-500/10 border border-indigo-500/20 text-[8px] font-bold text-indigo-400 uppercase tracking-tighter">
+                    Unlocked in Go
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </section>

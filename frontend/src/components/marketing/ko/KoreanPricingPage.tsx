@@ -71,10 +71,10 @@ const KO_FEATURE_COMPARISON = [
   { label: '서비스 모델', free: 'Hunyuan Lite', go: 'DeepSeek', plus: 'DeepSeek + Gemini', highlight: true },
   { label: '자선주/관심종목 수량', free: '3종', go: '10종', plus: '10종', highlight: true },
   { label: '월간 보고서 한도', free: '60 / 월', go: '200 / 월', plus: '200 / 월' },
-  { label: '추세 신호 / 전술 브리핑', free: '✅', go: '✅', plus: '✅' },
+  { label: '전술적 앵커 (Tactical Anchors)', free: '✅', go: '✅', plus: '✅' },
   { label: '핵심 매매가점 / 공매도 압력', free: '✅', go: '✅', plus: '✅' },
-  { label: '시나리오 추론 / 위험 리플렉션', free: '❌', go: '✅', plus: '✅' },
-  { label: '충돌/이견 설명', free: '❌', go: '✅', plus: '✅' },
+  { label: '논리적 트레이스 (Logical Trace)', free: '❌', go: '✅', plus: '✅' },
+  { label: '근거 감사 (Rationale Audit)', free: '❌', go: '✅', plus: '✅' },
   { label: '보고서 공유', free: '❌', go: '무제한', plus: '무제한' },
   { label: '시장 커버리지', free: 'US / HK / CN', go: 'US / HK / CN', plus: 'US / HK / CN' },
   

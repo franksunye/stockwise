@@ -22,10 +22,10 @@ export function KoreanHomePage() {
       },
       {
         "@type": "Question",
-        "name": "AI 추론은 어떻게 작동하나요?",
+        "name": "어떤 시장을 지원하나요?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "단순한 예측 봇과 달리, ZISO AI는 '에이전트 위원회(Council of Agents)' 아키텍처를 사용합니다. DeepSeek의 깊은 논리적 추론과 Hunyuan의 언어적 뉘앙스, 그리고 정형화된 퀀트 규칙 엔진을 결합하여 모든 전략적 브리핑이 데이터에 근거하고 설명 가능하도록 보장합니다."
+          "text": "ZISO AI는 현재 미국, 홍콩 및 중국 A주 시장을 지원합니다. 엔진은 현지화된 유동성 벡터와 시장별 컨텍스트를 캡처하여 글로벌 포트폴리오 커버리지를 보장합니다."
         }
       }
     ]
@@ -48,8 +48,7 @@ export function KoreanHomePage() {
             </span>
           </h1>
           <p className="text-lg md:text-xl text-slate-400 font-medium max-w-2xl mx-auto leading-relaxed">
-            ZISO AI는 장 마감 후의 시장 데이터를 주요 가격대, 실행 상태, 컨텍스트 및 리스크 경계가 포함된 체계적인 브리핑으로 변환합니다.
-            이제 개인 투자자도 장중 반응이 아닌, 다음 세션을 위한 철저한 준비를 할 수 있습니다.
+            ZISO AI는 <strong>통합 컨텍스트(매크로, 자금 흐름 및 변동성)</strong>를 분석하여 <strong>논리적 근거가 확실한 결정 시나리오</strong>를 생성합니다. 장중의 감정이 아닌 객관적 원격 측정 데이터를 기반으로 실행하십시오.
           </p>
           <div className="pt-10 flex flex-col md:flex-row items-center justify-center gap-4">
             <Link
@@ -102,8 +101,7 @@ export function KoreanHomePage() {
               <span className="text-indigo-400">내일이 오기 전에 내일의 시나리오를 작성하십시오.</span>
             </h2>
             <p className="text-slate-400 font-medium leading-relaxed">
-              전문 트레이더는 장중의 빠른 본능으로만 정의되지 않습니다. 그들의 진정한 우위는 장 마감 후의 노력에서 나옵니다.
-              ZISO AI는 매일 저녁 시장 데이터와 뉴스를 연결하여 구조화된 결정 시나리오로 변환합니다. 무분별한 예측이 아닌, 실행 가능한 경계를 정의합니다.
+              트레이더의 진정한 우위는 장 마감 후의 집중에서 나옵니다. ZISO AI는 매일 저녁 시장 컨텍스트, 자금 흐름 및 가격 변동을 합성하여 구조화된 결정 시나리오로 변환합니다. 무분별한 예측이 아닌, 실행 가능한 경계를 정의합니다.
             </p>
             <ul className="space-y-4">
               {[
@@ -131,30 +129,32 @@ export function KoreanHomePage() {
             <ShieldCheck size={120} className="absolute bottom-4 right-4 opacity-[0.1] text-red-500 pointer-events-none" />
           </div>
           <div className="order-1 md:order-2 space-y-8">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] font-black uppercase tracking-[0.2em]">
-              리스크 컨트롤 시스템
-            </div>
-            <h2 className="text-4xl md:text-5xl font-black tracking-tighter leading-tight">
-              거친 변동성 속에서도,
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[10px] font-black uppercase tracking-[0.2em]"> 훈련 프레임워크 </div>
+            <h2 className="text-4xl md:text-5xl font-black italic tracking-tighter leading-tight uppercase">
+              투명성은
               <br />
-              <span className="text-red-400">75%의 게이트는 유지됩니다.</span>
+              <span className="text-indigo-500">궁극적인 투자 규율입니다.</span>
             </h2>
             <p className="text-slate-400 font-medium leading-relaxed">
-              게임을 이해하는 것만으로는 부족합니다. 당신의 경계를 지켜야 합니다. 다음 세션에 대한 시스템의 신뢰도가 75% 미만으로 떨어지면,
-              ZISO AI는 강력한 서킷 브레이커를 작동시켜 공격적인 행동을 차단합니다. 관찰이 우선입니다. 생존이 우선입니다.
-              규율을 잃지 않는 것, 그것이 의미 있는 승리를 거둘 만큼 오랫동안 시장에 머무르는 첫 번째 규칙입니다.
+              모든 신호 뒤에 숨겨진 &apos;방법&apos;과 &apos;이유&apos;를 이해함으로써 감정적 간섭을 제거하십시오. 
+              ZISO Go는 모든 거래 설정에 대해 <strong>논리적 트레이스</strong>, <strong>근거 감사</strong> 및 <strong>개입 프로토콜</strong>을 제공하여 실행이 객관적 추론에 뿌리를 두도록 보장합니다.
             </p>
-            <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/5 space-y-4">
-              <div className="flex justify-between items-center text-xs font-black uppercase tracking-widest">
-                <span className="text-slate-500">AI 신뢰도 점수</span>
-                <span className="text-red-400">서킷 브레이커 작동</span>
-              </div>
-              <div className="h-3 w-full bg-white/5 rounded-full overflow-hidden">
-                <div className="h-full w-[64%] bg-red-500/50" />
-              </div>
-              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tighter">
-                현재 상태: 설정값 없음, 수비 모드 활성화
-              </p>
+            <div className="grid grid-cols-1 gap-3">
+              {[
+                { title: '논리적 트레이스 (Logical Trace)', desc: '단계별 추론 체인', active: true },
+                { title: '근거 감사 (Rationale Audit)', desc: '비판적 리스크 반사 및 감사', active: true },
+                { title: '개입 프로토콜 (Intervention Protocols)', desc: '충돌 해결 및 실행 시나리오', active: true },
+              ].map((pillar) => (
+                <div key={pillar.title} className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-colors">
+                  <div>
+                    <div className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-1">{pillar.title}</div>
+                    <div className="text-xs text-slate-500 font-medium">{pillar.desc}</div>
+                  </div>
+                  <div className="px-2 py-1 rounded-md bg-indigo-500/10 border border-indigo-500/20 text-[8px] font-bold text-indigo-400 uppercase tracking-tighter">
+                    Go 버전 지원
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </section>
@@ -174,8 +174,8 @@ export function KoreanHomePage() {
               },
               {
                 num: '02',
-                title: '매일 밤 브리핑을 받으십시오',
-                desc: '장 마감 후 약 30분 이내에, 리서치 어시스턴트가 지지선, 저항선, 전술적 프레임 및 결정 로직이 포함된 브리핑을 전달합니다.',
+                title: '매일 밤 추론을 감사하십시오',
+                desc: '장 마감 후 몇 분 이내에 리서치 엔진은 세션을 합성하여 새로운 전술적 앵커, 신호 반전 및 다음 세션을 위한 논리적 추론 트레이스를 계산합니다.',
               },
               {
                 num: '03',
@@ -210,12 +210,12 @@ export function KoreanHomePage() {
               <p className="text-slate-400 text-sm leading-relaxed">단순한 예측 봇과 달리, ZISO AI는 &apos;에이전트 위원회&apos; 아키텍처를 사용합니다. DeepSeek의 깊은 논리적 추론과 Hunyuan의 맥락 파악 능력, 그리고 고정된 퀀트 규칙 엔진을 결합하여 모든 전술 브리핑이 데이터에 기반하고 설명 가능하도록 보장합니다.</p>
             </div>
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
-              <p className="text-white font-bold mb-3 uppercase tracking-tighter">왜 75% 신뢰도 게이트를 유지하나요?</p>
-              <p className="text-slate-400 text-sm leading-relaxed">우리는 매매 빈도보다 실행 규율을 우선시합니다. 시스템의 신뢰도가 75% 미만으로 떨어지면 강력한 서킷 브레이커가 작동합니다. 생존이 우선이며, 그 다음에 승리가 있습니다. 이 게이트는 감정적인 &apos;과잉 매매&apos;를 방지하는 보호막 역할을 합니다.</p>
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter">과거 기록은 투명하게 공개되나요?</p>
+              <p className="text-slate-400 text-sm leading-relaxed">투명성은 우리의 핵심 가치입니다. 모든 추론 브리핑과 그에 따른 결과는 언제든 검증 가능합니다. 우리는 모든 전술 세션에 대해 투명한 감사 추적(Audit Trail)을 유지합니다.</p>
             </div>
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
-              <p className="text-white font-bold mb-3 uppercase tracking-tighter">과거 기록은 투명하게 공개되나요?</p>
-              <p className="text-slate-400 text-sm leading-relaxed">투명성은 우리의 핵심 가치입니다. 모든 전술 브리핑과 그에 따른 결과는 각 종목별 아카이브에 기록되며 언제든 검증 가능합니다. 우리는 단순히 의견을 전달하는 것에 그치지 않고, 모든 세션에 대해 투명한 감사 추적(Audit Trail)을 유지합니다.</p>
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter">어떤 시장을 지원하나요?</p>
+              <p className="text-slate-400 text-sm leading-relaxed">ZISO AI는 현재 미국, 홍콩 및 중국 A주 시장을 지원하며, 귀하의 관심 종목이 글로벌 유동성 벡터 및 시장별 컨텍스트와 동기화되도록 보장합니다.</p>
             </div>
           </div>
         </section>
@@ -226,9 +226,9 @@ export function KoreanHomePage() {
               <GeoSummary
                 locale="ko"
                 summary={[
-                  '핵심 리서치: MA, RSI, MACD 다중 타임프레임 추세 공생 관계에 기반한 장 마감 후 분석.',
-                  '의사결정 로직: 추론, 맥락 분석, 퀀트 구조적 제약을 분리한 다중 에이전트 시너지 아키텍처.',
-                  '리스크 프로토콜: 의사결정 경계를 위한 75% 신뢰도 서킷 브레이커, 기관급 실행 규율 보장.',
+                  '핵심 리서치: 다중 타임프레임 가격 활동 및 거래량 역학에 기반한 장 마감 후 분석.',
+                  '의사결정 로직: 통합 컨텍스트(매크로, 자금 흐름 및 적중률)를 분석하는 멀티 에이전트 시너지 아키텍처.',
+                  '투명성 프로토콜: 3단계 감사 프레임워크(추적, 감사, 프로토콜)로 장중 감정적 반응을 체계적인 실행으로 대체.',
                 ]}
               />
             </div>

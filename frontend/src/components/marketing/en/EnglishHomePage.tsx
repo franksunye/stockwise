@@ -30,10 +30,10 @@ export function EnglishHomePage() {
       },
       {
         "@type": "Question",
-        "name": "How does the AI reasoning work?",
+        "name": "Which markets are supported?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Unlike simple prediction bots, ZISO AI uses a 'Council of Agents' architecture. It combines the deep logical reasoning of DeepSeek with the linguistic nuance of other models and fixed quant rule engines to ensure every tactical briefing is explainable and grounded in data."
+          "text": "ZISO AI currently covers the US, Hong Kong, and China A-share markets. The engine captures localized liquidity vectors and market-specific context to ensure global portfolio coverage."
         }
       }
     ]
@@ -56,8 +56,7 @@ export function EnglishHomePage() {
             </span>
           </h1>
           <p className="text-lg md:text-xl text-slate-400 font-medium max-w-2xl mx-auto leading-relaxed">
-            ZISO AI turns post-close market data into a <strong>logic-grounded decision script</strong> with key levels,
-            action states, context, and risk boundaries, so retail investors can execute with institutional-grade discipline.
+            ZISO AI analyzed <strong>integrated context (Macro, Capital Flow, and Volatility)</strong> to generate a <strong>logic-grounded decision script</strong>, ensuring your execution is driven by objective telemetry, not intraday emotion.
           </p>
           <div className="pt-10 flex flex-col md:flex-row items-center justify-center gap-4">
             <Link
@@ -110,9 +109,7 @@ export function EnglishHomePage() {
               <span className="text-indigo-400">Write tomorrow&apos;s script before tomorrow arrives.</span>
             </h2>
             <p className="text-slate-400 font-medium leading-relaxed">
-              Professional traders are not defined by fast intraday instinct alone. Their real edge comes from the work
-              they do after the close. ZISO AI connects market data and news each evening, then turns that into a
-              structured decision script. It does not manufacture random predictions. It defines executable boundaries.
+              Real edge comes from the work you do after the close. ZISO AI synthesizes market context, capital flow, and price action each evening, transforming them into a structured decision script. It does not manufacture random predictions. It defines executable boundaries.
             </p>
             <ul className="space-y-4">
               {[
@@ -187,8 +184,8 @@ export function EnglishHomePage() {
               },
               {
                 num: '02',
-                title: 'Receive the nightly brief',
-                desc: 'Within about 30 minutes after the close, the research assistant delivers a briefing with support, resistance, tactical framing, and decision logic.',
+                title: 'Audit nightly reasoning',
+                desc: 'Within minutes after the close, the research engine synthesizes the session—calculating fresh tactical anchors, signal flips, and the logical reasoning trace for the next session.',
               },
               {
                 num: '03',
@@ -224,7 +221,11 @@ export function EnglishHomePage() {
             </div>
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
               <p className="text-white font-bold mb-3 uppercase tracking-tighter">Are the historical records authentic?</p>
-              <p className="text-slate-400 text-sm leading-relaxed">Transparency is our core currency. All nightly briefings and their subsequent outcomes are archived and verifiable within the individual stock files. We don&apos;t just deliver advice; we maintain a full, transparent audit trail for every tactical session.</p>
+              <p className="text-slate-400 text-sm leading-relaxed">Transparency is our core currency. All nightly briefings and their subsequent outcomes are archived and verifiable. We don&apos;t just deliver advice; we maintain a full, transparent audit trail for every tactical session.</p>
+            </div>
+            <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
+              <p className="text-white font-bold mb-3 uppercase tracking-tighter">Which markets are supported?</p>
+              <p className="text-slate-400 text-sm leading-relaxed">ZISO AI currently covers the US, Hong Kong, and China A-share markets, ensuring your watchlist remains synced across global liquidity vectors and market-specific context.</p>
             </div>
           </div>
         </section>
@@ -235,9 +236,9 @@ export function EnglishHomePage() {
               <GeoSummary
                 locale="en"
                 summary={[
-                  'Core Research: Post-close review focusing on multi-timeframe trend resonance (MA, RSI, MACD).',
-                  'Decision Logic: Multi-agent synergy architecture separating reasoning, context analysis, and quant structural constraints.',
-                  'Risk Protocol: 75% confidence circuit breaker for decision boundaries, ensuring institutional-grade execution discipline.',
+                  'Core Research: Post-close review focusing on multi-timeframe price action and volume dynamics.',
+                  'Decision Logic: Multi-agent synergy architecture analyzing integrated context (Macro, Capital Flow, & Hit-rates).',
+                  'Transparency Protocol: 3-pillar audit framework (Trace, Audit, Protocols) replacing emotional intraday reaction with disciplined execution.',
                 ]}
               />
             </div>

@@ -71,10 +71,10 @@ const ES_FEATURE_COMPARISON = [
   { label: 'Modelo de Servicio', free: 'Hunyuan Lite', go: 'DeepSeek', plus: 'DeepSeek + Gemini', highlight: true },
   { label: 'Acciones en Lista', free: '3 Acciones', go: '10 Acciones', plus: '10 Acciones', highlight: true },
   { label: 'Cuota Mensual de Informes', free: '60 / Mes', go: '200 / Mes', plus: '200 / Mes' },
-  { label: 'Señales / Informes Tácticos', free: '✅', go: '✅', plus: '✅' },
+  { label: 'Señales Tácticas (Tactical Anchors)', free: '✅', go: '✅', plus: '✅' },
   { label: 'Niveles Clave / Presión Corta', free: '✅', go: '✅', plus: '✅' },
-  { label: 'Deducción / Reflexión de Riesgo', free: '❌', go: '✅', plus: '✅' },
-  { label: 'Explicación de Conflicto', free: '❌', go: '✅', plus: '✅' },
+  { label: 'Rastro Lógico (Logical Trace)', free: '❌', go: '✅', plus: '✅' },
+  { label: 'Auditoría de Fundamentos (Rationale Audit)', free: '❌', go: '✅', plus: '✅' },
   { label: 'Compartir Informes', free: '❌', go: 'Ilimitado', plus: 'Ilimitado' },
   { label: 'Cobertura de Mercado', free: 'US / HK / CN', go: 'US / HK / CN', plus: 'US / HK / CN' },
   
