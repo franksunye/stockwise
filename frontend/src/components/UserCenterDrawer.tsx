@@ -361,7 +361,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                               }}
                           >
                               <div className="flex items-center gap-3">
-                                  <h4 className="text-sm font-bold text-white">
+                                  <h4 className="text-sm font-bold text-white uppercase">
                                       {t('investmentMode')}
                                   </h4>
                                   <span className="px-2 py-0.5 rounded-lg bg-indigo-500/10 text-[10px] font-bold text-indigo-400 border border-indigo-500/20">
@@ -536,7 +536,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                         <div className="glass-card !p-0 rounded-[24px] overflow-hidden relative group border-white/5 bg-white/[0.02]">
                           <div className="relative z-10 px-5 py-4 pb-2">
                              <div className="flex items-center justify-between mb-3">
-                 <h4 className="text-sm font-black italic text-white flex items-center gap-2">
+                 <h4 className="text-sm font-black italic text-white flex items-center gap-2 uppercase">
                                      {isChannel ? (referralAlias || t('referral.partner')) : t('referral.title')}
                                      {isChannel ? (
                                          <span className="px-1.5 py-0.5 rounded bg-amber-500 text-[8px] font-black uppercase not-italic text-black">C</span>
@@ -679,7 +679,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                         <div className="flex items-center gap-3">
                           <BookOpen className="w-5 h-5 text-indigo-400" />
                           <div className="text-left">
-                            <span className="block text-sm font-bold text-white">{t('learn')}</span>
+                            <span className="block text-sm font-bold text-white uppercase">{t('learn')}</span>
                             <span className="block text-[10px] text-slate-500 font-medium">{t('learnSubtitle')}</span>
                           </div>
                         </div>
@@ -689,7 +689,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                       <button onClick={() => setShowPricing(true)} className={`w-full py-4 px-5 rounded-[24px] border transition-all flex items-center justify-between group ${isPremiumTier ? 'bg-white/[0.02] border-white/5 hover:border-indigo-500/20' : 'bg-indigo-500/5 border-indigo-500/10 hover:border-indigo-500/20'}`}>
                         <div className="flex items-center gap-3">
                           <Crown className={`w-5 h-5 ${isPremiumTier ? 'text-slate-400' : 'text-amber-400'}`} />
-                          <span className="text-sm font-bold text-white uppercase text-left">{isPremiumTier ? tGlobal('pricing.title') : t('unlockGoBenefits')}</span>
+                          <span className="text-sm font-bold text-white uppercase text-left tracking-tight">{isPremiumTier ? tGlobal('pricing.title') : t('unlockGoBenefits')}</span>
                         </div>
                         <ChevronRight size={14} className="text-slate-600 group-hover:text-white transition-colors" />
                       </button>
