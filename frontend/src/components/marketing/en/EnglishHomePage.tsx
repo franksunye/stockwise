@@ -30,10 +30,10 @@ export function EnglishHomePage() {
       },
       {
         "@type": "Question",
-        "name": "Why the 75% confidence gate?",
+        "name": "How does the AI reasoning work?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "We prioritize execution discipline over frequency. If the system's confidence in a session's structural setups falls below 75%, it triggers a hard circuit breaker. This gate prevents the emotional 'over-trading' that traps most retail investors."
+          "text": "Unlike simple prediction bots, ZISO AI uses a 'Council of Agents' architecture. It combines the deep logical reasoning of DeepSeek with the linguistic nuance of other models and fixed quant rule engines to ensure every tactical briefing is explainable and grounded in data."
         }
       }
     ]
@@ -56,8 +56,8 @@ export function EnglishHomePage() {
             </span>
           </h1>
           <p className="text-lg md:text-xl text-slate-400 font-medium max-w-2xl mx-auto leading-relaxed">
-            ZISO AI turns post-close market data into a disciplined briefing with key levels, action states, context,
-            and risk boundaries, so retail investors can prepare for the next session instead of reacting inside it.
+            ZISO AI turns post-close market data into a <strong>logic-grounded decision script</strong> with key levels,
+            action states, context, and risk boundaries, so retail investors can execute with institutional-grade discipline.
           </p>
           <div className="pt-10 flex flex-col md:flex-row items-center justify-center gap-4">
             <Link
@@ -137,34 +137,37 @@ export function EnglishHomePage() {
         <section className="pt-32 w-full grid md:grid-cols-2 gap-20 items-center text-left">
           <div className="order-2 md:order-1 glass-card aspect-square bg-[#0A0A10] rounded-[40px] overflow-hidden border border-white/5 relative">
             <Image src="/images/landing/circuit-breaker-logic.png" alt="Risk circuit breaker logic" fill sizes="(min-width: 768px) 45vw, 100vw" className="object-cover opacity-80 hover:opacity-100 transition-opacity duration-700" />
-            <ShieldCheck size={120} className="absolute bottom-4 right-4 opacity-[0.1] text-red-500 pointer-events-none" />
+            <ShieldCheck size={120} className="absolute bottom-4 right-4 opacity-[0.1] text-indigo-500 pointer-events-none" />
           </div>
           <div className="order-1 md:order-2 space-y-8">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] font-black uppercase tracking-[0.2em]">
-              Risk control system
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[10px] font-black uppercase tracking-[0.2em]">
+              Discipline Framework
             </div>
             <h2 className="text-4xl md:text-5xl font-black tracking-tighter leading-tight">
-              Even in the wildest tape,
+              Transparency is the
               <br />
-              <span className="text-red-400">the 75% gate still holds.</span>
+              <span className="text-indigo-400">ultimate discipline.</span>
             </h2>
             <p className="text-slate-400 font-medium leading-relaxed">
-              Understanding the game is not enough. You also need to defend your boundaries. If the system&apos;s confidence
-              in the next session falls below 75%, ZISO AI triggers a hard circuit breaker and blocks aggressive action.
-              Observe first. Survive first. Not losing discipline is the first rule of staying in the market long enough
-              to win anything meaningful.
+              Eliminate emotional interference by understanding the &quot;how&quot; and &quot;why&quot; behind every signal. 
+              ZISO Go provides a comprehensive <strong>Logical Trace</strong>, <strong>Rationale Audit</strong>, and <strong>Intervention Protocols</strong> for every setup, ensuring your execution is grounded in objective reasoning, not impulse.
             </p>
-            <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/5 space-y-4">
-              <div className="flex justify-between items-center text-xs font-black uppercase tracking-widest">
-                <span className="text-slate-500">AI confidence score</span>
-                <span className="text-red-400">Circuit breaker triggered</span>
-              </div>
-              <div className="h-3 w-full bg-white/5 rounded-full overflow-hidden">
-                <div className="h-full w-[64%] bg-red-500/50" />
-              </div>
-              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tighter">
-                Current state: no setup, defense mode active
-              </p>
+            <div className="grid grid-cols-1 gap-3">
+              {[
+                { title: 'Logical Trace', desc: 'Step-by-step reasoning chain', active: true },
+                { title: 'Rationale Audit', desc: 'Critical risk reflection & audit', active: true },
+                { title: 'Intervention Protocols', desc: 'Conflict resolution & scripts', active: true },
+              ].map((pillar) => (
+                <div key={pillar.title} className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-colors">
+                  <div>
+                    <div className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-1">{pillar.title}</div>
+                    <div className="text-xs text-slate-500 font-medium">{pillar.desc}</div>
+                  </div>
+                  <div className="px-2 py-1 rounded-md bg-indigo-500/10 border border-indigo-500/20 text-[8px] font-bold text-indigo-400 uppercase tracking-tighter">
+                    Unlocked in Go
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </section>
@@ -218,10 +221,6 @@ export function EnglishHomePage() {
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
               <p className="text-white font-bold mb-3 uppercase tracking-tighter">How does the AI reasoning work?</p>
               <p className="text-slate-400 text-sm leading-relaxed">Unlike simple prediction bots, ZISO AI uses a &quot;Council of Agents&quot; architecture. It combines the deep logical reasoning of DeepSeek with the linguistic nuance of Hunyuan and fixed quant rule engines to ensure every tactical briefing is explainable and grounded in data.</p>
-            </div>
-            <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
-              <p className="text-white font-bold mb-3 uppercase tracking-tighter">Why the 75% confidence gate?</p>
-              <p className="text-slate-400 text-sm leading-relaxed">We prioritize execution discipline over frequency. If the system&apos;s confidence in a session&apos;s structural setups falls below 75%, it triggers a hard circuit breaker. Survive first, then win. This gate prevents the emotional &quot;over-trading&quot; that traps most retail investors.</p>
             </div>
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
               <p className="text-white font-bold mb-3 uppercase tracking-tighter">Are the historical records authentic?</p>
