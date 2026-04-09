@@ -17,7 +17,7 @@ export function EnglishHomePage() {
         "name": "What exactly is ZISO AI?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "It is a professional research desk that takes over the exhausting market homework. By combining deep historical modeling with a multi-agent reasoning council, it transforms complex market noise into a structured, executable decision script."
+          "text": "ZISO AI is a professional research desk that automates exhaustive market analysis. By combining deep historical modeling with a multi-agent reasoning council, it transforms complex market noise into a structured, executable decision script."
         }
       },
       {
@@ -52,7 +52,7 @@ export function EnglishHomePage() {
             AI does the research.
             <br />
             <span className="bg-gradient-to-r from-indigo-400 to-cyan-300 bg-clip-text text-transparent">
-              You keep the decision.
+              The decision remains yours.
             </span>
           </h1>
           <p className="text-lg md:text-xl text-slate-400 font-medium max-w-2xl mx-auto leading-relaxed">
@@ -106,7 +106,7 @@ export function EnglishHomePage() {
             <h2 className="text-4xl md:text-5xl font-black tracking-tighter leading-tight">
               Review when the market is calm.
               <br />
-              <span className="text-indigo-400">Write tomorrow&apos;s script before tomorrow arrives.</span>
+              <span className="text-indigo-400">Master the next session before the opening bell.</span>
             </h2>
             <p className="text-slate-400 font-medium leading-relaxed">
               Real edge comes from the work you do after the close. ZISO AI synthesizes market context, capital flow, and price action each evening, transforming them into a structured decision script. It does not manufacture random predictions. It defines executable boundaries.
@@ -147,7 +147,7 @@ export function EnglishHomePage() {
             </h2>
             <p className="text-slate-400 font-medium leading-relaxed">
               Eliminate emotional interference by understanding the &quot;how&quot; and &quot;why&quot; behind every signal. 
-              ZISO Go provides a comprehensive <strong>Logical Trace</strong>, <strong>Rationale Audit</strong>, and <strong>Intervention Protocols</strong> for every setup, ensuring your execution is grounded in objective reasoning, not impulse.
+              ZISO Go provides a comprehensive <strong>Logical Trace</strong>, <strong>Rationale Audit</strong>, and <strong>Intervention Protocols</strong> for every setup, ensuring your execution is rooted in objective reasoning, not impulse.
             </p>
             <div className="grid grid-cols-1 gap-3">
               {[
@@ -190,7 +190,7 @@ export function EnglishHomePage() {
               {
                 num: '03',
                 title: 'Execute with intraday discipline',
-                desc: 'Stop letting random intraday movement dictate the trade. When price reaches the script set the night before, the council helps restore execution discipline.',
+                desc: 'Stop letting random intraday noise dictate your trades. When price reaches the levels set the night before, the council helps you maintain strict execution discipline.',
               },
             ].map((step) => (
               <div key={step.num} className="space-y-6 relative group">
@@ -213,7 +213,7 @@ export function EnglishHomePage() {
           <div className="grid md:grid-cols-2 gap-4 text-left">
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
               <p className="text-white font-bold mb-3 uppercase tracking-tighter">What exactly is ZISO AI?</p>
-              <p className="text-slate-400 text-sm leading-relaxed">It is a professional research desk that takes over the exhausting market homework. By combining deep historical modeling with a multi-agent reasoning council, it transforms complex market noise into a structured, executable decision script.</p>
+              <p className="text-slate-400 text-sm leading-relaxed">ZISO AI is a professional research desk that automates exhaustive market analysis. By combining deep historical modeling with a multi-agent reasoning council, it transforms complex market noise into a structured, executable decision script.</p>
             </div>
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
               <p className="text-white font-bold mb-3 uppercase tracking-tighter">How does the AI reasoning work?</p>

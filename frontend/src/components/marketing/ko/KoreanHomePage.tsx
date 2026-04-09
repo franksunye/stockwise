@@ -44,7 +44,7 @@ export function KoreanHomePage() {
             AI가 리서치를 수행합니다.
             <br />
             <span className="bg-gradient-to-r from-indigo-400 to-cyan-300 bg-clip-text text-transparent">
-              결정은 귀하가 내립니다.
+              최종 의사결정은 당신의 몫입니다.
             </span>
           </h1>
           <p className="text-lg md:text-xl text-slate-400 font-medium max-w-2xl mx-auto leading-relaxed">
@@ -98,7 +98,7 @@ export function KoreanHomePage() {
             <h2 className="text-4xl md:text-5xl font-black tracking-tighter leading-tight">
               시장이 평온할 때 복기하십시오.
               <br />
-              <span className="text-indigo-400">내일이 오기 전에 내일의 시나리오를 작성하십시오.</span>
+              <span className="text-indigo-400">개장 전, 당신만의 대응 시나리오를 완성하십시오.</span>
             </h2>
             <p className="text-slate-400 font-medium leading-relaxed">
               트레이더의 진정한 우위는 장 마감 후의 집중에서 나옵니다. ZISO AI는 매일 저녁 시장 컨텍스트, 자금 흐름 및 가격 변동을 합성하여 구조화된 결정 시나리오로 변환합니다. 무분별한 예측이 아닌, 실행 가능한 경계를 정의합니다.
@@ -137,7 +137,7 @@ export function KoreanHomePage() {
             </h2>
             <p className="text-slate-400 font-medium leading-relaxed">
               모든 신호 뒤에 숨겨진 &apos;방법&apos;과 &apos;이유&apos;를 이해함으로써 감정적 간섭을 제거하십시오. 
-              ZISO Go는 모든 거래 설정에 대해 <strong>논리적 트레이스</strong>, <strong>근거 감사</strong> 및 <strong>개입 프로토콜</strong>을 제공하여 실행이 객관적 추론에 뿌리를 두도록 보장합니다.
+              ZISO Go는 모든 거래 설정에 대하여 <strong>논리적 트레이스</strong>, <strong>근거 감사</strong> 및 <strong>개입 프로토콜</strong>을 제공하여, 당신의 실행이 철저히 객관적 추론에 뿌리를 두도록 보장합니다.
             </p>
             <div className="grid grid-cols-1 gap-3">
               {[
@@ -180,7 +180,7 @@ export function KoreanHomePage() {
               {
                 num: '03',
                 title: '장중 규율을 실행하십시오',
-                desc: '장중의 무작위한 움직임에 매매를 맡기지 마십시오. 가격이 전날 밤 설정한 시나리오에 도달하면, 위원회가 실행 규율을 회복하도록 돕습니다.',
+                desc: '장중의 노이즈와 급격한 변동성에 매매를 맡기지 마십시오. 가격이 전날 밤 설정한 시나리오에 도달했을 때, 위원회가 당신의 실행 규율을 회복하도록 돕습니다.',
               },
             ].map((step) => (
               <div key={step.num} className="space-y-6 relative group">

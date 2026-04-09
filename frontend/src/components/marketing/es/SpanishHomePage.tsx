@@ -60,7 +60,7 @@ export function SpanishHomePage() {
             La IA investiga.
             <br />
             <span className="bg-gradient-to-r from-indigo-400 to-cyan-300 bg-clip-text text-transparent">
-              Tú tomas la decisión.
+              La decisión final es suya.
             </span>
           </h1>
           <p className="text-lg md:text-xl text-slate-400 font-medium max-w-2xl mx-auto leading-relaxed">
@@ -109,12 +109,12 @@ export function SpanishHomePage() {
         <section id="features" className="pt-48 w-full grid md:grid-cols-2 gap-20 items-center text-left">
           <div className="space-y-8">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[10px] font-black uppercase tracking-[0.2em]">
-              Construye el plan de mañana
+              Prepare su escenario operativo
             </div>
             <h2 className="text-4xl md:text-5xl font-black tracking-tighter leading-tight">
               Revisa cuando el mercado esté en calma.
               <br />
-              <span className="text-indigo-400">Escribe el guion de mañana antes de que llegue el mañana.</span>
+              <span className="text-indigo-400">Domine la próxima sesión antes de la apertura.</span>
             </h2>
             <p className="text-slate-400 font-medium leading-relaxed">
               La verdadera ventaja proviene del trabajo realizado después del cierre. ZISO AI sintetiza el contexto del mercado, el flujo de capital y la acción del precio cada noche, convirtiéndolos en un guion de decisión estructurado. No fabrica predicciones aleatorias. Define límites ejecutables.
@@ -146,7 +146,7 @@ export function SpanishHomePage() {
           </div>
           <div className="order-1 md:order-2 space-y-8">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[10px] font-black uppercase tracking-[0.2em]">
-              Marco de Disciplina
+              Marco de Ejecución
             </div>
             <h2 className="text-4xl md:text-5xl font-black tracking-tighter leading-tight">
               La transparencia es la
@@ -188,7 +188,7 @@ export function SpanishHomePage() {
               {
                 num: '01',
                 title: 'Fija tu lista de vigilancia',
-                desc: 'Añade los activos que te interesan. El sistema comienza inmediatamente a sincronizar y modelar aproximadamente 250 días de historial de trading.',
+                desc: 'Añada los activos de su interés. El sistema sincroniza y modela de inmediato el histórico de las últimas 250 sesiones.',
               },
               {
                 num: '02',
@@ -198,7 +198,7 @@ export function SpanishHomePage() {
               {
                 num: '03',
                 title: 'Ejecuta con disciplina intradía',
-                desc: 'Deja de permitir que el movimiento aleatorio intradía dicte tu operación. Cuando el precio alcance el guion establecido la noche anterior, el consejo ayuda a restaurar la disciplina de ejecución.',
+                desc: 'Evite que el ruido intradía condicione su estrategia. Cuando el precio alcanza los niveles definidos la noche anterior, el sistema refuerza su disciplina operativa.',
               },
             ].map((step) => (
               <div key={step.num} className="space-y-6 relative group">
