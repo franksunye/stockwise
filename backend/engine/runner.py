@@ -174,7 +174,7 @@ class PredictionRunner:
         if not data:
             try:
                 from backend.engine.prompts import fetch_full_analysis_context
-                data = await fetch_full_analysis_context(symbol, date, ctx=ctx)
+                data = await fetch_full_analysis_context(symbol, date, ctx=ctx, locale=locale)
                 
                 if "error" in data:
                     logger.warning(f"⚠️ Data context fetch failed: {data['error']}")

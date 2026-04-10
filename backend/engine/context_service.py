@@ -56,16 +56,16 @@ class ContextService:
         from backend.context.provider import MarketContextProvider
         self.provider = MarketContextProvider()
 
-    async def get_comprehensive_context(self, symbol: str, date_str: str, stock_name: str = None) -> Dict[str, Any]:
+    async def get_comprehensive_context(self, symbol: str, date_str: str, stock_name: str = None, locale: str = "cn") -> Dict[str, Any]:
         """
         API: Get a rich, structured context for a specific stock on a specific date.
         Combines macro, meso, and micro facts.
         """
         # Fallback to batch-of-one
-        results = await self.get_batch_comprehensive_context([symbol], date_str, {symbol: stock_name or symbol})
+        results = await self.get_batch_comprehensive_context([symbol], date_str, {symbol: stock_name or symbol}, locale=locale)
         return results.get(symbol, {})
 
-    async def get_batch_comprehensive_context(self, symbols: List[str], date_str: str, name_map: Dict[str, str] = None) -> Dict[str, Dict]:
+    async def get_batch_comprehensive_context(self, symbols: List[str], date_str: str, name_map: Dict[str, str] = None, locale: str = "cn") -> Dict[str, Dict]:
         """
         High-Performance Batch Context Fetching:
         Calculates altitude, volume and market mood for multiple symbols in optimized queries.
@@ -78,8 +78,8 @@ class ContextService:
         # Note: These operations might take time if not cached, so we do them serially for now.
         # Ideally, we should async these, but AkShare is sync requests.
         try:
-            macro_ctx = self.provider.get_macro_context()
-            market_flow_ctx = self.provider.get_market_flow_context()
+            macro_ctx = self.provider.get_macro_context(locale=locale)
+            market_flow_ctx = self.provider.get_market_flow_context(locale=locale)
         except Exception as e:
             logger.error(f"Context Provider Error: {e}")
             macro_ctx = {"summary": "数据暂缺"}
@@ -89,7 +89,7 @@ class ContextService:
         # We need to know which market each symbol belongs to
         markets = {get_market(s) for s in symbols}
         anchor_symbol = {"HK": "02800", "CN": "sh000001", "US": "SPY"}
-        moods = {m: self._get_cached_market_mood(date_str, anchor_symbol.get(m, "sh000001")) for m in markets}
+        moods = {m: self._get_cached_market_mood(date_str, anchor_symbol.get(m, "sh000001"), locale=locale) for m in markets}
         
         # 3. Meso & Micro: Altitude and Volume (The heavy lifting)
         # Use optimized SQL to calculate stats for all symbols
@@ -137,22 +137,31 @@ class ContextService:
                 # Fetch Stock specific flow (Individual Big Orders)
                 # This might be slow if batch is large. 
                 # For small batches (daily prediction usually runs in chunks), it is acceptable.
-                stock_flow_ctx = self.provider.get_stock_flow_context(sym)
+                stock_flow_ctx = self.provider.get_stock_flow_context(sym, locale=locale)
 
                 # helper to determine zone
                 def get_zone(p, hi, lo):
-                    if not hi or not lo or hi == lo: return "横盘"
+                    is_en = str(locale or "").strip().lower() == "en"
+                    if not hi or not lo or hi == lo:
+                        return "Sideways" if is_en else "横盘"
                     pct = (p - lo) / (hi - lo) * 100
-                    zone = "历史高位" if pct > 85 else ("风险位" if pct > 70 else ("中位" if pct > 40 else ("机会位" if pct > 15 else "底部强支撑")))
+                    if is_en:
+                        zone = "Historical high zone" if pct > 85 else ("Risk zone" if pct > 70 else ("Mid zone" if pct > 40 else ("Opportunity zone" if pct > 15 else "Strong bottom support")))
+                    else:
+                        zone = "历史高位" if pct > 85 else ("风险位" if pct > 70 else ("中位" if pct > 40 else ("机会位" if pct > 15 else "底部强支撑")))
                     return f"{zone} ({pct:.0f}%)"
                 
                 # helper for volume
-                vol_status = "量能平稳"
+                is_en = str(locale or "").strip().lower() == "en"
+                vol_status = "Volume stable" if is_en else "量能平稳"
                 if curr_v and avg_v and avg_v > 0:
                     ratio = curr_v / avg_v
-                    if ratio > 2.2: vol_status = f"异常放量 (量比 {ratio:.1f}x)"
-                    elif ratio > 1.5: vol_status = f"温和放量 (量比 {ratio:.1f}x)"
-                    elif ratio < 0.5: vol_status = f"极度缩量 (量比 {ratio:.1f}x)"
+                    if ratio > 2.2:
+                        vol_status = f"Abnormal volume expansion (vol ratio {ratio:.1f}x)" if is_en else f"异常放量 (量比 {ratio:.1f}x)"
+                    elif ratio > 1.5:
+                        vol_status = f"Mild volume expansion (vol ratio {ratio:.1f}x)" if is_en else f"温和放量 (量比 {ratio:.1f}x)"
+                    elif ratio < 0.5:
+                        vol_status = f"Extreme volume contraction (vol ratio {ratio:.1f}x)" if is_en else f"极度缩量 (量比 {ratio:.1f}x)"
                 
                 m = get_market(sym)
                 batch_results[sym] = {
@@ -162,9 +171,9 @@ class ContextService:
                     "market_flow_context": market_flow_ctx, # Added
                     "stock_flow_context": stock_flow_ctx,   # Added
                     "price_altitude": {
-                        "short_term_20d": get_zone(curr_p, hi20, lo20) if hi20 else "数据不足",
-                        "medium_term_60d": get_zone(curr_p, hi60, lo60) if hi60 else "数据不足",
-                        "long_term_250d": get_zone(curr_p, hi250, lo250) if hi250 else "数据不足"
+                        "short_term_20d": get_zone(curr_p, hi20, lo20) if hi20 else ("Insufficient data" if is_en else "数据不足"),
+                        "medium_term_60d": get_zone(curr_p, hi60, lo60) if hi60 else ("Insufficient data" if is_en else "数据不足"),
+                        "long_term_250d": get_zone(curr_p, hi250, lo250) if hi250 else ("Insufficient data" if is_en else "数据不足")
                     },
                     "volume_status": vol_status,
                     "timestamp": datetime.now().isoformat()
@@ -179,9 +188,9 @@ class ContextService:
                         "market_context": moods.get(m),
                         "macro_context": macro_ctx,
                         "market_flow_context": market_flow_ctx,
-                        "stock_flow_context": {"summary": "无数据"},
-                        "price_altitude": {"info": "历史数据不足"},
-                        "volume_status": "量能未知"
+                        "stock_flow_context": {"summary": "No data" if str(locale or "").strip().lower() == "en" else "无数据"},
+                        "price_altitude": {"info": "Insufficient historical data" if str(locale or "").strip().lower() == "en" else "历史数据不足"},
+                        "volume_status": "Volume unknown" if str(locale or "").strip().lower() == "en" else "量能未知"
                     }
                     
             return batch_results
@@ -191,25 +200,27 @@ class ContextService:
         finally:
             conn.close()
 
-    def _get_cached_market_mood(self, date_str: str, target_symbol: str = None) -> str:
+    def _get_cached_market_mood(self, date_str: str, target_symbol: str = None, locale: str = "cn") -> str:
         """Fetch market mood with date and market-based caching."""
         market = get_market(target_symbol) if target_symbol else "CN"
             
-        cache_key = f"market_mood_{market}_{date_str}"
+        locale_norm = str(locale or "cn").strip().lower()
+        cache_key = f"market_mood_{market}_{date_str}_{locale_norm}"
         if cache_key in self._global_cache:
             return self._global_cache[cache_key]
         
-        mood = self._calculate_market_mood(date_str, market)
+        mood = self._calculate_market_mood(date_str, market, locale=locale_norm)
         self._global_cache[cache_key] = mood
         return mood
 
-    def _calculate_market_mood(self, date_str: str, market: str = "CN") -> str:
+    def _calculate_market_mood(self, date_str: str, market: str = "CN", locale: str = "cn") -> str:
         """
         Analyze market sentiment:
         1. Query Index Proxies (02800, sh000001, 510300).
         2. Calculate Market Breadth (Advancers vs Decliners).
         """
         symbol_map = MARKET_SYMBOL_MAP
+        is_en = str(locale or "").strip().lower() == "en"
         
         conn = get_connection()
         try:
@@ -229,8 +240,8 @@ class ContextService:
             proxy_parts = []
             for sym, chg in anchors:
                 name = symbol_map.get(sym, sym)
-                proxy_parts.append(f"{name} {'涨' if chg > 0 else '跌'} {abs(chg):.2f}%")
-            proxy_msg = "，".join(proxy_parts)
+                proxy_parts.append(f"{name} {'up' if chg > 0 else 'down'} {abs(chg):.2f}%" if is_en else f"{name} {'涨' if chg > 0 else '跌'} {abs(chg):.2f}%")
+            proxy_msg = ", ".join(proxy_parts) if is_en else "，".join(proxy_parts)
             
             # Market Breadth (Filtered by Market)
             cursor.execute(
@@ -245,7 +256,7 @@ class ContextService:
             rows = cursor.fetchall()
             
             if not rows or len(rows) < 5: 
-                return proxy_msg if proxy_msg else "市场数据正在同步中。"
+                return proxy_msg if proxy_msg else ("Market data syncing." if is_en else "市场数据正在同步中。")
                 
             changes = [r[0] for r in rows if r[0] is not None]
             up = sum(1 for c in changes if c > 0)
@@ -253,14 +264,20 @@ class ContextService:
             median_chg = np.median(changes)
             
             sample_size = len(changes)
-            scope = f"{market}市场" if sample_size > 500 else f"{market}核心池"
-            breadth = f"({scope}涨{up}/跌{down}，中位数{median_chg:+.2f}%)"
+            if is_en:
+                scope = f"{market} market" if sample_size > 500 else f"{market} core basket"
+                breadth = f"({scope}: up {up}/down {down}, median {median_chg:+.2f}%)"
+            else:
+                scope = f"{market}市场" if sample_size > 500 else f"{market}核心池"
+                breadth = f"({scope}涨{up}/跌{down}，中位数{median_chg:+.2f}%)"
             
+            if is_en:
+                return f"{proxy_msg}, {breadth}" if proxy_msg else f"{market} sentiment {breadth}"
             return f"{proxy_msg}，{breadth}" if proxy_msg else f"{market}情绪{breadth}"
             
         except Exception as e:
             logger.warning(f"⚠️ Market mood error: {e}")
-            return "市场情绪数据暂时不可用。"
+            return "Market sentiment data temporarily unavailable." if is_en else "市场情绪数据暂时不可用。"
         finally:
             conn.close()
 

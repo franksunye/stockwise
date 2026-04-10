@@ -8,7 +8,59 @@ from backend.engine.signal_semantics import canonical_signal_from_layer1
 
 class RuleAdapter(BasePredictionModel):
     @staticmethod
-    def _layer1_action_profile(setup_state: str) -> Dict[str, str]:
+    def _is_en(locale: str) -> bool:
+        return str(locale or "").strip().lower() == "en"
+
+    @staticmethod
+    def _build_en_reason(close: float, ma20: float, rsi: float, macd: float) -> str:
+        trend_part = "Price action is neutral."
+        if ma20 > 0:
+            if close >= ma20:
+                trend_part = "Price is holding above MA20."
+            else:
+                trend_part = "Price is below MA20."
+
+        if rsi >= 65:
+            momentum_part = "Momentum is relatively strong."
+        elif rsi <= 35:
+            momentum_part = "Momentum is weak and risk-sensitive."
+        else:
+            momentum_part = "Momentum is balanced."
+
+        macd_part = "MACD histogram is improving." if macd >= 0 else "MACD histogram remains negative."
+        return f"{trend_part} {momentum_part} {macd_part}"
+
+    @staticmethod
+    def _layer1_action_profile(setup_state: str, locale: str = "cn") -> Dict[str, str]:
+        if RuleAdapter._is_en(locale):
+            profiles = {
+                "TriggeredLong": {
+                    "summary_prefix": "Setup is constructive for a controlled long attempt",
+                    "holding_profit_action": "Monitor and hold",
+                    "holding_loss_action": "Exit if discipline level breaks",
+                    "empty_action": "Consider staged entry",
+                },
+                "Watch": {
+                    "summary_prefix": "Current state favors observation",
+                    "holding_profit_action": "Monitor and hold",
+                    "holding_loss_action": "Trim on weak rebound",
+                    "empty_action": "Stay on watch",
+                },
+                "RiskOff": {
+                    "summary_prefix": "Risk-off state is active",
+                    "holding_profit_action": "Reduce existing exposure",
+                    "holding_loss_action": "Exit if discipline level breaks",
+                    "empty_action": "Pause new entries",
+                },
+                "NoSetup": {
+                    "summary_prefix": "No actionable setup for now",
+                    "holding_profit_action": "Monitor and hold",
+                    "holding_loss_action": "Trim if weakness persists",
+                    "empty_action": "No entry",
+                },
+            }
+            return profiles.get(setup_state, profiles["NoSetup"])
+
         profiles = {
             "TriggeredLong": {
                 "summary_prefix": "当前进入可尝试建仓区间",
@@ -50,9 +102,10 @@ class RuleAdapter(BasePredictionModel):
                 "confidence": 0.0,
                 "reasoning": self._build_reasoning(
                     signal="NoSetup",
-                    summary="数据缺失",
-                    analysis="无法获取价格数据",
+                    summary="Data unavailable" if self._is_en(locale) else "数据缺失",
+                    analysis="Unable to load price data" if self._is_en(locale) else "无法获取价格数据",
                     factors={},
+                    locale=locale,
                 ),
             }
 
@@ -119,14 +172,24 @@ class RuleAdapter(BasePredictionModel):
             close_val = latest.get("close", 0)
             ma20 = sig.factors.get("ma20", 0)
 
+            rsi = float(sig.factors.get("rsi", 0) or 0)
+            macd = float(sig.factors.get("macd_hist", 0) or 0)
+            summary_text = sig.reason
+            analysis_text = sig.reason
+            if self._is_en(locale):
+                en_reason = self._build_en_reason(close_val, float(ma20 or 0), rsi, macd)
+                summary_text = en_reason
+                analysis_text = en_reason
+
             reasoning_json = self._build_reasoning(
                 signal=final_action,
-                summary=sig.reason,
-                analysis=sig.reason,
+                summary=summary_text,
+                analysis=analysis_text,
                 factors=sig.factors,
                 close=close_val,
                 raw_signal=raw_action,
                 layer1_status=layer1_status,
+                locale=locale,
             )
 
             return {
@@ -167,8 +230,10 @@ class RuleAdapter(BasePredictionModel):
         close: float = 0,
         raw_signal: str = "",
         layer1_status: str = "",
+        locale: str = "cn",
     ) -> str:
         """Build a JSON-formatted reasoning string consistent with v3.3 schema."""
+        is_en = self._is_en(locale)
         ma20 = factors.get("ma20", 0)
         rsi = factors.get("rsi", 0)
         macd = factors.get("macd_hist", 0)
@@ -181,12 +246,100 @@ class RuleAdapter(BasePredictionModel):
 
         summary_text = summary
         decision_detail = signal
-        profile = self._layer1_action_profile(layer1_status or "NoSetup")
+        profile = self._layer1_action_profile(layer1_status or "NoSetup", locale=locale)
         if layer1_status and raw_signal and raw_signal != signal:
-            summary_text = f"{profile['summary_prefix']}。{summary_text}"
-            decision_detail += "（已根据系统规则校准方向）"
+            summary_text = (
+                f"{profile['summary_prefix']}. {summary_text}"
+                if is_en
+                else f"{profile['summary_prefix']}。{summary_text}"
+            )
+            decision_detail += " (direction calibrated by system rules)" if is_en else "（已根据系统规则校准方向）"
         elif layer1_status:
-            summary_text = f"{profile['summary_prefix']}。{summary_text}"
+            summary_text = (
+                f"{profile['summary_prefix']}. {summary_text}"
+                if is_en
+                else f"{profile['summary_prefix']}。{summary_text}"
+            )
+
+        trend_conclusion = "Trend context" if is_en else "趋势观察"
+        momentum_conclusion = "Momentum check" if is_en else "动能评估"
+        levels_conclusion = "Level map" if is_en else "空间格局"
+        context_conclusion = "Multi-timeframe alignment" if is_en else "多维对齐"
+        psychology_conclusion = "Execution discipline" if is_en else "博弈纪律"
+        decision_conclusion = "System contract" if is_en else "量化契约"
+
+        trend_data = (
+            f"MA20={ma20:.2f}, Price={close:.2f}. {analysis}"
+            if is_en
+            else f"MA20={ma20:.2f}, 价格={close:.2f}。{analysis}"
+        )
+        momentum_data = (
+            f"RSI={rsi:.1f}, MACD histogram={macd:.4f}"
+            if is_en
+            else f"RSI={rsi:.1f}, MACD柱={macd:.4f}"
+        )
+        levels_data = (
+            f"Immediate support is near MA20 ({ma20:.2f}); resistance references prior highs."
+            if is_en
+            else f"关键支撑位在 MA20 ({ma20:.2f}) 附近，上方阻力参考前高。"
+        )
+        context_data = (
+            "Multi-timeframe resonance check: daily/weekly/monthly quant alignment."
+            if is_en
+            else "多周期共振分析：日、周、月趋势量化对比（系统预置规则）。"
+        )
+        psychology_data = (
+            "Follow trend discipline and avoid subjective overreaction in high-volatility zones."
+            if is_en
+            else "遵循趋势跟踪纪律，避免波动较大的主观预期区间。"
+        )
+
+        p2_take_profit_action = "Staged take-profit plan" if is_en else "分批止盈预案"
+        p2_reduce_action = "Trim on rebound" if is_en else "反弹减仓"
+        p2_breakout_action = "Breakout follow-through plan" if is_en else "突破跟随预案"
+        trigger_not_break = f"Hold above {ma20:.2f}" if is_en else f"不跌破 {ma20:.2f}"
+        trigger_near_res = (
+            f"Approaches {resistance:.2f} with stalling momentum"
+            if is_en
+            else f"接近 {resistance:.2f} 且放量滞涨"
+        )
+        trigger_break_ma = f"Breaks below {ma20:.2f} with confirmation" if is_en else f"有效跌破 {ma20:.2f}"
+        trigger_rebound_fail = (
+            f"Rebound to around {resistance:.2f} fails to break"
+            if is_en
+            else f"反弹至 {resistance:.2f} 附近但未突破"
+        )
+        trigger_pullback = (
+            f"Pullback stabilizes near {support:.2f}"
+            if is_en
+            else f"回调至 {support:.2f} 企稳"
+        )
+        trigger_breakout = (
+            f"Breaks above {resistance:.2f} on volume and holds"
+            if is_en
+            else f"放量突破 {resistance:.2f} 并站稳"
+        )
+        reason_trend = "Trend remains intact" if is_en else "趋势未改"
+        reason_lock = "Lock gains first to avoid giveback after spikes" if is_en else "先锁定收益，避免冲高回落"
+        reason_risk = "Risk line triggered" if is_en else "触发风险线"
+        reason_weak_rebound = "Prioritize risk reduction on weak rebound" if is_en else "弱势反抽优先降仓位风险"
+        reason_wait = "Wait for confirmation before acting" if is_en else "等待趋势确认"
+        reason_follow = "Trade only after confirmation" if is_en else "只做确认后的顺势交易"
+        counter_argument = (
+            f"If price breaks below {stop_loss:.2f} on volume while RSI weakens further, this thesis is invalid."
+            if is_en
+            else f"如果价格放量跌破 {stop_loss:.2f} 且 RSI 进一步走弱，则当前逻辑失效。"
+        )
+        conflict_resolution = (
+            "Use moving-average structure as the anchor; execute mechanically without directional bias."
+            if is_en
+            else "以均线系统为准，不带多空偏见，执行机械量化纪律。"
+        )
+        tomorrow_focus = (
+            f"Watch the conviction of price action around MA20 ({ma20:.2f})."
+            if is_en
+            else f"关注价格在 {ma20:.2f} 均线附近的博弈强度。"
+        )
 
         reasoning_data = {
             "signal": signal,
@@ -195,33 +348,33 @@ class RuleAdapter(BasePredictionModel):
             "reasoning_trace": [
                 {
                     "step": "trend",
-                    "data": f"MA20={ma20:.2f}, 价格={close:.2f}。{analysis}",
-                    "conclusion": "趋势观察",
+                    "data": trend_data,
+                    "conclusion": trend_conclusion,
                 },
                 {
                     "step": "momentum",
-                    "data": f"RSI={rsi:.1f}, MACD柱={macd:.4f}",
-                    "conclusion": "动能评估",
+                    "data": momentum_data,
+                    "conclusion": momentum_conclusion,
                 },
                 {
                     "step": "levels",
-                    "data": f"关键支撑位在 MA20 ({ma20:.2f}) 附近，上方阻力参考前高。",
-                    "conclusion": "空间格局",
+                    "data": levels_data,
+                    "conclusion": levels_conclusion,
                 },
                 {
                     "step": "context",
-                    "data": "多周期共振分析：日、周、月趋势量化对比（系统预置规则）。",
-                    "conclusion": "多维对齐",
+                    "data": context_data,
+                    "conclusion": context_conclusion,
                 },
                 {
                     "step": "psychology",
-                    "data": "遵循趋势跟踪纪律，避免波动较大的主观预期区间。",
-                    "conclusion": "博弈纪律",
+                    "data": psychology_data,
+                    "conclusion": psychology_conclusion,
                 },
                 {
                     "step": "decision",
                     "data": decision_detail,
-                    "conclusion": "量化契约",
+                    "conclusion": decision_conclusion,
                 },
             ],
             "key_levels": {
@@ -234,56 +387,56 @@ class RuleAdapter(BasePredictionModel):
                     {
                         "priority": "P1",
                         "action": profile["holding_profit_action"],
-                        "trigger": f"不跌破 {ma20:.2f}",
+                        "trigger": trigger_not_break,
                         "target_price": round(resistance, 2),
                         "stop_advance_price": round(close, 2),
-                        "reason": "趋势未改",
+                        "reason": reason_trend,
                     },
                     {
                         "priority": "P2",
-                        "action": "分批止盈预案",
-                        "trigger": f"接近 {resistance:.2f} 且放量滞涨",
+                        "action": p2_take_profit_action,
+                        "trigger": trigger_near_res,
                         "target_price": round(resistance_2, 2),
                         "stop_advance_price": round(support, 2),
-                        "reason": "先锁定收益，避免冲高回落",
+                        "reason": reason_lock,
                     },
                 ],
                 "holding_loss": [
                     {
                         "priority": "P1",
                         "action": profile["holding_loss_action"],
-                        "trigger": f"有效跌破 {ma20:.2f}",
+                        "trigger": trigger_break_ma,
                         "stop_loss_price": round(stop_loss, 2),
-                        "reason": "触发风险线",
+                        "reason": reason_risk,
                     },
                     {
                         "priority": "P2",
-                        "action": "反弹减仓",
-                        "trigger": f"反弹至 {resistance:.2f} 附近但未突破",
+                        "action": p2_reduce_action,
+                        "trigger": trigger_rebound_fail,
                         "stop_loss_price": round(stop_loss, 2),
-                        "reason": "弱势反抽优先降仓位风险",
+                        "reason": reason_weak_rebound,
                     },
                 ],
                 "empty": [
                     {
                         "priority": "P1",
                         "action": profile["empty_action"],
-                        "trigger": f"回调至 {support:.2f} 企稳",
+                        "trigger": trigger_pullback,
                         "buy_zone_price": round(support, 2),
-                        "reason": "等待趋势确认",
+                        "reason": reason_wait,
                     },
                     {
                         "priority": "P2",
-                        "action": "突破跟随预案",
-                        "trigger": f"放量突破 {resistance:.2f} 并站稳",
+                        "action": p2_breakout_action,
+                        "trigger": trigger_breakout,
                         "buy_zone_price": [round(resistance, 2), round(resistance_2, 2)],
-                        "reason": "只做确认后的顺势交易",
+                        "reason": reason_follow,
                     },
                 ],
             },
-            "counter_argument": f"如果价格放量跌破 {stop_loss:.2f} 且 RSI 进一步走弱，则当前逻辑失效。",
-            "conflict_resolution": "以均线系统为准，不带多空偏见，执行机械量化纪律。",
-            "tomorrow_focus": f"关注价格在 {ma20:.2f} 均线附近的博弈强度。",
+            "counter_argument": counter_argument,
+            "conflict_resolution": conflict_resolution,
+            "tomorrow_focus": tomorrow_focus,
             "is_llm": False,
         }
         return json.dumps(reasoning_data, ensure_ascii=False)

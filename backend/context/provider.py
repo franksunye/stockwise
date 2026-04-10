@@ -53,6 +53,10 @@ class _DaemonThreadPoolExecutor(ThreadPoolExecutor):
             _threads_queues[t] = self._work_queue
 
 class MarketContextProvider:
+    @staticmethod
+    def _is_en(locale: str) -> bool:
+        return str(locale or "").strip().lower() == "en"
+
     _instance = None
     _lock = threading.Lock()
     _executor_lock = threading.Lock()
@@ -335,8 +339,9 @@ class MarketContextProvider:
             "negative_count": int((work["net_val"] < 0).sum()),
         }
 
-    def _get_hk_short_context(self, symbol: str) -> Dict[str, Any]:
+    def _get_hk_short_context(self, symbol: str, locale: str = "cn") -> Dict[str, Any]:
         """Fetch HK short-selling context from local sync tables."""
+        is_en = self._is_en(locale)
         conn = get_connection()
         try:
             cur = conn.cursor()
@@ -378,9 +383,9 @@ class MarketContextProvider:
 
             if not daily and not weekly and not eligible:
                 return {
-                    "summary": "港股做空数据暂无",
+                    "summary": "HK short-selling data unavailable" if is_en else "港股做空数据暂无",
                     "big_order_inflow": "N/A",
-                    "interpretation": "待同步",
+                    "interpretation": "Pending sync" if is_en else "待同步",
                     "short_selling_context": {"has_data": False, "eligible": None},
                 }
 
@@ -397,14 +402,20 @@ class MarketContextProvider:
             pressure_text = "做空压力数据不足"
             if short_amt_ratio is not None:
                 if short_amt_ratio >= 0.2:
-                    pressure_text = "做空压力偏高"
+                    pressure_text = "High short pressure" if is_en else "做空压力偏高"
                 elif short_amt_ratio >= 0.1:
-                    pressure_text = "做空压力中性"
+                    pressure_text = "Neutral short pressure" if is_en else "做空压力中性"
                 else:
-                    pressure_text = "做空压力偏低"
+                    pressure_text = "Low short pressure" if is_en else "做空压力偏低"
+            elif is_en:
+                pressure_text = "Insufficient short-pressure data"
 
             ratio_text = f"{short_amt_ratio:.2%}" if short_amt_ratio is not None else "N/A"
-            summary = f"做空成交比({daily_date or '-'})={ratio_text} | 周度申报做空仓位({weekly_date or '-'})"
+            summary = (
+                f"Short-turnover ratio ({daily_date or '-'})={ratio_text} | Weekly short interest ({weekly_date or '-'})"
+                if is_en
+                else f"做空成交比({daily_date or '-'})={ratio_text} | 周度申报做空仓位({weekly_date or '-'})"
+            )
 
             return {
                 "summary": summary,
@@ -433,15 +444,15 @@ class MarketContextProvider:
         except Exception as e:
             logger.warning(f"HK short context fetch failed for {symbol}: {e}")
             return {
-                "summary": "港股做空数据暂不可用",
+                "summary": "HK short-selling data temporarily unavailable" if is_en else "港股做空数据暂不可用",
                 "big_order_inflow": "N/A",
-                "interpretation": "数据源异常",
+                "interpretation": "Data source error" if is_en else "数据源异常",
                 "short_selling_context": {"has_data": False, "error": str(e)},
             }
         finally:
             conn.close()
 
-    def get_macro_context(self, skip_nasdaq: bool = False) -> Dict[str, Any]:
+    def get_macro_context(self, skip_nasdaq: bool = False, locale: str = "cn") -> Dict[str, Any]:
         """
         Fetch core macro indicators.
         Cache TTL: 24 hours (Macro data changes slowly)
@@ -551,13 +562,18 @@ class MarketContextProvider:
                 except Exception as e:
                     logger.warning(f"Global Nasdaq fetch failed: {e}")
 
+            is_en = self._is_en(locale)
             result = {
                 "gdp": gdp_val,
                 "cpi": cpi_val,
                 "bond_10y": bond_val,
                 "nasdaq": nasdaq_pct,
                 "nasdaq_skipped": nasdaq_skipped,
-                "summary": f"GDP:{gdp_val} | Bond10Y:{bond_val} | Nasdaq:{nasdaq_pct}"
+                "summary": (
+                    f"GDP:{gdp_val} | Bond10Y:{bond_val} | Nasdaq:{nasdaq_pct}"
+                    if is_en
+                    else f"GDP:{gdp_val} | 国债10Y:{bond_val} | 纳指:{nasdaq_pct}"
+                )
             }
             fetched_at = datetime.now()
             fields = {
@@ -596,7 +612,7 @@ class MarketContextProvider:
             logger.error(f"❌ Macro Context Failed: {e}")
             return {"summary": "Macro data unavailable"}
 
-    def get_market_flow_context(self) -> Dict[str, Any]:
+    def get_market_flow_context(self, locale: str = "cn") -> Dict[str, Any]:
         """
         Fetch market-wide capital flows (Northbound, Sector).
         Optimized to use the most stable domestic sources (THS/HSGT Summary).
@@ -608,7 +624,8 @@ class MarketContextProvider:
 
         logger.info("📡 Fetching Market Flow Data (Stable Route)...")
         
-        north_val = "暂停披露"
+        is_en = self._is_en(locale)
+        north_val = "Disclosure paused" if is_en else "暂停披露"
         north_breadth = None
         top_inflow = []
         top_outflow = []
@@ -651,8 +668,16 @@ class MarketContextProvider:
                     
                     if total > 0:
                         win_ratio = winners / total
-                        sentiment = "偏多" if win_ratio >= 0.65 else ("偏空" if win_ratio <= 0.35 else "均衡")
-                        north_val = f"涨{winners}/跌{losers} ({sentiment})"
+                        sentiment = (
+                            ("Bullish" if win_ratio >= 0.65 else ("Bearish" if win_ratio <= 0.35 else "Balanced"))
+                            if is_en
+                            else ("偏多" if win_ratio >= 0.65 else ("偏空" if win_ratio <= 0.35 else "均衡"))
+                        )
+                        north_val = (
+                            f"Up {winners}/Down {losers} ({sentiment})"
+                            if is_en
+                            else f"涨{winners}/跌{losers} ({sentiment})"
+                        )
                         north_breadth = {
                             "winners": winners, "losers": losers, "flat": flat,
                             "win_ratio": round(win_ratio, 3), "sentiment": sentiment
@@ -672,7 +697,11 @@ class MarketContextProvider:
             df_m = futures["broad"].result()
             if df_m is not None and not df_m.empty:
                 m_flow = df_m.iloc[-1].get('主力净流入-净额', 0)
-                top_inflow.append(f"全市场主力({m_flow/1e8:+.1f}亿)")
+                top_inflow.append(
+                    f"Market main force ({m_flow/1e8:+.1f}B CNY)"
+                    if is_en
+                    else f"全市场主力({m_flow/1e8:+.1f}亿)"
+                )
                 sector_fetched = True
                 sector_source = "akshare:stock_market_fund_flow"
                 logger.info("✅ Broad market flow succeeded (primary).")
@@ -765,7 +794,7 @@ class MarketContextProvider:
             logger.warning("⚠️  Sector flow missing: broad-market route failed.")
 
         if not top_outflow:
-            top_outflow = ["无明显净流出(>=0)"]
+            top_outflow = ["No obvious net outflow (>=0)"] if is_en else ["无明显净流出(>=0)"]
             consistency_flags.append("outflow_absent_non_negative_day")
 
         outflow_has_non_negative = False
@@ -786,9 +815,13 @@ class MarketContextProvider:
         result = {
             "northbound_net_inflow": north_val,
             "northbound_breadth": north_breadth,
-            "top_inflow_sectors": ", ".join(top_inflow) if top_inflow else "暂无数据",
-            "top_outflow_sectors": ", ".join(top_outflow) if top_outflow else "暂无数据",
-            "summary": f"北向:{north_val} | 领涨:{', '.join(top_inflow[:2]) if top_inflow else 'N/A'} | 领跌:{', '.join(top_outflow[:1]) if top_outflow else 'N/A'}"
+            "top_inflow_sectors": ", ".join(top_inflow) if top_inflow else ("No data" if is_en else "暂无数据"),
+            "top_outflow_sectors": ", ".join(top_outflow) if top_outflow else ("No data" if is_en else "暂无数据"),
+            "summary": (
+                f"Northbound: {north_val} | Top inflow: {', '.join(top_inflow[:2]) if top_inflow else 'N/A'} | Top outflow: {', '.join(top_outflow[:1]) if top_outflow else 'N/A'}"
+                if is_en
+                else f"北向:{north_val} | 领涨:{', '.join(top_inflow[:2]) if top_inflow else 'N/A'} | 领跌:{', '.join(top_outflow[:1]) if top_outflow else 'N/A'}"
+            )
         }
 
         flow_fields = {
@@ -830,7 +863,8 @@ class MarketContextProvider:
         return result
 
 
-    def get_stock_flow_context(self, symbol: str) -> Dict[str, Any]:
+    def get_stock_flow_context(self, symbol: str, locale: str = "cn") -> Dict[str, Any]:
+        is_en = self._is_en(locale)
         """
         Fetch individual stock capital flow.
         Cache TTL: 30 mins
@@ -857,7 +891,7 @@ class MarketContextProvider:
             
             if get_market(symbol) == "HK":
                 # HK stock: use local short-selling context synced by hk_short job.
-                result = self._get_hk_short_context(symbol)
+                result = self._get_hk_short_context(symbol, locale=locale)
                 self._cache["stock_flow"][symbol] = {"data": result, "timestamp": datetime.now()}
                 self._stats["stock_flow_success"] += 1
                 return result
@@ -913,16 +947,23 @@ class MarketContextProvider:
                 # Semantic interpretation
                 try:
                     net_float = float(main_net)
-                    if net_float > 0: flow_summary = "主力净流入 (吸筹)"
-                    elif net_float < 0: flow_summary = "主力净流出 (出货)"
-                    else: flow_summary = "资金平衡"
+                    if net_float > 0:
+                        flow_summary = "Main force net inflow (accumulation)" if is_en else "主力净流入 (吸筹)"
+                    elif net_float < 0:
+                        flow_summary = "Main force net outflow (distribution)" if is_en else "主力净流出 (出货)"
+                    else:
+                        flow_summary = "Flow balanced" if is_en else "资金平衡"
                 except (ValueError, TypeError):
-                    flow_summary = "数据解析错误"
+                    flow_summary = "Data parse error" if is_en else "数据解析错误"
 
             result = {
                 "big_order_inflow": big_order_val,
                 "interpretation": flow_summary,
-                "summary": f"主力资金: {big_order_val} [{flow_summary}]"
+                "summary": (
+                    f"Main force flow: {big_order_val} [{flow_summary}]"
+                    if is_en
+                    else f"主力资金: {big_order_val} [{flow_summary}]"
+                )
             }
             
             self._cache["stock_flow"][symbol] = {"data": result, "timestamp": datetime.now()}
@@ -932,7 +973,7 @@ class MarketContextProvider:
         except Exception as e:
             logger.warning(f"Stock flow fetch failed for {symbol}: {e}")
             return {
-                "summary": "资金流数据暂不可用",
+                "summary": "Flow data temporarily unavailable" if is_en else "资金流数据暂不可用",
                 "big_order_inflow": "N/A",
-                "interpretation": "数据源异常"
+                "interpretation": "Data source error" if is_en else "数据源异常"
             }

@@ -11,8 +11,10 @@ import requests
 import json
 import time
 import math
+from contextlib import contextmanager
 from typing import Optional, List, Dict, Any, Callable
 from pathlib import Path
+from urllib3.util import connection as urllib3_connection
 
 # --- Path Guidance ---
 current_file = os.path.abspath(__file__)
@@ -247,6 +249,12 @@ class TursoHttpConnection:
             "Authorization": f"Bearer {token}",
             "Content-Type": "application/json"
         }
+        # Reuse TCP/TLS connections to reduce handshake flakiness and latency.
+        self.session = requests.Session()
+        self.session.trust_env = False
+        # Keep production behavior unchanged by default.
+        # Opt-in locally with TURSO_FORCE_IPV4=1 when IPv6 path is unstable.
+        self.force_ipv4 = os.getenv("TURSO_FORCE_IPV4", "0").strip().lower() in {"1", "true", "yes", "on"}
     
     def cursor(self):
         return TursoHttpCursor(self)
@@ -256,7 +264,22 @@ class TursoHttpConnection:
         pass
         
     def close(self):
-        pass
+        try:
+            self.session.close()
+        except Exception:
+            pass
+
+    @contextmanager
+    def _maybe_force_ipv4(self):
+        if not self.force_ipv4:
+            yield
+            return
+        original = urllib3_connection.HAS_IPV6
+        try:
+            urllib3_connection.HAS_IPV6 = False
+            yield
+        finally:
+            urllib3_connection.HAS_IPV6 = original
         
     def _send(self, payload):
         max_retries = 3
@@ -267,13 +290,14 @@ class TursoHttpConnection:
                 # Explicitly bypass proxies to verify direct connectivity
                 # regardless of local system proxy settings.
                 # Increased timeout to 60s for batch operations
-                r = requests.post(
-                    self.url, 
-                    headers=self.headers, 
-                    json=payload, 
-                    timeout=60,
-                    proxies={"http": None, "https": None}
-                )
+                with self._maybe_force_ipv4():
+                    r = self.session.post(
+                        self.url,
+                        headers=self.headers,
+                        json=payload,
+                        timeout=60,
+                        proxies={"http": None, "https": None}
+                    )
                 
                 # Handle non-200 responses as potential transient errors
                 if r.status_code != 200:

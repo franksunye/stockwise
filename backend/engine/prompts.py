@@ -129,7 +129,7 @@ def _aggregate_daily_to_period_bars(daily_rows: List[Dict[str, Any]], period: st
     return records
 
 
-async def fetch_full_analysis_context(symbol: str, as_of_date: str = None, ctx: SessionContext = None) -> Dict[str, Any]:
+async def fetch_full_analysis_context(symbol: str, as_of_date: str = None, ctx: SessionContext = None, locale: str = "cn") -> Dict[str, Any]:
     """
     Fetch all raw data needed for a comprehensive stock analysis.
     Supports SessionContext for caching across multiple model runs.
@@ -256,7 +256,7 @@ async def fetch_full_analysis_context(symbol: str, as_of_date: str = None, ctx: 
     ctx_service = ContextService()
     
     # Use comprehensive context fetcher
-    comprehensive_ctx = await ctx_service.get_comprehensive_context(symbol, analysis_date, stock_name)
+    comprehensive_ctx = await ctx_service.get_comprehensive_context(symbol, analysis_date, stock_name, locale=locale)
     
     market_context = comprehensive_ctx.get("market_context", "数据同步中")
     altitude_context = comprehensive_ctx.get("price_altitude", {})
@@ -357,7 +357,7 @@ def prepare_stock_analysis_prompt(symbol: str, as_of_date: str = None, ctx: Dict
             asyncio.get_running_loop()
             return None, "prepare_stock_analysis_prompt requires pre-fetched ctx when called inside async loop"
         except RuntimeError:
-            ctx = asyncio.run(fetch_full_analysis_context(symbol, as_of_date))
+            ctx = asyncio.run(fetch_full_analysis_context(symbol, as_of_date, locale=locale))
     if "error" in ctx:
         return None, ctx["error"]
 
