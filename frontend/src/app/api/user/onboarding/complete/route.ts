@@ -42,11 +42,14 @@ export async function POST(request: Request) {
         let newTier = currentTier;
         let newExpiresAt = user.subscription_expires_at;
 
-        const isActivePro = currentTier !== 'free' && user.subscription_expires_at && new Date(user.subscription_expires_at) > now;
+        const hasAccessHistory = Boolean(user.subscription_expires_at) || currentTier !== 'free';
+        const hasActiveAccess = currentTier !== 'free' && user.subscription_expires_at && new Date(user.subscription_expires_at) > now;
 
-        if (!isActivePro) {
+        if (!hasActiveAccess) {
             if (user.has_onboarded) {
                 console.log(`User ${userId} already onboarded, skipping trial grant.`);
+            } else if (hasAccessHistory) {
+                console.log(`User ${userId} has prior access history, skipping onboarding trial re-grant.`);
             } else {
                 const trialDays = MEMBERSHIP_CONFIG.onboarding.trialDays;
                 const expiryDate = new Date();
@@ -67,6 +70,13 @@ export async function POST(request: Request) {
             // 3.5 Referrer Reward — only on FIRST onboarding completion
             if (!user.has_onboarded && user.referred_by && MEMBERSHIP_CONFIG.switches.enableReferralReward) {
                 try {
+                    const rewardRes = await client.execute({
+                        sql: "SELECT 1 FROM referral_transactions WHERE referred_id = ? AND type = 'reward' LIMIT 1",
+                        args: [userId]
+                    });
+                    if (rewardRes.rows.length > 0) {
+                        console.log(`Referrer reward already granted for ${userId}, skipping duplicate reward.`);
+                    } else {
                     const referrerId = user.referred_by;
                     const refRes = await client.execute({
                         sql: "SELECT subscription_tier, subscription_expires_at FROM users WHERE user_id = ?",
@@ -100,6 +110,7 @@ export async function POST(request: Request) {
                         }).catch((e: unknown) => console.error('Failed to send referral notification:', e));
 
                         console.log(`✅ Referrer ${referrerId} rewarded on onboarding completion of ${userId}`);
+                    }
                     }
                 } catch (refErr) {
                     console.error('Referrer reward on onboarding failed:', refErr);
@@ -164,21 +175,27 @@ export async function POST(request: Request) {
             // 3.5 Referrer Reward — only on FIRST onboarding completion (Local)
             if (!user.has_onboarded && user.referred_by && MEMBERSHIP_CONFIG.switches.enableReferralReward) {
                 try {
-                    const referrerId = user.referred_by;
-                    const referrer = client.prepare("SELECT subscription_tier, subscription_expires_at FROM users WHERE user_id = ?").get(referrerId);
+                    const existingReward = client.prepare("SELECT 1 FROM referral_transactions WHERE referred_id = ? AND type = 'reward' LIMIT 1").get(userId);
 
-                    if (referrer) {
-                        const currentExpiry = referrer.subscription_expires_at ? new Date(referrer.subscription_expires_at) : new Date();
-                        const baseDate = currentExpiry > new Date() ? currentExpiry : new Date();
-                        baseDate.setDate(baseDate.getDate() + MEMBERSHIP_CONFIG.referral.referrerDays);
-                        const newExpiry = baseDate.toISOString();
+                    if (existingReward) {
+                        console.log(`Referrer reward already granted for ${userId}, skipping duplicate reward.`);
+                    } else {
+                        const referrerId = user.referred_by;
+                        const referrer = client.prepare("SELECT subscription_tier, subscription_expires_at FROM users WHERE user_id = ?").get(referrerId);
 
-                        client.prepare("UPDATE users SET subscription_tier = 'pro', subscription_expires_at = ? WHERE user_id = ?").run(newExpiry, referrerId);
+                        if (referrer) {
+                            const currentExpiry = referrer.subscription_expires_at ? new Date(referrer.subscription_expires_at) : new Date();
+                            const baseDate = currentExpiry > new Date() ? currentExpiry : new Date();
+                            baseDate.setDate(baseDate.getDate() + MEMBERSHIP_CONFIG.referral.referrerDays);
+                            const newExpiry = baseDate.toISOString();
 
-                        const txId = `tx_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-                        client.prepare("INSERT INTO referral_transactions (id, referrer_id, referred_id, type, amount, status, created_at, note) VALUES (?, ?, ?, 'reward', 0, 'completed', ?, ?)").run(txId, referrerId, userId, now.toISOString(), `+${MEMBERSHIP_CONFIG.referral.referrerDays}天 PRO (邀请奖励 - 被邀请人完成引导)`);
+                            client.prepare("UPDATE users SET subscription_tier = 'pro', subscription_expires_at = ? WHERE user_id = ?").run(newExpiry, referrerId);
 
-                        console.log(`✅ Referrer ${referrerId} rewarded on onboarding completion of ${userId}`);
+                            const txId = `tx_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+                            client.prepare("INSERT INTO referral_transactions (id, referrer_id, referred_id, type, amount, status, created_at, note) VALUES (?, ?, ?, 'reward', 0, 'completed', ?, ?)").run(txId, referrerId, userId, now.toISOString(), `+${MEMBERSHIP_CONFIG.referral.referrerDays}天 PRO (邀请奖励 - 被邀请人完成引导)`);
+
+                            console.log(`✅ Referrer ${referrerId} rewarded on onboarding completion of ${userId}`);
+                        }
                     }
                 } catch (refErr) {
                     console.error('Referrer reward on onboarding failed (local):', refErr);

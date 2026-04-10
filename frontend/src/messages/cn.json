@@ -594,12 +594,18 @@
       "cta": "继续"
     },
     "complete": {
-      "ready": "一切就绪!",
-      "added": "{symbol} 已添加到您的自选池。",
-      "gift": "特别礼物",
-      "trial": "已激活 {days} 天 GO 体验权",
-      "trialDesc": "支持跟踪 10 只自选，并解锁 DeepSeek 分析与全量实时提醒。",
-      "cta": "进入控制台"
+      "ready": "准备就绪",
+      "added": "{symbol} 已加入您的自选池。",
+      "gift": "GO 体验权益",
+      "activeAccess": "GO 权益生效中",
+      "workspace": "控制台已就绪",
+      "trial": "已激活 {days} 天 GO 使用权限",
+      "activeTitle": "GO 权益剩余 {days} 天",
+      "workspaceTitle": "您的控制台已准备完成",
+      "trialDesc": "您现在可跟踪最多 10 只股票，并使用 DeepSeek 分析与全量实时提醒。",
+      "activeDesc": "您当前已有的 GO 权益将继续生效，进入控制台即可继续使用。",
+      "workspaceDesc": "自选池已更新，您现在可以直接进入控制台。",
+      "cta": "打开控制台"
     }
   },
   "install": {

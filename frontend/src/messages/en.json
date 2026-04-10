@@ -594,12 +594,18 @@
       "cta": "Continue"
     },
     "complete": {
-      "ready": "All set!",
-      "added": "{symbol} added to your watchlist.",
-      "gift": "Special Gift",
-      "trial": "{days}-Day GO Trial Activated",
-      "trialDesc": "Track up to 10 symbols with DeepSeek analysis and full real-time alerts.",
-      "cta": "Enter Dashboard"
+      "ready": "You're ready to go",
+      "added": "{symbol} is now on your watchlist.",
+      "gift": "GO Trial Access",
+      "activeAccess": "GO Access Active",
+      "workspace": "Workspace Ready",
+      "trial": "{days}-Day GO Access Activated",
+      "activeTitle": "{days}-Day GO Access Active",
+      "workspaceTitle": "Your dashboard is ready",
+      "trialDesc": "Your workspace now includes up to 10 symbols, DeepSeek analysis, and full real-time alerts.",
+      "activeDesc": "Your existing GO access stays active while you continue into the dashboard.",
+      "workspaceDesc": "Your watchlist has been updated and your dashboard is ready to open.",
+      "cta": "Open Dashboard"
     }
   },
   "install": {

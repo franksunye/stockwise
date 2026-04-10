@@ -54,6 +54,18 @@ export function OnboardingOverlay() {
   const revealActionMeta = getPredictionActionMeta({
     signal: revealData.signal as 'Long' | 'Short' | 'Side',
   });
+  const hasActiveAccess = Boolean(
+    profile?.tier &&
+    profile.tier !== 'free' &&
+    profile.expiresAt &&
+    new Date(profile.expiresAt).getTime() > Date.now(),
+  );
+  const willGrantOnboardingTrial = Boolean(
+    profile &&
+    !profile.hasOnboarded &&
+    profile.tier === 'free' &&
+    !profile.expiresAt,
+  );
 
   const fetchRecommendedStocks = useCallback(async () => {
     try {
@@ -75,8 +87,8 @@ export function OnboardingOverlay() {
         // Track the start of onboarding
         trackEvent('onboarding_start', { tier: profile.tier });
         
-        // If they are already Pro (via referral), check their expiry to show correct trial length
-        if (profile.tier === 'pro' && profile.expiresAt) {
+        // If they already have an active trial/membership, show the remaining valid days.
+        if (profile.tier !== 'free' && profile.expiresAt) {
           const expiry = new Date(profile.expiresAt);
           const now = new Date();
           const diffDays = Math.ceil((expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
@@ -474,12 +486,26 @@ export function OnboardingOverlay() {
                                 <span className="text-white font-bold">{selectedStock && selectedStockName ? getLocalizedStockName({ symbol: selectedStock, name: selectedStockName, name_en: selectedStockNameEn }, stockLocale) : (selectedStock || 'Trial Asset')}</span> {t('complete.added', { symbol: '' })}
                             </p>
                             
-                            {/* Upsell Card */}
+                            {/* Access Status Card */}
                             <div className="bg-gradient-to-br from-indigo-900/40 to-black border border-indigo-500/30 p-6 rounded-2xl relative overflow-hidden">
                                 <div className="relative z-10">
-                                     <h3 className="text-indigo-300 font-bold uppercase tracking-widest text-xs mb-2">{t('complete.gift')}</h3>
-                                      <p className="text-white font-bold text-lg mb-1">{t('complete.trial', { days: trialDays })}</p>
-                                     <p className="text-slate-400 text-xs">{t('complete.trialDesc')}</p>
+                                     <h3 className="text-indigo-300 font-bold uppercase tracking-widest text-xs mb-2">
+                                        {hasActiveAccess ? t('complete.activeAccess') : willGrantOnboardingTrial ? t('complete.gift') : t('complete.workspace')}
+                                     </h3>
+                                     <p className="text-white font-bold text-lg mb-1">
+                                        {hasActiveAccess
+                                          ? t('complete.activeTitle', { days: trialDays })
+                                          : willGrantOnboardingTrial
+                                            ? t('complete.trial', { days: trialDays })
+                                            : t('complete.workspaceTitle')}
+                                     </p>
+                                     <p className="text-slate-400 text-xs">
+                                        {hasActiveAccess
+                                          ? t('complete.activeDesc')
+                                          : willGrantOnboardingTrial
+                                            ? t('complete.trialDesc')
+                                            : t('complete.workspaceDesc')}
+                                     </p>
                                 </div>
                                 <Clock className="absolute -bottom-4 -right-4 w-24 h-24 text-indigo-500/10" />
                             </div>
