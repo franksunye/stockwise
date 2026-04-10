@@ -3,7 +3,7 @@
  *
  * Design: Zero-dependency, ISR-compatible, type-safe.
  * - Messages are static JSON imports (build-time assets, zero runtime fetch).
- * - Locale detection: localStorage → user profile → navigator.language → default 'cn'.
+ * - Locale detection: explicit user choice → profile/cookie hint → navigator.language → default 'en'.
  * - Supports {param} placeholder interpolation.
  *
  * @module lib/i18n
@@ -17,9 +17,9 @@ import enMessages from '@/messages/en.json';
 export const APP_LOCALES = ['cn', 'en'] as const;
 export type AppLocale = (typeof APP_LOCALES)[number];
 
-export const DEFAULT_APP_LOCALE: AppLocale = 'cn';
+export const DEFAULT_APP_LOCALE: AppLocale = 'en';
 
-const LOCALE_STORAGE_KEY = 'stockwise_locale';
+export const LOCALE_STORAGE_KEY = 'stockwise_locale';
 export const LOCALE_COOKIE_KEY = 'ziso_locale';
 
 // ─── Message Types ──────────────────────────────────────────────
@@ -75,6 +75,23 @@ function normalizeLocaleToken(value: string | null): string | null {
   return value.trim().toLowerCase();
 }
 
+export function inferLocaleFromToken(value: string | null | undefined): AppLocale | null {
+  const normalized = normalizeLocaleToken(value ?? null);
+  if (!normalized) return null;
+  if (normalized === 'cn' || normalized === 'zh' || normalized.startsWith('zh-')) return 'cn';
+  if (normalized === 'en' || normalized.startsWith('en-')) return 'en';
+  if (normalized === 'es' || normalized.startsWith('es-')) return 'en';
+  if (normalized === 'ko' || normalized.startsWith('ko-')) return 'en';
+  return null;
+}
+
+export function resolveLocaleFromBrowserLanguage(
+  language: string | null | undefined,
+  fallback: AppLocale = DEFAULT_APP_LOCALE,
+): AppLocale {
+  return inferLocaleFromToken(language) ?? fallback;
+}
+
 export function getLocaleCookieDomain(hostname: string): string | null {
   const host = hostname.toLowerCase();
   if (!host || host === 'localhost' || /^\d+\.\d+\.\d+\.\d+$/.test(host)) {
@@ -100,36 +117,28 @@ export function resolveLocale(profileLocale?: string | null): AppLocale {
   // 1. localStorage cache
   if (typeof window !== 'undefined') {
     try {
-      const cached = localStorage.getItem(LOCALE_STORAGE_KEY);
-      if (isAppLocale(cached)) return cached;
+      const cached = inferLocaleFromToken(localStorage.getItem(LOCALE_STORAGE_KEY));
+      if (cached) return cached;
     } catch {
       // Storage unavailable
     }
   }
 
   // 2. Cross-subdomain Cookie (Link between ziso.cc and app.ziso.cc)
-  const cookieLocale = normalizeLocaleToken(getCookie(LOCALE_COOKIE_KEY));
-  if (isAppLocale(cookieLocale)) return cookieLocale;
-  
-  // High-Risk Audit Fix: Enable international mode for ES/KO marketing visitors
-  // If we have a language choice from the marketing site that isn't cn,
-  // we force 'en' to ensure International Pricing (USD) is shown.
-  if (cookieLocale === 'es' || cookieLocale === 'ko') return 'en';
+  const cookieLocale = inferLocaleFromToken(getCookie(LOCALE_COOKIE_KEY));
+  if (cookieLocale) return cookieLocale;
 
   // 3. User profile locale
-  if (isAppLocale(profileLocale)) return profileLocale;
+  const profileResolved = inferLocaleFromToken(profileLocale);
+  if (profileResolved) return profileResolved;
 
   // 4. Browser language
   if (typeof navigator !== 'undefined') {
-    const browserLang = navigator.language?.toLowerCase() ?? '';
-    if (browserLang.startsWith('zh')) return 'cn';
-    if (browserLang.startsWith('ko')) return 'en'; // Keep en for KO users if no explicit choice yet
-    if (browserLang.startsWith('es')) return 'en';
-    if (browserLang.startsWith('en')) return 'en';
+    return resolveLocaleFromBrowserLanguage(navigator.language);
   }
 
   // 5. Default
-  return 'en';
+  return DEFAULT_APP_LOCALE;
 }
 
 /**

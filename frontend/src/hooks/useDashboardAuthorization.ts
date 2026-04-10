@@ -7,6 +7,7 @@ import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
 import { resolveReferralCode } from '@/lib/referral-resolver';
 import { isIOS, isStandalone } from '@/lib/device-utils';
 import { mapApiJsonToUserProfile } from '@/lib/map-user-profile';
+import { LOCALE_COOKIE_KEY, resolveLocaleFromBrowserLanguage, inferLocaleFromToken } from '@/lib/i18n';
 import {
     getOptimisticDashboardBootstrap as getOptimisticDashboardBootstrapState,
     markDashboardSplashSeen,
@@ -29,16 +30,24 @@ const PROFILE_SYNC_SESSION_KEY = 'last_profile_sync';
 const PROFILE_SYNC_IN_FLIGHT_KEY = 'profile_sync_in_flight_v1';
 const LOCALE_STORAGE_KEY = 'stockwise_locale';
 
+function getCookie(name: string): string | null {
+    if (typeof document === 'undefined') return null;
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop()?.split(';').shift() ?? null;
+    return null;
+}
+
 function getPreferredLocaleForProfileSync(): 'cn' | 'en' {
-    if (typeof window === 'undefined') return 'cn';
-    const raw = (localStorage.getItem(LOCALE_STORAGE_KEY) || '').trim().toLowerCase();
-    if (!raw) {
-        const nav = (navigator.language || '').toLowerCase();
-        if (nav.startsWith('zh')) return 'cn';
-        return 'cn';
-    }
-    if (raw === 'cn' || raw === 'zh' || raw.startsWith('zh-')) return 'cn';
-    return 'en';
+    if (typeof window === 'undefined') return 'en';
+
+    const stored = inferLocaleFromToken(localStorage.getItem(LOCALE_STORAGE_KEY));
+    if (stored) return stored;
+
+    const cookieLocale = inferLocaleFromToken(getCookie(LOCALE_COOKIE_KEY));
+    if (cookieLocale) return cookieLocale;
+
+    return resolveLocaleFromBrowserLanguage(navigator.language);
 }
 
 function coerceTierFromData(data: Record<string, unknown>): Tier {

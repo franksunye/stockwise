@@ -6,7 +6,12 @@ import { Lock, ArrowRight, Loader2, ShieldCheck, Zap } from 'lucide-react';
 import { getCurrentUser } from '@/lib/user';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { useEffect } from 'react';
-import { LOCALE_COOKIE_KEY, type AppLocale } from '@/lib/i18n';
+import {
+  LOCALE_COOKIE_KEY,
+  type AppLocale,
+  inferLocaleFromToken,
+  resolveLocaleFromBrowserLanguage,
+} from '@/lib/i18n';
 
 interface Props {
   onSuccess: (tier: string, expiresAt: string | null) => void;
@@ -22,18 +27,15 @@ function getCookie(name: string): string | null {
 
 function resolveInviteWallLocale(): AppLocale {
   if (typeof window !== 'undefined') {
-    const stored = localStorage.getItem('stockwise_locale')?.trim().toLowerCase();
-    if (stored === 'en') return 'en';
-    if (stored === 'cn' || stored === 'zh' || stored?.startsWith('zh-')) return 'cn';
+    const stored = inferLocaleFromToken(localStorage.getItem('stockwise_locale'));
+    if (stored) return stored;
   }
 
-  const cookieLocale = getCookie(LOCALE_COOKIE_KEY)?.trim().toLowerCase();
-  if (cookieLocale === 'en' || cookieLocale === 'es' || cookieLocale === 'ko') return 'en';
-  if (cookieLocale === 'cn' || cookieLocale === 'zh' || cookieLocale?.startsWith('zh-')) return 'cn';
+  const cookieLocale = inferLocaleFromToken(getCookie(LOCALE_COOKIE_KEY));
+  if (cookieLocale) return cookieLocale;
 
   if (typeof navigator !== 'undefined') {
-    const browserLang = navigator.language?.toLowerCase() ?? '';
-    if (browserLang.startsWith('zh')) return 'cn';
+    return resolveLocaleFromBrowserLanguage(navigator.language);
   }
 
   return 'en';
