@@ -81,7 +81,7 @@ export default async function RootLayout({
           }}
         />
       </head>
-      <body className="antialiased">
+      <body className="antialiased" suppressHydrationWarning>
         {/* Server-rendered splash: in the HTML from the first byte, no script timing dependency.
             Visible by default; the inline script below removes it for desktop / non-dashboard. */}
         <div
