@@ -575,30 +575,30 @@
     "analysis": {
       "defaultReasoning": "AI analysis summary based on recent market performance and technical indicators."
     },
-    "selectTitle": "Select a stock to experience",
-    "selectDesc": "Choose from trending stocks to unlock full AI analysis.",
-    "selectNote": "* After onboarding, you can add any HK or China A stocks.",
+    "selectTitle": "See How ZISO Thinks About a Stock",
+    "selectDesc": "Pick a stock and unlock an AI view of trend, risk, and decision logic in seconds.",
+    "selectNote": "* You can add any US, HK, or China A stock after onboarding.",
     "analyzing": {
-      "connecting": "ESTABLISHING UPLINK...",
-      "flows": "MAPPING LIQUIDITY VECTORS...",
-      "ai": "DEDUCING STRATEGIC LOGIC..."
+      "connecting": "Connecting to live market data...",
+      "flows": "Analyzing market flows...",
+      "ai": "Generating AI insights..."
     },
     "reveal": {
-      "proUnlocked": "Pro Feature Unlocked",
-      "reportTitle": "AI Deep Full-Dimensional Report",
-      "advice": "AI Advice",
-      "insight": "AI Core Logic",
-      "confidence": "Historical Confidence",
-      "support": "Support Level",
-      "privilegeNote": "* Logic and Support data are usually Pro-only. Temporarily unlocked for you.",
-      "cta": "Get This Insight"
+      "goUnlocked": "GO Trial Preview",
+      "reportTitle": "Rationale Preview",
+      "advice": "Today's Advice",
+      "insight": "Rationale",
+      "confidence": "Confidence",
+      "support": "Support",
+      "privilegeNote": "* Rationale and support are included with GO during your trial.",
+      "cta": "Continue"
     },
     "complete": {
       "ready": "All set!",
       "added": "{symbol} added to your watchlist.",
       "gift": "Special Gift",
-      "trial": "{days}-Day Pro Trial Activated",
-      "trialDesc": "Add up to 10 symbols and unlock all AI core logic.",
+      "trial": "{days}-Day GO Trial Activated",
+      "trialDesc": "Track up to 10 symbols with DeepSeek analysis and full real-time alerts.",
       "cta": "Enter Dashboard"
     }
   },

@@ -35,6 +35,7 @@ interface RecommendedStock {
 
 export function OnboardingOverlay() { 
   const t = useT('onboarding');
+  const tDashboard = useT('dashboard');
   const { locale } = useLocale();
   const stockLocale = locale === 'en' ? 'en' : 'cn';
   const isHighPerformance = shouldEnableHighPerformance();
@@ -56,7 +57,7 @@ export function OnboardingOverlay() {
 
   const fetchRecommendedStocks = useCallback(async () => {
     try {
-      const res = await fetch('/api/user/onboarding/stocks');
+      const res = await fetch(`/api/user/onboarding/stocks?locale=${locale}`);
       if (!res.ok) return;
       const data = await res.json();
       if (data.stocks && data.stocks.length > 0) {
@@ -65,7 +66,7 @@ export function OnboardingOverlay() {
     } catch (e) {
       console.error("Fetch recommended stocks failed", e);
     }
-  }, []);
+  }, [locale]);
 
   useEffect(() => {
     if (!profileLoading && profile) {
@@ -302,7 +303,7 @@ export function OnboardingOverlay() {
                                         { symbol: '01398', name: '工商银行', market: 'HK' },
                                         { symbol: '688981', name: '中芯国际', market: 'CN' },
                                     ]).map(item => {
-                                        const badge = getMarketBadge(item.market, 'full');
+                                        const badge = getMarketBadge(item.market, 'full', locale);
                                         return (
                                             <button 
                                                 key={item.symbol} 
@@ -365,14 +366,15 @@ export function OnboardingOverlay() {
                         exit={{ opacity: 0 }}
                         className="relative"
                     >
-                        <div className="absolute -top-10 left-0 right-0 text-center mb-4">
-                                <span className="inline-block px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-bold border border-amber-500/30 uppercase tracking-widest animate-pulse">
-                                    {t('reveal.proUnlocked')}
+                        <div className="absolute -top-9 left-0 right-0 text-center mb-4">
+                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 text-amber-300 text-[10px] font-bold border border-amber-500/20 uppercase tracking-[0.18em]">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                                    {t('reveal.goUnlocked')}
                                 </span>
                         </div>
 
                         {/* HERO CARD UI */}
-                        <div className="bg-[#1a1a24] border border-white/10 rounded-3xl p-6 shadow-2xl relative overflow-hidden group">
+                        <div className="bg-[#1a1a24] border border-white/10 rounded-3xl p-5 shadow-2xl relative overflow-hidden group">
                            {/* Decorative Glow */}
                            {!isHighPerformance && (
                               <div className={`absolute top-0 right-0 w-64 h-64 bg-gradient-to-br opacity-20 blur-[60px] rounded-full pointer-events-none ${
@@ -380,30 +382,30 @@ export function OnboardingOverlay() {
                               }`} />
                            )}
 
-                           <div className="relative z-10 space-y-6">
+                           <div className="relative z-10 space-y-5">
                                 {/* Header */}
                                 <div className="flex justify-between items-start">
-                                    <div>
-                                        <h3 className="text-3xl font-black italic text-white tracking-tighter">{revealData.name}</h3>
-                                        <p className="text-xs font-bold text-slate-500 tracking-[0.2em] uppercase mt-1">{t('reveal.reportTitle')}</p>
+                                    <div className="pr-4">
+                                        <h3 className="text-[2rem] leading-[0.95] font-black italic text-white tracking-tighter">{revealData.name}</h3>
+                                        <p className="text-[10px] font-black text-slate-500 tracking-[0.24em] uppercase mt-2">{t('reveal.reportTitle')}</p>
                                     </div>
-                                    <div className={`flex flex-col items-end ${revealData.change >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                                        <span className="text-2xl font-black mono">{revealData.price.toFixed(2)}</span>
-                                        <span className="text-xs font-bold">{revealData.change >= 0 ? '+' : ''}{revealData.change.toFixed(2)}%</span>
+                                    <div className={`flex flex-col items-end shrink-0 ${revealData.change >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                        <span className="text-[1.9rem] leading-none font-black mono">{revealData.price.toFixed(2)}</span>
+                                        <span className="text-[11px] font-bold mt-1">{revealData.change >= 0 ? '+' : ''}{revealData.change.toFixed(2)}%</span>
                                     </div>
                                 </div>
 
                                 {/* Core Signal */}
-                                <div className="py-4 text-center border-y border-white/5 bg-black/20 rounded-xl relative overflow-hidden">
-                                     <div className={`text-[10px] font-black uppercase tracking-widest mb-2 ${
+                                <div className="py-4 text-center border border-white/5 bg-black/20 rounded-2xl relative overflow-hidden">
+                                     <div className={`text-[10px] font-black uppercase tracking-[0.18em] mb-2 ${
                                          revealData.signal === 'Long' ? 'text-emerald-500' : revealData.signal === 'Short' ? 'text-rose-500' : 'text-amber-500'
                                      }`}>
                                          {t('reveal.advice')}
                                      </div>
-                                     <div className={`text-3xl font-black tracking-tighter ${
+                                     <div className={`text-[2rem] leading-none font-black tracking-tighter ${
                                          revealData.signal === 'Long' ? 'text-emerald-400' : revealData.signal === 'Short' ? 'text-rose-400' : 'text-amber-400'
                                      }`}>
-                                         {revealActionMeta.headline}
+                                         {tDashboard(`signal.${revealActionMeta.headline}`)}
                                      </div>
                                 </div>
 
@@ -411,40 +413,40 @@ export function OnboardingOverlay() {
                                 <div className="space-y-3">
                                     <div className="flex items-center gap-2 text-indigo-400">
                                         <Zap className="w-4 h-4 fill-current" />
-                                        <span className="text-xs font-bold uppercase tracking-wider">{t('reveal.insight')}</span>
+                                        <span className="text-[11px] font-black uppercase tracking-[0.18em]">{t('reveal.insight')}</span>
                                     </div>
-                                    <p className="text-sm font-medium text-slate-300 leading-relaxed border-l-2 border-indigo-500/50 pl-3">
+                                    <p className="text-sm font-medium text-slate-300 leading-relaxed border-l-2 border-indigo-500/40 pl-3">
                                         &quot;{revealData.reason}&quot;
                                     </p>
                                 </div>
 
                                 {/* Stats Grid */}
                                 <div className="grid grid-cols-2 gap-3">
-                                    <div className="bg-white/5 rounded-xl p-3 flex flex-col justify-between">
-                                        <div className="text-[10px] text-slate-500 uppercase font-bold flex items-center gap-1">
+                                    <div className="bg-white/5 rounded-2xl p-3 flex flex-col justify-between min-h-[92px]">
+                                        <div className="text-[10px] text-slate-500 uppercase font-black tracking-[0.12em] flex items-center gap-1">
                                             <Target className="w-3 h-3" /> {t('reveal.confidence')}
                                         </div>
-                                        <span className="text-xl font-bold text-white mt-1">{(revealData.confidence * 100).toFixed(0)}%</span>
+                                        <span className="text-[1.75rem] leading-none font-black text-white mt-2">{(revealData.confidence * 100).toFixed(0)}%</span>
                                     </div>
-                                    <div className="bg-white/5 rounded-xl p-3 flex flex-col justify-between">
-                                        <div className="text-[10px] text-slate-500 uppercase font-bold flex items-center gap-1">
+                                    <div className="bg-white/5 rounded-2xl p-3 flex flex-col justify-between min-h-[92px]">
+                                        <div className="text-[10px] text-slate-500 uppercase font-black tracking-[0.12em] flex items-center gap-1">
                                             <ShieldCheck className="w-3 h-3" /> {t('reveal.support')}
                                         </div>
-                                        <span className="text-xl font-bold text-white mt-1">{revealData.support.toFixed(2)}</span>
+                                        <span className="text-[1.75rem] leading-none font-black text-white mt-2">{revealData.support.toFixed(2)}</span>
                                     </div>
                                 </div>
 
                                 {/* Prompt */}
-                                <div className="pt-2">
-                                     <p className="text-[10px] text-center text-slate-500 italic">
+                                <div className="pt-1">
+                                     <p className="text-[10px] text-center text-slate-500 italic leading-relaxed">
                                         {t('reveal.privilegeNote')}
                                      </p>
                                 </div>
                            </div>
                         </div>
 
-                        <div className="mt-8 space-y-3">
-                             <button onClick={() => setStep(4)} className="w-full py-4 bg-indigo-600 text-white font-bold text-lg rounded-2xl active:scale-95 transition-all shadow-lg hover:bg-indigo-500">
+                        <div className="mt-7 space-y-3">
+                             <button onClick={() => setStep(4)} className="w-full py-4 bg-indigo-600 text-white font-black text-lg rounded-2xl active:scale-95 transition-all shadow-lg hover:bg-indigo-500">
                                 {t('reveal.cta')}
                              </button>
                         </div>

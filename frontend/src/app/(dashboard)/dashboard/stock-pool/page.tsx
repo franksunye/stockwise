@@ -344,7 +344,7 @@ export default function StockPoolPage() {
                 {showSuggestions && searchResults.length > 0 && (
                   <div className="mt-4 space-y-2 max-h-60 overflow-y-auto">
                     {searchResults.map(item => {
-                      const badge = getMarketBadge(item.market);
+                      const badge = getMarketBadge(item.market, 'compact', locale);
                       return (
                         <button key={item.symbol} onClick={() => handleAdd(item.symbol, item.name, item.name_en)} className="w-full flex items-center justify-between p-4 bg-white/5 rounded-2xl hover:bg-white/10 transition-colors">
                           <div className="flex items-center gap-3">

@@ -577,28 +577,28 @@
     },
     "selectTitle": "选择一只股票体验",
     "selectDesc": "从热门标的中选择，我们将完全解锁它的 AI 深度分析。",
-    "selectNote": "* 正式使用后，您可以添加任意港股或A股到自选池",
+    "selectNote": "* 正式使用后，您可以添加任意美股、港股或A股到自选池",
     "analyzing": {
       "connecting": "正在连接全球市场数据...",
       "flows": "正在追踪机构资金流向...",
       "ai": "AI 正在生成深度决策逻辑..."
     },
     "reveal": {
-      "proUnlocked": "Pro Feature Unlocked",
-      "reportTitle": "AI 深度全维分析报告",
-      "advice": "AI 建议",
-      "insight": "AI 核心逻辑",
-      "confidence": "历史表现置信度",
+      "goUnlocked": "GO 体验预览",
+      "reportTitle": "逻辑预览",
+      "advice": "今日建议",
+      "insight": "逻辑依据",
+      "confidence": "置信度",
       "support": "支撑位",
-      "privilegeNote": "* 普通用户通常无法查看到“核心逻辑”与“支撑位”数据。此特权已为您临时解锁。",
-      "cta": "收下这份洞察"
+      "privilegeNote": "* GO 体验期间，您可查看逻辑依据与支撑位。",
+      "cta": "继续"
     },
     "complete": {
       "ready": "一切就绪!",
       "added": "{symbol} 已添加到您的自选池。",
       "gift": "特别礼物",
-      "trial": "已激活 {days} 天 Pro 体验权",
-      "trialDesc": "支持添加 10 只自选并在全站解锁 AI 核心逻辑。",
+      "trial": "已激活 {days} 天 GO 体验权",
+      "trialDesc": "支持跟踪 10 只自选，并解锁 DeepSeek 分析与全量实时提醒。",
       "cta": "进入控制台"
     }
   },
