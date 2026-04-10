@@ -14,7 +14,9 @@ function formatDate(dateStr: string, fallback: string): string {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const base = brandCoreEn.domain;
+  // Use the canonical serving domain (www.ziso.cc) for all sitemap URLs.
+  // Google requires sitemap URLs to match the GSC property domain.
+  const base = "https://www.ziso.cc";
   const updated = nowIso();
 
   // 1. Static Routes for all 4 locales
