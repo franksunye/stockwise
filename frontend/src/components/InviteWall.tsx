@@ -1,14 +1,42 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Lock, ArrowRight, Loader2, ShieldCheck, Zap } from 'lucide-react';
 import { getCurrentUser } from '@/lib/user';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { useEffect } from 'react';
+import { LOCALE_COOKIE_KEY, type AppLocale } from '@/lib/i18n';
 
 interface Props {
   onSuccess: (tier: string, expiresAt: string | null) => void;
+}
+
+function getCookie(name: string): string | null {
+  if (typeof document === 'undefined') return null;
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(';').shift() ?? null;
+  return null;
+}
+
+function resolveInviteWallLocale(): AppLocale {
+  if (typeof window !== 'undefined') {
+    const stored = localStorage.getItem('stockwise_locale')?.trim().toLowerCase();
+    if (stored === 'en') return 'en';
+    if (stored === 'cn' || stored === 'zh' || stored?.startsWith('zh-')) return 'cn';
+  }
+
+  const cookieLocale = getCookie(LOCALE_COOKIE_KEY)?.trim().toLowerCase();
+  if (cookieLocale === 'en' || cookieLocale === 'es' || cookieLocale === 'ko') return 'en';
+  if (cookieLocale === 'cn' || cookieLocale === 'zh' || cookieLocale?.startsWith('zh-')) return 'cn';
+
+  if (typeof navigator !== 'undefined') {
+    const browserLang = navigator.language?.toLowerCase() ?? '';
+    if (browserLang.startsWith('zh')) return 'cn';
+  }
+
+  return 'en';
 }
 
 export function InviteWall({ onSuccess }: Props) {
@@ -16,6 +44,23 @@ export function InviteWall({ onSuccess }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { trackEvent } = useAnalytics();
+  const locale = useMemo(resolveInviteWallLocale, []);
+  const isEnglish = locale === 'en';
+
+  const copy = {
+    titleAccent: 'BETA',
+    description: isEnglish
+      ? 'We are currently in invitation-only beta. Enter your access code to unlock the AI decision workspace.'
+      : '目前处于邀请制内测阶段。请输入您的专属激活码以解锁 AI 决策系统。',
+    label: isEnglish ? 'Enter access code' : '输入邀请码',
+    invalidCode: isEnglish ? 'Invalid access code' : '无效的激活码',
+    networkFailure: isEnglish ? 'Network request failed. Please try again shortly.' : '网络请求失败，请稍后重试',
+    verifyIdentity: isEnglish ? 'Identity Check' : '验证身份',
+    unlockFeatures: isEnglish ? 'Unlock Access' : '解锁功能',
+    footer: isEnglish
+      ? 'Need an access code? Follow @franksunye on X for beta access updates and launch announcements.'
+      : '没有邀请码？关注官方公众号“知守AI”获取',
+  };
 
   useEffect(() => {
     trackEvent('view_invite_wall');
@@ -42,13 +87,13 @@ export function InviteWall({ onSuccess }: Props) {
         trackEvent('invite_redeem_success', { tier: data.tier });
         onSuccess(data.tier, data.expiresAt);
       } else {
-        const errorMsg = data.error || '无效的激活码';
+        const errorMsg = data.error || copy.invalidCode;
         trackEvent('invite_redeem_error', { reason: errorMsg });
         setError(errorMsg);
       }
     } catch {
       trackEvent('invite_redeem_error', { reason: 'network_failure' });
-      setError('网络请求失败，请稍后重试');
+      setError(copy.networkFailure);
     } finally {
       setLoading(false);
     }
@@ -75,10 +120,10 @@ export function InviteWall({ onSuccess }: Props) {
             <Lock className="w-10 h-10 text-white" />
           </div>
           <h1 className="text-4xl font-black italic tracking-tighter mb-4">
-            ZISO AI <span className="text-indigo-500">BETA</span>
+            ZISO AI <span className="text-indigo-500">{copy.titleAccent}</span>
           </h1>
           <p className="text-slate-400 font-medium leading-relaxed px-4">
-            目前处于邀请制内测阶段。请输入您的专属激活码以解锁 AI 决策系统。
+            {copy.description}
           </p>
         </div>
 
@@ -86,7 +131,7 @@ export function InviteWall({ onSuccess }: Props) {
           <div className="space-y-6">
             <div>
               <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-3 ml-1">
-                输入邀请码
+                {copy.label}
               </label>
               <div className="relative group">
                 <input 
@@ -118,18 +163,29 @@ export function InviteWall({ onSuccess }: Props) {
             <div className="pt-4 grid grid-cols-2 gap-4">
                <div className="flex items-center gap-2 text-[10px] font-bold text-slate-500">
                   <ShieldCheck size={14} className="text-indigo-400" />
-                  验证身份
+                  {copy.verifyIdentity}
                </div>
                <div className="flex items-center gap-2 text-[10px] font-bold text-slate-500">
                   <Zap size={14} className="text-purple-400" />
-                  解锁功能
+                  {copy.unlockFeatures}
                </div>
             </div>
           </div>
         </div>
 
         <p className="mt-10 text-center text-xs font-bold text-slate-600 uppercase tracking-widest">
-            没有邀请码? 关注官方公众号“知守AI”获取
+          {isEnglish ? (
+            <a
+              href="https://x.com/franksunye"
+              target="_blank"
+              rel="noreferrer"
+              className="transition-colors hover:text-slate-400"
+            >
+              {copy.footer}
+            </a>
+          ) : (
+            copy.footer
+          )}
         </p>
       </motion.div>
 

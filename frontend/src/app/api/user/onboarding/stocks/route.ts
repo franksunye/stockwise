@@ -69,10 +69,10 @@ function getFallbackStocks(locale: AppLocale): Stock[] {
     if (locale === 'en') {
         return [
             { symbol: 'AAPL', name: 'Apple', name_en: 'Apple Inc.', market: 'US' },
-            { symbol: 'NVDA', name: 'NVIDIA', name_en: 'NVIDIA Corporation', market: 'US' },
             { symbol: '00700', name: '腾讯控股', name_en: 'Tencent Holdings', market: 'HK' },
             { symbol: '09988', name: '阿里巴巴-W', name_en: 'Alibaba Group', market: 'HK' },
             { symbol: '600519', name: '贵州茅台', name_en: 'Kweichow Moutai', market: 'CN' },
+            { symbol: '688256', name: '寒武纪', name_en: 'Cambricon', market: 'CN' },
         ];
     }
 
