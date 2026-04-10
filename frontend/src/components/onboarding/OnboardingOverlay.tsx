@@ -9,6 +9,7 @@ import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
 import { getPredictionActionMeta } from '@/lib/layer1-ui';
 import { useT, useLocale } from '@/context/LocaleContext';
 import { getLocalizedStockName } from '@/lib/stock-name';
+import { getMarketBadge } from '@/lib/market-badge';
 import { useAnalytics } from '@/hooks/useAnalytics';
 
 // Fallback data for the reveal step
@@ -301,8 +302,7 @@ export function OnboardingOverlay() {
                                         { symbol: '01398', name: '工商银行', market: 'HK' },
                                         { symbol: '688981', name: '中芯国际', market: 'CN' },
                                     ]).map(item => {
-                                        const isHK = item.market === 'HK';
-                                        const suffix = isHK ? '.HK' : '';
+                                        const badge = getMarketBadge(item.market, 'full');
                                         return (
                                             <button 
                                                 key={item.symbol} 
@@ -310,12 +310,12 @@ export function OnboardingOverlay() {
                                                 className="w-full flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 hover:border-indigo-500/30 transition-all active:scale-[0.98]"
                                             >
                                                 <div className="flex items-center gap-3">
-                                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xs font-black ${isHK ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'}`}>
-                                                        {isHK ? '港股' : 'A股'}
+                                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xs font-black border ${badge.className}`}>
+                                                        {badge.label}
                                                     </div>
                                                     <div className="text-left">
                                                         <p className="text-base font-bold text-white">{getLocalizedStockName(item, stockLocale)}</p>
-                                                        <p className="text-[10px] text-slate-500 mono uppercase tracking-wider">{item.symbol}{suffix}</p>
+                                                        <p className="text-[10px] text-slate-500 mono uppercase tracking-wider">{item.symbol}{badge.suffix}</p>
                                                     </div>
                                                 </div>
                                                 <div className="w-8 h-8 rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">

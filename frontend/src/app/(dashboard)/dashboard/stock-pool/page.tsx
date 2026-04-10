@@ -14,6 +14,7 @@ import type { AIPrediction } from '@/lib/types';
 import { writeDashboardNavIntentSymbol } from '@/lib/dashboard-symbol-navigation';
 import { useT, useLocale } from '@/context/LocaleContext';
 import { getLocalizedStockName } from '@/lib/stock-name';
+import { getMarketBadge } from '@/lib/market-badge';
 import type { MessageKey } from '@/lib/i18n';
 
 interface StockSnapshot {
@@ -343,17 +344,16 @@ export default function StockPoolPage() {
                 {showSuggestions && searchResults.length > 0 && (
                   <div className="mt-4 space-y-2 max-h-60 overflow-y-auto">
                     {searchResults.map(item => {
-                      const isHK = item.market === 'HK';
-                      const suffix = isHK ? '.HK' : '';
+                      const badge = getMarketBadge(item.market);
                       return (
                         <button key={item.symbol} onClick={() => handleAdd(item.symbol, item.name, item.name_en)} className="w-full flex items-center justify-between p-4 bg-white/5 rounded-2xl hover:bg-white/10 transition-colors">
                           <div className="flex items-center gap-3">
-                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-[10px] font-black ${isHK ? 'bg-blue-500/10 text-blue-400' : 'bg-rose-500/10 text-rose-400'}`}>
-                              {isHK ? '港' : 'A'}
+                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-[10px] font-black ${badge.className}`}>
+                              {badge.label}
                             </div>
                             <div className="text-left">
                                <p className="text-sm font-bold">{getLocalizedStockName(item, stockLocale)}</p>
-                               <p className="text-[10px] text-slate-500 mono uppercase">{item.symbol}{suffix}</p>
+                               <p className="text-[10px] text-slate-500 mono uppercase">{item.symbol}{badge.suffix}</p>
                             </div>
                           </div>
                           <Plus size={16} className="text-slate-500" />
