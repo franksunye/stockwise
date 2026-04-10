@@ -216,9 +216,10 @@ export default function StockPoolPage() {
     const targetSymbol = symbolOverride || newSymbol.trim();
     if (!targetSymbol) return;
     
-    const limit = tier === 'pro' ? 10 : 3;
+    const isFreeTier = tier === 'free';
+    const limit = isFreeTier ? 3 : 10;
     if (watchlist.length >= limit) {
-      setLimitMsg(tier === 'pro' ? t('limit10') : t('limit3'));
+      setLimitMsg(isFreeTier ? t('limit3') : t('limit10'));
       setTimeout(() => setLimitMsg(null), 3000);
       return;
     }
