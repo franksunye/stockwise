@@ -18,26 +18,51 @@ type FocusedImageSliderProps = {
 export function FocusedImageSlider({ slides, className = '' }: FocusedImageSliderProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [isInView, setIsInView] = useState(false);
   const touchStartXRef = useRef<number | null>(null);
   const touchDeltaXRef = useRef(0);
-
-  if (!slides.length) return null;
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const slideCount = slides.length;
 
   const goPrev = () => {
-    setActiveIndex((prev) => (prev - 1 + slides.length) % slides.length);
+    if (slideCount <= 0) return;
+    setActiveIndex((prev) => (prev - 1 + slideCount) % slideCount);
   };
 
   const goNext = () => {
-    setActiveIndex((prev) => (prev + 1) % slides.length);
+    if (slideCount <= 0) return;
+    setActiveIndex((prev) => (prev + 1) % slideCount);
   };
 
   useEffect(() => {
-    if (isPaused || slides.length <= 1) return;
+    if (isPaused || !isInView || slideCount <= 1) return;
     const timer = window.setInterval(() => {
-      setActiveIndex((prev) => (prev + 1) % slides.length);
+      setActiveIndex((prev) => (prev + 1) % slideCount);
     }, 4500);
     return () => window.clearInterval(timer);
-  }, [isPaused, slides.length]);
+  }, [isPaused, isInView, slideCount]);
+
+  useEffect(() => {
+    if (slideCount <= 0) {
+      setActiveIndex(0);
+      return;
+    }
+    setActiveIndex((prev) => prev % slideCount);
+  }, [slideCount]);
+
+  useEffect(() => {
+    const node = containerRef.current;
+    if (!node) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        setIsInView(Boolean(entry?.isIntersecting));
+      },
+      { threshold: 0.35 }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
 
   const handleTouchStart: TouchEventHandler<HTMLDivElement> = (event) => {
     touchStartXRef.current = event.touches[0]?.clientX ?? null;
@@ -63,8 +88,16 @@ export function FocusedImageSlider({ slides, className = '' }: FocusedImageSlide
     setIsPaused(false);
   };
 
+  const prevIndex = (activeIndex - 1 + slideCount) % slideCount;
+  const nextIndex = (activeIndex + 1) % slideCount;
+  const shouldRenderSlide = (index: number) =>
+    slideCount <= 3 || index === activeIndex || index === prevIndex || index === nextIndex;
+
+  if (slideCount <= 0) return null;
+
   return (
     <div
+      ref={containerRef}
       className={`glass-card aspect-square bg-[#0A0A10] rounded-[40px] overflow-hidden border border-white/5 relative ${className}`}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
@@ -74,21 +107,25 @@ export function FocusedImageSlider({ slides, className = '' }: FocusedImageSlide
       onTouchCancel={handleTouchEnd}
     >
       {slides.map((slide, index) => (
-        <div
-          key={`${slide.src}-${index}`}
-          className={`absolute inset-0 transition-opacity duration-500 ${
-            index === activeIndex ? 'opacity-100' : 'opacity-0 pointer-events-none'
-          }`}
-        >
-          <Image
-            src={slide.src}
-            alt={slide.alt}
-            fill
-            sizes="(min-width: 768px) 45vw, 100vw"
-            className="object-cover opacity-90"
-            style={{ objectPosition: slide.objectPosition }}
-          />
-        </div>
+        shouldRenderSlide(index) ? (
+          <div
+            key={`${slide.src}-${index}`}
+            className={`absolute inset-0 transition-opacity duration-500 ${
+              index === activeIndex ? 'opacity-100' : 'opacity-0 pointer-events-none'
+            }`}
+          >
+            <Image
+              src={slide.src}
+              alt={slide.alt}
+              fill
+              sizes="(min-width: 1024px) 38vw, (min-width: 768px) 45vw, 92vw"
+              priority={index === 0}
+              loading={index === 0 ? 'eager' : 'lazy'}
+              className="object-cover opacity-90"
+              style={{ objectPosition: slide.objectPosition }}
+            />
+          </div>
+        ) : null
       ))}
 
       <div className="absolute inset-x-0 bottom-4 flex items-center justify-between px-4 z-20">
