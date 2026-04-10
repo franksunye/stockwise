@@ -241,7 +241,11 @@ if __name__ == "__main__":
 
             if sync_mode in ("core", "full"):
                 logger.info(f"⚡ [On-Demand] Fetching realtime snapshot for {args.symbol}...")
-                stats = sync_spot_prices([args.symbol])
+                stats = sync_spot_prices(
+                    [args.symbol],
+                    ignore_session_filter=True,
+                    ignore_trading_day_gate=True,
+                )
                 realtime_ok = bool(stats)
                 if stats:
                     job.set_stats(**stats)

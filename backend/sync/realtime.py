@@ -14,10 +14,18 @@ from logger import logger
 from trading_calendar import is_realtime_session_open
 
 
-def sync_spot_prices(symbols: list):
-    """盘中实时同步"""
+def sync_spot_prices(
+    symbols: list,
+    ignore_session_filter: bool = False,
+    ignore_trading_day_gate: bool = False,
+):
+    """盘中实时同步
+
+    ignore_session_filter=True: 跳过交易时段过滤（用于 on-demand 单票）
+    ignore_trading_day_gate=True: 跳过全市场交易日闸门（用于 on-demand 单票）
+    """
     # 如果全场休市，跳过实时同步
-    if check_trading_day_skip():
+    if not ignore_trading_day_gate and check_trading_day_skip():
         return {
             "success_count": 0,
             "failed_count": 0,
@@ -27,15 +35,19 @@ def sync_spot_prices(symbols: list):
         }
 
     pool_total = len(symbols)
-    _ignore = os.getenv("REALTIME_SYNC_IGNORE_SESSION", "").strip().lower() in (
+    env_ignore = os.getenv("REALTIME_SYNC_IGNORE_SESSION", "").strip().lower() in (
         "1",
         "true",
         "yes",
     )
-    if _ignore:
+    should_ignore_session = ignore_session_filter or env_ignore
+    if should_ignore_session:
         active = list(symbols)
         skipped_session = 0
-        logger.warning("⚠️ REALTIME_SYNC_IGNORE_SESSION set — 跳过交易时段过滤（全量标的）")
+        if ignore_session_filter:
+            logger.info("⚡ Realtime on-demand mode — 跳过交易时段过滤")
+        elif env_ignore:
+            logger.warning("⚠️ REALTIME_SYNC_IGNORE_SESSION set — 跳过交易时段过滤（全量标的）")
     else:
         active = [s for s in symbols if is_realtime_session_open(get_market(s))]
         skipped_session = pool_total - len(active)
