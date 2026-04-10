@@ -4,12 +4,19 @@ import { isAppLocale, type AppLocale, LOCALE_COOKIE_KEY } from '@/lib/i18n';
 
 export const dynamic = 'force-dynamic';
 const ONBOARDING_STOCK_LIMIT = 3;
+const MARKET_DISPLAY_ORDER = ['US', 'HK', 'CN'] as const;
 
 interface Stock {
     symbol: string;
     name: string;
     name_en?: string | null;
     market: string;
+}
+
+interface LocaleMarketRule {
+    primaryMarkets: string[];
+    targetByMarket: Partial<Record<(typeof MARKET_DISPLAY_ORDER)[number], number>>;
+    fillMarkets: string[];
 }
 
 function resolveRequestLocale(request: Request): AppLocale {
@@ -28,23 +35,46 @@ function resolveRequestLocale(request: Request): AppLocale {
     return 'cn';
 }
 
-function pickMarketAwareStocks(pool: Stock[], locale: AppLocale, limit = ONBOARDING_STOCK_LIMIT): Stock[] {
-    const preferredTargets = locale === 'en'
-        ? [
-            { market: 'US', target: 2 },
-            { market: 'HK', target: 1 },
-            { market: 'CN', target: 0 },
-        ]
-        : [
-            { market: 'HK', target: 2 },
-            { market: 'CN', target: 1 },
-            { market: 'US', target: 0 },
-        ];
+function getLocaleMarketRule(locale: AppLocale): LocaleMarketRule {
+    if (locale === 'en') {
+        return {
+            primaryMarkets: ['US', 'HK'],
+            targetByMarket: { US: 2, HK: 1, CN: 0 },
+            fillMarkets: ['US', 'HK', 'CN'],
+        };
+    }
 
+    return {
+        primaryMarkets: ['HK', 'CN'],
+        targetByMarket: { HK: 2, CN: 1, US: 0 },
+        fillMarkets: ['HK', 'CN', 'US'],
+    };
+}
+
+function pushStocksFromMarkets(
+    source: Stock[],
+    selected: Stock[],
+    selectedSymbols: Set<string>,
+    markets: string[],
+    limit: number,
+): void {
+    for (const market of markets) {
+        for (const stock of source) {
+            if (selected.length >= limit) return;
+            if (stock.market !== market || selectedSymbols.has(stock.symbol)) continue;
+            selected.push(stock);
+            selectedSymbols.add(stock.symbol);
+        }
+    }
+}
+
+function pickMarketAwareStocks(pool: Stock[], locale: AppLocale, limit = ONBOARDING_STOCK_LIMIT): Stock[] {
+    const rule = getLocaleMarketRule(locale);
     const selected: Stock[] = [];
     const selectedSymbols = new Set<string>();
 
-    for (const { market, target } of preferredTargets) {
+    for (const market of MARKET_DISPLAY_ORDER) {
+        const target = rule.targetByMarket[market] ?? 0;
         if (target <= 0) continue;
         for (const stock of pool) {
             if (selected.length >= limit) return selected;
@@ -55,11 +85,10 @@ function pickMarketAwareStocks(pool: Stock[], locale: AppLocale, limit = ONBOARD
         }
     }
 
-    for (const stock of pool) {
-        if (selected.length >= limit) break;
-        if (selectedSymbols.has(stock.symbol)) continue;
-        selected.push(stock);
-        selectedSymbols.add(stock.symbol);
+    pushStocksFromMarkets(pool, selected, selectedSymbols, rule.primaryMarkets, limit);
+
+    if (selected.length < limit) {
+        pushStocksFromMarkets(pool, selected, selectedSymbols, rule.fillMarkets, limit);
     }
 
     return selected;
@@ -69,6 +98,7 @@ function getFallbackStocks(locale: AppLocale): Stock[] {
     if (locale === 'en') {
         return [
             { symbol: 'AAPL', name: 'Apple', name_en: 'Apple Inc.', market: 'US' },
+            { symbol: 'NVDA', name: '英伟达', name_en: 'NVIDIA', market: 'US' },
             { symbol: '00700', name: '腾讯控股', name_en: 'Tencent Holdings', market: 'HK' },
             { symbol: '09988', name: '阿里巴巴-W', name_en: 'Alibaba Group', market: 'HK' },
             { symbol: '600519', name: '贵州茅台', name_en: 'Kweichow Moutai', market: 'CN' },
@@ -81,6 +111,7 @@ function getFallbackStocks(locale: AppLocale): Stock[] {
         { symbol: '09988', name: '阿里巴巴-W', name_en: 'Alibaba Group', market: 'HK' },
         { symbol: '688256', name: '寒武纪', name_en: 'Cambricon', market: 'CN' },
         { symbol: '601398', name: '工商银行', name_en: 'Industrial and Commercial Bank of China', market: 'CN' },
+        { symbol: '600519', name: '贵州茅台', name_en: 'Kweichow Moutai', market: 'CN' },
         { symbol: 'AAPL', name: 'Apple', name_en: 'Apple Inc.', market: 'US' },
     ];
 }
