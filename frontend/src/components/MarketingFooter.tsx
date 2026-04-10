@@ -94,9 +94,9 @@ export default function MarketingFooter({ locale = 'en' }: { locale?: PublicLoca
   ];
 
   return (
-    <footer className="relative z-10 border-t border-white/5 py-24 px-8 bg-black/20">
+    <footer className="relative z-10 border-t border-white/5 pt-12 pb-12 px-8 bg-black/20">
       <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-12 mb-20">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-10 mb-10">
           <div className="col-span-2 md:col-span-1">
             <Link href={localizedHome} className="flex items-center gap-2 mb-6">
               <Image
@@ -138,7 +138,7 @@ export default function MarketingFooter({ locale = 'en' }: { locale?: PublicLoca
           ))}
         </div>
 
-        <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="pt-6 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-[10px] text-slate-600 font-bold uppercase tracking-widest">
             © 2026 ZISO AI TECHNOLOGY. ALL RIGHTS RESERVED.
           </p>
