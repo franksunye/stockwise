@@ -28,10 +28,15 @@ export function UserPricingView({ currentTier, hasStripeCustomer, expiresAt }: P
   const isGo = currentTier === 'go';
   const isPlus = currentTier === 'plus';
   const isPremium = isGo || isPlus;
+  const canManageStripeSubscription = Boolean(hasStripeCustomer);
 
   // Strategic prices for translation placeholders
   const monthlyPriceStr = `${currencySymbol}${isCN ? '49' : '6.99'}`;
   const annualPriceStr = `${currencySymbol}${isCN ? '499' : '69.9'}`;
+  const getSubscribeLabel = (planName: string) => {
+    const tierName = tGlobal(planName as FullMessageKey);
+    return t('subscribeTier', { tier: tierName });
+  };
 
   // Formatter for expiry date
   const formatExpiry = (dateStr: string) => {
@@ -183,7 +188,7 @@ export function UserPricingView({ currentTier, hasStripeCustomer, expiresAt }: P
               </div>
             </div>
 
-            {hasStripeCustomer && !isPlus && (
+            {canManageStripeSubscription && (
               <button 
                 onClick={handleManageSubscription}
                 disabled={loadingPortal}
@@ -201,6 +206,16 @@ export function UserPricingView({ currentTier, hasStripeCustomer, expiresAt }: P
           <p className="text-[11px] font-medium text-indigo-100 opacity-90 leading-relaxed">
             {t('desc')}
           </p>
+          {canManageStripeSubscription && (
+            <button
+              onClick={handleManageSubscription}
+              disabled={loadingPortal}
+              className="mt-4 w-full py-2.5 rounded-xl bg-white/10 hover:bg-white/20 active:scale-95 transition-all border border-white/10 text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2"
+            >
+              {loadingPortal ? <Loader2 className="animate-spin" size={14} /> : <Zap size={14} />}
+              {loadingPortal ? t('portalRedirecting') : t('manageSub')}
+            </button>
+          )}
         </div>
       )}
 
@@ -303,7 +318,7 @@ export function UserPricingView({ currentTier, hasStripeCustomer, expiresAt }: P
                     >
                       {loadingPriceId === plan.priceId 
                         ? t('processing') 
-                        : (isPremium ? t('monthly', { price: monthlyPriceStr }) : t('subscribe'))
+                        : (isPremium ? t('monthly', { price: monthlyPriceStr }) : getSubscribeLabel(plan.name))
                       }
                       {!loadingPriceId && <ChevronRight size={14} />}
                     </button>

@@ -383,6 +383,7 @@
     "portalRedirecting": "正在跳转至管理门户...",
     "currentStatus": "当前账户状态",
     "subscribe": "订阅 Pro",
+    "subscribeTier": "订阅 {tier}",
     "monthly": "月度续费 ({price})",
     "annual": "年度订阅 (最优惠)",
     "annualExtended": "年度续期 ({price})",

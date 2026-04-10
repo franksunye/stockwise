@@ -383,6 +383,7 @@
     "portalRedirecting": "Redirecting to portal...",
     "currentStatus": "Current Account Status",
     "subscribe": "Subscribe Pro",
+    "subscribeTier": "Subscribe {tier}",
     "monthly": "Monthly Renewal ({price})",
     "annual": "Annual Subscription (Best Offer)",
     "annualExtended": "Annual Extension ({price})",
