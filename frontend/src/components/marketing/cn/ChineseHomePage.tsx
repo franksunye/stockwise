@@ -71,19 +71,19 @@ export function ChineseHomePage() {
           <div className="relative h-[500px] md:h-[700px] w-full flex items-center justify-center">
             <div className="absolute left-[5%] md:left-[15%] w-[45%] md:w-[25%] aspect-[9/19] bg-[#0A0A10] rounded-[30px] border border-white/10 shadow-2xl z-10 -rotate-12 origin-bottom-right hidden sm:flex items-center justify-center p-2 transition-transform hover:-translate-x-2">
                <div className="w-full h-full bg-[#050508] rounded-[22px] border border-white/5 overflow-hidden relative">
-                  <Image src="/images/landing/analysis-depth.png" alt="AI Analysis Detail" fill sizes="(min-width: 768px) 25vw, 45vw" className="object-cover" />
+                  <Image src="/images/landing/1-logical-trace.cn.png" alt="AI Analysis Detail" fill sizes="(min-width: 768px) 25vw, 45vw" className="object-cover" />
                </div>
             </div>
 
             <div className="absolute right-[5%] md:right-[15%] w-[45%] md:w-[25%] aspect-[9/19] bg-[#0A0A10] rounded-[30px] border border-white/10 shadow-2xl z-10 rotate-12 origin-bottom-left hidden sm:flex items-center justify-center p-2 transition-transform hover:translate-x-2">
                <div className="w-full h-full bg-[#050508] rounded-[22px] border border-white/5 overflow-hidden relative">
-                  <Image src="/images/landing/alert-popup.png" alt="Circuit Breaker Alert" fill sizes="(min-width: 768px) 25vw, 45vw" className="object-cover" />
+                  <Image src="/images/landing/2-main-dashboard.cn.png" alt="Circuit Breaker Alert" fill sizes="(min-width: 768px) 25vw, 45vw" className="object-cover" />
                </div>
             </div>
 
             <div className="relative w-[70%] sm:w-[50%] md:w-[32%] aspect-[9/19] bg-[#1A1A25] rounded-[40px] border border-white/20 shadow-[0_0_100px_rgba(99,102,241,0.2)] z-30 flex items-center justify-center p-2 md:p-3 transition-transform hover:scale-[1.02]">
                <div className="w-full h-full bg-[#050508] rounded-[30px] border border-white/10 overflow-hidden relative">
-                  <Image src="/images/landing/main-dashboard.png" alt="Main Dashboard Preview" fill priority sizes="(min-width: 1024px) 32vw, (min-width: 640px) 50vw, 70vw" className="object-cover" />
+                  <Image src="/images/landing/3-user-center.cn.png" alt="Main Dashboard Preview" fill priority sizes="(min-width: 1024px) 32vw, (min-width: 640px) 50vw, 70vw" className="object-cover" />
                   <div className="absolute top-4 left-1/2 -translate-x-1/2 w-20 h-5 bg-black rounded-full border border-white/5 z-20" />
                </div>
             </div>
