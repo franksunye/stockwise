@@ -4,7 +4,7 @@ import { getAllArticles } from "@/lib/learn-content";
 import { getAllSupportArticles } from "@/lib/support-content";
 
 function nowIso() {
-  return new Date().toISOString();
+  return new Date().toISOString().split('T')[0];
 }
 
 function formatDate(dateStr: string, fallback: string): string {
