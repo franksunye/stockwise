@@ -305,13 +305,13 @@ export function EnglishHomePage() {
             </ul>
           </div>
           <div className="glass-card aspect-square bg-[#0A0A10] rounded-[40px] overflow-hidden border border-white/5 relative">
-            <Image src="/images/landing/4-tactical-protocols.en.png" alt="Detailed tactical brief" fill className="object-cover object-[center_top] opacity-90 hover:opacity-100 transition-opacity duration-700" />
+            <Image src="/images/landing/4-tactical-protocols.en.png" alt="Detailed tactical brief" fill className="object-cover object-[center_20%] opacity-90 hover:opacity-100 transition-opacity duration-700" />
           </div>
         </section>
 
         <section className="pt-32 w-full grid md:grid-cols-2 gap-20 items-center text-left">
           <div className="order-2 md:order-1 glass-card aspect-square bg-[#0A0A10] rounded-[40px] overflow-hidden border border-white/5 relative">
-            <Image src="/images/landing/circuit-breaker-logic.png" alt="Risk circuit breaker logic" fill sizes="(min-width: 768px) 45vw, 100vw" className="object-cover opacity-80 hover:opacity-100 transition-opacity duration-700" />
+            <Image src="/images/landing/5-transparency.en.png" alt="Risk circuit breaker logic" fill sizes="(min-width: 768px) 45vw, 100vw" className="object-cover object-[center_bottom] opacity-90 hover:opacity-100 transition-opacity duration-700" />
             <ShieldCheck size={120} className="absolute bottom-4 right-4 opacity-[0.1] text-red-500 pointer-events-none" />
           </div>
           <div className="order-1 md:order-2 space-y-8">
