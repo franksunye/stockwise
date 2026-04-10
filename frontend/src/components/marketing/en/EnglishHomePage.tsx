@@ -127,7 +127,7 @@ export function EnglishHomePage() {
             </ul>
           </div>
           <div className="glass-card aspect-square bg-[#0A0A10] rounded-[40px] overflow-hidden border border-white/5 relative">
-            <Image src="/images/landing/4-tactical-protocols.en.png" alt="Detailed tactical brief" fill className="object-contain p-2 opacity-90 hover:opacity-100 transition-opacity duration-700" />
+            <Image src="/images/landing/4-tactical-protocols.en.png" alt="Detailed tactical brief" fill className="object-cover object-[center_top] opacity-90 hover:opacity-100 transition-opacity duration-700" />
           </div>
         </section>
 
