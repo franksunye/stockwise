@@ -3,7 +3,7 @@ import { Analytics } from "@vercel/analytics/react";
 import Image from "next/image";
 import { brandCoreZhCN } from "@/content/brand-core.zh-CN";
 import { ServiceWorkerRegistrar } from "@/components/ServiceWorkerRegistrar";
-import { buildRootBootstrapInlineScript } from "@/lib/dashboard-bootstrap";
+import { buildRootBootstrapInlineScript } from "@/lib/root-bootstrap";
 import Script from "next/script";
 
 import "./globals.css";

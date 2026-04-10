@@ -56,7 +56,10 @@ export function installLegacyProfileCacheWriteGuard(): void {
             }
             return;
         }
-        return original.call(this, key, value);
+        if (typeof original === 'function') {
+            return original.call(this, key, value);
+        }
+        return undefined;
     };
 }
 export const HAS_ONBOARDED_KEY = 'STOCKWISE_HAS_ONBOARDED';

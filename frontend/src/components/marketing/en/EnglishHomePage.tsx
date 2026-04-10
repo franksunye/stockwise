@@ -6,8 +6,21 @@ import { ChevronRight, ShieldCheck } from 'lucide-react';
 import { PageShell, EN_BOUNDARY_NOTICE, EN_DEFAULT_SOURCES } from './EnLayout';
 import { GeoSummary, SourceBlock, BoundaryNotice } from '@/components/seo/GeoBlocks';
 import { JsonLd } from '@/components/seo/JsonLd';
+import { FocusedImageSlider } from '../FocusedImageSlider';
 
 export function EnglishHomePage() {
+  const tacticalSlides = [
+    { src: '/images/landing/4-tactical-protocols.en.png', alt: 'Tactical protocols detail', objectPosition: 'center 60%' },
+    { src: '/images/landing/4-tactical-protocols-2.en.png', alt: 'Tactical protocols detail 2', objectPosition: 'center 60%' },
+    { src: '/images/landing/4-tactical-protocols-3.en.png', alt: 'Tactical protocols detail 3', objectPosition: 'center 60%' },
+    { src: '/images/landing/4-tactical-protocols-4.en.png', alt: 'Tactical protocols detail 4', objectPosition: 'center 60%' },
+    { src: '/images/landing/2-main-dashboard.en.png', alt: 'Main dashboard panel', objectPosition: 'center 40%' },
+  ] as const;
+  const transparencySlides = [
+    { src: '/images/landing/5-transparency.en.png', alt: 'Risk circuit breaker logic', objectPosition: 'center bottom' },
+    { src: '/images/landing/1-logical-trace.en.png', alt: 'Logical trace panel', objectPosition: 'center 20%' },
+  ] as const;
+
   const faqSchema = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -126,14 +139,12 @@ export function EnglishHomePage() {
               ))}
             </ul>
           </div>
-          <div className="glass-card aspect-square bg-[#0A0A10] rounded-[40px] overflow-hidden border border-white/5 relative">
-            <Image src="/images/landing/4-tactical-protocols.en.png" alt="Detailed tactical brief" fill className="object-cover object-[center_20%] opacity-90 hover:opacity-100 transition-opacity duration-700" />
-          </div>
+          <FocusedImageSlider slides={[...tacticalSlides]} />
         </section>
 
         <section className="pt-32 w-full grid md:grid-cols-2 gap-20 items-center text-left">
-          <div className="order-2 md:order-1 glass-card aspect-square bg-[#0A0A10] rounded-[40px] overflow-hidden border border-white/5 relative">
-            <Image src="/images/landing/5-transparency.en.png" alt="Risk circuit breaker logic" fill sizes="(min-width: 768px) 45vw, 100vw" className="object-cover object-[center_bottom] opacity-90 hover:opacity-100 transition-opacity duration-700" />
+          <div className="order-2 md:order-1 relative">
+            <FocusedImageSlider slides={[...transparencySlides]} />
             <ShieldCheck size={120} className="absolute bottom-4 right-4 opacity-[0.1] text-indigo-500 pointer-events-none" />
           </div>
           <div className="order-1 md:order-2 space-y-8">

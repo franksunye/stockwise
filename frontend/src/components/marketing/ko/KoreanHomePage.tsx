@@ -6,8 +6,22 @@ import { ChevronRight, ShieldCheck } from 'lucide-react';
 import { PageShell, KO_BOUNDARY_NOTICE, KO_DEFAULT_SOURCES } from './KoLayout';
 import { GeoSummary, SourceBlock, BoundaryNotice } from '@/components/seo/GeoBlocks';
 import { JsonLd } from '@/components/seo/JsonLd';
+import { FocusedImageSlider } from '../FocusedImageSlider';
 
 export function KoreanHomePage() {
+  const tacticalSlides = [
+    { src: '/images/landing/4-tactical-protocols.en.png', alt: '상세 전술 브리핑 1', objectPosition: 'center 60%' },
+    { src: '/images/landing/4-tactical-protocols-2.en.png', alt: '상세 전술 브리핑 2', objectPosition: 'center 60%' },
+    { src: '/images/landing/4-tactical-protocols-3.en.png', alt: '상세 전술 브리핑 3', objectPosition: 'center 60%' },
+    { src: '/images/landing/4-tactical-protocols-4.en.png', alt: '상세 전술 브리핑 4', objectPosition: 'center 60%' },
+    { src: '/images/landing/2-main-dashboard.en.png', alt: '메인 대시보드 패널', objectPosition: 'center 40%' },
+  ] as const;
+
+  const transparencySlides = [
+    { src: '/images/landing/5-transparency.en.png', alt: '리스크 서킷 브레이커 로직', objectPosition: 'center bottom' },
+    { src: '/images/landing/1-logical-trace.en.png', alt: '논리 트레이스 패널', objectPosition: 'center 20%' },
+  ] as const;
+
   const faqSchema = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -118,14 +132,12 @@ export function KoreanHomePage() {
               ))}
             </ul>
           </div>
-          <div className="glass-card aspect-square bg-[#0A0A10] rounded-[40px] overflow-hidden border border-white/5 relative">
-            <Image src="/images/landing/prediction-card-detail.png" alt="상세 전술 브리핑" fill className="object-cover opacity-80 hover:opacity-100 transition-opacity duration-700" />
-          </div>
+          <FocusedImageSlider slides={[...tacticalSlides]} />
         </section>
 
         <section className="pt-32 w-full grid md:grid-cols-2 gap-20 items-center text-left">
-          <div className="order-2 md:order-1 glass-card aspect-square bg-[#0A0A10] rounded-[40px] overflow-hidden border border-white/5 relative">
-            <Image src="/images/landing/circuit-breaker-logic.png" alt="리스크 서킷 브레이커 로직" fill sizes="(min-width: 768px) 45vw, 100vw" className="object-cover opacity-80 hover:opacity-100 transition-opacity duration-700" />
+          <div className="order-2 md:order-1 relative">
+            <FocusedImageSlider slides={[...transparencySlides]} />
             <ShieldCheck size={120} className="absolute bottom-4 right-4 opacity-[0.1] text-red-500 pointer-events-none" />
           </div>
           <div className="order-1 md:order-2 space-y-8">
