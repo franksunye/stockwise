@@ -4,7 +4,7 @@ import json
 import os
 
 # Configuration
-DOMAIN = "ziso.cc"
+DOMAIN = "www.ziso.cc"
 SITEMAP_URL = f"https://{DOMAIN}/sitemap.xml"
 INDEXNOW_KEY = "850e0d5d36e246739de77f525672d56a"
 INDEXNOW_API = "https://www.bing.com/indexnow"
