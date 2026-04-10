@@ -9,6 +9,7 @@ import { getMarketFromSymbol, getMarketScene } from '@/lib/date-utils';
 
 import { useStocks } from '@/context/StockContext';
 import { useUserProfile } from '@/hooks/useUserProfile';
+import { getDashboardPredictionView } from '@/lib/dashboard-prediction';
 import { getPredictionActionMeta } from '@/lib/layer1-ui';
 import type { AIPrediction } from '@/lib/types';
 import { writeDashboardNavIntentSymbol } from '@/lib/dashboard-symbol-navigation';
@@ -24,8 +25,7 @@ interface StockSnapshot {
   market: 'CN' | 'HK' | 'US';
   price: number;
   change: number;
-  aiSignal: 'Long' | 'Short' | 'Side';
-  layer1Status?: AIPrediction['layer1_status'];
+  prediction: Pick<AIPrediction, 'signal' | 'layer1_status'> | null;
   updateTag?: string;
 }
 
@@ -51,7 +51,7 @@ const StockItem = memo(({
   // Keep watchlist semantics aligned with dashboard/report:
   // free/go/plus => signal, pro/alpha => layer1_status allowed.
   const meta = getPredictionActionMeta(
-    { signal: stock.aiSignal, layer1_status: stock.layer1Status },
+    stock.prediction,
     { useLayer1Status: tier === 'pro' || tier === 'alpha' },
   );
   
@@ -154,8 +154,7 @@ export default function StockPoolPage() {
     market: getMarketFromSymbol(s.symbol),
     price: s.price?.close || 0,
     change: s.price?.change_percent || 0,
-    aiSignal: s.prediction?.signal || 'Side' as const,
-    layer1Status: s.prediction?.layer1_status,
+    prediction: getDashboardPredictionView(s).displayPrediction,
     updateTag: s.lastUpdated
   })), [globalStocks]);
 

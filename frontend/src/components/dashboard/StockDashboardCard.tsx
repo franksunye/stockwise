@@ -5,10 +5,11 @@ import { useMemo, memo } from 'react';
 import { Zap, Target, ShieldCheck, ChevronDown, Clock } from 'lucide-react';
 import { StockData, AIPrediction } from '@/lib/types';
 
-import { getMarketScene, getPredictionTitle, getClosePriceLabelFromData, getValidationLabelFromData, isTradingDay, getMarketFromSymbol, getLastTradingDay, getHKTime, normalizeToTradingDate } from '@/lib/date-utils';
+import { getMarketScene, getPredictionTitle, getClosePriceLabelFromData, getValidationLabelFromData, isTradingDay, getMarketFromSymbol, getHKTime, normalizeToTradingDate } from '@/lib/date-utils';
 import { COLORS } from './constants';
 
 import { formatModelName } from '@/lib/model-names';
+import { getDashboardPredictionView } from '@/lib/dashboard-prediction';
 import { getPredictionActionMeta } from '@/lib/layer1-ui';
 import { getValidationWindowLabel, parseValidationData } from '@/lib/prediction-display';
 import { getStockDashboardCardSurface, getStockDashboardCardTitle } from '@/lib/stock-dashboard-card-surface';
@@ -40,7 +41,6 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
   const marketType = getMarketFromSymbol(data.symbol);
 
   const scene = getMarketScene(marketType);
-  const isPostMarket = scene === 'post_market';
   const isPreMarket = scene === 'pre_market';
   
   // 统一使用 HK 时间进行日期判定，避免客户端时区差异
@@ -48,37 +48,10 @@ export const StockDashboardCard = memo(function StockDashboardCard({ data, onSho
   const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
   const normalizeTargetDate = (targetDate?: string) => normalizeToTradingDate(targetDate, marketType);
   
-  // 核心预测数据选择逻辑 (Strict Mode V2):
-  // 1. 寻找今日预测
-  const todayPrediction = [data.prediction, data.previousPrediction].find(
-    p => normalizeTargetDate(p?.target_date) === todayStr
+  const { todayPrediction, displayPrediction } = useMemo(
+    () => getDashboardPredictionView(data),
+    [data]
   );
-  
-  // 2. 确定数据有效性阈值 (Threshold)
-  // - 交易中/盘前 (Active): 必须是 T (今日) 的数据。过期数据无效。
-  // - 盘后/休市 (Closed): 允许 T (今日) 或 T-x (上一交易日) 的数据，方便周末复盘。
-  let thresholdDateStr = todayStr;
-
-  if (isPostMarket) {
-      // 在盘后或周末，即使今天是周日，我们也能接受周五(上一交易日)的数据作为"最新状态"
-      const lastTrading = getLastTradingDay(undefined, marketType);
-      const y = lastTrading.getFullYear();
-      const m = String(lastTrading.getMonth() + 1).padStart(2, '0');
-      const d = String(lastTrading.getDate()).padStart(2, '0');
-      thresholdDateStr = `${y}-${m}-${d}`;
-  }
-
-  // 3. 筛选候选数据 (Strict Mode V2.1)
-  // - 盘后 (Post-Market): 优先显示最新的预测 (通常是下一交易日的)，因为今日已成事实。
-  // - 盘中/盘前: 优先显示特定的"今日建议"，防止数据抢跑。
-  const candidate = (isPostMarket) ? data.prediction : (todayPrediction || data.prediction);
-  
-  // 4. 应用阈值过滤
-  // 只有当数据日期 >= 阈值日期时，才认为是有效数据。
-  // 这解决了"僵尸复活"显示3天前无效数据的问题，同时保留了周末查看周五数据的能力。
-  const displayPrediction = (candidate && normalizeTargetDate(candidate.target_date) >= thresholdDateStr) 
-      ? candidate 
-      : null;
   
   const userPosition = data.rule?.position === 'holding' ? 'holding' : 'empty';
   const { tacticalData, topTactic } = useMemo(
