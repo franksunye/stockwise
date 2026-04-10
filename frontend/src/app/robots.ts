@@ -1,5 +1,8 @@
 import type { MetadataRoute } from "next";
-import { brandCoreZhCN } from "@/content/brand-core.zh-CN";
+
+// Use the actual serving domain (www.ziso.cc) to avoid 307 redirect issues.
+// Search engines do NOT follow redirects when fetching robots.txt/sitemap targets.
+const CANONICAL_ORIGIN = "https://www.ziso.cc";
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -10,8 +13,8 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/api/", "/admin/"],
       },
     ],
-    sitemap: `${brandCoreZhCN.domain}/sitemap.xml`,
-    host: brandCoreZhCN.domain,
+    sitemap: `${CANONICAL_ORIGIN}/sitemap.xml`,
+    host: CANONICAL_ORIGIN,
   };
 }
 
