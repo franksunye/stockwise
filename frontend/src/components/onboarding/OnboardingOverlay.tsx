@@ -11,6 +11,7 @@ import { useT, useLocale } from '@/context/LocaleContext';
 import { getLocalizedStockName } from '@/lib/stock-name';
 import { getMarketBadge } from '@/lib/market-badge';
 import { useAnalytics } from '@/hooks/useAnalytics';
+import type { MessageKey } from '@/lib/i18n';
 
 // Fallback data for the reveal step
 const DEFAULT_REVEAL_DATA = { 
@@ -417,7 +418,7 @@ export function OnboardingOverlay() {
                                      <div className={`text-[2rem] leading-none font-black tracking-tighter ${
                                          revealData.signal === 'Long' ? 'text-emerald-400' : revealData.signal === 'Short' ? 'text-rose-400' : 'text-amber-400'
                                      }`}>
-                                         {tDashboard(`signal.${revealActionMeta.headline}`)}
+                                         {tDashboard(`signal.${revealActionMeta.headline}` as MessageKey<'dashboard'>)}
                                      </div>
                                 </div>
 
