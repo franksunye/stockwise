@@ -39,7 +39,7 @@ class TestWorkflowAdminNotification(unittest.TestCase):
             ["13800000000"],
         )
 
-    def test_success_notification_uses_chinese_metadata(self):
+    def test_success_notification_skips_wecom_send(self):
         with patch(
             "backend.scripts.send_admin_workflow_notification.send_wecom_notification",
             return_value=True,
@@ -52,9 +52,4 @@ class TestWorkflowAdminNotification(unittest.TestCase):
             )
 
         self.assertTrue(ok)
-        message = notify_mock.call_args.args[0]
-        self.assertIn("后台任务成功", message)
-        self.assertIn("CN 样本同步", message)
-        self.assertIn("HK Sidecar", message)
-        self.assertNotIn("mentioned_mobile_list", notify_mock.call_args.kwargs)
-
+        notify_mock.assert_not_called()

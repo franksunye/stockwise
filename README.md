@@ -26,6 +26,9 @@ python3 -m venv .venv
 ./.venv/bin/python -m pytest backend/tests
 ```
 
+Important: prefer the repo Python at `./.venv/bin/python` or the helper script below.
+Using the system `python` may miss backend dependencies such as `pytest` or `requests`.
+
 Or use the helper script:
 
 ```bash

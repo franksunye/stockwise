@@ -15,14 +15,12 @@ for candidate in (ROOT_DIR, BACKEND_DIR):
 try:
     from backend.admin_notifications import (
         build_failure_message,
-        build_success_message,
         get_admin_mobiles,
     )
     from backend.utils import send_wecom_notification
 except ImportError:
     from admin_notifications import (  # type: ignore
         build_failure_message,
-        build_success_message,
         get_admin_mobiles,
     )
     from utils import send_wecom_notification  # type: ignore
@@ -51,11 +49,10 @@ def send_admin_workflow_notification(
     if status not in {"success", "failed"}:
         raise ValueError(f"Unsupported status: {status}")
 
-    metadata = dict(metadata or {})
     if status == "success":
-        content = build_success_message(task_name=task_name, metadata=metadata)
-        return bool(send_wecom_notification(content))
+        return True
 
+    metadata = dict(metadata or {})
     mentions = get_admin_mobiles() or ["@all"]
     content = build_failure_message(
         task_name=task_name,
