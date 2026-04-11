@@ -162,23 +162,11 @@ export function UserPricingView({ currentTier, hasStripeCustomer, expiresAt }: P
       });
       void (async () => {
         try {
-          const response = await fetch('/api/checkout', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ priceId: targetPriceId }),
-          });
-          const data = await response.json();
-
-          if (response.status === 401) {
+          const checkoutUrl = await createCheckoutSession(targetPriceId, { bootstrapUser: true });
+          if (checkoutUrl) {
+            window.location.href = checkoutUrl;
             return;
           }
-
-          if (response.ok && data.url) {
-            window.location.href = data.url;
-            return;
-          }
-
-          throw new Error(data.error || 'Unable to create checkout session');
         } catch (error) {
           console.error('Auto checkout error:', error);
           trackEvent('checkout_error', {

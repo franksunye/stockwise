@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { LayoutGrid as Grid, ChevronDown, User, FileText, Share2, Copy } from 'lucide-react';
+import { LayoutGrid as Grid, ChevronDown, User, FileText, Share2, Copy, CheckCircle2, CircleAlert, X } from 'lucide-react';
 import { StockData, AIPrediction, MarketAlmanacData } from '@/lib/types';
 import { 
   StockVerticalFeed,
@@ -95,6 +95,7 @@ function DashboardContent() {
   const stockLocale = locale === 'en' ? 'en' : 'cn';
   const searchParams = useSearchParams();
   const preferredSymbol = readDashboardSymbolFromSearchParams(searchParams);
+  const [checkoutNotice, setCheckoutNotice] = useState<{ tone: 'success' | 'info'; message: string } | null>(null);
   const [userCenterOpen, setUserCenterOpen] = useState(false);
   const [briefOpen, setBriefOpen] = useState(false);
   const almanacRef = useRef<MarketAlmanacHandle>(null);
@@ -239,6 +240,44 @@ function DashboardContent() {
     }
   }, [searchParams]);
 
+  useEffect(() => {
+    const checkoutState = searchParams.get('checkout');
+    if (!checkoutState) {
+      setCheckoutNotice(null);
+      return;
+    }
+
+    const nextNotice =
+      checkoutState === 'success'
+        ? {
+            tone: 'success' as const,
+            message:
+              locale === 'en'
+                ? 'Payment confirmed. Your subscription access is refreshing now.'
+                : '支付已确认，会员权限正在刷新。',
+          }
+        : checkoutState === 'cancelled'
+          ? {
+              tone: 'info' as const,
+              message:
+                locale === 'en'
+                  ? 'Checkout was cancelled. You can continue using the app and try again anytime.'
+                  : '本次支付已取消，您可以继续使用应用，稍后随时重试。',
+            }
+          : null;
+
+    setCheckoutNotice(nextNotice);
+
+    if (!nextNotice || typeof window === 'undefined') return;
+
+    const params = new URLSearchParams(window.location.search);
+    params.delete('checkout');
+    const nextUrl = params.toString()
+      ? `${window.location.pathname}?${params.toString()}`
+      : window.location.pathname;
+    window.history.replaceState({}, '', nextUrl);
+  }, [locale, searchParams]);
+
   // Council data is daily-immutable and cached in localStorage keyed by target_date.
   // On-demand fetch when user opens TacticalBriefDrawer is sufficient;
   // swipe-based preloading removed to avoid wasteful /api/predictions requests.
@@ -331,6 +370,42 @@ function DashboardContent() {
           )}
         </div>
       </header>
+
+      <AnimatePresence>
+        {checkoutNotice && (
+          <motion.div
+            initial={{ opacity: 0, y: -16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            className="fixed top-20 left-4 right-4 z-[110] pointer-events-none"
+          >
+            <div
+              className={`mx-auto flex max-w-xl items-start gap-3 rounded-2xl border px-4 py-3 shadow-2xl backdrop-blur-md pointer-events-auto ${
+                checkoutNotice.tone === 'success'
+                  ? 'border-emerald-400/30 bg-emerald-500/15 text-emerald-50'
+                  : 'border-amber-400/30 bg-amber-500/15 text-amber-50'
+              }`}
+            >
+              {checkoutNotice.tone === 'success' ? (
+                <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-300" />
+              ) : (
+                <CircleAlert className="mt-0.5 h-5 w-5 shrink-0 text-amber-300" />
+              )}
+              <p className="flex-1 text-sm font-medium leading-relaxed">
+                {checkoutNotice.message}
+              </p>
+              <button
+                type="button"
+                onClick={() => setCheckoutNotice(null)}
+                className="rounded-full p-1 text-white/70 transition hover:bg-white/10 hover:text-white"
+                aria-label={locale === 'en' ? 'Dismiss checkout notice' : '关闭支付提示'}
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div
         ref={scrollRef}
