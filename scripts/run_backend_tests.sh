@@ -26,25 +26,49 @@ for arg in "$@"; do
 done
 
 if [ "${HAS_TARGETS}" -eq 1 ]; then
-  "${VENV_DIR}/bin/python" -m pytest "${PYTEST_ARGS[@]}"
+  if [ "${#PYTEST_ARGS[@]}" -gt 0 ]; then
+    "${VENV_DIR}/bin/python" -m pytest "${PYTEST_ARGS[@]}"
+  else
+    "${VENV_DIR}/bin/python" -m pytest
+  fi
   exit 0
 fi
 
 case "${SUITE}" in
   default)
-    "${VENV_DIR}/bin/python" -m pytest backend/tests -m "not network" "${PYTEST_ARGS[@]}"
+    if [ "${#PYTEST_ARGS[@]}" -gt 0 ]; then
+      "${VENV_DIR}/bin/python" -m pytest backend/tests -m "not network" "${PYTEST_ARGS[@]}"
+    else
+      "${VENV_DIR}/bin/python" -m pytest backend/tests -m "not network"
+    fi
     ;;
   unit)
-    "${VENV_DIR}/bin/python" -m pytest backend/tests -m "not integration and not network" "${PYTEST_ARGS[@]}"
+    if [ "${#PYTEST_ARGS[@]}" -gt 0 ]; then
+      "${VENV_DIR}/bin/python" -m pytest backend/tests -m "not integration and not network" "${PYTEST_ARGS[@]}"
+    else
+      "${VENV_DIR}/bin/python" -m pytest backend/tests -m "not integration and not network"
+    fi
     ;;
   integration)
-    "${VENV_DIR}/bin/python" -m pytest backend/tests -m "integration" "${PYTEST_ARGS[@]}"
+    if [ "${#PYTEST_ARGS[@]}" -gt 0 ]; then
+      "${VENV_DIR}/bin/python" -m pytest backend/tests -m "integration" "${PYTEST_ARGS[@]}"
+    else
+      "${VENV_DIR}/bin/python" -m pytest backend/tests -m "integration"
+    fi
     ;;
   network)
-    RUN_NETWORK_TESTS=1 "${VENV_DIR}/bin/python" -m pytest backend/tests -m "network" "${PYTEST_ARGS[@]}"
+    if [ "${#PYTEST_ARGS[@]}" -gt 0 ]; then
+      RUN_NETWORK_TESTS=1 "${VENV_DIR}/bin/python" -m pytest backend/tests -m "network" "${PYTEST_ARGS[@]}"
+    else
+      RUN_NETWORK_TESTS=1 "${VENV_DIR}/bin/python" -m pytest backend/tests -m "network"
+    fi
     ;;
   all)
-    RUN_NETWORK_TESTS=1 "${VENV_DIR}/bin/python" -m pytest backend/tests "${PYTEST_ARGS[@]}"
+    if [ "${#PYTEST_ARGS[@]}" -gt 0 ]; then
+      RUN_NETWORK_TESTS=1 "${VENV_DIR}/bin/python" -m pytest backend/tests "${PYTEST_ARGS[@]}"
+    else
+      RUN_NETWORK_TESTS=1 "${VENV_DIR}/bin/python" -m pytest backend/tests
+    fi
     ;;
   *)
     echo "Unknown suite: ${SUITE}" >&2

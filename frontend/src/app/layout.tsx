@@ -17,15 +17,15 @@ export const metadata: Metadata = {
   openGraph: {
     images: [
       {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
+        url: "/logo.png",
+        width: 512,
+        height: 512,
         alt: "ZISO AI",
       },
     ],
   },
   twitter: {
-    images: ["/og-image.png"],
+    images: ["/logo.png"],
   },
   appleWebApp: {
     capable: true,

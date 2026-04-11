@@ -58,9 +58,10 @@ def _normalize_base_url(raw: str) -> str:
 def _candidate_base_urls() -> List[str]:
     candidates: List[str] = []
     explicit_probe = _normalize_base_url(os.getenv("BROADCAST_PROBE_BASE_URL", ""))
+    app_url = _normalize_base_url(os.getenv("NEXT_PUBLIC_APP_URL", "https://app.ziso.cc"))
     site_url = _normalize_base_url(os.getenv("NEXT_PUBLIC_SITE_URL", "https://ziso.cc"))
 
-    for item in (explicit_probe, site_url):
+    for item in (explicit_probe, app_url, site_url):
         if item and item not in candidates:
             candidates.append(item)
 

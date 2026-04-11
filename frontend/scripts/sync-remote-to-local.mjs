@@ -137,7 +137,11 @@ function syncSchema(localDb, schemaRows) {
     try {
       localDb.exec(row.sql);
     } catch (error) {
-      if (!String(error.message || error).includes('already exists')) {
+      const message = String(error.message || error);
+      const allowKnownDrift =
+        message.includes('already exists') ||
+        (row.type !== 'table' && message.includes('no such column'));
+      if (!allowKnownDrift) {
         throw error;
       }
     }
@@ -180,6 +184,39 @@ function ensureLocalTableExists(localDb, table) {
     "SELECT name FROM sqlite_master WHERE type='table' AND name = ?"
   ).get(table);
   return Boolean(row);
+}
+
+async function getRemoteTableColumns(table) {
+  const rs = await remoteClient.execute(`PRAGMA table_info(${quoteIdent(table)})`);
+  return (rs.rows || []).map(row => String(row.name));
+}
+
+function getSchemaObjectsForTable(schemaRows, table) {
+  return schemaRows.filter(row => {
+    if (row.type === 'table') return row.name === table;
+    if (row.type === 'index' || row.type === 'trigger') {
+      return typeof row.sql === 'string' && row.sql.includes(`"${table}"`);
+    }
+    return false;
+  });
+}
+
+function recreateLocalTable(localDb, table, schemaRows) {
+  console.log(`    - 重建本地表结构以对齐远端: ${table}`);
+  localDb.prepare(`DROP TABLE IF EXISTS ${quoteIdent(table)}`).run();
+
+  const schemaObjects = getSchemaObjectsForTable(schemaRows, table);
+  const tableRow = schemaObjects.find(row => row.type === 'table');
+  if (!tableRow?.sql) {
+    throw new Error(`未找到远端表 ${table} 的建表语句`);
+  }
+
+  localDb.exec(tableRow.sql);
+  for (const row of schemaObjects) {
+    if (row.type !== 'table' && row.sql) {
+      localDb.exec(row.sql);
+    }
+  }
 }
 
 async function fullRefreshTable(localDb, table, remoteCount, summary, reason = null) {
@@ -231,7 +268,7 @@ async function fullRefreshTable(localDb, table, remoteCount, summary, reason = n
   summary.push({ table, mode: 'full-table', remoteCount, localCount, note: reason || '' });
 }
 
-async function incrementalSyncTable(localDb, table, remoteCount, summary) {
+async function incrementalSyncTable(localDb, table, remoteCount, summary, schemaRows) {
   const cursorColumn = getCursorColumn(localDb, table);
   const primaryKeys = getPrimaryKeyColumns(localDb, table);
 
@@ -275,6 +312,19 @@ async function incrementalSyncTable(localDb, table, remoteCount, summary) {
 
     if (!columns) {
       columns = Object.keys(batchRows[0] || {});
+      const localColumns = new Set(getTableColumns(localDb, table).map(col => col.name));
+      const missingColumns = columns.filter(name => !localColumns.has(name));
+      if (missingColumns.length) {
+        recreateLocalTable(localDb, table, schemaRows);
+        removeSyncState(localDb, table);
+        return fullRefreshTable(
+          localDb,
+          table,
+          remoteCount,
+          summary,
+          `本地缺少远端列: ${missingColumns.join(', ')}`
+        );
+      }
       upsertStmt = buildInsertStatement(localDb, table, columns, 'INSERT OR REPLACE');
     }
 
@@ -386,7 +436,7 @@ async function main() {
           removeSyncState(localDb, table);
         }
       } else {
-        await incrementalSyncTable(localDb, table, remoteCount, summary);
+        await incrementalSyncTable(localDb, table, remoteCount, summary, schemaResult.rows);
       }
     }
 

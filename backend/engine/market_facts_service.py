@@ -92,6 +92,14 @@ def _fetch_total_turnover_stable(fact_date: str, market: str = "CN") -> Tuple[Op
                         return total_yi, {"status": "ok", "source": "akshare:stock_zh_index_spot_em"}
         except Exception as e:
             logger.warning(f"Stable turnover logic failed (CN): {e}")
+        try:
+            df = _isolated_ak_fetch(ak.stock_zh_a_spot_em)
+            if df is not None and not df.empty and "成交额" in df.columns:
+                turnover = pd.to_numeric(df["成交额"], errors="coerce").dropna().sum()
+                if turnover and turnover > 0:
+                    return turnover / 1e8, {"status": "ok", "source": "akshare:stock_zh_a_spot_em"}
+        except Exception as e:
+            logger.warning(f"CN spot turnover fallback failed: {e}")
 
     # Global Fallback: Sum turnover of index anchors from daily_prices
     from backend.engine.context_service import MARKET_ANCHORS
@@ -253,26 +261,28 @@ def _extract_index_trend(symbol: str) -> Dict[str, Any]:
     out = {"symbol": symbol, "pct_1d": None, "pct_5d": None, "pct_20d": None, "direction": "flat", "status": "missing"}
     try:
         # Check if index is in local daily_prices first (Global unified storage)
-        conn = get_connection()
+        closes: List[float] = []
         try:
-            cur = conn.cursor()
-            cur.execute("""
-                SELECT close FROM daily_prices 
-                WHERE symbol = ? 
-                ORDER BY date DESC LIMIT 20
-            """, (symbol,))
-            closes = [r[0] for r in cur.fetchall()]
-            # Reverse to Chronological (Old -> New)
-            closes = closes[::-1]
-        finally:
-            conn.close()
+            conn = get_connection()
+            try:
+                cur = conn.cursor()
+                cur.execute("""
+                    SELECT close FROM daily_prices 
+                    WHERE symbol = ? 
+                    ORDER BY date DESC LIMIT 20
+                """, (symbol,))
+                closes = [r[0] for r in cur.fetchall()]
+                # Reverse to Chronological (Old -> New)
+                closes = closes[::-1]
+            finally:
+                conn.close()
+        except Exception as e:
+            out["db_error"] = str(e)
 
         if len(closes) < 2:
-            # Fallback to AkShare (CN Indices only)
-            if symbol.startswith(('sh', 'sz')):
-                df = _isolated_ak_fetch(ak.stock_zh_index_daily_em, symbol=symbol)
-                if df is not None and not df.empty and "close" in df.columns:
-                    closes = pd.to_numeric(df["close"], errors="coerce").dropna().tolist()
+            df = _isolated_ak_fetch(ak.stock_zh_index_daily_em, symbol=symbol)
+            if df is not None and not df.empty and "close" in df.columns:
+                closes = pd.to_numeric(df["close"], errors="coerce").dropna().tolist()
             
         if len(closes) < 2:
             return out

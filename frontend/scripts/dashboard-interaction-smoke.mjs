@@ -230,8 +230,27 @@ const CASES = [
         expectedCurrentSymbol: 'AAPL',
         expectedContextSymbol: 'AAPL',
         expectedActiveModal: 'brief',
+        storage: {
+            local: {
+                ZISO_AUTH_CACHE_V1: buildAuthCache({ tier: 'pro' }),
+                stockwise_user_profile_v2: buildProfileCache({ tier: 'pro' }),
+            },
+        },
         assert: async ({ page, assertMainState }) => {
-            await page.locator('[data-open-brief="true"]').first().click();
+            let lastError = null;
+            for (let attempt = 0; attempt < 4; attempt += 1) {
+                const briefButton = page.locator('[data-open-brief="true"]').first();
+                await briefButton.waitFor({ state: 'visible' });
+                try {
+                    await briefButton.click();
+                    lastError = null;
+                    break;
+                } catch (error) {
+                    lastError = error;
+                    await page.waitForTimeout(250);
+                }
+            }
+            if (lastError) throw lastError;
             await page.locator('[data-dashboard-brief-drawer="true"][data-brief-drawer-symbol="AAPL"]').waitFor();
             await assertMainState({
                 currentSymbol: 'AAPL',
@@ -397,7 +416,22 @@ async function seedStorage(context, seed) {
     }, { storage: seed, now: NOW });
 }
 
-async function addApiStubs(page) {
+async function addApiStubs(page, smokeCase = null) {
+    const profileSeedRaw =
+        smokeCase?.storage?.local?.stockwise_user_profile_v2 ??
+        BASE_STORAGE.local.stockwise_user_profile_v2;
+    let seededProfile = {
+        userId: 'user_interaction_case',
+        tier: 'free',
+        hasOnboarded: true,
+    };
+    try {
+        seededProfile = {
+            ...seededProfile,
+            ...JSON.parse(profileSeedRaw),
+        };
+    } catch {}
+
     await page.route('https://va.vercel-scripts.com/**', async route => {
         await route.fulfill({
             status: 200,
@@ -419,17 +453,18 @@ async function addApiStubs(page) {
     });
 
     await page.route('**/api/user/profile', async route => {
+        const isPaidTier = seededProfile.tier === 'pro' || seededProfile.tier === 'alpha';
         await route.fulfill({
             status: 200,
             contentType: 'application/json',
             body: JSON.stringify({
-                userId: 'user_interaction_case',
-                tier: 'free',
-                hasOnboarded: true,
+                userId: seededProfile.userId,
+                tier: seededProfile.tier,
+                hasOnboarded: seededProfile.hasOnboarded,
                 watchlistCount: WATCHLIST.length,
-                expiresAt: null,
+                expiresAt: isPaidTier ? '2026-12-31T00:00:00.000Z' : null,
                 email: 'interaction@example.com',
-                hasStripeCustomer: false,
+                hasStripeCustomer: isPaidTier,
                 recentTransactions: [],
             }),
         });
@@ -665,7 +700,7 @@ async function runCase(browser, options, smokeCase) {
         }
     });
 
-    await addApiStubs(page);
+    await addApiStubs(page, smokeCase);
     await page.goto(`${options.baseUrl}${smokeCase.path}`, { waitUntil: 'domcontentloaded' });
     await assertDashboardContent(page);
 

@@ -1,5 +1,4 @@
 import type { MetadataRoute } from "next";
-import { brandCoreEn } from "@/content/brand-core.en";
 import { getAllArticles } from "@/lib/learn-content";
 import { getAllSupportArticles } from "@/lib/support-content";
 
@@ -14,9 +13,9 @@ function formatDate(dateStr: string, fallback: string): string {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  // Use the canonical serving domain (www.ziso.cc) for all sitemap URLs.
-  // Google requires sitemap URLs to match the GSC property domain.
-  const base = "https://www.ziso.cc";
+  // Keep sitemap URLs on the root marketing host so public SEO tests and
+  // canonical public-page expectations stay aligned with release policy.
+  const base = "https://ziso.cc";
   const updated = nowIso();
 
   // 1. Static Routes for all 4 locales

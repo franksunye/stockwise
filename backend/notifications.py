@@ -19,7 +19,11 @@ except ImportError:
     from logger import logger
 
 def post_internal_api(path, payload, timeout=10):
-    base_url = os.getenv("NEXT_PUBLIC_SITE_URL") or "http://localhost:3000"
+    base_url = (
+        os.getenv("NEXT_PUBLIC_APP_URL")
+        or os.getenv("NEXT_PUBLIC_SITE_URL")
+        or "http://localhost:3000"
+    )
     api_url = f"{base_url}{path}"
     secret = os.getenv("INTERNAL_API_SECRET")
 
@@ -67,8 +71,8 @@ def send_push_notification(title, body, url=None, related_symbol=None, broadcast
     """
     调用 Internal API 发送 Web Push 通知
     """
-    # 在 GitHub Actions 中，NEXT_PUBLIC_SITE_URL 或类似变量应指向生产环境
-    # 如果没有设置，默认为 localhost (开发用)
+    # 在 GitHub Actions / cron 中，内部通知 API 应优先命中 app host。
+    # 如果未配置 NEXT_PUBLIC_APP_URL，则回退到 NEXT_PUBLIC_SITE_URL。
     payload = {
         "title": title,
         "body": body,

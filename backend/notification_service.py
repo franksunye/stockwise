@@ -130,7 +130,6 @@ class NotificationManager:
     # Categories that are ONLY available to Pro/Premium users.
     # If a Free user triggers these, they will be silently dropped.
     ADVANCED_CATEGORIES = {
-        "signal_flip",
         "signal_flip_batch",
         "ai_radar_alert"
     }
@@ -260,8 +259,10 @@ class NotificationManager:
             profile = {"tier": "free", "locale": "cn"}
             
             if row:
-                profile["tier"] = row[0] or "free"
-                profile["locale"] = row[1] or "cn"
+                if len(row) >= 1 and row[0] in {"free", "go", "plus", "pro", "premium"}:
+                    profile["tier"] = row[0] or "free"
+                if len(row) >= 2 and row[1]:
+                    profile["locale"] = row[1] or "cn"
                 
             self.user_profile_cache[user_id] = profile
             return profile
@@ -303,7 +304,14 @@ class NotificationManager:
 
         return [name_map.get(sym, sym) for sym in unique_symbols]
 
-    def _aggregate_notifications(self, user_id: str, events: List[dict], user_profile: Optional[dict] = None) -> Optional[dict]:
+    def _aggregate_notifications(
+        self,
+        user_id: str,
+        events: List[dict],
+        user_profile: Optional[dict] = None,
+        user_tier: Optional[str] = None,
+        user_locale: Optional[str] = None,
+    ) -> Optional[dict]:
         """
         Logic to merge multiple notifications into a single, clean push message.
         """
@@ -311,7 +319,11 @@ class NotificationManager:
             return None
 
         if not user_profile:
-            user_profile = self.get_user_profile(user_id)
+            user_profile = self._get_user_profile(user_id)
+        if user_tier:
+            user_profile["tier"] = user_tier
+        if user_locale:
+            user_profile["locale"] = user_locale
             
         tier = user_profile.get("tier", "free")
         lang = user_profile.get("locale", "cn")
@@ -531,7 +543,7 @@ class NotificationManager:
             return False
 
         # 3. Pre-check: Skip HTTP call if user has no push subscription
-        if not self._has_push_subscription(user_id):
+        if not self.dry_run and not self._has_push_subscription(user_id):
             logger.debug(f"⏭️ User {user_id} has no push subscription, skipping HTTP call")
             return False
         

@@ -119,6 +119,7 @@ DB_PATH = os.path.join(root_dir, "data", "stockwise.db")
 # 7.1 通知密钥
 INTERNAL_API_SECRET = os.getenv("INTERNAL_API_SECRET")
 NEXT_PUBLIC_SITE_URL = os.getenv("NEXT_PUBLIC_SITE_URL", "https://ziso.cc")
+NEXT_PUBLIC_APP_URL = os.getenv("NEXT_PUBLIC_APP_URL", "https://app.ziso.cc")
 
 # 8. 默认北京时间
 def get_now_beijing():

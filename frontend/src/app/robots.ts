@@ -1,8 +1,8 @@
 import type { MetadataRoute } from "next";
 
-// Use the actual serving domain (www.ziso.cc) to avoid 307 redirect issues.
+// Keep robots/sitemap on the root marketing host to match the public SEO policy.
 // Search engines do NOT follow redirects when fetching robots.txt/sitemap targets.
-const CANONICAL_ORIGIN = "https://www.ziso.cc";
+const CANONICAL_ORIGIN = "https://ziso.cc";
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -17,4 +17,3 @@ export default function robots(): MetadataRoute.Robots {
     host: CANONICAL_ORIGIN,
   };
 }
-

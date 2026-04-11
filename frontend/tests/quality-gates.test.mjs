@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
+import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { after, before, describe, it } from 'node:test';
@@ -303,7 +304,9 @@ describe('Frontend Smoke Gate', () => {
 describe('Public i18n/SEO Gate', () => {
     it('keeps app subdomain protected from locale-prefixed public routes', async () => {
         const appRootRes = await requestWithForwardedHost('/?__mwdebug=1', 'app.ziso.cc');
-        assert.equal(appRootRes.headers.get('x-ziso-mw-branch'), 'app-root-rewrite-dashboard');
+        assert.equal(appRootRes.headers.get('x-ziso-mw-is-app-domain'), 'true');
+        assert.equal(appRootRes.headers.get('x-ziso-mw-x-forwarded-host'), 'app.ziso.cc');
+        assert.ok(appRootRes.headers.get('x-middleware-rewrite')?.includes('/dashboard'));
 
         const appLocaleRes = await requestWithForwardedHost('/en?__mwdebug=1', 'app.ziso.cc');
         assert.equal(appLocaleRes.status, 307);
@@ -359,6 +362,21 @@ describe('Public i18n/SEO Gate', () => {
         assert.ok(!body.includes('https://ziso.cc/en/learn'));
         assert.ok(!body.includes('https://ziso.cc/en/support'));
         assert.ok(!body.includes('https://ziso.cc/status'));
+    });
+
+    it('keeps www.ziso.cc as a permanent alias redirect to ziso.cc', () => {
+        const vercelConfigPath = path.join(FRONTEND_DIR, 'vercel.json');
+        const raw = fs.readFileSync(vercelConfigPath, 'utf8');
+        const config = JSON.parse(raw);
+        const redirects = Array.isArray(config.redirects) ? config.redirects : [];
+        const aliasRedirect = redirects.find((item) =>
+            item?.destination === 'https://ziso.cc/:path*'
+            && item?.permanent === true
+            && Array.isArray(item?.has)
+            && item.has.some((rule) => rule?.type === 'host' && rule?.value === 'www.ziso.cc')
+        );
+
+        assert.ok(aliasRedirect, 'Expected permanent www.ziso.cc -> ziso.cc redirect in frontend/vercel.json');
     });
 });
 

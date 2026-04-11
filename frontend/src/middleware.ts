@@ -9,19 +9,22 @@ import {
     PUBLIC_ROUTE_ALLOWLIST,
 } from '@/lib/public-i18n';
 
-function normalizeHost(raw: string | null | undefined): string | null {
-    if (!raw) return null;
-    const first = raw.split(',')[0]?.trim().toLowerCase();
-    if (!first) return null;
-    return first.split(':')[0] || null;
+function normalizeHosts(raw: string | null | undefined): string[] {
+    if (!raw) return [];
+    return raw
+        .split(',')
+        .map((item) => item.trim().toLowerCase())
+        .filter(Boolean)
+        .map((item) => item.split(':')[0] || '')
+        .filter(Boolean);
 }
 
 function collectHostCandidates(request: NextRequest): string[] {
     const candidates = [
-        normalizeHost(request.headers.get('x-forwarded-host')),
-        normalizeHost(request.headers.get('host')),
-        normalizeHost(request.nextUrl.hostname),
-    ].filter((v): v is string => Boolean(v));
+        ...normalizeHosts(request.headers.get('x-forwarded-host')),
+        ...normalizeHosts(request.headers.get('host')),
+        ...normalizeHosts(request.nextUrl.hostname),
+    ];
 
     return Array.from(new Set(candidates));
 }
@@ -51,11 +54,12 @@ export function middleware(request: NextRequest) {
     const isLocalePrefixed = hasPublicLocalePrefix(pathname);
     const strippedPathname = stripPublicLocalePrefix(pathname);
     const isExcludedAfterLocaleStrip = isExcludedAppPath(strippedPathname);
+    const inheritedBranch = request.headers.get('x-ziso-mw-rewrite-branch');
 
     const withDebugHeaders = (res: NextResponse, branch: string): NextResponse => {
+        res.headers.set('x-ziso-mw-branch', inheritedBranch || branch);
         if (!debugEnabled) return res;
 
-        res.headers.set('x-ziso-mw-branch', branch);
         res.headers.set('x-ziso-mw-path', pathname);
         res.headers.set('x-ziso-mw-host-candidates', hostCandidates.join('|') || 'none');
         res.headers.set('x-ziso-mw-x-forwarded-host', request.headers.get('x-forwarded-host') || 'none');
@@ -116,8 +120,16 @@ export function middleware(request: NextRequest) {
         }
 
         if (pathname === '/') {
+            const headers = new Headers(request.headers);
+            headers.set('x-ziso-locale', locale);
+            headers.set('x-ziso-locale-prefix', isLocalePrefixed ? '1' : '0');
+            headers.set('x-ziso-mw-rewrite-branch', 'app-root-rewrite-dashboard');
             return withDebugHeaders(
-                NextResponse.rewrite(new URL('/dashboard', request.url)),
+                NextResponse.rewrite(new URL('/dashboard', request.url), {
+                    request: {
+                        headers,
+                    },
+                }),
                 'app-root-rewrite-dashboard'
             );
         }

@@ -401,6 +401,15 @@ class NotificationTemplates:
         Returns:
             A tuple of (title, body).
         """
+        kwargs = dict(kwargs)
+        if not kwargs.get("stock_name") and kwargs.get("symbol"):
+            kwargs["stock_name"] = kwargs["symbol"]
+        if kwargs.get("confidence_pct") is None and kwargs.get("confidence") is not None:
+            try:
+                kwargs["confidence_pct"] = int(float(kwargs["confidence"]) * 100)
+            except Exception:
+                pass
+
         # A. Resolve Tier & Type
         # Normalize Tier: Semantic distinction between 'free' and 'paid' (members)
         effective_tier = "free" if tier == "free" else "paid"

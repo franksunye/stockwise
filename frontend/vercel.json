@@ -1,0 +1,15 @@
+{
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.ziso.cc"
+        }
+      ],
+      "destination": "https://ziso.cc/:path*",
+      "permanent": true
+    }
+  ]
+}
