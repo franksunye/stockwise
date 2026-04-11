@@ -30,6 +30,7 @@ This directory serves as the unified single source of truth for the 知守 AI (Z
 - [Stock News Fetching Implementation](./1_Engineering/33_Stock_News_Fetching_Implementation.md)
 - [Dashboard Page Refactoring Design](./1_Engineering/34_Dashboard_Page_Refactoring_Design.md)
 - [Broadcast Layer A Operations Runbook](./1_Engineering/35_Broadcast_LayerA_Operations_Runbook_20260319.md) *(上线运行与应急收口标准)*
+- [International V1 Release Engineering Review](./1_Engineering/45_International_V1_Release_Engineering_Review_20260411.md) *(国际版 v1 发布前工程检查清单与当前结论)*
 - [Decision Model Implementation Plan](./1_Engineering/39_Decision_Model_Implementation_Plan_20260325.md)
 - [Trade Management Research Architecture](./1_Engineering/42_Trade_Management_Research_Architecture_20260327.md)
 
