@@ -126,14 +126,24 @@ export default async function RootLayout({
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
 
-            if (window.location.hostname === 'ziso.cc' || window.location.hostname === 'www.ziso.cc') {
+            var hostname = window.location.hostname || '';
+            var isTrackedHost =
+              hostname === 'ziso.cc' ||
+              hostname.endsWith('.ziso.cc');
+
+            if (isTrackedHost) {
               gtag('config', 'G-QXYCXRCL4P');
             }
           `}
         </Script>
         <Script id="microsoft-clarity" strategy="afterInteractive">
           {`
-            if (window.location.hostname === 'ziso.cc' || window.location.hostname === 'www.ziso.cc') {
+            var hostname = window.location.hostname || '';
+            var isTrackedHost =
+              hostname === 'ziso.cc' ||
+              hostname.endsWith('.ziso.cc');
+
+            if (isTrackedHost) {
               (function(c,l,a,r,i,t,y){
                   c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
                   t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i+"?ref=bwt";

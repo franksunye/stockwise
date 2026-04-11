@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useT, useGlobalT, useLocale } from '@/context/LocaleContext';
 import { getPricingPlans } from '@/lib/pricing-data';
 import type { FullMessageKey } from '@/lib/i18n';
+import { useAnalytics } from '@/hooks/useAnalytics';
 
 interface Props {
   currentTier: string;
@@ -20,6 +21,7 @@ export function UserPricingView({ currentTier, hasStripeCustomer, expiresAt }: P
   const [loadingPortal, setLoadingPortal] = useState(false);
 
   const { locale } = useLocale();
+  const { trackEvent } = useAnalytics();
   const pricingPlans = useMemo(() => getPricingPlans(locale), [locale]);
   const hasAttemptedAutoCheckoutRef = useRef(false);
   const isCN = locale === 'cn';
@@ -77,6 +79,12 @@ export function UserPricingView({ currentTier, hasStripeCustomer, expiresAt }: P
 
   const handleUpgrade = async (priceId: string) => {
     setLoadingPriceId(priceId);
+    trackEvent('checkout_start', {
+      price_id: priceId,
+      current_tier: currentTier,
+      locale,
+      surface: 'user_pricing_view',
+    });
     try {
       const checkoutUrl = await createCheckoutSession(priceId, { bootstrapUser: true });
       if (checkoutUrl) {
@@ -85,6 +93,13 @@ export function UserPricingView({ currentTier, hasStripeCustomer, expiresAt }: P
     } catch (error: unknown) {
       console.error('Checkout error:', error);
       const msg = (error as Error).message || '';
+      trackEvent('checkout_error', {
+        price_id: priceId,
+        current_tier: currentTier,
+        locale,
+        reason: msg || 'unknown',
+        surface: 'user_pricing_view',
+      });
       
       if (msg.includes('Missing required environment variables')) {
         alert(t('systemMaintenance'));
@@ -101,6 +116,11 @@ export function UserPricingView({ currentTier, hasStripeCustomer, expiresAt }: P
     await getCurrentUser();
     
     setLoadingPortal(true);
+    trackEvent('billing_portal_open', {
+      current_tier: currentTier,
+      locale,
+      surface: 'user_pricing_view',
+    });
     try {
       const response = await fetch('/api/billing/portal', {
         method: 'POST',
@@ -134,6 +154,12 @@ export function UserPricingView({ currentTier, hasStripeCustomer, expiresAt }: P
 
     if (targetPriceId && isWhitelisted) {
       hasAttemptedAutoCheckoutRef.current = true;
+      trackEvent('checkout_start', {
+        price_id: targetPriceId,
+        current_tier: currentTier,
+        locale,
+        surface: 'pricing_url_bridge',
+      });
       void (async () => {
         try {
           const response = await fetch('/api/checkout', {
@@ -155,10 +181,17 @@ export function UserPricingView({ currentTier, hasStripeCustomer, expiresAt }: P
           throw new Error(data.error || 'Unable to create checkout session');
         } catch (error) {
           console.error('Auto checkout error:', error);
+          trackEvent('checkout_error', {
+            price_id: targetPriceId,
+            current_tier: currentTier,
+            locale,
+            reason: error instanceof Error ? error.message : 'unknown',
+            surface: 'pricing_url_bridge',
+          });
         }
       })();
     }
-  }, [pricingPlans]);
+  }, [currentTier, locale, pricingPlans, trackEvent]);
 
   return (
     <div className="animate-in fade-in slide-in-from-right-4 duration-300 space-y-4 pb-12">
