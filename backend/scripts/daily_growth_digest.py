@@ -316,6 +316,7 @@ def get_clarity_metrics(token: str):
 def get_internal_metrics():
     """
     Fetches 24h / 7d / 30d internal growth and activation metrics from DB.
+    Note: `users` rows are bootstrap identities, not necessarily completed signups.
     """
     conn = get_connection()
     cursor = conn.cursor()
@@ -327,15 +328,24 @@ def get_internal_metrics():
 
     windows = {
         "last_24h": {
-            "new_signups": scalar("SELECT COUNT(*) FROM users WHERE created_at > datetime('now', '-24 hours', '+8 hours')"),
+            "new_user_rows": scalar("SELECT COUNT(*) FROM users WHERE created_at > datetime('now', '-24 hours', '+8 hours')"),
+            "anonymous_rows": scalar("SELECT COUNT(*) FROM users WHERE created_at > datetime('now', '-24 hours', '+8 hours') AND lower(coalesce(registration_type, 'anonymous')) = 'anonymous'"),
+            "activated_users": scalar("SELECT COUNT(*) FROM users WHERE created_at > datetime('now', '-24 hours', '+8 hours') AND has_onboarded = 1"),
+            "paid_rows": scalar("SELECT COUNT(*) FROM users WHERE created_at > datetime('now', '-24 hours', '+8 hours') AND lower(coalesce(subscription_tier, 'free')) IN ('go','plus','pro')"),
             "active_watchers": scalar("SELECT COUNT(DISTINCT user_id) FROM user_watchlist WHERE added_at > datetime('now', '-24 hours', '+8 hours')"),
         },
         "last_7d": {
-            "new_signups": scalar("SELECT COUNT(*) FROM users WHERE created_at > datetime('now', '-7 days', '+8 hours')"),
+            "new_user_rows": scalar("SELECT COUNT(*) FROM users WHERE created_at > datetime('now', '-7 days', '+8 hours')"),
+            "anonymous_rows": scalar("SELECT COUNT(*) FROM users WHERE created_at > datetime('now', '-7 days', '+8 hours') AND lower(coalesce(registration_type, 'anonymous')) = 'anonymous'"),
+            "activated_users": scalar("SELECT COUNT(*) FROM users WHERE created_at > datetime('now', '-7 days', '+8 hours') AND has_onboarded = 1"),
+            "paid_rows": scalar("SELECT COUNT(*) FROM users WHERE created_at > datetime('now', '-7 days', '+8 hours') AND lower(coalesce(subscription_tier, 'free')) IN ('go','plus','pro')"),
             "active_watchers": scalar("SELECT COUNT(DISTINCT user_id) FROM user_watchlist WHERE added_at > datetime('now', '-7 days', '+8 hours')"),
         },
         "last_30d": {
-            "new_signups": scalar("SELECT COUNT(*) FROM users WHERE created_at > datetime('now', '-30 days', '+8 hours')"),
+            "new_user_rows": scalar("SELECT COUNT(*) FROM users WHERE created_at > datetime('now', '-30 days', '+8 hours')"),
+            "anonymous_rows": scalar("SELECT COUNT(*) FROM users WHERE created_at > datetime('now', '-30 days', '+8 hours') AND lower(coalesce(registration_type, 'anonymous')) = 'anonymous'"),
+            "activated_users": scalar("SELECT COUNT(*) FROM users WHERE created_at > datetime('now', '-30 days', '+8 hours') AND has_onboarded = 1"),
+            "paid_rows": scalar("SELECT COUNT(*) FROM users WHERE created_at > datetime('now', '-30 days', '+8 hours') AND lower(coalesce(subscription_tier, 'free')) IN ('go','plus','pro')"),
             "active_watchers": scalar("SELECT COUNT(DISTINCT user_id) FROM user_watchlist WHERE added_at > datetime('now', '-30 days', '+8 hours')"),
         },
     }
@@ -348,7 +358,8 @@ def get_internal_metrics():
 
     cursor.execute("""
         SELECT
-            COUNT(*) AS signups_30d,
+            COUNT(*) AS user_rows_30d,
+            SUM(CASE WHEN lower(coalesce(registration_type, 'anonymous')) = 'anonymous' THEN 1 ELSE 0 END) AS anonymous_rows_30d,
             SUM(CASE WHEN has_onboarded = 1 THEN 1 ELSE 0 END) AS onboarded_30d,
             SUM(CASE WHEN lower(coalesce(subscription_tier, 'free')) IN ('go','plus','pro') THEN 1 ELSE 0 END) AS upgraded_30d,
             SUM(CASE WHEN EXISTS (SELECT 1 FROM user_watchlist w WHERE w.user_id = u.user_id) THEN 1 ELSE 0 END) AS with_watchlist_30d
@@ -357,25 +368,26 @@ def get_internal_metrics():
     """)
     row = cursor.fetchone()
     activation_summary = {
-        "signups_30d": row[0] or 0,
-        "onboarded_30d": row[1] or 0,
-        "upgraded_30d": row[2] or 0,
-        "with_watchlist_30d": row[3] or 0,
+        "user_rows_30d": row[0] or 0,
+        "anonymous_rows_30d": row[1] or 0,
+        "onboarded_30d": row[2] or 0,
+        "upgraded_30d": row[3] or 0,
+        "with_watchlist_30d": row[4] or 0,
     }
 
     cursor.execute("""
         SELECT
             CASE WHEN referred_by IS NOT NULL AND referred_by != '' THEN 'referred' ELSE 'organic' END AS channel,
-            COUNT(*) AS signups,
+            COUNT(*) AS user_rows,
             SUM(CASE WHEN has_onboarded = 1 THEN 1 ELSE 0 END) AS onboarded,
             SUM(CASE WHEN lower(coalesce(subscription_tier, 'free')) IN ('go','plus','pro') THEN 1 ELSE 0 END) AS upgraded
         FROM users
         WHERE created_at > datetime('now', '-30 days', '+8 hours')
         GROUP BY 1
-        ORDER BY signups DESC
+        ORDER BY user_rows DESC
     """)
     channel_quality = [
-        {"channel": row[0], "signups": row[1], "onboarded": row[2], "upgraded": row[3]}
+        {"channel": row[0], "user_rows": row[1], "onboarded": row[2], "upgraded": row[3]}
         for row in cursor.fetchall()
     ]
 
@@ -388,12 +400,15 @@ def get_internal_metrics():
     top_symbols = [{"symbol": row[0], "count": row[1], "users": row[2]} for row in cursor.fetchall()]
 
     cursor.execute("""
-        SELECT substr(created_at, 1, 10) as day, COUNT(*) as signups
+        SELECT
+            substr(created_at, 1, 10) as day,
+            COUNT(*) as user_rows,
+            SUM(CASE WHEN has_onboarded = 1 THEN 1 ELSE 0 END) AS activated
         FROM users
         WHERE created_at > datetime('now', '-7 days', '+8 hours')
         GROUP BY 1 ORDER BY 1
     """)
-    signup_trend = [{"day": row[0], "signups": row[1]} for row in cursor.fetchall()]
+    signup_trend = [{"day": row[0], "user_rows": row[1], "activated": row[2] or 0} for row in cursor.fetchall()]
 
     cursor.execute("""
         SELECT substr(added_at, 1, 10) as day, COUNT(*) as adds
@@ -451,42 +466,64 @@ def generate_report():
         return
 
     try:
-        ga = get_ga4_report(property_id, credentials_path)
         internal = get_internal_metrics()
-        
+
+        ga = None
+        ga_error = None
+        try:
+            ga = get_ga4_report(property_id, credentials_path)
+        except Exception as e:
+            ga_error = str(e)
+
         clarity_data = None
+        clarity_error = None
         if clarity_token:
-            clarity_data = get_clarity_metrics(clarity_token)
-        
+            try:
+                clarity_data = get_clarity_metrics(clarity_token)
+            except Exception as e:
+                clarity_error = str(e)
+
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        ga_24h = ga["windows"].get("last_24h", {})
-        ga_7d = ga["windows"].get("last_7d", {})
-        ga_30d = ga["windows"].get("last_30d", {})
+        ga_24h = (ga or {}).get("windows", {}).get("last_24h", {})
+        ga_7d = (ga or {}).get("windows", {}).get("last_7d", {})
+        ga_30d = (ga or {}).get("windows", {}).get("last_30d", {})
         db_24h = internal["windows"]["last_24h"]
         db_7d = internal["windows"]["last_7d"]
         db_30d = internal["windows"]["last_30d"]
         activation = internal["activation_summary"]
-        
+
+        def pct(numerator: int, denominator: int) -> float:
+            return (numerator / denominator * 100) if denominator else 0.0
+
         report_md = f"""# StockWise Growth Pulse ({timestamp})
 
 ## 📊 Summary (Last 24h)
 | Metric | Count | Source |
 | :--- | :--- | :--- |
-| **Total Sessions** | {ga_24h.get('sessions', 0)} | GA4 |
-| **Active Users** | {ga_24h.get('users', 0)} | GA4 |
-| **New Signups** | {db_24h['new_signups']} | DB |
-| **Conversion Rate** | {((db_24h['new_signups'] / ga_24h.get('sessions', 0) * 100) if ga_24h.get('sessions', 0) > 0 else 0):.2f}% | Derived |
+| **Total Sessions** | {ga_24h.get('sessions', 'N/A') if ga else 'N/A'} | GA4 |
+| **Active Users** | {ga_24h.get('users', 'N/A') if ga else 'N/A'} | GA4 |
+| **New User Rows** | {db_24h['new_user_rows']} | DB (`users`) |
+| **Activated Users** | {db_24h['activated_users']} | DB (`users.has_onboarded=1`) |
+| **Activation / User Rows** | {pct(db_24h['activated_users'], db_24h['new_user_rows']):.2f}% | Derived |
 | **Active Watchers** | {db_24h['active_watchers']} | DB |
-| **Total Page Views** | {ga_24h.get('page_views', 0)} | GA4 |
+| **Total Page Views** | {ga_24h.get('page_views', 'N/A') if ga else 'N/A'} | GA4 |
 
 ## 📈 Window Comparison
-| Window | Sessions | Users | Page Views | Signups | Signup / Session |
+| Window | Sessions | Users | Page Views | User Rows | Activated | Activation / Rows |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **24h** | {ga_24h.get('sessions', 0)} | {ga_24h.get('users', 0)} | {ga_24h.get('page_views', 0)} | {db_24h['new_signups']} | {((db_24h['new_signups'] / ga_24h.get('sessions', 0) * 100) if ga_24h.get('sessions', 0) > 0 else 0):.2f}% |
-| **7d** | {ga_7d.get('sessions', 0)} | {ga_7d.get('users', 0)} | {ga_7d.get('page_views', 0)} | {db_7d['new_signups']} | {((db_7d['new_signups'] / ga_7d.get('sessions', 0) * 100) if ga_7d.get('sessions', 0) > 0 else 0):.2f}% |
-| **30d** | {ga_30d.get('sessions', 0)} | {ga_30d.get('users', 0)} | {ga_30d.get('page_views', 0)} | {db_30d['new_signups']} | {((db_30d['new_signups'] / ga_30d.get('sessions', 0) * 100) if ga_30d.get('sessions', 0) > 0 else 0):.2f}% |
+| **24h** | {ga_24h.get('sessions', 'N/A') if ga else 'N/A'} | {ga_24h.get('users', 'N/A') if ga else 'N/A'} | {ga_24h.get('page_views', 'N/A') if ga else 'N/A'} | {db_24h['new_user_rows']} | {db_24h['activated_users']} | {pct(db_24h['activated_users'], db_24h['new_user_rows']):.2f}% |
+| **7d** | {ga_7d.get('sessions', 'N/A') if ga else 'N/A'} | {ga_7d.get('users', 'N/A') if ga else 'N/A'} | {ga_7d.get('page_views', 'N/A') if ga else 'N/A'} | {db_7d['new_user_rows']} | {db_7d['activated_users']} | {pct(db_7d['activated_users'], db_7d['new_user_rows']):.2f}% |
+| **30d** | {ga_30d.get('sessions', 'N/A') if ga else 'N/A'} | {ga_30d.get('users', 'N/A') if ga else 'N/A'} | {ga_30d.get('page_views', 'N/A') if ga else 'N/A'} | {db_30d['new_user_rows']} | {db_30d['activated_users']} | {pct(db_30d['activated_users'], db_30d['new_user_rows']):.2f}% |
 
 """
+        if ga_error or clarity_error:
+            report_md += "## 🚨 Data Collection Issues\n"
+            if ga_error:
+                report_md += f"- **GA4 unavailable**: {ga_error}\n"
+            if clarity_error:
+                report_md += f"- **Clarity unavailable**: {clarity_error}\n"
+            report_md += "- Continue to trust internal DB funnel metrics; external traffic trend is incomplete for this run.\n\n"
+
         if clarity_data:
             c24 = clarity_data.get("last_24h") or {}
             c7 = clarity_data.get("last_7d") or {}
@@ -515,20 +552,21 @@ def generate_report():
 ## 🧪 Activation Quality (Last 30d)
 | Metric | Count | Rate |
 | :--- | :--- | :--- |
-| **Signups** | {activation['signups_30d']} | 100.00% |
-| **Onboarded** | {activation['onboarded_30d']} | {(activation['onboarded_30d'] / activation['signups_30d'] * 100) if activation['signups_30d'] else 0:.2f}% |
-| **Upgraded (Go/Plus/Pro)** | {activation['upgraded_30d']} | {(activation['upgraded_30d'] / activation['signups_30d'] * 100) if activation['signups_30d'] else 0:.2f}% |
-| **Added Watchlist** | {activation['with_watchlist_30d']} | {(activation['with_watchlist_30d'] / activation['signups_30d'] * 100) if activation['signups_30d'] else 0:.2f}% |
+| **User Rows** | {activation['user_rows_30d']} | 100.00% |
+| **Anonymous Bootstrap Rows** | {activation['anonymous_rows_30d']} | {pct(activation['anonymous_rows_30d'], activation['user_rows_30d']):.2f}% |
+| **Onboarded** | {activation['onboarded_30d']} | {pct(activation['onboarded_30d'], activation['user_rows_30d']):.2f}% |
+| **Upgraded (Go/Plus/Pro)** | {activation['upgraded_30d']} | {pct(activation['upgraded_30d'], activation['user_rows_30d']):.2f}% |
+| **Added Watchlist** | {activation['with_watchlist_30d']} | {pct(activation['with_watchlist_30d'], activation['user_rows_30d']):.2f}% |
 
 ## 🔁 Channel Quality (Last 30d)
-| Channel | Signups | Onboarded | Upgraded |
+| Channel | User Rows | Onboarded | Upgraded |
 | :--- | :--- | :--- | :--- |
 """
         if not internal["channel_quality"]:
             report_md += "| No recent channels | - | - | - |\n"
         else:
             for item in internal["channel_quality"]:
-                report_md += f"| {item['channel']} | {item['signups']} | {item['onboarded']} | {item['upgraded']} |\n"
+                report_md += f"| {item['channel']} | {item['user_rows']} | {item['onboarded']} | {item['upgraded']} |\n"
 
         report_md += """
 
@@ -542,29 +580,36 @@ def generate_report():
             for u in internal['new_users_detailed']:
                 report_md += f"| `{u['user_id']}` | {u['created_at']} | {u['type']} | {u['tier']} | {u['referred_by'] if u['referred_by'] else '-'} | {u['watchlist_count']} | {'✅' if u['onboarded'] else '❌'} |\n"
 
-        report_md += "\n## 📉 Traffic Trend (GA4 7d)\n"
-        for item in ga["daily_trend"]:
-            report_md += f"- **{item['date']}**: {item['sessions']} sessions / {item['users']} users / {item['page_views']} PV\n"
+        if ga:
+            report_md += "\n## 📉 Traffic Trend (GA4 7d)\n"
+            for item in ga["daily_trend"]:
+                report_md += f"- **{item['date']}**: {item['sessions']} sessions / {item['users']} users / {item['page_views']} PV\n"
 
-        report_md += "\n## 📡 Top Traffic Sources (GA4 7d)\n"
-        for s in ga["top_sources"]:
-            report_md += f"- **{s['source_medium']}**: {s['sessions']} sessions / {s['users']} users\n"
+            report_md += "\n## 📡 Top Traffic Sources (GA4 7d)\n"
+            for s in ga["top_sources"]:
+                report_md += f"- **{s['source_medium']}**: {s['sessions']} sessions / {s['users']} users\n"
 
-        report_md += "\n## 📄 Top Landing Pages (GA4 7d)\n"
-        for p in ga["top_pages"]:
-            report_md += f"- `{p['path']}`: {p['sessions']} sessions / {p['users']} users\n"
+            report_md += "\n## 📄 Top Landing Pages (GA4 7d)\n"
+            for p in ga["top_pages"]:
+                report_md += f"- `{p['path']}`: {p['sessions']} sessions / {p['users']} users\n"
 
-        report_md += "\n## 🌍 Geography Mix (GA4 30d)\n"
-        for item in ga["geo_mix"]:
-            report_md += f"- **{item['country']}**: {item['sessions']} sessions / {item['users']} users\n"
+            report_md += "\n## 🌍 Geography Mix (GA4 30d)\n"
+            for item in ga["geo_mix"]:
+                report_md += f"- **{item['country']}**: {item['sessions']} sessions / {item['users']} users\n"
 
-        report_md += "\n## 📱 Device Mix (GA4 30d)\n"
-        for item in ga["device_mix"]:
-            report_md += f"- **{item['device']}**: {item['sessions']} sessions / {item['users']} users\n"
+            report_md += "\n## 📱 Device Mix (GA4 30d)\n"
+            for item in ga["device_mix"]:
+                report_md += f"- **{item['device']}**: {item['sessions']} sessions / {item['users']} users\n"
+        else:
+            report_md += "\n## 📉 Traffic Trend (GA4 7d)\n- GA4 data unavailable for this run.\n"
+            report_md += "\n## 📡 Top Traffic Sources (GA4 7d)\n- GA4 data unavailable for this run.\n"
+            report_md += "\n## 📄 Top Landing Pages (GA4 7d)\n- GA4 data unavailable for this run.\n"
+            report_md += "\n## 🌍 Geography Mix (GA4 30d)\n- GA4 data unavailable for this run.\n"
+            report_md += "\n## 📱 Device Mix (GA4 30d)\n- GA4 data unavailable for this run.\n"
 
         report_md += "\n## 🧾 Internal Trend (DB 7d)\n"
         for item in internal["signup_trend"]:
-            report_md += f"- **{item['day']}**: {item['signups']} signups\n"
+            report_md += f"- **{item['day']}**: {item['user_rows']} user rows / {item['activated']} activated\n"
         for item in internal["watchlist_trend"]:
             report_md += f"- **{item['day']}**: {item['adds']} watchlist adds\n"
 
