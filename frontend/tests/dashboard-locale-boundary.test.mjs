@@ -21,6 +21,7 @@ const LAYOUT_PATH = resolve(
   ROOT,
   'src',
   'app',
+  '(site)',
   '(dashboard)',
   'dashboard',
   'layout.tsx',

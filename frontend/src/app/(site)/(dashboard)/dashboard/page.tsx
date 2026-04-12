@@ -410,6 +410,7 @@ function DashboardContent() {
       <div
         ref={scrollRef}
         onScroll={handleScroll}
+        data-dashboard-horizontal-scroller="true"
         className={`h-full w-full flex snap-x snap-mandatory scrollbar-hide overscroll-x-contain touch-pan-x ${isHorizontalScrollLocked ? 'overflow-x-hidden' : 'overflow-x-scroll'}`}
       >
         {loadingPool && displayStocks.length === 0 && (

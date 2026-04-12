@@ -320,12 +320,7 @@ const CASES = [
         },
         assert: async ({ page, assertMainState }) => {
             await page.evaluate(async () => {
-                const container = Array.from(document.querySelectorAll('div')).find((node) => {
-                    if (!(node instanceof HTMLDivElement)) return false;
-                    const style = window.getComputedStyle(node);
-                    return node.scrollWidth > node.clientWidth + 20 &&
-                        (style.overflowX === 'scroll' || style.overflowX === 'auto');
-                });
+                const container = document.querySelector('[data-dashboard-horizontal-scroller="true"]');
 
                 if (!(container instanceof HTMLDivElement)) {
                     throw new Error('Horizontal dashboard scroller not found');
