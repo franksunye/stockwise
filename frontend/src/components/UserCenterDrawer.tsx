@@ -101,12 +101,12 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
     handleDisableNotifications,
     handleEnableNotifications,
     handleTestPush,
-    isAndroid,
     isHighPerformance,
     isSubscribed,
     isSubscribing,
     notificationSettings,
     pushSupported,
+    showAndroidPushWarning,
     testingPush,
     updateNotificationSetting,
   } = useUserCenterData({ isOpen, refreshProfile });
@@ -436,7 +436,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                         </div>
                         {isSubscribed && (
                           <div className="bg-white/[0.02] border-t border-white/5 px-5 py-2">
-                            {isAndroid && (
+                            {showAndroidPushWarning && (
                               <div className="mt-2 mb-3 px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-left">
                                 <p className="text-[10px] text-amber-200/90 font-bold">
                                   ⚠️ {t('push.androidLimited')}

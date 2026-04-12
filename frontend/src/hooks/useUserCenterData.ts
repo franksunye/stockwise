@@ -34,19 +34,34 @@ export function useUserCenterData({ isOpen, refreshProfile }: UseUserCenterDataA
     const [testingPush, setTestingPush] = useState(false);
     const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>(DEFAULT_NOTIFICATION_SETTINGS);
     const [isHighPerformance, setIsHighPerformance] = useState(false);
-    const [isAndroid, setIsAndroid] = useState(false);
+    const [showAndroidPushWarning, setShowAndroidPushWarning] = useState(false);
     const [currentMode, setCurrentMode] = useState<UserCenterModeSummary | null>(null);
 
     useEffect(() => {
         setIsHighPerformance(shouldEnableHighPerformance());
         const isAndroidDevice = /android/i.test(navigator.userAgent);
-        let isMainlandChina = false;
-        try {
-            isMainlandChina = Intl.DateTimeFormat().resolvedOptions().timeZone === 'Asia/Shanghai';
-        } catch {
-            isMainlandChina = false;
+
+        if (!isAndroidDevice) {
+            setShowAndroidPushWarning(false);
+            return;
         }
-        setIsAndroid(isAndroidDevice && isMainlandChina);
+
+        let cancelled = false;
+        void fetch('/api/ux-experiment/ping', { cache: 'no-store' })
+            .then((res) => (res.ok ? res.json() : null))
+            .then((data: { region?: string } | null) => {
+                if (cancelled) return;
+                setShowAndroidPushWarning(String(data?.region || '').toUpperCase() === 'CN');
+            })
+            .catch(() => {
+                if (!cancelled) {
+                    setShowAndroidPushWarning(false);
+                }
+            });
+
+        return () => {
+            cancelled = true;
+        };
     }, []);
 
     const loadCurrentMode = useCallback(async () => {
@@ -245,12 +260,12 @@ export function useUserCenterData({ isOpen, refreshProfile }: UseUserCenterDataA
         handleDisableNotifications,
         handleEnableNotifications,
         handleTestPush,
-        isAndroid,
         isHighPerformance,
         isSubscribed,
         isSubscribing,
         notificationSettings,
         pushSupported,
+        showAndroidPushWarning,
         testingPush,
         updateNotificationSetting,
     };
