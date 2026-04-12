@@ -275,7 +275,12 @@ export async function POST(request: Request) {
         }
 
         const isChannel = user.custom_commission_rate != null;
-        const referralAlias = await ensureUserReferralAlias(client, user.user_id, user.referral_alias);
+        let referralAlias = user.referral_alias || null;
+        try {
+            referralAlias = await ensureUserReferralAlias(client, user.user_id, user.referral_alias);
+        } catch (aliasError) {
+            console.error(`Failed to ensure referral alias for profile ${user.user_id}:`, aliasError);
+        }
 
         return NextResponse.json({
             userId: user.user_id,

@@ -77,7 +77,12 @@ export async function POST(request: Request) {
                 .run(userId, registrationType, now, now);
         }
 
-        const referralAlias = await ensureUserReferralAlias(client, userId);
+        let referralAlias: string | null = null;
+        try {
+            referralAlias = await ensureUserReferralAlias(client, userId);
+        } catch (aliasError) {
+            console.error('Failed to ensure referral alias during register:', aliasError);
+        }
 
         const sessionToken = createUserSessionToken(userId);
         if (!sessionToken) {

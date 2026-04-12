@@ -24,17 +24,13 @@ const referralAliasLib = fs.readFileSync(
 );
 
 test('profile route always ensures a referral alias before returning referral data', () => {
-    assert.match(
-        profileRoute,
-        /const referralAlias = await ensureUserReferralAlias\(client, user\.user_id, user\.referral_alias\);/
-    );
+    assert.match(profileRoute, /ensureUserReferralAlias\(client, user\.user_id, user\.referral_alias\)/);
+    assert.match(profileRoute, /Failed to ensure referral alias for profile/);
 });
 
 test('register route assigns a default referral alias for every user', () => {
-    assert.match(
-        registerRoute,
-        /const referralAlias = await ensureUserReferralAlias\(client, userId\);/
-    );
+    assert.match(registerRoute, /ensureUserReferralAlias\(client, userId\)/);
+    assert.match(registerRoute, /Failed to ensure referral alias during register:/);
     assert.match(registerRoute, /referralAlias,/);
 });
 

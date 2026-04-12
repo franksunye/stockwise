@@ -57,7 +57,12 @@ export async function POST(request: Request) {
                 .run(username, new Date().toISOString(), userId);
         }
 
-        const referralAlias = await ensureUserReferralAlias(client, userId);
+        let referralAlias: string | null = null;
+        try {
+            referralAlias = await ensureUserReferralAlias(client, userId);
+        } catch (aliasError) {
+            console.error(`Failed to ensure referral alias during upgrade for ${userId}:`, aliasError);
+        }
 
         return NextResponse.json({ success: true, referralAlias });
     } catch (error) {
