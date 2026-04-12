@@ -6,6 +6,28 @@ import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
 import { sendInternalNotification } from '@/lib/server-notify';
 import { requireUserSession } from '@/lib/user-session';
 
+function normalizeAppLocale(input: unknown): 'cn' | 'en' {
+    const raw = String(input || '').trim().toLowerCase();
+    if (raw === 'en') return 'en';
+    return 'cn';
+}
+
+function buildReferralRewardNotification(locale: unknown, rewardDays: number) {
+    const appLocale = normalizeAppLocale(locale);
+
+    if (appLocale === 'en') {
+        return {
+            title: '🎁 Your Referral Reward Has Arrived',
+            body: `Your invited friend has started using StockWise. ${rewardDays} days of PRO access has been added to your account!`,
+        };
+    }
+
+    return {
+        title: '🎁 邀请奖励已到账',
+        body: `你邀请的好友已开始使用，+${rewardDays}天 PRO 会员已存入你的账户！`,
+    };
+}
+
 export async function POST(request: Request) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let db: any;
@@ -79,12 +101,16 @@ export async function POST(request: Request) {
                     } else {
                     const referrerId = user.referred_by;
                     const refRes = await client.execute({
-                        sql: "SELECT subscription_tier, subscription_expires_at FROM users WHERE user_id = ?",
+                        sql: "SELECT subscription_tier, subscription_expires_at, locale FROM users WHERE user_id = ?",
                         args: [referrerId]
                     });
                     const referrer = refRes.rows[0];
 
                     if (referrer) {
+                        const referralRewardNotification = buildReferralRewardNotification(
+                            referrer.locale,
+                            MEMBERSHIP_CONFIG.referral.referrerDays
+                        );
                         const currentExpiry = referrer.subscription_expires_at ? new Date(referrer.subscription_expires_at) : new Date();
                         const baseDate = currentExpiry > new Date() ? currentExpiry : new Date();
                         baseDate.setDate(baseDate.getDate() + MEMBERSHIP_CONFIG.referral.referrerDays);
@@ -103,8 +129,8 @@ export async function POST(request: Request) {
 
                         sendInternalNotification({
                             target_user_id: referrerId,
-                            title: '🎁 邀请奖励已到账',
-                            body: `你邀请的好友已开始使用，+${MEMBERSHIP_CONFIG.referral.referrerDays}天 PRO 会员已存入你的账户！`,
+                            title: referralRewardNotification.title,
+                            body: referralRewardNotification.body,
                             url: '/dashboard',
                             tag: 'referral_reward'
                         }).catch((e: unknown) => console.error('Failed to send referral notification:', e));
@@ -181,9 +207,13 @@ export async function POST(request: Request) {
                         console.log(`Referrer reward already granted for ${userId}, skipping duplicate reward.`);
                     } else {
                         const referrerId = user.referred_by;
-                        const referrer = client.prepare("SELECT subscription_tier, subscription_expires_at FROM users WHERE user_id = ?").get(referrerId);
+                        const referrer = client.prepare("SELECT subscription_tier, subscription_expires_at, locale FROM users WHERE user_id = ?").get(referrerId);
 
                         if (referrer) {
+                            const referralRewardNotification = buildReferralRewardNotification(
+                                referrer.locale,
+                                MEMBERSHIP_CONFIG.referral.referrerDays
+                            );
                             const currentExpiry = referrer.subscription_expires_at ? new Date(referrer.subscription_expires_at) : new Date();
                             const baseDate = currentExpiry > new Date() ? currentExpiry : new Date();
                             baseDate.setDate(baseDate.getDate() + MEMBERSHIP_CONFIG.referral.referrerDays);
@@ -193,6 +223,14 @@ export async function POST(request: Request) {
 
                             const txId = `tx_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
                             client.prepare("INSERT INTO referral_transactions (id, referrer_id, referred_id, type, amount, status, created_at, note) VALUES (?, ?, ?, 'reward', 0, 'completed', ?, ?)").run(txId, referrerId, userId, now.toISOString(), `+${MEMBERSHIP_CONFIG.referral.referrerDays}天 PRO (邀请奖励 - 被邀请人完成引导)`);
+
+                            sendInternalNotification({
+                                target_user_id: referrerId,
+                                title: referralRewardNotification.title,
+                                body: referralRewardNotification.body,
+                                url: '/dashboard',
+                                tag: 'referral_reward'
+                            }).catch((e: unknown) => console.error('Failed to send referral notification:', e));
 
                             console.log(`✅ Referrer ${referrerId} rewarded on onboarding completion of ${userId}`);
                         }

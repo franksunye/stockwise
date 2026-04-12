@@ -18,6 +18,10 @@ const PREF_KEY_MAP: Record<string, string> = {
     prediction_ready: 'prediction_updated',  // Legacy tag compat
 };
 
+const SYSTEM_NOTIFICATION_TAGS = new Set([
+    'referral_reward',
+]);
+
 // Configure web-push
 if (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
     webpush.setVapidDetails(
@@ -112,6 +116,7 @@ export async function POST(request: Request) {
             notifTypeKey = 'price_update';
         }
         notifTypeKey = PREF_KEY_MAP[notifTypeKey] || notifTypeKey;
+        const shouldBypassUserPreferences = Boolean(tag && SYSTEM_NOTIFICATION_TAGS.has(tag));
 
         // 只有在有订阅者时才查询偏好
         if (subscriptions.length > 0) {
@@ -145,7 +150,7 @@ export async function POST(request: Request) {
         const promises = subscriptions.map(async (sub) => {
             // 检查用户是否禁用了此类型的通知
             const settingsJson = userPreferences.get(sub.user_id as string);
-            if (settingsJson) {
+            if (settingsJson && !shouldBypassUserPreferences) {
                 try {
                     const settings = typeof settingsJson === 'string' ? JSON.parse(settingsJson) : settingsJson;
                     // 全局开关
@@ -198,8 +203,14 @@ export async function POST(request: Request) {
         const skippedCount = results.filter((r) => r.status === 'skipped').length;
         const failedCount = results.filter((r) => r.status === 'rejected').length;
 
-        // Collect successful user IDs for logging (deduplicated)
+        // Collect user IDs for logging (deduplicated).
+        // For explicit target_user_id notifications, we still persist a log entry
+        // even when the user has no active push subscription, so in-app history
+        // is not silently coupled to browser push state.
         const successfulUserIds = new Set<string>();
+        if (target_user_id) {
+            successfulUserIds.add(target_user_id);
+        }
         results.forEach((r) => {
             if (r.status === 'fulfilled' && r.userId) {
                 successfulUserIds.add(r.userId);
