@@ -53,16 +53,15 @@ function buildAliasCandidates(userId: string): string[] {
 
 async function querySingleRow(db: DbClient, sql: string, args: unknown[]): Promise<Record<string, unknown> | undefined> {
     if (db.$type === 'cloud' && db.execute) {
-        const execute = db.execute as (statement: { sql: string; args?: unknown[] }) => Promise<{ rows?: Record<string, unknown>[] }>;
-        const res = await execute({ sql, args });
+        const res = await (db.execute as (statement: { sql: string; args?: unknown[] }) => Promise<{ rows?: Record<string, unknown>[] }>).call(db, { sql, args });
         return res.rows?.[0];
     }
 
     if (db.prepare) {
-        const prepare = db.prepare as (statement: string) => {
+        const prepared = (db.prepare as (statement: string) => {
             get: (...params: unknown[]) => Record<string, unknown> | undefined;
-        };
-        return prepare(sql).get(...args);
+        }).call(db, sql);
+        return prepared.get(...args);
     }
 
     throw new Error('Unsupported DB client');
@@ -70,16 +69,15 @@ async function querySingleRow(db: DbClient, sql: string, args: unknown[]): Promi
 
 async function runStatement(db: DbClient, sql: string, args: unknown[]): Promise<void> {
     if (db.$type === 'cloud' && db.execute) {
-        const execute = db.execute as (statement: { sql: string; args?: unknown[] }) => Promise<unknown>;
-        await execute({ sql, args });
+        await (db.execute as (statement: { sql: string; args?: unknown[] }) => Promise<unknown>).call(db, { sql, args });
         return;
     }
 
     if (db.prepare) {
-        const prepare = db.prepare as (statement: string) => {
+        const prepared = (db.prepare as (statement: string) => {
             run: (...params: unknown[]) => unknown;
-        };
-        prepare(sql).run(...args);
+        }).call(db, sql);
+        prepared.run(...args);
         return;
     }
 
