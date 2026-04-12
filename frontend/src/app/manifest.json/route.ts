@@ -210,7 +210,7 @@ export function GET(request: Request) {
   return new NextResponse(JSON.stringify(manifest, null, 2), {
     headers: {
       'Content-Type': 'application/manifest+json; charset=utf-8',
-      'Cache-Control': 'public, max-age=0, must-revalidate',
+      'Cache-Control': 'private, no-store, max-age=0, must-revalidate',
     },
   });
 }

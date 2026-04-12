@@ -18,6 +18,7 @@ const ROUTE_TIMEOUT_MS = 20_000;
 const BOOT_TIMEOUT_MS = 180_000;
 
 let serverProcess = null;
+let didBuildLocally = false;
 
 function sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
@@ -56,7 +57,45 @@ async function waitForServerReady() {
     throw new Error(`Server did not become ready within ${BOOT_TIMEOUT_MS}ms`);
 }
 
+async function ensureProductionBuild() {
+    if (process.env.TEST_BASE_URL || didBuildLocally) return;
+
+    await new Promise((resolve, reject) => {
+        const buildProcess = spawn('npm run build', {
+            cwd: FRONTEND_DIR,
+            env: {
+                ...process.env,
+                NODE_ENV: 'production',
+            },
+            stdio: ['ignore', 'pipe', 'pipe'],
+            shell: true,
+        });
+
+        let buildLogs = '';
+        const appendLog = (chunk) => {
+            buildLogs += chunk.toString();
+            if (buildLogs.length > 8000) {
+                buildLogs = buildLogs.slice(-8000);
+            }
+        };
+
+        buildProcess.stdout?.on('data', appendLog);
+        buildProcess.stderr?.on('data', appendLog);
+
+        buildProcess.once('exit', (code) => {
+            if (code === 0) {
+                didBuildLocally = true;
+                resolve();
+            } else {
+                reject(new Error(`npm run build failed with code ${code}\n${buildLogs}`));
+            }
+        });
+    });
+}
+
 async function startServer() {
+    await ensureProductionBuild();
+
     const env = {
         ...process.env,
         NODE_ENV: 'production',

@@ -33,16 +33,6 @@ const nextConfig: NextConfig = {
           },
         ],
       },
-      {
-        // manifest.json 短期缓存（1小时），确保 PWA 元数据及时更新
-        source: '/manifest.json',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=3600, must-revalidate',
-          },
-        ],
-      },
     ];
   },
 };
