@@ -610,7 +610,12 @@
     }
   },
   "install": {
+    "closeAriaLabel": "Dismiss install guide",
     "guideTitle": "Open in Browser",
+    "wechatDesc": "WeChat blocks direct PWA installation. Open this page in your system browser first, then install it there.",
+    "wechatArrowHint": "Menu",
+    "wechatStep1": "Tap the top-right menu",
+    "wechatStep2": "Choose 'Open in Browser'",
     "iosTitle": "Add to Home Screen",
     "iosDesc": "Enjoy full-screen experience and real-time alerts.",
     "iosStep1": "Click bottom share button",

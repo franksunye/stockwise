@@ -61,16 +61,18 @@ export function InstallGuide() {
 function GuideCard({
   children,
   onDismiss,
+  closeLabel,
 }: {
   children: React.ReactNode;
   onDismiss: () => void;
+  closeLabel: string;
 }) {
   return (
     <div className="relative bg-[#0f0f18]/95 backdrop-blur-xl border border-white/10 rounded-2xl p-5 shadow-[0_8px_40px_rgba(0,0,0,0.6)]">
       <button
         onClick={onDismiss}
         className="absolute top-3 right-3 p-1.5 rounded-full hover:bg-white/10 transition-colors text-slate-500 hover:text-white"
-        aria-label="关闭引导"
+        aria-label={closeLabel}
       >
         <X size={14} />
       </button>
@@ -83,7 +85,7 @@ function GuideCard({
 function WeChatGuide({ onDismiss }: { onDismiss: () => void }) {
   const t = useT('install');
   return (
-    <GuideCard onDismiss={onDismiss}>
+    <GuideCard onDismiss={onDismiss} closeLabel={t('closeAriaLabel')}>
       <div className="flex items-start gap-3">
         <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
           <ExternalLink className="w-5 h-5 text-emerald-400" />
@@ -91,7 +93,7 @@ function WeChatGuide({ onDismiss }: { onDismiss: () => void }) {
         <div className="flex-1 text-left">
           <h4 className="text-sm font-black text-white mb-1">{t('guideTitle')}</h4>
           <p className="text-xs text-slate-400 leading-relaxed">
-            {t('steps.clickDots')} <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-white/10 text-white font-bold text-[10px]">⋯</span> {t('steps.selectAdd')}
+            {t('wechatDesc')}
           </p>
         </div>
       </div>
@@ -99,8 +101,14 @@ function WeChatGuide({ onDismiss }: { onDismiss: () => void }) {
       <div className="mt-3 flex justify-end pr-2">
         <div className="flex items-center gap-1.5 text-[10px] text-emerald-400 font-bold uppercase tracking-wider animate-bounce">
           <span>↗</span>
-          <span>{t('steps.clickDots')}</span>
+          <span>{t('wechatArrowHint')}</span>
         </div>
+      </div>
+      <div className="mt-3 space-y-2 text-left">
+        <Step number={1}>
+          {t('wechatStep1')} <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-white/10 text-white font-bold text-[10px]">⋯</span>
+        </Step>
+        <Step number={2}>{t('wechatStep2')}</Step>
       </div>
     </GuideCard>
   );
@@ -110,7 +118,7 @@ function WeChatGuide({ onDismiss }: { onDismiss: () => void }) {
 function IOSSafariGuide({ onDismiss }: { onDismiss: () => void }) {
   const t = useT('install');
   return (
-    <GuideCard onDismiss={onDismiss}>
+    <GuideCard onDismiss={onDismiss} closeLabel={t('closeAriaLabel')}>
       <div className="flex items-start gap-3">
         <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0">
           <Smartphone className="w-5 h-5 text-blue-400" />
@@ -147,7 +155,7 @@ function AndroidNativeGuide({
 }) {
   const t = useT('install');
   return (
-    <GuideCard onDismiss={onDismiss}>
+    <GuideCard onDismiss={onDismiss} closeLabel={t('closeAriaLabel')}>
       <div className="flex items-start gap-3">
         <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shrink-0">
           <Download className="w-5 h-5 text-indigo-400" />
@@ -222,7 +230,7 @@ function AndroidManualGuide({
   };
 
   return (
-    <GuideCard onDismiss={onDismiss}>
+    <GuideCard onDismiss={onDismiss} closeLabel={t('closeAriaLabel')}>
       <div className="flex items-start gap-3">
         <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0">
           <Monitor className="w-5 h-5 text-amber-400" />

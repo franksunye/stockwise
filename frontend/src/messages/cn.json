@@ -610,7 +610,12 @@
     }
   },
   "install": {
+    "closeAriaLabel": "关闭安装引导",
     "guideTitle": "在浏览器中打开",
+    "wechatDesc": "微信内置浏览器无法直接安装 PWA，请先在系统浏览器中打开当前页面，再继续安装。",
+    "wechatArrowHint": "菜单",
+    "wechatStep1": "点击右上角菜单",
+    "wechatStep2": "选择“在浏览器中打开”",
     "iosTitle": "添加到主屏幕",
     "iosDesc": "获得全屏 App 体验，实时接收行情通知。",
     "iosStep1": "点击底部分享按钮",
