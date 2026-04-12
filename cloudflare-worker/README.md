@@ -32,8 +32,10 @@ The Worker uses a mix of exact cron triggers and a `15`-minute polling trigger:
 | Beijing Time Window | Workflow | Trigger Type |
 | --- | --- | --- |
 | `08:30` on weekdays | `daily_morning_call.yml` | Precision daily trigger |
-| `20:30` on weekdays | `trade_management_advice_loop.yml` | Precision daily trigger |
-| `09:15-16:30` on weekdays | `data_sync_realtime.yml` | Intraday production trigger |
+| `06:30` on Tuesday-Saturday (BJT) | `daily_pipeline_us.yml` | US post-close settlement; aligns with prior US trading day |
+| `08:30` on Tuesday-Saturday (BJT) | `daily_validation_check_us.yml` | US post-close validation glory |
+| `20:30` on weekdays | `trade_management_advice_loop.yml` / `daily_morning_call_us.yml` | Precision daily trigger |
+| `09:15-16:30` on weekdays and `21:30-05:00` during US weekdays | `data_sync_realtime.yml` | Intraday production trigger |
 | Other times | None | Skip |
 
 Implementation note:

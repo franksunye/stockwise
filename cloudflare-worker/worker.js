@@ -12,7 +12,7 @@
  */
 const JOB_REGISTRY = [
   {
-    hour: 6, minute: 30, days: [1, 2, 3, 4, 5],
+    hour: 6, minute: 30, days: [2, 3, 4, 5, 6],
     workflow: 'daily_pipeline_us.yml',
     label: 'us-pipeline-settlement',
   },
@@ -48,25 +48,39 @@ const JOB_REGISTRY = [
   },
 ];
 
+function getBeijingContext(now = new Date()) {
+  const beijingOffset = 8 * 60;
+  const utcMinutesTotal = now.getUTCHours() * 60 + now.getUTCMinutes();
+  const beijingMinutesTotal = (utcMinutesTotal + beijingOffset) % (24 * 60);
+  const beijingHour = Math.floor(beijingMinutesTotal / 60);
+  const beijingMinute = beijingMinutesTotal % 60;
+
+  let beijingDay = now.getUTCDay();
+  if (utcMinutesTotal + beijingOffset >= 24 * 60) {
+    beijingDay = (beijingDay + 1) % 7;
+  }
+
+  return { beijingMinutesTotal, beijingHour, beijingMinute, beijingDay };
+}
+
+function getUSEasternContext(now = new Date()) {
+  const et = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+  const etMinutesTotal = et.getHours() * 60 + et.getMinutes();
+  const etDay = et.getDay();
+  return { et, etMinutesTotal, etDay };
+}
+
 export default {
   // Cron Trigger 入口 (已配置为每 15 分钟触发一次)
   async scheduled(event, env, ctx) {
     console.log(`⏰ Heartbeat triggered at ${new Date().toISOString()}`);
 
-    // 1. 计算北京时间与星期
     const now = new Date();
-    const beijingOffset = 8 * 60; // UTC+8
-    const utcMinutesTotal = now.getUTCHours() * 60 + now.getUTCMinutes();
-    const beijingMinutesTotal = (utcMinutesTotal + beijingOffset) % (24 * 60);
-    const beijingHour = Math.floor(beijingMinutesTotal / 60);
-    const beijingMinute = beijingMinutesTotal % 60;
-    
-    let beijingDay = now.getUTCDay();
-    if (utcMinutesTotal + beijingOffset >= 24 * 60) {
-      beijingDay = (beijingDay + 1) % 7;
-    }
-    
+    const { beijingMinutesTotal, beijingHour, beijingMinute, beijingDay } = getBeijingContext(now);
+    const { et, etMinutesTotal, etDay } = getUSEasternContext(now);
+
     console.log(`🕙 Beijing Time: ${String(beijingHour).padStart(2, '0')}:${String(beijingMinute).padStart(2, '0')} (Day: ${beijingDay})`);
+    console.log(`🗽 US Eastern Time: ${et.toISOString().replace('T', ' ').substring(0, 19)} (Day: ${etDay})`);
 
     // 2. 精确任务匹配 (Precision Hits) - 增加 5 分钟容错窗口，防止分钟级漂移
     const hits = JOB_REGISTRY.filter((job) => {
@@ -98,12 +112,19 @@ export default {
 
     let isTrading = (beijingMinutesTotal >= cnStart && beijingMinutesTotal <= cnEnd);
     if (!isTrading) {
-      if (beijingMinutesTotal >= usStart || beijingMinutesTotal <= usEnd) {
+      const isUSEquitySession = (etDay >= 1 && etDay <= 5) && (etMinutesTotal >= 9 * 60 + 30 && etMinutesTotal <= 16 * 60);
+      if (isUSEquitySession || beijingMinutesTotal >= usStart || beijingMinutesTotal <= usEnd) {
         isTrading = true;
       }
     }
 
-    if (isTrading && beijingDay !== 0 && beijingDay !== 6) {
+    const isCnHkWeekday = beijingDay >= 1 && beijingDay <= 5;
+    const isUsWeekday = etDay >= 1 && etDay <= 5;
+    const shouldRunRealtime =
+      (beijingMinutesTotal >= cnStart && beijingMinutesTotal <= cnEnd && isCnHkWeekday) ||
+      ((beijingMinutesTotal >= usStart || beijingMinutesTotal <= usEnd) && isUsWeekday);
+
+    if (isTrading && shouldRunRealtime) {
       console.log(`📊 Global Trading Windows Active. Triggering heartbeat sync...`);
       const result = await triggerGitHubWorkflow(env, env.GITHUB_WORKFLOW || 'data_sync_realtime.yml');
       console.log(`✅ Realtime Sync triggered:`, result);
