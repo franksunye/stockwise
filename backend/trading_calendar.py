@@ -226,18 +226,42 @@ def get_holidays(market: str) -> set:
     return CN_HOLIDAYS_DEFAULT
 
 
-def is_market_closed(date: datetime, market: str = "HK") -> bool:
-    """判断指定日期是否为休市日 (周末或假期)"""
-    # 周六(5)或周日(6)
-    if date.weekday() >= 5:
-        return True
-    # 检查假期列表
-    date_str = date.strftime('%Y-%m-%d')
-    return date_str in get_holidays(market)
-
-
 _ASIA_SHANGHAI = ZoneInfo("Asia/Shanghai")
 _US_EASTERN = ZoneInfo("America/New_York")
+
+
+def _normalize_market_datetime(date: datetime, market: str) -> datetime:
+    """
+    Normalize an input timestamp into the target market's business timezone.
+
+    StockWise schedulers often pass Beijing-local datetimes; for US market
+    decisions we must project into US Eastern first so late Friday settlement
+    isn't mistaken for Saturday.
+    """
+    if date.tzinfo is None:
+        date = date.replace(tzinfo=_ASIA_SHANGHAI)
+
+    if (market or "CN").strip().upper() == "US":
+        return date.astimezone(_US_EASTERN)
+
+    return date.astimezone(_ASIA_SHANGHAI)
+
+
+def get_market_weekday(date: datetime, market: str = "HK") -> int:
+    """Return weekday in the market's own business timezone."""
+    return _normalize_market_datetime(date, market).weekday()
+
+
+def is_market_closed(date: datetime, market: str = "HK") -> bool:
+    """判断指定日期是否为休市日 (周末或假期)"""
+    localized = _normalize_market_datetime(date, market)
+
+    # 周六(5)或周日(6)
+    if localized.weekday() >= 5:
+        return True
+    # 检查假期列表
+    date_str = localized.strftime('%Y-%m-%d')
+    return date_str in get_holidays(market)
 
 
 def is_realtime_session_open(market: str, at: datetime | None = None) -> bool:

@@ -17,6 +17,7 @@ from engine.indicators import calculate_indicators
 from helpers import get_last_date, check_trading_day_skip
 from backend.db_repo.queries import get_cleanup_sql, get_save_prices_sql, GET_STOCK_NAME_QUERY
 from backend.logger import logger
+from trading_calendar import get_market_weekday
 
 
 def _normalize_period_ohlcv(df: pd.DataFrame, period: str) -> pd.DataFrame:
@@ -389,7 +390,7 @@ def run_full_sync(market_filter: str = None, force_full: bool = False):
     # 2. 自动模式: 
     #    - 周一至周四: 仅同步日线 (Daily)
     #    - 周五: 同步日线 + 周线 + 月线 (Daily, Weekly, Monthly)
-    weekday = datetime.now().weekday() # 0=Mon, 4=Fri
+    weekday = get_market_weekday(datetime.now(BEIJING_TZ), market_filter or "CN") # 0=Mon, 4=Fri
     is_friday = (weekday == 4)
     
     sync_weekly = force_full or is_friday
