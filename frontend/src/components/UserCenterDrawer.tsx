@@ -557,9 +557,13 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                     const base = window.location.hostname.includes('ziso.cc') 
                                         ? 'https://ziso.cc' 
                                         : window.location.origin;
-                                    const url = referralAlias 
-                                        ? `${base}/v/${referralAlias}` 
-                                        : `${base}/v/${userId}`;
+                                    if (!referralAlias) {
+                                        setRedeemMsg({ type: 'error', text: t('referral.copyFail') });
+                                        setTimeout(() => setRedeemMsg(null), 2000);
+                                        return;
+                                    }
+
+                                    const url = `${base}/v/${referralAlias}`;
                                     
                                     try {
                                         await navigator.clipboard.writeText(url);

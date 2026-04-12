@@ -3,6 +3,7 @@ import { createClient } from '@libsql/client';
 import Database from 'better-sqlite3';
 import path from 'path';
 import { requireUserSession } from '@/lib/user-session';
+import { ensureUserReferralAlias } from '@/lib/referral-alias';
 
 function getDbClient() {
     const url = process.env.TURSO_DB_URL;
@@ -56,7 +57,9 @@ export async function POST(request: Request) {
                 .run(username, new Date().toISOString(), userId);
         }
 
-        return NextResponse.json({ success: true });
+        const referralAlias = await ensureUserReferralAlias(client, userId);
+
+        return NextResponse.json({ success: true, referralAlias });
     } catch (error) {
         console.error('User upgrade error:', error);
         return NextResponse.json(

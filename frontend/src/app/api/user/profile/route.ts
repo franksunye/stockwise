@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getDbClient } from '@/lib/db';
 import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
 import { requireUserSession } from '@/lib/user-session';
+import { ensureUserReferralAlias } from '@/lib/referral-alias';
 
 function normalizeLocale(input: unknown): 'cn' | 'en' {
     const raw = String(input || '').trim().toLowerCase();
@@ -274,6 +275,7 @@ export async function POST(request: Request) {
         }
 
         const isChannel = user.custom_commission_rate != null;
+        const referralAlias = await ensureUserReferralAlias(client, user.user_id, user.referral_alias);
 
         return NextResponse.json({
             userId: user.user_id,
@@ -291,7 +293,7 @@ export async function POST(request: Request) {
 
             // Referral & Channel data
             isChannel,
-            referralAlias: user.referral_alias || null,
+            referralAlias,
             referralCount,
             recentTransactions,
         });

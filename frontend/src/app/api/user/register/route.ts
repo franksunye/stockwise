@@ -7,6 +7,7 @@ import {
     getTrustedUserIdFromRequest,
     setUserSessionCookie
 } from '@/lib/user-session';
+import { ensureUserReferralAlias } from '@/lib/referral-alias';
 
 function generateUserId(): string {
     return `user_${randomBytes(6).toString('base64url')}`;
@@ -76,6 +77,8 @@ export async function POST(request: Request) {
                 .run(userId, registrationType, now, now);
         }
 
+        const referralAlias = await ensureUserReferralAlias(client, userId);
+
         const sessionToken = createUserSessionToken(userId);
         if (!sessionToken) {
             console.error('[user-session] USER_SESSION_SECRET is not configured');
@@ -85,6 +88,7 @@ export async function POST(request: Request) {
         const response = NextResponse.json({
             success: true,
             userId,
+            referralAlias,
             sessionBound: true,
             legacyBootstrapUsed,
             bootstrapSource
