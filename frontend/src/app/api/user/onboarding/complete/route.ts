@@ -17,14 +17,14 @@ function buildReferralRewardNotification(locale: unknown, rewardDays: number) {
 
     if (appLocale === 'en') {
         return {
-            title: '🎁 Your Referral Reward Has Arrived',
-            body: `Your invited friend has started using StockWise. ${rewardDays} days of PRO access has been added to your account!`,
+            title: '🎁 Referral Reward Added',
+            body: `Your invited friend has completed signup. ${rewardDays} days of GO access have been added to your account.`,
         };
     }
 
     return {
         title: '🎁 邀请奖励已到账',
-        body: `你邀请的好友已开始使用，+${rewardDays}天 PRO 会员已存入你的账户！`,
+        body: `你邀请的好友已完成注册，${rewardDays} 天 GO 会员已发放到你的账户。`,
     };
 }
 

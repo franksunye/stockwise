@@ -17,8 +17,11 @@ describe('referral notification guard', () => {
     assert.ok(
       src.includes("function buildReferralRewardNotification(locale: unknown, rewardDays: number)") &&
       src.includes("if (appLocale === 'en')") &&
-      src.includes("title: '🎁 Your Referral Reward Has Arrived'") &&
-      src.includes('Your invited friend has started using StockWise.') &&
+      src.includes("title: '🎁 Referral Reward Added'") &&
+      src.includes('Your invited friend has completed signup.') &&
+      src.includes('days of GO access have been added to your account.') &&
+      src.includes('你邀请的好友已完成注册') &&
+      src.includes('天 GO 会员已发放到你的账户。') &&
       src.includes('SELECT subscription_tier, subscription_expires_at, locale FROM users WHERE user_id = ?'),
       'Referral reward notifications should read the referrer locale and send English copy to English users.',
     );
