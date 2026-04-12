@@ -173,8 +173,10 @@ export async function POST(request: Request) {
         const isDataMissing = !actualLatestDate || String(actualLatestDate) < expectedDate;
 
         if (isDataMissing) {
-            console.log(`📡[日线补全] ${symbol}: 库中最新(${actualLatestDate || '无'}) < 预期完整日线(${expectedDate})。触发同步...`);
-            await triggerOnDemandSync(symbol);
+            console.log(`📡[日线补全] ${symbol}: 库中最新(${actualLatestDate || '无'}) < 预期完整日线(${expectedDate})。后台触发同步...`);
+            void triggerOnDemandSync(symbol).catch((syncError) => {
+                console.error(`❌ 后台触发 ${symbol} 日线同步失败:`, syncError);
+            });
         } else {
             console.log(`✅[日线完备] ${symbol}: 库中最新(${actualLatestDate}) >= 预期(${expectedDate})。跳过冗余同步。`);
         }
@@ -272,4 +274,3 @@ export async function DELETE(request: Request) {
         return NextResponse.json({ error: 'Failed to delete' }, { status: 500 });
     }
 }
-

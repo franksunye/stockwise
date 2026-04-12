@@ -154,11 +154,14 @@ export function useWatchlist() {
 
         // Background Sync
         try {
-            await fetch('/api/stock-pool', {
+            const response = await fetch('/api/stock-pool', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ symbol, name })
             });
+            if (!response.ok) {
+                throw new Error(`Add failed with status ${response.status}`);
+            }
             return true;
         } catch (e) {
             console.error('Add failed', e);

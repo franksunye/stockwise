@@ -224,18 +224,17 @@ export default function StockPoolPage() {
       return;
     }
 
+    // Close the search panel immediately so optimistic watchlist updates feel instant.
+    setNewSymbol('');
+    setShowAdd(false);
+    setShowSuggestions(false);
+
     const ok = await addStock(targetSymbol, nameOverride || targetSymbol, nameEnOverride);
     if (!ok) {
       setLimitMsg(t('errorAdd'));
       setTimeout(() => setLimitMsg(null), 3000);
       return;
     }
-    
-    // Instant UI Feedback
-    setNewSymbol('');
-    setShowAdd(false);
-    setShowSuggestions(false);
-    // Prices will naturally update due to useEffect dependency on watchlist
   };
 
   const handleRemoveClick = useCallback((e: React.MouseEvent, stock: StockSnapshot) => {
