@@ -49,7 +49,7 @@ export const ES_FOUNDERS = [
 
 export const ES_AGENT_TEAM = [
   {
-    name: 'Gu Shen (DeepSeek)',
+    name: 'DeepSeek',
     role: 'Analista Senior',
     description:
       'Produce la conclusión principal, análisis de escenarios profundos y juicios de riesgo clave, transformando ese trabajo en una narrativa táctica clara.',

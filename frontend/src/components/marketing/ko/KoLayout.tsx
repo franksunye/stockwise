@@ -49,7 +49,7 @@ export const KO_FOUNDERS = [
 
 export const KO_AGENT_TEAM = [
   {
-    name: 'Gu Shen (DeepSeek)',
+    name: 'DeepSeek',
     role: '시니어 애널리스트',
     description:
       '결론 도출, 심층 시나리오 분석 및 핵심 리스크 판단을 수행하며, 이를 명확하고 전술적인 서사로 전환합니다.',

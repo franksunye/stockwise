@@ -99,7 +99,7 @@ const TEAM_MEMBER_DIRECTORY: Record<TeamMemberId, TeamMemberProfile> = {
   gu_shen: {
     id: 'gu_shen',
     name: '顾深',
-    nameEn: 'Gu Shen',
+    nameEn: 'DeepSeek',
     displayName: '顾深（DeepSeek）',
     role: '资深分析师',
     roleEn: 'SENIOR ANALYST',
