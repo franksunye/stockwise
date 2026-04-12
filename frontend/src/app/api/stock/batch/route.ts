@@ -211,7 +211,13 @@ export async function GET(request: Request) {
                         COALESCE(p.content_locale, 'cn') AS content_locale,
                         ${EFFECTIVE_DECISION_SEMANTIC_SQL} AS decision_semantic,
                         ? AS mode_id,
-                        ROW_NUMBER() OVER (PARTITION BY p.symbol, p.target_date ORDER BY m.priority DESC) as rn_daily
+                        ROW_NUMBER() OVER (
+                            PARTITION BY p.symbol, p.target_date
+                            ORDER BY
+                                m.priority DESC,
+                                COALESCE(p.updated_at, p.created_at, p.date || ' 00:00:00') DESC,
+                                p.rowid DESC
+                        ) as rn_daily
                 FROM ai_predictions_v2 p
                 LEFT JOIN prediction_models m ON p.model_id = m.model_id
                 LEFT JOIN mode_decision_log dlog
@@ -235,7 +241,12 @@ export async function GET(request: Request) {
             ),
             HistoryRanked AS (
                 SELECT d.*,
-                       ROW_NUMBER() OVER (PARTITION BY symbol ORDER BY target_date DESC) as rn_history
+                       ROW_NUMBER() OVER (
+                           PARTITION BY symbol
+                           ORDER BY
+                               target_date DESC,
+                               COALESCE(updated_at, date || ' 00:00:00') DESC
+                       ) as rn_history
                 FROM DailyBest d
             )
             SELECT h.*,
@@ -246,7 +257,7 @@ export async function GET(request: Request) {
             FROM HistoryRanked h
             LEFT JOIN daily_prices dp ON h.symbol = dp.symbol AND h.target_date = dp.date
             WHERE h.rn_history <= ${historyLimit}
-            ORDER BY h.target_date DESC
+            ORDER BY h.target_date DESC, COALESCE(h.updated_at, h.date || ' 00:00:00') DESC
         `;
         const fallbackHistorySql = `
             WITH RankedPredictions AS (
@@ -271,7 +282,13 @@ export async function GET(request: Request) {
                         COALESCE(p.content_locale, 'cn') AS content_locale,
                         p.signal AS decision_semantic,
                         ? AS mode_id,
-                        ROW_NUMBER() OVER (PARTITION BY p.symbol, p.target_date ORDER BY m.priority DESC) as rn_daily
+                        ROW_NUMBER() OVER (
+                            PARTITION BY p.symbol, p.target_date
+                            ORDER BY
+                                m.priority DESC,
+                                COALESCE(p.updated_at, p.created_at, p.date || ' 00:00:00') DESC,
+                                p.rowid DESC
+                        ) as rn_daily
                 FROM ai_predictions_v2 p
                 LEFT JOIN prediction_models m ON p.model_id = m.model_id
                 WHERE p.symbol IN (${placeholders})
@@ -284,7 +301,12 @@ export async function GET(request: Request) {
             ),
             HistoryRanked AS (
                 SELECT d.*,
-                       ROW_NUMBER() OVER (PARTITION BY symbol ORDER BY target_date DESC) as rn_history
+                       ROW_NUMBER() OVER (
+                           PARTITION BY symbol
+                           ORDER BY
+                               target_date DESC,
+                               COALESCE(updated_at, date || ' 00:00:00') DESC
+                       ) as rn_history
                 FROM DailyBest d
             )
             SELECT h.*,
@@ -295,7 +317,7 @@ export async function GET(request: Request) {
             FROM HistoryRanked h
             LEFT JOIN daily_prices dp ON h.symbol = dp.symbol AND h.target_date = dp.date
             WHERE h.rn_history <= ${historyLimit}
-            ORDER BY h.target_date DESC
+            ORDER BY h.target_date DESC, COALESCE(h.updated_at, h.date || ' 00:00:00') DESC
         `;
 
         try {

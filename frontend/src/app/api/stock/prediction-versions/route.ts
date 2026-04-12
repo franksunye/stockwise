@@ -60,7 +60,10 @@ export async function GET(request: Request) {
                     p.updated_at,
                     ROW_NUMBER() OVER (
                         PARTITION BY p.symbol, p.target_date
-                        ORDER BY m.priority DESC
+                        ORDER BY
+                            m.priority DESC,
+                            COALESCE(p.updated_at, p.created_at, p.date || ' 00:00:00') DESC,
+                            p.rowid DESC
                     ) AS rn_daily
                 FROM ai_predictions_v2 p
                 LEFT JOIN prediction_models m ON p.model_id = m.model_id
@@ -81,7 +84,9 @@ export async function GET(request: Request) {
                     updated_at,
                     ROW_NUMBER() OVER (
                         PARTITION BY symbol
-                        ORDER BY target_date DESC
+                        ORDER BY
+                            target_date DESC,
+                            COALESCE(updated_at, date || ' 00:00:00') DESC
                     ) AS rn_symbol
                 FROM DailyBest
             )

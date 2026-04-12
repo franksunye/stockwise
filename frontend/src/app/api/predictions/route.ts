@@ -144,7 +144,12 @@ export async function GET(request: Request) {
                     ON p.symbol = d.symbol
                    AND p.target_date = d.date
                 WHERE ${whereClause}
-                ORDER BY p.date DESC, m.priority DESC
+                ORDER BY
+                    p.date DESC,
+                    p.target_date DESC,
+                    m.priority DESC,
+                    COALESCE(p.updated_at, p.created_at, p.date || ' 00:00:00') DESC,
+                    p.rowid DESC
                 LIMIT ?
             `;
 
@@ -212,7 +217,12 @@ export async function GET(request: Request) {
                         ON p.symbol = d.symbol
                        AND p.target_date = d.date
                     WHERE ${whereClause}
-                    ORDER BY p.date DESC, m.priority DESC
+                    ORDER BY
+                        p.date DESC,
+                        p.target_date DESC,
+                        m.priority DESC,
+                        COALESCE(p.updated_at, p.created_at, p.date || ' 00:00:00') DESC,
+                        p.rowid DESC
                     LIMIT ?
                 `;
                 if (db.$type === 'cloud') {
