@@ -21,7 +21,9 @@ export const dynamic = 'force-dynamic';
 
 const BASE_SIGNAL_SQL = `COALESCE(pol.signal_state, p.signal)`;
 const BASE_CONFIDENCE_SQL = `COALESCE(pol.confidence, p.confidence)`;
-const BASE_REASONING_SQL = `COALESCE(NULLIF(pol.reasoning_payload, ''), p.ai_reasoning)`;
+// producer_outcome_log.reasoning_payload is not locale-scoped today, so user-facing
+// reasoning must stay anchored to ai_predictions_v2.content_locale.
+const BASE_REASONING_SQL = `p.ai_reasoning`;
 const EFFECTIVE_SIGNAL_WITH_OUTCOME_SQL = EFFECTIVE_SIGNAL_SQL.replace(/p\.signal/g, BASE_SIGNAL_SQL);
 const SAFE_LLM_SIGNAL_SQL = `
     COALESCE(

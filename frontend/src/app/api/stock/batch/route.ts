@@ -196,7 +196,9 @@ export async function GET(request: Request) {
                         COALESCE(pol.signal_state, p.signal) AS canonical_signal,
                         COALESCE(pol.confidence, p.confidence) AS confidence,
                         p.support_price,
-                        COALESCE(NULLIF(pol.reasoning_payload, ''), p.ai_reasoning) AS ai_reasoning,
+                        -- producer_outcome_log.reasoning_payload is not locale-scoped today.
+                        -- Keep user-facing reasoning bound to ai_predictions_v2.content_locale.
+                        p.ai_reasoning AS ai_reasoning,
                         ${EFFECTIVE_VALIDATION_STATUS_SQL} AS validation_status, p.actual_change,
                         p.validation_data,
                         ${EFFECTIVE_LAYER1_STATUS_SQL} AS layer1_status,
