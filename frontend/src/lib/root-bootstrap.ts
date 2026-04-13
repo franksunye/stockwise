@@ -2,6 +2,7 @@ const AUTH_CACHE_KEY = 'ZISO_AUTH_CACHE_V1';
 const PROFILE_CACHE_KEY = 'stockwise_user_profile_v2';
 const HAS_ONBOARDED_KEY = 'STOCKWISE_HAS_ONBOARDED';
 const SPLASH_TS_KEY = 'stockwise_splash_ts';
+const USER_ID_STORAGE_KEY = 'STOCKWISE_USER_ID';
 
 const AUTH_CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 const SPLASH_SESSION_TTL_MS = 120 * 1000;
@@ -21,7 +22,9 @@ export function buildRootBootstrapInlineScript(): string {
         var isMobile = isIOS || isAndroid;
         var now = Date.now();
         var authCacheRaw = localStorage.getItem('${AUTH_CACHE_KEY}');
-        var profileCacheRaw = localStorage.getItem('${PROFILE_CACHE_KEY}');
+        var currentUserId = localStorage.getItem('${USER_ID_STORAGE_KEY}');
+        var profileCacheKey = currentUserId ? '${PROFILE_CACHE_KEY}_' + currentUserId : '${PROFILE_CACHE_KEY}';
+        var profileCacheRaw = localStorage.getItem(profileCacheKey);
         var hasOnboardedFlag = localStorage.getItem('${HAS_ONBOARDED_KEY}') === 'true';
         var authCache = null;
         var profileCache = null;
@@ -84,4 +87,3 @@ export function buildRootBootstrapInlineScript(): string {
     })();
   `;
 }
-

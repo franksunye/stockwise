@@ -20,8 +20,9 @@ export async function POST(request: Request) {
         if ('response' in auth) return auth.response;
         const userId = auth.userId;
 
-        const { watchlist, referredBy, locale } = await request.json().catch(() => ({}));
+        const { watchlist, referredBy, locale, explicitLocale } = await request.json().catch(() => ({}));
         const preferredLocale = normalizeLocale(locale);
+        const shouldPersistLocale = explicitLocale === true;
 
         db = getDbClient();
         const isCloud = db.$type === 'cloud';
@@ -107,15 +108,23 @@ export async function POST(request: Request) {
             try {
                 const now = new Date().toISOString();
                 if (isCloud) {
-                    // Fire and forget update (awaiting only to ensure db instance is valid, but ignoring result)
-                    await client.execute({
-                        sql: "UPDATE users SET last_active_at = ?, locale = ? WHERE user_id = ?",
-                        args: [now, preferredLocale, userId]
-                    });
-                } else {
+                    await client.execute(
+                        shouldPersistLocale
+                            ? {
+                                sql: "UPDATE users SET last_active_at = ?, locale = ? WHERE user_id = ?",
+                                args: [now, preferredLocale, userId]
+                            }
+                            : {
+                                sql: "UPDATE users SET last_active_at = ? WHERE user_id = ?",
+                                args: [now, userId]
+                            }
+                    );
+                } else if (shouldPersistLocale) {
                     client.prepare("UPDATE users SET last_active_at = ?, locale = ? WHERE user_id = ?").run(now, preferredLocale, userId);
+                } else {
+                    client.prepare("UPDATE users SET last_active_at = ? WHERE user_id = ?").run(now, userId);
                 }
-                user = { ...user, locale: preferredLocale };
+                user = shouldPersistLocale ? { ...user, locale: preferredLocale } : { ...user, last_active_at: now };
             } catch (activeErr) {
                 // Ignore errors here to not block the main flow
                 console.error('Failed to update last_active_at:', activeErr);

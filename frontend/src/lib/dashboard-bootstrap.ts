@@ -9,8 +9,11 @@ function normalizeBootstrapTier(raw: unknown): BootstrapTier {
 export const AUTH_CACHE_KEY = 'ZISO_AUTH_CACHE_V1';
 /** Bump when tier semantics change so stale localStorage cannot flash wrong entitlements (e.g. invite → go vs legacy pro cache). */
 export const PROFILE_CACHE_KEY = 'stockwise_user_profile_v2';
+export const DASHBOARD_CACHE_KEY = 'stockwise_dashboard_cache_v2';
 /** Older key — never read by current code; removed on load/write so DevTools won’t show a “ghost” duplicate. */
 export const LEGACY_PROFILE_CACHE_KEY = 'stockwise_user_profile_v1';
+export const LEGACY_DASHBOARD_CACHE_PREFIX = 'stockwise_dashboard_cache_v1';
+const USER_ID_STORAGE_KEY = 'STOCKWISE_USER_ID';
 
 /** Remove deprecated profile key (stale tier / duplicate row in Application → Local Storage). */
 export function purgeLegacyUserProfileCache(): void {
@@ -112,6 +115,64 @@ function parseJson<T>(raw: string | null | undefined): T | null {
     }
 }
 
+export function getStoredUserId(): string | null {
+    if (typeof window === 'undefined') {
+        return null;
+    }
+
+    const raw = window.localStorage.getItem(USER_ID_STORAGE_KEY);
+    return typeof raw === 'string' && raw.trim() ? raw.trim() : null;
+}
+
+export function getScopedProfileCacheKey(userId?: string | null): string {
+    const normalizedUserId = typeof userId === 'string' ? userId.trim() : '';
+    return normalizedUserId ? `${PROFILE_CACHE_KEY}_${normalizedUserId}` : PROFILE_CACHE_KEY;
+}
+
+export function getDashboardCacheStorageKey(
+    userId: string | null | undefined,
+    locale: string | null | undefined
+): string {
+    const normalizedUserId = typeof userId === 'string' ? userId.trim() : '';
+    const normalizedLocale = String(locale || 'cn').trim().toLowerCase() === 'en' ? 'en' : 'cn';
+    return normalizedUserId
+        ? `${DASHBOARD_CACHE_KEY}_${normalizedUserId}_${normalizedLocale}`
+        : `${DASHBOARD_CACHE_KEY}_${normalizedLocale}`;
+}
+
+export function clearDashboardCacheForUser(userId: string | null | undefined): void {
+    if (typeof window === 'undefined') {
+        return;
+    }
+
+    const normalizedUserId = typeof userId === 'string' ? userId.trim() : '';
+    if (!normalizedUserId) {
+        return;
+    }
+
+    for (const locale of ['cn', 'en']) {
+        window.localStorage.removeItem(getDashboardCacheStorageKey(normalizedUserId, locale));
+    }
+}
+
+export function purgeLegacyDashboardCache(): void {
+    if (typeof window === 'undefined') {
+        return;
+    }
+
+    const removals: string[] = [];
+    for (let index = 0; index < window.localStorage.length; index += 1) {
+        const key = window.localStorage.key(index);
+        if (typeof key === 'string' && key.startsWith(LEGACY_DASHBOARD_CACHE_PREFIX)) {
+            removals.push(key);
+        }
+    }
+
+    for (const key of removals) {
+        window.localStorage.removeItem(key);
+    }
+}
+
 export function readAuthCache(
     raw: string | null | undefined,
     now: number = Date.now()
@@ -126,10 +187,17 @@ export function readAuthCache(
 }
 
 export function readProfileCache<T extends object = ProfileCache>(
-    raw: string | null | undefined
+    raw: string | null | undefined,
+    expectedUserId?: string | null
 ): T | null {
     const profile = parseJson<T>(raw);
     if (!profile || typeof profile !== 'object') return null;
+    if (expectedUserId) {
+        const profileRecord = profile as Record<string, unknown>;
+        if (profileRecord.userId !== expectedUserId) {
+            return null;
+        }
+    }
     return profile;
 }
 
@@ -243,7 +311,7 @@ export function readBrowserBootstrapStorageState(): DashboardBootstrapStorageSta
 
     return {
         authCacheRaw: window.localStorage.getItem(AUTH_CACHE_KEY),
-        profileCacheRaw: window.localStorage.getItem(PROFILE_CACHE_KEY),
+        profileCacheRaw: window.localStorage.getItem(getScopedProfileCacheKey(getStoredUserId())),
         hasOnboardedRaw: window.localStorage.getItem(HAS_ONBOARDED_KEY),
         navIntentRaw: window.sessionStorage.getItem(DASHBOARD_NAV_INTENT_KEY),
         splashTsRaw: window.localStorage.getItem(SPLASH_TS_KEY),
@@ -278,7 +346,7 @@ export function writeProfileCache<T extends { userId: string }>(profile: T): T |
     }
 
     purgeLegacyUserProfileCache();
-    window.localStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify(profile));
+    window.localStorage.setItem(getScopedProfileCacheKey(profile.userId), JSON.stringify(profile));
     return profile;
 }
 
@@ -317,7 +385,9 @@ export function buildRootBootstrapInlineScript(): string {
           var isMobile = isIOS || isAndroid;
           var now = Date.now();
           var authCacheRaw = localStorage.getItem('${AUTH_CACHE_KEY}');
-          var profileCacheRaw = localStorage.getItem('${PROFILE_CACHE_KEY}');
+          var currentUserId = localStorage.getItem('${USER_ID_STORAGE_KEY}');
+          var profileCacheKey = currentUserId ? '${PROFILE_CACHE_KEY}_' + currentUserId : '${PROFILE_CACHE_KEY}';
+          var profileCacheRaw = localStorage.getItem(profileCacheKey);
           var hasOnboardedFlag = localStorage.getItem('${HAS_ONBOARDED_KEY}') === 'true';
           var authCache = null;
           var profileCache = null;

@@ -10,16 +10,23 @@ const {
     AUTH_CACHE_MAX_AGE_MS,
     DASHBOARD_NAV_INTENT_KEY,
     DASHBOARD_NAV_INTENT_MAX_AGE_MS,
+    DASHBOARD_CACHE_KEY,
     HAS_ONBOARDED_KEY,
+    LEGACY_DASHBOARD_CACHE_PREFIX,
     PROFILE_CACHE_KEY,
     SPLASH_SESSION_TTL_MS,
     SPLASH_TS_KEY,
     buildRootBootstrapInlineScript,
     clearAuthCache,
+    clearDashboardCacheForUser,
+    getDashboardCacheStorageKey,
     getDashboardEntryHint,
     getOptimisticDashboardBootstrap,
+    getScopedProfileCacheKey,
     markDashboardSplashSeen,
+    purgeLegacyDashboardCache,
     readAuthCache,
+    readBrowserBootstrapStorageState,
     readDashboardNavIntent,
     readProfileCache,
     shouldMarkDashboardBootReady,
@@ -241,7 +248,83 @@ describe('dashboard bootstrap helpers', () => {
 
         const written = writeProfileCache(profile);
         assert.deepEqual(written, profile);
-        assert.deepEqual(readProfileCache(store.get(PROFILE_CACHE_KEY)), profile);
+        assert.deepEqual(readProfileCache(store.get(getScopedProfileCacheKey(profile.userId))), profile);
+        assert.equal(store.get(PROFILE_CACHE_KEY), undefined);
+
+        delete globalThis.window;
+    });
+
+    it('reads the active scoped profile cache for the current local user id', () => {
+        const store = new Map([
+            ['STOCKWISE_USER_ID', 'user_live'],
+            [getScopedProfileCacheKey('user_live'), JSON.stringify({ userId: 'user_live', tier: 'pro' })],
+            [getScopedProfileCacheKey('user_other'), JSON.stringify({ userId: 'user_other', tier: 'free' })],
+        ]);
+
+        globalThis.window = {
+            localStorage: {
+                getItem: (key) => store.get(key) ?? null,
+                setItem: (key, value) => store.set(key, value),
+                removeItem: (key) => store.delete(key),
+            },
+            sessionStorage: {
+                getItem: () => null,
+            },
+        };
+
+        const state = readBrowserBootstrapStorageState();
+        assert.equal(state.profileCacheRaw, store.get(getScopedProfileCacheKey('user_live')));
+
+        delete globalThis.window;
+    });
+
+    it('clears both locale buckets for the active dashboard user', () => {
+        const store = new Map([
+            [getDashboardCacheStorageKey('user_live', 'cn'), '{"data":[1]}'],
+            [getDashboardCacheStorageKey('user_live', 'en'), '{"data":[2]}'],
+        ]);
+
+        globalThis.window = {
+            localStorage: {
+                getItem: (key) => store.get(key) ?? null,
+                setItem: (key, value) => store.set(key, value),
+                removeItem: (key) => store.delete(key),
+            },
+        };
+
+        clearDashboardCacheForUser('user_live');
+
+        assert.equal(store.get(getDashboardCacheStorageKey('user_live', 'cn')), undefined);
+        assert.equal(store.get(getDashboardCacheStorageKey('user_live', 'en')), undefined);
+
+        delete globalThis.window;
+    });
+
+    it('purges legacy dashboard cache buckets after the v2 key migration', () => {
+        const store = new Map([
+            [`${LEGACY_DASHBOARD_CACHE_PREFIX}_cn`, '{"data":[1]}'],
+            [`${LEGACY_DASHBOARD_CACHE_PREFIX}_user_live_en`, '{"data":[2]}'],
+            [getDashboardCacheStorageKey('user_live', 'cn'), '{"data":[3]}'],
+        ]);
+
+        globalThis.window = {
+            localStorage: {
+                getItem: (key) => store.get(key) ?? null,
+                setItem: (key, value) => store.set(key, value),
+                removeItem: (key) => store.delete(key),
+                key: (index) => Array.from(store.keys())[index] ?? null,
+                get length() {
+                    return store.size;
+                },
+            },
+        };
+
+        purgeLegacyDashboardCache();
+
+        assert.equal(store.get(`${LEGACY_DASHBOARD_CACHE_PREFIX}_cn`), undefined);
+        assert.equal(store.get(`${LEGACY_DASHBOARD_CACHE_PREFIX}_user_live_en`), undefined);
+        assert.equal(store.get(getDashboardCacheStorageKey('user_live', 'cn')), '{"data":[3]}');
+        assert.match(getDashboardCacheStorageKey('user_live', 'cn'), new RegExp(DASHBOARD_CACHE_KEY));
 
         delete globalThis.window;
     });

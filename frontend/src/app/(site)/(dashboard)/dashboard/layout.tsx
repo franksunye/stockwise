@@ -10,6 +10,8 @@ import { useDashboardAuthorization } from '@/hooks/useDashboardAuthorization';
 import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton';
 import {
     installLegacyProfileCacheWriteGuard,
+    LEGACY_DASHBOARD_CACHE_PREFIX,
+    purgeLegacyDashboardCache,
     purgeLegacyUserProfileCache,
     LEGACY_PROFILE_CACHE_KEY,
 } from '@/lib/dashboard-bootstrap';
@@ -25,11 +27,16 @@ export default function DashboardLayout({
 
   useLayoutEffect(() => {
     installLegacyProfileCacheWriteGuard();
+    purgeLegacyDashboardCache();
     purgeLegacyUserProfileCache();
     const onPageShow = () => {
+      purgeLegacyDashboardCache();
       purgeLegacyUserProfileCache();
     };
     const onStorage = (ev: StorageEvent) => {
+      if ((ev.key && ev.key.startsWith(LEGACY_DASHBOARD_CACHE_PREFIX)) || (ev.key === LEGACY_PROFILE_CACHE_KEY && ev.newValue)) {
+        purgeLegacyDashboardCache();
+      }
       if (ev.key === LEGACY_PROFILE_CACHE_KEY && ev.newValue) {
         purgeLegacyUserProfileCache();
       }

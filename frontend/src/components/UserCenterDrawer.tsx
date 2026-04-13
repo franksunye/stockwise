@@ -19,6 +19,7 @@ import { SupportCenterView } from './SupportCenterView';
 import { LearnCenterView } from './LearnCenterView';
 import { useT, useGlobalT, useLocale } from '@/context/LocaleContext';
 import type { MessageKey } from '@/lib/i18n';
+import { clearDashboardCacheForUser, getStoredUserId, writeProfileCache } from '@/lib/dashboard-bootstrap';
 import pkg from '../../package.json';
 
 interface Props {
@@ -178,8 +179,14 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
 
   const handleSwitchLocale = async (nextLocale: 'cn' | 'en') => {
     if (locale === nextLocale) return;
+
+    const activeUserId = userId || profile?.userId || getStoredUserId();
     setLocale(nextLocale);
-    await refreshProfile({ force: true });
+    if (profile?.userId) {
+      writeProfileCache({ ...profile, locale: nextLocale });
+    }
+    clearDashboardCacheForUser(activeUserId);
+    await refreshProfile({ force: true, locale: nextLocale });
   };
   return (
     <AnimatePresence onExitComplete={resetDrawerState}>

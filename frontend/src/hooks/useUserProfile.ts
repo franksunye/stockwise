@@ -34,6 +34,7 @@ export interface UserProfile {
 export type RefreshProfileOptions = {
     watchlist?: string[];
     force?: boolean;
+    locale?: 'cn' | 'en';
 };
 
 export type UserProfileContextValue = {

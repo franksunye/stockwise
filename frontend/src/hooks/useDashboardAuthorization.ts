@@ -17,7 +17,8 @@ import {
     writeProfileCache,
     readProfileCache,
     purgeLegacyUserProfileCache,
-    PROFILE_CACHE_KEY,
+    getScopedProfileCacheKey,
+    getStoredUserId,
 } from '@/lib/dashboard-bootstrap';
 import type {
     Tier,
@@ -85,7 +86,11 @@ export function useDashboardAuthorization() {
         canSkipTransition.current = document.documentElement.classList.contains('dashboard-boot-ready');
 
         purgeLegacyUserProfileCache();
-        const cached = readProfileCache<UserProfile>(localStorage.getItem(PROFILE_CACHE_KEY));
+        const storedUserId = getStoredUserId();
+        const cached = readProfileCache<UserProfile>(
+            localStorage.getItem(getScopedProfileCacheKey(storedUserId)),
+            storedUserId,
+        );
         if (cached?.userId) {
             setProfile(cached);
             profileRef.current = cached;
@@ -134,12 +139,12 @@ export function useDashboardAuthorization() {
             const watchlist = options?.watchlist || getWatchlist();
             const referredBy = localStorage.getItem('STOCKWISE_REFERRED_BY');
 
-            const locale = getPreferredLocaleForProfileSync();
+            const locale = options?.locale ?? getPreferredLocaleForProfileSync();
             const res = await fetch('/api/user/profile', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 cache: 'no-store',
-                body: JSON.stringify({ watchlist, referredBy, locale }),
+                body: JSON.stringify({ watchlist, referredBy, locale, explicitLocale: Boolean(options?.locale) }),
             });
 
             if (!res.ok) {
@@ -188,14 +193,14 @@ export function useDashboardAuthorization() {
                     let res = await fetch('/api/user/profile', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ watchlist: getWatchlist(), locale }),
+                        body: JSON.stringify({ watchlist: getWatchlist(), locale, explicitLocale: false }),
                     });
                     if (res.status === 401) {
                         await getCurrentUser({ forceSessionSync: true });
                         res = await fetch('/api/user/profile', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ watchlist: getWatchlist(), locale }),
+                            body: JSON.stringify({ watchlist: getWatchlist(), locale, explicitLocale: false }),
                         });
                     }
                     if (res.ok) {
@@ -263,7 +268,7 @@ export function useDashboardAuthorization() {
                 let res = await fetch('/api/user/profile', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ watchlist: getWatchlist(), referredBy, locale }),
+                    body: JSON.stringify({ watchlist: getWatchlist(), referredBy, locale, explicitLocale: false }),
                     signal: controller.signal,
                 });
                 if (res.status === 401) {
@@ -271,7 +276,7 @@ export function useDashboardAuthorization() {
                     res = await fetch('/api/user/profile', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ watchlist: getWatchlist(), referredBy, locale }),
+                        body: JSON.stringify({ watchlist: getWatchlist(), referredBy, locale, explicitLocale: false }),
                         signal: controller.signal,
                     });
                 }

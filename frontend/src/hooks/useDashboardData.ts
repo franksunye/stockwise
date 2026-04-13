@@ -10,13 +10,13 @@ import { useLocale } from '@/context/LocaleContext';
 import { appLocaleToPredictionContentLocale } from '@/lib/prediction-content-locale';
 import { WatchlistItem } from './useWatchlist';
 import { useUserProfile } from '@/hooks/useUserProfile';
+import { getDashboardCacheStorageKey } from '@/lib/dashboard-bootstrap';
 
 // 价格层刷新间隔：盘中 1 分钟，非交易时段 10 分钟
 const TRADING_PRICE_REFRESH_INTERVAL = 1 * 60 * 1000;
 const DEFAULT_PRICE_REFRESH_INTERVAL = 10 * 60 * 1000;
 const BROADCAST_FAILURE_THRESHOLD = 3;
 const BROADCAST_CIRCUIT_BREAKER_MS = 5 * 60 * 1000;
-const CACHE_KEY = 'stockwise_dashboard_cache_v1';
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24小时过期
 const PREDICTION_VERSION_CHECK_KEY = 'stockwise_prediction_version_check_v1';
 const PREDICTION_VERSION_CHECK_INTERVAL = 10 * 60 * 1000;
@@ -132,10 +132,9 @@ export function useDashboardData(
     enableAlmanac = true
 ) {
     const { locale: appLocale } = useLocale();
-    const { profile } = useUserProfile();
-    const profileLocaleRaw = String(profile?.locale || '').trim().toLowerCase();
-    const predictionContentLocale = profileLocaleRaw === 'en' ? 'en' : appLocaleToPredictionContentLocale(appLocale);
-    const dashboardCacheStorageKey = `${CACHE_KEY}_${predictionContentLocale}`;
+    const { userId } = useUserProfile();
+    const predictionContentLocale = appLocaleToPredictionContentLocale(appLocale);
+    const dashboardCacheStorageKey = getDashboardCacheStorageKey(userId, predictionContentLocale);
 
     const [stocks, setStocks] = useState<StockData[]>([]);
     const [almanac, setAlmanac] = useState<MarketAlmanacData | null>(null);
@@ -261,6 +260,7 @@ export function useDashboardData(
                     setLoadingPool(false);
                     reportLocaleSwitchEvent('locale_switch_cache_hit', {
                         locale,
+                        userId: userId || 'anonymous',
                         stocks: data.length,
                         cacheAgeMs: age,
                     });
@@ -273,7 +273,7 @@ export function useDashboardData(
             reportLocaleSwitchEvent('locale_switch_cache_miss', { locale, reason: 'cache_parse_error' });
         }
         return false;
-    }, [enableAlmanac]);
+    }, [enableAlmanac, userId]);
 
     // 1. 初始化：尝试从本地缓存读取，实现【秒开】
     useEffect(() => {
@@ -538,7 +538,8 @@ export function useDashboardData(
                     almanac: enableAlmanac ? almanacRef.current : null,
                     almanacs: enableAlmanac ? almanacsRef.current : [],
                     timestamp: Date.now(),
-                    contentLocale: requestLocale
+                    contentLocale: requestLocale,
+                    userId: userId || null,
                 }));
             } catch (e) { console.error('Cache save error', e); }
 
@@ -587,7 +588,7 @@ export function useDashboardData(
                 setIsLocaleSwitching(false);
             }
         }
-    }, [watchlist, loadingWatchlist, historyLimit, enableAlmanac, predictionContentLocale, dashboardCacheStorageKey]);
+    }, [watchlist, loadingWatchlist, historyLimit, enableAlmanac, predictionContentLocale, dashboardCacheStorageKey, userId]);
 
     const isFirstPredictionLocaleEffectRef = useRef(true);
     const prevPredictionContentLocaleRef = useRef(predictionContentLocale);
