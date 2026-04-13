@@ -1,10 +1,13 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { Search, BookOpen, Clock, ChevronRight, ArrowLeft, Loader2 } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { Search, BookOpen, Clock, ChevronRight, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocale, useT } from '@/context/LocaleContext';
 import type { MessageKey } from '@/lib/i18n';
+import { localizePublicPath, type PublicLocale } from '@/lib/public-i18n';
 
 interface CourseMetadata {
   id: string;
@@ -13,19 +16,6 @@ interface CourseMetadata {
   category: string;
   readingTime: number;
   slug: string;
-}
-
-type CourseLocalizedContent = Pick<CourseMetadata, 'title' | 'description'>;
-
-interface CourseCatalogEntry {
-  id: string;
-  category: CourseMetadata['category'];
-  readingTime: number;
-  slug: string;
-  localized: {
-    cn: CourseLocalizedContent;
-    en: CourseLocalizedContent;
-  };
 }
 
 const CATEGORIES: { id: string; labelKey: MessageKey<'learn'> }[] = [
@@ -37,107 +27,71 @@ const CATEGORIES: { id: string; labelKey: MessageKey<'learn'> }[] = [
   { id: 'The Case', labelKey: 'categories.The Case' },
 ];
 
-const COURSE_CATALOG: CourseCatalogEntry[] = [
-  {
-    id: '1',
-    category: 'The Mind',
-    readingTime: 5,
-    slug: 'intro-to-ziso-philosophy',
-    localized: {
-      cn: {
-        title: 'ZISO 认知：为什么你需要 AI 席位？',
-        description: '理解知守 AI 的核心设计哲学，以及它如何帮助你克服贪婪与恐惧。',
-      },
-      en: {
-        title: 'ZISO Mindset: Why You Need AI Seats',
-        description: 'Understand ZISO AI design philosophy and how it helps neutralize greed and fear in execution.',
-      },
-    },
-  },
-  {
-    id: '2',
-    category: 'The Method',
-    readingTime: 8,
-    slug: 'volume-price-divergence',
-    localized: {
-      cn: {
-        title: '量价背离：识别趋势反转的第一个信号',
-        description: '深入学习如何通过成交量与价格的矛盾关系，预判市场潜在的变盘点。',
-      },
-      en: {
-        title: 'Volume-Price Divergence: First Reversal Signal',
-        description: 'Learn how to detect possible trend reversals by reading conflicts between volume and price action.',
-      },
-    },
-  },
-  {
-    id: '3',
-    category: 'The Money',
-    readingTime: 6,
-    slug: 'position-sizing-235',
-    localized: {
-      cn: {
-        title: '仓位控制的艺术：知守 2-3-5 原则',
-        description: '学习如何在不同市场环境下分配仓位，确保账户曲线的平滑与回撤控制。',
-      },
-      en: {
-        title: 'Position Sizing Mastery: The 2-3-5 Rule',
-        description: 'Apply disciplined sizing across market regimes to smooth equity curve volatility and control drawdowns.',
-      },
-    },
-  },
-  {
-    id: '4',
-    category: 'The Machine',
-    readingTime: 7,
-    slug: 'understanding-ai-seats',
-    localized: {
-      cn: {
-        title: '理解 AI 席位：不同性格的算法如何投票',
-        description: '拆解知守议会下各席位的逻辑差异，从趋势跟随到价值对冲。',
-      },
-      en: {
-        title: 'Inside AI Seats: How Different Models Vote',
-        description: 'Break down each seat in the AI council, from trend-following logic to value-hedging behavior.',
-      },
-    },
-  },
-  {
-    id: '5',
-    category: 'The Case',
-    readingTime: 10,
-    slug: '2024-q1-tech-review',
-    localized: {
-      cn: {
-        title: '历史实战：2024 年 Q1 科技股调整复盘',
-        description: '通过真实案例，看 AI 席位如何在剧烈波动中给出防守信号。',
-      },
-      en: {
-        title: 'Case Study: 2024 Q1 Tech Pullback Review',
-        description: 'Review a real volatility episode and see how AI seats issued defensive signals during the drawdown.',
-      },
-    },
-  },
-];
 
 export function LearnCenterView() {
   const t = useT('learn');
   const { locale } = useLocale();
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
+  const [courses, setCourses] = useState<CourseMetadata[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasLoadError, setHasLoadError] = useState(false);
 
-  const courses: CourseMetadata[] = useMemo(() => {
-    const contentLocale = locale === 'en' ? 'en' : 'cn';
-    return COURSE_CATALOG.map((entry) => ({
-      id: entry.id,
-      category: entry.category,
-      readingTime: entry.readingTime,
-      slug: entry.slug,
-      title: entry.localized[contentLocale].title,
-      description: entry.localized[contentLocale].description,
-    }));
-  }, [locale]);
+  const publicLocale: PublicLocale = locale === 'cn' ? 'cn' : 'en';
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadCourses() {
+      setIsLoading(true);
+      setHasLoadError(false);
+
+      try {
+        const response = await fetch(`/api/learn?locale=${publicLocale}`, {
+          signal: controller.signal,
+          cache: 'no-store',
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to load learn catalog: ${response.status}`);
+        }
+
+        const data = (await response.json()) as Array<{
+          slug: string;
+          title: string;
+          subtitle?: string;
+          category: string;
+          readingTime: number;
+        }>;
+
+        setCourses(
+          data.map((article) => ({
+            id: article.slug,
+            slug: article.slug,
+            title: article.title,
+            description: article.subtitle || article.title,
+            category: article.category,
+            readingTime: article.readingTime,
+          })),
+        );
+      } catch (error) {
+        if ((error as Error).name === 'AbortError') {
+          return;
+        }
+        setCourses([]);
+        setHasLoadError(true);
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    void loadCourses();
+
+    return () => controller.abort();
+  }, [publicLocale]);
 
   const filteredCourses = useMemo(() => {
     return courses.filter((course) => {
@@ -147,27 +101,6 @@ export function LearnCenterView() {
       return matchesSearch && matchesCategory;
     });
   }, [courses, searchQuery, selectedCategory]);
-
-  if (selectedCourse) {
-    return (
-      <div className="flex-1 overflow-y-auto bg-[#08090d] animate-in fade-in duration-300">
-        <div className="sticky top-0 z-10 border-b border-white/5 bg-[#08090d]/80 backdrop-blur-md px-4 py-4">
-          <button 
-            onClick={() => setSelectedCourse(null)}
-            className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors"
-          >
-            <ArrowLeft size={18} />
-            <span className="text-sm font-medium">{t('backToCatalog')}</span>
-          </button>
-        </div>
-        
-        <div className="p-6 text-center py-20">
-          <Loader2 className="w-8 h-8 animate-spin text-indigo-500 mx-auto mb-4" />
-          <p className="text-slate-400 text-sm">{t('loadFail')}</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-[#08090d]">
@@ -204,8 +137,17 @@ export function LearnCenterView() {
 
         {/* Course Grid */}
         <div className="grid gap-4">
-          <AnimatePresence mode="popLayout">
-            {filteredCourses.length > 0 ? (
+          {isLoading ? (
+            <div className="py-20 text-center space-y-3">
+              <Loader2 className="w-8 h-8 animate-spin text-indigo-500 mx-auto" />
+            </div>
+          ) : hasLoadError ? (
+            <div className="py-20 text-center space-y-3">
+              <p className="text-slate-500 text-sm">{t('loadFail')}</p>
+            </div>
+          ) : (
+            <AnimatePresence mode="popLayout">
+              {filteredCourses.length > 0 ? (
               filteredCourses.map((course, idx) => (
                 <motion.button
                   key={course.id}
@@ -214,7 +156,7 @@ export function LearnCenterView() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ delay: idx * 0.05 }}
-                  onClick={() => setSelectedCourse(course.id)}
+                  onClick={() => router.push(localizePublicPath(`/learn/${course.slug}`, publicLocale))}
                   className="group relative text-left bg-white/[0.02] border border-white/5 rounded-[24px] p-5 hover:bg-white/[0.04] hover:border-white/10 transition-all active:scale-[0.98]"
                 >
                   <div className="flex justify-between items-start mb-3">
@@ -240,17 +182,18 @@ export function LearnCenterView() {
                   </div>
                 </motion.button>
               ))
-            ) : (
-              <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="py-20 text-center space-y-3"
-              >
-                <BookOpen className="w-12 h-12 text-slate-800 mx-auto opacity-50" />
-                <p className="text-slate-500 text-sm">{t('noResults')}</p>
-              </motion.div>
-            )}
-          </AnimatePresence>
+              ) : (
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="py-20 text-center space-y-3"
+                >
+                  <BookOpen className="w-12 h-12 text-slate-800 mx-auto opacity-50" />
+                  <p className="text-slate-500 text-sm">{t('noResults')}</p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          )}
         </div>
 
         {/* Bottom Stats */}
@@ -258,6 +201,15 @@ export function LearnCenterView() {
           <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-700">
             {t('statsGuides', { count: courses.length })} · {t('statsModules', { count: CATEGORIES.length - 1 })}
           </p>
+        </div>
+
+        <div className="pb-6 text-center">
+          <Link
+            href={localizePublicPath('/learn', publicLocale)}
+            className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500 hover:text-white transition-colors"
+          >
+            {t('backToCatalog')}
+          </Link>
         </div>
       </div>
     </div>

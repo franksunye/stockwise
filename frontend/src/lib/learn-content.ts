@@ -2,9 +2,17 @@ import fs from 'fs';
 import path from 'path';
 import { DEFAULT_PUBLIC_LOCALE, type PublicLocale } from '@/lib/public-i18n';
 
-// Define the content directory (relative to project root, which is CWD for Node usually, but Next.js runs in frontend)
-// We need to resolve from the frontend directory up to docs
-const CONTENT_DIR = path.join(process.cwd(), '..', 'docs', '4_Growth_Ops', 'content');
+const CONTENT_DIR_CANDIDATES = [
+    path.join(process.cwd(), 'docs', '4_Growth_Ops', 'content'),
+    path.join(process.cwd(), '..', 'docs', '4_Growth_Ops', 'content'),
+];
+
+function resolveContentDir(): string {
+    const resolved = CONTENT_DIR_CANDIDATES.find((candidate) => fs.existsSync(candidate));
+    return resolved ?? CONTENT_DIR_CANDIDATES[0];
+}
+
+const CONTENT_DIR = resolveContentDir();
 
 // Recursive file walker
 function walkMarkdownFiles(dirPath: string, allFiles: string[] = []): string[] {
