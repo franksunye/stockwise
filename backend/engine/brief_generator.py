@@ -392,16 +392,15 @@ async def generate_stock_briefs_batch(date_str: str, specific_symbols: List[str]
 
         # 3. Process each stock (generate briefs for each tier)
         from engine.models.brief_strategies import SUPPORTED_TIERS, TIER_PROVIDER_MAP
-        from trading_calendar import get_market_from_symbol, is_market_closed
-        
-        check_date = datetime.strptime(date_str, "%Y-%m-%d")
+        from trading_calendar import get_market_from_symbol, is_market_closed_on_date
+
         processed_count = 0
         
         for symbol, stock_name, is_pro_watched in unique_stocks:
             try:
                 if not force:
                     market = get_market_from_symbol(symbol)
-                    if is_market_closed(check_date, market):
+                    if is_market_closed_on_date(date_str, market):
                         logger.info(f"⏭️ [Skip] {symbol} ({market}) market is closed on {date_str}.")
                         continue
 
@@ -508,10 +507,9 @@ async def run_daily_pipeline(date_str: str = None, force: bool = False, target_t
     # this ensures we don't waste LLM costs on non-trading days.
     if not force:
         try:
-            from trading_calendar import is_market_closed
-            check_date = datetime.strptime(date_str, "%Y-%m-%d")
-            cn_closed = is_market_closed(check_date, "CN")
-            hk_closed = is_market_closed(check_date, "HK")
+            from trading_calendar import is_market_closed_on_date
+            cn_closed = is_market_closed_on_date(date_str, "CN")
+            hk_closed = is_market_closed_on_date(date_str, "HK")
             if cn_closed and hk_closed:
                 logger.info(f"📅 [TradingDayGuard] {date_str} 为全市场休市日 (CN+HK)，跳过简报生成。")
                 return

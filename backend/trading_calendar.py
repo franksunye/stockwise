@@ -4,7 +4,7 @@
 用于计算下一个交易日、判断是否休市等。
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date as date_cls
 import logging
 from zoneinfo import ZoneInfo
 
@@ -264,6 +264,26 @@ def is_market_closed(date: datetime, market: str = "HK") -> bool:
     return date_str in get_holidays(market)
 
 
+def is_market_closed_on_date(date_input: str | datetime | date_cls, market: str = "HK") -> bool:
+    """
+    判断指定“市场自然日”是否休市。
+
+    适用于调度层传入的 YYYY-MM-DD 这类“日期标签”，不做跨时区换日。
+    """
+    if isinstance(date_input, datetime):
+        date_str = date_input.strftime("%Y-%m-%d")
+    elif isinstance(date_input, date_cls):
+        date_str = date_input.isoformat()
+    else:
+        date_str = str(date_input)
+
+    market = (market or "HK").strip().upper()
+    day = datetime.strptime(date_str, "%Y-%m-%d")
+    if day.weekday() >= 5:
+        return True
+    return date_str in get_holidays(market)
+
+
 def is_realtime_session_open(market: str, at: datetime | None = None) -> bool:
     """
     是否处于该市场「常规现货交易时段」内（用于盘中实时同步过滤）。
@@ -311,9 +331,10 @@ def is_trading_day(date_str: str, symbol: str = None, market: str = None) -> boo
     """
     try:
         if isinstance(date_str, datetime):
-            date = date_str
-        else:
-            date = datetime.strptime(date_str, '%Y-%m-%d')
+            return not is_market_closed_on_date(date_str, market or (get_market_from_symbol(symbol) if symbol else "CN"))
+        if isinstance(date_str, date_cls):
+            return not is_market_closed_on_date(date_str, market or (get_market_from_symbol(symbol) if symbol else "CN"))
+        datetime.strptime(date_str, '%Y-%m-%d')
     except ValueError:
         return False
     
@@ -321,7 +342,7 @@ def is_trading_day(date_str: str, symbol: str = None, market: str = None) -> boo
     if market is None:
         market = get_market_from_symbol(symbol) if symbol else "CN"
     
-    return not is_market_closed(date, market)
+    return not is_market_closed_on_date(date_str, market)
 
 
 def get_next_trading_day(from_date: datetime, market: str = "HK") -> datetime:

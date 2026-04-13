@@ -37,11 +37,10 @@ def generate_morning_calls(dry_run=False, target_date=None, force=False, market=
     if not force:
         try:
             # Lazy import to avoid circular dependency
-            from trading_calendar import is_market_closed
-            
-            check_date = datetime.strptime(today_str, "%Y-%m-%d")
+            from trading_calendar import is_market_closed_on_date
+
             # Market-specific holiday check
-            if is_market_closed(check_date, market):
+            if is_market_closed_on_date(today_str, market):
                 logger.info(f"📅 [TradingDayGuard] {today_str} 为 {market} 市场休市日，跳过早报推送。")
                 return 0
         except ImportError:

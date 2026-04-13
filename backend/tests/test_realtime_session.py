@@ -5,7 +5,13 @@ from zoneinfo import ZoneInfo
 
 import pytest
 
-from backend.trading_calendar import get_market_weekday, is_market_closed, is_realtime_session_open
+from backend.trading_calendar import (
+    get_market_weekday,
+    is_market_closed,
+    is_market_closed_on_date,
+    is_realtime_session_open,
+    is_trading_day,
+)
 
 SH = ZoneInfo("Asia/Shanghai")
 
@@ -61,3 +67,13 @@ def test_us_market_closed_handles_naive_beijing_dates():
     # Many scheduler callers pass naive datetimes derived from Beijing-local dates.
     at = datetime(2026, 4, 11, 0, 0)
     assert is_market_closed(at, "US") is False
+
+
+def test_us_market_date_guard_uses_market_calendar_day():
+    assert is_market_closed_on_date("2026-04-13", "US") is False
+    assert is_trading_day("2026-04-13", market="US") is True
+
+
+def test_us_market_date_guard_still_respects_holidays():
+    assert is_market_closed_on_date("2026-04-03", "US") is True
+    assert is_trading_day("2026-04-03", market="US") is False
