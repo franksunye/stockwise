@@ -10,6 +10,8 @@ from datetime import datetime
 import time
 from typing import Dict, Any, List
 from urllib3.util import connection as urllib3_connection
+from requests import Response
+from requests.exceptions import RequestException
 
 # Ensure we can import from parent directory
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -96,33 +98,50 @@ def _get_google_access_token(credentials_path: str) -> str:
         "https://www.googleapis.com/auth/analytics.readonly",
     )
 
-    with force_ipv4_requests():
-        response = requests.post(
-            credentials["token_uri"],
-            data={
-                "grant_type": "urn:ietf:params:oauth:grant-type:jwt-bearer",
-                "assertion": jwt,
-            },
-            timeout=30,
-        )
-
+    response = _request_with_retry(
+        "post",
+        credentials["token_uri"],
+        data={
+            "grant_type": "urn:ietf:params:oauth:grant-type:jwt-bearer",
+            "assertion": jwt,
+        },
+        timeout=30,
+    )
     response.raise_for_status()
     return response.json()["access_token"]
 
 
+def _request_with_retry(method: str, url: str, *, attempts: int = 3, backoff_seconds: float = 1.5, **kwargs) -> Response:
+    last_error: Exception | None = None
+    for attempt in range(1, attempts + 1):
+        try:
+            with force_ipv4_requests():
+                response = requests.request(method, url, **kwargs)
+            response.raise_for_status()
+            return response
+        except RequestException as exc:
+            last_error = exc
+            if attempt == attempts:
+                raise
+            time.sleep(backoff_seconds * attempt)
+
+    if last_error is not None:
+        raise last_error
+    raise RuntimeError(f"Request failed without exception: {method.upper()} {url}")
+
+
 def _run_ga4_report(property_id: str, access_token: str, body: Dict[str, Any]) -> Dict[str, Any]:
     url = f"https://analyticsdata.googleapis.com/v1beta/properties/{property_id}:runReport"
-    with force_ipv4_requests():
-        response = requests.post(
-            url,
-            headers={
-                "Authorization": f"Bearer {access_token}",
-                "Content-Type": "application/json",
-            },
-            json=body,
-            timeout=30,
-        )
-    response.raise_for_status()
+    response = _request_with_retry(
+        "post",
+        url,
+        headers={
+            "Authorization": f"Bearer {access_token}",
+            "Content-Type": "application/json",
+        },
+        json=body,
+        timeout=30,
+    )
     return response.json()
 
 
@@ -287,9 +306,7 @@ def get_clarity_metrics(token: str):
 
     def fetch(days: int):
         url = f"https://www.clarity.ms/export-data/api/v1/project-live-insights?numOfDays={days}"
-        with force_ipv4_requests():
-            response = requests.get(url, headers=headers, timeout=20)
-        response.raise_for_status()
+        response = _request_with_retry("get", url, headers=headers, timeout=20)
         raw_data = response.json()
         data = raw_data[0] if isinstance(raw_data, list) and len(raw_data) > 0 else raw_data
         if not isinstance(data, dict):
@@ -555,11 +572,11 @@ def generate_report():
 | **User Rows** | {activation['user_rows_30d']} | 100.00% |
 | **Anonymous Bootstrap Rows** | {activation['anonymous_rows_30d']} | {pct(activation['anonymous_rows_30d'], activation['user_rows_30d']):.2f}% |
 | **Onboarded** | {activation['onboarded_30d']} | {pct(activation['onboarded_30d'], activation['user_rows_30d']):.2f}% |
-| **Upgraded (Go/Plus/Pro)** | {activation['upgraded_30d']} | {pct(activation['upgraded_30d'], activation['user_rows_30d']):.2f}% |
+| **Access Granted (Go/Plus/Pro)** | {activation['upgraded_30d']} | {pct(activation['upgraded_30d'], activation['user_rows_30d']):.2f}% |
 | **Added Watchlist** | {activation['with_watchlist_30d']} | {pct(activation['with_watchlist_30d'], activation['user_rows_30d']):.2f}% |
 
 ## 🔁 Channel Quality (Last 30d)
-| Channel | User Rows | Onboarded | Upgraded |
+| Channel | User Rows | Onboarded | Access Granted |
 | :--- | :--- | :--- | :--- |
 """
         if not internal["channel_quality"]:
