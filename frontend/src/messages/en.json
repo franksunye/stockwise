@@ -356,6 +356,7 @@
       "testRemotePushSending": "Sending remote push...",
       "testRemotePushSuccess": "Remote push dispatched. Check your phone.",
       "testRemotePushFailed": "Remote push failed: {detail}",
+      "testRemotePushHint": "If your phone stays silent, turn notifications off and back on to refresh the device subscription.",
       "testNotificationTitle": "Test notification — ZISO AI",
       "testNotificationBody": "It works. Local time: {time}",
       "types": {

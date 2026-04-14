@@ -122,6 +122,18 @@ export function useUserCenterData({ isOpen, refreshProfile }: UseUserCenterDataA
         void loadCurrentMode();
     }, [isOpen, loadCurrentMode, refreshProfile, refreshPushStatus]);
 
+    const removeExistingSubscription = useCallback(async (endpoint?: string) => {
+        try {
+            await fetch('/api/notifications/unsubscribe', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(endpoint ? { endpoint } : {}),
+            });
+        } catch (error) {
+            console.warn('Failed to remove existing push subscription from server:', error);
+        }
+    }, []);
+
     const handleEnableNotifications = async () => {
         setIsSubscribing(true);
         try {
@@ -145,9 +157,21 @@ export function useUserCenterData({ isOpen, refreshProfile }: UseUserCenterDataA
 
             const swRegistration = await navigator.serviceWorker.ready;
             let subscription = await swRegistration.pushManager.getSubscription();
-            if (!subscription) {
-                subscription = await subscribeUserToPush(vapidKey);
+
+            // iPhone/Web Push subscriptions can become stale while still looking valid.
+            // Rebuilding the subscription on re-enable gives us a fresh Apple endpoint.
+            if (subscription) {
+                const staleEndpoint = subscription.endpoint;
+                try {
+                    await subscription.unsubscribe();
+                } catch (error) {
+                    console.warn('Failed to unsubscribe stale browser push subscription:', error);
+                }
+                await removeExistingSubscription(staleEndpoint);
+                subscription = null;
             }
+
+            subscription = await subscribeUserToPush(vapidKey);
 
             if (!subscription) {
                 return { success: false, message: tGlobal('user.push.noSubscription') };
@@ -246,7 +270,9 @@ export function useUserCenterData({ isOpen, refreshProfile }: UseUserCenterDataA
                 const detail = String((data as { error?: string }).error || response.status);
                 return {
                     success: false,
-                    message: tGlobal('user.push.testRemotePushFailed', { detail }),
+                    message: tGlobal('user.push.testRemotePushFailed', {
+                        detail: `${detail}. ${tGlobal('user.push.testRemotePushHint')}`,
+                    }),
                 };
             }
 
@@ -258,7 +284,9 @@ export function useUserCenterData({ isOpen, refreshProfile }: UseUserCenterDataA
             console.error(error);
             return {
                 success: false,
-                message: tGlobal('user.push.testRemotePushFailed', { detail: 'network' }),
+                message: tGlobal('user.push.testRemotePushFailed', {
+                    detail: `network. ${tGlobal('user.push.testRemotePushHint')}`,
+                }),
             };
         } finally {
             setTestingRemotePush(false);

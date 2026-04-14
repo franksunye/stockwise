@@ -356,6 +356,7 @@
       "testRemotePushSending": "正在发送远程推送...",
       "testRemotePushSuccess": "远程推送已发出，请查看手机。",
       "testRemotePushFailed": "远程推送失败：{detail}",
+      "testRemotePushHint": "如果手机没有收到，请先关闭再重新开启通知，以刷新设备订阅。",
       "testNotificationTitle": "🔔 测试通知 - ZISO AI",
       "testNotificationBody": "测试成功！当前时间: {time}",
       "types": {
