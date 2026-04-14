@@ -6,7 +6,6 @@ import { PageShell, EN_BOUNDARY_NOTICE, EN_DEFAULT_SOURCES } from './EnLayout';
 import { GeoSummary, SourceBlock, BoundaryNotice } from '@/components/seo/GeoBlocks';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { type FeatureComparisonRow } from '@/lib/pricing-data';
-import { STRIPE_PRICE_IDS } from '@/lib/stripe-constants';
 
 const EN_PRICING_PLANS = [
   {
@@ -40,8 +39,9 @@ const EN_PRICING_PLANS = [
       'Academy Access (101/Masters)',
       'Go Identity Badge',
     ],
-    cta: 'Subscribe Go',
-    href: `https://app.ziso.cc/pricing?priceId=${STRIPE_PRICE_IDS.USD_GO_MONTHLY}`,
+    cta: 'Open App to Subscribe',
+    href: 'https://app.ziso.cc',
+    note: 'Please complete subscription inside the app.',
     highlight: true,
     accent: 'text-indigo-300',
   },
@@ -215,6 +215,9 @@ export function EnglishPricingPage() {
                 {plan.cta}
                 <ChevronRight size={18} />
               </Link>
+              {'note' in plan && plan.note && (
+                <p className="mt-3 text-[11px] text-slate-500">{plan.note}</p>
+              )}
             </div>
           ))}
         </div>

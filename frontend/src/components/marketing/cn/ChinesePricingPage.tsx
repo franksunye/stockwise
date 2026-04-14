@@ -1,11 +1,9 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Check, ChevronRight, PartyPopper, X } from 'lucide-react';
-import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
+import { motion } from 'framer-motion';
+import { Check, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
-import { getCurrentUser } from '@/lib/user';
 import { pricingPlans, featureComparison, type FeatureComparisonRow } from '@/lib/pricing-data';
 import { PageShell } from './CnLayout';
 import { JsonLd } from '@/components/seo/JsonLd';
@@ -13,13 +11,6 @@ import { createTranslator, type MessageBundle } from '@/lib/i18n';
 import cnMessages from '@/messages/cn.json';
 
 function PricingContent() {
-  const [loadingPriceId, setLoadingPriceId] = useState<string | null>(null);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [userTier, setUserTier] = useState<string>('free');
-  const [hasStripeCustomer, setHasStripeCustomer] = useState(false);
-  const [loadingPortal, setLoadingPortal] = useState(false);
-  const searchParams = useSearchParams();
-
   const t = createTranslator(cnMessages as MessageBundle, 'pricing');
 
   const renderFeature = (feature: string) => {
@@ -63,112 +54,10 @@ function PricingContent() {
     ]
   };
 
-  useEffect(() => {
-    getCurrentUser().then(() => {
-      fetch('/api/user/profile', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({})
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.tier) setUserTier(data.tier);
-        if (typeof data.hasStripeCustomer === 'boolean') setHasStripeCustomer(data.hasStripeCustomer);
-      })
-      .catch(err => console.error('Failed to fetch user status', err));
-    });
-
-    if (searchParams.get('session_id') || searchParams.get('checkout') === 'success') {
-      setShowSuccess(true);
-      window.history.replaceState({}, '', window.location.pathname);
-    }
-  }, [searchParams]);
-
-  const handleManageSubscription = async () => {
-    setLoadingPortal(true);
-    try {
-      const response = await fetch('/api/billing/portal', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      const data = await response.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        alert(data.error || '无法打开订阅管理门户');
-      }
-    } catch (err) {
-      console.error('Portal error:', err);
-      alert('系统繁忙，请稍后再试');
-    } finally {
-      setLoadingPortal(false);
-    }
-  };
-
-  const handleUpgrade = async (priceId: string) => {
-    setLoadingPriceId(priceId);
-    try {
-      const response = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ priceId }),
-      });
-
-      const data = await response.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        throw new Error(data.error || '无法创建支付会话');
-      }
-    } catch (error: unknown) {
-      console.error('Checkout error:', error);
-      alert('⚠️ 支付暂时受阻。\n\nError: ' + ((error as Error).message || 'Unknown error'));
-    } finally {
-      setLoadingPriceId(null);
-    }
-  };
-
   return (
     <PageShell currentPage="pricing">
       <JsonLd data={softwareSchema} />
       <JsonLd data={faqSchema} />
-      <AnimatePresence>
-        {showSuccess && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center px-4 bg-black/80 backdrop-blur-md"
-          >
-            <motion.div
-              initial={{ scale: 0.9, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              className="glass-card max-w-md w-full p-8 text-center relative border-indigo-500/50 shadow-2xl shadow-indigo-500/20"
-            >
-              <button 
-                onClick={() => setShowSuccess(false)}
-                className="absolute top-4 right-4 text-slate-500 hover:text-white transition-colors"
-              >
-                <X size={20} />
-              </button>
-              <div className="w-20 h-20 bg-indigo-500/20 text-indigo-400 rounded-full flex items-center justify-center mx-auto mb-6">
-                <PartyPopper size={40} />
-              </div>
-              <h2 className="text-3xl font-black italic mb-4">欢迎加入 Go 会员!</h2>
-              <p className="text-slate-400 font-medium mb-8 leading-relaxed">
-                您的权限已自动激活。现在您可以享受深度复盘、更多自选额度以及实时推送。
-              </p>
-              <Link 
-                href="/"
-                className="block w-full py-4 rounded-2xl bg-indigo-600 text-white font-black italic hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-600/20"
-              >
-                进入仪表盘
-              </Link>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       <main className="relative z-10 max-w-7xl mx-auto px-8 pt-12 pb-40 text-center">
         <div className="space-y-4 mb-20 text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4 mx-auto">
@@ -241,36 +130,7 @@ function PricingContent() {
               </div>
 
               <div className="flex flex-col gap-3">
-                {userTier === 'go' && plan.enName === 'Go' && hasStripeCustomer && (
-                  <button 
-                    onClick={handleManageSubscription}
-                    disabled={loadingPortal}
-                    className="w-full py-4 rounded-2xl flex items-center justify-center gap-2 font-black italic bg-white/10 border border-white/20 hover:bg-white/20 text-white transition-all active:scale-95 mt-[-10px] mb-4"
-                  >
-                    {loadingPortal ? '正在跳转...' : '管理我的订阅 / 取消'}
-                  </button>
-                )}
-
-                {plan.priceId ? (
-                  <button 
-                    onClick={() => handleUpgrade(plan.priceId!)}
-                    disabled={!!loadingPriceId}
-                    className={`w-full py-4 rounded-2xl flex items-center justify-center gap-2 font-black italic transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${
-                      plan.highlight 
-                      ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-500 hover:shadow-indigo-600/40' 
-                      : 'bg-white/5 border border-white/10 hover:bg-white/10 text-white'
-                    }`}
-                  >
-                    {loadingPriceId === plan.priceId 
-                      ? '正在前往收银台...' 
-                      : (plan.priceIdAnnual 
-                          ? (userTier === 'go' && plan.enName === 'Go' ? '按月续费' : '按月支付') 
-                          : '免费开始'
-                        )
-                    }
-                    {loadingPriceId !== plan.priceId && <ChevronRight size={18} />}
-                  </button>
-                ) : (
+                {plan.enName === 'Plus' ? (
                   <Link
                     href={plan.href || '#'}
                     className={`w-full py-4 rounded-2xl flex items-center justify-center gap-2 font-black italic transition-all active:scale-95 ${
@@ -282,22 +142,23 @@ function PricingContent() {
                     {plan.enName === 'Plus' ? '加入等待名单' : '免费开始'}
                     <ChevronRight size={18} />
                   </Link>
-                )}
-
-                {plan.priceIdAnnual && (
-                  <button 
-                    onClick={() => handleUpgrade(plan.priceIdAnnual!)}
-                    disabled={!!loadingPriceId}
-                    className="w-full py-4 rounded-2xl flex flex-col items-center justify-center gap-0.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-black italic transition-all active:scale-95 shadow-lg shadow-orange-500/20 hover:from-amber-400 hover:to-orange-400 disabled:opacity-50 mt-3"
+                ) : (
+                  <Link
+                    href="https://app.ziso.cc"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`w-full py-4 rounded-2xl flex items-center justify-center gap-2 font-black italic transition-all active:scale-95 ${
+                      plan.highlight
+                        ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-500 hover:shadow-indigo-600/40'
+                        : 'bg-white/5 border border-white/10 hover:bg-white/10 text-white'
+                    }`}
                   >
-                    <div className="flex items-center gap-2">
-                       {loadingPriceId === plan.priceIdAnnual 
-                         ? '正在前往收银台...' 
-                         : (userTier === 'go' && plan.enName === 'Go' ? '按年续费 (¥299)' : '按年支付 (¥299)')
-                       }
-                       {loadingPriceId !== plan.priceIdAnnual && <ChevronRight size={18} />}
-                    </div>
-                  </button>
+                    {plan.enName === 'Go' ? '前往 App 订阅' : '进入 App'}
+                    <ChevronRight size={18} />
+                  </Link>
+                )}
+                {plan.enName === 'Go' && (
+                  <p className="mt-1 text-[11px] text-slate-500">请在 App 内完成订阅。</p>
                 )}
               </div>
             </motion.div>

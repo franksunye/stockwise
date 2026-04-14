@@ -6,7 +6,6 @@ import { PageShell, KO_BOUNDARY_NOTICE, KO_DEFAULT_SOURCES } from './KoLayout';
 import { GeoSummary, SourceBlock, BoundaryNotice } from '@/components/seo/GeoBlocks';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { type FeatureComparisonRow } from '@/lib/pricing-data';
-import { STRIPE_PRICE_IDS } from '@/lib/stripe-constants';
 
 const KO_PRICING_PLANS = [
   {
@@ -40,8 +39,9 @@ const KO_PRICING_PLANS = [
       '지수 아카데미 (101/마스터)',
       'Go 전용 아이덴티티 배지',
     ],
-    cta: 'Go 구독하기',
-    href: `https://app.ziso.cc/pricing?priceId=${STRIPE_PRICE_IDS.USD_GO_MONTHLY}`,
+    cta: '앱에서 구독하기',
+    href: 'https://app.ziso.cc',
+    note: '구독은 앱 내부에서 진행해 주세요.',
     highlight: true,
     accent: 'text-indigo-300',
   },
@@ -199,6 +199,9 @@ export function KoreanPricingPage() {
                 {plan.cta}
                 <ChevronRight size={18} />
               </Link>
+              {'note' in plan && plan.note && (
+                <p className="mt-3 text-[11px] text-slate-500">{plan.note}</p>
+              )}
             </div>
           ))}
         </div>
