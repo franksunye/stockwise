@@ -4,7 +4,7 @@ doc_id: "engineering-capacity-planning-and-scaling-strategy-20260317"
 doc_domain: "engineering"
 doc_status: "active"
 owner: "founder"
-last_reviewed_at: "2026-03-19"
+last_reviewed_at: "2026-04-14"
 summary: "定义容量规划与扩容路线，是广播、流量与容量相关内容的工程事实源。"
 ---
 
@@ -18,6 +18,11 @@ summary: "定义容量规划与扩容路线，是广播、流量与容量相关�
 > - 前端盘中价格刷新已从 3 分钟调整为 1 分钟；非交易时段保持 10 分钟。
 > - 已增加广播失败自动降级：连续失败后回退到 legacy `/api/stock/prices?symbols=...`，冷却后自动探测恢复。
 > - `global_stock_pool` 管理 bug 已修复（增删幂等、`1->0` 删除），并完成线上脏数据对账清理（计数一致）。
+>
+> 2026-04-14 实施更新（Vercel Phase 2）：
+> - `/api/stock/batch` 本轮采用**单路由公共化重构**，先在服务端内部拆成 `buildStockFacts(...)` 与 `projectFactsForTier(...)`，不立即暴露 public/private 双路由。
+> - 当前国际版 v1 的 `batch` 已明确定位为 `tier-gated public stock facts`；`free/go/plus` 继续以 `signal` 作为主显示语义，`mode` 与 `pro/alpha` 视图仍后置。
+> - 新增轻量 `POST /api/user/bootstrap`，用于 Dashboard 入口私有握手（session/profile/watchlist metadata/onboarding gate），但**不替代**本地 snapshot 秒开链路。
 
 ## Document Ownership & Scope Boundary
 
@@ -31,7 +36,7 @@ summary: "定义容量规划与扩容路线，是广播、流量与容量相关�
 
 1. 先完成价格层 broadcast（`/api/stock/prices/all` + 缓存 + 客户端过滤）并稳定运行；
 2. 再评估是否将该公共端点迁移到 Cloudflare Workers；
-3. `batch` 按 public/private 拆分后，再决定公共部分的迁移范围。
+3. 先完成 `batch` 的单路由公共化重构与轻量 `bootstrap` 收口，再评估是否需要物理拆路由或迁移公共部分。
 
 ## 1. Purpose
 
@@ -418,7 +423,7 @@ flowchart TB
 | API 速率限制 | middleware 或 API 层增加 per-IP / per-session 限制：全局 60 req/min, prices 30 req/min, batch 5 req/min | 1 天 | **P0** |
 | Vercel Pro | 确认部署在 Pro 计划 | 配置变更 | **P0** |
 | 请求抖动 | 客户端定时器加入 0-30s 随机延迟，缓解开盘惊群。实测开盘峰值可达稳态 8-10 倍。 | 0.5 天 | P1 |
-| Profile 请求合并 | `register` 和 `profile` 目前是独立的两次 POST，可合并为单一 `/api/user/bootstrap` 端点 — 一次 roundtrip 完成 session sync + profile 返回。节省 1 个函数调用 + 1 次 DB 连接/page load。 | 1 天 | P1 |
+| 轻量 bootstrap 收口 | 新增 `POST /api/user/bootstrap`，收口 Dashboard 入口的 session/profile/watchlist metadata/onboarding gate；保留 `/api/user/profile` 给显式 refresh / mutation 后同步使用，不把 dashboard 主数据塞进 bootstrap。 | 1 天 | P1 |
 | 低频端点 ISR | `/api/learn/*` (1h)。Calendar ISR 化应在 Tier 0 Quick Wins 阶段完成。 | 0.5 天 | P2 |
 
 **预估总工期**: 3-4 天
@@ -464,7 +469,11 @@ Tier 2 的价格广播架构将价格层降为 O(1)。但在 1M 规模下，**�
                         ≈ 5,400 GB-hrs → Vercel Pro 上限的 5.4 倍
 ```
 
-价格层已经 O(1) 化，但 **batch 端点承载的决策载荷是 per-user 的**（不同用户有不同 tier/mode/watchlist 组合），无法用同一招解决。
+价格层已经 O(1) 化，但 `batch` 仍然是最重的 Dashboard 决策端点。需要注意：
+
+- 当前国际版 v1（`free/go` 为主，`plus` 预热）下，`batch` 的主体并不是“用户私有 overlay”，而是 **`tier-gated public stock facts`**。
+- 本阶段已先完成**单路由公共化重构**：服务端内部拆成 facts 组装与 tier 投影，先减少查询耦合、序列化负担和未来误把 `mode` 当主契约的风险。
+- 只有在后续 `pro/alpha` / `mode` 真正产品化后，才值得继续评估物理拆成 `public facts route + private overlay route`。
 
 #### 6.4.2 The Next Breakpoint: Batch Decomposition
 

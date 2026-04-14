@@ -256,6 +256,7 @@ describe('Auth Contract Gate', () => {
         { method: 'GET', path: '/api/predictions?symbol=00700&limit=3', expect: 401 },
         { method: 'GET', path: '/api/stock/batch?symbols=00700,09988&historyLimit=3', expect: 401 },
         { method: 'GET', path: '/api/dashboard', expect: 401 },
+        { method: 'POST', path: '/api/user/bootstrap', body: {}, expect: 401 },
         { method: 'POST', path: '/api/user/pay-success', body: { amount: 10, planId: 'monthly' }, expect: 401 },
     ];
 
@@ -299,6 +300,20 @@ describe('Auth Contract Gate', () => {
         assert.equal(profileRes.status, 200);
         const profileBody = await json(profileRes);
         assert.equal(profileBody.userId, registerBody.userId);
+
+        const bootstrapRes = await client.request('/api/user/bootstrap', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ watchlist: ['00700', '09988'] }),
+        });
+        assert.equal(bootstrapRes.status, 200);
+        const bootstrapBody = await json(bootstrapRes);
+        assert.equal(bootstrapBody.userId, registerBody.userId);
+        assert.equal(Array.isArray(bootstrapBody.watchlist), true);
+        assert.equal(typeof bootstrapBody.watchlistCount, 'number');
+        assert.equal(bootstrapBody.stocks, undefined);
+        assert.equal(bootstrapBody.history, undefined);
+        assert.equal(bootstrapBody.almanac, undefined);
 
         const authenticatedCases = [
             { method: 'GET', path: '/api/brief?date=2026-02-01', expect: 200 },

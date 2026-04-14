@@ -447,6 +447,35 @@ async function addApiStubs(page, smokeCase = null) {
         });
     });
 
+    const bootstrapPayload = {
+        userId: seededProfile.userId,
+        tier: seededProfile.tier,
+        hasOnboarded: seededProfile.hasOnboarded,
+        watchlistCount: WATCHLIST.length,
+        watchlist: WATCHLIST.map((item) => ({
+            symbol: item.symbol,
+            name: item.name,
+            name_en: item.name,
+            addedAt: new Date(item.addedAt).toISOString(),
+        })),
+        expiresAt: seededProfile.tier === 'pro' || seededProfile.tier === 'alpha'
+            ? '2026-12-31T00:00:00.000Z'
+            : null,
+        email: 'interaction@example.com',
+        locale: 'en',
+        hasStripeCustomer: seededProfile.tier === 'pro' || seededProfile.tier === 'alpha',
+        isNewUser: false,
+        isChannel: false,
+    };
+
+    await page.route('**/api/user/bootstrap', async route => {
+        await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify(bootstrapPayload),
+        });
+    });
+
     await page.route('**/api/user/profile', async route => {
         const isPaidTier = seededProfile.tier === 'pro' || seededProfile.tier === 'alpha';
         await route.fulfill({

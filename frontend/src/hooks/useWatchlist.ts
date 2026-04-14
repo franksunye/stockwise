@@ -1,8 +1,11 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { getCurrentUser } from '@/lib/user';
-
-const WATCHLIST_STORAGE_KEY = 'STOCKWISE_WATCHLIST_V2'; // Version 2 for clean slate
-const WATCHLIST_SYNC_EVENT = 'stockwise-watchlist-sync';
+import {
+    hasFreshBootstrapWatchlist,
+    readCachedWatchlist,
+    WATCHLIST_SYNC_EVENT,
+    writeCachedWatchlist,
+} from '@/lib/watchlist-cache';
 
 function watchlistMetaDiffers(current: WatchlistItem[], remote: WatchlistItem[]): boolean {
     if (current.length !== remote.length) return true;
@@ -33,16 +36,7 @@ export function useWatchlist() {
 
     const restoreLocalWatchlist = useCallback(() => {
         try {
-            const stored = localStorage.getItem(WATCHLIST_STORAGE_KEY);
-            if (!stored) {
-                setWatchlist([]);
-                return;
-            }
-
-            const parsed = JSON.parse(stored);
-            if (Array.isArray(parsed)) {
-                setWatchlist(parsed);
-            }
+            setWatchlist(readCachedWatchlist());
         } catch (e) {
             console.error('Local watchlist load error', e);
         }
@@ -64,6 +58,7 @@ export function useWatchlist() {
     // 2. Sync with server (Silent & Lazy)
     useEffect(() => {
         if (!localBootstrapDone) return;
+        if (hasFreshBootstrapWatchlist()) return;
 
         const sync = async () => {
             if (isSyncing.current) return;
@@ -113,7 +108,7 @@ export function useWatchlist() {
 
                         if (currentStr !== remoteStr || watchlistMetaDiffers(current, remoteList)) {
                             console.log('🔄 Watchlist sync: updated from server');
-                            localStorage.setItem(WATCHLIST_STORAGE_KEY, JSON.stringify(remoteList));
+                            writeCachedWatchlist(remoteList);
                             return remoteList;
                         }
                         return current;
@@ -148,7 +143,7 @@ export function useWatchlist() {
         setWatchlist(prev => {
             if (prev.find(p => p.symbol === symbol)) return prev; // Dedup
             const next = [...prev, newItem];
-            localStorage.setItem(WATCHLIST_STORAGE_KEY, JSON.stringify(next));
+            writeCachedWatchlist(next, { markSynced: false });
             return next;
         });
 
@@ -168,7 +163,7 @@ export function useWatchlist() {
             // Rollback
             setWatchlist(prev => {
                 const next = prev.filter(p => p.symbol !== symbol);
-                localStorage.setItem(WATCHLIST_STORAGE_KEY, JSON.stringify(next));
+                writeCachedWatchlist(next, { markSynced: false });
                 return next;
             });
             return false;
@@ -190,7 +185,7 @@ export function useWatchlist() {
         setWatchlist(prev => {
             itemToRestore = prev.find(p => p.symbol === symbol);
             const next = prev.filter(p => p.symbol !== symbol);
-            localStorage.setItem(WATCHLIST_STORAGE_KEY, JSON.stringify(next));
+            writeCachedWatchlist(next, { markSynced: false });
             return next;
         });
 
@@ -206,7 +201,7 @@ export function useWatchlist() {
             if (itemToRestore) {
                 setWatchlist(prev => {
                     const next = [...prev, itemToRestore!];
-                    localStorage.setItem(WATCHLIST_STORAGE_KEY, JSON.stringify(next));
+                    writeCachedWatchlist(next, { markSynced: false });
                     return next;
                 });
             }

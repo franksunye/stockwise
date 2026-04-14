@@ -20,6 +20,7 @@ import {
     getScopedProfileCacheKey,
     getStoredUserId,
 } from '@/lib/dashboard-bootstrap';
+import { writeCachedWatchlist } from '@/lib/watchlist-cache';
 import type {
     Tier,
     UserProfile,
@@ -55,6 +56,39 @@ function coerceTierFromData(data: Record<string, unknown>): Tier {
     const t = String(data.tier || 'free').toLowerCase();
     if (t === 'go' || t === 'plus' || t === 'pro' || t === 'alpha') return t;
     return 'free';
+}
+
+function normalizeBootstrapWatchlist(data: Record<string, unknown>): Array<{
+    symbol: string;
+    name: string;
+    name_en: string | null;
+    addedAt: number;
+}> {
+    if (!Array.isArray(data.watchlist)) return [];
+
+    return data.watchlist
+        .map((item) => {
+            if (!item || typeof item !== 'object') return null;
+            const row = item as Record<string, unknown>;
+            const symbol = typeof row.symbol === 'string' ? row.symbol.trim() : '';
+            if (!symbol) return null;
+            const addedAt =
+                typeof row.addedAt === 'string' || typeof row.addedAt === 'number'
+                    ? new Date(row.addedAt).getTime()
+                    : Date.now();
+            return {
+                symbol,
+                name: typeof row.name === 'string' && row.name.trim() ? row.name : symbol,
+                name_en: typeof row.name_en === 'string' ? row.name_en : null,
+                addedAt: Number.isFinite(addedAt) ? addedAt : Date.now(),
+            };
+        })
+        .filter((item): item is {
+            symbol: string;
+            name: string;
+            name_en: string | null;
+            addedAt: number;
+        } => item !== null);
 }
 
 export function useDashboardAuthorization() {
@@ -109,6 +143,24 @@ export function useDashboardAuthorization() {
                 writeProfileCache(aligned);
             }
         }
+    }, []);
+
+    const fetchBootstrap = useCallback(async (
+        body: {
+            watchlist: string[];
+            referredBy?: string | null;
+            locale: 'cn' | 'en';
+            explicitLocale: boolean;
+        },
+        init?: RequestInit,
+    ) => {
+        return fetch('/api/user/bootstrap', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            cache: 'no-store',
+            body: JSON.stringify(body),
+            ...init,
+        });
     }, []);
 
     const refreshProfile = useCallback(async (options?: RefreshProfileOptions) => {
@@ -190,22 +242,27 @@ export function useDashboardAuthorization() {
                         // ignore
                     }
                     const locale = getPreferredLocaleForProfileSync();
-                    let res = await fetch('/api/user/profile', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ watchlist: getWatchlist(), locale, explicitLocale: false }),
+                    const watchlist = getWatchlist();
+                    let res = await fetchBootstrap({
+                        watchlist,
+                        locale,
+                        explicitLocale: false,
                     });
                     if (res.status === 401) {
                         await getCurrentUser({ forceSessionSync: true });
-                        res = await fetch('/api/user/profile', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ watchlist: getWatchlist(), locale, explicitLocale: false }),
+                        res = await fetchBootstrap({
+                            watchlist,
+                            locale,
+                            explicitLocale: false,
                         });
                     }
                     if (res.ok) {
                         const data = (await res.json()) as Record<string, unknown>;
                         applyServerProfilePayload(data, true);
+                        const watchlistItems = normalizeBootstrapWatchlist(data);
+                        if (watchlistItems.length > 0 || Number(data.watchlistCount || 0) === 0) {
+                            writeCachedWatchlist(watchlistItems);
+                        }
                         const mapped = mapApiJsonToUserProfile(data);
                         if (mapped) {
                             writeAuthCache(mapped.tier, true);
@@ -265,18 +322,23 @@ export function useDashboardAuthorization() {
                 }
 
                 const locale = getPreferredLocaleForProfileSync();
-                let res = await fetch('/api/user/profile', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ watchlist: getWatchlist(), referredBy, locale, explicitLocale: false }),
+                const watchlist = getWatchlist();
+                let res = await fetchBootstrap({
+                    watchlist,
+                    referredBy,
+                    locale,
+                    explicitLocale: false,
+                }, {
                     signal: controller.signal,
                 });
                 if (res.status === 401) {
                     await getCurrentUser({ forceSessionSync: true });
-                    res = await fetch('/api/user/profile', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ watchlist: getWatchlist(), referredBy, locale, explicitLocale: false }),
+                    res = await fetchBootstrap({
+                        watchlist,
+                        referredBy,
+                        locale,
+                        explicitLocale: false,
+                    }, {
                         signal: controller.signal,
                     });
                 }
@@ -291,6 +353,7 @@ export function useDashboardAuthorization() {
                 const newTier = coerceTierFromData(data);
                 if (res.ok && data.userId) {
                     applyServerProfilePayload(data, true);
+                    writeCachedWatchlist(normalizeBootstrapWatchlist(data));
                 } else {
                     applyServerProfilePayload(data, false);
                 }
@@ -321,7 +384,7 @@ export function useDashboardAuthorization() {
         };
 
         checkAuth();
-    }, [applyServerProfilePayload]);
+    }, [applyServerProfilePayload, fetchBootstrap]);
 
     useEffect(() => {
         if (isAuthorized !== null) {

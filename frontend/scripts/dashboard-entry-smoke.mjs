@@ -121,8 +121,9 @@ const CASES = [
         name: 'authorized-user-needs-onboarding',
         storage: {
             local: {
-                ZISO_AUTH_CACHE_V1: buildAuthCache(),
+                ZISO_AUTH_CACHE_V1: buildAuthCache({ tier: 'go' }),
                 stockwise_user_profile_v2: buildProfileCache({
+                    tier: 'go',
                     hasOnboarded: false,
                 }),
                 STOCKWISE_USER_ID: 'user_smoke_case',
@@ -131,7 +132,7 @@ const CASES = [
         },
         profileResponse: {
             userId: 'user_smoke_case',
-            tier: 'free',
+            tier: 'go',
             hasOnboarded: false,
             expiresAt: null,
         },
@@ -208,6 +209,23 @@ async function addApiStubs(page, profileResponse) {
             body: JSON.stringify({
                 success: true,
                 userId: 'user_smoke_case',
+            }),
+        });
+    });
+
+    await page.route('**/api/user/bootstrap', async route => {
+        await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({
+                ...profileResponse,
+                watchlistCount: 0,
+                watchlist: [],
+                email: 'smoke@example.com',
+                locale: 'en',
+                hasStripeCustomer: false,
+                isNewUser: false,
+                isChannel: false,
             }),
         });
     });

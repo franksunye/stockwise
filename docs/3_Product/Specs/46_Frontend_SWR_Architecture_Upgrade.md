@@ -4,7 +4,7 @@ doc_id: "spec-frontend-swr-architecture-upgrade"
 doc_domain: "product"
 doc_status: "active"
 owner: "founder"
-last_reviewed_at: "2026-03-27"
+last_reviewed_at: "2026-04-14"
 summary: "定义前端 SWR、PWA 壳层 bootstrap、Dashboard bootstrap state、本地快照边界，以及收盘后恢复探测与黄历失效策略的当前事实源。"
 ---
 
@@ -32,6 +32,7 @@ summary: "定义前端 SWR、PWA 壳层 bootstrap、Dashboard bootstrap state、
 5. `Dashboard` 首页主链路目前不作为下一步 SWR 落点。
 6. `shared almanac` 已从“长 ISR route cache”切换为“可主动失效的数据级缓存 + 5 分钟兜底”。
 7. `Dashboard` 收盘后恢复应用时，允许先做轻量版本检查，但不允许无条件重拉完整预测。
+8. `Dashboard` 入口私有握手已新增轻量 `POST /api/user/bootstrap`，但它只负责 gate/profile/watchlist metadata，不替代本地 snapshot 秒开链路。
 
 ## 2. 统一术语
 
@@ -124,6 +125,7 @@ SWR 不应被直接等同为：
 2. `Dashboard bootstrap state` 已完成第一轮读取侧、写入侧与入口编排收口。
 3. `dashboard/layout.tsx` 已被压薄为三态渲染层，授权编排、entry gate 与 provider 壳层已独立成模块。
 4. 但 profile、watchlist、data hook 的刷新与数据主链路仍然分散，不应误判为“整体已彻底统一”。
+5. 2026-04-14 起，`useDashboardAuthorization` 入口优先消费轻量 `bootstrap`；`refreshProfile()` 仍保留 `/api/user/profile`，避免把 mutation 后同步和入口握手混成一个重接口。
 
 ### 4.3 本地快照仍是必要层
 
@@ -135,6 +137,7 @@ SWR 不应被直接等同为：
 2. profile 已采用“先读本地，再静默刷新”
 3. Investment Mode Card 也使用本地 TTL 快照
 4. iOS PWA 的身份与存储隔离问题决定了不能把所有能力都压到单一运行时缓存中
+5. Dashboard 入口的轻量 `bootstrap` 只允许写入 auth/profile/watchlist metadata，不允许吞掉 `stockwise_dashboard_cache_v1` 这类主数据快照
 
 ### 4.4 共享黄历与个股预测的刷新边界
 
@@ -251,6 +254,15 @@ SWR 不应被直接等同为：
 22. `Dashboard` 收盘后轮询停止条件已收紧：
    - 不再是“任一股票进入今日批次即可停止”
    - 而是“所有股票都进入今日批次后才停止”
+23. `Dashboard` 入口私有初始化已完成第二轮收口：
+   - 已新增 [`frontend/src/app/api/user/bootstrap/route.ts`](/Users/yesun/Code/stockwise/frontend/src/app/api/user/bootstrap/route.ts)
+   - [`frontend/src/lib/user-bootstrap-server.ts`](/Users/yesun/Code/stockwise/frontend/src/lib/user-bootstrap-server.ts) 已统一 bootstrap/profile 的 server-side 数据组装
+   - [`frontend/src/hooks/useDashboardAuthorization.ts`](/Users/yesun/Code/stockwise/frontend/src/hooks/useDashboardAuthorization.ts) 现优先消费 `bootstrap` 并将 watchlist metadata seed 回本地缓存
+   - [`frontend/src/lib/watchlist-cache.ts`](/Users/yesun/Code/stockwise/frontend/src/lib/watchlist-cache.ts) 已成为 watchlist bootstrap / optimistic mutation / sync timestamp 的统一边界
+24. `batch` 主链路已完成一轮内部公共化收敛：
+   - [`frontend/src/lib/batch-stock-facts.ts`](/Users/yesun/Code/stockwise/frontend/src/lib/batch-stock-facts.ts) 已下沉 `buildStockFacts(...)` 与 `projectFactsForTier(...)`
+   - [`frontend/src/app/api/stock/batch/route.ts`](/Users/yesun/Code/stockwise/frontend/src/app/api/stock/batch/route.ts) 已明确当前国际版 v1 的 `batch` 是 `tier-gated public stock facts`
+   - 当前不新增 public/private 双路由，后续是否物理拆分视 `mode` / `pro/alpha` 产品化进度再定
 
 ### 5.2 已证伪或已停止推进
 
@@ -264,6 +276,7 @@ SWR 不应被直接等同为：
 2. `Dashboard Data Refresh Contract` 已完成第一轮，且 production refresh gate 已建立；但对实际线上刷新频率、重复请求和 watchlist 变更后的稳定性仍需要持续观测。
 3. 页面级 smoke 目前已并入正式 `verify:release`，并已接入 GitHub Actions 的 `frontend_quality_gates`；但尚未扩展到更高层 staging / device CI。
 4. 轻量版本探测目前仅覆盖 `Dashboard` 主列表，不覆盖更深层详情面或 Drawer 内局部数据面。
+5. 页面级 `verify:dashboard-*` smoke 仍依赖本地可监听 dev server；在受限环境下可能无法复跑，但脚本契约必须与当前 `bootstrap` 路由保持一致。
 
 ## 6. 当前阶段结论
 

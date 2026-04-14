@@ -1,6 +1,7 @@
 'use client';
 
 import { UserRule } from './types';
+import { readCachedWatchlist } from '@/lib/watchlist-cache';
 
 const RULES_KEY = 'stock_rules';
 const WATCHLIST_KEY = 'stock_watchlist';
@@ -33,6 +34,10 @@ export function saveRule(symbol: string, rule: Partial<UserRule>): void {
 
 export function getWatchlist(): string[] {
     if (typeof window === 'undefined') return DEFAULT_WATCHLIST;
+    const structuredWatchlist = readCachedWatchlist();
+    if (structuredWatchlist.length > 0) {
+        return structuredWatchlist.map((item) => item.symbol);
+    }
     const stored = localStorage.getItem(WATCHLIST_KEY);
     if (!stored) {
         localStorage.setItem(WATCHLIST_KEY, JSON.stringify(DEFAULT_WATCHLIST));

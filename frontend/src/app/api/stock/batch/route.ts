@@ -18,6 +18,10 @@ import {
 import { withDecisionViews } from '@/lib/decision-views';
 import { getCachedLatestPrices, getCachedShortMetrics } from '@/lib/stock-cache';
 import { parsePredictionContentLocaleParam } from '@/lib/prediction-content-locale';
+import {
+    buildStockFacts,
+    getBatchUiSignalModeForTier,
+} from '@/lib/batch-stock-facts';
 
 export const dynamic = 'force-dynamic';
 const DASHBOARD_PREDICTION_LOOKBACK_DAYS = 10;
@@ -65,32 +69,6 @@ function formatPriceUpdateTag(hkTime: Date): string {
     return `${month}-${day} ${hours}:${minutes}`;
 }
 
-const PRICE_TECHNICAL_KEYS = [
-    'ma5', 'ma10', 'ma20', 'ma60',
-    'macd', 'macd_signal', 'macd_hist',
-    'boll_upper', 'boll_mid', 'boll_lower',
-    'kdj_k', 'kdj_d', 'kdj_j', 'ai_summary',
-];
-
-function stripPredictionRow(row: Record<string, unknown>): Record<string, unknown> {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { llm_reasoning, rn_daily, rn_history, ...rest } = row;
-    return rest;
-}
-
-function stripPriceRow(price: Record<string, unknown>): Record<string, unknown> {
-    const out = { ...price };
-    for (const key of PRICE_TECHNICAL_KEYS) delete out[key];
-    return out;
-}
-
-function isAllNullMetrics(metrics: Record<string, unknown> | null): boolean {
-    if (!metrics) return true;
-    return Object.entries(metrics).every(
-        ([k, v]) => k === 'symbol' || v === null || v === undefined
-    );
-}
-
 function applyNoStoreHeaders(response: NextResponse): NextResponse {
     response.headers.set('Cache-Control', 'no-cache, no-store, max-age=0, must-revalidate');
     response.headers.set('Pragma', 'no-cache');
@@ -98,6 +76,52 @@ function applyNoStoreHeaders(response: NextResponse): NextResponse {
     response.headers.set('X-Accel-Buffering', 'no');
     response.headers.set('Vary', 'Cookie');
     return response;
+}
+
+function setBatchObservabilityHeaders(
+    response: NextResponse,
+    metrics: {
+        requestId: string;
+        tier: string;
+        symbolCount: number;
+        historyLimit: number;
+        uiSignalMode: string;
+        queryTime: number;
+        predictionCache: 'hit' | 'miss' | 'skipped';
+        dataCacheMode: string;
+    },
+): NextResponse {
+    response.headers.set('X-Stockwise-Request-Id', metrics.requestId);
+    response.headers.set('X-Stockwise-Tier', metrics.tier);
+    response.headers.set('X-Stockwise-Batch-Symbols', String(metrics.symbolCount));
+    response.headers.set('X-Stockwise-Batch-History-Limit', String(metrics.historyLimit));
+    response.headers.set('X-Stockwise-UI-Signal-Mode', metrics.uiSignalMode);
+    response.headers.set('X-Stockwise-Prediction-Cache', metrics.predictionCache);
+    response.headers.set('X-Stockwise-Data-Cache-Mode', metrics.dataCacheMode);
+    response.headers.set('Server-Timing', `app;dur=${metrics.queryTime}`);
+    return response;
+}
+
+function logBatchObservation(metrics: {
+    requestId: string;
+    tier: string;
+    symbolCount: number;
+    historyLimit: number;
+    uiSignalMode: string;
+    queryTime: number;
+    predictionCache: 'hit' | 'miss' | 'skipped';
+    dataCacheMode: string;
+    stage: string;
+    ok: boolean;
+}) {
+    console.info(
+        JSON.stringify({
+            type: 'stockwise_observation',
+            route: '/api/stock/batch',
+            ...metrics,
+            ts: new Date().toISOString(),
+        }),
+    );
 }
 
 async function resolvePredictionContentLocaleForUser(
@@ -125,11 +149,10 @@ async function resolvePredictionContentLocaleForUser(
     }
 }
 
-// Batch payload carries three decision lenses in one row:
-// - overlay lens: signal / layer1_status / decision_semantic
-// - base lens: canonical_signal / layer1_signal
-// - AI lens: llm_signal / llm_reasoning
-// Existing UI can keep using overlay fields; deeper views can adopt the explicit fields.
+// Current international v1 contract:
+// - batch is a tier-gated public facts endpoint
+// - free/go/plus render from signal-first semantics
+// - pro/alpha future paths keep layer1/mode detail, but are not the active v1 path
 
 export async function GET(request: Request) {
     const requestId = `batch_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
@@ -168,6 +191,7 @@ export async function GET(request: Request) {
         let allHistory: Record<string, unknown>[] = [];
         let shortMetricsRows: Record<string, unknown>[] = [];
         let currentModeId = DEFAULT_MODE_ID;
+        let predictionCache: 'hit' | 'miss' | 'skipped' = 'skipped';
 
         const placeholders = symbols.length > 0 ? symbols.map(() => '?').join(',') : '';
         const allowedModelIds = await getAllowedPredictionModelIdsForTier(client, userTier);
@@ -356,7 +380,9 @@ export async function GET(request: Request) {
                     const cached = _predCache.get(cacheKey);
                     if (cached && Date.now() - cached.ts < PRED_CACHE_TTL) {
                         allHistory = cached.rows;
+                        predictionCache = 'hit';
                     } else {
+                        predictionCache = 'miss';
                         const isCloud = 'execute' in client;
 
                         if (isCloud) {
@@ -427,49 +453,21 @@ export async function GET(request: Request) {
 
         allHistory = allHistory.map(withDecisionViews);
 
-        const priceMap = new Map(latestPrices.map(p => [p.symbol as string, p]));
-        const shortMetricsMap = new Map(shortMetricsRows.map(m => [m.symbol as string, m]));
-        const historyBySymbol = new Map<string, Record<string, unknown>[]>();
-        for (const hist of allHistory) {
-            const sym = hist.symbol as string;
-            if (!historyBySymbol.has(sym)) historyBySymbol.set(sym, []);
-            historyBySymbol.get(sym)!.push(hist);
-        }
-
         const hkTime = new Date(new Date().getTime() + (new Date().getTimezoneOffset() * 60000) + (3600000 * 8));
 
         // Calculate the threshold string exactly once to avoid redundant allocations inside the loop
         const PREDICTION_VALIDITY_DAYS = 20;
         const validDateThreshold = new Date(Date.now() - PREDICTION_VALIDITY_DAYS * 86400000).toISOString().split('T')[0];
 
-        const isLite = historyLimit <= 1;
-        const stocks = symbols.map(sym => {
-            const rawHistory = historyBySymbol.get(sym) || [];
-            const price = priceMap.get(sym) as Record<string, unknown> | undefined;
-            const validPreds = (rawHistory as { date: string }[]).filter(p => p.date >= validDateThreshold);
-
-            const prediction = validPreds[0] ? stripPredictionRow(validPreds[0] as Record<string, unknown>) : null;
-            const strippedHistory = rawHistory.map(h => stripPredictionRow(h));
-            const shortMetrics = shortMetricsMap.get(sym) || null;
-
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const entry: Record<string, any> = {
-                symbol: sym,
-                price: price && isLite ? stripPriceRow(price) : (price || null),
-                prediction,
-                previousPrediction: validPreds[1] ? stripPredictionRow(validPreds[1] as Record<string, unknown>) : null,
-                lastUpdated: formatPriceUpdateTag(hkTime)
-            };
-
-            if (!isLite) {
-                entry.history = strippedHistory;
-                entry.hasMoreHistory = strippedHistory.length >= historyLimit;
-            }
-            if (!isAllNullMetrics(shortMetrics)) {
-                entry.shortMetrics = shortMetrics;
-            }
-
-            return entry;
+        const stocks = buildStockFacts({
+            symbols,
+            latestPrices,
+            shortMetricsRows,
+            allHistory,
+            historyLimit,
+            tier: userTier,
+            lastUpdated: formatPriceUpdateTag(hkTime),
+            validDateThreshold,
         });
 
         debugStage = 'build_response';
@@ -477,10 +475,33 @@ export async function GET(request: Request) {
             stocks,
             timestamp: new Date().toISOString(),
             tier: userTier,
+            uiSignalMode: getBatchUiSignalModeForTier(userTier),
             queryTime: Date.now() - startTime,
             requestId
         });
-        response.headers.set('X-Stockwise-Request-Id', requestId);
+        const queryTime = Date.now() - startTime;
+        setBatchObservabilityHeaders(response, {
+            requestId,
+            tier: userTier,
+            symbolCount: symbols.length,
+            historyLimit,
+            uiSignalMode: getBatchUiSignalModeForTier(userTier),
+            queryTime,
+            predictionCache,
+            dataCacheMode: 'next-unstable-cache+warm-memory',
+        });
+        logBatchObservation({
+            requestId,
+            tier: userTier,
+            symbolCount: symbols.length,
+            historyLimit,
+            uiSignalMode: getBatchUiSignalModeForTier(userTier),
+            queryTime,
+            predictionCache,
+            dataCacheMode: 'next-unstable-cache+warm-memory',
+            stage: debugStage,
+            ok: true,
+        });
         return applyNoStoreHeaders(response);
     } catch (error) {
         const debugMessage = error instanceof Error ? error.message : String(error);
@@ -491,7 +512,28 @@ export async function GET(request: Request) {
             debugMessage,
             requestId
         }, { status: 500 });
-        response.headers.set('X-Stockwise-Request-Id', requestId);
+        setBatchObservabilityHeaders(response, {
+            requestId,
+            tier: 'unknown',
+            symbolCount: symbols.length,
+            historyLimit,
+            uiSignalMode: 'unknown',
+            queryTime: Date.now() - startTime,
+            predictionCache: 'skipped',
+            dataCacheMode: 'unknown',
+        });
+        logBatchObservation({
+            requestId,
+            tier: 'unknown',
+            symbolCount: symbols.length,
+            historyLimit,
+            uiSignalMode: 'unknown',
+            queryTime: Date.now() - startTime,
+            predictionCache: 'skipped',
+            dataCacheMode: 'unknown',
+            stage: debugStage,
+            ok: false,
+        });
         return applyNoStoreHeaders(response);
     }
 }

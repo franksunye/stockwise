@@ -12,6 +12,11 @@ import { getLocalizedStockName } from '@/lib/stock-name';
 import { getMarketBadge } from '@/lib/market-badge';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import type { MessageKey } from '@/lib/i18n';
+import {
+  WATCHLIST_SYNC_EVENT,
+  readCachedWatchlist,
+  writeCachedWatchlist,
+} from '@/lib/watchlist-cache';
 
 // Fallback data for the reveal step
 const DEFAULT_REVEAL_DATA = { 
@@ -23,9 +28,6 @@ const DEFAULT_REVEAL_DATA = {
   reason: 'Strong bullish pattern with ideal volume support.', 
   support: 95.00 
 };
-
-const WATCHLIST_STORAGE_KEY = 'STOCKWISE_WATCHLIST_V2';
-const WATCHLIST_SYNC_EVENT = 'stockwise-watchlist-sync';
 
 interface RecommendedStock {
   symbol: string;
@@ -129,19 +131,18 @@ export function OnboardingOverlay() {
         localStorage.setItem('STOCKWISE_HAS_ONBOARDED', 'true');
         if (selectedStock) {
           try {
-            const stored = localStorage.getItem(WATCHLIST_STORAGE_KEY);
-            const parsed = stored ? JSON.parse(stored) : [];
-            const currentList = Array.isArray(parsed) ? parsed : [];
+            const currentList = readCachedWatchlist();
             const alreadyExists = currentList.some((item) => item?.symbol === selectedStock);
             if (!alreadyExists) {
-              localStorage.setItem(WATCHLIST_STORAGE_KEY, JSON.stringify([
+              writeCachedWatchlist([
                 ...currentList,
                 {
                   symbol: selectedStock,
                   name: selectedStockName || selectedStock,
+                  name_en: selectedStockNameEn ?? null,
                   addedAt: Date.now()
                 }
-              ]));
+              ]);
             }
             window.dispatchEvent(new Event(WATCHLIST_SYNC_EVENT));
           } catch (storageError) {

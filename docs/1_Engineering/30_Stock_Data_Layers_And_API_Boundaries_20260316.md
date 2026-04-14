@@ -8,6 +8,11 @@
 - 明确哪些接口负责哪一层数据；
 - 明确哪些接口**不得**用于高频轮询，避免 `ai_reasoning` 这类日级重 payload 被误用在 10–15 分钟刷新场景。
 
+> 2026-04-14 口径修订：
+> - 当前国际版 v1（`free/go` 主路径，`plus` upcoming）中，`GET /api/stock/batch` 的正确定位是 **`tier-gated public stock facts`**。
+> - 本轮已先完成**单路由公共化重构**：服务端内部拆分为 facts 组装与 tier 投影视图，不立即暴露 public/private 双路由。
+> - `mode` / `pro/alpha` 相关语义仍视为 future path，不应反向主导当前 v1 的 batch 设计。
+
 ---
 
 ## 2. Data Layers Overview
@@ -45,12 +50,19 @@
   - 作用：Dashboard 主链路批量拉取每只股票的「最新预测 + 上一条预测 + 历史预测队列」，用于：
     - 首屏卡片信息  
     - 策略内参（Tactical Brief）的数据源  
+  - 当前定位：
+    - 主体是跨用户可共享的股票事实层；
+    - `tier` 只决定模型可见范围与 UI 语义投影；
+    - 在国际版 v1 下，不应将其理解为“用户私有 mode overlay 接口”。
   - 关键字段：
     - `prediction.ai_reasoning` / `llm_reasoning`：用于生成战术视图 / 投研解释  
     - `signal / canonical_signal / llm_signal / layer1_status / decision_semantic`：多层信号语义  
     - `history`：过去若干日的预测轨迹  
     - `shortMetrics`：港股沽空、仓位快照（按日）
   - 更新节奏：按交易日（或显式刷新）使用，不作为 10–15 分钟轮询接口。
+  - 当前国际版 v1 语义：
+    - `free/go/plus` 默认以 `signal` 作为主显示语义；
+    - `layer1_status` / `decision_semantic` 保留为未来更高阶 tier 的扩展语义，不作为本轮 batch 收敛的主契约。
 
 - `GET /api/predictions`
   - 作用：按 symbol + targetDate 拉取「全量顾问席/模型视角」预测列表，驱动投研决议（`AICouncil`）。
@@ -323,4 +335,3 @@ PageKey = (symbol, tier, mode?)
   - 在那之前，本节仅作为团队在「是否给 Batch 上 ISR」问题上的工程共识参考：
     - **优先给 per-symbol × tier × mode 的报告页做 ISR**；
     - **不要给当前形态的 `/api/stock/batch` 整包做 ISR**。
-

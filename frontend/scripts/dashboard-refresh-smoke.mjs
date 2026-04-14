@@ -57,14 +57,14 @@ async function loadPlaywright() {
     }
 }
 
-function getTodayInShanghai() {
+function getTodayInShanghai(at = new Date()) {
     const formatter = new Intl.DateTimeFormat('en-CA', {
         timeZone: 'Asia/Shanghai',
         year: 'numeric',
         month: '2-digit',
         day: '2-digit',
     });
-    return formatter.format(new Date());
+    return formatter.format(at);
 }
 
 function buildWatchlistItems(symbols, stockCatalog) {
@@ -93,7 +93,7 @@ function buildPrediction(symbol, today, updatedAtSuffix = '09:30:00.000Z') {
 function buildPrice(symbol, close, updatedAt = '09:30') {
     return {
         symbol,
-        date: getTodayInShanghai(),
+        date: getTodayInShanghai(new Date(FIXED_POST_MARKET_MS)),
         open: close - 1,
         high: close + 1,
         low: close - 2,
@@ -146,6 +146,7 @@ async function triggerResumeEvent(page) {
 }
 
 const FIXED_POST_MARKET_MS = Date.parse('2026-03-27T17:30:00+08:00');
+const FIXED_TODAY = getTodayInShanghai(new Date(FIXED_POST_MARKET_MS));
 
 async function seedStorage(context, stockCatalog, initialSymbols, today) {
     const dashboardCache = initialSymbols.map((symbol) => buildBatchStock(symbol, stockCatalog, today, '09:30:00.000Z'));
@@ -303,7 +304,7 @@ async function main() {
 
     const { chromium } = await loadPlaywright();
     await waitForServerReady(options.baseUrl);
-    const today = getTodayInShanghai();
+    const today = FIXED_TODAY;
     const browser = await chromium.launch({
         headless: options.headless,
     });
@@ -350,6 +351,30 @@ async function main() {
                     status: 200,
                     contentType: 'application/json',
                     body: JSON.stringify({ success: true, userId: 'user_refresh_smoke' }),
+                });
+            });
+            await page.route('**/api/user/bootstrap', async (route) => {
+                await route.fulfill({
+                    status: 200,
+                    contentType: 'application/json',
+                    body: JSON.stringify({
+                        userId: 'user_refresh_smoke',
+                        tier: 'free',
+                        hasOnboarded: true,
+                        watchlistCount: remoteSymbols.length,
+                        watchlist: remoteSymbols.map((symbol, index) => ({
+                            symbol,
+                            name: STOCK_CATALOG[symbol].name,
+                            name_en: STOCK_CATALOG[symbol].name,
+                            addedAt: new Date(Date.now() + index * 1000).toISOString(),
+                        })),
+                        expiresAt: null,
+                        email: 'refresh@example.com',
+                        locale: 'en',
+                        hasStripeCustomer: false,
+                        isNewUser: false,
+                        isChannel: false,
+                    }),
                 });
             });
             await page.route('**/api/user/profile', async (route) => {

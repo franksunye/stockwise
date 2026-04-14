@@ -7,7 +7,7 @@ import { prepareUserBootstrapPayload } from '@/lib/user-bootstrap-server';
 export async function POST(request: Request) {
     let db: ReturnType<typeof getDbClient> | null = null;
     const startTime = Date.now();
-    const requestId = `profile_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+    const requestId = `bootstrap_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
     try {
         const auth = requireUserSession(request);
         if ('response' in auth) {
@@ -26,8 +26,8 @@ export async function POST(request: Request) {
             explicitLocale,
             referralRewardEnabled: MEMBERSHIP_CONFIG.switches.enableReferralReward,
             referralDays: MEMBERSHIP_CONFIG.referral.refereeDays,
-            includeWatchlistItems: false,
-            includeReferralDetails: true,
+            includeWatchlistItems: true,
+            includeReferralDetails: false,
         });
 
         const response = NextResponse.json({
@@ -36,26 +36,21 @@ export async function POST(request: Request) {
             expiresAt: payload.expiresAt,
             hasOnboarded: payload.hasOnboarded,
             watchlistCount: payload.watchlistCount,
+            watchlist: payload.watchlist,
             email: payload.user.email ?? null,
             locale: payload.locale,
-            referralBalance: payload.referralBalance || 0,
-            totalEarned: payload.totalEarned || 0,
-            commissionRate: payload.commissionRate,
             hasStripeCustomer: payload.hasStripeCustomer,
             isNewUser: payload.isNewUser,
             isChannel: payload.isChannel,
-            referralAlias: payload.referralAlias ?? null,
-            referralCount: payload.referralCount ?? 0,
-            recentTransactions: payload.recentTransactions ?? [],
         });
         const duration = Date.now() - startTime;
         response.headers.set('X-Stockwise-Request-Id', requestId);
+        response.headers.set('X-Stockwise-Bootstrap-Watchlist-Count', String(payload.watchlistCount));
         response.headers.set('X-Stockwise-Tier', payload.tier);
-        response.headers.set('X-Stockwise-Profile-Watchlist-Count', String(payload.watchlistCount));
         response.headers.set('Server-Timing', `app;dur=${duration}`);
         console.info(JSON.stringify({
             type: 'stockwise_observation',
-            route: '/api/user/profile',
+            route: '/api/user/bootstrap',
             requestId,
             ok: true,
             tier: payload.tier,
@@ -66,10 +61,10 @@ export async function POST(request: Request) {
         }));
         return response;
     } catch (error: unknown) {
-        console.error('Profile error:', error);
+        console.error('Bootstrap error:', error);
         console.info(JSON.stringify({
             type: 'stockwise_observation',
-            route: '/api/user/profile',
+            route: '/api/user/bootstrap',
             requestId,
             ok: false,
             duration: Date.now() - startTime,
