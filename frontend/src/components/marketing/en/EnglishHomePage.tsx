@@ -7,6 +7,7 @@ import { PageShell, EN_BOUNDARY_NOTICE, EN_DEFAULT_SOURCES } from './EnLayout';
 import { GeoSummary, SourceBlock, BoundaryNotice } from '@/components/seo/GeoBlocks';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { FocusedImageSlider } from '../FocusedImageSlider';
+import { ProductHuntBadge } from '../ProductHuntBadge';
 
 export function EnglishHomePage() {
   const tacticalSlides = [
@@ -84,6 +85,7 @@ export function EnglishHomePage() {
               View Pricing
             </Link>
           </div>
+          <ProductHuntBadge locale="en" />
         </div>
 
         <div className="w-full max-w-5xl relative mt-20">

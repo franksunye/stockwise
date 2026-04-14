@@ -9,6 +9,7 @@ import { PageShell } from './CnLayout';
 import { GeoSummary, SourceBlock, BoundaryNotice } from '@/components/seo/GeoBlocks';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { brandCoreZhCN } from '@/content/brand-core.zh-CN';
+import { ProductHuntBadge } from '../ProductHuntBadge';
 
 export function ChineseHomePage() {
   const faqSchema = {
@@ -64,6 +65,7 @@ export function ChineseHomePage() {
               阅读 101 手册
             </Link>
           </div>
+          <ProductHuntBadge locale="cn" />
         </div>
 
         {/* Product Preview */}
