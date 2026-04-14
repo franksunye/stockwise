@@ -351,6 +351,11 @@
       "swRegisterFailed": "Service Worker 注册失败",
       "testPush": "测试推送",
       "testPushSending": "发送中...",
+      "testPushSuccess": "本地通知已发送。",
+      "testRemotePush": "远程测试推送",
+      "testRemotePushSending": "正在发送远程推送...",
+      "testRemotePushSuccess": "远程推送已发出，请查看手机。",
+      "testRemotePushFailed": "远程推送失败：{detail}",
       "testNotificationTitle": "🔔 测试通知 - ZISO AI",
       "testNotificationBody": "测试成功！当前时间: {time}",
       "types": {

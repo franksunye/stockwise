@@ -32,6 +32,7 @@ export function useUserCenterData({ isOpen, refreshProfile }: UseUserCenterDataA
     const [pushSupported, setPushSupported] = useState(false);
     const [isSubscribing, setIsSubscribing] = useState(false);
     const [testingPush, setTestingPush] = useState(false);
+    const [testingRemotePush, setTestingRemotePush] = useState(false);
     const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>(DEFAULT_NOTIFICATION_SETTINGS);
     const [isHighPerformance, setIsHighPerformance] = useState(false);
     const [showAndroidPushWarning, setShowAndroidPushWarning] = useState(false);
@@ -228,6 +229,42 @@ export function useUserCenterData({ isOpen, refreshProfile }: UseUserCenterDataA
         }
     };
 
+    const handleTestRemotePush = async () => {
+        if (testingRemotePush) {
+            return { success: false, message: tGlobal('user.push.testRemotePushSending') };
+        }
+
+        setTestingRemotePush(true);
+        try {
+            const response = await fetch('/api/notifications/test-remote', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+            });
+            const data = await response.json().catch(() => ({}));
+
+            if (!response.ok) {
+                const detail = String((data as { error?: string }).error || response.status);
+                return {
+                    success: false,
+                    message: tGlobal('user.push.testRemotePushFailed', { detail }),
+                };
+            }
+
+            return {
+                success: true,
+                message: tGlobal('user.push.testRemotePushSuccess'),
+            };
+        } catch (error) {
+            console.error(error);
+            return {
+                success: false,
+                message: tGlobal('user.push.testRemotePushFailed', { detail: 'network' }),
+            };
+        } finally {
+            setTestingRemotePush(false);
+        }
+    };
+
     const updateNotificationSetting = async (
         key: keyof NotificationSettings['types'],
         enabled: boolean,
@@ -260,6 +297,7 @@ export function useUserCenterData({ isOpen, refreshProfile }: UseUserCenterDataA
         handleDisableNotifications,
         handleEnableNotifications,
         handleTestPush,
+        handleTestRemotePush,
         isHighPerformance,
         isSubscribed,
         isSubscribing,
@@ -267,6 +305,7 @@ export function useUserCenterData({ isOpen, refreshProfile }: UseUserCenterDataA
         pushSupported,
         showAndroidPushWarning,
         testingPush,
+        testingRemotePush,
         updateNotificationSetting,
     };
 }

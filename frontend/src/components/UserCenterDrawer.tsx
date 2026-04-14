@@ -102,6 +102,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
     handleDisableNotifications,
     handleEnableNotifications,
     handleTestPush,
+    handleTestRemotePush,
     isHighPerformance,
     isSubscribed,
     isSubscribing,
@@ -109,6 +110,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
     pushSupported,
     showAndroidPushWarning,
     testingPush,
+    testingRemotePush,
     updateNotificationSetting,
   } = useUserCenterData({ isOpen, refreshProfile });
 
@@ -524,8 +526,22 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                       );
                                     })}
                                     <div className="pt-1.5 mt-1.5 border-t border-white/5 flex justify-center">
-                                        <button onClick={handleTestPush} disabled={testingPush} className="flex items-center gap-2 py-1.5 px-4 rounded-xl hover:bg-white/5 transition-colors text-[10px] text-slate-500 hover:text-indigo-400 font-bold uppercase tracking-wider disabled:opacity-50">
+                                        <button onClick={async () => {
+                                            const ok = await handleTestPush();
+                                            setRedeemMsg({
+                                                type: ok ? 'success' : 'error',
+                                                text: ok ? t('push.testPushSuccess') : t('push.enableFailed'),
+                                            });
+                                            if (ok) setTimeout(() => setRedeemMsg(null), 3000);
+                                        }} disabled={testingPush} className="flex items-center gap-2 py-1.5 px-4 rounded-xl hover:bg-white/5 transition-colors text-[10px] text-slate-500 hover:text-indigo-400 font-bold uppercase tracking-wider disabled:opacity-50">
                                             <Bell size={12} /> {testingPush ? t('push.testPushSending') : t('push.testPush')}
+                                        </button>
+                                        <button onClick={async () => {
+                                            const result = await handleTestRemotePush();
+                                            setRedeemMsg({ type: result.success ? 'success' : 'error', text: result.message });
+                                            if (result.success) setTimeout(() => setRedeemMsg(null), 3000);
+                                        }} disabled={testingRemotePush} className="flex items-center gap-2 py-1.5 px-4 rounded-xl hover:bg-white/5 transition-colors text-[10px] text-slate-500 hover:text-emerald-400 font-bold uppercase tracking-wider disabled:opacity-50">
+                                            <Bell size={12} /> {testingRemotePush ? t('push.testRemotePushSending') : t('push.testRemotePush')}
                                         </button>
                                     </div>
                                   </div>

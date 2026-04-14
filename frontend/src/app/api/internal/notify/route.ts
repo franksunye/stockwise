@@ -202,6 +202,9 @@ export async function POST(request: Request) {
         const successCount = results.filter((r) => r.status === 'fulfilled').length;
         const skippedCount = results.filter((r) => r.status === 'skipped').length;
         const failedCount = results.filter((r) => r.status === 'rejected').length;
+        const successfulSubscriptionIds = results
+            .filter((r) => r.status === 'fulfilled')
+            .map((r) => r.id);
 
         // Collect user IDs for logging (deduplicated).
         // For explicit target_user_id notifications, we still persist a log entry
@@ -306,6 +309,31 @@ export async function POST(request: Request) {
                 }
             } catch (e) {
                 console.error('Failed to cleanup expired subscriptions:', e);
+            }
+        }
+
+        if (successfulSubscriptionIds.length > 0) {
+            const touchClient = getDbClient();
+            try {
+                const timestamp = new Date().toISOString();
+                if (strategy === 'cloud') {
+                    for (const id of successfulSubscriptionIds) {
+                        await (touchClient as Client).execute({
+                            sql: 'UPDATE push_subscriptions SET last_used_at = ? WHERE id = ?',
+                            args: [timestamp, id],
+                        });
+                    }
+                } else {
+                    const db = touchClient as Database.Database;
+                    const updateStmt = db.prepare('UPDATE push_subscriptions SET last_used_at = ? WHERE id = ?');
+                    const transaction = db.transaction((ids, ts) => {
+                        for (const id of ids) updateStmt.run(ts, id);
+                    });
+                    transaction(successfulSubscriptionIds, timestamp);
+                    db.close();
+                }
+            } catch (touchErr) {
+                console.error('Failed to update last_used_at for successful subscriptions:', touchErr);
             }
         }
 

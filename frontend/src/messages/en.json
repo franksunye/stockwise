@@ -351,6 +351,11 @@
       "swRegisterFailed": "Couldn't register background updates.",
       "testPush": "Send test notification",
       "testPushSending": "Sending...",
+      "testPushSuccess": "Local notification sent.",
+      "testRemotePush": "Send remote push",
+      "testRemotePushSending": "Sending remote push...",
+      "testRemotePushSuccess": "Remote push dispatched. Check your phone.",
+      "testRemotePushFailed": "Remote push failed: {detail}",
       "testNotificationTitle": "Test notification — ZISO AI",
       "testNotificationBody": "It works. Local time: {time}",
       "types": {

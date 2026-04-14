@@ -10,6 +10,7 @@ export async function sendInternalNotification(payload: {
     body: string;
     url?: string;
     tag?: string;
+    skip_log?: boolean;
 }) {
     const secret = process.env.INTERNAL_API_SECRET;
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
