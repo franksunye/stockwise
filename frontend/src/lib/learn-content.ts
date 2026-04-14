@@ -212,6 +212,27 @@ export async function getArticleBySlug(slug: string, options?: ContentRequestOpt
     };
 }
 
+export async function getArticleLocalesBySlug(slug: string): Promise<PublicLocale[]> {
+    const locales: PublicLocale[] = [];
+
+    for (const locale of ['en', 'cn', 'ko', 'es'] as const) {
+        const dir = getContentDirectory(locale);
+        if (!dir) continue;
+
+        const allFiles = walkMarkdownFiles(dir);
+        const filePath = allFiles.find((file) => path.basename(file, '.md') === slug);
+        if (!filePath || !fs.existsSync(filePath)) continue;
+
+        const fileContent = fs.readFileSync(filePath, 'utf-8');
+        const { meta } = parseFrontmatter(fileContent);
+        if (!isPublishableMeta(meta as Partial<ArticleMeta> & { publish?: string })) continue;
+
+        locales.push(locale);
+    }
+
+    return locales;
+}
+
 export function getCategories(articles: ArticleMeta[]): string[] {
     const categories = new Set(articles.map(a => a.category));
     return Array.from(categories);

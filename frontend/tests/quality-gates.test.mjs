@@ -386,6 +386,12 @@ describe('Public i18n/SEO Gate', () => {
         assert.ok(supportRes.headers.get('location')?.includes('/support/tactical-brief-guide'));
     });
 
+    it('redirects cn-only learn slugs from root english path to /cn/learn', async () => {
+        const res = await requestWithForwardedHost('/learn/101-86_system_vs_intuition', 'ziso.cc');
+        assert.equal(res.status, 308);
+        assert.ok(res.headers.get('location')?.includes('/cn/learn/101-86_system_vs_intuition'));
+    });
+
     it('publishes only formal english static pages in the official sitemap', async () => {
         const sitemapRes = await withTimeout(
             fetch(`${BASE_URL}/sitemap.xml`),

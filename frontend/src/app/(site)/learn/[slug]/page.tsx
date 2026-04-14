@@ -1,7 +1,8 @@
 import { EnglishLearnArticlePage } from '@/components/public/EnglishLearnArticlePage';
-import { getAllArticles, getArticleBySlug } from '@/lib/learn-content';
+import { getAllArticles, getArticleBySlug, getArticleLocalesBySlug } from '@/lib/learn-content';
 import { buildPageMetadata } from '@/lib/seo';
 import { Metadata } from 'next';
+import { permanentRedirect } from 'next/navigation';
 
 export async function generateStaticParams() {
   const articles = await getAllArticles({ locale: 'en' });
@@ -27,5 +28,14 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
+
+  const englishArticle = await getArticleBySlug(slug, { locale: 'en' });
+  if (!englishArticle) {
+    const locales = await getArticleLocalesBySlug(slug);
+    if (locales.includes('cn')) {
+      permanentRedirect(`/cn/learn/${slug}`);
+    }
+  }
+
   return <EnglishLearnArticlePage slug={slug} />;
 }
