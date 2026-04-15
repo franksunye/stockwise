@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { Search, BookOpen, Clock, ChevronRight, Loader2, ChevronLeft, ExternalLink } from 'lucide-react';
+import { Search, BookOpen, Clock, ChevronRight, Loader2, ChevronLeft, ExternalLink, Link2, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import { useLocale, useT } from '@/context/LocaleContext';
@@ -49,6 +49,7 @@ export function LearnCenterView() {
   const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
   const [article, setArticle] = useState<LearnArticle | null>(null);
   const [articleLoading, setArticleLoading] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
   const listScrollYRef = useRef(0);
 
   const publicLocale: PublicLocale = locale === 'cn' ? 'cn' : 'en';
@@ -138,6 +139,21 @@ export function LearnCenterView() {
     }
   };
 
+  const articleHref = selectedSlug
+    ? localizePublicPath(`/learn/${selectedSlug}`, publicLocale)
+    : localizePublicPath('/learn', publicLocale);
+
+  const handleCopyLink = async () => {
+    if (typeof window === 'undefined') return;
+    try {
+      await navigator.clipboard.writeText(`${window.location.origin}${articleHref}`);
+      setCopiedLink(true);
+      window.setTimeout(() => setCopiedLink(false), 1500);
+    } catch {
+      setCopiedLink(false);
+    }
+  };
+
   if (selectedSlug) {
     return (
       <div className="flex-1 flex flex-col min-h-0 bg-[#08090d]">
@@ -146,7 +162,7 @@ export function LearnCenterView() {
           initial={{ opacity: 0, x: 24 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.2 }}
-          className="p-5 space-y-5"
+          className="p-5 space-y-5 max-w-4xl mx-auto w-full"
         >
           <div className="flex items-center justify-between">
             <button
@@ -158,19 +174,31 @@ export function LearnCenterView() {
                     window.scrollTo({ top: listScrollYRef.current, behavior: 'auto' });
                   }
                 });
+                setCopiedLink(false);
               }}
               className="flex items-center gap-1.5 text-slate-500 hover:text-white active:scale-95 transition-all py-1 -ml-1"
             >
               <ChevronLeft size={16} />
               <span className="text-[10px] font-bold uppercase tracking-wider">{t('backToCatalog')}</span>
             </button>
-            <Link
-              href={localizePublicPath(`/learn/${selectedSlug}`, publicLocale)}
-              className="text-[10px] font-bold uppercase tracking-wider text-slate-500 hover:text-white transition-colors flex items-center gap-1"
-            >
-              <ExternalLink size={12} />
-              Open Page
-            </Link>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => void handleCopyLink()}
+                className="text-[10px] font-bold uppercase tracking-wider text-slate-500 hover:text-white transition-colors flex items-center gap-1"
+              >
+                {copiedLink ? <Check size={12} /> : <Link2 size={12} />}
+                {copiedLink ? 'Copied' : 'Copy Link'}
+              </button>
+              <Link
+                href={articleHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[10px] font-bold uppercase tracking-wider text-slate-500 hover:text-white transition-colors flex items-center gap-1"
+              >
+                <ExternalLink size={12} />
+                Open Page
+              </Link>
+            </div>
           </div>
 
           {articleLoading ? (
@@ -184,6 +212,9 @@ export function LearnCenterView() {
           ) : (
             <>
               <div className="space-y-2.5">
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600">
+                  Learn · {t(`categories.${article.category}` as MessageKey<'learn'>)}
+                </p>
                 <div className="flex items-center gap-2">
                   <span className="px-2.5 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-[10px] font-black text-indigo-400 uppercase tracking-widest">
                     {t(`categories.${article.category}` as MessageKey<'learn'>)}
@@ -229,7 +260,7 @@ export function LearnCenterView() {
 
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-[#08090d]">
-      <div className="p-5 space-y-6">
+      <div className="p-5 space-y-6 max-w-4xl mx-auto w-full">
         {/* Header Section */}
         <div className="space-y-4">
           <div className="relative">

@@ -1,16 +1,17 @@
 'use client';
 
+import Link from 'next/link';
 import { useState, useMemo, useEffect } from 'react';
 import {
   Search, Brain, ShieldCheck, Zap,
   ChevronRight, ChevronLeft, Calendar,
-  User, Gift, Bell, Cpu, Gauge
+  User, Gift, Bell, Cpu, Gauge, ExternalLink, Link2, Check
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import { useLocale, useT } from '@/context/LocaleContext';
 import type { MessageKey } from '@/lib/i18n';
-import type { PublicLocale } from '@/lib/public-i18n';
+import { localizePublicPath, type PublicLocale } from '@/lib/public-i18n';
 
 import type { SupportArticle } from '@/lib/support-content';
 
@@ -80,6 +81,7 @@ export function SupportCenterView() {
   const [articleLoading, setArticleLoading] = useState(false);
   const [catalogBySlug, setCatalogBySlug] = useState<Record<string, SupportArticle>>({});
   const [catalogLoading, setCatalogLoading] = useState(true);
+  const [copiedLink, setCopiedLink] = useState(false);
   const publicLocale: PublicLocale = locale === 'cn' ? 'cn' : 'en';
 
   const handleSelectSlug = async (slug: string) => {
@@ -211,6 +213,19 @@ export function SupportCenterView() {
     return built;
   }, [catalogBySlug, searchQuery, locale]);
 
+  const articleHref = selectedSlug ? localizePublicPath(`/support/${selectedSlug}`, publicLocale) : localizePublicPath('/support', publicLocale);
+
+  const handleCopyLink = async () => {
+    if (typeof window === 'undefined') return;
+    try {
+      await navigator.clipboard.writeText(`${window.location.origin}${articleHref}`);
+      setCopiedLink(true);
+      window.setTimeout(() => setCopiedLink(false), 1500);
+    } catch {
+      setCopiedLink(false);
+    }
+  };
+
   // ─── Article Detail View ───
   if (article) {
     return (
@@ -219,17 +234,40 @@ export function SupportCenterView() {
         initial={{ opacity: 0, x: 30 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.2 }}
-        className="space-y-5"
+        className="space-y-5 max-w-4xl mx-auto w-full"
       >
-        <button
-          onClick={() => { setSelectedSlug(null); setArticle(null); }}
-           className="flex items-center gap-1.5 text-slate-500 hover:text-white active:scale-95 transition-all py-1 -ml-1"
-        >
-          <ChevronLeft size={16} />
-          <span className="text-[10px] font-bold uppercase tracking-wider">{t('backToList')}</span>
-        </button>
+        <div className="flex items-center justify-between gap-3">
+          <button
+            onClick={() => { setSelectedSlug(null); setArticle(null); setCopiedLink(false); }}
+             className="flex items-center gap-1.5 text-slate-500 hover:text-white active:scale-95 transition-all py-1 -ml-1"
+          >
+            <ChevronLeft size={16} />
+            <span className="text-[10px] font-bold uppercase tracking-wider">{t('backToList')}</span>
+          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => void handleCopyLink()}
+              className="text-[10px] font-bold uppercase tracking-wider text-slate-500 hover:text-white transition-colors flex items-center gap-1"
+            >
+              {copiedLink ? <Check size={12} /> : <Link2 size={12} />}
+              {copiedLink ? 'Copied' : 'Copy Link'}
+            </button>
+            <Link
+              href={articleHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[10px] font-bold uppercase tracking-wider text-slate-500 hover:text-white transition-colors flex items-center gap-1"
+            >
+              <ExternalLink size={12} />
+              Open Page
+            </Link>
+          </div>
+        </div>
 
         <div className="space-y-2.5">
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600">
+            Support · {article.category || t('loading')}
+          </p>
           <div className="flex items-center gap-2">
             <span className="px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[9px] font-black uppercase tracking-widest">
               {article.category || t('loading')}
@@ -305,7 +343,7 @@ export function SupportCenterView() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.15 }}
-      className="space-y-5"
+      className="space-y-5 max-w-4xl mx-auto w-full"
     >
       {/* Search */}
       <div className="relative">
