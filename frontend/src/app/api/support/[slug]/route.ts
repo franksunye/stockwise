@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupportArticleBySlug } from "@/lib/support-content";
+import { DEFAULT_PUBLIC_LOCALE, isSupportedPublicLocale } from "@/lib/public-i18n";
 
 export async function GET(
   request: NextRequest,
@@ -7,7 +8,22 @@ export async function GET(
 ) {
   try {
     const { slug } = await params;
-    const article = getSupportArticleBySlug(slug, { locale: "cn" });
+    const localeParam = request.nextUrl.searchParams.get("locale");
+    const locale = isSupportedPublicLocale(localeParam) ? localeParam : DEFAULT_PUBLIC_LOCALE;
+    let article = getSupportArticleBySlug(slug, { locale });
+
+    if (!article && locale !== "cn") {
+      const cnFallback = getSupportArticleBySlug(slug, { locale: "cn" });
+      if (cnFallback) {
+        article = {
+          ...cnFallback,
+          locale,
+          sourceLocale: "cn",
+          translationStatus: "fallback",
+          isFallback: true,
+        };
+      }
+    }
 
     if (!article) {
       return NextResponse.json({ error: "Article not found" }, { status: 404 });

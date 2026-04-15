@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   Search, Brain, ShieldCheck, Zap,
   ChevronRight, ChevronLeft, Calendar,
@@ -8,8 +8,9 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
-import { useT } from '@/context/LocaleContext';
+import { useLocale, useT } from '@/context/LocaleContext';
 import type { MessageKey } from '@/lib/i18n';
+import type { PublicLocale } from '@/lib/public-i18n';
 
 import type { SupportArticle } from '@/lib/support-content';
 
@@ -19,114 +20,73 @@ interface Section {
   color: string;
   bg: string;
   border: string;
-  items: { q: string; slug: string }[];
+  items: { title: string; slug: string }[];
 }
 
-// Mirror the same section structure as the web support page
-// Data source: support-content.ts (shared with /support web pages)
-const SECTIONS: Section[] = [
+const EN_TITLE_OVERRIDES: Record<string, string> = {
+  'smart-search': 'Smart Search & Instant Response',
+  'context-extraction': 'Intelligent Context Extraction',
+  'confidence-explained': 'How Confidence Percentage Works',
+  'badge-hygiene': 'Badge Hygiene and Count Cleanup',
+  'signal-flip-push': 'Signal Reversal Push Logic',
+  'notification-preference': 'Notification Control Panel',
+  'push-debug': 'Push Connectivity Test Tool',
+  'realtime-data-splicing': 'Real-time Market Data Splicing',
+  'on-demand-sync': 'On-demand Sync Scheduler',
+  'data-resiliency': 'Multi-source Data Resiliency',
+};
+
+const SECTION_META: Omit<Section, 'items'>[] = [
   {
     id: 'experience', icon: Zap,
     color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20',
-    items: [
-      { q: '时光机模式 (Time Machine)', slug: 'time-machine-feed' },
-      { q: '交互优先策略 (Interaction First)', slug: 'interaction-first' },
-      { q: '横向滑动地图 (Snap-X)', slug: 'nav-map-logic' },
-      { q: '性能自适应模式 (Auto-Perf)', slug: 'perf-adaptation' },
-      { q: '深度链接引导 (Deep Linking)', slug: 'deep-linking-usage' },
-      { q: 'TikTok 式沉浸滚动 (Snap-Y)', slug: 'snap-y-dynamics' },
-      { q: '搜索联想与秒速响应', slug: 'smart-search' },
-      { q: 'iOS 专项性能优化 (Safari)', slug: 'ios-tuning' }
-    ]
   },
   {
     id: 'ai-logic', icon: Brain,
     color: 'text-indigo-400', bg: 'bg-indigo-500/10', border: 'border-indigo-500/20',
-    items: [
-      { q: '投研决议：多维度共识', slug: 'ai-council-logic' },
-      { q: '策略内参解读 (Tactical Brief)', slug: 'tactical-brief-guide' },
-      { q: '关键价位图解 (Key Levels)', slug: 'key-levels-mapping' },
-      { q: '回看历史矩阵 (Review Matrix)', slug: 'history-matrix-viz' },
-      { q: '智能上下文提取机制', slug: 'context-extraction' },
-      { q: '失败回溯审计 (Failure Audit)', slug: 'failure-retrospective' }
-    ]
   },
   {
     id: 'quant', icon: Gauge,
     color: 'text-rose-400', bg: 'bg-rose-500/10', border: 'border-rose-500/20',
-    items: [
-      { q: '严格模式：防未来函数', slug: 'anti-future-function' },
-      { q: '智能标题逻辑 (Smart Title)', slug: 'smart-title-logic' },
-      { q: 'RSI 颜色隐喻 (RSI Metaphor)', slug: 'rsi-color-metaphor' },
-      { q: '脉冲与共振 (Pulse Logic)', slug: 'ai-pulse-resonance' },
-      { q: '置信度百分比解读', slug: 'confidence-explained' },
-      { q: '触感反馈的心理暗示', slug: 'haptic-sync' }
-    ]
   },
   {
     id: 'trust', icon: ShieldCheck,
     color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20',
-    items: [
-      { q: 'T+3 多日验证机制', slug: 'multi-day-verification' },
-      { q: '验证的三种状态说明', slug: 'verification-states' },
-      { q: '失败的价值 (Value of Failure)', slug: 'value-of-failure' }
-    ]
   },
   {
     id: 'account', icon: User,
     color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20',
-    items: [
-      { q: '身份护照系统 (Identity ID)', slug: 'identity-passport' },
-      { q: '邮箱绑定机制 (Email)', slug: 'email-sync-logic' },
-      { q: '身份找回流程 (Recovery)', slug: 'identity-restore-flow' },
-      { q: '隐私承诺 (Privacy Pledge)', slug: 'privacy-pledge' },
-      { q: '角标清除与数字减压', slug: 'badge-hygiene' }
-    ]
   },
   {
     id: 'growth', icon: Gift,
     color: 'text-fuchsia-400', bg: 'bg-fuchsia-500/10', border: 'border-fuchsia-500/20',
-    items: [
-      { q: '推荐激励 (Referral Rewards)', slug: 'referral-rewards' },
-      { q: '渠道分润看板 (Partners)', slug: 'channel-revenue-guide' },
-      { q: '权益兑换码 (Redeem Codes)', slug: 'redeem-code-usage' },
-      { q: '免费版与 Pro 版对比', slug: 'tiers-explained' }
-    ]
   },
   {
     id: 'notifications', icon: Bell,
     color: 'text-cyan-400', bg: 'bg-cyan-500/10', border: 'border-cyan-500/20',
-    items: [
-      { q: '智能反转推送逻辑', slug: 'signal-flip-push' },
-      { q: '精细化控制面板', slug: 'notification-preference' },
-      { q: 'Web Push 开启指南', slug: 'web-push-setup' },
-      { q: '通知连通性测试工具', slug: 'push-debug' }
-    ]
   },
   {
     id: 'infra', icon: Cpu,
     color: 'text-violet-400', bg: 'bg-violet-500/10', border: 'border-violet-500/20',
-    items: [
-      { q: '乐观更新机制 (Optimistic)', slug: 'optimistic-ui-logic' },
-      { q: '实时盘中拼接技术', slug: 'realtime-data-splicing' },
-      { q: '按需同步调度算法', slug: 'on-demand-sync' },
-      { q: '多源降级数据保障', slug: 'data-resiliency' }
-    ]
   }
 ];
 
 export function SupportCenterView() {
   const t = useT('support');
+  const { locale } = useLocale();
   const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [article, setArticle] = useState<SupportArticle | null>(null);
   const [articleLoading, setArticleLoading] = useState(false);
+  const [catalogBySlug, setCatalogBySlug] = useState<Record<string, SupportArticle>>({});
+  const [catalogLoading, setCatalogLoading] = useState(true);
+  const publicLocale: PublicLocale = locale === 'cn' ? 'cn' : 'en';
 
   const handleSelectSlug = async (slug: string) => {
     setSelectedSlug(slug);
     setArticleLoading(true);
     try {
-      const res = await fetch(`/api/support/${slug}`);
+      const res = await fetch(`/api/support/${slug}?locale=${publicLocale}`);
       if (!res.ok) throw new Error('Not found');
       const data = await res.json();
       setArticle(data);
@@ -136,14 +96,120 @@ export function SupportCenterView() {
     setArticleLoading(false);
   };
 
+  useEffect(() => {
+    let alive = true;
+    const controller = new AbortController();
+    setCatalogLoading(true);
+
+    async function loadCatalog() {
+      try {
+        const res = await fetch(`/api/support?locale=${publicLocale}`, {
+          signal: controller.signal,
+          cache: 'no-store',
+        });
+        if (!res.ok) throw new Error('Failed to load support catalog');
+        const data = (await res.json()) as SupportArticle[];
+        if (!alive) return;
+        const next: Record<string, SupportArticle> = {};
+        for (const entry of data) {
+          next[entry.slug] = entry;
+        }
+        setCatalogBySlug(next);
+      } catch {
+        if (!alive) return;
+        setCatalogBySlug({});
+      } finally {
+        if (!alive) return;
+        setCatalogLoading(false);
+      }
+    }
+
+    void loadCatalog();
+    return () => {
+      alive = false;
+      controller.abort();
+    };
+  }, [publicLocale]);
+
+  const getDisplayQuestion = (articleEntry: SupportArticle) => {
+    if (locale === 'cn') {
+      return articleEntry.title;
+    }
+
+    if (articleEntry.sourceLocale !== 'cn') {
+      return articleEntry.title;
+    }
+
+    const override = EN_TITLE_OVERRIDES[articleEntry.slug];
+    if (override) {
+      return override;
+    }
+
+    const trailingEnglish = articleEntry.title.match(/\(([^)]+)\)\s*$/);
+    if (trailingEnglish?.[1]) {
+      return trailingEnglish[1];
+    }
+
+    return articleEntry.title;
+  };
+
+  const resolveSectionId = (articleEntry: SupportArticle): string => {
+    const slug = articleEntry.slug.toLowerCase();
+    const category = (articleEntry.category || '').toLowerCase();
+
+    if (slug.includes('push') || slug.includes('notification') || slug.includes('signal-flip')) return 'notifications';
+    if (slug.includes('identity') || slug.includes('email') || slug.includes('privacy') || slug.includes('badge')) return 'account';
+    if (slug.includes('redeem') || slug.includes('referral') || slug.includes('tier') || slug.includes('quota') || slug.includes('channel')) return 'growth';
+    if (slug.includes('verification') || slug.includes('failure')) return 'trust';
+    if (slug.includes('optimistic') || slug.includes('realtime') || slug.includes('sync') || slug.includes('resilien') || slug.includes('infra') || slug.includes('zero-stale')) return 'infra';
+    if (slug.includes('rsi') || slug.includes('confidence') || slug.includes('future') || slug.includes('tradeability') || slug.includes('pulse')) return 'quant';
+    if (slug.includes('ai-') || slug.includes('tactical') || slug.includes('key-level') || slug.includes('matrix') || slug.includes('context')) return 'ai-logic';
+
+    if (category.includes('通知')) return 'notifications';
+    if (category.includes('账号') || category.includes('security')) return 'account';
+    if (category.includes('增长') || category.includes('growth') || category.includes('tiers')) return 'growth';
+    if (category.includes('验证') || category.includes('trust')) return 'trust';
+    if (category.includes('数据') || category.includes('engineering') || category.includes('infra')) return 'infra';
+    if (category.includes('量化') || category.includes('discipline')) return 'quant';
+    if (category.includes('ai') || category.includes('logic') || category.includes('engine')) return 'ai-logic';
+
+    return 'experience';
+  };
+
   const filteredSections = useMemo(() => {
-    if (!searchQuery) return SECTIONS;
+    const sectionMap = new Map<string, Section>(
+      SECTION_META.map((meta) => [meta.id, { ...meta, items: [] }]),
+    );
+
+    const articles = Object.values(catalogBySlug);
+    for (const articleEntry of articles) {
+      const sectionId = resolveSectionId(articleEntry);
+      const section = sectionMap.get(sectionId) || sectionMap.get('experience');
+      if (!section) continue;
+      section.items.push({
+        slug: articleEntry.slug,
+        title: getDisplayQuestion(articleEntry),
+      });
+    }
+
+    for (const section of sectionMap.values()) {
+      section.items.sort((a, b) => a.title.localeCompare(b.title));
+    }
+
     const q = searchQuery.toLowerCase();
-    return SECTIONS.map(s => ({
-      ...s,
-      items: s.items.filter(item => item.q.toLowerCase().includes(q))
-    })).filter(s => s.items.length > 0);
-  }, [searchQuery]);
+    const built = SECTION_META
+      .map((meta) => sectionMap.get(meta.id)!)
+      .map((section) => {
+        if (!searchQuery) return section;
+        return {
+          ...section,
+          items: section.items.filter((item) => item.title.toLowerCase().includes(q)),
+        };
+      })
+      .filter((section) => section.items.length > 0);
+
+    return built;
+  }, [catalogBySlug, searchQuery, locale]);
 
   // ─── Article Detail View ───
   if (article) {
@@ -168,6 +234,11 @@ export function SupportCenterView() {
             <span className="px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[9px] font-black uppercase tracking-widest">
               {article.category || t('loading')}
             </span>
+            {article.isFallback && article.sourceLocale === 'cn' ? (
+              <span className="px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[9px] font-black uppercase tracking-widest">
+                {t('fallbackBadge')}
+              </span>
+            ) : null}
             <div className="flex items-center gap-1 text-slate-600 text-[9px] font-bold">
               <Calendar size={10} />
               {article.lastUpdated || ''}
@@ -184,6 +255,11 @@ export function SupportCenterView() {
             </div>
         ) : (
             <article className="prose prose-invert prose-sm max-w-none">
+              {article.isFallback && article.sourceLocale === 'cn' && locale !== 'cn' ? (
+                <p className="mb-3 rounded-xl border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-[11px] font-bold text-amber-200 not-prose">
+                  {t('fallbackNotice')}
+                </p>
+              ) : null}
               <ReactMarkdown
                 components={{
                   h3: ({ children }) => <h4 className="text-sm font-bold text-slate-200 mt-5 mb-2">{children}</h4>,
@@ -244,6 +320,11 @@ export function SupportCenterView() {
       </div>
 
       {/* Sections */}
+      {catalogLoading && filteredSections.length === 0 ? (
+        <div className="flex items-center justify-center py-10 opacity-50">
+          <div className="w-5 h-5 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
+        </div>
+      ) : null}
       {filteredSections.map((section) => {
         const Icon = section.icon;
         return (
@@ -262,7 +343,7 @@ export function SupportCenterView() {
                   onClick={() => handleSelectSlug(item.slug)}
                   className="w-full px-4 py-3 flex items-center justify-between hover:bg-white/[0.03] active:bg-white/[0.05] transition-colors text-left"
                 >
-                  <span className="text-[13px] font-medium text-slate-300">{item.q}</span>
+                  <span className="text-[13px] font-medium text-slate-300">{item.title}</span>
                   <ChevronRight size={14} className="text-slate-700 shrink-0 ml-2" />
                 </button>
               ))}

@@ -563,6 +563,8 @@
     "backToList": "Back to list",
     "noResults": "No matching questions found",
     "loading": "Loading...",
+    "fallbackBadge": "CN fallback",
+    "fallbackNotice": "This article is currently shown in Chinese while the English version is being prepared.",
     "sections": {
       "experience": "UX & Navigation",
       "ai-logic": "AI Intelligence",

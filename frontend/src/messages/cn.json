@@ -563,6 +563,8 @@
     "backToList": "返回列表",
     "noResults": "没有找到相关问题",
     "loading": "加载中...",
+    "fallbackBadge": "中文回退",
+    "fallbackNotice": "该文章英文版本正在准备中，当前先展示中文内容。",
     "sections": {
       "experience": "交互与导航",
       "ai-logic": "AI 智慧与分析",
