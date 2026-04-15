@@ -10,20 +10,7 @@ export async function GET(
     const { slug } = await params;
     const localeParam = request.nextUrl.searchParams.get("locale");
     const locale = isSupportedPublicLocale(localeParam) ? localeParam : DEFAULT_PUBLIC_LOCALE;
-    let article = getSupportArticleBySlug(slug, { locale });
-
-    if (!article && locale !== "cn") {
-      const cnFallback = getSupportArticleBySlug(slug, { locale: "cn" });
-      if (cnFallback) {
-        article = {
-          ...cnFallback,
-          locale,
-          sourceLocale: "cn",
-          translationStatus: "fallback",
-          isFallback: true,
-        };
-      }
-    }
+    const article = getSupportArticleBySlug(slug, { locale, fallbackToDefault: false });
 
     if (!article) {
       return NextResponse.json({ error: "Article not found" }, { status: 404 });
