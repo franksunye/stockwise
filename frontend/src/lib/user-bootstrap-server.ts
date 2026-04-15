@@ -49,6 +49,16 @@ export function normalizeProfileLocale(input: unknown): NormalizedLocale {
     return 'en';
 }
 
+function resolveResponseLocale(user: UserRow, preferredLocale: NormalizedLocale, tier: string): NormalizedLocale {
+    // Keep invite/onboarding entry aligned with the user's current environment.
+    // Otherwise an old anonymous row with locale=cn can force English iPhone users
+    // back into Chinese before they ever complete onboarding.
+    if (!Boolean(user.has_onboarded) && tier === 'free') {
+        return preferredLocale;
+    }
+    return normalizeProfileLocale(user.locale);
+}
+
 function normalizeTier(raw: unknown): string {
     const tier = String(raw || 'free').toLowerCase();
     if (tier === 'go' || tier === 'plus' || tier === 'pro' || tier === 'alpha') return tier;
@@ -316,7 +326,7 @@ export async function prepareUserBootstrapPayload(
         hasOnboarded: Boolean(user.has_onboarded),
         watchlistCount: watchlistSummary.count,
         watchlist: watchlistSummary.items,
-        locale: normalizeProfileLocale(user.locale),
+        locale: resolveResponseLocale(user, preferredLocale, tier),
         isChannel,
         referralBalance: Number(user.referral_balance || 0),
         totalEarned: Number(user.total_earned || 0),
