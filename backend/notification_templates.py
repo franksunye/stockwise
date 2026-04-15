@@ -14,6 +14,17 @@ class NotificationTemplates:
     High-performance template engine for push notifications.
     Uses localized dictionaries and safe rendering with fallbacks.
     """
+
+    PRICE_FIELD_NAMES = {
+        "price",
+        "current_price",
+        "support_price",
+        "pressure_price",
+        "discipline_price",
+        "resistance_price",
+        "observation_price",
+        "trigger_price",
+    }
     
     # 1. Template Registry
     # Structure: [Type] -> [Tier] -> [Language] -> {title, body}
@@ -409,6 +420,7 @@ class NotificationTemplates:
                 kwargs["confidence_pct"] = int(float(kwargs["confidence"]) * 100)
             except Exception:
                 pass
+        kwargs = cls._normalize_template_kwargs(kwargs)
 
         # A. Resolve Tier & Type
         # Normalize Tier: Semantic distinction between 'free' and 'paid' (members)
@@ -459,3 +471,26 @@ class NotificationTemplates:
         title = payload.get("title") or "重要更新"
         body = payload.get("body") or "您有一条新的 AI 策略通知，点击查看。"
         return str(title), str(body)
+
+    @classmethod
+    def _normalize_template_kwargs(cls, payload: Dict[str, Any]) -> Dict[str, Any]:
+        normalized = dict(payload)
+        for key, value in list(normalized.items()):
+            if key == "stock_name" or not cls._should_format_price_field(key, value):
+                continue
+            normalized[key] = cls._format_price_value(value)
+        return normalized
+
+    @classmethod
+    def _should_format_price_field(cls, key: str, value: Any) -> bool:
+        if value is None:
+            return False
+        if not isinstance(value, (int, float)):
+            return False
+        if isinstance(value, bool):
+            return False
+        return key in cls.PRICE_FIELD_NAMES or key.endswith("_price")
+
+    @staticmethod
+    def _format_price_value(value: float) -> str:
+        return f"{float(value):.2f}".rstrip("0").rstrip(".")

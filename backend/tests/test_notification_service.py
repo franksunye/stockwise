@@ -132,6 +132,23 @@ class TestNotificationService(unittest.TestCase):
         self.assertNotIn("0700.HK", title)
         self.assertIn("最新:", body)
 
+    def test_price_update_template_formats_english_price_without_float_tail(self):
+        """English price notifications should not expose raw float precision noise."""
+        title, body = NotificationTemplates.render(
+            "price_update",
+            tier="free",
+            lang="en",
+            stock_name="Tencent",
+            symbol="0700.HK",
+            emoji="📈",
+            change_pct="+1.23",
+            price=512.3000000000001,
+            volume_formatted="1.2M",
+        )
+        self.assertEqual(title, "Tencent 📈 +1.23%")
+        self.assertIn("Last: 512.3", body)
+        self.assertNotIn("512.3000000000001", body)
+
     def test_aggregation_daily_brief_variant(self):
         """Daily brief variants should be aggregated and rendered."""
         user_id = "user1"
