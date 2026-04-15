@@ -10,13 +10,16 @@
 
 import { createClient } from '@libsql/client';
 import { config } from 'dotenv';
+import dns from 'dns';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
+
+dns.setDefaultResultOrder('ipv4first');
 
 // 始终从仓库根解析 backend/.env（避免在 frontend/ 下 cwd 错误导致未加载 Turso 密钥）
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(__dirname, '../..');
-config({ path: resolve(repoRoot, 'backend/.env') });
+config({ path: resolve(repoRoot, 'backend/.env'), quiet: true });
 
 const TURSO_DB_URL = process.env.TURSO_DB_URL;
 const TURSO_AUTH_TOKEN = process.env.TURSO_AUTH_TOKEN;
@@ -32,10 +35,42 @@ const client = createClient({
   authToken: TURSO_AUTH_TOKEN,
 });
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function isTransientTursoError(error) {
+  const message = String(error?.message || error || '').toLowerCase();
+  return (
+    message.includes('fetch failed') ||
+    message.includes('econnreset') ||
+    message.includes('tls') ||
+    message.includes('eof') ||
+    message.includes('timeout')
+  );
+}
+
+async function executeWithRetry(sql, attempts = 3) {
+  let lastError;
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      return await client.execute(sql);
+    } catch (error) {
+      lastError = error;
+      if (!isTransientTursoError(error) || attempt === attempts) {
+        throw error;
+      }
+      await sleep(attempt * 1000);
+    }
+  }
+  throw lastError;
+}
+
 async function main() {
   const [,, command, ...args] = process.argv;
+  const isRaw = args.includes('--raw');
 
-  console.log(`🔗 连接 Turso: ${TURSO_DB_URL.substring(0, 50)}...`);
+  if (!isRaw) {
+    console.log(`🔗 连接 Turso: ${TURSO_DB_URL.substring(0, 50)}...`);
+  }
 
   try {
     switch (command) {
@@ -43,7 +78,6 @@ async function main() {
       case 'sql':
         // Check for --raw flag
         const rawIndex = args.indexOf('--raw');
-        const isRaw = rawIndex !== -1;
         if (isRaw) {
           args.splice(rawIndex, 1);
         }
@@ -60,7 +94,7 @@ async function main() {
           console.log(`📝 执行: ${sql}\n`);
         }
         
-        const result = await client.execute(sql);
+        const result = await executeWithRetry(sql);
         
         if (!isRaw) {
            console.log(`✅ 影响行数: ${result.rowsAffected}`);
@@ -77,7 +111,7 @@ async function main() {
 
       case 'tables':
         // 列出所有表
-        const tables = await client.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name");
+        const tables = await executeWithRetry("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name");
         console.log('\n📋 数据库表:');
         tables.rows.forEach(row => console.log(`   - ${row.name}`));
         break;
@@ -85,13 +119,13 @@ async function main() {
       case 'count':
         // 统计表记录数
         const tableName = args[0] || 'daily_prices';
-        const count = await client.execute(`SELECT COUNT(*) as count FROM ${tableName}`);
+        const count = await executeWithRetry(`SELECT COUNT(*) as count FROM ${tableName}`);
         console.log(`\n📊 ${tableName}: ${count.rows[0].count} 条记录`);
         break;
 
       case 'stocks':
         // 显示股票池
-        const stocks = await client.execute('SELECT * FROM stock_pool ORDER BY added_at');
+        const stocks = await executeWithRetry('SELECT * FROM stock_pool ORDER BY added_at');
         console.log('\n📈 股票池:');
         console.table(stocks.rows);
         break;
@@ -99,7 +133,7 @@ async function main() {
       case 'latest':
         // 显示最新数据
         const symbol = args[0] || '00700';
-        const latest = await client.execute(`
+        const latest = await executeWithRetry(`
           SELECT symbol, date, close, ma5, macd, rsi 
           FROM daily_prices 
           WHERE symbol = '${symbol}' 

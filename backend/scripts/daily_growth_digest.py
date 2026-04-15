@@ -335,45 +335,205 @@ def get_internal_metrics():
     Fetches 24h / 7d / 30d internal growth and activation metrics from DB.
     Note: `users` rows are bootstrap identities, not necessarily completed signups.
     """
-    conn = get_connection()
-    cursor = conn.cursor()
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
 
-    def scalar(sql: str):
-        cursor.execute(sql)
+        def scalar(sql: str):
+            cursor.execute(sql)
+            row = cursor.fetchone()
+            return row[0] if row else 0
+
+        windows = {
+            "last_24h": {
+                "new_user_rows": scalar("SELECT COUNT(*) FROM users WHERE created_at > datetime('now', '-24 hours', '+8 hours')"),
+                "anonymous_rows": scalar("SELECT COUNT(*) FROM users WHERE created_at > datetime('now', '-24 hours', '+8 hours') AND lower(coalesce(registration_type, 'anonymous')) = 'anonymous'"),
+                "activated_users": scalar("SELECT COUNT(*) FROM users WHERE created_at > datetime('now', '-24 hours', '+8 hours') AND has_onboarded = 1"),
+                "paid_rows": scalar("SELECT COUNT(*) FROM users WHERE created_at > datetime('now', '-24 hours', '+8 hours') AND lower(coalesce(subscription_tier, 'free')) IN ('go','plus','pro')"),
+                "active_watchers": scalar("SELECT COUNT(DISTINCT user_id) FROM user_watchlist WHERE added_at > datetime('now', '-24 hours', '+8 hours')"),
+            },
+            "last_7d": {
+                "new_user_rows": scalar("SELECT COUNT(*) FROM users WHERE created_at > datetime('now', '-7 days', '+8 hours')"),
+                "anonymous_rows": scalar("SELECT COUNT(*) FROM users WHERE created_at > datetime('now', '-7 days', '+8 hours') AND lower(coalesce(registration_type, 'anonymous')) = 'anonymous'"),
+                "activated_users": scalar("SELECT COUNT(*) FROM users WHERE created_at > datetime('now', '-7 days', '+8 hours') AND has_onboarded = 1"),
+                "paid_rows": scalar("SELECT COUNT(*) FROM users WHERE created_at > datetime('now', '-7 days', '+8 hours') AND lower(coalesce(subscription_tier, 'free')) IN ('go','plus','pro')"),
+                "active_watchers": scalar("SELECT COUNT(DISTINCT user_id) FROM user_watchlist WHERE added_at > datetime('now', '-7 days', '+8 hours')"),
+            },
+            "last_30d": {
+                "new_user_rows": scalar("SELECT COUNT(*) FROM users WHERE created_at > datetime('now', '-30 days', '+8 hours')"),
+                "anonymous_rows": scalar("SELECT COUNT(*) FROM users WHERE created_at > datetime('now', '-30 days', '+8 hours') AND lower(coalesce(registration_type, 'anonymous')) = 'anonymous'"),
+                "activated_users": scalar("SELECT COUNT(*) FROM users WHERE created_at > datetime('now', '-30 days', '+8 hours') AND has_onboarded = 1"),
+                "paid_rows": scalar("SELECT COUNT(*) FROM users WHERE created_at > datetime('now', '-30 days', '+8 hours') AND lower(coalesce(subscription_tier, 'free')) IN ('go','plus','pro')"),
+                "active_watchers": scalar("SELECT COUNT(DISTINCT user_id) FROM user_watchlist WHERE added_at > datetime('now', '-30 days', '+8 hours')"),
+            },
+        }
+
+        cursor.execute("SELECT lower(coalesce(subscription_tier, 'free')), COUNT(*) FROM users GROUP BY 1 ORDER BY 2 DESC")
+        tiers = {row[0]: row[1] for row in cursor.fetchall()}
+
+        cursor.execute("SELECT lower(coalesce(locale, 'unknown')), COUNT(*) FROM users GROUP BY 1 ORDER BY 2 DESC")
+        locales = {row[0]: row[1] for row in cursor.fetchall()}
+
+        cursor.execute("""
+            SELECT
+                COUNT(*) AS user_rows_30d,
+                SUM(CASE WHEN lower(coalesce(registration_type, 'anonymous')) = 'anonymous' THEN 1 ELSE 0 END) AS anonymous_rows_30d,
+                SUM(CASE WHEN has_onboarded = 1 THEN 1 ELSE 0 END) AS onboarded_30d,
+                SUM(CASE WHEN lower(coalesce(subscription_tier, 'free')) IN ('go','plus','pro') THEN 1 ELSE 0 END) AS upgraded_30d,
+                SUM(CASE WHEN EXISTS (SELECT 1 FROM user_watchlist w WHERE w.user_id = u.user_id) THEN 1 ELSE 0 END) AS with_watchlist_30d
+            FROM users u
+            WHERE created_at > datetime('now', '-30 days', '+8 hours')
+        """)
         row = cursor.fetchone()
-        return row[0] if row else 0
+        activation_summary = {
+            "user_rows_30d": row[0] or 0,
+            "anonymous_rows_30d": row[1] or 0,
+            "onboarded_30d": row[2] or 0,
+            "upgraded_30d": row[3] or 0,
+            "with_watchlist_30d": row[4] or 0,
+        }
+
+        cursor.execute("""
+            SELECT
+                CASE WHEN referred_by IS NOT NULL AND referred_by != '' THEN 'referred' ELSE 'organic' END AS channel,
+                COUNT(*) AS user_rows,
+                SUM(CASE WHEN has_onboarded = 1 THEN 1 ELSE 0 END) AS onboarded,
+                SUM(CASE WHEN lower(coalesce(subscription_tier, 'free')) IN ('go','plus','pro') THEN 1 ELSE 0 END) AS upgraded
+            FROM users
+            WHERE created_at > datetime('now', '-30 days', '+8 hours')
+            GROUP BY 1
+            ORDER BY user_rows DESC
+        """)
+        channel_quality = [
+            {"channel": row[0], "user_rows": row[1], "onboarded": row[2], "upgraded": row[3]}
+            for row in cursor.fetchall()
+        ]
+
+        cursor.execute("""
+            SELECT symbol, COUNT(*) as count, COUNT(DISTINCT user_id) as users
+            FROM user_watchlist
+            WHERE added_at > datetime('now', '-30 days', '+8 hours')
+            GROUP BY symbol ORDER BY count DESC, users DESC LIMIT 10
+        """)
+        top_symbols = [{"symbol": row[0], "count": row[1], "users": row[2]} for row in cursor.fetchall()]
+
+        cursor.execute("""
+            SELECT
+                substr(created_at, 1, 10) as day,
+                COUNT(*) as user_rows,
+                SUM(CASE WHEN has_onboarded = 1 THEN 1 ELSE 0 END) AS activated
+            FROM users
+            WHERE created_at > datetime('now', '-7 days', '+8 hours')
+            GROUP BY 1 ORDER BY 1
+        """)
+        signup_trend = [{"day": row[0], "user_rows": row[1], "activated": row[2] or 0} for row in cursor.fetchall()]
+
+        cursor.execute("""
+            SELECT substr(added_at, 1, 10) as day, COUNT(*) as adds
+            FROM user_watchlist
+            WHERE added_at > datetime('now', '-7 days', '+8 hours')
+            GROUP BY 1 ORDER BY 1
+        """)
+        watchlist_trend = [{"day": row[0], "adds": row[1]} for row in cursor.fetchall()]
+
+        cursor.execute("""
+            SELECT user_id, registration_type, created_at, subscription_tier, referred_by, has_onboarded, locale
+            FROM users 
+            WHERE created_at > datetime('now', '-24 hours', '+8 hours')
+            ORDER BY created_at DESC LIMIT 10
+        """)
+        new_users_detailed = []
+        for row in cursor.fetchall():
+            uid = row[0]
+            cursor.execute("SELECT COUNT(*) FROM user_watchlist WHERE user_id = ?", (uid,))
+            w_count = cursor.fetchone()[0]
+            new_users_detailed.append({
+                "user_id": uid,
+                "type": row[1],
+                "created_at": row[2],
+                "tier": row[3],
+                "referred_by": row[4],
+                "onboarded": row[5],
+                "locale": row[6],
+                "watchlist_count": w_count
+            })
+        
+        conn.close()
+        return {
+            "windows": windows,
+            "top_symbols": top_symbols,
+            "tiers": tiers,
+            "locales": locales,
+            "activation_summary": activation_summary,
+            "channel_quality": channel_quality,
+            "signup_trend": signup_trend,
+            "watchlist_trend": watchlist_trend,
+            "new_users_detailed": new_users_detailed,
+        }
+    except Exception as exc:
+        print(f"⚠️ Primary DB path failed, falling back to Node Turso CLI: {exc}")
+        return get_internal_metrics_via_node_cli()
+
+
+def get_internal_metrics_via_node_cli():
+    frontend_dir = os.path.join(os.path.dirname(BASE_DIR), "frontend")
+    cli_path = os.path.join("scripts", "turso-cli.mjs")
+
+    def query(sql: str) -> List[Dict[str, Any]]:
+        result = subprocess.run(
+            ["node", cli_path, "query", "--raw", sql],
+            cwd=frontend_dir,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        stdout = result.stdout.strip()
+        start = stdout.find("[")
+        if start == -1:
+            raise RuntimeError(f"Unexpected Turso CLI output: {stdout}")
+        return json.loads(stdout[start:])
+
+    def scalar(sql: str, key: str) -> int:
+        rows = query(sql)
+        if not rows:
+            return 0
+        value = rows[0].get(key)
+        return int(value or 0)
 
     windows = {
         "last_24h": {
-            "new_user_rows": scalar("SELECT COUNT(*) FROM users WHERE created_at > datetime('now', '-24 hours', '+8 hours')"),
-            "anonymous_rows": scalar("SELECT COUNT(*) FROM users WHERE created_at > datetime('now', '-24 hours', '+8 hours') AND lower(coalesce(registration_type, 'anonymous')) = 'anonymous'"),
-            "activated_users": scalar("SELECT COUNT(*) FROM users WHERE created_at > datetime('now', '-24 hours', '+8 hours') AND has_onboarded = 1"),
-            "paid_rows": scalar("SELECT COUNT(*) FROM users WHERE created_at > datetime('now', '-24 hours', '+8 hours') AND lower(coalesce(subscription_tier, 'free')) IN ('go','plus','pro')"),
-            "active_watchers": scalar("SELECT COUNT(DISTINCT user_id) FROM user_watchlist WHERE added_at > datetime('now', '-24 hours', '+8 hours')"),
+            "new_user_rows": scalar("SELECT COUNT(*) AS value FROM users WHERE created_at > datetime('now', '-24 hours', '+8 hours')", "value"),
+            "anonymous_rows": scalar("SELECT COUNT(*) AS value FROM users WHERE created_at > datetime('now', '-24 hours', '+8 hours') AND lower(coalesce(registration_type, 'anonymous')) = 'anonymous'", "value"),
+            "activated_users": scalar("SELECT COUNT(*) AS value FROM users WHERE created_at > datetime('now', '-24 hours', '+8 hours') AND has_onboarded = 1", "value"),
+            "paid_rows": scalar("SELECT COUNT(*) AS value FROM users WHERE created_at > datetime('now', '-24 hours', '+8 hours') AND lower(coalesce(subscription_tier, 'free')) IN ('go','plus','pro')", "value"),
+            "active_watchers": scalar("SELECT COUNT(DISTINCT user_id) AS value FROM user_watchlist WHERE added_at > datetime('now', '-24 hours', '+8 hours')", "value"),
         },
         "last_7d": {
-            "new_user_rows": scalar("SELECT COUNT(*) FROM users WHERE created_at > datetime('now', '-7 days', '+8 hours')"),
-            "anonymous_rows": scalar("SELECT COUNT(*) FROM users WHERE created_at > datetime('now', '-7 days', '+8 hours') AND lower(coalesce(registration_type, 'anonymous')) = 'anonymous'"),
-            "activated_users": scalar("SELECT COUNT(*) FROM users WHERE created_at > datetime('now', '-7 days', '+8 hours') AND has_onboarded = 1"),
-            "paid_rows": scalar("SELECT COUNT(*) FROM users WHERE created_at > datetime('now', '-7 days', '+8 hours') AND lower(coalesce(subscription_tier, 'free')) IN ('go','plus','pro')"),
-            "active_watchers": scalar("SELECT COUNT(DISTINCT user_id) FROM user_watchlist WHERE added_at > datetime('now', '-7 days', '+8 hours')"),
+            "new_user_rows": scalar("SELECT COUNT(*) AS value FROM users WHERE created_at > datetime('now', '-7 days', '+8 hours')", "value"),
+            "anonymous_rows": scalar("SELECT COUNT(*) AS value FROM users WHERE created_at > datetime('now', '-7 days', '+8 hours') AND lower(coalesce(registration_type, 'anonymous')) = 'anonymous'", "value"),
+            "activated_users": scalar("SELECT COUNT(*) AS value FROM users WHERE created_at > datetime('now', '-7 days', '+8 hours') AND has_onboarded = 1", "value"),
+            "paid_rows": scalar("SELECT COUNT(*) AS value FROM users WHERE created_at > datetime('now', '-7 days', '+8 hours') AND lower(coalesce(subscription_tier, 'free')) IN ('go','plus','pro')", "value"),
+            "active_watchers": scalar("SELECT COUNT(DISTINCT user_id) AS value FROM user_watchlist WHERE added_at > datetime('now', '-7 days', '+8 hours')", "value"),
         },
         "last_30d": {
-            "new_user_rows": scalar("SELECT COUNT(*) FROM users WHERE created_at > datetime('now', '-30 days', '+8 hours')"),
-            "anonymous_rows": scalar("SELECT COUNT(*) FROM users WHERE created_at > datetime('now', '-30 days', '+8 hours') AND lower(coalesce(registration_type, 'anonymous')) = 'anonymous'"),
-            "activated_users": scalar("SELECT COUNT(*) FROM users WHERE created_at > datetime('now', '-30 days', '+8 hours') AND has_onboarded = 1"),
-            "paid_rows": scalar("SELECT COUNT(*) FROM users WHERE created_at > datetime('now', '-30 days', '+8 hours') AND lower(coalesce(subscription_tier, 'free')) IN ('go','plus','pro')"),
-            "active_watchers": scalar("SELECT COUNT(DISTINCT user_id) FROM user_watchlist WHERE added_at > datetime('now', '-30 days', '+8 hours')"),
+            "new_user_rows": scalar("SELECT COUNT(*) AS value FROM users WHERE created_at > datetime('now', '-30 days', '+8 hours')", "value"),
+            "anonymous_rows": scalar("SELECT COUNT(*) AS value FROM users WHERE created_at > datetime('now', '-30 days', '+8 hours') AND lower(coalesce(registration_type, 'anonymous')) = 'anonymous'", "value"),
+            "activated_users": scalar("SELECT COUNT(*) AS value FROM users WHERE created_at > datetime('now', '-30 days', '+8 hours') AND has_onboarded = 1", "value"),
+            "paid_rows": scalar("SELECT COUNT(*) AS value FROM users WHERE created_at > datetime('now', '-30 days', '+8 hours') AND lower(coalesce(subscription_tier, 'free')) IN ('go','plus','pro')", "value"),
+            "active_watchers": scalar("SELECT COUNT(DISTINCT user_id) AS value FROM user_watchlist WHERE added_at > datetime('now', '-30 days', '+8 hours')", "value"),
         },
     }
 
-    cursor.execute("SELECT lower(coalesce(subscription_tier, 'free')), COUNT(*) FROM users GROUP BY 1 ORDER BY 2 DESC")
-    tiers = {row[0]: row[1] for row in cursor.fetchall()}
+    tiers = {
+        str(row["tier"]): int(row["count"])
+        for row in query("SELECT lower(coalesce(subscription_tier, 'free')) AS tier, COUNT(*) AS count FROM users GROUP BY 1 ORDER BY 2 DESC")
+    }
+    locales = {
+        str(row["locale"]): int(row["count"])
+        for row in query("SELECT lower(coalesce(locale, 'unknown')) AS locale, COUNT(*) AS count FROM users GROUP BY 1 ORDER BY 2 DESC")
+    }
 
-    cursor.execute("SELECT lower(coalesce(locale, 'unknown')), COUNT(*) FROM users GROUP BY 1 ORDER BY 2 DESC")
-    locales = {row[0]: row[1] for row in cursor.fetchall()}
-
-    cursor.execute("""
+    activation_row = query("""
         SELECT
             COUNT(*) AS user_rows_30d,
             SUM(CASE WHEN lower(coalesce(registration_type, 'anonymous')) = 'anonymous' THEN 1 ELSE 0 END) AS anonymous_rows_30d,
@@ -382,83 +542,98 @@ def get_internal_metrics():
             SUM(CASE WHEN EXISTS (SELECT 1 FROM user_watchlist w WHERE w.user_id = u.user_id) THEN 1 ELSE 0 END) AS with_watchlist_30d
         FROM users u
         WHERE created_at > datetime('now', '-30 days', '+8 hours')
-    """)
-    row = cursor.fetchone()
+    """)[0]
     activation_summary = {
-        "user_rows_30d": row[0] or 0,
-        "anonymous_rows_30d": row[1] or 0,
-        "onboarded_30d": row[2] or 0,
-        "upgraded_30d": row[3] or 0,
-        "with_watchlist_30d": row[4] or 0,
+        "user_rows_30d": int(activation_row.get("user_rows_30d") or 0),
+        "anonymous_rows_30d": int(activation_row.get("anonymous_rows_30d") or 0),
+        "onboarded_30d": int(activation_row.get("onboarded_30d") or 0),
+        "upgraded_30d": int(activation_row.get("upgraded_30d") or 0),
+        "with_watchlist_30d": int(activation_row.get("with_watchlist_30d") or 0),
     }
 
-    cursor.execute("""
-        SELECT
-            CASE WHEN referred_by IS NOT NULL AND referred_by != '' THEN 'referred' ELSE 'organic' END AS channel,
-            COUNT(*) AS user_rows,
-            SUM(CASE WHEN has_onboarded = 1 THEN 1 ELSE 0 END) AS onboarded,
-            SUM(CASE WHEN lower(coalesce(subscription_tier, 'free')) IN ('go','plus','pro') THEN 1 ELSE 0 END) AS upgraded
-        FROM users
-        WHERE created_at > datetime('now', '-30 days', '+8 hours')
-        GROUP BY 1
-        ORDER BY user_rows DESC
-    """)
     channel_quality = [
-        {"channel": row[0], "user_rows": row[1], "onboarded": row[2], "upgraded": row[3]}
-        for row in cursor.fetchall()
+        {
+            "channel": str(row["channel"]),
+            "user_rows": int(row["user_rows"]),
+            "onboarded": int(row["onboarded"] or 0),
+            "upgraded": int(row["upgraded"] or 0),
+        }
+        for row in query("""
+            SELECT
+                CASE WHEN referred_by IS NOT NULL AND referred_by != '' THEN 'referred' ELSE 'organic' END AS channel,
+                COUNT(*) AS user_rows,
+                SUM(CASE WHEN has_onboarded = 1 THEN 1 ELSE 0 END) AS onboarded,
+                SUM(CASE WHEN lower(coalesce(subscription_tier, 'free')) IN ('go','plus','pro') THEN 1 ELSE 0 END) AS upgraded
+            FROM users
+            WHERE created_at > datetime('now', '-30 days', '+8 hours')
+            GROUP BY 1
+            ORDER BY user_rows DESC
+        """)
     ]
 
-    cursor.execute("""
-        SELECT symbol, COUNT(*) as count, COUNT(DISTINCT user_id) as users
-        FROM user_watchlist
-        WHERE added_at > datetime('now', '-30 days', '+8 hours')
-        GROUP BY symbol ORDER BY count DESC, users DESC LIMIT 10
-    """)
-    top_symbols = [{"symbol": row[0], "count": row[1], "users": row[2]} for row in cursor.fetchall()]
+    top_symbols = [
+        {"symbol": str(row["symbol"]), "count": int(row["count"]), "users": int(row["users"])}
+        for row in query("""
+            SELECT symbol, COUNT(*) as count, COUNT(DISTINCT user_id) as users
+            FROM user_watchlist
+            WHERE added_at > datetime('now', '-30 days', '+8 hours')
+            GROUP BY symbol ORDER BY count DESC, users DESC LIMIT 10
+        """)
+    ]
 
-    cursor.execute("""
-        SELECT
-            substr(created_at, 1, 10) as day,
-            COUNT(*) as user_rows,
-            SUM(CASE WHEN has_onboarded = 1 THEN 1 ELSE 0 END) AS activated
-        FROM users
-        WHERE created_at > datetime('now', '-7 days', '+8 hours')
-        GROUP BY 1 ORDER BY 1
-    """)
-    signup_trend = [{"day": row[0], "user_rows": row[1], "activated": row[2] or 0} for row in cursor.fetchall()]
+    signup_trend = [
+        {"day": str(row["day"]), "user_rows": int(row["user_rows"]), "activated": int(row["activated"] or 0)}
+        for row in query("""
+            SELECT
+                substr(created_at, 1, 10) as day,
+                COUNT(*) as user_rows,
+                SUM(CASE WHEN has_onboarded = 1 THEN 1 ELSE 0 END) AS activated
+            FROM users
+            WHERE created_at > datetime('now', '-7 days', '+8 hours')
+            GROUP BY 1 ORDER BY 1
+        """)
+    ]
 
-    cursor.execute("""
-        SELECT substr(added_at, 1, 10) as day, COUNT(*) as adds
-        FROM user_watchlist
-        WHERE added_at > datetime('now', '-7 days', '+8 hours')
-        GROUP BY 1 ORDER BY 1
-    """)
-    watchlist_trend = [{"day": row[0], "adds": row[1]} for row in cursor.fetchall()]
+    watchlist_trend = [
+        {"day": str(row["day"]), "adds": int(row["adds"])}
+        for row in query("""
+            SELECT substr(added_at, 1, 10) as day, COUNT(*) as adds
+            FROM user_watchlist
+            WHERE added_at > datetime('now', '-7 days', '+8 hours')
+            GROUP BY 1 ORDER BY 1
+        """)
+    ]
 
-    cursor.execute("""
-        SELECT user_id, registration_type, created_at, subscription_tier, referred_by, has_onboarded, locale
-        FROM users 
-        WHERE created_at > datetime('now', '-24 hours', '+8 hours')
-        ORDER BY created_at DESC LIMIT 10
-    """)
-    new_users_detailed = []
-    for row in cursor.fetchall():
-        uid = row[0]
-        # Check their watchlist count
-        cursor.execute("SELECT COUNT(*) FROM user_watchlist WHERE user_id = ?", (uid,))
-        w_count = cursor.fetchone()[0]
-        new_users_detailed.append({
-            "user_id": uid,
-            "type": row[1],
-            "created_at": row[2],
-            "tier": row[3],
-            "referred_by": row[4],
-            "onboarded": row[5],
-            "locale": row[6],
-            "watchlist_count": w_count
-        })
-    
-    conn.close()
+    new_users_detailed = [
+        {
+            "user_id": str(row["user_id"]),
+            "type": row.get("type"),
+            "created_at": row.get("created_at"),
+            "tier": row.get("tier"),
+            "referred_by": row.get("referred_by"),
+            "onboarded": int(row.get("onboarded") or 0),
+            "locale": row.get("locale"),
+            "watchlist_count": int(row.get("watchlist_count") or 0),
+        }
+        for row in query("""
+            SELECT
+                u.user_id AS user_id,
+                u.registration_type AS type,
+                u.created_at AS created_at,
+                u.subscription_tier AS tier,
+                u.referred_by AS referred_by,
+                u.has_onboarded AS onboarded,
+                u.locale AS locale,
+                COUNT(w.symbol) AS watchlist_count
+            FROM users u
+            LEFT JOIN user_watchlist w ON w.user_id = u.user_id
+            WHERE u.created_at > datetime('now', '-24 hours', '+8 hours')
+            GROUP BY u.user_id, u.registration_type, u.created_at, u.subscription_tier, u.referred_by, u.has_onboarded, u.locale
+            ORDER BY u.created_at DESC
+            LIMIT 10
+        """)
+    ]
+
     return {
         "windows": windows,
         "top_symbols": top_symbols,
