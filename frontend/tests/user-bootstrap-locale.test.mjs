@@ -9,16 +9,16 @@ const ROOT = resolve(__dirname, '..');
 const BOOTSTRAP_SERVER_PATH = resolve(ROOT, 'src', 'lib', 'user-bootstrap-server.ts');
 
 describe('user bootstrap locale boundary', () => {
-  it('should honor request locale for free users who have not onboarded yet', () => {
+  it('should backfill empty persisted locale with the current request locale', () => {
     const src = readFileSync(BOOTSTRAP_SERVER_PATH, 'utf-8');
 
     assert.ok(
-      src.includes("if (!Boolean(user.has_onboarded) && tier === 'free')"),
-      'Bootstrap locale response should special-case free users who have not onboarded yet.',
+      src.includes('const shouldBackfillLocale = !persistedLocale;'),
+      'Bootstrap should detect when an existing user row still has no locale.',
     );
     assert.ok(
-      src.includes('return preferredLocale;'),
-      'Bootstrap locale response should use the current request locale before onboarding completes.',
+      src.includes('if (shouldPersistLocale || shouldBackfillLocale) {'),
+      'Bootstrap should persist the current request locale when an existing row has no locale yet.',
     );
   });
 
@@ -48,12 +48,12 @@ describe('user bootstrap locale boundary', () => {
     );
   });
 
-  it('should keep persisted locale resolution for mature users when it exists', () => {
+  it('should keep persisted locale resolution for users when it exists', () => {
     const src = readFileSync(BOOTSTRAP_SERVER_PATH, 'utf-8');
 
     assert.ok(
       src.includes('return persistedLocale;'),
-      'Bootstrap locale response should still use the persisted profile locale when it exists and the user is mature.',
+      'Bootstrap locale response should still use the persisted profile locale when it exists.',
     );
   });
 });

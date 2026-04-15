@@ -452,7 +452,7 @@ def init_db():
                 last_active_at TIMESTAMP DEFAULT (datetime('now', '+8 hours')), 
                 subscription_tier TEXT DEFAULT 'free', 
                 subscription_expires_at TIMESTAMP,
-                locale TEXT DEFAULT 'cn',
+                locale TEXT,
                 referred_by TEXT,
                 has_onboarded BOOLEAN DEFAULT 0,
                 notification_settings TEXT,
@@ -1157,7 +1157,7 @@ def init_db():
         add_column_if_missing('users', 'total_earned', 'REAL DEFAULT 0')
         add_column_if_missing('users', 'custom_commission_rate', 'REAL')
         add_column_if_missing('users', 'referral_alias', 'TEXT')
-        add_column_if_missing('users', 'locale', "TEXT DEFAULT 'cn'")
+        add_column_if_missing('users', 'locale', 'TEXT')
 
         # Briefs Migrations
         add_column_if_missing('daily_briefs', 'notified_at', 'TIMESTAMP')

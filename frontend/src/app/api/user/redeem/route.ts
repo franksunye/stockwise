@@ -89,8 +89,8 @@ export async function POST(request: Request) {
 
             // Only proceed to update user if code update succeeded (Optimistic Lock passed)
             await client.execute({
-                sql: `INSERT INTO users (user_id, subscription_tier, subscription_expires_at, registration_type) 
-                      VALUES (?, ?, ?, 'anonymous') 
+                sql: `INSERT INTO users (user_id, subscription_tier, subscription_expires_at, registration_type, locale) 
+                      VALUES (?, ?, ?, 'anonymous', NULL) 
                       ON CONFLICT(user_id) DO UPDATE SET 
                       subscription_tier = ?, 
                       subscription_expires_at = ?`,
@@ -108,8 +108,8 @@ export async function POST(request: Request) {
                 }
 
                 client.prepare(`
-                INSERT INTO users (user_id, subscription_tier, subscription_expires_at, registration_type) 
-                VALUES (?, ?, ?, 'anonymous') 
+                INSERT INTO users (user_id, subscription_tier, subscription_expires_at, registration_type, locale) 
+                VALUES (?, ?, ?, 'anonymous', NULL) 
                 ON CONFLICT(user_id) DO UPDATE SET 
                 subscription_tier = ?, 
                 subscription_expires_at = ?

@@ -19,6 +19,8 @@ const USER_SESSION_SYNC_KEY = 'STOCKWISE_USER_SESSION_SYNCED_AT';
 const USER_SESSION_SYNC_INTERVAL_MS = 5 * 60 * 1000;
 const SESSION_SYNC_COOKIE = 'stockwise_ssync';
 const SESSION_SYNC_COOKIE_TTL_MIN = 30;
+const LOCALE_STORAGE_KEY = 'stockwise_locale';
+const LOCALE_COOKIE_KEY = 'ziso_locale';
 
 export type RegistrationType = 'anonymous' | 'explicit';
 
@@ -31,6 +33,23 @@ export interface User {
 interface GetCurrentUserOptions {
   forceSessionSync?: boolean;
   waitForSessionSync?: boolean;
+}
+
+function inferLocaleFromToken(value: string | null | undefined): 'cn' | 'en' | null {
+  const normalized = String(value || '').trim().toLowerCase();
+  if (!normalized) return null;
+  if (normalized === 'cn' || normalized === 'zh' || normalized.startsWith('zh-')) return 'cn';
+  if (normalized === 'en' || normalized.startsWith('en-')) return 'en';
+  return null;
+}
+
+function getInitialLocale(): 'cn' | 'en' {
+  if (typeof window === 'undefined') return 'en';
+  const stored = inferLocaleFromToken(localStorage.getItem(LOCALE_STORAGE_KEY));
+  if (stored) return stored;
+  const cookieLocale = inferLocaleFromToken(getCookie(LOCALE_COOKIE_KEY));
+  if (cookieLocale) return cookieLocale;
+  return inferLocaleFromToken(navigator.language) ?? 'en';
 }
 
 let pendingUserSessionSync: Promise<void> | null = null;
@@ -63,6 +82,7 @@ async function syncCurrentUserSession(
           body: JSON.stringify({
             userId,
             registrationType: userType || 'anonymous',
+            locale: getInitialLocale(),
           }),
           signal: controller.signal
         });

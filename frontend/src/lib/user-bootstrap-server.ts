@@ -53,7 +53,7 @@ export function normalizeRequestedLocale(input: unknown, fallback: NormalizedLoc
     return inferProfileLocale(input) ?? fallback;
 }
 
-function resolveResponseLocale(user: UserRow, preferredLocale: NormalizedLocale, tier: string): NormalizedLocale {
+function resolveResponseLocale(user: UserRow, preferredLocale: NormalizedLocale): NormalizedLocale {
     const persistedLocale = inferProfileLocale(user.locale);
 
     // Empty locale means "unknown preference", so defer to the current environment.
@@ -61,12 +61,6 @@ function resolveResponseLocale(user: UserRow, preferredLocale: NormalizedLocale,
         return preferredLocale;
     }
 
-    // Keep invite/onboarding entry aligned with the user's current environment.
-    // Otherwise an old anonymous row with locale=cn can force English iPhone users
-    // back into Chinese before they ever complete onboarding.
-    if (!Boolean(user.has_onboarded) && tier === 'free') {
-        return preferredLocale;
-    }
     return persistedLocale;
 }
 
@@ -261,7 +255,10 @@ export async function prepareUserBootstrapPayload(
     } else {
         try {
             const now = new Date().toISOString();
-            if (shouldPersistLocale) {
+            const persistedLocale = inferProfileLocale(user.locale);
+            const shouldBackfillLocale = !persistedLocale;
+
+            if (shouldPersistLocale || shouldBackfillLocale) {
                 await runStatement(
                     client,
                     'UPDATE users SET last_active_at = ?, locale = ? WHERE user_id = ?',
@@ -337,7 +334,7 @@ export async function prepareUserBootstrapPayload(
         hasOnboarded: Boolean(user.has_onboarded),
         watchlistCount: watchlistSummary.count,
         watchlist: watchlistSummary.items,
-        locale: resolveResponseLocale(user, preferredLocale, tier),
+        locale: resolveResponseLocale(user, preferredLocale),
         isChannel,
         referralBalance: Number(user.referral_balance || 0),
         totalEarned: Number(user.total_earned || 0),

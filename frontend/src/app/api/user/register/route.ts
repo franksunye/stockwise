@@ -20,6 +20,15 @@ function isValidUserId(input: unknown): input is string {
 interface RegisterBody {
     registrationType?: 'anonymous' | 'explicit';
     userId?: string;
+    locale?: unknown;
+}
+
+function normalizeLocale(input: unknown): 'cn' | 'en' | null {
+    const raw = String(input || '').trim().toLowerCase();
+    if (!raw) return null;
+    if (raw === 'cn' || raw === 'zh' || raw.startsWith('zh-')) return 'cn';
+    if (raw === 'en' || raw.startsWith('en-')) return 'en';
+    return null;
 }
 
 /**
@@ -59,22 +68,23 @@ export async function POST(request: Request) {
 
         client = getDbClient();
         const now = new Date().toISOString();
+        const locale = normalizeLocale(body.locale);
 
         if (client.$type === 'cloud') {
             // Turso
             await client.execute({
-                sql: `INSERT OR IGNORE INTO users (user_id, registration_type, created_at, last_active_at)
-                        VALUES (?, ?, ?, ?)`,
-                args: [userId, registrationType, now, now],
+                sql: `INSERT OR IGNORE INTO users (user_id, registration_type, created_at, last_active_at, locale)
+                        VALUES (?, ?, ?, ?, ?)`,
+                args: [userId, registrationType, now, now, locale],
             });
         } else {
             // SQLite
             client
                 .prepare(
-                    `INSERT OR IGNORE INTO users (user_id, registration_type, created_at, last_active_at)
-                        VALUES (?, ?, ?, ?)`
+                    `INSERT OR IGNORE INTO users (user_id, registration_type, created_at, last_active_at, locale)
+                        VALUES (?, ?, ?, ?, ?)`
                 )
-                .run(userId, registrationType, now, now);
+                .run(userId, registrationType, now, now, locale);
         }
 
         let referralAlias: string | null = null;
