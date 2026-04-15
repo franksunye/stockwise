@@ -35,6 +35,9 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
     if (locales.includes('cn')) {
       permanentRedirect(`/cn/learn/${slug}`);
     }
+    // Legacy master-series slugs and unpublished learn URLs should fall back
+    // to the learn index instead of surfacing a hard 404.
+    permanentRedirect('/learn');
   }
 
   return <EnglishLearnArticlePage slug={slug} />;
