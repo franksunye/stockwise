@@ -40,8 +40,17 @@ function getCookie(name: string): string | null {
     return null;
 }
 
+function getExplicitLocaleFromUrl(): 'cn' | 'en' | null {
+    if (typeof window === 'undefined') return null;
+    const params = new URLSearchParams(window.location.search);
+    return inferLocaleFromToken(params.get('locale'));
+}
+
 function getPreferredLocaleForProfileSync(): 'cn' | 'en' {
     if (typeof window === 'undefined') return 'en';
+
+    const explicitLocale = getExplicitLocaleFromUrl();
+    if (explicitLocale) return explicitLocale;
 
     const stored = inferLocaleFromToken(localStorage.getItem(LOCALE_STORAGE_KEY));
     if (stored) return stored;
@@ -191,12 +200,18 @@ export function useDashboardAuthorization() {
             const watchlist = options?.watchlist || getWatchlist();
             const referredBy = localStorage.getItem('STOCKWISE_REFERRED_BY');
 
-            const locale = options?.locale ?? getPreferredLocaleForProfileSync();
+            const explicitLocaleFromUrl = getExplicitLocaleFromUrl();
+            const locale = options?.locale ?? explicitLocaleFromUrl ?? getPreferredLocaleForProfileSync();
             const res = await fetch('/api/user/profile', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 cache: 'no-store',
-                body: JSON.stringify({ watchlist, referredBy, locale, explicitLocale: Boolean(options?.locale) }),
+                body: JSON.stringify({
+                    watchlist,
+                    referredBy,
+                    locale,
+                    explicitLocale: Boolean(options?.locale) || Boolean(explicitLocaleFromUrl),
+                }),
             });
 
             if (!res.ok) {
@@ -321,13 +336,14 @@ export function useDashboardAuthorization() {
                     // ignore
                 }
 
-                const locale = getPreferredLocaleForProfileSync();
+                const explicitLocaleFromUrl = getExplicitLocaleFromUrl();
+                const locale = explicitLocaleFromUrl ?? getPreferredLocaleForProfileSync();
                 const watchlist = getWatchlist();
                 let res = await fetchBootstrap({
                     watchlist,
                     referredBy,
                     locale,
-                    explicitLocale: false,
+                    explicitLocale: Boolean(explicitLocaleFromUrl),
                 }, {
                     signal: controller.signal,
                 });
@@ -337,7 +353,7 @@ export function useDashboardAuthorization() {
                         watchlist,
                         referredBy,
                         locale,
-                        explicitLocale: false,
+                        explicitLocale: Boolean(explicitLocaleFromUrl),
                     }, {
                         signal: controller.signal,
                     });

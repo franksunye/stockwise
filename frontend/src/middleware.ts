@@ -177,10 +177,10 @@ export function middleware(request: NextRequest) {
                 if (code) {
                     const appUrl = new URL(`https://app.ziso.cc`, request.url);
                     appUrl.searchParams.set('invite', code);
-                    return withDebugHeaders(
-                        NextResponse.redirect(appUrl, 307),
-                        'main-v-code-redirect-app'
-                    );
+                    appUrl.searchParams.set('locale', 'en');
+                    const res = NextResponse.redirect(appUrl, 307);
+                    setLocaleCookie(res, 'en');
+                    return withDebugHeaders(res, 'main-v-code-redirect-app');
                 }
             }
 
