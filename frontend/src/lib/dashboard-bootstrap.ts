@@ -10,6 +10,7 @@ export const AUTH_CACHE_KEY = 'ZISO_AUTH_CACHE_V1';
 /** Bump when tier semantics change so stale localStorage cannot flash wrong entitlements (e.g. invite → go vs legacy pro cache). */
 export const PROFILE_CACHE_KEY = 'stockwise_user_profile_v2';
 export const DASHBOARD_CACHE_KEY = 'stockwise_dashboard_cache_v2';
+export const ONBOARDING_COMPLETION_SNAPSHOT_KEY = 'stockwise_onboarding_completion_v1';
 /** Older key — never read by current code; removed on load/write so DevTools won’t show a “ghost” duplicate. */
 export const LEGACY_PROFILE_CACHE_KEY = 'stockwise_user_profile_v1';
 export const LEGACY_DASHBOARD_CACHE_PREFIX = 'stockwise_dashboard_cache_v1';
@@ -95,8 +96,25 @@ export interface DashboardBootstrapStorageState {
     authCacheRaw?: string | null;
     profileCacheRaw?: string | null;
     hasOnboardedRaw?: string | null;
+    onboardingSnapshotRaw?: string | null;
     navIntentRaw?: string | null;
     splashTsRaw?: string | null;
+}
+
+export interface OnboardingSnapshotWatchlistItem {
+    symbol: string;
+    name: string;
+    name_en?: string | null;
+    addedAt: number;
+}
+
+export interface OnboardingCompletionSnapshot {
+    userId: string;
+    tier: BootstrapTier;
+    expiresAt: string | null;
+    hasOnboarded: true;
+    completedAt: number;
+    watchlist: OnboardingSnapshotWatchlistItem[];
 }
 
 export interface SplashRuntimeState {
@@ -122,6 +140,35 @@ export function getStoredUserId(): string | null {
 
     const raw = window.localStorage.getItem(USER_ID_STORAGE_KEY);
     return typeof raw === 'string' && raw.trim() ? raw.trim() : null;
+}
+
+function normalizeOnboardingSnapshotWatchlist(
+    watchlist: unknown
+): OnboardingSnapshotWatchlistItem[] {
+    if (!Array.isArray(watchlist)) return [];
+    const normalized = watchlist
+        .map((item): OnboardingSnapshotWatchlistItem | null => {
+            if (!item || typeof item !== 'object') return null;
+            const row = item as Record<string, unknown>;
+            const symbol = typeof row.symbol === 'string' ? row.symbol.trim() : '';
+            if (!symbol) return null;
+            const name = typeof row.name === 'string' && row.name.trim() ? row.name.trim() : symbol;
+            const name_en =
+                typeof row.name_en === 'string' ? row.name_en : row.name_en === null ? null : undefined;
+            const addedAtRaw = row.addedAt;
+            const addedAt =
+                typeof addedAtRaw === 'number' && Number.isFinite(addedAtRaw)
+                    ? addedAtRaw
+                    : Date.now();
+            return {
+                symbol,
+                name,
+                name_en,
+                addedAt,
+            };
+        })
+        .filter((item): item is OnboardingSnapshotWatchlistItem => item !== null);
+    return normalized;
 }
 
 export function getScopedProfileCacheKey(userId?: string | null): string {
@@ -214,6 +261,31 @@ export function readDashboardNavIntent(
     };
 }
 
+export function readOnboardingCompletionSnapshot(
+    raw: string | null | undefined,
+    expectedUserId?: string | null
+): OnboardingCompletionSnapshot | null {
+    const snapshot = parseJson<OnboardingCompletionSnapshot>(raw);
+    if (!snapshot || typeof snapshot !== 'object') return null;
+    if (snapshot.hasOnboarded !== true) return null;
+    if (typeof snapshot.userId !== 'string' || !snapshot.userId.trim()) return null;
+    if (expectedUserId && snapshot.userId !== expectedUserId) return null;
+    return {
+        userId: snapshot.userId,
+        tier: normalizeBootstrapTier(snapshot.tier),
+        expiresAt:
+            typeof snapshot.expiresAt === 'string' && snapshot.expiresAt.trim()
+                ? snapshot.expiresAt
+                : null,
+        hasOnboarded: true,
+        completedAt:
+            typeof snapshot.completedAt === 'number' && Number.isFinite(snapshot.completedAt)
+                ? snapshot.completedAt
+                : 0,
+        watchlist: normalizeOnboardingSnapshotWatchlist(snapshot.watchlist),
+    };
+}
+
 export function hasOnboardedFlag(raw: string | null | undefined): boolean {
     return raw === 'true';
 }
@@ -224,14 +296,21 @@ export function shouldMarkDashboardBootReady(
 ): boolean {
     const authCache = readAuthCache(state.authCacheRaw, now);
     const profile = readProfileCache(state.profileCacheRaw);
+    const onboardingSnapshot = readOnboardingCompletionSnapshot(
+        state.onboardingSnapshotRaw,
+        profile && typeof (profile as Record<string, unknown>).userId === 'string'
+            ? String((profile as Record<string, unknown>).userId)
+            : undefined
+    );
     const onboarded = hasOnboardedFlag(state.hasOnboardedRaw);
 
     const hasOnboardedProfile = !!(profile && profile.userId && profile.hasOnboarded !== false);
     const hasAuthorizedIdentity =
         !!(authCache && authCache.authorized === true) ||
-        !!(profile && profile.userId);
+        !!(profile && profile.userId) ||
+        !!onboardingSnapshot?.userId;
 
-    return (onboarded || hasOnboardedProfile) && hasAuthorizedIdentity;
+    return (onboarded || hasOnboardedProfile || !!onboardingSnapshot) && hasAuthorizedIdentity;
 }
 
 export function getOptimisticDashboardBootstrap(
@@ -247,6 +326,12 @@ export function getOptimisticDashboardBootstrap(
     }
 
     const profile = readProfileCache(state.profileCacheRaw);
+    const onboardingSnapshot = readOnboardingCompletionSnapshot(
+        state.onboardingSnapshotRaw,
+        profile && typeof (profile as Record<string, unknown>).userId === 'string'
+            ? String((profile as Record<string, unknown>).userId)
+            : undefined
+    );
     const onboarded = hasOnboardedFlag(state.hasOnboardedRaw);
     const hasRecentDashboardIntent = Boolean(readDashboardNavIntent(state.navIntentRaw, now));
 
@@ -254,6 +339,13 @@ export function getOptimisticDashboardBootstrap(
         return {
             authorized: true,
             tier: normalizeBootstrapTier(profile.tier),
+        };
+    }
+
+    if (onboardingSnapshot?.userId) {
+        return {
+            authorized: true,
+            tier: onboardingSnapshot.tier,
         };
     }
 
@@ -266,10 +358,17 @@ export function shouldOptimisticallyEnterDashboard(
 ): boolean {
     const onboarded = hasOnboardedFlag(state.hasOnboardedRaw);
     const profile = readProfileCache(state.profileCacheRaw);
+    const onboardingSnapshot = readOnboardingCompletionSnapshot(
+        state.onboardingSnapshotRaw,
+        profile && typeof (profile as Record<string, unknown>).userId === 'string'
+            ? String((profile as Record<string, unknown>).userId)
+            : undefined
+    );
     const hasRecentDashboardIntent = Boolean(readDashboardNavIntent(state.navIntentRaw, now));
 
     return (
         onboarded ||
+        Boolean(onboardingSnapshot?.hasOnboarded) ||
         Boolean(profile?.userId && (profile.hasOnboarded !== false || hasRecentDashboardIntent))
     );
 }
@@ -313,6 +412,7 @@ export function readBrowserBootstrapStorageState(): DashboardBootstrapStorageSta
         authCacheRaw: window.localStorage.getItem(AUTH_CACHE_KEY),
         profileCacheRaw: window.localStorage.getItem(getScopedProfileCacheKey(getStoredUserId())),
         hasOnboardedRaw: window.localStorage.getItem(HAS_ONBOARDED_KEY),
+        onboardingSnapshotRaw: window.localStorage.getItem(ONBOARDING_COMPLETION_SNAPSHOT_KEY),
         navIntentRaw: window.sessionStorage.getItem(DASHBOARD_NAV_INTENT_KEY),
         splashTsRaw: window.localStorage.getItem(SPLASH_TS_KEY),
     };
@@ -348,6 +448,58 @@ export function writeProfileCache<T extends { userId: string }>(profile: T): T |
     purgeLegacyUserProfileCache();
     window.localStorage.setItem(getScopedProfileCacheKey(profile.userId), JSON.stringify(profile));
     return profile;
+}
+
+export function clearOnboardingCompletionSnapshot(): void {
+    if (typeof window === 'undefined') {
+        return;
+    }
+    window.localStorage.removeItem(ONBOARDING_COMPLETION_SNAPSHOT_KEY);
+}
+
+export function commitOnboardingCompletionSnapshot<T extends { userId: string }>(input: {
+    userId: string;
+    tier?: string | null;
+    expiresAt?: string | null;
+    watchlist?: OnboardingSnapshotWatchlistItem[];
+    profile?: T | null;
+    now?: number;
+}): OnboardingCompletionSnapshot | null {
+    if (typeof window === 'undefined') {
+        return null;
+    }
+
+    const userId = typeof input.userId === 'string' ? input.userId.trim() : '';
+    if (!userId) {
+        return null;
+    }
+
+    const snapshot: OnboardingCompletionSnapshot = {
+        userId,
+        tier: normalizeBootstrapTier(input.tier),
+        expiresAt:
+            typeof input.expiresAt === 'string' && input.expiresAt.trim()
+                ? input.expiresAt
+                : null,
+        hasOnboarded: true,
+        completedAt: typeof input.now === 'number' ? input.now : Date.now(),
+        watchlist: normalizeOnboardingSnapshotWatchlist(input.watchlist),
+    };
+
+    window.localStorage.setItem(HAS_ONBOARDED_KEY, 'true');
+    window.localStorage.setItem(ONBOARDING_COMPLETION_SNAPSHOT_KEY, JSON.stringify(snapshot));
+    writeAuthCache(snapshot.tier, true, snapshot.completedAt);
+
+    if (input.profile && input.profile.userId === userId) {
+        writeProfileCache({
+            ...input.profile,
+            hasOnboarded: true,
+            tier: snapshot.tier,
+            expiresAt: snapshot.expiresAt,
+        });
+    }
+
+    return snapshot;
 }
 
 export function markDashboardSplashSeen(now: number = Date.now()): string | null {

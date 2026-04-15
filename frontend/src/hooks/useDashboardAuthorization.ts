@@ -9,10 +9,12 @@ import { isIOS, isStandalone } from '@/lib/device-utils';
 import { mapApiJsonToUserProfile } from '@/lib/map-user-profile';
 import { LOCALE_COOKIE_KEY, resolveLocaleFromBrowserLanguage, inferLocaleFromToken } from '@/lib/i18n';
 import {
+    commitOnboardingCompletionSnapshot,
     getOptimisticDashboardBootstrap as getOptimisticDashboardBootstrapState,
     markDashboardSplashSeen,
     readAuthCache,
     readBrowserBootstrapStorageState,
+    readOnboardingCompletionSnapshot,
     writeAuthCache,
     writeProfileCache,
     readProfileCache,
@@ -130,8 +132,13 @@ export function useDashboardAuthorization() {
 
         purgeLegacyUserProfileCache();
         const storedUserId = getStoredUserId();
+        const browserState = readBrowserBootstrapStorageState();
         const cached = readProfileCache<UserProfile>(
             localStorage.getItem(getScopedProfileCacheKey(storedUserId)),
+            storedUserId,
+        );
+        const onboardingSnapshot = readOnboardingCompletionSnapshot(
+            browserState.onboardingSnapshotRaw,
             storedUserId,
         );
         if (cached?.userId) {
@@ -139,9 +146,21 @@ export function useDashboardAuthorization() {
             profileRef.current = cached;
             setBootstrapTier(cached.tier);
             setProfileLoading(false);
+        } else if (onboardingSnapshot?.userId) {
+            const snapshotProfile = {
+                userId: onboardingSnapshot.userId,
+                tier: onboardingSnapshot.tier,
+                expiresAt: onboardingSnapshot.expiresAt,
+                hasOnboarded: true,
+            } satisfies UserProfile;
+            setProfile(snapshotProfile);
+            profileRef.current = snapshotProfile;
+            setBootstrapTier(snapshotProfile.tier);
+            writeProfileCache(snapshotProfile);
+            setProfileLoading(false);
         }
 
-        const optimisticBootstrap = getOptimisticDashboardBootstrapState(readBrowserBootstrapStorageState());
+        const optimisticBootstrap = getOptimisticDashboardBootstrapState(browserState);
         if (optimisticBootstrap) {
             setIsAuthorized(optimisticBootstrap.authorized);
             setBootstrapTier(optimisticBootstrap.tier);
@@ -222,6 +241,14 @@ export function useDashboardAuthorization() {
 
             const data = (await res.json()) as Record<string, unknown>;
             applyServerProfilePayload(data, true);
+            if (data.userId && data.hasOnboarded === true) {
+                commitOnboardingCompletionSnapshot({
+                    userId: String(data.userId),
+                    tier: typeof data.tier === 'string' ? data.tier : null,
+                    expiresAt: typeof data.expiresAt === 'string' ? data.expiresAt : null,
+                    profile: mapApiJsonToUserProfile(data),
+                });
+            }
             return mapApiJsonToUserProfile(data);
         } catch (e) {
             console.error('refreshProfile failed', e);
@@ -274,6 +301,15 @@ export function useDashboardAuthorization() {
                     if (res.ok) {
                         const data = (await res.json()) as Record<string, unknown>;
                         applyServerProfilePayload(data, true);
+                        if (data.userId && data.hasOnboarded === true) {
+                            commitOnboardingCompletionSnapshot({
+                                userId: String(data.userId),
+                                tier: typeof data.tier === 'string' ? data.tier : null,
+                                expiresAt: typeof data.expiresAt === 'string' ? data.expiresAt : null,
+                                watchlist: normalizeBootstrapWatchlist(data),
+                                profile: mapApiJsonToUserProfile(data),
+                            });
+                        }
                         const watchlistItems = normalizeBootstrapWatchlist(data);
                         if (watchlistItems.length > 0 || Number(data.watchlistCount || 0) === 0) {
                             writeCachedWatchlist(watchlistItems);
@@ -369,7 +405,17 @@ export function useDashboardAuthorization() {
                 const newTier = coerceTierFromData(data);
                 if (res.ok && data.userId) {
                     applyServerProfilePayload(data, true);
-                    writeCachedWatchlist(normalizeBootstrapWatchlist(data));
+                    const watchlistItems = normalizeBootstrapWatchlist(data);
+                    if (data.hasOnboarded === true) {
+                        commitOnboardingCompletionSnapshot({
+                            userId: String(data.userId),
+                            tier: typeof data.tier === 'string' ? data.tier : null,
+                            expiresAt: typeof data.expiresAt === 'string' ? data.expiresAt : null,
+                            watchlist: watchlistItems,
+                            profile: mapApiJsonToUserProfile(data),
+                        });
+                    }
+                    writeCachedWatchlist(watchlistItems);
                 } else {
                     applyServerProfilePayload(data, false);
                 }

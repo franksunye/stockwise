@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { getCurrentUser } from '@/lib/user';
+import { getStoredUserId, readBrowserBootstrapStorageState, readOnboardingCompletionSnapshot } from '@/lib/dashboard-bootstrap';
 import {
     hasFreshBootstrapWatchlist,
     readCachedWatchlist,
@@ -36,7 +37,23 @@ export function useWatchlist() {
 
     const restoreLocalWatchlist = useCallback(() => {
         try {
-            setWatchlist(readCachedWatchlist());
+            const localWatchlist = readCachedWatchlist();
+            if (localWatchlist.length > 0) {
+                setWatchlist(localWatchlist);
+                return;
+            }
+
+            const onboardingSnapshot = readOnboardingCompletionSnapshot(
+                readBrowserBootstrapStorageState().onboardingSnapshotRaw,
+                getStoredUserId(),
+            );
+            if (onboardingSnapshot?.watchlist?.length) {
+                writeCachedWatchlist(onboardingSnapshot.watchlist, { markSynced: false });
+                setWatchlist(onboardingSnapshot.watchlist);
+                return;
+            }
+
+            setWatchlist([]);
         } catch (e) {
             console.error('Local watchlist load error', e);
         }

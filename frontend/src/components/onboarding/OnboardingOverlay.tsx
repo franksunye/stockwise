@@ -12,10 +12,10 @@ import { getLocalizedStockName } from '@/lib/stock-name';
 import { getMarketBadge } from '@/lib/market-badge';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import type { MessageKey } from '@/lib/i18n';
+import { commitOnboardingCompletionSnapshot } from '@/lib/dashboard-bootstrap';
 import {
   WATCHLIST_SYNC_EVENT,
   readCachedWatchlist,
-  writeCachedWatchlist,
 } from '@/lib/watchlist-cache';
 
 // Fallback data for the reveal step
@@ -45,6 +45,7 @@ export function OnboardingOverlay() {
   const [isVisible, setIsVisible] = useState(false);
   const [step, setStep] = useState(1);
   const [trialDays, setTrialDays] = useState(MEMBERSHIP_CONFIG.onboarding.trialDays);
+  const [isCompleting, setIsCompleting] = useState(false);
   const { trackEvent } = useAnalytics();
 
   const [selectedStock, setSelectedStock] = useState<string | null>(null);
@@ -119,6 +120,8 @@ export function OnboardingOverlay() {
   }, [fetchRecommendedStocks]);
 
   const handleComplete = async () => {
+    if (isCompleting) return;
+    setIsCompleting(true);
     try {
         const response = await fetch('/api/user/onboarding/complete', {
             method: 'POST',
@@ -128,22 +131,36 @@ export function OnboardingOverlay() {
         if (!response.ok) {
           throw new Error(`Onboarding completion failed: ${response.status}`);
         }
-        localStorage.setItem('STOCKWISE_HAS_ONBOARDED', 'true');
-        if (selectedStock) {
-          try {
-            const currentList = readCachedWatchlist();
-            const alreadyExists = currentList.some((item) => item?.symbol === selectedStock);
-            if (!alreadyExists) {
-              writeCachedWatchlist([
+        const completionPayload = await response.json().catch(() => null);
+        const nextWatchlist = selectedStock
+          ? (() => {
+              const currentList = readCachedWatchlist();
+              const alreadyExists = currentList.some((item) => item?.symbol === selectedStock);
+              if (alreadyExists) return currentList;
+              return [
                 ...currentList,
                 {
                   symbol: selectedStock,
                   name: selectedStockName || selectedStock,
                   name_en: selectedStockNameEn ?? null,
-                  addedAt: Date.now()
-                }
-              ]);
-            }
+                  addedAt: Date.now(),
+                },
+              ];
+            })()
+          : readCachedWatchlist();
+
+        const snapshot = profile?.userId
+          ? commitOnboardingCompletionSnapshot({
+              userId: profile.userId,
+              tier: completionPayload?.tier || profile.tier,
+              expiresAt: completionPayload?.expiresAt ?? profile.expiresAt ?? null,
+              watchlist: nextWatchlist,
+              profile,
+            })
+          : null;
+
+        if (selectedStock) {
+          try {
             window.dispatchEvent(new Event(WATCHLIST_SYNC_EVENT));
           } catch (storageError) {
             console.error('Failed to seed onboarding watchlist cache', storageError);
@@ -151,14 +168,20 @@ export function OnboardingOverlay() {
         }
         
         // Track final completion (Standard Sign-Up)
-        trackEvent('sign_up', { method: 'onboarding_invite', tier: profile?.tier });
+        trackEvent('sign_up', { method: 'onboarding_invite', tier: snapshot?.tier || profile?.tier });
         trackEvent('onboarding_complete');
 
-        // Use global state to naturally unmount the overlay without reloading the page
-        await refreshProfile({ force: true });
+        window.dispatchEvent(new Event('stockwise-onboarding-complete'));
+        setIsVisible(false);
+
+        // Refresh profile in background so UI can enter dashboard immediately.
+        void refreshProfile({ force: true }).catch((error) => {
+          console.error('Background profile refresh after onboarding failed', error);
+        });
         
     } catch (e) {
         console.error("Completion failed", e);
+        setIsCompleting(false);
     }
   };
 
@@ -513,8 +536,12 @@ export function OnboardingOverlay() {
                             </div>
                         </div>
 
-                        <button onClick={handleComplete} className="w-full py-4 bg-white text-black font-black text-lg rounded-2xl active:scale-95 transition-all">
-                            {t('complete.cta')}
+                        <button
+                          onClick={handleComplete}
+                          disabled={isCompleting}
+                          className="w-full py-4 bg-white text-black font-black text-lg rounded-2xl active:scale-95 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                        >
+                            {isCompleting ? (locale === 'en' ? 'Opening...' : '正在打开...') : t('complete.cta')}
                         </button>
                     </motion.div>
                 )}

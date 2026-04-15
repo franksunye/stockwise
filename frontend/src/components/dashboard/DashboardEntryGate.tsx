@@ -13,11 +13,23 @@ import {
 export function DashboardEntryGate({ children }: { children: ReactNode }) {
     const { profile, loading } = useUserProfile();
     const [canOptimisticallyEnter, setCanOptimisticallyEnter] = useState(false);
+    const [hasOptimisticOnboardingCompletion, setHasOptimisticOnboardingCompletion] = useState(false);
 
     useLayoutEffect(() => {
-        setCanOptimisticallyEnter(
-            getDashboardEntryHint(readBrowserBootstrapStorageState()).canOptimisticallyEnter
-        );
+        const updateBootstrapHints = () => {
+            const state = readBrowserBootstrapStorageState();
+            setCanOptimisticallyEnter(getDashboardEntryHint(state).canOptimisticallyEnter);
+            setHasOptimisticOnboardingCompletion(state.hasOnboardedRaw === 'true');
+        };
+
+        updateBootstrapHints();
+        window.addEventListener('stockwise-onboarding-complete', updateBootstrapHints);
+        window.addEventListener('storage', updateBootstrapHints);
+
+        return () => {
+            window.removeEventListener('stockwise-onboarding-complete', updateBootstrapHints);
+            window.removeEventListener('storage', updateBootstrapHints);
+        };
     }, []);
 
     if (loading || !profile) {
@@ -32,7 +44,7 @@ export function DashboardEntryGate({ children }: { children: ReactNode }) {
         );
     }
 
-    if (!profile.hasOnboarded) {
+    if (!profile.hasOnboarded && !hasOptimisticOnboardingCompletion) {
         return <OnboardingOverlay />;
     }
 

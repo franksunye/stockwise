@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server';
 import { getDbClient } from '@/lib/db';
-import { triggerOnDemandSync } from '@/lib/github-actions';
-import { getMarketFromSymbol, getExpectedLatestDataDate } from '@/lib/date-utils';
 import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
 import { sendInternalNotification } from '@/lib/server-notify';
 import { requireUserSession } from '@/lib/user-session';
@@ -181,18 +179,6 @@ export async function POST(request: Request) {
                         });
                     }
 
-                    // Smart synchronization jugement
-                    const market = getMarketFromSymbol(selectedStock);
-                    const expectedDate = getExpectedLatestDataDate(market);
-                    const priceRes = await client.execute({
-                        sql: 'SELECT MAX(date) as last_date FROM daily_prices WHERE symbol = ?',
-                        args: [selectedStock]
-                    });
-                    const actualLatestDate = priceRes.rows[0]?.last_date;
-
-                    if (!actualLatestDate || String(actualLatestDate) < expectedDate) {
-                        await triggerOnDemandSync(selectedStock);
-                    }
                 }
             }
         } else {
@@ -256,15 +242,6 @@ export async function POST(request: Request) {
                         client.prepare('INSERT INTO global_stock_pool (symbol, name, watchers_count, first_watched_at) VALUES (?, ?, 1, ?)').run(selectedStock, stockName, now.toISOString());
                     }
 
-                    // Smart sync (Local)
-                    const market = getMarketFromSymbol(selectedStock);
-                    const expectedDate = getExpectedLatestDataDate(market);
-                    const row = client.prepare('SELECT MAX(date) as last_date FROM daily_prices WHERE symbol = ?').get(selectedStock);
-                    const actualLatestDate = row?.last_date;
-
-                    if (!actualLatestDate || String(actualLatestDate) < expectedDate) {
-                        await triggerOnDemandSync(selectedStock);
-                    }
                 }
             }
 

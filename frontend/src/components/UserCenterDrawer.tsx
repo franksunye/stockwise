@@ -19,7 +19,12 @@ import { SupportCenterView } from './SupportCenterView';
 import { LearnCenterView } from './LearnCenterView';
 import { useT, useGlobalT, useLocale } from '@/context/LocaleContext';
 import type { MessageKey } from '@/lib/i18n';
-import { clearDashboardCacheForUser, getStoredUserId, writeProfileCache } from '@/lib/dashboard-bootstrap';
+import {
+  clearDashboardCacheForUser,
+  clearOnboardingCompletionSnapshot,
+  getStoredUserId,
+  writeProfileCache,
+} from '@/lib/dashboard-bootstrap';
 import pkg from '../../package.json';
 
 interface Props {
@@ -777,7 +782,14 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                         <div className="mt-4">
                           <button 
                             onClick={async () => { 
-                                localStorage.removeItem('STOCKWISE_HAS_ONBOARDED'); 
+                                localStorage.removeItem('STOCKWISE_HAS_ONBOARDED');
+                                clearOnboardingCompletionSnapshot();
+                                if (profile?.userId) {
+                                    writeProfileCache({
+                                        ...profile,
+                                        hasOnboarded: false,
+                                    });
+                                }
                                 try {
                                     await fetch('/api/user/onboarding/reset', {
                                         method: 'POST',

@@ -12,6 +12,7 @@ const {
     DASHBOARD_NAV_INTENT_MAX_AGE_MS,
     DASHBOARD_CACHE_KEY,
     HAS_ONBOARDED_KEY,
+    ONBOARDING_COMPLETION_SNAPSHOT_KEY,
     LEGACY_DASHBOARD_CACHE_PREFIX,
     PROFILE_CACHE_KEY,
     SPLASH_SESSION_TTL_MS,
@@ -19,6 +20,8 @@ const {
     buildRootBootstrapInlineScript,
     clearAuthCache,
     clearDashboardCacheForUser,
+    clearOnboardingCompletionSnapshot,
+    commitOnboardingCompletionSnapshot,
     getDashboardCacheStorageKey,
     getDashboardEntryHint,
     getOptimisticDashboardBootstrap,
@@ -28,6 +31,7 @@ const {
     readAuthCache,
     readBrowserBootstrapStorageState,
     readDashboardNavIntent,
+    readOnboardingCompletionSnapshot,
     readProfileCache,
     shouldMarkDashboardBootReady,
     shouldOptimisticallyEnterDashboard,
@@ -117,6 +121,27 @@ describe('dashboard bootstrap helpers', () => {
         assert.equal(readDashboardNavIntent(state.navIntentRaw, now), null);
         assert.equal(shouldOptimisticallyEnterDashboard(state, now), false);
         assert.equal(getOptimisticDashboardBootstrap(state, now), null);
+    });
+
+    it('allows optimistic enter directly from onboarding completion snapshot', () => {
+        const now = 95_000;
+        const state = {
+            onboardingSnapshotRaw: JSON.stringify({
+                userId: 'user_123',
+                tier: 'go',
+                expiresAt: '2026-05-01T00:00:00.000Z',
+                hasOnboarded: true,
+                completedAt: now - 500,
+                watchlist: [{ symbol: 'AAPL', name: 'Apple', name_en: 'Apple Inc.', addedAt: now - 500 }],
+            }),
+        };
+
+        assert.equal(shouldOptimisticallyEnterDashboard(state, now), true);
+        assert.equal(shouldMarkDashboardBootReady(state, now), true);
+        assert.deepEqual(getOptimisticDashboardBootstrap(state, now), {
+            authorized: true,
+            tier: 'go',
+        });
     });
 
     it('suppresses splash for recent in-session return visits', () => {
@@ -250,6 +275,62 @@ describe('dashboard bootstrap helpers', () => {
         assert.deepEqual(written, profile);
         assert.deepEqual(readProfileCache(store.get(getScopedProfileCacheKey(profile.userId))), profile);
         assert.equal(store.get(PROFILE_CACHE_KEY), undefined);
+
+        delete globalThis.window;
+    });
+
+    it('commits onboarding completion snapshot as the single local bridge', () => {
+        const store = new Map();
+        globalThis.window = {
+            localStorage: {
+                getItem: (key) => store.get(key) ?? null,
+                setItem: (key, value) => store.set(key, value),
+                removeItem: (key) => store.delete(key),
+                key: () => null,
+                length: 0,
+            },
+            sessionStorage: {
+                getItem: () => null,
+                setItem: () => {},
+                removeItem: () => {},
+            },
+        };
+
+        const committed = commitOnboardingCompletionSnapshot({
+            userId: 'user_123',
+            tier: 'go',
+            expiresAt: '2026-05-01T00:00:00.000Z',
+            watchlist: [{ symbol: 'AAPL', name: 'Apple', name_en: 'Apple Inc.', addedAt: 123 }],
+            profile: { userId: 'user_123', tier: 'free', hasOnboarded: false },
+            now: 123,
+        });
+
+        assert.deepEqual(committed, {
+            userId: 'user_123',
+            tier: 'go',
+            expiresAt: '2026-05-01T00:00:00.000Z',
+            hasOnboarded: true,
+            completedAt: 123,
+            watchlist: [{ symbol: 'AAPL', name: 'Apple', name_en: 'Apple Inc.', addedAt: 123 }],
+        });
+        assert.equal(store.get(HAS_ONBOARDED_KEY), 'true');
+        assert.ok(store.get(ONBOARDING_COMPLETION_SNAPSHOT_KEY));
+        assert.deepEqual(
+            readOnboardingCompletionSnapshot(store.get(ONBOARDING_COMPLETION_SNAPSHOT_KEY), 'user_123'),
+            committed,
+        );
+        assert.deepEqual(readAuthCache(store.get(AUTH_CACHE_KEY), 124), {
+            tier: 'go',
+            authorized: true,
+            timestamp: 123,
+        });
+        assert.deepEqual(
+            readProfileCache(store.get(getScopedProfileCacheKey('user_123')), 'user_123'),
+            { userId: 'user_123', tier: 'go', hasOnboarded: true, expiresAt: '2026-05-01T00:00:00.000Z' },
+        );
+
+        clearOnboardingCompletionSnapshot();
+        assert.equal(store.get(ONBOARDING_COMPLETION_SNAPSHOT_KEY), undefined);
 
         delete globalThis.window;
     });
