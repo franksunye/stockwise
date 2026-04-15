@@ -22,12 +22,38 @@ describe('user bootstrap locale boundary', () => {
     );
   });
 
-  it('should keep persisted locale resolution for mature users', () => {
+  it('should treat empty persisted locale as unknown and defer to request locale', () => {
     const src = readFileSync(BOOTSTRAP_SERVER_PATH, 'utf-8');
 
     assert.ok(
-      src.includes('return normalizeProfileLocale(user.locale);'),
-      'Bootstrap locale response should still fall back to the persisted profile locale outside the onboarding boundary.',
+      src.includes('const persistedLocale = inferProfileLocale(user.locale);'),
+      'Bootstrap locale response should parse persisted locale without forcing an empty value to cn.',
+    );
+    assert.ok(
+      src.includes('if (!persistedLocale) {'),
+      'Bootstrap locale response should special-case empty persisted locale.',
+    );
+    assert.ok(
+      src.includes('return preferredLocale;'),
+      'Bootstrap locale response should fall back to the current request locale when persisted locale is empty.',
+    );
+  });
+
+  it('should only use a hard fallback when request locale is missing too', () => {
+    const src = readFileSync(BOOTSTRAP_SERVER_PATH, 'utf-8');
+
+    assert.ok(
+      src.includes("export function normalizeRequestedLocale(input: unknown, fallback: NormalizedLocale = 'en')"),
+      'Request locale normalization should only fall back after request locale resolution fails.',
+    );
+  });
+
+  it('should keep persisted locale resolution for mature users when it exists', () => {
+    const src = readFileSync(BOOTSTRAP_SERVER_PATH, 'utf-8');
+
+    assert.ok(
+      src.includes('return persistedLocale;'),
+      'Bootstrap locale response should still use the persisted profile locale when it exists and the user is mature.',
     );
   });
 });

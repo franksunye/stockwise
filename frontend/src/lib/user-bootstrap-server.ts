@@ -42,21 +42,32 @@ type PreparedUserBootstrap = {
     isNewUser?: boolean;
 };
 
-export function normalizeProfileLocale(input: unknown): NormalizedLocale {
+export function inferProfileLocale(input: unknown): NormalizedLocale | null {
     const raw = String(input || '').trim().toLowerCase();
-    if (!raw) return 'cn';
+    if (!raw) return null;
     if (raw === 'cn' || raw === 'zh' || raw.startsWith('zh-')) return 'cn';
     return 'en';
 }
 
+export function normalizeRequestedLocale(input: unknown, fallback: NormalizedLocale = 'en'): NormalizedLocale {
+    return inferProfileLocale(input) ?? fallback;
+}
+
 function resolveResponseLocale(user: UserRow, preferredLocale: NormalizedLocale, tier: string): NormalizedLocale {
+    const persistedLocale = inferProfileLocale(user.locale);
+
+    // Empty locale means "unknown preference", so defer to the current environment.
+    if (!persistedLocale) {
+        return preferredLocale;
+    }
+
     // Keep invite/onboarding entry aligned with the user's current environment.
     // Otherwise an old anonymous row with locale=cn can force English iPhone users
     // back into Chinese before they ever complete onboarding.
     if (!Boolean(user.has_onboarded) && tier === 'free') {
         return preferredLocale;
     }
-    return normalizeProfileLocale(user.locale);
+    return persistedLocale;
 }
 
 function normalizeTier(raw: unknown): string {
@@ -207,7 +218,7 @@ export async function prepareUserBootstrapPayload(
     userId: string,
     options: BootstrapPayloadOptions,
 ): Promise<PreparedUserBootstrap> {
-    const preferredLocale = normalizeProfileLocale(options.locale);
+    const preferredLocale = normalizeRequestedLocale(options.locale);
     const shouldPersistLocale = options.explicitLocale === true;
     const referredBy = options.referredBy || null;
     const watchlist = Array.isArray(options.watchlist)
