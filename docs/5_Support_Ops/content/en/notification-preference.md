@@ -14,13 +14,13 @@ source_docs:
   - docs/3_Product/30_Notification_Strategy_Design.md
 traceability:
   status: "healthy"
-  last_reviewed_at: "2026-04-03"
+  last_reviewed_at: "2026-04-15"
 workflow:
   stage: "published"
   last_action_at: "2026-04-03"
 maintenance:
   change_status: "updated"
-  update_reason: "ziso_standard_upgrade"
+  update_reason: "v1_support_scope_refresh"
 website:
   enabled: true
   surface: "support"
@@ -29,20 +29,22 @@ distribution:
     status: "none"
 ---
 
-You can customize your alerts by category. We currently support 7 types of notifications:
+You can customize alerts by category in User Center.
 
-- **Signal Reversal**: Alerts for major trend shifts (Observe -> Entry or Entry -> Defense).
-- **Market Open Briefing**: A morning summary before the bell.
-- **Validation Report**: Post-market analysis of signal accuracy.
-- **Prediction Updates**: When our AI models refresh their multi-day forecasts.
-- **Daily Recap**: A summary of your watchlist's performance.
-- **Real-Time Tickers**: Live price updates (Disabled by default to save mental bandwidth).
-- **Investment Almanac**: Macro sentiment and periodic strategy insights.
+Core categories in v1 include:
+
+- **Signal Reversal**: major action-state changes
+- **Open / Close Briefing**: session context before and after market flow
+- **Validation / Review Updates**: follow-up checks after signals
+- **Watchlist Recaps**: summary-level watchlist health
+- **Real-time Alerts**: highest frequency channel, recommended only for users who can execute intraday
 
 ---
 
-### Our Philosophy
-We aim for **High-Value Alerts**, not high-frequency distraction. If a notification type isn't serving your execution, turn it off—we won't take it personally.
+### Recommended setup
+- Start with low-frequency categories first.
+- Add real-time alerts only for symbols you actively trade.
+- Turn off any category that causes reaction trading instead of disciplined execution.
 
 ---
 *ZISO AI: AI does the research. You keep the decision.*

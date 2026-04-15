@@ -14,13 +14,13 @@ source_docs:
   - docs/1_Engineering/11_Reliability_Protocol.md
 traceability:
   status: "healthy"
-  last_reviewed_at: "2026-04-03"
+  last_reviewed_at: "2026-04-15"
 workflow:
   stage: "published"
   last_action_at: "2026-04-03"
 maintenance:
   change_status: "updated"
-  update_reason: "ziso_standard_upgrade"
+  update_reason: "v1_support_scope_refresh"
 website:
   enabled: true
   surface: "support"
@@ -29,11 +29,19 @@ distribution:
     status: "none"
 ---
 
-We aren't interested in your bank balance or how much you trade.
+We collect only the data needed to run your account, watchlist, and support features.
 
-We only record your stock preferences and strategy settings—and every bit of information is **encrypted**. We do not collect your contacts, track your geolocation, or sell your behavior to advertisers. 
+### We do collect
+- Account identifiers required for login and recovery
+- Product preferences such as watchlist and notification settings
+- Basic service telemetry needed for reliability and abuse prevention
 
-At ZISO, you can refine your trading system in peace and complete privacy.
+### We do not sell
+- Personal behavior data to ad networks
+- Contact-list style social graph data for targeting
+
+### Security principle
+Sensitive account data is stored with layered controls. We optimize for product utility, not data maximization.
 
 ---
 *ZISO AI: AI does the research. You keep the decision.*

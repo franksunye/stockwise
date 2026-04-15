@@ -14,13 +14,13 @@ source_docs:
   - docs/3_Product/Specs/40_Quant_AI_Dual_Layer_UX.md
 traceability:
   status: "healthy"
-  last_reviewed_at: "2026-04-03"
+  last_reviewed_at: "2026-04-15"
 workflow:
   stage: "published"
   last_action_at: "2026-04-03"
 maintenance:
   change_status: "updated"
-  update_reason: "ziso_standard_upgrade"
+  update_reason: "v1_support_scope_refresh"
 website:
   enabled: true
   surface: "support"
@@ -29,24 +29,24 @@ distribution:
     status: "none"
 ---
 
-We have translated the complex outputs of our Layer-1 quantitative state machine into four minimalist action directives:
+In v1, ZISO compresses complex analysis into four action states:
 
-### 🟢 Entry (Target Found)
-The ticker's price action has triggered our optimal "sniper" criteria. Execution at this point is backed by strong mathematical probability within our core strategy.
+### Entry
+A setup condition is met. You may prepare or execute according to your plan.
 
-### 🟡 Observe (Wait/Setup)
-The ticker is currently in a consolidation phase or awaiting a structural breakout. Conditions for a high-probability entry have not yet been met. Do not chase blindly.
+### Observe
+The setup is incomplete. Keep monitoring, avoid forced entries.
 
-### 🔴 Defense (Risk Off)
-Signals of capital outflow or structural breakdown have emerged. Priority shifts to reclaiming cash and strictly controlling downside risk.
+### Defense
+Risk is rising or structure is weakening. Prioritize downside control.
 
-### ⚪ No Signal (Inactive/Weak)
-The ticker shows no significant volatility or is trapped in a persistent downtrend. No operations are recommended; stay on the sidelines.
+### No Signal
+No valid setup is detected. Do nothing and wait for better conditions.
 
 ---
 
-### The Goal of Minimalism
-ZISO is designed to liberate you from the mental fatigue of "guessing direction" and move you into the professional state of **"executing a predefined plan."**
+### Why this matters
+The state system is built to reduce emotional interpretation and keep decisions executable under pressure.
 
 ---
 *ZISO AI: AI does the research. You keep the decision.*

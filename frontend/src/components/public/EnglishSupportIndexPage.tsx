@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { HelpCircle, ChevronRight, Search, FileText } from 'lucide-react';
 import MarketingFooter from '@/components/MarketingFooter';
 import { getAllSupportArticles } from '@/lib/support-content';
+import { getV1SupportAllowlist } from '@/lib/support-v1';
 
 const SUPPORT_CATEGORIES: Record<string, { label: string; icon: React.ElementType; color: string }> = {
   'Onboarding': { label: 'Getting Started', icon: HelpCircle, color: 'text-indigo-400' },
@@ -10,8 +11,12 @@ const SUPPORT_CATEGORIES: Record<string, { label: string; icon: React.ElementTyp
 };
 
 export async function EnglishSupportIndexPage() {
+  const allowlist = getV1SupportAllowlist('en');
   const articles = await getAllSupportArticles({ locale: 'en' });
-  const categories = Array.from(new Set(articles.map((a) => a.category)));
+  const scopedArticles = allowlist
+    ? articles.filter((article) => allowlist.includes(article.slug))
+    : articles;
+  const categories = Array.from(new Set(scopedArticles.map((a) => a.category)));
 
   return (
     <div className="min-h-screen bg-[#050508] text-white font-sans selection:bg-indigo-500/30">
@@ -40,7 +45,7 @@ export async function EnglishSupportIndexPage() {
 
         <div className="space-y-16">
           {categories.map((categoryId) => {
-            const categoryArticles = articles.filter((article) => article.category === categoryId);
+            const categoryArticles = scopedArticles.filter((article) => article.category === categoryId);
             const meta = SUPPORT_CATEGORIES[categoryId] || { label: categoryId, icon: FileText, color: 'text-slate-400' };
             const Icon = meta.icon;
 

@@ -1,5 +1,5 @@
 ---
-title: "Tactical Brief: How to Read the Essentials?"
+title: "Tactical Brief: How to Read It in 30 Seconds"
 subtitle: "Executing Logic with Precision"
 date: "2026-03-19"
 image: "/images/support/tactical-brief-guide_cover.png"
@@ -14,13 +14,13 @@ source_docs:
   - docs/1_Engineering/13_Quant_Engine_Architecture.md
 traceability:
   status: "healthy"
-  last_reviewed_at: "2026-04-03"
+  last_reviewed_at: "2026-04-15"
 workflow:
   stage: "published"
   last_action_at: "2026-04-03"
 maintenance:
   change_status: "updated"
-  update_reason: "ziso_standard_upgrade"
+  update_reason: "v1_support_scope_refresh"
 website:
   enabled: true
   surface: "support"
@@ -29,27 +29,27 @@ distribution:
     status: "none"
 ---
 
-Click on the **"Tactical Brief"** section in any stock detail page to see an automatically generated execution playbook:
+Open **Tactical Brief** on any symbol and read it in this order:
 
-### 1. Pre-Trade Action Plan
-Provides differentiated trigger conditions based on your current position status: **Profiting**, **In Loss**, or **Wait-and-See**. 
+### 1) Current Action
+Start with the top action state: **Entry / Observe / Defense / No Signal**.
 
-### 2. Core Execution Levels
-A visual display of critical price boundaries:
-- **Resistance Zones** & **Challenge Levels**
-- **Breakout Confirmation** points
-- **Current Support** & **Defense Zones**
-- **Stop-Loss References**
+### 2) Key Levels
+Check support, pressure, and trigger levels. These are execution anchors, not decoration.
 
-### 3. Fundamental Market Briefing
-A plain-language AI summary of the overall market environment, trend momentum, and risk boundaries relative to the specific ticker.
+### 3) Scenario Plan
+Read the conditional plan: "If X happens, do Y."  
+This is where position state (empty / holding gain / holding loss) matters.
+
+### 4) Rationale Depth by Tier
+- **Free**: concise rationale summary  
+- **Go**: deeper single-model reasoning narrative  
+- **Plus**: consensus-oriented reasoning view
 
 ---
 
-### Conclusion
-Every textual conclusion ultimately converges on a definitive instruction: **"Entry,"** **"Defense,"** or **"Harvest."**
-
-The core of the Tactical Brief isn't to "predict future prices," but to establish an **execution discipline plan**: *"At this moment, if X happens, I will do Y."*
+The goal of Tactical Brief is not "price prophecy."  
+It is an execution contract you can follow under stress.
 
 ---
 *ZISO AI: AI does the research. You keep the decision.*

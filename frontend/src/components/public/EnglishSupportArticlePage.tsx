@@ -6,8 +6,13 @@ import { getSupportArticleBySlug } from '@/lib/support-content';
 import { notFound } from 'next/navigation';
 import { buildArticleJsonLd } from '@/lib/geo';
 import { brandCoreEn } from '@/content/brand-core.en';
+import { isSupportSlugAllowedForLocale } from '@/lib/support-v1';
 
 export async function EnglishSupportArticlePage({ slug }: { slug: string }) {
+  if (!isSupportSlugAllowedForLocale('en', slug)) {
+    notFound();
+  }
+
   const article = await getSupportArticleBySlug(slug, { locale: 'en' });
 
   if (!article) {
