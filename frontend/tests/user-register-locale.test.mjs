@@ -33,8 +33,29 @@ describe('user register locale persistence', () => {
       'Register route should normalize locale from the client request.',
     );
     assert.ok(
-      src.includes('INSERT OR IGNORE INTO users (user_id, registration_type, created_at, last_active_at, locale)'),
+      src.includes('INSERT OR IGNORE INTO users (') && src.includes('locale,'),
       'Register route should include locale in the insert statement.',
+    );
+  });
+
+  it('register route should persist registration device metadata for funnel analysis', () => {
+    const src = readFileSync(REGISTER_ROUTE_PATH, 'utf-8');
+
+    assert.ok(
+      src.includes("function classifyDeviceCategory(userAgent: string | null): 'desktop' | 'mobile' | 'tablet' | 'bot' | 'unknown' {"),
+      'Register route should classify the registering device from the request user agent.',
+    );
+    assert.ok(
+      src.includes("const registrationUserAgent = request.headers.get('user-agent');"),
+      'Register route should read the request user agent.',
+    );
+    assert.ok(
+      src.includes("const registrationDeviceCategory = classifyDeviceCategory(registrationUserAgent);"),
+      'Register route should derive a device category for the registering user.',
+    );
+    assert.ok(
+      src.includes('registration_user_agent,') && src.includes('registration_device_category'),
+      'Register route insert should persist device metadata columns.',
     );
   });
 
@@ -61,6 +82,27 @@ describe('user register locale persistence', () => {
     assert.ok(
       !src.includes("locale TEXT DEFAULT 'cn'"),
       'Users schema should not force cn as a default locale.',
+    );
+  });
+
+  it('base users schema should expose registration device metadata columns', () => {
+    const src = readFileSync(DB_SCHEMA_PATH, 'utf-8');
+
+    assert.ok(
+      src.includes('registration_user_agent TEXT,'),
+      'Users schema should persist the registration user agent.',
+    );
+    assert.ok(
+      src.includes('registration_device_category TEXT,'),
+      'Users schema should persist the registration device category.',
+    );
+    assert.ok(
+      src.includes("add_column_if_missing('users', 'registration_user_agent', 'TEXT')"),
+      'Users migrations should backfill the registration_user_agent column.',
+    );
+    assert.ok(
+      src.includes("add_column_if_missing('users', 'registration_device_category', 'TEXT')"),
+      'Users migrations should backfill the registration_device_category column.',
     );
   });
 });

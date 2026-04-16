@@ -23,6 +23,17 @@ interface RegisterBody {
     locale?: unknown;
 }
 
+function classifyDeviceCategory(userAgent: string | null): 'desktop' | 'mobile' | 'tablet' | 'bot' | 'unknown' {
+    const ua = String(userAgent || '').trim();
+    if (!ua) return 'unknown';
+    if (/bot|spider|crawl|slurp|facebookexternalhit|whatsapp|telegrambot/i.test(ua)) return 'bot';
+    if (/ipad|tablet|playbook|silk/i.test(ua)) return 'tablet';
+    if (/mobi|iphone|ipod|android.+mobile|windows phone/i.test(ua)) return 'mobile';
+    if (/macintosh|windows nt|x11|linux x86_64|cros/i.test(ua)) return 'desktop';
+    if (/android/i.test(ua)) return 'mobile';
+    return 'unknown';
+}
+
 function normalizeLocale(input: unknown): 'cn' | 'en' | null {
     const raw = String(input || '').trim().toLowerCase();
     if (!raw) return null;
@@ -69,22 +80,38 @@ export async function POST(request: Request) {
         client = getDbClient();
         const now = new Date().toISOString();
         const locale = normalizeLocale(body.locale);
+        const registrationUserAgent = request.headers.get('user-agent');
+        const registrationDeviceCategory = classifyDeviceCategory(registrationUserAgent);
 
         if (client.$type === 'cloud') {
             // Turso
             await client.execute({
-                sql: `INSERT OR IGNORE INTO users (user_id, registration_type, created_at, last_active_at, locale)
-                        VALUES (?, ?, ?, ?, ?)`,
-                args: [userId, registrationType, now, now, locale],
+                sql: `INSERT OR IGNORE INTO users (
+                        user_id,
+                        registration_type,
+                        created_at,
+                        last_active_at,
+                        locale,
+                        registration_user_agent,
+                        registration_device_category
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                args: [userId, registrationType, now, now, locale, registrationUserAgent, registrationDeviceCategory],
             });
         } else {
             // SQLite
             client
                 .prepare(
-                    `INSERT OR IGNORE INTO users (user_id, registration_type, created_at, last_active_at, locale)
-                        VALUES (?, ?, ?, ?, ?)`
+                    `INSERT OR IGNORE INTO users (
+                        user_id,
+                        registration_type,
+                        created_at,
+                        last_active_at,
+                        locale,
+                        registration_user_agent,
+                        registration_device_category
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?)`
                 )
-                .run(userId, registrationType, now, now, locale);
+                .run(userId, registrationType, now, now, locale, registrationUserAgent, registrationDeviceCategory);
         }
 
         let referralAlias: string | null = null;

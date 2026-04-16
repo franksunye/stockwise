@@ -453,6 +453,8 @@ def init_db():
                 subscription_tier TEXT DEFAULT 'free', 
                 subscription_expires_at TIMESTAMP,
                 locale TEXT,
+                registration_user_agent TEXT,
+                registration_device_category TEXT,
                 referred_by TEXT,
                 has_onboarded BOOLEAN DEFAULT 0,
                 notification_settings TEXT,
@@ -1158,6 +1160,8 @@ def init_db():
         add_column_if_missing('users', 'custom_commission_rate', 'REAL')
         add_column_if_missing('users', 'referral_alias', 'TEXT')
         add_column_if_missing('users', 'locale', 'TEXT')
+        add_column_if_missing('users', 'registration_user_agent', 'TEXT')
+        add_column_if_missing('users', 'registration_device_category', 'TEXT')
 
         # Briefs Migrations
         add_column_if_missing('daily_briefs', 'notified_at', 'TIMESTAMP')
