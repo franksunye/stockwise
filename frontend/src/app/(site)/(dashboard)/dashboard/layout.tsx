@@ -1,6 +1,6 @@
 'use client';
 
-import { useLayoutEffect } from 'react';
+import { useCallback, useLayoutEffect, useState } from 'react';
 import { InviteWall } from '@/components/InviteWall';
 import { DashboardShell } from '@/components/dashboard/DashboardShell';
 import { SystemSync } from '@/components/SystemSync';
@@ -8,12 +8,15 @@ import { ReferralTracker } from '@/components/ReferralTracker';
 import { BadgeManager } from '@/components/BadgeManager';
 import { useDashboardAuthorization } from '@/hooks/useDashboardAuthorization';
 import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton';
+import { AppEntryLoading } from '@/components/dashboard/AppEntryLoading';
 import {
     installLegacyProfileCacheWriteGuard,
     LEGACY_DASHBOARD_CACHE_PREFIX,
     purgeLegacyDashboardCache,
     purgeLegacyUserProfileCache,
     LEGACY_PROFILE_CACHE_KEY,
+    getAppEntryControllerSnapshot,
+    readBrowserBootstrapStorageState,
 } from '@/lib/dashboard-bootstrap';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -22,8 +25,17 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const [appEntryController, setAppEntryController] = useState(() =>
+    getAppEntryControllerSnapshot({}, ''),
+  );
   const { isAuthorized, setIsAuthorized, userSession, refreshProfile, canSkipTransition } =
     useDashboardAuthorization();
+
+  const updateAppEntryController = useCallback(() => {
+    setAppEntryController(
+      getAppEntryControllerSnapshot(readBrowserBootstrapStorageState(), window.location.search),
+    );
+  }, []);
 
   useLayoutEffect(() => {
     installLegacyProfileCacheWriteGuard();
@@ -32,6 +44,7 @@ export default function DashboardLayout({
     const onPageShow = () => {
       purgeLegacyDashboardCache();
       purgeLegacyUserProfileCache();
+      updateAppEntryController();
     };
     const onStorage = (ev: StorageEvent) => {
       if ((ev.key && ev.key.startsWith(LEGACY_DASHBOARD_CACHE_PREFIX)) || (ev.key === LEGACY_PROFILE_CACHE_KEY && ev.newValue)) {
@@ -40,14 +53,18 @@ export default function DashboardLayout({
       if (ev.key === LEGACY_PROFILE_CACHE_KEY && ev.newValue) {
         purgeLegacyUserProfileCache();
       }
+      updateAppEntryController();
     };
     window.addEventListener('pageshow', onPageShow);
     window.addEventListener('storage', onStorage);
+    window.addEventListener('stockwise-onboarding-complete', updateAppEntryController);
+    updateAppEntryController();
     return () => {
       window.removeEventListener('pageshow', onPageShow);
       window.removeEventListener('storage', onStorage);
+      window.removeEventListener('stockwise-onboarding-complete', updateAppEntryController);
     };
-  }, []);
+  }, [updateAppEntryController]);
 
   const appBootstrap = (
     <>
@@ -71,7 +88,11 @@ export default function DashboardLayout({
             transition={{ duration: 0.3 }}
             data-dashboard-skeleton="true"
           >
-            <DashboardSkeleton />
+            {appEntryController.loadingRoute === 'onboarding' ? (
+              <AppEntryLoading route="onboarding" />
+            ) : (
+              <DashboardSkeleton />
+            )}
           </motion.div>
         )}
 
@@ -104,7 +125,13 @@ export default function DashboardLayout({
             animate={{ opacity: 1 }}
             transition={{ duration: canSkipTransition.current ? 0 : 0.4 }}
           >
-            <DashboardShell userSession={userSession}>{children}</DashboardShell>
+            <DashboardShell
+              userSession={userSession}
+              appEntryController={appEntryController}
+              isAuthorized={isAuthorized}
+            >
+              {children}
+            </DashboardShell>
           </motion.div>
         )}
       </AnimatePresence>

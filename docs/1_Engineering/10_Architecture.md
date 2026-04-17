@@ -1,7 +1,7 @@
 ﻿# 知守 AI (ZISO AI) 架构文档（生产基线与演进方案）
 
-> **更新时间**: 2026-02-23
-> **版本**: v3.1（P0 完成基线版）
+> **更新时间**: 2026-04-16
+> **版本**: v3.2（补充 App Entry 顶层设计）
 > **适用范围**: `frontend/`、`backend/`、`docs/` 当前仓库实现
 
 ## 1. 文档目标与边界
@@ -34,6 +34,39 @@
 - 路由与域名策略：`frontend/src/middleware.ts`。
   - `app.ziso.cc` 与主域名流量分流。
   - `/v/[code]` 通过 307 重定向注入邀请码参数。
+
+#### 2.2.1.1 App Entry 顶层设计事实
+
+截至 2026-04-16，前端已经暴露出一个比局部性能更高层的问题：
+
+- `app entry` 既是架构问题，也是应用规格问题。
+
+原因在于，用户首访时真正感知到的并不是某个组件的局部实现，而是：
+
+1. 系统先把他判到哪条主路径，
+2. 系统先给他展示哪一种 loading，
+3. 哪些 bootstrap 工作被放在首屏关键路径上。
+
+因此，`app entry` 需要被视为顶层架构对象，而不是 `dashboard layout` 的实现细节。
+
+当前顶层规则已经明确为：
+
+`entry classification -> route-specific loading -> minimal bootstrap -> content render`
+
+其适用主路径为：
+
+1. `invite-onboarding`
+2. `authorized-dashboard`
+3. `invite-wall`
+4. `public`
+5. `error`
+
+顶层约束：
+
+1. 在 route class 未确认前，不允许展示误导性的业务态 skeleton。
+2. `invite-onboarding` 不允许先展示 Dashboard 风格骨架。
+3. route classification 必须有单一事实源，不能由多个层各自推断。
+4. app entry 必须具备可观测性，能够重建 route decision 与首屏时序。
 
 #### 2.2.2 数据访问
 - 统一入口：`frontend/src/lib/db.ts`。
@@ -156,6 +189,24 @@
 
 - 已有：任务级日志（`task_logs`）、预测追踪表（`chain_execution_traces`、`llm_traces`）。
 - 未完善：统一 SLI/SLO、告警门槛、恢复演练标准、跨链路 trace 贯通。
+
+### 2.5.1 前端 App Entry 可观测性缺口
+
+在 app 入口层，当前仍缺少完整的首屏 route telemetry。
+
+系统尚未稳定回答：
+
+1. 某个新用户样本被判到了哪条 route class
+2. route classification 耗时多少
+3. onboarding first meaningful paint 耗时多少
+4. dashboard first usable 耗时多少
+
+这意味着：
+
+- app entry 虽已有产品规则和前端实现，
+- 但尚未形成完整的工业级可观测闭环。
+
+后续 app entry 相关治理，应把 `state machine + single entry controller + observability` 视为同一层工作，而不是分散的小修。
 
 ### 2.6 当前架构图（As-Is）
 

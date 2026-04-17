@@ -74,6 +74,39 @@ summary: "定义 v1 阶段 (Free, Go, Plus) 的核心交互逻辑、国际化标
 *   **A股 / 港股**：维持现有数据源。
 *   **美股 (NASDAQ/NYSE)**：通过 `yfinance` 实现高频刷新（v1 阶段为 1 小时/次或日线级）。满足全球化逻辑预测。
 
+### 2.4 App Entry Experience Contract
+
+对于 app 入口，产品层需要明确一条统一规则：
+
+`先判定用户当前属于哪条主路径，再展示对应体验。`
+
+当前主路径只允许分为：
+
+1. `Invite Onboarding`
+2. `Authorized Dashboard`
+3. `Invite Wall`
+4. `Public / Marketing`
+
+产品约束：
+
+1. 用户进入 `Invite Onboarding` 时，不应先看到 Dashboard 风格的骨架屏。
+2. 用户进入 `Authorized Dashboard` 时，允许看到 Dashboard 专属加载态。
+3. 用户进入 `Invite Wall` 时，应直接看到准入体验，而不是先经过 Dashboard 内容骨架。
+4. 路径未判定前，只允许出现中性 loading，不允许出现会误导用户的业务态 skeleton。
+
+这条规则属于产品体验 contract，不是单纯前端实现细节。
+
+### 2.5 Onboarding First Impression Contract
+
+国际版 invite onboarding 的第一印象必须满足：
+
+1. 首屏语义明确，用户能立刻理解自己正在进入 onboarding。
+2. loading 与正式页面语义一致，不能出现“先像 Dashboard，再切成 onboarding”的错位感。
+3. 首次完成 onboarding 后，进入 Dashboard 不需要用户手动刷新。
+4. 首次进入的等待优化，优先通过减少关键路径完成，而不是增加更多花哨 loading。
+
+这条 contract 适用于 PC 与 Mobile。
+
 ---
 
 ## 3. 研备引擎与模型路由规格 (Reasoning Engine Spec)

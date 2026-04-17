@@ -31,6 +31,7 @@ This directory serves as the unified single source of truth for the 知守 AI (Z
 - [Dashboard Page Refactoring Design](./1_Engineering/34_Dashboard_Page_Refactoring_Design.md)
 - [Broadcast Layer A Operations Runbook](./1_Engineering/35_Broadcast_LayerA_Operations_Runbook_20260319.md) *(上线运行与应急收口标准)*
 - [International V1 Release Engineering Review](./1_Engineering/45_International_V1_Release_Engineering_Review_20260411.md) *(国际版 v1 发布前工程检查清单与当前结论)*
+- [International Onboarding Performance Optimization Plan](./1_Engineering/46_International_Onboarding_Performance_Optimization_Plan_20260416.md) *(国际版 invite/OB 首屏性能专项，只收问题、测量口径、优化范围与验收标准)*
 - [Decision Model Implementation Plan](./1_Engineering/39_Decision_Model_Implementation_Plan_20260325.md)
 - [Trade Management Research Architecture](./1_Engineering/42_Trade_Management_Research_Architecture_20260327.md)
 
@@ -100,5 +101,17 @@ This directory serves as the unified single source of truth for the 知守 AI (Z
 2. **Archiving Principle**: Move outdated or deprecated plans to `archive/` subdirectories.
 3. **Consistency Checks**: When code implementation conflicts with documentation, the code takes precedence. Always update documentation promptly to reflect actual implementations.
 
+## 🗂️ Document Lifecycle Rules
+1. **Strategy 只写长期原则**：放在 `0_Strategy/`，避免混入事故细节、阶段性补丁和临时验证日志。
+2. **Engineering 只写实现与专项**：放在 `1_Engineering/`，适合架构、故障复盘、性能专项、发布 gate；不承载渠道投放执行。
+3. **Product Specs 只写功能定义**：放在 `3_Product/Specs/`，说明产品行为边界，不记录临时事故修复过程。
+4. **Growth/Ops 只写渠道与运营执行**：放在 `4_Growth_Ops/`，适合 launch plan、campaign plan、内容运营，不承载底层技术根因。
+5. **Support 内容只写用户可消费口径**：放在 `5_Support_Ops/content/`，不写内部实现细节。
+6. **同主题长期演进才续写旧文档**：如果仍是同一长期主题、旧文档仍是当前主依据，可以续写。
+7. **独立专项新建短文档**：如果是一次有明确时间窗口、目标和验收标准的专项，单独新建文档，不继续把旧文档堆大。
+8. **主路径只保留当前有效版本**：历史方案、旧事故稿、已被替代的执行稿，默认迁到 `archive/`，不要留在主路径混淆判断。
+9. **删除是最后手段**：只有明显重复、无引用价值、且不会再作为审计材料的草稿才删除；默认优先归档。
+10. **新文档必须写清范围**：开头必须说明“解决什么 / 不解决什么 / 验收什么”，避免再次膨胀成混合文档。
+
 ---
-**Last Updated**: March 19, 2026
+**Last Updated**: April 16, 2026

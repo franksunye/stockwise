@@ -4,8 +4,8 @@ doc_id: "eng-frontend-architecture-baseline-20260327"
 doc_domain: "engineering"
 doc_status: "active"
 owner: "founder"
-last_reviewed_at: "2026-03-27"
-summary: "定义前端第一阶段架构升级完成后的稳定基线、默认验证动作、冻结边界与下一阶段进入条件。"
+last_reviewed_at: "2026-04-16"
+summary: "定义前端第一阶段架构升级完成后的稳定基线、默认验证动作、冻结边界与下一阶段进入条件，并补充 app entry 顶层路由判定与加载契约。"
 ---
 
 # Frontend Architecture Baseline
@@ -33,6 +33,63 @@ summary: "定义前端第一阶段架构升级完成后的稳定基线、默认�
 5. `Brief`、`StockProfile`、`UserCenterDrawer`、`TacticalBriefDrawer` 邻接内容层、`StockDashboardCard`、`HistoricalCard`、`StockVerticalFeed` 已完成第一轮收口。
 6. `symbol navigation` 与 `modal context` 已有独立 contract 与页面级 smoke 护栏。
 
+## 2.1 App Entry 顶层基线
+
+从 2026-04-16 起，`dashboard` 入口不再只是局部 loading 体验问题，而是前端顶层架构基线的一部分。
+
+当前正式基线为：
+
+`entry classification -> route-specific loading -> minimal bootstrap -> content render`
+
+### 2.1.1 Route classes
+
+App 入口当前只允许归入以下主路径之一：
+
+1. `invite-onboarding`
+2. `authorized-dashboard`
+3. `invite-wall`
+4. `public`
+5. `error`
+
+### 2.1.2 架构约束
+
+1. 路由判定必须先于业务态 skeleton。
+2. `invite-onboarding` 不允许先展示 Dashboard 风格骨架屏。
+3. `authorized-dashboard` 才允许展示 Dashboard 专属 loading。
+4. `invite-wall` 不允许先经过 Dashboard 内容骨架。
+5. 路由未判定前，只允许中性 shell loading。
+
+### 2.1.3 Single source of truth
+
+App entry route classification 必须由单一控制器负责。
+
+不允许长期维持以下分散判断模型：
+
+1. `layout` 判断一部分
+2. `entry gate` 判断一部分
+3. `profile/bootstrap hook` 判断一部分
+4. `onboarding overlay` 再反向覆盖
+
+目标是：
+
+1. 一处决策当前 route class
+2. 一处派发 route-specific loading
+3. 各业务面只消费 route decision，不重复推断入口语义
+
+### 2.1.4 Observability baseline
+
+App entry 不是完整架构能力，除非可以被观测。
+
+最少需要能回答：
+
+1. 当前样本被判到了哪条 route
+2. route classification 花了多久
+3. route-specific bootstrap 花了多久
+4. onboarding first meaningful paint 何时发生
+5. dashboard first usable 何时发生
+
+后续涉及 `dashboard entry` 的改动，默认要把 entry telemetry 视为 release gate 的一部分，而不是可选增强项。
+
 ## 3. 默认验证动作
 
 以后只要改到 `dashboard` 核心路径，默认验证动作就是：
@@ -52,6 +109,7 @@ summary: "定义前端第一阶段架构升级完成后的稳定基线、默认�
 2. 页面级 smoke 负责真实路径回归
 3. 纯逻辑测试负责 contract / surface 语义护栏
 4. 不把局部问题升级成重型全链路 E2E 工程
+5. `dashboard entry` 改动必须同时检查 route classification、route-specific loading 和首屏感知体验
 
 ## 4. 当前冻结边界
 
@@ -62,6 +120,7 @@ summary: "定义前端第一阶段架构升级完成后的稳定基线、默认�
 3. 引入全局持久化 SWR provider
 4. 继续扩张 `Dashboard Data Refresh Contract`，把它做成通用平台或事件框架
 5. 为了统一抽象而牺牲首帧体感、本地快照秒开或业务一致性约束
+6. 在没有 entry state machine 和 telemetry 的情况下继续堆叠新的入口特判
 
 ## 5. 允许继续改动的条件
 

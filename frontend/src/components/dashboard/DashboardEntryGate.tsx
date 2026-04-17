@@ -1,47 +1,32 @@
 'use client';
 
-import { useLayoutEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { OnboardingOverlay } from '@/components/onboarding/OnboardingOverlay';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton';
-import {
-    getDashboardEntryHint,
-    readBrowserBootstrapStorageState,
-} from '@/lib/dashboard-bootstrap';
+import { AppEntryLoading } from '@/components/dashboard/AppEntryLoading';
+import { useAppEntryController } from '@/components/dashboard/AppEntryControllerContext';
 
 export function DashboardEntryGate({ children }: { children: ReactNode }) {
     const { profile, loading } = useUserProfile();
-    const [canOptimisticallyEnter, setCanOptimisticallyEnter] = useState(false);
-    const [hasOptimisticOnboardingCompletion, setHasOptimisticOnboardingCompletion] = useState(false);
-
-    useLayoutEffect(() => {
-        const updateBootstrapHints = () => {
-            const state = readBrowserBootstrapStorageState();
-            setCanOptimisticallyEnter(getDashboardEntryHint(state).canOptimisticallyEnter);
-            setHasOptimisticOnboardingCompletion(state.hasOnboardedRaw === 'true');
-        };
-
-        updateBootstrapHints();
-        window.addEventListener('stockwise-onboarding-complete', updateBootstrapHints);
-        window.addEventListener('storage', updateBootstrapHints);
-
-        return () => {
-            window.removeEventListener('stockwise-onboarding-complete', updateBootstrapHints);
-            window.removeEventListener('storage', updateBootstrapHints);
-        };
-    }, []);
+    const {
+        canOptimisticallyEnter,
+        hasOptimisticOnboardingCompletion,
+        loadingRoute,
+    } = useAppEntryController();
 
     if (loading || !profile) {
         if (canOptimisticallyEnter) {
             return <>{children}</>;
         }
 
-        return (
-            <div data-dashboard-skeleton="true">
-                <DashboardSkeleton />
-            </div>
-        );
+        return loadingRoute === 'onboarding'
+            ? <AppEntryLoading route="onboarding" />
+            : (
+                <div data-dashboard-skeleton="true">
+                    <DashboardSkeleton />
+                </div>
+            );
     }
 
     if (!profile.hasOnboarded && !hasOptimisticOnboardingCompletion) {

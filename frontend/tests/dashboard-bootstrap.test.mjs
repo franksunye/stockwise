@@ -23,6 +23,7 @@ const {
     clearOnboardingCompletionSnapshot,
     commitOnboardingCompletionSnapshot,
     getDashboardCacheStorageKey,
+    getAppEntryControllerSnapshot,
     getDashboardEntryHint,
     getOptimisticDashboardBootstrap,
     getScopedProfileCacheKey,
@@ -34,6 +35,7 @@ const {
     readOnboardingCompletionSnapshot,
     readProfileCache,
     shouldMarkDashboardBootReady,
+    shouldPreferInviteOnboardingLoading,
     shouldOptimisticallyEnterDashboard,
     shouldSuppressDashboardSplash,
     writeAuthCache,
@@ -216,6 +218,43 @@ describe('dashboard bootstrap helpers', () => {
                 tier: 'free',
             },
         });
+    });
+
+    it('produces a single app entry controller snapshot from the same bootstrap state', () => {
+        const now = 405_000;
+        const state = {
+            authCacheRaw: JSON.stringify({ tier: 'go', authorized: true, timestamp: now - 1_000 }),
+            profileCacheRaw: JSON.stringify({ userId: 'user_123', hasOnboarded: false, tier: 'go' }),
+            hasOnboardedRaw: 'false',
+        };
+
+        assert.deepEqual(
+            getAppEntryControllerSnapshot(state, '?invite=PH&locale=en', now),
+            {
+                canOptimisticallyEnter: false,
+                hasOptimisticOnboardingCompletion: false,
+                preferInviteOnboardingLoading: true,
+                loadingRoute: 'onboarding',
+            },
+        );
+    });
+
+    it('prefers onboarding-aware loading for fresh invite entries that cannot yet enter dashboard', () => {
+        const now = 410_000;
+        const state = {
+            authCacheRaw: JSON.stringify({ tier: 'go', authorized: true, timestamp: now - 1_000 }),
+            profileCacheRaw: JSON.stringify({ userId: 'user_123', hasOnboarded: false, tier: 'go' }),
+            hasOnboardedRaw: 'false',
+        };
+
+        assert.equal(
+            shouldPreferInviteOnboardingLoading(state, '?invite=PH&locale=en', now),
+            true,
+        );
+        assert.equal(
+            shouldPreferInviteOnboardingLoading(state, '?locale=en', now),
+            false,
+        );
     });
 
     it('builds root bootstrap script from the same key and ttl constants', () => {
