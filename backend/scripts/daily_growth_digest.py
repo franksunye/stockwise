@@ -319,16 +319,13 @@ def get_clarity_metrics(token: str):
             "scroll_depth": data.get("averageScrollDepth", 0),
         }
 
+    result = {"last_24h": fetch(1)}
     try:
-        result = {"last_24h": fetch(1)}
-        try:
-            result["last_7d"] = fetch(7)
-        except Exception:
-            result["last_7d"] = None
-        return result
-    except Exception as e:
-        print(f"⚠️ Clarity API error: {e}")
-        return None
+        result["last_7d"] = fetch(7)
+    except Exception as exc:
+        result["last_7d"] = None
+        result["last_7d_error"] = str(exc)
+    return result
 
 def get_internal_metrics():
     """
@@ -368,6 +365,29 @@ def get_internal_metrics():
             },
         }
 
+        cursor.execute("SELECT COUNT(*) FROM users")
+        total_users = (cursor.fetchone() or [0])[0] or 0
+
+        cursor.execute("SELECT COUNT(*) FROM users WHERE stripe_customer_id IS NOT NULL AND stripe_customer_id != ''")
+        stripe_linked_users = (cursor.fetchone() or [0])[0] or 0
+
+        cursor.execute("""
+            SELECT COUNT(*)
+            FROM users
+            WHERE stripe_customer_id IS NOT NULL
+              AND stripe_customer_id != ''
+              AND subscription_expires_at IS NOT NULL
+              AND datetime(subscription_expires_at) > datetime('now')
+        """)
+        active_paid_users = (cursor.fetchone() or [0])[0] or 0
+
+        cursor.execute("""
+            SELECT COUNT(*)
+            FROM users
+            WHERE lower(coalesce(subscription_tier, 'free')) IN ('go','plus','pro')
+        """)
+        access_granted_users = (cursor.fetchone() or [0])[0] or 0
+
         cursor.execute("SELECT lower(coalesce(subscription_tier, 'free')), COUNT(*) FROM users GROUP BY 1 ORDER BY 2 DESC")
         tiers = {row[0]: row[1] for row in cursor.fetchall()}
 
@@ -379,7 +399,8 @@ def get_internal_metrics():
                 COUNT(*) AS user_rows_30d,
                 SUM(CASE WHEN lower(coalesce(registration_type, 'anonymous')) = 'anonymous' THEN 1 ELSE 0 END) AS anonymous_rows_30d,
                 SUM(CASE WHEN has_onboarded = 1 THEN 1 ELSE 0 END) AS onboarded_30d,
-                SUM(CASE WHEN lower(coalesce(subscription_tier, 'free')) IN ('go','plus','pro') THEN 1 ELSE 0 END) AS upgraded_30d,
+                SUM(CASE WHEN lower(coalesce(subscription_tier, 'free')) IN ('go','plus','pro') THEN 1 ELSE 0 END) AS access_granted_30d,
+                SUM(CASE WHEN stripe_customer_id IS NOT NULL AND stripe_customer_id != '' THEN 1 ELSE 0 END) AS stripe_linked_30d,
                 SUM(CASE WHEN EXISTS (SELECT 1 FROM user_watchlist w WHERE w.user_id = u.user_id) THEN 1 ELSE 0 END) AS with_watchlist_30d
             FROM users u
             WHERE created_at > datetime('now', '-30 days', '+8 hours')
@@ -389,8 +410,9 @@ def get_internal_metrics():
             "user_rows_30d": row[0] or 0,
             "anonymous_rows_30d": row[1] or 0,
             "onboarded_30d": row[2] or 0,
-            "upgraded_30d": row[3] or 0,
-            "with_watchlist_30d": row[4] or 0,
+            "access_granted_30d": row[3] or 0,
+            "stripe_linked_30d": row[4] or 0,
+            "with_watchlist_30d": row[5] or 0,
         }
 
         cursor.execute("""
@@ -398,14 +420,21 @@ def get_internal_metrics():
                 CASE WHEN referred_by IS NOT NULL AND referred_by != '' THEN 'referred' ELSE 'organic' END AS channel,
                 COUNT(*) AS user_rows,
                 SUM(CASE WHEN has_onboarded = 1 THEN 1 ELSE 0 END) AS onboarded,
-                SUM(CASE WHEN lower(coalesce(subscription_tier, 'free')) IN ('go','plus','pro') THEN 1 ELSE 0 END) AS upgraded
+                SUM(CASE WHEN lower(coalesce(subscription_tier, 'free')) IN ('go','plus','pro') THEN 1 ELSE 0 END) AS access_granted,
+                SUM(CASE WHEN stripe_customer_id IS NOT NULL AND stripe_customer_id != '' THEN 1 ELSE 0 END) AS stripe_linked
             FROM users
             WHERE created_at > datetime('now', '-30 days', '+8 hours')
             GROUP BY 1
             ORDER BY user_rows DESC
         """)
         channel_quality = [
-            {"channel": row[0], "user_rows": row[1], "onboarded": row[2], "upgraded": row[3]}
+            {
+                "channel": row[0],
+                "user_rows": row[1],
+                "onboarded": row[2],
+                "access_granted": row[3],
+                "stripe_linked": row[4],
+            }
             for row in cursor.fetchall()
         ]
 
@@ -461,6 +490,12 @@ def get_internal_metrics():
         conn.close()
         return {
             "windows": windows,
+            "user_base_summary": {
+                "total_users": total_users,
+                "stripe_linked_users": stripe_linked_users,
+                "active_paid_users": active_paid_users,
+                "access_granted_users": access_granted_users,
+            },
             "top_symbols": top_symbols,
             "tiers": tiers,
             "locales": locales,
@@ -524,6 +559,27 @@ def get_internal_metrics_via_node_cli():
         },
     }
 
+    total_users = scalar("SELECT COUNT(*) AS value FROM users", "value")
+    stripe_linked_users = scalar(
+        "SELECT COUNT(*) AS value FROM users WHERE stripe_customer_id IS NOT NULL AND stripe_customer_id != ''",
+        "value",
+    )
+    active_paid_users = scalar(
+        """
+        SELECT COUNT(*) AS value
+        FROM users
+        WHERE stripe_customer_id IS NOT NULL
+          AND stripe_customer_id != ''
+          AND subscription_expires_at IS NOT NULL
+          AND datetime(subscription_expires_at) > datetime('now')
+        """,
+        "value",
+    )
+    access_granted_users = scalar(
+        "SELECT COUNT(*) AS value FROM users WHERE lower(coalesce(subscription_tier, 'free')) IN ('go','plus','pro')",
+        "value",
+    )
+
     tiers = {
         str(row["tier"]): int(row["count"])
         for row in query("SELECT lower(coalesce(subscription_tier, 'free')) AS tier, COUNT(*) AS count FROM users GROUP BY 1 ORDER BY 2 DESC")
@@ -538,7 +594,8 @@ def get_internal_metrics_via_node_cli():
             COUNT(*) AS user_rows_30d,
             SUM(CASE WHEN lower(coalesce(registration_type, 'anonymous')) = 'anonymous' THEN 1 ELSE 0 END) AS anonymous_rows_30d,
             SUM(CASE WHEN has_onboarded = 1 THEN 1 ELSE 0 END) AS onboarded_30d,
-            SUM(CASE WHEN lower(coalesce(subscription_tier, 'free')) IN ('go','plus','pro') THEN 1 ELSE 0 END) AS upgraded_30d,
+            SUM(CASE WHEN lower(coalesce(subscription_tier, 'free')) IN ('go','plus','pro') THEN 1 ELSE 0 END) AS access_granted_30d,
+            SUM(CASE WHEN stripe_customer_id IS NOT NULL AND stripe_customer_id != '' THEN 1 ELSE 0 END) AS stripe_linked_30d,
             SUM(CASE WHEN EXISTS (SELECT 1 FROM user_watchlist w WHERE w.user_id = u.user_id) THEN 1 ELSE 0 END) AS with_watchlist_30d
         FROM users u
         WHERE created_at > datetime('now', '-30 days', '+8 hours')
@@ -547,7 +604,8 @@ def get_internal_metrics_via_node_cli():
         "user_rows_30d": int(activation_row.get("user_rows_30d") or 0),
         "anonymous_rows_30d": int(activation_row.get("anonymous_rows_30d") or 0),
         "onboarded_30d": int(activation_row.get("onboarded_30d") or 0),
-        "upgraded_30d": int(activation_row.get("upgraded_30d") or 0),
+        "access_granted_30d": int(activation_row.get("access_granted_30d") or 0),
+        "stripe_linked_30d": int(activation_row.get("stripe_linked_30d") or 0),
         "with_watchlist_30d": int(activation_row.get("with_watchlist_30d") or 0),
     }
 
@@ -556,14 +614,16 @@ def get_internal_metrics_via_node_cli():
             "channel": str(row["channel"]),
             "user_rows": int(row["user_rows"]),
             "onboarded": int(row["onboarded"] or 0),
-            "upgraded": int(row["upgraded"] or 0),
+            "access_granted": int(row["access_granted"] or 0),
+            "stripe_linked": int(row["stripe_linked"] or 0),
         }
         for row in query("""
             SELECT
                 CASE WHEN referred_by IS NOT NULL AND referred_by != '' THEN 'referred' ELSE 'organic' END AS channel,
                 COUNT(*) AS user_rows,
                 SUM(CASE WHEN has_onboarded = 1 THEN 1 ELSE 0 END) AS onboarded,
-                SUM(CASE WHEN lower(coalesce(subscription_tier, 'free')) IN ('go','plus','pro') THEN 1 ELSE 0 END) AS upgraded
+                SUM(CASE WHEN lower(coalesce(subscription_tier, 'free')) IN ('go','plus','pro') THEN 1 ELSE 0 END) AS access_granted,
+                SUM(CASE WHEN stripe_customer_id IS NOT NULL AND stripe_customer_id != '' THEN 1 ELSE 0 END) AS stripe_linked
             FROM users
             WHERE created_at > datetime('now', '-30 days', '+8 hours')
             GROUP BY 1
@@ -636,6 +696,12 @@ def get_internal_metrics_via_node_cli():
 
     return {
         "windows": windows,
+        "user_base_summary": {
+            "total_users": total_users,
+            "stripe_linked_users": stripe_linked_users,
+            "active_paid_users": active_paid_users,
+            "access_granted_users": access_granted_users,
+        },
         "top_symbols": top_symbols,
         "tiers": tiers,
         "locales": locales,
@@ -674,6 +740,7 @@ def generate_report():
                 clarity_data = get_clarity_metrics(clarity_token)
             except Exception as e:
                 clarity_error = str(e)
+        clarity_partial_error = (clarity_data or {}).get("last_7d_error")
 
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         ga_24h = (ga or {}).get("windows", {}).get("last_24h", {})
@@ -708,12 +775,14 @@ def generate_report():
 | **30d** | {ga_30d.get('sessions', 'N/A') if ga else 'N/A'} | {ga_30d.get('users', 'N/A') if ga else 'N/A'} | {ga_30d.get('page_views', 'N/A') if ga else 'N/A'} | {db_30d['new_user_rows']} | {db_30d['activated_users']} | {pct(db_30d['activated_users'], db_30d['new_user_rows']):.2f}% |
 
 """
-        if ga_error or clarity_error:
+        if ga_error or clarity_error or clarity_partial_error:
             report_md += "## 🚨 Data Collection Issues\n"
             if ga_error:
                 report_md += f"- **GA4 unavailable**: {ga_error}\n"
             if clarity_error:
                 report_md += f"- **Clarity unavailable**: {clarity_error}\n"
+            if clarity_partial_error:
+                report_md += f"- **Clarity 7d partial failure**: {clarity_partial_error}\n"
             report_md += "- Continue to trust internal DB funnel metrics; external traffic trend is incomplete for this run.\n\n"
 
         if clarity_data:
@@ -733,12 +802,17 @@ def generate_report():
 """
 
         report_md += f"""## 🧩 User Base Breakdown
+- **Total Users**: {internal['user_base_summary']['total_users']}
+- **Paid Users (Active Stripe-linked)**: {internal['user_base_summary']['active_paid_users']}
+- **Stripe-linked Users (Ever)**: {internal['user_base_summary']['stripe_linked_users']}
+- **Access Granted Users (Go/Plus/Pro)**: {internal['user_base_summary']['access_granted_users']}
 - **Free**: {internal['tiers'].get('free', 0)}
 - **Go**: {internal['tiers'].get('go', 0)}
 - **Plus**: {internal['tiers'].get('plus', 0)}
 - **Pro**: {internal['tiers'].get('pro', 0)}
 - **CN Locale**: {internal['locales'].get('cn', 0)}
 - **EN Locale**: {internal['locales'].get('en', 0)}
+- **Metric Note**: GO/PRO may come from onboarding or referral rewards, not only payment.
 - **Ghost Users Cleaned (Cumulative)**: Done
 
 ## 🧪 Activation Quality (Last 30d)
@@ -747,18 +821,19 @@ def generate_report():
 | **User Rows** | {activation['user_rows_30d']} | 100.00% |
 | **Anonymous Bootstrap Rows** | {activation['anonymous_rows_30d']} | {pct(activation['anonymous_rows_30d'], activation['user_rows_30d']):.2f}% |
 | **Onboarded** | {activation['onboarded_30d']} | {pct(activation['onboarded_30d'], activation['user_rows_30d']):.2f}% |
-| **Access Granted (Go/Plus/Pro)** | {activation['upgraded_30d']} | {pct(activation['upgraded_30d'], activation['user_rows_30d']):.2f}% |
+| **Access Granted (Go/Plus/Pro)** | {activation['access_granted_30d']} | {pct(activation['access_granted_30d'], activation['user_rows_30d']):.2f}% |
+| **Stripe-linked Paid Rows** | {activation['stripe_linked_30d']} | {pct(activation['stripe_linked_30d'], activation['user_rows_30d']):.2f}% |
 | **Added Watchlist** | {activation['with_watchlist_30d']} | {pct(activation['with_watchlist_30d'], activation['user_rows_30d']):.2f}% |
 
 ## 🔁 Channel Quality (Last 30d)
-| Channel | User Rows | Onboarded | Access Granted |
-| :--- | :--- | :--- | :--- |
+| Channel | User Rows | Onboarded | Access Granted | Stripe-linked Paid |
+| :--- | :--- | :--- | :--- | :--- |
 """
         if not internal["channel_quality"]:
-            report_md += "| No recent channels | - | - | - |\n"
+            report_md += "| No recent channels | - | - | - | - |\n"
         else:
             for item in internal["channel_quality"]:
-                report_md += f"| {item['channel']} | {item['user_rows']} | {item['onboarded']} | {item['upgraded']} |\n"
+                report_md += f"| {item['channel']} | {item['user_rows']} | {item['onboarded']} | {item['access_granted']} | {item['stripe_linked']} |\n"
 
         report_md += """
 
