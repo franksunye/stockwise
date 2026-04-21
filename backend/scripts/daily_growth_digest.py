@@ -5,8 +5,10 @@ import requests
 import subprocess
 import tempfile
 import base64
+import argparse
+import uuid
 from contextlib import contextmanager
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 import time
 from typing import Dict, Any, List
 from urllib3.util import connection as urllib3_connection
@@ -35,6 +37,108 @@ def load_env_file(env_path: str):
 
 
 load_env_file(ENV_PATH)
+
+GROWTH_SNAPSHOT_TABLE = "growth_daily_snapshots"
+BEIJING_TZ = timezone(timedelta(hours=8))
+
+
+def today_beijing() -> str:
+    return datetime.now(BEIJING_TZ).strftime("%Y-%m-%d")
+
+
+def normalized_language(value: Any) -> str:
+    raw = str(value or "").strip().lower()
+    if not raw or raw in {"none", "null", "(not set)", "unknown"}:
+        return "unknown"
+    if raw in {"cn", "zh", "zh-cn", "zh_cn", "chinese", "mandarin"} or raw.startswith("zh"):
+        return "zh"
+    if raw in {"en", "en-us", "en_us", "english"} or raw.startswith("en"):
+        return "en"
+    if raw.startswith("ko"):
+        return "ko"
+    if raw.startswith("es"):
+        return "es"
+    return raw.split("-")[0].split("_")[0] or "unknown"
+
+
+def pct(numerator: int, denominator: int) -> float:
+    return (numerator / denominator * 100) if denominator else 0.0
+
+
+def ensure_growth_snapshot_table(cursor):
+    cursor.execute(f"""
+        CREATE TABLE IF NOT EXISTS {GROWTH_SNAPSHOT_TABLE} (
+            snapshot_date TEXT PRIMARY KEY,
+            run_id TEXT NOT NULL,
+            generated_at TEXT NOT NULL,
+            status TEXT NOT NULL DEFAULT 'success',
+            db_source TEXT NOT NULL DEFAULT 'cloud',
+            sessions_24h INTEGER,
+            active_users_24h INTEGER,
+            page_views_24h INTEGER,
+            new_user_rows_24h INTEGER,
+            activated_users_24h INTEGER,
+            activation_rate_24h REAL,
+            paid_rows_24h INTEGER,
+            active_watchers_24h INTEGER,
+            total_users INTEGER,
+            access_granted_users INTEGER,
+            active_paid_users INTEGER,
+            stripe_linked_users INTEGER,
+            payload_json TEXT NOT NULL,
+            errors_json TEXT,
+            created_at TEXT DEFAULT (datetime('now', '+8 hours')),
+            updated_at TEXT DEFAULT (datetime('now', '+8 hours'))
+        )
+    """)
+
+
+def build_language_segments_from_rows(rows: List[tuple]) -> Dict[str, List[Dict[str, Any]]]:
+    segments: Dict[str, List[Dict[str, Any]]] = {"last_24h": [], "last_7d": [], "last_30d": []}
+    for row in rows:
+        window = str(row[0])
+        user_rows = int(row[2] or 0)
+        activated = int(row[4] or 0)
+        segments.setdefault(window, []).append({
+            "language": normalized_language(row[1]),
+            "raw_locale": row[1] or "unknown",
+            "new_user_rows": user_rows,
+            "anonymous_rows": int(row[3] or 0),
+            "activated_users": activated,
+            "activation_rate": round(pct(activated, user_rows), 2),
+            "paid_rows": int(row[5] or 0),
+            "with_watchlist": int(row[6] or 0),
+        })
+    return segments
+
+
+def language_segment_sql(hours_or_days: str, window_name: str) -> str:
+    return f"""
+        SELECT
+            '{window_name}' AS window_name,
+            lower(coalesce(nullif(locale, ''), 'unknown')) AS locale,
+            COUNT(*) AS new_user_rows,
+            SUM(CASE WHEN lower(coalesce(registration_type, 'anonymous')) = 'anonymous' THEN 1 ELSE 0 END) AS anonymous_rows,
+            SUM(CASE WHEN has_onboarded = 1 THEN 1 ELSE 0 END) AS activated_users,
+            SUM(CASE WHEN lower(coalesce(subscription_tier, 'free')) IN ('go','plus','pro') THEN 1 ELSE 0 END) AS paid_rows,
+            SUM(CASE WHEN EXISTS (SELECT 1 FROM user_watchlist w WHERE w.user_id = users.user_id) THEN 1 ELSE 0 END) AS with_watchlist
+        FROM users
+        WHERE created_at > datetime('now', '{hours_or_days}', '+8 hours')
+        GROUP BY 1, 2
+        ORDER BY new_user_rows DESC, locale ASC
+    """
+
+
+def build_referral_conversion_summary(referral_segments: Dict[str, Dict[str, int]]) -> Dict[str, Dict[str, Any]]:
+    summary: Dict[str, Dict[str, Any]] = {}
+    for window, values in referral_segments.items():
+        invited = int(values.get("invited_user_rows", 0) or 0)
+        onboarded = int(values.get("invited_onboarded", 0) or 0)
+        summary[window] = {
+            **values,
+            "invite_onboarding_rate": round(pct(onboarded, invited), 2),
+        }
+    return summary
 
 
 @contextmanager
@@ -286,6 +390,25 @@ def get_ga4_report(property_id: str, credentials_path: str):
         for row in geo_resp.get("rows", [])
     ]
 
+    language_resp = fetch(
+        {
+            "dimensions": [{"name": "language"}],
+            "metrics": [{"name": "sessions"}, {"name": "activeUsers"}],
+            "dateRanges": [{"startDate": "30daysAgo", "endDate": "today"}],
+            "orderBys": [{"metric": {"metricName": "sessions"}, "desc": True}],
+            "limit": 10,
+        }
+    )
+    language_mix = [
+        {
+            "language": normalized_language(_ga_dim(row, 0)),
+            "raw_language": _ga_dim(row, 0),
+            "sessions": int(_ga_value(row, 0)),
+            "users": int(_ga_value(row, 1)),
+        }
+        for row in language_resp.get("rows", [])
+    ]
+
     return {
         "windows": window_summary,
         "daily_trend": daily_trend,
@@ -293,6 +416,7 @@ def get_ga4_report(property_id: str, credentials_path: str):
         "top_sources": top_sources,
         "device_mix": device_mix,
         "geo_mix": geo_mix,
+        "language_mix": language_mix,
     }
 
 def get_clarity_metrics(token: str):
@@ -393,6 +517,121 @@ def get_internal_metrics():
 
         cursor.execute("SELECT lower(coalesce(locale, 'unknown')), COUNT(*) FROM users GROUP BY 1 ORDER BY 2 DESC")
         locales = {row[0]: row[1] for row in cursor.fetchall()}
+
+        referral_segments = {}
+        for window_name, interval in [
+            ("last_24h", "-24 hours"),
+            ("last_7d", "-7 days"),
+            ("last_30d", "-30 days"),
+        ]:
+            cursor.execute(f"""
+                SELECT
+                    COUNT(*) AS invited_user_rows,
+                    SUM(CASE WHEN has_onboarded = 1 THEN 1 ELSE 0 END) AS invited_onboarded,
+                    SUM(CASE WHEN lower(coalesce(subscription_tier, 'free')) IN ('go','plus','pro') THEN 1 ELSE 0 END) AS invited_access_granted,
+                    SUM(CASE WHEN EXISTS (SELECT 1 FROM user_watchlist w WHERE w.user_id = users.user_id) THEN 1 ELSE 0 END) AS invited_with_watchlist
+                FROM users
+                WHERE created_at > datetime('now', '{interval}', '+8 hours')
+                  AND referred_by IS NOT NULL
+                  AND referred_by != ''
+            """)
+            row = cursor.fetchone() or (0, 0, 0, 0)
+            referral_segments[window_name] = {
+                "invited_user_rows": row[0] or 0,
+                "invited_onboarded": row[1] or 0,
+                "invited_access_granted": row[2] or 0,
+                "invited_with_watchlist": row[3] or 0,
+            }
+        referral_conversion = build_referral_conversion_summary(referral_segments)
+
+        cursor.execute("""
+            SELECT
+                lower(coalesce(nullif(locale, ''), 'unknown')) AS locale,
+                COUNT(*) AS invited_user_rows,
+                SUM(CASE WHEN has_onboarded = 1 THEN 1 ELSE 0 END) AS invited_onboarded,
+                SUM(CASE WHEN lower(coalesce(subscription_tier, 'free')) IN ('go','plus','pro') THEN 1 ELSE 0 END) AS invited_access_granted
+            FROM users
+            WHERE created_at > datetime('now', '-30 days', '+8 hours')
+              AND referred_by IS NOT NULL
+              AND referred_by != ''
+            GROUP BY 1
+            ORDER BY invited_user_rows DESC, locale ASC
+        """)
+        referral_language_segments = [
+            {
+                "language": normalized_language(row[0]),
+                "raw_locale": row[0] or "unknown",
+                "invited_user_rows": row[1] or 0,
+                "invited_onboarded": row[2] or 0,
+                "invite_onboarding_rate": round(pct(row[2] or 0, row[1] or 0), 2),
+                "invited_access_granted": row[3] or 0,
+            }
+            for row in cursor.fetchall()
+        ]
+
+        cursor.execute("""
+            SELECT
+                u.referred_by,
+                COALESCE(r.referral_alias, u.referred_by) AS referrer_label,
+                lower(coalesce(nullif(r.locale, ''), 'unknown')) AS referrer_locale,
+                COUNT(*) AS invited_user_rows,
+                SUM(CASE WHEN u.has_onboarded = 1 THEN 1 ELSE 0 END) AS invited_onboarded,
+                SUM(CASE WHEN lower(coalesce(u.subscription_tier, 'free')) IN ('go','plus','pro') THEN 1 ELSE 0 END) AS invited_access_granted,
+                SUM(CASE WHEN EXISTS (SELECT 1 FROM user_watchlist w WHERE w.user_id = u.user_id) THEN 1 ELSE 0 END) AS invited_with_watchlist
+            FROM users u
+            LEFT JOIN users r ON r.user_id = u.referred_by
+            WHERE u.created_at > datetime('now', '-30 days', '+8 hours')
+              AND u.referred_by IS NOT NULL
+              AND u.referred_by != ''
+            GROUP BY 1, 2, 3
+            ORDER BY invited_onboarded DESC, invited_user_rows DESC
+            LIMIT 10
+        """)
+        referral_by_referrer = [
+            {
+                "referrer_user_id": row[0],
+                "referrer_label": row[1],
+                "referrer_language": normalized_language(row[2]),
+                "invited_user_rows": row[3] or 0,
+                "invited_onboarded": row[4] or 0,
+                "invite_onboarding_rate": round(pct(row[4] or 0, row[3] or 0), 2),
+                "invited_access_granted": row[5] or 0,
+                "invited_with_watchlist": row[6] or 0,
+            }
+            for row in cursor.fetchall()
+        ]
+
+        cursor.execute("""
+            SELECT
+                substr(created_at, 1, 10) AS day,
+                COUNT(*) AS invited_user_rows,
+                SUM(CASE WHEN has_onboarded = 1 THEN 1 ELSE 0 END) AS invited_onboarded
+            FROM users
+            WHERE created_at > datetime('now', '-7 days', '+8 hours')
+              AND referred_by IS NOT NULL
+              AND referred_by != ''
+            GROUP BY 1
+            ORDER BY 1
+        """)
+        referral_trend = [
+            {
+                "day": row[0],
+                "invited_user_rows": row[1] or 0,
+                "invited_onboarded": row[2] or 0,
+                "invite_onboarding_rate": round(pct(row[2] or 0, row[1] or 0), 2),
+            }
+            for row in cursor.fetchall()
+        ]
+
+        language_rows = []
+        for sql in [
+            language_segment_sql("-24 hours", "last_24h"),
+            language_segment_sql("-7 days", "last_7d"),
+            language_segment_sql("-30 days", "last_30d"),
+        ]:
+            cursor.execute(sql)
+            language_rows.extend(cursor.fetchall())
+        language_segments = build_language_segments_from_rows(language_rows)
 
         cursor.execute("""
             SELECT
@@ -499,6 +738,11 @@ def get_internal_metrics():
             "top_symbols": top_symbols,
             "tiers": tiers,
             "locales": locales,
+            "language_segments": language_segments,
+            "referral_conversion": referral_conversion,
+            "referral_language_segments": referral_language_segments,
+            "referral_by_referrer": referral_by_referrer,
+            "referral_trend": referral_trend,
             "activation_summary": activation_summary,
             "channel_quality": channel_quality,
             "signup_trend": signup_trend,
@@ -588,6 +832,125 @@ def get_internal_metrics_via_node_cli():
         str(row["locale"]): int(row["count"])
         for row in query("SELECT lower(coalesce(locale, 'unknown')) AS locale, COUNT(*) AS count FROM users GROUP BY 1 ORDER BY 2 DESC")
     }
+
+    referral_segments = {}
+    for window_name, interval in [
+        ("last_24h", "-24 hours"),
+        ("last_7d", "-7 days"),
+        ("last_30d", "-30 days"),
+    ]:
+        row = query(f"""
+            SELECT
+                COUNT(*) AS invited_user_rows,
+                SUM(CASE WHEN has_onboarded = 1 THEN 1 ELSE 0 END) AS invited_onboarded,
+                SUM(CASE WHEN lower(coalesce(subscription_tier, 'free')) IN ('go','plus','pro') THEN 1 ELSE 0 END) AS invited_access_granted,
+                SUM(CASE WHEN EXISTS (SELECT 1 FROM user_watchlist w WHERE w.user_id = users.user_id) THEN 1 ELSE 0 END) AS invited_with_watchlist
+            FROM users
+            WHERE created_at > datetime('now', '{interval}', '+8 hours')
+              AND referred_by IS NOT NULL
+              AND referred_by != ''
+        """)[0]
+        referral_segments[window_name] = {
+            "invited_user_rows": int(row.get("invited_user_rows") or 0),
+            "invited_onboarded": int(row.get("invited_onboarded") or 0),
+            "invited_access_granted": int(row.get("invited_access_granted") or 0),
+            "invited_with_watchlist": int(row.get("invited_with_watchlist") or 0),
+        }
+    referral_conversion = build_referral_conversion_summary(referral_segments)
+
+    referral_language_segments = [
+        {
+            "language": normalized_language(row.get("locale")),
+            "raw_locale": row.get("locale") or "unknown",
+            "invited_user_rows": int(row.get("invited_user_rows") or 0),
+            "invited_onboarded": int(row.get("invited_onboarded") or 0),
+            "invite_onboarding_rate": round(pct(int(row.get("invited_onboarded") or 0), int(row.get("invited_user_rows") or 0)), 2),
+            "invited_access_granted": int(row.get("invited_access_granted") or 0),
+        }
+        for row in query("""
+            SELECT
+                lower(coalesce(nullif(locale, ''), 'unknown')) AS locale,
+                COUNT(*) AS invited_user_rows,
+                SUM(CASE WHEN has_onboarded = 1 THEN 1 ELSE 0 END) AS invited_onboarded,
+                SUM(CASE WHEN lower(coalesce(subscription_tier, 'free')) IN ('go','plus','pro') THEN 1 ELSE 0 END) AS invited_access_granted
+            FROM users
+            WHERE created_at > datetime('now', '-30 days', '+8 hours')
+              AND referred_by IS NOT NULL
+              AND referred_by != ''
+            GROUP BY 1
+            ORDER BY invited_user_rows DESC, locale ASC
+        """)
+    ]
+
+    referral_by_referrer = [
+        {
+            "referrer_user_id": row.get("referred_by"),
+            "referrer_label": row.get("referrer_label"),
+            "referrer_language": normalized_language(row.get("referrer_locale")),
+            "invited_user_rows": int(row.get("invited_user_rows") or 0),
+            "invited_onboarded": int(row.get("invited_onboarded") or 0),
+            "invite_onboarding_rate": round(pct(int(row.get("invited_onboarded") or 0), int(row.get("invited_user_rows") or 0)), 2),
+            "invited_access_granted": int(row.get("invited_access_granted") or 0),
+            "invited_with_watchlist": int(row.get("invited_with_watchlist") or 0),
+        }
+        for row in query("""
+            SELECT
+                u.referred_by AS referred_by,
+                COALESCE(r.referral_alias, u.referred_by) AS referrer_label,
+                lower(coalesce(nullif(r.locale, ''), 'unknown')) AS referrer_locale,
+                COUNT(*) AS invited_user_rows,
+                SUM(CASE WHEN u.has_onboarded = 1 THEN 1 ELSE 0 END) AS invited_onboarded,
+                SUM(CASE WHEN lower(coalesce(u.subscription_tier, 'free')) IN ('go','plus','pro') THEN 1 ELSE 0 END) AS invited_access_granted,
+                SUM(CASE WHEN EXISTS (SELECT 1 FROM user_watchlist w WHERE w.user_id = u.user_id) THEN 1 ELSE 0 END) AS invited_with_watchlist
+            FROM users u
+            LEFT JOIN users r ON r.user_id = u.referred_by
+            WHERE u.created_at > datetime('now', '-30 days', '+8 hours')
+              AND u.referred_by IS NOT NULL
+              AND u.referred_by != ''
+            GROUP BY 1, 2, 3
+            ORDER BY invited_onboarded DESC, invited_user_rows DESC
+            LIMIT 10
+        """)
+    ]
+
+    referral_trend = [
+        {
+            "day": row.get("day"),
+            "invited_user_rows": int(row.get("invited_user_rows") or 0),
+            "invited_onboarded": int(row.get("invited_onboarded") or 0),
+            "invite_onboarding_rate": round(pct(int(row.get("invited_onboarded") or 0), int(row.get("invited_user_rows") or 0)), 2),
+        }
+        for row in query("""
+            SELECT
+                substr(created_at, 1, 10) AS day,
+                COUNT(*) AS invited_user_rows,
+                SUM(CASE WHEN has_onboarded = 1 THEN 1 ELSE 0 END) AS invited_onboarded
+            FROM users
+            WHERE created_at > datetime('now', '-7 days', '+8 hours')
+              AND referred_by IS NOT NULL
+              AND referred_by != ''
+            GROUP BY 1
+            ORDER BY 1
+        """)
+    ]
+
+    language_segment_rows = []
+    for sql in [
+        language_segment_sql("-24 hours", "last_24h"),
+        language_segment_sql("-7 days", "last_7d"),
+        language_segment_sql("-30 days", "last_30d"),
+    ]:
+        for row in query(sql):
+            language_segment_rows.append((
+                row.get("window_name"),
+                row.get("locale"),
+                row.get("new_user_rows"),
+                row.get("anonymous_rows"),
+                row.get("activated_users"),
+                row.get("paid_rows"),
+                row.get("with_watchlist"),
+            ))
+    language_segments = build_language_segments_from_rows(language_segment_rows)
 
     activation_row = query("""
         SELECT
@@ -705,12 +1068,136 @@ def get_internal_metrics_via_node_cli():
         "top_symbols": top_symbols,
         "tiers": tiers,
         "locales": locales,
+        "language_segments": language_segments,
+        "referral_conversion": referral_conversion,
+        "referral_language_segments": referral_language_segments,
+        "referral_by_referrer": referral_by_referrer,
+        "referral_trend": referral_trend,
         "activation_summary": activation_summary,
         "channel_quality": channel_quality,
         "signup_trend": signup_trend,
         "watchlist_trend": watchlist_trend,
         "new_users_detailed": new_users_detailed,
     }
+
+
+def collect_growth_payload(require_external: bool = False) -> Dict[str, Any]:
+    property_id = os.environ.get("GA4_PROPERTY_ID")
+    credentials_path = os.environ.get("GA4_CREDENTIALS_PATH")
+    clarity_token = os.environ.get("CLARITY_API_TOKEN")
+    errors: Dict[str, str] = {}
+
+    internal = get_internal_metrics()
+
+    ga = None
+    if property_id and credentials_path:
+        try:
+            ga = get_ga4_report(property_id, credentials_path)
+        except Exception as exc:
+            errors["ga4"] = str(exc)
+    elif require_external:
+        errors["ga4"] = "GA4_PROPERTY_ID or GA4_CREDENTIALS_PATH is not configured"
+
+    clarity = None
+    if clarity_token:
+        try:
+            clarity = get_clarity_metrics(clarity_token)
+        except Exception as exc:
+            errors["clarity"] = str(exc)
+
+    generated_at = datetime.now(BEIJING_TZ).strftime("%Y-%m-%d %H:%M:%S%z")
+    db_24h = internal["windows"]["last_24h"]
+    ga_24h = (ga or {}).get("windows", {}).get("last_24h", {})
+
+    payload = {
+        "generated_at": generated_at,
+        "snapshot_date": today_beijing(),
+        "internal": internal,
+        "ga4": ga,
+        "clarity": clarity,
+        "errors": errors,
+        "headline": {
+            "sessions_24h": int(ga_24h.get("sessions") or 0),
+            "active_users_24h": int(ga_24h.get("users") or 0),
+            "page_views_24h": int(ga_24h.get("page_views") or 0),
+            "new_user_rows_24h": int(db_24h["new_user_rows"] or 0),
+            "activated_users_24h": int(db_24h["activated_users"] or 0),
+            "activation_rate_24h": round(pct(int(db_24h["activated_users"] or 0), int(db_24h["new_user_rows"] or 0)), 2),
+            "paid_rows_24h": int(db_24h["paid_rows"] or 0),
+            "active_watchers_24h": int(db_24h["active_watchers"] or 0),
+        },
+    }
+    return payload
+
+
+def persist_growth_snapshot(payload: Dict[str, Any], snapshot_date: str | None = None, status: str = "success") -> Dict[str, Any]:
+    conn = get_connection()
+    cursor = conn.cursor()
+    ensure_growth_snapshot_table(cursor)
+
+    run_id = f"growth_{uuid.uuid4().hex[:12]}"
+    date_value = snapshot_date or payload.get("snapshot_date") or today_beijing()
+    headline = payload.get("headline", {})
+    user_base = payload.get("internal", {}).get("user_base_summary", {})
+    errors = payload.get("errors") or {}
+
+    cursor.execute(
+        f"""
+        INSERT INTO {GROWTH_SNAPSHOT_TABLE} (
+            snapshot_date, run_id, generated_at, status, db_source,
+            sessions_24h, active_users_24h, page_views_24h,
+            new_user_rows_24h, activated_users_24h, activation_rate_24h,
+            paid_rows_24h, active_watchers_24h,
+            total_users, access_granted_users, active_paid_users, stripe_linked_users,
+            payload_json, errors_json, updated_at
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now', '+8 hours'))
+        ON CONFLICT(snapshot_date) DO UPDATE SET
+            run_id = excluded.run_id,
+            generated_at = excluded.generated_at,
+            status = excluded.status,
+            db_source = excluded.db_source,
+            sessions_24h = excluded.sessions_24h,
+            active_users_24h = excluded.active_users_24h,
+            page_views_24h = excluded.page_views_24h,
+            new_user_rows_24h = excluded.new_user_rows_24h,
+            activated_users_24h = excluded.activated_users_24h,
+            activation_rate_24h = excluded.activation_rate_24h,
+            paid_rows_24h = excluded.paid_rows_24h,
+            active_watchers_24h = excluded.active_watchers_24h,
+            total_users = excluded.total_users,
+            access_granted_users = excluded.access_granted_users,
+            active_paid_users = excluded.active_paid_users,
+            stripe_linked_users = excluded.stripe_linked_users,
+            payload_json = excluded.payload_json,
+            errors_json = excluded.errors_json,
+            updated_at = datetime('now', '+8 hours')
+        """,
+        (
+            date_value,
+            run_id,
+            payload.get("generated_at") or datetime.now(BEIJING_TZ).strftime("%Y-%m-%d %H:%M:%S%z"),
+            status,
+            os.environ.get("DB_SOURCE", "cloud"),
+            headline.get("sessions_24h"),
+            headline.get("active_users_24h"),
+            headline.get("page_views_24h"),
+            headline.get("new_user_rows_24h"),
+            headline.get("activated_users_24h"),
+            headline.get("activation_rate_24h"),
+            headline.get("paid_rows_24h"),
+            headline.get("active_watchers_24h"),
+            user_base.get("total_users"),
+            user_base.get("access_granted_users"),
+            user_base.get("active_paid_users"),
+            user_base.get("stripe_linked_users"),
+            json.dumps(payload, ensure_ascii=False),
+            json.dumps(errors, ensure_ascii=False) if errors else None,
+        ),
+    )
+    conn.commit()
+    conn.close()
+    return {"snapshot_date": date_value, "run_id": run_id, "status": status, "errors": errors}
 
 def generate_report():
     print("--- 🚀 StockWise Daily Growth Pulse ---")
@@ -899,5 +1386,22 @@ def generate_report():
     except Exception as e:
         print(f"❌ Failed to generate growth report: {e}")
 
-if __name__ == "__main__":
+def main():
+    parser = argparse.ArgumentParser(description="Collect StockWise growth metrics.")
+    parser.add_argument("--persist", action="store_true", help="Persist the daily snapshot into growth_daily_snapshots.")
+    parser.add_argument("--date", default=None, help="Snapshot date in YYYY-MM-DD. Defaults to Beijing today.")
+    parser.add_argument("--print-only", action="store_true", help="Generate the legacy Markdown report only.")
+    parser.add_argument("--require-external", action="store_true", help="Treat missing GA4 configuration as a collection error.")
+    args = parser.parse_args()
+
+    if args.persist:
+        payload = collect_growth_payload(require_external=args.require_external)
+        result = persist_growth_snapshot(payload, snapshot_date=args.date)
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
+
     generate_report()
+
+
+if __name__ == "__main__":
+    main()

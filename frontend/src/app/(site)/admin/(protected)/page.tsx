@@ -283,6 +283,21 @@ export default function AdminDashboard() {
                </div>
              </Link>
 
+             <Link href="/admin/growth" className="group block">
+               <div className="glass-card p-8 flex items-center justify-between hover:bg-white/[0.04] transition-all border-cyan-500/20">
+                 <div className="flex items-center gap-6">
+                   <div className="w-14 h-14 rounded-2xl bg-cyan-500/10 flex items-center justify-center group-hover:bg-cyan-500/20 transition-all">
+                     <Users className="w-7 h-7 text-cyan-300" />
+                   </div>
+                   <div>
+                     <h2 className="text-xl font-black italic tracking-tighter mb-1">增长看板</h2>
+                     <p className="text-xs text-slate-500 font-medium">查看每日增长快照、语言拆分、渠道质量和热门自选股</p>
+                   </div>
+                 </div>
+                 <ArrowRight className="text-slate-700 group-hover:text-cyan-300 group-hover:translate-x-1 transition-all" />
+               </div>
+             </Link>
+
              <Link href="/admin/invitations" className="group block">
                <div className="glass-card p-8 flex items-center justify-between hover:bg-white/[0.04] transition-all border-indigo-500/20">
                  <div className="flex items-center gap-6">

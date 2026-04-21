@@ -1,0 +1,72 @@
+name: Daily Growth Snapshot
+
+on:
+  schedule:
+    # 07:00 Asia/Shanghai. GA4/Clarity are less stable before this window.
+    - cron: '0 23 * * *'
+  workflow_dispatch:
+
+jobs:
+  collect-growth:
+    runs-on: ubuntu-latest
+    env:
+      DB_SOURCE: cloud
+      TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
+      TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+      GA4_PROPERTY_ID: ${{ secrets.GA4_PROPERTY_ID }}
+      CLARITY_API_TOKEN: ${{ secrets.CLARITY_API_TOKEN }}
+      PYTHONPATH: ${{ github.workspace }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Prepare GA4 credentials
+        env:
+          GA4_SERVICE_ACCOUNT_JSON: ${{ secrets.GA4_SERVICE_ACCOUNT_JSON }}
+        run: |
+          if [ -n "$GA4_SERVICE_ACCOUNT_JSON" ]; then
+            mkdir -p backend/keys
+            printf '%s' "$GA4_SERVICE_ACCOUNT_JSON" > backend/keys/ga4-service-account.json
+            echo "GA4_CREDENTIALS_PATH=backend/keys/ga4-service-account.json" >> "$GITHUB_ENV"
+          fi
+
+      - name: Persist growth snapshot
+        run: |
+          python backend/scripts/daily_growth_digest.py --persist
+
+      - name: Verify snapshot
+        run: |
+          python - <<'PY'
+          from backend.database import get_connection
+
+          conn = get_connection()
+          cur = conn.cursor()
+          cur.execute("""
+              SELECT snapshot_date, status, new_user_rows_24h, activated_users_24h
+              FROM growth_daily_snapshots
+              ORDER BY snapshot_date DESC
+              LIMIT 1
+          """)
+          row = cur.fetchone()
+          conn.close()
+          if not row:
+              raise SystemExit("No growth snapshot row found after job")
+          print({
+              "snapshot_date": row[0],
+              "status": row[1],
+              "new_user_rows_24h": row[2],
+              "activated_users_24h": row[3],
+          })
+          PY
