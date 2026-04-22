@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { 
   BarChart3, 
   Users, 
@@ -41,28 +42,63 @@ interface Stats {
   };
 }
 
+const EMPTY_STATS: Stats = {
+  strategy: 'unknown',
+  counts: {
+    global_stocks: 0,
+    watchlists: 0,
+    prices: 0,
+    predictions: 0,
+    users: 0,
+    stock_meta_total: 0,
+    stock_meta_hk: 0,
+    stock_meta_cn: 0,
+  },
+  lastUpdates: {
+    stocks: null,
+    prices: null,
+    predictions: null,
+    stock_meta: null,
+  },
+};
+
 export default function AdminDashboard() {
+  const router = useRouter();
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     setRefreshing(true);
+    setError(null);
     try {
-      const res = await fetch('/api/admin/stats');
+      const res = await fetch('/api/admin/stats', { cache: 'no-store' });
       const data = await res.json();
+
+      if (res.status === 401 || res.status === 403) {
+        router.replace('/admin/login');
+        return;
+      }
+
+      if (!res.ok) {
+        throw new Error(data?.error || `Stats request failed with ${res.status}`);
+      }
+
       setStats(data);
     } catch (error) {
       console.error('Failed to fetch stats:', error);
+      setStats(EMPTY_STATS);
+      setError(error instanceof Error ? error.message : '统计数据加载失败');
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, [router]);
 
   useEffect(() => {
     fetchStats();
-  }, []);
+  }, [fetchStats]);
 
   if (loading) {
     return (
@@ -75,12 +111,14 @@ export default function AdminDashboard() {
     );
   }
 
-    const statCards = [
-    { label: '注册用户', value: stats?.counts?.users || 0, icon: Users, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-    { label: '核心股票池', value: stats?.counts?.global_stocks || 0, icon: Database, color: 'text-indigo-500', bg: 'bg-indigo-500/10' },
-    { label: '总关注记录', value: stats?.counts?.watchlists || 0, icon: LayoutGrid, color: 'text-purple-500', bg: 'bg-purple-500/10' },
-    { label: 'AI 预测总量', value: stats?.counts?.predictions || 0, icon: Zap, color: 'text-amber-500', bg: 'bg-amber-500/10' },
-    { label: '价格快照', value: stats?.counts?.prices || 0, icon: TrendingUp, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+  const safeStats = stats ?? EMPTY_STATS;
+
+  const statCards = [
+    { label: '注册用户', value: safeStats.counts.users, icon: Users, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+    { label: '核心股票池', value: safeStats.counts.global_stocks, icon: Database, color: 'text-indigo-500', bg: 'bg-indigo-500/10' },
+    { label: '总关注记录', value: safeStats.counts.watchlists, icon: LayoutGrid, color: 'text-purple-500', bg: 'bg-purple-500/10' },
+    { label: 'AI 预测总量', value: safeStats.counts.predictions, icon: Zap, color: 'text-amber-500', bg: 'bg-amber-500/10' },
+    { label: '价格快照', value: safeStats.counts.prices, icon: TrendingUp, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
   ];
 
   return (
@@ -97,10 +135,10 @@ export default function AdminDashboard() {
             <h1 className="text-4xl font-black italic tracking-tighter">BACKEND <span className="text-indigo-500 underline decoration-4 underline-offset-8">OVERVIEW</span></h1>
           </div>
           <div className="flex items-center gap-4">
-            <div className={`px-4 py-2 rounded-2xl border flex items-center gap-3 transition-colors ${stats?.strategy === 'cloud' ? 'bg-indigo-500/10 border-indigo-500/30' : 'bg-amber-500/10 border-amber-500/30'}`}>
-              <div className={`w-2 h-2 rounded-full animate-pulse ${stats?.strategy === 'cloud' ? 'bg-indigo-500' : 'bg-amber-500'}`} />
+            <div className={`px-4 py-2 rounded-2xl border flex items-center gap-3 transition-colors ${safeStats.strategy === 'cloud' ? 'bg-indigo-500/10 border-indigo-500/30' : 'bg-amber-500/10 border-amber-500/30'}`}>
+              <div className={`w-2 h-2 rounded-full animate-pulse ${safeStats.strategy === 'cloud' ? 'bg-indigo-500' : 'bg-amber-500'}`} />
               <span className="text-xs font-black uppercase tracking-widest">
-                {stats?.strategy === 'cloud' ? '☁️ 云端模式 (Turso)' : '🏠 本地模式 (SQLite)'}
+                {safeStats.strategy === 'cloud' ? '☁️ 云端模式 (Turso)' : '🏠 本地模式 (SQLite)'}
               </span>
             </div>
             <button 
@@ -112,6 +150,12 @@ export default function AdminDashboard() {
             </button>
           </div>
         </header>
+
+        {error && (
+          <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
+            {error}
+          </div>
+        )}
 
         {/* Stats Grid */}
         <section className="grid grid-cols-2 md:grid-cols-5 gap-4">
@@ -142,20 +186,20 @@ export default function AdminDashboard() {
               <h2 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">股票元数据库</h2>
             </div>
             <p className="text-[10px] mono text-slate-600">
-              最后同步: {stats?.lastUpdates.stock_meta ? new Date(stats.lastUpdates.stock_meta).toLocaleString('zh-CN', { hour12: false }) : '-'}
+              最后同步: {safeStats.lastUpdates.stock_meta ? new Date(safeStats.lastUpdates.stock_meta).toLocaleString('zh-CN', { hour12: false }) : '-'}
             </p>
           </div>
           <div className="grid grid-cols-3 gap-4">
             <div className="bg-white/5 rounded-2xl p-5 text-center">
-              <p className="text-4xl font-black mono text-white mb-2">{(stats?.counts.stock_meta_total || 0).toLocaleString()}</p>
+              <p className="text-4xl font-black mono text-white mb-2">{safeStats.counts.stock_meta_total.toLocaleString()}</p>
               <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">总股票数</p>
             </div>
             <div className="bg-rose-500/5 border border-rose-500/10 rounded-2xl p-5 text-center">
-              <p className="text-4xl font-black mono text-rose-400 mb-2">{(stats?.counts.stock_meta_cn || 0).toLocaleString()}</p>
+              <p className="text-4xl font-black mono text-rose-400 mb-2">{safeStats.counts.stock_meta_cn.toLocaleString()}</p>
               <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">A 股</p>
             </div>
             <div className="bg-blue-500/5 border border-blue-500/10 rounded-2xl p-5 text-center">
-              <p className="text-4xl font-black mono text-blue-400 mb-2">{(stats?.counts.stock_meta_hk || 0).toLocaleString()}</p>
+              <p className="text-4xl font-black mono text-blue-400 mb-2">{safeStats.counts.stock_meta_hk.toLocaleString()}</p>
               <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">港 股</p>
             </div>
           </div>
@@ -170,10 +214,10 @@ export default function AdminDashboard() {
             </div>
             <div className="space-y-6">
               {[
-                { label: '元数据同步', date: stats?.lastUpdates.stock_meta, color: 'bg-pink-500' },
-                { label: '核心资产同步', date: stats?.lastUpdates.stocks, color: 'bg-indigo-500' },
-                { label: '行情数据对齐', date: stats?.lastUpdates.prices, color: 'bg-emerald-500' },
-                { label: '策略模型更新', date: stats?.lastUpdates.predictions, color: 'bg-amber-500' },
+                { label: '元数据同步', date: safeStats.lastUpdates.stock_meta, color: 'bg-pink-500' },
+                { label: '核心资产同步', date: safeStats.lastUpdates.stocks, color: 'bg-indigo-500' },
+                { label: '行情数据对齐', date: safeStats.lastUpdates.prices, color: 'bg-emerald-500' },
+                { label: '策略模型更新', date: safeStats.lastUpdates.predictions, color: 'bg-amber-500' },
               ].map((item, i) => (
                 <div key={i} className="flex items-center gap-4">
                   <div className="flex flex-col items-center gap-1">

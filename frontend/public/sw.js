@@ -10,7 +10,7 @@
 //   - Push:     Preserve existing notification handling
 // =============================================================================
 
-const CACHE_VERSION = 'ziso-v11';
+const CACHE_VERSION = 'ziso-v12';
 
 // Critical resources that MUST be available offline for the App Shell
 const PRECACHE_URLS = [
@@ -296,6 +296,13 @@ self.addEventListener('fetch', (event) => {
 
   // ─── RULE 3: Navigation — CacheFirst + Background Revalidate (秒开) ───
   if (request.mode === 'navigate') {
+    // Admin pages are server-authenticated. Never serve them from the PWA
+    // navigation cache, otherwise expired sessions can keep seeing stale HTML
+    // while /api/admin/* correctly returns 401.
+    if (url.pathname === '/admin' || url.pathname.startsWith('/admin/')) {
+      return;
+    }
+
     // App subdomain entry: CacheFirst + Background Revalidate (秒开)
     // Rationale: The cached HTML is the React shell; all auth & data are
     // fetched client-side via API (no-store). Stale HTML is safe because
