@@ -1,7 +1,7 @@
 ﻿# 知守 AI (ZISO AI) 架构文档（生产基线与演进方案）
 
-> **更新时间**: 2026-04-16
-> **版本**: v3.2（补充 App Entry 顶层设计）
+> **更新时间**: 2026-04-23
+> **版本**: v3.3（收敛 App Entry 当前状态）
 > **适用范围**: `frontend/`、`backend/`、`docs/` 当前仓库实现
 
 ## 1. 文档目标与边界
@@ -37,23 +37,13 @@
 
 #### 2.2.1.1 App Entry 顶层设计事实
 
-截至 2026-04-16，前端已经暴露出一个比局部性能更高层的问题：
+截至 2026-04-23，`app entry` 已从 `dashboard layout` 的局部实现细节，收敛为前端顶层入口契约。
 
-- `app entry` 既是架构问题，也是应用规格问题。
-
-原因在于，用户首访时真正感知到的并不是某个组件的局部实现，而是：
-
-1. 系统先把他判到哪条主路径，
-2. 系统先给他展示哪一种 loading，
-3. 哪些 bootstrap 工作被放在首屏关键路径上。
-
-因此，`app entry` 需要被视为顶层架构对象，而不是 `dashboard layout` 的实现细节。
-
-当前顶层规则已经明确为：
+当前顶层规则：
 
 `entry classification -> route-specific loading -> minimal bootstrap -> content render`
 
-其适用主路径为：
+当前主路径：
 
 1. `invite-onboarding`
 2. `authorized-dashboard`
@@ -68,6 +58,17 @@
 3. cold direct app entry 在 invite 制开启且没有本地授权/完成 onboarding 证据时，必须使用 `invite-wall` 语义 loading，不能回落到 Dashboard 风格骨架。
 4. route classification 必须有单一事实源，不能由多个层各自推断。
 5. app entry 必须具备可观测性，能够重建 route decision 与首屏时序。
+
+当前实现事实：
+
+- 单一入口快照主要位于 `frontend/src/lib/dashboard-bootstrap.ts`。
+- `frontend/src/app/(site)/(dashboard)/dashboard/layout.tsx` 消费该快照决定首屏 loading。
+- `invite-wall` / `invite-onboarding` / `shell` loading 文案已接入 `frontend/src/messages/{cn,en}.json`。
+- direct cold app entry 已验证不再展示 Dashboard skeleton。
+
+详细 contract 与后续只维护在：
+
+- [46_International_Onboarding_Performance_Optimization_Plan_20260416.md](/Users/yesun/Code/stockwise/docs/1_Engineering/46_International_Onboarding_Performance_Optimization_Plan_20260416.md)
 
 #### 2.2.2 数据访问
 - 统一入口：`frontend/src/lib/db.ts`。

@@ -1,6 +1,6 @@
 # 交易大师图鉴 · 生产看板 (Master Series Production Board)
 
-> 自动生成时间：2026/4/9 10:17:02
+> 自动生成时间：2026/4/17 19:03:53
 > 说明：本看板由 `scripts/cmo_sync.mjs` 自动扫描 `master_series/` 目录下的 canonical 母稿生成。
 > 查看范围：仅 canonical 母稿（`ms-xx_*.md`），排除 `_notebooklm.md` 伴稿和规范文件。
 > 系列状态来源：优先读取各篇 frontmatter 里的 `master_series.*` 字段，用来标注编辑收口、首发分层和当前动作。
@@ -47,7 +47,7 @@
 | ms-26 | [理查德·威科夫](../master_series/ms-26_richard_wyckoff.md) | 第 2 批 | ✅ 已收口 | 进入试产 | ⚪ 未开始 | ⚪ / ⚪ / ⚪ |
 | ms-28 | [CAN SLIM](../master_series/ms-28_can_slim.md) | 第 2 批 | ✅ 已收口 | 进入试产 | ⚪ 未开始 | ⚪ / ⚪ / ⚪ |
 | ms-32 | [仓位管理与 R 倍数](../master_series/ms-32_position_sizing_and_r_multiple.md) | 第 2 批 | ✅ 已收口 | 进入试产 | ⚪ 未开始 | ⚪ / ⚪ / ⚪ |
-| ms-36 | [金融怪杰](../master_series/ms-36_market_wizards_as_reading_map.md) | 第 2 批 | ✅ 已收口 | 进入试产 | ⚪ 未开始 | ⚪ / ⚪ / ⚪ |
+| ms-36 | [系列终章｜逻辑全图](../master_series/ms-36_market_wizards_as_reading_map.md) | 第 2 批 | ✅ 已收口 | 进入试产 | ⚪ 未开始 | ⚪ / ⚪ / ⚪ |
 
 ## Ready To Publish
 
@@ -68,7 +68,7 @@
 | ms-26 | [理查德·威科夫](../master_series/ms-26_richard_wyckoff.md) | 第 2 批 | 进入试产 | ✍️ 生产中 |
 | ms-28 | [CAN SLIM](../master_series/ms-28_can_slim.md) | 第 2 批 | 进入试产 | ✍️ 生产中 |
 | ms-32 | [仓位管理与 R 倍数](../master_series/ms-32_position_sizing_and_r_multiple.md) | 第 2 批 | 进入试产 | ✍️ 生产中 |
-| ms-36 | [金融怪杰](../master_series/ms-36_market_wizards_as_reading_map.md) | 第 2 批 | 进入试产 | ✍️ 生产中 |
+| ms-36 | [系列终章｜逻辑全图](../master_series/ms-36_market_wizards_as_reading_map.md) | 第 2 批 | 进入试产 | ✍️ 生产中 |
 
 ## Ready To NLM
 
@@ -111,13 +111,13 @@
 | ms-33 | [系统开发与期望值](../master_series/ms-33_system_development_and_expectancy.md) | 📦 库存观察 | 继续观察 | ✅ |
 | ms-34 | [事实层与生产商模式](../master_series/ms-34_method_fact_layer_producer_mode.md) | 📦 库存观察 | 继续观察 | ✅ |
 | ms-35 | [霍华德·马克斯](../master_series/ms-35_howard_marks.md) | 🗂 候补池 | 留在候补池 | ✅ |
-| ms-36 | [金融怪杰](../master_series/ms-36_market_wizards_as_reading_map.md) | 🚀 首发样板 第 2 批 | 进入试产 | ✅ |
+| ms-36 | [系列终章｜逻辑全图](../master_series/ms-36_market_wizards_as_reading_map.md) | 🚀 首发样板 第 2 批 | 进入试产 | ✅ |
 
 ## 逐篇生产状态
 
 | 编号 | 标题 | 编辑状态 | 首发分层 | 当前动作 | 主流程 | 视觉 | 最近动作 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| ms-01 | [马克·米勒维尼](../master_series/ms-01_mark_minervini.md) | ✅ 已收口 | 🚀 首发样板 第 1 批 | 已发布 | 🚀 已发布 | 📦 已交付 | 2026-03-25 |
+| ms-01 | [马克·米勒维尼](../master_series/ms-01_mark_minervini.md) | ✅ 已收口 | 🚀 首发样板 第 1 批 | 已发布 | 🚀 已发布 | 📦 已交付 | 2026-04-17 |
 | ms-02 | [普拉迪普·邦德](../master_series/ms-02_pradeep_bonde.md) | ✅ 已收口 | 🗂 候补池 | 留在候补池 | ✍️ 生产中 | ⚪ 未开始 | 2026-03-25 |
 | ms-03 | [亚历山大·埃尔德](../master_series/ms-03_alexander_elder.md) | ✅ 已收口 | 🚀 首发样板 第 1 批 | 进入试产 | ✍️ 生产中 | ⚪ 未开始 | 2026-03-25 |
 | ms-04 | [理查德·丹尼斯](../master_series/ms-04_richard_dennis.md) | ✅ 已收口 | 🚀 首发样板 第 1 批 | 进入试产 | ✍️ 生产中 | ⚪ 未开始 | 2026-03-25 |
@@ -152,7 +152,7 @@
 | ms-33 | [系统开发与期望值](../master_series/ms-33_system_development_and_expectancy.md) | ✅ 已收口 | 📦 库存观察 | 继续观察 | ✍️ 生产中 | ⚪ 未开始 | 2026-03-25 |
 | ms-34 | [事实层与生产商模式](../master_series/ms-34_method_fact_layer_producer_mode.md) | ✅ 已收口 | 📦 库存观察 | 继续观察 | ✍️ 生产中 | ⚪ 未开始 | 2026-03-25 |
 | ms-35 | [霍华德·马克斯](../master_series/ms-35_howard_marks.md) | ✅ 已收口 | 🗂 候补池 | 留在候补池 | ✍️ 生产中 | ⚪ 未开始 | 2026-03-26 |
-| ms-36 | [金融怪杰](../master_series/ms-36_market_wizards_as_reading_map.md) | ✅ 已收口 | 🚀 首发样板 第 2 批 | 进入试产 | ✍️ 生产中 | ⚪ 未开始 | 2026-03-25 |
+| ms-36 | [系列终章｜逻辑全图](../master_series/ms-36_market_wizards_as_reading_map.md) | ✅ 已收口 | 🚀 首发样板 第 2 批 | 进入试产 | ✍️ 生产中 | ⚪ 未开始 | 2026-04-09 |
 
 ## NLM 生产状态
 
@@ -193,7 +193,7 @@
 | ms-33 | [系统开发与期望值](../master_series/ms-33_system_development_and_expectancy.md) | ✅ | ⚪ | ⚪ | ⚪ | ⚪ |
 | ms-34 | [事实层与生产商模式](../master_series/ms-34_method_fact_layer_producer_mode.md) | ✅ | ⚪ | ⚪ | ⚪ | ⚪ |
 | ms-35 | [霍华德·马克斯](../master_series/ms-35_howard_marks.md) | ✅ | ⚪ | ⚪ | ⚪ | ⚪ |
-| ms-36 | [金融怪杰](../master_series/ms-36_market_wizards_as_reading_map.md) | ✅ | ⚪ | ⚪ | ⚪ | ⚪ |
+| ms-36 | [系列终章｜逻辑全图](../master_series/ms-36_market_wizards_as_reading_map.md) | ✅ | ⚪ | ⚪ | ⚪ | ⚪ |
 
 ## 待补齐清单
 

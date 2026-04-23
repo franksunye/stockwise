@@ -35,7 +35,7 @@ workflow:
   reviewer: "founder"
   priority: "high"
   target_publish_date: "2026-03-25"
-  last_action_at: "2026-03-25"
+  last_action_at: "2026-04-17"
   blocked_reason: ""
 maintenance:
   change_status: "stable"
@@ -96,8 +96,9 @@ visual_strategy:
 visual_style_prefix: "Premium editorial finance style for mass-audience educational content, realistic not cartoonish, emotionally legible before intellectually impressive, Chinese retail investor context, one simple visual metaphor, clean composition, relatable human tension, premium but grounded materials, lighter premium editorial palette, soft neutral background, clean indoor or daylight-style lighting, calm clear restrained mood, professional finance magazine illustration feel rather than cinematic drama, stylized realism, simplified forms, limited details, no text, no watermark."
 distribution:
   wechat:
-    enabled: false
-    status: "none"
+    enabled: true
+    status: "published"
+    published_at: "2026-03-31"
   xhs:
     enabled: true
     status: "published"

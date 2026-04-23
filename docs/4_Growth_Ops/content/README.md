@@ -1,10 +1,10 @@
 # 内容运营主索引 (Content Operations Registry)
 
-> 自动生成时间：2026/4/9 10:17:02
+> 自动生成时间：2026/4/17 19:03:53
 > 说明：本索引由 `scripts/cmo_sync.mjs` 统一扫描 `4_Growth_Ops/content` 与 `5_Support_Ops/content` 生成。
 > 日期规则：已发布内容优先显示公众号真实发布日期；未发布内容显示目标发布日期。
 > 公众号默认发布节奏：固定为 周一 / 周三 / 周五；除非团队明确调整，否则不自动变更。
-> 视图：[_Pipeline_](_views/pipeline.md) · [_Next Release_](_views/next-release.md) · [_Recently Updated_](_views/recently-updated.md) · [_Change Impact_](_views/change-impact.md) · [_External Maintenance_](_views/external-maintenance.md) · [_Master Series_](_views/master-series.md)
+> 视图：[_Pipeline_](_views/pipeline.md) · [_Next Release_](_views/next-release.md) · [_Recently Updated_](_views/recently-updated.md) · [_Change Impact_](_views/change-impact.md) · [_External Maintenance_](_views/external-maintenance.md) · [_Master Series_](_views/master-series.md) · [_Ops Weekly_](_views/ops-weekly.md) · [_WeChat Funnel_](_views/wechat-funnel.md) · [_Data Quality_](_views/data-quality.md)
 
 | 标题 | 来源 | 类型 | 漏斗 | 战役角色 | 主流程 | 关键日期 | 网站 | 公众号 | 最近动作 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -147,22 +147,22 @@
 | [自选股容量与资源算力计算 (Stock Quota Limits)](../../5_Support_Ops/content/cn/stock-quota-limits.md) | Support | article | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-04-02 |
 | [最高级别用户环境物理隔离 (Env Isolation)](../../5_Support_Ops/content/cn/env-isolation.md) | Support | article | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-04-02 |
 | [左右滑：你的三个战场](../../5_Support_Ops/content/cn/nav-map-logic.md) | Support | article | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-04-02 |
+| [Account Restore: Move Devices Without Losing Your Setup](../../5_Support_Ops/content/en/identity-restore-flow.md) | Support | guide | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-04-03 |
 | [Action Semantics: Entry, Observe, Defense, No Signal](../../5_Support_Ops/content/en/four-states-semantics.md) | Support | guide | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-04-03 |
 | [AI 分析师人设框架的边界 (Analyst Personas)](../../5_Support_Ops/content/cn/analyst-personas.md) | Support | article | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-04-02 |
 | [Android 通知限制说明](../../5_Support_Ops/content/cn/android-notification-limit.md) | Support | article | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-04-02 |
 | [Free 与 Pro：差距在哪？](../../5_Support_Ops/content/cn/tiers-explained.md) | Support | article | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-04-02 |
-| [Free vs Pro: What's the Difference?](../../5_Support_Ops/content/en/tiers-explained.md) | Support | guide | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-04-03 |
+| [Free vs Go vs Plus: What's Different in v1?](../../5_Support_Ops/content/en/tiers-explained.md) | Support | guide | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-04-03 |
 | [Investment Mode: Switching Your Strategy Style](../../5_Support_Ops/content/en/investment-mode-config.md) | Support | guide | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-04-03 |
 | [iOS 特供：极致跟手感](../../5_Support_Ops/content/cn/ios-tuning.md) | Support | article | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-04-02 |
 | [Notification Preferences: Control the Signal](../../5_Support_Ops/content/en/notification-preference.md) | Support | guide | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-04-03 |
-| [Onboarding Trial Rules: Experience the Full Power](../../5_Support_Ops/content/en/onboarding-trial-rules.md) | Support | guide | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-04-03 |
-| [One-Click Restore: Instant Synchronization](../../5_Support_Ops/content/en/identity-restore-flow.md) | Support | guide | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-04-03 |
+| [Onboarding Trial: What You Unlock and What Happens After](../../5_Support_Ops/content/en/onboarding-trial-rules.md) | Support | guide | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-04-03 |
 | [Privacy Pledge: This is Your Safe Harbor](../../5_Support_Ops/content/en/privacy-pledge.md) | Support | guide | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-04-03 |
-| [Redeem Code: Manual Subscription Activation](../../5_Support_Ops/content/en/redeem-code-usage.md) | Support | guide | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-04-03 |
-| [Stock Quota Limits: Compute Resource Calculation](../../5_Support_Ops/content/en/stock-quota-limits.md) | Support | guide | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-04-03 |
+| [Redeem Code: Activate Campaign Access](../../5_Support_Ops/content/en/redeem-code-usage.md) | Support | guide | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-04-03 |
 | [T+3 验证：趋势需要时间](../../5_Support_Ops/content/cn/multi-day-verification.md) | Support | article | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-04-02 |
-| [Tactical Brief: How to Read the Essentials?](../../5_Support_Ops/content/en/tactical-brief-guide.md) | Support | guide | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-04-03 |
+| [Tactical Brief: How to Read It in 30 Seconds](../../5_Support_Ops/content/en/tactical-brief-guide.md) | Support | guide | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-04-03 |
 | [The ZISO Manifesto: Advanced Market Intelligence Powered by DeepSeek-V3](en/101_academy/101-99_the_ziso_manifesto.md) | Growth | article | Unknown | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-04-08 |
+| [Watchlist Limits in v1: Why 3 / 10 / 10?](../../5_Support_Ops/content/en/stock-quota-limits.md) | Support | guide | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-04-03 |
 | [Zero-Stale Protocol: Never Trust Old Data](../../5_Support_Ops/content/en/zero-stale-guarantee.md) | Support | guide | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-04-03 |
 | [101-68: 让“龙虾”替你炒股？它敢说，你敢信么](cn/101_academy/101-68_general_llm_illusion.md) | Growth | article | TOFU | 破圈钩子 | 🚀 已发布 | 2026-03-20 周五 | ✅ 上线中 | ✅ 已发布 | 2026-03-20 |
 | [复盘一场真实的大跌：当所有人都在疯狂时，AI 是如何冷着脸劝我离场休息的？](blitz_hub/Hub_06_Cold_Feedback_Case.md) | Growth | article | MOFU | - | 🚀 已发布 | 2026-03-20 周五 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
@@ -170,7 +170,6 @@
 | [101-100: 很多人不是不会炒股，而是连自己是什么段位都没弄明白](cn/101_academy/101-100_maturity_prologue.md) | Growth | article | MOFU | 信任桥梁 | 🚀 已发布 | 2026-03-25 周三 | ✅ 上线中 | ✅ 已发布 | 2026-04-03 |
 | [101-100: It’s Not About Skills, It’s About Your Level](en/101_academy/101-100_maturity_prologue.md) | Growth | article | MOFU | 信任桥梁 | 🚀 已发布 | 2026-03-25 周三 | ✅ 上线中 | ➖ 不发布 | 2026-04-03 |
 | [大师系列内容接入方案 2026](MASTER_SERIES_CONTENT_INTEGRATION_2026.md) | Growth | article | TOFU | - | ✍️ 生产中 | 2026-03-25 周三 | ✅ 上线中 | 📝 草稿 | 2026-04-03 |
-| [交易大师图鉴 01｜马克·米勒维尼：他不是教你追涨，他是在教你只打最有把握的仗](master_series/ms-01_mark_minervini.md) | Growth | article | TOFU | 信任桥梁 | 🚀 已发布 | 2026-03-25 周三 | ✅ 上线中 | ➖ 不发布 | 2026-03-25 |
 | [交易大师图鉴 02｜普拉迪普·邦德：真正的动量，不是捕捉无序的躁动，而是等待足以改写叙事的爆发。](master_series/ms-02_pradeep_bonde.md) | Growth | article | TOFU | 信任桥梁 | ✍️ 生产中 | 2026-03-25 周三 | ✅ 上线中 | ➖ 不发布 | 2026-03-25 |
 | [交易大师图鉴 03｜亚历山大·埃尔德：真正的高手，不是多看几张图，而是学会给市场“加滤网”。](master_series/ms-03_alexander_elder.md) | Growth | article | MOFU | 信任桥梁 | ✍️ 生产中 | 2026-03-25 周三 | ✅ 上线中 | ➖ 不发布 | 2026-03-25 |
 | [交易大师图鉴 04｜理查德·丹尼斯：比起赚多少钱，他更想证明：交易员不是天生的，而是可以被“练”出来的。](master_series/ms-04_richard_dennis.md) | Growth | article | TOFU | 信任桥梁 | ✍️ 生产中 | 2026-03-25 周三 | ✅ 上线中 | ➖ 不发布 | 2026-03-25 |
@@ -204,18 +203,18 @@
 | [交易大师图鉴 32｜仓位管理与 R 倍数：交易的真谛，不是去猜赚多少钱，而是算清每一次下注的“风险单位”。](master_series/ms-32_position_sizing_and_r_multiple.md) | Growth | article | MOFU | 信任桥梁 | ✍️ 生产中 | 2026-03-25 周三 | ✅ 上线中 | ➖ 不发布 | 2026-03-25 |
 | [交易大师图鉴 33｜系统开发与期望值：交易的真谛，不是追求每次都对，而是确认这套打法长期做下去到底“值不值得”。](master_series/ms-33_system_development_and_expectancy.md) | Growth | article | MOFU | 信任桥梁 | ✍️ 生产中 | 2026-03-25 周三 | ✅ 上线中 | ➖ 不发布 | 2026-03-25 |
 | [交易大师图鉴 34｜事实层与生产商模式：交易的真谛，不是去消费别人的情绪，而是建立自己的“逻辑生产线”。](master_series/ms-34_method_fact_layer_producer_mode.md) | Growth | article | MOFU | 信任桥梁 | ✍️ 生产中 | 2026-03-25 周三 | ✅ 上线中 | ➖ 不发布 | 2026-03-25 |
-| [交易大师图鉴 36｜金融怪杰：交易的真谛，不是去背诵英雄故事，而是借施瓦格的眼，看请进入行业的“阅读地图”。](master_series/ms-36_market_wizards_as_reading_map.md) | Growth | article | TOFU | 信任桥梁 | ✍️ 生产中 | 2026-03-25 周三 | ✅ 上线中 | ➖ 不发布 | 2026-03-25 |
+| [系列终章｜逻辑全图：36 篇图鉴沉淀后的最后一张底牌](master_series/ms-36_market_wizards_as_reading_map.md) | Growth | article | TOFU | 信任桥梁 | ✍️ 生产中 | 2026-03-25 周三 | ✅ 上线中 | ➖ 不发布 | 2026-04-09 |
 | [交易大师图鉴 35｜霍华德·马克斯：投资的真谛，不是靠预测未来，而是靠比别人“多想一层”。](master_series/ms-35_howard_marks.md) | Growth | article | TOFU | 信任桥梁 | ✍️ 生产中 | 2026-03-26 周四 | ✅ 上线中 | ➖ 不发布 | 2026-03-26 |
 | [谁在告诉你“炒股发财”？真正的量化交易，其实无聊得让人想睡觉](blitz_hub/Hub_07_Boring_Algorithm.md) | Growth | article | BOFU | - | 👀 待审核 | 2026-03-26 周四 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
 | [机会成本：很多人不是没机会，而是钱先被一只烂股拖住了](cn/101_academy/101-40_opportunity_cost.md) | Growth | article | TOFU | 破圈钩子 | 🚀 已发布 | 2026-03-27 周五 | ✅ 上线中 | ✅ 已发布 | 2026-03-30 |
-| [101-69: 很多亏损，不是没提醒，而是提醒太多把人带乱了](cn/101_academy/101-69_ziso_rhythm.md) | Growth | article | BOFU | 转化承接 | ✅ 已通过 | 2026-03-30 周一 | ✅ 上线中 | ⏳ 待发布 | 2026-03-20 |
-| [为什么股票一被套，你总能刷到漫山遍野的“重大利好”？](cn/101_academy/101-18_echo_chamber.md) | Growth | article | TOFU | 破圈钩子 | ✅ 已通过 | 2026-04-01 周三 | ✅ 上线中 | ⏳ 待发布 | 2026-03-22 |
+| [101-69: 很多亏损，不是没提醒，而是提醒太多把人带乱了](cn/101_academy/101-69_ziso_rhythm.md) | Growth | article | BOFU | 转化承接 | 🚀 已发布 | 2026-03-30 周一 | ✅ 上线中 | ✅ 已发布 | 2026-04-17 |
+| [交易大师图鉴 01｜马克·米勒维尼：他不是教你追涨，他是在教你只打最有把握的仗](master_series/ms-01_mark_minervini.md) | Growth | article | TOFU | 信任桥梁 | 🚀 已发布 | 2026-03-31 周二 | ✅ 上线中 | ✅ 已发布 | 2026-04-17 |
+| [为什么股票一被套，你总能刷到漫山遍野的“重大利好”？](cn/101_academy/101-18_echo_chamber.md) | Growth | article | TOFU | 破圈钩子 | 🚀 已发布 | 2026-04-01 周三 | ✅ 上线中 | ✅ 已发布 | 2026-04-17 |
 | [在所有人都在亏钱的行情里，不回撤才是最高维度的炫富](blitz_hub/Hub_08_No_Drawdown_Wealth.md) | Growth | article | BOFU | - | 👀 待审核 | 2026-04-02 周四 | ✅ 上线中 | ➖ 不发布 | 2026-03-19 |
-| [很多人不是亏在大跌里，而是亏在天天都有机会的行情里](cn/101_academy/101-44_volatility_tax.md) | Growth | article | TOFU | 破圈钩子 | ✅ 已通过 | 2026-04-03 周五 | ✅ 上线中 | ⏳ 待发布 | 2026-03-22 |
-| [101-104: 只要你的交易还经常从“我觉得”开始，你就还没走出 L0](cn/101_academy/101-104_maturity_l0_discretionary.md) | Growth | article | MOFU | 信任桥梁 | 🚀 已发布 | 2026-04-06 周一 | ✅ 上线中 | ⏳ 待发布 | 2026-04-03 |
+| [很多人不是亏在大跌里，而是亏在天天都有机会的行情里](cn/101_academy/101-44_volatility_tax.md) | Growth | article | TOFU | 破圈钩子 | 🚀 已发布 | 2026-04-03 周五 | ✅ 上线中 | ✅ 已发布 | 2026-04-17 |
 | [101-104: As Long as Your Trading Starts with "I Think," You Haven't Left L0](en/101_academy/101-104_maturity_l0_discretionary.md) | Growth | article | MOFU | 信任桥梁 | 🚀 已发布 | 2026-04-06 周一 | ✅ 上线中 | ➖ 不发布 | 2026-04-03 |
-| [满屏股神和收益截图，很多只是运气好的人还没翻车](cn/101_academy/101-42_survivorship_bias.md) | Growth | article | TOFU | 破圈钩子 | ✅ 已通过 | 2026-04-08 周三 | ✅ 上线中 | ⏳ 待发布 | 2026-03-23 |
-| [101-17: 很多人真正缺的，不是更会赚钱的工具，而是一个能在关键时刻拦住自己的系统](cn/101_academy/101-17_tower_shield.md) | Growth | article | BOFU | 转化承接 | ✅ 已通过 | 2026-04-10 周五 | ✅ 上线中 | ⏳ 待发布 | 2026-03-23 |
+| [满屏股神和收益截图，很多只是运气好的人还没翻车](cn/101_academy/101-42_survivorship_bias.md) | Growth | article | TOFU | 破圈钩子 | 🚀 已发布 | 2026-04-08 周三 | ✅ 上线中 | ✅ 已发布 | 2026-04-17 |
+| [101-17: 很多人真正缺的，不是更会赚钱的工具，而是一个能在关键时刻拦住自己的系统](cn/101_academy/101-17_tower_shield.md) | Growth | article | BOFU | 转化承接 | 🚀 已发布 | 2026-04-10 周五 | ✅ 上线中 | ✅ 已发布 | 2026-04-17 |
 | [101-33: 为什么你的指标总是变成反指？](cn/101_academy/101-33_indicator_failure.md) | Growth | article | MOFU | - | ✍️ 生产中 | 2026-04-10 周五 | ✅ 上线中 | 📝 草稿 | 2026-04-02 |
 | [101-34: 把“止损”推迟到明天的代价](cn/101_academy/101-34_mae_cost.md) | Growth | article | MOFU | - | ✍️ 生产中 | 2026-04-10 周五 | ✅ 上线中 | 📝 草稿 | 2026-04-02 |
 | [101-35: 回测与未来的鸿沟](cn/101_academy/101-35_overfitting_trap.md) | Growth | article | TOFU | - | ✍️ 生产中 | 2026-04-10 周五 | ✅ 上线中 | 📝 草稿 | 2026-04-02 |
@@ -228,22 +227,27 @@
 | [101-65: 盈利的恐惧：为什么赚钱时你总是拿不住？](cn/101_academy/101-65_profit_fear.md) | Growth | article | MOFU | - | ✍️ 生产中 | 2026-04-10 周五 | ✅ 上线中 | 📝 草稿 | 2026-04-02 |
 | [101-72: 置信度解码：AI 的“看好”到底几分真](cn/101_academy/101-72_confidence_decode.md) | Growth | article | BOFU | - | ✍️ 生产中 | 2026-04-10 周五 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
 | [101-73: 接受不完美：与市场的不确定性做朋友](cn/101_academy/101-73_embrace_uncertainty.md) | Growth | article | MOFU | - | ✍️ 生产中 | 2026-04-10 周五 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
-| [101-13: “这票明天会不会涨？”这句问得越勤，往往亏得越快](cn/101_academy/101-13_prediction_tax.md) | Growth | article | TOFU | 破圈钩子 | ✅ 已通过 | 2026-04-13 周一 | ✅ 上线中 | ⏳ 待发布 | 2026-03-23 |
-| [101-15: 很多人不是没计划，而是一开盘就忍不住自己改计划](cn/101_academy/101-15_analyst_vs_trader.md) | Growth | article | MOFU | 信任桥梁 | ✅ 已通过 | 2026-04-15 周三 | ✅ 上线中 | ⏳ 待发布 | 2026-03-23 |
+| [101-13: “这票明天会不会涨？”这句问得越勤，往往亏得越快](cn/101_academy/101-13_prediction_tax.md) | Growth | article | TOFU | 破圈钩子 | 🚀 已发布 | 2026-04-13 周一 | ✅ 上线中 | ✅ 已发布 | 2026-04-17 |
+| [101-15: 很多人不是没计划，而是一开盘就忍不住自己改计划](cn/101_academy/101-15_analyst_vs_trader.md) | Growth | article | MOFU | 信任桥梁 | 🚀 已发布 | 2026-04-13 周一 | ✅ 上线中 | ✅ 已发布 | 2026-04-17 |
+| [101-104: 只要你的交易还经常从“我觉得”开始，你就还没走出 L0](cn/101_academy/101-104_maturity_l0_discretionary.md) | Growth | article | MOFU | 信任桥梁 | 🚀 已发布 | 2026-04-15 周三 | ✅ 上线中 | ✅ 已发布 | 2026-04-17 |
+| [Deep Linking: Open the Exact Symbol Brief](../../5_Support_Ops/content/en/deep-linking-usage.md) | Support | guide | BOFU | - | 🚀 已发布 | 2026-04-15 周三 | ✅ 上线中 | ➖ 不发布 | 2026-04-15 |
+| [Interaction First: Response Never Waits](../../5_Support_Ops/content/en/interaction-first.md) | Support | guide | BOFU | - | 🚀 已发布 | 2026-04-15 周三 | ✅ 上线中 | ➖ 不发布 | 2026-04-15 |
+| [Push Debug: Why Notifications May Not Arrive](../../5_Support_Ops/content/en/push-debug.md) | Support | guide | BOFU | - | 🚀 已发布 | 2026-04-15 周三 | ✅ 上线中 | ➖ 不发布 | 2026-04-15 |
+| [Referral Rewards: Invite and Extend Access](../../5_Support_Ops/content/en/referral-rewards.md) | Support | guide | BOFU | - | 🚀 已发布 | 2026-04-15 周三 | ✅ 上线中 | ➖ 不发布 | 2026-04-15 |
+| [Signal-Flip Push: Only for Major Reversals](../../5_Support_Ops/content/en/signal-flip-push.md) | Support | guide | BOFU | - | 🚀 已发布 | 2026-04-15 周三 | ✅ 上线中 | ➖ 不发布 | 2026-04-15 |
+| [Smart Search: Find Symbols Fast](../../5_Support_Ops/content/en/smart-search.md) | Support | guide | BOFU | - | 🚀 已发布 | 2026-04-15 周三 | ✅ 上线中 | ➖ 不发布 | 2026-04-15 |
+| [Snap-X Navigation: Three Battle Surfaces](../../5_Support_Ops/content/en/nav-map-logic.md) | Support | guide | BOFU | - | 🚀 已发布 | 2026-04-15 周三 | ✅ 上线中 | ➖ 不发布 | 2026-04-15 |
+| [Time Machine: Review Context, Not Hindsight](../../5_Support_Ops/content/en/time-machine-feed.md) | Support | guide | BOFU | - | 🚀 已发布 | 2026-04-15 周三 | ✅ 上线中 | ➖ 不发布 | 2026-04-15 |
+| [Value of Failure: Why We Keep Wrong Calls Visible](../../5_Support_Ops/content/en/value-of-failure.md) | Support | guide | BOFU | - | 🚀 已发布 | 2026-04-15 周三 | ✅ 上线中 | ➖ 不发布 | 2026-04-15 |
+| [Verification States: Pending, Passed, Diverged](../../5_Support_Ops/content/en/verification-states.md) | Support | guide | BOFU | - | 🚀 已发布 | 2026-04-15 周三 | ✅ 上线中 | ➖ 不发布 | 2026-04-15 |
+| [Web Push Setup: Enable Alerts Properly](../../5_Support_Ops/content/en/web-push-setup.md) | Support | guide | BOFU | - | 🚀 已发布 | 2026-04-15 周三 | ✅ 上线中 | ➖ 不发布 | 2026-04-15 |
+| [101-14: 越盯盘，越容易亏大钱：很多大跌，都是盯出来的](cn/101_academy/101-14_eod_edge.md) | Growth | article | MOFU | 信任桥梁 | 👀 待审核 | 2026-04-17 周五 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
 | [101-105: 你以为自己在看信号，很多时候其实只是在盯着后视镜开车](cn/101_academy/101-105_maturity_l1_indicator.md) | Growth | article | MOFU | 信任桥梁 | 🚀 已发布 | 2026-04-20 周一 | ✅ 上线中 | 📝 草稿 | 2026-04-03 |
 | [101-105: Level L1 — Why Your Performance Still Looks Like a Retail Investor’s Despite Buying Advanced Indicators](en/101_academy/101-105_maturity_l1_indicator.md) | Growth | article | MOFU | 信任桥梁 | 🚀 已发布 | 2026-04-20 周一 | ✅ 上线中 | ➖ 不发布 | 2026-04-03 |
-| [模型层级划分：Pro 版与基础版 AI 引擎切流说明](../../5_Support_Ops/content/cn/model-tiers-diff.md) | Support | guide | BOFU | - | 👀 待审核 | 2026-04-21 周二 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
-| [投资模式：切换你的策略风格](../../5_Support_Ops/content/cn/investment-mode-config.md) | Support | guide | BOFU | 转化承接 | 👀 待审核 | 2026-04-21 周二 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
-| [101-14: 越盯盘，越容易亏大钱：很多大跌，都是盯出来的](cn/101_academy/101-14_eod_edge.md) | Growth | article | MOFU | 信任桥梁 | 👀 待审核 | 2026-04-22 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
-| [按需更新：好钢用在刀刃上](../../5_Support_Ops/content/cn/on-demand-sync.md) | Support | guide | BOFU | 转化承接 | 👀 待审核 | 2026-04-22 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
-| [双轨制：前台生产线，后台实验线](../../5_Support_Ops/content/cn/dual-lane-architecture.md) | Support | guide | BOFU | - | 👀 待审核 | 2026-04-22 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
-| [极端容错解析：大波动时，ZISO 为什么不容易白屏？](../../5_Support_Ops/content/cn/smart-parser-ui.md) | Support | guide | BOFU | 转化承接 | ✍️ 生产中 | 2026-04-23 周四 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
+| [黑天鹅数学：你以为十年一遇，市场却隔三差五就教你做人](cn/101_academy/101-37_black_swan_math.md) | Growth | article | TOFU | 破圈钩子 | 👀 待审核 | 2026-04-22 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
 | [101-70: AI 最危险的时候，不是它不聪明，而是你想冲时它也跟着你喊冲](cn/101_academy/101-70_ai_guardrails.md) | Growth | article | BOFU | 转化承接 | ✍️ 生产中 | 2026-04-24 周五 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
-| [零过期协议：尽量不让你看到旧价格](../../5_Support_Ops/content/cn/zero-stale-guarantee.md) | Support | guide | BOFU | 转化承接 | ✍️ 生产中 | 2026-04-24 周五 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
-| [黑天鹅数学：你以为十年一遇，市场却隔三差五就教你做人](cn/101_academy/101-37_black_swan_math.md) | Growth | article | TOFU | 破圈钩子 | 👀 待审核 | 2026-04-27 周一 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
-| [性能降级：省电也是战斗力](../../5_Support_Ops/content/cn/perf-adaptation.md) | Support | guide | BOFU | - | ✍️ 生产中 | 2026-04-27 周一 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
-| [101-32: 市场根本不在乎你亏了多少，只有你自己还在死守成本线](cn/101_academy/101-32_stateless_execution.md) | Growth | article | MOFU | 信任桥梁 | 👀 待审核 | 2026-04-29 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
-| [错误溯源：什么是 Trace ID (Trace ID Audit)](../../5_Support_Ops/content/cn/trace-id-audit.md) | Support | guide | BOFU | - | ✍️ 生产中 | 2026-04-29 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
+| [101-32: 市场根本不在乎你亏了多少，只有你自己还在死守成本线](cn/101_academy/101-32_stateless_execution.md) | Growth | article | MOFU | 信任桥梁 | 👀 待审核 | 2026-04-27 周一 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
+| [投资模式：切换你的策略风格](../../5_Support_Ops/content/cn/investment-mode-config.md) | Support | guide | BOFU | 转化承接 | 👀 待审核 | 2026-04-29 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
 | [101-106: 真正的 L2，不是会背几条规则，而是知道规则一失灵就该认错](cn/101_academy/101-106_systematic_rules_l2.md) | Growth | article | MOFU | 信任桥梁 | 🚀 已发布 | 2026-05-01 周五 | ✅ 上线中 | 📝 草稿 | 2026-04-03 |
 | [Maturity Level L2: Systematic Rule Governance via DeepSeek-V3 Intelligence](en/101_academy/101-106_systematic_rules_l2.md) | Growth | article | MOFU | 信任桥梁 | 🚀 已发布 | 2026-05-01 周五 | ✅ 上线中 | ➖ 不发布 | 2026-04-03 |
 | [101-59: 赚钱了，不代表你这笔买得漂亮，有时候只是运气救了你](cn/101_academy/101-59_mfe_truth.md) | Growth | article | MOFU | 信任桥梁 | 👀 待审核 | 2026-05-04 周一 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
@@ -253,14 +257,21 @@
 | [101-16: 组合的假象：买了 5 只白酒股，你以为分散了风险？](cn/101_academy/101-16_fake_diversification.md) | Growth | article | TOFU | - | ✍️ 生产中 | 2026-05-11 周一 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
 | [101-107: L3级——系统化组合投资，是舰队司令部的排兵布阵](cn/101_academy/101-107_institutional_portfolio_l3.md) | Growth | article | MOFU | - | 🚀 已发布 | 2026-05-13 周三 | ✅ 上线中 | ➖ 不发布 | 2026-04-03 |
 | [101-107: Level L3 — Systematic Portfolio Investment: The Fleet Command Center](en/101_academy/101-107_institutional_portfolio_l3.md) | Growth | article | MOFU | - | 🚀 已发布 | 2026-05-13 周三 | ✅ 上线中 | ➖ 不发布 | 2026-04-03 |
+| [模型层级划分：Pro 版与基础版 AI 引擎切流说明](../../5_Support_Ops/content/cn/model-tiers-diff.md) | Support | guide | BOFU | - | 👀 待审核 | 2026-05-13 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
 | [101-108: L4级——极硬量化，是物理层面的毫秒之战](cn/101_academy/101-108_hard_quant_l4.md) | Growth | article | MOFU | - | 🚀 已发布 | 2026-05-15 周五 | ✅ 上线中 | ➖ 不发布 | 2026-04-03 |
 | [101-108: Level L4 — Hard Quant: The Millisecond War at the Physical Layer](en/101_academy/101-108_hard_quant_l4.md) | Growth | article | MOFU | - | 🚀 已发布 | 2026-05-15 周五 | ✅ 上线中 | ➖ 不发布 | 2026-04-03 |
+| [按需更新：好钢用在刀刃上](../../5_Support_Ops/content/cn/on-demand-sync.md) | Support | guide | BOFU | 转化承接 | 👀 待审核 | 2026-05-15 周五 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
 | [101-101: 择时——像发牌员一样思考，而不是赌客](cn/101_academy/101-101_quant_trinity_timing.md) | Growth | article | MOFU | - | 🚀 已发布 | 2026-05-18 周一 | ✅ 上线中 | 📝 草稿 | 2026-04-03 |
 | [101-101: Timing — Think Like a Dealer, Not a Gambler](en/101_academy/101-101_quant_trinity_timing.md) | Growth | article | MOFU | - | 🚀 已发布 | 2026-05-18 周一 | ✅ 上线中 | ➖ 不发布 | 2026-04-03 |
+| [双轨制：前台生产线，后台实验线](../../5_Support_Ops/content/cn/dual-lane-architecture.md) | Support | guide | BOFU | - | 👀 待审核 | 2026-05-18 周一 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
 | [101-102: 交易管理——为什么“状态”是财富的分水岭](cn/101_academy/101-102_quant_trinity_management.md) | Growth | article | MOFU | - | 🚀 已发布 | 2026-05-20 周三 | ✅ 上线中 | 📝 草稿 | 2026-04-03 |
 | [101-102: Trade Management — Why 'State' is the Watershed of Wealth](en/101_academy/101-102_quant_trinity_management.md) | Growth | article | MOFU | - | 🚀 已发布 | 2026-05-20 周三 | ✅ 上线中 | ➖ 不发布 | 2026-04-03 |
+| [极端容错解析：大波动时，ZISO 为什么不容易白屏？](../../5_Support_Ops/content/cn/smart-parser-ui.md) | Support | guide | BOFU | 转化承接 | ✍️ 生产中 | 2026-05-20 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
 | [101-103: 交易执行——别在壕沟里与加特林机枪肉搏](cn/101_academy/101-103_quant_trinity_execution.md) | Growth | article | MOFU | - | 🚀 已发布 | 2026-05-22 周五 | ✅ 上线中 | 📝 草稿 | 2026-04-03 |
 | [101-103: Trade Execution — Stop Fighting Gatling Guns in a Trench](en/101_academy/101-103_quant_trinity_execution.md) | Growth | article | MOFU | - | 🚀 已发布 | 2026-05-22 周五 | ✅ 上线中 | ➖ 不发布 | 2026-04-03 |
+| [零过期协议：尽量不让你看到旧价格](../../5_Support_Ops/content/cn/zero-stale-guarantee.md) | Support | guide | BOFU | 转化承接 | ✍️ 生产中 | 2026-05-22 周五 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
+| [性能降级：省电也是战斗力](../../5_Support_Ops/content/cn/perf-adaptation.md) | Support | guide | BOFU | - | ✍️ 生产中 | 2026-05-25 周一 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
+| [错误溯源：什么是 Trace ID (Trace ID Audit)](../../5_Support_Ops/content/cn/trace-id-audit.md) | Support | guide | BOFU | - | ✍️ 生产中 | 2026-05-27 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
 | [101-104_maturity_l0_discretionary_wechat_release_brief](cn/101_academy/101-104_maturity_l0_discretionary_wechat_release_brief.md) | Growth | article | Unknown | - | 🚀 已发布 | N/A | ✅ 上线中 | ➖ 不发布 | 2026-04-02 |
 | [101-13_prediction_tax_wechat_release_brief](cn/101_academy/101-13_prediction_tax_wechat_release_brief.md) | Growth | article | Unknown | - | 🚀 已发布 | N/A | ✅ 上线中 | ➖ 不发布 | 2026-04-02 |
 | [101-15_analyst_vs_trader_wechat_release_brief](cn/101_academy/101-15_analyst_vs_trader_wechat_release_brief.md) | Growth | article | Unknown | - | 🚀 已发布 | N/A | ✅ 上线中 | ➖ 不发布 | 2026-04-02 |

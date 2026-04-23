@@ -8,6 +8,7 @@ Welcome to the Internationalization (i18n) subdirectory. This section provides t
 - [01_Stock_Name_Internationalization.md](./01_Stock_Name_Internationalization.md): Current production standard for CN/HK stock-name i18n (runtime source of truth, ETL flow, fallback and maintenance rules).
 - [02_Global_First_ISR_Architecture.md](./02_Global_First_ISR_Architecture.md): Architecture for performance optimization and static generation in a global context.
 - [03_Globalization_Strategy_and_Evolution.md](./03_Globalization_Strategy_and_Evolution.md): High-level strategy for global expansion and evolution.
+- [04_App_Locale_Resolution_Model.md](./04_App_Locale_Resolution_Model.md): Runtime model for app locale resolution, including the verified 2026-04-15 first-visit locale bug root cause, temporary invite-locale patch boundary, and cleanup backlog.
 
 ## 🌐 Principles and Strategy
 
@@ -26,4 +27,4 @@ Key engineering principles:
 - **Translating Marketing Content**: Create localized Markdown files under `docs/4_Growth_Ops/content/`.
 
 ---
-*Last Updated: 2026-04-05 (added §04 release checklist)*
+*Last Updated: 2026-04-15 (updated §04 with verified root cause and backlog)*

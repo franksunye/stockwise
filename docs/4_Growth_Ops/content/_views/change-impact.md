@@ -1,13 +1,18 @@
 # 产品变更影响视图 (Change Impact Board)
 
-> 自动生成时间：2026/4/9 10:17:02
+> 自动生成时间：2026/4/17 19:03:53
 > 说明：该视图用于回答“产品/工程文档变化后，哪些内容应该复核或补充”。
 
 ## 受底层文档变更影响，需优先复核的内容
 
 | 内容资产 | 来源 | 主流程 | 受影响源文档 |
 | --- | --- | --- | --- |
-| [大师系列内容接入方案 2026](../MASTER_SERIES_CONTENT_INTEGRATION_2026.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md` |
+| [深度链接：一键直达“战场”](../../../5_Support_Ops/content/cn/deep-linking-usage.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/46_Frontend_SWR_Architecture_Upgrade.md` |
+| [交互优先：手感不能断](../../../5_Support_Ops/content/cn/interaction-first.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/46_Frontend_SWR_Architecture_Upgrade.md` |
+| [左右滑：你的三个战场](../../../5_Support_Ops/content/cn/nav-map-logic.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/46_Frontend_SWR_Architecture_Upgrade.md` |
+| [乐观更新：不用等圈圈转](../../../5_Support_Ops/content/cn/optimistic-ui-logic.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/46_Frontend_SWR_Architecture_Upgrade.md` |
+| [单点对焦：别让散乱害了你](../../../5_Support_Ops/content/cn/snap-y-dynamics.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/46_Frontend_SWR_Architecture_Upgrade.md` |
+| [大师系列内容接入方案 2026](../MASTER_SERIES_CONTENT_INTEGRATION_2026.md) | Growth | ✍️ 生产中 | `docs/4_Growth_Ops/content/README.md` |
 | [101-01: 散户的不可能三角](../cn/101_academy/101-01_impossible_triangle.md) | Growth | 🚀 已发布 | `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md` |
 | [101-02: 错失恐惧症 (FOMO)](../cn/101_academy/101-02_fomo.md) | Growth | 🚀 已发布 | `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md` |
 | [101-03: 厌恶损失 (Loss Aversion)](../cn/101_academy/101-03_loss_aversion.md) | Growth | 🚀 已发布 | `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md` |
@@ -29,12 +34,12 @@
 | [101-109: 结篇——寻找你的量化绿洲](../cn/101_academy/101-109_maturity_epilogue.md) | Growth | 🚀 已发布 | `docs/0_Strategy/01_Product_Positioning_and_Boundaries.md` |
 | [101-10: 离场休息的艺术](../cn/101_academy/101-10_sitting_on_hands.md) | Growth | 🚀 已发布 | `docs/0_Strategy/06_Quant_Industry_Positioning_Map.md` |
 | [101-12: 你以为自己在做短线，很多时候其实只是在给人送钱](../cn/101_academy/101-12_l4_hft_illusion.md) | Growth | 🚀 已发布 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-13: “这票明天会不会涨？”这句问得越勤，往往亏得越快](../cn/101_academy/101-13_prediction_tax.md) | Growth | ✅ 已通过 | `docs/0_Strategy/01_Product_Positioning_and_Boundaries.md` |
+| [101-13: “这票明天会不会涨？”这句问得越勤，往往亏得越快](../cn/101_academy/101-13_prediction_tax.md) | Growth | 🚀 已发布 | `docs/0_Strategy/01_Product_Positioning_and_Boundaries.md` |
 | [101-14: 越盯盘，越容易亏大钱：很多大跌，都是盯出来的](../cn/101_academy/101-14_eod_edge.md) | Growth | 👀 待审核 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-15: 很多人不是没计划，而是一开盘就忍不住自己改计划](../cn/101_academy/101-15_analyst_vs_trader.md) | Growth | ✅ 已通过 | `docs/0_Strategy/01_Product_Positioning_and_Boundaries.md` |
+| [101-15: 很多人不是没计划，而是一开盘就忍不住自己改计划](../cn/101_academy/101-15_analyst_vs_trader.md) | Growth | 🚀 已发布 | `docs/0_Strategy/01_Product_Positioning_and_Boundaries.md` |
 | [101-16: 组合的假象：买了 5 只白酒股，你以为分散了风险？](../cn/101_academy/101-16_fake_diversification.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-17: 很多人真正缺的，不是更会赚钱的工具，而是一个能在关键时刻拦住自己的系统](../cn/101_academy/101-17_tower_shield.md) | Growth | ✅ 已通过 | `docs/0_Strategy/01_Product_Positioning_and_Boundaries.md` |
-| [为什么股票一被套，你总能刷到漫山遍野的“重大利好”？](../cn/101_academy/101-18_echo_chamber.md) | Growth | ✅ 已通过 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
+| [101-17: 很多人真正缺的，不是更会赚钱的工具，而是一个能在关键时刻拦住自己的系统](../cn/101_academy/101-17_tower_shield.md) | Growth | 🚀 已发布 | `docs/0_Strategy/01_Product_Positioning_and_Boundaries.md` |
+| [为什么股票一被套，你总能刷到漫山遍野的“重大利好”？](../cn/101_academy/101-18_echo_chamber.md) | Growth | 🚀 已发布 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
 | [内幕消息错觉：送上门的“内幕”，全是为你准备的绞肉机](../cn/101_academy/101-19_insider_illusion.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
 | [信息节食：屏蔽大 V 的 30 天，我的账户为何起死回生](../cn/101_academy/101-20_information_diet.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
 | [101-32: 市场根本不在乎你亏了多少，只有你自己还在死守成本线](../cn/101_academy/101-32_stateless_execution.md) | Growth | 👀 待审核 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
@@ -44,7 +49,7 @@
 | [101-36: 滑点与印花税：杀死回测富翁的毒药](../cn/101_academy/101-36_slippage_poison.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
 | [机会成本：很多人不是没机会，而是钱先被一只烂股拖住了](../cn/101_academy/101-40_opportunity_cost.md) | Growth | 🚀 已发布 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
 | [向下摊平：在错误的泥潭里越陷越深的死亡操作](../cn/101_academy/101-41_avg_down_trap.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [满屏股神和收益截图，很多只是运气好的人还没翻车](../cn/101_academy/101-42_survivorship_bias.md) | Growth | ✅ 已通过 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
+| [满屏股神和收益截图，很多只是运气好的人还没翻车](../cn/101_academy/101-42_survivorship_bias.md) | Growth | 🚀 已发布 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
 | [均值回归：万物皆周期，涨上天的终将跌回均线](../cn/101_academy/101-43_mean_reversion.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
 | [时间价值陷阱：横盘不仅折磨心智，更是对资金使用率的谋杀](../cn/101_academy/101-45_time_decay.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
 | [羊群效应：当连你家楼下的保安都在谈论股票时，快跑](../cn/101_academy/101-46_herd_mentality.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
@@ -52,11 +57,6 @@
 | [多动症的毁灭：为什么管不住手的人，都在给券商打工？](../cn/101_academy/101-49_overtrading_doom.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
 | [非对称博弈：寻找下跌空间有限、上涨空间无限的“肥尾”机会](../cn/101_academy/101-50_asymmetric_bet.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
 | [101-59: 赚钱了，不代表你这笔买得漂亮，有时候只是运气救了你](../cn/101_academy/101-59_mfe_truth.md) | Growth | 👀 待审核 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-60: 胜率的谎言：错 60% 还能赚钱](../cn/101_academy/101-60_win_rate_lie.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-61: 砍仓的艺术：亏 50% 需要 100% 回本](../cn/101_academy/101-61_drawdown_math_revisited.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-62: 头寸管理的铁律：1% 生存法则](../cn/101_academy/101-62_one_percent_survival.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-63: “再看看”：散户字典里最昂贵的三个字](../cn/101_academy/101-63_wait_and_see_cost.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-64: 如果没有信号，空仓就是最高级策略](../cn/101_academy/101-64_empty_position.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
 
 ## 尚未被转化成内容资产的内部文档机会
 

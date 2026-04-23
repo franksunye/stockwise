@@ -30,13 +30,13 @@ traceability:
   status: healthy
   last_reviewed_at: '2026-03-19'
 workflow:
-  stage: approved
+  stage: published
   review_priority: review_next
   owner: cmo
   reviewer: founder
   priority: high
   target_publish_date: '2026-04-03'
-  last_action_at: '2026-03-22'
+  last_action_at: '2026-04-17'
   blocked_reason: ''
 maintenance:
   change_status: updated
@@ -134,7 +134,8 @@ visual_style_prefix: >-
 distribution:
   wechat:
     enabled: true
-    status: scheduled
+    status: published
+    published_at: '2026-04-03'
     url: ''
   xhs:
     enabled: false
