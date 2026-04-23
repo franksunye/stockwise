@@ -65,8 +65,9 @@
 
 1. 在 route class 未确认前，不允许展示误导性的业务态 skeleton。
 2. `invite-onboarding` 不允许先展示 Dashboard 风格骨架。
-3. route classification 必须有单一事实源，不能由多个层各自推断。
-4. app entry 必须具备可观测性，能够重建 route decision 与首屏时序。
+3. cold direct app entry 在 invite 制开启且没有本地授权/完成 onboarding 证据时，必须使用 `invite-wall` 语义 loading，不能回落到 Dashboard 风格骨架。
+4. route classification 必须有单一事实源，不能由多个层各自推断。
+5. app entry 必须具备可观测性，能够重建 route decision 与首屏时序。
 
 #### 2.2.2 数据访问
 - 统一入口：`frontend/src/lib/db.ts`。

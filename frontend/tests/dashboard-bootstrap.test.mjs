@@ -36,6 +36,7 @@ const {
     readProfileCache,
     shouldMarkDashboardBootReady,
     shouldPreferInviteOnboardingLoading,
+    shouldPreferInviteWallLoading,
     shouldOptimisticallyEnterDashboard,
     shouldSuppressDashboardSplash,
     writeAuthCache,
@@ -234,9 +235,27 @@ describe('dashboard bootstrap helpers', () => {
                 canOptimisticallyEnter: false,
                 hasOptimisticOnboardingCompletion: false,
                 preferInviteOnboardingLoading: true,
+                preferInviteWallLoading: false,
                 loadingRoute: 'onboarding',
             },
         );
+    });
+
+    it('uses invite-wall loading for cold direct app entries without local authorization evidence', () => {
+        const now = 407_000;
+
+        assert.deepEqual(
+            getAppEntryControllerSnapshot({}, '', now),
+            {
+                canOptimisticallyEnter: false,
+                hasOptimisticOnboardingCompletion: false,
+                preferInviteOnboardingLoading: false,
+                preferInviteWallLoading: true,
+                loadingRoute: 'invite-wall',
+            },
+        );
+        assert.equal(shouldPreferInviteWallLoading({}, '', now), true);
+        assert.equal(shouldPreferInviteWallLoading({}, '?invite=PH&locale=en', now), false);
     });
 
     it('prefers onboarding-aware loading for fresh invite entries that cannot yet enter dashboard', () => {
@@ -253,6 +272,10 @@ describe('dashboard bootstrap helpers', () => {
         );
         assert.equal(
             shouldPreferInviteOnboardingLoading(state, '?locale=en', now),
+            false,
+        );
+        assert.equal(
+            shouldPreferInviteWallLoading(state, '?locale=en', now),
             false,
         );
     });

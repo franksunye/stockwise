@@ -94,6 +94,8 @@ The loading state must follow route semantics:
 
 Generic dashboard skeleton must not be the default fallback for every app entry.
 
+Direct cold app entry is covered by this contract. When `requireInvite` is enabled and the browser has no valid local evidence of an authorized/onboarded user, `app.ziso.cc` must not show the Dashboard skeleton while waiting for bootstrap. It should show invite-wall/classification loading first, then render the full invite wall once bootstrap confirms the user is blocked. If bootstrap later restores a cookie-only authorized user, the route can still transition to `authorized-dashboard`; the important rule is that the interim visual must not imply that Dashboard content is loading.
+
 ## 4.4 Entry State Machine
 
 To make this industrial-grade, the app entry flow must be modeled as an explicit state machine instead of scattered local decisions.

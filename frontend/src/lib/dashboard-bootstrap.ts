@@ -560,6 +560,35 @@ export function shouldPreferInviteOnboardingLoading(
     return !hasOnboardedFlag(state.hasOnboardedRaw) && !profile?.hasOnboarded && !onboardingSnapshot;
 }
 
+export function shouldPreferInviteWallLoading(
+    state: DashboardBootstrapStorageState,
+    search: string | null | undefined,
+    now: number = Date.now()
+): boolean {
+    if (searchHasInvite(search)) {
+        return false;
+    }
+
+    if (shouldOptimisticallyEnterDashboard(state, now)) {
+        return false;
+    }
+
+    const authCache = readAuthCache(state.authCacheRaw, now);
+    const profile = readProfileCache(state.profileCacheRaw);
+    const onboardingSnapshot = readOnboardingCompletionSnapshot(
+        state.onboardingSnapshotRaw,
+        profile && typeof (profile as Record<string, unknown>).userId === 'string'
+            ? String((profile as Record<string, unknown>).userId)
+            : undefined
+    );
+
+    if (authCache?.authorized === true && profile?.userId && profile.hasOnboarded === false) {
+        return false;
+    }
+
+    return !hasOnboardedFlag(state.hasOnboardedRaw) && !profile?.hasOnboarded && !onboardingSnapshot;
+}
+
 export function getAppEntryControllerSnapshot(
     state: DashboardBootstrapStorageState,
     search: string | null | undefined,
@@ -568,16 +597,20 @@ export function getAppEntryControllerSnapshot(
     canOptimisticallyEnter: boolean;
     hasOptimisticOnboardingCompletion: boolean;
     preferInviteOnboardingLoading: boolean;
-    loadingRoute: 'onboarding' | 'shell';
+    preferInviteWallLoading: boolean;
+    loadingRoute: 'onboarding' | 'invite-wall' | 'shell';
 } {
     const entryHint = getDashboardEntryHint(state, now);
     const preferInvite = shouldPreferInviteOnboardingLoading(state, search, now);
+    const preferInviteWall = shouldPreferInviteWallLoading(state, search, now);
+    const loadingRoute = preferInvite ? 'onboarding' : preferInviteWall ? 'invite-wall' : 'shell';
 
     return {
         canOptimisticallyEnter: entryHint.canOptimisticallyEnter,
         hasOptimisticOnboardingCompletion: state.hasOnboardedRaw === 'true',
         preferInviteOnboardingLoading: preferInvite,
-        loadingRoute: preferInvite ? 'onboarding' : 'shell',
+        preferInviteWallLoading: preferInviteWall,
+        loadingRoute,
     };
 }
 

@@ -20,8 +20,8 @@ export function DashboardEntryGate({ children }: { children: ReactNode }) {
             return <>{children}</>;
         }
 
-        return loadingRoute === 'onboarding'
-            ? <AppEntryLoading route="onboarding" />
+        return loadingRoute !== 'shell'
+            ? <AppEntryLoading route={loadingRoute} />
             : (
                 <div data-dashboard-skeleton="true">
                     <DashboardSkeleton />

@@ -12,7 +12,7 @@ function resolveRouteClass(
   hasOnboarded: boolean,
   canOptimisticallyEnter: boolean,
   hasOptimisticOnboardingCompletion: boolean,
-  loadingRoute: 'onboarding' | 'shell',
+  loadingRoute: 'onboarding' | 'invite-wall' | 'shell',
 ): 'entry_pending' | 'invite-onboarding' | 'authorized-dashboard' | 'invite-wall' {
   if (isAuthorized === false) {
     return 'invite-wall';
@@ -31,6 +31,10 @@ function resolveRouteClass(
 
   if (loadingRoute === 'onboarding') {
     return 'invite-onboarding';
+  }
+
+  if (loadingRoute === 'invite-wall') {
+    return 'invite-wall';
   }
 
   return 'entry_pending';

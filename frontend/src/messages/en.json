@@ -21,6 +21,13 @@
     "exportDate": "Export Date",
     "posterDisclaimer": "RISK WARNING: This report is for information only and does not constitute investment advice. Content is synthesized by AI quantitative engine. Investors should evaluate prudently."
   },
+  "appEntry": {
+    "loading": {
+      "onboarding": "Getting your trial ready...",
+      "inviteWall": "Checking your access...",
+      "shell": "Loading..."
+    }
+  },
   "dashboard": {
     "title": "CONTROL CENTER",
     "stockPool": "PORTFOLIO",

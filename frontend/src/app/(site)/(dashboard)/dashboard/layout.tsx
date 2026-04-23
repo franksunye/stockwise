@@ -86,12 +86,14 @@ export default function DashboardLayout({
             initial={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            data-dashboard-skeleton="true"
+            data-app-entry-pending="true"
           >
-            {appEntryController.loadingRoute === 'onboarding' ? (
-              <AppEntryLoading route="onboarding" />
+            {appEntryController.loadingRoute !== 'shell' ? (
+              <AppEntryLoading route={appEntryController.loadingRoute} />
             ) : (
-              <DashboardSkeleton />
+              <div data-dashboard-skeleton="true">
+                <DashboardSkeleton />
+              </div>
             )}
           </motion.div>
         )}

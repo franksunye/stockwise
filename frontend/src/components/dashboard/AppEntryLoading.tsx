@@ -1,14 +1,32 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { Zap } from 'lucide-react';
+import {
+  createTranslator,
+  DEFAULT_APP_LOCALE,
+  getMessages,
+  resolveLocale,
+  type AppLocale,
+} from '@/lib/i18n';
 
 export function AppEntryLoading({
   route = 'onboarding',
 }: {
-  route?: 'onboarding' | 'shell';
+  route?: 'onboarding' | 'invite-wall' | 'shell';
 }) {
+  const [locale, setLocale] = useState<AppLocale>(DEFAULT_APP_LOCALE);
+  useEffect(() => {
+    setLocale(resolveLocale());
+  }, []);
+
+  const t = createTranslator(getMessages(locale), 'appEntry');
   const subtitle =
-    route === 'onboarding' ? 'Getting your trial ready...' : 'Loading...';
+    route === 'onboarding'
+      ? t('loading.onboarding')
+      : route === 'invite-wall'
+        ? t('loading.inviteWall')
+        : t('loading.shell');
 
   return (
     <div

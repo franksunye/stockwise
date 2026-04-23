@@ -3,12 +3,13 @@
 import { createContext, useContext } from 'react';
 import type { ReactNode } from 'react';
 
-export type AppEntryLoadingRoute = 'onboarding' | 'shell';
+export type AppEntryLoadingRoute = 'onboarding' | 'invite-wall' | 'shell';
 
 export interface AppEntryControllerValue {
   canOptimisticallyEnter: boolean;
   hasOptimisticOnboardingCompletion: boolean;
   preferInviteOnboardingLoading: boolean;
+  preferInviteWallLoading: boolean;
   loadingRoute: AppEntryLoadingRoute;
 }
 
