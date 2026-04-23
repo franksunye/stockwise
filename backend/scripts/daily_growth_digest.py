@@ -445,10 +445,11 @@ def get_clarity_metrics(token: str):
 
     result = {"last_24h": fetch(1)}
     try:
-        result["last_7d"] = fetch(7)
+        # Clarity Data Export API supports numOfDays values 1, 2, or 3 only.
+        result["last_72h"] = fetch(3)
     except Exception as exc:
-        result["last_7d"] = None
-        result["last_7d_error"] = str(exc)
+        result["last_72h"] = None
+        result["last_72h_error"] = str(exc)
     return result
 
 def get_internal_metrics():
@@ -1227,7 +1228,7 @@ def generate_report():
                 clarity_data = get_clarity_metrics(clarity_token)
             except Exception as e:
                 clarity_error = str(e)
-        clarity_partial_error = (clarity_data or {}).get("last_7d_error")
+        clarity_partial_error = (clarity_data or {}).get("last_72h_error")
 
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         ga_24h = (ga or {}).get("windows", {}).get("last_24h", {})
@@ -1269,12 +1270,12 @@ def generate_report():
             if clarity_error:
                 report_md += f"- **Clarity unavailable**: {clarity_error}\n"
             if clarity_partial_error:
-                report_md += f"- **Clarity 7d partial failure**: {clarity_partial_error}\n"
+                report_md += f"- **Clarity 72h partial failure**: {clarity_partial_error}\n"
             report_md += "- Continue to trust internal DB funnel metrics; external traffic trend is incomplete for this run.\n\n"
 
         if clarity_data:
             c24 = clarity_data.get("last_24h") or {}
-            c7 = clarity_data.get("last_7d") or {}
+            c72 = clarity_data.get("last_72h") or {}
             report_md += f"""## ⚠️ UX Friction Signals (Clarity)
 | Metric | Count | Insight |
 | :--- | :--- | :--- |
@@ -1282,9 +1283,9 @@ def generate_report():
 | **Rage Clicks (24h)** | {c24.get('rage_clicks', 0)} | User frustration detected |
 | **Error Clicks (24h)** | {c24.get('error_clicks', 0)} | JS errors or broken links |
 | **Avg Engagement (24h)** | {c24.get('avg_engagement_ms', 0)/1000 if c24.get('avg_engagement_ms') else 0:.1f}s | Session duration |
-| **Dead Clicks (7d)** | {c7.get('dead_clicks', 'N/A') if c7 else 'N/A'} | Weekly friction accumulation |
-| **Rage Clicks (7d)** | {c7.get('rage_clicks', 'N/A') if c7 else 'N/A'} | Weekly frustration accumulation |
-| **Scroll Depth (7d)** | {c7.get('scroll_depth', 'N/A') if c7 else 'N/A'} | Higher is generally better |
+| **Dead Clicks (72h)** | {c72.get('dead_clicks', 'N/A') if c72 else 'N/A'} | Recent friction accumulation |
+| **Rage Clicks (72h)** | {c72.get('rage_clicks', 'N/A') if c72 else 'N/A'} | Recent frustration accumulation |
+| **Scroll Depth (72h)** | {c72.get('scroll_depth', 'N/A') if c72 else 'N/A'} | Higher is generally better |
 
 """
 
