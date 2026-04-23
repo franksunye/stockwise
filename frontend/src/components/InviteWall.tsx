@@ -13,6 +13,8 @@ import {
   resolveLocaleFromBrowserLanguage,
 } from '@/lib/i18n';
 
+const PRODUCT_HUNT_URL = 'https://www.producthunt.com/products/ziso-ai?utm_source=twitter&utm_medium=social';
+
 interface Props {
   onSuccess: (tier: string, expiresAt: string | null) => void;
 }
@@ -60,7 +62,7 @@ export function InviteWall({ onSuccess }: Props) {
     verifyIdentity: isEnglish ? 'Identity Check' : '验证身份',
     unlockFeatures: isEnglish ? 'Unlock Access' : '解锁功能',
     footer: isEnglish
-      ? 'Need an access code? Follow @franksunye on X for beta access updates and launch announcements.'
+      ? 'Need access? Visit ZISO AI on Product Hunt. Comment for a 30-day code.'
       : '没有邀请码？关注官方公众号“知守AI”获取',
   };
 
@@ -178,7 +180,7 @@ export function InviteWall({ onSuccess }: Props) {
         <p className="mt-10 text-center text-xs font-bold text-slate-600 uppercase tracking-widest">
           {isEnglish ? (
             <a
-              href="https://x.com/franksunye"
+              href={PRODUCT_HUNT_URL}
               target="_blank"
               rel="noreferrer"
               className="transition-colors hover:text-slate-400"
