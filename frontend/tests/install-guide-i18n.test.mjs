@@ -8,6 +8,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, '..');
 
 const INSTALL_GUIDE_PATH = resolve(ROOT, 'src', 'components', 'InstallGuide.tsx');
+const INSTALL_PROMPT_HOOK_PATH = resolve(ROOT, 'src', 'hooks', 'useInstallPrompt.ts');
 const EN_MESSAGES_PATH = resolve(ROOT, 'src', 'messages', 'en.json');
 const CN_MESSAGES_PATH = resolve(ROOT, 'src', 'messages', 'cn.json');
 
@@ -44,6 +45,24 @@ describe('install guide i18n regression', () => {
       src.includes('"wechatDesc": "微信内置浏览器无法直接安装 PWA，请先在系统浏览器中打开当前页面，再继续安装。"') &&
       src.includes('"wechatStep2": "选择“在浏览器中打开”"'),
       'Chinese install copy should explain the correct WeChat escape flow.',
+    );
+  });
+
+  it('android native install should fall back to manual guidance if install never completes', () => {
+    const src = readFileSync(INSTALL_PROMPT_HOOK_PATH, 'utf-8');
+
+    assert.ok(
+      src.includes('const [showAndroidFallbackManual, setShowAndroidFallbackManual] = useState(false);'),
+      'Install prompt hook should track whether the Android native prompt needs a manual fallback.',
+    );
+    assert.ok(
+      src.includes("if (isAndroidChromium() && showAndroidFallbackManual) return 'android-manual';"),
+      'Android Chromium should fall back to the manual install guide when native install does not complete.',
+    );
+    assert.ok(
+      src.includes('await new Promise((resolve) => window.setTimeout(resolve, 1500));') &&
+      src.includes('setShowAndroidFallbackManual(true);'),
+      'Accepted Android install prompts should restore manual guidance if appinstalled never arrives.',
     );
   });
 });

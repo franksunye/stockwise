@@ -53,6 +53,7 @@ export function useInstallPrompt(): InstallPromptState {
     const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
     const [isInstalled, setIsInstalled] = useState(false);
     const [dismissed, setDismissed] = useState(false);
+    const [showAndroidFallbackManual, setShowAndroidFallbackManual] = useState(false);
     const promptRef = useRef<BeforeInstallPromptEvent | null>(null);
 
     // --- Detect installed state ---
@@ -84,6 +85,7 @@ export function useInstallPrompt(): InstallPromptState {
         const installedHandler = () => {
             setIsInstalled(true);
             setDeferredPrompt(null);
+            setShowAndroidFallbackManual(false);
             promptRef.current = null;
         };
         window.addEventListener('appinstalled', installedHandler);
@@ -108,6 +110,11 @@ export function useInstallPrompt(): InstallPromptState {
         // Priority 3: Android Chromium with deferred prompt  →  native one-click
         if (isAndroidChromium() && deferredPrompt) return 'android-native';
 
+        // Native prompt can be consumed without a successful install on some Android environments
+        // (for example emulators). Fall back to the manual desktop shortcut guide instead of
+        // disappearing completely after a failed prompt.
+        if (isAndroidChromium() && showAndroidFallbackManual) return 'android-manual';
+
         // Priority 4: Android other browsers → manual guide with brand detection
         if (getCNBrowserBrand()) return 'android-manual';
 
@@ -124,7 +131,18 @@ export function useInstallPrompt(): InstallPromptState {
         await prompt.prompt();
         const { outcome } = await prompt.userChoice;
         if (outcome === 'accepted') {
-            setIsInstalled(true);
+            setDeferredPrompt(null);
+            promptRef.current = null;
+
+            await new Promise((resolve) => window.setTimeout(resolve, 1500));
+
+            if (isStandalone()) {
+                setIsInstalled(true);
+                setShowAndroidFallbackManual(false);
+            } else {
+                setShowAndroidFallbackManual(true);
+            }
+            return;
         }
         setDeferredPrompt(null);
         promptRef.current = null;
