@@ -1,6 +1,11 @@
 {
   "scripts": {
     "content:sync": "node scripts/cmo_sync.mjs",
+    "content:sync:feishu": "node scripts/cmo_sync_feishu.mjs --dry-run",
+    "content:sync:feishu:apply": "node scripts/cmo_sync_feishu.mjs",
+    "content:sync:feishu:campaign": "node scripts/cmo_sync_feishu.mjs --dry-run --scope=campaign",
+    "content:pull:feishu": "node scripts/cmo_backsync_feishu.mjs",
+    "content:pull:feishu:apply": "node scripts/cmo_backsync_feishu.mjs --apply",
     "content:audit": "node scripts/content_audit.mjs",
     "content:check-image-naming": "node scripts/check_image_naming.mjs",
     "image:grsai": "node scripts/grsai_generate_image.mjs",

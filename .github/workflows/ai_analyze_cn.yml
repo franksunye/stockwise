@@ -106,6 +106,9 @@ jobs:
           # Canonical DeepSeek Official (kept for rollback model entries, even if inactive)
           LLM_PROVIDER__DEEPSEEK_OFFICIAL__API_KEY: ${{ secrets.LLM_PROVIDER__DEEPSEEK_OFFICIAL__API_KEY }}
           LLM_PROVIDER__DEEPSEEK_OFFICIAL__BASE_URL: ${{ secrets.LLM_PROVIDER__DEEPSEEK_OFFICIAL__BASE_URL }}
+          # Canonical NVIDIA Integrate key + endpoint
+          LLM_PROVIDER__NVIDIA__API_KEY: ${{ secrets.LLM_PROVIDER__NVIDIA__API_KEY }}
+          LLM_PROVIDER__NVIDIA__BASE_URL: ${{ secrets.LLM_PROVIDER__NVIDIA__BASE_URL }}
           # AkShare stock flow guardrails (avoid single-symbol blocking the whole batch)
           AKSHARE_STOCK_FLOW_TIMEOUT_SEC: "12"
           AKSHARE_STOCK_FLOW_RETRIES: "1"

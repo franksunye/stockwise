@@ -25,8 +25,11 @@ const RECENTLY_UPDATED_FILE = path.join(VIEWS_DIR, 'recently-updated.md');
 const CHANGE_IMPACT_FILE = path.join(VIEWS_DIR, 'change-impact.md');
 const EXTERNAL_MAINTENANCE_FILE = path.join(VIEWS_DIR, 'external-maintenance.md');
 const MASTER_SERIES_VIEW_FILE = path.join(VIEWS_DIR, 'master-series.md');
+const OPS_WEEKLY_FILE = path.join(VIEWS_DIR, 'ops-weekly.md');
+const WECHAT_FUNNEL_FILE = path.join(VIEWS_DIR, 'wechat-funnel.md');
+const DATA_QUALITY_FILE = path.join(VIEWS_DIR, 'data-quality.md');
 const MASTER_SERIES_DIR = path.join(GROWTH_CONTENT_DIR, 'master_series');
-const NEXT_RELEASE_WINDOW_START = '2026-03-23'; // Fixed anchor; only change when the team explicitly updates the planning window.
+const NEXT_RELEASE_WINDOW_START = '2026-04-15'; // Fixed anchor; only change when the team explicitly updates the planning window.
 const WECHAT_RELEASE_CADENCE_LABEL = '周一 / 周三 / 周五';
 
 const SKIP_DIRS = new Set(['archive', 'marketing', '_views']);
@@ -545,7 +548,10 @@ function renderMasterRegistry(items, generatedAt) {
   output += `[_Recently Updated_](${getRelativePath(RECENTLY_UPDATED_FILE, MASTER_FILE)}) · `;
   output += `[_Change Impact_](${getRelativePath(CHANGE_IMPACT_FILE, MASTER_FILE)}) · `;
   output += `[_External Maintenance_](${getRelativePath(EXTERNAL_MAINTENANCE_FILE, MASTER_FILE)}) · `;
-  output += `[_Master Series_](${getRelativePath(MASTER_SERIES_VIEW_FILE, MASTER_FILE)})\n\n`;
+  output += `[_Master Series_](${getRelativePath(MASTER_SERIES_VIEW_FILE, MASTER_FILE)}) · `;
+  output += `[_Ops Weekly_](${getRelativePath(OPS_WEEKLY_FILE, MASTER_FILE)}) · `;
+  output += `[_WeChat Funnel_](${getRelativePath(WECHAT_FUNNEL_FILE, MASTER_FILE)}) · `;
+  output += `[_Data Quality_](${getRelativePath(DATA_QUALITY_FILE, MASTER_FILE)})\n\n`;
   output += markdownTable(
     ['标题', '来源', '类型', '漏斗', '战役角色', '主流程', '关键日期', '网站', '公众号', '最近动作'],
     rows
@@ -1376,6 +1382,229 @@ function renderMasterSeriesBoard(generatedAt) {
   return output;
 }
 
+function renderOpsWeeklyBoard(items, generatedAt) {
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  const next14 = new Date(now);
+  next14.setDate(now.getDate() + 14);
+
+  const activeItems = items.filter((item) => !['published', 'archived'].includes(item.workflowStage));
+  const blockedItems = activeItems.filter((item) => Boolean(item.blockedReason));
+  const overdueItems = activeItems.filter((item) => {
+    if (!item.targetPublishDateParsed) return false;
+    return item.targetPublishDateParsed < now;
+  });
+  const dueSoonItems = activeItems.filter((item) => {
+    if (!item.targetPublishDateParsed) return false;
+    return item.targetPublishDateParsed >= now && item.targetPublishDateParsed <= next14;
+  });
+
+  const stageCounts = new Map();
+  const ownerCounts = new Map();
+  activeItems.forEach((item) => {
+    stageCounts.set(item.workflowStage, (stageCounts.get(item.workflowStage) || 0) + 1);
+    const owner = item.owner || 'unassigned';
+    ownerCounts.set(owner, (ownerCounts.get(owner) || 0) + 1);
+  });
+
+  let output = '# 周运营驾驶舱 (Ops Weekly Cockpit)\n\n';
+  output += `> 自动生成时间：${generatedAt}\n`;
+  output += '> 说明：给内容运营周会使用，快速判断“哪些要先做、谁手里最满、未来两周是否会卡档期”。\n\n';
+
+  output += '## 本周关键指标\n\n';
+  output += markdownTable(
+    ['指标', '数值'],
+    [
+      ['活跃资产（未发布/未归档）', `${activeItems.length}`],
+      ['阻塞项', `${blockedItems.length}`],
+      ['已逾期（目标日期 < 今天）', `${overdueItems.length}`],
+      ['未来 14 天待交付', `${dueSoonItems.length}`]
+    ]
+  );
+  output += '\n\n';
+
+  output += '## 活跃流程分布\n\n';
+  output += markdownTable(
+    ['流程阶段', '数量'],
+    STAGE_ORDER
+      .filter((stage) => !['published', 'archived'].includes(stage))
+      .map((stage) => [STAGE_LABELS[stage] || stage, `${stageCounts.get(stage) || 0}`])
+  );
+  output += '\n\n';
+
+  output += '## Owner 负载分布\n\n';
+  output += markdownTable(
+    ['Owner', '活跃任务数'],
+    [...ownerCounts.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .map(([owner, count]) => [owner === 'unassigned' ? '未分配' : owner, `${count}`])
+  );
+  output += '\n\n';
+
+  output += '## 已逾期任务（优先清零）\n\n';
+  if (overdueItems.length === 0) {
+    output += '- 当前无逾期任务 ✅\n\n';
+  } else {
+    const topOverdue = sortByTargetDateThenTitle(overdueItems).slice(0, 50);
+    output += markdownTable(
+      ['标题', '来源', '阶段', '目标日期', 'Owner', '阻塞'],
+      topOverdue.map((item) => [
+        itemLink(item, 'master'),
+        item.contentSource === 'growth' ? 'Growth' : 'Support',
+        STAGE_LABELS[item.workflowStage] || item.workflowStage,
+        formatDateWithWeekday(item.targetPublishDate) || 'N/A',
+        item.owner || '-',
+        item.blockedReason || '-'
+      ])
+    );
+    if (overdueItems.length > topOverdue.length) {
+      output += `\n\n> 注：逾期任务共 ${overdueItems.length} 条，仅展示最早到期的 ${topOverdue.length} 条。`;
+    }
+    output += '\n\n';
+  }
+
+  output += '## 未来 14 天交付窗口\n\n';
+  if (dueSoonItems.length === 0) {
+    output += '- 当前无 14 天内到期任务\n\n';
+  } else {
+    output += markdownTable(
+      ['目标日期', '标题', '阶段', 'Owner', 'Reviewer', '公众号状态'],
+      sortByTargetDateThenTitle(dueSoonItems).map((item) => [
+        formatDateWithWeekday(item.targetPublishDate) || 'N/A',
+        itemLink(item, 'master'),
+        STAGE_LABELS[item.workflowStage] || item.workflowStage,
+        item.owner || '-',
+        item.reviewer || '-',
+        formatChannelStatus(item.distribution.wechat)
+      ])
+    );
+    output += '\n\n';
+  }
+
+  return output;
+}
+
+function renderWechatFunnelBoard(items, generatedAt) {
+  const wechatItems = items.filter((item) => item.distribution.wechat?.enabled);
+  const byFunnel = new Map();
+  for (const stage of ['TOFU', 'MOFU', 'BOFU', 'Unknown']) {
+    byFunnel.set(stage, {
+      total: 0,
+      published: 0,
+      scheduled: 0,
+      drafting: 0
+    });
+  }
+
+  for (const item of wechatItems) {
+    const funnel = byFunnel.has(item.funnelStage) ? item.funnelStage : 'Unknown';
+    const bucket = byFunnel.get(funnel);
+    bucket.total += 1;
+    if (item.distribution.wechat.status === 'published') bucket.published += 1;
+    if (['scheduled', 'staged'].includes(item.distribution.wechat.status)) bucket.scheduled += 1;
+    if (['draft', 'ready'].includes(item.distribution.wechat.status)) bucket.drafting += 1;
+  }
+
+  const upcoming = sortByTargetDateThenTitle(
+    wechatItems.filter((item) =>
+      ['approved', 'scheduled', 'reviewing', 'drafting', 'planned'].includes(item.workflowStage) &&
+      item.targetPublishDateParsed
+    )
+  ).slice(0, 20);
+
+  let output = '# 公众号漏斗报表 (WeChat Funnel Report)\n\n';
+  output += `> 自动生成时间：${generatedAt}\n`;
+  output += '> 说明：用于观察公众号供给结构（TOFU/MOFU/BOFU）是否失衡，以及近期待发内容是否覆盖完整漏斗。\n\n';
+
+  output += '## 漏斗供给总览\n\n';
+  output += markdownTable(
+    ['漏斗', '总数', '已发布', '已排期/已入后台', '草稿/待完善'],
+    [...byFunnel.entries()].map(([funnel, stats]) => [
+      funnel,
+      `${stats.total}`,
+      `${stats.published}`,
+      `${stats.scheduled}`,
+      `${stats.drafting}`
+    ])
+  );
+  output += '\n\n';
+
+  output += '## 近期待发布（最多 20 条）\n\n';
+  if (upcoming.length === 0) {
+    output += '- 当前无可识别的近期待发内容\n\n';
+  } else {
+    output += markdownTable(
+      ['目标日期', '标题', '漏斗', '战役角色', '主流程', '公众号状态'],
+      upcoming.map((item) => [
+        formatDateWithWeekday(item.targetPublishDate) || 'N/A',
+        itemLink(item, 'master'),
+        item.funnelStage,
+        formatCampaignRole(item.campaignRole),
+        STAGE_LABELS[item.workflowStage] || item.workflowStage,
+        formatChannelStatus(item.distribution.wechat)
+      ])
+    );
+    output += '\n\n';
+  }
+
+  return output;
+}
+
+function renderDataQualityBoard(items, generatedAt) {
+  const missingOwner = items.filter(
+    (item) => !['published', 'archived'].includes(item.workflowStage) && !item.owner
+  );
+  const missingTargetDate = items.filter(
+    (item) => !['published', 'archived'].includes(item.workflowStage) && !item.targetPublishDate
+  );
+  const publishedMissingDate = items.filter(
+    (item) => item.distribution.wechat?.status === 'published' && !item.wechatPublishedAt
+  );
+  const traceabilityMissing = items.filter((item) => item.traceabilityStatus === 'missing');
+
+  let output = '# 内容数据质量报表 (Data Quality Report)\n\n';
+  output += `> 自动生成时间：${generatedAt}\n`;
+  output += '> 说明：用于清理 frontmatter 关键字段，避免看板和飞书同步出现“状态看起来对，但字段不完整”。\n\n';
+
+  output += '## 质量告警概览\n\n';
+  output += markdownTable(
+    ['检查项', '异常数'],
+    [
+      ['活跃内容缺 owner', `${missingOwner.length}`],
+      ['活跃内容缺 target_publish_date', `${missingTargetDate.length}`],
+      ['公众号已发布但缺 published_at', `${publishedMissingDate.length}`],
+      ['缺 source_docs 溯源', `${traceabilityMissing.length}`]
+    ]
+  );
+  output += '\n\n';
+
+  const renderIssueTable = (title, issueItems) => {
+    output += `## ${title}\n\n`;
+    if (issueItems.length === 0) {
+      output += '- 无异常 ✅\n\n';
+      return;
+    }
+    output += markdownTable(
+      ['标题', '来源', '主流程', 'Owner', '目标日期'],
+      issueItems.slice(0, 50).map((item) => [
+        itemLink(item, 'master'),
+        item.contentSource === 'growth' ? 'Growth' : 'Support',
+        STAGE_LABELS[item.workflowStage] || item.workflowStage,
+        item.owner || '-',
+        formatDateWithWeekday(item.targetPublishDate) || 'N/A'
+      ])
+    );
+    output += '\n\n';
+  };
+
+  renderIssueTable('活跃内容缺 Owner', missingOwner);
+  renderIssueTable('活跃内容缺目标日期', missingTargetDate);
+  renderIssueTable('公众号已发布但缺发布时间', publishedMissingDate);
+  renderIssueTable('缺 source_docs 溯源', traceabilityMissing);
+
+  return output;
+}
+
 function writeFile(filePath, contents) {
   fs.writeFileSync(filePath, contents, 'utf8');
   console.log(`✅ Wrote ${path.relative(PROJECT_ROOT, filePath)}`);
@@ -1395,6 +1624,9 @@ function main() {
   writeFile(CHANGE_IMPACT_FILE, renderChangeImpactBoard(items, generatedAt));
   writeFile(EXTERNAL_MAINTENANCE_FILE, renderExternalMaintenanceBoard(items, generatedAt));
   writeFile(MASTER_SERIES_VIEW_FILE, renderMasterSeriesBoard(generatedAt));
+  writeFile(OPS_WEEKLY_FILE, renderOpsWeeklyBoard(items, generatedAt));
+  writeFile(WECHAT_FUNNEL_FILE, renderWechatFunnelBoard(items, generatedAt));
+  writeFile(DATA_QUALITY_FILE, renderDataQualityBoard(items, generatedAt));
 
   console.log(`✅ Unified content registry built for ${items.length} assets.`);
 }
