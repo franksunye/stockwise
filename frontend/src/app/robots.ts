@@ -12,6 +12,9 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/api/", "/admin/"],
       },
     ],
-    sitemap: `${CANONICAL_ORIGIN}/sitemap.xml`,
+    sitemap: [
+      `${CANONICAL_ORIGIN}/sitemap.xml`,
+      `${CANONICAL_ORIGIN}/sitemap-gsc.xml`,
+    ],
   };
 }
