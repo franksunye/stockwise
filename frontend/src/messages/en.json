@@ -592,6 +592,7 @@
       "defaultReasoning": "AI analysis summary based on recent market performance and technical indicators."
     },
     "selectTitle": "See How ZISO Thinks About a Stock",
+    "selectTitleB": "Analyze these institutional picks with AI Reasoning.",
     "selectDesc": "Pick a stock and unlock an AI view of trend, risk, and decision logic in seconds.",
     "selectNote": "* You can add any US, HK, or China A stock after onboarding.",
     "analyzing": {
@@ -601,13 +602,16 @@
     },
     "reveal": {
       "goUnlocked": "GO Trial Preview",
+      "goActive": "{days}-Day Go Access Active!",
       "reportTitle": "Rationale Preview",
       "advice": "Today's Advice",
       "insight": "Rationale",
       "confidence": "Confidence",
       "support": "Support",
       "privilegeNote": "* Rationale and support are included with GO during your trial.",
-      "cta": "Continue"
+      "deepSeekUnlocked": "DeepSeek reasoning unlocked.",
+      "cta": "Continue",
+      "startResearch": "Start Your Research"
     },
     "complete": {
       "ready": "You're ready to go",

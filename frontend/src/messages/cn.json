@@ -592,6 +592,7 @@
       "defaultReasoning": "基于近期市场表现和技术指标的综合分析结论。"
     },
     "selectTitle": "选择一只股票体验",
+    "selectTitleB": "用 AI 推理分析这些机构精选标的。",
     "selectDesc": "从热门标的中选择，我们将完全解锁它的 AI 深度分析。",
     "selectNote": "* 正式使用后，您可以添加任意美股、港股或A股到自选池",
     "analyzing": {
@@ -601,13 +602,16 @@
     },
     "reveal": {
       "goUnlocked": "GO 体验预览",
+      "goActive": "{days} 天 GO 权益已生效！",
       "reportTitle": "逻辑预览",
       "advice": "今日建议",
       "insight": "逻辑依据",
       "confidence": "置信度",
       "support": "支撑位",
       "privilegeNote": "* GO 体验期间，您可查看逻辑依据与支撑位。",
-      "cta": "继续"
+      "deepSeekUnlocked": "DeepSeek 推理已解锁。",
+      "cta": "继续",
+      "startResearch": "开始你的研究"
     },
     "complete": {
       "ready": "准备就绪",

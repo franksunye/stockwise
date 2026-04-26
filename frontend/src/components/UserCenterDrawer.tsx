@@ -25,6 +25,7 @@ import {
   getStoredUserId,
   writeProfileCache,
 } from '@/lib/dashboard-bootstrap';
+import { ONBOARDING_REENTRY_KEY, type OnboardingFlowVariant, writeOnboardingFlowVariant } from '@/lib/onboarding-flow';
 import pkg from '../../package.json';
 
 interface Props {
@@ -63,6 +64,27 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
     setIsLinkingEmail(false);
     setTempEmail('');
     setEmailMsg(null);
+  };
+
+  const reEnterActivationGuide = async (variant: OnboardingFlowVariant) => {
+    writeOnboardingFlowVariant(variant);
+    localStorage.setItem(ONBOARDING_REENTRY_KEY, 'true');
+    localStorage.removeItem('STOCKWISE_HAS_ONBOARDED');
+    clearOnboardingCompletionSnapshot();
+    if (profile?.userId) {
+      writeProfileCache({
+        ...profile,
+        hasOnboarded: false,
+      });
+    }
+    try {
+      await fetch('/api/user/onboarding/reset', {
+        method: 'POST',
+      });
+    } catch (err) {
+      console.error('Reset onboarding failed', err);
+    }
+    window.location.reload();
   };
 
   // Local sync/display states (derived from profile)
@@ -780,27 +802,20 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                         )}
                         
                         <div className="mt-4">
-                          <button 
-                            onClick={async () => { 
-                                localStorage.removeItem('STOCKWISE_HAS_ONBOARDED');
-                                clearOnboardingCompletionSnapshot();
-                                if (profile?.userId) {
-                                    writeProfileCache({
-                                        ...profile,
-                                        hasOnboarded: false,
-                                    });
-                                }
-                                try {
-                                    await fetch('/api/user/onboarding/reset', {
-                                        method: 'POST',
-                                    });
-                                } catch (err) { console.error('Reset onboarding failed', err); }
-                                window.location.reload(); 
-                            }} 
-                            className="text-[9px] text-slate-700 hover:text-slate-500 font-bold uppercase tracking-[0.3em] transition-colors"
-                          >
-                            {t('onboardingReset')}
-                          </button>
+                          <div className="flex items-center justify-center gap-4">
+                            <button
+                              onClick={() => { void reEnterActivationGuide('A'); }}
+                              className="text-[9px] text-slate-700 hover:text-slate-500 font-bold uppercase tracking-[0.3em] transition-colors"
+                            >
+                              AG-A
+                            </button>
+                            <button
+                              onClick={() => { void reEnterActivationGuide('B'); }}
+                              className="text-[9px] text-slate-700 hover:text-slate-500 font-bold uppercase tracking-[0.3em] transition-colors"
+                            >
+                              AG-B
+                            </button>
+                          </div>
                           <div className="mt-4 opacity-60 text-[8px] text-slate-400 uppercase tracking-widest font-medium">ZISO AI v{pkg.version}</div>
                         </div>
                     </div>

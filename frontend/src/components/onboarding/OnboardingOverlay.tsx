@@ -17,6 +17,7 @@ import {
   WATCHLIST_SYNC_EVENT,
   readCachedWatchlist,
 } from '@/lib/watchlist-cache';
+import { ONBOARDING_REENTRY_KEY, readOnboardingFlowVariant } from '@/lib/onboarding-flow';
 
 // Fallback data for the reveal step
 const DEFAULT_REVEAL_DATA = { 
@@ -43,7 +44,12 @@ export function OnboardingOverlay() {
   const stockLocale = locale === 'en' ? 'en' : 'cn';
   const isHighPerformance = shouldEnableHighPerformance();
   const [isVisible, setIsVisible] = useState(false);
-  const [step, setStep] = useState(1);
+  const [flowVariant] = useState(() => readOnboardingFlowVariant());
+  const [isReEntry] = useState(() => (
+    typeof window !== 'undefined' && window.localStorage.getItem(ONBOARDING_REENTRY_KEY) === 'true'
+  ));
+  const isFlowB = flowVariant === 'B';
+  const [step, setStep] = useState(() => (flowVariant === 'B' ? 2 : 1));
   const [trialDays, setTrialDays] = useState(MEMBERSHIP_CONFIG.onboarding.trialDays);
   const [isCompleting, setIsCompleting] = useState(false);
   const { trackEvent } = useAnalytics();
@@ -70,6 +76,27 @@ export function OnboardingOverlay() {
     profile.tier === 'free' &&
     !profile.expiresAt,
   );
+  const shouldShowGrantCopy = !isReEntry && (hasActiveAccess || willGrantOnboardingTrial);
+  const accessStatusLabel = shouldShowGrantCopy
+      ? t('complete.gift')
+      : hasActiveAccess
+        ? t('complete.activeAccess')
+      : t('complete.workspace');
+  const accessStatusTitle = shouldShowGrantCopy
+      ? t('complete.trial', { days: trialDays })
+      : hasActiveAccess
+        ? t('complete.activeTitle', { days: trialDays })
+      : t('complete.workspaceTitle');
+  const accessStatusDescription = shouldShowGrantCopy
+      ? t('complete.trialDesc')
+      : hasActiveAccess
+        ? t('complete.activeDesc')
+      : t('complete.workspaceDesc');
+  const flowBPillText = shouldShowGrantCopy
+    ? t('reveal.goActive', { days: trialDays })
+    : accessStatusTitle;
+  const indicatorSteps = isFlowB ? 3 : 4;
+  const currentIndicatorStep = isFlowB ? (step <= 2 ? 1 : step === 3 ? 2 : 3) : step;
 
   const fetchRecommendedStocks = useCallback(async () => {
     try {
@@ -172,6 +199,7 @@ export function OnboardingOverlay() {
         trackEvent('onboarding_complete');
 
         window.dispatchEvent(new Event('stockwise-onboarding-complete'));
+        window.localStorage.removeItem(ONBOARDING_REENTRY_KEY);
         setIsVisible(false);
 
         // Refresh profile in background so UI can enter dashboard immediately.
@@ -190,12 +218,25 @@ export function OnboardingOverlay() {
     setSelectedStock(symbol);
     setSelectedStockName(name || symbol);
     setSelectedStockNameEn(nameEn ?? null);
-    setAnalyzingStage(1);
+    setRevealData({
+      ...DEFAULT_REVEAL_DATA,
+      name: getLocalizedStockName(
+        { symbol, name: name || symbol, name_en: nameEn ?? null },
+        stockLocale,
+      ),
+    });
+
+    if (isFlowB) {
+      setAnalyzingStage(0);
+      setStep(3);
+    } else {
+      setAnalyzingStage(1);
+    }
     
     // Simulate Steps Timeline (Ensures progress even if API is slow)
-    const stage2Timer = setTimeout(() => setAnalyzingStage(2), 2000);
-    const stage3Timer = setTimeout(() => setAnalyzingStage(3), 4500);
-    const step4Timer = setTimeout(() => setStep(3), 7000); // 兜底进入下一步
+    const stage2Timer = isFlowB ? null : setTimeout(() => setAnalyzingStage(2), 2000);
+    const stage3Timer = isFlowB ? null : setTimeout(() => setAnalyzingStage(3), 4500);
+    const step4Timer = isFlowB ? null : setTimeout(() => setStep(3), 7000); // 兜底进入下一步
 
     // Fetch real stock data with timeout
     try {
@@ -250,9 +291,9 @@ export function OnboardingOverlay() {
 
     // Cleanup timers if we manually change step (optional, but good practice if logic evolves)
     return () => {
-        clearTimeout(stage2Timer);
-        clearTimeout(stage3Timer);
-        clearTimeout(step4Timer);
+        if (stage2Timer) clearTimeout(stage2Timer);
+        if (stage3Timer) clearTimeout(stage3Timer);
+        if (step4Timer) clearTimeout(step4Timer);
     };
   };
 
@@ -261,7 +302,7 @@ export function OnboardingOverlay() {
   return (
     <div
       data-dashboard-onboarding-overlay="true"
-      className="fixed inset-0 z-[999] bg-[#050508] text-white overflow-y-auto"
+      className="fixed inset-0 z-[999] w-screen max-w-full bg-[#050508] text-white overflow-y-auto overflow-x-hidden"
     >
       {/* Background Ambience */}
       <div className="absolute inset-0 bg-[#050508]">
@@ -283,8 +324,8 @@ export function OnboardingOverlay() {
         
         {/* Step Indicator */}
         <div className="flex gap-1 pt-8 mb-8 justify-center">
-            {[1, 2, 3, 4].map(s => (
-                <div key={s} className={`h-1 rounded-full transition-all duration-500 ${s <= step ? 'w-8 bg-indigo-500' : 'w-2 bg-white/10'}`} />
+            {Array.from({ length: indicatorSteps }, (_, index) => index + 1).map(s => (
+                <div key={s} className={`h-1 rounded-full transition-all duration-500 ${s <= currentIndicatorStep ? 'w-8 bg-indigo-500' : 'w-2 bg-white/10'}`} />
             ))}
         </div>
 
@@ -329,7 +370,7 @@ export function OnboardingOverlay() {
                     >
                         {analyzingStage === 0 ? (
                             <>
-                                <h2 className="text-2xl font-bold">{t('selectTitle')}</h2>
+                                <h2 className="text-2xl font-bold">{isFlowB ? t('selectTitleB') : t('selectTitle')}</h2>
                                 <p className="text-slate-400 text-sm">{t('selectDesc')}</p>
                                 
                                 {/* Curated Stock List - Only stocks with AI predictions */}
@@ -406,7 +447,7 @@ export function OnboardingOverlay() {
                         <div className="absolute -top-9 left-0 right-0 text-center mb-4">
                                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 text-amber-300 text-[10px] font-bold border border-amber-500/20 uppercase tracking-[0.18em]">
                                     <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                                    {t('reveal.goUnlocked')}
+                                    {isFlowB ? flowBPillText : t('reveal.goUnlocked')}
                                 </span>
                         </div>
 
@@ -424,7 +465,9 @@ export function OnboardingOverlay() {
                                 <div className="flex justify-between items-start">
                                     <div className="pr-4">
                                         <h3 className="text-[2rem] leading-[0.95] font-black italic text-white tracking-tighter">{revealData.name}</h3>
-                                        <p className="text-[10px] font-black text-slate-500 tracking-[0.24em] uppercase mt-2">{t('reveal.reportTitle')}</p>
+                                        {!isFlowB && (
+                                          <p className="text-[10px] font-black text-slate-500 tracking-[0.24em] uppercase mt-2">{t('reveal.reportTitle')}</p>
+                                        )}
                                     </div>
                                     <div className={`flex flex-col items-end shrink-0 ${revealData.change >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                                         <span className="text-[1.9rem] leading-none font-black mono">{revealData.price.toFixed(2)}</span>
@@ -452,7 +495,7 @@ export function OnboardingOverlay() {
                                         <Zap className="w-4 h-4 fill-current" />
                                         <span className="text-[11px] font-black uppercase tracking-[0.18em]">{t('reveal.insight')}</span>
                                     </div>
-                                    <p className="text-sm font-medium text-slate-300 leading-relaxed border-l-2 border-indigo-500/40 pl-3">
+                                    <p className={`text-sm font-medium text-slate-300 leading-relaxed border-l-2 border-indigo-500/40 pl-3 ${isFlowB ? 'overflow-hidden [display:-webkit-box] [-webkit-line-clamp:2] [-webkit-box-orient:vertical]' : ''}`}>
                                         &quot;{revealData.reason}&quot;
                                     </p>
                                 </div>
@@ -476,15 +519,26 @@ export function OnboardingOverlay() {
                                 {/* Prompt */}
                                 <div className="pt-1">
                                      <p className="text-[10px] text-center text-slate-500 italic leading-relaxed">
-                                        {t('reveal.privilegeNote')}
+                                        {isFlowB ? t('reveal.deepSeekUnlocked') : t('reveal.privilegeNote')}
                                      </p>
                                 </div>
                            </div>
                         </div>
 
                         <div className="mt-7 space-y-3">
-                             <button onClick={() => setStep(4)} className="w-full py-4 bg-indigo-600 text-white font-black text-lg rounded-2xl active:scale-95 transition-all shadow-lg hover:bg-indigo-500">
-                                {t('reveal.cta')}
+                             {isFlowB && (
+                               <div className="rounded-2xl border border-indigo-500/25 bg-indigo-950/20 px-4 py-3 text-center">
+                                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-indigo-300">{accessStatusLabel}</p>
+                                  <p className="mt-1 text-sm font-black text-white">{accessStatusTitle}</p>
+                                  <p className="mt-1 text-[11px] leading-relaxed text-slate-400">{accessStatusDescription}</p>
+                               </div>
+                             )}
+                             <button
+                               onClick={isFlowB ? handleComplete : () => setStep(4)}
+                               disabled={isFlowB && isCompleting}
+                               className="w-full py-4 bg-indigo-600 text-white font-black text-lg rounded-2xl active:scale-95 transition-all shadow-lg hover:bg-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed"
+                             >
+                                {isFlowB && isCompleting ? (locale === 'en' ? 'Opening...' : '正在打开...') : isFlowB ? t('reveal.startResearch') : t('reveal.cta')}
                              </button>
                         </div>
                     </motion.div>
@@ -515,21 +569,13 @@ export function OnboardingOverlay() {
                             <div className="bg-gradient-to-br from-indigo-900/40 to-black border border-indigo-500/30 p-6 rounded-2xl relative overflow-hidden">
                                 <div className="relative z-10">
                                      <h3 className="text-indigo-300 font-bold uppercase tracking-widest text-xs mb-2">
-                                        {hasActiveAccess ? t('complete.activeAccess') : willGrantOnboardingTrial ? t('complete.gift') : t('complete.workspace')}
+                                        {accessStatusLabel}
                                      </h3>
                                      <p className="text-white font-bold text-lg mb-1">
-                                        {hasActiveAccess
-                                          ? t('complete.activeTitle', { days: trialDays })
-                                          : willGrantOnboardingTrial
-                                            ? t('complete.trial', { days: trialDays })
-                                            : t('complete.workspaceTitle')}
+                                        {accessStatusTitle}
                                      </p>
                                      <p className="text-slate-400 text-xs">
-                                        {hasActiveAccess
-                                          ? t('complete.activeDesc')
-                                          : willGrantOnboardingTrial
-                                            ? t('complete.trialDesc')
-                                            : t('complete.workspaceDesc')}
+                                        {accessStatusDescription}
                                      </p>
                                 </div>
                                 <Clock className="absolute -bottom-4 -right-4 w-24 h-24 text-indigo-500/10" />
