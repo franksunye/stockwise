@@ -35,7 +35,7 @@ const ES_PRICING_PLANS = [
     features: [
       '10 Acciones en Lista (con Informes/día)',
       'Modelo de Servicio: DeepSeek',
-      'Notificaciones en Tiempo Real',
+      'Radar de Estructura Intradía',
       'Academia ZISO (101/Maestros)',
       'Insignia de identidad Go',
     ],
@@ -55,7 +55,7 @@ const ES_PRICING_PLANS = [
     features: [
       '10 Acciones en Lista (con Informes/día)',
       'Modelo de Servicio: DeepSeek + Gemini',
-      'Notificaciones en Tiempo Real',
+      'Radar de Estructura Intradía',
       'Academia ZISO (101/Maestros)',
       'Insignia de identidad Plus',
     ],
@@ -79,8 +79,9 @@ const ES_FEATURE_COMPARISON = [
   { label: 'Cobertura de Mercado', free: 'US / HK / CN', go: 'US / HK / CN', plus: 'US / HK / CN' },
   
   { isGroup: true, label: 'Notificaciones del Sistema (Notifications)' },
-  { label: 'Frecuencia en Tiempo Real', free: 'Limitado', go: 'Full Tiempo Real', plus: 'Full Tiempo Real', highlight: true },
-  { label: 'Categorías de Notificación', free: 'Básico', go: 'Todas las Categorías', plus: 'Todas las Categorías' },
+  { label: 'Frecuencia en Tiempo Real', free: 'Básica / baja frecuencia', go: 'Tiempo real de pago', plus: 'Tiempo real de pago', highlight: true },
+  { label: 'Radar de Estructura Intradía', free: '❌', go: '✅', plus: '✅', highlight: true },
+  { label: 'Categorías de Notificación', free: 'Básico', go: 'Incluye radar de pago', plus: 'Incluye radar de pago' },
 
   { isGroup: true, label: 'Academia ZISO (Academy)' },
   { label: 'Guías 101', free: 'Incluido', go: 'Incluido', plus: 'Incluido' },

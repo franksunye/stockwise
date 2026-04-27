@@ -576,7 +576,7 @@ Production 内部分为两组：
 | `data_sync_cn.yml` | `ADMIN` | `WeCom` | 已实现 | 盘后正式同步，失败不应静默 |
 | `data_sync_hk.yml` | `ADMIN` | `WeCom` | 已实现 | 含 HK short sync，内部告警链已接入 |
 | `data_sync_us.yml` | `ADMIN` | `WeCom` | 已实现 | 美股盘后正式同步（独立链），失败不应静默 |
-| `data_sync_realtime.yml` | `User + ADMIN` | `Mixed` | 已实现 | 盘中价格波动会走 `price_update` push；作业本身走 `JobGuard` 发 ADMIN 告警 |
+| `data_sync_realtime.yml` | `User + ADMIN` | `Mixed` | 已实现 | 盘中价格波动走 `price_update`；结构触发走 `ai_radar_alert`（个人中心可控，付费用户 `go`/`plus`/`pro`/`alpha` 专属，按日志做日级冷却）；作业本身走 `JobGuard` 发 ADMIN 告警 |
 | `data_sync_single.yml` | `ADMIN` | `WeCom` | 已实现 | 手工补数不直接通知用户，只向运维侧暴露执行结果 |
 | `verify_predictions.yml` | `User + ADMIN` | `Push + WeCom` | 已实现 | 用户侧验证结果/战报与 ADMIN 成功/失败告警都已接入，workflow 已注入 `WECOM_ROBOT_KEY` 与 `ADMIN_MOBILES` |
 | `ai_analyze_cn.yml` | `User + ADMIN` | `Mixed` | 已实现 | 用户会收到 `prediction_updated` / `signal_flip`，作业本身会发 ADMIN 通知 |

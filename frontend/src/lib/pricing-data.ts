@@ -56,7 +56,7 @@ export function getPricingPlans(locale: string): PricingPlan[] {
             features: [
                 'pricing.features.insights|10',
                 'pricing.features.model|DeepSeek',
-                'pricing.features.notifications_full',
+                'pricing.features.structure_radar',
                 'pricing.features.academy',
                 'pricing.features.badge_go',
             ],
@@ -77,7 +77,7 @@ export function getPricingPlans(locale: string): PricingPlan[] {
             features: [
                 'pricing.features.insights|10',
                 'pricing.features.model|DeepSeek + Gemini',
-                'pricing.features.notifications_full',
+                'pricing.features.structure_radar',
                 'pricing.features.academy',
                 'pricing.features.badge_plus',
             ],
@@ -123,8 +123,9 @@ export const featureComparison: FeatureComparisonRow[] = [
     
     // --- Notifications ---
     { isGroup: true, label: 'pricing.groups.notifications' },
-    { label: 'pricing.rows.realtime', free: '受限', go: '全量实时', plus: '全量实时', highlight: true },
-    { label: 'pricing.rows.categories', free: '基础通知', go: '全品类通知', plus: '全品类通知' },
+    { label: 'pricing.rows.realtime', free: '基础/低频', go: '付费实时', plus: '付费实时', highlight: true },
+    { label: 'pricing.rows.structureRadar', free: '❌', go: '✅', plus: '✅', highlight: true },
+    { label: 'pricing.rows.categories', free: '基础通知', go: '含付费雷达', plus: '含付费雷达' },
  
     // --- Academy ---
     { isGroup: true, label: 'pricing.groups.academy' },

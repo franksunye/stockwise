@@ -41,6 +41,7 @@ summary: "定义通知系统的生产基线与研究延续，是通知、节奏�
 | 预测更新 | `prediction_updated` | `prediction_updated` | `analysis/runner.py` | 服务状态告知 | 开启 |
 | 每日复盘 | `daily_brief` / `daily_brief_*` | `daily_brief` | `engine/services/brief_assembler.py` | 复盘内容送达 | 暂停 |
 | 实时行情 | `price_update` | `price_update` | `sync/prices.py` | 盘中波动提醒 | 关闭 |
+| 盘中结构雷达 | `ai_radar_alert` | `ai_radar_alert` | `sync/intraday_monitor.py` + `NotificationManager.broadcast_price_alert` | 支撑/压力触发后的高价值战术提醒 | 付费用户开启 / Free 锁定 |
 | 投资黄历 | `almanac_preview` / `almanac_ritual` | `market_almanac` | `scripts/broadcast_almanac.py` | 日级节奏与情绪框架 | 暂停 |
 
 ## 2.1 研究亮点（保留，不代表已全部实现）
@@ -153,12 +154,10 @@ summary: "定义通知系统的生产基线与研究延续，是通知、节奏�
 
 #### 8. 盘中结构雷达 (ai_radar_alert)
 > 触发逻辑：盘中实时触发。核心在于比较“实时走势”与“晨间 AI 预判”的逻辑一致性。仅在发生**明确背离**（如破位）或**超预期共振**（如放量突破压力位）时发信，作为高价值战术提醒。
-*   **Free (风险感应)**
-    *   **Title**: `📡 [AI雷达] 捕捉到结构性偏移`
-    *   **Body**: `{stock_names} 实际走势与晨间预判出现逻辑背离。重点观察其在 {current_price} 附近的表现。`
-*   **Pro (战术确认)**
-    *   **Title**: `🕵️ Pro 结构雷达：逻辑共振确认`
-    *   **Body**: `{stock_names} 盘中逻辑共振。放量突破 AI 强压力位 {resistance}。请根据 Pro 盘中实时计划调整策略。`
+> 发送约束：该通知对应个人中心“盘中结构雷达”开关；仅 `go` / `plus` / `pro` / `alpha` 付费用户可用（`premium` 作为历史兼容 tier 同口径放行），Free 用户前后端均锁定；后端复用 `notification_logs` 做 DB 级冷却，同一用户、同一股票、同一北京时间日期最多发送一次。
+*   **Paid (战术确认)**
+    *   **Title**: `🕵️ 结构雷达：逻辑共振确认`
+    *   **Body**: `{stock_names} 盘中逻辑共振。放量突破 AI 强压力位 {resistance}。请根据付费盘中计划调整策略。`
 
 
 

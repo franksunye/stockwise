@@ -424,7 +424,7 @@
     "go": {
       "name": "核心版 (Go)",
       "period": "每月 / 每年 {price}",
-      "description": "解锁 DeepSeek 深度洞察、10 只自选股、每月 200 份研判报告及全量实时预警。",
+      "description": "解锁 DeepSeek 深度洞察、10 只自选股、每月 200 份研判报告及付费盘中结构雷达。",
       "cta": "订阅 Go"
     },
     "plus": {
@@ -443,7 +443,8 @@
       "insights": "{count}只 自选股票 (含研判报告/天)",
       "model": "服务模型: {model}",
       "notifications_basic": "基础系统通知",
-      "notifications_full": "全量实时通知",
+      "notifications_full": "付费实时通知",
+      "structure_radar": "盘中结构雷达（付费专属）",
       "academy": "知守学院 (101/大师图鉴)",
       "badge_go": "Go 专属勋章",
       "badge_plus": "Plus 专属勋章"
@@ -465,6 +466,7 @@
       "sharing": "报告分享 (Report Sharing)",
       "market": "覆盖市场 (US / HK / CN)",
       "realtime": "实时预警频率",
+      "structureRadar": "盘中结构雷达",
       "categories": "通知品类覆盖",
       "academy101": "知守 101 课程",
       "masterLogics": "大师图鉴逻辑",
@@ -622,7 +624,7 @@
       "trial": "已激活 {days} 天 GO 使用权限",
       "activeTitle": "GO 权益剩余 {days} 天",
       "workspaceTitle": "您的控制台已准备完成",
-      "trialDesc": "您现在可跟踪最多 10 只股票，并使用 DeepSeek 分析与全量实时提醒。",
+      "trialDesc": "您现在可跟踪最多 10 只股票，并使用 DeepSeek 分析与盘中结构雷达。",
       "activeDesc": "您当前已有的 GO 权益将继续生效，进入控制台即可继续使用。",
       "workspaceDesc": "自选池已更新，您现在可以直接进入控制台。",
       "cta": "打开控制台"

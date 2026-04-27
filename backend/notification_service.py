@@ -123,6 +123,7 @@ class NotificationManager:
         "signal_flip_batch": "signal_flip",
         "almanac_preview": "market_almanac",
         "almanac_ritual": "market_almanac",
+        "ai_radar_alert": "ai_radar_alert",
         "prediction_ready": "prediction_updated",  # Legacy tag compat
     }
 
@@ -133,6 +134,8 @@ class NotificationManager:
         "signal_flip_batch",
         "ai_radar_alert"
     }
+
+    PAID_NOTIFICATION_TIERS = {"go", "plus", "pro", "alpha", "premium"}
 
     def check_signal_flip(self, user_id: str, symbol: str, new_signal: str, new_confidence: float) -> Optional[dict]:
         """
@@ -259,7 +262,7 @@ class NotificationManager:
             profile = {"tier": "free", "locale": "cn"}
             
             if row:
-                if len(row) >= 1 and row[0] in {"free", "go", "plus", "pro", "premium"}:
+                if len(row) >= 1 and row[0] in {"free", "go", "plus", "pro", "alpha", "premium"}:
                     profile["tier"] = row[0] or "free"
                 if len(row) >= 2 and row[1]:
                     profile["locale"] = row[1] or "cn"
@@ -500,6 +503,50 @@ class NotificationManager:
             if not self.conn:
                 conn.close()
 
+    def _is_advanced_notification_blocked(self, user_id: str, notif_type: str, tier: Optional[str] = None) -> bool:
+        """Return True when the user's tier is not allowed to receive an advanced notification."""
+        if notif_type not in self.ADVANCED_CATEGORIES:
+            return False
+
+        resolved_tier = (tier or self._get_user_profile(user_id).get("tier", "free") or "free").lower()
+        return resolved_tier not in self.PAID_NOTIFICATION_TIERS
+
+    def _has_radar_alert_cooldown(self, user_id: str, symbol: str) -> bool:
+        """
+        Reuse notification_logs as the durable cooldown source for ai_radar_alert.
+        Same user + same stock + same Beijing date should receive at most one radar alert.
+        """
+        conn = self._get_conn()
+        try:
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                SELECT related_symbols
+                FROM notification_logs
+                WHERE user_id = ?
+                  AND type = 'ai_radar_alert'
+                  AND date(sent_at) = date('now', '+8 hours')
+                ORDER BY sent_at DESC
+                LIMIT 50
+                """,
+                (user_id,)
+            )
+            for row in cursor.fetchall():
+                raw_symbols = row[0] if isinstance(row, (tuple, list)) else row["related_symbols"]
+                try:
+                    related_symbols = json.loads(raw_symbols or "[]")
+                except Exception:
+                    related_symbols = [str(raw_symbols)] if raw_symbols else []
+                if symbol in related_symbols:
+                    return True
+            return False
+        except Exception as e:
+            logger.debug(f"⚠️ Failed to check radar cooldown for {user_id}/{symbol}: {e}")
+            return False
+        finally:
+            if not self.conn:
+                conn.close()
+
     def _has_push_subscription(self, user_id: str) -> bool:
         """Check if user has at least one active push subscription.
         Cached per-instance to avoid repeated DB queries within one flush cycle."""
@@ -532,8 +579,8 @@ class NotificationManager:
         profile = self._get_user_profile(user_id)
         tier = profile.get("tier", "free")
         
-        if tier == "free" and notif_type in self.ADVANCED_CATEGORIES:
-            logger.debug(f"🛑 [TierGuard] User {user_id} is FREE, blocking advanced notification '{notif_type}'")
+        if self._is_advanced_notification_blocked(user_id, notif_type, tier=tier):
+            logger.debug(f"🛑 [TierGuard] User {user_id} tier={tier} cannot receive advanced notification '{notif_type}'")
             return False
 
         # 2. Check user preferences before sending
@@ -655,8 +702,16 @@ class NotificationManager:
                 tier = profile.get("tier", "free")
                 lang = profile.get("locale", "cn")
 
+                if self._is_advanced_notification_blocked(uid, event_type, tier=tier):
+                    logger.debug(f"🛑 [TierGuard] User {uid} tier={tier} cannot receive advanced broadcast '{event_type}'")
+                    continue
+
                 # Fetch settings for preference check
                 if not self._check_user_preference(uid, event_type):
+                    continue
+
+                if event_type == "ai_radar_alert" and self._has_radar_alert_cooldown(uid, symbol):
+                    logger.info(f"⏱️ Radar cooldown active for {uid}/{symbol}, skipping duplicate alert.")
                     continue
                 
                 # Render content per user language

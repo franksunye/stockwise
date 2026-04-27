@@ -31,11 +31,11 @@ const EN_PRICING_PLANS = [
     price: '6.99',
     msrp: '9.99',
     period: 'Monthly / $69.9 Yearly',
-    description: 'Unlock DeepSeek actionable insights, 10 watchlist stocks, 200 monthly reports, and all-category real-time alerts.',
+    description: 'Unlock DeepSeek actionable insights, 10 watchlist stocks, 200 monthly reports, and paid intraday structure alerts.',
     features: [
       '10 Watchlist Stocks (incl. Insights/day)',
       'Service Model: DeepSeek',
-      'Full Real-time Notifications',
+      'Session Structure Radar',
       'Academy Access (101/Masters)',
       'Go Identity Badge',
     ],
@@ -55,7 +55,7 @@ const EN_PRICING_PLANS = [
     features: [
       '10 Watchlist Stocks (incl. Insights/day)',
       'Service Model: DeepSeek + Gemini',
-      'Full Real-time Notifications',
+      'Session Structure Radar',
       'Academy Access (101/Masters)',
       'Plus Identity Badge',
     ],
@@ -94,8 +94,9 @@ const EN_FEATURE_COMPARISON = [
   { label: 'REPORT DISTRIBUTION', free: 'Unlimited', go: 'Unlimited', plus: 'Unlimited' },
   
   { isGroup: true, label: 'System Notifications' },
-  { label: 'Real-time Alerts', free: 'Limited', go: 'Full Real-time', plus: 'Full Real-time', highlight: true },
-  { label: 'Notification Categories', free: 'Basic', go: 'All Categories', plus: 'All Categories' },
+  { label: 'Real-time Alerts', free: 'Basic / low-frequency', go: 'Paid real-time', plus: 'Paid real-time', highlight: true },
+  { label: 'Session Structure Radar', free: '❌', go: '✅', plus: '✅', highlight: true },
+  { label: 'Notification Categories', free: 'Basic', go: 'Includes paid radar', plus: 'Includes paid radar' },
 
   { isGroup: true, label: 'ZISO Academy' },
   { label: '101 Guides', free: 'Included', go: 'Included', plus: 'Included' },

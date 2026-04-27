@@ -31,11 +31,11 @@ const KO_PRICING_PLANS = [
     price: '6.99',
     msrp: '9.99',
     period: '월간 / 연간 $69.9',
-    description: 'DeepSeek의 깊은 통찰(actionable insights), 10종 관심종목, 월간 200회 연판 보고서 및 전 기능 실시간 알림 잠금 해제.',
+    description: 'DeepSeek의 깊은 통찰(actionable insights), 10종 관심종목, 월간 200회 연판 보고서 및 유료 장중 구조 레이더를 잠금 해제.',
     features: [
       '10종 자선주/관심종목 (연판 보고서 포함)',
       '서비스 모델: DeepSeek',
-      '전 기능 실시간 알림',
+      '장중 구조 레이더',
       '지수 아카데미 (101/마스터)',
       'Go 전용 아이덴티티 배지',
     ],
@@ -55,7 +55,7 @@ const KO_PRICING_PLANS = [
     features: [
       '10종 자선주/관심종목 (연판 보고서 포함)',
       '서비스 모델: DeepSeek + Gemini',
-      '전 기능 실시간 알림',
+      '장중 구조 레이더',
       '지수 아카데미 (101/마스터)',
       'Plus 전용 아이덴티티 배지',
     ],
@@ -79,8 +79,9 @@ const KO_FEATURE_COMPARISON = [
   { label: '시장 커버리지', free: 'US / HK / CN', go: 'US / HK / CN', plus: 'US / HK / CN' },
   
   { isGroup: true, label: '시스템 알림 (Notifications)' },
-  { label: '실시간 알림 빈도', free: '제한적', go: '전 기능 실시간', plus: '전 기능 실시간', highlight: true },
-  { label: '알림 카테고리', free: '기본형', go: '모든 카테고리', plus: '모든 카테고리' },
+  { label: '실시간 알림 빈도', free: '기본 / 저빈도', go: '유료 실시간', plus: '유료 실시간', highlight: true },
+  { label: '장중 구조 레이더', free: '❌', go: '✅', plus: '✅', highlight: true },
+  { label: '알림 카테고리', free: '기본형', go: '유료 레이더 포함', plus: '유료 레이더 포함' },
 
   { isGroup: true, label: '지守 아카데미 (Academy)' },
   { label: '101 가이드', free: '포함됨', go: '포함됨', plus: '포함됨' },
@@ -259,7 +260,7 @@ export function KoreanPricingPage() {
             </div>
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
               <p className="text-white font-bold mb-3 uppercase tracking-tighter italic text-indigo-400">Go와 Free의 가장 큰 차이점은 무엇인가요?</p>
-              <p className="text-slate-400 text-sm leading-relaxed">Free는 규칙 기반이며 하루 3회 체크가 가능합니다. Go는 추론 기반이며 하루 10회 체크가 가능합니다. Go는 DeepSeek 논리 레이어를 활성화하여 더 깊은 전술적 서사, 전 기능 실시간 알림, 그리고 주요 가격대 분석을 제공합니다.</p>
+              <p className="text-slate-400 text-sm leading-relaxed">Free는 규칙 기반이며 하루 3회 체크가 가능합니다. Go는 추론 기반이며 하루 10회 체크가 가능합니다. Go는 DeepSeek 논리 레이어와 유료 장중 구조 레이더를 활성화하여 더 깊은 전술적 서사와 주요 가격대 알림을 제공합니다.</p>
             </div>
             <div className="glass-card p-8 border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.02] to-transparent">
               <p className="text-white font-bold mb-3 uppercase tracking-tighter italic text-indigo-400">&quot;Plus&quot;는 무엇인가요?</p>

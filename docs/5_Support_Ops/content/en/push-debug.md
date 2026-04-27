@@ -37,7 +37,7 @@ If you are not receiving notifications, run a test push first.
 - Verify network stability and reconnect
 - Reopen app and retry once
 
-If test push succeeds but real alerts still fail, review category toggles in User Center.
+If test push succeeds but real alerts still fail, review category toggles in User Center. Session Structure Radar is available only on paid tiers, so Free accounts will not receive that category even when basic push works.
 
 ---
 *ZISO AI: AI does the research. You keep the decision.*

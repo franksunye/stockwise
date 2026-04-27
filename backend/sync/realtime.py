@@ -78,7 +78,7 @@ def sync_spot_prices(
 
     # Lazy Import IntradayMonitor to avoid circular deps
     try:
-        from sync.intraday_monitor import IntradayMonitor
+        from backend.sync.intraday_monitor import IntradayMonitor
         monitor = IntradayMonitor()
         monitor.load_rules() # Ensure rules are loaded
     except ImportError:

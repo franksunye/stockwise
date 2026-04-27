@@ -10,9 +10,10 @@ const getDefaultSettings = () => ({
     morning_call: { enabled: true, priority: 'medium' },
     validation_glory: { enabled: true, priority: 'medium' },
     prediction_updated: { enabled: true, priority: 'low' },
-    daily_brief: { enabled: true, priority: 'low' },
+    daily_brief: { enabled: false, priority: 'low' },
     price_update: { enabled: false, priority: 'low' },  // 实时价格更新，默认关闭避免打扰
-    market_almanac: { enabled: true, priority: 'medium' }, // 投资黄历
+    market_almanac: { enabled: false, priority: 'medium' }, // 投资黄历
+    ai_radar_alert: { enabled: true, priority: 'high' }, // 盘中结构雷达
   },
 });
 

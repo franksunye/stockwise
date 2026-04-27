@@ -274,6 +274,111 @@ class TestNotificationService(unittest.TestCase):
         mock_push.assert_not_called()
         mock_log.assert_not_called()
 
+    def test_ai_radar_alert_preference_mapping(self):
+        """盘中结构雷达 should follow its own ai_radar_alert preference key."""
+        settings = {
+            "enabled": True,
+            "types": {
+                "ai_radar_alert": {"enabled": False},
+                "price_update": {"enabled": True},
+            },
+        }
+        cursor = self.mock_conn.cursor()
+        cursor.fetchone.return_value = (json.dumps(settings),)
+
+        self.assertFalse(self.manager._check_user_preference("user1", "ai_radar_alert"))
+        self.assertTrue(self.manager._check_user_preference("user1", "price_update"))
+
+    def test_radar_cooldown_uses_notification_logs_for_same_day_symbol(self):
+        """Existing ai_radar_alert log for the same user/symbol/day should suppress duplicates."""
+        cursor = self.mock_conn.cursor.return_value
+        cursor.fetchall.return_value = [(json.dumps(["700.HK"]),)]
+
+        self.assertTrue(self.manager._has_radar_alert_cooldown("user1", "700.HK"))
+        self.assertFalse(self.manager._has_radar_alert_cooldown("user1", "9988.HK"))
+
+    def test_broadcast_ai_radar_blocks_free_users(self):
+        """Free users should not receive paid-only ai_radar_alert broadcasts."""
+        cursor = self.mock_conn.cursor.return_value
+        cursor.fetchall.return_value = [("user_free",)]
+        manager = NotificationManager(conn=self.mock_conn, dry_run=False)
+
+        with patch('notification_service.get_connection', return_value=self.mock_conn), \
+             patch.object(manager, '_has_push_subscription', return_value=True), \
+             patch.object(manager, '_get_user_profile', return_value={"tier": "free", "locale": "cn"}), \
+             patch.object(manager, '_check_user_preference', return_value=True), \
+             patch('notification_service.send_push_notification') as mock_push:
+            manager.broadcast_price_alert("700.HK", "ai_radar_alert", {
+                "stock_names": "700.HK",
+                "current_price": "400.00",
+                "resonance_type": "逻辑共振",
+                "strategy_tip": "突破关键压力位",
+                "url": "/dashboard?symbol=700.HK",
+            }, tag="ai_radar_alert")
+
+        mock_push.assert_not_called()
+
+    def test_advanced_notification_tiers_are_explicitly_paid(self):
+        """go/plus/pro/alpha are paid tiers for advanced alerts; free or unknown tiers are blocked."""
+        manager = NotificationManager(conn=self.mock_conn, dry_run=False)
+
+        for tier in ("go", "plus", "pro", "alpha", "premium"):
+            self.assertFalse(
+                manager._is_advanced_notification_blocked("user1", "ai_radar_alert", tier=tier),
+                f"{tier} should receive paid radar alerts",
+            )
+
+        for tier in ("free", "trial", "", None):
+            self.assertTrue(
+                manager._is_advanced_notification_blocked("user1", "ai_radar_alert", tier=tier),
+                f"{tier} should not receive paid radar alerts",
+            )
+
+    def test_broadcast_ai_radar_respects_daily_cooldown(self):
+        """Pro users should not receive duplicate ai_radar_alert when log cooldown is active."""
+        cursor = self.mock_conn.cursor.return_value
+        cursor.fetchall.return_value = [("user_pro",)]
+        manager = NotificationManager(conn=self.mock_conn, dry_run=False)
+
+        with patch('notification_service.get_connection', return_value=self.mock_conn), \
+             patch.object(manager, '_has_push_subscription', return_value=True), \
+             patch.object(manager, '_get_user_profile', return_value={"tier": "pro", "locale": "cn"}), \
+             patch.object(manager, '_check_user_preference', return_value=True), \
+             patch.object(manager, '_has_radar_alert_cooldown', return_value=True), \
+             patch('notification_service.send_push_notification') as mock_push:
+            manager.broadcast_price_alert("700.HK", "ai_radar_alert", {
+                "stock_names": "700.HK",
+                "current_price": "400.00",
+                "resonance_type": "逻辑共振",
+                "strategy_tip": "突破关键压力位",
+                "url": "/dashboard?symbol=700.HK",
+            }, tag="ai_radar_alert")
+
+        mock_push.assert_not_called()
+
+    def test_broadcast_price_update_not_blocked_by_advanced_guard(self):
+        """Regular price_update should remain available to free users when enabled."""
+        cursor = self.mock_conn.cursor.return_value
+        cursor.fetchall.return_value = [("user_free",)]
+        manager = NotificationManager(conn=self.mock_conn, dry_run=False)
+
+        with patch('notification_service.get_connection', return_value=self.mock_conn), \
+             patch.object(manager, '_has_push_subscription', return_value=True), \
+             patch.object(manager, '_get_user_profile', return_value={"tier": "free", "locale": "cn"}), \
+             patch.object(manager, '_check_user_preference', return_value=True), \
+             patch('notification_service.send_push_notification', return_value=True) as mock_push:
+            manager.broadcast_price_alert("700.HK", "price_update", {
+                "stock_name": "腾讯控股",
+                "symbol": "700.HK",
+                "emoji": "📈",
+                "change_pct": "+1.20",
+                "price": 400.0,
+                "volume_formatted": "1.2M",
+                "url": "/dashboard/stock/700.HK",
+            }, tag="price_update")
+
+        mock_push.assert_called_once()
+
     def test_send_notification_should_append_tracking_id_before_logging(self):
         """Successful sends should append nid to URL before logging."""
         manager = NotificationManager(conn=self.mock_conn, dry_run=False)

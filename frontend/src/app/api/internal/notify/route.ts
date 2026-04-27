@@ -15,6 +15,7 @@ const PREF_KEY_MAP: Record<string, string> = {
     signal_flip_batch: 'signal_flip',
     almanac_preview: 'market_almanac',
     almanac_ritual: 'market_almanac',
+    ai_radar_alert: 'ai_radar_alert',
     prediction_ready: 'prediction_updated',  // Legacy tag compat
 };
 

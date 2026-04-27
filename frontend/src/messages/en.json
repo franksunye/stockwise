@@ -424,7 +424,7 @@
     "go": {
       "name": "GO",
       "period": "{price} / ANNUALLY",
-      "description": "DeepSeek engine access, 10 symbol monitoring, and unrestricted real-time telemetry.",
+      "description": "DeepSeek engine access, 10 symbol monitoring, and paid Session Structure Radar.",
       "cta": "SUBSCRIBE CORE"
     },
     "plus": {
@@ -443,7 +443,8 @@
       "insights": "{count} Watchlist Stocks (incl. Insights/day)",
       "model": "Service Model: {model}",
       "notifications_basic": "Basic System Notifications",
-      "notifications_full": "Full Real-time Notifications",
+      "notifications_full": "Paid Real-time Notifications",
+      "structure_radar": "Session Structure Radar (paid tiers)",
       "academy": "ZISO Academy (101/Masters)",
       "badge_go": "Go Identity Badge",
       "badge_plus": "Plus Identity Badge"
@@ -465,6 +466,7 @@
       "sharing": "REPORT DISTRIBUTION",
       "market": "Market Coverage (US / HK / CN)",
       "realtime": "Real-time Frequency",
+      "structureRadar": "Session Structure Radar",
       "categories": "Notification Categories",
       "academy101": "ZISO 101 Course",
       "masterLogics": "Master Logic Library",
@@ -622,7 +624,7 @@
       "trial": "{days}-Day GO Access Activated",
       "activeTitle": "{days}-Day GO Access Active",
       "workspaceTitle": "Your dashboard is ready",
-      "trialDesc": "Your workspace now includes up to 10 symbols, DeepSeek analysis, and full real-time alerts.",
+      "trialDesc": "Your workspace now includes up to 10 symbols, DeepSeek analysis, and Session Structure Radar.",
       "activeDesc": "Your existing GO access stays active while you continue into the dashboard.",
       "workspaceDesc": "Your watchlist has been updated and your dashboard is ready to open.",
       "cta": "Open Dashboard"

@@ -30,7 +30,7 @@
 | 等级 | 当前发布定位 | 核心价值点 | 营销话术 (Copy Hook) |
 | :--- | :--- | :--- | :--- |
 | **Free** | 体验入口 | 3 只自选 / 基础 AI / 基础通知 | "Start with structure before you scale conviction." |
-| **Go** | **本次主卖层** | DeepSeek 推理、10 只自选、200 份月报、全量实时提醒 | "If you only track 10 names, make every review count." |
+| **Go** | **本次主卖层** | DeepSeek 推理、10 只自选、200 份月报、盘中结构雷达 | "If you only track 10 names, make every review count." |
 | **Plus** | 预热层 / Waiting List | 多模型交叉验证与更高置信度共识 | "Consensus reasoning, when you need a stricter second brain." |
 
 ### 1.5 发布口径约束（必须统一）
@@ -181,7 +181,7 @@ Q1: What makes ZISO AI different from generic AI stock tools?
 A1: Most generic AI tools summarize information. ZISO AI is built around a repeatable workflow: post-close review, structured actionable insights, key price levels, and watchlist alerts. The goal is not to generate more market noise, but to help investors review more clearly and act with better boundaries.
 
 Q2: What do I get in the Go tier?
-A2: Go is the current core paid tier. It unlocks deeper reasoning powered by DeepSeek, supports up to 10 watchlist names, includes full real-time alerts, and provides up to 200 monthly research reports. It is designed for users who want a more disciplined nightly review process.
+A2: Go is the current core paid tier. It unlocks deeper reasoning powered by DeepSeek, supports up to 10 watchlist names, includes Session Structure Radar alerts, and provides up to 200 monthly research reports. It is designed for users who want a more disciplined nightly review process.
 
 Q3: Is this investment advice?
 A3: No. ZISO AI is a research and alerting tool, not investment advice. It helps users structure their post-close workflow, understand key levels, and track important changes more efficiently, but the final decision always remains with the investor.
@@ -206,7 +206,7 @@ They need a cleaner review process.
 We built ZISO AI to help users:
 - review the market after the close
 - see key price levels
-- stay on top of their watchlist with real-time alerts
+- stay on top of their watchlist with paid Session Structure Radar alerts
 
 Go is live now.
 Plus is upcoming.
@@ -223,7 +223,7 @@ Like many of you, I'm tired of stock tools that create more noise than clarity. 
 
 We took a different approach. We built an AI assistant for the post-close workflow: review the day, summarize the setup, mark key levels, and define what matters tomorrow.
 
-Today, the core paid tier is Go. It gives users deeper reasoning powered by DeepSeek, 10 watchlist slots, full real-time alerts, and a tactical brief with support/resistance style anchors.
+Today, the core paid tier is Go. It gives users deeper reasoning powered by DeepSeek, 10 watchlist slots, Session Structure Radar alerts, and a tactical brief with support/resistance style anchors.
 
 We call the product style “Silent Math.” No hype, no “99% accuracy” claims, and no pretending AI should replace judgment.
 
