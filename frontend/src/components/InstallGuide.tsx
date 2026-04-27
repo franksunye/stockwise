@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Download, Share, ExternalLink, Smartphone, Monitor } from 'lucide-react';
+import { X, Download, Share, ExternalLink, BellRing, Monitor } from 'lucide-react';
 import { useInstallPrompt } from '@/hooks/useInstallPrompt';
 import { useT } from '@/context/LocaleContext';
 import type { MessageKey } from '@/lib/i18n';
@@ -120,8 +120,8 @@ function IOSSafariGuide({ onDismiss }: { onDismiss: () => void }) {
   return (
     <GuideCard onDismiss={onDismiss} closeLabel={t('closeAriaLabel')}>
       <div className="flex items-start gap-3">
-        <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0">
-          <Smartphone className="w-5 h-5 text-blue-400" />
+        <div className="w-10 h-10 rounded-xl bg-blue-500/15 border border-blue-400/35 flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(59,130,246,0.16)]">
+          <BellRing className="w-5 h-5 text-blue-300" />
         </div>
         <div className="flex-1 text-left">
           <h4 className="text-sm font-black text-white mb-1">{t('iosTitle')}</h4>
@@ -130,6 +130,7 @@ function IOSSafariGuide({ onDismiss }: { onDismiss: () => void }) {
           </p>
         </div>
       </div>
+      <InstallAlert>{t('alertHint')}</InstallAlert>
       <div className="mt-4 flex items-center gap-3">
         <Step number={1}>
           {t('iosStep1')} <Share className="inline w-3.5 h-3.5 text-blue-400 -mt-0.5" />
@@ -157,8 +158,8 @@ function AndroidNativeGuide({
   return (
     <GuideCard onDismiss={onDismiss} closeLabel={t('closeAriaLabel')}>
       <div className="flex items-start gap-3">
-        <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shrink-0">
-          <Download className="w-5 h-5 text-indigo-400" />
+        <div className="w-10 h-10 rounded-xl bg-indigo-500/15 border border-indigo-400/35 flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(99,102,241,0.16)]">
+          <BellRing className="w-5 h-5 text-indigo-300" />
         </div>
         <div className="flex-1 text-left">
           <h4 className="text-sm font-black text-white mb-1">{t('androidTitle')}</h4>
@@ -167,6 +168,7 @@ function AndroidNativeGuide({
           </p>
         </div>
       </div>
+      <InstallAlert>{t('alertHint')}</InstallAlert>
       <button
         onClick={onInstall}
         disabled={!canPrompt}
@@ -232,7 +234,7 @@ function AndroidManualGuide({
   return (
     <GuideCard onDismiss={onDismiss} closeLabel={t('closeAriaLabel')}>
       <div className="flex items-start gap-3">
-        <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0">
+        <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-400/35 flex items-center justify-center shrink-0">
           <Monitor className="w-5 h-5 text-amber-400" />
         </div>
         <div className="flex-1 text-left">
@@ -242,6 +244,7 @@ function AndroidManualGuide({
           </p>
         </div>
       </div>
+      <InstallAlert tone="amber">{t('alertHint')}</InstallAlert>
       <div className="mt-3 space-y-2 text-left">
         {getInstructions()}
       </div>
@@ -265,6 +268,25 @@ function Step({ number, children }: { number: number; children: React.ReactNode 
         {number}
       </span>
       <span className="text-xs text-slate-400 leading-relaxed">{children}</span>
+    </div>
+  );
+}
+
+function InstallAlert({
+  children,
+  tone = 'blue',
+}: {
+  children: React.ReactNode;
+  tone?: 'blue' | 'amber';
+}) {
+  const toneClass =
+    tone === 'amber'
+      ? 'bg-amber-500/10 border-amber-400/20 text-amber-100'
+      : 'bg-blue-500/10 border-blue-400/20 text-blue-100';
+
+  return (
+    <div className={`mt-3 rounded-xl border px-3 py-2 text-left ${toneClass}`}>
+      <p className="text-[11px] font-bold leading-snug">{children}</p>
     </div>
   );
 }

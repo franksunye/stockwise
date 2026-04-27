@@ -6,7 +6,7 @@ import {
   Check, RefreshCw, Key, Bell, ChevronDown, ArrowLeftRight, Sun, 
   Trophy, ChevronRight, Mail, HelpCircle, BookOpen, Info, Activity
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { restoreUserIdentity } from '@/lib/user';
 import { MEMBERSHIP_CONFIG } from '@/lib/membership-config';
 import { getRiskBandLabel } from '@/lib/investment-mode';
@@ -26,6 +26,7 @@ import {
   writeProfileCache,
 } from '@/lib/dashboard-bootstrap';
 import { ONBOARDING_REENTRY_KEY, type OnboardingFlowVariant, writeOnboardingFlowVariant } from '@/lib/onboarding-flow';
+import { isStandalone } from '@/lib/device-utils';
 import pkg from '../../package.json';
 
 interface Props {
@@ -117,6 +118,7 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
   const [showPricing, setShowPricing] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
   const [showLearn, setShowLearn] = useState(false);
+  const [isAppMode, setIsAppMode] = useState(false);
 
   // Fix: Separate visibility state from loading state
   const [showEmailForm, setShowEmailForm] = useState(false);
@@ -140,6 +142,11 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
     testingRemotePush,
     updateNotificationSetting,
   } = useUserCenterData({ isOpen, refreshProfile });
+
+  useEffect(() => {
+    if (!isOpen) return;
+    setIsAppMode(isStandalone());
+  }, [isOpen]);
 
   const handleRedeem = async () => {
     if (!redeemCode || redeeming) return;
@@ -470,6 +477,13 @@ export function UserCenterDrawer({ isOpen, onClose }: Props) {
                                 }} disabled={isSubscribing} className="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg transition-all active:scale-95 disabled:opacity-50 uppercase">{isSubscribing ? '...' : t('push.enable')}</button>
                             )}
                         </div>
+                        {!isAppMode && (
+                          <div className="mx-5 mb-3 px-3 py-2 rounded-lg bg-blue-500/10 border border-blue-400/20 text-left">
+                            <p className="text-[10px] text-blue-100/90 font-bold">
+                              {t('push.installNotice')}
+                            </p>
+                          </div>
+                        )}
                         {isSubscribed && (
                           <div className="bg-white/[0.02] border-t border-white/5 px-5 py-2">
                             {showAndroidPushWarning && (
