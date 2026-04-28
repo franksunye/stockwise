@@ -42,6 +42,51 @@ def _should_inject_layer1_prompt_context() -> bool:
     return _is_truthy_env("LAYER1_PROMPT_INJECTION", "0")
 
 
+def _use_prediction_e2e_fixture() -> bool:
+    return _is_truthy_env("PREDICTION_E2E_FIXTURE", "0")
+
+
+def _build_prediction_e2e_fixture_context(symbol: str, analysis_date: str, locale: str = "cn") -> Dict[str, Any]:
+    is_en = str(locale or "").strip().lower() == "en"
+    market_context = (
+        "Local E2E fixture: neutral market context; external providers skipped."
+        if is_en
+        else "本地 E2E fixture：中性市场环境，已跳过外部数据源。"
+    )
+    return {
+        "market_context": market_context,
+        "price_altitude": {
+            "status": "fixture",
+            "source": "local:e2e",
+            "symbol": symbol,
+            "as_of": analysis_date,
+        },
+        "macro_context": {
+            "status": "fixture",
+            "source": "local:e2e",
+            "gdp": "N/A",
+            "cpi": "N/A",
+            "nasdaq": "N/A",
+            "contract_version": "macro.e2e.v1",
+        },
+        "market_flow_context": {
+            "status": "fixture",
+            "source": "local:e2e",
+            "northbound": "N/A",
+            "breadth": "neutral",
+            "contract_version": "market_flow.e2e.v1",
+        },
+        "stock_flow_context": {
+            "status": "fixture",
+            "source": "local:e2e",
+            "symbol": symbol,
+            "as_of": analysis_date,
+            "main_net_inflow": 0,
+            "contract_version": "stock_flow.e2e.v1",
+        },
+    }
+
+
 def _is_period_history_sane(rows: List[Dict[str, Any]], period: str) -> bool:
     """
     Detect daily-like leakage in weekly/monthly history.
@@ -181,6 +226,7 @@ async def fetch_full_analysis_context(symbol: str, as_of_date: str = None, ctx: 
     columns = [description[0] for description in cursor.description]
     row = cursor.fetchone()
     if not row:
+        conn.close()
         return {"error": f"未找到股票 {symbol} 的行情数据" + (f" (日期: {as_of_date})" if as_of_date else "")}
 
     latest_data = dict(zip(columns, row))
@@ -251,12 +297,17 @@ async def fetch_full_analysis_context(symbol: str, as_of_date: str = None, ctx: 
             if derived_monthly:
                 monthly_history = derived_monthly[:12]
 
+    conn.close()
+
     # 4. Global Market Context (Via ContextService)
-    from backend.engine.context_service import ContextService
-    ctx_service = ContextService()
-    
-    # Use comprehensive context fetcher
-    comprehensive_ctx = await ctx_service.get_comprehensive_context(symbol, analysis_date, stock_name, locale=locale)
+    # Local E2E uses deterministic fixtures to avoid AkShare/network calls while keeping
+    # the real DB-backed price/history path intact.
+    if _use_prediction_e2e_fixture():
+        comprehensive_ctx = _build_prediction_e2e_fixture_context(symbol, analysis_date, locale=locale)
+    else:
+        from backend.engine.context_service import ContextService
+        ctx_service = ContextService()
+        comprehensive_ctx = await ctx_service.get_comprehensive_context(symbol, analysis_date, stock_name, locale=locale)
     
     market_context = comprehensive_ctx.get("market_context", "数据同步中")
     altitude_context = comprehensive_ctx.get("price_altitude", {})

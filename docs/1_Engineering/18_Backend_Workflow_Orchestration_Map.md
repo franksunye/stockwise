@@ -2,6 +2,8 @@
 
 更新时间：2026-04-06
 
+> 2026-04-28 收口说明：本文档只定义后台 workflow 的时段、职责、依赖和阻塞级别。AI prediction pipeline 的分片、队列化、context 预物化和 tier SLA 统一见 [47_Prediction_Pipeline_Scaling_RFC_20260428.md](./47_Prediction_Pipeline_Scaling_RFC_20260428.md)。
+
 ## 1. 目标
 
 为当前 知守 AI (ZISO AI) 后台任务建立统一编排口径，解决以下问题：
@@ -518,9 +520,9 @@ Production 内部分为两组：
 | `data_sync_realtime.yml` | Intraday | ingestion | Cloudflare Worker (15min Grid) | 策略时段 (15min/次) | soft_blocking | 覆盖全球市场 (CN/HK/US) 实时行情与雷达监控 |
 | `data_sync_single.yml` | Manual / Backfill | ingestion | Manual / API Dispatch | 手工触发 | manual_only | 默认只做前端最小可展示补数；周期补数为可选扩展 |
 | `verify_predictions.yml` | Post-Close | production_validation | Workflow Call / Manual | `data_sync_*` | soft_blocking | 用户可见验证结果，属于生产口径 |
-| `ai_analyze_cn.yml` | Post-Close | analysis | Workflow Call / Manual | `data_sync_cn` | soft_blocking | 纯分析 workflow；内部仍会触发 `mode_pipeline` |
-| `ai_analyze_hk.yml` | Post-Close | analysis | Workflow Call / Manual | `data_sync_hk` | soft_blocking | 纯分析 workflow；与 CN 保持相同边界 |
-| `ai_analyze_us.yml` | Post-Close (US) | analysis | Workflow Call / Manual | `data_sync_us` | soft_blocking | 美股纯分析 workflow；与 CN/HK 同口径 |
+| `ai_analyze_cn.yml` | Post-Close | analysis | Workflow Call / Manual | `data_sync_cn` | soft_blocking | 纯分析 workflow；内部仍会触发 `mode_pipeline`；扩容细节见工程 RFC 47 |
+| `ai_analyze_hk.yml` | Post-Close | analysis | Workflow Call / Manual | `data_sync_hk` | soft_blocking | 纯分析 workflow；与 CN 保持相同边界；扩容细节见工程 RFC 47 |
+| `ai_analyze_us.yml` | Post-Close (US) | analysis | Workflow Call / Manual | `data_sync_us` | soft_blocking | 美股纯分析 workflow；与 CN/HK 同口径；扩容细节见工程 RFC 47 |
 | `mode_pipeline` | Post-Close | analysis | Internal Program Call | `ai_analyze_*` 内部触发 | soft_blocking | 正式 Investment Mode 产数 |
 
 #### 6.1.2 Production Content
@@ -670,7 +672,7 @@ Production 内部分为两组：
 | 09:30-16:00 | Production Core | `data_sync_realtime.yml` (HK) | 由 Cloudflare Worker 精确触发，直接服务前端 |
 | 16:00 | Production Core | `data_sync_cn.yml` | A 股盘后正式同步 |
 | 16:10 | Production Core | `verify_predictions.yml` | 历史验证，更新用户可见验证结果 |
-| 16:10 | Production Core | `ai_analyze_cn.yml` | 只做分析与 mode pipeline |
+| 16:10 | Production Core | `ai_analyze_cn.yml` | 只做分析与 mode pipeline；预测生产链扩容见 RFC 47 |
 | 16:12 | Production Content | `daily_almanac_cn` | 只做 T+1 黄历，依赖同步，不依赖整批分析 |
 | 16:30 | Production Core | `data_sync_hk.yml` / `ai_analyze_hk.yml` | 港股盘后正式链 |
 | 17:30 | Ops Governance / Production Content | `daily_validation_check.yml` | 巡检与摘要（`daily_brief_push` 已停用） |

@@ -66,6 +66,11 @@ concurrency:
 jobs:
   analyze-hk:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard_index: [0, 1]
+    name: analyze-hk-shard-${{ matrix.shard_index }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -143,5 +148,7 @@ jobs:
           fi
           LOCALE_ARGS=(--locale "${LOCALE_VALUE}")
 
-          echo "🚀 Executing: python -u backend/main.py --analyze --market HK ${MODEL_ARGS[*]} ${FORCE_ARGS[*]} ${DATE_ARGS[*]} ${LOCALE_ARGS[*]}"
-          python -u backend/main.py --analyze --market HK "${MODEL_ARGS[@]}" "${FORCE_ARGS[@]}" "${DATE_ARGS[@]}" "${LOCALE_ARGS[@]}"
+          SHARD_ARGS=(--shard-index "${{ matrix.shard_index }}" --shard-total 2 --max-symbol-concurrency 1)
+
+          echo "🚀 Executing: python -u backend/main.py --analyze --market HK ${MODEL_ARGS[*]} ${FORCE_ARGS[*]} ${DATE_ARGS[*]} ${LOCALE_ARGS[*]} ${SHARD_ARGS[*]}"
+          python -u backend/main.py --analyze --market HK "${MODEL_ARGS[@]}" "${FORCE_ARGS[@]}" "${DATE_ARGS[@]}" "${LOCALE_ARGS[@]}" "${SHARD_ARGS[@]}"

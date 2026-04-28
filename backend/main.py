@@ -76,6 +76,9 @@ if __name__ == "__main__":
     parser.add_argument('--force', action='store_true', help='强制重新分析')
     parser.add_argument('--full-periods', action='store_true', help='强制同步周线和月线')
     parser.add_argument('--skip-mode-pipeline', action='store_true', help='跳过 analyze 后的 mode 数据管线')
+    parser.add_argument('--shard-index', type=int, default=0, help='AI 分析分片索引（0-based）')
+    parser.add_argument('--shard-total', type=int, default=1, help='AI 分析分片总数')
+    parser.add_argument('--max-symbol-concurrency', type=int, default=1, help='AI 分析单 shard 内股票并发数')
 
     args = parser.parse_args()
     init_db()
@@ -170,7 +173,9 @@ if __name__ == "__main__":
                 auto_fill=args.auto_fill,
                 model_filter=args.model,
                 force=args.force,
-                locale=args.locale
+                locale=args.locale,
+                shard_index=args.shard_index,
+                shard_total=args.shard_total,
             )
             if stats:
                 job.set_stats(**stats)
@@ -185,8 +190,24 @@ if __name__ == "__main__":
         elif args.market == "US":
             rerun_workflow = "ai_analyze_us.yml"
         with JobGuard(f"AI Analysis ({market_dim})", task_type="prediction", rerun_workflow=rerun_workflow) as job:
-            job.set_dimensions(market=market_dim, model=args.model, locale=args.locale)
-            stats = run_ai_analysis(symbol=args.symbol, market_filter=args.market, force=args.force, model_filter=args.model, locale=args.locale)
+            job.set_dimensions(
+                market=market_dim,
+                model=args.model,
+                locale=args.locale,
+                shard_index=args.shard_index,
+                shard_total=args.shard_total,
+                max_symbol_concurrency=args.max_symbol_concurrency,
+            )
+            stats = run_ai_analysis(
+                symbol=args.symbol,
+                market_filter=args.market,
+                force=args.force,
+                model_filter=args.model,
+                locale=args.locale,
+                shard_index=args.shard_index,
+                shard_total=args.shard_total,
+                max_symbol_concurrency=args.max_symbol_concurrency,
+            )
             if stats:
                 job.set_stats(**stats)
             if not args.skip_mode_pipeline:

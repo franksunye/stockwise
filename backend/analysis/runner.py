@@ -3,6 +3,7 @@ AI 分析主入口模块
 """
 import time
 import os
+import asyncio
 from datetime import datetime
 
 import pandas as pd
@@ -16,6 +17,7 @@ from logger import logger
 
 from trading_calendar import get_market_from_symbol, is_market_closed
 from utils import get_market
+from backend.analysis.sharding import normalize_shard_args, select_shard
 
 
 def _normalize_locale(value: str) -> str:
@@ -95,7 +97,128 @@ def _symbol_effective_tiers(conn, symbol: str) -> list[str]:
     return tiers or ["free"]
 
 
-def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool = False, model_filter: str = None, locale: str = 'auto'):
+async def _run_stock_locale_analysis(
+    *,
+    stock: str,
+    target_locale: str,
+    market_filter: str = None,
+    force: bool = False,
+    model_filter: str = None,
+    now_date: datetime,
+    notif_manager=None,
+    stock_subscribers: dict | None = None,
+    batch_symbol: str | None = None,
+) -> dict:
+    try:
+        if not batch_symbol and not force:
+            market = get_market_from_symbol(stock)
+            if is_market_closed(now_date, market):
+                logger.debug(f"💤 {stock}: {market} 市场休市，跳过")
+                return {"status": "skipped_closed", "stock": stock, "locale": target_locale}
+
+        conn = get_connection()
+        try:
+            cursor = conn.cursor()
+            query = "SELECT * FROM daily_prices WHERE symbol = ? ORDER BY date DESC LIMIT 1"
+            df = pd.read_sql_query(query, conn, params=(stock,))
+
+            if df.empty:
+                logger.warning(f"⚠️ {stock}: 无行情数据，跳过")
+                return {"status": "no_data", "stock": stock, "locale": target_locale}
+
+            today_data = df.iloc[0]
+            today_str = today_data['date']
+
+            if not force and model_filter and model_filter != 'all':
+                cursor.execute(
+                    """
+                    SELECT 1
+                    FROM ai_predictions_v2
+                    WHERE symbol = ? AND date = ? AND model_id = ? AND COALESCE(content_locale, 'cn') = ?
+                    LIMIT 1
+                    """,
+                    (stock, today_str, model_filter, target_locale)
+                )
+                if cursor.fetchone():
+                    logger.info(f"⏩ {stock}: {today_str} ({model_filter}/{target_locale}) 预测已存在，跳过")
+                    return {
+                        "status": "skipped_existing",
+                        "stock": stock,
+                        "locale": target_locale,
+                        "success": 1,
+                        "ai": 0,
+                        "rule": 0,
+                    }
+
+            effective_tiers = _symbol_effective_tiers(conn, stock)
+        finally:
+            conn.close()
+
+        logger.info(f">>> 分析 {stock} ({today_str}, locale={target_locale})")
+
+        from backend.engine.runner import PredictionRunner
+
+        runner = PredictionRunner(
+            model_filter=model_filter,
+            force=force,
+            effective_tiers=effective_tiers,
+        )
+        analysis_result = await runner.run_analysis(stock, today_str, locale=target_locale)
+
+        if not analysis_result:
+            logger.warning(f"⚠️ {stock}: Analysis failed or returned no results (locale={target_locale}).")
+            return {"status": "failed", "stock": stock, "locale": target_locale}
+
+        primary_result = analysis_result.get('primary')
+        all_models = analysis_result.get('models', [])
+
+        if notif_manager and isinstance(primary_result, dict) and target_locale == "cn":
+            subscribers = (stock_subscribers or {}).get(stock, set())
+            for uid in subscribers:
+                notif_manager.check_signal_flip(
+                    uid, stock,
+                    primary_result.get('signal'),
+                    primary_result.get('confidence')
+                )
+                notif_manager.queue_notification(
+                    uid,
+                    "prediction_updated",
+                    {"symbol": stock, "market": market_filter or get_market(stock)}
+                )
+
+        return {
+            "status": "success",
+            "stock": stock,
+            "locale": target_locale,
+            "success": 1,
+            "ai": 1 if any(m != 'rule-engine' for m in all_models) else 0,
+            "rule": 1 if 'rule-engine' in all_models else 0,
+        }
+    except Exception as e:
+        logger.error(f"❌ {stock} AI Engine Failed (locale={target_locale}): {e}")
+        return {"status": "exception", "stock": stock, "locale": target_locale}
+
+
+async def _run_analysis_jobs(jobs: list[tuple[str, str]], max_symbol_concurrency: int, **kwargs) -> list[dict]:
+    semaphore = asyncio.Semaphore(max(1, int(max_symbol_concurrency or 1)))
+
+    async def _guarded(stock: str, target_locale: str) -> dict:
+        async with semaphore:
+            return await _run_stock_locale_analysis(stock=stock, target_locale=target_locale, **kwargs)
+
+    return await asyncio.gather(*[_guarded(stock, target_locale) for stock, target_locale in jobs])
+
+
+def run_ai_analysis(
+    symbol: str = None,
+    market_filter: str = None,
+    force: bool = False,
+    model_filter: str = None,
+    locale: str = 'auto',
+    shard_index: int = 0,
+    shard_total: int = 1,
+    max_symbol_concurrency: int = 1,
+):
     """独立运行 AI 预测任务
     
     Args:
@@ -121,11 +244,34 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool =
         else:
             targets = pool
     
-    logger.info(f"🧠 开始执行 AI 分析任务，共 {len(targets)} 只股票...")
+    shard_index, shard_total = normalize_shard_args(shard_index, shard_total)
+    max_symbol_concurrency = max(1, int(max_symbol_concurrency or 1))
+    total_before_shard = len(targets)
+    targets = select_shard(targets, shard_index=shard_index, shard_total=shard_total)
+    if not targets:
+        logger.warning(f"⚠️ 分片 {shard_index}/{shard_total} 无目标股票")
+        return {
+            "total": 0,
+            "success": 0,
+            "ai_models": 0,
+            "rule_engine": 0,
+            "failed": 0,
+            "duration": 0,
+            "shard_index": shard_index,
+            "shard_total": shard_total,
+            "shard_targets": 0,
+            "total_before_shard": total_before_shard,
+            "locale_jobs": 0,
+            "total_jobs": 0,
+            "max_symbol_concurrency": max_symbol_concurrency,
+        }
+
+    logger.info(
+        f"🧠 开始执行 AI 分析任务，共 {len(targets)} 只股票 "
+        f"(shard {shard_index}/{shard_total}, total_before_shard={total_before_shard}, "
+        f"max_symbol_concurrency={max_symbol_concurrency})..."
+    )
     start_time = time.time()
-    success_count = 0
-    ai_count = 0
-    rule_count = 0
     
     # [NEW] Initialize Smart Notification Manager if enabled
     from backend.config import ENABLE_SMART_NOTIFICATIONS
@@ -186,115 +332,45 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool =
                 stock_subscribers = {} # Fallback: No notifications will send
     
     conn = get_connection()
-    cursor = conn.cursor()
-    target_locale_map = _build_target_locale_map(conn, targets, effective_locale)
+    try:
+        target_locale_map = _build_target_locale_map(conn, targets, effective_locale)
+    finally:
+        conn.close()
     
     # 获取当前北京时间用于判断休市
     now_date = datetime.now(BEIJING_TZ)
+    jobs = [
+        (stock, target_locale)
+        for stock in targets
+        for target_locale in target_locale_map.get(stock, ["cn"])
+    ]
 
-    for stock in targets:
+    if os.name == 'nt':
         try:
-            # 1. 检查该股票所属市场是否休市 (Cost Saving)
-            # If running in batch mode (no symbol specified) without force flag, skip closed markets
-            if not symbol and not force:
-                market = get_market_from_symbol(stock)
-                # Only need to check individual stock market if we aren't filtering by a specific market 
-                # (if we filtered, the top-level check would have caught it)
-                # OR if the top-level check passed but strict per-stock checking is desired.
-                if is_market_closed(now_date, market):
-                    logger.debug(f"💤 {stock}: {market} 市场休市，跳过")
-                    continue
+            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+        except Exception:
+            pass
 
-            # 获取该股票最新的日线数据 (含指标)
-            query = "SELECT * FROM daily_prices WHERE symbol = ? ORDER BY date DESC LIMIT 1"
-            df = pd.read_sql_query(query, conn, params=(stock,))
-            
-            if df.empty:
-                logger.warning(f"⚠️ {stock}: 无行情数据，跳过")
-                continue
-                
-            today_data = df.iloc[0]
-            today_str = today_data['date']
-            
-            locales_for_stock = target_locale_map.get(stock, ["cn"])
-            for target_locale in locales_for_stock:
-                # --- Idempotency Check (per-locale) ---
-                if not force and model_filter and model_filter != 'all':
-                    cursor.execute(
-                        """
-                        SELECT 1
-                        FROM ai_predictions_v2
-                        WHERE symbol = ? AND date = ? AND model_id = ? AND COALESCE(content_locale, 'cn') = ?
-                        LIMIT 1
-                        """,
-                        (stock, today_str, model_filter, target_locale)
-                    )
-                    if cursor.fetchone():
-                        logger.info(f"⏩ {stock}: {today_str} ({model_filter}/{target_locale}) 预测已存在，跳过")
-                        success_count += 1
-                        continue
+    results = asyncio.run(
+        _run_analysis_jobs(
+            jobs,
+            max_symbol_concurrency=max_symbol_concurrency,
+            market_filter=market_filter,
+            force=force,
+            model_filter=model_filter,
+            now_date=now_date,
+            notif_manager=notif_manager,
+            stock_subscribers=stock_subscribers,
+            batch_symbol=symbol,
+        )
+    ) if jobs else []
 
-                logger.info(f">>> 分析 {stock} ({today_str}, locale={target_locale})")
-
-                # 生成预测 (New Multi-Model Engine)
-                # Use local import to avoid circular dependency issues if any
-                try:
-                    from backend.engine.runner import PredictionRunner
-                    import asyncio
-
-                    effective_tiers = _symbol_effective_tiers(conn, stock)
-                    runner = PredictionRunner(
-                        model_filter=model_filter,
-                        force=force,
-                        effective_tiers=effective_tiers,
-                    )
-
-                    # Run async in sync context
-                    if os.name == 'nt':
-                        try:
-                            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-                        except:
-                            pass
-
-                    analysis_result = asyncio.run(runner.run_analysis(stock, today_str, locale=target_locale))
-
-                    if analysis_result:
-                        # analysis_result is now a dict: {"primary": ..., "models": [...]}
-                        primary_result = analysis_result.get('primary')
-                        all_models = analysis_result.get('models', [])
-
-                        # Keep notification semantics stable; avoid duplicate fanout in auto-locale mode.
-                        if notif_manager and isinstance(primary_result, dict) and target_locale == "cn":
-                            subscribers = stock_subscribers.get(stock, set())
-                            for uid in subscribers:
-                                notif_manager.check_signal_flip(
-                                    uid, stock,
-                                    primary_result.get('signal'),
-                                    primary_result.get('confidence')
-                                )
-                                notif_manager.queue_notification(
-                                    uid,
-                                    "prediction_updated",
-                                    {"symbol": stock, "market": market_filter or get_market(stock)}
-                                )
-
-                        success_count += 1
-
-                        # Distinguish AI and Rule successes for reporting
-                        if any(m != 'rule-engine' for m in all_models):
-                            ai_count += 1
-                        if 'rule-engine' in all_models:
-                            rule_count += 1
-
-                    else:
-                        logger.warning(f"⚠️ {stock}: Analysis failed or returned no results (locale={target_locale}).")
-
-                except Exception as e:
-                    logger.error(f"❌ {stock} AI Engine Failed (locale={target_locale}): {e}")
-                    continue
-            
-        except Exception as e:
-            logger.error(f"❌ {stock} 分析失败: {e}")
+    success_count = sum(int(r.get("success", 0)) for r in results)
+    ai_count = sum(int(r.get("ai", 0)) for r in results)
+    rule_count = sum(int(r.get("rule", 0)) for r in results)
+    failed_count = sum(1 for r in results if r.get("status") in {"failed", "exception", "no_data"})
+    skipped_existing_count = sum(1 for r in results if r.get("status") == "skipped_existing")
+    skipped_closed_count = sum(1 for r in results if r.get("status") == "skipped_closed")
 
     # [NEW] Finalize Smart Notifications (Flush updates and send aggregated)
     if notif_manager:
@@ -309,8 +385,17 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool =
         "success": success_count,
         "ai_models": ai_count,
         "rule_engine": rule_count,
-        "failed": len(targets) - success_count,
-        "duration": duration
+        "failed": failed_count,
+        "duration": duration,
+        "shard_index": shard_index,
+        "shard_total": shard_total,
+        "shard_targets": len(targets),
+        "total_before_shard": total_before_shard,
+        "locale_jobs": len(jobs),
+        "total_jobs": len(jobs),
+        "skipped_existing": skipped_existing_count,
+        "skipped_closed": skipped_closed_count,
+        "max_symbol_concurrency": max_symbol_concurrency,
     }
 
     # Add Data Health Diagnostics to stats
@@ -335,7 +420,4 @@ def run_ai_analysis(symbol: str = None, market_filter: str = None, force: bool =
     except Exception as stat_e:
         logger.warning(f"Failed to gather diagnostics: {stat_e}")
 
-    # 最后关闭连接
-    conn.close()
-    
     return stats

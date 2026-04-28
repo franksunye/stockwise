@@ -66,23 +66,45 @@
 
 ### 4. Daily Pipeline 编排重构（技术架构 + 商业逻辑）（P1/P2）
 
+> 架构事实源：[`47_Prediction_Pipeline_Scaling_RFC_20260428.md`](./1_Engineering/47_Prediction_Pipeline_Scaling_RFC_20260428.md)。本节只保留未来 2-4 周可执行切片。
+
 #### 4.1 编排状态机统一（P1）
 - [ ] 定义统一任务状态：`success`、`skipped_existing`、`degraded`、`failed`，覆盖 `sync/analyze/backfill/mode`。
 - [ ] 将结果汇总粒度统一到 `date + market + symbol + model`，支持缺口可视化与重试定位。
 - [ ] 验收标准：任意一次 run 可在 1 个摘要视图中回答“哪些是真的失败、哪些是正常跳过”。
+
+#### 4.1A Phase 1：GitHub Actions 分片与并发止血（P1）
+- [ ] 为 `ai_analyze_*` 增加 `--shard-index` / `--shard-total` / `--max-symbol-concurrency`。
+- [ ] CN 先用保守 matrix 分片验证，不改变 `ai_predictions_v2` 写入语义。
+- [ ] 验收标准：单 shard 失败不影响其他 shard；CN 30+ 股票不慢于当前基线。
 
 #### 4.2 Analyze 与 Backfill 执行器收敛（P1）
 - [ ] 将 `ai_analyze_*` 与 `ai_backfill` 复用同一套执行策略（幂等、超时、重试、降级）。
 - [ ] 保留两个入口但统一策略层，避免同类问题在两个 workflow 重复修补。
 - [ ] 验收标准：同一输入条件下，Analyze 与 Backfill 的执行语义和日志分类一致。
 
+#### 4.2A Phase 2：`prediction_jobs` 队列化执行（P1/P2）
+- [ ] 新增 `prediction_jobs` 设计与迁移脚本，唯一键覆盖 `market + symbol + trade_date + model_id + content_locale`。
+- [ ] Daily Pipeline analyze 阶段先 enqueue，再由 worker claim/run/save。
+- [ ] 验收标准：中断后可从 `queued / retryable_failed` 恢复，且 rerun 不重复生成已存在预测。
+
+#### 4.2B Phase 3：Context 预物化与两层生产（P2）
+- [ ] 新增日级预测上下文预物化方案，先批量生成 Layer-1、价格摘要、市场上下文、资金流质量标记。
+- [ ] LLM worker 只读 context JSON，不在关键路径实时调用 AkShare 个股资金流。
+- [ ] 验收标准：1000 股票 rule-engine 可全量产出，LLM jobs 数量由候选策略控制。
+
 #### 4.3 商业策略层落地（P2）
 - [ ] 建立按用户层级/成本预算的模型执行策略（例如 Pro 主模型优先、失败降级规则、重试上限）。
 - [ ] 定义“用户可见降级语义”：当主模型缺失时，前端/通知明确标注降级来源与数据时效。
 - [ ] 验收标准：出现模型失败时，既不影响主流程出数，也不产生对用户不可解释的结果。
 
+#### 4.3A Phase 4：Tier SLA 与模型预算（P2）
+- [ ] 聚合 watcher demand：`free/go/plus/pro`、活跃用户、locale、持仓/自选优先级。
+- [ ] 定义 `tier -> model_policy -> budget -> priority`，并输出每日 token / 成本 / 成功率报表。
+- [ ] 验收标准：free/go/plus 的前端权益与后台生产策略一致，核心自选股在 SLA 内完成。
+
 #### 4.4 迁移与风险控制（P2）
-- [ ] 输出编排重构 RFC（现状、目标、状态机、分阶段迁移、回滚方案）。
+- [x] 输出编排重构 RFC（现状、目标、状态机、分阶段迁移、回滚方案）。
 - [ ] 采用分阶段灰度：先观测、再收敛执行器、最后切策略层。
 - [ ] 验收标准：迁移期间 `daily_pipeline_cn_main` 成功率不低于当前基线。
 

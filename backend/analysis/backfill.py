@@ -13,6 +13,7 @@ from engine.validator import validate_previous_prediction
 from trading_calendar import is_trading_day, get_market_from_symbol
 from logger import logger
 from utils import get_market
+from backend.analysis.sharding import normalize_shard_args, select_shard
 
 
 def _build_missing_predictions_query(symbol_count: int, model_filter: str = None):
@@ -93,7 +94,9 @@ def run_ai_analysis_backfill(
     auto_fill: bool = False,
     model_filter: str = None,
     force: bool = False,
-    locale: str = 'cn'
+    locale: str = 'cn',
+    shard_index: int = 0,
+    shard_total: int = 1,
 ):
     """
     AI 分析回填功能
@@ -121,6 +124,27 @@ def run_ai_analysis_backfill(
     if not targets:
         logger.warning("⚠️ 无目标股票")
         return
+
+    shard_index, shard_total = normalize_shard_args(shard_index, shard_total)
+    before_shard_count = len(targets)
+    targets = select_shard(targets, shard_index=shard_index, shard_total=shard_total)
+    if not targets:
+        logger.warning(f"⚠️ 分片 {shard_index}/{shard_total} 无目标股票")
+        return {
+            "success": 0,
+            "skipped_days": 0,
+            "period": date or f"{start_date or ''} ~ {end_date or ''}".strip(),
+            "duration": 0,
+            "shard_index": shard_index,
+            "shard_total": shard_total,
+            "shard_targets": 0,
+            "total_before_shard": before_shard_count,
+        }
+    if shard_total > 1:
+        logger.info(
+            f"🧩 Backfill shard {shard_index}/{shard_total}: "
+            f"{len(targets)}/{before_shard_count} stocks"
+        )
 
     conn = get_connection()
 
@@ -251,6 +275,10 @@ def run_ai_analysis_backfill(
         "skipped_days": total_skipped,
         "period": f"{target_dates[0]} ~ {target_dates[-1]}" if len(target_dates) > 1 else target_dates[0],
         "duration": duration,
+        "shard_index": shard_index,
+        "shard_total": shard_total,
+        "shard_targets": len(targets),
+        "total_before_shard": before_shard_count,
     }
 
 

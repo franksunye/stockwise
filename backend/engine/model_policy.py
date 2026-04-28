@@ -1,5 +1,6 @@
 from __future__ import annotations
 import json
+import os
 from typing import Any, Dict, Iterable, List, Set, Optional, Union
 
 from backend.logger import logger
@@ -48,6 +49,12 @@ def parse_model_policy(model_id: str, config_json_raw: str | None) -> Dict[str, 
         prediction_tiers = []
     normalized_prediction_tiers = [t for t in (normalize_tier(v) for v in prediction_tiers) if t in VALID_TIERS]
     normalized_prediction_tiers = list(dict.fromkeys(normalized_prediction_tiers))
+    if (
+        not normalized_prediction_tiers
+        and str(model_id or "").strip().lower() == "rule-engine"
+        and os.getenv("PREDICTION_E2E_FIXTURE", "0").strip().lower() in {"1", "true", "yes", "on"}
+    ):
+        normalized_prediction_tiers = ["free", "go", "plus", "pro", "alpha"]
 
     visibility_tiers = access.get("visibility_tiers")
     if not isinstance(visibility_tiers, list):

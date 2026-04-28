@@ -23,6 +23,10 @@ summary: "定义容量规划与扩容路线，是广播、流量与容量相关�
 > - `/api/stock/batch` 本轮采用**单路由公共化重构**，先在服务端内部拆成 `buildStockFacts(...)` 与 `projectFactsForTier(...)`，不立即暴露 public/private 双路由。
 > - 当前国际版 v1 的 `batch` 已明确定位为 `tier-gated public stock facts`；`free/go/plus` 继续以 `signal` 作为主显示语义，`mode` 与 `pro/alpha` 视图仍后置。
 > - 新增轻量 `POST /api/user/bootstrap`，用于 Dashboard 入口私有握手（session/profile/watchlist metadata/onboarding gate），但**不替代**本地 snapshot 秒开链路。
+>
+> 2026-04-28 收口更新（Prediction Pipeline Scaling）：
+> - 本文件继续作为全站容量规划总览，不再展开 AI 预测生产链的分片、队列、上下文预物化和 tier SLA 细节。
+> - 预测生产链扩容事实源统一迁移到 [47_Prediction_Pipeline_Scaling_RFC_20260428.md](./47_Prediction_Pipeline_Scaling_RFC_20260428.md)。
 
 ## Document Ownership & Scope Boundary
 
@@ -31,6 +35,7 @@ summary: "定义容量规划与扩容路线，是广播、流量与容量相关�
 - **本文件（31）负责**：`做什么`、`什么时候做`、`到哪个规模触发`（Tier roadmap + breakpoints）。
 - **[33_Cloudflare_Workers_Migration_POC_20260318.md](./33_Cloudflare_Workers_Migration_POC_20260318.md) 负责**：Cloudflare POC 的实验方法、结果数据与结论证据（不是实施主计划）。
 - **[32_Frontend_Network_Optimization_Zero_Redundancy.md](./32_Frontend_Network_Optimization_Zero_Redundancy.md) 负责**：前端请求冗余治理的实现细则（是本路线图的专项子方案）。
+- **[47_Prediction_Pipeline_Scaling_RFC_20260428.md](./47_Prediction_Pipeline_Scaling_RFC_20260428.md) 负责**：Daily AI Prediction Pipeline 的分片、队列化、context 预物化、模型预算和 tier SLA。
 
 执行顺序约束（以本文件为准）：
 
@@ -138,16 +143,9 @@ Source: `frontend/src/lib/stock-cache.ts`, `frontend/src/app/api/stock/batch/rou
 
 ### 2.5 Backend Pipeline
 
-后端数据生产管道面向**全局股票池**（`global_stock_pool`，当前约 100-200 只），不面向单个用户。
+后端数据生产管道面向**全局股票池**（`global_stock_pool`），不面向单个用户。这与 [02_Monetization_Pricing_Strategy.md](../0_Strategy/02_Monetization_Pricing_Strategy.md) 第 5 节的"去重机制红利"一致：**系统针对"股票"计算而非"用户"，100 人看同一只热门股只算 1 次。**
 
-| 维度 | 值 | 是否随用户增长 |
-|------|----|---------------|
-| 每日同步股票数 | ~100-200 (全局池) | 否 |
-| LLM 调用/天 | ~300-1000 (股票数 × 3-5 模型) | 否 |
-| GitHub Actions 分钟/天 | ~30-60 min | 否 |
-| 实时行情同步 | Cloudflare Worker ≈ 每 15 min (盘中) | 否 |
-
-这与 [02_Monetization_Pricing_Strategy.md](../0_Strategy/02_Monetization_Pricing_Strategy.md) 第 5 节的"去重机制红利"一致：**系统针对"股票"计算而非"用户"，100 人看同一只热门股只算 1 次。用户规模增长，单用户边际 AI 成本无限趋近于零。**
+容量总览只保留这个边界判断；AI 预测生产链的具体吞吐、分片、队列、模型预算和 tier SLA 不在本文展开，统一见 [47_Prediction_Pipeline_Scaling_RFC_20260428.md](./47_Prediction_Pipeline_Scaling_RFC_20260428.md)。
 
 ### 2.6 Service Worker
 
@@ -265,9 +263,9 @@ Turso 的行读取配额极其宽裕。瓶颈不在配额，而在：
 
 | 用户规模 | 影响 | 状态 |
 |----------|------|------|
-| 1K-1M | 无影响，管道按全局股票池运行 | 🟢 |
+| 1K-1M | 用户增长本身不线性增加同一股票的预测成本；全局股票池扩张会增加生产链吞吐压力 | 🟡 |
 
-唯一可能受影响的场景：用户增长导致全局股票池膨胀。若池从 100 只增长到 500 只，LLM 调用从 ~500/天增长到 ~2500/天，仍在可控范围内。
+预测链路不再在本文判断“500 只是否可控”。当 `global_stock_pool` 接近 500-1000 只，必须按 [47_Prediction_Pipeline_Scaling_RFC_20260428.md](./47_Prediction_Pipeline_Scaling_RFC_20260428.md) 执行分片、队列化、context 预物化和 tier SLA 路线。
 
 ### 4.4 Service Worker / PWA
 
@@ -358,7 +356,7 @@ flowchart TB
 
 此方案可行的前提条件 — StockWise 恰好全部满足：
 
-1. **全局股票池有限** — ~100-200 只，不是全市场数万只
+1. **全局股票池有限且可治理** — 不是全市场数万只；当池规模接近 500-1000 只时，预测生产链扩容按 RFC 47 执行
 2. **价格数据是公共的** — 同一只股票的价格对所有用户一致
 3. **日线级快照** — 不是逐笔行情，数据更新频率本就不高
 4. **响应体极小** — 6 KB 的 CDN 缓存对任何边缘节点都是微不足道的
@@ -656,15 +654,15 @@ Vercel compute 降至 ~1,350 GB-hrs，仍超 Pro 上限但已在 Enterprise 合�
 2. **即使在 1M 规模最贵方案下 ($2,640/mo)，也仅需 776 名年费会员覆盖**，占 1M 用户基的 0.08% — 这是极其健康的单位经济模型。
 3. **平台选择是 1M 阶段最大的成本杠杆。** Vercel Enterprise 与 Cloudflare Workers 混合部署的成本可能相差 5-10 倍。
 
-### 7.3 Backend Pipeline Cost: Scale-Invariant
+### 7.3 Backend Pipeline Cost Boundary
 
-后端 LLM 成本按全局股票池计算，与用户数完全脱钩：
+后端 LLM 成本按全局股票池计算，不按用户数线性增长：
 
 ```
 100 只股票 × 5 模型 × ¥0.032/次 = ¥16/天 ≈ $2.2/天 ≈ $66/月
 ```
 
-若股票池扩展到 500 只: ~$330/月。这一成本由 Pro 会员直接覆盖，与用户规模无关。
+上面的算式仅说明 per-stock 去重机制，不再作为当前 prediction pipeline 的成本承诺。股票池扩展、模型数量、语言数量和 tier SLA 的组合成本，统一按 [47_Prediction_Pipeline_Scaling_RFC_20260428.md](./47_Prediction_Pipeline_Scaling_RFC_20260428.md) 的模型预算路线治理。
 
 ### 7.4 Cost Scaling Curve
 

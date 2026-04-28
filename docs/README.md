@@ -41,6 +41,9 @@ This directory serves as the unified single source of truth for the 知守 AI (Z
 - [Investment Mode Product Layer](./3_Product/Specs/47_Investment_Mode_Product_Layer.md)
 - [Admin Tradeability Control Tower](./3_Product/Specs/48_Admin_Tradeability_Control_Tower.md)
 
+### Current Source of Truth: Prediction Pipeline Scaling
+- [Prediction Pipeline Scaling RFC](./1_Engineering/47_Prediction_Pipeline_Scaling_RFC_20260428.md)
+
 ### [2_Intelligence/](./2_Intelligence/) - How (Brain)
 > Project "AI Logic": Prompt engineering, model strategies, and core algorithms.
 - **[Quant Strategy & Methodology]**

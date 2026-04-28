@@ -1,6 +1,6 @@
 ﻿# 知守 AI (ZISO AI) 架构文档（生产基线与演进方案）
 
-> **更新时间**: 2026-04-23
+> **更新时间**: 2026-04-28
 > **版本**: v3.3（收敛 App Entry 当前状态）
 > **适用范围**: `frontend/`、`backend/`、`docs/` 当前仓库实现
 
@@ -104,6 +104,7 @@
 - 主链路（多模型）：`backend/engine/runner.py` -> `ai_predictions_v2`。
 - 旧表 `ai_predictions` 新写入已冻结。
 - 回填链路已迁移到 v2 语义，`ai_predictions_v2` 为唯一生产写入目标。
+- 预测生产链扩容（分片、队列化、context 预物化、tier SLA）不在总架构文档展开，统一见 [47_Prediction_Pipeline_Scaling_RFC_20260428.md](./47_Prediction_Pipeline_Scaling_RFC_20260428.md)。
 
 ### 2.4 数据架构现状
 
@@ -349,6 +350,8 @@ flowchart LR
 - 所有 SQL 语句参数化，禁止字符串拼接。
 
 ### 4.3 AI 推理与决策链路重构 (双层解耦架构)
+
+> 本节只定义推理/决策链路的架构方向。生产流水线的吞吐扩容、任务状态表、worker 分片与会员 SLA 由 [47_Prediction_Pipeline_Scaling_RFC_20260428.md](./47_Prediction_Pipeline_Scaling_RFC_20260428.md) 维护。
 
 - 将原有多模型平行竞争模式（`Multi-Model Race`）废弃，重构为**基于流水线的串行决策链 (Layer-1 Quant Trigger -> Layer-2 LLM Narrative)**。
 - **Layer-1** 引入纯量化算子层 `QuantEngine`，剥夺 LLM 的方向抉择权，由量化引擎接管核心行情触发与方向研判（如 Breakout / RiskOff）。
