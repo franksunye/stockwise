@@ -94,6 +94,8 @@ type GrowthResponse = {
   snapshots: Snapshot[];
 };
 
+type TrendPoint = GrowthResponse['trend'][number];
+
 function fmt(value: number | null | undefined): string {
   return Number(value || 0).toLocaleString('zh-CN');
 }
@@ -139,6 +141,110 @@ function BarRow({ label, value, max, aside }: { label: string; value: number; ma
   );
 }
 
+function TrendChart({ rows }: { rows: TrendPoint[] }) {
+  const width = 920;
+  const height = 220;
+  const padding = { top: 18, right: 22, bottom: 34, left: 38 };
+  const chartWidth = width - padding.left - padding.right;
+  const chartHeight = height - padding.top - padding.bottom;
+  const maxValue = Math.max(...rows.map((row) => Math.max(row.sessions, row.new_user_rows)), 1);
+  const latest = rows[rows.length - 1];
+  const previous = rows[rows.length - 2];
+  const visitDelta = latest && previous ? latest.sessions - previous.sessions : 0;
+  const userDelta = latest && previous ? latest.new_user_rows - previous.new_user_rows : 0;
+  const xFor = (index: number) => padding.left + (rows.length <= 1 ? chartWidth / 2 : (index / (rows.length - 1)) * chartWidth);
+  const yFor = (value: number) => padding.top + chartHeight - (value / maxValue) * chartHeight;
+  const lineFor = (selector: (row: TrendPoint) => number) => rows
+    .map((row, index) => `${xFor(index).toFixed(1)},${yFor(selector(row)).toFixed(1)}`)
+    .join(' ');
+  const areaFor = (selector: (row: TrendPoint) => number) => {
+    if (!rows.length) return '';
+    const firstX = xFor(0).toFixed(1);
+    const lastX = xFor(rows.length - 1).toFixed(1);
+    const bottomY = (padding.top + chartHeight).toFixed(1);
+    return `${firstX},${bottomY} ${lineFor(selector)} ${lastX},${bottomY}`;
+  };
+  const tickIndexes = rows
+    .map((_, index) => index)
+    .filter((index) => index === 0 || index === rows.length - 1 || index % 7 === 0);
+  const yTicks = Array.from(new Set([0, 0.5, 1].map((ratio) => Math.round(maxValue * ratio))));
+
+  if (!rows.length) {
+    return <p className="text-sm text-slate-500">暂无 30 天趋势数据。</p>;
+  }
+
+  return (
+    <div className="space-y-5">
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div className="border-l border-cyan-300/50 pl-3">
+          <p className="text-xs text-slate-500">最新访问</p>
+          <p className="mt-1 text-2xl font-semibold">{fmt(latest?.sessions)}</p>
+          <p className={`mt-1 text-xs ${visitDelta >= 0 ? 'text-cyan-300' : 'text-rose-300'}`}>
+            较前日 {visitDelta >= 0 ? '+' : ''}{fmt(visitDelta)}
+          </p>
+        </div>
+        <div className="border-l border-violet-300/50 pl-3">
+          <p className="text-xs text-slate-500">最新新用户</p>
+          <p className="mt-1 text-2xl font-semibold">{fmt(latest?.new_user_rows)}</p>
+          <p className={`mt-1 text-xs ${userDelta >= 0 ? 'text-violet-300' : 'text-rose-300'}`}>
+            较前日 {userDelta >= 0 ? '+' : ''}{fmt(userDelta)}
+          </p>
+        </div>
+      </div>
+
+      <div className="overflow-hidden rounded-lg border border-white/10 bg-black/20">
+        <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label="30 天 visits 和 new users 趋势图" className="h-[240px] w-full">
+          <defs>
+            <linearGradient id="visitsFill" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stopColor="#22d3ee" stopOpacity="0.22" />
+              <stop offset="100%" stopColor="#22d3ee" stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          {yTicks.map((tick) => {
+            const y = yFor(tick);
+            return (
+              <g key={tick}>
+                <line x1={padding.left} x2={width - padding.right} y1={y} y2={y} stroke="rgba(255,255,255,0.08)" />
+                <text x={padding.left - 10} y={y + 4} textAnchor="end" className="fill-slate-600 text-[11px]">{tick}</text>
+              </g>
+            );
+          })}
+          <polygon points={areaFor((row) => row.sessions)} fill="url(#visitsFill)" />
+          <polyline points={lineFor((row) => row.sessions)} fill="none" stroke="#22d3ee" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+          <polyline points={lineFor((row) => row.new_user_rows)} fill="none" stroke="#c084fc" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+          {rows.map((row, index) => (
+            <g key={row.date}>
+              <circle cx={xFor(index)} cy={yFor(row.sessions)} r="3.5" fill="#22d3ee" />
+              <circle cx={xFor(index)} cy={yFor(row.new_user_rows)} r="3.5" fill="#c084fc" />
+            </g>
+          ))}
+          {tickIndexes.map((index) => (
+            <text key={rows[index].date} x={xFor(index)} y={height - 10} textAnchor={index === 0 ? 'start' : index === rows.length - 1 ? 'end' : 'middle'} className="fill-slate-600 text-[11px]">
+              {rows[index].date.slice(5)}
+            </text>
+          ))}
+        </svg>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-5 text-xs text-slate-500">
+        <span className="inline-flex items-center gap-2"><span className="h-2 w-5 rounded-full bg-cyan-400" /> visits</span>
+        <span className="inline-flex items-center gap-2"><span className="h-2 w-5 rounded-full bg-violet-400" /> new users</span>
+        <span>范围：{rows[0]?.date} 至 {latest?.date}</span>
+      </div>
+
+      <div className="grid gap-2 border-t border-white/10 pt-4 sm:grid-cols-5">
+        {rows.slice(-5).map((row) => (
+          <div key={row.date} className="text-xs">
+            <p className="text-slate-500">{row.date.slice(5)}</p>
+            <p className="mt-1 text-slate-300">{fmt(row.sessions)} visits</p>
+            <p className="text-slate-500">{fmt(row.new_user_rows)} users</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function GrowthPage() {
   const [data, setData] = useState<GrowthResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -175,7 +281,7 @@ export default function GrowthPage() {
   const maxLang = Math.max(...languageSegments.map((row) => row.new_user_rows), 0);
   const maxSource = Math.max(...sourceRows.map((row) => row.sessions), 0);
   const maxReferralLang = Math.max(...referralLanguages.map((row) => row.invited_user_rows), 0);
-  const maxTrend = Math.max(...(data?.trend || []).map((row) => Math.max(row.sessions, row.new_user_rows)), 0);
+  const trendRows = data?.trend || [];
 
   const statusText = useMemo(() => {
     if (!latest) return '暂无快照';
@@ -369,18 +475,7 @@ export default function GrowthPage() {
 
             <section className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
               <h2 className="mb-5 text-sm font-semibold">30 天趋势</h2>
-              <div className="space-y-3">
-                {(data?.trend || []).map((row) => (
-                  <div key={row.date} className="grid grid-cols-[96px_1fr_86px_86px] items-center gap-3 text-xs">
-                    <span className="text-slate-500">{row.date}</span>
-                    <div className="h-2 rounded bg-white/5">
-                      <div className="h-2 rounded bg-cyan-400/80" style={{ width: `${maxTrend ? Math.max(3, (Math.max(row.sessions, row.new_user_rows) / maxTrend) * 100) : 0}%` }} />
-                    </div>
-                    <span className="text-right text-slate-400">{fmt(row.sessions)} visits</span>
-                    <span className="text-right text-slate-400">{fmt(row.new_user_rows)} users</span>
-                  </div>
-                ))}
-              </div>
+              <TrendChart rows={trendRows} />
             </section>
 
             <section className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
