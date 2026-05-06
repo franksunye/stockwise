@@ -1,6 +1,6 @@
 # ZISO AI v1 国际版全球发布手册 (GTM Playbook)
 
-> **版本**：v1.1 (2026-04-12)
+> **版本**：v1.2 (2026-04-27)
 > **状态**：Execution Draft — Ready after final go/no-go review
 > **负责人**：Frank (Founder) + Antigravity (Advanced Agentic AI)
 
@@ -46,17 +46,21 @@
 
 在正式放量前，必须先确认国际版的入口策略，否则 PH / X / Reddit 的流量会被 invite 流程阻塞。
 
-**当前执行方案：Marketing Open + App Invite Wall + PH Dedicated Invite Entry**
+**当前执行方案：Marketing Open + App Invite Wall + Dedicated Invite Entries**
 - 官网公开访问：`ziso.cc` 主站与 `pricing` 等营销页保持公开。
-- App 入口当前仍有 invite wall，不能把 PH 主流量直接导向普通 app 入口。
+- App 入口当前仍有 invite wall，不能把外部主流量直接导向普通 app 入口。
 - **Product Hunt 主链接固定使用：`https://ziso.cc/v/PH`**。
 - `ziso.cc/v/PH` 会跳转至 app 并携带 `invite=PH`，作为 **PH 专用 invite/referral entry**。
+- **Reddit 反馈链路固定使用：`https://ziso.cc/v/REDDIT`**。
+- `ziso.cc/v/REDDIT` 会跳转至 app 并携带 `invite=REDDIT&locale=en`，作为 **Reddit 专用 invite/referral entry**。
 - **发布前必须确认 `PH` 已在数据库中绑定为有效的 `referral_alias`**，否则 alias 解析会失败。
+- **Reddit 执行前必须确认 `REDDIT` 已在数据库中绑定为有效的 `referral_alias`**。当前绑定用户：`user_kd4sk7c68`。
 - Referral / Activation Code 继续保留，作为增长激励与放量控制手段。
 
 **执行含义**
 - PH：优先导向 `https://ziso.cc/v/PH`
-- X / Reddit：默认可先导向 `pricing`，若评论区用户明确要试用，再补贴 invite link
+- X：默认可先导向 `pricing`，若评论区用户明确要试用，再补贴 invite link
+- Reddit：本轮以反馈收集为目标，主帖不一定放链接；当帖子明确是 feedback / trial invite 时，使用 `https://ziso.cc/v/REDDIT`
 - 任何对外文案都不要暗示“完全公开注册”，而要强调 `launch invite link` 或 `trial link`
 
 ### 2.2 增长激励政策
@@ -107,11 +111,27 @@
 - **Reply Strategy**: 优先回复和 `discipline / review process / key levels / alerts` 相关的讨论，而不是泛 AI 论战。
 - **Pinned CTA**: 统一导向 `pricing` 页，而不是直接跳随机深链。
 
-### 3.3 Reddit - 创始人背书阵地
-- **策略**: Value-First（内容先行）。
-- **Subreddits**: `r/stocks`, `r/investing`, `r/algotrading`, `r/DeepSeek`.
-- **Founder Story**: 创始人亲自出面讲述“为什么我们要构建一套更冷静、更结构化的盘后研究工具”。
-- **Reddit 口径要求**：少用 marketing superlatives，多用具体流程、用户痛点与真实功能描述。
+### 3.3 Reddit - 反馈收集阵地 (Feedback Sprint)
+- **当前目标**：不是复刻 PH launch，也不是直接卖订阅，而是收集英文种子用户对定位、onboarding、tactical brief、key levels、alerts 的真实反馈。
+- **策略**：Founder-led + Feedback-first。创始人以真实 builder 身份参与讨论，先给社区贡献，再谨慎发帖。
+- **核心链接**：`https://ziso.cc/v/REDDIT`。仅在明确邀请试用、有人主动要链接、或 subreddit 规则允许 feedback link 时使用。
+- **账号策略**：优先使用创始人个人账号，而不是品牌号；profile 可写 `Founder of ZISO AI — building a calmer AI stock research workflow for serious retail investors.`。不要使用多账号互相提问、推荐或集中 upvote。
+- **优先社区顺序**：
+    1. `r/SideProject` / `r/SaaS` / `r/indiehackers`：优先发 positioning / build-in-public / feedback 类型内容。
+    2. `r/investing` / `r/stocks`：优先发 workflow discussion，不在首帖硬贴链接。
+    3. `r/algotrading`：谨慎；v1 不是自动量化执行产品，除非讨论透明推理、验证或工作流边界。
+    4. 暂不建议 `r/wallstreetbets`：语境与产品纪律定位冲突，且 self-promo 风险高。
+- **Reddit 口径要求**：
+    - 不说 `AI stock picker`、`trading signal`、`beat the market`、`99% win rate`。
+    - 使用 `AI stock research assistant`、`nightly review workflow`、`key levels`、`decision boundary`、`watchlist alerts`。
+    - 主帖先讲用户问题与构建经验，再讲产品；链接靠后或放评论。
+- **本轮成功指标**：
+    - `REDDIT` invite 进入数；
+    - onboarding 完成率；
+    - watchlist 添加率；
+    - tactical brief 打开率；
+    - 评论中是否出现关于 pricing / alerting / key levels / onboarding 的具体问题；
+    - 是否产生可整理进 FAQ 或产品 backlog 的真实反馈。
 
 ---
 
@@ -213,7 +233,72 @@ Plus is upcoming.
 [LINK]
 ```
 
-### 4.3 Reddit Founder Story Draft
+### 4.3 Reddit Founder Feedback Post（首选：反馈帖）
+> 使用场景：`r/SideProject` / `r/SaaS` / 合规的 feedback thread。目标是拿反馈，不是做硬广。
+
+```markdown
+Title: I’m testing whether “calmer AI” works better than louder stock signals
+
+Hey everyone, I'm building ZISO AI, a mobile-first AI stock research assistant for serious retail investors.
+
+The product bet is simple: most retail investors don't need more signals. They need a calmer review workflow:
+- what changed today
+- what levels matter tomorrow
+- what would invalidate the setup
+- what should be ignored during the session
+
+What I'm intentionally avoiding:
+- no "99% win rate" claims
+- no auto-trading language
+- no pretending AI should make the final decision
+
+The current v1 focuses on post-close review, key support/resistance levels, tactical briefs, and watchlist alerts. The Go tier includes DeepSeek-powered reasoning and Session Structure Radar alerts.
+
+I'm opening a small Reddit trial link here:
+https://ziso.cc/v/REDDIT
+
+No credit card required. If you try it, I'm mainly looking for feedback on:
+1. Does the onboarding make sense?
+2. Is the tactical brief clear enough?
+3. Would this fit your nightly review workflow?
+
+I'll be around in the comments. Critical feedback is welcome.
+```
+
+### 4.3A Reddit Workflow Discussion Post（投资社区优先：不放链接）
+> 使用场景：`r/investing` / `r/stocks`。首帖不贴链接，先讨论真实 workflow，降低 self-promo 风险。
+
+```markdown
+Title: How do you structure your nightly stock review without drowning in charts and news?
+
+I'm curious how other retail investors structure their nightly review.
+
+My current view is that the hard part is not finding more information. It's turning information into a repeatable workflow:
+- what changed today
+- what key levels matter tomorrow
+- what would invalidate the setup
+- what should I ignore during the session
+
+Do you use a checklist, spreadsheet, watchlist notes, alerts, or just charts?
+
+I'm especially interested in workflows that help reduce impulsive intraday decisions.
+```
+
+**若评论区有人问是否在做产品，再回复：**
+```markdown
+Yes, I'm building a small tool around this exact workflow. I didn't want to lead with the link because I'm more interested in how people actually review their watchlists.
+
+Happy to share if useful.
+```
+
+**若对方明确要求链接：**
+```markdown
+Sure, here’s the Reddit trial link: https://ziso.cc/v/REDDIT
+
+No credit card required. I’d mainly love feedback on whether the onboarding and tactical brief are clear.
+```
+
+### 4.3B Reddit Founder Story Draft（备用：故事帖）
 ```markdown
 Title: Why we built a calmer DeepSeek-powered stock research assistant for retail investors
 
@@ -235,11 +320,29 @@ Test it against your own watchlist. If it helps you see a key level or a cleaner
 I'll be in the comments if anyone wants to talk about workflow design, alerting logic, or where AI should stop and the investor should decide.
 ```
 
-### 4.3B Reddit Comment Closing Lines（备选）
+### 4.3C Reddit Comment Closing Lines（备选）
 ```markdown
 - Happy to share a 5-day Go trial link if anyone wants to test the workflow.
 - Curious whether this feels genuinely useful, or just like another layer of stock-tool noise.
 - If you try it, I’d especially love feedback on the key levels and alerting flow.
+```
+
+### 4.3D Reddit Objection Replies（高频质疑回复）
+```markdown
+Q: Is this just another AI stock picker?
+A: Fair concern. That is exactly the positioning problem I'm trying to avoid. ZISO is not built around "pick this stock" claims. The v1 product is closer to a structured review workflow: watchlist, key levels, tactical brief, and alerts.
+
+Q: Why not just use ChatGPT?
+A: ChatGPT is a blank box. ZISO is built around a repeatable stock-review workflow: daily watchlist review, key levels, verification states, and alerts. The goal is to avoid starting from a new prompt every day.
+
+Q: AI stock tools are mostly scams.
+A: I understand the reaction. That is why we avoid performance claims and keep the final decision with the investor. If the product cannot explain the reasoning clearly, it failed.
+
+Q: Does this tell me what to buy?
+A: No. It is a research and alerting tool, not financial advice. It helps clarify setup, levels, and risk boundaries. You still make the decision.
+
+Q: Why DeepSeek?
+A: DeepSeek is useful for structured reasoning at a cost that fits a lightweight retail workflow. The model name matters less than whether the output creates a clearer decision boundary.
 ```
 
 ### 4.4 评论区短回复定稿 (Fast Replies)
@@ -313,9 +416,12 @@ A: ZISO AI currently supports the US, Hong Kong, and China markets.
 - [ ] **X 评论区超短回复备忘** (见 4.4B)
 
 ### 5.3 Reddit
-- [ ] **Reddit Founder Story 定稿** (见 4.3)
-- [ ] **Reddit 互动话术库** (优先使用 4.3B / 4.4 的短回复)
+- [ ] **Reddit 账号装修**：优先使用创始人个人账号；profile 标明 founder 身份与 ZISO 定位，不伪装普通用户。
+- [ ] **Reddit Founder Feedback Post 定稿** (见 4.3)
+- [ ] **Reddit Workflow Discussion Post 定稿** (见 4.3A，用于投资社区，不在首帖贴链接)
+- [ ] **Reddit 互动话术库** (优先使用 4.3C / 4.3D / 4.4 的短回复)
 - [ ] **Subreddit 规则审查** (是否允许外链、是否允许 self-promo、是否先发讨论帖)
+- [ ] **Reddit 预热参与**：正式发帖前至少完成 3-5 条非推广型高质量评论。
 - [ ] **Reddit 首日评论区超短回复备忘** (见 4.4B)
 
 ### 5.4 增长与转化物料
@@ -338,7 +444,9 @@ A: ZISO AI currently supports the US, Hong Kong, and China markets.
 - [ ] 官网首页、pricing、about、refund、privacy、terms 全部可访问。
 - [ ] 国际 Stripe checkout 完整跑通（进入 checkout / success / cancel / portal）。
 - [ ] 数据库中已存在可解析的 `referral_alias = PH`。
+- [ ] 数据库中已存在可解析的 `referral_alias = REDDIT`。
 - [ ] `https://ziso.cc/v/PH` 跳转到 app 并带上 `invite=PH` 的链路跑通。
+- [ ] `https://ziso.cc/v/REDDIT` 跳转到 app 并带上 `invite=REDDIT&locale=en` 的链路跑通。
 - [ ] Referral link、redeem code、waitlist mailto 全部可用。
 - [ ] 通知开启链路、英文 onboarding、watchlist 添加至少走一遍。
 - [ ] 确认 analytics / source tagging 已生效。
@@ -353,7 +461,7 @@ A: ZISO AI currently supports the US, Hong Kong, and China markets.
 ### 6.4 D-Day：发布当天操作序列
 | 时间 | 动作 | Owner | 完成标准 |
 | :--- | :--- | :--- | :--- |
-| T-30min | 最终检查官网、`pricing`、`/v/PH`、checkout、analytics | Frank | 关键链路全部正常 |
+| T-30min | 最终检查官网、`pricing`、`/v/PH`、`/v/REDDIT`、checkout、analytics | Frank | 关键链路全部正常 |
 | T-0 | 发布 Product Hunt | Frank | PH 页面公开可访问 |
 | T+5min | 发布 X Hero Thread | Frank | 线程正常展示，链接可点 |
 | T+15min | 发布首条 Reddit 帖 | Frank | 成功发布且未被秒删 |
@@ -366,6 +474,27 @@ A: ZISO AI currently supports the US, Hong Kong, and China markets.
 - [ ] 抽取最佳用户反馈做二次传播素材。
 - [ ] 根据评论区高频问题，补 FAQ / pricing copy / support content。
 - [ ] 判断是否追加第二轮内容 push。
+
+### 6.6 Reddit Feedback Sprint（REDDIT 专项 7 天执行）
+> 当前阶段 Reddit 不追求“首帖爆量”，优先追求真实反馈、合规参与与渠道学习。
+
+| 日期 | 动作 | 链接策略 | 完成标准 |
+| :--- | :--- | :--- | :--- |
+| Day 0 | 账号装修 + 规则审查 + 参与 3-5 条非推广评论 | 不贴链接 | 账号看起来像真实 founder，不像投放号 |
+| Day 1 | 在 `r/SideProject` 或合规 feedback thread 发 4.3 feedback post | 可放 `https://ziso.cc/v/REDDIT` | 帖子未被秒删，开始收评论 |
+| Day 2 | 只回复评论、收集反馈、给深度反馈者 30 天码 | 评论中按需给链接 | 至少整理 3 条反馈标签 |
+| Day 3 | 在 `r/investing` 或 `r/stocks` 发 4.3A workflow discussion | 首帖不放链接 | 获取真实复盘流程讨论 |
+| Day 4 | 整理反馈，更新 FAQ / support / pricing notes | 不新增主帖 | 形成小型 feedback log |
+| Day 5 | 在 `r/indiehackers` 或 `r/SaaS` 发 build-in-public / positioning 复盘 | 链接放评论或按需提供 | 讨论定位，不硬推产品 |
+| Day 6-7 | 只评论和复盘，不追加复制帖 | 谨慎按需给链接 | 判断是否值得第二轮 |
+
+**Reddit 执行硬边界**
+- 不跨多个 subreddit 复制同一帖；
+- 不组织朋友集中 upvote；
+- 不使用多个账号自问自答；
+- 不在标题里写 `AI stock picker` / `trading signals`；
+- 不承诺收益、胜率或买卖建议；
+- 若帖子被删，不争辩，改为评论参与或等 weekly self-promo / feedback thread。
 
 ---
 
@@ -380,6 +509,7 @@ A: ZISO AI currently supports the US, Hong Kong, and China markets.
 ### 7.2 Conversion QA
 - [ ] 非 CN 入口可顺利进入 app。
 - [ ] `https://ziso.cc/v/PH` 不会被 invite wall 卡死，且 referral / Go 试用承接正常。
+- [ ] `https://ziso.cc/v/REDDIT` 不会被 invite wall 卡死，且 referral / Go 试用承接正常。
 - [ ] Stripe Checkout 可正常进入、成功返回、取消返回。
 - [ ] Manage Subscription / cancel portal 可打开。
 - [ ] referral link attribution 正常。
@@ -430,6 +560,9 @@ A: ZISO AI currently supports the US, Hong Kong, and China markets.
 Product Hunt main link:
 https://ziso.cc/v/PH
 
+Reddit feedback / trial link:
+https://ziso.cc/v/REDDIT
+
 X hero thread link:
 https://ziso.cc/pricing?utm_source=x&utm_medium=thread&utm_campaign=v1_international_launch
 
@@ -439,10 +572,10 @@ https://ziso.cc/pricing?utm_source=x&utm_medium=reply&utm_campaign=v1_internatio
 X profile link:
 https://ziso.cc/pricing?utm_source=x&utm_medium=profile&utm_campaign=v1_international_launch
 
-Reddit post link:
+Reddit pricing post link:
 https://ziso.cc/pricing?utm_source=reddit&utm_medium=launch&utm_campaign=v1_international_launch
 
-Reddit comment link:
+Reddit pricing comment link:
 https://ziso.cc/pricing?utm_source=reddit&utm_medium=comment&utm_campaign=v1_international_launch
 
 Referral landing link:
@@ -451,11 +584,12 @@ https://ziso.cc/pricing?utm_source=referral&utm_medium=share&utm_campaign=v1_int
 
 ### 8.2C 使用规则
 - Product Hunt 当前是特例：**主链接固定使用 `https://ziso.cc/v/PH`**，不走普通 `pricing`。
+- Reddit 本轮反馈 Sprint 也是特例：当目标是 trial / feedback collection 时，使用 `https://ziso.cc/v/REDDIT`；当目标是公开价格解释时，才使用 pricing UTM。
 - 其余公开渠道默认优先导向 `pricing`，除非你明确需要导向 app 深链。
 - 同一渠道不同位置，必须拆分 `utm_medium`，避免后续归因混在一起。
 - 评论区临时贴链也尽量使用带 UTM 的短链或原链。
 - 首日不要同时测试太多 landing path，避免归因失真。
-- **重要限制**：当前 `/v/*` 跳转链路不会保留 UTM 参数，因此 PH 来源优先通过 invite alias `PH` 识别；如需 PH 粒度更细的 UTM 归因，需要后续单独增强跳转逻辑。
+- **重要限制**：当前 `/v/*` 跳转链路不会保留 UTM 参数，因此 PH / Reddit 来源优先通过 invite alias `PH` / `REDDIT` 识别；如需更细 UTM 归因，需要后续单独增强跳转逻辑。
 
 ### 8.3 首周观察重点
 - 哪个渠道带来的用户最愿意完成 onboarding。
@@ -502,8 +636,10 @@ https://ziso.cc/pricing?utm_source=referral&utm_medium=share&utm_campaign=v1_int
 | 风险 | 触发信号 | 处理动作 | Owner |
 | :--- | :--- | :--- | :--- |
 | Invite wall 阻塞公开流量 | 用户无法通过 `https://ziso.cc/v/PH` 顺利进入 app / 获得 Go 试用 | 立即检查 `/v/PH` 重定向、alias 解析与 referral 承接逻辑 | Frank |
+| Reddit 链路阻塞 | 用户无法通过 `https://ziso.cc/v/REDDIT` 顺利进入 app / 获得 Go 试用 | 立即检查 `REDDIT` alias、`/v/*` 重定向、locale=en 与 referral 承接逻辑 | Frank |
 | Stripe checkout 失败 | 评论区出现支付失败反馈 / 后台错误 | 立即核对 price ID、checkout route、success/cancel URL | Frank |
 | Reddit 删帖 | 帖子被移除或限流 | 快速调整为 value-first 讨论帖，不硬贴链接 | Frank |
+| Reddit 被判定为 self-promo | 评论提示广告感强 / mod 提醒 / 帖子互动异常 | 暂停贴链，转为回答问题与 workflow discussion；等待 weekly self-promo / feedback thread | Frank |
 | 用户误解为投资建议 | 评论区要求收益保证 | 立刻使用标准 disclaimer 回应 | Frank |
 | Plus 预期过高 | 用户误以为 Plus 现已完整开放 | 明确说明 Plus 为 upcoming / waitlist | Frank |
 | 通知/产品体验与文案不一致 | 用户说没看到文案所述功能 | 优先修正文案或下线夸大描述 | Frank |

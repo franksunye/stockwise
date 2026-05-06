@@ -1,155 +1,77 @@
 # 知守 AI (ZISO AI) 项目待办清单 (Backlog)
 
-> 只保留近期开发有指导意义的待办项。已完成事项不在此处留痕；仍有价值但不属于近期执行面的事项，转入 `docs/0_Strategy/04_Milestones_Execution_Log.md`。
+> 自 2026-05 起，Backlog 按「当前执行版本」维护：**仅保留 v1 国际版直接事项**。  
+> 其它仍有价值但不属于 v1 交付面的工作，统一归档到 **Vx 候选池**（不占用当前执行优先级）。
 
 ---
 
-## 当前执行面
+## v1 国际版（当前执行面）
 
-### 1. 双层架构止血与稳态推进（P0）
+### A. Pricing / Learn / Support 权益一致性（P1）
 
-#### 1.1 双层架构 #2 参数迭代
-- [ ] 将 `TriggeredLong` 覆盖从当前约 `1.51%`（在线口径回放）提升到验收区间 `5%~20%`。
-- [ ] 每轮仅调整 1 个参数，优先 `breakout_volume_mult`、`momentum_change_threshold`。
-- [ ] 每轮同时复核 `RiskOff` 占比、最大回撤、方向一致率，不允许只追求 Long 覆盖。
-- [ ] 通过 `acceptance_weekly` 输出 gate 状态并同步 webhook 结论。
+#### A1. Academy Access（101 / Masters）产品承接补齐
+- [ ] 明确 `pricing` 中 `Academy Access (101/Masters)` / `Master Logics` 的产品边界：当前可用内容、即将补齐内容、是否所有层级都包含。
+- [ ] 在移动端 Learn 入口补 `Method Roots` / `Reference Library` 级别承接层，避免 pricing 已承诺 Masters 但 App 内只看到 101 列表。
+- [ ] 优先上线 3-5 篇英文 `master_series` 样板，先覆盖 Mark Minervini、Van Tharp、Richard Wyckoff、Howard Marks、Market Wizards Reading Map。
+- [ ] 在 pricing 文案、Learn 入口、Support FAQ 三处保持统一口径：Masters 是 Academy 参考库 / 方法源流，不是买卖建议或收益承诺。
+- [ ] 验收标准：英文用户从 pricing 看到 `101/Masters` 后，可在 App 内或公开 Learn 入口找到对应 Masters 承接页；若内容仍在补齐中，页面必须明确标注当前可用范围与 upcoming 状态。
 
-#### 1.2 乖离率（Bias）物理级强制拦截
-- [ ] 在核心引擎或预处理环节新增 `bias_ma20` 等物理字段，并在极端偏离时打上 `Bias_Overheat` 标签。
-- [ ] 向分析师系统提示词硬注入“极值防追高 / 防抄底”规则，避免大模型随机发挥量化常识。
-- [ ] 用高乖离样本做回放验收，要求 100% 触发防守或观望建议。
+### B. v1 层级权益与后台供给对齐（P1/P2）
 
-### 2. 系统稳定性与数据质量（P0）
-
-#### 2.1 数据质量 SLO 与告警
-- [ ] 定义污染率、空表率、周期覆盖率、当日同步成功率四项 SLO。
-- [ ] 任一指标越线时自动推送告警，并附带可执行修复建议。
-- [ ] 验收标准：越线后 5 分钟内完成告警触发。
-
-#### 2.2 新股与边界数据保护
-- [ ] 在 `process_stock_period()` 中增加数据行数检查。
-- [ ] 数据不足 30 天时仅存储价格数据，不生成 AI 预测。
-- [ ] 前端明确标注“数据不足”。
-
-#### 2.3 任务超时与失败保护
-- [ ] 为 `daily_sync.yml` 增加 `timeout-minutes: 45`。
-- [ ] 为 AI 预测增加 30 秒超时与降级策略。
-- [ ] 为数据库写入增加 exponential backoff 重试机制。
-
-#### 2.4 多周期同步一致性
-- [ ] 日线失败时跳过周线 / 月线，避免错误扩散。
-- [ ] 统一 `process_stock_period()` 返回 success / failure 状态。
-- [ ] 保证多周期数据写入的一致性。
-
-### 3. Daily Pipeline - A-Share (CN) 事件后续（P1/P2）
-
-#### 3.1 可观测性补强（P1）
-- [ ] 在分析流程中区分并上报：`skip_existing`、`model_error`、`context_timeout`、`save_failed` 四类结果计数。
-- [ ] Job 结束时输出“目标总数 / 各模型完成数 / 缺口数”摘要，减少手工 SQL 核对成本。
-- [ ] 验收标准：单次回填日志可在 30 秒内判断“是否真失败”与“缺口剩余量”。
-
-#### 3.2 回填入口一致化（P1）
-- [ ] `ai_analyze_cn.yml` 的 `model` 选项补齐 `deepseek-aliyun`，与 `ai_backfill.yml` 保持一致。
-- [ ] 明确文档：`analyze` 适合日常产线，`backfill` 适合按模型补缺口。
-- [ ] 验收标准：两条 workflow 都支持同一组模型输入，不再出现“某入口选不到线上主模型”。
-
-#### 3.3 失败隔离与降级（P1）
-- [ ] 为 `stock_flow` / 外部上下文增加“超时后降级继续”的可观测标记（不阻塞主预测）。
-- [ ] 单票连续失败达到阈值时自动隔离并继续后续股票，避免拖慢整批。
-- [ ] 验收标准：单只股票异常不应导致批任务长时间停在同一 symbol。
-
-#### 3.4 回归测试与运维手册（P2）
-- [ ] 增加测试：已存在记录时应输出 `No new predictions` 而非失败告警。
-- [ ] 增加测试：`auto-fill + model` 只补缺失，不重跑已存在记录。
-- [ ] 在运维文档中新增“线上缺口核验 SQL 模板 + 补单票 SOP（symbol/date/model）”。
-- [ ] 验收标准：新同学可按文档独立完成一次补缺口闭环。
-
-### 4. Daily Pipeline 编排重构（技术架构 + 商业逻辑）（P1/P2）
-
-> 架构事实源：[`47_Prediction_Pipeline_Scaling_RFC_20260428.md`](./1_Engineering/47_Prediction_Pipeline_Scaling_RFC_20260428.md)。本节只保留未来 2-4 周可执行切片。
-
-#### 4.1 编排状态机统一（P1）
-- [ ] 定义统一任务状态：`success`、`skipped_existing`、`degraded`、`failed`，覆盖 `sync/analyze/backfill/mode`。
-- [ ] 将结果汇总粒度统一到 `date + market + symbol + model`，支持缺口可视化与重试定位。
-- [ ] 验收标准：任意一次 run 可在 1 个摘要视图中回答“哪些是真的失败、哪些是正常跳过”。
-
-#### 4.1A Phase 1：GitHub Actions 分片与并发止血（P1）
-- [ ] 为 `ai_analyze_*` 增加 `--shard-index` / `--shard-total` / `--max-symbol-concurrency`。
-- [ ] CN 先用保守 matrix 分片验证，不改变 `ai_predictions_v2` 写入语义。
-- [ ] 验收标准：单 shard 失败不影响其他 shard；CN 30+ 股票不慢于当前基线。
-
-#### 4.2 Analyze 与 Backfill 执行器收敛（P1）
-- [ ] 将 `ai_analyze_*` 与 `ai_backfill` 复用同一套执行策略（幂等、超时、重试、降级）。
-- [ ] 保留两个入口但统一策略层，避免同类问题在两个 workflow 重复修补。
-- [ ] 验收标准：同一输入条件下，Analyze 与 Backfill 的执行语义和日志分类一致。
-
-#### 4.2A Phase 2：`prediction_jobs` 队列化执行（P1/P2）
-- [ ] 新增 `prediction_jobs` 设计与迁移脚本，唯一键覆盖 `market + symbol + trade_date + model_id + content_locale`。
-- [ ] Daily Pipeline analyze 阶段先 enqueue，再由 worker claim/run/save。
-- [ ] 验收标准：中断后可从 `queued / retryable_failed` 恢复，且 rerun 不重复生成已存在预测。
-
-#### 4.2B Phase 3：Context 预物化与两层生产（P2）
-- [ ] 新增日级预测上下文预物化方案，先批量生成 Layer-1、价格摘要、市场上下文、资金流质量标记。
-- [ ] LLM worker 只读 context JSON，不在关键路径实时调用 AkShare 个股资金流。
-- [ ] 验收标准：1000 股票 rule-engine 可全量产出，LLM jobs 数量由候选策略控制。
-
-#### 4.3 商业策略层落地（P2）
-- [ ] 建立按用户层级/成本预算的模型执行策略（例如 Pro 主模型优先、失败降级规则、重试上限）。
-- [ ] 定义“用户可见降级语义”：当主模型缺失时，前端/通知明确标注降级来源与数据时效。
-- [ ] 验收标准：出现模型失败时，既不影响主流程出数，也不产生对用户不可解释的结果。
-
-#### 4.3A Phase 4：Tier SLA 与模型预算（P2）
-- [ ] 聚合 watcher demand：`free/go/plus/pro`、活跃用户、locale、持仓/自选优先级。
+#### B1. Tier SLA / 模型预算最小闭环（面向 free/go/plus）
+- [ ] 聚合 watcher demand：`free/go/plus`、活跃用户、locale、持仓/自选优先级。
 - [ ] 定义 `tier -> model_policy -> budget -> priority`，并输出每日 token / 成本 / 成功率报表。
-- [ ] 验收标准：free/go/plus 的前端权益与后台生产策略一致，核心自选股在 SLA 内完成。
+- [ ] 验收标准：`free/go/plus` 的前端权益与后台生产策略一致，核心自选股在 SLA 内完成。
 
-#### 4.4 迁移与风险控制（P2）
-- [x] 输出编排重构 RFC（现状、目标、状态机、分阶段迁移、回滚方案）。
-- [ ] 采用分阶段灰度：先观测、再收敛执行器、最后切策略层。
-- [ ] 验收标准：迁移期间 `daily_pipeline_cn_main` 成功率不低于当前基线。
+### C. v1 体验体感优化（P1）
 
-### 5. 高级质量工程 (Advanced QE) - 信号语义深层治理（P2）
+#### C1. Dashboard 冷启动 / 回前台价格滞后优化
+- [ ] 先加 P0 观测：记录 `cache_age_on_hydrate`、`time_to_first_price_refresh_after_mount`、`resume_event_fired`。
+- [ ] 冷启动后增加一次价格层主动刷新（仅 price channel，不触发 batch 重拉）。
+- [ ] 回前台加入一次补拉策略（例如首拉 + 短延时补拉），提升恢复稳定性。
+- [ ] 验收标准：冷启动与前后台切换后，价格刷新体感明显改善，且不引入闪烁与重骨架。
 
-- [ ] **术语唯一事实来源 (SSOT)**: 定义前后端 Signal 常量类，杜绝硬编码字符串导致的术语漂移。
-- [ ] **强类型约束 (Type Safety)**: 将 `decision_semantic` 升级为 TypeScript Union 类型，实现编译期错误捕捉。
-- [ ] **跨层一致性校验**: 建立 CI 脚本自动校验 Python 后端与 TS 前端信号元数据的一致性。
-- [ ] **历史数据清洗 (Data Migration)**: 执行幂等数据库更新，将历史记录中的“建议看多”统一修正为“建议看多”。
-- [ ] **AI 内容审计 (LLM-as-a-Judge)**: 自动抽检 AI 生成摘要，确保叙事逻辑不误用旧版“进攻/进场”术语。
+---
 
-### 6. Cloudflare Scheduler 配额治理与统一编排（P2）
+## Vx 候选池（不属于当前 v1 执行面）
 
-#### 6.1 Cron 配额盘点与任务分层
-- [ ] 盘点当前 Cloudflare 账号下全部 Workers 的 cron 占用，形成 `precision cron / heartbeat routed / do-alarm backed` 三层分类表。
-- [ ] 明确哪些任务必须保留独立精确 cron，哪些任务应回收到统一 heartbeat 路由，避免继续线性消耗 `5` 个 cron 配额。
-- [ ] 验收标准：任意一个后台任务都能回答“为什么它值得单独占用一个 cron”。
+> 这些事项仍有价值，但不占用 v1 执行优先级。需要启用时再迁回上方「v1 国际版」。
 
-#### 6.2 StockWise Scheduler 配置化路由
-- [ ] 将 `stockwise-scheduler` 进一步收口为配置驱动任务表，新增精确任务时只需补配置而非手改分支。
-- [ ] 统一输出每个任务的 `cron / workflow / Beijing time / owner / fallback path`，降低后续接手成本。
-- [ ] 验收标准：新增一个精确调度任务时，不需要重写主调度逻辑。
+### Vx-A 量化引擎与双层架构演进
+- 双层架构 #2 参数迭代（`TriggeredLong` 覆盖、RiskOff 占比、最大回撤联动验收）
+- 乖离率（Bias）物理级强制拦截与高乖离样本回放
 
-#### 6.3 Durable Object Alarms 迁移评估
-- [ ] 评估是否将未来更多“准确但不值得独占 cron”的任务迁到 Durable Object Alarms。
-- [ ] 明确迁移边界：哪些任务适合静态 cron，哪些适合 DO alarm，哪些继续留在 heartbeat 内部判时。
-- [ ] 验收标准：形成一份可执行迁移方案，而不是继续临时追加 cron。
+### Vx-B Pipeline 深度重构与编排升级
+- Daily Pipeline - A Share 事件后续（可观测性、回填入口一致化、失败隔离、补缺口 SOP）
+- 编排状态机统一、Analyze/Backfill 执行器收敛、`prediction_jobs` 队列化执行
+- Context 预物化与两层生产、商业策略层深度落地
+
+### Vx-C 平台治理与工程基础设施
+- 高级质量工程（Signal SSOT、TS union、跨层一致性校验、历史数据清洗、LLM 审计）
+- Cloudflare Scheduler 配额治理与统一编排（cron 分层、配置化路由、DO alarms 迁移）
+
+### Vx-D 领域模型与数据治理深化
+- Phase 1.5 表级审计收口：46 张表 domain/role/owner/read-write/retention 完整盘点
+- canonical / shadow / projection / deprecated 标注体系与新增表 guardrail
 
 ---
 
 ## 使用规则
 
-1. 只记录未来 2-4 周内有望进入执行的事项。
+1. 「v1 国际版」只记录未来 2-4 周内有望进入执行的事项。
 2. 单条事项应尽量短、明确、可验收，避免写成长方案。
 3. 已完成事项直接移除，不在 Backlog 中保留历史痕迹。
-4. 有价值但需要按里程碑排期的事项，转入里程碑日志维护。
+4. 与 v1 无直接关系的事项，不写在当前执行面，统一放入「Vx 候选池」。
+5. 只有当事项被确认纳入当前版本目标时，才从「Vx 候选池」迁回「v1 国际版」。
 
 ## 维护流程
 
 1. 每周整理一次，优先在周初或 Sprint 切换时更新。
-2. 新事项先问自己一句：是不是未来 2-4 周真的会做。
-3. 如果答案是“会，而且已具备执行条件”，写入 Backlog。
-4. 如果答案是“有价值，但还要等前置条件或更适合并入某个里程碑”，转入里程碑日志。
+2. 新事项先问一句：它是否直接服务 v1 国际版交付。
+3. 如果答案是“是，而且未来 2-4 周会做”，写入「v1 国际版」。
+4. 如果答案是“有价值，但不在 v1 当前窗口”，写入「Vx 候选池」。
 5. 如果答案是“已经完成、已经过时、或者短期内不会做且没有明确战略价值”，直接移除。
-6. 每次整理 Backlog 时，同时复核一次里程碑日志，避免事项在两边重复存在。
+6. 每次整理 Backlog 时，同时复核一次里程碑日志，避免事项在多处重复存在。
 
 ---
 
@@ -163,4 +85,4 @@
 
 ---
 
-**最后更新**: 2026-03-30
+**最后更新**: 2026-05-06

@@ -43,6 +43,8 @@ This directory serves as the unified single source of truth for the 知守 AI (Z
 
 ### Current Source of Truth: Prediction Pipeline Scaling
 - [Prediction Pipeline Scaling RFC](./1_Engineering/47_Prediction_Pipeline_Scaling_RFC_20260428.md)
+- [Domain Model Consolidation RFC](./1_Engineering/48_Domain_Model_Consolidation_RFC_20260428.md) *(Phase 1.5：进入 prediction_jobs 前的数据模型收口)*
+- [Schema Long-Term Shape Notes](./1_Engineering/49_Schema_Long_Term_Shape_Notes_20260428.md) *(informational：长期可压缩边界与融合候选，不绑定 RFC 48 实施)*
 
 ### [2_Intelligence/](./2_Intelligence/) - How (Brain)
 > Project "AI Logic": Prompt engineering, model strategies, and core algorithms.
