@@ -29,6 +29,14 @@ function PricingContent() {
     return feature;
   };
 
+  const renderComparisonValue = (value?: string) => {
+    if (!value) return value;
+    if (value.startsWith('pricing.')) {
+      return t(value.replace('pricing.', '') as Parameters<typeof t>[0]);
+    }
+    return value;
+  };
+
   const softwareSchema = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
@@ -202,13 +210,13 @@ function PricingContent() {
                     <tr key={i} className="border-b border-white/[0.03] hover:bg-white/[0.01] transition-colors">
                       <td className="py-5 px-8 text-slate-400 font-bold whitespace-nowrap">{label}</td>
                       <td className="py-5 px-8 text-slate-500">
-                        {row.free}
+                        {renderComparisonValue(row.free)}
                       </td>
                       <td className={`py-5 px-8 ${row.highlight ? 'text-indigo-100 font-black bg-indigo-500/5' : 'text-slate-300'}`}>
-                        {row.go}
+                        {renderComparisonValue(row.go)}
                       </td>
                       <td className="py-5 px-8 text-slate-500 italic opacity-60">
-                        {row.plus}
+                        {renderComparisonValue(row.plus)}
                       </td>
                     </tr>
                   );
