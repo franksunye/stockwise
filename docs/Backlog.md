@@ -54,6 +54,11 @@
 - Phase 1.5 表级审计收口：46 张表 domain/role/owner/read-write/retention 完整盘点
 - canonical / shadow / projection / deprecated 标注体系与新增表 guardrail
 
+### Vx-E Paper Portfolio Lab / AI Thesis Tracking
+- 英文站 Paper Portfolio Lab 增长实验：Phase 0 已在英文首页落地静态 / 配置化营销模块，用于验证用户对 AI-assisted paper portfolio tracking 的兴趣，不接入后台用户级模拟交易功能。
+- 阶段路线见 `docs/4_Growth_Ops/51_Paper_Portfolio_Lab_Experiment_Plan_20260509.md`。
+- 下一步：观察 `paper_lab_view` / `paper_lab_cta_click` / `paper_lab_case_open`，若出现明确兴趣信号，再进入 Phase 1 公开实验页设计。
+
 ---
 
 ## 使用规则
@@ -85,4 +90,4 @@
 
 ---
 
-**最后更新**: 2026-05-06
+**最后更新**: 2026-05-09

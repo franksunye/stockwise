@@ -1,15 +1,21 @@
 'use client';
 
+import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ChevronRight, ShieldCheck } from 'lucide-react';
+import { Activity, Beaker, ChevronRight, ShieldCheck } from 'lucide-react';
 import { PageShell, EN_BOUNDARY_NOTICE, EN_DEFAULT_SOURCES } from './EnLayout';
 import { GeoSummary, SourceBlock, BoundaryNotice } from '@/components/seo/GeoBlocks';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { FocusedImageSlider } from '../FocusedImageSlider';
 import { ProductHuntBadge } from '../ProductHuntBadge';
+import { useAnalytics } from '@/hooks/useAnalytics';
 
 export function EnglishHomePage() {
+  const { trackEvent } = useAnalytics();
+  const [selectedPaperCase, setSelectedPaperCase] = useState('NVDA');
+  const viewTrackedRef = useRef(false);
+
   const tacticalSlides = [
     { src: '/images/landing/4-tactical-protocols.en.png', alt: 'Tactical protocols detail', objectPosition: 'center 60%' },
     { src: '/images/landing/4-tactical-protocols-2.en.png', alt: 'Tactical protocols detail 2', objectPosition: 'center 60%' },
@@ -21,6 +27,60 @@ export function EnglishHomePage() {
     { src: '/images/landing/5-transparency.en.png', alt: 'Risk circuit breaker logic', objectPosition: 'center bottom' },
     { src: '/images/landing/1-logical-trace.en.png', alt: 'Logical trace panel', objectPosition: 'center 20%' },
   ] as const;
+  const paperLabCases = [
+    {
+      ticker: 'NVDA',
+      thesis: 'Track whether AI infrastructure demand can keep the trend intact after a post-earnings volatility reset.',
+      entryDate: 'Lab entry: 2026-05-06',
+      status: 'Monitoring thesis drift',
+      risk: 'Invalidation if price loses the prior support shelf and volume expands on the breakdown.',
+      cadence: 'Reviewed after each US close',
+    },
+    {
+      ticker: 'MSFT',
+      thesis: 'Observe whether cloud and AI margin strength can defend a slower but higher-quality compounder profile.',
+      entryDate: 'Lab entry: 2026-05-07',
+      status: 'Waiting for confirmation',
+      risk: 'Risk rises if the stock fails to reclaim its tactical anchor after two review cycles.',
+      cadence: 'Reviewed twice per week',
+    },
+    {
+      ticker: 'TSLA',
+      thesis: 'Use a simulated plan to separate narrative volatility from an actual structure recovery attempt.',
+      entryDate: 'Lab entry: 2026-05-08',
+      status: 'High-volatility watch',
+      risk: 'No conviction increase until price action confirms above resistance with cleaner volume.',
+      cadence: 'Reviewed after major signal changes',
+    },
+  ] as const;
+
+  const activePaperCase = paperLabCases.find((item) => item.ticker === selectedPaperCase) ?? paperLabCases[0];
+
+  useEffect(() => {
+    if (viewTrackedRef.current) return;
+    viewTrackedRef.current = true;
+    trackEvent('paper_lab_view', {
+      surface: 'english_homepage',
+      phase: 'phase_0',
+    });
+  }, [trackEvent]);
+
+  const handlePaperCaseOpen = (ticker: string) => {
+    setSelectedPaperCase(ticker);
+    trackEvent('paper_lab_case_open', {
+      ticker,
+      surface: 'english_homepage',
+      phase: 'phase_0',
+    });
+  };
+
+  const handlePaperLabCta = (cta: 'join_beta' | 'follow_experiment') => {
+    trackEvent('paper_lab_cta_click', {
+      cta,
+      surface: 'english_homepage',
+      phase: 'phase_0',
+    });
+  };
 
   const faqSchema = {
     "@context": "https://schema.org",
@@ -112,6 +172,113 @@ export function EnglishHomePage() {
 
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] h-[60%] bg-indigo-600/10 blur-[120px] -z-10 rounded-full" />
         </div>
+
+        <section className="relative z-20 pt-32 w-full text-left" aria-labelledby="paper-lab-heading">
+          <div className="grid lg:grid-cols-[0.9fr_1.1fr] gap-12 items-stretch">
+            <div className="space-y-8">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-[10px] font-black uppercase tracking-[0.2em]">
+                <Beaker size={12} />
+                Paper Portfolio Lab Preview
+              </div>
+              <div className="space-y-5">
+                <h2 id="paper-lab-heading" className="text-4xl md:text-5xl font-black tracking-tighter leading-tight">
+                  Build conviction
+                  <br />
+                  <span className="text-cyan-300">before you trade.</span>
+                </h2>
+                <p className="text-slate-400 font-medium leading-relaxed">
+                  Follow a transparent paper-trading experiment for AI-generated investment theses. Track entries, risk boundaries, thesis changes, and review notes before putting real capital at risk.
+                </p>
+              </div>
+              <div className="grid sm:grid-cols-3 gap-3">
+                {['Simulated only', 'Thesis tracking', 'Post-close review'].map((item) => (
+                  <div key={item} className="rounded-2xl border border-white/5 bg-white/[0.02] px-4 py-3 text-[11px] font-black uppercase tracking-[0.14em] text-slate-300">
+                    {item}
+                  </div>
+                ))}
+              </div>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Link
+                  href="mailto:hi@ziso.cc?subject=Paper%20Portfolio%20Lab%20Beta"
+                  onClick={() => handlePaperLabCta('join_beta')}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-cyan-500 px-6 py-4 text-sm font-black text-black transition-all hover:bg-cyan-400 active:scale-95"
+                >
+                  Join the paper trading beta <ChevronRight size={18} />
+                </Link>
+                <Link
+                  href="mailto:hi@ziso.cc?subject=Follow%20Paper%20Portfolio%20Lab"
+                  onClick={() => handlePaperLabCta('follow_experiment')}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.03] px-6 py-4 text-sm font-black text-white transition-all hover:bg-white/[0.06] active:scale-95"
+                >
+                  Follow the experiment
+                </Link>
+              </div>
+              <p className="text-xs leading-relaxed text-slate-500">
+                Paper trading is simulated and for education only. It does not reflect actual investment results and does not guarantee future outcomes. ZISO AI is not financial advice.
+              </p>
+            </div>
+
+            <div className="p-0">
+              <div className="mb-6 flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-300">AI Thesis Tracker</p>
+                  <h3 className="mt-2 text-2xl font-black tracking-tighter text-white">Phase 0 static lab cases</h3>
+                </div>
+                <Activity className="text-cyan-300" size={26} />
+              </div>
+
+              <div className="grid md:grid-cols-[160px_1fr] gap-5">
+                <div className="grid grid-cols-3 md:grid-cols-1 gap-2">
+                  {paperLabCases.map((item) => (
+                    <button
+                      key={item.ticker}
+                      type="button"
+                      onClick={() => handlePaperCaseOpen(item.ticker)}
+                      className={`min-h-14 rounded-2xl border px-4 py-3 text-left transition-all ${
+                        selectedPaperCase === item.ticker
+                          ? 'border-cyan-400/40 bg-cyan-400/10 text-white'
+                          : 'border-white/5 bg-white/[0.02] text-slate-400 hover:bg-white/[0.05] hover:text-white'
+                      }`}
+                    >
+                      <span className="block text-base font-black tracking-tight">{item.ticker}</span>
+                      <span className="block text-[9px] font-black uppercase tracking-[0.16em] opacity-60">Thesis</span>
+                    </button>
+                  ))}
+                </div>
+
+                <div className="rounded-3xl border border-white/5 bg-white/[0.015] p-5 md:p-6">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="rounded-full bg-cyan-400/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-cyan-300">
+                      {activePaperCase.status}
+                    </span>
+                    <span className="rounded-full bg-white/[0.04] px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">
+                      {activePaperCase.entryDate}
+                    </span>
+                  </div>
+                  <div className="mt-6 space-y-5">
+                    <div>
+                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Working thesis</p>
+                      <p className="mt-2 text-lg font-bold leading-snug text-slate-100">{activePaperCase.thesis}</p>
+                    </div>
+                    <div className="grid sm:grid-cols-2 gap-5 border-t border-white/5 pt-5">
+                      <div>
+                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-rose-300">Risk note</p>
+                        <p className="mt-2 text-sm leading-relaxed text-slate-400">{activePaperCase.risk}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-indigo-300">Review cadence</p>
+                        <p className="mt-2 text-sm leading-relaxed text-slate-400">{activePaperCase.cadence}</p>
+                      </div>
+                    </div>
+                    <div className="border-t border-amber-500/10 pt-4 text-xs font-medium leading-relaxed text-amber-100/60">
+                      No real order is placed. No brokerage connection is used. The lab records the thesis and the discipline process, not a promised outcome.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
         <section id="features" className="pt-48 w-full grid md:grid-cols-2 gap-20 items-center text-left">
           <div className="space-y-8">
