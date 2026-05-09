@@ -13,6 +13,11 @@ import cnMessages from '@/messages/cn.json';
 function PricingContent() {
   const t = createTranslator(cnMessages as MessageBundle, 'pricing');
 
+  const getAnnualPrice = (planEnName: string) => {
+    if (planEnName === 'Go') return '¥499';
+    return '';
+  };
+
   const renderFeature = (feature: string) => {
     if (feature.startsWith('pricing.')) {
         const [keyWithPrefix, val] = feature.split('|');
@@ -108,7 +113,7 @@ function PricingContent() {
                   <span className="text-sm font-bold">¥</span>
                   <span className="text-5xl font-black tracking-tighter">{plan.price}</span>
                 <span className="text-slate-500 text-sm ml-2">
-                    {t(`${plan.enName.toLowerCase()}.period` as Parameters<typeof t>[0])}
+                    {t(`${plan.enName.toLowerCase()}.period` as Parameters<typeof t>[0], { price: getAnnualPrice(plan.enName) })}
                   </span>
                 </div>
                 <p className="text-slate-400 text-sm mt-4 leading-relaxed italic">
