@@ -217,8 +217,9 @@ Phase 1 再看复访：
 
 - 先作为英文市场增长实验记录，不进入 International V1 release blocker。
 - Phase 0 使用静态或配置化营销内容，不对接后台模拟交易功能。
+- Phase 0.1 调整为独立英文实验页 `/paper-portfolio-lab`，不再占用英文首页主叙事。
 - Backlog 放入 Vx 候选池，保留战略价值，但不占用 v1 当前执行优先级。
-- 若 Phase 0 获得明确兴趣信号，再进入 Phase 1 的公开实验页设计。
+- 若 Phase 0 / 0.1 获得明确兴趣信号，再进入 Phase 1 的公开实验页设计。
 
 ## 9. Phase 0 实施记录（2026-05-09）
 
@@ -237,3 +238,29 @@ Phase 1 再看复访：
 - 边界文案：已明确 `simulated`、`education only`、`not actual investment results`、`no guarantee of future outcomes`、`not financial advice`。
 
 本次仍未接入后台模拟交易功能，也未创建用户级 paper portfolio 数据结构。Phase 0 的目标是验证英文首页用户是否对 AI thesis tracking / paper trading beta 有兴趣。
+
+## 10. Phase 0.1 实施记录（2026-05-09）
+
+Phase 0.1 最终调整为独立英文实验页 `/paper-portfolio-lab`，而不是继续放在英文首页。原因是 Paper Portfolio Lab 与当前 International V1 主推产品不同：它是增长 / 产品试验，不应稀释首页对现有 research / watchlist / pricing 转化链路的表达。
+
+页面形态仍是轻量 `Lab Console`，更接近 nof1.ai 带来的“可观看实验场”启发，但保持 Stockwise 自己的边界：模拟、教育、thesis discipline，不展示 P&L，不连接券商，不承诺收益。
+
+已落地：
+
+- 顶部状态栏：`Paper Portfolio Lab`、`Season 0`、`Simulated`、`No P&L`、示例 ticker。
+- 左侧定位区：`Live Lab Preview`、核心句 `Build conviction before you trade.`、3 个轻量指标与 beta / follow CTA。
+- 中间 `Thesis Board`：展示 NVDA / MSFT / TSLA 的 thesis、状态、entry reference、review cadence、risk boundary。
+- 右侧 `AI Thesis Log`：展示模拟的 post-close review / boundary check / volatility note，让页面更像可持续观察的实验日志。
+- 埋点 phase 更新为 `phase_0_1`，继续使用 `paper_lab_view` / `paper_lab_cta_click` / `paper_lab_case_open`。
+- 免责声明保留：paper trading is simulated、educational only、not actual investment results、not financial advice。
+- 英文首页移除完整 Lab 模块，避免影响当前 v1 主叙事和首屏转化。
+- 英文 footer 增加轻入口 `Paper Portfolio Lab`，提供稳定内部入口，但不进入首页首屏或主导航。
+
+仍然不做：
+
+- 不展示收益率、排名或 leaderboard。
+- 不对接用户级 paper positions。
+- 不写入后台交易或组合数据。
+- 不引入真实 order / brokerage / copy-trading 语义。
+
+0.1 的判断标准不是“功能完整”，而是页面是否让英文用户一眼理解这是一个可持续关注的 AI thesis tracking experiment，并愿意点击 beta / follow CTA。

@@ -80,6 +80,7 @@ export default function MarketingFooter({ locale = 'en' }: { locale?: PublicLoca
       links: [
         { href: `${localizedHome}#faq`, label: currentLabels.faq },
         { href: localizePublicPath('/support', locale), label: currentLabels.support },
+        ...(locale === 'en' ? [{ href: '/paper-portfolio-lab', label: 'Paper Portfolio Lab' }] : []),
         { href: localizePublicPath('/about', locale), label: currentLabels.about },
       ]
     },
