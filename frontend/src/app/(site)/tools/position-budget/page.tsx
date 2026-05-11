@@ -530,50 +530,82 @@ export default function PositionBudgetToolPage() {
 
             {/* Header */}
             <header className="sticky top-0 z-30 bg-[#050508]/95 backdrop-blur-sm border-b border-white/5">
-                <div className="mx-auto max-w-4xl px-6 py-5 flex items-center justify-between">
-                    <Link
-                        href="/"
-                        className="p-2 rounded-full hover:bg-white/5 active:scale-90 transition-all text-slate-400"
-                        aria-label={tg('common.back')}
-                    >
-                        <ArrowLeft className="w-5 h-5" />
-                    </Link>
-                    <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-[18px] bg-white/5 border border-white/10 flex items-center justify-center">
-                            <Calculator className="w-6 h-6 text-indigo-400" />
-                        </div>
-                        <div className="text-center">
-                            <h1 className="text-xl font-black italic tracking-tighter text-white uppercase">
-                                {t('titleLine')}{' '}
-                                <span className="text-indigo-500 underline decoration-2 underline-offset-4">
-                                    {t('titleWordmark')}
-                                </span>
-                            </h1>
-                            <p className="text-[10px] text-slate-500 font-bold tracking-[0.2em] uppercase mt-1 flex items-center justify-center gap-1.5">
-                                <span className="w-1 h-1 rounded-full bg-indigo-500" />
-                                {t('subtitle')}
-                            </p>
+                <div className="mx-auto max-w-6xl px-4 sm:px-6 py-3 sm:py-5">
+                    <div className="flex items-center justify-between sm:hidden">
+                        <Link
+                            href="/"
+                            className="p-2 rounded-full hover:bg-white/5 active:scale-90 transition-all text-slate-400"
+                            aria-label={tg('common.back')}
+                        >
+                            <ArrowLeft className="w-5 h-5" />
+                        </Link>
+                        <div
+                            className="flex rounded-full border border-white/10 overflow-hidden text-[10px] font-black uppercase shrink-0"
+                            role="group"
+                            aria-label={tg('user.language.title')}
+                        >
+                            <button
+                                type="button"
+                                onClick={() => setLocale('cn')}
+                                className={`px-2.5 py-1.5 transition-colors ${locale === 'cn' ? 'bg-indigo-600 text-white' : 'text-slate-500 hover:text-slate-300'}`}
+                            >
+                                中
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setLocale('en')}
+                                className={`px-2.5 py-1.5 transition-colors ${locale === 'en' ? 'bg-indigo-600 text-white' : 'text-slate-500 hover:text-slate-300'}`}
+                            >
+                                EN
+                            </button>
                         </div>
                     </div>
-                    <div
-                        className="flex rounded-full border border-white/10 overflow-hidden text-[10px] font-black uppercase shrink-0"
-                        role="group"
-                        aria-label={tg('user.language.title')}
-                    >
-                        <button
-                            type="button"
-                            onClick={() => setLocale('cn')}
-                            className={`px-2.5 py-1.5 transition-colors ${locale === 'cn' ? 'bg-indigo-600 text-white' : 'text-slate-500 hover:text-slate-300'}`}
+
+                    <div className="mt-3 sm:mt-0 flex items-center justify-center sm:justify-between gap-3">
+                        <Link
+                            href="/"
+                            className="hidden sm:inline-flex p-2 rounded-full hover:bg-white/5 active:scale-90 transition-all text-slate-400"
+                            aria-label={tg('common.back')}
                         >
-                            {tg('user.language.cn')}
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setLocale('en')}
-                            className={`px-2.5 py-1.5 transition-colors ${locale === 'en' ? 'bg-indigo-600 text-white' : 'text-slate-500 hover:text-slate-300'}`}
+                            <ArrowLeft className="w-5 h-5" />
+                        </Link>
+                        <div className="flex items-center gap-3 min-w-0">
+                            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-[14px] sm:rounded-[18px] bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
+                                <Calculator className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-400" />
+                            </div>
+                            <div className="min-w-0">
+                                <h1 className="text-lg sm:text-xl font-black italic tracking-tighter text-white uppercase leading-tight text-left">
+                                    {t('titleLine')}{' '}
+                                    <span className="text-indigo-500 underline decoration-2 underline-offset-4">
+                                        {t('titleWordmark')}
+                                    </span>
+                                </h1>
+                                <p className="text-[10px] text-slate-500 font-bold tracking-[0.16em] uppercase mt-1 flex items-center gap-1.5 whitespace-nowrap">
+                                    <span className="w-1 h-1 rounded-full bg-indigo-500" />
+                                    {t('subtitle')}
+                                </p>
+                            </div>
+                        </div>
+                        <div
+                            className="hidden sm:flex rounded-full border border-white/10 overflow-hidden text-[10px] font-black uppercase shrink-0"
+                            role="group"
+                            aria-label={tg('user.language.title')}
                         >
-                            {tg('user.language.en')}
-                        </button>
+                            <button
+                                type="button"
+                                onClick={() => setLocale('cn')}
+                                className={`px-2.5 py-1.5 transition-colors ${locale === 'cn' ? 'bg-indigo-600 text-white' : 'text-slate-500 hover:text-slate-300'}`}
+                            >
+                                {tg('user.language.cn')}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setLocale('en')}
+                                className={`px-2.5 py-1.5 transition-colors ${locale === 'en' ? 'bg-indigo-600 text-white' : 'text-slate-500 hover:text-slate-300'}`}
+                            >
+                                {tg('user.language.en')}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </header>
