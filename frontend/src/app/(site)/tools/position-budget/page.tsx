@@ -911,7 +911,15 @@ export default function PositionBudgetToolPage() {
                                                 </p>
                                             </div>
                                         </div>
-                                        <div className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-2 text-[10px]">
+                                        <div className="mt-3 grid grid-cols-2 md:grid-cols-3 gap-2 text-[10px]">
+                                            <SnapshotMetric
+                                                label={t('fieldAccountSize')}
+                                                value={fmt(snapshot.account_size, 2, locale)}
+                                            />
+                                            <SnapshotMetric
+                                                label={t('fieldRiskPct')}
+                                                value={`${fmt(snapshot.risk_ratio * 100, 2, locale)}%`}
+                                            />
                                             <SnapshotMetric
                                                 label={t('fieldEntry')}
                                                 value={fmt(snapshot.entry_price, 4, locale)}
