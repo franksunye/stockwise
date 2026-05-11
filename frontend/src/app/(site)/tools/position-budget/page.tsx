@@ -28,6 +28,7 @@ import { useStockSymbolSearch } from '@/hooks/useStockSymbolSearch';
 import {
     fetchPositionBudgetPreferences,
     fetchPositionBudgetSnapshots,
+    fetchPositionBudgetStockIdentity,
     savePositionBudgetPreferences,
     savePositionBudgetSnapshot,
     type PositionBudgetSnapshot,
@@ -344,9 +345,29 @@ export default function PositionBudgetToolPage() {
         handlePickStock({ symbol: normalized });
     }, [query, handlePickStock]);
 
+    const selectedDisplayName = useMemo(() => {
+        if (!selected) return '';
+        if (stockLocale === 'en') {
+            return selected.name_en?.trim() || selected.name?.trim() || selected.symbol;
+        }
+        return selected.name?.trim() || selected.name_en?.trim() || selected.symbol;
+    }, [selected, stockLocale]);
+
     const loadSnapshotAsCurrent = useCallback(
         (snapshot: PositionBudgetSnapshot) => {
             setSelected({ symbol: snapshot.symbol });
+            void fetchPositionBudgetStockIdentity(snapshot.symbol).then((identity) => {
+                if (!identity) return;
+                setSelected((current) => {
+                    if (!current || current.symbol !== snapshot.symbol) return current;
+                    return {
+                        ...current,
+                        name: identity.name,
+                        name_en: identity.name_en,
+                        market: identity.market,
+                    };
+                });
+            });
             setAccountSize(String(snapshot.account_size));
             setRiskRatioPercent(String((snapshot.risk_ratio * 100).toFixed(2)));
             setEntryPrice(String(snapshot.entry_price));
@@ -533,14 +554,7 @@ export default function PositionBudgetToolPage() {
                                 </div>
                                 <div className="min-w-0 flex-1">
                                     <p className="text-base font-black italic tracking-tighter text-white truncate">
-                                        {getLocalizedStockName(
-                                            {
-                                                symbol: selected.symbol,
-                                                name: selected.name || selected.symbol,
-                                                name_en: selected.name_en,
-                                            },
-                                            stockLocale,
-                                        )}
+                                        {selectedDisplayName}
                                     </p>
                                     <p className="text-[10px] text-slate-500 mono uppercase tracking-widest mt-0.5">
                                         {selected.symbol}

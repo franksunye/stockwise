@@ -1,6 +1,7 @@
 'use client';
 
 import type { PositionBudgetRMode } from '@/lib/position-budget';
+import type { StockSearchHit } from '@/hooks/useStockSymbolSearch';
 
 export type PositionBudgetPreferences = {
   default_account_size: number | null;
@@ -61,6 +62,18 @@ export async function fetchPositionBudgetSnapshots(params?: {
   if (!response.ok) return [];
   const data = await readJson(response);
   return Array.isArray(data.snapshots) ? (data.snapshots as PositionBudgetSnapshot[]) : [];
+}
+
+export async function fetchPositionBudgetStockIdentity(
+  symbol: string,
+): Promise<Pick<StockSearchHit, 'symbol' | 'name' | 'name_en' | 'market'> | null> {
+  const normalized = symbol.trim().toUpperCase();
+  if (!normalized) return null;
+  const response = await fetch(`/api/stock/search?q=${encodeURIComponent(normalized)}`);
+  if (!response.ok) return null;
+  const data = await readJson(response);
+  const rows = Array.isArray(data.results) ? (data.results as StockSearchHit[]) : [];
+  return rows.find((row) => row.symbol?.toUpperCase() === normalized) ?? rows[0] ?? null;
 }
 
 export async function savePositionBudgetPreferences(
