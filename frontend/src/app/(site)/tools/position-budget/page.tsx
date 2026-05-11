@@ -27,8 +27,10 @@ import { StockSymbolSearchField } from '@/components/stock/StockSymbolSearchFiel
 import { useStockSymbolSearch } from '@/hooks/useStockSymbolSearch';
 import {
     fetchPositionBudgetPreferences,
+    fetchPositionBudgetSnapshots,
     savePositionBudgetPreferences,
     savePositionBudgetSnapshot,
+    type PositionBudgetSnapshot,
 } from '@/lib/position-budget-client';
 
 type SelectedStock = {
@@ -68,6 +70,24 @@ function fmt(value: number | null | undefined, digits = 2, appLocale: AppLocale 
         maximumFractionDigits: digits,
         minimumFractionDigits: 0,
     });
+}
+
+function fmtDate(value: string | null | undefined, appLocale: AppLocale): string {
+    if (!value) return '—';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return value;
+    return date.toLocaleString(appLocale === 'en' ? 'en-US' : 'zh-CN', {
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+    });
+}
+
+function snapshotRMultiple(snapshot: PositionBudgetSnapshot): number | null {
+    if (snapshot.target_price == null || snapshot.risk_per_share <= 0) return null;
+    const multiple = (snapshot.target_price - snapshot.entry_price) / snapshot.risk_per_share;
+    return Number.isFinite(multiple) ? multiple : null;
 }
 
 const BUDGET_ERROR_KEYS: Record<string, MessageKey<'positionBudget'>> = {
@@ -110,6 +130,8 @@ export default function PositionBudgetToolPage() {
     const [loadingPrefill, setLoadingPrefill] = useState(false);
     const [saving, setSaving] = useState(false);
     const [banner, setBanner] = useState<Banner | null>(null);
+    const [snapshots, setSnapshots] = useState<PositionBudgetSnapshot[]>([]);
+    const [loadingSnapshots, setLoadingSnapshots] = useState(false);
 
     const [selected, setSelected] = useState<SelectedStock | null>(null);
 
@@ -126,6 +148,16 @@ export default function PositionBudgetToolPage() {
 
     const { watchlist, loading: watchlistLoading } = useWatchlist();
 
+    const refreshSnapshots = useCallback(async () => {
+        setLoadingSnapshots(true);
+        try {
+            const rows = await fetchPositionBudgetSnapshots({ limit: 8 });
+            setSnapshots(rows);
+        } finally {
+            setLoadingSnapshots(false);
+        }
+    }, []);
+
     // Bootstrap: ensure anonymous user + load preferences
     useEffect(() => {
         let active = true;
@@ -135,6 +167,7 @@ export default function PositionBudgetToolPage() {
                 await getCurrentUser();
                 const preferences = await fetchPositionBudgetPreferences();
                 if (!active) return;
+                void refreshSnapshots();
                 if (!preferences) return;
                 if (preferences.default_account_size != null) {
                     setAccountSize(String(preferences.default_account_size));
@@ -159,7 +192,7 @@ export default function PositionBudgetToolPage() {
             active = false;
             prefillAbortRef.current?.abort();
         };
-    }, []);
+    }, [refreshSnapshots]);
 
     // Auto-dismiss banner
     useEffect(() => {
@@ -311,6 +344,29 @@ export default function PositionBudgetToolPage() {
         handlePickStock({ symbol: normalized });
     }, [query, handlePickStock]);
 
+    const loadSnapshotAsCurrent = useCallback(
+        (snapshot: PositionBudgetSnapshot) => {
+            setSelected({ symbol: snapshot.symbol });
+            setAccountSize(String(snapshot.account_size));
+            setRiskRatioPercent(String((snapshot.risk_ratio * 100).toFixed(2)));
+            setEntryPrice(String(snapshot.entry_price));
+            setTargetPrice(snapshot.target_price == null ? '' : String(snapshot.target_price));
+            setSystemStopLossPrice(String(snapshot.stop_loss_price));
+            setFixedStopLossPrice(String(snapshot.stop_loss_price));
+            setRMode(snapshot.r_mode);
+            if (snapshot.r_mode === 'percent_stop' && snapshot.entry_price > 0) {
+                const derivedStopPercent =
+                    ((snapshot.entry_price - snapshot.stop_loss_price) / snapshot.entry_price) * 100;
+                if (Number.isFinite(derivedStopPercent)) {
+                    setStopPercent(String(Number(derivedStopPercent.toFixed(2))));
+                }
+            }
+            resetSearch();
+            setBanner({ tone: 'info', text: t('snapshotLoaded') });
+        },
+        [resetSearch, t],
+    );
+
     async function saveAll(): Promise<void> {
         if (!selected) {
             setBanner({ tone: 'error', text: t('errSelectStock') });
@@ -350,6 +406,7 @@ export default function PositionBudgetToolPage() {
                 setBanner({ tone: 'error', text: snapshotResp.error || t('errSaveSnapshot') });
                 return;
             }
+            void refreshSnapshots();
             setBanner({ tone: 'success', text: t('successSaved') });
         } catch (error) {
             console.error('Save failed:', error);
@@ -578,6 +635,95 @@ export default function PositionBudgetToolPage() {
                                 </p>
                             )}
                         </>
+                    )}
+                </section>
+
+                {/* Recent snapshots section */}
+                <section className="glass-card">
+                    <div className="flex items-center justify-between gap-3 mb-4">
+                        <div>
+                            <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+                                {t('recentHeading')}
+                            </h2>
+                            <p className="mt-1 text-[10px] text-slate-600 font-medium">
+                                {t('recentHint')}
+                            </p>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => void refreshSnapshots()}
+                            disabled={loadingSnapshots}
+                            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest hover:bg-white/10 active:scale-95 transition-all disabled:opacity-50"
+                        >
+                            <RefreshCcw
+                                className={`w-3.5 h-3.5 text-indigo-400 ${loadingSnapshots ? 'animate-spin' : ''}`}
+                            />
+                            {t('recentRefresh')}
+                        </button>
+                    </div>
+
+                    {loadingSnapshots && snapshots.length === 0 ? (
+                        <p className="text-xs text-slate-500 font-medium">
+                            {t('recentLoading')}
+                        </p>
+                    ) : snapshots.length === 0 ? (
+                        <p className="text-xs text-slate-600 font-medium leading-relaxed">
+                            {t('recentEmpty')}
+                        </p>
+                    ) : (
+                        <div className="space-y-2">
+                            {snapshots.map((snapshot) => {
+                                const multiple = snapshotRMultiple(snapshot);
+                                return (
+                                    <button
+                                        key={snapshot.snapshot_id}
+                                        type="button"
+                                        onClick={() => loadSnapshotAsCurrent(snapshot)}
+                                        className="w-full text-left rounded-2xl border border-white/5 bg-white/[0.03] hover:bg-white/[0.06] active:scale-[0.99] transition-all p-4"
+                                    >
+                                        <div className="flex items-center justify-between gap-3">
+                                            <div>
+                                                <p className="text-sm font-black italic tracking-tighter text-white">
+                                                    {snapshot.symbol}
+                                                </p>
+                                                <p className="mt-1 text-[10px] text-slate-500 mono uppercase tracking-widest">
+                                                    {fmtDate(snapshot.created_at, locale)}
+                                                </p>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="text-sm font-black text-indigo-300 mono">
+                                                    {fmt(snapshot.position_size, 0, locale)}
+                                                </p>
+                                                <p className="mt-1 text-[10px] text-slate-500 uppercase tracking-widest">
+                                                    {t('resultShares')}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-2 text-[10px]">
+                                            <SnapshotMetric
+                                                label={t('fieldEntry')}
+                                                value={fmt(snapshot.entry_price, 4, locale)}
+                                            />
+                                            <SnapshotMetric
+                                                label={t('resultStop')}
+                                                value={fmt(snapshot.stop_loss_price, 4, locale)}
+                                            />
+                                            <SnapshotMetric
+                                                label={t('resultExpectedLoss')}
+                                                value={fmt(snapshot.expected_loss, 2, locale)}
+                                            />
+                                            <SnapshotMetric
+                                                label={t('resultRMultiple')}
+                                                value={multiple == null ? '—' : `${fmt(multiple, 2, locale)}R`}
+                                            />
+                                        </div>
+                                        <p className="mt-3 text-[10px] font-black uppercase tracking-widest text-indigo-400">
+                                            {t('loadSnapshot')}
+                                        </p>
+                                    </button>
+                                );
+                            })}
+                        </div>
                     )}
                 </section>
 
@@ -859,6 +1005,17 @@ function ResultCell({
                 {label}
             </p>
             <p className={`mt-2 text-2xl font-black mono tracking-tighter ${accent}`}>{value}</p>
+        </div>
+    );
+}
+
+function SnapshotMetric({ label, value }: { label: string; value: string }) {
+    return (
+        <div className="rounded-xl bg-black/20 border border-white/5 px-3 py-2">
+            <p className="text-slate-600 font-black uppercase tracking-widest truncate">
+                {label}
+            </p>
+            <p className="mt-1 mono text-slate-200 font-bold truncate">{value}</p>
         </div>
     );
 }

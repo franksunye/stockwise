@@ -242,6 +242,17 @@ source_docs:
 
 `GET /api/user/trade-management/position-budget/snapshots?symbol=...`
 
+### 8.5 快照 CRUD 语义（产品约束）
+
+仓位预算快照不是普通可编辑表单记录，而是“某一时刻的计划事实”。因此 CRUD 语义按以下方式收口：
+
+1. **Create**：保存本次预算快照，已在 P0 提供。
+2. **Read**：必须补齐为 P0.1 能力。用户保存后应能查看最近预算、按股票查看历史，并可把旧快照“载入为当前参数”继续测算。
+3. **Update**：不对历史快照做原地编辑。若用户基于旧快照调整参数，应生成新的快照；用户偏好（账户规模、默认风险比例、默认 R 模式）可以更新。
+4. **Delete / Archive**：允许删除误存、测试或无意义快照；若后续进入复盘链路，优先采用 `archived_at` / soft delete，而不是物理删除。
+
+一句话原则：**偏好可以改，快照只追加；旧快照只能载入、复制、删除/归档，不做原地覆盖。**
+
 ---
 
 ## 9. 与主系统并轨条件（Exit Criteria）
@@ -264,15 +275,42 @@ source_docs:
 2. 三模式计算 + 服务端偏好
 3. 快照持久化（匿名/登录）
 
-### 10.2 P1（轻集成）
+### 10.2 P0.1（快照查看与最小闭环）
+
+P0 已经提供保存动作，因此 P0.1 的重点不是继续堆计算能力，而是补足“保存之后如何查看”的闭环：
+
+1. 新增 **Recent Budgets / 最近预算** 区块，默认展示最近 5-10 条快照。
+2. 每条展示 `symbol`、`entry / stop / target`、`risk_ratio`、`position_size`、`expected_loss`、`r_multiple`、`created_at`。
+3. 支持按 `symbol` 查看历史预算快照。
+4. 支持 **Load as Current Parameters / 载入为当前参数**，但不修改原快照。
+5. 支持删除或归档误存快照；删除能力需保留会话鉴权和 `user_id` 边界。
+
+P0.1 不做：
+
+1. 不做快照原地编辑。
+2. 不做 realized R / 实际盈亏对比。
+3. 不做复杂交易日志统计。
+
+### 10.3 P1（计算器增强 + 轻集成）
 
 1. 在 `决议` tab 复用插件核心组件（先 `empty` 场景）
 2. 建立“决议 -> 预算 -> 录入”串联
+3. 增加手续费 / 滑点（fee & slippage）对 `risk_amount` 与 `r_multiple` 的影响
+4. 增加 1R / 2R / 3R / 自定义 R 的 target ladder
+5. 明确 long / short 支持边界（P1 默认可先 long-only，若支持 short 需同步调整 stop/target 校验）
 
-### 10.3 P2（完整并轨）
+### 10.4 P1.5（高级计划能力）
+
+1. 多目标位 / 分批止盈（partial take-profit ladder）
+2. 分批入场 / 加仓均价（multiple entry weighted average）
+3. 多场景比较（不同止损位、风险比例、目标位下的仓位差异）
+
+### 10.5 P2（完整并轨与复盘）
 
 1. 扩展到 `管理` tab 与状态机语义
 2. 对齐 `events` 与复盘消费链路
+3. 将计划快照与实际交易事件连接，计算 `realized_r`
+4. 形成用户级统计：`net_r`、`expectancy`、胜率、回撤、按策略/股票分组
 
 ---
 
@@ -287,6 +325,7 @@ source_docs:
 - [ ] 不引入新栈（Vue / Element / ECharts / localForage 等）
 - [ ] 与 Spec 56 字段口径一致，可并轨
 - [ ] 股票代码检索走 §12.3.1 共享模块（与自选池同行为：防抖、Enter 立即搜、请求可取消），插件内无重复搜索实现
+- [ ] P0.1 前明确快照语义：历史快照不原地编辑，查看/载入/删除或归档按 §8.5 执行
 
 ---
 

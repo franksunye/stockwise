@@ -22,6 +22,22 @@ export type PositionBudgetSnapshotInput = {
   r_mode: PositionBudgetRMode;
 };
 
+export type PositionBudgetSnapshot = {
+  snapshot_id: string;
+  symbol: string;
+  entry_price: number;
+  stop_loss_price: number;
+  target_price: number | null;
+  account_size: number;
+  risk_ratio: number;
+  risk_amount: number;
+  risk_per_share: number;
+  position_size: number;
+  expected_loss: number;
+  r_mode: PositionBudgetRMode;
+  created_at: string;
+};
+
 async function readJson(response: Response): Promise<Record<string, unknown>> {
   return response.json().catch(() => ({}));
 }
@@ -31,6 +47,20 @@ export async function fetchPositionBudgetPreferences(): Promise<PositionBudgetPr
   if (!response.ok) return null;
   const data = await readJson(response);
   return (data.preferences || null) as PositionBudgetPreferences | null;
+}
+
+export async function fetchPositionBudgetSnapshots(params?: {
+  symbol?: string;
+  limit?: number;
+}): Promise<PositionBudgetSnapshot[]> {
+  const qs = new URLSearchParams();
+  if (params?.symbol) qs.set('symbol', params.symbol);
+  if (params?.limit) qs.set('limit', String(params.limit));
+  const suffix = qs.toString() ? `?${qs.toString()}` : '';
+  const response = await fetch(`/api/user/trade-management/position-budget/snapshots${suffix}`);
+  if (!response.ok) return [];
+  const data = await readJson(response);
+  return Array.isArray(data.snapshots) ? (data.snapshots as PositionBudgetSnapshot[]) : [];
 }
 
 export async function savePositionBudgetPreferences(
