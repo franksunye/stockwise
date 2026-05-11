@@ -157,6 +157,7 @@ const BUDGET_ERROR_KEYS: Record<string, MessageKey<'positionBudget'>> = {
 const BUDGET_WARNING_KEYS: Record<string, MessageKey<'positionBudget'>> = {
     'Risk ratio is above 2%': 'budgetWarnings.riskRatioHigh',
 };
+const POSITION_BUDGET_HOME_URL = 'https://ziso.cc';
 
 export default function PositionBudgetToolPage() {
     const t = useT('positionBudget');
@@ -533,7 +534,7 @@ export default function PositionBudgetToolPage() {
                 <div className="mx-auto max-w-6xl px-4 sm:px-6 py-3 sm:py-5">
                     <div className="flex items-center justify-between sm:hidden">
                         <Link
-                            href="/"
+                            href={POSITION_BUDGET_HOME_URL}
                             className="p-2 rounded-full hover:bg-white/5 active:scale-90 transition-all text-slate-400"
                             aria-label={tg('common.back')}
                         >
@@ -563,7 +564,7 @@ export default function PositionBudgetToolPage() {
 
                     <div className="mt-3 sm:mt-0 flex items-center justify-center sm:justify-between gap-3">
                         <Link
-                            href="/"
+                            href={POSITION_BUDGET_HOME_URL}
                             className="hidden sm:inline-flex p-2 rounded-full hover:bg-white/5 active:scale-90 transition-all text-slate-400"
                             aria-label={tg('common.back')}
                         >
