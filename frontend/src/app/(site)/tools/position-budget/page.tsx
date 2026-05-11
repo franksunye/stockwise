@@ -642,7 +642,7 @@ export default function PositionBudgetToolPage() {
                                         </span>
                                     </p>
                                     <p className="text-[10px] text-slate-500 mono uppercase tracking-widest mt-0.5 flex flex-wrap items-center gap-2">
-                                        <span>{selectedBadge?.suffix || selected.market || 'MARKET'}</span>
+                                        <span>{selectedBadge?.suffix || selected.market || t('marketFallback')}</span>
                                         {selected.lastClose ? (
                                             <span className="text-slate-400">
                                                 {t('selectedClose')}{' '}
@@ -650,7 +650,7 @@ export default function PositionBudgetToolPage() {
                                             </span>
                                         ) : null}
                                         <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-emerald-300">
-                                            LONG
+                                            {t('directionLong')}
                                         </span>
                                     </p>
                                 </div>
@@ -739,7 +739,7 @@ export default function PositionBudgetToolPage() {
                             {t('riskModelInputs')}
                         </h2>
                         <span className="rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-slate-500">
-                            LONG
+                            {t('directionLong')}
                         </span>
                     </div>
 
@@ -1011,7 +1011,7 @@ export default function PositionBudgetToolPage() {
                                                     {snapshot.symbol}
                                                 </p>
                                                 <p className="mt-1 truncate text-[11px] text-slate-400">
-                                                    {fmt(snapshot.position_size, 0, locale)} {t('sharesUnit').toLowerCase()}{' '}
+                                                    {fmt(snapshot.position_size, 0, locale)} {t('sharesUnitCompact')}{' '}
                                                     <span className="text-slate-600">·</span>{' '}
                                                     {fmtRelativeTime(snapshot.created_at, locale)}
                                                 </p>
